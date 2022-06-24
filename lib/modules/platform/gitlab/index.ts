@@ -30,6 +30,7 @@ import {
   getQueryString,
   parseUrl,
 } from '../../../util/url';
+import { getPrBodyStruct } from '../pr-body';
 import type {
   BranchStatusConfig,
   CreatePRConfig,
@@ -62,12 +63,12 @@ import type {
 let config: {
   repository: string;
   email: string;
-  prList: any[];
-  issueList: GitlabIssue[];
+  prList: any[] | undefined;
+  issueList: GitlabIssue[] | undefined;
   mergeMethod: MergeMethod;
   defaultBranch: string;
-  cloneSubmodules: boolean;
-  ignorePrAuthor: boolean;
+  cloneSubmodules: boolean | undefined;
+  ignorePrAuthor: boolean | undefined;
   squash: boolean;
 } = {} as any;
 
@@ -168,7 +169,7 @@ export async function getRawFile(
   const repo = urlEscape(repoName ?? config.repository);
   const url =
     `projects/${repo}/repository/files/${escapedFileName}?ref=` +
-    (branchOrTag || `HEAD`);
+    (branchOrTag ?? `HEAD`);
   const res = await gitlabApi.getJson<{ content: string }>(url);
   const buf = res.body.content;
   const str = Buffer.from(buf, 'base64').toString();
@@ -180,11 +181,9 @@ export async function getJsonFile(
   repoName?: string,
   branchOrTag?: string
 ): Promise<any | null> {
-  const raw = await getRawFile(fileName, repoName, branchOrTag);
-  if (fileName.endsWith('.json5')) {
-    return JSON5.parse(raw);
-  }
-  return JSON.parse(raw);
+  // TODO #7154
+  const raw = (await getRawFile(fileName, repoName, branchOrTag)) as string;
+  return JSON5.parse(raw);
 }
 
 function getRepoUrl(
@@ -219,11 +218,12 @@ function getRepoUrl(
       );
     }
 
-    const { protocol, host, pathname } = parseUrl(defaults.endpoint);
+    // TODO: null check (#7154)
+    const { protocol, host, pathname } = parseUrl(defaults.endpoint)!;
     const newPathname = pathname.slice(0, pathname.indexOf('/api'));
     const url = URL.format({
       protocol: protocol.slice(0, -1) || 'https',
-      auth: 'oauth2:' + opts.token,
+      auth: `oauth2:${opts.token}`,
       host,
       pathname: newPathname + '/' + repository + '.git',
     });
@@ -233,7 +233,7 @@ function getRepoUrl(
 
   logger.debug({ url: res.body.http_url_to_repo }, `using http URL`);
   const repoUrl = URL.parse(`${res.body.http_url_to_repo}`);
-  repoUrl.auth = 'oauth2:' + opts.token;
+  repoUrl.auth = `oauth2:${opts.token}`;
   return URL.format(repoUrl);
 }
 
@@ -516,7 +516,7 @@ async function ignoreApprovals(pr: number): Promise<void> {
 
 async function tryPrAutomerge(
   pr: number,
-  platformOptions: PlatformPrOptions
+  platformOptions: PlatformPrOptions | undefined
 ): Promise<void> {
   if (platformOptions?.usePlatformAutomerge) {
     try {
@@ -579,7 +579,7 @@ export async function createPr({
         remove_source_branch: true,
         title,
         description,
-        labels: (labels || []).join(','),
+        labels: (labels ?? []).join(','),
         squash: config.squash,
       },
     }
@@ -608,9 +608,9 @@ export async function getPr(iid: number): Promise<Pr> {
     targetBranch: mr.target_branch,
     number: mr.iid,
     displayNumber: `Merge Request #${mr.iid}`,
-    body: mr.description,
+    bodyStruct: getPrBodyStruct(mr.description),
     state: mr.state === 'opened' ? PrState.Open : mr.state,
-    hasAssignees: !!(mr.assignee?.id || mr.assignees?.[0]?.id),
+    hasAssignees: !!(mr.assignee?.id ?? mr.assignees?.[0]?.id),
     hasReviewers: !!mr.reviewers?.length,
     title: mr.title,
     labels: mr.labels,
@@ -634,7 +634,8 @@ export async function updatePr({
   const newState = {
     [PrState.Closed]: 'close',
     [PrState.Open]: 'reopen',
-  }[state];
+    // TODO: null check (#7154)
+  }[state!];
   await gitlabApi.putJson(
     `projects/${config.repository}/merge_requests/${iid}`,
     {
@@ -711,19 +712,21 @@ export async function findPr({
   branchName,
   prTitle,
   state = PrState.All,
-}: FindPRConfig): Promise<Pr> {
+}: FindPRConfig): Promise<Pr | null> {
   logger.debug(`findPr(${branchName}, ${prTitle}, ${state})`);
   const prList = await getPrList();
-  return prList.find(
-    (p: { sourceBranch: string; title: string; state: string }) =>
-      p.sourceBranch === branchName &&
-      (!prTitle || p.title === prTitle) &&
-      matchesState(p.state, state)
+  return (
+    prList.find(
+      (p: { sourceBranch: string; title: string; state: string }) =>
+        p.sourceBranch === branchName &&
+        (!prTitle || p.title === prTitle) &&
+        matchesState(p.state, state)
+    ) ?? null
   );
 }
 
 // Returns the Pull Request for a branch. Null if not exists.
-export async function getBranchPr(branchName: string): Promise<Pr> {
+export async function getBranchPr(branchName: string): Promise<Pr | null> {
   logger.debug(`getBranchPr(${branchName})`);
   const existingPr = await findPr({
     branchName,
@@ -889,7 +892,7 @@ export async function ensureIssue({
             body: {
               title,
               description,
-              labels: (labels || issue.labels || []).join(','),
+              labels: (labels ?? issue.labels ?? []).join(','),
               confidential: confidential ?? false,
             },
           }
@@ -901,7 +904,7 @@ export async function ensureIssue({
         body: {
           title,
           description,
-          labels: (labels || []).join(','),
+          labels: (labels ?? []).join(','),
           confidential: confidential ?? false,
         },
       });
@@ -942,7 +945,7 @@ export async function addAssignees(
 ): Promise<void> {
   try {
     logger.debug(`Adding assignees '${assignees.join(', ')}' to #${iid}`);
-    const assigneeIds = [];
+    const assigneeIds: number[] = [];
     for (const assignee of assignees) {
       assigneeIds.push(await getUserID(assignee));
     }
@@ -1015,7 +1018,7 @@ export async function deleteLabel(
   logger.debug(`Deleting label ${label} from #${issueNo}`);
   try {
     const pr = await getPr(issueNo);
-    const labels = (pr.labels || [])
+    const labels = (pr.labels ?? [])
       .filter((l: string) => l !== label)
       .join(',');
     await gitlabApi.putJson(
@@ -1087,8 +1090,8 @@ export async function ensureComment({
     : topic;
   const comments = await getComments(number);
   let body: string;
-  let commentId: number;
-  let commentNeedsUpdating: boolean;
+  let commentId: number | undefined;
+  let commentNeedsUpdating: boolean | undefined;
   if (topic) {
     logger.debug(`Ensuring comment "${massagedTopic}" in #${number}`);
     body = `### ${topic}\n\n${sanitizedContent}`;
@@ -1164,7 +1167,7 @@ export function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
 export async function filterUnavailableUsers(
   users: string[]
 ): Promise<string[]> {
-  const filteredUsers = [];
+  const filteredUsers: string[] = [];
   for (const user of users) {
     if (!(await isUserBusy(user))) {
       filteredUsers.push(user);

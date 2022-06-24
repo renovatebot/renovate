@@ -21,7 +21,7 @@ Renovate will:
 ## Which Renovate versions are officially supported?
 
 The Renovate maintainers only support the latest version of Renovate.
-The Renovate team will only create bugfixes for an older version if the hosted app needs to stay on an older major version for a short time or if some critical bug needs to be fixed and the new major is blocked.
+The Renovate team will only fix bugs for an older version if the hosted app needs to stay on an older major version for a short time or if some critical bug needs to be fixed and the new major is blocked.
 
 If you're using the hosted app, you don't need to do anything, as the Renovate maintainers update the hosted app regularly.
 If you're self hosting Renovate, use the latest release if possible.
@@ -51,7 +51,7 @@ The default branch name that Git uses is `master` (this will be changed to `main
 The Git-hosting ecosystem has settled on using `main` to replace `master`.
 When you create a new repository on say GitHub or GitLab, you'll get a `main` branch as your base branch.
 
-It therefore makes sense for Renovate to replace `master` with `main` where possible as well.
+We've replaced `master` with `main` in our documentation where possible.
 
 A branch name has no special meaning within the Git program, it's just a name.
 The base branch could be called `trunk` or `mainline` or `prod`, and Git would work just as well.

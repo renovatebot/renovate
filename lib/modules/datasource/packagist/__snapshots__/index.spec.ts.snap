@@ -104,166 +104,6 @@ Object {
 }
 `;
 
-exports[`modules/datasource/packagist/index getReleases adds packagist source implicitly 2`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "packagist.org",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://packagist.org/p2/drewm/mailchimp-api.json",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "packagist.org",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://packagist.org/p2/drewm/mailchimp-api~dev.json",
-  },
-]
-`;
-
-exports[`modules/datasource/packagist/index getReleases handles auth rejections 1`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "composer.renovatebot.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://composer.renovatebot.com/packages.json",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "packagist.org",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://packagist.org/p2/vendor/package-name.json",
-  },
-]
-`;
-
-exports[`modules/datasource/packagist/index getReleases handles not found registries 1`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "composer.renovatebot.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://composer.renovatebot.com/packages.json",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "packagist.org",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://packagist.org/p2/drewm/mailchimp-api.json",
-  },
-]
-`;
-
-exports[`modules/datasource/packagist/index getReleases handles provider-includes miss 1`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "composer.renovatebot.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://composer.renovatebot.com/packages.json",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "composer.renovatebot.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://composer.renovatebot.com/p/providers-2018-09$14346045d7a7261cb3a12a6b7a1a7c4151982530347b115e5e277d879cad1942.json",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "packagist.org",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://packagist.org/p2/some/other.json",
-  },
-]
-`;
-
-exports[`modules/datasource/packagist/index getReleases handles providers miss 1`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "composer.renovatebot.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://composer.renovatebot.com/packages.json",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "packagist.org",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://packagist.org/p2/some/other.json",
-  },
-]
-`;
-
-exports[`modules/datasource/packagist/index getReleases handles timeouts 1`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "composer.renovatebot.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://composer.renovatebot.com/packages.json",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "packagist.org",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://packagist.org/p2/vendor/package-name2.json",
-  },
-]
-`;
-
 exports[`modules/datasource/packagist/index getReleases processes real versioned data 1`] = `
 Object {
   "registryUrl": "https://packagist.org",
@@ -366,31 +206,6 @@ Object {
   ],
   "sourceUrl": "https://github.com/drewm/mailchimp-api",
 }
-`;
-
-exports[`modules/datasource/packagist/index getReleases processes real versioned data 2`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "packagist.org",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://packagist.org/p2/drewm/mailchimp-api.json",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "packagist.org",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://packagist.org/p2/drewm/mailchimp-api~dev.json",
-  },
-]
 `;
 
 exports[`modules/datasource/packagist/index getReleases supports includes packages 1`] = `
@@ -538,33 +353,6 @@ Object {
 }
 `;
 
-exports[`modules/datasource/packagist/index getReleases supports includes packages 2`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "authorization": "Basic c29tZS11c2VybmFtZTpzb21lLXBhc3N3b3Jk",
-      "host": "composer.renovatebot.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://composer.renovatebot.com/packages.json",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "authorization": "Basic c29tZS11c2VybmFtZTpzb21lLXBhc3N3b3Jk",
-      "host": "composer.renovatebot.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://composer.renovatebot.com/include/all$afbf74d51f31c7cbb5ff10304f9290bfb4f4e68b.json",
-  },
-]
-`;
-
 exports[`modules/datasource/packagist/index getReleases supports lazy repositories 1`] = `
 Object {
   "registryUrl": "https://composer.renovatebot.com/composer/lazy",
@@ -579,31 +367,6 @@ Object {
     },
   ],
 }
-`;
-
-exports[`modules/datasource/packagist/index getReleases supports lazy repositories 2`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "composer.renovatebot.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://composer.renovatebot.com/composer/lazy/packages.json",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "composer.renovatebot.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://composer.renovatebot.com/composer/lazy/p/guzzlehttp/guzzle.json",
-  },
-]
 `;
 
 exports[`modules/datasource/packagist/index getReleases supports plain packages 1`] = `
@@ -624,21 +387,6 @@ Object {
     },
   ],
 }
-`;
-
-exports[`modules/datasource/packagist/index getReleases supports plain packages 2`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "composer.renovatebot.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://composer.renovatebot.com/packages.json",
-  },
-]
 `;
 
 exports[`modules/datasource/packagist/index getReleases supports provider-includes 1`] = `
@@ -671,41 +419,6 @@ Object {
 }
 `;
 
-exports[`modules/datasource/packagist/index getReleases supports provider-includes 2`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "composer.renovatebot.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://composer.renovatebot.com/packages.json",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "composer.renovatebot.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://composer.renovatebot.com/p/providers-2018-09$14346045d7a7261cb3a12a6b7a1a7c4151982530347b115e5e277d879cad1942.json",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "composer.renovatebot.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://composer.renovatebot.com/p/wpackagist-plugin/1beyt$b574a802b5bf20a58c0f027e73aea2a75d23a6f654afc298a8dc467331be316a.json",
-  },
-]
-`;
-
 exports[`modules/datasource/packagist/index getReleases supports providers 1`] = `
 Object {
   "homepage": "https://wordpress.org/plugins/1beyt/",
@@ -734,31 +447,6 @@ Object {
   ],
   "sourceUrl": "https://plugins.svn.wordpress.org/1beyt/",
 }
-`;
-
-exports[`modules/datasource/packagist/index getReleases supports providers 2`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "composer.renovatebot.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://composer.renovatebot.com/packages.json",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "composer.renovatebot.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://composer.renovatebot.com/p/wpackagist-plugin/1beyt$b574a802b5bf20a58c0f027e73aea2a75d23a6f654afc298a8dc467331be316a.json",
-  },
-]
 `;
 
 exports[`modules/datasource/packagist/index getReleases supports providers without a hash 1`] = `

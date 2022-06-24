@@ -19,6 +19,7 @@ describe('proxy', () => {
     bootstrap();
     expect(hasProxy()).toBeTrue();
   });
+
   it('copies upper case HTTP_PROXY to http_proxy', () => {
     process.env.HTTP_PROXY = httpProxy;
     bootstrap();
@@ -31,11 +32,13 @@ describe('proxy', () => {
     expect(process.env.NO_PROXY).toBeUndefined();
     expect(process.env.no_proxy).toBeUndefined();
   });
+
   it('respects HTTPS_PROXY', () => {
     process.env.HTTPS_PROXY = httpsProxy;
     bootstrap();
     expect(hasProxy()).toBeTrue();
   });
+
   it('copies upper case HTTPS_PROXY to https_proxy', () => {
     process.env.HTTPS_PROXY = httpsProxy;
     bootstrap();
@@ -48,6 +51,7 @@ describe('proxy', () => {
     expect(process.env.NO_PROXY).toBeUndefined();
     expect(process.env.no_proxy).toBeUndefined();
   });
+
   it('does nothing', () => {
     process.env.no_proxy = noProxy;
     bootstrap();

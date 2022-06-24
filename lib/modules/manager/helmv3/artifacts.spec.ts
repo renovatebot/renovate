@@ -8,7 +8,7 @@ import * as docker from '../../../util/exec/docker';
 import * as hostRules from '../../../util/host-rules';
 import * as _datasource from '../../datasource';
 import type { UpdateArtifactsConfig } from '../types';
-import * as helmv3 from './artifacts';
+import * as helmv3 from '.';
 
 jest.mock('child_process');
 jest.mock('../../datasource');
@@ -42,6 +42,7 @@ describe('modules/manager/helmv3/artifacts', () => {
     docker.resetPrefetchedImages();
     hostRules.clear();
   });
+
   afterEach(() => {
     GlobalConfig.reset();
   });
@@ -210,7 +211,7 @@ describe('modules/manager/helmv3/artifacts', () => {
     ]);
   });
 
-  it('sets repositories from aliases', async () => {
+  it('sets repositories from registryAliases', async () => {
     fs.privateCacheDir.mockReturnValue(
       '/tmp/renovate/cache/__renovate-private-cache'
     );
@@ -227,7 +228,7 @@ describe('modules/manager/helmv3/artifacts', () => {
         config: {
           ...config,
           updateType: 'lockFileMaintenance',
-          aliases: { stable: 'the_stable_url', repo1: 'the_repo1_url' },
+          registryAliases: { stable: 'the_stable_url', repo1: 'the_repo1_url' },
         },
       })
     ).toMatchSnapshot([
@@ -243,7 +244,7 @@ describe('modules/manager/helmv3/artifacts', () => {
     expect(execSnapshots).toMatchSnapshot();
   });
 
-  it('sets repositories from aliases with docker', async () => {
+  it('sets repositories from registryAliases with docker', async () => {
     GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
     fs.getSiblingFileName.mockReturnValueOnce('Chart.lock');
     fs.readLocalFile.mockResolvedValueOnce(ociLockFile1 as never);
@@ -264,7 +265,7 @@ describe('modules/manager/helmv3/artifacts', () => {
         config: {
           ...config,
           updateType: 'lockFileMaintenance',
-          aliases: { stable: 'the_stable_url', repo1: 'the_repo1_url' },
+          registryAliases: { stable: 'the_stable_url', repo1: 'the_repo1_url' },
         },
       })
     ).toMatchSnapshot([
@@ -280,7 +281,7 @@ describe('modules/manager/helmv3/artifacts', () => {
     expect(execSnapshots).toMatchSnapshot();
   });
 
-  it('log into private registries and repositories already defined in aliases', async () => {
+  it('log into private registries and repositories already defined in registryAliases', async () => {
     hostRules.add({
       username: 'test',
       password: 'aPassword',
@@ -309,7 +310,7 @@ describe('modules/manager/helmv3/artifacts', () => {
         config: {
           ...config,
           updateType: 'lockFileMaintenance',
-          aliases: {
+          registryAliases: {
             stable: 'the_stable_url',
             oci: 'oci://registry.example.com/organization',
             repo1: 'https://the_repo1_url',
@@ -329,7 +330,7 @@ describe('modules/manager/helmv3/artifacts', () => {
     expect(execSnapshots).toMatchSnapshot();
   });
 
-  it('log into private registries and repositories NOT defined in aliases', async () => {
+  it('log into private registries and repositories NOT defined in registryAliases', async () => {
     hostRules.add({
       username: 'registryUser',
       password: 'password',
@@ -359,7 +360,7 @@ describe('modules/manager/helmv3/artifacts', () => {
         config: {
           ...config,
           updateType: 'lockFileMaintenance',
-          aliases: {},
+          registryAliases: {},
         },
       })
     ).toMatchSnapshot([
@@ -399,7 +400,7 @@ describe('modules/manager/helmv3/artifacts', () => {
         config: {
           ...config,
           updateType: 'lockFileMaintenance',
-          aliases: {
+          registryAliases: {
             repo1:
               'https://gitlab.com/api/v4/projects/xxxxxxx/packages/helm/stable',
           },
@@ -430,7 +431,7 @@ describe('modules/manager/helmv3/artifacts', () => {
     expect(execSnapshots).toMatchSnapshot();
   });
 
-  it('do not add aliases to repository list', async () => {
+  it('do not add registryAliases to repository list', async () => {
     fs.getSiblingFileName.mockReturnValueOnce('Chart.lock');
     fs.readLocalFile.mockResolvedValueOnce(ociLockFile1Alias as never);
     const execSnapshots = mockExecAll(exec);
@@ -447,7 +448,7 @@ describe('modules/manager/helmv3/artifacts', () => {
         config: {
           ...config,
           updateType: 'lockFileMaintenance',
-          aliases: {
+          registryAliases: {
             jetstack: 'https://charts.jetstack.io',
           },
         },

@@ -27,6 +27,7 @@ jest.mock('./auto-replace');
 describe('workers/repository/update/branch/get-updated', () => {
   describe('getUpdatedPackageFiles()', () => {
     let config: BranchConfig;
+
     beforeEach(() => {
       config = {
         ...defaultConfig,
@@ -35,11 +36,12 @@ describe('workers/repository/update/branch/get-updated', () => {
       npm.updateDependency = jest.fn();
       git.getFile.mockResolvedValueOnce('existing content');
     });
+
     it('handles autoreplace base updated', async () => {
       config.upgrades.push({
         packageFile: 'index.html',
         manager: 'html',
-        branchName: undefined,
+        branchName: '',
       });
       autoReplace.doAutoReplace.mockResolvedValueOnce('updated-file');
       const res = await getUpdatedPackageFiles(config);
@@ -49,11 +51,12 @@ describe('workers/repository/update/branch/get-updated', () => {
         ],
       });
     });
+
     it('handles autoreplace branch no update', async () => {
       config.upgrades.push({
         packageFile: 'index.html',
         manager: 'html',
-        branchName: undefined,
+        branchName: '',
       });
       autoReplace.doAutoReplace.mockResolvedValueOnce('existing content');
       const res = await getUpdatedPackageFiles(config);
@@ -64,17 +67,19 @@ describe('workers/repository/update/branch/get-updated', () => {
         updatedPackageFiles: [],
       });
     });
+
     it('handles autoreplace failure', async () => {
-      config.upgrades.push({ manager: 'html', branchName: undefined });
+      config.upgrades.push({ manager: 'html', branchName: '' });
       autoReplace.doAutoReplace.mockResolvedValueOnce(null);
       await expect(getUpdatedPackageFiles(config)).rejects.toThrow();
     });
+
     it('handles autoreplace branch needs update', async () => {
       config.reuseExistingBranch = true;
       config.upgrades.push({
         packageFile: 'index.html',
         manager: 'html',
-        branchName: undefined,
+        branchName: '',
       });
       autoReplace.doAutoReplace.mockResolvedValueOnce(null);
       autoReplace.doAutoReplace.mockResolvedValueOnce('updated-file');
@@ -85,6 +90,7 @@ describe('workers/repository/update/branch/get-updated', () => {
         ],
       });
     });
+
     it('handles empty', async () => {
       const res = await getUpdatedPackageFiles(config);
       expect(res).toEqual({
@@ -94,6 +100,7 @@ describe('workers/repository/update/branch/get-updated', () => {
         updatedPackageFiles: [],
       });
     });
+
     it('handles null content', async () => {
       config.reuseExistingBranch = true;
       config.upgrades.push({
@@ -101,6 +108,7 @@ describe('workers/repository/update/branch/get-updated', () => {
       } as never);
       await expect(getUpdatedPackageFiles(config)).rejects.toThrow();
     });
+
     it('handles content change', async () => {
       config.reuseExistingBranch = true;
       config.upgrades.push({
@@ -119,12 +127,13 @@ describe('workers/repository/update/branch/get-updated', () => {
         ],
       });
     });
+
     it('handles lock files', async () => {
       config.reuseExistingBranch = true;
       config.upgrades.push({
         packageFile: 'composer.json',
         manager: 'composer',
-        branchName: undefined,
+        branchName: '',
       });
       autoReplace.doAutoReplace.mockResolvedValueOnce('some new content');
       composer.updateArtifacts.mockResolvedValueOnce([
@@ -154,6 +163,7 @@ describe('workers/repository/update/branch/get-updated', () => {
         ],
       });
     });
+
     it('handles lockFileMaintenance', async () => {
       config.upgrades.push({
         manager: 'composer',
@@ -179,6 +189,7 @@ describe('workers/repository/update/branch/get-updated', () => {
         ],
       });
     });
+
     it('handles isRemediation success', async () => {
       config.upgrades.push({
         manager: 'npm',
@@ -200,6 +211,7 @@ describe('workers/repository/update/branch/get-updated', () => {
         ],
       });
     });
+
     it('handles unsupported isRemediation', async () => {
       config.upgrades.push({
         manager: 'npm',
@@ -219,6 +231,7 @@ describe('workers/repository/update/branch/get-updated', () => {
         }
       `);
     });
+
     it('handles isRemediation rebase', async () => {
       config.upgrades.push({
         manager: 'npm',
@@ -241,6 +254,7 @@ describe('workers/repository/update/branch/get-updated', () => {
         ],
       });
     });
+
     it('handles lockFileMaintenance error', async () => {
       config.upgrades.push({
         manager: 'composer',
@@ -259,11 +273,12 @@ describe('workers/repository/update/branch/get-updated', () => {
         artifactErrors: [{ lockFile: 'composer.lock', stderr: 'some error' }],
       });
     });
+
     it('handles lock file errors', async () => {
       config.reuseExistingBranch = true;
       config.upgrades.push({
         manager: 'composer',
-        branchName: undefined,
+        branchName: '',
       });
       autoReplace.doAutoReplace.mockResolvedValueOnce('some new content');
       composer.updateArtifacts.mockResolvedValueOnce([
@@ -279,6 +294,7 @@ describe('workers/repository/update/branch/get-updated', () => {
         artifactErrors: [{ lockFile: 'composer.lock', stderr: 'some error' }],
       });
     });
+
     it('handles git submodules', async () => {
       config.upgrades.push({
         packageFile: '.gitmodules',
@@ -297,11 +313,12 @@ describe('workers/repository/update/branch/get-updated', () => {
         ],
       });
     });
+
     it('update artifacts on update-lockfile strategy', async () => {
       config.upgrades.push({
         packageFile: 'composer.json',
         manager: 'composer',
-        branchName: undefined,
+        branchName: '',
         isLockfileUpdate: true,
       });
       composer.updateLockedDependency.mockReturnValueOnce({
@@ -334,11 +351,12 @@ describe('workers/repository/update/branch/get-updated', () => {
         ],
       });
     });
+
     it('update artifacts on update-lockfile strategy with no updateLockedDependency', async () => {
       config.upgrades.push({
         packageFile: 'abc.tf',
         manager: 'terraform',
-        branchName: undefined,
+        branchName: '',
         isLockfileUpdate: true,
       });
       terraform.updateArtifacts.mockResolvedValueOnce([
@@ -368,12 +386,13 @@ describe('workers/repository/update/branch/get-updated', () => {
         ],
       });
     });
+
     it('attempts updateLockedDependency and handles unsupported', async () => {
       config.upgrades.push({
         packageFile: 'package.json',
         lockFiles: ['package-lock.json'],
         manager: 'npm',
-        branchName: undefined,
+        branchName: '',
         isLockfileUpdate: true,
       });
       npm.updateLockedDependency.mockResolvedValue({
@@ -389,13 +408,14 @@ describe('workers/repository/update/branch/get-updated', () => {
         }
       `);
     });
+
     it('attempts updateLockedDependency and handles already-updated', async () => {
       config.reuseExistingBranch = true;
       config.upgrades.push({
         packageFile: 'package.json',
         lockFile: 'package-lock.json',
         manager: 'npm',
-        branchName: undefined,
+        branchName: '',
         isLockfileUpdate: true,
       });
       npm.updateLockedDependency.mockResolvedValueOnce({
@@ -411,13 +431,14 @@ describe('workers/repository/update/branch/get-updated', () => {
         }
       `);
     });
+
     it('attempts updateLockedDependency and handles updated files with reuse branch', async () => {
       config.reuseExistingBranch = true;
       config.upgrades.push({
         packageFile: 'package.json',
         lockFile: 'package-lock.json',
         manager: 'npm',
-        branchName: undefined,
+        branchName: '',
         isLockfileUpdate: true,
       });
       git.getFile.mockResolvedValue('some content');
@@ -435,10 +456,11 @@ describe('workers/repository/update/branch/get-updated', () => {
         }
       `);
     });
+
     it('bumps versions in updateDependency managers', async () => {
       config.upgrades.push({
         packageFile: 'package.json',
-        branchName: undefined,
+        branchName: '',
         bumpVersion: 'patch',
         manager: 'npm',
       });
@@ -455,10 +477,11 @@ describe('workers/repository/update/branch/get-updated', () => {
         ],
       });
     });
+
     it('bumps versions in autoReplace managers', async () => {
       config.upgrades.push({
         packageFile: 'Chart.yaml',
-        branchName: undefined,
+        branchName: '',
         bumpVersion: 'patch',
         manager: 'helmv3',
       });

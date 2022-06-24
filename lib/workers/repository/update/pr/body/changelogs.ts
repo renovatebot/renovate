@@ -7,7 +7,6 @@ import releaseNotesHbs from '../changelog/hbs-template';
 
 export function getChangelogs(config: BranchConfig): string {
   let releaseNotes = '';
-  // istanbul ignore if
   if (!config.hasReleaseNotes) {
     return releaseNotes;
   }
@@ -15,14 +14,14 @@ export function getChangelogs(config: BranchConfig): string {
   const countReleaseNodesByRepoName: Record<string, number> = {};
 
   for (const upgrade of config.upgrades) {
-    if (upgrade.hasReleaseNotes) {
+    if (upgrade.hasReleaseNotes && upgrade.repoName) {
       countReleaseNodesByRepoName[upgrade.repoName] =
         (countReleaseNodesByRepoName[upgrade.repoName] || 0) + 1;
     }
   }
 
   for (const upgrade of config.upgrades) {
-    if (upgrade.hasReleaseNotes) {
+    if (upgrade.hasReleaseNotes && upgrade.repoName) {
       upgrade.releaseNotesSummaryTitle = `${upgrade.repoName}${
         countReleaseNodesByRepoName[upgrade.repoName] > 1
           ? ` (${upgrade.depName})`

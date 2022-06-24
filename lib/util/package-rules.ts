@@ -29,25 +29,25 @@ function matchesRule(
     manager,
     datasource,
   } = inputConfig;
-  const unconstrainedValue = lockedVersion && is.undefined(currentValue);
+  const unconstrainedValue = !!lockedVersion && is.undefined(currentValue);
   // Setting empty arrays simplifies our logic later
-  const matchFiles = packageRule.matchFiles || [];
-  const matchPaths = packageRule.matchPaths || [];
-  const matchLanguages = packageRule.matchLanguages || [];
-  const matchBaseBranches = packageRule.matchBaseBranches || [];
-  const matchManagers = packageRule.matchManagers || [];
-  const matchDatasources = packageRule.matchDatasources || [];
-  const matchDepTypes = packageRule.matchDepTypes || [];
-  const matchPackageNames = packageRule.matchPackageNames || [];
-  let matchPackagePatterns = packageRule.matchPackagePatterns || [];
-  const matchPackagePrefixes = packageRule.matchPackagePrefixes || [];
-  const excludePackageNames = packageRule.excludePackageNames || [];
-  const excludePackagePatterns = packageRule.excludePackagePatterns || [];
-  const excludePackagePrefixes = packageRule.excludePackagePrefixes || [];
-  const matchSourceUrlPrefixes = packageRule.matchSourceUrlPrefixes || [];
-  const matchSourceUrls = packageRule.matchSourceUrls || [];
-  const matchCurrentVersion = packageRule.matchCurrentVersion || null;
-  const matchUpdateTypes = packageRule.matchUpdateTypes || [];
+  const matchFiles = packageRule.matchFiles ?? [];
+  const matchPaths = packageRule.matchPaths ?? [];
+  const matchLanguages = packageRule.matchLanguages ?? [];
+  const matchBaseBranches = packageRule.matchBaseBranches ?? [];
+  const matchManagers = packageRule.matchManagers ?? [];
+  const matchDatasources = packageRule.matchDatasources ?? [];
+  const matchDepTypes = packageRule.matchDepTypes ?? [];
+  const matchPackageNames = packageRule.matchPackageNames ?? [];
+  let matchPackagePatterns = packageRule.matchPackagePatterns ?? [];
+  const matchPackagePrefixes = packageRule.matchPackagePrefixes ?? [];
+  const excludePackageNames = packageRule.excludePackageNames ?? [];
+  const excludePackagePatterns = packageRule.excludePackagePatterns ?? [];
+  const excludePackagePrefixes = packageRule.excludePackagePrefixes ?? [];
+  const matchSourceUrlPrefixes = packageRule.matchSourceUrlPrefixes ?? [];
+  const matchSourceUrls = packageRule.matchSourceUrls ?? [];
+  const matchCurrentVersion = packageRule.matchCurrentVersion ?? null;
+  const matchUpdateTypes = packageRule.matchUpdateTypes ?? [];
   let positiveMatch = false;
   // Massage a positive patterns patch if an exclude one is present
   if (
@@ -73,7 +73,7 @@ function matchesRule(
     }
     positiveMatch = true;
   }
-  if (matchPaths.length) {
+  if (matchPaths.length && packageFile) {
     const isMatch = matchPaths.some(
       (rulePath) =>
         packageFile.includes(rulePath) ||
@@ -86,7 +86,7 @@ function matchesRule(
   }
   if (matchDepTypes.length) {
     const isMatch =
-      matchDepTypes.includes(depType) ||
+      (depType && matchDepTypes.includes(depType)) ||
       depTypes?.some((dt) => matchDepTypes.includes(dt));
     if (!isMatch) {
       return false;
@@ -94,6 +94,9 @@ function matchesRule(
     positiveMatch = true;
   }
   if (matchLanguages.length) {
+    if (!language) {
+      return false;
+    }
     const isMatch = matchLanguages.includes(language);
     if (!isMatch) {
       return false;
@@ -101,6 +104,9 @@ function matchesRule(
     positiveMatch = true;
   }
   if (matchBaseBranches.length) {
+    if (!baseBranch) {
+      return false;
+    }
     const isMatch = matchBaseBranches.some((matchBaseBranch): boolean => {
       const isAllowedPred = configRegexPredicate(matchBaseBranch);
       if (isAllowedPred) {
@@ -115,6 +121,9 @@ function matchesRule(
     positiveMatch = true;
   }
   if (matchManagers.length) {
+    if (!manager) {
+      return false;
+    }
     const isMatch = matchManagers.includes(manager);
     if (!isMatch) {
       return false;
@@ -122,6 +131,9 @@ function matchesRule(
     positiveMatch = true;
   }
   if (matchDatasources.length) {
+    if (!datasource) {
+      return false;
+    }
     const isMatch = matchDatasources.includes(datasource);
     if (!isMatch) {
       return false;
@@ -130,7 +142,7 @@ function matchesRule(
   }
   if (matchUpdateTypes.length) {
     const isMatch =
-      matchUpdateTypes.includes(updateType) ||
+      (updateType && matchUpdateTypes.includes(updateType)) ||
       (isBump && matchUpdateTypes.includes('bump'));
     if (!isMatch) {
       return false;
@@ -138,11 +150,13 @@ function matchesRule(
     positiveMatch = true;
   }
   if (
-    depName &&
-    (matchPackageNames.length ||
-      matchPackagePatterns.length ||
-      matchPackagePrefixes.length)
+    matchPackageNames.length ||
+    matchPackagePatterns.length ||
+    matchPackagePrefixes.length
   ) {
+    if (!depName) {
+      return false;
+    }
     let isMatch = matchPackageNames.includes(depName);
     // name match is "or" so we check patterns if we didn't match names
     if (!isMatch) {
@@ -170,7 +184,7 @@ function matchesRule(
     positiveMatch = true;
   }
   if (excludePackageNames.length) {
-    const isMatch = excludePackageNames.includes(depName);
+    const isMatch = depName && excludePackageNames.includes(depName);
     if (isMatch) {
       return false;
     }
@@ -228,7 +242,10 @@ function matchesRule(
       matchCurrentVersionStr
     );
     if (matchCurrentVersionPred) {
-      if (!unconstrainedValue && !matchCurrentVersionPred(currentValue)) {
+      if (
+        !unconstrainedValue &&
+        (!currentValue || !matchCurrentVersionPred(currentValue))
+      ) {
         return false;
       }
       positiveMatch = true;
@@ -237,7 +254,10 @@ function matchesRule(
       try {
         isMatch =
           unconstrainedValue ||
-          version.matches(matchCurrentVersionStr, currentValue);
+          !!(
+            currentValue &&
+            version.matches(matchCurrentVersionStr, currentValue)
+          );
       } catch (err) {
         // Do nothing
       }
@@ -249,7 +269,7 @@ function matchesRule(
       const compareVersion =
         currentValue && version.isVersion(currentValue)
           ? currentValue // it's a version so we can match against it
-          : lockedVersion || currentVersion; // need to match against this currentVersion, if available
+          : lockedVersion ?? currentVersion; // need to match against this currentVersion, if available
       if (compareVersion) {
         // istanbul ignore next
         if (version.isVersion(compareVersion)) {
@@ -278,7 +298,7 @@ export function applyPackageRules<T extends PackageRuleInputConfig>(
   inputConfig: T
 ): T {
   let config = { ...inputConfig };
-  const packageRules = config.packageRules || [];
+  const packageRules = config.packageRules ?? [];
   logger.trace(
     { dependency: config.depName, packageRules },
     `Checking against ${packageRules.length} packageRules`

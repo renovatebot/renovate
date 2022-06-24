@@ -5,7 +5,7 @@ import { TerraformProviderDatasource } from '../../datasource/terraform-provider
 import type { PackageDependency } from '../types';
 import { TerraformDependencyTypes } from './common';
 import type { ProviderLock } from './lockfile/types';
-import type { ExtractionResult } from './types';
+import type { ExtractionResult, TerraformManagerData } from './types';
 import {
   getLockedVersion,
   keyValueExtractionRegex,
@@ -22,8 +22,8 @@ export function extractTerraformProvider(
   moduleName: string
 ): ExtractionResult {
   let lineNumber = startingLine;
-  const deps: PackageDependency[] = [];
-  const dep: PackageDependency = {
+  const deps: PackageDependency<TerraformManagerData>[] = [];
+  const dep: PackageDependency<TerraformManagerData> = {
     managerData: {
       moduleName,
       terraformDependencyType: TerraformDependencyTypes.provider,
@@ -40,20 +40,21 @@ export function extractTerraformProvider(
 
     // istanbul ignore else
     if (is.string(line)) {
-      // `{` will be counted wit +1 and `}` with -1. Therefore if we reach braceCounter == 0. We have found the end of the terraform block
-      const openBrackets = (line.match(regEx(/\{/g)) || []).length;
-      const closedBrackets = (line.match(regEx(/\}/g)) || []).length;
+      // `{` will be counted with +1 and `}` with -1. Therefore if we reach braceCounter == 0. We have found the end of the terraform block
+      const openBrackets = (line.match(regEx(/\{/g)) ?? []).length;
+      const closedBrackets = (line.match(regEx(/\}/g)) ?? []).length;
       braceCounter = braceCounter + openBrackets - closedBrackets;
 
       // only update fields inside the root block
       if (braceCounter === 1) {
         const kvMatch = keyValueExtractionRegex.exec(line);
-        if (kvMatch) {
+        if (kvMatch?.groups) {
           if (kvMatch.groups.key === 'version') {
             dep.currentValue = kvMatch.groups.value;
           } else if (kvMatch.groups.key === 'source') {
-            dep.managerData.source = kvMatch.groups.value;
-            dep.managerData.sourceLine = lineNumber;
+            // TODO #7154
+            dep.managerData!.source = kvMatch.groups.value;
+            dep.managerData!.sourceLine = lineNumber;
           }
         }
       }
@@ -75,12 +76,13 @@ export function analyzeTerraformProvider(
   locks: ProviderLock[]
 ): void {
   dep.depType = 'provider';
-  dep.depName = dep.managerData.moduleName;
+  dep.depName = dep.managerData?.moduleName;
   dep.datasource = TerraformProviderDatasource.id;
 
-  if (is.nonEmptyString(dep.managerData.source)) {
-    const source = sourceExtractionRegex.exec(dep.managerData.source);
-    if (!source) {
+  if (is.nonEmptyString(dep.managerData?.source)) {
+    // TODO #7154
+    const source = sourceExtractionRegex.exec(dep.managerData!.source);
+    if (!source?.groups) {
       dep.skipReason = 'unsupported-url';
       return;
     }
@@ -92,7 +94,7 @@ export function analyzeTerraformProvider(
       dep.registryUrls = [`https://${source.groups.hostname}`];
       dep.packageName = `${source.groups.namespace}/${source.groups.type}`;
     } else {
-      dep.packageName = dep.managerData.source;
+      dep.packageName = dep.managerData?.source;
     }
   }
   massageProviderLookupName(dep);

@@ -47,13 +47,13 @@ function getAuthJson(): string | null {
     .findAll({ hostType: PlatformId.Gitlab })
     ?.forEach((gitlabHostRule) => {
       if (gitlabHostRule?.token) {
-        const host = gitlabHostRule.resolvedHost || 'gitlab.com';
-        authJson['gitlab-token'] = authJson['gitlab-token'] || {};
+        const host = gitlabHostRule.resolvedHost ?? 'gitlab.com';
+        authJson['gitlab-token'] = authJson['gitlab-token'] ?? {};
         authJson['gitlab-token'][host] = gitlabHostRule.token;
         // https://getcomposer.org/doc/articles/authentication-for-private-packages.md#gitlab-token
         authJson['gitlab-domains'] = [
           host,
-          ...(authJson['gitlab-domains'] || []),
+          ...(authJson['gitlab-domains'] ?? []),
         ];
       }
     });
@@ -63,10 +63,10 @@ function getAuthJson(): string | null {
     ?.forEach((hostRule) => {
       const { resolvedHost, username, password, token } = hostRule;
       if (resolvedHost && username && password) {
-        authJson['http-basic'] = authJson['http-basic'] || {};
+        authJson['http-basic'] = authJson['http-basic'] ?? {};
         authJson['http-basic'][resolvedHost] = { username, password };
       } else if (resolvedHost && token) {
-        authJson.bearer = authJson.bearer || {};
+        authJson.bearer = authJson.bearer ?? {};
         authJson.bearer[resolvedHost] = token;
       }
     });
@@ -138,7 +138,12 @@ export async function updateArtifacts({
     } else {
       args =
         (
-          'update ' + updatedDeps.map((dep) => quote(dep.depName)).join(' ')
+          'update ' +
+          updatedDeps
+            .map((dep) => dep.depName)
+            .filter(is.string)
+            .map((dep) => quote(dep))
+            .join(' ')
         ).trim() + ' --with-dependencies';
     }
     args += getComposerArguments(config, composerToolConstraint);

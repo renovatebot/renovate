@@ -77,6 +77,7 @@ describe('modules/manager/npm/extract/locked-versions', () => {
         },
       ]);
     });
+
     it('uses yarn.lock with yarn v2.1.0', async () => {
       const yarnVersion = '2.1.0';
       const lockfileVersion = undefined;
@@ -123,6 +124,7 @@ describe('modules/manager/npm/extract/locked-versions', () => {
         },
       ]);
     });
+
     it('uses yarn.lock with yarn v2.2.0', async () => {
       const yarnVersion = '2.2.0';
       const lockfileVersion = 6;
@@ -169,6 +171,7 @@ describe('modules/manager/npm/extract/locked-versions', () => {
         },
       ]);
     });
+
     it('uses yarn.lock with yarn v3.0.0', async () => {
       const yarnVersion = '3.0.0';
       const lockfileVersion = 8;
@@ -195,6 +198,46 @@ describe('modules/manager/npm/extract/locked-versions', () => {
             },
             {
               currentValue: '3.0.0',
+              depName: 'yarn',
+              depType: 'packageManager',
+              lockedVersion: undefined,
+              packageName: '@yarnpkg/cli',
+            },
+          ],
+          lockFiles: ['yarn.lock'],
+          npmLock: 'package-lock.json',
+          yarnLock: 'yarn.lock',
+        },
+      ]);
+    });
+
+    it("uses yarn.lock but doesn't override contraints", async () => {
+      const yarnVersion = '3.2.0';
+      const lockfileVersion = 8;
+      const isYarn1 = false;
+      yarn.getYarnLock.mockReturnValue({
+        isYarn1,
+        lockfileVersion,
+        lockedVersions,
+      });
+      const packageFiles = getPackageFiles(yarnVersion);
+      packageFiles[0].constraints = { yarn: '3.2.0' };
+      await getLockedVersions(packageFiles);
+      expect(packageFiles).toEqual([
+        {
+          constraints: { yarn: '3.2.0' },
+          deps: [
+            { currentValue: '1.0.0', depName: 'a', lockedVersion: '1.0.0' },
+            { currentValue: '2.0.0', depName: 'b', lockedVersion: '2.0.0' },
+            {
+              currentValue: '^3.2.0',
+              depName: 'yarn',
+              depType: 'engines',
+              lockedVersion: undefined,
+              packageName: '@yarnpkg/cli',
+            },
+            {
+              currentValue: '3.2.0',
               depName: 'yarn',
               depType: 'packageManager',
               lockedVersion: undefined,
@@ -236,6 +279,7 @@ describe('modules/manager/npm/extract/locked-versions', () => {
         },
       ]);
     });
+
     it('uses package-lock.json with npm v7.0.0', async () => {
       npm.getNpmLock.mockReturnValue({
         lockedVersions: { a: '1.0.0', b: '2.0.0', c: '3.0.0' },
@@ -305,6 +349,7 @@ describe('modules/manager/npm/extract/locked-versions', () => {
         },
       ]);
     });
+
     it('ignores pnpm', async () => {
       const packageFiles = [
         {

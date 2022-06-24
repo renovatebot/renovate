@@ -36,7 +36,8 @@ function depStringHandler(
 ): Context {
   const depStr = token.value;
   const match = extractRegex.exec(depStr);
-  const { depName, currentValue } = match.groups;
+  // TODO #7154
+  const { depName, currentValue } = match!.groups!;
 
   const dep: PackageDependency<ManagerData> = {
     depName,

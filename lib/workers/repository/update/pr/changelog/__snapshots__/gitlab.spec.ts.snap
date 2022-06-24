@@ -17,6 +17,7 @@ Object {
       "changes": Array [],
       "compare": Object {},
       "date": undefined,
+      "gitRef": undefined,
       "releaseNotes": null,
       "version": "5.6.1",
     },
@@ -24,6 +25,7 @@ Object {
       "changes": Array [],
       "compare": Object {},
       "date": "2020-02-13T15:37:00.000Z",
+      "gitRef": undefined,
       "releaseNotes": null,
       "version": "5.6.0",
     },
@@ -31,6 +33,7 @@ Object {
       "changes": Array [],
       "compare": Object {},
       "date": undefined,
+      "gitRef": "eba303e91c930292198b2fc57040145682162a1b",
       "releaseNotes": null,
       "version": "5.5.0",
     },
@@ -38,115 +41,12 @@ Object {
       "changes": Array [],
       "compare": Object {},
       "date": "2018-08-24T14:23:00.000Z",
+      "gitRef": undefined,
       "releaseNotes": null,
       "version": "5.4.0",
     },
   ],
 }
-`;
-
-exports[`workers/repository/update/pr/changelog/gitlab getChangeLogJSON handles empty GitLab tags response 2`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "authorization": "Bearer abc",
-      "host": "gitlab.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://gitlab.com/api/v4/projects/meno%2Fdropzone/repository/tags?per_page=100",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "authorization": "Bearer abc",
-      "host": "gitlab.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://gitlab.com/api/v4/projects/meno%2Fdropzone/repository/tree?per_page=100",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "authorization": "Bearer abc",
-      "host": "gitlab.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://gitlab.com/api/v4/projects/meno%2Fdropzone/releases?per_page=100",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "authorization": "Bearer abc",
-      "host": "gitlab.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://gitlab.com/api/v4/projects/meno%2Fdropzone/repository/tree?per_page=100",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "authorization": "Bearer abc",
-      "host": "gitlab.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://gitlab.com/api/v4/projects/meno%2Fdropzone/releases?per_page=100",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "authorization": "Bearer abc",
-      "host": "gitlab.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://gitlab.com/api/v4/projects/meno%2Fdropzone/repository/tree?per_page=100",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "authorization": "Bearer abc",
-      "host": "gitlab.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://gitlab.com/api/v4/projects/meno%2Fdropzone/releases?per_page=100",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "authorization": "Bearer abc",
-      "host": "gitlab.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://gitlab.com/api/v4/projects/meno%2Fdropzone/repository/tree?per_page=100",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "authorization": "Bearer abc",
-      "host": "gitlab.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://gitlab.com/api/v4/projects/meno%2Fdropzone/releases?per_page=100",
-  },
-]
 `;
 
 exports[`workers/repository/update/pr/changelog/gitlab getChangeLogJSON supports gitlab enterprise and gitlab enterprise changelog 1`] = `
@@ -166,6 +66,7 @@ Object {
       "changes": Array [],
       "compare": Object {},
       "date": undefined,
+      "gitRef": undefined,
       "releaseNotes": null,
       "version": "5.6.1",
     },
@@ -173,6 +74,7 @@ Object {
       "changes": Array [],
       "compare": Object {},
       "date": "2020-02-13T15:37:00.000Z",
+      "gitRef": undefined,
       "releaseNotes": null,
       "version": "5.6.0",
     },
@@ -180,6 +82,7 @@ Object {
       "changes": Array [],
       "compare": Object {},
       "date": undefined,
+      "gitRef": "eba303e91c930292198b2fc57040145682162a1b",
       "releaseNotes": null,
       "version": "5.5.0",
     },
@@ -187,6 +90,7 @@ Object {
       "changes": Array [],
       "compare": Object {},
       "date": "2018-08-24T14:23:00.000Z",
+      "gitRef": undefined,
       "releaseNotes": null,
       "version": "5.4.0",
     },
@@ -211,6 +115,7 @@ Object {
       "changes": Array [],
       "compare": Object {},
       "date": undefined,
+      "gitRef": undefined,
       "releaseNotes": null,
       "version": "5.6.1",
     },
@@ -218,6 +123,7 @@ Object {
       "changes": Array [],
       "compare": Object {},
       "date": "2020-02-13T15:37:00.000Z",
+      "gitRef": undefined,
       "releaseNotes": null,
       "version": "5.6.0",
     },
@@ -225,6 +131,7 @@ Object {
       "changes": Array [],
       "compare": Object {},
       "date": undefined,
+      "gitRef": "eba303e91c930292198b2fc57040145682162a1b",
       "releaseNotes": null,
       "version": "5.5.0",
     },
@@ -232,6 +139,7 @@ Object {
       "changes": Array [],
       "compare": Object {},
       "date": "2018-08-24T14:23:00.000Z",
+      "gitRef": undefined,
       "releaseNotes": null,
       "version": "5.4.0",
     },
@@ -258,6 +166,7 @@ Object {
         "url": "https://gitlab.com/meno/dropzone/compare/v5.6.0...v5.6.1",
       },
       "date": undefined,
+      "gitRef": undefined,
       "releaseNotes": Object {
         "notesSourceUrl": "",
         "url": "https://gitlab.com/meno/dropzone/compare/v5.6.0...v5.6.1",
@@ -270,6 +179,7 @@ Object {
         "url": "https://gitlab.com/meno/dropzone/compare/v5.5.0...v5.6.0",
       },
       "date": "2020-02-13T15:37:00.000Z",
+      "gitRef": undefined,
       "releaseNotes": Object {
         "notesSourceUrl": "",
         "url": "https://gitlab.com/meno/dropzone/compare/v5.5.0...v5.6.0",
@@ -282,6 +192,7 @@ Object {
         "url": "https://gitlab.com/meno/dropzone/compare/v5.4.0...v5.5.0",
       },
       "date": undefined,
+      "gitRef": "eba303e91c930292198b2fc57040145682162a1b",
       "releaseNotes": Object {
         "notesSourceUrl": "",
         "url": "https://gitlab.com/meno/dropzone/compare/v5.4.0...v5.5.0",
@@ -294,6 +205,7 @@ Object {
         "url": "https://gitlab.com/meno/dropzone/compare/v5.2.0...v5.4.0",
       },
       "date": "2018-08-24T14:23:00.000Z",
+      "gitRef": undefined,
       "releaseNotes": Object {
         "notesSourceUrl": "",
         "url": "https://gitlab.com/meno/dropzone/compare/v5.2.0...v5.4.0",
@@ -302,110 +214,6 @@ Object {
     },
   ],
 }
-`;
-
-exports[`workers/repository/update/pr/changelog/gitlab getChangeLogJSON uses GitLab tags 2`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "authorization": "Bearer abc",
-      "host": "gitlab.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://gitlab.com/api/v4/projects/meno%2Fdropzone/repository/tags?per_page=100",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "authorization": "Bearer abc",
-      "host": "gitlab.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://gitlab.com/api/v4/projects/meno%2Fdropzone/repository/tree?per_page=100",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "authorization": "Bearer abc",
-      "host": "gitlab.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://gitlab.com/api/v4/projects/meno%2Fdropzone/releases?per_page=100",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "authorization": "Bearer abc",
-      "host": "gitlab.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://gitlab.com/api/v4/projects/meno%2Fdropzone/repository/tree?per_page=100",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "authorization": "Bearer abc",
-      "host": "gitlab.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://gitlab.com/api/v4/projects/meno%2Fdropzone/releases?per_page=100",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "authorization": "Bearer abc",
-      "host": "gitlab.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://gitlab.com/api/v4/projects/meno%2Fdropzone/repository/tree?per_page=100",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "authorization": "Bearer abc",
-      "host": "gitlab.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://gitlab.com/api/v4/projects/meno%2Fdropzone/releases?per_page=100",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "authorization": "Bearer abc",
-      "host": "gitlab.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://gitlab.com/api/v4/projects/meno%2Fdropzone/repository/tree?per_page=100",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "authorization": "Bearer abc",
-      "host": "gitlab.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://gitlab.com/api/v4/projects/meno%2Fdropzone/releases?per_page=100",
-  },
-]
 `;
 
 exports[`workers/repository/update/pr/changelog/gitlab getChangeLogJSON uses GitLab tags with error 1`] = `
@@ -425,6 +233,7 @@ Object {
       "changes": Array [],
       "compare": Object {},
       "date": undefined,
+      "gitRef": undefined,
       "releaseNotes": null,
       "version": "5.6.1",
     },
@@ -432,6 +241,7 @@ Object {
       "changes": Array [],
       "compare": Object {},
       "date": "2020-02-13T15:37:00.000Z",
+      "gitRef": undefined,
       "releaseNotes": null,
       "version": "5.6.0",
     },
@@ -439,6 +249,7 @@ Object {
       "changes": Array [],
       "compare": Object {},
       "date": undefined,
+      "gitRef": "eba303e91c930292198b2fc57040145682162a1b",
       "releaseNotes": null,
       "version": "5.5.0",
     },
@@ -446,115 +257,12 @@ Object {
       "changes": Array [],
       "compare": Object {},
       "date": "2018-08-24T14:23:00.000Z",
+      "gitRef": undefined,
       "releaseNotes": null,
       "version": "5.4.0",
     },
   ],
 }
-`;
-
-exports[`workers/repository/update/pr/changelog/gitlab getChangeLogJSON uses GitLab tags with error 2`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "authorization": "Bearer abc",
-      "host": "gitlab.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://gitlab.com/api/v4/projects/meno%2Fdropzone/repository/tags?per_page=100",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "authorization": "Bearer abc",
-      "host": "gitlab.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://gitlab.com/api/v4/projects/meno%2Fdropzone/repository/tree?per_page=100",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "authorization": "Bearer abc",
-      "host": "gitlab.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://gitlab.com/api/v4/projects/meno%2Fdropzone/releases?per_page=100",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "authorization": "Bearer abc",
-      "host": "gitlab.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://gitlab.com/api/v4/projects/meno%2Fdropzone/repository/tree?per_page=100",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "authorization": "Bearer abc",
-      "host": "gitlab.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://gitlab.com/api/v4/projects/meno%2Fdropzone/releases?per_page=100",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "authorization": "Bearer abc",
-      "host": "gitlab.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://gitlab.com/api/v4/projects/meno%2Fdropzone/repository/tree?per_page=100",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "authorization": "Bearer abc",
-      "host": "gitlab.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://gitlab.com/api/v4/projects/meno%2Fdropzone/releases?per_page=100",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "authorization": "Bearer abc",
-      "host": "gitlab.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://gitlab.com/api/v4/projects/meno%2Fdropzone/repository/tree?per_page=100",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "authorization": "Bearer abc",
-      "host": "gitlab.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://gitlab.com/api/v4/projects/meno%2Fdropzone/releases?per_page=100",
-  },
-]
 `;
 
 exports[`workers/repository/update/pr/changelog/gitlab getChangeLogJSON works without GitLab 1`] = `
@@ -574,6 +282,7 @@ Object {
       "changes": Array [],
       "compare": Object {},
       "date": undefined,
+      "gitRef": undefined,
       "releaseNotes": null,
       "version": "5.6.1",
     },
@@ -581,6 +290,7 @@ Object {
       "changes": Array [],
       "compare": Object {},
       "date": "2020-02-13T15:37:00.000Z",
+      "gitRef": undefined,
       "releaseNotes": null,
       "version": "5.6.0",
     },
@@ -588,6 +298,7 @@ Object {
       "changes": Array [],
       "compare": Object {},
       "date": undefined,
+      "gitRef": "eba303e91c930292198b2fc57040145682162a1b",
       "releaseNotes": null,
       "version": "5.5.0",
     },
@@ -595,6 +306,7 @@ Object {
       "changes": Array [],
       "compare": Object {},
       "date": "2018-08-24T14:23:00.000Z",
+      "gitRef": undefined,
       "releaseNotes": null,
       "version": "5.4.0",
     },

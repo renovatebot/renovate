@@ -17,8 +17,10 @@ handlebars.registerHelper(
     (context || '').replace(new RegExp(find, 'g'), replace) // TODO #12873
 );
 
-handlebars.registerHelper('containsString', (str, subStr, options) =>
-  str.includes(subStr)
+handlebars.registerHelper('lowercase', (str: string) => str?.toLowerCase());
+
+handlebars.registerHelper('containsString', (str, subStr) =>
+  str?.includes(subStr)
 );
 
 handlebars.registerHelper({
@@ -69,6 +71,9 @@ export const allowedFields = {
   currentValue: 'The extracted current value of the dependency being updated',
   currentVersion:
     'The version that would be currently installed. For example, if currentValue is ^3.0.0 then currentVersion might be 3.1.0.',
+  currentDigest: 'The extracted current digest of the dependency being updated',
+  currentDigestShort:
+    'The extracted current short digest of the dependency being updated',
   datasource: 'The datasource used to look up the upgrade',
   depName: 'The name of the dependency being updated',
   depNameLinked:
@@ -84,6 +89,7 @@ export const allowedFields = {
   isMajor: 'true if the upgrade is major',
   isPatch: 'true if the upgrade is a patch upgrade',
   isPin: 'true if the upgrade is pinning dependencies',
+  isPinDigest: 'true if the upgrade is pinning digests',
   isRollback: 'true if the upgrade is a rollback PR',
   isReplacement: 'true if the upgrade is a replacement',
   isRange: 'true if the new value is a range',
@@ -123,7 +129,8 @@ export const allowedFields = {
   sourceRepoOrg: 'The repository organization in the sourceUrl, if present',
   sourceRepoSlug: 'The slugified pathname of the sourceUrl, if present',
   sourceUrl: 'The source URL for the package',
-  updateType: 'One of digest, pin, rollback, patch, minor, major, replacement',
+  updateType:
+    'One of digest, pin, rollback, patch, minor, major, replacement, pinDigest',
   upgrades: 'An array of upgrade objects in the branch',
   url: 'The url of the release notes',
   version: 'The version number of the changelog',
@@ -136,6 +143,9 @@ const prBodyFields = [
   'table',
   'notes',
   'changelogs',
+  'hasWarningsErrors',
+  'errors',
+  'warnings',
   'configDescription',
   'controls',
   'footer',

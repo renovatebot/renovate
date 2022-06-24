@@ -1,25 +1,26 @@
+import { updateLockedDependency } from '../..';
+import { Fixtures } from '../../../../../../test/fixtures';
 import * as httpMock from '../../../../../../test/http-mock';
-import { loadFixture } from '../../../../../../test/util';
 import { clone } from '../../../../../util/clone';
 import type { UpdateLockedConfig } from '../../../types';
-import { updateLockedDependency } from '.';
 
-const packageFileContent = loadFixture('package.json', './package-lock');
-const lockFileContent = loadFixture('package-lock.json', './package-lock');
-const lockFileV2Content = loadFixture('package-lock-v2.json', './package-lock');
-const acceptsJson = JSON.parse(loadFixture('accepts.json', './package-lock'));
-const expressJson = JSON.parse(loadFixture('express.json', './common'));
-const mimeJson = JSON.parse(loadFixture('mime.json', './package-lock'));
-const serveStaticJson = JSON.parse(
-  loadFixture('serve-static.json', './package-lock')
+const packageFileContent = Fixtures.get('package.json', './package-lock');
+const lockFileContent = Fixtures.get('package-lock.json', './package-lock');
+const lockFileV2Content = Fixtures.get(
+  'package-lock-v2.json',
+  './package-lock'
 );
-const sendJson = JSON.parse(loadFixture('send.json', './package-lock'));
-const typeIsJson = JSON.parse(loadFixture('type-is.json', './package-lock'));
-const bundledPackageJson = loadFixture(
+const acceptsJson = Fixtures.getJson('accepts.json', './package-lock');
+const expressJson = Fixtures.get('express.json', './common');
+const mimeJson = Fixtures.get('mime.json', './package-lock');
+const serveStaticJson = Fixtures.get('serve-static.json', './package-lock');
+const sendJson = Fixtures.get('send.json', './package-lock');
+const typeIsJson = Fixtures.getJson('type-is.json', './package-lock');
+const bundledPackageJson = Fixtures.get(
   'bundled.package.json',
   './package-lock'
 );
-const bundledPackageLockJson = loadFixture(
+const bundledPackageLockJson = Fixtures.get(
   'bundled.package-lock.json',
   './package-lock'
 );
@@ -27,6 +28,7 @@ const bundledPackageLockJson = loadFixture(
 describe('modules/manager/npm/update/locked-dependency/index', () => {
   describe('updateLockedDependency()', () => {
     let config: UpdateLockedConfig;
+
     beforeEach(() => {
       config = {
         packageFile: 'package.json',
@@ -47,6 +49,7 @@ describe('modules/manager/npm/update/locked-dependency/index', () => {
         await updateLockedDependency({ ...config, lockFile: 'yarn.lock2' })
       ).toMatchObject({});
     });
+
     it('validates versions', async () => {
       expect(
         await updateLockedDependency({
@@ -55,11 +58,13 @@ describe('modules/manager/npm/update/locked-dependency/index', () => {
         })
       ).toMatchObject({});
     });
+
     it('returns null for unparseable files', async () => {
       expect(
         await updateLockedDependency({ ...config, lockFileContent: 'not json' })
       ).toMatchObject({});
     });
+
     it('rejects lockFileVersion 2', async () => {
       expect(
         await updateLockedDependency({
@@ -68,9 +73,11 @@ describe('modules/manager/npm/update/locked-dependency/index', () => {
         })
       ).toMatchObject({});
     });
+
     it('returns null if no locked deps', async () => {
       expect(await updateLockedDependency(config)).toMatchObject({});
     });
+
     it('rejects null if no constraint found', async () => {
       expect(
         await updateLockedDependency({
@@ -82,6 +89,7 @@ describe('modules/manager/npm/update/locked-dependency/index', () => {
         })
       ).toMatchObject({});
     });
+
     it('remediates in-range', async () => {
       const res = await updateLockedDependency({
         ...config,
@@ -90,9 +98,10 @@ describe('modules/manager/npm/update/locked-dependency/index', () => {
         newVersion: '1.2.12',
       });
       expect(
-        JSON.parse(res.files['package-lock.json']).dependencies.mime.version
+        JSON.parse(res.files!['package-lock.json']).dependencies.mime.version
       ).toBe('1.2.12');
     });
+
     it('rejects in-range remediation if lockfile v2+', async () => {
       const res = await updateLockedDependency({
         ...config,
@@ -103,6 +112,7 @@ describe('modules/manager/npm/update/locked-dependency/index', () => {
       });
       expect(res.status).toBe('unsupported');
     });
+
     it('fails to remediate if parent dep cannot support', async () => {
       const acceptsModified = clone(acceptsJson);
       acceptsModified.versions['2.0.0'] = {};
@@ -122,25 +132,28 @@ describe('modules/manager/npm/update/locked-dependency/index', () => {
       });
       expect(res).toMatchObject({});
     });
+
     it('remediates express', async () => {
       config.depName = 'express';
       config.currentVersion = '4.0.0';
       config.newVersion = '4.1.0';
       const res = await updateLockedDependency(config);
-      expect(res.files['package.json']).toContain('"express": "4.1.0"');
-      const packageLock = JSON.parse(res.files['package-lock.json']);
+      expect(res.files!['package.json']).toContain('"express": "4.1.0"');
+      const packageLock = JSON.parse(res.files!['package-lock.json']);
       expect(packageLock.dependencies.express.version).toBe('4.1.0');
     });
+
     it('remediates lock file v2 express', async () => {
       config.depName = 'express';
       config.currentVersion = '4.0.0';
       config.newVersion = '4.1.0';
       config.lockFileContent = lockFileV2Content;
       const res = await updateLockedDependency(config);
-      expect(res.files['package.json']).toContain('"express": "4.1.0"');
-      const packageLock = JSON.parse(res.files['package-lock.json']);
+      expect(res.files!['package.json']).toContain('"express": "4.1.0"');
+      const packageLock = JSON.parse(res.files!['package-lock.json']);
       expect(packageLock.dependencies.express.version).toBe('4.1.0');
     });
+
     it('returns already-updated if already remediated exactly', async () => {
       config.depName = 'mime';
       config.currentVersion = '1.2.10';
@@ -148,6 +161,7 @@ describe('modules/manager/npm/update/locked-dependency/index', () => {
       const res = await updateLockedDependency(config);
       expect(res.status).toBe('already-updated');
     });
+
     it('returns already-updated if already v2 remediated exactly', async () => {
       config.depName = 'mime';
       config.currentVersion = '1.2.10';
@@ -156,6 +170,7 @@ describe('modules/manager/npm/update/locked-dependency/index', () => {
       const res = await updateLockedDependency(config);
       expect(res.status).toBe('already-updated');
     });
+
     it('returns already-updated if already remediated higher', async () => {
       config.depName = 'mime';
       config.currentVersion = '1.2.9';
@@ -164,6 +179,7 @@ describe('modules/manager/npm/update/locked-dependency/index', () => {
       const res = await updateLockedDependency(config);
       expect(res.status).toBe('already-updated');
     });
+
     it('returns already-updated if not found', async () => {
       config.depName = 'notfound';
       config.currentVersion = '1.2.9';
@@ -172,6 +188,7 @@ describe('modules/manager/npm/update/locked-dependency/index', () => {
       const res = await updateLockedDependency(config);
       expect(res.status).toBe('already-updated');
     });
+
     it('returns update-failed if other, lower version found', async () => {
       config.depName = 'mime';
       config.currentVersion = '1.2.5';
@@ -180,6 +197,7 @@ describe('modules/manager/npm/update/locked-dependency/index', () => {
       const res = await updateLockedDependency(config);
       expect(res.status).toBe('update-failed');
     });
+
     it('remediates mime', async () => {
       config.depName = 'mime';
       config.currentVersion = '1.2.11';
@@ -201,11 +219,11 @@ describe('modules/manager/npm/update/locked-dependency/index', () => {
         .get('/type-is')
         .reply(200, typeIsJson);
       const res = await updateLockedDependency(config);
-      const packageLock = JSON.parse(res.files['package-lock.json']);
+      const packageLock = JSON.parse(res.files!['package-lock.json']);
       expect(packageLock.dependencies.mime.version).toBe('1.4.1');
       expect(packageLock.dependencies.express.version).toBe('4.16.0');
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
+
     it('fails remediation if cannot update parent', async () => {
       config.depName = 'mime';
       config.currentVersion = '1.2.11';
@@ -214,6 +232,7 @@ describe('modules/manager/npm/update/locked-dependency/index', () => {
       const res = await updateLockedDependency(config);
       expect(res.status).toBe('update-failed');
     });
+
     it('fails remediation if bundled', async () => {
       config.depName = 'ansi-regex';
       config.currentVersion = '3.0.0';

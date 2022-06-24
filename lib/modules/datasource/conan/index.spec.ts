@@ -31,7 +31,7 @@ describe('modules/datasource/conan/index', () => {
       httpMock
         .scope(nonDefaultRegistryUrl)
         .get('/v2/conans/search?q=fakepackage')
-        .reply(200, null);
+        .reply(200);
       config.depName = 'fakepackage';
       expect(
         await getPkgReleases({
@@ -158,6 +158,7 @@ describe('modules/datasource/conan/index', () => {
         ],
       });
     });
+
     it('rejects userAndChannel for Conan Center', async () => {
       expect(
         await getPkgReleases({

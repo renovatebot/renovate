@@ -53,17 +53,19 @@ function isDockerHost(host: string): boolean {
 export async function getAuthHeaders(
   http: Http,
   registryHost: string,
-  dockerRepository: string
+  dockerRepository: string,
+  apiCheckUrl = `${registryHost}/v2/`
 ): Promise<OutgoingHttpHeaders | null> {
   try {
-    const apiCheckUrl = `${registryHost}/v2/`;
-    const apiCheckResponse = await http.get(apiCheckUrl, {
+    // use json request, as this will be cached for tags, so it returns json
+    // TODO: add cache test
+    const apiCheckResponse = await http.getJson(apiCheckUrl, {
       throwHttpErrors: false,
       noAuth: true,
     });
 
     if (apiCheckResponse.statusCode === 200) {
-      logger.debug({ registryHost }, 'No registry auth required');
+      logger.debug({ apiCheckUrl }, 'No registry auth required');
       return {};
     }
     if (
@@ -71,7 +73,7 @@ export async function getAuthHeaders(
       !is.nonEmptyString(apiCheckResponse.headers['www-authenticate'])
     ) {
       logger.warn(
-        { registryHost, res: apiCheckResponse },
+        { apiCheckUrl, res: apiCheckResponse },
         'Invalid registry response'
       );
       return null;
@@ -90,7 +92,7 @@ export async function getAuthHeaders(
         { registryHost, dockerRepository },
         `Using ecr auth for Docker registry`
       );
-      const [, region] = ecrRegex.exec(registryHost);
+      const [, region] = ecrRegex.exec(registryHost) ?? [];
       const auth = await getECRAuthToken(region, opts);
       if (auth) {
         opts.headers = { authorization: `Basic ${auth}` };
@@ -132,10 +134,19 @@ export async function getAuthHeaders(
         { registryHost, dockerRepository, authenticateHeader },
         `Invalid realm, testing direct auth`
       );
-      return opts.headers;
+      return opts.headers ?? null;
     }
 
-    const authUrl = `${authenticateHeader.params.realm}?service=${authenticateHeader.params.service}&scope=repository:${dockerRepository}:pull`;
+    let scope = `repository:${dockerRepository}:pull`;
+    // repo isn't known to server yet, so causing wrong scope `repository:user/image:pull`
+    if (
+      is.string(authenticateHeader.params.scope) &&
+      !apiCheckUrl.endsWith('/v2/')
+    ) {
+      scope = authenticateHeader.params.scope;
+    }
+
+    const authUrl = `${authenticateHeader.params.realm}?service=${authenticateHeader.params.service}&scope=${scope}`;
     logger.trace(
       { registryHost, dockerRepository, authUrl },
       `Obtaining docker registry token`
@@ -148,7 +159,7 @@ export async function getAuthHeaders(
       )
     ).body;
 
-    const token = authResponse.token || authResponse.access_token;
+    const token = authResponse.token ?? authResponse.access_token;
     // istanbul ignore if
     if (!token) {
       logger.warn('Failed to obtain docker registry token');
@@ -200,7 +211,7 @@ export async function getAuthHeaders(
 }
 
 async function getECRAuthToken(
-  region: string,
+  region: string | undefined,
   opts: HostRule
 ): Promise<string | null> {
   const config: ECRClientConfig = { region };
@@ -244,7 +255,7 @@ export function getRegistryRepository(
       }
       let dockerRepository = packageName.replace(registryEndingWithSlash, '');
       const fullUrl = `${registryHost}/${dockerRepository}`;
-      const { origin, pathname } = parseUrl(fullUrl);
+      const { origin, pathname } = parseUrl(fullUrl)!;
       registryHost = origin;
       dockerRepository = pathname.substring(1);
       return {
@@ -253,7 +264,7 @@ export function getRegistryRepository(
       };
     }
   }
-  let registryHost: string;
+  let registryHost: string | undefined;
   const split = packageName.split('/');
   if (split.length > 1 && (split[0].includes('.') || split[0].includes(':'))) {
     [registryHost] = split;
@@ -299,11 +310,12 @@ export function extractDigestFromResponseBody(
 }
 
 export function isECRMaxResultsError(err: HttpError): boolean {
+  const resp = err.response as HttpResponse<any> | undefined;
   return !!(
-    err.response?.statusCode === 405 &&
-    err.response?.headers?.['docker-distribution-api-version'] &&
+    resp?.statusCode === 405 &&
+    resp.headers?.['docker-distribution-api-version'] &&
     // https://docs.aws.amazon.com/AmazonECR/latest/APIReference/API_DescribeRepositories.html#ECR-DescribeRepositories-request-maxResults
-    err.response.body?.['errors']?.[0]?.message?.includes(
+    resp.body?.['errors']?.[0]?.message?.includes(
       'Member must have value less than or equal to 1000'
     )
   );
@@ -336,12 +348,12 @@ export const defaultConfig = {
   },
 };
 
-function findLatestStable(tags: string[]): string {
+function findLatestStable(tags: string[]): string | null {
   const versions = tags
     .filter((v) => dockerVersioning.isValid(v) && dockerVersioning.isStable(v))
     .sort((a, b) => dockerVersioning.sortVersions(a, b));
 
-  return versions.pop() ?? tags.slice(-1).pop();
+  return versions.pop() ?? tags.slice(-1).pop() ?? null;
 }
 
 export class DockerDatasource extends Datasource {
@@ -361,7 +373,7 @@ export class DockerDatasource extends Datasource {
     dockerRepository: string,
     tag: string,
     mode: 'head' | 'get' = 'get'
-  ): Promise<HttpResponse> {
+  ): Promise<HttpResponse | null> {
     logger.debug(
       `getManifestResponse(${registryHost}, ${dockerRepository}, ${tag})`
     );
@@ -442,7 +454,7 @@ export class DockerDatasource extends Datasource {
     registry: string,
     dockerRepository: string,
     tag: string
-  ): Promise<string> {
+  ): Promise<string | null> {
     const manifestResponse = await this.getManifestResponse(
       registry,
       dockerRepository,
@@ -500,7 +512,7 @@ export class DockerDatasource extends Datasource {
       manifest.mediaType === MediaType.ociManifestIndexV1 ||
       (!manifest.mediaType && hasKey('manifests', manifest))
     ) {
-      const imageList = manifest as OciImageList;
+      const imageList = manifest;
       if (imageList.manifests.length) {
         logger.trace(
           { registry, dockerRepository, tag },
@@ -653,17 +665,25 @@ export class DockerDatasource extends Datasource {
       `${registry}/api/v1/repository/${repository}/tag/?limit=${limit}&page=${page}&onlyActiveTags=true`;
 
     let page = 1;
-    let url = pageUrl(page);
-    do {
-      const res = await this.http.getJson<{
-        tags: { name: string }[];
+    let url: string | null = pageUrl(page);
+    while (url && page <= 20) {
+      interface QuayRestDockerTags {
+        tags: {
+          name: string;
+        }[];
         has_additional: boolean;
-      }>(url, {});
+      }
+
+      // typescript issue :-/
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+      const res = (await this.http.getJson<QuayRestDockerTags>(
+        url
+      )) as HttpResponse<QuayRestDockerTags>;
       const pageTags = res.body.tags.map((tag) => tag.name);
       tags = tags.concat(pageTags);
       page += 1;
       url = res.body.has_additional ? pageUrl(page) : null;
-    } while (url && page < 20);
+    }
     return tags;
   }
 
@@ -675,12 +695,15 @@ export class DockerDatasource extends Datasource {
     // AWS ECR limits the maximum number of results to 1000
     // See https://docs.aws.amazon.com/AmazonECR/latest/APIReference/API_DescribeRepositories.html#ECR-DescribeRepositories-request-maxResults
     const limit = ecrRegex.test(registryHost) ? 1000 : 10000;
-    let url = `${registryHost}/${dockerRepository}/tags/list?n=${limit}`;
+    let url:
+      | string
+      | null = `${registryHost}/${dockerRepository}/tags/list?n=${limit}`;
     url = ensurePathPrefix(url, '/v2');
     const headers = await getAuthHeaders(
       this.http,
       registryHost,
-      dockerRepository
+      dockerRepository,
+      url
     );
     if (!headers) {
       logger.debug('Failed to get authHeaders for getTags lookup');
@@ -789,10 +812,10 @@ export class DockerDatasource extends Datasource {
       { registryUrl, packageName }: GetReleasesConfig,
       newValue?: string
     ) => {
-      const newTag = newValue || 'latest';
+      const newTag = newValue ?? 'latest';
       const { registryHost, dockerRepository } = getRegistryRepository(
         packageName,
-        registryUrl
+        registryUrl!
       );
       return `${registryHost}:${dockerRepository}:${newTag}`;
     },
@@ -803,13 +826,13 @@ export class DockerDatasource extends Datasource {
   ): Promise<string | null> {
     const { registryHost, dockerRepository } = getRegistryRepository(
       packageName,
-      registryUrl
+      registryUrl!
     );
     logger.debug(
       `getDigest(${registryHost}, ${dockerRepository}, ${newValue})`
     );
-    const newTag = newValue || 'latest';
-    let digest: string = null;
+    const newTag = newValue ?? 'latest';
+    let digest: string | null = null;
     try {
       let manifestResponse = await this.getManifestResponse(
         registryHost,
@@ -832,7 +855,7 @@ export class DockerDatasource extends Datasource {
             dockerRepository,
             newTag
           );
-          digest = extractDigestFromResponseBody(manifestResponse);
+          digest = extractDigestFromResponseBody(manifestResponse!);
         }
         logger.debug({ digest }, 'Got docker digest');
       }
@@ -869,7 +892,7 @@ export class DockerDatasource extends Datasource {
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     const { registryHost, dockerRepository } = getRegistryRepository(
       packageName,
-      registryUrl
+      registryUrl!
     );
     const tags = await this.getTags(registryHost, dockerRepository);
     if (!tags) {
@@ -884,6 +907,11 @@ export class DockerDatasource extends Datasource {
     const latestTag = tags.includes('latest')
       ? 'latest'
       : findLatestStable(tags);
+
+    // istanbul ignore if: needs test
+    if (!latestTag) {
+      return ret;
+    }
     const labels = await this.getLabels(
       registryHost,
       dockerRepository,

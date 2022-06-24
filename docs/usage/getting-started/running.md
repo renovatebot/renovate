@@ -5,7 +5,7 @@ As a Renovate end user, there are two main categories of use:
 - You self-host Renovate, e.g. by running the pre-built Docker image, or
 - Someone else is hosting Renovate, and you install/configure it for the repositories you choose
 
-If someone else is hosting Renovate for you, or you are using the WhiteSource Renovate App on GitHub, then you can skip ahead to the [installing & onboarding](./installing-onboarding.md) page.
+If someone else is hosting Renovate for you, or you are using the Mend Renovate App on GitHub, then you can skip ahead to the [installing & onboarding](./installing-onboarding.md) page.
 
 ## Self-Hosting Renovate
 
@@ -23,7 +23,7 @@ Self-hosting Renovate means that you are the "administrator" of the bot, which e
 Renovate's Open Source CLI is built and distributed as the npm package `renovate`.
 You can run this directly in any Node.js environment - even via `npx` - and it will process all the repositories it is configured with, before exiting.
 When you install Renovate from npm it naturally does not come bundled with any third-party tools or languages such as Ruby, Python, Composer, Bundler, Poetry, etc.
-Therefore if you need Renovate to support any non-npm lock files like Bundler then you'll need to make sure all required third-party tools are pre-installed in the same environment alongside Renovate before you run it.
+If you need Renovate to support any non-npm lock files like Bundler then you'll need to make sure all required third-party tools are pre-installed in the same environment alongside Renovate before you run it.
 
 The `renovate` npm package is compatible with all of Renovate's supported platforms.
 
@@ -57,9 +57,9 @@ The Renovate team provide a ["Renovate Runner"](https://gitlab.com/renovate-bot/
 This supports both `gitlab.com` as well as self-hosted GitLab.
 Details for how it works can be found in the project.
 
-#### WhiteSource Renovate On-Premises
+#### Mend Renovate On-Premises
 
-WhiteSource Renovate On-Premises (WSOP) started out as a commercial product "Renovate Pro", but was renamed and made free to use when Renovate became a part of WhiteSource in 2019.
+Mend Renovate On-Premises (WSOP) started out as a commercial product "Renovate Pro", but was renamed and made free to use when Renovate became a part of Mend (formerly WhiteSource) in 2019.
 It is built similarly to the "full" Renovate image described above, but with these differences:
 
 - It is a stateful app and does not exit once it's processed all repositories
@@ -71,16 +71,16 @@ It is built similarly to the "full" Renovate image described above, but with the
 WSOP supports GitHub (both `github.com` and GitHub Enterprise Server) as well as GitLab self-hosted.
 Documentation can be found in its public GitHub repository [`whitesource/renovate-on-prem`](https://github.com/whitesource/renovate-on-prem).
 
-#### WhiteSource Remediate
+#### Mend Remediate
 
-[WhiteSource Remediate](https://www.whitesourcesoftware.com/wp-content/media/2021/04/whitesource-remediation-solution.pdf) is an extension of WSOP available for WhiteSource commercial customers, with full enterprise support.
-It is integrated with WhiteSource's vulnerability detection capabilities and additionally supports the capability of "horizontal" scalability - the ability to configure many Renovate "worker" containers which share a common job queue in order to not conflict with each other.
+[Mend Remediate](https://www.whitesourcesoftware.com/wp-content/media/2021/04/whitesource-remediation-solution.pdf) is an extension of WSOP available for Mend commercial customers, with full enterprise support.
+It is integrated with Mend's vulnerability detection capabilities and additionally supports the capability of "horizontal" scalability - the ability to configure many Renovate "worker" containers which share a common job queue in order to not conflict with each other.
 
-WhiteSource Remediate supports GitHub Enterprise Server, GitLab self-hosted, and Bitbucket Server.
+Mend Remediate supports GitHub Enterprise Server, GitLab self-hosted, and Bitbucket Server.
 
 #### Forking Renovate app
 
-"Forking Renovate" is the sister app to the WhiteSource Renovate App on GitHub.com.
+"Forking Renovate" is the sister app to the Mend Renovate App on GitHub.com.
 The difference is that Forking Renovate does not require `write` permissions to create branches within the repo, and instead submits PRs from its own fork.
 Because of how it works, it functions on public repositories only and additionally cannot support `automerge` capabilities.
 
@@ -108,7 +108,7 @@ For the npm package approach or Docker images, you will need some form of VM or 
 In all the above cases you will need to make sure that some form of cron-like capability exists to schedule when Renovate runs.
 In general we recommend to run Renovate hourly if possible.
 
-WhiteSource Renovate On-Premises and WhiteSource Remediate both run as long-lived containers so do not need any additional cron-like concept as it is built-in.
+Mend Renovate On-Premises and Mend Remediate both run as long-lived containers so do not need any additional cron-like concept as it is built-in.
 
 ### Global config
 
@@ -150,8 +150,13 @@ An example of a `config.js` that exports an async function (which is a function 
 ### Authentication
 
 Regardless of platform, you need to select a user account for `renovate` to assume the identity of, and generate a Personal Access Token.
-It is recommended to be `@renovate-bot` if you are using a self-hosted server with free choice of usernames.
-It is also recommended that you configure `config.gitAuthor` with the same identity as your Renovate user, e.g. like `"gitAuthor": "Renovate Bot <renovate@whitesourcesoftware.com>"`.
+We recommend you use `@renovate-bot` as username if you're on a self-hosted server where you can set all usernames.
+We also recommend you configure `config.gitAuthor` with the same identity as your Renovate user, e.g. like `"gitAuthor": "Renovate Bot <renovate@whitesourcesoftware.com>"`.
+
+<!-- prettier-ignore -->
+!!! warning
+    We recommend you use a single, dedicated username for your Renovate bot.
+    Never share the Renovate username with your other bots, as this can cause flip-flopping.
 
 #### Docs
 

@@ -1,4 +1,0 @@
-commitMessage: 'Apply prettier formatting fix'
-excludeBranches:
-  - main
-pullsOnly: true

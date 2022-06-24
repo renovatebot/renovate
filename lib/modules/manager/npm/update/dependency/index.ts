@@ -1,9 +1,16 @@
+import is from '@sindresorhus/is';
 import { dequal } from 'dequal';
 import { logger } from '../../../../../logger';
 import { escapeRegExp, regEx } from '../../../../../util/regex';
 import { matchAt, replaceAt } from '../../../../../util/string';
-import type { UpdateDependencyConfig } from '../../../types';
-import type { DependenciesMeta, NpmPackage } from '../../extract/types';
+import type { UpdateDependencyConfig, Upgrade } from '../../../types';
+import type {
+  DependenciesMeta,
+  NpmPackage,
+  OverrideDependency,
+  RecursiveOverride,
+} from '../../extract/types';
+import type { NpmDepType, NpmManagerData } from '../../types';
 
 function renameObjKey(
   oldObj: DependenciesMeta,
@@ -18,35 +25,47 @@ function renameObjKey(
       acc[key] = oldObj[key];
     }
     return acc;
-  }, {});
+  }, {} as DependenciesMeta);
 }
 
 function replaceAsString(
   parsedContents: NpmPackage,
   fileContent: string,
-  depType: string,
+  depType: NpmDepType | 'dependenciesMeta' | 'packageManager',
   depName: string,
   oldValue: string,
-  newValue: string
-): string | null {
+  newValue: string,
+  parents?: string[]
+): string {
   if (depType === 'packageManager') {
     parsedContents[depType] = newValue;
   } else if (depName === oldValue) {
     // The old value is the name of the dependency itself
-    delete Object.assign(parsedContents[depType], {
-      [newValue]: parsedContents[depType][oldValue],
+    delete Object.assign(parsedContents[depType]!, {
+      [newValue]: parsedContents[depType]![oldValue],
     })[oldValue];
   } else if (depType === 'dependenciesMeta') {
     if (oldValue !== newValue) {
       parsedContents.dependenciesMeta = renameObjKey(
-        parsedContents.dependenciesMeta,
+        // TODO #7154
+        parsedContents.dependenciesMeta!,
         oldValue,
         newValue
       );
     }
+  } else if (parents && depType === 'overrides') {
+    // there is an object as a value in overrides block
+    const { depObjectReference, overrideDepName } = overrideDepPosition(
+      parsedContents[depType]!,
+      parents,
+      depName
+    );
+    if (depObjectReference) {
+      depObjectReference[overrideDepName] = newValue;
+    }
   } else {
     // The old value is the version of the dependency
-    parsedContents[depType][depName] = newValue;
+    parsedContents[depType]![depName] = newValue;
   }
   // Look for the old version number
   const searchString = `"${oldValue}"`;
@@ -55,9 +74,9 @@ function replaceAsString(
   const escapedDepName = escapeRegExp(depName);
   const patchRe = regEx(`^(patch:${escapedDepName}@(npm:)?).*#`);
   const match = patchRe.exec(oldValue);
-  if (match) {
+  if (match && depType === 'resolutions') {
     const patch = oldValue.replace(match[0], `${match[1]}${newValue}#`);
-    parsedContents[depType][depName] = patch;
+    parsedContents[depType]![depName] = patch;
     newString = `"${patch}"`;
   }
 
@@ -98,7 +117,9 @@ export function updateDependency({
       logger.debug('Updating package.json git digest');
       newValue = upgrade.currentRawValue.replace(
         upgrade.currentDigest,
-        upgrade.newDigest.substring(0, upgrade.currentDigest.length)
+        // TODO #7154
+
+        upgrade.newDigest!.substring(0, upgrade.currentDigest.length)
       );
     } else {
       logger.debug('Updating package.json git version tag');
@@ -114,37 +135,56 @@ export function updateDependency({
   logger.debug(`npm.updateDependency(): ${depType}.${depName} = ${newValue}`);
   try {
     const parsedContents: NpmPackage = JSON.parse(fileContent);
+    let overrideDepParents: string[] | undefined = undefined;
     // Save the old version
-    let oldVersion: string;
+    let oldVersion: string | undefined;
     if (depType === 'packageManager') {
       oldVersion = parsedContents[depType];
       newValue = `${depName}@${newValue}`;
+    } else if (isOverrideObject(upgrade)) {
+      overrideDepParents = managerData?.parents;
+      if (overrideDepParents) {
+        // old version when there is an object as a value in overrides block
+        const { depObjectReference, overrideDepName } = overrideDepPosition(
+          parsedContents['overrides']!,
+          overrideDepParents,
+          depName
+        );
+        if (depObjectReference) {
+          oldVersion = depObjectReference[overrideDepName]!;
+        }
+      }
     } else {
-      oldVersion = parsedContents[depType][depName];
+      // eslint-disable @typescript-eslint/no-unnecessary-type-assertion
+      oldVersion = parsedContents[depType as NpmDepType]![depName] as string;
     }
     if (oldVersion === newValue) {
       logger.trace('Version is already updated');
       return fileContent;
     }
 
+    // TODO #7154
     let newFileContent = replaceAsString(
       parsedContents,
       fileContent,
-      depType,
+      depType as NpmDepType,
       depName,
-      oldVersion,
-      newValue
+      oldVersion!,
+      newValue!,
+      overrideDepParents
     );
     if (upgrade.newName) {
       newFileContent = replaceAsString(
         parsedContents,
         newFileContent,
-        depType,
+        depType as NpmDepType,
         depName,
         depName,
-        upgrade.newName
+        upgrade.newName,
+        overrideDepParents
       );
     }
+    /* eslint-enable @typescript-eslint/no-unnecessary-type-assertion */
     // istanbul ignore if
     if (!newFileContent) {
       logger.debug(
@@ -154,7 +194,7 @@ export function updateDependency({
       return fileContent;
     }
     if (parsedContents?.resolutions) {
-      let depKey: string;
+      let depKey: string | undefined;
       if (parsedContents.resolutions[depName]) {
         depKey = depName;
       } else if (parsedContents.resolutions[`**/${depName}`]) {
@@ -179,7 +219,8 @@ export function updateDependency({
           'resolutions',
           depKey,
           parsedContents.resolutions[depKey],
-          newValue
+          // TODO #7154
+          newValue!
         );
         if (upgrade.newName) {
           if (depKey === `**/${depName}`) {
@@ -206,7 +247,7 @@ export function updateDependency({
             'dependenciesMeta',
             depName,
             depKey,
-            depName + '@' + newValue
+            `${depName}@${newValue}`
           );
         }
       }
@@ -216,4 +257,31 @@ export function updateDependency({
     logger.debug({ err }, 'updateDependency error');
     return null;
   }
+}
+function overrideDepPosition(
+  overrideBlock: OverrideDependency,
+  parents: string[],
+  depName: string
+): {
+  depObjectReference: Record<string, string>;
+  overrideDepName: string;
+} {
+  // get override dep position when its nested in an object
+  const lastParent = parents[parents.length - 1];
+  let overrideDep: OverrideDependency = overrideBlock;
+  for (const parent of parents) {
+    if (overrideDep) {
+      overrideDep = overrideDep[parent]! as Record<string, RecursiveOverride>;
+    }
+  }
+  const overrideDepName = depName === lastParent ? '.' : depName;
+  const depObjectReference = overrideDep as Record<string, string>;
+  return { depObjectReference, overrideDepName };
+}
+
+function isOverrideObject(upgrade: Upgrade<NpmManagerData>): boolean {
+  return (
+    is.array(upgrade.managerData?.parents, is.nonEmptyStringAndNotWhitespace) &&
+    upgrade.depType === 'overrides'
+  );
 }

@@ -6,7 +6,7 @@ import type { RepoGlobalConfig } from '../../../config/types';
 import * as docker from '../../../util/exec/docker';
 import type { StatusResult } from '../../../util/git/types';
 import type { UpdateArtifactsConfig } from '../types';
-import * as pipenv from './artifacts';
+import * as pipenv from '.';
 
 jest.mock('child_process');
 jest.mock('../../../util/exec/env');
@@ -26,7 +26,9 @@ const config: UpdateArtifactsConfig = {};
 const lockMaintenanceConfig = { ...config, isLockFileMaintenance: true };
 
 describe('modules/manager/pipenv/artifacts', () => {
-  let pipFileLock;
+  // TODO: #7154
+  let pipFileLock: any;
+
   beforeEach(() => {
     jest.resetAllMocks();
     env.getChildProcessEnv.mockReturnValue({

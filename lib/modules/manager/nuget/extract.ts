@@ -38,17 +38,18 @@ function extractDepsFromXml(xmlNode: XmlDocument): PackageDependency[] {
   const results: PackageDependency[] = [];
   const todo: XmlElement[] = [xmlNode];
   while (todo.length) {
-    const child = todo.pop();
+    const child = todo.pop()!;
     const { name, attr } = child;
 
     if (elemNames.has(name)) {
       const depName = attr?.Include || attr?.Update;
       const version =
-        attr?.Version ||
-        child.valueWithPath('Version') ||
-        attr?.VersionOverride ||
+        attr?.Version ??
+        child.valueWithPath('Version') ??
+        attr?.VersionOverride ??
         child.valueWithPath('VersionOverride');
       const currentValue = checkVersion
+
         ?.exec(version)
         ?.groups?.currentValue?.trim();
       if (depName && currentValue) {

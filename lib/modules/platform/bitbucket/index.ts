@@ -48,7 +48,7 @@ const defaults = { endpoint: BITBUCKET_PROD_ENDPOINT };
 
 const pathSeparator = '/';
 
-let renovateUserUuid: string;
+let renovateUserUuid: string | null = null;
 
 export async function initPlatform({
   endpoint,
@@ -89,7 +89,7 @@ export async function initPlatform({
   }
   // TODO: Add a connection check that endpoint/username/password combination are valid (#9594)
   const platformConfig: PlatformResult = {
-    endpoint: endpoint || BITBUCKET_PROD_ENDPOINT,
+    endpoint: endpoint ?? BITBUCKET_PROD_ENDPOINT,
   };
   return Promise.resolve(platformConfig);
 }
@@ -125,7 +125,7 @@ export async function getRawFile(
 
   const url =
     `/2.0/repositories/${repo}/src/` +
-    (finalBranchOrTag || `HEAD`) +
+    (finalBranchOrTag ?? `HEAD`) +
     `/${path}`;
   const res = await bitbucketHttp.get(url);
   return res.body;
@@ -136,11 +136,9 @@ export async function getJsonFile(
   repoName?: string,
   branchOrTag?: string
 ): Promise<any | null> {
-  const raw = await getRawFile(fileName, repoName, branchOrTag);
-  if (fileName.endsWith('.json5')) {
-    return JSON5.parse(raw);
-  }
-  return JSON.parse(raw);
+  // TODO #7154
+  const raw = (await getRawFile(fileName, repoName, branchOrTag)) as string;
+  return JSON5.parse(raw);
 }
 
 // Initialize bitbucket by getting base branch and SHA
@@ -191,7 +189,8 @@ export async function initRepo({
   // Converts API hostnames to their respective HTTP git hosts:
   // `api.bitbucket.org`  to `bitbucket.org`
   // `api-staging.<host>` to `staging.<host>`
-  const hostnameWithoutApiPrefix = regEx(/api[.|-](.+)/).exec(hostname)[1];
+  // TODO #7154
+  const hostnameWithoutApiPrefix = regEx(/api[.|-](.+)/).exec(hostname!)?.[1];
 
   const url = git.getUrl({
     protocol: 'https',
@@ -261,7 +260,7 @@ export async function findPr({
   if (pr) {
     logger.debug(`Found PR #${pr.number}`);
   }
-  return pr;
+  return pr ?? null;
 }
 
 // Gets details for a PR
@@ -297,7 +296,9 @@ interface BranchResponse {
 }
 
 // Return the commit SHA for a branch
-async function getBranchCommit(branchName: string): Promise<string | null> {
+async function getBranchCommit(
+  branchName: string
+): Promise<string | undefined> {
   try {
     const branch = (
       await bitbucketHttp.getJson<BranchResponse>(
@@ -309,7 +310,7 @@ async function getBranchCommit(branchName: string): Promise<string | null> {
     return branch.target.hash;
   } catch (err) /* istanbul ignore next */ {
     logger.debug({ err }, `getBranchCommit('${branchName}') failed'`);
-    return null;
+    return undefined;
   }
 }
 
@@ -373,7 +374,8 @@ export async function getBranchStatusCheck(
 ): Promise<BranchStatus | null> {
   const statuses = await getStatus(branchName);
   const bbState = statuses.find((status) => status.key === context)?.state;
-  return bbToRenovateStatusMapping[bbState] || null;
+  // TODO #7154
+  return bbToRenovateStatusMapping[bbState!] || null;
 }
 
 export async function setBranchStatus({
@@ -386,7 +388,7 @@ export async function setBranchStatus({
   const sha = await getBranchCommit(branchName);
 
   // TargetUrl can not be empty so default to bitbucket
-  const url = targetUrl || /* istanbul ignore next */ 'https://bitbucket.org';
+  const url = targetUrl ?? /* istanbul ignore next */ 'https://bitbucket.org';
 
   const body = {
     name: context,
@@ -428,7 +430,7 @@ async function findOpenIssues(title: string): Promise<BbIssue[]> {
   }
 }
 
-export async function findIssue(title: string): Promise<Issue> {
+export async function findIssue(title: string): Promise<Issue | null> {
   logger.debug(`findIssue(${title})`);
 
   /* istanbul ignore if */
@@ -485,7 +487,7 @@ export async function ensureIssue({
   }
   try {
     let issues = await findOpenIssues(title);
-    if (!issues.length) {
+    if (!issues.length && reuseTitle) {
       issues = await findOpenIssues(reuseTitle);
     }
     if (issues.length) {
@@ -496,7 +498,7 @@ export async function ensureIssue({
       const [issue] = issues;
       if (
         issue.title !== title ||
-        String(issue.content.raw).trim() !== description.trim()
+        String(issue.content?.raw).trim() !== description.trim()
       ) {
         logger.debug('Issue updated');
         await bitbucketHttp.putJson(
@@ -593,7 +595,8 @@ export async function addReviewers(
 ): Promise<void> {
   logger.debug(`Adding reviewers '${reviewers.join(', ')}' to #${prId}`);
 
-  const { title } = await getPr(prId);
+  // TODO #7154
+  const { title } = (await getPr(prId))!;
 
   const body = {
     title,
@@ -636,7 +639,7 @@ export function ensureCommentRemoval(
 async function sanitizeReviewers(
   reviewers: Account[],
   err: any
-): Promise<Account[]> {
+): Promise<Account[] | undefined> {
   if (err.statusCode === 400 && err.body?.error?.fields?.reviewers) {
     const sanitizedReviewers: Account[] = [];
 

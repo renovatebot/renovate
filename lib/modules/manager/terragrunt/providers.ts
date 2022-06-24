@@ -1,7 +1,7 @@
 import { newlineRegex, regEx } from '../../../util/regex';
 import type { PackageDependency } from '../types';
 import { TerragruntDependencyTypes } from './common';
-import type { ExtractionResult } from './types';
+import type { ExtractionResult, TerraformManagerData } from './types';
 import { keyValueExtractionRegex } from './util';
 
 export const sourceExtractionRegex = regEx(
@@ -9,7 +9,7 @@ export const sourceExtractionRegex = regEx(
 );
 
 function extractBracesContent(content: string): number {
-  const stack = [];
+  const stack: string[] = [];
   let i = 0;
   for (i; i < content.length; i += 1) {
     if (content[i] === '{') {
@@ -31,12 +31,12 @@ export function extractTerragruntProvider(
 ): ExtractionResult {
   const lineNumber = startingLine;
   let line: string;
-  const deps: PackageDependency[] = [];
-  const managerData: Record<string, unknown> = {
+  const deps: PackageDependency<TerraformManagerData>[] = [];
+  const managerData: TerraformManagerData = {
     moduleName,
     terragruntDependencyType: TerragruntDependencyTypes.terragrunt,
   };
-  const dep: PackageDependency = { managerData };
+  const dep: PackageDependency<TerraformManagerData> = { managerData };
   const teraformContent = lines
     .slice(lineNumber)
     .join('\n')

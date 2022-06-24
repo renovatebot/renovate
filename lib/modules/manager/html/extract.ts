@@ -11,7 +11,7 @@ const integrityRegex = regEx(
 
 export function extractDep(tag: string): PackageDependency | null {
   const match = cloudflareUrlRegex.exec(tag);
-  if (!match) {
+  if (!match?.groups) {
     return null;
   }
   const { depName, currentValue, asset } = match.groups;
@@ -23,13 +23,13 @@ export function extractDep(tag: string): PackageDependency | null {
     replaceString: tag,
   };
   const integrityMatch = integrityRegex.exec(tag);
-  if (integrityMatch) {
+  if (integrityMatch?.groups) {
     dep.currentDigest = integrityMatch.groups.currentDigest;
   }
   return dep;
 }
 
-export function extractPackageFile(content: string): PackageFile {
+export function extractPackageFile(content: string): PackageFile | null {
   const deps: PackageDependency[] = [];
   let rest = content;
   let match = regex.exec(rest);

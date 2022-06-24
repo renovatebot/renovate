@@ -1,6 +1,6 @@
 import got from 'got';
 import shell from 'shelljs';
-import { options } from './utils.mjs';
+import { options } from './utils/options.mjs';
 
 const version = options.release;
 const tag = options.tag || 'latest';

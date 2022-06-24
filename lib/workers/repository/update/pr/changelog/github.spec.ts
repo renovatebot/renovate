@@ -1,5 +1,7 @@
 import * as httpMock from '../../../../../../test/http-mock';
+import { GlobalConfig } from '../../../../../config/global';
 import { PlatformId } from '../../../../../constants';
+import { CacheableGithubTags } from '../../../../../modules/datasource/github-tags/cache';
 import * as semverVersioning from '../../../../../modules/versioning/semver';
 import * as hostRules from '../../../../../util/host-rules';
 import type { BranchUpgradeConfig } from '../../../../types';
@@ -8,7 +10,8 @@ import { ChangeLogError, getChangeLogJSON } from '.';
 jest.mock('../../../../../modules/datasource/npm');
 
 const upgrade: BranchUpgradeConfig = {
-  branchName: undefined,
+  manager: 'some-manager',
+  branchName: '',
   depName: 'renovate',
   endpoint: 'https://api.github.com/',
   versioning: semverVersioning.id,
@@ -33,6 +36,7 @@ describe('workers/repository/update/pr/changelog/github', () => {
   afterEach(() => {
     // FIXME: add missing http mocks
     httpMock.clear(false);
+    jest.resetAllMocks();
   });
 
   describe('getChangeLogJSON', () => {
@@ -49,7 +53,7 @@ describe('workers/repository/update/pr/changelog/github', () => {
       expect(
         await getChangeLogJSON({
           ...upgrade,
-          currentVersion: null,
+          currentVersion: undefined,
         })
       ).toBeNull();
     });
@@ -203,6 +207,7 @@ describe('workers/repository/update/pr/changelog/github', () => {
     });
 
     it('handles missing Github token', async () => {
+      GlobalConfig.set({ githubTokenWarn: true });
       expect(
         await getChangeLogJSON({
           ...upgrade,
@@ -290,6 +295,65 @@ describe('workers/repository/update/pr/changelog/github', () => {
           { version: '2.3.0' },
           { version: '2.2.2' },
         ],
+      });
+    });
+
+    it('works with same version releases but different prefix', async () => {
+      const githubTagsMock = jest.spyOn(
+        CacheableGithubTags.prototype,
+        'getItems'
+      );
+
+      githubTagsMock.mockResolvedValue([
+        { version: 'v1.0.1' },
+        { version: '1.0.1' },
+        { version: 'correctPrefix/target@1.0.1' },
+        { version: 'wrongPrefix/target-1.0.1' },
+      ] as never);
+
+      const upgradeData: BranchUpgradeConfig = {
+        manager: 'some-manager',
+        branchName: '',
+        depName: 'correctPrefix/target',
+        endpoint: 'https://api.github.com/',
+        versioning: 'npm',
+        currentVersion: '1.0.0',
+        newVersion: '1.0.1',
+        sourceUrl: 'https://github.com/chalk/chalk',
+        releases: [
+          { version: '1.0.1', gitRef: '123456' },
+          { version: '0.1.1', gitRef: 'npm_1.0.0' },
+        ],
+      };
+      expect(
+        await getChangeLogJSON({
+          ...upgradeData,
+        })
+      ).toMatchObject({
+        project: {
+          apiBaseUrl: 'https://api.github.com/',
+          baseUrl: 'https://github.com/',
+          type: 'github',
+          repository: 'chalk/chalk',
+          sourceUrl: 'https://github.com/chalk/chalk',
+          sourceDirectory: undefined,
+          depName: 'correctPrefix/target',
+        },
+        versions: [
+          {
+            version: '1.0.1',
+            date: undefined,
+            changes: [],
+            compare: {
+              url: 'https://github.com/chalk/chalk/compare/npm_1.0.0...correctPrefix/target@1.0.1',
+            },
+            releaseNotes: {
+              url: 'https://github.com/chalk/chalk/compare/npm_1.0.0...correctPrefix/target@1.0.1',
+              notesSourceUrl: '',
+            },
+          },
+        ],
+        hasReleaseNotes: true,
       });
     });
   });

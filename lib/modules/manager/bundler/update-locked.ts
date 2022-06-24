@@ -2,6 +2,8 @@ import { logger } from '../../../logger';
 import type { UpdateLockedConfig, UpdateLockedResult } from '../types';
 import { extractLockFileEntries } from './locked-version';
 
+// TODO: fix coverage after strict null checks finished
+
 export function updateLockedDependency(
   config: UpdateLockedConfig
 ): UpdateLockedResult {
@@ -11,8 +13,14 @@ export function updateLockedDependency(
     `bundler.updateLockedDependency: ${depName}@${currentVersion} -> ${newVersion} [${lockFile}]`
   );
   try {
-    const locked = extractLockFileEntries(lockFileContent);
-    if (locked.get(depName) === newVersion) {
+    const locked = extractLockFileEntries(
+      lockFileContent ?? /* istanbul ignore next: should never happen */ ''
+    );
+    if (
+      locked.get(
+        depName ?? /* istanbul ignore next: should never happen */ ''
+      ) === newVersion
+    ) {
       return { status: 'already-updated' };
     }
     return { status: 'unsupported' };

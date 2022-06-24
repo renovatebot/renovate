@@ -530,16 +530,8 @@ Object {
       "version": "1.17.8",
     },
     Object {
-      "releaseTimestamp": "2022-04-07T00:00:00.000Z",
-      "version": "1.17.9",
-    },
-    Object {
       "releaseTimestamp": "2022-03-15T00:00:00.000Z",
       "version": "1.18.0",
-    },
-    Object {
-      "releaseTimestamp": "2022-04-07T00:00:00.000Z",
-      "version": "1.18.1",
     },
   ],
   "sourceUrl": "https://github.com/golang/go",

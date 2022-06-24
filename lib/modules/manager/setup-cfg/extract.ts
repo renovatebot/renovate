@@ -6,16 +6,19 @@ import { PypiDatasource } from '../../datasource/pypi';
 import type { PackageDependency, PackageFile, Result } from '../types';
 
 function getSectionName(str: string): string {
-  const [, sectionName] = regEx(/^\[\s*([^\s]+)\s*]\s*$/).exec(str) || [];
+  const [, sectionName] = regEx(/^\[\s*([^\s]+)\s*]\s*$/).exec(str) ?? [];
   return sectionName;
 }
 
 function getSectionRecord(str: string): string {
-  const [, sectionRecord] = regEx(/^([^\s]+)\s+=/).exec(str) || [];
+  const [, sectionRecord] = regEx(/^([^\s]+)\s+=/).exec(str) ?? [];
   return sectionRecord;
 }
 
-function getDepType(section: string, record: string): null | string {
+function getDepType(
+  section: string | null,
+  record: string | null
+): null | string {
   if (section === 'options') {
     if (record === 'install_requires') {
       return 'install';
@@ -35,8 +38,8 @@ function getDepType(section: string, record: string): null | string {
 
 function parseDep(
   line: string,
-  section: string,
-  record: string
+  section: string | null,
+  record: string | null
 ): PackageDependency | null {
   const packagePattern = '[a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9._-]*[a-zA-Z0-9]';
   const extrasPattern = '(?:\\s*\\[[^\\]]+\\])?';
@@ -59,7 +62,7 @@ function parseDep(
 
   const [lineNoEnvMarkers] = line.split(';').map((part) => part.trim());
   const packageMatches =
-    pkgValRegex.exec(lineNoEnvMarkers) || pkgRegex.exec(lineNoEnvMarkers);
+    pkgValRegex.exec(lineNoEnvMarkers) ?? pkgRegex.exec(lineNoEnvMarkers);
 
   if (!packageMatches) {
     return null;
@@ -87,8 +90,8 @@ export function extractPackageFile(
 ): Result<PackageFile | null> {
   logger.trace('setup-cfg.extractPackageFile()');
 
-  let sectionName = null;
-  let sectionRecord = null;
+  let sectionName: string | null = null;
+  let sectionRecord: string | null = null;
 
   const deps: PackageDependency[] = [];
 

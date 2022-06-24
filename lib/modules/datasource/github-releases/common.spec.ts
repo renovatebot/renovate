@@ -6,8 +6,9 @@ describe('modules/datasource/github-releases/common', () => {
       const sourceUrl = getSourceUrlBase('https://gh.my-company.com');
       expect(sourceUrl).toBe('https://gh.my-company.com/');
     });
+
     it('defaults to github.com', () => {
-      const sourceUrl = getSourceUrlBase(null);
+      const sourceUrl = getSourceUrlBase(undefined);
       expect(sourceUrl).toBe('https://github.com/');
     });
   });
@@ -19,8 +20,12 @@ describe('modules/datasource/github-releases/common', () => {
     });
 
     it('supports local github installations', () => {
-      const apiUrl = getApiBaseUrl('https://gh.my-company.com/');
-      expect(apiUrl).toBe('https://gh.my-company.com/api/v3/');
+      expect(getApiBaseUrl('https://gh.my-company.com/')).toBe(
+        'https://gh.my-company.com/api/v3/'
+      );
+      expect(getApiBaseUrl('https://gh.my-company.com/api/v3/')).toBe(
+        'https://gh.my-company.com/api/v3/'
+      );
     });
   });
 });

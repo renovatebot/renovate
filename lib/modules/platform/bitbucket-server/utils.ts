@@ -10,6 +10,7 @@ import type {
   HttpPostOptions,
   HttpResponse,
 } from '../../../util/http/types';
+import { getPrBodyStruct } from '../pr-body';
 import type { BbsPr, BbsRestPr, BbsRestRepo, BitbucketError } from './types';
 
 export const BITBUCKET_INVALID_REVIEWERS_EXCEPTION =
@@ -28,7 +29,7 @@ export function prInfo(pr: BbsRestPr): BbsPr {
   return {
     version: pr.version,
     number: pr.id,
-    body: pr.description,
+    bodyStruct: getPrBodyStruct(pr.description),
     sourceBranch: pr.fromRef.displayId,
     targetBranch: pr.toRef.displayId,
     title: pr.title,
@@ -171,11 +172,12 @@ export function getRepoGitUrl(
   if (!cloneUrl) {
     // Fallback to generating the url if the API didn't give us an URL
     const { host, pathname } = url.parse(defaultEndpoint);
+    // TODO #7154
     gitUrl = git.getUrl({
       protocol: defaultEndpoint.split(':')[0] as GitProtocol,
       auth: `${opts.username}:${opts.password}`,
       host: `${host}${pathname}${
-        pathname.endsWith('/') ? '' : /* istanbul ignore next */ '/'
+        pathname!.endsWith('/') ? '' : /* istanbul ignore next */ '/'
       }scm`,
       repository,
     });

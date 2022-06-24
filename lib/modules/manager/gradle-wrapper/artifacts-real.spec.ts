@@ -111,7 +111,7 @@ describe('modules/manager/gradle-wrapper/artifacts-real', () => {
       });
 
       expect(result).toHaveLength(1);
-      expect(result[0].artifactError).toBeUndefined();
+      expect(result?.[0].artifactError).toBeUndefined();
 
       await compareFile(
         'gradle/wrapper/gradle-wrapper.properties',
@@ -120,9 +120,11 @@ describe('modules/manager/gradle-wrapper/artifacts-real', () => {
     });
 
     it('up to date', async () => {
-      git.getRepoStatus.mockResolvedValue({
-        modified: [],
-      } as StatusResult);
+      git.getRepoStatus.mockResolvedValue(
+        partial<StatusResult>({
+          modified: [],
+        })
+      );
 
       const res = await gradleWrapper.updateArtifacts({
         packageFileName: 'gradle/wrapper/gradle-wrapper.properties',
@@ -157,10 +159,10 @@ describe('modules/manager/gradle-wrapper/artifacts-real', () => {
         config,
       });
 
-      expect(res[0].artifactError.lockFile).toBe(
+      expect(res?.[0].artifactError?.lockFile).toBe(
         'gradle/wrapper/gradle-wrapper.properties'
       );
-      expect(res[0].artifactError.stderr).toBe('failed');
+      expect(res?.[0].artifactError?.stderr).toBe('failed');
 
       // 5.6.4 => 5.6.4 (updates execs) - unexpected behavior (looks like a bug in Gradle)
       for (const file of ['gradle/wrapper/gradle-wrapper.properties']) {
@@ -184,11 +186,11 @@ describe('modules/manager/gradle-wrapper/artifacts-real', () => {
         config,
       });
 
-      expect(res[0].artifactError.lockFile).toBe(
+      expect(res?.[0].artifactError?.lockFile).toBe(
         'gradle/wrapper/gradle-wrapper.properties'
       );
-      expect(res[0].artifactError.stderr).not.toBeNull();
-      expect(res[0].artifactError.stderr).not.toBe('');
+      expect(res?.[0].artifactError?.stderr).not.toBeNull();
+      expect(res?.[0].artifactError?.stderr).not.toBe('');
 
       // 5.6.4 => 5.6.4 (updates execs) - unexpected behavior (looks like a bug in Gradle)
       for (const file of ['gradle/wrapper/gradle-wrapper.properties']) {
@@ -201,7 +203,7 @@ describe('modules/manager/gradle-wrapper/artifacts-real', () => {
       const res = await gradleWrapper.updateArtifacts({
         packageFileName: 'gradle-wrapper.properties',
         updatedDeps: [],
-        newPackageFileContent: undefined,
+        newPackageFileContent: undefined as never, // TODO #7154
         config: {},
       });
 
@@ -240,27 +242,15 @@ describe('modules/manager/gradle-wrapper/artifacts-real', () => {
       });
 
       expect(result).toHaveLength(1);
-      expect(result[0].artifactError).toBeUndefined();
+      expect(result?.[0].artifactError).toBeUndefined();
 
       expect(
         await readString(
-          adminConfig.localDir,
+          // TODO #7154
+          adminConfig.localDir!,
           `gradle/wrapper/gradle-wrapper.properties`
         )
       ).toEqual(newContent);
-
-      expect(httpMock.getTrace()).toEqual([
-        {
-          headers: {
-            'accept-encoding': 'gzip, deflate, br',
-            host: 'services.gradle.org',
-            'user-agent':
-              'RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)',
-          },
-          method: 'GET',
-          url: 'https://services.gradle.org/distributions/gradle-6.3-bin.zip.sha256',
-        },
-      ]);
     });
 
     it('distributionSha256Sum 404', async () => {
@@ -282,18 +272,6 @@ describe('modules/manager/gradle-wrapper/artifacts-real', () => {
             lockFile: 'gradle/wrapper/gradle-wrapper.properties',
             stderr: 'Response code 404 (Not Found)',
           },
-        },
-      ]);
-      expect(httpMock.getTrace()).toEqual([
-        {
-          headers: {
-            'accept-encoding': 'gzip, deflate, br',
-            host: 'services.gradle.org',
-            'user-agent':
-              'RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)',
-          },
-          method: 'GET',
-          url: 'https://services.gradle.org/distributions/gradle-6.3-bin.zip.sha256',
         },
       ]);
     });

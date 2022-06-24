@@ -12,7 +12,6 @@ interface NodeJsSchedule {
 export type NodeJsData = Record<string, NodeJsSchedule>;
 
 const nodeSchedule: NodeJsData = JSON.parse(
-  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   dataFiles.get('data/node-js-schedule.json')!
 );
 
@@ -32,7 +31,7 @@ for (const version of Object.keys(nodeSchedule)) {
 export function findScheduleForCodename(
   codename: string
 ): NodeJsScheduleWithVersion | null {
-  return nodeCodenames.get(codename?.toUpperCase()) || null;
+  return nodeCodenames.get(codename?.toUpperCase()) ?? null;
 }
 
 export function findScheduleForVersion(version: string): NodeJsSchedule | null {

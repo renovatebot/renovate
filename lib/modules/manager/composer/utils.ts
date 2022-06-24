@@ -18,8 +18,9 @@ export function getComposerArguments(
 
   if (config.composerIgnorePlatformReqs) {
     if (config.composerIgnorePlatformReqs.length === 0) {
-      const major = api.getMajor(toolConstraint.constraint);
-      const minor = api.getMinor(toolConstraint.constraint);
+      // TODO: toolConstraint.constraint can be null or undefined? (#7154)
+      const major = api.getMajor(toolConstraint.constraint!);
+      const minor = api.getMinor(toolConstraint.constraint!);
       args += api.matches(`${major}.${minor}`, '^2.2')
         ? " --ignore-platform-req='ext-*' --ignore-platform-req='lib-*'"
         : ' --ignore-platform-reqs';
@@ -42,7 +43,9 @@ export function getComposerArguments(
   return args;
 }
 
-export function getPhpConstraint(constraints: Record<string, string>): string {
+export function getPhpConstraint(
+  constraints: Record<string, string>
+): string | null {
   const { php } = constraints;
 
   if (php) {

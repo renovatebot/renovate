@@ -102,7 +102,7 @@ describe('modules/manager/gradle-wrapper/artifacts', () => {
     const res = await gradleWrapper.updateArtifacts({
       packageFileName: 'gradle-wrapper.properties',
       updatedDeps: [],
-      newPackageFileContent: undefined,
+      newPackageFileContent: '',
       config: {},
     });
 
@@ -155,21 +155,9 @@ describe('modules/manager/gradle-wrapper/artifacts', () => {
     });
 
     expect(result).toHaveLength(1);
-    expect(result[0].artifactError).toBeUndefined();
+    expect(result?.[0].artifactError).toBeUndefined();
 
     expect(execSnapshots).toMatchSnapshot();
-    expect(httpMock.getTrace()).toEqual([
-      {
-        headers: {
-          'accept-encoding': 'gzip, deflate, br',
-          host: 'services.gradle.org',
-          'user-agent':
-            'RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)',
-        },
-        method: 'GET',
-        url: 'https://services.gradle.org/distributions/gradle-6.3-bin.zip.sha256',
-      },
-    ]);
   });
 
   it('distributionSha256Sum 404', async () => {
@@ -191,18 +179,6 @@ describe('modules/manager/gradle-wrapper/artifacts', () => {
           lockFile: 'gradle-wrapper.properties',
           stderr: 'Response code 404 (Not Found)',
         },
-      },
-    ]);
-    expect(httpMock.getTrace()).toEqual([
-      {
-        headers: {
-          'accept-encoding': 'gzip, deflate, br',
-          host: 'services.gradle.org',
-          'user-agent':
-            'RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)',
-        },
-        method: 'GET',
-        url: 'https://services.gradle.org/distributions/gradle-6.3-bin.zip.sha256',
       },
     ]);
   });

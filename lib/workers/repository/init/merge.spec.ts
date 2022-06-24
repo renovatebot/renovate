@@ -8,7 +8,7 @@ import {
 } from '../../../../test/util';
 import * as _migrateAndValidate from '../../../config/migrate-validate';
 import * as _migrate from '../../../config/migration';
-import { initialize } from '../../../util/cache/repository';
+import { initRepoCache } from '../../../util/cache/repository/init';
 import {
   checkForRepoConfigError,
   detectRepoFileConfig,
@@ -22,6 +22,7 @@ const migrate = mocked(_migrate);
 const migrateAndValidate = mocked(_migrateAndValidate);
 
 let config: RenovateConfig;
+
 beforeEach(() => {
   jest.resetAllMocks();
   config = getConfig();
@@ -35,7 +36,7 @@ jest.mock('../../../config/migrate-validate');
 describe('workers/repository/init/merge', () => {
   describe('detectRepoFileConfig()', () => {
     beforeEach(async () => {
-      await initialize({});
+      await initRepoCache({});
     });
 
     it('returns config if not found', async () => {
@@ -43,6 +44,7 @@ describe('workers/repository/init/merge', () => {
       fs.readLocalFile.mockResolvedValue('{}');
       expect(await detectRepoFileConfig()).toEqual({});
     });
+
     it('uses package.json config if found', async () => {
       git.getFileList.mockResolvedValue(['package.json']);
       const pJson = JSON.stringify({
@@ -62,6 +64,7 @@ describe('workers/repository/init/merge', () => {
         configFileParsed: undefined,
       });
     });
+
     it('massages package.json renovate string', async () => {
       git.getFileList.mockResolvedValue(['package.json']);
       const pJson = JSON.stringify({
@@ -75,6 +78,7 @@ describe('workers/repository/init/merge', () => {
         configFileParsed: { extends: ['github>renovatebot/renovate'] },
       });
     });
+
     it('returns error if cannot parse', async () => {
       git.getFileList.mockResolvedValue(['package.json', 'renovate.json']);
       fs.readLocalFile.mockResolvedValue('cannot parse');
@@ -86,6 +90,7 @@ describe('workers/repository/init/merge', () => {
         },
       });
     });
+
     it('throws error if duplicate keys', async () => {
       git.getFileList.mockResolvedValue(['package.json', '.renovaterc']);
       fs.readLocalFile.mockResolvedValue(
@@ -100,6 +105,7 @@ describe('workers/repository/init/merge', () => {
         },
       });
     });
+
     it('finds and parse renovate.json5', async () => {
       git.getFileList.mockResolvedValue(['package.json', 'renovate.json5']);
       fs.readLocalFile.mockResolvedValue(`{
@@ -110,6 +116,7 @@ describe('workers/repository/init/merge', () => {
         configFileParsed: {},
       });
     });
+
     it('finds .github/renovate.json', async () => {
       git.getFileList.mockResolvedValue([
         'package.json',
@@ -121,6 +128,7 @@ describe('workers/repository/init/merge', () => {
         configFileParsed: {},
       });
     });
+
     it('finds .gitlab/renovate.json', async () => {
       git.getFileList.mockResolvedValue([
         'package.json',
@@ -132,6 +140,7 @@ describe('workers/repository/init/merge', () => {
         configFileParsed: {},
       });
     });
+
     it('finds .renovaterc.json', async () => {
       git.getFileList.mockResolvedValue(['package.json', '.renovaterc.json']);
       fs.readLocalFile.mockResolvedValue('{}');
@@ -148,10 +157,12 @@ describe('workers/repository/init/merge', () => {
       `);
     });
   });
+
   describe('checkForRepoConfigError', () => {
     it('returns if no error', () => {
       expect(checkForRepoConfigError({})).toBeUndefined();
     });
+
     it('throws on error', () => {
       expect(() =>
         checkForRepoConfigError({
@@ -160,6 +171,7 @@ describe('workers/repository/init/merge', () => {
       ).toThrow();
     });
   });
+
   describe('mergeRenovateConfig()', () => {
     beforeEach(() => {
       migrate.migrateConfig.mockReturnValue({
@@ -167,35 +179,53 @@ describe('workers/repository/init/merge', () => {
         migratedConfig: {},
       });
     });
+
     it('throws error if misconfigured', async () => {
       git.getFileList.mockResolvedValue(['package.json', '.renovaterc.json']);
       fs.readLocalFile.mockResolvedValue('{}');
       migrateAndValidate.migrateAndValidate.mockResolvedValueOnce({
         errors: [{ topic: 'dep', message: 'test error' }],
       });
-      let e: Error;
+      let e: Error | undefined;
       try {
         await mergeRenovateConfig(config);
       } catch (err) {
         e = err;
       }
       expect(e).toBeDefined();
-      expect(e.toString()).toBe('Error: config-validation');
+      expect(e?.toString()).toBe('Error: config-validation');
     });
+
     it('migrates nested config', async () => {
       git.getFileList.mockResolvedValue(['renovate.json']);
       fs.readLocalFile.mockResolvedValue('{}');
-      migrateAndValidate.migrateAndValidate.mockResolvedValue({
-        warnings: [],
-        errors: [],
+      migrateAndValidate.migrateAndValidate.mockImplementation((_, c) => {
+        // We shouldn't see packageRules here (avoids #14827).
+        // (someday the validation should probably be reworked to know about `sourceUrl` from the repo config, but that day isn't today)
+        expect(c).not.toHaveProperty('packageRules');
+        return Promise.resolve({
+          ...c,
+          warnings: [],
+          errors: [],
+        });
       });
-      migrate.migrateConfig.mockReturnValueOnce({
+      migrate.migrateConfig.mockImplementation((c) => ({
         isMigrated: true,
-        migratedConfig: {},
+        migratedConfig: c,
+      }));
+      config.extends = [':automergeAll'];
+      config.packageRules = [{ extends: ['monorepo:react'] }];
+      const ret = await mergeRenovateConfig(config);
+      expect(ret).toMatchObject({
+        automerge: true,
+        packageRules: [
+          {
+            matchSourceUrlPrefixes: ['https://github.com/facebook/react'],
+          },
+        ],
       });
-      config.extends = [':automergeDisabled'];
-      expect(await mergeRenovateConfig(config)).toBeDefined();
     });
+
     it('continues if no errors', async () => {
       git.getFileList.mockResolvedValue(['package.json', '.renovaterc.json']);
       fs.readLocalFile.mockResolvedValue('{}');

@@ -1,11 +1,12 @@
 import { Fixtures } from '../../../../test/fixtures';
-import { extractPackageFile } from './extract';
+import { extractPackageFile } from '.';
 
 describe('modules/manager/setup-cfg/extract', () => {
   describe('extractPackageFile()', () => {
     it('returns null for empty', () => {
       expect(extractPackageFile('nothing here')).toBeNull();
     });
+
     it('extracts dependencies', () => {
       const res = extractPackageFile(Fixtures.get('setup-cfg-1.txt'));
       expect(res).toMatchSnapshot({

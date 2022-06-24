@@ -61,7 +61,7 @@ export async function extractPackageFile(
       return res;
     }
 
-    const repository = resolveAlias(dep.repository, config.aliases);
+    const repository = resolveAlias(dep.repository, config.registryAliases!);
     if (!repository) {
       res.skipReason = 'placeholder-url';
       return res;

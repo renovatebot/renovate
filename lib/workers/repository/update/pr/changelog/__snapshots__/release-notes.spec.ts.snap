@@ -21,21 +21,6 @@ Array [
 ]
 `;
 
-exports[`workers/repository/update/pr/changelog/release-notes getReleaseList() should return release list for github repo 2`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "api.github.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://api.github.com/repos/some/yet-other-repository/releases?per_page=100",
-  },
-]
-`;
-
 exports[`workers/repository/update/pr/changelog/release-notes getReleaseList() should return release list for gitlab.com project 1`] = `
 Array [
   Object {
@@ -51,21 +36,6 @@ Array [
     "notesSourceUrl": "https://gitlab.com/api/v4/projects/some%2Fyet-other-repository/releases",
     "tag": "v1.0.1",
     "url": "https://gitlab.com/api/v4/projects/some%2Fyet-other-repository/releases/v1.0.1",
-  },
-]
-`;
-
-exports[`workers/repository/update/pr/changelog/release-notes getReleaseList() should return release list for gitlab.com project 2`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "gitlab.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://gitlab.com/api/v4/projects/some%2Fyet-other-repository/releases?per_page=100",
   },
 ]
 `;
@@ -89,182 +59,7 @@ Array [
 ]
 `;
 
-exports[`workers/repository/update/pr/changelog/release-notes getReleaseList() should return release list for self hosted gitlab project 2`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "authorization": "Bearer some-token",
-      "host": "my.custom.domain",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://my.custom.domain/api/v4/projects/some%2Fyet-other-repository/releases?per_page=100",
-  },
-]
-`;
-
-exports[`workers/repository/update/pr/changelog/release-notes getReleaseNotes() gets release notes with body "" 1`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "api.github.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://api.github.com/repos/some/other-repository/releases?per_page=100",
-  },
-]
-`;
-
-exports[`workers/repository/update/pr/changelog/release-notes getReleaseNotes() gets release notes with body "other@" 1`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "api.github.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://api.github.com/repos/some/other-repository/releases?per_page=100",
-  },
-]
-`;
-
-exports[`workers/repository/update/pr/changelog/release-notes getReleaseNotes() gets release notes with body "other_v" 1`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "api.github.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://api.github.com/repos/some/other-repository/releases?per_page=100",
-  },
-]
-`;
-
-exports[`workers/repository/update/pr/changelog/release-notes getReleaseNotes() gets release notes with body "other-" 1`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "api.github.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://api.github.com/repos/some/other-repository/releases?per_page=100",
-  },
-]
-`;
-
-exports[`workers/repository/update/pr/changelog/release-notes getReleaseNotes() gets release notes with body "v" 1`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "api.github.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://api.github.com/repos/some/other-repository/releases?per_page=100",
-  },
-]
-`;
-
-exports[`workers/repository/update/pr/changelog/release-notes getReleaseNotes() gets release notes with body from gitlab repo "" 1`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "api.gitlab.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://api.gitlab.com/projects/some%2Fother-repository/releases?per_page=100",
-  },
-]
-`;
-
-exports[`workers/repository/update/pr/changelog/release-notes getReleaseNotes() gets release notes with body from gitlab repo "other-" 1`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "api.gitlab.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://api.gitlab.com/projects/some%2Fother-repository/releases?per_page=100",
-  },
-]
-`;
-
-exports[`workers/repository/update/pr/changelog/release-notes getReleaseNotes() gets release notes with body from gitlab repo "v" 1`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "api.gitlab.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://api.gitlab.com/projects/some%2Fother-repository/releases?per_page=100",
-  },
-]
-`;
-
-exports[`workers/repository/update/pr/changelog/release-notes getReleaseNotes() should return null for release notes without body 1`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "api.github.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://api.github.com/repos/some/repository/releases?per_page=100",
-  },
-]
-`;
-
 exports[`workers/repository/update/pr/changelog/release-notes getReleaseNotesMd() ReleaseNotes Correctness handles gitlab sourceDirectory 1`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "gitlab.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://gitlab.com/api/v4/projects/itentialopensource%2Fadapter-utils/repository/tree?per_page=100&path=packages/foo",
-  },
-  Object {
-    "headers": Object {
-      "accept-encoding": "gzip, deflate, br",
-      "host": "gitlab.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://gitlab.com/api/v4/projects/itentialopensource%2Fadapter-utils/repository/blobs/abcd/raw",
-  },
-]
-`;
-
-exports[`workers/repository/update/pr/changelog/release-notes getReleaseNotesMd() ReleaseNotes Correctness handles gitlab sourceDirectory 2`] = `
 Object {
   "body": "-   add new auth, fix accept header and base path in mock
 
@@ -280,30 +75,6 @@ See merge request itentialopensource/adapter-utils!177
 `;
 
 exports[`workers/repository/update/pr/changelog/release-notes getReleaseNotesMd() ReleaseNotes Correctness parses adapter-utils 4.33.0 1`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "gitlab.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://gitlab.com/api/v4/projects/itentialopensource%2Fadapter-utils/repository/tree?per_page=100",
-  },
-  Object {
-    "headers": Object {
-      "accept-encoding": "gzip, deflate, br",
-      "host": "gitlab.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://gitlab.com/api/v4/projects/itentialopensource%2Fadapter-utils/repository/blobs/abcd/raw",
-  },
-]
-`;
-
-exports[`workers/repository/update/pr/changelog/release-notes getReleaseNotesMd() ReleaseNotes Correctness parses adapter-utils 4.33.0 2`] = `
 Object {
   "body": "-   add new auth, fix accept header and base path in mock
 
@@ -319,41 +90,6 @@ See merge request itentialopensource/adapter-utils!177
 `;
 
 exports[`workers/repository/update/pr/changelog/release-notes getReleaseNotesMd() ReleaseNotes Correctness parses yargs 15.2.0 1`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "api.github.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://api.github.com/repos/yargs/yargs",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "api.github.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://api.github.com/repos/yargs/yargs/git/trees/main",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "api.github.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://api.github.com/repos/yargs/yargs/git/blobs/abcd",
-  },
-]
-`;
-
-exports[`workers/repository/update/pr/changelog/release-notes getReleaseNotesMd() ReleaseNotes Correctness parses yargs 15.2.0 2`] = `
 Object {
   "body": "##### ⚠ BREAKING CHANGES
 
@@ -385,41 +121,6 @@ Object {
 `;
 
 exports[`workers/repository/update/pr/changelog/release-notes getReleaseNotesMd() ReleaseNotes Correctness parses yargs 15.3.0 1`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "api.github.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://api.github.com/repos/yargs/yargs",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "api.github.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://api.github.com/repos/yargs/yargs/git/trees/main",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "api.github.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://api.github.com/repos/yargs/yargs/git/blobs/abcd",
-  },
-]
-`;
-
-exports[`workers/repository/update/pr/changelog/release-notes getReleaseNotesMd() ReleaseNotes Correctness parses yargs 15.3.0 2`] = `
 Object {
   "body": "##### Features
 
@@ -435,102 +136,7 @@ Object {
 }
 `;
 
-exports[`workers/repository/update/pr/changelog/release-notes getReleaseNotesMd() handles bad markdown 1`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "api.github.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://api.github.com/repos/some/repository2",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "api.github.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://api.github.com/repos/some/repository2/git/trees/HEAD",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "api.github.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://api.github.com/repos/some/repository2/git/blobs/abcd",
-  },
-]
-`;
-
-exports[`workers/repository/update/pr/changelog/release-notes getReleaseNotesMd() handles files mismatch 1`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "api.github.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://api.github.com/repos/chalk",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "api.github.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://api.github.com/repos/chalk/git/trees/HEAD",
-  },
-]
-`;
-
 exports[`workers/repository/update/pr/changelog/release-notes getReleaseNotesMd() handles github sourceDirectory 1`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "api.github.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://api.github.com/repos/nodeca/js-yaml",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "api.github.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://api.github.com/repos/nodeca/js-yaml/git/trees/HEAD?recursive=1",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "api.github.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://api.github.com/repos/nodeca/js-yaml/git/blobs/abcd",
-  },
-]
-`;
-
-exports[`workers/repository/update/pr/changelog/release-notes getReleaseNotesMd() handles github sourceDirectory 2`] = `
 Object {
   "body": "-   Fix \`condenseFlow\` output (quote keys for sure, instead of spaces), [#371](https://github.com/nodeca/js-yaml/issues/371), [#370](https://github.com/nodeca/js-yaml/issues/370).
 -   Dump astrals as codepoints instead of surrogate pair, [#368](https://github.com/nodeca/js-yaml/issues/368).
@@ -538,41 +144,6 @@ Object {
   "notesSourceUrl": "https://github.com/nodeca/js-yaml/blob/HEAD/packages/foo/CHANGELOG.md",
   "url": "https://github.com/nodeca/js-yaml/blob/HEAD/packages/foo/CHANGELOG.md#3100--2017-09-10",
 }
-`;
-
-exports[`workers/repository/update/pr/changelog/release-notes getReleaseNotesMd() handles wrong format 1`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "api.github.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://api.github.com/repos/some/repository1",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "api.github.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://api.github.com/repos/some/repository1/git/trees/HEAD",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "api.github.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://api.github.com/repos/some/repository1/git/blobs/abcd",
-  },
-]
 `;
 
 exports[`workers/repository/update/pr/changelog/release-notes getReleaseNotesMd() parses angular.js 1`] = `
@@ -606,66 +177,7 @@ Object {
 }
 `;
 
-exports[`workers/repository/update/pr/changelog/release-notes getReleaseNotesMd() parses angular.js 2`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "api.github.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://api.github.com/repos/angular/angular.js",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "api.github.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://api.github.com/repos/angular/angular.js/git/trees/HEAD",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "api.github.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://api.github.com/repos/angular/angular.js/git/blobs/abcd",
-  },
-]
-`;
-
 exports[`workers/repository/update/pr/changelog/release-notes getReleaseNotesMd() parses gitlab.com/gitlab-org/gitter/webapp 1`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "api.gitlab.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://api.gitlab.com/projects/gitlab-org%2Fgitter%2Fwebapp/repository/tree?per_page=100",
-  },
-  Object {
-    "headers": Object {
-      "accept-encoding": "gzip, deflate, br",
-      "host": "api.gitlab.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://api.gitlab.com/projects/gitlab-org%2Fgitter%2Fwebapp/repository/blobs/abcd/raw",
-  },
-]
-`;
-
-exports[`workers/repository/update/pr/changelog/release-notes getReleaseNotesMd() parses gitlab.com/gitlab-org/gitter/webapp 2`] = `
 Object {
   "body": "-   Removing markup from a part of the French translation, <https://gitlab.com/gitlab-org/gitter/webapp/-/merge_requests/1878>
 -   Fix typo documentation -> documentation, <https://gitlab.com/gitlab-org/gitter/webapp/-/merge_requests/1880>
@@ -683,41 +195,6 @@ Object {
 `;
 
 exports[`workers/repository/update/pr/changelog/release-notes getReleaseNotesMd() parses jest 1`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "api.github.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://api.github.com/repos/facebook/jest",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "api.github.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://api.github.com/repos/facebook/jest/git/trees/HEAD",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "api.github.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://api.github.com/repos/facebook/jest/git/blobs/abcd",
-  },
-]
-`;
-
-exports[`workers/repository/update/pr/changelog/release-notes getReleaseNotesMd() parses jest 2`] = `
 Object {
   "body": "##### Fixes
 
@@ -911,41 +388,6 @@ Object {
 `;
 
 exports[`workers/repository/update/pr/changelog/release-notes getReleaseNotesMd() parses js-yaml 1`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "api.github.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://api.github.com/repos/nodeca/js-yaml",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "api.github.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://api.github.com/repos/nodeca/js-yaml/git/trees/HEAD",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "api.github.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://api.github.com/repos/nodeca/js-yaml/git/blobs/abcd",
-  },
-]
-`;
-
-exports[`workers/repository/update/pr/changelog/release-notes getReleaseNotesMd() parses js-yaml 2`] = `
 Object {
   "body": "-   Fix \`condenseFlow\` output (quote keys for sure, instead of spaces), [#371](https://github.com/nodeca/js-yaml/issues/371), [#370](https://github.com/nodeca/js-yaml/issues/370).
 -   Dump astrals as codepoints instead of surrogate pair, [#368](https://github.com/nodeca/js-yaml/issues/368).
@@ -956,32 +398,6 @@ Object {
 `;
 
 exports[`workers/repository/update/pr/changelog/release-notes getReleaseNotesMd() parses self hosted gitlab 1`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "authorization": "Bearer some-token",
-      "host": "my.custom.domain",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://my.custom.domain/projects/gitlab-org%2Fgitter%2Fwebapp/repository/tree?per_page=100",
-  },
-  Object {
-    "headers": Object {
-      "accept-encoding": "gzip, deflate, br",
-      "authorization": "Bearer some-token",
-      "host": "my.custom.domain",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://my.custom.domain/projects/gitlab-org%2Fgitter%2Fwebapp/repository/blobs/abcd/raw",
-  },
-]
-`;
-
-exports[`workers/repository/update/pr/changelog/release-notes getReleaseNotesMd() parses self hosted gitlab 2`] = `
 Object {
   "body": "-   Removing markup from a part of the French translation, <https://gitlab.com/gitlab-org/gitter/webapp/-/merge_requests/1878>
 -   Fix typo documentation -> documentation, <https://gitlab.com/gitlab-org/gitter/webapp/-/merge_requests/1880>

@@ -1,11 +1,7 @@
 import { Fixtures } from '../../../../test/fixtures';
 import { ClojureDatasource } from '../../datasource/clojure';
-import {
-  extractFromVectors,
-  extractPackageFile,
-  extractVariables,
-  trimAtKey,
-} from './extract';
+import { extractFromVectors, extractVariables, trimAtKey } from './extract';
+import { extractPackageFile } from '.';
 
 const leinProjectClj = Fixtures.get(`project.clj`);
 
@@ -15,6 +11,7 @@ describe('modules/manager/leiningen/extract', () => {
     expect(trimAtKey(':dependencies    ', 'dependencies')).toBeNull();
     expect(trimAtKey(':dependencies \nfoobar', 'dependencies')).toBe('foobar');
   });
+
   it('extractFromVectors', () => {
     expect(extractFromVectors('')).toBeEmptyArray();
     expect(extractFromVectors('[]')).toBeEmptyArray();
@@ -51,6 +48,7 @@ describe('modules/manager/leiningen/extract', () => {
       },
     ]);
   });
+
   it('extractPackageFile', () => {
     expect(extractPackageFile(leinProjectClj)).toMatchSnapshot({
       deps: [
@@ -126,6 +124,7 @@ describe('modules/manager/leiningen/extract', () => {
       ],
     });
   });
+
   it('extractVariables', () => {
     expect(extractVariables('(def foo "1")')).toEqual({ foo: '1' });
     expect(extractVariables('(def foo"2")')).toEqual({ foo: '2' });

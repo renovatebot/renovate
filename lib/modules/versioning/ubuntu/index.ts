@@ -1,4 +1,3 @@
-import { DateTime } from 'luxon';
 import { regEx } from '../../../util/regex';
 import { DistroInfo } from '../distro';
 import type { NewValueConfig, VersioningApi } from '../types';
@@ -43,8 +42,9 @@ function isStable(version: string): boolean {
     return false;
   }
 
-  const schedule = di.getSchedule(ver);
-  if (schedule && DateTime.fromISO(schedule.release) > DateTime.now()) {
+  const match = ver.match(regEx(/^\d+.\d+/));
+
+  if (!di.isReleased(match ? match[0] : ver)) {
     return false;
   }
 

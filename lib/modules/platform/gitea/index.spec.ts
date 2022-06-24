@@ -5,8 +5,10 @@ import type {
   RepoParams,
   RepoResult,
 } from '..';
-import { partial } from '../../../../test/util';
+import { mocked, partial } from '../../../../test/util';
+import { PlatformId } from '../../../constants';
 import {
+  CONFIG_GIT_URL_UNAVAILABLE,
   REPOSITORY_ACCESS_FORBIDDEN,
   REPOSITORY_ARCHIVED,
   REPOSITORY_BLOCKED,
@@ -31,6 +33,7 @@ describe('modules/platform/gitea/index', () => {
   let helper: jest.Mocked<typeof import('./gitea-helper')>;
   let logger: jest.Mocked<typeof _logger>;
   let gitvcs: jest.Mocked<typeof _git>;
+  let hostRules: jest.Mocked<typeof import('../../../util/host-rules')>;
 
   const mockCommitHash = '0d9c7726c3d628b7e28af234595cfd20febdbf8e';
 
@@ -44,6 +47,7 @@ describe('modules/platform/gitea/index', () => {
   const mockRepo = partial<ght.Repo>({
     allow_rebase: true,
     clone_url: 'https://gitea.renovatebot.com/some/repo.git',
+    ssh_url: 'git@gitea.renovatebot.com/some/repo.git',
     default_branch: 'master',
     full_name: 'some/repo',
     permissions: {
@@ -53,20 +57,22 @@ describe('modules/platform/gitea/index', () => {
     },
   });
 
+  type MockPr = ght.PR & Required<Pick<ght.PR, 'head' | 'base'>>;
+
   const mockRepos: ght.Repo[] = [
     partial<ght.Repo>({ full_name: 'a/b' }),
     partial<ght.Repo>({ full_name: 'c/d' }),
   ];
 
-  const mockPRs: ght.PR[] = [
-    partial<ght.PR>({
+  const mockPRs: MockPr[] = [
+    partial<MockPr>({
       number: 1,
       title: 'Some PR',
       body: 'some random pull request',
       state: PrState.Open,
       diff_url: 'https://gitea.renovatebot.com/some/repo/pulls/1.diff',
       created_at: '2015-03-22T20:36:16Z',
-      closed_at: null,
+      closed_at: undefined,
       mergeable: true,
       base: { ref: 'some-base-branch' },
       head: {
@@ -75,7 +81,7 @@ describe('modules/platform/gitea/index', () => {
         repo: partial<ght.Repo>({ full_name: mockRepo.full_name }),
       },
     }),
-    partial<ght.PR>({
+    partial<MockPr>({
       number: 2,
       title: 'Other PR',
       body: 'other random pull request',
@@ -170,13 +176,15 @@ describe('modules/platform/gitea/index', () => {
     jest.mock('../../../logger');
 
     gitea = await import('.');
-    helper = (await import('./gitea-helper')) as any;
-    logger = (await import('../../../logger')).logger as any;
+    helper = mocked(await import('./gitea-helper'));
+    logger = mocked((await import('../../../logger')).logger);
     gitvcs = require('../../../util/git');
     gitvcs.isBranchStale.mockResolvedValue(false);
     gitvcs.getBranchCommit.mockReturnValue(mockCommitHash);
+    hostRules = mocked(await import('../../../util/host-rules'));
+    hostRules.clear();
 
-    setBaseUrl('https://gitea.renovatebot.com/api/v1');
+    setBaseUrl('https://gitea.renovatebot.com/');
   });
 
   function initFakePlatform(version = GITEA_VERSION): Promise<PlatformResult> {
@@ -227,6 +235,19 @@ describe('modules/platform/gitea/index', () => {
           endpoint: 'https://gitea.renovatebot.com',
         })
       ).toMatchSnapshot();
+    });
+
+    it('should support custom endpoint including api path', async () => {
+      helper.getCurrentUser.mockResolvedValueOnce(mockUser);
+
+      expect(
+        await gitea.initPlatform({
+          token: 'some-token',
+          endpoint: 'https://gitea.renovatebot.com/api/v1',
+        })
+      ).toMatchObject({
+        endpoint: 'https://gitea.renovatebot.com/',
+      });
     });
 
     it('should use username as author name if full name is missing', async () => {
@@ -322,6 +343,162 @@ describe('modules/platform/gitea/index', () => {
           allow_merge_commits: true,
         })
       ).toMatchSnapshot();
+    });
+
+    it('should use clone_url of repo if gitUrl is not specified', async () => {
+      expect.assertions(1);
+
+      helper.getRepo.mockResolvedValueOnce(mockRepo);
+      const repoCfg: RepoParams = {
+        repository: mockRepo.full_name,
+      };
+      await gitea.initRepo(repoCfg);
+
+      expect(gitvcs.initRepo).toHaveBeenCalledWith(
+        expect.objectContaining({ url: mockRepo.clone_url })
+      );
+    });
+
+    it('should use clone_url of repo if gitUrl has value default', async () => {
+      expect.assertions(1);
+
+      helper.getRepo.mockResolvedValueOnce(mockRepo);
+      const repoCfg: RepoParams = {
+        repository: mockRepo.full_name,
+        gitUrl: 'default',
+      };
+      await gitea.initRepo(repoCfg);
+
+      expect(gitvcs.initRepo).toHaveBeenCalledWith(
+        expect.objectContaining({ url: mockRepo.clone_url })
+      );
+    });
+
+    it('should use ssh_url of repo if gitUrl has value ssh', async () => {
+      expect.assertions(1);
+
+      helper.getRepo.mockResolvedValueOnce(mockRepo);
+      const repoCfg: RepoParams = {
+        repository: mockRepo.full_name,
+        gitUrl: 'ssh',
+      };
+      await gitea.initRepo(repoCfg);
+
+      expect(gitvcs.initRepo).toHaveBeenCalledWith(
+        expect.objectContaining({ url: mockRepo.ssh_url })
+      );
+    });
+
+    it('should abort when gitUrl has value ssh but ssh_url is empty', async () => {
+      expect.assertions(1);
+
+      helper.getRepo.mockResolvedValueOnce({ ...mockRepo, ssh_url: undefined });
+      const repoCfg: RepoParams = {
+        repository: mockRepo.full_name,
+        gitUrl: 'ssh',
+      };
+
+      await expect(gitea.initRepo(repoCfg)).rejects.toThrow(
+        CONFIG_GIT_URL_UNAVAILABLE
+      );
+    });
+
+    it('should use generated url of repo if gitUrl has value endpoint', async () => {
+      expect.assertions(1);
+
+      helper.getRepo.mockResolvedValueOnce(mockRepo);
+      const repoCfg: RepoParams = {
+        repository: mockRepo.full_name,
+        gitUrl: 'endpoint',
+      };
+      await gitea.initRepo(repoCfg);
+
+      expect(gitvcs.initRepo).toHaveBeenCalledWith(
+        expect.objectContaining({
+          url: `https://gitea.com/${mockRepo.full_name}.git`,
+        })
+      );
+    });
+
+    it('should abort when clone_url is empty', async () => {
+      expect.assertions(1);
+
+      helper.getRepo.mockResolvedValueOnce({
+        ...mockRepo,
+        clone_url: undefined,
+      });
+      const repoCfg: RepoParams = {
+        repository: mockRepo.full_name,
+      };
+
+      await expect(gitea.initRepo(repoCfg)).rejects.toThrow(
+        CONFIG_GIT_URL_UNAVAILABLE
+      );
+    });
+
+    it('should use given access token if gitUrl has value endpoint', async () => {
+      expect.assertions(1);
+
+      const token = 'abc';
+      hostRules.add({
+        hostType: PlatformId.Gitea,
+        matchHost: 'https://gitea.com/',
+        token,
+      });
+
+      helper.getRepo.mockResolvedValueOnce(mockRepo);
+      const repoCfg: RepoParams = {
+        repository: mockRepo.full_name,
+        gitUrl: 'endpoint',
+      };
+      await gitea.initRepo(repoCfg);
+
+      const url = new URL(`${mockRepo.clone_url}`);
+      url.username = token;
+      expect(gitvcs.initRepo).toHaveBeenCalledWith(
+        expect.objectContaining({
+          url: `https://${token}@gitea.com/${mockRepo.full_name}.git`,
+        })
+      );
+    });
+
+    it('should use given access token if gitUrl is not specified', async () => {
+      expect.assertions(1);
+
+      const token = 'abc';
+      hostRules.add({
+        hostType: PlatformId.Gitea,
+        matchHost: 'https://gitea.com/',
+        token,
+      });
+
+      helper.getRepo.mockResolvedValueOnce(mockRepo);
+      const repoCfg: RepoParams = {
+        repository: mockRepo.full_name,
+      };
+      await gitea.initRepo(repoCfg);
+
+      const url = new URL(`${mockRepo.clone_url}`);
+      url.username = token;
+      expect(gitvcs.initRepo).toHaveBeenCalledWith(
+        expect.objectContaining({ url: url.toString() })
+      );
+    });
+
+    it('should abort when clone_url is not valid', async () => {
+      expect.assertions(1);
+
+      helper.getRepo.mockResolvedValueOnce({
+        ...mockRepo,
+        clone_url: 'abc',
+      });
+      const repoCfg: RepoParams = {
+        repository: mockRepo.full_name,
+      };
+
+      await expect(gitea.initRepo(repoCfg)).rejects.toThrow(
+        CONFIG_GIT_URL_UNAVAILABLE
+      );
     });
   });
 
@@ -462,6 +639,7 @@ describe('modules/platform/gitea/index', () => {
         await gitea.getBranchStatusCheck('some-branch', 'some-context')
       ).toBeNull();
     });
+
     it('should return yellow with unknown status', async () => {
       helper.getCombinedCommitStatus.mockResolvedValueOnce(
         partial<ght.CombinedCommitStatus>({
@@ -675,7 +853,7 @@ describe('modules/platform/gitea/index', () => {
   });
 
   describe('createPr', () => {
-    const mockNewPR: ght.PR = {
+    const mockNewPR: MockPr = {
       number: 42,
       state: PrState.Open,
       head: {
@@ -916,11 +1094,11 @@ describe('modules/platform/gitea/index', () => {
 
   describe('getIssue', () => {
     it('should return the issue', async () => {
-      const mockIssue = mockIssues.find((i) => i.number === 1);
+      const mockIssue = mockIssues.find((i) => i.number === 1)!;
       helper.getIssue.mockResolvedValueOnce(mockIssue);
       await initFakeRepo();
 
-      expect(await gitea.getIssue(mockIssue.number)).toHaveProperty(
+      expect(await gitea.getIssue?.(mockIssue.number)).toHaveProperty(
         'number',
         mockIssue.number
       );
@@ -929,7 +1107,7 @@ describe('modules/platform/gitea/index', () => {
 
   describe('findIssue', () => {
     it('should return existing open issue', async () => {
-      const mockIssue = mockIssues.find((i) => i.title === 'open-issue');
+      const mockIssue = mockIssues.find((i) => i.title === 'open-issue')!;
       helper.searchIssues.mockResolvedValueOnce(mockIssues);
       helper.getIssue.mockResolvedValueOnce(mockIssue);
       await initFakeRepo();
@@ -941,7 +1119,7 @@ describe('modules/platform/gitea/index', () => {
     });
 
     it('should not return existing closed issue', async () => {
-      const mockIssue = mockIssues.find((i) => i.title === 'closed-issue');
+      const mockIssue = mockIssues.find((i) => i.title === 'closed-issue')!;
       helper.searchIssues.mockResolvedValueOnce(mockIssues);
       await initFakeRepo();
 
@@ -1015,7 +1193,7 @@ describe('modules/platform/gitea/index', () => {
     });
 
     it('should not reopen closed issue by default', async () => {
-      const closedIssue = mockIssues.find((i) => i.title === 'closed-issue');
+      const closedIssue = mockIssues.find((i) => i.title === 'closed-issue')!;
       helper.searchIssues.mockResolvedValueOnce(mockIssues);
       helper.updateIssue.mockResolvedValueOnce(closedIssue);
 
@@ -1149,7 +1327,7 @@ describe('modules/platform/gitea/index', () => {
     });
 
     it('should reopen closed issue if desired', async () => {
-      const closedIssue = mockIssues.find((i) => i.title === 'closed-issue');
+      const closedIssue = mockIssues.find((i) => i.title === 'closed-issue')!;
       helper.searchIssues.mockResolvedValueOnce(mockIssues);
       helper.updateIssue.mockResolvedValueOnce(closedIssue);
 
@@ -1175,7 +1353,7 @@ describe('modules/platform/gitea/index', () => {
     });
 
     it('should not update existing closed issue if desired', async () => {
-      const closedIssue = mockIssues.find((i) => i.title === 'closed-issue');
+      const closedIssue = mockIssues.find((i) => i.title === 'closed-issue')!;
       helper.searchIssues.mockResolvedValueOnce(mockIssues);
 
       await initFakeRepo();
@@ -1335,7 +1513,7 @@ describe('modules/platform/gitea/index', () => {
       const res = await gitea.ensureComment({
         number: 1,
         content: 'other-content',
-        topic: undefined,
+        topic: null,
       });
 
       expect(res).toBe(true);
@@ -1497,6 +1675,7 @@ describe('modules/platform/gitea/index', () => {
       expect(helper.requestPrReviewers).toHaveBeenCalledTimes(1);
       expect(logger.warn).not.toHaveBeenCalled();
     });
+
     it('should should do nothing if version to old', async () => {
       expect.assertions(3);
       const mockPR = mockPRs[0];
@@ -1507,6 +1686,7 @@ describe('modules/platform/gitea/index', () => {
       expect(helper.requestPrReviewers).not.toHaveBeenCalled();
       expect(logger.warn).not.toHaveBeenCalled();
     });
+
     it('catches errors', async () => {
       expect.assertions(2);
       const mockPR = mockPRs[0];
@@ -1520,10 +1700,13 @@ describe('modules/platform/gitea/index', () => {
   });
 
   describe('massageMarkdown', () => {
-    it('should truncate body to 1000000 characters', () => {
-      const excessiveBody = '*'.repeat(1000001);
+    it('replaces pr links', () => {
+      const body =
+        '[#123](../pull/123) [#124](../pull/124) [#125](../pull/125)';
 
-      expect(gitea.massageMarkdown(excessiveBody)).toHaveLength(1000000);
+      expect(gitea.massageMarkdown(body)).toBe(
+        '[#123](pulls/123) [#124](pulls/124) [#125](pulls/125)'
+      );
     });
   });
 
@@ -1578,6 +1761,7 @@ describe('modules/platform/gitea/index', () => {
       const res = await gitea.getJsonFile('file.json5');
       expect(res).toEqual({ foo: 'bar' });
     });
+
     it('throws on malformed JSON', async () => {
       helper.getRepoContents.mockResolvedValueOnce({
         contentString: '!@#',
@@ -1585,6 +1769,7 @@ describe('modules/platform/gitea/index', () => {
       await initFakeRepo({ full_name: 'some/repo' });
       await expect(gitea.getJsonFile('file.json')).rejects.toThrow();
     });
+
     it('throws on errors', async () => {
       helper.getRepoContents.mockRejectedValueOnce(new Error('some error'));
       await initFakeRepo({ full_name: 'some/repo' });

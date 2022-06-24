@@ -16,34 +16,32 @@ import type { PoetryFile, PoetrySection } from './types';
 
 function extractFromSection(
   parsedFile: PoetryFile,
-  section: keyof PoetrySection,
+  section: keyof Omit<PoetrySection, 'source'>,
   poetryLockfile: Record<string, string>
 ): PackageDependency[] {
-  const deps = [];
-  const sectionContent = parsedFile.tool.poetry[section];
+  const deps: PackageDependency[] = [];
+  const sectionContent = parsedFile.tool?.poetry?.[section];
   if (!sectionContent) {
     return [];
   }
 
-  Object.keys(sectionContent).forEach((depName) => {
-    if (depName === 'python') {
-      return;
+  for (const depName of Object.keys(sectionContent)) {
+    if (depName === 'python' || depName === 'source') {
+      continue;
     }
-    let skipReason: SkipReason;
+
+    let skipReason: SkipReason | null = null;
     let currentValue = sectionContent[depName];
     let nestedVersion = false;
-    if (typeof currentValue !== 'string') {
+    if (!is.string(currentValue)) {
       const version = currentValue.version;
       const path = currentValue.path;
       const git = currentValue.git;
       if (version) {
         currentValue = version;
         nestedVersion = true;
-        if (path) {
-          skipReason = 'path-dependency';
-        }
-        if (git) {
-          skipReason = 'git-dependency';
+        if (path || git) {
+          skipReason = path ? 'path-dependency' : 'git-dependency';
         }
       } else if (path) {
         currentValue = '';
@@ -59,32 +57,32 @@ function extractFromSection(
     const dep: PackageDependency = {
       depName,
       depType: section,
-      currentValue: currentValue as string,
+      currentValue: currentValue,
       managerData: { nestedVersion },
       datasource: PypiDatasource.id,
     };
-    if (dep.depName in poetryLockfile) {
-      dep.lockedVersion = poetryLockfile[dep.depName];
+    if (depName in poetryLockfile) {
+      dep.lockedVersion = poetryLockfile[depName];
     }
     if (skipReason) {
       dep.skipReason = skipReason;
-    } else if (pep440Versioning.isValid(dep.currentValue)) {
+    } else if (pep440Versioning.isValid(currentValue)) {
       dep.versioning = pep440Versioning.id;
-    } else if (poetryVersioning.isValid(dep.currentValue)) {
+    } else if (poetryVersioning.isValid(currentValue)) {
       dep.versioning = poetryVersioning.id;
     } else {
       dep.skipReason = 'unknown-version';
     }
     deps.push(dep);
-  });
+  }
   return deps;
 }
 
-function extractRegistries(pyprojectfile: PoetryFile): string[] {
+function extractRegistries(pyprojectfile: PoetryFile): string[] | undefined {
   const sources = pyprojectfile.tool?.poetry?.source;
 
   if (!Array.isArray(sources) || sources.length === 0) {
-    return null;
+    return undefined;
   }
 
   const registryUrls = new Set<string>();
@@ -93,7 +91,7 @@ function extractRegistries(pyprojectfile: PoetryFile): string[] {
       registryUrls.add(source.url);
     }
   }
-  registryUrls.add(process.env.PIP_INDEX_URL || 'https://pypi.org/pypi/');
+  registryUrls.add(process.env.PIP_INDEX_URL ?? 'https://pypi.org/pypi/');
 
   return Array.from(registryUrls);
 }
@@ -117,7 +115,8 @@ export async function extractPackageFile(
 
   // handle the lockfile
   const lockfileName = getSiblingFileName(fileName, 'poetry.lock');
-  const lockContents = await readLocalFile(lockfileName, 'utf8');
+  // TODO #7154
+  const lockContents = (await readLocalFile(lockfileName, 'utf8'))!;
 
   const lockfileMapping = extractLockFileEntries(lockContents);
 
@@ -130,16 +129,17 @@ export async function extractPackageFile(
     return null;
   }
 
-  const constraints: Record<string, any> = {};
+  const extractedConstraints: Record<string, any> = {};
 
   if (is.nonEmptyString(pyprojectfile.tool?.poetry?.dependencies?.python)) {
-    constraints.python = pyprojectfile.tool?.poetry?.dependencies?.python;
+    extractedConstraints.python =
+      pyprojectfile.tool?.poetry?.dependencies?.python;
   }
 
   const res: PackageFile = {
     deps,
     registryUrls: extractRegistries(pyprojectfile),
-    constraints,
+    extractedConstraints,
   };
   // Try poetry.lock first
   let lockFile = getSiblingFileName(fileName, 'poetry.lock');

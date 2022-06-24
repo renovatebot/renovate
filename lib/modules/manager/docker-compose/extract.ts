@@ -15,9 +15,9 @@ class LineMapper {
       .map(([lineNumber, line]) => ({ lineNumber, line, used: false }));
   }
 
-  pluckLineNumber(imageName: string): number {
+  pluckLineNumber(imageName: string | undefined): number | null {
     const lineMeta = this.imageLines.find(
-      ({ line, used }) => !used && line.includes(imageName)
+      ({ line, used }) => !used && imageName && line.includes(imageName)
     );
     // istanbul ignore if
     if (!lineMeta) {
@@ -64,7 +64,7 @@ export function extractPackageFile(
     // since docker-compose spec version 1.27, the 'version' key has
     // become optional and can no longer be used to differentiate
     // between v1 and v2.
-    const services = config.services || config;
+    const services = config.services ?? config;
 
     // Image name/tags for services are only eligible for update if they don't
     // use variables and if the image is not built locally
@@ -79,7 +79,7 @@ export function extractPackageFile(
         }
         return dep;
       })
-      .filter(Boolean);
+      .filter(is.truthy);
 
     logger.trace({ deps }, 'Docker Compose image');
     return { deps };

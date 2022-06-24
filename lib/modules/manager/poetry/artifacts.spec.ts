@@ -1,19 +1,18 @@
-import { exec as _exec } from 'child_process';
 import _fs from 'fs-extra';
 import { join } from 'upath';
-import { envMock, mockExecAll } from '../../../../test/exec-util';
-import { loadFixture, mocked } from '../../../../test/util';
+import { envMock, exec, mockExecAll } from '../../../../test/exec-util';
+import { Fixtures } from '../../../../test/fixtures';
+import { env, mocked } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import * as docker from '../../../util/exec/docker';
-import * as _env from '../../../util/exec/env';
 import * as _hostRules from '../../../util/host-rules';
 import * as _datasource from '../../datasource';
 import type { UpdateArtifactsConfig } from '../types';
-import { updateArtifacts } from './artifacts';
+import { updateArtifacts } from '.';
 
-const pyproject1toml = loadFixture('pyproject.1.toml');
-const pyproject10toml = loadFixture('pyproject.10.toml');
+const pyproject1toml = Fixtures.get('pyproject.1.toml');
+const pyproject10toml = Fixtures.get('pyproject.10.toml');
 
 jest.mock('fs-extra');
 jest.mock('child_process');
@@ -22,8 +21,6 @@ jest.mock('../../datasource');
 jest.mock('../../../util/host-rules');
 
 const fs: jest.Mocked<typeof _fs> = _fs as any;
-const exec: jest.Mock<typeof _exec> = _exec as any;
-const env = mocked(_env);
 const datasource = mocked(_datasource);
 const hostRules = mocked(_hostRules);
 
@@ -40,6 +37,7 @@ describe('modules/manager/poetry/artifacts', () => {
     GlobalConfig.set(adminConfig);
     docker.resetPrefetchedImages();
   });
+
   it('returns null if no poetry.lock found', async () => {
     const updatedDeps = [{ depName: 'dep1' }];
     expect(
@@ -51,6 +49,7 @@ describe('modules/manager/poetry/artifacts', () => {
       })
     ).toBeNull();
   });
+
   it('returns null if updatedDeps is empty', async () => {
     expect(
       await updateArtifacts({
@@ -61,6 +60,7 @@ describe('modules/manager/poetry/artifacts', () => {
       })
     ).toBeNull();
   });
+
   it('returns null if unchanged', async () => {
     fs.readFile.mockReturnValueOnce('Current poetry.lock' as any);
     const execSnapshots = mockExecAll(exec);
@@ -76,6 +76,7 @@ describe('modules/manager/poetry/artifacts', () => {
     ).toBeNull();
     expect(execSnapshots).toMatchSnapshot();
   });
+
   it('returns updated poetry.lock', async () => {
     fs.readFile.mockResolvedValueOnce('[metadata]\n' as never);
     const execSnapshots = mockExecAll(exec);
@@ -91,8 +92,10 @@ describe('modules/manager/poetry/artifacts', () => {
     ).not.toBeNull();
     expect(execSnapshots).toMatchSnapshot();
   });
+
   it('passes private credential environment vars', async () => {
-    fs.readFile.mockResolvedValueOnce(null);
+    // TODO #7154
+    fs.readFile.mockResolvedValueOnce(null as never);
     fs.readFile.mockResolvedValueOnce('[metadata]\n' as never);
     const execSnapshots = mockExecAll(exec);
     fs.readFile.mockReturnValueOnce('New poetry.lock' as any);
@@ -115,8 +118,10 @@ describe('modules/manager/poetry/artifacts', () => {
     expect(hostRules.find.mock.calls).toHaveLength(4);
     expect(execSnapshots).toMatchSnapshot();
   });
+
   it('prioritizes pypi-scoped credentials', async () => {
-    fs.readFile.mockResolvedValueOnce(null);
+    // TODO #7154
+    fs.readFile.mockResolvedValueOnce(null as never);
     fs.readFile.mockResolvedValueOnce(Buffer.from('[metadata]\n'));
     const execSnapshots = mockExecAll(exec);
     fs.readFile.mockResolvedValueOnce(Buffer.from('New poetry.lock'));
@@ -139,8 +144,10 @@ describe('modules/manager/poetry/artifacts', () => {
     ).not.toBeNull();
     expect(execSnapshots).toMatchSnapshot();
   });
+
   it('returns updated pyproject.lock', async () => {
-    fs.readFile.mockResolvedValueOnce(null);
+    // TODO #7154
+    fs.readFile.mockResolvedValueOnce(null as never);
     fs.readFile.mockResolvedValueOnce('[metadata]\n' as never);
     const execSnapshots = mockExecAll(exec);
     fs.readFile.mockReturnValueOnce('New poetry.lock' as any);
@@ -155,6 +162,7 @@ describe('modules/manager/poetry/artifacts', () => {
     ).not.toBeNull();
     expect(execSnapshots).toMatchSnapshot();
   });
+
   it('returns updated poetry.lock using docker', async () => {
     GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
     // poetry.lock
@@ -189,6 +197,7 @@ describe('modules/manager/poetry/artifacts', () => {
     ).not.toBeNull();
     expect(execSnapshots).toMatchSnapshot();
   });
+
   it('returns updated poetry.lock using docker (constraints)', async () => {
     GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
     // poetry.lock
@@ -223,6 +232,7 @@ describe('modules/manager/poetry/artifacts', () => {
     ).not.toBeNull();
     expect(execSnapshots).toMatchSnapshot();
   });
+
   it('catches errors', async () => {
     fs.readFile.mockResolvedValueOnce('Current poetry.lock' as any);
     fs.outputFile.mockImplementationOnce(() => {
@@ -238,6 +248,7 @@ describe('modules/manager/poetry/artifacts', () => {
       })
     ).toMatchSnapshot([{ artifactError: { lockFile: 'poetry.lock' } }]);
   });
+
   it('returns updated poetry.lock when doing lockfile maintenance', async () => {
     fs.readFile.mockResolvedValueOnce('Old poetry.lock' as any);
     const execSnapshots = mockExecAll(exec);

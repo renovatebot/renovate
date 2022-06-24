@@ -1,16 +1,16 @@
 import { logger } from '../../../logger';
 import { regEx } from '../../../util/regex';
-import { GithubTagsDatasource } from '../../datasource/github-tags';
+import { GithubReleasesDatasource } from '../../datasource/github-releases';
 import type { PackageDependency } from '../types';
 import { TerraformDependencyTypes } from './common';
-import type { ExtractionResult } from './types';
+import type { ExtractionResult, TerraformManagerData } from './types';
 import { keyValueExtractionRegex } from './util';
 
 export function extractTerraformRequiredVersion(
   startingLine: number,
   lines: string[]
-): ExtractionResult {
-  const deps: PackageDependency[] = [];
+): ExtractionResult | null {
+  const deps: PackageDependency<TerraformManagerData>[] = [];
   let lineNumber = startingLine;
   let braceCounter = 0;
   do {
@@ -21,13 +21,13 @@ export function extractTerraformRequiredVersion(
 
     const line = lines[lineNumber];
     // `{` will be counted wit +1 and `}` with -1. Therefore if we reach braceCounter == 0. We have found the end of the terraform block
-    const openBrackets = (line.match(regEx(/\{/g)) || []).length;
-    const closedBrackets = (line.match(regEx(/\}/g)) || []).length;
+    const openBrackets = (line.match(regEx(/\{/g)) ?? []).length;
+    const closedBrackets = (line.match(regEx(/\}/g)) ?? []).length;
     braceCounter = braceCounter + openBrackets - closedBrackets;
 
     const kvMatch = keyValueExtractionRegex.exec(line);
-    if (kvMatch && kvMatch.groups.key === 'required_version') {
-      const dep: PackageDependency = {
+    if (kvMatch?.groups && kvMatch.groups.key === 'required_version') {
+      const dep: PackageDependency<TerraformManagerData> = {
         currentValue: kvMatch.groups.value,
         lineNumber,
         managerData: {
@@ -47,7 +47,7 @@ export function extractTerraformRequiredVersion(
 
 export function analyseTerraformVersion(dep: PackageDependency): void {
   dep.depType = 'required_version';
-  dep.datasource = GithubTagsDatasource.id;
+  dep.datasource = GithubReleasesDatasource.id;
   dep.depName = 'hashicorp/terraform';
   dep.extractVersion = 'v(?<version>.*)$';
 }

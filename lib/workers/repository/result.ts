@@ -1,4 +1,5 @@
 import type { RenovateConfig } from '../../config/types';
+
 import {
   CONFIG_SECRETS_EXPOSED,
   CONFIG_VALIDATION,
@@ -19,7 +20,13 @@ import {
 } from '../../constants/error-messages';
 import { logger } from '../../logger';
 
-type ProcessStatus = 'disabled' | 'enabled' | 'onboarding' | 'unknown';
+export type ProcessStatus =
+  | 'disabled'
+  | 'onboarded'
+  | 'activated'
+  | 'onboarding'
+  | 'unknown';
+
 export interface ProcessResult {
   res: string;
   status: ProcessStatus;
@@ -55,8 +62,12 @@ export function processResult(
   if (disabledStatuses.includes(res)) {
     status = 'disabled';
     enabled = false;
+  } else if (config.repoIsActivated) {
+    status = 'activated';
+    enabled = true;
+    onboarded = true;
   } else if (enabledStatuses.includes(res) || config.repoIsOnboarded) {
-    status = 'enabled';
+    status = 'onboarded';
     enabled = true;
     onboarded = true;
   } else if (config.repoIsOnboarded === false) {
@@ -67,5 +78,8 @@ export function processResult(
     logger.debug({ res }, 'Unknown res');
     status = 'unknown';
   }
-  return { res, status, enabled, onboarded };
+  logger.debug(
+    `Repository result: ${res}, status: ${status}, enabled: ${enabled}, onboarded: ${onboarded}`
+  );
+  return { res, status, enabled: enabled, onboarded };
 }

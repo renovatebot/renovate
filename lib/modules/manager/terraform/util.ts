@@ -53,18 +53,21 @@ export function massageProviderLookupName(dep: PackageDependency): void {
   if (!dep.packageName) {
     dep.packageName = dep.depName;
   }
-  if (!dep.packageName.includes('/')) {
+
+  // TODO #7154
+  if (!dep.packageName!.includes('/')) {
     dep.packageName = `hashicorp/${dep.packageName}`;
   }
 
   // handle cases like `Telmate/proxmox`
-  dep.packageName = dep.packageName.toLowerCase();
+  // TODO #7154
+  dep.packageName = dep.packageName!.toLowerCase();
 }
 
 export function getLockedVersion(
   dep: PackageDependency,
   locks: ProviderLock[]
-): string {
+): string | undefined {
   const depRegistryUrl = dep.registryUrls
     ? dep.registryUrls[0]
     : TerraformProviderDatasource.defaultRegistryUrls[0];

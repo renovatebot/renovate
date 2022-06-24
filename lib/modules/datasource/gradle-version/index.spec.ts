@@ -1,11 +1,12 @@
 import { GetPkgReleasesConfig, GetReleasesConfig, getPkgReleases } from '..';
+import { Fixtures } from '../../../../test/fixtures';
 import * as httpMock from '../../../../test/http-mock';
-import { loadJsonFixture, partial } from '../../../../test/util';
+import { partial } from '../../../../test/util';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { id as versioning } from '../../versioning/gradle';
 import { GradleVersionDatasource } from '.';
 
-const allResponse: any = loadJsonFixture('all.json');
+const allResponse = Fixtures?.get('all.json');
 
 let config: GetPkgReleasesConfig;
 
@@ -30,11 +31,10 @@ describe('modules/datasource/gradle-version/index', () => {
       const res = await getPkgReleases(config);
       expect(res).toMatchSnapshot();
       expect(res).not.toBeNull();
-      expect(res.releases).toHaveLength(300);
+      expect(res?.releases).toHaveLength(300);
       expect(
-        res.releases.filter(({ isDeprecated }) => isDeprecated)
+        res?.releases.filter(({ isDeprecated }) => isDeprecated)
       ).toHaveLength(1);
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('calls configured registryUrls', async () => {
@@ -54,7 +54,6 @@ describe('modules/datasource/gradle-version/index', () => {
       });
       expect(res).toMatchSnapshot();
       expect(res).not.toBeNull();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('handles empty releases', async () => {
@@ -65,11 +64,10 @@ describe('modules/datasource/gradle-version/index', () => {
 
       const res = await getPkgReleases(config);
       expect(res).toBeNull();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('handles errors', async () => {
-      expect.assertions(3);
+      expect.assertions(2);
       httpMock
         .scope('https://services.gradle.org/')
         .get('/versions/all')
@@ -94,7 +92,6 @@ describe('modules/datasource/gradle-version/index', () => {
           })
         )
       ).rejects.toThrow(ExternalHostError);
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
 });

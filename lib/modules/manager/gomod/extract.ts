@@ -71,10 +71,10 @@ export function extractPackageFile(content: string): PackageFile | null {
           if (multiMatch && !line.endsWith('// indirect')) {
             logger.trace({ lineNumber }, `require line: "${line}"`);
             const dep = getDep(lineNumber, multiMatch, 'require');
-            dep.managerData.multiLine = true;
+            dep.managerData!.multiLine = true;
             deps.push(dep);
           } else if (line.trim() !== ')') {
-            logger.debug(`No multi-line match: ${line}`);
+            logger.trace(`No multi-line match: ${line}`);
           }
         } while (line.trim() !== ')');
       }

@@ -1,10 +1,10 @@
 import { Fixtures } from '../../../../test/fixtures';
 import {
   extractContainer,
-  extractPackageFile,
   extractRepository,
   parseAzurePipelines,
 } from './extract';
+import { extractPackageFile } from '.';
 
 const azurePipelines = Fixtures.get('azure-pipelines.yaml');
 
@@ -82,6 +82,7 @@ describe('modules/manager/azure-pipelines/extract', () => {
         datasource: 'docker',
       });
     });
+
     it('should return null if image field is missing', () => {
       expect(extractContainer({ image: null })).toBeNull();
     });
@@ -91,11 +92,13 @@ describe('modules/manager/azure-pipelines/extract', () => {
     it('returns null for invalid azure pipelines files', () => {
       expect(extractPackageFile('', 'some-file')).toBeNull();
     });
+
     it('extracts dependencies', () => {
       const res = extractPackageFile(azurePipelines, 'some-file');
-      expect(res.deps).toMatchSnapshot();
-      expect(res.deps).toHaveLength(3);
+      expect(res?.deps).toMatchSnapshot();
+      expect(res?.deps).toHaveLength(3);
     });
+
     it('should return null when there is no dependency found', () => {
       expect(
         extractPackageFile(azurePipelinesNoDependency, 'some-file')

@@ -1,4 +1,4 @@
-import updateArtifacts from './artifacts';
+import { updateArtifacts } from '.';
 
 describe('modules/manager/git-submodules/artifact', () => {
   describe('updateArtifacts()', () => {
@@ -14,6 +14,7 @@ describe('modules/manager/git-submodules/artifact', () => {
         { file: { type: 'addition', path: '', contents: '' } },
       ]);
     });
+
     it('returns two modules', () => {
       expect(
         updateArtifacts({

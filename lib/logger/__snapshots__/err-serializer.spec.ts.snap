@@ -1,38 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`logger/err-serializer got handles http error 1`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "authorization": "Basic OnRva2Vu",
-      "host": "github.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "POST",
-    "url": "https://:token@github.com/api",
-  },
-]
-`;
-
 exports[`logger/err-serializer got sanitize http error 1`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "authorization": "Basic OnRva2Vu",
-      "host": "github.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "POST",
-    "url": "https://:token@github.com/api",
-  },
-]
-`;
-
-exports[`logger/err-serializer got sanitize http error 2`] = `
 Object {
   "code": "ERR_NON_2XX_3XX_RESPONSE",
   "message": "Response code 412 (Precondition Failed)",
@@ -47,7 +15,7 @@ Object {
     "http2": false,
     "method": "POST",
     "password": "***********",
-    "url": "https://:**redacted**@github.com/api",
+    "url": "https://**redacted**@github.com/api",
     "username": "",
   },
   "response": Object {

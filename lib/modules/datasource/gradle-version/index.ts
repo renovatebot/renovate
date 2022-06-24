@@ -26,11 +26,16 @@ export class GradleVersionDatasource extends Datasource {
 
   @cache({
     namespace: `datasource-${GradleVersionDatasource.id}`,
-    key: ({ registryUrl }: GetReleasesConfig) => registryUrl,
+    key: ({ registryUrl }: GetReleasesConfig) => `${registryUrl}`,
   })
   async getReleases({
     registryUrl,
-  }: GetReleasesConfig): Promise<ReleaseResult> {
+  }: GetReleasesConfig): Promise<ReleaseResult | null> {
+    // istanbul ignore if
+    if (!registryUrl) {
+      return null;
+    }
+
     let releases: Release[];
     try {
       const response = await this.http.getJson<GradleRelease[]>(registryUrl);

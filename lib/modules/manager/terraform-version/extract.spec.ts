@@ -1,4 +1,4 @@
-import { extractPackageFile } from './extract';
+import { extractPackageFile } from '.';
 
 describe('modules/manager/terraform-version/extract', () => {
   describe('extractPackageFile()', () => {
@@ -14,6 +14,7 @@ describe('modules/manager/terraform-version/extract', () => {
         ],
       });
     });
+
     it('skips non ranges', () => {
       const res = extractPackageFile('latest');
       expect(res).toEqual({

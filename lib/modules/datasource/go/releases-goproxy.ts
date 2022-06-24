@@ -99,7 +99,7 @@ export class GoProxyDatasource extends Datasource {
    *
    * @see https://golang.org/ref/mod#goproxy-protocol
    */
-  parseGoproxy(input: string = process.env.GOPROXY): GoproxyItem[] {
+  parseGoproxy(input: string | undefined = process.env.GOPROXY): GoproxyItem[] {
     if (!is.string(input)) {
       return [];
     }
@@ -172,7 +172,7 @@ export class GoProxyDatasource extends Datasource {
   static parsedNoproxy: Record<string, RegExp | null> = {};
 
   static parseNoproxy(
-    input: unknown = process.env.GONOPROXY || process.env.GOPRIVATE
+    input: unknown = process.env.GONOPROXY ?? process.env.GOPRIVATE
   ): RegExp | null {
     if (!is.string(input)) {
       return null;

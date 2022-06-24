@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import { load } from 'js-yaml';
 import upath from 'upath';
 import { logger } from '../../../logger';
@@ -33,8 +34,8 @@ function extractImages(config: BatectConfig): string[] {
   }
 
   return Object.values(config.containers)
-    .filter((container) => container.image !== undefined)
-    .map((container) => container.image);
+    .map((container) => container.image)
+    .filter(is.string);
 }
 
 function createImageDependency(tag: string): PackageDependency {
@@ -159,7 +160,8 @@ export async function extractAllPackageFiles(
     filesAlreadyExamined.add(packageFile);
 
     const content = await readLocalFile(packageFile, 'utf8');
-    const result = extractPackageFile(content, packageFile);
+    // TODO #7154
+    const result = extractPackageFile(content!, packageFile);
 
     if (result !== null) {
       result.referencedConfigFiles.forEach((f) => {

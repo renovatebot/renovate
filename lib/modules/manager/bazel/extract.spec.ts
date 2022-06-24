@@ -1,5 +1,5 @@
 import { Fixtures } from '../../../../test/fixtures';
-import { extractPackageFile } from './extract';
+import { extractPackageFile } from '.';
 
 describe('modules/manager/bazel/extract', () => {
   describe('extractPackageFile()', () => {
@@ -7,33 +7,39 @@ describe('modules/manager/bazel/extract', () => {
       const res = extractPackageFile('blahhhhh:foo:@what\n');
       expect(res).toBeNull();
     });
+
     it('returns empty if cannot parse dependency', () => {
       const res = extractPackageFile('git_repository(\n  nothing\n)\n');
       expect(res).toBeNull();
     });
+
     it('extracts multiple types of dependencies', () => {
       const res = extractPackageFile(Fixtures.get('WORKSPACE1'));
-      expect(res.deps).toHaveLength(14);
-      expect(res.deps).toMatchSnapshot();
+      expect(res?.deps).toHaveLength(17);
+      expect(res?.deps).toMatchSnapshot();
     });
+
     it('extracts github tags', () => {
       const res = extractPackageFile(Fixtures.get('WORKSPACE2'));
-      expect(res.deps).toMatchSnapshot([
+      expect(res?.deps).toMatchSnapshot([
         { packageName: 'lmirosevic/GBDeviceInfo' },
         { packageName: 'nelhage/rules_boost' },
         { packageName: 'lmirosevic/GBDeviceInfo' },
         { packageName: 'nelhage/rules_boost' },
+        { packageName: 'bazelbuild/rules_go' },
       ]);
     });
+
     it('handle comments and strings', () => {
       const res = extractPackageFile(Fixtures.get('WORKSPACE3'));
-      expect(res.deps).toMatchSnapshot([
+      expect(res?.deps).toMatchSnapshot([
         { packageName: 'nelhage/rules_boost' },
       ]);
     });
+
     it('extracts dependencies from *.bzl files', () => {
       const res = extractPackageFile(Fixtures.get('repositories.bzl'));
-      expect(res.deps).toMatchSnapshot([
+      expect(res?.deps).toMatchSnapshot([
         {
           currentDigest: '0356bef3fbbabec5f0e196ecfacdeb6db62d48c0',
           packageName: 'google/subpar',
@@ -41,6 +47,10 @@ describe('modules/manager/bazel/extract', () => {
         {
           currentValue: '0.6.0',
           packageName: 'bazelbuild/bazel-skylib',
+        },
+        {
+          currentValue: '0.5.0',
+          packageName: 'bazelbuild/stardoc',
         },
       ]);
     });
@@ -57,7 +67,7 @@ describe('modules/manager/bazel/extract', () => {
           tag="v1.0.0-alpha31.cli-migrations"
         )`
       );
-      expect(res.deps).toMatchSnapshot([
+      expect(res?.deps).toMatchSnapshot([
         {
           currentDigest:
             'sha256:a4e8d8c444ca04fe706649e82263c9f4c2a4229bc30d2a64561b5e1d20cc8548',
@@ -80,8 +90,8 @@ go_repository(
 )
         `
       );
-      expect(successStory.deps[0].datasource).toBe('go');
-      expect(successStory.deps[0].packageName).toBe(
+      expect(successStory?.deps[0].datasource).toBe('go');
+      expect(successStory?.deps[0].packageName).toBe(
         'github.com/test/uuid-fork'
       );
 
@@ -95,7 +105,7 @@ go_repository(
 )
         `
       );
-      expect(badStory.deps[0].skipReason).toBe('unsupported-remote');
+      expect(badStory?.deps[0].skipReason).toBe('unsupported-remote');
 
       const gheStory = extractPackageFile(
         `
@@ -107,7 +117,7 @@ go_repository(
 )
         `
       );
-      expect(gheStory.deps[0].skipReason).toBe('unsupported-remote');
+      expect(gheStory?.deps[0].skipReason).toBe('unsupported-remote');
 
       const gitlabRemote = extractPackageFile(
         `
@@ -119,7 +129,7 @@ go_repository(
 )
         `
       );
-      expect(gitlabRemote.deps[0].skipReason).toBe('unsupported-remote');
+      expect(gitlabRemote?.deps[0].skipReason).toBe('unsupported-remote');
     });
   });
 });

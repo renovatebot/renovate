@@ -15,7 +15,7 @@ function relatePath(here: string, there: string): string {
     idx += 1;
   }
 
-  const result = [];
+  const result: string[] = [];
   for (let x = 0; x < hereParts.length - idx; x += 1) {
     result.push('..');
   }
@@ -27,8 +27,8 @@ function relatePath(here: string, there: string): string {
 
 export function loadModules<T>(
   dirname: string,
-  validate?: (module: T, moduleName?: string) => boolean,
-  filter: (moduleName?: string) => boolean = () => true
+  validate?: (module: T, moduleName: string) => boolean,
+  filter: (moduleName: string) => boolean = () => true
 ): Record<string, T> {
   const result: Record<string, T> = {};
 

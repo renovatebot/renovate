@@ -1,11 +1,12 @@
 import type { ModuleApi } from '../../types';
 
 export interface GetDigestInputConfig {
-  datasource?: string;
+  datasource: string;
   packageName?: string;
   depName: string;
   defaultRegistryUrls?: string[];
   registryUrls?: string[];
+  additionalRegistryUrls?: string[];
   currentValue?: string;
   currentDigest?: string;
 }
@@ -26,6 +27,7 @@ export interface GetPkgReleasesConfig {
   npmrc?: string;
   defaultRegistryUrls?: string[];
   registryUrls?: string[];
+  additionalRegistryUrls?: string[];
   datasource: string;
   depName: string;
   packageName?: string;
@@ -63,7 +65,7 @@ export interface ReleaseResult {
   changelogUrl?: string;
   dependencyUrl?: string;
   homepage?: string;
-  sourceUrl?: string;
+  sourceUrl?: string | null;
   sourceDirectory?: string;
   registryUrl?: string;
   replacementName?: string;
@@ -74,7 +76,7 @@ export interface DatasourceApi extends ModuleApi {
   id: string;
   getDigest?(config: DigestConfig, newValue?: string): Promise<string | null>;
   getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null>;
-  defaultRegistryUrls?: string[];
+  defaultRegistryUrls?: string[] | (() => string[]);
   defaultVersioning?: string;
   defaultConfig?: Record<string, unknown>;
 

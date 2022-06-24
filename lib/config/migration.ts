@@ -38,15 +38,7 @@ export function migrateConfig(config: RenovateConfig): MigratedConfig {
       'peerDependencies',
     ];
     for (const [key, val] of Object.entries(newConfig)) {
-      if (key === 'matchStrings' && is.array(val)) {
-        migratedConfig.matchStrings = val
-          .map(
-            (matchString) =>
-              is.string(matchString) &&
-              matchString.replace(regEx(/\(\?<lookupName>/g), '(?<packageName>')
-          )
-          .filter(Boolean);
-      } else if (key.startsWith('masterIssue')) {
+      if (key.startsWith('masterIssue')) {
         const newKey = key.replace('masterIssue', 'dependencyDashboard');
         migratedConfig[newKey] = val;
         if (optionTypes[newKey] === 'boolean' && val === 'true') {
@@ -67,7 +59,7 @@ export function migrateConfig(config: RenovateConfig): MigratedConfig {
               const payload = migrateConfig(
                 packageFile as RenovateConfig
               ).migratedConfig;
-              for (const subrule of payload.packageRules || []) {
+              for (const subrule of payload.packageRules ?? []) {
                 subrule.paths = [(packageFile as any).packageFile];
                 migratedConfig.packageRules.push(subrule);
               }
@@ -162,11 +154,12 @@ export function migrateConfig(config: RenovateConfig): MigratedConfig {
       ) {
         migratedConfig[key] = String(val[0]);
       } else if (key === 'node' && (val as RenovateConfig).enabled === true) {
-        delete migratedConfig.node.enabled;
-        migratedConfig.travis = migratedConfig.travis || {};
+        // validated non-null
+        delete migratedConfig.node!.enabled;
+        migratedConfig.travis = migratedConfig.travis ?? {};
         migratedConfig.travis.enabled = true;
-        if (Object.keys(migratedConfig.node).length) {
-          const subMigrate = migrateConfig(migratedConfig.node);
+        if (Object.keys(migratedConfig.node!).length) {
+          const subMigrate = migrateConfig(migratedConfig.node!);
           migratedConfig.node = subMigrate.migratedConfig;
         } else {
           delete migratedConfig.node;
@@ -189,11 +182,6 @@ export function migrateConfig(config: RenovateConfig): MigratedConfig {
         if (subMigrate.isMigrated) {
           migratedConfig[key] = subMigrate.migratedConfig;
         }
-      } else if (key === 'azureAutoComplete' || key === 'gitLabAutomerge') {
-        if (migratedConfig[key] !== undefined) {
-          migratedConfig.platformAutomerge = migratedConfig[key];
-        }
-        delete migratedConfig[key];
       }
 
       const migratedTemplates = {
@@ -225,12 +213,13 @@ export function migrateConfig(config: RenovateConfig): MigratedConfig {
         packagePatterns: 'matchPackagePatterns',
         sourceUrlPrefixes: 'matchSourceUrlPrefixes',
         updateTypes: 'matchUpdateTypes',
-      };
+      } as const;
       for (const packageRule of migratedConfig.packageRules) {
         for (const [oldKey, ruleVal] of Object.entries(packageRule)) {
-          const newKey = renameMap[oldKey];
+          const newKey = renameMap[oldKey as keyof typeof renameMap];
           if (newKey) {
-            packageRule[newKey] = ruleVal;
+            // TODO: fix types #7154
+            packageRule[newKey] = ruleVal as never;
             delete packageRule[oldKey];
           }
         }
@@ -245,7 +234,8 @@ export function migrateConfig(config: RenovateConfig): MigratedConfig {
           logger.debug('Flattening nested packageRules');
           // merge each subrule and add to the parent list
           for (const subrule of packageRule.packageRules) {
-            const combinedRule = mergeChildConfig(packageRule, subrule);
+            // TODO: fix types #7154
+            const combinedRule = mergeChildConfig(packageRule, subrule as any);
             delete combinedRule.packageRules;
             migratedConfig.packageRules.push(combinedRule);
           }
@@ -266,7 +256,7 @@ export function migrateConfig(config: RenovateConfig): MigratedConfig {
     }
     if (is.nonEmptyObject(migratedConfig['gradle-lite'])) {
       migratedConfig.gradle = mergeChildConfig(
-        migratedConfig.gradle || {},
+        migratedConfig.gradle ?? {},
         migratedConfig['gradle-lite']
       );
     }

@@ -95,6 +95,7 @@ describe('util/exec/docker/index', () => {
       getPkgReleases.mockResolvedValueOnce({ releases } as never);
       expect(await getDockerTag('foo', '^1.2.3', 'npm')).toBe('1.9.9');
     });
+
     it('filters out node unstable', async () => {
       const releases = [
         { version: '12.0.0' },
@@ -207,7 +208,7 @@ describe('util/exec/docker/index', () => {
   });
 
   describe('generateDockerCommand', () => {
-    const preCommands = [null, 'foo', undefined];
+    const preCommands = [null as never, 'foo', undefined as never];
     const commands = ['bar'];
     const envVars = ['FOO', 'BAR'];
     const image = 'sample_image';

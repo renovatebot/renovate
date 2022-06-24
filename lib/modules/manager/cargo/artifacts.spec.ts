@@ -5,7 +5,7 @@ import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import * as docker from '../../../util/exec/docker';
 import type { UpdateArtifactsConfig } from '../types';
-import * as cargo from './artifacts';
+import * as cargo from '.';
 
 jest.mock('child_process');
 jest.mock('../../../util/exec/env');
@@ -29,6 +29,7 @@ describe('modules/manager/cargo/artifacts', () => {
     GlobalConfig.set(adminConfig);
     docker.resetPrefetchedImages();
   });
+
   afterEach(() => {
     GlobalConfig.reset();
   });
@@ -195,6 +196,7 @@ describe('modules/manager/cargo/artifacts', () => {
     ).not.toBeNull();
     expect(execSnapshots).toMatchSnapshot();
   });
+
   it('catches errors', async () => {
     fs.stat.mockResolvedValueOnce({ name: 'Cargo.lock' } as any);
     fs.findLocalSiblingOrParent.mockResolvedValueOnce('Cargo.lock');

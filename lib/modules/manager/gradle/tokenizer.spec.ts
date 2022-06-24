@@ -1,7 +1,7 @@
 import { TokenType } from './common';
 import { extractRawTokens, tokenize } from './tokenizer';
 
-function tokenTypes(input): string[] {
+function tokenTypes(input: string): string[] {
   return extractRawTokens(input).map((token) => token.type);
 }
 

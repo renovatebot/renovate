@@ -20,6 +20,7 @@ describe('modules/datasource/flutter-version/index', () => {
         })
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
     });
+
     it('returns null for error', async () => {
       httpMock.scope(baseUrl).get(urlPath).replyWithError('error');
       expect(
@@ -29,6 +30,7 @@ describe('modules/datasource/flutter-version/index', () => {
         })
       ).toBeNull();
     });
+
     it('returns null for empty 200 OK', async () => {
       httpMock.scope(baseUrl).get(urlPath).reply(200, []);
       expect(
@@ -38,6 +40,7 @@ describe('modules/datasource/flutter-version/index', () => {
         })
       ).toBeNull();
     });
+
     it('processes real data', async () => {
       httpMock
         .scope(baseUrl)
@@ -48,7 +51,7 @@ describe('modules/datasource/flutter-version/index', () => {
         depName,
       });
       expect(res).toMatchSnapshot();
-      expect(res.releases).toHaveLength(31);
+      expect(res?.releases).toHaveLength(31);
     });
   });
 });

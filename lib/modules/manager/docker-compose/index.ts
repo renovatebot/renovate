@@ -7,7 +7,7 @@ const language = ProgrammingLanguage.Docker;
 export { extractPackageFile, language };
 
 export const defaultConfig = {
-  fileMatch: ['(^|/)docker-compose[^/]*\\.ya?ml$'],
+  fileMatch: ['(^|/)(?:docker-)?compose[^/]*\\.ya?ml$'],
 };
 
 export const supportedDatasources = [DockerDatasource.id];

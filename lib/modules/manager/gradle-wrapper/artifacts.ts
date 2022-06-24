@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import { quote } from 'shlex';
 import upath from 'upath';
 import { GlobalConfig } from '../../../config/global';
@@ -37,7 +38,7 @@ async function addIfUpdated(
   return null;
 }
 
-function getDistributionUrl(newPackageFileContent: string): string {
+function getDistributionUrl(newPackageFileContent: string): string | null {
   const distributionUrlLine = newPackageFileContent
     .split(newlineRegex)
     .find((line) => line.startsWith('distributionUrl='));
@@ -67,7 +68,7 @@ export async function updateArtifacts({
     const gradlewPath = upath.resolve(projectDir, `./${gradlew}`);
     let cmd = await prepareGradleCommand(
       gradlew,
-      projectDir,
+      projectDir!,
       await stat(gradlewPath).catch(() => null),
       `wrapper`
     );
@@ -91,14 +92,14 @@ export async function updateArtifacts({
         cmd += ` --gradle-distribution-sha256-sum ${quote(checksum)}`;
       }
     } else {
-      cmd += ` --gradle-version ${quote(config.newValue)}`;
+      cmd += ` --gradle-version ${quote(config.newValue!)}`;
     }
     logger.debug(`Updating gradle wrapper: "${cmd}"`);
     const execOptions: ExecOptions = {
       docker: {
         image: 'java',
         tagConstraint:
-          config.constraints?.java ?? getJavaContraint(config.currentValue),
+          config.constraints?.java ?? getJavaContraint(config.currentValue!),
         tagScheme: getJavaVersioning(),
       },
       extraEnv,
@@ -133,9 +134,9 @@ export async function updateArtifacts({
           addIfUpdated(status, fileProjectPath)
         )
       )
-    ).filter(Boolean);
+    ).filter(is.truthy);
     logger.debug(
-      { files: updateArtifactsResult.map((r) => r.file.path) },
+      { files: updateArtifactsResult.map((r) => r.file?.path) },
       `Returning updated gradle-wrapper files`
     );
     return updateArtifactsResult;

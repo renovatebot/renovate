@@ -27,7 +27,7 @@ export async function detectRepoFileConfig(): Promise<RepoFileConfig> {
   const cache = getCache();
   let { configFileName } = cache;
   if (configFileName) {
-    let configFileParsed = await platform.getJsonFile(configFileName);
+    let configFileParsed = (await platform.getJsonFile(configFileName))!;
     if (configFileParsed) {
       if (configFileName === 'package.json') {
         configFileParsed = configFileParsed.renovate;
@@ -41,7 +41,9 @@ export async function detectRepoFileConfig(): Promise<RepoFileConfig> {
     for (const fileName of configFileNames) {
       if (fileName === 'package.json') {
         try {
-          const pJson = JSON.parse(await readLocalFile('package.json', 'utf8'));
+          const pJson = JSON.parse(
+            (await readLocalFile('package.json', 'utf8'))!
+          );
           if (pJson.renovate) {
             logger.debug('Using package.json for global renovate config');
             return 'package.json';
@@ -55,18 +57,20 @@ export async function detectRepoFileConfig(): Promise<RepoFileConfig> {
     }
     return null;
   }
-  configFileName = await detectConfigFile();
+  configFileName = (await detectConfigFile()) ?? undefined;
   if (!configFileName) {
     logger.debug('No renovate config file found');
     return {};
   }
   cache.configFileName = configFileName;
   logger.debug(`Found ${configFileName} config file`);
-  let configFileParsed;
+  // TODO #7154
+  let configFileParsed: any;
   if (configFileName === 'package.json') {
     // We already know it parses
     configFileParsed = JSON.parse(
-      await readLocalFile('package.json', 'utf8')
+      // TODO #7154
+      (await readLocalFile('package.json', 'utf8'))!
     ).renovate;
     if (is.string(configFileParsed)) {
       logger.debug('Massaging string renovate config to extends array');
@@ -130,7 +134,7 @@ export async function detectRepoFileConfig(): Promise<RepoFileConfig> {
         };
       }
       try {
-        configFileParsed = JSON.parse(rawFileContents);
+        configFileParsed = JSON5.parse(rawFileContents);
       } catch (err) /* istanbul ignore next */ {
         logger.debug(
           { renovateConfig: rawFileContents },
@@ -168,7 +172,10 @@ export async function mergeRenovateConfig(
   config: RenovateConfig
 ): Promise<RenovateConfig> {
   let returnConfig = { ...config };
-  const repoConfig = await detectRepoFileConfig();
+  let repoConfig: RepoFileConfig = {};
+  if (config.requireConfig !== 'ignored') {
+    repoConfig = await detectRepoFileConfig();
+  }
   const configFileParsed = repoConfig?.configFileParsed || {};
   if (is.nonEmptyArray(returnConfig.extends)) {
     configFileParsed.extends = [
@@ -179,7 +186,7 @@ export async function mergeRenovateConfig(
   }
   checkForRepoConfigError(repoConfig);
   const migratedConfig = await migrateAndValidate(config, configFileParsed);
-  if (migratedConfig.errors.length) {
+  if (migratedConfig.errors?.length) {
     const error = new Error(CONFIG_VALIDATION);
     error.validationSource = repoConfig.configFileName;
     error.validationError =
@@ -191,18 +198,17 @@ export async function mergeRenovateConfig(
   }
   if (migratedConfig.warnings) {
     returnConfig.warnings = [
-      ...(returnConfig.warnings || []),
+      ...(returnConfig.warnings ?? []),
       ...migratedConfig.warnings,
     ];
   }
   delete migratedConfig.errors;
   delete migratedConfig.warnings;
   logger.debug({ config: migratedConfig }, 'migrated config');
+  // TODO #7154
+  const repository = config.repository!;
   // Decrypt before resolving in case we need npm authentication for any presets
-  const decryptedConfig = await decryptConfig(
-    migratedConfig,
-    config.repository
-  );
+  const decryptedConfig = await decryptConfig(migratedConfig, repository);
   // istanbul ignore if
   if (is.string(decryptedConfig.npmrc)) {
     logger.debug('Found npmrc in decrypted config - setting');
@@ -211,7 +217,7 @@ export async function mergeRenovateConfig(
   // Decrypt after resolving in case the preset contains npm authentication instead
   let resolvedConfig = await decryptConfig(
     await presets.resolveConfigPresets(decryptedConfig, config),
-    config.repository
+    repository
   );
   logger.trace({ config: resolvedConfig }, 'resolved config');
   const migrationResult = migrateConfig(resolvedConfig);
@@ -229,7 +235,7 @@ export async function mergeRenovateConfig(
   }
   resolvedConfig = applySecretsToConfig(
     resolvedConfig,
-    mergeChildConfig(config.secrets || {}, resolvedConfig.secrets || {})
+    mergeChildConfig(config.secrets ?? {}, resolvedConfig.secrets ?? {})
   );
   // istanbul ignore if
   if (resolvedConfig.hostRules) {
@@ -247,6 +253,7 @@ export async function mergeRenovateConfig(
     delete resolvedConfig.hostRules;
   }
   returnConfig = mergeChildConfig(returnConfig, resolvedConfig);
+  returnConfig = await presets.resolveConfigPresets(returnConfig, config);
   returnConfig.renovateJsonPresent = true;
   // istanbul ignore if
   if (returnConfig.ignorePaths?.length) {

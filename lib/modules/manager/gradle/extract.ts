@@ -42,7 +42,7 @@ export async function extractAllPackageFiles(
   const extractedDeps: PackageDependency<GradleManagerData>[] = [];
   const registry: VariableRegistry = {};
   const packageFilesByName: Record<string, PackageFile> = {};
-  const registryUrls = [];
+  const registryUrls: string[] = [];
   const reorderedFiles = reorderFiles(packageFiles);
   for (const packageFile of reorderedFiles) {
     packageFilesByName[packageFile] = {
@@ -52,7 +52,8 @@ export async function extractAllPackageFiles(
     };
 
     try {
-      const content = await readLocalFile(packageFile, 'utf8');
+      // TODO #7154
+      const content = (await readLocalFile(packageFile, 'utf8'))!;
       const dir = upath.dirname(toAbsolutePath(packageFile));
 
       const updateVars = (newVars: PackageVariables): void => {
@@ -106,7 +107,7 @@ export async function extractAllPackageFiles(
         registryUrls: [
           ...new Set([
             ...defaultRegistryUrls,
-            ...(dep.registryUrls || []),
+            ...(dep.registryUrls ?? []),
             ...registryUrls,
           ]),
         ],
