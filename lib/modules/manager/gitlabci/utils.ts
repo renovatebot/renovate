@@ -18,20 +18,36 @@ export function replaceReferenceTags(content: string): string {
 const depProxyRe = regEx(
   `(?<prefix>\\$\\{?CI_DEPENDENCY_PROXY_(?:DIRECT_)?GROUP_IMAGE_PREFIX\\}?\\/)(?<depName>.+)`
 );
+const ciRegistryRe = regEx(
+  `(?<prefix>\\$\\{?CI_REGISTRY\\}?\\/)(?<depName>.+)`
+);
 
 /**
  * Get image dependencies respecting Gitlab Dependency Proxy
  * @param imageName as used in .gitlab-ci.yml file
  * @return package dependency for the image
  */
-export function getGitlabDep(imageName: string): PackageDependency {
+export function getGitlabDep(
+  imageName: string,
+  registryPrefix?: string
+): PackageDependency {
   const match = depProxyRe.exec(imageName);
   if (match?.groups) {
     const dep = { ...getDep(match.groups.depName), replaceString: imageName };
     // TODO: #7154
     dep.autoReplaceStringTemplate = `${match.groups.prefix}${dep.autoReplaceStringTemplate}`;
     return dep;
-  } else {
-    return getDep(imageName);
   }
+  const ciRegistryMatch = ciRegistryRe.exec(imageName);
+  if (ciRegistryMatch?.groups && registryPrefix) {
+    const dep = {
+      ...getDep(`${registryPrefix}/${ciRegistryMatch.groups.depName}`),
+      replaceString: imageName,
+    };
+    // TODO: #7154
+    dep.autoReplaceStringTemplate = `${ciRegistryMatch.groups.prefix}${dep.autoReplaceStringTemplate}`;
+    return dep;
+  }
+
+  return getDep(imageName);
 }

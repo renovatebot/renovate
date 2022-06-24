@@ -42,6 +42,20 @@ describe('modules/manager/gitlabci/utils', () => {
       }
     );
 
+    it('supports registry variable', () => {
+      const imageName = '$CI_REGISTRY/renovate/renovate:19.70.8-slim';
+      const gitLabContainerRegistryPrefix = 'registry.example.org';
+
+      expect(
+        getGitlabDep(imageName, gitLabContainerRegistryPrefix)
+      ).toMatchObject({
+        autoReplaceStringTemplate: `$CI_REGISTRY/${defaultAutoReplaceStringTemplate}`,
+        replaceString: imageName,
+        depName: 'registry.example.org/renovate/renovate',
+        currentValue: '19.70.8-slim',
+      });
+    });
+
     it('no Docker hub', () => {
       expect(
         getGitlabDep('quay.io/prometheus/node-exporter:v1.3.1')

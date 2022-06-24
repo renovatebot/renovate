@@ -20,6 +20,7 @@ export interface ExtractConfig {
   npmrc?: string;
   npmrcMerge?: boolean;
   skipInstalls?: boolean;
+  gitLabContainerRegistryPrefix?: string;
 }
 
 export interface CustomExtractConfig
