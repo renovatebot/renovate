@@ -1,5 +1,5 @@
 import { newlineRegex, regEx } from '../../../util/regex';
-import type { PuppetForgeUrl, PuppetfileModule } from './types';
+import type { PuppetfileModule } from './types';
 
 const forgeRegex = regEx(/^forge\s+['"]([^'"]+)['"]/);
 const commentRegex = regEx(/#.*$/);
@@ -11,15 +11,9 @@ const commentRegex = regEx(/#.*$/);
  *
  */
 export class Puppetfile {
-  private readonly forgeModules = new Map<
-    PuppetForgeUrl | null,
-    PuppetfileModule[]
-  >();
+  private readonly forgeModules = new Map<string | null, PuppetfileModule[]>();
 
-  public add(
-    currentForge: PuppetForgeUrl | null,
-    module: PuppetfileModule
-  ): void {
+  public add(currentForge: string | null, module: PuppetfileModule): void {
     if (Object.keys(module).length === 0) {
       return;
     }
@@ -31,7 +25,7 @@ export class Puppetfile {
     this.forgeModules.get(currentForge)?.push(module);
   }
 
-  public getForges(): PuppetForgeUrl[] {
+  public getForges(): (string | null)[] {
     return Array.from(this.forgeModules.keys());
   }
 

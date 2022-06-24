@@ -6,5 +6,3 @@ export interface PuppetfileModule {
   tags?: Map<string, string>;
   skipReason?: SkipReason;
 }
-
-export type PuppetForgeUrl = string | null;
