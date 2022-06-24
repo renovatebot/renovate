@@ -425,7 +425,8 @@ Configure this option to `false` if you prefer Renovate to open a new issue when
 
 ## conservative
 
-Enable conservative mode for package managers that support it. This will only update the immediate dependency in the lockfile instead of all subdependencies.
+Enable conservative mode for package managers that support it.
+This will only update the immediate dependency in the lockfile instead of all subdependencies.
 
 ```
 {
