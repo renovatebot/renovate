@@ -9,6 +9,7 @@ import { setEmojiConfig } from '../../util/emoji';
 import { validateGitVersion } from '../../util/git';
 import * as hostRules from '../../util/host-rules';
 import { Limit, setMaxLimit } from './limits';
+import { applySecretsToConfig } from '../../config/secrets';
 
 async function setDirectories(input: AllConfig): Promise<AllConfig> {
   const config: AllConfig = { ...input };
@@ -46,6 +47,7 @@ async function checkVersions(): Promise<void> {
 function setGlobalHostRules(config: RenovateConfig): void {
   if (config.hostRules) {
     logger.debug('Setting global hostRules');
+    applySecretsToConfig(config, undefined, false);
     config.hostRules.forEach((rule) => hostRules.add(rule));
   }
 }
