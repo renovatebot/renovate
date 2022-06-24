@@ -37,6 +37,7 @@ import { RequireConfigMigration } from './custom/require-config-migration';
 import { RequiredStatusChecksMigration } from './custom/required-status-checks-migration';
 import { ScheduleMigration } from './custom/schedule-migration';
 import { SemanticCommitsMigration } from './custom/semantic-commits-migration';
+import { SemanticPrefixMigration } from './custom/semantic-prefix-migration';
 import { SeparateMajorReleasesMigration } from './custom/separate-major-release-migration';
 import { SeparateMultipleMajorMigration } from './custom/separate-multiple-major-migration';
 import { SuppressNotificationsMigration } from './custom/suppress-notifications-migration';
@@ -119,6 +120,7 @@ export class MigrationsService {
     VersionStrategyMigration,
     DryRunMigration,
     RequireConfigMigration,
+    SemanticPrefixMigration,
   ];
 
   static run(originalConfig: RenovateConfig): RenovateConfig {
