@@ -74,7 +74,7 @@ export function parsePuppetfile(content: string): Puppetfile {
 
       if (key) {
         currentPuppetfileModule.tags =
-          currentPuppetfileModule.tags || new Map();
+          currentPuppetfileModule.tags ?? new Map();
         currentPuppetfileModule.tags.set(key, value);
       } else {
         fillPuppetfileModule(currentPuppetfileModule, value);
