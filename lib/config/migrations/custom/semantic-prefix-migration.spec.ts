@@ -1,7 +1,7 @@
 import { SemanticPrefixMigration } from './semantic-prefix-migration';
 
 describe('config/migrations/custom/semantic-prefix-migration', () => {
-  it('should migrate true to "enabled"', () => {
+  it('should work', () => {
     expect(SemanticPrefixMigration).toMigrate(
       {
         semanticPrefix: 'fix(deps):',
@@ -10,7 +10,7 @@ describe('config/migrations/custom/semantic-prefix-migration', () => {
     );
   });
 
-  it('should migrate non-string to emoty', () => {
+  it('should remove non-string values', () => {
     expect(SemanticPrefixMigration).toMigrate(
       {
         semanticPrefix: true,
@@ -19,7 +19,7 @@ describe('config/migrations/custom/semantic-prefix-migration', () => {
     );
   });
 
-  it('should migrate no scoped to null', () => {
+  it('should migrate prefix with no-scope to null', () => {
     expect(SemanticPrefixMigration).toMigrate(
       {
         semanticPrefix: 'fix:',
