@@ -93,3 +93,20 @@ entries:
   - home:
     urls:
     - some.tgz
+  dummy-no-home:
+  - description: dummy chart without home metadata
+    name: dummy-no-home
+    sources:
+    - https://github.com/dummyorg/dummymonorepo/tree/main/charts/dummy-no-home
+    version: 0.0.42
+    urls:
+    - some.tgz
+  dummy-no-chart-repo:
+  - description: dummy chart without a valid chart repo URL
+    name: dummy-no-chart-repo
+    home: https://github.com/dummyorg/dummymonorepo/tree/main/charts/dummy-no-chart-repo
+    sources:
+    - https://some.test
+    version: 0.0.42
+    urls:
+    - some.tgz
