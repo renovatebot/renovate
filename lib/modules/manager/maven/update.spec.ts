@@ -72,7 +72,7 @@ describe('modules/manager/maven/update', () => {
         'prerelease'
       );
 
-      const project = new XmlDocument(bumpedContent);
+      const project = new XmlDocument(bumpedContent!);
       expect(project.valueWithPath('version')).toBe('1.0.0-2');
     });
   });
