@@ -2230,27 +2230,6 @@ If the `versioning` field is missing, then Renovate defaults to using `semver` v
 For more details and examples, see our [documentation for the `regex` manager](/modules/manager/regex/).
 For template fields, use the triple brace `{{{ }}}` notation to avoid Handlebars escaping any special characters.
 
-## registryAliases
-
-You can use the `registryAliases` object to set registry aliases.
-This feature only works with these managers:
-
-- `helm-requirements`
-- `helmv3`
-- `helmfile`
-
-The managers listed above all have this default registryAlias:
-
-```json
-{
-  "registryAliases": {
-    "stable": "https://charts.helm.sh/stable"
-  }
-}
-```
-
-Alias values must be properly formatted URIs.
-
 ### matchStrings
 
 `matchStrings` should each be a valid regular expression, optionally with named capture groups.
@@ -2496,6 +2475,27 @@ This will lead to following update where `1.21-alpine` is the newest version of 
 # The image of the service <registry>/<repo>/<image>:<tag>
 image: my.new.registry/aRepository/andImage:1.21-alpine
 ```
+
+## registryAliases
+
+You can use the `registryAliases` object to set registry aliases.
+This feature only works with these managers:
+
+- `helm-requirements`
+- `helmv3`
+- `helmfile`
+
+The managers listed above all have this default registryAlias:
+
+```json
+{
+  "registryAliases": {
+    "stable": "https://charts.helm.sh/stable"
+  }
+}
+```
+
+Alias values must be properly formatted URIs.
 
 ## registryUrls
 
