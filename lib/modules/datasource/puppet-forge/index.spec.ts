@@ -90,7 +90,6 @@ describe('modules/datasource/puppet-forge/index', () => {
         depName: 'puppetlabs/apache',
         packageName: 'puppetlabs/apache',
       });
-      expect(res).toBeDefined();
       expect(res).toEqual({
         deprecationMessage: 'use another module ...',
         registryUrl: 'https://forgeapi.puppet.com',
