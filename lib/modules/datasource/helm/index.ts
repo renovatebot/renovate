@@ -61,15 +61,14 @@ export class HelmDatasource extends Datasource {
         return null;
       }
       const result: HelmRepositoryData = {};
-      for (const [key, value] of Object.entries(doc.entries)) {
-        const releases = value.filter(({ version }) =>
-          helmVersioning.api.isValid(version)
-        );
-        const [latestRelease] = releases.sort((r0, r1) =>
-          helmVersioning.api.isGreaterThan(r0.version, r1.version) ? -1 : 1
-        );
+      for (const [name, releases] of Object.entries(doc.entries)) {
+        const [latestRelease] = releases
+          .filter(({ version }) => helmVersioning.api.isValid(version))
+          .sort((r0, r1) =>
+            helmVersioning.api.isGreaterThan(r0.version, r1.version) ? -1 : 1
+          );
         const { sourceUrl, sourceDirectory } = findSourceUrl(latestRelease);
-        result[key] = {
+        result[name] = {
           homepage: latestRelease.home,
           sourceUrl,
           sourceDirectory,
