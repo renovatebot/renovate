@@ -11,8 +11,8 @@ export * from './proxies';
 
 export const pipeline = util.promisify(stream.pipeline);
 
-function isPathInBaseDir(path: string, baseDir?: string): boolean {
-  if (baseDir && !path.startsWith(upath.resolve(baseDir))) {
+function isPathInBaseDir(path: string, baseDir: string): boolean {
+  if (!path.startsWith(upath.resolve(baseDir))) {
     logger.warn(
       { path, baseDir },
       'Preventing access to file outside the base directory'
@@ -47,7 +47,8 @@ export async function readLocalFile(
 ): Promise<string | Buffer | null> {
   const { localDir } = GlobalConfig.get();
   const localFileName = upath.resolve(localDir, fileName);
-  if (!isPathInBaseDir(localFileName, localDir)) {
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+  if (!isPathInBaseDir(localFileName, localDir!)) {
     return null;
   }
 
@@ -68,7 +69,8 @@ export async function writeLocalFile(
 ): Promise<void> {
   const { localDir } = GlobalConfig.get();
   const localFileName = upath.resolve(localDir, fileName);
-  if (!isPathInBaseDir(localFileName, localDir)) {
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+  if (!isPathInBaseDir(localFileName, localDir!)) {
     return;
   }
   await fs.outputFile(localFileName, fileContent);
@@ -78,7 +80,8 @@ export async function deleteLocalFile(fileName: string): Promise<void> {
   const { localDir } = GlobalConfig.get();
   if (localDir) {
     const localFileName = upath.resolve(localDir, fileName);
-    if (!isPathInBaseDir(localFileName, localDir)) {
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+    if (!isPathInBaseDir(localFileName, localDir!)) {
       return;
     }
     await fs.remove(localFileName);
@@ -94,8 +97,10 @@ export async function renameLocalFile(
   const fromPath = upath.resolve(localDir, fromFile);
   const toPath = upath.resolve(localDir, toFile);
   if (
-    !isPathInBaseDir(fromPath, localDir) ||
-    !isPathInBaseDir(toPath, localDir)
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+    !isPathInBaseDir(fromPath, localDir!) ||
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+    !isPathInBaseDir(toPath, localDir!)
   ) {
     return;
   }
@@ -113,7 +118,8 @@ export async function ensureDir(dirName: string): Promise<void> {
 export async function ensureLocalDir(dirName: string): Promise<void> {
   const { localDir } = GlobalConfig.get();
   const localDirName = upath.resolve(localDir, dirName);
-  if (!isPathInBaseDir(localDirName, localDir)) {
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+  if (!isPathInBaseDir(localDirName, localDir!)) {
     return;
   }
   await fs.ensureDir(localDirName);
@@ -122,7 +128,8 @@ export async function ensureLocalDir(dirName: string): Promise<void> {
 export async function ensureCacheDir(name: string): Promise<string> {
   const { cacheDir } = GlobalConfig.get();
   const cacheDirName = upath.resolve(cacheDir, `others/${name}`);
-  if (!isPathInBaseDir(cacheDirName, cacheDir)) {
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+  if (!isPathInBaseDir(cacheDirName, cacheDir!)) {
     return Promise.reject();
   }
 
@@ -143,7 +150,8 @@ export function privateCacheDir(): string {
 export function localPathExists(pathName: string): Promise<boolean> {
   const { localDir } = GlobalConfig.get();
   const localPathName = upath.resolve(localDir, pathName);
-  if (!isPathInBaseDir(localPathName, localDir)) {
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+  if (!isPathInBaseDir(localPathName, localDir!)) {
     return Promise.resolve(false);
   }
 
@@ -190,7 +198,8 @@ export function createWriteStream(path: string): fs.WriteStream {
 export function localPathIsFile(pathName: string): Promise<boolean> {
   const { localDir } = GlobalConfig.get();
   const localPathName = upath.resolve(localDir, pathName);
-  if (!isPathInBaseDir(localPathName, localDir)) {
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+  if (!isPathInBaseDir(localPathName, localDir!)) {
     return Promise.resolve(false);
   }
 
