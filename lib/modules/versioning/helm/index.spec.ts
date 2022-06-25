@@ -20,13 +20,6 @@ describe('modules/versioning/helm/index', () => {
   });
 
   test.each`
-    x          | y
-    ${'2.0.0'} | ${'1.0'}
-  `('isGreaterThan($x, $y)', ({ x, y }) => {
-    expect(semver.isGreaterThan(x, y)).toBeTrue();
-  });
-
-  test.each`
     version            | isSingle
     ${'1.2.3'}         | ${true}
     ${'1.2.3-alpha.1'} | ${true}
