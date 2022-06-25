@@ -5,7 +5,7 @@ import { extractPackageFile } from './extract';
 export { extractPackageFile };
 
 export const defaultConfig = {
-  fileMatch: ['(^|/)deps\\.edn$'],
+  fileMatch: ['(^|/)(?:deps|bb)\\.edn$'],
   versioning: mavenVersioning.id,
 };
 
