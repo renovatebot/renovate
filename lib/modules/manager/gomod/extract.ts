@@ -74,7 +74,7 @@ export function extractPackageFile(content: string): PackageFile | null {
             dep.managerData!.multiLine = true;
             deps.push(dep);
           } else if (line.trim() !== ')') {
-            logger.debug(`No multi-line match: ${line}`);
+            logger.trace(`No multi-line match: ${line}`);
           }
         } while (line.trim() !== ')');
       }
