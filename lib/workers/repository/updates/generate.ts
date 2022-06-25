@@ -188,7 +188,7 @@ export function generateBranchConfig(
     );
     commitMessage.subject = template.compile(commitMessage.subject, upgrade);
     commitMessage.subject = template.compile(commitMessage.subject, upgrade);
-    upgrade.commitMessage = commitMessage.formatSubject();
+    upgrade.commitMessage = commitMessage.toString();
     // istanbul ignore if
     if (upgrade.commitMessage !== sanitize(upgrade.commitMessage)) {
       logger.debug(
@@ -201,7 +201,7 @@ export function generateBranchConfig(
       regEx(/to vv(\d)/),
       'to v$1'
     );
-    upgrade.commitMessage = commitMessage.formatSubject();
+    upgrade.commitMessage = commitMessage.toString();
     if (upgrade.commitBody) {
       commitMessage.body = template.compile(upgrade.commitBody, upgrade);
       upgrade.commitMessage = commitMessage.toString();
