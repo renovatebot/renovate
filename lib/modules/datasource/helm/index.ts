@@ -65,7 +65,7 @@ export class HelmDatasource extends Datasource {
         const [latestRelease] = releases
           .filter(({ version }) => helmVersioning.api.isValid(version))
           .sort((r0, r1) =>
-            helmVersioning.api.isGreaterThan(r0.version, r1.version) ? -1 : 1
+            helmVersioning.api.sortVersions(r0.version, r1.version)
           );
         const { sourceUrl, sourceDirectory } = findSourceUrl(latestRelease);
         result[name] = {
