@@ -24,8 +24,7 @@ export function updateAtPosition(
     return fileContent;
   }
   if (version === currentValue || upgrade.groupName) {
-    // TODO: validate newValue
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+    // TODO: validate newValue (#7154)
     const replacedPart = versionPart.replace(version, newValue!);
     return leftPart + replacedPart + restPart;
   }

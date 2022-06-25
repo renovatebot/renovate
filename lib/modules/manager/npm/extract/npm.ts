@@ -3,7 +3,8 @@ import { readLocalFile } from '../../../../util/fs';
 import type { LockFile, LockFileEntry } from './types';
 
 export async function getNpmLock(filePath: string): Promise<LockFile> {
-  const lockRaw = await readLocalFile(filePath, 'utf8');
+  // TODO #7154
+  const lockRaw = (await readLocalFile(filePath, 'utf8'))!;
   try {
     const lockParsed = JSON.parse(lockRaw);
     const lockedVersions: Record<string, string> = {};

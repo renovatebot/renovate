@@ -44,7 +44,7 @@ export class ConanDatasource extends Datasource {
       json: true,
     }) as ConanYAML;
     return {
-      releases: Object.keys(doc?.versions || {}).map((version) => ({
+      releases: Object.keys(doc?.versions ?? {}).map((version) => ({
         version,
       })),
     };
@@ -80,7 +80,7 @@ export class ConanDatasource extends Datasource {
           logger.trace({ lookupUrl }, 'Got conan api result');
           const dep: ReleaseResult = { releases: [] };
 
-          for (const resultString of Object.values(versions.results || {})) {
+          for (const resultString of Object.values(versions.results ?? {})) {
             const fromMatch = conanDatasourceRegex.exec(resultString);
             if (fromMatch?.groups?.version && fromMatch?.groups?.userChannel) {
               const version = fromMatch.groups.version;

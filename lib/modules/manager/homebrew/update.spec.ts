@@ -1,7 +1,7 @@
 import { Readable } from 'stream';
 import * as httpMock from '../../../../test/http-mock';
 import { loadFixture } from '../../../../test/util';
-import { updateDependency } from './update';
+import { updateDependency } from '.';
 
 const aide = loadFixture('aide.rb');
 const ibazel = loadFixture('ibazel.rb');

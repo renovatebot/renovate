@@ -5,26 +5,58 @@ import {
   RenovateConfig,
   getConfig,
   logger,
+  mockedFunction,
   platform,
 } from '../../../test/util';
 import { GlobalConfig } from '../../config/global';
 import { PlatformId } from '../../constants';
+import type {
+  PackageDependency,
+  PackageFile,
+} from '../../modules/manager/types';
 import type { Platform } from '../../modules/platform';
+import { massageMarkdown } from '../../modules/platform/github';
 import { BranchConfig, BranchResult, BranchUpgradeConfig } from '../types';
 import * as dependencyDashboard from './dependency-dashboard';
 import { PackageFiles } from './package-files';
 
 type PrUpgrade = BranchUpgradeConfig;
 
+const massageMdSpy = jest.spyOn(platform, 'massageMarkdown');
 let config: RenovateConfig;
 
 beforeEach(() => {
   jest.clearAllMocks();
+  massageMdSpy.mockImplementation(massageMarkdown);
   config = getConfig();
   config.platform = PlatformId.Github;
   config.errors = [];
   config.warnings = [];
 });
+
+function genRandString(length: number): string {
+  let result = '';
+  const chars = 'abcdefghijklmnopqrstuvwxyz';
+  const charsLen = chars.length;
+  for (let i = 0; i < length; i++) {
+    result += chars.charAt(Math.floor(Math.random() * charsLen));
+  }
+  return result;
+}
+
+function genRandPackageFile(
+  depsNum: number,
+  depNameLen: number
+): Record<string, PackageFile[]> {
+  const deps: PackageDependency[] = [];
+  for (let i = 0; i < depsNum; i++) {
+    deps.push({
+      depName: genRandString(depNameLen),
+      currentVersion: '1.0.0',
+    });
+  }
+  return { npm: [{ packageFile: 'package.json', deps }] };
+}
 
 async function dryRun(
   branches: BranchConfig[],
@@ -517,7 +549,7 @@ describe('workers/repository/dependency-dashboard', () => {
       config.dependencyDashboard = true;
       config.dependencyDashboardChecks = { branchName2: 'approve-branch' };
       config.dependencyDashboardIssue = 1;
-      platform.getIssue.mockResolvedValueOnce({
+      mockedFunction(platform.getIssue!).mockResolvedValueOnce({
         title: 'Dependency Dashboard',
         body: `This issue contains a list of Renovate updates and their statuses.
 
@@ -661,6 +693,21 @@ describe('workers/repository/dependency-dashboard', () => {
           await dependencyDashboard.ensureDependencyDashboard(config, branches);
           expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
           expect(platform.ensureIssue.mock.calls[0][0].body).toMatchSnapshot();
+
+          // same with dry run
+          await dryRun(branches, platform);
+        });
+
+        it('truncates the body of a really big repo', async () => {
+          const branches: BranchConfig[] = [];
+          const truncatedLength = 60000;
+          const packageFilesBigRepo = genRandPackageFile(100, 700);
+          PackageFiles.add('main', packageFilesBigRepo);
+          await dependencyDashboard.ensureDependencyDashboard(config, branches);
+          expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
+          expect(platform.ensureIssue.mock.calls[0][0].body).toHaveLength(
+            truncatedLength
+          );
 
           // same with dry run
           await dryRun(branches, platform);

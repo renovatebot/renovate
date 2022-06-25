@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
 import { Fixtures } from '../../../test/fixtures';
 import { mocked } from '../../../test/util';
 import type { RenovateConfig } from '../types';

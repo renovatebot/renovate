@@ -1,14 +1,11 @@
 import is from '@sindresorhus/is';
 import { getManagerConfig, mergeChildConfig } from '../../../config';
-import type {
-  ManagerConfig,
-  RenovateConfig,
-  WorkerExtractConfig,
-} from '../../../config/types';
+import type { ManagerConfig, RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
 import { getManagerList } from '../../../modules/manager';
 import type { PackageFile } from '../../../modules/manager/types';
 import { getFileList } from '../../../util/git';
+import type { WorkerExtractConfig } from '../../types';
 import { getMatchingFiles } from './file-match';
 import { getManagerPackageFiles } from './manager-files';
 
@@ -48,14 +45,6 @@ export async function extractAllDependencies(
   const extractResults = await Promise.all(
     extractList.map(async (managerConfig) => {
       const packageFiles = await getManagerPackageFiles(managerConfig);
-      for (const p of packageFiles ?? []) {
-        for (const dep of p.deps ?? []) {
-          if (!config.updateInternalDeps && dep.isInternal) {
-            dep.skipReason = 'internal-package';
-          }
-        }
-      }
-
       return { manager: managerConfig.manager, packageFiles };
     })
   );

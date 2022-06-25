@@ -98,7 +98,10 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
       expect(
         await addReleaseNotes(input as never, {} as BranchUpgradeConfig)
       ).toEqual(input);
-      expect(await addReleaseNotes(null, {} as BranchUpgradeConfig)).toBeNull();
+      // TODO #7154
+      expect(
+        await addReleaseNotes(null as never, {} as BranchUpgradeConfig)
+      ).toBeNull();
       expect(
         await addReleaseNotes(
           { versions: [] } as never,
@@ -974,7 +977,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
             gitRef: '15.3.0',
           } as ChangeLogRelease
         );
-        versionOneNotes = res;
+        versionOneNotes = res!;
 
         expect(res).toMatchSnapshot({
           notesSourceUrl:
@@ -1004,7 +1007,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
             gitRef: '15.2.0',
           } as ChangeLogRelease
         );
-        versionTwoNotes = res;
+        versionTwoNotes = res!;
 
         expect(res).toMatchSnapshot({
           notesSourceUrl:
@@ -1034,7 +1037,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
             gitRef: '4.33.0',
           } as ChangeLogRelease
         );
-        versionTwoNotes = res;
+        versionTwoNotes = res!;
 
         expect(res).toMatchSnapshot({
           notesSourceUrl:
@@ -1070,7 +1073,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
             gitRef: '4.33.0',
           } as ChangeLogRelease
         );
-        versionTwoNotes = res;
+        versionTwoNotes = res!;
 
         expect(res).toMatchSnapshot({
           notesSourceUrl:
