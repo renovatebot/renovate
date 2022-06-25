@@ -1,10 +1,10 @@
 import is from '@sindresorhus/is';
 import { load } from 'js-yaml';
-import { gt } from 'semver';
 import { logger } from '../../../logger';
 import { cache } from '../../../util/cache/package/decorator';
 import { ensureTrailingSlash } from '../../../util/url';
 import * as helmVersioning from '../../versioning/helm';
+import * as semverCoerced from '../../versioning/semver-coerced';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 import { findSourceUrl } from './common';
@@ -63,9 +63,9 @@ export class HelmDatasource extends Datasource {
       }
       const result: HelmRepositoryData = {};
       for (const [name, releases] of Object.entries(doc.entries)) {
-        const latestRelease = releases.sort((r0, r1) =>
-          gt(r0.version, r1.version) ? -1 : 1
-        )[0];
+        const [latestRelease] = releases.sort((r0, r1) =>
+          semverCoerced.api.isGreaterThan(r0.version, r1.version) ? -1 : 1
+        );
         const { sourceUrl, sourceDirectory } = findSourceUrl(latestRelease);
         result[name] = {
           homepage: latestRelease.home,
