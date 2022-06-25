@@ -487,11 +487,6 @@ CI jobs are usually triggered by these events: pull-request creation, pull-reque
 Set as an integer.
 Default is no limit.
 
-## printConfig
-
-This option is useful for troubleshooting, particularly if using presets.
-e.g. run `renovate foo/bar --print-config > config.log` and the fully-resolved config will be included in the log file.
-
 ## privateKey
 
 This private key is used to decrypt config files.
@@ -691,7 +686,8 @@ This is currently applicable to `npm` and `lerna`/`npm` only, and only used in c
 
 ## unicodeEmoji
 
-If enabled emoji shortcodes (`:warning:`) are replaced with their Unicode equivalents (`⚠️`).
+If enabled emoji shortcodes are replaced with their Unicode equivalents.
+For example: `:warning:` will be replaced with `⚠️`.
 
 ## username
 

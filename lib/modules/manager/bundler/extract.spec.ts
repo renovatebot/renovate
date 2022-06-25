@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import { fs, loadFixture } from '../../../../test/util';
 import { isValid } from '../../versioning/ruby';
 import { extractPackageFile } from '.';
@@ -37,23 +38,21 @@ describe('modules/manager/bundler/extract', () => {
       expect(res).toMatchSnapshot();
       // couple of dependency of ruby rails are not present in the lock file. Filter out those before processing
       expect(
-        res.deps
+        res?.deps
           .filter((dep) =>
             Object.prototype.hasOwnProperty.call(dep, 'lockedVersion')
           )
           .every(
-            (dep) =>
-              Object.prototype.hasOwnProperty.call(dep, 'lockedVersion') &&
-              isValid(dep.lockedVersion)
+            (dep) => is.string(dep.lockedVersion) && isValid(dep.lockedVersion)
           )
       ).toBeTrue();
-      expect(res.deps).toHaveLength(68);
+      expect(res?.deps).toHaveLength(68);
     });
 
     it('parses sourceGroups', async () => {
       const res = await extractPackageFile(sourceGroupGemfile, 'Gemfile');
       expect(res).toMatchSnapshot();
-      expect(res.deps).toHaveLength(7);
+      expect(res?.deps).toHaveLength(7);
     });
 
     it('parse webpacker Gemfile', async () => {
@@ -61,13 +60,11 @@ describe('modules/manager/bundler/extract', () => {
       const res = await extractPackageFile(webPackerGemfile, 'Gemfile');
       expect(res).toMatchSnapshot();
       expect(
-        res.deps.every(
-          (dep) =>
-            Object.prototype.hasOwnProperty.call(dep, 'lockedVersion') &&
-            isValid(dep.lockedVersion)
+        res?.deps.every(
+          (dep) => is.string(dep.lockedVersion) && isValid(dep.lockedVersion)
         )
       ).toBeTrue();
-      expect(res.deps).toHaveLength(5);
+      expect(res?.deps).toHaveLength(5);
     });
 
     it('parse mastodon Gemfile', async () => {
@@ -75,17 +72,15 @@ describe('modules/manager/bundler/extract', () => {
       const res = await extractPackageFile(mastodonGemfile, 'Gemfile');
       expect(res).toMatchSnapshot();
       expect(
-        res.deps
+        res?.deps
           .filter((dep) =>
             Object.prototype.hasOwnProperty.call(dep, 'lockedVersion')
           )
           .every(
-            (dep) =>
-              Object.prototype.hasOwnProperty.call(dep, 'lockedVersion') &&
-              isValid(dep.lockedVersion)
+            (dep) => is.string(dep.lockedVersion) && isValid(dep.lockedVersion)
           )
       ).toBeTrue();
-      expect(res.deps).toHaveLength(125);
+      expect(res?.deps).toHaveLength(125);
     });
 
     it('parse Ruby CI Gemfile', async () => {
@@ -93,13 +88,11 @@ describe('modules/manager/bundler/extract', () => {
       const res = await extractPackageFile(rubyCIGemfile, 'Gemfile');
       expect(res).toMatchSnapshot();
       expect(
-        res.deps.every(
-          (dep) =>
-            Object.prototype.hasOwnProperty.call(dep, 'lockedVersion') &&
-            isValid(dep.lockedVersion)
+        res?.deps.every(
+          (dep) => is.string(dep.lockedVersion) && isValid(dep.lockedVersion)
         )
       ).toBeTrue();
-      expect(res.deps).toHaveLength(14);
+      expect(res?.deps).toHaveLength(14);
     });
   });
 
@@ -108,13 +101,11 @@ describe('modules/manager/bundler/extract', () => {
     const res = await extractPackageFile(gitlabFossGemfile, 'Gemfile');
     expect(res).toMatchSnapshot();
     expect(
-      res.deps.every(
-        (dep) =>
-          Object.prototype.hasOwnProperty.call(dep, 'lockedVersion') &&
-          isValid(dep.lockedVersion)
+      res?.deps.every(
+        (dep) => is.string(dep.lockedVersion) && isValid(dep.lockedVersion)
       )
     ).toBeTrue();
-    expect(res.deps).toHaveLength(252);
+    expect(res?.deps).toHaveLength(252);
   });
 
   it('parse source blocks in Gemfile', async () => {
@@ -130,6 +121,6 @@ describe('modules/manager/bundler/extract', () => {
       'Gemfile'
     );
     expect(res).toMatchSnapshot();
-    expect(res.deps).toHaveLength(2);
+    expect(res?.deps).toHaveLength(2);
   });
 });

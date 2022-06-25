@@ -16,7 +16,7 @@ describe('modules/datasource/helm/index', () => {
       expect(
         await getPkgReleases({
           datasource: HelmDatasource.id,
-          depName: undefined,
+          depName: undefined as never, // #7154
           registryUrls: ['https://example-repository.com'],
         })
       ).toBeNull();
@@ -41,7 +41,7 @@ describe('modules/datasource/helm/index', () => {
       httpMock
         .scope('https://example-repository.com')
         .get('/index.yaml')
-        .reply(200, null);
+        .reply(200);
       expect(
         await getPkgReleases({
           datasource: HelmDatasource.id,
@@ -187,6 +187,24 @@ describe('modules/datasource/helm/index', () => {
         registryUrl: 'https://example-repository.com/subdir',
         sourceUrl: 'https://github.com/datawire/ambassador',
         releases: expect.toBeArrayOfSize(27),
+      });
+    });
+
+    it('returns home and source metadata of the most recent version', async () => {
+      httpMock
+        .scope('https://example-repository.com')
+        .get('/index.yaml')
+        .reply(200, indexYaml);
+      const releases = await getPkgReleases({
+        datasource: HelmDatasource.id,
+        depName: 'cluster-autoscaler',
+        registryUrls: ['https://example-repository.com'],
+      });
+      expect(releases).not.toBeNull();
+      expect(releases).toMatchObject({
+        homepage: 'https://www.autoscaler.io/9.11.0',
+        sourceDirectory: 'cluster-autoscaler#9.11.0',
+        sourceUrl: 'https://github.com/kubernetes/autoscaler',
       });
     });
   });

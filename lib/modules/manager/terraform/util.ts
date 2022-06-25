@@ -53,13 +53,14 @@ export function massageProviderLookupName(dep: PackageDependency): void {
   if (!dep.packageName) {
     dep.packageName = dep.depName;
   }
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+
+  // TODO #7154
   if (!dep.packageName!.includes('/')) {
     dep.packageName = `hashicorp/${dep.packageName}`;
   }
 
   // handle cases like `Telmate/proxmox`
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+  // TODO #7154
   dep.packageName = dep.packageName!.toLowerCase();
 }
 

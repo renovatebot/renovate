@@ -186,6 +186,7 @@ export interface RenovateConfig
     RenovateSharedConfig,
     UpdateConfig<PackageRule>,
     AssigneesAndReviewersConfig,
+    ConfigMigration,
     Record<string, unknown> {
   depName?: string;
   baseBranches?: string[];
@@ -419,9 +420,9 @@ export interface PackageRuleInputConfig extends Record<string, unknown> {
   depType?: string;
   depTypes?: string[];
   depName?: string;
-  currentValue?: string;
+  currentValue?: string | null;
   currentVersion?: string;
-  lockedVersion?: string;
+  lockedVersion?: string | null;
   updateType?: UpdateType;
   isBump?: boolean;
   sourceUrl?: string | null;
@@ -430,6 +431,10 @@ export interface PackageRuleInputConfig extends Record<string, unknown> {
   manager?: string | null;
   datasource?: string;
   packageRules?: (PackageRule & PackageRuleInputConfig)[];
+}
+
+export interface ConfigMigration {
+  configMigration?: boolean;
 }
 
 export interface MigratedConfig {

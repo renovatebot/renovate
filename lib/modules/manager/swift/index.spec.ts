@@ -1,10 +1,9 @@
 import { Fixtures } from '../../../../test/fixtures';
-import { extractPackageFile } from './extract';
+import { extractPackageFile } from '.';
 
 describe('modules/manager/swift/index', () => {
   describe('extractPackageFile()', () => {
     it('returns null for empty content', () => {
-      expect(extractPackageFile(null)).toBeNull();
       expect(extractPackageFile(``)).toBeNull();
       expect(extractPackageFile(`dependencies:[]`)).toBeNull();
       expect(extractPackageFile(`dependencies:["foobar"]`)).toBeNull();

@@ -33,7 +33,6 @@ describe('website-docs', () => {
     .match(/\n## (.*?)\n/g)
     ?.map((match) => match.substring(4, match.length - 1));
   const expectedOptions = options
-    .filter((option) => option.stage !== 'global')
     .filter((option) => option.releaseStatus !== 'unpublished')
     .filter((option) => !option.globalOnly)
     .filter((option) => !option.parent)
@@ -42,7 +41,7 @@ describe('website-docs', () => {
     .sort();
 
   const selfHostExpectedOptions = options
-    .filter((option) => option.globalOnly || option.stage === 'global')
+    .filter((option) => !!option.globalOnly)
     .map((option) => option.name)
     .sort();
 

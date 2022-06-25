@@ -24,7 +24,7 @@ export function createDependency(
   config: CustomExtractConfig,
   dep?: PackageDependency
 ): PackageDependency | null {
-  const dependency = dep || {};
+  const dependency = dep ?? {};
   const { groups, replaceString } = extractionTemplate;
 
   function updateDependency(field: ValidMatchFields, value: string): void {
