@@ -6,9 +6,7 @@ import { getEnvName } from '../../lib/workers/global/config/parse/env';
 import { readFile, updateFile } from '../utils';
 
 const options = getOptions();
-const managers: Map<string, null> = new Map(
-  getManagerList().map((m) => [m, null])
-);
+const managers = new Set(getManagerList());
 
 /**
  * Merge string arrays one by one
