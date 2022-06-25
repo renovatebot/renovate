@@ -62,11 +62,14 @@ export class HelmDatasource extends Datasource {
       }
       const result: HelmRepositoryData = {};
       for (const [name, releases] of Object.entries(doc.entries)) {
-        const [latestRelease] = releases
+        let [latestRelease] = releases
           .filter(({ version }) => helmVersioning.api.isValid(version))
           .sort((r0, r1) =>
             helmVersioning.api.sortVersions(r0.version, r1.version)
           );
+        // istanbul ignore next
+        latestRelease ??= releases[releases.length - 1];
+
         const { sourceUrl, sourceDirectory } = findSourceUrl(latestRelease);
         result[name] = {
           homepage: latestRelease.home,
