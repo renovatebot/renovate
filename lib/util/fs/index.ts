@@ -75,13 +75,11 @@ export async function writeLocalFile(
 
 export async function deleteLocalFile(fileName: string): Promise<void> {
   const { localDir } = GlobalConfig.get();
-  if (localDir) {
-    const localFileName = upath.resolve(localDir, fileName);
-    if (!isPathInBaseDir(localFileName, localDir!)) {
-      return;
-    }
-    await fs.remove(localFileName);
+  const localFileName = upath.resolve(localDir, fileName);
+  if (!isPathInBaseDir(localFileName, localDir!)) {
+    return;
   }
+  await fs.remove(localFileName);
 }
 
 // istanbul ignore next
