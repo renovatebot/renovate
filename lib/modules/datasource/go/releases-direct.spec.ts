@@ -184,7 +184,7 @@ describe('modules/datasource/go/releases-direct', () => {
       ];
       for (const pkg of packages) {
         const res = await datasource.getReleases(pkg);
-        expect(res.releases).toBeEmpty();
+        expect(res?.releases).toBeEmpty();
       }
       expect(githubGetTags).toHaveBeenCalledTimes(3);
     });
@@ -240,8 +240,8 @@ describe('modules/datasource/go/releases-direct', () => {
       for (const pkg of packages) {
         const prefix = pkg.packageName.split('/')[3];
         const result = await datasource.getReleases(pkg);
-        expect(result.releases).toHaveLength(1);
-        expect(result.releases[0].version.startsWith(prefix)).toBeFalse();
+        expect(result?.releases).toHaveLength(1);
+        expect(result?.releases[0].version.startsWith(prefix)).toBeFalse();
       }
     });
 
@@ -270,7 +270,7 @@ describe('modules/datasource/go/releases-direct', () => {
 
       for (const pkg of packages) {
         const result = await datasource.getReleases(pkg);
-        expect(result.releases).toHaveLength(0);
+        expect(result?.releases).toHaveLength(0);
       }
     });
 
@@ -292,7 +292,7 @@ describe('modules/datasource/go/releases-direct', () => {
       });
 
       const result = await datasource.getReleases(pkg);
-      expect(result.releases).toEqual([
+      expect(result?.releases).toEqual([
         { version: 'v2.0.0', gitRef: 'b/v2.0.0' },
         { version: 'v3.0.0', gitRef: 'b/v3.0.0' },
       ]);

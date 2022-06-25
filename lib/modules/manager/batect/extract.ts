@@ -160,7 +160,8 @@ export async function extractAllPackageFiles(
     filesAlreadyExamined.add(packageFile);
 
     const content = await readLocalFile(packageFile, 'utf8');
-    const result = extractPackageFile(content, packageFile);
+    // TODO #7154
+    const result = extractPackageFile(content!, packageFile);
 
     if (result !== null) {
       result.referencedConfigFiles.forEach((f) => {

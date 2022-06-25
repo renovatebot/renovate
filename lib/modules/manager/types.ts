@@ -108,7 +108,7 @@ export interface Package<T> extends ManagerData<T> {
   npmPackageAlias?: boolean;
   packageFileVersion?: string;
   gitRef?: boolean;
-  sourceUrl?: string;
+  sourceUrl?: string | null;
   githubRepo?: string;
   pinDigests?: boolean;
   currentRawValue?: string;

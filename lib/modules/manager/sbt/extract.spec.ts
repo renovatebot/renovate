@@ -1,5 +1,5 @@
 import { Fixtures } from '../../../../test/fixtures';
-import { extractPackageFile } from './extract';
+import { extractPackageFile } from '.';
 
 const sbt = Fixtures.get(`sample.sbt`);
 const sbtScalaVersionVariable = Fixtures.get(`scala-version-variable.sbt`);
@@ -12,7 +12,7 @@ const sbtPrivateVariableDependencyFile = Fixtures.get(
 describe('modules/manager/sbt/extract', () => {
   describe('extractPackageFile()', () => {
     it('returns null for empty', () => {
-      expect(extractPackageFile(null)).toBeNull();
+      expect(extractPackageFile('')).toBeNull();
       expect(extractPackageFile('non-sense')).toBeNull();
       expect(
         extractPackageFile('libraryDependencies += "foo" % "bar" % ???')

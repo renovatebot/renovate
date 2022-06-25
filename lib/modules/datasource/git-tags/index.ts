@@ -49,7 +49,7 @@ export class GitTagsDatasource extends GitDatasource {
     newValue?: string
   ): Promise<string | null> {
     const rawRefs = await this.getRawRefs({ packageName });
-    const findValue = newValue || 'HEAD';
+    const findValue = newValue ?? 'HEAD';
     const ref = rawRefs?.find((rawRef) => rawRef.value === findValue);
     if (ref) {
       return ref.hash;

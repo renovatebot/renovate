@@ -1,5 +1,5 @@
 import { loadFixture } from '../../../../test/util';
-import { extractPackageFile } from './extract';
+import { extractPackageFile } from '.';
 
 const yamlFile1 = loadFixture('docker-compose.1.yml');
 const yamlFile3 = loadFixture('docker-compose.3.yml');
@@ -22,25 +22,25 @@ describe('modules/manager/docker-compose/extract', () => {
 
     it('extracts multiple image lines for version 1', () => {
       const res = extractPackageFile(yamlFile1);
-      expect(res.deps).toMatchSnapshot();
-      expect(res.deps).toHaveLength(8);
+      expect(res?.deps).toMatchSnapshot();
+      expect(res?.deps).toHaveLength(8);
     });
 
     it('extracts multiple image lines for version 3', () => {
       const res = extractPackageFile(yamlFile3);
-      expect(res.deps).toMatchSnapshot();
-      expect(res.deps).toHaveLength(8);
+      expect(res?.deps).toMatchSnapshot();
+      expect(res?.deps).toHaveLength(8);
     });
 
     it('extracts multiple image lines for version 3 without set version key', () => {
       const res = extractPackageFile(yamlFile3NoVersion);
-      expect(res.deps).toMatchSnapshot();
-      expect(res.deps).toHaveLength(8);
+      expect(res?.deps).toMatchSnapshot();
+      expect(res?.deps).toHaveLength(8);
     });
 
     it('extracts default variable values for version 3', () => {
       const res = extractPackageFile(yamlFile3DefaultValue);
-      expect(res.deps).toMatchInlineSnapshot(`
+      expect(res?.deps).toMatchInlineSnapshot(`
         Array [
           Object {
             "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
@@ -52,7 +52,7 @@ describe('modules/manager/docker-compose/extract', () => {
           },
         ]
       `);
-      expect(res.deps).toHaveLength(1);
+      expect(res?.deps).toHaveLength(1);
     });
   });
 });
