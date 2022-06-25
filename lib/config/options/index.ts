@@ -223,6 +223,7 @@ const options: RenovateOptions[] = [
     allowedValues: ['disabled', 'enabled', 'reset'],
     stage: 'repository',
     default: 'disabled',
+    experimental: true,
   },
   {
     name: 'force',
