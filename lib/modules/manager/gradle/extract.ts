@@ -51,7 +51,8 @@ export async function extractAllPackageFiles(
       deps: [],
     };
 
-    const content = await readLocalFile(packageFile, 'utf8');
+    // TODO #7154
+    const content = (await readLocalFile(packageFile, 'utf8'))!;
     const dir = upath.dirname(toAbsolutePath(packageFile));
 
     const updateVars = (newVars: PackageVariables): void => {
@@ -104,7 +105,7 @@ export async function extractAllPackageFiles(
       dep.registryUrls = [
         ...new Set([
           ...defaultRegistryUrls,
-          ...(dep.registryUrls || []),
+          ...(dep.registryUrls ?? []),
           ...registryUrls,
         ]),
       ];

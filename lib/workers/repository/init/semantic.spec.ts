@@ -20,7 +20,7 @@ describe('workers/repository/init/semantic', () => {
     });
 
     it('detects false if unknown', async () => {
-      config.semanticCommits = null;
+      config.semanticCommits = undefined;
       git.getCommitMessages.mockResolvedValueOnce(['foo', 'bar']);
       git.getCommitMessages.mockResolvedValueOnce([
         'fix: foo',
@@ -33,7 +33,7 @@ describe('workers/repository/init/semantic', () => {
     });
 
     it('detects true if known', async () => {
-      config.semanticCommits = null;
+      config.semanticCommits = undefined;
       git.getCommitMessages.mockResolvedValue(['fix: foo', 'refactor: bar']);
       const res = await detectSemanticCommits();
       expect(res).toBe('enabled');

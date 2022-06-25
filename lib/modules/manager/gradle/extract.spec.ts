@@ -91,7 +91,7 @@ describe('modules/manager/gradle/extract', () => {
     mockFs({
       'gradle.properties': 'baz=1.2.3',
       'build.gradle': 'url "https://example.com"; "foo:bar:$baz@zip"',
-      'settings.gradle': '',
+      'settings.gradle': null as never, // TODO: #7154
     });
 
     const res = await extractAllPackageFiles({} as ExtractConfig, [
@@ -205,6 +205,10 @@ describe('modules/manager/gradle/extract', () => {
           maven {
               url = "\${repositoryBaseURL}/repository-build"
           }
+          maven {
+              name = "baz"
+              url = "\${repositoryBaseURL}/\${name}"
+          }
       }
 
       dependencies {
@@ -236,13 +240,14 @@ describe('modules/manager/gradle/extract', () => {
             depName: 'com.google.protobuf:protobuf-java',
             currentValue: '2.17.0',
             managerData: {
-              fileReplacePosition: 227,
+              fileReplacePosition: 335,
               packageFile: 'build.gradle',
             },
-            fileReplacePosition: 227,
+            fileReplacePosition: 335,
             registryUrls: [
               'https://repo.maven.apache.org/maven2',
               'https://dummy.org/whatever/repository-build',
+              'https://dummy.org/whatever/baz',
             ],
           },
         ],

@@ -35,7 +35,6 @@ export async function getPreset({
     }
     const body = (await http.getJson<NpmResponse>(packageUrl)).body;
     // TODO: check null #7154
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
     dep = body.versions![body['dist-tags']!.latest];
   } catch (err) {
     throw new Error(PRESET_DEP_NOT_FOUND);

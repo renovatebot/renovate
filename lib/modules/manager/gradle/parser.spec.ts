@@ -92,6 +92,7 @@ describe('modules/manager/gradle/parser', () => {
         ${'baz = "1.2.3"'}                    | ${'foobar = "foo:bar:$baz"'}                            | ${{ depName: 'foo:bar', currentValue: '1.2.3', groupName: 'baz' }}
         ${'baz = "1.2.3"'}                    | ${'group: "foo", name: "bar", version: baz'}            | ${{ depName: 'foo:bar', currentValue: '1.2.3', groupName: 'baz' }}
         ${'baz = "1.2.3"'}                    | ${'library("foo.bar", "foo", "bar").versionRef("baz")'} | ${{ depName: 'foo:bar', currentValue: '1.2.3', groupName: 'baz' }}
+        ${''}                                 | ${'library("foo.bar", "foo", "bar").version("1.2.3")'}  | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
         ${'library("foo.bar", "foo", "bar")'} | ${'"${foo.bar}:1.2.3"'}                                 | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
       `('$def | $str', async ({ def, str, output }) => {
         const input = [def, str].join('\n');
@@ -125,26 +126,27 @@ describe('modules/manager/gradle/parser', () => {
 
   describe('registryUrls', () => {
     test.each`
-      def                         | input                                          | url
-      ${''}                       | ${'url ""'}                                    | ${null}
-      ${''}                       | ${'url "#!@"'}                                 | ${null}
-      ${''}                       | ${'url "https://example.com"'}                 | ${'https://example.com'}
-      ${'base="https://foo.bar"'} | ${'url "${base}/baz"'}                         | ${'https://foo.bar/baz'}
-      ${''}                       | ${'url("https://example.com")'}                | ${'https://example.com'}
-      ${'base="https://foo.bar"'} | ${'url("${base}/baz")'}                        | ${'https://foo.bar/baz'}
-      ${''}                       | ${'mavenCentral()'}                            | ${MAVEN_REPO}
-      ${''}                       | ${'jcenter()'}                                 | ${JCENTER_REPO}
-      ${''}                       | ${'google()'}                                  | ${GOOGLE_REPO}
-      ${''}                       | ${'google { content { includeGroup "foo" } }'} | ${GOOGLE_REPO}
-      ${''}                       | ${'gradlePluginPortal()'}                      | ${GRADLE_PLUGIN_PORTAL_REPO}
-      ${''}                       | ${'maven("https://foo.bar/baz/qux")'}          | ${'https://foo.bar/baz/qux'}
-      ${'base="https://foo.bar"'} | ${'maven("${base}/baz/qux")'}                  | ${'https://foo.bar/baz/qux'}
-      ${''}                       | ${'maven { url = uri("https://foo.bar/baz")'}  | ${'https://foo.bar/baz'}
-      ${'base="https://foo.bar"'} | ${'maven { url = uri("${base}/baz")'}          | ${'https://foo.bar/baz'}
-      ${''}                       | ${"maven { url 'https://foo.bar/baz'"}         | ${'https://foo.bar/baz'}
-      ${'base="https://foo.bar"'} | ${'maven { url "${base}/baz"'}                 | ${'https://foo.bar/baz'}
-      ${''}                       | ${"maven { url = 'https://foo.bar/baz'"}       | ${'https://foo.bar/baz'}
-      ${'base="https://foo.bar"'} | ${'maven { url = "${base}/baz"'}               | ${'https://foo.bar/baz'}
+      def                         | input                                              | url
+      ${''}                       | ${'url ""'}                                        | ${null}
+      ${''}                       | ${'url "#!@"'}                                     | ${null}
+      ${''}                       | ${'url "https://example.com"'}                     | ${'https://example.com'}
+      ${'base="https://foo.bar"'} | ${'url "${base}/baz"'}                             | ${'https://foo.bar/baz'}
+      ${''}                       | ${'url("https://example.com")'}                    | ${'https://example.com'}
+      ${'base="https://foo.bar"'} | ${'url("${base}/baz")'}                            | ${'https://foo.bar/baz'}
+      ${''}                       | ${'mavenCentral()'}                                | ${MAVEN_REPO}
+      ${''}                       | ${'jcenter()'}                                     | ${JCENTER_REPO}
+      ${''}                       | ${'google()'}                                      | ${GOOGLE_REPO}
+      ${''}                       | ${'google { content { includeGroup "foo" } }'}     | ${GOOGLE_REPO}
+      ${''}                       | ${'gradlePluginPortal()'}                          | ${GRADLE_PLUGIN_PORTAL_REPO}
+      ${''}                       | ${'maven("https://foo.bar/baz/qux")'}              | ${'https://foo.bar/baz/qux'}
+      ${'base="https://foo.bar"'} | ${'maven("${base}/baz/qux")'}                      | ${'https://foo.bar/baz/qux'}
+      ${''}                       | ${'maven { url = uri("https://foo.bar/baz")'}      | ${'https://foo.bar/baz'}
+      ${'base="https://foo.bar"'} | ${'maven { url = uri("${base}/baz")'}              | ${'https://foo.bar/baz'}
+      ${''}                       | ${"maven { url 'https://foo.bar/baz'"}             | ${'https://foo.bar/baz'}
+      ${'base="https://foo.bar"'} | ${'maven { url "${base}/baz"'}                     | ${'https://foo.bar/baz'}
+      ${''}                       | ${"maven { url = 'https://foo.bar/baz'"}           | ${'https://foo.bar/baz'}
+      ${'base="https://foo.bar"'} | ${'maven { url = "${base}/baz"'}                   | ${'https://foo.bar/baz'}
+      ${'base="https://foo.bar"'} | ${'maven { name = "baz"\nurl = "${base}/${name}"'} | ${'https://foo.bar/baz'}
     `('$def | $input', async ({ def, input, url }) => {
       const expected = [url].filter(Boolean);
       const { urls } = await parseGradle([def, input].join('\n'));
@@ -158,7 +160,8 @@ describe('modules/manager/gradle/parser', () => {
       const { deps } = await parseGradle(content);
       const [res] = deps;
       const idx = content
-        .slice(res.managerData.fileReplacePosition)
+        // TODO #7154
+        .slice(res.managerData!.fileReplacePosition)
         .indexOf('1.2.3');
       expect(idx).toBe(0);
     });
@@ -167,7 +170,8 @@ describe('modules/manager/gradle/parser', () => {
       const content = Fixtures.get('build.gradle.example1');
       const { deps } = await parseGradle(content, {}, 'build.gradle');
       const replacementIndices = deps.map(({ managerData, currentValue }) =>
-        content.slice(managerData.fileReplacePosition).indexOf(currentValue)
+        // TODO #7154
+        content.slice(managerData!.fileReplacePosition).indexOf(currentValue!)
       );
       expect(replacementIndices.every((idx) => idx === 0)).toBeTrue();
       expect(deps).toMatchSnapshot();
@@ -262,7 +266,7 @@ describe('modules/manager/gradle/parser', () => {
       const { vars } = await parseGradle(
         'apply from: "foo/bar.gradle"',
         {},
-        null,
+        '',
         1
       );
       expect(vars).toBeEmpty();
