@@ -215,19 +215,19 @@ export async function generateConfig(dist: string, bot = false): Promise<void> {
   const indexed = indexMarkdown(configOptionsRaw);
 
   options
-    .filter((option) => !!option.globalOnly === bot)
+    .filter(
+      (option) => !!option.globalOnly === bot && !managers.has(option.name)
+    )
     .forEach((option) => {
       // TODO: fix types (#7154,#9610)
       const el: Record<string, any> = { ...option };
 
       if (!indexed[option.name]) {
-        if (!managers.has(option.name)) {
-          throw new Error(
-            `Config option "${option.name}" is missing an entry in ${configFile}`
-          );
-        }
-        return;
+        throw new Error(
+          `Config option "${option.name}" is missing an entry in ${configFile}`
+        );
       }
+
       const [headerIndex, footerIndex] = indexed[option.name];
 
       el.cli = getCliName(option);
