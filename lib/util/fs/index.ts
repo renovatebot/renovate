@@ -114,15 +114,16 @@ export async function ensureDir(dirName: string): Promise<void> {
   }
 }
 
-// istanbul ignore next
-export async function ensureLocalDir(dirName: string): Promise<void> {
+export async function ensureLocalDir(dirName: string): Promise<string> {
   const { localDir } = GlobalConfig.get();
   const localDirName = upath.resolve(localDir, dirName);
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
   if (!isPathInBaseDir(localDirName, localDir!)) {
-    return;
+    return Promise.reject();
   }
+
   await fs.ensureDir(localDirName);
+  return localDirName;
 }
 
 export async function ensureCacheDir(name: string): Promise<string> {

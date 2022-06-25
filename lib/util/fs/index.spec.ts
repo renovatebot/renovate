@@ -7,6 +7,7 @@ import { GlobalConfig } from '../../config/global';
 import {
   deleteLocalFile,
   ensureCacheDir,
+  ensureLocalDir,
   exists,
   findLocalSiblingOrParent,
   findUpLocal,
@@ -134,6 +135,44 @@ describe('util/fs/index', () => {
     it('immediately returns null when either path is absolute', async () => {
       expect(await findLocalSiblingOrParent('/etc/hosts', 'other')).toBeNull();
       expect(await findLocalSiblingOrParent('other', '/etc/hosts')).toBeNull();
+    });
+  });
+
+  describe('ensureLocalDir', () => {
+    function setupMock(root: string): {
+      dirFromEnv: string;
+      dirFromConfig: string;
+    } {
+      const dirFromEnv = join(root, join('/bar/bundler'));
+      const dirFromConfig = join(root, join('/bar'));
+
+      jest.resetAllMocks();
+      env.getChildProcessEnv.mockReturnValueOnce({
+        ...envMock.basic,
+      });
+
+      GlobalConfig.set({
+        localDir: join(dirFromConfig),
+      });
+
+      return { dirFromEnv, dirFromConfig };
+    }
+
+    it('prefers environment variables over global config', async () => {
+      await withDir(
+        async (tmpDir) => {
+          const { dirFromEnv } = setupMock(tmpDir.path);
+          const res = await ensureLocalDir('bundler');
+          expect(res).toEqual(dirFromEnv);
+          expect(await exists(dirFromEnv)).toBeTrue();
+        },
+        { unsafeCleanup: true }
+      );
+    });
+
+    it('blocks path traversal attempt', async () => {
+      GlobalConfig.set({ localDir: join('some/invalid/dir') });
+      await expect(ensureLocalDir('../../filename')).toReject();
     });
   });
 
