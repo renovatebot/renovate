@@ -686,7 +686,8 @@ This is currently applicable to `npm` and `lerna`/`npm` only, and only used in c
 
 ## unicodeEmoji
 
-If enabled emoji shortcodes (`:warning:`) are replaced with their Unicode equivalents (`⚠️`).
+If enabled emoji shortcodes are replaced with their Unicode equivalents.
+For example: `:warning:` will be replaced with `⚠️`.
 
 ## username
 
