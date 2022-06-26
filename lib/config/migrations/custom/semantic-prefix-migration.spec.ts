@@ -27,4 +27,13 @@ describe('config/migrations/custom/semantic-prefix-migration', () => {
       { semanticCommitType: 'fix', semanticCommitScope: null }
     );
   });
+
+  it('works for random string', () => {
+    expect(SemanticPrefixMigration).toMigrate(
+      {
+        semanticPrefix: 'test',
+      } as any,
+      { semanticCommitType: 'test', semanticCommitScope: null }
+    );
+  });
 });
