@@ -35,7 +35,7 @@ describe('workers/repository/errors-warnings', () => {
     it('getWarning returns empty string', () => {
       config.warnings = [];
       const res = getWarnings(config);
-      expect(res).toMatchInlineSnapshot(`""`);
+      expect(res).toBe('');
     });
   });
 
@@ -98,7 +98,7 @@ describe('workers/repository/errors-warnings', () => {
     it('PR warning returns empty string', () => {
       const packageFiles: Record<string, PackageFile[]> = {};
       const res = getDepWarningsPR(packageFiles);
-      expect(res).toMatchInlineSnapshot(`""`);
+      expect(res).toBe('');
     });
   });
 
@@ -134,7 +134,7 @@ describe('workers/repository/errors-warnings', () => {
     it('getError returns empty string', () => {
       config.errors = [];
       const res = getErrors(config);
-      expect(res).toMatchInlineSnapshot(`""`);
+      expect(res).toBe('');
     });
   });
 });

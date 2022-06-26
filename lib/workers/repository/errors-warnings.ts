@@ -36,30 +36,22 @@ function getDepWarnings(
 ): DepWarnings {
   const warnings: string[] = [];
   const warningFiles: string[] = [];
-  try {
-    for (const files of Object.values(packageFiles || {})) {
-      for (const file of files || []) {
-        if (file.deps) {
-          for (const dep of file.deps || []) {
-            if (dep.warnings?.length) {
-              const message = dep.warnings[0].message;
-              if (!warnings.includes(message)) {
-                warnings.push(message);
-              }
-              if (
-                file.packageFile &&
-                !warningFiles.includes(file.packageFile)
-              ) {
-                warningFiles.push(file.packageFile);
-              }
+  for (const files of Object.values(packageFiles || {})) {
+    for (const file of files || []) {
+      if (file.deps) {
+        for (const dep of file.deps || []) {
+          if (dep.warnings?.length) {
+            const message = dep.warnings[0].message;
+            if (!warnings.includes(message)) {
+              warnings.push(message);
+            }
+            if (file.packageFile && !warningFiles.includes(file.packageFile)) {
+              warningFiles.push(file.packageFile);
             }
           }
         }
       }
     }
-  } catch (err) {
-    // istanbul ignore next
-    logger.error({ err }, 'Error generating packageFiles');
   }
   return { warnings, warningFiles };
 }
@@ -69,28 +61,23 @@ export function getDepWarningsPR(
 ): string {
   const { warnings, warningFiles } = getDepWarnings(packageFiles);
   let warningText = '';
-  try {
-    if (!warnings.length) {
-      return '';
-    }
-    logger.debug(
-      { warnings, warningFiles },
-      'Found package lookup warnings in onboarding'
-    );
-    warningText = emojify(
-      `\n---\n\n### :warning: Dependency Lookup Warnings :warning:\n\n`
-    );
-    warningText += `Please correct - or verify that you can safely ignore - these lookup failures before you merge this PR.\n\n`;
-    for (const w of warnings) {
-      warningText += `-   \`${w}\`\n`;
-    }
-    warningText +=
-      '\nFiles affected: ' +
-      warningFiles.map((f) => '`' + f + '`').join(', ') +
-      '\n\n';
-  } catch (err) {
-    // istanbul ignore next
-    logger.error({ err }, 'Error generating dep warnings text');
+  if (!warnings.length) {
+    return '';
   }
+  logger.debug(
+    { warnings, warningFiles },
+    'Found package lookup warnings in onboarding'
+  );
+  warningText = emojify(
+    `\n---\n\n### :warning: Dependency Lookup Warnings :warning:\n\n`
+  );
+  warningText += `Please correct - or verify that you can safely ignore - these lookup failures before you merge this PR.\n\n`;
+  for (const w of warnings) {
+    warningText += `-   \`${w}\`\n`;
+  }
+  warningText +=
+    '\nFiles affected: ' +
+    warningFiles.map((f) => '`' + f + '`').join(', ') +
+    '\n\n';
   return warningText;
 }
