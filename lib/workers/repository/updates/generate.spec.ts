@@ -506,7 +506,7 @@ describe('workers/repository/updates/generate', () => {
         } as BranchUpgradeConfig,
       ];
       const res = generateBranchConfig(branch);
-      expect(res.prTitle).toBe('chore(): update dependency some-dep to v1.2.0');
+      expect(res.prTitle).toBe('chore: update dependency some-dep to v1.2.0');
     });
 
     it('scopes monorepo commits with nested package files using parent directory', () => {
@@ -914,6 +914,38 @@ describe('workers/repository/updates/generate', () => {
         '`1.1.0`',
         '`1.1.1` (+1)',
       ]);
+    });
+
+    it('fixes commit message with body', () => {
+      const branch: BranchUpgradeConfig[] = [
+        {
+          manager: 'some-manager',
+          branchName: 'some-branch',
+          commitMessage: 'update to vv1.2.0',
+          commitBody: 'some body',
+        },
+      ];
+      const res = generateBranchConfig(branch);
+      expect(res.commitMessage).toBe('Update to v1.2.0\n\nsome body');
+    });
+
+    it('generates semantic commit message properly', () => {
+      const branch: BranchUpgradeConfig[] = [
+        {
+          ...defaultConfig,
+          manager: 'some-manager',
+          branchName: 'some-branch',
+          semanticCommits: 'enabled',
+          semanticCommitType: 'chore',
+          semanticCommitScope: 'deps',
+          depName: 'some-dep',
+          newValue: '1.2.0',
+        } as BranchUpgradeConfig,
+      ];
+      const res = generateBranchConfig(branch);
+      expect(res.commitMessage).toBe(
+        'chore(deps): update dependency some-dep to 1.2.0'
+      );
     });
   });
 });
