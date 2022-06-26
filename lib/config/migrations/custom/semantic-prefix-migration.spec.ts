@@ -4,9 +4,9 @@ describe('config/migrations/custom/semantic-prefix-migration', () => {
   it('should work', () => {
     expect(SemanticPrefixMigration).toMigrate(
       {
-        semanticPrefix: 'fix(deps):',
+        semanticPrefix: 'fix(deps): ',
       } as any,
-      { semanticCommitScope: 'deps', semanticCommitType: 'fix' }
+      { semanticCommitType: 'fix', semanticCommitScope: 'deps' }
     );
   });
 
@@ -22,9 +22,9 @@ describe('config/migrations/custom/semantic-prefix-migration', () => {
   it('should migrate prefix with no-scope to null', () => {
     expect(SemanticPrefixMigration).toMigrate(
       {
-        semanticPrefix: 'fix:',
+        semanticPrefix: 'fix: ',
       } as any,
-      { semanticCommitScope: null as never, semanticCommitType: 'fix' }
+      { semanticCommitType: 'fix', semanticCommitScope: null }
     );
   });
 });
