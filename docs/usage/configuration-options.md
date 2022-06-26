@@ -2700,7 +2700,7 @@ There are a couple of uses for `stabilityDays`:
 
 #### Suppress branch/PR creation for X days
 
-If you combine `stabilityDays=3` and `prCreation="not-pending"` then Renovate will hold back from creating branches until 3 or more days have elapsed since the version was released.
+If you combine `stabilityDays=3` and `internalChecksFilter="strict"` then Renovate will hold back from creating branches until 3 or more days have elapsed since the version was released.
 It's recommended that you enable `dependencyDashboard=true` so you don't lose visibility of these pending PRs.
 
 #### Prevent holding broken npm packages
