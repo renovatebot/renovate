@@ -11,7 +11,7 @@ import {
   isBranchConflicted,
   isBranchModified,
 } from '../../../../util/git';
-import type { BranchConfig } from '../../../types';
+import type { NarrowedBranchConfig } from '../../../types';
 import { isScheduledNow } from '../branch/schedule';
 import { resolveBranchStatus } from '../branch/status-checks';
 
@@ -34,7 +34,7 @@ export type AutomergePrResult = {
 
 export async function checkAutoMerge(
   pr: Pr,
-  config: BranchConfig
+  config: NarrowedBranchConfig
 ): Promise<AutomergePrResult> {
   logger.trace({ config }, 'checkAutoMerge');
   const {

@@ -17,8 +17,8 @@ import { deleteBranch, getBranchLastCommitTime } from '../../../../util/git';
 import { memoize } from '../../../../util/memoize';
 import { Limit, incLimitedValue, isLimitReached } from '../../../global/limits';
 import type {
-  BranchConfig,
   BranchUpgradeConfig,
+  NarrowedBranchConfig,
   PrBlockedBy,
 } from '../../../types';
 import { resolveBranchStatus } from '../branch/status-checks';
@@ -59,13 +59,13 @@ export type EnsurePrResult = ResultWithPr | ResultWithoutPr;
 
 // Ensures that PR exists with matching title/body
 export async function ensurePr(
-  prConfig: BranchConfig
+  prConfig: NarrowedBranchConfig
 ): Promise<EnsurePrResult> {
   const getBranchStatus = memoize(() =>
     resolveBranchStatus(branchName, ignoreTests)
   );
 
-  const config: BranchConfig = { ...prConfig };
+  const config: NarrowedBranchConfig = { ...prConfig };
 
   logger.trace({ config }, 'ensurePr');
   // If there is a group, it will use the config of the first upgrade in the array

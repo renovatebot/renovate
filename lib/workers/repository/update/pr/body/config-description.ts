@@ -1,10 +1,10 @@
 import { BranchStatus } from '../../../../../types';
 import { emojify } from '../../../../../util/emoji';
-import type { BranchConfig } from '../../../../types';
+import type { NarrowedBranchConfig } from '../../../../types';
 import { resolveBranchStatus } from '../../branch/status-checks';
 
 export async function getPrConfigDescription(
-  config: BranchConfig
+  config: NarrowedBranchConfig
 ): Promise<string> {
   let prBody = `\n\n---\n\n### Configuration\n\n`;
   prBody += emojify(`:date: **Schedule**: `);

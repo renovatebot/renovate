@@ -1,5 +1,5 @@
 import mockDate from 'mockdate';
-import type { RenovateConfig } from '../../../../config/types';
+import type { NarrowedBranchConfig } from '../../../types';
 import * as schedule from './schedule';
 
 describe('workers/repository/update/branch/schedule', () => {
@@ -137,12 +137,12 @@ describe('workers/repository/update/branch/schedule', () => {
   });
 
   describe('isScheduledNow(config)', () => {
-    let config: RenovateConfig;
+    let config: NarrowedBranchConfig;
 
     beforeEach(() => {
       mockDate.set('2017-06-30T10:50:00.000'); // Locally 2017-06-30 10:50am
       jest.resetAllMocks();
-      config = {};
+      config = {} as NarrowedBranchConfig;
     });
 
     it('returns true if no schedule', () => {

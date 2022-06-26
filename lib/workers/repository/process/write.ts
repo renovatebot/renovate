@@ -1,18 +1,15 @@
+import type { RenovateConfig } from '../../../config/types';
 import { addMeta, logger, removeMeta } from '../../../logger';
 import { branchExists } from '../../../util/git';
 import { Limit, incLimitedValue, setMaxLimit } from '../../global/limits';
-import {
-  BranchConfig,
-  BranchResult,
-  NarrowedRenovateConfig,
-} from '../../types';
+import { BranchConfig, BranchResult } from '../../types';
 import { processBranch } from '../update/branch';
 import { getBranchesRemaining, getPrsRemaining } from './limits';
 
 export type WriteUpdateResult = 'done' | 'automerged';
 
 export async function writeUpdates(
-  config: NarrowedRenovateConfig,
+  config: RenovateConfig,
   allBranches: BranchConfig[]
 ): Promise<WriteUpdateResult> {
   const branches = allBranches;
@@ -24,7 +21,7 @@ export async function writeUpdates(
       .sort()
       .join(', ')}`
   );
-  const prsRemaining = await getPrsRemaining(config, branches); // TODO: not necessary for cache
+  const prsRemaining = await getPrsRemaining(config, branches);
 
   logger.debug({ prsRemaining }, 'Calculated maximum PRs remaining this run');
   setMaxLimit(Limit.PullRequests, prsRemaining);

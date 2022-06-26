@@ -8,7 +8,7 @@ import {
   isBranchModified,
   isBranchStale,
 } from '../../../../util/git';
-import type { BranchConfig } from '../../../types';
+import type { NarrowedBranchConfig } from '../../../types';
 
 type ParentBranch = {
   reuseExistingBranch: boolean;
@@ -17,7 +17,7 @@ type ParentBranch = {
 };
 
 export async function shouldReuseExistingBranch(
-  config: BranchConfig
+  config: NarrowedBranchConfig
 ): Promise<ParentBranch> {
   const { baseBranch, branchName } = config;
   const result: ParentBranch = { reuseExistingBranch: false };

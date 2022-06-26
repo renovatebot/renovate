@@ -1,9 +1,9 @@
 import { GlobalConfig } from '../../../../config/global';
-import type { RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
 import { platform } from '../../../../modules/platform';
 import { BranchStatus } from '../../../../types';
 import { mergeBranch } from '../../../../util/git';
+import type { NarrowedBranchConfig } from '../../../types';
 import { isScheduledNow } from './schedule';
 import { resolveBranchStatus } from './status-checks';
 
@@ -18,7 +18,7 @@ export type AutomergeResult =
   | 'not ready';
 
 export async function tryBranchAutomerge(
-  config: RenovateConfig
+  config: NarrowedBranchConfig
 ): Promise<AutomergeResult> {
   logger.debug('Checking if we can automerge branch');
   if (!(config.automerge && config.automergeType === 'branch')) {

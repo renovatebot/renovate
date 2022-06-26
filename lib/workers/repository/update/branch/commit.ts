@@ -5,10 +5,10 @@ import { CONFIG_SECRETS_EXPOSED } from '../../../../constants/error-messages';
 import { logger } from '../../../../logger';
 import { commitAndPush } from '../../../../modules/platform/commit';
 import { sanitize } from '../../../../util/sanitize';
-import type { BranchConfig } from '../../../types';
+import type { NarrowedBranchConfig } from '../../../types';
 
 export function commitFilesToBranch(
-  config: BranchConfig
+  config: NarrowedBranchConfig
 ): Promise<string | null> {
   let updatedFiles = config.updatedPackageFiles.concat(config.updatedArtifacts);
   // istanbul ignore if

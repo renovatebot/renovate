@@ -1,6 +1,5 @@
 import { DateTime } from 'luxon';
 import { GlobalConfig } from '../../../../config/global';
-import type { RenovateConfig } from '../../../../config/types';
 import {
   CONFIG_VALIDATION,
   MANAGER_LOCKFILE_ERROR,
@@ -39,7 +38,11 @@ import {
   satisfiesConfidenceLevel,
 } from '../../../../util/merge-confidence';
 import { Limit, isLimitReached } from '../../../global/limits';
-import { BranchConfig, BranchResult, PrBlockedBy } from '../../../types';
+import {
+  BranchResult,
+  NarrowedBranchConfig,
+  PrBlockedBy,
+} from '../../../types';
 import { ensurePr, getPlatformPrOptions } from '../pr';
 import { checkAutoMerge } from '../pr/automerge';
 import { getPrBody } from '../pr/body';
@@ -54,7 +57,7 @@ import { shouldReuseExistingBranch } from './reuse';
 import { isScheduledNow } from './schedule';
 import { setConfidence, setStability } from './status-checks';
 
-function rebaseCheck(config: RenovateConfig, branchPr: Pr): boolean {
+function rebaseCheck(config: NarrowedBranchConfig, branchPr: Pr): boolean {
   const titleRebase = branchPr.title?.startsWith('rebase!');
   const labelRebase = branchPr.labels?.includes(config.rebaseLabel);
   const prRebaseChecked = !!branchPr.bodyStruct?.rebaseRequested;
@@ -78,9 +81,9 @@ export interface ProcessBranchResult {
 }
 
 export async function processBranch(
-  branchConfig: BranchConfig
+  branchConfig: NarrowedBranchConfig
 ): Promise<ProcessBranchResult> {
-  let config: BranchConfig = { ...branchConfig };
+  let config: NarrowedBranchConfig = { ...branchConfig };
   logger.trace({ config }, 'processBranch()');
   await checkoutBranch(config.baseBranch);
   let branchExists = gitBranchExists(config.branchName);

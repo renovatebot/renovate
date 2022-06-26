@@ -1,7 +1,10 @@
 import { logger } from '../../../../../logger';
 import { regEx } from '../../../../../util/regex';
 import * as template from '../../../../../util/template';
-import type { BranchConfig, BranchUpgradeConfig } from '../../../../types';
+import type {
+  BranchUpgradeConfig,
+  NarrowedBranchConfig,
+} from '../../../../types';
 
 type TableDefinition = {
   header: string;
@@ -39,7 +42,7 @@ function getNonEmptyColumns(
   return res;
 }
 
-export function getPrUpdatesTable(config: BranchConfig): string {
+export function getPrUpdatesTable(config: NarrowedBranchConfig): string {
   if (config.prBodyColumns === undefined) {
     logger.warn('getPrUpdatesTable - prBodyColumns is undefined');
     return '';

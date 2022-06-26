@@ -2,7 +2,7 @@ import { platform } from '../../../../../modules/platform';
 import { regEx } from '../../../../../util/regex';
 import * as template from '../../../../../util/template';
 import { ensureTrailingSlash } from '../../../../../util/url';
-import type { BranchConfig } from '../../../../types';
+import type { NarrowedBranchConfig } from '../../../../types';
 import { getChangelogs } from './changelogs';
 import { getPrConfigDescription } from './config-description';
 import { getControls } from './controls';
@@ -11,7 +11,7 @@ import { getPrHeader } from './header';
 import { getPrExtraNotes, getPrNotes } from './notes';
 import { getPrUpdatesTable } from './updates-table';
 
-function massageUpdateMetadata(config: BranchConfig): void {
+function massageUpdateMetadata(config: NarrowedBranchConfig): void {
   config.upgrades.forEach((upgrade) => {
     const {
       homepage,
@@ -65,7 +65,7 @@ interface PrBodyConfig {
 const rebasingRegex = regEx(/\*\*Rebasing\*\*: .*/);
 
 export async function getPrBody(
-  branchConfig: BranchConfig,
+  branchConfig: NarrowedBranchConfig,
   prBodyConfig?: PrBodyConfig
 ): Promise<string> {
   massageUpdateMetadata(branchConfig);

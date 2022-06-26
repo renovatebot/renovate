@@ -2,9 +2,9 @@ import is from '@sindresorhus/is';
 import { logger } from '../../../../../logger';
 import { emojify } from '../../../../../util/emoji';
 import * as template from '../../../../../util/template';
-import type { BranchConfig } from '../../../../types';
+import type { NarrowedBranchConfig } from '../../../../types';
 
-export function getPrNotes(config: BranchConfig): string {
+export function getPrNotes(config: NarrowedBranchConfig): string {
   const notes = [];
   for (const upgrade of config.upgrades) {
     if (is.nonEmptyArray(upgrade.prBodyNotes)) {
@@ -24,7 +24,7 @@ export function getPrNotes(config: BranchConfig): string {
   return uniqueNotes.join('\n\n') + '\n\n';
 }
 
-export function getPrExtraNotes(config: BranchConfig): string {
+export function getPrExtraNotes(config: NarrowedBranchConfig): string {
   let res = '';
   if (config.upgrades.some((upgrade) => upgrade.gitRef)) {
     res += emojify(

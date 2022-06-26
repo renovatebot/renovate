@@ -1,7 +1,7 @@
 import { defaultConfig, git, platform } from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
-import type { RenovateConfig } from '../../../../config/types';
 import { BranchStatus } from '../../../../types';
+import type { NarrowedBranchConfig } from '../../../types';
 import * as schedule from '../branch/schedule';
 import { tryBranchAutomerge } from './automerge';
 
@@ -10,12 +10,12 @@ jest.mock('../../../../util/git');
 describe('workers/repository/update/branch/automerge', () => {
   describe('tryBranchAutomerge', () => {
     const isScheduledSpy = jest.spyOn(schedule, 'isScheduledNow');
-    let config: RenovateConfig;
+    let config: NarrowedBranchConfig;
 
     beforeEach(() => {
       config = {
         ...defaultConfig,
-      };
+      } as NarrowedBranchConfig;
       GlobalConfig.reset();
     });
 

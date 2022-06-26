@@ -14,7 +14,7 @@ import type { FileChange } from '../../../../util/git/types';
 import { regEx } from '../../../../util/regex';
 import { sanitize } from '../../../../util/sanitize';
 import { compile } from '../../../../util/template';
-import type { BranchConfig, BranchUpgradeConfig } from '../../../types';
+import type { BranchUpgradeConfig, NarrowedBranchConfig } from '../../../types';
 
 export type PostUpgradeCommandsExecutionResult = {
   updatedArtifacts: FileChange[];
@@ -23,7 +23,7 @@ export type PostUpgradeCommandsExecutionResult = {
 
 export async function postUpgradeCommandsExecutor(
   filteredUpgradeCommands: BranchUpgradeConfig[],
-  config: BranchConfig
+  config: NarrowedBranchConfig
 ): Promise<PostUpgradeCommandsExecutionResult> {
   let updatedArtifacts = [...(config.updatedArtifacts || [])];
   const artifactErrors = [...(config.artifactErrors || [])];
@@ -151,7 +151,7 @@ export async function postUpgradeCommandsExecutor(
 }
 
 export default async function executePostUpgradeCommands(
-  config: BranchConfig
+  config: NarrowedBranchConfig
 ): Promise<PostUpgradeCommandsExecutionResult | null> {
   const { allowedPostUpgradeCommands } = GlobalConfig.get();
 

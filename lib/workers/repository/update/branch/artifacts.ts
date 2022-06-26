@@ -2,10 +2,10 @@ import { GlobalConfig } from '../../../../config/global';
 import { logger } from '../../../../logger';
 import { platform } from '../../../../modules/platform';
 import { BranchStatus } from '../../../../types';
-import type { BranchConfig } from '../../../types';
+import type { NarrowedBranchConfig } from '../../../types';
 
 export async function setArtifactErrorStatus(
-  config: BranchConfig
+  config: NarrowedBranchConfig
 ): Promise<void> {
   if (!config.artifactErrors?.length) {
     // no errors

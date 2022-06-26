@@ -1,8 +1,10 @@
 import { emojify } from '../../../../../util/emoji';
 import { isBranchModified } from '../../../../../util/git';
-import type { BranchConfig } from '../../../../types';
+import type { NarrowedBranchConfig } from '../../../../types';
 
-export async function getControls(config: BranchConfig): Promise<string> {
+export async function getControls(
+  config: NarrowedBranchConfig
+): Promise<string> {
   const warning = (await isBranchModified(config.branchName))
     ? emojify(' :warning: **Warning**: custom changes will be lost.')
     : '';

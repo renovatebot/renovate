@@ -3,8 +3,8 @@ import { parseCron } from '@cheap-glitch/mi-cron';
 import is from '@sindresorhus/is';
 import { DateTime } from 'luxon';
 import { fixShortHours } from '../../../../config/migration';
-import type { RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
+import type { NarrowedBranchConfig } from '../../../types';
 
 const minutesChar = '*';
 
@@ -113,7 +113,7 @@ function cronMatches(cron: string, now: DateTime): boolean {
 }
 
 export function isScheduledNow(
-  config: RenovateConfig,
+  config: NarrowedBranchConfig,
   scheduleKey: 'schedule' | 'automergeSchedule' = 'schedule'
 ): boolean {
   let configSchedule = config[scheduleKey];

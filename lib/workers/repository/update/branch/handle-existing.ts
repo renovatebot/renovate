@@ -5,9 +5,12 @@ import { ensureComment } from '../../../../modules/platform/comment';
 import { PrState } from '../../../../types';
 import { branchExists, deleteBranch } from '../../../../util/git';
 import * as template from '../../../../util/template';
-import type { BranchConfig } from '../../../types';
+import type { NarrowedBranchConfig } from '../../../types';
 
-export async function handlepr(config: BranchConfig, pr: Pr): Promise<void> {
+export async function handlepr(
+  config: NarrowedBranchConfig,
+  pr: Pr
+): Promise<void> {
   if (pr.state === PrState.Closed) {
     let content;
     if (config.updateType === 'major') {

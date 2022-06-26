@@ -5,7 +5,7 @@ import { Pr, platform } from '../../../modules/platform';
 import { PrState } from '../../../types';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { branchExists } from '../../../util/git';
-import type { BranchConfig, NarrowedRenovateConfig } from '../../types';
+import type { NarrowedBranchConfig } from '../../types';
 
 export async function getPrHourlyRemaining(
   config: RenovateConfig
@@ -42,7 +42,7 @@ export async function getPrHourlyRemaining(
 
 export async function getConcurrentPrsRemaining(
   config: RenovateConfig,
-  branches: BranchConfig[]
+  branches: NarrowedBranchConfig[]
 ): Promise<number> {
   if (config.prConcurrentLimit) {
     logger.debug(`Calculating prConcurrentLimit (${config.prConcurrentLimit})`);
@@ -78,8 +78,8 @@ export async function getConcurrentPrsRemaining(
 }
 
 export async function getPrsRemaining(
-  config: NarrowedRenovateConfig,
-  branches: BranchConfig[]
+  config: RenovateConfig,
+  branches: NarrowedBranchConfig[]
 ): Promise<number> {
   const hourlyRemaining = await getPrHourlyRemaining(config);
   const concurrentRemaining = await getConcurrentPrsRemaining(config, branches);
@@ -87,8 +87,8 @@ export async function getPrsRemaining(
 }
 
 export function getConcurrentBranchesRemaining(
-  config: NarrowedRenovateConfig,
-  branches: BranchConfig[]
+  config: RenovateConfig,
+  branches: NarrowedBranchConfig[]
 ): number {
   const { branchConcurrentLimit, prConcurrentLimit } = config;
   const limit =
@@ -123,8 +123,8 @@ export function getConcurrentBranchesRemaining(
 }
 
 export async function getBranchesRemaining(
-  config: NarrowedRenovateConfig,
-  branches: BranchConfig[]
+  config: RenovateConfig,
+  branches: NarrowedBranchConfig[]
 ): Promise<number> {
   const hourlyRemaining = await getPrHourlyRemaining(config);
   const concurrentRemaining = getConcurrentBranchesRemaining(config, branches);

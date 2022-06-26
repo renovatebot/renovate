@@ -8,7 +8,7 @@ import type {
 } from '../../../../modules/manager/types';
 import { getFile } from '../../../../util/git';
 import type { FileAddition, FileChange } from '../../../../util/git/types';
-import type { BranchConfig } from '../../../types';
+import type { NarrowedBranchConfig } from '../../../types';
 import { doAutoReplace } from './auto-replace';
 
 export interface PackageFilesResult {
@@ -19,7 +19,7 @@ export interface PackageFilesResult {
 }
 
 export async function getUpdatedPackageFiles(
-  config: BranchConfig
+  config: NarrowedBranchConfig
 ): Promise<PackageFilesResult> {
   logger.trace({ config });
   const { reuseExistingBranch } = config;

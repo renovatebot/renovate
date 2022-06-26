@@ -2,10 +2,10 @@ import { unemojify } from '../../../../../util/emoji';
 import { sanitizeMarkdown } from '../../../../../util/markdown';
 import { regEx } from '../../../../../util/regex';
 import * as template from '../../../../../util/template';
-import type { BranchConfig } from '../../../../types';
+import type { NarrowedBranchConfig } from '../../../../types';
 import releaseNotesHbs from '../changelog/hbs-template';
 
-export function getChangelogs(config: BranchConfig): string {
+export function getChangelogs(config: NarrowedBranchConfig): string {
   let releaseNotes = '';
   if (!config.hasReleaseNotes) {
     return releaseNotes;

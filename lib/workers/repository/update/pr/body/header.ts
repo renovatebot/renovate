@@ -1,7 +1,7 @@
 import * as template from '../../../../../util/template';
-import type { BranchConfig } from '../../../../types';
+import type { NarrowedBranchConfig } from '../../../../types';
 
-export function getPrHeader(config: BranchConfig): string {
+export function getPrHeader(config: NarrowedBranchConfig): string {
   if (!config.prHeader) {
     return '';
   }
