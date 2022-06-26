@@ -84,7 +84,6 @@ export async function processBranch(
 ): Promise<ProcessBranchResult> {
   let config: BranchConfig = { ...branchConfig };
   logger.trace({ config }, 'processBranch()');
-  await checkoutBranch(config.baseBranch!);
   let branchExists = gitBranchExists(config.branchName);
 
   if (!branchExists && config.branchPrefix !== config.branchPrefixOld) {
@@ -247,6 +246,8 @@ export async function processBranch(
         }
       }
     }
+
+    await checkoutBranch(config.baseBranch!);
 
     // Check schedule
     config.isScheduledNow = isScheduledNow(config, 'schedule');
