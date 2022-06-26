@@ -27,7 +27,7 @@ describe('modules/platform/pr-body', () => {
 
     it('returns rebaseRequested flag', () => {
       expect(getPrBodyStruct('- [x] <!-- rebase-check -->')).toEqual({
-        hash: '82bc749b41acc2a3a3cc398fbfb0717fd05db152b22e48ac7d27f03a06a5dc3a',
+        hash: '023952693e1e00a52a71b65d9b4804bca6ca9f215c20f6e029dbf420f322d541',
         rebaseRequested: true,
       });
     });
