@@ -247,8 +247,6 @@ export async function processBranch(
       }
     }
 
-    await checkoutBranch(config.baseBranch!);
-
     // Check schedule
     config.isScheduledNow = isScheduledNow(config, 'schedule');
     if (!config.isScheduledNow && !dependencyDashboardCheck) {
@@ -280,7 +278,12 @@ export async function processBranch(
         'Branch + PR exists but is not scheduled -- will update if necessary'
       );
     }
-
+    // eslint-disable-next-line no-console
+    console.time('checkedout');
+    await checkoutBranch(config.baseBranch!);
+    // eslint-disable-next-line no-console
+    console.timeEnd('checkedout');
+    //stability checks
     if (
       config.upgrades.some(
         (upgrade) =>
