@@ -13,16 +13,18 @@ export async function handlepr(
 ): Promise<void> {
   if (pr.state === PrState.Closed) {
     let content;
+    // TODO #7154
+    const userStrings = config.userStrings!;
     if (config.updateType === 'major') {
-      content = template.compile(config.userStrings.ignoreMajor, config);
+      content = template.compile(userStrings.ignoreMajor, config);
     } else if (config.updateType === 'digest') {
-      content = template.compile(config.userStrings.ignoreDigest, config);
+      content = template.compile(userStrings.ignoreDigest, config);
     } else {
-      content = template.compile(config.userStrings.ignoreOther, config);
+      content = template.compile(userStrings.ignoreOther, config);
     }
     content +=
       '\n\nIf this PR was closed by mistake or you changed your mind, you can simply rename this PR and you will soon get a fresh replacement PR opened.';
-    if (!config.suppressNotifications.includes('prIgnoreNotification')) {
+    if (!config.suppressNotifications!.includes('prIgnoreNotification')) {
       if (GlobalConfig.get('dryRun')) {
         logger.info(
           `DRY-RUN: Would ensure closed PR comment in PR #${pr.number}`
@@ -30,7 +32,7 @@ export async function handlepr(
       } else {
         await ensureComment({
           number: pr.number,
-          topic: config.userStrings.ignoreTopic,
+          topic: userStrings.ignoreTopic,
           content,
         });
       }

@@ -320,7 +320,7 @@ Currently this setting supports `helmv3`, `npm`, `maven` and `sbt` only, so rais
 Its purpose is if you want Renovate to update the `version` field within your package file any time it updates dependencies within.
 Usually this is for automatic release purposes, so that you don't need to add another step after Renovate before you can release a new version.
 
-Configure this value to `"patch"`, `"minor"` or `"major"` to have Renovate update the version in your edited package file.
+Configure this value to `"prerelease"`, `"patch"`, `"minor"` or `"major"` to have Renovate update the version in your edited package file.
 e.g. if you wish Renovate to always increase the target `package.json` version with a patch update, configure this to `"patch"`.
 
 For `npm` only you can also configure this field to `"mirror:x"` where `x` is the name of a package in the `package.json`.
@@ -416,6 +416,31 @@ If enabled, all issues created by Renovate are set as confidential, even in a pu
 <!-- prettier-ignore -->
 !!! note
     This option is applicable to GitLab only.
+
+## configMigration
+
+If enabled, Renovate will raise a pull request if config file migration is needed.
+
+We're adding new features to Renovate bot often.
+Most times you can keep using your Renovate config and benefit from the new features right away.
+But sometimes you need to change your Renovate configuration.
+To help you with this, Renovate will create config migration pull requests.
+
+Example:
+
+After we changed the [`baseBranches`](https://docs.renovatebot.com/configuration-options/#basebranches) feature, the Renovate configuration migration pull request would make this change:
+
+```diff
+{
+- "baseBranch": "main"
++ "baseBranches": ["main"]
+}
+```
+
+<!-- prettier-ignore -->
+!!! info
+    This feature writes plain JSON for `.json` files, and JSON5 for `.json5` files.
+    JSON5 content can potentially be down leveled (`.json` files) and all comments will be removed.
 
 ## configWarningReuseIssue
 
@@ -838,7 +863,7 @@ Also, approval rules overriding should not be [prevented in GitLab settings](htt
 Configuration added here applies for all Go-related updates.
 The only supported package manager for Go is the native Go Modules (the `gomod` manager).
 
-For self-hosted users, `GOPROXY`, `GONOPROXY` and `GOPRIVATE` environment variables are supported ([reference](https://go.dev/ref/mod#module-proxy)).
+For self-hosted users, `GOPROXY`, `GONOPROXY`, `GOPRIVATE` and `GOINSECURE` environment variables are supported ([reference](https://go.dev/ref/mod#module-proxy)).
 
 Usage of `direct` will fallback to the Renovate-native release fetching mechanism.
 Also we support the `off` keyword which will stop any fetching immediately.
@@ -1916,6 +1941,8 @@ The `postUpgradeTasks` configuration consists of three fields:
 
 A list of commands that are executed after Renovate has updated a dependency but before the commit is made.
 
+You can use variable templating in your commands if [`allowPostUpgradeCommandTemplating`](https://docs.renovatebot.com/self-hosted-configuration/#allowpostupgradecommandtemplating) is enabled.
+
 ### fileFilters
 
 A list of glob-style matchers that determine which files will be included in the final commit made by Renovate.
@@ -2088,6 +2115,11 @@ Here's an example of how you would define PR priority so that devDependencies ar
 ## prTitle
 
 The PR title is important for some of Renovate's matching algorithms (e.g. determining whether to recreate a PR or not) so ideally don't modify it much.
+
+## printConfig
+
+This option is useful for troubleshooting, particularly if using presets.
+e.g. run `renovate foo/bar --print-config > config.log` and the fully-resolved config will be included in the log file.
 
 ## pruneBranchAfterAutomerge
 
@@ -2668,7 +2700,7 @@ There are a couple of uses for `stabilityDays`:
 
 #### Suppress branch/PR creation for X days
 
-If you combine `stabilityDays=3` and `prCreation="not-pending"` then Renovate will hold back from creating branches until 3 or more days have elapsed since the version was released.
+If you combine `stabilityDays=3` and `internalChecksFilter="strict"` then Renovate will hold back from creating branches until 3 or more days have elapsed since the version was released.
 It's recommended that you enable `dependencyDashboard=true` so you don't lose visibility of these pending PRs.
 
 #### Prevent holding broken npm packages

@@ -1,3 +1,4 @@
+// TODO #7154
 import is from '@sindresorhus/is';
 import minimatch from 'minimatch';
 import { GlobalConfig } from '../../../../config/global';
@@ -25,8 +26,8 @@ export async function postUpgradeCommandsExecutor(
   filteredUpgradeCommands: BranchUpgradeConfig[],
   config: NarrowedBranchConfig
 ): Promise<PostUpgradeCommandsExecutionResult> {
-  let updatedArtifacts = [...(config.updatedArtifacts || [])];
-  const artifactErrors = [...(config.artifactErrors || [])];
+  let updatedArtifacts = [...(config.updatedArtifacts ?? [])];
+  const artifactErrors = [...(config.artifactErrors ?? [])];
   const { allowedPostUpgradeCommands, allowPostUpgradeCommandTemplating } =
     GlobalConfig.get();
 
@@ -39,26 +40,29 @@ export async function postUpgradeCommandsExecutor(
       },
       `Checking for post-upgrade tasks`
     );
-    const commands = upgrade.postUpgradeTasks?.commands || [];
-    const fileFilters = upgrade.postUpgradeTasks?.fileFilters || [];
+    const commands = upgrade.postUpgradeTasks?.commands ?? [];
+    const fileFilters = upgrade.postUpgradeTasks?.fileFilters ?? [];
     if (is.nonEmptyArray(commands)) {
       // Persist updated files in file system so any executed commands can see them
-      for (const file of config.updatedPackageFiles.concat(updatedArtifacts)) {
+      for (const file of config.updatedPackageFiles!.concat(updatedArtifacts)) {
         const canWriteFile = await localPathIsFile(file.path);
         if (file.type === 'addition' && canWriteFile) {
-          let contents;
+          let contents: Buffer | null;
           if (typeof file.contents === 'string') {
             contents = Buffer.from(file.contents);
           } else {
             contents = file.contents;
           }
-          await writeLocalFile(file.path, contents);
+          // TODO #7154
+          await writeLocalFile(file.path, contents!);
         }
       }
 
       for (const cmd of commands) {
         if (
-          allowedPostUpgradeCommands.some((pattern) => regEx(pattern).test(cmd))
+          allowedPostUpgradeCommands!.some((pattern) =>
+            regEx(pattern).test(cmd)
+          )
         ) {
           try {
             const compiledCmd = allowPostUpgradeCommandTemplating
@@ -156,8 +160,8 @@ export default async function executePostUpgradeCommands(
   const { allowedPostUpgradeCommands } = GlobalConfig.get();
 
   const hasChangedFiles =
-    config.updatedPackageFiles?.length > 0 ||
-    config.updatedArtifacts?.length > 0;
+    (config.updatedPackageFiles && config.updatedPackageFiles.length > 0) ||
+    (config.updatedArtifacts && config.updatedArtifacts.length > 0);
 
   if (
     /* Only run post-upgrade tasks if there are changes to package files... */
@@ -173,7 +177,7 @@ export default async function executePostUpgradeCommands(
       depName: config.upgrades.map(({ depName }) => depName).join(' '),
       branchName: config.branchName,
       postUpgradeTasks:
-        config.postUpgradeTasks.executionMode === 'branch'
+        config.postUpgradeTasks!.executionMode === 'branch'
           ? config.postUpgradeTasks
           : undefined,
       fileFilters: config.fileFilters,

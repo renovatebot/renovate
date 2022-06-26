@@ -1,3 +1,4 @@
+// TODO #7154
 import { GlobalConfig } from '../../../../config/global';
 import { logger } from '../../../../logger';
 import { platform } from '../../../../modules/platform';
@@ -27,12 +28,12 @@ export async function tryBranchAutomerge(
   if (!isScheduledNow(config, 'automergeSchedule')) {
     return 'off schedule';
   }
-  const existingPr = await platform.getBranchPr(config.branchName);
+  const existingPr = await platform.getBranchPr(config.branchName!);
   if (existingPr) {
     return 'automerge aborted - PR exists';
   }
   const branchStatus = await resolveBranchStatus(
-    config.branchName,
+    config.branchName!,
     config.ignoreTests
   );
   if (branchStatus === BranchStatus.green) {
@@ -41,7 +42,7 @@ export async function tryBranchAutomerge(
       if (GlobalConfig.get('dryRun')) {
         logger.info(`DRY-RUN: Would automerge branch ${config.branchName}`);
       } else {
-        await mergeBranch(config.branchName);
+        await mergeBranch(config.branchName!);
       }
       logger.info({ branch: config.branchName }, 'Branch automerged');
       return 'automerged'; // Branch no longer exists

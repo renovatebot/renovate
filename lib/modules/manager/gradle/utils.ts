@@ -17,7 +17,9 @@ const versionLikeRegex = regEx('^(?<version>[-.\\[\\](),a-zA-Z0-9+]+)');
 
 // Extracts version-like and range-like strings
 // from the beginning of input
-export function versionLikeSubstring(input: string): string | null {
+export function versionLikeSubstring(
+  input: string | null | undefined
+): string | null {
   const match = input ? versionLikeRegex.exec(input) : null;
   return match?.groups?.version ?? null;
 }

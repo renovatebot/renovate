@@ -8,8 +8,6 @@ import * as prAutomerge from './automerge';
 
 jest.mock('../../../../util/git');
 
-const defaultConfig = getConfig();
-
 describe('workers/repository/update/pr/automerge', () => {
   describe('checkAutoMerge(pr, config)', () => {
     const spy = jest.spyOn(schedule, 'isScheduledNow');
@@ -17,9 +15,10 @@ describe('workers/repository/update/pr/automerge', () => {
     let pr: Pr;
 
     beforeEach(() => {
-      config = partial<BranchConfig>({
-        ...defaultConfig,
-      });
+      // TODO #7154 incompatible types
+      config = {
+        ...getConfig(),
+      } as BranchConfig;
       pr = partial<Pr>({});
     });
 

@@ -2,6 +2,7 @@ import type { Merge } from 'type-fest';
 import type {
   GroupConfig,
   LegacyAdminConfig,
+  RegExManager,
   RenovateConfig,
   RenovateSharedConfig,
   UpdateType,
@@ -11,6 +12,8 @@ import type { Release } from '../modules/datasource/types';
 import type { NpmManagerData } from '../modules/manager/npm/types';
 import type {
   ArtifactError,
+  CustomExtractConfig,
+  ExtractConfig,
   LookupUpdate,
   PackageDependency,
   PackageFile,
@@ -66,7 +69,7 @@ export interface BranchUpgradeConfig
   updatedPackageFiles?: FileChange[];
   updatedArtifacts?: FileChange[];
 
-  logJSON?: ChangeLogResult;
+  logJSON?: ChangeLogResult | null;
 
   hasReleaseNotes?: boolean;
   homepage?: string;
@@ -293,4 +296,17 @@ export interface UpdateCacheConfig extends Record<string, any> {
   reuseExistingBranch?: boolean;
   updatedArtifacts?: FileChange[];
   artifactErrors?: ArtifactError[];
+}
+export interface WorkerExtractConfig
+  extends ExtractConfig,
+    Partial<CustomExtractConfig> {
+  manager: string;
+  fileList: string[];
+  fileMatch?: string[];
+  updateInternalDeps?: boolean;
+  includePaths?: string[];
+  ignorePaths?: string[];
+  regexManagers?: RegExManager[];
+  enabledManagers?: string[];
+  enabled?: boolean;
 }
