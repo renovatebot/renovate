@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
 import { Fixtures } from '../../../test/fixtures';
 import { mocked } from '../../../test/util';
-import { logger } from '../../logger';
 import type { RenovateConfig } from '../types';
+import * as _github from './github';
 import * as _local from './local';
 import * as _npm from './npm';
 import {
@@ -19,6 +19,7 @@ jest.mock('./local');
 
 const npm = mocked(_npm);
 const local = mocked(_local);
+const gitHub = mocked(_github);
 
 const presetIkatyang = Fixtures.getJson('renovate-config-ikatyang.json');
 
@@ -320,19 +321,61 @@ describe('config/presets/index', () => {
         {},
         [],
         [],
-        'on' // shallow log config
+        true // shallow log config
       );
       expect(res).toEqual({
+        extends: ['local>username/preset-repo'],
         labels: ['self-hosted resolved'],
       });
-      expect(logger.debug).toHaveBeenCalledWith(
+    });
+
+    it('logs user extended config from github', async () => {
+      config.extends = ['config:base', 'local>username/preset-repo'];
+      config.packageRules = [
         {
-          combinedConfig: {
-            labels: ['self-hosted resolved'],
-          },
+          matchManagers: ['github-actions'],
+          groupName: 'github-actions dependencies',
         },
-        'shallow config'
+      ];
+      local.getPreset.mockResolvedValueOnce({
+        extends: ['github>username/preset-repo'],
+        labels: ['self-hosted resolved'],
+      });
+      gitHub.getPreset.mockResolvedValueOnce({
+        packageRules: [
+          {
+            matchDatasources: ['docker'],
+            matchPackageNames: ['ubi-minimal'],
+            versioning: 'regex',
+          },
+        ],
+      });
+      const res = await presets.resolveConfigPresets(
+        config,
+        {},
+        [],
+        [],
+        true // shallow log config
       );
+      expect(res).toEqual({
+        packageRules: [
+          {
+            matchDatasources: ['docker'],
+            matchPackageNames: ['ubi-minimal'],
+            versioning: 'regex',
+          },
+          {
+            matchManagers: ['github-actions'],
+            groupName: 'github-actions dependencies',
+          },
+        ],
+        extends: [
+          'config:base',
+          'local>username/preset-repo',
+          'github>username/preset-repo',
+        ],
+        labels: ['self-hosted resolved'],
+      });
     });
   });
 
@@ -980,22 +1023,6 @@ Object {
       expect(e!.validationMessage).toBeUndefined();
     });
 
-    it('logs user extended config for shallow mode', () => {
-      presets.logShallowConfig(
-        { extends: ['github>username/preset-repo'] },
-        { extends: ['config:base'], pacakgeRules: ['some rule'] }
-      );
-      expect(logger.debug).toHaveBeenCalledWith(
-        {
-          combinedConfig: {
-            extends: ['config:base'],
-            pacakgeRules: ['some rule'],
-          },
-        },
-        'shallow config'
-      );
-    });
-
     it('includes external presets for shallow mode', () => {
       expect(
         presets.isPresetForShallowConfig(
@@ -1014,46 +1041,6 @@ Object {
       expect(
         presets.isPresetForShallowConfig('local>somerepo/renovate')
       ).toBeTruthy();
-    });
-
-    it('combines config for shallow mode', () => {
-      const repoConfig = {
-        value: {
-          extends: ['config:base'],
-          dependencyDashboard: true,
-        },
-      };
-      const fetchedConfig = {
-        extends: ['config:app'],
-        automergeType: 'pr',
-      };
-      presets.updateShallowConfig(repoConfig, fetchedConfig);
-      expect(repoConfig).toMatchObject({
-        value: {
-          extends: ['config:base', 'config:app'],
-          automergeType: 'pr',
-          dependencyDashboard: true,
-        },
-      });
-    });
-
-    it('removes empty extends array for shallow log', () => {
-      presets.logShallowConfig(
-        {
-          extends: ['github>username/preset-repo1'],
-          dependencyDashboard: true,
-        },
-        { extends: ['github>username/preset-repo2'], automergeType: 'pr' }
-      );
-      expect(logger.debug).toHaveBeenCalledWith(
-        {
-          combinedConfig: {
-            automergeType: 'pr',
-            dependencyDashboard: true,
-          },
-        },
-        'shallow config'
-      );
     });
   });
 });

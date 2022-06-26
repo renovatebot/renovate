@@ -8,6 +8,7 @@ import { decryptConfig } from '../../../config/decrypt';
 import { migrateAndValidate } from '../../../config/migrate-validate';
 import { migrateConfig } from '../../../config/migration';
 import * as presets from '../../../config/presets';
+import { isPresetForShallowConfig } from '../../../config/presets';
 import { applySecretsToConfig } from '../../../config/secrets';
 import type { RenovateConfig } from '../../../config/types';
 import {
@@ -210,15 +211,21 @@ export async function mergeRenovateConfig(
     logger.debug('Found npmrc in decrypted config - setting');
     npmApi.setNpmrc(decryptedConfig.npmrc);
   }
-  // Decrypt after resolving in case the preset contains npm authentication instead
-  let resolvedConfig = await decryptConfig(
+
+  const shallowResolvedConfig = await decryptConfig(
     await presets.resolveConfigPresets(
       decryptedConfig,
       config,
       [],
       [],
-      'on' // shallow log config
+      true // shallow log config
     ),
+    repository
+  );
+  logShallowConfig(shallowResolvedConfig);
+  // Decrypt after resolving in case the preset contains npm authentication instead
+  let resolvedConfig = await decryptConfig(
+    await presets.resolveConfigPresets(decryptedConfig, config),
     repository
   );
   logger.trace({ config: resolvedConfig }, 'resolved config');
@@ -265,4 +272,26 @@ export async function mergeRenovateConfig(
     );
   }
   return returnConfig;
+}
+
+export function logShallowConfig(ShallowConfig: RenovateConfig): void {
+  // remove resolved presets from the log
+  // there could be a preset that is extending a preset
+  // which is also present in an extend array of a different preset
+  // so lets clean that for the log
+  if (is.array(ShallowConfig?.extends)) {
+    if (ShallowConfig.extends.length) {
+      ShallowConfig.extends.filter((e) => !isPresetForShallowConfig(e));
+      const uniqueExtends: Set<string> = new Set(
+        ShallowConfig.extends.values()
+      );
+      ShallowConfig.extends = Array.from(uniqueExtends);
+    }
+    // istanbul ignore if
+    if (ShallowConfig.extends.length === 0) {
+      delete ShallowConfig.extends;
+    }
+  }
+
+  logger.debug({ resolvedShallowConfig: ShallowConfig }, 'shallow config');
 }
