@@ -12,11 +12,22 @@ describe('modules/platform/pr-body', () => {
       expect(getPrBodyStruct('')).toEqual({
         hash: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
       });
+      expect(
+        getPrBodyStruct(
+          'something \n<!--renovate-debug:eyJjcmVhdGVkQnlSZW5vdmF0ZVZlcnNpb24iOiAiMS4yLjEiLCJ1cGRhdGVkQnlSZW5vdmF0ZVZlcnNpb24iOiAiMS4yLjMifQ==-->'
+        )
+      ).toEqual({
+        hash: '82bc749b41acc2a3a3cc398fbfb0717fd05db152b22e48ac7d27f03a06a5dc3a',
+        debugData: {
+          createdByRenovateVersion: '1.2.1',
+          updatedByRenovateVersion: '1.2.3',
+        },
+      });
     });
 
     it('returns rebaseRequested flag', () => {
       expect(getPrBodyStruct('- [x] <!-- rebase-check -->')).toEqual({
-        hash: '023952693e1e00a52a71b65d9b4804bca6ca9f215c20f6e029dbf420f322d541',
+        hash: '82bc749b41acc2a3a3cc398fbfb0717fd05db152b22e48ac7d27f03a06a5dc3a',
         rebaseRequested: true,
       });
     });
