@@ -466,7 +466,7 @@ export async function ensureDependencyDashboard(
     await platform.ensureIssue({
       title: config.dependencyDashboardTitle!,
       reuseTitle,
-      body: issueBody,
+      body: platform.massageMarkdown(issueBody),
       labels: config.dependencyDashboardLabels,
       confidential: config.confidential,
     });

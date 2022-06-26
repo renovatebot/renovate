@@ -223,6 +223,7 @@ const options: RenovateOptions[] = [
     allowedValues: ['disabled', 'enabled', 'reset'],
     stage: 'repository',
     default: 'disabled',
+    experimental: true,
   },
   {
     name: 'force',
@@ -241,6 +242,7 @@ const options: RenovateOptions[] = [
     stage: 'global',
     type: 'boolean',
     default: true,
+    globalOnly: true,
   },
   {
     name: 'draftPR',
@@ -281,6 +283,7 @@ const options: RenovateOptions[] = [
       'If set, this Redis URL will be used for caching instead of the file system.',
     stage: 'global',
     type: 'string',
+    globalOnly: true,
   },
   {
     name: 'baseDir',
@@ -288,6 +291,7 @@ const options: RenovateOptions[] = [
       'The base directory for Renovate to store local files, including repository files and cache. If left empty, Renovate will create its own temporary directory to use.',
     stage: 'global',
     type: 'string',
+    globalOnly: true,
   },
   {
     name: 'cacheDir',
@@ -341,6 +345,7 @@ const options: RenovateOptions[] = [
     description: 'Log file path.',
     stage: 'global',
     type: 'string',
+    globalOnly: true,
   },
   {
     name: 'logFileLevel',
@@ -348,6 +353,7 @@ const options: RenovateOptions[] = [
     stage: 'global',
     type: 'string',
     default: 'debug',
+    globalOnly: true,
   },
   {
     name: 'logContext',
@@ -689,6 +695,7 @@ const options: RenovateOptions[] = [
     stage: 'global',
     type: 'boolean',
     default: false,
+    globalOnly: true,
   },
   {
     name: 'autodiscoverFilter',
@@ -696,6 +703,7 @@ const options: RenovateOptions[] = [
     stage: 'global',
     type: 'string',
     default: null,
+    globalOnly: true,
   },
   {
     name: 'prCommitsPerRunLimit',
@@ -704,6 +712,7 @@ const options: RenovateOptions[] = [
     stage: 'global',
     type: 'integer',
     default: 0,
+    globalOnly: true,
   },
   {
     name: 'repositories',
@@ -711,6 +720,7 @@ const options: RenovateOptions[] = [
     stage: 'global',
     type: 'array',
     cli: false,
+    globalOnly: true,
   },
   {
     name: 'baseBranches',
@@ -1241,7 +1251,7 @@ const options: RenovateOptions[] = [
     name: 'bumpVersion',
     description: 'Bump the version in the package file being updated.',
     type: 'string',
-    allowedValues: ['major', 'minor', 'patch'],
+    allowedValues: ['major', 'minor', 'patch', 'prerelease'],
     supportedManagers: ['helmv3', 'npm', 'maven', 'sbt'],
   },
   // Major/Minor/Patch

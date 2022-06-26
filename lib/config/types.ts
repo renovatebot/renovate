@@ -343,9 +343,13 @@ export interface RenovateOptionBase {
   // used by tests
   relatedOptions?: string[];
 
-  releaseStatus?: 'alpha' | 'beta' | 'unpublished';
-
   stage?: RenovateConfigStage;
+
+  experimental?: boolean;
+
+  experimentalDescription?: string;
+
+  experimentalIssues?: number[];
 }
 
 export interface RenovateArrayOption<
