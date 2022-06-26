@@ -148,7 +148,7 @@ export interface NarrowedBranchConfig extends Record<string, any> {
   constraints?: any;
   ignoreScripts?: boolean;
   postUpdateOptions?: string[];
-  managerData?: NpmManagerData;
+  managerData?: Record<string, any>;
   manager: string;
   fileFilters?: unknown;
   forceCommit?: boolean;
