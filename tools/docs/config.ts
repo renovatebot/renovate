@@ -1,10 +1,12 @@
 import stringify from 'json-stringify-pretty-compact';
 import { getOptions } from '../../lib/config/options';
+import { getManagerList } from '../../lib/modules/manager';
 import { getCliName } from '../../lib/workers/global/config/parse/cli';
 import { getEnvName } from '../../lib/workers/global/config/parse/env';
 import { readFile, updateFile } from '../utils';
 
 const options = getOptions();
+const managers = new Set(getManagerList());
 
 /**
  * Merge string arrays one by one
@@ -86,6 +88,9 @@ function genTable(obj: [string, string][], type: string, def: any): string {
     'allowString',
     'admin',
     'globalOnly',
+    'experimental',
+    'experimentalDescription',
+    'experimentalIssues',
   ];
   obj.forEach(([key, val]) => {
     const el = [key, val];
@@ -141,6 +146,60 @@ function genTable(obj: [string, string][], type: string, def: any): string {
   return buildHtmlTable(data);
 }
 
+function stringifyArrays(el: Record<string, any>): void {
+  const ignoredKeys = ['default', 'experimentalIssues'];
+
+  for (const [key, value] of Object.entries(el)) {
+    if (!ignoredKeys.includes(key) && Array.isArray(value)) {
+      el[key] = value.join(', ');
+    }
+  }
+}
+
+function genExperimentalMsg(el: Record<string, any>): string {
+  const ghIssuesUrl = 'https://github.com/renovatebot/renovate/issues/';
+  let warning =
+    '\n<!-- prettier-ignore -->\n!!! warning "This feature is flagged as experimental"\n';
+
+  if (el.experimentalDescription) {
+    warning += indent`${2}${el.experimentalDescription}`;
+  } else {
+    warning += indent`${2}Experimental features might be changed or even removed at any time.`;
+  }
+
+  const issues = el.experimentalIssues ?? [];
+  if (issues.length > 0) {
+    warning += `<br>To track this feature visit the following GitHub ${
+      issues.length > 1 ? 'issues' : 'issue'
+    } `;
+    warning +=
+      (issues
+        .map((issue: number) => `[#${issue}](${ghIssuesUrl}${issue})`)
+        .join(', ') as string) + '.';
+  }
+
+  return warning + '\n';
+}
+
+function indexMarkdown(lines: string[]): Record<string, [number, number]> {
+  const indexed: Record<string, [number, number]> = {};
+
+  let optionName = '';
+  let start = 0;
+  for (const [i, line] of lines.entries()) {
+    if (line.startsWith('## ') || line.startsWith('### ')) {
+      if (optionName) {
+        indexed[optionName] = [start, i - 1];
+      }
+      start = i;
+      optionName = line.split(' ')[1];
+    }
+  }
+  indexed[optionName] = [start, lines.length - 1];
+
+  return indexed;
+}
+
 export async function generateConfig(dist: string, bot = false): Promise<void> {
   let configFile = `configuration-options.md`;
   if (bot) {
@@ -151,21 +210,35 @@ export async function generateConfig(dist: string, bot = false): Promise<void> {
     '\n'
   );
 
+  const indexed = indexMarkdown(configOptionsRaw);
+
   options
-    .filter((option) => option.releaseStatus !== 'unpublished')
+    .filter(
+      (option) => !!option.globalOnly === bot && !managers.has(option.name)
+    )
     .forEach((option) => {
-      // TODO: fix types (#9610)
+      // TODO: fix types (#7154,#9610)
       const el: Record<string, any> = { ...option };
-      let headerIndex = configOptionsRaw.indexOf(`## ${option.name}`);
-      if (headerIndex === -1) {
-        headerIndex = configOptionsRaw.indexOf(`### ${option.name}`);
+
+      if (!indexed[option.name]) {
+        throw new Error(
+          `Config option "${option.name}" is missing an entry in ${configFile}`
+        );
       }
+
+      const [headerIndex, footerIndex] = indexed[option.name];
+
       el.cli = getCliName(option);
       el.env = getEnvName(option);
+      stringifyArrays(el);
 
       configOptionsRaw[headerIndex] +=
         `\n${option.description}\n\n` +
         genTable(Object.entries(el), option.type, option.default);
+
+      if (el.experimental) {
+        configOptionsRaw[footerIndex] += genExperimentalMsg(el);
+      }
     });
 
   await updateFile(`${dist}/${configFile}`, configOptionsRaw.join('\n'));

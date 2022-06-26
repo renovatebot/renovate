@@ -184,9 +184,9 @@ export function parsePreset(input: string): ParsedPreset {
       throw new Error(PRESET_INVALID);
     }
     ({ repo, presetPath, presetName, tag } =
-      nonScopedPresetWithSubdirRegex.exec(str)?.groups || {});
+      nonScopedPresetWithSubdirRegex.exec(str)?.groups ?? {});
   } else {
-    ({ repo, presetName, tag } = gitPresetRegex.exec(str)?.groups || {});
+    ({ repo, presetName, tag } = gitPresetRegex.exec(str)?.groups ?? {});
 
     if (presetSource === 'npm' && !repo.startsWith('renovate-config-')) {
       repo = `renovate-config-${repo}`;
@@ -277,7 +277,7 @@ export async function resolveConfigPresets(
   }
   let ignorePresets = clone(_ignorePresets);
   if (!ignorePresets || ignorePresets.length === 0) {
-    ignorePresets = inputConfig.ignorePresets || [];
+    ignorePresets = inputConfig.ignorePresets ?? [];
   }
   logger.trace(
     { config: inputConfig, existingPresets },

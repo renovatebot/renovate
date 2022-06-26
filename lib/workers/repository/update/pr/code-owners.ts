@@ -9,9 +9,9 @@ export async function codeOwnersForPr(pr: Pr): Promise<string[]> {
   logger.debug('Searching for CODEOWNERS file');
   try {
     const codeOwnersFile =
-      (await readLocalFile('CODEOWNERS', 'utf8')) ||
-      (await readLocalFile('.github/CODEOWNERS', 'utf8')) ||
-      (await readLocalFile('.gitlab/CODEOWNERS', 'utf8')) ||
+      (await readLocalFile('CODEOWNERS', 'utf8')) ??
+      (await readLocalFile('.github/CODEOWNERS', 'utf8')) ??
+      (await readLocalFile('.gitlab/CODEOWNERS', 'utf8')) ??
       (await readLocalFile('docs/CODEOWNERS', 'utf8'));
 
     if (!codeOwnersFile) {
