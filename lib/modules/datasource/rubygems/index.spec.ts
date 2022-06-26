@@ -229,7 +229,7 @@ describe('modules/datasource/rubygems/index', () => {
           ],
         });
       const res = await getPkgReleases(newparams);
-      expect(res.releases).toHaveLength(1);
+      expect(res?.releases).toHaveLength(1);
       expect(res).toMatchObject({
         releases: [
           {
@@ -279,7 +279,7 @@ describe('modules/datasource/rubygems/index', () => {
           ],
         });
       const res = await getPkgReleases(newparams);
-      expect(res.releases).toHaveLength(2);
+      expect(res?.releases).toHaveLength(2);
       expect(res).toMatchObject({
         releases: [
           {
