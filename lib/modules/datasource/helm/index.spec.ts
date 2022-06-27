@@ -172,7 +172,7 @@ describe('modules/datasource/helm/index', () => {
       expect(releases).toMatchSnapshot();
     });
 
-    it('returns list of versions for coercible version', async () => {
+    it('skips invalid semver versions', async () => {
       httpMock
         .scope('https://aws.github.io/eks-charts')
         .get('/index.yaml')
@@ -183,7 +183,7 @@ describe('modules/datasource/helm/index', () => {
         registryUrls: ['https://aws.github.io/eks-charts'],
       });
       expect(releases).toMatchObject({
-        releases: expect.toBeArrayOfSize(3),
+        releases: expect.toBeArrayOfSize(2),
       });
     });
 
