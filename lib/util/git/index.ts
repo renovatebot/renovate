@@ -418,9 +418,11 @@ export async function syncGit(): Promise<void> {
 }
 
 // istanbul ignore next
-export async function getRepoStatus(): Promise<StatusResult> {
+export async function getRepoStatus(
+  options?: TaskOptions
+): Promise<StatusResult> {
   await syncGit();
-  return git.status();
+  return git.status(options);
 }
 
 export function branchExists(branchName: string): boolean {
