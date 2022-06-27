@@ -126,13 +126,12 @@ export async function initPlatform({
     );
   }
 
-  let prefixedToken: string = token;
+  let accessToken = token;
   if (token.startsWith('x-access-token:')) {
     platformConfig.isGHApp = true;
-    prefixedToken = token;
   } else if (token.startsWith('ghs_')) {
     platformConfig.isGHApp = true;
-    prefixedToken = 'x-access-token:' + token;
+    accessToken = `x-access-token:${token}`;
   }
 
   if (endpoint) {
@@ -142,7 +141,7 @@ export async function initPlatform({
     logger.debug('Using default github endpoint: ' + platformConfig.endpoint);
   }
 
-  await detectGhe(prefixedToken);
+  await detectGhe(accessToken);
 
   let renovateUsername: string;
   if (username) {
@@ -150,7 +149,7 @@ export async function initPlatform({
   } else {
     platformConfig.userDetails ??= await getUserDetails(
       platformConfig.endpoint,
-      prefixedToken
+      accessToken
     );
     renovateUsername = platformConfig.userDetails.username;
   }
@@ -158,11 +157,11 @@ export async function initPlatform({
   if (!gitAuthor) {
     platformConfig.userDetails ??= await getUserDetails(
       platformConfig.endpoint,
-      prefixedToken
+      accessToken
     );
     platformConfig.userEmail ??= await getUserEmail(
       platformConfig.endpoint,
-      prefixedToken
+      accessToken
     );
     if (platformConfig.userEmail) {
       discoveredGitAuthor = `${platformConfig.userDetails.name} <${platformConfig.userEmail}>`;
@@ -173,7 +172,7 @@ export async function initPlatform({
     endpoint: platformConfig.endpoint,
     gitAuthor: gitAuthor ?? discoveredGitAuthor,
     renovateUsername,
-    token: prefixedToken,
+    token: accessToken,
   };
 
   return platformResult;

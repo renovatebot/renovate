@@ -65,6 +65,11 @@ export async function initPlatform(config: AllConfig): Promise<AllConfig> {
     // TODO: null check (#7154)
     matchHost: URL.parse(returnConfig.endpoint).hostname!,
   };
+  // There might have been platform-specific modifications to the token
+  if (returnConfig.token) {
+    platformRule['token'] = returnConfig['token'];
+    delete returnConfig['token'];
+  }
   (
     ['token', 'username', 'password'] as ('token' | 'username' | 'password')[]
   ).forEach((field) => {
