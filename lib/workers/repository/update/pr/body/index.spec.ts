@@ -56,7 +56,12 @@ describe('workers/repository/update/pr/body/index', () => {
           branchName: 'some-branch',
           upgrades: [],
         },
-        {}
+        {
+          debugData: {
+            updatedByRenovateVersion: '1.2.3',
+            createdByRenovateVersion: '1.2.3',
+          },
+        }
       );
       expect(res).toBeEmptyString();
     });
@@ -79,7 +84,12 @@ describe('workers/repository/update/pr/body/index', () => {
           branchName: 'some-branch',
           upgrades: [upgrade],
         },
-        {}
+        {
+          debugData: {
+            updatedByRenovateVersion: '1.2.3',
+            createdByRenovateVersion: '1.2.3',
+          },
+        }
       );
 
       expect(upgrade).toMatchObject({
@@ -110,7 +120,12 @@ describe('workers/repository/update/pr/body/index', () => {
           branchName: 'some-branch',
           upgrades: [upgrade],
         },
-        {}
+        {
+          debugData: {
+            updatedByRenovateVersion: '1.2.3',
+            createdByRenovateVersion: '1.2.3',
+          },
+        }
       );
 
       expect(upgrade).toMatchObject({
@@ -131,7 +146,12 @@ describe('workers/repository/update/pr/body/index', () => {
           upgrades: [],
           prBodyTemplate: 'PR BODY',
         },
-        {}
+        {
+          debugData: {
+            updatedByRenovateVersion: '1.2.3',
+            createdByRenovateVersion: '1.2.3',
+          },
+        }
       );
       expect(res).toContain('PR BODY');
       expect(res).toContain(`<!--renovate-debug`);
@@ -147,7 +167,13 @@ describe('workers/repository/update/pr/body/index', () => {
           upgrades: [],
           prBodyTemplate: ['aaa', '**Rebasing**: FOO', 'bbb'].join('\n'),
         },
-        { rebasingNotice: 'BAR' }
+        {
+          rebasingNotice: 'BAR',
+          debugData: {
+            updatedByRenovateVersion: '1.2.3',
+            createdByRenovateVersion: '1.2.3',
+          },
+        }
       );
       expect(res).toContain(['aaa', '**Rebasing**: BAR', 'bbb'].join('\n'));
     });
@@ -162,7 +188,12 @@ describe('workers/repository/update/pr/body/index', () => {
           upgrades: [],
           prBodyTemplate: 'PR BODY',
         },
-        {}
+        {
+          debugData: {
+            updatedByRenovateVersion: '1.2.3',
+            createdByRenovateVersion: '1.2.3',
+          },
+        }
       );
 
       const match = prDebugDataRe.exec(res);
