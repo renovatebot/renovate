@@ -2,6 +2,7 @@ import is from '@sindresorhus/is';
 import { load } from 'js-yaml';
 import { logger } from '../../../logger';
 import { cache } from '../../../util/cache/package/decorator';
+import type { HttpResponse } from '../../../util/http/types';
 import { ensureTrailingSlash } from '../../../util/url';
 import * as helmVersioning from '../../versioning/helm';
 import { Datasource } from '../datasource';
@@ -34,7 +35,7 @@ export class HelmDatasource extends Datasource {
   async getRepositoryData(
     helmRepository: string
   ): Promise<HelmRepositoryData | null> {
-    let res: any;
+    let res: HttpResponse<string>;
     try {
       res = await this.http.get('index.yaml', {
         baseUrl: ensureTrailingSlash(helmRepository),
@@ -87,11 +88,10 @@ export class HelmDatasource extends Datasource {
 
       return result;
     } catch (err) {
-      logger.warn(
-        { helmRepository },
+      logger.debug(
+        { helmRepository, err },
         `Failed to parse index.yaml from helm repository`
       );
-      logger.debug(err);
       return null;
     }
   }
@@ -107,7 +107,7 @@ export class HelmDatasource extends Datasource {
 
     const repositoryData = await this.getRepositoryData(helmRepository);
     if (!repositoryData) {
-      logger.debug(`Couldn't get index.yaml file from ${helmRepository}`);
+      logger.debug(`Missing repo data from ${helmRepository}`);
       return null;
     }
     const releases = repositoryData[packageName];
