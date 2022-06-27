@@ -376,8 +376,8 @@ describe('util/git/index', () => {
     it('link file', async () => {
       const file: FileChange = {
         type: 'addition',
-        path: 'link-to-future',
-        contents: 'future_file',
+        path: 'future_link',
+        contents: 'past_file',
         isSymlink: true,
       };
       const commit = await git.commitFiles({
@@ -385,7 +385,16 @@ describe('util/git/index', () => {
         files: [file],
         message: 'Create a link',
       });
-      expect(commit).not.toBeNull();
+      expect(commit).toBeString();
+      const tmpGit = Git(tmpDir.path);
+      const lsTree = await tmpGit.raw(['ls-tree', commit!]);
+      const files = lsTree
+        .trim()
+        .split(newlineRegex)
+        .map((x) => x.split(/\s/))
+        .map(([mode, type, _hash, name]) => [mode, type, name]);
+      expect(files).toContainEqual(['100644', 'blob', 'past_file']);
+      expect(files).toContainEqual(['120000', 'blob', 'future_link']);
     });
 
     it('deletes file', async () => {
