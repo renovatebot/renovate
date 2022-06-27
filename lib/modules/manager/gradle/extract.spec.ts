@@ -652,86 +652,43 @@ describe('modules/manager/gradle/extract', () => {
     ]);
 
     expect(res).toMatchObject([
-      {
-        packageFile: 'gradle.properties',
-        datasource: 'maven',
-        deps: [],
-      },
+      { packageFile: 'gradle.properties' },
       {
         packageFile: 'build.gradle',
-        datasource: 'maven',
-        deps: [
-          {
-            depName: 'io.jsonwebtoken:jjwt-api',
-            currentValue: '0.11.2',
-            managerData: {
-              fileReplacePosition: 507,
-              packageFile: 'build.gradle',
-            },
-            fileReplacePosition: 507,
-            registryUrls: ['https://repo.maven.apache.org/maven2'],
-          },
-        ],
+        deps: [{ depName: 'io.jsonwebtoken:jjwt-api' }],
       },
       {
         packageFile: 'gradle/libs2.gradle',
-        datasource: 'maven',
         deps: [
           {
             depName: 'com.google.protobuf:protobuf-java',
             currentValue: '3.18.2',
-            managerData: {
-              fileReplacePosition: 23,
-              packageFile: 'gradle/libs2.gradle',
-            },
-            groupName: 'protoBufVersion',
-            fileReplacePosition: 23,
-            registryUrls: ['https://repo.maven.apache.org/maven2'],
+            managerData: { packageFile: 'gradle/libs2.gradle' },
           },
         ],
       },
       {
         packageFile: 'gradleX/libs1.gradle',
-        datasource: 'maven',
         deps: [
           {
             depName: 'org.junit.jupiter:junit-jupiter-api',
             currentValue: '5.5.2',
-            managerData: {
-              fileReplacePosition: 20,
-              packageFile: 'gradleX/libs1.gradle',
-            },
-            groupName: 'junitVersion',
-            fileReplacePosition: 20,
-            registryUrls: ['https://repo.maven.apache.org/maven2'],
+            managerData: { packageFile: 'gradleX/libs1.gradle' },
           },
           {
             depName: 'org.junit.jupiter:junit-jupiter-engine',
             currentValue: '5.5.2',
-            managerData: {
-              fileReplacePosition: 20,
-              packageFile: 'gradleX/libs1.gradle',
-            },
-            groupName: 'junitVersion',
-            fileReplacePosition: 20,
-            registryUrls: ['https://repo.maven.apache.org/maven2'],
+            managerData: { packageFile: 'gradleX/libs1.gradle' },
           },
         ],
       },
       {
         packageFile: 'gradle/libs3.gradle',
-        datasource: 'maven',
         deps: [
           {
             depName: 'com.google.guava:guava',
             currentValue: '30.1-jre',
-            managerData: {
-              fileReplacePosition: 20,
-              packageFile: 'gradle/libs3.gradle',
-            },
-            groupName: 'guavaVersion',
-            fileReplacePosition: 20,
-            registryUrls: ['https://repo.maven.apache.org/maven2'],
+            managerData: { packageFile: 'gradle/libs3.gradle' },
           },
         ],
       },
