@@ -721,27 +721,10 @@ describe('modules/manager/gradle/extract', () => {
     ]);
 
     expect(res).toMatchObject([
-      {
-        packageFile: 'somesubdir/build.gradle',
-        datasource: 'maven',
-        deps: [],
-      },
+      { packageFile: 'somesubdir/build.gradle' },
       {
         packageFile: 'somesubdir/gradle/libs4.gradle',
-        datasource: 'maven',
-        deps: [
-          {
-            depName: 'com.google.protobuf:protobuf-java',
-            currentValue: '3.18.2',
-            managerData: {
-              fileReplacePosition: 23,
-              packageFile: 'somesubdir/gradle/libs4.gradle',
-            },
-            groupName: 'protoBufVersion',
-            fileReplacePosition: 23,
-            registryUrls: ['https://repo.maven.apache.org/maven2'],
-          },
-        ],
+        deps: [{ depName: 'com.google.protobuf:protobuf-java' }],
       },
     ]);
   });
