@@ -42,7 +42,7 @@ import {
 } from '../../../../util/merge-confidence';
 import { Limit, isLimitReached } from '../../../global/limits';
 import { BranchConfig, BranchResult, PrBlockedBy } from '../../../types';
-import { ensurePr, getPlatformPrOptions } from '../pr';
+import { ensurePr, getPlatformPrOptions, updatePrDebugData } from '../pr';
 import { checkAutoMerge } from '../pr/automerge';
 import { getPrBody } from '../pr/body';
 import { setArtifactErrorStatus } from './artifacts';
@@ -194,6 +194,7 @@ export async function processBranch(
             logger.debug('Manual rebase has been requested for PR');
           } else {
             const newBody = await getPrBody(branchConfig, {
+              debugData: updatePrDebugData(existingPr?.bodyStruct?.debugData),
               rebasingNotice:
                 'Renovate will not automatically rebase this PR, because other commits have been found.',
             });
