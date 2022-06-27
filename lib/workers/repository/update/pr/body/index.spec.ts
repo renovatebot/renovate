@@ -168,27 +168,5 @@ describe('workers/repository/update/pr/body/index', () => {
       const match = prDebugDataRe.exec(res);
       expect(match?.groups?.payload).toBeString();
     });
-
-    it('updates PR due to body change with pr data', async () => {
-      platform.massageMarkdown.mockImplementation((x) => x);
-      template.compile.mockImplementation((x) => x);
-      const res = await getPrBody(
-        {
-          manager: 'some-manager',
-          branchName: 'some-branch',
-          upgrades: [],
-          prBodyTemplate: `PR BODY \n<!--renovate-debug:ewogICJwckNyZWF0a-->\n`,
-        },
-        {
-          debugData: {
-            createdByRenovateVersion: '1.2.3',
-            updatedByRenovateVersion: '1.2.4',
-          },
-        }
-      );
-
-      const match = prDebugDataRe.exec(res);
-      expect(match?.groups?.payload).toBeString();
-    });
   });
 });
