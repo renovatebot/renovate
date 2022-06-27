@@ -66,18 +66,12 @@ export type EnsurePrResult = ResultWithPr | ResultWithoutPr;
 export function updatePrDebugData(
   debugData: PrDebugData | undefined
 ): PrDebugData {
-  let res: PrDebugData;
-  if (debugData) {
-    debugData.updatedByRenovateVersion = pkg.version;
-    res = debugData;
-  } else {
-    res = { updatedByRenovateVersion: pkg.version };
+  const createdByRenovateVersion = debugData?.createdByRenovateVersion ?? pkg.version;
+  const updatedByRenovateVersion = pkg.version;
+  return {
+    createdByRenovateVersion,
+    updatedByRenovateVersion,
   }
-
-  if (!res.createdByRenovateVersion) {
-    res.createdByRenovateVersion = pkg.version;
-  }
-  return res;
 }
 
 // Ensures that PR exists with matching title/body
