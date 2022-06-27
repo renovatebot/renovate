@@ -47,7 +47,7 @@
     "start": "node -r ts-node/register/transpile-only -- lib/renovate.ts",
     "test": "run-s lint test-schema type-check strict-check jest",
     "test-dirty": "git diff --exit-code",
-    "test-e2e": "npm pack && cd test/e2e && yarn install --no-lockfile --ignore-optional --prod && yarn test",
+    "test-e2e": "yarn pack && cd test/e2e && yarn install --no-lockfile --ignore-optional --prod && yarn test",
     "test-schema": "run-s create-json-schema",
     "tsc": "tsc",
     "type-check": "run-s generate:* \"tsc --noEmit {@}\" --",
