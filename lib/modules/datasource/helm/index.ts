@@ -87,11 +87,10 @@ export class HelmDatasource extends Datasource {
 
       return result;
     } catch (err) {
-      logger.warn(
-        { helmRepository },
+      logger.debug(
+        { helmRepository, err },
         `Failed to parse index.yaml from helm repository`
       );
-      logger.debug(err);
       return null;
     }
   }
@@ -107,7 +106,7 @@ export class HelmDatasource extends Datasource {
 
     const repositoryData = await this.getRepositoryData(helmRepository);
     if (!repositoryData) {
-      logger.debug(`Couldn't get index.yaml file from ${helmRepository}`);
+      logger.debug(`Missing repo data from ${helmRepository}`);
       return null;
     }
     const releases = repositoryData[packageName];
