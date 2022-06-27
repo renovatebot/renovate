@@ -35,7 +35,7 @@ For example, say you have these Rails gems in your Gemfile:
 
 ```
 gem 'rails'
-gem `railties`
+gem 'railties'
 gem 'actionmailer'
 gem 'actionpack'
 gem 'activemodel'
