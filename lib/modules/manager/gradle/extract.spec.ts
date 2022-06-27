@@ -807,37 +807,12 @@ describe('modules/manager/gradle/extract', () => {
     expect(res).toMatchObject([
       {
         packageFile: 'test.gradle',
-        datasource: 'maven',
         deps: [
-          {
-            depName: 'io.jsonwebtoken:jjwt-api',
-            currentValue: '0.11.2',
-            managerData: {
-              fileReplacePosition: 26,
-              packageFile: 'test.gradle',
-            },
-            groupName: 'jjwtVersion',
-            fileReplacePosition: 26,
-            registryUrls: ['https://repo.maven.apache.org/maven2'],
-          },
-          {
-            depName: 'io.jsonwebtoken:jjwt-impl',
-            currentValue: '0.11.2',
-            managerData: {
-              fileReplacePosition: 26,
-              packageFile: 'test.gradle',
-            },
-            groupName: 'jjwtVersion',
-            fileReplacePosition: 26,
-            registryUrls: ['https://repo.maven.apache.org/maven2'],
-          },
+          { depName: 'io.jsonwebtoken:jjwt-api' },
+          { depName: 'io.jsonwebtoken:jjwt-impl' },
         ],
       },
-      {
-        packageFile: 'build.gradle',
-        datasource: 'maven',
-        deps: [],
-      },
+      { packageFile: 'build.gradle' },
     ]);
   });
 });
