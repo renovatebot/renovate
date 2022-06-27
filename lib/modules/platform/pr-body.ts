@@ -14,6 +14,7 @@ const reviewableRegex = regEx(/\s*<!-- Reviewable:start -->/);
 
 export function hashBody(body: string | undefined): string {
   let result = body?.trim() ?? '';
+  result = result.replace(prDebugDataRe, '');
   const reviewableIndex = result.search(reviewableRegex);
   if (reviewableIndex > -1) {
     result = result.slice(0, reviewableIndex);
