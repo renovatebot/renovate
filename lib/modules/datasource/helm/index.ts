@@ -1,8 +1,8 @@
 import is from '@sindresorhus/is';
 import { load } from 'js-yaml';
-import { gt } from 'semver';
 import { logger } from '../../../logger';
 import { cache } from '../../../util/cache/package/decorator';
+import type { HttpResponse } from '../../../util/http/types';
 import { ensureTrailingSlash } from '../../../util/url';
 import * as helmVersioning from '../../versioning/helm';
 import { Datasource } from '../datasource';
@@ -35,7 +35,7 @@ export class HelmDatasource extends Datasource {
   async getRepositoryData(
     helmRepository: string
   ): Promise<HelmRepositoryData | null> {
-    let res: any;
+    let res: HttpResponse<string>;
     try {
       res = await this.http.get('index.yaml', {
         baseUrl: ensureTrailingSlash(helmRepository),
@@ -63,9 +63,17 @@ export class HelmDatasource extends Datasource {
       }
       const result: HelmRepositoryData = {};
       for (const [name, releases] of Object.entries(doc.entries)) {
-        const latestRelease = releases.sort((r0, r1) =>
-          gt(r0.version, r1.version) ? -1 : 1
-        )[0];
+        let latestRelease = releases[releases.length - 1];
+        const sortedReleases = releases
+          .filter(({ version }) => helmVersioning.api.isValid(version))
+          .sort((r0, r1) =>
+            helmVersioning.api.sortVersions(r0.version, r1.version)
+          );
+        const latestSortedRelease = sortedReleases[sortedReleases.length - 1];
+        if (latestSortedRelease) {
+          latestRelease = latestSortedRelease;
+        }
+
         const { sourceUrl, sourceDirectory } = findSourceUrl(latestRelease);
         result[name] = {
           homepage: latestRelease.home,
@@ -80,11 +88,10 @@ export class HelmDatasource extends Datasource {
 
       return result;
     } catch (err) {
-      logger.warn(
-        { helmRepository },
+      logger.debug(
+        { helmRepository, err },
         `Failed to parse index.yaml from helm repository`
       );
-      logger.debug(err);
       return null;
     }
   }
@@ -100,7 +107,7 @@ export class HelmDatasource extends Datasource {
 
     const repositoryData = await this.getRepositoryData(helmRepository);
     if (!repositoryData) {
-      logger.debug(`Couldn't get index.yaml file from ${helmRepository}`);
+      logger.debug(`Missing repo data from ${helmRepository}`);
       return null;
     }
     const releases = repositoryData[packageName];
