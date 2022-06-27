@@ -17,7 +17,7 @@ describe('modules/platform/pr-body', () => {
           'something \n<!--renovate-debug:eyJjcmVhdGVkQnlSZW5vdmF0ZVZlcnNpb24iOiAiMS4yLjEiLCJ1cGRhdGVkQnlSZW5vdmF0ZVZlcnNpb24iOiAiMS4yLjMifQ==-->'
         )
       ).toEqual({
-        hash: '82bc749b41acc2a3a3cc398fbfb0717fd05db152b22e48ac7d27f03a06a5dc3a',
+        hash: '3fc9b689459d738f8c88a3a48aa9e33542016b7a4052e001aaa536fca74813cb',
         debugData: {
           createdByRenovateVersion: '1.2.1',
           updatedByRenovateVersion: '1.2.3',
