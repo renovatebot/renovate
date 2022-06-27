@@ -6,11 +6,12 @@ import semver from 'semver';
 import { mergeChildConfig } from '../../../config';
 import { CONFIG_SECRETS_EXPOSED } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
-import { newlineRegex, regEx } from '../../../util/regex';
+import { regEx } from '../../../util/regex';
 import { sanitize } from '../../../util/sanitize';
 import * as template from '../../../util/template';
 import type { BranchConfig, BranchUpgradeConfig } from '../../types';
-import { CommitMessage } from '../model/commit-message';
+import { CommitMessageFactory } from '../model/commit-message-factory';
+import { SemanticCommitMessage } from '../model/semantic-commit-message';
 
 function isTypesGroup(branchUpgrades: BranchUpgradeConfig[]): boolean {
   return (
@@ -167,28 +168,27 @@ export function generateBranchConfig(
     } else if (semver.valid(toVersions[0])) {
       upgrade.isRange = false;
     }
+    const commitMessageFactory = new CommitMessageFactory(upgrade);
+    const commitMessage = commitMessageFactory.create();
     // Use templates to generate strings
-    if (upgrade.semanticCommits === 'enabled' && !upgrade.commitMessagePrefix) {
+    if (
+      SemanticCommitMessage.is(commitMessage) &&
+      upgrade.semanticCommitScope
+    ) {
       logger.trace('Upgrade has semantic commits enabled');
-      let semanticPrefix = upgrade.semanticCommitType;
-      if (upgrade.semanticCommitScope) {
-        semanticPrefix += `(${template.compile(
-          upgrade.semanticCommitScope,
-          upgrade
-        )})`;
-      }
-      upgrade.commitMessagePrefix = CommitMessage.formatPrefix(semanticPrefix!);
-      upgrade.toLowerCase =
-        regEx(/[A-Z]/).exec(upgrade.semanticCommitType!) === null &&
-        !upgrade.semanticCommitType!.startsWith(':');
+      commitMessage.scope = template.compile(
+        upgrade.semanticCommitScope,
+        upgrade
+      );
     }
     // Compile a few times in case there are nested templates
-    upgrade.commitMessage = template.compile(
+    commitMessage.subject = template.compile(
       upgrade.commitMessage ?? '',
       upgrade
     );
-    upgrade.commitMessage = template.compile(upgrade.commitMessage, upgrade);
-    upgrade.commitMessage = template.compile(upgrade.commitMessage, upgrade);
+    commitMessage.subject = template.compile(commitMessage.subject, upgrade);
+    commitMessage.subject = template.compile(commitMessage.subject, upgrade);
+    upgrade.commitMessage = commitMessage.toString();
     // istanbul ignore if
     if (upgrade.commitMessage !== sanitize(upgrade.commitMessage)) {
       logger.debug(
@@ -197,23 +197,14 @@ export function generateBranchConfig(
       );
       throw new Error(CONFIG_SECRETS_EXPOSED);
     }
-    upgrade.commitMessage = upgrade.commitMessage.trim(); // Trim exterior whitespace
-    upgrade.commitMessage = upgrade.commitMessage.replace(regEx(/\s+/g), ' '); // Trim extra whitespace inside string
-    upgrade.commitMessage = upgrade.commitMessage.replace(
+    commitMessage.subject = commitMessage.subject.replace(
       regEx(/to vv(\d)/),
       'to v$1'
     );
-    if (upgrade.toLowerCase) {
-      // We only need to lowercase the first line
-      const splitMessage = upgrade.commitMessage.split(newlineRegex);
-      splitMessage[0] = splitMessage[0].toLowerCase();
-      upgrade.commitMessage = splitMessage.join('\n');
-    }
+    upgrade.commitMessage = commitMessage.toString();
     if (upgrade.commitBody) {
-      upgrade.commitMessage = `${upgrade.commitMessage}\n\n${template.compile(
-        upgrade.commitBody,
-        upgrade
-      )}`;
+      commitMessage.body = template.compile(upgrade.commitBody, upgrade);
+      upgrade.commitMessage = commitMessage.toString();
     }
     logger.trace(`commitMessage: ` + JSON.stringify(upgrade.commitMessage));
     if (upgrade.prTitle) {
@@ -235,7 +226,7 @@ export function generateBranchConfig(
         upgrade.prTitle = upgrade.prTitle.toLowerCase();
       }
     } else {
-      [upgrade.prTitle] = upgrade.commitMessage.split(newlineRegex);
+      upgrade.prTitle = commitMessage.title;
     }
     upgrade.prTitle += upgrade.hasBaseBranches ? ' ({{baseBranch}})' : '';
     if (upgrade.isGroup) {
