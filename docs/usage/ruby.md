@@ -34,6 +34,7 @@ This is because Rails's gems must be updated in a batch.
 For example, say you have these Rails gems in your Gemfile:
 
 ```
+gem 'bootsnap'
 gem 'railties'
 gem 'actionmailer'
 gem 'actionpack'
