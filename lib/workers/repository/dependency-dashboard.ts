@@ -25,11 +25,9 @@ function checkApproveAllPendingPR(issueBody: string): string {
   );
   if (checkedApproveAll?.length) {
     const checkPending = ` - [ ] <!-- approve-branch=`;
-    // eslint-disable-next-line no-param-reassign
-    issueBody = issueBody.replaceAll(
-      checkPending,
-      checkPending.replace('[ ]', '[x]')
-    );
+    issueBody = issueBody
+      .toString()
+      .replaceAll(checkPending, checkPending.replace('[ ]', '[x]'));
   }
   return issueBody;
 }
@@ -42,19 +40,15 @@ function checkApproveAllRateLimitdPR(issueBody: string): string {
   );
   if (checkedApproveAll?.length) {
     const checkPending = ` - [ ] <!-- unlimit-branch=`;
-    // eslint-disable-next-line no-param-reassign
-    issueBody = issueBody.replaceAll(
-      checkPending,
-      checkPending.replace('[ ]', '[x]')
-    );
+    issueBody = issueBody
+      .toString()
+      .replaceAll(checkPending, checkPending.replace('[ ]', '[x]'));
   }
   return issueBody;
 }
 
 function parseDashboardIssue(issueBody: string): DependencyDashboard {
-  // eslint-disable-next-line no-param-reassign
   issueBody = checkApproveAllPendingPR(issueBody);
-  // eslint-disable-next-line no-param-reassign
   issueBody = checkApproveAllRateLimitdPR(issueBody);
   const checkMatch = ' - \\[x\\] <!-- ([a-zA-Z]+)-branch=([^\\s]+) -->';
   const checked = issueBody.match(regEx(checkMatch, 'g'));
