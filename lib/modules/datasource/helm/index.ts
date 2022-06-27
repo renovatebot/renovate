@@ -2,6 +2,7 @@ import is from '@sindresorhus/is';
 import { load } from 'js-yaml';
 import { logger } from '../../../logger';
 import { cache } from '../../../util/cache/package/decorator';
+import type { HttpResponse } from '../../../util/http/types';
 import { ensureTrailingSlash } from '../../../util/url';
 import * as helmVersioning from '../../versioning/helm';
 import { Datasource } from '../datasource';
@@ -34,7 +35,7 @@ export class HelmDatasource extends Datasource {
   async getRepositoryData(
     helmRepository: string
   ): Promise<HelmRepositoryData | null> {
-    let res: any;
+    let res: HttpResponse<string>;
     try {
       res = await this.http.get('index.yaml', {
         baseUrl: ensureTrailingSlash(helmRepository),
