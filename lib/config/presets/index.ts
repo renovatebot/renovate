@@ -360,7 +360,7 @@ export async function resolveConfigPresets(
 
         // istanbul ignore if
         if (shallowResolve && tempExtends.length) {
-          config?.extends.push(...tempExtends);
+          config?.extends?.push(...tempExtends);
         }
       }
     }
