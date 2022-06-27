@@ -233,7 +233,6 @@ export async function getPreset(
   if (!presetConfig) {
     throw new Error(PRESET_DEP_NOT_FOUND);
   }
-  // istanbul ignore if
   if (is.nullOrUndefined(cachedResult)) {
     memCache.set(cacheKey, presetConfig);
   }
