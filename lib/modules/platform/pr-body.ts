@@ -4,7 +4,9 @@ import { regEx } from '../../util/regex';
 import { fromBase64 } from '../../util/string';
 import type { PrBodyStruct } from './types';
 
-export const prDebugDataRe = regEx(/<!--renovate-debug:(?<payload>.*?)-->/s);
+export const prDebugDataRe = regEx(
+  /\n?<!--renovate-debug:(?<payload>.*?)-->\n?/
+);
 
 function noWhitespaceOrHeadings(input: string): string {
   return input.replace(regEx(/\r?\n|\r|\s|#/g), '');
