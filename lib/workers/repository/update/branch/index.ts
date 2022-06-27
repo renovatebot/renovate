@@ -85,7 +85,6 @@ export async function processBranch(
   let config: BranchConfig = { ...branchConfig };
   logger.trace({ config }, 'processBranch()');
   let branchExists = gitBranchExists(config.branchName);
-
   if (!branchExists && config.branchPrefix !== config.branchPrefixOld) {
     const branchName = config.branchName.replace(
       config.branchPrefix!,
@@ -278,11 +277,7 @@ export async function processBranch(
         'Branch + PR exists but is not scheduled -- will update if necessary'
       );
     }
-    // eslint-disable-next-line no-console
-    console.time('checkedout');
     await checkoutBranch(config.baseBranch!);
-    // eslint-disable-next-line no-console
-    console.timeEnd('checkedout');
     //stability checks
     if (
       config.upgrades.some(
