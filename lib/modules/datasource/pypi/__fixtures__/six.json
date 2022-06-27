@@ -1,0 +1,134 @@
+{
+  "info": {
+    "author": "Benjamin Peterson",
+    "author_email": "benjamin@python.org",
+    "bugtrack_url": null,
+    "classifiers": [
+      "Development Status :: 5 - Production/Stable",
+      "Intended Audience :: Developers",
+      "License :: OSI Approved :: MIT License",
+      "Programming Language :: Python :: 2",
+      "Programming Language :: Python :: 3",
+      "Topic :: Software Development :: Libraries",
+      "Topic :: Utilities"
+    ],
+    "description": ".. image:: https://img.shields.io/pypi/v/six.svg\n   :target: https://pypi.org/project/six/\n   :alt: six on PyPI\n\n.. image:: https://travis-ci.org/benjaminp/six.svg?branch=master\n   :target: https://travis-ci.org/benjaminp/six\n   :alt: six on TravisCI\n\n.. image:: https://readthedocs.org/projects/six/badge/?version=latest\n   :target: https://six.readthedocs.io/\n   :alt: six's documentation on Read the Docs\n\n.. image:: https://img.shields.io/badge/license-MIT-green.svg\n   :target: https://github.com/benjaminp/six/blob/master/LICENSE\n   :alt: MIT License badge\n\nSix is a Python 2 and 3 compatibility library.  It provides utility functions\nfor smoothing over the differences between the Python versions with the goal of\nwriting Python code that is compatible on both Python versions.  See the\ndocumentation for more information on what is provided.\n\nSix supports Python 2.7 and 3.3+.  It is contained in only one Python\nfile, so it can be easily copied into your project. (The copyright and license\nnotice must be retained.)\n\nOnline documentation is at https://six.readthedocs.io/.\n\nBugs can be reported to https://github.com/benjaminp/six.  The code can also\nbe found there.\n\n\n",
+    "description_content_type": "",
+    "docs_url": null,
+    "download_url": "",
+    "downloads": {
+      "last_day": -1,
+      "last_month": -1,
+      "last_week": -1
+    },
+    "home_page": "https://github.com/benjaminp/six",
+    "keywords": "",
+    "license": "MIT",
+    "maintainer": "",
+    "maintainer_email": "",
+    "name": "six",
+    "package_url": "https://pypi.org/project/six/",
+    "platform": "",
+    "project_url": "https://pypi.org/project/six/",
+    "project_urls": {
+      "Homepage": "https://github.com/benjaminp/six"
+    },
+    "release_url": "https://pypi.org/project/six/1.16.0/",
+    "requires_dist": null,
+    "requires_python": ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*",
+    "summary": "Python 2 and 3 compatibility utilities",
+    "version": "1.16.0",
+    "yanked": false,
+    "yanked_reason": null
+  },
+  "last_serial": 10266075,
+  "releases": {
+    "0.9.0": [
+      {
+        "comment_text": "",
+        "digests": {
+          "md5": "5ce2947347101b9f54674c19ef88233d",
+          "sha256": "14fd1ed3dd0e1a46cc53b8fc890b5a3b11737515aeb7f42c3af9f38e8d8975d7"
+        },
+        "downloads": -1,
+        "filename": "six-0.9.0.tar.gz",
+        "has_sig": true,
+        "md5_digest": "5ce2947347101b9f54674c19ef88233d",
+        "packagetype": "sdist",
+        "python_version": "source",
+        "requires_python": null,
+        "size": 13292,
+        "upload_time": "2010-06-29T19:56:36",
+        "upload_time_iso_8601": "2010-06-29T19:56:36.719942Z",
+        "url": "https://files.pythonhosted.org/packages/0e/f9/66471f9b7e9291cca697b2e61a10645a537f389a9d5c0679d50dd86b20f7/six-0.9.0.tar.gz",
+        "yanked": false,
+        "yanked_reason": null
+      }
+    ],
+    "0.9.1": [
+      {
+        "comment_text": "",
+        "digests": {
+          "md5": "1b249e0011355722f569406135a8ac93",
+          "sha256": "23a656e7db613f75d061570e3b2cf57d2a498501018593e6a01e24ed211a78dc"
+        },
+        "downloads": -1,
+        "filename": "six-0.9.1.tar.gz",
+        "has_sig": false,
+        "md5_digest": "1b249e0011355722f569406135a8ac93",
+        "packagetype": "sdist",
+        "python_version": "source",
+        "requires_python": null,
+        "size": 13653,
+        "upload_time": "2010-06-30T22:32:11",
+        "upload_time_iso_8601": "2010-06-30T22:32:11.719338Z",
+        "url": "https://files.pythonhosted.org/packages/4e/02/f08545a99829a04e841b6443267f216629c723c23fb9cfd17c99c068e33a/six-0.9.1.tar.gz",
+        "yanked": false,
+        "yanked_reason": null
+      }
+    ]
+  },
+  "urls": [
+    {
+      "comment_text": "",
+      "digests": {
+        "md5": "529d7fd7e14612ccde86417b4402d6f3",
+        "sha256": "8abb2f1d86890a2dfb989f9a77cfcfd3e47c2a354b01111771326f8aa26e0254"
+      },
+      "downloads": -1,
+      "filename": "six-1.16.0-py2.py3-none-any.whl",
+      "has_sig": false,
+      "md5_digest": "529d7fd7e14612ccde86417b4402d6f3",
+      "packagetype": "bdist_wheel",
+      "python_version": "py2.py3",
+      "requires_python": ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*",
+      "size": 11053,
+      "upload_time": "2021-05-05T14:18:17",
+      "upload_time_iso_8601": "2021-05-05T14:18:17.237677Z",
+      "url": "https://files.pythonhosted.org/packages/d9/5a/e7c31adbe875f2abbb91bd84cf2dc52d792b5a01506781dbcf25c91daf11/six-1.16.0-py2.py3-none-any.whl",
+      "yanked": false,
+      "yanked_reason": null
+    },
+    {
+      "comment_text": "",
+      "digests": {
+        "md5": "a7c927740e4964dd29b72cebfc1429bb",
+        "sha256": "1e61c37477a1626458e36f7b1d82aa5c9b094fa4802892072e49de9c60c4c926"
+      },
+      "downloads": -1,
+      "filename": "six-1.16.0.tar.gz",
+      "has_sig": false,
+      "md5_digest": "a7c927740e4964dd29b72cebfc1429bb",
+      "packagetype": "sdist",
+      "python_version": "source",
+      "requires_python": ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*",
+      "size": 34041,
+      "upload_time": "2021-05-05T14:18:18",
+      "upload_time_iso_8601": "2021-05-05T14:18:18.379524Z",
+      "url": "https://files.pythonhosted.org/packages/71/39/171f1c67cd00715f190ba0b100d606d440a28c93c7714febeca8b79af85e/six-1.16.0.tar.gz",
+      "yanked": false,
+      "yanked_reason": null
+    }
+  ],
+  "vulnerabilities": []
+}

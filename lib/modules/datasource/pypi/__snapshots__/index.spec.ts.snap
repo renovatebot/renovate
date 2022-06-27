@@ -44,7 +44,7 @@ Object {
 
 exports[`modules/datasource/pypi/index getReleases parses data-requires-python and respects constraints from simple endpoint 1`] = `
 Object {
-  "registryUrl": "https://pypi.org/simple",
+  "registryUrl": "https://some.registry.org/simple",
   "releases": Array [
     Object {
       "version": "0.1.2",
@@ -112,7 +112,7 @@ Object {
 
 exports[`modules/datasource/pypi/index getReleases process data from simple endpoint 1`] = `
 Object {
-  "registryUrl": "https://pypi.org/simple",
+  "registryUrl": "https://some.registry.org/simple",
   "releases": Array [
     Object {
       "version": "0.1.2",
@@ -154,7 +154,7 @@ Object {
 
 exports[`modules/datasource/pypi/index getReleases process data from simple endpoint with hyphens replaced with underscores 1`] = `
 Object {
-  "registryUrl": "https://pypi.org/simple",
+  "registryUrl": "https://some.registry.org/simple",
   "releases": Array [
     Object {
       "version": "0.0.5",
@@ -278,5 +278,22 @@ Object {
       "version": "0.31.0",
     },
   ],
+}
+`;
+
+exports[`modules/datasource/pypi/index uses https://pypi.org/pypi/ instead of https://pypi.org/simple/ 1`] = `
+Object {
+  "registryUrl": "https://pypi.org/simple",
+  "releases": Array [
+    Object {
+      "releaseTimestamp": "2010-06-29T19:56:36.000Z",
+      "version": "0.9.0",
+    },
+    Object {
+      "releaseTimestamp": "2010-06-30T22:32:11.000Z",
+      "version": "0.9.1",
+    },
+  ],
+  "sourceUrl": "https://github.com/benjaminp/six",
 }
 `;

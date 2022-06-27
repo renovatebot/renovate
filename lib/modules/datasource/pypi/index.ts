@@ -7,9 +7,8 @@ import { ensureTrailingSlash } from '../../../util/url';
 import * as pep440 from '../../versioning/pep440';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
+import { isGitHubRepo } from './common';
 import type { PypiJSON, PypiJSONRelease, Releases } from './types';
-
-const githubRepoPattern = regEx(/^https?:\/\/github\.com\/[^\\/]+\/[^\\/]+$/);
 
 export class PypiDatasource extends Datasource {
   static readonly id = 'pypi';
@@ -35,7 +34,14 @@ export class PypiDatasource extends Datasource {
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     let dependency: ReleaseResult | null = null;
-    const hostUrl = ensureTrailingSlash(`${registryUrl}`);
+    // if registryUrl is https://pypi.org/simple use https://pypi.org/pypi instead
+    // for more visit https://github.com/renovatebot/renovate/issues/15938#issuecomment-1167244918
+    const hostUrl = ensureTrailingSlash(
+      registryUrl?.replace(
+        'https://pypi.org/simple',
+        'https://pypi.org/pypi'
+      ) ?? ''
+    );
     const normalizedLookupName = PypiDatasource.normalizeName(packageName);
 
     // not all simple indexes use this identifier, but most do
@@ -103,7 +109,7 @@ export class PypiDatasource extends Datasource {
 
     if (dep.info?.home_page) {
       dependency.homepage = dep.info.home_page;
-      if (githubRepoPattern.exec(dep.info.home_page)) {
+      if (isGitHubRepo(dep.info.home_page)) {
         dependency.sourceUrl = dep.info.home_page.replace(
           'http://',
           'https://'
@@ -120,7 +126,7 @@ export class PypiDatasource extends Datasource {
           (lower.startsWith('repo') ||
             lower === 'code' ||
             lower === 'source' ||
-            githubRepoPattern.exec(projectUrl))
+            isGitHubRepo(projectUrl))
         ) {
           dependency.sourceUrl = projectUrl;
         }
