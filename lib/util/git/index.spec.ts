@@ -373,6 +373,21 @@ describe('util/git/index', () => {
       expect(commit).not.toBeNull();
     });
 
+    it('link file', async () => {
+      const file: FileChange = {
+        type: 'addition',
+        path: 'link-to-future',
+        contents: 'future_file',
+        isSymlink: true,
+      };
+      const commit = await git.commitFiles({
+        branchName: 'renovate/future_branch',
+        files: [file],
+        message: 'Create a link',
+      });
+      expect(commit).not.toBeNull();
+    });
+
     it('deletes file', async () => {
       const file: FileChange = {
         type: 'deletion',
