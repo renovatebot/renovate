@@ -1,11 +1,9 @@
 import { PrDebugData, platform } from '../../../../../modules/platform';
-import { prDebugDataRe } from '../../../../../modules/platform/pr-body';
 import { regEx } from '../../../../../util/regex';
 import { toBase64 } from '../../../../../util/string';
 import * as template from '../../../../../util/template';
 import { ensureTrailingSlash } from '../../../../../util/url';
 import type { BranchConfig } from '../../../../types';
-import { updatePrDebugData } from '../index';
 import { getChangelogs } from './changelogs';
 import { getPrConfigDescription } from './config-description';
 import { getControls } from './controls';
@@ -63,7 +61,7 @@ function massageUpdateMetadata(config: BranchConfig): void {
 interface PrBodyConfig {
   appendExtra?: string | null | undefined;
   rebasingNotice?: string;
-  debugData?: PrDebugData;
+  debugData: PrDebugData;
 }
 
 const rebasingRegex = regEx(/\*\*Rebasing\*\*: .*/);
@@ -89,16 +87,8 @@ export async function getPrBody(
     prBody = template.compile(prBodyTemplate, content, false);
     prBody = prBody.trim();
     prBody = prBody.replace(regEx(/\n\n\n+/g), '\n\n');
-    const debugData = updatePrDebugData(prBodyConfig?.debugData);
-    const prDebugData64 = toBase64(JSON.stringify(debugData));
-    if (prBodyConfig?.debugData) {
-      prBody = prBody.replace(
-        prDebugDataRe,
-        `<!--renovate-debug:${prDebugData64}-->`
-      );
-    } else {
-      prBody += `\n<!--renovate-debug:${prDebugData64}-->\n`;
-    }
+    const prDebugData64 = toBase64(JSON.stringify(prBodyConfig.debugData));
+    prBody += `\n<!--renovate-debug:${prDebugData64}-->\n`;
     prBody = platform.massageMarkdown(prBody);
 
     if (prBodyConfig?.rebasingNotice) {
