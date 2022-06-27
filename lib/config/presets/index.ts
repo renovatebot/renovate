@@ -222,7 +222,7 @@ export async function getPreset(
 
   const cacheKey = preset;
   const cachedResult = memCache.get<Preset>(cacheKey);
-  let presetConfig = is.nullOrUndefined(cachedResult)
+  let presetConfig = is.undefined(cachedResult)
     ? await presetSources[presetSource].getPreset({
         repo,
         presetPath,
@@ -233,7 +233,7 @@ export async function getPreset(
   if (!presetConfig) {
     throw new Error(PRESET_DEP_NOT_FOUND);
   }
-  if (is.nullOrUndefined(cachedResult)) {
+  if (is.undefined(cachedResult)) {
     memCache.set(cacheKey, presetConfig);
   }
 
