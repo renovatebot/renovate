@@ -11,10 +11,10 @@ export function isHermit(): boolean {
   return binarySource === 'hermit';
 }
 
-function statFileSync(f: string): fs.Stats | undefined {
+async function statFile(f: string): Promise<fs.Stats | undefined> {
   let exists: fs.Stats | undefined = undefined;
   try {
-    exists = fs.statSync(f);
+    exists = await fs.stat(f);
   } catch (e) {
     // not doing anything when file not exists for errors
   }
@@ -22,20 +22,23 @@ function statFileSync(f: string): fs.Stats | undefined {
   return exists;
 }
 
-function statHermit(defaultCwd: string, parts: string[]): fs.Stats | undefined {
+async function statHermit(
+  defaultCwd: string,
+  parts: string[]
+): Promise<fs.Stats | undefined> {
   const hermitForCwd = upath.join(...[defaultCwd, ...parts, 'bin', 'hermit']);
   logger.trace({ hermitForCwd }, 'looking up hermit');
-  return statFileSync(hermitForCwd);
+  return await statFile(hermitForCwd);
 }
 
-export function findHermitCwd(cwd: string): string {
+export async function findHermitCwd(cwd: string): Promise<string> {
   const defaultCwd = GlobalConfig.get('localDir') ?? '';
   const parts = cwd.replace(defaultCwd, '').split(upath.sep);
   let exists: fs.Stats | undefined = undefined;
 
   // search the current relative path until reach the defaultCwd
   while (parts.length > 0) {
-    exists = statHermit(defaultCwd, parts);
+    exists = await statHermit(defaultCwd, parts);
     // on file found. break out of the loop
     if (exists !== undefined) {
       break;
@@ -46,7 +49,7 @@ export function findHermitCwd(cwd: string): string {
 
   // search in defaultCwd
   if (exists === undefined) {
-    exists = statHermit(defaultCwd, parts);
+    exists = await statHermit(defaultCwd, parts);
   }
 
   if (exists === undefined) {
@@ -62,7 +65,7 @@ export async function getHermitEnvs(
   rawOptions: RawExecOptions
 ): Promise<Record<string, string>> {
   const cwd = (rawOptions.cwd ?? '').toString();
-  const hermitCwd = findHermitCwd(cwd);
+  const hermitCwd = await findHermitCwd(cwd);
   logger.debug({ cwd, hermitCwd }, 'fetching hermit environment variables');
   // with -r will output the raw unquoted environment variables to consume
   const hermitEnvResp = await rawExec('./hermit env -r', {

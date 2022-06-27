@@ -24,34 +24,35 @@ describe('util/exec/hermit', () => {
   });
 
   describe('findHermitCwd', () => {
-    it('should find the closest hermit cwd to the given path', () => {
+    it('should find the closest hermit cwd to the given path', async () => {
       const root = '/usr/src/app/repository-a';
       globalConfigMock.get.mockReturnValue(root);
       const nestedCwd = 'nested/other/directory';
-      fsMock.statSync.mockImplementation((p) => {
+      fsMock.stat.mockImplementation((p) => {
         if (p === `${root}/bin/hermit` || p === `${root}/nested/bin/hermit`) {
-          return {} as fs.Stats;
+          return Promise.resolve({} as fs.Stats);
         }
 
-        throw new Error('not exists');
+        return Promise.reject('not exists');
       });
 
-      expect(findHermitCwd(nestedCwd)).toBe(`${root}/nested/bin`);
-      expect(findHermitCwd('other/directory')).toBe(`${root}/bin`);
+      const nestedBin = await findHermitCwd(nestedCwd);
+      const rootBin = await findHermitCwd('other/directory');
+
+      expect(nestedBin).toBe(`${root}/nested/bin`);
+      expect(rootBin).toBe(`${root}/bin`);
     });
 
-    it('should throw error when hermit cwd is not found', () => {
+    it('should throw error when hermit cwd is not found', async () => {
       const root = '/usr/src/app/repository-a';
       const err = new Error('hermit not found for other/directory');
       globalConfigMock.get.mockReturnValue(root);
-      fsMock.statSync.mockImplementation(() => {
-        throw new Error('not exists');
-      });
+      fsMock.stat.mockRejectedValue('not exists');
 
-      let e: Error = undefined;
+      let e: Error | undefined = undefined;
 
       try {
-        findHermitCwd('other/directory');
+        await findHermitCwd('other/directory');
       } catch (err) {
         e = err;
       }
@@ -64,12 +65,12 @@ describe('util/exec/hermit', () => {
     it('should return hermit environment variables when hermit env returns successfully', async () => {
       const root = '/usr/src/app/repository-a';
       globalConfigMock.get.mockReturnValue(root);
-      fsMock.statSync.mockImplementation((p) => {
+      fsMock.stat.mockImplementation((p) => {
         if (p === `${root}/bin/hermit`) {
-          return {} as fs.Stats;
+          return Promise.resolve({} as fs.Stats);
         }
 
-        throw new Error('not exists');
+        return Promise.reject('not exists');
       });
       rawExecMock.mockResolvedValue({
         stdout: `GOBIN=/usr/src/app/repository-a/.hermit/go/bin
