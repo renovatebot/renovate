@@ -38,6 +38,7 @@ function getDepWarnings(
   const warningFiles: string[] = [];
   for (const files of Object.values(packageFiles ?? {})) {
     for (const file of files ?? []) {
+      // TODO: remove condition when type is fixed (#7154)
       if (file.packageFile) {
         for (const dep of file.deps ?? []) {
           for (const w of dep.warnings ?? []) {
