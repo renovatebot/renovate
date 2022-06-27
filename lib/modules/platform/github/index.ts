@@ -126,8 +126,13 @@ export async function initPlatform({
     );
   }
 
-  if (token.startsWith('x-access-token:') || token.startsWith('ghs_')) {
+  let prefixedToken: string = token;
+  if (token.startsWith('x-access-token:')) {
     platformConfig.isGHApp = true;
+    prefixedToken = token;
+  } else if (token.startsWith('ghs_')) {
+    platformConfig.isGHApp = true;
+    prefixedToken = 'x-access-token:' + token;
   }
 
   if (endpoint) {
@@ -137,7 +142,7 @@ export async function initPlatform({
     logger.debug('Using default github endpoint: ' + platformConfig.endpoint);
   }
 
-  await detectGhe(token);
+  await detectGhe(prefixedToken);
 
   let renovateUsername: string;
   if (username) {
@@ -145,7 +150,7 @@ export async function initPlatform({
   } else {
     platformConfig.userDetails ??= await getUserDetails(
       platformConfig.endpoint,
-      token
+      prefixedToken
     );
     renovateUsername = platformConfig.userDetails.username;
   }
@@ -153,11 +158,11 @@ export async function initPlatform({
   if (!gitAuthor) {
     platformConfig.userDetails ??= await getUserDetails(
       platformConfig.endpoint,
-      token
+      prefixedToken
     );
     platformConfig.userEmail ??= await getUserEmail(
       platformConfig.endpoint,
-      token
+      prefixedToken
     );
     if (platformConfig.userEmail) {
       discoveredGitAuthor = `${platformConfig.userDetails.name} <${platformConfig.userEmail}>`;
@@ -168,6 +173,7 @@ export async function initPlatform({
     endpoint: platformConfig.endpoint,
     gitAuthor: gitAuthor ?? discoveredGitAuthor,
     renovateUsername,
+    token: prefixedToken,
   };
 
   return platformResult;
@@ -490,16 +496,11 @@ export async function initRepo({
     logger.debug('Using forkToken for git init');
     parsedEndpoint.auth = config.forkToken ?? null;
   } else {
-    let tokenType = 'personal access';
-    if (opts.token?.startsWith('x-access-token:')) {
-      tokenType = 'app';
-    } else if (opts.token?.startsWith('ghs_')) {
-      tokenType = 'app';
-      parsedEndpoint.auth = `x-access-token:${opts.token}`;
-    } else {
-      parsedEndpoint.auth = opts.token ?? null;
-    }
+    const tokenType = opts.token?.startsWith('x-access-token:')
+      ? 'app'
+      : 'personal access';
     logger.debug(`Using ${tokenType} token for git init`);
+    parsedEndpoint.auth = opts.token ?? null;
   }
   // TODO: null checks (#7154)
   parsedEndpoint.host = parsedEndpoint.host!.replace(
