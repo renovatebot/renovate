@@ -82,6 +82,27 @@ Non-major updates in SemVer ecosystems shouldn't have breaking changes (if they 
 
 The `matchCurrentVersion` setting above is a rule to exclude any dependencies which are pre-1.0.0 because those can make breaking changes at _any_ time according to the SemVer spec.
 
+### Faster merges with platform-native automerge
+
+You can speed up merges by letting Renovate use your platform's native automerge.
+The config option is called `platformAutomerge`.
+If `automerge=true` and `automergeType=pr` then you can set `platformAutomerge=true`.
+
+For example:
+
+```json
+{
+  "lockFileMaintenance": {
+    "enabled": true,
+    "automerge": true,
+    "automergeType": "pr",
+    "platformAutomerge": true
+  }
+}
+```
+
+For more information read [`platformAutomerge`](https://docs.renovatebot.com/configuration-options/#platformautomerge).
+
 ## Automerging and scheduling
 
 Automerging is particularly beneficial if you have configured a schedule, because Renovate on its own may be able to automerge the majority of your updates.
