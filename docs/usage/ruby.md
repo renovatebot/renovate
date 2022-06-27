@@ -25,3 +25,23 @@ If you always want to have the latest available version, consider specifying `ge
 
 You can install the [Renovate App](https://github.com/apps/renovate) on GitHub.
 Or you can check out [Renovate OSS](https://github.com/renovatebot/renovate) to self-host Renovate.
+
+## Ruby on Rails
+
+Renovate doesn't support [Rails](https://rubyonrails.org/) gems correctly.
+This is because Rails's gems must be updated in a batch.
+
+For example, say you have these Rails gems in your Gemfile:
+
+```
+gem 'rails'
+gem `railties`
+gem 'actionmailer'
+gem 'actionpack'
+gem 'activemodel'
+gem 'activerecord'
+gem 'activesupport'
+```
+
+Running `bundler lock --update actionpack` won't do anything, apart from updating the `actionpack` gem.
+To update your gems you should run `bundler lock --update rails railties actionmailer actionpack activemodel activerecord activesupport`.
