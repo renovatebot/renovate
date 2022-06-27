@@ -363,14 +363,16 @@ export async function processBranch(
     if (userRebaseRequested) {
       logger.debug('Manual rebase requested via Dependency Dashboard');
       config.reuseExistingBranch = false;
-    } else if (userApproveAllPendingPRs) {
+    }
+    if (userApproveAllPendingPRs) {
       logger.debug(
         'Manual Approve All Pending PRs requested via Dependency Dashboard'
       );
       config.reuseExistingBranch = false;
-    } else if (userApproveAllRatelimitedPRs) {
+    }
+    if (userApproveAllRatelimitedPRs) {
       logger.debug(
-        'Manual Approve All Rate limited PRs requested via Dependency Dashboard'
+        'Manual Open All Rate limited PRs requested via Dependency Dashboard'
       );
       config.reuseExistingBranch = false;
     } else if (branchExists && config.rebaseWhen === 'never') {

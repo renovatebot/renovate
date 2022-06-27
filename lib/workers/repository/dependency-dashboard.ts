@@ -36,7 +36,7 @@ function checkApproveAllPendingPR(issueBody: string): string {
 
 function checkApproveAllRateLimitdPR(issueBody: string): string {
   const checkApproveAllPendingPR =
-    ' - \\[x\\] <!-- approve-opening-all-rate-limited-prs -->';
+    ' - \\[x\\] <!-- open-all-rate-limited-prs -->';
   const checkedApproveAll = issueBody.match(
     regEx(checkApproveAllPendingPR, 'g')
   );
@@ -71,7 +71,7 @@ function parseDashboardIssue(issueBody: string): DependencyDashboard {
   );
 
   const checkApprovAllRateLimitedPRs = issueBody.includes(
-    ' - [x] <!-- approve-opening-all-rate-limited-prs -->'
+    ' - [x] <!-- open-all-rate-limited-prs -->'
   );
 
   const checkedApproveAllPendingPRs = issueBody.includes(
@@ -221,9 +221,6 @@ export async function ensureDependencyDashboard(
 
   issueBody = appendRepoProblems(config, issueBody);
 
-  //TODO: remove before push
-  branches[0].result = BranchResult.NeedsApproval;
-  branches[1].result = BranchResult.NeedsApproval;
   const pendingApprovals = branches.filter(
     (branch) => branch.result === BranchResult.NeedsApproval
   );
@@ -253,15 +250,12 @@ export async function ensureDependencyDashboard(
     issueBody += '\n';
   }
 
-  branches[0].result = BranchResult.BranchLimitReached;
-  branches[1].result = BranchResult.PrLimitReached;
   const rateLimited = branches.filter(
     (branch) =>
       branch.result === BranchResult.BranchLimitReached ||
       branch.result === BranchResult.PrLimitReached ||
       branch.result === BranchResult.CommitLimitReached
   );
-  //TODO: remove before push
 
   if (rateLimited.length) {
     issueBody += '## Rate Limited\n\n';
@@ -269,8 +263,8 @@ export async function ensureDependencyDashboard(
       'These updates are currently rate limited. Click on a checkbox below to force their creation now.\n\n';
     if (rateLimited.length > 1) {
       issueBody += ' - [ ] ';
-      issueBody += '<!-- approve-opening-all-rate-limited-prs -->';
-      issueBody += '**Approve opening all rate-limited PRs**\n';
+      issueBody += '<!-- open-all-rate-limited-prs -->';
+      issueBody += '**Open all rate-limited PRs**\n';
     }
     for (const branch of rateLimited) {
       issueBody += getListItem(branch, 'unlimit');
@@ -436,22 +430,12 @@ export async function ensureDependencyDashboard(
           checkAllPending,
           checkAllPending.replace('[ ]', '[x]')
         );
-        const checkPending = ` - [ ] <!-- approve-branch=`;
-        issueBody = issueBody.replaceAll(
-          checkPending,
-          checkPending.replace('[ ]', '[x]')
-        );
       }
       if (dependencyDashboardAllRateLimited) {
-        const checkAllRateLimited = ` - [ ] <!-- approve-opening-all-rate-limited-prs -->`;
+        const checkAllRateLimited = ` - [ ] <!-- open-all-rate-limited-prs -->`;
         issueBody = issueBody.replace(
           checkAllRateLimited,
           checkAllRateLimited.replace('[ ]', '[x]')
-        );
-        const checkRateLimited = ` - [ ] <!-- unlimit-branch=`;
-        issueBody = issueBody.replaceAll(
-          checkRateLimited,
-          checkRateLimited.replace('[ ]', '[x]')
         );
       }
     }

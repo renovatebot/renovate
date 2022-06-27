@@ -82,8 +82,10 @@ describe('workers/repository/dependency-dashboard', () => {
         title: '',
         number: 1,
         body:
-          Fixtures.get('master-issue_with_8_PR.txt').replace('- [ ]', '- [x]') +
-          '\n\n - [x] <!-- rebase-all-open-prs -->',
+          Fixtures.get('master-issue_with_8_PR.txt').replace(
+            '- [ ] <!-- approve-branch=branchName1 -->',
+            '- [x] <!-- approve-branch=branchName1 -->'
+          ) + '\n\n - [x] <!-- rebase-all-open-prs -->',
       });
       await dependencyDashboard.readDashboardBody(conf);
       expect(conf).toEqual({
@@ -94,6 +96,60 @@ describe('workers/repository/dependency-dashboard', () => {
         dependencyDashboardRebaseAllOpen: true,
         dependencyDashboardTitle: 'Dependency Dashboard',
         prCreation: 'approval',
+        dependencyDashboardAllPending: false,
+        dependencyDashboardAllRateLimited: false,
+      });
+    });
+
+    it('reads dashboard body all pending approval', async () => {
+      const conf: RenovateConfig = {};
+      conf.prCreation = 'approval';
+      platform.findIssue.mockResolvedValueOnce({
+        title: '',
+        number: 1,
+        body: Fixtures.get('master-issue_with_8_PR.txt').replace(
+          '- [ ] <!-- approve-all-pending-prs -->',
+          '- [x] <!-- approve-all-pending-prs -->'
+        ),
+      });
+      await dependencyDashboard.readDashboardBody(conf);
+      expect(conf).toEqual({
+        dependencyDashboardChecks: {
+          branchName1: 'approve',
+          branchName2: 'approve',
+        },
+        dependencyDashboardIssue: 1,
+        dependencyDashboardRebaseAllOpen: false,
+        dependencyDashboardTitle: 'Dependency Dashboard',
+        prCreation: 'approval',
+        dependencyDashboardAllPending: true,
+        dependencyDashboardAllRateLimited: false,
+      });
+    });
+
+    it('reads dashboard body open all rate limited', async () => {
+      const conf: RenovateConfig = {};
+      conf.prCreation = 'approval';
+      platform.findIssue.mockResolvedValueOnce({
+        title: '',
+        number: 1,
+        body: Fixtures.get('master-issue_with_8_PR.txt').replace(
+          '- [ ] <!-- open-all-rate-limited-prs -->',
+          '- [x] <!-- open-all-rate-limited-prs -->'
+        ),
+      });
+      await dependencyDashboard.readDashboardBody(conf);
+      expect(conf).toEqual({
+        dependencyDashboardChecks: {
+          branchName5: 'unlimit',
+          branchName6: 'unlimit',
+        },
+        dependencyDashboardIssue: 1,
+        dependencyDashboardRebaseAllOpen: false,
+        dependencyDashboardTitle: 'Dependency Dashboard',
+        prCreation: 'approval',
+        dependencyDashboardAllPending: false,
+        dependencyDashboardAllRateLimited: true,
       });
     });
   });
@@ -568,6 +624,84 @@ describe('workers/repository/dependency-dashboard', () => {
 
          - [x] <!-- rebase-all-open-prs -->'
         `,
+      });
+      await dependencyDashboard.ensureDependencyDashboard(config, branches);
+      expect(platform.ensureIssue.mock.calls[0][0].body).toMatchSnapshot();
+    });
+
+    it('dependency Dashboard All Pending Approval', async () => {
+      const branches: BranchConfig[] = [
+        {
+          ...mock<BranchConfig>(),
+          prTitle: 'pr1',
+          upgrades: [{ ...mock<BranchUpgradeConfig>(), depName: 'dep1' }],
+          result: BranchResult.NeedsApproval,
+          branchName: 'branchName1',
+        },
+        {
+          ...mock<BranchConfig>(),
+          prTitle: 'pr2',
+          upgrades: [{ ...mock<BranchUpgradeConfig>(), depName: 'dep2' }],
+          result: BranchResult.NeedsApproval,
+          branchName: 'branchName2',
+        },
+      ];
+      config.dependencyDashboard = true;
+      config.dependencyDashboardChecks = {
+        branchName1: 'approve-branch',
+        branchName2: 'approve-branch',
+      };
+      config.dependencyDashboardIssue = 1;
+      mockedFunction(platform.getIssue!).mockResolvedValueOnce({
+        title: 'Dependency Dashboard',
+        body: `This issue contains a list of Renovate updates and their statuses.
+
+        ## Pending Approval
+
+        These branches will be created by Renovate only once you click their checkbox below.
+
+         - [x] <!-- approve-all-pending-prs -->**Approve all pending PRs**
+         - [ ] <!-- approve-branch=branchName1 -->pr1
+         - [ ] <!-- approve-branch=branchName2 -->pr2`,
+      });
+      await dependencyDashboard.ensureDependencyDashboard(config, branches);
+      expect(platform.ensureIssue.mock.calls[0][0].body).toMatchSnapshot();
+    });
+
+    it('dependency Dashboard Open All Rate Limited', async () => {
+      const branches: BranchConfig[] = [
+        {
+          ...mock<BranchConfig>(),
+          prTitle: 'pr1',
+          upgrades: [{ ...mock<BranchUpgradeConfig>(), depName: 'dep1' }],
+          result: BranchResult.BranchLimitReached,
+          branchName: 'branchName1',
+        },
+        {
+          ...mock<BranchConfig>(),
+          prTitle: 'pr2',
+          upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep2' }],
+          result: BranchResult.PrLimitReached,
+          branchName: 'branchName2',
+        },
+      ];
+      config.dependencyDashboard = true;
+      config.dependencyDashboardChecks = {
+        branchName1: 'unlimit-branch',
+        branchName2: 'unlimit-branch',
+      };
+      config.dependencyDashboardIssue = 1;
+      mockedFunction(platform.getIssue!).mockResolvedValueOnce({
+        title: 'Dependency Dashboard',
+        body: `This issue contains a list of Renovate updates and their statuses.
+
+        ## Rate Limited
+
+        These updates are currently rate limited. Click on a checkbox below to force their creation now.
+
+         - [x] <!-- open-all-rate-limited-prs -->**Open all rate-limited PRs**
+         - [ ] <!-- unlimit-branch=branchName1 -->pr1
+         - [ ] <!-- unlimit-branch=branchName2 -->pr2`,
       });
       await dependencyDashboard.ensureDependencyDashboard(config, branches);
       expect(platform.ensureIssue.mock.calls[0][0].body).toMatchSnapshot();

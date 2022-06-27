@@ -1705,5 +1705,65 @@ describe('workers/repository/update/branch/index', () => {
         'No package files need updating'
       );
     });
+
+    it('Dependency Dashboard All Pending approval', async () => {
+      getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
+        updatedPackageFiles: [{}],
+        artifactErrors: [{}],
+      } as PackageFilesResult);
+      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+        artifactErrors: [],
+        updatedArtifacts: [partial<FileChange>({})],
+      } as WriteExistingFilesResult);
+      git.branchExists.mockReturnValue(true);
+      platform.getBranchPr.mockResolvedValueOnce({
+        title: 'pending!',
+        state: PrState.Open,
+        bodyStruct: {
+          hash: hashBody(`- [x] <!-- approve-all-pending-prs -->`),
+          rebaseRequested: false,
+        },
+      } as Pr);
+      expect(
+        await branchWorker.processBranch({
+          ...config,
+          dependencyDashboardAllPending: true,
+        })
+      ).toEqual({
+        branchExists: true,
+        prNo: undefined,
+        result: 'done',
+      });
+    });
+
+    it('Dependency Dashboard open all rate limited', async () => {
+      getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
+        updatedPackageFiles: [{}],
+        artifactErrors: [{}],
+      } as PackageFilesResult);
+      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+        artifactErrors: [],
+        updatedArtifacts: [partial<FileChange>({})],
+      } as WriteExistingFilesResult);
+      git.branchExists.mockReturnValue(true);
+      platform.getBranchPr.mockResolvedValueOnce({
+        title: 'unlimited!',
+        state: PrState.Open,
+        bodyStruct: {
+          hash: hashBody(`- [x] <!-- open-all-rate-limited-prs -->`),
+          rebaseRequested: false,
+        },
+      } as Pr);
+      expect(
+        await branchWorker.processBranch({
+          ...config,
+          dependencyDashboardAllRateLimited: true,
+        })
+      ).toEqual({
+        branchExists: true,
+        prNo: undefined,
+        result: 'done',
+      });
+    });
   });
 });

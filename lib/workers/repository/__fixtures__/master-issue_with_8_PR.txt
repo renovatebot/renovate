@@ -4,6 +4,7 @@ This issue provides visibility into Renovate updates and their statuses. [Learn 
 
 These branches will be created by Renovate only once you click their checkbox below.
 
+ - [ ] <!-- approve-all-pending-prs -->**Approve all pending PRs**
  - [ ] <!-- approve-branch=branchName1 -->pr1
  - [ ] <!-- approve-branch=branchName2 -->pr2
 
@@ -18,6 +19,7 @@ These updates are awaiting their schedule. Click on a checkbox to get an update 
 
 These updates are currently rate limited. Click on a checkbox below to force their creation now.
 
+ - [ ] <!-- open-all-rate-limited-prs -->**Open all rate-limited PRs**
  - [ ] <!-- unlimit-branch=branchName5 -->pr5
  - [ ] <!-- unlimit-branch=branchName6 -->pr6
 
