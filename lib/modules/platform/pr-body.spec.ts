@@ -12,6 +12,17 @@ describe('modules/platform/pr-body', () => {
       expect(getPrBodyStruct('')).toEqual({
         hash: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
       });
+      expect(
+        getPrBodyStruct(
+          'something \n<!--renovate-debug:eyJjcmVhdGVkQnlSZW5vdmF0ZVZlcnNpb24iOiAiMS4yLjEiLCJ1cGRhdGVkQnlSZW5vdmF0ZVZlcnNpb24iOiAiMS4yLjMifQ==-->'
+        )
+      ).toEqual({
+        hash: '3fc9b689459d738f8c88a3a48aa9e33542016b7a4052e001aaa536fca74813cb',
+        debugData: {
+          createdByRenovateVersion: '1.2.1',
+          updatedByRenovateVersion: '1.2.3',
+        },
+      });
     });
 
     it('hashes ignoring debug info', () => {
