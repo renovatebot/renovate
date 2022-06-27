@@ -14,12 +14,6 @@ describe('modules/platform/pr-body', () => {
       });
     });
 
-    it('hashes ignoring reviewable section', () => {
-      expect(hashBody('foo<!-- Reviewable:start -->bar')).toEqual(
-        hashBody('foo')
-      );
-    });
-
     it('hashes ignoring debug info', () => {
       expect(hashBody('foo\n<!--renovate-debug:123-->\n')).toEqual(
         hashBody('foo')
