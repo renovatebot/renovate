@@ -78,17 +78,25 @@ describe('util/http/github', () => {
     });
 
     it('supports fetching asset with octet-stream header', async () => {
+      const content = 'foobar';
       hostRules.add({ hostType: 'github', token: 'x-access-token:123test' });
       httpMock
         .scope(githubApiHost)
         .get('/repos/some-owner/some-repo/releases/tags/some-tag')
-        .reply(200);
-      await githubApi.get(
+        .reply(200, Buffer.from(content, 'utf-8'), {
+          'content-type': 'application/octet-stream',
+          'content-length': `${content.length}`,
+          'content-disposition': 'attachment; filename=reply_file_2.tar.gz',
+        });
+
+      const res = await githubApi.get(
         '/repos/some-owner/some-repo/releases/tags/some-tag',
         {
           headers: { accept: 'application/octet-stream' },
         }
       );
+
+      expect(res.body).toBe('foobar');
       const [req] = httpMock.getTrace();
       expect(req).toBeDefined();
       expect(req.headers.accept).toBe('application/octet-stream');
