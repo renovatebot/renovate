@@ -862,9 +862,13 @@ export async function prepareCommit({
           }
           // some file systems including Windows don't support the mode
           // so the index should be manually updated after adding the file
-          await fs.outputFile(upath.join(localDir, fileName), contents, {
-            mode: file.isExecutable ? 0o777 : 0o666,
-          });
+          if (file.isSymlink) {
+            await fs.symlink(file.contents, upath.join(localDir, fileName));
+          } else {
+            await fs.outputFile(upath.join(localDir, fileName), contents, {
+              mode: file.isExecutable ? 0o777 : 0o666,
+            });
+          }
         }
         try {
           // istanbul ignore next
@@ -1108,7 +1112,7 @@ export async function clearRenovateRefs(): Promise<void> {
 }
 
 const treeItemRegex = regEx(
-  /^(?<mode>\d{6})\s+(?<type>blob|tree)\s+(?<sha>[0-9a-f]{40})\s+(?<path>.*)$/
+  /^(?<mode>\d{6})\s+(?<type>blob|tree|commit)\s+(?<sha>[0-9a-f]{40})\s+(?<path>.*)$/
 );
 
 const treeShaRegex = regEx(/tree\s+(?<treeSha>[0-9a-f]{40})\s*/);
