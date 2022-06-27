@@ -20,6 +20,12 @@ describe('modules/platform/pr-body', () => {
       );
     });
 
+    it('hashes ignoring reviewable section', () => {
+      expect(hashBody('foo<!-- Reviewable:start -->bar')).toEqual(
+        hashBody('foo')
+      );
+    });
+
     it('returns rebaseRequested flag', () => {
       expect(getPrBodyStruct('- [x] <!-- rebase-check -->')).toEqual({
         hash: '023952693e1e00a52a71b65d9b4804bca6ca9f215c20f6e029dbf420f322d541',
