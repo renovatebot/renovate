@@ -38,20 +38,15 @@ function getDepWarnings(
   const warningFiles: string[] = [];
   for (const files of Object.values(packageFiles ?? {})) {
     for (const file of files ?? []) {
-      if (file.deps) {
+      if (file.packageFile) {
         for (const dep of file.deps ?? []) {
-          if (dep.warnings?.length) {
-            for (const w of dep.warnings) {
-              const message = w.message;
-              if (!warnings.includes(message)) {
-                warnings.push(message);
-              }
-              if (
-                file.packageFile &&
-                !warningFiles.includes(file.packageFile)
-              ) {
-                warningFiles.push(file.packageFile);
-              }
+          for (const w of dep.warnings ?? []) {
+            const message = w.message;
+            if (!warnings.includes(message)) {
+              warnings.push(message);
+            }
+            if (!warningFiles.includes(file.packageFile)) {
+              warningFiles.push(file.packageFile);
             }
           }
         }
