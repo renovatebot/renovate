@@ -17,7 +17,7 @@ import * as npm from './npm';
 import * as nuget from './nuget';
 import * as pep440 from './pep440';
 import * as poetry from './poetry';
-import * as redhat from './redhat';
+import redhat from './redhat';
 import * as regex from './regex';
 import * as rez from './rez';
 import * as ruby from './ruby';
