@@ -1,4 +1,5 @@
 import _findUp from 'find-up';
+import fs from 'fs-extra';
 import { withDir } from 'tmp-promise';
 import { join } from 'upath';
 import { envMock } from '../../../test/exec-util';
@@ -7,7 +8,6 @@ import { GlobalConfig } from '../../config/global';
 import {
   ensureCacheDir,
   ensureLocalDir,
-  exists,
   findLocalSiblingOrParent,
   findUpLocal,
   getSubDirectory,
@@ -190,7 +190,7 @@ describe('util/fs/index', () => {
           const { dirFromEnv } = setupMock(tmpDir.path);
           const res = await ensureCacheDir('bundler');
           expect(res).toEqual(dirFromEnv);
-          expect(await exists(dirFromEnv)).toBeTrue();
+          expect(await fs.exists(dirFromEnv)).toBeTrue();
         },
         { unsafeCleanup: true }
       );
