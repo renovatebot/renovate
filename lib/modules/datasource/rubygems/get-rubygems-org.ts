@@ -119,11 +119,10 @@ export class RubyGemsOrgDatasource extends Datasource {
 
   private updateRubyGemsVersionsPromise: Promise<void> | null = null;
 
-  async syncVersions(registryUrl): Promise<void> {
+  async syncVersions(registryUrl?: string): Promise<void> {
     if (RubyGemsOrgDatasource.isDataStale()) {
       this.updateRubyGemsVersionsPromise =
-        // eslint-disable-next-line @typescript-eslint/no-misused-promises
-        this.updateRubyGemsVersionsPromise ||
+        this.updateRubyGemsVersionsPromise ??
         this.updateRubyGemsVersions(registryUrl);
       await this.updateRubyGemsVersionsPromise;
       this.updateRubyGemsVersionsPromise = null;

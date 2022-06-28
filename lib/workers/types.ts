@@ -66,7 +66,7 @@ export interface BranchUpgradeConfig
   updatedPackageFiles?: FileChange[];
   updatedArtifacts?: FileChange[];
 
-  logJSON?: ChangeLogResult;
+  logJSON?: ChangeLogResult | null;
 
   hasReleaseNotes?: boolean;
   homepage?: string;
@@ -139,4 +139,9 @@ export interface WorkerExtractConfig
   regexManagers?: RegExManager[];
   enabledManagers?: string[];
   enabled?: boolean;
+}
+
+export interface DepWarnings {
+  warnings: string[];
+  warningFiles: string[];
 }

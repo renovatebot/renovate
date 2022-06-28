@@ -251,7 +251,7 @@ async function cleanLocalBranches(): Promise<void> {
 
 export function setGitAuthor(gitAuthor: string | undefined): void {
   const gitAuthorParsed = parseGitAuthor(
-    gitAuthor || 'Renovate Bot <renovate@whitesourcesoftware.com>'
+    gitAuthor ?? 'Renovate Bot <renovate@whitesourcesoftware.com>'
   );
   if (!gitAuthorParsed) {
     const error = new Error(CONFIG_VALIDATION);
@@ -769,7 +769,7 @@ export async function getFile(
   await syncGit();
   try {
     const content = await git.show([
-      'origin/' + (branchName || config.currentBranch) + ':' + filePath,
+      'origin/' + (branchName ?? config.currentBranch) + ':' + filePath,
     ]);
     return content;
   } catch (err) {
@@ -862,9 +862,13 @@ export async function prepareCommit({
           }
           // some file systems including Windows don't support the mode
           // so the index should be manually updated after adding the file
-          await fs.outputFile(upath.join(localDir, fileName), contents, {
-            mode: file.isExecutable ? 0o777 : 0o666,
-          });
+          if (file.isSymlink) {
+            await fs.symlink(file.contents, upath.join(localDir, fileName));
+          } else {
+            await fs.outputFile(upath.join(localDir, fileName), contents, {
+              mode: file.isExecutable ? 0o777 : 0o666,
+            });
+          }
         }
         try {
           // istanbul ignore next
@@ -1022,7 +1026,7 @@ export function getUrl({
     return `git@${hostname}:${repository}.git`;
   }
   return URL.format({
-    protocol: protocol || 'https',
+    protocol: protocol ?? 'https',
     auth,
     hostname,
     host,
@@ -1108,7 +1112,7 @@ export async function clearRenovateRefs(): Promise<void> {
 }
 
 const treeItemRegex = regEx(
-  /^(?<mode>\d{6})\s+(?<type>blob|tree)\s+(?<sha>[0-9a-f]{40})\s+(?<path>.*)$/
+  /^(?<mode>\d{6})\s+(?<type>blob|tree|commit)\s+(?<sha>[0-9a-f]{40})\s+(?<path>.*)$/
 );
 
 const treeShaRegex = regEx(/tree\s+(?<treeSha>[0-9a-f]{40})\s*/);
