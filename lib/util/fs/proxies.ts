@@ -27,14 +27,6 @@ export function readFile(
 }
 
 // istanbul ignore next
-export function writeFile(
-  fileName: string,
-  fileContent: string
-): Promise<void> {
-  return fs.writeFile(fileName, fileContent);
-}
-
-// istanbul ignore next
 export function outputFile(
   file: string,
   data: unknown,
