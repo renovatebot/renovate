@@ -172,6 +172,14 @@ describe('util/http/index', () => {
     expect(httpMock.allUsed()).toBeTrue();
   });
 
+  it('disables hosts for stream', async () => {
+    hostRules.add({ matchHost: 'renovate.com', enabled: false });
+
+    await expect(http.stream('http://renovate.com/test')).rejects.toThrow(
+      HOST_DISABLED
+    );
+  });
+
   it('retries', async () => {
     const NODE_ENV = process.env.NODE_ENV;
     try {

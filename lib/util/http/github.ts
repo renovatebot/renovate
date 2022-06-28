@@ -169,14 +169,9 @@ function constructAcceptString(input?: any): string {
   const defaultAccept = 'application/vnd.github.v3+json';
   const acceptStrings =
     typeof input === 'string' ? input.split(regEx(/\s*,\s*/)) : [];
-  const isOctetStreamRequest = acceptStrings.some(
-    (x) => x === 'application/octet-stream'
-  );
-
   if (
-    !isOctetStreamRequest &&
-    (!acceptStrings.some((x) => x.startsWith('application/vnd.github.')) ||
-      acceptStrings.length < 2)
+    !acceptStrings.some((x) => x.startsWith('application/vnd.github.')) ||
+    acceptStrings.length < 2
   ) {
     acceptStrings.push(defaultAccept);
   }
