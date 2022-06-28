@@ -34,14 +34,14 @@ This is because Rails's gems must be updated in a batch.
 For example, say you have these Rails gems in your Gemfile:
 
 ```
-gem 'bootsnap'
-gem 'railties'
 gem 'actionmailer'
 gem 'actionpack'
 gem 'activemodel'
 gem 'activerecord'
 gem 'activesupport'
+gem 'bootsnap'
+gem 'railties'
 ```
 
-Running `bundler lock --update actionpack` won't do anything, apart from updating the `actionpack` gem.
-To update your gems you should run `bundler lock --update rails railties actionmailer actionpack activemodel activerecord activesupport`.
+When Renovate tries to update `actionpack` by running `bundler lock --update actionpack` it fails.
+To update your gems you need to run `bundler lock --update actionmailer actionpack activemodel activerecord activesupport bootsnap rails railties`.
