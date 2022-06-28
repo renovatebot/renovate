@@ -52,6 +52,7 @@ export function commitFilesToBranch(
 
   // API will know whether to create new branch or not
   return commitAndPush({
+    targetBranch: config.baseBranch,
     branchName: config.branchName,
     files: updatedFiles,
     message: config.commitMessage!,

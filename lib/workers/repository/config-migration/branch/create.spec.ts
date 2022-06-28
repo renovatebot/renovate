@@ -44,6 +44,7 @@ describe('workers/repository/config-migration/branch/create', () => {
       expect(checkoutBranch).toHaveBeenCalledWith(config.defaultBranch);
       expect(commitFiles).toHaveBeenCalledWith({
         branchName: 'renovate/migrate-config',
+        targetBranch: 'dev',
         files: [
           {
             type: 'addition',
@@ -64,6 +65,7 @@ describe('workers/repository/config-migration/branch/create', () => {
       expect(checkoutBranch).toHaveBeenCalledWith(config.defaultBranch);
       expect(platform.commitFiles).toHaveBeenCalledWith({
         branchName: 'renovate/migrate-config',
+        targetBranch: 'dev',
         files: [
           {
             type: 'addition',
@@ -86,6 +88,7 @@ describe('workers/repository/config-migration/branch/create', () => {
       expect(checkoutBranch).toHaveBeenCalledWith(config.defaultBranch);
       expect(commitFiles).toHaveBeenCalledWith({
         branchName: 'renovate/migrate-config',
+        targetBranch: 'dev',
         files: [
           {
             type: 'addition',
@@ -109,6 +112,7 @@ describe('workers/repository/config-migration/branch/create', () => {
         expect(checkoutBranch).toHaveBeenCalledWith(config.defaultBranch);
         expect(commitFiles).toHaveBeenCalledWith({
           branchName: 'renovate/migrate-config',
+          targetBranch: 'dev',
           files: [
             {
               type: 'addition',
@@ -133,6 +137,7 @@ describe('workers/repository/config-migration/branch/create', () => {
         expect(checkoutBranch).toHaveBeenCalledWith(config.defaultBranch);
         expect(commitFiles).toHaveBeenCalledWith({
           branchName: 'renovate/migrate-config',
+          targetBranch: 'dev',
           files: [
             {
               type: 'addition',
@@ -158,6 +163,7 @@ describe('workers/repository/config-migration/branch/create', () => {
         expect(checkoutBranch).toHaveBeenCalledWith(config.defaultBranch);
         expect(commitFiles).toHaveBeenCalledWith({
           branchName: 'renovate/migrate-config',
+          targetBranch: 'dev',
           files: [
             {
               type: 'addition',
@@ -182,6 +188,7 @@ describe('workers/repository/config-migration/branch/create', () => {
         expect(checkoutBranch).toHaveBeenCalledWith(config.defaultBranch);
         expect(commitFiles).toHaveBeenCalledWith({
           branchName: 'renovate/migrate-config',
+          targetBranch: 'dev',
           files: [
             {
               type: 'addition',

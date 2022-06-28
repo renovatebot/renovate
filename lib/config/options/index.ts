@@ -2423,7 +2423,15 @@ const options: RenovateOptions[] = [
     description: `Use platform API to perform commits instead of using Git directly.`,
     type: 'boolean',
     default: false,
-    supportedPlatforms: ['github'],
+    supportedPlatforms: ['github', 'gerrit'],
+  },
+  {
+    name: 'gerritAutoApprove',
+    description:
+      'If set to `true`, Renovate will automatically approved (Code-Review label = +2) their own changes.',
+    type: 'boolean',
+    default: false,
+    supportedPlatforms: ['gerrit'],
   },
   {
     name: 'branchNameStrict',

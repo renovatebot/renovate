@@ -1,0 +1,63 @@
+{
+  "id": "Ied428f0315d85e00f0df1fecbc1d8fb993e30b41",
+  "project": "web/apps",
+  "created": "2018-06-15 06:33:07.000000000",
+  "updated": "2018-06-15 06:33:07.000000000",
+  "change_id": "...",
+  "_number": 123456,
+  "status": "NEW",
+  "branch": "main",
+  "subject": "Fix for",
+  "insertions": 12,
+  "deletions": 13,
+  "submittable": true,
+  "current_revision": "58eae5696a555441d2f5f2527fc5dd1dfdf81e48",
+  "labels": {
+    "Code-Review": {
+      "approved": {
+        "_account_id": 1000000,
+        "username": "user"
+      }
+    }
+  },
+  "revisions": {
+    "58eae5696a555441d2f5f2527fc5dd1dfdf81e48": {
+      "ref": "refs/changes/1/2",
+      "uploader": {
+        "username": "otheruser"
+      }
+    }
+  },
+  "messages": [
+    {
+      "id": "9d78ac236714cee8c2d86e95d638358925cf6853",
+      "tag": "pull-request",
+      "message": "Patch Set 1:\n\nOld PR-Body"
+    },
+    {
+      "id": "1d17c930381e88e177bbc59595c3ec941bd21028",
+      "tag": "pull-request",
+      "message": "Patch Set 12:\n\nLast PR-Body"
+    },
+    {
+      "id": "9d78ac236714cee8c2d86e95d638358925cf6853",
+      "message": "other message..."
+    }
+  ],
+  "reviewers": {
+    "REVIEWER": [
+      {
+        "_account_id": 10000,
+        "name": "Mrs User",
+        "email": "user@example.com",
+        "username": "username"
+      }
+    ]
+  },
+  "submit_records": [],
+  "hashtags": ["other-tag", "sourceBranch-renovate/dependency-1.x"],
+  "owner": {
+    "_account_id": 1000000
+  },
+  "problems": []
+}

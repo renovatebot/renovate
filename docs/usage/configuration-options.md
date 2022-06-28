@@ -859,6 +859,10 @@ Renovate follows tags _strictly_, this can cause problems when a tagged stream i
 For example: you're following the `next` tag, but later the stream you actually want is called `stable` instead.
 If `next` is no longer getting updates, you must switch your `followTag` to `stable` to get updates again.
 
+## gerritAutoApprove
+
+If set to `true`, Renovate will automatically approve (assign Code-Review label = +2) their own changes.
+
 ## gitAuthor
 
 You can customize the Git author that's used whenever Renovate creates a commit.

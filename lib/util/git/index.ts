@@ -52,6 +52,7 @@ import type {
   CommitResult,
   CommitSha,
   LocalConfig,
+  PushFilesConfig,
   StatusResult,
   StorageConfig,
   TreeItem,
@@ -105,10 +106,6 @@ export async function gitRetry<T>(gitFunc: () => Promise<T>): Promise<T> {
   }
 
   throw lastError;
-}
-
-function localName(branchName: string): string {
-  return branchName.replace(regEx(/^origin\//), '');
 }
 
 async function isDirectory(dir: string): Promise<boolean> {
@@ -229,6 +226,20 @@ async function fetchBranchCommits(): Promise<void> {
   }
 }
 
+export async function registerBranch(
+  localBranchName: string,
+  modified: boolean,
+  sha?: string
+): Promise<void> {
+  config.branchCommits[localBranchName] =
+    sha ?? (await git.revparse([localBranchName])).trim();
+  config.branchIsModified[localBranchName] = modified;
+}
+
+export async function fetchRevSpec(revSpec: string): Promise<void> {
+  await gitRetry(() => git.fetch(['origin', revSpec]));
+}
+
 export async function initRepo(args: StorageConfig): Promise<void> {
   config = { ...args } as any;
   config.ignoredAuthors = [];
@@ -243,6 +254,18 @@ export async function initRepo(args: StorageConfig): Promise<void> {
   gitInitialized = false;
   submodulesInitizialized = false;
   await fetchBranchCommits();
+}
+
+export async function installHook(
+  name: string,
+  hookSource: string
+): Promise<void> {
+  await syncGit();
+  const localDir = GlobalConfig.get('localDir')!;
+  const gitHooks = upath.join(localDir, '.git/hooks');
+  await fs.mkdir(gitHooks, { recursive: true });
+  await fs.writeFile(`${gitHooks}/${name}`, hookSource);
+  await fs.chmod(`${gitHooks}/${name}`, fs.constants.S_IRWXU);
 }
 
 async function resetToBranch(branchName: string): Promise<void> {
@@ -504,11 +527,9 @@ export async function checkoutBranch(branchName: string): Promise<CommitSha> {
   logger.debug(`Setting current branch to ${branchName}`);
   await syncGit();
   try {
-    config.currentBranch = branchName;
-    config.currentBranchSha = (
-      await git.raw(['rev-parse', 'origin/' + branchName])
-    ).trim();
     await gitRetry(() => git.checkout(['-f', branchName, '--']));
+    config.currentBranch = branchName;
+    config.currentBranchSha = (await git.raw(['rev-parse', 'HEAD'])).trim();
     const latestCommitDate = (await git.log({ n: 1 }))?.latest?.date;
     if (latestCommitDate) {
       logger.debug({ branchName, latestCommitDate }, 'latest commit');
@@ -560,6 +581,7 @@ export function getBranchList(): string[] {
   return Object.keys(config.branchCommits);
 }
 
+//TODO: move to Platform-Interface
 export async function isBranchBehindBase(
   branchName: string,
   baseBranch: string
@@ -581,12 +603,13 @@ export async function isBranchBehindBase(
   try {
     const { currentBranchSha, currentBranch } = config;
     const branches = await git.branch([
-      '--remotes',
+      '--all', //for gerrit we check by name, there are no real remote branches. origin/$branchname was faked
       '--verbose',
       '--contains',
       config.currentBranchSha,
     ]);
-    isBehind = !branches.all.map(localName).includes(branchName);
+    isBehind = !branches.all.filter((b) => b.match(`origin/${branchName}$`))
+      .length;
     logger.debug(
       { currentBranch, currentBranchSha },
       `branch.isBehindBase(): ${isBehind}`
@@ -601,6 +624,7 @@ export async function isBranchBehindBase(
   }
 }
 
+//TODO: move to Platform-Interface
 export async function isBranchModified(branchName: string): Promise<boolean> {
   if (!branchExists(branchName)) {
     logger.debug('branch.isModified(): no cache');
@@ -667,6 +691,7 @@ export async function isBranchModified(branchName: string): Promise<boolean> {
   return true;
 }
 
+//TODO: move to Platform-Interface
 export async function isBranchConflicted(
   baseBranch: string,
   branch: string
@@ -705,6 +730,7 @@ export async function isBranchConflicted(
   const origBranch = config.currentBranch;
   try {
     await git.reset(ResetMode.HARD);
+    //TODO: see #18600
     if (origBranch !== baseBranch) {
       await git.checkout(baseBranch);
     }
@@ -855,10 +881,13 @@ export async function getFile(
   }
 }
 
-export async function hasDiff(branchName: string): Promise<boolean> {
+export async function hasDiff(
+  sourceRef: string,
+  targetRef: string
+): Promise<boolean> {
   await syncGit();
   try {
-    return (await gitRetry(() => git.diff(['HEAD', branchName]))) !== '';
+    return (await gitRetry(() => git.diff([sourceRef, targetRef]))) !== '';
   } catch (err) {
     return true;
   }
@@ -985,7 +1014,7 @@ export async function prepareCommit({
       { deletedFiles, ignoredFiles, result: commitRes },
       `git commit`
     );
-    if (!force && !(await hasDiff(`origin/${branchName}`))) {
+    if (!force && !(await hasDiff('HEAD', `origin/${branchName}`))) {
       logger.debug(
         { branchName, deletedFiles, addedModifiedFiles, ignoredFiles },
         'No file changes detected. Skipping commit'
@@ -1012,11 +1041,12 @@ export async function prepareCommit({
 }
 
 export async function pushCommit({
-  branchName,
+  sourceRef,
+  targetRef,
   files,
-}: CommitFilesConfig): Promise<boolean> {
+}: PushFilesConfig): Promise<boolean> {
   await syncGit();
-  logger.debug(`Pushing branch ${branchName}`);
+  logger.debug(`Pushing refSpec ${sourceRef}:${targetRef}`);
   let result = false;
   try {
     const pushOptions: TaskOptions = {
@@ -1028,14 +1058,14 @@ export async function pushCommit({
     }
 
     const pushRes = await gitRetry(() =>
-      git.push('origin', `${branchName}:${branchName}`, pushOptions)
+      git.push('origin', `${sourceRef}:${targetRef}`, pushOptions)
     );
     delete pushRes.repo;
     logger.debug({ result: pushRes }, 'git push');
     incLimitedValue('Commits');
     result = true;
   } catch (err) /* istanbul ignore next */ {
-    handleCommitError(files, branchName, err);
+    handleCommitError(files, sourceRef, err);
   }
   return result;
 }
@@ -1064,7 +1094,11 @@ export async function commitFiles(
   try {
     const commitResult = await prepareCommit(commitConfig);
     if (commitResult) {
-      const pushResult = await pushCommit(commitConfig);
+      const pushResult = await pushCommit({
+        sourceRef: commitConfig.branchName,
+        targetRef: commitConfig.targetBranch ?? commitConfig.branchName,
+        files: commitConfig.files,
+      });
       if (pushResult) {
         const { branchName } = commitConfig;
         const { commitSha } = commitResult;

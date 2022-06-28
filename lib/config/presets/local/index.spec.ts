@@ -3,6 +3,7 @@ import { GlobalConfig } from '../../global';
 import * as _azure from '../azure';
 import * as _bitbucket from '../bitbucket';
 import * as _bitbucketServer from '../bitbucket-server';
+import * as _gerrit from '../gerrit';
 import * as _gitea from '../gitea';
 import * as _github from '../github';
 import * as _gitlab from '../gitlab';
@@ -11,6 +12,7 @@ import * as local from '.';
 jest.mock('../azure');
 jest.mock('../bitbucket');
 jest.mock('../bitbucket-server');
+jest.mock('../gerrit');
 jest.mock('../gitea');
 jest.mock('../github');
 jest.mock('../gitlab');
@@ -18,6 +20,7 @@ jest.mock('../gitlab');
 const azure = mocked(_azure);
 const bitbucket = mocked(_bitbucket);
 const bitbucketServer = mocked(_bitbucketServer);
+const gerrit = mocked(_gerrit);
 const gitea = mocked(_gitea);
 const github = mocked(_github);
 const gitlab = mocked(_gitlab);
@@ -32,6 +35,7 @@ describe('config/presets/local/index', () => {
     gitea.getPresetFromEndpoint.mockResolvedValueOnce(preset);
     github.getPresetFromEndpoint.mockResolvedValueOnce(preset);
     gitlab.getPresetFromEndpoint.mockResolvedValueOnce(preset);
+    gerrit.getPresetFromEndpoint.mockResolvedValueOnce(preset);
   });
 
   describe('getPreset()', () => {
@@ -223,6 +227,30 @@ describe('config/presets/local/index', () => {
         tag: 'someTag',
       });
       expect(gitlab.getPresetFromEndpoint.mock.calls).toMatchSnapshot();
+      expect(content).toEqual({ resolved: 'preset' });
+    });
+
+    it('forwards to custom Gerrit', async () => {
+      GlobalConfig.set({
+        platform: 'gerrit',
+        endpoint: 'https://gerrit.example.com/path',
+      });
+      const content = await local.getPreset({
+        repo: 'some/repo',
+        presetName: 'default',
+      });
+      expect(gerrit.getPresetFromEndpoint.mock.calls).toMatchSnapshot();
+      expect(content).toEqual({ resolved: 'preset' });
+    });
+
+    it('forwards to gerrit with a tag', async () => {
+      GlobalConfig.set({ platform: 'gerrit' });
+      const content = await local.getPreset({
+        repo: 'some/repo',
+        presetName: 'default',
+        tag: 'someTag',
+      });
+      expect(gerrit.getPresetFromEndpoint.mock.calls).toMatchSnapshot();
       expect(content).toEqual({ resolved: 'preset' });
     });
   });

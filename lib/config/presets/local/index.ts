@@ -3,6 +3,7 @@ import { GlobalConfig } from '../../global';
 import * as azure from '../azure';
 import * as bitbucket from '../bitbucket';
 import * as bitbucketServer from '../bitbucket-server';
+import * as gerrit from '../gerrit';
 import * as gitea from '../gitea';
 import * as github from '../github';
 import * as gitlab from '../gitlab';
@@ -12,6 +13,7 @@ const resolvers = {
   azure,
   bitbucket,
   'bitbucket-server': bitbucketServer,
+  gerrit,
   gitea,
   github,
   gitlab,

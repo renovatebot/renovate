@@ -1,0 +1,31 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`modules/platform/gerrit/utils extractSourceBranch() extract source branch from existing gerrit change 1`] = `"renovate/dependency-1.x"`;
+
+exports[`modules/platform/gerrit/utils mapGerritChangeToPr() map a gerrit change to to Pr 1`] = `
+{
+  "bodyStruct": {
+    "hash": "9d603793b5b479240657b64157a4024cf1d7bf1adafe803df2bae0cb953e9684",
+  },
+  "hasReviewers": true,
+  "number": 123456,
+  "sourceBranch": "renovate/dependency-1.x",
+  "state": "open",
+  "targetBranch": "main",
+  "title": "Fix for",
+}
+`;
+
+exports[`modules/platform/gerrit/utils mapGerritChangeToPr() map a gerrit change without sourceBranch-tag to Pr 1`] = `
+{
+  "bodyStruct": {
+    "hash": "9d603793b5b479240657b64157a4024cf1d7bf1adafe803df2bae0cb953e9684",
+  },
+  "hasReviewers": true,
+  "number": 123456,
+  "sourceBranch": "main",
+  "state": "open",
+  "targetBranch": "main",
+  "title": "Fix for",
+}
+`;

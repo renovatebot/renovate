@@ -2,6 +2,7 @@ export type PlatformId =
   | 'azure'
   | 'bitbucket'
   | 'bitbucket-server'
+  | 'gerrit'
   | 'gitea'
   | 'github'
   | 'gitlab';

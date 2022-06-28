@@ -1,0 +1,7 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`modules/platform/gerrit/index initPlatform() should init 1`] = `
+{
+  "endpoint": "https://dev.gerrit.com/renovate/",
+}
+`;

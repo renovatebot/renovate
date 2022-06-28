@@ -71,11 +71,18 @@ export interface FileDeletion {
 export type FileChange = FileAddition | FileDeletion;
 
 export interface CommitFilesConfig {
+  targetBranch?: string;
   branchName: string;
   files: FileChange[];
-  message: string;
+  message: string | string[];
   force?: boolean;
   platformCommit?: boolean;
+}
+
+export interface PushFilesConfig {
+  sourceRef: string;
+  targetRef: string;
+  files: FileChange[];
 }
 
 export type BranchName = string;
