@@ -49,7 +49,7 @@ api.set('npm', npm.api);
 api.set('nuget', nuget.api);
 api.set('pep440', pep440.api);
 api.set('poetry', poetry.api);
-api.set('redhat', redhat.api);
+api.set('redhat', redhat);
 api.set('regex', regex.api);
 api.set('rez', rez.api);
 api.set('ruby', ruby.api);
