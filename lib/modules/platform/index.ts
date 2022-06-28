@@ -62,8 +62,6 @@ export async function initPlatform(config: AllConfig): Promise<AllConfig> {
   // There might have been platform-specific modifications to the token
   if (returnConfig.token) {
     config.token = returnConfig.token;
-    platformRule['token'] = returnConfig['token'];
-    delete returnConfig['token'];
   }
   (
     ['token', 'username', 'password'] as ('token' | 'username' | 'password')[]
