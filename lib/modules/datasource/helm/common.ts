@@ -16,11 +16,13 @@ export function findSourceUrl(release: HelmRelease): RepoSource {
     return { sourceUrl: releaseMatch[1] };
   }
 
-  const homeMatchGroups = release.home && githubUrl.exec(release.home)?.groups;
-  if (homeMatchGroups) {
-    const { url: sourceUrl, path: sourceDirectory, repo } = homeMatchGroups;
-    if (chartRepo.test(repo)) {
-      return { sourceUrl, sourceDirectory };
+  if (release.home) {
+    const githubUrlMatch = githubUrl.exec(release.home);
+    if (githubUrlMatch?.groups && chartRepo.test(githubUrlMatch?.groups.repo)) {
+      return {
+        sourceUrl: githubUrlMatch.groups.url,
+        sourceDirectory: githubUrlMatch.groups.path,
+      };
     }
   }
 
@@ -29,36 +31,15 @@ export function findSourceUrl(release: HelmRelease): RepoSource {
   }
 
   for (const url of release.sources) {
-    const githubUrlMatchGroups = githubUrl.exec(url)?.groups;
-    if (githubUrlMatchGroups) {
-      const {
-        url: sourceUrl,
-        path: sourceDirectory,
-        repo,
-      } = githubUrlMatchGroups;
-      if (chartRepo.test(repo)) {
-        return { sourceUrl, sourceDirectory };
-      }
+    const githubUrlMatch = githubUrl.exec(url);
+    if (githubUrlMatch?.groups && chartRepo.test(githubUrlMatch?.groups.repo)) {
+      return {
+        sourceUrl: githubUrlMatch.groups.url,
+        sourceDirectory: githubUrlMatch.groups.path,
+      };
     }
   }
 
-  // fallback: if neither home nor sources are a chart repo URL, use githubUrl (if present)
-  if (homeMatchGroups) {
-    const { url: sourceUrl, path: sourceDirectory } = homeMatchGroups;
-    if (sourceUrl && sourceDirectory) {
-      return { sourceUrl, sourceDirectory };
-    }
-  }
-
-  for (const source of release.sources) {
-    const firstSourceMatch = githubUrl.exec(source)?.groups;
-    if (firstSourceMatch) {
-      const { url: sourceUrl, path: sourceDirectory } = firstSourceMatch;
-      if (sourceUrl && sourceDirectory) {
-        return { sourceUrl, sourceDirectory };
-      }
-    }
-  }
-
+  // fallback
   return { sourceUrl: release.sources[0] };
 }
