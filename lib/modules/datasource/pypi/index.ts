@@ -34,8 +34,6 @@ export class PypiDatasource extends Datasource {
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     let dependency: ReleaseResult | null = null;
-    // if registryUrl is https://pypi.org/simple use https://pypi.org/pypi instead
-    // for more visit https://github.com/renovatebot/renovate/issues/15938#issuecomment-1167244918
     const hostUrl = ensureTrailingSlash(
       registryUrl!.replace('https://pypi.org/simple', 'https://pypi.org/pypi')
     );
