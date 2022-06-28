@@ -19,7 +19,7 @@ import * as gitlab from './gitlab';
 import * as internal from './internal';
 import * as local from './local';
 import * as npm from './npm';
-import type { ParsedPreset, Preset, PresetApi } from './types';
+import type { ParsedPreset, PresetApi } from './types';
 import {
   PRESET_DEP_NOT_FOUND,
   PRESET_INVALID,
@@ -221,20 +221,18 @@ export async function getPreset(
     parsePreset(preset);
 
   const cacheKey = preset;
-  const cachedResult = memCache.get<Preset>(cacheKey);
-  let presetConfig = is.undefined(cachedResult)
-    ? await presetSources[presetSource].getPreset({
-        repo,
-        presetPath,
-        presetName,
-        tag,
-      })
-    : cachedResult;
+  const cachedResult = memCache.get<RenovateConfig>(cacheKey);
+  if (cachedResult) {
+    return cachedResult;
+  }
+  let presetConfig = await presetSources[presetSource].getPreset({
+    repo,
+    presetPath,
+    presetName,
+    tag,
+  });
   if (!presetConfig) {
     throw new Error(PRESET_DEP_NOT_FOUND);
-  }
-  if (is.undefined(cachedResult)) {
-    memCache.set(cacheKey, presetConfig);
   }
 
   logger.trace({ presetConfig }, `Found preset ${preset}`);
@@ -269,7 +267,8 @@ export async function getPreset(
     delete presetConfig.description;
   }
   const { migratedConfig } = migration.migrateConfig(presetConfig);
-  return massage.massageConfig(migratedConfig);
+  memCache.set(cacheKey, massage.massageConfig(migratedConfig));
+  return memCache.get(cacheKey);
 }
 
 export async function resolveConfigPresets(
