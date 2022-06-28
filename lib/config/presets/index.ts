@@ -219,7 +219,6 @@ export async function getPreset(
   }
   const { presetSource, repo, presetPath, presetName, tag, params } =
     parsePreset(preset);
-
   const cacheKey = `preset:${preset}`;
   const cachedResult = memCache.get<Preset>(cacheKey);
   let presetConfig = is.undefined(cachedResult)
