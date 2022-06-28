@@ -127,7 +127,7 @@ async function getUpdateResult(
   packageFileName: string
 ): Promise<UpdateArtifactsResult[]> {
   const hermitFolder = `${upath.dirname(packageFileName)}/`;
-  const hermitChanges = await getRepoStatus([hermitFolder]);
+  const hermitChanges = await getRepoStatus(hermitFolder);
   logger.debug(
     { hermitChanges, hermitFolder },
     `hermit changes after package update`
