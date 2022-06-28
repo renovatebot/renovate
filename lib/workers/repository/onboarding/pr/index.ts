@@ -13,7 +13,11 @@ import {
 } from '../../../../util/git';
 import * as template from '../../../../util/template';
 import type { BranchConfig } from '../../../types';
-import { getDepWarnings, getErrors, getWarnings } from '../../errors-warnings';
+import {
+  getDepWarningsPR,
+  getErrors,
+  getWarnings,
+} from '../../errors-warnings';
 import { getPlatformPrOptions } from '../../update/pr';
 import { prepareLabels } from '../../update/pr/labels';
 import { addParticipants } from '../../update/pr/participants';
@@ -109,7 +113,7 @@ If you need any further assistance then you can also [request help here](${
   prBody = prBody.replace('{{CONFIG}}\n', configDesc);
   prBody = prBody.replace(
     '{{WARNINGS}}\n',
-    getWarnings(config) + getDepWarnings(packageFiles!)
+    getWarnings(config) + getDepWarningsPR(packageFiles!)
   );
   prBody = prBody.replace('{{ERRORS}}\n', getErrors(config));
   prBody = prBody.replace('{{BASEBRANCH}}\n', getBaseBranchDesc(config));
