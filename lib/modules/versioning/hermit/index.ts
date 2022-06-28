@@ -81,12 +81,7 @@ export class HermitVersioning extends RegExpVersioningApi {
   }
 
   override isValid(version: string): boolean {
-    if (this._isValidSemver(version)) {
-      return true;
-    }
-
-    // if a version starts with @ then it is a channel
-    return this._isChannel(version);
+    return this._isValidSemver(version) || this._isChannel(version);
   }
 
   private _getVersionPart(
