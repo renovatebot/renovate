@@ -220,20 +220,18 @@ export async function getPreset(
   const { presetSource, repo, presetPath, presetName, tag, params } =
     parsePreset(preset);
   const cacheKey = `preset:${preset}`;
-  const cachedResult = memCache.get<Preset>(cacheKey);
-  let presetConfig = is.undefined(cachedResult)
-    ? await presetSources[presetSource].getPreset({
-        repo,
-        presetPath,
-        presetName,
-        tag,
-      })
-    : cachedResult;
+  let presetConfig = memCache.get<Preset | null | undefined>(cacheKey);
+  if (is.nullOrUndefined(presetConfig)) {
+    presetConfig = await presetSources[presetSource].getPreset({
+      repo,
+      presetPath,
+      presetName,
+      tag,
+    });
+    memCache.set(cacheKey, presetConfig);
+  }
   if (!presetConfig) {
     throw new Error(PRESET_DEP_NOT_FOUND);
-  }
-  if (is.undefined(cachedResult)) {
-    memCache.set(cacheKey, presetConfig);
   }
   logger.trace({ presetConfig }, `Found preset ${preset}`);
   if (params) {
