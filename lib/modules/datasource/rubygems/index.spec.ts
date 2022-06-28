@@ -10,6 +10,7 @@ import { resetCache } from './get-rubygems-org';
 import { RubyGemsDatasource } from '.';
 
 const rubygemsOrgVersions = loadFixture('rubygems-org.txt');
+const contribsysComVersions = loadFixture('contribsys-com-versions.txt');
 const railsInfo = loadJsonFixture('rails/info.json');
 const railsVersions = loadJsonFixture('rails/versions.json');
 const railsDependencies = loadBinaryFixture('dependencies-rails.dat');
@@ -81,6 +82,32 @@ describe('modules/datasource/rubygems/index', () => {
       ).toBeDefined();
       expect(
         res.releases.find((release) => release.version === '0.1.2')
+      ).toBeUndefined();
+    });
+
+    it('returns a dep for a package hit on an arbitrary registry that only supports old format endpoints', async () => {
+      const newparams = {
+        ...params,
+        packageName: 'sidekiq-ent',
+        registryUrls: ['https://enterprise.contribsys.com'],
+      };
+      httpMock
+        .scope('https://enterprise.contribsys.com')
+        .get('/versions')
+        .reply(200, contribsysComVersions)
+        .get('/api/v1/gems/sidekiq-ent.json')
+        .reply(404, {})
+        .get('/api/v1/dependencies?gems=sidekiq-ent')
+        .reply(404, {});
+      const res = await getPkgReleases(newparams);
+      expect(res).not.toBeNull();
+      expect(res.releases).toHaveLength(39);
+      expect(res).toMatchSnapshot();
+      expect(
+        res.releases.find((release) => release.version === '2.1.2')
+      ).toBeDefined();
+      expect(
+        res.releases.find((release) => release.version === '2.1.3')
       ).toBeUndefined();
     });
 

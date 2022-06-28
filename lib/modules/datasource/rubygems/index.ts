@@ -1,4 +1,5 @@
 import { cache } from '../../../util/cache/package/decorator';
+import { HttpError } from '../../../util/http';
 import { parseUrl } from '../../../util/url';
 import * as rubyVersioning from '../../versioning/ruby';
 import { Datasource } from '../datasource';
@@ -34,16 +35,26 @@ export class RubyGemsDatasource extends Datasource {
     key: ({ registryUrl, packageName }: GetReleasesConfig) =>
       `${registryUrl}/${packageName}`,
   })
-  getReleases({
+  async getReleases({
     packageName,
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     if (parseUrl(registryUrl)?.hostname === 'rubygems.org') {
       return this.rubyGemsOrgDatasource.getReleases({ packageName });
     }
-    return this.internalRubyGemsDatasource.getReleases({
-      packageName,
-      registryUrl,
-    });
+    try {
+      return await this.internalRubyGemsDatasource.getReleases({
+        packageName,
+        registryUrl,
+      });
+    } catch (error) {
+      if (error instanceof HttpError && error.response?.statusCode === 404) {
+        return this.rubyGemsOrgDatasource.getReleases({
+          packageName,
+          registryUrl,
+        });
+      }
+      return null;
+    }
   }
 }

@@ -23,9 +23,10 @@ export class RubyGemsOrgDatasource extends Datasource {
 
   async getReleases({
     packageName,
+    registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     logger.debug(`getRubygemsOrgDependency(${packageName})`);
-    await this.syncVersions();
+    await this.syncVersions(registryUrl);
     if (!packageReleases[packageName]) {
       return null;
     }
@@ -44,8 +45,10 @@ export class RubyGemsOrgDatasource extends Datasource {
     return (' ' + x).slice(1);
   }
 
-  async updateRubyGemsVersions(): Promise<void> {
-    const url = 'https://rubygems.org/versions';
+  async updateRubyGemsVersions(
+    registryUrl = 'https://rubygems.org'
+  ): Promise<void> {
+    const url = `${registryUrl}/versions`;
     const options = {
       headers: {
         'accept-encoding': 'identity',
@@ -116,11 +119,12 @@ export class RubyGemsOrgDatasource extends Datasource {
 
   private updateRubyGemsVersionsPromise: Promise<void> | null = null;
 
-  async syncVersions(): Promise<void> {
+  async syncVersions(registryUrl): Promise<void> {
     if (RubyGemsOrgDatasource.isDataStale()) {
       this.updateRubyGemsVersionsPromise =
         // eslint-disable-next-line @typescript-eslint/no-misused-promises
-        this.updateRubyGemsVersionsPromise || this.updateRubyGemsVersions();
+        this.updateRubyGemsVersionsPromise ||
+        this.updateRubyGemsVersions(registryUrl);
       await this.updateRubyGemsVersionsPromise;
       this.updateRubyGemsVersionsPromise = null;
     }
