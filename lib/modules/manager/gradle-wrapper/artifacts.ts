@@ -68,7 +68,6 @@ export async function updateArtifacts({
     const gradlewPath = upath.resolve(projectDir, `./${gradlew}`);
     let cmd = await prepareGradleCommand(
       gradlew,
-      projectDir!,
       await stat(gradlewPath).catch(() => null),
       `wrapper`
     );
