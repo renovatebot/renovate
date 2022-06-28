@@ -221,7 +221,7 @@ export class HermitVersioning extends RegExpVersioningApi {
 
 export const api: VersioningApiConstructor = HermitVersioning;
 export const id = 'hermit';
-export const displayName = 'Hermit versioning';
+export const displayName = 'Hermit';
 export const urls = [
   'https://cashapp.github.io/hermit/packaging/reference/#versions',
 ];
