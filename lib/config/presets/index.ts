@@ -236,7 +236,6 @@ export async function getPreset(
   if (is.undefined(cachedResult)) {
     memCache.set(cacheKey, presetConfig);
   }
-
   logger.trace({ presetConfig }, `Found preset ${preset}`);
   if (params) {
     const argMapping: Record<string, string> = {};
