@@ -20,11 +20,8 @@ interface DependencyDashboard {
 function checkApproveAllPendingPR(issueBody: string): string {
   const checkApproveAllPendingPR =
     ' - \\[x\\] <!-- approve-all-pending-prs -->';
-  const checkedApproveAll = issueBody.match(
-    regEx(checkApproveAllPendingPR, 'g')
-  );
   let newIssueBody = issueBody;
-  if (checkedApproveAll?.length) {
+  if (regEx(checkApproveAllPendingPR).test(issueBody)) {
     const checkPending = regEx(/ - \[ ] <!-- approve-branch=/gm);
     newIssueBody = newIssueBody.replace(
       checkPending,
@@ -35,13 +32,10 @@ function checkApproveAllPendingPR(issueBody: string): string {
 }
 
 function checkApproveAllRateLimitdPR(issueBody: string): string {
-  const checkApproveAllPendingPR =
+  const checkApproveOpenAllRateLimitedPR =
     ' - \\[x\\] <!-- open-all-rate-limited-prs -->';
-  const checkedApproveAll = issueBody.match(
-    regEx(checkApproveAllPendingPR, 'g')
-  );
   let newIssueBody = issueBody;
-  if (checkedApproveAll?.length) {
+  if (regEx(checkApproveOpenAllRateLimitedPR).test(issueBody)) {
     const checkPending = regEx(/ - \[ ] <!-- unlimit-branch=/gm);
     newIssueBody = newIssueBody.replace(
       checkPending,
