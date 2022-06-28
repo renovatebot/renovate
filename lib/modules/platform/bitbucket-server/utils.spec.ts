@@ -1,4 +1,3 @@
-import is from '@sindresorhus/is';
 import type { Response } from 'got';
 import { partial } from '../../../../test/util';
 import type {
@@ -45,25 +44,34 @@ function infoMock(
   };
 
   if (options.cloneUrl.https || options.cloneUrl.ssh) {
+    links.clone = [];
+    if (options.cloneUrl.https) {
+      links.clone.push({
+        href: httpLink(endpointStr, projectKey, repositorySlug),
+        name: 'http',
+      });
+    }
+
+    if (options.cloneUrl.ssh) {
+      links.clone.push({
+        href: sshLink(projectKey, repositorySlug),
+        name: 'ssh',
+      });
+    }
+    return {
+      project: { key: projectKey },
+      origin: { name: repositorySlug, slug: repositorySlug },
+      links,
+    } as BbsRestRepo;
+  } else {
     // This mimics the behavior of bb-server which does not include the clone property at all
     // if ssh and https are both turned off
-    links.clone = [
-      options.cloneUrl.https
-        ? {
-            href: httpLink(endpointStr, projectKey, repositorySlug),
-            name: 'http',
-          }
-        : null,
-      options.cloneUrl.ssh
-        ? {
-            href: sshLink(projectKey, repositorySlug),
-            name: 'ssh',
-          }
-        : null,
-    ].filter(is.truthy);
+    return {
+      project: { key: projectKey },
+      origin: { name: repositorySlug, slug: repositorySlug },
+      links: { clone: undefined },
+    } as BbsRestRepo;
   }
-
-  return { project: undefined, origin: undefined, links } as BbsRestRepo;
 }
 
 describe('modules/platform/bitbucket-server/utils', () => {

@@ -184,55 +184,71 @@ export function getRepoGitUrl(
   info: BbsRestRepo,
   opts: HostRule
 ): string | null {
-  if (gitUrl === undefined) {
-    let cloneUrl = info.links.clone?.find(({ name }) => name === 'http');
-    if (!cloneUrl) {
-      // Http access might be disabled, try to find ssh url in this case
-      cloneUrl = info.links.clone?.find(({ name }) => name === 'ssh');
-    }
-
-    let gitUrl: string;
-    if (!cloneUrl) {
-      // Fallback to generating the url if the API didn't give us an URL
-      gitUrl = generateUrlFromEndpoint(defaultEndpoint, opts, repository);
-    } else if (cloneUrl.name === 'http') {
-      logger.debug({ url: cloneUrl.href }, `using http URL`);
-      // Inject auth into the API provided URL
-      const repoUrl = url.parse(cloneUrl.href);
-      repoUrl.auth = `${opts.username}:${opts.password}`;
-      gitUrl = url.format(repoUrl);
-    } else {
-      logger.debug({ url: cloneUrl.href }, `using ssh URL`);
-      // SSH urls can be used directly
-      gitUrl = cloneUrl.href;
-    }
-    return gitUrl;
-  } else {
-    if (gitUrl === 'ssh') {
-      const sshUrl = info.links.clone?.find(({ name }) => name === 'ssh');
-      if (sshUrl) {
-        logger.debug({ url: sshUrl.href }, `using ssh URL`);
-        return sshUrl.href;
-      } else {
-        logger.warn(`ssh URL could not be found for ${repository}.`);
-      }
-    } else if (gitUrl === 'default') {
+  switch (gitUrl) {
+    case 'default': {
       const httpUrl = info.links.clone?.find(({ name }) => name === 'http');
-      if (httpUrl) {
-        logger.debug({ url: httpUrl.href }, `using default URL`);
-        // Inject auth into the API provided URL
-        const repoUrl = url.parse(httpUrl.href);
-        repoUrl.auth = `${opts.username}:${opts.password}`;
-        return url.format(repoUrl);
-      } else {
-        logger.warn(
-          `endpoint URL could not be found for ${repository}. Falling back to generating`
-        );
+      if (httpUrl === undefined) {
+        return null;
       }
-    } else if (gitUrl === 'endpoint') {
-      // Fallback to generating the url if the API didn't give us an URL
-      return generateUrlFromEndpoint(defaultEndpoint, opts, repository);
+
+      logger.debug({ url: httpUrl.href }, `using http URL`);
+      // Inject auth into the API provided URL
+      const repoUrl = url.parse(httpUrl.href);
+      repoUrl.auth = `${opts.username}:${opts.password}`;
+      return url.format(repoUrl);
+      break;
     }
-    return null;
+    case 'ssh': {
+      const sshUrl = info.links.clone?.find(({ name }) => name === 'ssh');
+      if (sshUrl === undefined) {
+        return null;
+      }
+
+      logger.debug({ url: sshUrl.href }, `using ssh URL`);
+      return sshUrl.href;
+      break;
+    }
+    case 'endpoint': {
+      const generatedUrl = generateUrlFromEndpoint(
+        defaultEndpoint,
+        opts,
+        repository
+      );
+      logger.debug({ url: generatedUrl }, `using endpoint URL`);
+      return generatedUrl;
+      break;
+    }
+    case undefined: {
+      //if no connection type is specified try them all as a fallback
+      const httpUrl = getRepoGitUrl(
+        repository,
+        defaultEndpoint,
+        'default',
+        info,
+        opts
+      );
+      if (httpUrl !== null) {
+        return httpUrl;
+      }
+
+      const sshUrl = getRepoGitUrl(
+        repository,
+        defaultEndpoint,
+        'ssh',
+        info,
+        opts
+      );
+      if (sshUrl !== null) {
+        return sshUrl;
+      }
+
+      return getRepoGitUrl(repository, defaultEndpoint, 'endpoint', info, opts);
+      break;
+    }
+    default: {
+      throw new TypeError(
+        `The specified scm connection type ${gitUrl} is not a valid GitUrlOption value`
+      );
+    }
   }
 }
