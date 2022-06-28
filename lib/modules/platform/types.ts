@@ -21,9 +21,8 @@ export interface PlatformParams {
 export interface PlatformResult {
   endpoint: string;
   renovateUsername?: string;
-  token: string;
-  gitAuthor?: string;
   token?: string;
+  gitAuthor?: string;
 }
 
 export interface RepoResult {
