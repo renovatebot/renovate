@@ -190,7 +190,7 @@ describe('util/fs/index', () => {
           const { dirFromEnv } = setupMock(tmpDir.path);
           const res = await ensureCacheDir('bundler');
           expect(res).toEqual(dirFromEnv);
-          expect(await fs.exists(dirFromEnv)).toBeTrue();
+          expect(fs.existsSync(dirFromEnv)).toBeTrue();
         },
         { unsafeCleanup: true }
       );
