@@ -6,7 +6,6 @@ import { PypiDatasource } from '.';
 
 const res1 = Fixtures.get('azure-cli-monitor.json');
 const res2 = Fixtures.get('azure-cli-monitor-updated.json');
-const res3 = Fixtures.get('six.json');
 const htmlResponse = Fixtures.get('versions-html.html');
 const badResponse = Fixtures.get('versions-html-badfile.html');
 const dataRequiresPythonResponse = Fixtures.get(
@@ -525,7 +524,7 @@ describe('modules/datasource/pypi/index', () => {
   });
 
   it('uses https://pypi.org/pypi/ instead of https://pypi.org/simple/', async () => {
-    httpMock.scope(baseUrl).get('/six/json').reply(200, res3);
+    httpMock.scope(baseUrl).get('/azure-cli-monitor/json').reply(200, res1);
     const config = {
       registryUrls: ['https://pypi.org/simple/'],
     };
@@ -534,7 +533,7 @@ describe('modules/datasource/pypi/index', () => {
         datasource,
         ...config,
         constraints: { python: '2.7' },
-        depName: 'six',
+        depName: 'azure-cli-monitor',
       })
     ).toMatchSnapshot();
   });
