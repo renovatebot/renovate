@@ -1,6 +1,7 @@
 import { logger } from '../../../logger';
 import { cache } from '../../../util/cache/package/decorator';
 import { GithubHttp } from '../../../util/http/github';
+import { streamToString } from '../../../util/streams';
 import { id } from '../../versioning/hermit';
 import { Datasource } from '../datasource';
 import { GithubReleasesDatasource } from '../github-releases';
@@ -121,16 +122,15 @@ export class HermitDatasource extends Datasource {
       );
     }
 
-    // fetches the content of the asset via calling back to the url
-    // (not browser_download_url) to work with private
-    // repositories
-    const indexContent = await this.githubHttp.get(asset.url, {
-      headers: {
-        accept: 'application/octet-stream',
-      },
-    });
+    const indexContent = await streamToString(
+      this.githubHttp.stream(asset.url, {
+        headers: {
+          accept: 'application/octet-stream',
+        },
+      })
+    );
 
-    return JSON.parse(indexContent.body) as HermitSearchResult[];
+    return JSON.parse(indexContent) as HermitSearchResult[];
   }
 
   /**
