@@ -172,10 +172,10 @@ describe('util/http/index', () => {
     expect(httpMock.allUsed()).toBeTrue();
   });
 
-  it('disables hosts for stream', async () => {
+  it('disables hosts for stream', () => {
     hostRules.add({ matchHost: 'renovate.com', enabled: false });
 
-    await expect(http.stream('http://renovate.com/test')).rejects.toThrow(
+    expect(() => http.stream('http://renovate.com/test')).toThrow(
       HOST_DISABLED
     );
   });
