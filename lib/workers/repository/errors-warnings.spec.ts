@@ -1,6 +1,11 @@
 import { RenovateConfig, getConfig } from '../../../test/util';
 import type { PackageFile } from '../../modules/manager/types';
-import { getDepWarningsPR, getErrors, getWarnings } from './errors-warnings';
+import {
+  getDepWarningsDashboard,
+  getDepWarningsPR,
+  getErrors,
+  getWarnings,
+} from './errors-warnings';
 
 describe('workers/repository/errors-warnings', () => {
   describe('getWarnings()', () => {
@@ -98,6 +103,66 @@ describe('workers/repository/errors-warnings', () => {
     it('PR warning returns empty string', () => {
       const packageFiles: Record<string, PackageFile[]> = {};
       const res = getDepWarningsPR(packageFiles);
+      expect(res).toBe('');
+    });
+  });
+
+  describe('getDepWarningsDashboard()', () => {
+    beforeEach(() => {
+      jest.resetAllMocks();
+    });
+
+    it('returns dependency dashboard warning text', () => {
+      const packageFiles: Record<string, PackageFile[]> = {
+        npm: [
+          {
+            packageFile: 'package.json',
+            deps: [
+              {
+                warnings: [{ message: 'Warning 1', topic: '' }],
+              },
+              {},
+            ],
+          },
+          {
+            packageFile: 'backend/package.json',
+            deps: [
+              {
+                warnings: [{ message: 'Warning 1', topic: '' }],
+              },
+            ],
+          },
+        ],
+        dockerfile: [
+          {
+            packageFile: 'Dockerfile',
+            deps: [
+              {
+                warnings: [{ message: 'Warning 2', topic: '' }],
+              },
+            ],
+          },
+        ],
+      };
+      const res = getDepWarningsDashboard(packageFiles);
+      expect(res).toMatchInlineSnapshot(`
+        "
+        ---
+
+        ### ⚠ Dependency Lookup Warnings ⚠
+
+        -   \`Warning 1\`
+        -   \`Warning 2\`
+
+        Files affected: \`package.json\`, \`backend/package.json\`, \`Dockerfile\`
+
+        "
+      `);
+    });
+
+    it('dependency dashboard warning returns empty string', () => {
+      const packageFiles: Record<string, PackageFile[]> = {};
+      const res = getDepWarningsDashboard(packageFiles);
       expect(res).toBe('');
     });
   });

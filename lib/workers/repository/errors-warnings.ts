@@ -82,3 +82,28 @@ export function getDepWarningsPR(
     '\n\n';
   return warningText;
 }
+
+export function getDepWarningsDashboard(
+  packageFiles: Record<string, PackageFile[]>
+): string {
+  const { warnings, warningFiles } = getDepWarnings(packageFiles);
+  let warningText = '';
+  if (!warnings.length) {
+    return '';
+  }
+  logger.debug(
+    { warnings, warningFiles },
+    'Found package lookup warnings in onboarding'
+  );
+  warningText = emojify(
+    `\n---\n\n### :warning: Dependency Lookup Warnings :warning:\n\n`
+  );
+  warnings.forEach((w) => {
+    warningText += `-   \`${w}\`\n`;
+  });
+  warningText +=
+    '\nFiles affected: ' +
+    warningFiles.map((f) => '`' + f + '`').join(', ') +
+    '\n\n';
+  return warningText;
+}
