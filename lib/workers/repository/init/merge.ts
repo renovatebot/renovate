@@ -279,16 +279,16 @@ export async function mergeRenovateConfig(
 }
 
 export function logShallowConfig(ShallowConfig: RenovateConfig): void {
-  // remove resolved presets from the log
-  // there could be a preset that is extending a preset
+  // remove the resolved presets in the extends array from the log
+  // also there could be a preset that is extending a preset
   // which is also present in an extend array of a different preset
   // so lets clean that for the log
   if (is.array(ShallowConfig?.extends)) {
     if (ShallowConfig.extends.length) {
-      ShallowConfig.extends.filter((e) => !isPresetForShallowConfig(e));
-      const uniqueExtends: Set<string> = new Set(
-        ShallowConfig.extends.values()
+      ShallowConfig.extends = ShallowConfig.extends.filter(
+        (e) => !isPresetForShallowConfig(e)
       );
+      const uniqueExtends = new Set(ShallowConfig.extends.values());
       ShallowConfig.extends = Array.from(uniqueExtends);
     }
     // istanbul ignore if

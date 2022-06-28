@@ -266,7 +266,7 @@ export async function getPreset(
 }
 
 export async function resolveConfigPresets(
-  inputConfig: AllConfig, // has the repo config
+  inputConfig: AllConfig,
   baseConfig?: RenovateConfig,
   _ignorePresets?: string[],
   existingPresets: string[] = [],
