@@ -2,6 +2,13 @@ import { regEx } from '../../../util/regex';
 import { RegExpVersion, RegExpVersioningApi } from '../regex';
 import type { VersioningApiConstructor } from '../types';
 
+export const id = 'hermit';
+export const displayName = 'Hermit';
+export const urls = [
+  'https://cashapp.github.io/hermit/packaging/reference/#versions',
+];
+export const supportsRanges = false;
+
 export class HermitVersioning extends RegExpVersioningApi {
   static versionRegex =
     '^(?<major>\\d+)(\\.(?<minor>\\d+))?(\\.(?<patch>\\d+))?(_(?<build>\\d+))?([-]?(?<prerelease>[^.+][^+]*))?([+](?<compatibility>[^.-][^+]*))?$';
@@ -220,9 +227,5 @@ export class HermitVersioning extends RegExpVersioningApi {
 }
 
 export const api: VersioningApiConstructor = HermitVersioning;
-export const id = 'hermit';
-export const displayName = 'Hermit';
-export const urls = [
-  'https://cashapp.github.io/hermit/packaging/reference/#versions',
-];
-export const supportsRanges = false;
+
+export default api;

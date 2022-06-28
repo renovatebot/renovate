@@ -58,7 +58,7 @@ describe('modules/versioning/hermit/index', () => {
       ${'@latest'}                | ${true}
       ${'@stable'}                | ${true}
     `('isChannel("$version") === $expected', ({ version, expected }) => {
-      expect(!!versioning._isChannel(version)).toBe(expected);
+      expect(versioning._isChannel(version)).toBe(expected);
     });
   });
 
