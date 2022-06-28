@@ -144,7 +144,10 @@ describe('modules/manager/bundler/artifacts', () => {
         newPackageFileContent: 'Updated Gemfile content',
         config: {
           ...config,
-          conservative: true,
+          postUpdateOptions: [
+            ...(config.postUpdateOptions || []),
+            'bundlerConservative',
+          ],
         },
       })
     ).toEqual([updatedGemfileLock]);

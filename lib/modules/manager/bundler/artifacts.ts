@@ -61,9 +61,11 @@ export async function updateArtifacts(
     return null;
   }
 
-  const args = ['--update', config.conservative && '--conservative'].filter(
-    Boolean
-  );
+  const args = [
+    '--update',
+    config.postUpdateOptions?.includes('bundlerConservative') &&
+      '--conservative',
+  ].filter(Boolean);
 
   try {
     await writeLocalFile(packageFileName, newPackageFileContent);

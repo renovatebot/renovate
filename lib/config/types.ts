@@ -240,7 +240,6 @@ export interface RenovateConfig
   secrets?: Record<string, string>;
 
   constraints?: Record<string, string>;
-  conservative?: boolean;
 }
 
 export interface AllConfig extends RenovateConfig, GlobalOnlyConfig {}

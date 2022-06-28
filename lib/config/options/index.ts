@@ -1852,6 +1852,7 @@ const options: RenovateOptions[] = [
     type: 'array',
     default: [],
     allowedValues: [
+      'bundlerConservative',
       'gomodMassage',
       'gomodUpdateImportPaths',
       'gomodTidy',
@@ -1938,16 +1939,6 @@ const options: RenovateOptions[] = [
       'pipenv',
       'poetry',
     ],
-  },
-  {
-    name: 'conservative',
-    description:
-      'Enable conservative mode for package managers that support it. This will only update the immediate dependency in the lockfile instead of all subdependencies.',
-    type: 'boolean',
-    default: false,
-    mergeable: true,
-    cli: false,
-    supportedManagers: ['bundler'],
   },
   {
     name: 'java',

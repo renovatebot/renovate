@@ -448,17 +448,6 @@ Renovate's default behavior is to reuse/reopen a single Config Warning issue in 
 However for some people this has the downside that the config warning won't be sorted near the top if you view issues by creation date.
 Configure this option to `false` if you prefer Renovate to open a new issue whenever there is a config warning.
 
-## conservative
-
-Enable conservative mode for package managers that support it.
-This will only update the immediate dependency in the lockfile instead of all subdependencies.
-
-```
-{
-  "conservative": true
-}
-```
-
 ## constraints
 
 Constraints are used in package managers which use third-party tools to update "artifacts" like lock files or checksum files.
@@ -1914,6 +1903,7 @@ This way Renovate can use GitHub's [Commit signing support for bots and other Gi
 
 ## postUpdateOptions
 
+- `bundlerConservative`: Enable conservative mode for `bundler` (Ruby dependencies). This will only update the immediate dependency in the lockfile instead of all subdependencies.
 - `gomodMassage`: Enable massaging `replace` directives before calling `go` commands
 - `gomodTidy`: Run `go mod tidy` after Go module updates. This is implicitly enabled for major module updates when `gomodUpdateImportPaths` is enabled
 - `gomodTidy1.17`: Run `go mod tidy -compat=1.17` after Go module updates.
