@@ -6,22 +6,11 @@ import fs from 'fs-extra';
 import upath from 'upath';
 import { GlobalConfig } from '../../config/global';
 import { logger } from '../../logger';
+import { assertBaseDir } from './util';
 
 export * from './proxies';
 
 export const pipeline = util.promisify(stream.pipeline);
-
-function isPathInBaseDir(path: string, baseDir: string): boolean {
-  if (!path.startsWith(upath.resolve(baseDir))) {
-    logger.warn(
-      { path, baseDir },
-      'Preventing access to file outside the base directory'
-    );
-    return false;
-  }
-
-  return true;
-}
 
 export function getSubDirectory(fileName: string): string {
   return upath.parse(fileName).dir;
@@ -44,11 +33,9 @@ export async function readLocalFile(
   fileName: string,
   encoding?: string
 ): Promise<string | Buffer | null> {
-  const { localDir } = GlobalConfig.get();
+  const localDir = GlobalConfig.get('localDir');
   const localFileName = upath.resolve(localDir, fileName);
-  if (!isPathInBaseDir(localFileName, localDir!)) {
-    return null;
-  }
+  assertBaseDir(localFileName, localDir!);
 
   try {
     const fileContent = encoding
@@ -65,20 +52,16 @@ export async function writeLocalFile(
   fileName: string,
   fileContent: string | Buffer
 ): Promise<void> {
-  const { localDir } = GlobalConfig.get();
+  const localDir = GlobalConfig.get('localDir');
   const localFileName = upath.resolve(localDir, fileName);
-  if (!isPathInBaseDir(localFileName, localDir!)) {
-    return;
-  }
+  assertBaseDir(localFileName, localDir!);
   await fs.outputFile(localFileName, fileContent);
 }
 
 export async function deleteLocalFile(fileName: string): Promise<void> {
-  const { localDir } = GlobalConfig.get();
+  const localDir = GlobalConfig.get('localDir');
   const localFileName = upath.resolve(localDir, fileName);
-  if (!isPathInBaseDir(localFileName, localDir!)) {
-    return;
-  }
+  assertBaseDir(localFileName, localDir!);
   await fs.remove(localFileName);
 }
 
@@ -87,15 +70,11 @@ export async function renameLocalFile(
   fromFile: string,
   toFile: string
 ): Promise<void> {
-  const { localDir } = GlobalConfig.get();
+  const localDir = GlobalConfig.get('localDir');
   const fromPath = upath.resolve(localDir, fromFile);
   const toPath = upath.resolve(localDir, toFile);
-  if (
-    !isPathInBaseDir(fromPath, localDir!) ||
-    !isPathInBaseDir(toPath, localDir!)
-  ) {
-    return;
-  }
+  assertBaseDir(fromPath, localDir!);
+  assertBaseDir(toPath, localDir!);
   await fs.move(fromPath, toPath);
 }
 
@@ -107,22 +86,18 @@ export async function ensureDir(dirName: string): Promise<void> {
 }
 
 export async function ensureLocalDir(dirName: string): Promise<string> {
-  const { localDir } = GlobalConfig.get();
+  const localDir = GlobalConfig.get('localDir');
   const localDirName = upath.resolve(localDir, dirName);
-  if (!isPathInBaseDir(localDirName, localDir!)) {
-    return Promise.reject();
-  }
+  assertBaseDir(localDirName, localDir!);
 
   await fs.ensureDir(localDirName);
   return localDirName;
 }
 
 export async function ensureCacheDir(name: string): Promise<string> {
-  const { cacheDir } = GlobalConfig.get();
+  const cacheDir = GlobalConfig.get('cacheDir');
   const cacheDirName = upath.resolve(cacheDir, `others/${name}`);
-  if (!isPathInBaseDir(cacheDirName, cacheDir!)) {
-    return Promise.reject();
-  }
+  assertBaseDir(cacheDirName, cacheDir!);
 
   await fs.ensureDir(cacheDirName);
   return cacheDirName;
@@ -134,22 +109,22 @@ export async function ensureCacheDir(name: string): Promise<string> {
  * without risk of that information leaking to other repositories/users.
  */
 export function privateCacheDir(): string {
-  const { cacheDir } = GlobalConfig.get();
+  const cacheDir = GlobalConfig.get('cacheDir');
   return upath.join(cacheDir, '__renovate-private-cache');
 }
 
-export function localPathExists(pathName: string): Promise<boolean> {
-  const { localDir } = GlobalConfig.get();
+export async function localPathExists(pathName: string): Promise<boolean> {
+  const localDir = GlobalConfig.get('localDir');
   const localPathName = upath.resolve(localDir, pathName);
-  if (!isPathInBaseDir(localPathName, localDir!)) {
-    return Promise.resolve(false);
-  }
+  assertBaseDir(localPathName, localDir!);
 
   // Works for both files as well as directories
-  return fs
-    .stat(localPathName)
-    .then((s) => !!s)
-    .catch(() => false);
+  try {
+    const s = await fs.stat(localPathName);
+    return !!s;
+  } catch (_) {
+    return false;
+  }
 }
 
 /**
@@ -185,17 +160,17 @@ export function createWriteStream(path: string): fs.WriteStream {
   return fs.createWriteStream(path);
 }
 
-export function localPathIsFile(pathName: string): Promise<boolean> {
-  const { localDir } = GlobalConfig.get();
+export async function localPathIsFile(pathName: string): Promise<boolean> {
+  const localDir = GlobalConfig.get('localDir');
   const localPathName = upath.resolve(localDir, pathName);
-  if (!isPathInBaseDir(localPathName, localDir!)) {
-    return Promise.resolve(false);
-  }
+  assertBaseDir(localPathName, localDir!);
 
-  return fs
-    .stat(localPathName)
-    .then((s) => s.isFile())
-    .catch(() => false);
+  try {
+    const s = await fs.stat(localPathName);
+    return s.isFile();
+  } catch (_) {
+    return false;
+  }
 }
 
 /**
@@ -206,7 +181,7 @@ export async function findUpLocal(
   fileName: string | string[],
   cwd: string
 ): Promise<string | null> {
-  const { localDir } = GlobalConfig.get();
+  const localDir = GlobalConfig.get('localDir');
   const absoluteCwd = upath.join(localDir, cwd);
   const normalizedAbsoluteCwd = upath.normalizeSafe(absoluteCwd);
   const res = await findUp(fileName, {

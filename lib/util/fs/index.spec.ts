@@ -4,6 +4,7 @@ import { join } from 'upath';
 import { envMock } from '../../../test/exec-util';
 import { env, mockedFunction } from '../../../test/util';
 import { GlobalConfig } from '../../config/global';
+import { FILE_ACCESS_ERROR } from '../../constants/error-messages';
 import {
   deleteLocalFile,
   ensureCacheDir,
@@ -44,21 +45,27 @@ describe('util/fs/index', () => {
 
     it('blocks path traversal attempt', async () => {
       GlobalConfig.set({ localDir: 'some/invalid/dir' });
-      expect(await readLocalFile('../filename')).toBeNull();
+      await expect(readLocalFile('../filename')).rejects.toThrow(
+        FILE_ACCESS_ERROR
+      );
     });
   });
 
   describe('writeLocalFile', () => {
     it('blocks path traversal attempt', async () => {
       GlobalConfig.set({ localDir: 'some/invalid/dir' });
-      expect(await writeLocalFile('../filename', '')).toBeUndefined();
+      await expect(writeLocalFile('../filename', '')).rejects.toThrow(
+        FILE_ACCESS_ERROR
+      );
     });
   });
 
   describe('deleteLocalFile', () => {
     it('blocks path traversal attempt', async () => {
       GlobalConfig.set({ localDir: 'some/invalid/dir' });
-      expect(await deleteLocalFile('../filename')).toBeUndefined();
+      await expect(deleteLocalFile('../filename')).rejects.toThrow(
+        FILE_ACCESS_ERROR
+      );
     });
   });
 
@@ -80,7 +87,9 @@ describe('util/fs/index', () => {
 
     it('blocks path traversal attempt', async () => {
       GlobalConfig.set({ localDir: 'some/invalid/dir' });
-      expect(await localPathExists('../filename')).toBeFalse();
+      await expect(localPathExists('../filename')).rejects.toThrow(
+        FILE_ACCESS_ERROR
+      );
     });
   });
 
@@ -235,7 +244,9 @@ describe('util/fs/index', () => {
 
     it('blocks path traversal attempt', async () => {
       GlobalConfig.set({ localDir: 'some/invalid/dir' });
-      expect(await localPathIsFile('../filename')).toBeFalse();
+      await expect(localPathIsFile('../filename')).rejects.toThrow(
+        FILE_ACCESS_ERROR
+      );
     });
   });
 
