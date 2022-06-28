@@ -418,11 +418,21 @@ export async function syncGit(): Promise<void> {
 }
 
 // istanbul ignore next
-export async function getRepoStatus(
-  options?: TaskOptions
-): Promise<StatusResult> {
+export async function getRepoStatus(path?: string): Promise<StatusResult> {
+  if (path !== undefined) {
+    const { localDir } = GlobalConfig.get();
+    const localPath = upath.resolve(localDir, path);
+    if (!localPath.startsWith(upath.resolve(localDir))) {
+      logger.warn(
+        { localPath, localDir },
+        'Preventing access to file outside the local directory'
+      );
+      return Promise.reject();
+    }
+  }
+
   await syncGit();
-  return git.status(options);
+  return git.status(path ? [path] : []);
 }
 
 export function branchExists(branchName: string): boolean {

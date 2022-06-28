@@ -955,9 +955,19 @@ describe('util/git/index', () => {
 
       await fs.writeFile(tmpDir.path + '/bin/nested', 'new nested');
       await fs.writeFile(tmpDir.path + '/root', 'new root');
-      const resp = await git.getRepoStatus(['bin']);
+      const resp = await git.getRepoStatus('bin');
 
       expect(resp.modified).toStrictEqual(['bin/nested']);
+    });
+
+    it('should reject when trying to access directory out of localDir', async () => {
+      GlobalConfig.set({ localDir: tmpDir.path });
+      await git.checkoutBranch('renovate/nested_files');
+
+      await fs.writeFile(tmpDir.path + '/bin/nested', 'new nested');
+      await fs.writeFile(tmpDir.path + '/root', 'new root');
+
+      await expect(git.getRepoStatus('../../bin')).rejects.toBeUndefined();
     });
   });
 });
