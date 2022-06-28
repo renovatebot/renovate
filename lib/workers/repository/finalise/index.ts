@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
 import type { RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
 import { platform } from '../../../modules/platform';
@@ -19,11 +20,11 @@ export async function finaliseRepo(
     const migratedConfigData = await MigratedDataFactory.getAsync();
     const migrationBranch = await checkConfigMigrationBranch(
       config,
-      migratedConfigData
+      migratedConfigData!
     ); // null if migration not needed
     if (migrationBranch) {
       branchList.push(migrationBranch);
-      await ensureConfigMigrationPr(config, migratedConfigData);
+      await ensureConfigMigrationPr(config, migratedConfigData!);
     }
     MigratedDataFactory.reset();
   }

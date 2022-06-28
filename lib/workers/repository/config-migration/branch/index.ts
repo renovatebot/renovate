@@ -10,7 +10,7 @@ import { rebaseMigrationBranch } from './rebase';
 
 export async function checkConfigMigrationBranch(
   config: RenovateConfig,
-  migratedConfigData: MigratedData
+  migratedConfigData: MigratedData | null
 ): Promise<string | null> {
   logger.debug('checkConfigMigrationBranch()');
   if (!migratedConfigData) {

@@ -10,7 +10,8 @@ async function readFileAsXmlDocument(
   file: string
 ): Promise<XmlDocument | undefined> {
   try {
-    return new XmlDocument(await readLocalFile(file, 'utf8'));
+    // TODO #7154
+    return new XmlDocument((await readLocalFile(file, 'utf8'))!);
   } catch (err) {
     logger.debug({ err }, `failed to parse '${file}' as XML document`);
     return undefined;

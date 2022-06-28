@@ -34,7 +34,6 @@ export async function fetchJSONFile(
   }
 
   // TODO: null check #7154
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
   return parsePreset(fromBase64(res.content!));
 }
 

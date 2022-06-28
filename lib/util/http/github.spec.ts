@@ -13,6 +13,7 @@ import * as _repositoryCache from '../cache/repository';
 import type { RepoCacheData } from '../cache/repository/types';
 import * as hostRules from '../host-rules';
 import { GithubHttp, setBaseUrl } from './github';
+import type { GraphqlPageCache } from './github';
 
 jest.mock('../cache/repository');
 const repositoryCache = mocked(_repositoryCache);
@@ -527,9 +528,10 @@ describe('util/http/github', () => {
       const items = await githubApi.queryRepoField(graphqlQuery, 'testItem');
       expect(items).toHaveLength(3);
 
-      expect(
-        repoCache?.platform?.github?.graphqlPageCache?.['testItem']?.pageSize
-      ).toBe(25);
+      const graphqlPageCache = repoCache?.platform?.github?.[
+        'graphqlPageCache'
+      ] as GraphqlPageCache;
+      expect(graphqlPageCache?.['testItem']?.pageSize).toBe(25);
     });
 
     it('expands items count on timeout', async () => {
@@ -555,9 +557,10 @@ describe('util/http/github', () => {
 
       const items = await githubApi.queryRepoField(graphqlQuery, 'testItem');
       expect(items).toHaveLength(3);
-      expect(
-        repoCache?.platform?.github?.graphqlPageCache?.['testItem']?.pageSize
-      ).toBe(84);
+      const graphqlPageCache = repoCache?.platform?.github?.[
+        'graphqlPageCache'
+      ] as GraphqlPageCache;
+      expect(graphqlPageCache?.['testItem']?.pageSize).toBe(84);
     });
 
     it('continues to iterate with a lower page size on error 502', async () => {
@@ -599,10 +602,10 @@ describe('util/http/github', () => {
 
       const items = await githubApi.queryRepoField(graphqlQuery, 'testItem');
       expect(items).toHaveLength(3);
-
-      expect(
-        repoCache?.platform?.github?.graphqlPageCache?.['testItem']
-      ).toBeUndefined();
+      const graphqlPageCache = repoCache?.platform?.github?.[
+        'graphqlPageCache'
+      ] as GraphqlPageCache;
+      expect(graphqlPageCache?.['testItem']).toBeUndefined();
     });
 
     it('throws on 50x if count < 10', async () => {

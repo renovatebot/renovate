@@ -64,7 +64,7 @@ describe('workers/repository/extract/file-match', () => {
     });
 
     it('deduplicates', () => {
-      config.fileMatch.push('package.json');
+      config.fileMatch?.push('package.json');
       const res = fileMatch.getMatchingFiles(config, fileList);
       expect(res).toMatchSnapshot();
       expect(res).toHaveLength(2);

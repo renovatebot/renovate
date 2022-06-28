@@ -40,7 +40,7 @@ export function cleanRegistryUrls(registryUrls: string[]): string[] {
           .replace(regEx(/^{/), '')
           .replace(regEx(/}$/), '');
         const sub = process.env[envvar];
-        return sub || match;
+        return sub ?? match;
       }
     );
   });
@@ -76,7 +76,7 @@ export function extractPackageFile(content: string): PackageFile | null {
       const [lineNoEnvMarkers] = line.split(';').map((part) => part.trim());
       const lineNoHashes = lineNoEnvMarkers.split(' \\')[0];
       const packageMatches =
-        pkgValRegex.exec(lineNoHashes) || pkgRegex.exec(lineNoHashes);
+        pkgValRegex.exec(lineNoHashes) ?? pkgRegex.exec(lineNoHashes);
       const gitPackageMatches = packageGitRegex.exec(lineNoHashes);
       if (!packageMatches && !gitPackageMatches) {
         return null;
@@ -109,7 +109,6 @@ export function extractPackageFile(content: string): PackageFile | null {
       }
 
       // validated above
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
       const [, depName, , currVal] = packageMatches!;
       const currentValue = currVal?.trim();
       dep = {

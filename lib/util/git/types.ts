@@ -46,12 +46,14 @@ export interface FileAddition {
   /**
    * File contents
    */
-  contents: string | Buffer;
+  contents: string | Buffer | null;
 
   /**
    * The executable bit
    */
   isExecutable?: boolean;
+
+  isSymlink?: boolean;
 }
 
 export interface FileDeletion {
