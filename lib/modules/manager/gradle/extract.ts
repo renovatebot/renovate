@@ -51,37 +51,44 @@ export async function extractAllPackageFiles(
       deps: [],
     };
 
-    // TODO #7154
-    const content = (await readLocalFile(packageFile, 'utf8'))!;
-    const dir = upath.dirname(toAbsolutePath(packageFile));
+    try {
+      // TODO #7154
+      const content = (await readLocalFile(packageFile, 'utf8'))!;
+      const dir = upath.dirname(toAbsolutePath(packageFile));
 
-    const updateVars = (newVars: PackageVariables): void => {
-      const oldVars = registry[dir] || {};
-      registry[dir] = { ...oldVars, ...newVars };
-    };
+      const updateVars = (newVars: PackageVariables): void => {
+        const oldVars = registry[dir] || {};
+        registry[dir] = { ...oldVars, ...newVars };
+      };
 
-    if (isPropsFile(packageFile)) {
-      const { vars, deps } = parseProps(content, packageFile);
-      updateVars(vars);
-      extractedDeps.push(...deps);
-    } else if (isTOMLFile(packageFile)) {
-      const updatesFromCatalog = parseCatalog(packageFile, content);
-      extractedDeps.push(...updatesFromCatalog);
-    } else {
-      const vars = getVars(registry, dir);
-      const {
-        deps,
-        urls,
-        vars: gradleVars,
-      } = await parseGradle(content, vars, packageFile);
-      urls.forEach((url) => {
-        if (!registryUrls.includes(url)) {
-          registryUrls.push(url);
-        }
-      });
-      registry[dir] = { ...registry[dir], ...gradleVars };
-      updateVars(gradleVars);
-      extractedDeps.push(...deps);
+      if (isPropsFile(packageFile)) {
+        const { vars, deps } = parseProps(content, packageFile);
+        updateVars(vars);
+        extractedDeps.push(...deps);
+      } else if (isTOMLFile(packageFile)) {
+        const updatesFromCatalog = parseCatalog(packageFile, content);
+        extractedDeps.push(...updatesFromCatalog);
+      } else {
+        const vars = getVars(registry, dir);
+        const {
+          deps,
+          urls,
+          vars: gradleVars,
+        } = await parseGradle(content, vars, packageFile);
+        urls.forEach((url) => {
+          if (!registryUrls.includes(url)) {
+            registryUrls.push(url);
+          }
+        });
+        registry[dir] = { ...registry[dir], ...gradleVars };
+        updateVars(gradleVars);
+        extractedDeps.push(...deps);
+      }
+    } catch (err) {
+      logger.warn(
+        { err, config, packageFile },
+        `Failed to process Gradle file: ${packageFile}`
+      );
     }
   }
 
