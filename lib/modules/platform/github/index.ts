@@ -121,9 +121,7 @@ export async function initPlatform({
   gitAuthor,
 }: PlatformParams): Promise<PlatformResult> {
   if (!token) {
-    throw new Error(
-      'Init: You must configure a GitHub personal access token or app installation token'
-    );
+    throw new Error('Init: You must configure a GitHub token');
   }
 
   let accessToken = token;

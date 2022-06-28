@@ -50,7 +50,7 @@ describe('modules/platform/github/index', () => {
   describe('initPlatform()', () => {
     it('should throw if no token', async () => {
       await expect(github.initPlatform({} as any)).rejects.toThrow(
-        'Init: You must configure a GitHub personal access token or app installation token'
+        'Init: You must configure a GitHub token'
       );
     });
 
