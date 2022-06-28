@@ -349,15 +349,12 @@ export async function resolveConfigPresets(
           existingPresets.concat([preset]),
           shallowResolve
         );
-
         // istanbul ignore if
         if (inputConfig?.ignoreDeps?.length === 0) {
           delete presetConfig.description;
         }
-
         const tempExtends = extendsArrayClone(shallowResolve, config);
         config = mergeChildConfig(config, presetConfig);
-
         // istanbul ignore if
         if (shallowResolve && tempExtends.length) {
           config?.extends?.push(...tempExtends);
