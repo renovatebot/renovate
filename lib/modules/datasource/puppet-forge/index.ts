@@ -33,7 +33,7 @@ export class PuppetForgeDatasource extends Datasource {
       return null;
     }
 
-    return PuppetForgeDatasource.createReleaseResult(releases || [], module);
+    return PuppetForgeDatasource.createReleaseResult(releases, module);
   }
 
   static createReleaseResult(
