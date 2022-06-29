@@ -145,7 +145,7 @@ describe('modules/manager/bundler/artifacts', () => {
         config: {
           ...config,
           postUpdateOptions: [
-            ...(config.postUpdateOptions || []),
+            ...(config.postUpdateOptions ?? []),
             'bundlerConservative',
           ],
         },

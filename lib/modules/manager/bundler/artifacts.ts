@@ -65,7 +65,7 @@ export async function updateArtifacts(
     '--update',
     config.postUpdateOptions?.includes('bundlerConservative') &&
       '--conservative',
-  ].filter(Boolean);
+  ].filter(is.nonEmptyString);
 
   try {
     await writeLocalFile(packageFileName, newPackageFileContent);
