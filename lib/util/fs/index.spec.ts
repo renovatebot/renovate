@@ -1,13 +1,14 @@
 import _findUp from 'find-up';
+import fs from 'fs-extra';
 import { withDir } from 'tmp-promise';
 import { join } from 'upath';
 import { envMock } from '../../../test/exec-util';
 import { env, mockedFunction } from '../../../test/util';
 import { GlobalConfig } from '../../config/global';
 import {
+  chmodLocalFile,
   ensureCacheDir,
   ensureLocalDir,
-  exists,
   findLocalSiblingOrParent,
   findUpLocal,
   getSubDirectory,
@@ -15,6 +16,7 @@ import {
   localPathIsFile,
   readLocalDirectory,
   readLocalFile,
+  statLocalFile,
   writeLocalFile,
 } from '.';
 
@@ -190,7 +192,7 @@ describe('util/fs/index', () => {
           const { dirFromEnv } = setupMock(tmpDir.path);
           const res = await ensureCacheDir('bundler');
           expect(res).toEqual(dirFromEnv);
-          expect(await exists(dirFromEnv)).toBeTrue();
+          expect(await fs.pathExists(dirFromEnv)).toBeTrue();
         },
         { unsafeCleanup: true }
       );
@@ -238,6 +240,47 @@ describe('util/fs/index', () => {
       findUp.mockResolvedValueOnce('/abs/path/to/file.json');
       const res = await findUpLocal('file.json', 'subdir/subdir2');
       expect(res).toBeNull();
+    });
+  });
+
+  describe('statLocalFile', () => {
+    it('works', async () => {
+      await withDir(
+        async (tmpDir) => {
+          GlobalConfig.set({ localDir: tmpDir.path });
+
+          expect(await statLocalFile('foo')).toBeNull();
+
+          await writeLocalFile('foo', 'bar');
+          const stat = await statLocalFile('foo');
+          expect(stat).toBeDefined();
+          expect(stat!.isFile()).toBeTrue();
+        },
+        { unsafeCleanup: true }
+      );
+    });
+  });
+
+  describe('chmodLocalFile', () => {
+    it('works', async () => {
+      await withDir(
+        async (tmpDir) => {
+          GlobalConfig.set({ localDir: tmpDir.path });
+          await writeLocalFile('foo', 'bar');
+          let stat = await statLocalFile('foo');
+          const oldMode = stat!.mode & 0o777;
+          const newMode = oldMode & 0o555; // Remove `write` attributes (Windows-compatible)
+
+          await chmodLocalFile('foo', newMode);
+          stat = await statLocalFile('foo');
+          expect(stat!.mode & 0o777).toBe(newMode);
+
+          await chmodLocalFile('foo', oldMode);
+          stat = await statLocalFile('foo');
+          expect(stat!.mode & 0o777).toBe(oldMode);
+        },
+        { unsafeCleanup: true }
+      );
     });
   });
 });
