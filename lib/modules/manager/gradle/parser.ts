@@ -1043,7 +1043,7 @@ async function parseInlineScriptFile(
   }
 
   if (!regEx(/\.gradle(\.kts)?$/).test(scriptFile)) {
-    logger.warn({ scriptFile }, `Only Gradle files are eligible for inclusion`);
+    logger.warn({ scriptFile }, `Only Gradle files can be included`);
     return null;
   }
 
