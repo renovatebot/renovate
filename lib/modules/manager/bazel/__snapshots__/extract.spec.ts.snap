@@ -44,7 +44,6 @@ Array [
         )",
     },
     "packageName": "google/subpar",
-    "repo": "google/subpar",
   },
   Object {
     "currentValue": "0.6.0",
@@ -60,7 +59,6 @@ Array [
         )",
     },
     "packageName": "bazelbuild/bazel-skylib",
-    "repo": "bazelbuild/bazel-skylib",
   },
   Object {
     "currentValue": "0.5.0",
@@ -79,7 +77,6 @@ Array [
     )",
     },
     "packageName": "bazelbuild/stardoc",
-    "repo": "bazelbuild/stardoc",
   },
 ]
 `;
@@ -100,7 +97,6 @@ Array [
 )",
     },
     "packageName": "lmirosevic/GBDeviceInfo",
-    "repo": "lmirosevic/GBDeviceInfo",
   },
   Object {
     "currentDigest": "135d46b4c9423ee7d494c78a21ff621bc73c12f3",
@@ -116,7 +112,6 @@ Array [
 )",
     },
     "packageName": "nelhage/rules_boost",
-    "repo": "nelhage/rules_boost",
   },
   Object {
     "currentValue": "6.3.0",
@@ -132,7 +127,6 @@ Array [
 )",
     },
     "packageName": "lmirosevic/GBDeviceInfo",
-    "repo": "lmirosevic/GBDeviceInfo",
   },
   Object {
     "currentDigest": "135d46b4c9423ee7d494c78a21ff621bc73c12f3",
@@ -148,7 +142,6 @@ Array [
 )",
     },
     "packageName": "nelhage/rules_boost",
-    "repo": "nelhage/rules_boost",
   },
   Object {
     "currentValue": "v0.29.0",
@@ -164,7 +157,6 @@ Array [
 )",
     },
     "packageName": "bazelbuild/rules_go",
-    "repo": "bazelbuild/rules_go",
   },
 ]
 `;
@@ -258,7 +250,6 @@ Array [
 )",
     },
     "packageName": "GoogleContainerTools/distroless",
-    "repo": "GoogleContainerTools/distroless",
   },
   Object {
     "currentDigest": "d665ccfa3e9c90fa789671bf4ef5f7c19c5715c4",
@@ -277,7 +268,6 @@ Array [
 )",
     },
     "packageName": "bazelbuild/bazel-toolchains",
-    "repo": "bazelbuild/bazel-toolchains",
   },
   Object {
     "currentValue": "0.0.3",
@@ -321,7 +311,6 @@ Array [
 )",
     },
     "packageName": "bazelbuild/rules_go",
-    "repo": "bazelbuild/rules_go",
   },
   Object {
     "currentValue": "0.5.0",
@@ -340,7 +329,6 @@ Array [
 )",
     },
     "packageName": "bazelbuild/bazel-skylib",
-    "repo": "bazelbuild/bazel-skylib",
   },
   Object {
     "currentDigest": "446923c3756ceeaa75888f52fcbdd48bb314fbf8",
@@ -356,7 +344,6 @@ Array [
 )",
     },
     "packageName": "GoogleContainerTools/distroless",
-    "repo": "GoogleContainerTools/distroless",
   },
   Object {
     "currentValue": "v0.29.0",
@@ -372,7 +359,6 @@ Array [
 )",
     },
     "packageName": "bazelbuild/rules_go",
-    "repo": "bazelbuild/rules_go",
   },
   Object {
     "currentValue": "v0.24.0",
@@ -391,7 +377,6 @@ Array [
 )",
     },
     "packageName": "bazelbuild/bazel-gazelle",
-    "repo": "bazelbuild/bazel-gazelle",
   },
   Object {
     "currentDigest": "816c9085562cd7ee03e7f8188a1cfd942858cded",
@@ -446,7 +431,6 @@ Array [
 )",
     },
     "packageName": "GoogleContainerTools/distroless",
-    "repo": "GoogleContainerTools/distroless",
   },
 ]
 `;
@@ -467,7 +451,6 @@ Array [
 )",
     },
     "packageName": "nelhage/rules_boost",
-    "repo": "nelhage/rules_boost",
   },
 ]
 `;
