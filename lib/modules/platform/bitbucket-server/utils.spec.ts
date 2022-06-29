@@ -1,5 +1,6 @@
 import type { Response } from 'got';
 import { partial } from '../../../../test/util';
+import type { GitUrlOption } from '../types';
 import type {
   BbsRestRepo,
   BitbucketError,
@@ -120,6 +121,20 @@ describe('modules/platform/bitbucket-server/utils', () => {
           username: username,
           password: password,
         };
+
+        it('gitUrl:invalid throws error', () => {
+          expect(() => {
+            getRepoGitUrl(
+              'SOME/repo',
+              url.toString(),
+              'invalid' as GitUrlOption,
+              infoMock(url, 'SOME', 'repo', {
+                cloneUrl: { https: false, ssh: false },
+              }),
+              opts
+            );
+          }).toThrow(TypeError);
+        });
 
         it('works gitUrl:undefined generate endpoint', () => {
           expect(

@@ -196,7 +196,6 @@ export function getRepoGitUrl(
       const repoUrl = url.parse(httpUrl.href);
       repoUrl.auth = `${opts.username}:${opts.password}`;
       return url.format(repoUrl);
-      break;
     }
     case 'ssh': {
       const sshUrl = info.links.clone?.find(({ name }) => name === 'ssh');
@@ -206,7 +205,6 @@ export function getRepoGitUrl(
 
       logger.debug({ url: sshUrl.href }, `using ssh URL`);
       return sshUrl.href;
-      break;
     }
     case 'endpoint': {
       const generatedUrl = generateUrlFromEndpoint(
@@ -216,7 +214,6 @@ export function getRepoGitUrl(
       );
       logger.debug({ url: generatedUrl }, `using endpoint URL`);
       return generatedUrl;
-      break;
     }
     case undefined: {
       //if no connection type is specified try them all as a fallback
@@ -243,7 +240,6 @@ export function getRepoGitUrl(
       }
 
       return getRepoGitUrl(repository, defaultEndpoint, 'endpoint', info, opts);
-      break;
     }
     default: {
       throw new TypeError(
