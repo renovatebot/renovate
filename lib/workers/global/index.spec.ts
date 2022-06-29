@@ -17,7 +17,7 @@ jest.mock('../../util/fs');
 jest.mock('../../config/presets');
 
 jest.mock('fs-extra');
-const fs: jest.Mocked<typeof _fs> = _fs as never;
+const fs = mocked(_fs);
 
 // imports are readonly
 const repositoryWorker = _repositoryWorker;
