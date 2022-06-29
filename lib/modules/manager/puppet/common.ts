@@ -2,8 +2,9 @@ import { regEx } from '../../../util/regex';
 import { parseUrl } from '../../../util/url';
 import type { PackageDependency } from '../types';
 
-export const RE_REPOSITORY_GENERIC_GIT_SSH_FORMAT =
-  regEx(/^(?:git@[^:]*):(.+)$/);
+export const RE_REPOSITORY_GENERIC_GIT_SSH_FORMAT = regEx(
+  /^git@[^:]*:(?<repository>.+)$/
+);
 
 export function parseGitOwnerRepo(
   git: string,
@@ -11,8 +12,8 @@ export function parseGitOwnerRepo(
 ): string | PackageDependency {
   const genericGitSsh = RE_REPOSITORY_GENERIC_GIT_SSH_FORMAT.exec(git);
 
-  if (genericGitSsh) {
-    return genericGitSsh[1].replace(regEx(/\.git$/), '');
+  if (genericGitSsh?.groups) {
+    return genericGitSsh.groups.repository.replace(regEx(/\.git$/), '');
   } else {
     if (githubUrl) {
       return git
