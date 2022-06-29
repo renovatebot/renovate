@@ -1,12 +1,10 @@
 import is from '@sindresorhus/is';
 import { quote } from 'shlex';
-import upath from 'upath';
-import { GlobalConfig } from '../../../config/global';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { exec } from '../../../util/exec';
 import type { ExecOptions } from '../../../util/exec/types';
-import { readLocalFile, stat, writeLocalFile } from '../../../util/fs';
+import { readLocalFile, writeLocalFile } from '../../../util/fs';
 import { getRepoStatus } from '../../../util/git';
 import type { StatusResult } from '../../../util/git/types';
 import { Http } from '../../../util/http';
@@ -62,16 +60,9 @@ export async function updateArtifacts({
   config,
 }: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
   try {
-    const projectDir = GlobalConfig.get('localDir');
     logger.debug({ updatedDeps }, 'gradle-wrapper.updateArtifacts()');
-    const gradlew = gradleWrapperFileName();
-    const gradlewPath = upath.resolve(projectDir, `./${gradlew}`);
-    let cmd = await prepareGradleCommand(
-      gradlew,
-      projectDir!,
-      await stat(gradlewPath).catch(() => null),
-      `wrapper`
-    );
+    const gradlewFile = gradleWrapperFileName();
+    let cmd = await prepareGradleCommand(gradlewFile, `wrapper`);
     if (!cmd) {
       logger.info('No gradlew found - skipping Artifacts update');
       return null;
