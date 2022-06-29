@@ -116,11 +116,11 @@ export async function detectGhe(token: string): Promise<void> {
 
 export async function initPlatform({
   endpoint,
-  token: token_,
+  token: originalToken,
   username,
   gitAuthor,
 }: PlatformParams): Promise<PlatformResult> {
-  let token = token_;
+  let token = originalToken;
   if (!token) {
     throw new Error('Init: You must configure a GitHub token');
   }
