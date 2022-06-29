@@ -44,10 +44,6 @@ describe('util/fs/index', () => {
   });
 
   describe('localPathExists', () => {
-    beforeEach(() => {
-      GlobalConfig.set({ localDir: '' });
-    });
-
     it('returns true for file', async () => {
       expect(await localPathExists(__filename)).toBeTrue();
     });
