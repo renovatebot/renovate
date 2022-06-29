@@ -6,18 +6,18 @@ import upath from 'upath';
 import { migrateConfig } from '../../../../config/migration';
 import type { AllConfig, RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
-import { readFile } from '../../../../util/fs';
+import { readFileUnrestricted } from '../../../../util/fs';
 
 export async function getParsedContent(file: string): Promise<RenovateConfig> {
   switch (upath.extname(file)) {
     case '.yaml':
     case '.yml':
-      return load(await readFile(file, 'utf8'), {
+      return load(await readFileUnrestricted(file, 'utf8'), {
         json: true,
       }) as RenovateConfig;
     case '.json5':
     case '.json':
-      return JSON5.parse(await readFile(file, 'utf8'));
+      return JSON5.parse(await readFileUnrestricted(file, 'utf8'));
     case '.js': {
       const tmpConfig = await import(file);
       let config = tmpConfig.default ? tmpConfig.default : tmpConfig;

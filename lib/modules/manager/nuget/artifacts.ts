@@ -7,7 +7,7 @@ import type { ExecOptions } from '../../../util/exec/types';
 import {
   ensureDir,
   getSiblingFileName,
-  outputFile,
+  outputCacheFile,
   privateCacheDir,
   readLocalFile,
   writeLocalFile,
@@ -79,7 +79,7 @@ async function runDotnetRestore(
 
   await ensureDir(nugetCacheDir);
 
-  await outputFile(
+  await outputCacheFile(
     nugetConfigFile,
     `<?xml version="1.0" encoding="utf-8"?>\n<configuration>\n</configuration>\n`
   );
