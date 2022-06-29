@@ -320,7 +320,7 @@ describe('config/presets/index', () => {
           groupName: 'github-actions dependencies',
         },
       ];
-      gitHub.getPreset.mockResolvedValue({
+      gitHub.getPreset.mockResolvedValueOnce({
         packageRules: [
           {
             matchDatasources: ['docker'],
@@ -330,8 +330,8 @@ describe('config/presets/index', () => {
         ],
       });
 
-      let res = await presets.resolveConfigPresets(config);
-      res = await presets.resolveConfigPresets(config);
+      expect(await presets.resolveConfigPresets(config)).toBeDefined();
+      const res = await presets.resolveConfigPresets(config);
       expect(res).toEqual({
         packageRules: [
           {
