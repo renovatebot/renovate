@@ -194,6 +194,7 @@ export async function getDependency(
       }
       throw new ExternalHostError(err);
     }
+    logger.debug({ err }, 'Unknown npm lookup error');
     return null;
   }
 }
