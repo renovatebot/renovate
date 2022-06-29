@@ -39,7 +39,7 @@ export class ProblemStream extends Stream {
     this._problems = [];
   }
 }
-const templateFields = ['prBody'];
+
 const contentFields = [
   'content',
   'contents',
@@ -148,8 +148,6 @@ export function sanitizeValue(
         curValue = '***********';
       } else if (contentFields.includes(key)) {
         curValue = '[content]';
-      } else if (templateFields.includes(key)) {
-        curValue = '[Template]';
       } else if (key === 'secrets') {
         curValue = {};
         Object.keys(val).forEach((secretKey) => {
