@@ -349,6 +349,14 @@ For example, To add `[skip ci]` to every commit you could configure:
 
 Another example would be if you want to configure a DCO signoff to each commit.
 
+If you want Renovate to signoff its commits, add the [`:gitSignOff` preset](https://docs.renovatebot.com/presets-default/#gitsignoff) to your `extends` array:
+
+```json
+{
+  "extends": [":gitSignOff"]
+}
+```
+
 ## commitBodyTable
 
 ## commitMessage
