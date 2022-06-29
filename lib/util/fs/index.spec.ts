@@ -1,13 +1,14 @@
 import _findUp from 'find-up';
+import fs from 'fs-extra';
 import { withDir } from 'tmp-promise';
 import { join } from 'upath';
 import { envMock } from '../../../test/exec-util';
 import { env, mockedFunction } from '../../../test/util';
 import { GlobalConfig } from '../../config/global';
 import {
+  chmodLocalFile,
   ensureCacheDir,
   ensureLocalDir,
-  exists,
   findLocalSiblingOrParent,
   findUpLocal,
   getSubDirectory,
@@ -15,6 +16,7 @@ import {
   localPathIsFile,
   readLocalDirectory,
   readLocalFile,
+  statLocalFile,
   writeLocalFile,
 } from '.';
 
@@ -190,7 +192,7 @@ describe('util/fs/index', () => {
           const { dirFromEnv } = setupMock(tmpDir.path);
           const res = await ensureCacheDir('bundler');
           expect(res).toEqual(dirFromEnv);
-          expect(await exists(dirFromEnv)).toBeTrue();
+          expect(await fs.pathExists(dirFromEnv)).toBeTrue();
         },
         { unsafeCleanup: true }
       );
@@ -238,6 +240,42 @@ describe('util/fs/index', () => {
       findUp.mockResolvedValueOnce('/abs/path/to/file.json');
       const res = await findUpLocal('file.json', 'subdir/subdir2');
       expect(res).toBeNull();
+    });
+  });
+
+  describe('chmodLocalFile', () => {
+    it('works', async () => {
+      await withDir(
+        async (tmpDir) => {
+          GlobalConfig.set({ localDir: tmpDir.path });
+          await writeLocalFile('foo', 'bar');
+          await chmodLocalFile('foo', 0o000);
+          expect(await readLocalFile('foo')).toBeNull();
+          await chmodLocalFile('foo', 0o444);
+          expect((await readLocalFile('foo'))!.toString()).toBe('bar');
+        },
+        { unsafeCleanup: true }
+      );
+    });
+  });
+
+  describe('statLocalFile', () => {
+    it('works', async () => {
+      await withDir(
+        async (tmpDir) => {
+          GlobalConfig.set({ localDir: tmpDir.path });
+
+          expect(await statLocalFile('foo')).toBeNull();
+
+          await writeLocalFile('foo', 'bar');
+          await chmodLocalFile('foo', 0o123);
+
+          const res = await statLocalFile('foo');
+          expect(res!.isFile()).toBeTrue();
+          expect(res!.mode & 0o777).toBe(0o123);
+        },
+        { unsafeCleanup: true }
+      );
     });
   });
 });
