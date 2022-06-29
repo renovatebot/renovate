@@ -268,6 +268,7 @@ export class Http<GetOptions = HttpOptions, PostOptions = HttpPostOptions> {
   }
 
   stream(url: string, options?: HttpOptions): NodeJS.ReadableStream {
+    // TODO: fix types (#7154)
     let combinedOptions: any = {
       method: 'get',
       ...this.options,
