@@ -13,8 +13,6 @@ import type {
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 import type { HermitSearchResult } from './types';
 
-const datasource = 'hermit';
-
 /**
  * Hermit Datasource searches a given package from the specified `hermit-pakcages`
  * repository. It expects the search manifest to come from an asset `index.json` from
@@ -22,7 +20,7 @@ const datasource = 'hermit';
  * registryUrl will be thrown
  */
 export class HermitDatasource extends Datasource {
-  static readonly id = datasource;
+  static readonly id = 'hermit';
 
   override readonly customRegistrySupport = true;
 
@@ -42,9 +40,9 @@ export class HermitDatasource extends Datasource {
   }
 
   @cache({
-    namespace: `datasource-${datasource}-package`,
+    namespace: `datasource-hermit-package`,
     key: ({ registryUrl, packageName }: GetReleasesConfig) =>
-      `${registryUrl}-${packageName}`,
+      `${registryUrl ?? ''}-${packageName}`,
   })
   async getReleases({
     packageName,
@@ -53,10 +51,28 @@ export class HermitDatasource extends Datasource {
     logger.trace(`HermitDataSource.getReleases()`);
 
     if (!registryUrl) {
-      throw new Error('registryUrl must be supplied');
+      logger.debug('registryUrl must be supplied');
+      return null;
     }
 
-    const res = await this.getHermitRelease(packageName, registryUrl);
+    if (!registryUrl.startsWith('https://github.com/')) {
+      logger.debug({ registryUrl }, 'Only Github registryUrl is supported');
+      return null;
+    }
+
+    const items = await this.getHermitSearchManifest(registryUrl);
+
+    if (items === null) {
+      return null;
+    }
+
+    const res = items.find((i) => i.Name === packageName);
+
+    if (!res) {
+      logger.debug({ packageName, registryUrl }, 'cannot find hermit package');
+      return null;
+    }
+
     const sourceUrl = res.Repository;
 
     return {
@@ -79,16 +95,12 @@ export class HermitDatasource extends Datasource {
    * named index, parses it and returned the parsed JSON result
    */
   @cache({
-    namespace: `datasource-${datasource}-search-manifest`,
+    namespace: `datasource-hermit-search-manifest`,
     key: ({ registryUrl }: GetReleasesConfig) => registryUrl ?? '',
   })
   async getHermitSearchManifest(
     registryUrl: string
-  ): Promise<HermitSearchResult[]> {
-    if (!registryUrl.startsWith('https://github.com')) {
-      throw new Error(`Only Github registryUrl is supported`);
-    }
-
+  ): Promise<HermitSearchResult[] | null> {
     const u = new URL(registryUrl);
     const host = u.host;
     const path = u.pathname;
@@ -96,7 +108,8 @@ export class HermitDatasource extends Datasource {
     const parts = path.split('/').filter((p) => p !== '');
 
     if (parts.length < 2) {
-      throw new Error(`can't find owner & repo in the url`);
+      logger.debug({ registryUrl }, `can't find owner & repo in the url`);
+      return null;
     }
 
     logger.debug(
@@ -117,9 +130,11 @@ export class HermitDatasource extends Datasource {
     );
 
     if (!asset) {
-      throw new Error(
-        `cannot find asset index.json in the given registryUrl ${registryUrl}`
+      logger.debug(
+        { registryUrl },
+        `can't find asset index.json in the given registryUrl`
       );
+      return null;
     }
 
     const indexContent = await streamToString(
@@ -131,23 +146,5 @@ export class HermitDatasource extends Datasource {
     );
 
     return JSON.parse(indexContent) as HermitSearchResult[];
-  }
-
-  /**
-   * getHermitRelease fetches the search result manifest and search package name inside
-   */
-  async getHermitRelease(
-    name: string,
-    registryUrl: string
-  ): Promise<HermitSearchResult> {
-    const items = await this.getHermitSearchManifest(registryUrl);
-
-    const searchResult = items.find((i) => i.Name === name);
-
-    if (!searchResult) {
-      throw new Error(`cannot find package ${name} in the search result`);
-    }
-
-    return searchResult;
   }
 }

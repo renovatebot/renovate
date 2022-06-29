@@ -1,6 +1,6 @@
 import * as httpMock from '../../../../test/http-mock';
 import type { HermitSearchResult } from './types';
-import { HermitDatasource } from './index';
+import { HermitDatasource } from './';
 
 const datasource = new HermitDatasource();
 const githubApiHost = 'https://api.github.com';
@@ -100,7 +100,7 @@ describe('modules/datasource/hermit/index', () => {
           packageName: 'go',
           registryUrl,
         })
-      ).rejects.toThrow('cannot find package go in the search result');
+      ).resolves.toBeNull();
     });
 
     it('should fail on network error', async () => {
@@ -130,36 +130,36 @@ describe('modules/datasource/hermit/index', () => {
       ).rejects.toThrow();
     });
 
-    it('should throw error on non github url given', async () => {
+    it('should get null result on non github url given', async () => {
       await expect(
         datasource.getReleases({
           packageName: 'go',
           registryUrl: 'https://gitlab.com/owner/project',
         })
-      ).rejects.toThrow('Only Github registryUrl is supported');
+      ).resolves.toBeNull();
     });
 
-    it('should fail on missing repo or owner', async () => {
+    it('should get null result on missing repo or owner', async () => {
       await expect(
         datasource.getReleases({
           packageName: 'go',
           registryUrl: 'https://github.com/test',
         })
-      ).rejects.toThrow("can't find owner & repo in the url");
+      ).resolves.toBeNull();
       await expect(
         datasource.getReleases({
           packageName: 'go',
           registryUrl: 'https://github.com/',
         })
-      ).rejects.toThrow("can't find owner & repo in the url");
+      ).resolves.toBeNull();
     });
 
-    it('should fail on empty registryUrl', async () => {
+    it('should get null result on empty registryUrl', async () => {
       await expect(
         datasource.getReleases({
           packageName: 'go',
         })
-      ).rejects.toThrow('registryUrl must be supplied');
+      ).resolves.toBeNull();
     });
 
     it('should fail on missing index.json asset', async () => {
@@ -180,9 +180,7 @@ describe('modules/datasource/hermit/index', () => {
           packageName: 'go',
           registryUrl,
         })
-      ).rejects.toThrow(
-        `cannot find asset index.json in the given registryUrl ${registryUrl}`
-      );
+      ).resolves.toBeNull();
     });
   });
 });
