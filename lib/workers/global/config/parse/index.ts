@@ -6,7 +6,7 @@ import { detectAllGlobalConfig } from '../../../../modules/manager';
 import {
   ensureDir,
   getSubDirectory,
-  readFileUnrestricted,
+  readSystemFile,
 } from '../../../../util/fs';
 import { ensureTrailingSlash } from '../../../../util/url';
 import * as cliParser from './cli';
@@ -45,18 +45,12 @@ export async function parseConfigs(
   }
 
   if (!config.privateKey && config.privateKeyPath) {
-    config.privateKey = await readFileUnrestricted(
-      config.privateKeyPath,
-      'utf8'
-    );
+    config.privateKey = await readSystemFile(config.privateKeyPath, 'utf8');
     delete config.privateKeyPath;
   }
 
   if (!config.privateKeyOld && config.privateKeyPathOld) {
-    config.privateKey = await readFileUnrestricted(
-      config.privateKeyPathOld,
-      'utf8'
-    );
+    config.privateKey = await readSystemFile(config.privateKeyPathOld, 'utf8');
     delete config.privateKeyPathOld;
   }
 

@@ -247,12 +247,12 @@ export function outputCacheFile(
   return fs.outputFile(file, data, options ?? {});
 }
 
-export async function readFileUnrestricted(fileName: string): Promise<Buffer>;
-export async function readFileUnrestricted(
+export async function readSystemFile(fileName: string): Promise<Buffer>;
+export async function readSystemFile(
   fileName: string,
   encoding: 'utf8'
 ): Promise<string>;
-export function readFileUnrestricted(
+export function readSystemFile(
   fileName: string,
   encoding?: string
 ): Promise<string | Buffer> {
