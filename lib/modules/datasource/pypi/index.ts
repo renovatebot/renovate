@@ -34,6 +34,7 @@ export class PypiDatasource extends Datasource {
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     let dependency: ReleaseResult | null = null;
+    // TODO: null check (#7154)
     const hostUrl = ensureTrailingSlash(
       registryUrl!.replace('https://pypi.org/simple', 'https://pypi.org/pypi')
     );
