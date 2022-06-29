@@ -55,10 +55,12 @@ describe('modules/manager/gradle-wrapper/artifacts', () => {
     resetPrefetchedImages();
 
     fs.readLocalFile.mockResolvedValue('test');
-    fs.statLocalFile.mockResolvedValue(partial<Stats>({
-      isFile: () => true,
-      mode: 0o555,
-    }));
+    fs.statLocalFile.mockResolvedValue(
+      partial<Stats>({
+        isFile: () => true,
+        mode: 0o555,
+      })
+    );
   });
 
   afterEach(() => {
@@ -102,10 +104,12 @@ describe('modules/manager/gradle-wrapper/artifacts', () => {
   });
 
   it('gradlew not found', async () => {
-    fs.statLocalFile.mockResolvedValue(partial<Stats>({
-      isFile: () => false,
-      mode: 0o555,
-    }));
+    fs.statLocalFile.mockResolvedValue(
+      partial<Stats>({
+        isFile: () => false,
+        mode: 0o555,
+      })
+    );
     GlobalConfig.set({ ...adminConfig, localDir: 'some-dir' });
     const res = await gradleWrapper.updateArtifacts({
       packageFileName: 'gradle-wrapper.properties',
