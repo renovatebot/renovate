@@ -243,22 +243,6 @@ describe('util/fs/index', () => {
     });
   });
 
-  describe('chmodLocalFile', () => {
-    it('works', async () => {
-      await withDir(
-        async (tmpDir) => {
-          GlobalConfig.set({ localDir: tmpDir.path });
-          await writeLocalFile('foo', 'bar');
-          await chmodLocalFile('foo', 0o000);
-          expect(await readLocalFile('foo')).toBeNull();
-          await chmodLocalFile('foo', 0o444);
-          expect((await readLocalFile('foo'))!.toString()).toBe('bar');
-        },
-        { unsafeCleanup: true }
-      );
-    });
-  });
-
   describe('statLocalFile', () => {
     it('works', async () => {
       await withDir(
@@ -268,11 +252,32 @@ describe('util/fs/index', () => {
           expect(await statLocalFile('foo')).toBeNull();
 
           await writeLocalFile('foo', 'bar');
-          await chmodLocalFile('foo', 0o123);
+          const stat = await statLocalFile('foo');
+          expect(stat).toBeDefined();
+          expect(stat!.isFile()).toBeTrue();
+        },
+        { unsafeCleanup: true }
+      );
+    });
+  });
 
-          const res = await statLocalFile('foo');
-          expect(res!.isFile()).toBeTrue();
-          expect(res!.mode & 0o777).toBe(0o123);
+  describe('chmodLocalFile', () => {
+    it('works', async () => {
+      await withDir(
+        async (tmpDir) => {
+          GlobalConfig.set({ localDir: tmpDir.path });
+          await writeLocalFile('foo', 'bar');
+          let stat = await statLocalFile('foo');
+          const oldMode = stat!.mode & 0o777;
+          const newMode = oldMode & 0o555; // Remove `write` attributes (Windows-compatible)
+
+          await chmodLocalFile('foo', newMode);
+          stat = await statLocalFile('foo');
+          expect(stat!.mode & 0o777).toBe(newMode);
+
+          await chmodLocalFile('foo', oldMode);
+          stat = await statLocalFile('foo');
+          expect(stat!.mode & 0o777).toBe(oldMode);
         },
         { unsafeCleanup: true }
       );
