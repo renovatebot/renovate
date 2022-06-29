@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import Graph from 'graph-data-structure';
 import minimatch from 'minimatch';
 import upath from 'upath';
@@ -46,7 +47,8 @@ export async function getDependentPackageFiles(
       .childrenNamed('ItemGroup')
       .map((ig) => ig.childrenNamed('ProjectReference'))
       .flat()
-      .map((pf) => pf.attr['Include']);
+      .map((pf) => pf.attr['Include'])
+      .filter(is.nonEmptyString);
 
     const projectReferences = projectReferenceAttributes.map((a) =>
       upath.normalize(a)
