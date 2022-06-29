@@ -45,7 +45,7 @@ We recommend you set [`core.autocrlf = input`](https://git-scm.com/docs/gitattri
 You can do this by running this Git command:
 
 ```bash
-$ git config --global core.autocrlf input
+git config --global core.autocrlf input
 ```
 
 This prevents the carriage return `\r\n` which may confuse Renovate bot.
