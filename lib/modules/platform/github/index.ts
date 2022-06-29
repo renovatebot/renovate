@@ -124,13 +124,8 @@ export async function initPlatform({
   if (!token) {
     throw new Error('Init: You must configure a GitHub token');
   }
-
-  if (token.startsWith('x-access-token:')) {
-    platformConfig.isGHApp = true;
-  } else if (token.startsWith('ghs_')) {
-    platformConfig.isGHApp = true;
-    token = `x-access-token:${token}`;
-  }
+  token = token.replace(/^ghs_/, 'x-access-token:ghs_');
+  platformConfig.isGHApp = token.startsWith('x-access-token:');
 
   if (endpoint) {
     platformConfig.endpoint = ensureTrailingSlash(endpoint);
