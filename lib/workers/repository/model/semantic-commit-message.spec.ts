@@ -29,7 +29,7 @@ describe('workers/repository/model/semantic-commit-message', () => {
     const instance = SemanticCommitMessage.fromString('feat: ticket 123');
 
     expect(SemanticCommitMessage.is(instance)).toBeTrue();
-    expect(instance.toJSON()).toEqual({
+    expect(instance?.toJSON()).toEqual({
       body: '',
       footer: '',
       scope: '',
@@ -44,7 +44,7 @@ describe('workers/repository/model/semantic-commit-message', () => {
     );
 
     expect(SemanticCommitMessage.is(instance)).toBeTrue();
-    expect(instance.toJSON()).toEqual({
+    expect(instance?.toJSON()).toEqual({
       body: '',
       footer: '',
       scope: 'dashboard',
@@ -57,7 +57,7 @@ describe('workers/repository/model/semantic-commit-message', () => {
     const instance = SemanticCommitMessage.fromString('fix(deps): ');
 
     expect(SemanticCommitMessage.is(instance)).toBeTrue();
-    expect(instance.toJSON()).toEqual({
+    expect(instance?.toJSON()).toEqual({
       body: '',
       footer: '',
       scope: 'deps',

@@ -5,6 +5,7 @@ import {
 } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
+import * as memCache from '../../util/cache/memory';
 import { clone } from '../../util/clone';
 import { regEx } from '../../util/regex';
 import * as massage from '../massage';
@@ -18,7 +19,7 @@ import * as gitlab from './gitlab';
 import * as internal from './internal';
 import * as local from './local';
 import * as npm from './npm';
-import type { ParsedPreset, PresetApi } from './types';
+import type { ParsedPreset, Preset, PresetApi } from './types';
 import {
   PRESET_DEP_NOT_FOUND,
   PRESET_INVALID,
@@ -181,9 +182,9 @@ export function parsePreset(input: string): ParsedPreset {
       throw new Error(PRESET_INVALID);
     }
     ({ repo, presetPath, presetName, tag } =
-      nonScopedPresetWithSubdirRegex.exec(str)?.groups || {});
+      nonScopedPresetWithSubdirRegex.exec(str)?.groups ?? {});
   } else {
-    ({ repo, presetName, tag } = gitPresetRegex.exec(str)?.groups || {});
+    ({ repo, presetName, tag } = gitPresetRegex.exec(str)?.groups ?? {});
 
     if (presetSource === 'npm' && !repo.startsWith('renovate-config-')) {
       repo = `renovate-config-${repo}`;
@@ -218,12 +219,17 @@ export async function getPreset(
   }
   const { presetSource, repo, presetPath, presetName, tag, params } =
     parsePreset(preset);
-  let presetConfig = await presetSources[presetSource].getPreset({
-    repo,
-    presetPath,
-    presetName,
-    tag,
-  });
+  const cacheKey = `preset:${preset}`;
+  let presetConfig = memCache.get<Preset | null | undefined>(cacheKey);
+  if (is.nullOrUndefined(presetConfig)) {
+    presetConfig = await presetSources[presetSource].getPreset({
+      repo,
+      presetPath,
+      presetName,
+      tag,
+    });
+    memCache.set(cacheKey, presetConfig);
+  }
   if (!presetConfig) {
     throw new Error(PRESET_DEP_NOT_FOUND);
   }
@@ -270,7 +276,7 @@ export async function resolveConfigPresets(
 ): Promise<AllConfig> {
   let ignorePresets = clone(_ignorePresets);
   if (!ignorePresets || ignorePresets.length === 0) {
-    ignorePresets = inputConfig.ignorePresets || [];
+    ignorePresets = inputConfig.ignorePresets ?? [];
   }
   logger.trace(
     { config: inputConfig, existingPresets },

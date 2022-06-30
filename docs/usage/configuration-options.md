@@ -320,7 +320,7 @@ Currently this setting supports `helmv3`, `npm`, `maven` and `sbt` only, so rais
 Its purpose is if you want Renovate to update the `version` field within your package file any time it updates dependencies within.
 Usually this is for automatic release purposes, so that you don't need to add another step after Renovate before you can release a new version.
 
-Configure this value to `"patch"`, `"minor"` or `"major"` to have Renovate update the version in your edited package file.
+Configure this value to `"prerelease"`, `"patch"`, `"minor"` or `"major"` to have Renovate update the version in your edited package file.
 e.g. if you wish Renovate to always increase the target `package.json` version with a patch update, configure this to `"patch"`.
 
 For `npm` only you can also configure this field to `"mirror:x"` where `x` is the name of a package in the `package.json`.
@@ -348,6 +348,14 @@ For example, To add `[skip ci]` to every commit you could configure:
 ```
 
 Another example would be if you want to configure a DCO signoff to each commit.
+
+If you want Renovate to signoff its commits, add the [`:gitSignOff` preset](https://docs.renovatebot.com/presets-default/#gitsignoff) to your `extends` array:
+
+```json
+{
+  "extends": [":gitSignOff"]
+}
+```
 
 ## commitBodyTable
 
@@ -416,6 +424,31 @@ If enabled, all issues created by Renovate are set as confidential, even in a pu
 <!-- prettier-ignore -->
 !!! note
     This option is applicable to GitLab only.
+
+## configMigration
+
+If enabled, Renovate will raise a pull request if config file migration is needed.
+
+We're adding new features to Renovate bot often.
+Most times you can keep using your Renovate config and benefit from the new features right away.
+But sometimes you need to change your Renovate configuration.
+To help you with this, Renovate will create config migration pull requests.
+
+Example:
+
+After we changed the [`baseBranches`](https://docs.renovatebot.com/configuration-options/#basebranches) feature, the Renovate configuration migration pull request would make this change:
+
+```diff
+{
+- "baseBranch": "main"
++ "baseBranches": ["main"]
+}
+```
+
+<!-- prettier-ignore -->
+!!! info
+    This feature writes plain JSON for `.json` files, and JSON5 for `.json5` files.
+    JSON5 content can potentially be down leveled (`.json` files) and all comments will be removed.
 
 ## configWarningReuseIssue
 
@@ -792,13 +825,26 @@ For now, you can only use this option on the GitLab platform.
     Advanced functionality.
     Only use this if you're sure you know what you're doing.
 
-This functionality requires that the datasource to support distribution streams/tags, such as npm does.
+For `followTag` to work, the datasource must support distribution streams or tags, like for example npm does.
 
-The primary use case for this option is if you are following a pre-release tag of a certain dependency, e.g. `typescript`'s `"insiders"` build.
-If configured, Renovate bypasses its normal major/minor/patch upgrade logic and stable/unstable consistency logic and keeps your dependency version sync'd strictly to whatever version is in the tag.
+The main usecase is to follow a pre-release tag of a dependency, say TypeScripts's `"insiders"` build:
 
-Beware that Renovate follows tags strictly.
-For example, if you are following a tag like `next` and then that stream is released as `stable` and `next` is no longer being updated then that means your dependencies also won't be getting updated.
+```json
+{
+  "packageRules": [
+    {
+      "matchPackageNames": ["typescript"],
+      "followTag": "insiders"
+    }
+  ]
+}
+```
+
+If you've set a `followTag` then Renovate skips its normal major/minor/patch upgrade logic and stable/unstable consistency logic, and instead keeps your dependency version synced _strictly_ to the version in the tag.
+
+Renovate follows tags _strictly_, this can cause problems when a tagged stream is no longer maintained.
+For example: you're following the `next` tag, but later the stream you actually want is called `stable` instead.
+If `next` is no longer getting updates, you must switch your `followTag` to `stable` to get updates again.
 
 ## gitAuthor
 
@@ -838,7 +884,7 @@ Also, approval rules overriding should not be [prevented in GitLab settings](htt
 Configuration added here applies for all Go-related updates.
 The only supported package manager for Go is the native Go Modules (the `gomod` manager).
 
-For self-hosted users, `GOPROXY`, `GONOPROXY` and `GOPRIVATE` environment variables are supported ([reference](https://go.dev/ref/mod#module-proxy)).
+For self-hosted users, `GOPROXY`, `GONOPROXY`, `GOPRIVATE` and `GOINSECURE` environment variables are supported ([reference](https://go.dev/ref/mod#module-proxy)).
 
 Usage of `direct` will fallback to the Renovate-native release fetching mechanism.
 Also we support the `off` keyword which will stop any fetching immediately.
@@ -1916,6 +1962,8 @@ The `postUpgradeTasks` configuration consists of three fields:
 
 A list of commands that are executed after Renovate has updated a dependency but before the commit is made.
 
+You can use variable templating in your commands if [`allowPostUpgradeCommandTemplating`](https://docs.renovatebot.com/self-hosted-configuration/#allowpostupgradecommandtemplating) is enabled.
+
 ### fileFilters
 
 A list of glob-style matchers that determine which files will be included in the final commit made by Renovate.
@@ -2089,6 +2137,11 @@ Here's an example of how you would define PR priority so that devDependencies ar
 
 The PR title is important for some of Renovate's matching algorithms (e.g. determining whether to recreate a PR or not) so ideally don't modify it much.
 
+## printConfig
+
+This option is useful for troubleshooting, particularly if using presets.
+e.g. run `renovate foo/bar --print-config > config.log` and the fully-resolved config will be included in the log file.
+
 ## pruneBranchAfterAutomerge
 
 By default Renovate deletes, or "prunes", the branch after automerging.
@@ -2197,27 +2250,6 @@ If the `versioning` field is missing, then Renovate defaults to using `semver` v
 
 For more details and examples, see our [documentation for the `regex` manager](/modules/manager/regex/).
 For template fields, use the triple brace `{{{ }}}` notation to avoid Handlebars escaping any special characters.
-
-## registryAliases
-
-You can use the `registryAliases` object to set registry aliases.
-This feature only works with these managers:
-
-- `helm-requirements`
-- `helmv3`
-- `helmfile`
-
-The managers listed above all have this default registryAlias:
-
-```json
-{
-  "registryAliases": {
-    "stable": "https://charts.helm.sh/stable"
-  }
-}
-```
-
-Alias values must be properly formatted URIs.
 
 ### matchStrings
 
@@ -2465,6 +2497,27 @@ This will lead to following update where `1.21-alpine` is the newest version of 
 image: my.new.registry/aRepository/andImage:1.21-alpine
 ```
 
+## registryAliases
+
+You can use the `registryAliases` object to set registry aliases.
+This feature only works with these managers:
+
+- `helm-requirements`
+- `helmv3`
+- `helmfile`
+
+The managers listed above all have this default registryAlias:
+
+```json
+{
+  "registryAliases": {
+    "stable": "https://charts.helm.sh/stable"
+  }
+}
+```
+
+Alias values must be properly formatted URIs.
+
 ## registryUrls
 
 Usually Renovate is able to either (a) use the default registries for a datasource, or (b) automatically detect during the manager extract phase which custom registries are in use.
@@ -2668,7 +2721,7 @@ There are a couple of uses for `stabilityDays`:
 
 #### Suppress branch/PR creation for X days
 
-If you combine `stabilityDays=3` and `prCreation="not-pending"` then Renovate will hold back from creating branches until 3 or more days have elapsed since the version was released.
+If you combine `stabilityDays=3` and `internalChecksFilter="strict"` then Renovate will hold back from creating branches until 3 or more days have elapsed since the version was released.
 It's recommended that you enable `dependencyDashboard=true` so you don't lose visibility of these pending PRs.
 
 #### Prevent holding broken npm packages

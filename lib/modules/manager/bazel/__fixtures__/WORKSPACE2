@@ -1,4 +1,5 @@
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+load("@bazel_tools//tools/build_defs/repo:utils.bzl", "maybe")
 
 http_archive(
     name = "GBDeviceInfo",
@@ -28,4 +29,11 @@ http_archive(
     url = "https://github.com/nelhage/rules_boost/archive/135d46b4c9423ee7d494c78a21ff621bc73c12f3.zip",
     sha256 = "de8aac034cabe4a9ba5f7a33b9523862bf76c245a6c554c0e737f591bb7c7aeb",
     strip_prefix = "rules_boost-135d46b4c9423ee7d494c78a21ff621bc73c12f3",
+)
+
+maybe(
+  http_archive,
+  name = "io_bazel_rules_go",
+  sha256 = "2b1641428dff9018f9e85c0384f03ec6c10660d935b750e3fa1492a281a53b0f",
+  url = "https://github.com/bazelbuild/rules_go/releases/download/v0.29.0/rules_go-v0.29.0.zip",
 )

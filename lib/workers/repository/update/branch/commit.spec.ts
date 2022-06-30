@@ -1,7 +1,7 @@
 import {
   defaultConfig,
   git,
-  partial,
+  mockedFunction,
   platform,
 } from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
@@ -15,7 +15,8 @@ describe('workers/repository/update/branch/commit', () => {
     let config: BranchConfig;
 
     beforeEach(() => {
-      config = partial<BranchConfig>({
+      // TODO #7154 incompatible types
+      config = {
         ...defaultConfig,
         branchName: 'renovate/some-branch',
         commitMessage: 'some commit message',
@@ -24,7 +25,8 @@ describe('workers/repository/update/branch/commit', () => {
         semanticCommitScope: 'b',
         updatedPackageFiles: [],
         updatedArtifacts: [],
-      });
+        upgrades: [],
+      } as BranchConfig;
       jest.resetAllMocks();
       git.commitFiles.mockResolvedValueOnce('123test');
       platform.commitFiles = jest.fn();
@@ -37,7 +39,7 @@ describe('workers/repository/update/branch/commit', () => {
     });
 
     it('commits files', async () => {
-      config.updatedPackageFiles.push({
+      config.updatedPackageFiles?.push({
         type: 'addition',
         path: 'package.json',
         contents: 'some contents',
@@ -48,7 +50,7 @@ describe('workers/repository/update/branch/commit', () => {
     });
 
     it('commits via platform', async () => {
-      config.updatedPackageFiles.push({
+      config.updatedPackageFiles?.push({
         type: 'addition',
         path: 'package.json',
         contents: 'some contents',
@@ -56,12 +58,15 @@ describe('workers/repository/update/branch/commit', () => {
       config.platformCommit = true;
       await commitFilesToBranch(config);
       expect(platform.commitFiles).toHaveBeenCalledTimes(1);
-      expect(platform.commitFiles.mock.calls).toMatchSnapshot();
+      // TODO #7154
+      expect(
+        mockedFunction(platform.commitFiles!).mock.calls
+      ).toMatchSnapshot();
     });
 
     it('dry runs', async () => {
       GlobalConfig.set({ dryRun: 'full' });
-      config.updatedPackageFiles.push({
+      config.updatedPackageFiles?.push({
         type: 'addition',
         path: 'package.json',
         contents: 'some contents',

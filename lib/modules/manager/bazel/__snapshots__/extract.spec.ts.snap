@@ -44,7 +44,6 @@ Array [
         )",
     },
     "packageName": "google/subpar",
-    "repo": "google/subpar",
   },
   Object {
     "currentValue": "0.6.0",
@@ -60,7 +59,24 @@ Array [
         )",
     },
     "packageName": "bazelbuild/bazel-skylib",
-    "repo": "bazelbuild/bazel-skylib",
+  },
+  Object {
+    "currentValue": "0.5.0",
+    "datasource": "github-releases",
+    "depName": "io_bazel_stardoc",
+    "depType": "http_archive",
+    "managerData": Object {
+      "def": "maybe(
+        http_archive,
+        name = \\"io_bazel_stardoc\\",
+        sha256 = \\"c9794dcc8026a30ff67cf7cf91ebe245ca294b20b071845d12c192afe243ad72\\",
+        urls = [
+            \\"https://mirror.bazel.build/github.com/bazelbuild/stardoc/releases/download/0.5.0/stardoc-0.5.0.tar.gz\\",
+            \\"https://github.com/bazelbuild/stardoc/releases/download/0.5.0/stardoc-0.5.0.tar.gz\\",
+        ],
+    )",
+    },
+    "packageName": "bazelbuild/stardoc",
   },
 ]
 `;
@@ -81,7 +97,6 @@ Array [
 )",
     },
     "packageName": "lmirosevic/GBDeviceInfo",
-    "repo": "lmirosevic/GBDeviceInfo",
   },
   Object {
     "currentDigest": "135d46b4c9423ee7d494c78a21ff621bc73c12f3",
@@ -97,7 +112,6 @@ Array [
 )",
     },
     "packageName": "nelhage/rules_boost",
-    "repo": "nelhage/rules_boost",
   },
   Object {
     "currentValue": "6.3.0",
@@ -113,7 +127,6 @@ Array [
 )",
     },
     "packageName": "lmirosevic/GBDeviceInfo",
-    "repo": "lmirosevic/GBDeviceInfo",
   },
   Object {
     "currentDigest": "135d46b4c9423ee7d494c78a21ff621bc73c12f3",
@@ -129,7 +142,21 @@ Array [
 )",
     },
     "packageName": "nelhage/rules_boost",
-    "repo": "nelhage/rules_boost",
+  },
+  Object {
+    "currentValue": "v0.29.0",
+    "datasource": "github-releases",
+    "depName": "io_bazel_rules_go",
+    "depType": "http_archive",
+    "managerData": Object {
+      "def": "maybe(
+  http_archive,
+  name = \\"io_bazel_rules_go\\",
+  sha256 = \\"2b1641428dff9018f9e85c0384f03ec6c10660d935b750e3fa1492a281a53b0f\\",
+  url = \\"https://github.com/bazelbuild/rules_go/releases/download/v0.29.0/rules_go-v0.29.0.zip\\",
+)",
+    },
+    "packageName": "bazelbuild/rules_go",
   },
 ]
 `;
@@ -223,7 +250,6 @@ Array [
 )",
     },
     "packageName": "GoogleContainerTools/distroless",
-    "repo": "GoogleContainerTools/distroless",
   },
   Object {
     "currentDigest": "d665ccfa3e9c90fa789671bf4ef5f7c19c5715c4",
@@ -242,7 +268,6 @@ Array [
 )",
     },
     "packageName": "bazelbuild/bazel-toolchains",
-    "repo": "bazelbuild/bazel-toolchains",
   },
   Object {
     "currentValue": "0.0.3",
@@ -286,7 +311,6 @@ Array [
 )",
     },
     "packageName": "bazelbuild/rules_go",
-    "repo": "bazelbuild/rules_go",
   },
   Object {
     "currentValue": "0.5.0",
@@ -305,7 +329,6 @@ Array [
 )",
     },
     "packageName": "bazelbuild/bazel-skylib",
-    "repo": "bazelbuild/bazel-skylib",
   },
   Object {
     "currentDigest": "446923c3756ceeaa75888f52fcbdd48bb314fbf8",
@@ -321,7 +344,57 @@ Array [
 )",
     },
     "packageName": "GoogleContainerTools/distroless",
-    "repo": "GoogleContainerTools/distroless",
+  },
+  Object {
+    "currentValue": "v0.29.0",
+    "datasource": "github-releases",
+    "depName": "io_bazel_rules_go",
+    "depType": "http_archive",
+    "managerData": Object {
+      "def": "maybe(
+  http_archive,
+  name = \\"io_bazel_rules_go\\",
+  sha256 = \\"2b1641428dff9018f9e85c0384f03ec6c10660d935b750e3fa1492a281a53b0f\\",
+  url = \\"https://github.com/bazelbuild/rules_go/releases/download/v0.29.0/rules_go-v0.29.0.zip\\",
+)",
+    },
+    "packageName": "bazelbuild/rules_go",
+  },
+  Object {
+    "currentValue": "v0.24.0",
+    "datasource": "github-releases",
+    "depName": "bazel_gazelle",
+    "depType": "http_archive",
+    "managerData": Object {
+      "def": "maybe(
+    http_archive,
+    name = \\"bazel_gazelle\\",
+    sha256 = \\"de69a09dc70417580aabf20a28619bb3ef60d038470c7cf8442fafcf627c21cb\\",
+    urls = [
+        \\"https://mirror.bazel.build/github.com/bazelbuild/bazel-gazelle/releases/download/v0.24.0/bazel-gazelle-v0.24.0.tar.gz\\",
+        \\"https://github.com/bazelbuild/bazel-gazelle/releases/download/v0.24.0/bazel-gazelle-v0.24.0.tar.gz\\",
+    ],
+)",
+    },
+    "packageName": "bazelbuild/bazel-gazelle",
+  },
+  Object {
+    "currentDigest": "816c9085562cd7ee03e7f8188a1cfd942858cded",
+    "currentDigestShort": "816c908",
+    "currentValue": "v0.0.0",
+    "datasource": "go",
+    "depName": "com_github_pkg_errors",
+    "depType": "go_repository",
+    "digestOneAndOnly": true,
+    "managerData": Object {
+      "def": "maybe(
+    go_repository,
+    name = \\"com_github_pkg_errors\\",
+    commit = \\"816c9085562cd7ee03e7f8188a1cfd942858cded\\",
+    importpath = \\"github.com/pkg/errors\\",
+)",
+    },
+    "packageName": "github.com/pkg/errors",
   },
   Object {
     "currentDigest": "sha256:d5a717649fd93ea5b9c430d7f84e4c37ba219eb53bd73ed1d4a5a98e9edd84a7",
@@ -358,7 +431,6 @@ Array [
 )",
     },
     "packageName": "GoogleContainerTools/distroless",
-    "repo": "GoogleContainerTools/distroless",
   },
 ]
 `;
@@ -379,7 +451,6 @@ Array [
 )",
     },
     "packageName": "nelhage/rules_boost",
-    "repo": "nelhage/rules_boost",
   },
 ]
 `;

@@ -41,7 +41,7 @@ export async function filterInternalChecks(
       releaseConfig.updateType = getUpdateType(
         releaseConfig,
         versioning,
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+        // TODO #7154
         currentVersion!,
         candidateRelease.version
       );
@@ -70,20 +70,17 @@ export async function filterInternalChecks(
           continue;
         }
       }
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+
+      // TODO #7154
       if (isActiveConfidenceLevel(minimumConfidence!)) {
         const confidenceLevel = await getMergeConfidenceLevel(
-          // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
           datasource!,
-          // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
           depName!,
-          // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
           currentVersion!,
           newVersion,
-          // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
           updateType!
         );
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+        // TODO #7154
         if (!satisfiesConfidenceLevel(confidenceLevel, minimumConfidence!)) {
           logger.debug(
             { depName, check: 'minimumConfidence' },
@@ -113,6 +110,7 @@ export async function filterInternalChecks(
       }
     }
   }
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+
+  // TODO #7154
   return { release: release!, pendingChecks, pendingReleases };
 }

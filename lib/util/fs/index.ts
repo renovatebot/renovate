@@ -23,12 +23,11 @@ export function getSiblingFileName(
   return upath.join(subDirectory, otherFileName);
 }
 
-// TODO: can return null #7154
-export async function readLocalFile(fileName: string): Promise<Buffer>;
+export async function readLocalFile(fileName: string): Promise<Buffer | null>;
 export async function readLocalFile(
   fileName: string,
   encoding: 'utf8'
-): Promise<string>;
+): Promise<string | null>;
 export async function readLocalFile(
   fileName: string,
   encoding?: string
@@ -195,4 +194,25 @@ export async function findUpLocal(
   }
   // Return null if found file is outside of localDir
   return null;
+}
+
+export function chmodLocalFile(
+  fileName: string,
+  mode: string | number
+): Promise<void> {
+  const localDir = GlobalConfig.get('localDir');
+  const fullFileName = upath.join(localDir, fileName);
+  return fs.chmod(fullFileName, mode);
+}
+
+export async function statLocalFile(
+  fileName: string
+): Promise<fs.Stats | null> {
+  const localDir = GlobalConfig.get('localDir');
+  const fullFileName = upath.join(localDir, fileName);
+  try {
+    return await fs.stat(fullFileName);
+  } catch (_) {
+    return null;
+  }
 }

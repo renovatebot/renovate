@@ -1,6 +1,7 @@
 import type { ReleaseType } from 'semver';
 import type {
   MatchStringsStrategy,
+  RegexManagerTemplates,
   UpdateType,
   ValidationMessage,
 } from '../../config/types';
@@ -19,14 +20,6 @@ export interface ExtractConfig {
   npmrc?: string;
   npmrcMerge?: boolean;
   skipInstalls?: boolean;
-}
-
-export interface RegexManagerTemplates {
-  depNameTemplate?: string;
-  packageNameTemplate?: string;
-  datasourceTemplate?: string;
-  versioningTemplate?: string;
-  depTypeTemplate?: string;
 }
 
 export interface CustomExtractConfig
@@ -105,7 +98,6 @@ export interface Package<T> extends ManagerData<T> {
   groupName?: string;
   lineNumber?: number;
   packageName?: string | null;
-  repo?: string;
   target?: string;
   versioning?: string;
   dataType?: string;
@@ -115,8 +107,7 @@ export interface Package<T> extends ManagerData<T> {
   npmPackageAlias?: boolean;
   packageFileVersion?: string;
   gitRef?: boolean;
-  sourceUrl?: string;
-  githubRepo?: string;
+  sourceUrl?: string | null;
   pinDigests?: boolean;
   currentRawValue?: string;
   major?: { enabled?: boolean };

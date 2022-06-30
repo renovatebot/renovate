@@ -90,7 +90,7 @@ async function cleanUpBranches(
 
 export async function pruneStaleBranches(
   config: RenovateConfig,
-  branchList: string[]
+  branchList: string[] | null | undefined
 ): Promise<void> {
   logger.debug('Removing any stale branches');
   logger.trace({ config }, `pruneStaleBranches`);
@@ -99,8 +99,9 @@ export async function pruneStaleBranches(
     logger.debug('No branchList');
     return;
   }
+  // TODO #7154
   let renovateBranches = getBranchList().filter((branchName) =>
-    branchName.startsWith(config.branchPrefix)
+    branchName.startsWith(config.branchPrefix!)
   );
   if (!renovateBranches?.length) {
     logger.debug('No renovate branches found');

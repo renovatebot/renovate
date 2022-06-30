@@ -1,4 +1,4 @@
-import { extractPackageFile } from './extract';
+import { extractPackageFile } from '.';
 
 describe('modules/manager/terragrunt-version/extract', () => {
   describe('extractPackageFile()', () => {
