@@ -22,7 +22,7 @@ function checkApproveAllPendingPR(issueBody: string): string {
     ' - \\[x\\] <!-- approve-all-pending-prs -->';
   let newIssueBody = issueBody;
   if (regEx(checkApproveAllPendingPR).test(issueBody)) {
-    const checkPending = regEx(/ - \[ ] <!-- approve-branch=/gm);
+    const checkPending = regEx(/ - \[ ] <!-- approve-branch=/g);
     newIssueBody = newIssueBody.replace(
       checkPending,
       ' - [x] <!-- approve-branch='
@@ -36,7 +36,7 @@ function checkApproveAllRateLimitdPR(issueBody: string): string {
     ' - \\[x\\] <!-- open-all-rate-limited-prs -->';
   let newIssueBody = issueBody;
   if (regEx(checkApproveOpenAllRateLimitedPR).test(issueBody)) {
-    const checkPending = regEx(/ - \[ ] <!-- unlimit-branch=/gm);
+    const checkPending = regEx(/ - \[ ] <!-- unlimit-branch=/g);
     newIssueBody = newIssueBody.replace(
       checkPending,
       ' - [x] <!-- unlimit-branch='
