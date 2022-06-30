@@ -14,6 +14,7 @@ import { GlobalConfig } from '../../config/global';
 import type { RenovateConfig } from '../../config/types';
 import {
   CONFIG_VALIDATION,
+  INVALID_PATH,
   REPOSITORY_CHANGED,
   REPOSITORY_DISABLED,
   REPOSITORY_EMPTY,
@@ -427,7 +428,7 @@ export async function getRepoStatus(path?: string): Promise<StatusResult> {
         { localPath, localDir },
         'Preventing access to file outside the local directory'
       );
-      return Promise.reject();
+      throw new Error(INVALID_PATH);
     }
   }
 

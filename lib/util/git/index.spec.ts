@@ -3,7 +3,10 @@ import Git from 'simple-git';
 import tmp from 'tmp-promise';
 import { mocked } from '../../../test/util';
 import { GlobalConfig } from '../../config/global';
-import { CONFIG_VALIDATION } from '../../constants/error-messages';
+import {
+  CONFIG_VALIDATION,
+  INVALID_PATH,
+} from '../../constants/error-messages';
 import { newlineRegex, regEx } from '../regex';
 import * as _conflictsCache from './conflicts-cache';
 import type { FileChange } from './types';
@@ -967,7 +970,9 @@ describe('util/git/index', () => {
       await fs.writeFile(tmpDir.path + '/bin/nested', 'new nested');
       await fs.writeFile(tmpDir.path + '/root', 'new root');
 
-      await expect(git.getRepoStatus('../../bin')).rejects.toBeUndefined();
+      await expect(git.getRepoStatus('../../bin')).rejects.toThrow(
+        INVALID_PATH
+      );
     });
   });
 });
