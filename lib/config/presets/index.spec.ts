@@ -907,7 +907,7 @@ describe('config/presets/index', () => {
         {}
       );
       expect(res).toEqual({
-        description: ['Group eslint packages into same branch/PR'],
+        description: ['Group `eslint` packages into same branch/PR.'],
         packageRules: [
           {
             extends: ['packages:eslint'],
@@ -920,7 +920,7 @@ describe('config/presets/index', () => {
     it('handles missing params', async () => {
       const res = await presets.getPreset(':group()', {});
       expect(res).toEqual({
-        description: ['Group {{arg1}} packages into same branch/PR'],
+        description: ['Group `{{arg1}}` packages into same branch/PR.'],
         packageRules: [
           {
             extends: [],
@@ -934,7 +934,7 @@ describe('config/presets/index', () => {
       const res = await presets.getPreset(':pinVersions(foo, bar)', {});
       expect(res).toEqual({
         description: [
-          'Use version pinning (maintain a single version only and not SemVer ranges)',
+          'Use version pinning (maintain a single version only and not SemVer ranges).',
         ],
         rangeStrategy: 'pin',
       });
