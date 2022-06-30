@@ -204,3 +204,24 @@ export async function findUpLocal(
   // Return null if found file is outside of localDir
   return null;
 }
+
+export function chmodLocalFile(
+  fileName: string,
+  mode: string | number
+): Promise<void> {
+  const localDir = GlobalConfig.get('localDir');
+  const fullFileName = upath.join(localDir, fileName);
+  return fs.chmod(fullFileName, mode);
+}
+
+export async function statLocalFile(
+  fileName: string
+): Promise<fs.Stats | null> {
+  const localDir = GlobalConfig.get('localDir');
+  const fullFileName = upath.join(localDir, fileName);
+  try {
+    return await fs.stat(fullFileName);
+  } catch (_) {
+    return null;
+  }
+}
