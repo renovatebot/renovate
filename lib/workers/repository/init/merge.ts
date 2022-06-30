@@ -279,10 +279,9 @@ export async function mergeRenovateConfig(
 }
 
 export function logShallowConfig(ShallowConfig: RenovateConfig): void {
-  // remove the resolved presets in the extends array from the log
-  // also there could be a preset that is extending a preset
-  // which is also present in an extend array of a different preset
-  // so lets clean that for the log
+  // remove resolved external presets from the extends array for the log
+  // clean duplicate presets in case of two different presets are having
+  // same values in the extends array
   if (is.array(ShallowConfig?.extends)) {
     if (ShallowConfig.extends.length) {
       ShallowConfig.extends = ShallowConfig.extends.filter(

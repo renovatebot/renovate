@@ -371,6 +371,7 @@ export async function resolveConfigPresets(
   }
   logger.trace({ config }, `Post-preset resolve config`);
   const tempExtends = extendsArrayClone(shallowResolve, config);
+  // Now assign "regular" config on top
   config = mergeChildConfig(config, inputConfig);
   if (shallowResolve) {
     if (tempExtends.length && config?.extends) {
@@ -422,7 +423,9 @@ function extendsArrayClone(
   shallowResolve: boolean,
   config: AllConfig
 ): string[] {
-  // save extends array before using mergeChildConfig to not lose values from the array
+  // save extends array before using mergeChildConfig
+  // to not lose values from the array
+  // cause internal ones are needed for the log
   const tempExtends: string[] = [];
   if (shallowResolve && config?.extends?.length) {
     tempExtends.push(...config.extends);
