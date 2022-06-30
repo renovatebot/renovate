@@ -55,7 +55,7 @@ A way to get the user id of a GitHub app is to [query the user API](https://docs
 
 The token needs to be a [GitHub App Installation token](https://docs.github.com/en/developers/apps/building-github-apps/authenticating-with-github-apps#authenticating-as-an-installation).
 
-Previously, the token had to be prefixed with `x-access-token`.
+Previously, the token had to be prefixed with `x-access-token:`.
 While a prefixed token still works, it's recommended to move away from it as its support might be removed in the future.
 
 <!-- prettier-ignore -->
