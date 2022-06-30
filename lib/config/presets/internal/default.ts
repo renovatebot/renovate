@@ -10,7 +10,7 @@ export const presets: Record<string, Preset> = {
     enabled: false,
   },
   disableMajorUpdates: {
-    description: 'Disables `major` updates.',
+    description: 'Disable `major` updates.',
     major: {
       enabled: false,
     },
