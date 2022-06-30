@@ -24,11 +24,6 @@ import type {
  * @returns A Java semver range
  */
 function getJavaContraint(mavenVersion: string): string | null {
-  if (GlobalConfig.get('binarySource') !== 'docker') {
-    // ignore
-    return null;
-  }
-
   const major = mavenVersioning.getMajor(mavenVersion);
   const minor = mavenVersioning.getMinor(mavenVersion);
   if (major >= 3) {
