@@ -1,13 +1,13 @@
-import { loadFixture } from '../../../../test/util';
+import { Fixtures } from './../../../../test/fixtures';
 import { extractPackageFile } from '.';
 
-const typeBinFileContent = loadFixture(
+const typeBinFileContent = Fixtures.get(
   'wrapper-and-maven/maven-wrapper.properties'
 );
-const onlyWrapperProperties = loadFixture(
-  'only-wrapper/maven-wrapper.properties'
-);
-const onlyMavenProperties = loadFixture('only-maven/maven-wrapper.properties');
+const onlyWrapperProperties =
+  'wrapperUrl=https://repo.maven.apache.org/maven2/io/takari/maven-wrapper/0.5.6/maven-wrapper-0.5.6.jar';
+const onlyMavenProperties =
+  'distributionUrl=https://repo.maven.apache.org/maven2/org/apache/maven/apache-maven/3.5.4/apache-maven-3.5.4-bin.zip';
 
 describe('modules/manager/maven-wrapper/extract', () => {
   describe('extractPackageFile()', () => {
