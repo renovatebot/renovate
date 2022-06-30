@@ -42,6 +42,34 @@ describe('modules/manager/gitlabci/utils', () => {
       }
     );
 
+    it.each`
+      name              | imagePrefix          | registryPrefix
+      ${'plain'}        | ${'$CI_REGISTRY/'}   | ${'registry.example.org'}
+      ${'with curlies'} | ${'${CI_REGISTRY}/'} | ${'registry.example.org'}
+      ${'no prefix'}    | ${''}                | ${''}
+    `(
+      'supports registry variable - $name',
+      ({
+        imagePrefix,
+        registryPrefix,
+      }: {
+        imagePrefix: string;
+        registryPrefix: string;
+      }) => {
+        const imageName = `${imagePrefix}renovate/renovate:19.70.8-slim`;
+
+        expect(getGitlabDep(imageName, registryPrefix)).toMatchObject({
+          autoReplaceStringTemplate:
+            imagePrefix + defaultAutoReplaceStringTemplate,
+          replaceString: imageName,
+          depName: registryPrefix
+            ? `${registryPrefix}/renovate/renovate`
+            : 'renovate/renovate',
+          currentValue: '19.70.8-slim',
+        });
+      }
+    );
+
     it('supports registry variable', () => {
       const imageName = '$CI_REGISTRY/renovate/renovate:19.70.8-slim';
       const gitLabContainerRegistryPrefix = 'registry.example.org';
