@@ -1,6 +1,7 @@
 import { logger } from '../../../logger';
 import { cache } from '../../../util/cache/package/decorator';
 import { GithubHttp } from '../../../util/http/github';
+import { regEx } from '../../../util/regex';
 import { streamToString } from '../../../util/streams';
 import { id } from '../../versioning/hermit';
 import { Datasource } from '../datasource';
@@ -34,9 +35,12 @@ export class HermitDatasource extends Datasource {
 
   githubHttp: GithubHttp;
 
+  pathRegex: RegExp;
+
   constructor() {
     super(HermitDatasource.id);
     this.githubHttp = new GithubHttp(GithubReleasesDatasource.id);
+    this.pathRegex = regEx('^\\/(?<owner>[^/]+)\\/(?<repo>[^/]+)$');
   }
 
   @cache({
@@ -103,22 +107,14 @@ export class HermitDatasource extends Datasource {
   ): Promise<HermitSearchResult[] | null> {
     const u = new URL(registryUrl);
     const host = u.host;
-    const path = u.pathname;
+    const groups = this.pathRegex.exec(u.pathname)?.groups;
 
-    const parts = path.split('/').filter((p) => p !== '');
-
-    if (parts.length < 2) {
-      logger.debug({ registryUrl }, `can't find owner & repo in the url`);
+    if (!groups) {
       return null;
     }
 
-    logger.debug(
-      { registryUrl },
-      `fetching hermit search manifest from repository's index release`
-    );
+    const { owner, repo } = groups;
 
-    const owner = parts[0];
-    const repo = parts[1];
     const apiBaseUrl = getApiBaseUrl(`https://${host}`);
 
     const indexRelease = await this.githubHttp.getJson<GithubRelease>(

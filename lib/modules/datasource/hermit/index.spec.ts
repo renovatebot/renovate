@@ -154,6 +154,15 @@ describe('modules/datasource/hermit/index', () => {
       ).resolves.toBeNull();
     });
 
+    it('should get null for extra path provided in registry url', async () => {
+      await expect(
+        datasource.getReleases({
+          packageName: 'go',
+          registryUrl: 'https://github.com/test/repo/extra-path',
+        })
+      ).resolves.toBeNull();
+    });
+
     it('should get null result on empty registryUrl', async () => {
       await expect(
         datasource.getReleases({
