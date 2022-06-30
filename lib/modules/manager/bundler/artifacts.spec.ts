@@ -130,13 +130,13 @@ describe('modules/manager/bundler/artifacts', () => {
 
   it('supports conservative mode', async () => {
     fs.readLocalFile.mockResolvedValueOnce('Current Gemfile.lock');
-    fs.writeLocalFile.mockResolvedValueOnce(null as never);
-    fs.readLocalFile.mockResolvedValueOnce(null as never);
+    fs.writeLocalFile.mockResolvedValueOnce();
+    fs.readLocalFile.mockResolvedValueOnce(null);
     const execSnapshots = mockExecAll(exec);
     git.getRepoStatus.mockResolvedValueOnce({
       modified: ['Gemfile.lock'],
     } as StatusResult);
-    fs.readLocalFile.mockResolvedValueOnce('Updated Gemfile.lock' as any);
+    fs.readLocalFile.mockResolvedValueOnce('Updated Gemfile.lock');
     expect(
       await updateArtifacts({
         packageFileName: 'Gemfile',
