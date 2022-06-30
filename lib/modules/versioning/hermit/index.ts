@@ -19,13 +19,8 @@ export class HermitVersioning extends RegExpVersioningApi {
     this._hermitConfig = regEx(HermitVersioning.versionRegex);
   }
 
-  _parseVersion(version: string): RegExpVersion | null {
-    return this._parse(version);
-  }
-
   private _isValidSemver(version: string): boolean {
-    const parsed = super._parse(version);
-    return parsed !== null;
+    return super._parse(version) !== null;
   }
 
   protected override _parse(version: string): RegExpVersion | null {

@@ -3,36 +3,6 @@ import { HermitVersioning } from './index';
 describe('modules/versioning/hermit/index', () => {
   const versioning = new HermitVersioning();
 
-  describe('_parseVersion', () => {
-    test.each`
-      version           | release           | compatibility | prerelease
-      ${'17'}           | ${[17, 0, 0]}     | ${undefined}  | ${undefined}
-      ${'17.2'}         | ${[17, 2, 0]}     | ${undefined}  | ${undefined}
-      ${'17.2.3a1'}     | ${[17, 2, 3]}     | ${undefined}  | ${'a1'}
-      ${'17.2.3-foo'}   | ${[17, 2, 3]}     | ${undefined}  | ${'foo'}
-      ${'17.2.3+m1'}    | ${[17, 2, 3]}     | ${'m1'}       | ${undefined}
-      ${'17.2.3_40+m1'} | ${[17, 2, 3, 40]} | ${'m1'}       | ${undefined}
-      ${'@17'}          | ${[17]}           | ${undefined}  | ${undefined}
-      ${'@17.2'}        | ${[17, 2]}        | ${undefined}  | ${undefined}
-      ${'@17.2.3_40'}   | ${[17, 2, 3, 40]} | ${undefined}  | ${undefined}
-    `(
-      'getReleases for "$version"',
-      ({ version, release, compatibility, prerelease }) => {
-        const res = versioning._parseVersion(version);
-        if (res === null) {
-          throw new Error('res is null');
-        }
-        expect(res.release).toStrictEqual(release);
-        expect(res.compatibility).toStrictEqual(compatibility);
-        expect(res.prerelease).toStrictEqual(prerelease);
-      }
-    );
-
-    it('non semver channel will receive a null', () => {
-      expect(versioning._parseVersion('@stable')).toBeNull();
-    });
-  });
-
   describe('_isChannel', () => {
     test.each`
       version                     | expected
@@ -71,7 +41,7 @@ describe('modules/versioning/hermit/index', () => {
       ${'@latest'} | ${false}
       ${'@stable'} | ${false}
     `('isSemverChannel("$version") === $expected', ({ version, expected }) => {
-      expect(!!versioning._isSemverChannel(version)).toBe(expected);
+      expect(versioning._isSemverChannel(version)).toBe(expected);
     });
   });
 
@@ -86,7 +56,7 @@ describe('modules/versioning/hermit/index', () => {
       ${'@latest'} | ${false}
       ${'@stable'} | ${false}
     `('isStable("$version") === $expected', ({ version, expected }) => {
-      expect(!!versioning.isStable(version)).toBe(expected);
+      expect(versioning.isStable(version)).toBe(expected);
     });
   });
 
@@ -115,7 +85,7 @@ describe('modules/versioning/hermit/index', () => {
       ${'@latest'}                | ${true}
       ${'@stable'}                | ${true}
     `('isValid("$version") === $expected', ({ version, expected }) => {
-      expect(!!versioning.isValid(version)).toBe(expected);
+      expect(versioning.isValid(version)).toBe(expected);
     });
   });
 
@@ -153,7 +123,7 @@ describe('modules/versioning/hermit/index', () => {
       ${'@stable'}  | ${'@stable'} | ${true}
       ${'stable'}   | ${'stable'}  | ${true}
     `('equals("$version") === $expected', ({ version, other, expected }) => {
-      expect(!!versioning.equals(version, other)).toBe(expected);
+      expect(versioning.equals(version, other)).toBe(expected);
     });
   });
 
@@ -166,7 +136,7 @@ describe('modules/versioning/hermit/index', () => {
       ${'@latest'} | ${'@1'}      | ${false}
       ${'@stable'} | ${'@stable'} | ${true}
     `('matches("$version") === $expected', ({ version, other, expected }) => {
-      expect(!!versioning.matches(version, other)).toBe(expected);
+      expect(versioning.matches(version, other)).toBe(expected);
     });
   });
 
@@ -184,7 +154,7 @@ describe('modules/versioning/hermit/index', () => {
     `(
       'isGreaterThan("$version", "$other") === $expected',
       ({ version, other, expected }) => {
-        expect(!!versioning.isGreaterThan(version, other)).toBe(expected);
+        expect(versioning.isGreaterThan(version, other)).toBe(expected);
       }
     );
   });
@@ -201,7 +171,7 @@ describe('modules/versioning/hermit/index', () => {
     `(
       'isLessThanRange("$version") === $expected',
       ({ version, other, expected }) => {
-        expect(!!versioning.isLessThanRange(version, other)).toBe(expected);
+        expect(versioning.isLessThanRange(version, other)).toBe(expected);
       }
     );
   });
@@ -257,7 +227,7 @@ describe('modules/versioning/hermit/index', () => {
           '2.1',
           '@stable',
           '@latest',
-        ].sort(versioning.sortVersions.bind(versioning))
+        ].sort((a, b) => versioning.sortVersions(a, b))
       ).toEqual([
         '@latest',
         '@stable',
