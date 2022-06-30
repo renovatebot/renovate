@@ -1,4 +1,5 @@
 import { lt } from '@renovatebot/ruby-semver';
+import is from '@sindresorhus/is';
 import { quote } from 'shlex';
 import {
   BUNDLER_INVALID_CREDENTIALS,
