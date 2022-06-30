@@ -414,7 +414,7 @@ describe('config/presets/index', () => {
       });
     });
 
-    it(' local and github extend', async () => {
+    it('combines extends with user and github', async () => {
       config.extends = ['config:base', 'github>username/preset-repo'];
       config.packageRules = [
         {

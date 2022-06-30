@@ -421,7 +421,7 @@ function extendsArrayClone(
   shallowResolve: boolean,
   config: AllConfig
 ): string[] {
-  // save extends array before using mergeChildConfig to not lose values
+  // save extends array before using mergeChildConfig to not lose values from the array
   const tempExtends: string[] = [];
   if (shallowResolve && config?.extends?.length) {
     tempExtends.push(...config.extends);
