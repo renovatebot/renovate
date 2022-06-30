@@ -223,6 +223,7 @@ const options: RenovateOptions[] = [
     allowedValues: ['disabled', 'enabled', 'reset'],
     stage: 'repository',
     default: 'disabled',
+    experimental: true,
   },
   {
     name: 'force',
@@ -464,7 +465,7 @@ const options: RenovateOptions[] = [
       'Any text added here will be placed first in the Dependency Dashboard issue body.',
     type: 'string',
     default:
-      'This issue provides visibility into Renovate updates and their statuses. [Learn more](https://docs.renovatebot.com/key-concepts/dashboard/)',
+      'This issue lists Renovate updates and detected dependencies. Read the [Dependency Dashboard](https://docs.renovatebot.com/key-concepts/dashboard/) docs to learn more.',
   },
   {
     name: 'dependencyDashboardFooter',
@@ -1250,7 +1251,7 @@ const options: RenovateOptions[] = [
     name: 'bumpVersion',
     description: 'Bump the version in the package file being updated.',
     type: 'string',
-    allowedValues: ['major', 'minor', 'patch'],
+    allowedValues: ['major', 'minor', 'patch', 'prerelease'],
     supportedManagers: ['helmv3', 'npm', 'maven', 'sbt'],
   },
   // Major/Minor/Patch

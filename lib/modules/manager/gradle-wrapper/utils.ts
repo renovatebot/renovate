@@ -1,9 +1,7 @@
-import type { Stats } from 'fs';
 import os from 'os';
-import upath from 'upath';
 import { GlobalConfig } from '../../../config/global';
 import { logger } from '../../../logger';
-import { chmod } from '../../../util/fs';
+import { chmodLocalFile, statLocalFile } from '../../../util/fs';
 import { newlineRegex, regEx } from '../../../util/regex';
 import gradleVersioning from '../../versioning/gradle';
 import { id as npmVersioning } from '../../versioning/npm';
@@ -27,16 +25,16 @@ export function gradleWrapperFileName(): string {
 
 export async function prepareGradleCommand(
   gradlewName: string,
-  cwd: string,
-  gradlew: Stats | null,
   args: string | null
 ): Promise<string | null> {
+  const gradlewFile = gradleWrapperFileName();
+  const gradlewStat = await statLocalFile(gradlewFile);
   // istanbul ignore if
-  if (gradlew?.isFile() === true) {
+  if (gradlewStat?.isFile() === true) {
     // if the file is not executable by others
-    if ((gradlew.mode & 0o1) === 0) {
+    if ((gradlewStat.mode & 0o1) === 0) {
       // add the execution permission to the owner, group and others
-      await chmod(upath.join(cwd, gradlewName), gradlew.mode | 0o111);
+      await chmodLocalFile(gradlewName, gradlewStat.mode | 0o111);
     }
     if (args === null) {
       return gradlewName;
