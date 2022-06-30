@@ -1,5 +1,6 @@
 import { Fixtures } from '../../../test/fixtures';
 import { mocked } from '../../../test/util';
+import * as memCache from '../../util/cache/memory';
 import type { RenovateConfig } from '../types';
 import * as _github from './github';
 import * as _local from './local';
@@ -50,6 +51,7 @@ describe('config/presets/index', () => {
     beforeEach(() => {
       config = {};
       jest.clearAllMocks();
+      memCache.init();
     });
 
     it('returns same if no presets', async () => {
@@ -310,7 +312,42 @@ describe('config/presets/index', () => {
       });
     });
 
-    it('logs user extended config and returns original config', async () => {
+    it('gets preset value from cache when it has been seen', async () => {
+      config.extends = ['github>username/preset-repo'];
+      config.packageRules = [
+        {
+          matchManagers: ['github-actions'],
+          groupName: 'github-actions dependencies',
+        },
+      ];
+      gitHub.getPreset.mockResolvedValueOnce({
+        packageRules: [
+          {
+            matchDatasources: ['docker'],
+            matchPackageNames: ['ubi'],
+            versioning: 'regex',
+          },
+        ],
+      });
+
+      expect(await presets.resolveConfigPresets(config)).toBeDefined();
+      const res = await presets.resolveConfigPresets(config);
+      expect(res).toEqual({
+        packageRules: [
+          {
+            matchDatasources: ['docker'],
+            matchPackageNames: ['ubi'],
+            versioning: 'regex',
+          },
+          {
+            matchManagers: ['github-actions'],
+            groupName: 'github-actions dependencies',
+          },
+        ],
+      });
+    });
+
+    it('resolves and keeps extends array from config ', async () => {
       config.extends = ['local>username/preset-repo'];
       local.getPreset.mockResolvedValueOnce({
         labels: ['self-hosted resolved'],
@@ -328,7 +365,7 @@ describe('config/presets/index', () => {
       });
     });
 
-    it('logs user extended config from github', async () => {
+    it('resolves shallow config in case of local and github extend', async () => {
       config.extends = ['config:base', 'local>username/preset-repo'];
       config.packageRules = [
         {
@@ -374,6 +411,39 @@ describe('config/presets/index', () => {
           'github>username/preset-repo',
         ],
         labels: ['self-hosted resolved'],
+      });
+    });
+
+    it(' local and github extend', async () => {
+      config.extends = ['config:base', 'github>username/preset-repo'];
+      config.packageRules = [
+        {
+          matchManagers: ['github-actions'],
+          groupName: 'github-actions dependencies',
+        },
+      ];
+      gitHub.getPreset.mockResolvedValueOnce({
+        extends: ['config:js-app'],
+      });
+      const res = await presets.resolveConfigPresets(
+        config,
+        {},
+        [],
+        [],
+        true // shallow log config
+      );
+      expect(res).toEqual({
+        extends: [
+          'config:base',
+          'github>username/preset-repo',
+          'config:js-app',
+        ],
+        packageRules: [
+          {
+            matchManagers: ['github-actions'],
+            groupName: 'github-actions dependencies',
+          },
+        ],
       });
     });
   });
