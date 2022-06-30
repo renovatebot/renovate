@@ -340,7 +340,7 @@ Array [
 exports[`modules/manager/bundler/artifacts supports conservative mode 1`] = `
 Array [
   Object {
-    "cmd": "bundler lock --update --conservative foo bar",
+    "cmd": "bundler lock --conservative --update foo bar",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
