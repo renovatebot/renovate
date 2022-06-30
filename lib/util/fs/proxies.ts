@@ -6,14 +6,6 @@ export function stat(path: string | Buffer): Promise<fs.Stats> {
   return fs.stat(path);
 }
 
-// istanbul ignore next
-export function chmod(
-  path: string | Buffer,
-  mode: string | number
-): Promise<void> {
-  return fs.chmod(path, mode);
-}
-
 export async function readFile(fileName: string): Promise<Buffer>;
 export async function readFile(
   fileName: string,
@@ -24,14 +16,6 @@ export function readFile(
   encoding?: string
 ): Promise<string | Buffer> {
   return encoding ? fs.readFile(fileName, encoding) : fs.readFile(fileName);
-}
-
-// istanbul ignore next
-export function writeFile(
-  fileName: string,
-  fileContent: string
-): Promise<void> {
-  return fs.writeFile(fileName, fileContent);
 }
 
 // istanbul ignore next

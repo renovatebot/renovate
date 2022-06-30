@@ -6,6 +6,7 @@ import { envMock } from '../../../test/exec-util';
 import { env, mockedFunction } from '../../../test/util';
 import { GlobalConfig } from '../../config/global';
 import {
+  chmodLocalFile,
   ensureCacheDir,
   ensureLocalDir,
   findLocalSiblingOrParent,
@@ -15,6 +16,7 @@ import {
   localPathIsFile,
   readLocalDirectory,
   readLocalFile,
+  statLocalFile,
   writeLocalFile,
 } from '.';
 
@@ -238,6 +240,47 @@ describe('util/fs/index', () => {
       findUp.mockResolvedValueOnce('/abs/path/to/file.json');
       const res = await findUpLocal('file.json', 'subdir/subdir2');
       expect(res).toBeNull();
+    });
+  });
+
+  describe('statLocalFile', () => {
+    it('works', async () => {
+      await withDir(
+        async (tmpDir) => {
+          GlobalConfig.set({ localDir: tmpDir.path });
+
+          expect(await statLocalFile('foo')).toBeNull();
+
+          await writeLocalFile('foo', 'bar');
+          const stat = await statLocalFile('foo');
+          expect(stat).toBeDefined();
+          expect(stat!.isFile()).toBeTrue();
+        },
+        { unsafeCleanup: true }
+      );
+    });
+  });
+
+  describe('chmodLocalFile', () => {
+    it('works', async () => {
+      await withDir(
+        async (tmpDir) => {
+          GlobalConfig.set({ localDir: tmpDir.path });
+          await writeLocalFile('foo', 'bar');
+          let stat = await statLocalFile('foo');
+          const oldMode = stat!.mode & 0o777;
+          const newMode = oldMode & 0o555; // Remove `write` attributes (Windows-compatible)
+
+          await chmodLocalFile('foo', newMode);
+          stat = await statLocalFile('foo');
+          expect(stat!.mode & 0o777).toBe(newMode);
+
+          await chmodLocalFile('foo', oldMode);
+          stat = await statLocalFile('foo');
+          expect(stat!.mode & 0o777).toBe(oldMode);
+        },
+        { unsafeCleanup: true }
+      );
     });
   });
 });
