@@ -151,7 +151,11 @@ describe('modules/manager/bundler/artifacts', () => {
         },
       })
     ).toEqual([updatedGemfileLock]);
-    expect(execSnapshots).toMatchSnapshot();
+    expect(execSnapshots).toMatchObject([
+      expect.objectContaining({
+        cmd: 'bundler lock --conservative --update foo bar',
+      }),
+    ]);
   });
 
   describe('Docker', () => {

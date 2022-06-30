@@ -337,30 +337,6 @@ Array [
 ]
 `;
 
-exports[`modules/manager/bundler/artifacts supports conservative mode 1`] = `
-Array [
-  Object {
-    "cmd": "bundler lock --conservative --update foo bar",
-    "options": Object {
-      "cwd": "/tmp/github/some/repo",
-      "encoding": "utf-8",
-      "env": Object {
-        "GEM_HOME": "/tmp/cache/others/gem",
-        "HOME": "/home/user",
-        "HTTPS_PROXY": "https://example.com",
-        "HTTP_PROXY": "http://example.com",
-        "LANG": "en_US.UTF-8",
-        "LC_ALL": "en_US",
-        "NO_PROXY": "localhost",
-        "PATH": "/tmp/path",
-      },
-      "maxBuffer": 10485760,
-      "timeout": 900000,
-    },
-  },
-]
-`;
-
 exports[`modules/manager/bundler/artifacts works explicit global binarySource 1`] = `
 Array [
   Object {
