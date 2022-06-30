@@ -360,6 +360,7 @@ export async function resolveConfigPresets(
           delete presetConfig.description;
         }
         const tempExtends = extendsArrayClone(shallowResolve, config);
+        // Now assign "regular" config on top
         config = mergeChildConfig(config, presetConfig);
         // istanbul ignore if
         if (shallowResolve && tempExtends.length) {

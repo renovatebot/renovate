@@ -222,7 +222,7 @@ export async function mergeRenovateConfig(
       config,
       [],
       [],
-      true // shallow log config
+      true // resolve shallow config
     ),
     repository
   );
