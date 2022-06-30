@@ -858,40 +858,40 @@ describe('config/presets/index', () => {
     it('handles renamed monorepos', async () => {
       const res = await presets.getPreset('monorepo:opentelemetry', {});
       expect(res).toMatchInlineSnapshot(`
-Object {
-  "description": Array [
-    "opentelemetry-js monorepo",
-  ],
-  "matchSourceUrlPrefixes": Array [
-    "https://github.com/open-telemetry/opentelemetry-js",
-  ],
-}
-`);
+        Object {
+          "description": Array [
+            "opentelemetry-js monorepo",
+          ],
+          "matchSourceUrlPrefixes": Array [
+            "https://github.com/open-telemetry/opentelemetry-js",
+          ],
+        }
+      `);
     });
 
     it('handles renamed monorepo groups', async () => {
       const res = await presets.getPreset('group:opentelemetryMonorepo', {});
       expect(res).toMatchInlineSnapshot(`
-Object {
-  "packageRules": Array [
-    Object {
-      "description": Array [
-        "Group packages from opentelemetry-js monorepo together",
-      ],
-      "extends": Array [
-        "monorepo:opentelemetry-js",
-      ],
-      "groupName": "opentelemetry-js monorepo",
-      "matchUpdateTypes": Array [
-        "digest",
-        "patch",
-        "minor",
-        "major",
-      ],
-    },
-  ],
-}
-`);
+        Object {
+          "packageRules": Array [
+            Object {
+              "description": Array [
+                "Group packages from opentelemetry-js monorepo together.",
+              ],
+              "extends": Array [
+                "monorepo:opentelemetry-js",
+              ],
+              "groupName": "opentelemetry-js monorepo",
+              "matchUpdateTypes": Array [
+                "digest",
+                "patch",
+                "minor",
+                "major",
+              ],
+            },
+          ],
+        }
+      `);
     });
 
     it('gets linters', async () => {
