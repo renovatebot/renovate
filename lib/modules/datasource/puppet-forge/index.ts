@@ -20,7 +20,14 @@ export class PuppetForgeDatasource extends Datasource {
     const moduleSlug = packageName.replace('/', '-');
     const url = `${registryUrl}/v3/modules/${moduleSlug}?exclude_fields=current_release`;
 
-    const { body: module } = await this.http.getJson<PuppetModule>(url);
+    let module: PuppetModule;
+
+    try {
+      const response = await this.http.getJson<PuppetModule>(url);
+      module = response.body;
+    } catch (err) {
+      this.handleGenericErrors(err);
+    }
 
     const releases: Release[] = module?.releases?.map((release) => ({
       version: release.version,
