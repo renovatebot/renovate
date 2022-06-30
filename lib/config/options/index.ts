@@ -2130,16 +2130,16 @@ const options: RenovateOptions[] = [
     globalOnly: true,
   },
   {
-    name: 'gitLabIgnoreApprovals',
-    description: `Ignore approval rules for MRs created by Renovate, which is useful for automerge.`,
-    type: 'boolean',
-    default: false,
-  },
-  {
     name: 'gitLabContainerRegistryPrefix',
     description: `The prefix of the GitLab Container Registry.`,
     type: 'string',
     supportedPlatforms: ['gitlab'],
+  },
+  {
+    name: 'gitLabIgnoreApprovals',
+    description: `Ignore approval rules for MRs created by Renovate, which is useful for automerge.`,
+    type: 'boolean',
+    default: false,
   },
   {
     name: 'regexManagers',
