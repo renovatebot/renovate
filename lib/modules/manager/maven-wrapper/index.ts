@@ -5,7 +5,7 @@ export { extractPackageFile } from './extract';
 export { updateArtifacts } from './artifacts';
 
 export const defaultConfig = {
-  fileMatch: ['(^|/).mvn/wrapper/maven-wrapper.properties$'],
+  fileMatch: ['(^|\\/).mvn/wrapper/maven-wrapper.properties$'],
   versioningId,
 };
 
