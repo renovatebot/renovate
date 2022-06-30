@@ -77,8 +77,6 @@ function parseGitDependency(module: PuppetfileModule): PackageDependency {
 
   if (githubUrl) {
     packageDependency.packageName = gitOwnerRepo;
-    packageDependency.repo = undefined;
-    packageDependency.githubRepo = gitOwnerRepo;
     packageDependency.datasource = GithubTagsDatasource.id;
   }
 
