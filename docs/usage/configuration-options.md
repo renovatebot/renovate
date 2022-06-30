@@ -825,13 +825,26 @@ For now, you can only use this option on the GitLab platform.
     Advanced functionality.
     Only use this if you're sure you know what you're doing.
 
-This functionality requires that the datasource to support distribution streams/tags, such as npm does.
+For `followTag` to work, the datasource must support distribution streams or tags, like for example npm does.
 
-The primary use case for this option is if you are following a pre-release tag of a certain dependency, e.g. `typescript`'s `"insiders"` build.
-If configured, Renovate bypasses its normal major/minor/patch upgrade logic and stable/unstable consistency logic and keeps your dependency version sync'd strictly to whatever version is in the tag.
+The main usecase is to follow a pre-release tag of a dependency, say TypeScripts's `"insiders"` build:
 
-Beware that Renovate follows tags strictly.
-For example, if you are following a tag like `next` and then that stream is released as `stable` and `next` is no longer being updated then that means your dependencies also won't be getting updated.
+```json
+{
+  "packageRules": [
+    {
+      "matchPackageNames": ["typescript"],
+      "followTag": "insiders"
+    }
+  ]
+}
+```
+
+If you've set a `followTag` then Renovate skips its normal major/minor/patch upgrade logic and stable/unstable consistency logic, and instead keeps your dependency version synced _strictly_ to the version in the tag.
+
+Renovate follows tags _strictly_, this can cause problems when a tagged stream is no longer maintained.
+For example: you're following the `next` tag, but later the stream you actually want is called `stable` instead.
+If `next` is no longer getting updates, you must switch your `followTag` to `stable` to get updates again.
 
 ## gitAuthor
 
