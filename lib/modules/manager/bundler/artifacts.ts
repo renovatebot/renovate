@@ -63,9 +63,9 @@ export async function updateArtifacts(
   }
 
   const args = [
-    '--update',
     config.postUpdateOptions?.includes('bundlerConservative') &&
       '--conservative',
+    '--update',
   ].filter(is.nonEmptyString);
 
   try {
