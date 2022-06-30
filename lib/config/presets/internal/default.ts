@@ -69,7 +69,7 @@ export const presets: Record<string, Preset> = {
     packageRules: [{ matchPackagePatterns: ['*'], rangeStrategy: 'replace' }],
   },
   pinAllExceptPeerDependencies: {
-    description: 'Pin dependency versions for all except `peerDependencies`.',
+    description: 'Pin all dependency versions except `peerDependencies`.',
     packageRules: [
       {
         matchPackagePatterns: ['*'],
@@ -129,7 +129,7 @@ export const presets: Record<string, Preset> = {
   },
   separateMultipleMajorReleases: {
     description:
-      'Separate each available `major` versions of dependencies into individual branches/PRs.',
+      'Separate each `major` version of dependencies into individual branches/PRs.',
     separateMajorMinor: true,
     separateMultipleMajor: true,
   },
@@ -144,7 +144,7 @@ export const presets: Record<string, Preset> = {
     separateMinorPatch: false,
   },
   renovatePrefix: {
-    description: 'Use `renovate/` as prefix for all branch names.',
+    description: 'Prefix `renovate/` to all branch names.',
     branchPrefix: 'renovate/',
   },
   semanticCommitType: {
@@ -181,14 +181,14 @@ export const presets: Record<string, Preset> = {
     ],
   },
   disableDigestUpdates: {
-    description: 'Disable digest and Git hash updates.',
+    description: 'Disable `digest` and Git hash updates.',
     digest: {
       enabled: false,
     },
   },
   semanticPrefixFixDepsChoreOthers: {
     description:
-      'If semantic commits detected, use semantic commit type `fix` for dependencies and `chore` for all others.',
+      'If Renovate detects semantic commits, it will use semantic commit type `fix` for dependencies and `chore` for all others.',
     packageRules: [
       {
         matchPackagePatterns: ['*'],
@@ -214,7 +214,7 @@ export const presets: Record<string, Preset> = {
   },
   semanticCommitTypeAll: {
     description:
-      'If semantic commits detected, use semantic commit type `{{arg0}}` for all.',
+      'If Renovate detects semantic commits, it will use semantic commit type `{{arg0}}` for all commits.',
     packageRules: [
       {
         matchPackagePatterns: ['*'],
@@ -415,7 +415,7 @@ export const presets: Record<string, Preset> = {
     ],
   },
   pinSkipCi: {
-    description: 'Add [skip ci] to commit message body whenever pinning.',
+    description: 'Add `[skip ci]` to commit message body whenever pinning.',
     pin: {
       commitBody: '[skip ci]',
     },
