@@ -99,7 +99,6 @@ export interface Package<T> extends ManagerData<T> {
   groupName?: string;
   lineNumber?: number;
   packageName?: string | null;
-  repo?: string;
   target?: string;
   versioning?: string;
   dataType?: string;
@@ -110,7 +109,6 @@ export interface Package<T> extends ManagerData<T> {
   packageFileVersion?: string;
   gitRef?: boolean;
   sourceUrl?: string | null;
-  githubRepo?: string;
   pinDigests?: boolean;
   currentRawValue?: string;
   major?: { enabled?: boolean };
