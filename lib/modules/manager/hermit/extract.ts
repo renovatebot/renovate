@@ -1,11 +1,15 @@
-import fs from 'fs-extra';
+import is from '@sindresorhus/is';
 import minimatch from 'minimatch';
 import upath from 'upath';
 import { GlobalConfig } from '../../../config/global';
 import { logger } from '../../../logger';
+import { readLocalDirectorySync } from '../../../util/fs';
+import { regEx } from '../../../util/regex';
 import { HermitDatasource } from '../../datasource/hermit';
 import type { PackageDependency, PackageFile, Result } from '../types';
 import type { HermitListItem } from './types';
+
+const pkgReferenceRegex = regEx(`(?<packageName>.*?)-(?<version>[0-9]{1}.*)`);
 
 /**
  * extractPackageFile scans the folder of the package files
@@ -20,12 +24,14 @@ export function extractPackageFile(
   try {
     const packages = listHermitPackages(filename);
 
-    logger.trace({});
+    if (packages === null) {
+      return null;
+    }
 
     for (const p of packages) {
       // version of a hermit package is either a Version or a Channel
       // Channel will prepend with @ to distinguish from normal version
-      const version = p.Version ?? `@${p.Channel}`;
+      const version = p.Version ?? `@${p.Channel ?? ''}`;
 
       const dep: PackageDependency = {
         datasource: HermitDatasource.id,
@@ -37,7 +43,7 @@ export function extractPackageFile(
     }
   } catch (e) {
     logger.warn({ err: e }, `error listing hermit packages`);
-    throw e;
+    return null;
   }
 
   return { deps: dependencies };
@@ -46,17 +52,22 @@ export function extractPackageFile(
 /**
  * listHermitPackages will fetch all installed packages from the bin folder
  */
-function listHermitPackages(hermitFile: string): HermitListItem[] {
+function listHermitPackages(hermitFile: string): HermitListItem[] | null {
   logger.trace('hermit.listHermitPackages()');
 
   const localDir = GlobalConfig.get('localDir');
   const hermitFolder = upath.join(localDir, upath.dirname(hermitFile));
-  const files = fs.readdirSync(hermitFolder);
+  const files = readLocalDirectorySync(hermitFolder);
+
+  if (files === null) {
+    logger.debug({ hermitFolder }, 'error listing hermit package references');
+    return null;
+  }
 
   logger.debug({ files, hermitFolder }, 'files for hermit package list');
   return files
     .filter((f) => minimatch(f, '.*.pkg'))
-    .map((f): HermitListItem => {
+    .map((f): HermitListItem | null => {
       const fileName = f
         .replace(`${hermitFolder}/`, '')
         .substring(1)
@@ -70,25 +81,21 @@ function listHermitPackages(hermitFile: string): HermitListItem[] {
         };
       }
 
-      let hyphenIndex = fileName.indexOf('-');
-
-      while (hyphenIndex >= 0 && hyphenIndex < fileName.length - 1) {
-        const nextCh = fileName[hyphenIndex + 1];
-        if (nextCh >= '0' && nextCh <= '9') {
-          const name = fileName.substring(0, hyphenIndex);
-          const version = fileName.substring(hyphenIndex + 1);
-          return {
-            Name: name,
-            Version: version,
-          };
-        }
-
-        hyphenIndex = fileName.indexOf('-', hyphenIndex + 1);
+      const groups = pkgReferenceRegex.exec(fileName)?.groups;
+      if (!groups) {
+        logger.debug(
+          { fileName },
+          'invalid hermit package reference file name found'
+        );
+        return null;
       }
 
+      const { packageName, version } = groups;
+
       return {
-        Name: '',
+        Name: packageName,
+        Version: version,
       };
     })
-    .filter((i) => i.Name !== '');
+    .filter(is.truthy);
 }

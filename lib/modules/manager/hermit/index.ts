@@ -1,14 +1,13 @@
 import { HermitDatasource } from '../../datasource/hermit';
 import { id as versionId } from '../../versioning/hermit';
-import { updateArtifacts } from './artifacts';
+export { updateArtifacts } from './artifacts';
 import { defaultConfig as partialDefaultConfig } from './default-config';
-import { extractPackageFile } from './extract';
-import { updateDependency } from './update';
-
-export { extractPackageFile, updateDependency, updateArtifacts };
+export { extractPackageFile } from './extract';
+export { updateDependency } from './update';
 
 export const defaultConfig = {
-  ...partialDefaultConfig,
+  fileMatch: partialDefaultConfig.fileMatch,
+  excludeCommitPaths: partialDefaultConfig.excludeCommitPaths,
   versioning: versionId,
 };
 

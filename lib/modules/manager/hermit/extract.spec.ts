@@ -1,19 +1,18 @@
 jest.mock('child_process');
 jest.mock('../../../util/exec/hermit');
+jest.mock('../../../util/fs');
 jest.mock('../../../config/global');
-jest.mock('fs-extra');
 
-import fs from 'fs-extra';
-import type { Dirent } from 'fs-extra';
 import upath from 'upath';
 import { mocked, mockedFunction } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import { findHermitCwd } from '../../../util/exec/hermit';
+import { readLocalDirectorySync } from '../../../util/fs';
 import { HermitDatasource } from '../../datasource/hermit';
 import { extractPackageFile } from './extract';
 
 const findHermitCwdMock = mockedFunction(findHermitCwd);
-const readdirSyncMock = mockedFunction(fs.readdirSync);
+const readdirSyncMock = mockedFunction(readLocalDirectorySync);
 const globalConfigMock = mocked(GlobalConfig);
 
 describe('modules/manager/hermit/extract', () => {
@@ -34,7 +33,7 @@ describe('modules/manager/hermit/extract', () => {
         '.jq@stable.pkg',
         'jq',
         '.somepackage-invalid-version.pkg',
-      ].map((f) => f as unknown as Dirent);
+      ];
       readdirSyncMock.mockReturnValue(ret);
 
       const rootPackages = extractPackageFile('', 'bin/hermit');
@@ -66,7 +65,7 @@ describe('modules/manager/hermit/extract', () => {
         'java',
         '.maven@3.8.pkg',
         'maven',
-      ].map((f) => f as unknown as Dirent);
+      ];
       readdirSyncMock.mockReturnValue(nestedRet);
       const nestedPackages = extractPackageFile('', 'nested/bin/hermit');
       expect(nestedPackages).toStrictEqual({
@@ -98,7 +97,7 @@ describe('modules/manager/hermit/extract', () => {
         throw new Error(msg);
       });
 
-      expect(() => extractPackageFile('', 'bin/hermit')).toThrow(msg);
+      expect(extractPackageFile('', 'bin/hermit')).toBeNull();
     });
   });
 });

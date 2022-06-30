@@ -45,6 +45,29 @@ export async function readLocalFile(
   }
 }
 
+export async function readLocalSymlink(
+  fileName: string
+): Promise<string | null> {
+  const { localDir } = GlobalConfig.get();
+  const localFileName = upath.resolve(localDir, fileName);
+  if (!localFileName.startsWith(upath.resolve(localDir))) {
+    logger.warn(
+      { localFileName, localDir },
+      'Preventing access to file outside the local directory'
+    );
+
+    return null;
+  }
+  try {
+    const linkContent = await fs.readlink(localFileName);
+
+    return linkContent;
+  } catch (err) {
+    logger.trace({ err }, 'Error reading local symlink');
+    return null;
+  }
+}
+
 export async function writeLocalFile(
   fileName: string,
   fileContent: string | Buffer
@@ -152,6 +175,22 @@ export async function readLocalDirectory(path: string): Promise<string[]> {
   return fileList;
 }
 
+export function readLocalDirectorySync(path: string): string[] | null {
+  const { localDir } = GlobalConfig.get();
+  const localPath = upath.resolve(localDir, path);
+  if (!localPath.startsWith(upath.resolve(localDir))) {
+    logger.warn(
+      { localPath, localDir },
+      'Preventing access to file outside the local directory'
+    );
+
+    return null;
+  }
+
+  const fileList = fs.readdirSync(localPath);
+  return fileList;
+}
+
 export function createWriteStream(path: string): fs.WriteStream {
   return fs.createWriteStream(path);
 }
@@ -161,6 +200,24 @@ export function localPathIsFile(pathName: string): Promise<boolean> {
   return fs
     .stat(upath.join(localDir, pathName))
     .then((s) => s.isFile())
+    .catch(() => false);
+}
+
+export function localPathIsSymbolicLink(pathName: string): Promise<boolean> {
+  const { localDir } = GlobalConfig.get();
+  const localPath = upath.resolve(localDir, pathName);
+  if (!localPath.startsWith(upath.resolve(localDir))) {
+    logger.warn(
+      { localPath, localDir },
+      'Preventing access to file outside the local directory'
+    );
+
+    return Promise.resolve(false);
+  }
+
+  return fs
+    .lstat(localPath)
+    .then((s) => s.isSymbolicLink())
     .catch(() => false);
 }
 

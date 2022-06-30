@@ -1,4 +1,6 @@
 import _findUp from 'find-up';
+import fs from 'fs-extra';
+import upath from 'upath';
 import { withDir } from 'tmp-promise';
 import { join } from 'upath';
 import { envMock } from '../../../test/exec-util';
@@ -13,8 +15,11 @@ import {
   getSubDirectory,
   localPathExists,
   localPathIsFile,
+  localPathIsSymbolicLink,
   readLocalDirectory,
+  readLocalDirectorySync,
   readLocalFile,
+  readLocalSymlink,
   writeLocalFile,
 } from '.';
 
@@ -56,6 +61,34 @@ describe('util/fs/index', () => {
       expect(await localPathExists(__filename.replace('.ts', '.txt'))).toBe(
         false
       );
+    });
+  });
+
+  describe('readLocalSynmlink', () => {
+    it('reads symlink', async () => {
+      await withDir(
+        async (localDir) => {
+          GlobalConfig.set({
+            localDir: localDir.path,
+          });
+          await writeLocalFile('test/test.txt', '');
+          await fs.symlink(
+            upath.resolve(localDir.path, 'test/test.txt'),
+            upath.resolve(localDir.path, 'test/test')
+          );
+
+          const result = await readLocalSymlink('test/test');
+          expect(result).not.toBeNull();
+        },
+        {
+          unsafeCleanup: true,
+        }
+      );
+    });
+
+    it('does not throw', async () => {
+      // Does not work on FreeBSD: https://nodejs.org/docs/latest-v10.x/api/fs.html#fs_fs_readfile_path_options_callback
+      expect(await readLocalSymlink(__dirname)).toBeNull();
     });
   });
 
@@ -164,6 +197,58 @@ describe('util/fs/index', () => {
     });
   });
 
+  describe('readLocalDirectorySync', () => {
+    it('returns dir content', async () => {
+      await withDir(
+        async (localDir) => {
+          GlobalConfig.set({
+            localDir: localDir.path,
+          });
+          await writeLocalFile('test/Cargo.toml', '');
+          await writeLocalFile('test/Cargo.lock', '');
+
+          const result = readLocalDirectorySync('test');
+          expect(result).not.toBeNull();
+          expect(result).toBeArrayOfSize(2);
+          expect(result).toMatchSnapshot();
+
+          await writeLocalFile('Cargo.lock', '');
+          await writeLocalFile('/test/subdir/Cargo.lock', '');
+
+          const resultWithAdditionalFiles = await readLocalDirectory('test');
+          expect(resultWithAdditionalFiles).not.toBeNull();
+          expect(resultWithAdditionalFiles).toBeArrayOfSize(3);
+          expect(resultWithAdditionalFiles).toMatchSnapshot();
+        },
+        {
+          unsafeCleanup: true,
+        }
+      );
+    });
+
+    it('return empty array for non existing directory', async () => {
+      await withDir(
+        (localDir) => {
+          GlobalConfig.set({
+            localDir: localDir.path,
+          });
+          expect(() => readLocalDirectorySync('somedir')).toThrow();
+          return Promise.resolve();
+        },
+        {
+          unsafeCleanup: true,
+        }
+      );
+    });
+
+    it('return empty array for a existing but empty directory', async () => {
+      await ensureLocalDir('somedir');
+      const result = readLocalDirectorySync('somedir');
+      expect(result).not.toBeNull();
+      expect(result).toBeArrayOfSize(0);
+    });
+  });
+
   describe('ensureCacheDir', () => {
     function setupMock(root: string): {
       dirFromEnv: string;
@@ -217,6 +302,47 @@ describe('util/fs/index', () => {
     });
   });
 
+  describe('localPathIsSymbolicLink', () => {
+    beforeEach(() => {
+      GlobalConfig.set({ localDir: '' });
+    });
+
+    it('returns false for file', async () => {
+      expect(await localPathIsSymbolicLink(__filename)).toBeFalse();
+    });
+
+    it('returns false for directory', async () => {
+      expect(await localPathIsSymbolicLink(__dirname)).toBeFalse();
+    });
+
+    it('returns false for non-existing path', async () => {
+      expect(
+        await localPathIsSymbolicLink(__filename.replace('.ts', '.txt'))
+      ).toBeFalse();
+    });
+
+    it('returns true for symlink', async () => {
+      await withDir(
+        async (localDir) => {
+          GlobalConfig.set({
+            localDir: localDir.path,
+          });
+          await writeLocalFile('test/test.txt', '');
+          await fs.symlink(
+            upath.resolve(localDir.path, 'test/test.txt'),
+            upath.resolve(localDir.path, 'test/test')
+          );
+
+          const result = await localPathIsSymbolicLink('test/test');
+          expect(result).toBeTrue();
+        },
+        {
+          unsafeCleanup: true,
+        }
+      );
+    });
+  });
+
   describe('findUpLocal', () => {
     beforeEach(() => {
       GlobalConfig.set({ localDir: '/abs/path/to/local/dir' });
@@ -241,3 +367,6 @@ describe('util/fs/index', () => {
     });
   });
 });
+function readLocalSynmlink(arg0: string) {
+  throw new Error('Function not implemented.');
+}

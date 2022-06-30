@@ -1,4 +1,4 @@
-import { updateDependency } from './update';
+import { updateDependency } from '.';
 
 describe('modules/manager/hermit/update', () => {
   describe('updateDependency', () => {

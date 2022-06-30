@@ -1,17 +1,19 @@
-import fs from 'fs-extra';
 import pMap from 'p-map';
 import upath from 'upath';
-import { GlobalConfig } from '../../../config/global';
 import { logger } from '../../../logger';
 import { exec } from '../../../util/exec';
 import type { ExecOptions } from '../../../util/exec/types';
+import {
+  localPathIsSymbolicLink,
+  readLocalFile,
+  readLocalSymlink,
+} from '../../../util/fs';
 import { getRepoStatus } from '../../../util/git';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
 import type {
   HermitPackageDependency,
   ReadContentResult,
   UpdateHermitError,
-  UpdateHermitResult,
 } from './types';
 
 /**
@@ -22,17 +24,11 @@ export async function updateArtifacts({
   packageFileName,
 }: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
   logger.debug({ packageFileName }, `hermit.updateArtifacts()`);
-  const dependencies = updatedDeps.map(
-    (dep) =>
-      ({
-        ...dep,
-        packageFileName,
-      } as HermitPackageDependency)
-  );
+
   try {
-    // maps each updated dependencies to the actual hermit install command,
-    // and runs them one by one.
-    await pMap(dependencies, updateHermitPackage, { concurrency: 1 });
+    for (const dep of updatedDeps) {
+      await updateHermitPackage({ ...dep, packageFileName });
+    }
   } catch (err) {
     const execErr: UpdateHermitError<any> = err;
     logger.warn(
@@ -60,16 +56,16 @@ export async function updateArtifacts({
  * getContent returns the content of either link or a normal file
  */
 async function getContent(file: string): Promise<ReadContentResult> {
-  const { localDir } = GlobalConfig.get();
-  const path = upath.join(localDir, file);
-  const pathStats = await fs.lstat(path);
-  let contents = '';
-  const isSymlink = pathStats.isSymbolicLink();
-
+  let contents: string | null = '';
+  const isSymlink = await localPathIsSymbolicLink(file);
   if (isSymlink) {
-    contents = await fs.readlink(path);
+    contents = await readLocalSymlink(file);
   } else {
-    contents = (await fs.readFile(path)).toString();
+    contents = await readLocalFile(file, 'utf8');
+  }
+
+  if (contents === null) {
+    return Promise.reject();
   }
 
   return {
@@ -140,7 +136,8 @@ async function getUpdateResult(
       const contents = await getContent(path);
 
       return getAddResult(path, contents);
-    }
+    },
+    { concurrency: 5 }
   );
 
   const deleted = hermitChanges.deleted.map(getDeleteResult);
@@ -153,7 +150,8 @@ async function getUpdateResult(
         getDeleteResult(path), // delete existing link
         getAddResult(path, contents), // add a new link
       ];
-    }
+    },
+    { concurrency: 5 }
   );
 
   const renamed = await pMap(
@@ -164,7 +162,8 @@ async function getUpdateResult(
       const toContents = await getContent(to);
 
       return [getDeleteResult(from), getAddResult(to, toContents)];
-    }
+    },
+    { concurrency: 5 }
   );
 
   return [
@@ -201,7 +200,7 @@ function getHermitPackageReferenceFile(
  */
 async function updateHermitPackage(
   pkg: HermitPackageDependency
-): Promise<UpdateHermitResult | void> {
+): Promise<void> {
   logger.trace({ pkg }, `hermit.updateHermitPackage()`);
   if (!pkg.depName || !pkg.currentVersion || !pkg.newValue) {
     logger.error(
@@ -212,9 +211,10 @@ async function updateHermitPackage(
       },
       'missing package update information'
     );
-    throw {
+
+    return Promise.reject({
       stderr: `invalid package to update`,
-    };
+    });
   }
   const depName = pkg.depName;
   const currentVersion = pkg.currentVersion;
@@ -224,13 +224,8 @@ async function updateHermitPackage(
   const fromPackage = getHermitPackage(depName, currentVersion);
   const toPackage = getHermitPackage(depName, newValue);
   const execOptions: ExecOptions = {
-    extraEnv: {
-      // hermit takes GITHUB_TOKEN from the following environment variable to perform Github release download
-      // HERMIT_GITHUB_TOKEN has higher priority than GITHUB_TOKEN
-      HERMIT_GITHUB_TOKEN: process.env.HERMIT_GITHUB_TOKEN,
-      GITHUB_TOKEN: process.env.GITHUB_TOKEN,
-      HERMIT_LOCK_TIMEOUT: process.env.HERMIT_LOCK_TIMEOUT,
-      HERMIT_LOG: process.env.HERMIT_LOG,
+    docker: {
+      image: 'slim',
     },
     cwdFile: pkg.packageFileName,
   };
@@ -250,10 +245,12 @@ async function updateHermitPackage(
     logger.trace({ stdout: result.stdout }, `hermit command stdout`);
   } catch (e) {
     logger.error({ fromPackage, toPackage }, `error updating hermit package`);
-    throw {
+    return Promise.reject({
       ...e,
       from,
       to,
-    };
+    });
   }
+
+  return Promise.resolve();
 }
