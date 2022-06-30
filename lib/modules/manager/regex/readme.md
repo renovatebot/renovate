@@ -6,7 +6,8 @@ This manager is unique in Renovate in that:
 - Through the use of the `regexManagers` config, multiple "regex managers" can be created for the same repository
 - It can extract any `datasource`
 
-Check our [additional Handlebars helpers](https://docs.renovatebot.com/templates/#additional-handlebars-helpers).
+We have [additional Handlebars helpers](https://docs.renovatebot.com/templates/#additional-handlebars-helpers) which help you perform common transformations on the regex manager's template fields.
+Also read the documentation for the [`regexManagers` config option](https://docs.renovatebot.com/configuration-options/#regexmanagers).
 
 ### Required Fields
 
