@@ -1,6 +1,8 @@
 import { Fixtures } from '../../../test/fixtures';
 import { mocked } from '../../../test/util';
+import * as memCache from '../../util/cache/memory';
 import type { RenovateConfig } from '../types';
+import * as _github from './github';
 import * as _local from './local';
 import * as _npm from './npm';
 import {
@@ -17,6 +19,7 @@ jest.mock('./local');
 
 const npm = mocked(_npm);
 const local = mocked(_local);
+const gitHub = mocked(_github);
 
 const presetIkatyang = Fixtures.getJson('renovate-config-ikatyang.json');
 
@@ -48,6 +51,7 @@ describe('config/presets/index', () => {
     beforeEach(() => {
       config = {};
       jest.clearAllMocks();
+      memCache.init();
     });
 
     it('returns same if no presets', async () => {
@@ -305,6 +309,41 @@ describe('config/presets/index', () => {
         platform: 'gitlab',
         endpoint: 'https://dummy.example.com/api/v4',
         labels: ['self-hosted resolved'],
+      });
+    });
+
+    it('gets preset value from cache when it has been seen', async () => {
+      config.extends = ['github>username/preset-repo'];
+      config.packageRules = [
+        {
+          matchManagers: ['github-actions'],
+          groupName: 'github-actions dependencies',
+        },
+      ];
+      gitHub.getPreset.mockResolvedValueOnce({
+        packageRules: [
+          {
+            matchDatasources: ['docker'],
+            matchPackageNames: ['ubi'],
+            versioning: 'regex',
+          },
+        ],
+      });
+
+      expect(await presets.resolveConfigPresets(config)).toBeDefined();
+      const res = await presets.resolveConfigPresets(config);
+      expect(res).toEqual({
+        packageRules: [
+          {
+            matchDatasources: ['docker'],
+            matchPackageNames: ['ubi'],
+            versioning: 'regex',
+          },
+          {
+            matchManagers: ['github-actions'],
+            groupName: 'github-actions dependencies',
+          },
+        ],
       });
     });
   });
