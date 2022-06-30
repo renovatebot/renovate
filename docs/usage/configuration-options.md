@@ -858,6 +858,12 @@ Under the hood, it creates a MR-level approval rule where `approvals_required` i
 This option works only when `automerge=true`, `automergeType=pr` or `automergeType=branch` and `platformAutomerge=true`.
 Also, approval rules overriding should not be [prevented in GitLab settings](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/settings.html#prevent-editing-approval-rules-in-merge-requests).
 
+## gitLabContainerRegistryPrefix
+
+Configure the prefix of the GitLab Container Registry (e.g. `registry.gitlab.com`).
+If this is set Renovate will be able to update container images
+using the `CI_REGISTRY` GitLab CI variable, e.g. `$CI_REGISTRY/my/image:123`.
+
 ## golang
 
 Configuration added here applies for all Go-related updates.

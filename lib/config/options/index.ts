@@ -2136,6 +2136,12 @@ const options: RenovateOptions[] = [
     default: false,
   },
   {
+    name: 'gitLabContainerRegistryPrefix',
+    description: `The prefix of the GitLab Container Registry.`,
+    type: 'string',
+    supportedPlatforms: ['gitlab'],
+  },
+  {
     name: 'regexManagers',
     description: 'Custom managers using regex matching.',
     type: 'array',
