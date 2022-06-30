@@ -670,7 +670,7 @@ for (const monorepo of Object.keys(monorepos.presets)) {
   config[name] = {
     packageRules: [
       {
-        description: `Group packages from ${monorepo} monorepo together.`, // Check me on on adding a full stop here
+        description: `Group packages from ${monorepo} monorepo together.`,
         extends: `monorepo:${monorepo}`,
         matchUpdateTypes: nonPinUpdateTypes,
         groupName: `${monorepo} monorepo`,
@@ -679,7 +679,7 @@ for (const monorepo of Object.keys(monorepos.presets)) {
   };
 }
 config.monorepos = {
-  description: 'Group known monorepo packages together.', // Check me on on adding a full stop here
+  description: 'Group known monorepo packages together.',
   ignoreDeps: [],
   extends: monorepoNames,
 };
