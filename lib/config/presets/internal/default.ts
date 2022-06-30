@@ -421,8 +421,7 @@ export const presets: Record<string, Preset> = {
     },
   },
   gitSignOff: {
-    description:
-      'Append Git <code>Signed-off-by:</code> signature to Git commits.',
+    description: 'Append `Signed-off-by:` to signoff Git commits.',
     commitBody: 'Signed-off-by: {{{gitAuthor}}}',
   },
   npm: {
