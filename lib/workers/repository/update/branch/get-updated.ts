@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
 import is from '@sindresorhus/is';
 import { WORKER_FILE_UPDATE_FAILED } from '../../../../constants/error-messages';
 import { logger } from '../../../../logger';
@@ -22,7 +23,7 @@ export async function getUpdatedPackageFiles(
   config: BranchConfig
 ): Promise<PackageFilesResult> {
   logger.trace({ config });
-  const { reuseExistingBranch } = config;
+  const reuseExistingBranch = config.reuseExistingBranch!;
   logger.debug(
     `manager.getUpdatedPackageFiles() reuseExistinbranch=${reuseExistingBranch}`
   );
@@ -32,21 +33,24 @@ export async function getUpdatedPackageFiles(
   const packageFileUpdatedDeps: Record<string, PackageDependency[]> = {};
   const lockFileMaintenanceFiles = [];
   for (const upgrade of config.upgrades) {
-    const { manager, packageFile, depName, newVersion } = upgrade;
-    const updateLockedDependency = get(manager, 'updateLockedDependency');
+    const manager = upgrade.manager!;
+    const packageFile = upgrade.packageFile!;
+    const depName = upgrade.depName!;
+    const newVersion = upgrade.newVersion!;
+    const updateLockedDependency = get(manager, 'updateLockedDependency')!;
     packageFileManagers[packageFile] = manager;
     packageFileUpdatedDeps[packageFile] =
       packageFileUpdatedDeps[packageFile] || [];
     packageFileUpdatedDeps[packageFile].push({ ...upgrade });
-    let packageFileContent = updatedFileContents[packageFile];
+    let packageFileContent: string | null = updatedFileContents[packageFile];
     if (!packageFileContent) {
       packageFileContent = await getFile(
         packageFile,
         reuseExistingBranch ? config.branchName : config.baseBranch
       );
     }
-    let lockFileContent: string;
-    const lockFile = upgrade.lockFile || upgrade.lockFiles?.[0] || '';
+    let lockFileContent: string | null = null;
+    const lockFile = upgrade.lockFile ?? upgrade.lockFiles?.[0] ?? '';
     if (lockFile) {
       lockFileContent = updatedFileContents[lockFile];
       if (!lockFileContent) {
@@ -78,9 +82,9 @@ export async function getUpdatedPackageFiles(
         depName,
         newVersion,
         packageFile,
-        packageFileContent,
+        packageFileContent: packageFileContent!,
         lockFile,
-        lockFileContent,
+        lockFileContent: lockFileContent!,
         allowParentUpdates: true,
         allowHigherOrRemoved: true,
       });
@@ -107,14 +111,14 @@ export async function getUpdatedPackageFiles(
           depName,
           newVersion,
           packageFile,
-          packageFileContent,
+          packageFileContent: packageFileContent!,
           lockFile,
-          lockFileContent,
+          lockFileContent: lockFileContent!,
           allowParentUpdates: false,
         });
         if (status === 'unsupported') {
           // incompatible lock file
-          nonUpdatedFileContents[packageFile] = packageFileContent;
+          nonUpdatedFileContents[packageFile] = packageFileContent!;
         } else if (status === 'already-updated') {
           logger.debug(
             `Upgrade of ${depName} to ${newVersion} is already done in existing branch`
@@ -140,7 +144,7 @@ export async function getUpdatedPackageFiles(
           { manager },
           'isLockFileUpdate without updateLockedDependency'
         );
-        nonUpdatedFileContents[packageFile] = packageFileContent;
+        nonUpdatedFileContents[packageFile] = packageFileContent!;
       }
     } else {
       const bumpPackageVersion = get(manager, 'bumpPackageVersion');
@@ -148,7 +152,7 @@ export async function getUpdatedPackageFiles(
       if (!updateDependency) {
         let res = await doAutoReplace(
           upgrade,
-          packageFileContent,
+          packageFileContent!,
           reuseExistingBranch
         );
         if (upgrade.updateType === 'replacement' && res) {
@@ -162,7 +166,7 @@ export async function getUpdatedPackageFiles(
           if (bumpPackageVersion && upgrade.bumpVersion) {
             const { bumpedContent } = await bumpPackageVersion(
               res,
-              upgrade.packageFileVersion,
+              upgrade.packageFileVersion!,
               upgrade.bumpVersion
             );
             res = bumpedContent;
@@ -171,7 +175,7 @@ export async function getUpdatedPackageFiles(
             logger.debug({ packageFile, depName }, 'No content changed');
           } else {
             logger.debug({ packageFile, depName }, 'Contents updated');
-            updatedFileContents[packageFile] = res;
+            updatedFileContents[packageFile] = res!;
           }
           continue;
         } else if (reuseExistingBranch) {
@@ -184,13 +188,13 @@ export async function getUpdatedPackageFiles(
         throw new Error(WORKER_FILE_UPDATE_FAILED);
       }
       let newContent = await updateDependency({
-        fileContent: packageFileContent,
+        fileContent: packageFileContent!,
         upgrade,
       });
       if (bumpPackageVersion && upgrade.bumpVersion) {
         const { bumpedContent } = await bumpPackageVersion(
-          newContent,
-          upgrade.packageFileVersion,
+          newContent!,
+          upgrade.packageFileVersion!,
           upgrade.bumpVersion
         );
         newContent = bumpedContent;
@@ -251,7 +255,8 @@ export async function getUpdatedPackageFiles(
       const results = await updateArtifacts({
         packageFileName: packageFile.path,
         updatedDeps,
-        newPackageFileContent: packageFile.contents.toString(),
+        // TODO #7154
+        newPackageFileContent: packageFile.contents!.toString(),
         config,
       });
       if (is.nonEmptyArray(results)) {
@@ -281,7 +286,8 @@ export async function getUpdatedPackageFiles(
       const results = await updateArtifacts({
         packageFileName: packageFile.path,
         updatedDeps,
-        newPackageFileContent: packageFile.contents.toString(),
+        // TODO #7154
+        newPackageFileContent: packageFile.contents!.toString(),
         config,
       });
       if (is.nonEmptyArray(results)) {
@@ -313,7 +319,7 @@ export async function getUpdatedPackageFiles(
         const results = await updateArtifacts({
           packageFileName: packageFile,
           updatedDeps: [],
-          newPackageFileContent: packageFileContents,
+          newPackageFileContent: packageFileContents!,
           config,
         });
         if (is.nonEmptyArray(results)) {

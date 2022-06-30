@@ -293,7 +293,10 @@ describe('util/git/index', () => {
       };
       await git.commitFiles({
         branchName: 'renovate/branch_with_changes',
-        files: [file, { type: 'addition', path: 'dummy', contents: null }],
+        files: [
+          file,
+          { type: 'addition', path: 'dummy', contents: null as never },
+        ],
         message: 'Create something',
       });
       const branchFiles = await git.getBranchFiles(
@@ -368,6 +371,30 @@ describe('util/git/index', () => {
         message: 'Create something',
       });
       expect(commit).not.toBeNull();
+    });
+
+    it('link file', async () => {
+      const file: FileChange = {
+        type: 'addition',
+        path: 'future_link',
+        contents: 'past_file',
+        isSymlink: true,
+      };
+      const commit = await git.commitFiles({
+        branchName: 'renovate/future_branch',
+        files: [file],
+        message: 'Create a link',
+      });
+      expect(commit).toBeString();
+      const tmpGit = Git(tmpDir.path);
+      const lsTree = await tmpGit.raw(['ls-tree', commit!]);
+      const files = lsTree
+        .trim()
+        .split(newlineRegex)
+        .map((x) => x.split(/\s/))
+        .map(([mode, type, _hash, name]) => [mode, type, name]);
+      expect(files).toContainEqual(['100644', 'blob', 'past_file']);
+      expect(files).toContainEqual(['120000', 'blob', 'future_link']);
     });
 
     it('deletes file', async () => {
@@ -873,7 +900,7 @@ describe('util/git/index', () => {
         .filter(Boolean);
 
     it('creates renovate ref in default section', async () => {
-      const commit = git.getBranchCommit('develop');
+      const commit = git.getBranchCommit('develop')!;
 
       await git.pushCommitToRenovateRef(commit, 'foo/bar');
 
@@ -882,7 +909,7 @@ describe('util/git/index', () => {
     });
 
     it('creates custom section for renovate ref', async () => {
-      const commit = git.getBranchCommit('develop');
+      const commit = git.getBranchCommit('develop')!;
 
       await git.pushCommitToRenovateRef(commit, 'bar/baz', 'foo');
 
@@ -891,7 +918,7 @@ describe('util/git/index', () => {
     });
 
     it('clears pushed Renovate refs', async () => {
-      const commit = git.getBranchCommit('develop');
+      const commit = git.getBranchCommit('develop')!;
       await git.pushCommitToRenovateRef(commit, 'foo');
       await git.pushCommitToRenovateRef(commit, 'bar');
       await git.pushCommitToRenovateRef(commit, 'baz');
@@ -902,7 +929,7 @@ describe('util/git/index', () => {
     });
 
     it('clears remote Renovate refs', async () => {
-      const commit = git.getBranchCommit('develop');
+      const commit = git.getBranchCommit('develop')!;
       const tmpGit = Git(tmpDir.path);
       await tmpGit.raw(['update-ref', 'refs/renovate/aaa', commit]);
       await tmpGit.raw(['push', '--force', 'origin', 'refs/renovate/aaa']);
@@ -914,7 +941,7 @@ describe('util/git/index', () => {
     });
 
     it('preserves unknown sections by default', async () => {
-      const commit = git.getBranchCommit('develop');
+      const commit = git.getBranchCommit('develop')!;
       const tmpGit = Git(tmpDir.path);
       await tmpGit.raw(['update-ref', 'refs/renovate/foo/bar', commit]);
       await tmpGit.raw(['push', '--force', 'origin', 'refs/renovate/foo/bar']);
@@ -925,7 +952,7 @@ describe('util/git/index', () => {
 
   describe('listCommitTree', () => {
     it('creates non-branch ref', async () => {
-      const commit = git.getBranchCommit('develop');
+      const commit = git.getBranchCommit('develop')!;
       const res = await git.listCommitTree(commit);
       expect(res).toEqual([
         {

@@ -1,6 +1,7 @@
 import os from 'os';
 import fs from 'fs-extra';
 import upath from 'upath';
+import { applySecretsToConfig } from '../../config/secrets';
 import type { AllConfig, RenovateConfig } from '../../config/types';
 import { logger } from '../../logger';
 import { initPlatform } from '../../modules/platform';
@@ -12,7 +13,7 @@ import { Limit, setMaxLimit } from './limits';
 
 async function setDirectories(input: AllConfig): Promise<AllConfig> {
   const config: AllConfig = { ...input };
-  process.env.TMPDIR = process.env.RENOVATE_TMPDIR || os.tmpdir();
+  process.env.TMPDIR = process.env.RENOVATE_TMPDIR ?? os.tmpdir();
   if (config.baseDir) {
     logger.debug('Using configured baseDir: ' + config.baseDir);
   } else {
@@ -46,6 +47,7 @@ async function checkVersions(): Promise<void> {
 function setGlobalHostRules(config: RenovateConfig): void {
   if (config.hostRules) {
     logger.debug('Setting global hostRules');
+    applySecretsToConfig(config, undefined, false);
     config.hostRules.forEach((rule) => hostRules.add(rule));
   }
 }

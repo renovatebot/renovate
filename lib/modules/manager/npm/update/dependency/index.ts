@@ -41,13 +41,13 @@ function replaceAsString(
     parsedContents[depType] = newValue;
   } else if (depName === oldValue) {
     // The old value is the name of the dependency itself
-    delete Object.assign(parsedContents[depType], {
+    delete Object.assign(parsedContents[depType]!, {
       [newValue]: parsedContents[depType]![oldValue],
     })[oldValue];
   } else if (depType === 'dependenciesMeta') {
     if (oldValue !== newValue) {
       parsedContents.dependenciesMeta = renameObjKey(
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+        // TODO #7154
         parsedContents.dependenciesMeta!,
         oldValue,
         newValue
@@ -117,7 +117,8 @@ export function updateDependency({
       logger.debug('Updating package.json git digest');
       newValue = upgrade.currentRawValue.replace(
         upgrade.currentDigest,
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+        // TODO #7154
+
         upgrade.newDigest!.substring(0, upgrade.currentDigest.length)
       );
     } else {
@@ -162,7 +163,7 @@ export function updateDependency({
       return fileContent;
     }
 
-    /* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
+    // TODO #7154
     let newFileContent = replaceAsString(
       parsedContents,
       fileContent,
@@ -218,7 +219,7 @@ export function updateDependency({
           'resolutions',
           depKey,
           parsedContents.resolutions[depKey],
-          // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+          // TODO #7154
           newValue!
         );
         if (upgrade.newName) {
@@ -246,7 +247,7 @@ export function updateDependency({
             'dependenciesMeta',
             depName,
             depKey,
-            depName + '@' + newValue
+            `${depName}@${newValue}`
           );
         }
       }

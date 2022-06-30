@@ -57,7 +57,7 @@ export async function extractPackageFile(
   }
   const res: PackageFile = { deps };
   const lockFileName =
-    (await findLocalSiblingOrParent(fileName, 'mix.lock')) || 'mix.lock';
+    (await findLocalSiblingOrParent(fileName, 'mix.lock')) ?? 'mix.lock';
   // istanbul ignore if
   if (await localPathExists(lockFileName)) {
     res.lockFiles = [lockFileName];

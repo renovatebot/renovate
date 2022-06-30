@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
 import { Fixtures } from '../../../../../test/fixtures';
 import { defaultConfig } from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';

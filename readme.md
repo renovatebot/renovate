@@ -106,6 +106,7 @@ To run your own instance of Renovate you have several options:
 ## Contributing
 
 If you want to contribute to Renovate or get a local copy running, please read the instructions in [.github/contributing.md](.github/contributing.md).
+To get started look at the [list of good first issues](https://github.com/renovatebot/renovate/contribute).
 
 ## Security / Disclosure
 

@@ -1,10 +1,10 @@
 import { Fixtures } from '../../../../test/fixtures';
 import {
   extractContainer,
-  extractPackageFile,
   extractRepository,
   parseAzurePipelines,
 } from './extract';
+import { extractPackageFile } from '.';
 
 const azurePipelines = Fixtures.get('azure-pipelines.yaml');
 
@@ -95,8 +95,8 @@ describe('modules/manager/azure-pipelines/extract', () => {
 
     it('extracts dependencies', () => {
       const res = extractPackageFile(azurePipelines, 'some-file');
-      expect(res.deps).toMatchSnapshot();
-      expect(res.deps).toHaveLength(3);
+      expect(res?.deps).toMatchSnapshot();
+      expect(res?.deps).toHaveLength(3);
     });
 
     it('should return null when there is no dependency found', () => {
