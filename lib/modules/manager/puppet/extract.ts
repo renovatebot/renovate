@@ -69,7 +69,6 @@ function parseGitDependency(module: PuppetfileModule): PackageDependency {
   const packageDependency: PackageDependency = {
     depName: moduleName,
     packageName: git,
-    repo: git,
     sourceUrl: git,
     gitRef: true,
     currentValue: tag,
