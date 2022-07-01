@@ -22,7 +22,7 @@ Object {
     });
 
     it('handles no .npmrc', async () => {
-      fs.readSystemFile.mockImplementationOnce(() => Promise.reject());
+      fs.readSystemFile.mockRejectedValueOnce('error');
       const res = await detectGlobalConfig();
       expect(res).toEqual({});
     });

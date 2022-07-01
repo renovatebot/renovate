@@ -238,7 +238,6 @@ export function readCacheFile(
   return encoding ? fs.readFile(fileName, encoding) : fs.readFile(fileName);
 }
 
-// istanbul ignore next
 export function outputCacheFile(
   file: string,
   data: unknown,
