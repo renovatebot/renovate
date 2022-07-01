@@ -203,8 +203,6 @@ export function migrateConfig(config: RenovateConfig): MigratedConfig {
       }
     }
 
-    //TODO:below
-
     if (is.array(migratedConfig.packageRules)) {
       const newRules: PackageRule[] = [];
       const renameMap = {
@@ -250,7 +248,6 @@ export function migrateConfig(config: RenovateConfig): MigratedConfig {
       }
     }
 
-    //TODO:above
     if (is.nonEmptyArray(migratedConfig.matchManagers)) {
       if (migratedConfig.matchManagers.includes('gradle-lite')) {
         if (!migratedConfig.matchManagers.includes('gradle')) {
