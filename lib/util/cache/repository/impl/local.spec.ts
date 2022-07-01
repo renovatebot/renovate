@@ -37,7 +37,7 @@ describe('util/cache/repository/impl/local', () => {
   it('loads previously stored cache from disk', async () => {
     const data: RepoCacheData = { semanticCommits: 'enabled' };
     const cacheRecord = await createCacheRecord(data);
-    fs.readFile.mockResolvedValue(JSON.stringify(cacheRecord));
+    fs.readCacheFile.mockResolvedValue(JSON.stringify(cacheRecord));
     const localRepoCache = new LocalRepoCache('github', 'some/repo');
 
     await localRepoCache.load();
@@ -46,7 +46,7 @@ describe('util/cache/repository/impl/local', () => {
   });
 
   it('migrates revision from 10 to 12', async () => {
-    fs.readFile.mockResolvedValue(
+    fs.readCacheFile.mockResolvedValue(
       JSON.stringify({
         revision: 10,
         repository: 'some/repo',
@@ -59,14 +59,14 @@ describe('util/cache/repository/impl/local', () => {
     await localRepoCache.save();
 
     const cacheRecord = await createCacheRecord({ semanticCommits: 'enabled' });
-    expect(fs.outputFile).toHaveBeenCalledWith(
+    expect(fs.outputCacheFile).toHaveBeenCalledWith(
       '/tmp/cache/renovate/repository/github/some/repo.json',
       JSON.stringify(cacheRecord)
     );
   });
 
   it('migrates revision from 11 to 12', async () => {
-    fs.readFile.mockResolvedValue(
+    fs.readCacheFile.mockResolvedValue(
       JSON.stringify({
         revision: 11,
         repository: 'some/repo',
@@ -79,14 +79,14 @@ describe('util/cache/repository/impl/local', () => {
     await localRepoCache.save();
 
     const cacheRecord = await createCacheRecord({ semanticCommits: 'enabled' });
-    expect(fs.outputFile).toHaveBeenCalledWith(
+    expect(fs.outputCacheFile).toHaveBeenCalledWith(
       '/tmp/cache/renovate/repository/github/some/repo.json',
       JSON.stringify(cacheRecord)
     );
   });
 
   it('does not migrate from older revisions to 11', async () => {
-    fs.readFile.mockResolvedValueOnce(
+    fs.readCacheFile.mockResolvedValueOnce(
       JSON.stringify({
         revision: 9,
         repository: 'some/repo',
@@ -101,7 +101,7 @@ describe('util/cache/repository/impl/local', () => {
   });
 
   it('handles invalid data', async () => {
-    fs.readFile.mockResolvedValue(JSON.stringify({ foo: 'bar' }));
+    fs.readCacheFile.mockResolvedValue(JSON.stringify({ foo: 'bar' }));
     const localRepoCache = new LocalRepoCache('github', 'some/repo');
 
     await localRepoCache.load();
@@ -110,7 +110,7 @@ describe('util/cache/repository/impl/local', () => {
   });
 
   it('handles file read error', async () => {
-    fs.readFile.mockRejectedValue(new Error('unknown error'));
+    fs.readCacheFile.mockRejectedValue(new Error('unknown error'));
     const localRepoCache = new LocalRepoCache('github', 'some/repo');
 
     await localRepoCache.load();
@@ -121,7 +121,7 @@ describe('util/cache/repository/impl/local', () => {
 
   it('resets if repository does not match', async () => {
     const cacheRecord = createCacheRecord({ semanticCommits: 'enabled' });
-    fs.readFile.mockResolvedValueOnce(JSON.stringify(cacheRecord) as never);
+    fs.readCacheFile.mockResolvedValueOnce(JSON.stringify(cacheRecord));
 
     const localRepoCache = new LocalRepoCache('github', 'some/repo');
     await localRepoCache.load();
@@ -131,7 +131,7 @@ describe('util/cache/repository/impl/local', () => {
 
   it('saves modified cache data to file', async () => {
     const oldCacheRecord = createCacheRecord({ semanticCommits: 'enabled' });
-    fs.readFile.mockResolvedValueOnce(JSON.stringify(oldCacheRecord));
+    fs.readCacheFile.mockResolvedValueOnce(JSON.stringify(oldCacheRecord));
     const localRepoCache = new LocalRepoCache('github', 'some/repo');
 
     await localRepoCache.load();
@@ -142,7 +142,7 @@ describe('util/cache/repository/impl/local', () => {
     const newCacheRecord = await createCacheRecord({
       semanticCommits: 'disabled',
     });
-    expect(fs.outputFile).toHaveBeenCalledWith(
+    expect(fs.outputCacheFile).toHaveBeenCalledWith(
       '/tmp/cache/renovate/repository/github/some/repo.json',
       JSON.stringify(newCacheRecord)
     );
