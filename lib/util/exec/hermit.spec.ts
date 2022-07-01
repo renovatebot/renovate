@@ -43,6 +43,8 @@ describe('util/exec/hermit', () => {
       });
 
       expect(await findHermitCwd(nestedCwd)).toBe(`${root}/nested/bin`);
+      expect(await findHermitCwd('nested')).toBe(`${root}/nested/bin`);
+      expect(await findHermitCwd('')).toBe(`${root}/bin`);
       expect(await findHermitCwd('other/directory')).toBe(`${root}/bin`);
     });
 
