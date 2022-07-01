@@ -47,7 +47,7 @@ ${
     : ''
 }
 
-:question: Got questions? Something look not right? Please don't hesitate to [request help here](${
+:question: Got questions? Does something look wrong to you? Please don't hesitate to [request help here](${
       config.productLinks?.help
     }).\n\n`
   );
