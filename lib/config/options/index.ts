@@ -129,6 +129,9 @@ const options: RenovateOptions[] = [
     stage: 'repository',
     type: 'boolean',
     default: false,
+    experimental: true,
+    experimentalDescription:
+      'Config migration PRs are still being improved, in particular to reduce the amount of reordering and whitespace changes.',
   },
   {
     name: 'productLinks',
@@ -1853,6 +1856,7 @@ const options: RenovateOptions[] = [
     type: 'array',
     default: [],
     allowedValues: [
+      'bundlerConservative',
       'gomodMassage',
       'gomodUpdateImportPaths',
       'gomodTidy',
@@ -2294,6 +2298,7 @@ const options: RenovateOptions[] = [
     description:
       'Overrides the default resolution for Git remote, e.g. to switch GitLab from HTTPS to SSH-based.',
     type: 'string',
+    supportedPlatforms: ['gitlab', 'bitbucket-server'],
     allowedValues: ['default', 'ssh', 'endpoint'],
     default: 'default',
     stage: 'repository',
