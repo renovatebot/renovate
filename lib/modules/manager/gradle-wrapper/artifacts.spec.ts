@@ -1,4 +1,5 @@
-import { readFile, stat } from 'fs-extra';
+import type { Stats } from 'fs';
+import { readFile } from 'fs-extra';
 import { resolve } from 'upath';
 import { envMock, exec, mockExecAll } from '../../../../test/exec-util';
 import * as httpMock from '../../../../test/http-mock';
@@ -54,7 +55,12 @@ describe('modules/manager/gradle-wrapper/artifacts', () => {
     resetPrefetchedImages();
 
     fs.readLocalFile.mockResolvedValue('test');
-    fs.stat.mockImplementation((p) => stat(p));
+    fs.statLocalFile.mockResolvedValue(
+      partial<Stats>({
+        isFile: () => true,
+        mode: 0o555,
+      })
+    );
   });
 
   afterEach(() => {
@@ -98,6 +104,12 @@ describe('modules/manager/gradle-wrapper/artifacts', () => {
   });
 
   it('gradlew not found', async () => {
+    fs.statLocalFile.mockResolvedValue(
+      partial<Stats>({
+        isFile: () => false,
+        mode: 0o555,
+      })
+    );
     GlobalConfig.set({ ...adminConfig, localDir: 'some-dir' });
     const res = await gradleWrapper.updateArtifacts({
       packageFileName: 'gradle-wrapper.properties',
