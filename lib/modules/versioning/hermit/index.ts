@@ -1,4 +1,3 @@
-import { regEx } from '../../../util/regex';
 import { RegExpVersion, RegExpVersioningApi } from '../regex';
 import type { VersioningApiConstructor } from '../types';
 
@@ -12,14 +11,12 @@ export const supportsRanges = false;
 export class HermitVersioning extends RegExpVersioningApi {
   static versionRegex =
     '^(?<major>\\d+)(\\.(?<minor>\\d+))?(\\.(?<patch>\\d+))?(_(?<build>\\d+))?([-]?(?<prerelease>[^.+][^+]*))?([+](?<compatibility>[^.-][^+]*))?$';
-  private _hermitConfig: RegExp | null = null;
 
   public constructor() {
     super(HermitVersioning.versionRegex);
-    this._hermitConfig = regEx(HermitVersioning.versionRegex);
   }
 
-  private _isValidSemver(version: string): boolean {
+  private _isValid(version: string): boolean {
     return super._parse(version) !== null;
   }
 
@@ -30,7 +27,7 @@ export class HermitVersioning extends RegExpVersioningApi {
     }
     const channelVer = this._getChannel(version);
 
-    const groups = this._hermitConfig?.exec(channelVer)?.groups;
+    const groups = this._config?.exec(channelVer)?.groups;
 
     if (!groups) {
       return null;
@@ -60,7 +57,7 @@ export class HermitVersioning extends RegExpVersioningApi {
     };
   }
 
-  _isChannel(version: string): boolean {
+  private _isChannel(version: string): boolean {
     return version.startsWith('@');
   }
 
@@ -68,12 +65,8 @@ export class HermitVersioning extends RegExpVersioningApi {
     return version.substring(1);
   }
 
-  _isSemverChannel(version: string): boolean {
-    return this._isChannel(version) && this.isValid(this._getChannel(version));
-  }
-
   override isStable(version: string): boolean {
-    if (this._isValidSemver(version)) {
+    if (this._isValid(version)) {
       return super.isStable(version);
     }
 
@@ -83,35 +76,12 @@ export class HermitVersioning extends RegExpVersioningApi {
   }
 
   override isValid(version: string): boolean {
-    return this._isValidSemver(version) || this._isChannel(version);
-  }
-
-  private _getVersionPart(
-    partFn: (version: string) => null | number,
-    version: string
-  ): null | number {
-    if (this._isValidSemver(version) || this._isSemverChannel(version)) {
-      return partFn(version);
-    }
-
-    return null;
-  }
-
-  override getMajor(version: string): null | number {
-    return this._getVersionPart((version) => super.getMajor(version), version);
-  }
-
-  override getMinor(version: string): null | number {
-    return this._getVersionPart((version) => super.getMinor(version), version);
-  }
-
-  override getPatch(version: string): null | number {
-    return this._getVersionPart((version) => super.getPatch(version), version);
+    return this._isValid(version) || this._isChannel(version);
   }
 
   override equals(version: string, other: string): boolean {
     // compare semver when both are
-    if (this._isValidSemver(version) && this._isValidSemver(other)) {
+    if (this._isValid(version) && this._isValid(other)) {
       return super.equals(version, other);
     }
     const parsedVersion = this._parse(version);
@@ -145,36 +115,8 @@ export class HermitVersioning extends RegExpVersioningApi {
     return !this.isGreaterThan(version, range);
   }
 
-  private _filterVersions(versions: string[]): string[] {
-    return versions
-      .filter((v) => {
-        return this._isValidSemver(v) || this._isSemverChannel(v);
-      })
-      .map((v) => {
-        if (this._isSemverChannel(v)) {
-          return this._getChannel(v);
-        }
-
-        return v;
-      });
-  }
-
-  override getSatisfyingVersion(
-    versions: string[],
-    range: string
-  ): string | null {
-    return super.getSatisfyingVersion(this._filterVersions(versions), range);
-  }
-
-  override minSatisfyingVersion(
-    versions: string[],
-    range: string
-  ): string | null {
-    return super.minSatisfyingVersion(this._filterVersions(versions), range);
-  }
-
   override sortVersions(version: string, other: string): number {
-    if (this._isValidSemver(version) && this._isValidSemver(other)) {
+    if (this._isValid(version) && this._isValid(other)) {
       return super.sortVersions(version, other);
     }
 
