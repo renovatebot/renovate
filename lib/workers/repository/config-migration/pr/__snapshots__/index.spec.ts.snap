@@ -3,7 +3,7 @@
 exports[`workers/repository/config-migration/pr/index ensureConfigMigrationPr() creates PR for JSON5 config file 1`] = `
 "The Renovate config in this repository needs migrating. Typically this is because one or more configuration options you are using have been renamed.
 
-  This PR does not need to be merged urgently, because Renovate will continue to migrate these fields internally each time it runs, but in future some of these fields may be fully deprecated and migrations removed, so it's best to apply such migrations when they are suggested.
+  You don't need to merge this PR right away, because Renovate will continue to migrate these fields internally each time it runs. But later some of these fields may be fully deprecated and the migrations removed. So it's a good idea to merge this migration PR soon. 
 
 
 
@@ -23,7 +23,7 @@ exports[`workers/repository/config-migration/pr/index ensureConfigMigrationPr() 
 
 The Renovate config in this repository needs migrating. Typically this is because one or more configuration options you are using have been renamed.
 
-  This PR does not need to be merged urgently, because Renovate will continue to migrate these fields internally each time it runs, but in future some of these fields may be fully deprecated and migrations removed, so it's best to apply such migrations when they are suggested.
+  You don't need to merge this PR right away, because Renovate will continue to migrate these fields internally each time it runs. But later some of these fields may be fully deprecated and the migrations removed. So it's a good idea to merge this migration PR soon. 
 
 
 
@@ -43,7 +43,7 @@ exports[`workers/repository/config-migration/pr/index ensureConfigMigrationPr() 
 
 The Renovate config in this repository needs migrating. Typically this is because one or more configuration options you are using have been renamed.
 
-  This PR does not need to be merged urgently, because Renovate will continue to migrate these fields internally each time it runs, but in future some of these fields may be fully deprecated and migrations removed, so it's best to apply such migrations when they are suggested.
+  You don't need to merge this PR right away, because Renovate will continue to migrate these fields internally each time it runs. But later some of these fields may be fully deprecated and the migrations removed. So it's a good idea to merge this migration PR soon. 
 
 
 
@@ -65,7 +65,7 @@ This should not be the first line of the PR
 
 The Renovate config in this repository needs migrating. Typically this is because one or more configuration options you are using have been renamed.
 
-  This PR does not need to be merged urgently, because Renovate will continue to migrate these fields internally each time it runs, but in future some of these fields may be fully deprecated and migrations removed, so it's best to apply such migrations when they are suggested.
+  You don't need to merge this PR right away, because Renovate will continue to migrate these fields internally each time it runs. But later some of these fields may be fully deprecated and the migrations removed. So it's a good idea to merge this migration PR soon. 
 
 
 
