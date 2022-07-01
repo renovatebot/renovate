@@ -2524,8 +2524,6 @@ For the `gitlabci` manager it can be useful to configure an alias for the `$CI_R
 }
 ```
 
-###
-
 ## registryUrls
 
 Usually Renovate is able to either (a) use the default registries for a datasource, or (b) automatically detect during the manager extract phase which custom registries are in use.
