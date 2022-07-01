@@ -818,7 +818,7 @@ const options: RenovateOptions[] = [
       type: 'string',
       format: 'uri',
     },
-    supportedManagers: ['helm-requirements', 'helmv3', 'helmfile'],
+    supportedManagers: ['helm-requirements', 'helmv3', 'helmfile', 'gitlabci'],
   },
   {
     name: 'defaultRegistryUrls',
@@ -2129,12 +2129,6 @@ const options: RenovateOptions[] = [
     type: 'boolean',
     default: true,
     globalOnly: true,
-  },
-  {
-    name: 'gitLabContainerRegistryPrefix',
-    description: `The prefix of the GitLab Container Registry.`,
-    type: 'string',
-    supportedPlatforms: ['gitlab'],
   },
   {
     name: 'gitLabIgnoreApprovals',

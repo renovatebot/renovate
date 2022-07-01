@@ -872,12 +872,6 @@ Example:
 }
 ```
 
-## gitLabContainerRegistryPrefix
-
-Configure the prefix of the GitLab Container Registry (e.g. `registry.gitlab.com`).
-If this is set Renovate will be able to update container images
-using the `CI_REGISTRY` GitLab CI variable, e.g. `$CI_REGISTRY/my/image:123`.
-
 ## gitLabIgnoreApprovals
 
 Ignore the default project level approval(s), so that Renovate bot can automerge its merge requests, without needing approval(s).

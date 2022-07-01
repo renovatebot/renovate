@@ -1,3 +1,4 @@
+import type { PackageDependency } from '../types';
 import { getGitlabDep } from './utils';
 
 describe('modules/manager/gitlabci/utils', () => {
@@ -43,46 +44,29 @@ describe('modules/manager/gitlabci/utils', () => {
     );
 
     it.each`
-      name              | imagePrefix          | registryPrefix
-      ${'plain'}        | ${'$CI_REGISTRY/'}   | ${'registry.example.org'}
-      ${'with curlies'} | ${'${CI_REGISTRY}/'} | ${'registry.example.org'}
-      ${'no prefix'}    | ${''}                | ${''}
+      name   | registryAliases                                         | imageName                     | dep
+      ${'a'} | ${{ foo: 'foo.registry.com', bar: 'bar.registry.com' }} | ${'foo/image:1.0'}            | ${{ depName: 'foo.registry.com/image', currentValue: '1.0', autoReplaceStringTemplate: `foo/${defaultAutoReplaceStringTemplate}` }}
+      ${'b'} | ${{ $CI_REGISTRY: 'registry.com' }}                     | ${'$CI_REGISTRY/image:1.0'}   | ${{ depName: 'registry.com/image', currentValue: '1.0', autoReplaceStringTemplate: `$CI_REGISTRY/${defaultAutoReplaceStringTemplate}` }}
+      ${'c'} | ${{ '${CI_REGISTRY}': 'registry.com' }}                 | ${'${CI_REGISTRY}/image:1.0'} | ${{ depName: 'registry.com/image', currentValue: '1.0', autoReplaceStringTemplate: `$\{CI_REGISTRY}/${defaultAutoReplaceStringTemplate}` }}
+      ${'d'} | ${{}}                                                   | ${'$CI_REGISTRY/image:1.0'}   | ${{ autoReplaceStringTemplate: `${defaultAutoReplaceStringTemplate}` }}
+      ${'e'} | ${{}}                                                   | ${'registry.com/image:1.0'}   | ${{ depName: 'registry.com/image', currentValue: '1.0', autoReplaceStringTemplate: `${defaultAutoReplaceStringTemplate}` }}
     `(
       'supports registry variable - $name',
       ({
-        imagePrefix,
-        registryPrefix,
+        registryAliases,
+        imageName,
+        dep,
       }: {
-        imagePrefix: string;
-        registryPrefix: string;
+        registryAliases: Record<string, string>;
+        imageName: string;
+        dep: PackageDependency;
       }) => {
-        const imageName = `${imagePrefix}renovate/renovate:19.70.8-slim`;
-
-        expect(getGitlabDep(imageName, registryPrefix)).toMatchObject({
-          autoReplaceStringTemplate:
-            imagePrefix + defaultAutoReplaceStringTemplate,
+        expect(getGitlabDep(imageName, registryAliases)).toMatchObject({
+          ...dep,
           replaceString: imageName,
-          depName: registryPrefix
-            ? `${registryPrefix}/renovate/renovate`
-            : 'renovate/renovate',
-          currentValue: '19.70.8-slim',
         });
       }
     );
-
-    it('supports registry variable', () => {
-      const imageName = '$CI_REGISTRY/renovate/renovate:19.70.8-slim';
-      const gitLabContainerRegistryPrefix = 'registry.example.org';
-
-      expect(
-        getGitlabDep(imageName, gitLabContainerRegistryPrefix)
-      ).toMatchObject({
-        autoReplaceStringTemplate: `$CI_REGISTRY/${defaultAutoReplaceStringTemplate}`,
-        replaceString: imageName,
-        depName: 'registry.example.org/renovate/renovate',
-        currentValue: '19.70.8-slim',
-      });
-    });
 
     it('no Docker hub', () => {
       expect(

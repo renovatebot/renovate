@@ -1,4 +1,4 @@
-import { regEx } from '../../../util/regex';
+import { escapeRegExp, regEx } from '../../../util/regex';
 import { getDep } from '../dockerfile/extract';
 import type { PackageDependency } from '../types';
 
@@ -18,9 +18,6 @@ export function replaceReferenceTags(content: string): string {
 const depProxyRe = regEx(
   `(?<prefix>\\$\\{?CI_DEPENDENCY_PROXY_(?:DIRECT_)?GROUP_IMAGE_PREFIX\\}?\\/)(?<depName>.+)`
 );
-const ciRegistryRe = regEx(
-  `(?<prefix>\\$\\{?CI_REGISTRY\\}?\\/)(?<depName>.+)`
-);
 
 /**
  * Get image dependencies respecting Gitlab Dependency Proxy
@@ -29,7 +26,7 @@ const ciRegistryRe = regEx(
  */
 export function getGitlabDep(
   imageName: string,
-  registryPrefix?: string
+  registryAliases: Record<string, string> = {}
 ): PackageDependency {
   const match = depProxyRe.exec(imageName);
   if (match?.groups) {
@@ -38,15 +35,20 @@ export function getGitlabDep(
     dep.autoReplaceStringTemplate = `${match.groups.prefix}${dep.autoReplaceStringTemplate}`;
     return dep;
   }
-  const ciRegistryMatch = ciRegistryRe.exec(imageName);
-  if (ciRegistryMatch?.groups && registryPrefix) {
-    const dep = {
-      ...getDep(`${registryPrefix}/${ciRegistryMatch.groups.depName}`),
-      replaceString: imageName,
-    };
-    // TODO: #7154
-    dep.autoReplaceStringTemplate = `${ciRegistryMatch.groups.prefix}${dep.autoReplaceStringTemplate}`;
-    return dep;
+
+  for (const [name, value] of Object.entries(registryAliases)) {
+    const escapedName = escapeRegExp(name);
+    const match = regEx(`(?<prefix>${escapedName}/)(?<depName>.+)`).exec(
+      imageName
+    );
+    if (match?.groups) {
+      const dep = {
+        ...getDep(`${value}/${match.groups.depName}`),
+        replaceString: imageName,
+      };
+      dep.autoReplaceStringTemplate = `${match.groups.prefix}${dep.autoReplaceStringTemplate}`;
+      return dep;
+    }
   }
 
   return getDep(imageName);

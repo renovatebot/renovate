@@ -9,17 +9,17 @@ import { getGitlabDep, replaceReferenceTags } from './utils';
 
 export function extractFromImage(
   image: Image | undefined,
-  containerRegistryPrefix?: string
+  registryAliases?: Record<string, string>
 ): PackageDependency | null {
   if (is.undefined(image)) {
     return null;
   }
   let dep: PackageDependency | null = null;
   if (is.string(image)) {
-    dep = getGitlabDep(image, containerRegistryPrefix);
+    dep = getGitlabDep(image, registryAliases);
     dep.depType = 'image';
   } else if (is.string(image?.name)) {
-    dep = getGitlabDep(image.name, containerRegistryPrefix);
+    dep = getGitlabDep(image.name, registryAliases);
     dep.depType = 'image-name';
   }
   return dep;
@@ -27,7 +27,7 @@ export function extractFromImage(
 
 export function extractFromServices(
   services: Services | undefined,
-  containerRegistryPrefix?: string
+  registryAliases?: Record<string, string>
 ): PackageDependency[] {
   if (is.undefined(services)) {
     return [];
@@ -35,11 +35,11 @@ export function extractFromServices(
   const deps: PackageDependency[] = [];
   for (const service of services) {
     if (is.string(service)) {
-      const dep = getGitlabDep(service, containerRegistryPrefix);
+      const dep = getGitlabDep(service, registryAliases);
       dep.depType = 'service-image';
       deps.push(dep);
     } else if (is.string(service?.name)) {
-      const dep = getGitlabDep(service.name, containerRegistryPrefix);
+      const dep = getGitlabDep(service.name, registryAliases);
       dep.depType = 'service-image';
       deps.push(dep);
     }
@@ -49,7 +49,7 @@ export function extractFromServices(
 
 export function extractFromJob(
   job: Job | undefined,
-  containerRegistryPrefix?: string
+  registryAliases?: Record<string, string>
 ): PackageDependency[] {
   if (is.undefined(job)) {
     return [];
@@ -58,13 +58,13 @@ export function extractFromJob(
   if (is.object(job)) {
     const { image, services } = { ...job };
     if (is.object(image) || is.string(image)) {
-      const dep = extractFromImage(image, containerRegistryPrefix);
+      const dep = extractFromImage(image, registryAliases);
       if (dep) {
         deps.push(dep);
       }
     }
     if (is.array(services)) {
-      deps.push(...extractFromServices(services, containerRegistryPrefix));
+      deps.push(...extractFromServices(services, registryAliases));
     }
   }
   return deps;
@@ -87,7 +87,7 @@ export function extractPackageFile(
             {
               const dep = extractFromImage(
                 value as Image,
-                config.gitLabContainerRegistryPrefix
+                config.registryAliases
               );
               if (dep) {
                 deps.push(dep);
@@ -97,20 +97,12 @@ export function extractPackageFile(
 
           case 'services':
             deps.push(
-              ...extractFromServices(
-                value as Services,
-                config.gitLabContainerRegistryPrefix
-              )
+              ...extractFromServices(value as Services, config.registryAliases)
             );
             break;
 
           default:
-            deps.push(
-              ...extractFromJob(
-                value as Job,
-                config.gitLabContainerRegistryPrefix
-              )
-            );
+            deps.push(...extractFromJob(value as Job, config.registryAliases));
             break;
         }
       }
