@@ -37,8 +37,6 @@ describe('workers/repository/config-migration/pr/index', () => {
       ...getConfig(),
       configMigration: true,
       defaultBranch: 'main',
-      errors: [],
-      warnings: [],
       description: [],
     };
   });
