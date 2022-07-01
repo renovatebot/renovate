@@ -14,7 +14,6 @@ import { prepareLabels } from '../../update/pr/labels';
 import { addParticipants } from '../../update/pr/participants';
 import type { MigratedData } from '../branch/migrated-data';
 import { getMigrationBranchName } from '../common';
-import { getErrors, getWarnings } from './errors-warnings';
 
 export async function ensureConfigMigrationPr(
   config: RenovateConfig,
@@ -26,7 +25,7 @@ export async function ensureConfigMigrationPr(
     'configuration-options/#configmigration'
   );
   const branchName = getMigrationBranchName(config);
-  const prTitle = config.onboardingPrTitle ?? 'Config Migration';
+  const prTitle = 'Migrate Renovate config';
   const existingPr = await platform.getBranchPr(branchName);
   const closedPr = await platform.findPr({
     branchName,
@@ -35,8 +34,10 @@ export async function ensureConfigMigrationPr(
   });
   const filename = migratedConfigData.filename;
   logger.debug('Filling in config migration PR template');
-  let prTemplate = `Config migration needed, merge this PR to update your Renovate configuration file.\n\n`;
-  prTemplate += emojify(
+  let prBody = `The Renovate config in this repository needs migrating. Typically this is because one or more configuration options you are using have been renamed.
+
+  You don't need to merge this PR right away, because Renovate will continue to migrate these fields internally each time it runs. But later some of these fields may be fully deprecated and the migrations removed. So it's a good idea to merge this migration PR soon. \n\n`;
+  prBody += emojify(
     `
 
 ${
@@ -45,33 +46,12 @@ ${
       `JSON5 config file migrated! All comments & trailing commas were removed.`
     : ''
 }
----
-{{#if hasWarningsErrors}}
-{{{warnings}}}
-{{{errors}}}
-{{else}}
-#### Migration completed successfully, No errors or warnings found.
-{{/if}}
----
 
-
-:question: Got questions? Check out Renovate's [Docs](${
-      config.productLinks?.documentation
-    }), particularly the Getting Started section.
-If you need any further assistance then you can also [request help here](${
+:question: Got questions? Does something look wrong to you? Please don't hesitate to [request help here](${
       config.productLinks?.help
-    }).
-`
+    }).\n\n`
   );
-  const warnings = getWarnings(config);
-  const errors = getErrors(config);
-  const hasWarningsErrors = warnings || errors;
-  let prBody = prTemplate;
-  prBody = template.compile(prBody, {
-    warnings,
-    errors,
-    hasWarningsErrors,
-  });
+
   if (is.string(config.prHeader)) {
     prBody = `${template.compile(config.prHeader, config)}\n\n${prBody}`;
   }
@@ -103,9 +83,7 @@ If you need any further assistance then you can also [request help here](${
     }
     return;
   }
-  if (
-    [config.onboardingPrTitle, 'Config Migration'].includes(closedPr?.title)
-  ) {
+  if (closedPr) {
     logger.debug('Found closed migration PR, exiting...');
     return;
   }
