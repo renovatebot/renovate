@@ -2504,7 +2504,7 @@ You can use the `registryAliases` object to set registry aliases.
 
 The aliases are interpreted by the relevant manager.
 
-The `helm-requirements`, `helmv3` and `helmfile` managers listed above all have this default registryAlias:
+The `helm-requirements`, `helmv3` and `helmfile` managers have this default registryAlias:
 
 ```json
 {
