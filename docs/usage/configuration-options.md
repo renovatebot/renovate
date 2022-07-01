@@ -2501,13 +2501,10 @@ image: my.new.registry/aRepository/andImage:1.21-alpine
 ## registryAliases
 
 You can use the `registryAliases` object to set registry aliases.
-This feature only works with these managers:
 
-- `helm-requirements`
-- `helmv3`
-- `helmfile`
+The aliases are interpreted by the relevant manager.
 
-The managers listed above all have this default registryAlias:
+The `helm-requirements`, `helmv3` and `helmfile` managers listed above all have this default registryAlias:
 
 ```json
 {
@@ -2517,7 +2514,17 @@ The managers listed above all have this default registryAlias:
 }
 ```
 
-Alias values must be properly formatted URIs.
+For the `gitlabci` manager it can be useful to configure an alias for the `$CI_REGISTRY` variable:
+
+```json
+{
+  "registryAliases": {
+    "$CI_REGISTRY": "registry.example.com"
+  }
+}
+```
+
+###
 
 ## registryUrls
 
