@@ -80,11 +80,8 @@ describe('modules/manager/hermit/artifacts', () => {
       expect(execMock.mock.calls[0][0]).toBe(`./hermit install go-1.17.1`);
       expect(execMock.mock.calls[0][1]).toStrictEqual({
         cwdFile: 'go/bin/hermit',
-        extraEnv: {
-          HERMIT_GITHUB_TOKEN: process.env.HERMIT_GITHUB_TOKEN,
-          GITHUB_TOKEN: process.env.GITHUB_TOKEN,
-          HERMIT_LOCK_TIMEOUT: process.env.HERMIT_LOCK_TIMEOUT,
-          HERMIT_LOG: process.env.HERMIT_LOG,
+        docker: {
+          image: 'slim',
         },
       });
 
@@ -137,7 +134,7 @@ describe('modules/manager/hermit/artifacts', () => {
         {
           file: {
             contents: 'hermit',
-            isSymlink: false,
+            isSymlink: true,
             isExecutable: undefined,
             path: 'bin/jq-extra',
             type: 'addition',
