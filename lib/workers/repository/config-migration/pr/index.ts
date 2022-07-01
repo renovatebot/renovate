@@ -36,7 +36,7 @@ export async function ensureConfigMigrationPr(
   logger.debug('Filling in config migration PR template');
   let prBody = `The Renovate config in this repository needs migrating. Typically this is because one or more configuration options you are using have been renamed.
 
-  This PR does not need to be merged urgently, because Renovate will continue to migrate these fields internally each time it runs, but in future some of these fields may be fully deprecated and migrations removed, so it's best to apply such migrations when they are suggested.\n\n`;
+  You don't need to merge this PR right away, because Renovate will continue to migrate these fields internally each time it runs. But later some of these fields may be fully deprecated and the migrations removed. So it's a good idea to merge this migration PR soon. \n\n`;
   prBody += emojify(
     `
 
