@@ -51,7 +51,7 @@ export interface BbsRestRepo {
   project: { key: string };
   origin: { name: string; slug: string };
   links: {
-    clone: { href: string; name: string }[];
+    clone?: { href: string; name: string }[];
   };
 }
 

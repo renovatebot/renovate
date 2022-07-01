@@ -465,7 +465,7 @@ const options: RenovateOptions[] = [
       'Any text added here will be placed first in the Dependency Dashboard issue body.',
     type: 'string',
     default:
-      'This issue provides visibility into Renovate updates and their statuses. [Learn more](https://docs.renovatebot.com/key-concepts/dashboard/)',
+      'This issue lists Renovate updates and detected dependencies. Read the [Dependency Dashboard](https://docs.renovatebot.com/key-concepts/dashboard/) docs to learn more.',
   },
   {
     name: 'dependencyDashboardFooter',
@@ -1853,6 +1853,7 @@ const options: RenovateOptions[] = [
     type: 'array',
     default: [],
     allowedValues: [
+      'bundlerConservative',
       'gomodMassage',
       'gomodUpdateImportPaths',
       'gomodTidy',
@@ -2294,6 +2295,7 @@ const options: RenovateOptions[] = [
     description:
       'Overrides the default resolution for Git remote, e.g. to switch GitLab from HTTPS to SSH-based.',
     type: 'string',
+    supportedPlatforms: ['gitlab', 'bitbucket-server'],
     allowedValues: ['default', 'ssh', 'endpoint'],
     default: 'default',
     stage: 'repository',
