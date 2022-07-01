@@ -16,6 +16,8 @@ Self-hosting Renovate means that you are the "administrator" of the bot, which e
 - You ensure it's running regularly,
 - You ensure Renovate bot itself is updated
 
+Read our section on [Self-hosting on Windows](./installing-onboarding.md#self-hosting-on-windows) to prevent line endings from confusing Renovate bot.
+
 ### Available distributions
 
 #### npm package (CLI)
