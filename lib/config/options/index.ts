@@ -129,6 +129,9 @@ const options: RenovateOptions[] = [
     stage: 'repository',
     type: 'boolean',
     default: false,
+    experimental: true,
+    experimentalDescription:
+      'Config migration PRs are still being improved, in particular to reduce the amount of reordering and whitespace changes.',
   },
   {
     name: 'productLinks',
