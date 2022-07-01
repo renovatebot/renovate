@@ -121,9 +121,7 @@ describe('util/cache/repository/impl/local', () => {
 
   it('resets if repository does not match', async () => {
     const cacheRecord = createCacheRecord({ semanticCommits: 'enabled' });
-    fs.readCacheFile.mockResolvedValueOnce(
-      JSON.stringify(cacheRecord) as never
-    );
+    fs.readCacheFile.mockResolvedValueOnce(JSON.stringify(cacheRecord));
 
     const localRepoCache = new LocalRepoCache('github', 'some/repo');
     await localRepoCache.load();
