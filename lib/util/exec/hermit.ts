@@ -1,8 +1,8 @@
 import os from 'os';
-import fs from 'fs-extra';
 import upath from 'upath';
 import { GlobalConfig } from '../../config/global';
 import { logger } from '../../logger';
+import { localPathExists } from '../fs';
 import { rawExec } from './common';
 import type { RawExecOptions } from './types';
 
@@ -11,48 +11,23 @@ export function isHermit(): boolean {
   return binarySource === 'hermit';
 }
 
-async function statFile(f: string): Promise<fs.Stats | undefined> {
-  let exists: fs.Stats | undefined = undefined;
-  try {
-    exists = await fs.stat(f);
-  } catch (e) {
-    // not doing anything when file not exists for errors
-  }
-
-  return exists;
-}
-
-async function statHermit(
-  defaultCwd: string,
-  parts: string[]
-): Promise<fs.Stats | undefined> {
-  const hermitForCwd = upath.join(...[defaultCwd, ...parts, 'bin', 'hermit']);
+async function hermitExists(parts: string[]): Promise<boolean> {
+  const hermitForCwd = upath.join(...[...parts, 'bin', 'hermit']);
   logger.trace({ hermitForCwd }, 'looking up hermit');
-  return await statFile(hermitForCwd);
+  return await localPathExists(hermitForCwd);
 }
 
 export async function findHermitCwd(cwd: string): Promise<string> {
   const defaultCwd = GlobalConfig.get('localDir') ?? '';
   const parts = cwd.replace(defaultCwd, '').split(upath.sep);
-  let exists: fs.Stats | undefined = undefined;
+  let exists = false;
 
   // search the current relative path until reach the defaultCwd
-  while (parts.length > 0) {
-    exists = await statHermit(defaultCwd, parts);
-    // on file found. break out of the loop
-    if (exists !== undefined) {
-      break;
-    }
-    // otherwise, continue searching in parent directory
-    parts.pop();
-  }
+  do {
+    exists = await hermitExists(parts);
+  } while (!exists && parts.pop() !== undefined);
 
-  // search in defaultCwd
-  if (exists === undefined) {
-    exists = await statHermit(defaultCwd, parts);
-  }
-
-  if (exists === undefined) {
+  if (exists === false) {
     throw new Error(`hermit not found for ${cwd}`);
   }
 
@@ -64,7 +39,7 @@ export async function findHermitCwd(cwd: string): Promise<string> {
 export async function getHermitEnvs(
   rawOptions: RawExecOptions
 ): Promise<Record<string, string>> {
-  const cwd = (rawOptions.cwd ?? '').toString();
+  const cwd = rawOptions.cwd?.toString() ?? '';
   const hermitCwd = await findHermitCwd(cwd);
   logger.debug({ cwd, hermitCwd }, 'fetching hermit environment variables');
   // with -r will output the raw unquoted environment variables to consume
@@ -72,7 +47,7 @@ export async function getHermitEnvs(
     ...rawOptions,
     cwd: hermitCwd,
   });
-  const hermitEnvVars = hermitEnvResp.stdout
+  return hermitEnvResp.stdout
     .split(os.EOL)
     .reduce((acc: Record<string, string>, line): Record<string, string> => {
       const trimmedLine = line.trim();
@@ -81,10 +56,7 @@ export async function getHermitEnvs(
       }
       const equalIndex = trimmedLine.indexOf('=');
       const name = trimmedLine.substring(0, equalIndex);
-      const value = trimmedLine.substring(equalIndex + 1);
-      acc[name] = value;
+      acc[name] = trimmedLine.substring(equalIndex + 1);
       return acc;
     }, {});
-
-  return hermitEnvVars;
 }

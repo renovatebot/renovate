@@ -1,24 +1,29 @@
-jest.mock('../../config/global');
-jest.mock('fs-extra');
-jest.mock('./common');
-
-import fs from 'fs-extra';
-import { mocked, mockedFunction } from '../../../test/util';
 import { GlobalConfig } from '../../config/global';
-import { rawExec } from './common';
+import * as fs from '../fs';
+import * as common from './common';
 import { findHermitCwd, getHermitEnvs, isHermit } from './hermit';
 import type { ExecResult, RawExecOptions } from './types';
 
-const globalConfigMock = mocked(GlobalConfig);
-const fsMock = mocked(fs);
-const rawExecMock = mockedFunction(rawExec);
-
 describe('util/exec/hermit', () => {
+  let localPathExistsMock: jest.SpyInstance;
+  let rawExecMock: jest.SpyInstance;
+  let globalGetMock: jest.SpyInstance;
+
+  beforeEach(() => {
+    localPathExistsMock = jest.spyOn(fs, 'localPathExists');
+    rawExecMock = jest.spyOn(common, 'rawExec');
+    globalGetMock = jest.spyOn(GlobalConfig, 'get');
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
   describe('isHermit', () => {
     it('should return true when binarySource is hermit', () => {
-      globalConfigMock.get.mockReturnValue({ binarySource: 'docker' });
+      globalGetMock.mockReturnValue({ binarySource: 'docker' });
       expect(isHermit()).toBeFalsy();
-      globalConfigMock.get.mockReturnValue({ binarySource: 'hermit' });
+      globalGetMock.mockReturnValue({ binarySource: 'hermit' });
       expect(isHermit()).toBeTruthy();
     });
   });
@@ -26,51 +31,41 @@ describe('util/exec/hermit', () => {
   describe('findHermitCwd', () => {
     it('should find the closest hermit cwd to the given path', async () => {
       const root = '/usr/src/app/repository-a';
-      globalConfigMock.get.mockReturnValue(root);
+      globalGetMock.mockReturnValue(root);
       const nestedCwd = 'nested/other/directory';
-      fsMock.stat.mockImplementation((p) => {
-        if (p === `${root}/bin/hermit` || p === `${root}/nested/bin/hermit`) {
-          return Promise.resolve({} as fs.Stats);
+
+      localPathExistsMock.mockImplementation((p) => {
+        if (p === `bin/hermit` || p === `nested/bin/hermit`) {
+          return Promise.resolve(true);
         }
 
-        return Promise.reject('not exists');
+        return Promise.resolve(false);
       });
 
-      const nestedBin = await findHermitCwd(nestedCwd);
-      const rootBin = await findHermitCwd('other/directory');
-
-      expect(nestedBin).toBe(`${root}/nested/bin`);
-      expect(rootBin).toBe(`${root}/bin`);
+      expect(await findHermitCwd(nestedCwd)).toBe(`${root}/nested/bin`);
+      expect(await findHermitCwd('other/directory')).toBe(`${root}/bin`);
     });
 
     it('should throw error when hermit cwd is not found', async () => {
       const root = '/usr/src/app/repository-a';
       const err = new Error('hermit not found for other/directory');
-      globalConfigMock.get.mockReturnValue(root);
-      fsMock.stat.mockRejectedValue('not exists');
+      globalGetMock.mockReturnValue(root);
+      localPathExistsMock.mockResolvedValue(false);
 
-      let e: Error | undefined = undefined;
-
-      try {
-        await findHermitCwd('other/directory');
-      } catch (err) {
-        e = err;
-      }
-
-      expect(e).toStrictEqual(err);
+      await expect(findHermitCwd('other/directory')).rejects.toThrow(err);
     });
   });
 
   describe('getHermitEnvs', () => {
     it('should return hermit environment variables when hermit env returns successfully', async () => {
       const root = '/usr/src/app/repository-a';
-      globalConfigMock.get.mockReturnValue(root);
-      fsMock.stat.mockImplementation((p) => {
-        if (p === `${root}/bin/hermit`) {
-          return Promise.resolve({} as fs.Stats);
+      globalGetMock.mockReturnValue(root);
+      localPathExistsMock.mockImplementation((p) => {
+        if (p === `bin/hermit`) {
+          return Promise.resolve(true);
         }
 
-        return Promise.reject('not exists');
+        return Promise.resolve(false);
       });
       rawExecMock.mockResolvedValue({
         stdout: `GOBIN=/usr/src/app/repository-a/.hermit/go/bin
