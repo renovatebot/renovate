@@ -1856,6 +1856,7 @@ const options: RenovateOptions[] = [
     type: 'array',
     default: [],
     allowedValues: [
+      'bundlerConservative',
       'gomodMassage',
       'gomodUpdateImportPaths',
       'gomodTidy',
