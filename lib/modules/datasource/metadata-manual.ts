@@ -23,7 +23,7 @@ export const manualChangelogUrls: Record<string, Record<string, string>> = {
     django: 'https://github.com/django/django/tree/master/docs/releases',
     djangorestframework:
       'https://www.django-rest-framework.org/community/release-notes/',
-    flake8: 'http://flake8.pycqa.org/en/latest/release-notes/index.html',
+    flake8: 'https://flake8.pycqa.org/en/latest/release-notes/index.html',
     'django-storages':
       'https://github.com/jschneier/django-storages/blob/master/CHANGELOG.rst',
     hypothesis:
@@ -32,8 +32,8 @@ export const manualChangelogUrls: Record<string, Record<string, string>> = {
     mypy: 'https://mypy-lang.blogspot.com/',
     phonenumbers:
       'https://github.com/daviddrysdale/python-phonenumbers/blob/dev/python/HISTORY.md',
-    psycopg2: 'http://initd.org/psycopg/articles/tag/release/',
-    'psycopg2-binary': 'http://initd.org/psycopg/articles/tag/release/',
+    psycopg2: 'https://initd.org/psycopg/articles/tag/release/',
+    'psycopg2-binary': 'https://initd.org/psycopg/articles/tag/release/',
     pycountry:
       'https://github.com/flyingcircusio/pycountry/blob/master/HISTORY.txt',
     'django-debug-toolbar':
