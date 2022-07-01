@@ -1,6 +1,6 @@
 import type { Response } from 'got';
 import { partial } from '../../../../test/util';
-import type { GitUrlOption } from '../types';
+import { CONFIG_GIT_URL_UNAVAILABLE } from '../../../constants/error-messages';
 import type {
   BbsRestRepo,
   BitbucketError,
@@ -122,20 +122,6 @@ describe('modules/platform/bitbucket-server/utils', () => {
           password: password,
         };
 
-        it('gitUrl:invalid throws error', () => {
-          expect(() => {
-            getRepoGitUrl(
-              'SOME/repo',
-              url.toString(),
-              'invalid' as GitUrlOption,
-              infoMock(url, 'SOME', 'repo', {
-                cloneUrl: { https: false, ssh: false },
-              }),
-              opts
-            );
-          }).toThrow(TypeError);
-        });
-
         it('works gitUrl:undefined generate endpoint', () => {
           expect(
             getRepoGitUrl(
@@ -205,7 +191,21 @@ describe('modules/platform/bitbucket-server/utils', () => {
           );
         });
 
-        it('gitUrl:default no http url returns undefined', () => {
+        it('gitUrl:default invalid http url throws CONFIG_GIT_URL_UNAVAILABLE', () => {
+          expect(() =>
+            getRepoGitUrl(
+              'SOME/repo',
+              url.toString(),
+              'default',
+              infoMock('invalidUrl', 'SOME', 'repo', {
+                cloneUrl: { https: true, ssh: false },
+              }),
+              opts
+            )
+          ).toThrow(Error(CONFIG_GIT_URL_UNAVAILABLE));
+        });
+
+        it('gitUrl:default no http url returns generated url', () => {
           expect(
             getRepoGitUrl(
               'SOME/repo',
@@ -216,11 +216,16 @@ describe('modules/platform/bitbucket-server/utils', () => {
               }),
               opts
             )
-          ).toBeNull();
+          ).toBe(
+            httpLink(url.toString(), 'SOME', 'repo').replace(
+              'https://',
+              `https://${username}:${password}@`
+            )
+          );
         });
 
-        it('gitUrl:ssh no ssh url returns undefined', () => {
-          expect(
+        it('gitUrl:ssh no ssh url throws CONFIG_GIT_URL_UNAVAILABLE', () => {
+          expect(() =>
             getRepoGitUrl(
               'SOME/repo',
               url.toString(),
@@ -230,7 +235,7 @@ describe('modules/platform/bitbucket-server/utils', () => {
               }),
               opts
             )
-          ).toBeNull();
+          ).toThrow(Error(CONFIG_GIT_URL_UNAVAILABLE));
         });
 
         it('works gitUrl:ssh', () => {

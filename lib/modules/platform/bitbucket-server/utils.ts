@@ -1,6 +1,7 @@
 // SEE for the reference https://github.com/renovatebot/renovate/blob/c3e9e572b225085448d94aa121c7ec81c14d3955/lib/platform/bitbucket/utils.js
 import url from 'url';
 import is from '@sindresorhus/is';
+import { CONFIG_GIT_URL_UNAVAILABLE } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { HostRule, PrState } from '../../../types';
 import type { GitProtocol } from '../../../types/git';
@@ -11,6 +12,7 @@ import type {
   HttpPostOptions,
   HttpResponse,
 } from '../../../util/http/types';
+import { parseUrl } from '../../../util/url';
 import { getPrBodyStruct } from '../pr-body';
 import type { GitUrlOption } from '../types';
 import type { BbsPr, BbsRestPr, BbsRestRepo, BitbucketError } from './types';
@@ -177,74 +179,43 @@ function generateUrlFromEndpoint(
   return generatedUrl;
 }
 
+function injectAuth(url: string, opts: HostRule): string {
+  const repoUrl = parseUrl(url)!;
+  if (!repoUrl) {
+    logger.debug(`Invalid url: ${url}`);
+    throw new Error(CONFIG_GIT_URL_UNAVAILABLE);
+  }
+  // TODO: null checks (#7154)
+  repoUrl.username = opts.username!;
+  repoUrl.password = opts.password!;
+  return repoUrl.toString();
+}
+
 export function getRepoGitUrl(
   repository: string,
   defaultEndpoint: string,
   gitUrl: GitUrlOption | undefined,
   info: BbsRestRepo,
   opts: HostRule
-): string | null {
-  switch (gitUrl) {
-    case 'default': {
-      const httpUrl = info.links.clone?.find(({ name }) => name === 'http');
-      if (httpUrl === undefined) {
-        return null;
-      }
-
-      logger.debug({ url: httpUrl.href }, `using http URL`);
-      // Inject auth into the API provided URL
-      const repoUrl = url.parse(httpUrl.href);
-      repoUrl.auth = `${opts.username}:${opts.password}`;
-      return url.format(repoUrl);
+): string {
+  if (gitUrl === 'ssh') {
+    const sshUrl = info.links.clone?.find(({ name }) => name === 'ssh');
+    if (sshUrl === undefined) {
+      throw new Error(CONFIG_GIT_URL_UNAVAILABLE);
     }
-    case 'ssh': {
-      const sshUrl = info.links.clone?.find(({ name }) => name === 'ssh');
-      if (sshUrl === undefined) {
-        return null;
-      }
-
-      logger.debug({ url: sshUrl.href }, `using ssh URL`);
-      return sshUrl.href;
-    }
-    case 'endpoint': {
-      const generatedUrl = generateUrlFromEndpoint(
-        defaultEndpoint,
-        opts,
-        repository
-      );
-      logger.debug({ url: generatedUrl }, `using endpoint URL`);
-      return generatedUrl;
-    }
-    case undefined: {
-      //if no connection type is specified try them all as a fallback
-      const httpUrl = getRepoGitUrl(
-        repository,
-        defaultEndpoint,
-        'default',
-        info,
-        opts
-      );
-      if (httpUrl !== null) {
-        return httpUrl;
-      }
-
-      const sshUrl = getRepoGitUrl(
-        repository,
-        defaultEndpoint,
-        'ssh',
-        info,
-        opts
-      );
-      if (sshUrl !== null) {
-        return sshUrl;
-      }
-
-      return getRepoGitUrl(repository, defaultEndpoint, 'endpoint', info, opts);
-    }
-    default: {
-      throw new TypeError(
-        `The specified scm connection type ${gitUrl} is not a valid GitUrlOption value`
-      );
-    }
+    logger.debug({ url: sshUrl.href }, `using ssh URL`);
+    return sshUrl.href;
   }
+  let cloneUrl = info.links.clone?.find(({ name }) => name === 'http');
+  if (cloneUrl) {
+    // Inject auth into the API provided URL
+    return injectAuth(cloneUrl.href, opts);
+  }
+  // Http access might be disabled, try to find ssh url in this case
+  cloneUrl = info.links.clone?.find(({ name }) => name === 'ssh');
+  if (gitUrl === 'endpoint' || !cloneUrl) {
+    return generateUrlFromEndpoint(defaultEndpoint, opts, repository);
+  }
+  // SSH urls can be used directly
+  return cloneUrl.href;
 }
