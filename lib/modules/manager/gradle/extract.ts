@@ -84,7 +84,7 @@ export async function extractAllPackageFiles(
         updateVars(gradleVars);
         extractedDeps.push(...deps);
       }
-    } catch (err) /* istanbul ignore next */ {
+    } catch (err) {
       logger.warn(
         { err, config, packageFile },
         `Failed to process Gradle file: ${packageFile}`

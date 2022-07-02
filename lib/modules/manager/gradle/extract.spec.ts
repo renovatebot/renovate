@@ -1,6 +1,7 @@
 import { Fixtures } from '../../../../test/fixtures';
-import { fs } from '../../../../test/util';
+import { fs, logger } from '../../../../test/util';
 import type { ExtractConfig } from '../types';
+import * as parser from './parser';
 import { extractAllPackageFiles } from '.';
 
 jest.mock('../../../util/fs');
@@ -37,6 +38,22 @@ describe('modules/manager/gradle/extract', () => {
     ]);
 
     expect(res).toBeNull();
+  });
+
+  it('logs a warning in case parseGradle throws an exception', async () => {
+    const filename = 'build.gradle';
+    const err = new Error('unknown');
+
+    jest.spyOn(parser, 'parseGradle').mockImplementationOnce(() => {
+      throw err;
+    });
+
+    await extractAllPackageFiles({} as ExtractConfig, [filename]);
+
+    expect(logger.logger.warn).toHaveBeenCalledWith(
+      { err, config: {}, packageFile: filename },
+      `Failed to process Gradle file: ${filename}`
+    );
   });
 
   it('extracts from cross-referenced files', async () => {
