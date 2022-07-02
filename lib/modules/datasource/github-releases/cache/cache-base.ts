@@ -288,7 +288,6 @@ export abstract class AbstractGithubDatasourceCache<
                   )
                 ) {
                   stopIteration = true;
-                  break;
                 }
 
                 cacheItems[version] = newStoredItem;
