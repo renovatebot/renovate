@@ -15,7 +15,9 @@ on:
         required: false
 
 permissions:
-  contents: read
+  contents: write
+  issues: write
+  pull-requests: write
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.number || github.ref }}
