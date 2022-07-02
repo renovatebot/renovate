@@ -268,11 +268,10 @@ export abstract class AbstractGithubDatasourceCache<
           if (res instanceof Error) {
             if (
               res.message.startsWith(
-                'Something went wrong while executing your query.'
+                'Something went wrong while executing your query.' // #16343
               ) &&
               variables.count > 30
             ) {
-              // See:
               logger.warn(
                 `GitHub datasource cache: shrinking GraphQL page size due to error`
               );
