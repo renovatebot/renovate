@@ -14,4 +14,5 @@ For example:
 
 <!-- prettier-ignore -->
 !!! note
-    This also works for private repositories. It can leverage the same `token` that you had to configure in order to be able to reach the private artifactory.
+    This also works for private repositories.
+    It can leverage the same `token that you had to configure in order to be able to reach the private Artifactory.
