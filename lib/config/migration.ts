@@ -8,6 +8,7 @@ import { getOptions } from './options';
 import type {
   MigratedConfig,
   MigratedRenovateConfig,
+  PackageRule,
   RenovateConfig,
   RenovateOptions,
 } from './types';
@@ -192,6 +193,7 @@ export function migrateConfig(config: RenovateConfig): MigratedConfig {
       }
     }
     if (is.array(migratedConfig.packageRules)) {
+      const newRules: PackageRule[] = [];
       const renameMap = {
         paths: 'matchPaths',
         languages: 'matchLanguages',
@@ -205,15 +207,15 @@ export function migrateConfig(config: RenovateConfig): MigratedConfig {
         updateTypes: 'matchUpdateTypes',
       } as const;
       for (const packageRule of migratedConfig.packageRules) {
+        const newRuleObj = {} as PackageRule;
         for (const [oldKey, ruleVal] of Object.entries(packageRule)) {
-          const newKey = renameMap[oldKey as keyof typeof renameMap];
-          if (newKey) {
-            // TODO: fix types #7154
-            packageRule[newKey] = ruleVal as never;
-            delete packageRule[oldKey];
-          }
+          const key = renameMap[oldKey as keyof typeof renameMap] ?? oldKey;
+          // TODO: fix types #7154
+          newRuleObj[key] = ruleVal as never;
         }
+        newRules.push(newRuleObj);
       }
+      migratedConfig.packageRules = newRules;
     }
     // Migrate nested packageRules
     if (is.nonEmptyArray(migratedConfig.packageRules)) {

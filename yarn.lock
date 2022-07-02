@@ -1990,15 +1990,15 @@
   dependencies:
     graceful-fs "^4.2.6"
 
-"@pnpm/read-project-manifest@3.0.5":
-  version "3.0.5"
-  resolved "https://registry.yarnpkg.com/@pnpm/read-project-manifest/-/read-project-manifest-3.0.5.tgz#0b395e40772b7966bb16aaf75f6401c9e64d3a04"
-  integrity sha512-wskWUcxkjnOrDb7WFMcAZkQIUX4TG6a2+SSVLqYl6CAHgTRRwXUO4lCUBJhYCWuiiRvVoa1hzS/7cN42ZsT3mA==
+"@pnpm/read-project-manifest@3.0.6":
+  version "3.0.6"
+  resolved "https://registry.yarnpkg.com/@pnpm/read-project-manifest/-/read-project-manifest-3.0.6.tgz#f37645215c3b60e7d198b8423c79832efc09042b"
+  integrity sha512-nKFODeo/K7kLSLXMJcGywANaiyL9JlLQHKG3SWJaAjkP3QBgYWqqXhGWx8ZPsk5z9k0RL0gPEpt3wod8FAbTPg==
   dependencies:
     "@pnpm/error" "3.0.1"
     "@pnpm/graceful-fs" "2.0.0"
-    "@pnpm/types" "8.3.0"
-    "@pnpm/write-project-manifest" "3.0.4"
+    "@pnpm/types" "8.4.0"
+    "@pnpm/write-project-manifest" "3.0.5"
     detect-indent "^6.0.0"
     fast-deep-equal "^3.1.3"
     is-windows "^1.0.2"
@@ -2008,17 +2008,17 @@
     sort-keys "^4.2.0"
     strip-bom "^4.0.0"
 
-"@pnpm/types@8.3.0":
-  version "8.3.0"
-  resolved "https://registry.yarnpkg.com/@pnpm/types/-/types-8.3.0.tgz#ef17c7c3569b2ea00ae122ff2d7fafa4f4185de2"
-  integrity sha512-RCO4nOX4N3C4RtWybxJ9WA2P/xQEeM7IhVP/b8WFkj9SJh2BH62HLoouWyf60XCB33pc+9yJpG//oZNHSQS7TA==
+"@pnpm/types@8.4.0":
+  version "8.4.0"
+  resolved "https://registry.yarnpkg.com/@pnpm/types/-/types-8.4.0.tgz#7f4df21b6bb696227a03335a2b374dafa6d31887"
+  integrity sha512-sq/UdSq/jWCpYglw9SFmvR8qzUEi0p2oZIO0AHjkWWQg4Qrolf6DgD0WWmLiEP2WxHjbYeyD3ZzWzQor1+6cvw==
 
-"@pnpm/write-project-manifest@3.0.4":
-  version "3.0.4"
-  resolved "https://registry.yarnpkg.com/@pnpm/write-project-manifest/-/write-project-manifest-3.0.4.tgz#c505f35d4d8549868df8d952f77f146a48eb5f4c"
-  integrity sha512-HO3dFnJfqUYp3Ix1p72hvWmBKnGZSVZAn/Nsqd/aw6OC9XIzlNAufeXQ26t9HRobXDmZyt8B5uk8wqAPLfdyCA==
+"@pnpm/write-project-manifest@3.0.5":
+  version "3.0.5"
+  resolved "https://registry.yarnpkg.com/@pnpm/write-project-manifest/-/write-project-manifest-3.0.5.tgz#e833b0ae845456db6e3a8f8b7a6f7c68547a2298"
+  integrity sha512-d56Lz1bIGSvaGRFG9rNliOayq8dLyLiexRaFX3KVO9zCziLJ7i2SNkYlw3bUhDCRYKEDcWvr34zS7NwKRlkBgQ==
   dependencies:
-    "@pnpm/types" "8.3.0"
+    "@pnpm/types" "8.4.0"
     json5 "^2.1.3"
     write-file-atomic "^3.0.3"
     write-yaml-file "^4.2.0"
@@ -4701,13 +4701,13 @@ filter-obj@^1.1.0:
   resolved "https://registry.yarnpkg.com/filter-obj/-/filter-obj-1.1.0.tgz#9b311112bc6c6127a16e016c6c5d7f19e0805c5b"
   integrity sha512-8rXg1ZnX7xzy2NGDVkBVaAy+lSlPNwad13BtgSlLuxfIslyt5Vg64U7tFcCt4WS1R0hvtnQybT/IyCkGZ3DpXQ==
 
-find-packages@9.0.5:
-  version "9.0.5"
-  resolved "https://registry.yarnpkg.com/find-packages/-/find-packages-9.0.5.tgz#97b9bcc4ec5e1612413bac6c4dafa29084f51d59"
-  integrity sha512-8A//5HSwbnmgOvyvTVWB+SNt/sPRBMZRr0EJ+xzylqHXUtGzV37HSFRTRWj0SgpY/8mW8GVoY1Grb6hysWEpWw==
+find-packages@9.0.6:
+  version "9.0.6"
+  resolved "https://registry.yarnpkg.com/find-packages/-/find-packages-9.0.6.tgz#6167bb706c1e27d0f808f84aa38e2487fff2d9fa"
+  integrity sha512-D4IhAYrTKeg/FgcjVCpgCYrnTCKOzyNfqktYETB3ttk21kmjxSSK+bTqoAOIyKy88o0cmMfbohtAZt69mf848A==
   dependencies:
-    "@pnpm/read-project-manifest" "3.0.5"
-    "@pnpm/types" "8.3.0"
+    "@pnpm/read-project-manifest" "3.0.6"
+    "@pnpm/types" "8.4.0"
     fast-glob "^3.2.4"
     p-filter "^2.1.0"
 
@@ -6751,10 +6751,10 @@ mdurl@^1.0.1:
   resolved "https://registry.yarnpkg.com/mdurl/-/mdurl-1.0.1.tgz#fe85b2ec75a59037f2adfec100fd6c601761152e"
   integrity sha512-/sKlQJCBYVY9Ers9hqzKou4H6V5UWc/M59TH2dvkt+84itfnq7uFOMLpOiOS4ujvHP4etln18fmIxA5R5fll0g==
 
-memfs@3.4.6:
-  version "3.4.6"
-  resolved "https://registry.yarnpkg.com/memfs/-/memfs-3.4.6.tgz#74097983d27c82b973665885dc75f27a65174510"
-  integrity sha512-rH9mjopto6Wkr7RFuH9l9dk3qb2XGOcYKr7xMhaYqfzuJqOqhRrcFvfD7JMuPj6SLmPreh5+6eAuv36NFAU+Mw==
+memfs@3.4.7:
+  version "3.4.7"
+  resolved "https://registry.yarnpkg.com/memfs/-/memfs-3.4.7.tgz#e5252ad2242a724f938cb937e3c4f7ceb1f70e5a"
+  integrity sha512-ygaiUSNalBX85388uskeCyhSAoOSgzBbtVCr9jA2RROssFL9Q19/ZXFqS+2Th2sr1ewNIWgFdLzLC3Yl1Zv+lw==
   dependencies:
     fs-monkey "^1.0.3"
 
@@ -8463,10 +8463,10 @@ shelljs@0.8.5:
     interpret "^1.0.0"
     rechoir "^0.6.2"
 
-shlex@2.1.0:
-  version "2.1.0"
-  resolved "https://registry.yarnpkg.com/shlex/-/shlex-2.1.0.tgz#4f8fbf75c4a9956283e4095fa5eac3f4969f6a6b"
-  integrity sha512-Tk8PjohJbWpGu2NtAlsEi/9AS4GU2zW2ZWLFrWRDskZpSJmyBIU3nTkBtocxD90r3w4BwRevsNtIqIP9HMuYiQ==
+shlex@2.1.2:
+  version "2.1.2"
+  resolved "https://registry.yarnpkg.com/shlex/-/shlex-2.1.2.tgz#5b5384d603885281c1dee05d56975865edddcba0"
+  integrity sha512-Nz6gtibMVgYeMEhUjp2KuwAgqaJA1K155dU/HuDaEJUGgnmYfVtVZah+uerVWdH8UGnyahhDCgABbYTbs254+w==
 
 side-channel@^1.0.4:
   version "1.0.4"
