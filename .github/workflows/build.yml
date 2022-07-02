@@ -14,9 +14,6 @@ on:
         default: 'true'
         required: false
 
-permissions:
-  contents: read
-
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.number || github.ref }}
   cancel-in-progress: true
