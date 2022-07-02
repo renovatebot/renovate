@@ -4,7 +4,6 @@ import type { RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
 import { platform } from '../../../../modules/platform';
 import { hashBody } from '../../../../modules/platform/pr-body';
-import { PrState } from '../../../../types';
 import { emojify } from '../../../../util/emoji';
 import { deleteBranch } from '../../../../util/git';
 import * as template from '../../../../util/template';
@@ -27,11 +26,6 @@ export async function ensureConfigMigrationPr(
   const branchName = getMigrationBranchName(config);
   const prTitle = 'Migrate Renovate config';
   const existingPr = await platform.getBranchPr(branchName);
-  const closedPr = await platform.findPr({
-    branchName,
-    prTitle,
-    state: PrState.Closed,
-  });
   const filename = migratedConfigData.filename;
   logger.debug('Filling in config migration PR template');
   let prBody = `The Renovate config in this repository needs migrating. Typically this is because one or more configuration options you are using have been renamed.
@@ -81,10 +75,6 @@ ${
       });
       logger.info({ pr: existingPr.number }, 'Migration PR updated');
     }
-    return;
-  }
-  if (closedPr) {
-    logger.debug('Found closed migration PR, exiting...');
     return;
   }
   logger.debug('Creating migration PR');
