@@ -270,7 +270,7 @@ describe('modules/datasource/github-releases/cache/cache-base', () => {
 
     expect(sortItems(res)).toMatchObject([
       { version: 'v1', bar: 'aaa' },
-      { version: 'v2', bar: 'bbb' },
+      { version: 'v2', bar: 'yyy' },
       { version: 'v3', bar: 'zzz' },
     ]);
   });
