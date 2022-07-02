@@ -8,7 +8,6 @@ import { getOptions } from './options';
 import type {
   MigratedConfig,
   MigratedRenovateConfig,
-  PackageRule,
   RenovateConfig,
   RenovateOptions,
 } from './types';
@@ -199,50 +198,6 @@ export function migrateConfig(config: RenovateConfig): MigratedConfig {
             regEx(from, 'g'),
             to
           );
-        }
-      }
-    }
-    if (is.array(migratedConfig.packageRules)) {
-      const newRules: PackageRule[] = [];
-      const renameMap = {
-        paths: 'matchPaths',
-        languages: 'matchLanguages',
-        baseBranchList: 'matchBaseBranches',
-        managers: 'matchManagers',
-        datasources: 'matchDatasources',
-        depTypeList: 'matchDepTypes',
-        packageNames: 'matchPackageNames',
-        packagePatterns: 'matchPackagePatterns',
-        sourceUrlPrefixes: 'matchSourceUrlPrefixes',
-        updateTypes: 'matchUpdateTypes',
-      } as const;
-      for (const packageRule of migratedConfig.packageRules) {
-        const newRuleObj = {} as PackageRule;
-        for (const [oldKey, ruleVal] of Object.entries(packageRule)) {
-          const key = renameMap[oldKey as keyof typeof renameMap] ?? oldKey;
-          // TODO: fix types #7154
-          newRuleObj[key] = ruleVal as never;
-        }
-        newRules.push(newRuleObj);
-      }
-      migratedConfig.packageRules = newRules;
-    }
-    // Migrate nested packageRules
-    if (is.nonEmptyArray(migratedConfig.packageRules)) {
-      const existingRules = migratedConfig.packageRules;
-      migratedConfig.packageRules = [];
-      for (const packageRule of existingRules) {
-        if (is.array(packageRule.packageRules)) {
-          logger.debug('Flattening nested packageRules');
-          // merge each subrule and add to the parent list
-          for (const subrule of packageRule.packageRules) {
-            // TODO: fix types #7154
-            const combinedRule = mergeChildConfig(packageRule, subrule as any);
-            delete combinedRule.packageRules;
-            migratedConfig.packageRules.push(combinedRule);
-          }
-        } else {
-          migratedConfig.packageRules.push(packageRule);
         }
       }
     }
