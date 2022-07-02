@@ -1,7 +1,7 @@
 ### Fetching changelogs from API
 In case your repository doesn't hold a `CHANGELOG.md` file and you need to fetch changelogs from an API (just like the one from [Gitlab](https://docs.gitlab.com/ee/api/releases) or [Github](https://docs.github.com/en/rest/releases)), you need to configure `Maven` so that `renovatebot` is able to determine the `sourceUrl` when fetching info about the artifact.
 
-In order to do so, you just need to properly configure the [scm section](https://maven.apache.org/scm/git.html) on the `pom.xml` of the given artifact.
+To do so, you need to configure the [scm section](https://maven.apache.org/scm/git.html) on the `pom.xml` of the given artifact.
 
 Example:
 ```xml
