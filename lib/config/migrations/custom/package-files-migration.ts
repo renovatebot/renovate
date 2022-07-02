@@ -39,7 +39,6 @@ export class PackageFilesMigration extends AbstractMigration {
         this.setSafely('includePaths', fileList);
       }
       if (packageRules.length) {
-        // be cautious rewriting packageRules
         this.setSafely('packageRules', packageRules);
       }
     }
