@@ -3,7 +3,8 @@ In case your repository doesn't hold a `CHANGELOG.md` file and you need to fetch
 
 To do so, you need to configure the [scm section](https://maven.apache.org/scm/git.html) on the `pom.xml` of the given artifact.
 
-Example:
+For example:
+
 ```xml
 <scm>
     <url>scm:git:https://github.com/path_to_repository</url>
