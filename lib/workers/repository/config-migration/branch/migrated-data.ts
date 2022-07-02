@@ -68,7 +68,7 @@ export class MigratedDataFactory {
       res = { content, filename };
     } catch (err) {
       logger.debug(
-        err,
+        { err },
         'MigratedDataFactory.getAsync() Error initializing renovate MigratedData'
       );
     }
