@@ -233,6 +233,11 @@ async function resetToBranch(branchName: string): Promise<void> {
   await git.raw(['clean', '-fd']);
 }
 
+export async function resetToCommit(commit: string): Promise<void> {
+  logger.debug(`resetToCommit(${commit})`);
+  await git.raw(['reset', '--hard', commit]);
+}
+
 async function deleteLocalBranch(branchName: string): Promise<void> {
   await git.branch(['-D', branchName]);
 }
@@ -975,7 +980,7 @@ export async function fetchCommit({
   logger.debug(`Fetching branch ${branchName}`);
   try {
     const ref = `refs/heads/${branchName}:refs/remotes/origin/${branchName}`;
-    await gitRetry(() => git.fetch(['origin', ref, '--force']));
+    await gitRetry(() => git.pull(['origin', ref, '--force']));
     const commit = (await git.revparse([branchName])).trim();
     config.branchCommits[branchName] = commit;
     config.branchIsModified[branchName] = false;
