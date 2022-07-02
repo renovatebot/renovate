@@ -233,6 +233,7 @@ async function resetToBranch(branchName: string): Promise<void> {
   await git.raw(['clean', '-fd']);
 }
 
+// istanbul ignore next
 export async function resetToCommit(commit: string): Promise<void> {
   logger.debug(`resetToCommit(${commit})`);
   await git.raw(['reset', '--hard', commit]);
