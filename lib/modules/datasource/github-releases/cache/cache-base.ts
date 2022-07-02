@@ -174,7 +174,7 @@ export abstract class AbstractGithubDatasourceCache<
       });
       const { body } = graphqlRes;
       const { data, errors } = body;
-      return data ?? Error(errors?.[0]?.message);
+      return data ?? new Error(errors?.[0]?.message);
     } catch (err) {
       return err;
     }
