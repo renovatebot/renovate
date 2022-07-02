@@ -11,6 +11,7 @@ For example:
     <url>scm:git:https://github.com/path_to_repository</url>
 </scm>
 ```
+
 <!-- prettier-ignore -->
 !!! note
     This also works for private repositories. It can leverage the same `token` that you had to configure in order to be able to reach the private artifactory.
