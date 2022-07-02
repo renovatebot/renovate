@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-      - v25
 
   pull_request:
 
@@ -14,6 +13,11 @@ on:
         description: 'Dry-Run'
         default: 'true'
         required: false
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.number || github.ref }}
