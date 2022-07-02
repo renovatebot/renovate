@@ -1,4 +1,5 @@
 import { DateTime, DurationLikeObject } from 'luxon';
+import { logger } from '../../../../logger';
 import * as packageCache from '../../../../util/cache/package';
 import type {
   GithubGraphqlResponse,
@@ -265,6 +266,19 @@ export abstract class AbstractGithubDatasourceCache<
         while (pagesRemained > 0 && !stopIteration) {
           const res = await this.query(baseUrl, variables);
           if (res instanceof Error) {
+            if (
+              res.message.startsWith(
+                'Something went wrong while executing your query.' // #16343
+              ) &&
+              variables.count > 30
+            ) {
+              logger.warn(
+                `GitHub datasource cache: shrinking GraphQL page size due to error`
+              );
+              pagesRemained *= 2;
+              variables.count = Math.floor(variables.count / 2);
+              continue;
+            }
             throw res;
           }
 
