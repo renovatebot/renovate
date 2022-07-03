@@ -100,7 +100,7 @@ export async function extractAllPackageFiles(
     const key = dep.managerData?.packageFile;
     // istanbul ignore else
     if (key) {
-      let pkgFile: PackageFile = packageFilesByName[key];
+      let pkgFile = packageFilesByName[key];
       if (!pkgFile) {
         pkgFile = {
           packageFile: key,
