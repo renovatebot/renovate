@@ -1,10 +1,10 @@
 import { Readable } from 'stream';
+import { Fixtures } from '../../../../test/fixtures';
 import * as httpMock from '../../../../test/http-mock';
-import { loadFixture } from '../../../../test/util';
 import { updateDependency } from '.';
 
-const aide = loadFixture('aide.rb');
-const ibazel = loadFixture('ibazel.rb');
+const aide = Fixtures.get('aide.rb');
+const ibazel = Fixtures.get('ibazel.rb');
 
 const baseUrl = 'https://github.com';
 

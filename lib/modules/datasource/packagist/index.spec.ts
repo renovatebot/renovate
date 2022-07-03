@@ -1,6 +1,6 @@
 import { getPkgReleases } from '..';
+import { Fixtures } from '../../../../test/fixtures';
 import * as httpMock from '../../../../test/http-mock';
-import { loadJsonFixture } from '../../../../test/util';
 import type { HostRule } from '../../../types';
 import * as _hostRules from '../../../util/host-rules';
 import * as composerVersioning from '../../versioning/composer';
@@ -11,10 +11,10 @@ jest.mock('../../../util/host-rules');
 
 const hostRules = _hostRules;
 
-const includesJson: any = loadJsonFixture('includes.json');
-const beytJson: any = loadJsonFixture('1beyt.json');
-const mailchimpJson: any = loadJsonFixture('mailchimp-api.json');
-const mailchimpDevJson: any = loadJsonFixture('mailchimp-api~dev.json');
+const includesJson: any = Fixtures.getJson('includes.json');
+const beytJson: any = Fixtures.getJson('1beyt.json');
+const mailchimpJson: any = Fixtures.getJson('mailchimp-api.json');
+const mailchimpDevJson: any = Fixtures.getJson('mailchimp-api~dev.json');
 
 const baseUrl = 'https://packagist.org';
 const datasource = PackagistDatasource.id;
