@@ -331,6 +331,7 @@ const annoyingMethods = new Set([
   'mutableListOf',
   'setOf',
   'mutableSetOf',
+  'stages', // https://github.com/ajoberstar/reckon
 ]);
 
 function processLongFormDep({
