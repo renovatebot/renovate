@@ -11,10 +11,10 @@ jest.mock('../../../util/host-rules');
 
 const hostRules = _hostRules;
 
-const includesJson: any = Fixtures.getJson('includes.json');
-const beytJson: any = Fixtures.getJson('1beyt.json');
-const mailchimpJson: any = Fixtures.getJson('mailchimp-api.json');
-const mailchimpDevJson: any = Fixtures.getJson('mailchimp-api~dev.json');
+const includesJson = Fixtures.getJson('includes.json');
+const beytJson = Fixtures.getJson('1beyt.json');
+const mailchimpJson: = Fixtures.getJson('mailchimp-api.json');
+const mailchimpDevJson = Fixtures.getJson('mailchimp-api~dev.json');
 
 const baseUrl = 'https://packagist.org';
 const datasource = PackagistDatasource.id;
