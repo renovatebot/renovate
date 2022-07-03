@@ -1,6 +1,7 @@
 import url from 'url';
 import is from '@sindresorhus/is';
 import { logger } from '../../../logger';
+import { getSiblingFileName, readLocalFile } from '../../../util/fs';
 import { newlineRegex, regEx } from '../../../util/regex';
 import type { PackageDependency } from '../types';
 import {
@@ -394,6 +395,19 @@ function processLibraryDep(input: SyntaxHandlerInput): SyntaxHandlerOutput {
     }
   }
   return res;
+}
+
+function processApplyFrom({
+  tokenMap,
+  variables,
+}: SyntaxHandlerInput): SyntaxHandlerOutput {
+  let scriptFile: string | null = tokenMap.scriptFile?.value ?? null;
+  if (tokenMap.scriptFile?.type === TokenType.StringInterpolation) {
+    const token = tokenMap.scriptFile as StringInterpolation;
+    scriptFile = interpolateString(token.children, variables);
+  }
+
+  return { scriptFile };
 }
 
 const matcherConfigs: SyntaxMatchConfig[] = [
@@ -913,6 +927,86 @@ const matcherConfigs: SyntaxMatchConfig[] = [
     ],
     handler: processLongFormDep,
   },
+  {
+    // apply from: 'foo.gradle'
+    // apply from: "$somedir/foo.gradle"
+    matchers: [
+      { matchType: TokenType.Word, matchValue: 'apply' },
+      { matchType: TokenType.Word, matchValue: 'from' },
+      { matchType: TokenType.Colon },
+      {
+        matchType: [TokenType.String, TokenType.StringInterpolation],
+        tokenMapKey: 'scriptFile',
+      },
+    ],
+    handler: processApplyFrom,
+  },
+  {
+    // apply from: file("$somedir/foo.gradle")
+    matchers: [
+      { matchType: TokenType.Word, matchValue: 'apply' },
+      { matchType: TokenType.Word, matchValue: 'from' },
+      { matchType: TokenType.Colon },
+      { matchType: TokenType.Word, matchValue: 'file' },
+      { matchType: TokenType.LeftParen },
+      {
+        matchType: [TokenType.String, TokenType.StringInterpolation],
+        tokenMapKey: 'scriptFile',
+      },
+      { matchType: TokenType.RightParen },
+    ],
+    handler: processApplyFrom,
+  },
+  {
+    // apply from: new File("$somedir/foo.gradle")
+    matchers: [
+      { matchType: TokenType.Word, matchValue: 'apply' },
+      { matchType: TokenType.Word, matchValue: 'from' },
+      { matchType: TokenType.Colon },
+      { matchType: TokenType.Word, matchValue: 'new' },
+      { matchType: TokenType.Word, matchValue: 'File' },
+      { matchType: TokenType.LeftParen },
+      {
+        matchType: [TokenType.String, TokenType.StringInterpolation],
+        tokenMapKey: 'scriptFile',
+      },
+      { matchType: TokenType.RightParen },
+    ],
+    handler: processApplyFrom,
+  },
+  {
+    // apply(from = 'foo.gradle')
+    // apply(from = "$somedir/foo.gradle")
+    matchers: [
+      { matchType: TokenType.Word, matchValue: 'apply' },
+      { matchType: TokenType.LeftParen },
+      { matchType: TokenType.Word, matchValue: 'from' },
+      { matchType: TokenType.Assignment },
+      {
+        matchType: [TokenType.String, TokenType.StringInterpolation],
+        tokenMapKey: 'scriptFile',
+      },
+      { matchType: TokenType.RightParen },
+    ],
+    handler: processApplyFrom,
+  },
+  {
+    // apply(from = File("$somedir/foo.gradle"))
+    matchers: [
+      { matchType: TokenType.Word, matchValue: 'apply' },
+      { matchType: TokenType.LeftParen },
+      { matchType: TokenType.Word, matchValue: 'from' },
+      { matchType: TokenType.Assignment },
+      { matchType: TokenType.Word, matchValue: 'File' },
+      { matchType: TokenType.LeftParen },
+      {
+        matchType: [TokenType.String, TokenType.StringInterpolation],
+        tokenMapKey: 'scriptFile',
+      },
+      { matchType: TokenType.RightParen },
+    ],
+    handler: processApplyFrom,
+  },
 ];
 
 function tryMatch({
@@ -937,11 +1031,43 @@ function tryMatch({
   return null;
 }
 
-export function parseGradle(
+async function parseInlineScriptFile(
+  scriptFile: string,
+  variables: PackageVariables,
+  recursionDepth: number,
+  packageFile = ''
+): Promise<SyntaxHandlerOutput> {
+  if (recursionDepth > 0) {
+    logger.warn({ scriptFile }, `Max recursion depth reached`);
+    return null;
+  }
+
+  if (!regEx(/\.gradle(\.kts)?$/).test(scriptFile)) {
+    logger.warn({ scriptFile }, `Only Gradle files can be included`);
+    return null;
+  }
+
+  const scriptFilePath = getSiblingFileName(packageFile, scriptFile);
+  const scriptFileContent = await readLocalFile(scriptFilePath, 'utf8');
+  if (!scriptFileContent) {
+    logger.warn({ scriptFilePath }, `Failed to process Gradle file`);
+    return null;
+  }
+
+  return parseGradle(
+    scriptFileContent,
+    variables,
+    scriptFilePath,
+    recursionDepth + 1
+  );
+}
+
+export async function parseGradle(
   input: string,
   initVars: PackageVariables = {},
-  packageFile?: string
-): ParseGradleResult {
+  packageFile?: string,
+  recursionDepth = 0
+): Promise<ParseGradleResult> {
   let vars: PackageVariables = { ...initVars };
   const deps: PackageDependency<GradleManagerData>[] = [];
   const urls: string[] = [];
@@ -949,7 +1075,15 @@ export function parseGradle(
   const tokens = tokenize(input);
   let prevTokensLength = tokens.length;
   while (tokens.length) {
-    const matchResult = tryMatch({ tokens, variables: vars, packageFile });
+    let matchResult = tryMatch({ tokens, variables: vars, packageFile });
+    if (matchResult?.scriptFile) {
+      matchResult = await parseInlineScriptFile(
+        matchResult.scriptFile,
+        vars,
+        recursionDepth,
+        packageFile
+      );
+    }
     if (matchResult?.deps?.length) {
       deps.push(...matchResult.deps);
     }
