@@ -345,6 +345,38 @@ describe('modules/datasource/github-releases/cache/cache-base', () => {
     expect(packageCache.set).not.toHaveBeenCalled();
   });
 
+  it('shrinks for some of graphql errors', async () => {
+    packageCache.get.mockResolvedValueOnce({
+      items: {},
+      createdAt: t3,
+      updatedAt: t3,
+    });
+    responses = [
+      {
+        statusCode: 200,
+        headers: {},
+        body: {
+          errors: [
+            { message: 'Something went wrong while executing your query.' },
+          ],
+        },
+      },
+      resp([{ name: 'v3', createdAt: t3, foo: 'ccc' }], true),
+      resp([{ name: 'v2', createdAt: t2, foo: 'bbb' }], true),
+      resp([{ name: 'v1', createdAt: t1, foo: 'aaa' }]),
+    ];
+    const cache = new TestCache(http, { resetDeltaMinutes: 0 });
+
+    const res = await cache.getItems({ packageName: 'foo/bar' });
+
+    expect(sortItems(res)).toMatchObject([
+      { version: 'v1', bar: 'aaa' },
+      { version: 'v2', bar: 'bbb' },
+      { version: 'v3', bar: 'ccc' },
+    ]);
+    expect(packageCache.set).toHaveBeenCalled();
+  });
+
   it('finds latest release timestamp correctly', () => {
     const cache = new TestCache(http);
     const ts = cache.getLastReleaseTimestamp({
