@@ -383,7 +383,7 @@ To handle the case where the underlying Git processes appear to hang, configure 
 ## gitUrl
 
 Override the default resolution for Git remote, e.g. to switch GitLab from HTTPS to SSH-based.
-Currently works for GitLab only.
+Currently works for Bitbucket Server and GitLab only.
 
 Possible values:
 
@@ -486,11 +486,6 @@ Parameter to reduce CI load.
 CI jobs are usually triggered by these events: pull-request creation, pull-request update, automerge events.
 Set as an integer.
 Default is no limit.
-
-## printConfig
-
-This option is useful for troubleshooting, particularly if using presets.
-e.g. run `renovate foo/bar --print-config > config.log` and the fully-resolved config will be included in the log file.
 
 ## privateKey
 
@@ -615,10 +610,6 @@ Set this to `"enabled"` to have Renovate maintain a JSON file cache per-reposito
 Set to `"reset"` if you ever need to bypass the cache and have it overwritten.
 JSON files will be stored inside the `cacheDir` beside the existing file-based package cache.
 
-<!-- prettier-ignore -->
-!!! warning
-    This is an experimental feature and may be modified or removed in a future non-major release.
-
 ## requireConfig
 
 By default, Renovate needs a Renovate config file in each repository where it runs before it will propose any dependency updates.
@@ -691,7 +682,8 @@ This is currently applicable to `npm` and `lerna`/`npm` only, and only used in c
 
 ## unicodeEmoji
 
-If enabled emoji shortcodes (`:warning:`) are replaced with their Unicode equivalents (`⚠️`).
+If enabled emoji shortcodes are replaced with their Unicode equivalents.
+For example: `:warning:` will be replaced with `⚠️`.
 
 ## username
 

@@ -373,6 +373,30 @@ describe('util/git/index', () => {
       expect(commit).not.toBeNull();
     });
 
+    it('link file', async () => {
+      const file: FileChange = {
+        type: 'addition',
+        path: 'future_link',
+        contents: 'past_file',
+        isSymlink: true,
+      };
+      const commit = await git.commitFiles({
+        branchName: 'renovate/future_branch',
+        files: [file],
+        message: 'Create a link',
+      });
+      expect(commit).toBeString();
+      const tmpGit = Git(tmpDir.path);
+      const lsTree = await tmpGit.raw(['ls-tree', commit!]);
+      const files = lsTree
+        .trim()
+        .split(newlineRegex)
+        .map((x) => x.split(/\s/))
+        .map(([mode, type, _hash, name]) => [mode, type, name]);
+      expect(files).toContainEqual(['100644', 'blob', 'past_file']);
+      expect(files).toContainEqual(['120000', 'blob', 'future_link']);
+    });
+
     it('deletes file', async () => {
       const file: FileChange = {
         type: 'deletion',

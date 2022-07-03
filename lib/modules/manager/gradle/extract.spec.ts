@@ -1,6 +1,7 @@
 import { Fixtures } from '../../../../test/fixtures';
-import { fs } from '../../../../test/util';
+import { fs, logger } from '../../../../test/util';
 import type { ExtractConfig } from '../types';
+import * as parser from './parser';
 import { extractAllPackageFiles } from '.';
 
 jest.mock('../../../util/fs');
@@ -8,10 +9,16 @@ jest.mock('../../../util/fs');
 function mockFs(files: Record<string, string>): void {
   fs.readLocalFile.mockImplementation((fileName: string): Promise<string> => {
     const content = files?.[fileName];
-    return typeof content === 'string'
-      ? Promise.resolve(content)
-      : Promise.reject(`File not found: ${fileName}`);
+    return Promise.resolve(content ?? '');
   });
+
+  fs.getSiblingFileName.mockImplementation(
+    (existingFileNameWithPath: string, otherFileName: string) => {
+      return existingFileNameWithPath
+        .slice(0, existingFileNameWithPath.lastIndexOf('/') + 1)
+        .concat(otherFileName);
+    }
+  );
 }
 
 describe('modules/manager/gradle/extract', () => {
@@ -31,6 +38,19 @@ describe('modules/manager/gradle/extract', () => {
     ]);
 
     expect(res).toBeNull();
+  });
+
+  it('logs a warning in case parseGradle throws an exception', async () => {
+    const filename = 'build.gradle';
+    const err = new Error('unknown');
+
+    jest.spyOn(parser, 'parseGradle').mockRejectedValueOnce(err);
+    await extractAllPackageFiles({} as ExtractConfig, [filename]);
+
+    expect(logger.logger.warn).toHaveBeenCalledWith(
+      { err, config: {}, packageFile: filename },
+      `Failed to process Gradle file: ${filename}`
+    );
   });
 
   it('extracts from cross-referenced files', async () => {
@@ -199,6 +219,10 @@ describe('modules/manager/gradle/extract', () => {
           maven {
               url = "\${repositoryBaseURL}/repository-build"
           }
+          maven {
+              name = "baz"
+              url = "\${repositoryBaseURL}/\${name}"
+          }
       }
 
       dependencies {
@@ -208,7 +232,7 @@ describe('modules/manager/gradle/extract', () => {
 
     mockFs({
       'build.gradle': buildFile,
-      'gradle.properties': 'repositoryBaseURL: https://dummy.org/whatever',
+      'gradle.properties': 'repositoryBaseURL: https\\://dummy.org/whatever',
     });
 
     const res = await extractAllPackageFiles({} as ExtractConfig, [
@@ -230,13 +254,14 @@ describe('modules/manager/gradle/extract', () => {
             depName: 'com.google.protobuf:protobuf-java',
             currentValue: '2.17.0',
             managerData: {
-              fileReplacePosition: 227,
+              fileReplacePosition: 335,
               packageFile: 'build.gradle',
             },
-            fileReplacePosition: 227,
+            fileReplacePosition: 335,
             registryUrls: [
               'https://repo.maven.apache.org/maven2',
               'https://dummy.org/whatever/repository-build',
+              'https://dummy.org/whatever/baz',
             ],
           },
         ],
@@ -598,6 +623,193 @@ describe('modules/manager/gradle/extract', () => {
           },
         ],
       },
+    ]);
+  });
+
+  it('loads further scripts using apply from statements', async () => {
+    const buildFile = `
+      buildscript {
+          repositories {
+              mavenCentral()
+          }
+
+          apply from: "\${someDir}/libs1.gradle"
+          apply from: file("gradle/libs2.gradle")
+          apply from: "gradle/libs3.gradle"
+          apply from: file("gradle/non-existing.gradle")
+
+          dependencies {
+              classpath "com.google.protobuf:protobuf-java:\${protoBufVersion}"
+              classpath "com.google.guava:guava:\${guavaVersion}"
+              classpath "io.jsonwebtoken:jjwt-api:0.11.2"
+
+              classpath "org.junit.jupiter:junit-jupiter-api:\${junitVersion}"
+              classpath "org.junit.jupiter:junit-jupiter-engine:\${junitVersion}"
+          }
+      }
+    `;
+
+    mockFs({
+      'gradleX/libs1.gradle': "ext.junitVersion = '5.5.2'",
+      'gradle/libs2.gradle': "ext.protoBufVersion = '3.18.2'",
+      'gradle/libs3.gradle': "ext.guavaVersion = '30.1-jre'",
+      'build.gradle': buildFile,
+      'gradle.properties': 'someDir=gradleX',
+    });
+
+    const res = await extractAllPackageFiles({} as ExtractConfig, [
+      'gradleX/libs1.gradle',
+      'gradle/libs2.gradle',
+      // 'gradle/libs3.gradle', is intentionally not listed here
+      'build.gradle',
+      'gradle.properties',
+    ]);
+
+    expect(res).toMatchObject([
+      { packageFile: 'gradle.properties' },
+      {
+        packageFile: 'build.gradle',
+        deps: [{ depName: 'io.jsonwebtoken:jjwt-api' }],
+      },
+      {
+        packageFile: 'gradle/libs2.gradle',
+        deps: [
+          {
+            depName: 'com.google.protobuf:protobuf-java',
+            currentValue: '3.18.2',
+            managerData: { packageFile: 'gradle/libs2.gradle' },
+          },
+        ],
+      },
+      {
+        packageFile: 'gradleX/libs1.gradle',
+        deps: [
+          {
+            depName: 'org.junit.jupiter:junit-jupiter-api',
+            currentValue: '5.5.2',
+            managerData: { packageFile: 'gradleX/libs1.gradle' },
+          },
+          {
+            depName: 'org.junit.jupiter:junit-jupiter-engine',
+            currentValue: '5.5.2',
+            managerData: { packageFile: 'gradleX/libs1.gradle' },
+          },
+        ],
+      },
+      {
+        packageFile: 'gradle/libs3.gradle',
+        deps: [
+          {
+            depName: 'com.google.guava:guava',
+            currentValue: '30.1-jre',
+            managerData: { packageFile: 'gradle/libs3.gradle' },
+          },
+        ],
+      },
+    ]);
+  });
+
+  it('apply from works with files in sub-directories', async () => {
+    const buildFile = `
+      buildscript {
+          repositories {
+              mavenCentral()
+          }
+
+          apply from: "gradle/libs4.gradle"
+
+          dependencies {
+              classpath "com.google.protobuf:protobuf-java:\${protoBufVersion}"
+          }
+      }
+    `;
+
+    mockFs({
+      'somesubdir/gradle/libs4.gradle': "ext.protoBufVersion = '3.18.2'",
+      'somesubdir/build.gradle': buildFile,
+    });
+
+    const res = await extractAllPackageFiles({} as ExtractConfig, [
+      'somesubdir/gradle/libs4.gradle',
+      'somesubdir/build.gradle',
+    ]);
+
+    expect(res).toMatchObject([
+      { packageFile: 'somesubdir/build.gradle' },
+      {
+        packageFile: 'somesubdir/gradle/libs4.gradle',
+        deps: [{ depName: 'com.google.protobuf:protobuf-java' }],
+      },
+    ]);
+  });
+
+  it('prevents recursive apply from calls', async () => {
+    mockFs({
+      'build.gradle': "apply from: 'test.gradle'",
+      'test.gradle': "apply from: 'build.gradle'",
+    });
+
+    const res = await extractAllPackageFiles({} as ExtractConfig, [
+      'build.gradle',
+      'test.gradle',
+    ]);
+
+    expect(res).toBeNull();
+  });
+
+  it('prevents inclusion of non-Gradle files', async () => {
+    mockFs({
+      'build.gradle': "apply from: '../../test.non-gradle'",
+    });
+
+    const res = await extractAllPackageFiles({} as ExtractConfig, [
+      'build.gradle',
+    ]);
+
+    expect(res).toBeNull();
+  });
+
+  it('filters duplicate dependency findings', async () => {
+    const buildFile = `
+      apply from: 'test.gradle'
+
+      repositories {
+          mavenCentral()
+      }
+
+      dependencies {
+        implementation "io.jsonwebtoken:jjwt-api:$\{jjwtVersion}"
+        runtimeOnly "io.jsonwebtoken:jjwt-impl:$\{jjwtVersion}"
+      }
+    `;
+
+    const testFile = `
+      ext.jjwtVersion = '0.11.2'
+
+      ext {
+          jjwtApi = "io.jsonwebtoken:jjwt-api:$jjwtVersion"
+      }
+    `;
+
+    mockFs({
+      'build.gradle': buildFile,
+      'test.gradle': testFile,
+    });
+
+    const res = await extractAllPackageFiles({} as ExtractConfig, [
+      'build.gradle',
+      'test.gradle',
+    ]);
+
+    expect(res).toMatchObject([
+      {
+        packageFile: 'test.gradle',
+        deps: [
+          { depName: 'io.jsonwebtoken:jjwt-api' },
+          { depName: 'io.jsonwebtoken:jjwt-impl' },
+        ],
+      },
+      { packageFile: 'build.gradle' },
     ]);
   });
 });

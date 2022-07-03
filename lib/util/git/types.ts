@@ -52,6 +52,8 @@ export interface FileAddition {
    * The executable bit
    */
   isExecutable?: boolean;
+
+  isSymlink?: boolean;
 }
 
 export interface FileDeletion {

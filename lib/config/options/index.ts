@@ -129,6 +129,10 @@ const options: RenovateOptions[] = [
     stage: 'repository',
     type: 'boolean',
     default: false,
+    experimental: true,
+    experimentalDescription:
+      'Config migration PRs are still being improved, in particular to reduce the amount of reordering and whitespace changes.',
+    experimentalIssues: [16359],
   },
   {
     name: 'productLinks',
@@ -223,6 +227,7 @@ const options: RenovateOptions[] = [
     allowedValues: ['disabled', 'enabled', 'reset'],
     stage: 'repository',
     default: 'disabled',
+    experimental: true,
   },
   {
     name: 'force',
@@ -241,6 +246,7 @@ const options: RenovateOptions[] = [
     stage: 'global',
     type: 'boolean',
     default: true,
+    globalOnly: true,
   },
   {
     name: 'draftPR',
@@ -262,9 +268,8 @@ const options: RenovateOptions[] = [
   {
     name: 'printConfig',
     description:
-      'If enabled, Renovate logs the fullly resolved config for each repo, plus the fully resolved presets.',
+      'If enabled, Renovate logs the fully resolved config for each repo, plus the fully resolved presets.',
     type: 'boolean',
-    globalOnly: true,
     default: false,
   },
   {
@@ -282,6 +287,7 @@ const options: RenovateOptions[] = [
       'If set, this Redis URL will be used for caching instead of the file system.',
     stage: 'global',
     type: 'string',
+    globalOnly: true,
   },
   {
     name: 'baseDir',
@@ -289,6 +295,7 @@ const options: RenovateOptions[] = [
       'The base directory for Renovate to store local files, including repository files and cache. If left empty, Renovate will create its own temporary directory to use.',
     stage: 'global',
     type: 'string',
+    globalOnly: true,
   },
   {
     name: 'cacheDir',
@@ -342,6 +349,7 @@ const options: RenovateOptions[] = [
     description: 'Log file path.',
     stage: 'global',
     type: 'string',
+    globalOnly: true,
   },
   {
     name: 'logFileLevel',
@@ -349,6 +357,7 @@ const options: RenovateOptions[] = [
     stage: 'global',
     type: 'string',
     default: 'debug',
+    globalOnly: true,
   },
   {
     name: 'logContext',
@@ -460,7 +469,7 @@ const options: RenovateOptions[] = [
       'Any text added here will be placed first in the Dependency Dashboard issue body.',
     type: 'string',
     default:
-      'This issue provides visibility into Renovate updates and their statuses. [Learn more](https://docs.renovatebot.com/key-concepts/dashboard/)',
+      'This issue lists Renovate updates and detected dependencies. Read the [Dependency Dashboard](https://docs.renovatebot.com/key-concepts/dashboard/) docs to learn more.',
   },
   {
     name: 'dependencyDashboardFooter',
@@ -690,6 +699,7 @@ const options: RenovateOptions[] = [
     stage: 'global',
     type: 'boolean',
     default: false,
+    globalOnly: true,
   },
   {
     name: 'autodiscoverFilter',
@@ -697,6 +707,7 @@ const options: RenovateOptions[] = [
     stage: 'global',
     type: 'string',
     default: null,
+    globalOnly: true,
   },
   {
     name: 'prCommitsPerRunLimit',
@@ -705,6 +716,7 @@ const options: RenovateOptions[] = [
     stage: 'global',
     type: 'integer',
     default: 0,
+    globalOnly: true,
   },
   {
     name: 'repositories',
@@ -712,6 +724,7 @@ const options: RenovateOptions[] = [
     stage: 'global',
     type: 'array',
     cli: false,
+    globalOnly: true,
   },
   {
     name: 'baseBranches',
@@ -1242,7 +1255,7 @@ const options: RenovateOptions[] = [
     name: 'bumpVersion',
     description: 'Bump the version in the package file being updated.',
     type: 'string',
-    allowedValues: ['major', 'minor', 'patch'],
+    allowedValues: ['major', 'minor', 'patch', 'prerelease'],
     supportedManagers: ['helmv3', 'npm', 'maven', 'sbt'],
   },
   // Major/Minor/Patch
@@ -1844,6 +1857,7 @@ const options: RenovateOptions[] = [
     type: 'array',
     default: [],
     allowedValues: [
+      'bundlerConservative',
       'gomodMassage',
       'gomodUpdateImportPaths',
       'gomodTidy',
@@ -2285,6 +2299,7 @@ const options: RenovateOptions[] = [
     description:
       'Overrides the default resolution for Git remote, e.g. to switch GitLab from HTTPS to SSH-based.',
     type: 'string',
+    supportedPlatforms: ['gitlab', 'bitbucket-server'],
     allowedValues: ['default', 'ssh', 'endpoint'],
     default: 'default',
     stage: 'repository',

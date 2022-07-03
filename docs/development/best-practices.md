@@ -11,6 +11,7 @@ Follow these best practices when you're working on our code.
 - Always add unit tests for full code coverage
   - Only use `istanbul` comments for unreachable code coverage that is needed for `codecov` completion
   - Use descriptive `istanbul` comments
+- Avoid cast or prefer `x as T` instead of `<T>x` cast.
 
 ```ts
 // istanbul ignore next: can never happen
@@ -172,5 +173,12 @@ Use [Named Capturing Groups](https://www.regular-expressions.info/named.html) wh
 
 ### Windows
 
-We recommend you set [`core.autocrlf = input`](https://git-scm.com/docs/gitattributes#_text) in your `gitConfig`, or the carriage return `\r\n` might confuse Renovate bot.
+We recommend you set [`core.autocrlf = input`](https://git-scm.com/docs/gitattributes#_text) in your Git config.
+You can do this by running this Git command:
+
+```bash
+git config --global core.autocrlf input
+```
+
+This prevents the carriage return `\r\n` which may confuse Renovate bot.
 You can also set the line endings in your repository by adding `* text=auto eol=lf` to your `.gitattributes` file.
