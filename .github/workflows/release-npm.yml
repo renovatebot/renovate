@@ -23,6 +23,9 @@ env:
   NPM_VERSION: ${{ github.event.client_payload.version }}
   NPM_TAG: ${{ github.event.client_payload.tag }}
 
+permissions:
+  contents: read
+
 jobs:
   release-npm:
     runs-on: ubuntu-latest
