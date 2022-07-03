@@ -9,6 +9,15 @@ import { GlobalConfig } from '../../config/global';
 import { logger } from '../../logger';
 import { assertBaseDir } from './util';
 
+function ensureLocalPath(path: string): string {
+  const localDir = GlobalConfig.get('localDir');
+  const fullPath = upath.isAbsolute(path)
+    ? path
+    : upath.resolve(localDir, path);
+  assertBaseDir(fullPath, localDir!);
+  return fullPath;
+}
+
 export const pipeline = util.promisify(stream.pipeline);
 
 export function getSubDirectory(fileName: string): string {
@@ -32,14 +41,12 @@ export async function readLocalFile(
   fileName: string,
   encoding?: string
 ): Promise<string | Buffer | null> {
-  const localDir = GlobalConfig.get('localDir');
-  const localFileName = upath.resolve(localDir, fileName);
-  assertBaseDir(localFileName, localDir!);
+  const fullPath = ensureLocalPath(fileName);
 
   try {
     const fileContent = encoding
-      ? await fs.readFile(localFileName, encoding)
-      : await fs.readFile(localFileName);
+      ? await fs.readFile(fullPath, encoding)
+      : await fs.readFile(fullPath);
     return fileContent;
   } catch (err) {
     logger.trace({ err }, 'Error reading local file');
@@ -51,17 +58,13 @@ export async function writeLocalFile(
   fileName: string,
   fileContent: string | Buffer
 ): Promise<void> {
-  const localDir = GlobalConfig.get('localDir');
-  const localFileName = upath.resolve(localDir, fileName);
-  assertBaseDir(localFileName, localDir!);
-  await fs.outputFile(localFileName, fileContent);
+  const fullPath = ensureLocalPath(fileName);
+  await fs.outputFile(fullPath, fileContent);
 }
 
 export async function deleteLocalFile(fileName: string): Promise<void> {
-  const localDir = GlobalConfig.get('localDir');
-  const localFileName = upath.resolve(localDir, fileName);
-  assertBaseDir(localFileName, localDir!);
-  await fs.remove(localFileName);
+  const fullPath = ensureLocalPath(fileName);
+  await fs.remove(fullPath);
 }
 
 // istanbul ignore next
@@ -69,11 +72,8 @@ export async function renameLocalFile(
   fromFile: string,
   toFile: string
 ): Promise<void> {
-  const localDir = GlobalConfig.get('localDir');
-  const fromPath = upath.resolve(localDir, fromFile);
-  const toPath = upath.resolve(localDir, toFile);
-  assertBaseDir(fromPath, localDir!);
-  assertBaseDir(toPath, localDir!);
+  const fromPath = ensureLocalPath(fromFile);
+  const toPath = ensureLocalPath(toFile);
   await fs.move(fromPath, toPath);
 }
 
@@ -85,12 +85,9 @@ export async function ensureDir(dirName: string): Promise<void> {
 }
 
 export async function ensureLocalDir(dirName: string): Promise<string> {
-  const localDir = GlobalConfig.get('localDir');
-  const localDirName = upath.resolve(localDir, dirName);
-  assertBaseDir(localDirName, localDir!);
-
-  await fs.ensureDir(localDirName);
-  return localDirName;
+  const fullPath = ensureLocalPath(dirName);
+  await fs.ensureDir(fullPath);
+  return fullPath;
 }
 
 export async function ensureCacheDir(name: string): Promise<string> {
@@ -113,13 +110,11 @@ export function privateCacheDir(): string {
 }
 
 export async function localPathExists(pathName: string): Promise<boolean> {
-  const localDir = GlobalConfig.get('localDir');
-  const localPathName = upath.resolve(localDir, pathName);
-  assertBaseDir(localPathName, localDir!);
+  const fullPath = ensureLocalPath(pathName);
 
   // Works for both files as well as directories
   try {
-    const s = await fs.stat(localPathName);
+    const s = await fs.stat(fullPath);
     return !!s;
   } catch (_) {
     return false;
@@ -160,12 +155,10 @@ export function createWriteStream(path: string): fs.WriteStream {
 }
 
 export async function localPathIsFile(pathName: string): Promise<boolean> {
-  const localDir = GlobalConfig.get('localDir');
-  const localPathName = upath.resolve(localDir, pathName);
-  assertBaseDir(localPathName, localDir!);
+  const fullPath = ensureLocalPath(pathName);
 
   try {
-    const s = await fs.stat(localPathName);
+    const s = await fs.stat(fullPath);
     return s.isFile();
   } catch (_) {
     return false;
@@ -208,18 +201,16 @@ export function chmodLocalFile(
   fileName: string,
   mode: string | number
 ): Promise<void> {
-  const localDir = GlobalConfig.get('localDir');
-  const fullFileName = upath.join(localDir, fileName);
+  const fullFileName = ensureLocalPath(fileName);
   return fs.chmod(fullFileName, mode);
 }
 
 export async function statLocalFile(
   fileName: string
 ): Promise<fs.Stats | null> {
-  const localDir = GlobalConfig.get('localDir');
-  const fullFileName = upath.join(localDir, fileName);
+  const fullPath = ensureLocalPath(fileName);
   try {
-    return await fs.stat(fullFileName);
+    return await fs.stat(fullPath);
   } catch (_) {
     return null;
   }
