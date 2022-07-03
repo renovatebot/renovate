@@ -39,40 +39,7 @@ export function migrateConfig(config: RenovateConfig): MigratedConfig {
       'peerDependencies',
     ];
     for (const [key, val] of Object.entries(newConfig)) {
-      if (key === 'packageFiles' && is.array(val)) {
-        const fileList = [];
-        for (const packageFile of val) {
-          if (is.object(packageFile) && !is.array(packageFile)) {
-            fileList.push((packageFile as any).packageFile);
-            if (Object.keys(packageFile).length > 1) {
-              migratedConfig.packageRules = is.array(
-                migratedConfig.packageRules
-              )
-                ? migratedConfig.packageRules
-                : [];
-              const payload = migrateConfig(
-                packageFile as RenovateConfig
-              ).migratedConfig;
-              for (const subrule of payload.packageRules ?? []) {
-                subrule.paths = [(packageFile as any).packageFile];
-                migratedConfig.packageRules.push(subrule);
-              }
-              delete payload.packageFile;
-              delete payload.packageRules;
-              if (Object.keys(payload).length) {
-                migratedConfig.packageRules.push({
-                  ...payload,
-                  paths: [(packageFile as any).packageFile],
-                });
-              }
-            }
-          } else {
-            fileList.push(packageFile);
-          }
-        }
-        migratedConfig.includePaths = fileList;
-        delete migratedConfig.packageFiles;
-      } else if (depTypes.includes(key)) {
+      if (depTypes.includes(key)) {
         migratedConfig.packageRules = is.array(migratedConfig.packageRules)
           ? migratedConfig.packageRules
           : [];
