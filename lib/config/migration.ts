@@ -201,6 +201,25 @@ export function migrateConfig(config: RenovateConfig): MigratedConfig {
         }
       }
     }
+    // Migrate nested packageRules
+    if (is.nonEmptyArray(migratedConfig.packageRules)) {
+      const existingRules = migratedConfig.packageRules;
+      migratedConfig.packageRules = [];
+      for (const packageRule of existingRules) {
+        if (is.array(packageRule.packageRules)) {
+          logger.debug('Flattening nested packageRules');
+          // merge each subrule and add to the parent list
+          for (const subrule of packageRule.packageRules) {
+            // TODO: fix types #7154
+            const combinedRule = mergeChildConfig(packageRule, subrule as any);
+            delete combinedRule.packageRules;
+            migratedConfig.packageRules.push(combinedRule);
+          }
+        } else {
+          migratedConfig.packageRules.push(packageRule);
+        }
+      }
+    }
     if (is.nonEmptyArray(migratedConfig.matchManagers)) {
       if (migratedConfig.matchManagers.includes('gradle-lite')) {
         if (!migratedConfig.matchManagers.includes('gradle')) {

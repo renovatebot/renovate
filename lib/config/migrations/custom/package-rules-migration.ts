@@ -1,7 +1,5 @@
 import is from '@sindresorhus/is';
-import { logger } from '../../../logger';
 import type { PackageRule } from '../../types';
-import { mergeChildConfig } from '../../utils';
 import { AbstractMigration } from '../base/abstract-migration';
 
 const renameMap = {
@@ -37,21 +35,6 @@ export class PackageRulesMigration extends AbstractMigration {
 
       return newPackageRule;
     });
-
-    packageRules = packageRules.flatMap((packageRule) => {
-      if (Array.isArray(packageRule.packageRules)) {
-        const subrules: PackageRule[] = [];
-        logger.debug('Flattening nested packageRules');
-
-        for (const subrule of packageRule.packageRules) {
-          const combinedRule = mergeChildConfig(packageRule, subrule);
-          delete combinedRule.packageRules;
-          subrules.push(combinedRule);
-        }
-        return subrules;
-      }
-      return packageRule;
-    }) as PackageRule[];
 
     this.rewrite(packageRules);
   }
