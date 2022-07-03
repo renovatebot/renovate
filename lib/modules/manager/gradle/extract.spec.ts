@@ -44,10 +44,7 @@ describe('modules/manager/gradle/extract', () => {
     const filename = 'build.gradle';
     const err = new Error('unknown');
 
-    jest.spyOn(parser, 'parseGradle').mockImplementationOnce(() => {
-      throw err;
-    });
-
+    jest.spyOn(parser, 'parseGradle').mockRejectedValueOnce(err);
     await extractAllPackageFiles({} as ExtractConfig, [filename]);
 
     expect(logger.logger.warn).toHaveBeenCalledWith(
