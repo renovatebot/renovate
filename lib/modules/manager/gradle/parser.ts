@@ -401,7 +401,7 @@ function processApplyFrom({
   tokenMap,
   variables,
 }: SyntaxHandlerInput): SyntaxHandlerOutput {
-  let scriptFile: string | null = tokenMap.scriptFile?.value;
+  let scriptFile: string | null = tokenMap.scriptFile?.value ?? null;
   if (tokenMap.scriptFile?.type === TokenType.StringInterpolation) {
     const token = tokenMap.scriptFile as StringInterpolation;
     scriptFile = interpolateString(token.children, variables);
