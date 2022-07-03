@@ -13,7 +13,7 @@ const hostRules = _hostRules;
 
 const includesJson = Fixtures.getJson('includes.json');
 const beytJson = Fixtures.getJson('1beyt.json');
-const mailchimpJson: = Fixtures.getJson('mailchimp-api.json');
+const mailchimpJson = Fixtures.getJson('mailchimp-api.json');
 const mailchimpDevJson = Fixtures.getJson('mailchimp-api~dev.json');
 
 const baseUrl = 'https://packagist.org';
