@@ -11,26 +11,32 @@ describe('config/migrations/custom/package-files-migration', () => {
           },
         ],
       },
-      { includePaths: ['package.json'] }
+      {
+        includePaths: ['package.json'],
+        packageRules: [{ packageFile: 'package.json', packageRules: [] }],
+      }
     );
   });
 
   it('should still work for wrong config', () => {
     expect(PackageFilesMigration).toMigrate(
       {
-        packageRules: [{ labels: ['hello'] }],
+        packageRules: [{ labels: ['lint'] }],
         packageFiles: [
           {
             packageFile: 'package.json',
-            packageRules: [{ labels: ['bye'] }],
+            packageRules: [{ labels: ['breaking'] }],
           },
         ],
       },
       {
         includePaths: ['package.json'],
         packageRules: [
-          { labels: ['hello'] },
-          { labels: ['bye'], paths: ['package.json'] },
+          { labels: ['lint'] },
+          {
+            packageFile: 'package.json',
+            packageRules: [{ labels: ['breaking'] }],
+          },
         ],
       }
     );
@@ -54,7 +60,10 @@ describe('config/migrations/custom/package-files-migration', () => {
           {
             packageFile: 'package.json',
             packageRules: [
-              { labels: ['bye'], packageRules: [{ addLabels: ['dear'] }] },
+              {
+                labels: ['linter'],
+                packageRules: [{ addLabels: ['es-lint'] }],
+              },
             ],
           },
         ],
@@ -62,7 +71,15 @@ describe('config/migrations/custom/package-files-migration', () => {
       {
         includePaths: ['package.json'],
         packageRules: [
-          { addLabels: ['dear'], labels: ['bye'], paths: ['package.json'] },
+          {
+            packageFile: 'package.json',
+            packageRules: [
+              {
+                labels: ['linter'],
+                packageRules: [{ addLabels: ['es-lint'] }],
+              },
+            ],
+          },
         ],
       }
     );
