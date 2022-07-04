@@ -1,6 +1,6 @@
 import {
   ExecOptions as ChildProcessExecOptions,
-  exec as _cpExec,
+  spawn as _cpSpawn,
 } from 'child_process';
 import { envMock } from '../../../test/exec-util';
 import { GlobalConfig } from '../../config/global';
@@ -10,7 +10,7 @@ import * as dockerModule from './docker';
 import type { ExecOptions, RawExecOptions, VolumeOption } from './types';
 import { exec } from '.';
 
-const cpExec: jest.Mock<typeof _cpExec> = _cpExec as any;
+const cpExec: jest.Mock<typeof _cpSpawn> = _cpSpawn as any;
 
 jest.mock('child_process');
 jest.mock('../../modules/datasource');
