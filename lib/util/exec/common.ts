@@ -106,7 +106,7 @@ function promisifySpawn(
 
 export const rawSpawn: (
   cmd: string,
-  opts: RawExecOptions
+  opts: RawSpawnOptions
 ) => Promise<ExecResult> = promisifySpawn;
 
 export const rawExec: (
