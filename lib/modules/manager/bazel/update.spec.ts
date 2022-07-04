@@ -1,12 +1,12 @@
 import { Readable } from 'stream';
+import { Fixtures } from '../../../../test/fixtures';
 import * as httpMock from '../../../../test/http-mock';
-import { loadFixture } from '../../../../test/util';
 import type { UpdateType } from '../../../config/types';
 import { updateDependency } from '.';
 
-const content = loadFixture('WORKSPACE1');
-const contentContainerPull = loadFixture('container_pull');
-const fileWithBzlExtension = loadFixture('repositories.bzl');
+const content = Fixtures.get('WORKSPACE1');
+const contentContainerPull = Fixtures.get('container_pull');
+const fileWithBzlExtension = Fixtures.get('repositories.bzl');
 
 /*
 git_repository(

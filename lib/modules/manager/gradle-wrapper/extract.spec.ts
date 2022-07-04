@@ -1,21 +1,21 @@
-import { loadFixture } from '../../../../test/util';
+import { Fixtures } from '../../../../test/fixtures';
 import { extractPackageFile } from '.';
 
-const typeBinFileContent = loadFixture('gradle-wrapper-bin.properties');
-const typeAllFileContent = loadFixture('gradle-wrapper-all.properties');
-const prereleaseVersionFileContent = loadFixture(
+const typeBinFileContent = Fixtures.get('gradle-wrapper-bin.properties');
+const typeAllFileContent = Fixtures.get('gradle-wrapper-all.properties');
+const prereleaseVersionFileContent = Fixtures.get(
   'gradle-wrapper-prerelease.properties'
 );
-const unknownFormatFileContent = loadFixture(
+const unknownFormatFileContent = Fixtures.get(
   'gradle-wrapper-unknown-format.properties'
 );
-const whitespacePropertiesFile = loadFixture(
+const whitespacePropertiesFile = Fixtures.get(
   'gradle-wrapper-whitespace.properties'
 );
-const customTypeBinFileContent = loadFixture(
+const customTypeBinFileContent = Fixtures.get(
   'custom-gradle-wrapper-bin.properties'
 );
-const customTypeAllFileContent = loadFixture(
+const customTypeAllFileContent = Fixtures.get(
   'custom-gradle-wrapper-all.properties'
 );
 
