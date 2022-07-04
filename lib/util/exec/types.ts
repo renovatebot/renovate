@@ -1,4 +1,7 @@
-import type { SpawnOptions as ChildProcessSpawnOptions } from 'child_process';
+import type {
+  ExecOptions as ChildProcessExecOptions,
+  SpawnOptions as ChildProcessSpawnOptions,
+} from 'child_process';
 
 export interface ToolConstraint {
   toolName: string;
@@ -27,13 +30,15 @@ export interface DockerOptions {
   cwd?: Opt<string>;
 }
 
-// this will be renamed later on, left as is to minimize PR diff
-export interface RawExecOptions extends ChildProcessSpawnOptions {
+export interface RawSpawnOptions extends ChildProcessSpawnOptions {
   encoding: string;
   maxBuffer?: number | undefined;
 }
 
-// this will be renamed later on, left as is to minimize PR diff
+export interface RawExecOptions extends ChildProcessExecOptions {
+  encoding: string;
+}
+
 export interface ExecResult {
   stdout: string;
   stderr: string;
@@ -41,7 +46,6 @@ export interface ExecResult {
 
 export type ExtraEnv<T = unknown> = Record<string, T>;
 
-// this will be renamed later on, left as is to minimize PR diff
 export interface ExecOptions {
   cwd?: string;
   cwdFile?: string;
