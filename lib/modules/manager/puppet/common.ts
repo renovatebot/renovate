@@ -22,19 +22,14 @@ export function parseGitOwnerRepo(
         .replace(regEx(/^https:\/\/github\.com\//), '')
         .replace(regEx(/\.git$/), '');
     }
-    try {
-      const url = parseUrl(git);
 
-      if (!url) {
-        return invalidUrl(git);
-      }
+    const url = parseUrl(git);
 
-      return url.pathname
-        .replace(regEx(/\.git$/), '')
-        .replace(regEx(/^\//), '');
-    } catch (err) {
+    if (!url) {
       return invalidUrl(git);
     }
+
+    return url.pathname.replace(regEx(/\.git$/), '').replace(regEx(/^\//), '');
   }
 }
 
