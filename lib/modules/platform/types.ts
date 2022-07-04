@@ -44,8 +44,8 @@ export interface RepoParams {
 }
 
 export interface PrDebugData {
-  createdByRenovateVersion: string;
-  updatedByRenovateVersion: string;
+  createdInVer: string;
+  updatedInVer: string;
 }
 
 export interface PrBodyStruct {

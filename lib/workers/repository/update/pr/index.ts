@@ -66,12 +66,11 @@ export type EnsurePrResult = ResultWithPr | ResultWithoutPr;
 export function updatePrDebugData(
   debugData: PrDebugData | undefined
 ): PrDebugData {
-  const createdByRenovateVersion =
-    debugData?.createdByRenovateVersion ?? pkg.version;
+  const createdByRenovateVersion = debugData?.createdInVer ?? pkg.version;
   const updatedByRenovateVersion = pkg.version;
   return {
-    createdByRenovateVersion,
-    updatedByRenovateVersion,
+    createdInVer: createdByRenovateVersion,
+    updatedInVer: updatedByRenovateVersion,
   };
 }
 

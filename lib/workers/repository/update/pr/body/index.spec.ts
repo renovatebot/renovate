@@ -58,8 +58,8 @@ describe('workers/repository/update/pr/body/index', () => {
         },
         {
           debugData: {
-            updatedByRenovateVersion: '1.2.3',
-            createdByRenovateVersion: '1.2.3',
+            updatedInVer: '1.2.3',
+            createdInVer: '1.2.3',
           },
         }
       );
@@ -86,8 +86,8 @@ describe('workers/repository/update/pr/body/index', () => {
         },
         {
           debugData: {
-            updatedByRenovateVersion: '1.2.3',
-            createdByRenovateVersion: '1.2.3',
+            updatedInVer: '1.2.3',
+            createdInVer: '1.2.3',
           },
         }
       );
@@ -122,8 +122,8 @@ describe('workers/repository/update/pr/body/index', () => {
         },
         {
           debugData: {
-            updatedByRenovateVersion: '1.2.3',
-            createdByRenovateVersion: '1.2.3',
+            updatedInVer: '1.2.3',
+            createdInVer: '1.2.3',
           },
         }
       );
@@ -148,8 +148,8 @@ describe('workers/repository/update/pr/body/index', () => {
         },
         {
           debugData: {
-            updatedByRenovateVersion: '1.2.3',
-            createdByRenovateVersion: '1.2.3',
+            updatedInVer: '1.2.3',
+            createdInVer: '1.2.3',
           },
         }
       );
@@ -170,8 +170,8 @@ describe('workers/repository/update/pr/body/index', () => {
         {
           rebasingNotice: 'BAR',
           debugData: {
-            updatedByRenovateVersion: '1.2.3',
-            createdByRenovateVersion: '1.2.3',
+            updatedInVer: '1.2.3',
+            createdInVer: '1.2.3',
           },
         }
       );
@@ -190,8 +190,8 @@ describe('workers/repository/update/pr/body/index', () => {
         },
         {
           debugData: {
-            updatedByRenovateVersion: '1.2.3',
-            createdByRenovateVersion: '1.2.3',
+            updatedInVer: '1.2.3',
+            createdInVer: '1.2.3',
           },
         }
       );

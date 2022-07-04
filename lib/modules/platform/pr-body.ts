@@ -1,4 +1,5 @@
 import hasha from 'hasha';
+import { logger } from '../../logger';
 import { stripEmojis } from '../../util/emoji';
 import { regEx } from '../../util/regex';
 import { fromBase64 } from '../../util/string';
@@ -48,9 +49,13 @@ export function getPrBodyStruct(
     result.rebaseRequested = rebaseRequested;
   }
 
-  const debugPayload = getRenovateDebugPayload(body);
-  if (debugPayload) {
-    result.debugData = JSON.parse(fromBase64(debugPayload));
+  try {
+    const debugPayload = getRenovateDebugPayload(body);
+    if (debugPayload) {
+      result.debugData = JSON.parse(fromBase64(debugPayload));
+    }
+  } catch (e) {
+    logger.warn('Unable to read and parse debugData from the PR');
   }
   return result;
 }
