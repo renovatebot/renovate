@@ -1,4 +1,4 @@
-import { loadFixture } from '../../../../../test/util';
+import { Fixtures } from '../../../../../test/fixtures';
 import { getConfig } from '../../../../config/defaults';
 import * as _fs from '../../../../util/fs';
 import * as npmExtract from '.';
@@ -8,15 +8,15 @@ const fs: any = _fs;
 // TODO: fix types
 const defaultConfig = getConfig();
 
-const input01Content = loadFixture('inputs/01.json', '..');
-const input01GlobContent = loadFixture('inputs/01-glob.json', '..');
-const workspacesContent = loadFixture('inputs/workspaces.json', '..');
-const workspacesSimpleContent = loadFixture(
+const input01Content = Fixtures.get('inputs/01.json', '..');
+const input01GlobContent = Fixtures.get('inputs/01-glob.json', '..');
+const workspacesContent = Fixtures.get('inputs/workspaces.json', '..');
+const workspacesSimpleContent = Fixtures.get(
   'inputs/workspaces-simple.json',
   '..'
 );
-const vendorisedContent = loadFixture('is-object.json', '..');
-const invalidNameContent = loadFixture('invalid-name.json', '..');
+const vendorisedContent = Fixtures.get('is-object.json', '..');
+const invalidNameContent = Fixtures.get('invalid-name.json', '..');
 
 describe('modules/manager/npm/extract/index', () => {
   describe('.extractPackageFile()', () => {
