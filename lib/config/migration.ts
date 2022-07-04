@@ -120,26 +120,6 @@ export function migrateConfig(config: RenovateConfig): MigratedConfig {
           '{{semanticPrefix}}',
           '{{#if semanticCommitType}}{{semanticCommitType}}{{#if semanticCommitScope}}({{semanticCommitScope}}){{/if}}: {{/if}}'
         );
-      } else if (key === 'depTypes' && is.array(val)) {
-        val.forEach((depType) => {
-          if (is.object(depType) && !is.array(depType)) {
-            const depTypeName = (depType as any).depType;
-            if (depTypeName) {
-              migratedConfig.packageRules = is.array(
-                migratedConfig.packageRules
-              )
-                ? migratedConfig.packageRules
-                : [];
-              const newPackageRule = migrateConfig(
-                depType as RenovateConfig
-              ).migratedConfig;
-              delete newPackageRule.depType;
-              newPackageRule.depTypeList = [depTypeName];
-              migratedConfig.packageRules.push(newPackageRule);
-            }
-          }
-        });
-        delete migratedConfig.depTypes;
       } else if (optionTypes[key] === 'object' && is.boolean(val)) {
         migratedConfig[key] = { enabled: val };
       } else if (optionTypes[key] === 'boolean') {
