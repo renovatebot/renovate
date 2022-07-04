@@ -1128,7 +1128,7 @@ export async function ensureComment({
         .replace(regEx(/PR/g), 'MR')
     : topic;
   const comments = await getComments(number);
-  const discussions = await getDiscussions(number);
+  const discussions = blocksMerge ? await getDiscussions(number) : [];
   let body: string;
   let commentId: number | undefined;
   let discussionId: string | undefined;

@@ -1119,8 +1119,6 @@ describe('modules/platform/gitlab/index', () => {
       scope
         .get('/api/v4/projects/some%2Frepo/merge_requests/42/notes')
         .reply(200, [])
-        .get('/api/v4/projects/some%2Frepo/merge_requests/42/discussions')
-        .reply(200, [])
         .post('/api/v4/projects/some%2Frepo/merge_requests/42/notes')
         .reply(200);
       await expect(
@@ -1175,8 +1173,6 @@ describe('modules/platform/gitlab/index', () => {
       scope
         .get('/api/v4/projects/some%2Frepo/merge_requests/42/notes')
         .reply(200, [{ id: 1234, body: '### some-subject\n\nblablabla' }])
-        .get('/api/v4/projects/some%2Frepo/merge_requests/42/discussions')
-        .reply(200, [])
         .put('/api/v4/projects/some%2Frepo/merge_requests/42/notes/1234')
         .reply(200);
       await expect(
@@ -1193,8 +1189,6 @@ describe('modules/platform/gitlab/index', () => {
       scope
         .get('/api/v4/projects/some%2Frepo/merge_requests/42/notes')
         .reply(200, [{ id: 1234, body: '### some-subject\n\nsome\ncontent' }])
-        .get('/api/v4/projects/some%2Frepo/merge_requests/42/discussions')
-        .reply(200, []);
       await expect(
         gitlab.ensureComment({
           number: 42,
@@ -1209,8 +1203,6 @@ describe('modules/platform/gitlab/index', () => {
       scope
         .get('/api/v4/projects/some%2Frepo/merge_requests/42/notes')
         .reply(200, [{ id: 1234, body: '!merge' }])
-        .get('/api/v4/projects/some%2Frepo/merge_requests/42/discussions')
-        .reply(200, []);
       await expect(
         gitlab.ensureComment({
           number: 42,
