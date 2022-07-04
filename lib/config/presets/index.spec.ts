@@ -360,7 +360,6 @@ describe('config/presets/index', () => {
         true // shallow log config
       );
       expect(res).toEqual({
-        extends: ['local>username/preset-repo'],
         labels: ['self-hosted resolved'],
       });
     });
@@ -405,11 +404,7 @@ describe('config/presets/index', () => {
             groupName: 'github-actions dependencies',
           },
         ],
-        extends: [
-          'config:base',
-          'local>username/preset-repo',
-          'github>username/preset-repo',
-        ],
+        extends: ['config:base'],
         labels: ['self-hosted resolved'],
       });
     });
@@ -433,11 +428,38 @@ describe('config/presets/index', () => {
         true // shallow log config
       );
       expect(res).toEqual({
-        extends: [
-          'config:base',
-          'github>username/preset-repo',
-          'config:js-app',
+        extends: ['config:base', 'config:js-app'],
+        packageRules: [
+          {
+            matchManagers: ['github-actions'],
+            groupName: 'github-actions dependencies',
+          },
         ],
+      });
+    });
+
+    it('ignore fetching internal persets ', async () => {
+      // ignore resolving of merge-confidence:beta
+      config.extends = [
+        'config:base',
+        'github>whitesource/merge-confidence:beta',
+      ];
+      config.packageRules = [
+        {
+          matchManagers: ['github-actions'],
+          groupName: 'github-actions dependencies',
+        },
+      ];
+      gitHub.getPreset.mockResolvedValueOnce({});
+      const res = await presets.resolveConfigPresets(
+        config,
+        {},
+        [],
+        [],
+        true // shallow log config
+      );
+      expect(res).toEqual({
+        extends: ['config:base', 'github>whitesource/merge-confidence:beta'],
         packageRules: [
           {
             matchManagers: ['github-actions'],
@@ -1090,26 +1112,6 @@ Object {
       expect(e!.validationSource).toBeUndefined();
       expect(e!.validationError).toBeUndefined();
       expect(e!.validationMessage).toBeUndefined();
-    });
-
-    it('includes external presets for shallow mode', () => {
-      expect(
-        presets.isPresetForShallowConfig(
-          'github>whitesource/merge-confidence:beta'
-        )
-      ).toBeFalsy();
-      expect(
-        presets.isPresetForShallowConfig('github>somerepo/renovate')
-      ).toBeTruthy();
-      expect(
-        presets.isPresetForShallowConfig('gitlab>somerepo/renovate')
-      ).toBeTruthy();
-      expect(
-        presets.isPresetForShallowConfig('gitea>somerepo/renovate')
-      ).toBeTruthy();
-      expect(
-        presets.isPresetForShallowConfig('local>somerepo/renovate')
-      ).toBeTruthy();
     });
   });
 });

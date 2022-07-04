@@ -8,7 +8,6 @@ import { decryptConfig } from '../../../config/decrypt';
 import { migrateAndValidate } from '../../../config/migrate-validate';
 import { migrateConfig } from '../../../config/migration';
 import * as presets from '../../../config/presets';
-import { isPresetForShallowConfig } from '../../../config/presets';
 import { applySecretsToConfig } from '../../../config/secrets';
 import type { RenovateConfig } from '../../../config/types';
 import {
@@ -226,7 +225,10 @@ export async function mergeRenovateConfig(
     ),
     repository
   );
-  logShallowConfig(shallowResolvedConfig);
+  logger.debug(
+    { resolvedShallowConfig: shallowResolvedConfig },
+    'shallow config'
+  );
   // Decrypt after resolving in case the preset contains npm authentication instead
   let resolvedConfig = await decryptConfig(
     await presets.resolveConfigPresets(decryptedConfig, config),
@@ -276,25 +278,4 @@ export async function mergeRenovateConfig(
     );
   }
   return returnConfig;
-}
-
-export function logShallowConfig(ShallowConfig: RenovateConfig): void {
-  // remove resolved external presets from the extends array for the log
-  // clean duplicate presets in case of two different presets are having
-  // same values in the extends array
-  if (is.array(ShallowConfig?.extends)) {
-    if (ShallowConfig.extends.length) {
-      ShallowConfig.extends = ShallowConfig.extends.filter(
-        (e) => !isPresetForShallowConfig(e)
-      );
-      const uniqueExtends = new Set(ShallowConfig.extends.values());
-      ShallowConfig.extends = Array.from(uniqueExtends);
-    }
-    // istanbul ignore if
-    if (ShallowConfig.extends.length === 0) {
-      delete ShallowConfig.extends;
-    }
-  }
-
-  logger.debug({ resolvedShallowConfig: ShallowConfig }, 'shallow config');
 }

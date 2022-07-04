@@ -278,9 +278,6 @@ export async function resolveConfigPresets(
   existingPresets: string[] = [],
   shallowResolve = false
 ): Promise<AllConfig> {
-  if (shallowResolve === true && is.emptyObject(inputConfig)) {
-    return {};
-  }
   let ignorePresets = clone(_ignorePresets);
   if (!ignorePresets || ignorePresets.length === 0) {
     ignorePresets = inputConfig.ignorePresets ?? [];
@@ -290,6 +287,7 @@ export async function resolveConfigPresets(
     'resolveConfigPresets'
   );
   let config: AllConfig = {};
+  const tempExtends: string[] = [];
   // First, merge all the preset configs from left to right
   if (inputConfig.extends?.length) {
     for (const preset of inputConfig.extends) {
@@ -345,7 +343,8 @@ export async function resolveConfigPresets(
           );
           throw error;
         }
-        if (shallowResolve && !isPresetForShallowConfig(preset)) {
+        if (shallowResolve && !shouldShallowResolve(preset)) {
+          tempExtends.push(preset);
           fetchedPreset = {};
         }
         const presetConfig = await resolveConfigPresets(
@@ -359,25 +358,24 @@ export async function resolveConfigPresets(
         if (inputConfig?.ignoreDeps?.length === 0) {
           delete presetConfig.description;
         }
-        const tempExtends = extendsArrayClone(shallowResolve, config);
+
+        if (shallowResolve && presetConfig?.extends) {
+          // save extends array to not lose values from it
+          for (const extend of presetConfig.extends) {
+            if (!shouldShallowResolve(extend)) {
+              tempExtends.push(extend);
+            }
+          }
+        }
         // Now assign "regular" config on top
         config = mergeChildConfig(config, presetConfig);
-        // istanbul ignore if
-        if (shallowResolve && tempExtends.length) {
-          config?.extends?.push(...tempExtends);
-        }
       }
     }
   }
   logger.trace({ config }, `Post-preset resolve config`);
-  const tempExtends = extendsArrayClone(shallowResolve, config);
   // Now assign "regular" config on top
   config = mergeChildConfig(config, inputConfig);
-  if (shallowResolve) {
-    if (tempExtends.length && config?.extends) {
-      config.extends.push(...tempExtends);
-    }
-  } else {
+  if (!shallowResolve) {
     delete config.extends;
   }
   delete config.ignorePresets;
@@ -416,25 +414,27 @@ export async function resolveConfigPresets(
   }
   logger.trace({ config: inputConfig }, 'Input config');
   logger.trace({ config }, 'Resolved config');
+  if (shallowResolve) {
+    handleExtendsArray(config, tempExtends);
+  }
   return config;
 }
 
-function extendsArrayClone(
-  shallowResolve: boolean,
-  config: AllConfig
-): string[] {
-  // save extends array before using mergeChildConfig
-  // to not lose values from the array
-  // cause internal ones are needed for the log
-  const tempExtends: string[] = [];
-  if (shallowResolve && config?.extends?.length) {
-    tempExtends.push(...config.extends);
-    tempExtends.filter((e) => !whitesourcePresetRegex.test(e));
+function handleExtendsArray(config: AllConfig, tempExtends: string[]): void {
+  // in case of shallowResolve set to true:
+  // remove resolved external presets from the extends array for the log
+  // clean duplicate presets in case of two different presets are having
+  // same values in the extends array
+  config.extends = config.extends?.filter((e) => !shouldShallowResolve(e));
+  config.extends?.push(...tempExtends);
+  const uniqueExtends = new Set(config.extends?.values());
+  config.extends = Array.from(uniqueExtends);
+  if (config?.extends?.length === 0) {
+    delete config.extends;
   }
-  return tempExtends;
 }
 
-export function isPresetForShallowConfig(presetSource: string): boolean {
+export function shouldShallowResolve(presetSource: string): boolean {
   if (whitesourcePresetRegex.test(presetSource)) {
     return false;
   }
