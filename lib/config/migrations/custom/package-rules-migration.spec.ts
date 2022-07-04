@@ -1,26 +1,9 @@
 import type { RenovateConfig } from '../../types';
 import { MigrationsService } from '../migrations-service';
+import { PackageRulesMigration, renameMap } from './package-rules-migration';
 
 describe('config/migrations/custom/package-rules-migration', () => {
-  it('should migrate value to object', () => {
-    const res = {
-      packageRules: [
-        {
-          matchPaths: [],
-          labels: ['linting'],
-          matchBaseBranches: [],
-          matchLanguages: [],
-          matchManagers: [],
-          matchDatasources: [],
-          matchDepTypes: [],
-          addLabels: [],
-          matchPackageNames: [],
-          matchPackagePatterns: [],
-          matchSourceUrlPrefixes: [],
-          matchUpdateTypes: [],
-        },
-      ],
-    };
+  it('should preserve config order', () => {
     const originalConfig: RenovateConfig = {
       packageRules: [
         {
@@ -43,8 +26,35 @@ describe('config/migrations/custom/package-rules-migration', () => {
       MigrationsService.run(originalConfig).packageRules;
 
     const mappedProperties = Object.keys(migratedPackageRules![0]);
-    const expectedMappedProperties = Object.keys(res.packageRules[0]);
+    const expectedMappedProperties = Object.keys(
+      originalConfig.packageRules![0]
+    ).map((key) => renameMap[key as keyof typeof renameMap] ?? key);
 
     expect(expectedMappedProperties).toEqual(mappedProperties);
+  });
+
+  it('should not migrate nested packageRules', () => {
+    expect(PackageRulesMigration).toMigrate(
+      {
+        packageRules: [
+          {
+            paths: [],
+            packgageRules: {
+              languages: ['javascript'],
+            },
+          },
+        ],
+      },
+      {
+        packageRules: [
+          {
+            matchPaths: [],
+            packgageRules: {
+              languages: ['javascript'],
+            },
+          },
+        ],
+      }
+    );
   });
 });

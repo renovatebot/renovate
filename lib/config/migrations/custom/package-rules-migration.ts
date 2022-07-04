@@ -1,8 +1,7 @@
-import is from '@sindresorhus/is';
 import type { PackageRule } from '../../types';
 import { AbstractMigration } from '../base/abstract-migration';
 
-const renameMap = {
+export const renameMap = {
   paths: 'matchPaths',
   languages: 'matchLanguages',
   baseBranchList: 'matchBaseBranches',
@@ -21,10 +20,6 @@ export class PackageRulesMigration extends AbstractMigration {
   override run(value: PackageRule[] | null): void {
     let packageRules = this.get('packageRules') as PackageRule[];
     packageRules = Array.isArray(packageRules) ? [...packageRules] : [];
-
-    if (is.plainObject(value)) {
-      packageRules.push(value);
-    }
 
     packageRules = packageRules.map((packageRule) => {
       const newPackageRule: PackageRule = {};
