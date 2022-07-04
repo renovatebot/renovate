@@ -294,14 +294,13 @@ export function extractPackageFile(
         return;
       }
       dep.depName = depName;
-      dep.repo = parsedUrl.repo;
       if (regEx(/^[a-f0-9]{40}$/i).test(parsedUrl.currentValue)) {
         dep.currentDigest = parsedUrl.currentValue;
       } else {
         dep.currentValue = parsedUrl.currentValue;
       }
       dep.datasource = parsedUrl.datasource;
-      dep.packageName = dep.repo;
+      dep.packageName = parsedUrl.repo;
       deps.push(dep);
     } else if (
       depType === 'container_pull' &&

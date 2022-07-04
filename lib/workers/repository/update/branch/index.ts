@@ -84,9 +84,7 @@ export async function processBranch(
 ): Promise<ProcessBranchResult> {
   let config: BranchConfig = { ...branchConfig };
   logger.trace({ config }, 'processBranch()');
-  await checkoutBranch(config.baseBranch!);
   let branchExists = gitBranchExists(config.branchName);
-
   if (!branchExists && config.branchPrefix !== config.branchPrefixOld) {
     const branchName = config.branchName.replace(
       config.branchPrefix!,
@@ -280,7 +278,8 @@ export async function processBranch(
         'Branch + PR exists but is not scheduled -- will update if necessary'
       );
     }
-
+    await checkoutBranch(config.baseBranch!);
+    //stability checks
     if (
       config.upgrades.some(
         (upgrade) =>

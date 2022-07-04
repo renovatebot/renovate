@@ -60,10 +60,6 @@ export abstract class CommitMessage {
     this._footer = this.normalizeInput(value);
   }
 
-  get subject(): string {
-    return this._subject;
-  }
-
   set subject(value: string) {
     this._subject = this.normalizeInput(value);
     this._subject = this._subject?.replace(
