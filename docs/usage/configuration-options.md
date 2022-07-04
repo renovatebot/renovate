@@ -2502,29 +2502,12 @@ image: my.new.registry/aRepository/andImage:1.21-alpine
 
 You can use the `registryAliases` object to set registry aliases.
 
-The aliases are interpreted by the relevant manager.
+This feature works with the following managers:
 
-The `helm-requirements`, `helmv3` and `helmfile` managers listed above all have this default registryAlias:
-
-```json
-{
-  "registryAliases": {
-    "stable": "https://charts.helm.sh/stable"
-  }
-}
-```
-
-For the `gitlabci` manager it can be useful to configure an alias for the `$CI_REGISTRY` variable:
-
-```json
-{
-  "registryAliases": {
-    "$CI_REGISTRY": "registry.example.com"
-  }
-}
-```
-
-###
+- [`helm-requirements`](/modules/manager/helm-requirements/)
+- [`helmv3`](/modules/manager/helmv3/)
+- [`helmfile`](/modules/manager/helmfile/)
+- [`gitlabci`](/modules/manager/gitlabci/)
 
 ## registryUrls
 
