@@ -213,6 +213,24 @@ describe('modules/manager/npm/extract/index', () => {
       expect(res?.npmrc).toBe('registry=https://registry.npmjs.org\n');
     });
 
+    it('reads .yarnrc.yml when config.npmrc is merged', async () => {
+      fs.readLocalFile = jest.fn((fileName) => {
+        if (fileName === '.yarnrc.yml') {
+          return 'npmRegistryServer: https://registry.npmjs.org';
+        }
+        return null;
+      });
+      const res = await npmExtract.extractPackageFile(
+        input01Content,
+        'package.json',
+        { npmrc: 'save-exact=true', npmrcMerge: true }
+      );
+      expect(res?.npmrc).toBe(
+        `save-exact=true
+registry=https://registry.npmjs.org`
+      );
+    });
+
     it('finds lerna', async () => {
       fs.readLocalFile = jest.fn((fileName) => {
         if (fileName === 'lerna.json') {

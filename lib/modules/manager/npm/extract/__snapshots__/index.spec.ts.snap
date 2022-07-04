@@ -1547,7 +1547,7 @@ Object {
     "yarnZeroInstall": true,
   },
   "npmLock": undefined,
-  "npmrc": undefined,
+  "npmrc": "",
   "packageFileVersion": "1.0.0",
   "packageJsonName": "renovate",
   "packageJsonType": "app",

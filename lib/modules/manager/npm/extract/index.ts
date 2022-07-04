@@ -7,6 +7,7 @@ import { getSiblingFileName, readLocalFile } from '../../../../util/fs';
 import { newlineRegex, regEx } from '../../../../util/regex';
 import { GithubTagsDatasource } from '../../../datasource/github-tags';
 import { NpmDatasource } from '../../../datasource/npm';
+import { convertYarnrcYmlToNpmrc } from '../../../datasource/npm/yarnrc';
 import * as nodeVersioning from '../../../versioning/node';
 import { isValid, isVersion } from '../../../versioning/npm';
 import type {
@@ -138,6 +139,24 @@ export async function extractPackageFile(
 
   const yarnrcYmlFileName = getSiblingFileName(fileName, '.yarnrc.yml');
   const yarnZeroInstall = await isZeroInstall(yarnrcYmlFileName);
+
+  const repoYarnrcYml = await readLocalFile(yarnrcYmlFileName, 'utf8');
+  if (is.string(repoYarnrcYml)) {
+    if (is.string(config.npmrc) && !config.npmrcMerge) {
+      logger.debug(
+        { yarnrcYmlFileName },
+        'Repo .yarnrc.yml file is ignored due to config.npmrc with config.npmrcMerge=false'
+      );
+    } else {
+      npmrc = config.npmrc ?? '';
+      if (npmrc.length) {
+        if (!npmrc.endsWith('\n')) {
+          npmrc += '\n';
+        }
+      }
+      npmrc += convertYarnrcYmlToNpmrc(repoYarnrcYml);
+    }
+  }
 
   let lernaJsonFile: string | undefined;
   let lernaPackages: string[] | undefined;
