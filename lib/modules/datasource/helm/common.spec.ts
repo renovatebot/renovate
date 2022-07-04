@@ -1,10 +1,10 @@
 import { load } from 'js-yaml';
-import { loadFixture } from '../../../../test/util';
+import { Fixtures } from '../../../../test/fixtures';
 import { findSourceUrl } from './common';
 import type { HelmRepository } from './types';
 
 // Truncated index.yaml file
-const repo = load(loadFixture('sample.yaml'), {
+const repo = load(Fixtures.get('sample.yaml'), {
   json: true,
 }) as HelmRepository;
 

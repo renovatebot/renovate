@@ -1,11 +1,11 @@
-import { loadFixture } from '../../../../test/util';
+import { Fixtures } from '../../../../test/fixtures';
 import { extractPackageFile } from '.';
 
-const aalib = loadFixture('aalib.rb');
-const aap = loadFixture('aap.rb');
-const acmetool = loadFixture('acmetool.rb');
-const aide = loadFixture('aide.rb');
-const ibazel = loadFixture('ibazel.rb');
+const aalib = Fixtures.get('aalib.rb');
+const aap = Fixtures.get('aap.rb');
+const acmetool = Fixtures.get('acmetool.rb');
+const aide = Fixtures.get('aide.rb');
+const ibazel = Fixtures.get('ibazel.rb');
 
 describe('modules/manager/homebrew/extract', () => {
   describe('extractPackageFile()', () => {
