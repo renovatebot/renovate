@@ -90,11 +90,9 @@ function listHermitPackages(hermitFile: string): HermitListItem[] | null {
         return null;
       }
 
-      const { packageName, version } = groups;
-
       return {
-        Name: packageName,
-        Version: version,
+        Name: groups.packageName,
+        Version: groups.version,
       };
     })
     .filter(is.truthy);
