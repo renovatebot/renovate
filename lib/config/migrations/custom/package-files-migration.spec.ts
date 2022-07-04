@@ -21,7 +21,7 @@ describe('config/migrations/custom/package-files-migration', () => {
   it('should handle multiple packageFile', () => {
     expect(PackageFilesMigration).toMigrate(
       {
-        packageFiles: ['package.json', 'Chart.yaml'],
+        packageFiles: [['package.json', 'Chart.yaml']],
       },
       {
         includePaths: ['package.json', 'Chart.yaml'],
