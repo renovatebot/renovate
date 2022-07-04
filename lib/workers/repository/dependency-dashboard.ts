@@ -17,39 +17,52 @@ interface DependencyDashboard {
   dependencyDashboardAllRateLimited: boolean;
 }
 
-function checkApproveAllPendingPR(issueBody: string): string {
-  const checkApproveAllPendingPR =
-    ' - \\[x\\] <!-- approve-all-pending-prs -->';
+function markApproveAllPendingPRBranches(issueBody: string): string {
   let newIssueBody = issueBody;
-  if (regEx(checkApproveAllPendingPR).test(issueBody)) {
-    const checkPending = regEx(/ - \[ ] <!-- approve-branch=/g);
-    newIssueBody = newIssueBody.replace(
-      checkPending,
-      ' - [x] <!-- approve-branch='
-    );
-  }
+  const checkPending = regEx(/ - \[ ] <!-- approve-branch=/g);
+  newIssueBody = newIssueBody.replace(
+    checkPending,
+    ' - [x] <!-- approve-branch='
+  );
   return newIssueBody;
 }
 
-function checkApproveAllRateLimitdPR(issueBody: string): string {
+function markOpenAllRateLimitedPRBranches(issueBody: string): string {
+  let newIssueBody = issueBody;
+  const checkPending = regEx(/ - \[ ] <!-- unlimit-branch=/g);
+  newIssueBody = newIssueBody.replace(
+    checkPending,
+    ' - [x] <!-- unlimit-branch='
+  );
+
+  return newIssueBody;
+}
+
+function checkOpenAllRateLimitedPR(issueBody: string): boolean {
   const checkApproveOpenAllRateLimitedPR =
     ' - \\[x\\] <!-- open-all-rate-limited-prs -->';
-  let newIssueBody = issueBody;
-  if (regEx(checkApproveOpenAllRateLimitedPR).test(issueBody)) {
-    const checkPending = regEx(/ - \[ ] <!-- unlimit-branch=/g);
-    newIssueBody = newIssueBody.replace(
-      checkPending,
-      ' - [x] <!-- unlimit-branch='
-    );
-  }
-  return newIssueBody;
+  return regEx(checkApproveOpenAllRateLimitedPR).test(issueBody);
+}
+
+function checkApproveAllPendingPR(issueBody: string): boolean {
+  const checkApproveAllPendingPR =
+    ' - \\[x\\] <!-- approve-all-pending-prs -->';
+  return regEx(checkApproveAllPendingPR).test(issueBody);
 }
 
 function parseDashboardIssue(issueBody: string): DependencyDashboard {
-  let newIssueBody = checkApproveAllPendingPR(issueBody);
-  newIssueBody = checkApproveAllRateLimitdPR(newIssueBody);
+  const dependencyDashboardAllPending = checkApproveAllPendingPR(issueBody);
+  const dependencyDashboardAllRateLimited =
+    checkOpenAllRateLimitedPR(issueBody);
+  let massagedIssueBody = issueBody;
+  if (dependencyDashboardAllRateLimited) {
+    massagedIssueBody = markOpenAllRateLimitedPRBranches(massagedIssueBody);
+  }
+  if (dependencyDashboardAllPending) {
+    massagedIssueBody = markApproveAllPendingPRBranches(massagedIssueBody);
+  }
   const checkMatch = ' - \\[x\\] <!-- ([a-zA-Z]+)-branch=([^\\s]+) -->';
-  const checked = newIssueBody.match(regEx(checkMatch, 'g'));
+  const checked = massagedIssueBody.match(regEx(checkMatch, 'g'));
   const dependencyDashboardChecks: Record<string, string> = {};
   if (checked?.length) {
     const re = regEx(checkMatch);
@@ -58,32 +71,16 @@ function parseDashboardIssue(issueBody: string): DependencyDashboard {
       dependencyDashboardChecks[branchName] = type;
     });
   }
-  const checkedRebaseAll = newIssueBody.includes(
+  const checkedRebaseAll = massagedIssueBody.includes(
     ' - [x] <!-- rebase-all-open-prs -->'
   );
 
-  const checkApprovAllRateLimitedPRs = newIssueBody.includes(
-    ' - [x] <!-- open-all-rate-limited-prs -->'
-  );
-
-  const checkedApproveAllPendingPRs = newIssueBody.includes(
-    ' - [x] <!-- approve-all-pending-prs -->'
-  );
   let dependencyDashboardRebaseAllOpen = false;
-  let dependencyDashboardAllPending = false;
-  let dependencyDashboardAllRateLimited = false;
 
   if (checkedRebaseAll) {
     dependencyDashboardRebaseAllOpen = true;
   }
 
-  if (checkedApproveAllPendingPRs) {
-    dependencyDashboardAllPending = true;
-  }
-
-  if (checkApprovAllRateLimitedPRs) {
-    dependencyDashboardAllRateLimited = true;
-  }
   return {
     dependencyDashboardChecks,
     dependencyDashboardRebaseAllOpen,

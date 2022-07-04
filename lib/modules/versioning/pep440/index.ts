@@ -29,8 +29,8 @@ const {
 
 function isVersion(input: string | undefined | null): boolean {
   // @renovatebot/pep440 isn't strict null save
-
-  return !!valid(input);
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+  return !!valid(input!);
 }
 
 const isStable = (input: string): boolean => {
