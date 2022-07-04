@@ -44,9 +44,27 @@ export interface ExecResult {
   stderr: string;
 }
 
+export interface SpawnResult {
+  stdout: string;
+  stderr: string;
+}
+
 export type ExtraEnv<T = unknown> = Record<string, T>;
 
 export interface ExecOptions {
+  cwd?: string;
+  cwdFile?: string;
+  env?: Opt<ExtraEnv>;
+  extraEnv?: Opt<ExtraEnv>;
+  docker?: Opt<DockerOptions>;
+  toolConstraints?: Opt<ToolConstraint[]>;
+  preCommands?: Opt<string[]>;
+  // Following are pass-through to child process
+  maxBuffer?: number | undefined;
+  timeout?: number | undefined;
+}
+
+export interface SpawnOptions {
   cwd?: string;
   cwdFile?: string;
   env?: Opt<ExtraEnv>;
