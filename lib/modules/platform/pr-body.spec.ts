@@ -19,8 +19,8 @@ describe('modules/platform/pr-body', () => {
       ).toEqual({
         hash: '3fc9b689459d738f8c88a3a48aa9e33542016b7a4052e001aaa536fca74813cb',
         debugData: {
-          createdByRenovateVersion: '1.2.1',
-          updatedByRenovateVersion: '1.2.3',
+          createdInVer: '1.2.1',
+          updatedInVer: '1.2.3',
         },
       });
       expect(
