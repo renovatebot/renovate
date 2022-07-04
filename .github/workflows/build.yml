@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-      - v25
 
   pull_request:
 
@@ -14,6 +13,9 @@ on:
         description: 'Dry-Run'
         default: 'true'
         required: false
+
+permissions:
+  contents: read
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.number || github.ref }}
@@ -146,6 +148,10 @@ jobs:
     runs-on: ubuntu-latest
     # release shouldn't need more than 5 min
     timeout-minutes: 15
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
 
     steps:
       # full checkout for semantic-release
