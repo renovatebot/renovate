@@ -9,10 +9,14 @@ export class PackageFilesMigration extends AbstractMigration {
   override run(value: unknown): void {
     const packageRules: PackageRule[] = this.get('packageRules') ?? [];
     if (is.array(value)) {
-      const fileList = [];
+      const fileList: string[] = [];
       for (const packageFile of value) {
-        if (is.object(packageFile) && !is.array(packageFile)) {
-          fileList.push((packageFile as any).packageFile);
+        if (
+          is.nonEmptyObject(packageFile) &&
+          'packageFile' in packageFile &&
+          is.string(packageFile['packageFile'])
+        ) {
+          fileList.push(packageFile['packageFile']);
           if (Object.keys(packageFile).length > 1) {
             packageRules.push({
               ...packageFile,
