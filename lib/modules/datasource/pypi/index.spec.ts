@@ -178,6 +178,25 @@ describe('modules/datasource/pypi/index', () => {
       expect(result?.changelogUrl).toBe(info.project_urls.changelog);
     });
 
+    it('excludes gh sponsors url from project_urls', async () => {
+      const info = {
+        name: 'flexget',
+        home_page: 'https://flexget.com',
+        project_urls: {
+          random: 'https://github.com/sponsors/Flexget',
+        },
+      };
+      httpMock
+        .scope(baseUrl)
+        .get('/flexget/json')
+        .reply(200, { ...JSON.parse(res1), info });
+      const result = await getPkgReleases({
+        datasource,
+        depName: 'flexget',
+      });
+      expect(result?.sourceUrl).toBeUndefined();
+    });
+
     it('normalizes the package name according to PEP 503', async () => {
       const expectedHttpCall = httpMock
         .scope(baseUrl)
@@ -213,7 +232,7 @@ describe('modules/datasource/pypi/index', () => {
     });
 
     it('normalizes the package name according to PEP 503 querying a simple endpoint', async () => {
-      const simpleRegistryUrl = 'https://pypi.org/simple/';
+      const simpleRegistryUrl = 'https://some.registry.org/simple/';
       const expectedHttpCall = httpMock
         .scope(simpleRegistryUrl)
         .get('/not-normalized-package/')
@@ -258,11 +277,11 @@ describe('modules/datasource/pypi/index', () => {
 
     it('process data from simple endpoint', async () => {
       httpMock
-        .scope('https://pypi.org/simple/')
+        .scope('https://some.registry.org/simple/')
         .get('/dj-database-url/')
         .reply(200, htmlResponse);
       const config = {
-        registryUrls: ['https://pypi.org/simple/'],
+        registryUrls: ['https://some.registry.org/simple/'],
       };
       expect(
         await getPkgReleases({
@@ -315,11 +334,11 @@ describe('modules/datasource/pypi/index', () => {
 
     it('process data from simple endpoint with hyphens', async () => {
       httpMock
-        .scope('https://pypi.org/simple/')
+        .scope('https://some.registry.org/simple/')
         .get('/package-with-hyphens/')
         .reply(200, hyphensResponse);
       const config = {
-        registryUrls: ['https://pypi.org/simple/'],
+        registryUrls: ['https://some.registry.org/simple/'],
       };
       const res = await getPkgReleases({
         datasource,
@@ -335,11 +354,11 @@ describe('modules/datasource/pypi/index', () => {
 
     it('process data from simple endpoint with hyphens replaced with underscores', async () => {
       httpMock
-        .scope('https://pypi.org/simple/')
+        .scope('https://some.registry.org/simple/')
         .get('/image-collector/')
         .reply(200, mixedHyphensResponse);
       const config = {
-        registryUrls: ['https://pypi.org/simple/'],
+        registryUrls: ['https://some.registry.org/simple/'],
       };
       expect(
         await getPkgReleases({
@@ -353,11 +372,11 @@ describe('modules/datasource/pypi/index', () => {
 
     it('process data from simple endpoint with mixed-case characters', async () => {
       httpMock
-        .scope('https://pypi.org/simple/')
+        .scope('https://some.registry.org/simple/')
         .get('/packagewithmixedcase/')
         .reply(200, mixedCaseResponse);
       const config = {
-        registryUrls: ['https://pypi.org/simple/'],
+        registryUrls: ['https://some.registry.org/simple/'],
       };
       const res = await getPkgReleases({
         datasource,
@@ -373,11 +392,11 @@ describe('modules/datasource/pypi/index', () => {
 
     it('process data from simple endpoint with mixed-case characters when using lower case dependency name', async () => {
       httpMock
-        .scope('https://pypi.org/simple/')
+        .scope('https://some.registry.org/simple/')
         .get('/packagewithmixedcase/')
         .reply(200, mixedCaseResponse);
       const config = {
-        registryUrls: ['https://pypi.org/simple/'],
+        registryUrls: ['https://some.registry.org/simple/'],
       };
       const res = await getPkgReleases({
         datasource,
@@ -393,11 +412,11 @@ describe('modules/datasource/pypi/index', () => {
 
     it('process data from simple endpoint with periods', async () => {
       httpMock
-        .scope('https://pypi.org/simple/')
+        .scope('https://some.registry.org/simple/')
         .get('/package-with-periods/')
         .reply(200, withPeriodsResponse);
       const config = {
-        registryUrls: ['https://pypi.org/simple/'],
+        registryUrls: ['https://some.registry.org/simple/'],
       };
       const res = await getPkgReleases({
         datasource,
@@ -413,11 +432,11 @@ describe('modules/datasource/pypi/index', () => {
 
     it('returns null for empty response', async () => {
       httpMock
-        .scope('https://pypi.org/simple/')
+        .scope('https://some.registry.org/simple/')
         .get('/dj-database-url/')
         .reply(200);
       const config = {
-        registryUrls: ['https://pypi.org/simple/'],
+        registryUrls: ['https://some.registry.org/simple/'],
       };
       expect(
         await getPkgReleases({
@@ -431,11 +450,11 @@ describe('modules/datasource/pypi/index', () => {
 
     it('returns null for 404 response from simple endpoint', async () => {
       httpMock
-        .scope('https://pypi.org/simple/')
+        .scope('https://some.registry.org/simple/')
         .get('/dj-database-url/')
         .replyWithError('error');
       const config = {
-        registryUrls: ['https://pypi.org/simple/'],
+        registryUrls: ['https://some.registry.org/simple/'],
       };
       expect(
         await getPkgReleases({
@@ -449,11 +468,11 @@ describe('modules/datasource/pypi/index', () => {
 
     it('returns null for response with no versions', async () => {
       httpMock
-        .scope('https://pypi.org/simple/')
+        .scope('https://some.registry.org/simple/')
         .get('/dj-database-url/')
         .reply(200, badResponse);
       const config = {
-        registryUrls: ['https://pypi.org/simple/'],
+        registryUrls: ['https://some.registry.org/simple/'],
       };
       expect(
         await getPkgReleases({
@@ -487,11 +506,11 @@ describe('modules/datasource/pypi/index', () => {
 
     it('parses data-requires-python and respects constraints from simple endpoint', async () => {
       httpMock
-        .scope('https://pypi.org/simple/')
+        .scope('https://some.registry.org/simple/')
         .get('/dj-database-url/')
         .reply(200, dataRequiresPythonResponse);
       const config = {
-        registryUrls: ['https://pypi.org/simple/'],
+        registryUrls: ['https://some.registry.org/simple/'],
       };
       expect(
         await getPkgReleases({
@@ -502,5 +521,20 @@ describe('modules/datasource/pypi/index', () => {
         })
       ).toMatchSnapshot();
     });
+  });
+
+  it('uses https://pypi.org/pypi/ instead of https://pypi.org/simple/', async () => {
+    httpMock.scope(baseUrl).get('/azure-cli-monitor/json').reply(200, res1);
+    const config = {
+      registryUrls: ['https://pypi.org/simple/'],
+    };
+    expect(
+      await getPkgReleases({
+        datasource,
+        ...config,
+        constraints: { python: '2.7' },
+        depName: 'azure-cli-monitor',
+      })
+    ).toMatchSnapshot();
   });
 });

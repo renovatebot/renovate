@@ -1,10 +1,10 @@
-import { loadFixture } from '../../../../test/util';
+import { Fixtures } from '../../../../test/fixtures';
 import { GlobalConfig } from '../../../config/global';
 import { extractPackageFile } from '.';
 
-const yamlFileMultiConfig = loadFixture('gitlab-ci.1.yaml');
-const yamlFileSingleConfig = loadFixture('gitlab-ci.2.yaml');
-const yamlWithEmptyIncludeConfig = loadFixture('gitlab-ci.3.yaml');
+const yamlFileMultiConfig = Fixtures.get('gitlab-ci.1.yaml');
+const yamlFileSingleConfig = Fixtures.get('gitlab-ci.2.yaml');
+const yamlWithEmptyIncludeConfig = Fixtures.get('gitlab-ci.3.yaml');
 
 describe('modules/manager/gitlabci-include/extract', () => {
   describe('extractPackageFile()', () => {
