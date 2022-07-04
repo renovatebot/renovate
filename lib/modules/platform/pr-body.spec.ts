@@ -23,6 +23,13 @@ describe('modules/platform/pr-body', () => {
           updatedByRenovateVersion: '1.2.3',
         },
       });
+      expect(
+        getPrBodyStruct(
+          'something \n<!--renovate-debug:some-wrong-data-ABCDEFGHIJKLMNOP-->'
+        )
+      ).toEqual({
+        hash: '3fc9b689459d738f8c88a3a48aa9e33542016b7a4052e001aaa536fca74813cb',
+      });
     });
 
     it('hashes ignoring debug info', () => {

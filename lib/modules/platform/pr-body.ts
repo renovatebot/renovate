@@ -49,13 +49,13 @@ export function getPrBodyStruct(
     result.rebaseRequested = rebaseRequested;
   }
 
-  try {
-    const debugPayload = getRenovateDebugPayload(body);
-    if (debugPayload) {
+  const debugPayload = getRenovateDebugPayload(body);
+  if (debugPayload) {
+    try {
       result.debugData = JSON.parse(fromBase64(debugPayload));
+    } catch (e) {
+      logger.warn('Unable to read and parse debugData from the PR');
     }
-  } catch (e) {
-    logger.warn('Unable to read and parse debugData from the PR');
   }
   return result;
 }
