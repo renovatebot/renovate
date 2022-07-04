@@ -113,7 +113,7 @@ Alias values must be properly formatted URIs.
 
 ## artifactUpdateWarningAsThread
 
-By default, Renovate will create a warning comment when an artifact update occurs.
+By default, Renovate will create a warning comment when an artifact update fails.
 By configuring this setting to `true`, Renovatebot will instead create a thread when an artifact update occurs. This requires explicit acknowlegement of the issue when your repository is configured to have all threads resolved before merging.
 
 ## assignAutomerge
