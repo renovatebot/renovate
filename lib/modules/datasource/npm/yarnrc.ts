@@ -1,54 +1,76 @@
 import { load } from 'js-yaml';
+import type { HostRule } from '../../../types/host-rules';
+import type { NpmrcRules } from './types';
 
 interface YarnrcYAML {
-  npmAlwaysAuth?: boolean;
   npmAuthToken?: string;
   npmRegistryServer?: string;
   npmScopes?: {
     [key: string]: {
-      npmAlwaysAuth?: boolean;
       npmAuthToken?: string;
       npmRegistryServer?: string;
     };
   };
 }
 
-export function convertYarnrcYmlToNpmrc(yarnrcYml: string): string {
+export function convertYarnrcYmlToRules(yarnrcYml: string): NpmrcRules {
+  const rules: NpmrcRules = {
+    hostRules: [],
+    packageRules: [],
+  };
+  const hosts: Map<string, HostRule> = new Map();
+
   const yarnrc = load(yarnrcYml, {
     json: true,
   }) as YarnrcYAML;
 
-  const npmrc: string[] = [];
-
-  const { npmAlwaysAuth, npmAuthToken, npmRegistryServer, npmScopes } = yarnrc;
+  const { npmAuthToken, npmRegistryServer, npmScopes } = yarnrc;
 
   if (npmRegistryServer) {
-    npmrc.push(`registry=${npmRegistryServer}`);
+    const rule: HostRule = hosts.get(npmRegistryServer) || {
+      hostType: 'npm',
+      matchHost: npmRegistryServer,
+    };
     if (npmAuthToken) {
-      npmrc.push(`${npmRegistryServer}:_authToken=${npmAuthToken}`);
+      rule.token = npmAuthToken;
     }
-    if (npmAlwaysAuth) {
-      npmrc.push(`${npmRegistryServer}:_always-auth=true`);
-    }
+    hosts.set(npmRegistryServer, rule);
+    rules.hostRules.push(rule);
   }
 
   if (npmScopes) {
-    for (const npmScope of Object.keys(npmScopes)) {
+    const matchDatasources = ['npm'];
+
+    for (const scope of Object.keys(npmScopes)) {
       const {
-        npmAlwaysAuth: scopedAlwaysAuth,
         npmAuthToken: scopedAuthToken,
         npmRegistryServer: scopedRegistryServer,
-      } = npmScopes[npmScope];
+      } = npmScopes[scope];
 
-      npmrc.push(`@${npmScope}:registry=${scopedRegistryServer}`);
-      if (scopedAuthToken) {
-        npmrc.push(`${scopedRegistryServer}:_authToken=${scopedAuthToken}`);
-      }
-      if (scopedAlwaysAuth) {
-        npmrc.push(`${scopedRegistryServer}:_always-auth=true`);
+      if (scopedRegistryServer) {
+        rules.packageRules?.push({
+          matchDatasources,
+          matchPackagePrefixes: [`${scope}/`],
+          registryUrls: [scopedRegistryServer],
+        });
+
+        if (scopedAuthToken) {
+          let rule = hosts.get(scopedRegistryServer);
+          if (rule) {
+            rule.token = scopedAuthToken;
+          } else {
+            rule = {
+              hostType: 'npm',
+              matchHost: scopedRegistryServer,
+              token: scopedAuthToken,
+            };
+            hosts.set(scopedRegistryServer, rule);
+            rules.hostRules.push(rule);
+          }
+        }
       }
     }
   }
 
-  return npmrc.join('\n');
+  return rules;
 }

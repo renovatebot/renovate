@@ -1,86 +1,107 @@
-import { convertYarnrcYmlToNpmrc } from './yarnrc';
+import { convertYarnrcYmlToRules } from './yarnrc';
 
 describe('modules/datasource/npm/yarnrc', () => {
   beforeEach(() => {
     jest.resetAllMocks();
   });
 
-  describe('convertYarnrcYmlToNpmrc()', () => {
+  describe('convertYarnrcYmlToRules()', () => {
     it('handles registry url', () => {
-      const res = convertYarnrcYmlToNpmrc(
+      const res = convertYarnrcYmlToRules(
         'npmRegistryServer: https://private.example.com/npm'
       );
 
-      expect(res).toBe('registry=https://private.example.com/npm');
+      expect(res).toMatchInlineSnapshot(`
+        Object {
+          "hostRules": Array [
+            Object {
+              "hostType": "npm",
+              "matchHost": "https://private.example.com/npm",
+            },
+          ],
+          "packageRules": Array [],
+        }
+      `);
     });
 
     it('handles registry url and auth token', () => {
-      const res = convertYarnrcYmlToNpmrc(
+      const res = convertYarnrcYmlToRules(
         `npmAuthToken: foobar
 npmRegistryServer: https://private.example.com/npm`
       );
 
-      expect(res).toBe(
-        `registry=https://private.example.com/npm
-https://private.example.com/npm:_authToken=foobar`
-      );
+      expect(res).toMatchInlineSnapshot(`
+        Object {
+          "hostRules": Array [
+            Object {
+              "hostType": "npm",
+              "matchHost": "https://private.example.com/npm",
+              "token": "foobar",
+            },
+          ],
+          "packageRules": Array [],
+        }
+      `);
     });
 
-    it('handles registry url and auth token and always auth', () => {
-      const res = convertYarnrcYmlToNpmrc(
-        `npmAlwaysAuth: true
-npmAuthToken: foobar
-npmRegistryServer: https://private.example.com/npm`
-      );
-
-      expect(res).toBe(
-        `registry=https://private.example.com/npm
-https://private.example.com/npm:_authToken=foobar
-https://private.example.com/npm:_always-auth=true`
-      );
-    });
-
-    it('handles scoped registry url', () => {
-      const res = convertYarnrcYmlToNpmrc(
-        `npmRegistryServer: https://private.example.com/npm-default
-npmScopes:
-  foo:
-    npmRegistryServer: https://private.example.com/npm-foo`
-      );
-
-      expect(res).toBe(
-        `registry=https://private.example.com/npm-default
-@foo:registry=https://private.example.com/npm-foo`
-      );
-    });
-
-    it('handles all options', () => {
-      const res = convertYarnrcYmlToNpmrc(
-        `npmAlwaysAuth: true
-npmAuthToken: default-token
+    it('handles scoped options', () => {
+      const res = convertYarnrcYmlToRules(
+        `npmAuthToken: default-token
 npmRegistryServer: https://private.example.com/npm-default
 npmScopes:
   foo:
-    npmAlwaysAuth: true
     npmAuthToken: foo-token
     npmRegistryServer: https://private.example.com/npm-foo
   bar:
-    npmAlwaysAuth: true
     npmAuthToken: bar-token
     npmRegistryServer: https://private.example.com/npm-bar`
       );
 
-      expect(res).toBe(
-        `registry=https://private.example.com/npm-default
-https://private.example.com/npm-default:_authToken=default-token
-https://private.example.com/npm-default:_always-auth=true
-@foo:registry=https://private.example.com/npm-foo
-https://private.example.com/npm-foo:_authToken=foo-token
-https://private.example.com/npm-foo:_always-auth=true
-@bar:registry=https://private.example.com/npm-bar
-https://private.example.com/npm-bar:_authToken=bar-token
-https://private.example.com/npm-bar:_always-auth=true`
-      );
+      expect(res).toMatchInlineSnapshot(`
+        Object {
+          "hostRules": Array [
+            Object {
+              "hostType": "npm",
+              "matchHost": "https://private.example.com/npm-default",
+              "token": "default-token",
+            },
+            Object {
+              "hostType": "npm",
+              "matchHost": "https://private.example.com/npm-foo",
+              "token": "foo-token",
+            },
+            Object {
+              "hostType": "npm",
+              "matchHost": "https://private.example.com/npm-bar",
+              "token": "bar-token",
+            },
+          ],
+          "packageRules": Array [
+            Object {
+              "matchDatasources": Array [
+                "npm",
+              ],
+              "matchPackagePrefixes": Array [
+                "foo/",
+              ],
+              "registryUrls": Array [
+                "https://private.example.com/npm-foo",
+              ],
+            },
+            Object {
+              "matchDatasources": Array [
+                "npm",
+              ],
+              "matchPackagePrefixes": Array [
+                "bar/",
+              ],
+              "registryUrls": Array [
+                "https://private.example.com/npm-bar",
+              ],
+            },
+          ],
+        }
+      `);
     });
   });
 });
