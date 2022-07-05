@@ -1,6 +1,7 @@
 import { expect } from '@jest/globals';
 import { ERROR, WARN } from 'bunyan';
-import { fs, logger, mocked } from '../../../test/util';
+import * as _fs from 'fs-extra';
+import { logger, mocked } from '../../../test/util';
 import * as _presets from '../../config/presets';
 import { PlatformId } from '../../constants';
 import { CONFIG_PRESETS_INVALID } from '../../constants/error-messages';
@@ -14,6 +15,9 @@ import * as globalWorker from '.';
 jest.mock('../repository');
 jest.mock('../../util/fs');
 jest.mock('../../config/presets');
+
+jest.mock('fs-extra');
+const fs = mocked(_fs);
 
 // imports are readonly
 const repositoryWorker = _repositoryWorker;
@@ -176,7 +180,6 @@ describe('workers/global/index', () => {
         endpoint: 'https://github.com/',
         writeDiscoveredRepos: '/tmp/renovate-output.json',
       });
-      fs.writeFile.mockResolvedValueOnce();
 
       expect(await globalWorker.start()).toBe(0);
       expect(fs.writeFile).toHaveBeenCalledTimes(1);
