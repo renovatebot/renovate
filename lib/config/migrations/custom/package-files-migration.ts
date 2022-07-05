@@ -17,6 +17,9 @@ export class PackageFilesMigration extends AbstractMigration {
           is.string(packageFile['packageFile'])
         ) {
           fileList.push(packageFile['packageFile']);
+          packageFile.paths = [packageFile.packageFile];
+          delete packageFile.packageFile;
+
           if (Object.keys(packageFile).length > 1) {
             packageRules.push({
               ...packageFile,

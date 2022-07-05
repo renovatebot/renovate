@@ -192,10 +192,6 @@ export function migrateConfig(config: RenovateConfig): MigratedConfig {
       const existingRules = migratedConfig.packageRules;
       migratedConfig.packageRules = [];
       for (const packageRule of existingRules) {
-        if (is.string(packageRule.packageFile)) {
-          packageRule.paths = [packageRule.packageFile];
-          delete packageRule.packageFile;
-        }
         if (is.array(packageRule.packageRules)) {
           logger.debug('Flattening nested packageRules');
           // merge each subrule and add to the parent list

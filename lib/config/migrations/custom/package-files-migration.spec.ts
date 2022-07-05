@@ -13,7 +13,7 @@ describe('config/migrations/custom/package-files-migration', () => {
       },
       {
         includePaths: ['package.json'],
-        packageRules: [{ packageFile: 'package.json', packageRules: [] }],
+        packageRules: [{ paths: ['package.json'], packageRules: [] }],
       }
     );
   });
@@ -45,7 +45,7 @@ describe('config/migrations/custom/package-files-migration', () => {
         packageRules: [
           { labels: ['lint'] },
           {
-            packageFile: 'package.json',
+            paths: ['package.json'],
             packageRules: [{ labels: ['breaking'] }],
           },
         ],
@@ -83,7 +83,7 @@ describe('config/migrations/custom/package-files-migration', () => {
         includePaths: ['package.json'],
         packageRules: [
           {
-            packageFile: 'package.json',
+            paths: ['package.json'],
             packageRules: [
               {
                 labels: ['linter'],
