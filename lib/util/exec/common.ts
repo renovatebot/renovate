@@ -103,7 +103,7 @@ export function promisifiedSpawn(
   });
 }
 
-// todo: rename to rawSpawn
+// TODO: rename
 export const rawExec: (
   cmd: string,
   opts: RawExecOptions

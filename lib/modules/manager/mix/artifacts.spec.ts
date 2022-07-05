@@ -1,7 +1,7 @@
 import { join } from 'upath';
 import {
   envMock,
-  mockSpawnAll,
+  mockExecAll,
   promisifiedSpawn,
 } from '../../../../test/exec-util';
 import { env, fs, hostRules } from '../../../../test/util';
@@ -71,7 +71,7 @@ describe('modules/manager/mix/artifacts', () => {
 
   it('returns null if unchanged', async () => {
     fs.readLocalFile.mockResolvedValueOnce('Current mix.lock');
-    const execSnapshots = mockSpawnAll(promisifiedSpawn);
+    const execSnapshots = mockExecAll(promisifiedSpawn);
     fs.readLocalFile.mockResolvedValueOnce('Current mix.lock');
     expect(
       await updateArtifacts({
@@ -89,7 +89,7 @@ describe('modules/manager/mix/artifacts', () => {
     GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
     fs.readLocalFile.mockResolvedValueOnce('Old mix.lock');
     fs.findLocalSiblingOrParent.mockResolvedValueOnce('mix.lock');
-    const execSnapshots = mockSpawnAll(promisifiedSpawn);
+    const execSnapshots = mockExecAll(promisifiedSpawn);
     fs.readLocalFile.mockResolvedValueOnce('New mix.lock');
     expect(
       await updateArtifacts({
@@ -111,7 +111,7 @@ describe('modules/manager/mix/artifacts', () => {
     GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
     fs.readLocalFile.mockResolvedValueOnce('Old mix.lock');
     fs.findLocalSiblingOrParent.mockResolvedValueOnce('mix.lock');
-    const execSnapshots = mockSpawnAll(promisifiedSpawn);
+    const execSnapshots = mockExecAll(promisifiedSpawn);
     fs.readLocalFile.mockResolvedValueOnce('New mix.lock');
     hostRules.find.mockReturnValueOnce({ token: 'valid_test_token' });
     hostRules.find.mockReturnValueOnce({});
@@ -151,7 +151,7 @@ describe('modules/manager/mix/artifacts', () => {
   it('returns updated mix.lock in subdir', async () => {
     GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
     fs.findLocalSiblingOrParent.mockResolvedValueOnce('subdir/mix.lock');
-    mockSpawnAll(promisifiedSpawn);
+    mockExecAll(promisifiedSpawn);
     expect(
       await updateArtifacts({
         packageFileName: 'subdir/mix.exs',

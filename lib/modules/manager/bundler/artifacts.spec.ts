@@ -1,7 +1,7 @@
 import { join } from 'upath';
 import {
   envMock,
-  mockSpawnAll,
+  mockExecAll,
   promisifiedSpawn,
 } from '../../../../test/exec-util';
 import { env, fs, git, mocked } from '../../../../test/util';
@@ -75,7 +75,7 @@ describe('modules/manager/bundler/artifacts', () => {
   it('returns null if Gemfile.lock was not changed', async () => {
     fs.readLocalFile.mockResolvedValueOnce('Current Gemfile.lock');
     fs.writeLocalFile.mockResolvedValueOnce();
-    const execSnapshots = mockSpawnAll(promisifiedSpawn);
+    const execSnapshots = mockExecAll(promisifiedSpawn);
     git.getRepoStatus.mockResolvedValueOnce({
       modified: [] as string[],
     } as StatusResult);
@@ -95,7 +95,7 @@ describe('modules/manager/bundler/artifacts', () => {
     fs.readLocalFile.mockResolvedValueOnce('Current Gemfile.lock');
     fs.writeLocalFile.mockResolvedValueOnce();
     fs.readLocalFile.mockResolvedValueOnce(null);
-    const execSnapshots = mockSpawnAll(promisifiedSpawn);
+    const execSnapshots = mockExecAll(promisifiedSpawn);
     git.getRepoStatus.mockResolvedValueOnce({
       modified: ['Gemfile.lock'],
     } as StatusResult);
@@ -116,7 +116,7 @@ describe('modules/manager/bundler/artifacts', () => {
     fs.readLocalFile.mockResolvedValueOnce('Current Gemfile.lock');
     fs.writeLocalFile.mockResolvedValueOnce();
     fs.readLocalFile.mockResolvedValueOnce(null);
-    const execSnapshots = mockSpawnAll(promisifiedSpawn);
+    const execSnapshots = mockExecAll(promisifiedSpawn);
     git.getRepoStatus.mockResolvedValueOnce({
       modified: ['Gemfile.lock'],
     } as StatusResult);
@@ -136,7 +136,7 @@ describe('modules/manager/bundler/artifacts', () => {
     fs.readLocalFile.mockResolvedValueOnce('Current Gemfile.lock');
     fs.writeLocalFile.mockResolvedValueOnce();
     fs.readLocalFile.mockResolvedValueOnce(null);
-    const execSnapshots = mockSpawnAll(promisifiedSpawn);
+    const execSnapshots = mockExecAll(promisifiedSpawn);
     git.getRepoStatus.mockResolvedValueOnce({
       modified: ['Gemfile.lock'],
     } as StatusResult);
@@ -184,7 +184,7 @@ describe('modules/manager/bundler/artifacts', () => {
           { version: '1.3.0' },
         ],
       });
-      const execSnapshots = mockSpawnAll(promisifiedSpawn);
+      const execSnapshots = mockExecAll(promisifiedSpawn);
       git.getRepoStatus.mockResolvedValueOnce({
         modified: ['Gemfile.lock'],
       } as StatusResult);
@@ -214,7 +214,7 @@ describe('modules/manager/bundler/artifacts', () => {
           { version: '1.3.0' },
         ],
       });
-      const execSnapshots = mockSpawnAll(promisifiedSpawn);
+      const execSnapshots = mockExecAll(promisifiedSpawn);
       git.getRepoStatus.mockResolvedValueOnce({
         modified: ['Gemfile.lock'],
       } as StatusResult);
@@ -250,7 +250,7 @@ describe('modules/manager/bundler/artifacts', () => {
           { version: '1.3.0' },
         ],
       });
-      const execSnapshots = mockSpawnAll(promisifiedSpawn);
+      const execSnapshots = mockExecAll(promisifiedSpawn);
       git.getRepoStatus.mockResolvedValueOnce({
         modified: ['Gemfile.lock'],
       } as StatusResult);
@@ -299,7 +299,7 @@ describe('modules/manager/bundler/artifacts', () => {
       bundlerHostRules.getAuthenticationHeaderValue.mockReturnValue(
         'some-user:some-password'
       );
-      const execSnapshots = mockSpawnAll(promisifiedSpawn);
+      const execSnapshots = mockExecAll(promisifiedSpawn);
       git.getRepoStatus.mockResolvedValueOnce({
         modified: ['Gemfile.lock'],
       } as StatusResult);
@@ -339,7 +339,7 @@ describe('modules/manager/bundler/artifacts', () => {
       bundlerHostRules.getAuthenticationHeaderValue.mockReturnValue(
         'some-user:some-password'
       );
-      const execSnapshots = mockSpawnAll(promisifiedSpawn);
+      const execSnapshots = mockExecAll(promisifiedSpawn);
       git.getRepoStatus.mockResolvedValueOnce({
         modified: ['Gemfile.lock'],
       } as StatusResult);
@@ -384,7 +384,7 @@ describe('modules/manager/bundler/artifacts', () => {
       bundlerHostRules.getAuthenticationHeaderValue.mockReturnValue(
         'some-user:some-password'
       );
-      const execSnapshots = mockSpawnAll(promisifiedSpawn);
+      const execSnapshots = mockExecAll(promisifiedSpawn);
       git.getRepoStatus.mockResolvedValueOnce({
         modified: ['Gemfile.lock'],
       } as StatusResult);
@@ -432,7 +432,7 @@ describe('modules/manager/bundler/artifacts', () => {
       bundlerHostRules.getAuthenticationHeaderValue.mockReturnValue(
         'some-user:some-password'
       );
-      const execSnapshots = mockSpawnAll(promisifiedSpawn);
+      const execSnapshots = mockExecAll(promisifiedSpawn);
       git.getRepoStatus.mockResolvedValueOnce({
         modified: ['Gemfile.lock'],
       } as StatusResult);
@@ -455,7 +455,7 @@ describe('modules/manager/bundler/artifacts', () => {
     (execError as any).stderr = '';
     fs.readLocalFile.mockResolvedValueOnce('Current Gemfile.lock');
     fs.writeLocalFile.mockResolvedValueOnce(null as never);
-    const execSnapshots = mockSpawnAll(promisifiedSpawn, execError);
+    const execSnapshots = mockExecAll(promisifiedSpawn, execError);
     git.getRepoStatus.mockResolvedValueOnce({
       modified: ['Gemfile.lock'],
     } as StatusResult);
@@ -482,7 +482,7 @@ describe('modules/manager/bundler/artifacts', () => {
   it('performs lockFileMaintenance', async () => {
     fs.readLocalFile.mockResolvedValueOnce('Current Gemfile.lock');
     fs.writeLocalFile.mockResolvedValueOnce(null as never);
-    const execSnapshots = mockSpawnAll(promisifiedSpawn);
+    const execSnapshots = mockExecAll(promisifiedSpawn);
     git.getRepoStatus.mockResolvedValueOnce({
       modified: ['Gemfile.lock'],
     } as StatusResult);

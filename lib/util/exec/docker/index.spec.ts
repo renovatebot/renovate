@@ -1,6 +1,6 @@
 import {
-  mockSpawnAll,
-  mockSpawnSequence,
+  mockExecAll,
+  mockExecSequence,
   promisifiedSpawn,
 } from '../../../../test/exec-util';
 import { GlobalConfig } from '../../../config/global';
@@ -35,13 +35,13 @@ describe('util/exec/docker/index', () => {
     });
 
     it('runs prefetch command', async () => {
-      const spawnSnapshots = mockSpawnAll(promisifiedSpawn);
+      const spawnSnapshots = mockExecAll(promisifiedSpawn);
       await prefetchDockerImage('foo:1.2.3');
       expect(spawnSnapshots).toMatchObject([{ cmd: 'docker pull foo:1.2.3' }]);
     });
 
     it('performs prefetch once for each image', async () => {
-      const execSnapshots = mockSpawnAll(promisifiedSpawn);
+      const execSnapshots = mockExecAll(promisifiedSpawn);
       await prefetchDockerImage('foo:1.0.0');
       await prefetchDockerImage('foo:2.0.0');
       await prefetchDockerImage('bar:3.0.0');
@@ -111,12 +111,12 @@ describe('util/exec/docker/index', () => {
 
   describe('removeDockerContainer', () => {
     it('gracefully handles container list error', async () => {
-      mockSpawnAll(promisifiedSpawn, new Error('unknown'));
+      mockExecAll(promisifiedSpawn, new Error('unknown'));
       await expect(removeDockerContainer('bar', 'foo_')).resolves.not.toThrow();
     });
 
     it('gracefully handles container removal error', async () => {
-      mockSpawnSequence(promisifiedSpawn, [
+      mockExecSequence(promisifiedSpawn, [
         { stdout: '12345', stderr: '' },
         new Error('unknown'),
       ]);
@@ -124,12 +124,12 @@ describe('util/exec/docker/index', () => {
     });
 
     it('gracefully handles empty container list', async () => {
-      mockSpawnAll(promisifiedSpawn, { stdout: '\n', stderr: '' });
+      mockExecAll(promisifiedSpawn, { stdout: '\n', stderr: '' });
       await expect(removeDockerContainer('bar', 'foo_')).resolves.not.toThrow();
     });
 
     it('runs Docker commands for container removal', async () => {
-      const execSnapshots = mockSpawnSequence(promisifiedSpawn, [
+      const execSnapshots = mockExecSequence(promisifiedSpawn, [
         { stdout: '12345', stderr: '' },
         { stdout: '', stderr: '' },
       ]);
@@ -148,7 +148,7 @@ describe('util/exec/docker/index', () => {
     });
 
     it('short-circuits in non-Docker environment', async () => {
-      const execSnapshots = mockSpawnAll(promisifiedSpawn);
+      const execSnapshots = mockExecAll(promisifiedSpawn);
       GlobalConfig.set({ binarySource: 'global' });
       await removeDanglingContainers();
       expect(execSnapshots).toBeEmpty();
@@ -157,7 +157,7 @@ describe('util/exec/docker/index', () => {
     it('handles insufficient memory error', async () => {
       const err: Error & { errno: string } = new Error() as never;
       err.errno = 'ENOMEM';
-      mockSpawnAll(promisifiedSpawn, err);
+      mockExecAll(promisifiedSpawn, err);
       await expect(removeDanglingContainers).rejects.toThrow(
         SYSTEM_INSUFFICIENT_MEMORY
       );
@@ -166,7 +166,7 @@ describe('util/exec/docker/index', () => {
     it('handles missing Docker daemon', async () => {
       const err: Error & { stderr: string } = new Error() as never;
       err.stderr = 'Cannot connect to the Docker daemon';
-      const execSnapshots = mockSpawnAll(promisifiedSpawn, err);
+      const execSnapshots = mockExecAll(promisifiedSpawn, err);
       await removeDanglingContainers();
       expect(execSnapshots).toMatchObject([
         { cmd: 'docker ps --filter label=renovate_child -aq' },
@@ -176,10 +176,7 @@ describe('util/exec/docker/index', () => {
     });
 
     it('handles unknown error', async () => {
-      const execSnapshots = mockSpawnAll(
-        promisifiedSpawn,
-        new Error('unknown')
-      );
+      const execSnapshots = mockExecAll(promisifiedSpawn, new Error('unknown'));
       await removeDanglingContainers();
       expect(execSnapshots).toMatchObject([
         { cmd: 'docker ps --filter label=renovate_child -aq' },
@@ -189,7 +186,7 @@ describe('util/exec/docker/index', () => {
     });
 
     it('handles empty container list ', async () => {
-      const execSnapshots = mockSpawnAll(promisifiedSpawn, {
+      const execSnapshots = mockExecAll(promisifiedSpawn, {
         stdout: '\n\n\n',
         stderr: '',
       });
@@ -203,7 +200,7 @@ describe('util/exec/docker/index', () => {
     });
 
     it('removes containers', async () => {
-      const execSnapshots = mockSpawnSequence(promisifiedSpawn, [
+      const execSnapshots = mockExecSequence(promisifiedSpawn, [
         { stdout: '111\n222\n333', stderr: '' },
         { stdout: '', stderr: '' },
       ]);
@@ -241,7 +238,7 @@ describe('util/exec/docker/index', () => {
     });
 
     it('returns executable command', async () => {
-      mockSpawnAll(promisifiedSpawn);
+      mockExecAll(promisifiedSpawn);
       const res = await generateDockerCommand(
         commands,
         preCommands,
@@ -251,7 +248,7 @@ describe('util/exec/docker/index', () => {
     });
 
     it('handles volumes', async () => {
-      mockSpawnAll(promisifiedSpawn);
+      mockExecAll(promisifiedSpawn);
       const volumes: VolumeOption[] = [
         '/tmp/foo',
         ['/tmp/bar', `/tmp/bar`],
@@ -270,7 +267,7 @@ describe('util/exec/docker/index', () => {
     });
 
     it('handles tag parameter', async () => {
-      mockSpawnAll(promisifiedSpawn);
+      mockExecAll(promisifiedSpawn);
       const res = await generateDockerCommand(commands, preCommands, {
         ...dockerOptions,
         tag: '1.2.3',
@@ -279,7 +276,7 @@ describe('util/exec/docker/index', () => {
     });
 
     it('handles tag constraint', async () => {
-      mockSpawnAll(promisifiedSpawn);
+      mockExecAll(promisifiedSpawn);
       getPkgReleases.mockResolvedValueOnce({
         releases: [
           { version: '1.2.3' },

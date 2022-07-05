@@ -3,7 +3,7 @@ import { readFile } from 'fs-extra';
 import { resolve } from 'upath';
 import {
   envMock,
-  mockSpawnAll,
+  mockExecAll,
   promisifiedSpawn,
 } from '../../../../test/exec-util';
 import * as httpMock from '../../../../test/http-mock';
@@ -80,7 +80,7 @@ describe('modules/manager/gradle-wrapper/artifacts', () => {
       ],
     } as StatusResult);
 
-    const execSnapshots = mockSpawnAll(promisifiedSpawn);
+    const execSnapshots = mockExecAll(promisifiedSpawn);
 
     const res = await gradleWrapper.updateArtifacts({
       packageFileName: 'gradle/wrapper/gradle-wrapper.properties',
@@ -126,7 +126,7 @@ describe('modules/manager/gradle-wrapper/artifacts', () => {
   });
 
   it('gradlew failed', async () => {
-    const execSnapshots = mockSpawnAll(promisifiedSpawn, new Error('failed'));
+    const execSnapshots = mockExecAll(promisifiedSpawn, new Error('failed'));
     git.getRepoStatus.mockResolvedValueOnce(
       partial<StatusResult>({
         modified: [],
@@ -158,7 +158,7 @@ describe('modules/manager/gradle-wrapper/artifacts', () => {
       })
     );
 
-    const execSnapshots = mockSpawnAll(promisifiedSpawn);
+    const execSnapshots = mockExecAll(promisifiedSpawn);
 
     const result = await gradleWrapper.updateArtifacts({
       packageFileName: 'gradle-wrapper.properties',

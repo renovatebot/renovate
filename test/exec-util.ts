@@ -7,23 +7,24 @@ import { regEx } from '../lib/util/regex';
 
 type CallOptions = ExecOptions | null | undefined;
 
-export type SpawnResult = { stdout: string; stderr: string } | Error;
+// TODO: rename
+export type ExecResult = { stdout: string; stderr: string } | Error;
 
 // TODO: fix type #7154
-export type SpawnMock = jest.Mock<typeof _promisifiedSpawn>;
-export const promisifiedSpawn: SpawnMock = _promisifiedSpawn as any;
+export type ExecMock = jest.Mock<typeof _promisifiedSpawn>;
+export const promisifiedSpawn: ExecMock = _promisifiedSpawn as any;
 
-interface SpawnSnapshot {
+// TODO: rename
+interface ExecSnapshot {
   cmd: string;
   options?: ExecOptions | null | undefined;
 }
 
-export type SpawnSnapshots = SpawnSnapshot[];
+// TODO: rename
+export type ExecSnapshots = ExecSnapshot[];
 
-export function spawnSnapshot(
-  cmd: string,
-  options?: CallOptions
-): SpawnSnapshot {
+// TODO: rename
+export function execSnapshot(cmd: string, options?: CallOptions): ExecSnapshot {
   const snapshot = {
     cmd,
     options,
@@ -43,13 +44,14 @@ export function spawnSnapshot(
 
 const defaultSpawnResult = { stdout: '', stderr: '' };
 
-export function mockSpawnAll(
-  spawnFn: SpawnMock,
-  spawnResult: SpawnResult = defaultSpawnResult
-): SpawnSnapshots {
-  const snapshots: SpawnSnapshots = [];
+// TODO: rename
+export function mockExecAll(
+  spawnFn: ExecMock,
+  spawnResult: ExecResult = defaultSpawnResult
+): ExecSnapshots {
+  const snapshots: ExecSnapshots = [];
   spawnFn.mockImplementation((cmd, options) => {
-    snapshots.push(spawnSnapshot(cmd, options));
+    snapshots.push(execSnapshot(cmd, options));
     if (spawnResult instanceof Error) {
       throw spawnResult;
     }
@@ -58,14 +60,15 @@ export function mockSpawnAll(
   return snapshots;
 }
 
-export function mockSpawnSequence(
-  spawnFn: SpawnMock,
-  spawnResults: SpawnResult[]
-): SpawnSnapshots {
-  const snapshots: SpawnSnapshots = [];
+// TODO: rename
+export function mockExecSequence(
+  spawnFn: ExecMock,
+  spawnResults: ExecResult[]
+): ExecSnapshots {
+  const snapshots: ExecSnapshots = [];
   spawnResults.forEach((spawnResult) => {
     spawnFn.mockImplementationOnce((cmd, options) => {
-      snapshots.push(spawnSnapshot(cmd, options));
+      snapshots.push(execSnapshot(cmd, options));
       if (spawnResult instanceof Error) {
         throw spawnResult;
       }

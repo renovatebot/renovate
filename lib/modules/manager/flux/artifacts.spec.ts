@@ -1,4 +1,4 @@
-import { mockSpawnAll, promisifiedSpawn } from '../../../../test/exec-util';
+import { mockExecAll, promisifiedSpawn } from '../../../../test/exec-util';
 import { fs } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import { updateArtifacts } from '.';
@@ -14,7 +14,7 @@ describe('modules/manager/flux/artifacts', () => {
   });
 
   it('replaces existing value', async () => {
-    const snapshots = mockSpawnAll(promisifiedSpawn, {
+    const snapshots = mockExecAll(promisifiedSpawn, {
       stdout: '',
       stderr: '',
     });
@@ -64,7 +64,7 @@ describe('modules/manager/flux/artifacts', () => {
   });
 
   it('ignores unchanged system manifests', async () => {
-    const execSnapshots = mockSpawnAll(promisifiedSpawn, {
+    const execSnapshots = mockExecAll(promisifiedSpawn, {
       stdout: '',
       stderr: '',
     });
@@ -97,7 +97,7 @@ describe('modules/manager/flux/artifacts', () => {
   });
 
   it('failed to generate system manifest', async () => {
-    mockSpawnAll(promisifiedSpawn, new Error('failed'));
+    mockExecAll(promisifiedSpawn, new Error('failed'));
     const res = await updateArtifacts({
       packageFileName: 'clusters/my-cluster/flux-system/gotk-components.yaml',
       updatedDeps: [{ newVersion: '1.0.1' }],
@@ -116,7 +116,7 @@ describe('modules/manager/flux/artifacts', () => {
   });
 
   it('failed to read system manifest', async () => {
-    mockSpawnAll(promisifiedSpawn, { stdout: '', stderr: 'Error' });
+    mockExecAll(promisifiedSpawn, { stdout: '', stderr: 'Error' });
     fs.readLocalFile.mockResolvedValueOnce('old');
     fs.readLocalFile.mockResolvedValueOnce('');
     const res = await updateArtifacts({

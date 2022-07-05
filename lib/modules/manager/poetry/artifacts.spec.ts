@@ -2,7 +2,7 @@ import _fs from 'fs-extra';
 import { join } from 'upath';
 import {
   envMock,
-  mockSpawnAll,
+  mockExecAll,
   promisifiedSpawn,
 } from '../../../../test/exec-util';
 import { Fixtures } from '../../../../test/fixtures';
@@ -67,7 +67,7 @@ describe('modules/manager/poetry/artifacts', () => {
 
   it('returns null if unchanged', async () => {
     fs.readFile.mockReturnValueOnce('Current poetry.lock' as any);
-    const execSnapshots = mockSpawnAll(promisifiedSpawn);
+    const execSnapshots = mockExecAll(promisifiedSpawn);
     fs.readFile.mockReturnValueOnce('Current poetry.lock' as any);
     const updatedDeps = [{ depName: 'dep1' }];
     expect(
@@ -83,7 +83,7 @@ describe('modules/manager/poetry/artifacts', () => {
 
   it('returns updated poetry.lock', async () => {
     fs.readFile.mockResolvedValueOnce('[metadata]\n' as never);
-    const execSnapshots = mockSpawnAll(promisifiedSpawn);
+    const execSnapshots = mockExecAll(promisifiedSpawn);
     fs.readFile.mockReturnValueOnce('New poetry.lock' as any);
     const updatedDeps = [{ depName: 'dep1' }];
     expect(
@@ -101,7 +101,7 @@ describe('modules/manager/poetry/artifacts', () => {
     // TODO #7154
     fs.readFile.mockResolvedValueOnce(null as never);
     fs.readFile.mockResolvedValueOnce('[metadata]\n' as never);
-    const execSnapshots = mockSpawnAll(promisifiedSpawn);
+    const execSnapshots = mockExecAll(promisifiedSpawn);
     fs.readFile.mockReturnValueOnce('New poetry.lock' as any);
     hostRules.find.mockReturnValueOnce({
       username: 'usernameOne',
@@ -127,7 +127,7 @@ describe('modules/manager/poetry/artifacts', () => {
     // TODO #7154
     fs.readFile.mockResolvedValueOnce(null as never);
     fs.readFile.mockResolvedValueOnce(Buffer.from('[metadata]\n'));
-    const execSnapshots = mockSpawnAll(promisifiedSpawn);
+    const execSnapshots = mockExecAll(promisifiedSpawn);
     fs.readFile.mockResolvedValueOnce(Buffer.from('New poetry.lock'));
     hostRules.find.mockImplementation((search) => ({
       password:
@@ -153,7 +153,7 @@ describe('modules/manager/poetry/artifacts', () => {
     // TODO #7154
     fs.readFile.mockResolvedValueOnce(null as never);
     fs.readFile.mockResolvedValueOnce('[metadata]\n' as never);
-    const execSnapshots = mockSpawnAll(promisifiedSpawn);
+    const execSnapshots = mockExecAll(promisifiedSpawn);
     fs.readFile.mockReturnValueOnce('New poetry.lock' as any);
     const updatedDeps = [{ depName: 'dep1' }];
     expect(
@@ -171,7 +171,7 @@ describe('modules/manager/poetry/artifacts', () => {
     GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
     // poetry.lock
     fs.readFile.mockResolvedValueOnce('[metadata]\n' as any);
-    const execSnapshots = mockSpawnAll(promisifiedSpawn);
+    const execSnapshots = mockExecAll(promisifiedSpawn);
     fs.readFile.mockReturnValueOnce('New poetry.lock' as any);
     // poetry
     datasource.getPkgReleases.mockResolvedValueOnce({
@@ -208,7 +208,7 @@ describe('modules/manager/poetry/artifacts', () => {
     fs.readFile.mockResolvedValueOnce(
       '[metadata]\npython-versions = "~2.7 || ^3.4"' as any
     );
-    const execSnapshots = mockSpawnAll(promisifiedSpawn);
+    const execSnapshots = mockExecAll(promisifiedSpawn);
     fs.readFile.mockReturnValueOnce('New poetry.lock' as any);
     // poetry
     datasource.getPkgReleases.mockResolvedValueOnce({
@@ -255,7 +255,7 @@ describe('modules/manager/poetry/artifacts', () => {
 
   it('returns updated poetry.lock when doing lockfile maintenance', async () => {
     fs.readFile.mockResolvedValueOnce('Old poetry.lock' as any);
-    const execSnapshots = mockSpawnAll(promisifiedSpawn);
+    const execSnapshots = mockExecAll(promisifiedSpawn);
     fs.readFile.mockReturnValueOnce('New poetry.lock' as any);
     expect(
       await updateArtifacts({

@@ -1,6 +1,6 @@
 import {
   envMock,
-  mockSpawnAll,
+  mockExecAll,
   promisifiedSpawn,
 } from '../../../../../test/exec-util';
 import { Fixtures } from '../../../../../test/fixtures';
@@ -27,7 +27,7 @@ describe('modules/manager/npm/post-update/pnpm', () => {
   });
 
   it('generates lock files', async () => {
-    const execSnapshots = mockSpawnAll(promisifiedSpawn);
+    const execSnapshots = mockExecAll(promisifiedSpawn);
     fs.readLocalFile.mockResolvedValue('package-lock-contents');
     const res = await pnpmHelper.generateLockFile('some-dir', {}, config);
     expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
@@ -36,7 +36,7 @@ describe('modules/manager/npm/post-update/pnpm', () => {
   });
 
   it('catches errors', async () => {
-    const execSnapshots = mockSpawnAll(promisifiedSpawn);
+    const execSnapshots = mockExecAll(promisifiedSpawn);
     fs.readLocalFile.mockImplementation(() => {
       throw new Error('not found');
     });
@@ -48,7 +48,7 @@ describe('modules/manager/npm/post-update/pnpm', () => {
   });
 
   it('finds pnpm globally', async () => {
-    const execSnapshots = mockSpawnAll(promisifiedSpawn);
+    const execSnapshots = mockExecAll(promisifiedSpawn);
     fs.readLocalFile.mockResolvedValue('package-lock-contents');
     const res = await pnpmHelper.generateLockFile('some-dir', {}, config);
     expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
@@ -57,7 +57,7 @@ describe('modules/manager/npm/post-update/pnpm', () => {
   });
 
   it('performs lock file maintenance', async () => {
-    const execSnapshots = mockSpawnAll(promisifiedSpawn);
+    const execSnapshots = mockExecAll(promisifiedSpawn);
     fs.readLocalFile.mockResolvedValue('package-lock-contents');
     const res = await pnpmHelper.generateLockFile('some-dir', {}, config, [
       { isLockFileMaintenance: true },
@@ -69,7 +69,7 @@ describe('modules/manager/npm/post-update/pnpm', () => {
   });
 
   it('uses the new version if packageManager is updated', async () => {
-    const execSnapshots = mockSpawnAll(promisifiedSpawn);
+    const execSnapshots = mockExecAll(promisifiedSpawn);
     fs.readLocalFile.mockResolvedValue('package-lock-contents');
     const res = await pnpmHelper.generateLockFile('some-dir', {}, config, [
       {
@@ -85,7 +85,7 @@ describe('modules/manager/npm/post-update/pnpm', () => {
   });
 
   it('uses constraint version if parent json has constraints', async () => {
-    const execSnapshots = mockSpawnAll(promisifiedSpawn);
+    const execSnapshots = mockExecAll(promisifiedSpawn);
     const configTemp = partial<PostUpdateConfig>({});
     const fileContent = Fixtures.get('parent/package.json');
     fs.readLocalFile
@@ -127,7 +127,7 @@ describe('modules/manager/npm/post-update/pnpm', () => {
   });
 
   it('uses packageManager version and puts it into constraint', async () => {
-    const execSnapshots = mockSpawnAll(promisifiedSpawn);
+    const execSnapshots = mockExecAll(promisifiedSpawn);
     const configTemp = partial<PostUpdateConfig>({});
     const fileContent = Fixtures.get('manager-field/package.json');
     fs.readLocalFile
@@ -169,7 +169,7 @@ describe('modules/manager/npm/post-update/pnpm', () => {
   });
 
   it('uses skips pnpm v7 if lockfileVersion indicates <7', async () => {
-    mockSpawnAll(promisifiedSpawn);
+    mockExecAll(promisifiedSpawn);
     const configTemp = partial<PostUpdateConfig>({});
     fs.readLocalFile
       .mockResolvedValueOnce('{}') // package.json

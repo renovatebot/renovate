@@ -1,7 +1,7 @@
 import { join } from 'upath';
 import {
   envMock,
-  mockSpawnAll,
+  mockExecAll,
   promisifiedSpawn,
 } from '../../../../test/exec-util';
 
@@ -56,7 +56,7 @@ describe('modules/manager/cocoapods/artifacts', () => {
   });
 
   it('returns null if no Podfile.lock found', async () => {
-    const execSnapshots = mockSpawnAll(promisifiedSpawn);
+    const execSnapshots = mockExecAll(promisifiedSpawn);
     expect(
       await updateArtifacts({
         packageFileName: 'Podfile',
@@ -69,7 +69,7 @@ describe('modules/manager/cocoapods/artifacts', () => {
   });
 
   it('returns null if no updatedDeps were provided', async () => {
-    const execSnapshots = mockSpawnAll(promisifiedSpawn);
+    const execSnapshots = mockExecAll(promisifiedSpawn);
     expect(
       await updateArtifacts({
         packageFileName: 'Podfile',
@@ -82,7 +82,7 @@ describe('modules/manager/cocoapods/artifacts', () => {
   });
 
   it('returns null for invalid local directory', async () => {
-    const execSnapshots = mockSpawnAll(promisifiedSpawn);
+    const execSnapshots = mockExecAll(promisifiedSpawn);
     GlobalConfig.set({
       localDir: '',
     });
@@ -99,7 +99,7 @@ describe('modules/manager/cocoapods/artifacts', () => {
   });
 
   it('returns null if updatedDeps is empty', async () => {
-    const execSnapshots = mockSpawnAll(promisifiedSpawn);
+    const execSnapshots = mockExecAll(promisifiedSpawn);
     expect(
       await updateArtifacts({
         packageFileName: 'Podfile',
@@ -112,7 +112,7 @@ describe('modules/manager/cocoapods/artifacts', () => {
   });
 
   it('returns null if unchanged', async () => {
-    const execSnapshots = mockSpawnAll(promisifiedSpawn);
+    const execSnapshots = mockExecAll(promisifiedSpawn);
     fs.findLocalSiblingOrParent.mockResolvedValueOnce('Podfile.lock');
     fs.readLocalFile.mockResolvedValueOnce('Current Podfile');
     git.getRepoStatus.mockResolvedValueOnce({
@@ -132,7 +132,7 @@ describe('modules/manager/cocoapods/artifacts', () => {
   });
 
   it('returns updated Podfile', async () => {
-    const execSnapshots = mockSpawnAll(promisifiedSpawn);
+    const execSnapshots = mockExecAll(promisifiedSpawn);
     GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
     fs.getSiblingFileName.mockReturnValueOnce('Podfile.lock');
     fs.findLocalSiblingOrParent.mockResolvedValueOnce('Podfile');
@@ -154,7 +154,7 @@ describe('modules/manager/cocoapods/artifacts', () => {
   });
 
   it('returns updated Podfile and Pods files', async () => {
-    const execSnapshots = mockSpawnAll(promisifiedSpawn);
+    const execSnapshots = mockExecAll(promisifiedSpawn);
     GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
     fs.getSiblingFileName.mockReturnValueOnce('Podfile.lock');
     fs.findLocalSiblingOrParent.mockResolvedValueOnce('Podfile.lock');
@@ -185,7 +185,7 @@ describe('modules/manager/cocoapods/artifacts', () => {
   });
 
   it('catches write error', async () => {
-    const execSnapshots = mockSpawnAll(promisifiedSpawn);
+    const execSnapshots = mockExecAll(promisifiedSpawn);
     fs.getSiblingFileName.mockReturnValueOnce('Podfile.lock');
     fs.findLocalSiblingOrParent.mockResolvedValueOnce('Podfile.lock');
     fs.readLocalFile.mockResolvedValueOnce('Current Podfile');
@@ -206,7 +206,7 @@ describe('modules/manager/cocoapods/artifacts', () => {
   });
 
   it('returns pod exec error', async () => {
-    const execSnapshots = mockSpawnAll(
+    const execSnapshots = mockExecAll(
       promisifiedSpawn,
       new Error('exec exception')
     );
@@ -230,7 +230,7 @@ describe('modules/manager/cocoapods/artifacts', () => {
   });
 
   it('dynamically selects Docker image tag', async () => {
-    const execSnapshots = mockSpawnAll(promisifiedSpawn);
+    const execSnapshots = mockExecAll(promisifiedSpawn);
 
     GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
 
@@ -268,7 +268,7 @@ describe('modules/manager/cocoapods/artifacts', () => {
   });
 
   it('falls back to the `latest` Docker image tag', async () => {
-    const execSnapshots = mockSpawnAll(promisifiedSpawn);
+    const execSnapshots = mockExecAll(promisifiedSpawn);
 
     GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
 
