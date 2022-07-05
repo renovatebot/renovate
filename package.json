@@ -211,7 +211,7 @@
     "upath": "2.0.1",
     "url-join": "4.0.1",
     "validate-npm-package-name": "4.0.0",
-    "xmldoc": "1.1.3"
+    "xmldoc": "1.1.4"
   },
   "optionalDependencies": {
     "re2": "1.17.7"
