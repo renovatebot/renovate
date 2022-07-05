@@ -31,13 +31,7 @@ export function migrateConfig(config: RenovateConfig): MigratedConfig {
     }
     const newConfig = MigrationsService.run(config);
     const migratedConfig = clone(newConfig) as MigratedRenovateConfig;
-    const depTypes = [
-      'dependencies',
-      'devDependencies',
-      'engines',
-      'optionalDependencies',
-      'peerDependencies',
-    ];
+
     for (const [key, val] of Object.entries(newConfig)) {
       if (key.startsWith('masterIssue')) {
         const newKey = key.replace('masterIssue', 'dependencyDashboard');
@@ -79,17 +73,6 @@ export function migrateConfig(config: RenovateConfig): MigratedConfig {
         }
         migratedConfig.includePaths = fileList;
         delete migratedConfig.packageFiles;
-      } else if (depTypes.includes(key)) {
-        migratedConfig.packageRules = is.array(migratedConfig.packageRules)
-          ? migratedConfig.packageRules
-          : [];
-        const depTypePackageRule = migrateConfig(
-          val as RenovateConfig
-        ).migratedConfig;
-        depTypePackageRule.depTypeList = [key];
-        delete depTypePackageRule.packageRules;
-        migratedConfig.packageRules.push(depTypePackageRule);
-        delete migratedConfig[key];
       } else if (is.string(val) && val.includes('{{baseDir}}')) {
         migratedConfig[key] = val.replace(
           regEx(/{{baseDir}}/g),
