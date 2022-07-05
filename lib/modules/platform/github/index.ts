@@ -1695,8 +1695,8 @@ export async function commitFiles(
   config: CommitFilesConfig
 ): Promise<CommitSha | null> {
   const commitResult = await git.prepareCommit(config); // Commit locally and don't push
+  const { branchName, files } = config;
   if (!commitResult) {
-    const { branchName, files } = config;
     logger.debug(
       { branchName, files: files.map(({ path }) => path) },
       `Platform-native commit: unable to prepare for commit`
@@ -1708,7 +1708,9 @@ export async function commitFiles(
   if (!pushResult) {
     return null;
   }
-  // Because the branch commit was done remotely via REST API, now we git fetch it locally.
-  // We also do this step when committing/pushing using local git tooling.
-  return git.fetchCommit(config);
+  // Replace locally created branch with the remotely created one
+  // and return the remote commit SHA
+  await git.resetToCommit(commitResult.parentCommitSha);
+  const commitSha = await git.fetchCommit(config);
+  return commitSha;
 }
