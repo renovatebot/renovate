@@ -4,7 +4,10 @@ import pAll from 'p-all';
 import { getManagerConfig, mergeChildConfig } from '../../../config';
 import type { RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
-import { getDefaultConfig } from '../../../modules/datasource';
+import {
+  getDefaultConfig,
+  getDefaultVersioning,
+} from '../../../modules/datasource';
 import type {
   PackageDependency,
   PackageFile,
@@ -39,6 +42,7 @@ async function fetchDepUpdates(
   let depConfig = mergeChildConfig(packageFileConfig, dep);
   const datasourceDefaultConfig = await getDefaultConfig(depConfig.datasource!);
   depConfig = mergeChildConfig(depConfig, datasourceDefaultConfig);
+  depConfig.versioning ??= getDefaultVersioning(depConfig.datasource);
   depConfig = applyPackageRules(depConfig);
   if (depConfig.ignoreDeps!.includes(depName!)) {
     logger.debug({ dependency: depName }, 'Dependency is ignored');

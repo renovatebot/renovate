@@ -13,6 +13,10 @@ function updateWithNewVersion(
   currentValue: string,
   newValue: string
 ): string {
+  // istanbul ignore if
+  if (currentValue === newValue) {
+    return content;
+  }
   const replaceFrom = currentValue.replace(regEx(/^v/), '');
   const replaceTo = newValue.replace(regEx(/^v/), '');
   let newContent = content;
