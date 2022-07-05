@@ -147,17 +147,6 @@ export function migrateConfig(config: RenovateConfig): MigratedConfig {
         val.length === 1
       ) {
         migratedConfig[key] = String(val[0]);
-      } else if (key === 'node' && (val as RenovateConfig).enabled === true) {
-        // validated non-null
-        delete migratedConfig.node!.enabled;
-        migratedConfig.travis = migratedConfig.travis ?? {};
-        migratedConfig.travis.enabled = true;
-        if (Object.keys(migratedConfig.node!).length) {
-          const subMigrate = migrateConfig(migratedConfig.node!);
-          migratedConfig.node = subMigrate.migratedConfig;
-        } else {
-          delete migratedConfig.node;
-        }
       } else if (is.array(val)) {
         if (is.array(migratedConfig?.[key])) {
           const newArray = [];
