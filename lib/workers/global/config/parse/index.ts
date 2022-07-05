@@ -3,7 +3,11 @@ import type { AllConfig } from '../../../../config/types';
 import { mergeChildConfig } from '../../../../config/utils';
 import { addStream, logger, setContext } from '../../../../logger';
 import { detectAllGlobalConfig } from '../../../../modules/manager';
-import { ensureDir, getSubDirectory, readFile } from '../../../../util/fs';
+import {
+  ensureDir,
+  getSubDirectory,
+  readSystemFile,
+} from '../../../../util/fs';
 import { ensureTrailingSlash } from '../../../../util/url';
 import * as cliParser from './cli';
 import * as envParser from './env';
@@ -41,12 +45,12 @@ export async function parseConfigs(
   }
 
   if (!config.privateKey && config.privateKeyPath) {
-    config.privateKey = await readFile(config.privateKeyPath, 'utf8');
+    config.privateKey = await readSystemFile(config.privateKeyPath, 'utf8');
     delete config.privateKeyPath;
   }
 
   if (!config.privateKeyOld && config.privateKeyPathOld) {
-    config.privateKey = await readFile(config.privateKeyPathOld, 'utf8');
+    config.privateKey = await readSystemFile(config.privateKeyPathOld, 'utf8');
     delete config.privateKeyPathOld;
   }
 

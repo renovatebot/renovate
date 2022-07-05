@@ -15,6 +15,7 @@ import {
   localPathExists,
   localPathIsFile,
   localPathIsSymbolicLink,
+  outputCacheFile,
   readLocalDirectory,
   readLocalDirectorySync,
   readLocalFile,
@@ -402,6 +403,22 @@ describe('util/fs/index', () => {
           await chmodLocalFile('foo', oldMode);
           stat = await statLocalFile('foo');
           expect(stat!.mode & 0o777).toBe(oldMode);
+        },
+        { unsafeCleanup: true }
+      );
+    });
+  });
+
+  describe('outputCacheFile', () => {
+    it('works', async () => {
+      await withDir(
+        async ({ path }) => {
+          const fsOutputFile = jest.spyOn(fs, 'outputFile');
+          const file = join(path, 'some-file');
+          await outputCacheFile(file, 'foobar');
+          const res = await fs.readFile(file, 'utf8');
+          expect(res).toBe('foobar');
+          expect(fsOutputFile).toHaveBeenCalledWith(file, 'foobar', {});
         },
         { unsafeCleanup: true }
       );

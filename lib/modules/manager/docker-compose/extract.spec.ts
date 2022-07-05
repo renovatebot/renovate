@@ -1,10 +1,10 @@
-import { loadFixture } from '../../../../test/util';
+import { Fixtures } from '../../../../test/fixtures';
 import { extractPackageFile } from '.';
 
-const yamlFile1 = loadFixture('docker-compose.1.yml');
-const yamlFile3 = loadFixture('docker-compose.3.yml');
-const yamlFile3NoVersion = loadFixture('docker-compose.3-no-version.yml');
-const yamlFile3DefaultValue = loadFixture('docker-compose.3-default-val.yml');
+const yamlFile1 = Fixtures.get('docker-compose.1.yml');
+const yamlFile3 = Fixtures.get('docker-compose.3.yml');
+const yamlFile3NoVersion = Fixtures.get('docker-compose.3-no-version.yml');
+const yamlFile3DefaultValue = Fixtures.get('docker-compose.3-default-val.yml');
 
 describe('modules/manager/docker-compose/extract', () => {
   describe('extractPackageFile()', () => {

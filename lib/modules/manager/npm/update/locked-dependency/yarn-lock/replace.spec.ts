@@ -1,10 +1,10 @@
 import * as Diff from 'diff';
-import { loadFixture } from '../../../../../../../test/util';
+import { Fixtures } from '../../../../../../../test/fixtures';
 import { replaceConstraintVersion } from './replace';
 
-const yarnLock1 = loadFixture('express.yarn.lock');
-const yarnLock2 = loadFixture('2.yarn.lock');
-const yarn2Lock = loadFixture('yarn2.lock');
+const yarnLock1 = Fixtures.get('express.yarn.lock');
+const yarnLock2 = Fixtures.get('2.yarn.lock');
+const yarn2Lock = Fixtures.get('yarn2.lock');
 
 describe('modules/manager/npm/update/locked-dependency/yarn-lock/replace', () => {
   describe('replaceConstraintVersion()', () => {
