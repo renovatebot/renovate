@@ -26,7 +26,7 @@ const depProxyRe = regEx(
  */
 export function getGitlabDep(
   imageName: string,
-  registryAliases: Record<string, string> = {}
+  registryAliases?: Record<string, string>
 ): PackageDependency {
   const match = depProxyRe.exec(imageName);
   if (match?.groups) {
@@ -36,7 +36,7 @@ export function getGitlabDep(
     return dep;
   }
 
-  for (const [name, value] of Object.entries(registryAliases)) {
+  for (const [name, value] of Object.entries(registryAliases ?? {})) {
     const escapedName = escapeRegExp(name);
     const match = regEx(`(?<prefix>${escapedName}/)(?<depName>.+)`).exec(
       imageName
