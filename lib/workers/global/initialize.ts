@@ -1,6 +1,7 @@
 import os from 'os';
 import fs from 'fs-extra';
 import upath from 'upath';
+import { applySecretsToConfig } from '../../config/secrets';
 import type { AllConfig, RenovateConfig } from '../../config/types';
 import { logger } from '../../logger';
 import { initPlatform } from '../../modules/platform';
@@ -46,6 +47,7 @@ async function checkVersions(): Promise<void> {
 function setGlobalHostRules(config: RenovateConfig): void {
   if (config.hostRules) {
     logger.debug('Setting global hostRules');
+    applySecretsToConfig(config, undefined, false);
     config.hostRules.forEach((rule) => hostRules.add(rule));
   }
 }
