@@ -9,7 +9,7 @@ import { env, fs } from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
 import * as npmHelper from './npm';
 
-jest.mock('../../../util/exec/common');
+jest.mock('../../../../util/exec/common');
 jest.mock('../../../../util/exec/env');
 jest.mock('../../../../util/fs');
 jest.mock('./node-version');

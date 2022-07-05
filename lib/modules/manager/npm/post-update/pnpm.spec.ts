@@ -9,7 +9,7 @@ import { GlobalConfig } from '../../../../config/global';
 import type { PostUpdateConfig } from '../../types';
 import * as pnpmHelper from './pnpm';
 
-jest.mock('../../../util/exec/common');
+jest.mock('../../../../util/exec/common');
 jest.mock('../../../../util/exec/env');
 jest.mock('../../../../util/fs');
 jest.mock('./node-version');

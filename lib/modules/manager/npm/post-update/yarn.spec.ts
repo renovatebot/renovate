@@ -18,7 +18,7 @@ import * as yarnHelper from './yarn';
 jest.mock('fs-extra', () =>
   require('../../../../../test/fixtures').Fixtures.fsExtra()
 );
-jest.mock('../../../util/exec/common');
+jest.mock('../../../../util/exec/common');
 jest.mock('../../../../util/exec/env');
 jest.mock('./node-version');
 jest.mock('../../../datasource');
