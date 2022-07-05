@@ -1,29 +1,29 @@
-import { exec as _exec } from 'child_process';
 import is from '@sindresorhus/is';
 import traverse from 'traverse';
 import upath from 'upath';
-import type { ExecOptions } from '../lib/util/exec/types';
+import { promisifiedSpawn as _promisifiedSpawn } from '../lib/util/exec/common';
+import type { SpawnOptions } from '../lib/util/exec/types';
 import { regEx } from '../lib/util/regex';
 
-type CallOptions = ExecOptions | null | undefined;
+type CallOptions = SpawnOptions | null | undefined;
 
-export type ExecResult = { stdout: string; stderr: string } | Error;
+export type SpawnResult = { stdout: string; stderr: string } | Error;
 
 // TODO: fix type #7154
-export type ExecMock = jest.Mock<typeof _exec>;
-export const exec: ExecMock = _exec as any;
+export type SpawnMock = jest.Mock<typeof _promisifiedSpawn>;
+export const promisifiedSpawn: SpawnMock = _promisifiedSpawn as any;
 
-interface ExecSnapshot {
+interface SpawnSnapshot {
   cmd: string;
-  options?: ExecOptions | null | undefined;
+  opts?: SpawnOptions | null | undefined;
 }
 
-export type ExecSnapshots = ExecSnapshot[];
+export type SpawnSnapshots = SpawnSnapshot[];
 
-export function execSnapshot(cmd: string, options?: CallOptions): ExecSnapshot {
+export function spawnSnapshot(cmd: string, opts?: CallOptions): SpawnSnapshot {
   const snapshot = {
     cmd,
-    options,
+    opts,
   };
 
   const cwd = upath.toUnix(process.cwd());
@@ -38,37 +38,35 @@ export function execSnapshot(cmd: string, options?: CallOptions): ExecSnapshot {
   });
 }
 
-const defaultExecResult = { stdout: '', stderr: '' };
+const defaultSpawnResult = { stdout: '', stderr: '' };
 
-export function mockExecAll(
-  execFn: ExecMock,
-  execResult: ExecResult = defaultExecResult
-): ExecSnapshots {
-  const snapshots: ExecSnapshots = [];
-  execFn.mockImplementation((cmd, options, callback) => {
-    snapshots.push(execSnapshot(cmd, options));
-    if (execResult instanceof Error) {
-      throw execResult;
+export function mockSpawnAll(
+  spawnFn: SpawnMock,
+  spawnResult: SpawnResult = defaultSpawnResult
+): SpawnSnapshots {
+  const snapshots: SpawnSnapshots = [];
+  spawnFn.mockImplementation((cmd, opts) => {
+    snapshots.push(spawnSnapshot(cmd, opts));
+    if (spawnResult instanceof Error) {
+      throw spawnResult;
     }
-    callback(null, execResult);
-    return undefined as never;
+    return spawnResult as never;
   });
   return snapshots;
 }
 
-export function mockExecSequence(
-  execFn: ExecMock,
-  execResults: ExecResult[]
-): ExecSnapshots {
-  const snapshots: ExecSnapshots = [];
-  execResults.forEach((execResult) => {
-    execFn.mockImplementationOnce((cmd, options, callback) => {
-      snapshots.push(execSnapshot(cmd, options));
-      if (execResult instanceof Error) {
-        throw execResult;
+export function mockSpawnSequence(
+  spawnFn: SpawnMock,
+  spawnResults: SpawnResult[]
+): SpawnSnapshots {
+  const snapshots: SpawnSnapshots = [];
+  spawnResults.forEach((spawnResult) => {
+    spawnFn.mockImplementationOnce((cmd, opts) => {
+      snapshots.push(spawnSnapshot(cmd, opts));
+      if (spawnResult instanceof Error) {
+        throw spawnResult;
       }
-      callback(null, execResult);
-      return undefined as never;
+      return spawnResult as never;
     });
   });
   return snapshots;
@@ -101,8 +99,8 @@ export const envMock = {
   filtered: filteredEnvMock,
 };
 
-// reset exec mock, otherwise there can be some left over from previous test
+// reset spawn mock, otherwise there can be some left over from previous test
 beforeEach(() => {
   // maybe not mocked
-  exec.mockReset?.();
+  promisifiedSpawn.mockReset?.();
 });

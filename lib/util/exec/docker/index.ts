@@ -6,7 +6,7 @@ import { getPkgReleases } from '../../../modules/datasource';
 import * as versioning from '../../../modules/versioning';
 import { newlineRegex, regEx } from '../../regex';
 import { ensureTrailingSlash } from '../../url';
-import { rawExec } from '../common';
+import { rawSpawn } from '../common';
 import type { DockerOptions, Opt, VolumeOption, VolumesPair } from '../types';
 
 const prefetchedImages = new Map<string, string>();
@@ -22,7 +22,7 @@ export async function prefetchDockerImage(taggedImage: string): Promise<void> {
     );
   } else {
     logger.debug(`Fetching Docker image: ${taggedImage}`);
-    const res = await rawExec(`docker pull ${taggedImage}`, {
+    const res = await rawSpawn(`docker pull ${taggedImage}`, {
       encoding: 'utf-8',
     });
     const imageDigest = digestRegex.exec(res?.stdout)?.[1] ?? 'unknown';
@@ -146,14 +146,14 @@ export async function removeDockerContainer(
   const containerName = getContainerName(image, prefix);
   let cmd = `docker ps --filter name=${containerName} -aq`;
   try {
-    const res = await rawExec(cmd, {
+    const res = await rawSpawn(cmd, {
       encoding: 'utf-8',
     });
     const containerId = res?.stdout?.trim() || '';
     if (containerId.length) {
       logger.debug({ containerId }, 'Removing container');
       cmd = `docker rm -f ${containerId}`;
-      await rawExec(cmd, {
+      await rawSpawn(cmd, {
         encoding: 'utf-8',
       });
     } else {
@@ -175,7 +175,7 @@ export async function removeDanglingContainers(): Promise<void> {
 
   try {
     const containerLabel = getContainerLabel(dockerChildPrefix);
-    const res = await rawExec(
+    const res = await rawSpawn(
       `docker ps --filter label=${containerLabel} -aq`,
       {
         encoding: 'utf-8',
@@ -188,7 +188,7 @@ export async function removeDanglingContainers(): Promise<void> {
         .map((container) => container.trim())
         .filter(Boolean);
       logger.debug({ containerIds }, 'Removing dangling child containers');
-      await rawExec(`docker rm -f ${containerIds.join(' ')}`, {
+      await rawSpawn(`docker rm -f ${containerIds.join(' ')}`, {
         encoding: 'utf-8',
       });
     } else {

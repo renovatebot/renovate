@@ -1,7 +1,5 @@
-import {
-  ExecOptions as ChildProcessExecOptions,
-  exec as _cpExec,
-} from 'child_process';
+import type { SpawnOptions as ChildProcessSpawnOptions } from 'child_process';
+import { promisifiedSpawn as _promisifiedSpawn } from '../../../lib/util/exec/common';
 import { envMock } from '../../../test/exec-util';
 import { GlobalConfig } from '../../config/global';
 import type { RepoGlobalConfig } from '../../config/types';
@@ -10,9 +8,9 @@ import * as dockerModule from './docker';
 import type { ExecOptions, RawExecOptions, VolumeOption } from './types';
 import { exec } from '.';
 
-const cpExec: jest.Mock<typeof _cpExec> = _cpExec as any;
+const cpSpawn: jest.Mock<typeof _promisifiedSpawn> = _promisifiedSpawn as any;
 
-jest.mock('child_process');
+jest.mock('../../../lib/util/exec/common');
 jest.mock('../../modules/datasource');
 
 interface TestInput {
@@ -708,12 +706,11 @@ describe('util/exec/index', () => {
     process.env = procEnv;
 
     const actualCmd: string[] = [];
-    const actualOpts: ChildProcessExecOptions[] = [];
-    cpExec.mockImplementation((execCmd, execOpts, callback) => {
-      actualCmd.push(execCmd);
-      actualOpts.push(execOpts);
-      callback(null, { stdout: '', stderr: '' });
-      return undefined as never;
+    const actualOpts: ChildProcessSpawnOptions[] = [];
+    cpSpawn.mockImplementation((spawnCmd, spawnOpts) => {
+      actualCmd.push(spawnCmd);
+      actualOpts.push(spawnOpts);
+      return { stdout: '', stderr: '' } as never;
     });
     GlobalConfig.set({ cacheDir, localDir: cwd, ...adminConfig });
     await exec(cmd as string, inOpts);
@@ -726,10 +723,9 @@ describe('util/exec/index', () => {
     process.env = processEnv;
 
     const actualCmd: string[] = [];
-    cpExec.mockImplementation((execCmd, execOpts, callback) => {
+    cpSpawn.mockImplementation((execCmd, execOpts) => {
       actualCmd.push(execCmd);
-      callback(null, { stdout: '', stderr: '' });
-      return undefined as never;
+      return { stdout: '', stderr: '' } as never;
     });
 
     GlobalConfig.set({ binarySource: 'global' });
@@ -767,7 +763,7 @@ describe('util/exec/index', () => {
 
   it('Supports binarySource=install', async () => {
     process.env = processEnv;
-    cpExec.mockImplementation(() => {
+    cpSpawn.mockImplementation(() => {
       throw new Error('some error occurred');
     });
     GlobalConfig.set({ binarySource: 'install' });
@@ -777,7 +773,7 @@ describe('util/exec/index', () => {
   });
 
   it('only calls removeDockerContainer in catch block is useDocker is set', async () => {
-    cpExec.mockImplementation(() => {
+    cpSpawn.mockImplementation(() => {
       throw new Error('some error occurred');
     });
 
@@ -793,7 +789,7 @@ describe('util/exec/index', () => {
 
   it('wraps error if removeDockerContainer throws an error', async () => {
     GlobalConfig.set({ binarySource: 'docker' });
-    cpExec.mockImplementation(() => {
+    cpSpawn.mockImplementation(() => {
       throw new Error('some error occurred');
     });
     jest
@@ -826,10 +822,11 @@ describe('util/exec/index', () => {
   });
 
   it('converts to TEMPORARY_ERROR', async () => {
-    cpExec.mockImplementation(() => {
+    cpSpawn.mockImplementation(() => {
       class ErrorSignal extends Error {
         signal?: string;
       }
+
       const error = new ErrorSignal();
       error.signal = 'SIGTERM';
       throw error;

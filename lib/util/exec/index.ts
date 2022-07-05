@@ -4,22 +4,22 @@ import { GlobalConfig } from '../../config/global';
 import { TEMPORARY_ERROR } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import { generateInstallCommands, isDynamicInstall } from './buildpack';
-import { rawExec } from './common';
+import { rawSpawn } from './common';
 import { generateDockerCommand, removeDockerContainer } from './docker';
 import { getChildProcessEnv } from './env';
 import type {
   DockerOptions,
-  ExecOptions,
-  ExecResult,
   ExtraEnv,
   Opt,
   RawExecOptions,
+  SpawnOptions,
+  SpawnResult,
 } from './types';
 
 function getChildEnv({
   extraEnv,
   env: forcedEnv = {},
-}: ExecOptions): Record<string, string> {
+}: SpawnOptions): Record<string, string> {
   const globalConfigEnv = GlobalConfig.get('customEnvVariables');
 
   const inheritedKeys: string[] = [];
@@ -52,7 +52,7 @@ function dockerEnvVars(extraEnv: ExtraEnv, childEnv: ExtraEnv): string[] {
   return extraEnvKeys.filter((key) => is.nonEmptyString(childEnv[key]));
 }
 
-function getCwd({ cwd, cwdFile }: ExecOptions): string | undefined {
+function getCwd({ cwd, cwdFile }: SpawnOptions): string | undefined {
   const defaultCwd = GlobalConfig.get('localDir');
   const paramCwd = cwdFile
     ? upath.join(defaultCwd, upath.dirname(cwdFile))
@@ -60,7 +60,7 @@ function getCwd({ cwd, cwdFile }: ExecOptions): string | undefined {
   return paramCwd ?? defaultCwd;
 }
 
-function getRawExecOptions(opts: ExecOptions): RawExecOptions {
+function getRawExecOptions(opts: SpawnOptions): RawExecOptions {
   const defaultExecutionTimeout = GlobalConfig.get('executionTimeout');
   const childEnv = getChildEnv(opts);
   const cwd = getCwd(opts);
@@ -97,7 +97,7 @@ interface RawExecArguments {
 
 async function prepareRawExec(
   cmd: string | string[],
-  opts: ExecOptions = {}
+  opts: SpawnOptions = {}
 ): Promise<RawExecArguments> {
   const { docker } = opts;
   const { customEnvVariables } = GlobalConfig.get();
@@ -136,8 +136,8 @@ async function prepareRawExec(
 
 export async function exec(
   cmd: string | string[],
-  opts: ExecOptions = {}
-): Promise<ExecResult> {
+  opts: SpawnOptions = {}
+): Promise<SpawnResult> {
   const { docker } = opts;
   const dockerChildPrefix =
     GlobalConfig.get('dockerChildPrefix') ?? 'renovate_';
@@ -145,7 +145,7 @@ export async function exec(
   const { rawCommands, rawOptions } = await prepareRawExec(cmd, opts);
   const useDocker = isDocker(docker);
 
-  let res: ExecResult = { stdout: '', stderr: '' };
+  let res: SpawnResult = { stdout: '', stderr: '' };
   for (const rawCmd of rawCommands) {
     const startTime = Date.now();
     if (useDocker) {
@@ -154,7 +154,7 @@ export async function exec(
     logger.debug({ command: rawCmd }, 'Executing command');
     logger.trace({ commandOptions: rawOptions }, 'Command options');
     try {
-      res = await rawExec(rawCmd, rawOptions);
+      res = await rawSpawn(rawCmd, rawOptions);
     } catch (err) {
       logger.debug({ err }, 'rawExec err');
       if (useDocker) {
