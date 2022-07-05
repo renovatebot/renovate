@@ -22,7 +22,7 @@ export class PackageFilesMigration extends AbstractMigration {
               ...packageFile,
             });
           }
-        } else if (is.array<string>(packageFile)) {
+        } else if (is.array(packageFile, is.string)) {
           fileList.push(...packageFile);
         } else if (is.string(packageFile)) {
           fileList.push(packageFile);
