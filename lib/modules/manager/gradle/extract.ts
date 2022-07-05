@@ -110,12 +110,12 @@ export async function extractAllPackageFiles(
       }
 
       dep.registryUrls = [
-        ...new Set([
-          ...defaultRegistryUrls,
-          ...(dep.registryUrls ?? []),
-          ...registryUrls,
-        ]),
+        ...new Set([...registryUrls, ...(dep.registryUrls ?? [])]),
       ];
+
+      if (!dep.registryUrls.length) {
+        dep.registryUrls = defaultRegistryUrls;
+      }
 
       const depAlreadyInPkgFile = pkgFile.deps.some(
         (item) =>
