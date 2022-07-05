@@ -1,5 +1,5 @@
 import type { SpawnOptions as ChildProcessSpawnOptions } from 'child_process';
-import { exec as _exec } from '../../../lib/util/exec/common';
+import { exec as _cpExec } from '../../../lib/util/exec/common';
 import { envMock } from '../../../test/exec-util';
 import { GlobalConfig } from '../../config/global';
 import type { RepoGlobalConfig } from '../../config/types';
@@ -8,7 +8,7 @@ import * as dockerModule from './docker';
 import type { ExecOptions, RawExecOptions, VolumeOption } from './types';
 import { exec } from '.';
 
-const cpSpawn: jest.Mock<typeof _exec> = _exec as any;
+const cpExec: jest.Mock<typeof _cpExec> = _cpExec as any;
 
 jest.mock('../../../lib/util/exec/common');
 jest.mock('../../modules/datasource');
@@ -707,7 +707,7 @@ describe('util/exec/index', () => {
 
     const actualCmd: string[] = [];
     const actualOpts: ChildProcessSpawnOptions[] = [];
-    cpSpawn.mockImplementation((spawnCmd, spawnOpts) => {
+    cpExec.mockImplementation((spawnCmd, spawnOpts) => {
       actualCmd.push(spawnCmd);
       actualOpts.push(spawnOpts);
       return { stdout: '', stderr: '' } as never;
@@ -723,7 +723,7 @@ describe('util/exec/index', () => {
     process.env = processEnv;
 
     const actualCmd: string[] = [];
-    cpSpawn.mockImplementation((execCmd, execOpts) => {
+    cpExec.mockImplementation((execCmd, execOpts) => {
       actualCmd.push(execCmd);
       return { stdout: '', stderr: '' } as never;
     });
@@ -763,7 +763,7 @@ describe('util/exec/index', () => {
 
   it('Supports binarySource=install', async () => {
     process.env = processEnv;
-    cpSpawn.mockImplementation(() => {
+    cpExec.mockImplementation(() => {
       throw new Error('some error occurred');
     });
     GlobalConfig.set({ binarySource: 'install' });
@@ -773,7 +773,7 @@ describe('util/exec/index', () => {
   });
 
   it('only calls removeDockerContainer in catch block is useDocker is set', async () => {
-    cpSpawn.mockImplementation(() => {
+    cpExec.mockImplementation(() => {
       throw new Error('some error occurred');
     });
 
@@ -789,7 +789,7 @@ describe('util/exec/index', () => {
 
   it('wraps error if removeDockerContainer throws an error', async () => {
     GlobalConfig.set({ binarySource: 'docker' });
-    cpSpawn.mockImplementation(() => {
+    cpExec.mockImplementation(() => {
       throw new Error('some error occurred');
     });
     jest
@@ -822,7 +822,7 @@ describe('util/exec/index', () => {
   });
 
   it('converts to TEMPORARY_ERROR', async () => {
-    cpSpawn.mockImplementation(() => {
+    cpExec.mockImplementation(() => {
       class ErrorSignal extends Error {
         signal?: string;
       }

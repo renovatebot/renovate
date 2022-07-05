@@ -35,9 +35,9 @@ describe('util/exec/docker/index', () => {
     });
 
     it('runs prefetch command', async () => {
-      const spawnSnapshots = mockExecAll(exec);
+      const execSnapshots = mockExecAll(exec);
       await prefetchDockerImage('foo:1.2.3');
-      expect(spawnSnapshots).toMatchObject([{ cmd: 'docker pull foo:1.2.3' }]);
+      expect(execSnapshots).toMatchObject([{ cmd: 'docker pull foo:1.2.3' }]);
     });
 
     it('performs prefetch once for each image', async () => {
