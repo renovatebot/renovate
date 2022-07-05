@@ -9,7 +9,7 @@ import { logger } from '../../../logger';
 import type { HostRule } from '../../../types';
 import * as memCache from '../../../util/cache/memory';
 import { exec } from '../../../util/exec';
-import type { ExecOptions } from '../../../util/exec/types';
+import type { SpawnOptions } from '../../../util/exec/types';
 import {
   ensureCacheDir,
   readLocalFile,
@@ -138,7 +138,7 @@ export async function updateArtifacts(
       );
     }
 
-    const execOptions: ExecOptions = {
+    const execOptions: SpawnOptions = {
       cwdFile: packageFileName,
       extraEnv: {
         ...bundlerHostRulesVariables,

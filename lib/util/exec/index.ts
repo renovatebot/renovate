@@ -11,7 +11,7 @@ import type {
   DockerOptions,
   ExtraEnv,
   Opt,
-  RawExecOptions,
+  RawSpawnOptions,
   SpawnOptions,
   SpawnResult,
 } from './types';
@@ -60,11 +60,11 @@ function getCwd({ cwd, cwdFile }: SpawnOptions): string | undefined {
   return paramCwd ?? defaultCwd;
 }
 
-function getRawExecOptions(opts: SpawnOptions): RawExecOptions {
+function getRawExecOptions(opts: SpawnOptions): RawSpawnOptions {
   const defaultExecutionTimeout = GlobalConfig.get('executionTimeout');
   const childEnv = getChildEnv(opts);
   const cwd = getCwd(opts);
-  const rawExecOptions: RawExecOptions = {
+  const rawExecOptions: RawSpawnOptions = {
     cwd,
     encoding: 'utf-8',
     env: childEnv,
@@ -92,7 +92,7 @@ function isDocker(docker: Opt<DockerOptions>): docker is DockerOptions {
 
 interface RawExecArguments {
   rawCommands: string[];
-  rawOptions: RawExecOptions;
+  rawOptions: RawSpawnOptions;
 }
 
 async function prepareRawExec(

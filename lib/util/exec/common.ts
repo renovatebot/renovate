@@ -1,11 +1,5 @@
-import { ChildProcess, exec, spawn } from 'child_process';
-import { promisify } from 'util';
-import type {
-  ExecResult,
-  RawExecOptions,
-  RawSpawnOptions,
-  SpawnResult,
-} from './types';
+import { ChildProcess, spawn } from 'child_process';
+import type { RawSpawnOptions, SpawnResult } from './types';
 
 // https://man7.org/linux/man-pages/man7/signal.7.html#NAME
 // Non TERM/CORE signals
@@ -113,8 +107,3 @@ export const rawSpawn: (
   cmd: string,
   opts: RawSpawnOptions
 ) => Promise<SpawnResult> = promisifiedSpawn;
-
-export const rawExec: (
-  cmd: string,
-  opts: RawExecOptions
-) => Promise<ExecResult> = promisify(exec);

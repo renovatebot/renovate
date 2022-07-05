@@ -2,7 +2,7 @@ import { quote } from 'shlex';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { exec } from '../../../util/exec';
-import type { ExecOptions, ToolConstraint } from '../../../util/exec/types';
+import type { SpawnOptions, ToolConstraint } from '../../../util/exec/types';
 import { readLocalFile } from '../../../util/fs';
 import { getRepoStatus } from '../../../util/git';
 import { regEx } from '../../../util/regex';
@@ -39,7 +39,7 @@ export async function updateArtifacts(
     constraint: config.constraints?.jb,
   };
 
-  const execOptions: ExecOptions = {
+  const execOptions: SpawnOptions = {
     cwdFile: packageFileName,
     docker: {
       image: 'sidecar',

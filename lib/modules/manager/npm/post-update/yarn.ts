@@ -11,8 +11,8 @@ import { logger } from '../../../../logger';
 import { ExternalHostError } from '../../../../types/errors/external-host-error';
 import { exec } from '../../../../util/exec';
 import type {
-  ExecOptions,
   ExtraEnv,
+  SpawnOptions,
   ToolConstraint,
 } from '../../../../util/exec/types';
 import {
@@ -177,7 +177,7 @@ export async function generateLockFile(
     }
     const tagConstraint =
       getNodeUpdate(upgrades) ?? (await getNodeConstraint(config));
-    const execOptions: ExecOptions = {
+    const execOptions: SpawnOptions = {
       cwdFile: lockFileName,
       extraEnv,
       docker: {

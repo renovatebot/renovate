@@ -1,7 +1,7 @@
 import { quote } from 'shlex';
 import { logger } from '../../../logger';
 import { exec } from '../../../util/exec';
-import type { ExecOptions } from '../../../util/exec/types';
+import type { SpawnOptions } from '../../../util/exec/types';
 import { readLocalFile } from '../../../util/fs';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
 import { isSystemManifest } from './common';
@@ -22,7 +22,7 @@ export async function updateArtifacts({
       args.push('--components', quote(systemDep.managerData.components));
     }
     const cmd = `flux install ${args.join(' ')} > ${quote(packageFileName)}`;
-    const execOptions: ExecOptions = {
+    const execOptions: SpawnOptions = {
       docker: {
         image: 'sidecar',
       },

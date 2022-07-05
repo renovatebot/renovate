@@ -5,7 +5,7 @@ import { PlatformId } from '../../../constants';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { exec } from '../../../util/exec';
-import type { ExecOptions } from '../../../util/exec/types';
+import type { SpawnOptions } from '../../../util/exec/types';
 import {
   ensureCacheDir,
   readLocalFile,
@@ -213,7 +213,7 @@ export async function updateArtifacts({
     await writeLocalFile(goModFileName, massagedGoMod);
 
     const cmd = 'go';
-    const execOptions: ExecOptions = {
+    const execOptions: SpawnOptions = {
       cwdFile: goModFileName,
       extraEnv: {
         GOPATH: await ensureCacheDir('go'),

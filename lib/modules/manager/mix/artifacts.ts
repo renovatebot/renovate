@@ -3,7 +3,7 @@ import { quote } from 'shlex';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { exec } from '../../../util/exec';
-import type { ExecOptions } from '../../../util/exec/types';
+import type { SpawnOptions } from '../../../util/exec/types';
 import {
   findLocalSiblingOrParent,
   readLocalFile,
@@ -73,7 +73,7 @@ export async function updateArtifacts({
     return acc;
   }, [] as string[]);
 
-  const execOptions: ExecOptions = {
+  const execOptions: SpawnOptions = {
     cwdFile: packageFileName,
     docker: {
       image: 'elixir',

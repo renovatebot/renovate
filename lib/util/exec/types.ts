@@ -1,7 +1,4 @@
-import type {
-  ExecOptions as ChildProcessExecOptions,
-  SpawnOptions as ChildProcessSpawnOptions,
-} from 'child_process';
+import type { SpawnOptions as ChildProcessSpawnOptions } from 'child_process';
 
 export interface ToolConstraint {
   toolName: string;
@@ -35,34 +32,12 @@ export interface RawSpawnOptions extends ChildProcessSpawnOptions {
   maxBuffer?: number | undefined;
 }
 
-export interface RawExecOptions extends ChildProcessExecOptions {
-  encoding: string;
-}
-
-export interface ExecResult {
-  stdout: string;
-  stderr: string;
-}
-
 export interface SpawnResult {
   stdout: string;
   stderr: string;
 }
 
 export type ExtraEnv<T = unknown> = Record<string, T>;
-
-export interface ExecOptions {
-  cwd?: string;
-  cwdFile?: string;
-  env?: Opt<ExtraEnv>;
-  extraEnv?: Opt<ExtraEnv>;
-  docker?: Opt<DockerOptions>;
-  toolConstraints?: Opt<ToolConstraint[]>;
-  preCommands?: Opt<string[]>;
-  // Following are pass-through to child process
-  maxBuffer?: number | undefined;
-  timeout?: number | undefined;
-}
 
 export interface SpawnOptions {
   cwd?: string;
