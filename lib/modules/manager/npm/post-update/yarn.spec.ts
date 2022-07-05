@@ -2,9 +2,9 @@ import fs from 'fs-extra';
 import {
   ExecSnapshots,
   envMock,
+  exec,
   mockExecAll,
   mockExecSequence,
-  promisifiedSpawn,
 } from '../../../../../test/exec-util';
 import { Fixtures } from '../../../../../test/fixtures';
 import { env, mockedFunction, partial } from '../../../../../test/util';
@@ -63,7 +63,7 @@ describe('modules/manager/npm/post-update/yarn', () => {
         '/some-dir'
       );
       GlobalConfig.set({ localDir: '/' });
-      const execSnapshots = mockExecAll(promisifiedSpawn, {
+      const execSnapshots = mockExecAll(exec, {
         stdout: yarnVersion,
         stderr: '',
       });
@@ -95,7 +95,7 @@ describe('modules/manager/npm/post-update/yarn', () => {
       },
       'some-dir'
     );
-    const execSnapshots = mockExecAll(promisifiedSpawn, {
+    const execSnapshots = mockExecAll(exec, {
       stdout: '3.0.0',
       stderr: '',
     });
@@ -119,7 +119,7 @@ describe('modules/manager/npm/post-update/yarn', () => {
       },
       'some-dir'
     );
-    const execSnapshots = mockExecAll(promisifiedSpawn, {
+    const execSnapshots = mockExecAll(exec, {
       stdout: '3.0.0',
       stderr: '',
     });
@@ -141,7 +141,7 @@ describe('modules/manager/npm/post-update/yarn', () => {
       },
       'some-dir'
     );
-    const execSnapshots = mockExecAll(promisifiedSpawn, {
+    const execSnapshots = mockExecAll(exec, {
       stdout: '2.1.0',
       stderr: '',
     });
@@ -170,7 +170,7 @@ describe('modules/manager/npm/post-update/yarn', () => {
         },
         'some-dir'
       );
-      const execSnapshots = mockExecAll(promisifiedSpawn, {
+      const execSnapshots = mockExecAll(exec, {
         stdout: yarnVersion,
         stderr: '',
       });
@@ -205,7 +205,7 @@ describe('modules/manager/npm/post-update/yarn', () => {
         },
         'some-dir'
       );
-      const execSnapshots = mockExecAll(promisifiedSpawn, {
+      const execSnapshots = mockExecAll(exec, {
         stdout: yarnVersion,
         stderr: '',
       });
@@ -234,7 +234,7 @@ describe('modules/manager/npm/post-update/yarn', () => {
         },
         'some-dir'
       );
-      const execSnapshots = mockExecAll(promisifiedSpawn, {
+      const execSnapshots = mockExecAll(exec, {
         stdout: yarnVersion,
         stderr: '',
       });
@@ -266,7 +266,7 @@ describe('modules/manager/npm/post-update/yarn', () => {
         },
         'some-dir'
       );
-      const execSnapshots = mockExecAll(promisifiedSpawn, {
+      const execSnapshots = mockExecAll(exec, {
         stdout: yarnVersion,
         stderr: '',
       });
@@ -289,10 +289,7 @@ describe('modules/manager/npm/post-update/yarn', () => {
 
   it('catches errors', async () => {
     Fixtures.mock({});
-    const execSnapshots = mockExecAll(
-      promisifiedSpawn,
-      new Error('some-error')
-    );
+    const execSnapshots = mockExecAll(exec, new Error('some-error'));
     const res = await yarnHelper.generateLockFile('some-dir', {});
     expect(fs.readFile).toHaveBeenCalledTimes(1);
     expect(res.error).toBeTrue();
@@ -313,7 +310,7 @@ describe('modules/manager/npm/post-update/yarn', () => {
     mockedFunction(getPkgReleases).mockResolvedValueOnce({
       releases: [{ version: '0.10.0' }],
     });
-    const execSnapshots = mockExecAll(promisifiedSpawn, {
+    const execSnapshots = mockExecAll(exec, {
       stdout: '2.1.0',
       stderr: '',
     });
@@ -357,7 +354,7 @@ describe('modules/manager/npm/post-update/yarn', () => {
     mockedFunction(getPkgReleases).mockResolvedValueOnce({
       releases: [{ version: '1.22.18' }, { version: '2.4.3' }],
     });
-    const execSnapshots = mockExecAll(promisifiedSpawn, {
+    const execSnapshots = mockExecAll(exec, {
       stdout: '2.1.0',
       stderr: '',
     });
@@ -392,7 +389,7 @@ describe('modules/manager/npm/post-update/yarn', () => {
     mockedFunction(getPkgReleases).mockResolvedValueOnce({
       releases: [{ version: '1.22.18' }],
     });
-    const execSnapshots = mockExecSequence(promisifiedSpawn, [
+    const execSnapshots = mockExecSequence(exec, [
       { stdout: '', stderr: '' },
       { stdout: '', stderr: '' },
       { stdout: '', stderr: '' },
@@ -430,7 +427,7 @@ describe('modules/manager/npm/post-update/yarn', () => {
     mockedFunction(getPkgReleases).mockResolvedValueOnce({
       releases: [{ version: '1.22.18' }],
     });
-    const execSnapshots = mockExecAll(promisifiedSpawn, {
+    const execSnapshots = mockExecAll(exec, {
       stdout: '',
       stderr: '',
     });

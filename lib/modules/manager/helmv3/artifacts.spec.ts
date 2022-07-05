@@ -1,9 +1,5 @@
 import { join } from 'upath';
-import {
-  envMock,
-  mockExecAll,
-  promisifiedSpawn,
-} from '../../../../test/exec-util';
+import { envMock, exec, mockExecAll } from '../../../../test/exec-util';
 import { Fixtures } from '../../../../test/fixtures';
 import { env, fs, mocked } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
@@ -77,7 +73,7 @@ describe('modules/manager/helmv3/artifacts', () => {
   it('returns null if unchanged', async () => {
     fs.readLocalFile.mockResolvedValueOnce(ociLockFile1 as any);
     fs.getSiblingFileName.mockReturnValueOnce('Chart.lock');
-    const execSnapshots = mockExecAll(promisifiedSpawn);
+    const execSnapshots = mockExecAll(exec);
     fs.readLocalFile.mockResolvedValueOnce(ociLockFile1 as any);
     fs.privateCacheDir.mockReturnValue(
       '/tmp/renovate/cache/__renovate-private-cache'
@@ -98,7 +94,7 @@ describe('modules/manager/helmv3/artifacts', () => {
   it('returns updated Chart.lock', async () => {
     fs.readLocalFile.mockResolvedValueOnce(ociLockFile1 as never);
     fs.getSiblingFileName.mockReturnValueOnce('Chart.lock');
-    const execSnapshots = mockExecAll(promisifiedSpawn);
+    const execSnapshots = mockExecAll(exec);
     fs.readLocalFile.mockResolvedValueOnce(ociLockFile2 as never);
     fs.privateCacheDir.mockReturnValue(
       '/tmp/renovate/cache/__renovate-private-cache'
@@ -128,7 +124,7 @@ describe('modules/manager/helmv3/artifacts', () => {
   it('returns updated Chart.lock for lockfile maintenance', async () => {
     fs.readLocalFile.mockResolvedValueOnce(ociLockFile1 as never);
     fs.getSiblingFileName.mockReturnValueOnce('Chart.lock');
-    const execSnapshots = mockExecAll(promisifiedSpawn);
+    const execSnapshots = mockExecAll(exec);
     fs.readLocalFile.mockResolvedValueOnce(ociLockFile2 as never);
     fs.privateCacheDir.mockReturnValue(
       '/tmp/renovate/cache/__renovate-private-cache'
@@ -158,7 +154,7 @@ describe('modules/manager/helmv3/artifacts', () => {
     GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
     fs.getSiblingFileName.mockReturnValueOnce('Chart.lock');
     fs.readLocalFile.mockResolvedValueOnce(ociLockFile1 as never);
-    const execSnapshots = mockExecAll(promisifiedSpawn);
+    const execSnapshots = mockExecAll(exec);
     fs.readLocalFile.mockResolvedValueOnce(ociLockFile2 as never);
     fs.privateCacheDir.mockReturnValue(
       '/tmp/renovate/cache/__renovate-private-cache'
@@ -221,7 +217,7 @@ describe('modules/manager/helmv3/artifacts', () => {
     );
     fs.getSiblingFileName.mockReturnValueOnce('Chart.lock');
     fs.readLocalFile.mockResolvedValueOnce(ociLockFile1 as never);
-    const execSnapshots = mockExecAll(promisifiedSpawn);
+    const execSnapshots = mockExecAll(exec);
     fs.readLocalFile.mockResolvedValueOnce(ociLockFile2 as never);
     fs.getSubDirectory.mockReturnValue('');
     expect(
@@ -252,7 +248,7 @@ describe('modules/manager/helmv3/artifacts', () => {
     GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
     fs.getSiblingFileName.mockReturnValueOnce('Chart.lock');
     fs.readLocalFile.mockResolvedValueOnce(ociLockFile1 as never);
-    const execSnapshots = mockExecAll(promisifiedSpawn);
+    const execSnapshots = mockExecAll(exec);
     fs.readLocalFile.mockResolvedValueOnce(ociLockFile2 as never);
     fs.privateCacheDir.mockReturnValue(
       '/tmp/renovate/cache/__renovate-private-cache'
@@ -300,7 +296,7 @@ describe('modules/manager/helmv3/artifacts', () => {
 
     fs.getSiblingFileName.mockReturnValueOnce('Chart.lock');
     fs.readLocalFile.mockResolvedValueOnce(ociLockFile1 as never);
-    const execSnapshots = mockExecAll(promisifiedSpawn);
+    const execSnapshots = mockExecAll(exec);
     fs.readLocalFile.mockResolvedValueOnce(ociLockFile2 as never);
     fs.privateCacheDir.mockReturnValue(
       '/tmp/renovate/cache/__renovate-private-cache'
@@ -350,7 +346,7 @@ describe('modules/manager/helmv3/artifacts', () => {
 
     fs.getSiblingFileName.mockReturnValueOnce('Chart.lock');
     fs.readLocalFile.mockResolvedValueOnce(ociLockFile1 as never);
-    const execSnapshots = mockExecAll(promisifiedSpawn);
+    const execSnapshots = mockExecAll(exec);
     fs.readLocalFile.mockResolvedValueOnce(ociLockFile2 as never);
     fs.privateCacheDir.mockReturnValue(
       '/tmp/renovate/cache/__renovate-private-cache'
@@ -390,7 +386,7 @@ describe('modules/manager/helmv3/artifacts', () => {
 
     fs.getSiblingFileName.mockReturnValueOnce('Chart.lock');
     fs.readLocalFile.mockResolvedValueOnce(ociLockFile1 as never);
-    const execSnapshots = mockExecAll(promisifiedSpawn);
+    const execSnapshots = mockExecAll(exec);
     fs.readLocalFile.mockResolvedValueOnce(ociLockFile2 as never);
     fs.privateCacheDir.mockReturnValue(
       '/tmp/renovate/cache/__renovate-private-cache'
@@ -438,7 +434,7 @@ describe('modules/manager/helmv3/artifacts', () => {
   it('do not add registryAliases to repository list', async () => {
     fs.getSiblingFileName.mockReturnValueOnce('Chart.lock');
     fs.readLocalFile.mockResolvedValueOnce(ociLockFile1Alias as never);
-    const execSnapshots = mockExecAll(promisifiedSpawn);
+    const execSnapshots = mockExecAll(exec);
     fs.readLocalFile.mockResolvedValueOnce(ociLockFile2Alias as never);
     fs.privateCacheDir.mockReturnValue(
       '/tmp/renovate/cache/__renovate-private-cache'

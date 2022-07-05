@@ -1,7 +1,7 @@
 import is from '@sindresorhus/is';
 import traverse from 'traverse';
 import upath from 'upath';
-import { promisifiedSpawn as _promisifiedSpawn } from '../lib/util/exec/common';
+import { exec as _exec } from '../lib/util/exec/common';
 import type { ExecOptions } from '../lib/util/exec/types';
 import { regEx } from '../lib/util/regex';
 
@@ -11,8 +11,8 @@ type CallOptions = ExecOptions | null | undefined;
 export type ExecResult = { stdout: string; stderr: string } | Error;
 
 // TODO: fix type #7154
-export type ExecMock = jest.Mock<typeof _promisifiedSpawn>;
-export const promisifiedSpawn: ExecMock = _promisifiedSpawn as any;
+export type ExecMock = jest.Mock<typeof _exec>;
+export const exec: ExecMock = _exec as any;
 
 // TODO: rename
 interface ExecSnapshot {
@@ -46,33 +46,33 @@ const defaultSpawnResult = { stdout: '', stderr: '' };
 
 // TODO: rename
 export function mockExecAll(
-  spawnFn: ExecMock,
-  spawnResult: ExecResult = defaultSpawnResult
+  execFn: ExecMock,
+  execResult: ExecResult = defaultSpawnResult
 ): ExecSnapshots {
   const snapshots: ExecSnapshots = [];
-  spawnFn.mockImplementation((cmd, options) => {
+  execFn.mockImplementation((cmd, options) => {
     snapshots.push(execSnapshot(cmd, options));
-    if (spawnResult instanceof Error) {
-      throw spawnResult;
+    if (execResult instanceof Error) {
+      throw execResult;
     }
-    return spawnResult as never;
+    return execResult as never;
   });
   return snapshots;
 }
 
 // TODO: rename
 export function mockExecSequence(
-  spawnFn: ExecMock,
-  spawnResults: ExecResult[]
+  execFn: ExecMock,
+  execResults: ExecResult[]
 ): ExecSnapshots {
   const snapshots: ExecSnapshots = [];
-  spawnResults.forEach((spawnResult) => {
-    spawnFn.mockImplementationOnce((cmd, options) => {
+  execResults.forEach((execResult) => {
+    execFn.mockImplementationOnce((cmd, options) => {
       snapshots.push(execSnapshot(cmd, options));
-      if (spawnResult instanceof Error) {
-        throw spawnResult;
+      if (execResult instanceof Error) {
+        throw execResult;
       }
-      return spawnResult as never;
+      return execResult as never;
     });
   });
   return snapshots;
@@ -105,8 +105,8 @@ export const envMock = {
   filtered: filteredEnvMock,
 };
 
-// reset spawn mock, otherwise there can be some left over from previous test
+// reset exec mock, otherwise there can be some left over from previous test
 beforeEach(() => {
   // maybe not mocked
-  promisifiedSpawn.mockReset?.();
+  exec.mockReset?.();
 });

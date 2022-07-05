@@ -52,10 +52,7 @@ function initStreamListeners(
   return [stdout, stderr];
 }
 
-export function promisifiedSpawn(
-  cmd: string,
-  opts: RawExecOptions
-): Promise<ExecResult> {
+export function exec(cmd: string, opts: RawExecOptions): Promise<ExecResult> {
   return new Promise((resolve, reject) => {
     const encoding = opts.encoding as BufferEncoding;
     const [command, ...args] = cmd.split(/\s+/);
@@ -107,4 +104,4 @@ export function promisifiedSpawn(
 export const rawExec: (
   cmd: string,
   opts: RawExecOptions
-) => Promise<ExecResult> = promisifiedSpawn;
+) => Promise<ExecResult> = exec; // TODO: rename

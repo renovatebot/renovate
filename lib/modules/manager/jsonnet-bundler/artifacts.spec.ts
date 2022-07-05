@@ -1,9 +1,5 @@
 import { join } from 'upath';
-import {
-  envMock,
-  mockExecAll,
-  promisifiedSpawn,
-} from '../../../../test/exec-util';
+import { envMock, exec, mockExecAll } from '../../../../test/exec-util';
 import { env, fs, git, partial } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
@@ -44,7 +40,7 @@ describe('modules/manager/jsonnet-bundler/artifacts', () => {
 
   it('returns null if there are no changes', async () => {
     fs.readLocalFile.mockResolvedValueOnce('Current jsonnetfile.lock.json');
-    const execSnapshots = mockExecAll(promisifiedSpawn);
+    const execSnapshots = mockExecAll(exec);
     git.getRepoStatus.mockResolvedValueOnce(
       partial<StatusResult>({
         modified: [],
@@ -68,7 +64,7 @@ describe('modules/manager/jsonnet-bundler/artifacts', () => {
 
   it('updates the vendor dir when dependencies change', async () => {
     fs.readLocalFile.mockResolvedValueOnce('Current jsonnetfile.lock.json');
-    const execSnapshots = mockExecAll(promisifiedSpawn);
+    const execSnapshots = mockExecAll(exec);
     git.getRepoStatus.mockResolvedValueOnce({
       not_added: ['vendor/foo/main.jsonnet', 'vendor/bar/main.jsonnet'],
       modified: ['jsonnetfile.json', 'jsonnetfile.lock.json'],
@@ -141,7 +137,7 @@ describe('modules/manager/jsonnet-bundler/artifacts', () => {
 
   it('performs lock file maintenance', async () => {
     fs.readLocalFile.mockResolvedValueOnce('Current jsonnetfile.lock.json');
-    const execSnapshots = mockExecAll(promisifiedSpawn);
+    const execSnapshots = mockExecAll(exec);
     git.getRepoStatus.mockResolvedValueOnce({
       modified: ['jsonnetfile.lock.json'],
       isClean(): boolean {
@@ -176,7 +172,7 @@ describe('modules/manager/jsonnet-bundler/artifacts', () => {
     (execError as any).stderr = 'jb released the magic smoke';
 
     fs.readLocalFile.mockResolvedValueOnce('Current jsonnetfile.lock.json');
-    const execSnapshots = mockExecAll(promisifiedSpawn, execError);
+    const execSnapshots = mockExecAll(exec, execError);
     git.getRepoStatus.mockResolvedValueOnce({
       modified: ['jsonnetfile.lock.json'],
       isClean(): boolean {

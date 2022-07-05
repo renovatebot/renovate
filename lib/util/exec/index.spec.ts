@@ -1,5 +1,5 @@
 import type { SpawnOptions as ChildProcessSpawnOptions } from 'child_process';
-import { promisifiedSpawn as _promisifiedSpawn } from '../../../lib/util/exec/common';
+import { exec as _exec } from '../../../lib/util/exec/common';
 import { envMock } from '../../../test/exec-util';
 import { GlobalConfig } from '../../config/global';
 import type { RepoGlobalConfig } from '../../config/types';
@@ -8,7 +8,7 @@ import * as dockerModule from './docker';
 import type { ExecOptions, RawExecOptions, VolumeOption } from './types';
 import { exec } from '.';
 
-const cpSpawn: jest.Mock<typeof _promisifiedSpawn> = _promisifiedSpawn as any;
+const cpSpawn: jest.Mock<typeof _exec> = _exec as any;
 
 jest.mock('../../../lib/util/exec/common');
 jest.mock('../../modules/datasource');

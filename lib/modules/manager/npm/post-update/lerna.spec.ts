@@ -1,8 +1,4 @@
-import {
-  envMock,
-  mockExecAll,
-  promisifiedSpawn,
-} from '../../../../../test/exec-util';
+import { envMock, exec, mockExecAll } from '../../../../../test/exec-util';
 import { env, partial } from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
 import type { RepoGlobalConfig } from '../../../../config/types';
@@ -62,7 +58,7 @@ describe('modules/manager/npm/post-update/lerna', () => {
     });
 
     it('generates package-lock.json files', async () => {
-      const execSnapshots = mockExecAll(promisifiedSpawn);
+      const execSnapshots = mockExecAll(exec);
       const skipInstalls = true;
       const res = await lernaHelper.generateLockFiles(
         lernaPkgFile('npm'),
@@ -76,7 +72,7 @@ describe('modules/manager/npm/post-update/lerna', () => {
     });
 
     it('performs full npm install', async () => {
-      const execSnapshots = mockExecAll(promisifiedSpawn);
+      const execSnapshots = mockExecAll(exec);
       const skipInstalls = false;
       const res = await lernaHelper.generateLockFiles(
         lernaPkgFile('npm'),
@@ -90,7 +86,7 @@ describe('modules/manager/npm/post-update/lerna', () => {
     });
 
     it('generates yarn.lock files', async () => {
-      const execSnapshots = mockExecAll(promisifiedSpawn);
+      const execSnapshots = mockExecAll(exec);
       const res = await lernaHelper.generateLockFiles(
         lernaPkgFile('yarn'),
         'some-dir',
@@ -102,7 +98,7 @@ describe('modules/manager/npm/post-update/lerna', () => {
     });
 
     it('defaults to latest if lerna version unspecified', async () => {
-      const execSnapshots = mockExecAll(promisifiedSpawn);
+      const execSnapshots = mockExecAll(exec);
       const res = await lernaHelper.generateLockFiles(
         lernaPkgFileWithoutLernaDep('npm'),
         'some-dir',
@@ -114,7 +110,7 @@ describe('modules/manager/npm/post-update/lerna', () => {
     });
 
     it('allows scripts for trust level high', async () => {
-      const execSnapshots = mockExecAll(promisifiedSpawn);
+      const execSnapshots = mockExecAll(exec);
       GlobalConfig.set({ ...globalConfig, allowScripts: true });
       const res = await lernaHelper.generateLockFiles(
         lernaPkgFile('npm'),
