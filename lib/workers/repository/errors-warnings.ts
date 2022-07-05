@@ -99,11 +99,18 @@ export function getDepWarningsDashboard(
     `\n---\n\n### :warning: Dependency Lookup Warnings :warning:\n\n`
   );
   warnings.forEach((w) => {
-    warningText += `-   \`${w}\`\n`;
+    const splitStr = w.split(' ');
+    const msg = splitStr.slice(0, 5).join(' ');
+    const dep = splitStr.slice(5).join(' ');
+
+    warningText += `-   ${msg} \`${dep}\`\n`;
   });
   warningText +=
     '\nFiles affected: ' +
     warningFiles.map((f) => '`' + f + '`').join(', ') +
     '\n\n';
+
+  warningText += '---';
+  warningText += '\n\n';
   return warningText;
 }

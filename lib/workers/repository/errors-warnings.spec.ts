@@ -151,10 +151,12 @@ describe('workers/repository/errors-warnings', () => {
 
         ### ⚠ Dependency Lookup Warnings ⚠
 
-        -   \`Warning 1\`
-        -   \`Warning 2\`
+        -   Warning 1 \`\`
+        -   Warning 2 \`\`
 
         Files affected: \`package.json\`, \`backend/package.json\`, \`Dockerfile\`
+
+        ---
 
         "
       `);

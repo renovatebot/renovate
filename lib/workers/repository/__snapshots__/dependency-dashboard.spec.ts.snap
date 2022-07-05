@@ -8,9 +8,11 @@ exports[`workers/repository/dependency-dashboard ensureDependencyDashboard() che
 
 ### ⚠ Dependency Lookup Warnings ⚠
 
--   \`Warning 2\`
+-   Warning 2 \`\`
 
 Files affected: \`package.json\`
+
+---
 
 
 This repository currently has no open or pending branches.
