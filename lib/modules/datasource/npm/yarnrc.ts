@@ -1,5 +1,6 @@
 import { load } from 'js-yaml';
 import type { HostRule } from '../../../types/host-rules';
+import { defaultRegistryUrls } from './common';
 import type { NpmrcRules } from './types';
 
 interface YarnrcYAML {
@@ -27,7 +28,7 @@ export function convertYarnrcYmlToRules(yarnrcYml: string): NpmrcRules {
   const { npmAuthToken, npmRegistryServer, npmScopes } = yarnrc;
 
   if (npmRegistryServer) {
-    const rule: HostRule = hosts.get(npmRegistryServer) || {
+    const rule: HostRule = hosts.get(npmRegistryServer) ?? {
       hostType: 'npm',
       matchHost: npmRegistryServer,
     };
@@ -73,4 +74,28 @@ export function convertYarnrcYmlToRules(yarnrcYml: string): NpmrcRules {
   }
 
   return rules;
+}
+
+export function resolveRegistryUrl(
+  packageName: string,
+  rules: NpmrcRules
+): string {
+  let registryUrl = defaultRegistryUrls[0];
+
+  if (rules.hostRules.length && rules.hostRules[0].matchHost) {
+    registryUrl = rules.hostRules[0].matchHost;
+  }
+
+  for (const rule of rules.packageRules) {
+    const { matchPackagePrefixes, registryUrls } = rule;
+    if (
+      !matchPackagePrefixes ||
+      packageName.startsWith(`@${matchPackagePrefixes[0]}`)
+    ) {
+      // TODO: fix types #7154
+      registryUrl = registryUrls![0];
+    }
+  }
+
+  return registryUrl;
 }
