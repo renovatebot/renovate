@@ -3,7 +3,7 @@ import { quote } from 'shlex';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { exec } from '../../../util/exec';
-import type { SpawnOptions } from '../../../util/exec/types';
+import type { ExecOptions } from '../../../util/exec/types';
 import { readLocalFile, writeLocalFile } from '../../../util/fs';
 import { getRepoStatus } from '../../../util/git';
 import type { StatusResult } from '../../../util/git/types';
@@ -86,7 +86,7 @@ export async function updateArtifacts({
       cmd += ` --gradle-version ${quote(config.newValue!)}`;
     }
     logger.debug(`Updating gradle wrapper: "${cmd}"`);
-    const execOptions: SpawnOptions = {
+    const execOptions: ExecOptions = {
       docker: {
         image: 'java',
         tagConstraint:

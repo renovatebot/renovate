@@ -27,19 +27,22 @@ export interface DockerOptions {
   cwd?: Opt<string>;
 }
 
-export interface RawSpawnOptions extends ChildProcessSpawnOptions {
+// todo: rename to RawSpawnOptions
+export interface RawExecOptions extends ChildProcessSpawnOptions {
   encoding: string;
   maxBuffer?: number | undefined;
 }
 
-export interface SpawnResult {
+// todo: rename to SpawnResult
+export interface ExecResult {
   stdout: string;
   stderr: string;
 }
 
 export type ExtraEnv<T = unknown> = Record<string, T>;
 
-export interface SpawnOptions {
+// todo: rename to SpawnOptions
+export interface ExecOptions {
   cwd?: string;
   cwdFile?: string;
   env?: Opt<ExtraEnv>;

@@ -5,7 +5,7 @@ import { GlobalConfig } from '../../config/global';
 import type { RepoGlobalConfig } from '../../config/types';
 import { TEMPORARY_ERROR } from '../../constants/error-messages';
 import * as dockerModule from './docker';
-import type { RawSpawnOptions, SpawnOptions, VolumeOption } from './types';
+import type { ExecOptions, RawExecOptions, VolumeOption } from './types';
 import { exec } from '.';
 
 const cpSpawn: jest.Mock<typeof _promisifiedSpawn> = _promisifiedSpawn as any;
@@ -16,9 +16,9 @@ jest.mock('../../modules/datasource');
 interface TestInput {
   processEnv: Record<string, string>;
   inCmd: string | string[];
-  inOpts: SpawnOptions;
+  inOpts: ExecOptions;
   outCmd: string[];
-  outOpts: RawSpawnOptions[];
+  outOpts: RawExecOptions[];
   adminConfig?: Partial<RepoGlobalConfig>;
 }
 

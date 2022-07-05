@@ -7,7 +7,7 @@ import {
 } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { exec } from '../../../util/exec';
-import type { SpawnOptions, ToolConstraint } from '../../../util/exec/types';
+import type { ExecOptions, ToolConstraint } from '../../../util/exec/types';
 import {
   ensureCacheDir,
   ensureLocalDir,
@@ -106,7 +106,7 @@ export async function updateArtifacts({
       constraint: constraints.composer,
     };
 
-    const execOptions: SpawnOptions = {
+    const execOptions: ExecOptions = {
       cwdFile: packageFileName,
       extraEnv: {
         COMPOSER_CACHE_DIR: await ensureCacheDir('composer'),

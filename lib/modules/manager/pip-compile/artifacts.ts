@@ -4,7 +4,7 @@ import upath from 'upath';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { exec } from '../../../util/exec';
-import type { SpawnOptions } from '../../../util/exec/types';
+import type { ExecOptions } from '../../../util/exec/types';
 import {
   deleteLocalFile,
   readLocalFile,
@@ -116,7 +116,7 @@ export async function updateArtifacts({
     );
     const tagConstraint = getPythonConstraint(config);
     const pipToolsConstraint = getPipToolsConstraint(config);
-    const execOptions: SpawnOptions = {
+    const execOptions: ExecOptions = {
       cwdFile: inputFileName,
       docker: {
         image: 'python',

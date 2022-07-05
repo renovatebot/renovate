@@ -5,7 +5,7 @@ import { GlobalConfig } from '../../../../config/global';
 import { TEMPORARY_ERROR } from '../../../../constants/error-messages';
 import { logger } from '../../../../logger';
 import { exec } from '../../../../util/exec';
-import type { ExtraEnv, SpawnOptions } from '../../../../util/exec/types';
+import type { ExecOptions, ExtraEnv } from '../../../../util/exec/types';
 import type { PackageFile, PostUpdateConfig } from '../../types';
 import { getNodeConstraint } from './node-version';
 import type { GenerateLockFileResult } from './types';
@@ -80,7 +80,7 @@ export async function generateLockFiles(
       NPM_CONFIG_CACHE: env.NPM_CONFIG_CACHE,
       npm_config_store: env.npm_config_store,
     };
-    const execOptions: SpawnOptions = {
+    const execOptions: ExecOptions = {
       cwdFile: upath.join(lockFileDir, 'package.json'),
       extraEnv,
       docker: {

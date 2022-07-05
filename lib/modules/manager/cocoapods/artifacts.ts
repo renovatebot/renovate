@@ -3,7 +3,7 @@ import upath from 'upath';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { exec } from '../../../util/exec';
-import type { SpawnOptions } from '../../../util/exec/types';
+import type { ExecOptions } from '../../../util/exec/types';
 import {
   ensureCacheDir,
   getSiblingFileName,
@@ -70,7 +70,7 @@ export async function updateArtifacts({
   const cocoapods = match?.groups?.cocoapodsVersion ?? null;
 
   const cmd = [...getPluginCommands(newPackageFileContent), 'pod install'];
-  const execOptions: SpawnOptions = {
+  const execOptions: ExecOptions = {
     cwdFile: packageFileName,
     extraEnv: {
       CP_HOME_DIR: await ensureCacheDir('cocoapods'),

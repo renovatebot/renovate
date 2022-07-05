@@ -5,7 +5,7 @@ import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import type { HostRule } from '../../../types';
 import { exec } from '../../../util/exec';
-import type { SpawnOptions, ToolConstraint } from '../../../util/exec/types';
+import type { ExecOptions, ToolConstraint } from '../../../util/exec/types';
 import {
   deleteLocalFile,
   getSiblingFileName,
@@ -184,7 +184,7 @@ export async function updateArtifacts({
       constraint,
     };
 
-    const execOptions: SpawnOptions = {
+    const execOptions: ExecOptions = {
       cwdFile: packageFileName,
       extraEnv,
       docker: {

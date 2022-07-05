@@ -4,7 +4,7 @@ import upath from 'upath';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { exec } from '../../../util/exec';
-import type { SpawnOptions, ToolConstraint } from '../../../util/exec/types';
+import type { ExecOptions, ToolConstraint } from '../../../util/exec/types';
 import {
   getSiblingFileName,
   getSubDirectory,
@@ -23,7 +23,7 @@ import {
 } from './utils';
 
 async function helmCommands(
-  execOptions: SpawnOptions,
+  execOptions: ExecOptions,
   manifestPath: string,
   repositories: Repository[]
 ): Promise<void> {
@@ -146,7 +146,7 @@ export async function updateArtifacts({
       constraint: config.constraints?.helm,
     };
 
-    const execOptions: SpawnOptions = {
+    const execOptions: ExecOptions = {
       docker: {
         image: 'sidecar',
       },

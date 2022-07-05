@@ -3,7 +3,7 @@ import { join } from 'upath';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { exec } from '../../../util/exec';
-import type { SpawnOptions } from '../../../util/exec/types';
+import type { ExecOptions } from '../../../util/exec/types';
 import {
   ensureDir,
   getSiblingFileName,
@@ -68,7 +68,7 @@ async function runDotnetRestore(
 ): Promise<void> {
   const nugetCacheDir = join(privateCacheDir(), 'nuget');
 
-  const execOptions: SpawnOptions = {
+  const execOptions: ExecOptions = {
     docker: {
       image: 'dotnet',
     },

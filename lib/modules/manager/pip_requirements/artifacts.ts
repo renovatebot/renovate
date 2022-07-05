@@ -2,7 +2,7 @@ import is from '@sindresorhus/is';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { exec } from '../../../util/exec';
-import type { SpawnOptions } from '../../../util/exec/types';
+import type { ExecOptions } from '../../../util/exec/types';
 import { readLocalFile } from '../../../util/fs';
 import { newlineRegex, regEx } from '../../../util/regex';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
@@ -38,7 +38,7 @@ export async function updateArtifacts({
       logger.debug('No hashin commands to run - returning');
       return null;
     }
-    const execOptions: SpawnOptions = {
+    const execOptions: ExecOptions = {
       cwdFile: '.',
       docker: {
         image: 'python',

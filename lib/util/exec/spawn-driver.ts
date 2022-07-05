@@ -1,11 +1,11 @@
 import { logger } from '../../logger';
-import { rawSpawn } from './common';
+import { rawExec } from './common';
 // import { rawExec } from './common';
-import type { RawSpawnOptions } from './types';
+import type { RawExecOptions } from './types';
 
 void (async () => {
-  const cmds: [string, RawSpawnOptions][] = [];
-  const opts: RawSpawnOptions = {
+  const cmds: [string, RawExecOptions][] = [];
+  const opts: RawExecOptions = {
     encoding: 'utf8',
     shell: true,
     timeout: 2000,
@@ -29,7 +29,7 @@ void (async () => {
     logger.info('-------------------------------------------------------');
     logger.info({ opts }, `Run rawSpawn() - START - "${cmd}"`);
     try {
-      const { stdout, stderr } = await rawSpawn(cmd, opts);
+      const { stdout, stderr } = await rawExec(cmd, opts);
       // const { stdout, stderr } = await rawExec(cmd, {encoding: 'utf8', timeout: 0});
       if (stdout) {
         logger.info(stdout);

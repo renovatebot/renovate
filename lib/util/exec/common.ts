@@ -1,5 +1,5 @@
 import { ChildProcess, spawn } from 'child_process';
-import type { RawSpawnOptions, SpawnResult } from './types';
+import type { ExecResult, RawExecOptions } from './types';
 
 // https://man7.org/linux/man-pages/man7/signal.7.html#NAME
 // Non TERM/CORE signals
@@ -22,7 +22,7 @@ function stringify(stream: Buffer[], encoding: BufferEncoding): string {
 
 function initStreamListeners(
   cp: ChildProcess,
-  opts: RawSpawnOptions & { maxBuffer: number; encoding: BufferEncoding }
+  opts: RawExecOptions & { maxBuffer: number; encoding: BufferEncoding }
 ): [Buffer[], Buffer[]] {
   const stdout: Buffer[] = [];
   const stderr: Buffer[] = [];
@@ -54,8 +54,8 @@ function initStreamListeners(
 
 export function promisifiedSpawn(
   cmd: string,
-  opts: RawSpawnOptions
-): Promise<SpawnResult> {
+  opts: RawExecOptions
+): Promise<ExecResult> {
   return new Promise((resolve, reject) => {
     const encoding = opts.encoding as BufferEncoding;
     const [command, ...args] = cmd.split(/\s+/);
@@ -103,7 +103,8 @@ export function promisifiedSpawn(
   });
 }
 
-export const rawSpawn: (
+// todo: rename to rawSpawn
+export const rawExec: (
   cmd: string,
-  opts: RawSpawnOptions
-) => Promise<SpawnResult> = promisifiedSpawn;
+  opts: RawExecOptions
+) => Promise<ExecResult> = promisifiedSpawn;

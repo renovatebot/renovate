@@ -6,8 +6,8 @@ import { TEMPORARY_ERROR } from '../../../../constants/error-messages';
 import { logger } from '../../../../logger';
 import { exec } from '../../../../util/exec';
 import type {
+  ExecOptions,
   ExtraEnv,
-  SpawnOptions,
   ToolConstraint,
 } from '../../../../util/exec/types';
 import { deleteLocalFile, readLocalFile } from '../../../../util/fs';
@@ -40,7 +40,7 @@ export async function generateLockFile(
       NPM_CONFIG_CACHE: env.NPM_CONFIG_CACHE,
       npm_config_store: env.npm_config_store,
     };
-    const execOptions: SpawnOptions = {
+    const execOptions: ExecOptions = {
       cwdFile: lockFileName,
       extraEnv,
       docker: {

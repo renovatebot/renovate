@@ -2,10 +2,10 @@ import is from '@sindresorhus/is';
 import traverse from 'traverse';
 import upath from 'upath';
 import { promisifiedSpawn as _promisifiedSpawn } from '../lib/util/exec/common';
-import type { SpawnOptions } from '../lib/util/exec/types';
+import type { ExecOptions } from '../lib/util/exec/types';
 import { regEx } from '../lib/util/regex';
 
-type CallOptions = SpawnOptions | null | undefined;
+type CallOptions = ExecOptions | null | undefined;
 
 export type SpawnResult = { stdout: string; stderr: string } | Error;
 
@@ -15,7 +15,7 @@ export const promisifiedSpawn: SpawnMock = _promisifiedSpawn as any;
 
 interface SpawnSnapshot {
   cmd: string;
-  options?: SpawnOptions | null | undefined;
+  options?: ExecOptions | null | undefined;
 }
 
 export type SpawnSnapshots = SpawnSnapshot[];
