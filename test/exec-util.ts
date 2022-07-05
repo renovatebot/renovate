@@ -15,15 +15,18 @@ export const promisifiedSpawn: SpawnMock = _promisifiedSpawn as any;
 
 interface SpawnSnapshot {
   cmd: string;
-  opts?: SpawnOptions | null | undefined;
+  options?: SpawnOptions | null | undefined;
 }
 
 export type SpawnSnapshots = SpawnSnapshot[];
 
-export function spawnSnapshot(cmd: string, opts?: CallOptions): SpawnSnapshot {
+export function spawnSnapshot(
+  cmd: string,
+  options?: CallOptions
+): SpawnSnapshot {
   const snapshot = {
     cmd,
-    opts,
+    options,
   };
 
   const cwd = upath.toUnix(process.cwd());
@@ -45,8 +48,8 @@ export function mockSpawnAll(
   spawnResult: SpawnResult = defaultSpawnResult
 ): SpawnSnapshots {
   const snapshots: SpawnSnapshots = [];
-  spawnFn.mockImplementation((cmd, opts) => {
-    snapshots.push(spawnSnapshot(cmd, opts));
+  spawnFn.mockImplementation((cmd, options) => {
+    snapshots.push(spawnSnapshot(cmd, options));
     if (spawnResult instanceof Error) {
       throw spawnResult;
     }
@@ -61,8 +64,8 @@ export function mockSpawnSequence(
 ): SpawnSnapshots {
   const snapshots: SpawnSnapshots = [];
   spawnResults.forEach((spawnResult) => {
-    spawnFn.mockImplementationOnce((cmd, opts) => {
-      snapshots.push(spawnSnapshot(cmd, opts));
+    spawnFn.mockImplementationOnce((cmd, options) => {
+      snapshots.push(spawnSnapshot(cmd, options));
       if (spawnResult instanceof Error) {
         throw spawnResult;
       }

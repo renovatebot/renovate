@@ -1,9 +1,9 @@
-import { exec, mockExecAll } from '../../../../test/exec-util';
+import { mockSpawnAll, promisifiedSpawn } from '../../../../test/exec-util';
 import { fs } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import { updateArtifacts } from '.';
 
-jest.mock('child_process');
+jest.mock('../../../util/exec/common');
 jest.mock('../../../util/fs');
 
 describe('modules/manager/flux/artifacts', () => {
@@ -14,7 +14,10 @@ describe('modules/manager/flux/artifacts', () => {
   });
 
   it('replaces existing value', async () => {
-    const snapshots = mockExecAll(exec, { stdout: '', stderr: '' });
+    const snapshots = mockSpawnAll(promisifiedSpawn, {
+      stdout: '',
+      stderr: '',
+    });
     fs.readLocalFile.mockResolvedValueOnce('old');
     fs.readLocalFile.mockResolvedValueOnce('test');
 
@@ -61,7 +64,10 @@ describe('modules/manager/flux/artifacts', () => {
   });
 
   it('ignores unchanged system manifests', async () => {
-    const execSnapshots = mockExecAll(exec, { stdout: '', stderr: '' });
+    const execSnapshots = mockSpawnAll(promisifiedSpawn, {
+      stdout: '',
+      stderr: '',
+    });
     fs.readLocalFile.mockResolvedValueOnce('old');
     fs.readLocalFile.mockResolvedValueOnce('old');
     const res = await updateArtifacts({
@@ -91,7 +97,7 @@ describe('modules/manager/flux/artifacts', () => {
   });
 
   it('failed to generate system manifest', async () => {
-    mockExecAll(exec, new Error('failed'));
+    mockSpawnAll(promisifiedSpawn, new Error('failed'));
     const res = await updateArtifacts({
       packageFileName: 'clusters/my-cluster/flux-system/gotk-components.yaml',
       updatedDeps: [{ newVersion: '1.0.1' }],
@@ -110,7 +116,7 @@ describe('modules/manager/flux/artifacts', () => {
   });
 
   it('failed to read system manifest', async () => {
-    mockExecAll(exec, { stdout: '', stderr: 'Error' });
+    mockSpawnAll(promisifiedSpawn, { stdout: '', stderr: 'Error' });
     fs.readLocalFile.mockResolvedValueOnce('old');
     fs.readLocalFile.mockResolvedValueOnce('');
     const res = await updateArtifacts({

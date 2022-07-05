@@ -1,6 +1,10 @@
 import _fs from 'fs-extra';
 import { join } from 'upath';
-import { envMock, exec, mockExecAll } from '../../../../test/exec-util';
+import {
+  envMock,
+  mockSpawnAll,
+  promisifiedSpawn,
+} from '../../../../test/exec-util';
 import { Fixtures } from '../../../../test/fixtures';
 import { env, git } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
@@ -13,7 +17,7 @@ import { constructPipCompileCmd } from './artifacts';
 import { updateArtifacts } from '.';
 
 jest.mock('fs-extra');
-jest.mock('child_process');
+jest.mock('../../../util/exec/common');
 jest.mock('../../../util/exec/env');
 jest.mock('../../../util/git');
 jest.mock('../../../util/host-rules');
@@ -56,7 +60,7 @@ describe('modules/manager/pip-compile/artifacts', () => {
 
   it('returns null if unchanged', async () => {
     fs.readFile.mockResolvedValueOnce('content' as any);
-    const execSnapshots = mockExecAll(exec);
+    const execSnapshots = mockSpawnAll(promisifiedSpawn);
     fs.readFile.mockReturnValueOnce('content' as any);
     expect(
       await updateArtifacts({
@@ -71,7 +75,7 @@ describe('modules/manager/pip-compile/artifacts', () => {
 
   it('returns updated requirements.txt', async () => {
     fs.readFile.mockResolvedValueOnce('current requirements.txt' as any);
-    const execSnapshots = mockExecAll(exec);
+    const execSnapshots = mockSpawnAll(promisifiedSpawn);
     git.getRepoStatus.mockResolvedValue({
       modified: ['requirements.txt'],
     } as StatusResult);
@@ -89,7 +93,7 @@ describe('modules/manager/pip-compile/artifacts', () => {
 
   it('supports docker mode', async () => {
     GlobalConfig.set(dockerAdminConfig);
-    const execSnapshots = mockExecAll(exec);
+    const execSnapshots = mockSpawnAll(promisifiedSpawn);
     git.getRepoStatus.mockResolvedValue({
       modified: ['requirements.txt'],
     } as StatusResult);
@@ -126,7 +130,7 @@ describe('modules/manager/pip-compile/artifacts', () => {
 
   it('returns updated requirements.txt when doing lockfile maintenance', async () => {
     fs.readFile.mockResolvedValueOnce('Current requirements.txt' as any);
-    const execSnapshots = mockExecAll(exec);
+    const execSnapshots = mockSpawnAll(promisifiedSpawn);
     git.getRepoStatus.mockResolvedValue({
       modified: ['requirements.txt'],
     } as StatusResult);
@@ -144,7 +148,7 @@ describe('modules/manager/pip-compile/artifacts', () => {
 
   it('uses pipenv version from config', async () => {
     GlobalConfig.set(dockerAdminConfig);
-    const execSnapshots = mockExecAll(exec);
+    const execSnapshots = mockSpawnAll(promisifiedSpawn);
     git.getRepoStatus.mockResolvedValue({
       modified: ['requirements.txt'],
     } as StatusResult);
