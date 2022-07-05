@@ -5,7 +5,7 @@ import { GlobalConfig } from '../../../config/global';
 import { logger } from '../../../logger';
 import * as memCache from '../../../util/cache/memory';
 import { cache } from '../../../util/cache/package/decorator';
-import { privateCacheDir, readFile } from '../../../util/fs';
+import { privateCacheDir, readCacheFile } from '../../../util/fs';
 import { simpleGitConfig } from '../../../util/git/config';
 import { newlineRegex, regEx } from '../../../util/regex';
 import { parseUrl } from '../../../util/url';
@@ -160,7 +160,7 @@ export class CrateDatasource extends Datasource {
         info.clonePath,
         ...CrateDatasource.getIndexSuffix(packageName)
       );
-      return readFile(path, 'utf8');
+      return readCacheFile(path, 'utf8');
     }
 
     if (info.flavor === RegistryFlavor.CratesIo) {

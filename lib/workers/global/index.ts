@@ -17,7 +17,6 @@ import { CONFIG_PRESETS_INVALID } from '../../constants/error-messages';
 import { pkg } from '../../expose.cjs';
 import { getTracer } from '../../instrumentation';
 import { getProblems, logger, setMeta } from '../../logger';
-import { writeFile } from '../../util/fs';
 import * as hostRules from '../../util/host-rules';
 import * as repositoryWorker from '../repository';
 import { autodiscoverRepositories } from './autodiscover';
@@ -149,7 +148,7 @@ export async function start(): Promise<number> {
 
     if (is.nonEmptyString(config.writeDiscoveredRepos)) {
       const content = JSON.stringify(config.repositories);
-      await writeFile(config.writeDiscoveredRepos, content);
+      await fs.writeFile(config.writeDiscoveredRepos, content);
       logger.info(
         `Written discovered repositories to ${config.writeDiscoveredRepos}`
       );

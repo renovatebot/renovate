@@ -75,6 +75,13 @@ export class MigrationsService {
     ['versionScheme', 'versioning'],
     ['lookupNameTemplate', 'packageNameTemplate'],
     ['aliases', 'registryAliases'],
+    ['masterIssue', 'dependencyDashboard'],
+    ['masterIssueApproval', 'dependencyDashboardApproval'],
+    ['masterIssueAutoclose', 'dependencyDashboardAutoclose'],
+    ['masterIssueHeader', 'dependencyDashboardHeader'],
+    ['masterIssueFooter', 'dependencyDashboardFooter'],
+    ['masterIssueTitle', 'dependencyDashboardTitle'],
+    ['masterIssueLabels', 'dependencyDashboardLabels'],
   ]);
 
   static readonly customMigrations: ReadonlyArray<MigrationConstructor> = [

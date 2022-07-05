@@ -349,6 +349,14 @@ For example, To add `[skip ci]` to every commit you could configure:
 
 Another example would be if you want to configure a DCO signoff to each commit.
 
+If you want Renovate to signoff its commits, add the [`:gitSignOff` preset](https://docs.renovatebot.com/presets-default/#gitsignoff) to your `extends` array:
+
+```json
+{
+  "extends": [":gitSignOff"]
+}
+```
+
 ## commitBodyTable
 
 ## commitMessage
@@ -817,13 +825,26 @@ For now, you can only use this option on the GitLab platform.
     Advanced functionality.
     Only use this if you're sure you know what you're doing.
 
-This functionality requires that the datasource to support distribution streams/tags, such as npm does.
+For `followTag` to work, the datasource must support distribution streams or tags, like for example npm does.
 
-The primary use case for this option is if you are following a pre-release tag of a certain dependency, e.g. `typescript`'s `"insiders"` build.
-If configured, Renovate bypasses its normal major/minor/patch upgrade logic and stable/unstable consistency logic and keeps your dependency version sync'd strictly to whatever version is in the tag.
+The main usecase is to follow a pre-release tag of a dependency, say TypeScripts's `"insiders"` build:
 
-Beware that Renovate follows tags strictly.
-For example, if you are following a tag like `next` and then that stream is released as `stable` and `next` is no longer being updated then that means your dependencies also won't be getting updated.
+```json
+{
+  "packageRules": [
+    {
+      "matchPackageNames": ["typescript"],
+      "followTag": "insiders"
+    }
+  ]
+}
+```
+
+If you've set a `followTag` then Renovate skips its normal major/minor/patch upgrade logic and stable/unstable consistency logic, and instead keeps your dependency version synced _strictly_ to the version in the tag.
+
+Renovate follows tags _strictly_, this can cause problems when a tagged stream is no longer maintained.
+For example: you're following the `next` tag, but later the stream you actually want is called `stable` instead.
+If `next` is no longer getting updates, you must switch your `followTag` to `stable` to get updates again.
 
 ## gitAuthor
 
@@ -1903,6 +1924,7 @@ This way Renovate can use GitHub's [Commit signing support for bots and other Gi
 
 ## postUpdateOptions
 
+- `bundlerConservative`: Enable conservative mode for `bundler` (Ruby dependencies). This will only update the immediate dependency in the lockfile instead of all subdependencies
 - `gomodMassage`: Enable massaging `replace` directives before calling `go` commands
 - `gomodTidy`: Run `go mod tidy` after Go module updates. This is implicitly enabled for major module updates when `gomodUpdateImportPaths` is enabled
 - `gomodTidy1.17`: Run `go mod tidy -compat=1.17` after Go module updates.
@@ -2230,27 +2252,6 @@ If the `versioning` field is missing, then Renovate defaults to using `semver` v
 For more details and examples, see our [documentation for the `regex` manager](/modules/manager/regex/).
 For template fields, use the triple brace `{{{ }}}` notation to avoid Handlebars escaping any special characters.
 
-## registryAliases
-
-You can use the `registryAliases` object to set registry aliases.
-This feature only works with these managers:
-
-- `helm-requirements`
-- `helmv3`
-- `helmfile`
-
-The managers listed above all have this default registryAlias:
-
-```json
-{
-  "registryAliases": {
-    "stable": "https://charts.helm.sh/stable"
-  }
-}
-```
-
-Alias values must be properly formatted URIs.
-
 ### matchStrings
 
 `matchStrings` should each be a valid regular expression, optionally with named capture groups.
@@ -2496,6 +2497,27 @@ This will lead to following update where `1.21-alpine` is the newest version of 
 # The image of the service <registry>/<repo>/<image>:<tag>
 image: my.new.registry/aRepository/andImage:1.21-alpine
 ```
+
+## registryAliases
+
+You can use the `registryAliases` object to set registry aliases.
+This feature only works with these managers:
+
+- `helm-requirements`
+- `helmv3`
+- `helmfile`
+
+The managers listed above all have this default registryAlias:
+
+```json
+{
+  "registryAliases": {
+    "stable": "https://charts.helm.sh/stable"
+  }
+}
+```
+
+Alias values must be properly formatted URIs.
 
 ## registryUrls
 
