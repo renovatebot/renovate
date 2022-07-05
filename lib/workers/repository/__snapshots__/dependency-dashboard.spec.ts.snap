@@ -385,42 +385,6 @@ None detected
 "
 `;
 
-exports[`workers/repository/dependency-dashboard ensureDependencyDashboard() dependency Dashboard All Pending Approval 1`] = `
-"This issue lists Renovate updates and detected dependencies. Read the [Dependency Dashboard](https://docs.renovatebot.com/key-concepts/dashboard/) docs to learn more.
-
-## Pending Approval
-
-These branches will be created by Renovate only once you click their checkbox below.
-
- - [x] <!-- approve-all-pending-prs -->**Approve all pending PRs**
- - [ ] <!-- approve-branch=branchName1 -->pr1
- - [ ] <!-- approve-branch=branchName2 -->pr2
-
-## Detected dependencies
-
-None detected
-
-"
-`;
-
-exports[`workers/repository/dependency-dashboard ensureDependencyDashboard() dependency Dashboard Open All Rate Limited 1`] = `
-"This issue lists Renovate updates and detected dependencies. Read the [Dependency Dashboard](https://docs.renovatebot.com/key-concepts/dashboard/) docs to learn more.
-
-## Rate Limited
-
-These updates are currently rate limited. Click on a checkbox below to force their creation now.
-
- - [x] <!-- open-all-rate-limited-prs -->**Open all rate-limited PRs**
- - [ ] <!-- unlimit-branch=branchName1 -->pr1
- - [ ] <!-- unlimit-branch=branchName2 -->pr2
-
-## Detected dependencies
-
-None detected
-
-"
-`;
-
 exports[`workers/repository/dependency-dashboard ensureDependencyDashboard() open or update Dependency Dashboard when all branches are closed and dependencyDashboardAutoclose is false 1`] = `
 "This is a header
 

@@ -16,6 +16,7 @@ import type {
 } from '../../modules/manager/types';
 import type { Platform } from '../../modules/platform';
 import { massageMarkdown } from '../../modules/platform/github';
+import { regEx } from '../../util/regex';
 import { BranchConfig, BranchResult, BranchUpgradeConfig } from '../types';
 import * as dependencyDashboard from './dependency-dashboard';
 import { PackageFiles } from './package-files';
@@ -665,7 +666,30 @@ describe('workers/repository/dependency-dashboard', () => {
          - [ ] <!-- approve-branch=branchName2 -->pr2`,
       });
       await dependencyDashboard.ensureDependencyDashboard(config, branches);
-      expect(platform.ensureIssue.mock.calls[0][0].body).toMatchSnapshot();
+      const checkApprovePendingSelectAll = regEx(
+        / - \[x] <!-- approve-all-pending-prs -->/g
+      );
+      const checkApprovePendingBranch1 = regEx(
+        / - \[ ] <!-- approve-branch=branchName1 -->pr1/g
+      );
+      const checkApprovePendingBranch2 = regEx(
+        / - \[ ] <!-- approve-branch=branchName2 -->pr2/g
+      );
+      expect(
+        checkApprovePendingSelectAll.test(
+          platform.ensureIssue.mock.calls[0][0].body
+        )
+      ).toBeTrue();
+      expect(
+        checkApprovePendingBranch1.test(
+          platform.ensureIssue.mock.calls[0][0].body
+        )
+      ).toBeTrue();
+      expect(
+        checkApprovePendingBranch2.test(
+          platform.ensureIssue.mock.calls[0][0].body
+        )
+      ).toBeTrue();
     });
 
     it('dependency Dashboard Open All Rate Limited', async () => {
@@ -704,7 +728,26 @@ describe('workers/repository/dependency-dashboard', () => {
          - [ ] <!-- unlimit-branch=branchName2 -->pr2`,
       });
       await dependencyDashboard.ensureDependencyDashboard(config, branches);
-      expect(platform.ensureIssue.mock.calls[0][0].body).toMatchSnapshot();
+      const checkRateLimitedSelectAll = regEx(
+        / - \[x] <!-- open-all-rate-limited-prs -->/g
+      );
+      const checkRateLimitedBranch1 = regEx(
+        / - \[ ] <!-- unlimit-branch=branchName1 -->pr1/g
+      );
+      const checkRateLimitedBranch2 = regEx(
+        / - \[ ] <!-- unlimit-branch=branchName2 -->pr2/g
+      );
+      expect(
+        checkRateLimitedSelectAll.test(
+          platform.ensureIssue.mock.calls[0][0].body
+        )
+      ).toBeTrue();
+      expect(
+        checkRateLimitedBranch1.test(platform.ensureIssue.mock.calls[0][0].body)
+      ).toBeTrue();
+      expect(
+        checkRateLimitedBranch2.test(platform.ensureIssue.mock.calls[0][0].body)
+      ).toBeTrue();
     });
 
     it('forwards configured labels to the ensure issue call', async () => {
