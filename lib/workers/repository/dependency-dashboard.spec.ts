@@ -691,7 +691,7 @@ describe('workers/repository/dependency-dashboard', () => {
         branchName2: 'unlimit-branch',
       };
       config.dependencyDashboardIssue = 1;
-      mockedFunction(platform.getIssue!).mockResolvedValueOnce({
+      jest.spyOn(platform, 'getIssue').mockResolvedValueOnce({
         title: 'Dependency Dashboard',
         body: `This issue contains a list of Renovate updates and their statuses.
 

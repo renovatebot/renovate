@@ -31,9 +31,9 @@ function markBranchesApproveAllPendingPR(issueBody: string): string {
 // updates the issue body by marking all 'unlimit-branch' as checked
 function markBranchesOpenAllRateLimitedPR(issueBody: string): string {
   let newIssueBody = issueBody;
-  const checkPending = regEx(/ - \[ ] <!-- unlimit-branch=/g);
+  const checkRateLimited = regEx(/ - \[ ] <!-- unlimit-branch=/g);
   newIssueBody = newIssueBody.replace(
-    checkPending,
+    checkRateLimited,
     ' - [x] <!-- unlimit-branch='
   );
   return newIssueBody;

@@ -1737,7 +1737,7 @@ describe('workers/repository/update/branch/index', () => {
     });
 
     it('Dependency Dashboard open all rate limited', async () => {
-      getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
+      jest.spyOn(getUpdated, 'getUpdatedPackageFiles').mockResolvedValueOnce({
         updatedPackageFiles: [{}],
         artifactErrors: [{}],
       } as PackageFilesResult);
