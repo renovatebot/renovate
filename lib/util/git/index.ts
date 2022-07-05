@@ -420,7 +420,7 @@ export async function syncGit(): Promise<void> {
 
 // istanbul ignore next
 export async function getRepoStatus(path?: string): Promise<StatusResult> {
-  if (path !== undefined) {
+  if (is.string(path)) {
     const { localDir } = GlobalConfig.get();
     const localPath = upath.resolve(localDir, path);
     if (!localPath.startsWith(upath.resolve(localDir))) {
