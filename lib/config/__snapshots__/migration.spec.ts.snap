@@ -216,6 +216,19 @@ Object {
       ],
     },
     Object {
+      "major": Object {
+        "automerge": false,
+      },
+      "matchDepTypes": Array [
+        "optionalDependencies",
+      ],
+      "minor": Object {
+        "automerge": true,
+      },
+      "respectLatest": false,
+      "schedule": "before 5am on Monday",
+    },
+    Object {
       "matchDepTypes": Array [
         "peerDependencies",
       ],
@@ -232,19 +245,6 @@ Object {
         "automerge": true,
       },
       "schedule": null,
-    },
-    Object {
-      "major": Object {
-        "automerge": false,
-      },
-      "matchDepTypes": Array [
-        "optionalDependencies",
-      ],
-      "minor": Object {
-        "automerge": true,
-      },
-      "respectLatest": false,
-      "schedule": "before 5am on Monday",
     },
   ],
   "patch": Object {

@@ -31,13 +31,7 @@ export function migrateConfig(config: RenovateConfig): MigratedConfig {
     }
     const newConfig = MigrationsService.run(config);
     const migratedConfig = clone(newConfig) as MigratedRenovateConfig;
-    const depTypes = [
-      'dependencies',
-      'devDependencies',
-      'engines',
-      'optionalDependencies',
-      'peerDependencies',
-    ];
+
     for (const [key, val] of Object.entries(newConfig)) {
       if (key.startsWith('masterIssue')) {
         const newKey = key.replace('masterIssue', 'dependencyDashboard');
@@ -79,17 +73,6 @@ export function migrateConfig(config: RenovateConfig): MigratedConfig {
         }
         migratedConfig.includePaths = fileList;
         delete migratedConfig.packageFiles;
-      } else if (depTypes.includes(key)) {
-        migratedConfig.packageRules = is.array(migratedConfig.packageRules)
-          ? migratedConfig.packageRules
-          : [];
-        const depTypePackageRule = migrateConfig(
-          val as RenovateConfig
-        ).migratedConfig;
-        depTypePackageRule.depTypeList = [key];
-        delete depTypePackageRule.packageRules;
-        migratedConfig.packageRules.push(depTypePackageRule);
-        delete migratedConfig[key];
       } else if (is.string(val) && val.includes('{{baseDir}}')) {
         migratedConfig[key] = val.replace(
           regEx(/{{baseDir}}/g),
@@ -211,7 +194,12 @@ export function migrateConfig(config: RenovateConfig): MigratedConfig {
     if (is.nonEmptyArray(migratedConfig.packageRules)) {
       const existingRules = migratedConfig.packageRules;
       migratedConfig.packageRules = [];
-      for (const packageRule of existingRules) {
+      for (let packageRule of existingRules) {
+        if (packageRule.matchDepTypes) {
+          packageRule = migrateConfig(packageRule as RenovateConfig)
+            .migratedConfig as PackageRule;
+          delete packageRule.packageRules;
+        }
         if (is.array(packageRule.packageRules)) {
           logger.debug('Flattening nested packageRules');
           // merge each subrule and add to the parent list
