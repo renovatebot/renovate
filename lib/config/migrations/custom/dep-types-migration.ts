@@ -40,7 +40,7 @@ export class DepTypesMigration extends AbstractMigration {
     }
 
     if (packageRules.length) {
-      this.setSafely('packageRules', packageRules);
+      this.rewrite('packageRules', packageRules);
     }
   }
 }
