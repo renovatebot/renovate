@@ -41,16 +41,14 @@ function markBranchesOpenAllRateLimitedPR(issueBody: string): string {
 
 // returns if the checkbox 'Open all rate-limited PRs' is checked
 function isOpenAllRateLimitedPR(issueBody: string): boolean {
-  const checkApproveOpenAllRateLimitedPR =
-    ' - \\[x\\] <!-- open-all-rate-limited-prs -->';
-  return regEx(checkApproveOpenAllRateLimitedPR).test(issueBody);
+  const rateLimitRe = regEx(/- \[x] <!-- open-all-rate-limited-prs -->/);
+  return rateLimitRe.test(issueBody);
 }
 
 // returns if the checkbox 'Approve all pending PRs' is checked
 function isApproveAllPendingPR(issueBody: string): boolean {
-  const checkApproveAllPendingPR =
-    ' - \\[x\\] <!-- approve-all-pending-prs -->';
-  return regEx(checkApproveAllPendingPR).test(issueBody);
+  const approvePendingRe = regEx(/- \[x] <!-- approve-all-pending-prs -->/);
+  return approvePendingRe.test(issueBody);
 }
 
 function parseDashboardIssue(issueBody: string): DependencyDashboard {

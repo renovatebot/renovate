@@ -1707,7 +1707,7 @@ describe('workers/repository/update/branch/index', () => {
     });
 
     it('Dependency Dashboard All Pending approval', async () => {
-      getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
+      jest.spyOn(getUpdated, 'getUpdatedPackageFiles').mockResolvedValueOnce({
         updatedPackageFiles: [{}],
         artifactErrors: [{}],
       } as PackageFilesResult);
