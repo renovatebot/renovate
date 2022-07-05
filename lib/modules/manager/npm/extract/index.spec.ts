@@ -9,6 +9,7 @@ const fs: any = _fs;
 const defaultConfig = getConfig();
 
 const input01Content = Fixtures.get('inputs/01.json', '..');
+const input02Content = Fixtures.get('inputs/02.json', '..');
 const input01GlobContent = Fixtures.get('inputs/01-glob.json', '..');
 const workspacesContent = Fixtures.get('inputs/workspaces.json', '..');
 const workspacesSimpleContent = Fixtures.get(
@@ -213,22 +214,35 @@ describe('modules/manager/npm/extract/index', () => {
       expect(res?.npmrc).toBe('registry=https://registry.npmjs.org\n');
     });
 
-    it('reads .yarnrc.yml when config.npmrc is merged', async () => {
+    it('reads config .yarnrc.yml when config.npmrc is merged', async () => {
       fs.readLocalFile = jest.fn((fileName) => {
         if (fileName === '.yarnrc.yml') {
-          return 'npmRegistryServer: https://registry.npmjs.org';
+          return `npmRegistryServer: https://registry.example.com
+npmScopes:
+  babel:
+    npmRegistryServer: https://registry.babel.com`;
         }
         return null;
       });
       const res = await npmExtract.extractPackageFile(
-        input01Content,
+        input02Content,
         'package.json',
-        { npmrc: 'save-exact=true', npmrcMerge: true }
+        { npmrcMerge: true }
       );
-      expect(res?.npmrc).toBe(
-        `save-exact=true
-registry=https://registry.npmjs.org`
-      );
+      expect(res).toMatchSnapshot({
+        deps: [
+          {
+            depName: '@babel/core',
+            currentValue: '7.0.0',
+            registryUrls: ['https://registry.babel.com'],
+          },
+          {
+            depName: 'config',
+            currentValue: '1.21.0',
+            registryUrls: ['https://registry.example.com'],
+          },
+        ],
+      });
     });
 
     it('finds lerna', async () => {

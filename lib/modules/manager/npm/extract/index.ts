@@ -7,7 +7,11 @@ import { getSiblingFileName, readLocalFile } from '../../../../util/fs';
 import { newlineRegex, regEx } from '../../../../util/regex';
 import { GithubTagsDatasource } from '../../../datasource/github-tags';
 import { NpmDatasource } from '../../../datasource/npm';
-import { convertYarnrcYmlToNpmrc } from '../../../datasource/npm/yarnrc';
+import type { NpmrcRules } from '../../../datasource/npm/types';
+import {
+  convertYarnrcYmlToRules,
+  resolveRegistryUrl,
+} from '../../../datasource/npm/yarnrc';
 import * as nodeVersioning from '../../../versioning/node';
 import { api, isValid, isVersion } from '../../../versioning/npm';
 import type {
@@ -136,6 +140,7 @@ export async function extractPackageFile(
   const yarnrcYmlFileName = getSiblingFileName(fileName, '.yarnrc.yml');
   const yarnZeroInstall = await isZeroInstall(yarnrcYmlFileName);
 
+  let yarnRules: NpmrcRules;
   const repoYarnrcYml = await readLocalFile(yarnrcYmlFileName, 'utf8');
   if (is.string(repoYarnrcYml)) {
     if (is.string(config.npmrc) && !config.npmrcMerge) {
@@ -144,13 +149,7 @@ export async function extractPackageFile(
         'Repo .yarnrc.yml file is ignored due to config.npmrc with config.npmrcMerge=false'
       );
     } else {
-      npmrc = config.npmrc ?? '';
-      if (npmrc.length) {
-        if (!npmrc.endsWith('\n')) {
-          npmrc += '\n';
-        }
-      }
-      npmrc += convertYarnrcYmlToNpmrc(repoYarnrcYml);
+      yarnRules = convertYarnrcYmlToRules(repoYarnrcYml);
     }
   }
 
@@ -287,6 +286,9 @@ export async function extractPackageFile(
       dep.skipReason = 'file';
       hasFancyRefs = true;
       return dep;
+    }
+    if (yarnRules) {
+      dep.registryUrls = [resolveRegistryUrl(depName, yarnRules)];
     }
     if (isValid(dep.currentValue)) {
       dep.datasource = NpmDatasource.id;
