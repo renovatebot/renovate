@@ -14,7 +14,7 @@ describe('modules/platform/pr-body', () => {
       });
       expect(
         getPrBodyStruct(
-          'something \n<!--renovate-debug:eyJjcmVhdGVkQnlSZW5vdmF0ZVZlcnNpb24iOiAiMS4yLjEiLCJ1cGRhdGVkQnlSZW5vdmF0ZVZlcnNpb24iOiAiMS4yLjMifQ==-->'
+          'something \n<!--renovate-debug:eyJjcmVhdGVkSW5WZXIiOiAiMS4yLjEiLCJ1cGRhdGVkSW5WZXIiOiAiMS4yLjMifQ==-->'
         )
       ).toEqual({
         hash: '3fc9b689459d738f8c88a3a48aa9e33542016b7a4052e001aaa536fca74813cb',
@@ -23,6 +23,9 @@ describe('modules/platform/pr-body', () => {
           updatedInVer: '1.2.3',
         },
       });
+    });
+
+    it('checks if we reach warning', () => {
       expect(
         getPrBodyStruct(
           'something \n<!--renovate-debug:some-wrong-data-ABCDEFGHIJKLMNOP-->'
