@@ -33,13 +33,11 @@ export class HermitDatasource extends Datasource {
     'https://github.com/cashapp/hermit-packages',
   ];
 
-  githubHttp: GithubHttp;
-
   pathRegex: RegExp;
 
   constructor() {
     super(HermitDatasource.id);
-    this.githubHttp = new GithubHttp(GithubReleasesDatasource.id);
+    this.http = new GithubHttp(GithubReleasesDatasource.id);
     this.pathRegex = regEx('^\\/(?<owner>[^/]+)\\/(?<repo>[^/]+)$');
   }
 
@@ -55,12 +53,12 @@ export class HermitDatasource extends Datasource {
     logger.trace(`HermitDataSource.getReleases()`);
 
     if (!registryUrl) {
-      logger.debug('registryUrl must be supplied');
+      logger.error('registryUrl must be supplied');
       return null;
     }
 
     if (!registryUrl.startsWith('https://github.com/')) {
-      logger.debug({ registryUrl }, 'Only Github registryUrl is supported');
+      logger.error({ registryUrl }, 'Only Github registryUrl is supported');
       return null;
     }
 
@@ -73,7 +71,7 @@ export class HermitDatasource extends Datasource {
     const res = items.find((i) => i.Name === packageName);
 
     if (!res) {
-      logger.debug({ packageName, registryUrl }, 'cannot find hermit package');
+      logger.error({ packageName, registryUrl }, 'cannot find hermit package');
       return null;
     }
 
@@ -117,7 +115,7 @@ export class HermitDatasource extends Datasource {
 
     const apiBaseUrl = getApiBaseUrl(`https://${host}`);
 
-    const indexRelease = await this.githubHttp.getJson<GithubRelease>(
+    const indexRelease = await this.http.getJson<GithubRelease>(
       `${apiBaseUrl}repos/${owner}/${repo}/releases/tags/index`
     );
 
@@ -126,7 +124,7 @@ export class HermitDatasource extends Datasource {
     );
 
     if (!asset) {
-      logger.debug(
+      logger.error(
         { registryUrl },
         `can't find asset index.json in the given registryUrl`
       );
@@ -134,7 +132,7 @@ export class HermitDatasource extends Datasource {
     }
 
     const indexContent = await streamToString(
-      this.githubHttp.stream(asset.url, {
+      this.http.stream(asset.url, {
         headers: {
           accept: 'application/octet-stream',
         },
