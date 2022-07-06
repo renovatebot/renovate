@@ -23,6 +23,7 @@ import { HostRulesMigration } from './custom/host-rules-migration';
 import { IgnoreNodeModulesMigration } from './custom/ignore-node-modules-migration';
 import { IgnoreNpmrcFileMigration } from './custom/ignore-npmrc-file-migration';
 import { MatchStringsMigration } from './custom/match-strings-migration';
+import { NodeMigration } from './custom/node-migration';
 import { PackageNameMigration } from './custom/package-name-migration';
 import { PackagePatternMigration } from './custom/package-pattern-migration';
 import { PackageRulesMigration } from './custom/package-rules-migration';
@@ -38,6 +39,7 @@ import { RequireConfigMigration } from './custom/require-config-migration';
 import { RequiredStatusChecksMigration } from './custom/required-status-checks-migration';
 import { ScheduleMigration } from './custom/schedule-migration';
 import { SemanticCommitsMigration } from './custom/semantic-commits-migration';
+import { SemanticPrefixMigration } from './custom/semantic-prefix-migration';
 import { SeparateMajorReleasesMigration } from './custom/separate-major-release-migration';
 import { SeparateMultipleMajorMigration } from './custom/separate-multiple-major-migration';
 import { SuppressNotificationsMigration } from './custom/suppress-notifications-migration';
@@ -76,6 +78,13 @@ export class MigrationsService {
     ['versionScheme', 'versioning'],
     ['lookupNameTemplate', 'packageNameTemplate'],
     ['aliases', 'registryAliases'],
+    ['masterIssue', 'dependencyDashboard'],
+    ['masterIssueApproval', 'dependencyDashboardApproval'],
+    ['masterIssueAutoclose', 'dependencyDashboardAutoclose'],
+    ['masterIssueHeader', 'dependencyDashboardHeader'],
+    ['masterIssueFooter', 'dependencyDashboardFooter'],
+    ['masterIssueTitle', 'dependencyDashboardTitle'],
+    ['masterIssueLabels', 'dependencyDashboardLabels'],
   ]);
 
   static readonly customMigrations: ReadonlyArray<MigrationConstructor> = [
@@ -121,6 +130,8 @@ export class MigrationsService {
     DryRunMigration,
     RequireConfigMigration,
     PackageRulesMigration,
+    NodeMigration,
+    SemanticPrefixMigration,
   ];
 
   static run(originalConfig: RenovateConfig): RenovateConfig {

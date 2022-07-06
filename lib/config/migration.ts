@@ -38,14 +38,7 @@ export function migrateConfig(config: RenovateConfig): MigratedConfig {
       'peerDependencies',
     ];
     for (const [key, val] of Object.entries(newConfig)) {
-      if (key.startsWith('masterIssue')) {
-        const newKey = key.replace('masterIssue', 'dependencyDashboard');
-        migratedConfig[newKey] = val;
-        if (optionTypes[newKey] === 'boolean' && val === 'true') {
-          migratedConfig[newKey] = true;
-        }
-        delete migratedConfig[key];
-      } else if (key === 'packageFiles' && is.array(val)) {
+      if (key === 'packageFiles' && is.array(val)) {
         const fileList = [];
         for (const packageFile of val) {
           if (is.object(packageFile) && !is.array(packageFile)) {
@@ -104,16 +97,6 @@ export function migrateConfig(config: RenovateConfig): MigratedConfig {
           regEx(/{{depNameShort}}/g),
           '{{depName}}'
         );
-      } else if (key === 'semanticPrefix' && is.string(val)) {
-        delete migratedConfig.semanticPrefix;
-        let [text] = val.split(':') as any; // TODO: fixme
-        text = text.split('(');
-        [migratedConfig.semanticCommitType] = text;
-        if (text.length > 1) {
-          [migratedConfig.semanticCommitScope] = text[1].split(')');
-        } else {
-          migratedConfig.semanticCommitScope = null;
-        }
       } else if (is.string(val) && val.startsWith('{{semanticPrefix}}')) {
         migratedConfig[key] = val.replace(
           '{{semanticPrefix}}',
@@ -153,17 +136,6 @@ export function migrateConfig(config: RenovateConfig): MigratedConfig {
         val.length === 1
       ) {
         migratedConfig[key] = String(val[0]);
-      } else if (key === 'node' && (val as RenovateConfig).enabled === true) {
-        // validated non-null
-        delete migratedConfig.node!.enabled;
-        migratedConfig.travis = migratedConfig.travis ?? {};
-        migratedConfig.travis.enabled = true;
-        if (Object.keys(migratedConfig.node!).length) {
-          const subMigrate = migrateConfig(migratedConfig.node!);
-          migratedConfig.node = subMigrate.migratedConfig;
-        } else {
-          delete migratedConfig.node;
-        }
       } else if (is.array(val)) {
         if (is.array(migratedConfig?.[key])) {
           const newArray = [];

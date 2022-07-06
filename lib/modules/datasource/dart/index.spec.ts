@@ -1,9 +1,9 @@
 import { getPkgReleases } from '..';
+import { Fixtures } from '../../../../test/fixtures';
 import * as httpMock from '../../../../test/http-mock';
-import { loadJsonFixture } from '../../../../test/util';
 import { DartDatasource } from '.';
 
-const body = loadJsonFixture('shared_preferences.json');
+const body = Fixtures.getJson('shared_preferences.json');
 
 const baseUrl = 'https://pub.dartlang.org/api/packages/';
 

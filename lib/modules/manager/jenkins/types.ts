@@ -3,7 +3,7 @@ export interface JenkinsPluginRenovate {
 }
 
 export interface JenkinsPluginSource {
-  version?: string;
+  version?: string | number;
   url?: string;
 }
 
