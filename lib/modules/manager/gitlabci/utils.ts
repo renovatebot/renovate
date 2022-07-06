@@ -1,4 +1,4 @@
-import { escapeRegExp, regEx } from '../../../util/regex';
+import { regEx } from '../../../util/regex';
 import { getDep } from '../dockerfile/extract';
 import type { PackageDependency } from '../types';
 
