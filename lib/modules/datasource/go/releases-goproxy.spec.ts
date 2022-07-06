@@ -1,5 +1,5 @@
+import { Fixtures } from '../../../../test/fixtures';
 import * as httpMock from '../../../../test/http-mock';
-import { loadFixture } from '../../../../test/util';
 import { GithubReleasesDatasource } from '../github-releases';
 import { GithubTagsDatasource } from '../github-tags';
 import { GoProxyDatasource } from './releases-goproxy';
@@ -31,7 +31,7 @@ describe('modules/datasource/go/releases-goproxy', () => {
       httpMock
         .scope(baseUrl)
         .get('/github.com/go-kit/kit/@v/list')
-        .reply(200, loadFixture('go-kit.list.txt'));
+        .reply(200, Fixtures.get('go-kit.list.txt'));
 
       const versions = await datasource.listVersions(baseUrl, packageName);
 

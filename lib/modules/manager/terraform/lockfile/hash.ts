@@ -26,7 +26,7 @@ export class TerraformProviderHash {
       const hash = crypto.createHash('sha256');
 
       // a sha256sum displayed as lowercase hex string to root hash
-      const fileBuffer = await fs.readFile(file);
+      const fileBuffer = await fs.readCacheFile(file);
       hash.update(fileBuffer);
       rootHash.update(hash.digest('hex'));
 
@@ -45,7 +45,7 @@ export class TerraformProviderHash {
     extractPath: string
   ): Promise<string> {
     await extract(zipFilePath, { dir: extractPath });
-    const files = await fs.readdir(extractPath);
+    const files = await fs.listCacheDir(extractPath);
     // the h1 hashing algorithms requires that the files are sorted by filename
     const sortedFiles = files.sort((a, b) => a.localeCompare(b));
     const filesWithPath = sortedFiles.map((file) => `${extractPath}/${file}`);
@@ -53,7 +53,7 @@ export class TerraformProviderHash {
     const result = await TerraformProviderHash.hashFiles(filesWithPath);
 
     // delete extracted files
-    await fs.rm(extractPath, { recursive: true });
+    await fs.rmCache(extractPath);
 
     return result;
   }
@@ -86,7 +86,7 @@ export class TerraformProviderHash {
       return hash;
     } finally {
       // delete zip file
-      await fs.unlink(downloadFileName);
+      await fs.rmCache(downloadFileName);
     }
   }
 
