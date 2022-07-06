@@ -23,6 +23,7 @@ import { HostRulesMigration } from './custom/host-rules-migration';
 import { IgnoreNodeModulesMigration } from './custom/ignore-node-modules-migration';
 import { IgnoreNpmrcFileMigration } from './custom/ignore-npmrc-file-migration';
 import { MatchStringsMigration } from './custom/match-strings-migration';
+import { NodeMigration } from './custom/node-migration';
 import { PackageFilesMigration } from './custom/package-files-migration';
 import { PackageNameMigration } from './custom/package-name-migration';
 import { PackagePatternMigration } from './custom/package-pattern-migration';
@@ -129,6 +130,7 @@ export class MigrationsService {
     DryRunMigration,
     RequireConfigMigration,
     PackageFilesMigration,
+    NodeMigration,
     SemanticPrefixMigration,
   ];
 
