@@ -14,6 +14,7 @@ import { GlobalConfig } from '../../config/global';
 import type { RenovateConfig } from '../../config/types';
 import {
   CONFIG_VALIDATION,
+  INVALID_PATH,
   REPOSITORY_CHANGED,
   REPOSITORY_DISABLED,
   REPOSITORY_EMPTY,
@@ -424,9 +425,21 @@ export async function syncGit(): Promise<void> {
 }
 
 // istanbul ignore next
-export async function getRepoStatus(): Promise<StatusResult> {
+export async function getRepoStatus(path?: string): Promise<StatusResult> {
+  if (is.string(path)) {
+    const { localDir } = GlobalConfig.get();
+    const localPath = upath.resolve(localDir, path);
+    if (!localPath.startsWith(upath.resolve(localDir))) {
+      logger.warn(
+        { localPath, localDir },
+        'Preventing access to file outside the local directory'
+      );
+      throw new Error(INVALID_PATH);
+    }
+  }
+
   await syncGit();
-  return git.status();
+  return git.status(path ? [path] : []);
 }
 
 export function branchExists(branchName: string): boolean {
