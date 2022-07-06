@@ -222,7 +222,7 @@
     "@jest/reporters": "28.1.2",
     "@jest/test-result": "28.1.1",
     "@ls-lint/ls-lint": "1.11.2",
-    "@openpgp/web-stream-tools": "0.0.10",
+    "@openpgp/web-stream-tools": "0.0.11",
     "@renovate/eslint-plugin": "https://github.com/renovatebot/eslint-plugin#v0.0.4",
     "@semantic-release/exec": "6.0.3",
     "@types/auth-header": "1.0.2",
