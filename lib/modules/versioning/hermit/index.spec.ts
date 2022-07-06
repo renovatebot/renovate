@@ -80,9 +80,12 @@ describe('modules/versioning/hermit/index', () => {
       ${'@latest'}  | ${'@1'}      | ${false}
       ${'@stable'}  | ${'@stable'} | ${true}
       ${'stable'}   | ${'stable'}  | ${true}
-    `('equals("$version") === $expected', ({ version, other, expected }) => {
-      expect(versioning.equals(version, other)).toBe(expected);
-    });
+    `(
+      'equals("$version", "$other") === $expected',
+      ({ version, other, expected }) => {
+        expect(versioning.equals(version, other)).toBe(expected);
+      }
+    );
   });
 
   describe('matches', () => {
@@ -124,7 +127,7 @@ describe('modules/versioning/hermit/index', () => {
     test.each`
       version      | other        | expected
       ${'@1'}      | ${'@1.2'}    | ${false}
-      ${'@1.2'}    | ${'@1.2'}    | ${true}
+      ${'@1.2'}    | ${'@1.2'}    | ${false}
       ${'@1.2.3'}  | ${'@1.2'}    | ${true}
       ${'@latest'} | ${'@1'}      | ${true}
       ${'@stable'} | ${'@latest'} | ${false}

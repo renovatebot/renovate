@@ -79,45 +79,13 @@ export class HermitVersioning extends RegExpVersioningApi {
     return this._isValid(version) || this._isChannel(version);
   }
 
-  override equals(version: string, other: string): boolean {
-    // compare semver when both are
-    if (this._isValid(version) && this._isValid(other)) {
-      return super.equals(version, other);
-    }
-    const parsedVersion = this._parse(version);
-    const parsedOther = this._parse(other);
-
-    if (parsedVersion !== null && parsedOther !== null) {
-      const versionReleases = parsedVersion.release;
-      const otherReleases = parsedOther.release;
-
-      if (versionReleases.length !== otherReleases.length) {
-        return false;
-      }
-
-      for (let i = 0; i < versionReleases.length; i++) {
-        if (versionReleases[i] !== otherReleases[i]) {
-          return false;
-        }
-      }
-
-      return true;
-    }
-
-    return version === other;
-  }
-
-  override isGreaterThan(version: string, other: string): boolean {
-    return this.sortVersions(version, other) > 0;
-  }
-
   override isLessThanRange(version: string, range: string): boolean {
-    return !this.isGreaterThan(version, range);
+    return this._compare(version, range) < 0;
   }
 
-  override sortVersions(version: string, other: string): number {
+  protected override _compare(version: string, other: string): number {
     if (this._isValid(version) && this._isValid(other)) {
-      return super.sortVersions(version, other);
+      return super._compare(version, other);
     }
 
     const parsedVersion = this._parse(version);
