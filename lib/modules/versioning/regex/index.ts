@@ -39,7 +39,7 @@ export class RegExpVersioningApi extends GenericVersioningApi<RegExpVersion> {
   //   RegExp('^(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)(?<prerelease>[^.-]+)?(-(?<compatibility>.*))?$');
   // * matches the versioning approach used by the Bitnami images on DockerHub:
   //   RegExp('^(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)(:?-(?<compatibility>.*-r)(?<build>\\d+))?$');
-  protected _config: RegExp | null = null;
+  protected readonly _config: RegExp;
 
   constructor(_new_config: string | undefined) {
     super();
