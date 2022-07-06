@@ -18,14 +18,14 @@ export class PackageRulesMigration extends AbstractMigration {
   override readonly propertyName = 'packageRules';
 
   override run(value: PackageRule[] | null): void {
-    let packageRules = this.get('packageRules') as PackageRule[];
+    let packageRules = value;
     packageRules = Array.isArray(packageRules) ? [...packageRules] : [];
 
     packageRules = packageRules.map((packageRule) => {
       const newPackageRule: PackageRule = {};
 
-      for (const [key, value] of Object.entries(packageRule)) {
-        newPackageRule[renameMap[key as keyof typeof renameMap] ?? key] = value;
+      for (const [key, val] of Object.entries(packageRule)) {
+        newPackageRule[renameMap[key as keyof typeof renameMap] ?? key] = val;
       }
 
       return newPackageRule;
