@@ -98,9 +98,10 @@ export function mergeExtractionTemplate(
   };
 }
 
-export function isValidDependency(dep: PackageDependency): boolean {
+export function isValidDependency({
+  depName,
+  currentValue,
+}: PackageDependency): boolean {
   // check if all the fields are set
-  return !['depName', 'currentValue'].some(
-    (value) => !dep[value as keyof PackageDependency]
-  );
+  return Boolean(depName) && Boolean(currentValue);
 }
