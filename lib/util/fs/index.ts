@@ -15,11 +15,11 @@ export function getParentDir(fileName: string): string {
 }
 
 export function getSiblingFileName(
-  existingFileNameWithPath: string,
-  otherFileName: string
+  fileName: string,
+  siblingName: string
 ): string {
-  const subDirectory = getParentDir(existingFileNameWithPath);
-  return upath.join(subDirectory, otherFileName);
+  const subDirectory = getParentDir(fileName);
+  return upath.join(subDirectory, siblingName);
 }
 
 export async function readLocalFile(fileName: string): Promise<Buffer | null>;

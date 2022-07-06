@@ -12,6 +12,7 @@ import {
   findLocalSiblingOrParent,
   findUpLocal,
   getParentDir,
+  getSiblingFileName,
   localPathExists,
   localPathIsFile,
   outputCacheFile,
@@ -46,6 +47,23 @@ describe('util/fs/index', () => {
     `(`getParentDir('$dir') === '$expected'`, ({ dir, expected }) => {
       expect(getParentDir(dir)).toBe(expected);
     });
+  });
+
+  describe('getSiblingFileName', () => {
+    test.each`
+      file          | sibling  | expected
+      ${'/foo/bar'} | ${'baz'} | ${'/foo/baz'}
+      ${'foo/bar'}  | ${'baz'} | ${'foo/baz'}
+      ${'foo/'}     | ${'baz'} | ${'baz'}
+      ${'foo'}      | ${'baz'} | ${'baz'}
+      ${'./foo'}    | ${'baz'} | ${'baz'}
+      ${'../foo'}   | ${'baz'} | ${'../baz'}
+    `(
+      `getSiblingFileName('$file', '$sibling') === '$expected'`,
+      ({ file, sibling, expected }) => {
+        expect(getSiblingFileName(file, sibling)).toBe(expected);
+      }
+    );
   });
 
   describe('readLocalFile', () => {
