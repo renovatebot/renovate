@@ -42,12 +42,12 @@ export function execSnapshot(cmd: string, options?: CallOptions): ExecSnapshot {
   });
 }
 
-const defaultSpawnResult = { stdout: '', stderr: '' };
+const defaultExecResult = { stdout: '', stderr: '' };
 
 // TODO: rename
 export function mockExecAll(
   execFn: ExecMock,
-  execResult: ExecResult = defaultSpawnResult
+  execResult: ExecResult = defaultExecResult
 ): ExecSnapshots {
   const snapshots: ExecSnapshots = [];
   execFn.mockImplementation((cmd, options) => {
