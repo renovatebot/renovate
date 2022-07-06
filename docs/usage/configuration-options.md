@@ -2649,6 +2649,7 @@ Renovate does not support scheduled minutes or "at an exact time" granularity.
 !!! note
     Actions triggered via the [Dependency Dashboard](https://docs.renovatebot.com/configuration-options/#dependencydashboard) are not restricted by a configured schedule.
 
+<!-- prettier-ignore -->
 !!! tip
     If you'd like to validate your proposed `later` schedule before updating your `renovate.json`, you can use [this CodePen](https://codepen.io/rationaltiger24/full/ZExQEgK) to do so.
 
