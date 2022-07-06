@@ -11,7 +11,7 @@ import {
   ensureLocalDir,
   findLocalSiblingOrParent,
   findUpLocal,
-  getSubDirectory,
+  getParentDir,
   localPathExists,
   localPathIsFile,
   outputCacheFile,
@@ -27,6 +27,27 @@ jest.mock('find-up');
 const findUp = mockedFunction(_findUp);
 
 describe('util/fs/index', () => {
+  describe('getParentDir', () => {
+    test.each`
+      dir            | expected
+      ${'/foo/bar/'} | ${'/foo'}
+      ${'/foo/bar'}  | ${'/foo'}
+      ${'/foo/'}     | ${'/'}
+      ${'/foo'}      | ${'/'}
+      ${'foo/bar/'}  | ${'foo'}
+      ${'foo/bar'}   | ${'foo'}
+      ${'foo/'}      | ${''}
+      ${'foo'}       | ${''}
+      ${''}          | ${''}
+      ${'.'}         | ${''}
+      ${'..'}        | ${''}
+      ${'./foo'}     | ${'.'}
+      ${'../foo'}    | ${'..'}
+    `(`getParentDir('$dir') === '$expected'`, ({ dir, expected }) => {
+      expect(getParentDir(dir)).toBe(expected);
+    });
+  });
+
   describe('readLocalFile', () => {
     beforeEach(() => {
       GlobalConfig.set({ localDir: '' });
@@ -52,7 +73,7 @@ describe('util/fs/index', () => {
     });
 
     it('returns true for directory', async () => {
-      expect(await localPathExists(getSubDirectory(__filename))).toBeTrue();
+      expect(await localPathExists(getParentDir(__filename))).toBeTrue();
     });
 
     it('returns false', async () => {
