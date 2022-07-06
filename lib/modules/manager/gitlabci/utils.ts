@@ -35,21 +35,5 @@ export function getGitlabDep(
     dep.autoReplaceStringTemplate = `${match.groups.prefix}${dep.autoReplaceStringTemplate}`;
     return dep;
   }
-
-  for (const [name, value] of Object.entries(registryAliases ?? {})) {
-    const escapedName = escapeRegExp(name);
-    const match = regEx(`(?<prefix>${escapedName}/)(?<depName>.+)`).exec(
-      imageName
-    );
-    if (match?.groups) {
-      const dep = {
-        ...getDep(`${value}/${match.groups.depName}`),
-        replaceString: imageName,
-      };
-      dep.autoReplaceStringTemplate = `${match.groups.prefix}${dep.autoReplaceStringTemplate}`;
-      return dep;
-    }
-  }
-
-  return getDep(imageName);
+  return getDep(imageName, true, registryAliases);
 }
