@@ -98,16 +98,6 @@ export function migrateConfig(config: RenovateConfig): MigratedConfig {
           regEx(/{{depNameShort}}/g),
           '{{depName}}'
         );
-      } else if (key === 'semanticPrefix' && is.string(val)) {
-        delete migratedConfig.semanticPrefix;
-        let [text] = val.split(':') as any; // TODO: fixme
-        text = text.split('(');
-        [migratedConfig.semanticCommitType] = text;
-        if (text.length > 1) {
-          [migratedConfig.semanticCommitScope] = text[1].split(')');
-        } else {
-          migratedConfig.semanticCommitScope = null;
-        }
       } else if (is.string(val) && val.startsWith('{{semanticPrefix}}')) {
         migratedConfig[key] = val.replace(
           '{{semanticPrefix}}',
