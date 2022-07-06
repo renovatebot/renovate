@@ -1,4 +1,5 @@
 import { TokenType } from './common';
+import type { VariableRegistry } from './types';
 import {
   getVars,
   interpolateString,
@@ -18,6 +19,7 @@ describe('modules/manager/gradle/utils', () => {
       '(,2.0[',
       '2.1.1.RELEASE',
       '1.0.+',
+      '2022-05-10_55',
       'latest',
     ].forEach((input) => {
       expect(versionLikeSubstring(input)).toEqual(input);
@@ -176,7 +178,7 @@ describe('modules/manager/gradle/utils', () => {
   });
 
   it('getVars', () => {
-    const registry = {
+    const registry: VariableRegistry = {
       [toAbsolutePath('/foo')]: {
         foo: { key: 'foo', value: 'FOO' } as never,
         bar: { key: 'bar', value: 'BAR' } as never,

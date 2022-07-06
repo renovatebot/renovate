@@ -70,7 +70,7 @@ describe('modules/manager/bundler/artifacts', () => {
 
   it('returns null if Gemfile.lock was not changed', async () => {
     fs.readLocalFile.mockResolvedValueOnce('Current Gemfile.lock');
-    fs.writeLocalFile.mockResolvedValueOnce(null as never);
+    fs.writeLocalFile.mockResolvedValueOnce();
     const execSnapshots = mockExecAll(exec);
     git.getRepoStatus.mockResolvedValueOnce({
       modified: [] as string[],
@@ -89,13 +89,13 @@ describe('modules/manager/bundler/artifacts', () => {
 
   it('works for default binarySource', async () => {
     fs.readLocalFile.mockResolvedValueOnce('Current Gemfile.lock');
-    fs.writeLocalFile.mockResolvedValueOnce(null as never);
-    fs.readLocalFile.mockResolvedValueOnce(null as never);
+    fs.writeLocalFile.mockResolvedValueOnce();
+    fs.readLocalFile.mockResolvedValueOnce(null);
     const execSnapshots = mockExecAll(exec);
     git.getRepoStatus.mockResolvedValueOnce({
       modified: ['Gemfile.lock'],
     } as StatusResult);
-    fs.readLocalFile.mockResolvedValueOnce('Updated Gemfile.lock' as any);
+    fs.readLocalFile.mockResolvedValueOnce('Updated Gemfile.lock');
     expect(
       await updateArtifacts({
         packageFileName: 'Gemfile',
@@ -110,13 +110,13 @@ describe('modules/manager/bundler/artifacts', () => {
   it('works explicit global binarySource', async () => {
     GlobalConfig.set({ ...adminConfig, binarySource: 'global' });
     fs.readLocalFile.mockResolvedValueOnce('Current Gemfile.lock');
-    fs.writeLocalFile.mockResolvedValueOnce(null as never);
-    fs.readLocalFile.mockResolvedValueOnce(null as never);
+    fs.writeLocalFile.mockResolvedValueOnce();
+    fs.readLocalFile.mockResolvedValueOnce(null);
     const execSnapshots = mockExecAll(exec);
     git.getRepoStatus.mockResolvedValueOnce({
       modified: ['Gemfile.lock'],
     } as StatusResult);
-    fs.readLocalFile.mockResolvedValueOnce('Updated Gemfile.lock' as any);
+    fs.readLocalFile.mockResolvedValueOnce('Updated Gemfile.lock');
     expect(
       await updateArtifacts({
         packageFileName: 'Gemfile',
@@ -126,6 +126,36 @@ describe('modules/manager/bundler/artifacts', () => {
       })
     ).toEqual([updatedGemfileLock]);
     expect(execSnapshots).toMatchSnapshot();
+  });
+
+  it('supports conservative mode', async () => {
+    fs.readLocalFile.mockResolvedValueOnce('Current Gemfile.lock');
+    fs.writeLocalFile.mockResolvedValueOnce();
+    fs.readLocalFile.mockResolvedValueOnce(null);
+    const execSnapshots = mockExecAll(exec);
+    git.getRepoStatus.mockResolvedValueOnce({
+      modified: ['Gemfile.lock'],
+    } as StatusResult);
+    fs.readLocalFile.mockResolvedValueOnce('Updated Gemfile.lock');
+    expect(
+      await updateArtifacts({
+        packageFileName: 'Gemfile',
+        updatedDeps: [{ depName: 'foo' }, { depName: 'bar' }],
+        newPackageFileContent: 'Updated Gemfile content',
+        config: {
+          ...config,
+          postUpdateOptions: [
+            ...(config.postUpdateOptions ?? []),
+            'bundlerConservative',
+          ],
+        },
+      })
+    ).toEqual([updatedGemfileLock]);
+    expect(execSnapshots).toMatchObject([
+      expect.objectContaining({
+        cmd: 'bundler lock --conservative --update foo bar',
+      }),
+    ]);
   });
 
   describe('Docker', () => {

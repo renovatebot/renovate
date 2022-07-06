@@ -1,8 +1,8 @@
-import { RenovateConfig, getConfig } from '../../../../../test/util';
-import type { PackageFile } from '../../../../modules/manager/types';
-import { getDepWarnings, getErrors, getWarnings } from './errors-warnings';
+import { RenovateConfig, getConfig } from '../../../test/util';
+import type { PackageFile } from '../../modules/manager/types';
+import { getDepWarningsPR, getErrors, getWarnings } from './errors-warnings';
 
-describe('workers/repository/onboarding/pr/errors-warnings', () => {
+describe('workers/repository/errors-warnings', () => {
   describe('getWarnings()', () => {
     let config: RenovateConfig;
 
@@ -31,21 +31,27 @@ describe('workers/repository/onboarding/pr/errors-warnings', () => {
         "
       `);
     });
+
+    it('getWarning returns empty string', () => {
+      config.warnings = [];
+      const res = getWarnings(config);
+      expect(res).toBe('');
+    });
   });
 
-  describe('getDepWarnings()', () => {
+  describe('getDepWarningsPR()', () => {
     beforeEach(() => {
       jest.resetAllMocks();
     });
 
-    it('returns warning text', () => {
+    it('returns pr warning text', () => {
       const packageFiles: Record<string, PackageFile[]> = {
         npm: [
           {
             packageFile: 'package.json',
             deps: [
               {
-                warnings: [{ message: 'Warning 1', topic: undefined }],
+                warnings: [{ message: 'Warning 1', topic: '' }],
               },
               {},
             ],
@@ -54,7 +60,7 @@ describe('workers/repository/onboarding/pr/errors-warnings', () => {
             packageFile: 'backend/package.json',
             deps: [
               {
-                warnings: [{ message: 'Warning 1', topic: undefined }],
+                warnings: [{ message: 'Warning 1', topic: '' }],
               },
             ],
           },
@@ -64,13 +70,14 @@ describe('workers/repository/onboarding/pr/errors-warnings', () => {
             packageFile: 'Dockerfile',
             deps: [
               {
-                warnings: [{ message: 'Warning 2', topic: undefined }],
+                warnings: [{ message: 'Warning 2', topic: '' }],
               },
             ],
           },
         ],
       };
-      const res = getDepWarnings(packageFiles);
+
+      const res = getDepWarningsPR(packageFiles);
       expect(res).toMatchInlineSnapshot(`
         "
         ---
@@ -86,6 +93,12 @@ describe('workers/repository/onboarding/pr/errors-warnings', () => {
 
         "
       `);
+    });
+
+    it('PR warning returns empty string', () => {
+      const packageFiles: Record<string, PackageFile[]> = {};
+      const res = getDepWarningsPR(packageFiles);
+      expect(res).toBe('');
     });
   });
 
@@ -116,6 +129,12 @@ describe('workers/repository/onboarding/pr/errors-warnings', () => {
         ---
         "
       `);
+    });
+
+    it('getError returns empty string', () => {
+      config.errors = [];
+      const res = getErrors(config);
+      expect(res).toBe('');
     });
   });
 });

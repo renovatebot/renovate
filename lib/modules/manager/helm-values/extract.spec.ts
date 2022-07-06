@@ -1,11 +1,11 @@
-import { loadFixture } from '../../../../test/util';
-import { extractPackageFile } from './extract';
+import { Fixtures } from '../../../../test/fixtures';
+import { extractPackageFile } from '.';
 
-const helmDefaultChartInitValues = loadFixture(
+const helmDefaultChartInitValues = Fixtures.get(
   'default_chart_init_values.yaml'
 );
 
-const helmMultiAndNestedImageValues = loadFixture(
+const helmMultiAndNestedImageValues = Fixtures.get(
   'multi_and_nested_image_values.yaml'
 );
 
@@ -25,11 +25,6 @@ describe('modules/manager/helm-values/extract', () => {
       expect(result).toBeNull();
     });
 
-    it('returns null for no file content', () => {
-      const result = extractPackageFile(null);
-      expect(result).toBeNull();
-    });
-
     it('extracts from values.yaml correctly with same structure as "helm create"', () => {
       const result = extractPackageFile(helmDefaultChartInitValues);
       expect(result).toMatchSnapshot({
@@ -45,7 +40,7 @@ describe('modules/manager/helm-values/extract', () => {
     it('extracts from complex values file correctly"', () => {
       const result = extractPackageFile(helmMultiAndNestedImageValues);
       expect(result).toMatchSnapshot();
-      expect(result.deps).toHaveLength(5);
+      expect(result?.deps).toHaveLength(5);
     });
   });
 });

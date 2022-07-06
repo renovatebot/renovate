@@ -88,8 +88,8 @@ export async function getDependency(
     }
 
     const latestVersion = res.versions[res['dist-tags']?.latest ?? ''];
-    res.repository = res.repository || latestVersion?.repository;
-    res.homepage = res.homepage || latestVersion?.homepage;
+    res.repository ??= latestVersion?.repository;
+    res.homepage ??= latestVersion?.homepage;
 
     const { sourceUrl, sourceDirectory } = getPackageSource(res.repository);
 
@@ -194,6 +194,7 @@ export async function getDependency(
       }
       throw new ExternalHostError(err);
     }
+    logger.debug({ err }, 'Unknown npm lookup error');
     return null;
   }
 }

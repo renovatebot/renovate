@@ -1,9 +1,11 @@
+import { GlobalConfig } from '../../../config/global';
 import { applySecretsToConfig } from '../../../config/secrets';
 import type { RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
 import { platform } from '../../../modules/platform';
 import { clone } from '../../../util/clone';
 import { setUserRepoConfig } from '../../../util/git';
+import { getAll } from '../../../util/host-rules';
 import { checkIfConfigured } from '../configured';
 import { PackageFiles } from '../package-files';
 import { initApis } from './apis';
@@ -17,8 +19,9 @@ function initializeConfig(config: RenovateConfig): RenovateConfig {
 
 function warnOnUnsupportedOptions(config: RenovateConfig): void {
   if (config.filterUnavailableUsers && !platform.filterUnavailableUsers) {
+    const platform = GlobalConfig.get('platform');
     logger.warn(
-      `Configuration option 'filterUnavailableUsers' is not supported on the current platform '${config.platform}'.`
+      `Configuration option 'filterUnavailableUsers' is not supported on the current platform '${platform}'.`
     );
   }
 }
@@ -39,7 +42,10 @@ export async function initRepo(
   config = await detectVulnerabilityAlerts(config);
   // istanbul ignore if
   if (config.printConfig) {
-    logger.info({ config }, 'Full resolved config including presets');
+    logger.info(
+      { config, hostRules: getAll() },
+      'Full resolved config and hostRules including presets'
+    );
   }
   return config;
 }

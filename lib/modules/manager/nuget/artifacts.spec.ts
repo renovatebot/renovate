@@ -16,9 +16,11 @@ jest.mock('../../../util/host-rules');
 jest.mock('../../../util/git');
 jest.mock('./util');
 
-const { getConfiguredRegistries, getDefaultRegistries, getRandomString } =
-  mocked(util);
+const { getConfiguredRegistries, getDefaultRegistries } = mocked(util);
 const hostRules = mocked(_hostRules);
+
+const realFs: typeof import('../../../util/fs') =
+  jest.requireActual('../../../util/fs');
 
 const adminConfig: RepoGlobalConfig = {
   // `join` fixes Windows CI
@@ -34,11 +36,8 @@ describe('modules/manager/nuget/artifacts', () => {
     jest.resetModules();
     getDefaultRegistries.mockReturnValue([]);
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
-    fs.ensureCacheDir.mockImplementation((dirName: string) =>
-      Promise.resolve(`others/${dirName}`)
-    );
+    fs.privateCacheDir.mockImplementation(realFs.privateCacheDir);
     git.getFileList.mockResolvedValueOnce([]);
-    getRandomString.mockReturnValue('not-so-random');
     GlobalConfig.set(adminConfig);
     docker.resetPrefetchedImages();
   });

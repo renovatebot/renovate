@@ -1,13 +1,13 @@
-import { loadFixture } from '../../../../test/util';
-import { extractPackageFile } from './extract';
+import { Fixtures } from '../../../../test/fixtures';
+import { extractPackageFile } from '.';
 
-const invalidYamlFile = loadFixture('invalid.yaml');
+const invalidYamlFile = Fixtures.get('invalid.yaml');
 
-const pluginsTextFile = loadFixture('plugins.txt');
-const pluginsYamlFile = loadFixture('plugins.yaml');
+const pluginsTextFile = Fixtures.get('plugins.txt');
+const pluginsYamlFile = Fixtures.get('plugins.yaml');
 
-const pluginsEmptyTextFile = loadFixture('empty.txt');
-const pluginsEmptyYamlFile = loadFixture('empty.yaml');
+const pluginsEmptyTextFile = Fixtures.get('empty.txt');
+const pluginsEmptyYamlFile = Fixtures.get('empty.yaml');
 
 describe('modules/manager/jenkins/extract', () => {
   describe('extractPackageFile()', () => {
@@ -28,14 +28,14 @@ describe('modules/manager/jenkins/extract', () => {
 
     it('extracts multiple image lines in text format', () => {
       const res = extractPackageFile(pluginsTextFile, 'path/file.txt');
-      expect(res.deps).toMatchSnapshot();
-      expect(res.deps).toHaveLength(6);
+      expect(res?.deps).toMatchSnapshot();
+      expect(res?.deps).toHaveLength(6);
     });
 
     it('extracts multiple image lines in yaml format', () => {
       const res = extractPackageFile(pluginsYamlFile, 'path/file.yml');
-      expect(res.deps).toMatchSnapshot();
-      expect(res.deps).toHaveLength(8);
+      expect(res?.deps).toMatchSnapshot();
+      expect(res?.deps).toHaveLength(8);
     });
   });
 });

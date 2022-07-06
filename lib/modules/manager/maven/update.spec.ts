@@ -1,9 +1,11 @@
+// TODO #7154
 import { XmlDocument } from 'xmldoc';
 import { Fixtures } from '../../../../test/fixtures';
-import * as pomUpdater from './update';
+import * as pomUpdater from '.';
 
 const simpleContent = Fixtures.get(`simple.pom.xml`);
 const minimumContent = Fixtures.get(`minimum.pom.xml`);
+const prereleaseContent = Fixtures.get(`prerelease.pom.xml`);
 
 describe('modules/manager/maven/update', () => {
   describe('bumpPackageVersion', () => {
@@ -14,7 +16,7 @@ describe('modules/manager/maven/update', () => {
         'patch'
       );
 
-      const project = new XmlDocument(bumpedContent);
+      const project = new XmlDocument(bumpedContent!);
       expect(project.valueWithPath('version')).toBe('0.0.2');
     });
 
@@ -25,7 +27,7 @@ describe('modules/manager/maven/update', () => {
         'patch'
       );
       const { bumpedContent: bumpedContent2 } = pomUpdater.bumpPackageVersion(
-        bumpedContent,
+        bumpedContent!,
         '0.0.1',
         'patch'
       );
@@ -40,7 +42,7 @@ describe('modules/manager/maven/update', () => {
         'patch'
       );
 
-      const project = new XmlDocument(bumpedContent);
+      const project = new XmlDocument(bumpedContent!);
       expect(project.valueWithPath('version')).toBe('1');
     });
 
@@ -61,6 +63,17 @@ describe('modules/manager/maven/update', () => {
         true as any
       );
       expect(bumpedContent).toEqual(simpleContent);
+    });
+
+    it('bumps pom.xml version with prerelease semver level', () => {
+      const { bumpedContent } = pomUpdater.bumpPackageVersion(
+        prereleaseContent,
+        '1.0.0-1',
+        'prerelease'
+      );
+
+      const project = new XmlDocument(bumpedContent!);
+      expect(project.valueWithPath('version')).toBe('1.0.0-2');
     });
   });
 });

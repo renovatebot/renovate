@@ -1,16 +1,16 @@
 import { getPkgReleases } from '..';
+import { Fixtures } from '../../../../test/fixtures';
 import * as httpMock from '../../../../test/http-mock';
-import { loadJsonFixture } from '../../../../test/util';
 import { DartDatasource } from '.';
 
-const body = loadJsonFixture('shared_preferences.json');
+const body = Fixtures.getJson('shared_preferences.json');
 
 const baseUrl = 'https://pub.dartlang.org/api/packages/';
 
 describe('modules/datasource/dart/index', () => {
   describe('getReleases', () => {
     it('returns null for empty result', async () => {
-      httpMock.scope(baseUrl).get('/non_sense').reply(200, null);
+      httpMock.scope(baseUrl).get('/non_sense').reply(200, '}');
       expect(
         await getPkgReleases({
           datasource: DartDatasource.id,

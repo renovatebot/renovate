@@ -25,8 +25,8 @@ describe('modules/datasource/github-releases/digest', () => {
         release,
         'test-digest'
       );
-      expect(digestAsset.assetName).toBe('SHASUMS.txt');
-      expect(digestAsset.digestedFileName).toBe('linux-amd64.tar.gz');
+      expect(digestAsset?.assetName).toBe('SHASUMS.txt');
+      expect(digestAsset?.digestedFileName).toBe('linux-amd64.tar.gz');
     });
 
     it('returns null when not found in digest file asset', async () => {
@@ -61,8 +61,8 @@ describe('modules/datasource/github-releases/digest', () => {
         release,
         contentDigest
       );
-      expect(digestAsset.assetName).toBe('asset.zip');
-      expect(digestAsset.digestedFileName).toBeUndefined();
+      expect(digestAsset?.assetName).toBe('asset.zip');
+      expect(digestAsset?.digestedFileName).toBeUndefined();
     });
 
     it('returns null when no assets available', async () => {

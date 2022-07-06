@@ -15,7 +15,7 @@ If you or others keep committing to the default branch then Renovate cannot find
 Once a branch is automerged, the "Git state" needs to be recalculated for every remaining branch.
 At times, merging one branch could result in another branch's updates being changed or even removed as unnecessary.
 Renovate's approach is to ensure that automerging branches are up-to-date with their target branch before automerging.
-Therefore merging multiple branches in a row won't reliably work, we prefer not to do that.
+This means merging multiple branches in a row won't work reliably, so we prefer not to do that.
 What all this means is that Renovate will only automerge at most one branch/PR per target branch per run, before you need to wait for the next run.
 
 As a general guide, we recommend that you enable automerge for any type of dependency updates where you would just click "merge" anyway.
@@ -66,7 +66,7 @@ But in many cases the new version(s) will pass tests, and if so then there's rea
 
 ### Automerge non-major updates
 
-Non-major updates in SemVer ecosystems shouldn't have breaking changes (if they follow the spec), therefore many users enable automerge for these too:
+Non-major updates in SemVer ecosystems shouldn't have breaking changes (if they follow the spec), so many users enable automerge for these too:
 
 ```json
 {
@@ -81,6 +81,27 @@ Non-major updates in SemVer ecosystems shouldn't have breaking changes (if they 
 ```
 
 The `matchCurrentVersion` setting above is a rule to exclude any dependencies which are pre-1.0.0 because those can make breaking changes at _any_ time according to the SemVer spec.
+
+### Faster merges with platform-native automerge
+
+You can speed up merges by letting Renovate use your platform's native automerge.
+The config option is called `platformAutomerge`.
+If `automerge=true` and `automergeType=pr` then you can set `platformAutomerge=true`.
+
+For example:
+
+```json
+{
+  "lockFileMaintenance": {
+    "enabled": true,
+    "automerge": true,
+    "automergeType": "pr",
+    "platformAutomerge": true
+  }
+}
+```
+
+For more information read [`platformAutomerge`](https://docs.renovatebot.com/configuration-options/#platformautomerge).
 
 ## Automerging and scheduling
 
@@ -145,7 +166,9 @@ If you have configured your project to require Pull Requests before merging, it 
 
 If you have mandatory Pull Request reviews then it means Renovate can't automerge its own PR until such a review has happened.
 
-If you are running the hosted Mend Renovate App on `github.com`, you can also install the helper apps [renovate-approve](https://github.com/apps/renovate-approve) and [renovate-approve-2](https://github.com/apps/renovate-approve-2) and they will mark all automerging Pull Requests by Renovate as approved.
+If you're on `github.com` or GitHub Enterprise Server (`>=3.4`) you can let Renovate bypass the mandatory Pull Request reviews using the "[Allow specified actors to bypass required pull requests](https://github.blog/changelog/2021-11-19-allow-bypassing-required-pull-requests/)" option in your branch protection rules.
+
+Alternatively, if you are running the hosted Mend Renovate App on `github.com`, you can also install the helper apps [renovate-approve](https://github.com/apps/renovate-approve) and [renovate-approve-2](https://github.com/apps/renovate-approve-2) and they will mark all automerging Pull Requests by Renovate as approved.
 These approval helper apps are only available for GitHub.
 
 ### Codeowners
