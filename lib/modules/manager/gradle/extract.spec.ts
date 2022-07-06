@@ -90,7 +90,7 @@ describe('modules/manager/gradle/extract', () => {
           {
             depName: 'foo:bar',
             currentValue: '1.2.3',
-            registryUrls: ['https://repo.maven.apache.org/maven2'],
+            registryUrls: [],
             skipReason: 'contains-variable',
             managerData: {
               packageFile: 'build.gradle',
@@ -539,7 +539,7 @@ describe('modules/manager/gradle/extract', () => {
               packageFile: 'gradle/libs.versions.toml',
             },
             fileReplacePosition: 30,
-            registryUrls: ['https://repo.maven.apache.org/maven2'],
+            registryUrls: [],
           },
           {
             depType: 'plugin',
@@ -584,7 +584,7 @@ describe('modules/manager/gradle/extract', () => {
               packageFile: 'gradle/libs.versions.toml',
             },
             fileReplacePosition: 124,
-            registryUrls: ['https://repo.maven.apache.org/maven2'],
+            registryUrls: [],
           },
           {
             depName: 'mocha-junit:mocha-junit',
@@ -595,7 +595,7 @@ describe('modules/manager/gradle/extract', () => {
               packageFile: 'gradle/libs.versions.toml',
             },
             fileReplacePosition: 82,
-            registryUrls: ['https://repo.maven.apache.org/maven2'],
+            registryUrls: [],
           },
         ],
       },
