@@ -1,6 +1,8 @@
 // SEE for the reference https://github.com/renovatebot/renovate/blob/c3e9e572b225085448d94aa121c7ec81c14d3955/lib/platform/bitbucket/utils.js
 import url from 'url';
 import is from '@sindresorhus/is';
+import { CONFIG_GIT_URL_UNAVAILABLE } from '../../../constants/error-messages';
+import { logger } from '../../../logger';
 import { HostRule, PrState } from '../../../types';
 import type { GitProtocol } from '../../../types/git';
 import * as git from '../../../util/git';
@@ -10,7 +12,9 @@ import type {
   HttpPostOptions,
   HttpResponse,
 } from '../../../util/http/types';
+import { parseUrl } from '../../../util/url';
 import { getPrBodyStruct } from '../pr-body';
+import type { GitUrlOption } from '../types';
 import type { BbsPr, BbsRestPr, BbsRestRepo, BitbucketError } from './types';
 
 export const BITBUCKET_INVALID_REVIEWERS_EXCEPTION =
@@ -156,39 +160,62 @@ export function getInvalidReviewers(err: BitbucketError): string[] {
   return invalidReviewers;
 }
 
+function generateUrlFromEndpoint(
+  defaultEndpoint: string,
+  opts: HostRule,
+  repository: string
+): string {
+  const url = new URL(defaultEndpoint);
+  const generatedUrl = git.getUrl({
+    protocol: url.protocol as GitProtocol,
+    auth: `${opts.username}:${opts.password}`,
+    host: `${url.host}${url.pathname}${
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+      url.pathname!.endsWith('/') ? '' : /* istanbul ignore next */ '/'
+    }scm`,
+    repository,
+  });
+  logger.debug({ url: generatedUrl }, `using generated endpoint URL`);
+  return generatedUrl;
+}
+
+function injectAuth(url: string, opts: HostRule): string {
+  const repoUrl = parseUrl(url)!;
+  if (!repoUrl) {
+    logger.debug(`Invalid url: ${url}`);
+    throw new Error(CONFIG_GIT_URL_UNAVAILABLE);
+  }
+  // TODO: null checks (#7154)
+  repoUrl.username = opts.username!;
+  repoUrl.password = opts.password!;
+  return repoUrl.toString();
+}
+
 export function getRepoGitUrl(
   repository: string,
   defaultEndpoint: string,
+  gitUrl: GitUrlOption | undefined,
   info: BbsRestRepo,
   opts: HostRule
 ): string {
+  if (gitUrl === 'ssh') {
+    const sshUrl = info.links.clone?.find(({ name }) => name === 'ssh');
+    if (sshUrl === undefined) {
+      throw new Error(CONFIG_GIT_URL_UNAVAILABLE);
+    }
+    logger.debug({ url: sshUrl.href }, `using ssh URL`);
+    return sshUrl.href;
+  }
   let cloneUrl = info.links.clone?.find(({ name }) => name === 'http');
-  if (!cloneUrl) {
-    // Http access might be disabled, try to find ssh url in this case
-    cloneUrl = info.links.clone?.find(({ name }) => name === 'ssh');
-  }
-
-  let gitUrl: string;
-  if (!cloneUrl) {
-    // Fallback to generating the url if the API didn't give us an URL
-    const { host, pathname } = url.parse(defaultEndpoint);
-    // TODO #7154
-    gitUrl = git.getUrl({
-      protocol: defaultEndpoint.split(':')[0] as GitProtocol,
-      auth: `${opts.username}:${opts.password}`,
-      host: `${host}${pathname}${
-        pathname!.endsWith('/') ? '' : /* istanbul ignore next */ '/'
-      }scm`,
-      repository,
-    });
-  } else if (cloneUrl.name === 'http') {
+  if (cloneUrl) {
     // Inject auth into the API provided URL
-    const repoUrl = url.parse(cloneUrl.href);
-    repoUrl.auth = `${opts.username}:${opts.password}`;
-    gitUrl = url.format(repoUrl);
-  } else {
-    // SSH urls can be used directly
-    gitUrl = cloneUrl.href;
+    return injectAuth(cloneUrl.href, opts);
   }
-  return gitUrl;
+  // Http access might be disabled, try to find ssh url in this case
+  cloneUrl = info.links.clone?.find(({ name }) => name === 'ssh');
+  if (gitUrl === 'endpoint' || !cloneUrl) {
+    return generateUrlFromEndpoint(defaultEndpoint, opts, repository);
+  }
+  // SSH urls can be used directly
+  return cloneUrl.href;
 }

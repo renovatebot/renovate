@@ -8,6 +8,7 @@ import { getOptions } from './options';
 import type {
   MigratedConfig,
   MigratedRenovateConfig,
+  PackageRule,
   RenovateConfig,
   RenovateOptions,
 } from './types';
@@ -38,14 +39,7 @@ export function migrateConfig(config: RenovateConfig): MigratedConfig {
       'peerDependencies',
     ];
     for (const [key, val] of Object.entries(newConfig)) {
-      if (key.startsWith('masterIssue')) {
-        const newKey = key.replace('masterIssue', 'dependencyDashboard');
-        migratedConfig[newKey] = val;
-        if (optionTypes[newKey] === 'boolean' && val === 'true') {
-          migratedConfig[newKey] = true;
-        }
-        delete migratedConfig[key];
-      } else if (key === 'packageFiles' && is.array(val)) {
+      if (key === 'packageFiles' && is.array(val)) {
         const fileList = [];
         for (const packageFile of val) {
           if (is.object(packageFile) && !is.array(packageFile)) {
@@ -104,16 +98,6 @@ export function migrateConfig(config: RenovateConfig): MigratedConfig {
           regEx(/{{depNameShort}}/g),
           '{{depName}}'
         );
-      } else if (key === 'semanticPrefix' && is.string(val)) {
-        delete migratedConfig.semanticPrefix;
-        let [text] = val.split(':') as any; // TODO: fixme
-        text = text.split('(');
-        [migratedConfig.semanticCommitType] = text;
-        if (text.length > 1) {
-          [migratedConfig.semanticCommitScope] = text[1].split(')');
-        } else {
-          migratedConfig.semanticCommitScope = null;
-        }
       } else if (is.string(val) && val.startsWith('{{semanticPrefix}}')) {
         migratedConfig[key] = val.replace(
           '{{semanticPrefix}}',
@@ -202,6 +186,7 @@ export function migrateConfig(config: RenovateConfig): MigratedConfig {
       }
     }
     if (is.array(migratedConfig.packageRules)) {
+      const newRules: PackageRule[] = [];
       const renameMap = {
         paths: 'matchPaths',
         languages: 'matchLanguages',
@@ -215,15 +200,15 @@ export function migrateConfig(config: RenovateConfig): MigratedConfig {
         updateTypes: 'matchUpdateTypes',
       } as const;
       for (const packageRule of migratedConfig.packageRules) {
+        const newRuleObj = {} as PackageRule;
         for (const [oldKey, ruleVal] of Object.entries(packageRule)) {
-          const newKey = renameMap[oldKey as keyof typeof renameMap];
-          if (newKey) {
-            // TODO: fix types #7154
-            packageRule[newKey] = ruleVal as never;
-            delete packageRule[oldKey];
-          }
+          const key = renameMap[oldKey as keyof typeof renameMap] ?? oldKey;
+          // TODO: fix types #7154
+          newRuleObj[key] = ruleVal as never;
         }
+        newRules.push(newRuleObj);
       }
+      migratedConfig.packageRules = newRules;
     }
     // Migrate nested packageRules
     if (is.nonEmptyArray(migratedConfig.packageRules)) {

@@ -394,6 +394,12 @@ export async function lookupUpdates(
         (update) => update.newValue === currentValue
       );
     }
+    // Handle a weird edge case involving followTag and fallbacks
+    if (rollbackPrs && followTag) {
+      res.updates = res.updates.filter(
+        (update) => res.updates.length === 1 || update.updateType !== 'rollback'
+      );
+    }
   } catch (err) /* istanbul ignore next */ {
     if (err instanceof ExternalHostError || err.message === CONFIG_VALIDATION) {
       throw err;

@@ -320,7 +320,7 @@ Currently this setting supports `helmv3`, `npm`, `maven` and `sbt` only, so rais
 Its purpose is if you want Renovate to update the `version` field within your package file any time it updates dependencies within.
 Usually this is for automatic release purposes, so that you don't need to add another step after Renovate before you can release a new version.
 
-Configure this value to `"patch"`, `"minor"` or `"major"` to have Renovate update the version in your edited package file.
+Configure this value to `"prerelease"`, `"patch"`, `"minor"` or `"major"` to have Renovate update the version in your edited package file.
 e.g. if you wish Renovate to always increase the target `package.json` version with a patch update, configure this to `"patch"`.
 
 For `npm` only you can also configure this field to `"mirror:x"` where `x` is the name of a package in the `package.json`.
@@ -348,6 +348,14 @@ For example, To add `[skip ci]` to every commit you could configure:
 ```
 
 Another example would be if you want to configure a DCO signoff to each commit.
+
+If you want Renovate to signoff its commits, add the [`:gitSignOff` preset](https://docs.renovatebot.com/presets-default/#gitsignoff) to your `extends` array:
+
+```json
+{
+  "extends": [":gitSignOff"]
+}
+```
 
 ## commitBodyTable
 
@@ -817,13 +825,26 @@ For now, you can only use this option on the GitLab platform.
     Advanced functionality.
     Only use this if you're sure you know what you're doing.
 
-This functionality requires that the datasource to support distribution streams/tags, such as npm does.
+For `followTag` to work, the datasource must support distribution streams or tags, like for example npm does.
 
-The primary use case for this option is if you are following a pre-release tag of a certain dependency, e.g. `typescript`'s `"insiders"` build.
-If configured, Renovate bypasses its normal major/minor/patch upgrade logic and stable/unstable consistency logic and keeps your dependency version sync'd strictly to whatever version is in the tag.
+The main usecase is to follow a pre-release tag of a dependency, say TypeScripts's `"insiders"` build:
 
-Beware that Renovate follows tags strictly.
-For example, if you are following a tag like `next` and then that stream is released as `stable` and `next` is no longer being updated then that means your dependencies also won't be getting updated.
+```json
+{
+  "packageRules": [
+    {
+      "matchPackageNames": ["typescript"],
+      "followTag": "insiders"
+    }
+  ]
+}
+```
+
+If you've set a `followTag` then Renovate skips its normal major/minor/patch upgrade logic and stable/unstable consistency logic, and instead keeps your dependency version synced _strictly_ to the version in the tag.
+
+Renovate follows tags _strictly_, this can cause problems when a tagged stream is no longer maintained.
+For example: you're following the `next` tag, but later the stream you actually want is called `stable` instead.
+If `next` is no longer getting updates, you must switch your `followTag` to `stable` to get updates again.
 
 ## gitAuthor
 
@@ -1903,6 +1924,7 @@ This way Renovate can use GitHub's [Commit signing support for bots and other Gi
 
 ## postUpdateOptions
 
+- `bundlerConservative`: Enable conservative mode for `bundler` (Ruby dependencies). This will only update the immediate dependency in the lockfile instead of all subdependencies
 - `gomodMassage`: Enable massaging `replace` directives before calling `go` commands
 - `gomodTidy`: Run `go mod tidy` after Go module updates. This is implicitly enabled for major module updates when `gomodUpdateImportPaths` is enabled
 - `gomodTidy1.17`: Run `go mod tidy -compat=1.17` after Go module updates.
@@ -2230,27 +2252,6 @@ If the `versioning` field is missing, then Renovate defaults to using `semver` v
 For more details and examples, see our [documentation for the `regex` manager](/modules/manager/regex/).
 For template fields, use the triple brace `{{{ }}}` notation to avoid Handlebars escaping any special characters.
 
-## registryAliases
-
-You can use the `registryAliases` object to set registry aliases.
-This feature only works with these managers:
-
-- `helm-requirements`
-- `helmv3`
-- `helmfile`
-
-The managers listed above all have this default registryAlias:
-
-```json
-{
-  "registryAliases": {
-    "stable": "https://charts.helm.sh/stable"
-  }
-}
-```
-
-Alias values must be properly formatted URIs.
-
 ### matchStrings
 
 `matchStrings` should each be a valid regular expression, optionally with named capture groups.
@@ -2497,6 +2498,27 @@ This will lead to following update where `1.21-alpine` is the newest version of 
 image: my.new.registry/aRepository/andImage:1.21-alpine
 ```
 
+## registryAliases
+
+You can use the `registryAliases` object to set registry aliases.
+This feature only works with these managers:
+
+- `helm-requirements`
+- `helmv3`
+- `helmfile`
+
+The managers listed above all have this default registryAlias:
+
+```json
+{
+  "registryAliases": {
+    "stable": "https://charts.helm.sh/stable"
+  }
+}
+```
+
+Alias values must be properly formatted URIs.
+
 ## registryUrls
 
 Usually Renovate is able to either (a) use the default registries for a datasource, or (b) automatically detect during the manager extract phase which custom registries are in use.
@@ -2700,7 +2722,7 @@ There are a couple of uses for `stabilityDays`:
 
 #### Suppress branch/PR creation for X days
 
-If you combine `stabilityDays=3` and `prCreation="not-pending"` then Renovate will hold back from creating branches until 3 or more days have elapsed since the version was released.
+If you combine `stabilityDays=3` and `internalChecksFilter="strict"` then Renovate will hold back from creating branches until 3 or more days have elapsed since the version was released.
 It's recommended that you enable `dependencyDashboard=true` so you don't lose visibility of these pending PRs.
 
 #### Prevent holding broken npm packages
