@@ -2651,7 +2651,7 @@ Renovate does not support scheduled minutes or "at an exact time" granularity.
 
 <!-- prettier-ignore -->
 !!! tip
-    If you'd like to validate your proposed `later` schedule before updating your `renovate.json`, you can use [this CodePen](https://codepen.io/rationaltiger24/full/ZExQEgK) to do so.
+    To validate your `later` schedule before updating your `renovate.json`, you can use [this CodePen](https://codepen.io/rationaltiger24/full/ZExQEgK).
 
 
 ## semanticCommitScope
