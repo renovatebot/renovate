@@ -1,8 +1,8 @@
-import { loadFixture } from '../../../../test/util';
+import { Fixtures } from '../../../../test/fixtures';
 import { extractPackageFile } from '.';
 
-const sample = loadFixture(`sample.html`);
-const nothing = loadFixture(`nothing.html`);
+const sample = Fixtures.get(`sample.html`);
+const nothing = Fixtures.get(`nothing.html`);
 
 describe('modules/manager/html/extract', () => {
   it('extractPackageFile', () => {

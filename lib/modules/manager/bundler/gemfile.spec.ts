@@ -1,7 +1,7 @@
-import { loadFixture } from '../../../../test/util';
+import { Fixtures } from '../../../../test/fixtures';
 import { extractLockFileEntries } from './locked-version';
 
-const gemLockFile = loadFixture('Gemfile.rails.lock');
+const gemLockFile = Fixtures.get('Gemfile.rails.lock');
 
 describe('modules/manager/bundler/gemfile', () => {
   it('matches the expected output', () => {
