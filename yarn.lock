@@ -1964,10 +1964,10 @@
   dependencies:
     "@octokit/openapi-types" "^12.6.1"
 
-"@openpgp/web-stream-tools@0.0.10":
-  version "0.0.10"
-  resolved "https://registry.yarnpkg.com/@openpgp/web-stream-tools/-/web-stream-tools-0.0.10.tgz#4496390da9715c9bfc581ad144f9fb8a36a37775"
-  integrity sha512-1ONZADML0fb0RJR5UiGYPnRf9VaYBYUBc1gF9jyq57sHkr58cp5/BQHS+ivrqbRw21Sb70FKTssmJbRe71V+kw==
+"@openpgp/web-stream-tools@0.0.11":
+  version "0.0.11"
+  resolved "https://registry.yarnpkg.com/@openpgp/web-stream-tools/-/web-stream-tools-0.0.11.tgz#71bc9c493024506b1e5b0a587b85984435bbff8e"
+  integrity sha512-52NMPRmlXIVajd5dhpDNsG7WJRCdlcS1wXY03OGH1rxm7p6i3QzJvTVyKEAcW0T9KojvLKakV2uTICceELqSMw==
   dependencies:
     "@mattiasbuelens/web-streams-adapter" "~0.1.0"
     web-streams-polyfill "~3.0.3"
