@@ -1,10 +1,10 @@
-Hermit versioning is a mix of `semver` and `channel`.
+Hermit versioning is a mix of `version` and `channel`.
 
-**Semver**
+**Version**
 
-Hermit's semver was the untangled versions comes back from package's tag.
-It supports major, minor, patch and also build number in the semver.
-An example of that is from OpenJDK `15.0.1_9`.
+Hermit's package version comes from the packge's original git tag. The version is
+an extension to semver, with an extra build number to accomondate package
+versions from OpenJDK, which has a value `15.0.1_9`.
 
 **Channel**
 

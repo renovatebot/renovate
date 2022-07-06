@@ -25,7 +25,7 @@ export class HermitVersioning extends RegExpVersioningApi {
     if (parsed) {
       return parsed;
     }
-    const channelVer = this._getChannel(version);
+    const channelVer = HermitVersioning._getChannel(version);
 
     const groups = this._config?.exec(channelVer)?.groups;
 
@@ -57,11 +57,11 @@ export class HermitVersioning extends RegExpVersioningApi {
     };
   }
 
-  private _isChannel(version: string): boolean {
+  private static _isChannel(version: string): boolean {
     return version.startsWith('@');
   }
 
-  private _getChannel(version: string): string {
+  private static _getChannel(version: string): string {
     return version.substring(1);
   }
 
@@ -76,7 +76,7 @@ export class HermitVersioning extends RegExpVersioningApi {
   }
 
   override isValid(version: string): boolean {
-    return this._isValid(version) || this._isChannel(version);
+    return this._isValid(version) || HermitVersioning._isChannel(version);
   }
 
   override isLessThanRange(version: string, range: string): boolean {
