@@ -175,6 +175,7 @@ export function migrateConfig(config: RenovateConfig): MigratedConfig {
           logger.debug('Flattening nested packageRules');
           // merge each subrule and add to the parent list
           for (const subrule of packageRule.packageRules) {
+            // TODO: fix types #7154
             const combinedRule = mergeChildConfig(
               packageRule,
               subrule as PackageRule
