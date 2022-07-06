@@ -13,23 +13,23 @@ export const renameMap = {
   sourceUrlPrefixes: 'matchSourceUrlPrefixes',
   updateTypes: 'matchUpdateTypes',
 };
+type renameMapKeyType = keyof typeof renameMap;
 
+function renameKeys(packageRule: PackageRule): PackageRule {
+  const newPackageRule: PackageRule = {};
+  for (const [key, val] of Object.entries(packageRule)) {
+    newPackageRule[renameMap[key as renameMapKeyType] ?? key] = val;
+  }
+  return newPackageRule;
+}
 export class PackageRulesMigration extends AbstractMigration {
   override readonly propertyName = 'packageRules';
 
-  override run(value: PackageRule[] | null): void {
-    let packageRules = value;
+  override run(value: unknown): void {
+    let packageRules = (this.get('packageRules') as PackageRule[]) ?? [];
     packageRules = Array.isArray(packageRules) ? [...packageRules] : [];
 
-    packageRules = packageRules.map((packageRule) => {
-      const newPackageRule: PackageRule = {};
-
-      for (const [key, val] of Object.entries(packageRule)) {
-        newPackageRule[renameMap[key as keyof typeof renameMap] ?? key] = val;
-      }
-
-      return newPackageRule;
-    });
+    packageRules = packageRules.map(renameKeys);
 
     this.rewrite(packageRules);
   }
