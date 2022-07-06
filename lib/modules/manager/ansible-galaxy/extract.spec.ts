@@ -1,13 +1,13 @@
-import { loadFixture } from '../../../../test/util';
+import { Fixtures } from '../../../../test/fixtures';
 import { getSliceEndNumber } from './extract';
 import { extractPackageFile } from './';
 
-const yamlFile1 = loadFixture('requirements01.yml');
-const yamlFile2 = loadFixture('requirements02.yml');
-const helmRequirements = loadFixture('helmRequirements.yml');
-const collections1 = loadFixture('collections1.yml');
-const collections2 = loadFixture('collections2.yml');
-const galaxy = loadFixture('galaxy.yml');
+const yamlFile1 = Fixtures.get('requirements01.yml');
+const yamlFile2 = Fixtures.get('requirements02.yml');
+const helmRequirements = Fixtures.get('helmRequirements.yml');
+const collections1 = Fixtures.get('collections1.yml');
+const collections2 = Fixtures.get('collections2.yml');
+const galaxy = Fixtures.get('galaxy.yml');
 
 describe('modules/manager/ansible-galaxy/extract', () => {
   describe('extractPackageFile()', () => {
