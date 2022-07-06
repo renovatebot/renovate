@@ -44,7 +44,7 @@ describe('util/fs/index', () => {
       ${'..'}        | ${''}
       ${'./foo'}     | ${'.'}
       ${'../foo'}    | ${'..'}
-    `(`getParentDir('$dir') === '$expected'`, ({ dir, expected }) => {
+    `(`('$dir') -> '$expected'`, ({ dir, expected }) => {
       expect(getParentDir(dir)).toBe(expected);
     });
   });
@@ -58,12 +58,9 @@ describe('util/fs/index', () => {
       ${'foo'}      | ${'baz'} | ${'baz'}
       ${'./foo'}    | ${'baz'} | ${'baz'}
       ${'../foo'}   | ${'baz'} | ${'../baz'}
-    `(
-      `getSiblingFileName('$file', '$sibling') === '$expected'`,
-      ({ file, sibling, expected }) => {
-        expect(getSiblingFileName(file, sibling)).toBe(expected);
-      }
-    );
+    `(`('$file', '$sibling') -> '$expected'`, ({ file, sibling, expected }) => {
+      expect(getSiblingFileName(file, sibling)).toBe(expected);
+    });
   });
 
   describe('readLocalFile', () => {
