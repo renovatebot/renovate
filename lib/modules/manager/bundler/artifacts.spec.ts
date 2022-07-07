@@ -90,7 +90,7 @@ describe('modules/manager/bundler/artifacts', () => {
     git.getRepoStatus.mockResolvedValueOnce({
       modified: [] as string[],
     } as StatusResult);
-    fs.readLocalFile.mockResolvedValueOnce('Updated Gemfile.lock' as any);
+    fs.readLocalFile.mockResolvedValueOnce('Updated Gemfile.lock');
     expect(
       await updateArtifacts({
         packageFileName: 'Gemfile',
@@ -183,7 +183,7 @@ describe('modules/manager/bundler/artifacts', () => {
 
     it('.ruby-version', async () => {
       fs.readLocalFile.mockResolvedValueOnce('Current Gemfile.lock');
-      fs.writeLocalFile.mockResolvedValueOnce(null as never);
+      fs.writeLocalFile.mockResolvedValueOnce();
       fs.readLocalFile.mockResolvedValueOnce('1.2.0');
       datasource.getPkgReleases.mockResolvedValueOnce({
         releases: [{ version: '1.17.2' }, { version: '2.3.5' }],
@@ -199,7 +199,7 @@ describe('modules/manager/bundler/artifacts', () => {
       git.getRepoStatus.mockResolvedValueOnce({
         modified: ['Gemfile.lock'],
       } as StatusResult);
-      fs.readLocalFile.mockResolvedValueOnce('Updated Gemfile.lock' as any);
+      fs.readLocalFile.mockResolvedValueOnce('Updated Gemfile.lock');
       expect(
         await updateArtifacts({
           packageFileName: 'Gemfile',
@@ -214,7 +214,7 @@ describe('modules/manager/bundler/artifacts', () => {
     it('constraints options', async () => {
       GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
       fs.readLocalFile.mockResolvedValueOnce('Current Gemfile.lock');
-      fs.writeLocalFile.mockResolvedValueOnce(null as never);
+      fs.writeLocalFile.mockResolvedValueOnce();
       datasource.getPkgReleases.mockResolvedValueOnce({
         releases: [{ version: '1.17.2' }, { version: '2.3.5' }],
       });
@@ -229,7 +229,7 @@ describe('modules/manager/bundler/artifacts', () => {
       git.getRepoStatus.mockResolvedValueOnce({
         modified: ['Gemfile.lock'],
       } as StatusResult);
-      fs.readLocalFile.mockResolvedValueOnce('Updated Gemfile.lock' as any);
+      fs.readLocalFile.mockResolvedValueOnce('Updated Gemfile.lock');
       expect(
         await updateArtifacts({
           packageFileName: 'Gemfile',
@@ -250,7 +250,7 @@ describe('modules/manager/bundler/artifacts', () => {
     it('invalid constraints options', async () => {
       GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
       fs.readLocalFile.mockResolvedValueOnce('Current Gemfile.lock');
-      fs.writeLocalFile.mockResolvedValueOnce(null as never);
+      fs.writeLocalFile.mockResolvedValueOnce();
       datasource.getPkgReleases.mockResolvedValueOnce({
         releases: [{ version: '1.17.2' }, { version: '2.3.5' }],
       });
@@ -265,7 +265,7 @@ describe('modules/manager/bundler/artifacts', () => {
       git.getRepoStatus.mockResolvedValueOnce({
         modified: ['Gemfile.lock'],
       } as StatusResult);
-      fs.readLocalFile.mockResolvedValueOnce('Updated Gemfile.lock' as any);
+      fs.readLocalFile.mockResolvedValueOnce('Updated Gemfile.lock');
       expect(
         await updateArtifacts({
           packageFileName: 'Gemfile',
@@ -286,7 +286,7 @@ describe('modules/manager/bundler/artifacts', () => {
     it('injects bundler host configuration environment variables', async () => {
       GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
       fs.readLocalFile.mockResolvedValueOnce('Current Gemfile.lock');
-      fs.writeLocalFile.mockResolvedValueOnce(null as never);
+      fs.writeLocalFile.mockResolvedValueOnce();
       fs.readLocalFile.mockResolvedValueOnce('1.2.0');
       datasource.getPkgReleases.mockResolvedValueOnce({
         releases: [{ version: '1.17.2' }, { version: '2.3.5' }],
@@ -314,7 +314,7 @@ describe('modules/manager/bundler/artifacts', () => {
       git.getRepoStatus.mockResolvedValueOnce({
         modified: ['Gemfile.lock'],
       } as StatusResult);
-      fs.readLocalFile.mockResolvedValueOnce('Updated Gemfile.lock' as any);
+      fs.readLocalFile.mockResolvedValueOnce('Updated Gemfile.lock');
       expect(
         await updateArtifacts({
           packageFileName: 'Gemfile',
@@ -329,7 +329,7 @@ describe('modules/manager/bundler/artifacts', () => {
     it('injects bundler host configuration as command with bundler < 2', async () => {
       GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
       fs.readLocalFile.mockResolvedValueOnce('Current Gemfile.lock');
-      fs.writeLocalFile.mockResolvedValueOnce(null as never);
+      fs.writeLocalFile.mockResolvedValueOnce();
       fs.readLocalFile.mockResolvedValueOnce('1.2.0');
       datasource.getPkgReleases.mockResolvedValueOnce({
         releases: [
@@ -354,7 +354,7 @@ describe('modules/manager/bundler/artifacts', () => {
       git.getRepoStatus.mockResolvedValueOnce({
         modified: ['Gemfile.lock'],
       } as StatusResult);
-      fs.readLocalFile.mockResolvedValueOnce('Updated Gemfile.lock' as any);
+      fs.readLocalFile.mockResolvedValueOnce('Updated Gemfile.lock');
       expect(
         await updateArtifacts({
           packageFileName: 'Gemfile',
@@ -374,7 +374,7 @@ describe('modules/manager/bundler/artifacts', () => {
     it('injects bundler host configuration as command with bundler >= 2', async () => {
       GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
       fs.readLocalFile.mockResolvedValueOnce('Current Gemfile.lock');
-      fs.writeLocalFile.mockResolvedValueOnce(null as never);
+      fs.writeLocalFile.mockResolvedValueOnce();
       fs.readLocalFile.mockResolvedValueOnce('1.2.0');
       datasource.getPkgReleases.mockResolvedValueOnce({
         releases: [
@@ -399,7 +399,7 @@ describe('modules/manager/bundler/artifacts', () => {
       git.getRepoStatus.mockResolvedValueOnce({
         modified: ['Gemfile.lock'],
       } as StatusResult);
-      fs.readLocalFile.mockResolvedValueOnce('Updated Gemfile.lock' as any);
+      fs.readLocalFile.mockResolvedValueOnce('Updated Gemfile.lock');
       expect(
         await updateArtifacts({
           packageFileName: 'Gemfile',
@@ -419,7 +419,7 @@ describe('modules/manager/bundler/artifacts', () => {
     it('injects bundler host configuration as command with bundler == latest', async () => {
       GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
       fs.readLocalFile.mockResolvedValueOnce('Current Gemfile.lock');
-      fs.writeLocalFile.mockResolvedValueOnce(null as never);
+      fs.writeLocalFile.mockResolvedValueOnce();
       fs.readLocalFile.mockResolvedValueOnce('1.2.0');
       datasource.getPkgReleases.mockResolvedValueOnce({
         releases: [{ version: '1.17.2' }, { version: '2.3.5' }],
@@ -462,12 +462,12 @@ describe('modules/manager/bundler/artifacts', () => {
 
   it('performs lockFileMaintenance', async () => {
     fs.readLocalFile.mockResolvedValueOnce('Current Gemfile.lock');
-    fs.writeLocalFile.mockResolvedValueOnce(null as never);
+    fs.writeLocalFile.mockResolvedValueOnce();
     const execSnapshots = mockExecAll(exec);
     git.getRepoStatus.mockResolvedValueOnce({
       modified: ['Gemfile.lock'],
     } as StatusResult);
-    fs.readLocalFile.mockResolvedValueOnce('Updated Gemfile.lock' as any);
+    fs.readLocalFile.mockResolvedValueOnce('Updated Gemfile.lock');
     expect(
       await updateArtifacts({
         packageFileName: 'Gemfile',
@@ -486,7 +486,7 @@ describe('modules/manager/bundler/artifacts', () => {
     it('returns error when failing in lockFileMaintenance true', async () => {
       const execError = new ExecError('', ' foo was resolved to');
       fs.readLocalFile.mockResolvedValueOnce('Current Gemfile.lock');
-      fs.writeLocalFile.mockResolvedValueOnce(null as never);
+      fs.writeLocalFile.mockResolvedValueOnce();
       const execSnapshots = mockExecAll(exec, execError);
       git.getRepoStatus.mockResolvedValueOnce({
         modified: ['Gemfile.lock'],
@@ -514,7 +514,7 @@ describe('modules/manager/bundler/artifacts', () => {
     it('rethrows for temporary error', async () => {
       const execError = new ExecError(TEMPORARY_ERROR);
       fs.readLocalFile.mockResolvedValueOnce('Current Gemfile.lock');
-      fs.writeLocalFile.mockResolvedValueOnce(null as never);
+      fs.writeLocalFile.mockResolvedValueOnce();
       mockExecAll(exec, execError);
       await expect(
         updateArtifacts({
@@ -535,7 +535,7 @@ describe('modules/manager/bundler/artifacts', () => {
         'but that version could not be found'
       );
       fs.readLocalFile.mockResolvedValueOnce('Current Gemfile.lock');
-      fs.writeLocalFile.mockResolvedValueOnce(null as never);
+      fs.writeLocalFile.mockResolvedValueOnce();
       mockExecAll(exec, execError);
       expect(
         await updateArtifacts({
@@ -557,7 +557,7 @@ describe('modules/manager/bundler/artifacts', () => {
         'Please make sure you have the correct access rights'
       );
       fs.readLocalFile.mockResolvedValueOnce('Current Gemfile.lock');
-      fs.writeLocalFile.mockResolvedValueOnce(null as never);
+      fs.writeLocalFile.mockResolvedValueOnce();
       mockExecAll(exec, execError);
       await expect(
         updateArtifacts({
@@ -579,7 +579,7 @@ describe('modules/manager/bundler/artifacts', () => {
         'bar was resolved to bar'
       );
       fs.readLocalFile.mockResolvedValue('Current Gemfile.lock');
-      fs.writeLocalFile.mockResolvedValue(null as never);
+      fs.writeLocalFile.mockResolvedValue();
       const execSnapshots = mockExecSequence(exec, [
         execError,
         { stdout: '', stderr: '' },

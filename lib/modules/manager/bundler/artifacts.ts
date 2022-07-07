@@ -43,7 +43,9 @@ function buildBundleHostVariable(hostRule: HostRule): Record<string, string> {
   };
 }
 
-const resolvedPkgRegex = regEx(/(?<pkg>\S+) was resolved to/g);
+const resolvedPkgRegex = regEx(
+  /(?<pkg>\S+)(?:\s*\([^)]+\)\s*) was resolved to/g
+);
 
 function getResolvedPackages(input: string): string[] {
   const result: string[] = [];
