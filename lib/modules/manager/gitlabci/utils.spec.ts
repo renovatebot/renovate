@@ -1,3 +1,4 @@
+import type { PackageDependency } from '../types';
 import { getGitlabDep } from './utils';
 
 describe('modules/manager/gitlabci/utils', () => {
@@ -38,6 +39,31 @@ describe('modules/manager/gitlabci/utils', () => {
           replaceString: imageName,
           depName: 'renovate/renovate',
           currentValue: '19.70.8-slim',
+        });
+      }
+    );
+
+    it.each`
+      name                         | registryAliases                                         | imageName                     | dep
+      ${'multiple aliases'}        | ${{ foo: 'foo.registry.com', bar: 'bar.registry.com' }} | ${'foo/image:1.0'}            | ${{ depName: 'foo.registry.com/image', currentValue: '1.0', autoReplaceStringTemplate: `foo/${defaultAutoReplaceStringTemplate}` }}
+      ${'aliased variable'}        | ${{ $CI_REGISTRY: 'registry.com' }}                     | ${'$CI_REGISTRY/image:1.0'}   | ${{ depName: 'registry.com/image', currentValue: '1.0', autoReplaceStringTemplate: `$CI_REGISTRY/${defaultAutoReplaceStringTemplate}` }}
+      ${'variables with brackets'} | ${{ '${CI_REGISTRY}': 'registry.com' }}                 | ${'${CI_REGISTRY}/image:1.0'} | ${{ depName: 'registry.com/image', currentValue: '1.0', autoReplaceStringTemplate: `$\{CI_REGISTRY}/${defaultAutoReplaceStringTemplate}` }}
+      ${'not aliased variable'}    | ${{}}                                                   | ${'$CI_REGISTRY/image:1.0'}   | ${{ autoReplaceStringTemplate: `${defaultAutoReplaceStringTemplate}` }}
+      ${'plain image'}             | ${{}}                                                   | ${'registry.com/image:1.0'}   | ${{ depName: 'registry.com/image', currentValue: '1.0', autoReplaceStringTemplate: `${defaultAutoReplaceStringTemplate}` }}
+    `(
+      'supports registry aliases - $name',
+      ({
+        registryAliases,
+        imageName,
+        dep,
+      }: {
+        registryAliases: Record<string, string>;
+        imageName: string;
+        dep: PackageDependency;
+      }) => {
+        expect(getGitlabDep(imageName, registryAliases)).toMatchObject({
+          ...dep,
+          replaceString: imageName,
         });
       }
     );
