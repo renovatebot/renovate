@@ -1,19 +1,19 @@
 import { DirectoryResult, dir } from 'tmp-promise';
 import { join } from 'upath';
-import { loadFixture } from '../../../../test/util';
+import { Fixtures } from '../../../../test/fixtures';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import { writeLocalFile } from '../../../util/fs';
 import type { ExtractConfig } from '../types';
 import { extractPackageFile } from '.';
 
-const cargo1toml = loadFixture('Cargo.1.toml');
-const cargo2toml = loadFixture('Cargo.2.toml');
-const cargo3toml = loadFixture('Cargo.3.toml');
-const cargo4toml = loadFixture('Cargo.4.toml');
-const cargo5toml = loadFixture('Cargo.5.toml');
-const cargo6configtoml = loadFixture('cargo.6.config.toml');
-const cargo6toml = loadFixture('Cargo.6.toml');
+const cargo1toml = Fixtures.get('Cargo.1.toml');
+const cargo2toml = Fixtures.get('Cargo.2.toml');
+const cargo3toml = Fixtures.get('Cargo.3.toml');
+const cargo4toml = Fixtures.get('Cargo.4.toml');
+const cargo5toml = Fixtures.get('Cargo.5.toml');
+const cargo6configtoml = Fixtures.get('cargo.6.config.toml');
+const cargo6toml = Fixtures.get('Cargo.6.toml');
 
 describe('modules/manager/cargo/extract', () => {
   describe('extractPackageFile()', () => {

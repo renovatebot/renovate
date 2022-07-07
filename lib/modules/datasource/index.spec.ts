@@ -12,6 +12,7 @@ import type { DatasourceApi, GetReleasesConfig, ReleaseResult } from './types';
 import {
   getDatasourceList,
   getDatasources,
+  getDefaultVersioning,
   getDigest,
   getPkgReleases,
   supportsDigests,
@@ -107,6 +108,12 @@ describe('modules/datasource/index', () => {
 
   afterEach(() => {
     datasources.delete(datasource);
+  });
+
+  describe('getDefaultVersioning()', () => {
+    it('returns semver if undefined', () => {
+      expect(getDefaultVersioning(undefined)).toBe('semver');
+    });
   });
 
   describe('Validations', () => {
