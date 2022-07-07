@@ -653,8 +653,8 @@ describe('config/validation', () => {
         config,
         true
       );
-      expect(warnings).toHaveLength(1);
-      expect(errors).toHaveLength(0);
+      expect(warnings).toHaveLength(0);
+      expect(errors).toHaveLength(1);
     });
 
     it('warns if only selectors in packageRules', async () => {
