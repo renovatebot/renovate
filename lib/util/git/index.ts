@@ -2,7 +2,6 @@ import URL from 'url';
 import is from '@sindresorhus/is';
 import delay from 'delay';
 import fs from 'fs-extra';
-// eslint-disable-next-line import/no-extraneous-dependencies
 import prettier from 'prettier';
 import simpleGit, {
   Options,
@@ -880,11 +879,13 @@ export async function prepareCommit({
           if (typeof file.contents === 'string') {
             if (/migrate-config/g.exec(branchName)) {
               const prettierConfigPath = readLocalPath(fileName);
-              const options = await prettier.resolveConfig(prettierConfigPath!);
-              file.contents = prettier.format(
-                file.contents.replace(/\s{2}/g, ''),
-                { filepath: fileName, ...options }
-              );
+              const options = await prettier.resolveConfig(prettierConfigPath);
+              if (!is.null_(options)) {
+                file.contents = prettier.format(
+                  file.contents.replace(/\s{2}/g, ''),
+                  { filepath: fileName, ...options }
+                );
+              }
             }
             contents = Buffer.from(file.contents);
           } else {
