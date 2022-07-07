@@ -50,9 +50,10 @@ type PackageJson = {
 };
 
 (async () => {
-  for (const file of configFileNames.filter(
-    (name) => name !== 'package.json'
-  )) {
+  for (const file of new Set([
+    ...configFileNames.filter((name) => name !== 'package.json'),
+    ...process.argv.slice(2),
+  ])) {
     try {
       if (!(await pathExists(file))) {
         continue;
