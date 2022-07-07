@@ -24,6 +24,7 @@ import { IgnoreNodeModulesMigration } from './custom/ignore-node-modules-migrati
 import { IgnoreNpmrcFileMigration } from './custom/ignore-npmrc-file-migration';
 import { MatchStringsMigration } from './custom/match-strings-migration';
 import { NodeMigration } from './custom/node-migration';
+import { PackageFilesMigration } from './custom/package-files-migration';
 import { PackageNameMigration } from './custom/package-name-migration';
 import { PackagePatternMigration } from './custom/package-pattern-migration';
 import { PackageRulesMigration } from './custom/package-rules-migration';
@@ -129,6 +130,7 @@ export class MigrationsService {
     VersionStrategyMigration,
     DryRunMigration,
     RequireConfigMigration,
+    PackageFilesMigration,
     PackageRulesMigration,
     NodeMigration,
     SemanticPrefixMigration,
