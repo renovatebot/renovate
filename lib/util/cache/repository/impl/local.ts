@@ -4,7 +4,7 @@ import hasha from 'hasha';
 import upath from 'upath';
 import { GlobalConfig } from '../../../../config/global';
 import { logger } from '../../../../logger';
-import { outputFile, readFile } from '../../../fs';
+import { outputCacheFile, readCacheFile } from '../../../fs';
 import {
   CACHE_REVISION,
   isValidRev10,
@@ -36,7 +36,7 @@ export class LocalRepoCache extends RepoCacheBase {
     const cacheFileName = this.getCacheFileName();
     try {
       const cacheFileName = this.getCacheFileName();
-      const rawCache = await readFile(cacheFileName, 'utf8');
+      const rawCache = await readCacheFile(cacheFileName, 'utf8');
       const oldCache = JSON.parse(rawCache);
 
       if (isValidRev12(oldCache, this.repository)) {
@@ -80,7 +80,7 @@ export class LocalRepoCache extends RepoCacheBase {
       const compressed = await compress(jsonStr);
       const payload = compressed.toString('base64');
       const record: RepoCacheRecord = { revision, repository, payload, hash };
-      await outputFile(cacheFileName, JSON.stringify(record));
+      await outputCacheFile(cacheFileName, JSON.stringify(record));
     }
   }
 }

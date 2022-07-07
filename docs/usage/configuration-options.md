@@ -1924,6 +1924,7 @@ This way Renovate can use GitHub's [Commit signing support for bots and other Gi
 
 ## postUpdateOptions
 
+- `bundlerConservative`: Enable conservative mode for `bundler` (Ruby dependencies). This will only update the immediate dependency in the lockfile instead of all subdependencies
 - `gomodMassage`: Enable massaging `replace` directives before calling `go` commands
 - `gomodTidy`: Run `go mod tidy` after Go module updates. This is implicitly enabled for major module updates when `gomodUpdateImportPaths` is enabled
 - `gomodTidy1.17`: Run `go mod tidy -compat=1.17` after Go module updates.
@@ -2500,23 +2501,13 @@ image: my.new.registry/aRepository/andImage:1.21-alpine
 ## registryAliases
 
 You can use the `registryAliases` object to set registry aliases.
-This feature only works with these managers:
 
-- `helm-requirements`
-- `helmv3`
-- `helmfile`
+This feature works with the following managers:
 
-The managers listed above all have this default registryAlias:
-
-```json
-{
-  "registryAliases": {
-    "stable": "https://charts.helm.sh/stable"
-  }
-}
-```
-
-Alias values must be properly formatted URIs.
+- [`helm-requirements`](/modules/manager/helm-requirements/)
+- [`helmv3`](/modules/manager/helmv3/)
+- [`helmfile`](/modules/manager/helmfile/)
+- [`gitlabci`](/modules/manager/gitlabci/)
 
 ## registryUrls
 

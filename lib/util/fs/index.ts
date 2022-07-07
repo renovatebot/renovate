@@ -3,24 +3,23 @@ import util from 'util';
 import is from '@sindresorhus/is';
 import findUp from 'find-up';
 import fs from 'fs-extra';
+import type { WriteFileOptions } from 'fs-extra';
 import upath from 'upath';
 import { GlobalConfig } from '../../config/global';
 import { logger } from '../../logger';
 
-export * from './proxies';
-
 export const pipeline = util.promisify(stream.pipeline);
 
-export function getSubDirectory(fileName: string): string {
+export function getParentDir(fileName: string): string {
   return upath.parse(fileName).dir;
 }
 
 export function getSiblingFileName(
-  existingFileNameWithPath: string,
-  otherFileName: string
+  fileName: string,
+  siblingName: string
 ): string {
-  const subDirectory = getSubDirectory(existingFileNameWithPath);
-  return upath.join(subDirectory, otherFileName);
+  const subDirectory = getParentDir(fileName);
+  return upath.join(subDirectory, siblingName);
 }
 
 export async function readLocalFile(fileName: string): Promise<Buffer | null>;
@@ -132,7 +131,7 @@ export async function findLocalSiblingOrParent(
 
   let current = existingFileNameWithPath;
   while (current !== '') {
-    current = getSubDirectory(current);
+    current = getParentDir(current);
     const candidate = upath.join(current, otherFileName);
     if (await localPathExists(candidate)) {
       return candidate;
@@ -215,4 +214,46 @@ export async function statLocalFile(
   } catch (_) {
     return null;
   }
+}
+
+// istanbul ignore next
+export function listCacheDir(path: string): Promise<string[]> {
+  return fs.readdir(path);
+}
+
+// istanbul ignore next
+export async function rmCache(path: string): Promise<void> {
+  await fs.rm(path, { recursive: true });
+}
+
+export async function readCacheFile(fileName: string): Promise<Buffer>;
+export async function readCacheFile(
+  fileName: string,
+  encoding: 'utf8'
+): Promise<string>;
+export function readCacheFile(
+  fileName: string,
+  encoding?: string
+): Promise<string | Buffer> {
+  return encoding ? fs.readFile(fileName, encoding) : fs.readFile(fileName);
+}
+
+export function outputCacheFile(
+  file: string,
+  data: unknown,
+  options?: WriteFileOptions | string
+): Promise<void> {
+  return fs.outputFile(file, data, options ?? {});
+}
+
+export async function readSystemFile(fileName: string): Promise<Buffer>;
+export async function readSystemFile(
+  fileName: string,
+  encoding: 'utf8'
+): Promise<string>;
+export function readSystemFile(
+  fileName: string,
+  encoding?: string
+): Promise<string | Buffer> {
+  return encoding ? fs.readFile(fileName, encoding) : fs.readFile(fileName);
 }
