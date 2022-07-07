@@ -31,8 +31,9 @@ async function applyPrettierFormatting(
   let prettierExists = (await getFileList()).some((file) =>
     prettierConfigFilenames.includes(file)
   );
-  const checkPackageJson = await readLocalFile('package.json', 'utf8');
-  prettierExists ||= checkPackageJson && JSON.parse(checkPackageJson).prettier;
+  const packageJsonContent = await readLocalFile('package.json', 'utf8');
+  prettierExists ||=
+    packageJsonContent && JSON.parse(packageJsonContent).prettier;
 
   let newContent = content;
 
