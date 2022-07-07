@@ -146,7 +146,7 @@ export function addMetaData(
     }
 
     if (dep.sourceUrl === dep.homepage) {
-      delete dep.sourceUrl;
+      delete dep.homepage;
     }
   }
   // Clean up any empty urls
