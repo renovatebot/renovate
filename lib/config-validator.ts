@@ -50,10 +50,9 @@ type PackageJson = {
 };
 
 (async () => {
-  for (const file of new Set([
-    ...configFileNames.filter((name) => name !== 'package.json'),
-    ...process.argv.slice(2),
-  ])) {
+  for (const file of configFileNames.filter(
+    (name) => name !== 'package.json'
+  )) {
     try {
       if (!(await pathExists(file))) {
         continue;
@@ -102,6 +101,26 @@ type PackageJson = {
     }
   } catch (err) {
     // ignore
+  }
+  for (const file of process.argv.slice(2)) {
+    try {
+      if (!(await pathExists(file))) {
+        returnVal = 1;
+        logger.error(`${file} does not exist`);
+        break;
+      }
+      const parsedContent = await getParsedContent(file);
+      try {
+        logger.info(`Validating ${file}`);
+        await validate(file, parsedContent);
+      } catch (err) {
+        logger.warn({ err }, `${file} is not valid Renovate config`);
+        returnVal = 1;
+      }
+    } catch (err) {
+      logger.warn({ err }, `${file} could not be parsed`);
+      returnVal = 1;
+    }
   }
   if (returnVal !== 0) {
     process.exit(returnVal);
