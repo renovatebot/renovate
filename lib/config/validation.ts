@@ -8,7 +8,7 @@ import {
 } from '../workers/repository/update/branch/schedule';
 import { migrateConfig } from './migration';
 import { getOptions } from './options';
-import { resolveConfigPresets } from './presets';
+import { getPreset, resolveConfigPresets } from './presets';
 import type {
   RenovateConfig,
   RenovateOptions,
@@ -269,6 +269,14 @@ export async function validateConfig(
             if (key === 'extends') {
               for (const subval of val) {
                 if (is.string(subval)) {
+                  try {
+                    await getPreset(subval, config);
+                  } catch (e) {
+                    warnings.push({
+                      topic: 'Configuration Warning',
+                      message: `Invalid Preset ${subval}`,
+                    });
+                  }
                   if (
                     parentName === 'packageRules' &&
                     subval.startsWith('group:')
