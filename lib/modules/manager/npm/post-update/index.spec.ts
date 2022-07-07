@@ -136,7 +136,7 @@ describe('modules/manager/npm/post-update/index', () => {
     };
 
     // reset mocked version
-    fs.getSubDirectory.mockImplementation((p) => upath.parse(p).dir);
+    fs.getParentDir.mockImplementation((p) => upath.parse(p).dir);
   });
 
   describe('determineLockFileDirs()', () => {
