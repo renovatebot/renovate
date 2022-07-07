@@ -10,16 +10,16 @@ import { logger } from '../../logger';
 
 export const pipeline = util.promisify(stream.pipeline);
 
-export function getSubDirectory(fileName: string): string {
+export function getParentDir(fileName: string): string {
   return upath.parse(fileName).dir;
 }
 
 export function getSiblingFileName(
-  existingFileNameWithPath: string,
-  otherFileName: string
+  fileName: string,
+  siblingName: string
 ): string {
-  const subDirectory = getSubDirectory(existingFileNameWithPath);
-  return upath.join(subDirectory, otherFileName);
+  const subDirectory = getParentDir(fileName);
+  return upath.join(subDirectory, siblingName);
 }
 
 export async function readLocalFile(fileName: string): Promise<Buffer | null>;
@@ -131,7 +131,7 @@ export async function findLocalSiblingOrParent(
 
   let current = existingFileNameWithPath;
   while (current !== '') {
-    current = getSubDirectory(current);
+    current = getParentDir(current);
     const candidate = upath.join(current, otherFileName);
     if (await localPathExists(candidate)) {
       return candidate;
