@@ -90,7 +90,7 @@ describe('modules/manager/gradle/extract', () => {
           {
             depName: 'foo:bar',
             currentValue: '1.2.3',
-            registryUrls: ['https://repo.maven.apache.org/maven2'],
+            registryUrls: [],
             skipReason: 'contains-variable',
             managerData: {
               packageFile: 'build.gradle',
@@ -121,10 +121,7 @@ describe('modules/manager/gradle/extract', () => {
           {
             depName: 'foo:bar',
             currentValue: '1.2.3',
-            registryUrls: [
-              'https://repo.maven.apache.org/maven2',
-              'https://example.com',
-            ],
+            registryUrls: ['https://example.com'],
           },
         ],
       },
@@ -197,8 +194,8 @@ describe('modules/manager/gradle/extract', () => {
             depType: 'plugin',
             registryUrls: [
               'https://repo.maven.apache.org/maven2',
-              'https://plugins.gradle.org/m2/',
               'https://example.com',
+              'https://plugins.gradle.org/m2/',
             ],
           },
           {
@@ -352,10 +349,7 @@ describe('modules/manager/gradle/extract', () => {
               fileReplacePosition: 21,
               packageFile: 'gradle/libs.versions.toml',
             },
-            registryUrls: [
-              'https://repo.maven.apache.org/maven2',
-              'https://plugins.gradle.org/m2/',
-            ],
+            registryUrls: ['https://plugins.gradle.org/m2/'],
           },
           {
             depName: 'org.danilopianini.publish-on-central',
@@ -367,10 +361,7 @@ describe('modules/manager/gradle/extract', () => {
               fileReplacePosition: 82,
               packageFile: 'gradle/libs.versions.toml',
             },
-            registryUrls: [
-              'https://repo.maven.apache.org/maven2',
-              'https://plugins.gradle.org/m2/',
-            ],
+            registryUrls: ['https://plugins.gradle.org/m2/'],
           },
           {
             depName: 'org.ajoberstar.grgit',
@@ -381,10 +372,7 @@ describe('modules/manager/gradle/extract', () => {
             managerData: {
               packageFile: 'gradle/libs.versions.toml',
             },
-            registryUrls: [
-              'https://repo.maven.apache.org/maven2',
-              'https://plugins.gradle.org/m2/',
-            ],
+            registryUrls: ['https://plugins.gradle.org/m2/'],
             skipReason: 'unknown-version',
           },
         ],
@@ -474,10 +462,7 @@ describe('modules/manager/gradle/extract', () => {
               fileReplacePosition: 661,
               packageFile: 'gradle/libs.versions.toml',
             },
-            registryUrls: [
-              'https://repo.maven.apache.org/maven2',
-              'https://plugins.gradle.org/m2/',
-            ],
+            registryUrls: ['https://plugins.gradle.org/m2/'],
           },
           {
             depName: 'org.jetbrains.kotlin.plugin.serialization',
@@ -489,10 +474,7 @@ describe('modules/manager/gradle/extract', () => {
               fileReplacePosition: 21,
               packageFile: 'gradle/libs.versions.toml',
             },
-            registryUrls: [
-              'https://repo.maven.apache.org/maven2',
-              'https://plugins.gradle.org/m2/',
-            ],
+            registryUrls: ['https://plugins.gradle.org/m2/'],
           },
           {
             depName: 'org.danilopianini.multi-jvm-test-plugin',
@@ -505,10 +487,7 @@ describe('modules/manager/gradle/extract', () => {
               fileReplacePosition: 822,
               packageFile: 'gradle/libs.versions.toml',
             },
-            registryUrls: [
-              'https://repo.maven.apache.org/maven2',
-              'https://plugins.gradle.org/m2/',
-            ],
+            registryUrls: ['https://plugins.gradle.org/m2/'],
           },
         ],
       },
@@ -560,17 +539,14 @@ describe('modules/manager/gradle/extract', () => {
               packageFile: 'gradle/libs.versions.toml',
             },
             fileReplacePosition: 30,
-            registryUrls: ['https://repo.maven.apache.org/maven2'],
+            registryUrls: [],
           },
           {
             depType: 'plugin',
             depName: 'io.gitlab.arturbosch.detekt',
             packageName:
               'io.gitlab.arturbosch.detekt:io.gitlab.arturbosch.detekt.gradle.plugin',
-            registryUrls: [
-              'https://repo.maven.apache.org/maven2',
-              'https://plugins.gradle.org/m2/',
-            ],
+            registryUrls: ['https://plugins.gradle.org/m2/'],
             currentValue: '1.18.1',
             managerData: {
               fileReplacePosition: 30,
@@ -608,7 +584,7 @@ describe('modules/manager/gradle/extract', () => {
               packageFile: 'gradle/libs.versions.toml',
             },
             fileReplacePosition: 124,
-            registryUrls: ['https://repo.maven.apache.org/maven2'],
+            registryUrls: [],
           },
           {
             depName: 'mocha-junit:mocha-junit',
@@ -619,7 +595,7 @@ describe('modules/manager/gradle/extract', () => {
               packageFile: 'gradle/libs.versions.toml',
             },
             fileReplacePosition: 82,
-            registryUrls: ['https://repo.maven.apache.org/maven2'],
+            registryUrls: [],
           },
         ],
       },
