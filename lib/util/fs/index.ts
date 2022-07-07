@@ -43,7 +43,10 @@ export async function readLocalFile(
     return null;
   }
 }
-
+export function readLocalPath(fileName: string): string | null {
+  const { localDir } = GlobalConfig.get();
+  return upath.join(localDir, fileName);
+}
 export async function writeLocalFile(
   fileName: string,
   fileContent: string | Buffer
