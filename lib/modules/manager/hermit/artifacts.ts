@@ -3,11 +3,7 @@ import upath from 'upath';
 import { logger } from '../../../logger';
 import { exec } from '../../../util/exec';
 import type { ExecOptions } from '../../../util/exec/types';
-import {
-  localPathIsSymbolicLink,
-  readLocalFile,
-  readLocalSymlink,
-} from '../../../util/fs';
+import { localPathIsSymbolicLink, readLocalSymlink } from '../../../util/fs';
 import { getRepoStatus } from '../../../util/git';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
 import type {
@@ -58,14 +54,13 @@ export async function updateArtifacts({
 async function getContent(file: string): Promise<ReadContentResult> {
   let contents: string | null = '';
   const isSymlink = await localPathIsSymbolicLink(file);
+
   if (isSymlink) {
     contents = await readLocalSymlink(file);
-  } else {
-    contents = await readLocalFile(file, 'utf8');
   }
 
   if (contents === null) {
-    return Promise.reject();
+    throw new Error(`error getting content for ${file}`);
   }
 
   return {
@@ -212,9 +207,9 @@ async function updateHermitPackage(
       'missing package update information'
     );
 
-    return Promise.reject({
-      stderr: `invalid package to update`,
-    });
+    throw {
+      stderr: 'invalid package to update',
+    };
   }
   const depName = pkg.depName;
   const currentVersion = pkg.currentVersion;
@@ -225,7 +220,7 @@ async function updateHermitPackage(
   const toPackage = getHermitPackage(depName, newValue);
   const execOptions: ExecOptions = {
     docker: {
-      image: 'slim',
+      image: 'sidecar',
     },
     cwdFile: pkg.packageFileName,
   };

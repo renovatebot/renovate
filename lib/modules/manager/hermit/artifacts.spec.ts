@@ -1,24 +1,26 @@
-jest.mock('../../../config/global');
-jest.mock('../../../util/exec');
-jest.mock('../../../util/git');
-jest.mock('fs-extra');
-
-import fs from 'fs-extra';
 import type { StatusResult } from 'simple-git/promise';
-import { mocked, mockedFunction } from '../../../../test/util';
+import { mockedFunction } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import { exec } from '../../../util/exec';
+import {
+  localPathIsSymbolicLink,
+  readLocalFile,
+  readLocalSymlink,
+} from '../../../util/fs';
 import { getRepoStatus } from '../../../util/git';
 import type { UpdateArtifact } from '../types';
-import { updateArtifacts } from './artifacts';
+import { updateArtifacts } from '.';
+
+jest.mock('../../../util/exec');
+jest.mock('../../../util/git');
+jest.mock('../../../util/fs');
 
 const execMock = mockedFunction(exec);
 const getRepoStatusMock = mockedFunction(getRepoStatus);
-const globalConfigMock = mocked(GlobalConfig);
 
-const lstatsMock = mockedFunction(fs.lstat);
-const readlinkMock = mockedFunction(fs.readlink);
-const readFileMock = mockedFunction(fs.readFile);
+const lstatsMock = mockedFunction(localPathIsSymbolicLink);
+const readlinkMock = mockedFunction(readLocalSymlink);
+const readFileMock = mockedFunction(readLocalFile);
 
 describe('modules/manager/hermit/artifacts', () => {
   beforeEach(() => {
@@ -28,21 +30,11 @@ describe('modules/manager/hermit/artifacts', () => {
 
   describe('updateArtifacts', () => {
     it('should run hermit install for packages and return updated files', async () => {
-      lstatsMock.mockImplementation((p) => {
-        if (p === 'bin/jq-extra') {
-          return Promise.resolve({
-            isSymbolicLink: () => false,
-          } as fs.Stats);
-        }
-
-        return Promise.resolve({
-          isSymbolicLink: () => true,
-        } as fs.Stats);
-      });
+      lstatsMock.mockResolvedValue(true);
 
       readlinkMock.mockResolvedValue('hermit');
-      readFileMock.mockResolvedValue(Buffer.from('hermit'));
-      globalConfigMock.get.mockReturnValue({ localDir: '' });
+      readFileMock.mockResolvedValue('hermit');
+      GlobalConfig.set({ localDir: '' });
 
       execMock.mockResolvedValue({
         stdout: '',
@@ -81,7 +73,7 @@ describe('modules/manager/hermit/artifacts', () => {
       expect(execMock.mock.calls[0][1]).toStrictEqual({
         cwdFile: 'go/bin/hermit',
         docker: {
-          image: 'slim',
+          image: 'sidecar',
         },
       });
 
