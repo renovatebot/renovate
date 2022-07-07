@@ -8,6 +8,7 @@ import { getOptions } from './options';
 import type {
   MigratedConfig,
   MigratedRenovateConfig,
+  PackageRule,
   RenovateConfig,
   RenovateOptions,
 } from './types';
@@ -38,47 +39,7 @@ export function migrateConfig(config: RenovateConfig): MigratedConfig {
       'peerDependencies',
     ];
     for (const [key, val] of Object.entries(newConfig)) {
-      if (key.startsWith('masterIssue')) {
-        const newKey = key.replace('masterIssue', 'dependencyDashboard');
-        migratedConfig[newKey] = val;
-        if (optionTypes[newKey] === 'boolean' && val === 'true') {
-          migratedConfig[newKey] = true;
-        }
-        delete migratedConfig[key];
-      } else if (key === 'packageFiles' && is.array(val)) {
-        const fileList = [];
-        for (const packageFile of val) {
-          if (is.object(packageFile) && !is.array(packageFile)) {
-            fileList.push((packageFile as any).packageFile);
-            if (Object.keys(packageFile).length > 1) {
-              migratedConfig.packageRules = is.array(
-                migratedConfig.packageRules
-              )
-                ? migratedConfig.packageRules
-                : [];
-              const payload = migrateConfig(
-                packageFile as RenovateConfig
-              ).migratedConfig;
-              for (const subrule of payload.packageRules ?? []) {
-                subrule.paths = [(packageFile as any).packageFile];
-                migratedConfig.packageRules.push(subrule);
-              }
-              delete payload.packageFile;
-              delete payload.packageRules;
-              if (Object.keys(payload).length) {
-                migratedConfig.packageRules.push({
-                  ...payload,
-                  paths: [(packageFile as any).packageFile],
-                });
-              }
-            }
-          } else {
-            fileList.push(packageFile);
-          }
-        }
-        migratedConfig.includePaths = fileList;
-        delete migratedConfig.packageFiles;
-      } else if (depTypes.includes(key)) {
+      if (depTypes.includes(key)) {
         migratedConfig.packageRules = is.array(migratedConfig.packageRules)
           ? migratedConfig.packageRules
           : [];
@@ -104,16 +65,6 @@ export function migrateConfig(config: RenovateConfig): MigratedConfig {
           regEx(/{{depNameShort}}/g),
           '{{depName}}'
         );
-      } else if (key === 'semanticPrefix' && is.string(val)) {
-        delete migratedConfig.semanticPrefix;
-        let [text] = val.split(':') as any; // TODO: fixme
-        text = text.split('(');
-        [migratedConfig.semanticCommitType] = text;
-        if (text.length > 1) {
-          [migratedConfig.semanticCommitScope] = text[1].split(')');
-        } else {
-          migratedConfig.semanticCommitScope = null;
-        }
       } else if (is.string(val) && val.startsWith('{{semanticPrefix}}')) {
         migratedConfig[key] = val.replace(
           '{{semanticPrefix}}',
@@ -153,17 +104,6 @@ export function migrateConfig(config: RenovateConfig): MigratedConfig {
         val.length === 1
       ) {
         migratedConfig[key] = String(val[0]);
-      } else if (key === 'node' && (val as RenovateConfig).enabled === true) {
-        // validated non-null
-        delete migratedConfig.node!.enabled;
-        migratedConfig.travis = migratedConfig.travis ?? {};
-        migratedConfig.travis.enabled = true;
-        if (Object.keys(migratedConfig.node!).length) {
-          const subMigrate = migrateConfig(migratedConfig.node!);
-          migratedConfig.node = subMigrate.migratedConfig;
-        } else {
-          delete migratedConfig.node;
-        }
       } else if (is.array(val)) {
         if (is.array(migratedConfig?.[key])) {
           const newArray = [];
@@ -202,6 +142,7 @@ export function migrateConfig(config: RenovateConfig): MigratedConfig {
       }
     }
     if (is.array(migratedConfig.packageRules)) {
+      const newRules: PackageRule[] = [];
       const renameMap = {
         paths: 'matchPaths',
         languages: 'matchLanguages',
@@ -215,15 +156,15 @@ export function migrateConfig(config: RenovateConfig): MigratedConfig {
         updateTypes: 'matchUpdateTypes',
       } as const;
       for (const packageRule of migratedConfig.packageRules) {
+        const newRuleObj = {} as PackageRule;
         for (const [oldKey, ruleVal] of Object.entries(packageRule)) {
-          const newKey = renameMap[oldKey as keyof typeof renameMap];
-          if (newKey) {
-            // TODO: fix types #7154
-            packageRule[newKey] = ruleVal as never;
-            delete packageRule[oldKey];
-          }
+          const key = renameMap[oldKey as keyof typeof renameMap] ?? oldKey;
+          // TODO: fix types #7154
+          newRuleObj[key] = ruleVal as never;
         }
+        newRules.push(newRuleObj);
       }
+      migratedConfig.packageRules = newRules;
     }
     // Migrate nested packageRules
     if (is.nonEmptyArray(migratedConfig.packageRules)) {
@@ -235,7 +176,10 @@ export function migrateConfig(config: RenovateConfig): MigratedConfig {
           // merge each subrule and add to the parent list
           for (const subrule of packageRule.packageRules) {
             // TODO: fix types #7154
-            const combinedRule = mergeChildConfig(packageRule, subrule as any);
+            const combinedRule = mergeChildConfig(
+              packageRule,
+              subrule as PackageRule
+            );
             delete combinedRule.packageRules;
             migratedConfig.packageRules.push(combinedRule);
           }

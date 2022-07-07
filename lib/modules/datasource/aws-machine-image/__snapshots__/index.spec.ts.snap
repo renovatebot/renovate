@@ -117,7 +117,7 @@ Array [
         "region": [Function],
         "regionInfoProvider": [Function],
         "requestHandler": NodeHttpHandler {
-          "configProvider": [Function],
+          "configProvider": Promise {},
           "metadata": Object {
             "handlerProtocol": "http/1.1",
           },
@@ -271,7 +271,7 @@ Array [
         "region": [Function],
         "regionInfoProvider": [Function],
         "requestHandler": NodeHttpHandler {
-          "configProvider": [Function],
+          "configProvider": Promise {},
           "metadata": Object {
             "handlerProtocol": "http/1.1",
           },
@@ -425,7 +425,7 @@ Array [
         "region": [Function],
         "regionInfoProvider": [Function],
         "requestHandler": NodeHttpHandler {
-          "configProvider": [Function],
+          "configProvider": Promise {},
           "metadata": Object {
             "handlerProtocol": "http/1.1",
           },

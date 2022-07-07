@@ -24,7 +24,7 @@ describe('modules/manager/gitlabci/extract', () => {
 
   describe('extractAllPackageFile()', () => {
     it('extracts from empty file', () => {
-      expect(extractPackageFile('')).toBeNull();
+      expect(extractPackageFile('', '', {})).toBeNull();
     });
   });
 
@@ -169,7 +169,8 @@ describe('modules/manager/gitlabci/extract', () => {
     });
 
     it('extract images from dependency proxy', () => {
-      const res = extractPackageFile(`
+      const res = extractPackageFile(
+        `
         image:
           name: $\{CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/renovate/renovate:31.65.1-slim
 
@@ -177,7 +178,10 @@ describe('modules/manager/gitlabci/extract', () => {
           - $CI_DEPENDENCY_PROXY_DIRECT_GROUP_IMAGE_PREFIX/mariadb:10.4.11
           - name: $CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX/other/image1:1.0.0
             alias: imagealias1
-      `);
+      `,
+        '',
+        {}
+      );
       expect(res?.deps).toEqual([
         {
           autoReplaceStringTemplate:
@@ -214,6 +218,60 @@ describe('modules/manager/gitlabci/extract', () => {
           depType: 'service-image',
           replaceString:
             '$CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX/other/image1:1.0.0',
+        },
+      ]);
+    });
+
+    it('extract images via registry aliases', () => {
+      const registryAliases = {
+        $CI_REGISTRY: 'registry.com',
+        foo: 'foo.registry.com',
+      };
+      const res = extractPackageFile(
+        `
+        image:
+          name: $CI_REGISTRY/renovate/renovate:31.65.1-slim
+
+        services:
+          - foo/mariadb:10.4.11
+          - name: $CI_REGISTRY/other/image1:1.0.0
+            alias: imagealias1
+      `,
+        '',
+        {
+          registryAliases,
+        }
+      );
+      expect(res?.deps).toEqual([
+        {
+          autoReplaceStringTemplate:
+            '$CI_REGISTRY/{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentDigest: undefined,
+          currentValue: '31.65.1-slim',
+          datasource: 'docker',
+          depName: 'registry.com/renovate/renovate',
+          depType: 'image-name',
+          replaceString: '$CI_REGISTRY/renovate/renovate:31.65.1-slim',
+        },
+        {
+          autoReplaceStringTemplate:
+            'foo/{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentDigest: undefined,
+          currentValue: '10.4.11',
+          datasource: 'docker',
+          depName: 'foo.registry.com/mariadb',
+          depType: 'service-image',
+          replaceString: 'foo/mariadb:10.4.11',
+        },
+        {
+          autoReplaceStringTemplate:
+            '$CI_REGISTRY/{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentDigest: undefined,
+          currentValue: '1.0.0',
+          datasource: 'docker',
+          depName: 'registry.com/other/image1',
+          depType: 'service-image',
+          replaceString: '$CI_REGISTRY/other/image1:1.0.0',
         },
       ]);
     });

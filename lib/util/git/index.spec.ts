@@ -3,7 +3,10 @@ import Git from 'simple-git';
 import tmp from 'tmp-promise';
 import { mocked } from '../../../test/util';
 import { GlobalConfig } from '../../config/global';
-import { CONFIG_VALIDATION } from '../../constants/error-messages';
+import {
+  CONFIG_VALIDATION,
+  INVALID_PATH,
+} from '../../constants/error-messages';
 import { newlineRegex, regEx } from '../regex';
 import * as _conflictsCache from './conflicts-cache';
 import type { FileChange } from './types';
@@ -67,6 +70,14 @@ describe('util/git/index', () => {
     await repo.add(['custom_file']);
     await repo.addConfig('user.email', 'custom@example.com');
     await repo.commit('custom message');
+
+    await repo.checkoutBranch('renovate/nested_files', defaultBranch);
+    await fs.mkdirp(base.path + '/bin/');
+    await fs.writeFile(base.path + '/bin/nested', 'nested');
+    await fs.writeFile(base.path + '/root', 'root');
+    await repo.add(['root', 'bin/nested']);
+    await repo.addConfig('user.email', 'custom@example.com');
+    await repo.commit('nested message');
 
     await repo.checkoutBranch('renovate/equal_branch', defaultBranch);
 
@@ -371,6 +382,30 @@ describe('util/git/index', () => {
         message: 'Create something',
       });
       expect(commit).not.toBeNull();
+    });
+
+    it('link file', async () => {
+      const file: FileChange = {
+        type: 'addition',
+        path: 'future_link',
+        contents: 'past_file',
+        isSymlink: true,
+      };
+      const commit = await git.commitFiles({
+        branchName: 'renovate/future_branch',
+        files: [file],
+        message: 'Create a link',
+      });
+      expect(commit).toBeString();
+      const tmpGit = Git(tmpDir.path);
+      const lsTree = await tmpGit.raw(['ls-tree', commit!]);
+      const files = lsTree
+        .trim()
+        .split(newlineRegex)
+        .map((x) => x.split(/\s/))
+        .map(([mode, type, _hash, name]) => [mode, type, name]);
+      expect(files).toContainEqual(['100644', 'blob', 'past_file']);
+      expect(files).toContainEqual(['120000', 'blob', 'future_link']);
     });
 
     it('deletes file', async () => {
@@ -938,6 +973,30 @@ describe('util/git/index', () => {
           type: 'blob',
         },
       ]);
+    });
+  });
+
+  describe('getRepoStatus', () => {
+    it('should pass options into git status', async () => {
+      await git.checkoutBranch('renovate/nested_files');
+
+      await fs.writeFile(tmpDir.path + '/bin/nested', 'new nested');
+      await fs.writeFile(tmpDir.path + '/root', 'new root');
+      const resp = await git.getRepoStatus('bin');
+
+      expect(resp.modified).toStrictEqual(['bin/nested']);
+    });
+
+    it('should reject when trying to access directory out of localDir', async () => {
+      GlobalConfig.set({ localDir: tmpDir.path });
+      await git.checkoutBranch('renovate/nested_files');
+
+      await fs.writeFile(tmpDir.path + '/bin/nested', 'new nested');
+      await fs.writeFile(tmpDir.path + '/root', 'new root');
+
+      await expect(git.getRepoStatus('../../bin')).rejects.toThrow(
+        INVALID_PATH
+      );
     });
   });
 });
