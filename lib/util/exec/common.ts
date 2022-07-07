@@ -80,7 +80,11 @@ export function exec(cmd: string, opts: RawExecOptions): Promise<ExecResult> {
     });
 
     cp.on('exit', (code: number, signal: string) => {
-      if (signal && !NONTERM.includes(signal)) {
+      if (NONTERM.includes(signal)) {
+        return;
+      }
+
+      if (signal) {
         try {
           // process.kill(-(cp.pid as number), signal); // PID range hack; signal process tree
 
@@ -96,8 +100,8 @@ export function exec(cmd: string, opts: RawExecOptions): Promise<ExecResult> {
         }
         stderr.push(
           Buffer.from(
-            `PID= ${cp.pid as number}\n` +
-              `COMMAND= "${cp.spawnargs.join(' ')}"\n` +
+            `PID=${cp.pid as number}\n` +
+              `COMMAND="${cp.spawnargs.join(' ')}"\n` +
               `Signaled with "${signal}"`
           )
         );
