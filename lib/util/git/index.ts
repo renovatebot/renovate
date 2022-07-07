@@ -2,7 +2,6 @@ import URL from 'url';
 import is from '@sindresorhus/is';
 import delay from 'delay';
 import fs from 'fs-extra';
-import prettier from 'prettier';
 import simpleGit, {
   Options,
   ResetMode,
@@ -27,7 +26,6 @@ import { api as semverCoerced } from '../../modules/versioning/semver-coerced';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import type { GitProtocol } from '../../types/git';
 import { Limit, incLimitedValue } from '../../workers/global/limits';
-import { readLocalPath } from '../fs';
 import { newlineRegex, regEx } from '../regex';
 import { parseGitAuthor } from './author';
 import { getNoVerify, simpleGitConfig } from './config';
@@ -877,16 +875,6 @@ export async function prepareCommit({
           let contents: Buffer;
           // istanbul ignore else
           if (typeof file.contents === 'string') {
-            if (/migrate-config/g.exec(branchName)) {
-              const prettierConfigPath = readLocalPath(fileName);
-              const options = await prettier.resolveConfig(prettierConfigPath);
-              if (!is.null_(options)) {
-                file.contents = prettier.format(
-                  file.contents.replace(/\s{2}/g, ''),
-                  { filepath: fileName, ...options }
-                );
-              }
-            }
             contents = Buffer.from(file.contents);
           } else {
             contents = file.contents;
