@@ -13,7 +13,7 @@ export const renameMap = {
   sourceUrlPrefixes: 'matchSourceUrlPrefixes',
   updateTypes: 'matchUpdateTypes',
 };
-type renameMapKeyType = keyof typeof renameMap;
+type RenameMapKey = keyof typeof renameMap;
 
 function renameKeys(packageRule: PackageRule): PackageRule {
   const newPackageRule: PackageRule = {};
