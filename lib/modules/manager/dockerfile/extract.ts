@@ -168,13 +168,13 @@ export function getDep(
     const escapedName = escapeRegExp(name);
     const match = regEx(`(?<prefix>${escapedName}/)(?<depName>.+)`).exec(
       currentFrom
-    );
-    if (match?.groups) {
+    )?.groups;
+    if (groups) {
       const dep = {
-        ...getDep(`${value}/${match.groups.depName}`),
+        ...getDep(`${value}/${groups.depName}`),
         replaceString: currentFrom,
       };
-      dep.autoReplaceStringTemplate = `${match.groups.prefix}${dep.autoReplaceStringTemplate}`;
+      dep.autoReplaceStringTemplate = `${groups.prefix}${dep.autoReplaceStringTemplate}`;
       return dep;
     }
   }
