@@ -1,6 +1,6 @@
 import is from '@sindresorhus/is';
 import { logger } from '../../../logger';
-import { newlineRegex, regEx } from '../../../util/regex';
+import { escapeRegExp, newlineRegex, regEx } from '../../../util/regex';
 import { DockerDatasource } from '../../datasource/docker';
 import * as debianVersioning from '../../versioning/debian';
 import * as ubuntuVersioning from '../../versioning/ubuntu';
@@ -154,13 +154,31 @@ const quayRegex = regEx(/^quay\.io(?::[1-9][0-9]{0,4})?/i);
 
 export function getDep(
   currentFrom: string | null | undefined,
-  specifyReplaceString = true
+  specifyReplaceString = true,
+  registryAliases?: Record<string, string>
 ): PackageDependency {
   if (!is.string(currentFrom)) {
     return {
       skipReason: 'invalid-value',
     };
   }
+
+  // Resolve registry aliases first so that we don't need special casing later on:
+  for (const [name, value] of Object.entries(registryAliases ?? {})) {
+    const escapedName = escapeRegExp(name);
+    const groups = regEx(`(?<prefix>${escapedName}/)(?<depName>.+)`).exec(
+      currentFrom
+    )?.groups;
+    if (groups) {
+      const dep = {
+        ...getDep(`${value}/${groups.depName}`),
+        replaceString: currentFrom,
+      };
+      dep.autoReplaceStringTemplate = `${groups.prefix}${dep.autoReplaceStringTemplate}`;
+      return dep;
+    }
+  }
+
   const dep = splitImageParts(currentFrom);
   if (specifyReplaceString) {
     if (!dep.replaceString) {
@@ -294,7 +312,9 @@ export function extractPackageFile(content: string): PackageFile | null {
       }
 
       if (fromMatch.groups?.name) {
-        logger.debug('Found a multistage build stage name');
+        logger.debug(
+          `Found a multistage build stage name: ${fromMatch.groups.name}`
+        );
         stageNames.push(fromMatch.groups.name);
       }
       if (fromImage === 'scratch') {

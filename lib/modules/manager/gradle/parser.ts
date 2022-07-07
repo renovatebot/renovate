@@ -1,6 +1,7 @@
 import url from 'url';
 import is from '@sindresorhus/is';
 import { logger } from '../../../logger';
+import { getSiblingFileName, readLocalFile } from '../../../util/fs';
 import { newlineRegex, regEx } from '../../../util/regex';
 import type { PackageDependency } from '../types';
 import {
@@ -120,7 +121,6 @@ function handleAssignment({
   if (dep) {
     dep.groupName = key;
     dep.managerData = {
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
       fileReplacePosition: valToken.offset + dep.depName!.length + 1,
       packageFile,
     };
@@ -149,7 +149,6 @@ function processDepString({
   const dep = parseDependencyString(token.value);
   if (dep) {
     dep.managerData = {
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
       fileReplacePosition: token.offset + dep.depName!.length + 1,
       packageFile,
     };
@@ -280,14 +279,26 @@ function processCustomRegistryUrl({
   tokenMap,
   variables,
 }: SyntaxHandlerInput): SyntaxHandlerOutput {
+  let localVariables = variables;
+  if (tokenMap.keyToken?.value === 'name') {
+    localVariables = {
+      ...variables,
+      name: {
+        key: 'name',
+        value: tokenMap.valToken.value,
+      },
+    };
+  }
+
   let registryUrl: string | null = tokenMap.registryUrl?.value;
   if (tokenMap.registryUrl?.type === TokenType.StringInterpolation) {
     const token = tokenMap.registryUrl as StringInterpolation;
-    registryUrl = interpolateString(token.children, variables);
+    registryUrl = interpolateString(token.children, localVariables);
   }
 
   try {
     if (registryUrl) {
+      registryUrl = registryUrl.replace(regEx(/\\/g), '');
       const { host, protocol } = url.parse(registryUrl);
       if (host && protocol) {
         return { urls: [registryUrl] };
@@ -309,7 +320,6 @@ function processPredefinedRegistryUrl({
     google: GOOGLE_REPO,
     gradlePluginPortal: GRADLE_PLUGIN_PORTAL_REPO,
   }[registryName];
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
   return { urls: [registryUrl!] };
 }
 
@@ -322,6 +332,7 @@ const annoyingMethods = new Set([
   'mutableListOf',
   'setOf',
   'mutableSetOf',
+  'stages', // https://github.com/ajoberstar/reckon
 ]);
 
 function processLongFormDep({
@@ -386,6 +397,19 @@ function processLibraryDep(input: SyntaxHandlerInput): SyntaxHandlerOutput {
     }
   }
   return res;
+}
+
+function processApplyFrom({
+  tokenMap,
+  variables,
+}: SyntaxHandlerInput): SyntaxHandlerOutput {
+  let scriptFile: string | null = tokenMap.scriptFile?.value ?? null;
+  if (tokenMap.scriptFile?.type === TokenType.StringInterpolation) {
+    const token = tokenMap.scriptFile as StringInterpolation;
+    scriptFile = interpolateString(token.children, variables);
+  }
+
+  return { scriptFile };
 }
 
 const matcherConfigs: SyntaxMatchConfig[] = [
@@ -555,6 +579,37 @@ const matcherConfigs: SyntaxMatchConfig[] = [
         tokenMapKey: 'registryUrl',
       },
       { matchType: TokenType.RightParen },
+      endOfInstruction,
+    ],
+    handler: processCustomRegistryUrl,
+  },
+  {
+    // maven { name = "baz"; url = "https://maven.springframework.org/${name}" }
+    matchers: [
+      {
+        matchType: TokenType.Word,
+        matchValue: 'maven',
+      },
+      { matchType: TokenType.LeftBrace },
+      {
+        matchType: TokenType.Word,
+        matchValue: 'name',
+        tokenMapKey: 'keyToken',
+      },
+      { matchType: TokenType.Assignment },
+      {
+        matchType: [TokenType.String, TokenType.StringInterpolation],
+        tokenMapKey: 'valToken',
+      },
+      {
+        matchType: TokenType.Word,
+        matchValue: 'url',
+      },
+      { matchType: TokenType.Assignment },
+      {
+        matchType: [TokenType.String, TokenType.StringInterpolation],
+        tokenMapKey: 'registryUrl',
+      },
       endOfInstruction,
     ],
     handler: processCustomRegistryUrl,
@@ -874,6 +929,86 @@ const matcherConfigs: SyntaxMatchConfig[] = [
     ],
     handler: processLongFormDep,
   },
+  {
+    // apply from: 'foo.gradle'
+    // apply from: "$somedir/foo.gradle"
+    matchers: [
+      { matchType: TokenType.Word, matchValue: 'apply' },
+      { matchType: TokenType.Word, matchValue: 'from' },
+      { matchType: TokenType.Colon },
+      {
+        matchType: [TokenType.String, TokenType.StringInterpolation],
+        tokenMapKey: 'scriptFile',
+      },
+    ],
+    handler: processApplyFrom,
+  },
+  {
+    // apply from: file("$somedir/foo.gradle")
+    matchers: [
+      { matchType: TokenType.Word, matchValue: 'apply' },
+      { matchType: TokenType.Word, matchValue: 'from' },
+      { matchType: TokenType.Colon },
+      { matchType: TokenType.Word, matchValue: 'file' },
+      { matchType: TokenType.LeftParen },
+      {
+        matchType: [TokenType.String, TokenType.StringInterpolation],
+        tokenMapKey: 'scriptFile',
+      },
+      { matchType: TokenType.RightParen },
+    ],
+    handler: processApplyFrom,
+  },
+  {
+    // apply from: new File("$somedir/foo.gradle")
+    matchers: [
+      { matchType: TokenType.Word, matchValue: 'apply' },
+      { matchType: TokenType.Word, matchValue: 'from' },
+      { matchType: TokenType.Colon },
+      { matchType: TokenType.Word, matchValue: 'new' },
+      { matchType: TokenType.Word, matchValue: 'File' },
+      { matchType: TokenType.LeftParen },
+      {
+        matchType: [TokenType.String, TokenType.StringInterpolation],
+        tokenMapKey: 'scriptFile',
+      },
+      { matchType: TokenType.RightParen },
+    ],
+    handler: processApplyFrom,
+  },
+  {
+    // apply(from = 'foo.gradle')
+    // apply(from = "$somedir/foo.gradle")
+    matchers: [
+      { matchType: TokenType.Word, matchValue: 'apply' },
+      { matchType: TokenType.LeftParen },
+      { matchType: TokenType.Word, matchValue: 'from' },
+      { matchType: TokenType.Assignment },
+      {
+        matchType: [TokenType.String, TokenType.StringInterpolation],
+        tokenMapKey: 'scriptFile',
+      },
+      { matchType: TokenType.RightParen },
+    ],
+    handler: processApplyFrom,
+  },
+  {
+    // apply(from = File("$somedir/foo.gradle"))
+    matchers: [
+      { matchType: TokenType.Word, matchValue: 'apply' },
+      { matchType: TokenType.LeftParen },
+      { matchType: TokenType.Word, matchValue: 'from' },
+      { matchType: TokenType.Assignment },
+      { matchType: TokenType.Word, matchValue: 'File' },
+      { matchType: TokenType.LeftParen },
+      {
+        matchType: [TokenType.String, TokenType.StringInterpolation],
+        tokenMapKey: 'scriptFile',
+      },
+      { matchType: TokenType.RightParen },
+    ],
+    handler: processApplyFrom,
+  },
 ];
 
 function tryMatch({
@@ -898,11 +1033,43 @@ function tryMatch({
   return null;
 }
 
-export function parseGradle(
+async function parseInlineScriptFile(
+  scriptFile: string,
+  variables: PackageVariables,
+  recursionDepth: number,
+  packageFile = ''
+): Promise<SyntaxHandlerOutput> {
+  if (recursionDepth > 0) {
+    logger.warn({ scriptFile }, `Max recursion depth reached`);
+    return null;
+  }
+
+  if (!regEx(/\.gradle(\.kts)?$/).test(scriptFile)) {
+    logger.warn({ scriptFile }, `Only Gradle files can be included`);
+    return null;
+  }
+
+  const scriptFilePath = getSiblingFileName(packageFile, scriptFile);
+  const scriptFileContent = await readLocalFile(scriptFilePath, 'utf8');
+  if (!scriptFileContent) {
+    logger.warn({ scriptFilePath }, `Failed to process Gradle file`);
+    return null;
+  }
+
+  return parseGradle(
+    scriptFileContent,
+    variables,
+    scriptFilePath,
+    recursionDepth + 1
+  );
+}
+
+export async function parseGradle(
   input: string,
   initVars: PackageVariables = {},
-  packageFile?: string
-): ParseGradleResult {
+  packageFile?: string,
+  recursionDepth = 0
+): Promise<ParseGradleResult> {
   let vars: PackageVariables = { ...initVars };
   const deps: PackageDependency<GradleManagerData>[] = [];
   const urls: string[] = [];
@@ -910,7 +1077,15 @@ export function parseGradle(
   const tokens = tokenize(input);
   let prevTokensLength = tokens.length;
   while (tokens.length) {
-    const matchResult = tryMatch({ tokens, variables: vars, packageFile });
+    let matchResult = tryMatch({ tokens, variables: vars, packageFile });
+    if (matchResult?.scriptFile) {
+      matchResult = await parseInlineScriptFile(
+        matchResult.scriptFile,
+        vars,
+        recursionDepth,
+        packageFile
+      );
+    }
     if (matchResult?.deps?.length) {
       deps.push(...matchResult.deps);
     }
@@ -959,7 +1134,6 @@ export function parseProps(
             ...dep,
             managerData: {
               fileReplacePosition:
-                // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
                 offset + leftPart.length + dep.depName!.length + 1,
               packageFile,
             },

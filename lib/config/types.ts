@@ -341,9 +341,13 @@ export interface RenovateOptionBase {
   // used by tests
   relatedOptions?: string[];
 
-  releaseStatus?: 'alpha' | 'beta' | 'unpublished';
-
   stage?: RenovateConfigStage;
+
+  experimental?: boolean;
+
+  experimentalDescription?: string;
+
+  experimentalIssues?: number[];
 }
 
 export interface RenovateArrayOption<
@@ -419,9 +423,9 @@ export interface PackageRuleInputConfig extends Record<string, unknown> {
   depType?: string;
   depTypes?: string[];
   depName?: string;
-  currentValue?: string;
+  currentValue?: string | null;
   currentVersion?: string;
-  lockedVersion?: string;
+  lockedVersion?: string | null;
   updateType?: UpdateType;
   isBump?: boolean;
   sourceUrl?: string | null;

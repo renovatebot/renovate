@@ -1,4 +1,5 @@
 import { DateTime, DurationLikeObject } from 'luxon';
+import { logger } from '../../../../logger';
 import * as packageCache from '../../../../util/cache/package';
 import type {
   GithubGraphqlResponse,
@@ -8,6 +9,7 @@ import type { GetReleasesConfig } from '../../types';
 import { getApiBaseUrl } from '../common';
 import type {
   CacheOptions,
+  ChangelogRelease,
   GithubDatasourceCache,
   GithubQueryParams,
   QueryResponse,
@@ -160,10 +162,32 @@ export abstract class AbstractGithubDatasourceCache<
    */
   abstract coerceFetched(fetchedItem: FetchedItem): StoredItem | null;
 
+  private async query(
+    baseUrl: string,
+    variables: GithubQueryParams
+  ): Promise<QueryResponse<FetchedItem> | Error> {
+    try {
+      const graphqlRes = await this.http.postJson<
+        GithubGraphqlResponse<QueryResponse<FetchedItem>>
+      >('/graphql', {
+        baseUrl,
+        body: { query: this.graphqlQuery, variables },
+      });
+      const { body } = graphqlRes;
+      const { data, errors } = body;
+      return data ?? new Error(errors?.[0]?.message);
+    } catch (err) {
+      return err;
+    }
+  }
+
   /**
    * Pre-fetch, update, or just return the package cache items.
    */
-  async getItems(releasesConfig: GetReleasesConfig): Promise<StoredItem[]> {
+  async getItems(
+    releasesConfig: GetReleasesConfig,
+    changelogRelease?: ChangelogRelease
+  ): Promise<StoredItem[]> {
     const { packageName, registryUrl } = releasesConfig;
 
     // The time meant to be used across the function
@@ -213,7 +237,15 @@ export abstract class AbstractGithubDatasourceCache<
         }
       }
 
-      if (isExpired(now, cacheUpdatedAt, updateDuration)) {
+      if (
+        isExpired(now, cacheUpdatedAt, updateDuration) ||
+        this.newChangelogReleaseDetected(
+          changelogRelease,
+          now,
+          updateDuration,
+          cacheItems
+        )
+      ) {
         const variables: GithubQueryParams = {
           owner,
           name,
@@ -232,67 +264,69 @@ export abstract class AbstractGithubDatasourceCache<
           : this.maxPrefetchPages;
         let stopIteration = false;
         while (pagesRemained > 0 && !stopIteration) {
-          const graphqlRes = await this.http.postJson<
-            GithubGraphqlResponse<QueryResponse<FetchedItem>>
-          >('/graphql', {
-            baseUrl,
-            body: { query: this.graphqlQuery, variables },
-          });
-          pagesRemained -= 1;
-
-          const { data, errors } = graphqlRes.body;
-
-          const errorMessage = errors?.[0]?.message;
-          if (errorMessage) {
-            throw Error(errorMessage);
+          const res = await this.query(baseUrl, variables);
+          if (res instanceof Error) {
+            if (
+              res.message.startsWith(
+                'Something went wrong while executing your query.' // #16343
+              ) &&
+              variables.count > 30
+            ) {
+              logger.warn(
+                `GitHub datasource cache: shrinking GraphQL page size due to error`
+              );
+              pagesRemained *= 2;
+              variables.count = Math.floor(variables.count / 2);
+              continue;
+            }
+            throw res;
           }
 
-          if (data) {
-            const {
-              nodes: fetchedItems,
-              pageInfo: { hasNextPage, endCursor },
-            } = data.repository.payload;
+          pagesRemained -= 1;
 
-            if (hasNextPage) {
-              variables.cursor = endCursor;
-            } else {
-              stopIteration = true;
-            }
+          const {
+            nodes: fetchedItems,
+            pageInfo: { hasNextPage, endCursor },
+          } = res.repository.payload;
 
-            for (const item of fetchedItems) {
-              const newStoredItem = this.coerceFetched(item);
-              if (newStoredItem) {
-                const { version, releaseTimestamp } = newStoredItem;
+          if (hasNextPage) {
+            variables.cursor = endCursor;
+          } else {
+            stopIteration = true;
+          }
 
-                // Stop earlier if the stored item have reached stability,
-                // which means `unstableDays` period have passed
-                const oldStoredItem = cacheItems[version];
-                if (
-                  oldStoredItem &&
-                  isExpired(
-                    now,
-                    oldStoredItem.releaseTimestamp,
-                    this.stabilityDuration
-                  )
-                ) {
-                  stopIteration = true;
-                  break;
-                }
+          for (const item of fetchedItems) {
+            const newStoredItem = this.coerceFetched(item);
+            if (newStoredItem) {
+              const { version, releaseTimestamp } = newStoredItem;
 
-                cacheItems[version] = newStoredItem;
-                checkedVersions.add(version);
+              // Stop earlier if the stored item have reached stability,
+              // which means `unstableDays` period have passed
+              const oldStoredItem = cacheItems[version];
+              if (
+                oldStoredItem &&
+                isExpired(
+                  now,
+                  oldStoredItem.releaseTimestamp,
+                  this.stabilityDuration
+                )
+              ) {
+                stopIteration = true;
+              }
 
-                lastReleasedAt ??= releaseTimestamp;
-                // It may be tempting to optimize the code and
-                // remove the check, as we're fetching fresh releases here.
-                // That's wrong, because some items are already cached,
-                // and they obviously aren't latest.
-                if (
-                  DateTime.fromISO(releaseTimestamp) >
-                  DateTime.fromISO(lastReleasedAt)
-                ) {
-                  lastReleasedAt = releaseTimestamp;
-                }
+              cacheItems[version] = newStoredItem;
+              checkedVersions.add(version);
+
+              lastReleasedAt ??= releaseTimestamp;
+              // It may be tempting to optimize the code and
+              // remove the check, as we're fetching fresh releases here.
+              // That's wrong, because some items are already cached,
+              // and they obviously aren't latest.
+              if (
+                DateTime.fromISO(releaseTimestamp) >
+                DateTime.fromISO(lastReleasedAt)
+              ) {
+                lastReleasedAt = releaseTimestamp;
               }
             }
           }
@@ -364,5 +398,30 @@ export abstract class AbstractGithubDatasourceCache<
     }
 
     return result;
+  }
+
+  newChangelogReleaseDetected(
+    changelogRelease: ChangelogRelease | undefined,
+    now: DateTime,
+    updateDuration: DurationLikeObject,
+    cacheItems: Record<string, StoredItem>
+  ): boolean {
+    if (!changelogRelease) {
+      return false;
+    }
+
+    const releaseTime = changelogRelease.date.toString();
+    const isVersionPresentInCache = !!cacheItems[changelogRelease.version];
+    const isChangelogReleaseFresh = !isExpired(
+      now,
+      releaseTime,
+      updateDuration
+    );
+
+    if (isVersionPresentInCache || !isChangelogReleaseFresh) {
+      return false;
+    }
+
+    return true;
   }
 }

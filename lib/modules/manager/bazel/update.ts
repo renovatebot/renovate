@@ -13,6 +13,10 @@ function updateWithNewVersion(
   currentValue: string,
   newValue: string
 ): string {
+  // istanbul ignore if
+  if (currentValue === newValue) {
+    return content;
+  }
   const replaceFrom = currentValue.replace(regEx(/^v/), '');
   const replaceTo = newValue.replace(regEx(/^v/), '');
   let newContent = content;
@@ -93,7 +97,7 @@ export async function updateDependency({
 }: UpdateDependencyConfig<BazelManagerData>): Promise<string | null> {
   try {
     logger.debug(
-      `bazel.updateDependency(): ${upgrade.newValue || upgrade.newDigest}`
+      `bazel.updateDependency(): ${upgrade.newValue ?? upgrade.newDigest}`
     );
     let newDef: string | undefined;
     if (upgrade.depType === 'container_pull' && upgrade.managerData?.def) {

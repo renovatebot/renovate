@@ -40,7 +40,7 @@ describe('workers/repository/config-migration/branch/migrated-data', () => {
     it('Calls getAsync a first when migration not needed', async () => {
       mockedFunction(migrateConfig).mockReturnValueOnce({
         isMigrated: false,
-        migratedConfig: null,
+        migratedConfig: {},
       });
       await expect(MigratedDataFactory.getAsync()).resolves.toBeNull();
     });
@@ -62,12 +62,12 @@ describe('workers/repository/config-migration/branch/migrated-data', () => {
     describe('MigratedData class', () => {
       it('gets the filename from the class instance', async () => {
         const data = await MigratedDataFactory.getAsync();
-        expect(data.filename).toBe('renovate.json');
+        expect(data?.filename).toBe('renovate.json');
       });
 
       it('gets the content from the class instance', async () => {
         const data = await MigratedDataFactory.getAsync();
-        expect(data.content).toBe(migratedData.content);
+        expect(data?.content).toBe(migratedData.content);
       });
     });
 
@@ -80,9 +80,10 @@ describe('workers/repository/config-migration/branch/migrated-data', () => {
 
     it('Resets the factory and gets a new value with default indentation', async () => {
       mockedFunction(detectIndent).mockReturnValueOnce({
-        type: null,
+        type: undefined,
         amount: 0,
-        indent: null,
+        // TODO: incompatible types (#7154)
+        indent: null as never,
       });
       MigratedDataFactory.reset();
       await expect(MigratedDataFactory.getAsync()).resolves.toEqual(
@@ -103,7 +104,7 @@ describe('workers/repository/config-migration/branch/migrated-data', () => {
 
     it('Returns nothing due to fs error', async () => {
       mockedFunction(detectRepoFileConfig).mockResolvedValueOnce({
-        configFileName: null,
+        configFileName: undefined,
       });
       mockedFunction(readLocalFile).mockRejectedValueOnce(null);
       MigratedDataFactory.reset();

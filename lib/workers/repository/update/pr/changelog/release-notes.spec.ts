@@ -1,6 +1,7 @@
 import { DateTime } from 'luxon';
+import { Fixtures } from '../../../../../../test/fixtures';
 import * as httpMock from '../../../../../../test/http-mock';
-import { loadFixture, mocked } from '../../../../../../test/util';
+import { mocked } from '../../../../../../test/util';
 import { CacheableGithubReleases } from '../../../../../modules/datasource/github-releases/cache';
 import { clone } from '../../../../../util/clone';
 import * as _hostRules from '../../../../../util/host-rules';
@@ -24,12 +25,12 @@ jest.mock('../../../../../util/host-rules');
 
 const hostRules = mocked(_hostRules);
 
-const angularJsChangelogMd = loadFixture('angular-js.md', '..');
-const jestChangelogMd = loadFixture('jest.md', '..');
-const jsYamlChangelogMd = loadFixture('js-yaml.md', '..');
-const yargsChangelogMd = loadFixture('yargs.md', '..');
-const adapterutilsChangelogMd = loadFixture('adapter-utils.md', '..');
-const gitterWebappChangelogMd = loadFixture('gitter-webapp.md', '..');
+const angularJsChangelogMd = Fixtures.get('angular-js.md', '..');
+const jestChangelogMd = Fixtures.get('jest.md', '..');
+const jsYamlChangelogMd = Fixtures.get('js-yaml.md', '..');
+const yargsChangelogMd = Fixtures.get('yargs.md', '..');
+const adapterutilsChangelogMd = Fixtures.get('adapter-utils.md', '..');
+const gitterWebappChangelogMd = Fixtures.get('gitter-webapp.md', '..');
 
 const githubTreeResponse = {
   tree: [
@@ -98,7 +99,10 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
       expect(
         await addReleaseNotes(input as never, {} as BranchUpgradeConfig)
       ).toEqual(input);
-      expect(await addReleaseNotes(null, {} as BranchUpgradeConfig)).toBeNull();
+      // TODO #7154
+      expect(
+        await addReleaseNotes(null as never, {} as BranchUpgradeConfig)
+      ).toBeNull();
       expect(
         await addReleaseNotes(
           { versions: [] } as never,
@@ -974,7 +978,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
             gitRef: '15.3.0',
           } as ChangeLogRelease
         );
-        versionOneNotes = res;
+        versionOneNotes = res!;
 
         expect(res).toMatchSnapshot({
           notesSourceUrl:
@@ -1004,7 +1008,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
             gitRef: '15.2.0',
           } as ChangeLogRelease
         );
-        versionTwoNotes = res;
+        versionTwoNotes = res!;
 
         expect(res).toMatchSnapshot({
           notesSourceUrl:
@@ -1034,7 +1038,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
             gitRef: '4.33.0',
           } as ChangeLogRelease
         );
-        versionTwoNotes = res;
+        versionTwoNotes = res!;
 
         expect(res).toMatchSnapshot({
           notesSourceUrl:
@@ -1070,7 +1074,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
             gitRef: '4.33.0',
           } as ChangeLogRelease
         );
-        versionTwoNotes = res;
+        versionTwoNotes = res!;
 
         expect(res).toMatchSnapshot({
           notesSourceUrl:

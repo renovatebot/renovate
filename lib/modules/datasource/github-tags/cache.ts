@@ -26,8 +26,10 @@ query ($owner: String!, $name: String!, $cursor: String, $count: Int!) {
             target {
               ... on Commit {
                 hash: oid
-                releaseTimestamp: committedDate
               }
+            }
+            tagger {
+              releaseTimestamp: date
             }
           }
         }
@@ -53,6 +55,8 @@ export interface FetchedTag {
         type: 'Tag';
         target: {
           hash: string;
+        };
+        tagger: {
           releaseTimestamp: string;
         };
       };
@@ -67,7 +71,7 @@ export class CacheableGithubTags extends AbstractGithubDatasourceCache<
   StoredTag,
   FetchedTag
 > {
-  readonly cacheNs = 'github-datasource-graphql-tags';
+  readonly cacheNs = 'github-datasource-graphql-tags-v2';
   readonly graphqlQuery = query;
 
   constructor(http: GithubHttp, opts: CacheOptions = {}) {
@@ -80,7 +84,8 @@ export class CacheableGithubTags extends AbstractGithubDatasourceCache<
       const { hash, releaseTimestamp } = target;
       return { version, hash, releaseTimestamp };
     } else if (target.type === 'Tag') {
-      const { hash, releaseTimestamp } = target.target;
+      const { hash } = target.target;
+      const { releaseTimestamp } = target.tagger;
       return { version, hash, releaseTimestamp };
     }
     return null;

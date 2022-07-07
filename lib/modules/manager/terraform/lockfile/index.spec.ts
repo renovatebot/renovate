@@ -1,5 +1,6 @@
 import { join } from 'upath';
-import { fs, loadFixture, mocked } from '../../../../../test/util';
+import { Fixtures } from '../../../../../test/fixtures';
+import { fs, mocked } from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
 import { getPkgReleases } from '../../../datasource';
 import type { UpdateArtifactsConfig } from '../../types';
@@ -21,8 +22,8 @@ const adminConfig = {
   cacheDir: join('/tmp/renovate/cache'),
 };
 
-const validLockfile = loadFixture('validLockfile.hcl');
-const validLockfile2 = loadFixture('validLockfile2.hcl');
+const validLockfile = Fixtures.get('validLockfile.hcl');
+const validLockfile2 = Fixtures.get('validLockfile2.hcl');
 
 const mockHash = mocked(TerraformProviderHash).createHashes;
 const mockGetPkgReleases = getPkgReleases as jest.MockedFunction<
@@ -37,7 +38,7 @@ describe('modules/manager/terraform/lockfile/index', () => {
   });
 
   it('returns null if no .terraform.lock.hcl found', async () => {
-    fs.readLocalFile.mockResolvedValueOnce(null);
+    fs.readLocalFile.mockResolvedValueOnce('');
 
     expect(
       await updateArtifacts({
@@ -50,7 +51,7 @@ describe('modules/manager/terraform/lockfile/index', () => {
   });
 
   it('returns null if .terraform.lock.hcl is empty', async () => {
-    fs.readLocalFile.mockResolvedValueOnce('empty' as any);
+    fs.readLocalFile.mockResolvedValueOnce('empty');
 
     expect(
       await updateArtifacts({
@@ -63,7 +64,7 @@ describe('modules/manager/terraform/lockfile/index', () => {
   });
 
   it('update single dependency with exact constraint and depType provider', async () => {
-    fs.readLocalFile.mockResolvedValueOnce(validLockfile as any);
+    fs.readLocalFile.mockResolvedValueOnce(validLockfile);
     fs.getSiblingFileName.mockReturnValueOnce('.terraform.lock.hcl');
 
     mockHash.mockResolvedValueOnce([
@@ -87,15 +88,15 @@ describe('modules/manager/terraform/lockfile/index', () => {
     });
     expect(result).not.toBeNull();
     expect(result).toBeArrayOfSize(1);
-    expect(result[0].file).not.toBeNull();
-    expect(result[0].file).toMatchSnapshot();
+    expect(result?.[0].file).not.toBeNull();
+    expect(result?.[0].file).toMatchSnapshot();
 
     expect(mockHash.mock.calls).toBeArrayOfSize(1);
     expect(mockHash.mock.calls).toMatchSnapshot();
   });
 
   it('update single dependency with exact constraint and and depType required_provider', async () => {
-    fs.readLocalFile.mockResolvedValueOnce(validLockfile as any);
+    fs.readLocalFile.mockResolvedValueOnce(validLockfile);
     fs.getSiblingFileName.mockReturnValueOnce('.terraform.lock.hcl');
 
     mockHash.mockResolvedValueOnce([
@@ -119,8 +120,8 @@ describe('modules/manager/terraform/lockfile/index', () => {
     });
     expect(result).not.toBeNull();
     expect(result).toBeArrayOfSize(1);
-    expect(result[0].file).not.toBeNull();
-    expect(result[0].file).toMatchSnapshot();
+    expect(result?.[0].file).not.toBeNull();
+    expect(result?.[0].file).toMatchSnapshot();
 
     expect(mockHash.mock.calls).toBeArrayOfSize(1);
     expect(mockHash.mock.calls).toMatchSnapshot();
@@ -145,7 +146,7 @@ describe('modules/manager/terraform/lockfile/index', () => {
   });
 
   it('update single dependency with range constraint and minor update from private registry', async () => {
-    fs.readLocalFile.mockResolvedValueOnce(validLockfile as any);
+    fs.readLocalFile.mockResolvedValueOnce(validLockfile);
     fs.getSiblingFileName.mockReturnValueOnce('.terraform.lock.hcl');
 
     mockHash.mockResolvedValueOnce([
@@ -170,15 +171,15 @@ describe('modules/manager/terraform/lockfile/index', () => {
     });
     expect(result).not.toBeNull();
     expect(result).toBeArrayOfSize(1);
-    expect(result[0].file).not.toBeNull();
-    expect(result[0].file).toMatchSnapshot();
+    expect(result?.[0].file).not.toBeNull();
+    expect(result?.[0].file).toMatchSnapshot();
 
     expect(mockHash.mock.calls).toBeArrayOfSize(1);
     expect(mockHash.mock.calls).toMatchSnapshot();
   });
 
   it('update single dependency with range constraint and major update', async () => {
-    fs.readLocalFile.mockResolvedValueOnce(validLockfile as any);
+    fs.readLocalFile.mockResolvedValueOnce(validLockfile);
     fs.getSiblingFileName.mockReturnValueOnce('.terraform.lock.hcl');
 
     mockHash.mockResolvedValueOnce([
@@ -202,15 +203,15 @@ describe('modules/manager/terraform/lockfile/index', () => {
     });
     expect(result).not.toBeNull();
     expect(result).toBeArrayOfSize(1);
-    expect(result[0].file).not.toBeNull();
-    expect(result[0].file).toMatchSnapshot();
+    expect(result?.[0].file).not.toBeNull();
+    expect(result?.[0].file).toMatchSnapshot();
 
     expect(mockHash.mock.calls).toBeArrayOfSize(1);
     expect(mockHash.mock.calls).toMatchSnapshot();
   });
 
   it('update single dependency in subfolder', async () => {
-    fs.readLocalFile.mockResolvedValueOnce(validLockfile as any);
+    fs.readLocalFile.mockResolvedValueOnce(validLockfile);
     fs.getSiblingFileName.mockReturnValueOnce('test/.terraform.lock.hcl');
 
     mockHash.mockResolvedValueOnce([
@@ -234,15 +235,15 @@ describe('modules/manager/terraform/lockfile/index', () => {
     });
     expect(result).not.toBeNull();
     expect(result).toBeArrayOfSize(1);
-    expect(result[0].file).not.toBeNull();
-    expect(result[0].file).toMatchSnapshot();
+    expect(result?.[0].file).not.toBeNull();
+    expect(result?.[0].file).toMatchSnapshot();
 
     expect(mockHash.mock.calls).toBeArrayOfSize(1);
     expect(mockHash.mock.calls).toMatchSnapshot();
   });
 
   it('update multiple dependencies which are not ordered', async () => {
-    fs.readLocalFile.mockResolvedValue(validLockfile2 as any);
+    fs.readLocalFile.mockResolvedValue(validLockfile2);
     fs.getSiblingFileName.mockReturnValue('test/.terraform.lock.hcl');
 
     mockHash.mockResolvedValue([
@@ -287,15 +288,15 @@ describe('modules/manager/terraform/lockfile/index', () => {
     });
     expect(result).not.toBeNull();
     expect(result).toBeArrayOfSize(1);
-    expect(result[0].file).not.toBeNull();
-    expect(result[0].file).toMatchSnapshot();
+    expect(result?.[0].file).not.toBeNull();
+    expect(result?.[0].file).toMatchSnapshot();
 
     expect(mockHash.mock.calls).toBeArrayOfSize(4);
     expect(mockHash.mock.calls).toMatchSnapshot();
   });
 
   it('do full lock file maintenance', async () => {
-    fs.readLocalFile.mockResolvedValueOnce(validLockfile as any);
+    fs.readLocalFile.mockResolvedValueOnce(validLockfile);
     fs.getSiblingFileName.mockReturnValueOnce('.terraform.lock.hcl');
 
     mockGetPkgReleases
@@ -360,15 +361,15 @@ describe('modules/manager/terraform/lockfile/index', () => {
     expect(result).not.toBeNull();
     expect(result).toBeArrayOfSize(1);
 
-    result.forEach((value) => expect(value.file).not.toBeNull());
-    result.forEach((value) => expect(value.file).toMatchSnapshot());
+    result?.forEach((value) => expect(value.file).not.toBeNull());
+    result?.forEach((value) => expect(value.file).toMatchSnapshot());
 
     expect(mockHash.mock.calls).toBeArrayOfSize(2);
     expect(mockHash.mock.calls).toMatchSnapshot();
   });
 
   it('do full lock file maintenance with lockfile in subfolder', async () => {
-    fs.readLocalFile.mockResolvedValueOnce(validLockfile as any);
+    fs.readLocalFile.mockResolvedValueOnce(validLockfile);
     fs.getSiblingFileName.mockReturnValueOnce('subfolder/.terraform.lock.hcl');
 
     mockGetPkgReleases
@@ -433,15 +434,15 @@ describe('modules/manager/terraform/lockfile/index', () => {
     expect(result).not.toBeNull();
     expect(result).toBeArrayOfSize(1);
 
-    result.forEach((value) => expect(value.file).not.toBeNull());
-    result.forEach((value) => expect(value.file).toMatchSnapshot());
+    result?.forEach((value) => expect(value.file).not.toBeNull());
+    result?.forEach((value) => expect(value.file).toMatchSnapshot());
 
     expect(mockHash.mock.calls).toBeArrayOfSize(2);
     expect(mockHash.mock.calls).toMatchSnapshot();
   });
 
   it('do full lock file maintenance without necessary changes', async () => {
-    fs.readLocalFile.mockResolvedValueOnce(validLockfile as any);
+    fs.readLocalFile.mockResolvedValueOnce(validLockfile);
 
     mockGetPkgReleases
       .mockResolvedValueOnce({
@@ -493,7 +494,7 @@ describe('modules/manager/terraform/lockfile/index', () => {
   });
 
   it('return null if hashing fails', async () => {
-    fs.readLocalFile.mockResolvedValueOnce(validLockfile as any);
+    fs.readLocalFile.mockResolvedValueOnce(validLockfile);
 
     mockGetPkgReleases
       .mockResolvedValueOnce({

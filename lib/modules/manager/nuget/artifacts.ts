@@ -7,7 +7,7 @@ import type { ExecOptions } from '../../../util/exec/types';
 import {
   ensureDir,
   getSiblingFileName,
-  outputFile,
+  outputCacheFile,
   privateCacheDir,
   readLocalFile,
   writeLocalFile,
@@ -35,7 +35,7 @@ async function addSourceCmds(
   nugetConfigFile: string
 ): Promise<string[]> {
   const registries =
-    (await getConfiguredRegistries(packageFileName)) || getDefaultRegistries();
+    (await getConfiguredRegistries(packageFileName)) ?? getDefaultRegistries();
   const result: string[] = [];
   for (const registry of registries) {
     const { username, password } = hostRules.find({
@@ -79,7 +79,7 @@ async function runDotnetRestore(
 
   await ensureDir(nugetCacheDir);
 
-  await outputFile(
+  await outputCacheFile(
     nugetConfigFile,
     `<?xml version="1.0" encoding="utf-8"?>\n<configuration>\n</configuration>\n`
   );

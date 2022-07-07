@@ -8,7 +8,7 @@ import * as docker from '../../../util/exec/docker';
 import * as hostRules from '../../../util/host-rules';
 import * as _datasource from '../../datasource';
 import type { UpdateArtifactsConfig } from '../types';
-import * as helmv3 from './artifacts';
+import * as helmv3 from '.';
 
 jest.mock('child_process');
 jest.mock('../../datasource');
@@ -78,7 +78,7 @@ describe('modules/manager/helmv3/artifacts', () => {
     fs.privateCacheDir.mockReturnValue(
       '/tmp/renovate/cache/__renovate-private-cache'
     );
-    fs.getSubDirectory.mockReturnValue('');
+    fs.getParentDir.mockReturnValue('');
     const updatedDeps = [{ depName: 'dep1' }];
     expect(
       await helmv3.updateArtifacts({
@@ -99,7 +99,7 @@ describe('modules/manager/helmv3/artifacts', () => {
     fs.privateCacheDir.mockReturnValue(
       '/tmp/renovate/cache/__renovate-private-cache'
     );
-    fs.getSubDirectory.mockReturnValue('');
+    fs.getParentDir.mockReturnValue('');
     const updatedDeps = [{ depName: 'dep1' }];
     expect(
       await helmv3.updateArtifacts({
@@ -129,7 +129,7 @@ describe('modules/manager/helmv3/artifacts', () => {
     fs.privateCacheDir.mockReturnValue(
       '/tmp/renovate/cache/__renovate-private-cache'
     );
-    fs.getSubDirectory.mockReturnValue('');
+    fs.getParentDir.mockReturnValue('');
     expect(
       await helmv3.updateArtifacts({
         packageFileName: 'Chart.yaml',
@@ -159,7 +159,7 @@ describe('modules/manager/helmv3/artifacts', () => {
     fs.privateCacheDir.mockReturnValue(
       '/tmp/renovate/cache/__renovate-private-cache'
     );
-    fs.getSubDirectory.mockReturnValue('');
+    fs.getParentDir.mockReturnValue('');
     datasource.getPkgReleases.mockResolvedValueOnce({
       releases: [{ version: 'v3.7.2' }],
     });
@@ -219,7 +219,7 @@ describe('modules/manager/helmv3/artifacts', () => {
     fs.readLocalFile.mockResolvedValueOnce(ociLockFile1 as never);
     const execSnapshots = mockExecAll(exec);
     fs.readLocalFile.mockResolvedValueOnce(ociLockFile2 as never);
-    fs.getSubDirectory.mockReturnValue('');
+    fs.getParentDir.mockReturnValue('');
     expect(
       await helmv3.updateArtifacts({
         packageFileName: 'Chart.yaml',
@@ -253,7 +253,7 @@ describe('modules/manager/helmv3/artifacts', () => {
     fs.privateCacheDir.mockReturnValue(
       '/tmp/renovate/cache/__renovate-private-cache'
     );
-    fs.getSubDirectory.mockReturnValue('');
+    fs.getParentDir.mockReturnValue('');
     datasource.getPkgReleases.mockResolvedValueOnce({
       releases: [{ version: 'v3.7.2' }],
     });
@@ -301,7 +301,7 @@ describe('modules/manager/helmv3/artifacts', () => {
     fs.privateCacheDir.mockReturnValue(
       '/tmp/renovate/cache/__renovate-private-cache'
     );
-    fs.getSubDirectory.mockReturnValue('');
+    fs.getParentDir.mockReturnValue('');
     expect(
       await helmv3.updateArtifacts({
         packageFileName: 'Chart.yaml',
@@ -351,7 +351,7 @@ describe('modules/manager/helmv3/artifacts', () => {
     fs.privateCacheDir.mockReturnValue(
       '/tmp/renovate/cache/__renovate-private-cache'
     );
-    fs.getSubDirectory.mockReturnValue('');
+    fs.getParentDir.mockReturnValue('');
     expect(
       await helmv3.updateArtifacts({
         packageFileName: 'Chart.yaml',
@@ -391,7 +391,7 @@ describe('modules/manager/helmv3/artifacts', () => {
     fs.privateCacheDir.mockReturnValue(
       '/tmp/renovate/cache/__renovate-private-cache'
     );
-    fs.getSubDirectory.mockReturnValue('');
+    fs.getParentDir.mockReturnValue('');
     expect(
       await helmv3.updateArtifacts({
         packageFileName: 'Chart.yaml',
@@ -439,7 +439,7 @@ describe('modules/manager/helmv3/artifacts', () => {
     fs.privateCacheDir.mockReturnValue(
       '/tmp/renovate/cache/__renovate-private-cache'
     );
-    fs.getSubDirectory.mockReturnValue('');
+    fs.getParentDir.mockReturnValue('');
     expect(
       await helmv3.updateArtifacts({
         packageFileName: 'Chart.yaml',

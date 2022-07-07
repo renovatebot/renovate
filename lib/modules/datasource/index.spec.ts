@@ -12,6 +12,7 @@ import type { DatasourceApi, GetReleasesConfig, ReleaseResult } from './types';
 import {
   getDatasourceList,
   getDatasources,
+  getDefaultVersioning,
   getDigest,
   getPkgReleases,
   supportsDigests,
@@ -20,7 +21,10 @@ import {
 const datasource = 'dummy';
 const depName = 'package';
 
-type RegistriesMock = Record<string, ReleaseResult | (() => ReleaseResult)>;
+type RegistriesMock = Record<
+  string,
+  ReleaseResult | (() => ReleaseResult) | null
+>;
 const defaultRegistriesMock: RegistriesMock = {
   'https://reg1.com': { releases: [{ version: '1.2.3' }] },
 };
@@ -35,7 +39,7 @@ class DummyDatasource extends Datasource {
   override getReleases({
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    const fn = this.registriesMock[registryUrl];
+    const fn = this.registriesMock[registryUrl!];
     if (typeof fn === 'function') {
       return Promise.resolve(fn());
     }
@@ -55,7 +59,7 @@ class DummyDatasource2 extends Datasource {
   override getReleases({
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    const fn = this.registriesMock[registryUrl];
+    const fn = this.registriesMock[registryUrl!];
     if (typeof fn === 'function') {
       return Promise.resolve(fn());
     }
@@ -76,7 +80,7 @@ class DummyDatasource3 extends Datasource {
   override getReleases({
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    const fn = this.registriesMock[registryUrl];
+    const fn = this.registriesMock[registryUrl!];
     if (typeof fn === 'function') {
       return Promise.resolve(fn());
     }
@@ -104,6 +108,12 @@ describe('modules/datasource/index', () => {
 
   afterEach(() => {
     datasources.delete(datasource);
+  });
+
+  describe('getDefaultVersioning()', () => {
+    it('returns semver if undefined', () => {
+      expect(getDefaultVersioning(undefined)).toBe('semver');
+    });
   });
 
   describe('Validations', () => {
@@ -151,7 +161,7 @@ describe('modules/datasource/index', () => {
       expect(Array.from(dss.keys())).toEqual(Object.keys(loadedDs));
 
       for (const dsName of dss.keys()) {
-        const ds = dss.get(dsName);
+        const ds = dss.get(dsName)!;
         expect(validateDatasource(ds, dsName)).toBeTrue();
       }
     });
@@ -159,7 +169,7 @@ describe('modules/datasource/index', () => {
     it('returns null for null datasource', async () => {
       expect(
         await getPkgReleases({
-          datasource: null,
+          datasource: null as never, // #7154
           depName: 'some/dep',
         })
       ).toBeNull();
@@ -170,7 +180,7 @@ describe('modules/datasource/index', () => {
       expect(
         await getPkgReleases({
           datasource: datasource,
-          depName: null,
+          depName: null as never, // #7154
         })
       ).toBeNull();
     });

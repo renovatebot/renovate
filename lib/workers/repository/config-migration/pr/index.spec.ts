@@ -37,8 +37,6 @@ describe('workers/repository/config-migration/pr/index', () => {
       ...getConfig(),
       configMigration: true,
       defaultBranch: 'main',
-      errors: [],
-      warnings: [],
       description: [],
     };
   });
@@ -61,7 +59,7 @@ describe('workers/repository/config-migration/pr/index', () => {
 
     it('creates PR with default PR title', async () => {
       await ensureConfigMigrationPr(
-        { ...config, onboardingPrTitle: null },
+        { ...config, onboardingPrTitle: '' },
         migratedData
       );
       expect(platform.getBranchPr).toHaveBeenCalledTimes(1);
@@ -86,21 +84,6 @@ describe('workers/repository/config-migration/pr/index', () => {
       await ensureConfigMigrationPr(config, migratedData);
       expect(platform.updatePr).toHaveBeenCalledTimes(1);
       expect(platform.createPr).toHaveBeenCalledTimes(0);
-    });
-
-    it('Founds a closed PR and exit', async () => {
-      platform.getBranchPr.mockResolvedValueOnce(null);
-      platform.findPr.mockResolvedValueOnce(
-        mock<Pr>({
-          title: 'Config Migration',
-        })
-      );
-      await ensureConfigMigrationPr(config, migratedData);
-      expect(platform.updatePr).toHaveBeenCalledTimes(0);
-      expect(platform.createPr).toHaveBeenCalledTimes(0);
-      expect(logger.debug).toHaveBeenCalledWith(
-        'Found closed migration PR, exiting...'
-      );
     });
 
     it('Dry runs and does not update out of date PR', async () => {
@@ -229,7 +212,7 @@ describe('workers/repository/config-migration/pr/index', () => {
     });
 
     it('deletes branch when PR already exists but cannot find it', async () => {
-      err.response.body = {
+      response.body = {
         errors: [{ message: 'A pull request already exists' }],
       };
       platform.createPr.mockRejectedValue(err);

@@ -98,7 +98,6 @@ export interface Package<T> extends ManagerData<T> {
   groupName?: string;
   lineNumber?: number;
   packageName?: string | null;
-  repo?: string;
   target?: string;
   versioning?: string;
   dataType?: string;
@@ -108,8 +107,7 @@ export interface Package<T> extends ManagerData<T> {
   npmPackageAlias?: boolean;
   packageFileVersion?: string;
   gitRef?: boolean;
-  sourceUrl?: string;
-  githubRepo?: string;
+  sourceUrl?: string | null;
   pinDigests?: boolean;
   currentRawValue?: string;
   major?: { enabled?: boolean };

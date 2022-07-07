@@ -1,12 +1,13 @@
-import { loadFixture } from '../../../../test/util';
-import { extractPackageFile, getSliceEndNumber } from './extract';
+import { Fixtures } from '../../../../test/fixtures';
+import { getSliceEndNumber } from './extract';
+import { extractPackageFile } from './';
 
-const yamlFile1 = loadFixture('requirements01.yml');
-const yamlFile2 = loadFixture('requirements02.yml');
-const helmRequirements = loadFixture('helmRequirements.yml');
-const collections1 = loadFixture('collections1.yml');
-const collections2 = loadFixture('collections2.yml');
-const galaxy = loadFixture('galaxy.yml');
+const yamlFile1 = Fixtures.get('requirements01.yml');
+const yamlFile2 = Fixtures.get('requirements02.yml');
+const helmRequirements = Fixtures.get('helmRequirements.yml');
+const collections1 = Fixtures.get('collections1.yml');
+const collections2 = Fixtures.get('collections2.yml');
+const galaxy = Fixtures.get('galaxy.yml');
 
 describe('modules/manager/ansible-galaxy/extract', () => {
   describe('extractPackageFile()', () => {
@@ -16,14 +17,14 @@ describe('modules/manager/ansible-galaxy/extract', () => {
 
     it('extracts multiple dependencies from requirements.yml', () => {
       const res = extractPackageFile(yamlFile1, 'requirements.yml');
-      expect(res.deps).toMatchSnapshot();
-      expect(res.deps).toHaveLength(12);
+      expect(res?.deps).toMatchSnapshot();
+      expect(res?.deps).toHaveLength(12);
     });
 
     it('extracts dependencies from a not beautified requirements file', () => {
       const res = extractPackageFile(yamlFile2, 'requirements.yml');
-      expect(res.deps).toMatchSnapshot();
-      expect(res.deps).toHaveLength(2);
+      expect(res?.deps).toMatchSnapshot();
+      expect(res?.deps).toHaveLength(2);
     });
 
     it('check if an empty file returns null', () => {
@@ -38,21 +39,21 @@ describe('modules/manager/ansible-galaxy/extract', () => {
 
     it('check collection style requirements file', () => {
       const res = extractPackageFile(collections1, 'requirements.yml');
-      expect(res.deps).toMatchSnapshot();
-      expect(res.deps).toHaveLength(13);
-      expect(res.deps.filter((value) => value.skipReason)).toHaveLength(6);
+      expect(res?.deps).toMatchSnapshot();
+      expect(res?.deps).toHaveLength(13);
+      expect(res?.deps.filter((value) => value.skipReason)).toHaveLength(6);
     });
 
     it('check collection style requirements file in reverse order and missing empty line', () => {
       const res = extractPackageFile(collections2, 'requirements.yml');
-      expect(res.deps).toMatchSnapshot();
-      expect(res.deps).toHaveLength(4);
+      expect(res?.deps).toMatchSnapshot();
+      expect(res?.deps).toHaveLength(4);
     });
 
     it('check galaxy definition file', () => {
       const res = extractPackageFile(galaxy, 'galaxy.yml');
-      expect(res.deps).toMatchSnapshot();
-      expect(res.deps).toHaveLength(2);
+      expect(res?.deps).toMatchSnapshot();
+      expect(res?.deps).toHaveLength(2);
     });
   });
 

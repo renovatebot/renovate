@@ -1,7 +1,8 @@
-/* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
 import { Fixtures } from '../../../test/fixtures';
 import { mocked } from '../../../test/util';
+import * as memCache from '../../util/cache/memory';
 import type { RenovateConfig } from '../types';
+import * as _github from './github';
 import * as _local from './local';
 import * as _npm from './npm';
 import {
@@ -18,6 +19,7 @@ jest.mock('./local');
 
 const npm = mocked(_npm);
 const local = mocked(_local);
+const gitHub = mocked(_github);
 
 const presetIkatyang = Fixtures.getJson('renovate-config-ikatyang.json');
 
@@ -49,6 +51,7 @@ describe('config/presets/index', () => {
     beforeEach(() => {
       config = {};
       jest.clearAllMocks();
+      memCache.init();
     });
 
     it('returns same if no presets', async () => {
@@ -306,6 +309,41 @@ describe('config/presets/index', () => {
         platform: 'gitlab',
         endpoint: 'https://dummy.example.com/api/v4',
         labels: ['self-hosted resolved'],
+      });
+    });
+
+    it('gets preset value from cache when it has been seen', async () => {
+      config.extends = ['github>username/preset-repo'];
+      config.packageRules = [
+        {
+          matchManagers: ['github-actions'],
+          groupName: 'github-actions dependencies',
+        },
+      ];
+      gitHub.getPreset.mockResolvedValueOnce({
+        packageRules: [
+          {
+            matchDatasources: ['docker'],
+            matchPackageNames: ['ubi'],
+            versioning: 'regex',
+          },
+        ],
+      });
+
+      expect(await presets.resolveConfigPresets(config)).toBeDefined();
+      const res = await presets.resolveConfigPresets(config);
+      expect(res).toEqual({
+        packageRules: [
+          {
+            matchDatasources: ['docker'],
+            matchPackageNames: ['ubi'],
+            versioning: 'regex',
+          },
+          {
+            matchManagers: ['github-actions'],
+            groupName: 'github-actions dependencies',
+          },
+        ],
       });
     });
   });
@@ -820,40 +858,40 @@ describe('config/presets/index', () => {
     it('handles renamed monorepos', async () => {
       const res = await presets.getPreset('monorepo:opentelemetry', {});
       expect(res).toMatchInlineSnapshot(`
-Object {
-  "description": Array [
-    "opentelemetry-js monorepo",
-  ],
-  "matchSourceUrlPrefixes": Array [
-    "https://github.com/open-telemetry/opentelemetry-js",
-  ],
-}
-`);
+        Object {
+          "description": Array [
+            "opentelemetry-js monorepo",
+          ],
+          "matchSourceUrlPrefixes": Array [
+            "https://github.com/open-telemetry/opentelemetry-js",
+          ],
+        }
+      `);
     });
 
     it('handles renamed monorepo groups', async () => {
       const res = await presets.getPreset('group:opentelemetryMonorepo', {});
       expect(res).toMatchInlineSnapshot(`
-Object {
-  "packageRules": Array [
-    Object {
-      "description": Array [
-        "Group packages from opentelemetry-js monorepo together",
-      ],
-      "extends": Array [
-        "monorepo:opentelemetry-js",
-      ],
-      "groupName": "opentelemetry-js monorepo",
-      "matchUpdateTypes": Array [
-        "digest",
-        "patch",
-        "minor",
-        "major",
-      ],
-    },
-  ],
-}
-`);
+        Object {
+          "packageRules": Array [
+            Object {
+              "description": Array [
+                "Group packages from opentelemetry-js monorepo together.",
+              ],
+              "extends": Array [
+                "monorepo:opentelemetry-js",
+              ],
+              "groupName": "opentelemetry-js monorepo",
+              "matchUpdateTypes": Array [
+                "digest",
+                "patch",
+                "minor",
+                "major",
+              ],
+            },
+          ],
+        }
+      `);
     });
 
     it('gets linters', async () => {
@@ -869,7 +907,7 @@ Object {
         {}
       );
       expect(res).toEqual({
-        description: ['Group eslint packages into same branch/PR'],
+        description: ['Group `eslint` packages into same branch/PR.'],
         packageRules: [
           {
             extends: ['packages:eslint'],
@@ -882,7 +920,7 @@ Object {
     it('handles missing params', async () => {
       const res = await presets.getPreset(':group()', {});
       expect(res).toEqual({
-        description: ['Group {{arg1}} packages into same branch/PR'],
+        description: ['Group `{{arg1}}` packages into same branch/PR.'],
         packageRules: [
           {
             extends: [],
@@ -896,7 +934,7 @@ Object {
       const res = await presets.getPreset(':pinVersions(foo, bar)', {});
       expect(res).toEqual({
         description: [
-          'Use version pinning (maintain a single version only and not SemVer ranges)',
+          'Use version pinning (maintain a single version only and not SemVer ranges).',
         ],
         rangeStrategy: 'pin',
       });

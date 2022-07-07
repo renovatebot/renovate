@@ -365,6 +365,234 @@ Array [
 ]
 `;
 
+exports[`modules/manager/npm/post-update/yarn performs lock file maintenance in subdirectory independent workspaces using yarn v1.22.0 1`] = `
+Array [
+  Object {
+    "cmd": "yarn install --ignore-engines --ignore-platform --network-timeout 100000 --ignore-scripts",
+    "options": Object {
+      "cwd": "some-dir/sub_workspace",
+      "encoding": "utf-8",
+      "env": Object {
+        "CI": "true",
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
+      "maxBuffer": 10485760,
+      "timeout": 900000,
+    },
+  },
+  Object {
+    "cmd": "npx yarn-deduplicate --strategy fewer",
+    "options": Object {
+      "cwd": "some-dir/sub_workspace",
+      "encoding": "utf-8",
+      "env": Object {
+        "CI": "true",
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
+      "maxBuffer": 10485760,
+      "timeout": 900000,
+    },
+  },
+  Object {
+    "cmd": "yarn install --ignore-engines --ignore-platform --network-timeout 100000 --ignore-scripts",
+    "options": Object {
+      "cwd": "some-dir/sub_workspace",
+      "encoding": "utf-8",
+      "env": Object {
+        "CI": "true",
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
+      "maxBuffer": 10485760,
+      "timeout": 900000,
+    },
+  },
+  Object {
+    "cmd": "npx yarn-deduplicate --strategy highest",
+    "options": Object {
+      "cwd": "some-dir/sub_workspace",
+      "encoding": "utf-8",
+      "env": Object {
+        "CI": "true",
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
+      "maxBuffer": 10485760,
+      "timeout": 900000,
+    },
+  },
+  Object {
+    "cmd": "yarn install --ignore-engines --ignore-platform --network-timeout 100000 --ignore-scripts",
+    "options": Object {
+      "cwd": "some-dir/sub_workspace",
+      "encoding": "utf-8",
+      "env": Object {
+        "CI": "true",
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
+      "maxBuffer": 10485760,
+      "timeout": 900000,
+    },
+  },
+]
+`;
+
+exports[`modules/manager/npm/post-update/yarn performs lock file maintenance in subdirectory independent workspaces using yarn v2.1.0 1`] = `
+Array [
+  Object {
+    "cmd": "yarn install",
+    "options": Object {
+      "cwd": "some-dir/sub_workspace",
+      "encoding": "utf-8",
+      "env": Object {
+        "CI": "true",
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+        "YARN_ENABLE_GLOBAL_CACHE": "1",
+        "YARN_ENABLE_IMMUTABLE_INSTALLS": "false",
+        "YARN_ENABLE_SCRIPTS": "0",
+        "YARN_HTTP_TIMEOUT": "100000",
+      },
+      "maxBuffer": 10485760,
+      "timeout": 900000,
+    },
+  },
+]
+`;
+
+exports[`modules/manager/npm/post-update/yarn performs lock file maintenance in subdirectory independent workspaces using yarn v2.2.0 1`] = `
+Array [
+  Object {
+    "cmd": "yarn install",
+    "options": Object {
+      "cwd": "some-dir/sub_workspace",
+      "encoding": "utf-8",
+      "env": Object {
+        "CI": "true",
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+        "YARN_ENABLE_GLOBAL_CACHE": "1",
+        "YARN_ENABLE_IMMUTABLE_INSTALLS": "false",
+        "YARN_ENABLE_SCRIPTS": "0",
+        "YARN_HTTP_TIMEOUT": "100000",
+      },
+      "maxBuffer": 10485760,
+      "timeout": 900000,
+    },
+  },
+  Object {
+    "cmd": "yarn dedupe --strategy highest",
+    "options": Object {
+      "cwd": "some-dir/sub_workspace",
+      "encoding": "utf-8",
+      "env": Object {
+        "CI": "true",
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+        "YARN_ENABLE_GLOBAL_CACHE": "1",
+        "YARN_ENABLE_IMMUTABLE_INSTALLS": "false",
+        "YARN_ENABLE_SCRIPTS": "0",
+        "YARN_HTTP_TIMEOUT": "100000",
+      },
+      "maxBuffer": 10485760,
+      "timeout": 900000,
+    },
+  },
+]
+`;
+
+exports[`modules/manager/npm/post-update/yarn performs lock file maintenance in subdirectory independent workspaces using yarn v3.0.0 1`] = `
+Array [
+  Object {
+    "cmd": "yarn install --mode=update-lockfile",
+    "options": Object {
+      "cwd": "some-dir/sub_workspace",
+      "encoding": "utf-8",
+      "env": Object {
+        "CI": "true",
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+        "YARN_ENABLE_GLOBAL_CACHE": "1",
+        "YARN_ENABLE_IMMUTABLE_INSTALLS": "false",
+        "YARN_HTTP_TIMEOUT": "100000",
+      },
+      "maxBuffer": 10485760,
+      "timeout": 900000,
+    },
+  },
+  Object {
+    "cmd": "yarn dedupe --strategy highest --mode=update-lockfile",
+    "options": Object {
+      "cwd": "some-dir/sub_workspace",
+      "encoding": "utf-8",
+      "env": Object {
+        "CI": "true",
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+        "YARN_ENABLE_GLOBAL_CACHE": "1",
+        "YARN_ENABLE_IMMUTABLE_INSTALLS": "false",
+        "YARN_HTTP_TIMEOUT": "100000",
+      },
+      "maxBuffer": 10485760,
+      "timeout": 900000,
+    },
+  },
+]
+`;
+
 exports[`modules/manager/npm/post-update/yarn performs lock file maintenance using yarn v1.22.0 1`] = `
 Array [
   Object {

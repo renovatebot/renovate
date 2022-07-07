@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-      - v25
 
   pull_request:
 
@@ -14,6 +13,9 @@ on:
         description: 'Dry-Run'
         default: 'true'
         required: false
+
+permissions:
+  contents: read
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.number || github.ref }}
@@ -42,16 +44,15 @@ jobs:
         include: >-
           ${{ fromJSON((github.event_name != 'pull_request' || contains(github.event.pull_request.labels.*.name, 'ci:fulltest')) && '[{
             "os": "macos-latest",
-            "node-version": 14
+            "node-version": 16
           }, {
             "os": "windows-latest",
-            "node-version": 14
+            "node-version": 16
           }]' || '[]') }}
 
     env:
       coverage: ${{ matrix.os == 'ubuntu-latest' && (matrix.node-version == 14 || matrix.node-version == 16) }}
       NODE_VERSION: ${{ matrix.node-version }}
-      JAVA_VERSION: ${{ matrix.java-version }}
 
     steps:
       - uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b # tag=v3.0.2
@@ -138,8 +139,8 @@ jobs:
       - name: Type check
         run: yarn type-check
 
-      - name: Null check
-        run: yarn null-check
+      - name: Strict check
+        run: yarn strict-check
 
   release:
     needs: [lint, test]
@@ -147,6 +148,10 @@ jobs:
     runs-on: ubuntu-latest
     # release shouldn't need more than 5 min
     timeout-minutes: 15
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
 
     steps:
       # full checkout for semantic-release
