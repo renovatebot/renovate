@@ -1,4 +1,5 @@
-import { fs, loadFixture } from '../../../../../test/util';
+import { Fixtures } from '../../../../../test/fixtures';
+import { fs } from '../../../../../test/util';
 import { getYarnLock } from './yarn';
 
 jest.mock('../../../../util/fs');
@@ -13,7 +14,7 @@ describe('modules/manager/npm/extract/yarn', () => {
     });
 
     it('extracts yarn 1', async () => {
-      const plocktest1Lock = loadFixture('plocktest1/yarn.lock', '..');
+      const plocktest1Lock = Fixtures.get('plocktest1/yarn.lock', '..');
       fs.readLocalFile.mockResolvedValueOnce(plocktest1Lock);
       const res = await getYarnLock('package.json');
       expect(res.isYarn1).toBeTrue();
@@ -23,7 +24,7 @@ describe('modules/manager/npm/extract/yarn', () => {
     });
 
     it('extracts yarn 2', async () => {
-      const plocktest1Lock = loadFixture('yarn2/yarn.lock', '..');
+      const plocktest1Lock = Fixtures.get('yarn2/yarn.lock', '..');
       fs.readLocalFile.mockResolvedValueOnce(plocktest1Lock);
       const res = await getYarnLock('package.json');
       expect(res.isYarn1).toBeFalse();
@@ -33,7 +34,7 @@ describe('modules/manager/npm/extract/yarn', () => {
     });
 
     it('extracts yarn 2 cache version', async () => {
-      const plocktest1Lock = loadFixture('yarn2.2/yarn.lock', '..');
+      const plocktest1Lock = Fixtures.get('yarn2.2/yarn.lock', '..');
       fs.readLocalFile.mockResolvedValueOnce(plocktest1Lock);
       const res = await getYarnLock('package.json');
       expect(res.isYarn1).toBeFalse();

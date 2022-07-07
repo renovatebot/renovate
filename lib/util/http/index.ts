@@ -128,6 +128,7 @@ export class Http<GetOptions = HttpOptions, PostOptions = HttpPostOptions> {
 
     options = applyHostRules(url, options);
     if (options.enabled === false) {
+      logger.debug({ url }, 'Host is disabled - rejecting request');
       throw new Error(HOST_DISABLED);
     }
     options = applyAuthorization(options);
@@ -268,7 +269,8 @@ export class Http<GetOptions = HttpOptions, PostOptions = HttpPostOptions> {
   }
 
   stream(url: string, options?: HttpOptions): NodeJS.ReadableStream {
-    const combinedOptions: any = {
+    // TODO: fix types (#7154)
+    let combinedOptions: any = {
       method: 'get',
       ...this.options,
       hostType: this.hostType,
@@ -282,6 +284,12 @@ export class Http<GetOptions = HttpOptions, PostOptions = HttpPostOptions> {
     }
 
     applyDefaultHeaders(combinedOptions);
+    combinedOptions = applyHostRules(resolvedUrl, combinedOptions);
+    if (combinedOptions.enabled === false) {
+      throw new Error(HOST_DISABLED);
+    }
+    combinedOptions = applyAuthorization(combinedOptions);
+
     return got.stream(resolvedUrl, combinedOptions);
   }
 }

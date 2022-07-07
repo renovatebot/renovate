@@ -1,10 +1,10 @@
-import { loadFixture } from '../../../../test/util';
+import { Fixtures } from '../../../../test/fixtures';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import { extractPackageFile } from '.';
 
-const simplePodfile = loadFixture('Podfile.simple');
-const complexPodfile = loadFixture('Podfile.complex');
+const simplePodfile = Fixtures.get('Podfile.simple');
+const complexPodfile = Fixtures.get('Podfile.complex');
 
 const adminConfig: RepoGlobalConfig = { localDir: '' };
 

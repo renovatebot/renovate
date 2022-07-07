@@ -334,7 +334,6 @@ export async function extractPackageFile(
       dep.skipReason = 'unversioned-reference';
       return dep;
     }
-    dep.githubRepo = githubOwnerRepo;
     dep.sourceUrl = `https://github.com/${githubOwnerRepo}`;
     dep.gitRef = true;
     return dep;
