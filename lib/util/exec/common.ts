@@ -16,8 +16,8 @@ const NONTERM = [
   'SIGWINCH',
 ];
 
-function stringify(stream: Buffer[], encoding: BufferEncoding): string {
-  return Buffer.concat(stream).toString(encoding);
+function stringify(list: Buffer[], encoding: BufferEncoding): string {
+  return Buffer.concat(list).toString(encoding);
 }
 
 function initStreamListeners(
@@ -29,24 +29,29 @@ function initStreamListeners(
   let stdoutLen = 0;
   let stderrLen = 0;
 
-  cp.stdout?.on('data', (data: Buffer) => {
+  // encode data chunks to string
+  // https://nodejs.org/api/stream.html#class-streamreadable
+  cp.stdout?.setEncoding(opts.encoding);
+  cp.stdout?.on('data', (chunk: string) => {
     // process.stdout.write(data.toString());
-    const len = Buffer.byteLength(data, opts.encoding);
+    const len = Buffer.byteLength(chunk, opts.encoding);
     stdoutLen += len;
     if (stdoutLen > opts.maxBuffer) {
-      cp.emit('error', new Error('exceeded max buffer size for stdout'));
+      cp.emit('error', new Error('stdout maxBuffer exceeded'));
     } else {
-      stdout.push(data);
+      stdout.push(Buffer.from(chunk));
     }
   });
-  cp.stderr?.on('data', (data: Buffer) => {
+
+  cp.stderr?.setEncoding(opts.encoding);
+  cp.stderr?.on('data', (chunk: string) => {
     // process.stderr.write(data.toString());
-    const len = Buffer.byteLength(data, opts.encoding);
+    const len = Buffer.byteLength(chunk, opts.encoding);
     stderrLen += len;
     if (stderrLen > opts.maxBuffer) {
-      cp.emit('error', new Error('exceeded max buffer size for stderr'));
+      cp.emit('error', new Error('stderr maxBuffer exceeded'));
     } else {
-      stderr.push(data);
+      stderr.push(Buffer.from(chunk));
     }
   });
   return [stdout, stderr];
@@ -59,8 +64,8 @@ export function exec(cmd: string, opts: RawExecOptions): Promise<ExecResult> {
     const maxBuffer = opts.maxBuffer ?? 10 * 1024 * 1024; // Set default max buffer size to 10MB
     const cp = spawn(command, args, {
       ...opts,
-      detached: true,
-    }); // force detached
+      detached: process.platform !== 'win32',
+    }); // force detached on non WIN platforms
 
     // handle streams
     const [stdout, stderr] = initStreamListeners(cp, {
@@ -79,7 +84,7 @@ export function exec(cmd: string, opts: RawExecOptions): Promise<ExecResult> {
         try {
           // process.kill(-(cp.pid as number), signal); // PID range hack; signal process tree
 
-          // destroying stdio is needed to unref to work
+          // destroying stdio is needed for unref to work
           // https://nodejs.org/api/child_process.html#subprocessunref
           // https://github.com/nodejs/node/blob/4d5ff25a813fd18939c9f76b17e36291e3ea15c3/lib/child_process.js#L412-L426
           cp.stderr?.destroy();
