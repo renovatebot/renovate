@@ -272,7 +272,7 @@ export async function validateConfig(
                   try {
                     await getPreset(subval, config);
                   } catch (e) {
-                    warnings.push({
+                    errors.push({
                       topic: 'Configuration Warning',
                       message: `Invalid Preset ${subval}`,
                     });
