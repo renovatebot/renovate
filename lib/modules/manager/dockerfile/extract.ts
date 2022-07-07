@@ -166,7 +166,7 @@ export function getDep(
   // Resolve registry aliases first so that we don't need special casing later on:
   for (const [name, value] of Object.entries(registryAliases ?? {})) {
     const escapedName = escapeRegExp(name);
-    const match = regEx(`(?<prefix>${escapedName}/)(?<depName>.+)`).exec(
+    const groups = regEx(`(?<prefix>${escapedName}/)(?<depName>.+)`).exec(
       currentFrom
     )?.groups;
     if (groups) {
