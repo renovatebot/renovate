@@ -253,7 +253,19 @@ Array [
 ]
 `;
 
-exports[`modules/manager/bundler/artifacts performs lockFileMaintenance 1`] = `
+exports[`modules/manager/bundler/artifacts Error handling returns error when failing in lockFileMaintenance true 1`] = `
+Array [
+  Object {
+    "artifactError": Object {
+      "lockFile": "Gemfile.lock",
+      "stderr": " foo was resolved to
+",
+    },
+  },
+]
+`;
+
+exports[`modules/manager/bundler/artifacts Error handling returns error when failing in lockFileMaintenance true 2`] = `
 Array [
   Object {
     "cmd": "bundler lock --update",
@@ -277,19 +289,7 @@ Array [
 ]
 `;
 
-exports[`modules/manager/bundler/artifacts returns error when failing in lockFileMaintenance true 1`] = `
-Array [
-  Object {
-    "artifactError": Object {
-      "lockFile": "Gemfile.lock",
-      "stderr": " foo was resolved to
-",
-    },
-  },
-]
-`;
-
-exports[`modules/manager/bundler/artifacts returns error when failing in lockFileMaintenance true 2`] = `
+exports[`modules/manager/bundler/artifacts performs lockFileMaintenance 1`] = `
 Array [
   Object {
     "cmd": "bundler lock --update",

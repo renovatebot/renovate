@@ -1,8 +1,17 @@
 import { join } from 'upath';
-import { envMock, exec, mockExecAll } from '../../../../test/exec-util';
+import {
+  envMock,
+  exec,
+  mockExecAll,
+  mockExecSequence,
+} from '../../../../test/exec-util';
 import { env, fs, git, mocked } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
+import {
+  BUNDLER_INVALID_CREDENTIALS,
+  TEMPORARY_ERROR,
+} from '../../../constants/error-messages';
 import * as docker from '../../../util/exec/docker';
 import type { StatusResult } from '../../../util/git/types';
 import * as _datasource from '../../datasource';
@@ -37,6 +46,12 @@ const updatedGemfileLock = {
     contents: 'Updated Gemfile.lock',
   },
 };
+
+class ExecError extends Error {
+  constructor(message: string, public stdout = '', public stderr = '') {
+    super(message);
+  }
+}
 
 describe('modules/manager/bundler/artifacts', () => {
   beforeEach(() => {
@@ -445,36 +460,6 @@ describe('modules/manager/bundler/artifacts', () => {
     });
   });
 
-  it('returns error when failing in lockFileMaintenance true', async () => {
-    const execError = new Error();
-    (execError as any).stdout = ' foo was resolved to';
-    (execError as any).stderr = '';
-    fs.readLocalFile.mockResolvedValueOnce('Current Gemfile.lock');
-    fs.writeLocalFile.mockResolvedValueOnce(null as never);
-    const execSnapshots = mockExecAll(exec, execError);
-    git.getRepoStatus.mockResolvedValueOnce({
-      modified: ['Gemfile.lock'],
-    } as StatusResult);
-    expect(
-      await updateArtifacts({
-        packageFileName: 'Gemfile',
-        updatedDeps: [],
-        newPackageFileContent: '{}',
-        config: {
-          ...config,
-          isLockFileMaintenance: true,
-        },
-      })
-    ).toMatchSnapshot([
-      {
-        artifactError: {
-          lockFile: 'Gemfile.lock',
-        },
-      },
-    ]);
-    expect(execSnapshots).toMatchSnapshot();
-  });
-
   it('performs lockFileMaintenance', async () => {
     fs.readLocalFile.mockResolvedValueOnce('Current Gemfile.lock');
     fs.writeLocalFile.mockResolvedValueOnce(null as never);
@@ -495,5 +480,129 @@ describe('modules/manager/bundler/artifacts', () => {
       })
     ).not.toBeNull();
     expect(execSnapshots).toMatchSnapshot();
+  });
+
+  describe('Error handling', () => {
+    it('returns error when failing in lockFileMaintenance true', async () => {
+      const execError = new ExecError('', ' foo was resolved to');
+      fs.readLocalFile.mockResolvedValueOnce('Current Gemfile.lock');
+      fs.writeLocalFile.mockResolvedValueOnce(null as never);
+      const execSnapshots = mockExecAll(exec, execError);
+      git.getRepoStatus.mockResolvedValueOnce({
+        modified: ['Gemfile.lock'],
+      } as StatusResult);
+      expect(
+        await updateArtifacts({
+          packageFileName: 'Gemfile',
+          updatedDeps: [],
+          newPackageFileContent: '{}',
+          config: {
+            ...config,
+            isLockFileMaintenance: true,
+          },
+        })
+      ).toMatchSnapshot([
+        {
+          artifactError: {
+            lockFile: 'Gemfile.lock',
+          },
+        },
+      ]);
+      expect(execSnapshots).toMatchSnapshot();
+    });
+
+    it('rethrows for temporary error', async () => {
+      const execError = new ExecError(TEMPORARY_ERROR);
+      fs.readLocalFile.mockResolvedValueOnce('Current Gemfile.lock');
+      fs.writeLocalFile.mockResolvedValueOnce(null as never);
+      mockExecAll(exec, execError);
+      await expect(
+        updateArtifacts({
+          packageFileName: 'Gemfile',
+          updatedDeps: [],
+          newPackageFileContent: '{}',
+          config: {
+            ...config,
+            isLockFileMaintenance: true,
+          },
+        })
+      ).rejects.toThrow(TEMPORARY_ERROR);
+    });
+
+    it('handles "Could not parse object" error', async () => {
+      const execError = new ExecError(
+        'fatal: Could not parse object',
+        'but that version could not be found'
+      );
+      fs.readLocalFile.mockResolvedValueOnce('Current Gemfile.lock');
+      fs.writeLocalFile.mockResolvedValueOnce(null as never);
+      mockExecAll(exec, execError);
+      expect(
+        await updateArtifacts({
+          packageFileName: 'Gemfile',
+          updatedDeps: [],
+          newPackageFileContent: '{}',
+          config: {
+            ...config,
+            isLockFileMaintenance: true,
+          },
+        })
+      ).toMatchObject([{ artifactError: { lockFile: 'Gemfile.lock' } }]);
+    });
+
+    it('throws on authentication errors', async () => {
+      const execError = new ExecError(
+        '',
+        'Please supply credentials for this source',
+        'Please make sure you have the correct access rights'
+      );
+      fs.readLocalFile.mockResolvedValueOnce('Current Gemfile.lock');
+      fs.writeLocalFile.mockResolvedValueOnce(null as never);
+      mockExecAll(exec, execError);
+      await expect(
+        updateArtifacts({
+          packageFileName: 'Gemfile',
+          updatedDeps: [],
+          newPackageFileContent: '{}',
+          config: {
+            ...config,
+            isLockFileMaintenance: true,
+          },
+        })
+      ).rejects.toThrow(BUNDLER_INVALID_CREDENTIALS);
+    });
+
+    it('handles recursive resolved dependencies', async () => {
+      const execError = new ExecError(
+        '',
+        'foo was resolved to foo',
+        'bar was resolved to bar'
+      );
+      fs.readLocalFile.mockResolvedValue('Current Gemfile.lock');
+      fs.writeLocalFile.mockResolvedValue(null as never);
+      const execSnapshots = mockExecSequence(exec, [
+        execError,
+        { stdout: '', stderr: '' },
+      ]);
+      git.getRepoStatus.mockResolvedValueOnce({
+        modified: ['Gemfile.lock'],
+      } as StatusResult);
+
+      const res = await updateArtifacts({
+        packageFileName: 'Gemfile',
+        updatedDeps: [{ depName: 'foo' }],
+        newPackageFileContent: '{}',
+        config: {
+          ...config,
+          isLockFileMaintenance: false,
+        },
+      });
+
+      expect(res).toMatchObject([{ file: { path: 'Gemfile.lock' } }]);
+      expect(execSnapshots).toMatchObject([
+        { cmd: 'bundler lock --update foo' },
+        { cmd: 'bundler lock --update foo bar' },
+      ]);
+    });
   });
 });
