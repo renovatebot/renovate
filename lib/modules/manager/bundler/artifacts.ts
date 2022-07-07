@@ -44,7 +44,7 @@ function buildBundleHostVariable(hostRule: HostRule): Record<string, string> {
 }
 
 const resolvedPkgRegex = regEx(
-  /(?<pkg>\S+)(?:\s*\([^)]+\)\s*) was resolved to/g
+  /(?<pkg>\S+)(?:\s*\([^)]+\)\s*)? was resolved to/g
 );
 
 function getResolvedPackages(input: string): string[] {
@@ -83,7 +83,9 @@ export async function updateArtifacts(
     '--update',
   ].filter(is.nonEmptyString);
 
-  const updatedDepNames = updatedDeps.map(({ depName }) => depName!);
+  const updatedDepNames = updatedDeps
+    .map(({ depName }) => depName)
+    .filter(is.nonEmptyStringAndNotWhitespace);
 
   try {
     await writeLocalFile(packageFileName, newPackageFileContent);

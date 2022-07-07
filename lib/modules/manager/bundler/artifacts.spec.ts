@@ -99,7 +99,9 @@ describe('modules/manager/bundler/artifacts', () => {
         config,
       })
     ).toBeNull();
-    expect(execSnapshots).toMatchSnapshot();
+    expect(execSnapshots).toMatchObject([
+      { cmd: 'bundler lock --update foo bar' },
+    ]);
   });
 
   it('works for default binarySource', async () => {
@@ -119,7 +121,9 @@ describe('modules/manager/bundler/artifacts', () => {
         config,
       })
     ).toEqual([updatedGemfileLock]);
-    expect(execSnapshots).toMatchSnapshot();
+    expect(execSnapshots).toMatchObject([
+      { cmd: 'bundler lock --update foo bar' },
+    ]);
   });
 
   it('works explicit global binarySource', async () => {
@@ -140,7 +144,9 @@ describe('modules/manager/bundler/artifacts', () => {
         config,
       })
     ).toEqual([updatedGemfileLock]);
-    expect(execSnapshots).toMatchSnapshot();
+    expect(execSnapshots).toMatchObject([
+      { cmd: 'bundler lock --update foo bar' },
+    ]);
   });
 
   it('supports conservative mode', async () => {
@@ -208,7 +214,13 @@ describe('modules/manager/bundler/artifacts', () => {
           config,
         })
       ).toEqual([updatedGemfileLock]);
-      expect(execSnapshots).toMatchSnapshot();
+      expect(execSnapshots).toMatchObject([
+        { cmd: 'docker pull renovate/ruby:1.2.0' },
+        { cmd: 'docker ps --filter name=renovate_ruby -aq' },
+        {
+          cmd: 'docker run --rm --name=renovate_ruby --label=renovate_child -v "/tmp/github/some/repo":"/tmp/github/some/repo" -v "/tmp/cache":"/tmp/cache" -e GEM_HOME -w "/tmp/github/some/repo" renovate/ruby:1.2.0 bash -l -c "install-tool bundler 2.3.5 && ruby --version && bundler lock --update foo bar"',
+        },
+      ]);
     });
 
     it('constraints options', async () => {
@@ -244,7 +256,13 @@ describe('modules/manager/bundler/artifacts', () => {
           },
         })
       ).toEqual([updatedGemfileLock]);
-      expect(execSnapshots).toMatchSnapshot();
+      expect(execSnapshots).toMatchObject([
+        { cmd: 'docker pull renovate/ruby:latest' },
+        { cmd: 'docker ps --filter name=renovate_ruby -aq' },
+        {
+          cmd: 'docker run --rm --name=renovate_ruby --label=renovate_child -v "/tmp/github/some/repo":"/tmp/github/some/repo" -v "/tmp/cache":"/tmp/cache" -e GEM_HOME -w "/tmp/github/some/repo" renovate/ruby:latest bash -l -c "install-tool bundler 3.2.1 && ruby --version && bundler lock --update foo bar"',
+        },
+      ]);
     });
 
     it('invalid constraints options', async () => {
@@ -280,7 +298,13 @@ describe('modules/manager/bundler/artifacts', () => {
           },
         })
       ).toEqual([updatedGemfileLock]);
-      expect(execSnapshots).toMatchSnapshot();
+      expect(execSnapshots).toMatchObject([
+        { cmd: 'docker pull renovate/ruby:latest' },
+        { cmd: 'docker ps --filter name=renovate_ruby -aq' },
+        {
+          cmd: 'docker run --rm --name=renovate_ruby --label=renovate_child -v "/tmp/github/some/repo":"/tmp/github/some/repo" -v "/tmp/cache":"/tmp/cache" -e GEM_HOME -w "/tmp/github/some/repo" renovate/ruby:latest bash -l -c "install-tool bundler 2.3.5 && ruby --version && bundler lock --update foo bar"',
+        },
+      ]);
     });
 
     it('injects bundler host configuration environment variables', async () => {
@@ -323,7 +347,13 @@ describe('modules/manager/bundler/artifacts', () => {
           config,
         })
       ).toEqual([updatedGemfileLock]);
-      expect(execSnapshots).toMatchSnapshot();
+      expect(execSnapshots).toMatchObject([
+        { cmd: 'docker pull renovate/ruby:1.2.0' },
+        { cmd: 'docker ps --filter name=renovate_ruby -aq' },
+        {
+          cmd: 'docker run --rm --name=renovate_ruby --label=renovate_child -v "/tmp/github/some/repo":"/tmp/github/some/repo" -v "/tmp/cache":"/tmp/cache" -e BUNDLE_GEMS__PRIVATE__COM -e GEM_HOME -w "/tmp/github/some/repo" renovate/ruby:1.2.0 bash -l -c "install-tool bundler 2.3.5 && ruby --version && bundler lock --update foo bar"',
+        },
+      ]);
     });
 
     it('injects bundler host configuration as command with bundler < 2', async () => {
@@ -368,7 +398,13 @@ describe('modules/manager/bundler/artifacts', () => {
           },
         })
       ).toEqual([updatedGemfileLock]);
-      expect(execSnapshots).toMatchSnapshot();
+      expect(execSnapshots).toMatchObject([
+        { cmd: 'docker pull renovate/ruby:1.2.0' },
+        { cmd: 'docker ps --filter name=renovate_ruby -aq' },
+        {
+          cmd: 'docker run --rm --name=renovate_ruby --label=renovate_child -v "/tmp/github/some/repo":"/tmp/github/some/repo" -v "/tmp/cache":"/tmp/cache" -e GEM_HOME -w "/tmp/github/some/repo" renovate/ruby:1.2.0 bash -l -c "install-tool bundler 1.2 && ruby --version && bundler config --local gems-private.com some-user:some-password && bundler lock --update foo bar"',
+        },
+      ]);
     });
 
     it('injects bundler host configuration as command with bundler >= 2', async () => {
@@ -413,7 +449,13 @@ describe('modules/manager/bundler/artifacts', () => {
           },
         })
       ).toEqual([updatedGemfileLock]);
-      expect(execSnapshots).toMatchSnapshot();
+      expect(execSnapshots).toMatchObject([
+        { cmd: 'docker pull renovate/ruby:1.2.0' },
+        { cmd: 'docker ps --filter name=renovate_ruby -aq' },
+        {
+          cmd: 'docker run --rm --name=renovate_ruby --label=renovate_child -v "/tmp/github/some/repo":"/tmp/github/some/repo" -v "/tmp/cache":"/tmp/cache" -e GEM_HOME -w "/tmp/github/some/repo" renovate/ruby:1.2.0 bash -l -c "install-tool bundler 2.1 && ruby --version && bundler config set --local gems-private.com some-user:some-password && bundler lock --update foo bar"',
+        },
+      ]);
     });
 
     it('injects bundler host configuration as command with bundler == latest', async () => {
@@ -456,7 +498,13 @@ describe('modules/manager/bundler/artifacts', () => {
           config,
         })
       ).toEqual([updatedGemfileLock]);
-      expect(execSnapshots).toMatchSnapshot();
+      expect(execSnapshots).toMatchObject([
+        { cmd: 'docker pull renovate/ruby:1.2.0' },
+        { cmd: 'docker ps --filter name=renovate_ruby -aq' },
+        {
+          cmd: 'docker run --rm --name=renovate_ruby --label=renovate_child -v "/tmp/github/some/repo":"/tmp/github/some/repo" -v "/tmp/cache":"/tmp/cache" -e GEM_HOME -w "/tmp/github/some/repo" renovate/ruby:1.2.0 bash -l -c "install-tool bundler 2.3.5 && ruby --version && bundler config set --local gems-private.com some-user:some-password && bundler lock --update foo bar"',
+        },
+      ]);
     });
   });
 
@@ -479,7 +527,7 @@ describe('modules/manager/bundler/artifacts', () => {
         },
       })
     ).not.toBeNull();
-    expect(execSnapshots).toMatchSnapshot();
+    expect(execSnapshots).toMatchObject([{ cmd: 'bundler lock --update' }]);
   });
 
   describe('Error handling', () => {
@@ -501,14 +549,14 @@ describe('modules/manager/bundler/artifacts', () => {
             isLockFileMaintenance: true,
           },
         })
-      ).toMatchSnapshot([
+      ).toMatchObject([
         {
           artifactError: {
             lockFile: 'Gemfile.lock',
           },
         },
       ]);
-      expect(execSnapshots).toMatchSnapshot();
+      expect(execSnapshots).toMatchObject([{ cmd: 'bundler lock --update' }]);
     });
 
     it('rethrows for temporary error', async () => {
