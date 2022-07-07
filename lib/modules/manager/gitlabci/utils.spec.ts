@@ -44,14 +44,14 @@ describe('modules/manager/gitlabci/utils', () => {
     );
 
     it.each`
-      name   | registryAliases                                         | imageName                     | dep
-      ${'a'} | ${{ foo: 'foo.registry.com', bar: 'bar.registry.com' }} | ${'foo/image:1.0'}            | ${{ depName: 'foo.registry.com/image', currentValue: '1.0', autoReplaceStringTemplate: `foo/${defaultAutoReplaceStringTemplate}` }}
-      ${'b'} | ${{ $CI_REGISTRY: 'registry.com' }}                     | ${'$CI_REGISTRY/image:1.0'}   | ${{ depName: 'registry.com/image', currentValue: '1.0', autoReplaceStringTemplate: `$CI_REGISTRY/${defaultAutoReplaceStringTemplate}` }}
-      ${'c'} | ${{ '${CI_REGISTRY}': 'registry.com' }}                 | ${'${CI_REGISTRY}/image:1.0'} | ${{ depName: 'registry.com/image', currentValue: '1.0', autoReplaceStringTemplate: `$\{CI_REGISTRY}/${defaultAutoReplaceStringTemplate}` }}
-      ${'d'} | ${{}}                                                   | ${'$CI_REGISTRY/image:1.0'}   | ${{ autoReplaceStringTemplate: `${defaultAutoReplaceStringTemplate}` }}
-      ${'e'} | ${{}}                                                   | ${'registry.com/image:1.0'}   | ${{ depName: 'registry.com/image', currentValue: '1.0', autoReplaceStringTemplate: `${defaultAutoReplaceStringTemplate}` }}
+      name                         | registryAliases                                         | imageName                     | dep
+      ${'multiple aliases'}        | ${{ foo: 'foo.registry.com', bar: 'bar.registry.com' }} | ${'foo/image:1.0'}            | ${{ depName: 'foo.registry.com/image', currentValue: '1.0', autoReplaceStringTemplate: `foo/${defaultAutoReplaceStringTemplate}` }}
+      ${'aliased variable'}        | ${{ $CI_REGISTRY: 'registry.com' }}                     | ${'$CI_REGISTRY/image:1.0'}   | ${{ depName: 'registry.com/image', currentValue: '1.0', autoReplaceStringTemplate: `$CI_REGISTRY/${defaultAutoReplaceStringTemplate}` }}
+      ${'variables with brackets'} | ${{ '${CI_REGISTRY}': 'registry.com' }}                 | ${'${CI_REGISTRY}/image:1.0'} | ${{ depName: 'registry.com/image', currentValue: '1.0', autoReplaceStringTemplate: `$\{CI_REGISTRY}/${defaultAutoReplaceStringTemplate}` }}
+      ${'not aliased variable'}    | ${{}}                                                   | ${'$CI_REGISTRY/image:1.0'}   | ${{ autoReplaceStringTemplate: `${defaultAutoReplaceStringTemplate}` }}
+      ${'plain image'}             | ${{}}                                                   | ${'registry.com/image:1.0'}   | ${{ depName: 'registry.com/image', currentValue: '1.0', autoReplaceStringTemplate: `${defaultAutoReplaceStringTemplate}` }}
     `(
-      'supports registry variable - $name',
+      'supports registry aliases - $name',
       ({
         registryAliases,
         imageName,
