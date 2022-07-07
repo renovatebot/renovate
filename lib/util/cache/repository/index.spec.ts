@@ -13,7 +13,7 @@ describe('util/cache/repository/index', () => {
   beforeEach(() => {
     resetCache();
     jest.resetAllMocks();
-    GlobalConfig.set({ cacheDir: '/tmp/cache' });
+    GlobalConfig.set({ cacheDir: '/tmp/cache', platform: 'github' });
   });
 
   const config: RenovateConfig = {
@@ -24,13 +24,20 @@ describe('util/cache/repository/index', () => {
 
   it('returns if cache not enabled', async () => {
     await initRepoCache({ ...config, repositoryCache: 'disabled' });
-    expect(fs.readFile).not.toHaveBeenCalled();
+    expect(fs.readCacheFile).not.toHaveBeenCalled();
     expect(getCache()).toBeEmpty();
   });
 
   it('saves cache', async () => {
     await initRepoCache({ ...config, repositoryCache: 'enabled' });
     await saveCache();
-    expect(fs.outputFile).toHaveBeenCalled();
+    expect(fs.outputCacheFile).toHaveBeenCalled();
+  });
+
+  it('resets cache', async () => {
+    await initRepoCache({ ...config, repositoryCache: 'reset' });
+    expect(fs.readCacheFile).not.toHaveBeenCalled();
+    expect(fs.outputCacheFile).toHaveBeenCalled();
+    expect(getCache()).toBeEmpty();
   });
 });

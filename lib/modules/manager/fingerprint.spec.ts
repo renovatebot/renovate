@@ -6,7 +6,7 @@ describe('modules/manager/fingerprint', () => {
     const regex = regEx(/^[a-f0-9]{64}$/i);
     const managers = getManagers();
     for (const [manager] of managers) {
-      const managerHash = hashMap.get(manager);
+      const managerHash = hashMap.get(manager)!;
       expect(regex.test(managerHash)).toBeTrue();
     }
   });

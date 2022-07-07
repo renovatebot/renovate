@@ -21,8 +21,7 @@ You can "activate" the manager by specifying a `fileMatch` pattern such as:
 
 If Renovate matches/extracts a file, it assumes that the corresponding output file is found by swapping the `.in` for `.txt`.
 e.g. `requirements.in` => `requirements.txt`
-
-Therefore it will not work if files are in separate directories, including `input/requirements.in` and `output/requirements.txt`.
+It will not work if files are in separate directories, including `input/requirements.in` and `output/requirements.txt`.
 
 If no `.in` suffix is found, then a `.txt` suffix is appended for the output file, e.g. `foo.file` would look for a corresponding `foo.file.txt`.
 

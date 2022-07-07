@@ -274,7 +274,6 @@ export class PackagistDatasource extends Datasource {
       if (name in providerPackages) {
         pkgUrl = URL.resolve(
           regUrl,
-          // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
           providersUrl!
             .replace('%package%', name)
             .replace('%hash%', providerPackages[name])

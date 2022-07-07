@@ -14,6 +14,7 @@ import { GlobalConfig } from '../../config/global';
 import type { RenovateConfig } from '../../config/types';
 import {
   CONFIG_VALIDATION,
+  INVALID_PATH,
   REPOSITORY_CHANGED,
   REPOSITORY_DISABLED,
   REPOSITORY_EMPTY,
@@ -233,6 +234,12 @@ async function resetToBranch(branchName: string): Promise<void> {
   await git.raw(['clean', '-fd']);
 }
 
+// istanbul ignore next
+export async function resetToCommit(commit: string): Promise<void> {
+  logger.debug(`resetToCommit(${commit})`);
+  await git.raw(['reset', '--hard', commit]);
+}
+
 async function deleteLocalBranch(branchName: string): Promise<void> {
   await git.branch(['-D', branchName]);
 }
@@ -251,7 +258,7 @@ async function cleanLocalBranches(): Promise<void> {
 
 export function setGitAuthor(gitAuthor: string | undefined): void {
   const gitAuthorParsed = parseGitAuthor(
-    gitAuthor || 'Renovate Bot <renovate@whitesourcesoftware.com>'
+    gitAuthor ?? 'Renovate Bot <renovate@whitesourcesoftware.com>'
   );
   if (!gitAuthorParsed) {
     const error = new Error(CONFIG_VALIDATION);
@@ -418,9 +425,21 @@ export async function syncGit(): Promise<void> {
 }
 
 // istanbul ignore next
-export async function getRepoStatus(): Promise<StatusResult> {
+export async function getRepoStatus(path?: string): Promise<StatusResult> {
+  if (is.string(path)) {
+    const { localDir } = GlobalConfig.get();
+    const localPath = upath.resolve(localDir, path);
+    if (!localPath.startsWith(upath.resolve(localDir))) {
+      logger.warn(
+        { localPath, localDir },
+        'Preventing access to file outside the local directory'
+      );
+      throw new Error(INVALID_PATH);
+    }
+  }
+
   await syncGit();
-  return git.status();
+  return git.status(path ? [path] : []);
 }
 
 export function branchExists(branchName: string): boolean {
@@ -769,7 +788,7 @@ export async function getFile(
   await syncGit();
   try {
     const content = await git.show([
-      'origin/' + (branchName || config.currentBranch) + ':' + filePath,
+      'origin/' + (branchName ?? config.currentBranch) + ':' + filePath,
     ]);
     return content;
   } catch (err) {
@@ -862,9 +881,13 @@ export async function prepareCommit({
           }
           // some file systems including Windows don't support the mode
           // so the index should be manually updated after adding the file
-          await fs.outputFile(upath.join(localDir, fileName), contents, {
-            mode: file.isExecutable ? 0o777 : 0o666,
-          });
+          if (file.isSymlink) {
+            await fs.symlink(file.contents, upath.join(localDir, fileName));
+          } else {
+            await fs.outputFile(upath.join(localDir, fileName), contents, {
+              mode: file.isExecutable ? 0o777 : 0o666,
+            });
+          }
         }
         try {
           // istanbul ignore next
@@ -971,7 +994,7 @@ export async function fetchCommit({
   logger.debug(`Fetching branch ${branchName}`);
   try {
     const ref = `refs/heads/${branchName}:refs/remotes/origin/${branchName}`;
-    await gitRetry(() => git.fetch(['origin', ref, '--force']));
+    await gitRetry(() => git.pull(['origin', ref, '--force']));
     const commit = (await git.revparse([branchName])).trim();
     config.branchCommits[branchName] = commit;
     config.branchIsModified[branchName] = false;
@@ -1022,7 +1045,7 @@ export function getUrl({
     return `git@${hostname}:${repository}.git`;
   }
   return URL.format({
-    protocol: protocol || 'https',
+    protocol: protocol ?? 'https',
     auth,
     hostname,
     host,
@@ -1108,7 +1131,7 @@ export async function clearRenovateRefs(): Promise<void> {
 }
 
 const treeItemRegex = regEx(
-  /^(?<mode>\d{6})\s+(?<type>blob|tree)\s+(?<sha>[0-9a-f]{40})\s+(?<path>.*)$/
+  /^(?<mode>\d{6})\s+(?<type>blob|tree|commit)\s+(?<sha>[0-9a-f]{40})\s+(?<path>.*)$/
 );
 
 const treeShaRegex = regEx(/tree\s+(?<treeSha>[0-9a-f]{40})\s*/);
