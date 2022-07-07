@@ -18,7 +18,7 @@ type RenameMapKey = keyof typeof renameMap;
 function renameKeys(packageRule: PackageRule): PackageRule {
   const newPackageRule: PackageRule = {};
   for (const [key, val] of Object.entries(packageRule)) {
-    newPackageRule[renameMap[key as renameMapKeyType] ?? key] = val;
+    newPackageRule[renameMap[key as RenameMapKey] ?? key] = val;
   }
   return newPackageRule;
 }
