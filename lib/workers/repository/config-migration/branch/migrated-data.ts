@@ -16,14 +16,27 @@ async function applyPrettierFormatting(
   content: string,
   fileName: string
 ): Promise<string> {
-  const prettierConfigFilenames = ['.prettierrc'];
-  const prettierExists = (await getFileList()).some((file) =>
+  const prettierConfigFilenames = [
+    '.prettierrc',
+    '.prettierrc.json',
+    '.prettierrc.yml',
+    '.prettierrc.yaml',
+    '.prettierrc.json5',
+    '.prettierrc.js',
+    '.prettierrc.cjs',
+    'prettier.config.js',
+    'prettier.config.cjs',
+    '.prettierrc.toml',
+  ];
+  let prettierExists = (await getFileList()).some((file) =>
     prettierConfigFilenames.includes(file)
   );
+  const checkPackageJson = await readLocalFile('package.json', 'utf8');
+  prettierExists ||= checkPackageJson && JSON.parse(checkPackageJson).prettier;
 
   let newContent = content;
 
-  if (!is.null_(prettierExists)) {
+  if (prettierExists) {
     const options = await prettier.resolveConfig('.prettierrc'); // renovate's prettierrc config
     if (!is.null_(options)) {
       newContent = prettier.format(content, {

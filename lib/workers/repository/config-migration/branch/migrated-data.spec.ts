@@ -4,10 +4,12 @@ import { mockedFunction } from '../../../../../test/util';
 
 import { migrateConfig } from '../../../../config/migration';
 import { readLocalFile } from '../../../../util/fs';
+import { getFileList } from '../../../../util/git';
 import { detectRepoFileConfig } from '../../init/merge';
 import { MigratedDataFactory } from './migrated-data';
 
 jest.mock('../../../../config/migration');
+jest.mock('../../../../util/git');
 jest.mock('../../../../util/fs');
 jest.mock('../../init/merge');
 jest.mock('detect-indent');
@@ -17,6 +19,9 @@ const rawNonMigratedJson5 = Fixtures.get('./renovate.json5');
 const migratedData = Fixtures.getJson('./migrated-data.json');
 const migratedDataJson5 = Fixtures.getJson('./migrated-data.json5');
 const migratedConfigObj = Fixtures.getJson('./migrated.json');
+const formattedMigratedData = Fixtures.getJson(
+  './migrated-data-formatted.json'
+);
 
 describe('workers/repository/config-migration/branch/migrated-data', () => {
   describe('MigratedDataFactory.getAsync', () => {
@@ -35,6 +40,7 @@ describe('workers/repository/config-migration/branch/migrated-data', () => {
         isMigrated: true,
         migratedConfig: migratedConfigObj,
       });
+      mockedFunction(getFileList).mockResolvedValue([]);
     });
 
     it('Calls getAsync a first when migration not needed', async () => {
@@ -99,6 +105,18 @@ describe('workers/repository/config-migration/branch/migrated-data', () => {
       MigratedDataFactory.reset();
       await expect(MigratedDataFactory.getAsync()).resolves.toEqual(
         migratedDataJson5
+      );
+    });
+
+    it('format and migrate a JSON config file', async () => {
+      mockedFunction(detectRepoFileConfig).mockResolvedValueOnce({
+        configFileName: 'renovate.json',
+      });
+      mockedFunction(readLocalFile).mockResolvedValueOnce(rawNonMigrated);
+      mockedFunction(getFileList).mockResolvedValue(['.prettierrc']);
+      MigratedDataFactory.reset();
+      await expect(MigratedDataFactory.getAsync()).resolves.toEqual(
+        formattedMigratedData
       );
     });
 
