@@ -144,6 +144,10 @@ export function addMetaData(
     } else {
       delete dep.sourceUrl;
     }
+
+    if (dep.sourceUrl === dep.homepage) {
+      delete dep.sourceUrl;
+    }
   }
   // Clean up any empty urls
   const urlKeys: (keyof ReleaseResult)[] = [
