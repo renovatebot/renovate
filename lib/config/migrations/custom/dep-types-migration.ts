@@ -2,13 +2,6 @@ import is from '@sindresorhus/is';
 import type { PackageRule } from '../../types';
 import { AbstractMigration } from '../base/abstract-migration';
 
-const depTypes = [
-  'dependencies',
-  'devDependencies',
-  'engines',
-  'optionalDependencies',
-  'peerDependencies',
-];
 export class DepTypesMigration extends AbstractMigration {
   override readonly deprecated = true;
   override readonly propertyName = 'depTypes';
@@ -27,20 +20,8 @@ export class DepTypesMigration extends AbstractMigration {
         }
       }
     }
-
-    for (const depType of depTypes) {
-      const val = this.get(depType);
-      if (is.nonEmptyObject(val)) {
-        delete (depType as any).depType;
-        (val as any).depTypeList = [depType];
-
-        packageRules.push({ ...(val as PackageRule) });
-        this.delete(depType);
-      }
-    }
-
     if (packageRules.length) {
-      this.setSafely('packageRules', packageRules);
+      this.setHard('packageRules', packageRules);
     }
   }
 }
