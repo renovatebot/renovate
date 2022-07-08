@@ -8,6 +8,7 @@ import { getOptions } from './options';
 import type {
   MigratedConfig,
   MigratedRenovateConfig,
+  PackageRule,
   RenovateConfig,
   RenovateOptions,
 } from './types';
