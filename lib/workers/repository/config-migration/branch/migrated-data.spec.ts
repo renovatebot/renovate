@@ -6,7 +6,7 @@ import { migrateConfig } from '../../../../config/migration';
 import { readLocalFile } from '../../../../util/fs';
 import { getFileList } from '../../../../util/git';
 import { detectRepoFileConfig } from '../../init/merge';
-import { MigratedDataFactory } from './migrated-data';
+import { MigratedDataFactory, applyPrettierFormatting } from './migrated-data';
 
 jest.mock('../../../../config/migration');
 jest.mock('../../../../util/git');
@@ -139,6 +139,12 @@ describe('workers/repository/config-migration/branch/migrated-data', () => {
       await expect(MigratedDataFactory.getAsync()).resolves.toEqual(
         migratedData
       );
+    });
+
+    it('return original content if its invalid', async () => {
+      await expect(
+        applyPrettierFormatting(`{"name":"Rahul"`, 'renovate.json')
+      ).resolves.toBe(`{"name":"Rahul"`);
     });
   });
 });
