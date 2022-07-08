@@ -7,7 +7,10 @@ import type { RawExecOptions } from './types';
 
 jest.mock('child_process');
 
-function getReadable(data: string | undefined) {
+function getReadable(
+  data: string | undefined,
+  encoding: BufferEncoding
+): Readable {
   const readable = new Readable();
   readable._read = (size: number): void => {
     /*do nothing*/
@@ -18,7 +21,7 @@ function getReadable(data: string | undefined) {
   };
 
   if (data !== undefined) {
-    readable.push(data);
+    readable.push(data, encoding);
     readable.push(null);
   }
 
@@ -27,16 +30,26 @@ function getReadable(data: string | undefined) {
 
 interface StubArgs {
   cmd: string;
-  error?: Error;
   exitCode: number | null;
   exitSignal: string | null;
+  encoding?: BufferEncoding;
+  error?: Error;
   stdout?: string;
   stderr?: string;
   timeout?: number;
 }
 
 function getSpawnStub(args: StubArgs): ChildProcess {
-  const { cmd, error, exitCode, exitSignal, stdout, stderr, timeout } = args;
+  const {
+    cmd,
+    error,
+    exitCode,
+    exitSignal,
+    stdout,
+    stderr,
+    encoding,
+    timeout,
+  } = args;
   const listeners: any = {};
   const pid = 1337;
 
@@ -48,13 +61,13 @@ function getSpawnStub(args: StubArgs): ChildProcess {
   };
 
   // init readable streams
-  const stdoutStream = getReadable(stdout);
-  const stderrStream = getReadable(stderr);
+  const stdoutStream = getReadable(stdout, encoding ?? 'utf8');
+  const stderrStream = getReadable(stderr, encoding ?? 'utf8');
 
   // define class methods
-  const emit = (event: string, err: Error): boolean => {
+  const emit = (event: string, arg: any): boolean => {
     if (listeners[event]) {
-      listeners[event](err);
+      listeners[event](arg);
       return true;
     }
     return false;

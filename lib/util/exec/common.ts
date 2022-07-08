@@ -29,29 +29,25 @@ function initStreamListeners(
   let stdoutLen = 0;
   let stderrLen = 0;
 
-  // encode data chunks to string
-  // https://nodejs.org/api/stream.html#class-streamreadable
-  cp.stdout?.setEncoding(opts.encoding);
-  cp.stdout?.on('data', (chunk: string) => {
+  cp.stdout?.on('data', (chunk: Buffer) => {
     // process.stdout.write(data.toString());
     const len = Buffer.byteLength(chunk, opts.encoding);
     stdoutLen += len;
     if (stdoutLen > opts.maxBuffer) {
       cp.emit('error', new Error('stdout maxBuffer exceeded'));
     } else {
-      stdout.push(Buffer.from(chunk));
+      stdout.push(chunk);
     }
   });
 
-  cp.stderr?.setEncoding(opts.encoding);
-  cp.stderr?.on('data', (chunk: string) => {
+  cp.stderr?.on('data', (chunk: Buffer) => {
     // process.stderr.write(data.toString());
     const len = Buffer.byteLength(chunk, opts.encoding);
     stderrLen += len;
     if (stderrLen > opts.maxBuffer) {
       cp.emit('error', new Error('stderr maxBuffer exceeded'));
     } else {
-      stderr.push(Buffer.from(chunk));
+      stderr.push(chunk);
     }
   });
   return [stdout, stderr];
@@ -102,7 +98,8 @@ export function exec(cmd: string, opts: RawExecOptions): Promise<ExecResult> {
           Buffer.from(
             `PID=${cp.pid as number}\n` +
               `COMMAND="${cp.spawnargs.join(' ')}"\n` +
-              `Signaled with "${signal}"`
+              `Signaled with "${signal}"`,
+            encoding
           )
         );
         reject(stringify(stderr, encoding));
