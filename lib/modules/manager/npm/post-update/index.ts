@@ -10,8 +10,8 @@ import { getChildProcessEnv } from '../../../../util/exec/env';
 import {
   deleteLocalFile,
   ensureCacheDir,
+  getParentDir,
   getSiblingFileName,
-  getSubDirectory,
   readLocalFile,
   writeLocalFile,
 } from '../../../../util/fs';
@@ -738,7 +738,7 @@ export async function getAdditionalFiles(
     logger.debug(`Finding package.json for lerna location "${lernaJsonFile}"`);
     const lernaPackageFile = packageFiles.npm.find(
       // TODO #7154
-      (p) => getSubDirectory(p.packageFile!) === getSubDirectory(lernaJsonFile)
+      (p) => getParentDir(p.packageFile!) === getParentDir(lernaJsonFile)
     );
     // istanbul ignore if: not sure how to test
     if (!lernaPackageFile) {
@@ -752,7 +752,7 @@ export async function getAdditionalFiles(
     }
     const skipInstalls =
       lockFile === 'npm-shrinkwrap.json' ? false : config.skipInstalls;
-    const learnaFileDir = getSubDirectory(lernaJsonFile);
+    const learnaFileDir = getParentDir(lernaJsonFile);
     const npmrcContent = await getNpmrcContent(learnaFileDir);
     await updateNpmrcContent(
       learnaFileDir,
@@ -761,7 +761,7 @@ export async function getAdditionalFiles(
     );
     const res = await lerna.generateLockFiles(
       lernaPackageFile,
-      getSubDirectory(lernaJsonFile),
+      getParentDir(lernaJsonFile),
       config,
       env,
       skipInstalls

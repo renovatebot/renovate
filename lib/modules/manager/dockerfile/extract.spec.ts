@@ -1,4 +1,5 @@
 import { Fixtures } from '../../../../test/fixtures';
+import type { PackageDependency } from '../types';
 import { extractVariables, getDep } from './extract';
 import { extractPackageFile } from '.';
 
@@ -1149,6 +1150,34 @@ describe('modules/manager/dockerfile/extract', () => {
         }
       `);
     });
+
+    const defaultAutoReplaceStringTemplate =
+      '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}';
+
+    it.each`
+      name                         | registryAliases                                         | imageName                     | dep
+      ${'multiple aliases'}        | ${{ foo: 'foo.registry.com', bar: 'bar.registry.com' }} | ${'foo/image:1.0'}            | ${{ depName: 'foo.registry.com/image', currentValue: '1.0', autoReplaceStringTemplate: `foo/${defaultAutoReplaceStringTemplate}` }}
+      ${'aliased variable'}        | ${{ $CI_REGISTRY: 'registry.com' }}                     | ${'$CI_REGISTRY/image:1.0'}   | ${{ depName: 'registry.com/image', currentValue: '1.0', autoReplaceStringTemplate: `$CI_REGISTRY/${defaultAutoReplaceStringTemplate}` }}
+      ${'variables with brackets'} | ${{ '${CI_REGISTRY}': 'registry.com' }}                 | ${'${CI_REGISTRY}/image:1.0'} | ${{ depName: 'registry.com/image', currentValue: '1.0', autoReplaceStringTemplate: `$\{CI_REGISTRY}/${defaultAutoReplaceStringTemplate}` }}
+      ${'not aliased variable'}    | ${{}}                                                   | ${'$CI_REGISTRY/image:1.0'}   | ${{ autoReplaceStringTemplate: `${defaultAutoReplaceStringTemplate}` }}
+      ${'plain image'}             | ${{}}                                                   | ${'registry.com/image:1.0'}   | ${{ depName: 'registry.com/image', currentValue: '1.0', autoReplaceStringTemplate: `${defaultAutoReplaceStringTemplate}` }}
+    `(
+      'supports registry aliases - $name',
+      ({
+        registryAliases,
+        imageName,
+        dep,
+      }: {
+        registryAliases: Record<string, string>;
+        imageName: string;
+        dep: PackageDependency;
+      }) => {
+        expect(getDep(imageName, true, registryAliases)).toMatchObject({
+          ...dep,
+          replaceString: imageName,
+        });
+      }
+    );
   });
 
   describe('extractVariables()', () => {
