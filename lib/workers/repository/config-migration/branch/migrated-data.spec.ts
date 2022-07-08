@@ -143,7 +143,7 @@ describe('workers/repository/config-migration/branch/migrated-data', () => {
 
     it('return original content if its invalid', async () => {
       await expect(
-        applyPrettierFormatting(`{"name":"Rahul"`, 'renovate.json')
+        applyPrettierFormatting(`{"name":"Rahul"`, 'renovate.yaml')
       ).resolves.toBe(`{"name":"Rahul"`);
     });
   });
