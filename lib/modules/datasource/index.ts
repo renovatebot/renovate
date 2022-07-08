@@ -230,7 +230,12 @@ function resolveRegistryUrls(
   return massageRegistryUrls(resolvedUrls);
 }
 
-export function getDefaultVersioning(datasourceName: string): string {
+export function getDefaultVersioning(
+  datasourceName: string | undefined
+): string {
+  if (!datasourceName) {
+    return 'semver';
+  }
   const datasource = getDatasourceFor(datasourceName);
   // istanbul ignore if: wrong regex manager config?
   if (!datasource) {
