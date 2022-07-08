@@ -1,4 +1,3 @@
-import is from '@sindresorhus/is';
 import detectIndent from 'detect-indent';
 import JSON5 from 'json5';
 import prettier from 'prettier';
@@ -32,20 +31,22 @@ async function applyPrettierFormatting(
     prettierConfigFilenames.includes(file)
   );
   const packageJsonContent = await readLocalFile('package.json', 'utf8');
-  prettierExists ||=
-    packageJsonContent && JSON.parse(packageJsonContent).prettier;
+  try {
+    prettierExists ||=
+      packageJsonContent && JSON.parse(packageJsonContent).prettier;
+  } catch {
+    logger.warn('Invalid JSON found in package.json');
+  }
+
+  if (!prettierExists) {
+    return content;
+  }
 
   let newContent = content;
 
-  if (prettierExists) {
-    const options = await prettier.resolveConfig('.prettierrc'); // renovate's prettierrc config
-    if (!is.null_(options)) {
-      newContent = prettier.format(content, {
-        filepath: fileName,
-        ...options,
-      });
-    }
-  }
+  newContent = prettier.format(content, {
+    filepath: fileName,
+  });
 
   return newContent;
 }

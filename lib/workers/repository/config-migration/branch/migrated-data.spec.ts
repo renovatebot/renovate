@@ -108,6 +108,15 @@ describe('workers/repository/config-migration/branch/migrated-data', () => {
       );
     });
 
+    it('Returns nothing due to fs error', async () => {
+      mockedFunction(detectRepoFileConfig).mockResolvedValueOnce({
+        configFileName: undefined,
+      });
+      mockedFunction(readLocalFile).mockRejectedValueOnce(null);
+      MigratedDataFactory.reset();
+      await expect(MigratedDataFactory.getAsync()).resolves.toBeNull();
+    });
+
     it('format and migrate a JSON config file', async () => {
       mockedFunction(detectRepoFileConfig).mockResolvedValueOnce({
         configFileName: 'renovate.json',
@@ -120,13 +129,16 @@ describe('workers/repository/config-migration/branch/migrated-data', () => {
       );
     });
 
-    it('Returns nothing due to fs error', async () => {
+    it('should not stop run for invalid package.json', async () => {
       mockedFunction(detectRepoFileConfig).mockResolvedValueOnce({
-        configFileName: undefined,
+        configFileName: 'renovate.json',
       });
-      mockedFunction(readLocalFile).mockRejectedValueOnce(null);
+      mockedFunction(readLocalFile).mockResolvedValueOnce(rawNonMigrated);
+      mockedFunction(readLocalFile).mockResolvedValue('abci');
       MigratedDataFactory.reset();
-      await expect(MigratedDataFactory.getAsync()).resolves.toBeNull();
+      await expect(MigratedDataFactory.getAsync()).resolves.toEqual(
+        migratedData
+      );
     });
   });
 });
