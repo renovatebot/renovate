@@ -11,9 +11,11 @@ import {
   ensureLocalDir,
   findLocalSiblingOrParent,
   findUpLocal,
-  getSubDirectory,
+  getParentDir,
+  getSiblingFileName,
   localPathExists,
   localPathIsFile,
+  outputCacheFile,
   readLocalDirectory,
   readLocalFile,
   statLocalFile,
@@ -26,6 +28,41 @@ jest.mock('find-up');
 const findUp = mockedFunction(_findUp);
 
 describe('util/fs/index', () => {
+  describe('getParentDir', () => {
+    test.each`
+      dir            | expected
+      ${'/foo/bar/'} | ${'/foo'}
+      ${'/foo/bar'}  | ${'/foo'}
+      ${'/foo/'}     | ${'/'}
+      ${'/foo'}      | ${'/'}
+      ${'foo/bar/'}  | ${'foo'}
+      ${'foo/bar'}   | ${'foo'}
+      ${'foo/'}      | ${''}
+      ${'foo'}       | ${''}
+      ${''}          | ${''}
+      ${'.'}         | ${''}
+      ${'..'}        | ${''}
+      ${'./foo'}     | ${'.'}
+      ${'../foo'}    | ${'..'}
+    `(`('$dir') -> '$expected'`, ({ dir, expected }) => {
+      expect(getParentDir(dir)).toBe(expected);
+    });
+  });
+
+  describe('getSiblingFileName', () => {
+    test.each`
+      file          | sibling  | expected
+      ${'/foo/bar'} | ${'baz'} | ${'/foo/baz'}
+      ${'foo/bar'}  | ${'baz'} | ${'foo/baz'}
+      ${'foo/'}     | ${'baz'} | ${'baz'}
+      ${'foo'}      | ${'baz'} | ${'baz'}
+      ${'./foo'}    | ${'baz'} | ${'baz'}
+      ${'../foo'}   | ${'baz'} | ${'../baz'}
+    `(`('$file', '$sibling') -> '$expected'`, ({ file, sibling, expected }) => {
+      expect(getSiblingFileName(file, sibling)).toBe(expected);
+    });
+  });
+
   describe('readLocalFile', () => {
     beforeEach(() => {
       GlobalConfig.set({ localDir: '' });
@@ -51,7 +88,7 @@ describe('util/fs/index', () => {
     });
 
     it('returns true for directory', async () => {
-      expect(await localPathExists(getSubDirectory(__filename))).toBeTrue();
+      expect(await localPathExists(getParentDir(__filename))).toBeTrue();
     });
 
     it('returns false', async () => {
@@ -278,6 +315,22 @@ describe('util/fs/index', () => {
           await chmodLocalFile('foo', oldMode);
           stat = await statLocalFile('foo');
           expect(stat!.mode & 0o777).toBe(oldMode);
+        },
+        { unsafeCleanup: true }
+      );
+    });
+  });
+
+  describe('outputCacheFile', () => {
+    it('works', async () => {
+      await withDir(
+        async ({ path }) => {
+          const fsOutputFile = jest.spyOn(fs, 'outputFile');
+          const file = join(path, 'some-file');
+          await outputCacheFile(file, 'foobar');
+          const res = await fs.readFile(file, 'utf8');
+          expect(res).toBe('foobar');
+          expect(fsOutputFile).toHaveBeenCalledWith(file, 'foobar', {});
         },
         { unsafeCleanup: true }
       );

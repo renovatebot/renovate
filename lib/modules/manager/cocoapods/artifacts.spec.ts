@@ -206,7 +206,7 @@ describe('modules/manager/cocoapods/artifacts', () => {
     fs.getSiblingFileName.mockReturnValueOnce('Podfile.lock');
     fs.findLocalSiblingOrParent.mockResolvedValueOnce('Podfile.lock');
     fs.readLocalFile.mockResolvedValueOnce('Old Podfile.lock');
-    fs.outputFile.mockResolvedValueOnce(null as never);
+    fs.outputCacheFile.mockResolvedValueOnce();
     fs.findLocalSiblingOrParent.mockResolvedValueOnce('Podfile.lock');
     fs.readLocalFile.mockResolvedValueOnce('Old Podfile.lock');
     expect(

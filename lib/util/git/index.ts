@@ -14,6 +14,7 @@ import { GlobalConfig } from '../../config/global';
 import type { RenovateConfig } from '../../config/types';
 import {
   CONFIG_VALIDATION,
+  INVALID_PATH,
   REPOSITORY_CHANGED,
   REPOSITORY_DISABLED,
   REPOSITORY_EMPTY,
@@ -233,6 +234,12 @@ async function resetToBranch(branchName: string): Promise<void> {
   await git.raw(['clean', '-fd']);
 }
 
+// istanbul ignore next
+export async function resetToCommit(commit: string): Promise<void> {
+  logger.debug(`resetToCommit(${commit})`);
+  await git.raw(['reset', '--hard', commit]);
+}
+
 async function deleteLocalBranch(branchName: string): Promise<void> {
   await git.branch(['-D', branchName]);
 }
@@ -418,9 +425,21 @@ export async function syncGit(): Promise<void> {
 }
 
 // istanbul ignore next
-export async function getRepoStatus(): Promise<StatusResult> {
+export async function getRepoStatus(path?: string): Promise<StatusResult> {
+  if (is.string(path)) {
+    const { localDir } = GlobalConfig.get();
+    const localPath = upath.resolve(localDir, path);
+    if (!localPath.startsWith(upath.resolve(localDir))) {
+      logger.warn(
+        { localPath, localDir },
+        'Preventing access to file outside the local directory'
+      );
+      throw new Error(INVALID_PATH);
+    }
+  }
+
   await syncGit();
-  return git.status();
+  return git.status(path ? [path] : []);
 }
 
 export function branchExists(branchName: string): boolean {
@@ -975,7 +994,7 @@ export async function fetchCommit({
   logger.debug(`Fetching branch ${branchName}`);
   try {
     const ref = `refs/heads/${branchName}:refs/remotes/origin/${branchName}`;
-    await gitRetry(() => git.fetch(['origin', ref, '--force']));
+    await gitRetry(() => git.pull(['origin', ref, '--force']));
     const commit = (await git.revparse([branchName])).trim();
     config.branchCommits[branchName] = commit;
     config.branchIsModified[branchName] = false;
