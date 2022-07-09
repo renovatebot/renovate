@@ -611,7 +611,6 @@ describe('modules/manager/bundler/artifacts', () => {
         'bar was resolved to bar'
       );
       fs.readLocalFile.mockResolvedValue('Current Gemfile.lock');
-      fs.writeLocalFile.mockResolvedValue();
       const execSnapshots = mockExecSequence(exec, [
         execError,
         { stdout: '', stderr: '' },
