@@ -57,12 +57,15 @@ export async function getAuthHeaders(
   apiCheckUrl = `${registryHost}/v2/`
 ): Promise<OutgoingHttpHeaders | null> {
   try {
-    // use json request, as this will be cached for tags, so it returns json
-    // TODO: add cache test
-    const apiCheckResponse = await http.getJson(apiCheckUrl, {
+    const options = {
       throwHttpErrors: false,
       noAuth: true,
-    });
+    };
+    const apiCheckResponse = apiCheckUrl.endsWith('/v2/')
+      ? await http.get(apiCheckUrl, options)
+      : // use json request, as this will be cached for tags, so it returns json
+        // TODO: add cache test
+        await http.getJson(apiCheckUrl, options);
 
     if (apiCheckResponse.statusCode === 200) {
       logger.debug({ apiCheckUrl }, 'No registry auth required');
