@@ -56,12 +56,12 @@ function initStreamListeners(
 export function exec(cmd: string, opts: RawExecOptions): Promise<ExecResult> {
   return new Promise((resolve, reject) => {
     const encoding = opts.encoding as BufferEncoding;
-    const [command, ...args] = cmd.split(/\s+/);
     const maxBuffer = opts.maxBuffer ?? 10 * 1024 * 1024; // Set default max buffer size to 10MB
-    const cp = spawn(command, args, {
+    const cp = spawn(cmd, {
       ...opts,
-      detached: process.platform !== 'win32',
-    }); // force detached on non WIN platforms
+      detached: process.platform !== 'win32', // force detached on non WIN platforms
+      shell: typeof opts.shell === 'string' ? opts.shell : true, // force shell
+    });
 
     // handle streams
     const [stdout, stderr] = initStreamListeners(cp, {
@@ -72,7 +72,11 @@ export function exec(cmd: string, opts: RawExecOptions): Promise<ExecResult> {
 
     // handle process events
     cp.on('error', (error) => {
-      reject(error.message);
+      reject({
+        message: error.message,
+        Error: error,
+        ...rejectInfo(),
+      });
     });
 
     cp.on('exit', (code: number, signal: string) => {
@@ -94,19 +98,19 @@ export function exec(cmd: string, opts: RawExecOptions): Promise<ExecResult> {
         } catch (err) {
           // cp is a single node tree, therefore -pid is invalid,
         }
-        stderr.push(
-          Buffer.from(
-            `PID=${cp.pid as number}\n` +
-              `COMMAND="${cp.spawnargs.join(' ')}"\n` +
-              `Signaled with "${signal}"`,
-            encoding
-          )
-        );
-        reject(stringify(stderr, encoding));
+        reject({
+          message: `Process signaled with "${signal}"`,
+          signal,
+          ...rejectInfo(),
+        });
         return;
       }
       if (code !== 0) {
-        reject(stringify(stderr, encoding));
+        reject({
+          message: `Process exited with exit code "${code}"`,
+          exitCode: code,
+          ...rejectInfo(),
+        });
         return;
       }
       resolve({
@@ -114,6 +118,15 @@ export function exec(cmd: string, opts: RawExecOptions): Promise<ExecResult> {
         stdout: stringify(stdout, encoding),
       });
     });
+
+    function rejectInfo(): object {
+      return {
+        cmd: cp.spawnargs.join(' '),
+        options: opts,
+        stdout: stringify(stdout, encoding),
+        stderr: stringify(stderr, encoding),
+      };
+    }
   });
 }
 

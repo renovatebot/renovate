@@ -51,7 +51,6 @@ function getSpawnStub(args: StubArgs): ChildProcess {
     timeout,
   } = args;
   const listeners: any = {};
-  const pid = 1337;
 
   // init listeners
   const on = (name: string, cb: any) => {
@@ -106,7 +105,6 @@ function getSpawnStub(args: StubArgs): ChildProcess {
     emit,
     unref,
     kill,
-    pid,
   } as ChildProcess;
 }
 
@@ -134,7 +132,10 @@ describe('util/exec/common', () => {
       });
       spawnSpy.mockImplementationOnce((cmd, opts) => stub);
       await expect(
-        exec(cmd, partial<RawExecOptions>({ encoding: 'utf8' }))
+        exec(
+          cmd,
+          partial<RawExecOptions>({ encoding: 'utf8', shell: 'bin/bash' })
+        )
       ).resolves.toEqual({
         stderr,
         stdout,
@@ -144,23 +145,34 @@ describe('util/exec/common', () => {
     it('command exits with code 1', async () => {
       const cmd = 'ls -l';
       const stderr = 'err';
-      const stub = getSpawnStub({ cmd, exitCode: 1, exitSignal: null, stderr });
+      const exitCode = 1;
+      const stub = getSpawnStub({ cmd, exitCode, exitSignal: null, stderr });
       spawnSpy.mockImplementationOnce((cmd, opts) => stub);
       await expect(
         exec(cmd, partial<RawExecOptions>({ encoding: 'utf8' }))
-      ).rejects.toBe(stderr);
+      ).rejects.toMatchObject({
+        cmd,
+        message: 'Process exited with exit code "1"',
+        exitCode,
+        stderr,
+      });
     });
 
     it('process terminated with SIGTERM', async () => {
       const cmd = 'ls -l';
-      const stub = getSpawnStub({ cmd, exitCode: null, exitSignal: 'SIGTERM' });
+      const exitSignal = 'SIGTERM';
+      const stub = getSpawnStub({ cmd, exitCode: null, exitSignal });
       spawnSpy.mockImplementationOnce((cmd, opts) => stub);
       await expect(
         exec(cmd, partial<RawExecOptions>({ encoding: 'utf8' }))
-      ).rejects.toBe(`PID=1337\nCOMMAND="ls -l"\nSignaled with "SIGTERM"`);
+      ).rejects.toMatchObject({
+        cmd,
+        signal: exitSignal,
+        message: 'Process signaled with "SIGTERM"',
+      });
     });
 
-    it('process does nothing when signaled with SIGSTOP and timeout', async () => {
+    it('process does nothing when signaled with SIGSTOP and eventually times out', async () => {
       const cmd = 'ls -l';
       const stub = getSpawnStub({
         cmd,
@@ -186,7 +198,7 @@ describe('util/exec/common', () => {
       spawnSpy.mockImplementationOnce((cmd, opts) => stub);
       await expect(
         exec(cmd, partial<RawExecOptions>({ encoding: 'utf8' }))
-      ).rejects.toBe(errMsg);
+      ).rejects.toMatchObject({ cmd: 'ls -l', message: 'error message' });
     });
 
     it('process exits with error due to exceeded stdout maxBuffer', async () => {
@@ -194,7 +206,7 @@ describe('util/exec/common', () => {
       const stub = getSpawnStub({
         cmd,
         exitCode: null,
-        exitSignal: 'SIGSTOP',
+        exitSignal: null,
         stdout: 'some message',
       });
       spawnSpy.mockImplementationOnce((cmd, opts) => stub);
@@ -206,14 +218,19 @@ describe('util/exec/common', () => {
             maxBuffer: 5,
           })
         )
-      ).rejects.toBe('stdout maxBuffer exceeded');
+      ).rejects.toMatchObject({
+        cmd: 'ls -l',
+        message: 'stdout maxBuffer exceeded',
+        stderr: '',
+        stdout: '',
+      });
     });
 
     it('process exits with error due to exceeded stderr maxBuffer', async () => {
       const stub = getSpawnStub({
         cmd,
         exitCode: null,
-        exitSignal: 'SIGSTOP',
+        exitSignal: null,
         stderr: 'some message',
       });
       spawnSpy.mockImplementationOnce((cmd, opts) => stub);
@@ -225,7 +242,12 @@ describe('util/exec/common', () => {
             maxBuffer: 5,
           })
         )
-      ).rejects.toBe('stderr maxBuffer exceeded');
+      ).rejects.toMatchObject({
+        cmd: 'ls -l',
+        message: 'stderr maxBuffer exceeded',
+        stderr: '',
+        stdout: '',
+      });
     });
   });
 });
