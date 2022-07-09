@@ -2,7 +2,7 @@ import { quote } from 'shlex';
 import { logger } from '../../../logger';
 import { exec } from '../../../util/exec';
 import type { ExecOptions } from '../../../util/exec/types';
-import { readLocalFile } from '../../../util/fs';
+import { readLocalBlob } from '../../../util/fs';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
 import { isSystemManifest } from './common';
 
@@ -14,7 +14,7 @@ export async function updateArtifacts({
   if (!isSystemManifest(packageFileName) || !systemDep?.newVersion) {
     return null;
   }
-  const existingFileContent = await readLocalFile(packageFileName);
+  const existingFileContent = await readLocalBlob(packageFileName);
   try {
     logger.debug(`Updating Flux system manifests`);
     const args: string[] = ['--export'];
@@ -35,7 +35,7 @@ export async function updateArtifacts({
     };
     const result = await exec(cmd, execOptions);
 
-    const newFileContent = await readLocalFile(packageFileName);
+    const newFileContent = await readLocalBlob(packageFileName);
     if (!newFileContent) {
       logger.debug('Cannot read new flux file content');
       return [

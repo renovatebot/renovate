@@ -42,7 +42,7 @@ export async function updateArtifacts({
     ];
   }
 
-  const existingLockFileContent = await readLocalFile(lockFileName, 'utf8');
+  const existingLockFileContent = await readLocalFile(lockFileName);
   if (!existingLockFileContent) {
     logger.debug('No mix.lock found');
     return null;
@@ -112,7 +112,7 @@ export async function updateArtifacts({
     ];
   }
 
-  const newMixLockContent = await readLocalFile(lockFileName, 'utf8');
+  const newMixLockContent = await readLocalFile(lockFileName);
   if (existingLockFileContent === newMixLockContent) {
     logger.debug('mix.lock is unchanged');
     return null;

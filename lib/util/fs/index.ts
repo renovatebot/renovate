@@ -22,22 +22,22 @@ export function getSiblingFileName(
   return upath.join(subDirectory, siblingName);
 }
 
-export async function readLocalFile(fileName: string): Promise<Buffer | null>;
-export async function readLocalFile(
-  fileName: string,
-  encoding: 'utf8'
-): Promise<string | null>;
-export async function readLocalFile(
-  fileName: string,
-  encoding?: string
-): Promise<string | Buffer | null> {
+export async function readLocalFile(fileName: string): Promise<string | null> {
   const { localDir } = GlobalConfig.get();
   const localFileName = upath.join(localDir, fileName);
   try {
-    const fileContent = encoding
-      ? await fs.readFile(localFileName, encoding)
-      : await fs.readFile(localFileName);
-    return fileContent;
+    return await fs.readFile(localFileName, 'utf8');
+  } catch (err) {
+    logger.trace({ err }, 'Error reading local file');
+    return null;
+  }
+}
+
+export async function readLocalBlob(fileName: string): Promise<Buffer | null> {
+  const { localDir } = GlobalConfig.get();
+  const localFileName = upath.join(localDir, fileName);
+  try {
+    return await fs.readFile(localFileName);
   } catch (err) {
     logger.trace({ err }, 'Error reading local file');
     return null;

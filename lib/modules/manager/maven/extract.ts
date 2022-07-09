@@ -449,7 +449,7 @@ export async function extractAllPackageFiles(
   const additionalRegistryUrls: string[] = [];
 
   for (const packageFile of packageFiles) {
-    const content = await readLocalFile(packageFile, 'utf8');
+    const content = await readLocalFile(packageFile);
     if (!content) {
       logger.trace({ packageFile }, 'packageFile has no content');
       continue;

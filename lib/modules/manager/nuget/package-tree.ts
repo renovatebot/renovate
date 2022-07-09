@@ -39,7 +39,7 @@ export async function getDependentPackageFiles(
   }
 
   for (const f of packageFiles) {
-    const packageFileContent = await readLocalFile(f, 'utf8');
+    const packageFileContent = await readLocalFile(f);
 
     // TODO #7154
     const doc = new xmldoc.XmlDocument(packageFileContent!);

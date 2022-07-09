@@ -135,10 +135,7 @@ export async function generateLockFile(
 
     // Read the result
     // TODO #7154
-    lockFile = (await readLocalFile(
-      upath.join(lockFileDir, filename),
-      'utf8'
-    ))!;
+    lockFile = (await readLocalFile(upath.join(lockFileDir, filename)))!;
 
     // Massage lockfile counterparts of package.json that were modified
     // because npm install was called with an explicit version for rangeStrategy=update-lockfile

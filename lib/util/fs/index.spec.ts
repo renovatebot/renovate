@@ -22,6 +22,7 @@ import {
   outputCacheFile,
   privateCacheDir,
   readCacheFile,
+  readLocalBlob,
   readLocalDirectory,
   readLocalFile,
   readSystemFile,
@@ -87,11 +88,11 @@ describe('util/fs/index', () => {
 
   describe('readLocalFile', () => {
     it('reads buffer', async () => {
-      expect(await readLocalFile(__filename)).toBeInstanceOf(Buffer);
+      expect(await readLocalBlob(__filename)).toBeInstanceOf(Buffer);
     });
 
     it('reads string', async () => {
-      expect(typeof (await readLocalFile(__filename, 'utf8'))).toBe('string');
+      expect(typeof (await readLocalFile(__filename))).toBe('string');
     });
 
     it('does not throw', async () => {

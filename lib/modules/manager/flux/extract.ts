@@ -139,7 +139,7 @@ export async function extractAllPackageFiles(
   const results: PackageFile[] = [];
 
   for (const file of packageFiles) {
-    const content = await readLocalFile(file, 'utf8');
+    const content = await readLocalFile(file);
     // TODO #7154
     const manifest = readManifest(content!, file);
     if (manifest) {

@@ -34,7 +34,7 @@ export async function getRubyConstraint(
       packageFileName,
       '.ruby-version'
     );
-    const rubyVersionFileContent = await readLocalFile(rubyVersionFile, 'utf8');
+    const rubyVersionFileContent = await readLocalFile(rubyVersionFile);
     if (rubyVersionFileContent) {
       logger.debug('Using ruby version specified in .ruby-version');
       return rubyVersionFileContent

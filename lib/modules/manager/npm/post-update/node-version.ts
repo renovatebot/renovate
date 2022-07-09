@@ -7,7 +7,7 @@ import type { PostUpdateConfig, Upgrade } from '../../types';
 async function getNodeFile(filename: string): Promise<string | null> {
   try {
     // TODO #7154
-    const constraint = (await readLocalFile(filename, 'utf8'))!
+    const constraint = (await readLocalFile(filename))!
       .split(newlineRegex)[0]
       .replace(regEx(/^v/), '');
     if (semver.validRange(constraint)) {

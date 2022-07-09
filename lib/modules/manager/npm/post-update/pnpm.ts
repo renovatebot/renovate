@@ -78,7 +78,7 @@ export async function generateLockFile(
     }
 
     await exec(`${cmd} ${args}`, execOptions);
-    lockFile = await readLocalFile(lockFileName, 'utf8');
+    lockFile = await readLocalFile(lockFileName);
   } catch (err) /* istanbul ignore next */ {
     if (err.message === TEMPORARY_ERROR) {
       throw err;
@@ -103,7 +103,7 @@ async function getPnpmContraint(
 ): Promise<string | undefined> {
   let result: string | undefined;
   const rootPackageJson = upath.join(lockFileDir, 'package.json');
-  const content = await readLocalFile(rootPackageJson, 'utf8');
+  const content = await readLocalFile(rootPackageJson);
   if (content) {
     const packageJson: NpmPackage = JSON.parse(content);
     const packageManager = packageJson?.packageManager;
@@ -122,7 +122,7 @@ async function getPnpmContraint(
   }
   if (!result) {
     const lockFileName = upath.join(lockFileDir, 'pnpm-lock.yaml');
-    const content = await readLocalFile(lockFileName, 'utf8');
+    const content = await readLocalFile(lockFileName);
     if (content) {
       const pnpmLock = load(content) as PnpmLockFile;
       if (

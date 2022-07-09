@@ -4,7 +4,7 @@ import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { exec } from '../../../util/exec';
 import type { ExecOptions } from '../../../util/exec/types';
-import { readLocalFile, writeLocalFile } from '../../../util/fs';
+import { readLocalBlob, writeLocalFile } from '../../../util/fs';
 import { getRepoStatus } from '../../../util/git';
 import type { StatusResult } from '../../../util/git/types';
 import { Http } from '../../../util/http';
@@ -29,7 +29,7 @@ async function addIfUpdated(
       file: {
         type: 'addition',
         path: fileProjectPath,
-        contents: await readLocalFile(fileProjectPath),
+        contents: await readLocalBlob(fileProjectPath),
       },
     };
   }

@@ -12,6 +12,7 @@ import { exec } from '../../../util/exec';
 import type { ExecOptions } from '../../../util/exec/types';
 import {
   ensureCacheDir,
+  readLocalBlob,
   readLocalFile,
   writeLocalFile,
 } from '../../../util/fs';
@@ -56,7 +57,7 @@ export async function updateArtifacts(
     throw new Error(existingError);
   }
   const lockFileName = `${packageFileName}.lock`;
-  const existingLockFileContent = await readLocalFile(lockFileName, 'utf8');
+  const existingLockFileContent = await readLocalFile(lockFileName);
   if (!existingLockFileContent) {
     logger.debug('No Gemfile.lock found');
     return null;
@@ -164,7 +165,7 @@ export async function updateArtifacts(
       return null;
     }
     logger.debug('Returning updated Gemfile.lock');
-    const lockFileContent = await readLocalFile(lockFileName);
+    const lockFileContent = await readLocalBlob(lockFileName);
     return [
       {
         file: {

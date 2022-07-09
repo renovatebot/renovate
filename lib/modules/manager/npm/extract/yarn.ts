@@ -11,7 +11,7 @@ import type { LockFile } from './types';
 
 export async function getYarnLock(filePath: string): Promise<LockFile> {
   // TODO #7154
-  const yarnLockRaw = (await readLocalFile(filePath, 'utf8'))!;
+  const yarnLockRaw = (await readLocalFile(filePath))!;
   try {
     const parsed = parseSyml(yarnLockRaw);
     const lockedVersions: Record<string, string> = {};
@@ -58,7 +58,7 @@ export function getZeroInstallPaths(yarnrcYml: string): string[] {
 }
 
 export async function isZeroInstall(yarnrcYmlPath: string): Promise<boolean> {
-  const yarnrcYml = await readLocalFile(yarnrcYmlPath, 'utf8');
+  const yarnrcYml = await readLocalFile(yarnrcYmlPath);
   if (is.string(yarnrcYml)) {
     const paths = getZeroInstallPaths(yarnrcYml);
     for (const p of paths) {

@@ -99,7 +99,7 @@ export async function updateArtifacts({
   logger.debug(
     `pipCompile.updateArtifacts(${inputFileName}->${outputFileName})`
   );
-  const existingOutput = await readLocalFile(outputFileName, 'utf8');
+  const existingOutput = await readLocalFile(outputFileName);
   if (!existingOutput) {
     logger.debug('No pip-compile output file found');
     return null;
@@ -139,7 +139,7 @@ export async function updateArtifacts({
         file: {
           type: 'addition',
           path: outputFileName,
-          contents: await readLocalFile(outputFileName, 'utf8'),
+          contents: await readLocalFile(outputFileName),
         },
       },
     ];

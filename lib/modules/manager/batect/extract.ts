@@ -159,7 +159,7 @@ export async function extractAllPackageFiles(
     filesToExamine.delete(packageFile);
     filesAlreadyExamined.add(packageFile);
 
-    const content = await readLocalFile(packageFile, 'utf8');
+    const content = await readLocalFile(packageFile);
     // TODO #7154
     const result = extractPackageFile(content!, packageFile);
 

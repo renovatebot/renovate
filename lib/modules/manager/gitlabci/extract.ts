@@ -127,7 +127,7 @@ export async function extractAllPackageFiles(
   while (filesToExamine.length > 0) {
     const file = filesToExamine.pop()!;
 
-    const content = await readLocalFile(file, 'utf8');
+    const content = await readLocalFile(file);
     if (!content) {
       logger.debug({ file }, 'Empty or non existent gitlabci file');
 

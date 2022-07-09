@@ -95,7 +95,7 @@ export async function extractPackageFile(
 
   // handle lockfile
   const lockfilePath = fileName.replace(regEx(/\.json$/), '.lock');
-  const lockContents = await readLocalFile(lockfilePath, 'utf8');
+  const lockContents = await readLocalFile(lockfilePath);
   let lockParsed: ComposerLock | undefined;
   if (lockContents) {
     logger.debug({ packageFile: fileName }, 'Found composer lock file');

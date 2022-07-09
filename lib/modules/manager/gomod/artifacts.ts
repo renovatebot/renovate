@@ -8,6 +8,7 @@ import { exec } from '../../../util/exec';
 import type { ExecOptions } from '../../../util/exec/types';
 import {
   ensureCacheDir,
+  readLocalBlob,
   readLocalFile,
   writeLocalFile,
 } from '../../../util/fs';
@@ -146,7 +147,7 @@ export async function updateArtifacts({
   logger.debug(`gomod.updateArtifacts(${goModFileName})`);
 
   const sumFileName = goModFileName.replace(regEx(/\.mod$/), '.sum');
-  const existingGoSumContent = await readLocalFile(sumFileName);
+  const existingGoSumContent = await readLocalBlob(sumFileName);
   if (!existingGoSumContent) {
     logger.debug('No go.sum found');
     return null;
@@ -154,7 +155,7 @@ export async function updateArtifacts({
 
   const vendorDir = upath.join(upath.dirname(goModFileName), 'vendor/');
   const vendorModulesFileName = upath.join(vendorDir, 'modules.txt');
-  const useVendor = (await readLocalFile(vendorModulesFileName)) !== null;
+  const useVendor = (await readLocalBlob(vendorModulesFileName)) !== null;
 
   let massagedGoMod = newGoModContent;
 
@@ -306,7 +307,7 @@ export async function updateArtifacts({
         file: {
           type: 'addition',
           path: sumFileName,
-          contents: await readLocalFile(sumFileName),
+          contents: await readLocalBlob(sumFileName),
         },
       },
     ];
@@ -320,7 +321,7 @@ export async function updateArtifacts({
             file: {
               type: 'addition',
               path: f,
-              contents: await readLocalFile(f),
+              contents: await readLocalBlob(f),
             },
           });
         }
@@ -334,7 +335,7 @@ export async function updateArtifacts({
             file: {
               type: 'addition',
               path: f,
-              contents: await readLocalFile(f),
+              contents: await readLocalBlob(f),
             },
           });
         }
@@ -350,7 +351,7 @@ export async function updateArtifacts({
     }
 
     // TODO #7154
-    const finalGoModContent = (await readLocalFile(goModFileName, 'utf8'))!
+    const finalGoModContent = (await readLocalFile(goModFileName))!
       .replace(regEx(/\/\/ renovate-replace /g), '')
       .replace(regEx(/renovate-replace-bracket/g), ')');
     if (finalGoModContent !== newGoModContent) {

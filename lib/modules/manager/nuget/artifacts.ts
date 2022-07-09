@@ -104,7 +104,7 @@ async function getLockFileContentMap(
 
   for (const lockFileName of lockFileNames) {
     lockFileContentMap[lockFileName] = local
-      ? await readLocalFile(lockFileName, 'utf8')
+      ? await readLocalFile(lockFileName)
       : await getFile(lockFileName);
   }
 

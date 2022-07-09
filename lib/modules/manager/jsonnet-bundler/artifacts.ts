@@ -3,7 +3,7 @@ import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { exec } from '../../../util/exec';
 import type { ExecOptions, ToolConstraint } from '../../../util/exec/types';
-import { readLocalFile } from '../../../util/fs';
+import { readLocalBlob, readLocalFile } from '../../../util/fs';
 import { getRepoStatus } from '../../../util/git';
 import { regEx } from '../../../util/regex';
 import type {
@@ -27,7 +27,7 @@ export async function updateArtifacts(
   logger.trace({ packageFileName }, 'jsonnet-bundler.updateArtifacts()');
 
   const lockFileName = packageFileName.replace(regEx(/\.json$/), '.lock.json');
-  const existingLockFileContent = await readLocalFile(lockFileName, 'utf8');
+  const existingLockFileContent = await readLocalFile(lockFileName);
 
   if (!existingLockFileContent) {
     logger.debug('No jsonnetfile.lock.json found');
@@ -73,7 +73,7 @@ export async function updateArtifacts(
         file: {
           type: 'addition',
           path: f,
-          contents: await readLocalFile(f),
+          contents: await readLocalBlob(f),
         },
       });
     }
@@ -82,7 +82,7 @@ export async function updateArtifacts(
         file: {
           type: 'addition',
           path: f,
-          contents: await readLocalFile(f),
+          contents: await readLocalBlob(f),
         },
       });
     }

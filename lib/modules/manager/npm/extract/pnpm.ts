@@ -18,7 +18,7 @@ export async function extractPnpmFilters(
 ): Promise<string[] | undefined> {
   try {
     // TODO #7154
-    const contents = load((await readLocalFile(fileName, 'utf8'))!, {
+    const contents = load((await readLocalFile(fileName))!, {
       json: true,
     }) as PnpmWorkspaceFile;
     if (

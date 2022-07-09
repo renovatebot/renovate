@@ -7,6 +7,7 @@ import type { ExecOptions } from '../../../util/exec/types';
 import {
   ensureCacheDir,
   getSiblingFileName,
+  readLocalBlob,
   readLocalFile,
   writeLocalFile,
 } from '../../../util/fs';
@@ -58,7 +59,7 @@ export async function updateArtifacts({
     ];
   }
 
-  const existingLockFileContent = await readLocalFile(lockFileName, 'utf8');
+  const existingLockFileContent = await readLocalFile(lockFileName);
   if (!existingLockFileContent) {
     logger.debug(`Lockfile not found: ${lockFileName}`);
     return null;
@@ -110,7 +111,7 @@ export async function updateArtifacts({
     return null;
   }
   logger.debug(`Returning updated lockfile: ${lockFileName}`);
-  const lockFileContent = await readLocalFile(lockFileName);
+  const lockFileContent = await readLocalBlob(lockFileName);
   const res: UpdateArtifactsResult[] = [
     {
       file: {
@@ -123,14 +124,14 @@ export async function updateArtifacts({
 
   const podsDir = upath.join(upath.dirname(packageFileName), 'Pods');
   const podsManifestFileName = upath.join(podsDir, 'Manifest.lock');
-  if (await readLocalFile(podsManifestFileName, 'utf8')) {
+  if (await readLocalFile(podsManifestFileName)) {
     for (const f of status.modified.concat(status.not_added)) {
       if (f.startsWith(podsDir)) {
         res.push({
           file: {
             type: 'addition',
             path: f,
-            contents: await readLocalFile(f),
+            contents: await readLocalBlob(f),
           },
         });
       }

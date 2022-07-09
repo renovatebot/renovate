@@ -79,7 +79,7 @@ export async function updateArtifacts({
   logger.debug(`pipenv.updateArtifacts(${pipfileName})`);
 
   const lockFileName = pipfileName + '.lock';
-  const existingLockFileContent = await readLocalFile(lockFileName, 'utf8');
+  const existingLockFileContent = await readLocalFile(lockFileName);
   if (!existingLockFileContent) {
     logger.debug('No Pipfile.lock found');
     return null;
@@ -119,7 +119,7 @@ export async function updateArtifacts({
         file: {
           type: 'addition',
           path: lockFileName,
-          contents: await readLocalFile(lockFileName, 'utf8'),
+          contents: await readLocalFile(lockFileName),
         },
       },
     ];

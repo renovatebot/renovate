@@ -34,10 +34,7 @@ export async function checkYarnrc(
   let offlineMirror = false;
   let yarnPath: string | null = null;
   try {
-    const yarnrc = await readLocalFile(
-      upath.join(lockFileDir, '.yarnrc'),
-      'utf8'
-    );
+    const yarnrc = await readLocalFile(upath.join(lockFileDir, '.yarnrc'));
     if (is.string(yarnrc)) {
       const mirrorLine = yarnrc
         .split(newlineRegex)
@@ -271,7 +268,7 @@ export async function generateLockFile(
     await exec(commands, execOptions);
 
     // Read the result
-    lockFile = await readLocalFile(lockFileName, 'utf8');
+    lockFile = await readLocalFile(lockFileName);
   } catch (err) /* istanbul ignore next */ {
     if (err.message === TEMPORARY_ERROR) {
       throw err;

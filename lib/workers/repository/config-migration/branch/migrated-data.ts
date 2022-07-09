@@ -48,7 +48,7 @@ export class MigratedDataFactory {
       delete migratedConfig.warnings;
 
       const filename = rc.configFileName ?? '';
-      const raw = await readLocalFile(filename, 'utf8');
+      const raw = await readLocalFile(filename);
 
       // indent defaults to 2 spaces
       // TODO #7154

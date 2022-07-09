@@ -13,6 +13,7 @@ import {
   ensureLocalDir,
   getSiblingFileName,
   localPathExists,
+  readLocalBlob,
   readLocalFile,
   writeLocalFile,
 } from '../../../util/fs';
@@ -83,7 +84,7 @@ export async function updateArtifacts({
   logger.debug(`composer.updateArtifacts(${packageFileName})`);
 
   const lockFileName = packageFileName.replace(regEx(/\.json$/), '.lock');
-  const existingLockFileContent = await readLocalFile(lockFileName, 'utf8');
+  const existingLockFileContent = await readLocalFile(lockFileName);
   if (!existingLockFileContent) {
     logger.debug('No composer.lock found');
     return null;
@@ -161,7 +162,7 @@ export async function updateArtifacts({
         file: {
           type: 'addition',
           path: lockFileName,
-          contents: await readLocalFile(lockFileName),
+          contents: await readLocalBlob(lockFileName),
         },
       },
     ];
@@ -177,7 +178,7 @@ export async function updateArtifacts({
           file: {
             type: 'addition',
             path: f,
-            contents: await readLocalFile(f),
+            contents: await readLocalBlob(f),
           },
         });
       }

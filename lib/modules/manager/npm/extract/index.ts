@@ -89,7 +89,7 @@ export async function extractPackageFile(
     string
   ][]) {
     const filePath = getSiblingFileName(fileName, val);
-    if (await readLocalFile(filePath, 'utf8')) {
+    if (await readLocalFile(filePath)) {
       lockFiles[key] = filePath;
     } else {
       lockFiles[key] = undefined;
@@ -101,7 +101,7 @@ export async function extractPackageFile(
 
   let npmrc: string | undefined;
   const npmrcFileName = getSiblingFileName(fileName, '.npmrc');
-  let repoNpmrc = await readLocalFile(npmrcFileName, 'utf8');
+  let repoNpmrc = await readLocalFile(npmrcFileName);
   if (is.string(repoNpmrc)) {
     if (is.string(config.npmrc) && !config.npmrcMerge) {
       logger.debug(
@@ -153,7 +153,7 @@ export async function extractPackageFile(
   try {
     lernaJsonFile = getSiblingFileName(fileName, 'lerna.json');
     // TODO #7154
-    lernaJson = JSON.parse((await readLocalFile(lernaJsonFile, 'utf8'))!);
+    lernaJson = JSON.parse((await readLocalFile(lernaJsonFile))!);
   } catch (err) /* istanbul ignore next */ {
     logger.warn({ err }, 'Could not parse lerna.json');
   }
@@ -483,7 +483,7 @@ export async function extractAllPackageFiles(
 ): Promise<PackageFile[]> {
   const npmFiles: PackageFile[] = [];
   for (const packageFile of packageFiles) {
-    const content = await readLocalFile(packageFile, 'utf8');
+    const content = await readLocalFile(packageFile);
     // istanbul ignore else
     if (content) {
       const deps = await extractPackageFile(content, packageFile, config);

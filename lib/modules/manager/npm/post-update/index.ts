@@ -12,6 +12,7 @@ import {
   ensureCacheDir,
   getParentDir,
   getSiblingFileName,
+  readLocalBlob,
   readLocalFile,
   writeLocalFile,
 } from '../../../../util/fs';
@@ -304,7 +305,7 @@ async function getNpmrcContent(dir: string): Promise<string | null> {
   const npmrcFilePath = upath.join(dir, '.npmrc');
   let originalNpmrcContent: string | null = null;
   try {
-    originalNpmrcContent = await readLocalFile(npmrcFilePath, 'utf8');
+    originalNpmrcContent = await readLocalFile(npmrcFilePath);
     logger.debug('npmrc file found in repository');
   } catch /* istanbul ignore next */ {
     logger.debug('No npmrc file found in repository');
@@ -391,7 +392,7 @@ async function updateYarnOffline(
           updatedArtifacts.push({
             type: 'addition',
             path: f,
-            contents: await readLocalFile(f),
+            contents: await readLocalBlob(f),
           });
         }
       }
@@ -416,7 +417,7 @@ export async function updateYarnBinary(
   try {
     const yarnrcYmlFilename = upath.join(lockFileDir, '.yarnrc.yml');
     yarnrcYml ||= (await getFile(yarnrcYmlFilename)) ?? undefined;
-    const newYarnrcYml = await readLocalFile(yarnrcYmlFilename, 'utf8');
+    const newYarnrcYml = await readLocalFile(yarnrcYmlFilename);
     if (!is.string(yarnrcYml) || !is.string(newYarnrcYml)) {
       return existingYarnrcYmlContent;
     }
@@ -441,7 +442,7 @@ export async function updateYarnBinary(
       {
         type: 'addition',
         path: newYarnFullPath,
-        contents: await readLocalFile(newYarnFullPath, 'utf8'),
+        contents: await readLocalFile(newYarnFullPath),
         isExecutable: true,
       }
     );
@@ -589,7 +590,7 @@ export async function getAdditionalFiles(
     // istanbul ignore if: needs test
     if (additionalYarnRcYml) {
       yarnRcYmlFilename = getSiblingFileName(yarnLock, '.yarnrc.yml');
-      existingYarnrcYmlContent = await readLocalFile(yarnRcYmlFilename, 'utf8');
+      existingYarnrcYmlContent = await readLocalFile(yarnRcYmlFilename);
       if (existingYarnrcYmlContent) {
         try {
           const existingYarnrRcYml = load(existingYarnrcYmlContent) as Record<
@@ -829,13 +830,9 @@ export async function getAdditionalFiles(
           logger.trace('Checking against ' + lockFilePath);
           try {
             const newContent =
-              (await readLocalFile(lockFilePath, 'utf8')) ??
+              (await readLocalFile(lockFilePath)) ??
               (await readLocalFile(
-                lockFilePath.replace(
-                  'npm-shrinkwrap.json',
-                  'package-lock.json'
-                ),
-                'utf8'
+                lockFilePath.replace('npm-shrinkwrap.json', 'package-lock.json')
               ));
             // istanbul ignore if: needs test
             if (newContent === existingContent) {

@@ -93,7 +93,7 @@ function extractFromSection(
 async function readCargoConfig(): Promise<CargoConfig | null> {
   for (const configName of ['config.toml', 'config']) {
     const path = `.cargo/${configName}`;
-    const payload = await readLocalFile(path, 'utf8');
+    const payload = await readLocalFile(path);
     if (payload) {
       try {
         return parse(payload) as CargoConfig;

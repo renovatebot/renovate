@@ -146,11 +146,11 @@ export async function updateArtifacts({
   }
   // Try poetry.lock first
   let lockFileName = getSiblingFileName(packageFileName, 'poetry.lock');
-  let existingLockFileContent = await readLocalFile(lockFileName, 'utf8');
+  let existingLockFileContent = await readLocalFile(lockFileName);
   if (!existingLockFileContent) {
     // Try pyproject.lock next
     lockFileName = getSiblingFileName(packageFileName, 'pyproject.lock');
-    existingLockFileContent = await readLocalFile(lockFileName, 'utf8');
+    existingLockFileContent = await readLocalFile(lockFileName);
     if (!existingLockFileContent) {
       logger.debug(`No lock file found`);
       return null;
@@ -195,7 +195,7 @@ export async function updateArtifacts({
       toolConstraints: [toolConstraint],
     };
     await exec(cmd, execOptions);
-    const newPoetryLockContent = await readLocalFile(lockFileName, 'utf8');
+    const newPoetryLockContent = await readLocalFile(lockFileName);
     if (existingLockFileContent === newPoetryLockContent) {
       logger.debug(`${lockFileName} is unchanged`);
       return null;

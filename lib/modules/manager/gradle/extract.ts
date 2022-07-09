@@ -53,7 +53,7 @@ export async function extractAllPackageFiles(
 
     try {
       // TODO #7154
-      const content = (await readLocalFile(packageFile, 'utf8'))!;
+      const content = (await readLocalFile(packageFile))!;
       const dir = upath.dirname(toAbsolutePath(packageFile));
 
       const updateVars = (newVars: PackageVariables): void => {

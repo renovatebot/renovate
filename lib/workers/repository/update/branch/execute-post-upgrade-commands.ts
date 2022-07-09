@@ -8,7 +8,7 @@ import type { ArtifactError } from '../../../../modules/manager/types';
 import { exec } from '../../../../util/exec';
 import {
   localPathIsFile,
-  readLocalFile,
+  readLocalBlob,
   writeLocalFile,
 } from '../../../../util/fs';
 import { getRepoStatus } from '../../../../util/git';
@@ -111,7 +111,7 @@ export async function postUpgradeCommandsExecutor(
               { file: relativePath, pattern },
               'Post-upgrade file saved'
             );
-            const existingContent = await readLocalFile(relativePath);
+            const existingContent = await readLocalBlob(relativePath);
             const existingUpdatedArtifacts = updatedArtifacts.find(
               (ua) => ua.path === relativePath
             );

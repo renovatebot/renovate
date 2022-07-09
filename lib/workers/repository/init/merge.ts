@@ -41,9 +41,7 @@ export async function detectRepoFileConfig(): Promise<RepoFileConfig> {
     for (const fileName of configFileNames) {
       if (fileName === 'package.json') {
         try {
-          const pJson = JSON.parse(
-            (await readLocalFile('package.json', 'utf8'))!
-          );
+          const pJson = JSON.parse((await readLocalFile('package.json'))!);
           if (pJson.renovate) {
             logger.debug('Using package.json for global renovate config');
             return 'package.json';
@@ -70,7 +68,7 @@ export async function detectRepoFileConfig(): Promise<RepoFileConfig> {
     // We already know it parses
     configFileParsed = JSON.parse(
       // TODO #7154
-      (await readLocalFile('package.json', 'utf8'))!
+      (await readLocalFile('package.json'))!
     ).renovate;
     if (is.string(configFileParsed)) {
       logger.debug('Massaging string renovate config to extends array');
@@ -78,7 +76,7 @@ export async function detectRepoFileConfig(): Promise<RepoFileConfig> {
     }
     logger.debug({ config: configFileParsed }, 'package.json>renovate config');
   } else {
-    let rawFileContents = await readLocalFile(configFileName, 'utf8');
+    let rawFileContents = await readLocalFile(configFileName);
     // istanbul ignore if
     if (!is.string(rawFileContents)) {
       logger.warn({ configFileName }, 'Null contents when reading config file');

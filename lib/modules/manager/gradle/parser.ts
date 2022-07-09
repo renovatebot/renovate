@@ -1050,7 +1050,7 @@ async function parseInlineScriptFile(
   }
 
   const scriptFilePath = getSiblingFileName(packageFile, scriptFile);
-  const scriptFileContent = await readLocalFile(scriptFilePath, 'utf8');
+  const scriptFileContent = await readLocalFile(scriptFilePath);
   if (!scriptFileContent) {
     logger.warn({ scriptFilePath }, `Failed to process Gradle file`);
     return null;

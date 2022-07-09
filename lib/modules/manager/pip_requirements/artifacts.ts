@@ -47,7 +47,7 @@ export async function updateArtifacts({
       preCommands: ['pip install hashin'],
     };
     await exec(cmd, execOptions);
-    const newContent = await readLocalFile(packageFileName, 'utf8');
+    const newContent = await readLocalFile(packageFileName);
     if (newContent === newPackageFileContent) {
       logger.debug(`${packageFileName} is unchanged`);
       return null;

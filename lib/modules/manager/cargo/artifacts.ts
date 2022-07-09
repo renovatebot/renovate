@@ -5,7 +5,7 @@ import { exec } from '../../../util/exec';
 import type { ExecOptions } from '../../../util/exec/types';
 import {
   findLocalSiblingOrParent,
-  readLocalFile,
+  readLocalBlob,
   writeLocalFile,
 } from '../../../util/fs';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
@@ -55,7 +55,7 @@ export async function updateArtifacts({
     'Cargo.lock'
   );
   const existingLockFileContent = lockFileName
-    ? await readLocalFile(lockFileName)
+    ? await readLocalBlob(lockFileName)
     : null;
   if (!existingLockFileContent || !lockFileName) {
     logger.debug('No Cargo.lock found');
@@ -66,7 +66,7 @@ export async function updateArtifacts({
     logger.debug('Updating ' + lockFileName);
     await cargoUpdate(packageFileName, isLockFileMaintenance);
     logger.debug('Returning updated Cargo.lock');
-    const newCargoLockContent = await readLocalFile(lockFileName);
+    const newCargoLockContent = await readLocalBlob(lockFileName);
     if (existingLockFileContent === newCargoLockContent) {
       logger.debug('Cargo.lock is unchanged');
       return null;

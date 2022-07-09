@@ -27,7 +27,7 @@ export function findLockFile(packageFilePath: string): string {
 }
 
 export function readLockFile(lockFilePath: string): Promise<string | null> {
-  return readLocalFile(lockFilePath, 'utf8');
+  return readLocalFile(lockFilePath);
 }
 
 export function extractLocks(lockFileContent: string): ProviderLock[] | null {
