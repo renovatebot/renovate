@@ -12,8 +12,7 @@ export interface MigratedData {
 }
 
 export async function applyPrettierFormatting(
-  content: string,
-  fileName: string
+  content: string
 ): Promise<string> {
   const prettierConfigFilenames = [
     '.prettierrc',
@@ -43,7 +42,7 @@ export async function applyPrettierFormatting(
   }
 
   return prettier.format(content, {
-    filepath: fileName,
+    parser: 'json',
   });
 }
 
@@ -98,7 +97,7 @@ export class MigratedDataFactory {
         content = JSON.stringify(migratedConfig, undefined, indent);
       }
 
-      content = await applyPrettierFormatting(content, filename);
+      content = await applyPrettierFormatting(content);
       if (!content.endsWith('\n')) {
         content += '\n';
       }
