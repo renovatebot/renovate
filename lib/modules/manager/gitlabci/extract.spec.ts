@@ -9,6 +9,8 @@ import {
 } from './extract';
 import { extractAllPackageFiles, extractPackageFile } from '.';
 
+jest.mock('../../../util/fs/access');
+
 const config: ExtractConfig = {};
 
 const adminConfig: RepoGlobalConfig = { localDir: '' };

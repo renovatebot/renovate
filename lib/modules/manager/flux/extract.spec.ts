@@ -4,6 +4,8 @@ import type { RepoGlobalConfig } from '../../../config/types';
 import type { ExtractConfig } from '../types';
 import { extractAllPackageFiles, extractPackageFile } from '.';
 
+jest.mock('../../../util/fs/access');
+
 const config: ExtractConfig = {};
 const adminConfig: RepoGlobalConfig = { localDir: '' };
 

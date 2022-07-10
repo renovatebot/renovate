@@ -8,6 +8,8 @@ import { PodDatasource } from '../../datasource/pod';
 import type { PackageDependency, PackageFile } from '../types';
 import type { ParsedLine } from './types';
 
+jest.mock('../../../util/fs/access');
+
 const regexMappings = [
   regEx(`^\\s*pod\\s+(['"])(?<spec>[^'"/]+)(\\/(?<subspec>[^'"]+))?(['"])`),
   regEx(

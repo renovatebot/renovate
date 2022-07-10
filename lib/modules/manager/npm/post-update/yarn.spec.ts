@@ -22,6 +22,7 @@ jest.mock('child_process');
 jest.mock('../../../../util/exec/env');
 jest.mock('./node-version');
 jest.mock('../../../datasource');
+jest.mock('../../../../util/fs/access');
 
 delete process.env.NPM_CONFIG_CACHE;
 
