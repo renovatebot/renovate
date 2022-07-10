@@ -22,6 +22,7 @@ function renameKeys(packageRule: PackageRule): PackageRule {
   }
   return newPackageRule;
 }
+
 export class PackageRulesMigration extends AbstractMigration {
   override readonly propertyName = 'packageRules';
 
