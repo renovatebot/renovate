@@ -58,7 +58,8 @@ You must use a [GitHub App Installation token](https://docs.github.com/en/develo
 Previously, the token had to be prefixed with `x-access-token:`.
 We recommend you replace any prefixed tokens with normal tokens.
 We will drop support for prefixed tokens in the future.
-Tokens starting with `ghs_` should not be prefixed, only tokens from GitHub Enterprise Server releases older than `3.2` need to be prefixed.
+
+Any tokens that do not start with `ghs_` (for example tokens from GitHub Enterprise Server versions before version `3.2`) must be prefixed with `x-access-token:`.
 
 <!-- prettier-ignore -->
 !!! note
