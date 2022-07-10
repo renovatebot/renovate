@@ -44,9 +44,15 @@ export interface RepoParams {
   ignorePrAuthor?: boolean;
 }
 
+export interface PrDebugData {
+  createdInVer: string;
+  updatedInVer: string;
+}
+
 export interface PrBodyStruct {
   hash: string;
   rebaseRequested?: boolean;
+  debugData?: PrDebugData;
 }
 
 /**
