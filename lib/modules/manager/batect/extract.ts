@@ -16,8 +16,6 @@ import type {
   ExtractionResult,
 } from './types';
 
-jest.mock('../../../util/fs/access');
-
 function loadConfig(content: string): BatectConfig {
   const config = load(content);
 
