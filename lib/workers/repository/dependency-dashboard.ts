@@ -8,6 +8,7 @@ import { platform } from '../../modules/platform';
 import { regEx } from '../../util/regex';
 import * as template from '../../util/template';
 import { BranchConfig, BranchResult } from '../types';
+import { MarkdownHtmlFixer } from './dependency-dashboard-utils';
 import { PackageFiles } from './package-files';
 
 interface DependencyDashboard {
@@ -320,13 +321,6 @@ export async function ensureDependencyDashboard(
 
   issueBody += PackageFiles.getDashboardMarkdown(config);
 
-  if (config.dependencyDashboardFooter?.length) {
-    issueBody +=
-      '---\n' +
-      template.compile(config.dependencyDashboardFooter, config) +
-      '\n';
-  }
-
   if (config.dependencyDashboardIssue) {
     const updatedIssue = await platform.getIssue?.(
       config.dependencyDashboardIssue,
@@ -358,9 +352,21 @@ export async function ensureDependencyDashboard(
     await platform.ensureIssue({
       title: config.dependencyDashboardTitle!,
       reuseTitle,
-      body: platform.massageMarkdown(issueBody),
+      body: finalizeMd(issueBody, config),
       labels: config.dependencyDashboardLabels,
       confidential: config.confidential,
     });
   }
+}
+
+function finalizeMd(issueBody: string, config: RenovateConfig): string {
+  let md = new MarkdownHtmlFixer(platform.massageMarkdown(issueBody)).fix();
+
+  if (config.dependencyDashboardFooter?.length) {
+    md +=
+      '---\n' +
+      template.compile(config.dependencyDashboardFooter, config) +
+      '\n\n';
+  }
+  return md;
 }

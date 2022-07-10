@@ -18,6 +18,7 @@ import type { Platform } from '../../modules/platform';
 import { massageMarkdown } from '../../modules/platform/github';
 import { BranchConfig, BranchResult, BranchUpgradeConfig } from '../types';
 import * as dependencyDashboard from './dependency-dashboard';
+import { MarkdownHtmlFixer } from './dependency-dashboard-utils';
 import { PackageFiles } from './package-files';
 
 type PrUpgrade = BranchUpgradeConfig;
@@ -52,7 +53,7 @@ function genRandPackageFile(
   for (let i = 0; i < depsNum; i++) {
     deps.push({
       depName: genRandString(depNameLen),
-      currentVersion: '1.0.0',
+      currentValue: '1.0.0',
     });
   }
   return { npm: [{ packageFile: 'package.json', deps }] };
@@ -698,16 +699,22 @@ describe('workers/repository/dependency-dashboard', () => {
           await dryRun(branches, platform);
         });
 
-        it('truncates the body of a really big repo', async () => {
+        it('truncates and fixes the body of a really big repo', async () => {
           const branches: BranchConfig[] = [];
-          const truncatedLength = 60000;
-          const packageFilesBigRepo = genRandPackageFile(100, 700);
+          const maxLength = 64000;
+          const packageFilesBigRepo = genRandPackageFile(6100, 10);
+          config.dependencyDashboardFooter =
+            '\n- [ ] <!-- manual job -->Check this box to trigger a request for Renovate to run again on this repository\n';
           PackageFiles.add('main', packageFilesBigRepo);
           await dependencyDashboard.ensureDependencyDashboard(config, branches);
+          const body = platform.ensureIssue.mock.calls[0][0].body;
           expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
-          expect(platform.ensureIssue.mock.calls[0][0].body).toHaveLength(
-            truncatedLength
-          );
+          expect(platform.massageMarkdown).toHaveBeenCalledTimes(1);
+          expect(MarkdownHtmlFixer.isValidMdHtml(body)).toBeTrue();
+          expect(body.length < maxLength).toBeTrue();
+          expect(
+            body.endsWith(config.dependencyDashboardFooter + '\n\n')
+          ).toBeTrue();
 
           // same with dry run
           await dryRun(branches, platform);
