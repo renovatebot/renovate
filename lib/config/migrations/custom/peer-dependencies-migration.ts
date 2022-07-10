@@ -11,7 +11,7 @@ export class PeerDependenciesMigration extends AbstractMigration {
       const packageRules: PackageRule[] = this.get('packageRules') ?? [];
 
       packageRules.push({
-        depTypeList: ['peerDependencies'],
+        matchDepTypes: ['peerDependencies'],
         ...value,
       } as PackageRule);
 
