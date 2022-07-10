@@ -58,3 +58,6 @@ export const UNKNOWN_ERROR = 'unknown-error';
 
 // PATH Error
 export const INVALID_PATH = 'invalid-path';
+
+// PAGE NOT FOUND
+export const PAGE_NOT_FOUND_ERROR = 'page-not-found';

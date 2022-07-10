@@ -105,6 +105,22 @@ describe('modules/datasource/docker/index', () => {
   });
 
   describe('getAuthHeaders', () => {
+    it('returns empty Object', async () => {
+      httpMock
+        .scope('https://my.local.registry')
+        .get('/v2/repo/tags/list?n=1000')
+        .reply(404, {});
+
+      const headers = await getAuthHeaders(
+        http,
+        'https://my.local.registry',
+        'repo',
+        'https://my.local.registry/v2/repo/tags/list?n=1000'
+      );
+
+      expect(headers).toEqual({});
+    });
+
     it('returns "authType token" if both provided', async () => {
       httpMock
         .scope('https://my.local.registry')
