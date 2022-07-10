@@ -418,7 +418,9 @@ function processApplyFrom({
       const token = tokenMap.parentPath as StringInterpolation;
       parentPath = interpolateString(token.children, variables);
     }
-    scriptFile = upath.join(parentPath, scriptFile);
+    if (parentPath && scriptFile) {
+      scriptFile = upath.join(parentPath, scriptFile);
+    }
   }
 
   return { scriptFile };
