@@ -40,18 +40,7 @@ export function migrateConfig(config: RenovateConfig): MigratedConfig {
     ];
 
     for (const [key, val] of Object.entries(newConfig)) {
-      if (depTypes.includes(key)) {
-        migratedConfig.packageRules = is.array(migratedConfig.packageRules)
-          ? migratedConfig.packageRules
-          : [];
-        const depTypePackageRule = migrateConfig(
-          val as RenovateConfig
-        ).migratedConfig;
-        depTypePackageRule.depTypeList = [key];
-        delete depTypePackageRule.packageRules;
-        migratedConfig.packageRules.push(depTypePackageRule);
-        delete migratedConfig[key];
-      } else if (is.string(val) && val.includes('{{baseDir}}')) {
+      if (is.string(val) && val.includes('{{baseDir}}')) {
         migratedConfig[key] = val.replace(
           regEx(/{{baseDir}}/g),
           '{{packageFileDir}}'
@@ -91,6 +80,14 @@ export function migrateConfig(config: RenovateConfig): MigratedConfig {
           for (const item of migratedConfig[key] as unknown[]) {
             if (is.object(item) && !is.array(item)) {
               const arrMigrate = migrateConfig(item as RenovateConfig);
+              if (
+                (item as PackageRule).matchDepTypes?.some((depType) =>
+                  depTypes.includes(depType)
+                )
+              ) {
+                (arrMigrate as any).matchDepTypes = [key];
+                delete (arrMigrate as any).packageRules;
+              }
               newArray.push(arrMigrate.migratedConfig);
             } else {
               newArray.push(item);
