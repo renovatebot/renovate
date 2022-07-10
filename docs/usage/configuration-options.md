@@ -2854,7 +2854,7 @@ Follow these steps:
 1. Enable the "Dependency graph"
 1. Enable "Dependabot alerts"
 1. If you're running Renovate in app mode: make sure the app has `read` permissions for "Vulnerability alerts".
-   If you're the account administrator, browse to the app (for example [https://github.com/apps/renovate](https://github.com/apps/renovate)), select "Configure", and then scroll down to the "Permissions" section and make sure that `read` access to "vulnerability alerts" is mentioned.
+   If you're the account administrator, browse to the app (for example [https://github.com/apps/renovate](https://github.com/apps/renovate)), select "Configure", and then scroll down to the "Permissions" section and make sure that `read` access to "vulnerability alerts" is mentioned
 
 Once the above conditions are met, and you got one or more vulnerability alerts from GitHub for this repository, then Renovate tries to raise fix PRs.
 
