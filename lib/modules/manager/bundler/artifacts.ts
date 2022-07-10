@@ -59,7 +59,8 @@ function getResolvedPackages(input: string): string[] {
 }
 
 export async function updateArtifacts(
-  updateArtifact: UpdateArtifact
+  updateArtifact: UpdateArtifact,
+  recursionLimit = 10
 ): Promise<UpdateArtifactsResult[] | null> {
   const { packageFileName, updatedDeps, newPackageFileContent, config } =
     updateArtifact;
@@ -228,21 +229,30 @@ export async function updateArtifacts(
     const resolveMatches: string[] = getResolvedPackages(output).filter(
       (depName) => !updatedDepNames.includes(depName)
     );
-    if (resolveMatches.length && !config.isLockFileMaintenance) {
+    if (
+      recursionLimit > 0 &&
+      resolveMatches.length &&
+      !config.isLockFileMaintenance
+    ) {
       logger.debug(
         { resolveMatches, updatedDeps },
         'Found new resolve matches - reattempting recursively'
       );
       const newUpdatedDeps = [
-        ...updatedDeps,
-        ...resolveMatches.map((match) => ({ depName: match })),
+        ...new Set([
+          ...updatedDeps,
+          ...resolveMatches.map((match) => ({ depName: match })),
+        ]),
       ];
-      return updateArtifacts({
-        packageFileName,
-        updatedDeps: newUpdatedDeps,
-        newPackageFileContent,
-        config,
-      });
+      return updateArtifacts(
+        {
+          packageFileName,
+          updatedDeps: newUpdatedDeps,
+          newPackageFileContent,
+          config,
+        },
+        recursionLimit - 1
+      );
     }
 
     logger.info({ err }, 'Gemfile.lock update failed due to an unknown reason');
