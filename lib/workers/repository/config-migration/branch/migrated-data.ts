@@ -6,6 +6,7 @@ import { logger } from '../../../../logger';
 import { readLocalFile } from '../../../../util/fs';
 import { getFileList } from '../../../../util/git';
 import { detectRepoFileConfig } from '../../init/merge';
+
 export interface MigratedData {
   content: string;
   filename: string;
@@ -29,12 +30,14 @@ export async function applyPrettierFormatting(
   let prettierExists = (await getFileList()).some((file) =>
     prettierConfigFilenames.includes(file)
   );
-  const packageJsonContent = await readLocalFile('package.json', 'utf8');
-  try {
-    prettierExists ||=
-      packageJsonContent && JSON.parse(packageJsonContent).prettier;
-  } catch {
-    logger.warn('Invalid JSON found in package.json');
+  if (!prettierExists) {
+    try {
+      const packageJsonContent = await readLocalFile('package.json', 'utf8');
+      prettierExists ||=
+        packageJsonContent && JSON.parse(packageJsonContent).prettier;
+    } catch {
+      logger.warn('Invalid JSON found in package.json');
+    }
   }
 
   if (!prettierExists) {
