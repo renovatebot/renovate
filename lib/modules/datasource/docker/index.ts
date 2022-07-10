@@ -74,7 +74,6 @@ export async function getAuthHeaders(
       logger.debug({ apiCheckUrl }, 'No registry auth required');
       return {};
     }
-
     if (apiCheckResponse.statusCode === 404) {
       logger.debug({ apiCheckUrl }, 'Page Not Found');
       throw new Error(PAGE_NOT_FOUND_ERROR);
