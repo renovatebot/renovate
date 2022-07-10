@@ -414,9 +414,14 @@ function processApplyFrom({
 
 const matcherConfigs: SyntaxMatchConfig[] = [
   {
-    // ext.foo.bar = 'baz'
+    // ext.foo = 'baz'
+    // project.foo = 'baz'
+    // rootProject.foo = 'baz'
     matchers: [
-      { matchType: TokenType.Word, matchValue: 'ext' },
+      {
+        matchType: TokenType.Word,
+        matchValue: ['ext', 'project', 'rootProject'],
+      },
       { matchType: TokenType.Dot },
       { matchType: TokenType.Word, tokenMapKey: 'keyToken' },
       { matchType: TokenType.Assignment },
@@ -931,7 +936,7 @@ const matcherConfigs: SyntaxMatchConfig[] = [
   },
   {
     // apply from: 'foo.gradle'
-    // apply from: "$somedir/foo.gradle"
+    // apply from: "${somedir}/foo.gradle"
     matchers: [
       { matchType: TokenType.Word, matchValue: 'apply' },
       { matchType: TokenType.Word, matchValue: 'from' },
@@ -944,7 +949,7 @@ const matcherConfigs: SyntaxMatchConfig[] = [
     handler: processApplyFrom,
   },
   {
-    // apply from: file("$somedir/foo.gradle")
+    // apply from: file("${somedir}/foo.gradle")
     matchers: [
       { matchType: TokenType.Word, matchValue: 'apply' },
       { matchType: TokenType.Word, matchValue: 'from' },
@@ -960,7 +965,7 @@ const matcherConfigs: SyntaxMatchConfig[] = [
     handler: processApplyFrom,
   },
   {
-    // apply from: new File("$somedir/foo.gradle")
+    // apply from: new File("${somedir}/foo.gradle")
     matchers: [
       { matchType: TokenType.Word, matchValue: 'apply' },
       { matchType: TokenType.Word, matchValue: 'from' },
@@ -978,7 +983,7 @@ const matcherConfigs: SyntaxMatchConfig[] = [
   },
   {
     // apply(from = 'foo.gradle')
-    // apply(from = "$somedir/foo.gradle")
+    // apply(from = "${somedir}/foo.gradle")
     matchers: [
       { matchType: TokenType.Word, matchValue: 'apply' },
       { matchType: TokenType.LeftParen },
@@ -993,7 +998,7 @@ const matcherConfigs: SyntaxMatchConfig[] = [
     handler: processApplyFrom,
   },
   {
-    // apply(from = File("$somedir/foo.gradle"))
+    // apply(from = File("${somedir}/foo.gradle"))
     matchers: [
       { matchType: TokenType.Word, matchValue: 'apply' },
       { matchType: TokenType.LeftParen },
