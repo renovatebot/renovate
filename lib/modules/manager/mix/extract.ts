@@ -4,8 +4,6 @@ import { newlineRegex, regEx } from '../../../util/regex';
 import { HexDatasource } from '../../datasource/hex';
 import type { PackageDependency, PackageFile } from '../types';
 
-jest.mock('../../../util/fs/access');
-
 const depSectionRegExp = regEx(/defp\s+deps.*do/g);
 const depMatchRegExp = regEx(
   /{:(?<depName>\w+),\s*(?<datasource>[^:"]+)?:?\s*"(?<currentValue>[^"]+)",?\s*(?:organization: "(?<organization>.*)")?.*}/gm
