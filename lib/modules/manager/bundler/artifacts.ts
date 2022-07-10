@@ -55,7 +55,7 @@ function getResolvedPackages(input: string): string[] {
     result.push(pkg);
     resolveMatchGroups = resolvedPkgRegex.exec(input)?.groups;
   }
-  return result;
+  return [...new Set(result)];
 }
 
 export async function updateArtifacts(
