@@ -640,8 +640,6 @@ export async function isBranchConflicted(
   branch: string
 ): Promise<boolean> {
   logger.debug(`isBranchConflicted(${baseBranch}, ${branch})`);
-  await syncGit();
-  await writeGitAuthor();
 
   const baseBranchSha = getBranchCommit(baseBranch);
   const branchSha = getBranchCommit(branch);
