@@ -1,5 +1,5 @@
 import * as child_process from 'child_process';
-import type { ChildProcess } from 'child_process';
+import type { ChildProcess, SendHandle, Serializable } from 'child_process';
 import { Readable } from 'stream';
 import { partial } from '../../../test/util';
 import { exec } from './common';
@@ -28,10 +28,26 @@ function getReadable(
   return readable;
 }
 
+type MessageListener = (message: Serializable, sendHandle: SendHandle) => void;
+type NoArgListener = () => void;
+type EndListener = (code: number | null, signal: NodeJS.Signals | null) => void;
+type ErrorListener = (err: Error) => void;
+
+type Listener = MessageListener | NoArgListener | EndListener | ErrorListener;
+
+interface Events {
+  close?: EndListener;
+  disconnect?: NoArgListener;
+  error?: ErrorListener;
+  exit?: EndListener;
+  message?: MessageListener;
+  spawn?: NoArgListener;
+}
+
 interface StubArgs {
   cmd: string;
   exitCode: number | null;
-  exitSignal: string | null;
+  exitSignal: NodeJS.Signals | null;
   encoding?: BufferEncoding;
   error?: Error;
   stdout?: string;
@@ -50,12 +66,23 @@ function getSpawnStub(args: StubArgs): ChildProcess {
     encoding,
     timeout,
   } = args;
-  const listeners: any = {};
+  const listeners: Events = {};
 
   // init listeners
-  const on = (name: string, cb: any) => {
-    if (!listeners[name]) {
-      listeners[name] = cb;
+  const on = (name: string, cb: Listener) => {
+    const event = name as keyof Events;
+    if (listeners[event]) {
+      return;
+    }
+    switch (event) {
+      case 'exit':
+        listeners.exit = cb as EndListener;
+        break;
+      case 'error':
+        listeners.error = cb as ErrorListener;
+        break;
+      default:
+        break;
     }
   };
 
@@ -64,12 +91,21 @@ function getSpawnStub(args: StubArgs): ChildProcess {
   const stderrStream = getReadable(stderr, encoding ?? 'utf8');
 
   // define class methods
-  const emit = (event: string, arg: any): boolean => {
-    if (listeners[event]) {
-      listeners[event](arg);
-      return true;
+  const emit = (name: string, ...arg: (string | number | Error)[]): boolean => {
+    const event = name as keyof Events;
+
+    switch (event) {
+      case 'error':
+        listeners.error?.(arg[0] as Error);
+        break;
+      case 'exit':
+        listeners.exit?.(arg[0] as number, arg[1] as NodeJS.Signals);
+        break;
+      default:
+        break;
     }
-    return false;
+
+    return !!listeners[event];
   };
 
   const unref = (): void => {
@@ -83,17 +119,15 @@ function getSpawnStub(args: StubArgs): ChildProcess {
 
   // queue events and wait for event loop to clear
   setTimeout(() => {
-    if (error && listeners.error) {
-      listeners.error(error);
+    if (error) {
+      listeners.error?.(error);
     }
-    if (listeners.exit) {
-      listeners.exit(exitCode, exitSignal);
-    }
+    listeners.exit?.(exitCode, exitSignal);
   }, 0);
 
   if (timeout) {
     setTimeout(() => {
-      listeners.exit(null, 'SIGTERM');
+      listeners.exit?.(null, 'SIGTERM');
     }, timeout);
   }
 
@@ -107,8 +141,6 @@ function getSpawnStub(args: StubArgs): ChildProcess {
     kill,
   } as ChildProcess;
 }
-
-jest.mock('child_process');
 
 describe('util/exec/common', () => {
   const spawnSpy = jest.spyOn(child_process, 'spawn');
