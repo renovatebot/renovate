@@ -71,7 +71,7 @@ export class HermitDatasource extends Datasource {
     const res = items.find((i) => i.Name === packageName);
 
     if (!res) {
-      logger.error({ packageName, registryUrl }, 'cannot find hermit package');
+      logger.debug({ packageName, registryUrl }, 'cannot find hermit package');
       return null;
     }
 
