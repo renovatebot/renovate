@@ -16,6 +16,7 @@ import type {
 } from '../../modules/manager/types';
 import type { Platform } from '../../modules/platform';
 import { massageMarkdown } from '../../modules/platform/github';
+import { regEx } from '../../util/regex';
 import { BranchConfig, BranchResult, BranchUpgradeConfig } from '../types';
 import * as dependencyDashboard from './dependency-dashboard';
 import { DashboardHtmlFixer } from './dependency-dashboard-utils';
@@ -703,18 +704,18 @@ describe('workers/repository/dependency-dashboard', () => {
           const branches: BranchConfig[] = [];
           const maxLength = 64000;
           const packageFilesBigRepo = genRandPackageFile(6100, 10);
-          config.dependencyDashboardFooter =
+          const footer =
             '\n- [ ] <!-- manual job -->Check this box to trigger a request for Renovate to run again on this repository\n';
+          config.dependencyDashboardFooter = footer;
           PackageFiles.add('main', packageFilesBigRepo);
           await dependencyDashboard.ensureDependencyDashboard(config, branches);
           const body = platform.ensureIssue.mock.calls[0][0].body;
+          const footerRe = regEx(`${footer.replace('[', '\\[')}\\s*$`);
           expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
           expect(platform.massageMarkdown).toHaveBeenCalledTimes(1);
           expect(DashboardHtmlFixer.isValidMdHtml(body)).toBeTrue();
           expect(body.length < maxLength).toBeTrue();
-          expect(
-            body.endsWith(config.dependencyDashboardFooter + '\n\n')
-          ).toBeTrue();
+          expect(footerRe.test(body)).toBeTrue();
 
           // same with dry run
           await dryRun(branches, platform);
@@ -729,7 +730,7 @@ describe('workers/repository/dependency-dashboard', () => {
             '    <tr>\n' +
             '      <th>Name</th>\n' +
             '      <th>Value</th>\n';
-          const fixedHtml = new DashboardHtmlFixer(html).fix();
+          const fixedHtml = DashboardHtmlFixer.fix(html);
           expect(fixedHtml).toEndWith('</tr>\n</thead>\n</table>\n\n');
           expect(DashboardHtmlFixer.isValidMdHtml(fixedHtml)).toBeTrue();
         });
@@ -742,17 +743,14 @@ describe('workers/repository/dependency-dashboard', () => {
             '    </tr>\n' +
             '  </thead>\n' +
             '</table>\n\n';
-          const fixedHtml = new DashboardHtmlFixer(html).fix();
+          const fixedHtml = DashboardHtmlFixer.fix(html);
           expect(fixedHtml).toMatch(html);
           expect(DashboardHtmlFixer.isValidMdHtml(fixedHtml)).toBeTrue();
         });
 
         it('does nothing to a regular string', () => {
           const html = 'this is a string';
-          // call mdFixer.fix twice for coverage
-          const mdFixer = new DashboardHtmlFixer(html);
-          const fixedHtml = mdFixer.fix();
-          mdFixer.fix();
+          const fixedHtml = DashboardHtmlFixer.fix(html);
           expect(fixedHtml).toMatch(html);
           expect(DashboardHtmlFixer.isValidMdHtml(fixedHtml)).toBeTrue();
         });
@@ -760,7 +758,7 @@ describe('workers/repository/dependency-dashboard', () => {
         it('removes a truncated opening html tag and fixes it', () => {
           const html =
             '<table>\n' + '  <thead>\n' + '    <tr>\n' + '    <truncated';
-          const fixedHtml = new DashboardHtmlFixer(html).fix();
+          const fixedHtml = DashboardHtmlFixer.fix(html);
           expect(fixedHtml.includes('<truncated')).toBeFalse();
           expect(fixedHtml).toEndWith('</tr>\n</thead>\n</table>\n\n');
           expect(DashboardHtmlFixer.isValidMdHtml(fixedHtml)).toBeTrue();
@@ -769,7 +767,7 @@ describe('workers/repository/dependency-dashboard', () => {
         it('removes a truncated closing html tag and fixes it', () => {
           const html =
             '<table>\n' + '  <thead>\n' + '    <tr>\n' + '    </truncated';
-          const fixedHtml = new DashboardHtmlFixer(html).fix();
+          const fixedHtml = DashboardHtmlFixer.fix(html);
           expect(fixedHtml.includes('</truncated')).toBeFalse();
           expect(fixedHtml).toEndWith('</tr>\n</thead>\n</table>\n\n');
           expect(DashboardHtmlFixer.isValidMdHtml(fixedHtml)).toBeTrue();

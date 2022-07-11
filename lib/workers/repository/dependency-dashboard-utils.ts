@@ -1,41 +1,26 @@
 import { regEx } from '../../util/regex';
 
 export class DashboardHtmlFixer {
-  private readonly md: string;
-  private fixedMd: string | null = null;
-  private missingHtmlTags: string[];
-
   static isValidMdHtml(md: string): boolean {
     return !getMissingHtmlTags(md).length;
   }
 
-  constructor(markdown: string) {
+  static fix(markdown: string): string {
     // edge-case: remove truncated html tag at the end of the markdown string
-    this.md = markdown.replace(/<\/?\w*$/, '');
-    this.missingHtmlTags = getMissingHtmlTags(this.md);
-  }
+    const md = markdown.replace(/<\/?\w*$/, '');
 
-  fix(): string {
-    if (this.fixedMd) {
-      return this.fixedMd;
+    if (DashboardHtmlFixer.isValidMdHtml(md)) {
+      return md;
     }
 
-    if (this.isValidMdHtml()) {
-      this.fixedMd = this.md;
-      return this.fixedMd;
-    }
-
-    this.fixedMd =
-      this.md +
+    return (
+      md +
       '\n\n' +
-      this.missingHtmlTags.map((str) => str.replace('<', '</')).join('\n') +
-      '\n\n';
-
-    return this.fixedMd;
-  }
-
-  private isValidMdHtml(): boolean {
-    return !this.missingHtmlTags.length;
+      getMissingHtmlTags(md)
+        .map((str) => str.replace('<', '</'))
+        .join('\n') +
+      '\n\n'
+    );
   }
 }
 

@@ -361,7 +361,7 @@ export async function ensureDependencyDashboard(
 
 function finalizeMd(issueBody: string, config: RenovateConfig): string {
   let md = platform.massageMarkdown(issueBody);
-  md = new DashboardHtmlFixer(md).fix();
+  md = DashboardHtmlFixer.fix(md);
 
   if (config.dependencyDashboardFooter?.length) {
     md +=
