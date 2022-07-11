@@ -277,7 +277,7 @@ export async function processBranch(
         'Branch + PR exists but is not scheduled -- will update if necessary'
       );
     }
-    await checkoutBranch(config.baseBranch!);
+
     //stability checks
     if (
       config.upgrades.some(
@@ -369,7 +369,8 @@ export async function processBranch(
       config = { ...config, ...(await shouldReuseExistingBranch(config)) };
     }
     logger.debug(`Using reuseExistingBranch: ${config.reuseExistingBranch}`);
-    const res = await getUpdatedPackageFiles(config);
+    // if()
+    const res = await getUpdatedPackageFiles(config); //TODO: prevent this
     // istanbul ignore if
     if (res.artifactErrors && config.artifactErrors) {
       res.artifactErrors = config.artifactErrors.concat(res.artifactErrors);
@@ -404,7 +405,7 @@ export async function processBranch(
     } else {
       logger.debug('No updated lock files in branch');
     }
-    const postUpgradeCommandResults = await executePostUpgradeCommands(config);
+    const postUpgradeCommandResults = await executePostUpgradeCommands(config); //TODO: prevent this
 
     if (postUpgradeCommandResults !== null) {
       const { updatedArtifacts, artifactErrors } = postUpgradeCommandResults;
@@ -474,7 +475,7 @@ export async function processBranch(
         };
       }
     }
-
+    await checkoutBranch(config.baseBranch!);
     const commitSha = await commitFilesToBranch(config);
     // istanbul ignore if
     if (branchPr && platform.refreshPr) {

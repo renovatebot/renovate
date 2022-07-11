@@ -580,6 +580,7 @@ export async function isBranchModified(branchName: string): Promise<boolean> {
     (branch) => branch.branchName === branchName
   );
   if (branchCache) {
+    // compare cached sha with fetched sha
     if (
       branchCache?.sha &&
       config.branchCommits[branchName] &&
@@ -639,8 +640,6 @@ export async function isBranchConflicted(
   branch: string
 ): Promise<boolean> {
   logger.debug(`isBranchConflicted(${baseBranch}, ${branch})`);
-  await syncGit();
-  await writeGitAuthor();
 
   const baseBranchSha = getBranchCommit(baseBranch);
   const branchSha = getBranchCommit(branch);
@@ -664,6 +663,9 @@ export async function isBranchConflicted(
     );
     return cachedResult;
   }
+
+  await syncGit();
+  await writeGitAuthor();
 
   let result = false;
 
