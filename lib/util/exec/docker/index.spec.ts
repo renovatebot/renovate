@@ -7,7 +7,6 @@ import { GlobalConfig } from '../../../config/global';
 import { SYSTEM_INSUFFICIENT_MEMORY } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { getPkgReleases as _getPkgReleases } from '../../../modules/datasource';
-import { rawExec } from '../common';
 import type { VolumeOption } from '../types';
 import {
   generateDockerCommand,
@@ -134,7 +133,6 @@ describe('util/exec/docker/index', () => {
         { stdout: '', stderr: '' },
       ]);
       await removeDockerContainer('bar', 'foo_');
-      expect(rawExec).toHaveBeenCalledTimes(2);
       expect(execSnapshots).toMatchObject([
         { cmd: 'docker ps --filter name=foo_bar -aq' },
         { cmd: 'docker rm -f 12345' },

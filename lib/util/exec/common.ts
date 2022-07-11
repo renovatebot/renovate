@@ -72,6 +72,7 @@ export function exec(cmd: string, opts: RawExecOptions): Promise<ExecResult> {
 
     // handle process events
     cp.on('error', (error) => {
+      kill(cp, 'SIGTERM');
       reject({
         message: error.message,
         Error: error,
@@ -79,25 +80,13 @@ export function exec(cmd: string, opts: RawExecOptions): Promise<ExecResult> {
       });
     });
 
-    cp.on('exit', (code: number, signal: string) => {
+    cp.on('exit', (code: number, signal: NodeJS.Signals) => {
       if (NONTERM.includes(signal)) {
         return;
       }
 
       if (signal) {
-        try {
-          // process.kill(-(cp.pid as number), signal); // PID range hack; signal process tree
-
-          // destroying stdio is needed for unref to work
-          // https://nodejs.org/api/child_process.html#subprocessunref
-          // https://github.com/nodejs/node/blob/4d5ff25a813fd18939c9f76b17e36291e3ea15c3/lib/child_process.js#L412-L426
-          cp.stderr?.destroy();
-          cp.stdout?.destroy();
-          cp.unref();
-          cp.kill(signal as NodeJS.Signals);
-        } catch (err) {
-          // cp is a single node tree, therefore -pid is invalid,
-        }
+        kill(cp, signal);
         reject({
           message: `Process signaled with "${signal}"`,
           signal,
@@ -128,6 +117,23 @@ export function exec(cmd: string, opts: RawExecOptions): Promise<ExecResult> {
       };
     }
   });
+}
+
+function kill(cp: ChildProcess, signal: NodeJS.Signals): boolean {
+  try {
+    // process.kill(-(cp.pid as number), signal); // PID range hack; signal process tree
+
+    // destroying stdio is needed for unref to work
+    // https://nodejs.org/api/child_process.html#subprocessunref
+    // https://github.com/nodejs/node/blob/4d5ff25a813fd18939c9f76b17e36291e3ea15c3/lib/child_process.js#L412-L426
+    cp.stderr?.destroy();
+    cp.stdout?.destroy();
+    cp.unref();
+    return cp.kill(signal);
+  } catch (err) {
+    // cp is a single node tree, therefore -pid is invalid,
+    return false;
+  }
 }
 
 // TODO: rename

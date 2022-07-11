@@ -10,7 +10,7 @@ import { exec } from '.';
 
 const cpExec: jest.Mock<typeof _cpExec> = _cpExec as any;
 
-jest.mock('../../../lib/util/exec/common');
+jest.mock('./common');
 jest.mock('../../modules/datasource');
 
 interface TestInput {
