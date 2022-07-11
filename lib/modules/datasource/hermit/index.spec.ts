@@ -92,7 +92,7 @@ describe('modules/datasource/hermit/index', () => {
           ],
         });
 
-      httpMock.scope(githubApiHost).get(indexAssetUrl).reply(200, `[]`);
+      httpMock.scope(githubApiHost).get(indexAssetUrl).reply(200, []);
 
       await expect(
         datasource.getReleases({
