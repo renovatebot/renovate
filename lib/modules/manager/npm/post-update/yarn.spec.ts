@@ -248,8 +248,62 @@ describe('modules/manager/npm/post-update/yarn', () => {
         { isLockFileMaintenance: true },
       ]);
       expect(fs.readFile).toHaveBeenCalledTimes(expectedFsCalls);
-      expect(fs.remove).toHaveBeenCalledTimes(1);
-      expect(res.lockFile).toBeNull();
+      expect(fs.remove).toHaveBeenCalledTimes(0);
+
+      // expected the lock file not to be deleted.
+      expect(res.lockFile).toBe('');
+      expect(fixSnapshots(execSnapshots)).toMatchSnapshot();
+    }
+  );
+
+  it.each([
+    ['1.22.0', '^1.10.0', 2],
+    ['2.1.0', '>= 2.0.0', 1],
+    ['2.2.0', '2.2.0', 1],
+    ['3.0.0', '3.0.0', 1],
+  ])(
+    'performs lock file maintenance in subdirectory independent workspaces using yarn v%s',
+    async (yarnVersion, yarnCompatibility, expectedFsReadCalls) => {
+      Fixtures.mock(
+        {
+          '.yarnrc': null,
+          'package.json': JSON.stringify({ name: 'main-workspace' }),
+          'yarn.lock': 'main-workspace-lock-contents',
+          'sub_workspace/package.json': JSON.stringify({
+            name: 'sub-workspace',
+          }),
+          'sub_workspace/yarn.lock': 'sub-workspace-lock-contents',
+        },
+        'some-dir'
+      );
+      const execSnapshots = mockExecAll(exec, {
+        stdout: yarnVersion,
+        stderr: '',
+      });
+      const config = {
+        constraints: {
+          yarn: yarnCompatibility,
+        },
+        postUpdateOptions: ['yarnDedupeFewer', 'yarnDedupeHighest'],
+      };
+      const res = await yarnHelper.generateLockFile(
+        'some-dir/sub_workspace',
+        {},
+        config,
+        [{ isLockFileMaintenance: true }]
+      );
+      expect(fs.readFile).toHaveBeenCalledTimes(expectedFsReadCalls);
+      expect(fs.remove).toHaveBeenCalledTimes(0);
+
+      // Expect the lock file to be not deleted before `yarn install` is run.
+      // The lock file should exist but just be empty. This is necessary for
+      // subdirectory isolated workspaces to work with Yarn 2+.
+      expect(res.lockFile).toBe('');
+      expect(fs.outputFile).toHaveBeenCalledTimes(1);
+      expect(fs.outputFile).toHaveBeenCalledWith(
+        'some-dir/sub_workspace/yarn.lock',
+        ''
+      );
       expect(fixSnapshots(execSnapshots)).toMatchSnapshot();
     }
   );

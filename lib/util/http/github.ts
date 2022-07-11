@@ -45,13 +45,18 @@ interface GithubGraphqlRepoData<T = unknown> {
   repository?: T;
 }
 
-export interface GithubGraphqlResponse<T = unknown> {
-  data?: T;
-  errors?: {
-    type?: string;
-    message: string;
-  }[];
-}
+export type GithubGraphqlResponse<T = unknown> =
+  | {
+      data: T;
+      errors?: never;
+    }
+  | {
+      data?: never;
+      errors: {
+        type?: string;
+        message: string;
+      }[];
+    };
 
 function handleGotError(
   err: GotLegacyError,

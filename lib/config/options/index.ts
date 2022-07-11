@@ -132,6 +132,7 @@ const options: RenovateOptions[] = [
     experimental: true,
     experimentalDescription:
       'Config migration PRs are still being improved, in particular to reduce the amount of reordering and whitespace changes.',
+    experimentalIssues: [16359],
   },
   {
     name: 'productLinks',
@@ -821,7 +822,7 @@ const options: RenovateOptions[] = [
       type: 'string',
       format: 'uri',
     },
-    supportedManagers: ['helm-requirements', 'helmv3', 'helmfile'],
+    supportedManagers: ['helm-requirements', 'helmv3', 'helmfile', 'gitlabci'],
   },
   {
     name: 'defaultRegistryUrls',
