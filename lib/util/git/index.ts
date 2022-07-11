@@ -568,7 +568,7 @@ export async function isBranchStale(branchName: string): Promise<boolean> {
 }
 
 export async function isBranchModified(branchName: string): Promise<boolean> {
-  // First check local cache
+  // First check local config
   if (config.branchIsModified[branchName] !== undefined) {
     return config.branchIsModified[branchName];
   }
@@ -582,7 +582,6 @@ export async function isBranchModified(branchName: string): Promise<boolean> {
   }
 
   await syncGit();
-
   if (!branchExists(branchName)) {
     logger.debug(
       { branchName },
@@ -590,7 +589,6 @@ export async function isBranchModified(branchName: string): Promise<boolean> {
     );
     return false;
   }
-
   // Retrieve the author of the most recent commit
   let lastAuthor: string | undefined;
   try {
@@ -642,6 +640,8 @@ export async function isBranchConflicted(
   branch: string
 ): Promise<boolean> {
   logger.debug(`isBranchConflicted(${baseBranch}, ${branch})`);
+  await syncGit();
+  await writeGitAuthor();
 
   const baseBranchSha = getBranchCommit(baseBranch);
   const branchSha = getBranchCommit(branch);
@@ -665,9 +665,6 @@ export async function isBranchConflicted(
     );
     return cachedResult;
   }
-
-  await syncGit();
-  await writeGitAuthor();
 
   let result = false;
 
