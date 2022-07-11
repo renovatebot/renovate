@@ -1,0 +1,29 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`modules/datasource/cpan/index getReleases returns a dep for www.cpan.org package hit (*.tar.gz) 1`] = `
+Object {
+  "changelogUrl": "https://metacpan.org/dist/AAAA-Mail-SpamAssassin/changes",
+  "homepage": "https://metacpan.org/pod/AAAA::Mail::SpamAssassin",
+  "registryUrl": "https://www.cpan.org",
+  "releases": Array [
+    Object {
+      "isStable": true,
+      "version": "0.002",
+    },
+  ],
+}
+`;
+
+exports[`modules/datasource/cpan/index getReleases returns a dep for www.cpan.org package hit (*.tgz) 1`] = `
+Object {
+  "changelogUrl": "https://metacpan.org/dist/Regexp-Assemble/changes",
+  "homepage": "https://metacpan.org/pod/Regexp::Assemble",
+  "registryUrl": "https://www.cpan.org",
+  "releases": Array [
+    Object {
+      "isStable": true,
+      "version": "0.38",
+    },
+  ],
+}
+`;

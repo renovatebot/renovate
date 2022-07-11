@@ -1,0 +1,32 @@
+File:         02packages.details.txt
+URL:          http://www.cpan.org/modules/02packages.details.txt
+Description:  Package names found in directory $CPAN/authors/id/
+Columns:      package name, version, path
+Intended-For: Automated fetch routines, namespace documentation.
+Written-By:   PAUSE version 1.005
+Line-Count:   251137
+Last-Updated: Thu, 07 Jul 2022 12:17:03 GMT
+
+A1z::Html                          0.04  C/CE/CEEJAY/A1z-Html-0.04.tar.gz
+A1z::HTML5::Template               0.22  C/CE/CEEJAY/A1z-HTML5-Template-0.22.tar.gz
+A_Third_Package                   undef  C/CL/CLEMBURG/Test-Unit-0.13.tar.gz
+AAA::Demo                         undef  J/JW/JWACH/Apache-FastForward-1.1.tar.gz
+AAA::eBay                         undef  J/JW/JWACH/Apache-FastForward-1.1.tar.gz
+AAAA                              undef  P/PR/PRBRENAN/Data-Table-Text-20210818.tar.gz
+AAAA::Crypt::DH                    0.06  B/BI/BINGOS/AAAA-Crypt-DH-0.06.tar.gz
+AAAA::Mail::SpamAssassin          0.002  S/SC/SCHWIGON/AAAA-Mail-SpamAssassin-0.002.tar.gz
+AAAAAAAAA                          1.01  M/MS/MSCHWERN/AAAAAAAAA-1.01.tar.gz
+AAC::Pvoice                        0.91  J/JO/JOUKE/AAC-Pvoice-0.91.tar.gz
+AAC::Pvoice::Bitmap                1.12  J/JO/JOUKE/AAC-Pvoice-0.91.tar.gz
+AAC::Pvoice::Dialog                1.01  J/JO/JOUKE/AAC-Pvoice-0.91.tar.gz
+AAC::Pvoice::EditableRow           1.04  J/JO/JOUKE/AAC-Pvoice-0.91.tar.gz
+AAC::Pvoice::Input                 1.12  J/JO/JOUKE/AAC-Pvoice-0.91.tar.gz
+AAC::Pvoice::Panel                 1.15  J/JO/JOUKE/AAC-Pvoice-0.91.tar.gz
+AAC::Pvoice::Row                   1.05  J/JO/JOUKE/AAC-Pvoice-0.91.tar.gz
+Aard                              0.001  M/MG/MGV/Aard-0.001.tar.gz
+abbreviation                       0.02  M/MI/MIYAGAWA/abbreviation-0.02.tar.gz
+ABI                                 1.0  M/MA/MALAY/ABI-1.0.tar.gz
+Abilities                           0.5  I/ID/IDOPEREL/Abilities-0.5.tar.gz
+Abilities::Features                 0.5  I/ID/IDOPEREL/Abilities-0.5.tar.gz
+Regexp::Assemble                   0.38  R/RS/RSAVAGE/Regexp-Assemble-0.38.tgz
+Regexp::Assemble::Compressed       0.02  T/TA/TANIGUCHI/Regexp-Assemble-Compressed-0.02.tar.gz
