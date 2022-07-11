@@ -10,7 +10,7 @@ import * as _hostRules from '../../../util/host-rules';
 import type { UpdateArtifactsConfig } from '../types';
 import * as gomod from '.';
 
-jest.mock('child_process');
+jest.mock('../../../util/exec/common');
 jest.mock('../../../util/exec/env');
 jest.mock('../../../util/git');
 jest.mock('../../../util/host-rules');
