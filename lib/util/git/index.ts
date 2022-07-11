@@ -670,6 +670,8 @@ export async function isBranchConflicted(
   await writeGitAuthor();
 
   let result = false;
+  await syncGit();
+  await writeGitAuthor();
 
   const origBranch = config.currentBranch;
   try {
