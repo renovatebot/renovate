@@ -26,6 +26,7 @@ import { api as semverCoerced } from '../../modules/versioning/semver-coerced';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import type { GitProtocol } from '../../types/git';
 import { Limit, incLimitedValue } from '../../workers/global/limits';
+import { getCache } from '../cache/repository';
 import { newlineRegex, regEx } from '../regex';
 import { parseGitAuthor } from './author';
 import { getNoVerify, simpleGitConfig } from './config';
@@ -564,11 +565,6 @@ export async function isBranchStale(branchName: string): Promise<boolean> {
 }
 
 export async function isBranchModified(branchName: string): Promise<boolean> {
-  await syncGit();
-  // First check cache
-  if (config.branchIsModified[branchName] !== undefined) {
-    return config.branchIsModified[branchName];
-  }
   if (!branchExists(branchName)) {
     logger.debug(
       { branchName },
@@ -576,6 +572,28 @@ export async function isBranchModified(branchName: string): Promise<boolean> {
     );
     return false;
   }
+
+  const cache = getCache();
+
+  // check if branch exists in cache or not
+  const branchCache = cache.branches?.find(
+    (branch) => branch.branchName === branchName
+  );
+  if (branchCache) {
+    if (
+      branchCache?.sha &&
+      config.branchCommits[branchName] &&
+      branchCache.sha === config.branchCommits[branchName]
+    ) {
+      return (config.branchIsModified[branchName] = branchCache.isModified);
+    }
+  }
+  // First check cache
+  if (config.branchIsModified[branchName] !== undefined) {
+    return config.branchIsModified[branchName];
+  }
+
+  await syncGit();
   // Retrieve the author of the most recent commit
   let lastAuthor: string | undefined;
   try {
