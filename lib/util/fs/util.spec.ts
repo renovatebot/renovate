@@ -11,10 +11,11 @@ describe('util/fs/util', () => {
   });
 
   test.each`
-    path      | fullPath
-    ${''}     | ${`${localDir}`}
-    ${'baz'}  | ${`${localDir}/baz`}
-    ${'/baz'} | ${`${localDir}/baz`}
+    path             | fullPath
+    ${''}            | ${`${localDir}`}
+    ${'baz'}         | ${`${localDir}/baz`}
+    ${'/baz'}        | ${`${localDir}/baz`}
+    ${'/foo/../bar'} | ${`${localDir}/bar`}
   `(`ensureLocalPath('$path', '$fullPath')`, ({ path, fullPath }) => {
     expect(ensureLocalPath(path)).toBe(fullPath);
   });
@@ -29,10 +30,11 @@ describe('util/fs/util', () => {
   });
 
   test.each`
-    path      | fullPath
-    ${''}     | ${`${cacheDir}`}
-    ${'baz'}  | ${`${cacheDir}/baz`}
-    ${'/baz'} | ${`${cacheDir}/baz`}
+    path             | fullPath
+    ${''}            | ${`${cacheDir}`}
+    ${'baz'}         | ${`${cacheDir}/baz`}
+    ${'/baz'}        | ${`${cacheDir}/baz`}
+    ${'/foo/../bar'} | ${`${cacheDir}/bar`}
   `(`ensureCachePath('$path', '$fullPath')`, ({ path, fullPath }) => {
     expect(ensureCachePath(path)).toBe(fullPath);
   });
