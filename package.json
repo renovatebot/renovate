@@ -170,7 +170,7 @@
     "find-packages": "9.0.6",
     "find-up": "5.0.0",
     "fs-extra": "10.1.0",
-    "git-url-parse": "11.6.0",
+    "git-url-parse": "12.0.0",
     "github-url-from-git": "1.5.0",
     "global-agent": "3.0.0",
     "good-enough-parser": "1.1.7",
