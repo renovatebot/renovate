@@ -14,7 +14,7 @@ export class DepTypesMigration extends AbstractMigration {
           const depTypeName = (depType as any).depType;
           if (depTypeName) {
             delete (depType as PackageRuleInputConfig).depType;
-            (depType as any).depTypeList = [depTypeName];
+            (depType as PackageRule).matchDepTypes = [depTypeName];
             packageRules.push({ ...(depType as PackageRule) });
           }
         }
