@@ -121,7 +121,13 @@ export function exec(cmd: string, opts: RawExecOptions): Promise<ExecResult> {
 
 function kill(cp: ChildProcess, signal: NodeJS.Signals): boolean {
   try {
-    // process.kill(-(cp.pid as number), signal); // PID range hack; signal process tree
+    /**
+     * If `pid` is negative, but not `-1`, signal shall be sent to all processes
+     * (excluding an unspecified set of system processes),
+     * whose process group ID (pgid) is equal to the absolute value of pid,
+     * and for which the process has permission to send a signal.
+     */
+    // process.kill(-(cp.pid as number), signal);
 
     // destroying stdio is needed for unref to work
     // https://nodejs.org/api/child_process.html#subprocessunref
@@ -131,7 +137,7 @@ function kill(cp: ChildProcess, signal: NodeJS.Signals): boolean {
     cp.unref();
     return cp.kill(signal);
   } catch (err) {
-    // cp is a single node tree, therefore -pid is invalid,
+    // cp is a single node tree, therefore -pid is invalid as there is no such pgid,
     return false;
   }
 }
