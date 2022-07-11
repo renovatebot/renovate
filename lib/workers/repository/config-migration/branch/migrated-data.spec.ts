@@ -20,124 +20,134 @@ const migratedData = Fixtures.getJson('./migrated-data.json');
 const migratedDataJson5 = Fixtures.getJson('./migrated-data.json5');
 const migratedConfigObj = Fixtures.getJson('./migrated.json');
 const formattedMigratedData = Fixtures.getJson(
-'./migrated-data-formatted.json'
+  './migrated-data-formatted.json'
 );
 
 describe('workers/repository/config-migration/branch/migrated-data', () => {
-describe('MigratedDataFactory.getAsync', () => {
-beforeEach(() => {
-jest.resetAllMocks();
-mockedFunction(detectIndent).mockReturnValue({
-type: 'space',
-amount: 2,
-indent: '  ',
-});
-mockedFunction(detectRepoFileConfig).mockResolvedValue({
-configFileName: 'renovate.json',
-});
-mockedFunction(readLocalFile).mockResolvedValue(rawNonMigrated);
-mockedFunction(migrateConfig).mockReturnValue({
-isMigrated: true,
-migratedConfig: migratedConfigObj,
-});
-mockedFunction(getFileList).mockResolvedValue([]);
-});
+  describe('MigratedDataFactory.getAsync', () => {
+    beforeEach(() => {
+      jest.resetAllMocks();
+      mockedFunction(detectIndent).mockReturnValue({
+        type: 'space',
+        amount: 2,
+        indent: '  ',
+      });
+      mockedFunction(detectRepoFileConfig).mockResolvedValue({
+        configFileName: 'renovate.json',
+      });
+      mockedFunction(readLocalFile).mockResolvedValue(rawNonMigrated);
+      mockedFunction(migrateConfig).mockReturnValue({
+        isMigrated: true,
+        migratedConfig: migratedConfigObj,
+      });
+      mockedFunction(getFileList).mockResolvedValue([]);
+    });
 
-it('Calls getAsync a first when migration not needed', async () => {
-mockedFunction(migrateConfig).mockReturnValueOnce({
-isMigrated: false,
-migratedConfig: {},
-});
-await expect(MigratedDataFactory.getAsync()).resolves.toBeNull();
-});
+    it('Calls getAsync a first when migration not needed', async () => {
+      mockedFunction(migrateConfig).mockReturnValueOnce({
+        isMigrated: false,
+        migratedConfig: {},
+      });
+      await expect(MigratedDataFactory.getAsync()).resolves.toBeNull();
+    });
 
-it('Calls getAsync a first time to initialize the factory', async () => {
-await expect(MigratedDataFactory.getAsync()).resolves.toEqual(migratedData);
-expect(detectRepoFileConfig).toHaveBeenCalledTimes(1);
-});
+    it('Calls getAsync a first time to initialize the factory', async () => {
+      await expect(MigratedDataFactory.getAsync()).resolves.toEqual(
+        migratedData
+      );
+      expect(detectRepoFileConfig).toHaveBeenCalledTimes(1);
+    });
 
-it('Calls getAsync a second time to get the saved data from before', async () => {
-await expect(MigratedDataFactory.getAsync()).resolves.toEqual(migratedData);
-expect(detectRepoFileConfig).toHaveBeenCalledTimes(0);
-});
+    it('Calls getAsync a second time to get the saved data from before', async () => {
+      await expect(MigratedDataFactory.getAsync()).resolves.toEqual(
+        migratedData
+      );
+      expect(detectRepoFileConfig).toHaveBeenCalledTimes(0);
+    });
 
-describe('MigratedData class', () => {
-it('gets the filename from the class instance', async () => {
-const data = await MigratedDataFactory.getAsync();
-expect(data?.filename).toBe('renovate.json');
-});
+    describe('MigratedData class', () => {
+      it('gets the filename from the class instance', async () => {
+        const data = await MigratedDataFactory.getAsync();
+        expect(data?.filename).toBe('renovate.json');
+      });
 
-it('gets the content from the class instance', async () => {
-const data = await MigratedDataFactory.getAsync();
-expect(data?.content).toBe(migratedData.content);
-});
-});
+      it('gets the content from the class instance', async () => {
+        const data = await MigratedDataFactory.getAsync();
+        expect(data?.content).toBe(migratedData.content);
+      });
+    });
 
-it('Resets the factory and gets a new value', async () => {
-MigratedDataFactory.reset();
-await expect(MigratedDataFactory.getAsync()).resolves.toEqual(migratedData);
-});
+    it('Resets the factory and gets a new value', async () => {
+      MigratedDataFactory.reset();
+      await expect(MigratedDataFactory.getAsync()).resolves.toEqual(
+        migratedData
+      );
+    });
 
-it('Resets the factory and gets a new value with default indentation', async () => {
-mockedFunction(detectIndent).mockReturnValueOnce({
-type: undefined,
-amount: 0,
-// TODO: incompatible types (#7154)
-indent: null as never,
-});
-MigratedDataFactory.reset();
-await expect(MigratedDataFactory.getAsync()).resolves.toEqual(migratedData);
-});
+    it('Resets the factory and gets a new value with default indentation', async () => {
+      mockedFunction(detectIndent).mockReturnValueOnce({
+        type: undefined,
+        amount: 0,
+        // TODO: incompatible types (#7154)
+        indent: null as never,
+      });
+      MigratedDataFactory.reset();
+      await expect(MigratedDataFactory.getAsync()).resolves.toEqual(
+        migratedData
+      );
+    });
 
-it('Migrate a JSON5 config file', async () => {
-mockedFunction(detectRepoFileConfig).mockResolvedValueOnce({
-configFileName: 'renovate.json5',
-});
-mockedFunction(readLocalFile).mockResolvedValueOnce(rawNonMigratedJson5);
-MigratedDataFactory.reset();
-await expect(MigratedDataFactory.getAsync()).resolves.toEqual(
-migratedDataJson5
-);
-});
+    it('Migrate a JSON5 config file', async () => {
+      mockedFunction(detectRepoFileConfig).mockResolvedValueOnce({
+        configFileName: 'renovate.json5',
+      });
+      mockedFunction(readLocalFile).mockResolvedValueOnce(rawNonMigratedJson5);
+      MigratedDataFactory.reset();
+      await expect(MigratedDataFactory.getAsync()).resolves.toEqual(
+        migratedDataJson5
+      );
+    });
 
-it('Returns nothing due to fs error', async () => {
-mockedFunction(detectRepoFileConfig).mockResolvedValueOnce({
-configFileName: undefined,
-});
-mockedFunction(readLocalFile).mockRejectedValueOnce(null);
-MigratedDataFactory.reset();
-await expect(MigratedDataFactory.getAsync()).resolves.toBeNull();
-});
+    it('Returns nothing due to fs error', async () => {
+      mockedFunction(detectRepoFileConfig).mockResolvedValueOnce({
+        configFileName: undefined,
+      });
+      mockedFunction(readLocalFile).mockRejectedValueOnce(null);
+      MigratedDataFactory.reset();
+      await expect(MigratedDataFactory.getAsync()).resolves.toBeNull();
+    });
 
-it('format and migrate a JSON config file', async () => {
-mockedFunction(detectRepoFileConfig).mockResolvedValueOnce({
-configFileName: 'renovate.json',
-});
-mockedFunction(readLocalFile).mockResolvedValueOnce(rawNonMigrated);
-mockedFunction(getFileList).mockResolvedValue(['.prettierrc']);
-MigratedDataFactory.reset();
-await expect(MigratedDataFactory.getAsync()).resolves.toEqual(
-formattedMigratedData
-);
-});
+    it('format and migrate a JSON config file', async () => {
+      mockedFunction(detectRepoFileConfig).mockResolvedValueOnce({
+        configFileName: 'renovate.json',
+      });
+      mockedFunction(readLocalFile).mockResolvedValueOnce(rawNonMigrated);
+      mockedFunction(getFileList).mockResolvedValue(['.prettierrc']);
+      MigratedDataFactory.reset();
+      await expect(MigratedDataFactory.getAsync()).resolves.toEqual(
+        formattedMigratedData
+      );
+    });
 
-it('should not stop run for invalid package.json', async () => {
-mockedFunction(detectRepoFileConfig).mockResolvedValueOnce({
-configFileName: 'renovate.json',
-});
-mockedFunction(readLocalFile).mockResolvedValueOnce(rawNonMigrated);
-mockedFunction(readLocalFile).mockResolvedValue('abci');
-MigratedDataFactory.reset();
-await expect(MigratedDataFactory.getAsync()).resolves.toEqual(migratedData);
-});
+    it('should not stop run for invalid package.json', async () => {
+      mockedFunction(detectRepoFileConfig).mockResolvedValueOnce({
+        configFileName: 'renovate.json',
+      });
+      mockedFunction(readLocalFile).mockResolvedValueOnce(rawNonMigrated);
+      mockedFunction(readLocalFile).mockResolvedValue('abci');
+      MigratedDataFactory.reset();
+      await expect(MigratedDataFactory.getAsync()).resolves.toEqual(
+        migratedData
+      );
+    });
 
-it('return original content if its invalid', async () => {
-await expect(
-applyPrettierFormatting(`{"name":"Rahul"`, 'json', {
-indent: '  ',
-amount: 2,
-})
-).resolves.toBe(`{"name":"Rahul"`);
-});
-});
+    it('return original content if its invalid', async () => {
+      await expect(
+        applyPrettierFormatting(`{"name":"Rahul"`, 'json', {
+          indent: '  ',
+          amount: 2,
+        })
+      ).resolves.toBe(`{"name":"Rahul"`);
+    });
+  });
 });
