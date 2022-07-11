@@ -572,7 +572,7 @@ export async function isBranchModified(branchName: string): Promise<boolean> {
   if (config.branchIsModified[branchName] !== undefined) {
     return config.branchIsModified[branchName];
   }
-  // check in repoCache
+  // Second check repoCache
   const isModified = getCachedModifiedResult(
     branchName,
     config.branchCommits[branchName]

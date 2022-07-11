@@ -278,6 +278,20 @@ describe('util/git/index', () => {
     });
   });
 
+  describe('isBranchModified() with non-null cache', () => {
+    beforeEach(() => {
+      modifiedCache.getCachedModifiedResult.mockReturnValue(false);
+    });
+
+    it('should return false when branch is not found', async () => {
+      expect(await git.isBranchModified('renovate/not_found')).toBeFalse();
+    });
+
+    it('should return false when author matches', async () => {
+      expect(await git.isBranchModified('renovate/future_branch')).toBeFalse();
+    });
+  });
+
   describe('getBranchCommit(branchName)', () => {
     it('should return same value for equal refs', () => {
       const hex = git.getBranchCommit('renovate/equal_branch');
