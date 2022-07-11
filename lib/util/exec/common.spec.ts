@@ -1,6 +1,6 @@
-import * as child_process from 'child_process';
 import type { ChildProcess, SendHandle, Serializable } from 'child_process';
 import { Readable } from 'stream';
+import { spawn } from '../../../test/exec-util';
 import { partial } from '../../../test/util';
 import { exec } from './common';
 import type { RawExecOptions } from './types';
@@ -143,7 +143,6 @@ function getSpawnStub(args: StubArgs): ChildProcess {
 }
 
 describe('util/exec/common', () => {
-  const spawnSpy = jest.spyOn(child_process, 'spawn');
   const cmd = 'ls -l';
   const stdout = 'out message';
   const stderr = 'err message';
@@ -162,7 +161,7 @@ describe('util/exec/common', () => {
         stdout,
         stderr,
       });
-      spawnSpy.mockImplementationOnce((cmd, opts) => stub);
+      spawn.mockImplementationOnce((cmd, opts) => stub);
       await expect(
         exec(
           cmd,
@@ -179,7 +178,7 @@ describe('util/exec/common', () => {
       const stderr = 'err';
       const exitCode = 1;
       const stub = getSpawnStub({ cmd, exitCode, exitSignal: null, stderr });
-      spawnSpy.mockImplementationOnce((cmd, opts) => stub);
+      spawn.mockImplementationOnce((cmd, opts) => stub);
       await expect(
         exec(cmd, partial<RawExecOptions>({ encoding: 'utf8' }))
       ).rejects.toMatchObject({
@@ -194,7 +193,7 @@ describe('util/exec/common', () => {
       const cmd = 'ls -l';
       const exitSignal = 'SIGTERM';
       const stub = getSpawnStub({ cmd, exitCode: null, exitSignal });
-      spawnSpy.mockImplementationOnce((cmd, opts) => stub);
+      spawn.mockImplementationOnce((cmd, opts) => stub);
       await expect(
         exec(cmd, partial<RawExecOptions>({ encoding: 'utf8' }))
       ).rejects.toMatchObject({
@@ -212,7 +211,7 @@ describe('util/exec/common', () => {
         exitSignal: 'SIGSTOP',
         timeout: 500,
       });
-      spawnSpy.mockImplementationOnce((cmd, opts) => stub);
+      spawn.mockImplementationOnce((cmd, opts) => stub);
       await expect(
         exec(cmd, partial<RawExecOptions>({ encoding: 'utf8' }))
       ).toReject();
@@ -227,7 +226,7 @@ describe('util/exec/common', () => {
         exitSignal: null,
         error: new Error(errMsg),
       });
-      spawnSpy.mockImplementationOnce((cmd, opts) => stub);
+      spawn.mockImplementationOnce((cmd, opts) => stub);
       await expect(
         exec(cmd, partial<RawExecOptions>({ encoding: 'utf8' }))
       ).rejects.toMatchObject({ cmd: 'ls -l', message: 'error message' });
@@ -241,7 +240,7 @@ describe('util/exec/common', () => {
         exitSignal: null,
         stdout: 'some message',
       });
-      spawnSpy.mockImplementationOnce((cmd, opts) => stub);
+      spawn.mockImplementationOnce((cmd, opts) => stub);
       await expect(
         exec(
           cmd,
@@ -265,7 +264,7 @@ describe('util/exec/common', () => {
         exitSignal: null,
         stderr: 'some message',
       });
-      spawnSpy.mockImplementationOnce((cmd, opts) => stub);
+      spawn.mockImplementationOnce((cmd, opts) => stub);
       await expect(
         exec(
           cmd,

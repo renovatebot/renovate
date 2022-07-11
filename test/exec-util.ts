@@ -1,3 +1,4 @@
+import { spawn as _spawn } from 'child_process';
 import is from '@sindresorhus/is';
 import traverse from 'traverse';
 import upath from 'upath';
@@ -13,6 +14,9 @@ export type ExecResult = { stdout: string; stderr: string } | Error;
 // TODO: fix type #7154
 export type ExecMock = jest.Mock<typeof _exec>;
 export const exec: ExecMock = _exec as any;
+
+export type SpawnMock = jest.MockedFunction<typeof _spawn>;
+export const spawn = _spawn as SpawnMock;
 
 // TODO: rename
 interface ExecSnapshot {
