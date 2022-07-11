@@ -12,7 +12,7 @@ import { PackagistDatasource } from '../../datasource/packagist';
 import type { UpdateArtifactsConfig } from '../types';
 import * as composer from '.';
 
-jest.mock('child_process');
+jest.mock('../../../util/exec/common');
 jest.mock('../../../util/exec/env');
 jest.mock('../../datasource');
 jest.mock('../../../util/fs');
