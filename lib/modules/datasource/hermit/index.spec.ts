@@ -21,7 +21,6 @@ describe('modules/datasource/hermit/index', () => {
           Repository: 'https://github.com/golang/golang',
         },
       ] as HermitSearchResult[];
-      const jsonResult = JSON.stringify(resp);
       httpMock
         .scope(githubApiHost)
         .get(releaseUrl)
