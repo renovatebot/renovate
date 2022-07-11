@@ -1,4 +1,4 @@
-import * as cacache from 'cacache';
+import cacache from 'cacache';
 import { DateTime } from 'luxon';
 import upath from 'upath';
 import { logger } from '../../../logger';

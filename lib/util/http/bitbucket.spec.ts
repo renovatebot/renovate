@@ -7,6 +7,7 @@ const baseUrl = 'https://api.bitbucket.org';
 
 describe('util/http/bitbucket', () => {
   let api: BitbucketHttp;
+
   beforeEach(() => {
     api = new BitbucketHttp();
 
@@ -29,25 +30,30 @@ describe('util/http/bitbucket', () => {
     httpMock.scope(baseUrl).post('/some-url').reply(200, body);
     const res = await api.postJson('some-url');
     expect(res.body).toEqual(body);
-    expect(httpMock.getTrace()).toMatchSnapshot();
   });
+
   it('accepts custom baseUrl', async () => {
     const customBaseUrl = 'https://api-test.bitbucket.org';
     httpMock.scope(baseUrl).post('/some-url').reply(200, {});
     httpMock.scope(customBaseUrl).post('/some-url').reply(200, {});
 
-    await api.postJson('some-url');
+    expect(await api.postJson('some-url')).toEqual({
+      authorization: true,
+      body: {},
+      headers: {
+        'content-type': 'application/json',
+      },
+      statusCode: 200,
+    });
 
     setBaseUrl(customBaseUrl);
-    await api.postJson('some-url');
-
-    expect(httpMock.getTrace()).toMatchSnapshot();
-  });
-  it('returns cached', async () => {
-    httpMock.scope(baseUrl).get('/projects/foo').reply(200, {});
-    const { body } = await api.getJson('projects/foo');
-    // FIXME: explicit assert condition
-    expect(body).toMatchSnapshot();
-    expect(httpMock.getTrace()).toMatchSnapshot();
+    expect(await api.postJson('some-url')).toEqual({
+      authorization: false,
+      body: {},
+      headers: {
+        'content-type': 'application/json',
+      },
+      statusCode: 200,
+    });
   });
 });

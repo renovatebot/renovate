@@ -3,16 +3,17 @@ import { clone } from '../util/clone';
 import * as options from './options';
 import type { RenovateConfig } from './types';
 
-export function mergeChildConfig<T, TChild>(
-  parent: T,
-  child: TChild
-): T & TChild {
+export function mergeChildConfig<
+  T extends Record<string, any>,
+  TChild extends Record<string, any> | undefined
+>(parent: T, child: TChild): T & TChild {
   logger.trace({ parent, child }, `mergeChildConfig`);
   if (!child) {
     return parent as never;
   }
   const parentConfig = clone(parent);
-  const childConfig = clone(child);
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+  const childConfig = clone(child!);
   const config: Record<string, any> = { ...parentConfig, ...childConfig };
   for (const option of options.getOptions()) {
     if (

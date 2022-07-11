@@ -1,11 +1,14 @@
+// TODO #7154
 import is from '@sindresorhus/is';
 import { nameFromLevel } from 'bunyan';
 import { GlobalConfig } from '../../config/global';
 import type { RenovateConfig } from '../../config/types';
 import { getProblems, logger } from '../../logger';
-import { platform } from '../../platform';
+import { platform } from '../../modules/platform';
 import { regEx } from '../../util/regex';
+import * as template from '../../util/template';
 import { BranchConfig, BranchResult } from '../types';
+import { PackageFiles } from './package-files';
 
 interface DependencyDashboard {
   dependencyDashboardChecks: Record<string, string>;
@@ -19,7 +22,7 @@ function parseDashboardIssue(issueBody: string): DependencyDashboard {
   if (checked?.length) {
     const re = regEx(checkMatch);
     checked.forEach((check) => {
-      const [, type, branchName] = re.exec(check);
+      const [, type, branchName] = re.exec(check)!;
       dependencyDashboardChecks[branchName] = type;
     });
   }
@@ -42,11 +45,11 @@ export async function readDashboardBody(config: RenovateConfig): Promise<void> {
     stringifiedConfig.includes('"prCreation":"approval"')
   ) {
     config.dependencyDashboardTitle =
-      config.dependencyDashboardTitle || `Dependency Dashboard`;
+      config.dependencyDashboardTitle ?? `Dependency Dashboard`;
     const issue = await platform.findIssue(config.dependencyDashboardTitle);
     if (issue) {
       config.dependencyDashboardIssue = issue.number;
-      Object.assign(config, parseDashboardIssue(issue.body));
+      Object.assign(config, parseDashboardIssue(issue.body!));
     }
   }
 }
@@ -60,7 +63,7 @@ function getListItem(branch: BranchConfig, type: string): string {
     item += branch.prTitle;
   }
   const uniquePackages = [
-    ...new Set(branch.upgrades.map((upgrade) => '`' + upgrade.depName + '`')),
+    ...new Set(branch.upgrades.map((upgrade) => `\`${upgrade.depName}\``)),
   ];
   if (uniquePackages.length < 2) {
     return item + '\n';
@@ -95,10 +98,15 @@ function appendRepoProblems(config: RenovateConfig, issueBody: string): string {
 
 export async function ensureDependencyDashboard(
   config: RenovateConfig,
-  branches: BranchConfig[]
+  allBranches: BranchConfig[]
 ): Promise<void> {
   // legacy/migrated issue
   const reuseTitle = 'Update Dependencies (Renovate Bot)';
+  const branches = allBranches.filter(
+    (branch) =>
+      branch.result !== BranchResult.Automerged &&
+      !branch.upgrades?.every((upgrade) => upgrade.remediationNotPossible)
+  );
   if (
     !(
       config.dependencyDashboard ||
@@ -106,8 +114,8 @@ export async function ensureDependencyDashboard(
       config.packageRules?.some((rule) => rule.dependencyDashboardApproval) ||
       branches.some(
         (branch) =>
-          branch.dependencyDashboardApproval ||
-          branch.dependencyDashboardPrApproval
+          !!branch.dependencyDashboardApproval ||
+          !!branch.dependencyDashboardPrApproval
       )
     )
   ) {
@@ -118,7 +126,7 @@ export async function ensureDependencyDashboard(
       );
     } else {
       logger.debug('Closing Dependency Dashboard');
-      await platform.ensureIssueClosing(config.dependencyDashboardTitle);
+      await platform.ensureIssueClosing(config.dependencyDashboardTitle!);
     }
     return;
   }
@@ -128,9 +136,7 @@ export async function ensureDependencyDashboard(
     return;
   }
   logger.debug('Ensuring Dependency Dashboard');
-  const hasBranches =
-    is.nonEmptyArray(branches) &&
-    branches.some((branch) => branch.result !== BranchResult.Automerged);
+  const hasBranches = is.nonEmptyArray(branches);
   if (config.dependencyDashboardAutoclose && !hasBranches) {
     if (GlobalConfig.get('dryRun')) {
       logger.info(
@@ -139,13 +145,14 @@ export async function ensureDependencyDashboard(
       );
     } else {
       logger.debug('Closing Dependency Dashboard');
-      await platform.ensureIssueClosing(config.dependencyDashboardTitle);
+      await platform.ensureIssueClosing(config.dependencyDashboardTitle!);
     }
     return;
   }
   let issueBody = '';
   if (config.dependencyDashboardHeader?.length) {
-    issueBody += `${config.dependencyDashboardHeader}\n\n`;
+    issueBody +=
+      template.compile(config.dependencyDashboardHeader, config) + '\n\n';
   }
 
   issueBody = appendRepoProblems(config, issueBody);
@@ -167,7 +174,7 @@ export async function ensureDependencyDashboard(
   if (awaitingSchedule.length) {
     issueBody += '## Awaiting Schedule\n\n';
     issueBody +=
-      'These updates are awaiting their schedule. Click on a checkbox to get an update now.\n';
+      'These updates are awaiting their schedule. Click on a checkbox to get an update now.\n\n';
     for (const branch of awaitingSchedule) {
       issueBody += getListItem(branch, 'unschedule');
     }
@@ -260,25 +267,17 @@ export async function ensureDependencyDashboard(
   ];
   let inProgress = branches.filter(
     (branch) =>
-      !otherRes.includes(branch.result) &&
+      !otherRes.includes(branch.result!) &&
       branch.prBlockedBy !== 'BranchAutomerge'
   );
   const otherBranches = inProgress.filter(
-    (branch) => branch.prBlockedBy || !branch.prNo
+    (branch) => !!branch.prBlockedBy || !branch.prNo
   );
   // istanbul ignore if
   if (otherBranches.length) {
     issueBody += '## Other Branches\n\n';
     issueBody += `These updates are pending. To force PRs open, click the checkbox below.\n\n`;
     for (const branch of otherBranches) {
-      logger.info(
-        {
-          prBlockedBy: branch.prBlockedBy,
-          prNo: branch.prNo,
-          result: branch.result,
-        },
-        'Blocked PR'
-      );
       issueBody += getListItem(branch, 'other');
     }
     issueBody += '\n';
@@ -319,8 +318,13 @@ export async function ensureDependencyDashboard(
       'This repository currently has no open or pending branches.\n\n';
   }
 
+  issueBody += PackageFiles.getDashboardMarkdown(config);
+
   if (config.dependencyDashboardFooter?.length) {
-    issueBody += `---\n${config.dependencyDashboardFooter}\n`;
+    issueBody +=
+      '---\n' +
+      template.compile(config.dependencyDashboardFooter, config) +
+      '\n';
   }
 
   if (config.dependencyDashboardIssue) {
@@ -330,9 +334,9 @@ export async function ensureDependencyDashboard(
     );
     if (updatedIssue) {
       const { dependencyDashboardChecks } = parseDashboardIssue(
-        updatedIssue.body
+        updatedIssue.body!
       );
-      for (const branchName of Object.keys(config.dependencyDashboardChecks)) {
+      for (const branchName of Object.keys(config.dependencyDashboardChecks!)) {
         delete dependencyDashboardChecks[branchName];
       }
       for (const branchName of Object.keys(dependencyDashboardChecks)) {
@@ -352,9 +356,9 @@ export async function ensureDependencyDashboard(
     );
   } else {
     await platform.ensureIssue({
-      title: config.dependencyDashboardTitle,
+      title: config.dependencyDashboardTitle!,
       reuseTitle,
-      body: issueBody,
+      body: platform.massageMarkdown(issueBody),
       labels: config.dependencyDashboardLabels,
       confidential: config.confidential,
     });

@@ -1,7 +1,366 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`workers/repository/dependency-dashboard ensureDependencyDashboard() checks detected dependencies section multi base branch repo add detected dependencies to the Dependency Dashboard body 1`] = `
+"This issue lists Renovate updates and detected dependencies. Read the [Dependency Dashboard](https://docs.renovatebot.com/key-concepts/dashboard/) docs to learn more.
+
+This repository currently has no open or pending branches.
+
+## Detected dependencies
+
+<details><summary>Branch main</summary>
+<blockquote>
+
+<details><summary>dockerfile</summary>
+<blockquote>
+
+<details><summary>Dockerfile</summary>
+
+ - \`ubuntu 20.04\`
+
+</details>
+
+</blockquote>
+</details>
+
+<details><summary>npm</summary>
+<blockquote>
+
+<details><summary>package.json</summary>
+
+ - \`cookie-parser ^1.4.5\`
+ - \`express ~4.17.1\`
+ - \`express-handlebars >=5.3.4\`
+ - \`geoip-lite 1.4.*\`
+ - \`nodemailer 6.7.0\`
+ - \`redis 3.1.2-3.4.0\`
+ - \`dotenv 10.0.0\`
+ - \`nodemon 2.0.14\`
+
+</details>
+
+</blockquote>
+</details>
+
+<details><summary>poetry</summary>
+<blockquote>
+
+<details><summary>pyproject.toml</summary>
+
+ - \`six <=1.3.0\`
+
+</details>
+
+</blockquote>
+</details>
+
+</blockquote>
+</details>
+
+<details><summary>Branch dev</summary>
+<blockquote>
+
+<details><summary>dockerfile</summary>
+<blockquote>
+
+<details><summary>Dockerfile</summary>
+
+ - \`ubuntu 20.04\`
+
+</details>
+
+</blockquote>
+</details>
+
+<details><summary>npm</summary>
+<blockquote>
+
+<details><summary>package.json</summary>
+
+ - \`cookie-parser ^1.4.5\`
+ - \`express ~4.17.1\`
+ - \`express-handlebars >=5.3.4\`
+ - \`geoip-lite 1.4.*\`
+ - \`nodemailer 6.7.0\`
+ - \`redis 3.1.2-3.4.0\`
+ - \`dotenv 10.0.0\`
+ - \`nodemon 2.0.14\`
+
+</details>
+
+</blockquote>
+</details>
+
+<details><summary>poetry</summary>
+<blockquote>
+
+<details><summary>pyproject.toml</summary>
+
+ - \`six <=1.3.0\`
+
+</details>
+
+</blockquote>
+</details>
+
+</blockquote>
+</details>
+
+"
+`;
+
+exports[`workers/repository/dependency-dashboard ensureDependencyDashboard() checks detected dependencies section multi base branch repo show default message in issues body when packageFiles is empty 1`] = `
+"This issue lists Renovate updates and detected dependencies. Read the [Dependency Dashboard](https://docs.renovatebot.com/key-concepts/dashboard/) docs to learn more.
+
+This repository currently has no open or pending branches.
+
+## Detected dependencies
+
+<details><summary>Branch main</summary>
+<blockquote>
+
+None detected
+
+</blockquote>
+</details>
+
+<details><summary>Branch dev</summary>
+<blockquote>
+
+<details><summary>dockerfile</summary>
+<blockquote>
+
+<details><summary>Dockerfile</summary>
+
+ - \`ubuntu 20.04\`
+
+</details>
+
+</blockquote>
+</details>
+
+<details><summary>npm</summary>
+<blockquote>
+
+<details><summary>package.json</summary>
+
+ - \`cookie-parser ^1.4.5\`
+ - \`express ~4.17.1\`
+ - \`express-handlebars >=5.3.4\`
+ - \`geoip-lite 1.4.*\`
+ - \`nodemailer 6.7.0\`
+ - \`redis 3.1.2-3.4.0\`
+ - \`dotenv 10.0.0\`
+ - \`nodemon 2.0.14\`
+
+</details>
+
+</blockquote>
+</details>
+
+<details><summary>poetry</summary>
+<blockquote>
+
+<details><summary>pyproject.toml</summary>
+
+ - \`six <=1.3.0\`
+
+</details>
+
+</blockquote>
+</details>
+
+</blockquote>
+</details>
+
+"
+`;
+
+exports[`workers/repository/dependency-dashboard ensureDependencyDashboard() checks detected dependencies section multi base branch repo show default message in issues body when when packageFiles is null 1`] = `
+"This issue lists Renovate updates and detected dependencies. Read the [Dependency Dashboard](https://docs.renovatebot.com/key-concepts/dashboard/) docs to learn more.
+
+This repository currently has no open or pending branches.
+
+## Detected dependencies
+
+<details><summary>Branch main</summary>
+<blockquote>
+
+None detected
+
+</blockquote>
+</details>
+
+<details><summary>Branch dev</summary>
+<blockquote>
+
+<details><summary>dockerfile</summary>
+<blockquote>
+
+<details><summary>Dockerfile</summary>
+
+ - \`ubuntu 20.04\`
+
+</details>
+
+</blockquote>
+</details>
+
+<details><summary>npm</summary>
+<blockquote>
+
+<details><summary>package.json</summary>
+
+ - \`cookie-parser ^1.4.5\`
+ - \`express ~4.17.1\`
+ - \`express-handlebars >=5.3.4\`
+ - \`geoip-lite 1.4.*\`
+ - \`nodemailer 6.7.0\`
+ - \`redis 3.1.2-3.4.0\`
+ - \`dotenv 10.0.0\`
+ - \`nodemon 2.0.14\`
+
+</details>
+
+</blockquote>
+</details>
+
+<details><summary>poetry</summary>
+<blockquote>
+
+<details><summary>pyproject.toml</summary>
+
+ - \`six <=1.3.0\`
+
+</details>
+
+</blockquote>
+</details>
+
+</blockquote>
+</details>
+
+"
+`;
+
+exports[`workers/repository/dependency-dashboard ensureDependencyDashboard() checks detected dependencies section single base branch repo add detected dependencies to the Dependency Dashboard body 1`] = `
+"This issue lists Renovate updates and detected dependencies. Read the [Dependency Dashboard](https://docs.renovatebot.com/key-concepts/dashboard/) docs to learn more.
+
+This repository currently has no open or pending branches.
+
+## Detected dependencies
+
+<details><summary>dockerfile</summary>
+<blockquote>
+
+<details><summary>Dockerfile</summary>
+
+ - \`ubuntu 20.04\`
+
+</details>
+
+</blockquote>
+</details>
+
+<details><summary>npm</summary>
+<blockquote>
+
+<details><summary>package.json</summary>
+
+ - \`cookie-parser ^1.4.5\`
+ - \`express ~4.17.1\`
+ - \`express-handlebars >=5.3.4\`
+ - \`geoip-lite 1.4.*\`
+ - \`nodemailer 6.7.0\`
+ - \`redis 3.1.2-3.4.0\`
+ - \`dotenv 10.0.0\`
+ - \`nodemon 2.0.14\`
+
+</details>
+
+</blockquote>
+</details>
+
+<details><summary>poetry</summary>
+<blockquote>
+
+<details><summary>pyproject.toml</summary>
+
+ - \`six <=1.3.0\`
+
+</details>
+
+</blockquote>
+</details>
+
+"
+`;
+
+exports[`workers/repository/dependency-dashboard ensureDependencyDashboard() checks detected dependencies section single base branch repo show default message in issues body when packageFiles is empty 1`] = `
+"This issue lists Renovate updates and detected dependencies. Read the [Dependency Dashboard](https://docs.renovatebot.com/key-concepts/dashboard/) docs to learn more.
+
+This repository currently has no open or pending branches.
+
+## Detected dependencies
+
+None detected
+
+"
+`;
+
+exports[`workers/repository/dependency-dashboard ensureDependencyDashboard() checks detected dependencies section single base branch repo show default message in issues body when when packageFiles is null 1`] = `
+"This issue lists Renovate updates and detected dependencies. Read the [Dependency Dashboard](https://docs.renovatebot.com/key-concepts/dashboard/) docs to learn more.
+
+This repository currently has no open or pending branches.
+
+## Detected dependencies
+
+None detected
+
+"
+`;
+
+exports[`workers/repository/dependency-dashboard ensureDependencyDashboard() checks detected dependencies section single base branch repo shows different combinations of version+digest for a given dependency 1`] = `
+"This issue lists Renovate updates and detected dependencies. Read the [Dependency Dashboard](https://docs.renovatebot.com/key-concepts/dashboard/) docs to learn more.
+
+This repository currently has no open or pending branches.
+
+## Detected dependencies
+
+<details><summary>dockerfile</summary>
+<blockquote>
+
+<details><summary>ver-and-digest/Dockerfile</summary>
+
+ - \`ubuntu 18.04@sha256:a7ed45c4a95fbe19f9c5fb9d1ca58b2431b2a4984754be2f50ccec99d9428b79\`
+
+</details>
+
+<details><summary>no-ver-no-digest/Dockerfile</summary>
+
+ - \`ubuntu no version found\`
+
+</details>
+
+<details><summary>ver-only/Dockerfile</summary>
+
+ - \`ubuntu 20.04\`
+
+</details>
+
+<details><summary>digest-only/Dockerfile</summary>
+
+ - \`ubuntu sha256:06b5d30fabc1fc574f2ecab87375692299d45f8f190d9b71f512deb494114e1f\`
+
+</details>
+
+</blockquote>
+</details>
+
+"
+`;
+
 exports[`workers/repository/dependency-dashboard ensureDependencyDashboard() contains logged problems 1`] = `
-"This issue provides visibility into Renovate updates and their statuses. [Learn more](https://docs.renovatebot.com/key-concepts/dashboard/)
+"This issue lists Renovate updates and detected dependencies. Read the [Dependency Dashboard](https://docs.renovatebot.com/key-concepts/dashboard/) docs to learn more.
 
 ## Repository problems
 
@@ -19,13 +378,21 @@ These updates await pending status checks. To force their creation now, click th
 
  - [ ] <!-- approvePr-branch=branchName1 -->pr1
 
+## Detected dependencies
+
+None detected
+
 "
 `;
 
 exports[`workers/repository/dependency-dashboard ensureDependencyDashboard() open or update Dependency Dashboard when all branches are closed and dependencyDashboardAutoclose is false 1`] = `
-"This issue provides visibility into Renovate updates and their statuses. [Learn more](https://docs.renovatebot.com/key-concepts/dashboard/)
+"This is a header
 
 This repository currently has no open or pending branches.
+
+## Detected dependencies
+
+None detected
 
 ---
 And this is a footer
@@ -33,17 +400,21 @@ And this is a footer
 `;
 
 exports[`workers/repository/dependency-dashboard ensureDependencyDashboard() open or update Dependency Dashboard when rules contain approvals 1`] = `
-"This issue provides visibility into Renovate updates and their statuses. [Learn more](https://docs.renovatebot.com/key-concepts/dashboard/)
+"This is a header for platform:github
 
 This repository currently has no open or pending branches.
 
+## Detected dependencies
+
+None detected
+
 ---
-And this is a footer
+And this is a footer for repository:test
 "
 `;
 
 exports[`workers/repository/dependency-dashboard ensureDependencyDashboard() rechecks branches 1`] = `
-"This issue provides visibility into Renovate updates and their statuses. [Learn more](https://docs.renovatebot.com/key-concepts/dashboard/)
+"This issue lists Renovate updates and detected dependencies. Read the [Dependency Dashboard](https://docs.renovatebot.com/key-concepts/dashboard/) docs to learn more.
 
 ## Pending Approval
 
@@ -55,7 +426,12 @@ These branches will be created by Renovate only once you click their checkbox be
 ## Awaiting Schedule
 
 These updates are awaiting their schedule. Click on a checkbox to get an update now.
+
  - [x] <!-- unschedule-branch=branchName3 -->pr3
+
+## Detected dependencies
+
+None detected
 
 "
 `;

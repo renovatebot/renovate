@@ -1,7 +1,8 @@
+// TODO #7154
 import { GlobalConfig } from '../../config/global';
 import type { RenovateConfig } from '../../config/types';
 import { logger } from '../../logger';
-import { platform } from '../../platform';
+import { platform } from '../../modules/platform';
 import { PrState } from '../../types';
 import { regEx } from '../../util/regex';
 
@@ -14,14 +15,14 @@ export async function raiseConfigWarningIssue(
   if (error.validationSource) {
     body += `Location: \`${error.validationSource}\`\n`;
   }
-  body += `Error type: ${error.validationError}\n`;
+  body += `Error type: ${error.validationError!}\n`;
   if (error.validationMessage) {
     body += `Message: \`${error.validationMessage.replace(
       regEx(/`/g),
       "'"
     )}\`\n`;
   }
-  const pr = await platform.getBranchPr(config.onboardingBranch);
+  const pr = await platform.getBranchPr(config.onboardingBranch!);
   if (pr?.state === PrState.Open) {
     logger.debug('Updating onboarding PR with config error notice');
     body = `## Action Required: Fix Renovate Configuration\n\n${body}`;
@@ -32,7 +33,7 @@ export async function raiseConfigWarningIssue(
       try {
         await platform.updatePr({
           number: pr.number,
-          prTitle: config.onboardingPrTitle,
+          prTitle: config.onboardingPrTitle!,
           prBody: body,
         });
       } catch (err) /* istanbul ignore next */ {
@@ -41,6 +42,10 @@ export async function raiseConfigWarningIssue(
     }
   } else if (GlobalConfig.get('dryRun')) {
     logger.info('DRY-RUN: Would ensure config error issue');
+  } else if (config.suppressNotifications?.includes('configErrorIssue')) {
+    logger.info(
+      'configErrorIssue - configuration failure, issues will be suppressed'
+    );
   } else {
     const once = false;
     const shouldReopen = config.configWarningReuseIssue;

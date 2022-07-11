@@ -9,11 +9,11 @@ If the administrator has configured a fixed list of repositories then the only w
 Otherwise, the process for adding new repositories to a Renovate installation can vary:
 
 - Most commonly, you run Renovate as a dedicated "bot user" with global config option `autodiscover` set to `true`, meaning that it will run on every repository which it's been granted access to
-- If using a GitHub App (including WhiteSource Renovate on `github.com`) then you can install the app into a user or organization account and select either "All repositories", or "Select repositories" and pick them manually
+- If using a GitHub App (including Mend Renovate on `github.com`) then you can install the app into a user or organization account and select either "All repositories", or "Select repositories" and pick them manually
 
 ### Hosted GitHub.com App
 
-Installing/enabling WhiteSource's Renovate GitHub App is simple.
+Installing/enabling Mend's Renovate GitHub App is simple.
 
 First, navigate to [https://github.com/apps/renovate](https://github.com/apps/renovate) and click the Install button:
 
@@ -25,21 +25,35 @@ The only choice you need to make is whether to run Renovate on all repositories 
 
 Renovate will ignore any repositories that don't have known package files, as well as any forks, so you can enable Renovate for all your repositories with no problems.
 That said, most people run Renovate on selected repositories.
-Unfortunately GitHub doesn't offer a "select all except X,Y,Z" option, so you must select each repository where you want Renovate to run.
+Unfortunately GitHub doesn't offer a "select all except X, Y, Z" option, so you must select each repository where you want Renovate to run.
 
 Once you're done selecting repositories for Renovate to run on, click the green Install button at the bottom of the page and Renovate will be enabled for those repositories and start the onboarding process.
 
-Note: if you are using the WhiteSource Renovate App then it has a custom behavior for forked repositories.
-If you choose "All repositories" when installing then forked repositories will be skipped by default, while if you choose "Select repositories" then they will be processed by Renovate even if they're a fork.
+<!-- prettier-ignore -->
+!!! note
+    If you are using the Mend Renovate App then it has a custom behavior for forked repositories.
+    If you choose "All repositories" when installing then forked repositories will be skipped by default, while if you choose "Select repositories" then they will be processed by Renovate even if they're a fork.
 
 ### Hosted GitLab.com App
 
-Unfortunately WhiteSource's hosted GitLab app needed to be taken offline indefinitely until a viable security model for bots on GitLab.com is available.
+Unfortunately Mend's hosted GitLab app needed to be taken offline indefinitely until a viable security model for bots on GitLab.com is available.
 For more details on GitLab security for bots, please see the [GitLab Bot Security](../gitlab-bot-security.md) doc.
+
+### Self-hosting on Windows
+
+We recommend you set [`core.autocrlf = input`](https://git-scm.com/docs/gitattributes#_text) in your Git config.
+You can do this by running this Git command:
+
+```bash
+git config --global core.autocrlf input
+```
+
+This prevents the carriage return `\r\n` which may confuse Renovate bot.
+You can also set the line endings in your repository by adding `* text=auto eol=lf` to your `.gitattributes` file.
 
 ## Repository onboarding
 
-Once you have enabled Renovate on a repository, you will receive a "Configure Renovate" Pull Request looking something like this:
+Once you have enabled Renovate on a repository, you will get a "Configure Renovate" Pull Request looking something like this:
 
 ![Onboarding](../assets/images/onboarding.png)
 
@@ -52,7 +66,7 @@ You can edit your Renovate configuration **within the `renovate/configure` branc
 
 ### Check for warnings
 
-If you have any Warnings or Errors listed, see if you need or want to make any changes to address them.
+If you have any Warnings or Errors listed, see if you need or want to make any changes to fix them.
 Warnings and errors should be fixed on the base branch (e.g. `main`) so that Renovate can recreate its Configure Renovate PR on its next cycle.
 
 ### Configuration location
@@ -71,7 +85,9 @@ If you don't want a `renovate.json` file in your repository you can use one of t
 
 #### package.json
 
-Note: this approach has been deprecated and will be removed in a future release.
+<!-- prettier-ignore -->
+!!! warning
+    This approach has been deprecated and will be removed in a future release.
 
 You can add the same settings to a `"renovate"` section in your `package.json` file instead.
 The `package.json` file must be located at the root of your repository.
@@ -91,7 +107,7 @@ Sometimes Renovate detects that an override to these defaults is needed, and wil
 Please check the docs on this website for an exhaustive Configuration Reference.
 To help you get started, here are some of the most commonly changed (overridden) configuration settings:
 
-- **rangeStrategy**: By default (with zero config) it's `"replace"` however the `"config:base"` preset overrides it to `"auto"`. If you don't want to pin dependency versions and retain ranges, add the `":preserveSemverRanges"` preset to the `extends` array
+- **rangeStrategy**: By default (with zero config) it's `"replace"` but the `"config:base"` preset overrides it to `"auto"`. If you don't want to pin dependency versions and retain ranges, add the `":preserveSemverRanges"` preset to the `extends` array
 - **labels**: Labels to assign to Pull Requests
 - **assignees**: GitHub user(s) to assign the Pull Requests to
 
@@ -119,6 +135,9 @@ If you want to make config edits directly, follow these steps:
 1. Validate your config by running `renovate-config-validator`
 1. If the improved config passes the validation, merge the branch into your mainline branch
 
+You can configure a [pre-commit](https://pre-commit.com) hook to validate your configuration automatically.
+Please check out the [`renovatebot/pre-commit-hooks` repository](https://github.com/renovatebot/pre-commit-hooks) for more information.
+
 ### Nuke config and re-onboard
 
 Perhaps you really liked the interactive onboarding PR and want to use it again.
@@ -130,4 +149,4 @@ Any existing Renovate PRs will be closed after you've completed these steps.
 1. Remove the current Renovate configuration file (e.g. `renovate.json`) from your mainline branch
 
 Following these steps will trick Renovate into thinking that your repository was _never_ onboarded, and will trigger a new "Configure Renovate" PR.
-If you're using the hosted WhiteSource Renovate App and you don't receive a new onboarding PR within a few hours, then please create a Discussions post to request staff trigger it manually.
+If you're using the hosted Mend Renovate App and you don't get a new onboarding PR within a few hours, then please create a Discussions post to request staff trigger it manually.

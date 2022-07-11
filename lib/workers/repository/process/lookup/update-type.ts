@@ -1,5 +1,5 @@
 import type { UpdateType } from '../../../../config/types';
-import * as allVersioning from '../../../../versioning';
+import type * as allVersioning from '../../../../modules/versioning';
 
 export interface UpdateTypeConfig {
   separateMajorMinor?: boolean;
@@ -13,10 +13,10 @@ export function getUpdateType(
   currentVersion: string,
   newVersion: string
 ): UpdateType {
-  if (versioning.getMajor(newVersion) > versioning.getMajor(currentVersion)) {
+  if (versioning.getMajor(newVersion)! > versioning.getMajor(currentVersion)!) {
     return 'major';
   }
-  if (versioning.getMinor(newVersion) > versioning.getMinor(currentVersion)) {
+  if (versioning.getMinor(newVersion)! > versioning.getMinor(currentVersion)!) {
     return 'minor';
   }
   return 'patch';

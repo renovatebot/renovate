@@ -1,15 +1,11 @@
-import mockFs from 'mock-fs';
-import { loadFixture } from '../../../test/util';
+import { Fixtures } from '../../../test/fixtures';
 import { configFileNames } from '../../config/app-strings';
 import { GlobalConfig } from '../../config/global';
 import { EditorConfig } from './editor-config';
 import { IndentationType } from './indentation-type';
 
+jest.mock('fs');
 const defaultConfigFile = configFileNames[0];
-
-const GLOBAL_EDITOR_CONFIG = loadFixture('.global_editorconfig', '.');
-const JSON_FILES_EDITOR_CONFIG = loadFixture('.json_editorconfig', '.');
-const NON_JSON_FILES_EDITOR_CONFIG = loadFixture('.non_json_editorconfig', '.');
 
 describe('util/json-writer/editor-config', () => {
   beforeAll(() => {
@@ -18,13 +14,13 @@ describe('util/json-writer/editor-config', () => {
     });
   });
 
-  afterEach(() => {
-    mockFs.restore();
+  beforeEach(() => {
+    Fixtures.reset();
   });
 
   it('should handle empty .editorconfig file', async () => {
     expect.assertions(2);
-    mockFs({
+    Fixtures.mock({
       '.editorconfig': '',
     });
     const format = await EditorConfig.getCodeFormat(defaultConfigFile);
@@ -35,8 +31,8 @@ describe('util/json-writer/editor-config', () => {
 
   it('should handle global config from .editorconfig', async () => {
     expect.assertions(2);
-    mockFs({
-      '.editorconfig': GLOBAL_EDITOR_CONFIG,
+    Fixtures.mock({
+      '.editorconfig': Fixtures.get('.global_editorconfig'),
     });
     const format = await EditorConfig.getCodeFormat(defaultConfigFile);
     expect(format.indentationSize).toBe(6);
@@ -45,8 +41,8 @@ describe('util/json-writer/editor-config', () => {
 
   it('should not handle non json config from .editorconfig', async () => {
     expect.assertions(2);
-    mockFs({
-      '.editorconfig': NON_JSON_FILES_EDITOR_CONFIG,
+    Fixtures.mock({
+      '.editorconfig': Fixtures.get('.non_json_editorconfig'),
     });
     const format = await EditorConfig.getCodeFormat(defaultConfigFile);
 
@@ -56,8 +52,8 @@ describe('util/json-writer/editor-config', () => {
 
   it('should handle json config from .editorconfig', async () => {
     expect.assertions(1);
-    mockFs({
-      '.editorconfig': JSON_FILES_EDITOR_CONFIG,
+    Fixtures.mock({
+      '.editorconfig': Fixtures.get('.json_editorconfig'),
     });
     const format = await EditorConfig.getCodeFormat(defaultConfigFile);
 

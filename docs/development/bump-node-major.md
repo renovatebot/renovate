@@ -4,13 +4,13 @@
 
 - Add new version via `package.json>engines>node` and `package.json>engines-next>node`
 - Update the node version in the [local-development](./local-development.md) docs
-- Update the node version in the Github Actions workflow files
+- Update the node version in the GitHub Actions workflow files
 
 ## Deprecate old NodeJS version
 
 - Deprecate old LTS via `package.json>engines-next>node`
 - Update the node version in the [local-development](./local-development.md) docs
-- Remove the old node version in the Github Actions workflow files
+- Remove the old node version in the GitHub Actions workflow files
 
 ## Remove old NodeJS version
 

@@ -1,4 +1,4 @@
-import { GitTreeNode } from '../../git';
+import type { GitTreeNode } from '../../git';
 
 export type GitLabBranch = {
   default: boolean;

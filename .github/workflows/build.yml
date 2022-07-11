@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-      - v25
 
   pull_request:
 
@@ -15,6 +14,9 @@ on:
         default: 'true'
         required: false
 
+permissions:
+  contents: read
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.number || github.ref }}
   cancel-in-progress: true
@@ -24,58 +26,44 @@ env:
   DEFAULT_BRANCH: main
   NODE_VERSION: 14
   DRY_RUN: true
+  SKIP_JAVA_TESTS: true
 
 jobs:
   test:
-    name: ${{ format('test ({0})', matrix.os) }}
+    name: ${{ matrix.node-version == 14 && format('test ({0})', matrix.os) || format('test ({0}, node-{1})', matrix.os, matrix.node-version) }}
     runs-on: ${{ matrix.os }}
 
     # tests shouldn't need more time
-    timeout-minutes: 30
+    timeout-minutes: 45
 
     strategy:
       matrix:
         os: [ubuntu-latest]
-        node-version: [14]
-        java-version: [11]
+        node-version: [14, 16]
         # skip macOS and Windows test on pull requests without 'ci:fulltest' label
         include: >-
           ${{ fromJSON((github.event_name != 'pull_request' || contains(github.event.pull_request.labels.*.name, 'ci:fulltest')) && '[{
             "os": "macos-latest",
-            "node-version": 14,
-            "java-version": 11
+            "node-version": 16
           }, {
             "os": "windows-latest",
-            "node-version": 14,
-            "java-version": 11
+            "node-version": 16
           }]' || '[]') }}
 
     env:
-      coverage: ${{ matrix.os == 'ubuntu-latest' && matrix.node-version == 14 }}
+      coverage: ${{ matrix.os == 'ubuntu-latest' && (matrix.node-version == 14 || matrix.node-version == 16) }}
       NODE_VERSION: ${{ matrix.node-version }}
-      JAVA_VERSION: ${{ matrix.java-version }}
-      # skip Java tests on pull requests without 'ci:fulltest' label
-      SKIP_JAVA_TESTS: ${{ matrix.node-version != 14 || (github.event_name == 'pull_request' && !contains(github.event.pull_request.labels.*.name, 'ci:fulltest')) }}
 
     steps:
-      - uses: actions/checkout@ec3a7ce113134d7a93b817d10a8272cb61118579 # renovate: tag=v2.4.0
+      - uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b # tag=v3.0.2
         with:
           fetch-depth: 2
 
       - name: Set up Node.js ${{ env.NODE_VERSION }}
-        uses: actions/setup-node@04c56d2f954f1e4c69436aa54cfef261a018f458 # renovate: tag=v2.5.0
+        uses: actions/setup-node@eeb10cff27034e7acf239c5d29f62154018672fd # tag=v3.3.0
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: yarn
-
-      - name: Set up Java  ${{ env.JAVA_VERSION }}
-        if: env.SKIP_JAVA_TESTS == 'false'
-        uses: actions/setup-java@5f00602cd1b2819185d88dc7a1b1985f598c6705 # renovate: tag=v2.4.0
-        with:
-          java-version: ${{ env.JAVA_VERSION }}
-          distribution: 'adopt'
-          java-package: jre
-          check-latest: false
 
       - name: Init platform
         shell: bash
@@ -92,17 +80,16 @@ jobs:
       - name: Installing dependencies
         run: yarn install --frozen-lockfile
 
-      - name: Unit tests
-        run: yarn jest --maxWorkers=2 --ci --coverage ${{ env.coverage }}
-
-      - name: Codecov
-        uses: codecov/codecov-action@f32b3a3741e1053eb607407145bc9619351dc93b # renovate: tag=v2.1.0
-        if: always() && env.coverage == 'true'
-
-      # build after tests to exclude build files from tests
-      # TODO: check if build before test speeds up tests
+      # build before tests to for static file check
       - name: Build
         run: yarn build
+
+      - name: Unit tests
+        run: yarn jest:${{ env.NODE_VERSION }} --maxWorkers=2 --ci --coverage ${{ env.coverage }}
+
+      - name: Codecov
+        uses: codecov/codecov-action@81cd2dc8148241f03f5839d295e000b8f761e378 # tag=v3.1.0
+        if: always() && env.coverage == 'true'
 
       - name: E2E Test
         run: yarn test-e2e
@@ -114,12 +101,12 @@ jobs:
     timeout-minutes: 15
 
     steps:
-      - uses: actions/checkout@ec3a7ce113134d7a93b817d10a8272cb61118579 # renovate: tag=v2.4.0
+      - uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b # tag=v3.0.2
         with:
           fetch-depth: 2
 
       - name: Set up Node.js ${{ env.NODE_VERSION }}
-        uses: actions/setup-node@04c56d2f954f1e4c69436aa54cfef261a018f458 # renovate: tag=v2.5.0
+        uses: actions/setup-node@eeb10cff27034e7acf239c5d29f62154018672fd # tag=v3.3.0
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: yarn
@@ -152,8 +139,8 @@ jobs:
       - name: Type check
         run: yarn type-check
 
-      - name: Null check
-        run: yarn null-check
+      - name: Strict check
+        run: yarn strict-check
 
   release:
     needs: [lint, test]
@@ -161,15 +148,19 @@ jobs:
     runs-on: ubuntu-latest
     # release shouldn't need more than 5 min
     timeout-minutes: 15
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
 
     steps:
       # full checkout for semantic-release
-      - uses: actions/checkout@ec3a7ce113134d7a93b817d10a8272cb61118579 # renovate: tag=v2.4.0
+      - uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b # tag=v3.0.2
         with:
           fetch-depth: 0
 
       - name: Set up Node.js ${{ env.NODE_VERSION }}
-        uses: actions/setup-node@04c56d2f954f1e4c69436aa54cfef261a018f458 # renovate: tag=v2.5.0
+        uses: actions/setup-node@eeb10cff27034e7acf239c5d29f62154018672fd # tag=v3.3.0
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: yarn
@@ -206,7 +197,7 @@ jobs:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Upload docs
-        uses: actions/upload-artifact@82c141cc518b40d92cc801eee768e7aafc9c2fa2 # renovate: tag=v2.3.1
+        uses: actions/upload-artifact@3cea5372237819ed00197afe530f5a7ea3e805c8 # tag=v3.1.0
         with:
           name: docs
           path: tmp/docs/

@@ -16,9 +16,14 @@ let issues = 0;
 
 markdown.enable(['fence']);
 
+/**
+ *
+ * @param {string} file
+ * @param {import('markdown-it/lib/token')} token
+ */
 function checkValidJson(file, token) {
-  const start = parseInt(token.map[0], 10) + 1;
-  const end = parseInt(token.map[1], 10) + 1;
+  const start = token.map ? token.map[0] + 1 : 0;
+  const end = token.map ? token.map[1] + 1 : 0;
 
   try {
     JSON.parse(token.content);
@@ -36,10 +41,13 @@ function checkValidJson(file, token) {
   }
 }
 
+/**
+ *
+ * @param {string} file
+ */
 async function processFile(file) {
   const text = await fs.readFile(file, 'utf8');
   const tokens = markdown.parse(text, undefined);
-  shell.echo(`Linting ${file}...`);
 
   tokens.forEach((token) => {
     if (token.type === 'fence' && token.info === 'json') {

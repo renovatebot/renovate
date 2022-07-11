@@ -25,11 +25,12 @@ const config: InitialOptionsTsJest = {
     },
   },
   modulePathIgnorePatterns: ['<rootDir>/dist/', '/__fixtures__/'],
-  reporters: ci ? ['default', 'jest-github-actions-reporter'] : ['default'],
+  reporters: ci ? ['default', 'github-actions'] : ['default'],
   setupFilesAfterEnv: [
     'jest-extended/all',
     'expect-more-jest',
     '<rootDir>/test/setup.ts',
+    '<rootDir>/test/to-migrate.ts',
   ],
   snapshotSerializers: ['<rootDir>/test/newline-snapshot-serializer.ts'],
   testEnvironment: 'node',

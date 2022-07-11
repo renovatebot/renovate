@@ -21,17 +21,33 @@ describe('logger/err-serializer', () => {
         },
       },
     });
-    // FIXME: explicit assert condition
-    expect(errSerializer(err)).toMatchSnapshot();
+    expect(errSerializer(err)).toEqual({
+      a: 1,
+      b: 2,
+      message: 'some message',
+      response: {
+        body: 'some response body',
+        url: 'some/path',
+      },
+      options: {
+        headers: {
+          authorization: 'Bearer testtoken',
+        },
+      },
+    });
   });
+
   it('handles missing fields', () => {
     const err = partial<Error & Record<string, unknown>>({
       a: 1,
       stack: 'foo',
       body: 'some body',
     });
-    // FIXME: explicit assert condition
-    expect(errSerializer(err)).toMatchSnapshot();
+    expect(errSerializer(err)).toEqual({
+      a: 1,
+      stack: 'foo',
+      body: 'some body',
+    });
   });
 
   describe('got', () => {
@@ -61,7 +77,6 @@ describe('logger/err-serializer', () => {
         err = errSerializer(error);
       }
 
-      expect(httpMock.getTrace()).toMatchSnapshot();
       expect(err).toBeDefined();
       expect(err.response.body).toBeDefined();
       expect(err.options).toBeDefined();
@@ -79,7 +94,6 @@ describe('logger/err-serializer', () => {
         err = error;
       }
 
-      expect(httpMock.getTrace()).toMatchSnapshot();
       expect(err).toBeDefined();
 
       // remove platform related props
@@ -92,7 +106,7 @@ describe('logger/err-serializer', () => {
         options: {
           method: 'POST',
           password: '***********',
-          url: 'https://:**redacted**@github.com/api',
+          url: 'https://**redacted**@github.com/api',
           username: '',
         },
       });

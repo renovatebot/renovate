@@ -1,12 +1,21 @@
+// TODO #7154
+import is from '@sindresorhus/is';
 import pAll from 'p-all';
 import { getManagerConfig, mergeChildConfig } from '../../../config';
 import type { RenovateConfig } from '../../../config/types';
-import { getDefaultConfig } from '../../../datasource';
 import { logger } from '../../../logger';
-import type { PackageDependency, PackageFile } from '../../../manager/types';
-import { SkipReason } from '../../../types';
+import {
+  getDefaultConfig,
+  getDefaultVersioning,
+} from '../../../modules/datasource';
+import type {
+  PackageDependency,
+  PackageFile,
+} from '../../../modules/manager/types';
+import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { clone } from '../../../util/clone';
 import { applyPackageRules } from '../../../util/package-rules';
+import { PackageFiles } from '../package-files';
 import { lookupUpdates } from './lookup';
 import type { LookupUpdateConfig } from './lookup/types';
 
@@ -16,29 +25,55 @@ async function fetchDepUpdates(
 ): Promise<PackageDependency> {
   let dep = clone(indep);
   dep.updates = [];
+  if (is.string(dep.depName)) {
+    dep.depName = dep.depName.trim();
+  }
+  if (!is.nonEmptyString(dep.depName)) {
+    dep.skipReason = 'invalid-name';
+  }
+  if (dep.isInternal && !packageFileConfig.updateInternalDeps) {
+    dep.skipReason = 'internal-package';
+  }
   if (dep.skipReason) {
     return dep;
   }
   const { depName } = dep;
   // TODO: fix types
   let depConfig = mergeChildConfig(packageFileConfig, dep);
-  const datasourceDefaultConfig = await getDefaultConfig(depConfig.datasource);
+  const datasourceDefaultConfig = await getDefaultConfig(depConfig.datasource!);
   depConfig = mergeChildConfig(depConfig, datasourceDefaultConfig);
+  depConfig.versioning ??= getDefaultVersioning(depConfig.datasource);
   depConfig = applyPackageRules(depConfig);
-  if (depConfig.ignoreDeps.includes(depName)) {
+  if (depConfig.ignoreDeps!.includes(depName!)) {
     logger.debug({ dependency: depName }, 'Dependency is ignored');
-    dep.skipReason = SkipReason.Ignored;
+    dep.skipReason = 'ignored';
   } else if (depConfig.enabled === false) {
     logger.debug({ dependency: depName }, 'Dependency is disabled');
-    dep.skipReason = SkipReason.Disabled;
+    dep.skipReason = 'disabled';
   } else {
     if (depConfig.datasource) {
-      dep = {
-        ...dep,
-        ...(await lookupUpdates(depConfig as LookupUpdateConfig)),
-      };
+      try {
+        dep = {
+          ...dep,
+          ...(await lookupUpdates(depConfig as LookupUpdateConfig)),
+        };
+      } catch (err) {
+        if (
+          packageFileConfig.repoIsOnboarded ||
+          !(err instanceof ExternalHostError)
+        ) {
+          throw err;
+        }
+
+        const cause = err.err;
+        dep.warnings ??= [];
+        dep.warnings.push({
+          topic: 'Lookup Error',
+          message: `${depName}: ${cause.message}`,
+        });
+      }
     }
-    dep.updates = dep.updates || [];
+    dep.updates = dep.updates ?? [];
   }
   return dep;
 }
@@ -91,6 +126,7 @@ export async function fetchUpdates(
     fetchManagerUpdates(config, packageFiles, manager)
   );
   await Promise.all(allManagerJobs);
+  PackageFiles.add(config.baseBranch!, { ...packageFiles });
   logger.debug(
     { baseBranch: config.baseBranch },
     'Package releases lookups complete'

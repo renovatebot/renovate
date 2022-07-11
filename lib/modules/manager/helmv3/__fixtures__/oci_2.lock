@@ -1,0 +1,9 @@
+dependencies:
+- name: renovate-test
+  repository: oci://registry.gitlab.com/user/oci-helm-test
+  version: 0.2.0
+- name: repo-test
+  repository: https://gitlab.com/api/v4/projects/xxxxxxx/packages/helm/stable
+  version: 0.5.0
+digest: sha256:886f204516ea48785fe615d22071d742f7fb0d6519ed3cd274f4ec0978d8b82b
+generated: "2022-01-20T17:48:47.610371241+01:00"

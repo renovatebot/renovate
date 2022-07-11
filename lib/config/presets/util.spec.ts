@@ -2,28 +2,37 @@ import type { FetchPresetConfig, Preset } from './types';
 import { PRESET_DEP_NOT_FOUND, PRESET_NOT_FOUND, fetchPreset } from './util';
 
 const config: FetchPresetConfig = {
-  pkgName: 'some/repo',
+  repo: 'some/repo',
   filePreset: 'default',
   endpoint: 'endpoint',
-  fetch: undefined,
+  fetch: undefined as never,
 };
 
-const fetch = jest.fn(() => Promise.resolve<Preset>({}));
+const fetch = jest.fn(() => Promise.resolve<Preset | null>({}));
 
 describe('config/presets/util', () => {
   beforeEach(() => {
     fetch.mockReset();
   });
+
   it('works', async () => {
-    fetch.mockResolvedValue({ sub: { preset: { foo: true } } });
+    fetch.mockResolvedValueOnce({ sub: { preset: { foo: true } } });
     expect(await fetchPreset({ ...config, fetch })).toEqual({
       sub: { preset: { foo: true } },
     });
 
+    fetch.mockRejectedValueOnce(new Error(PRESET_DEP_NOT_FOUND));
+    fetch.mockResolvedValueOnce({ sub: { preset: { foo: true } } });
+    expect(await fetchPreset({ ...config, fetch })).toEqual({
+      sub: { preset: { foo: true } },
+    });
+
+    fetch.mockResolvedValueOnce({ sub: { preset: { foo: true } } });
     expect(
       await fetchPreset({ ...config, filePreset: 'some/sub', fetch })
     ).toEqual({ preset: { foo: true } });
 
+    fetch.mockResolvedValueOnce({ sub: { preset: { foo: true } } });
     expect(
       await fetchPreset({ ...config, filePreset: 'some/sub/preset', fetch })
     ).toEqual({ foo: true });

@@ -15,8 +15,8 @@ Renovate supports upgrading dependencies in `go.mod` files and their accompanyin
 1. If Renovate finds an update, Renovate will update `go.mod` to the new value
 1. Renovate runs `go get` to update the `go.sum` files
 1. If the user has enabled the option `gomodUpdateImportPaths` in the [`postUpdateOptions`](https://docs.renovatebot.com/configuration-options/#postupdateoptions) array, then Renovate uses [mod](https://github.com/marwan-at-work/mod) to update import paths on major updates, which can update any Go source file
-1. If the user has enabled the option `gomodTidy` in the [`postUpdateOptions`](https://docs.renovatebot.com/configuration-options/#postupdateoptions) array, then Renovate runs `go mod tidy`, which itself can update `go.mod` and `go.sum`.
-   1. This is implicitly enabled for major updates if the user has enabled the option `gomodUpdateImportPaths` in the [`postUpdateOptions`](https://docs.renovatebot.com/configuration-options/#postupdateoptions) array
+1. If the user has enabled the option `gomodTidy` or `gomodTidy1.17` in the [`postUpdateOptions`](https://docs.renovatebot.com/configuration-options/#postupdateoptions) array, then Renovate runs `go mod tidy` or `go mod tidy -compat=1.17` respectively, which itself can update `go.mod` and `go.sum`.
+   1. `gomodTidy` is implicitly enabled for major updates if the user has enabled the option `gomodUpdateImportPaths` in the [`postUpdateOptions`](https://docs.renovatebot.com/configuration-options/#postupdateoptions) array. If go modules 1.17 compatibility is needed you need to explicitly set the option `gomodTidy1.17`.
 1. `go mod vendor` is run if vendored modules are detected
 1. A PR will be created with `go.mod`,`go.sum`, and any updated vendored files updated in the one commit
 1. If the source repository has either a "changelog" file or uses GitHub releases, then Release Notes for each version will be embedded in the generated PR
@@ -27,6 +27,16 @@ Renovate updates Go Modules by default.
 To install Renovate Bot itself, either enable the [Renovate App](https://github.com/apps/renovate) on GitHub, or check out [Renovate OSS](https://github.com/renovatebot/renovate) for self-hosted.
 
 ## Technical Details
+
+### Replace massaging
+
+Renovate can massage `replace` statements it finds prior to running `go` commands, and then massage them back afterwards.
+This capability was added - and originally default behavior - because relative `replace` statements outside of the current repo will not work when Renovate clones the repo locally.
+
+On the other hand, this massaging of `replace` statements may lead to unexpected results, especially because `go mod tidy` may not fully tidy the `go.sum` if it is missing the `replace` directives in `go.mod`.
+It has therefore been disabled by default.
+
+To enable this replace massaging behavior, add `gomodMassage` to your `postUpdateOptions` array.
 
 ### Module Tidying
 

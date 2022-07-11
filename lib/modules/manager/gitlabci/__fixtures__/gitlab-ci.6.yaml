@@ -1,0 +1,27 @@
+image:
+  # comment
+  name: renovate/renovate:19.70.8-slim
+
+services:
+  # comment
+  - name: other/image1:1.0.0
+    alias: imagealias1
+  # another comment
+  - alias: imagealias2
+    name: other/image2:1.0.0
+job1:
+    services:
+        - name: mooseagency/postgresql:12.3-1@sha256:a5a65569456f221ee1f8a0b3b4e2d440eb5830772d9440c9b30b1dbfd454c778
+          command:
+              - something:thatIsNotAnImage
+              - -something2
+              - -something3
+              - -something4
+job2:
+    services:
+      - "mariadb:10.4.11"
+      - postgres:11.7
+      - redis:latest
+      - name: "registry.example.com/myimage:latest"
+      - myimage@sha256:0ecb2ad60
+      - tomcat:7-jre8

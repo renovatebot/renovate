@@ -2,7 +2,7 @@ import { configFileNames } from '../../../../config/app-strings';
 import { GlobalConfig } from '../../../../config/global';
 import type { RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
-import { commitFiles } from '../../../../util/git';
+import { commitAndPush } from '../../../../modules/platform/commit';
 import { OnboardingCommitMessageFactory } from './commit-message';
 import { getOnboardingConfigContents } from './config';
 
@@ -11,17 +11,19 @@ const defaultConfigFile = configFileNames[0];
 export async function createOnboardingBranch(
   config: Partial<RenovateConfig>
 ): Promise<string | null> {
-  const configFile = configFileNames.includes(config.onboardingConfigFileName)
+  // TODO #7154
+  const configFile = configFileNames.includes(config.onboardingConfigFileName!)
     ? config.onboardingConfigFileName
     : defaultConfigFile;
 
   logger.debug('createOnboardingBranch()');
-  const contents = await getOnboardingConfigContents(config, configFile);
+  // TODO #7154
+  const contents = await getOnboardingConfigContents(config, configFile!);
   logger.debug('Creating onboarding branch');
 
   const commitMessageFactory = new OnboardingCommitMessageFactory(
     config,
-    configFile
+    configFile!
   );
   const commitMessage = commitMessageFactory.create();
 
@@ -30,14 +32,18 @@ export async function createOnboardingBranch(
     logger.info('DRY-RUN: Would commit files to onboarding branch');
     return null;
   }
-  return commitFiles({
-    branchName: config.onboardingBranch,
+
+  return commitAndPush({
+    branchName: config.onboardingBranch!,
     files: [
       {
-        name: configFile,
+        type: 'addition',
+        // TODO #7154
+        path: configFile!,
         contents,
       },
     ],
     message: commitMessage.toString(),
+    platformCommit: !!config.platformCommit,
   });
 }

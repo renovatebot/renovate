@@ -1,6 +1,6 @@
 import pMap from 'p-map';
-import { getChangeLogJSON } from '../../pr/changelog';
 import type { BranchUpgradeConfig } from '../../types';
+import { getChangeLogJSON } from '../update/pr/changelog';
 
 // istanbul ignore next
 async function embedChangelog(upgrade: BranchUpgradeConfig): Promise<void> {

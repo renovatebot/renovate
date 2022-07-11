@@ -23,3 +23,25 @@ export function replaceAt(
     content.substr(index + oldString.length)
   );
 }
+
+/**
+ * Converts from utf-8 string to base64-encoded string
+ */
+export function toBase64(input: string): string {
+  return Buffer.from(input).toString('base64');
+}
+
+/**
+ * Converts from base64-encoded string to utf-8 string
+ */
+export function fromBase64(input: string): string {
+  return Buffer.from(input, 'base64').toString();
+}
+
+export function uniqueStrings(
+  element: string,
+  index: number,
+  elements: string[]
+): boolean {
+  return elements.indexOf(element) === index;
+}

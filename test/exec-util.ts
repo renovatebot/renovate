@@ -1,7 +1,7 @@
 import { exec as _exec } from 'child_process';
 import is from '@sindresorhus/is';
 import traverse from 'traverse';
-import { toUnix } from 'upath';
+import upath from 'upath';
 import type { ExecOptions } from '../lib/util/exec/types';
 import { regEx } from '../lib/util/regex';
 
@@ -9,6 +9,7 @@ type CallOptions = ExecOptions | null | undefined;
 
 export type ExecResult = { stdout: string; stderr: string } | Error;
 
+// TODO: fix type #7154
 export type ExecMock = jest.Mock<typeof _exec>;
 export const exec: ExecMock = _exec as any;
 
@@ -25,13 +26,13 @@ export function execSnapshot(cmd: string, options?: CallOptions): ExecSnapshot {
     options,
   };
 
-  const cwd = toUnix(process.cwd());
+  const cwd = upath.toUnix(process.cwd());
 
   return traverse(snapshot).map(function fixup(v) {
     if (is.string(v)) {
       const val = v
         .replace(regEx(/\\(\w)/g), '/$1')
-        .replace(cwd, '/root/project'); // TODO #12071
+        .replace(cwd, '/root/project');
       this.update(val);
     }
   });
@@ -99,3 +100,9 @@ export const envMock = {
   full: fullEnvMock,
   filtered: filteredEnvMock,
 };
+
+// reset exec mock, otherwise there can be some left over from previous test
+beforeEach(() => {
+  // maybe not mocked
+  exec.mockReset?.();
+});

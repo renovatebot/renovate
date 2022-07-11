@@ -1,4 +1,5 @@
-import { clean as cleanGitRef } from 'clean-git-ref';
+// TODO #7154
+import cleanGitRef from 'clean-git-ref';
 import hasha from 'hasha';
 import slugify from 'slugify';
 import type { RenovateConfig } from '../../../config/types';
@@ -19,7 +20,8 @@ const RE_MULTIPLE_DASH = regEx(/--+/g);
  * - chained dashes(breaks markdown comments) are replaced by single dash
  */
 function cleanBranchName(branchName: string): string {
-  return cleanGitRef(branchName)
+  return cleanGitRef
+    .clean(branchName)
     .replace(regEx(/^\.|\.$/), '') // leading or trailing dot
     .replace(regEx(/\/\./g), '/') // leading dot after slash
     .replace(regEx(/\s/g), '') // whitespace
@@ -36,7 +38,7 @@ export function generateBranchName(update: RenovateConfig): void {
     logger.debug(
       `Dependency ${update.depName} is part of group ${update.groupName}`
     );
-    update.groupSlug = slugify(update.groupSlug || update.groupName, {
+    update.groupSlug = slugify(update.groupSlug ?? update.groupName, {
       lower: true,
     });
     if (update.updateType === 'major' && update.separateMajorMinor) {
@@ -50,13 +52,13 @@ export function generateBranchName(update: RenovateConfig): void {
     if (update.updateType === 'patch' && update.separateMinorPatch) {
       update.groupSlug = `patch-${update.groupSlug}`;
     }
-    update.branchTopic = update.group.branchTopic || update.branchTopic;
-    update.branchName = update.group.branchName || update.branchName;
+    update.branchTopic = update.group!.branchTopic ?? update.branchTopic;
+    update.branchName = update.group!.branchName ?? update.branchName;
   }
 
   if (update.hashedBranchLength) {
-    let hashLength = update.hashedBranchLength - update.branchPrefix.length;
-    if (hashLength <= MIN_HASH_LENGTH) {
+    let hashLength = update.hashedBranchLength - update.branchPrefix!.length;
+    if (hashLength < MIN_HASH_LENGTH) {
       logger.warn(
         `\`hashedBranchLength\` must allow for at least ${MIN_HASH_LENGTH} characters hashing in addition to \`branchPrefix\`. Using ${MIN_HASH_LENGTH} character hash instead.`
       );
@@ -81,9 +83,9 @@ export function generateBranchName(update: RenovateConfig): void {
 
     const hash = hasha(hashInput);
 
-    update.branchName = update.branchPrefix + hash.slice(0, hashLength);
+    update.branchName = `${update.branchPrefix}${hash.slice(0, hashLength)}`;
   } else {
-    update.branchName = template.compile(update.branchName, update);
+    update.branchName = template.compile(update.branchName!, update);
 
     // Compile extra times in case of nested templates
     update.branchName = template.compile(update.branchName, update);

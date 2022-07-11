@@ -51,7 +51,7 @@ By default, `renovate` will maintain separate branches for each dependency.
 So if 20 dependencies need updating, there will be at least 20 branches/PRs.
 Although this may seem undesirable, it's even less desirable if all 20 were in the same Pull Request and it's very difficult to work out which upgrade caused the test failure.
 
-However, you can override the default templates for branch name to get a single branch for all dependencies.
+But you can override the default templates for branch name to get a single branch for all dependencies.
 The `groupName` configuration option can be used at a repository level (e.g. give it the value `All`) and then all dependency updates will be in the same branch/PR.
 
 ## Separate Minor and Major PRs
@@ -73,7 +73,7 @@ Branches have names like `renovate/webpack-1.x` instead of `renovate/webpack-1.2
 
 We do this because:
 
-- Branches often receive updates (e.g. new patches) before they're merged
+- Branches often get updates (e.g. new patches) before they're merged
 - Naming the branch like `1.x` means its name still makes sense if a `1.2.1` release happens
 
 Note: You can configure the branch names by using the string template `branchName` and/or its sub-templates `branchPrefix` and `branchTopic`.

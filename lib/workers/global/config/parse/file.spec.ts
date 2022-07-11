@@ -1,4 +1,5 @@
 import fs from 'fs';
+import fsExtra from 'fs-extra';
 import { DirectoryResult, dir } from 'tmp-promise';
 import upath from 'upath';
 import { logger } from '../../../../logger';
@@ -89,6 +90,29 @@ describe('workers/global/config/parse/file', () => {
       const configFile = upath.resolve(tmp.path, './file4.js');
       await file.getConfig({ RENOVATE_CONFIG_FILE: configFile });
 
+      expect(mockProcessExit).toHaveBeenCalledWith(1);
+    });
+
+    it('fatal error and exit if config.js contains unresolved env var', async () => {
+      const mockProcessExit = jest
+        .spyOn(process, 'exit')
+        .mockImplementation(() => undefined as never);
+
+      const configFile = upath.resolve(
+        __dirname,
+        './__fixtures__/config-ref-error.js-invalid'
+      );
+      const tmpDir = tmp.path;
+      await fsExtra.ensureDir(tmpDir);
+
+      const tmpConfigFile = upath.resolve(tmpDir, 'config-ref-error.js');
+      await fsExtra.copy(configFile, tmpConfigFile);
+
+      await file.getConfig({ RENOVATE_CONFIG_FILE: tmpConfigFile });
+
+      expect(logger.fatal).toHaveBeenCalledWith(
+        `Error parsing config file due to unresolved variable(s): CI_API_V4_URL is not defined`
+      );
       expect(mockProcessExit).toHaveBeenCalledWith(1);
     });
 

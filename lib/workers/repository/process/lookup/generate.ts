@@ -1,8 +1,8 @@
-import type { Release } from '../../../../datasource';
 import { logger } from '../../../../logger';
-import type { LookupUpdate } from '../../../../manager/types';
-import { RangeStrategy } from '../../../../types';
-import type { VersioningApi } from '../../../../versioning';
+import type { Release } from '../../../../modules/datasource';
+import type { LookupUpdate } from '../../../../modules/manager/types';
+import type { VersioningApi } from '../../../../modules/versioning';
+import type { RangeStrategy } from '../../../../types';
 import type { LookupUpdateConfig } from './types';
 import { getUpdateType } from './update-type';
 
@@ -18,19 +18,26 @@ export function generateUpdate(
   const update: LookupUpdate = {
     bucket,
     newVersion,
-    newValue: null,
+    newValue: null!,
   };
-  const releaseFields = [
-    'checksumUrl',
-    'downloadUrl',
-    'newDigest',
-    'releaseTimestamp',
-  ];
-  for (const field of releaseFields) {
-    if (release[field] !== undefined) {
-      update[field] = release[field];
-    }
+
+  // istanbul ignore if
+  if (release.checksumUrl !== undefined) {
+    update.checksumUrl = release.checksumUrl;
   }
+  // istanbul ignore if
+  if (release.downloadUrl !== undefined) {
+    update.downloadUrl = release.downloadUrl;
+  }
+  // istanbul ignore if
+  if (release.newDigest !== undefined) {
+    update.newDigest = release.newDigest;
+  }
+  // istanbul ignore if
+  if (release.releaseTimestamp !== undefined) {
+    update.releaseTimestamp = release.releaseTimestamp;
+  }
+
   const { currentValue } = config;
   if (currentValue) {
     try {
@@ -39,7 +46,7 @@ export function generateUpdate(
         rangeStrategy,
         currentVersion,
         newVersion,
-      });
+      })!;
     } catch (err) /* istanbul ignore next */ {
       logger.warn(
         { err, currentValue, rangeStrategy, currentVersion, newVersion },
@@ -48,18 +55,18 @@ export function generateUpdate(
       update.newValue = currentValue;
     }
   } else {
-    update.newValue = currentValue;
+    update.newValue = currentValue!;
   }
-  update.newMajor = versioning.getMajor(newVersion);
-  update.newMinor = versioning.getMinor(newVersion);
+  update.newMajor = versioning.getMajor(newVersion)!;
+  update.newMinor = versioning.getMinor(newVersion)!;
   // istanbul ignore if
   if (!update.updateType && !currentVersion) {
     logger.debug({ update }, 'Update has no currentVersion');
-    update.newValue = currentValue;
+    update.newValue = currentValue!;
     return update;
   }
   update.updateType =
-    update.updateType ||
+    update.updateType ??
     getUpdateType(config, versioning, currentVersion, newVersion);
   if (!versioning.isVersion(update.newValue)) {
     update.isRange = true;
@@ -69,7 +76,8 @@ export function generateUpdate(
   }
   if (
     rangeStrategy === 'bump' &&
-    versioning.matches(newVersion, currentValue)
+    // TODO #7154
+    versioning.matches(newVersion, currentValue!)
   ) {
     update.isBump = true;
   }

@@ -1,8 +1,11 @@
 import is from '@sindresorhus/is';
-import { getLanguageList, getManagerList } from '../manager';
+import { getLanguageList, getManagerList } from '../modules/manager';
 import { configRegexPredicate, isConfigRegex, regEx } from '../util/regex';
 import * as template from '../util/template';
-import { hasValidSchedule, hasValidTimezone } from '../workers/branch/schedule';
+import {
+  hasValidSchedule,
+  hasValidTimezone,
+} from '../workers/repository/update/branch/schedule';
 import { migrateConfig } from './migration';
 import { getOptions } from './options';
 import { resolveConfigPresets } from './presets';
@@ -37,7 +40,8 @@ const ignoredNodes = [
   'prBody', // deprecated
   'minimumConfidence', // undocumented feature flag
 ];
-
+const tzRe = regEx(/^:timezone\((.+)\)$/);
+const rulesRe = regEx(/p.*Rules\[\d+\]$/);
 function isManagerPath(parentPath: string): boolean {
   return (
     regEx(/^regexManagers\[[0-9]+]$/).test(parentPath) ||
@@ -73,8 +77,8 @@ function getUnsupportedEnabledManagers(enabledManagers: string[]): string[] {
   );
 }
 
-function getDeprecationMessage(option: string): string {
-  const deprecatedOptions = {
+function getDeprecationMessage(option: string): string | undefined {
+  const deprecatedOptions: Record<string, string | undefined> = {
     branchName: `Direct editing of branchName is now deprecated. Please edit branchPrefix, additionalBranchPrefix, or branchTopic instead`,
     commitMessage: `Direct editing of commitMessage is now deprecated. Please edit commitMessage's subcomponents instead.`,
     prTitle: `Direct editing of prTitle is now deprecated. Please edit commitMessage subcomponents instead as they will be passed through to prTitle.`,
@@ -82,13 +86,13 @@ function getDeprecationMessage(option: string): string {
   return deprecatedOptions[option];
 }
 
-export function getParentName(parentPath: string): string {
+export function getParentName(parentPath: string | undefined): string {
   return parentPath
     ? parentPath
         .replace(regEx(/\.?encrypted$/), '')
         .replace(regEx(/\[\d+\]$/), '')
         .split('.')
-        .pop()
+        .pop()!
     : '.';
 }
 
@@ -163,7 +167,7 @@ export async function validateConfig(
       if (getDeprecationMessage(key)) {
         warnings.push({
           topic: 'Deprecation Warning',
-          message: getDeprecationMessage(key),
+          message: getDeprecationMessage(key)!,
         });
       }
       const templateKeys = [
@@ -175,7 +179,8 @@ export async function validateConfig(
       ];
       if ((key.endsWith('Template') || templateKeys.includes(key)) && val) {
         try {
-          let res = template.compile(val.toString(), config, false);
+          // TODO: validate string #7154
+          let res = template.compile((val as string).toString(), config, false);
           res = template.compile(res, config, false);
           template.compile(res, config, false);
         } catch (err) {
@@ -239,12 +244,21 @@ export async function validateConfig(
               )} (${typeof val})`,
             });
           }
+        } else if (type === 'integer') {
+          if (!is.number(val)) {
+            errors.push({
+              topic: 'Configuration Error',
+              message: `Configuration option \`${currentPath}\` should be an integer. Found: ${JSON.stringify(
+                val
+              )} (${typeof val})`,
+            });
+          }
         } else if (type === 'array' && val) {
           if (is.array(val)) {
             for (const [subIndex, subval] of val.entries()) {
               if (is.object(subval)) {
-                const subValidation = await module.exports.validateConfig(
-                  subval,
+                const subValidation = await validateConfig(
+                  subval as RenovateConfig,
                   isPreset,
                   `${currentPath}[${subIndex}]`
                 );
@@ -253,7 +267,6 @@ export async function validateConfig(
               }
             }
             if (key === 'extends') {
-              const tzRe = regEx(/^:timezone\((.+)\)$/); // TODO #12071
               for (const subval of val) {
                 if (is.string(subval)) {
                   if (
@@ -266,7 +279,7 @@ export async function validateConfig(
                     });
                   }
                   if (tzRe.test(subval)) {
-                    const [, timezone] = tzRe.exec(subval);
+                    const [, timezone] = tzRe.exec(subval)!;
                     const [validTimezone, errorMessage] =
                       hasValidTimezone(timezone);
                     if (!validTimezone) {
@@ -301,6 +314,7 @@ export async function validateConfig(
               'excludePackagePrefixes',
               'matchCurrentVersion',
               'matchSourceUrlPrefixes',
+              'matchSourceUrls',
               'matchUpdateTypes',
             ];
             if (key === 'packageRules') {
@@ -313,7 +327,7 @@ export async function validateConfig(
                         config
                       ),
                     ],
-                  }).migratedConfig.packageRules[0];
+                  }).migratedConfig.packageRules![0];
                   errors.push(
                     ...managerValidator.check({ resolvedRule, currentPath })
                   );
@@ -382,7 +396,7 @@ export async function validateConfig(
                 'matchStrings',
                 'matchStringsStrategy',
                 'depNameTemplate',
-                'lookupNameTemplate',
+                'packageNameTemplate',
                 'datasourceTemplate',
                 'versioningTemplate',
                 'registryUrlTemplate',
@@ -391,7 +405,7 @@ export async function validateConfig(
                 'autoReplaceStringTemplate',
                 'depTypeTemplate',
               ];
-              // TODO: fix types
+              // TODO: fix types #7154
               for (const regexManager of val as any[]) {
                 if (
                   Object.keys(regexManager).some(
@@ -432,8 +446,9 @@ export async function validateConfig(
                       for (const field of mandatoryFields) {
                         if (
                           !regexManager[`${field}Template`] &&
-                          !regexManager.matchStrings.some((matchString) =>
-                            matchString.includes(`(?<${field}>`)
+                          !regexManager.matchStrings.some(
+                            (matchString: string) =>
+                              matchString.includes(`(?<${field}>`)
                           )
                         ) {
                           errors.push({
@@ -488,7 +503,8 @@ export async function validateConfig(
             }
             if (
               (selectors.includes(key) || key === 'matchCurrentVersion') &&
-              !regEx(/p.*Rules\[\d+\]$/).test(parentPath) && // Inside a packageRule  // TODO #12071
+              // TODO: can be undefined ? #7154
+              !rulesRe.test(parentPath!) && // Inside a packageRule
               (parentPath || !isPreset) // top level in a preset
             ) {
               errors.push({
@@ -516,7 +532,7 @@ export async function validateConfig(
           currentPath !== 'force.constraints'
         ) {
           if (is.plainObject(val)) {
-            if (key === 'aliases') {
+            if (key === 'registryAliases') {
               const res = validateAliasObject(val);
               if (res !== true) {
                 errors.push({
@@ -539,7 +555,7 @@ export async function validateConfig(
                 .filter((option) => option.freeChoice)
                 .map((option) => option.name);
               if (!ignoredObjects.includes(key)) {
-                const subValidation = await module.exports.validateConfig(
+                const subValidation = await validateConfig(
                   val,
                   isPreset,
                   currentPath

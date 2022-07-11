@@ -23,6 +23,9 @@ env:
   NPM_VERSION: ${{ github.event.client_payload.version }}
   NPM_TAG: ${{ github.event.client_payload.tag }}
 
+permissions:
+  contents: read
+
 jobs:
   release-npm:
     runs-on: ubuntu-latest
@@ -35,12 +38,12 @@ jobs:
             echo "NPM_TAG=${{ github.event.inputs.tag }}" >> $GITHUB_ENV
           fi
 
-      - uses: actions/checkout@ec3a7ce113134d7a93b817d10a8272cb61118579 # renovate: tag=v2.4.0
+      - uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b # tag=v3.0.2
         with:
           ref: ${{ env.GIT_SHA }}
 
       - name: Set up Node.js ${{ env.NODE_VERSION }}
-        uses: actions/setup-node@04c56d2f954f1e4c69436aa54cfef261a018f458 # renovate: tag=v2.5.0
+        uses: actions/setup-node@eeb10cff27034e7acf239c5d29f62154018672fd # tag=v3.3.0
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: yarn

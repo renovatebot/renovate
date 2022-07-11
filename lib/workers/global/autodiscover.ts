@@ -2,7 +2,8 @@ import is from '@sindresorhus/is';
 import minimatch from 'minimatch';
 import type { AllConfig } from '../../config/types';
 import { logger } from '../../logger';
-import { platform } from '../../platform';
+import { platform } from '../../modules/platform';
+import { configRegexPredicate, isConfigRegex } from '../../util/regex';
 
 // istanbul ignore next
 function repoName(value: string | { repository: string }): string {
@@ -21,8 +22,8 @@ export async function autodiscoverRepositories(
     return config;
   }
   // Autodiscover list of repositories
-  let discovered = await platform.getRepos();
-  if (!discovered?.length) {
+  const allRepos = await platform.getRepos();
+  if (!allRepos?.length) {
     // Soft fail (no error thrown) if no accessible repositories
     logger.debug(
       'The account associated with your token does not have access to any repos'
@@ -32,12 +33,21 @@ export async function autodiscoverRepositories(
   if (config.autodiscoverFilter) {
     const matched = new Set<string>();
     for (const filter of config.autodiscoverFilter) {
-      const res = minimatch.match(discovered, filter);
+      let res: string[];
+      if (isConfigRegex(filter)) {
+        const autodiscoveryPred = configRegexPredicate(filter);
+        if (!autodiscoveryPred) {
+          throw new Error(`Failed to parse regex pattern "${filter}"`);
+        }
+        res = allRepos.filter(autodiscoveryPred);
+      } else {
+        res = allRepos.filter(minimatch.filter(filter));
+      }
       for (const repository of res) {
         matched.add(repository);
       }
     }
-    discovered = [...matched];
+    const discovered = [...matched];
 
     if (!discovered.length) {
       // Soft fail (no error thrown) if no accessible repositories match the filter

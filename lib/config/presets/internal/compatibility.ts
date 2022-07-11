@@ -1,9 +1,9 @@
-import { Preset } from '../types';
+import type { Preset } from '../types';
 
 export const presets: Record<string, Preset> = {
   additionalBranchPrefix: {
     description:
-      'Backwards-compatibility preset to restore additionalBranchPrefix settings for multiple managers which were removed in v25',
+      'Backwards-compatibility preset to restore `additionalBranchPrefix` settings for multiple managers which were removed in Renovate `v25`.',
     buildkite: {
       additionalBranchPrefix: 'buildkite-',
     },

@@ -1,4 +1,8 @@
+import is from '@sindresorhus/is';
+// eslint-disable-next-line no-restricted-imports
+import _parseLinkHeader from 'parse-link-header';
 import urlJoin from 'url-join';
+import { logger } from '../logger';
 import { regEx } from './regex';
 
 export function joinUrlParts(...parts: string[]): string {
@@ -20,6 +24,10 @@ export function ensureTrailingSlash(url: string): string {
 
 export function trimTrailingSlash(url: string): string {
   return url.replace(regEx(/\/+$/), '');
+}
+
+export function trimLeadingSlash(path: string): string {
+  return path.replace(/^\//, '');
 }
 
 export function resolveBaseUrl(baseUrl: string, input: string | URL): string {
@@ -63,7 +71,11 @@ export function validateUrl(url?: string, httpOnly = true): boolean {
   }
 }
 
-export function parseUrl(url: string): URL | null {
+export function parseUrl(url: string | undefined | null): URL | null {
+  if (!url) {
+    return null;
+  }
+
   try {
     return new URL(url);
   } catch (err) {
@@ -78,4 +90,19 @@ export function parseUrl(url: string): URL | null {
  */
 export function createURLFromHostOrURL(url: string): URL | null {
   return parseUrl(url) ?? parseUrl(`https://${url}`);
+}
+
+export type LinkHeaderLinks = _parseLinkHeader.Links;
+
+export function parseLinkHeader(
+  linkHeader: string | null | undefined
+): LinkHeaderLinks | null {
+  if (!is.nonEmptyString(linkHeader)) {
+    return null;
+  }
+  if (linkHeader.length > 2000) {
+    logger.warn({ linkHeader }, 'Link header too long.');
+    return null;
+  }
+  return _parseLinkHeader(linkHeader);
 }

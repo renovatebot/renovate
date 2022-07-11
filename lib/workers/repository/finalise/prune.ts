@@ -2,7 +2,8 @@ import { GlobalConfig } from '../../../config/global';
 import type { RenovateConfig } from '../../../config/types';
 import { REPOSITORY_CHANGED } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
-import { platform } from '../../../platform';
+import { platform } from '../../../modules/platform';
+import { ensureComment } from '../../../modules/platform/comment';
 import { PrState } from '../../../types';
 import {
   deleteBranch,
@@ -34,7 +35,7 @@ async function cleanUpBranches(
           if (GlobalConfig.get('dryRun')) {
             logger.info(`DRY-RUN: Would add Autoclosing Skipped comment to PR`);
           } else {
-            await platform.ensureComment({
+            await ensureComment({
               number: pr.number,
               topic: 'Autoclosing Skipped',
               content:
@@ -62,6 +63,8 @@ async function cleanUpBranches(
           });
           await deleteBranch(branchName);
         }
+      } else if (branchIsModified) {
+        logger.debug('Orphan Branch is modified - skipping branch deletion');
       } else if (GlobalConfig.get('dryRun')) {
         logger.info(`DRY-RUN: Would delete orphan branch ${branchName}`);
       } else {
@@ -87,7 +90,7 @@ async function cleanUpBranches(
 
 export async function pruneStaleBranches(
   config: RenovateConfig,
-  branchList: string[]
+  branchList: string[] | null | undefined
 ): Promise<void> {
   logger.debug('Removing any stale branches');
   logger.trace({ config }, `pruneStaleBranches`);
@@ -96,8 +99,9 @@ export async function pruneStaleBranches(
     logger.debug('No branchList');
     return;
   }
+  // TODO #7154
   let renovateBranches = getBranchList().filter((branchName) =>
-    branchName.startsWith(config.branchPrefix)
+    branchName.startsWith(config.branchPrefix!)
   );
   if (!renovateBranches?.length) {
     logger.debug('No renovate branches found');

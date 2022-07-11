@@ -13,5 +13,5 @@
   "globs": ["**/*.md"],
 
   // Define glob expressions to ignore
-  "ignores": ["**/__fixtures__/*", "**/node_modules/**"]
+  "ignores": ["**/__fixtures__/*", "**/node_modules/**", "./tmp/**/*"]
 }

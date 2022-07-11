@@ -38,7 +38,7 @@ export async function generatePresets(dist: string): Promise<void> {
       delete value.description;
       if (!presetDescription) {
         if (value.packageRules?.[0].description) {
-          presetDescription = value.packageRules[0].description;
+          presetDescription = value.packageRules[0].description as string;
           delete value.packageRules[0].description;
         }
       }
@@ -48,10 +48,10 @@ export async function generatePresets(dist: string): Promise<void> {
       } else {
         logger.warn(`Preset ${name}:${preset} has no description`);
       }
-      body += '\n```\n';
+      body += '\n```json\n';
       body += JSON.stringify(value, null, 2);
       body += '\n```\n';
-      body += '----\n';
+      body += '\n----\n';
       if (body.includes('{{arg0}}')) {
         header += '(`<arg0>`';
         if (body.includes('{{arg1}}')) {

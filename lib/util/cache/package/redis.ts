@@ -1,17 +1,18 @@
 /* istanbul ignore file */
-import { WrappedNodeRedisClient, createNodeRedisClient } from 'handy-redis';
 import { DateTime } from 'luxon';
+import { createClient } from 'redis';
 import { logger } from '../../../logger';
 
-let client: WrappedNodeRedisClient | undefined;
+let client: ReturnType<typeof createClient> | undefined;
 
 function getKey(namespace: string, key: string): string {
   return `${namespace}-${key}`;
 }
 
-export function end(): void {
+export async function end(): Promise<void> {
   try {
-    client?.nodeRedis?.end(true); // TODO: Why is this not supported by client directly? (#9714)
+    // https://github.com/redis/node-redis#disconnecting
+    await client?.disconnect();
   } catch (err) {
     logger.warn({ err }, 'Redis cache end failed');
   }
@@ -54,29 +55,33 @@ export async function set(
   ttlMinutes = 5
 ): Promise<void> {
   logger.trace({ namespace, key, ttlMinutes }, 'Saving cached value');
+
+  // Redis requires TTL to be integer, not float
+  const redisTTL = Math.floor(ttlMinutes * 60);
+
   await client?.set(
     getKey(namespace, key),
     JSON.stringify({
       value,
       expiry: DateTime.local().plus({ minutes: ttlMinutes }),
     }),
-    ['EX', ttlMinutes * 60]
+    { EX: redisTTL }
   );
 }
 
-export function init(url: string): void {
+export async function init(url: string): Promise<void> {
   if (!url) {
     return;
   }
   logger.debug('Redis cache init');
-  client = createNodeRedisClient({
+  client = createClient({
     url,
-    retry_strategy: (options) => {
-      if (options.error) {
-        logger.error({ err: options.error }, 'Redis cache error');
-      }
-      // Reconnect after this time
-      return Math.min(options.attempt * 100, 3000);
+    socket: {
+      reconnectStrategy: (retries) => {
+        // Reconnect after this time
+        return Math.min(retries * 100, 3000);
+      },
     },
   });
+  await client.connect();
 }

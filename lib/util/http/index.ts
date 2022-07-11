@@ -1,7 +1,8 @@
 import crypto from 'crypto';
 import merge from 'deepmerge';
-import got, { Options, Response } from 'got';
+import got, { Options, RequestError, Response } from 'got';
 import { HOST_DISABLED } from '../../constants/error-messages';
+import { pkg } from '../../expose.cjs';
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import * as memCache from '../cache/memory';
@@ -14,45 +15,16 @@ import { getQueue } from './queue';
 import type {
   GotJSONOptions,
   GotOptions,
-  OutgoingHttpHeaders,
+  HttpOptions,
+  HttpPostOptions,
+  HttpResponse,
+  InternalHttpOptions,
   RequestStats,
 } from './types';
-
 // TODO: refactor code to remove this (#9651)
 import './legacy';
 
-export interface HttpOptions {
-  body?: any;
-  username?: string;
-  password?: string;
-  baseUrl?: string;
-  headers?: OutgoingHttpHeaders;
-
-  /**
-   * Do not use authentication
-   */
-  noAuth?: boolean;
-
-  throwHttpErrors?: boolean;
-  useCache?: boolean;
-}
-
-export interface HttpPostOptions extends HttpOptions {
-  body: unknown;
-}
-
-export interface InternalHttpOptions extends HttpOptions {
-  json?: Record<string, unknown>;
-  responseType?: 'json' | 'buffer';
-  method?: 'get' | 'post' | 'put' | 'patch' | 'delete' | 'head';
-}
-
-export interface HttpResponse<T = string> {
-  statusCode: number;
-  body: T;
-  headers: any;
-  authorization?: boolean;
-}
+export { RequestError as HttpError };
 
 function cloneResponse<T extends Buffer | string | any>(
   response: HttpResponse<T>
@@ -69,18 +41,11 @@ function cloneResponse<T extends Buffer | string | any>(
 }
 
 function applyDefaultHeaders(options: Options): void {
-  let renovateVersion = 'unknown';
-  try {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    renovateVersion = require('../../../package.json').version;
-  } catch (err) /* istanbul ignore next */ {
-    logger.debug({ err }, 'Error getting renovate version');
-  }
-
+  const renovateVersion = pkg.version;
   options.headers = {
     ...options.headers,
     'user-agent':
-      process.env.RENOVATE_USER_AGENT ||
+      process.env.RENOVATE_USER_AGENT ??
       `RenovateBot/${renovateVersion} (https://github.com/renovatebot/renovate)`,
   };
 }
@@ -93,34 +58,51 @@ function applyDefaultHeaders(options: Options): void {
 async function gotRoutine<T>(
   url: string,
   options: GotOptions,
-  requestStats: Partial<RequestStats>
+  requestStats: Omit<RequestStats, 'duration' | 'statusCode'>
 ): Promise<Response<T>> {
   logger.trace({ url, options }, 'got request');
 
-  // Cheat the TS compiler using `as` to pick a specific overload.
-  // Otherwise it doesn't typecheck.
-  const resp = await got<T>(url, { ...options, hooks } as GotJSONOptions);
-  const duration =
-    resp.timings.phases.total || /* istanbul ignore next: can't be tested */ 0;
+  let duration = 0;
+  let statusCode = 0;
 
-  const httpRequests = memCache.get('http-requests') || [];
-  httpRequests.push({ ...requestStats, duration });
-  memCache.set('http-requests', httpRequests);
+  try {
+    // Cheat the TS compiler using `as` to pick a specific overload.
+    // Otherwise it doesn't typecheck.
+    const resp = await got<T>(url, { ...options, hooks } as GotJSONOptions);
+    statusCode = resp.statusCode;
+    duration =
+      resp.timings.phases.total ??
+      /* istanbul ignore next: can't be tested */ 0;
+    return resp;
+  } catch (error) {
+    if (error instanceof RequestError) {
+      statusCode =
+        error.response?.statusCode ??
+        /* istanbul ignore next: can't be tested */ 0;
+      duration =
+        error.timings?.phases.total ??
+        /* istanbul ignore next: can't be tested */ 0;
+    }
 
-  return resp;
+    throw error;
+  } finally {
+    const httpRequests = memCache.get<RequestStats[]>('http-requests') || [];
+    httpRequests.push({ ...requestStats, duration, statusCode });
+    memCache.set('http-requests', httpRequests);
+  }
 }
 
 export class Http<GetOptions = HttpOptions, PostOptions = HttpPostOptions> {
   private options?: GotOptions;
 
-  constructor(private hostType: string, options?: HttpOptions) {
+  constructor(private hostType: string, options: HttpOptions = {}) {
     this.options = merge<GotOptions>(options, { context: { hostType } });
   }
 
   protected async request<T>(
     requestUrl: string | URL,
-    httpOptions?: InternalHttpOptions
-  ): Promise<HttpResponse<T> | null> {
+    httpOptions: InternalHttpOptions = {}
+  ): Promise<HttpResponse<T>> {
     let url = requestUrl.toString();
     if (httpOptions?.baseUrl) {
       url = resolveBaseUrl(httpOptions.baseUrl, url);
@@ -146,6 +128,7 @@ export class Http<GetOptions = HttpOptions, PostOptions = HttpPostOptions> {
 
     options = applyHostRules(url, options);
     if (options.enabled === false) {
+      logger.debug({ url }, 'Host is disabled - rejecting request');
       throw new Error(HOST_DISABLED);
     }
     options = applyAuthorization(options);
@@ -166,7 +149,7 @@ export class Http<GetOptions = HttpOptions, PostOptions = HttpPostOptions> {
 
     // Cache GET requests unless useCache=false
     if (
-      ['get', 'head'].includes(options.method) &&
+      (options.method === 'get' || options.method === 'head') &&
       options.useCache !== false
     ) {
       resPromise = memCache.get(cacheKey);
@@ -178,15 +161,15 @@ export class Http<GetOptions = HttpOptions, PostOptions = HttpPostOptions> {
       const queueTask = (): Promise<Response<T>> => {
         const queueDuration = Date.now() - startTime;
         return gotRoutine(url, options, {
-          method: options.method,
+          method: options.method ?? 'get',
           url,
           queueDuration,
         });
       };
       const queue = getQueue(url);
       resPromise = queue?.add(queueTask) ?? queueTask();
-      if (options.method === 'get') {
-        memCache.set(cacheKey, resPromise); // always set if it's a get
+      if (options.method === 'get' || options.method === 'head') {
+        memCache.set(cacheKey, resPromise); // always set if it's a get or a head
       }
     }
 
@@ -286,7 +269,8 @@ export class Http<GetOptions = HttpOptions, PostOptions = HttpPostOptions> {
   }
 
   stream(url: string, options?: HttpOptions): NodeJS.ReadableStream {
-    const combinedOptions: any = {
+    // TODO: fix types (#7154)
+    let combinedOptions: any = {
       method: 'get',
       ...this.options,
       hostType: this.hostType,
@@ -300,6 +284,12 @@ export class Http<GetOptions = HttpOptions, PostOptions = HttpPostOptions> {
     }
 
     applyDefaultHeaders(combinedOptions);
+    combinedOptions = applyHostRules(resolvedUrl, combinedOptions);
+    if (combinedOptions.enabled === false) {
+      throw new Error(HOST_DISABLED);
+    }
+    combinedOptions = applyAuthorization(combinedOptions);
+
     return got.stream(resolvedUrl, combinedOptions);
   }
 }

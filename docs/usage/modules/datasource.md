@@ -4,8 +4,11 @@ title: Datasources
 
 # Datasources
 
-Once Renovate's manager is done scanning files and extracting dependencies, it will assign a `datasource` to each extracted package file and/or dependency so that Renovate then knows how to search for new versions.
-You do not need to ever configure/override datasources directly, but you may use them in a `packageRules` array to configure other aspects of Renovate's behavior, e.g.
+After Renovate's manager scanned the files and extracted the dependencies, it assigns a `datasource` to each extracted package file or dependency.
+The `datasource` tells Renovate how to search for new versions.
+
+You don't need to configure or override datasources.
+But you may use datasources in a `packageRules` array to configure Renovate's behavior, for example:
 
 ```json
 {
@@ -21,5 +24,5 @@ You do not need to ever configure/override datasources directly, but you may use
 
 ## Supported Datasources
 
-<!-- Autogenerate in https://github.com/renovatebot/renovatebot.github.io -->
+<!-- Autogenerate in https://github.com/renovatebot/renovate -->
 <!-- Autogenerate end -->

@@ -5,8 +5,8 @@ import {
   fromHexcodeToCodepoint,
   fromUnicodeToHexcode,
 } from 'emojibase';
-import emojibaseEmojiRegex from 'emojibase-regex/emoji';
-import SHORTCODE_REGEX from 'emojibase-regex/shortcode';
+import emojibaseEmojiRegex from 'emojibase-regex/emoji.js';
+import SHORTCODE_REGEX from 'emojibase-regex/shortcode.js';
 import type { RenovateConfig } from '../config/types';
 import dataFiles from '../data-files.generated';
 import { regEx } from './regex';
@@ -20,7 +20,7 @@ const hexCodesByShort = new Map<string, string>();
 function lazyInitMappings(): void {
   if (!mappingsInitialized) {
     const table: Record<string, string | string[]> = JSON.parse(
-      dataFiles.get('node_modules/emojibase-data/en/shortcodes/github.json')
+      dataFiles.get('node_modules/emojibase-data/en/shortcodes/github.json')!
     );
     for (const [hex, val] of Object.entries(table)) {
       const shortCodes: string[] = is.array<string>(val) ? val : [val];
@@ -33,8 +33,8 @@ function lazyInitMappings(): void {
   }
 }
 
-export function setEmojiConfig(_config: RenovateConfig): void {
-  unicodeEmoji = _config.unicodeEmoji;
+export function setEmojiConfig(config: RenovateConfig): void {
+  unicodeEmoji = !!config.unicodeEmoji;
 }
 
 const shortCodeRegex = regEx(SHORTCODE_REGEX.source, 'g');
@@ -87,7 +87,7 @@ export function unemojify(text: string): string {
   return text.replace(emojiRegex, (emoji) => {
     const hexCode = stripHexCode(fromUnicodeToHexcode(emoji));
     const shortCode = shortCodesByHex.get(hexCode);
-    return shortCode || '�';
+    return shortCode ?? '�';
   });
 }
 

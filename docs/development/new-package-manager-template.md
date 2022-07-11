@@ -2,7 +2,7 @@
 
 **Did you read our documentation on adding a package manager?**
 
-- [ ] I've read the [adding a package manager](/renovatebot/renovate/blob/HEAD/docs/development/adding-a-package-manager.md) documentation.
+- [ ] I've read the [adding a package manager](adding-a-package-manager.md) documentation.
 
 ## Basics
 
@@ -23,7 +23,7 @@
 
 ### What type of package files and names does it use?
 
-### What [fileMatch](https://renovatebot.com/docs/configuration-options/#filematch) pattern(s) should be used?
+### What [fileMatch](../usage/configuration-options.md/#filematch) pattern(s) should be used?
 
 ### Is it likely that many users would need to extend this pattern for custom file names?
 
@@ -54,7 +54,7 @@
 - [ ] Custom-parsed line by line
 - [ ] Other
 
-### Does the package file structure distinguish between different "types" of dependencies? e.g. production dependencies, dev dependencies, etc?
+### Does the package file structure distinguish between different "types" of dependencies? e.g. production dependencies, development dependencies, etc?
 
 - [ ] Yes, production and development dependencies
 - [ ] No, all dependencies are treated the same
@@ -93,7 +93,7 @@
 
 ### Will users need the capability to specify a custom host/registry to look up? Can it be found within the package files, or within other files inside the repository, or would it require Renovate configuration?
 
-### Do the package files contain any "constraints" on the parent language (e.g. supports only v3.x of Python) or platform (Linux, Windows, etc) that should be used in the lookup procedure?
+### Do the package files have any "constraints" on the parent language (e.g. supports only v3.x of Python) or platform (Linux, Windows, etc) that should be used in the lookup procedure?
 
 ### Will users need the ability to configure language or other constraints using Renovate config?
 
@@ -105,7 +105,7 @@
 
 ### If so, what tool and exact commands should be used if updating one or more package versions in a dependency file?
 
-### If applicable, describe how the tool maintains a cache and if it can be controlled via CLI or env? Do you recommend the cache be kept or disabled/ignored?
+### If applicable, describe how the tool maintains a cache and if it can be controlled via CLI or environment variables? Do you recommend the cache be kept or disabled/ignored?
 
 ### If applicable, what command should be used to generate a lock file from scratch if you already have a package file? This will be used for "lock file maintenance"
 

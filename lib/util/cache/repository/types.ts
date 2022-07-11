@@ -1,5 +1,6 @@
-import type { PackageFile } from '../../../manager/types';
+import type { PackageFile } from '../../../modules/manager/types';
 import type { RepoInitConfig } from '../../../workers/repository/init/types';
+import type { GitConflictsCache } from '../../git/types';
 
 export interface BaseBranchCache {
   sha: string; // branch commit sha
@@ -14,7 +15,7 @@ export interface BranchUpgradeCache {
   depName?: string;
   fixedVersion?: string;
   currentVersion?: string;
-  lookupName?: string;
+  packageName?: string;
   newDigest?: string;
   newValue?: string;
   newVersion?: string;
@@ -31,13 +32,29 @@ export interface BranchCache {
   upgrades: BranchUpgradeCache[];
 }
 
-export interface Cache {
+export interface RepoCacheData {
   configFileName?: string;
   semanticCommits?: 'enabled' | 'disabled';
   branches?: BranchCache[];
-  repository?: string;
-  revision?: number;
   init?: RepoInitConfig;
   scan?: Record<string, BaseBranchCache>;
   lastPlatformAutomergeFailure?: string;
+  platform?: {
+    github?: Record<string, unknown>;
+  };
+  gitConflicts?: GitConflictsCache;
+  prComments?: Record<number, Record<string, string>>;
+}
+
+export interface RepoCacheRecord {
+  repository: string;
+  revision: number;
+  payload: string;
+  hash: string;
+}
+
+export interface RepoCache {
+  load(): Promise<void>;
+  save(): Promise<void>;
+  getData(): RepoCacheData;
 }

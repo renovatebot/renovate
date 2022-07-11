@@ -2,7 +2,7 @@ import type { Preset } from '../types';
 
 export const presets: Record<string, Preset> = {
   angularJs: {
-    description: 'All AngularJS packages',
+    description: 'All AngularJS packages.',
     matchPackageNames: [
       'angular',
       'angular-animate',
@@ -11,38 +11,38 @@ export const presets: Record<string, Preset> = {
     ],
   },
   react: {
-    description: 'All React packages',
+    description: 'All React packages.',
     matchPackageNames: ['@types/react'],
     matchPackagePrefixes: ['react'],
   },
   apollographql: {
-    description: 'All packages published by Apollo GraphQL',
+    description: 'All packages published by Apollo GraphQL.',
     matchSourceUrlPrefixes: ['https://github.com/apollographql/'],
   },
   mapbox: {
-    description: 'All mapbox-related packages',
+    description: 'All Mapbox-related packages.',
     matchPackagePrefixes: ['leaflet', 'mapbox'],
   },
   emberTemplateLint: {
-    description: 'All ember-template-lint packages',
+    description: 'All ember-template-lint packages.',
     matchPackagePrefixes: ['ember-template-lint'],
   },
   eslint: {
-    description: 'All ESLint packages',
+    description: 'All ESLint packages.',
     matchPackageNames: ['@types/eslint', 'babel-eslint'],
     matchPackagePrefixes: ['@typescript-eslint/', 'eslint'],
   },
   stylelint: {
-    description: 'All stylelint packages',
+    description: 'All Stylelint packages.',
     matchPackagePrefixes: ['stylelint'],
   },
   tslint: {
-    description: 'All TSLint packages',
+    description: 'All TSLint packages.',
     matchPackageNames: ['codelyzer'],
     matchPackagePatterns: ['\\btslint\\b'],
   },
   linters: {
-    description: 'All lint-related packages',
+    description: 'All lint-related packages.',
     extends: [
       'packages:emberTemplateLint',
       'packages:eslint',
@@ -52,12 +52,12 @@ export const presets: Record<string, Preset> = {
     matchPackageNames: ['remark-lint'],
   },
   postcss: {
-    description: 'All PostCSS packages',
+    description: 'All PostCSS packages.',
     matchPackageNames: ['postcss'],
     matchPackagePrefixes: ['postcss-'],
   },
   jsUnitTest: {
-    description: 'Unit test packages for JavaScript',
+    description: 'Unit test packages for JavaScript.',
     matchPackageNames: [
       '@types/chai',
       '@types/ember-mocha',
@@ -94,24 +94,24 @@ export const presets: Record<string, Preset> = {
     ],
   },
   unitTest: {
-    description: 'All unit test packages',
+    description: 'All unit test packages.',
     extends: ['packages:jsUnitTest'],
   },
   jsTest: {
-    description: 'JavaScript test packages',
+    description: 'JavaScript test packages.',
     extends: ['packages:jsUnitTest'],
   },
   test: {
-    description: 'Test packages',
+    description: 'Test packages.',
     extends: ['packages:unitTest'],
   },
   gatsby: {
-    description: 'All packages published by Gatsby',
+    description: 'All packages published by Gatsby.',
     extends: ['monorepo:gatsby'],
   },
   googleapis: {
     matchDatasources: ['npm'],
-    description: 'All googleapis packages',
+    description: 'All `googleapis` packages.',
     matchPackagePrefixes: ['@google-cloud/'],
   },
 };

@@ -13,7 +13,7 @@ import { exec } from '.';
 const cpExec: jest.Mock<typeof _cpExec> = _cpExec as any;
 
 jest.mock('child_process');
-jest.mock('../../../lib/datasource');
+jest.mock('../../modules/datasource');
 
 interface TestInput {
   processEnv: Record<string, string>;
@@ -466,7 +466,7 @@ describe('util/exec/index', () => {
           docker: {
             image,
           },
-          preCommands: ['preCommand1', 'preCommand2', null],
+          preCommands: ['preCommand1', 'preCommand2', null as never],
         },
         outCmd: [
           dockerPullCmd,
@@ -748,9 +748,23 @@ describe('util/exec/index', () => {
     await exec(inCmd, { docker });
     await exec(inCmd, { docker });
 
-    // FIXME: explicit assert condition
-    expect(actualCmd).toMatchSnapshot();
+    expect(actualCmd).toEqual([
+      `echo hello`,
+      `echo hello`,
+      `docker pull renovate/image`,
+      `docker ps --filter name=renovate_image -aq`,
+      `docker run --rm --name=renovate_image --label=renovate_child renovate/image bash -l -c "echo hello"`,
+      `docker ps --filter name=renovate_image -aq`,
+      `docker run --rm --name=renovate_image --label=renovate_child renovate/image bash -l -c "echo hello"`,
+      `echo hello`,
+      `echo hello`,
+      `docker ps --filter name=renovate_image -aq`,
+      `docker run --rm --name=renovate_image --label=renovate_child renovate/image bash -l -c "echo hello"`,
+      `docker ps --filter name=renovate_image -aq`,
+      `docker run --rm --name=renovate_image --label=renovate_child renovate/image bash -l -c "echo hello"`,
+    ]);
   });
+
   it('Supports binarySource=install', async () => {
     process.env = processEnv;
     cpExec.mockImplementation(() => {
@@ -810,6 +824,7 @@ describe('util/exec/index', () => {
     );
     expect(removeDockerContainerSpy).toHaveBeenCalledTimes(2);
   });
+
   it('converts to TEMPORARY_ERROR', async () => {
     cpExec.mockImplementation(() => {
       class ErrorSignal extends Error {

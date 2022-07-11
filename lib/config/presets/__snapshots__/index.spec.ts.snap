@@ -3,7 +3,7 @@
 exports[`config/presets/index getPreset gets linters 1`] = `
 Object {
   "description": Array [
-    "All lint-related packages",
+    "All lint-related packages.",
   ],
   "extends": Array [
     "packages:emberTemplateLint",
@@ -28,10 +28,10 @@ Object {
   "automergeType": "pr",
   "branchPrefix": "renovate/",
   "description": Array [
-    "Use <code>renovate/</code> as prefix for all branch names",
-    "If semantic commits detected, use semantic commit type <code>fix</code> for dependencies and <code>chore</code> for all others",
-    "Require all status checks to pass before any automerging",
-    "Pin dependency versions for <code>devDependencies</code> and retain SemVer ranges for others",
+    "Prefix \`renovate/\` to all branch names.",
+    "If Renovate detects semantic commits, it will use semantic commit type \`fix\` for dependencies and \`chore\` for all others.",
+    "Require all status checks to pass before any automerging.",
+    "Pin dependency versions for \`devDependencies\` and retain SemVer ranges for others.",
   ],
   "ignoreTests": false,
   "ignoreUnstable": true,
@@ -62,6 +62,20 @@ Object {
       "matchDepTypes": Array [
         "dependencies",
         "require",
+      ],
+      "semanticCommitType": "fix",
+    },
+    Object {
+      "matchDatasources": Array [
+        "maven",
+      ],
+      "matchDepTypes": Array [
+        "compile",
+        "provided",
+        "runtime",
+        "system",
+        "import",
+        "parent",
       ],
       "semanticCommitType": "fix",
     },
@@ -113,7 +127,7 @@ Object {
 exports[`config/presets/index resolvePreset resolves linters 1`] = `
 Object {
   "description": Array [
-    "All lint-related packages",
+    "All lint-related packages.",
   ],
   "matchPackageNames": Array [
     "@types/eslint",
@@ -136,13 +150,13 @@ Object {
 exports[`config/presets/index resolvePreset resolves nested groups 1`] = `
 Object {
   "description": Array [
-    "Update lint packages automatically if tests pass",
+    "Update lint packages automatically if tests pass.",
   ],
   "packageRules": Array [
     Object {
       "automerge": true,
       "description": Array [
-        "All lint-related packages",
+        "All lint-related packages.",
       ],
       "matchPackageNames": Array [
         "@types/eslint",

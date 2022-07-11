@@ -6,7 +6,7 @@ import {
   REPOSITORY_NO_PACKAGE_FILES,
 } from '../../../../constants/error-messages';
 import { logger } from '../../../../logger';
-import { platform } from '../../../../platform';
+import { platform } from '../../../../modules/platform';
 import { checkoutBranch, setGitAuthor } from '../../../../util/git';
 import { extractAllDependencies } from '../../extract';
 import { mergeRenovateConfig } from '../../init/merge';
@@ -43,8 +43,9 @@ export async function checkOnboardingBranch(
     }
     // istanbul ignore if
     if (platform.refreshPr) {
-      const onboardingPr = await platform.getBranchPr(config.onboardingBranch);
-      await platform.refreshPr(onboardingPr.number);
+      // TODO #7154
+      const onboardingPr = await platform.getBranchPr(config.onboardingBranch!);
+      await platform.refreshPr(onboardingPr!.number);
     }
   } else {
     logger.debug('Onboarding PR does not exist');
@@ -71,8 +72,10 @@ export async function checkOnboardingBranch(
     }
   }
   if (!GlobalConfig.get('dryRun')) {
-    await checkoutBranch(onboardingBranch);
+    // TODO #7154
+    await checkoutBranch(onboardingBranch!);
   }
-  const branchList = [onboardingBranch];
+  // TODO #7154
+  const branchList = [onboardingBranch!];
   return { ...config, repoIsOnboarded, onboardingBranch, branchList };
 }

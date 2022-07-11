@@ -18,10 +18,10 @@ These labels should also map approximately to our Conventional Commit scopes.
 
 You should know about platforms, package managers, datasources and versioning to label issues effectively.
 
-- To learn about platforms, read the [Renovate docs on Platforms](https://docs.renovatebot.com/modules/platform/).
-- To learn about managers, read the [Renovate docs on Managers](https://docs.renovatebot.com/modules/manager/).
-- To learn about datasources, read the [Renovate docs on Datasources](https://docs.renovatebot.com/modules/datasource/).
-- To learn more about versioning, read the [Renovate docs on Versioning](https://docs.renovatebot.com/modules/versioning/).
+- To learn about platforms, read the [Renovate docs on Platforms](https://docs.renovatebot.com/modules/platform/)
+- To learn about managers, read the [Renovate docs on Managers](https://docs.renovatebot.com/modules/manager/)
+- To learn about datasources, read the [Renovate docs on Datasources](https://docs.renovatebot.com/modules/datasource/)
+- To learn more about versioning, read the [Renovate docs on Versioning](https://docs.renovatebot.com/modules/versioning/)
 
 Most issues should have a label relating to either a platform, manager, datasource, versioning or worker topic.
 
@@ -43,7 +43,7 @@ Most issues should have a label relating to either a platform, manager, datasour
 Use these to label the status of an issue.
 For example, use `status:requirements` to mean that an issue is not yet ready for development to begin.
 If we need the original poster or somebody else to respond to a query of ours, apply the `status:waiting-on-response` label.
-All open issues should have some `status:*` label applied, and [this search](https://github.com/renovatebot/renovate/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+-label%3Astatus%3Arequirements+-label%3Astatus%3Aready+-label%3Astatus%3Ain-progress+-label%3Astatus%3Ablocked+-label%3Astatus%3Awaiting-on-response+) can identify any which are missing a status label.
+All open issues should have some `status:*` label applied, and [this search](https://github.com/renovatebot/renovate/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+-label%3Astatus%3Arequirements+-label%3Astatus%3Aready+-label%3Astatus%3Ain-progress+-label%3Astatus%3Ablocked+-label%3Astatus%3Awaiting-on-response+) can find any which are missing a status label.
 
 ### Type of issue
 
@@ -63,9 +63,9 @@ For example, use `type:bug` to label a bug type issue, and use `type:feature` fo
 Only use `type:refactor` for code changes, don't use `type:refactor` for documentation type changes.
 Use the `type:help` label for issues which should be converted to a discussion post.
 
-Any issue which has the label `status:ready` should also have a `type:*` label, and [this search](https://github.com/renovatebot/renovate/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+-label%3Atype%3Abug+label%3Astatus%3Aready+-label%3Atype%3Afeature+-label%3Atype%3Adocs+-label%3Atype%3Arefactor+) can identify any which are missing one.
+Any issue which has the label `status:ready` should also have a `type:*` label, and [this search](https://github.com/renovatebot/renovate/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+-label%3Atype%3Abug+label%3Astatus%3Aready+-label%3Atype%3Afeature+-label%3Atype%3Adocs+-label%3Atype%3Arefactor+) can find any which are missing one.
 
-Add the `breaking` label for Issues or PRs which contain changes that are not backwards compatible and require a major version bump.
+Add the `breaking` label for Issues or PRs which have changes that are not backwards compatible and require a major version bump.
 
 ### Priority
 
@@ -73,8 +73,8 @@ Add the `breaking` label for Issues or PRs which contain changes that are not ba
     <summary>Priority</summary>
 
     priority-1-critical
-    priority-2-important
-    priority-3-normal
+    priority-2-high
+    priority-3-medium
     priority-4-low
     priority-5-triage
 
@@ -82,11 +82,11 @@ Add the `breaking` label for Issues or PRs which contain changes that are not ba
 
 Use these to assign a priority level to an issue.
 Incoming issues are labeled `priority-5-triage` by default, this label should be replaced with a proper priority (low/normal/important/critical).
-Make a best-effort attempt to select a proper priority.
+Try to select the proper priority.
 Nothing bad will happen if you select a "wrong" priority.
 At a high level: critical = needs immediate fix, important = to be prioritized ahead of others, normal = default priority, low = trivial issue, or impacts a very small % of the user base.
 
-Use [this search](https://github.com/renovatebot/renovate/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+-label%3Apriority-1-critical+-label%3Apriority-2-important+-label%3Apriority-3-normal+-label%3Apriority-4-low++-label%3Apriority-5-triage) to find any issues which are missing a priority label.
+Use [this search](https://github.com/renovatebot/renovate/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+-label%3Apriority-1-critical+-label%3Apriority-2-high+-label%3Apriority-3-medium+-label%3Apriority-4-low++-label%3Apriority-5-triage) to find any issues which are missing a priority label.
 
 ### Platform
 
@@ -198,4 +198,4 @@ Add a label `duplicate` to issues/PRs that are a duplicate of an earlier issue/P
 
 </details>
 
-Use the `self-hosted` label to identify when an issue is applicable only to users who self-administer their own bot.
+Apply the `self-hosted` label when an issue is applicable only to users who self-administer their own bot.

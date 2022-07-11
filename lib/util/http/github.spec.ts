@@ -1,4 +1,6 @@
+import { DateTime } from 'luxon';
 import * as httpMock from '../../../test/http-mock';
+import { mocked } from '../../../test/util';
 import {
   EXTERNAL_HOST_ERROR,
   PLATFORM_BAD_CREDENTIALS,
@@ -6,9 +8,15 @@ import {
   PLATFORM_RATE_LIMIT_EXCEEDED,
   REPOSITORY_CHANGED,
 } from '../../constants/error-messages';
-import { id as GITHUB_RELEASES_ID } from '../../datasource/github-releases';
+import { GithubReleasesDatasource } from '../../modules/datasource/github-releases';
+import * as _repositoryCache from '../cache/repository';
+import type { RepoCacheData } from '../cache/repository/types';
 import * as hostRules from '../host-rules';
 import { GithubHttp, setBaseUrl } from './github';
+import type { GraphqlPageCache } from './github';
+
+jest.mock('../cache/repository');
+const repositoryCache = mocked(_repositoryCache);
 
 const githubApiHost = 'https://api.github.com';
 
@@ -40,10 +48,14 @@ query(
 
 describe('util/http/github', () => {
   let githubApi: GithubHttp;
+  let repoCache: RepoCacheData = {};
+
   beforeEach(() => {
     githubApi = new GithubHttp();
     setBaseUrl(githubApiHost);
     jest.resetAllMocks();
+    repoCache = {};
+    repositoryCache.getCache.mockReturnValue(repoCache);
   });
 
   afterEach(() => {
@@ -66,10 +78,10 @@ describe('util/http/github', () => {
     });
 
     it('supports different datasources', async () => {
-      const githubApiDatasource = new GithubHttp(GITHUB_RELEASES_ID);
+      const githubApiDatasource = new GithubHttp(GithubReleasesDatasource.id);
       hostRules.add({ hostType: 'github', token: 'abc' });
       hostRules.add({
-        hostType: GITHUB_RELEASES_ID,
+        hostType: GithubReleasesDatasource.id,
         token: 'def',
       });
       httpMock.scope(githubApiHost).get('/some-url').reply(200);
@@ -80,24 +92,23 @@ describe('util/http/github', () => {
     });
 
     it('paginates', async () => {
-      const url = '/some-url';
+      const url = '/some-url?per_page=2';
       httpMock
         .scope(githubApiHost)
         .get(url)
-        .reply(200, ['a'], {
-          link: `<${url}?page=2>; rel="next", <${url}?page=3>; rel="last"`,
+        .reply(200, ['a', 'b'], {
+          link: `<${url}&page=2>; rel="next", <${url}&page=3>; rel="last"`,
         })
-        .get(`${url}?page=2`)
-        .reply(200, ['b', 'c'], {
-          link: `<${url}?page=3>; rel="next", <${url}?page=3>; rel="last"`,
+        .get(`${url}&page=2`)
+        .reply(200, ['c', 'd'], {
+          link: `<${url}&page=3>; rel="next", <${url}&page=3>; rel="last"`,
         })
-        .get(`${url}?page=3`)
-        .reply(200, ['d']);
-      const res = await githubApi.getJson('some-url', { paginate: true });
-      expect(res.body).toEqual(['a', 'b', 'c', 'd']);
-      const trace = httpMock.getTrace();
-      expect(trace).toHaveLength(3);
+        .get(`${url}&page=3`)
+        .reply(200, ['e']);
+      const res = await githubApi.getJson(url, { paginate: true });
+      expect(res.body).toEqual(['a', 'b', 'c', 'd', 'e']);
     });
+
     it('uses paginationField', async () => {
       const url = '/some-url';
       httpMock
@@ -125,9 +136,8 @@ describe('util/http/github', () => {
         paginationField: 'the_field',
       });
       expect(res.body.the_field).toEqual(['a', 'b', 'c', 'd']);
-      const trace = httpMock.getTrace();
-      expect(trace).toHaveLength(3);
     });
+
     it('attempts to paginate', async () => {
       const url = '/some-url';
       httpMock
@@ -139,14 +149,13 @@ describe('util/http/github', () => {
       const res = await githubApi.getJson('some-url', { paginate: true });
       expect(res).toBeDefined();
       expect(res.body).toEqual(['a']);
-      const trace = httpMock.getTrace();
-      expect(trace).toHaveLength(1);
     });
+
     describe('handleGotError', () => {
       async function fail(
         code: number,
         body: any = undefined,
-        headers: httpMock.ReplyHeaders = undefined
+        headers: httpMock.ReplyHeaders = {}
       ) {
         const url = '/some-url';
         httpMock
@@ -177,6 +186,7 @@ describe('util/http/github', () => {
           'Response code 404 (Not Found)'
         );
       });
+
       it('should throw 410', async () => {
         await expect(
           fail(410, { message: 'Issues are disabled for this repo' })
@@ -184,6 +194,7 @@ describe('util/http/github', () => {
           'Response code 410 (Issues are disabled for this repo)'
         );
       });
+
       it('should throw rate limit exceeded', async () => {
         await expect(
           fail(403, {
@@ -192,6 +203,7 @@ describe('util/http/github', () => {
           })
         ).rejects.toThrow(PLATFORM_RATE_LIMIT_EXCEEDED);
       });
+
       it('should throw secondary rate limit exceeded', async () => {
         await expect(
           fail(403, {
@@ -200,11 +212,13 @@ describe('util/http/github', () => {
           })
         ).rejects.toThrow(PLATFORM_RATE_LIMIT_EXCEEDED);
       });
+
       it('should throw Bad credentials', async () => {
         await expect(
           fail(401, { message: 'Bad credentials. (401)' })
         ).rejects.toThrow(PLATFORM_BAD_CREDENTIALS);
       });
+
       it('should throw platform failure', async () => {
         await expect(
           fail(
@@ -216,6 +230,7 @@ describe('util/http/github', () => {
           )
         ).rejects.toThrow(EXTERNAL_HOST_ERROR);
       });
+
       it('should throw platform failure for ENOTFOUND, ETIMEDOUT or EAI_AGAIN', async () => {
         const codes = ['ENOTFOUND', 'ETIMEDOUT', 'EAI_AGAIN'];
         for (let idx = 0; idx < codes.length; idx += 1) {
@@ -225,22 +240,27 @@ describe('util/http/github', () => {
           );
         }
       });
+
       it('should throw platform failure for 500', async () => {
         await expect(fail(500)).rejects.toThrow(EXTERNAL_HOST_ERROR);
       });
+
       it('should throw platform failure ParseError', async () => {
         await expect(fail(200, '{{')).rejects.toThrow(EXTERNAL_HOST_ERROR);
       });
+
       it('should throw for unauthorized integration', async () => {
         await expect(
           fail(403, { message: 'Resource not accessible by integration (403)' })
         ).rejects.toThrow(PLATFORM_INTEGRATION_UNAUTHORIZED);
       });
+
       it('should throw for unauthorized integration2', async () => {
         await expect(
           fail(403, { message: 'Upgrade to GitHub Pro' })
         ).rejects.toThrow('Upgrade to GitHub Pro');
       });
+
       it('should throw on abuse', async () => {
         await expect(
           fail(403, {
@@ -248,6 +268,7 @@ describe('util/http/github', () => {
           })
         ).rejects.toThrow(PLATFORM_RATE_LIMIT_EXCEEDED);
       });
+
       it('should throw on repository change', async () => {
         await expect(
           fail(422, {
@@ -256,6 +277,7 @@ describe('util/http/github', () => {
           })
         ).rejects.toThrow(REPOSITORY_CHANGED);
       });
+
       it('should throw platform failure on 422 response', async () => {
         await expect(
           fail(422, {
@@ -263,6 +285,7 @@ describe('util/http/github', () => {
           })
         ).rejects.toThrow(EXTERNAL_HOST_ERROR);
       });
+
       it('should throw original error when failed to add reviewers', async () => {
         await expect(
           fail(422, {
@@ -272,6 +295,7 @@ describe('util/http/github', () => {
           'Review cannot be requested from pull request author.'
         );
       });
+
       it('should throw original error when pull requests aleady existed', async () => {
         await expect(
           fail(422, {
@@ -280,6 +304,7 @@ describe('util/http/github', () => {
           })
         ).rejects.toThrow('Validation error');
       });
+
       it('should throw original error of unknown type', async () => {
         await expect(
           fail(418, {
@@ -366,6 +391,7 @@ describe('util/http/github', () => {
       expect(req).toBeDefined();
       expect(req.url).toBe('https://ghe.mycompany.com/api/graphql');
     });
+
     it('supports app mode', async () => {
       hostRules.add({ hostType: 'github', token: 'x-access-token:123test' });
       httpMock
@@ -381,6 +407,7 @@ describe('util/http/github', () => {
         'application/vnd.github.machine-man-preview+json'
       );
     });
+
     it('returns empty array for undefined data', async () => {
       httpMock
         .scope(githubApiHost)
@@ -396,6 +423,7 @@ describe('util/http/github', () => {
         })
       ).toEqual([]);
     });
+
     it('returns empty array for undefined data.', async () => {
       httpMock
         .scope(githubApiHost)
@@ -409,6 +437,7 @@ describe('util/http/github', () => {
         })
       ).toEqual([]);
     });
+
     it('throws errors for invalid responses', async () => {
       httpMock.scope(githubApiHost).post('/graphql').reply(418);
       await expect(
@@ -417,6 +446,7 @@ describe('util/http/github', () => {
         })
       ).rejects.toThrow("Response code 418 (I'm a Teapot)");
     });
+
     it('halves node count and retries request', async () => {
       httpMock
         .scope(githubApiHost)
@@ -427,9 +457,11 @@ describe('util/http/github', () => {
             someprop: 'someval',
           },
         });
-      await githubApi.queryRepoField(graphqlQuery, 'testItem');
-      expect(httpMock.getTrace()).toHaveLength(7);
+      expect(
+        await githubApi.queryRepoField(graphqlQuery, 'testItem')
+      ).toMatchInlineSnapshot(`Array []`);
     });
+
     it('queryRepo', async () => {
       const repository = {
         foo: 'foo',
@@ -440,10 +472,10 @@ describe('util/http/github', () => {
         .post('/graphql')
         .reply(200, { data: { repository } });
 
-      const { data } = await githubApi.requestGraphql(graphqlQuery);
-      expect(httpMock.getTrace()).toHaveLength(1);
-      expect(data).toStrictEqual({ repository });
+      const res = await githubApi.requestGraphql(graphqlQuery);
+      expect(res?.data).toStrictEqual({ repository });
     });
+
     it('queryRepoField', async () => {
       httpMock
         .scope(githubApiHost)
@@ -455,9 +487,9 @@ describe('util/http/github', () => {
         .reply(200, page3);
 
       const items = await githubApi.queryRepoField(graphqlQuery, 'testItem');
-      expect(httpMock.getTrace()).toHaveLength(3);
       expect(items).toHaveLength(3);
     });
+
     it('limit result size', async () => {
       httpMock
         .scope(githubApiHost)
@@ -469,10 +501,19 @@ describe('util/http/github', () => {
       const items = await githubApi.queryRepoField(graphqlQuery, 'testItem', {
         limit: 2,
       });
-      expect(httpMock.getTrace()).toHaveLength(2);
       expect(items).toHaveLength(2);
     });
+
     it('shrinks items count on 50x', async () => {
+      repoCache.platform ??= {};
+      repoCache.platform.github ??= {};
+      repoCache.platform.github.graphqlPageCache = {
+        testItem: {
+          pageLastResizedAt: DateTime.local().toISO(),
+          pageSize: 50,
+        },
+      };
+
       httpMock
         .scope(githubApiHost)
         .post('/graphql')
@@ -487,10 +528,86 @@ describe('util/http/github', () => {
       const items = await githubApi.queryRepoField(graphqlQuery, 'testItem');
       expect(items).toHaveLength(3);
 
-      const trace = httpMock.getTrace();
-      expect(trace).toHaveLength(4);
-      expect(trace).toMatchSnapshot();
+      const graphqlPageCache = repoCache?.platform?.github?.[
+        'graphqlPageCache'
+      ] as GraphqlPageCache;
+      expect(graphqlPageCache?.['testItem']?.pageSize).toBe(25);
     });
+
+    it('expands items count on timeout', async () => {
+      repoCache.platform ??= {};
+      repoCache.platform.github ??= {};
+      repoCache.platform.github.graphqlPageCache = {
+        testItem: {
+          pageLastResizedAt: DateTime.local()
+            .minus({ hours: 24, seconds: 1 })
+            .toISO(),
+          pageSize: 42,
+        },
+      };
+
+      httpMock
+        .scope(githubApiHost)
+        .post('/graphql')
+        .reply(200, page1)
+        .post('/graphql')
+        .reply(200, page2)
+        .post('/graphql')
+        .reply(200, page3);
+
+      const items = await githubApi.queryRepoField(graphqlQuery, 'testItem');
+      expect(items).toHaveLength(3);
+      const graphqlPageCache = repoCache?.platform?.github?.[
+        'graphqlPageCache'
+      ] as GraphqlPageCache;
+      expect(graphqlPageCache?.['testItem']?.pageSize).toBe(84);
+    });
+
+    it('continues to iterate with a lower page size on error 502', async () => {
+      httpMock
+        .scope(githubApiHost)
+        .post('/graphql')
+        .reply(502)
+        .post('/graphql')
+        .reply(200, page1)
+        .post('/graphql')
+        .reply(200, page2)
+        .post('/graphql')
+        .reply(200, page3);
+
+      const items = await githubApi.queryRepoField(graphqlQuery, 'testItem');
+      expect(items).toHaveLength(3);
+    });
+
+    it('removes cache record once expanded to the maximum', async () => {
+      repoCache.platform ??= {};
+      repoCache.platform.github ??= {};
+      repoCache.platform.github.graphqlPageCache = {
+        testItem: {
+          pageLastResizedAt: DateTime.local()
+            .minus({ hours: 24, seconds: 1 })
+            .toISO(),
+          pageSize: 50,
+        },
+      };
+
+      httpMock
+        .scope(githubApiHost)
+        .post('/graphql')
+        .reply(200, page1)
+        .post('/graphql')
+        .reply(200, page2)
+        .post('/graphql')
+        .reply(200, page3);
+
+      const items = await githubApi.queryRepoField(graphqlQuery, 'testItem');
+      expect(items).toHaveLength(3);
+      const graphqlPageCache = repoCache?.platform?.github?.[
+        'graphqlPageCache'
+      ] as GraphqlPageCache;
+      expect(graphqlPageCache?.['testItem']).toBeUndefined();
+    });
+
     it('throws on 50x if count < 10', async () => {
       httpMock.scope(githubApiHost).post('/graphql').reply(500);
       await expect(

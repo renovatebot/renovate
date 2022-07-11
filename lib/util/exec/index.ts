@@ -1,5 +1,5 @@
 import is from '@sindresorhus/is';
-import { dirname, join } from 'upath';
+import upath from 'upath';
 import { GlobalConfig } from '../../config/global';
 import { TEMPORARY_ERROR } from '../../constants/error-messages';
 import { logger } from '../../logger';
@@ -52,9 +52,11 @@ function dockerEnvVars(extraEnv: ExtraEnv, childEnv: ExtraEnv): string[] {
   return extraEnvKeys.filter((key) => is.nonEmptyString(childEnv[key]));
 }
 
-function getCwd({ cwd, cwdFile }: ExecOptions): string {
+function getCwd({ cwd, cwdFile }: ExecOptions): string | undefined {
   const defaultCwd = GlobalConfig.get('localDir');
-  const paramCwd = cwdFile ? join(defaultCwd, dirname(cwdFile)) : cwd;
+  const paramCwd = cwdFile
+    ? upath.join(defaultCwd, upath.dirname(cwdFile))
+    : cwd;
   return paramCwd ?? defaultCwd;
 }
 
@@ -105,7 +107,7 @@ async function prepareRawExec(
   let rawCommands = typeof cmd === 'string' ? [cmd] : cmd;
 
   if (isDocker(docker)) {
-    logger.debug('Using docker to execute');
+    logger.debug({ image: docker.image }, 'Using docker to execute');
     const extraEnv = { ...opts.extraEnv, ...customEnvVariables };
     const childEnv = getChildEnv(opts);
     const envVars = dockerEnvVars(extraEnv, childEnv);
@@ -137,7 +139,8 @@ export async function exec(
   opts: ExecOptions = {}
 ): Promise<ExecResult> {
   const { docker } = opts;
-  const dockerChildPrefix = GlobalConfig.get('dockerChildPrefix');
+  const dockerChildPrefix =
+    GlobalConfig.get('dockerChildPrefix') ?? 'renovate_';
 
   const { rawCommands, rawOptions } = await prepareRawExec(cmd, opts);
   const useDocker = isDocker(docker);

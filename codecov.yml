@@ -1,4 +1,4 @@
-comment: off
+comment: false
 codecov:
   require_ci_to_pass: false
   notify:

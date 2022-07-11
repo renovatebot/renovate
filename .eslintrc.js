@@ -3,7 +3,7 @@ module.exports = {
   env: {
     node: true,
   },
-  plugins: ['@renovate'],
+  plugins: ['@renovate', 'typescript-enum', 'jest-formatting'],
   extends: [
     'eslint:recommended',
     'plugin:import/errors',
@@ -15,6 +15,7 @@ module.exports = {
     'plugin:@typescript-eslint/recommended',
     'plugin:@typescript-eslint/recommended-requiring-type-checking',
     'plugin:promise/recommended',
+    'plugin:jest-formatting/recommended',
     'prettier',
   ],
   parserOptions: {
@@ -28,11 +29,16 @@ module.exports = {
      * checks done by typescript.
      *
      * https://github.com/typescript-eslint/typescript-eslint/blob/master/docs/getting-started/linting/FAQ.md#eslint-plugin-import
+     * required for esm check
      */
-    'import/default': 0,
-    'import/named': 0,
-    'import/namespace': 0,
+    'import/default': 2,
+    'import/named': 2,
+    'import/namespace': 2,
     'import/no-named-as-default-member': 0,
+    'import/no-extraneous-dependencies': [
+      'error',
+      { devDependencies: ['test/**/*', '**/*.spec.ts'] },
+    ],
     'import/prefer-default-export': 0, // no benefit
 
     // other rules
@@ -64,7 +70,17 @@ module.exports = {
     ],
 
     // disallow direct `nock` module usage as it causes memory issues.
-    'no-restricted-imports': [2, { paths: ['nock'] }],
+    // disallow `parse-link-header` to allow override ENV https://github.com/thlorenz/parse-link-header#environmental-variables
+    // disallow `path` in favor of `upath`
+    'no-restricted-imports': [
+      2,
+      { paths: ['nock', 'parse-link-header', 'path'] },
+    ],
+
+    '@typescript-eslint/consistent-type-assertions': [
+      'error',
+      { assertionStyle: 'as', objectLiteralTypeAssertions: 'allow' },
+    ],
 
     // Makes no sense to allow type inference for expression parameters, but require typing the response
     '@typescript-eslint/explicit-function-return-type': [
@@ -74,7 +90,8 @@ module.exports = {
 
     // TODO: fix lint
     '@typescript-eslint/no-explicit-any': 0,
-    '@typescript-eslint/no-non-null-assertion': 2,
+    // TODO: https://github.com/renovatebot/renovate/issues/7154
+    '@typescript-eslint/no-non-null-assertion': 0,
     '@typescript-eslint/no-unused-vars': [
       2,
       {
@@ -113,13 +130,26 @@ module.exports = {
     '@typescript-eslint/unbound-method': 2,
     '@typescript-eslint/ban-types': 2,
     '@renovate/jest-root-describe': 2,
+
+    'typescript-enum/no-const-enum': 2,
+    'typescript-enum/no-enum': 2,
   },
   settings: {
     'import/parsers': {
       '@typescript-eslint/parser': ['.ts'],
     },
+    'import/resolver': {
+      typescript: {
+        alwaysTryTypes: true, // always try to resolve types under `<root>@types` directory even it doesn't contain any source code, like `@types/unist`
+        project: 'tsconfig.lint.json',
+      },
+    },
   },
   overrides: [
+    {
+      // files to check, so no `--ext` is required
+      files: ['**/*.{js,mjs,cjs,ts}'],
+    },
     {
       files: ['**/*.spec.ts', 'test/**'],
       env: {
@@ -143,7 +173,7 @@ module.exports = {
       },
     },
     {
-      files: ['**/*.{js,mjs}'],
+      files: ['**/*.{js,mjs,cjs}'],
 
       rules: {
         '@typescript-eslint/explicit-function-return-type': 0,
@@ -152,7 +182,7 @@ module.exports = {
       },
     },
     {
-      files: ['tools/**/*.{ts,js,mjs}'],
+      files: ['tools/**/*.{ts,js,mjs,cjs}'],
       env: {
         node: true,
       },
@@ -164,7 +194,7 @@ module.exports = {
       },
     },
     {
-      files: ['tools/**/*.js'],
+      files: ['tools/**/*.{js,cjs}', 'bin/*.{js,cjs}'],
       rules: {
         // need commonjs
         '@typescript-eslint/no-var-requires': 'off',

@@ -1,0 +1,24 @@
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: external-dns
+  namespace: kube-system
+spec:
+  releaseName: external-dns
+  chart:
+    spec:
+      chart: external-dns
+      sourceRef:
+        kind: HelmRepository
+        name: external-dns
+      version: "1.7.0"
+  interval: 1h0m0s
+---
+apiVersion: source.toolkit.fluxcd.io/v1beta1
+kind: HelmRepository
+metadata:
+  name: external-dns
+  namespace: kube-system
+spec:
+  interval: 1h0m0s
+  url: https://kubernetes-sigs.github.io/external-dns/

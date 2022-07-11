@@ -1,9 +1,10 @@
-import parseLinkHeader from 'parse-link-header';
+import is from '@sindresorhus/is';
 import { PlatformId } from '../../constants';
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
-import { parseUrl } from '../url';
-import { Http, HttpResponse, InternalHttpOptions } from '.';
+import { parseLinkHeader, parseUrl } from '../url';
+import type { HttpResponse, InternalHttpOptions } from './types';
+import { Http } from '.';
 
 let baseUrl = 'https://gitlab.com/api/v4/';
 export const setBaseUrl = (url: string): void => {
@@ -27,9 +28,7 @@ export class GitlabHttp extends Http<GitlabHttpOptions, GitlabHttpOptions> {
   protected override async request<T>(
     url: string | URL,
     options?: GitlabInternalOptions & GitlabHttpOptions
-  ): Promise<HttpResponse<T> | null> {
-    let result = null;
-
+  ): Promise<HttpResponse<T>> {
     const opts = {
       baseUrl,
       ...options,
@@ -37,22 +36,25 @@ export class GitlabHttp extends Http<GitlabHttpOptions, GitlabHttpOptions> {
     };
 
     try {
-      result = await super.request<T>(url, opts);
-      if (opts.paginate) {
+      const result = await super.request<T>(url, opts);
+      if (opts.paginate && is.array(result.body)) {
         // Check if result is paginated
         try {
-          const linkHeader = parseLinkHeader(result.headers.link as string);
-          if (linkHeader?.next) {
-            const nextUrl = parseUrl(linkHeader.next.url);
+          const linkHeader = parseLinkHeader(result.headers.link);
+          const nextUrl = linkHeader?.next?.url
+            ? parseUrl(linkHeader.next.url)
+            : null;
+          if (nextUrl) {
             if (process.env.GITLAB_IGNORE_REPO_URL) {
               const defaultEndpoint = new URL(baseUrl);
               nextUrl.protocol = defaultEndpoint.protocol;
               nextUrl.host = defaultEndpoint.host;
             }
 
-            result.body = result.body.concat(
-              (await this.request<T>(nextUrl, opts)).body
-            );
+            const nextResult = await this.request<T>(nextUrl, opts);
+            if (is.array(nextResult.body)) {
+              result.body.push(...nextResult.body);
+            }
           }
         } catch (err) /* istanbul ignore next */ {
           logger.warn({ err }, 'Pagination error');

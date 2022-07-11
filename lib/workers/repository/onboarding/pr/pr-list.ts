@@ -18,8 +18,9 @@ export function getPrList(
   prDesc += branches.length > 1 ? `s:\n\n` : `:\n\n`;
 
   for (const branch of branches) {
-    const prTitleRe = regEx(/@([a-z]+\/[a-z]+)/); // TODO #12071
-    prDesc += `<details>\n<summary>${branch.prTitle.replace(
+    const prTitleRe = regEx(/@([a-z]+\/[a-z]+)/);
+    // TODO #7154
+    prDesc += `<details>\n<summary>${branch.prTitle!.replace(
       prTitleRe,
       '@&#8203;$1'
     )}</summary>\n\n`;
@@ -44,11 +45,11 @@ export function getPrList(
         if (upgrade.sourceUrl) {
           text += `[${upgrade.depName}](${upgrade.sourceUrl})`;
         } else {
-          text += upgrade.depName.replace(prTitleRe, '@&#8203;$1');
+          text += upgrade.depName!.replace(prTitleRe, '@&#8203;$1');
         }
         text += upgrade.isLockfileUpdate
           ? ` to \`${upgrade.newVersion}\``
-          : ` to \`${upgrade.newDigest || upgrade.newValue}\``;
+          : ` to \`${upgrade.newDigest ?? upgrade.newValue}\``;
         text += '\n';
       }
       if (!seen.includes(text)) {
@@ -59,13 +60,15 @@ export function getPrList(
     prDesc += '\n\n';
     prDesc += '</details>\n\n';
   }
+  // TODO #7154
+  const prHourlyLimit = config.prHourlyLimit!;
   if (
-    config.prHourlyLimit > 0 &&
-    config.prHourlyLimit < 5 &&
-    config.prHourlyLimit < branches.length
+    prHourlyLimit > 0 &&
+    prHourlyLimit < 5 &&
+    prHourlyLimit < branches.length
   ) {
     prDesc += emojify(
-      `<br />\n\n:children_crossing: Branch creation will be limited to maximum ${config.prHourlyLimit} per hour, so it doesn't swamp any CI resources or spam the project. See docs for \`prhourlylimit\` for details.\n\n`
+      `<br />\n\n:children_crossing: Branch creation will be limited to maximum ${prHourlyLimit} per hour, so it doesn't swamp any CI resources or spam the project. See docs for \`prhourlylimit\` for details.\n\n`
     );
   }
   return prDesc;
