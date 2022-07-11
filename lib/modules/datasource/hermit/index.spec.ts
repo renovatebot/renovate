@@ -37,7 +37,7 @@ describe('modules/datasource/hermit/index', () => {
           ],
         });
 
-      httpMock.scope(githubApiHost).get(indexAssetUrl).reply(200, jsonResult);
+      httpMock.scope(githubApiHost).get(indexAssetUrl).reply(200, resp);
 
       const res = await datasource.getReleases({
         packageName: 'go',
