@@ -86,6 +86,15 @@ export function getAuthenticationRules(
   const authenticationRules = [];
   const hasUser = token.split(':').length > 1;
   const insteadUrl = gitUrlParse(gitUrl);
+
+  // Workaround for https://github.com/IonicaBizau/parse-path/issues/38
+  if (insteadUrl.port && insteadUrl.resource.endsWith(`:${insteadUrl.port}`)) {
+    insteadUrl.resource = insteadUrl.resource.substring(
+      0,
+      insteadUrl.resource.length - `:${insteadUrl.port}`.length
+    );
+  }
+
   const url = { ...insteadUrl };
   const protocol = regEx(/^https?$/).test(url.protocol)
     ? url.protocol
