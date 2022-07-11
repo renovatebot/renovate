@@ -14,10 +14,7 @@ describe('modules/manager/flux/artifacts', () => {
   });
 
   it('replaces existing value', async () => {
-    const snapshots = mockExecAll(exec, {
-      stdout: '',
-      stderr: '',
-    });
+    const snapshots = mockExecAll(exec, { stdout: '', stderr: '' });
     fs.readLocalFile.mockResolvedValueOnce('old');
     fs.readLocalFile.mockResolvedValueOnce('test');
 
@@ -64,10 +61,7 @@ describe('modules/manager/flux/artifacts', () => {
   });
 
   it('ignores unchanged system manifests', async () => {
-    const execSnapshots = mockExecAll(exec, {
-      stdout: '',
-      stderr: '',
-    });
+    const execSnapshots = mockExecAll(exec, { stdout: '', stderr: '' });
     fs.readLocalFile.mockResolvedValueOnce('old');
     fs.readLocalFile.mockResolvedValueOnce('old');
     const res = await updateArtifacts({

@@ -1,6 +1,5 @@
 import { join } from 'upath';
 import { envMock, exec, mockExecAll } from '../../../../test/exec-util';
-
 import { env, fs, git, mocked, partial } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';

@@ -481,10 +481,7 @@ describe('modules/manager/npm/post-update/yarn', () => {
     mockedFunction(getPkgReleases).mockResolvedValueOnce({
       releases: [{ version: '1.22.18' }],
     });
-    const execSnapshots = mockExecAll(exec, {
-      stdout: '',
-      stderr: '',
-    });
+    const execSnapshots = mockExecAll(exec, { stdout: '', stderr: '' });
     const config = partial<PostUpdateConfig<NpmManagerData>>({});
     const res = await yarnHelper.generateLockFile('some-dir', {}, config);
     expect(res.lockFile).toBe(plocktest1YarnLockV1);

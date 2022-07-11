@@ -184,10 +184,7 @@ describe('util/exec/docker/index', () => {
     });
 
     it('handles empty container list ', async () => {
-      const execSnapshots = mockExecAll(exec, {
-        stdout: '\n\n\n',
-        stderr: '',
-      });
+      const execSnapshots = mockExecAll(exec, { stdout: '\n\n\n', stderr: '' });
       await removeDanglingContainers();
       expect(execSnapshots).toMatchObject([
         { cmd: 'docker ps --filter label=renovate_child -aq' },
