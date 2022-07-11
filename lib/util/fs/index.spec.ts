@@ -99,20 +99,14 @@ describe('util/fs/index', () => {
 
   describe('readLocalFile', () => {
     it('reads buffer', async () => {
-      const path = `${localDir}/file.txt`;
-      await fs.outputFile(path, 'foobar');
-
-      const res = await readLocalFile(path);
-
+      await fs.outputFile(`${localDir}/file.txt`, 'foobar');
+      const res = await readLocalFile('file.txt');
       expect(res).toBeInstanceOf(Buffer);
     });
 
     it('reads string', async () => {
-      const path = `${localDir}/file.txt`;
-      await fs.outputFile(path, 'foobar');
-
-      const res = await readLocalFile(path, 'utf8');
-
+      await fs.outputFile(`${localDir}/file.txt`, 'foobar');
+      const res = await readLocalFile('file.txt', 'utf8');
       expect(typeof res).toBe('string');
     });
 
@@ -196,15 +190,15 @@ describe('util/fs/index', () => {
     it('returns true for file', async () => {
       const path = `${localDir}/file.txt`;
       await fs.outputFile(path, 'foobar');
-      expect(await localPathExists(path)).toBeTrue();
+      expect(await localPathExists('file.txt')).toBeTrue();
     });
 
     it('returns true for directory', async () => {
-      expect(await localPathExists(localDir)).toBeTrue();
+      expect(await localPathExists('.')).toBeTrue();
     });
 
     it('returns false', async () => {
-      expect(await localPathExists(`${localDir}/file.txt`)).toBe(false);
+      expect(await localPathExists('file.txt')).toBe(false);
     });
   });
 
@@ -275,7 +269,7 @@ describe('util/fs/index', () => {
       const path = `${cacheDir}/file.txt`;
       await fs.outputFile(path, 'foo');
 
-      const stream = createCacheWriteStream(path);
+      const stream = createCacheWriteStream('file.txt');
       expect(stream).toBeInstanceOf(fs.WriteStream);
 
       const write = new Promise((resolve, reject) => {
@@ -291,7 +285,7 @@ describe('util/fs/index', () => {
     it('returns true for file', async () => {
       const path = `${localDir}/file.txt`;
       await fs.outputFile(path, 'foo');
-      expect(await localPathIsFile(path)).toBeTrue();
+      expect(await localPathIsFile('file.txt')).toBeTrue();
     });
 
     it('returns false for directory', async () => {
@@ -360,14 +354,14 @@ describe('util/fs/index', () => {
   describe('listCacheDir', () => {
     it('lists directory', async () => {
       await fs.outputFile(`${cacheDir}/foo/bar.txt`, 'foobar');
-      expect(await listCacheDir(`${cacheDir}/foo`)).toEqual(['bar.txt']);
+      expect(await listCacheDir('foo')).toEqual(['bar.txt']);
     });
   });
 
   describe('rmCache', () => {
     it('removes cache dir', async () => {
       await fs.outputFile(`${cacheDir}/foo/bar/file.txt`, 'foobar');
-      await rmCache(`${cacheDir}/foo/bar`);
+      await rmCache(`foo/bar`);
       expect(await fs.pathExists(`${cacheDir}/foo/bar/file.txt`)).toBeFalse();
       expect(await fs.pathExists(`${cacheDir}/foo/bar`)).toBeFalse();
     });
@@ -376,10 +370,8 @@ describe('util/fs/index', () => {
   describe('readCacheFile', () => {
     it('reads file', async () => {
       await fs.outputFile(`${cacheDir}/foo/bar/file.txt`, 'foobar');
-      expect(await readCacheFile(`${cacheDir}/foo/bar/file.txt`, 'utf8')).toBe(
-        'foobar'
-      );
-      expect(await readCacheFile(`${cacheDir}/foo/bar/file.txt`)).toEqual(
+      expect(await readCacheFile(`foo/bar/file.txt`, 'utf8')).toBe('foobar');
+      expect(await readCacheFile(`foo/bar/file.txt`)).toEqual(
         Buffer.from('foobar')
       );
     });
@@ -387,9 +379,8 @@ describe('util/fs/index', () => {
 
   describe('outputCacheFile', () => {
     it('outputs file', async () => {
-      const file = join(cacheDir, 'some-file');
-      await outputCacheFile(file, 'foobar');
-      const res = await fs.readFile(file, 'utf8');
+      await outputCacheFile('file.txt', 'foobar');
+      const res = await fs.readFile(`${cacheDir}/file.txt`, 'utf8');
       expect(res).toBe('foobar');
     });
   });
