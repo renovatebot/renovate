@@ -4,7 +4,11 @@ import { assertBaseDir } from './access';
 
 function ensurePath(path: string, key: 'localDir' | 'cacheDir'): string {
   const baseDir = upath.resolve(GlobalConfig.get(key)!);
-  const fullPath = upath.resolve(upath.join(baseDir, path));
+  let fullPath = path;
+  if (fullPath.startsWith(baseDir)) {
+    fullPath = fullPath.replace(baseDir, '');
+  }
+  fullPath = upath.resolve(upath.join(baseDir, fullPath));
   assertBaseDir(fullPath, baseDir);
   return fullPath;
 }
