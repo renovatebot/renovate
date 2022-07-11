@@ -1,4 +1,4 @@
-import type { ProgrammingLanguage } from '../../../constants';
+import type { Category, ProgrammingLanguage } from '../../../constants';
 import { GitTagsDatasource } from '../../datasource/git-tags';
 import { PackagistDatasource } from '../../datasource/packagist';
 import { updateArtifacts } from './artifacts';
@@ -21,6 +21,8 @@ export const defaultConfig = {
   fileMatch: ['(^|/)([\\w-]*)composer\\.json$'],
   versioning: composerVersioningId,
 };
+
+export const categories = [Category.PHP];
 
 export const supportedDatasources = [
   GitTagsDatasource.id,

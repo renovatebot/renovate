@@ -1721,6 +1721,21 @@ Use this field to restrict rules to a particular language. e.g.
 }
 ```
 
+### matchCategories
+
+Use this field to restrict rules to a particular language. e.g.
+
+```json
+{
+  "packageRules": [
+    {
+      "matchCategories": ["python"],
+      "enabled": false
+    }
+  ]
+}
+```
+
 ### matchBaseBranches
 
 Use this field to restrict rules to a particular branch. e.g.

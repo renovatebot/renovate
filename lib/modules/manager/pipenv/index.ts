@@ -1,4 +1,4 @@
-import type { ProgrammingLanguage } from '../../../constants';
+import type { Category, ProgrammingLanguage } from '../../../constants';
 import { PypiDatasource } from '../../datasource/pypi';
 
 export { extractPackageFile } from './extract';
@@ -12,3 +12,5 @@ export const supportedDatasources = [PypiDatasource.id];
 export const defaultConfig = {
   fileMatch: ['(^|/)Pipfile$'],
 };
+
+export const categories = [Category.Python];

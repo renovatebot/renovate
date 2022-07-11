@@ -321,6 +321,7 @@ export interface PackageRule
   matchSourceUrlPrefixes?: string[];
   matchSourceUrls?: string[];
   matchUpdateTypes?: UpdateType[];
+  matchCategories?: string[];
   registryUrls?: string[] | null;
 }
 
@@ -454,6 +455,7 @@ export interface PackageRuleInputConfig extends Record<string, unknown> {
   isBump?: boolean;
   sourceUrl?: string | null;
   language?: string;
+  categories?: string[];
   baseBranch?: string;
   manager?: string | null;
   datasource?: string;

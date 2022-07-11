@@ -1,4 +1,4 @@
-import type { ProgrammingLanguage } from '../../../constants';
+import type { Category, ProgrammingLanguage } from '../../../constants';
 import { DockerDatasource } from '../../datasource/docker';
 import * as dockerVersioning from '../../versioning/docker';
 
@@ -12,3 +12,5 @@ export const defaultConfig = {
   fileMatch: ['(^|/)\\.python-version$'],
   versioning: dockerVersioning.id,
 };
+
+export const categories = [Category.Python];

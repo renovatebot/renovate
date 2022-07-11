@@ -1,4 +1,4 @@
-import type { ProgrammingLanguage } from '../../../constants';
+import type  { Category, ProgrammingLanguage } from '../../../constants';
 import { DotnetDatasource } from '../../datasource/dotnet';
 import { NugetDatasource } from '../../datasource/nuget';
 
@@ -16,5 +16,7 @@ export const defaultConfig = {
     '(^|/)global\\.json$',
   ],
 };
+
+export const categories = [Category.Dotnet];
 
 export const supportedDatasources = [DotnetDatasource.id, NugetDatasource.id];

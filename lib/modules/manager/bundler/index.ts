@@ -1,4 +1,4 @@
-import type { ProgrammingLanguage } from '../../../constants';
+import type { Category, ProgrammingLanguage } from '../../../constants';
 import { RubyVersionDatasource } from '../../datasource/ruby-version';
 import { RubyGemsDatasource } from '../../datasource/rubygems';
 import * as rubyVersioning from '../../versioning/ruby';
@@ -24,6 +24,8 @@ export const defaultConfig = {
   fileMatch: ['(^|/)Gemfile$'],
   versioning: rubyVersioning.id,
 };
+
+export const categories = [Category.Ruby];
 
 export const supportedDatasources = [
   RubyGemsDatasource.id,

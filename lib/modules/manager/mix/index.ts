@@ -1,4 +1,4 @@
-import type { ProgrammingLanguage } from '../../../constants';
+import type { Category, ProgrammingLanguage } from '../../../constants';
 import { GitTagsDatasource } from '../../datasource/git-tags';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { HexDatasource } from '../../datasource/hex';

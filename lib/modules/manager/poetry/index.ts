@@ -1,4 +1,4 @@
-import type { ProgrammingLanguage } from '../../../constants';
+import type { Category, ProgrammingLanguage } from '../../../constants';
 import { PypiDatasource } from '../../datasource/pypi';
 
 export { extractPackageFile } from './extract';
@@ -13,3 +13,5 @@ export const supportsLockFileMaintenance = true;
 export const defaultConfig = {
   fileMatch: ['(^|/)pyproject\\.toml$'],
 };
+
+export const categories = [Category.Python];

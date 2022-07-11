@@ -1,3 +1,4 @@
+import { Category } from '../../../constants';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
 
 export { extractPackageFile } from './extract';
@@ -9,4 +10,9 @@ export const defaultConfig = {
   ],
 };
 
-export const supportedDatasources = [GithubTagsDatasource.id];
+export const categories = [Category.CI];
+
+export const supportedDatasources = [
+  GithubTagsDatasource.id,
+  dockerVersioning.id,
+];

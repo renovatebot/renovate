@@ -1,4 +1,4 @@
-import type { ProgrammingLanguage } from '../../../constants';
+import type { Category, ProgrammingLanguage } from '../../../constants';
 import { CrateDatasource } from '../../datasource/crate';
 import * as cargoVersioning from '../../versioning/cargo';
 import { updateArtifacts } from './artifacts';
@@ -15,5 +15,7 @@ export const defaultConfig = {
   fileMatch: ['(^|/)Cargo\\.toml$'],
   versioning: cargoVersioning.id,
 };
+
+export const categories = [Category.Rust];
 
 export const supportedDatasources = [CrateDatasource.id];

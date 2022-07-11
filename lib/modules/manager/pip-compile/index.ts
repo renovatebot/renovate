@@ -1,4 +1,4 @@
-import type { ProgrammingLanguage } from '../../../constants';
+import type { Category, ProgrammingLanguage } from '../../../constants';
 import { PypiDatasource } from '../../datasource/pypi';
 
 export { extractPackageFile } from '../pip_requirements/extract';
@@ -17,3 +17,5 @@ export const defaultConfig = {
     commitMessageAction: 'Refresh pip-compile outputs',
   },
 };
+
+export const categories = [Category.Python];

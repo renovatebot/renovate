@@ -1,4 +1,4 @@
-import type { ProgrammingLanguage } from '../../../constants';
+import type { Category, ProgrammingLanguage } from '../../../constants';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
 import * as nodeVersioning from '../../versioning/node';
 
@@ -15,3 +15,5 @@ export const defaultConfig = {
   },
   versioning: nodeVersioning.id,
 };
+
+export const categories = [Category.CI];

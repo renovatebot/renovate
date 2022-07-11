@@ -1,3 +1,4 @@
+import { Category } from '../../../constants';
 import { MavenDatasource } from '../../datasource/maven';
 import { SbtPackageDatasource } from '../../datasource/sbt-package';
 import { SbtPluginDatasource } from '../../datasource/sbt-plugin';
@@ -16,3 +17,5 @@ export const defaultConfig = {
   fileMatch: ['\\.sbt$', 'project/[^/]*.scala$'],
   versioning: ivyVersioning.id,
 };
+
+export const categories = [Category.JVM];

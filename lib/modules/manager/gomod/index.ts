@@ -1,4 +1,4 @@
-import type { ProgrammingLanguage } from '../../../constants';
+import type { Category, ProgrammingLanguage } from '../../../constants';
 import { GoDatasource } from '../../datasource/go';
 import { GolangVersionDatasource } from '../../datasource/golang-version';
 import { updateArtifacts } from './artifacts';
@@ -15,6 +15,8 @@ export const language: ProgrammingLanguage = 'golang';
 export const defaultConfig = {
   fileMatch: ['(^|/)go\\.mod$'],
 };
+
+export const categories = [Category.Golang];
 
 export const supportedDatasources = [
   GoDatasource.id,

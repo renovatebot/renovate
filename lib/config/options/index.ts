@@ -959,6 +959,19 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
+    name: 'matchCategories',
+    description:
+      'List of categories to match (e.g. `["python"]`). Valid only within a `packageRules` object.',
+    type: 'array',
+    subType: 'string',
+    allowString: true,
+    parent: 'packageRules',
+    stage: 'package',
+    mergeable: true,
+    cli: false,
+    env: false,
+  },
+  {
     name: 'matchBaseBranches',
     description:
       'List of strings containing exact matches (e.g. `["main"]`) and/or regex expressions (e.g. `["/^release/.*/"]`). Valid only within a `packageRules` object.',

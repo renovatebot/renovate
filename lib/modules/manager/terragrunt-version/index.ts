@@ -1,3 +1,4 @@
+import { Category } from '../../../constants';
 import { GithubReleasesDatasource } from '../../datasource/github-releases';
 import * as hashicorpVersioning from '../../versioning/hashicorp';
 
@@ -10,3 +11,5 @@ export const defaultConfig = {
   versioning: hashicorpVersioning.id,
   extractVersion: '^v(?<version>.+)$',
 };
+
+export const categories = [Category.Terraform];

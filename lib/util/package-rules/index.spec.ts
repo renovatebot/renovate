@@ -1,4 +1,5 @@
 import type { PackageRuleInputConfig, UpdateType } from '../../config/types';
+import { Category, ProgrammingLanguage } from '../constants';
 import { DockerDatasource } from '../../modules/datasource/docker';
 import { OrbDatasource } from '../../modules/datasource/orb';
 import { applyPackageRules } from './index';
@@ -314,6 +315,7 @@ describe('util/package-rules/index', () => {
     const dep = {
       depType: 'dependencies',
       language: 'python',
+      categories: [Category.Python],
       manager: 'pipenv',
       depName: 'node',
     };
@@ -354,6 +356,64 @@ describe('util/package-rules/index', () => {
     const dep = {
       depType: 'dependencies',
       language: 'python',
+      manager: 'pipenv',
+      depName: 'node',
+    };
+    const res = applyPackageRules({ ...config, ...dep });
+    expect(res.x).toBeUndefined();
+  });
+
+  it('filters categories with matching category', () => {
+    const config: TestConfig = {
+      packageRules: [
+        {
+          matchCategories: [Category.NodeJS],
+          matchPackageNames: ['node'],
+          x: 1,
+        },
+      ],
+    };
+    const dep = {
+      depType: 'dependencies',
+      categories: [Category.JavaScript, Category.NodeJS],
+      manager: 'meteor',
+      depName: 'node',
+    };
+    const res = applyPackageRules({ ...config, ...dep });
+    expect(res.x).toBe(1);
+  });
+
+  it('filters categories with non-matching category', () => {
+    const config: TestConfig = {
+      packageRules: [
+        {
+          matchCategories: [Category.Docker],
+          matchPackageNames: ['node'],
+          x: 1,
+        },
+      ],
+    };
+    const dep = {
+      depType: 'dependencies',
+      categories: [Category.Python],
+      manager: 'pipenv',
+      depName: 'node',
+    };
+    const res = applyPackageRules({ ...config, ...dep });
+    expect(res.x).toBeUndefined();
+  });
+
+  it('filters categories with undefined category', () => {
+    const config: TestConfig = {
+      packageRules: [
+        {
+          matchCategories: [Category.Docker],
+          x: 1,
+        },
+      ],
+    };
+    const dep = {
+      depType: 'dependencies',
       manager: 'pipenv',
       depName: 'node',
     };

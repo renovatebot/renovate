@@ -1,3 +1,4 @@
+import { Category } from '../../../constants';
 import { GitTagsDatasource } from '../../datasource/git-tags';
 export { updateArtifacts } from './artifacts';
 export { extractPackageFile } from './extract';
@@ -8,5 +9,7 @@ export const defaultConfig = {
   fileMatch: ['(^|/)jsonnetfile\\.json$'],
   datasource: GitTagsDatasource.id,
 };
+
+export const categories = [Category.Kubernetes];
 
 export const supportedDatasources = [GitTagsDatasource.id];

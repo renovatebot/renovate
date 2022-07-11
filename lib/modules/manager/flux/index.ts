@@ -1,3 +1,4 @@
+import { Category } from '../../../constants';
 import { BitBucketTagsDatasource } from '../../datasource/bitbucket-tags';
 import { DockerDatasource } from '../../datasource/docker';
 import { GitRefsDatasource } from '../../datasource/git-refs';
@@ -14,6 +15,8 @@ export { updateArtifacts } from './artifacts';
 export const defaultConfig = {
   fileMatch: [systemManifestRegex],
 };
+
+export const categories = [Category.Kubernetes, Category.CD];
 
 export const supportedDatasources = [
   GithubReleasesDatasource.id,

@@ -1,3 +1,4 @@
+import { Category } from '../../../constants';
 import { DockerDatasource } from '../../datasource/docker';
 import { GitTagsDatasource } from '../../datasource/git-tags';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
@@ -8,6 +9,8 @@ export const defaultConfig = {
   fileMatch: ['(^|/)kustomization\\.ya?ml$'],
   pinDigests: false,
 };
+
+export const categories = [Category.Kubernetes];
 
 export const supportedDatasources = [
   DockerDatasource.id,

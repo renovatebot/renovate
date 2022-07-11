@@ -1,4 +1,4 @@
-import type { ProgrammingLanguage } from '../../../constants';
+import type { Category, ProgrammingLanguage } from '../../../constants';
 import { PypiDatasource } from '../../datasource/pypi';
 import { id as versioning } from '../../versioning/pep440';
 
@@ -12,3 +12,5 @@ export const defaultConfig = {
   fileMatch: ['(^|/)setup\\.cfg$'],
   versioning,
 };
+
+export const categories = [Category.Python];

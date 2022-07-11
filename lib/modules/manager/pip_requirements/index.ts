@@ -1,4 +1,4 @@
-import type { ProgrammingLanguage } from '../../../constants';
+import type { Category, ProgrammingLanguage } from '../../../constants';
 import { GitTagsDatasource } from '../../datasource/git-tags';
 import { PypiDatasource } from '../../datasource/pypi';
 
@@ -10,5 +10,7 @@ export const language: ProgrammingLanguage = 'python';
 export const defaultConfig = {
   fileMatch: ['(^|/)([\\w-]*)requirements\\.(txt|pip)$'],
 };
+
+export const categories = [Category.Python];
 
 export const supportedDatasources = [PypiDatasource.id, GitTagsDatasource.id];

@@ -1,4 +1,4 @@
-import type { ProgrammingLanguage } from '../../../constants';
+import type { Category, ProgrammingLanguage } from '../../../constants';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
 import * as nodeVersioning from '../../versioning/node';
 
@@ -13,5 +13,7 @@ export const defaultConfig = {
   fileMatch: ['(^|/)\\.node-version$'],
   versioning: nodeVersioning.id,
 };
+
+export const categories = [Category.JavaScript, Category.NodeJS];
 
 export const supportedDatasources = [GithubTagsDatasource.id];

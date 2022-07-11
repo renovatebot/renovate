@@ -1,5 +1,5 @@
 import moo from 'moo';
-import type { ProgrammingLanguage } from '../../../constants';
+import type { Category, ProgrammingLanguage } from '../../../constants';
 import { regEx } from '../../../util/regex';
 import { NugetDatasource } from '../../datasource/nuget';
 import type { PackageDependency, PackageFile } from '../types';
@@ -9,6 +9,8 @@ export const language: ProgrammingLanguage = 'dotnet';
 export const defaultConfig = {
   fileMatch: ['\\.cake$'],
 };
+
+export const categories = [Category.Dotnet];
 
 const lexer = moo.states({
   main: {

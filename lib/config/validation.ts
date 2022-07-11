@@ -314,6 +314,7 @@ export async function validateConfig(
               'matchFiles',
               'matchPaths',
               'matchLanguages',
+              'matchCategories',
               'matchBaseBranches',
               'matchManagers',
               'matchDatasources',

@@ -1,4 +1,4 @@
-import type { ProgrammingLanguage } from '../../../constants';
+import type { Category, ProgrammingLanguage } from '../../../constants';
 import { MavenDatasource } from '../../datasource/maven';
 import * as gradleVersioning from '../../versioning/gradle';
 
@@ -22,5 +22,7 @@ export const defaultConfig = {
   timeout: 600,
   versioning: gradleVersioning.id,
 };
+
+export const categories = [Category.JVM];
 
 export const supportedDatasources = [MavenDatasource.id];
