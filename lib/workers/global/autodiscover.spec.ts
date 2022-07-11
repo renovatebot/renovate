@@ -81,7 +81,7 @@ describe('workers/global/autodiscover', () => {
 
   it('filters autodiscovered github repos with regex', async () => {
     config.autodiscover = true;
-    config.autodiscoverFilter = '/project/re*./';
+    config.autodiscoverFilter = ['/project/re*./'];
     config.platform = PlatformId.Github;
     hostRules.find = jest.fn(() => ({
       token: 'abc',
@@ -95,7 +95,7 @@ describe('workers/global/autodiscover', () => {
 
   it('filters autodiscovered github repos with regex negation', async () => {
     config.autodiscover = true;
-    config.autodiscoverFilter = '!/project/re*./';
+    config.autodiscoverFilter = ['!/project/re*./'];
     config.platform = PlatformId.Github;
     hostRules.find = jest.fn(() => ({
       token: 'abc',
@@ -109,7 +109,7 @@ describe('workers/global/autodiscover', () => {
 
   it('fail if regex pattern is not valid', async () => {
     config.autodiscover = true;
-    config.autodiscoverFilter = '/project/re**./';
+    config.autodiscoverFilter = ['/project/re**./'];
     config.platform = PlatformId.Github;
     hostRules.find = jest.fn(() => ({
       token: 'abc',

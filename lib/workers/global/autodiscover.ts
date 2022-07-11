@@ -30,35 +30,25 @@ export async function autodiscoverRepositories(
     );
     return config;
   }
+
+  const discovered: string[] = [];
+
   if (config.autodiscoverFilter) {
-    const matched = new Set<string>();
-    for (const filter of config.autodiscoverFilter) {
-      let res: string[];
-      if (isConfigRegex(filter)) {
-        const autodiscoveryPred = configRegexPredicate(filter);
-        if (!autodiscoveryPred) {
-          throw new Error(`Failed to parse regex pattern "${filter}"`);
-        }
-        res = allRepos.filter(autodiscoveryPred);
-      } else {
-        res = allRepos.filter(minimatch.filter(filter));
-      }
-      for (const repository of res) {
-        matched.add(repository);
-      }
-    }
-    const discovered = [...matched];
+    discovered.push(...applyFilters(allRepos, config.autodiscoverFilter));
 
     if (!discovered.length) {
       // Soft fail (no error thrown) if no accessible repositories match the filter
       logger.debug('None of the discovered repositories matched the filter');
       return config;
     }
+  } else {
+    discovered.push(...allRepos);
   }
   logger.info(
     { length: discovered.length, repositories: discovered },
     `Autodiscovered repositories`
   );
+
   // istanbul ignore if
   if (config.repositories?.length) {
     logger.debug(
@@ -84,4 +74,25 @@ export async function autodiscoverRepositories(
     }
   }
   return { ...config, repositories: discovered };
+}
+
+export function applyFilters(repos: string[], filters: string[]): string[] {
+  const matched = new Set<string>();
+
+  for (const filter of filters) {
+    let res: string[];
+    if (isConfigRegex(filter)) {
+      const autodiscoveryPred = configRegexPredicate(filter);
+      if (!autodiscoveryPred) {
+        throw new Error(`Failed to parse regex pattern "${filter}"`);
+      }
+      res = repos.filter(autodiscoveryPred);
+    } else {
+      res = repos.filter(minimatch.filter(filter));
+    }
+    for (const repository of res) {
+      matched.add(repository);
+    }
+  }
+  return [...matched];
 }
