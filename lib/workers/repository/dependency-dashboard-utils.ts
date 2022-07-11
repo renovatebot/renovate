@@ -1,6 +1,7 @@
 import { regEx } from '../../util/regex';
 
-export class MarkdownHtmlFixer {
+export class DashboardHtmlFixer {
+  private readonly md: string;
   private fixedMd: string | null = null;
   private missingHtmlTags: string[];
 
@@ -8,7 +9,9 @@ export class MarkdownHtmlFixer {
     return !getMissingHtmlTags(md).length;
   }
 
-  constructor(private readonly md: string) {
+  constructor(markdown: string) {
+    // edge-case: remove truncated html tag at the end of the markdown string
+    this.md = markdown.replace(/<\/?\w*$/, '');
     this.missingHtmlTags = getMissingHtmlTags(this.md);
   }
 
@@ -18,7 +21,8 @@ export class MarkdownHtmlFixer {
     }
 
     if (this.isValidMdHtml()) {
-      return this.md;
+      this.fixedMd = this.md;
+      return this.fixedMd;
     }
 
     this.fixedMd =
@@ -55,7 +59,7 @@ class Stack {
   }
 
   getContent(): string[] {
-    return [...this.stack];
+    return [...this.stack].reverse();
   }
 }
 
@@ -78,10 +82,7 @@ function getMissingHtmlTags(md: string): string[] {
   const htmlTag = regEx(/<[\w/]*>/g);
 
   const stack = new Stack();
-  for (const match of md.matchAll(htmlTag) ?? []) {
-    if (!match) {
-      break;
-    }
+  for (const match of md.matchAll(htmlTag)) {
     const prev = stack.peek();
     const next = match[0];
 

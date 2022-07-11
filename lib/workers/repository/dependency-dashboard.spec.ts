@@ -18,7 +18,7 @@ import type { Platform } from '../../modules/platform';
 import { massageMarkdown } from '../../modules/platform/github';
 import { BranchConfig, BranchResult, BranchUpgradeConfig } from '../types';
 import * as dependencyDashboard from './dependency-dashboard';
-import { MarkdownHtmlFixer } from './dependency-dashboard-utils';
+import { DashboardHtmlFixer } from './dependency-dashboard-utils';
 import { PackageFiles } from './package-files';
 
 type PrUpgrade = BranchUpgradeConfig;
@@ -710,7 +710,7 @@ describe('workers/repository/dependency-dashboard', () => {
           const body = platform.ensureIssue.mock.calls[0][0].body;
           expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
           expect(platform.massageMarkdown).toHaveBeenCalledTimes(1);
-          expect(MarkdownHtmlFixer.isValidMdHtml(body)).toBeTrue();
+          expect(DashboardHtmlFixer.isValidMdHtml(body)).toBeTrue();
           expect(body.length < maxLength).toBeTrue();
           expect(
             body.endsWith(config.dependencyDashboardFooter + '\n\n')
@@ -718,6 +718,61 @@ describe('workers/repository/dependency-dashboard', () => {
 
           // same with dry run
           await dryRun(branches, platform);
+        });
+      });
+
+      describe('Tests MarkdownFixer class', () => {
+        it('fixes a truncated html', () => {
+          const html =
+            '<table>\n' +
+            '  <thead>\n' +
+            '    <tr>\n' +
+            '      <th>Name</th>\n' +
+            '      <th>Value</th>\n';
+          const fixedHtml = new DashboardHtmlFixer(html).fix();
+          expect(fixedHtml).toEndWith('</tr>\n</thead>\n</table>\n\n');
+          expect(DashboardHtmlFixer.isValidMdHtml(fixedHtml)).toBeTrue();
+        });
+
+        it('does nothing to a valid html', () => {
+          const html =
+            '<table>\n' +
+            '  <thead>\n' +
+            '    <tr>\n' +
+            '    </tr>\n' +
+            '  </thead>\n' +
+            '</table>\n\n';
+          const fixedHtml = new DashboardHtmlFixer(html).fix();
+          expect(fixedHtml).toMatch(html);
+          expect(DashboardHtmlFixer.isValidMdHtml(fixedHtml)).toBeTrue();
+        });
+
+        it('does nothing to a regular string', () => {
+          const html = 'this is a string';
+          // call mdFixer.fix twice for coverage
+          const mdFixer = new DashboardHtmlFixer(html);
+          const fixedHtml = mdFixer.fix();
+          mdFixer.fix();
+          expect(fixedHtml).toMatch(html);
+          expect(DashboardHtmlFixer.isValidMdHtml(fixedHtml)).toBeTrue();
+        });
+
+        it('removes a truncated opening html tag and fixes it', () => {
+          const html =
+            '<table>\n' + '  <thead>\n' + '    <tr>\n' + '    <truncated';
+          const fixedHtml = new DashboardHtmlFixer(html).fix();
+          expect(fixedHtml.includes('<truncated')).toBeFalse();
+          expect(fixedHtml).toEndWith('</tr>\n</thead>\n</table>\n\n');
+          expect(DashboardHtmlFixer.isValidMdHtml(fixedHtml)).toBeTrue();
+        });
+
+        it('removes a truncated closing html tag and fixes it', () => {
+          const html =
+            '<table>\n' + '  <thead>\n' + '    <tr>\n' + '    </truncated';
+          const fixedHtml = new DashboardHtmlFixer(html).fix();
+          expect(fixedHtml.includes('</truncated')).toBeFalse();
+          expect(fixedHtml).toEndWith('</tr>\n</thead>\n</table>\n\n');
+          expect(DashboardHtmlFixer.isValidMdHtml(fixedHtml)).toBeTrue();
         });
       });
     });

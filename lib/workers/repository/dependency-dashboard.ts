@@ -8,7 +8,7 @@ import { platform } from '../../modules/platform';
 import { regEx } from '../../util/regex';
 import * as template from '../../util/template';
 import { BranchConfig, BranchResult } from '../types';
-import { MarkdownHtmlFixer } from './dependency-dashboard-utils';
+import { DashboardHtmlFixer } from './dependency-dashboard-utils';
 import { PackageFiles } from './package-files';
 
 interface DependencyDashboard {
@@ -360,7 +360,8 @@ export async function ensureDependencyDashboard(
 }
 
 function finalizeMd(issueBody: string, config: RenovateConfig): string {
-  let md = new MarkdownHtmlFixer(platform.massageMarkdown(issueBody)).fix();
+  let md = platform.massageMarkdown(issueBody);
+  md = new DashboardHtmlFixer(md).fix();
 
   if (config.dependencyDashboardFooter?.length) {
     md +=
