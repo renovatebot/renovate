@@ -9,7 +9,7 @@ import type { UpdateArtifactsConfig } from '../types';
 import * as util from './util';
 import * as nuget from '.';
 
-jest.mock('child_process');
+jest.mock('../../../util/exec/common');
 jest.mock('../../../util/exec/env');
 jest.mock('../../../util/fs');
 jest.mock('../../../util/host-rules');
