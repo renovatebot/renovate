@@ -278,7 +278,6 @@ export async function processBranch(
         'Branch + PR exists but is not scheduled -- will update if necessary'
       );
     }
-
     await checkoutBranch(config.baseBranch!);
     //stability checks
     if (
@@ -476,6 +475,7 @@ export async function processBranch(
         };
       }
     }
+
     const commitSha = await commitFilesToBranch(config);
     // istanbul ignore if
     if (branchPr && platform.refreshPr) {
