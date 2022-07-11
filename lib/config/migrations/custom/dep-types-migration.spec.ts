@@ -51,7 +51,7 @@ describe('config/migrations/custom/dep-types-migration', () => {
             ],
           },
           {
-            depTypeList: ['optionalDependencies'],
+            matchDepTypes: ['optionalDependencies'],
             respectLatest: false,
           },
         ],
@@ -73,7 +73,7 @@ describe('config/migrations/custom/dep-types-migration', () => {
       {
         packageRules: [
           {
-            depTypeList: ['optionalDependencies'],
+            matchDepTypes: ['optionalDependencies'],
             respectLatest: false,
           },
         ],
