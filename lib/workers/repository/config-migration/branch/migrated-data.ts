@@ -8,112 +8,123 @@ import { getFileList } from '../../../../util/git';
 import { detectRepoFileConfig } from '../../init/merge';
 
 export interface MigratedData {
-  content: string;
-  filename: string;
+content: string;
+filename: string;
+}
+interface Indent {
+amount: number;
+indent: string;
+type?: string;
+}
+export async function applyPrettierFormatting(
+content: string,
+parser: string,
+indent: Indent
+): Promise<string> {
+const prettierConfigFilenames = [
+'.prettierrc',
+'.prettierrc.json',
+'.prettierrc.yml',
+'.prettierrc.yaml',
+'.prettierrc.json5',
+'.prettierrc.js',
+'.prettierrc.cjs',
+'prettier.config.js',
+'prettier.config.cjs',
+'.prettierrc.toml',
+];
+let prettierExists = (await getFileList()).some((file) =>
+prettierConfigFilenames.includes(file)
+);
+if (!prettierExists) {
+try {
+const packageJsonContent = await readLocalFile('package.json', 'utf8');
+prettierExists ||=
+packageJsonContent && JSON.parse(packageJsonContent).prettier;
+} catch {
+logger.warn('Invalid JSON found in package.json');
+}
 }
 
-export async function applyPrettierFormatting(
-  content: string,
-  indent: string
-): Promise<string> {
-  const prettierConfigFilenames = [
-    '.prettierrc',
-    '.prettierrc.json',
-    '.prettierrc.yml',
-    '.prettierrc.yaml',
-    '.prettierrc.json5',
-    '.prettierrc.js',
-    '.prettierrc.cjs',
-    'prettier.config.js',
-    'prettier.config.cjs',
-    '.prettierrc.toml',
-  ];
-  let prettierExists = (await getFileList()).some((file) =>
-    prettierConfigFilenames.includes(file)
-  );
-  if (!prettierExists) {
-    try {
-      const packageJsonContent = await readLocalFile('package.json', 'utf8');
-      prettierExists ||=
-        packageJsonContent && JSON.parse(packageJsonContent).prettier;
-    } catch {
-      logger.warn('Invalid JSON found in package.json');
-    }
-  }
+if (!prettierExists) {
+return content;
+}
+const options = {
+parser: parser,
+tabWidth: indent.amount,
+useTabs: indent.type === 'tab',
+};
 
-  if (!prettierExists) {
-    return content;
-  }
-
-  return prettier.format(content, {
-    parser: 'json',
-    tabWidth: indent.length,
-  });
+return prettier.format(content, options);
 }
 
 export class MigratedDataFactory {
-  // singleton
-  private static data: MigratedData | null;
+// singleton
+private static data: MigratedData | null;
 
-  public static async getAsync(): Promise<MigratedData | null> {
-    if (this.data) {
-      return this.data;
-    }
-    const migrated = await this.build();
+public static async getAsync(): Promise<MigratedData | null> {
+if (this.data) {
+return this.data;
+}
+const migrated = await this.build();
 
-    if (!migrated) {
-      return null;
-    }
+if (!migrated) {
+return null;
+}
 
-    this.data = migrated;
-    return this.data;
-  }
+this.data = migrated;
+return this.data;
+}
 
-  public static reset(): void {
-    this.data = null;
-  }
+public static reset(): void {
+this.data = null;
+}
 
-  private static async build(): Promise<MigratedData | null> {
-    let res: MigratedData | null = null;
-    try {
-      const rc = await detectRepoFileConfig();
-      const configFileParsed = rc?.configFileParsed || {};
+private static async build(): Promise<MigratedData | null> {
+let res: MigratedData | null = null;
+try {
+const rc = await detectRepoFileConfig();
+const configFileParsed = rc?.configFileParsed || {};
 
-      // get migrated config
-      const { isMigrated, migratedConfig } = migrateConfig(configFileParsed);
-      if (!isMigrated) {
-        return null;
-      }
+// get migrated config
+const { isMigrated, migratedConfig } = migrateConfig(configFileParsed);
+if (!isMigrated) {
+return null;
+}
 
-      delete migratedConfig.errors;
-      delete migratedConfig.warnings;
+delete migratedConfig.errors;
+delete migratedConfig.warnings;
 
-      const filename = rc.configFileName ?? '';
-      const raw = await readLocalFile(filename, 'utf8');
+const filename = rc.configFileName ?? '';
+const raw = await readLocalFile(filename, 'utf8');
 
-      // indent defaults to 2 spaces
-      // TODO #7154
-      const indent = detectIndent(raw!).indent ?? '  ';
-      let content: string;
+// indent defaults to 2 spaces
+// TODO #7154
+const indent = detectIndent(raw!);
+let content: string;
 
-      if (filename.endsWith('.json5')) {
-        content = JSON5.stringify(migratedConfig, undefined, indent);
-      } else {
-        content = JSON.stringify(migratedConfig, undefined, indent);
-      }
+if (filename.endsWith('.json5')) {
+content = JSON5.stringify(migratedConfig, undefined, indent.indent ?? '  ');
+} else {
+content = JSON.stringify(migratedConfig, undefined, indent.indent ?? '  ');
+}
 
-      content = await applyPrettierFormatting(content, indent);
-      if (!content.endsWith('\n')) {
-        content += '\n';
-      }
+content = await applyPrettierFormatting(
+content,
+filename.endsWith('.json5') ? 'json5' : 'json',
+indent
+);
+if (!content.endsWith('\n')) {
+content += '\n';
+}
 
-      res = { content, filename };
-    } catch (err) {
-      logger.debug(
-        { err },
-        'MigratedDataFactory.getAsync() Error initializing renovate MigratedData'
-      );
-    }
-    return res;
-  }
+res = { content, filename };
+} catch (err) {
+logger.debug(
+{ err },
+'MigratedDataFactory.getAsync() Error initializing renovate MigratedData'
+);
+}
+return res;
+}
 }
