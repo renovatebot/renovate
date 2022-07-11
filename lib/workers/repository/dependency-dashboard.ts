@@ -366,7 +366,7 @@ function finalizeMd(issueBody: string, config: RenovateConfig): string {
     md +=
       '---\n' +
       template.compile(config.dependencyDashboardFooter, config) +
-      '\n\n';
+      '\n';
   }
   return md;
 }

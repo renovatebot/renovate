@@ -23,9 +23,9 @@ export class MarkdownHtmlFixer {
 
     this.fixedMd =
       this.md +
-      '\n' +
+      '\n\n' +
       this.missingHtmlTags.map((str) => str.replace('<', '</')).join('\n') +
-      '\n';
+      '\n\n';
 
     return this.fixedMd;
   }
@@ -54,17 +54,17 @@ class Stack {
     return this.stack.pop();
   }
 
-  get(): string[] {
-    return this.stack;
+  getContent(): string[] {
+    return [...this.stack];
   }
 }
 
 function isHtmlPair(opening: string, closing: string): boolean {
   const isOpeningTag = regEx(/<[^/]/);
-  const tagRe = regEx(/<\/?\s*(?<tag>\w*)\s*>/);
+  const tagTypeRe = regEx(/<\/?\s*(?<type>\w*)\s*>/);
 
   function getTagName(str: string): string | undefined {
-    return tagRe.exec(str)?.groups?.tag;
+    return tagTypeRe.exec(str)?.groups?.type;
   }
 
   return (
@@ -75,22 +75,22 @@ function isHtmlPair(opening: string, closing: string): boolean {
 }
 
 function getMissingHtmlTags(md: string): string[] {
-  const re = regEx(/<[\w/]*>/g);
+  const htmlTag = regEx(/<[\w/]*>/g);
 
   const stack = new Stack();
-  for (const match of md.matchAll(re) ?? []) {
+  for (const match of md.matchAll(htmlTag) ?? []) {
     if (!match) {
       break;
     }
-    const top = stack.peek();
+    const prev = stack.peek();
     const next = match[0];
 
-    if (!top) {
+    if (!prev) {
       stack.push(next);
       continue;
     }
 
-    if (isHtmlPair(top, next)) {
+    if (isHtmlPair(prev, next)) {
       stack.pop();
       continue;
     }
@@ -98,5 +98,5 @@ function getMissingHtmlTags(md: string): string[] {
     stack.push(next);
   }
 
-  return stack.get();
+  return stack.getContent();
 }
