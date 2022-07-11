@@ -98,13 +98,18 @@ export function getDepWarningsDashboard(
   warningText = emojify(
     `\n---\n\n### :warning: Dependency Lookup Warnings :warning:\n\n`
   );
+  let firstTime = true;
   warnings.forEach((w) => {
     const splitStr = w.split(' ');
-    const msg = splitStr.slice(0, 5).join(' ');
     const dep = splitStr.slice(5).join(' ');
-
-    warningText += `-   ${msg} \`${dep}\`\n`;
+    if (firstTime) {
+      warningText += `-   Renovate failed to look up the following dependencies: \`${dep}\``;
+      firstTime = false;
+    } else {
+      warningText += `, \`${dep}\``;
+    }
   });
+  warningText += '.\n';
   warningText +=
     '\nFiles affected: ' +
     warningFiles.map((f) => '`' + f + '`').join(', ') +

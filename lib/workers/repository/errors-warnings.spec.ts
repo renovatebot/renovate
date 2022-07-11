@@ -151,8 +151,7 @@ describe('workers/repository/errors-warnings', () => {
 
         ### ⚠ Dependency Lookup Warnings ⚠
 
-        -   Warning 1 \`\`
-        -   Warning 2 \`\`
+        -   Renovate failed to look up the following dependencies: \`\`, \`\`.
 
         Files affected: \`package.json\`, \`backend/package.json\`, \`Dockerfile\`
 
