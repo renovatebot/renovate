@@ -138,6 +138,7 @@ function kill(cp: ChildProcess, signal: NodeJS.Signals): boolean {
     return cp.kill(signal);
   } catch (err) {
     // cp is a single node tree, therefore -pid is invalid as there is no such pgid,
+    // istanbul ignore next: will be covered once we use process.kill
     return false;
   }
 }
