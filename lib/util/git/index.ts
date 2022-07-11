@@ -26,7 +26,6 @@ import { api as semverCoerced } from '../../modules/versioning/semver-coerced';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import type { GitProtocol } from '../../types/git';
 import { Limit, incLimitedValue } from '../../workers/global/limits';
-import { getCache } from '../cache/repository';
 import { newlineRegex, regEx } from '../regex';
 import { parseGitAuthor } from './author';
 import { getNoVerify, simpleGitConfig } from './config';
@@ -35,6 +34,10 @@ import {
   setCachedConflictResult,
 } from './conflicts-cache';
 import { checkForPlatformFailure, handleCommitError } from './error';
+import {
+  getCachedModifiedResult,
+  setCachedModifiedResult,
+} from './modified-cache';
 import { configSigningKey, writePrivateKey } from './private-key';
 import type {
   CommitFilesConfig,
@@ -565,6 +568,21 @@ export async function isBranchStale(branchName: string): Promise<boolean> {
 }
 
 export async function isBranchModified(branchName: string): Promise<boolean> {
+  // First check local cache
+  if (config.branchIsModified[branchName] !== undefined) {
+    return config.branchIsModified[branchName];
+  }
+  // check in repoCache
+  const isModified = getCachedModifiedResult(
+    branchName,
+    config.branchCommits[branchName]
+  );
+  if (!is.null_(isModified)) {
+    return (config.branchIsModified[branchName] = isModified);
+  }
+
+  await syncGit();
+
   if (!branchExists(branchName)) {
     logger.debug(
       { branchName },
@@ -573,28 +591,6 @@ export async function isBranchModified(branchName: string): Promise<boolean> {
     return false;
   }
 
-  const cache = getCache();
-
-  // check if branch exists in cache or not
-  const branchCache = cache.branches?.find(
-    (branch) => branch.branchName === branchName
-  );
-  if (branchCache) {
-    // compare cached sha with fetched sha
-    if (
-      branchCache?.sha &&
-      config.branchCommits[branchName] &&
-      branchCache.sha === config.branchCommits[branchName]
-    ) {
-      return (config.branchIsModified[branchName] = branchCache.isModified);
-    }
-  }
-  // First check cache
-  if (config.branchIsModified[branchName] !== undefined) {
-    return config.branchIsModified[branchName];
-  }
-
-  await syncGit();
   // Retrieve the author of the most recent commit
   let lastAuthor: string | undefined;
   try {
@@ -625,6 +621,11 @@ export async function isBranchModified(branchName: string): Promise<boolean> {
     // author matches - branch has not been modified
     logger.debug({ branchName }, 'Branch has not been modified');
     config.branchIsModified[branchName] = false;
+    setCachedModifiedResult(
+      branchName,
+      config.branchCommits[branchName],
+      false
+    );
     return false;
   }
   logger.debug(
@@ -632,6 +633,7 @@ export async function isBranchModified(branchName: string): Promise<boolean> {
     'Last commit author does not match git author email - branch has been modified'
   );
   config.branchIsModified[branchName] = true;
+  setCachedModifiedResult(branchName, config.branchCommits[branchName], true);
   return true;
 }
 
