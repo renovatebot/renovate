@@ -61,7 +61,6 @@ export async function deleteLocalFile(fileName: string): Promise<void> {
   }
 }
 
-// istanbul ignore next
 export async function renameLocalFile(
   fromFile: string,
   toFile: string
@@ -70,14 +69,12 @@ export async function renameLocalFile(
   await fs.move(upath.join(localDir, fromFile), upath.join(localDir, toFile));
 }
 
-// istanbul ignore next
 export async function ensureDir(dirName: string): Promise<void> {
   if (is.nonEmptyString(dirName)) {
     await fs.ensureDir(dirName);
   }
 }
 
-// istanbul ignore next
 export async function ensureLocalDir(dirName: string): Promise<void> {
   const { localDir } = GlobalConfig.get();
   const localDirName = upath.join(localDir, dirName);
@@ -151,7 +148,7 @@ export async function readLocalDirectory(path: string): Promise<string[]> {
   return fileList;
 }
 
-export function createWriteStream(path: string): fs.WriteStream {
+export function createCacheWriteStream(path: string): fs.WriteStream {
   return fs.createWriteStream(path);
 }
 
@@ -216,12 +213,10 @@ export async function statLocalFile(
   }
 }
 
-// istanbul ignore next
 export function listCacheDir(path: string): Promise<string[]> {
   return fs.readdir(path);
 }
 
-// istanbul ignore next
 export async function rmCache(path: string): Promise<void> {
   await fs.rm(path, { recursive: true });
 }
