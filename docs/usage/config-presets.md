@@ -5,23 +5,23 @@ description: Renovate's support for ESLint-like shareable configs
 
 # Shareable Config Presets
 
-This document describes how to configure your shared presets.
+This page describes how to configure your shared presets.
 Read the [Key concepts, presets](./key-concepts/presets.md) page to learn more about presets in general.
 
-Shareable config presets can only be used with the JSON format, other formats are not supported.
+Shareable config presets must use the JSON format, other formats are not supported.
 
 <!-- prettier-ignore -->
 !!! warning
-    `default.json` is intended for use with presets only!
-    Also, do not use a `renovate.json` file as a preset.
+    Only use `default.json` for your presets.
 
 <!-- prettier-ignore -->
-!!! info
-    We've deprecated the use of a `renovate.json` file for presets as this can cause issues if the repository configuration uses a `renovate.json` file as well.
+!!! warning
+    We've deprecated using a `renovate.json` file for presets, as this causes issues if the repository configuration _also_ uses a `renovate.json` file.
+    If you're using a `renovate.json` file for presets, rename it to `default.json`.
 
 <!-- prettier-ignore -->
 !!! tip
-    Describe what your preset is doing by using the `"description"` field.
+    Describe what your preset does in the `"description"` field.
     This way your configuration is self-documenting.
 
 ## Extending from a preset
@@ -35,7 +35,8 @@ Presets should be hosted in repositories, which usually means the same platform 
 
 <!-- prettier-ignore -->
 !!! warning
-    npm-based presets are deprecated and support will be removed in a future major release.
+    We deprecated npm-based presets.
+    We plan to drop the npm-based presets feature in a future major release of Renovate.
 
 You can set a Git tag (like a SemVer) to use a specific release of your shared config.
 
@@ -95,21 +96,23 @@ You can set a Git tag (like a SemVer) to use a specific release of your shared c
 
 ## Example configs
 
-An example of a small rule is `:preserveSemverRanges`, which has the description "Preserve (but continue to upgrade) any existing semver ranges".
+An example of a small rule is `:preserveSemverRanges`, which has the description "Preserve (but continue to upgrade) any existing SemVer ranges.".
 It simply sets the configuration option `rangeStrategy` to `replace`.
 
 An example of a full config is `config:base`, which is Renovate's default configuration.
-It mostly uses Renovate config defaults but adds a few smart customisations such as grouping monorepo packages together.
+It mostly uses Renovate config defaults but adds a few smart customizations such as grouping monorepo packages together.
 
 <!-- prettier-ignore -->
 !!! note
-    The `:xyz` naming convention (with `:` prefix) is a special shorthand for the `default:` presets.
-    e.g. `:xyz` is equivalent to `default:xyz`.
+    The `:xyz` naming convention (with `:` prefix) is shorthand for the `default:` presets.
+    For example: `:xyz` is the same as `default:xyz`.
 
 ## How to Use Preset Configs
 
-By default, the Renovate App's onboarding process will suggest `["config:base]"`.
-If you are self hosting you must add `"onboardingConfig": { "extends": ["config:base"] }` to your bot's config.
+By default, Renovate App's onboarding PR suggests the `["config:base]"` preset.
+If you're self hosting you must add `"onboardingConfig": { "extends": ["config:base"] }` to your bot's config.
+
+Read the [Full Config Presets](https://docs.renovatebot.com/presets-config/) page to learn more about our `config:` presets.
 
 A typical onboarding `renovate.json` looks like this:
 
@@ -119,17 +122,16 @@ A typical onboarding `renovate.json` looks like this:
 }
 ```
 
-Say you want to modify the default behavior, for example scheduling Renovate to process upgrades during non-office hours only.
-To do this you can modify the default `renovate.json` file like this:
+Here's an example of using presets to change Renovate's behavior.
+You're happy with the `config:base` preset, but want Renovate to create PRs when you're not at the office.
+You look at our `schedule:` presets, and find the `schedule:nonOfficeHours` preset.
+You put `schedule:nonOfficeHours` in the `extends` array of your `renovate.json` file, like this:
 
 ```json
 {
   "extends": ["config:base", "schedule:nonOfficeHours"]
 }
 ```
-
-This makes use of the `schedules:` presets.
-You can find the Renovate team's preset configs at the "Config Presets" section of [Renovate Docs](https://docs.renovatebot.com).
 
 ## Preset Parameters
 
@@ -169,19 +171,19 @@ To host your preset config on GitHub:
 - Create a new repository. Normally you'd call it `renovate-config` but it can be named anything
 - Add configuration files to this new repo for any presets you want to share. For the default preset, `default.json` will be checked. For named presets, `<preset-name>.json` will be loaded. For example, loading preset `library` would load `library.json`. No other files are necessary.
 - In other repos, reference it in an extends array like "github>owner/name", for example:
-
-```json
-{
-  "extends": ["github>rarkins/renovate-config"]
-}
-```
+   
+    ```json
+    {
+      "extends": ["github>rarkins/renovate-config"]
+    }
+    ```
 
 From then on Renovate will use the Renovate config from the preset repo's default branch.
 You do not need to add it as a devDependency or add any other files to the preset repo.
 
 ## GitLab-hosted Presets
 
-For a private GitLab repository Renovate requires at least _Reporter_ level access.
+For a private GitLab repository Renovate requires at least `Reporter` level access.
 
 To host your preset config on GitLab:
 
