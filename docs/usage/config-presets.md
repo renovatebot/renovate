@@ -171,12 +171,12 @@ To host your preset config on GitHub:
 - Create a new repository. Normally you'd call it `renovate-config` but it can be named anything
 - Add configuration files to this new repo for any presets you want to share. For the default preset, `default.json` will be checked. For named presets, `<preset-name>.json` will be loaded. For example, loading preset `library` would load `library.json`. No other files are necessary.
 - In other repos, reference it in an extends array like "github>owner/name", for example:
-   
-    ```json
-    {
-      "extends": ["github>rarkins/renovate-config"]
-    }
-    ```
+
+  ```json
+  {
+    "extends": ["github>rarkins/renovate-config"]
+  }
+  ```
 
 From then on Renovate will use the Renovate config from the preset repo's default branch.
 You do not need to add it as a devDependency or add any other files to the preset repo.
