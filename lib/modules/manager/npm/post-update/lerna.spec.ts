@@ -5,7 +5,7 @@ import type { RepoGlobalConfig } from '../../../../config/types';
 import type { PackageFile, PostUpdateConfig } from '../../types';
 import * as lernaHelper from './lerna';
 
-jest.mock('child_process');
+jest.mock('../../../../util/exec/common');
 jest.mock('../../../../util/exec/env');
 jest.mock('../../npm/post-update/node-version');
 
