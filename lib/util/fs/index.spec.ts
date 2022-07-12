@@ -59,7 +59,9 @@ describe('util/fs/index', () => {
   });
 
   afterEach(async () => {
-    await localDirResult.cleanup();
+    await localDirResult?.cleanup();
+    await cacheDirResult?.cleanup();
+    await tmpDirResult?.cleanup();
   });
 
   describe('getParentDir', () => {
@@ -107,7 +109,7 @@ describe('util/fs/index', () => {
     it('reads string', async () => {
       await fs.outputFile(`${localDir}/file.txt`, 'foobar');
       const res = await readLocalFile('file.txt', 'utf8');
-      expect(typeof res).toBe('string');
+      expect(res).toBe('foobar');
     });
 
     it('does not throw', async () => {

@@ -3,7 +3,6 @@ import util from 'util';
 import is from '@sindresorhus/is';
 import findUp from 'find-up';
 import fs from 'fs-extra';
-import type { WriteFileOptions } from 'fs-extra';
 import upath from 'upath';
 import { GlobalConfig } from '../../config/global';
 import { logger } from '../../logger';
@@ -235,13 +234,9 @@ export function readCacheFile(
   return encoding ? fs.readFile(fullPath, encoding) : fs.readFile(fullPath);
 }
 
-export function outputCacheFile(
-  file: string,
-  data: unknown,
-  options?: WriteFileOptions | string
-): Promise<void> {
+export function outputCacheFile(file: string, data: unknown): Promise<void> {
   const filePath = ensureCachePath(file);
-  return fs.outputFile(filePath, data, options ?? {});
+  return fs.outputFile(filePath, data);
 }
 
 export async function readSystemFile(fileName: string): Promise<Buffer>;
