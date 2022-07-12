@@ -1,11 +1,21 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`modules/manager/gomod/extract extractPackageFile() extracts constraints 1`] = `
+exports[`modules/manager/gomod/extract extractPackageFile() extracts constraints and golang 1`] = `
 Object {
   "constraints": Object {
     "go": "^1.13",
   },
   "deps": Array [
+    Object {
+      "currentValue": "1.13",
+      "datasource": "golang-version",
+      "depName": "go",
+      "depType": "golang",
+      "managerData": Object {
+        "lineNumber": 2,
+      },
+      "versioning": "npm",
+    },
     Object {
       "currentValue": "v0.45.1",
       "datasource": "go",

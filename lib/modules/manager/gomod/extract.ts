@@ -1,8 +1,8 @@
 import semver from 'semver';
 import { logger } from '../../../logger';
 import { newlineRegex, regEx } from '../../../util/regex';
-
 import { GoDatasource } from '../../datasource/go';
+import { GolangVersionDatasource } from '../../datasource/golang-version';
 import { isVersion } from '../../versioning/semver';
 import type { PackageDependency, PackageFile } from '../types';
 
@@ -41,9 +41,10 @@ function getGoDep(lineNumber: number, goVer: string): PackageDependency {
       lineNumber,
     },
     depName: 'go',
-    depType: '',
+    depType: 'golang',
     currentValue: goVer,
-    datasource: GoDatasource.id,
+    datasource: GolangVersionDatasource.id,
+    versioning: 'npm',
   };
 }
 
