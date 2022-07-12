@@ -276,19 +276,21 @@ describe('util/git/index', () => {
     it('should return true when custom author is unknown', async () => {
       expect(await git.isBranchModified('renovate/custom_author')).toBeTrue();
     });
-  });
 
-  describe('isBranchModified() with non-null cache', () => {
-    beforeEach(() => {
-      modifiedCache.getCachedModifiedResult.mockReturnValue(false);
-    });
+    describe('isBranchModified() with non-null cache', () => {
+      beforeEach(() => {
+        modifiedCache.getCachedModifiedResult.mockReturnValue(false);
+      });
 
-    it('should return false when branch is not found', async () => {
-      expect(await git.isBranchModified('renovate/not_found')).toBeFalse();
-    });
+      it('should return false when branch is not found', async () => {
+        expect(await git.isBranchModified('renovate/not_found')).toBeFalse();
+      });
 
-    it('should return false when author matches', async () => {
-      expect(await git.isBranchModified('renovate/future_branch')).toBeFalse();
+      it('should return false when author matches', async () => {
+        expect(
+          await git.isBranchModified('renovate/future_branch')
+        ).toBeFalse();
+      });
     });
   });
 
