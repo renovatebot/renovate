@@ -8,7 +8,6 @@ import { platform } from '../../modules/platform';
 import { regEx } from '../../util/regex';
 import * as template from '../../util/template';
 import { BranchConfig, BranchResult } from '../types';
-import { DashboardHtmlFixer } from './dependency-dashboard-utils';
 import { PackageFiles } from './package-files';
 
 interface DependencyDashboard {
@@ -319,16 +318,14 @@ export async function ensureDependencyDashboard(
       'This repository currently has no open or pending branches.\n\n';
   }
 
-  let footer = '';
+  issueBody += PackageFiles.getDashboardMarkdown(config);
+
   if (config.dependencyDashboardFooter?.length) {
-    footer +=
+    issueBody +=
       '---\n' +
       template.compile(config.dependencyDashboardFooter, config) +
       '\n';
   }
-  issueBody += footer;
-
-  issueBody += PackageFiles.getDashboardMarkdown(config);
 
   if (config.dependencyDashboardIssue) {
     const updatedIssue = await platform.getIssue?.(
@@ -361,22 +358,9 @@ export async function ensureDependencyDashboard(
     await platform.ensureIssue({
       title: config.dependencyDashboardTitle!,
       reuseTitle,
-      body: finalizeMd(issueBody, config),
+      body: platform.massageMarkdown(issueBody),
       labels: config.dependencyDashboardLabels,
       confidential: config.confidential,
     });
   }
-}
-
-function finalizeMd(issueBody: string, config: RenovateConfig): string {
-  let md = platform.massageMarkdown(issueBody);
-  md = DashboardHtmlFixer.fix(md);
-
-  if (config.dependencyDashboardFooter?.length) {
-    md +=
-      '---\n' +
-      template.compile(config.dependencyDashboardFooter, config) +
-      '\n';
-  }
-  return md;
 }

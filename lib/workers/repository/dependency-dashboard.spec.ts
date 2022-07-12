@@ -16,10 +16,8 @@ import type {
 } from '../../modules/manager/types';
 import type { Platform } from '../../modules/platform';
 import { massageMarkdown } from '../../modules/platform/github';
-import { regEx } from '../../util/regex';
 import { BranchConfig, BranchResult, BranchUpgradeConfig } from '../types';
 import * as dependencyDashboard from './dependency-dashboard';
-import { DashboardHtmlFixer } from './dependency-dashboard-utils';
 import { PackageFiles } from './package-files';
 
 type PrUpgrade = BranchUpgradeConfig;
@@ -54,7 +52,7 @@ function genRandPackageFile(
   for (let i = 0; i < depsNum; i++) {
     deps.push({
       depName: genRandString(depNameLen),
-      currentValue: '1.0.0',
+      currentVersion: '1.0.0',
     });
   }
   return { npm: [{ packageFile: 'package.json', deps }] };
@@ -700,77 +698,19 @@ describe('workers/repository/dependency-dashboard', () => {
           await dryRun(branches, platform);
         });
 
-        it('truncates and fixes the body of a really big repo', async () => {
+        it('truncates the body of a really big repo', async () => {
           const branches: BranchConfig[] = [];
-          const maxLength = 64000;
-          const packageFilesBigRepo = genRandPackageFile(6100, 10);
-          const footer =
-            '\n- [ ] <!-- manual job -->Check this box to trigger a request for Renovate to run again on this repository\n';
-          config.dependencyDashboardFooter = footer;
+          const truncatedLength = 60000;
+          const packageFilesBigRepo = genRandPackageFile(100, 700);
           PackageFiles.add('main', packageFilesBigRepo);
           await dependencyDashboard.ensureDependencyDashboard(config, branches);
-          const body = platform.ensureIssue.mock.calls[0][0].body;
-          const footerRe = regEx(`${footer.replace('[', '\\[')}\\s*$`);
           expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
-          expect(platform.massageMarkdown).toHaveBeenCalledTimes(1);
-          expect(DashboardHtmlFixer.isValidMdHtml(body)).toBeTrue();
-          expect(body.length < maxLength).toBeTrue();
-          expect(footerRe.test(body)).toBeTrue();
+          expect(platform.ensureIssue.mock.calls[0][0].body).toHaveLength(
+            truncatedLength
+          );
 
           // same with dry run
           await dryRun(branches, platform);
-        });
-      });
-
-      describe('Tests MarkdownFixer class', () => {
-        it('fixes a truncated html', () => {
-          const html =
-            '<table>\n' +
-            '  <thead>\n' +
-            '    <tr>\n' +
-            '      <th>Name</th>\n' +
-            '      <th>Value</th>\n';
-          const fixedHtml = DashboardHtmlFixer.fix(html);
-          expect(fixedHtml).toEndWith('</tr>\n</thead>\n</table>\n\n');
-          expect(DashboardHtmlFixer.isValidMdHtml(fixedHtml)).toBeTrue();
-        });
-
-        it('does nothing to a valid html', () => {
-          const html =
-            '<table>\n' +
-            '  <thead>\n' +
-            '    <tr>\n' +
-            '    </tr>\n' +
-            '  </thead>\n' +
-            '</table>\n\n';
-          const fixedHtml = DashboardHtmlFixer.fix(html);
-          expect(fixedHtml).toMatch(html);
-          expect(DashboardHtmlFixer.isValidMdHtml(fixedHtml)).toBeTrue();
-        });
-
-        it('does nothing to a regular string', () => {
-          const html = 'this is a string';
-          const fixedHtml = DashboardHtmlFixer.fix(html);
-          expect(fixedHtml).toMatch(html);
-          expect(DashboardHtmlFixer.isValidMdHtml(fixedHtml)).toBeTrue();
-        });
-
-        it('removes a truncated opening html tag and fixes it', () => {
-          const html =
-            '<table>\n' + '  <thead>\n' + '    <tr>\n' + '    <truncated';
-          const fixedHtml = DashboardHtmlFixer.fix(html);
-          expect(fixedHtml.includes('<truncated')).toBeFalse();
-          expect(fixedHtml).toEndWith('</tr>\n</thead>\n</table>\n\n');
-          expect(DashboardHtmlFixer.isValidMdHtml(fixedHtml)).toBeTrue();
-        });
-
-        it('removes a truncated closing html tag and fixes it', () => {
-          const html =
-            '<table>\n' + '  <thead>\n' + '    <tr>\n' + '    </truncated';
-          const fixedHtml = DashboardHtmlFixer.fix(html);
-          expect(fixedHtml.includes('</truncated')).toBeFalse();
-          expect(fixedHtml).toEndWith('</tr>\n</thead>\n</table>\n\n');
-          expect(DashboardHtmlFixer.isValidMdHtml(fixedHtml)).toBeTrue();
         });
       });
     });
