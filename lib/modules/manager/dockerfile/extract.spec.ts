@@ -1152,8 +1152,9 @@ describe('modules/manager/dockerfile/extract', () => {
     });
 
     const versionAndDigestTemplate =
-      '{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}';
-    const defaultAutoReplaceStringTemplate = `{{depName}}${versionAndDigestTemplate}`;
+      ':{{#if newValue}}{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}';
+    const defaultAutoReplaceStringTemplate =
+      '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}';
 
     it.each`
       name                         | registryAliases                                         | imageName                     | dep

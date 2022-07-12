@@ -4,8 +4,9 @@ import { getGitlabDep } from './utils';
 describe('modules/manager/gitlabci/utils', () => {
   describe('getGitlabDep', () => {
     const versionAndDigestTemplate =
-      '{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}';
-    const defaultAutoReplaceStringTemplate = `{{depName}}${versionAndDigestTemplate}`;
+      ':{{#if newValue}}{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}';
+    const defaultAutoReplaceStringTemplate =
+      '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}';
 
     it.each`
       name                           | imagePrefix

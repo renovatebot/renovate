@@ -30,17 +30,17 @@ function getAutoReplaceTemplate(dep: PackageDependency): string | undefined {
   let template = dep.replaceString;
 
   if (dep.currentValue) {
-    let placeholder = '{{#if newValue}}:{{newValue}}{{/if}}';
+    let placeholder = '{{#if newValue}}{{newValue}}{{/if}}';
     if (!dep.currentDigest) {
       placeholder += '{{#if newDigest}}@{{newDigest}}{{/if}}';
     }
-    template = template?.replace(`:${dep.currentValue}`, placeholder);
+    template = template?.replace(dep.currentValue, placeholder);
   }
 
   if (dep.currentDigest) {
     template = template?.replace(
-      `@${dep.currentDigest}`,
-      '{{#if newDigest}}@{{newDigest}}{{/if}}'
+      dep.currentDigest,
+      '{{#if newDigest}}{{newDigest}}{{/if}}'
     );
   }
 
