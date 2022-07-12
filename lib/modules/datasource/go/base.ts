@@ -84,21 +84,26 @@ export class BaseGoDatasource {
       return null;
     }
     logger.debug({ goModule, goSourceUrl }, 'Go lookup source url');
-    if (goSourceUrl?.startsWith('https://github.com/')) {
+    return this.detectDatasource(goSourceUrl, goModule);
+  }
+
+  private static detectDatasource(
+    url: string,
+    goModule: string
+  ): DataSource | null {
+    if (url?.startsWith('https://github.com/')) {
       return {
         datasource: GithubTagsDatasource.id,
-        packageName: goSourceUrl
+        packageName: url
           .replace('https://github.com/', '')
           .replace(regEx(/\/$/), ''),
         registryUrl: 'https://github.com',
       };
     }
     const gitlabUrl =
-      BaseGoDatasource.gitlabHttpsRegExp.exec(goSourceUrl)?.groups
-        ?.httpsRegExpUrl;
+      BaseGoDatasource.gitlabHttpsRegExp.exec(url)?.groups?.httpsRegExpUrl;
     const gitlabUrlName =
-      BaseGoDatasource.gitlabHttpsRegExp.exec(goSourceUrl)?.groups
-        ?.httpsRegExpName;
+      BaseGoDatasource.gitlabHttpsRegExp.exec(url)?.groups?.httpsRegExpName;
     const gitlabModuleName =
       BaseGoDatasource.gitlabRegExp.exec(goModule)?.groups?.regExpPath;
     if (gitlabUrl && gitlabUrlName) {
@@ -129,11 +134,11 @@ export class BaseGoDatasource {
 
     const opts = hostRules.find({
       hostType: PlatformId.Gitlab,
-      url: goSourceUrl,
+      url: url,
     });
     if (opts.token) {
       // get server base url from import url
-      const parsedUrl = URL.parse(goSourceUrl);
+      const parsedUrl = URL.parse(url);
 
       // TODO: `parsedUrl.pathname` can be undefined
       const packageName = trimLeadingSlash(`${parsedUrl.pathname}`);
@@ -173,18 +178,26 @@ export class BaseGoDatasource {
     // get server base url from import url
     const parsedUrl = URL.parse(goImportURL);
 
-    // split the go module from the URL: host/go/module -> go/module
-    // TODO: `parsedUrl.pathname` can be undefined
-    const packageName = trimTrailingSlash(`${parsedUrl.pathname}`)
-      .replace(regEx(/\.git$/), '')
-      .split('/')
-      .slice(-2)
-      .join('/');
+    const datasource = this.detectDatasource(
+      goImportURL.replace(regEx(/\.git$/), ''),
+      goModule
+    );
+    // fall back to old behaviour if detection did not work
+    if (datasource === null) {
+      // split the go module from the URL: host/go/module -> go/module
+      // TODO: `parsedUrl.pathname` can be undefined
+      const packageName = trimTrailingSlash(`${parsedUrl.pathname}`)
+        .replace(regEx(/\.git$/), '')
+        .split('/')
+        .slice(-2)
+        .join('/');
 
-    return {
-      datasource: GithubTagsDatasource.id,
-      registryUrl: `${parsedUrl.protocol}//${parsedUrl.host}`,
-      packageName,
-    };
+      return {
+        datasource: GithubTagsDatasource.id,
+        registryUrl: `${parsedUrl.protocol}//${parsedUrl.host}`,
+        packageName,
+      };
+    }
+    return datasource;
   }
 }
