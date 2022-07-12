@@ -23,7 +23,7 @@ const datasource = mocked(_datasource);
 const bundlerHostRules = mocked(_bundlerHostRules);
 
 jest.mock('fs-extra');
-jest.mock('child_process');
+jest.mock('../../../util/exec/common');
 jest.mock('../../../util/exec/env');
 jest.mock('../../datasource');
 jest.mock('../../../util/fs');
