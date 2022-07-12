@@ -112,8 +112,8 @@ describe('util/fs/index', () => {
       expect(res).toBe('foobar');
     });
 
-    it('does not throw', async () => {
-      expect(await readLocalFile('')).toBeNull();
+    it('returns null if file is not found', async () => {
+      expect(await readLocalFile('foobar')).toBeNull();
     });
   });
 
