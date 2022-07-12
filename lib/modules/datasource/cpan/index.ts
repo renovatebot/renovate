@@ -3,6 +3,7 @@ import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { cache } from '../../../util/cache/package/decorator';
 import { getElapsedMinutes } from '../../../util/date';
 import { newlineRegex, regEx } from '../../../util/regex';
+import { copystr } from '../../../util/string';
 import * as perlVersioning from '../../versioning/perl';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
@@ -57,13 +58,6 @@ export class CpanDatasource extends Datasource {
     return dep;
   }
 
-  /**
-   * https://bugs.chromium.org/p/v8/issues/detail?id=2869
-   */
-  private static copystr(x: string): string {
-    return (' ' + x).slice(1);
-  }
-
   async updateCpanVersions(): Promise<void> {
     const url = 'https://www.cpan.org/modules/02packages.details.txt';
     const options = {
@@ -109,7 +103,7 @@ export class CpanDatasource extends Datasource {
       }
       split = l.split(/\s+/);
       [pkg, latestVersion, path] = split;
-      pkg = CpanDatasource.copystr(pkg);
+      pkg = copystr(pkg);
       const distribution = path.replace(pathPattern, '$1');
       packages[pkg] = {
         release: {
