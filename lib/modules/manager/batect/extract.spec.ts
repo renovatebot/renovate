@@ -7,8 +7,6 @@ import { getDep } from '../dockerfile/extract';
 import type { ExtractConfig, PackageDependency } from '../types';
 import { extractAllPackageFiles } from '.';
 
-jest.mock('../../../util/fs/access');
-
 const fixturesDir = 'lib/modules/manager/batect/__fixtures__';
 
 function createDockerDependency(tag: string): PackageDependency {

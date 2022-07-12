@@ -1,6 +1,17 @@
 import upath from 'upath';
 import { GlobalConfig } from '../../config/global';
-import { assertBaseDir } from './access';
+import { FILE_ACCESS_VIOLATION_ERROR } from '../../constants/error-messages';
+import { logger } from '../../logger';
+
+export function assertBaseDir(path: string, baseDir: string): void {
+  if (!path.startsWith(upath.resolve(baseDir))) {
+    logger.warn(
+      { path, baseDir },
+      'Preventing access to file outside the base directory'
+    );
+    throw new Error(FILE_ACCESS_VIOLATION_ERROR);
+  }
+}
 
 function ensurePath(path: string, key: 'localDir' | 'cacheDir'): string {
   const baseDir = upath.resolve(GlobalConfig.get(key)!);

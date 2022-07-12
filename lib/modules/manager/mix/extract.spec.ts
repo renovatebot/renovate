@@ -2,8 +2,6 @@ import { Fixtures } from '../../../../test/fixtures';
 import { GlobalConfig } from '../../../config/global';
 import { extractPackageFile } from '.';
 
-jest.mock('../../../util/fs/access');
-
 describe('modules/manager/mix/extract', () => {
   beforeEach(() => {
     GlobalConfig.set({ localDir: '' });
