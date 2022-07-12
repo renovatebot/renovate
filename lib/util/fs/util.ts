@@ -3,7 +3,7 @@ import { GlobalConfig } from '../../config/global';
 import { FILE_ACCESS_VIOLATION_ERROR } from '../../constants/error-messages';
 import { logger } from '../../logger';
 
-export function assertBaseDir(path: string, baseDir: string): void {
+function assertBaseDir(path: string, baseDir: string): void {
   if (!path.startsWith(upath.resolve(baseDir))) {
     logger.warn(
       { path, baseDir },
