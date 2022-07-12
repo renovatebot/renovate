@@ -119,6 +119,7 @@ export class HermitDatasource extends Datasource {
       `${apiBaseUrl}repos/${owner}/${repo}/releases/tags/index`
     );
 
+    // finds asset with name index.json
     const asset = indexRelease.body.assets.find(
       (asset: GithubReleaseAsset) => asset.name === 'index.json'
     );
@@ -131,6 +132,12 @@ export class HermitDatasource extends Datasource {
       return null;
     }
 
+    // stream down the content of index.json
+    // Note: need to use stream here with
+    // the accept header as octet-stream to
+    // download asset from private github repository
+    // see GithubDoc:
+    // https://docs.github.com/en/rest/releases/assets#get-a-release-asset
     const indexContent = await streamToString(
       this.http.stream(asset.url, {
         headers: {
@@ -139,6 +146,14 @@ export class HermitDatasource extends Datasource {
       })
     );
 
-    return JSON.parse(indexContent) as HermitSearchResult[];
+    let ret: HermitSearchResult[] | null = null;
+
+    try {
+      ret = JSON.parse(indexContent) as HermitSearchResult[];
+    } catch (e) {
+      logger.error('error parsing hermit search manifest from remote respond');
+    }
+
+    return ret;
   }
 }
