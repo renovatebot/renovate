@@ -245,7 +245,7 @@ describe('modules/manager/gitlabci/extract', () => {
       expect(res?.deps).toEqual([
         {
           autoReplaceStringTemplate:
-            '$CI_REGISTRY/{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+            '$CI_REGISTRY/renovate/renovate{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
           currentDigest: undefined,
           currentValue: '31.65.1-slim',
           datasource: 'docker',
@@ -255,7 +255,7 @@ describe('modules/manager/gitlabci/extract', () => {
         },
         {
           autoReplaceStringTemplate:
-            'foo/{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+            'foo/mariadb{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
           currentDigest: undefined,
           currentValue: '10.4.11',
           datasource: 'docker',
@@ -265,7 +265,7 @@ describe('modules/manager/gitlabci/extract', () => {
         },
         {
           autoReplaceStringTemplate:
-            '$CI_REGISTRY/{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+            '$CI_REGISTRY/other/image1{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
           currentDigest: undefined,
           currentValue: '1.0.0',
           datasource: 'docker',
