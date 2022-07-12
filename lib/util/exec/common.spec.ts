@@ -7,27 +7,6 @@ import type { RawExecOptions } from './types';
 
 jest.mock('child_process');
 
-function getReadable(
-  data: string | undefined,
-  encoding: BufferEncoding
-): Readable {
-  const readable = new Readable();
-  readable._read = (size: number): void => {
-    /*do nothing*/
-  };
-
-  readable.destroy = (error?: Error | undefined): Readable => {
-    return readable;
-  };
-
-  if (data !== undefined) {
-    readable.push(data, encoding);
-    readable.push(null);
-  }
-
-  return readable;
-}
-
 type MessageListener = (message: Serializable, sendHandle: SendHandle) => void;
 type NoArgListener = () => void;
 type EndListener = (code: number | null, signal: NodeJS.Signals | null) => void;
@@ -53,6 +32,27 @@ interface StubArgs {
   stdout?: string;
   stderr?: string;
   timeout?: number;
+}
+
+function getReadable(
+  data: string | undefined,
+  encoding: BufferEncoding
+): Readable {
+  const readable = new Readable();
+  readable._read = (size: number): void => {
+    /*do nothing*/
+  };
+
+  readable.destroy = (error?: Error | undefined): Readable => {
+    return readable;
+  };
+
+  if (data !== undefined) {
+    readable.push(data, encoding);
+    readable.push(null);
+  }
+
+  return readable;
 }
 
 function getSpawnStub(args: StubArgs): ChildProcess {

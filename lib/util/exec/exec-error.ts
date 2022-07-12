@@ -20,6 +20,7 @@ export class ExecError extends Error {
   constructor(message: string, data: ExecErrorData, err?: Error) {
     const { cmd, exitCode, stderr, stdout, options, signal } = data;
 
+    // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error/cause
     if (err) {
       super(message, { cause: err });
     } else {
