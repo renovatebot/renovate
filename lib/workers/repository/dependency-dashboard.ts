@@ -319,6 +319,15 @@ export async function ensureDependencyDashboard(
       'This repository currently has no open or pending branches.\n\n';
   }
 
+  let footer = '';
+  if (config.dependencyDashboardFooter?.length) {
+    footer +=
+      '---\n' +
+      template.compile(config.dependencyDashboardFooter, config) +
+      '\n';
+  }
+  issueBody += footer;
+
   issueBody += PackageFiles.getDashboardMarkdown(config);
 
   if (config.dependencyDashboardIssue) {
