@@ -13,7 +13,7 @@ import { constructPipCompileCmd } from './artifacts';
 import { updateArtifacts } from '.';
 
 jest.mock('fs-extra');
-jest.mock('child_process');
+jest.mock('../../../util/exec/common');
 jest.mock('../../../util/exec/env');
 jest.mock('../../../util/git');
 jest.mock('../../../util/host-rules');

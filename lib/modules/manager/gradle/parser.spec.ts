@@ -33,11 +33,13 @@ describe('modules/manager/gradle/parser', () => {
 
   describe('variable assignments', () => {
     test.each`
-      input                          | name                 | value
-      ${'version = "1.2.3"'}         | ${'version'}         | ${'1.2.3'}
-      ${'set("version", "1.2.3")'}   | ${'version'}         | ${'1.2.3'}
-      ${'versions.foobar = "1.2.3"'} | ${'versions.foobar'} | ${'1.2.3'}
-      ${'ext.foo.bar = "1.2.3"'}     | ${'foo.bar'}         | ${'1.2.3'}
+      input                             | name                 | value
+      ${'version = "1.2.3"'}            | ${'version'}         | ${'1.2.3'}
+      ${'set("version", "1.2.3")'}      | ${'version'}         | ${'1.2.3'}
+      ${'versions.foobar = "1.2.3"'}    | ${'versions.foobar'} | ${'1.2.3'}
+      ${'ext.foobar = "1.2.3"'}         | ${'foobar'}          | ${'1.2.3'}
+      ${'project.foobar = "1.2.3"'}     | ${'foobar'}          | ${'1.2.3'}
+      ${'rootProject.foobar = "1.2.3"'} | ${'foobar'}          | ${'1.2.3'}
     `('$input', async ({ input, name, value }) => {
       const { vars } = await parseGradle(input);
       expect(vars).toContainKey(name);

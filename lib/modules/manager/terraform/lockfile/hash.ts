@@ -73,7 +73,7 @@ export class TerraformProviderHash {
       `Downloading archive and generating hash for ${build.name}-${build.version}...`
     );
     const readStream = TerraformProviderHash.http.stream(build.url);
-    const writeStream = fs.createWriteStream(downloadFileName);
+    const writeStream = fs.createCacheWriteStream(downloadFileName);
 
     try {
       await fs.pipeline(readStream, writeStream);

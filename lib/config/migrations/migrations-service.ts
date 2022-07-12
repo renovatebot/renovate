@@ -32,6 +32,7 @@ import { OptionalDependenciesMigration } from './custom/optional-dependencies-mi
 import { PackageFilesMigration } from './custom/package-files-migration';
 import { PackageNameMigration } from './custom/package-name-migration';
 import { PackagePatternMigration } from './custom/package-pattern-migration';
+import { PackageRulesMigration } from './custom/package-rules-migration';
 import { PackagesMigration } from './custom/packages-migration';
 import { PathRulesMigration } from './custom/path-rules-migration';
 import { PeerDependenciesMigration } from './custom/peer-dependencies-migration';
@@ -142,6 +143,7 @@ export class MigrationsService {
     OptionalDependenciesMigration,
     PeerDependenciesMigration,
     EnginesMigration,
+    PackageRulesMigration,
     NodeMigration,
     SemanticPrefixMigration,
   ];
