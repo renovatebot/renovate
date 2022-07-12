@@ -1,7 +1,7 @@
 import * as _AWS from '@aws-sdk/client-ecr';
 import { getDigest, getPkgReleases } from '..';
 import * as httpMock from '../../../../test/http-mock';
-import { mocked, partial } from '../../../../test/util';
+import { logger, mocked, partial } from '../../../../test/util';
 import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages';
 import * as _hostRules from '../../../util/host-rules';
 import { Http } from '../../../util/http';
@@ -561,6 +561,118 @@ describe('modules/datasource/docker/index', () => {
       await expect(
         getDigest({ datasource: 'docker', depName: 'some-dep' }, 'latest')
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
+    });
+
+    it('supports architecture-specific digest', async () => {
+      httpMock
+        .scope(authUrl)
+        .get(
+          '/token?service=registry.docker.io&scope=repository:library/some-dep:pull'
+        )
+        .times(3)
+        .reply(200, { token: 'some-token' });
+      httpMock
+        .scope(baseUrl)
+        .get('/')
+        .reply(401, '', {
+          'www-authenticate':
+            'Bearer realm="https://auth.docker.io/token",service="registry.docker.io",scope="repository:library/some-dep:pull  "',
+        })
+        .get('/library/some-dep/manifests/some-current-value')
+        .reply(
+          200,
+          `{
+            "manifests": [
+              {
+                "digest": "sha256:197c58a9c30faf97f16412d63e333a0adffed856b06994759899d070f28db51e",
+                "platform": {
+                  "architecture": "arm",
+                  "os": "linux",
+                  "variant": "v6"
+                }
+              },
+              {
+                "digest": "sha256:81c09f6d42c2db8121bcd759565ea244cedc759f36a0f090ec7da9de4f7f8fe4",
+                "platform": {
+                  "architecture": "amd64",
+                  "os": "linux"
+                }
+              },
+              {
+                "digest": "sha256:295b5db1283633daf8d82f0b794bd543118508a5568c90b055d7a48ad6afcfd1",
+                "platform": {
+                  "architecture": "386",
+                  "os": "linux"
+                }
+              }
+            ]
+          }`,
+          {
+            'content-type': 'text/plain',
+          }
+        );
+      httpMock
+        .scope(baseUrl)
+        .get('/')
+        .twice()
+        .reply(401, '', {
+          'www-authenticate':
+            'Bearer realm="https://auth.docker.io/token",service="registry.docker.io",scope="repository:library/some-dep:pull  "',
+        })
+        .head('/library/some-dep/manifests/some-new-value')
+        .reply(200, undefined, {})
+        .get('/library/some-dep/manifests/some-new-value')
+        .reply(
+          200,
+          `{
+            "manifests": [
+              {
+                "digest": "sha256:c3fe2aac7e4f47270eeff0fdd35cb9bad674105eaa1663942645ca58399a2dbc",
+                "platform": {
+                  "architecture": "arm",
+                  "os": "linux",
+                  "variant": "v6"
+                }
+              },
+              {
+                "digest": "sha256:78fa4d63fec4e647f00908f24cda05af101aa9702700f613c7f82a96a267d801",
+                "platform": {
+                  "architecture": "386",
+                  "os": "linux"
+                }
+              },
+              {
+                "digest": "sha256:81093b981e72a54d488d5a60780006d82f7cc02d248d88ff71ff4137b0f51176",
+                "platform": {
+                  "architecture": "amd64",
+                  "os": "linux"
+                }
+              }
+            ]
+          }`,
+          {
+            'content-type': 'text/plain',
+          }
+        );
+
+      const currentDigest =
+        'sha256:81c09f6d42c2db8121bcd759565ea244cedc759f36a0f090ec7da9de4f7f8fe4';
+      const res = await getDigest(
+        {
+          datasource: 'docker',
+          depName: 'some-dep',
+          currentValue: 'some-current-value',
+          currentDigest,
+        },
+        'some-new-value'
+      );
+
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        `Current digest ${currentDigest} relates to architecture amd64`
+      );
+      expect(res).toBe(
+        'sha256:81093b981e72a54d488d5a60780006d82f7cc02d248d88ff71ff4137b0f51176'
+      );
     });
   });
 

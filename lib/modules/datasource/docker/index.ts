@@ -30,7 +30,7 @@ import {
   id as dockerVersioningId,
 } from '../../versioning/docker';
 import { Datasource } from '../datasource';
-import type { GetReleasesConfig, ReleaseResult } from '../types';
+import type { DigestConfig, GetReleasesConfig, ReleaseResult } from '../types';
 import { sourceLabels } from './common';
 import {
   Image,
@@ -812,7 +812,7 @@ export class DockerDatasource extends Datasource {
   @cache({
     namespace: 'datasource-docker-digest',
     key: (
-      { registryUrl, packageName }: GetReleasesConfig,
+      { registryUrl, packageName, currentValue, currentDigest }: DigestConfig,
       newValue?: string
     ) => {
       const newTag = newValue ?? 'latest';
@@ -824,7 +824,7 @@ export class DockerDatasource extends Datasource {
     },
   })
   override async getDigest(
-    { registryUrl, packageName }: GetReleasesConfig,
+    { registryUrl, packageName, currentValue, currentDigest }: DigestConfig,
     newValue?: string
   ): Promise<string | null> {
     const { registryHost, dockerRepository } = getRegistryRepository(
@@ -832,11 +832,39 @@ export class DockerDatasource extends Datasource {
       registryUrl!
     );
     logger.debug(
-      `getDigest(${registryHost}, ${dockerRepository}, ${newValue})`
+      `getDigest(${registryHost}, ${dockerRepository}, ${
+        newValue ?? 'undefined'
+      })`
     );
     const newTag = newValue ?? 'latest';
     let digest: string | null = null;
     try {
+      let architecture: string | null = null;
+      if (currentValue && currentDigest) {
+        const manifestResponse = await this.getManifestResponse(
+          registryHost,
+          dockerRepository,
+          currentValue
+        );
+        if (manifestResponse) {
+          const manifestList = JSON.parse(manifestResponse.body) as
+            | ImageList
+            | OciImageList;
+          for (const manifest of manifestList.manifests) {
+            if (manifest.digest === currentDigest) {
+              architecture =
+                (manifest.platform['architecture'] as string) || null;
+              logger.debug(
+                `Current digest ${currentDigest} relates to architecture ${
+                  architecture ?? 'null'
+                }`
+              );
+              break;
+            }
+          }
+        }
+      }
+
       let manifestResponse = await this.getManifestResponse(
         registryHost,
         dockerRepository,
@@ -844,21 +872,38 @@ export class DockerDatasource extends Datasource {
         'head'
       );
       if (manifestResponse) {
-        if (hasKey('docker-content-digest', manifestResponse.headers)) {
+        if (
+          !architecture &&
+          hasKey('docker-content-digest', manifestResponse.headers)
+        ) {
           digest =
             (manifestResponse.headers['docker-content-digest'] as string) ||
             null;
         } else {
           logger.debug(
             { registryHost },
-            'Missing docker content digest header, pulling full manifest'
+            'Architecture-specific digest or missing docker-content-digest header - pulling full manifest'
           );
           manifestResponse = await this.getManifestResponse(
             registryHost,
             dockerRepository,
             newTag
           );
-          digest = extractDigestFromResponseBody(manifestResponse!);
+          if (architecture && manifestResponse) {
+            const manifestList = JSON.parse(manifestResponse.body) as
+              | ImageList
+              | OciImageList;
+            for (const manifest of manifestList.manifests) {
+              if (manifest.platform['architecture'] === architecture) {
+                digest = manifest.digest;
+                break;
+              }
+            }
+          }
+
+          if (!digest) {
+            digest = extractDigestFromResponseBody(manifestResponse!);
+          }
         }
         logger.debug({ digest }, 'Got docker digest');
       }
