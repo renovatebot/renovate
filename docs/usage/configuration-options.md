@@ -2501,23 +2501,13 @@ image: my.new.registry/aRepository/andImage:1.21-alpine
 ## registryAliases
 
 You can use the `registryAliases` object to set registry aliases.
-This feature only works with these managers:
 
-- `helm-requirements`
-- `helmv3`
-- `helmfile`
+This feature works with the following managers:
 
-The managers listed above all have this default registryAlias:
-
-```json
-{
-  "registryAliases": {
-    "stable": "https://charts.helm.sh/stable"
-  }
-}
-```
-
-Alias values must be properly formatted URIs.
+- [`helm-requirements`](/modules/manager/helm-requirements/)
+- [`helmv3`](/modules/manager/helmv3/)
+- [`helmfile`](/modules/manager/helmfile/)
+- [`gitlabci`](/modules/manager/gitlabci/)
 
 ## registryUrls
 
@@ -2648,6 +2638,10 @@ Renovate does not support scheduled minutes or "at an exact time" granularity.
 <!-- prettier-ignore -->
 !!! note
     Actions triggered via the [Dependency Dashboard](https://docs.renovatebot.com/configuration-options/#dependencydashboard) are not restricted by a configured schedule.
+
+<!-- prettier-ignore -->
+!!! tip
+    To validate your `later` schedule before updating your `renovate.json`, you can use [this CodePen](https://codepen.io/rationaltiger24/full/ZExQEgK).
 
 ## semanticCommitScope
 
@@ -2850,16 +2844,22 @@ Other managers can use the `"loose"` versioning fallback: the first 3 parts are 
 
 ## vulnerabilityAlerts
 
-Renovate can read from GitHub's Vulnerability Alerts and customize Pull Requests accordingly.
-For this to work, you must first ensure you have enabled "[Dependency graph](https://docs.github.com/en/code-security/supply-chain-security/understanding-your-software-supply-chain/about-the-dependency-graph#enabling-the-dependency-graph)" and "[Dependabot alerts](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/enabling-features-for-your-repository/managing-security-and-analysis-settings-for-your-repository)" under the "Security & analysis" section of the repository's "Settings" tab.
+Renovate can read GitHub's Vulnerability Alerts to customize its Pull Requests.
+For this to work, you must enable the [Dependency graph](https://docs.github.com/en/code-security/supply-chain-security/understanding-your-software-supply-chain/about-the-dependency-graph#enabling-the-dependency-graph), and [Dependabot alerts](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/enabling-features-for-your-repository/managing-security-and-analysis-settings-for-your-repository).
+Follow these steps:
 
-Additionally, if you are running Renovate in app mode then you must make sure that the app has been granted the permissions to read "Vulnerability alerts".
-If you are the account admin, browse to the app (e.g. [https://github.com/apps/renovate](https://github.com/apps/renovate)), select "Configure", and then scroll down to the "Permissions" section and verify that read access to "vulnerability alerts" is mentioned.
+1. While logged in to GitHub, navigate to your repository
+1. Click on the "Settings" tab
+1. Click on "Code security and analysis" in the sidebar
+1. Enable the "Dependency graph"
+1. Enable "Dependabot alerts"
+1. If you're running Renovate in app mode: make sure the app has `read` permissions for "Vulnerability alerts".
+   If you're the account administrator, browse to the app (for example [https://github.com/apps/renovate](https://github.com/apps/renovate)), select "Configure", and then scroll down to the "Permissions" section and make sure that `read` access to "vulnerability alerts" is mentioned
 
-Once the above conditions are met, and you got one or more vulnerability alerts from GitHub for this repository, then Renovate tries to raise fix PRs accordingly.
+Once the above conditions are met, and you got one or more vulnerability alerts from GitHub for this repository, then Renovate tries to raise fix PRs.
 
-Use the `vulnerabilityAlerts` configuration object if you want to customise vulnerability-fix PRs specifically.
-For example, to configure custom labels and assignees:
+You may use the `vulnerabilityAlerts` configuration object to customize vulnerability-fix PRs.
+For example, to set custom labels and assignees:
 
 ```json
 {
@@ -2875,7 +2875,7 @@ For example, to configure custom labels and assignees:
 !!! warning
     There's a small chance that an incorrect vulnerability alert could result in flapping/looping vulnerability fixes, so observe carefully if enabling `automerge`.
 
-To disable the vulnerability alerts functionality completely, configure like this:
+To disable the vulnerability alerts feature, set `enabled=false` in a `vulnerabilityAlerts` config object, like this:
 
 ```json
 {
