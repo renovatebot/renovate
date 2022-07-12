@@ -190,5 +190,31 @@ describe('modules/datasource/hermit/index', () => {
         })
       ).resolves.toBeNull();
     });
+
+    it('should get null on invalid index.json asset', async () => {
+      httpMock
+        .scope(githubApiHost)
+        .get(releaseUrl)
+        .reply(200, {
+          assets: [
+            {
+              name: 'index.json',
+              url: `${githubApiHost}${indexAssetUrl}`,
+            },
+          ],
+        });
+
+      httpMock
+        .scope(githubApiHost)
+        .get(indexAssetUrl)
+        .reply(200, 'invalid content');
+
+      await expect(
+        datasource.getReleases({
+          packageName: 'go',
+          registryUrl,
+        })
+      ).resolves.toBeNull();
+    });
   });
 });
