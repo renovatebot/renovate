@@ -17,7 +17,7 @@ import {
   resetPrefetchedImages,
 } from '.';
 
-jest.mock('child_process');
+jest.mock('../common');
 
 const getPkgReleases: jest.Mock<typeof _getPkgReleases> =
   _getPkgReleases as any;
