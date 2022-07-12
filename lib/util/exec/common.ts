@@ -1,4 +1,5 @@
 import { ChildProcess, spawn } from 'child_process';
+import { ExecError, ExecErrorData } from './exec-error';
 import type { ExecResult, RawExecOptions } from './types';
 
 // https://man7.org/linux/man-pages/man7/signal.7.html#NAME
@@ -59,7 +60,9 @@ export function exec(cmd: string, opts: RawExecOptions): Promise<ExecResult> {
     const maxBuffer = opts.maxBuffer ?? 10 * 1024 * 1024; // Set default max buffer size to 10MB
     const cp = spawn(cmd, {
       ...opts,
-      detached: process.platform !== 'win32', // force detached on non WIN platforms
+      // force detached on non WIN platforms
+      // https://github.com/nodejs/node/issues/21825#issuecomment-611328888
+      detached: process.platform !== 'win32',
       shell: typeof opts.shell === 'string' ? opts.shell : true, // force shell
     });
 
@@ -73,11 +76,7 @@ export function exec(cmd: string, opts: RawExecOptions): Promise<ExecResult> {
     // handle process events
     cp.on('error', (error) => {
       kill(cp, 'SIGTERM');
-      reject({
-        message: error.message,
-        Error: error,
-        ...rejectInfo(),
-      });
+      reject(new ExecError(error.message, rejectInfo(), error));
     });
 
     cp.on('exit', (code: number, signal: NodeJS.Signals) => {
@@ -86,20 +85,14 @@ export function exec(cmd: string, opts: RawExecOptions): Promise<ExecResult> {
       }
 
       if (signal) {
+        const message = `Process signaled with "${signal}"`;
         kill(cp, signal);
-        reject({
-          message: `Process signaled with "${signal}"`,
-          signal,
-          ...rejectInfo(),
-        });
+        reject(new ExecError(message, { ...rejectInfo(), signal }));
         return;
       }
       if (code !== 0) {
-        reject({
-          message: `Process exited with exit code "${code}"`,
-          exitCode: code,
-          ...rejectInfo(),
-        });
+        const message = `Process exited with exit code "${code}"`;
+        reject(new ExecError(message, { ...rejectInfo(), exitCode: code }));
         return;
       }
       resolve({
@@ -108,7 +101,7 @@ export function exec(cmd: string, opts: RawExecOptions): Promise<ExecResult> {
       });
     });
 
-    function rejectInfo(): object {
+    function rejectInfo(): ExecErrorData {
       return {
         cmd: cp.spawnargs.join(' '),
         options: opts,
