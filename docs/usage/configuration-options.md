@@ -1723,7 +1723,7 @@ Use this field to restrict rules to a particular language. e.g.
 
 ### matchCategories
 
-Use this field to restrict rules to a particular language. e.g.
+Use this field to restrict rules to a particular language or group. The categories can be found on the [manager documentation](./modules/manager.md). e.g.
 
 ```json
 {

@@ -121,11 +121,27 @@ export async function generateManagers(dist: string): Promise<void> {
     const { defaultConfig, supportedDatasources } = definition;
     const { fileMatch } = defaultConfig as RenovateConfig;
     const displayName = getDisplayName(manager, definition);
+
+    const categories = definition.categories ?? [];
+
     let md = `---
 title: ${getTitle(manager, displayName)}
 sidebar_label: ${displayName}
 ---
 `;
+    md += '**Categories**: ';
+    if (categories.length) {
+      for (let i = 0; i < categories.length; i++) {
+        const category = categories[i];
+        if (i < categories.length - 1) {
+          md += `${category}, `;
+        } else {
+          md += `${category}`;
+        }
+      }
+    }
+    md += '\n\n';
+
     if (manager !== 'regex') {
       const nameWithUrl = getNameWithUrl(manager, definition);
       md += `Renovate supports updating ${nameWithUrl} dependencies.\n\n`;
