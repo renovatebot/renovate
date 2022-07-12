@@ -1,4 +1,4 @@
-import { Category } from '../../../constants';
+import type { Category } from '../../../constants';
 import { ClojureDatasource } from '../../datasource/clojure';
 import * as mavenVersioning from '../../versioning/maven';
 
@@ -9,6 +9,6 @@ export const defaultConfig = {
   versioning: mavenVersioning.id,
 };
 
-export const categories = [Category.JVM];
+export const categories: Category[] = ['jvm'];
 
 export const supportedDatasources = [ClojureDatasource.id];

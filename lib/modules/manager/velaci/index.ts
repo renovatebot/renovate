@@ -1,4 +1,4 @@
-import { Category } from '../../../constants';
+import type { Category } from '../../../constants';
 import { DockerDatasource } from '../../datasource/docker';
 
 export { extractPackageFile } from './extract';
@@ -9,4 +9,4 @@ export const defaultConfig = {
 
 export const supportedDatasources = [DockerDatasource.id];
 
-export const categories = [Category.CI];
+export const categories: Category[] = ['ci'];

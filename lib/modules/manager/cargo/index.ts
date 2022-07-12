@@ -16,6 +16,6 @@ export const defaultConfig = {
   versioning: cargoVersioning.id,
 };
 
-export const categories = [Category.Rust];
+export const categories: Category[] = ['rust'];
 
 export const supportedDatasources = [CrateDatasource.id];

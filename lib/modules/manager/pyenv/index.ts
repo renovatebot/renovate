@@ -13,4 +13,4 @@ export const defaultConfig = {
   versioning: dockerVersioning.id,
 };
 
-export const categories = [Category.Python];
+export const categories: Category[] = ['python'];

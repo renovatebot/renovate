@@ -1,4 +1,4 @@
-import { Category } from '../../../constants';
+import type { Category } from '../../../constants';
 import { DartDatasource } from '../../datasource/dart';
 import * as npmVersioning from '../../versioning/npm';
 
@@ -13,4 +13,4 @@ export const defaultConfig = {
   versioning: npmVersioning.id,
 };
 
-export const categories = [Category.Dart];
+export const categories: Category[] = ['dart'];

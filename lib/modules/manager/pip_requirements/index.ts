@@ -11,6 +11,6 @@ export const defaultConfig = {
   fileMatch: ['(^|/)([\\w-]*)requirements\\.(txt|pip)$'],
 };
 
-export const categories = [Category.Python];
+export const categories: Category[] = ['python'];
 
 export const supportedDatasources = [PypiDatasource.id, GitTagsDatasource.id];

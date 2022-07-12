@@ -18,4 +18,4 @@ export const defaultConfig = {
   },
 };
 
-export const categories = [Category.Python];
+export const categories: Category[] = ['python'];

@@ -13,4 +13,4 @@ export const defaultConfig = {
   versioning: rubyVersioning.id,
 };
 
-export const categories = [Category.Ruby];
+export const categories: Category[] = ['ruby'];

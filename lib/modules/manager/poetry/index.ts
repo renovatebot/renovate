@@ -14,4 +14,4 @@ export const defaultConfig = {
   fileMatch: ['(^|/)pyproject\\.toml$'],
 };
 
-export const categories = [Category.Python];
+export const categories: Category[] = ['python'];

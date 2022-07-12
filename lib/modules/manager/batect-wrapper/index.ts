@@ -1,4 +1,4 @@
-import { Category } from '../../../constants';
+import type { Category } from '../../../constants';
 import { GithubReleasesDatasource } from '../../datasource/github-releases';
 import { id as versioning } from '../../versioning/semver';
 
@@ -10,6 +10,6 @@ export const defaultConfig = {
   versioning,
 };
 
-export const categories = [Category.Batect];
+export const categories: Category[] = ['batect'];
 
 export const supportedDatasources = [GithubReleasesDatasource.id];

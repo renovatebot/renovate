@@ -1,4 +1,4 @@
-import { Category } from '../../../constants';
+import type { Category } from '../../../constants';
 import { GitTagsDatasource } from '../../datasource/git-tags';
 import { extractAllPackageFiles, extractPackageFile } from './extract';
 
@@ -8,6 +8,6 @@ export const defaultConfig = {
   fileMatch: ['(^|/)batect(-bundle)?\\.yml$'],
 };
 
-export const categories = [Category.Batect];
+export const categories: Category[] = ['batect'];
 
 export const supportedDatasources = [GitTagsDatasource.id];

@@ -1,4 +1,4 @@
-import { Category } from '../../../constants';
+import type { Category } from '../../../constants';
 import { GitTagsDatasource } from '../../datasource/git-tags';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { GitlabTagsDatasource } from '../../datasource/gitlab-tags';
@@ -16,7 +16,7 @@ export const defaultConfig = {
   versioning: rubyVersioning.id,
 };
 
-export const categories = [Category.Swift];
+export const categories: Category[] = ['swift'];
 
 export const supportedDatasources = [
   GitTagsDatasource.id,

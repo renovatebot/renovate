@@ -15,6 +15,6 @@ export const defaultConfig = {
   pinDigests: false,
 };
 
-export const categories = [Category.JavaScript, Category.NodeJS];
+export const categories: Category[] = ['javascript', 'node'];
 
 export const supportedDatasources = [GithubTagsDatasource.id];

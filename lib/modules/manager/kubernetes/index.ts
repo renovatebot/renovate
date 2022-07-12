@@ -10,7 +10,7 @@ export const defaultConfig = {
   fileMatch: [],
 };
 
-export const categories = [Category.Kubernetes];
+export const categories: Category[] = ['kubernetes'];
 
 export const supportedDatasources = [
   DockerDatasource.id,

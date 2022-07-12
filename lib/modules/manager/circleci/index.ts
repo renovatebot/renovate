@@ -1,4 +1,4 @@
-import { Category } from '../../../constants';
+import type { Category } from '../../../constants';
 import { DockerDatasource } from '../../datasource/docker';
 import { OrbDatasource } from '../../datasource/orb';
 import { extractPackageFile } from './extract';
@@ -13,6 +13,6 @@ export const defaultConfig = {
   fileMatch: ['(^|/)\\.circleci/config\\.yml$'],
 };
 
-export const categories = [Category.CI];
+export const categories: Category[] = ['ci'];
 
 export const supportedDatasources = [DockerDatasource.id, OrbDatasource.id];

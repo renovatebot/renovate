@@ -1,4 +1,4 @@
-import { Category } from '../../../constants';
+import type { Category } from '../../../constants';
 import { GitlabTagsDatasource } from '../../datasource/gitlab-tags';
 import { extractPackageFile } from './extract';
 
@@ -8,6 +8,6 @@ export const defaultConfig = {
   fileMatch: ['\\.gitlab-ci\\.yml$'],
 };
 
-export const categories = [Category.CI];
+export const categories: Category[] = ['ci'];
 
 export const supportedDatasources = [GitlabTagsDatasource.id];

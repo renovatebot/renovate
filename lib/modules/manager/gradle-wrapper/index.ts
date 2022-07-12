@@ -1,4 +1,4 @@
-import { Category } from '../../../constants';
+import type { Category } from '../../../constants';
 import { GradleVersionDatasource } from '../../datasource/gradle-version';
 import { id as versioning } from '../../versioning/gradle';
 
@@ -10,6 +10,6 @@ export const defaultConfig = {
   versioning,
 };
 
-export const categories = [Category.JVM];
+export const categories: Category[] = ['jvm'];
 
 export const supportedDatasources = [GradleVersionDatasource.id];

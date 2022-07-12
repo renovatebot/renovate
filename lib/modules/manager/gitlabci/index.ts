@@ -10,6 +10,6 @@ export const defaultConfig = {
   fileMatch: ['\\.gitlab-ci\\.yml$'],
 };
 
-export const categories = [Category.CI];
+export const categories: Category[] = ['ci'];
 
 export const supportedDatasources = [DockerDatasource.id];

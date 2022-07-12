@@ -17,6 +17,6 @@ export const defaultConfig = {
   ],
 };
 
-export const categories = [Category.Dotnet];
+export const categories: Category[] = ['dotnet'];
 
 export const supportedDatasources = [DotnetDatasource.id, NugetDatasource.id];

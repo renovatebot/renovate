@@ -1,4 +1,4 @@
-import { Category } from '../../../constants';
+import type { Category } from '../../../constants';
 import { DockerDatasource } from '../../datasource/docker';
 import { GitTagsDatasource } from '../../datasource/git-tags';
 import { HelmDatasource } from '../../datasource/helm';
@@ -12,7 +12,7 @@ export const defaultConfig = {
   fileMatch: [],
 };
 
-export const categories = [Category.Kubernetes, Category.CD];
+export const categories: Category[] = ['kubernetes', 'cd'];
 
 export const supportedDatasources = [
   DockerDatasource.id,

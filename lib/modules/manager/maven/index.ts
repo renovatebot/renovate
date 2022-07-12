@@ -12,6 +12,6 @@ export const defaultConfig = {
   versioning: mavenVersioning.id,
 };
 
-export const categories = [Category.JVM];
+export const categories: Category[] = ['jvm'];
 
 export const supportedDatasources = [MavenDatasource.id];

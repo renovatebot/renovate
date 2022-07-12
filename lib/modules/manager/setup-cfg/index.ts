@@ -13,4 +13,4 @@ export const defaultConfig = {
   versioning,
 };
 
-export const categories = [Category.Python];
+export const categories: Category[] = ['python'];

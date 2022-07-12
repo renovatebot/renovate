@@ -4,7 +4,7 @@ export { extractPackageFile } from './extract';
 
 export const language: ProgrammingLanguage = 'docker';
 
-export const categories = [Category.Ansible, Category.IaC];
+export const categories: Category[] = ['ansible', 'iac'];
 
 export const defaultConfig = {
   fileMatch: ['(^|/)tasks/[^/]+\\.ya?ml$'],

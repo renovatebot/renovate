@@ -315,7 +315,7 @@ describe('util/package-rules/index', () => {
     const dep = {
       depType: 'dependencies',
       language: 'python',
-      categories: [Category.Python],
+      categories: ['python'],
       manager: 'pipenv',
       depName: 'node',
     };
@@ -367,7 +367,7 @@ describe('util/package-rules/index', () => {
     const config: TestConfig = {
       packageRules: [
         {
-          matchCategories: [Category.NodeJS],
+          matchCategories: ['node'],
           matchPackageNames: ['node'],
           x: 1,
         },
@@ -375,7 +375,7 @@ describe('util/package-rules/index', () => {
     };
     const dep = {
       depType: 'dependencies',
-      categories: [Category.JavaScript, Category.NodeJS],
+      categories: ['javascript', 'node'],
       manager: 'meteor',
       depName: 'node',
     };
@@ -387,7 +387,7 @@ describe('util/package-rules/index', () => {
     const config: TestConfig = {
       packageRules: [
         {
-          matchCategories: [Category.Docker],
+          matchCategories: ['docker'],
           matchPackageNames: ['node'],
           x: 1,
         },
@@ -395,7 +395,7 @@ describe('util/package-rules/index', () => {
     };
     const dep = {
       depType: 'dependencies',
-      categories: [Category.Python],
+      categories: ['python'],
       manager: 'pipenv',
       depName: 'node',
     };
@@ -407,7 +407,7 @@ describe('util/package-rules/index', () => {
     const config: TestConfig = {
       packageRules: [
         {
-          matchCategories: [Category.Docker],
+          matchCategories: ['docker'],
           x: 1,
         },
       ],

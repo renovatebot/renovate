@@ -22,7 +22,7 @@ export const defaultConfig = {
   versioning: composerVersioningId,
 };
 
-export const categories = [Category.PHP];
+export const categories: Category[] = ['php'];
 
 export const supportedDatasources = [
   GitTagsDatasource.id,

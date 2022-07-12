@@ -9,6 +9,6 @@ export const defaultConfig = {
   fileMatch: ['(^|/)setup\\.py$'],
 };
 
-export const categories = [Category.Python];
+export const categories: Category[] = ['python'];
 
 export const supportedDatasources = [PypiDatasource.id];

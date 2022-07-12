@@ -16,4 +16,4 @@ export const defaultConfig = {
   versioning: nodeVersioning.id,
 };
 
-export const categories = [Category.CI];
+export const categories: Category[] = ['ci'];

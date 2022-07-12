@@ -10,7 +10,7 @@ export const defaultConfig = {
   fileMatch: ['\\.cake$'],
 };
 
-export const categories = [Category.Dotnet];
+export const categories: Category[] = ['dotnet'];
 
 const lexer = moo.states({
   main: {

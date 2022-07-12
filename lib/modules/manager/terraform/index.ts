@@ -1,4 +1,4 @@
-import { Category } from '../../../constants';
+import type { Category } from '../../../constants';
 import { BitBucketTagsDatasource } from '../../datasource/bitbucket-tags';
 import { DockerDatasource } from '../../datasource/docker';
 import { GitTagsDatasource } from '../../datasource/git-tags';
@@ -30,4 +30,4 @@ export const defaultConfig = {
   pinDigests: false,
 };
 
-export const categories = [Category.Terraform, Category.IaC];
+export const categories: Category[] = ['terraform', 'iac'];

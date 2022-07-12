@@ -14,6 +14,8 @@ export const defaultConfig = {
   versioning: hexVersioning.id,
 };
 
+export const categories: Category[] = ['elixir'];
+
 export const supportedDatasources = [
   GithubTagsDatasource.id,
   GitTagsDatasource.id,

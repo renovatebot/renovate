@@ -16,7 +16,7 @@ export const defaultConfig = {
   fileMatch: ['(^|/)go\\.mod$'],
 };
 
-export const categories = [Category.Golang];
+export const categories: Category[] = ['golang'];
 
 export const supportedDatasources = [
   GoDatasource.id,

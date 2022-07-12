@@ -13,4 +13,4 @@ export const defaultConfig = {
   fileMatch: ['(^|/)Pipfile$'],
 };
 
-export const categories = [Category.Python];
+export const categories: Category[] = ['python'];

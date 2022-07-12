@@ -10,6 +10,6 @@ export const defaultConfig = {
   fileMatch: ['(^|/|\\.)Dockerfile$', '(^|/)Dockerfile[^/]*$'],
 };
 
-export const categories = [Category.Docker];
+export const categories: Category[] = ['docker'];
 
 export const supportedDatasources = [DockerDatasource.id];

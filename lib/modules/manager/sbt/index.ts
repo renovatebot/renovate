@@ -1,4 +1,4 @@
-import { Category } from '../../../constants';
+import type { Category } from '../../../constants';
 import { MavenDatasource } from '../../datasource/maven';
 import { SbtPackageDatasource } from '../../datasource/sbt-package';
 import { SbtPluginDatasource } from '../../datasource/sbt-plugin';
@@ -18,4 +18,4 @@ export const defaultConfig = {
   versioning: ivyVersioning.id,
 };
 
-export const categories = [Category.JVM];
+export const categories: Category[] = ['jvm'];
