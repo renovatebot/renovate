@@ -2,8 +2,8 @@ import type { RawExecOptions } from './types';
 
 export interface ExecErrorData {
   cmd: string;
-  stdout: string;
   stderr: string;
+  stdout: string;
   options: RawExecOptions;
   exitCode?: number;
   signal?: NodeJS.Signals;
@@ -11,10 +11,10 @@ export interface ExecErrorData {
 
 export class ExecError extends Error {
   cmd: string;
-  exitCode?: number;
   stderr: string;
   stdout: string;
   options: any;
+  exitCode?: number;
   signal?: NodeJS.Signals;
 
   constructor(message: string, data: ExecErrorData, err?: Error) {
@@ -28,11 +28,17 @@ export class ExecError extends Error {
     }
 
     Object.setPrototypeOf(this, ExecError.prototype);
+
     this.cmd = cmd;
-    this.exitCode = exitCode;
     this.stderr = stderr;
     this.stdout = stdout;
     this.options = options;
-    this.signal = signal;
+
+    if (exitCode) {
+      this.exitCode = exitCode;
+    }
+    if (signal) {
+      this.signal = signal;
+    }
   }
 }
