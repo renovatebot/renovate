@@ -3,44 +3,42 @@ import { getCache } from '../cache/repository';
 import type { BranchCache } from '../cache/repository/types';
 
 export function getCachedModifiedResult(
-  targetBranchName: string,
-  targetBranchSha: string
+  branchName: string,
+  branchSha: string
 ): boolean | null {
   const { branches } = getCache();
-  const targetBranch = branches?.find(
-    (branch) => branch.branchName === targetBranchName
-  );
-  if (is.undefined(targetBranch)) {
+  const branch = branches?.find((branch) => branch.branchName === branchName);
+  if (is.undefined(branch)) {
     return null;
   }
 
-  if (targetBranch.sha !== targetBranchSha) {
+  if (branch.sha !== branchSha) {
     return null;
   }
 
-  return targetBranch.isModified;
+  return branch.isModified;
 }
 
 export function setCachedModifiedResult(
-  targetBranchName: string,
-  targetBranchSha: string,
+  branchName: string,
+  branchSha: string,
   isModified: boolean
 ): void {
   const cache = getCache();
   cache.branches ??= [];
   const { branches } = cache;
-  const targetBranch =
-    branches?.find((branch) => branch.branchName === targetBranchName) ??
-    ({ branchName: targetBranchName } as BranchCache);
+  const branch =
+    branches?.find((branch) => branch.branchName === branchName) ??
+    ({ branchName: branchName } as BranchCache);
 
   // if branch not present add it to cache
-  if (is.undefined(targetBranch.sha)) {
-    branches.push(targetBranch);
+  if (is.undefined(branch.sha)) {
+    branches.push(branch);
   }
 
-  if (targetBranch?.sha !== targetBranchSha) {
-    targetBranch.sha = targetBranchSha;
+  if (branch?.sha !== branchSha) {
+    branch.sha = branchSha;
   }
 
-  targetBranch.isModified = isModified;
+  branch.isModified = isModified;
 }
