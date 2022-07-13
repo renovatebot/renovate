@@ -2,6 +2,7 @@
 
 exports[`modules/datasource/dart/index getReleases processes real data 1`] = `
 Object {
+  "homepage": "https://github.com/flutter/plugins/tree/master/packages/shared_preferences/shared_preferences",
   "registryUrl": "https://pub.dartlang.org/",
   "releases": Array [
     Object {

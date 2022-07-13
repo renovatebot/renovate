@@ -145,7 +145,7 @@ export function addMetaData(
       delete dep.sourceUrl;
     }
 
-    if (dep.sourceUrl === dep.homepage) {
+    if (dep.sourceUrl === dep.homepage && !dep.homepage?.endsWith('/')) {
       delete dep.homepage;
     }
   }
