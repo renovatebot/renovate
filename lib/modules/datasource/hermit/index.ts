@@ -57,6 +57,11 @@ export class HermitDatasource extends Datasource {
       return null;
     }
 
+    if (parseUrl(registryUrl) === null) {
+      logger.warn({ registryUrl }, 'invalid registryUrl given');
+      return null;
+    }
+
     if (!registryUrl.startsWith('https://github.com/')) {
       logger.warn({ registryUrl }, 'Only Github registryUrl is supported');
       return null;
@@ -104,11 +109,8 @@ export class HermitDatasource extends Datasource {
     registryUrl: string
   ): Promise<HermitSearchResult[] | null> {
     const u = parseUrl(registryUrl);
-    if (u === null) {
-      return null;
-    }
-    const host = u.host;
-    const groups = this.pathRegex.exec(u.pathname)?.groups;
+    const host = u?.host ?? '';
+    const groups = this.pathRegex.exec(u?.pathname ?? '')?.groups;
 
     if (!groups) {
       return null;

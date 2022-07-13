@@ -19,6 +19,7 @@ describe('modules/datasource/hermit/index', () => {
           Channels: ['@1.17', '@1.18'],
           CurrentVersion: '1.17.9',
           Repository: 'https://github.com/golang/golang',
+          Description: 'golang',
         },
       ];
       httpMock
@@ -213,6 +214,15 @@ describe('modules/datasource/hermit/index', () => {
         datasource.getReleases({
           packageName: 'go',
           registryUrl,
+        })
+      ).resolves.toBeNull();
+    });
+
+    it('should get null on invalid registry url', async () => {
+      await expect(
+        datasource.getReleases({
+          packageName: 'go',
+          registryUrl: 'invalid url',
         })
       ).resolves.toBeNull();
     });
