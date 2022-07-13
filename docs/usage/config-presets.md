@@ -17,7 +17,7 @@ Shareable config presets must use the JSON format, other formats are not support
 <!-- prettier-ignore -->
 !!! warning
     We've deprecated using a `renovate.json` file for presets, as this causes issues if the repository configuration _also_ uses a `renovate.json` file.
-    If you're using a `renovate.json` file for presets, rename it to `default.json`.
+    If you're using a `renovate.json` file to share your presets, rename it to `default.json`.
 
 <!-- prettier-ignore -->
 !!! tip
