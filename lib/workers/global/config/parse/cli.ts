@@ -1,5 +1,6 @@
 import { Command } from 'commander';
 import JSON5 from 'json5';
+import { massageConfig } from '../../../../config/massage';
 import { getOptions } from '../../../../config/options';
 import type { AllConfig } from '../../../../config/types';
 import { pkg } from '../../../../expose.cjs';
@@ -152,5 +153,5 @@ export function getConfig(input: string[]): AllConfig {
     })
     .parse(argv);
 
-  return config;
+  return massageConfig(config);
 }
