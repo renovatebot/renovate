@@ -58,7 +58,7 @@ export class HermitDatasource extends Datasource {
     }
 
     if (!registryUrl.startsWith('https://github.com/')) {
-      logger.error({ registryUrl }, 'Only Github registryUrl is supported');
+      logger.warn({ registryUrl }, 'Only Github registryUrl is supported');
       return null;
     }
 
@@ -125,7 +125,7 @@ export class HermitDatasource extends Datasource {
     );
 
     if (!asset) {
-      logger.error(
+      logger.warn(
         { registryUrl },
         `can't find asset index.json in the given registryUrl`
       );
@@ -151,7 +151,7 @@ export class HermitDatasource extends Datasource {
     try {
       ret = JSON.parse(indexContent) as HermitSearchResult[];
     } catch (e) {
-      logger.error('error parsing hermit search manifest from remote respond');
+      logger.warn('error parsing hermit search manifest from remote respond');
     }
 
     return ret;
