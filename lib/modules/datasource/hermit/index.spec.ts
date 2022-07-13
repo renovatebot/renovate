@@ -12,7 +12,7 @@ const registryUrl = 'https://github.com/cashapp/hermit-packages';
 describe('modules/datasource/hermit/index', () => {
   describe('getReleases', () => {
     it('should return result from hermit list', async () => {
-      const resp = [
+      const resp: HermitSearchResult[] = [
         {
           Name: 'go',
           Versions: ['1.17.9', '1.17.10', '1.18', '1.18.1'],
