@@ -7,7 +7,7 @@ import type { PackageDependency, PackageFile } from '../types';
 import type { FleetFile, FleetFileHelm, GitRepo } from './types';
 
 function extractGitRepo(doc: GitRepo): PackageDependency {
-  const tempDep: PackageDependency = {
+  const dep: PackageDependency = {
     depType: 'git_repo',
     datasource: GitTagsDatasource.id,
   };
@@ -15,23 +15,23 @@ function extractGitRepo(doc: GitRepo): PackageDependency {
   const repo = doc.spec?.repo;
   if (!repo) {
     return {
-      ...tempDep,
+      ...dep,
       skipReason: 'missing-depname',
     };
   }
-  tempDep.sourceUrl = repo;
-  tempDep.depName = repo;
+  dep.sourceUrl = repo;
+  dep.depName = repo;
 
   const currentValue = doc.spec.revision;
   if (!currentValue) {
     return {
-      ...tempDep,
+      ...dep,
       skipReason: 'no-version',
     };
   }
 
   return {
-    ...tempDep,
+    ...dep,
     currentValue,
   };
 }
