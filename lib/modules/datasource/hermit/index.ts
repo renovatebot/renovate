@@ -152,6 +152,6 @@ export class HermitDatasource extends Datasource {
       logger.warn('error parsing hermit search manifest from remote respond');
     }
 
-    return ret;
+    return null;
   }
 }
