@@ -105,7 +105,7 @@ describe('modules/datasource/docker/index', () => {
   });
 
   describe('getAuthHeaders', () => {
-    it('returns empty Object', async () => {
+    it('returns empty object if page not found', async () => {
       httpMock
         .scope('https://my.local.registry')
         .get('/v2/repo/tags/list?n=1000')
