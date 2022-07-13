@@ -9,19 +9,25 @@ const otherYamlFile = Fixtures.get('gitlab-ci.yaml');
 describe('modules/manager/kubernetes/extract', () => {
   describe('extractPackageFile()', () => {
     it('returns null for empty', () => {
-      expect(extractPackageFile(kubernetesConfigMapFile)).toBeNull();
+      expect(extractPackageFile('')).toBeNull();
     });
 
-    it('extracts multiple image lines', () => {
+    it('returns only API version', () => {
+      const res = extractPackageFile(kubernetesConfigMapFile);
+      expect(res?.deps).toMatchSnapshot();
+      expect(res?.deps).toHaveLength(1);
+    });
+
+    it('extracts multiple Kubernetes configurations', () => {
       const res = extractPackageFile(kubernetesImagesFile);
       expect(res?.deps).toMatchSnapshot();
-      expect(res?.deps).toHaveLength(2);
+      expect(res?.deps).toHaveLength(4);
     });
 
     it('extracts image line in a YAML array', () => {
       const res = extractPackageFile(kubernetesArraySyntaxFile);
       expect(res?.deps).toMatchSnapshot();
-      expect(res?.deps).toHaveLength(1);
+      expect(res?.deps).toHaveLength(2);
     });
 
     it('ignores non-Kubernetes YAML files', () => {

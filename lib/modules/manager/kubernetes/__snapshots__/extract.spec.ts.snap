@@ -10,10 +10,14 @@ Array [
     "depName": "quay.io/external_storage/local-volume-provisioner",
     "replaceString": "quay.io/external_storage/local-volume-provisioner:v2.1.0",
   },
+  Object {
+    "currentValue": "apps/v1",
+    "depName": "DaemonSet",
+  },
 ]
 `;
 
-exports[`modules/manager/kubernetes/extract extractPackageFile() extracts multiple image lines 1`] = `
+exports[`modules/manager/kubernetes/extract extractPackageFile() extracts multiple Kubernetes configurations 1`] = `
 Array [
   Object {
     "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
@@ -30,6 +34,23 @@ Array [
     "datasource": "docker",
     "depName": "k8s.gcr.io/kube-proxy-amd64",
     "replaceString": "k8s.gcr.io/kube-proxy-amd64:v1.11.1",
+  },
+  Object {
+    "currentValue": "apps/v1",
+    "depName": "Deployment",
+  },
+  Object {
+    "currentValue": "extensions/v1beta1",
+    "depName": "DaemonSet",
+  },
+]
+`;
+
+exports[`modules/manager/kubernetes/extract extractPackageFile() returns only API version 1`] = `
+Array [
+  Object {
+    "currentValue": "v1",
+    "depName": "ConfigMap",
   },
 ]
 `;
