@@ -289,6 +289,25 @@ describe('modules/datasource/go/base', () => {
           packageName: 'fyne-io/fyne',
         });
       });
+
+      it('handles go-import with gitlab source', async () => {
+        const meta =
+          '<meta name="go-import" content="my.custom.domain/golang/myrepo git https://gitlab.com/golang/myrepo.git">';
+        httpMock
+          .scope('https://my.custom.domain')
+          .get('/golang/myrepo?go-get=1')
+          .reply(200, meta);
+
+        const res = await BaseGoDatasource.getDatasource(
+          'my.custom.domain/golang/myrepo'
+        );
+
+        expect(res).toEqual({
+          datasource: 'gitlab-tags',
+          registryUrl: 'https://gitlab.com',
+          packageName: 'golang/myrepo',
+        });
+      });
     });
   });
 });
