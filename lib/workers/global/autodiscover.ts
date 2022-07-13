@@ -22,8 +22,8 @@ export async function autodiscoverRepositories(
     return config;
   }
   // Autodiscover list of repositories
-  const allRepos = await platform.getRepos();
-  if (!allRepos?.length) {
+  let discovered = await platform.getRepos();
+  if (!discovered?.length) {
     // Soft fail (no error thrown) if no accessible repositories
     logger.debug(
       'The account associated with your token does not have access to any repos'
@@ -31,18 +31,14 @@ export async function autodiscoverRepositories(
     return config;
   }
 
-  const discovered: string[] = [];
-
   if (config.autodiscoverFilter) {
-    discovered.push(...applyFilters(allRepos, config.autodiscoverFilter));
+    discovered = applyFilters(allRepos, config.autodiscoverFilter);
 
     if (!discovered.length) {
       // Soft fail (no error thrown) if no accessible repositories match the filter
       logger.debug('None of the discovered repositories matched the filter');
       return config;
     }
-  } else {
-    discovered.push(...allRepos);
   }
   logger.info(
     { length: discovered.length, repositories: discovered },
