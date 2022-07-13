@@ -318,17 +318,11 @@ export async function ensureDependencyDashboard(
       'This repository currently has no open or pending branches.\n\n';
   }
 
-  const [detectedDependencies, isTruncated] = PackageFiles.getTruncatedMarkdown(
+  issueBody += PackageFiles.getTruncatedMarkdown(
     config,
     60000 - issueBody.length - getFooter(config).length
   );
 
-  if (isTruncated) {
-    issueBody +=
-      '> **Warning**\n> Detected dependencies section has been truncated\n';
-  }
-
-  issueBody += detectedDependencies;
   issueBody += getFooter(config);
 
   if (config.dependencyDashboardIssue) {

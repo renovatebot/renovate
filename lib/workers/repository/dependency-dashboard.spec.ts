@@ -52,7 +52,7 @@ function genRandPackageFile(
   for (let i = 0; i < depsNum; i++) {
     deps.push({
       depName: genRandString(depNameLen),
-      currentVersion: '1.0.0',
+      currentValue: '1.0.0',
     });
   }
   return { npm: [{ packageFile: 'package.json', deps }] };
@@ -700,15 +700,15 @@ describe('workers/repository/dependency-dashboard', () => {
 
         it('truncates the body of a really big repo', async () => {
           const branches: BranchConfig[] = [];
-          const truncatedLength = 60000;
+          const maxMdLength = 60000;
           const packageFilesBigRepo = genRandPackageFile(100, 700);
           PackageFiles.clear();
           PackageFiles.add('main', packageFilesBigRepo);
           await dependencyDashboard.ensureDependencyDashboard(config, branches);
           expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
-          expect(platform.ensureIssue.mock.calls[0][0].body).toHaveLength(
-            truncatedLength
-          );
+          expect(
+            platform.ensureIssue.mock.calls[0][0].body.length < maxMdLength
+          ).toBeTrue();
 
           // same with dry run
           await dryRun(branches, platform);

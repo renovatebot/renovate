@@ -6,8 +6,6 @@ import type {
 } from '../../modules/manager/types';
 import { clone } from '../../util/clone';
 
-// import { clone } from '../../util/clone';
-
 export class PackageFiles {
   private static data = new Map<string, Record<string, PackageFile[]> | null>();
 
@@ -30,7 +28,7 @@ export class PackageFiles {
     this.data.clear();
   }
 
-  public static pop(): PackageDependency | null {
+  static pop(): PackageDependency | null {
     const [branch, managers] = Array.from(this.data).pop() ?? [];
     if (!branch) {
       return null;
@@ -61,25 +59,35 @@ export class PackageFiles {
   public static getTruncatedMarkdown(
     config: RenovateConfig,
     maxLength: number
-  ): [string, boolean] {
+  ): string {
     // deep copy map
     const data = new Map(clone(Array.from(this.data)));
+    const note =
+      '> **Note**\n> Detected dependencies section has been truncated\n';
+    let title = `## Detected dependencies\n\n`;
 
     let md: string;
     let dep: PackageDependency | null = null;
 
     do {
-      md = PackageFiles.getDashboardMarkdown(config);
+      md = PackageFiles.getDashboardMarkdown(config, false);
       if (md.length > maxLength) {
         dep = PackageFiles.pop();
       }
-    } while (dep && md.length > maxLength);
+    } while (dep && md.length > maxLength - (title + note).length);
 
     this.data = data;
-    return [md, md.length !== PackageFiles.getDashboardMarkdown(config).length];
+    title +=
+      md.length === PackageFiles.getDashboardMarkdown(config, false).length
+        ? ''
+        : note;
+    return title + md;
   }
 
-  public static getDashboardMarkdown(config: RenovateConfig): string {
+  public static getDashboardMarkdown(
+    config: RenovateConfig,
+    setTitle = true
+  ): string {
     const title = `## Detected dependencies\n\n`;
     const none = 'None detected\n\n';
     const pad = this.data.size > 1; // padding condition for a multi base branch repo
@@ -124,6 +132,6 @@ export class PackageFiles {
       deps += pad ? '</blockquote>\n</details>\n\n' : '';
     }
 
-    return title + deps;
+    return (setTitle ? title : '') + deps;
   }
 }
