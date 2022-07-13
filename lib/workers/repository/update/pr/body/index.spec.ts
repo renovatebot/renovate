@@ -1,4 +1,5 @@
 import { mocked, platform } from '../../../../../../test/util';
+import { prDebugDataRe } from '../../../../../modules/platform/pr-body';
 import * as _template from '../../../../../util/template';
 import * as _changelogs from './changelogs';
 import * as _configDescription from './config-description';
@@ -49,11 +50,19 @@ describe('workers/repository/update/pr/body/index', () => {
     });
 
     it('handles empty template', async () => {
-      const res = await getPrBody({
-        manager: 'some-manager',
-        branchName: 'some-branch',
-        upgrades: [],
-      });
+      const res = await getPrBody(
+        {
+          manager: 'some-manager',
+          branchName: 'some-branch',
+          upgrades: [],
+        },
+        {
+          debugData: {
+            updatedInVer: '1.2.3',
+            createdInVer: '1.2.3',
+          },
+        }
+      );
       expect(res).toBeEmptyString();
     });
 
@@ -69,11 +78,19 @@ describe('workers/repository/update/pr/body/index', () => {
         homepage: 'https://example.com',
       };
 
-      await getPrBody({
-        manager: 'some-manager',
-        branchName: 'some-branch',
-        upgrades: [upgrade],
-      });
+      await getPrBody(
+        {
+          manager: 'some-manager',
+          branchName: 'some-branch',
+          upgrades: [upgrade],
+        },
+        {
+          debugData: {
+            updatedInVer: '1.2.3',
+            createdInVer: '1.2.3',
+          },
+        }
+      );
 
       expect(upgrade).toMatchObject({
         branchName: 'some-branch',
@@ -97,11 +114,19 @@ describe('workers/repository/update/pr/body/index', () => {
         dependencyUrl: 'https://github.com/foo/bar',
       };
 
-      await getPrBody({
-        manager: 'some-manager',
-        branchName: 'some-branch',
-        upgrades: [upgrade],
-      });
+      await getPrBody(
+        {
+          manager: 'some-manager',
+          branchName: 'some-branch',
+          upgrades: [upgrade],
+        },
+        {
+          debugData: {
+            updatedInVer: '1.2.3',
+            createdInVer: '1.2.3',
+          },
+        }
+      );
 
       expect(upgrade).toMatchObject({
         branchName: 'some-branch',
@@ -114,13 +139,22 @@ describe('workers/repository/update/pr/body/index', () => {
     it('compiles template', async () => {
       platform.massageMarkdown.mockImplementation((x) => x);
       template.compile.mockImplementation((x) => x);
-      const res = await getPrBody({
-        manager: 'some-manager',
-        branchName: 'some-branch',
-        upgrades: [],
-        prBodyTemplate: 'PR BODY',
-      });
-      expect(res).toBe('PR BODY');
+      const res = await getPrBody(
+        {
+          manager: 'some-manager',
+          branchName: 'some-branch',
+          upgrades: [],
+          prBodyTemplate: 'PR BODY',
+        },
+        {
+          debugData: {
+            updatedInVer: '1.2.3',
+            createdInVer: '1.2.3',
+          },
+        }
+      );
+      expect(res).toContain('PR BODY');
+      expect(res).toContain(`<!--renovate-debug`);
     });
 
     it('supports custom rebasing message', async () => {
@@ -133,9 +167,37 @@ describe('workers/repository/update/pr/body/index', () => {
           upgrades: [],
           prBodyTemplate: ['aaa', '**Rebasing**: FOO', 'bbb'].join('\n'),
         },
-        { rebasingNotice: 'BAR' }
+        {
+          rebasingNotice: 'BAR',
+          debugData: {
+            updatedInVer: '1.2.3',
+            createdInVer: '1.2.3',
+          },
+        }
       );
       expect(res).toContain(['aaa', '**Rebasing**: BAR', 'bbb'].join('\n'));
+    });
+
+    it('updates PR due to body change without pr data', async () => {
+      platform.massageMarkdown.mockImplementation((x) => x);
+      template.compile.mockImplementation((x) => x);
+      const res = await getPrBody(
+        {
+          manager: 'some-manager',
+          branchName: 'some-branch',
+          upgrades: [],
+          prBodyTemplate: 'PR BODY',
+        },
+        {
+          debugData: {
+            updatedInVer: '1.2.3',
+            createdInVer: '1.2.3',
+          },
+        }
+      );
+
+      const match = prDebugDataRe.exec(res);
+      expect(match?.groups?.payload).toBeString();
     });
   });
 });
