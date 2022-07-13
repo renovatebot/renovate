@@ -146,8 +146,6 @@ export class HermitDatasource extends Datasource {
       })
     );
 
-    let ret: HermitSearchResult[] | null = null;
-
     try {
       ret = JSON.parse(indexContent) as HermitSearchResult[];
     } catch (e) {
