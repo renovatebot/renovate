@@ -3,9 +3,9 @@ import { cache } from '../../../util/cache/package/decorator';
 import { GithubHttp } from '../../../util/http/github';
 import { regEx } from '../../../util/regex';
 import { streamToString } from '../../../util/streams';
+import { parseUrl } from '../../../util/url';
 import { id } from '../../versioning/hermit';
 import { Datasource } from '../datasource';
-import { GithubReleasesDatasource } from '../github-releases';
 import { getApiBaseUrl } from '../github-releases/common';
 import type {
   GithubRelease,
@@ -37,7 +37,7 @@ export class HermitDatasource extends Datasource {
 
   constructor() {
     super(HermitDatasource.id);
-    this.http = new GithubHttp(GithubReleasesDatasource.id);
+    this.http = new GithubHttp(id);
     this.pathRegex = regEx('^\\/(?<owner>[^/]+)\\/(?<repo>[^/]+)$');
   }
 
@@ -103,7 +103,10 @@ export class HermitDatasource extends Datasource {
   async getHermitSearchManifest(
     registryUrl: string
   ): Promise<HermitSearchResult[] | null> {
-    const u = new URL(registryUrl);
+    const u = parseUrl(registryUrl);
+    if (u === null) {
+      return null;
+    }
     const host = u.host;
     const groups = this.pathRegex.exec(u.pathname)?.groups;
 
