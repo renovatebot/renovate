@@ -20,10 +20,7 @@ export function extractPackageFile(content: string): PackageFile | null {
     ...extractApis(content),
   ];
 
-  if (!deps.length) {
-    return null;
-  }
-  return { deps };
+  return deps.length ? { deps } : null;
 }
 
 function extractImages(content: string): PackageDependency[] {
