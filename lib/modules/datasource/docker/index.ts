@@ -849,17 +849,21 @@ export class DockerDatasource extends Datasource {
         if (manifestResponse) {
           const manifestList = JSON.parse(manifestResponse.body) as
             | ImageList
-            | OciImageList;
-          for (const manifest of manifestList.manifests) {
-            if (manifest.digest === currentDigest) {
-              architecture =
-                (manifest.platform['architecture'] as string) || null;
-              logger.debug(
-                `Current digest ${currentDigest} relates to architecture ${
-                  architecture ?? 'null'
-                }`
-              );
-              break;
+            | Image
+            | OciImageList
+            | OciImage;
+          if(manifest.schemaVersion === 2 && manifest.mediaType === MediaType.manifestListV2) {
+            for (const manifest of manifestList.manifests) {
+              if (manifest.digest === currentDigest) {
+                architecture =
+                  (manifest.platform['architecture'] as string) ?? null;
+                logger.debug(
+                  `Current digest ${currentDigest} relates to architecture ${
+                    architecture ?? 'null'
+                  }`
+                );
+                break;
+              }
             }
           }
         }
