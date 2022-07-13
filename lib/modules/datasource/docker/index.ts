@@ -872,53 +872,65 @@ export class DockerDatasource extends Datasource {
         }
       }
 
-      let manifestResponse = await this.getManifestResponse(
-        registryHost,
-        dockerRepository,
-        newTag,
-        'head'
-      );
-      if (manifestResponse) {
+      let manifestResponse = null;
+      if (!architecture) {
+        manifestResponse = await this.getManifestResponse(
+          registryHost,
+          dockerRepository,
+          newTag,
+          'head'
+        );
+
         if (
-          !architecture &&
+          manifestResponse &&
           hasKey('docker-content-digest', manifestResponse.headers)
         ) {
           digest =
             (manifestResponse.headers['docker-content-digest'] as string) ||
             null;
-        } else {
-          logger.debug(
-            { registryHost },
-            'Architecture-specific digest or missing docker-content-digest header - pulling full manifest'
-          );
-          manifestResponse = await this.getManifestResponse(
-            registryHost,
-            dockerRepository,
-            newTag
-          );
-          if (architecture && manifestResponse) {
-            const manifestList = JSON.parse(manifestResponse.body) as
-              | ImageList
-              | Image
-              | OciImageList
-              | OciImage;
-            if (
-              manifestList.schemaVersion === 2 &&
-              manifestList.mediaType === MediaType.manifestListV2
-            ) {
-              for (const manifest of manifestList.manifests) {
-                if (manifest.platform['architecture'] === architecture) {
-                  digest = manifest.digest;
-                  break;
-                }
+        }
+      }
+
+      if (
+        architecture ||
+        (manifestResponse &&
+          !hasKey('docker-content-digest', manifestResponse.headers))
+      ) {
+        logger.debug(
+          { registryHost },
+          'Architecture-specific digest or missing docker-content-digest header - pulling full manifest'
+        );
+        manifestResponse = await this.getManifestResponse(
+          registryHost,
+          dockerRepository,
+          newTag
+        );
+
+        if (architecture && manifestResponse) {
+          const manifestList = JSON.parse(manifestResponse.body) as
+            | ImageList
+            | Image
+            | OciImageList
+            | OciImage;
+          if (
+            manifestList.schemaVersion === 2 &&
+            manifestList.mediaType === MediaType.manifestListV2
+          ) {
+            for (const manifest of manifestList.manifests) {
+              if (manifest.platform['architecture'] === architecture) {
+                digest = manifest.digest;
+                break;
               }
             }
           }
-
-          if (!digest) {
-            digest = extractDigestFromResponseBody(manifestResponse!);
-          }
         }
+
+        if (!digest) {
+          digest = extractDigestFromResponseBody(manifestResponse!);
+        }
+      }
+
+      if (manifestResponse) {
         logger.debug({ digest }, 'Got docker digest');
       }
     } catch (err) /* istanbul ignore next */ {
