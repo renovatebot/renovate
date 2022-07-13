@@ -581,32 +581,37 @@ describe('modules/datasource/docker/index', () => {
         .get('/library/some-dep/manifests/some-current-value')
         .reply(
           200,
-          `{
-            "manifests": [
+          {
+            schemaVersion: 2,
+            mediaType: MediaType.manifestListV2,
+            manifests: [
               {
-                "digest": "sha256:197c58a9c30faf97f16412d63e333a0adffed856b06994759899d070f28db51e",
-                "platform": {
-                  "architecture": "arm",
-                  "os": "linux",
-                  "variant": "v6"
-                }
+                digest:
+                  'sha256:197c58a9c30faf97f16412d63e333a0adffed856b06994759899d070f28db51e',
+                platform: {
+                  architecture: 'arm',
+                  os: 'linux',
+                  variant: 'v6',
+                },
               },
               {
-                "digest": "sha256:81c09f6d42c2db8121bcd759565ea244cedc759f36a0f090ec7da9de4f7f8fe4",
-                "platform": {
-                  "architecture": "amd64",
-                  "os": "linux"
-                }
+                digest:
+                  'sha256:81c09f6d42c2db8121bcd759565ea244cedc759f36a0f090ec7da9de4f7f8fe4',
+                platform: {
+                  architecture: 'amd64',
+                  os: 'linux',
+                },
               },
               {
-                "digest": "sha256:295b5db1283633daf8d82f0b794bd543118508a5568c90b055d7a48ad6afcfd1",
-                "platform": {
-                  "architecture": "386",
-                  "os": "linux"
-                }
-              }
-            ]
-          }`,
+                digest:
+                  'sha256:295b5db1283633daf8d82f0b794bd543118508a5568c90b055d7a48ad6afcfd1',
+                platform: {
+                  architecture: '386',
+                  os: 'linux',
+                },
+              },
+            ],
+          },
           {
             'content-type': 'text/plain',
           }
@@ -624,32 +629,37 @@ describe('modules/datasource/docker/index', () => {
         .get('/library/some-dep/manifests/some-new-value')
         .reply(
           200,
-          `{
-            "manifests": [
+          {
+            schemaVersion: 2,
+            mediaType: MediaType.manifestListV2,
+            manifests: [
               {
-                "digest": "sha256:c3fe2aac7e4f47270eeff0fdd35cb9bad674105eaa1663942645ca58399a2dbc",
-                "platform": {
-                  "architecture": "arm",
-                  "os": "linux",
-                  "variant": "v6"
-                }
+                digest:
+                  'sha256:c3fe2aac7e4f47270eeff0fdd35cb9bad674105eaa1663942645ca58399a2dbc',
+                platform: {
+                  architecture: 'arm',
+                  os: 'linux',
+                  variant: 'v6',
+                },
               },
               {
-                "digest": "sha256:78fa4d63fec4e647f00908f24cda05af101aa9702700f613c7f82a96a267d801",
-                "platform": {
-                  "architecture": "386",
-                  "os": "linux"
-                }
+                digest:
+                  'sha256:78fa4d63fec4e647f00908f24cda05af101aa9702700f613c7f82a96a267d801',
+                platform: {
+                  architecture: '386',
+                  os: 'linux',
+                },
               },
               {
-                "digest": "sha256:81093b981e72a54d488d5a60780006d82f7cc02d248d88ff71ff4137b0f51176",
-                "platform": {
-                  "architecture": "amd64",
-                  "os": "linux"
-                }
-              }
-            ]
-          }`,
+                digest:
+                  'sha256:81093b981e72a54d488d5a60780006d82f7cc02d248d88ff71ff4137b0f51176',
+                platform: {
+                  architecture: 'amd64',
+                  os: 'linux',
+                },
+              },
+            ],
+          },
           {
             'content-type': 'text/plain',
           }
