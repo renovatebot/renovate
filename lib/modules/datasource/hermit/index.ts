@@ -57,7 +57,8 @@ export class HermitDatasource extends Datasource {
       return null;
     }
 
-    if (parseUrl(registryUrl) === null) {
+    const parsedUrl = parseUrl(registryUrl);
+    if (parsedUrl === null) {
       logger.warn({ registryUrl }, 'invalid registryUrl given');
       return null;
     }
@@ -67,7 +68,7 @@ export class HermitDatasource extends Datasource {
       return null;
     }
 
-    const items = await this.getHermitSearchManifest(registryUrl);
+    const items = await this.getHermitSearchManifest(parsedUrl);
 
     if (items === null) {
       return null;
@@ -103,14 +104,13 @@ export class HermitDatasource extends Datasource {
    */
   @cache({
     namespace: `datasource-hermit-search-manifest`,
-    key: ({ registryUrl }: GetReleasesConfig) => registryUrl ?? '',
+    key: (registryUrl: URL) => registryUrl.toString(),
   })
   async getHermitSearchManifest(
-    registryUrl: string
+    registryUrl: URL
   ): Promise<HermitSearchResult[] | null> {
-    const u = parseUrl(registryUrl);
-    const host = u?.host ?? '';
-    const groups = this.pathRegex.exec(u?.pathname ?? '')?.groups;
+    const host = registryUrl.host;
+    const groups = this.pathRegex.exec(registryUrl.pathname)?.groups;
 
     if (!groups) {
       return null;
