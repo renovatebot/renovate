@@ -252,8 +252,7 @@ describe('util/git/index', () => {
     });
   });
 
-  // eslint-disable-next-line jest/no-focused-tests
-  describe.only('isBranchModified()', () => {
+  describe('isBranchModified()', () => {
     beforeEach(() => {
       modifiedCache.getCachedModifiedResult.mockReturnValue(null);
     });
