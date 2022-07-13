@@ -46,7 +46,7 @@ const gitPresetRegex = regEx(
 );
 
 // shallow mode preset to ignore regex
-const whitesourcePresetRegex = regEx(/^.*>(whitesource)\//);
+const whitesourcePresetRegex = regEx(/^.*?>whitesource\//);
 
 export function replaceArgs(
   obj: string,
@@ -287,7 +287,7 @@ export async function resolveConfigPresets(
     'resolveConfigPresets'
   );
   let config: AllConfig = {};
-  const tempExtends: string[] = [];
+  const unresolvedPreserts: string[] = [];
   // First, merge all the preset configs from left to right
   if (inputConfig.extends?.length) {
     for (const preset of inputConfig.extends) {
@@ -344,7 +344,7 @@ export async function resolveConfigPresets(
           throw error;
         }
         if (shallowResolve && !shouldShallowResolve(preset)) {
-          tempExtends.push(preset);
+          unresolvedPreserts.push(preset);
           fetchedPreset = {};
         }
         const presetConfig = await resolveConfigPresets(
@@ -363,7 +363,7 @@ export async function resolveConfigPresets(
           // save extends array to not lose values from it
           for (const extend of presetConfig.extends) {
             if (!shouldShallowResolve(extend)) {
-              tempExtends.push(extend);
+              unresolvedPreserts.push(extend);
             }
           }
         }
@@ -415,7 +415,7 @@ export async function resolveConfigPresets(
   logger.trace({ config: inputConfig }, 'Input config');
   logger.trace({ config }, 'Resolved config');
   if (shallowResolve) {
-    handleExtendsArray(config, tempExtends);
+    handleExtendsArray(config, unresolvedPreserts);
   }
   return config;
 }
