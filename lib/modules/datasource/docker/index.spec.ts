@@ -569,7 +569,7 @@ describe('modules/datasource/docker/index', () => {
         .get(
           '/token?service=registry.docker.io&scope=repository:library/some-dep:pull'
         )
-        .times(3)
+        .twice()
         .reply(200, { token: 'some-token' });
       httpMock
         .scope(baseUrl)
@@ -619,13 +619,10 @@ describe('modules/datasource/docker/index', () => {
       httpMock
         .scope(baseUrl)
         .get('/')
-        .twice()
         .reply(401, '', {
           'www-authenticate':
             'Bearer realm="https://auth.docker.io/token",service="registry.docker.io",scope="repository:library/some-dep:pull  "',
         })
-        .head('/library/some-dep/manifests/some-new-value')
-        .reply(200, undefined, {})
         .get('/library/some-dep/manifests/some-new-value')
         .reply(
           200,
