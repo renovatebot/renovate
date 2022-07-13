@@ -17,8 +17,7 @@ import type { HermitSearchResult } from './types';
 /**
  * Hermit Datasource searches a given package from the specified `hermit-packages`
  * repository. It expects the search manifest to come from an asset `index.json` from
- * a release named index. Any error fetching, parsing and finding the package from the given
- * registryUrl will be thrown
+ * a release named index.
  */
 export class HermitDatasource extends Datasource {
   static readonly id = 'hermit';
