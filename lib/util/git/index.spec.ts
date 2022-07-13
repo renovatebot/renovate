@@ -277,7 +277,7 @@ describe('util/git/index', () => {
       expect(await git.isBranchModified('renovate/custom_author')).toBeTrue();
     });
 
-    describe('isBranchModified() with non-null cache', () => {
+    describe('Cache', () => {
       beforeEach(() => {
         modifiedCache.getCachedModifiedResult.mockReturnValue(false);
       });
