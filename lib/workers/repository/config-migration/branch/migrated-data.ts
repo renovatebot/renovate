@@ -113,6 +113,7 @@ export class MigratedDataFactory {
         content = JSON.stringify(migratedConfig, undefined, indentSpace);
       }
 
+      // format if prettier is found in the user's repo
       content = await applyPrettierFormatting(
         content,
         filename.endsWith('.json5') ? 'json5' : 'json',
