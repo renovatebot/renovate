@@ -852,7 +852,10 @@ export class DockerDatasource extends Datasource {
             | Image
             | OciImageList
             | OciImage;
-          if(manifest.schemaVersion === 2 && manifest.mediaType === MediaType.manifestListV2) {
+          if (
+            manifestList.schemaVersion === 2 &&
+            manifestList.mediaType === MediaType.manifestListV2
+          ) {
             for (const manifest of manifestList.manifests) {
               if (manifest.digest === currentDigest) {
                 architecture =
@@ -896,11 +899,18 @@ export class DockerDatasource extends Datasource {
           if (architecture && manifestResponse) {
             const manifestList = JSON.parse(manifestResponse.body) as
               | ImageList
-              | OciImageList;
-            for (const manifest of manifestList.manifests) {
-              if (manifest.platform['architecture'] === architecture) {
-                digest = manifest.digest;
-                break;
+              | Image
+              | OciImageList
+              | OciImage;
+            if (
+              manifestList.schemaVersion === 2 &&
+              manifestList.mediaType === MediaType.manifestListV2
+            ) {
+              for (const manifest of manifestList.manifests) {
+                if (manifest.platform['architecture'] === architecture) {
+                  digest = manifest.digest;
+                  break;
+                }
               }
             }
           }
