@@ -318,14 +318,18 @@ export async function ensureDependencyDashboard(
       'This repository currently has no open or pending branches.\n\n';
   }
 
-  issueBody += PackageFiles.getDashboardMarkdown(config);
+  const [detectedDependencies, isTruncated] = PackageFiles.getTruncatedMarkdown(
+    config,
+    60000 - issueBody.length - getFooter(config).length
+  );
 
-  if (config.dependencyDashboardFooter?.length) {
+  if (isTruncated) {
     issueBody +=
-      '---\n' +
-      template.compile(config.dependencyDashboardFooter, config) +
-      '\n';
+      '> **Warning**\n> Detected dependencies section has been truncated\n';
   }
+
+  issueBody += detectedDependencies;
+  issueBody += getFooter(config);
 
   if (config.dependencyDashboardIssue) {
     const updatedIssue = await platform.getIssue?.(
@@ -363,4 +367,16 @@ export async function ensureDependencyDashboard(
       confidential: config.confidential,
     });
   }
+}
+
+function getFooter(config: RenovateConfig): string {
+  let footer = '';
+  if (config.dependencyDashboardFooter?.length) {
+    footer +=
+      '---\n' +
+      template.compile(config.dependencyDashboardFooter, config) +
+      '\n';
+  }
+
+  return footer;
 }

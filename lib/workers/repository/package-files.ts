@@ -1,6 +1,12 @@
 import type { RenovateConfig } from '../../config/types';
 import { logger } from '../../logger';
-import type { PackageFile } from '../../modules/manager/types';
+import type {
+  PackageDependency,
+  PackageFile,
+} from '../../modules/manager/types';
+import { clone } from '../../util/clone';
+
+// import { clone } from '../../util/clone';
 
 export class PackageFiles {
   private static data = new Map<string, Record<string, PackageFile[]> | null>();
@@ -22,6 +28,55 @@ export class PackageFiles {
       'PackageFiles.clear() - Package files deleted'
     );
     this.data.clear();
+  }
+
+  public static pop(): PackageDependency | null {
+    const [branch, managers] = Array.from(this.data).pop() ?? [];
+    if (!branch) {
+      return null;
+    }
+
+    if (!managers) {
+      this.data.delete(branch);
+      return this.pop();
+    }
+
+    const [manager, packageFiles] = Object.entries(managers).pop() ?? [];
+
+    if (!manager) {
+      return null;
+    }
+
+    if (!packageFiles) {
+      delete managers[manager];
+      return this.pop();
+    }
+
+    const len = packageFiles.length - 1;
+    const dep = packageFiles[len].deps.pop();
+
+    return dep ?? null;
+  }
+
+  public static getTruncatedMarkdown(
+    config: RenovateConfig,
+    maxLength: number
+  ): [string, boolean] {
+    // deep copy map
+    const data = new Map(clone(Array.from(this.data)));
+
+    let md: string;
+    let dep: PackageDependency | null = null;
+
+    do {
+      md = PackageFiles.getDashboardMarkdown(config);
+      if (md.length > maxLength) {
+        dep = PackageFiles.pop();
+      }
+    } while (dep && md.length > maxLength);
+
+    this.data = data;
+    return [md, md.length !== PackageFiles.getDashboardMarkdown(config).length];
   }
 
   public static getDashboardMarkdown(config: RenovateConfig): string {

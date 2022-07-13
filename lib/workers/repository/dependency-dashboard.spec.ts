@@ -702,6 +702,7 @@ describe('workers/repository/dependency-dashboard', () => {
           const branches: BranchConfig[] = [];
           const truncatedLength = 60000;
           const packageFilesBigRepo = genRandPackageFile(100, 700);
+          PackageFiles.clear();
           PackageFiles.add('main', packageFilesBigRepo);
           await dependencyDashboard.ensureDependencyDashboard(config, branches);
           expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
