@@ -826,7 +826,6 @@ describe('util/exec/index', () => {
       class ErrorSignal extends Error {
         signal?: string;
       }
-
       const error = new ErrorSignal();
       error.signal = 'SIGTERM';
       throw error;
