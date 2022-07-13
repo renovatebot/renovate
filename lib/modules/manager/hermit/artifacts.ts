@@ -239,7 +239,10 @@ async function updateHermitPackage(
     const result = await exec(execCommands, execOptions);
     logger.trace({ stdout: result.stdout }, `hermit command stdout`);
   } catch (e) {
-    logger.error({ fromPackage, toPackage }, `error updating hermit package`);
+    logger.warn(
+      { fromPackage, toPackage, err: e },
+      `error updating hermit package`
+    );
     return Promise.reject({
       ...e,
       from,
