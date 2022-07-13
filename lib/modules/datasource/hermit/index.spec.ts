@@ -20,7 +20,7 @@ describe('modules/datasource/hermit/index', () => {
           CurrentVersion: '1.17.9',
           Repository: 'https://github.com/golang/golang',
         },
-      ] as HermitSearchResult[];
+      ];
       httpMock
         .scope(githubApiHost)
         .get(releaseUrl)
