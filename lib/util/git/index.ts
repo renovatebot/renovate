@@ -568,6 +568,13 @@ export async function isBranchStale(branchName: string): Promise<boolean> {
 }
 
 export async function isBranchModified(branchName: string): Promise<boolean> {
+  if (!branchExists(branchName)) {
+    logger.debug(
+      { branchName },
+      'Branch does not exist - cannot check isModified'
+    );
+    return false;
+  }
   // First check local config
   if (config.branchIsModified[branchName] !== undefined) {
     return config.branchIsModified[branchName];
@@ -582,13 +589,6 @@ export async function isBranchModified(branchName: string): Promise<boolean> {
   }
 
   await syncGit();
-  if (!branchExists(branchName)) {
-    logger.debug(
-      { branchName },
-      'Branch does not exist - cannot check isModified'
-    );
-    return false;
-  }
   // Retrieve the author of the most recent commit
   let lastAuthor: string | undefined;
   try {
