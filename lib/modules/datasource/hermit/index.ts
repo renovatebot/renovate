@@ -147,7 +147,7 @@ export class HermitDatasource extends Datasource {
     );
 
     try {
-      ret = JSON.parse(indexContent) as HermitSearchResult[];
+      return JSON.parse(indexContent) as HermitSearchResult[];
     } catch (e) {
       logger.warn('error parsing hermit search manifest from remote respond');
     }
