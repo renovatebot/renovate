@@ -4,7 +4,7 @@ import * as httpMock from '../../../../test/http-mock';
 import * as perlVersioning from '../../versioning/perl';
 import { CpanDatasource, resetCache } from '.';
 
-const packagesDetails = Fixtures?.get('02packages.details.txt');
+const packagesDetails = Fixtures.get('02packages.details.txt');
 
 describe('modules/datasource/cpan/index', () => {
   describe('getReleases', () => {
