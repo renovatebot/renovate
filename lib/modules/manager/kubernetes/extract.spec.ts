@@ -5,7 +5,6 @@ const kubernetesImagesFile = Fixtures.get('kubernetes.yaml');
 const kubernetesConfigMapFile = Fixtures.get('configmap.yaml');
 const kubernetesArraySyntaxFile = Fixtures.get('array-syntax.yaml');
 const otherYamlFile = Fixtures.get('gitlab-ci.yaml');
-const invalidYamlFile = Fixtures.get('invalid.yaml');
 
 describe('modules/manager/kubernetes/extract', () => {
   describe('extractPackageFile()', () => {
@@ -80,7 +79,11 @@ describe('modules/manager/kubernetes/extract', () => {
     });
 
     it('handles invalid YAML files', () => {
-      expect(extractPackageFile(invalidYamlFile)).toBeNull();
+      const invalidYaml = `apiVersion: v1
+kind: ConfigMap
+<
+`;
+      expect(extractPackageFile(invalidYaml)).toBeNull();
     });
   });
 });
