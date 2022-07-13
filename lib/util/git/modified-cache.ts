@@ -8,11 +8,8 @@ export function getCachedModifiedResult(
 ): boolean | null {
   const { branches } = getCache();
   const branch = branches?.find((branch) => branch.branchName === branchName);
-  if (is.undefined(branch)) {
-    return null;
-  }
 
-  if (branch.sha !== branchSha) {
+  if (branch?.sha !== branchSha) {
     return null;
   }
 
