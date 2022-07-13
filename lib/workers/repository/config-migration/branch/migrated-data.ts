@@ -16,30 +16,33 @@ interface Indent {
   indent: string;
   type?: string;
 }
+
+const prettierConfigFilenames = new Set([
+  '.prettierrc',
+  '.prettierrc.json',
+  '.prettierrc.yml',
+  '.prettierrc.yaml',
+  '.prettierrc.json5',
+  '.prettierrc.js',
+  '.prettierrc.cjs',
+  'prettier.config.js',
+  'prettier.config.cjs',
+  '.prettierrc.toml',
+]);
+
 export async function applyPrettierFormatting(
   content: string,
   parser: string,
   indent: Indent
 ): Promise<string> {
-  const prettierConfigFilenames = [
-    '.prettierrc',
-    '.prettierrc.json',
-    '.prettierrc.yml',
-    '.prettierrc.yaml',
-    '.prettierrc.json5',
-    '.prettierrc.js',
-    '.prettierrc.cjs',
-    'prettier.config.js',
-    'prettier.config.cjs',
-    '.prettierrc.toml',
-  ];
-  let prettierExists = (await getFileList()).some((file) =>
-    prettierConfigFilenames.includes(file)
+  const fileList = await getFileList();
+  let prettierExists = fileList.some((file) =>
+    prettierConfigFilenames.has(file)
   );
   if (!prettierExists) {
     try {
       const packageJsonContent = await readLocalFile('package.json', 'utf8');
-      prettierExists ||=
+      prettierExists =
         packageJsonContent && JSON.parse(packageJsonContent).prettier;
     } catch {
       logger.warn('Invalid JSON found in package.json');
@@ -50,8 +53,8 @@ export async function applyPrettierFormatting(
     return content;
   }
   const options = {
-    parser: parser,
-    tabWidth: indent.amount,
+    parser,
+    tabWidth: indent.amount === 0 ? 2 : indent.amount,
     useTabs: indent.type === 'tab',
   };
 
@@ -101,20 +104,13 @@ export class MigratedDataFactory {
       // indent defaults to 2 spaces
       // TODO #7154
       const indent = detectIndent(raw!);
+      const indentSpace = indent.indent ?? '  ';
       let content: string;
 
       if (filename.endsWith('.json5')) {
-        content = JSON5.stringify(
-          migratedConfig,
-          undefined,
-          indent.indent ?? '  '
-        );
+        content = JSON5.stringify(migratedConfig, undefined, indentSpace);
       } else {
-        content = JSON.stringify(
-          migratedConfig,
-          undefined,
-          indent.indent ?? '  '
-        );
+        content = JSON.stringify(migratedConfig, undefined, indentSpace);
       }
 
       content = await applyPrettierFormatting(
