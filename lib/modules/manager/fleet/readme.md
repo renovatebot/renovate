@@ -5,8 +5,6 @@ To enable GitRepo updates you have to extend your [`fileMatch`](https://docs.ren
 
 ```json
 {
-  "fleet": {
-    "fileMatch": ["myGitRepoManifests\\.yaml"]
-  }
+  "fileMatch": ["'(^|/)fleet.ya?ml", "myGitRepoManifests\\.yaml"]
 }
 ```
