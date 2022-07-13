@@ -32,7 +32,7 @@ export async function autodiscoverRepositories(
   }
 
   if (config.autodiscoverFilter) {
-    discovered = applyFilters(allRepos, config.autodiscoverFilter);
+    discovered = applyFilters(discovered, config.autodiscoverFilter);
 
     if (!discovered.length) {
       // Soft fail (no error thrown) if no accessible repositories match the filter
