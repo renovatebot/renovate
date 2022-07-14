@@ -50,7 +50,6 @@ function mockEcrAuthReject(msg: string) {
 
 describe('modules/datasource/docker/index', () => {
   beforeEach(() => {
-    jest.setTimeout(60000);
     hostRules.find.mockReturnValue({
       username: 'some-username',
       password: 'some-password',
