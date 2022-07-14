@@ -18,7 +18,9 @@ const globalConfigMock = mocked(GlobalConfig);
 describe('modules/manager/hermit/extract', () => {
   beforeEach(() => {
     findHermitCwdMock.mockClear();
-    findHermitCwdMock.mockImplementation((p) => upath.dirname(p));
+    findHermitCwdMock.mockImplementation((p) =>
+      Promise.resolve(upath.dirname(p))
+    );
   });
 
   describe('extractPackageFile', () => {

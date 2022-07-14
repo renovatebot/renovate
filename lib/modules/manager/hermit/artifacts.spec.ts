@@ -1,5 +1,5 @@
 import type { StatusResult } from 'simple-git/promise';
-import { mockedFunction } from '../../../../test/util';
+import { mockedFunction, partial } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import { exec } from '../../../util/exec';
 import {
@@ -40,34 +40,38 @@ describe('modules/manager/hermit/artifacts', () => {
         stdout: '',
         stderr: '',
       });
-      getRepoStatusMock.mockResolvedValue({
-        not_added: ['bin/go-1.17.1'],
-        deleted: ['bin/go-1.17'],
-        modified: ['bin/go', 'bin/jq'],
-        created: ['bin/jq-extra'],
-        renamed: [
-          {
-            from: 'bin/jq-1.5',
-            to: 'bin/jq-1.6',
-          },
-        ],
-      } as StatusResult);
+      getRepoStatusMock.mockResolvedValue(
+        partial<StatusResult>({
+          not_added: ['bin/go-1.17.1'],
+          deleted: ['bin/go-1.17'],
+          modified: ['bin/go', 'bin/jq'],
+          created: ['bin/jq-extra'],
+          renamed: [
+            {
+              from: 'bin/jq-1.5',
+              to: 'bin/jq-1.6',
+            },
+          ],
+        })
+      );
 
-      const res = await updateArtifacts({
-        updatedDeps: [
-          {
-            depName: 'go',
-            currentVersion: '1.17',
-            newValue: '1.17.1',
-          },
-          {
-            depName: 'jq',
-            currentVersion: '1.5',
-            newValue: '1.6',
-          },
-        ],
-        packageFileName: 'go/bin/hermit',
-      } as UpdateArtifact);
+      const res = await updateArtifacts(
+        partial<UpdateArtifact>({
+          updatedDeps: [
+            {
+              depName: 'go',
+              currentVersion: '1.17',
+              newValue: '1.17.1',
+            },
+            {
+              depName: 'jq',
+              currentVersion: '1.5',
+              newValue: '1.6',
+            },
+          ],
+          packageFileName: 'go/bin/hermit',
+        })
+      );
 
       expect(execMock.mock.calls[0][0]).toBe(`./hermit install go-1.17.1`);
       expect(execMock.mock.calls[0][1]).toStrictEqual({
@@ -152,21 +156,23 @@ describe('modules/manager/hermit/artifacts', () => {
 
     it('should return error on installation error', async () => {
       execMock.mockRejectedValue({ stderr: 'error executing hermit install' });
-      const res = await updateArtifacts({
-        updatedDeps: [
-          {
-            depName: 'go',
-            currentVersion: '1.17',
-            newValue: '1.17.1',
-          },
-          {
-            depName: 'jq',
-            currentVersion: '1.5',
-            newValue: '1.6',
-          },
-        ],
-        packageFileName: 'go/bin/hermit',
-      } as UpdateArtifact);
+      const res = await updateArtifacts(
+        partial<UpdateArtifact>({
+          updatedDeps: [
+            {
+              depName: 'go',
+              currentVersion: '1.17',
+              newValue: '1.17.1',
+            },
+            {
+              depName: 'jq',
+              currentVersion: '1.5',
+              newValue: '1.6',
+            },
+          ],
+          packageFileName: 'go/bin/hermit',
+        })
+      );
 
       expect(res).toStrictEqual([
         {
@@ -199,39 +205,45 @@ describe('modules/manager/hermit/artifacts', () => {
           },
         },
       ];
-      let res = await updateArtifacts({
-        updatedDeps: [
-          {
-            currentVersion: '1.17',
-            newValue: '1.17.1',
-          },
-        ],
-        packageFileName: 'go/bin/hermit',
-      } as UpdateArtifact);
+      let res = await updateArtifacts(
+        partial<UpdateArtifact>({
+          updatedDeps: [
+            {
+              currentVersion: '1.17',
+              newValue: '1.17.1',
+            },
+          ],
+          packageFileName: 'go/bin/hermit',
+        })
+      );
 
       expect(res).toStrictEqual(invalidPackageErrorResp);
 
-      res = await updateArtifacts({
-        updatedDeps: [
-          {
-            depName: 'go',
-            newValue: '1.17.1',
-          },
-        ],
-        packageFileName: 'go/bin/hermit',
-      } as UpdateArtifact);
+      res = await updateArtifacts(
+        partial<UpdateArtifact>({
+          updatedDeps: [
+            {
+              depName: 'go',
+              newValue: '1.17.1',
+            },
+          ],
+          packageFileName: 'go/bin/hermit',
+        })
+      );
 
       expect(res).toStrictEqual(invalidPackageErrorResp);
 
-      res = await updateArtifacts({
-        updatedDeps: [
-          {
-            depName: 'go',
-            currentVersion: '1.17',
-          },
-        ],
-        packageFileName: 'go/bin/hermit',
-      } as UpdateArtifact);
+      res = await updateArtifacts(
+        partial<UpdateArtifact>({
+          updatedDeps: [
+            {
+              depName: 'go',
+              currentVersion: '1.17',
+            },
+          ],
+          packageFileName: 'go/bin/hermit',
+        })
+      );
 
       expect(res).toStrictEqual(invalidPackageErrorResp);
     });

@@ -1,7 +1,7 @@
 import _findUp from 'find-up';
 import fs from 'fs-extra';
 import tmp, { DirectoryResult, withDir } from 'tmp-promise';
-import { join, * as upath } from 'upath';
+import { join, resolve } from 'upath';
 import { envMock } from '../../../test/exec-util';
 import { env, mockedFunction } from '../../../test/util';
 import { GlobalConfig } from '../../config/global';
@@ -228,8 +228,8 @@ describe('util/fs/index', () => {
           });
           await writeLocalFile('test/test.txt', '');
           await fs.symlink(
-            upath.resolve(localDir.path, 'test/test.txt'),
-            upath.resolve(localDir.path, 'test/test')
+            resolve(localDir.path, 'test/test.txt'),
+            resolve(localDir.path, 'test/test')
           );
 
           const result = await readLocalSymlink('test/test');
@@ -329,15 +329,18 @@ describe('util/fs/index', () => {
           const result = readLocalDirectorySync('test');
           expect(result).not.toBeNull();
           expect(result).toBeArrayOfSize(2);
-          expect(result).toMatchSnapshot();
+          expect(result).toEqual(['Cargo.lock', 'Cargo.toml']);
 
           await writeLocalFile('Cargo.lock', '');
           await writeLocalFile('/test/subdir/Cargo.lock', '');
 
           const resultWithAdditionalFiles = await readLocalDirectory('test');
           expect(resultWithAdditionalFiles).not.toBeNull();
-          expect(resultWithAdditionalFiles).toBeArrayOfSize(3);
-          expect(resultWithAdditionalFiles).toMatchSnapshot();
+          expect(resultWithAdditionalFiles).toEqual([
+            'Cargo.lock',
+            'Cargo.toml',
+            'subdir',
+          ]);
         },
         {
           unsafeCleanup: true,
@@ -367,7 +370,6 @@ describe('util/fs/index', () => {
       expect(result).toBeArrayOfSize(0);
     });
   });
-
 
   describe('createCacheWriteStream', () => {
     it('creates write stream', async () => {
@@ -429,8 +431,8 @@ describe('util/fs/index', () => {
           });
           await writeLocalFile('test/test.txt', '');
           await fs.symlink(
-            upath.resolve(localDir.path, 'test/test.txt'),
-            upath.resolve(localDir.path, 'test/test')
+            resolve(localDir.path, 'test/test.txt'),
+            resolve(localDir.path, 'test/test')
           );
 
           const result = await localPathIsSymbolicLink('test/test');

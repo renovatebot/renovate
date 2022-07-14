@@ -26,7 +26,7 @@ export async function updateArtifacts({
       await updateHermitPackage({ ...dep, packageFileName });
     }
   } catch (err) {
-    const execErr: UpdateHermitError<any> = err;
+    const execErr: UpdateHermitError<string> = err;
     logger.warn(
       { stdout: execErr.stdout, stderr: execErr.stderr },
       `error updating hermit packages.`
@@ -209,7 +209,9 @@ async function updateHermitPackage(
 
     throw {
       stderr: 'invalid package to update',
-    };
+      from: pkg.currentVersion,
+      to: pkg.newValue,
+    } as UpdateHermitError<string>;
   }
   const depName = pkg.depName;
   const currentVersion = pkg.currentVersion;
@@ -243,12 +245,10 @@ async function updateHermitPackage(
       { fromPackage, toPackage, err: e },
       `error updating hermit package`
     );
-    return Promise.reject({
+    throw {
       ...e,
       from,
       to,
-    });
+    } as UpdateHermitError<string>;
   }
-
-  return Promise.resolve();
 }
