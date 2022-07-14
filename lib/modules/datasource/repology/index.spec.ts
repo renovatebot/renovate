@@ -48,12 +48,12 @@ const mockResolverCall = (
   }
 };
 
-const fixtureNginx = Fixtures?.get(`nginx.json`);
-const fixtureGccDefaults = Fixtures?.get(`gcc-defaults.json`);
-const fixtureGcc = Fixtures?.get(`gcc.json`);
-const fixturePulseaudio = Fixtures?.get(`pulseaudio.json`);
-const fixtureJdk = Fixtures?.get(`openjdk.json`);
-const fixturePython = Fixtures?.get(`python.json`);
+const fixtureNginx = Fixtures.get(`nginx.json`);
+const fixtureGccDefaults = Fixtures.get(`gcc-defaults.json`);
+const fixtureGcc = Fixtures.get(`gcc.json`);
+const fixturePulseaudio = Fixtures.get(`pulseaudio.json`);
+const fixtureJdk = Fixtures.get(`openjdk.json`);
+const fixturePython = Fixtures.get(`python.json`);
 
 describe('modules/datasource/repology/index', () => {
   describe('getReleases', () => {
