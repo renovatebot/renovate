@@ -1,4 +1,5 @@
 import { URL } from 'url';
+import is from '@sindresorhus/is';
 import type { RegexManagerTemplates } from '../../../config/types';
 import { logger } from '../../../logger';
 import * as template from '../../../util/template';
@@ -103,5 +104,8 @@ export function isValidDependency({
   currentValue,
 }: PackageDependency): boolean {
   // check if all the fields are set
-  return Boolean(depName) && Boolean(currentValue);
+  return (
+    is.nonEmptyStringAndNotWhitespace(depName) &&
+    is.nonEmptyStringAndNotWhitespace(currentValue)
+  );
 }
