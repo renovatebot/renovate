@@ -1,6 +1,6 @@
 import upath from 'upath';
 import { GlobalConfig } from '../../config/global';
-import { FILE_ACCESS_VIOLATION_ERROR } from '../../constants/error-messages';
+// import { FILE_ACCESS_VIOLATION_ERROR } from '../../constants/error-messages';
 import { logger } from '../../logger';
 
 function assertBaseDir(path: string, baseDir: string): void {
@@ -9,7 +9,7 @@ function assertBaseDir(path: string, baseDir: string): void {
       { path, baseDir },
       'Preventing access to file outside the base directory'
     );
-    throw new Error(FILE_ACCESS_VIOLATION_ERROR);
+    throw { path, baseDir };
   }
 }
 
