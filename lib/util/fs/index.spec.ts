@@ -2,7 +2,8 @@ import _findUp from 'find-up';
 import fs from 'fs-extra';
 import tmp, { DirectoryResult } from 'tmp-promise';
 import { join } from 'upath';
-import { mockedFunction } from '../../../test/util';
+import { envMock } from '../../../test/exec-util';
+import { env, mockedFunction } from '../../../test/util';
 import { GlobalConfig } from '../../config/global';
 import {
   chmodLocalFile,
@@ -36,32 +37,17 @@ jest.mock('find-up');
 const findUp = mockedFunction(_findUp);
 
 describe('util/fs/index', () => {
-  let localDirResult: DirectoryResult;
-  let localDir: string;
-
-  let cacheDirResult: DirectoryResult;
-  let cacheDir: string;
-
-  let tmpDirResult: DirectoryResult;
+  let dirResult: DirectoryResult;
   let tmpDir: string;
 
   beforeEach(async () => {
-    localDirResult = await tmp.dir({ unsafeCleanup: true });
-    localDir = localDirResult.path;
-
-    cacheDirResult = await tmp.dir({ unsafeCleanup: true });
-    cacheDir = cacheDirResult.path;
-
-    tmpDirResult = await tmp.dir({ unsafeCleanup: true });
-    tmpDir = tmpDirResult.path;
-
-    GlobalConfig.set({ localDir, cacheDir });
+    GlobalConfig.set({ localDir: '' });
+    dirResult = await tmp.dir({ unsafeCleanup: true });
+    tmpDir = dirResult.path;
   });
 
   afterEach(async () => {
-    await localDirResult?.cleanup();
-    await cacheDirResult?.cleanup();
-    await tmpDirResult?.cleanup();
+    await dirResult.cleanup();
   });
 
   describe('getParentDir', () => {
@@ -101,24 +87,23 @@ describe('util/fs/index', () => {
 
   describe('readLocalFile', () => {
     it('reads buffer', async () => {
-      await fs.outputFile(`${localDir}/file.txt`, 'foobar');
-      const res = await readLocalFile('file.txt');
-      expect(res).toBeInstanceOf(Buffer);
+      expect(await readLocalFile(__filename)).toBeInstanceOf(Buffer);
     });
 
     it('reads string', async () => {
-      await fs.outputFile(`${localDir}/file.txt`, 'foobar');
-      const res = await readLocalFile('file.txt', 'utf8');
-      expect(res).toBe('foobar');
+      expect(typeof (await readLocalFile(__filename, 'utf8'))).toBe('string');
     });
 
-    it('returns null if file is not found', async () => {
-      expect(await readLocalFile('foobar')).toBeNull();
+    it('does not throw', async () => {
+      // Does not work on FreeBSD: https://nodejs.org/docs/latest-v10.x/api/fs.html#fs_fs_readfile_path_options_callback
+      expect(await readLocalFile(__dirname)).toBeNull();
     });
   });
 
   describe('writeLocalFile', () => {
     it('outputs file', async () => {
+      const localDir = tmpDir;
+      GlobalConfig.set({ localDir });
       await writeLocalFile('foo/bar/file.txt', 'foobar');
 
       const path = `${localDir}/foo/bar/file.txt`;
@@ -129,6 +114,8 @@ describe('util/fs/index', () => {
 
   describe('deleteLocalFile', () => {
     it('deletes file', async () => {
+      const localDir = tmpDir;
+      GlobalConfig.set({ localDir });
       const filePath = `${localDir}/foo/bar/file.txt`;
       await fs.outputFile(filePath, 'foobar');
 
@@ -140,6 +127,8 @@ describe('util/fs/index', () => {
 
   describe('renameLocalFile', () => {
     it('renames file', async () => {
+      const localDir = tmpDir;
+      GlobalConfig.set({ localDir });
       const sourcePath = `${localDir}/foo.txt`;
       const targetPath = `${localDir}/bar.txt`;
       await fs.outputFile(sourcePath, 'foobar');
@@ -154,6 +143,8 @@ describe('util/fs/index', () => {
 
   describe('ensureDir', () => {
     it('creates directory', async () => {
+      const localDir = tmpDir;
+      GlobalConfig.set({ localDir });
       const path = `${localDir}/foo/bar`;
 
       await ensureDir(path);
@@ -164,6 +155,8 @@ describe('util/fs/index', () => {
 
   describe('ensureLocalDir', () => {
     it('creates local directory', async () => {
+      const localDir = tmpDir;
+      GlobalConfig.set({ localDir });
       const path = `${localDir}/foo/bar`;
 
       await ensureLocalDir('foo/bar');
@@ -173,11 +166,30 @@ describe('util/fs/index', () => {
   });
 
   describe('ensureCacheDir', () => {
+    function setupMock(root: string): {
+      dirFromEnv: string;
+      dirFromConfig: string;
+    } {
+      const dirFromEnv = join(root, join('/bar/others/bundler'));
+      const dirFromConfig = join(root, join('/bar'));
+
+      jest.resetAllMocks();
+      env.getChildProcessEnv.mockReturnValueOnce({
+        ...envMock.basic,
+      });
+
+      GlobalConfig.set({
+        cacheDir: join(dirFromConfig),
+      });
+
+      return { dirFromEnv, dirFromConfig };
+    }
+
     it('prefers environment variables over global config', async () => {
+      const { dirFromEnv } = setupMock(tmpDir);
       const res = await ensureCacheDir('bundler');
-      const path = join(cacheDir, 'others/bundler');
-      expect(res).toEqual(path);
-      expect(await fs.pathExists(path)).toBeTrue();
+      expect(res).toEqual(dirFromEnv);
+      expect(await fs.pathExists(dirFromEnv)).toBeTrue();
     });
   });
 
@@ -190,22 +202,25 @@ describe('util/fs/index', () => {
 
   describe('localPathExists', () => {
     it('returns true for file', async () => {
-      const path = `${localDir}/file.txt`;
-      await fs.outputFile(path, 'foobar');
-      expect(await localPathExists('file.txt')).toBeTrue();
+      expect(await localPathExists(__filename)).toBeTrue();
     });
 
     it('returns true for directory', async () => {
-      expect(await localPathExists('.')).toBeTrue();
+      expect(await localPathExists(getParentDir(__filename))).toBeTrue();
     });
 
     it('returns false', async () => {
-      expect(await localPathExists('file.txt')).toBe(false);
+      expect(await localPathExists(__filename.replace('.ts', '.txt'))).toBe(
+        false
+      );
     });
   });
 
   describe('findLocalSiblingOrParent', () => {
     it('returns path for file', async () => {
+      const localDir = tmpDir;
+      GlobalConfig.set({ localDir });
+
       await writeLocalFile('crates/one/Cargo.toml', 'foo');
       await writeLocalFile('Cargo.lock', 'bar');
 
@@ -237,6 +252,8 @@ describe('util/fs/index', () => {
 
   describe('readLocalDirectory', () => {
     it('returns dir content', async () => {
+      const localDir = tmpDir;
+      GlobalConfig.set({ localDir });
       await writeLocalFile('test/Cargo.toml', '');
       await writeLocalFile('test/Cargo.lock', '');
 
@@ -255,6 +272,8 @@ describe('util/fs/index', () => {
     });
 
     it('return empty array for non existing directory', async () => {
+      const localDir = tmpDir;
+      GlobalConfig.set({ localDir });
       await expect(readLocalDirectory('somedir')).rejects.toThrow();
     });
 
@@ -268,10 +287,10 @@ describe('util/fs/index', () => {
 
   describe('createCacheWriteStream', () => {
     it('creates write stream', async () => {
-      const path = `${cacheDir}/file.txt`;
+      const path = `${tmpDir}/file.txt`;
       await fs.outputFile(path, 'foo');
 
-      const stream = createCacheWriteStream('file.txt');
+      const stream = createCacheWriteStream(path);
       expect(stream).toBeInstanceOf(fs.WriteStream);
 
       const write = new Promise((resolve, reject) => {
@@ -285,19 +304,17 @@ describe('util/fs/index', () => {
 
   describe('localPathIsFile', () => {
     it('returns true for file', async () => {
-      const path = `${localDir}/file.txt`;
-      await fs.outputFile(path, 'foo');
-      expect(await localPathIsFile('file.txt')).toBeTrue();
+      expect(await localPathIsFile(__filename)).toBeTrue();
     });
 
     it('returns false for directory', async () => {
-      const path = `${localDir}/foobar`;
-      await fs.mkdir(path);
-      expect(await localPathIsFile(path)).toBeFalse();
+      expect(await localPathIsFile(__dirname)).toBeFalse();
     });
 
     it('returns false for non-existing path', async () => {
-      expect(await localPathIsFile(`${localDir}/foobar`)).toBeFalse();
+      expect(
+        await localPathIsFile(__filename.replace('.ts', '.txt'))
+      ).toBeFalse();
     });
   });
 
@@ -327,6 +344,8 @@ describe('util/fs/index', () => {
 
   describe('chmodLocalFile', () => {
     it('changes file mode', async () => {
+      const localDir = tmpDir;
+      GlobalConfig.set({ localDir });
       await writeLocalFile('foo', 'bar');
       let stat = await statLocalFile('foo');
       const oldMode = stat!.mode & 0o777;
@@ -344,6 +363,9 @@ describe('util/fs/index', () => {
 
   describe('statLocalFile', () => {
     it('returns stat object', async () => {
+      const localDir = tmpDir;
+      GlobalConfig.set({ localDir });
+
       expect(await statLocalFile('foo')).toBeNull();
 
       await writeLocalFile('foo', 'bar');
@@ -355,15 +377,19 @@ describe('util/fs/index', () => {
 
   describe('listCacheDir', () => {
     it('lists directory', async () => {
+      const cacheDir = tmpDir;
+      GlobalConfig.set({ cacheDir });
       await fs.outputFile(`${cacheDir}/foo/bar.txt`, 'foobar');
-      expect(await listCacheDir('foo')).toEqual(['bar.txt']);
+      expect(await listCacheDir(`${cacheDir}/foo`)).toEqual(['bar.txt']);
     });
   });
 
   describe('rmCache', () => {
     it('removes cache dir', async () => {
+      const cacheDir = tmpDir;
+      GlobalConfig.set({ cacheDir });
       await fs.outputFile(`${cacheDir}/foo/bar/file.txt`, 'foobar');
-      await rmCache(`foo/bar`);
+      await rmCache(`${cacheDir}/foo/bar`);
       expect(await fs.pathExists(`${cacheDir}/foo/bar/file.txt`)).toBeFalse();
       expect(await fs.pathExists(`${cacheDir}/foo/bar`)).toBeFalse();
     });
@@ -371,9 +397,13 @@ describe('util/fs/index', () => {
 
   describe('readCacheFile', () => {
     it('reads file', async () => {
+      const cacheDir = tmpDir;
+      GlobalConfig.set({ cacheDir });
       await fs.outputFile(`${cacheDir}/foo/bar/file.txt`, 'foobar');
-      expect(await readCacheFile(`foo/bar/file.txt`, 'utf8')).toBe('foobar');
-      expect(await readCacheFile(`foo/bar/file.txt`)).toEqual(
+      expect(await readCacheFile(`${cacheDir}/foo/bar/file.txt`, 'utf8')).toBe(
+        'foobar'
+      );
+      expect(await readCacheFile(`${cacheDir}/foo/bar/file.txt`)).toEqual(
         Buffer.from('foobar')
       );
     });
@@ -381,8 +411,9 @@ describe('util/fs/index', () => {
 
   describe('outputCacheFile', () => {
     it('outputs file', async () => {
-      await outputCacheFile('file.txt', 'foobar');
-      const res = await fs.readFile(`${cacheDir}/file.txt`, 'utf8');
+      const file = join(tmpDir, 'some-file');
+      await outputCacheFile(file, 'foobar');
+      const res = await fs.readFile(file, 'utf8');
       expect(res).toBe('foobar');
     });
   });

@@ -300,8 +300,9 @@ describe('modules/manager/npm/post-update/yarn', () => {
       // subdirectory isolated workspaces to work with Yarn 2+.
       expect(res.lockFile).toBe('');
       expect(fs.outputFile).toHaveBeenCalledTimes(1);
-      expect(mockedFunction(fs.outputFile).mock.calls[0][0]).toEndWith(
-        'some-dir/sub_workspace/yarn.lock'
+      expect(fs.outputFile).toHaveBeenCalledWith(
+        'some-dir/sub_workspace/yarn.lock',
+        ''
       );
       expect(fixSnapshots(execSnapshots)).toMatchSnapshot();
     }
