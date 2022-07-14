@@ -16,8 +16,8 @@ describe('util/fs/util', () => {
     ${''}     | ${`${localDir}`}
     ${'baz'}  | ${`${localDir}/baz`}
     ${'/baz'} | ${`${localDir}/baz`}
-  `(`ensureLocalPath('$path', '$fullPath')`, ({ path, fullPath }) => {
-    expect(ensureLocalPath(path)).toBe(fullPath);
+  `(`ensureLocalPath('$path') === '$fullPath'`, ({ path, fullPath }) => {
+    expect(ensureLocalPath(path)).toBe(resolve(fullPath));
   });
 
   test.each`
@@ -26,7 +26,7 @@ describe('util/fs/util', () => {
     ${'../etc/passwd'}
     ${'/foo/../bar'}
     ${'/foo/../../etc/passwd'}
-  `(`ensureLocalPath('$path', '${localDir}') - throws`, ({ path }) => {
+  `(`ensureLocalPath('$path') - throws`, ({ path }) => {
     expect(() => ensureLocalPath(path)).toThrow(FILE_ACCESS_VIOLATION_ERROR);
   });
 
@@ -35,8 +35,8 @@ describe('util/fs/util', () => {
     ${''}     | ${`${cacheDir}`}
     ${'baz'}  | ${`${cacheDir}/baz`}
     ${'/baz'} | ${`${cacheDir}/baz`}
-  `(`ensureCachePath('$path', '$fullPath')`, ({ path, fullPath }) => {
-    expect(ensureCachePath(path)).toBe(fullPath);
+  `(`ensureCachePath('$path') === '$fullPath'`, ({ path, fullPath }) => {
+    expect(ensureCachePath(path)).toBe(resolve(fullPath));
   });
 
   test.each`
@@ -45,7 +45,7 @@ describe('util/fs/util', () => {
     ${'../etc/passwd'}
     ${'/bar/../foo'}
     ${'/bar/../../etc/passwd'}
-  `(`ensureCachePath('$path', '${cacheDir}') - throws`, ({ path }) => {
+  `(`ensureCachePath('$path') - throws`, ({ path }) => {
     expect(() => ensureCachePath(path)).toThrow(FILE_ACCESS_VIOLATION_ERROR);
   });
 });
