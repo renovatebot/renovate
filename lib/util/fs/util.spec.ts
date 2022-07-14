@@ -1,10 +1,11 @@
+import { resolve } from 'upath';
 import { GlobalConfig } from '../../config/global';
 import { FILE_ACCESS_VIOLATION_ERROR } from '../../constants/error-messages';
 import { ensureCachePath, ensureLocalPath } from './util';
 
 describe('util/fs/util', () => {
-  const localDir = '/foo';
-  const cacheDir = '/bar';
+  const localDir = resolve('/foo');
+  const cacheDir = resolve('/bar');
 
   beforeAll(() => {
     GlobalConfig.set({ localDir, cacheDir });
