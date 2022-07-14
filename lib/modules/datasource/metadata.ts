@@ -4,7 +4,7 @@ import parse from 'github-url-from-git';
 import { DateTime } from 'luxon';
 import * as hostRules from '../../util/host-rules';
 import { regEx } from '../../util/regex';
-import { validateUrl } from '../../util/url';
+import { urlHasSubPath, validateUrl } from '../../util/url';
 import { manualChangelogUrls, manualSourceUrls } from './metadata-manual';
 import type { ReleaseResult } from './types';
 
@@ -118,7 +118,10 @@ export function addMetaData(
   if (dep.homepage?.includes('github.com')) { // lgtm [js/incomplete-url-substring-sanitization]
     if (!dep.sourceUrl) {
       dep.sourceUrl = dep.homepage;
-      delete dep.homepage;
+      if(!urlHasSubPath(dep.homepage)){
+        // remove homepage if its not a link to a dependency (its a sourceUrl)
+        delete dep.homepage;
+      }
     }
   }
   const extraBaseUrls = [];
@@ -145,7 +148,12 @@ export function addMetaData(
       delete dep.sourceUrl;
     }
 
-    if (dep.sourceUrl === dep.homepage && !dep.homepage?.endsWith('/')) {
+    if (
+      (dep.homepage?.includes('github.com') &&
+        dep.sourceUrl === massageGithubUrl(dep.homepage)) ||
+      dep.sourceUrl === dep.homepage
+    ) {
+      // delete homepage if its the same as the sourceUrl after massaging
       delete dep.homepage;
     }
   }

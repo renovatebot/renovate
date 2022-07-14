@@ -106,3 +106,9 @@ export function parseLinkHeader(
   }
   return _parseLinkHeader(linkHeader);
 }
+
+export function urlHasSubPath(url: string): boolean {
+  const parsedUrl = parseUrl(url);
+  // no pathname is a single slash or empty string
+  return parsedUrl?.pathname !== '/' || !parsedUrl?.pathname;
+}

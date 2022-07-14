@@ -396,7 +396,6 @@ Object {
 
 exports[`modules/datasource/nuget/index getReleases processes real data (v3) feed is not a nuget.org 1`] = `
 Object {
-  "homepage": "https://nunit.org/",
   "registryUrl": "https://myprivatefeed/index.json",
   "releases": Array [
     Object {

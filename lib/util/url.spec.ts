@@ -8,6 +8,7 @@ import {
   parseUrl,
   resolveBaseUrl,
   trimTrailingSlash,
+  urlHasSubPath,
   validateUrl,
 } from './url';
 
@@ -166,5 +167,19 @@ describe('util/url', () => {
         url: 'https://api.github.com/user/9287/repos?page=5&per_page=100',
       },
     });
+  });
+
+  it('checks if url has a subpath', () => {
+    const link1 = 'https://nlog-project.org/';
+    const link2 = 'https://nlog-project.org/some/path';
+    const link3 = 'https://nlog-project.org';
+    const link4 = 'https://nlog-project.org?q=val';
+    const link5 = 'https://nlog-project.org/some/path?q=val';
+
+    expect(urlHasSubPath(link1)).toBeFalsy();
+    expect(urlHasSubPath(link2)).toBeTruthy();
+    expect(urlHasSubPath(link3)).toBeFalsy();
+    expect(urlHasSubPath(link4)).toBeFalsy();
+    expect(urlHasSubPath(link5)).toBeTruthy();
   });
 });
