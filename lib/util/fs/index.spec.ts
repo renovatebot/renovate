@@ -1,7 +1,7 @@
 import _findUp from 'find-up';
 import fs from 'fs-extra';
 import tmp, { DirectoryResult } from 'tmp-promise';
-import { join, resolve } from 'upath';
+import { join } from 'upath';
 import { mockedFunction } from '../../../test/util';
 import { GlobalConfig } from '../../config/global';
 import {
