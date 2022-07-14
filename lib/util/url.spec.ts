@@ -4,6 +4,7 @@ import {
   ensureTrailingSlash,
   getQueryString,
   hasRepoSubPath,
+  isGitHubUrl,
   joinUrlParts,
   parseLinkHeader,
   parseUrl,
@@ -181,5 +182,22 @@ describe('util/url', () => {
     expect(hasRepoSubPath(link3)).toBeFalsy();
     expect(hasRepoSubPath(link4)).toBeFalsy();
     expect(hasRepoSubPath(link5)).toBeTruthy();
+    expect(hasRepoSubPath(undefined)).toBeFalsy();
+    expect(hasRepoSubPath('')).toBeFalsy();
+  });
+
+  it('checks if its a github url', () => {
+    const link1 = 'https://github.com/';
+    const link2 = 'https://github.com';
+    const link3 = 'https://nlog-project.org';
+    const link4 = 'http://www.github.com';
+    const link5 = 'https://github.com/some/path?q=val';
+    expect(isGitHubUrl(link1)).toBeTruthy();
+    expect(isGitHubUrl(link2)).toBeTruthy();
+    expect(isGitHubUrl(link3)).toBeFalsy();
+    expect(isGitHubUrl(link4)).toBeTruthy();
+    expect(isGitHubUrl(link5)).toBeTruthy();
+    expect(isGitHubUrl(undefined)).toBeFalsy();
+    expect(isGitHubUrl('')).toBeFalsy();
   });
 });

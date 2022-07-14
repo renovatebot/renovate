@@ -107,9 +107,20 @@ export function parseLinkHeader(
   return _parseLinkHeader(linkHeader);
 }
 
-export function hasRepoSubPath(url: string): boolean {
+export function hasRepoSubPath(url: string | undefined): boolean {
+  if (url === undefined) {
+    return false;
+  }
   const parsedUrl = parseUrl(url);
   // no repo subpath is pathname with a single slash or empty string
   const idxOfLastSlash = parsedUrl?.pathname?.lastIndexOf('/') ?? 0;
-  return idxOfLastSlash > 0 || !parsedUrl?.pathname;
+  return idxOfLastSlash > 0 || parsedUrl?.pathname.trim() === '';
+}
+
+export function isGitHubUrl(url: string | undefined): boolean {
+  if (url === undefined) {
+    return false;
+  }
+  const githubUrlRe = regEx('^https?://(?:www.)?github.com');
+  return githubUrlRe.test(url);
 }

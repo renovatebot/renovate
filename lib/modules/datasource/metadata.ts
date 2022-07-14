@@ -4,7 +4,7 @@ import parse from 'github-url-from-git';
 import { DateTime } from 'luxon';
 import * as hostRules from '../../util/host-rules';
 import { regEx } from '../../util/regex';
-import { hasRepoSubPath, validateUrl } from '../../util/url';
+import { hasRepoSubPath, isGitHubUrl, validateUrl } from '../../util/url';
 import { manualChangelogUrls, manualSourceUrls } from './metadata-manual';
 import type { ReleaseResult } from './types';
 
@@ -116,12 +116,12 @@ export function addMetaData(
   }
   let isGithubHomePage = false;
   // prettier-ignore
-  if (dep.homepage?.includes('github.com')) { // lgtm [js/incomplete-url-substring-sanitization]
+  if (isGitHubUrl(dep.homepage)) { // lgtm [js/incomplete-url-substring-sanitization]
     isGithubHomePage = true;
     if (!dep.sourceUrl) {
       dep.sourceUrl = dep.homepage;
       if(!hasRepoSubPath(dep.homepage)){
-        // remove homepage if its not a link to a path in the github repo.
+        // remove homepage if its not a link to a path in a github repo.
         delete dep.homepage;
       }
     }
