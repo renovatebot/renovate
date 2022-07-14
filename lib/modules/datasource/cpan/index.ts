@@ -118,7 +118,7 @@ export class CpanDatasource extends Datasource {
       packages[pkg] = {
         release: {
           version: latestVersion,
-          isStable: !latestVersion.includes('_'),
+          isStable: perlVersioning.api.isStable(latestVersion),
         },
         distribution,
       };
