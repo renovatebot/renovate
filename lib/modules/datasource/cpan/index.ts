@@ -4,6 +4,7 @@ import { cache } from '../../../util/cache/package/decorator';
 import { getElapsedMinutes } from '../../../util/date';
 import { newlineRegex, regEx } from '../../../util/regex';
 import { copystr } from '../../../util/string';
+import { joinUrlParts } from '../../../util/url';
 import * as perlVersioning from '../../versioning/perl';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
@@ -44,8 +45,14 @@ export class CpanDatasource extends Datasource {
   })
   override async getReleases({
     packageName,
+    registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    await this.syncVersions();
+    // istanbul ignore if
+    if (!registryUrl) {
+      return null;
+    }
+
+    await this.syncVersions(registryUrl);
     const pkg = packages[packageName];
     if (!pkg) {
       return null;
@@ -58,8 +65,8 @@ export class CpanDatasource extends Datasource {
     return dep;
   }
 
-  async updateCpanVersions(): Promise<void> {
-    const url = 'https://www.cpan.org/modules/02packages.details.txt';
+  async updateCpanVersions(registryUrl: string): Promise<void> {
+    const url = joinUrlParts(registryUrl, 'modules', '02packages.details.txt');
     const options = {
       headers: {
         'accept-encoding': 'identity',
@@ -68,19 +75,22 @@ export class CpanDatasource extends Datasource {
     };
     let newLines: string;
     try {
-      logger.debug('CPAN: Fetching www.cpan.org versions');
+      logger.trace({ registryUrl }, 'Fetching 02packages.details.txt');
       const startTime = Date.now();
       newLines = (await this.http.get(url, options)).body;
       const durationMs = Math.round(Date.now() - startTime);
-      logger.debug({ durationMs }, 'CPAN: Fetched www.cpan.org versions');
+      logger.trace(
+        { registryUrl, durationMs },
+        'Fetched 02packages.details.txt'
+      );
     } catch (err) /* istanbul ignore next */ {
       if (err.statusCode !== 416) {
         contentLength = 0;
         packages = Object.create(null); // Because we might need a "constructor" key
-        logger.debug({ err }, 'CPAN fetch error');
+        logger.trace({ registryUrl, err }, 'fetch error');
         throw new ExternalHostError(new Error('CPAN fetch error'));
       }
-      logger.debug('CPAN: No update');
+      logger.trace({ registryUrl }, 'No update');
       lastSync = new Date();
       return;
     }
@@ -126,10 +136,10 @@ export class CpanDatasource extends Datasource {
 
   private updateCpanVersionsPromise: Promise<void> | null = null;
 
-  async syncVersions(): Promise<void> {
+  async syncVersions(registryUrl: string): Promise<void> {
     if (CpanDatasource.isDataStale()) {
       this.updateCpanVersionsPromise =
-        this.updateCpanVersionsPromise ?? this.updateCpanVersions();
+        this.updateCpanVersionsPromise ?? this.updateCpanVersions(registryUrl);
       await this.updateCpanVersionsPromise;
       this.updateCpanVersionsPromise = null;
     }
