@@ -323,7 +323,7 @@ describe('modules/manager/regex/index', () => {
     expect(res).toBeNull();
   });
 
-  it('return with recursive strategy if matchStrings is empty', async () => {
+  it('return null with recursive strategy if matchStrings is empty', async () => {
     const config: CustomExtractConfig = {
       matchStrings: [],
       matchStringsStrategy: 'recursive',
