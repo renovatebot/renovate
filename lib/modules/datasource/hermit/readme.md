@@ -1,4 +1,4 @@
-[Hermit](https://cashapp.github.io/hermit/) by default looks up packages from the open source project [https://github.com/cashapp/hermit-packages](https://github.com/cashapp/hermit-packages).
+By default [Hermit](https://cashapp.github.io/hermit/) looks up packages from the open source project [https://github.com/cashapp/hermit-packages](https://github.com/cashapp/hermit-packages).
 
 Hermit supports [private packages](https://cashapp.github.io/hermit/packaging/private/). To make your private packages works with Renovate, you will need to do the following.
 
