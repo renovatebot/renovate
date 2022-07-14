@@ -12,7 +12,7 @@ Follow these best practices when you're working on our code.
   - Only use `istanbul` comments for unreachable code coverage that is needed for `codecov` completion
   - Use descriptive `istanbul` comments
 - Avoid cast or prefer `x as T` instead of `<T>x` cast
-- Avoid `Boolean` instead use `is` functions, for example: `is.string`
+- Avoid `Boolean` instead use `is` functions from `@sindresorhus/is` package, for example: `is.string`
 
 ```ts
 // istanbul ignore next: can never happen
