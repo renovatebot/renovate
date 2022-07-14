@@ -2,7 +2,10 @@ import * as _AWS from '@aws-sdk/client-ecr';
 import { getDigest, getPkgReleases } from '..';
 import * as httpMock from '../../../../test/http-mock';
 import { mocked, partial } from '../../../../test/util';
-import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages';
+import {
+  EXTERNAL_HOST_ERROR,
+  PAGE_NOT_FOUND_ERROR,
+} from '../../../constants/error-messages';
 import * as _hostRules from '../../../util/host-rules';
 import { Http } from '../../../util/http';
 import { MediaType } from './types';
@@ -47,6 +50,7 @@ function mockEcrAuthReject(msg: string) {
 
 describe('modules/datasource/docker/index', () => {
   beforeEach(() => {
+    jest.setTimeout(60000);
     hostRules.find.mockReturnValue({
       username: 'some-username',
       password: 'some-password',
@@ -105,20 +109,20 @@ describe('modules/datasource/docker/index', () => {
   });
 
   describe('getAuthHeaders', () => {
-    it('returns empty object if page not found', async () => {
+    it('throw page not found exception', async () => {
       httpMock
         .scope('https://my.local.registry')
         .get('/v2/repo/tags/list?n=1000')
         .reply(404, {});
 
-      const headers = await getAuthHeaders(
-        http,
-        'https://my.local.registry',
-        'repo',
-        'https://my.local.registry/v2/repo/tags/list?n=1000'
-      );
-
-      expect(headers).toEqual({});
+      await expect(
+        getAuthHeaders(
+          http,
+          'https://my.local.registry',
+          'repo',
+          'https://my.local.registry/v2/repo/tags/list?n=1000'
+        )
+      ).rejects.toThrow(PAGE_NOT_FOUND_ERROR);
     });
 
     it('returns "authType token" if both provided', async () => {

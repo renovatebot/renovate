@@ -209,7 +209,7 @@ export async function getAuthHeaders(
       throw new ExternalHostError(err);
     }
     if (err.message === PAGE_NOT_FOUND_ERROR) {
-      return {};
+      throw err;
     }
     if (err.message === HOST_DISABLED) {
       logger.trace({ registryHost, dockerRepository, err }, 'Host disabled');
@@ -712,12 +712,19 @@ export class DockerDatasource extends Datasource {
       | string
       | null = `${registryHost}/${dockerRepository}/tags/list?n=${limit}`;
     url = ensurePathPrefix(url, '/v2');
-    const headers = await getAuthHeaders(
-      this.http,
-      registryHost,
-      dockerRepository,
-      url
-    );
+    let headers = null;
+    try {
+      headers = await getAuthHeaders(
+        this.http,
+        registryHost,
+        dockerRepository,
+        url
+      );
+    } catch (err) /* istanbul ignore next */ {
+      if (err.message === PAGE_NOT_FOUND_ERROR) {
+        throw err;
+      }
+    }
     if (!headers) {
       logger.debug('Failed to get authHeaders for getTags lookup');
       return null;
@@ -777,7 +784,10 @@ export class DockerDatasource extends Datasource {
       if (err instanceof ExternalHostError) {
         throw err;
       }
-      if (err.statusCode === 404 && !dockerRepository.includes('/')) {
+      if (
+        (err.statusCode === 404 || err.message === PAGE_NOT_FOUND_ERROR) &&
+        !dockerRepository.includes('/')
+      ) {
         logger.debug(
           `Retrying Tags for ${registryHost}/${dockerRepository} using library/ prefix`
         );
@@ -786,7 +796,7 @@ export class DockerDatasource extends Datasource {
       // prettier-ignore
       if (err.statusCode === 429 && isDockerHost(registryHost)) {
         logger.warn(
-          { registryHost, dockerRepository, err },
+          {registryHost, dockerRepository, err},
           'docker registry failure: too many requests'
         );
         throw new ExternalHostError(err);
@@ -794,7 +804,7 @@ export class DockerDatasource extends Datasource {
       // prettier-ignore
       if (err.statusCode === 401 && isDockerHost(registryHost)) {
         logger.warn(
-          { registryHost, dockerRepository, err },
+          {registryHost, dockerRepository, err},
           'docker registry failure: unauthorized'
         );
         throw new ExternalHostError(err);
