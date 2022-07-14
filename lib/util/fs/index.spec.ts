@@ -1,7 +1,7 @@
 import _findUp from 'find-up';
 import fs from 'fs-extra';
 import tmp, { DirectoryResult } from 'tmp-promise';
-import { join } from 'upath';
+import { join, resolve } from 'upath';
 import { mockedFunction } from '../../../test/util';
 import { GlobalConfig } from '../../config/global';
 import {
@@ -246,7 +246,7 @@ describe('util/fs/index', () => {
       expect(result).toMatchSnapshot();
 
       await writeLocalFile('Cargo.lock', '');
-      await writeLocalFile('/test/subdir/Cargo.lock', '');
+      await writeLocalFile('test/subdir/Cargo.lock', '');
 
       const resultWithAdditionalFiles = await readLocalDirectory('test');
       expect(resultWithAdditionalFiles).not.toBeNull();
@@ -291,13 +291,13 @@ describe('util/fs/index', () => {
     });
 
     it('returns false for directory', async () => {
-      const path = `${localDir}/foobar`;
+      const path = resolve(`${localDir}/foobar`);
       await fs.mkdir(path);
       expect(await localPathIsFile(path)).toBeFalse();
     });
 
     it('returns false for non-existing path', async () => {
-      expect(await localPathIsFile(`${localDir}/foobar`)).toBeFalse();
+      expect(await localPathIsFile(resolve(`${localDir}/foobar`))).toBeFalse();
     });
   });
 
