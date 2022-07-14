@@ -9,10 +9,12 @@ To get Renovate to find your private packages, follow these steps:
 1. Add a package rule for the Hermit manager, so that Renovate knows where to find your private packages:
 
 ```json
-"packageRules": [
+{
+  "packageRules": [
     {
       "matchManagers": ["hermit"],
       "defaultRegistryUrls": ["https://github.com/your/private-hermit-packages"]
     }
-]
+  ]
+}
 ```
