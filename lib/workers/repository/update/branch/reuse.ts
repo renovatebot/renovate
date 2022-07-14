@@ -62,7 +62,7 @@ export async function shouldReuseExistingBranch(
     (config.rebaseWhen === 'auto' &&
       (config.automerge || (await platform.getRepoForceRebase())))
   ) {
-    if (await isBranchStale(branchName)) {
+    if (isBranchStale(branchName)) {
       logger.debug(`Branch is stale and needs rebasing`);
       // We can rebase the branch only if no PR or PR can be rebased
       if (await isBranchModified(branchName)) {

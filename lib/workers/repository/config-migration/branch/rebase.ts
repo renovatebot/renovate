@@ -20,7 +20,7 @@ export async function rebaseMigrationBranch(
   const configFileName = migratedConfigData.filename;
   const contents = migratedConfigData.content;
   const existingContents = await getFile(configFileName, branchName);
-  if (contents === existingContents && !(await isBranchStale(branchName))) {
+  if (contents === existingContents && !isBranchStale(branchName)) {
     logger.debug('Migration branch is up to date');
     return null;
   }

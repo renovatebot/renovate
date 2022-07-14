@@ -36,7 +36,7 @@ describe('modules/platform/gitlab/index', () => {
     jest.mock('../../../util/git');
     git = require('../../../util/git');
     git.branchExists.mockReturnValue(true);
-    git.isBranchStale.mockResolvedValue(true);
+    git.isBranchStale.mockReturnValue(true);
     git.getBranchCommit.mockReturnValue(
       '0d9c7726c3d628b7e28af234595cfd20febdbf8e'
     );
