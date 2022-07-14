@@ -115,6 +115,10 @@ try {
 }
 ```
 
+### Aysnc functions
+
+Never use `reject` in async functions, instead throw an error class type.
+
 ### Dates and times
 
 Use [`Luxon`](https://www.npmjs.com/package/luxon) to handle dates and times.
