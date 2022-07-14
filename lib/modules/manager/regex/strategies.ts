@@ -54,9 +54,7 @@ export function handleCombination(
 export function handleRecursive(
   content: string,
   packageFile: string,
-  config: CustomExtractConfig,
-  index = 0,
-  combinedGroups: Record<string, string> = {}
+  config: CustomExtractConfig
 ): PackageDependency[] {
   const regexes = config.matchStrings.map((matchString) =>
     regEx(matchString, 'g')
@@ -66,27 +64,29 @@ export function handleRecursive(
     return [];
   }
 
-  // abort if we have no matchString anymore
-  if (!regexes[index]) {
-    const result = createDependency(
-      {
-        groups: combinedGroups,
-        replaceString: content,
-      },
-      config
-    );
-    return result ? [result] : [];
-  }
-  return regexMatchAll(regexes[index], content)
-    .flatMap((match) => {
-      return handleRecursive(
+  function recurse(
+    content: string,
+    index: number,
+    combinedGroups: Record<string, string>
+  ): PackageDependency[] {
+    // abort if we have no matchString anymore
+    if (!regexes[index]) {
+      const result = createDependency(
+        {
+          groups: combinedGroups,
+          replaceString: content,
+        },
+        config
+      );
+      return result ? [result] : [];
+    }
+    return regexMatchAll(regexes[index], content).flatMap((match) => {
+      return recurse(
         match[0],
-        packageFile,
-        config,
         index + 1,
         mergeGroups(combinedGroups, match.groups ?? {})
       );
-    })
-    .filter(is.truthy)
-    .filter(isValidDependency);
+    });
+  }
+  return recurse(content, 0, {}).filter(is.truthy).filter(isValidDependency);
 }
