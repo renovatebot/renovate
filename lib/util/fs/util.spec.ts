@@ -27,7 +27,9 @@ describe('util/fs/util', () => {
     ${'/foo/../bar'}
     ${'/foo/../../etc/passwd'}
   `(`ensureLocalPath('$path') - throws`, ({ path }) => {
-    expect(() => ensureLocalPath(path)).toThrow(FILE_ACCESS_VIOLATION_ERROR);
+    expect(() => ensureLocalPath(path, true)).toThrow(
+      FILE_ACCESS_VIOLATION_ERROR
+    );
   });
 
   test.each`
@@ -46,6 +48,8 @@ describe('util/fs/util', () => {
     ${'/bar/../foo'}
     ${'/bar/../../etc/passwd'}
   `(`ensureCachePath('$path') - throws`, ({ path }) => {
-    expect(() => ensureCachePath(path)).toThrow(FILE_ACCESS_VIOLATION_ERROR);
+    expect(() => ensureCachePath(path, true)).toThrow(
+      FILE_ACCESS_VIOLATION_ERROR
+    );
   });
 });
