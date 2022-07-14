@@ -854,7 +854,9 @@ export class DockerDatasource extends Datasource {
             | OciImage;
           if (
             manifestList.schemaVersion === 2 &&
-            manifestList.mediaType === MediaType.manifestListV2
+            (manifestList.mediaType === MediaType.manifestListV2 ||
+              manifestList.mediaType === MediaType.ociManifestIndexV1 ||
+              (!manifestList.mediaType && hasKey('manifests', manifestList)))
           ) {
             for (const manifest of manifestList.manifests) {
               if (manifest.digest === currentDigest) {
@@ -914,7 +916,9 @@ export class DockerDatasource extends Datasource {
             | OciImage;
           if (
             manifestList.schemaVersion === 2 &&
-            manifestList.mediaType === MediaType.manifestListV2
+            (manifestList.mediaType === MediaType.manifestListV2 ||
+              manifestList.mediaType === MediaType.ociManifestIndexV1 ||
+              (!manifestList.mediaType && hasKey('manifests', manifestList)))
           ) {
             for (const manifest of manifestList.manifests) {
               if (manifest.platform['architecture'] === architecture) {
