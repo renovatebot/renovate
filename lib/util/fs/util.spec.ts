@@ -4,8 +4,8 @@ import { FILE_ACCESS_VIOLATION_ERROR } from '../../constants/error-messages';
 import { ensureCachePath, ensureLocalPath } from './util';
 
 describe('util/fs/util', () => {
-  const localDir = resolve('/foo');
-  const cacheDir = resolve('/bar');
+  const localDir = '/foo';
+  const cacheDir = '/bar';
 
   beforeAll(() => {
     GlobalConfig.set({ localDir, cacheDir });
@@ -27,9 +27,7 @@ describe('util/fs/util', () => {
     ${'/foo/../bar'}
     ${'/foo/../../etc/passwd'}
   `(`ensureLocalPath('$path') - throws`, ({ path }) => {
-    expect(() => ensureLocalPath(path, true)).toThrow(
-      FILE_ACCESS_VIOLATION_ERROR
-    );
+    expect(() => ensureLocalPath(path)).toThrow(FILE_ACCESS_VIOLATION_ERROR);
   });
 
   test.each`
@@ -48,8 +46,6 @@ describe('util/fs/util', () => {
     ${'/bar/../foo'}
     ${'/bar/../../etc/passwd'}
   `(`ensureCachePath('$path') - throws`, ({ path }) => {
-    expect(() => ensureCachePath(path, true)).toThrow(
-      FILE_ACCESS_VIOLATION_ERROR
-    );
+    expect(() => ensureCachePath(path)).toThrow(FILE_ACCESS_VIOLATION_ERROR);
   });
 });
