@@ -102,32 +102,21 @@ export class CpanDatasource extends Datasource {
   }
 
   private static processLine(line: string): void {
-    let split: string[] | undefined;
-    let pkg: string | undefined;
-    let latestVersion: string | undefined;
-    let path: string | undefined;
-    try {
-      const l = line.trim();
-      if (!l.length || !pathExtensionPattern.test(l)) {
-        return;
-      }
-      split = l.split(/\s+/);
-      [pkg, latestVersion, path] = split;
-      pkg = copystr(pkg);
-      const distribution = path.replace(pathPattern, '$1');
-      packages[pkg] = {
-        release: {
-          version: latestVersion,
-          isStable: perlVersioning.api.isStable(latestVersion),
-        },
-        distribution,
-      };
-    } catch (err) /* istanbul ignore next */ {
-      logger.warn(
-        { err, line, split, pkg, latestVersion, path },
-        'CPAN line parsing error'
-      );
+    const l = line.trim();
+    if (!l.length || !pathExtensionPattern.test(l)) {
+      return;
     }
+    const split = l.split(/\s+/);
+    const [_pkg, latestVersion, path] = split;
+    const pkg = copystr(_pkg);
+    const distribution = path.replace(pathPattern, '$1');
+    packages[pkg] = {
+      release: {
+        version: latestVersion,
+        isStable: perlVersioning.api.isStable(latestVersion),
+      },
+      distribution,
+    };
   }
 
   private static isDataStale(): boolean {
