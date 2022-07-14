@@ -4,7 +4,7 @@ import { logger } from '../../../../logger';
 import { commitAndPush } from '../../../../modules/platform/commit';
 import {
   getFile,
-  isBehindBaseBranch,
+  isBranchBehindBase,
   isBranchModified,
 } from '../../../../util/git';
 import { getMigrationBranchName } from '../common';
@@ -26,7 +26,7 @@ export async function rebaseMigrationBranch(
   const existingContents = await getFile(configFileName, branchName);
   if (
     contents === existingContents &&
-    !(await isBehindBaseBranch(branchName))
+    !(await isBranchBehindBase(branchName))
   ) {
     logger.debug('Migration branch is up to date');
     return null;

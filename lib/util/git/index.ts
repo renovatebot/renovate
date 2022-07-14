@@ -538,7 +538,7 @@ export function getBranchList(): string[] {
   return Object.keys(config.branchCommits);
 }
 
-export async function isBehindBaseBranch(branchName: string): Promise<boolean> {
+export async function isBranchBehindBase(branchName: string): Promise<boolean> {
   await syncGit();
   try {
     const { currentBranchSha, currentBranch } = config;
@@ -548,14 +548,12 @@ export async function isBehindBaseBranch(branchName: string): Promise<boolean> {
       '--contains',
       config.currentBranchSha,
     ]);
-    const isBehindBaseBranch = !branches.all
-      .map(localName)
-      .includes(branchName);
+    const isBehind = !branches.all.map(localName).includes(branchName);
     logger.debug(
-      { isBehindBaseBranch, currentBranch, currentBranchSha },
-      `isBehindBaseBranch=${isBehindBaseBranch}`
+      { isBehind, currentBranch, currentBranchSha },
+      `isBranchBehindBase=${isBehind}`
     );
-    return isBehindBaseBranch;
+    return isBehind;
   } catch (err) /* istanbul ignore next */ {
     const errChecked = checkForPlatformFailure(err);
     if (errChecked) {

@@ -5,7 +5,7 @@ import { logger } from '../../../../logger';
 import { commitAndPush } from '../../../../modules/platform/commit';
 import {
   getFile,
-  isBehindBaseBranch,
+  isBranchBehindBase,
   isBranchModified,
 } from '../../../../util/git';
 import { OnboardingCommitMessageFactory } from './commit-message';
@@ -31,7 +31,7 @@ export async function rebaseOnboardingBranch(
   // TODO #7154
   if (
     contents === existingContents &&
-    !(await isBehindBaseBranch(config.onboardingBranch!))
+    !(await isBranchBehindBase(config.onboardingBranch!))
   ) {
     logger.debug('Onboarding branch is up to date');
     return null;
