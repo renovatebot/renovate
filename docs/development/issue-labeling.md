@@ -112,11 +112,11 @@ Keep in mind that an issue can be both affecting a platform and a self hosted in
 
     core:automerge
     core:changelogs
+    core:config
     core:dashboard
+    core:git
     core:onboarding
     core:schedule
-    core:config
-    core:git
 
 </details>
 
@@ -137,10 +137,10 @@ Use a `datasource:` label when it is applicable specifically to particular datas
 <details>
     <summary>Worker</summary>
 
-    worker:global
     worker:branch
-    worker:repository
+    worker:global
     worker:pr
+    worker:repository
 
 </details>
 
