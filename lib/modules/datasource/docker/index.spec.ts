@@ -783,6 +783,160 @@ describe('modules/datasource/docker/index', () => {
         'sha256:ee75deb1a41bb998e52a116707a6e22a91904cba0c1d6e6c76cf04923efff2d8'
       );
     });
+
+    it('supports architecture-specific digest in OCI manifests with media type', async () => {
+      httpMock
+        .scope(authUrl)
+        .get(
+          '/token?service=registry.docker.io&scope=repository:library/some-dep:pull'
+        )
+        .twice()
+        .reply(200, { token: 'some-token' });
+      httpMock
+        .scope(baseUrl)
+        .get('/')
+        .reply(401, '', {
+          'www-authenticate':
+            'Bearer realm="https://auth.docker.io/token",service="registry.docker.io",scope="repository:library/some-dep:pull  "',
+        })
+        .get('/library/some-dep/manifests/some-current-value')
+        .reply(
+          200,
+          {
+            schemaVersion: 2,
+            mediaType: MediaType.ociManifestIndexV1,
+            manifests: [
+              {
+                digest: 'some-image-digest',
+                platform: {
+                  architecture: 'amd64',
+                },
+              },
+            ],
+          },
+          {
+            'content-type': 'text/plain',
+          }
+        );
+      httpMock
+        .scope(baseUrl)
+        .get('/')
+        .reply(401, '', {
+          'www-authenticate':
+            'Bearer realm="https://auth.docker.io/token",service="registry.docker.io",scope="repository:library/some-dep:pull  "',
+        })
+        .get('/library/some-dep/manifests/some-new-value')
+        .reply(
+          200,
+          {
+            schemaVersion: 2,
+            mediaType: MediaType.ociManifestIndexV1,
+            manifests: [
+              {
+                digest: 'some-new-image-digest',
+                platform: {
+                  architecture: 'amd64',
+                },
+              },
+            ],
+          },
+          {
+            'content-type': 'text/plain',
+          }
+        );
+
+      const currentDigest = 'some-image-digest';
+      const res = await getDigest(
+        {
+          datasource: 'docker',
+          depName: 'some-dep',
+          currentValue: 'some-current-value',
+          currentDigest,
+        },
+        'some-new-value'
+      );
+
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        `Current digest ${currentDigest} relates to architecture amd64`
+      );
+      expect(res).toBe('some-new-image-digest');
+    });
+
+    it('supports architecture-specific digest in OCI manifests without media type', async () => {
+      httpMock
+        .scope(authUrl)
+        .get(
+          '/token?service=registry.docker.io&scope=repository:library/some-dep:pull'
+        )
+        .twice()
+        .reply(200, { token: 'some-token' });
+      httpMock
+        .scope(baseUrl)
+        .get('/')
+        .reply(401, '', {
+          'www-authenticate':
+            'Bearer realm="https://auth.docker.io/token",service="registry.docker.io",scope="repository:library/some-dep:pull  "',
+        })
+        .get('/library/some-dep/manifests/some-current-value')
+        .reply(
+          200,
+          {
+            schemaVersion: 2,
+            manifests: [
+              {
+                digest: 'some-image-digest',
+                platform: {
+                  architecture: 'amd64',
+                },
+              },
+            ],
+          },
+          {
+            'content-type': 'text/plain',
+          }
+        );
+      httpMock
+        .scope(baseUrl)
+        .get('/')
+        .reply(401, '', {
+          'www-authenticate':
+            'Bearer realm="https://auth.docker.io/token",service="registry.docker.io",scope="repository:library/some-dep:pull  "',
+        })
+        .get('/library/some-dep/manifests/some-new-value')
+        .reply(
+          200,
+          {
+            schemaVersion: 2,
+            manifests: [
+              {
+                digest: 'some-new-image-digest',
+                platform: {
+                  architecture: 'amd64',
+                },
+              },
+            ],
+          },
+          {
+            'content-type': 'text/plain',
+          }
+        );
+
+      const currentDigest = 'some-image-digest';
+      const res = await getDigest(
+        {
+          datasource: 'docker',
+          depName: 'some-dep',
+          currentValue: 'some-current-value',
+          currentDigest,
+        },
+        'some-new-value'
+      );
+
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        `Current digest ${currentDigest} relates to architecture amd64`
+      );
+      expect(res).toBe('some-new-image-digest');
+    });
   });
 
   describe('getReleases', () => {
