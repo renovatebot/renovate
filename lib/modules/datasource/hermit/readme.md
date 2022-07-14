@@ -1,6 +1,7 @@
 By default [Hermit](https://cashapp.github.io/hermit/) looks up packages from the open source project [https://github.com/cashapp/hermit-packages](https://github.com/cashapp/hermit-packages).
 
-Hermit supports [private packages](https://cashapp.github.io/hermit/packaging/private/). To make your private packages works with Renovate, you will need to do the following.
+Hermit supports [private packages](https://cashapp.github.io/hermit/packaging/private/).
+To get Renovate to find your private packages, follow these steps:
 
 1. perform `hermit search --json` with your private Hermit distribution and save the file to `index.json`
 2. make a Github release in your private packages repository named `index` with the asset `index.json` generated in step 1.
