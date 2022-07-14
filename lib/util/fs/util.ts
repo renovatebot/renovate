@@ -12,7 +12,11 @@ function assertBaseDir(path: string, baseDir: string, debug = false): void {
     throw new Error(FILE_ACCESS_VIOLATION_ERROR);
   }
   // istanbul ignore if
-  if (debug && (path.endsWith('passwd') || path.endsWith('bar'))) {
+  if (
+    process.platform === 'win32' &&
+    debug &&
+    (path.endsWith('passwd') || path.endsWith('bar'))
+  ) {
     throw { path, baseDir };
   }
 }
