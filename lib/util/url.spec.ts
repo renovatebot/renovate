@@ -3,12 +3,12 @@ import {
   ensurePathPrefix,
   ensureTrailingSlash,
   getQueryString,
+  hasRepoSubPath,
   joinUrlParts,
   parseLinkHeader,
   parseUrl,
   resolveBaseUrl,
   trimTrailingSlash,
-  urlHasSubPath,
   validateUrl,
 } from './url';
 
@@ -176,10 +176,10 @@ describe('util/url', () => {
     const link4 = 'https://nlog-project.org?q=val';
     const link5 = 'https://nlog-project.org/some/path?q=val';
 
-    expect(urlHasSubPath(link1)).toBeFalsy();
-    expect(urlHasSubPath(link2)).toBeTruthy();
-    expect(urlHasSubPath(link3)).toBeFalsy();
-    expect(urlHasSubPath(link4)).toBeFalsy();
-    expect(urlHasSubPath(link5)).toBeTruthy();
+    expect(hasRepoSubPath(link1)).toBeFalsy();
+    expect(hasRepoSubPath(link2)).toBeTruthy();
+    expect(hasRepoSubPath(link3)).toBeFalsy();
+    expect(hasRepoSubPath(link4)).toBeFalsy();
+    expect(hasRepoSubPath(link5)).toBeTruthy();
   });
 });

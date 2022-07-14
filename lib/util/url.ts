@@ -107,8 +107,9 @@ export function parseLinkHeader(
   return _parseLinkHeader(linkHeader);
 }
 
-export function urlHasSubPath(url: string): boolean {
+export function hasRepoSubPath(url: string): boolean {
   const parsedUrl = parseUrl(url);
-  // no pathname is a single slash or empty string
-  return parsedUrl?.pathname !== '/' || !parsedUrl?.pathname;
+  // no repo subpath is pathname with a single slash or empty string
+  const idxOfLastSlash = parsedUrl?.pathname?.lastIndexOf('/') ?? 0;
+  return idxOfLastSlash > 0 || !parsedUrl?.pathname;
 }

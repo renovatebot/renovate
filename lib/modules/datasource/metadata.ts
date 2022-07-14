@@ -4,7 +4,7 @@ import parse from 'github-url-from-git';
 import { DateTime } from 'luxon';
 import * as hostRules from '../../util/host-rules';
 import { regEx } from '../../util/regex';
-import { urlHasSubPath, validateUrl } from '../../util/url';
+import { hasRepoSubPath, validateUrl } from '../../util/url';
 import { manualChangelogUrls, manualSourceUrls } from './metadata-manual';
 import type { ReleaseResult } from './types';
 
@@ -114,12 +114,14 @@ export function addMetaData(
   ) {
     dep.sourceUrl = dep.changelogUrl;
   }
+  let isGithubHomePage = false;
   // prettier-ignore
   if (dep.homepage?.includes('github.com')) { // lgtm [js/incomplete-url-substring-sanitization]
+    isGithubHomePage = true;
     if (!dep.sourceUrl) {
       dep.sourceUrl = dep.homepage;
-      if(!urlHasSubPath(dep.homepage)){
-        // remove homepage if its not a link to a dependency (its a sourceUrl)
+      if(!hasRepoSubPath(dep.homepage)){
+        // remove homepage if its not a link to a path in the github repo.
         delete dep.homepage;
       }
     }
@@ -148,11 +150,7 @@ export function addMetaData(
       delete dep.sourceUrl;
     }
 
-    if (
-      (dep.homepage?.includes('github.com') &&
-        dep.sourceUrl === massageGithubUrl(dep.homepage)) ||
-      dep.sourceUrl === dep.homepage
-    ) {
+    if (deleteHomepage(dep.sourceUrl, dep.homepage, isGithubHomePage)) {
       // delete homepage if its the same as the sourceUrl after massaging
       delete dep.homepage;
     }
@@ -172,4 +170,16 @@ export function addMetaData(
       delete dep[urlKey];
     }
   }
+}
+
+function deleteHomepage(
+  sourceUrl: string | undefined,
+  homepage: string | undefined,
+  isGithubUrl: boolean
+): boolean {
+  return (
+    homepage !== undefined &&
+    ((isGithubUrl && sourceUrl === massageGithubUrl(homepage)) ||
+      sourceUrl === homepage)
+  );
 }

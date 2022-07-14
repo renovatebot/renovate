@@ -256,4 +256,63 @@ describe('modules/datasource/metadata', () => {
       'https://example.com/foo/bar'
     );
   });
+
+  it('Should delete homepage if its not a link to a github repo subpath', () => {
+    const dep = {
+      homepage: 'http://github.com/foo',
+      releases: [
+        { version: '1.0.1', releaseTimestamp: '2000-01-01T12:34:56' },
+        { version: '1.0.2', releaseTimestamp: '2000-01-02T12:34:56.000Z' },
+        { version: '1.0.3', releaseTimestamp: '2000-01-03T14:34:56.000+02:00' },
+      ],
+    };
+    addMetaData(dep, MavenDatasource.id, 'foobar');
+    expect(dep).toMatchObject({
+      releases: [
+        {
+          version: '1.0.1',
+          releaseTimestamp: '2000-01-01T12:34:56.000Z',
+        },
+        {
+          version: '1.0.2',
+          releaseTimestamp: '2000-01-02T12:34:56.000Z',
+        },
+        {
+          version: '1.0.3',
+          releaseTimestamp: '2000-01-03T12:34:56.000Z',
+        },
+      ],
+      sourceUrl: 'http://github.com/foo',
+    });
+  });
+
+  it('Should delete homepage if its same as sourceUrl after massage', () => {
+    const dep = {
+      homepage: 'http://somesource.com',
+      sourceUrl: 'http://somesource.com',
+      releases: [
+        { version: '1.0.1', releaseTimestamp: '2000-01-01T12:34:56' },
+        { version: '1.0.2', releaseTimestamp: '2000-01-02T12:34:56.000Z' },
+        { version: '1.0.3', releaseTimestamp: '2000-01-03T14:34:56.000+02:00' },
+      ],
+    };
+    addMetaData(dep, MavenDatasource.id, 'foobar');
+    expect(dep).toMatchObject({
+      releases: [
+        {
+          version: '1.0.1',
+          releaseTimestamp: '2000-01-01T12:34:56.000Z',
+        },
+        {
+          version: '1.0.2',
+          releaseTimestamp: '2000-01-02T12:34:56.000Z',
+        },
+        {
+          version: '1.0.3',
+          releaseTimestamp: '2000-01-03T12:34:56.000Z',
+        },
+      ],
+      sourceUrl: 'http://somesource.com',
+    });
+  });
 });
