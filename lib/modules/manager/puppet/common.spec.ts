@@ -1,4 +1,7 @@
-import { RE_REPOSITORY_GENERIC_GIT_SSH_FORMAT } from './common';
+import {
+  RE_REPOSITORY_GENERIC_GIT_SSH_FORMAT,
+  parseGitOwnerRepo,
+} from './common';
 
 describe('modules/manager/puppet/common', () => {
   describe('RE_REPOSITORY_GENERIC_GIT_SSH_FORMAT', () => {
@@ -22,6 +25,20 @@ describe('modules/manager/puppet/common', () => {
       );
       expect(regex?.groups).not.toBeNull();
       expect(regex?.groups?.repository).toBe('dir1/dir2/project.git');
+    });
+  });
+
+  describe('parseGitOwnerRepo', () => {
+    it('unable to parse url', () => {
+      expect(parseGitOwnerRepo('invalid-url-example', false)).toBeNull();
+    });
+
+    it('parseable url', () => {
+      const url = parseGitOwnerRepo(
+        'https://gitlab.com/example/example',
+        false
+      );
+      expect(url).toBe('example/example');
     });
   });
 });

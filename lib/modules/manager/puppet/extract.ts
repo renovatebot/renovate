@@ -59,7 +59,8 @@ function parseGitDependency(module: PuppetfileModule): PackageDependency {
     // failed to parse git url
     return {
       depName: moduleName,
-      ...gitOwnerRepo,
+      sourceUrl: git,
+      skipReason: 'invalid-url',
     };
   }
 
