@@ -35,7 +35,6 @@ export function parseGitOwnerRepo(
 
 function invalidUrl(sourceUrl: string): PackageDependency {
   return {
-    gitRef: true,
     sourceUrl,
     skipReason: 'invalid-url',
   };

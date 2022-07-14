@@ -35,7 +35,6 @@ function parseGitDependency(module: PuppetfileModule): PackageDependency {
   if (!git || !tag) {
     return {
       depName: moduleName,
-      gitRef: true,
       sourceUrl: git,
       skipReason: 'invalid-version',
     };
@@ -49,9 +48,7 @@ function parseGitDependency(module: PuppetfileModule): PackageDependency {
       `Access to github is only allowed for https, your url was: ${git}`
     );
     return {
-      datasource: GithubTagsDatasource.id,
       depName: moduleName,
-      gitRef: true,
       sourceUrl: git,
       skipReason: 'invalid-url',
     };
@@ -112,9 +109,5 @@ export function extractPackageFile(content: string): PackageFile | null {
     }
   }
 
-  if (deps.length) {
-    return { deps };
-  }
-
-  return null;
+  return deps.length ? { deps } : null;
 }

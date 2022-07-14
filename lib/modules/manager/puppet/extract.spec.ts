@@ -151,11 +151,9 @@ describe('modules/manager/puppet/extract', () => {
       expect(res).toMatchObject({
         deps: [
           {
-            datasource: GithubTagsDatasource.id,
             depName: 'apache',
             sourceUrl: 'http://github.com/puppetlabs/puppetlabs-apache',
             skipReason: 'invalid-url',
-            gitRef: true,
           },
         ],
       });
@@ -173,7 +171,6 @@ describe('modules/manager/puppet/extract', () => {
         deps: [
           {
             depName: 'stdlib',
-            gitRef: true,
             skipReason: 'invalid-version',
             sourceUrl: 'git@github.com:puppetlabs/puppetlabs-stdlib.git',
           },
@@ -193,7 +190,6 @@ describe('modules/manager/puppet/extract', () => {
         deps: [
           {
             depName: 'stdlib',
-            gitRef: true,
             skipReason: 'invalid-config',
             sourceUrl: 'git@github.com:puppetlabs/puppetlabs-stdlib.git',
           },
@@ -241,7 +237,6 @@ describe('modules/manager/puppet/extract', () => {
           {
             depName: 'invalid_url',
             sourceUrl: 'hello world',
-            gitRef: true,
             skipReason: 'invalid-url',
           },
         ],
