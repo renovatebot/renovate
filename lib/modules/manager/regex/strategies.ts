@@ -61,6 +61,11 @@ export function handleRecursive(
   const regexes = config.matchStrings.map((matchString) =>
     regEx(matchString, 'g')
   );
+
+  if (!regexes.length) {
+    return [];
+  }
+
   // abort if we have no matchString anymore
   if (!regexes[index]) {
     const result = createDependency(
@@ -82,5 +87,6 @@ export function handleRecursive(
         mergeGroups(combinedGroups, match.groups ?? {})
       );
     })
+    .filter(is.truthy)
     .filter(isValidDependency);
 }

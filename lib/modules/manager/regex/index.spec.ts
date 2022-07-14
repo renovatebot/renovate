@@ -323,6 +323,19 @@ describe('modules/manager/regex/index', () => {
     expect(res).toBeNull();
   });
 
+  it('return with recursive strategy if matchStrings is empty', async () => {
+    const config: CustomExtractConfig = {
+      matchStrings: [],
+      matchStringsStrategy: 'recursive',
+    };
+    const res = await extractPackageFile(
+      exampleJsonContent,
+      'example.json',
+      config
+    );
+    expect(res).toBeNull();
+  });
+
   it('extracts with recursive strategy and single match', async () => {
     const config: CustomExtractConfig = {
       matchStrings: [
