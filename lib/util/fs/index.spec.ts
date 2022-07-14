@@ -1,7 +1,7 @@
 import _findUp from 'find-up';
 import fs from 'fs-extra';
 import tmp, { DirectoryResult } from 'tmp-promise';
-import { join } from 'upath';
+import { join, resolve } from 'upath';
 import { mockedFunction } from '../../../test/util';
 import { GlobalConfig } from '../../config/global';
 import {
@@ -67,19 +67,19 @@ describe('util/fs/index', () => {
   describe('getParentDir', () => {
     test.each`
       dir            | expected
-      ${'/foo/bar/'} | ${'/foo'}
-      ${'/foo/bar'}  | ${'/foo'}
-      ${'/foo/'}     | ${'/'}
-      ${'/foo'}      | ${'/'}
-      ${'foo/bar/'}  | ${'foo'}
-      ${'foo/bar'}   | ${'foo'}
-      ${'foo/'}      | ${''}
-      ${'foo'}       | ${''}
-      ${''}          | ${''}
-      ${'.'}         | ${''}
-      ${'..'}        | ${''}
-      ${'./foo'}     | ${'.'}
-      ${'../foo'}    | ${'..'}
+      ${'/foo/bar/'} | ${resolve('/foo')}
+      ${'/foo/bar'}  | ${resolve('/foo')}
+      ${'/foo/'}     | ${resolve('/')}
+      ${'/foo'}      | ${resolve('/')}
+      ${'foo/bar/'}  | ${resolve('foo')}
+      ${'foo/bar'}   | ${resolve('foo')}
+      ${'foo/'}      | ${resolve('')}
+      ${'foo'}       | ${resolve('')}
+      ${''}          | ${resolve('')}
+      ${'.'}         | ${resolve('')}
+      ${'..'}        | ${resolve('')}
+      ${'./foo'}     | ${resolve('.')}
+      ${'../foo'}    | ${resolve('..')}
     `(`('$dir') -> '$expected'`, ({ dir, expected }) => {
       expect(getParentDir(dir)).toBe(expected);
     });
@@ -88,12 +88,12 @@ describe('util/fs/index', () => {
   describe('getSiblingFileName', () => {
     test.each`
       file          | sibling  | expected
-      ${'/foo/bar'} | ${'baz'} | ${'/foo/baz'}
-      ${'foo/bar'}  | ${'baz'} | ${'foo/baz'}
-      ${'foo/'}     | ${'baz'} | ${'baz'}
-      ${'foo'}      | ${'baz'} | ${'baz'}
-      ${'./foo'}    | ${'baz'} | ${'baz'}
-      ${'../foo'}   | ${'baz'} | ${'../baz'}
+      ${'/foo/bar'} | ${'baz'} | ${resolve('/foo/baz')}
+      ${'foo/bar'}  | ${'baz'} | ${resolve('foo/baz')}
+      ${'foo/'}     | ${'baz'} | ${resolve('baz')}
+      ${'foo'}      | ${'baz'} | ${resolve('baz')}
+      ${'./foo'}    | ${'baz'} | ${resolve('baz')}
+      ${'../foo'}   | ${'baz'} | ${resolve('../baz')}
     `(`('$file', '$sibling') -> '$expected'`, ({ file, sibling, expected }) => {
       expect(getSiblingFileName(file, sibling)).toBe(expected);
     });
