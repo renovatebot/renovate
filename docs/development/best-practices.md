@@ -117,7 +117,8 @@ try {
 
 ### Aysnc functions
 
-Never use `reject` in async functions, instead throw an error class type.
+Never use `Promise.resolve` in async functions.
+Never use `Promise.reject` in async functions, instead throw an `Error` class type.
 
 ### Dates and times
 
