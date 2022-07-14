@@ -67,7 +67,10 @@ export class HermitDatasource extends Datasource {
       return null;
     }
 
-    const items = await this.getHermitSearchManifest(parsedUrl);
+    const items = await this.getHermitSearchManifest({
+      packageName,
+      registryUrl,
+    });
 
     if (items === null) {
       return null;
@@ -103,13 +106,14 @@ export class HermitDatasource extends Datasource {
    */
   @cache({
     namespace: `datasource-hermit-search-manifest`,
-    key: (registryUrl: URL) => (registryUrl ? registryUrl.toString() : ''),
+    key: ({ registryUrl }: GetReleasesConfig) => registryUrl ?? '',
   })
-  async getHermitSearchManifest(
-    registryUrl: URL
-  ): Promise<HermitSearchResult[] | null> {
-    const host = registryUrl.host;
-    const groups = this.pathRegex.exec(registryUrl.pathname)?.groups;
+  async getHermitSearchManifest({
+    registryUrl,
+  }: GetReleasesConfig): Promise<HermitSearchResult[] | null> {
+    const u = parseUrl(registryUrl);
+    const host = u?.host ?? '';
+    const groups = this.pathRegex.exec(u?.pathname ?? '')?.groups;
 
     if (!groups) {
       return null;
