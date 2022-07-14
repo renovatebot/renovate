@@ -103,7 +103,7 @@ export class HermitDatasource extends Datasource {
    */
   @cache({
     namespace: `datasource-hermit-search-manifest`,
-    key: (registryUrl: URL) => registryUrl.toString(),
+    key: (registryUrl: URL) => (registryUrl ? registryUrl.toString() : ''),
   })
   async getHermitSearchManifest(
     registryUrl: URL
