@@ -179,7 +179,7 @@ describe('modules/platform/gitea/index', () => {
     helper = mocked(await import('./gitea-helper'));
     logger = mocked((await import('../../../logger')).logger);
     gitvcs = require('../../../util/git');
-    gitvcs.isBranchStale.mockResolvedValue(false);
+    gitvcs.isBehindBaseBranch.mockResolvedValue(false);
     gitvcs.getBranchCommit.mockReturnValue(mockCommitHash);
     hostRules = mocked(await import('../../../util/host-rules'));
     hostRules.clear();
