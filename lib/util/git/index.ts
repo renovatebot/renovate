@@ -26,6 +26,7 @@ import { api as semverCoerced } from '../../modules/versioning/semver-coerced';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import type { GitProtocol } from '../../types/git';
 import { Limit, incLimitedValue } from '../../workers/global/limits';
+import { getCache } from '../cache/repository';
 import { newlineRegex, regEx } from '../regex';
 import { parseGitAuthor } from './author';
 import { getNoVerify, simpleGitConfig } from './config';
@@ -93,10 +94,6 @@ export async function gitRetry<T>(gitFunc: () => Promise<T>): Promise<T> {
   }
 
   throw lastError;
-}
-
-function localName(branchName: string): string {
-  return branchName.replace(regEx(/^origin\//), '');
 }
 
 async function isDirectory(dir: string): Promise<boolean> {
@@ -538,29 +535,17 @@ export function getBranchList(): string[] {
   return Object.keys(config.branchCommits);
 }
 
-export async function isBranchStale(branchName: string): Promise<boolean> {
-  await syncGit();
-  try {
-    const { currentBranchSha, currentBranch } = config;
-    const branches = await git.branch([
-      '--remotes',
-      '--verbose',
-      '--contains',
-      config.currentBranchSha,
-    ]);
-    const isStale = !branches.all.map(localName).includes(branchName);
-    logger.debug(
-      { isStale, currentBranch, currentBranchSha },
-      `isBranchStale=${isStale}`
-    );
-    return isStale;
-  } catch (err) /* istanbul ignore next */ {
-    const errChecked = checkForPlatformFailure(err);
-    if (errChecked) {
-      throw errChecked;
-    }
-    throw err;
-  }
+export function isBranchStale(branchName: string): boolean {
+  const { currentBranchSha } = config;
+  const { branches } = getCache();
+  const cachedBranch = branches?.find(
+    (branch) => branch.branchName === branchName
+  );
+
+  return (
+    config.branchCommits[branchName] === cachedBranch?.sha &&
+    currentBranchSha === cachedBranch?.parentSha
+  );
 }
 
 export async function isBranchModified(branchName: string): Promise<boolean> {
