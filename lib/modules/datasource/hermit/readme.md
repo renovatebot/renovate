@@ -7,14 +7,13 @@ To get Renovate to find your private packages, follow these steps:
 1. make a GitHub release in your private packages repository named `index` with the asset `index.json` generated in step 1.
 1. setup a CI pipeline to repeat step 1 & 2 on new commits to the private packages repository.
 1. Add a package rule for the Hermit manager, so that Renovate knows where to find your private packages:
-
-```json
-{
-  "packageRules": [
+    ```json
     {
-      "matchManagers": ["hermit"],
-      "defaultRegistryUrls": ["https://github.com/your/private-hermit-packages"]
+      "packageRules": [
+        {
+          "matchManagers": ["hermit"],
+          "defaultRegistryUrls": ["https://github.com/your/private-hermit-packages"]
+        }
+      ]
     }
-  ]
-}
-```
+    ```
