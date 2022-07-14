@@ -41,6 +41,7 @@ export const NO_VULNERABILITY_ALERTS = 'no-vulnerability-alerts';
 
 // Manager Error
 export const MANAGER_LOCKFILE_ERROR = 'lockfile-error';
+export const FILE_ACCESS_VIOLATION_ERROR = 'file-access-violation-error';
 
 // Host error
 export const EXTERNAL_HOST_ERROR = 'external-host-error';
