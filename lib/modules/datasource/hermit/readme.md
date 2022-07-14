@@ -9,7 +9,7 @@ To get Renovate to find your private packages, follow these steps:
 
 Once setup, add a package rule to tell Hermit datasource to fetches packages from in the repository config like the following.
 
-```
+```json
 "packageRules": [
     {
       "matchManagers": ["hermit"],
