@@ -584,7 +584,7 @@ export async function isBranchModified(branchName: string): Promise<boolean> {
     branchName,
     config.branchCommits[branchName]
   );
-  if (!is.null_(isModified)) {
+  if (isModified !== null) {
     return (config.branchIsModified[branchName] = isModified);
   }
 
