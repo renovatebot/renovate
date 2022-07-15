@@ -60,10 +60,6 @@ export function handleRecursive(
     regEx(matchString, 'g')
   );
 
-  if (!regexes.length) {
-    return [];
-  }
-
   function recurse(
     content: string,
     index: number,
