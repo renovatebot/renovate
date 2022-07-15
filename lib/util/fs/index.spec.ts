@@ -24,7 +24,6 @@ import {
   privateCacheDir,
   readCacheFile,
   readLocalDirectory,
-  readLocalDirectorySync,
   readLocalFile,
   readLocalSymlink,
   readSystemFile,
@@ -311,61 +310,6 @@ describe('util/fs/index', () => {
     it('return empty array for a existing but empty directory', async () => {
       await ensureLocalDir('somedir');
       const result = await readLocalDirectory('somedir');
-      expect(result).not.toBeNull();
-      expect(result).toBeArrayOfSize(0);
-    });
-  });
-
-  describe('readLocalDirectorySync', () => {
-    it('returns dir content', async () => {
-      await withDir(
-        async (localDir) => {
-          GlobalConfig.set({
-            localDir: localDir.path,
-          });
-          await writeLocalFile('test/Cargo.toml', '');
-          await writeLocalFile('test/Cargo.lock', '');
-
-          const result = readLocalDirectorySync('test');
-          expect(result).not.toBeNull();
-          expect(result).toBeArrayOfSize(2);
-          expect(result).toEqual(['Cargo.lock', 'Cargo.toml']);
-
-          await writeLocalFile('Cargo.lock', '');
-          await writeLocalFile('/test/subdir/Cargo.lock', '');
-
-          const resultWithAdditionalFiles = await readLocalDirectory('test');
-          expect(resultWithAdditionalFiles).not.toBeNull();
-          expect(resultWithAdditionalFiles).toEqual([
-            'Cargo.lock',
-            'Cargo.toml',
-            'subdir',
-          ]);
-        },
-        {
-          unsafeCleanup: true,
-        }
-      );
-    });
-
-    it('return empty array for non existing directory', async () => {
-      await withDir(
-        (localDir) => {
-          GlobalConfig.set({
-            localDir: localDir.path,
-          });
-          expect(() => readLocalDirectorySync('somedir')).toThrow();
-          return Promise.resolve();
-        },
-        {
-          unsafeCleanup: true,
-        }
-      );
-    });
-
-    it('return empty array for a existing but empty directory', async () => {
-      await ensureLocalDir('somedir');
-      const result = readLocalDirectorySync('somedir');
       expect(result).not.toBeNull();
       expect(result).toBeArrayOfSize(0);
     });

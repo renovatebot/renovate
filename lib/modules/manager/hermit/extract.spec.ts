@@ -1,32 +1,15 @@
-jest.mock('child_process');
-jest.mock('../../../util/exec/hermit');
-jest.mock('../../../util/fs');
-jest.mock('../../../config/global');
-
-import upath from 'upath';
-import { mocked, mockedFunction } from '../../../../test/util';
-import { GlobalConfig } from '../../../config/global';
-import { findHermitCwd } from '../../../util/exec/hermit';
-import { readLocalDirectorySync } from '../../../util/fs';
+import { mockedFunction } from '../../../../test/util';
+import { readLocalDirectory } from '../../../util/fs';
 import { HermitDatasource } from '../../datasource/hermit';
 import { extractPackageFile } from './extract';
 
-const findHermitCwdMock = mockedFunction(findHermitCwd);
-const readdirSyncMock = mockedFunction(readLocalDirectorySync);
-const globalConfigMock = mocked(GlobalConfig);
+jest.mock('../../../util/fs');
+
+const readdirMock = mockedFunction(readLocalDirectory);
 
 describe('modules/manager/hermit/extract', () => {
-  beforeEach(() => {
-    findHermitCwdMock.mockClear();
-    findHermitCwdMock.mockImplementation((p) =>
-      Promise.resolve(upath.dirname(p))
-    );
-  });
-
   describe('extractPackageFile', () => {
-    it('should list packages on command success', () => {
-      const localDir = '/tmp/renovate/repos/repository-a/';
-      globalConfigMock.get.mockReturnValue(localDir);
+    it('should list packages on command success', async () => {
       const ret = [
         '.go-1.17.9.pkg',
         'go',
@@ -36,9 +19,9 @@ describe('modules/manager/hermit/extract', () => {
         'jq',
         '.somepackage-invalid-version.pkg',
       ];
-      readdirSyncMock.mockReturnValue(ret);
+      readdirMock.mockResolvedValue(ret);
 
-      const rootPackages = extractPackageFile('', 'bin/hermit');
+      const rootPackages = await extractPackageFile('', 'bin/hermit');
       expect(rootPackages).toStrictEqual({
         deps: [
           {
@@ -59,7 +42,6 @@ describe('modules/manager/hermit/extract', () => {
         ],
       });
 
-      globalConfigMock.get.mockReturnValue(localDir);
       const nestedRet = [
         '.gradle-7.4.2.pkg',
         'go',
@@ -68,8 +50,8 @@ describe('modules/manager/hermit/extract', () => {
         '.maven@3.8.pkg',
         'maven',
       ];
-      readdirSyncMock.mockReturnValue(nestedRet);
-      const nestedPackages = extractPackageFile('', 'nested/bin/hermit');
+      readdirMock.mockResolvedValue(nestedRet);
+      const nestedPackages = await extractPackageFile('', 'nested/bin/hermit');
       expect(nestedPackages).toStrictEqual({
         deps: [
           {
@@ -91,15 +73,11 @@ describe('modules/manager/hermit/extract', () => {
       });
     });
 
-    it('should throw error on execution failure', () => {
-      const msg = 'error executing hermit install';
-      const localDir = '/tmp/renovate/repos/repository-a/';
-      globalConfigMock.get.mockReturnValue(localDir);
-      readdirSyncMock.mockImplementation(() => {
-        throw new Error(msg);
-      });
+    it('should throw error on execution failure', async () => {
+      const msg = 'error reading directory';
+      readdirMock.mockRejectedValue(msg);
 
-      expect(extractPackageFile('', 'bin/hermit')).toBeNull();
+      expect(await extractPackageFile('', 'bin/hermit')).toBeNull();
     });
   });
 });

@@ -1,12 +1,11 @@
 import is from '@sindresorhus/is';
 import minimatch from 'minimatch';
 import upath from 'upath';
-import { GlobalConfig } from '../../../config/global';
 import { logger } from '../../../logger';
-import { readLocalDirectorySync } from '../../../util/fs';
+import { readLocalDirectory } from '../../../util/fs';
 import { regEx } from '../../../util/regex';
 import { HermitDatasource } from '../../datasource/hermit';
-import type { PackageDependency, PackageFile, Result } from '../types';
+import type { PackageDependency, PackageFile } from '../types';
 import type { HermitListItem } from './types';
 
 const pkgReferenceRegex = regEx(`(?<packageName>.*?)-(?<version>[0-9]{1}.*)`);
@@ -15,35 +14,31 @@ const pkgReferenceRegex = regEx(`(?<packageName>.*?)-(?<version>[0-9]{1}.*)`);
  * extractPackageFile scans the folder of the package files
  * and looking for .{packageName}-{version}.pkg
  */
-export function extractPackageFile(
+export async function extractPackageFile(
   content: string,
   filename: string
-): Result<PackageFile> | null {
+): Promise<PackageFile | null> {
   logger.trace('hermit.extractPackageFile()');
   const dependencies = [] as PackageDependency[];
-  try {
-    const packages = listHermitPackages(filename);
+  const packages = await listHermitPackages(filename);
 
-    if (packages === null) {
-      return null;
-    }
-
-    for (const p of packages) {
-      // version of a hermit package is either a Version or a Channel
-      // Channel will prepend with @ to distinguish from normal version
-      const version = p.Version ?? `@${p.Channel ?? ''}`;
-
-      const dep: PackageDependency = {
-        datasource: HermitDatasource.id,
-        depName: p.Name,
-        currentValue: version,
-      };
-
-      dependencies.push(dep);
-    }
-  } catch (e) {
-    logger.warn({ err: e }, `error listing hermit packages`);
+  if (packages === null) {
+    logger.warn(`error listing hermit packages`);
     return null;
+  }
+
+  for (const p of packages) {
+    // version of a hermit package is either a Version or a Channel
+    // Channel will prepend with @ to distinguish from normal version
+    const version = p.Version ?? `@${p.Channel ?? ''}`;
+
+    const dep: PackageDependency = {
+      datasource: HermitDatasource.id,
+      depName: p.Name,
+      currentValue: version,
+    };
+
+    dependencies.push(dep);
   }
 
   return { deps: dependencies };
@@ -52,19 +47,26 @@ export function extractPackageFile(
 /**
  * listHermitPackages will fetch all installed packages from the bin folder
  */
-function listHermitPackages(hermitFile: string): HermitListItem[] | null {
+async function listHermitPackages(
+  hermitFile: string
+): Promise<HermitListItem[] | null> {
   logger.trace('hermit.listHermitPackages()');
+  const hermitFolder = upath.dirname(hermitFile);
 
-  const localDir = GlobalConfig.get('localDir');
-  const hermitFolder = upath.join(localDir, upath.dirname(hermitFile));
-  const files = readLocalDirectorySync(hermitFolder);
+  let files: string[] = [];
 
-  if (files === null) {
-    logger.debug({ hermitFolder }, 'error listing hermit package references');
+  try {
+    files = await readLocalDirectory(hermitFolder);
+  } catch (e) {
+    logger.warn(
+      { hermitFolder, error: e },
+      'error listing hermit package references'
+    );
     return null;
   }
 
   logger.debug({ files, hermitFolder }, 'files for hermit package list');
+
   return files
     .filter((f) => minimatch(f, '.*.pkg'))
     .map((f): HermitListItem | null => {

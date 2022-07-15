@@ -171,23 +171,6 @@ export async function readLocalDirectory(path: string): Promise<string[]> {
   return fileList;
 }
 
-export function readLocalDirectorySync(path: string): string[] | null {
-  const { localDir } = GlobalConfig.get();
-  const localPath = upath.resolve(localDir, path);
-  if (!localPath.startsWith(upath.resolve(localDir))) {
-    logger.warn(
-      { localPath, localDir },
-      'Preventing access to file outside the local directory'
-    );
-
-    return null;
-  }
-
-  const fileList = fs.readdirSync(localPath);
-  return fileList;
-}
-
-
 export function createCacheWriteStream(path: string): fs.WriteStream {
   return fs.createWriteStream(path);
 }

@@ -6,44 +6,51 @@ import type { ExecOptions } from '../../../util/exec/types';
 import { localPathIsSymbolicLink, readLocalSymlink } from '../../../util/fs';
 import { getRepoStatus } from '../../../util/git';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
-import type {
-  HermitPackageDependency,
-  ReadContentResult,
-  UpdateHermitError,
-} from './types';
+import type { ReadContentResult } from './types';
 
 /**
  * updateArtifacts runs hermit install for each updated dependencies
  */
-export async function updateArtifacts({
-  updatedDeps,
-  packageFileName,
-}: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
+export async function updateArtifacts(
+  update: UpdateArtifact
+): Promise<UpdateArtifactsResult[] | null> {
+  const { packageFileName } = update;
   logger.debug({ packageFileName }, `hermit.updateArtifacts()`);
 
   try {
-    for (const dep of updatedDeps) {
-      await updateHermitPackage({ ...dep, packageFileName });
-    }
+    await updateHermitPackage(update);
   } catch (err) {
-    const execErr: UpdateHermitError<string> = err;
+    const execErr: UpdateHermitError = err;
     logger.warn(
       { stdout: execErr.stdout, stderr: execErr.stderr },
       `error updating hermit packages.`
     );
-    return [execErr.from, execErr.to].map((lockFile) => ({
-      artifactError: {
-        lockFile,
-        stderr: execErr.stderr,
+    return [
+      {
+        artifactError: {
+          lockFile: `from: ${execErr.from}, to: ${execErr.to}`,
+          stderr: execErr.stderr,
+        },
       },
-    }));
+    ];
   }
 
   logger.debug(`scanning the changes after update`);
 
-  const updateResult = await getUpdateResult(packageFileName);
+  let updateResult: UpdateArtifactsResult[] | null = null;
 
-  logger.debug({ updateResult }, `update result for hermit`);
+  try {
+    updateResult = await getUpdateResult(packageFileName);
+    logger.debug({ updateResult }, `update result for hermit`);
+  } catch (e) {
+    return [
+      {
+        artifactError: {
+          stderr: e.message,
+        },
+      },
+    ];
+  }
 
   return updateResult;
 }
@@ -180,59 +187,56 @@ function getHermitPackage(name: string, version: string): string {
 }
 
 /**
- * getHermitPackageReferenceFile returns the hermit package reference
- * file with the given package name and version
- */
-function getHermitPackageReferenceFile(
-  pkgName: string,
-  version: string
-): string {
-  return `bin/.${getHermitPackage(pkgName, version)}.pkg`;
-}
-
-/**
  * updateHermitPackage runs hermit install for the given package
  */
-async function updateHermitPackage(
-  pkg: HermitPackageDependency
-): Promise<void> {
-  logger.trace({ pkg }, `hermit.updateHermitPackage()`);
-  if (!pkg.depName || !pkg.currentVersion || !pkg.newValue) {
-    logger.error(
-      {
-        depName: pkg.depName,
-        currentVersion: pkg.currentVersion,
-        newValue: pkg.newValue,
-      },
-      'missing package update information'
-    );
+async function updateHermitPackage(update: UpdateArtifact): Promise<void> {
+  logger.trace({ update }, `hermit.updateHermitPackage()`);
 
-    throw {
-      stderr: 'invalid package to update',
-      from: pkg.currentVersion,
-      to: pkg.newValue,
-    } as UpdateHermitError<string>;
+  const toInstall = [];
+  const from = [];
+
+  for (const pkg of update.updatedDeps) {
+    if (!pkg.depName || !pkg.currentVersion || !pkg.newValue) {
+      logger.warn(
+        {
+          depName: pkg.depName,
+          currentVersion: pkg.currentVersion,
+          newValue: pkg.newValue,
+        },
+        'missing package update information'
+      );
+
+      throw new UpdateHermitError(
+        getHermitPackage(pkg.depName ?? '', pkg.currentVersion ?? ''),
+        getHermitPackage(pkg.depName ?? '', pkg.newValue ?? ''),
+        'invalid package to update'
+      );
+    }
+
+    const depName = pkg.depName ?? '';
+    const currentVersion = pkg.currentVersion ?? '';
+    const newValue = pkg.newValue ?? '';
+    const fromPackage = getHermitPackage(depName, currentVersion);
+    const toPackage = getHermitPackage(depName, newValue);
+    toInstall.push(toPackage);
+    from.push(fromPackage);
   }
-  const depName = pkg.depName;
-  const currentVersion = pkg.currentVersion;
-  const newValue = pkg.newValue;
-  const from = getHermitPackageReferenceFile(depName, currentVersion);
-  const to = getHermitPackageReferenceFile(depName, newValue);
-  const fromPackage = getHermitPackage(depName, currentVersion);
-  const toPackage = getHermitPackage(depName, newValue);
+
   const execOptions: ExecOptions = {
     docker: {
       image: 'sidecar',
     },
-    cwdFile: pkg.packageFileName,
+    cwdFile: update.packageFileName,
   };
-  const execCommands = `./hermit install ${toPackage}`;
+
+  const packagesToInstall = toInstall.join(' ');
+  const fromPackages = from.join(' ');
+
+  const execCommands = `./hermit install ${packagesToInstall}`;
   logger.debug(
     {
-      fromPackage,
-      toPackage,
-      pkgName: pkg.depName,
-      packageFile: pkg.packageFileName,
+      packageFile: update.packageFileName,
+      packagesToInstall: packagesToInstall,
     },
     `performing updates`
   );
@@ -241,14 +245,27 @@ async function updateHermitPackage(
     const result = await exec(execCommands, execOptions);
     logger.trace({ stdout: result.stdout }, `hermit command stdout`);
   } catch (e) {
-    logger.warn(
-      { fromPackage, toPackage, err: e },
-      `error updating hermit package`
+    logger.warn({ err: e }, `error updating hermit package`);
+    throw new UpdateHermitError(
+      fromPackages,
+      packagesToInstall,
+      e.stderr,
+      e.stdout
     );
-    throw {
-      ...e,
-      from,
-      to,
-    } as UpdateHermitError<string>;
+  }
+}
+
+class UpdateHermitError extends Error {
+  stdout: string;
+  stderr: string;
+  from: string;
+  to: string;
+
+  constructor(from: string, to: string, stderr: string, stdout = '') {
+    super();
+    this.stdout = stdout;
+    this.stderr = stderr;
+    this.from = from;
+    this.to = to;
   }
 }
