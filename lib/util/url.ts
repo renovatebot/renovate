@@ -114,9 +114,9 @@ export function hasRepoSubPath(url: string | undefined): boolean {
     return false;
   }
   const parsedUrl = parseUrl(url);
-  // no repo subpath is pathname with a single slash or empty string
+  // url has subpath(nested path) if there is more than than one slash in pathname.
   const idxOfLastSlash = parsedUrl?.pathname?.lastIndexOf('/') ?? 0;
-  return idxOfLastSlash > 0 || parsedUrl?.pathname.trim() === '';
+  return idxOfLastSlash > 0;
 }
 
 export function isGitHubUrl(url: string | undefined): boolean {
