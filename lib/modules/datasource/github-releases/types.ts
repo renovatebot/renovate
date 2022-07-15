@@ -13,6 +13,7 @@ export type GithubRelease = {
 
 export interface GithubReleaseAsset {
   name: string;
+  url: string;
   browser_download_url: string;
   size: number;
 }

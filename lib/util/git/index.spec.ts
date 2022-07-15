@@ -9,13 +9,16 @@ import {
 } from '../../constants/error-messages';
 import { newlineRegex, regEx } from '../regex';
 import * as _conflictsCache from './conflicts-cache';
+import * as _modifiedCache from './modified-cache';
 import type { FileChange } from './types';
 import * as git from '.';
 import { setNoVerify } from '.';
 
 jest.mock('./conflicts-cache');
+jest.mock('./modified-cache');
 jest.mock('delay');
 const conflictsCache = mocked(_conflictsCache);
+const modifiedCache = mocked(_modifiedCache);
 
 // Class is no longer exported
 const SimpleGit = Git().constructor as { prototype: ReturnType<typeof Git> };
@@ -110,14 +113,14 @@ describe('util/git/index', () => {
   });
 
   afterEach(async () => {
-    await tmpDir.cleanup();
-    await origin.cleanup();
+    await tmpDir?.cleanup();
+    await origin?.cleanup();
     jest.restoreAllMocks();
   });
 
   afterAll(async () => {
     process.env = OLD_ENV;
-    await base.cleanup();
+    await base?.cleanup();
   });
 
   describe('gitRetry', () => {
@@ -234,22 +237,28 @@ describe('util/git/index', () => {
     });
   });
 
-  describe('isBranchStale()', () => {
+  describe('isBranchBehindBase()', () => {
     it('should return false if same SHA as master', async () => {
-      expect(await git.isBranchStale('renovate/future_branch')).toBeFalse();
+      expect(
+        await git.isBranchBehindBase('renovate/future_branch')
+      ).toBeFalse();
     });
 
     it('should return true if SHA different from master', async () => {
-      expect(await git.isBranchStale('renovate/past_branch')).toBeTrue();
+      expect(await git.isBranchBehindBase('renovate/past_branch')).toBeTrue();
     });
 
     it('should return result even if non-default and not under branchPrefix', async () => {
-      expect(await git.isBranchStale('develop')).toBeTrue();
-      expect(await git.isBranchStale('develop')).toBeTrue(); // cache
+      expect(await git.isBranchBehindBase('develop')).toBeTrue();
+      expect(await git.isBranchBehindBase('develop')).toBeTrue(); // cache
     });
   });
 
   describe('isBranchModified()', () => {
+    beforeEach(() => {
+      modifiedCache.getCachedModifiedResult.mockReturnValue(null);
+    });
+
     it('should return false when branch is not found', async () => {
       expect(await git.isBranchModified('renovate/not_found')).toBeFalse();
     });
@@ -268,6 +277,11 @@ describe('util/git/index', () => {
 
     it('should return true when custom author is unknown', async () => {
       expect(await git.isBranchModified('renovate/custom_author')).toBeTrue();
+    });
+
+    it('should return value stored in modifiedCacheResult', async () => {
+      modifiedCache.getCachedModifiedResult.mockReturnValue(true);
+      expect(await git.isBranchModified('renovate/future_branch')).toBeTrue();
     });
   });
 
