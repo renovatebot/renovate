@@ -1,6 +1,7 @@
 import is from '@sindresorhus/is';
 import { regEx } from '../../../util/regex';
 import type { CustomExtractConfig, PackageDependency } from '../types';
+import type { RecursionParameter } from './types';
 import {
   createDependency,
   isValidDependency,
@@ -60,29 +61,43 @@ export function handleRecursive(
     regEx(matchString, 'g')
   );
 
-  function recurse(
-    content: string,
-    index: number,
-    combinedGroups: Record<string, string>
-  ): PackageDependency[] {
-    // abort if we have no matchString anymore
-    if (!regexes[index]) {
-      const result = createDependency(
-        {
-          groups: combinedGroups,
-          replaceString: content,
-        },
-        config
-      );
-      return result ? [result] : [];
-    }
-    return regexMatchAll(regexes[index], content).flatMap((match) => {
-      return recurse(
-        match[0],
-        index + 1,
-        mergeGroups(combinedGroups, match.groups ?? {})
-      );
-    });
+  return processRecursive({
+    content,
+    packageFile,
+    config,
+    index: 0,
+    combinedGroups: {},
+    regexes,
+  })
+    .filter(is.truthy)
+    .filter(isValidDependency);
+}
+
+function processRecursive(parameters: RecursionParameter): PackageDependency[] {
+  const {
+    content,
+    index,
+    combinedGroups,
+    regexes,
+    config,
+  }: RecursionParameter = parameters;
+  // abort if we have no matchString anymore
+  if (!regexes[index]) {
+    const result = createDependency(
+      {
+        groups: combinedGroups,
+        replaceString: content,
+      },
+      config
+    );
+    return result ? [result] : [];
   }
-  return recurse(content, 0, {}).filter(is.truthy).filter(isValidDependency);
+  return regexMatchAll(regexes[index], content).flatMap((match) => {
+    return processRecursive({
+      ...parameters,
+      content: match[0],
+      index: index + 1,
+      combinedGroups: mergeGroups(combinedGroups, match.groups ?? {}),
+    });
+  });
 }
