@@ -113,14 +113,14 @@ describe('util/git/index', () => {
   });
 
   afterEach(async () => {
-    await tmpDir.cleanup();
-    await origin.cleanup();
+    await tmpDir?.cleanup();
+    await origin?.cleanup();
     jest.restoreAllMocks();
   });
 
   afterAll(async () => {
     process.env = OLD_ENV;
-    await base.cleanup();
+    await base?.cleanup();
   });
 
   describe('gitRetry', () => {
