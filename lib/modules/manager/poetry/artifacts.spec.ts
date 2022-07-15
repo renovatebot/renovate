@@ -15,7 +15,7 @@ const pyproject1toml = Fixtures.get('pyproject.1.toml');
 const pyproject10toml = Fixtures.get('pyproject.10.toml');
 
 jest.mock('fs-extra');
-jest.mock('child_process');
+jest.mock('../../../util/exec/common');
 jest.mock('../../../util/exec/env');
 jest.mock('../../datasource');
 jest.mock('../../../util/host-rules');
