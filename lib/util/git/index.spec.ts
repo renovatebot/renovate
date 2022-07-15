@@ -252,7 +252,9 @@ describe('util/git/index', () => {
           } as BranchCache,
         ],
       });
-      expect(git.isBranchBehindBase('renovate/future_branch')).toBeFalse();
+      expect(
+        await git.isBranchBehindBase('renovate/future_branch')
+      ).toBeFalse();
     });
 
     it('should return true if SHA different from master', async () => {
@@ -265,7 +267,7 @@ describe('util/git/index', () => {
           } as BranchCache,
         ],
       });
-      expect(git.isBranchBehindBase('renovate/past_branch')).toBeTrue();
+      expect(await git.isBranchBehindBase('renovate/past_branch')).toBeTrue();
     });
 
     it('should return result even if non-default and not under branchPrefix', async () => {
@@ -278,8 +280,8 @@ describe('util/git/index', () => {
           } as BranchCache,
         ],
       });
-      expect(git.isBranchBehindBase('develop')).toBeFalse();
-      expect(git.isBranchBehindBase('develop')).toBeFalse(); // cache
+      expect(await git.isBranchBehindBase('develop')).toBeFalse();
+      expect(await git.isBranchBehindBase('develop')).toBeFalse(); // cache
     });
   });
 

@@ -539,17 +539,19 @@ export function getBranchList(): string[] {
   return Object.keys(config.branchCommits);
 }
 
-export function isBranchBehindBase(branchName: string): boolean {
+export async function isBranchBehindBase(branchName: string): Promise<boolean> {
   const { currentBranchSha } = config;
   const { branches } = getCache();
   const cachedBranch = branches?.find(
     (branch) => branch.branchName === branchName
   );
-  if (!branchExists(branchName) || !currentBranchSha || !cachedBranch) {
-    return false;
+
+  if (cachedBranch) {
+    return !(currentBranchSha === cachedBranch?.parentSha);
   }
 
-  return !(currentBranchSha === cachedBranch?.parentSha);
+  const parentSha = await getBranchParentSha(branchName);
+  return !(currentBranchSha === parentSha);
 }
 
 export async function isBranchModified(branchName: string): Promise<boolean> {
