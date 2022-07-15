@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import type { RenovateConfig } from '../../config/types';
 import { logger } from '../../logger';
 import type {
@@ -34,19 +35,15 @@ export class PackageFiles {
       return null;
     }
 
-    if (!managers) {
+    if (!managers || is.emptyObject(managers)) {
       this.data.delete(branch);
       return this.pop();
     }
 
     const [manager, packageFiles] = Object.entries(managers).pop() ?? [];
 
-    if (!manager) {
-      return null;
-    }
-
-    if (!packageFiles) {
-      delete managers[manager];
+    if (!packageFiles || is.emptyArray(packageFiles)) {
+      delete managers[manager!];
       return this.pop();
     }
 
@@ -58,30 +55,37 @@ export class PackageFiles {
 
   public static getTruncatedMarkdown(
     config: RenovateConfig,
-    maxLength: number
+    maxLength: number,
+    setHeader = true
   ): string {
-    // deep copy map
-    const data = new Map(clone(Array.from(this.data)));
+    const org = this.data; // backup data
+    const cloned = new Map(clone(Array.from(this.data))); // deep clone data
+    this.data = cloned; // only mutate cloned data
+
     const note =
       '> **Note**\n> Detected dependencies section has been truncated\n';
-    let title = `## Detected dependencies\n\n`;
+    const title = `## Detected dependencies\n\n`;
+    const mdMaxLength = maxLength - (setHeader ? (title + note).length : 0);
 
     let md: string;
     let dep: PackageDependency | null = null;
+    let header = '';
+    let truncated = false;
 
     do {
       md = PackageFiles.getDashboardMarkdown(config, false);
-      if (md.length > maxLength) {
+      if (md.length > mdMaxLength) {
+        truncated = true;
         dep = PackageFiles.pop();
       }
-    } while (dep && md.length > maxLength - (title + note).length);
+    } while (dep && md.length > mdMaxLength);
 
-    this.data = data;
-    title +=
-      md.length === PackageFiles.getDashboardMarkdown(config, false).length
-        ? ''
-        : note;
-    return title + md;
+    this.data = org; // restore data
+
+    header += title;
+    header += truncated ? note : '';
+
+    return (setHeader ? header : '') + md;
   }
 
   public static getDashboardMarkdown(

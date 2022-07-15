@@ -603,11 +603,8 @@ describe('workers/repository/dependency-dashboard', () => {
 
       describe('single base branch repo', () => {
         beforeEach(() => {
-          PackageFiles.add('main', packageFiles);
-        });
-
-        afterEach(() => {
           PackageFiles.clear();
+          PackageFiles.add('main', packageFiles);
         });
 
         it('add detected dependencies to the Dependency Dashboard body', async () => {
@@ -658,12 +655,9 @@ describe('workers/repository/dependency-dashboard', () => {
 
       describe('multi base branch repo', () => {
         beforeEach(() => {
+          PackageFiles.clear();
           PackageFiles.add('main', packageFiles);
           PackageFiles.add('dev', packageFiles);
-        });
-
-        afterEach(() => {
-          PackageFiles.clear();
         });
 
         it('add detected dependencies to the Dependency Dashboard body', async () => {
@@ -712,6 +706,83 @@ describe('workers/repository/dependency-dashboard', () => {
 
           // same with dry run
           await dryRun(branches, platform);
+        });
+      });
+
+      describe('tests PackageFiles.getTruncatedMarkdown()', () => {
+        const getDashboardMarkdownSpy = jest.spyOn(
+          PackageFiles,
+          'getDashboardMarkdown'
+        );
+        const note =
+          '> **Note**\n> Detected dependencies section has been truncated\n';
+        const title = `## Detected dependencies\n\n`;
+
+        beforeEach(() => {
+          PackageFiles.clear();
+        });
+
+        afterAll(() => {
+          jest.resetAllMocks();
+        });
+
+        it('removes a branch with no managers and then proceeds to remove one dep', () => {
+          PackageFiles.add('main', packageFiles);
+          PackageFiles.add('dev', packageFilesWithDigest);
+          const md = PackageFiles.getDashboardMarkdown(config, false);
+          const len = md.length;
+          PackageFiles.add('empty/branch', {});
+          const truncated = PackageFiles.getTruncatedMarkdown(
+            config,
+            len,
+            false
+          );
+          const nonTruncated = PackageFiles.getDashboardMarkdown(config, false);
+          expect(getDashboardMarkdownSpy).toHaveBeenCalledTimes(4); // only one dep was removed
+          expect(truncated.length < nonTruncated.length).toBeTrue();
+        });
+
+        it('does not truncate as there is enough space to fit', () => {
+          PackageFiles.add('main', packageFiles);
+          const nonTruncated = PackageFiles.getDashboardMarkdown(config, false);
+          const len = (title + note + nonTruncated).length;
+          const truncated = PackageFiles.getTruncatedMarkdown(
+            config,
+            len,
+            false
+          );
+          const truncatedWithTitle = PackageFiles.getTruncatedMarkdown(
+            config,
+            len
+          );
+          expect(truncated.length === nonTruncated.length).toBeTrue();
+          expect(truncatedWithTitle.includes(note)).toBeFalse();
+        });
+
+        it('coverage: does nothing when no base branches', () => {
+          const truncated = PackageFiles.getTruncatedMarkdown(
+            config,
+            -1,
+            false
+          );
+          expect(getDashboardMarkdownSpy).toHaveBeenCalledTimes(1);
+          expect(truncated).toBe('');
+        });
+
+        it('removes a manager with no package files then proceeds to remove one dep', () => {
+          PackageFiles.add('main', packageFiles);
+          PackageFiles.add('dev', { dockerfile: [] });
+          const md = PackageFiles.getDashboardMarkdown(config, false);
+          const len = md.length;
+          PackageFiles.add('empty/branch', {});
+          const truncated = PackageFiles.getTruncatedMarkdown(
+            config,
+            len,
+            false
+          );
+          const nonTruncated = PackageFiles.getDashboardMarkdown(config, false);
+          expect(getDashboardMarkdownSpy).toHaveBeenCalledTimes(4); // only one dep was removed
+          expect(truncated.length < nonTruncated.length).toBeTrue();
         });
       });
     });
