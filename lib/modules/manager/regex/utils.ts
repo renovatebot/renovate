@@ -102,10 +102,12 @@ export function mergeExtractionTemplate(
 export function isValidDependency({
   depName,
   currentValue,
+  currentDigest,
 }: PackageDependency): boolean {
   // check if all the fields are set
   return (
-    is.nonEmptyStringAndNotWhitespace(depName) &&
+    (is.nonEmptyStringAndNotWhitespace(depName) ||
+      is.nonEmptyStringAndNotWhitespace(currentDigest)) &&
     is.nonEmptyStringAndNotWhitespace(currentValue)
   );
 }
