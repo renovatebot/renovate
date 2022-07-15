@@ -55,7 +55,7 @@ function parseGitDependency(module: PuppetfileModule): PackageDependency {
   }
   const gitOwnerRepo = parseGitOwnerRepo(git, githubUrl);
 
-  if (typeof gitOwnerRepo !== 'string') {
+  if (!gitOwnerRepo) {
     // failed to parse git url
     return {
       depName: moduleName,
