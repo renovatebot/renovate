@@ -41,7 +41,7 @@ describe('modules/platform/azure/index', () => {
     logger = (await import('../../../logger')).logger as never;
     git = require('../../../util/git');
     git.branchExists.mockReturnValue(true);
-    git.isBranchStale.mockReturnValue(false);
+    git.isBranchBehindBase.mockReturnValue(false);
     hostRules.find.mockReturnValue({
       token: 'token',
     });

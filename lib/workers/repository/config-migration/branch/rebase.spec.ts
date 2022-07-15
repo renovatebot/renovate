@@ -52,7 +52,7 @@ describe('workers/repository/config-migration/branch/rebase', () => {
     });
 
     it('rebases migration branch', async () => {
-      git.isBranchStale.mockReturnValueOnce(true);
+      git.isBranchBehindBase.mockReturnValueOnce(true);
       await rebaseMigrationBranch(config, migratedConfigData);
       expect(git.commitFiles).toHaveBeenCalledTimes(1);
     });
@@ -61,14 +61,14 @@ describe('workers/repository/config-migration/branch/rebase', () => {
       GlobalConfig.set({
         dryRun: 'full',
       });
-      git.isBranchStale.mockReturnValueOnce(true);
+      git.isBranchBehindBase.mockReturnValueOnce(true);
       await rebaseMigrationBranch(config, migratedConfigData);
       expect(git.commitFiles).toHaveBeenCalledTimes(0);
     });
 
     it('rebases via platform', async () => {
       config.platformCommit = true;
-      git.isBranchStale.mockReturnValueOnce(true);
+      git.isBranchBehindBase.mockReturnValueOnce(true);
       await rebaseMigrationBranch(config, migratedConfigData);
       expect(platform.commitFiles).toHaveBeenCalledTimes(1);
     });

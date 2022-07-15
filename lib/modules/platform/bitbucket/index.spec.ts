@@ -34,7 +34,7 @@ describe('modules/platform/bitbucket/index', () => {
     logger = (await import('../../../logger')).logger as any;
     git = require('../../../util/git');
     git.branchExists.mockReturnValue(true);
-    git.isBranchStale.mockReturnValue(false);
+    git.isBranchBehindBase.mockReturnValue(false);
     // clean up hostRules
     hostRules.clear();
     hostRules.find.mockReturnValue({
