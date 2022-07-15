@@ -5,6 +5,8 @@ import urlJoin from 'url-join';
 import { logger } from '../logger';
 import { regEx } from './regex';
 
+const githubUrlRe = regEx(/^(https?:\/\/)?(www\.)?github\.com\/?/);
+
 export function joinUrlParts(...parts: string[]): string {
   return urlJoin(...parts);
 }
@@ -121,6 +123,5 @@ export function isGitHubUrl(url: string | undefined): boolean {
   if (url === undefined) {
     return false;
   }
-  const githubUrlRe = regEx('^https?://(?:www.)?github.com');
   return githubUrlRe.test(url);
 }
