@@ -17,13 +17,15 @@ const NONTERM = [
   'SIGWINCH',
 ];
 
-function stringify(list: Buffer[], encoding: BufferEncoding): string {
+const encoding = 'utf8';
+
+function stringify(list: Buffer[]): string {
   return Buffer.concat(list).toString(encoding);
 }
 
 function initStreamListeners(
   cp: ChildProcess,
-  opts: RawExecOptions & { maxBuffer: number; encoding: BufferEncoding }
+  opts: RawExecOptions & { maxBuffer: number }
 ): [Buffer[], Buffer[]] {
   const stdout: Buffer[] = [];
   const stderr: Buffer[] = [];
@@ -32,7 +34,7 @@ function initStreamListeners(
 
   cp.stdout?.on('data', (chunk: Buffer) => {
     // process.stdout.write(data.toString());
-    const len = Buffer.byteLength(chunk, opts.encoding);
+    const len = Buffer.byteLength(chunk, encoding);
     stdoutLen += len;
     if (stdoutLen > opts.maxBuffer) {
       cp.emit('error', new Error('stdout maxBuffer exceeded'));
@@ -43,7 +45,7 @@ function initStreamListeners(
 
   cp.stderr?.on('data', (chunk: Buffer) => {
     // process.stderr.write(data.toString());
-    const len = Buffer.byteLength(chunk, opts.encoding);
+    const len = Buffer.byteLength(chunk, encoding);
     stderrLen += len;
     if (stderrLen > opts.maxBuffer) {
       cp.emit('error', new Error('stderr maxBuffer exceeded'));
@@ -56,7 +58,6 @@ function initStreamListeners(
 
 export function exec(cmd: string, opts: RawExecOptions): Promise<ExecResult> {
   return new Promise((resolve, reject) => {
-    const encoding = opts.encoding as BufferEncoding;
     const maxBuffer = opts.maxBuffer ?? 10 * 1024 * 1024; // Set default max buffer size to 10MB
     const cp = spawn(cmd, {
       ...opts,
@@ -70,7 +71,6 @@ export function exec(cmd: string, opts: RawExecOptions): Promise<ExecResult> {
     const [stdout, stderr] = initStreamListeners(cp, {
       ...opts,
       maxBuffer,
-      encoding,
     });
 
     // handle process events
@@ -96,8 +96,8 @@ export function exec(cmd: string, opts: RawExecOptions): Promise<ExecResult> {
         return;
       }
       resolve({
-        stderr: stringify(stderr, encoding),
-        stdout: stringify(stdout, encoding),
+        stderr: stringify(stderr),
+        stdout: stringify(stdout),
       });
     });
 
@@ -105,8 +105,8 @@ export function exec(cmd: string, opts: RawExecOptions): Promise<ExecResult> {
       return {
         cmd: cp.spawnargs.join(' '),
         options: opts,
-        stdout: stringify(stdout, encoding),
-        stderr: stringify(stderr, encoding),
+        stdout: stringify(stdout),
+        stderr: stringify(stderr),
       };
     }
   });

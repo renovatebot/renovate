@@ -2,7 +2,7 @@ import { spawn as _spawn } from 'child_process';
 import is from '@sindresorhus/is';
 import traverse from 'traverse';
 import upath from 'upath';
-import { exec as _exec } from '../lib/util/exec/common';
+import { rawExec as _exec } from '../lib/util/exec/common';
 import type { ExecOptions } from '../lib/util/exec/types';
 import { regEx } from '../lib/util/regex';
 

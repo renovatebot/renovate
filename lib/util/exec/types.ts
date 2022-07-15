@@ -29,6 +29,9 @@ export interface DockerOptions {
 
 // TODO: rename
 export interface RawExecOptions extends ChildProcessSpawnOptions {
+  /**
+   * @deprecated renovate uses utf8, encoding property is ignored.
+   */
   encoding: string;
   maxBuffer?: number | undefined;
 }
