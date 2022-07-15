@@ -252,32 +252,34 @@ describe('util/git/index', () => {
           } as BranchCache,
         ],
       });
-      expect(git.isBranchStale('renovate/future_branch')).toBeFalse();
+      expect(git.isBranchBehindBase('renovate/future_branch')).toBeFalse();
     });
 
-    it('should return true if SHA different from master', () => {
+    it('should return true if SHA different from master', async () => {
+      const parentSha = await git.getBranchParentSha('renovate/past_branch');
       repoCache.getCache.mockReturnValueOnce({
         branches: [
           {
             branchName: 'renovate/past_branch',
-            parentSha: 'fd974b8952ed96b143db552b36114bcc5e510bc2',
+            parentSha: parentSha,
           } as BranchCache,
         ],
       });
-      expect(git.isBranchStale('renovate/past_branch')).toBeTrue();
+      expect(git.isBranchBehindBase('renovate/past_branch')).toBeTrue();
     });
 
-    it('should return result even if non-default and not under branchPrefix', () => {
+    it('should return result even if non-default and not under branchPrefix', async () => {
+      const parentSha = await git.getBranchParentSha('renovate/future_branch');
       repoCache.getCache.mockReturnValueOnce({}).mockReturnValueOnce({
         branches: [
           {
             branchName: 'develop',
-            parentSha: 'fd974b8952ed96b143db552b36114bcc5e510bc2',
+            parentSha: parentSha,
           } as BranchCache,
         ],
       });
-      expect(git.isBranchStale('develop')).toBeFalse();
-      expect(git.isBranchStale('develop')).toBeTrue(); // cache
+      expect(git.isBranchBehindBase('develop')).toBeFalse();
+      expect(git.isBranchBehindBase('develop')).toBeFalse(); // cache
     });
   });
 
