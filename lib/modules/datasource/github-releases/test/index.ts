@@ -24,10 +24,12 @@ export class GitHubReleaseMocker {
     });
     for (const assetFn of Object.keys(assets)) {
       const assetPath = `/repos/${this.packageName}/releases/download/${version}/${assetFn}`;
+      const urlPath = `/repos/${this.packageName}/releases/assets/${version}-${assetFn}`;
       const assetData = assets[assetFn];
       releaseData.assets.push({
         name: assetFn,
         size: assetData.length,
+        url: `${this.githubApiHost}${urlPath}`,
         browser_download_url: `${this.githubApiHost}${assetPath}`,
       });
       httpMock
