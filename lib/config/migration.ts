@@ -85,8 +85,7 @@ export function migrateConfig(config: RenovateConfig): MigratedConfig {
                   depTypes.includes(depType)
                 )
               ) {
-                (arrMigrate as unknown as PackageRule).matchDepTypes = [key];
-                delete (arrMigrate as unknown as PackageRule).packageRules;
+                delete arrMigrate.migratedConfig.packageRules;
               }
               newArray.push(arrMigrate.migratedConfig);
             } else {

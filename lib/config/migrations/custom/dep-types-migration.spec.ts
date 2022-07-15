@@ -7,6 +7,18 @@ describe('config/migrations/custom/dep-types-migration', () => {
         peerDependencies: {
           versionStrategy: 'widen',
         },
+        dependencies: {
+          versionStrategy: 'widen',
+        },
+        engines: {
+          rangeStrategy: 'auto',
+        },
+        optionalDependencies: {
+          versionStrategy: 'widen',
+        },
+        devDependencies: {
+          versionStrategy: 'widen',
+        },
         depTypes: [
           'dependencies',
           {
@@ -32,9 +44,6 @@ describe('config/migrations/custom/dep-types-migration', () => {
         ],
       },
       {
-        peerDependencies: {
-          versionStrategy: 'widen',
-        },
         packageRules: [
           {
             packagePatterns: '^(@angular|typescript)' as never,
@@ -49,29 +58,27 @@ describe('config/migrations/custom/dep-types-migration', () => {
                 automerge: true,
               },
             ],
+          },
+          {
+            matchDepTypes: ['peerDependencies'],
+            versionStrategy: 'widen',
+          },
+          {
+            matchDepTypes: ['dependencies'],
+            versionStrategy: 'widen',
+          },
+          {
+            matchDepTypes: ['engines'],
+            rangeStrategy: 'auto',
           },
           {
             matchDepTypes: ['optionalDependencies'],
-            respectLatest: false,
+            versionStrategy: 'widen',
           },
-        ],
-      }
-    );
-  });
-
-  it('should migrate depTypes', () => {
-    expect(DepTypesMigration).toMigrate(
-      {
-        depTypes: [
-          'dependencies',
           {
-            depType: 'optionalDependencies',
-            respectLatest: false,
+            matchDepTypes: ['devDependencies'],
+            versionStrategy: 'widen',
           },
-        ],
-      },
-      {
-        packageRules: [
           {
             matchDepTypes: ['optionalDependencies'],
             respectLatest: false,
