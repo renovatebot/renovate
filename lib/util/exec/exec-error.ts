@@ -16,17 +16,14 @@ export class ExecError extends Error {
   options: RawExecOptions;
   exitCode?: number;
   signal?: NodeJS.Signals;
+  err?: Error;
 
   constructor(message: string, data: ExecErrorData, err?: Error) {
     const { cmd, exitCode, stderr, stdout, options, signal } = data;
 
-    // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error/cause
-    if (err) {
-      super(message, { cause: err });
-    } else {
-      super(message);
-    }
+    super(message);
 
+    this.name = this.constructor.name;
     this.cmd = cmd;
     this.stderr = stderr;
     this.stdout = stdout;
@@ -35,8 +32,13 @@ export class ExecError extends Error {
     if (exitCode) {
       this.exitCode = exitCode;
     }
+
     if (signal) {
       this.signal = signal;
+    }
+
+    if (err) {
+      this.err = err;
     }
   }
 }
