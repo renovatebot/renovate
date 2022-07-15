@@ -3,7 +3,7 @@ import { fs } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import { updateArtifacts } from '.';
 
-jest.mock('child_process');
+jest.mock('../../../util/exec/common');
 jest.mock('../../../util/fs');
 
 describe('modules/manager/flux/artifacts', () => {
