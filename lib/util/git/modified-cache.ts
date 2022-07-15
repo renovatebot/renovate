@@ -33,7 +33,7 @@ export function setCachedModifiedResult(
     branches.push(branch);
   }
 
-  if (branch?.sha !== branchSha) {
+  if (branch.sha !== branchSha) {
     branch.sha = branchSha;
   }
 
