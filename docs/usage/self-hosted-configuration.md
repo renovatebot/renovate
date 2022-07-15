@@ -339,16 +339,11 @@ In practice, it is implemented by converting the `force` configuration into a `p
 This is set to `true` by default, meaning that any settings (such as `schedule`) take maximum priority even against custom settings existing inside individual repositories.
 It will also override any settings in `packageRules`.
 
-## forkMode
-
-You probably have no need for this option - it is an experimental setting for the Renovate hosted GitHub App.
-If this is set to `true` then Renovate will fork the repository into the personal space of the person owning the Personal Access Token.
-
 ## forkToken
 
-You probably don't need this option - it is an experimental setting for the Renovate hosted GitHub App.
-This should be set to a Personal Access Token (GitHub only) when `forkMode` is set to `true`.
-Renovate will use this token to fork the repository into the personal space of the person owning the Personal Access Token.
+You probably have no need for this option - it is an experimental setting developed for the Forking Renovate hosted GitHub App.
+
+If this option is non-null then Renovate will fork the target repository into the account owning the Personal Access Token, and keep its default branch up-to-date with the target.
 Renovate will then create branches on the fork and opens Pull Requests on the parent repository.
 
 ## gitNoVerify

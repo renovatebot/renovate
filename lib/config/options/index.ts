@@ -392,22 +392,14 @@ const options: RenovateOptions[] = [
     default: false,
   },
   {
-    name: 'forkMode',
-    description:
-      'Set to `true` to fork the source repository and create branches there instead.',
-    stage: 'repository',
-    type: 'boolean',
-    default: false,
-    globalOnly: true,
-  },
-  {
     name: 'forkToken',
     description:
-      'Will be used on GitHub when `forkMode` is set to `true` to clone the repositories.',
+      'Configure a personal access token here to enable "fork mode".',
     stage: 'repository',
     type: 'string',
-    default: '',
     globalOnly: true,
+    supportedPlatforms: ['github'],
+    experimental: true, 
   },
   {
     name: 'githubTokenWarn',

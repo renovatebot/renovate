@@ -93,7 +93,6 @@ export interface LocalRepoConfig {
   prReviewsRequired: boolean;
   repoForceRebase?: boolean;
   parentRepo: string | null;
-  forkMode?: boolean;
   forkToken?: string;
   prList: Pr[] | null;
   issueList: any[] | null;

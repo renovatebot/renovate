@@ -36,7 +36,6 @@ export interface RepoParams {
   repository: string;
   endpoint?: string;
   gitUrl?: GitUrlOption;
-  forkMode?: string;
   forkToken?: string;
   includeForks?: boolean;
   renovateUsername?: string;

@@ -322,23 +322,23 @@ describe('modules/platform/github/index', () => {
       expect(config).toMatchSnapshot();
     });
 
-    it('should fork when forkMode', async () => {
+    it('should fork when using forkToken', async () => {
       const scope = httpMock.scope(githubApiHost);
       forkInitRepoMock(scope, 'some/repo', false);
       const config = await github.initRepo({
         repository: 'some/repo',
-        forkMode: true,
+        forkToken: 'abc123',
       } as any);
       expect(config).toMatchSnapshot();
     });
 
-    it('should update fork when forkMode', async () => {
+    it('should update fork when using forkToken', async () => {
       const scope = httpMock.scope(githubApiHost);
       forkInitRepoMock(scope, 'some/repo', true);
       scope.patch('/repos/forked/repo/git/refs/heads/master').reply(200);
       const config = await github.initRepo({
         repository: 'some/repo',
-        forkMode: true,
+        forkToken: 'abc123',
       } as any);
       expect(config).toMatchSnapshot();
     });
@@ -351,7 +351,7 @@ describe('modules/platform/github/index', () => {
       scope.patch('/repos/forked/repo/git/refs/heads/master').reply(200);
       const config = await github.initRepo({
         repository: 'some/repo',
-        forkMode: true,
+        forkToken: 'abc123',
       } as any);
       expect(config).toMatchSnapshot();
     });
@@ -1037,7 +1037,7 @@ describe('modules/platform/github/index', () => {
         ]);
       await github.initRepo({
         repository: 'some/repo',
-        forkMode: true,
+        forkToken: 'abc123',
       } as any);
 
       const pr = await github.getBranchPr('somebranch');

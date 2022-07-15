@@ -241,7 +241,6 @@ export async function getJsonFile(
 export async function initRepo({
   endpoint,
   repository,
-  forkMode,
   forkToken,
   renovateUsername,
   cloneSubmodules,
@@ -366,9 +365,8 @@ export async function initRepo({
   config.issueList = null;
   config.prList = null;
 
-  config.forkMode = !!forkMode;
-  if (forkMode) {
-    logger.debug('Bot is in forkMode');
+  if (forkToken) {
+    logger.debug('Bot is in fork mode');
     config.forkToken = forkToken;
     // save parent name then delete
     config.parentRepo = config.repository;
@@ -484,7 +482,7 @@ export async function initRepo({
 
   const parsedEndpoint = URL.parse(platformConfig.endpoint);
   // istanbul ignore else
-  if (forkMode) {
+  if (forkToken) {
     logger.debug('Using forkToken for git init');
     parsedEndpoint.auth = config.forkToken ?? null;
   } else {
@@ -612,7 +610,7 @@ export async function getPrList(): Promise<Pr[]> {
   if (!config.prList) {
     const repo = config.parentRepo ?? config.repository;
     const username =
-      !config.forkMode && !config.ignorePrAuthor && config.renovateUsername
+      !config.forkToken && !config.ignorePrAuthor && config.renovateUsername
         ? config.renovateUsername
         : null;
     // TODO: check null `repo` (#7154)
@@ -635,7 +633,7 @@ export async function findPr({
       p.sourceBranch === branchName &&
       (!prTitle || p.title === prTitle) &&
       matchesState(p.state, state) &&
-      (config.forkMode || config.repository === p.sourceRepo) // #5188
+      (config.forkToken || config.repository === p.sourceRepo) // #5188
   );
   if (pr) {
     logger.debug(`Found PR #${pr.number}`);
@@ -1389,7 +1387,7 @@ export async function createPr({
 }: CreatePRConfig): Promise<Pr | null> {
   const body = sanitize(rawBody);
   const base = targetBranch;
-  // Include the repository owner to handle forkMode and regular mode
+  // Include the repository owner to handle forkToken and regular mode
   // TODO: can `repository` be null? (#7154)
 
   const head = `${config.repository!.split('/')[0]}:${sourceBranch}`;

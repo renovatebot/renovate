@@ -242,7 +242,7 @@ If so then Renovate will reflect this setting in its description and use package
 
 <!-- prettier-ignore -->
 !!! note
-    The `baseBranches` config option is not supported when `forkMode` is enabled, including in the Forking Renovate app.
+    The `baseBranches` config option is not supported when a `forkToken` has been configured, such as in the Forking Renovate app.
 
 ## bbUseDefaultReviewers
 
