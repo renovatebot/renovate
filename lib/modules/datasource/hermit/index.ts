@@ -7,10 +7,7 @@ import { parseUrl } from '../../../util/url';
 import { id } from '../../versioning/hermit';
 import { Datasource } from '../datasource';
 import { getApiBaseUrl } from '../github-releases/common';
-import type {
-  GithubRelease,
-  GithubReleaseAsset,
-} from '../github-releases/types';
+import type { GithubRelease } from '../github-releases/types';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 import type { HermitSearchResult } from './types';
 
@@ -67,10 +64,7 @@ export class HermitDatasource extends Datasource {
       return null;
     }
 
-    const items = await this.getHermitSearchManifest({
-      packageName,
-      registryUrl,
-    });
+    const items = await this.getHermitSearchManifest(parsedUrl);
 
     if (items === null) {
       return null;
@@ -106,16 +100,17 @@ export class HermitDatasource extends Datasource {
    */
   @cache({
     namespace: `datasource-hermit-search-manifest`,
-    key: ({ registryUrl }: GetReleasesConfig) => registryUrl ?? '',
+    key: (u) => u.toString(),
   })
-  async getHermitSearchManifest({
-    registryUrl,
-  }: GetReleasesConfig): Promise<HermitSearchResult[] | null> {
-    const u = parseUrl(registryUrl);
-    const host = u?.host ?? '';
-    const groups = this.pathRegex.exec(u?.pathname ?? '')?.groups;
-
+  async getHermitSearchManifest(u: URL): Promise<HermitSearchResult[] | null> {
+    const registryUrl = u.toString();
+    const host = u.host ?? '';
+    const groups = this.pathRegex.exec(u.pathname ?? '')?.groups;
     if (!groups) {
+      logger.warn(
+        { registryUrl },
+        'failed to get owner and repo from given url'
+      );
       return null;
     }
 
@@ -129,7 +124,7 @@ export class HermitDatasource extends Datasource {
 
     // finds asset with name index.json
     const asset = indexRelease.body.assets.find(
-      (asset: GithubReleaseAsset) => asset.name === 'index.json'
+      (asset) => asset.name === 'index.json'
     );
 
     if (!asset) {
