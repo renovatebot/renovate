@@ -11,6 +11,7 @@ import { joinUrlParts } from '../../../../util/url';
 import { getPlatformPrOptions } from '../../update/pr';
 import { prepareLabels } from '../../update/pr/labels';
 import { addParticipants } from '../../update/pr/participants';
+import { ConfigMigrationCommitMessageFactory } from '../branch/commit-message';
 import type { MigratedData } from '../branch/migrated-data';
 import { getMigrationBranchName } from '../common';
 
@@ -24,7 +25,12 @@ export async function ensureConfigMigrationPr(
     'configuration-options/#configmigration'
   );
   const branchName = getMigrationBranchName(config);
-  const prTitle = 'Migrate Renovate config';
+  const commitMessageFactory = new ConfigMigrationCommitMessageFactory(
+    config,
+    migratedConfigData.filename
+  );
+
+  const prTitle = commitMessageFactory.create().toString();
   const existingPr = await platform.getBranchPr(branchName);
   const filename = migratedConfigData.filename;
   logger.debug('Filling in config migration PR template');
