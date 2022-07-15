@@ -541,11 +541,11 @@ export function isBranchStale(branchName: string): boolean {
   const cachedBranch = branches?.find(
     (branch) => branch.branchName === branchName
   );
+  if (!branchExists(branchName) || !currentBranchSha || !cachedBranch) {
+    return false;
+  }
 
-  return (
-    config.branchCommits[branchName] === cachedBranch?.sha &&
-    currentBranchSha === cachedBranch?.parentSha
-  );
+  return !(currentBranchSha === cachedBranch?.parentSha);
 }
 
 export async function isBranchModified(branchName: string): Promise<boolean> {

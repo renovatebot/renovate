@@ -7,6 +7,8 @@ import {
   CONFIG_VALIDATION,
   INVALID_PATH,
 } from '../../constants/error-messages';
+import * as _repoCache from '../cache/repository';
+import type { BranchCache } from '../cache/repository/types';
 import { newlineRegex, regEx } from '../regex';
 import * as _conflictsCache from './conflicts-cache';
 import type { FileChange } from './types';
@@ -15,6 +17,8 @@ import { setNoVerify } from '.';
 
 jest.mock('./conflicts-cache');
 jest.mock('delay');
+jest.mock('../cache/repository');
+const repoCache = mocked(_repoCache);
 const conflictsCache = mocked(_conflictsCache);
 
 // Class is no longer exported
@@ -236,16 +240,41 @@ describe('util/git/index', () => {
 
   describe('isBranchStale()', () => {
     it('should return false if same SHA as master', async () => {
-      expect(await git.isBranchStale('renovate/future_branch')).toBeFalse();
+      const parentSha = await git.getBranchParentSha('renovate/future_branch');
+      repoCache.getCache.mockReturnValueOnce({
+        branches: [
+          {
+            branchName: 'renovate/future_branch',
+            parentSha: parentSha,
+          } as BranchCache,
+        ],
+      });
+      expect(git.isBranchStale('renovate/future_branch')).toBeFalse();
     });
 
-    it('should return true if SHA different from master', async () => {
-      expect(await git.isBranchStale('renovate/past_branch')).toBeTrue();
+    it('should return true if SHA different from master', () => {
+      repoCache.getCache.mockReturnValueOnce({
+        branches: [
+          {
+            branchName: 'renovate/past_branch',
+            parentSha: 'fd974b8952ed96b143db552b36114bcc5e510bc2',
+          } as BranchCache,
+        ],
+      });
+      expect(git.isBranchStale('renovate/past_branch')).toBeTrue();
     });
 
-    it('should return result even if non-default and not under branchPrefix', async () => {
-      expect(await git.isBranchStale('develop')).toBeTrue();
-      expect(await git.isBranchStale('develop')).toBeTrue(); // cache
+    it('should return result even if non-default and not under branchPrefix', () => {
+      repoCache.getCache.mockReturnValueOnce({}).mockReturnValueOnce({
+        branches: [
+          {
+            branchName: 'develop',
+            parentSha: 'fd974b8952ed96b143db552b36114bcc5e510bc2',
+          } as BranchCache,
+        ],
+      });
+      expect(git.isBranchStale('develop')).toBeFalse();
+      expect(git.isBranchStale('develop')).toBeTrue(); // cache
     });
   });
 
