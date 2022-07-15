@@ -34,6 +34,10 @@ import {
   setCachedConflictResult,
 } from './conflicts-cache';
 import { checkForPlatformFailure, handleCommitError } from './error';
+import {
+  getCachedModifiedResult,
+  setCachedModifiedResult,
+} from './modified-cache';
 import { configSigningKey, writePrivateKey } from './private-key';
 import type {
   CommitFilesConfig,
@@ -564,11 +568,6 @@ export async function isBranchStale(branchName: string): Promise<boolean> {
 }
 
 export async function isBranchModified(branchName: string): Promise<boolean> {
-  await syncGit();
-  // First check cache
-  if (config.branchIsModified[branchName] !== undefined) {
-    return config.branchIsModified[branchName];
-  }
   if (!branchExists(branchName)) {
     logger.debug(
       { branchName },
@@ -576,6 +575,20 @@ export async function isBranchModified(branchName: string): Promise<boolean> {
     );
     return false;
   }
+  // First check local config
+  if (config.branchIsModified[branchName] !== undefined) {
+    return config.branchIsModified[branchName];
+  }
+  // Second check repoCache
+  const isModified = getCachedModifiedResult(
+    branchName,
+    config.branchCommits[branchName]
+  );
+  if (isModified !== null) {
+    return (config.branchIsModified[branchName] = isModified);
+  }
+
+  await syncGit();
   // Retrieve the author of the most recent commit
   let lastAuthor: string | undefined;
   try {
@@ -606,6 +619,11 @@ export async function isBranchModified(branchName: string): Promise<boolean> {
     // author matches - branch has not been modified
     logger.debug({ branchName }, 'Branch has not been modified');
     config.branchIsModified[branchName] = false;
+    setCachedModifiedResult(
+      branchName,
+      config.branchCommits[branchName],
+      false
+    );
     return false;
   }
   logger.debug(
@@ -613,6 +631,7 @@ export async function isBranchModified(branchName: string): Promise<boolean> {
     'Last commit author does not match git author email - branch has been modified'
   );
   config.branchIsModified[branchName] = true;
+  setCachedModifiedResult(branchName, config.branchCommits[branchName], true);
   return true;
 }
 
