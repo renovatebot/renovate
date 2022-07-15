@@ -82,7 +82,7 @@ function processRecursive(parameters: RecursionParameter): PackageDependency[] {
     config,
   }: RecursionParameter = parameters;
   // abort if we have no matchString anymore
-  if (!regexes[index]) {
+  if (regexes.length === index) {
     const result = createDependency(
       {
         groups: combinedGroups,
