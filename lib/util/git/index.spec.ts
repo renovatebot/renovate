@@ -242,36 +242,24 @@ describe('util/git/index', () => {
   });
 
   describe('isBranchBehindBase()', () => {
+    it('should return false if branch doesn"t exists', async () => {
+      expect(
+        await git.isBranchBehindBase('renovate/does_not_exist')
+      ).toBeFalse();
+    });
+
     it('should return false if same SHA as master', async () => {
-      const parentSha = await git.getBranchParentSha('renovate/future_branch');
-      repoCache.getCache.mockReturnValueOnce({
-        branches: [
-          {
-            branchName: 'renovate/future_branch',
-            parentSha: parentSha,
-          } as BranchCache,
-        ],
-      });
       expect(
         await git.isBranchBehindBase('renovate/future_branch')
       ).toBeFalse();
     });
 
     it('should return true if SHA different from master', async () => {
-      const parentSha = await git.getBranchParentSha('renovate/past_branch');
-      repoCache.getCache.mockReturnValueOnce({
-        branches: [
-          {
-            branchName: 'renovate/past_branch',
-            parentSha: parentSha,
-          } as BranchCache,
-        ],
-      });
       expect(await git.isBranchBehindBase('renovate/past_branch')).toBeTrue();
     });
 
     it('should return result even if non-default and not under branchPrefix', async () => {
-      const parentSha = await git.getBranchParentSha('renovate/future_branch');
+      const parentSha = await git.getBranchParentSha('develop');
       repoCache.getCache.mockReturnValueOnce({}).mockReturnValueOnce({
         branches: [
           {
@@ -280,8 +268,8 @@ describe('util/git/index', () => {
           } as BranchCache,
         ],
       });
-      expect(await git.isBranchBehindBase('develop')).toBeFalse();
-      expect(await git.isBranchBehindBase('develop')).toBeFalse(); // cache
+      expect(await git.isBranchBehindBase('develop')).toBeTrue();
+      expect(await git.isBranchBehindBase('develop')).toBeTrue(); // cache
     });
   });
 

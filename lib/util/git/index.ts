@@ -540,17 +540,26 @@ export function getBranchList(): string[] {
 }
 
 export async function isBranchBehindBase(branchName: string): Promise<boolean> {
+  if (!branchExists(branchName)) {
+    // not sure what to return
+    return false;
+  }
   const { currentBranchSha } = config;
-  const { branches } = getCache();
+  const cache = getCache() ?? {};
+  cache.branches ??= [];
+  const { branches } = cache;
   const cachedBranch = branches?.find(
     (branch) => branch.branchName === branchName
   );
-
   if (cachedBranch) {
     return !(currentBranchSha === cachedBranch?.parentSha);
   }
 
   const parentSha = await getBranchParentSha(branchName);
+  // happens when branch has no commits of own or if doesn't exist..so we can just compare the with the branch's sha
+  if (parentSha === null) {
+    return !(currentBranchSha === config.branchCommits[branchName]);
+  }
   return !(currentBranchSha === parentSha);
 }
 
