@@ -1,7 +1,8 @@
 import is from '@sindresorhus/is';
-import type { PackageRule } from '../../types';
+import type { PackageRule, PackageRuleInputConfig } from '../../types';
 import { AbstractMigration } from '../base/abstract-migration';
 
+interface DepTypesRule extends PackageRule, PackageRuleInputConfig {}
 export class DepTypesMigration extends AbstractMigration {
   override readonly deprecated = true;
   override readonly propertyName = /.*[d|D]ependencies$|engines$|depTypes$/;
@@ -16,12 +17,12 @@ export class DepTypesMigration extends AbstractMigration {
     }
 
     if (is.array(value)) {
-      for (const depType of value) {
+      for (const depType of value as DepTypesRule[]) {
         if (is.object(depType) && !is.array(depType)) {
-          const depTypeName = (depType as any).depType;
+          const depTypeName = depType.depType;
           if (depTypeName) {
-            delete (depType as any).depType;
-            (depType as any).matchDepTypes = [depTypeName];
+            delete depType.depType;
+            depType.matchDepTypes = [depTypeName];
             packageRules.push({ ...(depType as PackageRule) });
           }
         }
