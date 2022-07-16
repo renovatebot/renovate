@@ -15,5 +15,5 @@ export function getCachedBehindBaseResult(
     return null;
   }
 
-  return !(currentBaseBranchSha === cachedBranch?.parentSha);
+  return !(currentBaseBranchSha === cachedBranch.parentSha);
 }
