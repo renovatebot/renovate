@@ -171,38 +171,31 @@ describe('util/url', () => {
   });
 
   it('checks if url has a subpath', () => {
-    const link1 = 'https://github.com/';
-    const link2 = 'https://github.com/repo/path';
-    const link3 = 'https://github.com/repo/';
-    const link4 = 'https://github.com/repo';
-    const link5 = 'https://github.com/repo/path/nested/val';
-    const link6 = 'https://github.com/repo/path/nested/val?q=k';
-    const link7 = 'https://nlog-project.org?q=val';
-    const link8 = 'https://nlog-project.org/some/path?q=val';
-
-    expect(urlContainsSubPath(link1)).toBeFalsy();
-    expect(urlContainsSubPath(link2)).toBeTruthy();
-    expect(urlContainsSubPath(link3)).toBeFalsy();
-    expect(urlContainsSubPath(link4)).toBeFalsy();
-    expect(urlContainsSubPath(link5)).toBeTruthy();
-    expect(urlContainsSubPath(link6)).toBeTruthy();
-    expect(urlContainsSubPath(link7)).toBeFalsy();
-    expect(urlContainsSubPath(link8)).toBeTruthy();
+    expect(urlContainsSubPath('https://github.com/repo/path')).toBeTruthy();
+    expect(
+      urlContainsSubPath('https://github.com/repo/path/nested/val')
+    ).toBeTruthy();
+    expect(
+      urlContainsSubPath('https://github.com/repo/path/nested/val?q=k')
+    ).toBeTruthy();
+    expect(
+      urlContainsSubPath('https://nlog-project.org/some/path?q=val')
+    ).toBeTruthy();
+    expect(urlContainsSubPath('https://github.com/')).toBeFalsy();
+    expect(urlContainsSubPath('https://github.com/repo/')).toBeFalsy();
+    expect(urlContainsSubPath('https://github.com/repo')).toBeFalsy();
+    expect(urlContainsSubPath('https://nlog-project.org?q=val')).toBeFalsy();
     expect(urlContainsSubPath(undefined)).toBeFalsy();
     expect(urlContainsSubPath('')).toBeFalsy();
   });
 
   it('checks if its a github url', () => {
-    const link1 = 'https://github.com/';
-    const link2 = 'https://github.com';
-    const link3 = 'https://nlog-project.org';
-    const link4 = 'http://www.github.com';
-    const link5 = 'https://github.com/some/path?q=val';
-    expect(isGitHubUrl(link1)).toBeTruthy();
-    expect(isGitHubUrl(link2)).toBeTruthy();
-    expect(isGitHubUrl(link3)).toBeFalsy();
-    expect(isGitHubUrl(link4)).toBeTruthy();
-    expect(isGitHubUrl(link5)).toBeTruthy();
+    expect(isGitHubUrl('https://github.com/')).toBeTruthy();
+    expect(isGitHubUrl('https://github.com')).toBeTruthy();
+    expect(isGitHubUrl('http://www.github.com')).toBeTruthy();
+    expect(isGitHubUrl('https://github.com/some/path?q=val')).toBeTruthy();
+    expect(isGitHubUrl('https://nlog-project.org')).toBeFalsy();
+    expect(isGitHubUrl('https://nlog-project.org/github.com')).toBeFalsy();
     expect(isGitHubUrl(undefined)).toBeFalsy();
     expect(isGitHubUrl('')).toBeFalsy();
   });
