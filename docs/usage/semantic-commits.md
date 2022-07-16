@@ -13,7 +13,6 @@ Renovate only finds Angular-style conventional commits, it ignores other commit 
 When Renovate finds Angular-style commits, Renovate creates commit messages and PR titles like this:
 
 - chore(deps): update eslint to v7.30.0
-- fix(deps): update express to v4.17.1
 
 By default, Renovate uses the `chore` prefix.
 
