@@ -116,12 +116,12 @@ export function urlContainsSubPath(url: string | undefined): boolean {
   }
   // url has subpath(nested path)
   // if there is more than than one slash in pathname with a string after it.
-  const idxOfLastSlash = parsedUrl.pathname.lastIndexOf('/');
-  const strAfterSlash = parsedUrl.pathname.substring(idxOfLastSlash);
+  const lastSlashPos = parsedUrl.pathname.lastIndexOf('/');
+  const afterLastSlash = parsedUrl.pathname.substring(lastSlashPos);
   return (
-    idxOfLastSlash > 0 &&
-    !is.emptyString(strAfterSlash) &&
-    strAfterSlash !== '/'
+    lastSlashPos > 0 &&
+    !is.emptyString(afterLastSlash) &&
+    afterLastSlash !== '/'
   );
 }
 
