@@ -31,13 +31,6 @@ export function migrateConfig(config: RenovateConfig): MigratedConfig {
     }
     const newConfig = MigrationsService.run(config);
     const migratedConfig = clone(newConfig) as MigratedRenovateConfig;
-    const depTypes = [
-      'dependencies',
-      'devDependencies',
-      'engines',
-      'optionalDependencies',
-      'peerDependencies',
-    ];
 
     for (const [key, val] of Object.entries(newConfig)) {
       if (is.string(val) && val.includes('{{baseDir}}')) {
@@ -80,13 +73,6 @@ export function migrateConfig(config: RenovateConfig): MigratedConfig {
           for (const item of migratedConfig[key] as unknown[]) {
             if (is.object(item) && !is.array(item)) {
               const arrMigrate = migrateConfig(item as RenovateConfig);
-              if (
-                (item as PackageRule).matchDepTypes?.some((depType) =>
-                  depTypes.includes(depType)
-                )
-              ) {
-                delete arrMigrate.migratedConfig.packageRules;
-              }
               newArray.push(arrMigrate.migratedConfig);
             } else {
               newArray.push(item);
