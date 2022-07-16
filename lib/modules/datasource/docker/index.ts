@@ -812,7 +812,7 @@ export class DockerDatasource extends Datasource {
   @cache({
     namespace: 'datasource-docker-digest',
     key: (
-      { registryUrl, packageName, currentValue, currentDigest }: DigestConfig,
+      { registryUrl, packageName, currentDigest }: DigestConfig,
       newValue?: string
     ) => {
       const newTag = newValue ?? 'latest';
@@ -820,7 +820,8 @@ export class DockerDatasource extends Datasource {
         packageName,
         registryUrl!
       );
-      return `${registryHost}:${dockerRepository}:${newTag}`;
+      const digest = currentDigest ? '@' + currentDigest : '';
+      return `${registryHost}:${dockerRepository}:${newTag}${digest}`;
     },
   })
   override async getDigest(
