@@ -28,7 +28,7 @@ const modifiedCache = mocked(_modifiedCache);
 const SimpleGit = Git().constructor as { prototype: ReturnType<typeof Git> };
 
 describe('util/git/index', () => {
-  jest.setTimeout(25000);
+  jest.setTimeout(60000);
 
   const masterCommitDate = new Date();
   masterCommitDate.setMilliseconds(0);
