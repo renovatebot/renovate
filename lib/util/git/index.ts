@@ -245,6 +245,7 @@ async function resetToBranch(branchName: string): Promise<void> {
     if (err.message?.includes('fatal: not a git repository')) {
       throw new Error(REPOSITORY_CHANGED);
     }
+    /* istanbul ignore next*/
     throw err;
   }
 }
@@ -291,6 +292,7 @@ async function cleanLocalBranches(): Promise<void> {
     if (err.message?.includes('fatal: not a git repository')) {
       throw new Error(REPOSITORY_CHANGED);
     }
+    /*istanbul ignore next*/
     throw err;
   }
 }
@@ -447,6 +449,7 @@ export async function syncGit(): Promise<void> {
     if (err.message?.includes('fatal: not a git repository')) {
       throw new Error(REPOSITORY_CHANGED);
     }
+    /*istanbul ignore next*/
     throw err;
   }
   if (config.cloneSubmodules) {
