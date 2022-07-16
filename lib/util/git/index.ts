@@ -520,6 +520,7 @@ export async function getBranchParentSha(
     const parentSha = await git.revparse([`${branchSha}^`]);
     return parentSha;
   } catch (err) {
+    /* istanbul ignore next */
     if (err.message?.includes('fatal: not a git repository')) {
       throw new Error(REPOSITORY_CHANGED);
     }
