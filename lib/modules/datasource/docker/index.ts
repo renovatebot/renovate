@@ -841,33 +841,47 @@ export class DockerDatasource extends Datasource {
     try {
       let architecture: string | null = null;
       if (currentValue && currentDigest) {
-        const manifestResponse = await this.getManifestResponse(
+        let manifestResponse = await this.getManifestResponse(
           registryHost,
           dockerRepository,
-          currentValue
+          currentDigest,
+          'head'
         );
-        if (manifestResponse) {
-          const manifestList = JSON.parse(manifestResponse.body) as
-            | ImageList
-            | Image
-            | OciImageList
-            | OciImage;
-          if (
-            manifestList.schemaVersion === 2 &&
-            (manifestList.mediaType === MediaType.manifestListV2 ||
-              manifestList.mediaType === MediaType.ociManifestIndexV1 ||
-              (!manifestList.mediaType && hasKey('manifests', manifestList)))
-          ) {
-            for (const manifest of manifestList.manifests) {
-              if (manifest.digest === currentDigest) {
-                architecture =
-                  (manifest.platform['architecture'] as string) ?? null;
-                logger.debug(
-                  `Current digest ${currentDigest} relates to architecture ${
-                    architecture ?? 'null'
-                  }`
-                );
-                break;
+
+        if (
+          manifestResponse &&
+          (manifestResponse.headers['content-type'] === MediaType.manifestV2 ||
+            manifestResponse.headers['content-type'] ===
+              MediaType.ociManifestV1)
+        ) {
+          manifestResponse = await this.getManifestResponse(
+            registryHost,
+            dockerRepository,
+            currentValue
+          );
+          if (manifestResponse) {
+            const manifestList = JSON.parse(manifestResponse.body) as
+              | ImageList
+              | Image
+              | OciImageList
+              | OciImage;
+            if (
+              manifestList.schemaVersion === 2 &&
+              (manifestList.mediaType === MediaType.manifestListV2 ||
+                manifestList.mediaType === MediaType.ociManifestIndexV1 ||
+                (!manifestList.mediaType && hasKey('manifests', manifestList)))
+            ) {
+              for (const manifest of manifestList.manifests) {
+                if (manifest.digest === currentDigest) {
+                  architecture =
+                    (manifest.platform['architecture'] as string) ?? null;
+                  logger.debug(
+                    `Current digest ${currentDigest} relates to architecture ${
+                      architecture ?? 'null'
+                    }`
+                  );
+                  break;
+                }
               }
             }
           }
