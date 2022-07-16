@@ -26,9 +26,9 @@ import { api as semverCoerced } from '../../modules/versioning/semver-coerced';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import type { GitProtocol } from '../../types/git';
 import { Limit, incLimitedValue } from '../../workers/global/limits';
-import { getCache } from '../cache/repository';
 import { newlineRegex, regEx } from '../regex';
 import { parseGitAuthor } from './author';
+import { getCachedBehindBaseResult } from './behind-base-branch-cache';
 import { getNoVerify, simpleGitConfig } from './config';
 import {
   getCachedConflictResult,
@@ -98,6 +98,10 @@ export async function gitRetry<T>(gitFunc: () => Promise<T>): Promise<T> {
   }
 
   throw lastError;
+}
+
+function localName(branchName: string): string {
+  return branchName.replace(regEx(/^origin\//), '');
 }
 
 async function isDirectory(dir: string): Promise<boolean> {
@@ -540,27 +544,34 @@ export function getBranchList(): string[] {
 }
 
 export async function isBranchBehindBase(branchName: string): Promise<boolean> {
-  if (!branchExists(branchName)) {
-    // not sure what to return
-    return false;
-  }
   const { currentBranchSha } = config;
-  const cache = getCache() ?? {};
-  cache.branches ??= [];
-  const { branches } = cache;
-  const cachedBranch = branches?.find(
-    (branch) => branch.branchName === branchName
-  );
-  if (cachedBranch) {
-    return !(currentBranchSha === cachedBranch?.parentSha);
-  }
 
-  const parentSha = await getBranchParentSha(branchName);
-  // happens when branch has no commits of own or if doesn't exist..so we can just compare the with the branch's sha
-  if (parentSha === null) {
-    return !(currentBranchSha === config.branchCommits[branchName]);
+  let isBehind = getCachedBehindBaseResult(branchName, currentBranchSha);
+  if (isBehind !== null) {
+    return isBehind;
   }
-  return !(currentBranchSha === parentSha);
+  try {
+    await syncGit();
+    const { currentBranchSha, currentBranch } = config;
+    const branches = await git.branch([
+      '--remotes',
+      '--verbose',
+      '--contains',
+      config.currentBranchSha,
+    ]);
+    isBehind = !branches.all.map(localName).includes(branchName);
+    logger.debug(
+      { isBehind, currentBranch, currentBranchSha },
+      `isBranchBehindBase=${isBehind}`
+    );
+    return isBehind;
+  } catch (err) /* istanbul ignore next */ {
+    const errChecked = checkForPlatformFailure(err);
+    if (errChecked) {
+      throw errChecked;
+    }
+    throw err;
+  }
 }
 
 export async function isBranchModified(branchName: string): Promise<boolean> {
