@@ -1,10 +1,7 @@
 import is from '@sindresorhus/is';
 import type { RenovateConfig } from '../../config/types';
 import { logger } from '../../logger';
-import type {
-  PackageDependency,
-  PackageFile,
-} from '../../modules/manager/types';
+import type { PackageFile } from '../../modules/manager/types';
 import { clone } from '../../util/clone';
 
 export class PackageFiles {
@@ -29,28 +26,28 @@ export class PackageFiles {
     this.data.clear();
   }
 
-  static pop(): PackageDependency | null {
+  static pop(): boolean {
     const [branch, managers] = Array.from(this.data).pop() ?? [];
     if (!branch) {
-      return null;
+      return false;
     }
 
     if (!managers || is.emptyObject(managers)) {
-      this.data.delete(branch);
-      return this.pop();
+      return this.data.delete(branch);
     }
 
     const [manager, packageFiles] = Object.entries(managers).pop() ?? [];
 
     if (!packageFiles || is.emptyArray(packageFiles)) {
-      delete managers[manager!];
-      return this.pop();
+      return delete managers[manager!];
     }
 
     const len = packageFiles.length - 1;
-    const dep = packageFiles[len].deps.pop();
+    if (is.emptyArray(packageFiles[len].deps)) {
+      return !!packageFiles.pop();
+    }
 
-    return dep ?? null;
+    return !!packageFiles[len].deps.pop();
   }
 
   public static getTruncatedMarkdown(
@@ -59,8 +56,8 @@ export class PackageFiles {
     setHeader = true
   ): string {
     const org = this.data; // backup data
-    const cloned = new Map(clone(Array.from(this.data))); // deep clone data
-    this.data = cloned; // only mutate cloned data
+    // deep clone data
+    this.data = new Map(clone(Array.from(this.data))); // only mutate cloned data
 
     const note =
       '> **Note**\n> Detected dependencies section has been truncated\n';
@@ -68,17 +65,19 @@ export class PackageFiles {
     const mdMaxLength = maxLength - (setHeader ? (title + note).length : 0);
 
     let md: string;
-    let dep: PackageDependency | null = null;
     let header = '';
+    let removed = false;
     let truncated = false;
 
     do {
       md = PackageFiles.getDashboardMarkdown(config, false);
       if (md.length > mdMaxLength) {
-        truncated = true;
-        dep = PackageFiles.pop();
+        removed = PackageFiles.pop();
       }
-    } while (dep && md.length > mdMaxLength);
+      if (removed) {
+        truncated = true;
+      }
+    } while (removed && md.length > mdMaxLength);
 
     this.data = org; // restore data
 

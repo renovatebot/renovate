@@ -709,11 +709,7 @@ describe('workers/repository/dependency-dashboard', () => {
         });
       });
 
-      describe('tests PackageFiles.getTruncatedMarkdown()', () => {
-        const getDashboardMarkdownSpy = jest.spyOn(
-          PackageFiles,
-          'getDashboardMarkdown'
-        );
+      describe('PackageFiles.getTruncatedMarkdown()', () => {
         const note =
           '> **Note**\n> Detected dependencies section has been truncated\n';
         const title = `## Detected dependencies\n\n`;
@@ -726,7 +722,20 @@ describe('workers/repository/dependency-dashboard', () => {
           jest.resetAllMocks();
         });
 
-        it('removes a branch with no managers and then proceeds to remove one dep', () => {
+        it('does not truncates as there is enough space to fit', () => {
+          PackageFiles.add('main', packageFiles);
+          const nonTruncated = PackageFiles.getDashboardMarkdown(config);
+          const len = (title + note + nonTruncated).length;
+          const truncated = PackageFiles.getTruncatedMarkdown(config, len);
+          const truncatedWithTitle = PackageFiles.getTruncatedMarkdown(
+            config,
+            len
+          );
+          expect(truncated.length === nonTruncated.length).toBeTrue();
+          expect(truncatedWithTitle.includes(note)).toBeFalse();
+        });
+
+        it('removes a branch with no managers', () => {
           PackageFiles.add('main', packageFiles);
           PackageFiles.add('dev', packageFilesWithDigest);
           const md = PackageFiles.getDashboardMarkdown(config, false);
@@ -737,52 +746,57 @@ describe('workers/repository/dependency-dashboard', () => {
             len,
             false
           );
-          const nonTruncated = PackageFiles.getDashboardMarkdown(config, false);
-          expect(getDashboardMarkdownSpy).toHaveBeenCalledTimes(4); // only one dep was removed
-          expect(truncated.length < nonTruncated.length).toBeTrue();
+          expect(truncated.includes('empty/branch')).toBeFalse();
+          expect(truncated.length === len).toBeTrue();
         });
 
-        it('does not truncate as there is enough space to fit', () => {
+        it('removes a manager with no package files', () => {
           PackageFiles.add('main', packageFiles);
-          const nonTruncated = PackageFiles.getDashboardMarkdown(config, false);
-          const len = (title + note + nonTruncated).length;
+          const md = PackageFiles.getDashboardMarkdown(config, false);
+          const len = md.length;
+          PackageFiles.add('dev', { dockerfile: [] });
           const truncated = PackageFiles.getTruncatedMarkdown(
             config,
             len,
             false
           );
-          const truncatedWithTitle = PackageFiles.getTruncatedMarkdown(
-            config,
-            len
-          );
-          expect(truncated.length === nonTruncated.length).toBeTrue();
-          expect(truncatedWithTitle.includes(note)).toBeFalse();
+          expect(truncated.includes('dev')).toBeFalse();
+          expect(truncated.length === len).toBeTrue();
         });
 
-        it('coverage: does nothing when no base branches', () => {
+        it('does nothing when there are no base branches left', () => {
           const truncated = PackageFiles.getTruncatedMarkdown(
             config,
             -1,
             false
           );
-          expect(getDashboardMarkdownSpy).toHaveBeenCalledTimes(1);
           expect(truncated).toBe('');
         });
 
-        it('removes a manager with no package files then proceeds to remove one dep', () => {
+        it('removes an entire base branch', () => {
           PackageFiles.add('main', packageFiles);
-          PackageFiles.add('dev', { dockerfile: [] });
-          const md = PackageFiles.getDashboardMarkdown(config, false);
-          const len = md.length;
-          PackageFiles.add('empty/branch', {});
+          const md = PackageFiles.getDashboardMarkdown(config);
+          const len = md.length + note.length;
+          PackageFiles.add('dev', packageFilesWithDigest);
+          const truncated = PackageFiles.getTruncatedMarkdown(config, len);
+          expect(truncated.includes('dev')).toBeFalse();
+          expect(truncated.length === len).toBeTrue();
+        });
+
+        it('ensures original data is unchanged', () => {
+          PackageFiles.add('main', packageFiles);
+          PackageFiles.add('dev', packageFilesWithDigest);
+          const pre = PackageFiles.getDashboardMarkdown(config);
           const truncated = PackageFiles.getTruncatedMarkdown(
             config,
-            len,
+            -1,
             false
           );
-          const nonTruncated = PackageFiles.getDashboardMarkdown(config, false);
-          expect(getDashboardMarkdownSpy).toHaveBeenCalledTimes(4); // only one dep was removed
-          expect(truncated.length < nonTruncated.length).toBeTrue();
+          const post = PackageFiles.getDashboardMarkdown(config);
+          expect(truncated).toBe('');
+          expect(pre === post).toBeTrue();
+          expect(post.includes('main')).toBeTrue();
+          expect(post.includes('dev')).toBeTrue();
         });
       });
     });
