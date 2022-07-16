@@ -51,7 +51,7 @@ export class GitRefsDatasource extends GitDatasource {
       releases: uniqueRefs.map((ref) => ({
         version: ref,
         gitRef: ref,
-        newDigest: rawRefs.find((rawRef) => rawRef.value === ref)?.hash,
+        newDigest: rawRefs!.find((rawRef) => rawRef.value === ref)?.hash,
       })),
     };
 
