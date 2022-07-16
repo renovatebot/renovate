@@ -242,12 +242,6 @@ describe('util/git/index', () => {
   });
 
   describe('isBranchBehindBase()', () => {
-    it('should return false if branch doesn"t exists', async () => {
-      expect(
-        await git.isBranchBehindBase('renovate/does_not_exist')
-      ).toBeFalse();
-    });
-
     it('should return false if same SHA as master', async () => {
       expect(
         await git.isBranchBehindBase('renovate/future_branch')
