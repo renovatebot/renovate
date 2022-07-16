@@ -3,13 +3,13 @@ import {
   ensurePathPrefix,
   ensureTrailingSlash,
   getQueryString,
-  hasRepoSubPath,
   isGitHubUrl,
   joinUrlParts,
   parseLinkHeader,
   parseUrl,
   resolveBaseUrl,
   trimTrailingSlash,
+  urlContainsSubPath,
   validateUrl,
 } from './url';
 
@@ -171,19 +171,25 @@ describe('util/url', () => {
   });
 
   it('checks if url has a subpath', () => {
-    const link1 = 'https://nlog-project.org/';
-    const link2 = 'https://nlog-project.org/some/path';
-    const link3 = 'https://nlog-project.org';
-    const link4 = 'https://nlog-project.org?q=val';
-    const link5 = 'https://nlog-project.org/some/path?q=val';
+    const link1 = 'https://github.com/';
+    const link2 = 'https://github.com/repo/path';
+    const link3 = 'https://github.com/repo/';
+    const link4 = 'https://github.com/repo';
+    const link5 = 'https://github.com/repo/path/nested/val';
+    const link6 = 'https://github.com/repo/path/nested/val?q=k';
+    const link7 = 'https://nlog-project.org?q=val';
+    const link8 = 'https://nlog-project.org/some/path?q=val';
 
-    expect(hasRepoSubPath(link1)).toBeFalsy();
-    expect(hasRepoSubPath(link2)).toBeTruthy();
-    expect(hasRepoSubPath(link3)).toBeFalsy();
-    expect(hasRepoSubPath(link4)).toBeFalsy();
-    expect(hasRepoSubPath(link5)).toBeTruthy();
-    expect(hasRepoSubPath(undefined)).toBeFalsy();
-    expect(hasRepoSubPath('')).toBeFalsy();
+    expect(urlContainsSubPath(link1)).toBeFalsy();
+    expect(urlContainsSubPath(link2)).toBeTruthy();
+    expect(urlContainsSubPath(link3)).toBeFalsy();
+    expect(urlContainsSubPath(link4)).toBeFalsy();
+    expect(urlContainsSubPath(link5)).toBeTruthy();
+    expect(urlContainsSubPath(link6)).toBeTruthy();
+    expect(urlContainsSubPath(link7)).toBeFalsy();
+    expect(urlContainsSubPath(link8)).toBeTruthy();
+    expect(urlContainsSubPath(undefined)).toBeFalsy();
+    expect(urlContainsSubPath('')).toBeFalsy();
   });
 
   it('checks if its a github url', () => {

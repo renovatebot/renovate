@@ -109,14 +109,20 @@ export function parseLinkHeader(
   return _parseLinkHeader(linkHeader);
 }
 
-export function hasRepoSubPath(url: string | undefined): boolean {
-  if (url === undefined) {
+export function urlContainsSubPath(url: string | undefined): boolean {
+  const parsedUrl = parseUrl(url);
+  if (is.nullOrUndefined(parsedUrl)) {
     return false;
   }
-  const parsedUrl = parseUrl(url);
-  // url has subpath(nested path) if there is more than than one slash in pathname.
-  const idxOfLastSlash = parsedUrl?.pathname?.lastIndexOf('/') ?? 0;
-  return idxOfLastSlash > 0;
+  // url has subpath(nested path)
+  // if there is more than than one slash in pathname with a string after it.
+  const idxOfLastSlash = parsedUrl.pathname.lastIndexOf('/');
+  const strAfterSlash = parsedUrl.pathname.substring(idxOfLastSlash);
+  return (
+    idxOfLastSlash > 0 &&
+    !is.emptyString(strAfterSlash) &&
+    strAfterSlash !== '/'
+  );
 }
 
 export function isGitHubUrl(url: string | undefined): boolean {

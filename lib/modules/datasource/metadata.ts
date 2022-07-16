@@ -4,7 +4,7 @@ import parse from 'github-url-from-git';
 import { DateTime } from 'luxon';
 import * as hostRules from '../../util/host-rules';
 import { regEx } from '../../util/regex';
-import { hasRepoSubPath, isGitHubUrl, validateUrl } from '../../util/url';
+import { isGitHubUrl, urlContainsSubPath, validateUrl } from '../../util/url';
 import { manualChangelogUrls, manualSourceUrls } from './metadata-manual';
 import type { ReleaseResult } from './types';
 
@@ -120,7 +120,7 @@ export function addMetaData(
     isGithubHomePage = true;
     if (!dep.sourceUrl) {
       dep.sourceUrl = dep.homepage;
-      if(!hasRepoSubPath(dep.homepage)){
+      if(!urlContainsSubPath(dep.homepage)){
         // remove homepage if its not a link to a path in a github repo.
         delete dep.homepage;
       }
@@ -150,7 +150,7 @@ export function addMetaData(
       delete dep.sourceUrl;
     }
 
-    if (deleteHomepage(dep.sourceUrl, dep.homepage, isGithubHomePage)) {
+    if (deleteHomepageFrom(dep, isGithubHomePage)) {
       // delete homepage if its the same as the sourceUrl after massaging
       delete dep.homepage;
     }
@@ -172,14 +172,10 @@ export function addMetaData(
   }
 }
 
-function deleteHomepage(
-  sourceUrl: string | undefined,
-  homepage: string | undefined,
-  isGithubUrl: boolean
-): boolean {
+function deleteHomepageFrom(dep: ReleaseResult, isGithubUrl: boolean): boolean {
   return (
-    homepage !== undefined &&
-    ((isGithubUrl && sourceUrl === massageGithubUrl(homepage)) ||
-      sourceUrl === homepage)
+    dep.homepage !== undefined &&
+    ((isGithubUrl && dep.sourceUrl === massageGithubUrl(dep.homepage)) ||
+      dep.sourceUrl === dep.homepage)
   );
 }
