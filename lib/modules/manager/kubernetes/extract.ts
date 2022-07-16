@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import { loadAll } from 'js-yaml';
 import { logger } from '../../../logger';
 import { newlineRegex, regEx } from '../../../util/regex';
@@ -56,8 +57,15 @@ function extractApis(content: string): PackageDependency[] {
     return [];
   }
 
-  return doc.map((configuration) => ({
-    depName: configuration.kind,
-    currentValue: configuration.apiVersion,
-  }));
+  return doc
+    .filter(is.truthy)
+    .filter(
+      (m) =>
+        is.nonEmptyStringAndNotWhitespace(m.kind) &&
+        is.nonEmptyStringAndNotWhitespace(m.apiVersion)
+    )
+    .map((configuration) => ({
+      depName: configuration.kind,
+      currentValue: configuration.apiVersion,
+    }));
 }
