@@ -608,6 +608,12 @@ export async function isBranchModified(branchName: string): Promise<boolean> {
         'Remote branch not found when checking last commit author - aborting run'
       );
       throw new Error(REPOSITORY_CHANGED);
+    } else if (
+      err.message?.includes(
+        'fatal: not a git repository (or any parent up to mount point /mnt)'
+      )
+    ) {
+      throw new Error(REPOSITORY_CHANGED);
     }
     logger.warn({ err }, 'Error checking last author for isBranchModified');
   }
@@ -678,6 +684,13 @@ export async function isBranchConflicted(
   } catch (err) {
     result = true;
     // istanbul ignore if: not easily testable
+    if (
+      err.message?.includes(
+        'fatal: not a git repository (or any parent up to mount point /mnt)'
+      )
+    ) {
+      throw new Error(REPOSITORY_CHANGED);
+    }
     if (!err?.git?.conflicts?.length) {
       logger.debug(
         { baseBranch, branch, err },
