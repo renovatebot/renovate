@@ -120,7 +120,7 @@ export function addMetaData(
     isGithubHomePage = true;
     if (!dep.sourceUrl) {
       dep.sourceUrl = dep.homepage;
-      if(pathDepthOf(dep.homepage) > 1){
+      if(pathDepthOf(dep.homepage) <= 1){
         // remove homepage if its not a link to a path in a github repo.
         delete dep.homepage;
       }

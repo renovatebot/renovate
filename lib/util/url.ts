@@ -6,7 +6,7 @@ import { logger } from '../logger';
 import { regEx } from './regex';
 
 const githubUrlRe = regEx(/^(https?:\/\/)?(www\.)?github\.com\/?/);
-const urlPathSplitRe = regEx(/\/(?=\w+)/);
+//const urlPathSplitRe = regEx(/\//);
 
 export function joinUrlParts(...parts: string[]): string {
   return urlJoin(...parts);
@@ -118,9 +118,13 @@ export function pathDepthOf(url: string | undefined): number {
   if (is.nullOrUndefined(parsedUrl)) {
     return 0;
   }
-  // if there is more than one path after the split
-  const afterFirstSlash = parsedUrl.pathname.substring(1);
-  return afterFirstSlash.split(urlPathSplitRe).length;
+  const pathLength = parsedUrl.pathname.length;
+  let path = parsedUrl.pathname;
+  if (parsedUrl.pathname.charAt(pathLength - 1) === '/') {
+    path = path.substring(0, pathLength - 1); // remove last slash
+  }
+  const depth = countSlashes(path);
+  return depth === 0 ? 1 : depth; // return 1 if there is no nested path
 }
 
 export function isGitHubUrl(url: string | undefined): boolean {
@@ -128,4 +132,14 @@ export function isGitHubUrl(url: string | undefined): boolean {
     return false;
   }
   return githubUrlRe.test(url);
+}
+
+function countSlashes(path: string): number {
+  let slashCount = 0;
+  for (let i = 0; i < path.length; i++) {
+    if (path.charAt(i) === '/') {
+      slashCount++;
+    }
+  }
+  return slashCount;
 }
