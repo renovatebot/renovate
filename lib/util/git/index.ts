@@ -603,6 +603,9 @@ export async function isBranchModified(branchName: string): Promise<boolean> {
       ])
     ).trim();
   } catch (err) /* istanbul ignore next */ {
+    if (err.message?.includes('fatal: not a git repository')) {
+      throw new Error(REPOSITORY_CHANGED);
+    }
     if (err.message?.includes('fatal: bad revision')) {
       logger.debug(
         { err },
