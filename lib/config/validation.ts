@@ -1,4 +1,5 @@
 import is from '@sindresorhus/is';
+import { logger } from '../logger';
 import { getLanguageList, getManagerList } from '../modules/manager';
 import { configRegexPredicate, isConfigRegex, regEx } from '../util/regex';
 import * as template from '../util/template';
@@ -271,7 +272,11 @@ export async function validateConfig(
                 if (is.string(subval)) {
                   try {
                     await getPreset(subval, config);
-                  } catch (e) {
+                  } catch (err) {
+                    logger.warn(
+                      { err },
+                      `Preset Error while validating ${subval}`
+                    );
                     errors.push({
                       topic: 'Configuration Warning',
                       message: `Invalid Preset ${subval}`,
