@@ -147,6 +147,8 @@ const repoGroups = {
   nest: [
     'https://github.com/nestjs/nest',
     'https://github.com/nestjs/passport',
+    'https://github.com/nestjs/schematics',
+    'https://github.com/nestjs/terminus',
   ],
   netty: 'https://github.com/netty/netty',
   neutrino: [
