@@ -1,0 +1,7 @@
+mod 'apache',
+  :git => 'https://github.com/puppetlabs/puppetlabs-apache',
+  :tag => '0.9.0'
+
+mod 'stdlib',
+  :git => 'git@github.com:puppetlabs/puppetlabs-stdlib.git',
+  :tag => '5.0.0'
