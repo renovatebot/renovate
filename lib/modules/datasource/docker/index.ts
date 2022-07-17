@@ -453,6 +453,88 @@ export class DockerDatasource extends Datasource {
     }
   }
 
+  @cache({
+    namespace: 'datasource-docker-imageconfig',
+    key: (
+      registryHost: string,
+      dockerRepository: string,
+      configDigest: string
+    ) => `${registryHost}:${dockerRepository}@${configDigest}`,
+  })
+  public async getImageConfig(
+    registryHost: string,
+    dockerRepository: string,
+    configDigest: string
+  ): Promise<HttpResponse | null> {
+    logger.debug(
+      `getImageConfig(${registryHost}, ${dockerRepository}, ${configDigest})`
+    );
+    try {
+      const headers = await getAuthHeaders(
+        this.http,
+        registryHost,
+        dockerRepository
+      );
+      // istanbul ignore if: Should never be happen
+      if (!headers) {
+        logger.debug('No docker auth found - returning');
+        return null;
+      }
+      const url = `${registryHost}/v2/${dockerRepository}/blobs/${configDigest}`;
+      return await this.http.get(url, {
+        headers,
+        noAuth: true,
+      });
+    } catch (err) /* istanbul ignore next */ {
+      if (err instanceof ExternalHostError) {
+        throw err;
+      }
+      if (err.statusCode === 400 || err.statusCode === 401) {
+        logger.debug(
+          { registryHost, dockerRepository, err },
+          'Unauthorized docker lookup'
+        );
+      } else if (err.statusCode === 404) {
+        logger.warn(
+          {
+            err,
+            registryHost,
+            dockerRepository,
+            configDigest,
+          },
+          'Image configuration is unknown'
+        );
+      } else if (err.statusCode === 429 && isDockerHost(registryHost)) {
+        logger.warn({ err }, 'docker registry failure: too many requests');
+      } else if (err.statusCode >= 500 && err.statusCode < 600) {
+        logger.debug(
+          {
+            err,
+            registryHost,
+            dockerRepository,
+            configDigest,
+          },
+          'docker registry failure: internal error'
+        );
+      } else if (
+        err.code === 'ERR_TLS_CERT_ALTNAME_INVALID' ||
+        err.code === 'ETIMEDOUT'
+      ) {
+        logger.debug(
+          { registryHost, err },
+          'Error connecting to docker registry'
+        );
+      } else {
+        logger.info(
+          { registryHost, dockerRepository, configDigest, err },
+          'Unknown error getting image configuration'
+        );
+      }
+    }
+
+    return null;
+  }
+
   private async getConfigDigest(
     registry: string,
     dockerRepository: string,
@@ -590,83 +672,32 @@ export class DockerDatasource extends Datasource {
           return null;
         }
 
-        const headers = await getAuthHeaders(
-          this.http,
+        const configResponse = await this.getImageConfig(
           registryHost,
-          dockerRepository
+          dockerRepository,
+          configDigest
         );
-        // istanbul ignore if: Should never be happen
-        if (!headers) {
-          logger.debug('No docker auth found - returning');
-          return null;
+        if (configResponse) {
+          const imageConfiguration = JSON.parse(configResponse.body);
+          const architecture =
+            (imageConfiguration['architecture'] as string) ?? null;
+          logger.debug(
+            `Current digest ${currentDigest} relates to architecture ${
+              architecture ?? 'null'
+            }`
+          );
+
+          return architecture;
         }
-        const url = `${registryHost}/v2/${dockerRepository}/blobs/${configDigest}`;
-        const configResponse = await this.http.get(url, {
-          headers,
-          noAuth: true,
-        });
-
-        const imageConfiguration = JSON.parse(configResponse.body);
-        const architecture =
-          (imageConfiguration['architecture'] as string) ?? null;
-        logger.debug(
-          `Current digest ${currentDigest} relates to architecture ${
-            architecture ?? 'null'
-          }`
-        );
-
-        return architecture;
       }
     } catch (err) /* istanbul ignore next: should be tested in future */ {
       if (err instanceof ExternalHostError) {
         throw err;
       }
-      if (err.statusCode === 400 || err.statusCode === 401) {
-        logger.debug(
-          { registryHost, dockerRepository, err },
-          'Unauthorized docker lookup'
-        );
-      } else if (err.statusCode === 404) {
-        logger.warn(
-          {
-            err,
-            registryHost,
-            dockerRepository,
-            currentDigest,
-          },
-          'Config Manifest is unknown'
-        );
-      } else if (err.statusCode === 429 && isDockerHost(registryHost)) {
-        logger.warn({ err }, 'docker registry failure: too many requests');
-      } else if (err.statusCode >= 500 && err.statusCode < 600) {
-        logger.debug(
-          {
-            err,
-            registryHost,
-            dockerRepository,
-            currentDigest,
-          },
-          'docker registry failure: internal error'
-        );
-      } else if (
-        err.code === 'ERR_TLS_CERT_ALTNAME_INVALID' ||
-        err.code === 'ETIMEDOUT'
-      ) {
-        logger.debug(
-          { registryHost, err },
-          'Error connecting to docker registry'
-        );
-      } else if (registryHost === 'https://quay.io') {
-        // istanbul ignore next
-        logger.debug(
-          'Ignoring quay.io errors until they fully support v2 schema'
-        );
-      } else {
-        logger.info(
-          { registryHost, dockerRepository, currentDigest, err },
-          'Unknown error getting image architecture'
-        );
-      }
+      logger.info(
+        { registryHost, dockerRepository, currentDigest, err },
+        'Unknown error getting image architecture'
+      );
     }
 
     return null;
