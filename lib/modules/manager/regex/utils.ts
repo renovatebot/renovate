@@ -108,6 +108,6 @@ export function isValidDependency({
   return (
     is.nonEmptyStringAndNotWhitespace(depName) &&
     (is.nonEmptyStringAndNotWhitespace(currentDigest) ||
-    is.nonEmptyStringAndNotWhitespace(currentValue))
+      is.nonEmptyStringAndNotWhitespace(currentValue))
   );
 }
