@@ -7,8 +7,8 @@ import {
   joinUrlParts,
   parseLinkHeader,
   parseUrl,
-  pathDepthOf,
   resolveBaseUrl,
+  subpathDepth,
   trimTrailingSlash,
   validateUrl,
 } from './url';
@@ -171,16 +171,17 @@ describe('util/url', () => {
   });
 
   it('checks url path depth', () => {
-    expect(pathDepthOf('https://github.com/repo/path')).toBe(2);
-    expect(pathDepthOf('https://github.com/repo/path/nested/val')).toBe(4);
-    expect(pathDepthOf('https://github.com/repo/path/nested/val?q=k')).toBe(4);
-    expect(pathDepthOf('https://nlog-project.org/some/path?q=val')).toBe(2);
-    expect(pathDepthOf('https://github.com/')).toBe(1);
-    expect(pathDepthOf('https://github.com/repo/')).toBe(1);
-    expect(pathDepthOf('https://github.com/repo')).toBe(1);
-    expect(pathDepthOf('https://nlog-project.org?q=val')).toBe(1);
-    expect(pathDepthOf(undefined)).toBe(0);
-    expect(pathDepthOf('')).toBe(0);
+    expect(subpathDepth('https://github.com/repo/path')).toBe(2);
+    expect(subpathDepth('https://github.com/repo/path/nested/val')).toBe(4);
+    expect(subpathDepth('https://github.com/repo/path/nested/val?q=k')).toBe(4);
+    expect(subpathDepth('https://nlog-project.org/some/path?q=val')).toBe(2);
+    expect(subpathDepth('https://github.com/repo/')).toBe(1);
+    expect(subpathDepth('https://github.com/repo')).toBe(1);
+    expect(subpathDepth('https://github.com/')).toBe(0);
+    expect(subpathDepth('https://github.com')).toBe(0);
+    expect(subpathDepth('https://nlog-project.org?q=val')).toBe(0);
+    expect(subpathDepth(undefined)).toBe(0);
+    expect(subpathDepth('')).toBe(0);
   });
 
   it('checks if its a github url', () => {

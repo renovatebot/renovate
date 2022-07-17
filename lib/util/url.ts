@@ -6,7 +6,7 @@ import { logger } from '../logger';
 import { regEx } from './regex';
 
 const githubUrlRe = regEx(/^(https?:\/\/)?(www\.)?github\.com\/?/);
-//const urlPathSplitRe = regEx(/\//);
+const gitlabUrlRe = regEx(/^(https?:\/\/)?(www\.)?gitlab\.com\/?/);
 
 export function joinUrlParts(...parts: string[]): string {
   return urlJoin(...parts);
@@ -113,7 +113,7 @@ export function parseLinkHeader(
 // this method returns the path length of a url
 // example : https://github.com/org/repo/nested-path
 // output : 3.  (org->repo->nested-path depth of this path is 3)
-export function pathDepthOf(url: string | undefined): number {
+export function subpathDepth(url: string | undefined): number {
   const parsedUrl = parseUrl(url);
   if (is.nullOrUndefined(parsedUrl)) {
     return 0;
@@ -123,8 +123,7 @@ export function pathDepthOf(url: string | undefined): number {
   if (parsedUrl.pathname.charAt(pathLength - 1) === '/') {
     path = path.substring(0, pathLength - 1); // remove last slash
   }
-  const depth = countSlashes(path);
-  return depth === 0 ? 1 : depth; // return 1 if there is no nested path
+  return countChar(path, '/');
 }
 
 export function isGitHubUrl(url: string | undefined): boolean {
@@ -134,10 +133,17 @@ export function isGitHubUrl(url: string | undefined): boolean {
   return githubUrlRe.test(url);
 }
 
-function countSlashes(path: string): number {
+export function isGitLabUrl(url: string | undefined): boolean {
+  if (url === undefined) {
+    return false;
+  }
+  return gitlabUrlRe.test(url);
+}
+
+function countChar(path: string, character: string): number {
   let slashCount = 0;
   for (let i = 0; i < path.length; i++) {
-    if (path.charAt(i) === '/') {
+    if (path.charAt(i) === character) {
       slashCount++;
     }
   }

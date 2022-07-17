@@ -4,7 +4,12 @@ import parse from 'github-url-from-git';
 import { DateTime } from 'luxon';
 import * as hostRules from '../../util/host-rules';
 import { regEx } from '../../util/regex';
-import { isGitHubUrl, pathDepthOf, validateUrl } from '../../util/url';
+import {
+  isGitHubUrl,
+  isGitLabUrl,
+  subpathDepth,
+  validateUrl,
+} from '../../util/url';
 import { manualChangelogUrls, manualSourceUrls } from './metadata-manual';
 import type { ReleaseResult } from './types';
 
@@ -120,7 +125,7 @@ export function addMetaData(
     isGithubHomePage = true;
     if (!dep.sourceUrl) {
       dep.sourceUrl = dep.homepage;
-      if(pathDepthOf(dep.homepage) <= 1){
+      if(subpathDepth(dep.homepage) <= 1){
         // remove homepage if its not a link to a path in a github repo.
         delete dep.homepage;
       }
@@ -150,7 +155,7 @@ export function addMetaData(
       delete dep.sourceUrl;
     }
 
-    if (deleteHomepageFrom(dep, isGithubHomePage)) {
+    if (shouldDeleteHomepage(dep, isGithubHomePage)) {
       // delete homepage if its the same as the sourceUrl after massaging
       delete dep.homepage;
     }
@@ -172,10 +177,18 @@ export function addMetaData(
   }
 }
 
-function deleteHomepageFrom(dep: ReleaseResult, isGithubUrl: boolean): boolean {
-  return (
-    dep.homepage !== undefined &&
-    ((isGithubUrl && dep.sourceUrl === massageGithubUrl(dep.homepage)) ||
-      dep.sourceUrl === dep.homepage)
-  );
+function shouldDeleteHomepage(
+  dep: ReleaseResult,
+  isGithubUrl: boolean
+): boolean {
+  if (dep.homepage === undefined) {
+    return false;
+  }
+  const delGitHub =
+    isGithubUrl && dep.sourceUrl === massageGithubUrl(dep.homepage);
+  const delGitLab =
+    isGitLabUrl(dep.homepage) &&
+    dep.sourceUrl === massageGitlabUrl(dep.homepage);
+
+  return delGitHub || delGitLab || dep.sourceUrl === dep.homepage;
 }
