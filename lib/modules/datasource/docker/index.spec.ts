@@ -564,7 +564,6 @@ describe('modules/datasource/docker/index', () => {
     });
 
     it('supports architecture-specific digest', async () => {
-      const currentValue = 'some-current-value';
       const currentDigest =
         'sha256:81c09f6d42c2db8121bcd759565ea244cedc759f36a0f090ec7da9de4f7f8fe4';
 
@@ -573,48 +572,27 @@ describe('modules/datasource/docker/index', () => {
         .get(
           '/token?service=registry.docker.io&scope=repository:library/some-dep:pull'
         )
-        .times(3)
+        .times(4)
         .reply(200, { token: 'some-token' });
       httpMock
         .scope(baseUrl)
         .get('/')
-        .twice()
+        .times(3)
         .reply(401, '', {
           'www-authenticate':
             'Bearer realm="https://auth.docker.io/token",service="registry.docker.io",scope="repository:library/some-dep:pull"',
         })
         .head('/library/some-dep/manifests/' + currentDigest)
         .reply(200, '', { 'content-type': MediaType.manifestV2 })
-        .get('/library/some-dep/manifests/' + currentValue)
+        .get('/library/some-dep/manifests/' + currentDigest)
         .reply(200, {
           schemaVersion: 2,
-          mediaType: MediaType.manifestListV2,
-          manifests: [
-            {
-              digest:
-                'sha256:197c58a9c30faf97f16412d63e333a0adffed856b06994759899d070f28db51e',
-              platform: {
-                architecture: 'arm',
-                os: 'linux',
-                variant: 'v6',
-              },
-            },
-            {
-              digest: currentDigest,
-              platform: {
-                architecture: 'amd64',
-                os: 'linux',
-              },
-            },
-            {
-              digest:
-                'sha256:295b5db1283633daf8d82f0b794bd543118508a5568c90b055d7a48ad6afcfd1',
-              platform: {
-                architecture: '386',
-                os: 'linux',
-              },
-            },
-          ],
+          mediaType: MediaType.manifestV2,
+          config: { digest: 'some-config-digest' },
+        })
+        .get('/library/some-dep/blobs/some-config-digest')
+        .reply(200, {
+          architecture: 'amd64',
         });
       httpMock
         .scope(baseUrl)
@@ -660,7 +638,6 @@ describe('modules/datasource/docker/index', () => {
         {
           datasource: 'docker',
           depName: 'some-dep',
-          currentValue,
           currentDigest,
         },
         'some-new-value'
@@ -675,7 +652,6 @@ describe('modules/datasource/docker/index', () => {
     });
 
     it('handles missing architecture-specific digest', async () => {
-      const currentValue = 'some-current-value';
       const currentDigest =
         'sha256:81c09f6d42c2db8121bcd759565ea244cedc759f36a0f090ec7da9de4f7f8fe4';
 
@@ -684,29 +660,26 @@ describe('modules/datasource/docker/index', () => {
         .get(
           '/token?service=registry.docker.io&scope=repository:library/some-dep:pull'
         )
-        .times(4)
+        .times(5)
         .reply(200, { token: 'some-token' });
       httpMock
         .scope(baseUrl)
         .get('/')
-        .twice()
+        .times(3)
         .reply(401, '', {
           'www-authenticate':
             'Bearer realm="https://auth.docker.io/token",service="registry.docker.io",scope="repository:library/some-dep:pull"',
         })
         .head('/library/some-dep/manifests/' + currentDigest)
         .reply(200, '', { 'content-type': MediaType.manifestV2 })
-        .get('/library/some-dep/manifests/' + currentValue)
+        .get('/library/some-dep/manifests/' + currentDigest)
         .reply(200, {
           schemaVersion: 2,
-          mediaType: MediaType.manifestListV2,
-          manifests: [
-            {
-              digest: currentDigest,
-              platform: {},
-            },
-          ],
-        });
+          mediaType: MediaType.manifestV2,
+          config: { digest: 'some-config-digest' },
+        })
+        .get('/library/some-dep/blobs/some-config-digest')
+        .reply(200, {});
       httpMock
         .scope(baseUrl)
         .get('/')
@@ -754,7 +727,6 @@ describe('modules/datasource/docker/index', () => {
         {
           datasource: 'docker',
           depName: 'some-dep',
-          currentValue,
           currentDigest,
         },
         'some-new-value'
@@ -769,7 +741,6 @@ describe('modules/datasource/docker/index', () => {
     });
 
     it('supports architecture-specific digest in OCI manifests with media type', async () => {
-      const currentValue = 'some-current-value';
       const currentDigest = 'some-image-digest';
 
       httpMock
@@ -777,37 +748,28 @@ describe('modules/datasource/docker/index', () => {
         .get(
           '/token?service=registry.docker.io&scope=repository:library/some-dep:pull'
         )
-        .times(3)
+        .times(4)
         .reply(200, { token: 'some-token' });
       httpMock
         .scope(baseUrl)
         .get('/')
-        .twice()
+        .times(3)
         .reply(401, '', {
           'www-authenticate':
             'Bearer realm="https://auth.docker.io/token",service="registry.docker.io",scope="repository:library/some-dep:pull  "',
         })
         .head('/library/some-dep/manifests/' + currentDigest)
         .reply(200, '', { 'content-type': MediaType.ociManifestV1 })
-        .get('/library/some-dep/manifests/' + currentValue)
-        .reply(
-          200,
-          {
-            schemaVersion: 2,
-            mediaType: MediaType.ociManifestIndexV1,
-            manifests: [
-              {
-                digest: currentDigest,
-                platform: {
-                  architecture: 'amd64',
-                },
-              },
-            ],
-          },
-          {
-            'content-type': 'text/plain',
-          }
-        );
+        .get('/library/some-dep/manifests/' + currentDigest)
+        .reply(200, {
+          schemaVersion: 2,
+          mediaType: MediaType.ociManifestV1,
+          config: { digest: 'some-config-digest' },
+        })
+        .get('/library/some-dep/blobs/some-config-digest')
+        .reply(200, {
+          architecture: 'amd64',
+        });
       httpMock
         .scope(baseUrl)
         .get('/')
@@ -839,7 +801,6 @@ describe('modules/datasource/docker/index', () => {
         {
           datasource: 'docker',
           depName: 'some-dep',
-          currentValue,
           currentDigest,
         },
         'some-new-value'
@@ -852,7 +813,6 @@ describe('modules/datasource/docker/index', () => {
     });
 
     it('supports architecture-specific digest in OCI manifests without media type', async () => {
-      const currentValue = 'some-current-value';
       const currentDigest = 'some-image-digest';
 
       httpMock
@@ -860,36 +820,27 @@ describe('modules/datasource/docker/index', () => {
         .get(
           '/token?service=registry.docker.io&scope=repository:library/some-dep:pull'
         )
-        .times(3)
+        .times(4)
         .reply(200, { token: 'some-token' });
       httpMock
         .scope(baseUrl)
         .get('/')
-        .twice()
+        .times(3)
         .reply(401, '', {
           'www-authenticate':
             'Bearer realm="https://auth.docker.io/token",service="registry.docker.io",scope="repository:library/some-dep:pull  "',
         })
         .head('/library/some-dep/manifests/' + currentDigest)
         .reply(200, '', { 'content-type': MediaType.ociManifestV1 })
-        .get('/library/some-dep/manifests/' + currentValue)
-        .reply(
-          200,
-          {
-            schemaVersion: 2,
-            manifests: [
-              {
-                digest: currentDigest,
-                platform: {
-                  architecture: 'amd64',
-                },
-              },
-            ],
-          },
-          {
-            'content-type': 'text/plain',
-          }
-        );
+        .get('/library/some-dep/manifests/' + currentDigest)
+        .reply(200, {
+          schemaVersion: 2,
+          config: { digest: 'some-config-digest' },
+        })
+        .get('/library/some-dep/blobs/some-config-digest')
+        .reply(200, {
+          architecture: 'amd64',
+        });
       httpMock
         .scope(baseUrl)
         .get('/')
@@ -898,29 +849,22 @@ describe('modules/datasource/docker/index', () => {
             'Bearer realm="https://auth.docker.io/token",service="registry.docker.io",scope="repository:library/some-dep:pull  "',
         })
         .get('/library/some-dep/manifests/some-new-value')
-        .reply(
-          200,
-          {
-            schemaVersion: 2,
-            manifests: [
-              {
-                digest: 'some-new-image-digest',
-                platform: {
-                  architecture: 'amd64',
-                },
+        .reply(200, {
+          schemaVersion: 2,
+          manifests: [
+            {
+              digest: 'some-new-image-digest',
+              platform: {
+                architecture: 'amd64',
               },
-            ],
-          },
-          {
-            'content-type': 'text/plain',
-          }
-        );
+            },
+          ],
+        });
 
       const res = await getDigest(
         {
           datasource: 'docker',
           depName: 'some-dep',
-          currentValue,
           currentDigest,
         },
         'some-new-value'
@@ -933,7 +877,6 @@ describe('modules/datasource/docker/index', () => {
     });
 
     it('handles error while retrieving manifest list for architecture-specific digest', async () => {
-      const currentValue = 'some-current-value';
       const currentDigest =
         'sha256:81c09f6d42c2db8121bcd759565ea244cedc759f36a0f090ec7da9de4f7f8fe4';
 
@@ -954,7 +897,7 @@ describe('modules/datasource/docker/index', () => {
         })
         .head('/library/some-dep/manifests/' + currentDigest)
         .reply(200, '', { 'content-type': MediaType.manifestV2 })
-        .get('/library/some-dep/manifests/' + currentValue)
+        .get('/library/some-dep/manifests/' + currentDigest)
         .replyWithError({ statusCode: 404 });
       httpMock
         .scope(baseUrl)
@@ -1003,19 +946,49 @@ describe('modules/datasource/docker/index', () => {
         {
           datasource: 'docker',
           depName: 'some-dep',
-          currentValue,
           currentDigest,
         },
         'some-new-value'
       );
 
       expect(logger.logger.debug).toHaveBeenCalledWith(
-        { packageName: 'some-dep', currentValue: 'some-current-value' },
-        `Unexpected error while retrieving manifest list for docker image`
+        {
+          registryHost: 'https://index.docker.io',
+          dockerRepository: 'library/some-dep',
+          currentDigest,
+        },
+        `Unexpected error while retrieving config digest for docker image`
       );
       expect(res).toBe(
         'sha256:ee75deb1a41bb998e52a116707a6e22a91904cba0c1d6e6c76cf04923efff2d8'
       );
+    });
+
+    it('returns null if digest refers to manifest list and new value invalid', async () => {
+      httpMock
+        .scope(baseUrl)
+        .get('/', undefined, { badheaders: ['authorization'] })
+        .reply(200, { token: 'some-token' })
+        .head('/library/some-dep/manifests/some-digest')
+        .replyWithError({ statusCode: 404 });
+      httpMock
+        .scope(baseUrl)
+        .get('/', undefined, { badheaders: ['authorization'] })
+        .reply(200, '', {})
+        .head('/library/some-dep/manifests/some-new-value', undefined, {
+          badheaders: ['authorization'],
+        })
+        .reply(401);
+
+      const res = await getDigest(
+        {
+          datasource: 'docker',
+          depName: 'some-dep',
+          currentDigest: 'some-digest',
+        },
+        'some-new-value'
+      );
+      expect(res).toBeNull();
     });
   });
 

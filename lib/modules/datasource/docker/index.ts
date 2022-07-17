@@ -548,6 +548,130 @@ export class DockerDatasource extends Datasource {
     return null;
   }
 
+  @cache({
+    namespace: 'datasource-docker-architecture',
+    key: (
+      registryHost: string,
+      dockerRepository: string,
+      currentDigest: string
+    ) => `${registryHost}:${dockerRepository}@${currentDigest}`,
+  })
+  public async getImageArchitecture(
+    registryHost: string,
+    dockerRepository: string,
+    currentDigest: string
+  ): Promise<string | null> {
+    try {
+      const manifestResponse = await this.getManifestResponse(
+        registryHost,
+        dockerRepository,
+        currentDigest,
+        'head'
+      );
+
+      if (
+        manifestResponse?.headers['content-type'] === MediaType.manifestV2 ||
+        manifestResponse?.headers['content-type'] === MediaType.ociManifestV1
+      ) {
+        const configDigest = await this.getConfigDigest(
+          registryHost,
+          dockerRepository,
+          currentDigest
+        );
+        if (!configDigest) {
+          logger.debug(
+            {
+              registryHost,
+              dockerRepository,
+              currentDigest,
+            },
+            'Unexpected error while retrieving config digest for docker image'
+          );
+          return null;
+        }
+
+        const headers = await getAuthHeaders(
+          this.http,
+          registryHost,
+          dockerRepository
+        );
+        // istanbul ignore if: Should never be happen
+        if (!headers) {
+          logger.debug('No docker auth found - returning');
+          return null;
+        }
+        const url = `${registryHost}/v2/${dockerRepository}/blobs/${configDigest}`;
+        const configResponse = await this.http.get(url, {
+          headers,
+          noAuth: true,
+        });
+
+        const imageConfiguration = JSON.parse(configResponse.body);
+        const architecture =
+          (imageConfiguration['architecture'] as string) ?? null;
+        logger.debug(
+          `Current digest ${currentDigest} relates to architecture ${
+            architecture ?? 'null'
+          }`
+        );
+
+        return architecture;
+      }
+    } catch (err) /* istanbul ignore next: should be tested in future */ {
+      if (err instanceof ExternalHostError) {
+        throw err;
+      }
+      if (err.statusCode === 400 || err.statusCode === 401) {
+        logger.debug(
+          { registryHost, dockerRepository, err },
+          'Unauthorized docker lookup'
+        );
+      } else if (err.statusCode === 404) {
+        logger.warn(
+          {
+            err,
+            registryHost,
+            dockerRepository,
+            currentDigest,
+          },
+          'Config Manifest is unknown'
+        );
+      } else if (err.statusCode === 429 && isDockerHost(registryHost)) {
+        logger.warn({ err }, 'docker registry failure: too many requests');
+      } else if (err.statusCode >= 500 && err.statusCode < 600) {
+        logger.debug(
+          {
+            err,
+            registryHost,
+            dockerRepository,
+            currentDigest,
+          },
+          'docker registry failure: internal error'
+        );
+      } else if (
+        err.code === 'ERR_TLS_CERT_ALTNAME_INVALID' ||
+        err.code === 'ETIMEDOUT'
+      ) {
+        logger.debug(
+          { registryHost, err },
+          'Error connecting to docker registry'
+        );
+      } else if (registryHost === 'https://quay.io') {
+        // istanbul ignore next
+        logger.debug(
+          'Ignoring quay.io errors until they fully support v2 schema'
+        );
+      } else {
+        logger.info(
+          { registryHost, dockerRepository, currentDigest, err },
+          'Unknown error getting image architecture'
+        );
+      }
+    }
+
+    return null;
+  }
+
   /*
    * docker.getLabels
    *
@@ -825,7 +949,7 @@ export class DockerDatasource extends Datasource {
     },
   })
   override async getDigest(
-    { registryUrl, packageName, currentValue, currentDigest }: DigestConfig,
+    { registryUrl, packageName, currentDigest }: DigestConfig,
     newValue?: string
   ): Promise<string | null> {
     const { registryHost, dockerRepository } = getRegistryRepository(
@@ -840,59 +964,13 @@ export class DockerDatasource extends Datasource {
     const newTag = newValue ?? 'latest';
     let digest: string | null = null;
     try {
-      let architecture: string | null = null;
-      if (currentValue && currentDigest) {
-        let manifestResponse = await this.getManifestResponse(
+      let architecture = null;
+      if (currentDigest) {
+        architecture = await this.getImageArchitecture(
           registryHost,
           dockerRepository,
-          currentDigest,
-          'head'
+          currentDigest
         );
-
-        if (
-          manifestResponse?.headers['content-type'] === MediaType.manifestV2 ||
-          manifestResponse?.headers['content-type'] === MediaType.ociManifestV1
-        ) {
-          manifestResponse = await this.getManifestResponse(
-            registryHost,
-            dockerRepository,
-            currentValue
-          );
-          if (manifestResponse) {
-            const manifestList = JSON.parse(manifestResponse.body) as
-              | ImageList
-              | Image
-              | OciImageList
-              | OciImage;
-            if (
-              manifestList.schemaVersion === 2 &&
-              (manifestList.mediaType === MediaType.manifestListV2 ||
-                manifestList.mediaType === MediaType.ociManifestIndexV1 ||
-                (!manifestList.mediaType && hasKey('manifests', manifestList)))
-            ) {
-              for (const manifest of manifestList.manifests) {
-                if (manifest.digest === currentDigest) {
-                  architecture =
-                    (manifest.platform['architecture'] as string) ?? null;
-                  logger.debug(
-                    `Current digest ${currentDigest} relates to architecture ${
-                      architecture ?? 'null'
-                    }`
-                  );
-                  break;
-                }
-              }
-            }
-          } else {
-            logger.debug(
-              {
-                packageName,
-                currentValue,
-              },
-              'Unexpected error while retrieving manifest list for docker image'
-            );
-          }
-        }
       }
 
       let manifestResponse = null;
@@ -920,7 +998,7 @@ export class DockerDatasource extends Datasource {
           !hasKey('docker-content-digest', manifestResponse.headers))
       ) {
         logger.debug(
-          { registryHost },
+          { registryHost, dockerRepository },
           'Architecture-specific digest or missing docker-content-digest header - pulling full manifest'
         );
         manifestResponse = await this.getManifestResponse(
