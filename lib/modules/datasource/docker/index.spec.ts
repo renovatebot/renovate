@@ -931,6 +931,92 @@ describe('modules/datasource/docker/index', () => {
       );
       expect(res).toBe('some-new-image-digest');
     });
+
+    it('handles error while retrieving manifest list for architecture-specific digest', async () => {
+      const currentValue = 'some-current-value';
+      const currentDigest =
+        'sha256:81c09f6d42c2db8121bcd759565ea244cedc759f36a0f090ec7da9de4f7f8fe4';
+
+      httpMock
+        .scope(authUrl)
+        .get(
+          '/token?service=registry.docker.io&scope=repository:library/some-dep:pull'
+        )
+        .times(4)
+        .reply(200, { token: 'some-token' });
+      httpMock
+        .scope(baseUrl)
+        .get('/')
+        .twice()
+        .reply(401, '', {
+          'www-authenticate':
+            'Bearer realm="https://auth.docker.io/token",service="registry.docker.io",scope="repository:library/some-dep:pull"',
+        })
+        .head('/library/some-dep/manifests/' + currentDigest)
+        .reply(200, '', { 'content-type': MediaType.manifestV2 })
+        .get('/library/some-dep/manifests/' + currentValue)
+        .replyWithError({ statusCode: 404 });
+      httpMock
+        .scope(baseUrl)
+        .get('/')
+        .twice()
+        .reply(401, '', {
+          'www-authenticate':
+            'Bearer realm="https://auth.docker.io/token",service="registry.docker.io",scope="repository:library/some-dep:pull"',
+        })
+        .head('/library/some-dep/manifests/some-new-value')
+        .reply(200, undefined, {})
+        .get('/library/some-dep/manifests/some-new-value')
+        .reply(200, {
+          schemaVersion: 2,
+          mediaType: MediaType.manifestListV2,
+          manifests: [
+            {
+              digest:
+                'sha256:c3fe2aac7e4f47270eeff0fdd35cb9bad674105eaa1663942645ca58399a2dbc',
+              platform: {
+                architecture: 'arm',
+                os: 'linux',
+                variant: 'v6',
+              },
+            },
+            {
+              digest:
+                'sha256:78fa4d63fec4e647f00908f24cda05af101aa9702700f613c7f82a96a267d801',
+              platform: {
+                architecture: '386',
+                os: 'linux',
+              },
+            },
+            {
+              digest:
+                'sha256:81093b981e72a54d488d5a60780006d82f7cc02d248d88ff71ff4137b0f51176',
+              platform: {
+                architecture: 'amd64',
+                os: 'linux',
+              },
+            },
+          ],
+        });
+
+      const res = await getDigest(
+        {
+          datasource: 'docker',
+          depName: 'some-dep',
+          currentValue,
+          currentDigest,
+        },
+        'some-new-value'
+      );
+
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        { packageName: 'some-dep', currentValue: 'some-current-value' },
+        `Unexpected error while retrieving manifest list for docker image`
+      );
+      expect(res).toBe(
+        'sha256:ee75deb1a41bb998e52a116707a6e22a91904cba0c1d6e6c76cf04923efff2d8'
+      );
+    });
   });
 
   describe('getReleases', () => {

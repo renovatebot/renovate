@@ -883,6 +883,14 @@ export class DockerDatasource extends Datasource {
                 }
               }
             }
+          } else {
+            logger.debug(
+              {
+                packageName,
+                currentValue,
+              },
+              'Unexpected error while retrieving manifest list for docker image'
+            );
           }
         }
       }
