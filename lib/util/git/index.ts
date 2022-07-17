@@ -349,9 +349,9 @@ export async function syncGit(): Promise<void> {
       const fetchStart = Date.now();
       await gitRetry(() => git.pull());
       await gitRetry(() => git.fetch());
-      config.currentBranch =
-        config.currentBranch || (await getDefaultBranch(git));
-      await resetToBranch(config.currentBranch);
+      config.currentBaseBranch =
+        config.currentBaseBranch || (await getDefaultBranch(git));
+      await resetToBranch(config.currentBaseBranch);
       await cleanLocalBranches();
       await gitRetry(() => git.raw(['remote', 'prune', 'origin']));
       const durationMs = Math.round(Date.now() - fetchStart);
@@ -397,7 +397,7 @@ export async function syncGit(): Promise<void> {
     const durationMs = Math.round(Date.now() - cloneStart);
     logger.debug({ durationMs }, 'git clone completed');
   }
-  config.currentBranchSha = (await git.raw(['rev-parse', 'HEAD'])).trim();
+  config.currentBaseBranchSha = (await git.raw(['rev-parse', 'HEAD'])).trim();
   if (config.cloneSubmodules) {
     const submodules = await getSubmodules();
     for (const submodule of submodules) {
@@ -425,7 +425,8 @@ export async function syncGit(): Promise<void> {
     }
     logger.warn({ err }, 'Cannot retrieve latest commit');
   }
-  config.currentBranch = config.currentBranch || (await getDefaultBranch(git));
+  config.currentBaseBranch =
+    config.currentBaseBranch || (await getDefaultBranch(git));
 }
 
 // istanbul ignore next
@@ -484,7 +485,7 @@ export async function checkoutBranch(branchName: string): Promise<CommitSha> {
   await syncGit();
   try {
     config.currentBranch = branchName;
-    config.currentBranchSha = (
+    config.currentBaseBranchSha = (
       await git.raw(['rev-parse', 'origin/' + branchName])
     ).trim();
     await gitRetry(() => git.checkout(['-f', branchName, '--']));
@@ -493,7 +494,7 @@ export async function checkoutBranch(branchName: string): Promise<CommitSha> {
       logger.debug({ branchName, latestCommitDate }, 'latest commit');
     }
     await git.reset(ResetMode.HARD);
-    return config.currentBranchSha;
+    return config.currentBaseBranchSha;
   } catch (err) /* istanbul ignore next */ {
     const errChecked = checkForPlatformFailure(err);
     if (errChecked) {
@@ -509,7 +510,7 @@ export async function checkoutBranch(branchName: string): Promise<CommitSha> {
 
 export async function getFileList(): Promise<string[]> {
   await syncGit();
-  const branch = config.currentBranch;
+  const branch = config.currentBaseBranch;
   const submodules = await getSubmodules();
   let files: string;
   try {
@@ -545,16 +546,16 @@ export function getBranchList(): string[] {
 export async function isBranchBehindBase(branchName: string): Promise<boolean> {
   await syncGit();
   try {
-    const { currentBranchSha, currentBranch } = config;
+    const { currentBaseBranchSha, currentBaseBranch } = config;
     const branches = await git.branch([
       '--remotes',
       '--verbose',
       '--contains',
-      config.currentBranchSha,
+      config.currentBaseBranchSha,
     ]);
     const isBehind = !branches.all.map(localName).includes(branchName);
     logger.debug(
-      { isBehind, currentBranch, currentBranchSha },
+      { isBehind, currentBaseBranch, currentBaseBranchSha },
       `isBranchBehindBase=${isBehind}`
     );
     return isBehind;
@@ -668,7 +669,7 @@ export async function isBranchConflicted(
   await syncGit();
   await writeGitAuthor();
 
-  const origBranch = config.currentBranch;
+  const origBranch = config.currentBaseBranch;
   try {
     await git.reset(ResetMode.HARD);
     if (origBranch !== baseBranch) {
@@ -740,8 +741,8 @@ export async function mergeBranch(branchName: string): Promise<void> {
     await gitRetry(() =>
       git.checkout([
         '-B',
-        config.currentBranch,
-        'origin/' + config.currentBranch,
+        config.currentBaseBranch,
+        'origin/' + config.currentBaseBranch,
       ])
     );
     status = await git.status();
@@ -752,7 +753,7 @@ export async function mergeBranch(branchName: string): Promise<void> {
     logger.debug(
       {
         baseBranch: config.currentBranch,
-        baseSha: config.currentBranchSha,
+        baseSha: config.currentBaseBranchSha,
         branchName,
         branchSha: getBranchCommit(branchName),
         status,
@@ -807,7 +808,7 @@ export async function getFile(
   await syncGit();
   try {
     const content = await git.show([
-      'origin/' + (branchName ?? config.currentBranch) + ':' + filePath,
+      'origin/' + (branchName ?? config.currentBaseBranch) + ':' + filePath,
     ]);
     return content;
   } catch (err) {
@@ -863,9 +864,9 @@ export async function prepareCommit({
   try {
     await git.reset(ResetMode.HARD);
     await git.raw(['clean', '-fd']);
-    const parentCommitSha = config.currentBranchSha;
+    const parentCommitSha = config.currentBaseBranchSha;
     await gitRetry(() =>
-      git.checkout(['-B', branchName, 'origin/' + config.currentBranch])
+      git.checkout(['-B', branchName, 'origin/' + config.currentBaseBranch])
     );
     const deletedFiles: string[] = [];
     const addedModifiedFiles: string[] = [];

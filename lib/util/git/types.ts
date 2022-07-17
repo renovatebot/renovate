@@ -21,8 +21,8 @@ export interface StorageConfig {
 
 export interface LocalConfig extends StorageConfig {
   additionalBranches: string[];
-  currentBranch: string;
-  currentBranchSha: string;
+  currentBaseBranch: string;
+  currentBaseBranchSha: string;
   branchCommits: Record<string, CommitSha>;
   branchIsModified: Record<string, boolean>;
   ignoredAuthors: string[];
