@@ -127,9 +127,6 @@ async function getDefaultBranch(git: SimpleGit): Promise<string> {
     }
     return res.replace('origin/', '').trim();
   } catch (err) /* istanbul ignore next */ {
-    if (err.message?.includes('fatal: not a git repository')) {
-      throw new Error(REPOSITORY_CHANGED);
-    }
     const errChecked = checkForPlatformFailure(err);
     if (errChecked) {
       throw errChecked;
@@ -234,66 +231,32 @@ export async function initRepo(args: StorageConfig): Promise<void> {
 }
 
 async function resetToBranch(branchName: string): Promise<void> {
-  try {
-    logger.debug(`resetToBranch(${branchName})`);
-    await git.raw(['reset', '--hard']);
-    await gitRetry(() => git.checkout(branchName));
-    await git.raw(['reset', '--hard', 'origin/' + branchName]);
-    await git.raw(['clean', '-fd']);
-  } catch (err) {
-    /* istanbul ignore next*/
-    if (err.message?.includes('fatal: not a git repository')) {
-      throw new Error(REPOSITORY_CHANGED);
-    }
-    /* istanbul ignore next*/
-    throw err;
-  }
+  logger.debug(`resetToBranch(${branchName})`);
+  await git.raw(['reset', '--hard']);
+  await gitRetry(() => git.checkout(branchName));
+  await git.raw(['reset', '--hard', 'origin/' + branchName]);
+  await git.raw(['clean', '-fd']);
 }
 
 // istanbul ignore next
 export async function resetToCommit(commit: string): Promise<void> {
-  try {
-    logger.debug(`resetToCommit(${commit})`);
-    await git.raw(['reset', '--hard', commit]);
-  } catch (err) {
-    /*istanbul ignore next*/
-    if (err.message?.includes('fatal: not a git repository')) {
-      throw new Error(REPOSITORY_CHANGED);
-    }
-    throw err;
-  }
+  logger.debug(`resetToCommit(${commit})`);
+  await git.raw(['reset', '--hard', commit]);
 }
 
 async function deleteLocalBranch(branchName: string): Promise<void> {
-  try {
-    await git.branch(['-D', branchName]);
-  } catch (err) {
-    /*istanbul ignore next*/
-    if (err.message?.includes('fatal: not a git repository')) {
-      throw new Error(REPOSITORY_CHANGED);
-    }
-    throw err;
-  }
+  await git.branch(['-D', branchName]);
 }
 
 async function cleanLocalBranches(): Promise<void> {
-  try {
-    const existingBranches = (await git.raw(['branch']))
-      .split(newlineRegex)
-      .map((branch) => branch.trim())
-      .filter((branch) => branch.length)
-      .filter((branch) => !branch.startsWith('* '));
-    logger.debug({ existingBranches });
-    for (const branchName of existingBranches) {
-      await deleteLocalBranch(branchName);
-    }
-  } catch (err) {
-    /*istanbul ignore next*/
-    if (err.message?.includes('fatal: not a git repository')) {
-      throw new Error(REPOSITORY_CHANGED);
-    }
-    /*istanbul ignore next*/
-    throw err;
+  const existingBranches = (await git.raw(['branch']))
+    .split(newlineRegex)
+    .map((branch) => branch.trim())
+    .filter((branch) => branch.length)
+    .filter((branch) => !branch.startsWith('* '));
+  logger.debug({ existingBranches });
+  for (const branchName of existingBranches) {
+    await deleteLocalBranch(branchName);
   }
 }
 
@@ -396,9 +359,6 @@ export async function syncGit(): Promise<void> {
       clone = false;
     } catch (err) {
       /*istanbul ignore next*/
-      if (err.message?.includes('fatal: not a git repository')) {
-        throw new Error(REPOSITORY_CHANGED);
-      }
       if (err.message === REPOSITORY_EMPTY) {
         throw err;
       }
@@ -427,9 +387,6 @@ export async function syncGit(): Promise<void> {
       await gitRetry(() => emptyDirAndClone());
     } catch (err) {
       /*istanbul ignore next*/
-      if (err.message?.includes('fatal: not a git repository')) {
-        throw new Error(REPOSITORY_CHANGED);
-      }
       logger.debug({ err }, 'git clone error');
       if (err.message?.includes('No space left on device')) {
         throw new Error(SYSTEM_INSUFFICIENT_DISK_SPACE);
@@ -442,16 +399,7 @@ export async function syncGit(): Promise<void> {
     const durationMs = Math.round(Date.now() - cloneStart);
     logger.debug({ durationMs }, 'git clone completed');
   }
-  try {
-    config.currentBranchSha = (await git.raw(['rev-parse', 'HEAD'])).trim();
-  } catch (err) {
-    /*istanbul ignore next*/
-    if (err.message?.includes('fatal: not a git repository')) {
-      throw new Error(REPOSITORY_CHANGED);
-    }
-    /*istanbul ignore next*/
-    throw err;
-  }
+  config.currentBranchSha = (await git.raw(['rev-parse', 'HEAD'])).trim();
   if (config.cloneSubmodules) {
     const submodules = await getSubmodules();
     for (const submodule of submodules) {
@@ -470,9 +418,6 @@ export async function syncGit(): Promise<void> {
     const latestCommit = (await git.log({ n: 1 })).latest;
     logger.debug({ latestCommit }, 'latest repository commit');
   } catch (err) /* istanbul ignore next */ {
-    if (err.message?.includes('fatal: not a git repository')) {
-      throw new Error(REPOSITORY_CHANGED);
-    }
     const errChecked = checkForPlatformFailure(err);
     if (errChecked) {
       throw errChecked;
@@ -483,6 +428,7 @@ export async function syncGit(): Promise<void> {
     logger.warn({ err }, 'Cannot retrieve latest commit');
   }
   config.currentBranch = config.currentBranch || (await getDefaultBranch(git));
+  await git.status([]);
 }
 
 // istanbul ignore next
@@ -500,17 +446,7 @@ export async function getRepoStatus(path?: string): Promise<StatusResult> {
   }
 
   await syncGit();
-  let status: any;
-  try {
-    status = git.status(path ? [path] : []);
-  } catch (err) {
-    /*istanbul ignore next*/
-    if (err.message?.includes('fatal: not a git repository')) {
-      throw new Error(REPOSITORY_CHANGED);
-    }
-    throw err;
-  }
-  return status;
+  return git.status(path ? [path] : []);
 }
 
 export function branchExists(branchName: string): boolean {
@@ -563,9 +499,6 @@ export async function checkoutBranch(branchName: string): Promise<CommitSha> {
     await git.reset(ResetMode.HARD);
     return config.currentBranchSha;
   } catch (err) /* istanbul ignore next */ {
-    if (err.message?.includes('fatal: not a git repository')) {
-      throw new Error(REPOSITORY_CHANGED);
-    }
     const errChecked = checkForPlatformFailure(err);
     if (errChecked) {
       throw errChecked;
@@ -586,9 +519,6 @@ export async function getFileList(): Promise<string[]> {
   try {
     files = await git.raw(['ls-tree', '-r', branch]);
   } catch (err) /* istanbul ignore next */ {
-    if (err.message?.includes('fatal: not a git repository')) {
-      throw new Error(REPOSITORY_CHANGED);
-    }
     if (err.message?.includes('fatal: Not a valid object name')) {
       logger.debug(
         { err },
@@ -634,9 +564,6 @@ export async function isBranchBehindBase(branchName: string): Promise<boolean> {
     return isBehind;
   } catch (err) {
     /*istanbul ignore next*/
-    if (err.message?.includes('fatal: not a git repository')) {
-      throw new Error(REPOSITORY_CHANGED);
-    }
     const errChecked = checkForPlatformFailure(err);
     if (errChecked) {
       throw errChecked;
@@ -681,9 +608,6 @@ export async function isBranchModified(branchName: string): Promise<boolean> {
     ).trim();
   } catch (err) {
     /*istanbul ignore next*/
-    if (err.message?.includes('fatal: not a git repository')) {
-      throw new Error(REPOSITORY_CHANGED);
-    }
     if (err.message?.includes('fatal: bad revision')) {
       logger.debug(
         { err },
@@ -759,9 +683,6 @@ export async function isBranchConflicted(
     await git.merge(['--no-commit', '--no-ff', `origin/${branch}`]);
   } catch (err) {
     /*istanbul ignore next*/
-    if (err.message?.includes('fatal: not a git repository')) {
-      throw new Error(REPOSITORY_CHANGED);
-    }
     result = true;
     if (!err?.git?.conflicts?.length) {
       logger.debug(
@@ -794,9 +715,6 @@ export async function deleteBranch(branchName: string): Promise<void> {
     logger.debug({ branchName }, 'Deleted remote branch');
   } catch (err) {
     /*istanbul ignore next*/
-    if (err.message?.includes('fatal: not a git repository')) {
-      throw new Error(REPOSITORY_CHANGED);
-    }
     const errChecked = checkForPlatformFailure(err);
     if (errChecked) {
       throw errChecked;
@@ -839,9 +757,6 @@ export async function mergeBranch(branchName: string): Promise<void> {
     incLimitedValue(Limit.Commits);
   } catch (err) {
     /*istanbul ignore next*/
-    if (err.message?.includes('fatal: not a git repository')) {
-      throw new Error(REPOSITORY_CHANGED);
-    }
     logger.debug(
       {
         baseBranch: config.currentBranch,
@@ -885,9 +800,6 @@ export async function getBranchFiles(
     return diff.files.map((file) => file.file);
   } catch (err) {
     /*istanbul ignore next*/
-    if (err.message?.includes('fatal: not a git repository')) {
-      throw new Error(REPOSITORY_CHANGED);
-    }
     logger.warn({ err }, 'getBranchFiles error');
     const errChecked = checkForPlatformFailure(err);
     if (errChecked) {
@@ -908,10 +820,6 @@ export async function getFile(
     ]);
     return content;
   } catch (err) {
-    /*istanbul ignore next*/
-    if (err.message?.includes('fatal: not a git repository')) {
-      throw new Error(REPOSITORY_CHANGED);
-    }
     const errChecked = checkForPlatformFailure(err);
     // istanbul ignore if
     if (errChecked) {
@@ -926,10 +834,6 @@ export async function hasDiff(branchName: string): Promise<boolean> {
   try {
     return (await gitRetry(() => git.diff(['HEAD', branchName]))) !== '';
   } catch (err) {
-    /*istanbul ignore next*/
-    if (err.message?.includes('fatal: not a git repository')) {
-      throw new Error(REPOSITORY_CHANGED);
-    }
     return true;
   }
 }
@@ -1077,10 +981,6 @@ export async function prepareCommit({
 
     return result;
   } catch (err) {
-    /*istanbul ignore next*/
-    if (err.message?.includes('fatal: not a git repository')) {
-      throw new Error(REPOSITORY_CHANGED);
-    }
     return handleCommitError(files, branchName, err);
   }
 }
@@ -1109,10 +1009,6 @@ export async function pushCommit({
     incLimitedValue(Limit.Commits);
     result = true;
   } catch (err) {
-    /*istanbul ignore next*/
-    if (err.message?.includes('fatal: not a git repository')) {
-      throw new Error(REPOSITORY_CHANGED);
-    }
     handleCommitError(files, branchName, err);
   }
   return result;
@@ -1132,10 +1028,6 @@ export async function fetchCommit({
     config.branchIsModified[branchName] = false;
     return commit;
   } catch (err) {
-    /*istanbul ignore next*/
-    if (err.message?.includes('fatal: not a git repository')) {
-      throw new Error(REPOSITORY_CHANGED);
-    }
     return handleCommitError(files, branchName, err);
   }
 }
@@ -1204,17 +1096,10 @@ export async function pushCommitToRenovateRef(
   refName: string,
   section = 'branches'
 ): Promise<void> {
-  try {
-    const fullRefName = `refs/renovate/${section}/${refName}`;
-    await git.raw(['update-ref', fullRefName, commitSha]);
-    await git.push(['--force', 'origin', fullRefName]);
-    remoteRefsExist = true;
-  } catch (err) /* istanbul ignore next */ {
-    if (err.message?.includes('fatal: not a git repository')) {
-      throw new Error(REPOSITORY_CHANGED);
-    }
-    throw err;
-  }
+  const fullRefName = `refs/renovate/${section}/${refName}`;
+  await git.raw(['update-ref', fullRefName, commitSha]);
+  await git.push(['--force', 'origin', fullRefName]);
+  remoteRefsExist = true;
 }
 
 /**
@@ -1252,9 +1137,6 @@ export async function clearRenovateRefs(): Promise<void> {
       .filter((line) => line.startsWith('refs/renovate/'));
     renovateRefs.push(...refs);
   } catch (err) /* istanbul ignore next */ {
-    if (err.message?.includes('fatal: not a git repository')) {
-      throw new Error(REPOSITORY_CHANGED);
-    }
     logger.warn({ err }, `Renovate refs cleanup error`);
   }
 
