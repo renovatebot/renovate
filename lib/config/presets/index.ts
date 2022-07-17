@@ -420,15 +420,15 @@ export async function resolveConfigPresets(
   return config;
 }
 
+// handleExtendsArray:
+// This function edits extends array presets when shallowResolve is enabled
+// 1. remove resolved external presets from the extends array.
+// 2. clean duplicate presets keys (from different resolution levels).
 function handleExtendsArray(
   config: AllConfig,
   unresolvedPreserts: string[]
 ): void {
-  // in case of shallowResolve set to true:
-  // remove resolved external presets from the extends array for the log
-  // clean duplicate presets in case of two different presets are having
-  // same values in the extends array
-  if (config.extends === undefined) {
+  if (config.extends === undefined || config.extends.length === 0) {
     return;
   }
   config.extends = config.extends?.filter((e) => !shouldShallowResolve(e));
@@ -436,6 +436,7 @@ function handleExtendsArray(
   const uniqueExtends = new Set(config.extends?.values());
   config.extends = Array.from(uniqueExtends);
   if (config?.extends?.length === 0) {
+    // clean empty extends array
     delete config.extends;
   }
 }
