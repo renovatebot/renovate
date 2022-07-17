@@ -225,10 +225,7 @@ export async function mergeRenovateConfig(
     ),
     repository
   );
-  logger.debug(
-    { resolvedShallowConfig: shallowResolvedConfig },
-    'shallow config'
-  );
+  logger.debug({ config: shallowResolvedConfig }, 'shallow config');
   // Decrypt after resolving in case the preset contains npm authentication instead
   let resolvedConfig = await decryptConfig(
     await presets.resolveConfigPresets(decryptedConfig, config),

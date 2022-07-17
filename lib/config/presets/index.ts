@@ -420,13 +420,19 @@ export async function resolveConfigPresets(
   return config;
 }
 
-function handleExtendsArray(config: AllConfig, tempExtends: string[]): void {
+function handleExtendsArray(
+  config: AllConfig,
+  unresolvedPreserts: string[]
+): void {
   // in case of shallowResolve set to true:
   // remove resolved external presets from the extends array for the log
   // clean duplicate presets in case of two different presets are having
   // same values in the extends array
+  if (config.extends === undefined) {
+    return;
+  }
   config.extends = config.extends?.filter((e) => !shouldShallowResolve(e));
-  config.extends?.push(...tempExtends);
+  config.extends?.push(...unresolvedPreserts);
   const uniqueExtends = new Set(config.extends?.values());
   config.extends = Array.from(uniqueExtends);
   if (config?.extends?.length === 0) {
