@@ -6,6 +6,7 @@ import { logger } from '../logger';
 import { regEx } from './regex';
 
 const githubUrlRe = regEx(/^(https?:\/\/)?(www\.)?github\.com\/?/);
+const urlPathNameRe = regEx(/\/.+\/.+/);
 
 export function joinUrlParts(...parts: string[]): string {
   return urlJoin(...parts);
@@ -116,13 +117,7 @@ export function urlContainsSubPath(url: string | undefined): boolean {
   }
   // url has subpath(nested path)
   // if there is more than than one slash in pathname with a string after it.
-  const lastSlashPos = parsedUrl.pathname.lastIndexOf('/');
-  const afterLastSlash = parsedUrl.pathname.substring(lastSlashPos);
-  return (
-    lastSlashPos > 0 &&
-    !is.emptyString(afterLastSlash) &&
-    afterLastSlash !== '/'
-  );
+  return urlPathNameRe.test(parsedUrl.pathname);
 }
 
 export function isGitHubUrl(url: string | undefined): boolean {
