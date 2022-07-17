@@ -964,6 +964,53 @@ describe('modules/datasource/docker/index', () => {
       );
     });
 
+    it('handles error while retrieving image config blob', async () => {
+      const currentDigest = 'some-image-digest';
+
+      httpMock
+        .scope(authUrl)
+        .get(
+          '/token?service=registry.docker.io&scope=repository:library/some-dep:pull'
+        )
+        .times(3)
+        .reply(200, { token: 'some-token' });
+      httpMock
+        .scope(baseUrl)
+        .get('/')
+        .times(3)
+        .reply(401, '', {
+          'www-authenticate':
+            'Bearer realm="https://auth.docker.io/token",service="registry.docker.io",scope="repository:library/some-dep:pull"',
+        })
+        .head('/library/some-dep/manifests/' + currentDigest)
+        .reply(200, '', { 'content-type': MediaType.ociManifestV1 })
+        .get('/library/some-dep/manifests/' + currentDigest)
+        .reply(200, {
+          schemaVersion: 2,
+          config: { digest: 'some-config-digest' },
+        })
+        .get('/library/some-dep/blobs/some-config-digest')
+        .replyWithError({ statusCode: 404 });
+      httpMock
+        .scope(baseUrl)
+        .get('/', undefined, { badheaders: ['authorization'] })
+        .reply(200, '', {})
+        .head('/library/some-dep/manifests/some-new-value', undefined, {
+          badheaders: ['authorization'],
+        })
+        .reply(401);
+
+      const res = await getDigest(
+        {
+          datasource: 'docker',
+          depName: 'some-dep',
+          currentDigest,
+        },
+        'some-new-value'
+      );
+      expect(res).toBeNull();
+    });
+
     it('returns null if digest refers to manifest list and new value invalid', async () => {
       httpMock
         .scope(baseUrl)
