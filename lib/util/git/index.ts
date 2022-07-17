@@ -357,8 +357,7 @@ export async function syncGit(): Promise<void> {
       const durationMs = Math.round(Date.now() - fetchStart);
       logger.info({ durationMs }, 'git fetch completed');
       clone = false;
-    } catch (err) {
-      /*istanbul ignore next*/
+    } catch (err) /*istanbul ignore next*/ {
       if (err.message === REPOSITORY_EMPTY) {
         throw err;
       }
@@ -385,8 +384,7 @@ export async function syncGit(): Promise<void> {
         await git.clone(config.url, '.', opts);
       };
       await gitRetry(() => emptyDirAndClone());
-    } catch (err) {
-      /*istanbul ignore next*/
+    } catch (err) /*istanbul ignore next*/ {
       logger.debug({ err }, 'git clone error');
       if (err.message?.includes('No space left on device')) {
         throw new Error(SYSTEM_INSUFFICIENT_DISK_SPACE);
@@ -467,7 +465,6 @@ export async function getBranchParentSha(
     const parentSha = await git.revparse([`${branchSha}^`]);
     return parentSha;
   } catch (err) {
-    /* istanbul ignore next */
     logger.debug({ err }, 'Error getting branch parent sha');
     return null;
   }
@@ -562,8 +559,7 @@ export async function isBranchBehindBase(branchName: string): Promise<boolean> {
       `isBranchBehindBase=${isBehind}`
     );
     return isBehind;
-  } catch (err) {
-    /*istanbul ignore next*/
+  } catch (err) /*istanbul ignore next*/ {
     const errChecked = checkForPlatformFailure(err);
     if (errChecked) {
       throw errChecked;
@@ -606,8 +602,7 @@ export async function isBranchModified(branchName: string): Promise<boolean> {
         '--',
       ])
     ).trim();
-  } catch (err) {
-    /*istanbul ignore next*/
+  } catch (err) /*istanbul ignore next*/ {
     if (err.message?.includes('fatal: bad revision')) {
       logger.debug(
         { err },
@@ -682,8 +677,8 @@ export async function isBranchConflicted(
     }
     await git.merge(['--no-commit', '--no-ff', `origin/${branch}`]);
   } catch (err) {
-    /*istanbul ignore next*/
     result = true;
+    // istanbul ignore if: not easily testable
     if (!err?.git?.conflicts?.length) {
       logger.debug(
         { baseBranch, branch, err },
@@ -713,8 +708,7 @@ export async function deleteBranch(branchName: string): Promise<void> {
   try {
     await gitRetry(() => git.raw(['push', '--delete', 'origin', branchName]));
     logger.debug({ branchName }, 'Deleted remote branch');
-  } catch (err) {
-    /*istanbul ignore next*/
+  } catch (err) /*istanbul ignore next*/ {
     const errChecked = checkForPlatformFailure(err);
     if (errChecked) {
       throw errChecked;
@@ -755,8 +749,7 @@ export async function mergeBranch(branchName: string): Promise<void> {
     await gitRetry(() => git.merge(['--ff-only', branchName]));
     await gitRetry(() => git.push('origin', config.currentBranch));
     incLimitedValue(Limit.Commits);
-  } catch (err) {
-    /*istanbul ignore next*/
+  } catch (err) /*istanbul ignore next*/ {
     logger.debug(
       {
         baseBranch: config.currentBranch,
@@ -798,8 +791,7 @@ export async function getBranchFiles(
       git.diffSummary([`origin/${branchName}`, `origin/${branchName}^`])
     );
     return diff.files.map((file) => file.file);
-  } catch (err) {
-    /*istanbul ignore next*/
+  } catch (err) /*istanbul ignore next*/ {
     logger.warn({ err }, 'getBranchFiles error');
     const errChecked = checkForPlatformFailure(err);
     if (errChecked) {
@@ -980,7 +972,7 @@ export async function prepareCommit({
     };
 
     return result;
-  } catch (err) {
+  } catch (err) /* istanbul ignore next */ {
     return handleCommitError(files, branchName, err);
   }
 }
@@ -1008,7 +1000,7 @@ export async function pushCommit({
     logger.debug({ result: pushRes }, 'git push');
     incLimitedValue(Limit.Commits);
     result = true;
-  } catch (err) {
+  } catch (err) /* istanbul ignore next */ {
     handleCommitError(files, branchName, err);
   }
   return result;
@@ -1027,7 +1019,7 @@ export async function fetchCommit({
     config.branchCommits[branchName] = commit;
     config.branchIsModified[branchName] = false;
     return commit;
-  } catch (err) {
+  } catch (err) /* istanbul ignore next */ {
     return handleCommitError(files, branchName, err);
   }
 }
