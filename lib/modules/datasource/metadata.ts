@@ -4,7 +4,7 @@ import parse from 'github-url-from-git';
 import { DateTime } from 'luxon';
 import * as hostRules from '../../util/host-rules';
 import { regEx } from '../../util/regex';
-import { isGitHubUrl, urlContainsSubPath, validateUrl } from '../../util/url';
+import { isGitHubUrl, pathDepthOf, validateUrl } from '../../util/url';
 import { manualChangelogUrls, manualSourceUrls } from './metadata-manual';
 import type { ReleaseResult } from './types';
 
@@ -120,7 +120,7 @@ export function addMetaData(
     isGithubHomePage = true;
     if (!dep.sourceUrl) {
       dep.sourceUrl = dep.homepage;
-      if(!urlContainsSubPath(dep.homepage)){
+      if(pathDepthOf(dep.homepage) > 1){
         // remove homepage if its not a link to a path in a github repo.
         delete dep.homepage;
       }

@@ -6,7 +6,7 @@ import { logger } from '../logger';
 import { regEx } from './regex';
 
 const githubUrlRe = regEx(/^(https?:\/\/)?(www\.)?github\.com\/?/);
-const urlPathNameRe = regEx(/\/.+\/.+/);
+const urlPathSplitRe = regEx(/\/(?=\w+)/);
 
 export function joinUrlParts(...parts: string[]): string {
   return urlJoin(...parts);
@@ -110,14 +110,17 @@ export function parseLinkHeader(
   return _parseLinkHeader(linkHeader);
 }
 
-export function urlContainsSubPath(url: string | undefined): boolean {
+// this method returns the path length of a url
+// example : https://github.com/org/repo/nested-path
+// output : 3.  (org->repo->nested-path depth of this path is 3)
+export function pathDepthOf(url: string | undefined): number {
   const parsedUrl = parseUrl(url);
   if (is.nullOrUndefined(parsedUrl)) {
-    return false;
+    return 0;
   }
-  // url has subpath(nested path)
-  // if there is more than than one slash in pathname with a string after it.
-  return urlPathNameRe.test(parsedUrl.pathname);
+  // if there is more than one path after the split
+  const afterFirstSlash = parsedUrl.pathname.substring(1);
+  return afterFirstSlash.split(urlPathSplitRe).length;
 }
 
 export function isGitHubUrl(url: string | undefined): boolean {
