@@ -357,7 +357,7 @@ export async function syncGit(): Promise<void> {
       const durationMs = Math.round(Date.now() - fetchStart);
       logger.info({ durationMs }, 'git fetch completed');
       clone = false;
-    } catch (err) /*istanbul ignore next*/ {
+    } catch (err) /* istanbul ignore next */ {
       if (err.message === REPOSITORY_EMPTY) {
         throw err;
       }
@@ -384,7 +384,7 @@ export async function syncGit(): Promise<void> {
         await git.clone(config.url, '.', opts);
       };
       await gitRetry(() => emptyDirAndClone());
-    } catch (err) /*istanbul ignore next*/ {
+    } catch (err) /* istanbul ignore next */ {
       logger.debug({ err }, 'git clone error');
       if (err.message?.includes('No space left on device')) {
         throw new Error(SYSTEM_INSUFFICIENT_DISK_SPACE);
@@ -559,7 +559,7 @@ export async function isBranchBehindBase(branchName: string): Promise<boolean> {
       `isBranchBehindBase=${isBehind}`
     );
     return isBehind;
-  } catch (err) /*istanbul ignore next*/ {
+  } catch (err) /* istanbul ignore next */ {
     const errChecked = checkForPlatformFailure(err);
     if (errChecked) {
       throw errChecked;
@@ -602,7 +602,7 @@ export async function isBranchModified(branchName: string): Promise<boolean> {
         '--',
       ])
     ).trim();
-  } catch (err) /*istanbul ignore next*/ {
+  } catch (err) /* istanbul ignore next */ {
     if (err.message?.includes('fatal: bad revision')) {
       logger.debug(
         { err },
@@ -708,7 +708,7 @@ export async function deleteBranch(branchName: string): Promise<void> {
   try {
     await gitRetry(() => git.raw(['push', '--delete', 'origin', branchName]));
     logger.debug({ branchName }, 'Deleted remote branch');
-  } catch (err) /*istanbul ignore next*/ {
+  } catch (err) /* istanbul ignore next */ {
     const errChecked = checkForPlatformFailure(err);
     if (errChecked) {
       throw errChecked;
@@ -749,7 +749,7 @@ export async function mergeBranch(branchName: string): Promise<void> {
     await gitRetry(() => git.merge(['--ff-only', branchName]));
     await gitRetry(() => git.push('origin', config.currentBranch));
     incLimitedValue(Limit.Commits);
-  } catch (err) /*istanbul ignore next*/ {
+  } catch (err) {
     logger.debug(
       {
         baseBranch: config.currentBranch,
@@ -772,7 +772,7 @@ export async function getBranchLastCommitTime(
   try {
     const time = await git.show(['-s', '--format=%ai', 'origin/' + branchName]);
     return new Date(Date.parse(time));
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) {
     const errChecked = checkForPlatformFailure(err);
     // istanbul ignore if
     if (errChecked) {
@@ -791,7 +791,7 @@ export async function getBranchFiles(
       git.diffSummary([`origin/${branchName}`, `origin/${branchName}^`])
     );
     return diff.files.map((file) => file.file);
-  } catch (err) /*istanbul ignore next*/ {
+  } catch (err) /* istanbul ignore next */ {
     logger.warn({ err }, 'getBranchFiles error');
     const errChecked = checkForPlatformFailure(err);
     if (errChecked) {
