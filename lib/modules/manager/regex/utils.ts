@@ -106,8 +106,8 @@ export function isValidDependency({
 }: PackageDependency): boolean {
   // check if all the fields are set
   return (
-    (is.nonEmptyStringAndNotWhitespace(depName) ||
-      is.nonEmptyStringAndNotWhitespace(currentDigest)) &&
-    is.nonEmptyStringAndNotWhitespace(currentValue)
+    is.nonEmptyStringAndNotWhitespace(depName) &&
+    (is.nonEmptyStringAndNotWhitespace(currentDigest) ||
+    is.nonEmptyStringAndNotWhitespace(currentValue))
   );
 }
