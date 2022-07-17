@@ -30,7 +30,6 @@ describe('modules/manager/gomod/extract', () => {
           }),
         ])
       );
-      expect(res).toMatchSnapshot();
       expect(res?.constraints?.go).toBe('^1.13');
     });
 
