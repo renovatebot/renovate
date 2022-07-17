@@ -1389,17 +1389,17 @@
   dependencies:
     "@seald-io/nedb" "3.0.0"
 
-"@jamiemagee/osv-offline@1.2.7":
-  version "1.2.7"
-  resolved "https://registry.yarnpkg.com/@jamiemagee/osv-offline/-/osv-offline-1.2.7.tgz#c0fa075c1bdd155d76b9d94bb73628ccb43efef7"
-  integrity sha512-5EquMiMtWNowdEEZDyV6idf5UZNpp9s2EjVvqtTohr/4C+UXM/8GSuRuqZ8a+MyUHKdZeHSO5eFrd5CeU1puRA==
+"@jamiemagee/osv-offline@1.2.8":
+  version "1.2.8"
+  resolved "https://registry.yarnpkg.com/@jamiemagee/osv-offline/-/osv-offline-1.2.8.tgz#19b6ba13abb8d525e21d2f3a117c4350cbbe6168"
+  integrity sha512-3R8LRyGrw/fJ5YHmPFShxFbrwISLfG2FzbDxO8q+OLPw+8gmS9ditVUPKCPItIie0kWdSj6x7bV9dgjVHsfzyg==
   dependencies:
     "@jamiemagee/osv-offline-db" "1.1.4"
     "@octokit/rest" "18.12.0"
     adm-zip "^0.5.9"
     fs-extra "10.0.0"
     got "11.8.5"
-    luxon "2.4.0"
+    luxon "2.5.0"
 
 "@jest/console@^28.1.1":
   version "28.1.1"
@@ -6678,10 +6678,10 @@ lru-cache@^7.4.4, lru-cache@^7.5.1, lru-cache@^7.7.1:
   resolved "https://registry.yarnpkg.com/lru-cache/-/lru-cache-7.12.0.tgz#be2649a992c8a9116efda5c487538dcf715f3476"
   integrity sha512-OIP3DwzRZDfLg9B9VP/huWBlpvbkmbfiBy8xmsXp4RPmE4A3MhwNozc5ZJ3fWnSg8fDcdlE/neRTPG2ycEKliw==
 
-luxon@2.4.0:
-  version "2.4.0"
-  resolved "https://registry.yarnpkg.com/luxon/-/luxon-2.4.0.tgz#9435806545bb32d4234dab766ab8a3d54847a765"
-  integrity sha512-w+NAwWOUL5hO0SgwOHsMBAmZ15SoknmQXhSO0hIbJCAmPKSsGeK8MlmhYh2w6Iib38IxN2M+/ooXWLbeis7GuA==
+luxon@2.5.0:
+  version "2.5.0"
+  resolved "https://registry.yarnpkg.com/luxon/-/luxon-2.5.0.tgz#098090f67d690b247e83c090267a60b1aa8ea96c"
+  integrity sha512-IDkEPB80Rb6gCAU+FEib0t4FeJ4uVOuX1CQ9GsvU3O+JAGIgu0J7sf1OarXKaKDygTZIoJyU6YdZzTFRu+YR0A==
 
 make-dir@^3.0.0:
   version "3.1.0"
