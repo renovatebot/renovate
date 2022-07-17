@@ -820,7 +820,7 @@ export class DockerDatasource extends Datasource {
         packageName,
         registryUrl!
       );
-      const digest = currentDigest ? '@' + currentDigest : '';
+      const digest = currentDigest ? `@${currentDigest}` : '';
       return `${registryHost}:${dockerRepository}:${newTag}${digest}`;
     },
   })
@@ -850,10 +850,8 @@ export class DockerDatasource extends Datasource {
         );
 
         if (
-          manifestResponse &&
-          (manifestResponse.headers['content-type'] === MediaType.manifestV2 ||
-            manifestResponse.headers['content-type'] ===
-              MediaType.ociManifestV1)
+          manifestResponse?.headers['content-type'] === MediaType.manifestV2 ||
+          manifestResponse?.headers['content-type'] === MediaType.ociManifestV1
         ) {
           manifestResponse = await this.getManifestResponse(
             registryHost,
