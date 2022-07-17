@@ -56,8 +56,8 @@ export function extractPackageFile(content: string): PackageFile | null {
     const lines = content.split(newlineRegex);
     for (let lineNumber = 0; lineNumber < lines.length; lineNumber += 1) {
       let line = lines[lineNumber];
-      const goVer = line.replace('go ', '');
-      if (line.startsWith('go ') && semver.validRange(goVer)) {
+      const goVer = line.startsWith('go ') ? line.replace('go ', '') : null;
+      if (goVer && semver.validRange(goVer)) {
         const dep = getGoDep(lineNumber, goVer);
         deps.push(dep);
         constraints.go = line.replace('go ', '^');
