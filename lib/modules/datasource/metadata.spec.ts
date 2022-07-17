@@ -315,4 +315,34 @@ describe('modules/datasource/metadata', () => {
       sourceUrl: 'http://somesource.com',
     });
   });
+
+  it('Should delete homepage if its same as sourceUrl after massage for gitlab', () => {
+    const dep = {
+      homepage: 'https://gitlab.com/meno/',
+      sourceUrl: 'https://gitlab.com/meno/',
+      releases: [
+        { version: '1.0.1', releaseTimestamp: '2000-01-01T12:34:56' },
+        { version: '1.0.2', releaseTimestamp: '2000-01-02T12:34:56.000Z' },
+        { version: '1.0.3', releaseTimestamp: '2000-01-03T14:34:56.000+02:00' },
+      ],
+    };
+    addMetaData(dep, MavenDatasource.id, 'foobar');
+    expect(dep).toMatchObject({
+      sourceUrl: 'https://gitlab.com/meno/',
+      releases: [
+        {
+          version: '1.0.1',
+          releaseTimestamp: '2000-01-01T12:34:56.000Z',
+        },
+        {
+          version: '1.0.2',
+          releaseTimestamp: '2000-01-02T12:34:56.000Z',
+        },
+        {
+          version: '1.0.3',
+          releaseTimestamp: '2000-01-03T12:34:56.000Z',
+        },
+      ],
+    });
+  });
 });
