@@ -13,6 +13,7 @@ export const GITHUB_API_USING_HOST_TYPES = [
   'github-releases',
   'github-tags',
   'pod',
+  'hermit',
   'github-changelog',
 ];
 

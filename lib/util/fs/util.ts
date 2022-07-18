@@ -15,11 +15,9 @@ function assertBaseDir(path: string, baseDir: string): void {
 
 function ensurePath(path: string, key: 'localDir' | 'cacheDir'): string {
   const baseDir = upath.resolve(GlobalConfig.get(key)!);
-  let fullPath = path;
-  if (fullPath.startsWith(baseDir)) {
-    fullPath = fullPath.replace(baseDir, '');
-  }
-  fullPath = upath.resolve(upath.join(baseDir, fullPath));
+  const fullPath = upath.resolve(
+    upath.isAbsolute(path) ? path : upath.join(baseDir, path)
+  );
   assertBaseDir(fullPath, baseDir);
   return fullPath;
 }
