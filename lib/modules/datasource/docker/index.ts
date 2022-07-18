@@ -795,7 +795,7 @@ export class DockerDatasource extends Datasource {
       // prettier-ignore
       if (err.statusCode === 429 && isDockerHost(registryHost)) {
         logger.warn(
-          {registryHost, dockerRepository, err},
+          { registryHost, dockerRepository, err },
           'docker registry failure: too many requests'
         );
         throw new ExternalHostError(err);
@@ -803,7 +803,7 @@ export class DockerDatasource extends Datasource {
       // prettier-ignore
       if (err.statusCode === 401 && isDockerHost(registryHost)) {
         logger.warn(
-          {registryHost, dockerRepository, err},
+          { registryHost, dockerRepository, err },
           'docker registry failure: unauthorized'
         );
         throw new ExternalHostError(err);
