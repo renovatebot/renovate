@@ -14,12 +14,13 @@ const gitPrefix = regEx('^git:/?/?');
 export function massageUrl(sourceUrl: string): string {
   let massagedUrl = '';
   const parsedUrl = URL.parse(sourceUrl);
-  if (parsedUrl?.hostname) {
-    if (parsedUrl.hostname.includes('gitlab')) {
-      massagedUrl = massageGitlabUrl(sourceUrl);
-    } else {
-      massagedUrl = massageGithubUrl(sourceUrl);
-    }
+  if (parsedUrl.hostname === null) {
+    return massagedUrl;
+  }
+  if (parsedUrl.hostname.includes('gitlab.com')) {
+    massagedUrl = massageGitlabUrl(sourceUrl);
+  } else {
+    massagedUrl = massageGithubUrl(sourceUrl);
   }
   return massagedUrl;
 }
@@ -130,8 +131,7 @@ export function addMetaData(
 
   if (dep.homepage) {
     const parsedHomePage = parseUrl(dep.homepage);
-    // prettier-ignore
-    if (parsedHomePage?.hostname.includes('github')) {  // lgtm [js/incomplete-url-substring-sanitization]
+    if (parsedHomePage?.hostname.includes('github.com')) {
       if (!dep.sourceUrl) {
         dep.sourceUrl = dep.homepage;
       }
