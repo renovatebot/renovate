@@ -415,7 +415,7 @@ export async function extractPackageFile(
             );
           } else {
             // TODO: fix type #7154
-            dep = { ...dep, ...extractDependency(depType, depName, val) };
+            dep = { ...dep, ...extractDependency(depType, depName, val!) };
             setNodeCommitTopic(dep);
             dep.prettyDepType = depTypes[depType];
             deps.push(dep);
