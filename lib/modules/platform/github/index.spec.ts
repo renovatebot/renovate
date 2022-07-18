@@ -35,7 +35,7 @@ describe('modules/platform/github/index', () => {
     setBaseUrl(githubApiHost);
 
     git.branchExists.mockReturnValue(true);
-    git.isBranchStale.mockResolvedValue(true);
+    git.isBranchBehindBase.mockResolvedValue(true);
     git.getBranchCommit.mockReturnValue(
       '0d9c7726c3d628b7e28af234595cfd20febdbf8e'
     );
