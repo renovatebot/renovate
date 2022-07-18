@@ -736,7 +736,8 @@ export function massageMarkdown(input: string): string {
       'you tick the rebase/retry checkbox',
       'rename PR to start with "rebase!"'
     )
-    .replace(regEx(`\n---\n\n.*?<!-- rebase-check -->.*?\n`), '');
+    .replace(regEx(`\n---\n\n.*?<!-- rebase-check -->.*?\n`), '')
+    .replace(regEx(/<!--renovate-debug:.*?-->/), '');
 }
 
 /* istanbul ignore next */

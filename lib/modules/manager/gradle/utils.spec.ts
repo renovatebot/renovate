@@ -19,6 +19,7 @@ describe('modules/manager/gradle/utils', () => {
       '(,2.0[',
       '2.1.1.RELEASE',
       '1.0.+',
+      '2022-05-10_55',
       'latest',
     ].forEach((input) => {
       expect(versionLikeSubstring(input)).toEqual(input);
