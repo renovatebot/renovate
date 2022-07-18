@@ -88,11 +88,6 @@ export async function shouldReuseExistingBranch(
 
     if ((await isBranchModified(branchName)) === false) {
       logger.debug(`Branch is not mergeable and needs rebasing`);
-      if (config.rebaseWhen === 'never') {
-        logger.debug('Rebasing disabled by config');
-        result.reuseExistingBranch = true;
-        result.isModified = false;
-      }
       // Setting reuseExistingBranch back to undefined means that we'll use the default branch
       return result;
     }

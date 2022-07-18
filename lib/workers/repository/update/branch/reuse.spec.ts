@@ -107,16 +107,6 @@ describe('workers/repository/update/branch/reuse', () => {
       expect(res.reuseExistingBranch).toBeTrue();
     });
 
-    it('returns true if unmergeable and can rebase, but rebaseWhen is never', async () => {
-      config.rebaseWhen = 'never';
-      git.branchExists.mockReturnValueOnce(true);
-      git.isBranchConflicted.mockResolvedValueOnce(true);
-      platform.getBranchPr.mockResolvedValueOnce(pr);
-      git.isBranchModified.mockResolvedValueOnce(false);
-      const res = await shouldReuseExistingBranch(config);
-      expect(res.reuseExistingBranch).toBeTrue();
-    });
-
     it('returns false if PR title rebase!', async () => {
       git.branchExists.mockReturnValueOnce(true);
       platform.getBranchPr.mockResolvedValueOnce({
