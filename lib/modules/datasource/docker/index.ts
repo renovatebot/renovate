@@ -525,8 +525,7 @@ export class DockerDatasource extends Datasource {
       manifest.mediaType === MediaType.ociManifestIndexV1 ||
       (!manifest.mediaType && hasKey('manifests', manifest))
     ) {
-      const imageList = manifest;
-      if (imageList.manifests.length) {
+      if (manifest.manifests.length) {
         logger.trace(
           { registry, dockerRepository, tag },
           'Found manifest index, using first image'

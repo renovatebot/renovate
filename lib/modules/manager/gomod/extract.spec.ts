@@ -19,9 +19,17 @@ describe('modules/manager/gomod/extract', () => {
       expect(res?.filter((e) => e.depType === 'replace')).toHaveLength(1);
     });
 
-    it('extracts constraints', () => {
+    it('extracts constraints and golang', () => {
       const res = extractPackageFile(gomod3);
-      expect(res).toMatchSnapshot();
+      expect(res?.deps).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            depType: 'golang',
+            depName: 'go',
+            datasource: 'golang-version',
+          }),
+        ])
+      );
       expect(res?.constraints?.go).toBe('^1.13');
     });
 
