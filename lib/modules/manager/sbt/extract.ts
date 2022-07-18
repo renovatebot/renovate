@@ -328,7 +328,7 @@ function parseSbtLine(
       const depExpr = rightPart.replace(regEx(/[\s,]*$/), '');
       dep = parseDepExpr(depExpr, {
         ...ctx,
-        depType: 'plugin', // workaround to find in agoda-maven, otherwise it couldn't lookup
+        depType: 'plugin',
       });
     }
   }
@@ -401,7 +401,7 @@ export async function extractAllPackageFiles(
   let variables: ParseContext['variables'] = {};
 
   // Start parsing file in project/ folder first to get variable
-  packageFiles.sort((a, b) => (a.startsWith('project/') ? -1 : 1));
+  packageFiles.sort((a, b) => (a.match('project/.*\\.scala$') ? -1 : 1));
 
   for (const packageFile of packageFiles) {
     const content = await readLocalFile(packageFile, 'utf8');
