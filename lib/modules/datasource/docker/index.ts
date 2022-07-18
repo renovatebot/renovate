@@ -712,18 +712,12 @@ export class DockerDatasource extends Datasource {
       | null = `${registryHost}/${dockerRepository}/tags/list?n=${limit}`;
     url = ensurePathPrefix(url, '/v2');
     let headers = null;
-    try {
-      headers = await getAuthHeaders(
-        this.http,
-        registryHost,
-        dockerRepository,
-        url
-      );
-    } catch (err) /* istanbul ignore next */ {
-      if (err.message === PAGE_NOT_FOUND_ERROR) {
-        throw err;
-      }
-    }
+    headers = await getAuthHeaders(
+      this.http,
+      registryHost,
+      dockerRepository,
+      url
+    );
     if (!headers) {
       logger.debug('Failed to get authHeaders for getTags lookup');
       return null;
