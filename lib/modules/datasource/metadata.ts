@@ -12,17 +12,14 @@ const githubPages = regEx('^https://([^.]+).github.com/([^/]+)$');
 const gitPrefix = regEx('^git:/?/?');
 
 export function massageUrl(sourceUrl: string): string {
-  let massagedUrl = '';
   const parsedUrl = URL.parse(sourceUrl);
-  if (parsedUrl.hostname === null) {
-    return massagedUrl;
+  if (!parsedUrl?.hostname) {
+    return '';
   }
   if (parsedUrl.hostname.includes('gitlab')) {
-    massagedUrl = massageGitlabUrl(sourceUrl);
-  } else {
-    massagedUrl = massageGithubUrl(sourceUrl);
+    return massageGitlabUrl(sourceUrl);
   }
-  return massagedUrl;
+  return massageGithubUrl(sourceUrl);
 }
 
 export function massageGithubUrl(url: string): string {
