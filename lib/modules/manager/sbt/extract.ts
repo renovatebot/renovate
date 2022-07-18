@@ -1,3 +1,5 @@
+import { logger } from '../../../logger';
+import { readLocalFile } from '../../../util/fs';
 import { newlineRegex, regEx } from '../../../util/regex';
 import { MavenDatasource } from '../../datasource/maven';
 import { MAVEN_REPO } from '../../datasource/maven/common';
@@ -8,7 +10,7 @@ import {
 } from '../../datasource/sbt-plugin';
 import { get } from '../../versioning';
 import * as mavenVersioning from '../../versioning/maven';
-import type { PackageDependency, PackageFile } from '../types';
+import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
 import type { ParseContext, ParseOptions } from './types';
 
 const stripComment = (str: string): string =>
@@ -120,31 +122,43 @@ const getVarName = (str: string): string =>
     .replace(regEx(/\s*=\s*"[^"]*"\s*$/), '');
 
 const isVarName = (str: string): boolean =>
-  regEx(/^[_a-zA-Z][_a-zA-Z0-9]*$/).test(str);
+  // allow dot annotation
+  regEx(/^[_a-zA-Z][_a-zA-Z0-9]*(\.[_a-zA-Z][_a-zA-Z0-9]*)*$/).test(str);
 
-const getVarInfo = (str: string, ctx: ParseContext): { val: string } => {
+const getVarInfo = (
+  str: string,
+  ctx: ParseContext
+): { val: string; sourceFile: string; lineIndex: number } => {
   const rightPart = str.replace(
     regEx(/^\s*(private\s*)?(lazy\s*)?val\s+[_a-zA-Z][_a-zA-Z0-9]*\s*=\s*"/),
     ''
   );
   const val = rightPart.replace(regEx(/"\s*$/), '');
-  return { val };
+  return { val, sourceFile: ctx.lookupVariableFile!, lineIndex: ctx.lineIndex };
 };
 
 function parseDepExpr(
   expr: string,
   ctx: ParseContext
 ): PackageDependency | null {
-  const { scalaVersion, variables } = ctx;
+  const { scalaVersion, variables, lineIndex } = ctx;
   let { depType } = ctx;
 
-  const isValidToken = (str: string): boolean =>
-    isStringLiteral(str) || (isVarName(str) && !!variables[str]);
+  const getLastDotAnnotation = (longVar: string): string =>
+    longVar?.match('.') ? longVar.split('.').pop() ?? '' : '';
 
-  const resolveToken = (str: string): string =>
-    isStringLiteral(str)
-      ? str.replace(regEx(/^"/), '').replace(regEx(/"$/), '')
-      : variables[str].val;
+  const isValidToken = (str: string): boolean =>
+    isStringLiteral(str) ||
+    (isVarName(str) && !!variables[getLastDotAnnotation(str)]);
+
+  const resolveToken = (str: string): string => {
+    if (isStringLiteral(str)) {
+      return str.replace(regEx(/^"/), '').replace(regEx(/"$/), '');
+    }
+    const variable = variables[getLastDotAnnotation(str)];
+    ctx.lookupVariableFile = variable.sourceFile;
+    return variable.val;
+  };
 
   const tokens = expr
     .trim()
@@ -208,10 +222,17 @@ function parseDepExpr(
     depName,
     packageName,
     currentValue,
+    editFile: ctx?.lookupVariableFile,
+    fileReplacePosition: lineIndex,
   };
 
   if (variables[rawVersion]) {
     result.groupName = `${rawVersion}`;
+  }
+  if (variables[getLastDotAnnotation(rawVersion)]) {
+    result.fileReplacePosition =
+      variables[getLastDotAnnotation(rawVersion)].lineIndex;
+    result.groupName = `${getLastDotAnnotation(rawVersion)}`;
   }
 
   if (depType) {
@@ -234,6 +255,8 @@ function parseSbtLine(
   const ctx: ParseContext = {
     scalaVersion,
     variables,
+    lookupVariableFile: acc.packageFile!,
+    lineIndex,
   };
 
   let dep: PackageDependency | null = null;
@@ -305,6 +328,7 @@ function parseSbtLine(
       const depExpr = rightPart.replace(regEx(/[\s,]*$/), '');
       dep = parseDepExpr(depExpr, {
         ...ctx,
+        depType: 'plugin', // workaround to find in agoda-maven, otherwise it couldn't lookup
       });
     }
   }
@@ -336,14 +360,17 @@ function parseSbtLine(
       packageFileVersion,
     };
   }
-
   return {
     deps,
     packageFileVersion,
   };
 }
 
-export function extractPackageFile(content: string): PackageFile | null {
+export function extractPackageFile(
+  content: string,
+  packageFile?: string,
+  variables: ParseOptions['variables'] = {}
+): (PackageFile & ParseOptions) | null {
   if (!content) {
     return null;
   }
@@ -356,10 +383,65 @@ export function extractPackageFile(content: string): PackageFile | null {
     deps: [],
     isMultiDeps: false,
     scalaVersion: null,
-    variables: {},
+    variables,
+    packageFile,
   };
 
   // TODO: needs major refactoring?
   const res = lines.reduce(parseSbtLine, acc);
   return res.deps.length ? res : null;
+}
+
+export async function extractAllPackageFiles(
+  _config: ExtractConfig,
+  packageFiles: string[]
+): Promise<PackageFile[] | null> {
+  const packages: PackageFile[] = [];
+  const mapDepsToVariableFile: Record<string, PackageDependency[]> = {};
+  let variables: ParseContext['variables'] = {};
+
+  // Start parsing file in project/ folder first to get variable
+  packageFiles.sort((a, b) => (a.startsWith('project/') ? -1 : 1));
+
+  for (const packageFile of packageFiles) {
+    const content = await readLocalFile(packageFile, 'utf8');
+    if (!content) {
+      logger.trace({ packageFile }, 'packageFile has no content');
+      continue;
+    }
+    const res = extractPackageFile(content, packageFile, variables);
+    if (res) {
+      res.packageFile = packageFile;
+      if (res?.deps) {
+        variables = { ...variables, ...res.variables };
+        for (const dep of res.deps) {
+          if (dep.editFile) {
+            if (!mapDepsToVariableFile[dep.editFile]) {
+              mapDepsToVariableFile[dep.editFile] = [];
+            }
+            mapDepsToVariableFile[dep.editFile].push(dep);
+          }
+        }
+        packages.push(res);
+      }
+    }
+  }
+
+  // Filter unique package
+  const finalPackages = Object.entries(mapDepsToVariableFile).map(
+    ([packageFile, deps]) => ({
+      packageFile,
+      deps: deps.filter(
+        (val, idx, self) =>
+          idx ===
+          self.findIndex(
+            (dep) =>
+              dep.packageName === val.packageName &&
+              dep.currentValue === val.currentValue
+          )
+      ),
+    })
+  );
+
+  return finalPackages.length > 0 ? finalPackages : null;
 }
