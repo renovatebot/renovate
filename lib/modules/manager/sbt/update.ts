@@ -1,7 +1,10 @@
 import semver, { ReleaseType } from 'semver';
 import { logger } from '../../../logger';
 import { regEx } from '../../../util/regex';
-import type { BumpPackageVersionResult } from '../types';
+import type {
+  BumpPackageVersionResult,
+  UpdateDependencyConfig,
+} from '../types';
 
 export function bumpPackageVersion(
   content: string,
@@ -30,4 +33,32 @@ export function bumpPackageVersion(
   }
 
   return { bumpedContent };
+}
+
+export function updateDependency({
+  fileContent,
+  upgrade,
+}: UpdateDependencyConfig): string | null {
+  const { fileReplacePosition, currentValue, newValue } = upgrade;
+  if (currentValue && newValue) {
+    if (fileReplacePosition) {
+      const actualLineNo = upgrade.fileReplacePosition!;
+      const offset = fileContent.split('\n', actualLineNo).join('\n').length;
+      const offsetEndOfLine = fileContent
+        .split('\n', actualLineNo + 1)
+        .join('\n').length;
+
+      const [header, updateLine, footer] = [
+        fileContent.slice(0, offset),
+        fileContent.slice(offset, offsetEndOfLine),
+        fileContent.slice(offsetEndOfLine),
+      ];
+
+      const updatedLine = updateLine.replace(currentValue, newValue);
+      return header + updatedLine + footer;
+    }
+    return fileContent.replace(currentValue, newValue);
+  }
+
+  return null;
 }
