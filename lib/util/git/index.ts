@@ -550,8 +550,9 @@ export async function isBranchBehindBase(branchName: string): Promise<boolean> {
   if (isBehind !== null) {
     return isBehind;
   }
+
+  await syncGit();
   try {
-    await syncGit();
     const { currentBranchSha, currentBranch } = config;
     const branches = await git.branch([
       '--remotes',
