@@ -16,7 +16,7 @@ import {
   writeLocalFile,
 } from '../../../util/fs';
 import { getRepoStatus } from '../../../util/git';
-import { regEx } from '../../../util/regex';
+import { newlineRegex, regEx } from '../../../util/regex';
 import { addSecretForSanitizing } from '../../../util/sanitize';
 import { isValid } from '../../versioning/ruby';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
@@ -44,17 +44,20 @@ function buildBundleHostVariable(hostRule: HostRule): Record<string, string> {
 }
 
 const resolvedPkgRegex = regEx(
-  /(?<pkg>\S+)(?:\s*\([^)]+\)\s*)? was resolved to/g
+  /(?<pkg>\S+)(?:\s*\([^)]+\)\s*)? was resolved to/
 );
 
 function getResolvedPackages(input: string): string[] {
+  const lines = input.split(newlineRegex);
   const result: string[] = [];
-  let resolveMatchGroups = resolvedPkgRegex.exec(input)?.groups;
-  while (resolveMatchGroups) {
-    const { pkg } = resolveMatchGroups;
-    result.push(pkg);
-    resolveMatchGroups = resolvedPkgRegex.exec(input)?.groups;
+  for (const line of lines) {
+    const resolveMatchGroups = line.match(resolvedPkgRegex)?.groups;
+    if (resolveMatchGroups) {
+      const { pkg } = resolveMatchGroups;
+      result.push(pkg);
+    }
   }
+
   return [...new Set(result)];
 }
 
