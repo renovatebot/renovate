@@ -45,7 +45,7 @@ export function massageGithubUrl(url: string): string {
 function massageGitlabUrl(url: string): string {
   return url
     .replace('http:', 'https:')
-    .replace(regEx(/^git:\/?\/?/), 'https://')
+    .replace(gitPrefix, 'https://')
     .replace(regEx(/\/tree\/.*$/i), '')
     .replace(regEx(/\/$/i), '')
     .replace('.git', '');
