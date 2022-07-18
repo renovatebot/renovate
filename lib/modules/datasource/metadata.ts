@@ -17,7 +17,7 @@ export function massageUrl(sourceUrl: string): string {
   if (parsedUrl.hostname === null) {
     return massagedUrl;
   }
-  if (parsedUrl.hostname.includes('gitlab.com')) {
+  if (parsedUrl.hostname.includes('gitlab')) {
     massagedUrl = massageGitlabUrl(sourceUrl);
   } else {
     massagedUrl = massageGithubUrl(sourceUrl);
@@ -131,7 +131,7 @@ export function addMetaData(
 
   if (dep.homepage) {
     const parsedHomePage = parseUrl(dep.homepage);
-    if (parsedHomePage?.hostname.includes('github.com')) {
+    if (parsedHomePage?.hostname.includes('github')) {
       if (!dep.sourceUrl) {
         dep.sourceUrl = dep.homepage;
       }
