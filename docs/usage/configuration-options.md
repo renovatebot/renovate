@@ -2744,8 +2744,18 @@ This works because Renovate will add a "renovate/stability-days" pending status 
 
 ## stopUpdatingLabel
 
-On supported platforms it is possible to add a label to a PR to request Renovate stop updating the PR.
-By default this label is `"stop-updating"` but you can configure it to anything you want by changing this `stopUpdatingLabel` field.
+This feature only works on supported platforms, check the table above.
+
+If you want Renovate to stop updating a PR, you can apply a label to the PR.
+By default, Renovate listens to the label: `"stop-updating"`.
+
+You can set your own label name with the `"stopUpdatingLabel"` field:
+
+```json
+{
+  "stopUpdatingLabel": "take-a-break-renovate"
+}
+```
 
 ## suppressNotifications
 

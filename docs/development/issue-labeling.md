@@ -112,7 +112,9 @@ Keep in mind that an issue can be both affecting a platform and a self hosted in
 
     core:automerge
     core:changelogs
+    core:config
     core:dashboard
+    core:git
     core:onboarding
     core:schedule
 
@@ -137,8 +139,8 @@ Use a `datasource:` label when it is applicable specifically to particular datas
 
     worker:branch
     worker:global
-    worker:onboarding
     worker:pr
+    worker:repository
 
 </details>
 
