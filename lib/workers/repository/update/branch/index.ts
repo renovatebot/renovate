@@ -107,6 +107,8 @@ export async function processBranch(
     logger.debug(`PR rebase requested=${config.rebaseRequested}`);
   }
   const artifactErrorTopic = emojify(':warning: Artifact update problem');
+  config.stopUpdating = branchPr?.labels?.includes(config.stopUpdatingLabel!);
+  const prRebaseChecked = !!branchPr?.bodyStruct?.rebaseRequested;
   try {
     // Check if branch already existed
     const existingPr = branchPr ? undefined : await prAlreadyExisted(config);
@@ -172,6 +174,19 @@ export async function processBranch(
       };
     }
     if (branchExists) {
+      if (dependencyDashboardCheck && config.stopUpdating) {
+        if (!prRebaseChecked) {
+          logger.info(
+            'Branch updating is skipped because stopUpdatingLabel is present in config'
+          );
+          return {
+            branchExists: true,
+            prNo: branchPr?.number,
+            result: BranchResult.NoWork,
+          };
+        }
+      }
+
       logger.debug('Checking if PR has been edited');
       const branchIsModified = await isBranchModified(config.branchName);
       if (branchPr) {
@@ -278,7 +293,7 @@ export async function processBranch(
         'Branch + PR exists but is not scheduled -- will update if necessary'
       );
     }
-    await checkoutBranch(config.baseBranch!);
+
     //stability checks
     if (
       config.upgrades.some(
@@ -405,6 +420,7 @@ export async function processBranch(
     } else {
       logger.debug('No updated lock files in branch');
     }
+    await checkoutBranch(config.baseBranch!);
     const postUpgradeCommandResults = await executePostUpgradeCommands(config);
 
     if (postUpgradeCommandResults !== null) {
@@ -458,23 +474,6 @@ export async function processBranch(
       branchExists &&
       (await isBranchConflicted(config.baseBranch!, config.branchName));
     config.forceCommit = forcedManually || config.isConflicted;
-
-    config.stopUpdating = branchPr?.labels?.includes(config.stopUpdatingLabel!);
-
-    const prRebaseChecked = !!branchPr?.bodyStruct?.rebaseRequested;
-
-    if (branchExists && dependencyDashboardCheck && config.stopUpdating) {
-      if (!prRebaseChecked) {
-        logger.info(
-          'Branch updating is skipped because stopUpdatingLabel is present in config'
-        );
-        return {
-          branchExists: true,
-          prNo: branchPr?.number,
-          result: BranchResult.NoWork,
-        };
-      }
-    }
 
     const commitSha = await commitFilesToBranch(config);
     // istanbul ignore if
