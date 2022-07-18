@@ -119,13 +119,11 @@ export function addMetaData(
   ) {
     dep.sourceUrl = dep.changelogUrl;
   }
-  let isGithubHomePage = false;
-  // prettier-ignore
-  if (isGitHubUrl(dep.homepage)) { // lgtm [js/incomplete-url-substring-sanitization]
-    isGithubHomePage = true;
+  if (isGitHubUrl(dep.homepage)) {
+    // lgtm [js/incomplete-url-substring-sanitization]
     if (!dep.sourceUrl) {
       dep.sourceUrl = dep.homepage;
-      if(subpathDepth(dep.homepage) <= 1){
+      if (subpathDepth(dep.homepage) <= 1) {
         // remove homepage if its not a link to a path in a github repo.
         delete dep.homepage;
       }
@@ -155,8 +153,7 @@ export function addMetaData(
       delete dep.sourceUrl;
     }
 
-    if (shouldDeleteHomepage(dep, isGithubHomePage)) {
-      // delete homepage if its the same as the sourceUrl after massaging
+    if (shouldDeleteHomepage(dep)) {
       delete dep.homepage;
     }
   }
@@ -177,18 +174,16 @@ export function addMetaData(
   }
 }
 
-function shouldDeleteHomepage(
-  dep: ReleaseResult,
-  isGithubUrl: boolean
-): boolean {
+// delete homepage if its the same as the sourceUrl
+function shouldDeleteHomepage(dep: ReleaseResult): boolean {
   if (dep.homepage === undefined) {
     return false;
   }
-  const delGitHub =
-    isGithubUrl && dep.sourceUrl === massageGithubUrl(dep.homepage);
-  const delGitLab =
-    isGitLabUrl(dep.homepage) &&
-    dep.sourceUrl === massageGitlabUrl(dep.homepage);
-
-  return delGitHub || delGitLab || dep.sourceUrl === dep.homepage;
+  if (isGitHubUrl(dep.homepage)) {
+    return dep.sourceUrl === massageGithubUrl(dep.homepage);
+  }
+  if (isGitLabUrl(dep.homepage)) {
+    return dep.sourceUrl === massageGitlabUrl(dep.homepage);
+  }
+  return dep.sourceUrl === dep.homepage;
 }
