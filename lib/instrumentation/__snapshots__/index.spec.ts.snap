@@ -1,63 +1,5 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`instrumentation/index activate and remote logger 1`] = `
-MultiSpanProcessor {
-  "_spanProcessors": Array [
-    SimpleSpanProcessor {
-      "_exporter": ConsoleSpanExporter {},
-      "_shutdownOnce": BindOnceFuture {
-        "_callback": [Function],
-        "_deferred": Deferred {
-          "_promise": Promise {},
-          "_reject": [Function],
-          "_resolve": [Function],
-        },
-        "_isCalled": false,
-        "_that": [Circular],
-      },
-    },
-    BatchSpanProcessor {
-      "_exportTimeoutMillis": 30000,
-      "_exporter": OTLPTraceExporter {
-        "DEFAULT_HEADERS": Object {},
-        "_concurrencyLimit": Infinity,
-        "_sendingPromises": Array [],
-        "_shutdownOnce": BindOnceFuture {
-          "_callback": [Function],
-          "_deferred": Deferred {
-            "_promise": Promise {},
-            "_reject": [Function],
-            "_resolve": [Function],
-          },
-          "_isCalled": false,
-          "_that": [Circular],
-        },
-        "agent": undefined,
-        "attributes": undefined,
-        "compression": "none",
-        "headers": Object {},
-        "shutdown": [Function],
-        "url": "https://collector.example.com/v1/traces",
-      },
-      "_finishedSpans": Array [],
-      "_maxExportBatchSize": 512,
-      "_maxQueueSize": 2048,
-      "_scheduledDelayMillis": 5000,
-      "_shutdownOnce": BindOnceFuture {
-        "_callback": [Function],
-        "_deferred": Deferred {
-          "_promise": Promise {},
-          "_reject": [Function],
-          "_resolve": [Function],
-        },
-        "_isCalled": false,
-        "_that": [Circular],
-      },
-    },
-  ],
-}
-`;
-
 exports[`instrumentation/index activate console logger 1`] = `
 MultiSpanProcessor {
   "_spanProcessors": Array [
@@ -111,10 +53,55 @@ MultiSpanProcessor {
           "_that": [Circular],
         },
         "agent": undefined,
-        "attributes": undefined,
         "compression": "none",
         "headers": Object {},
         "shutdown": [Function],
+        "timeoutMillis": 10000,
+        "url": "https://collector.example.com/v1/traces",
+      },
+      "_finishedSpans": Array [],
+      "_maxExportBatchSize": 512,
+      "_maxQueueSize": 2048,
+      "_scheduledDelayMillis": 5000,
+      "_shutdownOnce": BindOnceFuture {
+        "_callback": [Function],
+        "_deferred": Deferred {
+          "_promise": Promise {},
+          "_reject": [Function],
+          "_resolve": [Function],
+        },
+        "_isCalled": false,
+        "_that": [Circular],
+      },
+    },
+  ],
+}
+`;
+
+exports[`instrumentation/index activate remote logger 1`] = `
+MultiSpanProcessor {
+  "_spanProcessors": Array [
+    BatchSpanProcessor {
+      "_exportTimeoutMillis": 30000,
+      "_exporter": OTLPTraceExporter {
+        "DEFAULT_HEADERS": Object {},
+        "_concurrencyLimit": Infinity,
+        "_sendingPromises": Array [],
+        "_shutdownOnce": BindOnceFuture {
+          "_callback": [Function],
+          "_deferred": Deferred {
+            "_promise": Promise {},
+            "_reject": [Function],
+            "_resolve": [Function],
+          },
+          "_isCalled": false,
+          "_that": [Circular],
+        },
+        "agent": undefined,
+        "compression": "none",
+        "headers": Object {},
+        "shutdown": [Function],
+        "timeoutMillis": 10000,
         "url": "https://collector.example.com/v1/traces",
       },
       "_finishedSpans": Array [],

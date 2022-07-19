@@ -8,9 +8,16 @@ import { getTracerProvider, init } from './index';
 jest.unmock('.');
 
 describe('instrumentation/index', () => {
+  const oldEnv = process.env;
+
   beforeEach(() => {
     jest.clearAllMocks();
     api.trace.disable(); // clear global components
+    process.env = { ...oldEnv };
+  });
+
+  afterAll(() => {
+    process.env = oldEnv; // Restore old environment
   });
 
   it('should use NoopTraceProvider if not activated', () => {
@@ -36,7 +43,7 @@ describe('instrumentation/index', () => {
     expect(provider).toMatchSnapshot();
   });
 
-  it('activate and remote logger', () => {
+  it('activate remote logger', () => {
     process.env.OTEL_EXPORTER_OTLP_ENDPOINT = 'https://collector.example.com';
 
     init();
