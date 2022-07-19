@@ -228,6 +228,7 @@ function parseDepExpr(
   if (variables[rawVersion]) {
     result.groupName = `${rawVersion}`;
   }
+
   if (variables[getLastDotAnnotation(rawVersion)]) {
     result.fileReplacePosition =
       variables[getLastDotAnnotation(rawVersion)].lineIndex;
@@ -384,6 +385,7 @@ export function extractPackageFile(
     deps: [],
     isMultiDeps: false,
     scalaVersion: null,
+    variables: {},
     ...defaultAcc,
   };
 

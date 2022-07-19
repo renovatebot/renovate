@@ -17,6 +17,7 @@ exports[`modules/manager/sbt/extract extractPackageFile() extract deps from nati
       "currentValue": "0.7.1",
       "datasource": "sbt-package",
       "depName": "com.example:foo",
+      "fileReplacePosition": 9,
       "packageName": "com.example:foo_2.13.0-RC5",
       "registryUrls": [
         "https://repo.maven.apache.org/maven2",
@@ -26,6 +27,8 @@ exports[`modules/manager/sbt/extract extractPackageFile() extract deps from nati
       "currentValue": "1.2.3",
       "datasource": "sbt-package",
       "depName": "com.abc:abc",
+      "editFile": undefined,
+      "fileReplacePosition": 7,
       "groupName": "abcVersion",
       "packageName": "com.abc:abc",
       "registryUrls": [
@@ -35,6 +38,7 @@ exports[`modules/manager/sbt/extract extractPackageFile() extract deps from nati
     },
   ],
   "packageFileVersion": undefined,
+  "scalaVersion": "2.13.0-RC5",
 }
 `;
 
@@ -55,6 +59,7 @@ exports[`modules/manager/sbt/extract extractPackageFile() extract deps from nati
       "currentValue": "0.7.1",
       "datasource": "sbt-package",
       "depName": "com.example:foo",
+      "fileReplacePosition": 9,
       "packageName": "com.example:foo_2.13.0-RC5",
       "registryUrls": [
         "https://repo.maven.apache.org/maven2",
@@ -64,6 +69,8 @@ exports[`modules/manager/sbt/extract extractPackageFile() extract deps from nati
       "currentValue": "1.2.3",
       "datasource": "sbt-package",
       "depName": "com.abc:abc",
+      "editFile": undefined,
+      "fileReplacePosition": 7,
       "groupName": "abcVersion",
       "packageName": "com.abc:abc",
       "registryUrls": [
@@ -75,6 +82,8 @@ exports[`modules/manager/sbt/extract extractPackageFile() extract deps from nati
       "currentValue": "1.2.3",
       "datasource": "sbt-package",
       "depName": "com.abc:abc-a",
+      "editFile": undefined,
+      "fileReplacePosition": 7,
       "groupName": "abcVersion",
       "packageName": "com.abc:abc-a",
       "registryUrls": [
@@ -86,6 +95,8 @@ exports[`modules/manager/sbt/extract extractPackageFile() extract deps from nati
       "currentValue": "1.2.3",
       "datasource": "sbt-package",
       "depName": "com.abc:abc-b",
+      "editFile": undefined,
+      "fileReplacePosition": 7,
       "groupName": "abcVersion",
       "packageName": "com.abc:abc-b",
       "registryUrls": [
@@ -97,6 +108,8 @@ exports[`modules/manager/sbt/extract extractPackageFile() extract deps from nati
       "currentValue": "1.2.3",
       "datasource": "sbt-package",
       "depName": "com.abc:abc-c",
+      "editFile": undefined,
+      "fileReplacePosition": 7,
       "groupName": "abcVersion",
       "packageName": "com.abc:abc-c",
       "registryUrls": [
@@ -106,6 +119,7 @@ exports[`modules/manager/sbt/extract extractPackageFile() extract deps from nati
     },
   ],
   "packageFileVersion": undefined,
+  "scalaVersion": "2.13.0-RC5",
 }
 `;
 
@@ -131,6 +145,7 @@ exports[`modules/manager/sbt/extract extractPackageFile() extracts deps for gene
       "currentValue": "0.0.1",
       "datasource": "sbt-package",
       "depName": "org.example:foo",
+      "fileReplacePosition": 5,
       "packageName": "org.example:foo",
       "registryUrls": [
         "https://repo.maven.apache.org/maven2",
@@ -145,6 +160,7 @@ exports[`modules/manager/sbt/extract extractPackageFile() extracts deps for gene
       "currentValue": "0.0.2",
       "datasource": "sbt-package",
       "depName": "org.example:bar",
+      "fileReplacePosition": 6,
       "packageName": "org.example:bar_2.9.10",
       "registryUrls": [
         "https://repo.maven.apache.org/maven2",
@@ -159,6 +175,7 @@ exports[`modules/manager/sbt/extract extractPackageFile() extracts deps for gene
       "currentValue": "0.0.3",
       "datasource": "sbt-package",
       "depName": "org.example:baz",
+      "fileReplacePosition": 8,
       "packageName": "org.example:baz_2.9.10",
       "registryUrls": [
         "https://repo.maven.apache.org/maven2",
@@ -173,6 +190,7 @@ exports[`modules/manager/sbt/extract extractPackageFile() extracts deps for gene
       "currentValue": "0.0.4",
       "datasource": "sbt-package",
       "depName": "org.example:qux",
+      "fileReplacePosition": 9,
       "packageName": "org.example:qux",
       "registryUrls": [
         "https://repo.maven.apache.org/maven2",
@@ -188,6 +206,7 @@ exports[`modules/manager/sbt/extract extractPackageFile() extracts deps for gene
       "datasource": "sbt-package",
       "depName": "org.scala-lang:scala-library",
       "depType": "sources",
+      "fileReplacePosition": 11,
       "packageName": "org.scala-lang:scala-library",
       "registryUrls": [
         "https://repo.maven.apache.org/maven2",
@@ -202,6 +221,7 @@ exports[`modules/manager/sbt/extract extractPackageFile() extracts deps for gene
       "currentValue": "0.0.5",
       "datasource": "sbt-package",
       "depName": "org.example:quux",
+      "fileReplacePosition": 13,
       "packageName": "org.example:quux",
       "registryUrls": [
         "https://repo.maven.apache.org/maven2",
@@ -217,6 +237,7 @@ exports[`modules/manager/sbt/extract extractPackageFile() extracts deps for gene
       "datasource": "sbt-package",
       "depName": "org.example:quuz",
       "depType": "test",
+      "fileReplacePosition": 20,
       "packageName": "org.example:quuz_2.9.10",
       "registryUrls": [
         "https://repo.maven.apache.org/maven2",
@@ -247,6 +268,7 @@ exports[`modules/manager/sbt/extract extractPackageFile() extracts deps for gene
       "datasource": "sbt-package",
       "depName": "org.example:corge",
       "depType": "Provided",
+      "fileReplacePosition": 21,
       "packageName": "org.example:corge",
       "registryUrls": [
         "https://repo.maven.apache.org/maven2",
@@ -262,6 +284,8 @@ exports[`modules/manager/sbt/extract extractPackageFile() extracts deps for gene
       "datasource": "sbt-package",
       "depName": "org.example:grault",
       "depType": "Test",
+      "editFile": undefined,
+      "fileReplacePosition": 17,
       "groupName": "versionExample",
       "packageName": "org.example:grault",
       "registryUrls": [
@@ -279,6 +303,7 @@ exports[`modules/manager/sbt/extract extractPackageFile() extracts deps for gene
       "datasource": "sbt-plugin",
       "depName": "org.example:waldo",
       "depType": "plugin",
+      "fileReplacePosition": 34,
       "packageName": "org.example:waldo",
       "registryUrls": [
         "https://repo.maven.apache.org/maven2",
@@ -294,6 +319,7 @@ exports[`modules/manager/sbt/extract extractPackageFile() extracts deps for gene
       "currentValue": "(,8.4.0]",
       "datasource": "sbt-package",
       "depName": "org.example:fred",
+      "fileReplacePosition": 36,
       "packageName": "org.example:fred",
       "registryUrls": [
         "https://repo.maven.apache.org/maven2",
@@ -306,6 +332,7 @@ exports[`modules/manager/sbt/extract extractPackageFile() extracts deps for gene
     },
   ],
   "packageFileVersion": "1.0",
+  "scalaVersion": "2.9.10",
 }
 `;
 
@@ -331,6 +358,7 @@ exports[`modules/manager/sbt/extract extractPackageFile() extracts deps when sca
       "currentValue": "0.0.1",
       "datasource": "sbt-package",
       "depName": "org.example:foo",
+      "fileReplacePosition": 8,
       "packageName": "org.example:foo",
       "registryUrls": [
         "https://repo.maven.apache.org/maven2",
@@ -345,6 +373,7 @@ exports[`modules/manager/sbt/extract extractPackageFile() extracts deps when sca
       "currentValue": "0.0.2",
       "datasource": "sbt-package",
       "depName": "org.example:bar",
+      "fileReplacePosition": 9,
       "packageName": "org.example:bar_2.12",
       "registryUrls": [
         "https://repo.maven.apache.org/maven2",
@@ -359,6 +388,7 @@ exports[`modules/manager/sbt/extract extractPackageFile() extracts deps when sca
       "currentValue": "0.0.3",
       "datasource": "sbt-package",
       "depName": "org.example:baz",
+      "fileReplacePosition": 11,
       "packageName": "org.example:baz_2.12",
       "registryUrls": [
         "https://repo.maven.apache.org/maven2",
@@ -373,6 +403,7 @@ exports[`modules/manager/sbt/extract extractPackageFile() extracts deps when sca
       "currentValue": "0.0.4",
       "datasource": "sbt-package",
       "depName": "org.example:qux",
+      "fileReplacePosition": 12,
       "packageName": "org.example:qux",
       "registryUrls": [
         "https://repo.maven.apache.org/maven2",
@@ -387,6 +418,7 @@ exports[`modules/manager/sbt/extract extractPackageFile() extracts deps when sca
       "currentValue": "0.0.5",
       "datasource": "sbt-package",
       "depName": "org.example:quux",
+      "fileReplacePosition": 15,
       "packageName": "org.example:quux",
       "registryUrls": [
         "https://repo.maven.apache.org/maven2",
@@ -402,6 +434,7 @@ exports[`modules/manager/sbt/extract extractPackageFile() extracts deps when sca
       "datasource": "sbt-package",
       "depName": "org.example:quuz",
       "depType": "test",
+      "fileReplacePosition": 21,
       "packageName": "org.example:quuz_2.12",
       "registryUrls": [
         "https://repo.maven.apache.org/maven2",
@@ -417,6 +450,7 @@ exports[`modules/manager/sbt/extract extractPackageFile() extracts deps when sca
       "datasource": "sbt-package",
       "depName": "org.example:corge",
       "depType": "Provided",
+      "fileReplacePosition": 22,
       "packageName": "org.example:corge",
       "registryUrls": [
         "https://repo.maven.apache.org/maven2",
@@ -432,6 +466,8 @@ exports[`modules/manager/sbt/extract extractPackageFile() extracts deps when sca
       "datasource": "sbt-package",
       "depName": "org.example:grault",
       "depType": "Test",
+      "editFile": undefined,
+      "fileReplacePosition": 1,
       "groupName": "versionExample",
       "packageName": "org.example:grault",
       "registryUrls": [
@@ -449,6 +485,7 @@ exports[`modules/manager/sbt/extract extractPackageFile() extracts deps when sca
       "datasource": "sbt-plugin",
       "depName": "org.example:waldo",
       "depType": "plugin",
+      "fileReplacePosition": 35,
       "packageName": "org.example:waldo",
       "registryUrls": [
         "https://repo.maven.apache.org/maven2",
@@ -462,6 +499,7 @@ exports[`modules/manager/sbt/extract extractPackageFile() extracts deps when sca
     },
   ],
   "packageFileVersion": "3.2.1",
+  "scalaVersion": "2.12",
 }
 `;
 
@@ -482,6 +520,7 @@ exports[`modules/manager/sbt/extract extractPackageFile() extracts deps when sca
       "currentValue": "0.0.2",
       "datasource": "sbt-package",
       "depName": "org.example:bar",
+      "fileReplacePosition": 3,
       "packageName": "org.example:bar_2.12",
       "registryUrls": [
         "https://repo.maven.apache.org/maven2",
@@ -489,6 +528,7 @@ exports[`modules/manager/sbt/extract extractPackageFile() extracts deps when sca
     },
   ],
   "packageFileVersion": undefined,
+  "scalaVersion": "2.12",
 }
 `;
 
@@ -509,6 +549,7 @@ exports[`modules/manager/sbt/extract extractPackageFile() extracts deps when sca
       "currentValue": "0.0.2",
       "datasource": "sbt-package",
       "depName": "org.example:bar",
+      "fileReplacePosition": 5,
       "packageName": "org.example:bar_2.12",
       "registryUrls": [
         "https://repo.maven.apache.org/maven2",
@@ -516,6 +557,7 @@ exports[`modules/manager/sbt/extract extractPackageFile() extracts deps when sca
     },
   ],
   "packageFileVersion": undefined,
+  "scalaVersion": "2.12",
 }
 `;
 
@@ -536,6 +578,7 @@ exports[`modules/manager/sbt/extract extractPackageFile() extracts deps when sca
       "currentValue": "0.0.2",
       "datasource": "sbt-package",
       "depName": "org.example:bar",
+      "fileReplacePosition": 2,
       "packageName": "org.example:bar_2.12",
       "registryUrls": [
         "https://repo.maven.apache.org/maven2",
@@ -543,6 +586,7 @@ exports[`modules/manager/sbt/extract extractPackageFile() extracts deps when sca
     },
   ],
   "packageFileVersion": undefined,
+  "scalaVersion": "2.12",
 }
 `;
 
@@ -563,6 +607,7 @@ exports[`modules/manager/sbt/extract extractPackageFile() extracts deps when sca
       "currentValue": "0.0.2",
       "datasource": "sbt-package",
       "depName": "org.example:bar",
+      "fileReplacePosition": 4,
       "packageName": "org.example:bar_2.12",
       "registryUrls": [
         "https://repo.maven.apache.org/maven2",
@@ -570,5 +615,6 @@ exports[`modules/manager/sbt/extract extractPackageFile() extracts deps when sca
     },
   ],
   "packageFileVersion": undefined,
+  "scalaVersion": "2.12",
 }
 `;

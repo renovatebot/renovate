@@ -1,8 +1,10 @@
-import { codeBlock } from 'common-tags';
 import { Fixtures } from '../../../../test/fixtures';
-import { extractPackageFile as extract } from '.';
+import { GlobalConfig } from '../../../config/global';
+import type { RepoGlobalConfig } from '../../../config/types';
+import type { ExtractConfig, PackageFile } from '../types';
+import { extractAllPackageFiles, extractPackageFile } from '.';
 
-const extractPackageFile = (content: string) => extract(content, 'build.sbt');
+const fixturesDir = 'lib/modules/manager/sbt/__fixtures__';
 
 const sbt = Fixtures.get(`sample.sbt`);
 const sbtScalaVersionVariable = Fixtures.get(`scala-version-variable.sbt`);
@@ -17,7 +19,6 @@ describe('modules/manager/sbt/extract', () => {
     it('returns null for empty', () => {
       expect(extractPackageFile('')).toBeNull();
       expect(extractPackageFile('non-sense')).toBeNull();
-      expect(extractPackageFile('version := "1.2.3"')).toBeNull();
       expect(
         extractPackageFile('libraryDependencies += "foo" % "bar" % ???')
       ).toBeNull();
@@ -35,6 +36,9 @@ describe('modules/manager/sbt/extract', () => {
       expect(extractPackageFile('libraryDependencies += "foo"')).toBeNull();
       expect(
         extractPackageFile('libraryDependencies += "foo" % "bar" %')
+      ).toBeNull();
+      expect(
+        extractPackageFile('libraryDependencies += "foo" % "bar" % "baz" %%')
       ).toBeNull();
     });
 
@@ -55,7 +59,6 @@ describe('modules/manager/sbt/extract', () => {
           },
           { packageName: 'org.example:quux', currentValue: '0.0.5' },
           { packageName: 'org.example:quuz_2.9.10', currentValue: '0.0.6' },
-          { packageName: 'org.example:abc_2.9.10', currentValue: '0.0.42' },
           { packageName: 'org.example:corge', currentValue: '0.0.7' },
           { packageName: 'org.example:grault', currentValue: '0.0.8' },
           { packageName: 'org.example:waldo', currentValue: '0.0.9' },
@@ -68,10 +71,6 @@ describe('modules/manager/sbt/extract', () => {
     it('extracts deps when scala version is defined in a variable', () => {
       expect(extractPackageFile(sbtScalaVersionVariable)).toMatchSnapshot({
         deps: [
-          {
-            packageName: 'org.scala-lang:scala-library',
-            currentValue: '2.12.10',
-          },
           { packageName: 'org.example:foo', currentValue: '0.0.1' },
           { packageName: 'org.example:bar_2.12', currentValue: '0.0.2' },
           { packageName: 'org.example:baz_2.12', currentValue: '0.0.3' },
@@ -80,39 +79,10 @@ describe('modules/manager/sbt/extract', () => {
           { packageName: 'org.example:quuz_2.12', currentValue: '0.0.6' },
           { packageName: 'org.example:corge', currentValue: '0.0.7' },
           { packageName: 'org.example:grault', currentValue: '0.0.8' },
-          {
-            datasource: 'sbt-plugin',
-            packageName: 'org.example:waldo',
-            currentValue: '0.0.9',
-          },
+          { packageName: 'org.example:waldo', currentValue: '0.0.9' },
         ],
+
         packageFileVersion: '3.2.1',
-      });
-    });
-
-    it('extracts packageFileVersion when scala version is defined in a variable', () => {
-      const content = `
-        val fileVersion = "1.2.3"
-        version := fileVersion
-        libraryDependencies += "foo" % "bar" % "0.0.1"
-      `;
-      expect(extractPackageFile(content)).toMatchObject({
-        packageFileVersion: '1.2.3',
-      });
-    });
-
-    it('extracts typed variables', () => {
-      const content = `
-        val version: String = "1.2.3"
-        libraryDependencies += "foo" % "bar" % version
-      `;
-      expect(extractPackageFile(content)).toMatchObject({
-        deps: [
-          {
-            currentValue: '1.2.3',
-            groupName: 'version',
-          },
-        ],
       });
     });
 
@@ -123,6 +93,7 @@ describe('modules/manager/sbt/extract', () => {
             currentValue: '3.0.0',
             datasource: 'sbt-package',
             depName: 'org.scalatest:scalatest',
+            fileReplacePosition: 3,
             packageName: 'org.scalatest:scalatest',
             registryUrls: ['https://repo.maven.apache.org/maven2'],
           },
@@ -131,16 +102,18 @@ describe('modules/manager/sbt/extract', () => {
             datasource: 'sbt-plugin',
             depName: 'com.github.gseitz:sbt-release',
             depType: 'plugin',
+            editFile: undefined,
+            fileReplacePosition: 6,
             groupName: 'sbtReleaseVersion',
             packageName: 'com.github.gseitz:sbt-release',
             registryUrls: [
               'https://repo.maven.apache.org/maven2',
-              'https://repo.scala-sbt.org/scalasbt/sbt-plugin-releases',
+              'https://dl.bintray.com/sbt/sbt-plugin-releases',
             ],
-            variableName: 'sbtReleaseVersion',
           },
         ],
         packageFileVersion: '1.0.1',
+        scalaVersion: null,
       });
     });
 
@@ -193,16 +166,7 @@ describe('modules/manager/sbt/extract', () => {
         libraryDependencies += "org.example" %% "bar" % "0.0.2"
       `;
       expect(extractPackageFile(content)).toMatchSnapshot({
-        deps: [
-          {
-            packageName: 'org.scala-lang:scala-library',
-            currentValue: '2.12.10',
-          },
-          {
-            packageName: 'org.example:bar_2.12',
-            currentValue: '0.0.2',
-          },
-        ],
+        deps: [{ packageName: 'org.example:bar_2.12', currentValue: '0.0.2' }],
       });
     });
 
@@ -225,21 +189,6 @@ describe('modules/manager/sbt/extract', () => {
       });
     });
 
-    it('extracts correct scala library when dealing with scala 3', () => {
-      const content = `
-        scalaVersion := "3.1.1"
-      `;
-
-      expect(extractPackageFile(content)).toMatchObject({
-        deps: [
-          {
-            packageName: 'org.scala-lang:scala3-library_3',
-            currentValue: '3.1.1',
-          },
-        ],
-      });
-    });
-
     it('extracts deps when scala version is defined in a variable with ThisBuild scope', () => {
       const content = `
         val ScalaVersion = "2.12.10"
@@ -248,10 +197,6 @@ describe('modules/manager/sbt/extract', () => {
       `;
       expect(extractPackageFile(content)).toMatchSnapshot({
         deps: [
-          {
-            packageName: 'org.scala-lang:scala-library',
-            currentValue: '2.12.10',
-          },
           {
             packageName: 'org.example:bar_2.12',
             currentValue: '0.0.2',
@@ -322,120 +267,95 @@ describe('modules/manager/sbt/extract', () => {
         packageFileVersion: undefined,
       });
     });
+  });
 
-    it('extract deps with comment', () => {
-      const content = `
-      name := "service"
-      scalaVersion := "2.13.8" // scalaVersion
+  describe('extractAllPackageFiles()', () => {
+    const adminConfig: RepoGlobalConfig = {
+      localDir: '',
+    };
 
-      lazy val compileDependencies =
-        Seq(
-          "com.typesafe.scala-logging" %% "scala-logging" % "3.9.4", /** critical lib */
-          "ch.qos.logback" % "logback-classic" % "1.2.10" // common lib
-        )
-      `;
-      expect(extractPackageFile(content)).toMatchObject({
-        deps: [
-          {
-            registryUrls: ['https://repo.maven.apache.org/maven2'],
-            datasource: 'maven',
-            depName: 'scala',
-            packageName: 'org.scala-lang:scala-library',
-            currentValue: '2.13.8',
-            separateMinorPatch: true,
-          },
-          {
-            registryUrls: ['https://repo.maven.apache.org/maven2'],
-            depName: 'com.typesafe.scala-logging:scala-logging',
-            packageName: 'com.typesafe.scala-logging:scala-logging_2.13',
-            currentValue: '3.9.4',
-            datasource: 'sbt-package',
-          },
-          {
-            registryUrls: ['https://repo.maven.apache.org/maven2'],
-            depName: 'ch.qos.logback:logback-classic',
-            packageName: 'ch.qos.logback:logback-classic',
-            currentValue: '1.2.10',
-            datasource: 'sbt-package',
-          },
-        ],
-        packageFileVersion: undefined,
-      });
+    const config: ExtractConfig = {};
+
+    beforeEach(() => {
+      GlobalConfig.set(adminConfig);
     });
 
-    it('extract addCompilerPlugin', () => {
-      expect(
-        extractPackageFile(`
-        addCompilerPlugin("org.scala-tools.sxr" %% "sxr" % "0.3.0")
-        `)
-      ).toMatchObject({
-        deps: [
-          {
-            datasource: 'sbt-plugin',
-            packageName: 'org.scala-tools.sxr:sxr',
-            currentValue: '0.3.0',
-          },
-        ],
-        packageFileVersion: undefined,
-      });
+    afterEach(() => {
+      GlobalConfig.reset();
     });
 
-    it('extract sbt version', () => {
+    it('returns null for empty', async () => {
       expect(
-        extract(
-          codeBlock`
-            sbt.version=1.6.0
-          `,
-          'project/build.properties'
-        )
-      ).toMatchObject({
-        deps: [
+        await extractAllPackageFiles(config, [
+          `${fixturesDir}/simple-project/project/Versions.scala`,
+          `${fixturesDir}/simple-project/project/plugins.sbt`,
+          `${fixturesDir}/simple-project/build.sbt`,
+        ])
+      ).toEqual(
+        expect.arrayContaining([
           {
-            datasource: 'github-releases',
-            packageName: 'sbt/sbt',
-            depName: 'sbt/sbt',
-            currentValue: '1.6.0',
-            replaceString: 'sbt.version=1.6.0',
-            versioning: 'semver',
-            extractVersion: '^v(?<version>\\S+)',
+            deps: [
+              {
+                currentValue: '2.13.8',
+                datasource: 'maven',
+                depName: 'scala',
+                packageName: 'org.scala-lang:scala-library',
+                registryUrls: ['https://repo.maven.apache.org/maven2'],
+                separateMinorPatch: true,
+              },
+              {
+                currentValue: '1.2.11',
+                datasource: 'sbt-package',
+                depName: 'ch.qos.logback:logback-classic',
+                fileReplacePosition: 35,
+                packageName: 'ch.qos.logback:logback-classic',
+                registryUrls: ['https://repo.maven.apache.org/maven2'],
+              },
+            ],
+            packageFile:
+              'lib/modules/manager/sbt/__fixtures__/simple-project/build.sbt',
           },
-        ],
-      });
-    });
-
-    it('extract sbt version if the file contains other properties', () => {
-      expect(
-        extract(
-          codeBlock`
-            sbt.version=1.6.0
-            another.conf=1.4.0
-          `,
-          'project/build.properties'
-        )
-      ).toMatchObject({
-        deps: [
           {
-            datasource: 'github-releases',
-            packageName: 'sbt/sbt',
-            depName: 'sbt/sbt',
-            currentValue: '1.6.0',
-            replaceString: 'sbt.version=1.6.0',
-            versioning: 'semver',
-            extractVersion: '^v(?<version>\\S+)',
+            deps: [
+              {
+                currentValue: '0.13.0',
+                datasource: 'sbt-package',
+                depName: 'io.circe:circe-generic',
+                editFile:
+                  'lib/modules/manager/sbt/__fixtures__/simple-project/project/Versions.scala',
+                fileReplacePosition: 7,
+                groupName: 'circe',
+                packageName: 'io.circe:circe-generic_2.13',
+                registryUrls: ['https://repo.maven.apache.org/maven2'],
+              },
+              {
+                currentValue: '10.2.6',
+                datasource: 'sbt-package',
+                depName: 'com.typesafe.akka:akka-http',
+                editFile:
+                  'lib/modules/manager/sbt/__fixtures__/simple-project/project/Versions.scala',
+                fileReplacePosition: 3,
+                groupName: 'akkaHttp',
+                packageName: 'com.typesafe.akka:akka-http_2.13',
+                registryUrls: ['https://repo.maven.apache.org/maven2'],
+              },
+              {
+                currentValue: '2.6.18',
+                datasource: 'sbt-package',
+                depName: 'com.typesafe.akka:akka-stream',
+                editFile:
+                  'lib/modules/manager/sbt/__fixtures__/simple-project/project/Versions.scala',
+                fileReplacePosition: 2,
+                groupName: 'akka',
+                packageName: 'com.typesafe.akka:akka-stream_2.13',
+                registryUrls: ['https://repo.maven.apache.org/maven2'],
+              },
+            ],
+            packageFile:
+              'lib/modules/manager/sbt/__fixtures__/simple-project/project/Versions.scala',
           },
-        ],
-      });
-    });
-
-    it('ignores build.properties file if does not contain sbt version', () => {
-      expect(
-        extract(
-          codeBlock`
-            another.conf=1.4.0
-          `,
-          'project/build.properties'
-        )
-      ).toBeNull();
+        ] as PackageFile[])
+      );
     });
   });
 });
