@@ -369,7 +369,7 @@ function parseSbtLine(
   };
 }
 
-export function extractPackageFile(
+export function extractFile(
   content: string,
   defaultAcc?: PackageFile & ParseOptions
 ): (PackageFile & ParseOptions) | null {
@@ -421,7 +421,7 @@ async function prepareLoadPackageFiles(
       continue;
     }
     acc.packageFile = packageFile;
-    const res = extractPackageFile(content, acc);
+    const res = extractFile(content, acc);
     if (res) {
       variables = { ...variables, ...res.variables };
       if (res.registryUrls) {
@@ -461,7 +461,7 @@ export async function extractAllPackageFiles(
       logger.trace({ packageFile }, 'packageFile has no content');
       continue;
     }
-    const res = extractPackageFile(content, {
+    const res = extractFile(content, {
       variables,
       registryUrls,
       deps: [],

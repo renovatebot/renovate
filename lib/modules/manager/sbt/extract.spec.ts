@@ -2,7 +2,7 @@ import { Fixtures } from '../../../../test/fixtures';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import type { ExtractConfig, PackageFile } from '../types';
-import { extractPackageFile } from './extract';
+import { extractFile } from './extract';
 import { extractAllPackageFiles } from '.';
 
 const fixturesDir = 'lib/modules/manager/sbt/__fixtures__';
@@ -16,35 +16,33 @@ const sbtPrivateVariableDependencyFile = Fixtures.get(
 );
 
 describe('modules/manager/sbt/extract', () => {
-  describe('extractPackageFile()', () => {
+  describe('extractFile()', () => {
     it('returns null for empty', () => {
-      expect(extractPackageFile('')).toBeNull();
-      expect(extractPackageFile('non-sense')).toBeNull();
+      expect(extractFile('')).toBeNull();
+      expect(extractFile('non-sense')).toBeNull();
       expect(
-        extractPackageFile('libraryDependencies += "foo" % "bar" % ???')
+        extractFile('libraryDependencies += "foo" % "bar" % ???')
       ).toBeNull();
       expect(
-        extractPackageFile('libraryDependencies += "foo" % "bar" %% "baz"')
+        extractFile('libraryDependencies += "foo" % "bar" %% "baz"')
       ).toBeNull();
       expect(
-        extractPackageFile('libraryDependencies += ??? % "bar" % "baz"')
+        extractFile('libraryDependencies += ??? % "bar" % "baz"')
       ).toBeNull();
       expect(
-        extractPackageFile('libraryDependencies += "foo" % ??? % "baz"')
+        extractFile('libraryDependencies += "foo" % ??? % "baz"')
       ).toBeNull();
 
-      expect(extractPackageFile('libraryDependencies += ')).toBeNull();
-      expect(extractPackageFile('libraryDependencies += "foo"')).toBeNull();
+      expect(extractFile('libraryDependencies += ')).toBeNull();
+      expect(extractFile('libraryDependencies += "foo"')).toBeNull();
+      expect(extractFile('libraryDependencies += "foo" % "bar" %')).toBeNull();
       expect(
-        extractPackageFile('libraryDependencies += "foo" % "bar" %')
-      ).toBeNull();
-      expect(
-        extractPackageFile('libraryDependencies += "foo" % "bar" % "baz" %%')
+        extractFile('libraryDependencies += "foo" % "bar" % "baz" %%')
       ).toBeNull();
     });
 
     it('extracts deps for generic use-cases', () => {
-      expect(extractPackageFile(sbt)).toMatchSnapshot({
+      expect(extractFile(sbt)).toMatchSnapshot({
         deps: [
           {
             packageName: 'org.scala-lang:scala-library',
@@ -70,7 +68,7 @@ describe('modules/manager/sbt/extract', () => {
     });
 
     it('extracts deps when scala version is defined in a variable', () => {
-      expect(extractPackageFile(sbtScalaVersionVariable)).toMatchSnapshot({
+      expect(extractFile(sbtScalaVersionVariable)).toMatchSnapshot({
         deps: [
           { packageName: 'org.example:foo', currentValue: '0.0.1' },
           { packageName: 'org.example:bar_2.12', currentValue: '0.0.2' },
@@ -88,7 +86,7 @@ describe('modules/manager/sbt/extract', () => {
     });
 
     it('skips deps when scala version is missing', () => {
-      expect(extractPackageFile(sbtMissingScalaVersion)).toEqual({
+      expect(extractFile(sbtMissingScalaVersion)).toEqual({
         deps: [
           {
             currentValue: '3.0.0',
@@ -119,7 +117,7 @@ describe('modules/manager/sbt/extract', () => {
     });
 
     it('extract deps from native scala file with variables', () => {
-      expect(extractPackageFile(sbtDependencyFile)).toMatchSnapshot({
+      expect(extractFile(sbtDependencyFile)).toMatchSnapshot({
         deps: [
           {
             packageName: 'org.scala-lang:scala-library',
@@ -144,7 +142,7 @@ describe('modules/manager/sbt/extract', () => {
         )
         libraryDependencies += "org.example" %% "bar" % "0.0.2"
       `;
-      expect(extractPackageFile(content)).toMatchSnapshot({
+      expect(extractFile(content)).toMatchSnapshot({
         deps: [
           {
             packageName: 'org.scala-lang:scala-library',
@@ -166,7 +164,7 @@ describe('modules/manager/sbt/extract', () => {
         )
         libraryDependencies += "org.example" %% "bar" % "0.0.2"
       `;
-      expect(extractPackageFile(content)).toMatchSnapshot({
+      expect(extractFile(content)).toMatchSnapshot({
         deps: [{ packageName: 'org.example:bar_2.12', currentValue: '0.0.2' }],
       });
     });
@@ -176,7 +174,7 @@ describe('modules/manager/sbt/extract', () => {
         ThisBuild / scalaVersion := "2.12.10"
         libraryDependencies += "org.example" %% "bar" % "0.0.2"
       `;
-      expect(extractPackageFile(content)).toMatchSnapshot({
+      expect(extractFile(content)).toMatchSnapshot({
         deps: [
           {
             packageName: 'org.scala-lang:scala-library',
@@ -196,7 +194,7 @@ describe('modules/manager/sbt/extract', () => {
         ThisBuild / scalaVersion := ScalaVersion
         libraryDependencies += "org.example" %% "bar" % "0.0.2"
       `;
-      expect(extractPackageFile(content)).toMatchSnapshot({
+      expect(extractFile(content)).toMatchSnapshot({
         deps: [
           {
             packageName: 'org.example:bar_2.12',
@@ -207,9 +205,7 @@ describe('modules/manager/sbt/extract', () => {
     });
 
     it('extract deps from native scala file with private variables', () => {
-      expect(
-        extractPackageFile(sbtPrivateVariableDependencyFile)
-      ).toMatchSnapshot({
+      expect(extractFile(sbtPrivateVariableDependencyFile)).toMatchSnapshot({
         deps: [
           {
             packageName: 'org.scala-lang:scala-library',
@@ -240,7 +236,7 @@ describe('modules/manager/sbt/extract', () => {
         )
 
       libraryDependencies ++= compileDependencies`;
-      expect(extractPackageFile(content)).toMatchObject({
+      expect(extractFile(content)).toMatchObject({
         deps: [
           {
             registryUrls: ['https://repo.maven.apache.org/maven2'],
