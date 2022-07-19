@@ -350,7 +350,7 @@ function parseSbtLine(
       }
     }
     deps.push({
-      registryUrls,
+      registryUrls: Array.from(new Set(registryUrls)),
       ...dep,
     });
   }
@@ -408,7 +408,7 @@ function prepareLoadPackageFiles(
   scalaVersion: ParseOptions['scalaVersion'];
 } {
   let variables: ParseOptions['variables'] = {};
-  let registryUrls: string[] = [MAVEN_REPO];
+  const registryUrls: string[] = [MAVEN_REPO];
   const acc: PackageFile & ParseOptions = {
     registryUrls,
     deps: [],
@@ -422,16 +422,19 @@ function prepareLoadPackageFiles(
     if (res) {
       variables = { ...variables, ...res.variables };
       if (res.registryUrls) {
-        registryUrls = Array.from(
-          new Set([...registryUrls, ...res.registryUrls])
-        );
+        registryUrls.push(...res.registryUrls);
       }
       if (res.scalaVersion) {
         scalaVersion = res.scalaVersion;
       }
     }
   }
-  return { variables, registryUrls, scalaVersion };
+
+  return {
+    variables,
+    registryUrls,
+    scalaVersion,
+  };
 }
 
 export async function extractAllPackageFiles(
