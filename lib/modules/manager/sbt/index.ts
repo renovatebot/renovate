@@ -16,6 +16,6 @@ export const supportedDatasources = [
 ];
 
 export const defaultConfig = {
-  fileMatch: ['project/.*\\.scala$', '\\.sbt$', 'project/[^/]*.scala$'],
+  fileMatch: ['\\.sbt$', 'project/[^/]*.scala$'],
   versioning: ivyVersioning.id,
 };
