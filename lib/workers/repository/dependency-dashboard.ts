@@ -7,7 +7,7 @@ import { getProblems, logger } from '../../logger';
 import { platform } from '../../modules/platform';
 import { regEx } from '../../util/regex';
 import * as template from '../../util/template';
-import { BranchConfig, BranchResult } from '../types';
+import { BranchConfig, BranchResult, SelectAllConfig } from '../types';
 import { PackageFiles } from './package-files';
 
 interface DependencyDashboard {
@@ -36,7 +36,9 @@ function parseDashboardIssue(issueBody: string): DependencyDashboard {
   return { dependencyDashboardChecks, dependencyDashboardRebaseAllOpen };
 }
 
-export async function readDashboardBody(config: RenovateConfig): Promise<void> {
+export async function readDashboardBody(
+  config: SelectAllConfig
+): Promise<void> {
   config.dependencyDashboardChecks = {};
   const stringifiedConfig = JSON.stringify(config);
   if (
@@ -97,7 +99,7 @@ function appendRepoProblems(config: RenovateConfig, issueBody: string): string {
 }
 
 export async function ensureDependencyDashboard(
-  config: RenovateConfig,
+  config: SelectAllConfig,
   allBranches: BranchConfig[]
 ): Promise<void> {
   // legacy/migrated issue
