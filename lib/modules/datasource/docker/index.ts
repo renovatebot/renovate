@@ -711,8 +711,7 @@ export class DockerDatasource extends Datasource {
       | string
       | null = `${registryHost}/${dockerRepository}/tags/list?n=${limit}`;
     url = ensurePathPrefix(url, '/v2');
-    let headers = null;
-    headers = await getAuthHeaders(
+    const headers = await getAuthHeaders(
       this.http,
       registryHost,
       dockerRepository,
