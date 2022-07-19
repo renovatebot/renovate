@@ -124,6 +124,7 @@ export async function lookup(
   packageFiles: Record<string, PackageFile[]>
 ): Promise<ExtractResult> {
   await fetchUpdates(config, packageFiles);
+  ensureGithubToken(packageFiles);
   await raiseDeprecationWarnings(config, packageFiles);
   const { branches, branchList } = await branchifyUpgrades(
     config,
