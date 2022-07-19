@@ -212,7 +212,6 @@ export interface RenovateConfig
   dependencyDashboardAutoclose?: boolean;
   dependencyDashboardChecks?: Record<string, string>;
   dependencyDashboardIssue?: number;
-  dependencyDashboardRebaseAllOpen?: boolean;
   dependencyDashboardTitle?: string;
   dependencyDashboardHeader?: string;
   dependencyDashboardFooter?: string;

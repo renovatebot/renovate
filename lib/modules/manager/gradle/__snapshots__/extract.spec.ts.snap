@@ -15,7 +15,6 @@ Array [
           "packageFile": "gradle.properties",
         },
         "registryUrls": Array [
-          "https://repo.maven.apache.org/maven2",
           "https://example.com",
         ],
       },
