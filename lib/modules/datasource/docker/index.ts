@@ -460,7 +460,7 @@ export class DockerDatasource extends Datasource {
       dockerRepository: string,
       configDigest: string
     ) => `${registryHost}:${dockerRepository}@${configDigest}`,
-    ttlMinutes: 1440,
+    ttlMinutes: 1440 * 28,
   })
   public async getImageConfig(
     registryHost: string,
@@ -638,7 +638,7 @@ export class DockerDatasource extends Datasource {
       dockerRepository: string,
       currentDigest: string
     ) => `${registryHost}:${dockerRepository}@${currentDigest}`,
-    ttlMinutes: 1440,
+    ttlMinutes: 1440 * 28,
   })
   public async getImageArchitecture(
     registryHost: string,
