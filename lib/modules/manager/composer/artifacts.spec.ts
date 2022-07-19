@@ -102,13 +102,13 @@ describe('modules/manager/composer/artifacts', () => {
     hostRules.add({
       hostType: PlatformId.Github,
       matchHost: 'api.github.com',
-      token: 'github-token',
+      token: 'ghp_github-token',
     });
     // This rule should not affect the result the Github rule has priority to avoid breaking changes.
     hostRules.add({
       hostType: GitTagsDatasource.id,
       matchHost: 'github.com',
-      token: 'git-tags-token',
+      token: 'ghp_git-tags-token',
     });
     hostRules.add({
       hostType: PlatformId.Gitlab,
@@ -158,9 +158,39 @@ describe('modules/manager/composer/artifacts', () => {
 
   it('git-tags hostRule for github.com set github-token in COMPOSER_AUTH', async () => {
     hostRules.add({
+      hostType: PlatformId.Github,
+      matchHost: 'api.github.com',
+      token: 'ghs_token',
+    });
+    hostRules.add({
       hostType: GitTagsDatasource.id,
       matchHost: 'github.com',
-      token: 'git-tags-token',
+      token: 'ghp_token',
+    });
+    fs.readLocalFile.mockResolvedValueOnce('{}');
+    const execSnapshots = mockExecAll(exec);
+    fs.readLocalFile.mockResolvedValueOnce('{}');
+    const authConfig = {
+      ...config,
+      registryUrls: ['https://packagist.renovatebot.com'],
+    };
+    git.getRepoStatus.mockResolvedValueOnce(repoStatus);
+    expect(
+      await composer.updateArtifacts({
+        packageFileName: 'composer.json',
+        updatedDeps: [],
+        newPackageFileContent: '{}',
+        config: authConfig,
+      })
+    ).toBeNull();
+    expect(execSnapshots).toMatchSnapshot();
+  });
+
+  it('Skip github application access token hostRules in COMPOSER_AUTH', async () => {
+    hostRules.add({
+      hostType: GitTagsDatasource.id,
+      matchHost: 'github.com',
+      token: 'ghp_token',
     });
     fs.readLocalFile.mockResolvedValueOnce('{}');
     const execSnapshots = mockExecAll(exec);

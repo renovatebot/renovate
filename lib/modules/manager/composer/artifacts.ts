@@ -30,23 +30,42 @@ import {
   requireComposerDependencyInstallation,
 } from './utils';
 import { GitTagsDatasource } from '../../datasource/git-tags';
+import type { HostRuleSearch } from '../../../util/host-rules';
+
+function findGithubPersonnalAccessToken(
+  search: HostRuleSearch
+): string | undefined {
+  const token = hostRules.find(search)?.token?.replace('x-access-token:', '');
+  if (isPersonnalAccessToken(token)) {
+    return token;
+  }
+  return undefined;
+}
+
+function isPersonnalAccessToken(token: string): boolean {
+  return /^ghp_/.test(token);
+}
 
 function getAuthJson(): string | null {
   const authJson: AuthJson = {};
 
-  let githubHostRule = hostRules.find({
+  const githubToken = findGithubPersonnalAccessToken({
     hostType: PlatformId.Github,
     url: 'https://api.github.com/',
   });
-  if (!githubHostRule?.token) {
-    githubHostRule = hostRules.find({
-      hostType: GitTagsDatasource.id,
-      url: 'https://github.com',
-    });
-  }
-  if (githubHostRule?.token) {
+  if (githubToken) {
     authJson['github-oauth'] = {
-      'github.com': githubHostRule.token.replace('x-access-token:', ''),
+      'github.com': githubToken,
+    };
+  }
+
+  const gitTagsGithubToken = findGithubPersonnalAccessToken({
+    hostType: GitTagsDatasource.id,
+    url: 'https://github.com',
+  });
+  if (gitTagsGithubToken) {
+    authJson['github-oauth'] = {
+      'github.com': gitTagsGithubToken,
     };
   }
 
