@@ -15,6 +15,7 @@ type MetaCpanResult = {
         distribution: string;
         date: string;
         deprecated: boolean;
+        maturity: string;
         download_url: string;
       };
     }[];
@@ -70,6 +71,7 @@ export class CpanDatasource extends Datasource {
           'distribution',
           'date',
           'deprecated',
+          'maturity',
           'download_url',
         ],
         sort: [{ date: 'desc' }],
@@ -89,6 +91,7 @@ export class CpanDatasource extends Datasource {
             distribution,
             date: releaseTimestamp,
             deprecated: isDeprecated,
+            maturity,
             download_url: downloadUrl,
           } = _source;
 
@@ -96,11 +99,8 @@ export class CpanDatasource extends Datasource {
             ({ name }) => name === packageName
           )?.version;
           if (version) {
-            const isStable =
-              perlVersioning.api.isStable(version) &&
-              !(downloadUrl.split('/').pop() ?? '').match(
-                /^.+-TRIAL\.([a-zA-Z.]+)$/
-              );
+            // https://metacpan.org/pod/CPAN::DistnameInfo#maturity
+            const isStable = maturity === 'released';
             acc.push({
               distribution,
               // Release properties

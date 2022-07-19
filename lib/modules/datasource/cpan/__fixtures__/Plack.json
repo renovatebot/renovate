@@ -1,102 +1,106 @@
 {
+   "took" : 3,
    "_shards" : {
       "total" : 3,
       "successful" : 3,
       "failed" : 0
    },
-   "took" : 9,
-   "timed_out" : false,
    "hits" : {
-      "max_score" : null,
+      "total" : 169,
       "hits" : [
          {
+            "_type" : "file",
             "_id" : "iGmpDWEqEQB4FO1lXb0j3tLgIDw",
             "_index" : "cpan_v1_01",
+            "sort" : [
+               1606695696000
+            ],
+            "_score" : null,
             "_source" : {
                "deprecated" : false,
                "module" : [
                   {
-                     "version" : "1.0048",
+                     "name" : "Plack",
+                     "version" : "1.0048"
+                  }
+               ],
+               "date" : "2020-11-30T00:21:36",
+               "maturity" : "released",
+               "distribution" : "Plack",
+               "download_url" : "https://cpan.metacpan.org/authors/id/M/MI/MIYAGAWA/Plack-1.0048.tar.gz"
+            }
+         },
+         {
+            "_index" : "cpan_v1_01",
+            "_id" : "rV2b5IZa2PG_JbjbYRdzPXZPFw4",
+            "sort" : [
+               1518254730000
+            ],
+            "_score" : null,
+            "_source" : {
+               "distribution" : "Plack",
+               "download_url" : "https://cpan.metacpan.org/authors/id/M/MI/MIYAGAWA/Plack-1.0047.tar.gz",
+               "deprecated" : false,
+               "module" : [
+                  {
+                     "version" : "1.0047",
                      "name" : "Plack"
                   }
                ],
-               "distribution" : "Plack",
-               "date" : "2020-11-30T00:21:36",
-               "download_url" : "https://cpan.metacpan.org/authors/id/M/MI/MIYAGAWA/Plack-1.0048.tar.gz"
+               "date" : "2018-02-10T09:25:30",
+               "maturity" : "released"
             },
-            "_score" : null,
+            "_type" : "file"
+         },
+         {
+            "_source" : {
+               "distribution" : "Plack",
+               "download_url" : "https://cpan.metacpan.org/authors/id/M/MI/MIYAGAWA/Plack-1.0046.tar.gz",
+               "maturity" : "released",
+               "module" : [
+                  {
+                     "version" : "1.0046",
+                     "name" : "Plack"
+                  }
+               ],
+               "date" : "2018-02-10T07:52:31",
+               "deprecated" : false
+            },
             "sort" : [
-               1606695696000
+               1518249151000
             ],
+            "_score" : null,
+            "_index" : "cpan_v1_01",
+            "_id" : "K3Pl0SIFDJ2K3kt5HxLnT2gVIxc",
+            "_type" : "file"
+         },
+         {
+            "_source" : {
+               "deprecated" : false,
+               "maturity" : "released",
+               "module" : [
+                  {
+                     "version" : "1.0045",
+                     "name" : "Plack"
+                  }
+               ],
+               "date" : "2017-12-31T20:42:50",
+               "distribution" : "Plack",
+               "download_url" : "https://cpan.metacpan.org/authors/id/M/MI/MIYAGAWA/Plack-1.0045.tar.gz"
+            },
+            "_index" : "cpan_v1_01",
+            "_id" : "mMVzdQVT1y8stbntvAQQc87mGeM",
+            "sort" : [
+               1514752970000
+            ],
+            "_score" : null,
             "_type" : "file"
          },
          {
             "_type" : "file",
-            "sort" : [
-               1518254730000
-            ],
-            "_id" : "rV2b5IZa2PG_JbjbYRdzPXZPFw4",
             "_source" : {
-               "download_url" : "https://cpan.metacpan.org/authors/id/M/MI/MIYAGAWA/Plack-1.0047.tar.gz",
+               "download_url" : "https://cpan.metacpan.org/authors/id/M/MI/MIYAGAWA/Plack-1.0044.tar.gz",
                "distribution" : "Plack",
-               "date" : "2018-02-10T09:25:30",
-               "module" : [
-                  {
-                     "name" : "Plack",
-                     "version" : "1.0047"
-                  }
-               ],
-               "deprecated" : false
-            },
-            "_index" : "cpan_v1_01",
-            "_score" : null
-         },
-         {
-            "_type" : "file",
-            "sort" : [
-               1518249151000
-            ],
-            "_id" : "K3Pl0SIFDJ2K3kt5HxLnT2gVIxc",
-            "_source" : {
-               "download_url" : "https://cpan.metacpan.org/authors/id/M/MI/MIYAGAWA/Plack-1.0046.tar.gz",
-               "distribution" : "Plack",
-               "date" : "2018-02-10T07:52:31",
-               "module" : [
-                  {
-                     "name" : "Plack",
-                     "version" : "1.0046"
-                  }
-               ],
-               "deprecated" : false
-            },
-            "_index" : "cpan_v1_01",
-            "_score" : null
-         },
-         {
-            "_id" : "mMVzdQVT1y8stbntvAQQc87mGeM",
-            "_index" : "cpan_v1_01",
-            "_source" : {
-               "download_url" : "https://cpan.metacpan.org/authors/id/M/MI/MIYAGAWA/Plack-1.0045.tar.gz",
-               "date" : "2017-12-31T20:42:50",
-               "distribution" : "Plack",
-               "module" : [
-                  {
-                     "name" : "Plack",
-                     "version" : "1.0045"
-                  }
-               ],
-               "deprecated" : false
-            },
-            "_score" : null,
-            "_type" : "file",
-            "sort" : [
-               1514752970000
-            ]
-         },
-         {
-            "_score" : null,
-            "_source" : {
-               "deprecated" : false,
                "module" : [
                   {
                      "name" : "Plack",
@@ -104,108 +108,113 @@
                   }
                ],
                "date" : "2017-04-27T17:48:20",
-               "distribution" : "Plack",
-               "download_url" : "https://cpan.metacpan.org/authors/id/M/MI/MIYAGAWA/Plack-1.0044.tar.gz"
+               "maturity" : "released",
+               "deprecated" : false
             },
-            "_index" : "cpan_v1_01",
-            "_id" : "FCsCemrqDXJgxmIF1MYaf3yxHtk",
+            "_score" : null,
             "sort" : [
                1493315300000
             ],
-            "_type" : "file"
+            "_index" : "cpan_v1_01",
+            "_id" : "FCsCemrqDXJgxmIF1MYaf3yxHtk"
          },
          {
+            "_type" : "file",
+            "_index" : "cpan_v1_01",
             "_id" : "Noy_4t07AY__XEYnpJ9efRqKkNY",
+            "_score" : null,
+            "sort" : [
+               1487732525000
+            ],
             "_source" : {
-               "download_url" : "https://cpan.metacpan.org/authors/id/M/MI/MIYAGAWA/Plack-1.0043.tar.gz",
-               "distribution" : "Plack",
-               "date" : "2017-02-22T03:02:05",
+               "deprecated" : false,
                "module" : [
                   {
                      "name" : "Plack",
                      "version" : "1.0043"
                   }
                ],
-               "deprecated" : false
-            },
-            "_index" : "cpan_v1_01",
-            "_score" : null,
-            "_type" : "file",
-            "sort" : [
-               1487732525000
-            ]
+               "date" : "2017-02-22T03:02:05",
+               "maturity" : "released",
+               "distribution" : "Plack",
+               "download_url" : "https://cpan.metacpan.org/authors/id/M/MI/MIYAGAWA/Plack-1.0043.tar.gz"
+            }
          },
          {
+            "_type" : "file",
             "_score" : null,
+            "sort" : [
+               1475127522000
+            ],
             "_index" : "cpan_v1_01",
+            "_id" : "xC2vIHM6w4Bruk0EsQCeVm25d2c",
             "_source" : {
-               "deprecated" : false,
+               "distribution" : "Plack",
+               "download_url" : "https://cpan.metacpan.org/authors/id/M/MI/MIYAGAWA/Plack-1.0042.tar.gz",
+               "maturity" : "released",
                "module" : [
                   {
                      "name" : "Plack",
                      "version" : "1.0042"
                   }
                ],
-               "distribution" : "Plack",
                "date" : "2016-09-29T05:38:42",
-               "download_url" : "https://cpan.metacpan.org/authors/id/M/MI/MIYAGAWA/Plack-1.0042.tar.gz"
-            },
-            "_id" : "xC2vIHM6w4Bruk0EsQCeVm25d2c",
-            "_type" : "file",
-            "sort" : [
-               1475127522000
-            ]
+               "deprecated" : false
+            }
          },
          {
-            "sort" : [
-               1474838747000
-            ],
-            "_type" : "file",
-            "_score" : null,
-            "_index" : "cpan_v1_01",
             "_source" : {
-               "date" : "2016-09-25T21:25:47",
-               "distribution" : "Plack",
-               "download_url" : "https://cpan.metacpan.org/authors/id/M/MI/MIYAGAWA/Plack-1.0041.tar.gz",
                "deprecated" : false,
-               "module" : [
-                  {
-                     "version" : "1.0041",
-                     "name" : "Plack"
-                  }
-               ]
-            },
-            "_id" : "JBBPOsgzGyMPb5CkrBY8GnrCocs"
-         },
-         {
-            "_score" : null,
-            "_id" : "NkAJcXogQmuVpc46K4jm07QqUS8",
-            "_index" : "cpan_v1_01",
-            "_source" : {
-               "download_url" : "https://cpan.metacpan.org/authors/id/M/MI/MIYAGAWA/Plack-1.0040-TRIAL.tar.gz",
-               "date" : "2016-04-01T16:58:21",
-               "distribution" : "Plack",
+               "maturity" : "released",
                "module" : [
                   {
                      "name" : "Plack",
-                     "version" : "1.0040"
+                     "version" : "1.0041"
                   }
                ],
-               "deprecated" : false
+               "date" : "2016-09-25T21:25:47",
+               "download_url" : "https://cpan.metacpan.org/authors/id/M/MI/MIYAGAWA/Plack-1.0041.tar.gz",
+               "distribution" : "Plack"
             },
+            "_index" : "cpan_v1_01",
+            "_id" : "JBBPOsgzGyMPb5CkrBY8GnrCocs",
+            "_score" : null,
             "sort" : [
-               1459529901000
+               1474838747000
             ],
             "_type" : "file"
          },
          {
-            "_id" : "Y7WlIYOZjk3rh9O05F3UZE6WwGo",
             "_source" : {
+               "distribution" : "Plack",
+               "download_url" : "https://cpan.metacpan.org/authors/id/M/MI/MIYAGAWA/Plack-1.0040-TRIAL.tar.gz",
                "deprecated" : false,
                "module" : [
                   {
-                     "name" : "Plack",
-                     "version" : "1.0039"
+                     "version" : "1.0040",
+                     "name" : "Plack"
+                  }
+               ],
+               "date" : "2016-04-01T16:58:21",
+               "maturity" : "developer"
+            },
+            "sort" : [
+               1459529901000
+            ],
+            "_score" : null,
+            "_index" : "cpan_v1_01",
+            "_id" : "NkAJcXogQmuVpc46K4jm07QqUS8",
+            "_type" : "file"
+         },
+         {
+            "_type" : "file",
+            "_source" : {
+               "deprecated" : false,
+               "maturity" : "released",
+               "module" : [
+                  {
+                     "version" : "1.0039",
+                     "name" : "Plack"
                   }
                ],
                "date" : "2015-12-06T11:29:40",
@@ -213,13 +222,14 @@
                "download_url" : "https://cpan.metacpan.org/authors/id/M/MI/MIYAGAWA/Plack-1.0039.tar.gz"
             },
             "_index" : "cpan_v1_01",
+            "_id" : "Y7WlIYOZjk3rh9O05F3UZE6WwGo",
             "_score" : null,
             "sort" : [
                1449401380000
-            ],
-            "_type" : "file"
+            ]
          }
       ],
-      "total" : 169
-   }
+      "max_score" : null
+   },
+   "timed_out" : false
 }
