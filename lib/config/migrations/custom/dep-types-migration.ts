@@ -5,7 +5,8 @@ import { AbstractMigration } from '../base/abstract-migration';
 interface DepTypesRule extends PackageRule, PackageRuleInputConfig {}
 export class DepTypesMigration extends AbstractMigration {
   override readonly deprecated = true;
-  override readonly propertyName = /^(?:(?:d|devD|optionalD|peerD)ependencies|engines|depTypes)$/;
+  override readonly propertyName =
+    /^(?:(?:d|devD|optionalD|peerD)ependencies|engines|depTypes)$/;
 
   override run(value: unknown, key: string): void {
     const packageRules: PackageRule[] = this.get('packageRules') ?? [];
