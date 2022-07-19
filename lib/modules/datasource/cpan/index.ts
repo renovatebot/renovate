@@ -1,32 +1,25 @@
-import { logger } from '../../../logger';
-import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { cache } from '../../../util/cache/package/decorator';
-import { getElapsedMinutes } from '../../../util/date';
-import { newlineRegex, regEx } from '../../../util/regex';
-import { copystr } from '../../../util/string';
-import { joinUrlParts } from '../../../util/url';
+import type { HttpResponse } from '../../../util/http/types';
 import * as perlVersioning from '../../versioning/perl';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
 
-type Package = {
-  release: Release;
-  distribution: string;
+type MetaCpanResult = {
+  hits: {
+    hits: {
+      _source: {
+        module: {
+          name: string;
+          version?: string;
+        }[];
+        distribution: string;
+        date: string;
+        deprecated: boolean;
+        download_url: string;
+      };
+    }[];
+  };
 };
-
-let lastSync = new Date('2000-01-01');
-let packages: Record<string, Package> = Object.create(null); // Because we might need a "constructor" key
-let contentLength = 0;
-
-const pathExtensionPattern = regEx(/(\.tgz|\.tar\.gz)$/);
-const pathPattern = regEx(/^.+\/(.+)-(?:\d+(?:\.\d+)*)(?:\.tgz|\.tar\.gz)$/);
-
-// Note: use only for tests
-export function resetCache(): void {
-  lastSync = new Date('2000-01-01');
-  packages = Object.create(null);
-  contentLength = 0;
-}
 
 export class CpanDatasource extends Datasource {
   static readonly id = 'cpan';
@@ -35,7 +28,9 @@ export class CpanDatasource extends Datasource {
     super(CpanDatasource.id);
   }
 
-  override readonly defaultRegistryUrls = ['https://www.cpan.org'];
+  override readonly customRegistrySupport = false;
+
+  override readonly defaultRegistryUrls = ['https://fastapi.metacpan.org/'];
 
   override readonly defaultVersioning = perlVersioning.id;
 
@@ -52,85 +47,83 @@ export class CpanDatasource extends Datasource {
       return null;
     }
 
-    await this.syncVersions(registryUrl);
-    const pkg = packages[packageName];
-    if (!pkg) {
-      return null;
-    }
-    const dep: ReleaseResult = {
-      releases: [pkg.release],
-      changelogUrl: `https://metacpan.org/dist/${pkg.distribution}/changes`,
-      homepage: `https://metacpan.org/pod/${packageName}`,
-    };
-    return dep;
-  }
+    let result: ReleaseResult | null = null;
+    const pkgUrl = `${registryUrl}v1/file/_search`;
 
-  async updateCpanVersions(registryUrl: string): Promise<void> {
-    const url = joinUrlParts(registryUrl, 'modules', '02packages.details.txt');
-    const options = {
-      headers: {
-        'accept-encoding': 'identity',
-        range: `bytes=${contentLength}-`,
-      },
-    };
-    let newLines: string;
+    let raw: HttpResponse<MetaCpanResult> | null = null;
     try {
-      logger.trace({ registryUrl }, 'Fetching 02packages.details.txt');
-      const startTime = Date.now();
-      newLines = (await this.http.get(url, options)).body;
-      const durationMs = Math.round(Date.now() - startTime);
-      logger.trace(
-        { registryUrl, durationMs },
-        'Fetched 02packages.details.txt'
+      const body = {
+        query: {
+          filtered: {
+            query: { match_all: {} },
+            filter: {
+              and: [
+                { term: { 'module.name': packageName } },
+                { exists: { field: 'module.associated_pod' } },
+              ],
+            },
+          },
+        },
+        _source: [
+          'module.name',
+          'module.version',
+          'distribution',
+          'date',
+          'deprecated',
+          'download_url',
+        ],
+        sort: [{ date: 'desc' }],
+      };
+      raw = await this.http.postJson<MetaCpanResult>(pkgUrl, { body });
+    } catch (err) {
+      this.handleGenericErrors(err);
+    }
+
+    const body = raw?.body;
+    if (body) {
+      const hits = body.hits.hits;
+      const releases: (Release & { distribution: string })[] = hits.flatMap(
+        ({ _source }) => {
+          const {
+            module,
+            distribution,
+            date: releaseTimestamp,
+            deprecated: isDeprecated,
+            download_url: downloadUrl,
+          } = _source;
+
+          const version = module.find(
+            ({ name }) => name === packageName
+          )?.version;
+          if (version) {
+            const isStable =
+              perlVersioning.api.isStable(version) &&
+              !(downloadUrl.split('/').pop() ?? '').match(
+                /^.+-TRIAL\.([a-zA-Z.]+)$/
+              );
+            return {
+              distribution,
+              // Release properties
+              downloadUrl,
+              isDeprecated,
+              isStable,
+              releaseTimestamp,
+              version,
+            };
+          }
+
+          return [];
+        }
       );
-    } catch (err) /* istanbul ignore next */ {
-      if (err.statusCode !== 416) {
-        contentLength = 0;
-        packages = Object.create(null); // Because we might need a "constructor" key
-        logger.trace({ registryUrl, err }, 'fetch error');
-        throw new ExternalHostError(new Error('CPAN fetch error'));
+      if (releases.length > 0) {
+        const latest = releases[0];
+        result = {
+          releases,
+          changelogUrl: `https://metacpan.org/dist/${latest.distribution}/changes`,
+          homepage: `https://metacpan.org/pod/${packageName}`,
+        };
       }
-      logger.trace({ registryUrl }, 'No update');
-      lastSync = new Date();
-      return;
     }
-
-    for (const line of newLines.split(newlineRegex)) {
-      CpanDatasource.processLine(line);
-    }
-    lastSync = new Date();
-  }
-
-  private static processLine(line: string): void {
-    const l = line.trim();
-    if (!l.length || !pathExtensionPattern.test(l)) {
-      return;
-    }
-    const split = l.split(/\s+/);
-    const [_pkg, latestVersion, path] = split;
-    const pkg = copystr(_pkg);
-    const distribution = path.replace(pathPattern, '$1');
-    packages[pkg] = {
-      release: {
-        version: latestVersion,
-        isStable: perlVersioning.api.isStable(latestVersion),
-      },
-      distribution,
-    };
-  }
-
-  private static isDataStale(): boolean {
-    return getElapsedMinutes(lastSync) >= 5;
-  }
-
-  private updateCpanVersionsPromise: Promise<void> | null = null;
-
-  async syncVersions(registryUrl: string): Promise<void> {
-    if (CpanDatasource.isDataStale()) {
-      this.updateCpanVersionsPromise =
-        this.updateCpanVersionsPromise ?? this.updateCpanVersions(registryUrl);
-      await this.updateCpanVersionsPromise;
-      this.updateCpanVersionsPromise = null;
-    }
+    return result;
   }
 }

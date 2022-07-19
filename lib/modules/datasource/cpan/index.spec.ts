@@ -1,76 +1,74 @@
 import { getPkgReleases } from '..';
 import { Fixtures } from '../../../../test/fixtures';
 import * as httpMock from '../../../../test/http-mock';
-import * as perlVersioning from '../../versioning/perl';
-import { CpanDatasource, resetCache } from '.';
+import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages';
+import { CpanDatasource } from '.';
 
-const packagesDetails = Fixtures.get('02packages.details.txt');
+const baseUrl = 'https://fastapi.metacpan.org/';
 
 describe('modules/datasource/cpan/index', () => {
   describe('getReleases', () => {
-    const SKIP_CACHE = process.env.RENOVATE_SKIP_CACHE;
-
-    const params = {
-      versioning: perlVersioning.id,
-      datasource: CpanDatasource.id,
-      depName: 'Plack',
-      registryUrls: [],
-    };
-
-    beforeEach(() => {
-      resetCache();
-      process.env.RENOVATE_SKIP_CACHE = 'true';
-      jest.resetAllMocks();
-    });
-
-    afterEach(() => {
-      process.env.RENOVATE_SKIP_CACHE = SKIP_CACHE;
-    });
-
-    it('returns null for www.cpan.org package miss', async () => {
-      const newparams = { ...params };
+    it('returns null for empty result', async () => {
       httpMock
-        .scope('https://www.cpan.org')
-        .get('/modules/02packages.details.txt')
-        .reply(200, packagesDetails);
-      const res = await getPkgReleases(newparams);
-      expect(res).toBeNull();
-    });
-
-    it('returns a dep for www.cpan.org package hit (*.tar.gz)', async () => {
-      const newparams = {
-        ...params,
-        packageName: 'AAAA::Mail::SpamAssassin',
-      };
-      httpMock
-        .scope('https://www.cpan.org')
-        .get('/modules/02packages.details.txt')
-        .reply(200, packagesDetails);
-      const res = await getPkgReleases(newparams);
-      expect(res).not.toBeNull();
-      expect(res?.releases).toHaveLength(1);
-      expect(res).toMatchSnapshot();
+        .scope(baseUrl)
+        .post(
+          '/v1/file/_search',
+          (body) =>
+            body.query.filtered.filter.and[0].term['module.name'] === 'FooBar'
+        )
+        .reply(200, Fixtures.get('empty.json'));
       expect(
-        res?.releases.find((release) => release.version === '0.002')
-      ).toBeDefined();
+        await getPkgReleases({
+          datasource: CpanDatasource.id,
+          depName: 'FooBar',
+        })
+      ).toBeNull();
     });
 
-    it('returns a dep for www.cpan.org package hit (*.tgz)', async () => {
-      const newparams = {
-        ...params,
-        packageName: 'Regexp::Assemble',
-      };
-      httpMock
-        .scope('https://www.cpan.org')
-        .get('/modules/02packages.details.txt')
-        .reply(200, packagesDetails);
-      const res = await getPkgReleases(newparams);
-      expect(res).not.toBeNull();
-      expect(res?.releases).toHaveLength(1);
-      expect(res).toMatchSnapshot();
+    it('returns null for 404', async () => {
+      httpMock.scope(baseUrl).post('/v1/file/_search').reply(404);
       expect(
-        res?.releases.find((release) => release.version === '0.38')
-      ).toBeDefined();
+        await getPkgReleases({
+          datasource: CpanDatasource.id,
+          depName: 'Plack',
+        })
+      ).toBeNull();
+    });
+
+    it('throws for 5xx', async () => {
+      httpMock.scope(baseUrl).post('/v1/file/_search').reply(502);
+      await expect(
+        getPkgReleases({
+          datasource: CpanDatasource.id,
+          depName: 'Plack',
+        })
+      ).rejects.toThrow(EXTERNAL_HOST_ERROR);
+    });
+
+    it('returns null for unknown error', async () => {
+      httpMock.scope(baseUrl).post('/v1/file/_search').replyWithError('');
+      expect(
+        await getPkgReleases({
+          datasource: CpanDatasource.id,
+          depName: 'Plack',
+        })
+      ).toBeNull();
+    });
+
+    it('processes real data', async () => {
+      httpMock
+        .scope(baseUrl)
+        .post(
+          '/v1/file/_search',
+          (body) =>
+            body.query.filtered.filter.and[0].term['module.name'] === 'Plack'
+        )
+        .reply(200, Fixtures.get('Plack.json'));
+      const res = await getPkgReleases({
+        datasource: CpanDatasource.id,
+        depName: 'Plack',
+      });
+      expect(res).toMatchSnapshot();
     });
   });
 });
