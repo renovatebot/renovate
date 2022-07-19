@@ -2,7 +2,6 @@ import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { getElapsedMinutes } from '../../../util/date';
 import { newlineRegex } from '../../../util/regex';
-import { copystr } from '../../../util/string';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 
@@ -36,6 +35,13 @@ export class RubyGemsOrgDatasource extends Datasource {
       })),
     };
     return dep;
+  }
+
+  /**
+   * https://bugs.chromium.org/p/v8/issues/detail?id=2869
+   */
+  private static copystr(x: string): string {
+    return (' ' + x).slice(1);
   }
 
   async updateRubyGemsVersions(): Promise<void> {
@@ -82,7 +88,7 @@ export class RubyGemsOrgDatasource extends Datasource {
       }
       split = l.split(' ');
       [pkg, versions] = split;
-      pkg = copystr(pkg);
+      pkg = RubyGemsOrgDatasource.copystr(pkg);
       packageReleases[pkg] = packageReleases[pkg] || [];
       const lineVersions = versions.split(',').map((version) => version.trim());
       for (const lineVersion of lineVersions) {
@@ -93,7 +99,7 @@ export class RubyGemsOrgDatasource extends Datasource {
             (version) => version !== deletedVersion
           );
         } else {
-          packageReleases[pkg].push(copystr(lineVersion));
+          packageReleases[pkg].push(RubyGemsOrgDatasource.copystr(lineVersion));
         }
       }
     } catch (err) /* istanbul ignore next */ {

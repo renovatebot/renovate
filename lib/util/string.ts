@@ -45,10 +45,3 @@ export function uniqueStrings(
 ): boolean {
   return elements.indexOf(element) === index;
 }
-
-/**
- * https://bugs.chromium.org/p/v8/issues/detail?id=2869
- */
-export function copystr(x: string): string {
-  return (' ' + x).slice(1);
-}
