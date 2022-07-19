@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-      - v25
 
   pull_request:
 
@@ -14,6 +13,9 @@ on:
         description: 'Dry-Run'
         default: 'true'
         required: false
+
+permissions:
+  contents: read
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.number || github.ref }}
@@ -58,7 +60,7 @@ jobs:
           fetch-depth: 2
 
       - name: Set up Node.js ${{ env.NODE_VERSION }}
-        uses: actions/setup-node@eeb10cff27034e7acf239c5d29f62154018672fd # tag=v3.3.0
+        uses: actions/setup-node@2fddd8803e2f5c9604345a0b591c3020ee971a93 # tag=v3.4.1
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: yarn
@@ -104,7 +106,7 @@ jobs:
           fetch-depth: 2
 
       - name: Set up Node.js ${{ env.NODE_VERSION }}
-        uses: actions/setup-node@eeb10cff27034e7acf239c5d29f62154018672fd # tag=v3.3.0
+        uses: actions/setup-node@2fddd8803e2f5c9604345a0b591c3020ee971a93 # tag=v3.4.1
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: yarn
@@ -146,6 +148,10 @@ jobs:
     runs-on: ubuntu-latest
     # release shouldn't need more than 5 min
     timeout-minutes: 15
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
 
     steps:
       # full checkout for semantic-release
@@ -154,7 +160,7 @@ jobs:
           fetch-depth: 0
 
       - name: Set up Node.js ${{ env.NODE_VERSION }}
-        uses: actions/setup-node@eeb10cff27034e7acf239c5d29f62154018672fd # tag=v3.3.0
+        uses: actions/setup-node@2fddd8803e2f5c9604345a0b591c3020ee971a93 # tag=v3.4.1
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: yarn

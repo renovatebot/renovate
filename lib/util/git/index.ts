@@ -14,6 +14,7 @@ import { GlobalConfig } from '../../config/global';
 import type { RenovateConfig } from '../../config/types';
 import {
   CONFIG_VALIDATION,
+  INVALID_PATH,
   REPOSITORY_CHANGED,
   REPOSITORY_DISABLED,
   REPOSITORY_EMPTY,
@@ -33,6 +34,10 @@ import {
   setCachedConflictResult,
 } from './conflicts-cache';
 import { checkForPlatformFailure, handleCommitError } from './error';
+import {
+  getCachedModifiedResult,
+  setCachedModifiedResult,
+} from './modified-cache';
 import { configSigningKey, writePrivateKey } from './private-key';
 import type {
   CommitFilesConfig,
@@ -233,6 +238,12 @@ async function resetToBranch(branchName: string): Promise<void> {
   await git.raw(['clean', '-fd']);
 }
 
+// istanbul ignore next
+export async function resetToCommit(commit: string): Promise<void> {
+  logger.debug(`resetToCommit(${commit})`);
+  await git.raw(['reset', '--hard', commit]);
+}
+
 async function deleteLocalBranch(branchName: string): Promise<void> {
   await git.branch(['-D', branchName]);
 }
@@ -386,7 +397,14 @@ export async function syncGit(): Promise<void> {
     const durationMs = Math.round(Date.now() - cloneStart);
     logger.debug({ durationMs }, 'git clone completed');
   }
-  config.currentBranchSha = (await git.raw(['rev-parse', 'HEAD'])).trim();
+  try {
+    config.currentBranchSha = (await git.raw(['rev-parse', 'HEAD'])).trim();
+  } catch (err) /* istanbul ignore next */ {
+    if (err.message?.includes('fatal: not a git repository')) {
+      throw new Error(REPOSITORY_CHANGED);
+    }
+    throw err;
+  }
   if (config.cloneSubmodules) {
     const submodules = await getSubmodules();
     for (const submodule of submodules) {
@@ -418,9 +436,21 @@ export async function syncGit(): Promise<void> {
 }
 
 // istanbul ignore next
-export async function getRepoStatus(): Promise<StatusResult> {
+export async function getRepoStatus(path?: string): Promise<StatusResult> {
+  if (is.string(path)) {
+    const { localDir } = GlobalConfig.get();
+    const localPath = upath.resolve(localDir, path);
+    if (!localPath.startsWith(upath.resolve(localDir))) {
+      logger.warn(
+        { localPath, localDir },
+        'Preventing access to file outside the local directory'
+      );
+      throw new Error(INVALID_PATH);
+    }
+  }
+
   await syncGit();
-  return git.status();
+  return git.status(path ? [path] : []);
 }
 
 export function branchExists(branchName: string): boolean {
@@ -519,7 +549,7 @@ export function getBranchList(): string[] {
   return Object.keys(config.branchCommits);
 }
 
-export async function isBranchStale(branchName: string): Promise<boolean> {
+export async function isBranchBehindBase(branchName: string): Promise<boolean> {
   await syncGit();
   try {
     const { currentBranchSha, currentBranch } = config;
@@ -529,12 +559,12 @@ export async function isBranchStale(branchName: string): Promise<boolean> {
       '--contains',
       config.currentBranchSha,
     ]);
-    const isStale = !branches.all.map(localName).includes(branchName);
+    const isBehind = !branches.all.map(localName).includes(branchName);
     logger.debug(
-      { isStale, currentBranch, currentBranchSha },
-      `isBranchStale=${isStale}`
+      { isBehind, currentBranch, currentBranchSha },
+      `isBranchBehindBase=${isBehind}`
     );
-    return isStale;
+    return isBehind;
   } catch (err) /* istanbul ignore next */ {
     const errChecked = checkForPlatformFailure(err);
     if (errChecked) {
@@ -545,11 +575,6 @@ export async function isBranchStale(branchName: string): Promise<boolean> {
 }
 
 export async function isBranchModified(branchName: string): Promise<boolean> {
-  await syncGit();
-  // First check cache
-  if (config.branchIsModified[branchName] !== undefined) {
-    return config.branchIsModified[branchName];
-  }
   if (!branchExists(branchName)) {
     logger.debug(
       { branchName },
@@ -557,6 +582,20 @@ export async function isBranchModified(branchName: string): Promise<boolean> {
     );
     return false;
   }
+  // First check local config
+  if (config.branchIsModified[branchName] !== undefined) {
+    return config.branchIsModified[branchName];
+  }
+  // Second check repoCache
+  const isModified = getCachedModifiedResult(
+    branchName,
+    config.branchCommits[branchName]
+  );
+  if (isModified !== null) {
+    return (config.branchIsModified[branchName] = isModified);
+  }
+
+  await syncGit();
   // Retrieve the author of the most recent commit
   let lastAuthor: string | undefined;
   try {
@@ -587,6 +626,11 @@ export async function isBranchModified(branchName: string): Promise<boolean> {
     // author matches - branch has not been modified
     logger.debug({ branchName }, 'Branch has not been modified');
     config.branchIsModified[branchName] = false;
+    setCachedModifiedResult(
+      branchName,
+      config.branchCommits[branchName],
+      false
+    );
     return false;
   }
   logger.debug(
@@ -594,6 +638,7 @@ export async function isBranchModified(branchName: string): Promise<boolean> {
     'Last commit author does not match git author email - branch has been modified'
   );
   config.branchIsModified[branchName] = true;
+  setCachedModifiedResult(branchName, config.branchCommits[branchName], true);
   return true;
 }
 
@@ -602,8 +647,6 @@ export async function isBranchConflicted(
   branch: string
 ): Promise<boolean> {
   logger.debug(`isBranchConflicted(${baseBranch}, ${branch})`);
-  await syncGit();
-  await writeGitAuthor();
 
   const baseBranchSha = getBranchCommit(baseBranch);
   const branchSha = getBranchCommit(branch);
@@ -629,6 +672,8 @@ export async function isBranchConflicted(
   }
 
   let result = false;
+  await syncGit();
+  await writeGitAuthor();
 
   const origBranch = config.currentBranch;
   try {
@@ -975,7 +1020,7 @@ export async function fetchCommit({
   logger.debug(`Fetching branch ${branchName}`);
   try {
     const ref = `refs/heads/${branchName}:refs/remotes/origin/${branchName}`;
-    await gitRetry(() => git.fetch(['origin', ref, '--force']));
+    await gitRetry(() => git.pull(['origin', ref, '--force']));
     const commit = (await git.revparse([branchName])).trim();
     config.branchCommits[branchName] = commit;
     config.branchIsModified[branchName] = false;

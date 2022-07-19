@@ -980,40 +980,40 @@ describe('config/presets/index', () => {
     it('handles renamed monorepos', async () => {
       const res = await presets.getPreset('monorepo:opentelemetry', {});
       expect(res).toMatchInlineSnapshot(`
-Object {
-  "description": Array [
-    "opentelemetry-js monorepo",
-  ],
-  "matchSourceUrlPrefixes": Array [
-    "https://github.com/open-telemetry/opentelemetry-js",
-  ],
-}
-`);
+        Object {
+          "description": Array [
+            "opentelemetry-js monorepo",
+          ],
+          "matchSourceUrlPrefixes": Array [
+            "https://github.com/open-telemetry/opentelemetry-js",
+          ],
+        }
+      `);
     });
 
     it('handles renamed monorepo groups', async () => {
       const res = await presets.getPreset('group:opentelemetryMonorepo', {});
       expect(res).toMatchInlineSnapshot(`
-Object {
-  "packageRules": Array [
-    Object {
-      "description": Array [
-        "Group packages from opentelemetry-js monorepo together",
-      ],
-      "extends": Array [
-        "monorepo:opentelemetry-js",
-      ],
-      "groupName": "opentelemetry-js monorepo",
-      "matchUpdateTypes": Array [
-        "digest",
-        "patch",
-        "minor",
-        "major",
-      ],
-    },
-  ],
-}
-`);
+        Object {
+          "packageRules": Array [
+            Object {
+              "description": Array [
+                "Group packages from opentelemetry-js monorepo together.",
+              ],
+              "extends": Array [
+                "monorepo:opentelemetry-js",
+              ],
+              "groupName": "opentelemetry-js monorepo",
+              "matchUpdateTypes": Array [
+                "digest",
+                "patch",
+                "minor",
+                "major",
+              ],
+            },
+          ],
+        }
+      `);
     });
 
     it('gets linters', async () => {
@@ -1029,7 +1029,7 @@ Object {
         {}
       );
       expect(res).toEqual({
-        description: ['Group eslint packages into same branch/PR'],
+        description: ['Group `eslint` packages into same branch/PR.'],
         packageRules: [
           {
             extends: ['packages:eslint'],
@@ -1042,7 +1042,7 @@ Object {
     it('handles missing params', async () => {
       const res = await presets.getPreset(':group()', {});
       expect(res).toEqual({
-        description: ['Group {{arg1}} packages into same branch/PR'],
+        description: ['Group `{{arg1}}` packages into same branch/PR.'],
         packageRules: [
           {
             extends: [],
@@ -1056,7 +1056,7 @@ Object {
       const res = await presets.getPreset(':pinVersions(foo, bar)', {});
       expect(res).toEqual({
         description: [
-          'Use version pinning (maintain a single version only and not SemVer ranges)',
+          'Use version pinning (maintain a single version only and not SemVer ranges).',
         ],
         rangeStrategy: 'pin',
       });

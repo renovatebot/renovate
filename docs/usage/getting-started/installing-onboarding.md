@@ -39,6 +39,18 @@ Once you're done selecting repositories for Renovate to run on, click the green 
 Unfortunately Mend's hosted GitLab app needed to be taken offline indefinitely until a viable security model for bots on GitLab.com is available.
 For more details on GitLab security for bots, please see the [GitLab Bot Security](../gitlab-bot-security.md) doc.
 
+### Self-hosting on Windows
+
+We recommend you set [`core.autocrlf = input`](https://git-scm.com/docs/gitattributes#_text) in your Git config.
+You can do this by running this Git command:
+
+```bash
+git config --global core.autocrlf input
+```
+
+This prevents the carriage return `\r\n` which may confuse Renovate bot.
+You can also set the line endings in your repository by adding `* text=auto eol=lf` to your `.gitattributes` file.
+
 ## Repository onboarding
 
 Once you have enabled Renovate on a repository, you will get a "Configure Renovate" Pull Request looking something like this:
