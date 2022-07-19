@@ -222,7 +222,6 @@ function parseDepExpr(
     depName,
     packageName,
     currentValue,
-    editFile: ctx?.lookupVariableFile,
     fileReplacePosition: lineIndex,
   };
 
@@ -233,6 +232,7 @@ function parseDepExpr(
     result.fileReplacePosition =
       variables[getLastDotAnnotation(rawVersion)].lineIndex;
     result.groupName = `${getLastDotAnnotation(rawVersion)}`;
+    result.editFile = variables[getLastDotAnnotation(rawVersion)].sourceFile;
   }
 
   if (depType) {
@@ -328,7 +328,7 @@ function parseSbtLine(
       const depExpr = rightPart.replace(regEx(/[\s,]*$/), '');
       dep = parseDepExpr(depExpr, {
         ...ctx,
-        depType: 'plugin',
+        // depType: 'plugin',
       });
     }
   }
@@ -337,7 +337,9 @@ function parseSbtLine(
     if (!dep.datasource) {
       if (dep.depType === 'plugin') {
         dep.datasource = SbtPluginDatasource.id;
-        dep.registryUrls = [...registryUrls, ...sbtPluginDefaultRegistries];
+        dep.registryUrls = Array.from(
+          new Set([...registryUrls, ...sbtPluginDefaultRegistries])
+        );
       } else {
         dep.datasource = SbtPackageDatasource.id;
       }
@@ -369,7 +371,7 @@ function parseSbtLine(
 export function extractPackageFile(
   content: string,
   packageFile?: string,
-  variables: ParseOptions['variables'] = {}
+  defaultAcc?: PackageFile & ParseOptions
 ): (PackageFile & ParseOptions) | null {
   if (!content) {
     return null;
@@ -383,13 +385,50 @@ export function extractPackageFile(
     deps: [],
     isMultiDeps: false,
     scalaVersion: null,
-    variables,
     packageFile,
+    ...defaultAcc,
   };
 
   // TODO: needs major refactoring?
   const res = lines.reduce(parseSbtLine, acc);
   return res.deps.length ? res : null;
+}
+
+async function prepareLoadPackageFiles(
+  _config: ExtractConfig,
+  packageFiles: string[]
+): Promise<{
+  variables: Record<
+    string,
+    { val: string; sourceFile: string; lineIndex: number }
+  >;
+  registryUrls: string[];
+}> {
+  let variables: ParseOptions['variables'] = {};
+  let registryUrls: string[] = [MAVEN_REPO];
+  const acc: PackageFile & ParseOptions = {
+    registryUrls,
+    deps: [],
+    variables,
+  };
+
+  for (const packageFile of packageFiles) {
+    const content = await readLocalFile(packageFile, 'utf8');
+    if (!content) {
+      logger.trace({ packageFile }, 'packageFile has no content');
+      continue;
+    }
+    const res = extractPackageFile(content, packageFile, acc);
+    if (res) {
+      variables = { ...variables, ...res.variables };
+      if (res.registryUrls) {
+        registryUrls = Array.from(
+          new Set([...registryUrls, ...res.registryUrls])
+        );
+      }
+    }
+  }
+  return { variables, registryUrls };
 }
 
 export async function extractAllPackageFiles(
@@ -398,10 +437,14 @@ export async function extractAllPackageFiles(
 ): Promise<PackageFile[] | null> {
   const packages: PackageFile[] = [];
   const mapDepsToVariableFile: Record<string, PackageDependency[]> = {};
-  let variables: ParseContext['variables'] = {};
 
   // Start parsing file in project/ folder first to get variable
   packageFiles.sort((a, b) => (a.match('project/.*\\.scala$') ? -1 : 1));
+
+  const { variables, registryUrls } = await prepareLoadPackageFiles(
+    _config,
+    packageFiles
+  );
 
   for (const packageFile of packageFiles) {
     const content = await readLocalFile(packageFile, 'utf8');
@@ -409,18 +452,20 @@ export async function extractAllPackageFiles(
       logger.trace({ packageFile }, 'packageFile has no content');
       continue;
     }
-    const res = extractPackageFile(content, packageFile, variables);
+    const res = extractPackageFile(content, packageFile, {
+      variables,
+      registryUrls,
+      deps: [],
+    });
     if (res) {
       res.packageFile = packageFile;
       if (res?.deps) {
-        variables = { ...variables, ...res.variables };
         for (const dep of res.deps) {
-          if (dep.editFile) {
-            if (!mapDepsToVariableFile[dep.editFile]) {
-              mapDepsToVariableFile[dep.editFile] = [];
-            }
-            mapDepsToVariableFile[dep.editFile].push(dep);
+          const variableSourceFile = dep?.editFile ?? packageFile;
+          if (!mapDepsToVariableFile[variableSourceFile]) {
+            mapDepsToVariableFile[variableSourceFile] = [];
           }
+          mapDepsToVariableFile[variableSourceFile].push(dep);
         }
         packages.push(res);
       }
@@ -428,6 +473,8 @@ export async function extractAllPackageFiles(
   }
 
   // Filter unique package
+  // Packages are counted in submodule but it's the same one
+  // by packageName and currentValue
   const finalPackages = Object.entries(mapDepsToVariableFile).map(
     ([packageFile, deps]) => ({
       packageFile,
