@@ -2,7 +2,11 @@ import { GlobalConfig } from '../../../../config/global';
 import type { RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
 import { commitAndPush } from '../../../../modules/platform/commit';
-import { getFile, isBranchModified, isBranchStale } from '../../../../util/git';
+import {
+  getFile,
+  isBranchBehindBase,
+  isBranchModified,
+} from '../../../../util/git';
 import { getMigrationBranchName } from '../common';
 import { ConfigMigrationCommitMessageFactory } from './commit-message';
 import type { MigratedData } from './migrated-data';
@@ -20,7 +24,10 @@ export async function rebaseMigrationBranch(
   const configFileName = migratedConfigData.filename;
   const contents = migratedConfigData.content;
   const existingContents = await getFile(configFileName, branchName);
-  if (contents === existingContents && !(await isBranchStale(branchName))) {
+  if (
+    contents === existingContents &&
+    !(await isBranchBehindBase(branchName))
+  ) {
     logger.debug('Migration branch is up to date');
     return null;
   }
