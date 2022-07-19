@@ -56,7 +56,7 @@ function haveReachedLimits(): boolean {
 
 /* istanbul ignore next */
 function checkEnv(): void {
-  const range = pkg.engines!.node;
+  const range = pkg.engines!.node!;
   const rangeNext = pkg['engines-next']?.node;
   if (process.release?.name !== 'node' || !process.versions?.node) {
     logger.warn(
