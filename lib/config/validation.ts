@@ -275,7 +275,7 @@ export async function validateConfig(
                   } catch (err) {
                     logger.warn(
                       { err },
-                      `Preset Error while validating ${subval}`
+                      `Could not resolve preset during config validation`
                     );
                     errors.push({
                       topic: 'Configuration Warning',
