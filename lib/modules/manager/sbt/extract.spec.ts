@@ -2,7 +2,8 @@ import { Fixtures } from '../../../../test/fixtures';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import type { ExtractConfig, PackageFile } from '../types';
-import { extractAllPackageFiles, extractPackageFile } from '.';
+import { extractPackageFile } from './extract';
+import { extractAllPackageFiles } from '.';
 
 const fixturesDir = 'lib/modules/manager/sbt/__fixtures__';
 
