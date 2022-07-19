@@ -11,7 +11,12 @@ import {
 import { get } from '../../versioning';
 import * as mavenVersioning from '../../versioning/maven';
 import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
-import type { ParseContext, ParseOptions } from './types';
+import type {
+  MapFilenameContent,
+  ParseContext,
+  ParseOptions,
+  VariableContext,
+} from './types';
 
 const stripComment = (str: string): string =>
   str.replace(regEx(/(^|\s+)\/\/.*$/), '');
@@ -127,14 +132,14 @@ const isVarName = (str: string): boolean =>
 
 const getVarInfo = (
   str: string,
-  ctx: ParseContext
-): { val: string; sourceFile: string; lineIndex: number } => {
+  { lookupVariableFile, lineIndex }: ParseContext
+): VariableContext => {
   const rightPart = str.replace(
     regEx(/^\s*(private\s*)?(lazy\s*)?val\s+[_a-zA-Z][_a-zA-Z0-9]*\s*=\s*"/),
     ''
   );
   const val = rightPart.replace(regEx(/"\s*$/), '');
-  return { val, sourceFile: ctx.lookupVariableFile!, lineIndex: ctx.lineIndex };
+  return { val, sourceFile: lookupVariableFile!, lineIndex };
 };
 
 function parseDepExpr(
@@ -394,17 +399,14 @@ export function extractFile(
   return res.deps.length ? res : null;
 }
 
-async function prepareLoadPackageFiles(
+function prepareLoadPackageFiles(
   _config: ExtractConfig,
-  packageFiles: string[]
-): Promise<{
-  variables: Record<
-    string,
-    { val: string; sourceFile: string; lineIndex: number }
-  >;
+  packageFilesContent: MapFilenameContent
+): {
+  variables: ParseOptions['variables'];
   registryUrls: string[];
-  scalaVersion: string | null;
-}> {
+  scalaVersion: ParseOptions['scalaVersion'];
+} {
   let variables: ParseOptions['variables'] = {};
   let registryUrls: string[] = [MAVEN_REPO];
   const acc: PackageFile & ParseOptions = {
@@ -414,12 +416,7 @@ async function prepareLoadPackageFiles(
   };
   let scalaVersion: string | null = null;
 
-  for (const packageFile of packageFiles) {
-    const content = await readLocalFile(packageFile, 'utf8');
-    if (!content) {
-      logger.trace({ packageFile }, 'packageFile has no content');
-      continue;
-    }
+  for (const [packageFile, content] of Object.entries(packageFilesContent)) {
     acc.packageFile = packageFile;
     const res = extractFile(content, acc);
     if (res) {
@@ -441,26 +438,33 @@ export async function extractAllPackageFiles(
   _config: ExtractConfig,
   packageFiles: string[]
 ): Promise<PackageFile[] | null> {
-  // package might appear in multiple files but at the end only update 1 single place
-  // So merge them in filename
-  const mapDepsToVariableFile: Record<string, PackageDependency[]> = {};
-
   // Start parsing file in project/ folder first to get variable
   packageFiles.sort((a, b) => (a.match('project/.*\\.scala$') ? -1 : 1));
 
-  // 1. variables from all package file
-  // 2. registry from all package file
-  // 3. Project's scalaVersion - use in parseDepExpr to add suffix eg. "_2.13"
-  const { variables, registryUrls, scalaVersion } =
-    await prepareLoadPackageFiles(_config, packageFiles);
-
-  // Start extract all package files
+  // Read packages and store in packageFilesContent
+  const packageFilesContent: MapFilenameContent = {};
   for (const packageFile of packageFiles) {
     const content = await readLocalFile(packageFile, 'utf8');
     if (!content) {
       logger.trace({ packageFile }, 'packageFile has no content');
       continue;
     }
+    packageFilesContent[packageFile] = content;
+  }
+
+  // 1. variables from all package file
+  // 2. registry from all package file
+  // 3. Project's scalaVersion - use in parseDepExpr to add suffix eg. "_2.13"
+  const { variables, registryUrls, scalaVersion } = prepareLoadPackageFiles(
+    _config,
+    packageFilesContent
+  );
+
+  // package might appear in multiple files but at the end only update 1 single place
+  // So merge them in filename
+  const mapDepsToVariableFile: Record<string, PackageDependency[]> = {};
+  // Start extract all package files
+  for (const [packageFile, content] of Object.entries(packageFilesContent)) {
     const res = extractFile(content, {
       variables,
       registryUrls,
