@@ -103,8 +103,8 @@ It mostly uses Renovate config defaults but adds a few smart customisations such
 
 <!-- prettier-ignore -->
 !!! note
-    The `:xyz` naming convention (with `:` prefix) is a special shorthand for the `default:` presets.
-    e.g. `:xyz` is equivalent to `default:xyz`.
+    The `:xyz` naming convention (with `:` prefix) is shorthand for the `config:` presets.
+    This means that `:xyz` is the same as `config:xyz`.
 
 ## How to Use Preset Configs
 
