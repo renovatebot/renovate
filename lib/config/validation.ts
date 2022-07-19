@@ -274,7 +274,7 @@ export async function validateConfig(
                     await getPreset(subval, config);
                   } catch (err) {
                     logger.warn(
-                      { err },
+                      { err, preset: subval },
                       `Could not resolve preset during config validation`
                     );
                     errors.push({
