@@ -4,9 +4,8 @@ export function getCachedBehindBaseResult(
   branchName: string,
   currentBaseBranchSha: string
 ): boolean | null {
-  const cache = getCache() ?? {};
-  cache.branches ??= [];
-  const { branches } = cache;
+  const cache = getCache();
+  const { branches = [] } = cache;
   const cachedBranch = branches?.find(
     (branch) => branch.branchName === branchName
   );

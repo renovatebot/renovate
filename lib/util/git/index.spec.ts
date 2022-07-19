@@ -243,12 +243,14 @@ describe('util/git/index', () => {
 
   describe('isBranchBehindBase()', () => {
     it('should return false if same SHA as master', async () => {
+      repoCache.getCache.mockReturnValueOnce({});
       expect(
         await git.isBranchBehindBase('renovate/future_branch')
       ).toBeFalse();
     });
 
     it('should return true if SHA different from master', async () => {
+      repoCache.getCache.mockReturnValueOnce({});
       expect(await git.isBranchBehindBase('renovate/past_branch')).toBeTrue();
     });
 
