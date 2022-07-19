@@ -328,7 +328,6 @@ function parseSbtLine(
       const depExpr = rightPart.replace(regEx(/[\s,]*$/), '');
       dep = parseDepExpr(depExpr, {
         ...ctx,
-        // depType: 'plugin',
       });
     }
   }
@@ -365,12 +364,12 @@ function parseSbtLine(
   return {
     deps,
     packageFileVersion,
+    scalaVersion,
   };
 }
 
 export function extractPackageFile(
   content: string,
-  packageFile?: string,
   defaultAcc?: PackageFile & ParseOptions
 ): (PackageFile & ParseOptions) | null {
   if (!content) {
@@ -385,7 +384,6 @@ export function extractPackageFile(
     deps: [],
     isMultiDeps: false,
     scalaVersion: null,
-    packageFile,
     ...defaultAcc,
   };
 
@@ -403,6 +401,7 @@ async function prepareLoadPackageFiles(
     { val: string; sourceFile: string; lineIndex: number }
   >;
   registryUrls: string[];
+  scalaVersion: string | null;
 }> {
   let variables: ParseOptions['variables'] = {};
   let registryUrls: string[] = [MAVEN_REPO];
@@ -411,6 +410,7 @@ async function prepareLoadPackageFiles(
     deps: [],
     variables,
   };
+  let scalaVersion: string | null = null;
 
   for (const packageFile of packageFiles) {
     const content = await readLocalFile(packageFile, 'utf8');
@@ -418,7 +418,8 @@ async function prepareLoadPackageFiles(
       logger.trace({ packageFile }, 'packageFile has no content');
       continue;
     }
-    const res = extractPackageFile(content, packageFile, acc);
+    acc.packageFile = packageFile;
+    const res = extractPackageFile(content, acc);
     if (res) {
       variables = { ...variables, ...res.variables };
       if (res.registryUrls) {
@@ -426,53 +427,61 @@ async function prepareLoadPackageFiles(
           new Set([...registryUrls, ...res.registryUrls])
         );
       }
+      if (res.scalaVersion) {
+        scalaVersion = res.scalaVersion;
+      }
     }
   }
-  return { variables, registryUrls };
+  return { variables, registryUrls, scalaVersion };
 }
 
 export async function extractAllPackageFiles(
   _config: ExtractConfig,
   packageFiles: string[]
 ): Promise<PackageFile[] | null> {
-  const packages: PackageFile[] = [];
+  // package might appear in multiple files but at the end only update 1 single place
+  // So merge them in filename
   const mapDepsToVariableFile: Record<string, PackageDependency[]> = {};
 
   // Start parsing file in project/ folder first to get variable
   packageFiles.sort((a, b) => (a.match('project/.*\\.scala$') ? -1 : 1));
 
-  const { variables, registryUrls } = await prepareLoadPackageFiles(
-    _config,
-    packageFiles
-  );
+  // 1. variables from all package file
+  // 2. registry from all package file
+  // 3. Project's scalaVersion - use in parseDepExpr to add suffix eg. "_2.13"
+  const { variables, registryUrls, scalaVersion } =
+    await prepareLoadPackageFiles(_config, packageFiles);
 
+  // Start extract all package files
   for (const packageFile of packageFiles) {
     const content = await readLocalFile(packageFile, 'utf8');
     if (!content) {
       logger.trace({ packageFile }, 'packageFile has no content');
       continue;
     }
-    const res = extractPackageFile(content, packageFile, {
+    const res = extractPackageFile(content, {
       variables,
       registryUrls,
       deps: [],
+      packageFile,
+      scalaVersion,
     });
     if (res) {
-      res.packageFile = packageFile;
       if (res?.deps) {
         for (const dep of res.deps) {
           const variableSourceFile = dep?.editFile ?? packageFile;
           if (!mapDepsToVariableFile[variableSourceFile]) {
             mapDepsToVariableFile[variableSourceFile] = [];
           }
+          // merge dep by file
           mapDepsToVariableFile[variableSourceFile].push(dep);
         }
-        packages.push(res);
       }
     }
   }
 
   // Filter unique package
+  // As we merge all package to single package file
   // Packages are counted in submodule but it's the same one
   // by packageName and currentValue
   const finalPackages = Object.entries(mapDepsToVariableFile).map(
