@@ -466,7 +466,7 @@ export class DockerDatasource extends Datasource {
     registryHost: string,
     dockerRepository: string,
     configDigest: string
-  ): Promise<HttpResponse | null> {
+  ): Promise<HttpResponse | null | undefined> {
     logger.debug(
       `getImageConfig(${registryHost}, ${dockerRepository}, ${configDigest})`
     );
@@ -479,7 +479,7 @@ export class DockerDatasource extends Datasource {
       // istanbul ignore if: Should never be happen
       if (!headers) {
         logger.debug('No docker auth found - returning');
-        return null;
+        return undefined;
       }
       const url = `${registryHost}/v2/${dockerRepository}/blobs/${configDigest}`;
       return await this.http.get(url, {
@@ -505,6 +505,7 @@ export class DockerDatasource extends Datasource {
           },
           'Image configuration is unknown'
         );
+        return null;
       } else if (err.statusCode === 429 && isDockerHost(registryHost)) {
         logger.warn({ err }, 'docker registry failure: too many requests');
       } else if (err.statusCode >= 500 && err.statusCode < 600) {
@@ -533,7 +534,7 @@ export class DockerDatasource extends Datasource {
       }
     }
 
-    return null;
+    return undefined;
   }
 
   private async getConfigDigest(
@@ -644,7 +645,7 @@ export class DockerDatasource extends Datasource {
     registryHost: string,
     dockerRepository: string,
     currentDigest: string
-  ): Promise<string | null> {
+  ): Promise<string | null | undefined> {
     try {
       const manifestResponse = await this.getManifestResponse(
         registryHost,
@@ -671,7 +672,7 @@ export class DockerDatasource extends Datasource {
             },
             'Unexpected error while retrieving config digest for docker image'
           );
-          return null;
+          return undefined;
         }
 
         const configResponse = await this.getImageConfig(
@@ -702,7 +703,7 @@ export class DockerDatasource extends Datasource {
       );
     }
 
-    return null;
+    return undefined;
   }
 
   /*
