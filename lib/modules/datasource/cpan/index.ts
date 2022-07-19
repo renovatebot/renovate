@@ -82,8 +82,8 @@ export class CpanDatasource extends Datasource {
     const body = raw?.body;
     if (body) {
       const hits = body.hits.hits;
-      const releases: (Release & { distribution: string })[] = hits.flatMap(
-        ({ _source }) => {
+      const releases = hits.reduce(
+        (acc: (Release & { distribution: string })[], { _source }) => {
           const {
             module,
             distribution,
@@ -101,7 +101,7 @@ export class CpanDatasource extends Datasource {
               !(downloadUrl.split('/').pop() ?? '').match(
                 /^.+-TRIAL\.([a-zA-Z.]+)$/
               );
-            return {
+            acc.push({
               distribution,
               // Release properties
               downloadUrl,
@@ -109,11 +109,12 @@ export class CpanDatasource extends Datasource {
               isStable,
               releaseTimestamp,
               version,
-            };
+            });
           }
 
-          return [];
-        }
+          return acc;
+        },
+        []
       );
       if (releases.length > 0) {
         const latest = releases[0];
