@@ -5,6 +5,7 @@ import {
 } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
+import * as memCache from '../../util/cache/memory';
 import { clone } from '../../util/clone';
 import { regEx } from '../../util/regex';
 import * as massage from '../massage';
@@ -18,7 +19,7 @@ import * as gitlab from './gitlab';
 import * as internal from './internal';
 import * as local from './local';
 import * as npm from './npm';
-import type { ParsedPreset, PresetApi } from './types';
+import type { ParsedPreset, Preset, PresetApi } from './types';
 import {
   PRESET_DEP_NOT_FOUND,
   PRESET_INVALID,
@@ -218,12 +219,17 @@ export async function getPreset(
   }
   const { presetSource, repo, presetPath, presetName, tag, params } =
     parsePreset(preset);
-  let presetConfig = await presetSources[presetSource].getPreset({
-    repo,
-    presetPath,
-    presetName,
-    tag,
-  });
+  const cacheKey = `preset:${preset}`;
+  let presetConfig = memCache.get<Preset | null | undefined>(cacheKey);
+  if (is.nullOrUndefined(presetConfig)) {
+    presetConfig = await presetSources[presetSource].getPreset({
+      repo,
+      presetPath,
+      presetName,
+      tag,
+    });
+    memCache.set(cacheKey, presetConfig);
+  }
   if (!presetConfig) {
     throw new Error(PRESET_DEP_NOT_FOUND);
   }

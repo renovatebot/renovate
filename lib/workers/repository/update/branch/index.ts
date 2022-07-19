@@ -42,7 +42,7 @@ import {
 } from '../../../../util/merge-confidence';
 import { Limit, isLimitReached } from '../../../global/limits';
 import { BranchConfig, BranchResult, PrBlockedBy } from '../../../types';
-import { ensurePr, getPlatformPrOptions } from '../pr';
+import { ensurePr, getPlatformPrOptions, updatePrDebugData } from '../pr';
 import { checkAutoMerge } from '../pr/automerge';
 import { getPrBody } from '../pr/body';
 import { setArtifactErrorStatus } from './artifacts';
@@ -84,9 +84,7 @@ export async function processBranch(
 ): Promise<ProcessBranchResult> {
   let config: BranchConfig = { ...branchConfig };
   logger.trace({ config }, 'processBranch()');
-  await checkoutBranch(config.baseBranch!);
   let branchExists = gitBranchExists(config.branchName);
-
   if (!branchExists && config.branchPrefix !== config.branchPrefixOld) {
     const branchName = config.branchName.replace(
       config.branchPrefix!,
@@ -194,6 +192,7 @@ export async function processBranch(
             logger.debug('Manual rebase has been requested for PR');
           } else {
             const newBody = await getPrBody(branchConfig, {
+              debugData: updatePrDebugData(existingPr?.bodyStruct?.debugData),
               rebasingNotice:
                 'Renovate will not automatically rebase this PR, because other commits have been found.',
             });
@@ -279,7 +278,8 @@ export async function processBranch(
         'Branch + PR exists but is not scheduled -- will update if necessary'
       );
     }
-
+    await checkoutBranch(config.baseBranch!);
+    //stability checks
     if (
       config.upgrades.some(
         (upgrade) =>

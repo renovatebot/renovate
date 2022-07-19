@@ -37,8 +37,6 @@ describe('workers/repository/config-migration/pr/index', () => {
       ...getConfig(),
       configMigration: true,
       defaultBranch: 'main',
-      errors: [],
-      warnings: [],
       description: [],
     };
   });
@@ -86,21 +84,6 @@ describe('workers/repository/config-migration/pr/index', () => {
       await ensureConfigMigrationPr(config, migratedData);
       expect(platform.updatePr).toHaveBeenCalledTimes(1);
       expect(platform.createPr).toHaveBeenCalledTimes(0);
-    });
-
-    it('Founds a closed PR and exit', async () => {
-      platform.getBranchPr.mockResolvedValueOnce(null);
-      platform.findPr.mockResolvedValueOnce(
-        mock<Pr>({
-          title: 'Config Migration',
-        })
-      );
-      await ensureConfigMigrationPr(config, migratedData);
-      expect(platform.updatePr).toHaveBeenCalledTimes(0);
-      expect(platform.createPr).toHaveBeenCalledTimes(0);
-      expect(logger.debug).toHaveBeenCalledWith(
-        'Found closed migration PR, exiting...'
-      );
     });
 
     it('Dry runs and does not update out of date PR', async () => {
@@ -184,6 +167,40 @@ describe('workers/repository/config-migration/pr/index', () => {
       );
       expect(platform.createPr).toHaveBeenCalledTimes(1);
       expect(platform.createPr.mock.calls[0][0].prBody).toMatchSnapshot();
+    });
+
+    it('creates non-semantic PR title', async () => {
+      await ensureConfigMigrationPr(
+        {
+          ...config,
+          prHeader: '\r\r\nThis should not be the first line of the PR',
+          prFooter:
+            'There should be several empty lines at the end of the PR\r\n\n\n',
+        },
+        migratedData
+      );
+      expect(platform.createPr).toHaveBeenCalledTimes(1);
+      expect(platform.createPr.mock.calls[0][0].prTitle).toBe(
+        'Migrate config renovate.json'
+      );
+    });
+
+    it('creates semantic PR title', async () => {
+      await ensureConfigMigrationPr(
+        {
+          ...config,
+          commitMessagePrefix: '',
+          semanticCommits: 'enabled',
+          prHeader: '\r\r\nThis should not be the first line of the PR',
+          prFooter:
+            'There should be several empty lines at the end of the PR\r\n\n\n',
+        },
+        migratedData
+      );
+      expect(platform.createPr).toHaveBeenCalledTimes(1);
+      expect(platform.createPr.mock.calls[0][0].prTitle).toBe(
+        'chore(config): migrate config renovate.json'
+      );
     });
 
     it('creates PR with footer and header using templating', async () => {

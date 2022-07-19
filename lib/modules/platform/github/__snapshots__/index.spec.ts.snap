@@ -118,6 +118,7 @@ Object {
   "endpoint": "https://ghe.renovatebot.com/",
   "gitAuthor": "undefined <user@domain.com>",
   "renovateUsername": "renovate-bot",
+  "token": "123test",
 }
 `;
 
@@ -126,6 +127,7 @@ Object {
   "endpoint": "https://ghe.renovatebot.com/",
   "gitAuthor": "undefined <user@domain.com>",
   "renovateUsername": "renovate-bot",
+  "token": "123test",
 }
 `;
 
@@ -134,6 +136,7 @@ Object {
   "endpoint": "https://api.github.com/",
   "gitAuthor": undefined,
   "renovateUsername": "renovate-bot",
+  "token": "123test",
 }
 `;
 
@@ -142,6 +145,7 @@ Object {
   "endpoint": "https://api.github.com/",
   "gitAuthor": undefined,
   "renovateUsername": "renovate-bot",
+  "token": "123test",
 }
 `;
 
@@ -150,6 +154,7 @@ Object {
   "endpoint": "https://api.github.com/",
   "gitAuthor": "undefined <user@domain.com>",
   "renovateUsername": "renovate-bot",
+  "token": "123test",
 }
 `;
 
@@ -158,6 +163,7 @@ Object {
   "endpoint": "https://api.github.com/",
   "gitAuthor": "renovate@whitesourcesoftware.com",
   "renovateUsername": "renovate-bot",
+  "token": "123test",
 }
 `;
 

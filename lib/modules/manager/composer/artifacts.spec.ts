@@ -13,7 +13,7 @@ import type { UpdateArtifactsConfig } from '../types';
 import * as composer from '.';
 import { GitTagsDatasource } from '../../datasource/git-tags';
 
-jest.mock('child_process');
+jest.mock('../../../util/exec/common');
 jest.mock('../../../util/exec/env');
 jest.mock('../../datasource');
 jest.mock('../../../util/fs');
