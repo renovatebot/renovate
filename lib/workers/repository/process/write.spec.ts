@@ -35,18 +35,22 @@ describe('workers/repository/process/write', () => {
       ] as never;
       git.branchExists.mockReturnValue(true);
       branchWorker.processBranch.mockResolvedValueOnce({
+        configHash: '111',
         branchExists: true,
         result: BranchResult.PrCreated,
       });
       branchWorker.processBranch.mockResolvedValueOnce({
+        configHash: '111',
         branchExists: false,
         result: BranchResult.AlreadyExisted,
       });
       branchWorker.processBranch.mockResolvedValueOnce({
+        configHash: '111',
         branchExists: false,
         result: BranchResult.Automerged,
       });
       branchWorker.processBranch.mockResolvedValueOnce({
+        configHash: '111',
         branchExists: false,
         result: BranchResult.Automerged,
       });
@@ -59,6 +63,7 @@ describe('workers/repository/process/write', () => {
     it('increments branch counter', async () => {
       const branches: BranchConfig[] = [{}] as never;
       branchWorker.processBranch.mockResolvedValueOnce({
+        configHash: '111',
         branchExists: true,
         result: BranchResult.PrCreated,
       });
