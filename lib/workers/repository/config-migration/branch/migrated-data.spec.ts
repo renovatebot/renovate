@@ -1,13 +1,15 @@
 import detectIndent from 'detect-indent';
 import { Fixtures } from '../../../../../test/fixtures';
-import { mockedFunction } from '../../../../../test/util';
+import { mockedFunction, platform } from '../../../../../test/util';
 
 import { migrateConfig } from '../../../../config/migration';
+import { getCache } from '../../../../util/cache/repository';
 import { readLocalFile } from '../../../../util/fs';
 import { getFileList } from '../../../../util/git';
 import { detectRepoFileConfig } from '../../init/merge';
 import { MigratedDataFactory, applyPrettierFormatting } from './migrated-data';
 
+jest.mock('../../../../util/cache/repository');
 jest.mock('../../../../config/migration');
 jest.mock('../../../../util/git');
 jest.mock('../../../../util/fs');
@@ -36,6 +38,7 @@ describe('workers/repository/config-migration/branch/migrated-data', () => {
         configFileName: 'renovate.json',
       });
       mockedFunction(readLocalFile).mockResolvedValue(rawNonMigrated);
+      mockedFunction(getCache).mockReturnValue({});
       mockedFunction(migrateConfig).mockReturnValue({
         isMigrated: true,
         migratedConfig: migratedConfigObj,
@@ -108,11 +111,34 @@ describe('workers/repository/config-migration/branch/migrated-data', () => {
       );
     });
 
-    it('Returns nothing due to fs error', async () => {
+    it('Retrieve JSON5 config file from repo cache and migrate it', async () => {
+      const repoData = { configFileName: 'renovate.json5' };
+      mockedFunction(detectRepoFileConfig).mockResolvedValueOnce(repoData);
+      mockedFunction(getCache).mockReturnValue(repoData);
+      mockedFunction(platform.getRawFile).mockResolvedValueOnce(
+        rawNonMigratedJson5
+      );
+      MigratedDataFactory.reset();
+      await expect(MigratedDataFactory.getAsync()).resolves.toEqual(
+        migratedDataJson5
+      );
+    });
+
+    it('Returns nothing due to readLocalFile failing', async () => {
       mockedFunction(detectRepoFileConfig).mockResolvedValueOnce({
         configFileName: undefined,
       });
-      mockedFunction(readLocalFile).mockRejectedValueOnce(null);
+      mockedFunction(readLocalFile).mockResolvedValueOnce(null);
+      MigratedDataFactory.reset();
+      await expect(MigratedDataFactory.getAsync()).resolves.toBeNull();
+      expect(detectIndent).toHaveBeenCalledTimes(0);
+    });
+
+    it('Returns nothing due to platform.getRawFile throwing', async () => {
+      const repoData = { configFileName: 'renovate.json5' };
+      mockedFunction(detectRepoFileConfig).mockResolvedValueOnce(repoData);
+      mockedFunction(getCache).mockReturnValue(repoData);
+      mockedFunction(platform.getRawFile).mockRejectedValue(null);
       MigratedDataFactory.reset();
       await expect(MigratedDataFactory.getAsync()).resolves.toBeNull();
     });

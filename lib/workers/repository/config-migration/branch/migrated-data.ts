@@ -4,6 +4,7 @@ import prettier from 'prettier';
 import { migrateConfig } from '../../../../config/migration';
 import { logger } from '../../../../logger';
 import { platform } from '../../../../modules/platform';
+import { getCache } from '../../../../util/cache/repository';
 import { readLocalFile } from '../../../../util/fs';
 import { getFileList } from '../../../../util/git';
 import { detectRepoFileConfig } from '../../init/merge';
@@ -100,11 +101,23 @@ export class MigratedDataFactory {
       delete migratedConfig.warnings;
 
       const filename = rc.configFileName ?? '';
-      const raw = await platform.getRawFile(filename);
+
+      let raw: string | null;
+      if (filename === getCache().configFileName) {
+        raw = await platform.getRawFile(filename);
+      } else {
+        raw = await readLocalFile(filename, 'utf8');
+      }
+      if (!raw) {
+        logger.debug(
+          'MigratedDataFactory.getAsync() Error retrieving repo config'
+        );
+        return null;
+      }
 
       // indent defaults to 2 spaces
       // TODO #7154
-      const indent = detectIndent(raw!);
+      const indent = detectIndent(raw);
       const indentSpace = indent.indent ?? '  ';
       let content: string;
 
