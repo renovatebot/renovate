@@ -6014,10 +6014,10 @@ jest-environment-node@^28.1.3:
     jest-mock "^28.1.3"
     jest-util "^28.1.3"
 
-jest-extended@3.0.0:
-  version "3.0.0"
-  resolved "https://registry.yarnpkg.com/jest-extended/-/jest-extended-3.0.0.tgz#c7cdd8c2326a9744de0b12677436c71353f39b5c"
-  integrity sha512-lhL+MCISeki6hGpRR7m8ViVR9pYlJHLj178OdvnYaOiXuXVaEkMiI8JfyZKEN/so8YzzbIfED1FGDSWWmxRNjg==
+jest-extended@3.0.1:
+  version "3.0.1"
+  resolved "https://registry.yarnpkg.com/jest-extended/-/jest-extended-3.0.1.tgz#9fc2d329d793f5c3256edc366f9ef574f62010d3"
+  integrity sha512-OSGbKUhbjy7QikfQyK3ishFrAqLeRodBzeJk7SuuWGACAT7HHcGuJ4aUQ3ueLANx4KSv1Pa7r1LJWGtJ3eI0xA==
   dependencies:
     jest-diff "^28.0.0"
     jest-get-type "^28.0.0"
