@@ -30,7 +30,7 @@ export async function extractPackageFile(
   for (const p of packages) {
     // version of a hermit package is either a Version or a Channel
     // Channel will prepend with @ to distinguish from normal version
-    const version = p.Version ?? `@${p.Channel ?? ''}`;
+    const version = p.Version === '' ? `@${p.Channel}` : p.Version;
 
     const dep: PackageDependency = {
       datasource: HermitDatasource.id,
@@ -80,6 +80,7 @@ async function listHermitPackages(
         return {
           Name: channelParts[0],
           Channel: channelParts[1],
+          Version: '',
         };
       }
 
@@ -95,6 +96,7 @@ async function listHermitPackages(
       return {
         Name: groups.packageName,
         Version: groups.version,
+        Channel: '',
       };
     })
     .filter(is.truthy);

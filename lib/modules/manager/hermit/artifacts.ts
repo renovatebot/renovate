@@ -213,9 +213,9 @@ async function updateHermitPackage(update: UpdateArtifact): Promise<void> {
       );
     }
 
-    const depName = pkg.depName ?? '';
-    const currentVersion = pkg.currentVersion ?? '';
-    const newValue = pkg.newValue ?? '';
+    const depName = pkg.depName;
+    const currentVersion = pkg.currentVersion;
+    const newValue = pkg.newValue;
     const fromPackage = getHermitPackage(depName, currentVersion);
     const toPackage = getHermitPackage(depName, newValue);
     toInstall.push(toPackage);
