@@ -3,6 +3,7 @@ import JSON5 from 'json5';
 import prettier from 'prettier';
 import { migrateConfig } from '../../../../config/migration';
 import { logger } from '../../../../logger';
+import { platform } from '../../../../modules/platform';
 import { readLocalFile } from '../../../../util/fs';
 import { getFileList } from '../../../../util/git';
 import { detectRepoFileConfig } from '../../init/merge';
@@ -99,7 +100,7 @@ export class MigratedDataFactory {
       delete migratedConfig.warnings;
 
       const filename = rc.configFileName ?? '';
-      const raw = await readLocalFile(filename, 'utf8');
+      const raw = await platform.getRawFile(filename);
 
       // indent defaults to 2 spaces
       // TODO #7154
