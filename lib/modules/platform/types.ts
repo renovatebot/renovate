@@ -21,6 +21,7 @@ export interface PlatformParams {
 export interface PlatformResult {
   endpoint: string;
   renovateUsername?: string;
+  token?: string;
   gitAuthor?: string;
 }
 
@@ -43,9 +44,15 @@ export interface RepoParams {
   ignorePrAuthor?: boolean;
 }
 
+export interface PrDebugData {
+  createdInVer: string;
+  updatedInVer: string;
+}
+
 export interface PrBodyStruct {
   hash: string;
   rebaseRequested?: boolean;
+  debugData?: PrDebugData;
 }
 
 /**

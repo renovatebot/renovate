@@ -1,7 +1,7 @@
-import { exec as _exec } from 'child_process';
 import is from '@sindresorhus/is';
 import traverse from 'traverse';
 import upath from 'upath';
+import { rawExec as _exec } from '../lib/util/exec/common';
 import type { ExecOptions } from '../lib/util/exec/types';
 import { regEx } from '../lib/util/regex';
 
@@ -45,13 +45,12 @@ export function mockExecAll(
   execResult: ExecResult = defaultExecResult
 ): ExecSnapshots {
   const snapshots: ExecSnapshots = [];
-  execFn.mockImplementation((cmd, options, callback) => {
+  execFn.mockImplementation((cmd, options) => {
     snapshots.push(execSnapshot(cmd, options));
     if (execResult instanceof Error) {
       throw execResult;
     }
-    callback(null, execResult);
-    return undefined as never;
+    return execResult as never;
   });
   return snapshots;
 }
@@ -62,13 +61,12 @@ export function mockExecSequence(
 ): ExecSnapshots {
   const snapshots: ExecSnapshots = [];
   execResults.forEach((execResult) => {
-    execFn.mockImplementationOnce((cmd, options, callback) => {
+    execFn.mockImplementationOnce((cmd, options) => {
       snapshots.push(execSnapshot(cmd, options));
       if (execResult instanceof Error) {
         throw execResult;
       }
-      callback(null, execResult);
-      return undefined as never;
+      return execResult as never;
     });
   });
   return snapshots;
