@@ -119,8 +119,7 @@ export async function processBranch(
   }
 
   const cache = getCache();
-  cache.branches ??= [];
-  const { branches } = cache;
+  const { branches = [] } = cache;
   const branchCache =
     branches?.find((branch) => branch.branchName === config.branchName) ??
     ({} as BranchCache);
