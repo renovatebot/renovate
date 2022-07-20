@@ -65,7 +65,11 @@ describe('modules/manager/helm-values/extract', () => {
       sixthImage:
         registry: docker.io
         repository: bitnami/postgres-exporter3
-        tag: 1.2.2@sha256:xxxxxx`;
+        tag: 1.2.2@sha256:xxxxxx
+      seventhImage:
+        registry: docker.io
+        repository: bitnami/postgres-exporter4
+        tag: '10.90'`;
       const result = extractPackageFile(input);
       expect(result).toEqual({
         deps: [
@@ -116,6 +120,16 @@ describe('modules/manager/helm-values/extract', () => {
             replaceString: '1.2.2@sha256:xxxxxx',
             versioning: 'docker',
             currentDigest: 'sha256:xxxxxx',
+            autoReplaceStringTemplate:
+              '"{{newValue}}{{#if newDigest}}@{{newDigest}}{{/if}}"',
+          },
+          {
+            depName: 'docker.io/bitnami/postgres-exporter4',
+            currentValue: '10.90',
+            datasource: 'docker',
+            replaceString: '10.90',
+            versioning: 'docker',
+            currentDigest: undefined,
             autoReplaceStringTemplate:
               '"{{newValue}}{{#if newDigest}}@{{newDigest}}{{/if}}"',
           },
