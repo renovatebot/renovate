@@ -39,7 +39,7 @@ export async function writeUpdates(
     branch.prBlockedBy = res?.prBlockedBy;
     branch.prNo = res?.prNo;
     branch.result = res?.result;
-    branch.configHash = res.configHash;
+    branch.configAndManagerHash = res.configAndManagerHash;
     if (
       branch.result === BranchResult.Automerged &&
       branch.automergeType !== 'pr-comment'

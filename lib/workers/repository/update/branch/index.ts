@@ -17,6 +17,7 @@ import {
   WORKER_FILE_UPDATE_FAILED,
 } from '../../../../constants/error-messages';
 import { logger, removeMeta } from '../../../../logger';
+import { hashMap } from '../../../../modules/manager';
 import { getAdditionalFiles } from '../../../../modules/manager/npm/post-update';
 import { Pr, platform } from '../../../../modules/platform';
 import {
@@ -76,7 +77,7 @@ async function deleteBranchSilently(branchName: string): Promise<void> {
 }
 
 export interface ProcessBranchResult {
-  configHash: string;
+  configAndManagerHash: string;
   branchExists: boolean;
   prBlockedBy?: PrBlockedBy;
   prNo?: number;
@@ -86,17 +87,15 @@ export interface ProcessBranchResult {
 function doesBranchNeedUpdate(
   config: BranchConfig,
   branchCache: BranchCache,
-  configHash: string
+  configAndManagerHash: string
 ): boolean {
   const currentBaseBranchSha = getBranchCommit(config.baseBranch!);
-  const cachedBaseBranchSha = branchCache?.parentSha;
   const branchCommit = getBranchCommit(config?.branchName);
-  const cachedBranchCommit = branchCache?.sha;
 
   return (
-    currentBaseBranchSha === cachedBaseBranchSha &&
-    branchCommit === cachedBranchCommit &&
-    configHash === branchCache.configHash
+    currentBaseBranchSha === branchCache?.parentSha &&
+    branchCommit === branchCache?.sha &&
+    configAndManagerHash === branchCache.configAndManagerHash
   );
 }
 export async function processBranch(
@@ -104,7 +103,10 @@ export async function processBranch(
 ): Promise<ProcessBranchResult> {
   let config: BranchConfig = { ...branchConfig };
   logger.trace({ config }, 'processBranch()');
-  const configHash = hasha(JSON.stringify(config));
+  const configAndManagerHash = hasha([
+    JSON.stringify(config),
+    hashMap.get(config.manager) ?? config.manager,
+  ]);
   let branchExists = gitBranchExists(config.branchName);
   if (!branchExists && config.branchPrefix !== config.branchPrefixOld) {
     const branchName = config.branchName.replace(
@@ -144,7 +146,7 @@ export async function processBranch(
       );
       await handlepr(config, existingPr);
       return {
-        configHash,
+        configAndManagerHash,
         branchExists: false,
         prNo: existingPr.number,
         result: BranchResult.AlreadyExisted,
@@ -157,7 +159,7 @@ export async function processBranch(
       } else {
         logger.debug(`Branch ${config.branchName} needs approval`);
         return {
-          configHash,
+          configAndManagerHash,
           branchExists,
           prNo: branchPr?.number,
           result: BranchResult.NeedsApproval,
@@ -172,7 +174,7 @@ export async function processBranch(
     ) {
       logger.debug('Reached branch limit - skipping branch creation');
       return {
-        configHash,
+        configAndManagerHash,
         branchExists,
         prNo: branchPr?.number,
         result: BranchResult.BranchLimitReached,
@@ -185,7 +187,7 @@ export async function processBranch(
     ) {
       logger.debug('Reached commits limit - skipping branch');
       return {
-        configHash,
+        configAndManagerHash,
         branchExists,
         prNo: branchPr?.number,
         result: BranchResult.CommitLimitReached,
@@ -197,16 +199,16 @@ export async function processBranch(
       !dependencyDashboardCheck
     ) {
       return {
-        configHash,
+        configAndManagerHash,
         branchExists: false,
         prNo: branchPr?.number,
         result: BranchResult.Pending,
       };
     }
     if (branchExists) {
-      if (doesBranchNeedUpdate(config, branchCache, configHash)) {
+      if (doesBranchNeedUpdate(config, branchCache, configAndManagerHash)) {
         return {
-          configHash,
+          configAndManagerHash,
           branchExists: true,
           prNo: branchPr?.number,
           result: BranchResult.NoWork,
@@ -249,7 +251,7 @@ export async function processBranch(
               });
             }
             return {
-              configHash,
+              configAndManagerHash,
               branchExists,
               prNo: branchPr.number,
               result: BranchResult.PrEdited,
@@ -264,7 +266,7 @@ export async function processBranch(
         if (!oldPr) {
           logger.debug('Branch has been edited but found no PR - skipping');
           return {
-            configHash,
+            configAndManagerHash,
             branchExists,
             result: BranchResult.PrEdited,
           };
@@ -282,7 +284,7 @@ export async function processBranch(
             'Found old PR but the SHA is different'
           );
           return {
-            configHash,
+            configAndManagerHash,
             branchExists,
             result: BranchResult.PrEdited,
           };
@@ -296,7 +298,7 @@ export async function processBranch(
       if (!branchExists) {
         logger.debug('Skipping branch creation as not within schedule');
         return {
-          configHash,
+          configAndManagerHash,
           branchExists,
           prNo: branchPr?.number,
           result: BranchResult.NotScheduled,
@@ -305,7 +307,7 @@ export async function processBranch(
       if (config.updateNotScheduled === false && !config.rebaseRequested) {
         logger.debug('Skipping branch update as not within schedule');
         return {
-          configHash,
+          configAndManagerHash,
           branchExists,
           prNo: branchPr?.number,
           result: BranchResult.UpdateNotScheduled,
@@ -315,7 +317,7 @@ export async function processBranch(
       if (!branchPr) {
         logger.debug('Skipping PR creation out of schedule');
         return {
-          configHash,
+          configAndManagerHash,
           branchExists,
           result: BranchResult.NotScheduled,
         };
@@ -390,7 +392,7 @@ export async function processBranch(
           'Skipping branch creation due to internal status checks not met'
         );
         return {
-          configHash,
+          configAndManagerHash,
           branchExists,
           prNo: branchPr?.number,
           result: BranchResult.Pending,
@@ -409,7 +411,7 @@ export async function processBranch(
     } else if (branchExists && config.rebaseWhen === 'never') {
       logger.debug('rebaseWhen=never so skipping branch update check');
       return {
-        configHash,
+        configAndManagerHash,
         branchExists,
         prNo: branchPr?.number,
         result: BranchResult.NoWork,
@@ -517,7 +519,7 @@ export async function processBranch(
           'Branch updating is skipped because stopUpdatingLabel is present in config'
         );
         return {
-          configHash,
+          configAndManagerHash,
           branchExists: true,
           prNo: branchPr?.number,
           result: BranchResult.NoWork,
@@ -532,7 +534,7 @@ export async function processBranch(
     }
     if (!commitSha && !branchExists) {
       return {
-        configHash,
+        configAndManagerHash,
         branchExists,
         prNo: branchPr?.number,
         result: BranchResult.NoWork,
@@ -557,7 +559,7 @@ export async function processBranch(
     ) {
       logger.debug({ commitSha }, `Branch status pending`);
       return {
-        configHash,
+        configAndManagerHash,
         branchExists: true,
         prNo: branchPr?.number,
         result: BranchResult.Pending,
@@ -576,7 +578,7 @@ export async function processBranch(
         }
         logger.debug('Branch is automerged - returning');
         return {
-          configHash,
+          configAndManagerHash,
           branchExists: false,
           result: BranchResult.Automerged,
         };
@@ -586,7 +588,7 @@ export async function processBranch(
           'Branch cannot automerge now because automergeSchedule is off schedule - skipping'
         );
         return {
-          configHash,
+          configAndManagerHash,
           branchExists,
           result: BranchResult.NotScheduled,
         };
@@ -664,7 +666,7 @@ export async function processBranch(
     } else if (err.message.startsWith('bundler-')) {
       // we have already warned inside the bundler artifacts error handling, so just return
       return {
-        configHash,
+        configAndManagerHash,
         branchExists: true,
         prNo: branchPr?.number,
         result: BranchResult.Error,
@@ -688,7 +690,7 @@ export async function processBranch(
     }
     // Don't throw here - we don't want to stop the other renovations
     return {
-      configHash,
+      configAndManagerHash,
       branchExists,
       prNo: branchPr?.number,
       result: BranchResult.Error,
@@ -708,7 +710,7 @@ export async function processBranch(
       if (prBlockedBy === 'RateLimited' && !config.isVulnerabilityAlert) {
         logger.debug('Reached PR limit - skipping PR creation');
         return {
-          configHash,
+          configAndManagerHash,
           branchExists,
           prBlockedBy,
           result: BranchResult.PrLimitReached,
@@ -717,7 +719,7 @@ export async function processBranch(
       // TODO: ensurePr should check for automerge itself (#9719)
       if (prBlockedBy === 'NeedsApproval') {
         return {
-          configHash,
+          configAndManagerHash,
           branchExists,
           prBlockedBy,
           result: BranchResult.NeedsPrApproval,
@@ -725,7 +727,7 @@ export async function processBranch(
       }
       if (prBlockedBy === 'AwaitingTests') {
         return {
-          configHash,
+          configAndManagerHash,
           branchExists,
           prBlockedBy,
           result: BranchResult.Pending,
@@ -733,7 +735,7 @@ export async function processBranch(
       }
       if (prBlockedBy === 'BranchAutomerge') {
         return {
-          configHash,
+          configAndManagerHash,
           branchExists,
           prBlockedBy,
           result: BranchResult.Done,
@@ -741,7 +743,7 @@ export async function processBranch(
       }
       if (prBlockedBy === 'Error') {
         return {
-          configHash,
+          configAndManagerHash,
           branchExists,
           prBlockedBy,
           result: BranchResult.Error,
@@ -749,7 +751,7 @@ export async function processBranch(
       }
       logger.warn({ prBlockedBy }, 'Unknown PrBlockedBy result');
       return {
-        configHash,
+        configAndManagerHash,
         branchExists,
         prBlockedBy,
         result: BranchResult.Error,
@@ -807,7 +809,7 @@ export async function processBranch(
         const prAutomergeResult = await checkAutoMerge(pr, config);
         if (prAutomergeResult?.automerged) {
           return {
-            configHash,
+            configAndManagerHash,
             branchExists,
             result: BranchResult.Automerged,
           };
@@ -829,14 +831,14 @@ export async function processBranch(
   }
   if (!branchExists) {
     return {
-      configHash,
+      configAndManagerHash,
       branchExists: true,
       prNo: branchPr?.number,
       result: BranchResult.PrCreated,
     };
   }
   return {
-    configHash,
+    configAndManagerHash,
     branchExists,
     prNo: branchPr?.number,
     result: BranchResult.Done,
