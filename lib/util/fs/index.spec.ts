@@ -221,6 +221,24 @@ describe('util/fs/index', () => {
 
           const result = await readLocalSymlink('test/test');
           expect(result).not.toBeNull();
+        },
+        {
+          unsafeCleanup: true,
+        }
+      );
+    });
+
+    it('return null when link not exists', async () => {
+      await withDir(
+        async (localDir) => {
+          GlobalConfig.set({
+            localDir: localDir.path,
+          });
+          await writeLocalFile('test/test.txt', '');
+          await fs.symlink(
+            resolve(localDir.path, 'test/test.txt'),
+            resolve(localDir.path, 'test/test')
+          );
 
           const notExistsResult = await readLocalSymlink('test/not-exists');
 
@@ -230,11 +248,6 @@ describe('util/fs/index', () => {
           unsafeCleanup: true,
         }
       );
-    });
-
-    it('does not throw', async () => {
-      // Does not work on FreeBSD: https://nodejs.org/docs/latest-v10.x/api/fs.html#fs_fs_readfile_path_options_callback
-      expect(await readLocalSymlink(__dirname)).toBeNull();
     });
   });
 

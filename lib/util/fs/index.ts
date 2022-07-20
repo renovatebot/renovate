@@ -46,16 +46,7 @@ export async function readLocalFile(
 export async function readLocalSymlink(
   fileName: string
 ): Promise<string | null> {
-  const { localDir } = GlobalConfig.get();
-  const localFileName = upath.resolve(localDir, fileName);
-  if (!localFileName.startsWith(upath.resolve(localDir))) {
-    logger.warn(
-      { localFileName, localDir },
-      'Preventing access to file outside the local directory'
-    );
-
-    return null;
-  }
+  const localFileName = ensureLocalPath(fileName);
   try {
     const linkContent = await fs.readlink(localFileName);
 
