@@ -455,9 +455,6 @@ export function getBranchCommit(branchName: string): CommitSha | null {
   return config.branchCommits[branchName] || null;
 }
 
-export function getCurrentBranchSha(): CommitSha | null {
-  return config.currentBranchSha || null;
-}
 // Return the parent commit SHA for a branch
 export async function getBranchParentSha(
   branchName: string
