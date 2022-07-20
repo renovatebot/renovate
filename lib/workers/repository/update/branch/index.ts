@@ -329,7 +329,7 @@ export async function processBranch(
         'Branch + PR exists but is not scheduled -- will update if necessary'
       );
     }
-
+    await checkoutBranch(config.baseBranch!);
     //stability checks
     if (
       config.upgrades.some(
@@ -459,7 +459,7 @@ export async function processBranch(
     } else {
       logger.debug('No updated lock files in branch');
     }
-    await checkoutBranch(config.baseBranch!);
+  
     const postUpgradeCommandResults = await executePostUpgradeCommands(config);
 
     if (postUpgradeCommandResults !== null) {
