@@ -1,5 +1,6 @@
 import { load } from 'js-yaml';
 import { logger } from '../../../logger';
+import { regEx } from '../../../util/regex';
 import { id as dockerVersioning } from '../../versioning/docker';
 import { getDep } from '../dockerfile/extract';
 import type { PackageDependency, PackageFile } from '../types';
@@ -8,6 +9,8 @@ import {
   matchesHelmValuesDockerHeuristic,
   matchesHelmValuesInlineImage,
 } from './util';
+
+let noQuotes = false;
 
 function getHelmDep({
   registry,
@@ -21,8 +24,13 @@ function getHelmDep({
   const dep = getDep(`${registry}${repository}:${tag}`, false);
   dep.replaceString = tag;
   dep.versioning = dockerVersioning;
-  dep.autoReplaceStringTemplate =
-    '{{newValue}}{{#if newDigest}}@{{newDigest}}{{/if}}';
+  if (noQuotes) {
+    dep.autoReplaceStringTemplate =
+      '"{{newValue}}{{#if newDigest}}@{{newDigest}}{{/if}}"';
+  } else {
+    dep.autoReplaceStringTemplate =
+      '{{newValue}}{{#if newDigest}}@{{newDigest}}{{/if}}';
+  }
   return dep;
 }
 
@@ -60,6 +68,9 @@ function findDependencies(
 export function extractPackageFile(content: string): PackageFile | null {
   let parsedContent: Record<string, unknown> | HelmDockerImageDependency;
   try {
+    if (regEx(/(?<tag>\s*tag:\s*)(?<ver>\d+.\d*)/g).test(content)) {
+      noQuotes = true;
+    }
     // a parser that allows extracting line numbers would be preferable, with
     // the current approach we need to match anything we find again during the update
     // TODO: fix me (#9610)
