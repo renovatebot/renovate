@@ -110,10 +110,10 @@ export function parseLinkHeader(
   return _parseLinkHeader(linkHeader);
 }
 
-// this method returns the path length of a url
+// this method returns path depth of a url
 // example : https://github.com/org/repo/nested-path
 // output : 3.  (org->repo->nested-path depth of this path is 3)
-export function subpathDepth(url: string | undefined): number {
+export function urlPathDepth(url: string | undefined): number {
   const parsedUrl = parseUrl(url);
   if (is.nullOrUndefined(parsedUrl)) {
     return 0;

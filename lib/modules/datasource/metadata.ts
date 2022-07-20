@@ -4,7 +4,13 @@ import parse from 'github-url-from-git';
 import { DateTime } from 'luxon';
 import * as hostRules from '../../util/host-rules';
 import { regEx } from '../../util/regex';
-import { parseUrl, validateUrl } from '../../util/url';
+import {
+  isGitHubUrl,
+  isGitLabUrl,
+  parseUrl,
+  urlPathDepth,
+  validateUrl,
+} from '../../util/url';
 import { manualChangelogUrls, manualSourceUrls } from './metadata-manual';
 import type { ReleaseResult } from './types';
 
@@ -131,8 +137,11 @@ export function addMetaData(
     if (parsedHomePage?.hostname.includes('github')) {
       if (!dep.sourceUrl) {
         dep.sourceUrl = dep.homepage;
+        if (urlPathDepth(dep.homepage) < 2) {
+          // remove homepage if its not a link to a path in a github repo.
+          delete dep.homepage;
+        }
       }
-      delete dep.homepage;
     }
   }
   const extraBaseUrls = [];

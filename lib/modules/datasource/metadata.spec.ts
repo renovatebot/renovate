@@ -257,7 +257,7 @@ describe('modules/datasource/metadata', () => {
     );
   });
 
-  it('Should delete homepage if its not a link to a github repo subpath', () => {
+  it('Should delete homepage if its not a link to a path in github repo', () => {
     const dep = {
       homepage: 'http://github.com/foo',
       releases: [
@@ -316,7 +316,7 @@ describe('modules/datasource/metadata', () => {
     });
   });
 
-  it('Should delete homepage if its same as sourceUrl after massage for gitlab', () => {
+  it('Should delete gitlab homepage if its same as sourceUrl after massage', () => {
     const dep = {
       homepage: 'https://gitlab.com/meno/',
       sourceUrl: 'https://gitlab.com/meno/',

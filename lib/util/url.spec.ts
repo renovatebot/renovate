@@ -4,12 +4,13 @@ import {
   ensureTrailingSlash,
   getQueryString,
   isGitHubUrl,
+  isGitLabUrl,
   joinUrlParts,
   parseLinkHeader,
   parseUrl,
   resolveBaseUrl,
-  subpathDepth,
   trimTrailingSlash,
+  urlPathDepth,
   validateUrl,
 } from './url';
 
@@ -171,17 +172,17 @@ describe('util/url', () => {
   });
 
   it('checks url path depth', () => {
-    expect(subpathDepth('https://github.com/repo/path')).toBe(2);
-    expect(subpathDepth('https://github.com/repo/path/nested/val')).toBe(4);
-    expect(subpathDepth('https://github.com/repo/path/nested/val?q=k')).toBe(4);
-    expect(subpathDepth('https://nlog-project.org/some/path?q=val')).toBe(2);
-    expect(subpathDepth('https://github.com/repo/')).toBe(1);
-    expect(subpathDepth('https://github.com/repo')).toBe(1);
-    expect(subpathDepth('https://github.com/')).toBe(0);
-    expect(subpathDepth('https://github.com')).toBe(0);
-    expect(subpathDepth('https://nlog-project.org?q=val')).toBe(0);
-    expect(subpathDepth(undefined)).toBe(0);
-    expect(subpathDepth('')).toBe(0);
+    expect(urlPathDepth('https://github.com/repo/path')).toBe(2);
+    expect(urlPathDepth('https://github.com/repo/path/nested/val')).toBe(4);
+    expect(urlPathDepth('https://github.com/repo/path/nested/val?q=k')).toBe(4);
+    expect(urlPathDepth('https://nlog-project.org/some/path?q=val')).toBe(2);
+    expect(urlPathDepth('https://github.com/repo/')).toBe(1);
+    expect(urlPathDepth('https://github.com/repo')).toBe(1);
+    expect(urlPathDepth('https://github.com/')).toBe(0);
+    expect(urlPathDepth('https://github.com')).toBe(0);
+    expect(urlPathDepth('https://nlog-project.org?q=val')).toBe(0);
+    expect(urlPathDepth(undefined)).toBe(0);
+    expect(urlPathDepth('')).toBe(0);
   });
 
   it('checks if its a github url', () => {
@@ -193,5 +194,16 @@ describe('util/url', () => {
     expect(isGitHubUrl('https://nlog-project.org/github.com')).toBeFalsy();
     expect(isGitHubUrl(undefined)).toBeFalsy();
     expect(isGitHubUrl('')).toBeFalsy();
+  });
+
+  it('checks if its a gitlab url', () => {
+    expect(isGitLabUrl('https://gitlab.com/')).toBeTruthy();
+    expect(isGitLabUrl('https://gitlab.com')).toBeTruthy();
+    expect(isGitLabUrl('http://www.gitlab.com')).toBeTruthy();
+    expect(isGitLabUrl('https://gitlab.com/org/path?q=val')).toBeTruthy();
+    expect(isGitLabUrl('https://nlog-project.org')).toBeFalsy();
+    expect(isGitLabUrl('https://nlog-project.org/gitlab.com')).toBeFalsy();
+    expect(isGitLabUrl(undefined)).toBeFalsy();
+    expect(isGitLabUrl('')).toBeFalsy();
   });
 });
