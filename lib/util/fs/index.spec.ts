@@ -221,6 +221,10 @@ describe('util/fs/index', () => {
 
           const result = await readLocalSymlink('test/test');
           expect(result).not.toBeNull();
+
+          const notExistsResult = await readLocalSymlink('test/not-exists');
+
+          expect(notExistsResult).toBeNull();
         },
         {
           unsafeCleanup: true,

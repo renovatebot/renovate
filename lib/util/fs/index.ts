@@ -183,22 +183,16 @@ export async function localPathIsFile(pathName: string): Promise<boolean> {
   }
 }
 
-export function localPathIsSymbolicLink(pathName: string): Promise<boolean> {
-  const { localDir } = GlobalConfig.get();
-  const localPath = upath.resolve(localDir, pathName);
-  if (!localPath.startsWith(upath.resolve(localDir))) {
-    logger.warn(
-      { localPath, localDir },
-      'Preventing access to file outside the local directory'
-    );
-
-    return Promise.resolve(false);
+export async function localPathIsSymbolicLink(
+  pathName: string
+): Promise<boolean> {
+  const path = ensureLocalPath(pathName);
+  try {
+    const s = await fs.lstat(path);
+    return s.isSymbolicLink();
+  } catch (_) {
+    return false;
   }
-
-  return fs
-    .lstat(localPath)
-    .then((s) => s.isSymbolicLink())
-    .catch(() => false);
 }
 
 /**
