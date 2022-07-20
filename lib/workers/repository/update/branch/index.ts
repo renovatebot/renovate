@@ -171,7 +171,6 @@ export async function processBranch(
       !config.isVulnerabilityAlert
     ) {
       logger.debug('Reached branch limit - skipping branch creation');
-
       return {
         configHash,
         branchExists,
@@ -185,7 +184,6 @@ export async function processBranch(
       !config.isVulnerabilityAlert
     ) {
       logger.debug('Reached commits limit - skipping branch');
-
       return {
         configHash,
         branchExists,
@@ -250,7 +248,6 @@ export async function processBranch(
                 platformOptions: getPlatformPrOptions(config),
               });
             }
-
             return {
               configHash,
               branchExists,
@@ -285,7 +282,6 @@ export async function processBranch(
             { oldPrNumber: oldPr.number, oldPrSha, branchSha },
             'Found old PR but the SHA is different'
           );
-
           return {
             configHash,
             branchExists,
@@ -413,7 +409,6 @@ export async function processBranch(
       config.reuseExistingBranch = false;
     } else if (branchExists && config.rebaseWhen === 'never') {
       logger.debug('rebaseWhen=never so skipping branch update check');
-
       return {
         configHash,
         branchExists,
@@ -459,7 +454,7 @@ export async function processBranch(
     } else {
       logger.debug('No updated lock files in branch');
     }
-  
+
     const postUpgradeCommandResults = await executePostUpgradeCommands(config);
 
     if (postUpgradeCommandResults !== null) {
@@ -513,7 +508,7 @@ export async function processBranch(
       branchExists &&
       (await isBranchConflicted(config.baseBranch!, config.branchName));
     config.forceCommit = forcedManually || config.isConflicted;
- 
+
     config.stopUpdating = branchPr?.labels?.includes(config.stopUpdatingLabel!);
 
     const prRebaseChecked = !!branchPr?.bodyStruct?.rebaseRequested;
@@ -524,11 +519,14 @@ export async function processBranch(
           'Branch updating is skipped because stopUpdatingLabel is present in config'
         );
         return {
+          configHash,
           branchExists: true,
           prNo: branchPr?.number,
           result: BranchResult.NoWork,
         };
-      
+      }
+    }
+
     const commitSha = await commitFilesToBranch(config);
     // istanbul ignore if
     if (branchPr && platform.refreshPr) {
@@ -560,7 +558,6 @@ export async function processBranch(
       config.prCreation !== 'immediate'
     ) {
       logger.debug({ commitSha }, `Branch status pending`);
-
       return {
         configHash,
         branchExists: true,
@@ -668,7 +665,6 @@ export async function processBranch(
       logger.warn('Error updating branch: update failure');
     } else if (err.message.startsWith('bundler-')) {
       // we have already warned inside the bundler artifacts error handling, so just return
-
       return {
         configHash,
         branchExists: true,
@@ -693,7 +689,6 @@ export async function processBranch(
       logger.warn({ err }, `Error updating branch`);
     }
     // Don't throw here - we don't want to stop the other renovations
-
     return {
       configHash,
       branchExists,
@@ -755,7 +750,6 @@ export async function processBranch(
         };
       }
       logger.warn({ prBlockedBy }, 'Unknown PrBlockedBy result');
-
       return {
         configHash,
         branchExists,
@@ -843,7 +837,6 @@ export async function processBranch(
       result: BranchResult.PrCreated,
     };
   }
-
   return {
     configHash,
     branchExists,
