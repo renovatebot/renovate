@@ -30,7 +30,7 @@ export interface BranchCache {
   sha: string | null;
   parentSha: string | null;
   upgrades: BranchUpgradeCache[];
-  configAndManagerHash?: string;
+  configAndManagersHash?: string;
 }
 
 export interface RepoCacheData {

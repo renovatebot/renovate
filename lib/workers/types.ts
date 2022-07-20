@@ -125,7 +125,7 @@ export interface BranchConfig
   prNo?: number;
   stopUpdating?: boolean;
   isConflicted?: boolean;
-  configAndManagerHash?: string;
+  configAndManagersHash?: string;
 }
 
 export interface WorkerExtractConfig
