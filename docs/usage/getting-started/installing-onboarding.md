@@ -135,13 +135,8 @@ If you want to make config edits directly, follow these steps:
 1. Validate your config by running `renovate-config-validator`
 1. If the improved config passes the validation, merge the branch into your mainline branch
 
-The validator program checks files based on multiple inputs:
-
-- Filenames as CLI arguments
-- `RENOVATE_CONFIG_FILE` environment variable
-- All [default locations](../configuration-options.md) if the files exist
-
-At the moment, all locations are validated without any precedence or deduplication.
+The validator program checks files passed as CLI arguments.
+If no argument is given, all [default locations](../configuration-options.md) (if files exist) and the `RENOVATE_CONFIG_FILE` environment variable are checked.
 
 You can configure a [pre-commit](https://pre-commit.com) hook to validate your configuration automatically.
 Please check out the [`renovatebot/pre-commit-hooks` repository](https://github.com/renovatebot/pre-commit-hooks) for more information.
