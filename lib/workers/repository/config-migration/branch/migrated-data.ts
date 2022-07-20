@@ -2,6 +2,7 @@ import detectIndent from 'detect-indent';
 import JSON5 from 'json5';
 import prettier from 'prettier';
 import { migrateConfig } from '../../../../config/migration';
+import type { RepositoryCacheConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
 import { platform } from '../../../../modules/platform';
 import { getCache } from '../../../../util/cache/repository';
@@ -13,6 +14,7 @@ export interface MigratedData {
   content: string;
   filename: string;
 }
+
 interface Indent {
   amount: number;
   indent: string;
@@ -66,8 +68,13 @@ export async function applyPrettierFormatting(
 export class MigratedDataFactory {
   // singleton
   private static data: MigratedData | null;
+  private static repoCacheEnabled: boolean;
 
-  public static async getAsync(): Promise<MigratedData | null> {
+  public static async getAsync(
+    repoCache: RepositoryCacheConfig = 'disabled'
+  ): Promise<MigratedData | null> {
+    this.repoCacheEnabled = repoCache !== 'disabled';
+
     if (this.data) {
       return this.data;
     }
@@ -103,7 +110,7 @@ export class MigratedDataFactory {
       const filename = rc.configFileName ?? '';
 
       let raw: string | null;
-      if (filename === getCache().configFileName) {
+      if (this.repoCacheEnabled && filename === getCache().configFileName) {
         raw = await platform.getRawFile(filename);
       } else {
         raw = await readLocalFile(filename, 'utf8');

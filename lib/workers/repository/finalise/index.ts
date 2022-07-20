@@ -17,7 +17,9 @@ export async function finaliseRepo(
   branchList: string[]
 ): Promise<void> {
   if (config.configMigration) {
-    const migratedConfigData = await MigratedDataFactory.getAsync();
+    const migratedConfigData = await MigratedDataFactory.getAsync(
+      config.repositoryCache
+    );
     const migrationBranch = await checkConfigMigrationBranch(
       config,
       migratedConfigData!

@@ -119,7 +119,7 @@ describe('workers/repository/config-migration/branch/migrated-data', () => {
         rawNonMigratedJson5
       );
       MigratedDataFactory.reset();
-      await expect(MigratedDataFactory.getAsync()).resolves.toEqual(
+      await expect(MigratedDataFactory.getAsync('enabled')).resolves.toEqual(
         migratedDataJson5
       );
     });
@@ -140,7 +140,7 @@ describe('workers/repository/config-migration/branch/migrated-data', () => {
       mockedFunction(getCache).mockReturnValue(repoData);
       mockedFunction(platform.getRawFile).mockRejectedValue(null);
       MigratedDataFactory.reset();
-      await expect(MigratedDataFactory.getAsync()).resolves.toBeNull();
+      await expect(MigratedDataFactory.getAsync('enabled')).resolves.toBeNull();
     });
 
     it('format and migrate a JSON config file', async () => {
