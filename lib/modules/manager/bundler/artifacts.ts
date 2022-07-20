@@ -1,4 +1,5 @@
 import { lt } from '@renovatebot/ruby-semver';
+import is from '@sindresorhus/is';
 import { quote } from 'shlex';
 import {
   BUNDLER_INVALID_CREDENTIALS,
@@ -61,6 +62,12 @@ export async function updateArtifacts(
     return null;
   }
 
+  const args = [
+    config.postUpdateOptions?.includes('bundlerConservative') &&
+      '--conservative',
+    '--update',
+  ].filter(is.nonEmptyString);
+
   try {
     await writeLocalFile(packageFileName, newPackageFileContent);
 
@@ -69,7 +76,7 @@ export async function updateArtifacts(
     if (config.isLockFileMaintenance) {
       cmd = 'bundler lock --update';
     } else {
-      cmd = `bundler lock --update ${updatedDeps
+      cmd = `bundler lock ${args.join(' ')} ${updatedDeps
         .map((dep) => `${dep.depName}`)
         .filter((dep) => dep !== 'ruby')
         .map(quote)

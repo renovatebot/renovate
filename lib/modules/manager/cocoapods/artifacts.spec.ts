@@ -9,7 +9,7 @@ import * as _datasource from '../../datasource';
 import type { UpdateArtifactsConfig } from '../types';
 import { updateArtifacts } from '.';
 
-jest.mock('child_process');
+jest.mock('../../../util/exec/common');
 jest.mock('../../../util/exec/env');
 jest.mock('../../../util/git');
 jest.mock('../../../util/fs');
@@ -205,7 +205,7 @@ describe('modules/manager/cocoapods/artifacts', () => {
     fs.getSiblingFileName.mockReturnValueOnce('Podfile.lock');
     fs.findLocalSiblingOrParent.mockResolvedValueOnce('Podfile.lock');
     fs.readLocalFile.mockResolvedValueOnce('Old Podfile.lock');
-    fs.outputFile.mockResolvedValueOnce(null as never);
+    fs.outputCacheFile.mockResolvedValueOnce();
     fs.findLocalSiblingOrParent.mockResolvedValueOnce('Podfile.lock');
     fs.readLocalFile.mockResolvedValueOnce('Old Podfile.lock');
     expect(

@@ -154,6 +154,7 @@ export async function initRepo({
   repository,
   cloneSubmodules,
   ignorePrAuthor,
+  gitUrl,
 }: RepoParams): Promise<RepoResult> {
   logger.debug(`initRepo("${JSON.stringify({ repository }, null, 2)}")`);
   const opts = hostRules.find({
@@ -189,17 +190,18 @@ export async function initRepo({
       throw new Error(REPOSITORY_EMPTY);
     }
 
-    const gitUrl = utils.getRepoGitUrl(
+    const url = utils.getRepoGitUrl(
       config.repositorySlug,
       // TODO #7154
       defaults.endpoint!,
+      gitUrl,
       info,
       opts
     );
 
     await git.initRepo({
       ...config,
-      url: gitUrl,
+      url,
       cloneSubmodules,
       fullClone: true,
     });

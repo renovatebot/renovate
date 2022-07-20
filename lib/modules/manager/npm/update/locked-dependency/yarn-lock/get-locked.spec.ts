@@ -1,9 +1,9 @@
 import { parseSyml } from '@yarnpkg/parsers';
-import { loadFixture } from '../../../../../../../test/util';
+import { Fixtures } from '../../../../../../../test/fixtures';
 import { getLockedDependencies } from './get-locked';
 
-const yarnLock1 = parseSyml(loadFixture('express.yarn.lock'));
-const yarnLock3 = parseSyml(loadFixture('3.yarn.lock'));
+const yarnLock1 = parseSyml(Fixtures.get('express.yarn.lock'));
+const yarnLock3 = parseSyml(Fixtures.get('3.yarn.lock'));
 
 describe('modules/manager/npm/update/locked-dependency/yarn-lock/get-locked', () => {
   describe('replaceConstraintVersion()', () => {
