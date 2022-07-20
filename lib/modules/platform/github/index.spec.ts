@@ -35,7 +35,7 @@ describe('modules/platform/github/index', () => {
     setBaseUrl(githubApiHost);
 
     git.branchExists.mockReturnValue(true);
-    git.isBranchStale.mockResolvedValue(true);
+    git.isBranchBehindBase.mockResolvedValue(true);
     git.getBranchCommit.mockReturnValue(
       '0d9c7726c3d628b7e28af234595cfd20febdbf8e'
     );
@@ -50,7 +50,7 @@ describe('modules/platform/github/index', () => {
   describe('initPlatform()', () => {
     it('should throw if no token', async () => {
       await expect(github.initPlatform({} as any)).rejects.toThrow(
-        'Init: You must configure a GitHub personal access token'
+        'Init: You must configure a GitHub token'
       );
     });
 
@@ -191,6 +191,34 @@ describe('modules/platform/github/index', () => {
         username: 'renovate-bot',
         gitAuthor: 'Renovate Bot',
         token: 'x-access-token:123test',
+      });
+      httpMock
+        .scope(githubApiHost)
+        .get('/installation/repositories?per_page=100')
+        .reply(200, {
+          repositories: [
+            {
+              full_name: 'a/b',
+            },
+            {
+              full_name: 'c/d',
+            },
+            null,
+          ],
+        });
+
+      const repos = await github.getRepos();
+      expect(repos).toStrictEqual(['a/b', 'c/d']);
+    });
+
+    it('should return an array of repos when using GitHub App Installation Token', async () => {
+      //Use Github App token
+      await github.initPlatform({
+        endpoint: githubApiHost,
+        username: 'self-hosted-renovate[bot]',
+        gitAuthor:
+          'Self-hosted Renovate Bot <123456+self-hosted-renovate[bot]@users.noreply.github.com>',
+        token: 'ghs_123test',
       });
       httpMock
         .scope(githubApiHost)
