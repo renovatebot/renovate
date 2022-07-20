@@ -134,9 +134,6 @@ export async function processBranch(
     logger.debug(`PR rebase requested=${config.rebaseRequested}`);
   }
   const artifactErrorTopic = emojify(':warning: Artifact update problem');
-  config.stopUpdating = branchPr?.labels?.includes(config.stopUpdatingLabel!);
-  const prRebaseChecked = !!branchPr?.bodyStruct?.rebaseRequested;
-
   try {
     // Check if branch already existed
     const existingPr = branchPr ? undefined : await prAlreadyExisted(config);
@@ -209,19 +206,6 @@ export async function processBranch(
       };
     }
     if (branchExists) {
-      if (dependencyDashboardCheck && config.stopUpdating) {
-        if (!prRebaseChecked) {
-          logger.info(
-            'Branch updating is skipped because stopUpdatingLabel is present in config'
-          );
-          return {
-            configHash,
-            branchExists: true,
-            prNo: branchPr?.number,
-            result: BranchResult.NoWork,
-          };
-        }
-      }
       if (doesBranchNeedUpdate(config, branchCache, configHash)) {
         return {
           configHash,
@@ -530,6 +514,23 @@ export async function processBranch(
       (await isBranchConflicted(config.baseBranch!, config.branchName));
     config.forceCommit = forcedManually || config.isConflicted;
 
+  config.stopUpdating = branchPr?.labels?.includes(config.stopUpdatingLabel!);
+  const prRebaseChecked = !!branchPr?.bodyStruct?.rebaseRequested;
+  
+  if (dependencyDashboardCheck && config.stopUpdating) {
+        if (!prRebaseChecked) {
+          logger.info(
+            'Branch updating is skipped because stopUpdatingLabel is present in config'
+          );
+          return {
+            configHash,
+            branchExists: true,
+            prNo: branchPr?.number,
+            result: BranchResult.NoWork,
+          };
+        }
+      }
+      
     const commitSha = await commitFilesToBranch(config);
     // istanbul ignore if
     if (branchPr && platform.refreshPr) {
