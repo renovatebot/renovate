@@ -1,6 +1,5 @@
 import { load } from 'js-yaml';
 import { logger } from '../../../logger';
-import { regEx } from '../../../util/regex';
 import { id as dockerVersioning } from '../../versioning/docker';
 import { getDep } from '../dockerfile/extract';
 import type { PackageDependency, PackageFile } from '../types';
@@ -10,23 +9,27 @@ import {
   matchesHelmValuesInlineImage,
 } from './util';
 
-let noQuotes = false;
+let tagIsNumber = false;
 
-function getHelmDep({
-  registry,
-  repository,
-  tag,
-}: {
-  registry: string;
-  repository: string;
-  tag: string;
-}): PackageDependency {
+function getHelmDep(
+  {
+    registry,
+    repository,
+    tag,
+  }: {
+    registry: string;
+    repository: string;
+    tag: string;
+  },
+  isNumber: boolean
+): PackageDependency {
   const dep = getDep(`${registry}${repository}:${tag}`, false);
   dep.replaceString = tag;
   dep.versioning = dockerVersioning;
-  if (noQuotes) {
+  if (isNumber) {
     dep.autoReplaceStringTemplate =
       '"{{newValue}}{{#if newDigest}}@{{newDigest}}{{/if}}"';
+    tagIsNumber = false;
   } else {
     dep.autoReplaceStringTemplate =
       '{{newValue}}{{#if newDigest}}@{{newDigest}}{{/if}}';
@@ -50,12 +53,19 @@ function findDependencies(
   Object.entries(parsedContent).forEach(([key, value]) => {
     if (matchesHelmValuesDockerHeuristic(key, value)) {
       const currentItem = value;
-
       let registry = currentItem.registry;
       registry = registry ? `${registry}/` : '';
       const repository = String(currentItem.repository);
+      if (
+        typeof currentItem.tag === 'number' ||
+        typeof currentItem.version === 'number'
+      ) {
+        tagIsNumber = true;
+      }
       const tag = `${currentItem.tag ?? currentItem.version}`;
-      packageDependencies.push(getHelmDep({ repository, tag, registry }));
+      packageDependencies.push(
+        getHelmDep({ registry, repository, tag }, tagIsNumber)
+      );
     } else if (matchesHelmValuesInlineImage(key, value)) {
       packageDependencies.push(getDep(value));
     } else {
@@ -68,9 +78,6 @@ function findDependencies(
 export function extractPackageFile(content: string): PackageFile | null {
   let parsedContent: Record<string, unknown> | HelmDockerImageDependency;
   try {
-    if (regEx(/(?<tag>\s*tag:\s*)(?<ver>\d+.\d*)/g).test(content)) {
-      noQuotes = true;
-    }
     // a parser that allows extracting line numbers would be preferable, with
     // the current approach we need to match anything we find again during the update
     // TODO: fix me (#9610)
