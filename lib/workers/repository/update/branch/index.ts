@@ -263,7 +263,6 @@ export async function processBranch(
         });
         if (!oldPr) {
           logger.debug('Branch has been edited but found no PR - skipping');
-
           return {
             configHash,
             branchExists,
@@ -454,7 +453,6 @@ export async function processBranch(
     } else {
       logger.debug('No updated lock files in branch');
     }
-
     const postUpgradeCommandResults = await executePostUpgradeCommands(config);
 
     if (postUpgradeCommandResults !== null) {
