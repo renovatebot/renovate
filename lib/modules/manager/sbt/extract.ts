@@ -248,9 +248,7 @@ function parseDepExpr(
     result.fileReplacePosition = variables[actualVar].lineIndex;
     result.groupName = actualVar;
     result.editFile = variables[actualVar].sourceFile;
-  }
-
-  if (globalVariables[getLastDotAnnotation(rawVersion)]) {
+  } else if (globalVariables[getLastDotAnnotation(rawVersion)]) {
     const actualVar = getLastDotAnnotation(rawVersion);
     result.fileReplacePosition = globalVariables[actualVar].lineIndex;
     result.groupName = actualVar;
@@ -460,8 +458,13 @@ function getLocalBaseDir(packageFiles: string[]): string {
 }
 
 function folderGroup(baseDir: string, packageFile: string): string {
-  const dirs = packageFile.replace(`${baseDir}/`, '').split('/');
   let group = '';
+  let dirs: string[] = [];
+  if (baseDir === '') {
+    dirs = packageFile.split('/');
+  } else {
+    dirs = packageFile.replace(baseDir, '').split('/').slice(1);
+  }
   if (dirs.length > 1) {
     group = dirs[0];
   }
@@ -475,8 +478,8 @@ export async function extractAllPackageFiles(
   // baseDir will group folder to lookup in it's scope
   const baseDir = getLocalBaseDir(packageFiles);
 
-  // Read packages and store in packageFilesContent
-  // const packageFilesContent: MapFilenameContent = {};
+  // Read packages and store in groupPackageFileContent
+  // group package file by its folder
   const groupPackageFileContent: GroupFilenameContent = {};
   for (const packageFile of packageFiles) {
     const content = await readLocalFile(packageFile, 'utf8');
@@ -491,22 +494,24 @@ export async function extractAllPackageFiles(
     groupPackageFileContent[group].push({ packageFile, content });
   }
 
-  // 1. variables from all package file
+  // 1. globalVariables from project/ and root package file
   // 2. registry from all package file
   // 3. Project's scalaVersion - use in parseDepExpr to add suffix eg. "_2.13"
   const { globalVariables, registryUrls, scalaVersion } =
     prepareLoadPackageFiles(_config, [
       ...groupPackageFileContent[''], // root
-      ...groupPackageFileContent['project'], // in project/ folder
+      ...(groupPackageFileContent['project']
+        ? groupPackageFileContent['project']
+        : []), // in project/ folder
     ]);
 
-  // package might appear in multiple files but at the end only update 1 single place
-  // So merge them in filename
-  const mapDepsToVariableFile: Record<string, PackageDependency[]> = {};
+  const mapDepsToPackageFile: Record<string, PackageDependency[]> = {};
   // Start extract all package files
   for (const [, packageFileContents] of Object.entries(
     groupPackageFileContent
   )) {
+    // Extract package file by its group
+    // local variable is share within its group
     for (const { packageFile, content } of packageFileContents) {
       const res = extractFile(content, {
         registryUrls,
@@ -520,11 +525,11 @@ export async function extractAllPackageFiles(
           for (const dep of res.deps) {
             const variableSourceFile = dep?.editFile ?? packageFile;
             dep.registryUrls = [...new Set(dep.registryUrls)];
-            if (!mapDepsToVariableFile[variableSourceFile]) {
-              mapDepsToVariableFile[variableSourceFile] = [];
+            if (!mapDepsToPackageFile[variableSourceFile]) {
+              mapDepsToPackageFile[variableSourceFile] = [];
             }
             // merge dep by file
-            mapDepsToVariableFile[variableSourceFile].push(dep);
+            mapDepsToPackageFile[variableSourceFile].push(dep);
           }
         }
       }
@@ -535,7 +540,7 @@ export async function extractAllPackageFiles(
   // As we merge all package to single package file
   // Packages are counted in submodule but it's the same one
   // by packageName and currentValue
-  const finalPackages = Object.entries(mapDepsToVariableFile).map(
+  const finalPackages = Object.entries(mapDepsToPackageFile).map(
     ([packageFile, deps]) => ({
       packageFile,
       deps: deps.filter(
