@@ -490,12 +490,7 @@ export class DockerDatasource extends Datasource {
       if (err instanceof ExternalHostError) {
         throw err;
       }
-      if (err.statusCode === 400 || err.statusCode === 401) {
-        logger.debug(
-          { registryHost, dockerRepository, err },
-          'Unauthorized docker lookup'
-        );
-      } else if (err.statusCode === 404) {
+      if (err.statusCode === 404) {
         logger.warn(
           {
             err,
@@ -506,26 +501,6 @@ export class DockerDatasource extends Datasource {
           'Image configuration is unknown'
         );
         return null;
-      } else if (err.statusCode === 429 && isDockerHost(registryHost)) {
-        logger.warn({ err }, 'docker registry failure: too many requests');
-      } else if (err.statusCode >= 500 && err.statusCode < 600) {
-        logger.debug(
-          {
-            err,
-            registryHost,
-            dockerRepository,
-            configDigest,
-          },
-          'docker registry failure: internal error'
-        );
-      } else if (
-        err.code === 'ERR_TLS_CERT_ALTNAME_INVALID' ||
-        err.code === 'ETIMEDOUT'
-      ) {
-        logger.debug(
-          { registryHost, err },
-          'Error connecting to docker registry'
-        );
       } else {
         logger.info(
           { registryHost, dockerRepository, configDigest, err },
@@ -693,11 +668,11 @@ export class DockerDatasource extends Datasource {
           return architecture;
         }
       }
-    } catch (err) /* istanbul ignore next: should be tested in future */ {
+    } catch (err) /* istanbul ignore next */ {
       if (err instanceof ExternalHostError) {
         throw err;
       }
-      logger.info(
+      logger.debug(
         { registryHost, dockerRepository, currentDigest, err },
         'Unknown error getting image architecture'
       );
