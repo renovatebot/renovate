@@ -3,23 +3,7 @@ import type { HttpResponse } from '../../../util/http/types';
 import * as perlVersioning from '../../versioning/perl';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
-
-type MetaCpanResult = {
-  hits: {
-    hits: {
-      _source: {
-        module: {
-          name: string;
-          version?: string;
-        }[];
-        distribution: string;
-        date: string;
-        deprecated: boolean;
-        maturity: string;
-      };
-    }[];
-  };
-};
+import type { MetaCpanResult } from './types';
 
 export class CpanDatasource extends Datasource {
   static readonly id = 'cpan';
