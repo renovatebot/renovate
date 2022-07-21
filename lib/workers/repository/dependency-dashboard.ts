@@ -16,6 +16,7 @@ interface DependencyDashboard {
   dependencyDashboardAllPending: boolean;
   dependencyDashboardAllRateLimited: boolean;
 }
+
 function checkOpenAllRateLimitedPR(issueBody: string): boolean {
   return issueBody.includes(' - [x] <!-- open-all-rate-limited-prs -->');
 }
@@ -23,6 +24,7 @@ function checkOpenAllRateLimitedPR(issueBody: string): boolean {
 function checkApproveAllPendingPR(issueBody: string): boolean {
   return issueBody.includes(' - [x] <!-- approve-all-pending-prs -->');
 }
+
 function selectAllRelevantBranches(issueBody: string): string[] {
   const checkedBranches = [];
   if (checkOpenAllRateLimitedPR(issueBody)) {
@@ -30,7 +32,6 @@ function selectAllRelevantBranches(issueBody: string): string[] {
     const checkedRate = issueBody.match(regEx(checkMatchRate, 'g')) ?? [];
     checkedBranches.push(...checkedRate);
   }
-
   if (checkApproveAllPendingPR(issueBody)) {
     const checkMatchPendingApproval =
       ' - \\[ \\] <!-- approve-branch=([^\\s]+) -->';
