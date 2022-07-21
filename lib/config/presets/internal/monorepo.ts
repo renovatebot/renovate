@@ -17,6 +17,8 @@ const repoGroups = {
   'angular-eslint': 'https://github.com/angular-eslint/angular-eslint',
   angularfire: 'https://github.com/angular/angularfire',
   angularjs: 'https://github.com/angular/angular.js',
+  'applicationinsights-dotnet':
+    'https://github.com/Microsoft/ApplicationInsights-dotnet',
   'apollo-server': 'https://github.com/apollographql/apollo-server',
   apolloclient: 'https://github.com/apollographql/apollo-client',
   'arcus.background-jobs':
