@@ -1,3 +1,5 @@
+import is from '@sindresorhus/is';
+import hasha from 'hasha';
 import {
   defaultConfig,
   fs,
@@ -13,6 +15,7 @@ import {
   REPOSITORY_CHANGED,
 } from '../../../../constants/error-messages';
 import { logger } from '../../../../logger';
+import { hashMap } from '../../../../modules/manager';
 import * as _npmPostExtract from '../../../../modules/manager/npm/post-update';
 import type { WriteExistingFilesResult } from '../../../../modules/manager/npm/post-update/types';
 import { hashBody } from '../../../../modules/platform/pr-body';
@@ -80,6 +83,14 @@ function findFileContent(
   return null;
 }
 
+function managersHash(config: BranchConfig): string {
+  return hasha(
+    config.upgrades
+      .map((upgrade) => hashMap.get(upgrade.manager) ?? upgrade.manager)
+      .filter(is.string)
+  );
+}
+
 describe('workers/repository/update/branch/index', () => {
   describe('processBranch', () => {
     const updatedPackageFiles: PackageFilesResult = {
@@ -132,6 +143,10 @@ describe('workers/repository/update/branch/index', () => {
         branchExists: false,
         prNo: undefined,
         result: 'not-scheduled',
+        configAndManagersHash: hasha([
+          JSON.stringify(config),
+          managersHash(config),
+        ]),
       });
     });
 
@@ -144,6 +159,10 @@ describe('workers/repository/update/branch/index', () => {
         branchExists: true,
         prNo: undefined,
         result: 'update-not-scheduled',
+        configAndManagersHash: hasha([
+          JSON.stringify(config),
+          managersHash(config),
+        ]),
       });
     });
 
@@ -167,6 +186,10 @@ describe('workers/repository/update/branch/index', () => {
         branchExists: false,
         prNo: undefined,
         result: 'pending',
+        configAndManagersHash: hasha([
+          JSON.stringify(config),
+          managersHash(config),
+        ]),
       });
     });
 
@@ -184,6 +207,10 @@ describe('workers/repository/update/branch/index', () => {
         branchExists: false,
         prNo: undefined,
         result: 'pending',
+        configAndManagersHash: hasha([
+          JSON.stringify(config),
+          managersHash(config),
+        ]),
       });
     });
 
@@ -202,6 +229,10 @@ describe('workers/repository/update/branch/index', () => {
         branchExists: false,
         prNo: undefined,
         result: 'error',
+        configAndManagersHash: hasha([
+          JSON.stringify(config),
+          managersHash(config),
+        ]),
       });
     });
 
@@ -220,6 +251,10 @@ describe('workers/repository/update/branch/index', () => {
         branchExists: false,
         prNo: undefined,
         result: 'error',
+        configAndManagersHash: hasha([
+          JSON.stringify(config),
+          managersHash(config),
+        ]),
       });
     });
 
@@ -306,6 +341,10 @@ describe('workers/repository/update/branch/index', () => {
         branchExists: true,
         prNo: undefined,
         result: 'error',
+        configAndManagersHash: hasha([
+          JSON.stringify(config),
+          managersHash(config),
+        ]),
       });
     });
 
@@ -326,6 +365,10 @@ describe('workers/repository/update/branch/index', () => {
         branchExists: true,
         prNo: undefined,
         result: 'pr-edited',
+        configAndManagersHash: hasha([
+          JSON.stringify(config),
+          managersHash(config),
+        ]),
       });
     });
 
@@ -347,6 +390,10 @@ describe('workers/repository/update/branch/index', () => {
         branchExists: true,
         prNo: undefined,
         result: 'pr-edited',
+        configAndManagersHash: hasha([
+          JSON.stringify(config),
+          managersHash(config),
+        ]),
       });
     });
 
@@ -371,6 +418,10 @@ describe('workers/repository/update/branch/index', () => {
         branchExists: true,
         prNo: undefined,
         result: 'error',
+        configAndManagersHash: hasha([
+          JSON.stringify(config),
+          managersHash(config),
+        ]),
       });
     });
 
@@ -384,6 +435,10 @@ describe('workers/repository/update/branch/index', () => {
         branchExists: true,
         prNo: undefined,
         result: 'pr-edited',
+        configAndManagersHash: hasha([
+          JSON.stringify(config),
+          managersHash(config),
+        ]),
       });
     });
 
@@ -401,6 +456,10 @@ describe('workers/repository/update/branch/index', () => {
         branchExists: false,
         prNo: undefined,
         result: 'branch-limit-reached',
+        configAndManagersHash: hasha([
+          JSON.stringify(config),
+          managersHash(config),
+        ]),
       });
     });
 
@@ -422,6 +481,10 @@ describe('workers/repository/update/branch/index', () => {
         branchExists: true,
         prBlockedBy: 'RateLimited',
         result: 'pr-limit-reached',
+        configAndManagersHash: hasha([
+          JSON.stringify(config),
+          managersHash(config),
+        ]),
       });
     });
 
@@ -440,6 +503,10 @@ describe('workers/repository/update/branch/index', () => {
         branchExists: false,
         prNo: undefined,
         result: 'commit-limit-reached',
+        configAndManagersHash: hasha([
+          JSON.stringify(config),
+          managersHash(config),
+        ]),
       });
     });
 
@@ -457,6 +524,10 @@ describe('workers/repository/update/branch/index', () => {
         branchExists: false,
         prNo: undefined,
         result: 'no-work',
+        configAndManagersHash: hasha([
+          JSON.stringify(config),
+          managersHash(config),
+        ]),
       });
     });
 
@@ -473,6 +544,10 @@ describe('workers/repository/update/branch/index', () => {
         branchExists: false,
         prNo: undefined,
         result: 'pending',
+        configAndManagersHash: hasha([
+          JSON.stringify(config),
+          managersHash(config),
+        ]),
       });
     });
 
@@ -547,6 +622,10 @@ describe('workers/repository/update/branch/index', () => {
         branchExists: true,
         prBlockedBy: 'NeedsApproval',
         result: 'needs-pr-approval',
+        configAndManagersHash: hasha([
+          JSON.stringify(config),
+          managersHash(config),
+        ]),
       });
     });
 
@@ -570,6 +649,10 @@ describe('workers/repository/update/branch/index', () => {
         branchExists: true,
         prBlockedBy: 'AwaitingTests',
         result: 'pending',
+        configAndManagersHash: hasha([
+          JSON.stringify(config),
+          managersHash(config),
+        ]),
       });
     });
 
@@ -593,6 +676,10 @@ describe('workers/repository/update/branch/index', () => {
         branchExists: true,
         prBlockedBy: 'BranchAutomerge',
         result: 'done',
+        configAndManagersHash: hasha([
+          JSON.stringify(config),
+          managersHash(config),
+        ]),
       });
     });
 
@@ -616,6 +703,10 @@ describe('workers/repository/update/branch/index', () => {
         branchExists: true,
         prBlockedBy: 'Error',
         result: 'error',
+        configAndManagersHash: hasha([
+          JSON.stringify(config),
+          managersHash(config),
+        ]),
       });
     });
 
@@ -639,6 +730,10 @@ describe('workers/repository/update/branch/index', () => {
         branchExists: true,
         prBlockedBy: 'whoops',
         result: 'error',
+        configAndManagersHash: hasha([
+          JSON.stringify(config),
+          managersHash(config),
+        ]),
       });
     });
 
@@ -651,16 +746,19 @@ describe('workers/repository/update/branch/index', () => {
         artifactErrors: [],
         updatedArtifacts: [partial<FileChange>({})],
       } as WriteExistingFilesResult);
-      expect(
-        await branchWorker.processBranch({
-          ...config,
-          ignoreTests: true,
-          prCreation: 'not-pending',
-        })
-      ).toEqual({
+      const testConfig = {
+        ...config,
+        ignoreTests: true,
+        prCreation: 'not-pending',
+      } as BranchConfig;
+      expect(await branchWorker.processBranch(testConfig)).toEqual({
         branchExists: true,
         prNo: undefined,
         result: 'pending',
+        configAndManagersHash: hasha([
+          JSON.stringify(testConfig),
+          managersHash(testConfig),
+        ]),
       });
 
       expect(automerge.tryBranchAutomerge).toHaveBeenCalledTimes(0);
@@ -732,15 +830,18 @@ describe('workers/repository/update/branch/index', () => {
       );
       prAutomerge.checkAutoMerge.mockResolvedValueOnce({ automerged: false });
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
-      await expect(
-        branchWorker.processBranch({
-          ...config,
-          automerge: true,
-          rebaseWhen: 'conflicted',
-        })
-      ).resolves.toEqual({
+      const testConfig = {
+        ...config,
+        automerge: true,
+        rebaseWhen: 'conflicted',
+      };
+      await expect(branchWorker.processBranch(testConfig)).resolves.toEqual({
         branchExists: true,
         result: BranchResult.NotScheduled,
+        configAndManagersHash: hasha([
+          JSON.stringify(testConfig),
+          managersHash(testConfig),
+        ]),
       });
       expect(logger.debug).toHaveBeenCalledWith(
         'Branch cannot automerge now because automergeSchedule is off schedule - skipping'
@@ -1700,17 +1801,20 @@ describe('workers/repository/update/branch/index', () => {
           state: PrState.Open,
         })
       );
-      expect(
-        await branchWorker.processBranch({
-          ...config,
-          branchName: 'new/some-branch',
-          branchPrefix: 'new/',
-          branchPrefixOld: 'old/',
-        })
-      ).toEqual({
+      const testConfig = {
+        ...config,
+        branchName: 'new/some-branch',
+        branchPrefix: 'new/',
+        branchPrefixOld: 'old/',
+      };
+      expect(await branchWorker.processBranch(testConfig)).toEqual({
         branchExists: true,
         prNo: undefined,
         result: 'done',
+        configAndManagersHash: hasha([
+          JSON.stringify(testConfig),
+          managersHash(testConfig),
+        ]),
       });
       expect(logger.debug).toHaveBeenCalledWith('Found existing branch PR');
       expect(logger.debug).toHaveBeenCalledWith(

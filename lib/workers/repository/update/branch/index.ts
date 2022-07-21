@@ -104,9 +104,9 @@ export async function processBranch(
   let config: BranchConfig = { ...branchConfig };
   logger.trace({ config }, 'processBranch()');
   const managersHash = hasha(
-    config.upgrades.map(
-      (upgrade) => hashMap.get(upgrade.manager) ?? upgrade.manager
-    )
+    config.upgrades
+      .map((upgrade) => hashMap.get(upgrade.manager) ?? upgrade.manager)
+      .filter(is.string)
   );
   const configAndManagersHash = hasha([JSON.stringify(config), managersHash]);
   let branchExists = gitBranchExists(config.branchName);
