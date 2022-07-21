@@ -15,6 +15,7 @@ jest.mock('../../../util/host-rules');
 const adminConfig: RepoGlobalConfig = {
   // `join` fixes Windows CI
   localDir: join('/tmp/github/some/repo'),
+  cacheDir: join('/tmp/cache'),
 };
 
 const config: UpdateArtifactsConfig = {};
