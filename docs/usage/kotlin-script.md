@@ -21,5 +21,14 @@ println("Hello world!")
 // ...
 ```
 
-By default, Renovate scans files with `.main.kts` extension. There are cases where just `.kts` extension or no extension
-is used, and in that case Renovate can be configured to scan also these.
+By default, Renovate scans files only with `.main.kts` extension and not `.kts`, to avoid ambiguity with Gradle config
+files that have `.gradle.kts` extension. As there are cases where just `.kts` extension or no extension is used,
+Renovate can be [configured](https://docs.renovatebot.com/configuration-options/) to scan also these:
+
+```json
+{
+  "kotlin-script": {
+    "fileMatch": ["^.*\\.kts$"]
+  }
+}
+```
