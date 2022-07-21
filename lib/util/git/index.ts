@@ -28,6 +28,7 @@ import type { GitProtocol } from '../../types/git';
 import { Limit, incLimitedValue } from '../../workers/global/limits';
 import { newlineRegex, regEx } from '../regex';
 import { parseGitAuthor } from './author';
+import { getCachedBehindBaseResult } from './behind-base-branch-cache';
 import { getNoVerify, simpleGitConfig } from './config';
 import {
   getCachedConflictResult,
@@ -550,6 +551,13 @@ export function getBranchList(): string[] {
 }
 
 export async function isBranchBehindBase(branchName: string): Promise<boolean> {
+  const { currentBranchSha } = config;
+
+  let isBehind = getCachedBehindBaseResult(branchName, currentBranchSha);
+  if (isBehind !== null) {
+    return isBehind;
+  }
+
   await syncGit();
   try {
     const { currentBranchSha, currentBranch } = config;
@@ -559,7 +567,7 @@ export async function isBranchBehindBase(branchName: string): Promise<boolean> {
       '--contains',
       config.currentBranchSha,
     ]);
-    const isBehind = !branches.all.map(localName).includes(branchName);
+    isBehind = !branches.all.map(localName).includes(branchName);
     logger.debug(
       { isBehind, currentBranch, currentBranchSha },
       `isBranchBehindBase=${isBehind}`
