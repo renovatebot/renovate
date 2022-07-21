@@ -1,4 +1,4 @@
-export interface MetaCpanResult {
+export interface MetaCpanSearchResult {
   hits: {
     hits: {
       _source: {
