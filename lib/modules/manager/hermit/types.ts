@@ -1,14 +1,8 @@
-import type { SpawnSyncReturns } from 'child_process';
-
 export interface HermitListItem {
   Name: string;
-  Version?: string;
-  Channel?: string;
+  Version: string;
+  Channel: string;
 }
-
-export interface UpdateHermitError<T>
-  extends SpawnSyncReturns<T>,
-    UpdateHermitResult {}
 
 export interface UpdateHermitResult {
   from: string;

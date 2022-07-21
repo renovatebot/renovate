@@ -105,17 +105,6 @@ function getDeleteResult(path: string): UpdateArtifactsResult {
 }
 
 /**
- * flattern records for modified and renamed records,
- * which has both deleted and added files in the array
- */
-function flattern(arr: UpdateArtifactsResult[][]): UpdateArtifactsResult[] {
-  return arr.reduce(
-    (acc, nested) => [...acc, ...nested],
-    [] as UpdateArtifactsResult[]
-  );
-}
-
-/**
  * getUpdateResult will return the update result after `hermit install`
  * has been performed for all packages
  */
