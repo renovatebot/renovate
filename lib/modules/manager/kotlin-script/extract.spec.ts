@@ -1,16 +1,20 @@
 import { Fixtures } from '../../../../test/fixtures';
 import { extractPackageFile } from '.';
 
-const genericCaseFileContent = Fixtures.get('generic-case.main.kts');
+const genericCaseMainKtsFileContent = Fixtures.get('generic-case.main.kts');
+const genericCaseKtsFileContent = Fixtures.get('generic-case.kts');
 const customRepositoriesFileContent = Fixtures.get(
   'custom-repositories.main.kts'
 );
 
 describe('modules/manager/kotlin-script/extract', () => {
   describe('extractPackageFile()', () => {
-    it('extracts dependencies in a generic case', () => {
+    it('extracts dependencies in a generic case - .main.kts', () => {
       // when
-      const packageFile = extractPackageFile(genericCaseFileContent);
+      const packageFile = extractPackageFile(
+        genericCaseMainKtsFileContent,
+        'generic-case.main.kts'
+      );
 
       // then
       expect(packageFile?.deps).toEqual([
@@ -39,9 +43,31 @@ describe('modules/manager/kotlin-script/extract', () => {
       ]);
     });
 
-    it('detects custom repository definitions', () => {
+    it('extracts dependencies in a generic case - .kts', () => {
       // when
-      const packageFile = extractPackageFile(customRepositoriesFileContent);
+      const packageFile = extractPackageFile(
+        genericCaseKtsFileContent,
+        'generic-case.kts'
+      );
+
+      // then
+      expect(packageFile?.deps).toEqual([
+        {
+          depName: 'it.krzeminski:github-actions-kotlin-dsl',
+          currentValue: '0.22.0',
+          replaceString: '"it.krzeminski:github-actions-kotlin-dsl:0.22.0"',
+          datasource: 'maven',
+          registryUrls: null,
+        },
+      ]);
+    });
+
+    it('detects custom repository definitions - .main.kts', () => {
+      // when
+      const packageFile = extractPackageFile(
+        customRepositoriesFileContent,
+        'custom-repositories.main.kts'
+      );
 
       // then
       expect(packageFile?.deps).toEqual([
@@ -67,6 +93,25 @@ describe('modules/manager/kotlin-script/extract', () => {
           ],
         },
       ]);
+    });
+
+    it('ignores build.gradle.kts file', () => {
+      // when
+      const packageFile = extractPackageFile('irrelevant', 'build.gradle.kts');
+
+      // then
+      expect(packageFile).toBeNull();
+    });
+
+    it('ignores settings.gradle.kts file', () => {
+      // when
+      const packageFile = extractPackageFile(
+        'irrelevant',
+        'settings.gradle.kts'
+      );
+
+      // then
+      expect(packageFile).toBeNull();
     });
   });
 });

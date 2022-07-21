@@ -7,7 +7,7 @@ import * as gradleVersioning from '../../versioning/gradle';
 export const language = ProgrammingLanguage.Kotlin;
 
 export const defaultConfig = {
-  fileMatch: ['^.*\\.main\\.kts$'],
+  fileMatch: ['^.*\\.kts$'],
   versioning: gradleVersioning.id,
 };
 

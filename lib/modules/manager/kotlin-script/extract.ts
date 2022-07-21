@@ -9,7 +9,14 @@ const repositoryRegex = regEx(
   /@file\s*:\s*Repository\s*\(\s*"(?<repositoryName>.*)"\s*\)/g
 );
 
-export function extractPackageFile(fileContent: string): PackageFile | null {
+export function extractPackageFile(
+  fileContent: string,
+  packageFile: string
+): PackageFile | null {
+  if (packageFile.endsWith('.gradle.kts')) {
+    return null;
+  }
+
   const registryUrls: string[] = [...fileContent.matchAll(repositoryRegex)]
     .map((match) => {
       return match.groups?.repositoryName;
