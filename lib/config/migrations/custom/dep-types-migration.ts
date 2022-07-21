@@ -3,6 +3,7 @@ import type { PackageRule, PackageRuleInputConfig } from '../../types';
 import { AbstractMigration } from '../base/abstract-migration';
 
 interface DepTypesRule extends PackageRule, PackageRuleInputConfig {}
+
 export class DepTypesMigration extends AbstractMigration {
   override readonly deprecated = true;
   override readonly propertyName =
