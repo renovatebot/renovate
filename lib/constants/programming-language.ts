@@ -6,7 +6,6 @@ export enum ProgrammingLanguage {
   Golang = 'golang',
   Java = 'java',
   JavaScript = 'js',
-  Kotlin = 'kotlin',
   NET = 'dotnet',
   NodeJS = 'node',
   PHP = 'php',
