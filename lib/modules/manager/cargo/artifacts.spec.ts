@@ -18,6 +18,7 @@ const config: UpdateArtifactsConfig = {};
 const adminConfig: RepoGlobalConfig = {
   // `join` fixes Windows CI
   localDir: join('/tmp/github/some/repo'),
+  cacheDir: join('/tmp/cache'),
 };
 
 describe('modules/manager/cargo/artifacts', () => {
