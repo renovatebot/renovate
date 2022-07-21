@@ -180,7 +180,7 @@ export async function localPathIsSymbolicLink(
   const path = ensureLocalPath(pathName);
   try {
     const s = await fs.lstat(path);
-    return s?.isSymbolicLink() ?? false;
+    return s.isSymbolicLink();
   } catch (_) {
     return false;
   }
