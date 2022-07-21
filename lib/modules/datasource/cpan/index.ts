@@ -32,7 +32,7 @@ export class CpanDatasource extends Datasource {
     }
 
     let result: ReleaseResult | null = null;
-    const pkgUrl = `${registryUrl}v1/file/_search`;
+    const searchUrl = `${registryUrl}v1/file/_search`;
 
     let raw: HttpResponse<MetaCpanSearchResult> | null = null;
     try {
@@ -58,7 +58,7 @@ export class CpanDatasource extends Datasource {
         ],
         sort: [{ date: 'desc' }],
       };
-      raw = await this.http.postJson<MetaCpanSearchResult>(pkgUrl, { body });
+      raw = await this.http.postJson<MetaCpanSearchResult>(searchUrl, { body });
     } catch (err) {
       this.handleGenericErrors(err);
     }
