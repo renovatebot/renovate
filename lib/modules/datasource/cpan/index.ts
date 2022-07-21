@@ -68,36 +68,33 @@ export class CpanDatasource extends Datasource {
     const body = raw?.body;
     if (body) {
       const hits = body.hits.hits;
-      const releases = hits.reduce(
-        (acc: (Release & { distribution: string })[], { _source }) => {
-          const {
+      const releases: (Release & { distribution: string })[] = [];
+      for (const hit of hits) {
+        const {
+          _source: {
             module,
             distribution,
             date: releaseTimestamp,
             deprecated: isDeprecated,
             maturity,
-          } = _source;
-
-          const version = module.find(
-            ({ name }) => name === packageName
-          )?.version;
-          if (version) {
-            // https://metacpan.org/pod/CPAN::DistnameInfo#maturity
-            const isStable = maturity === 'released';
-            acc.push({
-              distribution,
-              // Release properties
-              isDeprecated,
-              isStable,
-              releaseTimestamp,
-              version,
-            });
-          }
-
-          return acc;
-        },
-        []
-      );
+          },
+        } = hit;
+        const version = module.find(
+          ({ name }) => name === packageName
+        )?.version;
+        if (version) {
+          // https://metacpan.org/pod/CPAN::DistnameInfo#maturity
+          const isStable = maturity === 'released';
+          releases.push({
+            distribution,
+            // Release properties
+            isDeprecated,
+            isStable,
+            releaseTimestamp,
+            version,
+          });
+        }
+      }
       if (releases.length > 0) {
         const latest = releases[0];
         result = {
