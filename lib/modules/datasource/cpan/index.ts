@@ -3,7 +3,7 @@ import type { HttpResponse } from '../../../util/http/types';
 import * as perlVersioning from '../../versioning/perl';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
-import type { MetaCpanSearchResult } from './types';
+import type { MetaCpanFileSearchResult } from './types';
 
 export class CpanDatasource extends Datasource {
   static readonly id = 'cpan';
@@ -34,7 +34,7 @@ export class CpanDatasource extends Datasource {
     let result: ReleaseResult | null = null;
     const searchUrl = `${registryUrl}v1/file/_search`;
 
-    let raw: HttpResponse<MetaCpanSearchResult> | null = null;
+    let raw: HttpResponse<MetaCpanFileSearchResult> | null = null;
     try {
       const body = {
         query: {
@@ -58,7 +58,9 @@ export class CpanDatasource extends Datasource {
         ],
         sort: [{ date: 'desc' }],
       };
-      raw = await this.http.postJson<MetaCpanSearchResult>(searchUrl, { body });
+      raw = await this.http.postJson<MetaCpanFileSearchResult>(searchUrl, {
+        body,
+      });
     } catch (err) {
       this.handleGenericErrors(err);
     }
