@@ -12,7 +12,7 @@ import { get } from '../../versioning';
 import * as mavenVersioning from '../../versioning/maven';
 import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
 import type {
-  MapFilenameContent,
+  GroupFilenameContent,
   ParseContext,
   ParseOptions,
   VariableContext,
@@ -146,7 +146,7 @@ function parseDepExpr(
   expr: string,
   ctx: ParseContext
 ): PackageDependency | null {
-  const { scalaVersion, variables, lineIndex } = ctx;
+  const { scalaVersion, variables, lineIndex, globalVariables } = ctx;
   let { depType } = ctx;
 
   const getLastDotAnnotation = (longVar: string): string =>
@@ -154,15 +154,24 @@ function parseDepExpr(
 
   const isValidToken = (str: string): boolean =>
     isStringLiteral(str) ||
-    (isVarName(str) && !!variables[getLastDotAnnotation(str)]);
+    (isVarName(str) &&
+      (Boolean(variables[getLastDotAnnotation(str)]) ||
+        Boolean(globalVariables[getLastDotAnnotation(str)])));
 
   const resolveToken = (str: string): string => {
     if (isStringLiteral(str)) {
       return str.replace(regEx(/^"/), '').replace(regEx(/"$/), '');
     }
-    const variable = variables[getLastDotAnnotation(str)];
-    ctx.lookupVariableFile = variable.sourceFile;
-    return variable.val;
+    const varName = getLastDotAnnotation(str);
+    if (variables[varName]) {
+      ctx.lookupVariableFile = variables[varName].sourceFile;
+      return variables[varName].val;
+    }
+    if (globalVariables[varName]) {
+      ctx.lookupVariableFile = globalVariables[varName].sourceFile;
+      return globalVariables[varName].val;
+    }
+    return str;
   };
 
   const tokens = expr
@@ -235,10 +244,17 @@ function parseDepExpr(
   }
 
   if (variables[getLastDotAnnotation(rawVersion)]) {
-    result.fileReplacePosition =
-      variables[getLastDotAnnotation(rawVersion)].lineIndex;
-    result.groupName = `${getLastDotAnnotation(rawVersion)}`;
-    result.editFile = variables[getLastDotAnnotation(rawVersion)].sourceFile;
+    const actualVar = getLastDotAnnotation(rawVersion);
+    result.fileReplacePosition = variables[actualVar].lineIndex;
+    result.groupName = actualVar;
+    result.editFile = variables[actualVar].sourceFile;
+  }
+
+  if (globalVariables[getLastDotAnnotation(rawVersion)]) {
+    const actualVar = getLastDotAnnotation(rawVersion);
+    result.fileReplacePosition = globalVariables[actualVar].lineIndex;
+    result.groupName = actualVar;
+    result.editFile = globalVariables[actualVar].sourceFile;
   }
 
   if (depType) {
@@ -254,7 +270,7 @@ function parseSbtLine(
   lineIndex: number,
   lines: string[]
 ): PackageFile & ParseOptions {
-  const { deps, registryUrls = [], variables = {} } = acc;
+  const { deps, registryUrls = [], variables = {}, globalVariables = {} } = acc;
 
   let { isMultiDeps, scalaVersion, packageFileVersion } = acc;
 
@@ -263,6 +279,7 @@ function parseSbtLine(
     variables,
     lookupVariableFile: acc.packageFile!,
     lineIndex,
+    globalVariables,
   };
 
   let dep: PackageDependency | null = null;
@@ -342,15 +359,13 @@ function parseSbtLine(
     if (!dep.datasource) {
       if (dep.depType === 'plugin') {
         dep.datasource = SbtPluginDatasource.id;
-        dep.registryUrls = Array.from(
-          new Set([...registryUrls, ...sbtPluginDefaultRegistries])
-        );
+        dep.registryUrls = [...registryUrls, ...sbtPluginDefaultRegistries];
       } else {
         dep.datasource = SbtPackageDatasource.id;
       }
     }
     deps.push({
-      registryUrls: Array.from(new Set(registryUrls)),
+      registryUrls,
       ...dep,
     });
   }
@@ -391,6 +406,7 @@ export function extractFile(
     isMultiDeps: false,
     scalaVersion: null,
     variables: {},
+    globalVariables: {},
     ...defaultAcc,
   };
 
@@ -401,26 +417,27 @@ export function extractFile(
 
 function prepareLoadPackageFiles(
   _config: ExtractConfig,
-  packageFilesContent: MapFilenameContent
+  packageFilesContent: { packageFile: string; content: string }[]
 ): {
-  variables: ParseOptions['variables'];
+  globalVariables: ParseOptions['variables'];
   registryUrls: string[];
   scalaVersion: ParseOptions['scalaVersion'];
 } {
-  let variables: ParseOptions['variables'] = {};
+  // Return variable
+  let globalVariables: ParseOptions['variables'] = {};
   const registryUrls: string[] = [MAVEN_REPO];
-  const acc: PackageFile & ParseOptions = {
-    registryUrls,
-    deps: [],
-    variables,
-  };
   let scalaVersion: string | null = null;
 
-  for (const [packageFile, content] of Object.entries(packageFilesContent)) {
-    acc.packageFile = packageFile;
+  for (const { packageFile, content } of packageFilesContent) {
+    const acc: PackageFile & ParseOptions = {
+      registryUrls,
+      deps: [],
+      variables: globalVariables,
+      packageFile,
+    };
     const res = extractFile(content, acc);
     if (res) {
-      variables = { ...variables, ...res.variables };
+      globalVariables = { ...globalVariables, ...res.variables };
       if (res.registryUrls) {
         registryUrls.push(...res.registryUrls);
       }
@@ -431,59 +448,84 @@ function prepareLoadPackageFiles(
   }
 
   return {
-    variables,
+    globalVariables,
     registryUrls,
     scalaVersion,
   };
+}
+
+function getLocalBaseDir(packageFiles: string[]): string {
+  packageFiles.sort();
+  return packageFiles[0].split('/').slice(0, -1).join('/');
+}
+
+function folderGroup(baseDir: string, packageFile: string): string {
+  const dirs = packageFile.replace(`${baseDir}/`, '').split('/');
+  let group = '';
+  if (dirs.length > 1) {
+    group = dirs[0];
+  }
+  return group;
 }
 
 export async function extractAllPackageFiles(
   _config: ExtractConfig,
   packageFiles: string[]
 ): Promise<PackageFile[] | null> {
-  // Start parsing file in project/ folder first to get variable
-  packageFiles.sort((a, b) => (a.match('project/.*\\.scala$') ? -1 : 1));
+  // baseDir will group folder to lookup in it's scope
+  const baseDir = getLocalBaseDir(packageFiles);
 
   // Read packages and store in packageFilesContent
-  const packageFilesContent: MapFilenameContent = {};
+  // const packageFilesContent: MapFilenameContent = {};
+  const groupPackageFileContent: GroupFilenameContent = {};
   for (const packageFile of packageFiles) {
     const content = await readLocalFile(packageFile, 'utf8');
     if (!content) {
       logger.trace({ packageFile }, 'packageFile has no content');
       continue;
     }
-    packageFilesContent[packageFile] = content;
+    const group = folderGroup(baseDir, packageFile);
+    if (!groupPackageFileContent[group]) {
+      groupPackageFileContent[group] = [];
+    }
+    groupPackageFileContent[group].push({ packageFile, content });
   }
 
   // 1. variables from all package file
   // 2. registry from all package file
   // 3. Project's scalaVersion - use in parseDepExpr to add suffix eg. "_2.13"
-  const { variables, registryUrls, scalaVersion } = prepareLoadPackageFiles(
-    _config,
-    packageFilesContent
-  );
+  const { globalVariables, registryUrls, scalaVersion } =
+    prepareLoadPackageFiles(_config, [
+      ...groupPackageFileContent[''], // root
+      ...groupPackageFileContent['project'], // in project/ folder
+    ]);
 
   // package might appear in multiple files but at the end only update 1 single place
   // So merge them in filename
   const mapDepsToVariableFile: Record<string, PackageDependency[]> = {};
   // Start extract all package files
-  for (const [packageFile, content] of Object.entries(packageFilesContent)) {
-    const res = extractFile(content, {
-      variables,
-      registryUrls,
-      deps: [],
-      packageFile,
-      scalaVersion,
-    });
-    if (res) {
-      if (res?.deps) {
-        for (const dep of res.deps) {
-          const variableSourceFile = dep?.editFile ?? packageFile;
-          if (!mapDepsToVariableFile[variableSourceFile]) {
-            mapDepsToVariableFile[variableSourceFile] = [];
+  for (const [, packageFileContents] of Object.entries(
+    groupPackageFileContent
+  )) {
+    for (const { packageFile, content } of packageFileContents) {
+      const res = extractFile(content, {
+        registryUrls,
+        deps: [],
+        packageFile,
+        scalaVersion,
+        globalVariables,
+      });
+      if (res) {
+        if (res?.deps) {
+          for (const dep of res.deps) {
+            const variableSourceFile = dep?.editFile ?? packageFile;
+            dep.registryUrls = [...new Set(dep.registryUrls)];
+            if (!mapDepsToVariableFile[variableSourceFile]) {
+              mapDepsToVariableFile[variableSourceFile] = [];
+            }
+            // merge dep by file
+            mapDepsToVariableFile[variableSourceFile].push(dep);
           }
-          // merge dep by file
-          mapDepsToVariableFile[variableSourceFile].push(dep);
         }
       }
     }

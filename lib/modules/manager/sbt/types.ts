@@ -11,12 +11,17 @@ export interface ParseContext {
   lineIndex: number;
   lookupVariableFile?: string;
   depType?: string;
+  readonly globalVariables: Variables;
 }
 
 export interface ParseOptions {
   isMultiDeps?: boolean;
   scalaVersion?: string | null;
   variables?: Variables;
+  readonly globalVariables?: Variables;
 }
 
-export type MapFilenameContent = Record<string, string>;
+export type GroupFilenameContent = Record<
+  string,
+  { packageFile: string; content: string }[]
+>;
