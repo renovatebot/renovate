@@ -304,7 +304,7 @@ describe('util/git/index', () => {
       expect(parentSha).toEqual(git.getBranchCommit(defaultBranch));
     });
 
-    it('should return false if not found', async () => {
+    it('should return null if not found', async () => {
       expect(await git.getBranchParentSha('not_found')).toBeNull();
     });
   });

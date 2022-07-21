@@ -38,6 +38,7 @@ import {
   getCachedModifiedResult,
   setCachedModifiedResult,
 } from './modified-cache';
+import { getCachedBranchParentShaResult } from './parent-sha-cache';
 import { configSigningKey, writePrivateKey } from './private-key';
 import type {
   CommitFilesConfig,
@@ -459,9 +460,14 @@ export function getBranchCommit(branchName: string): CommitSha | null {
 export async function getBranchParentSha(
   branchName: string
 ): Promise<CommitSha | null> {
+  const branchSha = getBranchCommit(branchName);
+  let parentSha = getCachedBranchParentShaResult(branchName, branchSha);
+  if (parentSha !== null) {
+    return parentSha;
+  }
+
   try {
-    const branchSha = getBranchCommit(branchName);
-    const parentSha = await git.revparse([`${branchSha}^`]);
+    parentSha = await git.revparse([`${branchSha}^`]);
     return parentSha;
   } catch (err) {
     logger.debug({ err }, 'Error getting branch parent sha');
