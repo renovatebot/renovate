@@ -25,7 +25,7 @@ describe('modules/manager/hermit/artifacts', () => {
       readlinkMock.mockResolvedValue('hermit');
       GlobalConfig.set({ localDir: '' });
 
-      execMock.mockResolvedValue({
+      execMock.mockResolvedValueOnce({
         stdout: '',
         stderr: '',
       });

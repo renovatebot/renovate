@@ -21,10 +21,7 @@ export async function updateArtifacts(
     await updateHermitPackage(update);
   } catch (err) {
     const execErr: UpdateHermitError = err;
-    logger.warn(
-      { stdout: execErr.stdout, stderr: execErr.stderr },
-      `error updating hermit packages.`
-    );
+    logger.debug({ err }, `error updating hermit packages.`);
     return [
       {
         artifactError: {
@@ -42,11 +39,12 @@ export async function updateArtifacts(
   try {
     updateResult = await getUpdateResult(packageFileName);
     logger.debug({ updateResult }, `update result for hermit`);
-  } catch (e) {
+  } catch (err) {
+    logger.debug({ err }, 'Error getting hermet update results');
     return [
       {
         artifactError: {
-          stderr: e.message,
+          stderr: err.message,
         },
       },
     ];
@@ -172,8 +170,8 @@ async function getUpdateResult(
     // rename will need to go first, because
     // it needs to create the new link for the new version
     // for the modified links to use
-    ...flattern(renamed),
-    ...flattern(modified),
+    ...renamed.flat(),
+    ...modified.flat(),
     ...added,
     ...deleted,
   ];
