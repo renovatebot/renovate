@@ -16,7 +16,6 @@ type MetaCpanResult = {
         date: string;
         deprecated: boolean;
         maturity: string;
-        download_url: string;
       };
     }[];
   };
@@ -72,7 +71,6 @@ export class CpanDatasource extends Datasource {
           'date',
           'deprecated',
           'maturity',
-          'download_url',
         ],
         sort: [{ date: 'desc' }],
       };
@@ -92,7 +90,6 @@ export class CpanDatasource extends Datasource {
             date: releaseTimestamp,
             deprecated: isDeprecated,
             maturity,
-            download_url: downloadUrl,
           } = _source;
 
           const version = module.find(
@@ -104,7 +101,6 @@ export class CpanDatasource extends Datasource {
             acc.push({
               distribution,
               // Release properties
-              downloadUrl,
               isDeprecated,
               isStable,
               releaseTimestamp,
