@@ -320,12 +320,14 @@ export async function ensureDependencyDashboard(
       'This repository currently has no open or pending branches.\n\n';
   }
 
+  // fit the detected dependencies section
+  const footer = getFooter(config);
   issueBody += PackageFiles.getTruncatedMarkdown(
     config,
-    60000 - issueBody.length - getFooter(config).length
+    60000 - issueBody.length - footer.length
   );
 
-  issueBody += getFooter(config);
+  issueBody += footer;
 
   if (config.dependencyDashboardIssue) {
     const updatedIssue = await platform.getIssue?.(

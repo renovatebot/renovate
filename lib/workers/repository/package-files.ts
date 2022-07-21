@@ -26,30 +26,50 @@ export class PackageFiles {
     this.data.clear();
   }
 
-  static pop(): boolean {
+  /**
+   * Removes the last dependency/entry in the PackageFiles data
+   * i.e. the last line in the tobe generated detected dependency section
+   * @Returns true if anything that translates to a markdown written line was deleted
+   *          otherwise false is returned
+   */
+  private static pop(): boolean {
+    // get detected managers list of the last listed base branch
     const [branch, managers] = Array.from(this.data).pop() ?? [];
     if (!branch) {
       return false;
     }
 
+    // delete base branch listing if it has no managers left
     if (!managers || is.emptyObject(managers)) {
       return this.data.delete(branch);
     }
 
+    // get all manifest files for the last listed manager
     const [manager, packageFiles] = Object.entries(managers).pop() ?? [];
 
+    // delete current manager if it has no manifest files left
     if (!packageFiles || is.emptyArray(packageFiles)) {
       return delete managers[manager!];
     }
 
+    // delete manifest file if it has no deps left
     const len = packageFiles.length - 1;
     if (is.emptyArray(packageFiles[len].deps)) {
       return !!packageFiles.pop();
     }
 
+    // remove the last listed dependency
     return !!packageFiles[len].deps.pop();
   }
 
+  /**
+   * Truncates the detected dependencies' section until it fits the available space
+   * i.e. It has length smaller than maxLength.
+   * This does not mutate the original PackageFiles data
+   * @param config
+   * @param maxLength
+   * @param setHeader
+   */
   public static getTruncatedMarkdown(
     config: RenovateConfig,
     maxLength: number,
@@ -62,7 +82,10 @@ export class PackageFiles {
     const note =
       '> **Note**\n> Detected dependencies section has been truncated\n';
     const title = `## Detected dependencies\n\n`;
-    const mdMaxLength = maxLength - (setHeader ? (title + note).length : 0);
+
+    // exclude header length from the available space
+    const maxHeaderLen = setHeader ? (title + note).length : 0;
+    const mdMaxLength = maxLength - maxHeaderLen;
 
     let md: string;
     let header = '';
@@ -70,16 +93,17 @@ export class PackageFiles {
     let truncated = false;
 
     do {
+      // shorten markdown until it fits
       md = PackageFiles.getDashboardMarkdown(config, false);
       if (md.length > mdMaxLength) {
         removed = PackageFiles.pop();
       }
       if (removed) {
-        truncated = true;
+        truncated = true; // used to set the truncation Note
       }
     } while (removed && md.length > mdMaxLength);
 
-    this.data = org; // restore data
+    this.data = org; // restore original PackageFiles data
 
     header += title;
     header += truncated ? note : '';
