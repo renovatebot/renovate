@@ -43,6 +43,20 @@ export async function readLocalFile(
   }
 }
 
+export async function readLocalSymlink(
+  fileName: string
+): Promise<string | null> {
+  const localFileName = ensureLocalPath(fileName);
+  try {
+    const linkContent = await fs.readlink(localFileName);
+
+    return linkContent;
+  } catch (err) {
+    logger.trace({ err }, 'Error reading local symlink');
+    return null;
+  }
+}
+
 export async function writeLocalFile(
   fileName: string,
   fileContent: string | Buffer
@@ -155,6 +169,18 @@ export async function localPathIsFile(pathName: string): Promise<boolean> {
   try {
     const s = await fs.stat(path);
     return s.isFile();
+  } catch (_) {
+    return false;
+  }
+}
+
+export async function localPathIsSymbolicLink(
+  pathName: string
+): Promise<boolean> {
+  const path = ensureLocalPath(pathName);
+  try {
+    const s = await fs.lstat(path);
+    return s.isSymbolicLink();
   } catch (_) {
     return false;
   }

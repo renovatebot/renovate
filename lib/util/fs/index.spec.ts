@@ -1,6 +1,6 @@
 import _findUp from 'find-up';
 import fs from 'fs-extra';
-import tmp, { DirectoryResult } from 'tmp-promise';
+import tmp, { DirectoryResult, withDir } from 'tmp-promise';
 import { join, resolve } from 'upath';
 import { mockedFunction } from '../../../test/util';
 import { GlobalConfig } from '../../config/global';
@@ -18,11 +18,13 @@ import {
   listCacheDir,
   localPathExists,
   localPathIsFile,
+  localPathIsSymbolicLink,
   outputCacheFile,
   privateCacheDir,
   readCacheFile,
   readLocalDirectory,
   readLocalFile,
+  readLocalSymlink,
   readSystemFile,
   renameLocalFile,
   rmCache,
@@ -204,6 +206,51 @@ describe('util/fs/index', () => {
     });
   });
 
+  describe('readLocalSynmlink', () => {
+    it('reads symlink', async () => {
+      await withDir(
+        async (localDir) => {
+          GlobalConfig.set({
+            localDir: localDir.path,
+          });
+          await writeLocalFile('test/test.txt', '');
+          await fs.symlink(
+            resolve(localDir.path, 'test/test.txt'),
+            resolve(localDir.path, 'test/test')
+          );
+
+          const result = await readLocalSymlink('test/test');
+          expect(result).not.toBeNull();
+        },
+        {
+          unsafeCleanup: true,
+        }
+      );
+    });
+
+    it('return null when link not exists', async () => {
+      await withDir(
+        async (localDir) => {
+          GlobalConfig.set({
+            localDir: localDir.path,
+          });
+          await writeLocalFile('test/test.txt', '');
+          await fs.symlink(
+            resolve(localDir.path, 'test/test.txt'),
+            resolve(localDir.path, 'test/test')
+          );
+
+          const notExistsResult = await readLocalSymlink('test/not-exists');
+
+          expect(notExistsResult).toBeNull();
+        },
+        {
+          unsafeCleanup: true,
+        }
+      );
+    });
+  });
+
   describe('findLocalSiblingOrParent', () => {
     it('returns path for file', async () => {
       await writeLocalFile('crates/one/Cargo.toml', 'foo');
@@ -298,6 +345,47 @@ describe('util/fs/index', () => {
 
     it('returns false for non-existing path', async () => {
       expect(await localPathIsFile(resolve(`${localDir}/foobar`))).toBeFalse();
+    });
+  });
+
+  describe('localPathIsSymbolicLink', () => {
+    beforeEach(() => {
+      GlobalConfig.set({ localDir: '' });
+    });
+
+    it('returns false for file', async () => {
+      expect(await localPathIsSymbolicLink(__filename)).toBeFalse();
+    });
+
+    it('returns false for directory', async () => {
+      expect(await localPathIsSymbolicLink(__dirname)).toBeFalse();
+    });
+
+    it('returns false for non-existing path', async () => {
+      expect(
+        await localPathIsSymbolicLink(__filename.replace('.ts', '.txt'))
+      ).toBeFalse();
+    });
+
+    it('returns true for symlink', async () => {
+      await withDir(
+        async (localDir) => {
+          GlobalConfig.set({
+            localDir: localDir.path,
+          });
+          await writeLocalFile('test/test.txt', '');
+          await fs.symlink(
+            resolve(localDir.path, 'test/test.txt'),
+            resolve(localDir.path, 'test/test')
+          );
+
+          const result = await localPathIsSymbolicLink('test/test');
+          expect(result).toBeTrue();
+        },
+        {
+          unsafeCleanup: true,
+        }
+      );
     });
   });
 
