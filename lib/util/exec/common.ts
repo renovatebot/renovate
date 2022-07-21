@@ -114,6 +114,7 @@ export function exec(cmd: string, opts: RawExecOptions): Promise<ExecResult> {
 
 function kill(cp: ChildProcess, signal: NodeJS.Signals): boolean {
   try {
+    // TODO: will be enabled in #16654
     /**
      * If `pid` is negative, but not `-1`, signal shall be sent to all processes
      * (excluding an unspecified set of system processes),
@@ -136,8 +137,8 @@ function kill(cp: ChildProcess, signal: NodeJS.Signals): boolean {
   }
 }
 
-// TODO: rename
+// TODO: rename #16653
 export const rawExec: (
   cmd: string,
   opts: RawExecOptions
-) => Promise<ExecResult> = exec; // TODO: rename
+) => Promise<ExecResult> = exec; // TODO: rename #16653

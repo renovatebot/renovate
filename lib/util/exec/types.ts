@@ -27,8 +27,9 @@ export interface DockerOptions {
   cwd?: Opt<string>;
 }
 
-// TODO: rename
+// TODO: rename #16653
 export interface RawExecOptions extends ChildProcessSpawnOptions {
+  // TODO: to be removed in #16655
   /**
    * @deprecated renovate uses utf8, encoding property is ignored.
    */
@@ -36,7 +37,7 @@ export interface RawExecOptions extends ChildProcessSpawnOptions {
   maxBuffer?: number | undefined;
 }
 
-// TODO: rename
+// TODO: rename #16653
 export interface ExecResult {
   stdout: string;
   stderr: string;
@@ -44,7 +45,7 @@ export interface ExecResult {
 
 export type ExtraEnv<T = unknown> = Record<string, T>;
 
-// TODO: rename
+// TODO: rename #16653
 export interface ExecOptions {
   cwd?: string;
   cwdFile?: string;

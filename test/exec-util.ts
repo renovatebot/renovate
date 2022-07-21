@@ -8,7 +8,7 @@ import { regEx } from '../lib/util/regex';
 
 type CallOptions = ExecOptions | null | undefined;
 
-// TODO: rename
+// TODO: rename #16653
 export type ExecResult = { stdout: string; stderr: string } | Error;
 
 // TODO: fix type #7154
@@ -18,16 +18,16 @@ export const exec: ExecMock = _exec as any;
 export type SpawnMock = jest.MockedFunction<typeof _spawn>;
 export const spawn = _spawn as SpawnMock;
 
-// TODO: rename
+// TODO: rename #16653
 interface ExecSnapshot {
   cmd: string;
   options?: ExecOptions | null | undefined;
 }
 
-// TODO: rename
+// TODO: rename #16653
 export type ExecSnapshots = ExecSnapshot[];
 
-// TODO: rename
+// TODO: rename #16653
 export function execSnapshot(cmd: string, options?: CallOptions): ExecSnapshot {
   const snapshot = {
     cmd,
@@ -48,7 +48,7 @@ export function execSnapshot(cmd: string, options?: CallOptions): ExecSnapshot {
 
 const defaultExecResult = { stdout: '', stderr: '' };
 
-// TODO: rename
+// TODO: rename #16653
 export function mockExecAll(
   execFn: ExecMock,
   execResult: ExecResult = defaultExecResult
@@ -64,7 +64,7 @@ export function mockExecAll(
   return snapshots;
 }
 
-// TODO: rename
+// TODO: rename #16653
 export function mockExecSequence(
   execFn: ExecMock,
   execResults: ExecResult[]
