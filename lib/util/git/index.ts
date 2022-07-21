@@ -398,7 +398,14 @@ export async function syncGit(): Promise<void> {
     const durationMs = Math.round(Date.now() - cloneStart);
     logger.debug({ durationMs }, 'git clone completed');
   }
-  config.currentBranchSha = (await git.raw(['rev-parse', 'HEAD'])).trim();
+  try {
+    config.currentBranchSha = (await git.raw(['rev-parse', 'HEAD'])).trim();
+  } catch (err) /* istanbul ignore next */ {
+    if (err.message?.includes('fatal: not a git repository')) {
+      throw new Error(REPOSITORY_CHANGED);
+    }
+    throw err;
+  }
   if (config.cloneSubmodules) {
     const submodules = await getSubmodules();
     for (const submodule of submodules) {
