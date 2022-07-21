@@ -4,7 +4,6 @@ import { updateDependency } from '.';
 
 const gomod1 = Fixtures.get('1/go.mod');
 const gomod2 = Fixtures.get('2/go.mod');
-const gomod3 = Fixtures.get('3/go.mod');
 
 describe('modules/manager/gomod/update', () => {
   describe('updateDependency', () => {
@@ -17,18 +16,6 @@ describe('modules/manager/gomod/update', () => {
       };
       const res = updateDependency({ fileContent: gomod1, upgrade });
       expect(res).not.toEqual(gomod1);
-      expect(res).toContain(upgrade.newValue);
-    });
-
-    it('replaces golang version update', () => {
-      const upgrade = {
-        depName: 'go',
-        managerData: { lineNumber: 2 },
-        newValue: '1.18',
-        depType: 'golang',
-      };
-      const res = updateDependency({ fileContent: gomod3, upgrade });
-      expect(res).not.toEqual(gomod3);
       expect(res).toContain(upgrade.newValue);
     });
 

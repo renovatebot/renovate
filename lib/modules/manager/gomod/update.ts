@@ -39,10 +39,6 @@ export function updateDependency({
       return null;
     }
     let updateLineExp: RegExp | undefined;
-
-    if (depType === 'golang') {
-      updateLineExp = regEx(/(?<depPart>go)(?<divider>\s+)[^\s]+/);
-    }
     if (depType === 'replace') {
       updateLineExp = regEx(
         /^(?<depPart>replace\s+[^\s]+[\s]+[=][>]+\s+)(?<divider>[^\s]+\s+)[^\s]+/
