@@ -21,7 +21,7 @@ Array [
     },
   },
   Object {
-    "cmd": "docker run --rm --name=renovate_sidecar --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/cache\\":\\"/tmp/cache\\" -e BUILDPACK_CACHE_DIR -w \\"/tmp/github/some/repo\\" renovate/sidecar bash -l -c \\"install-tool erlang 24.3.4.2 && install-tool elixir 1.13.4 && mix hex.organization auth renovate_test --key valid_test_token && mix deps.update private_package other_package\\"",
+    "cmd": "docker run --rm --name=renovate_sidecar --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/cache\\":\\"/tmp/cache\\" -e BUILDPACK_CACHE_DIR -w \\"/tmp/github/some/repo\\" renovate/sidecar bash -l -c \\"install-tool erlang 24.3.4.2 && install-tool elixir v1.13.4 && mix hex.organization auth renovate_test --key valid_test_token && mix deps.update private_package other_package\\"",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
