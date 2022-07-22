@@ -17,6 +17,7 @@ import * as _datasource from '../../datasource';
 import type { UpdateArtifactsConfig } from '../types';
 import * as _bundlerHostRules from './host-rules';
 import { updateArtifacts } from '.';
+import { ExecError } from '../../../util/exec/exec-error';
 
 const datasource = mocked(_datasource);
 const bundlerHostRules = mocked(_bundlerHostRules);
@@ -44,12 +45,6 @@ const updatedGemfileLock = {
     contents: 'Updated Gemfile.lock',
   },
 };
-
-class ExecError extends Error {
-  constructor(message: string, public stdout = '', public stderr = '') {
-    super(message);
-  }
-}
 
 describe('modules/manager/bundler/artifacts', () => {
   beforeEach(() => {
@@ -497,9 +492,12 @@ describe('modules/manager/bundler/artifacts', () => {
   });
 
   it('returns error when failing in lockFileMaintenance true', async () => {
-    const execError = new Error();
-    (execError as any).stdout = ' foo was resolved to';
-    (execError as any).stderr = '';
+    const execError = new ExecError('Exec error', {
+      cmd: '',
+      stdout: ' foo was resolved to',
+      stderr: '',
+      options: { encoding: 'utf8' },
+    });
     fs.readLocalFile.mockResolvedValueOnce('Current Gemfile.lock');
     fs.writeLocalFile.mockResolvedValueOnce(null as never);
     const execSnapshots = mockExecAll(execError);
@@ -544,7 +542,12 @@ describe('modules/manager/bundler/artifacts', () => {
 
   describe('Error handling', () => {
     it('returns error when failing in lockFileMaintenance true', async () => {
-      const execError = new ExecError('', ' foo was resolved to');
+      const execError = new ExecError('Exec error', {
+        cmd: '',
+        stdout: ' foo was resolved to',
+        stderr: '',
+        options: { encoding: 'utf8' },
+      });
       fs.readLocalFile.mockResolvedValueOnce('Current Gemfile.lock');
       const execSnapshots = mockExecAll(execError);
       git.getRepoStatus.mockResolvedValueOnce({
@@ -571,7 +574,12 @@ describe('modules/manager/bundler/artifacts', () => {
     });
 
     it('rethrows for temporary error', async () => {
-      const execError = new ExecError(TEMPORARY_ERROR);
+      const execError = new ExecError(TEMPORARY_ERROR, {
+        cmd: '',
+        stdout: '',
+        stderr: '',
+        options: { encoding: 'utf8' },
+      });
       fs.readLocalFile.mockResolvedValueOnce('Current Gemfile.lock');
       mockExecAll(execError);
       await expect(
@@ -588,10 +596,12 @@ describe('modules/manager/bundler/artifacts', () => {
     });
 
     it('handles "Could not parse object" error', async () => {
-      const execError = new ExecError(
-        'fatal: Could not parse object',
-        'but that version could not be found'
-      );
+      const execError = new ExecError('fatal: Could not parse object', {
+        cmd: '',
+        stdout: 'but that version could not be found',
+        stderr: '',
+        options: { encoding: 'utf8' },
+      });
       fs.readLocalFile.mockResolvedValueOnce('Current Gemfile.lock');
       mockExecAll(execError);
       expect(
@@ -608,11 +618,12 @@ describe('modules/manager/bundler/artifacts', () => {
     });
 
     it('throws on authentication errors', async () => {
-      const execError = new ExecError(
-        '',
-        'Please supply credentials for this source',
-        'Please make sure you have the correct access rights'
-      );
+      const execError = new ExecError('Exec error', {
+        cmd: '',
+        stdout: 'Please supply credentials for this source',
+        stderr: 'Please make sure you have the correct access rights',
+        options: { encoding: 'utf8' },
+      });
       fs.readLocalFile.mockResolvedValueOnce('Current Gemfile.lock');
       mockExecAll(execError);
       await expect(
@@ -629,11 +640,12 @@ describe('modules/manager/bundler/artifacts', () => {
     });
 
     it('handles recursive resolved dependencies', async () => {
-      const execError = new ExecError(
-        '',
-        'foo was resolved to foo',
-        'bar was resolved to bar'
-      );
+      const execError = new ExecError('Exec error', {
+        cmd: '',
+        stdout: 'foo was resolved to foo',
+        stderr: 'bar was resolved to bar',
+        options: { encoding: 'utf8' },
+      });
       fs.readLocalFile.mockResolvedValue('Current Gemfile.lock');
       const execSnapshots = mockExecSequence([
         execError,
