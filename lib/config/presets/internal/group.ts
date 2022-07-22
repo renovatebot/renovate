@@ -659,6 +659,16 @@ const staticGroups = {
       },
     ],
   },
+  nestjsMajor: {
+    description: 'Group `@nestjs/*` packages major version updates',
+    packageRules: [
+      {
+        matchSourceUrlPrefixes: ['https://github.com/nestjs/'],
+        matchUpdateTypes: ['major'],
+        groupName: 'nestjs packages',
+      },
+    ],
+  },
 };
 
 const config: any = { ...staticGroups };
