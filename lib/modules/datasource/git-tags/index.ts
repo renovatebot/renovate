@@ -14,12 +14,13 @@ export class GitTagsDatasource extends GitDatasource {
 
   @cache({
     namespace: `datasource-${GitTagsDatasource.id}`,
-    key: ({ packageName }: GetReleasesConfig) => packageName,
+    key: (config: GetReleasesConfig) => JSON.stringify(config),
   })
   async getReleases({
     packageName,
+    filter,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    const rawRefs = await this.getRawRefs({ packageName });
+    const rawRefs = await this.getRawRefs({ packageName, filter });
 
     if (rawRefs === null) {
       return null;
@@ -48,8 +49,13 @@ export class GitTagsDatasource extends GitDatasource {
     { packageName }: DigestConfig,
     newValue?: string
   ): Promise<string | null> {
-    const rawRefs = await this.getRawRefs({ packageName });
     const findValue = newValue ?? 'HEAD';
+    const rawRefs = await this.getRawRefs({
+      packageName,
+      filter: {
+        prefix: `refs/tags/${findValue}`,
+      },
+    });
     const ref = rawRefs?.find((rawRef) => rawRef.value === findValue);
     if (ref) {
       return ref.hash;

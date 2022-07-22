@@ -26,13 +26,17 @@ export abstract class GitDatasource extends Datasource {
   })
   async getRawRefs({
     packageName,
+    filter,
   }: GetReleasesConfig): Promise<RawRefs[] | null> {
     const git = simpleGit(simpleGitConfig());
 
+    const args = [getRemoteUrlWithToken(packageName, this.id)];
+    if (filter?.prefix) {
+      args.push(`${filter.prefix}*`);
+    }
+
     // fetch remote tags
-    const lsRemote = await git.listRemote([
-      getRemoteUrlWithToken(packageName, this.id),
-    ]);
+    const lsRemote = await git.listRemote(args);
     if (!lsRemote) {
       return null;
     }

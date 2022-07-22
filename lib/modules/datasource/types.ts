@@ -21,6 +21,11 @@ export interface DigestConfig {
 export interface GetReleasesConfig {
   packageName: string;
   registryUrl?: string;
+  filter?: ReleaseFilter;
+}
+
+export interface ReleaseFilter {
+  prefix?: string;
 }
 
 export interface GetPkgReleasesConfig {

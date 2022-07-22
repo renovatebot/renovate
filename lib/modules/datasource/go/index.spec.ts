@@ -9,28 +9,13 @@ const hostRules = mocked(_hostRules);
 
 const getReleasesDirectMock = jest.fn();
 
-const getDigestGithubMock = jest.fn();
-const getDigestGitlabMock = jest.fn();
-const getDigestBitbucketMock = jest.fn();
+const getDigestGitMock = jest.fn();
 jest.mock('./releases-direct', () => {
   return {
     GoDirectDatasource: jest.fn().mockImplementation(() => {
       return {
-        github: { getDigest: () => getDigestGithubMock() },
-        gitlab: { getDigest: () => getDigestGitlabMock() },
-        bitbucket: { getDigest: () => getDigestBitbucketMock() },
+        git: { getDigest: () => getDigestGitMock() },
         getReleases: () => getReleasesDirectMock(),
-      };
-    }),
-  };
-});
-
-const getReleasesProxyMock = jest.fn();
-jest.mock('./releases-goproxy', () => {
-  return {
-    GoProxyDatasource: jest.fn().mockImplementation(() => {
-      return {
-        getReleases: () => getReleasesProxyMock(),
       };
     }),
   };
@@ -53,7 +38,6 @@ describe('modules/datasource/go/index', () => {
 
     it('fetches release info directly from VCS', async () => {
       const expected = { releases: [{ version: '0.0.1' }] };
-      getReleasesProxyMock.mockResolvedValue(null);
       getReleasesDirectMock.mockResolvedValue(expected);
 
       const res = await datasource.getReleases({
@@ -61,23 +45,7 @@ describe('modules/datasource/go/index', () => {
       });
 
       expect(res).toBe(expected);
-      expect(getReleasesProxyMock).not.toHaveBeenCalled();
       expect(getReleasesDirectMock).toHaveBeenCalled();
-    });
-
-    it('supports GOPROXY', async () => {
-      const expected = { releases: [{ version: '0.0.1' }] };
-      getReleasesProxyMock.mockResolvedValue(expected);
-      getReleasesDirectMock.mockResolvedValue(null);
-      process.env.GOPROXY = 'https://proxy.golang.org,direct';
-
-      const res = await datasource.getReleases({
-        packageName: 'golang.org/foo/bar',
-      });
-
-      expect(res).toBe(expected);
-      expect(getReleasesProxyMock).toHaveBeenCalled();
-      expect(getReleasesDirectMock).not.toHaveBeenCalled();
     });
   });
 
@@ -109,6 +77,7 @@ describe('modules/datasource/go/index', () => {
         .scope('https://golang.org/')
         .get('/y/text?go-get=1')
         .reply(200, Fixtures.get('go-get-github.html'));
+
       const res = await datasource.getDigest(
         { packageName: 'golang.org/y/text' },
         null
@@ -121,7 +90,7 @@ describe('modules/datasource/go/index', () => {
         .scope('https://gitlab.com/')
         .get('/group/subgroup?go-get=1')
         .reply(200, Fixtures.get('go-get-gitlab.html'));
-      getDigestGitlabMock.mockResolvedValue('abcdefabcdefabcdefabcdef');
+      getDigestGitMock.mockResolvedValue('abcdefabcdefabcdefabcdef');
       const res = await datasource.getDigest(
         { packageName: 'gitlab.com/group/subgroup' },
         null
@@ -130,12 +99,12 @@ describe('modules/datasource/go/index', () => {
     });
 
     it('supports gitlab digest with a specific branch', async () => {
-      const branch = 'some-branch';
       httpMock
         .scope('https://gitlab.com/')
         .get('/group/subgroup?go-get=1')
         .reply(200, Fixtures.get('go-get-gitlab.html'));
-      getDigestGitlabMock.mockResolvedValue('abcdefabcdefabcdefabcdef');
+      const branch = 'some-branch';
+      getDigestGitMock.mockResolvedValue('abcdefabcdefabcdefabcdef');
       const res = await datasource.getDigest(
         { packageName: 'gitlab.com/group/subgroup' },
         branch
@@ -148,7 +117,7 @@ describe('modules/datasource/go/index', () => {
         .scope('https://golang.org/')
         .get('/x/text?go-get=1')
         .reply(200, Fixtures.get('go-get-github.html'));
-      getDigestGithubMock.mockResolvedValueOnce('abcdefabcdefabcdefabcdef');
+      getDigestGitMock.mockResolvedValueOnce('abcdefabcdefabcdefabcdef');
       const res = await datasource.getDigest(
         { packageName: 'golang.org/x/text' },
         null
@@ -157,7 +126,7 @@ describe('modules/datasource/go/index', () => {
     });
 
     it('support bitbucket digest', async () => {
-      getDigestBitbucketMock.mockResolvedValueOnce('123');
+      getDigestGitMock.mockResolvedValueOnce('123');
       const res = await datasource.getDigest(
         {
           packageName: 'bitbucket.org/golang/text',

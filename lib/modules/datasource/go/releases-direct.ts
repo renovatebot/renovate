@@ -1,26 +1,21 @@
 import { logger } from '../../../logger';
 import { cache } from '../../../util/cache/package/decorator';
 import { regEx } from '../../../util/regex';
-import { BitBucketTagsDatasource } from '../bitbucket-tags';
 import { Datasource } from '../datasource';
-import { GithubTagsDatasource } from '../github-tags';
+import { GitTagsDatasource } from '../git-tags';
 import { GitlabTagsDatasource } from '../gitlab-tags';
-import type { DatasourceApi, GetReleasesConfig, ReleaseResult } from '../types';
+import type { GetReleasesConfig, ReleaseResult } from '../types';
 import { BaseGoDatasource } from './base';
 import { getSourceUrl } from './common';
 
 export class GoDirectDatasource extends Datasource {
   static readonly id = 'go-direct';
 
-  github: GithubTagsDatasource;
-  gitlab: DatasourceApi;
-  bitbucket: DatasourceApi;
+  git: GitTagsDatasource;
 
   constructor() {
     super(GoDirectDatasource.id);
-    this.github = new GithubTagsDatasource();
-    this.gitlab = new GitlabTagsDatasource();
-    this.bitbucket = new BitBucketTagsDatasource();
+    this.git = new GitTagsDatasource();
   }
 
   /**
@@ -41,8 +36,6 @@ export class GoDirectDatasource extends Datasource {
   async getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
     const { packageName } = config;
 
-    let res: ReleaseResult | null = null;
-
     logger.trace(`go.getReleases(${packageName})`);
     const source = await BaseGoDatasource.getDatasource(packageName);
 
@@ -54,31 +47,11 @@ export class GoDirectDatasource extends Datasource {
       return null;
     }
 
-    switch (source.datasource) {
-      case GithubTagsDatasource.id: {
-        res = await this.github.getReleases(source);
-        break;
-      }
-      case GitlabTagsDatasource.id: {
-        res = await this.gitlab.getReleases(source);
-        break;
-      }
-      case BitBucketTagsDatasource.id: {
-        res = await this.bitbucket.getReleases(source);
-        break;
-      }
-      /* istanbul ignore next: can never happen, makes lint happy */
-      default: {
-        return null;
-      }
-    }
+    const sourceUrl = getSourceUrl(source);
 
-    // istanbul ignore if
-    if (!res) {
+    if (!sourceUrl) {
       return null;
     }
-
-    const sourceUrl = getSourceUrl(source);
 
     /**
      * github.com/org/mod/submodule should be tagged as submodule/va.b.c
@@ -86,43 +59,63 @@ export class GoDirectDatasource extends Datasource {
      * the old behaviour stays the same.
      */
     const nameParts = packageName.replace(regEx(/\/v\d+$/), '').split('/');
-    logger.trace({ nameParts, releases: res.releases }, 'go.getReleases');
+
+    const prefix: string[] = ['refs/tags'];
+    let submodPath: string | null = null;
 
     // If it has more than 3 parts it's a submodule or subgroup (gitlab only)
     if (nameParts.length > 3) {
-      const prefix = nameParts.slice(3, nameParts.length).join('/');
-      logger.trace(`go.getReleases.prefix:${prefix}`);
+      submodPath = nameParts.slice(3, nameParts.length).join('/');
+      prefix.push(submodPath);
+      logger.trace(`go.getReleases.prefix:${submodPath}`);
+    }
 
-      // Filter the releases so that we only get the ones that are for this submodule
-      // Also trim the submodule prefix from the version number
-      const submodReleases = res.releases
-        .filter((release) => release.version?.startsWith(prefix))
-        .map((release) => {
-          const r2 = release;
-          r2.version = r2.version.replace(`${prefix}/`, '');
-          return r2;
-        });
-      logger.trace({ submodReleases }, 'go.getReleases');
+    prefix.push('v');
 
-      // If not from gitlab -> no subgroups -> must be submodule
-      // If from gitlab and directory one level above has tags -> has to be submodule, since groups can't have tags
-      // If not, it's simply a repo in a subfolder, and the normal tags are used.
-      if (
-        !(source.datasource === GitlabTagsDatasource.id) ||
-        (source.datasource === GitlabTagsDatasource.id && submodReleases.length)
-      ) {
-        return {
-          sourceUrl,
-          releases: submodReleases,
-        };
+    let res = await this.git.getReleases({
+      packageName: sourceUrl,
+      filter: {
+        prefix: prefix.join('/'),
+      },
+    });
+
+    // istanbul ignore if
+    if (!res) {
+      return null;
+    }
+
+    // If from gitlab and no submodule tags, fallback to normal tag
+    if (!res.releases.length && source.datasource === GitlabTagsDatasource.id) {
+      submodPath = null;
+      res = await this.git.getReleases({
+        packageName: sourceUrl,
+        filter: {
+          prefix: 'refs/tags/v',
+        },
+      });
+
+      // istanbul ignore if
+      if (!res) {
+        return null;
       }
     }
 
-    if (res.releases) {
-      res.releases = res.releases.filter((release) =>
-        release.version?.startsWith('v')
-      );
+    if (submodPath) {
+      // Filter the releases so that we only get the ones that are for this submodule
+      // Also trim the submodule prefix from the version number
+      const submodReleases = res.releases.map((release) => {
+        const r2 = release;
+        r2.version = r2.version.replace(`${submodPath}/`, '');
+        return r2;
+      });
+      logger.trace({ submodReleases }, 'go.getReleases');
+
+      return {
+        sourceUrl,
+        releases: submodReleases,
+      };
     }
+    logger.trace({ nameParts, releases: res.releases }, 'go.getReleases');
 
     return { ...res, sourceUrl };
   }

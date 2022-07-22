@@ -2,16 +2,13 @@
 
 exports[`modules/datasource/go/releases-direct getReleases support bitbucket tags 1`] = `
 Object {
-  "registryUrl": "https://bitbucket.org",
   "releases": Array [
     Object {
       "gitRef": "v1.0.0",
-      "releaseTimestamp": undefined,
       "version": "v1.0.0",
     },
     Object {
       "gitRef": "v2.0.0",
-      "releaseTimestamp": undefined,
       "version": "v2.0.0",
     },
   ],
@@ -24,12 +21,10 @@ Object {
   "releases": Array [
     Object {
       "gitRef": "v1.0.0",
-      "releaseTimestamp": undefined,
       "version": "v1.0.0",
     },
     Object {
       "gitRef": "v2.0.0",
-      "releaseTimestamp": undefined,
       "version": "v2.0.0",
     },
   ],
@@ -42,12 +37,10 @@ Object {
   "releases": Array [
     Object {
       "gitRef": "v1.0.0",
-      "releaseTimestamp": undefined,
       "version": "v1.0.0",
     },
     Object {
       "gitRef": "v2.0.0",
-      "releaseTimestamp": undefined,
       "version": "v2.0.0",
     },
   ],
@@ -60,12 +53,10 @@ Object {
   "releases": Array [
     Object {
       "gitRef": "v1.0.0",
-      "releaseTimestamp": undefined,
       "version": "v1.0.0",
     },
     Object {
       "gitRef": "v2.0.0",
-      "releaseTimestamp": undefined,
       "version": "v2.0.0",
     },
   ],
