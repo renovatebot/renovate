@@ -105,6 +105,7 @@ const repoGroups = {
   formatjs: 'https://github.com/formatjs/formatjs',
   framework7: 'https://github.com/framework7io/framework7',
   gatsby: 'https://github.com/gatsbyjs/gatsby',
+  grafana: 'https://github.com/grafana/grafana',
   graphqlcodegenerator: [
     'https://github.com/dotansimha/graphql-code-generator',
     'https://github.com/dotansimha/graphql-codegen',
