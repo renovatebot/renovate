@@ -118,6 +118,48 @@ Object {
 }
 `;
 
+exports[`modules/manager/sbt/extract extractFile() extracts addCompilerPlugin 1`] = `
+Object {
+  "deps": Array [
+    Object {
+      "currentValue": "0.9.9",
+      "datasource": "sbt-plugin",
+      "depName": "org.spire-math:kind-projector",
+      "depType": "plugin",
+      "fileReplacePosition": 0,
+      "packageName": "org.spire-math:kind-projector",
+      "registryUrls": Array [
+        "https://repo.maven.apache.org/maven2",
+        "https://dl.bintray.com/sbt/sbt-plugin-releases",
+      ],
+    },
+  ],
+  "packageFileVersion": undefined,
+  "scalaVersion": null,
+}
+`;
+
+exports[`modules/manager/sbt/extract extractFile() extracts addCompilerPlugin 2`] = `
+Object {
+  "deps": Array [
+    Object {
+      "currentValue": "2.1.1",
+      "datasource": "sbt-plugin",
+      "depName": "org.scalamacros:paradise",
+      "depType": "plugin",
+      "fileReplacePosition": 0,
+      "packageName": "org.scalamacros:paradise",
+      "registryUrls": Array [
+        "https://repo.maven.apache.org/maven2",
+        "https://dl.bintray.com/sbt/sbt-plugin-releases",
+      ],
+    },
+  ],
+  "packageFileVersion": undefined,
+  "scalaVersion": null,
+}
+`;
+
 exports[`modules/manager/sbt/extract extractFile() extracts deps for generic use-cases 1`] = `
 Object {
   "deps": Array [

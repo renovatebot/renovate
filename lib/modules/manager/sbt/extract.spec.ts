@@ -67,6 +67,33 @@ describe('modules/manager/sbt/extract', () => {
       });
     });
 
+    it('extracts addCompilerPlugin', () => {
+      expect(
+        extractFile(
+          `addCompilerPlugin(("org.spire-math" % "kind-projector" % "0.9.9").cross(CrossVersion.binary))`
+        )
+      ).toMatchSnapshot({
+        deps: [
+          {
+            packageName: 'org.spire-math:kind-projector',
+            currentValue: '0.9.9',
+          },
+        ],
+      });
+      expect(
+        extractFile(
+          `addCompilerPlugin(("org.scalamacros" % "paradise" % "2.1.1").cross(CrossVersion.full))`
+        )
+      ).toMatchSnapshot({
+        deps: [
+          {
+            packageName: 'org.scalamacros:paradise',
+            currentValue: '2.1.1',
+          },
+        ],
+      });
+    });
+
     it('extracts deps when scala version is defined in a variable', () => {
       expect(extractFile(sbtScalaVersionVariable)).toMatchSnapshot({
         deps: [
