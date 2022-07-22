@@ -156,16 +156,10 @@ describe('modules/manager/nuget/package-tree', () => {
     });
 
     it('throws error on invalid xml file', async () => {
-      git.getFileList.mockResolvedValue(['one/one.csproj', 'two/two.csproj']);
-      Fixtures.mock({
-        '/tmp/repo/one/one.csproj': Fixtures.get(
-          'circular-reference/one/one.csproj'
-        ),
-        '/tmp/repo/two/two.csproj': '<invalid',
-      });
-
-      await expect(getDependentPackageFiles('one/one.csproj')).rejects.toThrow(
-        'Invalid xml file: two/two.csproj'
+      git.getFileList.mockResolvedValue(['foo/bar.csproj']);
+      Fixtures.mock({ '/tmp/repo/foo/bar.csproj': '<invalid' });
+      await expect(getDependentPackageFiles('foo/bar.csproj')).rejects.toThrow(
+        'Invalid xml file: foo/bar.csproj'
       );
     });
   });
