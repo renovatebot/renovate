@@ -1,11 +1,12 @@
+import { spawn as _spawn } from 'child_process';
 import type { ChildProcess, SendHandle, Serializable } from 'child_process';
 import { Readable } from 'stream';
-import { spawn } from '../../../test/exec-util';
-import { partial } from '../../../test/util';
+import { mockedFunction, partial } from '../../../test/util';
 import { exec } from './common';
 import type { RawExecOptions } from './types';
 
 jest.mock('child_process');
+const spawn = mockedFunction(_spawn);
 
 type MessageListener = (message: Serializable, sendHandle: SendHandle) => void;
 type NoArgListener = () => void;
