@@ -289,7 +289,7 @@ describe('workers/global/config/parse/env', () => {
         RENOVATE_DRY_RUN: 'false',
       };
       const config = env.getConfig(envParam);
-      expect(config.dryRun).toBeNull();
+      expect(config.dryRun).toBeUndefined();
     });
 
     it('dryRun null', () => {
@@ -297,7 +297,7 @@ describe('workers/global/config/parse/env', () => {
         RENOVATE_DRY_RUN: 'null',
       };
       const config = env.getConfig(envParam);
-      expect(config.dryRun).toBeNull();
+      expect(config.dryRun).toBeUndefined();
     });
 
     it('requireConfig boolean true', () => {
