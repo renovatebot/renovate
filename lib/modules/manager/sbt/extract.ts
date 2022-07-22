@@ -29,7 +29,7 @@ const isDepsBegin = (str: string): boolean =>
   regEx(/\s*Seq\(\s*$/).test(str);
 
 const isPluginDep = (str: string): boolean =>
-  regEx(/^\s*addSbtPlugin\s*\(.*\)\s*$/).test(str);
+  regEx(/^\s*(addSbtPlugin|addCompilerPlugin)\s*\(.*\)\s*$/).test(str);
 
 const isStringLiteral = (str: string): boolean => regEx(/^"[^"]*"$/).test(str);
 
@@ -337,8 +337,12 @@ function parseSbtLine(
       });
     } else if (isPluginDep(line)) {
       isMultiDeps = false;
-      const rightPart = line.replace(regEx(/^\s*addSbtPlugin\s*\(/), '');
-      const depExpr = rightPart.replace(regEx(/\)\s*$/), '');
+      const depExpr = line.replace(
+        regEx(
+          /^\s*(addSbtPlugin|addCompilerPlugin)\s*\(+(.*(%%?).*(%)\s*(\w+|".*")\s*)\)+.*/
+        ),
+        '$2'
+      );
       dep = parseDepExpr(depExpr, {
         ...ctx,
         depType: 'plugin',
