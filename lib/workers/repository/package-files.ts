@@ -66,6 +66,8 @@ export class PackageFiles {
    * Truncates the detected dependencies' section until it fits the available space
    * i.e. It has length smaller than maxLength.
    * This does not mutate the original PackageFiles data
+   * Note:  setHeader=false is used for testing purposes only
+   *        Mainly for comparing the output of getTruncatedMarkdown and getDashboardMarkdown
    * @param config
    * @param maxLength
    * @param setHeader
@@ -111,6 +113,13 @@ export class PackageFiles {
     return (setHeader ? header : '') + md;
   }
 
+  /**
+   * Generates the "detected dependencies" markdown
+   * Note:  setTitle=false is used for testing purposes only
+   *        Mainly for comparing the output of getDashboardMarkdown and getTruncatedMarkdown
+   * @param config
+   * @param setTitle
+   */
   public static getDashboardMarkdown(
     config: RenovateConfig,
     setTitle = true
