@@ -25,7 +25,8 @@ const isSingleLineDep = (str: string): boolean =>
   regEx(/^\s*(libraryDependencies|dependencyOverrides)\s*\+=\s*/).test(str);
 
 const isDepsBegin = (str: string): boolean =>
-  regEx(/^\s*(libraryDependencies|dependencyOverrides)\s*\+\+=\s*/).test(str);
+  regEx(/^\s*(libraryDependencies|dependencyOverrides)\s*\+\+=\s*/).test(str) ||
+  regEx(/\s*Seq\(\s*$/).test(str);
 
 const isPluginDep = (str: string): boolean =>
   regEx(/^\s*addSbtPlugin\s*\(.*\)\s*$/).test(str);
