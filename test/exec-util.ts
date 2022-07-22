@@ -8,6 +8,7 @@ import { mockedFunction } from './util';
 
 jest.mock('../lib/util/exec/common');
 
+// TODO: rename #16653
 export type ExecResult = { stdout: string; stderr: string } | Error;
 
 export const exec = mockedFunction(_exec);
@@ -17,8 +18,10 @@ export interface ExecSnapshot {
   options?: RawExecOptions | null | undefined;
 }
 
+// TODO: rename #16653
 export type ExecSnapshots = ExecSnapshot[];
 
+// TODO: rename #16653
 function execSnapshot(cmd: string, options?: RawExecOptions): ExecSnapshot {
   const snapshot = {
     cmd,
@@ -39,6 +42,7 @@ function execSnapshot(cmd: string, options?: RawExecOptions): ExecSnapshot {
 
 const defaultExecResult = { stdout: '', stderr: '' };
 
+// TODO: rename #16653
 export function mockExecAll(
   execResult: ExecResult = defaultExecResult
 ): ExecSnapshots {
@@ -53,6 +57,7 @@ export function mockExecAll(
   return snapshots;
 }
 
+// TODO: rename #16653
 export function mockExecSequence(execResults: ExecResult[]): ExecSnapshots {
   const snapshots: ExecSnapshots = [];
   execResults.forEach((execResult) => {
