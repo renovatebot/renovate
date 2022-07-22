@@ -1,10 +1,10 @@
-import { RepoCacheBase } from './impl/base';
+import { MemoryRepoCache } from './impl/memory';
 import type { RepoCache, RepoCacheData } from './types';
 
-let repoCache: RepoCache = new RepoCacheBase();
+let repoCache: RepoCache = new MemoryRepoCache();
 
 export function resetCache(): void {
-  setCache(new RepoCacheBase());
+  setCache(new MemoryRepoCache());
 }
 
 export function setCache(cache: RepoCache): void {
