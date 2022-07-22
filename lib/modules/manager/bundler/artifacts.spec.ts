@@ -12,12 +12,12 @@ import {
   TEMPORARY_ERROR,
 } from '../../../constants/error-messages';
 import * as docker from '../../../util/exec/docker';
+import { ExecError } from '../../../util/exec/exec-error';
 import type { StatusResult } from '../../../util/git/types';
 import * as _datasource from '../../datasource';
 import type { UpdateArtifactsConfig } from '../types';
 import * as _bundlerHostRules from './host-rules';
 import { updateArtifacts } from '.';
-import { ExecError } from '../../../util/exec/exec-error';
 
 const datasource = mocked(_datasource);
 const bundlerHostRules = mocked(_bundlerHostRules);
