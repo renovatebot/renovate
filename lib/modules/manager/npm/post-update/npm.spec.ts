@@ -1,11 +1,10 @@
 import upath from 'upath';
-import { envMock, exec, mockExecAll } from '../../../../../test/exec-util';
+import { envMock, mockExecAll } from '../../../../../test/exec-util';
 import { Fixtures } from '../../../../../test/fixtures';
 import { env, fs } from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
 import * as npmHelper from './npm';
 
-jest.mock('../../../../util/exec/common');
 jest.mock('../../../../util/exec/env');
 jest.mock('../../../../util/fs');
 jest.mock('./node-version');
@@ -19,7 +18,7 @@ describe('modules/manager/npm/post-update/npm', () => {
   });
 
   it('generates lock files', async () => {
-    const execSnapshots = mockExecAll(exec);
+    const execSnapshots = mockExecAll();
     fs.readLocalFile.mockResolvedValueOnce('package-lock-contents');
     const skipInstalls = true;
     const postUpdateOptions = ['npmDedupe'];
@@ -40,7 +39,7 @@ describe('modules/manager/npm/post-update/npm', () => {
   });
 
   it('performs lock file updates', async () => {
-    const execSnapshots = mockExecAll(exec);
+    const execSnapshots = mockExecAll();
     fs.readLocalFile.mockResolvedValueOnce('package-lock-contents');
     const skipInstalls = true;
     const updates = [
@@ -60,7 +59,7 @@ describe('modules/manager/npm/post-update/npm', () => {
   });
 
   it('performs lock file updates retaining the package.json counterparts', async () => {
-    const execSnapshots = mockExecAll(exec);
+    const execSnapshots = mockExecAll();
     fs.readLocalFile.mockResolvedValueOnce(
       Fixtures.get('update-lockfile-massage-1/package-lock.json')
     );
@@ -88,7 +87,7 @@ describe('modules/manager/npm/post-update/npm', () => {
   });
 
   it('performs npm-shrinkwrap.json updates', async () => {
-    const execSnapshots = mockExecAll(exec);
+    const execSnapshots = mockExecAll();
     fs.localPathExists.mockResolvedValueOnce(true);
     fs.readLocalFile.mockResolvedValueOnce('package-lock-contents');
     const skipInstalls = true;
@@ -114,7 +113,7 @@ describe('modules/manager/npm/post-update/npm', () => {
   });
 
   it('performs npm-shrinkwrap.json updates (no package-lock.json)', async () => {
-    const execSnapshots = mockExecAll(exec);
+    const execSnapshots = mockExecAll();
     fs.findLocalSiblingOrParent.mockResolvedValueOnce(null);
     fs.readLocalFile.mockResolvedValueOnce('package-lock-contents');
     const skipInstalls = true;
@@ -136,7 +135,7 @@ describe('modules/manager/npm/post-update/npm', () => {
   });
 
   it('performs full install', async () => {
-    const execSnapshots = mockExecAll(exec);
+    const execSnapshots = mockExecAll();
     fs.readLocalFile.mockResolvedValueOnce('package-lock-contents');
     const skipInstalls = false;
     const binarySource = 'global';
@@ -153,7 +152,7 @@ describe('modules/manager/npm/post-update/npm', () => {
   });
 
   it('runs twice if remediating', async () => {
-    const execSnapshots = mockExecAll(exec);
+    const execSnapshots = mockExecAll();
     fs.readLocalFile.mockResolvedValueOnce('package-lock-contents');
     const binarySource = 'global';
     const res = await npmHelper.generateLockFile(
@@ -170,7 +169,7 @@ describe('modules/manager/npm/post-update/npm', () => {
   });
 
   it('catches errors', async () => {
-    const execSnapshots = mockExecAll(exec);
+    const execSnapshots = mockExecAll();
     fs.readLocalFile.mockImplementation(() => {
       throw new Error('not found');
     });
@@ -186,7 +185,7 @@ describe('modules/manager/npm/post-update/npm', () => {
   });
 
   it('finds npm globally', async () => {
-    const execSnapshots = mockExecAll(exec);
+    const execSnapshots = mockExecAll();
     fs.readLocalFile.mockResolvedValue('package-lock-contents');
     const res = await npmHelper.generateLockFile(
       'some-dir',
@@ -199,7 +198,7 @@ describe('modules/manager/npm/post-update/npm', () => {
   });
 
   it('uses docker npm', async () => {
-    const execSnapshots = mockExecAll(exec);
+    const execSnapshots = mockExecAll();
     fs.readLocalFile.mockResolvedValue('package-lock-contents');
     const res = await npmHelper.generateLockFile(
       'some-dir',
@@ -213,7 +212,7 @@ describe('modules/manager/npm/post-update/npm', () => {
   });
 
   it('performs lock file maintenance', async () => {
-    const execSnapshots = mockExecAll(exec);
+    const execSnapshots = mockExecAll();
     fs.readLocalFile.mockResolvedValue('package-lock-contents');
     const res = await npmHelper.generateLockFile(
       'some-dir',
