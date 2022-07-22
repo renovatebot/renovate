@@ -73,7 +73,7 @@ export async function init(url: string): Promise<void> {
   if (!url) {
     return;
   }
-  logger.debug('Redis cache init');
+  logger.debug('Redis package cache init');
   client = createClient({
     url,
     socket: {
