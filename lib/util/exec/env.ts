@@ -21,7 +21,7 @@ export function getChildProcessEnv(
 ): NodeJS.ProcessEnv {
   const env: NodeJS.ProcessEnv = {};
   if (GlobalConfig.get('exposeAllEnv')) {
-    return { ...env, ...process.env };
+    return { ...process.env };
   }
   const envVars = [...basicEnvVars, ...customEnvVars];
   envVars.forEach((envVar) => {

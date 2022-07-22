@@ -9,11 +9,12 @@ Array [
     },
   },
   Object {
-    "cmd": "docker run --rm --name=renovate_ruby --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/cache\\":\\"/tmp/cache\\" -w \\"/tmp/github/some/repo\\" renovate/ruby:2.7.4 bash -l -c \\"install-tool cocoapods 1.2.4 && pod install\\"",
+    "cmd": "docker run --rm --name=renovate_ruby --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/cache\\":\\"/tmp/cache\\" -e BUILDPACK_CACHE_DIR -w \\"/tmp/github/some/repo\\" renovate/ruby:2.7.4 bash -l -c \\"install-tool cocoapods 1.2.4 && pod install\\"",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
       "env": Object {
+        "BUILDPACK_CACHE_DIR": "/tmp/cache/buildpack",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
         "HTTP_PROXY": "http://example.com",
@@ -38,11 +39,12 @@ Array [
     },
   },
   Object {
-    "cmd": "docker run --rm --name=renovate_ruby --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/cache\\":\\"/tmp/cache\\" -w \\"/tmp/github/some/repo\\" renovate/ruby:latest bash -l -c \\"install-tool cocoapods 1.2.4 && pod install\\"",
+    "cmd": "docker run --rm --name=renovate_ruby --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/cache\\":\\"/tmp/cache\\" -e BUILDPACK_CACHE_DIR -w \\"/tmp/github/some/repo\\" renovate/ruby:latest bash -l -c \\"install-tool cocoapods 1.2.4 && pod install\\"",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
       "env": Object {
+        "BUILDPACK_CACHE_DIR": "/tmp/cache/buildpack",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
         "HTTP_PROXY": "http://example.com",
@@ -133,11 +135,12 @@ Array [
     },
   },
   Object {
-    "cmd": "docker run --rm --name=renovate_ruby --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/cache\\":\\"/tmp/cache\\" -w \\"/tmp/github/some/repo\\" renovate/ruby:2.7.4 bash -l -c \\"install-tool cocoapods 3.1.0 && gem install cocoapods-acknowledgements && pod install\\"",
+    "cmd": "docker run --rm --name=renovate_ruby --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/cache\\":\\"/tmp/cache\\" -e BUILDPACK_CACHE_DIR -w \\"/tmp/github/some/repo\\" renovate/ruby:2.7.4 bash -l -c \\"install-tool cocoapods 3.1.0 && gem install cocoapods-acknowledgements && pod install\\"",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
       "env": Object {
+        "BUILDPACK_CACHE_DIR": "/tmp/cache/buildpack",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
         "HTTP_PROXY": "http://example.com",
@@ -194,11 +197,12 @@ Array [
     },
   },
   Object {
-    "cmd": "docker run --rm --name=renovate_ruby --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/cache\\":\\"/tmp/cache\\" -w \\"/tmp/github/some/repo\\" renovate/ruby:2.7.4 bash -l -c \\"install-tool cocoapods 3.1.0 && pod install\\"",
+    "cmd": "docker run --rm --name=renovate_ruby --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/cache\\":\\"/tmp/cache\\" -e BUILDPACK_CACHE_DIR -w \\"/tmp/github/some/repo\\" renovate/ruby:2.7.4 bash -l -c \\"install-tool cocoapods 3.1.0 && pod install\\"",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
       "env": Object {
+        "BUILDPACK_CACHE_DIR": "/tmp/cache/buildpack",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
         "HTTP_PROXY": "http://example.com",

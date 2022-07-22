@@ -248,6 +248,7 @@ describe('modules/manager/cocoapods/artifacts', () => {
           'docker run --rm --name=renovate_ruby --label=renovate_child ' +
           '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
           '-v "/tmp/cache":"/tmp/cache" ' +
+          '-e BUILDPACK_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
           'renovate/ruby:2.7.4' +
           ' bash -l -c "' +
@@ -290,6 +291,7 @@ describe('modules/manager/cocoapods/artifacts', () => {
           'docker run --rm --name=renovate_ruby --label=renovate_child ' +
           '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
           '-v "/tmp/cache":"/tmp/cache" ' +
+          '-e BUILDPACK_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
           'renovate/ruby:latest' +
           ' bash -l -c "' +
