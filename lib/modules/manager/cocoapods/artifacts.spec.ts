@@ -1,5 +1,5 @@
 import { join } from 'upath';
-import { envMock, exec, mockExecAll } from '../../../../test/exec-util';
+import { envMock, mockExecAll } from '../../../../test/exec-util';
 import { env, fs, git, mocked } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
@@ -9,7 +9,6 @@ import * as _datasource from '../../datasource';
 import type { UpdateArtifactsConfig } from '../types';
 import { updateArtifacts } from '.';
 
-jest.mock('../../../util/exec/common');
 jest.mock('../../../util/exec/env');
 jest.mock('../../../util/git');
 jest.mock('../../../util/fs');
@@ -51,7 +50,7 @@ describe('modules/manager/cocoapods/artifacts', () => {
   });
 
   it('returns null if no Podfile.lock found', async () => {
-    const execSnapshots = mockExecAll(exec);
+    const execSnapshots = mockExecAll();
     expect(
       await updateArtifacts({
         packageFileName: 'Podfile',
@@ -64,7 +63,7 @@ describe('modules/manager/cocoapods/artifacts', () => {
   });
 
   it('returns null if no updatedDeps were provided', async () => {
-    const execSnapshots = mockExecAll(exec);
+    const execSnapshots = mockExecAll();
     expect(
       await updateArtifacts({
         packageFileName: 'Podfile',
@@ -77,7 +76,7 @@ describe('modules/manager/cocoapods/artifacts', () => {
   });
 
   it('returns null for invalid local directory', async () => {
-    const execSnapshots = mockExecAll(exec);
+    const execSnapshots = mockExecAll();
     GlobalConfig.set({
       localDir: '',
     });
@@ -94,7 +93,7 @@ describe('modules/manager/cocoapods/artifacts', () => {
   });
 
   it('returns null if updatedDeps is empty', async () => {
-    const execSnapshots = mockExecAll(exec);
+    const execSnapshots = mockExecAll();
     expect(
       await updateArtifacts({
         packageFileName: 'Podfile',
@@ -107,7 +106,7 @@ describe('modules/manager/cocoapods/artifacts', () => {
   });
 
   it('returns null if unchanged', async () => {
-    const execSnapshots = mockExecAll(exec);
+    const execSnapshots = mockExecAll();
     fs.findLocalSiblingOrParent.mockResolvedValueOnce('Podfile.lock');
     fs.readLocalFile.mockResolvedValueOnce('Current Podfile');
     git.getRepoStatus.mockResolvedValueOnce({
@@ -127,7 +126,7 @@ describe('modules/manager/cocoapods/artifacts', () => {
   });
 
   it('returns updated Podfile', async () => {
-    const execSnapshots = mockExecAll(exec);
+    const execSnapshots = mockExecAll();
     GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
     fs.getSiblingFileName.mockReturnValueOnce('Podfile.lock');
     fs.findLocalSiblingOrParent.mockResolvedValueOnce('Podfile');
@@ -149,7 +148,7 @@ describe('modules/manager/cocoapods/artifacts', () => {
   });
 
   it('returns updated Podfile and Pods files', async () => {
-    const execSnapshots = mockExecAll(exec);
+    const execSnapshots = mockExecAll();
     GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
     fs.getSiblingFileName.mockReturnValueOnce('Podfile.lock');
     fs.findLocalSiblingOrParent.mockResolvedValueOnce('Podfile.lock');
@@ -180,7 +179,7 @@ describe('modules/manager/cocoapods/artifacts', () => {
   });
 
   it('catches write error', async () => {
-    const execSnapshots = mockExecAll(exec);
+    const execSnapshots = mockExecAll();
     fs.getSiblingFileName.mockReturnValueOnce('Podfile.lock');
     fs.findLocalSiblingOrParent.mockResolvedValueOnce('Podfile.lock');
     fs.readLocalFile.mockResolvedValueOnce('Current Podfile');
@@ -201,7 +200,7 @@ describe('modules/manager/cocoapods/artifacts', () => {
   });
 
   it('returns pod exec error', async () => {
-    const execSnapshots = mockExecAll(exec, new Error('exec exception'));
+    const execSnapshots = mockExecAll(new Error('exec exception'));
     fs.getSiblingFileName.mockReturnValueOnce('Podfile.lock');
     fs.findLocalSiblingOrParent.mockResolvedValueOnce('Podfile.lock');
     fs.readLocalFile.mockResolvedValueOnce('Old Podfile.lock');
@@ -222,7 +221,7 @@ describe('modules/manager/cocoapods/artifacts', () => {
   });
 
   it('dynamically selects Docker image tag', async () => {
-    const execSnapshots = mockExecAll(exec);
+    const execSnapshots = mockExecAll();
 
     GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
 
@@ -261,7 +260,7 @@ describe('modules/manager/cocoapods/artifacts', () => {
   });
 
   it('falls back to the `latest` Docker image tag', async () => {
-    const execSnapshots = mockExecAll(exec);
+    const execSnapshots = mockExecAll();
 
     GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
 

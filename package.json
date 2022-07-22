@@ -153,7 +153,7 @@
     "chalk": "4.1.2",
     "changelog-filename-regex": "2.0.1",
     "clean-git-ref": "2.0.1",
-    "commander": "9.3.0",
+    "commander": "9.4.0",
     "conventional-commits-detector": "1.0.3",
     "crypto-random-string": "3.3.1",
     "deepmerge": "4.2.2",
@@ -212,7 +212,7 @@
     "upath": "2.0.1",
     "url-join": "4.0.1",
     "validate-npm-package-name": "4.0.0",
-    "xmldoc": "1.1.4"
+    "xmldoc": "1.2.0"
   },
   "optionalDependencies": {
     "re2": "1.17.7"
