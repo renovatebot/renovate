@@ -144,7 +144,7 @@ const repoGroups = {
   'mikro-orm': 'https://github.com/mikro-orm/mikro-orm',
   mockito: 'https://github.com/mockito/mockito',
   mstest: 'https://github.com/microsoft/testfx',
-  nest: ['https://github.com/nestjs/nest'],
+  nest: 'https://github.com/nestjs/nest',
   netty: 'https://github.com/netty/netty',
   neutrino: [
     'https://github.com/neutrinojs/neutrino',
