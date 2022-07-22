@@ -1,34 +1,28 @@
-import { spawn as _spawn } from 'child_process';
 import is from '@sindresorhus/is';
 import traverse from 'traverse';
 import upath from 'upath';
 import { rawExec as _exec } from '../lib/util/exec/common';
-import type { ExecOptions } from '../lib/util/exec/types';
+import type { RawExecOptions } from '../lib/util/exec/types';
 import { regEx } from '../lib/util/regex';
+import { mockedFunction } from './util';
 
-type CallOptions = ExecOptions | null | undefined;
+jest.mock('../lib/util/exec/common');
 
 // TODO: rename #16653
 export type ExecResult = { stdout: string; stderr: string } | Error;
 
-// TODO: fix type #7154
-export type ExecMock = jest.Mock<typeof _exec>;
-export const exec: ExecMock = _exec as any;
+export const exec = mockedFunction(_exec);
 
-export type SpawnMock = jest.MockedFunction<typeof _spawn>;
-export const spawn = _spawn as SpawnMock;
-
-// TODO: rename #16653
-interface ExecSnapshot {
+export interface ExecSnapshot {
   cmd: string;
-  options?: ExecOptions | null | undefined;
+  options?: RawExecOptions | null | undefined;
 }
 
 // TODO: rename #16653
 export type ExecSnapshots = ExecSnapshot[];
 
 // TODO: rename #16653
-export function execSnapshot(cmd: string, options?: CallOptions): ExecSnapshot {
+function execSnapshot(cmd: string, options?: RawExecOptions): ExecSnapshot {
   const snapshot = {
     cmd,
     options,
@@ -50,11 +44,10 @@ const defaultExecResult = { stdout: '', stderr: '' };
 
 // TODO: rename #16653
 export function mockExecAll(
-  execFn: ExecMock,
   execResult: ExecResult = defaultExecResult
 ): ExecSnapshots {
   const snapshots: ExecSnapshots = [];
-  execFn.mockImplementation((cmd, options) => {
+  exec.mockImplementation((cmd, options) => {
     snapshots.push(execSnapshot(cmd, options));
     if (execResult instanceof Error) {
       throw execResult;
@@ -65,13 +58,10 @@ export function mockExecAll(
 }
 
 // TODO: rename #16653
-export function mockExecSequence(
-  execFn: ExecMock,
-  execResults: ExecResult[]
-): ExecSnapshots {
+export function mockExecSequence(execResults: ExecResult[]): ExecSnapshots {
   const snapshots: ExecSnapshots = [];
   execResults.forEach((execResult) => {
-    execFn.mockImplementationOnce((cmd, options) => {
+    exec.mockImplementationOnce((cmd, options) => {
       snapshots.push(execSnapshot(cmd, options));
       if (execResult instanceof Error) {
         throw execResult;
