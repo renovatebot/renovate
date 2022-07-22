@@ -1,5 +1,5 @@
 import { join } from 'upath';
-import { envMock, exec, mockExecAll } from '../../../../test/exec-util';
+import { envMock, mockExecAll } from '../../../../test/exec-util';
 import { env, fs, hostRules } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
@@ -7,7 +7,6 @@ import * as docker from '../../../util/exec/docker';
 import type { UpdateArtifactsConfig } from '../types';
 import { updateArtifacts } from '.';
 
-jest.mock('../../../util/exec/common');
 jest.mock('../../../util/exec/env');
 jest.mock('../../../util/fs');
 jest.mock('../../../util/host-rules');
@@ -68,7 +67,7 @@ describe('modules/manager/mix/artifacts', () => {
 
   it('returns null if unchanged', async () => {
     fs.readLocalFile.mockResolvedValueOnce('Current mix.lock');
-    const execSnapshots = mockExecAll(exec);
+    const execSnapshots = mockExecAll();
     fs.readLocalFile.mockResolvedValueOnce('Current mix.lock');
     expect(
       await updateArtifacts({
@@ -86,7 +85,7 @@ describe('modules/manager/mix/artifacts', () => {
     GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
     fs.readLocalFile.mockResolvedValueOnce('Old mix.lock');
     fs.findLocalSiblingOrParent.mockResolvedValueOnce('mix.lock');
-    const execSnapshots = mockExecAll(exec);
+    const execSnapshots = mockExecAll();
     fs.readLocalFile.mockResolvedValueOnce('New mix.lock');
     expect(
       await updateArtifacts({
@@ -108,7 +107,7 @@ describe('modules/manager/mix/artifacts', () => {
     GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
     fs.readLocalFile.mockResolvedValueOnce('Old mix.lock');
     fs.findLocalSiblingOrParent.mockResolvedValueOnce('mix.lock');
-    const execSnapshots = mockExecAll(exec);
+    const execSnapshots = mockExecAll();
     fs.readLocalFile.mockResolvedValueOnce('New mix.lock');
     hostRules.find.mockReturnValueOnce({ token: 'valid_test_token' });
     hostRules.find.mockReturnValueOnce({});
@@ -148,7 +147,7 @@ describe('modules/manager/mix/artifacts', () => {
   it('returns updated mix.lock in subdir', async () => {
     GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
     fs.findLocalSiblingOrParent.mockResolvedValueOnce('subdir/mix.lock');
-    mockExecAll(exec);
+    mockExecAll();
     expect(
       await updateArtifacts({
         packageFileName: 'subdir/mix.exs',
@@ -181,9 +180,7 @@ describe('modules/manager/mix/artifacts', () => {
   it('catches exec errors', async () => {
     fs.readLocalFile.mockResolvedValueOnce('Current mix.lock');
     fs.findLocalSiblingOrParent.mockResolvedValueOnce('mix.lock');
-    exec.mockImplementationOnce(() => {
-      throw new Error('exec-error');
-    });
+    mockExecAll(new Error('exec-error'));
     expect(
       await updateArtifacts({
         packageFileName: 'mix.exs',
