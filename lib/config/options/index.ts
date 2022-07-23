@@ -822,7 +822,7 @@ const options: RenovateOptions[] = [
       type: 'string',
       format: 'uri',
     },
-    supportedManagers: ['helm-requirements', 'helmv3', 'helmfile'],
+    supportedManagers: ['helm-requirements', 'helmv3', 'helmfile', 'gitlabci'],
   },
   {
     name: 'defaultRegistryUrls',

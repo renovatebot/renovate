@@ -169,6 +169,40 @@ describe('workers/repository/config-migration/pr/index', () => {
       expect(platform.createPr.mock.calls[0][0].prBody).toMatchSnapshot();
     });
 
+    it('creates non-semantic PR title', async () => {
+      await ensureConfigMigrationPr(
+        {
+          ...config,
+          prHeader: '\r\r\nThis should not be the first line of the PR',
+          prFooter:
+            'There should be several empty lines at the end of the PR\r\n\n\n',
+        },
+        migratedData
+      );
+      expect(platform.createPr).toHaveBeenCalledTimes(1);
+      expect(platform.createPr.mock.calls[0][0].prTitle).toBe(
+        'Migrate config renovate.json'
+      );
+    });
+
+    it('creates semantic PR title', async () => {
+      await ensureConfigMigrationPr(
+        {
+          ...config,
+          commitMessagePrefix: '',
+          semanticCommits: 'enabled',
+          prHeader: '\r\r\nThis should not be the first line of the PR',
+          prFooter:
+            'There should be several empty lines at the end of the PR\r\n\n\n',
+        },
+        migratedData
+      );
+      expect(platform.createPr).toHaveBeenCalledTimes(1);
+      expect(platform.createPr.mock.calls[0][0].prTitle).toBe(
+        'chore(config): migrate config renovate.json'
+      );
+    });
+
     it('creates PR with footer and header using templating', async () => {
       config.baseBranch = 'some-branch';
       config.repository = 'test';

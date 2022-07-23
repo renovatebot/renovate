@@ -116,14 +116,15 @@ export async function detectGhe(token: string): Promise<void> {
 
 export async function initPlatform({
   endpoint,
-  token,
+  token: originalToken,
   username,
   gitAuthor,
 }: PlatformParams): Promise<PlatformResult> {
+  let token = originalToken;
   if (!token) {
-    throw new Error('Init: You must configure a GitHub personal access token');
+    throw new Error('Init: You must configure a GitHub token');
   }
-
+  token = token.replace(/^ghs_/, 'x-access-token:ghs_');
   platformConfig.isGHApp = token.startsWith('x-access-token:');
 
   if (endpoint) {
@@ -164,6 +165,7 @@ export async function initPlatform({
     endpoint: platformConfig.endpoint,
     gitAuthor: gitAuthor ?? discoveredGitAuthor,
     renovateUsername,
+    token,
   };
 
   return platformResult;

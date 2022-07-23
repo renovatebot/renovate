@@ -1,10 +1,16 @@
-import { git } from '../../../test/util';
-import type { RenovateConfig } from '../../config/types';
+import { git, mockedFunction } from '../../../test/util';
+import type { AllConfig, RenovateConfig } from '../../config/types';
+import { initPlatform as _initPlatform } from '../../modules/platform';
 import { globalInitialize } from './initialize';
 
 jest.mock('../../util/git');
+const initPlatform = mockedFunction(_initPlatform);
 
 describe('workers/global/initialize', () => {
+  beforeEach(() => {
+    initPlatform.mockImplementationOnce((r) => Promise.resolve(r));
+  });
+
   describe('checkVersions()', () => {
     it('throws if invalid version', async () => {
       const config: RenovateConfig = {};
@@ -13,7 +19,13 @@ describe('workers/global/initialize', () => {
     });
 
     it('returns if valid git version', async () => {
-      const config: RenovateConfig = {};
+      const config: RenovateConfig = { prCommitsPerRunLimit: 2 };
+      git.validateGitVersion.mockResolvedValueOnce(true);
+      await expect(globalInitialize(config)).toResolve();
+    });
+
+    it('supports buildpack', async () => {
+      const config: AllConfig = { binarySource: 'docker' };
       git.validateGitVersion.mockResolvedValueOnce(true);
       await expect(globalInitialize(config)).toResolve();
     });

@@ -1,5 +1,6 @@
 import url from 'url';
 import is from '@sindresorhus/is';
+import upath from 'upath';
 import { logger } from '../../../logger';
 import { getSiblingFileName, readLocalFile } from '../../../util/fs';
 import { newlineRegex, regEx } from '../../../util/regex';
@@ -409,14 +410,32 @@ function processApplyFrom({
     scriptFile = interpolateString(token.children, variables);
   }
 
+  if (tokenMap.parentPath) {
+    let parentPath: string | null = tokenMap.parentPath.value ?? null;
+    if (tokenMap.parentPath.type === TokenType.Word) {
+      parentPath = coercePotentialString(tokenMap.parentPath, variables);
+    } else if (tokenMap.parentPath.type === TokenType.StringInterpolation) {
+      const token = tokenMap.parentPath as StringInterpolation;
+      parentPath = interpolateString(token.children, variables);
+    }
+    if (parentPath && scriptFile) {
+      scriptFile = upath.join(parentPath, scriptFile);
+    }
+  }
+
   return { scriptFile };
 }
 
 const matcherConfigs: SyntaxMatchConfig[] = [
   {
-    // ext.foo.bar = 'baz'
+    // ext.foo = 'baz'
+    // project.foo = 'baz'
+    // rootProject.foo = 'baz'
     matchers: [
-      { matchType: TokenType.Word, matchValue: 'ext' },
+      {
+        matchType: TokenType.Word,
+        matchValue: ['ext', 'project', 'rootProject'],
+      },
       { matchType: TokenType.Dot },
       { matchType: TokenType.Word, tokenMapKey: 'keyToken' },
       { matchType: TokenType.Assignment },
@@ -931,7 +950,7 @@ const matcherConfigs: SyntaxMatchConfig[] = [
   },
   {
     // apply from: 'foo.gradle'
-    // apply from: "$somedir/foo.gradle"
+    // apply from: "${somedir}/foo.gradle"
     matchers: [
       { matchType: TokenType.Word, matchValue: 'apply' },
       { matchType: TokenType.Word, matchValue: 'from' },
@@ -944,7 +963,7 @@ const matcherConfigs: SyntaxMatchConfig[] = [
     handler: processApplyFrom,
   },
   {
-    // apply from: file("$somedir/foo.gradle")
+    // apply from: file("${somedir}/foo.gradle")
     matchers: [
       { matchType: TokenType.Word, matchValue: 'apply' },
       { matchType: TokenType.Word, matchValue: 'from' },
@@ -960,7 +979,7 @@ const matcherConfigs: SyntaxMatchConfig[] = [
     handler: processApplyFrom,
   },
   {
-    // apply from: new File("$somedir/foo.gradle")
+    // apply from: new File("${somedir}/foo.gradle")
     matchers: [
       { matchType: TokenType.Word, matchValue: 'apply' },
       { matchType: TokenType.Word, matchValue: 'from' },
@@ -977,8 +996,54 @@ const matcherConfigs: SyntaxMatchConfig[] = [
     handler: processApplyFrom,
   },
   {
+    // apply from: new File(somedir, "${otherdir}/foo.gradle")
+    // apply from: new File("${somedir}", "${otherdir}/foo.gradle")
+    matchers: [
+      { matchType: TokenType.Word, matchValue: 'apply' },
+      { matchType: TokenType.Word, matchValue: 'from' },
+      { matchType: TokenType.Colon },
+      { matchType: TokenType.Word, matchValue: 'new' },
+      { matchType: TokenType.Word, matchValue: 'File' },
+      { matchType: TokenType.LeftParen },
+      {
+        matchType: [
+          TokenType.Word,
+          TokenType.String,
+          TokenType.StringInterpolation,
+        ],
+        tokenMapKey: 'parentPath',
+      },
+      { matchType: TokenType.Comma },
+      {
+        matchType: [TokenType.String, TokenType.StringInterpolation],
+        tokenMapKey: 'scriptFile',
+      },
+      { matchType: TokenType.RightParen },
+    ],
+    handler: processApplyFrom,
+  },
+  {
+    // apply from: project.file("${somedir}/foo.gradle")
+    // apply from: rootProject.file("${somedir}/foo.gradle")
+    matchers: [
+      { matchType: TokenType.Word, matchValue: 'apply' },
+      { matchType: TokenType.Word, matchValue: 'from' },
+      { matchType: TokenType.Colon },
+      { matchType: TokenType.Word, matchValue: ['project', 'rootProject'] },
+      { matchType: TokenType.Dot },
+      { matchType: TokenType.Word, matchValue: 'file' },
+      { matchType: TokenType.LeftParen },
+      {
+        matchType: [TokenType.String, TokenType.StringInterpolation],
+        tokenMapKey: 'scriptFile',
+      },
+      { matchType: TokenType.RightParen },
+    ],
+    handler: processApplyFrom,
+  },
+  {
     // apply(from = 'foo.gradle')
-    // apply(from = "$somedir/foo.gradle")
+    // apply(from = "${somedir}/foo.gradle")
     matchers: [
       { matchType: TokenType.Word, matchValue: 'apply' },
       { matchType: TokenType.LeftParen },
@@ -993,7 +1058,7 @@ const matcherConfigs: SyntaxMatchConfig[] = [
     handler: processApplyFrom,
   },
   {
-    // apply(from = File("$somedir/foo.gradle"))
+    // apply(from = File("${somedir}/foo.gradle"))
     matchers: [
       { matchType: TokenType.Word, matchValue: 'apply' },
       { matchType: TokenType.LeftParen },
@@ -1001,6 +1066,33 @@ const matcherConfigs: SyntaxMatchConfig[] = [
       { matchType: TokenType.Assignment },
       { matchType: TokenType.Word, matchValue: 'File' },
       { matchType: TokenType.LeftParen },
+      {
+        matchType: [TokenType.String, TokenType.StringInterpolation],
+        tokenMapKey: 'scriptFile',
+      },
+      { matchType: TokenType.RightParen },
+    ],
+    handler: processApplyFrom,
+  },
+  {
+    // apply(from = File(somedir, "${otherdir}/foo.gradle"))
+    // apply(from = File("${somedir}", "${otherdir}/foo.gradle")
+    matchers: [
+      { matchType: TokenType.Word, matchValue: 'apply' },
+      { matchType: TokenType.LeftParen },
+      { matchType: TokenType.Word, matchValue: 'from' },
+      { matchType: TokenType.Assignment },
+      { matchType: TokenType.Word, matchValue: 'File' },
+      { matchType: TokenType.LeftParen },
+      {
+        matchType: [
+          TokenType.Word,
+          TokenType.String,
+          TokenType.StringInterpolation,
+        ],
+        tokenMapKey: 'parentPath',
+      },
+      { matchType: TokenType.Comma },
       {
         matchType: [TokenType.String, TokenType.StringInterpolation],
         tokenMapKey: 'scriptFile',

@@ -3,22 +3,32 @@ import Git from 'simple-git';
 import tmp from 'tmp-promise';
 import { mocked } from '../../../test/util';
 import { GlobalConfig } from '../../config/global';
-import { CONFIG_VALIDATION } from '../../constants/error-messages';
+import {
+  CONFIG_VALIDATION,
+  INVALID_PATH,
+} from '../../constants/error-messages';
+import * as _repoCache from '../cache/repository';
+import type { BranchCache } from '../cache/repository/types';
 import { newlineRegex, regEx } from '../regex';
 import * as _conflictsCache from './conflicts-cache';
+import * as _modifiedCache from './modified-cache';
 import type { FileChange } from './types';
 import * as git from '.';
 import { setNoVerify } from '.';
 
 jest.mock('./conflicts-cache');
+jest.mock('./modified-cache');
 jest.mock('delay');
+jest.mock('../cache/repository');
+const repoCache = mocked(_repoCache);
 const conflictsCache = mocked(_conflictsCache);
+const modifiedCache = mocked(_modifiedCache);
 
 // Class is no longer exported
 const SimpleGit = Git().constructor as { prototype: ReturnType<typeof Git> };
 
 describe('util/git/index', () => {
-  jest.setTimeout(25000);
+  jest.setTimeout(60000);
 
   const masterCommitDate = new Date();
   masterCommitDate.setMilliseconds(0);
@@ -68,6 +78,14 @@ describe('util/git/index', () => {
     await repo.addConfig('user.email', 'custom@example.com');
     await repo.commit('custom message');
 
+    await repo.checkoutBranch('renovate/nested_files', defaultBranch);
+    await fs.mkdirp(base.path + '/bin/');
+    await fs.writeFile(base.path + '/bin/nested', 'nested');
+    await fs.writeFile(base.path + '/root', 'root');
+    await repo.add(['root', 'bin/nested']);
+    await repo.addConfig('user.email', 'custom@example.com');
+    await repo.commit('nested message');
+
     await repo.checkoutBranch('renovate/equal_branch', defaultBranch);
 
     await repo.checkout(defaultBranch);
@@ -99,14 +117,14 @@ describe('util/git/index', () => {
   });
 
   afterEach(async () => {
-    await tmpDir.cleanup();
-    await origin.cleanup();
+    await tmpDir?.cleanup();
+    await origin?.cleanup();
     jest.restoreAllMocks();
   });
 
   afterAll(async () => {
     process.env = OLD_ENV;
-    await base.cleanup();
+    await base?.cleanup();
   });
 
   describe('gitRetry', () => {
@@ -223,22 +241,39 @@ describe('util/git/index', () => {
     });
   });
 
-  describe('isBranchStale()', () => {
+  describe('isBranchBehindBase()', () => {
     it('should return false if same SHA as master', async () => {
-      expect(await git.isBranchStale('renovate/future_branch')).toBeFalse();
+      repoCache.getCache.mockReturnValueOnce({});
+      expect(
+        await git.isBranchBehindBase('renovate/future_branch')
+      ).toBeFalse();
     });
 
     it('should return true if SHA different from master', async () => {
-      expect(await git.isBranchStale('renovate/past_branch')).toBeTrue();
+      repoCache.getCache.mockReturnValueOnce({});
+      expect(await git.isBranchBehindBase('renovate/past_branch')).toBeTrue();
     });
 
     it('should return result even if non-default and not under branchPrefix', async () => {
-      expect(await git.isBranchStale('develop')).toBeTrue();
-      expect(await git.isBranchStale('develop')).toBeTrue(); // cache
+      const parentSha = await git.getBranchParentSha('develop');
+      repoCache.getCache.mockReturnValueOnce({}).mockReturnValueOnce({
+        branches: [
+          {
+            branchName: 'develop',
+            parentSha: parentSha,
+          } as BranchCache,
+        ],
+      });
+      expect(await git.isBranchBehindBase('develop')).toBeTrue();
+      expect(await git.isBranchBehindBase('develop')).toBeTrue(); // cache
     });
   });
 
   describe('isBranchModified()', () => {
+    beforeEach(() => {
+      modifiedCache.getCachedModifiedResult.mockReturnValue(null);
+    });
+
     it('should return false when branch is not found', async () => {
       expect(await git.isBranchModified('renovate/not_found')).toBeFalse();
     });
@@ -257,6 +292,11 @@ describe('util/git/index', () => {
 
     it('should return true when custom author is unknown', async () => {
       expect(await git.isBranchModified('renovate/custom_author')).toBeTrue();
+    });
+
+    it('should return value stored in modifiedCacheResult', async () => {
+      modifiedCache.getCachedModifiedResult.mockReturnValue(true);
+      expect(await git.isBranchModified('renovate/future_branch')).toBeTrue();
     });
   });
 
@@ -962,6 +1002,30 @@ describe('util/git/index', () => {
           type: 'blob',
         },
       ]);
+    });
+  });
+
+  describe('getRepoStatus', () => {
+    it('should pass options into git status', async () => {
+      await git.checkoutBranch('renovate/nested_files');
+
+      await fs.writeFile(tmpDir.path + '/bin/nested', 'new nested');
+      await fs.writeFile(tmpDir.path + '/root', 'new root');
+      const resp = await git.getRepoStatus('bin');
+
+      expect(resp.modified).toStrictEqual(['bin/nested']);
+    });
+
+    it('should reject when trying to access directory out of localDir', async () => {
+      GlobalConfig.set({ localDir: tmpDir.path });
+      await git.checkoutBranch('renovate/nested_files');
+
+      await fs.writeFile(tmpDir.path + '/bin/nested', 'new nested');
+      await fs.writeFile(tmpDir.path + '/root', 'new root');
+
+      await expect(git.getRepoStatus('../../bin')).rejects.toThrow(
+        INVALID_PATH
+      );
     });
   });
 });
