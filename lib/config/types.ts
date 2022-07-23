@@ -10,7 +10,12 @@ export type RenovateConfigStage =
   | 'branch'
   | 'pr';
 
-export type RepositoryCacheConfig = 'disabled' | 'enabled' | 'reset';
+export type RepositoryCacheConfig =
+  | 'disabled'
+  | 'enabled'
+  | 'reset'
+  | 'local'
+  | string;
 export type DryRunConfig = 'extract' | 'lookup' | 'full';
 export type RequiredConfig = 'required' | 'optional' | 'ignored';
 
