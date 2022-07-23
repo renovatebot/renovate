@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import { loadAll } from 'js-yaml';
 import { regEx } from '../../../util/regex';
 import { GitTagsDatasource } from '../../datasource/git-tags';
@@ -37,44 +38,45 @@ function extractGitRepo(doc: GitRepo): PackageDependency {
 }
 
 function extractFleetFile(doc: FleetFileHelm): PackageDependency {
-  const tempDep: PackageDependency = {
+  const dep: PackageDependency = {
     depType: 'fleet',
     datasource: HelmDatasource.id,
   };
 
   if (!doc.chart) {
     return {
-      ...tempDep,
+      ...dep,
       skipReason: 'missing-depname',
     };
   }
-  tempDep.depName = doc.chart;
-  tempDep.packageName = doc.chart;
+  dep.depName = doc.chart;
 
   if (!doc.repo) {
     if (checkIfStringIsPath(doc.chart)) {
       return {
-        ...tempDep,
+        ...dep,
         skipReason: 'local-chart',
       };
     }
     return {
-      ...tempDep,
+      ...dep,
       skipReason: 'no-repository',
     };
   }
-  tempDep.registryUrls = [doc.repo];
+  dep.registryUrls = [doc.repo];
 
   const currentValue = doc.version;
   if (!doc.version) {
     return {
-      ...tempDep,
+      ...dep,
       skipReason: 'no-version',
     };
   }
-  tempDep.currentValue = currentValue;
 
-  return tempDep;
+  return {
+    ...dep,
+    currentValue,
+  };
 }
 
 export function extractPackageFile(
@@ -90,7 +92,7 @@ export function extractPackageFile(
     // TODO: fix me (#9610)
     const docs = loadAll(content, null, { json: true }) as FleetFile[];
     const fleetDeps = docs
-      .filter((doc) => Boolean(doc?.helm))
+      .filter((doc) => is.truthy(doc?.helm))
       .flatMap((doc) => extractFleetFile(doc.helm));
 
     deps.push(...fleetDeps);
