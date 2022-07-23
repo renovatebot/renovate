@@ -365,7 +365,7 @@ describe('config/presets/index', () => {
     });
 
     it('resolves shallow config in case of local and github extend', async () => {
-      config.extends = ['config:base', 'local>username/preset-repo'];
+      config.extends = ['config:base', 'some/repo'];
       config.packageRules = [
         {
           matchManagers: ['github-actions'],
