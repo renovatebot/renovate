@@ -336,15 +336,16 @@ describe('workers/repository/update/branch/index', () => {
         labels: ['rebase'],
       } as Pr);
       git.isBranchModified.mockResolvedValueOnce(true);
+      const configAndManagersHash = hasha([
+        JSON.stringify(config),
+        managersHash(config),
+      ]);
       const res = await branchWorker.processBranch(config);
       expect(res).toEqual({
         branchExists: true,
         prNo: undefined,
         result: 'error',
-        configAndManagersHash: hasha([
-          JSON.stringify(config),
-          managersHash(config),
-        ]),
+        configAndManagersHash: configAndManagersHash,
       });
     });
 
@@ -360,15 +361,16 @@ describe('workers/repository/update/branch/index', () => {
         body: '**Rebasing**: something',
       } as Pr);
       git.isBranchModified.mockResolvedValueOnce(true);
+      const configAndManagersHash = hasha([
+        JSON.stringify(config),
+        managersHash(config),
+      ]);
       const res = await branchWorker.processBranch(config);
       expect(res).toEqual({
         branchExists: true,
         prNo: undefined,
         result: 'pr-edited',
-        configAndManagersHash: hasha([
-          JSON.stringify(config),
-          managersHash(config),
-        ]),
+        configAndManagersHash: configAndManagersHash,
       });
     });
 
@@ -385,6 +387,22 @@ describe('workers/repository/update/branch/index', () => {
       } as Pr);
       git.isBranchModified.mockResolvedValueOnce(false);
       config.baseBranch = 'master';
+      const configAndManagersHash = hasha([
+        JSON.stringify(config),
+        managersHash(config),
+      ]);
+      const res = await branchWorker.processBranch(config);
+      expect(res).toEqual({
+        branchExists: true,
+        prNo: undefined,
+        result: 'pr-edited',
+        configAndManagersHash: configAndManagersHash,
+      });
+    });
+
+    it('skips branch if branch edited and no PR found', async () => {
+      git.branchExists.mockReturnValue(true);
+      git.isBranchModified.mockResolvedValueOnce(true);
       const res = await branchWorker.processBranch(config);
       expect(res).toEqual({
         branchExists: true,
@@ -397,21 +415,10 @@ describe('workers/repository/update/branch/index', () => {
       });
     });
 
-    it('skips branch if branch edited and no PR found', async () => {
-      git.branchExists.mockReturnValue(true);
-      git.isBranchModified.mockResolvedValueOnce(true);
-      const res = await branchWorker.processBranch(config);
-      expect(res).toEqual({
-        branchExists: true,
-        prNo: undefined,
-        result: 'pr-edited',
-      });
-    });
-
     it('continues branch if branch edited and but PR found', async () => {
       git.branchExists.mockReturnValue(true);
       git.isBranchModified.mockResolvedValueOnce(true);
-      git.getBranchCommit.mockReturnValueOnce('123test');
+      git.getBranchCommit.mockReturnValue('123test');
       platform.findPr.mockResolvedValueOnce({ sha: '123test' } as any);
       const res = await branchWorker.processBranch(config);
       expect(res).toEqual({
@@ -746,18 +753,18 @@ describe('workers/repository/update/branch/index', () => {
         artifactErrors: [],
         updatedArtifacts: [partial<FileChange>({})],
       } as WriteExistingFilesResult);
-      const testConfig = {
+      const inconfig = {
         ...config,
         ignoreTests: true,
         prCreation: 'not-pending',
       } as BranchConfig;
-      expect(await branchWorker.processBranch(testConfig)).toEqual({
+      expect(await branchWorker.processBranch(inconfig)).toEqual({
         branchExists: true,
         prNo: undefined,
         result: 'pending',
         configAndManagersHash: hasha([
-          JSON.stringify(testConfig),
-          managersHash(testConfig),
+          JSON.stringify(inconfig),
+          managersHash(inconfig),
         ]),
       });
 
@@ -830,17 +837,17 @@ describe('workers/repository/update/branch/index', () => {
       );
       prAutomerge.checkAutoMerge.mockResolvedValueOnce({ automerged: false });
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
-      const testConfig = {
+      const inconfig = {
         ...config,
         automerge: true,
         rebaseWhen: 'conflicted',
       };
-      await expect(branchWorker.processBranch(testConfig)).resolves.toEqual({
+      await expect(branchWorker.processBranch(inconfig)).resolves.toEqual({
         branchExists: true,
         result: BranchResult.NotScheduled,
         configAndManagersHash: hasha([
-          JSON.stringify(testConfig),
-          managersHash(testConfig),
+          JSON.stringify(inconfig),
+          managersHash(inconfig),
         ]),
       });
       expect(logger.debug).toHaveBeenCalledWith(
@@ -972,6 +979,10 @@ describe('workers/repository/update/branch/index', () => {
         branchExists: false,
         prNo: undefined,
         result: 'error',
+        configAndManagersHash: hasha([
+          JSON.stringify(config),
+          managersHash(config),
+        ]),
       });
     });
 
@@ -988,6 +999,10 @@ describe('workers/repository/update/branch/index', () => {
         branchExists: true,
         prNo: undefined,
         result: 'pr-created',
+        configAndManagersHash: hasha([
+          JSON.stringify(config),
+          managersHash(config),
+        ]),
       });
     });
 
@@ -1009,6 +1024,10 @@ describe('workers/repository/update/branch/index', () => {
         branchExists: true,
         prNo: undefined,
         result: 'done',
+        configAndManagersHash: hasha([
+          JSON.stringify(config),
+          managersHash(config),
+        ]),
       });
     });
 
@@ -1022,6 +1041,10 @@ describe('workers/repository/update/branch/index', () => {
         branchExists: false,
         prNo: undefined,
         result: 'already-existed',
+        configAndManagersHash: hasha([
+          JSON.stringify(config),
+          managersHash(config),
+        ]),
       });
     });
 
@@ -1036,10 +1059,15 @@ describe('workers/repository/update/branch/index', () => {
       } as Pr);
       git.isBranchModified.mockResolvedValueOnce(true);
       GlobalConfig.set({ ...adminConfig, dryRun: 'full' });
+      const configAndManagersHash = hasha([
+        JSON.stringify(config),
+        managersHash(config),
+      ]);
       expect(await branchWorker.processBranch(config)).toEqual({
         branchExists: true,
         prNo: undefined,
         result: 'pr-edited',
+        configAndManagersHash: configAndManagersHash,
       });
     });
 
@@ -1065,17 +1093,20 @@ describe('workers/repository/update/branch/index', () => {
       schedule.isScheduledNow.mockReturnValueOnce(false);
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
       GlobalConfig.set({ ...adminConfig, dryRun: 'full' });
-      expect(
-        await branchWorker.processBranch({
-          ...config,
-          updateType: 'lockFileMaintenance',
-          reuseExistingBranch: false,
-          updatedArtifacts: [{ type: 'deletion', path: 'dummy' }],
-        })
-      ).toEqual({
+      const inconfig = {
+        ...config,
+        updateType: 'lockFileMaintenance',
+        reuseExistingBranch: false,
+        updatedArtifacts: [{ type: 'deletion', path: 'dummy' }],
+      } as BranchConfig;
+      expect(await branchWorker.processBranch(inconfig)).toEqual({
         branchExists: true,
         prNo: undefined,
         result: 'done',
+        configAndManagersHash: hasha([
+          JSON.stringify(inconfig),
+          managersHash(inconfig),
+        ]),
       });
     });
 
@@ -1105,15 +1136,19 @@ describe('workers/repository/update/branch/index', () => {
       } as ResultWithPr);
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
       GlobalConfig.set({ ...adminConfig, dryRun: 'full' });
-      expect(
-        await branchWorker.processBranch({
-          ...config,
-          artifactErrors: [{}],
-        })
-      ).toEqual({
+      // TODO: some error
+      const inconfig = {
+        ...config,
+        artifactErrors: [{}],
+      } as BranchConfig;
+      expect(await branchWorker.processBranch(inconfig)).toEqual({
         branchExists: true,
         prNo: undefined,
         result: 'done',
+        configAndManagersHash: hasha([
+          JSON.stringify(inconfig),
+          managersHash(inconfig),
+        ]),
       });
     });
 
@@ -1141,17 +1176,20 @@ describe('workers/repository/update/branch/index', () => {
       git.isBranchModified.mockResolvedValueOnce(true);
       schedule.isScheduledNow.mockReturnValueOnce(false);
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
-      expect(
-        await branchWorker.processBranch({
-          ...config,
-          updateType: 'lockFileMaintenance',
-          reuseExistingBranch: false,
-          updatedArtifacts: [{ type: 'deletion', path: 'dummy' }],
-        })
-      ).toEqual({
+      const inconfig = {
+        ...config,
+        updateType: 'lockFileMaintenance',
+        reuseExistingBranch: false,
+        updatedArtifacts: [{ type: 'deletion', path: 'dummy' }],
+      } as BranchConfig;
+      expect(await branchWorker.processBranch(inconfig)).toEqual({
         branchExists: true,
         prNo: undefined,
         result: 'done',
+        configAndManagersHash: hasha([
+          JSON.stringify(inconfig),
+          managersHash(inconfig),
+        ]),
       });
     });
 
@@ -1177,19 +1215,20 @@ describe('workers/repository/update/branch/index', () => {
       git.isBranchModified.mockResolvedValueOnce(true);
       schedule.isScheduledNow.mockReturnValueOnce(false);
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
-      expect(
-        await branchWorker.processBranch({
-          ...config,
-          dependencyDashboardChecks: { 'renovate/some-branch': 'true' },
-          updatedArtifacts: [{ type: 'deletion', path: 'dummy' }],
-        })
-      ).toMatchInlineSnapshot(`
-        Object {
-          "branchExists": true,
-          "prNo": undefined,
-          "result": "no-work",
-        }
-      `);
+      const inconfig = {
+        ...config,
+        dependencyDashboardChecks: { 'renovate/some-branch': 'true' },
+        updatedArtifacts: [{ type: 'deletion', path: 'dummy' }],
+      } as BranchConfig;
+      expect(await branchWorker.processBranch(inconfig)).toEqual({
+        branchExists: true,
+        prNo: undefined,
+        result: 'no-work',
+        configAndManagersHash: hasha([
+          JSON.stringify(inconfig),
+          managersHash(inconfig),
+        ]),
+      });
       expect(commit.commitFilesToBranch).not.toHaveBeenCalled();
     });
 
@@ -1218,19 +1257,30 @@ describe('workers/repository/update/branch/index', () => {
       git.isBranchModified.mockResolvedValueOnce(true);
       schedule.isScheduledNow.mockReturnValueOnce(false);
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
-      expect(
-        await branchWorker.processBranch({
-          ...config,
-          reuseExistingBranch: false,
-          updatedArtifacts: [{ type: 'deletion', path: 'dummy' }],
-        })
-      ).toMatchInlineSnapshot(`
+      const inconfig = {
+        ...config,
+        reuseExistingBranch: false,
+        updatedArtifacts: [{ type: 'deletion', path: 'dummy' }],
+      } as BranchConfig;
+      expect(await branchWorker.processBranch(inconfig)).toMatchInlineSnapshot(
+        {
+          branchExists: true,
+          prNo: undefined,
+          result: 'done',
+          configAndManagersHash: hasha([
+            JSON.stringify(inconfig),
+            managersHash(inconfig),
+          ]),
+        },
+        `
         Object {
           "branchExists": true,
+          "configAndManagersHash": "19fea338fb3eba596231b83bc77789d000447787bfdd3f07703a515312d3f6164932ba921102f1a825688adceff4f65912752419da91c8847698f3234ab98691",
           "prNo": undefined,
           "result": "done",
         }
-      `);
+      `
+      );
       expect(commit.commitFilesToBranch).toHaveBeenCalled();
     });
 
@@ -1290,8 +1340,7 @@ describe('workers/repository/update/branch/index', () => {
         exposeAllEnv: true,
         localDir: '/localDir',
       });
-
-      const result = await branchWorker.processBranch({
+      const inconfig = {
         ...config,
         postUpgradeTasks: {
           executionMode: 'update',
@@ -1309,12 +1358,16 @@ describe('workers/repository/update/branch/index', () => {
             },
           } as BranchUpgradeConfig,
         ],
-      });
-
+      } as BranchConfig;
+      const result = await branchWorker.processBranch(inconfig);
       expect(result).toEqual({
         branchExists: true,
         prNo: undefined,
         result: 'done',
+        configAndManagersHash: hasha([
+          JSON.stringify(inconfig),
+          managersHash(inconfig),
+        ]),
       });
       const errorMessage = expect.stringContaining(
         "Post-upgrade command 'disallowed task' has not been added to the allowed list in allowedPostUpgradeCommand"
@@ -1464,7 +1517,7 @@ describe('workers/repository/update/branch/index', () => {
         exposeAllEnv: true,
         localDir: '/localDir',
       });
-      const result = await branchWorker.processBranch({
+      const inconfig = {
         ...config,
         postUpgradeTasks: {
           executionMode: 'update',
@@ -1482,12 +1535,16 @@ describe('workers/repository/update/branch/index', () => {
             },
           } as BranchUpgradeConfig,
         ],
-      });
-
+      } as BranchConfig;
+      const result = await branchWorker.processBranch(inconfig);
       expect(result).toEqual({
         branchExists: true,
         prNo: undefined,
         result: 'done',
+        configAndManagersHash: hasha([
+          JSON.stringify(inconfig),
+          managersHash(inconfig),
+        ]),
       });
       expect(exec.exec).toHaveBeenCalledWith('echo {{{versioning}}}', {
         cwd: '/localDir',
@@ -1612,6 +1669,10 @@ describe('workers/repository/update/branch/index', () => {
         branchExists: true,
         prNo: undefined,
         result: 'done',
+        configAndManagersHash: hasha([
+          JSON.stringify(inconfig),
+          managersHash(inconfig),
+        ]),
       });
       expect(exec.exec).toHaveBeenNthCalledWith(1, 'echo some-dep-name-1', {
         cwd: '/localDir',
@@ -1756,6 +1817,10 @@ describe('workers/repository/update/branch/index', () => {
         branchExists: true,
         prNo: undefined,
         result: 'done',
+        configAndManagersHash: hasha([
+          JSON.stringify(inconfig),
+          managersHash(inconfig),
+        ]),
       });
       expect(exec.exec).toHaveBeenNthCalledWith(1, 'echo hardcoded-string', {
         cwd: '/localDir',
@@ -1801,19 +1866,19 @@ describe('workers/repository/update/branch/index', () => {
           state: PrState.Open,
         })
       );
-      const testConfig = {
+      const inconfig = {
         ...config,
         branchName: 'new/some-branch',
         branchPrefix: 'new/',
         branchPrefixOld: 'old/',
       };
-      expect(await branchWorker.processBranch(testConfig)).toEqual({
+      expect(await branchWorker.processBranch(inconfig)).toEqual({
         branchExists: true,
         prNo: undefined,
         result: 'done',
         configAndManagersHash: hasha([
-          JSON.stringify(testConfig),
-          managersHash(testConfig),
+          JSON.stringify(inconfig),
+          managersHash(inconfig),
         ]),
       });
       expect(logger.debug).toHaveBeenCalledWith('Found existing branch PR');
