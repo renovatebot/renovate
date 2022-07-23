@@ -20,6 +20,8 @@ import * as _npmPostExtract from '../../../../modules/manager/npm/post-update';
 import type { WriteExistingFilesResult } from '../../../../modules/manager/npm/post-update/types';
 import { hashBody } from '../../../../modules/platform/pr-body';
 import { PrState } from '../../../../types';
+import * as _repoCache from '../../../../util/cache/repository';
+import type { BranchCache } from '../../../../util/cache/repository/types';
 import * as _exec from '../../../../util/exec';
 import type { FileChange, StatusResult } from '../../../../util/git/types';
 import * as _mergeConfidence from '../../../../util/merge-confidence';
@@ -55,6 +57,7 @@ jest.mock('../../../../util/sanitize');
 jest.mock('../../../../util/fs');
 jest.mock('../../../../util/git');
 jest.mock('../../../global/limits');
+jest.mock('../../../../util/cache/repository');
 
 const getUpdated = mocked(_getUpdated);
 const schedule = mocked(_schedule);
@@ -69,6 +72,7 @@ const prWorker = mocked(_prWorker);
 const exec = mocked(_exec);
 const sanitize = mocked(_sanitize);
 const limits = mocked(_limits);
+const repoCache = mocked(_repoCache);
 
 const adminConfig: RepoGlobalConfig = { localDir: '', cacheDir: '' };
 
@@ -126,6 +130,7 @@ describe('workers/repository/update/branch/index', () => {
       });
       GlobalConfig.set(adminConfig);
       sanitize.sanitize.mockImplementation((input) => input);
+      repoCache.getCache.mockReturnValue({});
     });
 
     afterEach(() => {
@@ -1262,25 +1267,15 @@ describe('workers/repository/update/branch/index', () => {
         reuseExistingBranch: false,
         updatedArtifacts: [{ type: 'deletion', path: 'dummy' }],
       } as BranchConfig;
-      expect(await branchWorker.processBranch(inconfig)).toMatchInlineSnapshot(
-        {
-          branchExists: true,
-          prNo: undefined,
-          result: 'done',
-          configAndManagersHash: hasha([
-            JSON.stringify(inconfig),
-            managersHash(inconfig),
-          ]),
-        },
-        `
-        Object {
-          "branchExists": true,
-          "configAndManagersHash": "19fea338fb3eba596231b83bc77789d000447787bfdd3f07703a515312d3f6164932ba921102f1a825688adceff4f65912752419da91c8847698f3234ab98691",
-          "prNo": undefined,
-          "result": "done",
-        }
-      `
-      );
+      expect(await branchWorker.processBranch(inconfig)).toEqual({
+        branchExists: true,
+        prNo: undefined,
+        result: 'done',
+        configAndManagersHash: hasha([
+          JSON.stringify(inconfig),
+          managersHash(inconfig),
+        ]),
+      });
       expect(commit.commitFilesToBranch).toHaveBeenCalled();
     });
 
@@ -1885,6 +1880,43 @@ describe('workers/repository/update/branch/index', () => {
       expect(logger.debug).toHaveBeenCalledWith(
         'No package files need updating'
       );
+    });
+
+    it('returns nowork if the updates are same', async () => {
+      git.branchExists.mockReturnValueOnce(true);
+      git.getBranchCommit.mockReturnValue('111');
+      git.getBranchCommit.mockReturnValue('111');
+      platform.getBranchPr.mockResolvedValueOnce(
+        partial<Pr>({
+          sourceBranch: 'old/some-branch',
+          state: PrState.Open,
+        })
+      );
+      const inconfig = {
+        ...config,
+        branchName: 'new/some-branch',
+        branchPrefix: 'new/',
+        branchPrefixOld: 'old/',
+      };
+      const configAndManagersHash = hasha([
+        JSON.stringify(inconfig),
+        managersHash(inconfig),
+      ]);
+      const branchCache = {
+        branchName: 'new/some-branch',
+        configAndManagersHash: configAndManagersHash,
+        parentSha: '111',
+        sha: '111',
+      } as BranchCache;
+      repoCache.getCache.mockReturnValueOnce({
+        branches: [branchCache],
+      });
+      expect(await branchWorker.processBranch(inconfig)).toEqual({
+        branchExists: true,
+        prNo: undefined,
+        result: 'no-work',
+        configAndManagersHash: configAndManagersHash,
+      });
     });
   });
 });
