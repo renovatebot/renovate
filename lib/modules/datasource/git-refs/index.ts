@@ -23,11 +23,12 @@ export class GitRefsDatasource extends GitDatasource {
   })
   override async getReleases({
     packageName,
+    filter,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     let rawRefs: RawRefs[] | null = null;
 
     try {
-      rawRefs = await this.getRawRefs({ packageName });
+      rawRefs = await this.getRawRefs({ packageName, filter });
     } catch (err) /* istanbul ignore next */ {
       logger.debug({ err }, 'Error getting git-refs');
     }

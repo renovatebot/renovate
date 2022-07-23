@@ -68,6 +68,28 @@ describe('modules/datasource/git-refs/index', () => {
       const result = versions?.releases.map((x) => x.version).sort();
       expect(result).toHaveLength(6);
     });
+
+    it('returns versions for query with filter', async () => {
+      const mockListRemote = jest.fn((args: string[]) => {
+        return Promise.resolve(
+          Fixtures.get('ls-remote-2.txt')
+        ) as Response<string>;
+      });
+      simpleGit.mockReturnValue({
+        listRemote: mockListRemote,
+      });
+      const versions = await new GitRefsDatasource().getReleases({
+        packageName: 'https://host/path/repo',
+        filter: {
+          prefix: 'refs/tags/a/v',
+        },
+      });
+      const result = versions?.releases.map((x) => x.version).sort();
+      expect(result).toMatchObject(['a/v1.0.0', 'a/v1.0.1', 'a/v1.0.2']);
+      expect(mockListRemote.mock.calls).toMatchObject([
+        [['https://host/path/repo', 'refs/tags/a/v*']],
+      ]);
+    });
   });
 
   describe('getDigest()', () => {

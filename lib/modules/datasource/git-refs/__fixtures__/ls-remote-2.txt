@@ -1,0 +1,6 @@
+0be9ffb1ae0c8d0846cd88b58dfef42d74674673	refs/tags/a/v1.0.0
+7b756026fb2de270240a889a413e7e3a9d4d4d85	refs/tags/a/v1.0.0^{}
+281fbfb58990ec98b237a923d67904c102bec34c	refs/tags/a/v1.0.1
+e173183f932ba8a31d0e4f23cc1070e8ebfa59d6	refs/tags/a/v1.0.1^{}
+9cb93e0b236385a4e2efd089d7c6a458f5ff321f	refs/tags/a/v1.0.2
+3936a6bced3587dc9fd464b0a910e0dfd4cfe10d	refs/tags/a/v1.0.2^{}
