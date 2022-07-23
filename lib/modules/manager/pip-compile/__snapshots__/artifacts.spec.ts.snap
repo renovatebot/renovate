@@ -84,11 +84,12 @@ Array [
     },
   },
   Object {
-    "cmd": "docker run --rm --name=renovate_python --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/renovate/cache\\":\\"/tmp/renovate/cache\\" -w \\"/tmp/github/some/repo\\" renovate/python bash -l -c \\"pip install --user pip-tools && pip-compile requirements.in\\"",
+    "cmd": "docker run --rm --name=renovate_python --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/renovate/cache\\":\\"/tmp/renovate/cache\\" -e BUILDPACK_CACHE_DIR -w \\"/tmp/github/some/repo\\" renovate/python bash -l -c \\"pip install --user pip-tools && pip-compile requirements.in\\"",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
       "env": Object {
+        "BUILDPACK_CACHE_DIR": "/tmp/renovate/cache/buildpack",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
         "HTTP_PROXY": "http://example.com",
@@ -119,11 +120,12 @@ Array [
     },
   },
   Object {
-    "cmd": "docker run --rm --name=renovate_python --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/renovate/cache\\":\\"/tmp/renovate/cache\\" -w \\"/tmp/github/some/repo\\" renovate/python bash -l -c \\"pip install --user pip-tools1.2.3 && pip-compile requirements.in\\"",
+    "cmd": "docker run --rm --name=renovate_python --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/renovate/cache\\":\\"/tmp/renovate/cache\\" -e BUILDPACK_CACHE_DIR -w \\"/tmp/github/some/repo\\" renovate/python bash -l -c \\"pip install --user pip-tools1.2.3 && pip-compile requirements.in\\"",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
       "env": Object {
+        "BUILDPACK_CACHE_DIR": "/tmp/renovate/cache/buildpack",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
         "HTTP_PROXY": "http://example.com",

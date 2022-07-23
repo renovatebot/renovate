@@ -116,5 +116,3 @@ Object {
   "sourceUrl": "https://github.com/datawire/ambassador",
 }
 `;
-
-exports[`modules/datasource/helm/index getReleases throws for 5xx 1`] = `[Error: external-host-error]`;
