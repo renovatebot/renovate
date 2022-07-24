@@ -65,7 +65,7 @@ function getListItem(branch: BranchConfig, type: string): string {
     item += branch.prTitle;
   }
   const uniquePackages = [
-    ...new Set(branch.upgrades.map((upgrade) => `\`${upgrade.depName}\``)),
+    ...new Set(branch.upgrades?.map((upgrade) => `\`${upgrade.depName}\``)),
   ];
   if (uniquePackages.length < 2) {
     return item + '\n';

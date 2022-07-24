@@ -9,6 +9,7 @@ import { deleteLocalFile, privateCacheDir } from '../../util/fs';
 import * as queue from '../../util/http/queue';
 import { addSplit, getSplits, splitInit } from '../../util/split';
 import { setBranchCache } from './cache';
+import { configMigration } from './config-migration';
 import { ensureDependencyDashboard } from './dependency-dashboard';
 import handleError from './error';
 import { finaliseRepo } from './finalise';
@@ -50,6 +51,7 @@ export async function renovateRepository(
       const res = await updateRepo(config, branches);
       setMeta({ repository: config.repository });
       addSplit('update');
+      await configMigration(config, branches, branchList);
       await setBranchCache(branches);
       if (res === 'automerged') {
         if (canRetry) {
