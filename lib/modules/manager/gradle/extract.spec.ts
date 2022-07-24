@@ -802,4 +802,33 @@ describe('modules/manager/gradle/extract', () => {
       { packageFile: 'build.gradle' },
     ]);
   });
+
+  it('ensures depType is assigned', async () => {
+    const fsMock = {
+      'build.gradle':
+        "id 'org.sonarqube' version '3.1.1'\n\"io.jsonwebtoken:jjwt-api:0.11.2\"",
+      'buildSrc/build.gradle': '"com.google.protobuf:protobuf-java:3.18.2"',
+    };
+
+    mockFs(fsMock);
+
+    const res = await extractAllPackageFiles(
+      {} as ExtractConfig,
+      Object.keys(fsMock)
+    );
+
+    expect(res).toMatchObject([
+      {
+        packageFile: 'build.gradle',
+        deps: [
+          { depName: 'org.sonarqube', depType: 'plugin' },
+          { depName: 'io.jsonwebtoken:jjwt-api', depType: 'dependencies' },
+        ],
+      },
+      {
+        packageFile: 'buildSrc/build.gradle',
+        deps: [{ depType: 'devDependencies' }],
+      },
+    ]);
+  });
 });
