@@ -67,8 +67,9 @@ export class CpanDatasource extends Datasource {
       this.handleGenericErrors(err);
     }
 
+    let latestDistribution: string | null = null;
     if (hits) {
-      const releases: (Release & { distribution: string })[] = [];
+      const releases: Release[] = [];
       for (const hit of hits) {
         const {
           module,
@@ -84,20 +85,21 @@ export class CpanDatasource extends Datasource {
           // https://metacpan.org/pod/CPAN::DistnameInfo#maturity
           const isStable = maturity === 'released';
           releases.push({
-            distribution,
-            // Release properties
             isDeprecated,
             isStable,
             releaseTimestamp,
             version,
           });
+
+          if (!latestDistribution) {
+            latestDistribution = distribution;
+          }
         }
       }
-      if (releases.length > 0) {
-        const latest = releases[0];
+      if (releases.length > 0 && latestDistribution) {
         result = {
           releases,
-          changelogUrl: `https://metacpan.org/dist/${latest.distribution}/changes`,
+          changelogUrl: `https://metacpan.org/dist/${latestDistribution}/changes`,
           homepage: `https://metacpan.org/pod/${packageName}`,
         };
       }

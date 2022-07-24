@@ -75,14 +75,12 @@ describe('modules/datasource/cpan/index', () => {
         releases: expect.toBeArrayOfSize(10),
       });
       expect(res?.releases[1]).toMatchObject({
-        distribution: 'Plack',
         isDeprecated: false,
         isStable: false,
         releaseTimestamp: '2016-04-01T16:58:21.000Z',
         version: '1.0040',
       });
       expect(res?.releases[9]).toMatchObject({
-        distribution: 'Plack',
         isDeprecated: false,
         isStable: true,
         releaseTimestamp: '2020-11-30T00:21:36.000Z',
