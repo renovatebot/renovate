@@ -1,11 +1,10 @@
-import { envMock, exec, mockExecAll } from '../../../../../test/exec-util';
+import { envMock, mockExecAll } from '../../../../../test/exec-util';
 import { env, partial } from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
 import type { RepoGlobalConfig } from '../../../../config/types';
 import type { PackageFile, PostUpdateConfig } from '../../types';
 import * as lernaHelper from './lerna';
 
-jest.mock('child_process');
 jest.mock('../../../../util/exec/env');
 jest.mock('../../npm/post-update/node-version');
 
@@ -58,7 +57,7 @@ describe('modules/manager/npm/post-update/lerna', () => {
     });
 
     it('generates package-lock.json files', async () => {
-      const execSnapshots = mockExecAll(exec);
+      const execSnapshots = mockExecAll();
       const skipInstalls = true;
       const res = await lernaHelper.generateLockFiles(
         lernaPkgFile('npm'),
@@ -72,7 +71,7 @@ describe('modules/manager/npm/post-update/lerna', () => {
     });
 
     it('performs full npm install', async () => {
-      const execSnapshots = mockExecAll(exec);
+      const execSnapshots = mockExecAll();
       const skipInstalls = false;
       const res = await lernaHelper.generateLockFiles(
         lernaPkgFile('npm'),
@@ -86,7 +85,7 @@ describe('modules/manager/npm/post-update/lerna', () => {
     });
 
     it('generates yarn.lock files', async () => {
-      const execSnapshots = mockExecAll(exec);
+      const execSnapshots = mockExecAll();
       const res = await lernaHelper.generateLockFiles(
         lernaPkgFile('yarn'),
         'some-dir',
@@ -98,7 +97,7 @@ describe('modules/manager/npm/post-update/lerna', () => {
     });
 
     it('defaults to latest if lerna version unspecified', async () => {
-      const execSnapshots = mockExecAll(exec);
+      const execSnapshots = mockExecAll();
       const res = await lernaHelper.generateLockFiles(
         lernaPkgFileWithoutLernaDep('npm'),
         'some-dir',
@@ -110,7 +109,7 @@ describe('modules/manager/npm/post-update/lerna', () => {
     });
 
     it('allows scripts for trust level high', async () => {
-      const execSnapshots = mockExecAll(exec);
+      const execSnapshots = mockExecAll();
       GlobalConfig.set({ ...globalConfig, allowScripts: true });
       const res = await lernaHelper.generateLockFiles(
         lernaPkgFile('npm'),

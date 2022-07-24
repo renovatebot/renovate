@@ -6,8 +6,14 @@ import {
   PLATFORM_RATE_LIMIT_EXCEEDED,
   REPOSITORY_CHANGED,
 } from '../../../../constants/error-messages';
+import { pkg } from '../../../../expose.cjs';
 import { logger } from '../../../../logger';
-import { PlatformPrOptions, Pr, platform } from '../../../../modules/platform';
+import {
+  PlatformPrOptions,
+  Pr,
+  PrDebugData,
+  platform,
+} from '../../../../modules/platform';
 import { ensureComment } from '../../../../modules/platform/comment';
 import { hashBody } from '../../../../modules/platform/pr-body';
 import { BranchStatus } from '../../../../types';
@@ -45,17 +51,28 @@ export function getPlatformPrOptions(
   };
 }
 
-export type ResultWithPr = {
+export interface ResultWithPr {
   type: 'with-pr';
   pr: Pr;
-};
+}
 
-export type ResultWithoutPr = {
+export interface ResultWithoutPr {
   type: 'without-pr';
   prBlockedBy: PrBlockedBy;
-};
+}
 
 export type EnsurePrResult = ResultWithPr | ResultWithoutPr;
+
+export function updatePrDebugData(
+  debugData: PrDebugData | undefined
+): PrDebugData {
+  const createdByRenovateVersion = debugData?.createdInVer ?? pkg.version;
+  const updatedByRenovateVersion = pkg.version;
+  return {
+    createdInVer: createdByRenovateVersion,
+    updatedInVer: updatedByRenovateVersion,
+  };
+}
 
 // Ensures that PR exists with matching title/body
 export async function ensurePr(
@@ -249,7 +266,9 @@ export async function ensurePr(
     }
   }
 
-  const prBody = await getPrBody(config);
+  const prBody = await getPrBody(config, {
+    debugData: updatePrDebugData(existingPr?.bodyStruct?.debugData),
+  });
 
   try {
     if (existingPr) {
@@ -334,6 +353,7 @@ export async function ensurePr(
           platformOptions: getPlatformPrOptions(config),
           draftPR: config.draftPR,
         });
+
         incLimitedValue(Limit.PullRequests);
         logger.info({ pr: pr?.number, prTitle }, 'PR created');
       } catch (err) {
