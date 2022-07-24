@@ -1,6 +1,5 @@
 /**
- * - https://github.com/metacpan/metacpan-api/blob/master/docs/API-docs.md#available-fields
- * - https://fastapi.metacpan.org/v1/file/_mapping
+ * https://fastapi.metacpan.org/v1/file/_mapping
  */
 export interface MetaCpanApiFile {
   module: {
@@ -13,6 +12,9 @@ export interface MetaCpanApiFile {
   maturity: string;
 }
 
+/**
+ * https://github.com/metacpan/metacpan-api/blob/master/docs/API-docs.md#available-fields
+ */
 export interface MetaCpanApiFileSearchResult {
   hits: {
     hits: {
