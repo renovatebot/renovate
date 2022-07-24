@@ -15,11 +15,12 @@ Array [
     },
   },
   Object {
-    "cmd": "docker run --rm --name=renovate_ruby --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/cache\\":\\"/tmp/cache\\" -e GEM_HOME -w \\"/tmp/github/some/repo\\" renovate/ruby:1.2.0 bash -l -c \\"install-tool bundler 2.3.5 && ruby --version && bundler lock --update foo bar\\"",
+    "cmd": "docker run --rm --name=renovate_ruby --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/cache\\":\\"/tmp/cache\\" -e GEM_HOME -e BUILDPACK_CACHE_DIR -w \\"/tmp/github/some/repo\\" renovate/ruby:1.2.0 bash -l -c \\"install-tool bundler 2.3.5 && ruby --version && bundler lock --update foo bar\\"",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
       "env": Object {
+        "BUILDPACK_CACHE_DIR": "/tmp/cache/buildpack",
         "GEM_HOME": "/tmp/cache/others/gem",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -51,11 +52,12 @@ Array [
     },
   },
   Object {
-    "cmd": "docker run --rm --name=renovate_ruby --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/cache\\":\\"/tmp/cache\\" -e GEM_HOME -w \\"/tmp/github/some/repo\\" renovate/ruby:latest bash -l -c \\"install-tool bundler 3.2.1 && ruby --version && bundler lock --update foo bar\\"",
+    "cmd": "docker run --rm --name=renovate_ruby --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/cache\\":\\"/tmp/cache\\" -e GEM_HOME -e BUILDPACK_CACHE_DIR -w \\"/tmp/github/some/repo\\" renovate/ruby:latest bash -l -c \\"install-tool bundler 3.2.1 && ruby --version && bundler lock --update foo bar\\"",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
       "env": Object {
+        "BUILDPACK_CACHE_DIR": "/tmp/cache/buildpack",
         "GEM_HOME": "/tmp/cache/others/gem",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -87,11 +89,12 @@ Array [
     },
   },
   Object {
-    "cmd": "docker run --rm --name=renovate_ruby --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/cache\\":\\"/tmp/cache\\" -e GEM_HOME -w \\"/tmp/github/some/repo\\" renovate/ruby:1.2.0 bash -l -c \\"install-tool bundler 1.2 && ruby --version && bundler config --local gems-private.com some-user:some-password && bundler lock --update foo bar\\"",
+    "cmd": "docker run --rm --name=renovate_ruby --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/cache\\":\\"/tmp/cache\\" -e GEM_HOME -e BUILDPACK_CACHE_DIR -w \\"/tmp/github/some/repo\\" renovate/ruby:1.2.0 bash -l -c \\"install-tool bundler 1.2 && ruby --version && bundler config --local gems-private.com some-user:some-password && bundler lock --update foo bar\\"",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
       "env": Object {
+        "BUILDPACK_CACHE_DIR": "/tmp/cache/buildpack",
         "GEM_HOME": "/tmp/cache/others/gem",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -123,11 +126,12 @@ Array [
     },
   },
   Object {
-    "cmd": "docker run --rm --name=renovate_ruby --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/cache\\":\\"/tmp/cache\\" -e GEM_HOME -w \\"/tmp/github/some/repo\\" renovate/ruby:1.2.0 bash -l -c \\"install-tool bundler 2.3.5 && ruby --version && bundler config set --local gems-private.com some-user:some-password && bundler lock --update foo bar\\"",
+    "cmd": "docker run --rm --name=renovate_ruby --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/cache\\":\\"/tmp/cache\\" -e GEM_HOME -e BUILDPACK_CACHE_DIR -w \\"/tmp/github/some/repo\\" renovate/ruby:1.2.0 bash -l -c \\"install-tool bundler 2.3.5 && ruby --version && bundler config set --local gems-private.com some-user:some-password && bundler lock --update foo bar\\"",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
       "env": Object {
+        "BUILDPACK_CACHE_DIR": "/tmp/cache/buildpack",
         "GEM_HOME": "/tmp/cache/others/gem",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -159,11 +163,12 @@ Array [
     },
   },
   Object {
-    "cmd": "docker run --rm --name=renovate_ruby --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/cache\\":\\"/tmp/cache\\" -e GEM_HOME -w \\"/tmp/github/some/repo\\" renovate/ruby:1.2.0 bash -l -c \\"install-tool bundler 2.1 && ruby --version && bundler config set --local gems-private.com some-user:some-password && bundler lock --update foo bar\\"",
+    "cmd": "docker run --rm --name=renovate_ruby --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/cache\\":\\"/tmp/cache\\" -e GEM_HOME -e BUILDPACK_CACHE_DIR -w \\"/tmp/github/some/repo\\" renovate/ruby:1.2.0 bash -l -c \\"install-tool bundler 2.1 && ruby --version && bundler config set --local gems-private.com some-user:some-password && bundler lock --update foo bar\\"",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
       "env": Object {
+        "BUILDPACK_CACHE_DIR": "/tmp/cache/buildpack",
         "GEM_HOME": "/tmp/cache/others/gem",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -195,11 +200,12 @@ Array [
     },
   },
   Object {
-    "cmd": "docker run --rm --name=renovate_ruby --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/cache\\":\\"/tmp/cache\\" -e BUNDLE_GEMS__PRIVATE__COM -e GEM_HOME -w \\"/tmp/github/some/repo\\" renovate/ruby:1.2.0 bash -l -c \\"install-tool bundler 2.3.5 && ruby --version && bundler lock --update foo bar\\"",
+    "cmd": "docker run --rm --name=renovate_ruby --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/cache\\":\\"/tmp/cache\\" -e BUNDLE_GEMS__PRIVATE__COM -e GEM_HOME -e BUILDPACK_CACHE_DIR -w \\"/tmp/github/some/repo\\" renovate/ruby:1.2.0 bash -l -c \\"install-tool bundler 2.3.5 && ruby --version && bundler lock --update foo bar\\"",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
       "env": Object {
+        "BUILDPACK_CACHE_DIR": "/tmp/cache/buildpack",
         "BUNDLE_GEMS__PRIVATE__COM": "some-user:some-password",
         "GEM_HOME": "/tmp/cache/others/gem",
         "HOME": "/home/user",
@@ -232,11 +238,12 @@ Array [
     },
   },
   Object {
-    "cmd": "docker run --rm --name=renovate_ruby --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/cache\\":\\"/tmp/cache\\" -e GEM_HOME -w \\"/tmp/github/some/repo\\" renovate/ruby:latest bash -l -c \\"install-tool bundler 2.3.5 && ruby --version && bundler lock --update foo bar\\"",
+    "cmd": "docker run --rm --name=renovate_ruby --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/cache\\":\\"/tmp/cache\\" -e GEM_HOME -e BUILDPACK_CACHE_DIR -w \\"/tmp/github/some/repo\\" renovate/ruby:latest bash -l -c \\"install-tool bundler 2.3.5 && ruby --version && bundler lock --update foo bar\\"",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
       "env": Object {
+        "BUILDPACK_CACHE_DIR": "/tmp/cache/buildpack",
         "GEM_HOME": "/tmp/cache/others/gem",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
