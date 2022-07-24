@@ -88,22 +88,24 @@ export class BaseGoDatasource {
   }
 
   private static detectDatasource(
-    url: string,
+    goSourceUrl: string,
     goModule: string
   ): DataSource | null {
-    if (url?.startsWith('https://github.com/')) {
+    if (goSourceUrl?.startsWith('https://github.com/')) {
       return {
         datasource: GithubTagsDatasource.id,
-        packageName: url
+        packageName: goSourceUrl
           .replace('https://github.com/', '')
           .replace(regEx(/\/$/), ''),
         registryUrl: 'https://github.com',
       };
     }
     const gitlabUrl =
-      BaseGoDatasource.gitlabHttpsRegExp.exec(url)?.groups?.httpsRegExpUrl;
+      BaseGoDatasource.gitlabHttpsRegExp.exec(goSourceUrl)?.groups
+        ?.httpsRegExpUrl;
     const gitlabUrlName =
-      BaseGoDatasource.gitlabHttpsRegExp.exec(url)?.groups?.httpsRegExpName;
+      BaseGoDatasource.gitlabHttpsRegExp.exec(goSourceUrl)?.groups
+        ?.httpsRegExpName;
     const gitlabModuleName =
       BaseGoDatasource.gitlabRegExp.exec(goModule)?.groups?.regExpPath;
     if (gitlabUrl && gitlabUrlName) {
@@ -134,11 +136,11 @@ export class BaseGoDatasource {
 
     const opts = hostRules.find({
       hostType: PlatformId.Gitlab,
-      url: url,
+      url: goSourceUrl,
     });
     if (opts.token) {
       // get server base url from import url
-      const parsedUrl = URL.parse(url);
+      const parsedUrl = URL.parse(goSourceUrl);
 
       // TODO: `parsedUrl.pathname` can be undefined
       const packageName = trimLeadingSlash(`${parsedUrl.pathname}`);
