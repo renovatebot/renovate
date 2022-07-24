@@ -606,9 +606,14 @@ Elements in the `repositories` array can be an object if you wish to define addi
 
 ## repositoryCache
 
-Set this to `"enabled"` to have Renovate maintain a JSON file cache per-repository to speed up extractions.
-Set to `"reset"` if you ever need to bypass the cache and have it overwritten.
-JSON files will be stored inside the `cacheDir` beside the existing file-based package cache.
+Renovate supports a per-repository cache to speed up dependency extractions.
+Set this to `"local"` to have Renovate maintain a local JSON file cache inside the `cacheDir` beside the existing file-based package cache.
+Set this to a Redis URL (like `redis://localhost`) to use Redis for the cache. It's recommended that you use a separate Redis database or instance from the `redisUrl` as this will contain sensitive data.
+Set to `"disabled"` if you don't want to use a repository cache for extractions.
+
+<!-- prettier-ignore -->
+!!! warning
+  The `"enabled"` option is deprecated; use `"local"` instead.
 
 ## requireConfig
 
