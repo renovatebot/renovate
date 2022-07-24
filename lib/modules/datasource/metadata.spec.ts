@@ -424,5 +424,11 @@ describe('modules/datasource/metadata', () => {
         'https://gitlab.com/org/repo'
       )
     ).toBeTruthy();
+    expect(
+      shouldDeleteHomepage(
+        'https://gitlab.com/org/repo/',
+        'https://gitlab.com/org/repo/path/to/something/'
+      )
+    ).toBeFalsy();
   });
 });
