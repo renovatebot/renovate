@@ -915,5 +915,38 @@ describe('workers/repository/updates/generate', () => {
         '`1.1.1` (+1)',
       ]);
     });
+
+    it('merge excludeCommitPaths if appears in upgrade', () => {
+      const branch: BranchUpgradeConfig[] = [
+        {
+          manager: 'some-manager',
+          depName: 'some-dep1',
+          branchName: 'some-branch',
+          prTitle: 'some-title',
+          newValue: '0.6.0',
+        },
+        {
+          manager: 'some-other-manager',
+          depName: 'some-dep2',
+          branchName: 'some-branch',
+          prTitle: 'some-title',
+          newValue: '0.8.0',
+          excludeCommitPaths: ['some/path', 'some/other/path'],
+        },
+        {
+          manager: 'some-manager-3',
+          depName: 'some-dep3',
+          branchName: 'some-branch',
+          prTitle: 'some-title',
+          newValue: '0.9.0',
+          excludeCommitPaths: ['some/path', 'some/other-manager/path'],
+        },
+      ];
+      const res = generateBranchConfig(branch);
+      const excludeCommitPaths = res.excludeCommitPaths ?? [];
+      expect(excludeCommitPaths.sort()).toStrictEqual(
+        ['some/path', 'some/other/path', 'some/other-manager/path'].sort()
+      );
+    });
   });
 });
