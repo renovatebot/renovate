@@ -315,6 +315,36 @@ describe('modules/datasource/go/releases-direct', () => {
       ]);
     });
 
+    it('works for modules on github v2+ major upgrades', async () => {
+      getDatasourceSpy.mockResolvedValueOnce({
+        datasource: 'github-tags',
+        packageName: 'x/text',
+        registryUrl: 'https://github.com',
+      });
+      const pkg = { packageName: 'github.com/x/text/v2' };
+
+      gitGetTags.mockResolvedValue({
+        releases: [
+          { version: 'v2.0.0', gitRef: 'v2.0.0' },
+          { version: 'v3.0.0', gitRef: 'v3.0.0' },
+        ],
+      });
+
+      const result = await datasource.getReleases(pkg);
+      expect(result?.releases).toEqual([
+        { version: 'v2.0.0', gitRef: 'v2.0.0' },
+        { version: 'v3.0.0', gitRef: 'v3.0.0' },
+      ]);
+      expect(gitGetTags.mock.calls).toMatchObject([
+        [
+          {
+            filter: { prefix: 'refs/tags/v' },
+            packageName: 'https://github.com/x/text',
+          },
+        ],
+      ]);
+    });
+
     it('works for nested modules on github v2+ major upgrades', async () => {
       getDatasourceSpy.mockResolvedValueOnce({
         datasource: 'github-tags',

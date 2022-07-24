@@ -60,7 +60,7 @@ export class GoDirectDatasource extends Datasource {
     const registryHost = source.registryUrl.replace(regEx(/^.+:\/\//), '');
     const packageNameEscaped = source.packageName.replace(regEx(/\./g), '\\$&');
     const submodPath = packageName
-      .replace(regEx(`^${registryHost}/${packageNameEscaped}/?`), '')
+      .replace(regEx(`^${registryHost}/${packageNameEscaped}`), '')
       .replace(regEx(/\/v\d+$/), '')
       .split('/')
       .filter((s) => s !== '');
