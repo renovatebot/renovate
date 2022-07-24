@@ -15,11 +15,11 @@ import { fetchUpdates } from './fetch';
 import { sortBranches } from './sort';
 import { WriteUpdateResult, writeUpdates } from './write';
 
-export type ExtractResult = {
+export interface ExtractResult {
   branches: BranchConfig[];
   branchList: string[];
   packageFiles: Record<string, PackageFile[]>;
-};
+}
 
 export interface StatsResult {
   fileCount: number;

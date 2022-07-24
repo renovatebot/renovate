@@ -15,6 +15,7 @@ import { BranchNameMigration } from './custom/branch-name-migration';
 import { BranchPrefixMigration } from './custom/branch-prefix-migration';
 import { CompatibilityMigration } from './custom/compatibility-migration';
 import { ComposerIgnorePlatformReqsMigration } from './custom/composer-ignore-platform-reqs-migration';
+import { DepTypesMigration } from './custom/dep-types-migration';
 import { DryRunMigration } from './custom/dry-run-migration';
 import { EnabledManagersMigration } from './custom/enabled-managers-migration';
 import { ExtendsMigration } from './custom/extends-migration';
@@ -131,6 +132,7 @@ export class MigrationsService {
     DryRunMigration,
     RequireConfigMigration,
     PackageFilesMigration,
+    DepTypesMigration,
     PackageRulesMigration,
     NodeMigration,
     SemanticPrefixMigration,

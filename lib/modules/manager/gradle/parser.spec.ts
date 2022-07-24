@@ -245,21 +245,29 @@ describe('modules/manager/gradle/parser', () => {
     });
 
     test.each`
-      def             | input                                              | output
-      ${''}           | ${'apply from: ""'}                                | ${{}}
-      ${''}           | ${'apply from: "foo/invalid.gradle"'}              | ${{}}
-      ${''}           | ${'apply from: "foo/invalid.non-gradle"'}          | ${{}}
-      ${''}           | ${'apply from: "https://someurl.com/file.gradle"'} | ${{}}
-      ${''}           | ${'apply from: "foo/bar.gradle"'}                  | ${validOutput}
-      ${'base="foo"'} | ${'apply from: "${base}/bar.gradle"'}              | ${validOutput}
-      ${''}           | ${'apply from: file("foo/bar.gradle")'}            | ${validOutput}
-      ${'base="foo"'} | ${'apply from: file("${base}/bar.gradle")'}        | ${validOutput}
-      ${''}           | ${'apply from: new File("foo/bar.gradle")'}        | ${validOutput}
-      ${'base="foo"'} | ${'apply from: new File("${base}/bar.gradle")'}    | ${validOutput}
-      ${''}           | ${'apply(from = "foo/bar.gradle"))'}               | ${validOutput}
-      ${'base="foo"'} | ${'apply(from = "${base}/bar.gradle"))'}           | ${validOutput}
-      ${''}           | ${'apply(from = File("foo/bar.gradle"))'}          | ${validOutput}
-      ${'base="foo"'} | ${'apply(from = File("${base}/bar.gradle"))'}      | ${validOutput}
+      def             | input                                               | output
+      ${''}           | ${'apply from: ""'}                                 | ${{}}
+      ${''}           | ${'apply from: "foo/invalid.gradle"'}               | ${{}}
+      ${''}           | ${'apply from: "foo/invalid.non-gradle"'}           | ${{}}
+      ${''}           | ${'apply from: "https://someurl.com/file.gradle"'}  | ${{}}
+      ${''}           | ${'apply from: "foo/bar.gradle"'}                   | ${validOutput}
+      ${'base="foo"'} | ${'apply from: "${base}/bar.gradle"'}               | ${validOutput}
+      ${''}           | ${'apply from: file("foo/bar.gradle")'}             | ${validOutput}
+      ${'base="foo"'} | ${'apply from: file("${base}/bar.gradle")'}         | ${validOutput}
+      ${''}           | ${'apply from: project.file("foo/bar.gradle")'}     | ${validOutput}
+      ${''}           | ${'apply from: rootProject.file("foo/bar.gradle")'} | ${validOutput}
+      ${''}           | ${'apply from: new File("foo/bar.gradle")'}         | ${validOutput}
+      ${'base="foo"'} | ${'apply from: new File("${base}/bar.gradle")'}     | ${validOutput}
+      ${''}           | ${'apply from: new File("foo", "bar.gradle")'}      | ${validOutput}
+      ${'base="foo"'} | ${'apply from: new File(base, "bar.gradle")'}       | ${validOutput}
+      ${'base="foo"'} | ${'apply from: new File("${base}", "bar.gradle")'}  | ${validOutput}
+      ${''}           | ${'apply(from = "foo/bar.gradle"))'}                | ${validOutput}
+      ${'base="foo"'} | ${'apply(from = "${base}/bar.gradle"))'}            | ${validOutput}
+      ${''}           | ${'apply(from = File("foo/bar.gradle"))'}           | ${validOutput}
+      ${'base="foo"'} | ${'apply(from = File("${base}/bar.gradle"))'}       | ${validOutput}
+      ${''}           | ${'apply(from = File("foo", "bar.gradle"))'}        | ${validOutput}
+      ${'base="foo"'} | ${'apply(from = File(base, "bar.gradle"))'}         | ${validOutput}
+      ${'base="foo"'} | ${'apply(from = File("${base}", "bar.gradle"))'}    | ${validOutput}
     `('$def | $input', async ({ def, input, output }) => {
       const { vars } = await parseGradle([def, input].join('\n'));
       expect(vars).toMatchObject(output);
