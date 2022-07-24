@@ -4,6 +4,7 @@ import { logger } from '../../logger';
 import type { PackageFile } from '../../modules/manager/types';
 import { emojify } from '../../util/emoji';
 import type { DepWarnings } from '../types';
+import { regEx } from '../../util/regex';
 
 export function getWarnings(config: RenovateConfig): string {
   if (!config.warnings?.length) {
@@ -65,10 +66,7 @@ export function getDepWarningsPR(
   if (!warnings.length) {
     return '';
   }
-  logger.debug(
-    { warnings, warningFiles },
-    'Found package lookup warnings in onboarding'
-  );
+  logger.debug({ warnings, warningFiles }, 'Found package lookup warnings');
   warningText = emojify(
     `\n---\n\n### :warning: Dependency Lookup Warnings :warning:\n\n`
   );
@@ -91,17 +89,16 @@ export function getDepWarningsDashboard(
   if (!warnings.length) {
     return '';
   }
-  logger.debug(
-    { warnings, warningFiles },
-    'Found package lookup warnings in onboarding'
-  );
+  logger.debug({ warnings, warningFiles }, 'Found package lookup warnings');
   warningText = emojify(
     `\n---\n\n### :warning: Dependency Lookup Warnings :warning:\n\n`
   );
   let firstTime = true;
   warnings.forEach((w) => {
-    const splitStr = w.split(' ');
-    const dep = splitStr.slice(5).join(' ');
+    const depReg = regEx(
+      /((?<msg>Failed to look up dependency)(?<dep>\s.*)?)$/g
+    );
+    const { dep: dep } = depReg.exec(w)?.groups ?? { dep: '' };
     if (firstTime) {
       warningText += `-   Renovate failed to look up the following dependencies: \`${dep}\``;
       firstTime = false;
