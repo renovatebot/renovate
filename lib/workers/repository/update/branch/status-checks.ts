@@ -51,10 +51,10 @@ async function setStatusCheck(
   }
 }
 
-export type StabilityConfig = RenovateConfig & {
+export interface StabilityConfig extends RenovateConfig {
   stabilityStatus?: BranchStatus;
   branchName: string;
-};
+}
 
 export async function setStability(config: StabilityConfig): Promise<void> {
   if (!config.stabilityStatus) {
@@ -74,10 +74,10 @@ export async function setStability(config: StabilityConfig): Promise<void> {
   );
 }
 
-export type ConfidenceConfig = RenovateConfig & {
+export interface ConfidenceConfig extends RenovateConfig {
   confidenceStatus?: BranchStatus;
   minimumConfidence?: MergeConfidence;
-};
+}
 
 export async function setConfidence(config: ConfidenceConfig): Promise<void> {
   if (
