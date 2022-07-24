@@ -51,15 +51,15 @@ export function getPlatformPrOptions(
   };
 }
 
-export type ResultWithPr = {
+export interface ResultWithPr {
   type: 'with-pr';
   pr: Pr;
-};
+}
 
-export type ResultWithoutPr = {
+export interface ResultWithoutPr {
   type: 'without-pr';
   prBlockedBy: PrBlockedBy;
-};
+}
 
 export type EnsurePrResult = ResultWithPr | ResultWithoutPr;
 
