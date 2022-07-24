@@ -8,6 +8,7 @@ Array [
       Object {
         "currentValue": "1.2.3",
         "depName": "foo:bar",
+        "depType": "dependencies",
         "fileReplacePosition": 4,
         "groupName": "baz",
         "managerData": Object {
