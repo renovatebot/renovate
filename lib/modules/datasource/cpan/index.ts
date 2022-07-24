@@ -1,4 +1,5 @@
 import { cache } from '../../../util/cache/package/decorator';
+import { joinUrlParts } from '../../../util/url';
 import * as perlVersioning from '../../versioning/perl';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
@@ -31,7 +32,7 @@ export class CpanDatasource extends Datasource {
     }
 
     let result: ReleaseResult | null = null;
-    const searchUrl = `${registryUrl}v1/file/_search`;
+    const searchUrl = joinUrlParts(registryUrl, 'v1/file/_search');
 
     let hits: MetaCpanApiFile[] | null = null;
     try {
