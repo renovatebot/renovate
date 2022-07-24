@@ -148,7 +148,6 @@ export async function processBranch(
       );
       await handlepr(config, existingPr);
       return {
-        configAndManagersHash,
         branchExists: false,
         prNo: existingPr.number,
         result: BranchResult.AlreadyExisted,
@@ -161,7 +160,6 @@ export async function processBranch(
       } else {
         logger.debug(`Branch ${config.branchName} needs approval`);
         return {
-          configAndManagersHash,
           branchExists,
           prNo: branchPr?.number,
           result: BranchResult.NeedsApproval,
@@ -176,7 +174,6 @@ export async function processBranch(
     ) {
       logger.debug('Reached branch limit - skipping branch creation');
       return {
-        configAndManagersHash,
         branchExists,
         prNo: branchPr?.number,
         result: BranchResult.BranchLimitReached,
@@ -201,7 +198,6 @@ export async function processBranch(
       !dependencyDashboardCheck
     ) {
       return {
-        configAndManagersHash,
         branchExists: false,
         prNo: branchPr?.number,
         result: BranchResult.Pending,
@@ -303,7 +299,6 @@ export async function processBranch(
       if (!branchExists) {
         logger.debug('Skipping branch creation as not within schedule');
         return {
-          configAndManagersHash,
           branchExists,
           prNo: branchPr?.number,
           result: BranchResult.NotScheduled,
@@ -397,7 +392,6 @@ export async function processBranch(
           'Skipping branch creation due to internal status checks not met'
         );
         return {
-          configAndManagersHash,
           branchExists,
           prNo: branchPr?.number,
           result: BranchResult.Pending,
@@ -539,7 +533,6 @@ export async function processBranch(
     }
     if (!commitSha && !branchExists) {
       return {
-        configAndManagersHash,
         branchExists,
         prNo: branchPr?.number,
         result: BranchResult.NoWork,
@@ -583,7 +576,6 @@ export async function processBranch(
         }
         logger.debug('Branch is automerged - returning');
         return {
-          configAndManagersHash,
           branchExists: false,
           result: BranchResult.Automerged,
         };
