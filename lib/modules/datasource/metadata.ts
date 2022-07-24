@@ -122,14 +122,14 @@ export function addMetaData(
 
   if (
     dep.changelogUrl &&
-    detectPlatform(dep.changelogUrl) === 'github' && // lgtm [js/incomplete-url-substring-sanitization]
+    detectPlatform(dep.changelogUrl) === 'github' &&
     !dep.sourceUrl
   ) {
     dep.sourceUrl = dep.changelogUrl;
   }
 
   if (dep.homepage && !dep.sourceUrl) {
-    setHomepageToSourceURl(dep);
+    setSourceUrlToHomepage(dep);
   }
   const extraBaseUrls = [];
   // istanbul ignore next
@@ -149,7 +149,7 @@ export function addMetaData(
         }) || dep.sourceUrl;
     }
 
-    if (dep.homepage && dep.sourceUrl === dep.homepage) {
+    if (dep.homepage && dep.homepage === dep.sourceUrl) {
       delete dep.homepage;
     }
   }
@@ -170,8 +170,8 @@ export function addMetaData(
   }
 }
 
-export function setHomepageToSourceURl(dep: ReleaseResult): void {
-  if (dep.homepage === undefined) {
+export function setSourceUrlToHomepage(dep: ReleaseResult): void {
+  if (!dep?.homepage) {
     return;
   }
   const platform = detectPlatform(dep.homepage);
@@ -179,47 +179,41 @@ export function setHomepageToSourceURl(dep: ReleaseResult): void {
     return;
   }
   dep.sourceUrl = dep.homepage;
-  if (shouldDeleteHomepage(massageUrl(dep.sourceUrl), dep.homepage)) {
+  if (shouldDeleteHomepage(dep.sourceUrl, dep.homepage)) {
     // remove homepage if its not a link to a path in a github/gitlab repo.
     delete dep.homepage;
   }
 }
 
 export function shouldDeleteHomepage(
-  sourceUrl: string | null | undefined,
-  homepage: string | undefined
+  sourceUrl: string,
+  homepage: string
 ): boolean {
-  if (homepage === undefined) {
-    return false;
-  }
-  if (sourceUrl === homepage) {
+  const massagedSourceUrl = massageUrl(sourceUrl);
+  if (massagedSourceUrl === homepage) {
     return true;
   }
-  const sourceUrlParsed = parseUrl(sourceUrl);
+  const sourceUrlParsed = parseUrl(massagedSourceUrl);
+  if (is.nullOrUndefined(sourceUrlParsed)) {
+    return false;
+  }
   const homepageParsed = parseUrl(homepage);
-  if (
-    is.nullOrUndefined(sourceUrlParsed) ||
-    is.nullOrUndefined(homepageParsed)
-  ) {
+  if (is.nullOrUndefined(homepageParsed)) {
     return false;
   }
   // if urlDepth is less than or equal to 2 then url is not
   // a link to a path in the repo.
   // this case handles these kinds of links:
-  // github.com/org/
-  // github.com/org
-  // gitub.com/org/repo
-  // github.com/org/repo/
+  //   github.com/org
+  //   github.com/org/
+  //   gitub.com/org/repo
+  //   github.com/org/repo/
   if (urlPathDepth(homepage) <= 2) {
     return true;
   }
-  let sourceUrlPath = sourceUrlParsed.pathname;
-  let homepagePath = homepageParsed.pathname;
-  if (sourceUrlPath.charAt(sourceUrlPath.length - 1) === '/') {
-    sourceUrlPath = sourceUrlPath.substring(0, sourceUrlPath.length - 1); // remove last slash
+  let hPath = homepageParsed.pathname;
+  if (hPath.charAt(hPath.length - 1) === '/') {
+    hPath = hPath.substring(0, hPath.length - 1); // remove last slash
   }
-  if (homepagePath.charAt(homepagePath.length - 1) === '/') {
-    homepagePath = homepagePath.substring(0, homepagePath.length - 1); // remove last slash
-  }
-  return sourceUrlPath === homepagePath;
+  return hPath === sourceUrlParsed.pathname;
 }

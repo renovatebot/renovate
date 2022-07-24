@@ -2,7 +2,7 @@ import { MavenDatasource } from './maven';
 import {
   addMetaData,
   massageGithubUrl,
-  setHomepageToSourceURl,
+  setSourceUrlToHomepage,
   shouldDeleteHomepage,
 } from './metadata';
 import { NpmDatasource } from './npm';
@@ -359,7 +359,7 @@ describe('modules/datasource/metadata', () => {
         { version: '1.0.3', releaseTimestamp: '2000-01-03T14:34:56.000+02:00' },
       ],
     };
-    setHomepageToSourceURl(dep);
+    setSourceUrlToHomepage(dep);
     expect(dep).toMatchObject({
       sourceUrl: 'https://gitlab.com/meno/repo',
       releases: [
@@ -388,7 +388,7 @@ describe('modules/datasource/metadata', () => {
         { version: '1.0.3', releaseTimestamp: '2000-01-03T14:34:56.000+02:00' },
       ],
     };
-    setHomepageToSourceURl(dep);
+    setSourceUrlToHomepage(dep);
     expect(dep).toMatchObject({
       homepage: 'https://somesource.com/',
       releases: [
@@ -410,10 +410,10 @@ describe('modules/datasource/metadata', () => {
 
   it('should delete homepage', () => {
     expect(
-      shouldDeleteHomepage(null, 'https://gitlab.com/org/repo')
+      shouldDeleteHomepage('not a url', 'https://gitlab.com/org/repo')
     ).toBeFalsy();
     expect(
-      shouldDeleteHomepage('https://gitlab.com/org/repo', undefined)
+      shouldDeleteHomepage('https://gitlab.com/org/repo', 'not a url')
     ).toBeFalsy();
     expect(
       shouldDeleteHomepage('https://gitlab.com/org', 'https://gitlab.com/org/')
@@ -424,6 +424,12 @@ describe('modules/datasource/metadata', () => {
         'https://gitlab.com/org/repo'
       )
     ).toBeTruthy();
+    expect(
+      shouldDeleteHomepage(
+        'https://github.com/org/repo/path/',
+        'https://github.com/org/repo/path/'
+      )
+    ).toBeFalsy();
     expect(
       shouldDeleteHomepage(
         'https://gitlab.com/org/repo/',
