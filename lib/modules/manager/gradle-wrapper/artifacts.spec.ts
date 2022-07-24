@@ -1,7 +1,7 @@
 import type { Stats } from 'fs';
 import { readFile } from 'fs-extra';
 import { resolve } from 'upath';
-import { envMock, exec, mockExecAll } from '../../../../test/exec-util';
+import { envMock, mockExecAll } from '../../../../test/exec-util';
 import * as httpMock from '../../../../test/http-mock';
 import {
   addReplacingSerializer,
@@ -17,7 +17,6 @@ import type { StatusResult } from '../../../util/git/types';
 import type { UpdateArtifactsConfig } from '../types';
 import * as gradleWrapper from '.';
 
-jest.mock('../../../util/exec/common');
 jest.mock('../../../util/fs');
 jest.mock('../../../util/git');
 jest.mock('../../../util/exec/env');
@@ -76,7 +75,7 @@ describe('modules/manager/gradle-wrapper/artifacts', () => {
       ],
     } as StatusResult);
 
-    const execSnapshots = mockExecAll(exec);
+    const execSnapshots = mockExecAll();
 
     const res = await gradleWrapper.updateArtifacts({
       packageFileName: 'gradle/wrapper/gradle-wrapper.properties',
@@ -122,7 +121,7 @@ describe('modules/manager/gradle-wrapper/artifacts', () => {
   });
 
   it('gradlew failed', async () => {
-    const execSnapshots = mockExecAll(exec, new Error('failed'));
+    const execSnapshots = mockExecAll(new Error('failed'));
     git.getRepoStatus.mockResolvedValueOnce(
       partial<StatusResult>({
         modified: [],
@@ -154,7 +153,7 @@ describe('modules/manager/gradle-wrapper/artifacts', () => {
       })
     );
 
-    const execSnapshots = mockExecAll(exec);
+    const execSnapshots = mockExecAll();
 
     const result = await gradleWrapper.updateArtifacts({
       packageFileName: 'gradle-wrapper.properties',
