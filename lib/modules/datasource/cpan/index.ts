@@ -1,9 +1,8 @@
 import { cache } from '../../../util/cache/package/decorator';
-import type { HttpResponse } from '../../../util/http/types';
 import * as perlVersioning from '../../versioning/perl';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
-import type { MetaCpanFileSearchResult } from './types';
+import type { MetaCpanApiFile, MetaCpanApiFileSearchResult } from './types';
 
 export class CpanDatasource extends Datasource {
   static readonly id = 'cpan';
@@ -34,7 +33,7 @@ export class CpanDatasource extends Datasource {
     let result: ReleaseResult | null = null;
     const searchUrl = `${registryUrl}v1/file/_search`;
 
-    let raw: HttpResponse<MetaCpanFileSearchResult> | null = null;
+    let hits: MetaCpanApiFile[] | null = null;
     try {
       const body = {
         query: {
@@ -58,26 +57,24 @@ export class CpanDatasource extends Datasource {
         ],
         sort: [{ date: 'desc' }],
       };
-      raw = await this.http.postJson<MetaCpanFileSearchResult>(searchUrl, {
-        body,
-      });
+      const res = await this.http.postJson<MetaCpanApiFileSearchResult>(
+        searchUrl,
+        { body }
+      );
+      hits = res.body?.hits?.hits?.map(({ _source }) => _source);
     } catch (err) {
       this.handleGenericErrors(err);
     }
 
-    const body = raw?.body;
-    if (body) {
-      const hits = body.hits.hits;
+    if (hits) {
       const releases: (Release & { distribution: string })[] = [];
       for (const hit of hits) {
         const {
-          _source: {
-            module,
-            distribution,
-            date: releaseTimestamp,
-            deprecated: isDeprecated,
-            maturity,
-          },
+          module,
+          distribution,
+          date: releaseTimestamp,
+          deprecated: isDeprecated,
+          maturity,
         } = hit;
         const version = module.find(
           ({ name }) => name === packageName
