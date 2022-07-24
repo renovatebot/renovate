@@ -8,7 +8,7 @@ description: Renovate's support for ESLint-like shareable configs
 This page describes how to configure your shared presets.
 Read the [Key concepts, presets](./key-concepts/presets.md) page to learn more about presets in general.
 
-Shareable config presets must use the JSON format, other formats are not supported.
+Shareable config presets must use the JSON or JSON5 formats, other formats are not supported.
 
 <!-- prettier-ignore -->
 !!! warning
