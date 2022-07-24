@@ -77,14 +77,14 @@ async function deleteBranchSilently(branchName: string): Promise<void> {
 }
 
 export interface ProcessBranchResult {
-  configAndManagersHash: string;
+  configAndManagersHash?: string;
   branchExists: boolean;
   prBlockedBy?: PrBlockedBy;
   prNo?: number;
   result: BranchResult;
 }
 
-function doesBranchNeedUpdate(
+function canSkipBranchUpdateCheck(
   config: BranchConfig,
   branchCache: BranchCache,
   configAndManagersHash: string
@@ -208,7 +208,10 @@ export async function processBranch(
       };
     }
     if (branchExists) {
-      if (doesBranchNeedUpdate(config, branchCache, configAndManagersHash)) {
+      if (
+        canSkipBranchUpdateCheck(config, branchCache, configAndManagersHash)
+      ) {
+        logger.debug('According to branch cache, no updates are necessary');
         return {
           configAndManagersHash,
           branchExists: true,
