@@ -28,6 +28,7 @@ import type { GitProtocol } from '../../types/git';
 import { Limit, incLimitedValue } from '../../workers/global/limits';
 import { newlineRegex, regEx } from '../regex';
 import { parseGitAuthor } from './author';
+import { getCachedBehindBaseResult } from './behind-base-branch-cache';
 import { getNoVerify, simpleGitConfig } from './config';
 import {
   getCachedConflictResult,
@@ -398,7 +399,14 @@ export async function syncGit(): Promise<void> {
     const durationMs = Math.round(Date.now() - cloneStart);
     logger.debug({ durationMs }, 'git clone completed');
   }
-  config.currentBranchSha = (await git.raw(['rev-parse', 'HEAD'])).trim();
+  try {
+    config.currentBranchSha = (await git.raw(['rev-parse', 'HEAD'])).trim();
+  } catch (err) /* istanbul ignore next */ {
+    if (err.message?.includes('fatal: not a git repository')) {
+      throw new Error(REPOSITORY_CHANGED);
+    }
+    throw err;
+  }
   if (config.cloneSubmodules) {
     const submodules = await getSubmodules();
     for (const submodule of submodules) {
@@ -549,6 +557,13 @@ export function getBranchList(): string[] {
 }
 
 export async function isBranchBehindBase(branchName: string): Promise<boolean> {
+  const { currentBranchSha } = config;
+
+  let isBehind = getCachedBehindBaseResult(branchName, currentBranchSha);
+  if (isBehind !== null) {
+    return isBehind;
+  }
+
   await syncGit();
   try {
     const { currentBranchSha, currentBranch } = config;
@@ -558,7 +573,7 @@ export async function isBranchBehindBase(branchName: string): Promise<boolean> {
       '--contains',
       config.currentBranchSha,
     ]);
-    const isBehind = !branches.all.map(localName).includes(branchName);
+    isBehind = !branches.all.map(localName).includes(branchName);
     logger.debug(
       { isBehind, currentBranch, currentBranchSha },
       `isBranchBehindBase=${isBehind}`

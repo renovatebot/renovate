@@ -84,11 +84,12 @@ Array [
     },
   },
   Object {
-    "cmd": "docker run --rm --name=renovate_rust --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -w \\"/tmp/github/some/repo\\" renovate/rust bash -l -c \\"cargo update --manifest-path Cargo.toml --workspace\\"",
+    "cmd": "docker run --rm --name=renovate_rust --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/cache\\":\\"/tmp/cache\\" -e BUILDPACK_CACHE_DIR -w \\"/tmp/github/some/repo\\" renovate/rust bash -l -c \\"cargo update --manifest-path Cargo.toml --workspace\\"",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
       "env": Object {
+        "BUILDPACK_CACHE_DIR": "/tmp/cache/buildpack",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
         "HTTP_PROXY": "http://example.com",

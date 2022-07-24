@@ -7,6 +7,8 @@ import {
   CONFIG_VALIDATION,
   INVALID_PATH,
 } from '../../constants/error-messages';
+import * as _repoCache from '../cache/repository';
+import type { BranchCache } from '../cache/repository/types';
 import { newlineRegex, regEx } from '../regex';
 import * as _conflictsCache from './conflicts-cache';
 import * as _modifiedCache from './modified-cache';
@@ -17,6 +19,8 @@ import { setNoVerify } from '.';
 jest.mock('./conflicts-cache');
 jest.mock('./modified-cache');
 jest.mock('delay');
+jest.mock('../cache/repository');
+const repoCache = mocked(_repoCache);
 const conflictsCache = mocked(_conflictsCache);
 const modifiedCache = mocked(_modifiedCache);
 
@@ -239,16 +243,27 @@ describe('util/git/index', () => {
 
   describe('isBranchBehindBase()', () => {
     it('should return false if same SHA as master', async () => {
+      repoCache.getCache.mockReturnValueOnce({});
       expect(
         await git.isBranchBehindBase('renovate/future_branch')
       ).toBeFalse();
     });
 
     it('should return true if SHA different from master', async () => {
+      repoCache.getCache.mockReturnValueOnce({});
       expect(await git.isBranchBehindBase('renovate/past_branch')).toBeTrue();
     });
 
     it('should return result even if non-default and not under branchPrefix', async () => {
+      const parentSha = await git.getBranchParentSha('develop');
+      repoCache.getCache.mockReturnValueOnce({}).mockReturnValueOnce({
+        branches: [
+          {
+            branchName: 'develop',
+            parentSha: parentSha,
+          } as BranchCache,
+        ],
+      });
       expect(await git.isBranchBehindBase('develop')).toBeTrue();
       expect(await git.isBranchBehindBase('develop')).toBeTrue(); // cache
     });
