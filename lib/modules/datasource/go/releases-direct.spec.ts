@@ -198,7 +198,7 @@ describe('modules/datasource/go/releases-direct', () => {
         registryUrl: 'https://gitlab.com',
         packageName: 'group/subgroup/repo',
       });
-      gitGetTags.mockResolvedValueOnce({
+      gitGetTags.mockResolvedValue({
         releases: [
           { gitRef: 'v1.0.0', version: 'v1.0.0' },
           { gitRef: 'v2.0.0', version: 'v2.0.0' },
@@ -210,6 +210,14 @@ describe('modules/datasource/go/releases-direct', () => {
       expect(res).toMatchSnapshot();
       expect(res).not.toBeNull();
       expect(res).toBeDefined();
+      expect(gitGetTags.mock.calls).toMatchObject([
+        [
+          {
+            filter: { prefix: 'refs/tags/v' },
+            packageName: 'https://gitlab.com/group/subgroup/repo',
+          },
+        ],
+      ]);
     });
 
     it('works for nested modules on github', async () => {

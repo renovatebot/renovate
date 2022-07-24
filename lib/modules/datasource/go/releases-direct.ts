@@ -3,7 +3,6 @@ import { cache } from '../../../util/cache/package/decorator';
 import { regEx } from '../../../util/regex';
 import { Datasource } from '../datasource';
 import { GitTagsDatasource } from '../git-tags';
-import { GitlabTagsDatasource } from '../gitlab-tags';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 import { BaseGoDatasource } from './base';
 import { getSourceUrl } from './common';
@@ -58,25 +57,23 @@ export class GoDirectDatasource extends Datasource {
      * and that tag should be used instead of just va.b.c, although for compatibility
      * the old behaviour stays the same.
      */
-    const nameParts = packageName.replace(regEx(/\/v\d+$/), '').split('/');
+    const registryHost = source.registryUrl.replace(regEx(/^.+:\/\//), '');
+    const packageNameEscaped = source.packageName.replace(regEx(/\./g), '\\$&');
+    const submodPath = packageName
+      .replace(regEx(`^${registryHost}/${packageNameEscaped}/?`), '')
+      .replace(regEx(/\/v\d+$/), '')
+      .split('/')
+      .filter((s) => s !== '');
 
-    const prefix: string[] = ['refs/tags'];
-    let submodPath: string | null = null;
-
-    // If it has more than 3 parts it's a submodule or subgroup (gitlab only)
-    if (nameParts.length > 3) {
-      submodPath = nameParts.slice(3, nameParts.length).join('/');
-      prefix.push(submodPath);
-      logger.trace(`go.getReleases.prefix:${submodPath}`);
+    if (submodPath.length) {
+      logger.trace(`go.getReleases.prefix:${submodPath.join('/')}`);
     }
 
-    prefix.push('v');
+    const prefix = ['refs/tags'].concat(submodPath, ['v']).join('/');
 
-    let res = await this.git.getReleases({
+    const res = await this.git.getReleases({
       packageName: sourceUrl,
-      filter: {
-        prefix: prefix.join('/'),
-      },
+      filter: { prefix },
     });
 
     // istanbul ignore if
@@ -84,28 +81,12 @@ export class GoDirectDatasource extends Datasource {
       return null;
     }
 
-    // If from gitlab and no submodule tags, fallback to normal tag
-    if (!res.releases.length && source.datasource === GitlabTagsDatasource.id) {
-      submodPath = null;
-      res = await this.git.getReleases({
-        packageName: sourceUrl,
-        filter: {
-          prefix: 'refs/tags/v',
-        },
-      });
-
-      // istanbul ignore if
-      if (!res) {
-        return null;
-      }
-    }
-
-    if (submodPath) {
+    if (submodPath.length) {
       // Filter the releases so that we only get the ones that are for this submodule
       // Also trim the submodule prefix from the version number
       const submodReleases = res.releases.map((release) => {
         const r2 = release;
-        r2.version = r2.version.replace(`${submodPath}/`, '');
+        r2.version = r2.version.replace(`${submodPath.join('/')}/`, '');
         return r2;
       });
       logger.trace({ submodReleases }, 'go.getReleases');
@@ -115,7 +96,7 @@ export class GoDirectDatasource extends Datasource {
         releases: submodReleases,
       };
     }
-    logger.trace({ nameParts, releases: res.releases }, 'go.getReleases');
+    logger.trace({ submodPath, releases: res.releases }, 'go.getReleases');
 
     return { ...res, sourceUrl };
   }
