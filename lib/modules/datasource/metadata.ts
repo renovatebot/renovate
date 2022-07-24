@@ -4,13 +4,8 @@ import parse from 'github-url-from-git';
 import { DateTime } from 'luxon';
 import * as hostRules from '../../util/host-rules';
 import { regEx } from '../../util/regex';
-import {
-  isGitHubUrl,
-  isGitLabUrl,
-  parseUrl,
-  urlPathDepth,
-  validateUrl,
-} from '../../util/url';
+import { parseUrl, urlPathDepth, validateUrl } from '../../util/url';
+import { detectPlatform } from '../platform/util';
 import { manualChangelogUrls, manualSourceUrls } from './metadata-manual';
 import type { ReleaseResult } from './types';
 
@@ -126,23 +121,15 @@ export function addMetaData(
   }
 
   if (
-    dep.changelogUrl?.includes('github.com') && // lgtm [js/incomplete-url-substring-sanitization]
+    dep.changelogUrl &&
+    detectPlatform(dep.changelogUrl) === 'github' && // lgtm [js/incomplete-url-substring-sanitization]
     !dep.sourceUrl
   ) {
     dep.sourceUrl = dep.changelogUrl;
   }
 
-  if (dep.homepage) {
-    const parsedHomePage = parseUrl(dep.homepage);
-    if (parsedHomePage?.hostname.includes('github')) {
-      if (!dep.sourceUrl) {
-        dep.sourceUrl = dep.homepage;
-        if (urlPathDepth(dep.homepage) < 2) {
-          // remove homepage if its not a link to a path in a github repo.
-          delete dep.homepage;
-        }
-      }
-    }
+  if (dep.homepage && !dep.sourceUrl) {
+    setHomepageToSourceURl(dep);
   }
   const extraBaseUrls = [];
   // istanbul ignore next
@@ -162,7 +149,7 @@ export function addMetaData(
         }) || dep.sourceUrl;
     }
 
-    if (shouldDeleteHomepage(dep)) {
+    if (dep.homepage && dep.sourceUrl === dep.homepage) {
       delete dep.homepage;
     }
   }
@@ -183,16 +170,56 @@ export function addMetaData(
   }
 }
 
-// delete homepage if its the same as the sourceUrl
-function shouldDeleteHomepage(dep: ReleaseResult): boolean {
+export function setHomepageToSourceURl(dep: ReleaseResult): void {
   if (dep.homepage === undefined) {
+    return;
+  }
+  const platform = detectPlatform(dep.homepage);
+  if (platform !== 'github' && platform !== 'gitlab') {
+    return;
+  }
+  dep.sourceUrl = dep.homepage;
+  if (shouldDeleteHomepage(massageUrl(dep.sourceUrl), dep.homepage)) {
+    // remove homepage if its not a link to a path in a github/gitlab repo.
+    delete dep.homepage;
+  }
+}
+
+export function shouldDeleteHomepage(
+  sourceUrl: string | null | undefined,
+  homepage: string | undefined
+): boolean {
+  if (homepage === undefined) {
     return false;
   }
-  if (isGitHubUrl(dep.homepage)) {
-    return dep.sourceUrl === massageGithubUrl(dep.homepage);
+  if (sourceUrl === homepage) {
+    return true;
   }
-  if (isGitLabUrl(dep.homepage)) {
-    return dep.sourceUrl === massageGitlabUrl(dep.homepage);
+  const sourceUrlParsed = parseUrl(sourceUrl);
+  const homepageParsed = parseUrl(homepage);
+  if (
+    is.nullOrUndefined(sourceUrlParsed) ||
+    is.nullOrUndefined(homepageParsed)
+  ) {
+    return false;
   }
-  return dep.sourceUrl === dep.homepage;
+  // if urlDepth is less than or equal to 2 then url is not
+  // a link to a path in the repo.
+  // this case handles these kinds of links:
+  // github.com/org/
+  // github.com/org
+  // gitub.com/org/repo
+  // github.com/org/repo/
+  if (urlPathDepth(homepage) <= 2) {
+    return true;
+  }
+  let sourceUrlPath = sourceUrlParsed.pathname;
+  let homepagePath = homepageParsed.pathname;
+  if (sourceUrlPath.charAt(sourceUrlPath.length - 1) === '/') {
+    sourceUrlPath = sourceUrlPath.substring(0, sourceUrlPath.length - 1); // remove last slash
+  }
+  if (homepagePath.charAt(homepagePath.length - 1) === '/') {
+    homepagePath = homepagePath.substring(0, homepagePath.length - 1); // remove last slash
+  }
+  return sourceUrlPath === homepagePath;
 }

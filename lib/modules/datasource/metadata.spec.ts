@@ -1,5 +1,10 @@
 import { MavenDatasource } from './maven';
-import { addMetaData, massageGithubUrl } from './metadata';
+import {
+  addMetaData,
+  massageGithubUrl,
+  setHomepageToSourceURl,
+  shouldDeleteHomepage,
+} from './metadata';
 import { NpmDatasource } from './npm';
 import { PypiDatasource } from './pypi';
 import type { ReleaseResult } from './types';
@@ -259,7 +264,7 @@ describe('modules/datasource/metadata', () => {
 
   it('Should delete homepage if its not a link to a path in github repo', () => {
     const dep = {
-      homepage: 'http://github.com/foo',
+      homepage: 'https://github.com/foo/bar',
       releases: [
         { version: '1.0.1', releaseTimestamp: '2000-01-01T12:34:56' },
         { version: '1.0.2', releaseTimestamp: '2000-01-02T12:34:56.000Z' },
@@ -282,7 +287,7 @@ describe('modules/datasource/metadata', () => {
           releaseTimestamp: '2000-01-03T12:34:56.000Z',
         },
       ],
-      sourceUrl: 'http://github.com/foo',
+      sourceUrl: 'https://github.com/foo/bar',
     });
   });
 
@@ -318,8 +323,7 @@ describe('modules/datasource/metadata', () => {
 
   it('Should delete gitlab homepage if its same as sourceUrl after massage', () => {
     const dep = {
-      homepage: 'https://gitlab.com/meno/',
-      sourceUrl: 'https://gitlab.com/meno/',
+      sourceUrl: 'https://gitlab.com/meno/repo',
       releases: [
         { version: '1.0.1', releaseTimestamp: '2000-01-01T12:34:56' },
         { version: '1.0.2', releaseTimestamp: '2000-01-02T12:34:56.000Z' },
@@ -328,7 +332,7 @@ describe('modules/datasource/metadata', () => {
     };
     addMetaData(dep, MavenDatasource.id, 'foobar');
     expect(dep).toMatchObject({
-      sourceUrl: 'https://gitlab.com/meno/',
+      sourceUrl: 'https://gitlab.com/meno/repo',
       releases: [
         {
           version: '1.0.1',
@@ -344,5 +348,81 @@ describe('modules/datasource/metadata', () => {
         },
       ],
     });
+  });
+
+  it('does not set homepage to sourceURl when undefined', () => {
+    const dep = {
+      sourceUrl: 'https://gitlab.com/meno/repo',
+      releases: [
+        { version: '1.0.1', releaseTimestamp: '2000-01-01T12:34:56' },
+        { version: '1.0.2', releaseTimestamp: '2000-01-02T12:34:56.000Z' },
+        { version: '1.0.3', releaseTimestamp: '2000-01-03T14:34:56.000+02:00' },
+      ],
+    };
+    setHomepageToSourceURl(dep);
+    expect(dep).toMatchObject({
+      sourceUrl: 'https://gitlab.com/meno/repo',
+      releases: [
+        {
+          version: '1.0.1',
+          releaseTimestamp: '2000-01-01T12:34:56',
+        },
+        {
+          version: '1.0.2',
+          releaseTimestamp: '2000-01-02T12:34:56.000Z',
+        },
+        {
+          version: '1.0.3',
+          releaseTimestamp: '2000-01-03T14:34:56.000+02:00',
+        },
+      ],
+    });
+  });
+
+  it('does not set homepage to sourceURl when not github or gitlab', () => {
+    const dep = {
+      homepage: 'https://somesource.com/',
+      releases: [
+        { version: '1.0.1', releaseTimestamp: '2000-01-01T12:34:56' },
+        { version: '1.0.2', releaseTimestamp: '2000-01-02T12:34:56.000Z' },
+        { version: '1.0.3', releaseTimestamp: '2000-01-03T14:34:56.000+02:00' },
+      ],
+    };
+    setHomepageToSourceURl(dep);
+    expect(dep).toMatchObject({
+      homepage: 'https://somesource.com/',
+      releases: [
+        {
+          version: '1.0.1',
+          releaseTimestamp: '2000-01-01T12:34:56',
+        },
+        {
+          version: '1.0.2',
+          releaseTimestamp: '2000-01-02T12:34:56.000Z',
+        },
+        {
+          version: '1.0.3',
+          releaseTimestamp: '2000-01-03T14:34:56.000+02:00',
+        },
+      ],
+    });
+  });
+
+  it('should delete homepage', () => {
+    expect(
+      shouldDeleteHomepage(null, 'https://gitlab.com/org/repo')
+    ).toBeFalsy();
+    expect(
+      shouldDeleteHomepage('https://gitlab.com/org/repo', undefined)
+    ).toBeFalsy();
+    expect(
+      shouldDeleteHomepage('https://gitlab.com/org', 'https://gitlab.com/org/')
+    ).toBeTruthy();
+    expect(
+      shouldDeleteHomepage(
+        'https://gitlab.com/org/repo/',
+        'https://gitlab.com/org/repo'
+      )
+    ).toBeTruthy();
   });
 });

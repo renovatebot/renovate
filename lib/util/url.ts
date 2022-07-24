@@ -5,9 +5,6 @@ import urlJoin from 'url-join';
 import { logger } from '../logger';
 import { regEx } from './regex';
 
-const githubUrlRe = regEx(/^(https?:\/\/)?(www\.)?github\.com\/?/);
-const gitlabUrlRe = regEx(/^(https?:\/\/)?(www\.)?gitlab\.com\/?/);
-
 export function joinUrlParts(...parts: string[]): string {
   return urlJoin(...parts);
 }
@@ -126,21 +123,7 @@ export function urlPathDepth(url: string | undefined): number {
   return countChar(path, '/');
 }
 
-export function isGitHubUrl(url: string | undefined): boolean {
-  if (url === undefined) {
-    return false;
-  }
-  return githubUrlRe.test(url);
-}
-
-export function isGitLabUrl(url: string | undefined): boolean {
-  if (url === undefined) {
-    return false;
-  }
-  return gitlabUrlRe.test(url);
-}
-
-function countChar(path: string, character: string): number {
+export function countChar(path: string, character: string): number {
   let slashCount = 0;
   for (let i = 0; i < path.length; i++) {
     if (path.charAt(i) === character) {
