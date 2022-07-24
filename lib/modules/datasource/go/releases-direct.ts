@@ -48,6 +48,7 @@ export class GoDirectDatasource extends Datasource {
 
     const sourceUrl = getSourceUrl(source);
 
+    // istanbul ignore if
     if (!sourceUrl) {
       return null;
     }
