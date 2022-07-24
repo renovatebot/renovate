@@ -148,10 +148,6 @@ describe('workers/repository/update/branch/index', () => {
         branchExists: false,
         prNo: undefined,
         result: 'not-scheduled',
-        configAndManagersHash: hasha([
-          JSON.stringify(config),
-          managersHash(config),
-        ]),
       });
     });
 
@@ -191,10 +187,6 @@ describe('workers/repository/update/branch/index', () => {
         branchExists: false,
         prNo: undefined,
         result: 'pending',
-        configAndManagersHash: hasha([
-          JSON.stringify(config),
-          managersHash(config),
-        ]),
       });
     });
 
@@ -212,10 +204,6 @@ describe('workers/repository/update/branch/index', () => {
         branchExists: false,
         prNo: undefined,
         result: 'pending',
-        configAndManagersHash: hasha([
-          JSON.stringify(config),
-          managersHash(config),
-        ]),
       });
     });
 
@@ -468,10 +456,6 @@ describe('workers/repository/update/branch/index', () => {
         branchExists: false,
         prNo: undefined,
         result: 'branch-limit-reached',
-        configAndManagersHash: hasha([
-          JSON.stringify(config),
-          managersHash(config),
-        ]),
       });
     });
 
@@ -536,10 +520,6 @@ describe('workers/repository/update/branch/index', () => {
         branchExists: false,
         prNo: undefined,
         result: 'no-work',
-        configAndManagersHash: hasha([
-          JSON.stringify(config),
-          managersHash(config),
-        ]),
       });
     });
 
@@ -556,10 +536,6 @@ describe('workers/repository/update/branch/index', () => {
         branchExists: false,
         prNo: undefined,
         result: 'pending',
-        configAndManagersHash: hasha([
-          JSON.stringify(config),
-          managersHash(config),
-        ]),
       });
     });
 
@@ -1046,10 +1022,6 @@ describe('workers/repository/update/branch/index', () => {
         branchExists: false,
         prNo: undefined,
         result: 'already-existed',
-        configAndManagersHash: hasha([
-          JSON.stringify(config),
-          managersHash(config),
-        ]),
       });
     });
 
