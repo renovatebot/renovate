@@ -94,6 +94,7 @@ describe('modules/datasource/go/base', () => {
           datasource: GithubTagsDatasource.id,
           packageName: 'golang/text',
           registryUrl: 'https://github.com',
+          repoRoot: 'https://github.com/golang/text',
         });
       });
 
@@ -111,23 +112,43 @@ describe('modules/datasource/go/base', () => {
           datasource: GithubTagsDatasource.id,
           packageName: 'example/module',
           registryUrl: 'https://git.enterprise.com',
+          repoRoot: 'https://git.enterprise.com/example/module.git',
         });
       });
 
       it('supports GitLab deps', async () => {
         httpMock
           .scope('https://gitlab.com')
-          .get('/group/subgroup?go-get=1')
+          .get('/group/subgroup/repo?go-get=1')
           .reply(200, Fixtures.get('go-get-gitlab.html'));
 
         const res = await BaseGoDatasource.getDatasource(
-          'gitlab.com/group/subgroup'
+          'gitlab.com/group/subgroup/repo'
         );
 
         expect(res).toEqual({
           datasource: GitlabTagsDatasource.id,
-          packageName: 'group/subgroup',
+          packageName: 'group/subgroup/repo',
           registryUrl: 'https://gitlab.com',
+          repoRoot: 'https://gitlab.com/group/subgroup/repo',
+        });
+      });
+
+      it('supports GitLab deps with nested modules', async () => {
+        httpMock
+          .scope('https://gitlab.com')
+          .get('/group/subgroup/repo/submodule?go-get=1')
+          .reply(200, Fixtures.get('go-get-gitlab.html'));
+
+        const res = await BaseGoDatasource.getDatasource(
+          'gitlab.com/group/subgroup/repo/submodule'
+        );
+
+        expect(res).toEqual({
+          datasource: GitlabTagsDatasource.id,
+          packageName: 'group/subgroup/repo/submodule',
+          registryUrl: 'https://gitlab.com',
+          repoRoot: 'https://gitlab.com/group/subgroup/repo',
         });
       });
 
@@ -135,7 +156,7 @@ describe('modules/datasource/go/base', () => {
         httpMock
           .scope('https://gitlab.com')
           .get('/group/subgroup/private.git/v3?go-get=1')
-          .reply(200, Fixtures.get('go-get-gitlab.html'));
+          .reply(200, Fixtures.get('go-get-gitlab-private.html'));
 
         const res = await BaseGoDatasource.getDatasource(
           'gitlab.com/group/subgroup/private.git/v3'
@@ -145,6 +166,7 @@ describe('modules/datasource/go/base', () => {
           datasource: GitlabTagsDatasource.id,
           packageName: 'group/subgroup/private',
           registryUrl: 'https://gitlab.com',
+          repoRoot: 'https://gitlab.com/group/subgroup/private',
         });
       });
 
@@ -164,23 +186,25 @@ describe('modules/datasource/go/base', () => {
           datasource: GitlabTagsDatasource.id,
           packageName: 'golang/text',
           registryUrl: 'https://gitlab.com',
+          repoRoot: 'https://gitlab.com/golang/text',
         });
       });
 
       it('supports GitLab deps with version', async () => {
         httpMock
           .scope('https://gitlab.com')
-          .get('/group/subgroup/v2?go-get=1')
+          .get('/group/subgroup/repo/v2?go-get=1')
           .reply(200, Fixtures.get('go-get-gitlab.html'));
 
         const res = await BaseGoDatasource.getDatasource(
-          'gitlab.com/group/subgroup/v2'
+          'gitlab.com/group/subgroup/repo/v2'
         );
 
         expect(res).toEqual({
           datasource: GitlabTagsDatasource.id,
-          packageName: 'group/subgroup',
+          packageName: 'group/subgroup/repo',
           registryUrl: 'https://gitlab.com',
+          repoRoot: 'https://gitlab.com/group/subgroup/repo',
         });
       });
 
@@ -199,6 +223,7 @@ describe('modules/datasource/go/base', () => {
           datasource: GitlabTagsDatasource.id,
           packageName: 'golang/myrepo',
           registryUrl: 'https://my.custom.domain',
+          repoRoot: 'https://my.custom.domain/golang/myrepo',
         });
       });
 
@@ -217,6 +242,7 @@ describe('modules/datasource/go/base', () => {
           datasource: GitlabTagsDatasource.id,
           packageName: 'golang/subgroup/myrepo',
           registryUrl: 'https://my.custom.domain',
+          repoRoot: 'https://my.custom.domain/golang/subgroup/myrepo',
         });
       });
 
@@ -235,6 +261,7 @@ describe('modules/datasource/go/base', () => {
           datasource: GitlabTagsDatasource.id,
           packageName: 'golang/subgroup/myrepo',
           registryUrl: 'https://my.custom.domain',
+          repoRoot: 'https://my.custom.domain/golang/subgroup/myrepo',
         });
       });
 
@@ -253,6 +280,7 @@ describe('modules/datasource/go/base', () => {
           datasource: GitlabTagsDatasource.id,
           packageName: 'golang/subgroup/myrepo',
           registryUrl: 'https://my.custom.domain',
+          repoRoot: 'https://my.custom.domain/golang/subgroup/myrepo',
         });
       });
 
@@ -270,6 +298,7 @@ describe('modules/datasource/go/base', () => {
           datasource: 'github-tags',
           registryUrl: 'https://github.com',
           packageName: 'fyne-io/fyne',
+          repoRoot: 'https://github.com/fyne-io/fyne',
         });
       });
 
@@ -287,6 +316,7 @@ describe('modules/datasource/go/base', () => {
           datasource: 'github-tags',
           registryUrl: 'https://github.com',
           packageName: 'fyne-io/fyne',
+          repoRoot: 'https://github.com/fyne-io/fyne',
         });
       });
     });

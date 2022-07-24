@@ -88,11 +88,11 @@ describe('modules/datasource/go/index', () => {
     it('supports gitlab digest', async () => {
       httpMock
         .scope('https://gitlab.com/')
-        .get('/group/subgroup?go-get=1')
+        .get('/group/subgroup/repo?go-get=1')
         .reply(200, Fixtures.get('go-get-gitlab.html'));
       getDigestGitMock.mockResolvedValue('abcdefabcdefabcdefabcdef');
       const res = await datasource.getDigest(
-        { packageName: 'gitlab.com/group/subgroup' },
+        { packageName: 'gitlab.com/group/subgroup/repo' },
         null
       );
       expect(res).toBe('abcdefabcdefabcdefabcdef');
@@ -101,12 +101,12 @@ describe('modules/datasource/go/index', () => {
     it('supports gitlab digest with a specific branch', async () => {
       httpMock
         .scope('https://gitlab.com/')
-        .get('/group/subgroup?go-get=1')
+        .get('/group/subgroup/repo?go-get=1')
         .reply(200, Fixtures.get('go-get-gitlab.html'));
       const branch = 'some-branch';
       getDigestGitMock.mockResolvedValue('abcdefabcdefabcdefabcdef');
       const res = await datasource.getDigest(
-        { packageName: 'gitlab.com/group/subgroup' },
+        { packageName: 'gitlab.com/group/subgroup/repo' },
         branch
       );
       expect(res).toBe('abcdefabcdefabcdefabcdef');

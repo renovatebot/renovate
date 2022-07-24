@@ -48,6 +48,22 @@ Object {
 }
 `;
 
+exports[`modules/datasource/go/releases-direct getReleases support nested modules on gitlab subgroups 1`] = `
+Object {
+  "releases": Array [
+    Object {
+      "gitRef": "v1.0.0",
+      "version": "v1.0.0",
+    },
+    Object {
+      "gitRef": "v2.0.0",
+      "version": "v2.0.0",
+    },
+  ],
+  "sourceUrl": "https://gitlab.com/group/subgroup/repo",
+}
+`;
+
 exports[`modules/datasource/go/releases-direct getReleases support self hosted gitlab private repositories 1`] = `
 Object {
   "releases": Array [

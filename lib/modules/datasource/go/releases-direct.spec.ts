@@ -47,6 +47,7 @@ describe('modules/datasource/go/releases-direct', () => {
         datasource: 'github-tags',
         packageName: 'golang/text',
         registryUrl: 'https://github.com',
+        repoRoot: 'https://github.com/golang/text',
       });
       gitGetTags.mockResolvedValueOnce({
         releases: [
@@ -73,6 +74,7 @@ describe('modules/datasource/go/releases-direct', () => {
         datasource: 'gitlab-tags',
         registryUrl: 'https://gitlab.com',
         packageName: 'golang/text',
+        repoRoot: 'https://gitlab.com/golang/text',
       });
       gitGetTags.mockResolvedValueOnce({
         releases: [
@@ -93,6 +95,7 @@ describe('modules/datasource/go/releases-direct', () => {
         datasource: 'gitlab-tags',
         registryUrl: 'https://my.custom.domain',
         packageName: 'golang/myrepo',
+        repoRoot: 'https://my.custom.domain/golang/myrepo',
       });
       hostRules.find.mockReturnValue({ token: 'some-token' });
       gitGetTags.mockResolvedValueOnce({
@@ -114,6 +117,7 @@ describe('modules/datasource/go/releases-direct', () => {
         datasource: 'bitbucket-tags',
         packageName: 'golang/text',
         registryUrl: 'https://bitbucket.org',
+        repoRoot: 'https://bitbucket.org/golang/text',
       });
       gitGetTags.mockResolvedValueOnce({
         releases: [
@@ -134,6 +138,7 @@ describe('modules/datasource/go/releases-direct', () => {
         datasource: 'github-tags',
         registryUrl: 'https://git.enterprise.com',
         packageName: 'example/module',
+        repoRoot: 'https://git.enterprise.com/example/module',
       });
       gitGetTags.mockResolvedValueOnce({
         releases: [
@@ -168,16 +173,19 @@ describe('modules/datasource/go/releases-direct', () => {
         datasource: 'github-tags',
         packageName: 'x/text',
         registryUrl: 'https://github.com',
+        repoRoot: 'https://github.com/x/text',
       });
       getDatasourceSpy.mockResolvedValueOnce({
         datasource: 'github-tags',
         packageName: 'x/text',
         registryUrl: 'https://github.com',
+        repoRoot: 'https://github.com/x/text',
       });
       getDatasourceSpy.mockResolvedValueOnce({
         datasource: 'github-tags',
         packageName: 'go-x/x',
         registryUrl: 'https://github.com',
+        repoRoot: 'https://github.com/go-x/x',
       });
       gitGetTags.mockResolvedValue({ releases: [] });
       const packages = [
@@ -197,6 +205,7 @@ describe('modules/datasource/go/releases-direct', () => {
         datasource: 'gitlab-tags',
         registryUrl: 'https://gitlab.com',
         packageName: 'group/subgroup/repo',
+        repoRoot: 'https://gitlab.com/group/subgroup/repo',
       });
       gitGetTags.mockResolvedValue({
         releases: [
@@ -220,21 +229,53 @@ describe('modules/datasource/go/releases-direct', () => {
       ]);
     });
 
+    it('support nested modules on gitlab subgroups', async () => {
+      getDatasourceSpy.mockResolvedValueOnce({
+        datasource: 'gitlab-tags',
+        registryUrl: 'https://gitlab.com',
+        packageName: 'group/subgroup/repo',
+        repoRoot: 'https://gitlab.com/group/subgroup/repo',
+      });
+      gitGetTags.mockResolvedValue({
+        releases: [
+          { gitRef: 'v1.0.0', version: 'v1.0.0' },
+          { gitRef: 'v2.0.0', version: 'v2.0.0' },
+        ],
+      });
+      const res = await datasource.getReleases({
+        packageName: 'gitlab.com/group/subgroup/repo/submodule',
+      });
+      expect(res).toMatchSnapshot();
+      expect(res).not.toBeNull();
+      expect(res).toBeDefined();
+      expect(gitGetTags.mock.calls).toMatchObject([
+        [
+          {
+            filter: { prefix: 'refs/tags/submodule/v' },
+            packageName: 'https://gitlab.com/group/subgroup/repo',
+          },
+        ],
+      ]);
+    });
+
     it('works for nested modules on github', async () => {
       getDatasourceSpy.mockResolvedValueOnce({
         datasource: 'github-tags',
         packageName: 'x/text',
         registryUrl: 'https://github.com',
+        repoRoot: 'https://github.com/x/text',
       });
       getDatasourceSpy.mockResolvedValueOnce({
         datasource: 'github-tags',
         packageName: 'x/text',
         registryUrl: 'https://github.com',
+        repoRoot: 'https://github.com/x/text',
       });
       getDatasourceSpy.mockResolvedValueOnce({
         datasource: 'github-tags',
         packageName: 'x/text',
         registryUrl: 'https://github.com',
+        repoRoot: 'https://github.com/x/text',
       });
       const packages = [
         { packageName: 'github.com/x/text/a' },
@@ -276,11 +317,13 @@ describe('modules/datasource/go/releases-direct', () => {
         datasource: 'github-tags',
         packageName: 'x/text',
         registryUrl: 'https://github.com',
+        repoRoot: 'https://github.com/x/text',
       });
       getDatasourceSpy.mockResolvedValueOnce({
         datasource: 'github-tags',
         packageName: 'x/text',
         registryUrl: 'https://github.com',
+        repoRoot: 'https://github.com/x/text',
       });
       const packages = [
         { packageName: 'github.com/x/text/a' },
@@ -320,6 +363,7 @@ describe('modules/datasource/go/releases-direct', () => {
         datasource: 'github-tags',
         packageName: 'x/text',
         registryUrl: 'https://github.com',
+        repoRoot: 'https://github.com/x/text',
       });
       const pkg = { packageName: 'github.com/x/text/v2' };
 
@@ -350,6 +394,7 @@ describe('modules/datasource/go/releases-direct', () => {
         datasource: 'github-tags',
         packageName: 'x/text',
         registryUrl: 'https://github.com',
+        repoRoot: 'https://github.com/x/text',
       });
       const pkg = { packageName: 'github.com/x/text/b/v2' };
 

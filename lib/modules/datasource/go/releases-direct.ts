@@ -5,7 +5,6 @@ import { Datasource } from '../datasource';
 import { GitTagsDatasource } from '../git-tags';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 import { BaseGoDatasource } from './base';
-import { getSourceUrl } from './common';
 
 export class GoDirectDatasource extends Datasource {
   static readonly id = 'go-direct';
@@ -46,13 +45,6 @@ export class GoDirectDatasource extends Datasource {
       return null;
     }
 
-    const sourceUrl = getSourceUrl(source);
-
-    // istanbul ignore if
-    if (!sourceUrl) {
-      return null;
-    }
-
     /**
      * github.com/org/mod/submodule should be tagged as submodule/va.b.c
      * and that tag should be used instead of just va.b.c, although for compatibility
@@ -73,7 +65,7 @@ export class GoDirectDatasource extends Datasource {
     const prefix = ['refs/tags'].concat(submodPath, ['v']).join('/');
 
     const res = await this.git.getReleases({
-      packageName: sourceUrl,
+      packageName: source.repoRoot,
       filter: { prefix },
     });
 
@@ -93,12 +85,12 @@ export class GoDirectDatasource extends Datasource {
       logger.trace({ submodReleases }, 'go.getReleases');
 
       return {
-        sourceUrl,
+        sourceUrl: source.repoRoot,
         releases: submodReleases,
       };
     }
     logger.trace({ submodPath, releases: res.releases }, 'go.getReleases');
 
-    return { ...res, sourceUrl };
+    return { ...res, sourceUrl: source.repoRoot };
   }
 }

@@ -23,6 +23,10 @@ export class BaseGoDatasource {
   private static readonly http = new Http(BaseGoDatasource.id);
 
   static async getDatasource(goModule: string): Promise<DataSource | null> {
+    const flatRepoRoot = (registryUrl: string, packageName: string): string => {
+      const namePath = packageName.split('/');
+      return `${registryUrl}/${namePath[0]}/${namePath[1]}`;
+    };
     if (goModule.startsWith('gopkg.in/')) {
       const [pkg] = goModule.replace('gopkg.in/', '').split('.');
       const packageName = pkg.includes('/') ? pkg : `go-${pkg}/${pkg}`;
@@ -30,6 +34,7 @@ export class BaseGoDatasource {
         datasource: GithubTagsDatasource.id,
         packageName,
         registryUrl: 'https://github.com',
+        repoRoot: flatRepoRoot('https://github.com', packageName),
       };
     }
 
@@ -40,6 +45,7 @@ export class BaseGoDatasource {
         datasource: GithubTagsDatasource.id,
         packageName,
         registryUrl: 'https://github.com',
+        repoRoot: flatRepoRoot('https://github.com', packageName),
       };
     }
 
@@ -50,6 +56,7 @@ export class BaseGoDatasource {
         datasource: BitBucketTagsDatasource.id,
         packageName,
         registryUrl: 'https://bitbucket.org',
+        repoRoot: flatRepoRoot('https://bitbucket.org', packageName),
       };
     }
 
@@ -91,6 +98,7 @@ export class BaseGoDatasource {
           .replace('https://github.com/', '')
           .replace(regEx(/\/$/), ''),
         registryUrl: 'https://github.com',
+        repoRoot: trimTrailingSlash(goSourceUrl),
       };
     }
     const gitlabUrl =
@@ -111,12 +119,14 @@ export class BaseGoDatasource {
               0,
               gitlabModuleName.indexOf('.git')
             ),
+            repoRoot: trimTrailingSlash(goSourceUrl),
           };
         }
         return {
           datasource: GitlabTagsDatasource.id,
           registryUrl: gitlabUrl,
           packageName: gitlabModuleName,
+          repoRoot: trimTrailingSlash(goSourceUrl),
         };
       }
 
@@ -124,6 +134,7 @@ export class BaseGoDatasource {
         datasource: GitlabTagsDatasource.id,
         registryUrl: gitlabUrl,
         packageName: gitlabUrlName,
+        repoRoot: trimTrailingSlash(goSourceUrl),
       };
     }
 
@@ -144,6 +155,7 @@ export class BaseGoDatasource {
         datasource: GitlabTagsDatasource.id,
         registryUrl,
         packageName,
+        repoRoot: trimTrailingSlash(goSourceUrl),
       };
     }
     /* istanbul ignore next */
@@ -185,6 +197,7 @@ export class BaseGoDatasource {
       datasource: GithubTagsDatasource.id,
       registryUrl: `${parsedUrl.protocol}//${parsedUrl.host}`,
       packageName,
+      repoRoot: trimTrailingSlash(goImportURL),
     };
   }
 }
