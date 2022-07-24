@@ -387,10 +387,10 @@ function handleExtendsArray(
   if (!config.extends?.length) {
     return;
   }
-  const uniqueExtends = new Set([
-    ...config.extends.filter((e) => !shouldShallowResolve(e)),
-    ...unresolvedPresets,
-  ]);
+  const filteredPresets = config.extends.filter(
+    (e) => !shouldShallowResolve(e)
+  );
+  const uniqueExtends = new Set([...filteredPresets, ...unresolvedPresets]);
   config.extends = Array.from(uniqueExtends);
   if (config?.extends?.length === 0) {
     // clean empty extends array
