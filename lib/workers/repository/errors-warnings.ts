@@ -3,8 +3,8 @@ import type { RenovateConfig } from '../../config/types';
 import { logger } from '../../logger';
 import type { PackageFile } from '../../modules/manager/types';
 import { emojify } from '../../util/emoji';
-import type { DepWarnings } from '../types';
 import { regEx } from '../../util/regex';
+import type { DepWarnings } from '../types';
 
 export function getWarnings(config: RenovateConfig): string {
   if (!config.warnings?.length) {
@@ -111,7 +111,6 @@ export function getDepWarningsDashboard(
     '\nFiles affected: ' +
     warningFiles.map((f) => '`' + f + '`').join(', ') +
     '\n\n';
-
   warningText += '---';
   warningText += '\n\n';
   return warningText;
