@@ -110,7 +110,7 @@ It mostly uses Renovate config defaults but adds a few smart customizations such
 ## How to Use Preset Configs
 
 By default, Renovate App's onboarding PR suggests the `["config:base]"` preset.
-If you're self hosting you must add `"onboardingConfig": { "extends": ["config:base"] }` to your bot's config.
+If you're self hosting, and want to use the `config:base` preset, then you must add `"onboardingConfig": { "extends": ["config:base"] }` to your bot's config.
 
 Read the [Full Config Presets](https://docs.renovatebot.com/presets-config/) page to learn more about our `config:` presets.
 
