@@ -1,11 +1,11 @@
 export { extractPackageFile } from './extract';
 
 import { MavenDatasource } from '../../datasource/maven';
-import * as gradleVersioning from '../../versioning/gradle';
+import * as mavenVersioning from '../../versioning/maven';
 
 export const defaultConfig = {
   fileMatch: ['^.*\\.main\\.kts$'],
-  versioning: gradleVersioning.id,
+  versioning: mavenVersioning.id,
 };
 
 export const supportedDatasources = [MavenDatasource.id];
