@@ -12,6 +12,7 @@ jest.mock('../updates/branchify');
 jest.mock('../extract');
 jest.mock('../../../util/cache/repository');
 jest.mock('../../../util/git');
+jest.mock('../../../util/check-token');
 
 const branchify = mocked(_branchify);
 const repositoryCache = mocked(_repositoryCache);
