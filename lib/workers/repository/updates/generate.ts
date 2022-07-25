@@ -325,6 +325,24 @@ export function generateBranchConfig(
       )
     ),
   ].filter(is.nonEmptyString);
+  // combine excludeCommitPaths for multiple manager experience
+  const hasExcludeCommitPaths = config.upgrades.some(
+    (u) => u.excludeCommitPaths && u.excludeCommitPaths.length > 0
+  );
+  if (hasExcludeCommitPaths) {
+    config.excludeCommitPaths = Object.keys(
+      config.upgrades.reduce((acc: Record<string, boolean>, upgrade) => {
+        if (upgrade.excludeCommitPaths) {
+          upgrade.excludeCommitPaths.forEach((p) => {
+            acc[p] = true;
+          });
+        }
+
+        return acc;
+      }, {} as Record<string, boolean>)
+    );
+  }
+
   config.automerge = config.upgrades.every((upgrade) => upgrade.automerge);
   // combine all labels
   config.labels = [
