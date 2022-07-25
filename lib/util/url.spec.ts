@@ -8,7 +8,6 @@ import {
   parseUrl,
   resolveBaseUrl,
   trimTrailingSlash,
-  urlPathDepth,
   validateUrl,
 } from './url';
 
@@ -167,20 +166,5 @@ describe('util/url', () => {
         url: 'https://api.github.com/user/9287/repos?page=5&per_page=100',
       },
     });
-  });
-
-  it('checks url path depth', () => {
-    expect(urlPathDepth('https://github.com/repo/path')).toBe(2);
-    expect(urlPathDepth('https://github.com/repo/path/')).toBe(2);
-    expect(urlPathDepth('https://github.com/repo/path/nested/val')).toBe(4);
-    expect(urlPathDepth('https://github.com/repo/path/nested/val?q=k')).toBe(4);
-    expect(urlPathDepth('https://nlog-project.org/some/path?q=val')).toBe(2);
-    expect(urlPathDepth('https://github.com/repo/')).toBe(1);
-    expect(urlPathDepth('https://github.com/repo')).toBe(1);
-    expect(urlPathDepth('https://github.com/')).toBe(0);
-    expect(urlPathDepth('https://github.com')).toBe(0);
-    expect(urlPathDepth('https://nlog-project.org?q=val')).toBe(0);
-    expect(urlPathDepth(undefined)).toBe(0);
-    expect(urlPathDepth('')).toBe(0);
   });
 });

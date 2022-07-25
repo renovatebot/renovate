@@ -4,7 +4,7 @@ import parse from 'github-url-from-git';
 import { DateTime } from 'luxon';
 import * as hostRules from '../../util/host-rules';
 import { regEx } from '../../util/regex';
-import { parseUrl, urlPathDepth, validateUrl } from '../../util/url';
+import { parseUrl, validateUrl } from '../../util/url';
 import { detectPlatform } from '../platform/util';
 import { manualChangelogUrls, manualSourceUrls } from './metadata-manual';
 import type { ReleaseResult } from './types';
@@ -200,16 +200,6 @@ export function shouldDeleteHomepage(
   const homepageParsed = parseUrl(homepage);
   if (is.nullOrUndefined(homepageParsed)) {
     return false;
-  }
-  // if urlDepth is less than or equal to 2 then url is not
-  // a link to a path in the repo.
-  // this case handles these kinds of links:
-  //   github.com/org
-  //   github.com/org/
-  //   gitub.com/org/repo
-  //   github.com/org/repo/
-  if (urlPathDepth(homepage) <= 2) {
-    return true;
   }
   let hPath = homepageParsed.pathname;
   if (hPath.charAt(hPath.length - 1) === '/') {

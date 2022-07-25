@@ -106,29 +106,3 @@ export function parseLinkHeader(
   }
   return _parseLinkHeader(linkHeader);
 }
-
-// this method returns path depth of a url
-// example : https://github.com/org/repo/nested-path
-// output : 3.  (org->repo->nested-path depth of this path is 3)
-export function urlPathDepth(url: string | undefined): number {
-  const parsedUrl = parseUrl(url);
-  if (is.nullOrUndefined(parsedUrl)) {
-    return 0;
-  }
-  const pathLength = parsedUrl.pathname.length;
-  let path = parsedUrl.pathname;
-  if (parsedUrl.pathname.charAt(pathLength - 1) === '/') {
-    path = path.substring(0, pathLength - 1); // remove last slash
-  }
-  return countChar(path, '/');
-}
-
-export function countChar(path: string, character: string): number {
-  let slashCount = 0;
-  for (let i = 0; i < path.length; i++) {
-    if (path.charAt(i) === character) {
-      slashCount++;
-    }
-  }
-  return slashCount;
-}
