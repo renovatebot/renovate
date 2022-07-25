@@ -5,7 +5,6 @@ const genericCaseFileContent = Fixtures.get('generic-case.main.kts');
 const customRepositoriesFileContent = Fixtures.get(
   'custom-repositories.main.kts'
 );
-const noDependenciesFileContent = Fixtures.get('no-dependencies.main.kts');
 const missingPartsFileContent = Fixtures.get('missing-parts.main.kts');
 
 describe('modules/manager/kotlin-script/extract', () => {
@@ -73,7 +72,9 @@ describe('modules/manager/kotlin-script/extract', () => {
 
     it('no dependencies', () => {
       // when
-      const packageFile = extractPackageFile(noDependenciesFileContent);
+      const packageFile = extractPackageFile(`
+        #!/usr/bin/env kotlin
+        println("Hello world")`);
 
       // then
       expect(packageFile).toBeNull();
