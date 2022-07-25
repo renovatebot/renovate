@@ -12,9 +12,7 @@ const repositoryRegex = regEx(
 
 export function extractPackageFile(fileContent: string): PackageFile | null {
   const registryUrls: string[] = [...fileContent.matchAll(repositoryRegex)]
-    .map((match) => {
-      return match.groups?.repositoryName;
-    })
+    .map((match) => match.groups?.repositoryName)
     .filter(is.string);
 
   const matches = [...fileContent.matchAll(dependsOnRegex)];
@@ -25,7 +23,6 @@ export function extractPackageFile(fileContent: string): PackageFile | null {
       depName: `${match.groups?.groupId}:${match.groups?.artifactId}`,
       replaceString: match.groups?.replaceString,
       datasource: MavenDatasource.id,
-      registryUrls: registryUrls.length > 0 ? registryUrls : null,
     };
     deps.push(dep);
   }
@@ -36,5 +33,6 @@ export function extractPackageFile(fileContent: string): PackageFile | null {
 
   return {
     deps,
+    ...(registryUrls.length && { registryUrls }),
   };
 }

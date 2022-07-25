@@ -14,30 +14,30 @@ describe('modules/manager/kotlin-script/extract', () => {
       const packageFile = extractPackageFile(genericCaseFileContent);
 
       // then
-      expect(packageFile?.deps).toEqual([
-        {
-          depName: 'it.krzeminski:github-actions-kotlin-dsl',
-          currentValue: '0.22.0',
-          replaceString: '"it.krzeminski:github-actions-kotlin-dsl:0.22.0"',
-          datasource: 'maven',
-          registryUrls: null,
-        },
-        {
-          depName: 'org.eclipse.jgit:org.eclipse.jgit',
-          currentValue: '4.6.0.201612231935-r',
-          replaceString:
-            '"org.eclipse.jgit:org.eclipse.jgit:4.6.0.201612231935-r"',
-          datasource: 'maven',
-          registryUrls: null,
-        },
-        {
-          depName: 'org.jetbrains.lets-plot:lets-plot-kotlin-jvm',
-          currentValue: '3.0.2',
-          replaceString: '"org.jetbrains.lets-plot:lets-plot-kotlin-jvm:3.0.2"',
-          datasource: 'maven',
-          registryUrls: null,
-        },
-      ]);
+      expect(packageFile).toEqual({
+        deps: [
+          {
+            depName: 'it.krzeminski:github-actions-kotlin-dsl',
+            currentValue: '0.22.0',
+            replaceString: '"it.krzeminski:github-actions-kotlin-dsl:0.22.0"',
+            datasource: 'maven',
+          },
+          {
+            depName: 'org.eclipse.jgit:org.eclipse.jgit',
+            currentValue: '4.6.0.201612231935-r',
+            replaceString:
+              '"org.eclipse.jgit:org.eclipse.jgit:4.6.0.201612231935-r"',
+            datasource: 'maven',
+          },
+          {
+            depName: 'org.jetbrains.lets-plot:lets-plot-kotlin-jvm',
+            currentValue: '3.0.2',
+            replaceString:
+              '"org.jetbrains.lets-plot:lets-plot-kotlin-jvm:3.0.2"',
+            datasource: 'maven',
+          },
+        ],
+      });
     });
 
     it('detects custom repository definitions', () => {
@@ -45,29 +45,27 @@ describe('modules/manager/kotlin-script/extract', () => {
       const packageFile = extractPackageFile(customRepositoriesFileContent);
 
       // then
-      expect(packageFile?.deps).toEqual([
-        {
-          depName: 'it.krzeminski:github-actions-kotlin-dsl',
-          currentValue: '0.22.0',
-          replaceString: '"it.krzeminski:github-actions-kotlin-dsl:0.22.0"',
-          datasource: 'maven',
-          registryUrls: [
-            'https://jitpack.io',
-            'https://some.other.repo/foo/bar/baz',
-          ],
-        },
-        {
-          depName: 'org.eclipse.jgit:org.eclipse.jgit',
-          currentValue: '4.6.0.201612231935-r',
-          replaceString:
-            '"org.eclipse.jgit:org.eclipse.jgit:4.6.0.201612231935-r"',
-          datasource: 'maven',
-          registryUrls: [
-            'https://jitpack.io',
-            'https://some.other.repo/foo/bar/baz',
-          ],
-        },
-      ]);
+      expect(packageFile).toEqual({
+        deps: [
+          {
+            depName: 'it.krzeminski:github-actions-kotlin-dsl',
+            currentValue: '0.22.0',
+            replaceString: '"it.krzeminski:github-actions-kotlin-dsl:0.22.0"',
+            datasource: 'maven',
+          },
+          {
+            depName: 'org.eclipse.jgit:org.eclipse.jgit',
+            currentValue: '4.6.0.201612231935-r',
+            replaceString:
+              '"org.eclipse.jgit:org.eclipse.jgit:4.6.0.201612231935-r"',
+            datasource: 'maven',
+          },
+        ],
+        registryUrls: [
+          'https://jitpack.io',
+          'https://some.other.repo/foo/bar/baz',
+        ],
+      });
     });
 
     it('no dependencies', () => {
@@ -85,15 +83,16 @@ describe('modules/manager/kotlin-script/extract', () => {
       const packageFile = extractPackageFile(missingPartsFileContent);
 
       // then
-      expect(packageFile?.deps).toEqual([
-        {
-          depName: 'it.krzeminski:github-actions-kotlin-dsl',
-          currentValue: '0.22.0',
-          replaceString: '"it.krzeminski:github-actions-kotlin-dsl:0.22.0"',
-          datasource: 'maven',
-          registryUrls: null,
-        },
-      ]);
+      expect(packageFile).toEqual({
+        deps: [
+          {
+            depName: 'it.krzeminski:github-actions-kotlin-dsl',
+            currentValue: '0.22.0',
+            replaceString: '"it.krzeminski:github-actions-kotlin-dsl:0.22.0"',
+            datasource: 'maven',
+          },
+        ],
+      });
     });
   });
 });
