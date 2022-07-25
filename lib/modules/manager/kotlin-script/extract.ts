@@ -30,6 +30,10 @@ export function extractPackageFile(fileContent: string): PackageFile | null {
     deps.push(dep);
   }
 
+  if (deps.length === 0) {
+    return null;
+  }
+
   return {
     deps,
   };
