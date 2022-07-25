@@ -89,11 +89,9 @@ function canSkipBranchUpdateCheck(
   branchCache: BranchCache,
   configAndManagersHash: string
 ): boolean {
-  const currentBaseBranchSha = getBranchCommit(config.baseBranch!);
   const branchCommit = getBranchCommit(config?.branchName);
 
   return (
-    currentBaseBranchSha === branchCache?.parentSha &&
     branchCommit === branchCache?.sha &&
     configAndManagersHash === branchCache.configAndManagersHash
   );
@@ -204,17 +202,6 @@ export async function processBranch(
       };
     }
     if (branchExists) {
-      if (
-        canSkipBranchUpdateCheck(config, branchCache, configAndManagersHash)
-      ) {
-        logger.debug('According to branch cache, no updates are necessary');
-        return {
-          configAndManagersHash,
-          branchExists: true,
-          prNo: branchPr?.number,
-          result: BranchResult.NoWork,
-        };
-      }
       logger.debug('Checking if PR has been edited');
       const branchIsModified = await isBranchModified(config.branchName);
       if (branchPr) {
@@ -326,7 +313,6 @@ export async function processBranch(
         'Branch + PR exists but is not scheduled -- will update if necessary'
       );
     }
-    await checkoutBranch(config.baseBranch!);
     //stability checks
     if (
       config.upgrades.some(
@@ -419,6 +405,19 @@ export async function processBranch(
       config = { ...config, ...(await shouldReuseExistingBranch(config)) };
     }
     logger.debug(`Using reuseExistingBranch: ${config.reuseExistingBranch}`);
+    if (
+      config.reuseExistingBranch &&
+      canSkipBranchUpdateCheck(config, branchCache, configAndManagersHash)
+    ) {
+      logger.debug('According to branch cache, no updates are necessary');
+      return {
+        configAndManagersHash,
+        branchExists: true,
+        prNo: branchPr?.number,
+        result: BranchResult.NoWork,
+      };
+    }
+    await checkoutBranch(config.baseBranch!);
     const res = await getUpdatedPackageFiles(config);
     // istanbul ignore if
     if (res.artifactErrors && config.artifactErrors) {

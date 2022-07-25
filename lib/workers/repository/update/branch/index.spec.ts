@@ -1855,10 +1855,10 @@ describe('workers/repository/update/branch/index', () => {
     });
 
     it('returns nowork if the updates are same', async () => {
-      git.branchExists.mockReturnValueOnce(true);
+      git.branchExists.mockReturnValue(true);
       git.getBranchCommit.mockReturnValue('111');
       git.getBranchCommit.mockReturnValue('111');
-      platform.getBranchPr.mockResolvedValueOnce(
+      platform.getBranchPr.mockResolvedValue(
         partial<Pr>({
           sourceBranch: 'old/some-branch',
           state: PrState.Open,
@@ -1869,6 +1869,7 @@ describe('workers/repository/update/branch/index', () => {
         branchName: 'new/some-branch',
         branchPrefix: 'new/',
         branchPrefixOld: 'old/',
+        reuseExistingBranch: true,
       };
       const configAndManagersHash = hasha([
         JSON.stringify(inconfig),
@@ -1880,7 +1881,7 @@ describe('workers/repository/update/branch/index', () => {
         parentSha: '111',
         sha: '111',
       } as BranchCache;
-      repoCache.getCache.mockReturnValueOnce({
+      repoCache.getCache.mockReturnValue({
         branches: [branchCache],
       });
       expect(await branchWorker.processBranch(inconfig)).toEqual({
