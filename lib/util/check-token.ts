@@ -3,6 +3,7 @@ import { logger } from '../logger';
 import { GithubReleasesDatasource } from '../modules/datasource/github-releases';
 import { GithubTagsDatasource } from '../modules/datasource/github-tags';
 import type { PackageFile } from '../modules/manager/types';
+import * as memCache from '../util/cache/memory';
 import * as hostRules from './host-rules';
 import { parseUrl } from './url';
 
@@ -13,7 +14,7 @@ function isGithubUrl(url: string | null | undefined): boolean {
   }
 
   const { hostname } = parsedUrl;
-  return hostname === 'github.com';
+  return hostname.endsWith('.github.com') || hostname === 'github.com';
 }
 
 export function checkGithubToken(
@@ -25,6 +26,7 @@ export function checkGithubToken(
   });
 
   if (token) {
+    logger.trace('GitHub token is found');
     return;
   }
 
@@ -37,7 +39,7 @@ export function checkGithubToken(
           dep.datasource === GithubReleasesDatasource.id ||
           isGithubUrl(dep.sourceUrl)
         ) {
-          // dep.skipReason = 'github-token-required';
+          dep.skipReason = 'github-token-required';
           if (dep.depName) {
             githubDeps.push(dep.depName);
           }
@@ -47,9 +49,15 @@ export function checkGithubToken(
   }
 
   if (githubDeps.length > 0) {
-    logger.warn(
-      { githubDeps },
-      `GitHub token is required for some dependencies`
+    const warningLogged = memCache.get<boolean | undefined>(
+      'github-token-required-warning-logged'
     );
+    if (!warningLogged) {
+      logger.warn(
+        { githubDeps },
+        `GitHub token is required for some dependencies`
+      );
+      memCache.set('github-token-required-warning-logged', true);
+    }
   }
 }
