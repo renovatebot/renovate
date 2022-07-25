@@ -4,8 +4,8 @@ import { GitlabTagsDatasource } from '../../datasource/gitlab-tags';
 import { PodDatasource } from '../../datasource/pod';
 import * as rubyVersioning from '../../versioning/ruby';
 
-export { updateArtifacts } from './artifacts';
 export { extractPackageFile } from './extract';
+export { updateArtifacts } from './artifacts';
 
 export const displayName = 'CocoaPods';
 export const url = 'https://cocoapods.org';
