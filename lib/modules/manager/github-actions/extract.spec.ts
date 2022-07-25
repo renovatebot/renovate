@@ -11,7 +11,7 @@ describe('modules/manager/github-actions/extract', () => {
       const res = extractPackageFile(Fixtures.get('workflow_1.yml'));
       expect(res?.deps).toMatchSnapshot();
       expect(res?.deps.filter((d) => d.datasource === 'docker')).toHaveLength(
-        2
+        5
       );
     });
 

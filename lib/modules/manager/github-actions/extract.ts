@@ -5,7 +5,9 @@ import * as dockerVersioning from '../../versioning/docker';
 import { getDep } from '../dockerfile/extract';
 import type { PackageDependency, PackageFile } from '../types';
 
-const dockerRe = regEx(/^\s+uses: docker:\/\/([^"]+)\s*$/);
+const dockerRe = regEx(
+  /^\s+(?:(?:container|image): ['"]?|uses: ['"]?docker:\/\/)([^'"]+)\s*$/
+);
 const actionRe = regEx(
   /^\s+-?\s+?uses: (?<replaceString>['"]?(?<depName>[\w-]+\/[\w-]+)(?<path>\/.*)?@(?<currentValue>[^\s'"]+)['"]?(?:\s+#\s+(?:renovate:\s+)?tag=(?<tag>\S+))?)/
 );
