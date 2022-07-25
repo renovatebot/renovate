@@ -3,7 +3,7 @@ import { MavenDatasource } from '../../datasource/maven';
 import type { PackageDependency, PackageFile } from '../types';
 
 const dependsOnRegex = regEx(
-  /@file\s*:\s*DependsOn\s*\(\s*(?<replaceString>"(?<groupId>.*):(?<artifactId>.*):(?<version>.*)")\s*\)/g
+  /@file\s*:\s*DependsOn\s*\(\s*(?<replaceString>"(?<groupId>.+):(?<artifactId>.+):(?<version>.+)")\s*\)/g
 );
 const repositoryRegex = regEx(
   /@file\s*:\s*Repository\s*\(\s*"(?<repositoryName>.*)"\s*\)/g
