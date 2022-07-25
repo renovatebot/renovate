@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import { regEx } from '../../../util/regex';
 import { MavenDatasource } from '../../datasource/maven';
 import type { PackageDependency, PackageFile } from '../types';
@@ -14,11 +15,11 @@ export function extractPackageFile(fileContent: string): PackageFile | null {
     .map((match) => {
       return match.groups?.repositoryName;
     })
-    .filter((x): x is string => x !== null);
+    .filter(is.string);
 
-  const deps: PackageDependency[] = [
-    ...fileContent.matchAll(dependsOnRegex),
-  ].map((match) => {
+  const matches = [...fileContent.matchAll(dependsOnRegex)];
+  const deps: PackageDependency[] = [];
+  for (const match of matches) {
     const dep: PackageDependency = {
       currentValue: match.groups?.version,
       depName: `${match.groups?.groupId}:${match.groups?.artifactId}`,
@@ -26,8 +27,8 @@ export function extractPackageFile(fileContent: string): PackageFile | null {
       datasource: MavenDatasource.id,
       registryUrls: registryUrls.length > 0 ? registryUrls : null,
     };
-    return dep;
-  });
+    deps.push(dep);
+  }
 
   return {
     deps,
