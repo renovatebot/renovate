@@ -258,7 +258,7 @@ describe('util/git/index', () => {
     });
 
     it('should return result even if non-default and not under branchPrefix', async () => {
-      const parentSha = (await Git().raw(['rev-parse', 'HEAD'])).trim();
+      const parentSha = 'SHA';
       const branchCache = partial<BranchCache>({
         branchName: 'develop',
         parentSha: parentSha,
