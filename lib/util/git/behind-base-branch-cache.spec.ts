@@ -1,4 +1,4 @@
-import { mocked } from '../../../test/util';
+import { mocked, partial } from '../../../test/util';
 import * as _repositoryCache from '../cache/repository';
 import type { BranchCache, RepoCacheData } from '../cache/repository/types';
 import { getCachedBehindBaseResult } from './behind-base-branch-cache';
@@ -25,8 +25,11 @@ describe('util/git/behind-base-branch-cache', () => {
 
     it('returns null if cache is partially defined', () => {
       const branchName = 'branchName';
-      const branchCache = { branchName, isModified: false } as BranchCache;
-      const repoCache = { branches: [branchCache] } as RepoCacheData;
+      const branchCache = partial<BranchCache>({
+        branchName,
+        isModified: false,
+      });
+      const repoCache: RepoCacheData = { branches: [branchCache] };
       repositoryCache.getCache.mockReturnValue(repoCache);
       expect(getCachedBehindBaseResult(branchName, '111')).toBeNull();
     });
