@@ -80,4 +80,12 @@ describe('util/template/index', () => {
     const output = template.compile(userTemplate, undefined as never);
     expect(output).toBe('foo');
   });
+
+  it('appends v to version when needed', () => {
+    const userTemplate =
+      '{{#if (isFirstCharacterV newVersion)}}{{newVersion}}{{else}}v{{newVersion}}{{/if}}';
+    const input = { newVersion: 'v5.1.2' };
+    const output = template.compile(userTemplate, input);
+    expect(output).toBe('v5.1.2');
+  });
 });

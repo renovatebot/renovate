@@ -23,6 +23,8 @@ handlebars.registerHelper('containsString', (str, subStr) =>
   str?.includes(subStr)
 );
 
+handlebars.registerHelper('isFirstCharacterV', (str) => str?.charAt(0) === 'v');
+
 handlebars.registerHelper({
   and(...args) {
     // Need to remove the 'options', as last parameter
@@ -59,6 +61,7 @@ export const exposedConfigOptions = [
   'prBodyDefinitions',
   'prBodyNotes',
   'prTitle',
+  'prettyNewVersion',
   'semanticCommitScope',
   'semanticCommitType',
   'separateMajorMinor',
