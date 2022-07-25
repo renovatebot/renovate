@@ -16,7 +16,6 @@ import type {
   ToolConstraint,
 } from '../../../../util/exec/types';
 import {
-  deleteLocalFile,
   localPathIsFile,
   readLocalFile,
   writeLocalFile,
@@ -251,12 +250,19 @@ export async function generateLockFile(
       logger.debug(
         `Removing ${lockFileName} first due to lock file maintenance upgrade`
       );
+
+      // Note: Instead of just deleting the `yarn.lock` file, we just wipe it
+      // and keep an empty lock file. Deleting the lock file could result in different
+      // Yarn semantics. e.g. Yarn 2+ will error when `yarn install` is executed in
+      // a subdirectory which is not part of a Yarn workspace. Yarn suggests to create
+      // an empty lock file if a subdirectory should be treated as its own workspace.
+      // https://github.com/yarnpkg/berry/blob/20612e82d26ead5928cc27bf482bb8d62dde87d3/packages/yarnpkg-core/sources/Project.ts#L284.
       try {
-        await deleteLocalFile(lockFileName);
+        await writeLocalFile(lockFileName, '');
       } catch (err) /* istanbul ignore next */ {
         logger.debug(
           { err, lockFileName },
-          'Error removing yarn.lock for lock file maintenance'
+          'Error clearing `yarn.lock` for lock file maintenance'
         );
       }
     }

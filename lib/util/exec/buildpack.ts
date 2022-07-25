@@ -9,6 +9,7 @@ import { id as npmVersioningId } from '../../modules/versioning/npm';
 import { id as pep440VersioningId } from '../../modules/versioning/pep440';
 import { id as rubyVersioningId } from '../../modules/versioning/ruby';
 import { id as semverVersioningId } from '../../modules/versioning/semver';
+import { id as semverCoercedVersioningId } from '../../modules/versioning/semver-coerced';
 import type { Opt, ToolConfig, ToolConstraint } from './types';
 
 const allToolConfig: Record<string, ToolConfig> = {
@@ -31,6 +32,16 @@ const allToolConfig: Record<string, ToolConfig> = {
     datasource: 'npm',
     depName: 'corepack',
     versioning: npmVersioningId,
+  },
+  erlang: {
+    datasource: 'github-releases',
+    depName: 'containerbase/erlang-prebuild',
+    versioning: semverCoercedVersioningId,
+  },
+  elixir: {
+    datasource: 'github-releases',
+    depName: 'elixir-lang/elixir',
+    versioning: semverVersioningId,
   },
   flux: {
     datasource: 'github-releases',
