@@ -23,6 +23,14 @@ describe('util/git/behind-base-branch-cache', () => {
       expect(getCachedBehindBaseResult('foo', '111')).toBeNull();
     });
 
+    it('returns null if cache is partially defined', () => {
+      const branchName = 'branchName';
+      const branchCache = { branchName, isModified: false } as BranchCache;
+      const repoCache = { branches: [branchCache] } as RepoCacheData;
+      repositoryCache.getCache.mockReturnValue(repoCache);
+      expect(getCachedBehindBaseResult(branchName, '111')).toBeNull();
+    });
+
     it('returns true if target SHA has changed', () => {
       repoCache.branches = [
         { branchName: 'foo', sha: 'aaa', parentSha: '222' } as BranchCache,
