@@ -1,6 +1,6 @@
 import _findUp from 'find-up';
 import fs from 'fs-extra';
-import tmp, { DirectoryResult, withDir } from 'tmp-promise';
+import tmp, { DirectoryResult } from 'tmp-promise';
 import { join, resolve } from 'upath';
 import { mockedFunction } from '../../../test/util';
 import { GlobalConfig } from '../../config/global';
@@ -206,48 +206,29 @@ describe('util/fs/index', () => {
     });
   });
 
-  describe('readLocalSynmlink', () => {
+  describe('readLocalSymlink', () => {
     it('reads symlink', async () => {
-      await withDir(
-        async (localDir) => {
-          GlobalConfig.set({
-            localDir: localDir.path,
-          });
-          await writeLocalFile('test/test.txt', '');
-          await fs.symlink(
-            resolve(localDir.path, 'test/test.txt'),
-            resolve(localDir.path, 'test/test')
-          );
-
-          const result = await readLocalSymlink('test/test');
-          expect(result).not.toBeNull();
-        },
-        {
-          unsafeCleanup: true,
-        }
+      await writeLocalFile('test/test.txt', '');
+      await fs.symlink(
+        join(localDir, 'test/test.txt'),
+        join(localDir, 'test/test')
       );
+
+      const result = await readLocalSymlink('test/test');
+
+      expect(result).not.toBeNull();
     });
 
     it('return null when link not exists', async () => {
-      await withDir(
-        async (localDir) => {
-          GlobalConfig.set({
-            localDir: localDir.path,
-          });
-          await writeLocalFile('test/test.txt', '');
-          await fs.symlink(
-            resolve(localDir.path, 'test/test.txt'),
-            resolve(localDir.path, 'test/test')
-          );
-
-          const notExistsResult = await readLocalSymlink('test/not-exists');
-
-          expect(notExistsResult).toBeNull();
-        },
-        {
-          unsafeCleanup: true,
-        }
+      await writeLocalFile('test/test.txt', '');
+      await fs.symlink(
+        join(localDir, 'test/test.txt'),
+        join(localDir, 'test/test')
       );
+
+      const notExistsResult = await readLocalSymlink('test/not-exists');
+
+      expect(notExistsResult).toBeNull();
     });
   });
 
@@ -349,43 +330,31 @@ describe('util/fs/index', () => {
   });
 
   describe('localPathIsSymbolicLink', () => {
-    beforeEach(() => {
-      GlobalConfig.set({ localDir: '' });
-    });
-
     it('returns false for file', async () => {
-      expect(await localPathIsSymbolicLink(__filename)).toBeFalse();
+      const path = `${localDir}/file.txt`;
+      await fs.outputFile(path, 'foobar');
+      expect(await localPathIsSymbolicLink(path)).toBeFalse();
     });
 
     it('returns false for directory', async () => {
-      expect(await localPathIsSymbolicLink(__dirname)).toBeFalse();
+      const path = `${localDir}/foobar`;
+      await fs.mkdir(path);
+      expect(await localPathIsSymbolicLink(path)).toBeFalse();
     });
 
     it('returns false for non-existing path', async () => {
-      expect(
-        await localPathIsSymbolicLink(__filename.replace('.ts', '.txt'))
-      ).toBeFalse();
+      const path = `${localDir}/file.txt`;
+      expect(await localPathIsSymbolicLink(path)).toBeFalse();
     });
 
     it('returns true for symlink', async () => {
-      await withDir(
-        async (localDir) => {
-          GlobalConfig.set({
-            localDir: localDir.path,
-          });
-          await writeLocalFile('test/test.txt', '');
-          await fs.symlink(
-            resolve(localDir.path, 'test/test.txt'),
-            resolve(localDir.path, 'test/test')
-          );
+      const source = `${localDir}/test/test.txt`;
+      const target = `${localDir}/test/test`;
+      await fs.outputFile(source, 'foobar');
+      await fs.symlink(source, target);
 
-          const result = await localPathIsSymbolicLink('test/test');
-          expect(result).toBeTrue();
-        },
-        {
-          unsafeCleanup: true,
-        }
-      );
+      const result = await localPathIsSymbolicLink('test/test');
+      expect(result).toBeTrue();
     });
   });
 

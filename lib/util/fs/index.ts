@@ -49,7 +49,6 @@ export async function readLocalSymlink(
   const localFileName = ensureLocalPath(fileName);
   try {
     const linkContent = await fs.readlink(localFileName);
-
     return linkContent;
   } catch (err) {
     logger.trace({ err }, 'Error reading local symlink');
