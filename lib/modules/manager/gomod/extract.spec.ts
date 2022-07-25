@@ -27,6 +27,7 @@ describe('modules/manager/gomod/extract', () => {
             depType: 'golang',
             depName: 'go',
             datasource: 'golang-version',
+            rangeStrategy: 'replace',
           }),
         ])
       );

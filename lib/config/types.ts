@@ -241,7 +241,10 @@ export interface RenovateConfig
   constraints?: Record<string, string>;
 }
 
-export interface AllConfig extends RenovateConfig, GlobalOnlyConfig {}
+export interface AllConfig
+  extends RenovateConfig,
+    GlobalOnlyConfig,
+    RepoGlobalConfig {}
 
 export interface AssigneesAndReviewersConfig {
   assigneesFromCodeOwners?: boolean;

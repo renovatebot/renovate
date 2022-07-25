@@ -27,11 +27,11 @@ export enum PrAutomergeBlockReason {
   OffSchedule = 'off schedule',
 }
 
-export type AutomergePrResult = {
+export interface AutomergePrResult {
   automerged: boolean;
   branchRemoved?: boolean;
   prAutomergeBlockReason?: PrAutomergeBlockReason;
-};
+}
 
 export async function checkAutoMerge(
   pr: Pr,
