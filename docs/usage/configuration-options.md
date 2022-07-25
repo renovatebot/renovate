@@ -2314,7 +2314,7 @@ This can be used to narrow down the search area to prevent multiple matches.
 But the `recursive` strategy still allows the matching of multiple dependencies as described below.
 All matches of the first `matchStrings` pattern are detected, then each of these matches will used as basis be used as the input for the next `matchStrings` pattern, and so on.
 If the next `matchStrings` pattern has multiple matches then it will split again.
-This process will be followed as long there is a match plus a next `matchingStrings` pattern is available or a dependency is detected.
+This process will be followed as long there is a match plus a next `matchingStrings` pattern is available.
 
 Matched groups will be available in subsequent matching layers.
 
@@ -2744,8 +2744,18 @@ This works because Renovate will add a "renovate/stability-days" pending status 
 
 ## stopUpdatingLabel
 
-On supported platforms it is possible to add a label to a PR to request Renovate stop updating the PR.
-By default this label is `"stop-updating"` but you can configure it to anything you want by changing this `stopUpdatingLabel` field.
+This feature only works on supported platforms, check the table above.
+
+If you want Renovate to stop updating a PR, you can apply a label to the PR.
+By default, Renovate listens to the label: `"stop-updating"`.
+
+You can set your own label name with the `"stopUpdatingLabel"` field:
+
+```json
+{
+  "stopUpdatingLabel": "take-a-break-renovate"
+}
+```
 
 ## suppressNotifications
 

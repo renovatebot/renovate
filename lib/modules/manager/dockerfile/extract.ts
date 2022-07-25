@@ -166,7 +166,7 @@ export function getDep(
   // Resolve registry aliases first so that we don't need special casing later on:
   for (const [name, value] of Object.entries(registryAliases ?? {})) {
     const escapedName = escapeRegExp(name);
-    const groups = regEx(`(?<prefix>${escapedName}/)(?<depName>.+)`).exec(
+    const groups = regEx(`(?<prefix>${escapedName})/(?<depName>.+)`).exec(
       currentFrom
     )?.groups;
     if (groups) {
@@ -174,7 +174,7 @@ export function getDep(
         ...getDep(`${value}/${groups.depName}`),
         replaceString: currentFrom,
       };
-      dep.autoReplaceStringTemplate = `${groups.prefix}${dep.autoReplaceStringTemplate}`;
+      dep.autoReplaceStringTemplate = getAutoReplaceTemplate(dep)!;
       return dep;
     }
   }

@@ -11,7 +11,8 @@ Follow these best practices when you're working on our code.
 - Always add unit tests for full code coverage
   - Only use `istanbul` comments for unreachable code coverage that is needed for `codecov` completion
   - Use descriptive `istanbul` comments
-- Avoid cast or prefer `x as T` instead of `<T>x` cast.
+- Avoid cast or prefer `x as T` instead of `<T>x` cast
+- Avoid `Boolean` instead use `is` functions from `@sindresorhus/is` package, for example: `is.string`
 
 ```ts
 // istanbul ignore next: can never happen
@@ -115,6 +116,11 @@ try {
 }
 ```
 
+### Aysnc functions
+
+Never use `Promise.resolve` in async functions.
+Never use `Promise.reject` in async functions, instead throw an `Error` class type.
+
 ### Dates and times
 
 Use [`Luxon`](https://www.npmjs.com/package/luxon) to handle dates and times.
@@ -137,6 +143,8 @@ Use `UTC` to be time zone independent.
   - huge strings like the Renovate PR body text
   - huge complex objects where you only need to test parts
 - Avoid exporting functions purely for the purpose of testing unless you really need to
+- Avoid cast or prefer `x as T` instead of `<T>x` cast
+  - Use `partial<T>()` from `test/util` If only a partial object is required,
 
 ### Fixtures
 
