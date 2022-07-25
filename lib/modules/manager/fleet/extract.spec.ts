@@ -1,3 +1,4 @@
+import yaml from 'js-yaml';
 import { Fixtures } from '../../../../test/fixtures';
 import { extractPackageFile } from '.';
 
@@ -10,6 +11,10 @@ const invalidGitRepoYaml = Fixtures.get('invalid_gitrepo.yaml');
 const configMapYaml = Fixtures.get('configmap.yaml', '../kubernetes');
 
 describe('modules/manager/fleet/extract', () => {
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
   describe('extractPackageFile()', () => {
     it('should return null if empty content', () => {
       const result = extractPackageFile('', 'fleet.yaml');
@@ -24,6 +29,15 @@ describe('modules/manager/fleet/extract', () => {
     });
 
     describe('fleet.yaml', () => {
+      it('should return null if content is a malformed YAML', () => {
+        jest.spyOn(yaml, 'loadAll').mockImplementation(() => {
+          throw new Error();
+        });
+        const result = extractPackageFile('test-', 'fleet.yaml');
+
+        expect(result).toBeNull();
+      });
+
       it('should parse valid configuration', () => {
         const result = extractPackageFile(validFleetYaml, 'fleet.yaml');
 
@@ -80,6 +94,15 @@ describe('modules/manager/fleet/extract', () => {
     });
 
     describe('GitRepo', () => {
+      it('should return null if content is a malformed YAML', () => {
+        jest.spyOn(yaml, 'loadAll').mockImplementation(() => {
+          throw new Error();
+        });
+        const result = extractPackageFile(`test`, 'test.yaml');
+
+        expect(result).toBeNull();
+      });
+
       it('should parse valid configuration', () => {
         const result = extractPackageFile(validGitRepoYaml, 'test.yaml');
 

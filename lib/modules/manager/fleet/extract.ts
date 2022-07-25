@@ -1,5 +1,6 @@
 import is from '@sindresorhus/is';
 import { loadAll } from 'js-yaml';
+import { logger } from '../../../logger';
 import { regEx } from '../../../util/regex';
 import { GitTagsDatasource } from '../../datasource/git-tags';
 import { HelmDatasource } from '../../datasource/helm';
@@ -88,21 +89,25 @@ export function extractPackageFile(
   }
   const deps: PackageDependency[] = [];
 
-  if (regEx('fleet.ya?ml').test(packageFile)) {
-    // TODO: fix me (#9610)
-    const docs = loadAll(content, null, { json: true }) as FleetFile[];
-    const fleetDeps = docs
-      .filter((doc) => is.truthy(doc?.helm))
-      .flatMap((doc) => extractFleetFile(doc.helm));
+  try {
+    if (regEx('fleet.ya?ml').test(packageFile)) {
+      // TODO: fix me (#9610)
+      const docs = loadAll(content, null, { json: true }) as FleetFile[];
+      const fleetDeps = docs
+        .filter((doc) => is.truthy(doc?.helm))
+        .flatMap((doc) => extractFleetFile(doc.helm));
 
-    deps.push(...fleetDeps);
-  } else {
-    // TODO: fix me (#9610)
-    const docs = loadAll(content, null, { json: true }) as GitRepo[];
-    const gitRepoDeps = docs
-      .filter((doc) => doc.kind === 'GitRepo') // ensure only GitRepo manifests are processed
-      .flatMap((doc) => extractGitRepo(doc));
-    deps.push(...gitRepoDeps);
+      deps.push(...fleetDeps);
+    } else {
+      // TODO: fix me (#9610)
+      const docs = loadAll(content, null, { json: true }) as GitRepo[];
+      const gitRepoDeps = docs
+        .filter((doc) => doc.kind === 'GitRepo') // ensure only GitRepo manifests are processed
+        .flatMap((doc) => extractGitRepo(doc));
+      deps.push(...gitRepoDeps);
+    }
+  } catch (err) {
+    logger.error({ error: err, packageFile }, 'Failed to parse fleet YAML');
   }
 
   return deps.length ? { deps } : null;
