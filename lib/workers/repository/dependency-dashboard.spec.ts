@@ -731,7 +731,7 @@ describe('workers/repository/dependency-dashboard', () => {
           });
           const dep = [
             {
-              warnings: [{ message: 'Warning 2', topic: '' }],
+              warnings: [{ message: 'dependency-2', topic: '' }],
             },
           ];
           const packageFiles: Record<string, PackageFile[]> = {

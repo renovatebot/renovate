@@ -8,7 +8,7 @@ exports[`workers/repository/dependency-dashboard ensureDependencyDashboard() che
 
 ### ⚠ Dependency Lookup Warnings ⚠
 
--   Renovate failed to look up the following dependencies: \`Warning 2\`.
+-   Renovate failed to look up the following dependencies: \`dependency-2\`.
 
 Files affected: \`package.json\`
 

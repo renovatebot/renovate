@@ -119,7 +119,7 @@ describe('workers/repository/errors-warnings', () => {
             packageFile: 'package.json',
             deps: [
               {
-                warnings: [{ message: 'Warning 1', topic: '' }],
+                warnings: [{ message: 'dependency-1', topic: '' }],
               },
               {},
             ],
@@ -128,7 +128,7 @@ describe('workers/repository/errors-warnings', () => {
             packageFile: 'backend/package.json',
             deps: [
               {
-                warnings: [{ message: 'Warning 1', topic: '' }],
+                warnings: [{ message: 'dependency-1', topic: '' }],
               },
             ],
           },
@@ -138,7 +138,7 @@ describe('workers/repository/errors-warnings', () => {
             packageFile: 'Dockerfile',
             deps: [
               {
-                warnings: [{ message: 'Warning 2', topic: '' }],
+                warnings: [{ message: 'dependency-2', topic: '' }],
               },
             ],
           },
@@ -151,7 +151,7 @@ describe('workers/repository/errors-warnings', () => {
 
         ### ⚠ Dependency Lookup Warnings ⚠
 
-        -   Renovate failed to look up the following dependencies: \`Warning 1\`, \`Warning 2\`.
+        -   Renovate failed to look up the following dependencies: \`dependency-1\`, \`dependency-2\`.
 
         Files affected: \`package.json\`, \`backend/package.json\`, \`Dockerfile\`
 
