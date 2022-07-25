@@ -5,6 +5,7 @@ import {
   getConfig,
   git,
   mockedFunction,
+  partial,
   platform,
 } from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
@@ -19,6 +20,7 @@ jest.mock('./migrated-data');
 jest.mock('./rebase');
 jest.mock('./create');
 jest.mock('../../../../util/git');
+jest.mock('../../update/branch/handle-existing');
 
 const migratedData = Fixtures.getJson<MigratedData>('./migrated-data.json');
 
@@ -93,6 +95,20 @@ describe('workers/repository/config-migration/branch/index', () => {
       expect(res).toBe(`${config.branchPrefix}migrate-config`);
       expect(git.checkoutBranch).toHaveBeenCalledTimes(0);
       expect(git.commitFiles).toHaveBeenCalledTimes(0);
+    });
+
+    it('skips branch when there is a closed one', async () => {
+      const title = 'PR title';
+      platform.findPr.mockResolvedValueOnce(partial<Pr>({ title }));
+      platform.getBranchPr.mockResolvedValue(null);
+      const res = await checkConfigMigrationBranch(config, migratedData);
+      expect(res).toBeNull();
+      expect(git.checkoutBranch).toHaveBeenCalledTimes(0);
+      expect(git.commitFiles).toHaveBeenCalledTimes(0);
+      expect(logger.debug).toHaveBeenCalledWith(
+        { prTitle: title },
+        'Closed PR already exists. Skipping branch.'
+      );
     });
   });
 });
