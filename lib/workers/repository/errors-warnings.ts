@@ -3,7 +3,6 @@ import type { RenovateConfig } from '../../config/types';
 import { logger } from '../../logger';
 import type { PackageFile } from '../../modules/manager/types';
 import { emojify } from '../../util/emoji';
-import { regEx } from '../../util/regex';
 import type { DepWarnings } from '../types';
 
 export function getWarnings(config: RenovateConfig): string {
@@ -85,33 +84,24 @@ export function getDepWarningsDashboard(
   packageFiles: Record<string, PackageFile[]>
 ): string {
   const { warnings, warningFiles } = getDepWarnings(packageFiles);
-  let warningText = '';
   if (!warnings.length) {
     return '';
   }
+
+  let depWarnings = '';
+  warnings.forEach((w) => {
+    const dep = w.replace('Failed to look up dependency ', '');
+    depWarnings += '`' + dep + '`, ';
+  });
+
   logger.debug({ warnings, warningFiles }, 'Found package lookup warnings');
-  warningText = emojify(
+  let warningText = emojify(
     `\n---\n\n### :warning: Dependency Lookup Warnings :warning:\n\n`
   );
-  let firstTime = true;
-  warnings.forEach((w) => {
-    const depReg = regEx(
-      /((?<msg>Failed to look up dependency)(?<dep>\s.*)?)$/g
-    );
-    const { dep: dep } = depReg.exec(w)?.groups ?? { dep: '' };
-    if (firstTime) {
-      warningText += `-   Renovate failed to look up the following dependencies: \`${dep}\``;
-      firstTime = false;
-    } else {
-      warningText += `, \`${dep}\``;
-    }
-  });
-  warningText += '.\n';
-  warningText +=
-    '\nFiles affected: ' +
-    warningFiles.map((f) => '`' + f + '`').join(', ') +
-    '\n\n';
-  warningText += '---';
-  warningText += '\n\n';
+  warningText += `-   Renovate failed to look up the following dependencies: `;
+  warningText += depWarnings.substring(0, depWarnings.length - 2); // append after removing the last comma
+  warningText += '.\n\nFiles affected: ';
+  warningText += warningFiles.map((f) => '`' + f + '`').join(', ');
+  warningText += '\n\n---\n\n';
   return warningText;
 }
