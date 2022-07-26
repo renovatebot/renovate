@@ -38,7 +38,7 @@ function caller() {
 function calculateUpdateAndPrint(...) { /* code */ }
 ```
 
-Simplified code
+Simplified code:
 
 ```ts
 function caller() {
