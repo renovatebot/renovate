@@ -970,14 +970,6 @@ describe('modules/datasource/docker/index', () => {
         'some-new-value'
       );
 
-      expect(logger.logger.debug).toHaveBeenCalledWith(
-        {
-          registryHost: 'https://index.docker.io',
-          dockerRepository: 'library/some-dep',
-          currentDigest,
-        },
-        `Unexpected error while retrieving config digest for docker image`
-      );
       expect(res).toBe(
         'sha256:ee75deb1a41bb998e52a116707a6e22a91904cba0c1d6e6c76cf04923efff2d8'
       );

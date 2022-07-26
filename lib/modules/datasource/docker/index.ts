@@ -37,6 +37,7 @@ import type { DigestConfig, GetReleasesConfig, ReleaseResult } from '../types';
 import { sourceLabels } from './common';
 import {
   Image,
+  ImageConfig,
   ImageList,
   MediaType,
   OciImage,
@@ -477,50 +478,26 @@ export class DockerDatasource extends Datasource {
     registryHost: string,
     dockerRepository: string,
     configDigest: string
-  ): Promise<HttpResponse | null | undefined> {
+  ): Promise<HttpResponse<ImageConfig> | undefined> {
     logger.debug(
       `getImageConfig(${registryHost}, ${dockerRepository}, ${configDigest})`
     );
-    try {
-      const headers = await getAuthHeaders(
-        this.http,
-        registryHost,
-        dockerRepository
-      );
-      // istanbul ignore if: Should never be happen
-      if (!headers) {
-        logger.debug('No docker auth found - returning');
-        return undefined;
-      }
-      const url = `${registryHost}/v2/${dockerRepository}/blobs/${configDigest}`;
-      return await this.http.get(url, {
-        headers,
-        noAuth: true,
-      });
-    } catch (err) /* istanbul ignore next */ {
-      if (err instanceof ExternalHostError) {
-        throw err;
-      }
-      if (err.statusCode === 404) {
-        logger.warn(
-          {
-            err,
-            registryHost,
-            dockerRepository,
-            configDigest,
-          },
-          'Image configuration is unknown'
-        );
-        return null;
-      } else {
-        logger.info(
-          { registryHost, dockerRepository, configDigest, err },
-          'Unknown error getting image configuration'
-        );
-      }
-    }
 
-    return undefined;
+    const headers = await getAuthHeaders(
+      this.http,
+      registryHost,
+      dockerRepository
+    );
+    // istanbul ignore if: Should never be happen
+    if (!headers) {
+      logger.debug('No docker auth found - returning');
+      return undefined;
+    }
+    const url = `${registryHost}/v2/${dockerRepository}/blobs/${configDigest}`;
+    return await this.http.getJson<ImageConfig>(url, {
+      headers,
+      noAuth: true,
+    });
   }
 
   private async getConfigDigest(
@@ -649,14 +626,6 @@ export class DockerDatasource extends Datasource {
           currentDigest
         );
         if (!configDigest) {
-          logger.debug(
-            {
-              registryHost,
-              dockerRepository,
-              currentDigest,
-            },
-            'Unexpected error while retrieving config digest for docker image'
-          );
           return undefined;
         }
 
@@ -666,9 +635,7 @@ export class DockerDatasource extends Datasource {
           configDigest
         );
         if (configResponse) {
-          const imageConfiguration = JSON.parse(configResponse.body);
-          const architecture =
-            (imageConfiguration['architecture'] as string) ?? null;
+          const architecture = configResponse.body.architecture ?? null;
           logger.debug(
             `Current digest ${currentDigest} relates to architecture ${
               architecture ?? 'null'
@@ -986,7 +953,7 @@ export class DockerDatasource extends Datasource {
     const newTag = newValue ?? 'latest';
     let digest: string | null = null;
     try {
-      let architecture = null;
+      let architecture: string | null | undefined = null;
       if (currentDigest) {
         architecture = await this.getImageArchitecture(
           registryHost,
@@ -995,7 +962,7 @@ export class DockerDatasource extends Datasource {
         );
       }
 
-      let manifestResponse = null;
+      let manifestResponse: HttpResponse | null = null;
       if (!architecture) {
         manifestResponse = await this.getManifestResponse(
           registryHost,
