@@ -96,7 +96,8 @@ export async function checkAutoMerge(
     };
   }
   if (automergeType === 'pr-comment') {
-    logger.debug(`Applying automerge comment: ${automergeComment}`);
+    // TODO: types (#7154)
+    logger.debug(`Applying automerge comment: ${automergeComment!}`);
     // istanbul ignore if
     if (GlobalConfig.get('dryRun')) {
       logger.info(
@@ -124,15 +125,19 @@ export async function checkAutoMerge(
   // Let's merge this
   // istanbul ignore if
   if (GlobalConfig.get('dryRun')) {
+    // TODO: types (#7154)
     logger.info(
-      `DRY-RUN: Would merge PR #${pr.number} with strategy "${automergeStrategy}"`
+      `DRY-RUN: Would merge PR #${
+        pr.number
+      } with strategy "${automergeStrategy!}"`
     );
     return {
       automerged: false,
       prAutomergeBlockReason: PrAutomergeBlockReason.DryRun,
     };
   }
-  logger.debug(`Automerging #${pr.number} with strategy ${automergeStrategy}`);
+  // TODO: types (#7154)
+  logger.debug(`Automerging #${pr.number} with strategy ${automergeStrategy!}`);
   const res = await platform.mergePr({
     branchName,
     id: pr.number,
