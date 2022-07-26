@@ -18,7 +18,7 @@ export async function prefetchDockerImage(taggedImage: string): Promise<void> {
     logger.debug(
       `Docker image is already prefetched: ${taggedImage}@${prefetchedImages.get(
         taggedImage
-      )}`
+      )!}`
     );
   } else {
     logger.debug(`Fetching Docker image: ${taggedImage}`);
