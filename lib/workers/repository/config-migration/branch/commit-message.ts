@@ -6,12 +6,11 @@ import { CommitMessageFactory } from '../../model/commit-message-factory';
 
 export class ConfigMigrationSemanticFactory {
   private readonly config: RenovateConfig;
+  private commitMessage: string | null = null;
+  private prTitle: string | null = null;
 
-  private readonly configFile: string;
-
-  constructor(config: RenovateConfig, configFile: string) {
+  constructor(config: RenovateConfig, private readonly configFile: string) {
     this.config = clone(config);
-    this.configFile = configFile;
   }
 
   private create(isTitle = false): CommitMessage {
@@ -49,10 +48,16 @@ export class ConfigMigrationSemanticFactory {
   }
 
   getCommitMessage(): string {
-    return this.create().toString();
+    if (this.commitMessage === null) {
+      this.commitMessage = this.create().toString();
+    }
+    return this.commitMessage;
   }
 
   getPrTitle(): string {
-    return this.create(true).toString();
+    if (this.prTitle === null) {
+      this.prTitle = this.create(true).toString();
+    }
+    return this.prTitle;
   }
 }

@@ -1,9 +1,19 @@
 import { getConfig } from '../../../../config/defaults';
+import * as template from '../../../../util/template';
 import { ConfigMigrationSemanticFactory } from './commit-message';
 
 describe('workers/repository/config-migration/branch/commit-message', () => {
   const config = getConfig();
   const fileName = 'renovate.json';
+  const templateCompileSpy = jest.spyOn(template, 'compile');
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  afterAll(() => {
+    jest.resetAllMocks();
+  });
 
   it('creates semantic commit message', () => {
     config.semanticCommits = 'enabled';
@@ -14,6 +24,10 @@ describe('workers/repository/config-migration/branch/commit-message', () => {
     expect(semanticFactory.getCommitMessage()).toBe(
       'chore(config): migrate config renovate.json'
     );
+    expect(semanticFactory.getCommitMessage()).toBe(
+      'chore(config): migrate config renovate.json'
+    );
+    expect(templateCompileSpy).toHaveBeenCalledTimes(1);
   });
 
   it('creates semantic pr title', () => {
@@ -25,6 +39,10 @@ describe('workers/repository/config-migration/branch/commit-message', () => {
     expect(semanticFactory.getPrTitle()).toBe(
       'chore(config): migrate renovate config'
     );
+    expect(semanticFactory.getPrTitle()).toBe(
+      'chore(config): migrate renovate config'
+    );
+    expect(templateCompileSpy).toHaveBeenCalledTimes(1);
   });
 
   it('creates non-semantic commit message', () => {
@@ -36,6 +54,10 @@ describe('workers/repository/config-migration/branch/commit-message', () => {
     expect(semanticFactory.getCommitMessage()).toBe(
       'Migrate config renovate.json'
     );
+    expect(semanticFactory.getCommitMessage()).toBe(
+      'Migrate config renovate.json'
+    );
+    expect(templateCompileSpy).toHaveBeenCalledTimes(1);
   });
 
   it('creates non-semantic pr title', () => {
@@ -45,5 +67,21 @@ describe('workers/repository/config-migration/branch/commit-message', () => {
       fileName
     );
     expect(semanticFactory.getPrTitle()).toBe('Migrate renovate config');
+    expect(semanticFactory.getPrTitle()).toBe('Migrate renovate config');
+    expect(templateCompileSpy).toHaveBeenCalledTimes(1);
+  });
+
+  it('returns default values when commitMessage template string is empty', () => {
+    config.semanticCommits = 'disabled';
+    config.commitMessage = '';
+    const semanticFactory = new ConfigMigrationSemanticFactory(
+      config,
+      fileName
+    );
+    expect(semanticFactory.getPrTitle()).toBe('Migrate renovate config');
+    expect(semanticFactory.getCommitMessage()).toBe(
+      'Migrate config renovate.json'
+    );
+    expect(templateCompileSpy).toHaveBeenCalledTimes(0);
   });
 });
