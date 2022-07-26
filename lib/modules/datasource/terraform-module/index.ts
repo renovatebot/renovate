@@ -83,7 +83,7 @@ export class TerraformModuleDatasource extends TerraformDatasource {
     try {
       pkgUrl = joinUrlParts(
         registryUrl,
-        serviceDiscovery['modules.v1'],
+        serviceDiscovery['modules.v1']!,
         repository
       );
       res = (await this.http.getJson<TerraformRelease>(pkgUrl)).body;
@@ -130,7 +130,7 @@ export class TerraformModuleDatasource extends TerraformDatasource {
     try {
       pkgUrl = joinUrlParts(
         registryUrl,
-        serviceDiscovery['modules.v1'],
+        serviceDiscovery['modules.v1']!,
         repository,
         'versions'
       );

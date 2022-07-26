@@ -98,7 +98,7 @@ export class TerraformProviderDatasource extends TerraformDatasource {
   ): Promise<ReleaseResult> {
     const backendURL = joinUrlParts(
       registryUrl,
-      serviceDiscovery['providers.v1'],
+      serviceDiscovery['providers.v1']!,
       repository
     );
     const res = (await this.http.getJson<TerraformProvider>(backendURL)).body;
@@ -133,7 +133,7 @@ export class TerraformProviderDatasource extends TerraformDatasource {
   ): Promise<ReleaseResult> {
     const backendURL = joinUrlParts(
       registryUrl,
-      serviceDiscovery['providers.v1'],
+      serviceDiscovery['providers.v1']!,
       repository,
       'versions'
     );
@@ -221,7 +221,7 @@ export class TerraformProviderDatasource extends TerraformDatasource {
     }
     const backendURL = joinUrlParts(
       registryURL,
-      serviceDiscovery['providers.v1'],
+      serviceDiscovery['providers.v1']!,
       repository
     );
     const versionsResponse = (
