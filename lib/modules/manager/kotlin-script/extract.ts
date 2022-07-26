@@ -18,6 +18,10 @@ export function extractPackageFile(fileContent: string): PackageFile | null {
   const matches = [...fileContent.matchAll(dependsOnRegex)];
   const deps: PackageDependency[] = [];
   for (const match of matches) {
+    if (!match.groups) {
+      continue;
+    }
+
     const dep: PackageDependency = {
       currentValue: match.groups?.version,
       depName: `${match.groups?.groupId}:${match.groups?.artifactId}`,
