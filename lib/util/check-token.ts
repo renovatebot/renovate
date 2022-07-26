@@ -18,7 +18,7 @@ function isGithubUrl(url: string | null | undefined): boolean {
 }
 
 export function checkGithubToken(
-  packageFiles: Record<string, PackageFile[]>
+  packageFiles: Record<string, PackageFile[]> | undefined
 ): void {
   const { token } = hostRules.find({
     hostType: PlatformId.Github,
@@ -31,9 +31,9 @@ export function checkGithubToken(
   }
 
   const githubDeps: string[] = [];
-  for (const files of Object.values(packageFiles)) {
+  for (const files of Object.values(packageFiles ?? {})) {
     for (const file of files) {
-      for (const dep of file.deps) {
+      for (const dep of file.deps ?? []) {
         if (
           dep.datasource === GithubTagsDatasource.id ||
           dep.datasource === GithubReleasesDatasource.id ||
