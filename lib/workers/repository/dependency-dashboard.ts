@@ -28,7 +28,7 @@ function parseDashboardIssue(issueBody: string): DependencyDashboard {
   const checked = getCheckedBranches(issueBody);
   const dependencyDashboardChecks: Record<string, string> = {};
   if (checked?.length) {
-    const checkMatch = ' - \\[[ x]\\] <!-- ([a-zA-Z]+)-branch=([^\\s]+) -->';
+    const checkMatch = ' - \\[x\\] <!-- ([a-zA-Z]+)-branch=([^\\s]+) -->';
     const re = regEx(checkMatch);
     checked.forEach((check) => {
       const [, type, branchName] = re.exec(check)!;
