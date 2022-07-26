@@ -113,6 +113,12 @@ export async function extractAllPackageFiles(
         ...new Set([...registryUrls, ...(dep.registryUrls ?? [])]),
       ];
 
+      if (!dep.depType) {
+        dep.depType = key.startsWith('buildSrc')
+          ? 'devDependencies'
+          : 'dependencies';
+      }
+
       const depAlreadyInPkgFile = pkgFile.deps.some(
         (item) =>
           item.depName === dep.depName &&
