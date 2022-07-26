@@ -2,7 +2,7 @@ import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { cache } from '../../../util/cache/package/decorator';
 import { HttpError } from '../../../util/http';
-import { joinUrlParts } from '../../../util/url';
+import { getQueryString, joinUrlParts } from '../../../util/url';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
 import {
@@ -74,7 +74,15 @@ export class AdoptiumJavaDatasource extends Datasource {
     const url = joinUrlParts(
       registryUrl,
       'v3/info/release_versions',
-      `?page_size=${pageSize}&image_type=${imageType}&project=jdk&release_type=ga&sort_method=DATE&sort_order=DESC&vendor=adoptium`
+      `?${getQueryString({
+        page_size: pageSize,
+        image_type: imageType,
+        project: 'jdk',
+        release_type: 'ga',
+        sort_method: 'DATE',
+        sort_order: 'DESC',
+        vendor: 'adoptium',
+      })}`
     );
 
     const result: ReleaseResult = {
