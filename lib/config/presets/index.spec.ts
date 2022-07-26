@@ -443,6 +443,8 @@ describe('config/presets/index', () => {
       config.extends = [
         'config:base',
         'github>whitesource/merge-confidence:beta',
+        'whitesource/merge-confidence:beta',
+        'local>whitesource/merge-confidence:beta',
       ];
       config.packageRules = [
         {
@@ -459,7 +461,12 @@ describe('config/presets/index', () => {
         true // shallow log config
       );
       expect(res).toEqual({
-        extends: ['config:base', 'github>whitesource/merge-confidence:beta'],
+        extends: [
+          'config:base',
+          'github>whitesource/merge-confidence:beta',
+          'whitesource/merge-confidence:beta',
+          'local>whitesource/merge-confidence:beta',
+        ],
         packageRules: [
           {
             matchManagers: ['github-actions'],

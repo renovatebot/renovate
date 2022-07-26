@@ -46,7 +46,7 @@ const gitPresetRegex = regEx(
 );
 
 // shallow mode preset to ignore regex
-const whitesourcePresetRegex = regEx(/^.*?>whitesource\//);
+const whitesourcePresetRegex = regEx(/^(?:.+?>)?whitesource\//);
 
 export function replaceArgs(
   obj: string,
