@@ -70,7 +70,7 @@ function foo(str: string): boolean {
 }
 ```
 
-Simplified code
+Simplified code:
 
 ```ts
 function foo(str: string): boolean {
