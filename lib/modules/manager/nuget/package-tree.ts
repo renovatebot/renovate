@@ -40,7 +40,7 @@ export async function getDependentPackageFiles(
   for (const f of packageFiles) {
     const doc = await readFileAsXmlDocument(f);
     if (!doc) {
-      throw new Error(`Invalid xml file: ${f}`);
+      continue;
     }
 
     const projectReferenceAttributes = doc

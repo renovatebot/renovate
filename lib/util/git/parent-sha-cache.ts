@@ -7,7 +7,7 @@ export function getCachedBranchParentShaResult(
   const { branches } = getCache();
   const branch = branches?.find((branch) => branch.branchName === branchName);
 
-  if (branchSha === branch?.sha) {
+  if (branch?.parentSha && branchSha === branch?.sha) {
     return branch.parentSha;
   }
 
