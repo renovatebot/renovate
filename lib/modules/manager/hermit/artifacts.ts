@@ -184,7 +184,7 @@ async function updateHermitPackage(update: UpdateArtifact): Promise<void> {
 
   for (const pkg of update.updatedDeps) {
     if (!pkg.depName || !pkg.currentVersion || !pkg.newValue) {
-      logger.warn(
+      logger.debug(
         {
           depName: pkg.depName,
           currentVersion: pkg.currentVersion,

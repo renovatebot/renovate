@@ -1,17 +1,16 @@
-import type { StatusResult } from 'simple-git/promise';
+import { mockExecAll } from '../../../../test/exec-util';
 import { mockedFunction, partial } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import { exec } from '../../../util/exec';
 import { localPathIsSymbolicLink, readLocalSymlink } from '../../../util/fs';
 import { getRepoStatus } from '../../../util/git';
+import type { StatusResult } from '../../../util/git/types';
 import type { UpdateArtifact } from '../types';
 import { updateArtifacts } from '.';
 
-jest.mock('../../../util/exec');
 jest.mock('../../../util/git');
 jest.mock('../../../util/fs');
 
-const execMock = mockedFunction(exec);
 const getRepoStatusMock = mockedFunction(getRepoStatus);
 
 const lstatsMock = mockedFunction(localPathIsSymbolicLink);
@@ -25,10 +24,7 @@ describe('modules/manager/hermit/artifacts', () => {
       readlinkMock.mockResolvedValue('hermit');
       GlobalConfig.set({ localDir: '' });
 
-      execMock.mockResolvedValueOnce({
-        stdout: '',
-        stderr: '',
-      });
+      const execSnapshots = mockExecAll()
       getRepoStatusMock.mockResolvedValue(
         partial<StatusResult>({
           not_added: ['bin/go-1.17.1'],

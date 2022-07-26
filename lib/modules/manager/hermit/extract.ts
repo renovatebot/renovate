@@ -22,8 +22,7 @@ export async function extractPackageFile(
   const dependencies = [] as PackageDependency[];
   const packages = await listHermitPackages(filename);
 
-  if (packages === null) {
-    logger.warn(`error listing hermit packages`);
+  if (!packages?.length) {
     return null;
   }
 
@@ -58,14 +57,14 @@ async function listHermitPackages(
   try {
     files = await readLocalDirectory(hermitFolder);
   } catch (e) {
-    logger.warn(
-      { hermitFolder, error: e },
+    logger.debug(
+      { hermitFolder, err: e },
       'error listing hermit package references'
     );
     return null;
   }
 
-  logger.debug({ files, hermitFolder }, 'files for hermit package list');
+  logger.trace({ files, hermitFolder }, 'files for hermit package list');
 
   return files
     .filter((f) => minimatch(f, '.*.pkg'))
