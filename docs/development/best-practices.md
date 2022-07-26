@@ -54,7 +54,10 @@ function update(...)    { /* code */ }
 function print(...)     { /* code */ }
 ```
 
-- #### Keep indentation level low (fail quickly), nested code logic is difficult to read and more prone to logic mistakes
+- #### Keep indentation level low 
+
+Fail quickly.
+Nested code logic is difficult to read and prone to logic mistakes.
 
 ```ts
 function foo(str: string): boolean {
