@@ -16,8 +16,7 @@ process.on('unhandledRejection', (err) => {
   process.exit(-1);
 });
 
-// eslint-disable-next-line @typescript-eslint/no-floating-promises
-(async () => {
+await (async () => {
   try {
     const dist = 'tmp/docs';
     let r: shell.ShellString;
