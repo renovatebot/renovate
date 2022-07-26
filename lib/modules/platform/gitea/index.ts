@@ -450,7 +450,7 @@ const platform: Platform = {
     prTitle: title,
     state = PrState.All,
   }: FindPRConfig): Promise<Pr | null> {
-    logger.debug(`findPr(${branchName}, ${title}, ${state})`);
+    logger.debug(`findPr(${branchName}, ${title!}, ${state})`);
     const prList = await platform.getPrList();
     const pr = prList.find(
       (p) =>
@@ -606,7 +606,8 @@ const platform: Platform = {
     if (!issue) {
       return null;
     }
-    logger.debug(`Found Issue #${issue.number}`);
+    // TODO: types (#7154)
+    logger.debug(`Found Issue #${issue.number!}`);
     // TODO #7154
     return getIssue!(issue.number!);
   },
@@ -656,7 +657,8 @@ const platform: Platform = {
         // Close any duplicate issues
         for (const issue of issues) {
           if (issue.state === 'open' && issue.number !== activeIssue.number) {
-            logger.warn(`Closing duplicate Issue #${issue.number}`);
+            // TODO: types (#7154)
+            logger.warn(`Closing duplicate Issue #${issue.number!}`);
             // TODO #7154
             await helper.closeIssue(config.repository, issue.number!);
           }
@@ -669,13 +671,15 @@ const platform: Platform = {
           activeIssue.state === 'open'
         ) {
           logger.debug(
-            `Issue #${activeIssue.number} is open and up to date - nothing to do`
+            // TODO: types (#7154)
+            `Issue #${activeIssue.number!} is open and up to date - nothing to do`
           );
           return null;
         }
 
         // Update issue body and re-open if enabled
-        logger.debug(`Updating Issue #${activeIssue.number}`);
+        // TODO: types (#7154)
+        logger.debug(`Updating Issue #${activeIssue.number!}`);
         const existingIssue = await helper.updateIssue(
           config.repository,
           // TODO #7154

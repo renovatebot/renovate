@@ -60,12 +60,14 @@ function getListItem(branch: BranchConfig, type: string): string {
   let item = ' - [ ] ';
   item += `<!-- ${type}-branch=${branch.branchName} -->`;
   if (branch.prNo) {
-    item += `[${branch.prTitle}](../pull/${branch.prNo})`;
+    // TODO: types (#7154)
+    item += `[${branch.prTitle!}](../pull/${branch.prNo})`;
   } else {
     item += branch.prTitle;
   }
   const uniquePackages = [
-    ...new Set(branch.upgrades.map((upgrade) => `\`${upgrade.depName}\``)),
+    // TODO: types (#7154)
+    ...new Set(branch.upgrades.map((upgrade) => `\`${upgrade.depName!}\``)),
   ];
   if (uniquePackages.length < 2) {
     return item + '\n';

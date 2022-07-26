@@ -369,7 +369,8 @@ export async function processBranch(
     } else {
       config = { ...config, ...(await shouldReuseExistingBranch(config)) };
     }
-    logger.debug(`Using reuseExistingBranch: ${config.reuseExistingBranch}`);
+    // TODO: types (#7154)
+    logger.debug(`Using reuseExistingBranch: ${config.reuseExistingBranch!}`);
     const res = await getUpdatedPackageFiles(config);
     // istanbul ignore if
     if (res.artifactErrors && config.artifactErrors) {
@@ -696,9 +697,10 @@ export async function processBranch(
         content +=
           ' - you rename this PR\'s title to start with "rebase!" to trigger it manually';
         content += '\n\nThe artifact failure details are included below:\n\n';
+        // TODO: types (#7154)
         config.artifactErrors.forEach((error) => {
-          content += `##### File name: ${error.lockFile}\n\n`;
-          content += `\`\`\`\n${error.stderr}\n\`\`\`\n\n`;
+          content += `##### File name: ${error.lockFile!}\n\n`;
+          content += `\`\`\`\n${error.stderr!}\n\`\`\`\n\n`;
         });
         content = platform.massageMarkdown(content);
         if (

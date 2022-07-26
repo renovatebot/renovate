@@ -18,11 +18,13 @@ import {
   listCacheDir,
   localPathExists,
   localPathIsFile,
+  localPathIsSymbolicLink,
   outputCacheFile,
   privateCacheDir,
   readCacheFile,
   readLocalDirectory,
   readLocalFile,
+  readLocalSymlink,
   readSystemFile,
   renameLocalFile,
   rmCache,
@@ -204,6 +206,32 @@ describe('util/fs/index', () => {
     });
   });
 
+  describe('readLocalSymlink', () => {
+    it('reads symlink', async () => {
+      await writeLocalFile('test/test.txt', '');
+      await fs.symlink(
+        join(localDir, 'test/test.txt'),
+        join(localDir, 'test/test')
+      );
+
+      const result = await readLocalSymlink('test/test');
+
+      expect(result).not.toBeNull();
+    });
+
+    it('return null when link not exists', async () => {
+      await writeLocalFile('test/test.txt', '');
+      await fs.symlink(
+        join(localDir, 'test/test.txt'),
+        join(localDir, 'test/test')
+      );
+
+      const notExistsResult = await readLocalSymlink('test/not-exists');
+
+      expect(notExistsResult).toBeNull();
+    });
+  });
+
   describe('findLocalSiblingOrParent', () => {
     it('returns path for file', async () => {
       await writeLocalFile('crates/one/Cargo.toml', 'foo');
@@ -298,6 +326,35 @@ describe('util/fs/index', () => {
 
     it('returns false for non-existing path', async () => {
       expect(await localPathIsFile(resolve(`${localDir}/foobar`))).toBeFalse();
+    });
+  });
+
+  describe('localPathIsSymbolicLink', () => {
+    it('returns false for file', async () => {
+      const path = `${localDir}/file.txt`;
+      await fs.outputFile(path, 'foobar');
+      expect(await localPathIsSymbolicLink(path)).toBeFalse();
+    });
+
+    it('returns false for directory', async () => {
+      const path = `${localDir}/foobar`;
+      await fs.mkdir(path);
+      expect(await localPathIsSymbolicLink(path)).toBeFalse();
+    });
+
+    it('returns false for non-existing path', async () => {
+      const path = `${localDir}/file.txt`;
+      expect(await localPathIsSymbolicLink(path)).toBeFalse();
+    });
+
+    it('returns true for symlink', async () => {
+      const source = `${localDir}/test/test.txt`;
+      const target = `${localDir}/test/test`;
+      await fs.outputFile(source, 'foobar');
+      await fs.symlink(source, target);
+
+      const result = await localPathIsSymbolicLink('test/test');
+      expect(result).toBeTrue();
     });
   });
 
