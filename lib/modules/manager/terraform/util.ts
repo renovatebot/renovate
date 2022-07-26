@@ -56,7 +56,7 @@ export function massageProviderLookupName(dep: PackageDependency): void {
 
   // TODO #7154
   if (!dep.packageName!.includes('/')) {
-    dep.packageName = `hashicorp/${dep.packageName}`;
+    dep.packageName = `hashicorp/${dep.packageName!}`;
   }
 
   // handle cases like `Telmate/proxmox`

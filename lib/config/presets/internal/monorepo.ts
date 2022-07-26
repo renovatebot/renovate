@@ -19,6 +19,8 @@ const repoGroups = {
   angularjs: 'https://github.com/angular/angular.js',
   'apollo-server': 'https://github.com/apollographql/apollo-server',
   apolloclient: 'https://github.com/apollographql/apollo-client',
+  'applicationinsights-dotnet':
+    'https://github.com/Microsoft/ApplicationInsights-dotnet',
   'arcus.background-jobs':
     'https://github.com/arcus-azure/arcus.backgroundjobs',
   'arcus.event-grid': 'https://github.com/arcus-azure/arcus.eventgrid',
