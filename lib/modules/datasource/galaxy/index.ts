@@ -1,6 +1,7 @@
 import { logger } from '../../../logger';
 import { cache } from '../../../util/cache/package/decorator';
 import type { HttpResponse } from '../../../util/http/types';
+import { joinUrlParts } from '../../../util/url';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
 import type { GalaxyResult } from './types';
@@ -25,12 +26,24 @@ export class GalaxyDatasource extends Datasource {
     packageName,
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
+    // istanbul ignore if: should never happen because of defaultRegistryUrls
+    if (!registryUrl) {
+      return null;
+    }
+
     const lookUp = packageName.split('.');
     const userName = lookUp[0];
     const projectName = lookUp[1];
 
-    const galaxyAPIUrl = `${registryUrl}api/v1/roles/?owner__username=${userName}&name=${projectName}`;
-    const galaxyProjectUrl = `${registryUrl}${userName}/${projectName}`;
+    // joinUrlParts (url-join) removes the trailing slash, so adding it with query params.
+    const galaxyAPIUrl = `${joinUrlParts(
+      registryUrl,
+      'api/v1/roles'
+    )}/?owner__username=${userName}&name=${projectName}`;
+    const galaxyProjectUrl = joinUrlParts(
+      registryUrl,
+      `${userName}/${projectName}`
+    );
 
     let raw: HttpResponse<GalaxyResult> | null = null;
     try {

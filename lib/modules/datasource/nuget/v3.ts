@@ -7,7 +7,7 @@ import { ExternalHostError } from '../../../types/errors/external-host-error';
 import * as packageCache from '../../../util/cache/package';
 import { Http, HttpError } from '../../../util/http';
 import { regEx } from '../../../util/regex';
-import { ensureTrailingSlash } from '../../../util/url';
+import { joinUrlParts } from '../../../util/url';
 import type { Release, ReleaseResult } from '../types';
 import { massageUrl, removeBuildMeta } from './common';
 import type {
@@ -115,7 +115,7 @@ export async function getReleases(
   pkgName: string
 ): Promise<ReleaseResult | null> {
   const baseUrl = feedUrl.replace(regEx(/\/*$/), '');
-  const url = `${baseUrl}/${pkgName.toLowerCase()}/index.json`;
+  const url = joinUrlParts(baseUrl, `${pkgName.toLowerCase()}/index.json`);
   const packageRegistration = await http.getJson<PackageRegistration>(url);
   const catalogPages = packageRegistration.body.items || [];
   const catalogPagesQueue = catalogPages.map(
@@ -167,9 +167,10 @@ export async function getReleases(
     );
     // istanbul ignore else: this is a required v3 api
     if (is.nonEmptyString(packageBaseAddress)) {
-      const nuspecUrl = `${ensureTrailingSlash(
-        packageBaseAddress
-      )}${pkgName.toLowerCase()}/${latestStable}/${pkgName.toLowerCase()}.nuspec`;
+      const nuspecUrl = joinUrlParts(
+        packageBaseAddress,
+        `${pkgName.toLowerCase()}/${latestStable}/${pkgName.toLowerCase()}.nuspec`
+      );
       const metaresult = await http.get(nuspecUrl);
       const nuspec = new XmlDocument(metaresult.body);
       const sourceUrl = nuspec.valueWithPath('metadata.repository@url');

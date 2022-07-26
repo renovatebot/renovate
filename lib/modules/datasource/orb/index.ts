@@ -1,5 +1,6 @@
 import { logger } from '../../../logger';
 import { cache } from '../../../util/cache/package/decorator';
+import { joinUrlParts } from '../../../util/url';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 import type { OrbRelease } from './types';
@@ -40,7 +41,7 @@ export class OrbDatasource extends Datasource {
     if (!registryUrl) {
       return null;
     }
-    const url = `${registryUrl}graphql-unstable`;
+    const url = joinUrlParts(registryUrl, 'graphql-unstable');
     const body = {
       query,
       variables: { packageName },

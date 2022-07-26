@@ -10,7 +10,7 @@ import type { HttpResponse } from '../../../util/http/types';
 import { regEx } from '../../../util/regex';
 import { getS3Client, parseS3Url } from '../../../util/s3';
 import { streamToString } from '../../../util/streams';
-import { parseUrl } from '../../../util/url';
+import { joinUrlParts, parseUrl } from '../../../util/url';
 import { normalizeDate } from '../metadata';
 import type { ReleaseResult } from '../types';
 import { MAVEN_REPO } from './common';
@@ -289,7 +289,7 @@ export async function downloadMavenXml(
 
 export function getDependencyParts(packageName: string): MavenDependency {
   const [group, name] = packageName.split(':');
-  const dependencyUrl = `${group.replace(regEx(/\./g), '/')}/${name}`;
+  const dependencyUrl = joinUrlParts(group.replace(regEx(/\./g), '/'), name);
   return {
     display: packageName,
     group,

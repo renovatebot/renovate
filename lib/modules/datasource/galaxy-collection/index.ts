@@ -3,6 +3,7 @@ import pMap from 'p-map';
 import { logger } from '../../../logger';
 import { cache } from '../../../util/cache/package/decorator';
 import type { HttpResponse } from '../../../util/http/types';
+import { joinUrlParts } from '../../../util/url';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
 import type {
@@ -30,9 +31,17 @@ export class GalaxyCollectionDatasource extends Datasource {
     packageName,
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
+    // istanbul ignore if: should never happen because of defaultRegistryUrls
+    if (!registryUrl) {
+      return null;
+    }
+
     const [namespace, projectName] = packageName.split('.');
 
-    const baseUrl = `${registryUrl}api/v2/collections/${namespace}/${projectName}/`;
+    const baseUrl = joinUrlParts(
+      registryUrl,
+      `api/v2/collections/${namespace}/${projectName}/`
+    );
 
     let baseUrlResponse: HttpResponse<BaseProjectResult>;
     try {
@@ -51,7 +60,7 @@ export class GalaxyCollectionDatasource extends Datasource {
 
     const baseProject = baseUrlResponse.body;
 
-    const versionsUrl = `${baseUrl}versions/`;
+    const versionsUrl = joinUrlParts(baseUrl, 'versions/');
 
     let versionsUrlResponse: HttpResponse<VersionsProjectResult>;
     try {

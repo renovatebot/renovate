@@ -2,6 +2,7 @@ import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { cache } from '../../../util/cache/package/decorator';
 import { HttpError } from '../../../util/http';
+import { joinUrlParts } from '../../../util/url';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
 import {
@@ -29,7 +30,7 @@ export class AdoptiumJavaDatasource extends Datasource {
     url: string,
     page: number
   ): Promise<Release[] | null> {
-    const pgUrl = `${url}&page=${page}`;
+    const pgUrl = joinUrlParts(url, `&page=${page}`);
     try {
       const pgRes = await this.http.getJson<AdoptiumJavaResponse>(pgUrl);
       return (
@@ -60,12 +61,20 @@ export class AdoptiumJavaDatasource extends Datasource {
     registryUrl,
     packageName,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
+    // istanbul ignore if: should never happen because of defaultRegistryUrls
+    if (!registryUrl) {
+      return null;
+    }
+
     const imageType = getImageType(packageName);
     logger.trace(
       { registryUrl, packageName, imageType },
       'fetching java release'
     );
-    const url = `${registryUrl}v3/info/release_versions?page_size=${pageSize}&image_type=${imageType}&project=jdk&release_type=ga&sort_method=DATE&sort_order=DESC&vendor=adoptium`;
+    const url = joinUrlParts(
+      registryUrl,
+      `v3/info/release_versions?page_size=${pageSize}&image_type=${imageType}&project=jdk&release_type=ga&sort_method=DATE&sort_order=DESC&vendor=adoptium`
+    );
 
     const result: ReleaseResult = {
       homepage: 'https://adoptium.net',

@@ -1,6 +1,6 @@
 import URL from 'url';
-import { ECR } from '@aws-sdk/client-ecr';
 import type { ECRClientConfig } from '@aws-sdk/client-ecr';
+import { ECR } from '@aws-sdk/client-ecr';
 import is from '@sindresorhus/is';
 import { parse } from 'auth-header';
 import hasha from 'hasha';
@@ -24,6 +24,7 @@ import { regEx } from '../../../util/regex';
 import {
   ensurePathPrefix,
   ensureTrailingSlash,
+  joinUrlParts,
   parseLinkHeader,
   parseUrl,
   trimTrailingSlash,
@@ -268,7 +269,7 @@ export function getRegistryRepository(
         registryHost = `https://${registryHost}`;
       }
       let dockerRepository = packageName.replace(registryEndingWithSlash, '');
-      const fullUrl = `${registryHost}/${dockerRepository}`;
+      const fullUrl = joinUrlParts(registryHost, dockerRepository);
       const { origin, pathname } = parseUrl(fullUrl)!;
       registryHost = origin;
       dockerRepository = pathname.substring(1);
@@ -407,7 +408,10 @@ export class DockerDatasource extends Datasource {
         MediaType.ociManifestV1,
         MediaType.ociManifestIndexV1,
       ].join(', ');
-      const url = `${registryHost}/v2/${dockerRepository}/manifests/${tag}`;
+      const url = joinUrlParts(
+        registryHost,
+        `v2/${dockerRepository}/manifests/${tag}`
+      );
       const manifestResponse = await this.http[mode](url, {
         headers,
         noAuth: true,
@@ -597,7 +601,10 @@ export class DockerDatasource extends Datasource {
         logger.debug('No docker auth found - returning');
         return {};
       }
-      const url = `${registryHost}/v2/${dockerRepository}/blobs/${configDigest}`;
+      const url = joinUrlParts(
+        registryHost,
+        `v2/${dockerRepository}/blobs/${configDigest}`
+      );
       const configResponse = await this.http.get(url, {
         headers,
         noAuth: true,
@@ -738,7 +745,10 @@ export class DockerDatasource extends Datasource {
           isECRMaxResultsError(err)
         ) {
           const maxResults = 1000;
-          url = `${registryHost}/${dockerRepository}/tags/list?n=${maxResults}`;
+          url = joinUrlParts(
+            registryHost,
+            `${dockerRepository}/tags/list?n=${maxResults}`
+          );
           url = ensurePathPrefix(url, '/v2');
           foundMaxResultsError = true;
           continue;

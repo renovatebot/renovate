@@ -168,9 +168,11 @@ export class InternalRubyGemsDatasource extends Datasource {
     registry: string,
     path: string
   ): Promise<T | null> {
-    const url = `${joinUrlParts(registry, path)}?${getQueryString({
-      gems: dependency,
-    })}`;
+    const url = joinUrlParts(
+      registry,
+      path,
+      `?${getQueryString({ gems: dependency })}`
+    );
 
     logger.trace({ registry, dependency, url }, `RubyGems lookup request`);
     const response = await this.http.getBuffer(url);

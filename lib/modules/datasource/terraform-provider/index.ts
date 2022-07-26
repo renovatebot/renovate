@@ -4,6 +4,7 @@ import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { cache } from '../../../util/cache/package/decorator';
 import { regEx } from '../../../util/regex';
+import { joinUrlParts } from '../../../util/url';
 import * as hashicorpVersioning from '../../versioning/hashicorp';
 import { TerraformDatasource } from '../terraform-module/base';
 import type { ServiceDiscoveryResult } from '../terraform-module/types';
@@ -95,7 +96,11 @@ export class TerraformProviderDatasource extends TerraformDatasource {
     registryUrl: string,
     repository: string
   ): Promise<ReleaseResult> {
-    const backendURL = `${registryUrl}${serviceDiscovery['providers.v1']}${repository}`;
+    const backendURL = joinUrlParts(
+      registryUrl,
+      serviceDiscovery['providers.v1'],
+      repository
+    );
     const res = (await this.http.getJson<TerraformProvider>(backendURL)).body;
     const dep: ReleaseResult = {
       releases: res.versions.map((version) => ({
@@ -113,7 +118,7 @@ export class TerraformProviderDatasource extends TerraformDatasource {
     if (latestVersion) {
       latestVersion.releaseTimestamp = res.published_at;
     }
-    dep.homepage = `${registryUrl}/providers/${repository}`;
+    dep.homepage = joinUrlParts(registryUrl, `providers/${repository}`);
     return dep;
   }
 
@@ -126,7 +131,12 @@ export class TerraformProviderDatasource extends TerraformDatasource {
     registryUrl: string,
     repository: string
   ): Promise<ReleaseResult> {
-    const backendURL = `${registryUrl}${serviceDiscovery['providers.v1']}${repository}/versions`;
+    const backendURL = joinUrlParts(
+      registryUrl,
+      serviceDiscovery['providers.v1'],
+      repository,
+      'versions'
+    );
     const res = (await this.http.getJson<TerraformProviderVersions>(backendURL))
       .body;
     const dep: ReleaseResult = {
@@ -209,7 +219,11 @@ export class TerraformProviderDatasource extends TerraformDatasource {
       logger.trace(`Failed to retrieve service discovery from ${registryURL}`);
       return null;
     }
-    const backendURL = `${registryURL}${serviceDiscovery['providers.v1']}${repository}`;
+    const backendURL = joinUrlParts(
+      registryURL,
+      serviceDiscovery['providers.v1'],
+      repository
+    );
     const versionsResponse = (
       await this.http.getJson<TerraformRegistryVersions>(
         `${backendURL}/versions`
@@ -231,7 +245,10 @@ export class TerraformProviderDatasource extends TerraformDatasource {
     const result = await pMap(
       builds.platforms,
       async (platform) => {
-        const buildURL = `${backendURL}/${version}/download/${platform.os}/${platform.arch}`;
+        const buildURL = joinUrlParts(
+          backendURL,
+          `${version}/download/${platform.os}/${platform.arch}`
+        );
         try {
           const res = (
             await this.http.getJson<TerraformRegistryBuildResponse>(buildURL)

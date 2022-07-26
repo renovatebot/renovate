@@ -1,5 +1,6 @@
 import { logger } from '../../../logger';
 import { cache } from '../../../util/cache/package/decorator';
+import { joinUrlParts } from '../../../util/url';
 import { GithubReleasesDatasource } from '../github-releases';
 import { getApiBaseUrl, getSourceUrl } from '../github-releases/common';
 import type {
@@ -50,7 +51,10 @@ export class GithubTagsDatasource extends GithubReleasesDatasource {
     const apiBaseUrl = getApiBaseUrl(registryUrl);
     let digest: string | null = null;
     try {
-      const url = `${apiBaseUrl}repos/${githubRepo}/commits?per_page=1`;
+      const url = joinUrlParts(
+        apiBaseUrl,
+        `repos/${githubRepo}/commits?per_page=1`
+      );
       const res = await this.http.getJson<{ sha: string }[]>(url);
       digest = res.body[0].sha;
     } catch (err) {

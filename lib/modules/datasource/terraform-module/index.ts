@@ -1,6 +1,7 @@
 import { logger } from '../../../logger';
 import { cache } from '../../../util/cache/package/decorator';
 import { regEx } from '../../../util/regex';
+import { joinUrlParts } from '../../../util/url';
 import * as hashicorpVersioning from '../../versioning/hashicorp';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 import { TerraformDatasource } from './base';
@@ -80,7 +81,11 @@ export class TerraformModuleDatasource extends TerraformDatasource {
     let pkgUrl: string;
 
     try {
-      pkgUrl = `${registryUrl}${serviceDiscovery['modules.v1']}${repository}`;
+      pkgUrl = joinUrlParts(
+        registryUrl,
+        serviceDiscovery['modules.v1'],
+        repository
+      );
       res = (await this.http.getJson<TerraformRelease>(pkgUrl)).body;
       const returnedName = res.namespace + '/' + res.name + '/' + res.provider;
       if (returnedName !== repository) {
@@ -100,7 +105,7 @@ export class TerraformModuleDatasource extends TerraformDatasource {
     if (res.source) {
       dep.sourceUrl = res.source;
     }
-    dep.homepage = `${registryUrl}/modules/${repository}`;
+    dep.homepage = joinUrlParts(registryUrl, `modules/${repository}`);
     // set published date for latest release
     const latestVersion = dep.releases.find(
       (release) => res.version === release.version
@@ -123,7 +128,12 @@ export class TerraformModuleDatasource extends TerraformDatasource {
     let res: TerraformModuleVersions;
     let pkgUrl: string;
     try {
-      pkgUrl = `${registryUrl}${serviceDiscovery['modules.v1']}${repository}/versions`;
+      pkgUrl = joinUrlParts(
+        registryUrl,
+        serviceDiscovery['modules.v1'],
+        repository,
+        'versions'
+      );
       res = (await this.http.getJson<TerraformModuleVersions>(pkgUrl)).body;
       if (res.modules.length < 1) {
         logger.warn({ pkgUrl }, 'Terraform registry result mismatch');

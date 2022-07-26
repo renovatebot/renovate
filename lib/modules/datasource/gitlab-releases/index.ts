@@ -1,5 +1,6 @@
 import { cache } from '../../../util/cache/package/decorator';
 import { GitlabHttp } from '../../../util/http/gitlab';
+import { joinUrlParts } from '../../../util/url';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
 import type { GitlabRelease } from './types';
@@ -31,7 +32,10 @@ export class GitlabReleasesDatasource extends Datasource {
     }
 
     const urlEncodedRepo = encodeURIComponent(packageName);
-    const apiUrl = `${registryUrl}/api/v4/projects/${urlEncodedRepo}/releases`;
+    const apiUrl = joinUrlParts(
+      registryUrl,
+      `api/v4/projects/${urlEncodedRepo}/releases`
+    );
 
     try {
       const gitlabReleasesResponse = (

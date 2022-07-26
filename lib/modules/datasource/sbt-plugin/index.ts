@@ -1,7 +1,7 @@
 import { logger } from '../../../logger';
 import { Http } from '../../../util/http';
 import { regEx } from '../../../util/regex';
-import { ensureTrailingSlash } from '../../../util/url';
+import { ensureTrailingSlash, joinUrlParts } from '../../../util/url';
 import * as ivyVersioning from '../../versioning/ivy';
 import { compare } from '../../versioning/maven/compare';
 import { downloadHttpProtocol } from '../maven/util';
@@ -117,7 +117,7 @@ export class SbtPluginDatasource extends SbtPackageDatasource {
         urls = await this.getUrls(searchRoot, artifactSubdirs, latestVersion);
       }
 
-      const dependencyUrl = `${searchRoot}/${artifact}`;
+      const dependencyUrl = joinUrlParts(searchRoot, artifact);
 
       if (versions) {
         return {

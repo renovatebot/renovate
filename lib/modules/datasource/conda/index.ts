@@ -2,6 +2,7 @@ import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { cache } from '../../../util/cache/package/decorator';
 import { HttpError } from '../../../util/http';
+import { joinUrlParts } from '../../../util/url';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
 import { datasource, defaultRegistryUrl } from './common';
@@ -29,9 +30,14 @@ export class CondaDatasource extends Datasource {
     registryUrl,
     packageName,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
+    // istanbul ignore if: should never happen because of defaultRegistryUrls
+    if (!registryUrl) {
+      return null;
+    }
+
     logger.trace({ registryUrl, packageName }, 'fetching conda package');
 
-    const url = `${registryUrl}${packageName}`;
+    const url = joinUrlParts(registryUrl, packageName);
 
     const result: ReleaseResult = {
       releases: [],

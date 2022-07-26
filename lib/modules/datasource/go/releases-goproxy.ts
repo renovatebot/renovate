@@ -4,6 +4,7 @@ import pAll from 'p-all';
 import { logger } from '../../../logger';
 import { cache } from '../../../util/cache/package/decorator';
 import { regEx } from '../../../util/regex';
+import { joinUrlParts } from '../../../util/url';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
 import { BaseGoDatasource } from './base';
@@ -199,7 +200,10 @@ export class GoProxyDatasource extends Datasource {
   }
 
   async listVersions(baseUrl: string, packageName: string): Promise<string[]> {
-    const url = `${baseUrl}/${this.encodeCase(packageName)}/@v/list`;
+    const url = joinUrlParts(
+      baseUrl,
+      `${this.encodeCase(packageName)}/@v/list`
+    );
     const { body } = await this.http.get(url);
     return body
       .split(regEx(/\s+/))
@@ -212,7 +216,10 @@ export class GoProxyDatasource extends Datasource {
     packageName: string,
     version: string
   ): Promise<Release> {
-    const url = `${baseUrl}/${this.encodeCase(packageName)}/@v/${version}.info`;
+    const url = joinUrlParts(
+      baseUrl,
+      `${this.encodeCase(packageName)}/@v/${version}.info`
+    );
     const res = await this.http.getJson<VersionInfo>(url);
 
     const result: Release = {

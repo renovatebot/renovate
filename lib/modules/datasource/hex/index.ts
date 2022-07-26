@@ -1,6 +1,7 @@
 import { logger } from '../../../logger';
 import { cache } from '../../../util/cache/package/decorator';
 import type { HttpResponse } from '../../../util/http/types';
+import { joinUrlParts } from '../../../util/url';
 import * as hexVersioning from '../../versioning/hex';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
@@ -41,7 +42,11 @@ export class HexDatasource extends Datasource {
     const organizationUrlPrefix = organizationName
       ? `repos/${organizationName}/`
       : '';
-    const hexUrl = `${registryUrl}api/${organizationUrlPrefix}packages/${hexPackageName}`;
+    const hexUrl = joinUrlParts(
+      registryUrl,
+      `api/${organizationUrlPrefix}`,
+      `packages/${hexPackageName}`
+    );
 
     let response: HttpResponse<HexRelease>;
     try {

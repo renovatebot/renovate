@@ -2,7 +2,7 @@ import { XmlDocument } from 'xmldoc';
 import { logger } from '../../../logger';
 import { Http } from '../../../util/http';
 import { regEx } from '../../../util/regex';
-import { ensureTrailingSlash } from '../../../util/url';
+import { ensureTrailingSlash, joinUrlParts } from '../../../util/url';
 import * as ivyVersioning from '../../versioning/ivy';
 import { compare } from '../../versioning/maven/compare';
 import { Datasource } from '../datasource';
@@ -115,7 +115,10 @@ export class SbtPackageDatasource extends Datasource {
       ];
 
       for (const pomFileName of pomFileNames) {
-        const pomUrl = `${searchRoot}/${artifactDir}/${version}/${pomFileName}`;
+        const pomUrl = joinUrlParts(
+          searchRoot,
+          `${artifactDir}/${version}/${pomFileName}`
+        );
         const { body: content } = await downloadHttpProtocol(this.http, pomUrl);
 
         if (content) {

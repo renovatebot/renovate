@@ -8,7 +8,7 @@ import { cache } from '../../../util/cache/package/decorator';
 import { privateCacheDir, readCacheFile } from '../../../util/fs';
 import { simpleGitConfig } from '../../../util/git/config';
 import { newlineRegex, regEx } from '../../../util/regex';
-import { parseUrl } from '../../../util/url';
+import { joinUrlParts, parseUrl } from '../../../util/url';
 import * as cargoVersioning from '../../versioning/cargo';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
@@ -130,7 +130,10 @@ export class CrateDatasource extends Datasource {
     // The `?include=` suffix is required to avoid unnecessary database queries
     // on the crates.io server. This lets us work around the regular request
     // throttling of one request per second.
-    const crateUrl = `${CrateDatasource.CRATES_IO_API_BASE_URL}crates/${packageName}?include=`;
+    const crateUrl = joinUrlParts(
+      CrateDatasource.CRATES_IO_API_BASE_URL,
+      `crates/${packageName}?include=`
+    );
 
     logger.debug(
       { crateUrl, packageName, registryUrl: info.rawUrl },

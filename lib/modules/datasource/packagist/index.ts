@@ -110,7 +110,7 @@ export class PackagistDatasource extends Datasource {
   ): string {
     const { key, sha256 } = regFile;
     const fileName = key.replace('%hash%', sha256);
-    const url = `${regUrl}/${fileName}`;
+    const url = joinUrlParts(regUrl, fileName);
     return url;
   }
 
