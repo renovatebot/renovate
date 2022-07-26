@@ -20,7 +20,9 @@ Follow these best practices when you're working on our code.
 
 ## Code simplicity
 
-### Prefer code that is simpler and easier to read, this will help others and specially reviewers
+### Write simple code
+
+Simple code is easy to read and review.
 
 - #### Write single purpose functions, they are easier to understand, test and debug
 
