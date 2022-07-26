@@ -20,7 +20,7 @@ function checkRebaseAll(issueBody: string): boolean {
 }
 
 function getCheckedBranches(issueBody: string): RegExpMatchArray | null {
-  const checkMatch = ' - \\[[x]\\] <!-- ([a-zA-Z]+)-branch=([^\\s]+) -->';
+  const checkMatch = ' - \\[x\\] <!-- ([a-zA-Z]+)-branch=([^\\s]+) -->';
   return issueBody.match(regEx(checkMatch, 'g'));
 }
 
