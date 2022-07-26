@@ -54,9 +54,9 @@ export function getMatchingFiles(
   const fileList = getFilteredFileList(config, allFiles);
   const { fileMatch, manager } = config;
   let matchedFiles: string[] = [];
-  // TODO #7154
+  // TODO: types (#7154)
   for (const match of fileMatch!) {
-    logger.debug(`Using file match: ${match} for manager ${manager}`);
+    logger.debug(`Using file match: ${match} for manager ${manager!}`);
     const re = regEx(match);
     matchedFiles = matchedFiles.concat(
       fileList.filter((file) => re.test(file))
