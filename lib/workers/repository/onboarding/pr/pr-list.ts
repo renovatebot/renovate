@@ -43,13 +43,15 @@ export function getPrList(
           text += '  - Upgrade ';
         }
         if (upgrade.sourceUrl) {
-          text += `[${upgrade.depName}](${upgrade.sourceUrl})`;
+          // TODO: types (#7154)
+          text += `[${upgrade.depName!}](${upgrade.sourceUrl})`;
         } else {
           text += upgrade.depName!.replace(prTitleRe, '@&#8203;$1');
         }
+        // TODO: types (#7154)
         text += upgrade.isLockfileUpdate
-          ? ` to \`${upgrade.newVersion}\``
-          : ` to \`${upgrade.newDigest ?? upgrade.newValue}\``;
+          ? ` to \`${upgrade.newVersion!}\``
+          : ` to \`${upgrade.newDigest ?? upgrade.newValue!}\``;
         text += '\n';
       }
       if (!seen.includes(text)) {
@@ -60,7 +62,7 @@ export function getPrList(
     prDesc += '\n\n';
     prDesc += '</details>\n\n';
   }
-  // TODO #7154
+  // TODO: type (#7154)
   const prHourlyLimit = config.prHourlyLimit!;
   if (
     prHourlyLimit > 0 &&

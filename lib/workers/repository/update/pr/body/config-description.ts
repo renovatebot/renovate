@@ -43,6 +43,8 @@ export async function getPrConfigDescription(
   prBody += `, or you tick the rebase/retry checkbox.\n\n`;
   if (config.recreateClosed) {
     prBody += emojify(
+      // TODO: types (#7154)
+      // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
       `:ghost: **Immortal**: This PR will be recreated if closed unmerged. Get [config help](${config.productLinks?.help}) if that's undesired.\n\n`
     );
   } else {
