@@ -15,17 +15,15 @@ export function extractPackageFile(fileContent: string): PackageFile | null {
     .map((match) => match.groups?.repositoryName)
     .filter(is.string);
 
-  const matches = [...fileContent.matchAll(dependsOnRegex)];
+  const matches = [...fileContent.matchAll(dependsOnRegex)]
+    .map((m) => m.groups)
+    .filter(is.truthy);
   const deps: PackageDependency[] = [];
   for (const match of matches) {
-    if (!match.groups) {
-      continue;
-    }
-
     const dep: PackageDependency = {
-      currentValue: match.groups.version,
-      depName: `${match.groups.groupId}:${match.groups.artifactId}`,
-      replaceString: match.groups.replaceString,
+      currentValue: match.version,
+      depName: `${match.groupId}:${match.artifactId}`,
+      replaceString: match.replaceString,
       datasource: MavenDatasource.id,
     };
     deps.push(dep);
