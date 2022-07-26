@@ -1,4 +1,3 @@
-import yaml from 'js-yaml';
 import { Fixtures } from '../../../../test/fixtures';
 import { extractPackageFile } from '.';
 
@@ -30,10 +29,12 @@ describe('modules/manager/fleet/extract', () => {
 
     describe('fleet.yaml', () => {
       it('should return null if content is a malformed YAML', () => {
-        jest.spyOn(yaml, 'loadAll').mockImplementation(() => {
-          throw new Error();
-        });
-        const result = extractPackageFile('test-', 'fleet.yaml');
+        const result = extractPackageFile(
+          `apiVersion: v1
+kind: Fleet
+< `,
+          'fleet.yaml'
+        );
 
         expect(result).toBeNull();
       });
@@ -95,10 +96,12 @@ describe('modules/manager/fleet/extract', () => {
 
     describe('GitRepo', () => {
       it('should return null if content is a malformed YAML', () => {
-        jest.spyOn(yaml, 'loadAll').mockImplementation(() => {
-          throw new Error();
-        });
-        const result = extractPackageFile(`test`, 'test.yaml');
+        const result = extractPackageFile(
+          `apiVersion: v1
+ kind: GitRepo
+ < `,
+          'test.yaml'
+        );
 
         expect(result).toBeNull();
       });
