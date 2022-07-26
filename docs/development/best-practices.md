@@ -24,7 +24,9 @@ Follow these best practices when you're working on our code.
 
 Simple code is easy to read and review.
 
-- #### Write single purpose functions, they are easier to understand, test and debug
+- #### Write single purpose functions
+
+Single purpose functions are easier to understand, test and debug.
 
 ```ts
 function caller() {
