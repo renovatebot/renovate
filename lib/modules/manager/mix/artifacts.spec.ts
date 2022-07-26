@@ -1,15 +1,19 @@
 import { join } from 'upath';
 import { envMock, mockExecAll } from '../../../../test/exec-util';
-import { env, fs, hostRules } from '../../../../test/util';
+import { env, fs, hostRules, mockedFunction } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import * as docker from '../../../util/exec/docker';
+import { getPkgReleases as _getPkgReleases } from '../../datasource';
 import type { UpdateArtifactsConfig } from '../types';
 import { updateArtifacts } from '.';
 
 jest.mock('../../../util/exec/env');
 jest.mock('../../../util/fs');
 jest.mock('../../../util/host-rules');
+jest.mock('../../datasource');
+
+const getPkgReleases = mockedFunction(_getPkgReleases);
 
 const adminConfig: RepoGlobalConfig = {
   // `join` fixes Windows CI
@@ -87,6 +91,26 @@ describe('modules/manager/mix/artifacts', () => {
     fs.findLocalSiblingOrParent.mockResolvedValueOnce('mix.lock');
     const execSnapshots = mockExecAll();
     fs.readLocalFile.mockResolvedValueOnce('New mix.lock');
+
+    // erlang
+    getPkgReleases.mockResolvedValueOnce({
+      releases: [
+        { version: '22.3.4.26' },
+        { version: '23.1.1.0' },
+        { version: '24.3.4.1' },
+        { version: '24.3.4.2' },
+        { version: '25.0.0.0' },
+      ],
+    });
+    // elixir
+    getPkgReleases.mockResolvedValueOnce({
+      releases: [
+        { version: '1.8.2' },
+        { version: '1.13.3' },
+        { version: '1.13.4' },
+      ],
+    });
+
     expect(
       await updateArtifacts({
         packageFileName: 'mix.exs',
@@ -111,6 +135,25 @@ describe('modules/manager/mix/artifacts', () => {
     fs.readLocalFile.mockResolvedValueOnce('New mix.lock');
     hostRules.find.mockReturnValueOnce({ token: 'valid_test_token' });
     hostRules.find.mockReturnValueOnce({});
+
+    // erlang
+    getPkgReleases.mockResolvedValueOnce({
+      releases: [
+        { version: '22.3.4.26' },
+        { version: '23.1.1.0' },
+        { version: '24.3.4.1' },
+        { version: '24.3.4.2' },
+        { version: '25.0.0.0' },
+      ],
+    });
+    // elixir
+    getPkgReleases.mockResolvedValueOnce({
+      releases: [
+        { version: 'v1.8.2' },
+        { version: 'v1.13.3' },
+        { version: 'v1.13.4' },
+      ],
+    });
 
     const result = await updateArtifacts({
       packageFileName: 'mix.exs',
