@@ -1,7 +1,7 @@
 import { mockExecAll } from '../../../../test/exec-util';
 import { mockedFunction, partial } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
-import { exec } from '../../../util/exec';
+import { ExecError } from '../../../util/exec/exec-error';
 import { localPathIsSymbolicLink, readLocalSymlink } from '../../../util/fs';
 import { getRepoStatus } from '../../../util/git';
 import type { StatusResult } from '../../../util/git/types';
@@ -24,7 +24,7 @@ describe('modules/manager/hermit/artifacts', () => {
       readlinkMock.mockResolvedValue('hermit');
       GlobalConfig.set({ localDir: '' });
 
-      const execSnapshots = mockExecAll()
+      const execSnapshots = mockExecAll();
       getRepoStatusMock.mockResolvedValue(
         partial<StatusResult>({
           not_added: ['bin/go-1.17.1'],
@@ -58,15 +58,9 @@ describe('modules/manager/hermit/artifacts', () => {
         })
       );
 
-      expect(execMock.mock.calls[0][0]).toBe(
-        `./hermit install go-1.17.1 jq-1.6`
-      );
-      expect(execMock.mock.calls[0][1]).toStrictEqual({
-        cwdFile: 'go/bin/hermit',
-        docker: {
-          image: 'sidecar',
-        },
-      });
+      expect(execSnapshots).toMatchObject([
+        { cmd: './hermit install go-1.17.1 jq-1.6' },
+      ]);
 
       expect(res).toStrictEqual([
         {
@@ -147,10 +141,11 @@ describe('modules/manager/hermit/artifacts', () => {
       readlinkMock.mockResolvedValue(null);
       GlobalConfig.set({ localDir: '' });
 
-      execMock.mockResolvedValue({
+      mockExecAll({
         stdout: '',
         stderr: '',
       });
+
       getRepoStatusMock.mockResolvedValue(
         partial<StatusResult>({
           not_added: [],
@@ -194,7 +189,17 @@ describe('modules/manager/hermit/artifacts', () => {
     });
 
     it('should return error on installation error', async () => {
-      execMock.mockRejectedValue({ stderr: 'error executing hermit install' });
+      mockExecAll(
+        new ExecError('', {
+          stdout: '',
+          stderr: 'error executing hermit install',
+          cmd: '',
+          options: {
+            encoding: 'utf-8',
+          },
+        })
+      );
+
       const res = await updateArtifacts(
         partial<UpdateArtifact>({
           updatedDeps: [

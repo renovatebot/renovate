@@ -242,7 +242,7 @@ async function updateHermitPackage(update: UpdateArtifact): Promise<void> {
   }
 }
 
-class UpdateHermitError extends Error {
+export class UpdateHermitError extends Error {
   stdout: string;
   stderr: string;
   from: string;

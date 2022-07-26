@@ -1,4 +1,3 @@
-import is from '@sindresorhus/is';
 import minimatch from 'minimatch';
 import upath from 'upath';
 import { logger } from '../../../logger';
@@ -66,37 +65,42 @@ async function listHermitPackages(
 
   logger.trace({ files, hermitFolder }, 'files for hermit package list');
 
-  return files
-    .filter((f) => minimatch(f, '.*.pkg'))
-    .map((f): HermitListItem | null => {
-      const fileName = f
-        .replace(`${hermitFolder}/`, '')
-        .substring(1)
-        .replace(/\.pkg$/, '');
-      const channelParts = fileName.split('@');
+  const out = [] as HermitListItem[];
 
-      if (channelParts.length > 1) {
-        return {
-          Name: channelParts[0],
-          Channel: channelParts[1],
-          Version: '',
-        };
-      }
+  for (const f of files) {
+    if (!minimatch(f, '.*.pkg')) {
+      continue;
+    }
 
-      const groups = pkgReferenceRegex.exec(fileName)?.groups;
-      if (!groups) {
-        logger.debug(
-          { fileName },
-          'invalid hermit package reference file name found'
-        );
-        return null;
-      }
+    const fileName = f
+      .replace(`${hermitFolder}/`, '')
+      .substring(1)
+      .replace(/\.pkg$/, '');
+    const channelParts = fileName.split('@');
 
-      return {
-        Name: groups.packageName,
-        Version: groups.version,
-        Channel: '',
-      };
-    })
-    .filter(is.truthy);
+    if (channelParts.length > 1) {
+      out.push({
+        Name: channelParts[0],
+        Channel: channelParts[1],
+        Version: '',
+      });
+    }
+
+    const groups = pkgReferenceRegex.exec(fileName)?.groups;
+    if (!groups) {
+      logger.debug(
+        { fileName },
+        'invalid hermit package reference file name found'
+      );
+      continue;
+    }
+
+    out.push({
+      Name: groups.packageName,
+      Version: groups.version,
+      Channel: '',
+    });
+  }
+
+  return out;
 }
