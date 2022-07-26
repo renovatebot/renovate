@@ -13,7 +13,8 @@ Let Renovate use your PAT by doing _one_ of the following:
 - Set your PAT as an environment variable `RENOVATE_TOKEN`
 - Set your PAT when you run Renovate in the CLI with `--token=`
 
-Remember to set `platform=gitea` somewhere in your Renovate config file. The account must have full name (and email address) set to allow Renovate to estabilish Git identity.
+Remember to set `platform=gitea` somewhere in your Renovate config file.
+Either the account should have full name and email address set to allow Renovate to estabilish Git identity, or the `gitAuthor` config option should be set.
 
 ## Unsupported platform features/concepts
 
