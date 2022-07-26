@@ -47,7 +47,7 @@ function getPythonConstraint(
 function getPipenvConstraint(
   existingLockFileContent: string,
   config: UpdateArtifactsConfig
-): string | null {
+): string {
   const { constraints = {} } = config;
   const { pipenv } = constraints;
 
