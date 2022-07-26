@@ -11,7 +11,7 @@ import { joinUrlParts } from '../../../../util/url';
 import { getPlatformPrOptions } from '../../update/pr';
 import { prepareLabels } from '../../update/pr/labels';
 import { addParticipants } from '../../update/pr/participants';
-import { ConfigMigrationCommitMessageFactory } from '../branch/commit-message';
+import { ConfigMigrationSemanticFactory } from '../branch/commit-message';
 import type { MigratedData } from '../branch/migrated-data';
 import { getMigrationBranchName } from '../common';
 
@@ -25,12 +25,12 @@ export async function ensureConfigMigrationPr(
     'configuration-options/#configmigration'
   );
   const branchName = getMigrationBranchName(config);
-  const commitMessageFactory = new ConfigMigrationCommitMessageFactory(
+  const semanticFactory = new ConfigMigrationSemanticFactory(
     config,
     migratedConfigData.filename
   );
 
-  const prTitle = commitMessageFactory.create().toString();
+  const prTitle = semanticFactory.getPrTitle();
   const existingPr = await platform.getBranchPr(branchName);
   const filename = migratedConfigData.filename;
   logger.debug('Filling in config migration PR template');

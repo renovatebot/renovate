@@ -181,7 +181,7 @@ describe('workers/repository/config-migration/pr/index', () => {
       );
       expect(platform.createPr).toHaveBeenCalledTimes(1);
       expect(platform.createPr.mock.calls[0][0].prTitle).toBe(
-        'Migrate config renovate.json'
+        'Migrate renovate config'
       );
     });
 
@@ -199,7 +199,7 @@ describe('workers/repository/config-migration/pr/index', () => {
       );
       expect(platform.createPr).toHaveBeenCalledTimes(1);
       expect(platform.createPr.mock.calls[0][0].prTitle).toBe(
-        'chore(config): migrate config renovate.json'
+        'chore(config): migrate renovate config'
       );
     });
 

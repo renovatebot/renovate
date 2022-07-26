@@ -3,7 +3,7 @@ import type { RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
 import { commitAndPush } from '../../../../modules/platform/commit';
 import { getMigrationBranchName } from '../common';
-import { ConfigMigrationCommitMessageFactory } from './commit-message';
+import { ConfigMigrationSemanticFactory } from './commit-message';
 import type { MigratedData } from './migrated-data';
 
 export function createConfigMigrationBranch(
@@ -15,12 +15,12 @@ export function createConfigMigrationBranch(
   const configFileName = migratedConfigData.filename;
   logger.debug('Creating config migration branch');
 
-  const commitMessageFactory = new ConfigMigrationCommitMessageFactory(
+  const semanticFactory = new ConfigMigrationSemanticFactory(
     config,
     configFileName
   );
 
-  const commitMessage = commitMessageFactory.create();
+  const commitMessage = semanticFactory.getCommitMessage();
 
   // istanbul ignore if
   if (GlobalConfig.get('dryRun')) {
