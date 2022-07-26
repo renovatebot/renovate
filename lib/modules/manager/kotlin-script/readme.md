@@ -3,8 +3,6 @@ title: Kotlin Script dependency versions
 description: Kotlin Script dependency versions support in Renovate
 ---
 
-# Kotlin Script dependency versions
-
 Renovate supports upgrading dependencies in [Kotlin Script](https://github.com/Kotlin/KEEP/blob/master/proposals/scripting-support.md) files.
 These are self-contained scripts where one can write Kotlin code with JVM backend, and compilation happens when the
 scripts are ran. For example:
