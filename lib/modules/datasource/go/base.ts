@@ -184,22 +184,23 @@ export class BaseGoDatasource {
       goImportURL.replace(regEx(/\.git$/), ''),
       goModule
     );
-    // fall back to old behaviour if detection did not work
-    if (datasource === null) {
-      // split the go module from the URL: host/go/module -> go/module
-      // TODO: `parsedUrl.pathname` can be undefined
-      const packageName = trimTrailingSlash(`${parsedUrl.pathname}`)
-        .replace(regEx(/\.git$/), '')
-        .split('/')
-        .slice(-2)
-        .join('/');
-
-      return {
-        datasource: GithubTagsDatasource.id,
-        registryUrl: `${parsedUrl.protocol}//${parsedUrl.host}`,
-        packageName,
-      };
+    if (datasource !== null) {
+      return datasource;
     }
-    return datasource;
+    // fall back to old behaviour if detection did not work
+
+    // split the go module from the URL: host/go/module -> go/module
+    // TODO: `parsedUrl.pathname` can be undefined
+    const packageName = trimTrailingSlash(`${parsedUrl.pathname}`)
+      .replace(regEx(/\.git$/), '')
+      .split('/')
+      .slice(-2)
+      .join('/');
+
+    return {
+      datasource: GithubTagsDatasource.id,
+      registryUrl: `${parsedUrl.protocol}//${parsedUrl.host}`,
+      packageName,
+    };
   }
 }
