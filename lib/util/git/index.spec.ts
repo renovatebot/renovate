@@ -1,7 +1,7 @@
 import fs from 'fs-extra';
 import Git from 'simple-git';
 import tmp from 'tmp-promise';
-import { mocked } from '../../../test/util';
+import { mocked, partial } from '../../../test/util';
 import { GlobalConfig } from '../../config/global';
 import {
   CONFIG_VALIDATION,
@@ -258,14 +258,13 @@ describe('util/git/index', () => {
     });
 
     it('should return result even if non-default and not under branchPrefix', async () => {
-      const parentSha = await git.getBranchParentSha('develop');
+      const parentSha = 'SHA';
+      const branchCache = partial<BranchCache>({
+        branchName: 'develop',
+        parentSha: parentSha,
+      });
       repoCache.getCache.mockReturnValueOnce({}).mockReturnValueOnce({
-        branches: [
-          {
-            branchName: 'develop',
-            parentSha: parentSha,
-          } as BranchCache,
-        ],
+        branches: [branchCache],
       });
       expect(await git.isBranchBehindBase('develop')).toBeTrue();
       expect(await git.isBranchBehindBase('develop')).toBeTrue(); // cache

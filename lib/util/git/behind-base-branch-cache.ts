@@ -12,7 +12,7 @@ export function getCachedBehindBaseResult(
     (branch) => branch.branchName === branchName
   );
 
-  if (!cachedBranch) {
+  if (!cachedBranch?.parentSha) {
     return null;
   }
 
