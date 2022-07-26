@@ -54,7 +54,7 @@ function update(...)    { /* code */ }
 function print(...)     { /* code */ }
 ```
 
-- #### Keep indentation level low 
+- #### Keep indentation level low
 
 Fail quickly.
 Nested code logic is difficult to read and prone to logic mistakes.
