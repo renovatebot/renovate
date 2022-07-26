@@ -11,7 +11,8 @@ process.on('unhandledRejection', (err) => {
 
 proxy.bootstrap();
 
-await (async (): Promise<void> => {
+// eslint-disable-next-line @typescript-eslint/no-floating-promises
+(async (): Promise<void> => {
   process.exitCode = await globalWorker.start();
   // istanbul ignore if
   if (process.env.RENOVATE_X_HARD_EXIT) {
