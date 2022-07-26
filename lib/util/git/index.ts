@@ -28,6 +28,7 @@ import type { GitProtocol } from '../../types/git';
 import { Limit, incLimitedValue } from '../../workers/global/limits';
 import { newlineRegex, regEx } from '../regex';
 import { parseGitAuthor } from './author';
+import { getCachedBehindBaseResult } from './behind-base-branch-cache';
 import { getNoVerify, simpleGitConfig } from './config';
 import {
   getCachedConflictResult,
@@ -38,6 +39,7 @@ import {
   getCachedModifiedResult,
   setCachedModifiedResult,
 } from './modified-cache';
+import { getCachedBranchParentShaResult } from './parent-sha-cache';
 import { configSigningKey, writePrivateKey } from './private-key';
 import type {
   CommitFilesConfig,
@@ -466,9 +468,14 @@ export function getBranchCommit(branchName: string): CommitSha | null {
 export async function getBranchParentSha(
   branchName: string
 ): Promise<CommitSha | null> {
+  const branchSha = getBranchCommit(branchName);
+  let parentSha = getCachedBranchParentShaResult(branchName, branchSha);
+  if (parentSha !== null) {
+    return parentSha;
+  }
+
   try {
-    const branchSha = getBranchCommit(branchName);
-    const parentSha = await git.revparse([`${branchSha}^`]);
+    parentSha = await git.revparse([`${branchSha}^`]);
     return parentSha;
   } catch (err) {
     logger.debug({ err }, 'Error getting branch parent sha');
@@ -550,6 +557,13 @@ export function getBranchList(): string[] {
 }
 
 export async function isBranchBehindBase(branchName: string): Promise<boolean> {
+  const { currentBranchSha } = config;
+
+  let isBehind = getCachedBehindBaseResult(branchName, currentBranchSha);
+  if (isBehind !== null) {
+    return isBehind;
+  }
+
   await syncGit();
   try {
     const { currentBranchSha, currentBranch } = config;
@@ -559,7 +573,7 @@ export async function isBranchBehindBase(branchName: string): Promise<boolean> {
       '--contains',
       config.currentBranchSha,
     ]);
-    const isBehind = !branches.all.map(localName).includes(branchName);
+    isBehind = !branches.all.map(localName).includes(branchName);
     logger.debug(
       { isBehind, currentBranch, currentBranchSha },
       `isBranchBehindBase=${isBehind}`

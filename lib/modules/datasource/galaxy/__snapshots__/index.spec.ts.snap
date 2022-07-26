@@ -21,5 +21,3 @@ Object {
   "sourceUrl": "https://github.com/yatesr/ansible-timezone",
 }
 `;
-
-exports[`modules/datasource/galaxy/index getReleases throws for 5xx 1`] = `[Error: external-host-error]`;
