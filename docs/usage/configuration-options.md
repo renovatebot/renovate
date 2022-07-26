@@ -1481,7 +1481,7 @@ You should order your `packageRules` in order of importance so that later rules 
 
 <!-- prettier-ignore -->
 !!! warning
-    Never put any `object`-type configuration option in a `packageRules` array.
+    Avoid nesting any `object`-type configuration in a `packageRules` array, such as a `major` or `minor` block.
 
 ### allowedVersions
 
