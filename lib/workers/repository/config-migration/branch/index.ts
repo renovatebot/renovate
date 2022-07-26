@@ -38,7 +38,10 @@ export async function checkConfigMigrationBranch(
     upgrades: [],
     branchName: configMigrationBranch,
     userStrings: {
-      ...(config.userStrings as Record<string, string>),
+      ignoreTopic:
+        (config.ignoreTopic as string) ?? 'Renovate Ignore Notification',
+      ignoreMajor: '',
+      ignoreDigest: '',
       ignoreOther: '',
     },
     suppressNotifications: config.suppressNotifications,

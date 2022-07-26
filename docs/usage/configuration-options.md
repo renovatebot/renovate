@@ -450,6 +450,10 @@ After we changed the [`baseBranches`](https://docs.renovatebot.com/configuration
     This feature writes plain JSON for `.json` files, and JSON5 for `.json5` files.
     JSON5 content can potentially be down leveled (`.json` files) and all comments will be removed.
 
+<!-- prettier-ignore -->
+!!! note
+    Closing the config migration PR will cause it to be ignored and not being reopend/recreated in the future.',
+
 ## configWarningReuseIssue
 
 Renovate's default behavior is to reuse/reopen a single Config Warning issue in each repository so as to keep the "noise" down.
