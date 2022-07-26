@@ -1078,6 +1078,8 @@ When this field is enabled, Renovate will abort its run if it encounters either 
 
 This can be used with `token` to create a custom http `authorization` header.
 
+Don't set `authType=Bearer`, it's the default.
+
 An example for npm basic auth with token:
 
 ```json
