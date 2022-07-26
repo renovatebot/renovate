@@ -1,5 +1,5 @@
 import { regEx } from '../../../util/regex';
-import { defaultConfig } from './index';
+import { defaultConfig } from '.';
 
 describe('modules/manager/kotlin-script/index', () => {
   it('fileMatch regex is correct', () => {
