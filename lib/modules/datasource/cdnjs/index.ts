@@ -32,7 +32,8 @@ export class CdnJsDatasource extends Datasource {
     const library = packageName.split('/')[0];
     const url = joinUrlParts(
       registryUrl,
-      `libraries/${library}?fields=homepage,repository,assets`
+      `libraries/${library}`,
+      '?fields=homepage,repository,assets'
     );
     let result: ReleaseResult | null = null;
     try {

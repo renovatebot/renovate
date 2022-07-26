@@ -73,7 +73,8 @@ export class AdoptiumJavaDatasource extends Datasource {
     );
     const url = joinUrlParts(
       registryUrl,
-      `v3/info/release_versions?page_size=${pageSize}&image_type=${imageType}&project=jdk&release_type=ga&sort_method=DATE&sort_order=DESC&vendor=adoptium`
+      'v3/info/release_versions',
+      `?page_size=${pageSize}&image_type=${imageType}&project=jdk&release_type=ga&sort_method=DATE&sort_order=DESC&vendor=adoptium`
     );
 
     const result: ReleaseResult = {

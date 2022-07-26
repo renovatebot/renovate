@@ -747,7 +747,8 @@ export class DockerDatasource extends Datasource {
           const maxResults = 1000;
           url = joinUrlParts(
             registryHost,
-            `${dockerRepository}/tags/list?n=${maxResults}`
+            `${dockerRepository}/tags/list`,
+            `?n=${maxResults}`
           );
           url = ensurePathPrefix(url, '/v2');
           foundMaxResultsError = true;
