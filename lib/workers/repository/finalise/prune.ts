@@ -94,12 +94,13 @@ export async function pruneStaleBranches(
 ): Promise<void> {
   logger.debug('Removing any stale branches');
   logger.trace({ config }, `pruneStaleBranches`);
-  logger.debug(`config.repoIsOnboarded=${config.repoIsOnboarded}`);
+  // TODO: types (#7154)
+  logger.debug(`config.repoIsOnboarded=${config.repoIsOnboarded!}`);
   if (!branchList) {
     logger.debug('No branchList');
     return;
   }
-  // TODO #7154
+  // TODO: types (#7154)
   let renovateBranches = getBranchList().filter((branchName) =>
     branchName.startsWith(config.branchPrefix!)
   );
@@ -114,7 +115,8 @@ export async function pruneStaleBranches(
     },
     'Branch lists'
   );
-  const lockFileBranch = `${config.branchPrefix}lock-file-maintenance`;
+  // TODO: types (#7154)
+  const lockFileBranch = `${config.branchPrefix!}lock-file-maintenance`;
   renovateBranches = renovateBranches.filter(
     (branch) => branch !== lockFileBranch
   );
