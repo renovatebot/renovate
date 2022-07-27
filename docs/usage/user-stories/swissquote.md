@@ -2,7 +2,10 @@
 
 > This article was originally published on [Medium](https://medium.com/swissquote-engineering/how-swissquote-is-keeping-software-dependencies-up-to-date-with-renovate-6246e8b20437) by [Stéphane Goetz](https://onigoetz.ch/), Principal Software Engineer at [Swissquote Bank](https://github.com/swissquote/)
 
-Swissquote has more than 1'000 distinct applications running in production. They come in many different flavors including services, daemons, and webapps, and their age can be counted from days to more than a decade. While there are many topics of interest when talking about software maintenance, today’s topic is software dependencies. We’ll see in this article why it’s important to keep them up-to-date and why it’s not as simple as one may think.
+Swissquote has more than 1000 distinct applications running in production.
+They come in many different flavors including services, daemons, and webapps, and their age can be counted from days to more than a decade.
+While there are many topics of interest when talking about software maintenance, today’s topic is software dependencies.
+We’ll see in this article why it’s important to keep them up-to-date and why it’s not as simple as one may think.
 
 Software dependencies have been a heavily discussed topic in the past months. One aspect that’s discussed a lot is security issues like the recent [log4shell](https://en.wikipedia.org/wiki/Log4Shell), [Supply chain attacks](https://blog.sonatype.com/npm-project-used-by-millions-hijacked-in-supply-chain-attack), [an expiring SSL Certificate](https://www.webnic.cc/root-ssl-certificate-expiry-and-what-happens-next-for-brands/). But there are also other aspects like bugs caused by your dependencies.
 
