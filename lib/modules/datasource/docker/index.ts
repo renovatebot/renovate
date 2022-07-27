@@ -4,7 +4,10 @@ import type { ECRClientConfig } from '@aws-sdk/client-ecr';
 import is from '@sindresorhus/is';
 import { parse } from 'auth-header';
 import hasha from 'hasha';
-import { HOST_DISABLED } from '../../../constants/error-messages';
+import {
+  HOST_DISABLED,
+  PAGE_NOT_FOUND_ERROR,
+} from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import type { HostRule } from '../../../types';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
@@ -57,16 +60,24 @@ export async function getAuthHeaders(
   apiCheckUrl = `${registryHost}/v2/`
 ): Promise<OutgoingHttpHeaders | null> {
   try {
-    // use json request, as this will be cached for tags, so it returns json
-    // TODO: add cache test
-    const apiCheckResponse = await http.getJson(apiCheckUrl, {
+    const options = {
       throwHttpErrors: false,
       noAuth: true,
-    });
+    };
+    const apiCheckResponse = apiCheckUrl.endsWith('/v2/')
+      ? await http.get(apiCheckUrl, options)
+      : // use json request, as this will be cached for tags, so it returns json
+        // TODO: add cache test
+        await http.getJson(apiCheckUrl, options);
 
     if (apiCheckResponse.statusCode === 200) {
       logger.debug({ apiCheckUrl }, 'No registry auth required');
       return {};
+    }
+    if (apiCheckResponse.statusCode === 404) {
+      logger.debug({ apiCheckUrl }, 'Page Not Found');
+      // throw error up to be caught and potentially retried with library/ prefix
+      throw new Error(PAGE_NOT_FOUND_ERROR);
     }
     if (
       apiCheckResponse.statusCode !== 401 ||
@@ -197,6 +208,9 @@ export async function getAuthHeaders(
     }
     if (err.statusCode >= 500 && err.statusCode < 600) {
       throw new ExternalHostError(err);
+    }
+    if (err.message === PAGE_NOT_FOUND_ERROR) {
+      throw err;
     }
     if (err.message === HOST_DISABLED) {
       logger.trace({ registryHost, dockerRepository, err }, 'Host disabled');
@@ -512,8 +526,7 @@ export class DockerDatasource extends Datasource {
       manifest.mediaType === MediaType.ociManifestIndexV1 ||
       (!manifest.mediaType && hasKey('manifests', manifest))
     ) {
-      const imageList = manifest;
-      if (imageList.manifests.length) {
+      if (manifest.manifests.length) {
         logger.trace(
           { registry, dockerRepository, tag },
           'Found manifest index, using first image'
@@ -764,7 +777,10 @@ export class DockerDatasource extends Datasource {
       if (err instanceof ExternalHostError) {
         throw err;
       }
-      if (err.statusCode === 404 && !dockerRepository.includes('/')) {
+      if (
+        (err.statusCode === 404 || err.message === PAGE_NOT_FOUND_ERROR) &&
+        !dockerRepository.includes('/')
+      ) {
         logger.debug(
           `Retrying Tags for ${registryHost}/${dockerRepository} using library/ prefix`
         );

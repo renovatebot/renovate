@@ -8,6 +8,7 @@ Array [
       Object {
         "currentValue": "1.2.3",
         "depName": "foo:bar",
+        "depType": "dependencies",
         "fileReplacePosition": 4,
         "groupName": "baz",
         "managerData": Object {
@@ -15,7 +16,6 @@ Array [
           "packageFile": "gradle.properties",
         },
         "registryUrls": Array [
-          "https://repo.maven.apache.org/maven2",
           "https://example.com",
         ],
       },

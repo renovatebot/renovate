@@ -16,7 +16,8 @@ export function getGitAuthenticatedEnvironmentVariables(
 ): NodeJS.ProcessEnv {
   if (!token) {
     logger.warn(
-      `Could not create environment variable for ${matchHost} as token was empty`
+      // TODO: types (#7154)
+      `Could not create environment variable for ${matchHost!} as token was empty`
     );
     return { ...environmentVariables };
   }
@@ -86,6 +87,15 @@ export function getAuthenticationRules(
   const authenticationRules = [];
   const hasUser = token.split(':').length > 1;
   const insteadUrl = gitUrlParse(gitUrl);
+
+  // Workaround for https://github.com/IonicaBizau/parse-path/issues/38
+  if (insteadUrl.port && insteadUrl.resource.endsWith(`:${insteadUrl.port}`)) {
+    insteadUrl.resource = insteadUrl.resource.substring(
+      0,
+      insteadUrl.resource.length - `:${insteadUrl.port}`.length
+    );
+  }
+
   const url = { ...insteadUrl };
   const protocol = regEx(/^https?$/).test(url.protocol)
     ? url.protocol

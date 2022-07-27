@@ -73,8 +73,8 @@ Add the `breaking` label for Issues or PRs which have changes that are not backw
     <summary>Priority</summary>
 
     priority-1-critical
-    priority-2-important
-    priority-3-normal
+    priority-2-high
+    priority-3-medium
     priority-4-low
     priority-5-triage
 
@@ -86,7 +86,7 @@ Try to select the proper priority.
 Nothing bad will happen if you select a "wrong" priority.
 At a high level: critical = needs immediate fix, important = to be prioritized ahead of others, normal = default priority, low = trivial issue, or impacts a very small % of the user base.
 
-Use [this search](https://github.com/renovatebot/renovate/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+-label%3Apriority-1-critical+-label%3Apriority-2-important+-label%3Apriority-3-normal+-label%3Apriority-4-low++-label%3Apriority-5-triage) to find any issues which are missing a priority label.
+Use [this search](https://github.com/renovatebot/renovate/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+-label%3Apriority-1-critical+-label%3Apriority-2-high+-label%3Apriority-3-medium+-label%3Apriority-4-low++-label%3Apriority-5-triage) to find any issues which are missing a priority label.
 
 ### Platform
 
@@ -112,7 +112,9 @@ Keep in mind that an issue can be both affecting a platform and a self hosted in
 
     core:automerge
     core:changelogs
+    core:config
     core:dashboard
+    core:git
     core:onboarding
     core:schedule
 
@@ -137,8 +139,8 @@ Use a `datasource:` label when it is applicable specifically to particular datas
 
     worker:branch
     worker:global
-    worker:onboarding
     worker:pr
+    worker:repository
 
 </details>
 

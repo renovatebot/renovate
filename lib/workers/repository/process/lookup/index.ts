@@ -146,7 +146,8 @@ export async function lookupUpdates(
         if (!rollback) {
           res.warnings.push({
             topic: depName,
-            message: `Can't find version matching ${currentValue} for ${depName}`,
+            // TODO: types (#7154)
+            message: `Can't find version matching ${currentValue!} for ${depName}`,
           });
           return res;
         }
@@ -392,6 +393,12 @@ export async function lookupUpdates(
     if (config.rangeStrategy === 'in-range-only') {
       res.updates = res.updates.filter(
         (update) => update.newValue === currentValue
+      );
+    }
+    // Handle a weird edge case involving followTag and fallbacks
+    if (rollbackPrs && followTag) {
+      res.updates = res.updates.filter(
+        (update) => res.updates.length === 1 || update.updateType !== 'rollback'
       );
     }
   } catch (err) /* istanbul ignore next */ {

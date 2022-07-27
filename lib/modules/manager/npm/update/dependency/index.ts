@@ -218,7 +218,8 @@ export function updateDependency({
           newFileContent,
           'resolutions',
           depKey,
-          parsedContents.resolutions[depKey],
+          // TODO #7154
+          parsedContents.resolutions[depKey]!,
           // TODO #7154
           newValue!
         );

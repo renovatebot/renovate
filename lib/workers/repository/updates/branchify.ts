@@ -53,7 +53,8 @@ export async function branchifyUpgrades(
       .filter((upgrade) => {
         const { manager, packageFile, depName, currentValue, newValue } =
           upgrade;
-        const upgradeKey = `${packageFile}:${depName}:${currentValue}`;
+        // TODO: types (#7154)
+        const upgradeKey = `${packageFile!}:${depName!}:${currentValue!}`;
         const previousNewValue = seenUpdates[upgradeKey];
         if (previousNewValue && previousNewValue !== newValue) {
           logger.info(
@@ -79,7 +80,8 @@ export async function branchifyUpgrades(
     branches.push(branch);
   }
   removeMeta(['branch']);
-  logger.debug(`config.repoIsOnboarded=${config.repoIsOnboarded}`);
+  // TODO: types (#7154)
+  logger.debug(`config.repoIsOnboarded=${config.repoIsOnboarded!}`);
   const branchList = config.repoIsOnboarded
     ? branches.map((upgrade) => upgrade.branchName)
     : config.branchList;

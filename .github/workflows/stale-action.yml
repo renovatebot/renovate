@@ -5,11 +5,15 @@ on:
   schedule:
     - cron: '30 1 * * *'
 
+permissions:
+  issues: write
+  pull-requests: write
+
 jobs:
   stale:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/stale@3cc123766321e9f15a6676375c154ccffb12a358 # tag=v5.0.0
+      - uses: actions/stale@532554b8a8498a0e006fbcde824b048728c4178f # tag=v5.1.0
         with:
           # Rate limit per run, (defaults to 30, but we've increased it to 40 for now).
           operations-per-run: 40
@@ -32,6 +36,9 @@ jobs:
           days-before-issue-close: 7
           close-issue-message: 'This bug report has been closed as we need a reproduction to work on this. If the original poster or anybody else with the same problem discovers that they can reproduce it, please create a new issue, and reference this issue.'
 
-          # Never label/close any pull requests
+          # Close stale issues as "not planned" on GitHub.
+          close-issue-reason: 'not_planned'
+
+          # Never label/close any pull requests.
           days-before-pr-close: -1
           days-before-pr-stale: -1

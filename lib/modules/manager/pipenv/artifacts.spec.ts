@@ -1,5 +1,5 @@
 import { join } from 'upath';
-import { envMock, exec, mockExecAll } from '../../../../test/exec-util';
+import { envMock, mockExecAll } from '../../../../test/exec-util';
 import { env, fs, git } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
@@ -8,7 +8,6 @@ import type { StatusResult } from '../../../util/git/types';
 import type { UpdateArtifactsConfig } from '../types';
 import * as pipenv from '.';
 
-jest.mock('child_process');
 jest.mock('../../../util/exec/env');
 jest.mock('../../../util/git');
 jest.mock('../../../util/fs');
@@ -63,7 +62,7 @@ describe('modules/manager/pipenv/artifacts', () => {
       '/tmp/renovate/cache/others/pipenv'
     );
     fs.readLocalFile.mockResolvedValueOnce(JSON.stringify(pipFileLock));
-    const execSnapshots = mockExecAll(exec);
+    const execSnapshots = mockExecAll();
     fs.readLocalFile.mockResolvedValueOnce(JSON.stringify(pipFileLock));
     expect(
       await pipenv.updateArtifacts({
@@ -81,7 +80,7 @@ describe('modules/manager/pipenv/artifacts', () => {
       '/tmp/renovate/cache/others/pipenv'
     );
     fs.readLocalFile.mockResolvedValueOnce('unparseable pipfile lock');
-    const execSnapshots = mockExecAll(exec);
+    const execSnapshots = mockExecAll();
     fs.readLocalFile.mockResolvedValueOnce('unparseable pipfile lock');
     expect(
       await pipenv.updateArtifacts({
@@ -99,7 +98,7 @@ describe('modules/manager/pipenv/artifacts', () => {
       '/tmp/renovate/cache/others/pipenv'
     );
     fs.readLocalFile.mockResolvedValueOnce('current pipfile.lock');
-    const execSnapshots = mockExecAll(exec);
+    const execSnapshots = mockExecAll();
     git.getRepoStatus.mockResolvedValue({
       modified: ['Pipfile.lock'],
     } as StatusResult);
@@ -122,7 +121,7 @@ describe('modules/manager/pipenv/artifacts', () => {
       '/tmp/renovate/cache/others/pipenv'
     );
     fs.readLocalFile.mockResolvedValueOnce(JSON.stringify(pipFileLock));
-    const execSnapshots = mockExecAll(exec);
+    const execSnapshots = mockExecAll();
     git.getRepoStatus.mockResolvedValue({
       modified: ['Pipfile.lock'],
     } as StatusResult);
@@ -163,7 +162,7 @@ describe('modules/manager/pipenv/artifacts', () => {
       '/tmp/renovate/cache/others/pipenv'
     );
     fs.readLocalFile.mockResolvedValueOnce('Current Pipfile.lock');
-    const execSnapshots = mockExecAll(exec);
+    const execSnapshots = mockExecAll();
     git.getRepoStatus.mockResolvedValue({
       modified: ['Pipfile.lock'],
     } as StatusResult);
@@ -186,7 +185,7 @@ describe('modules/manager/pipenv/artifacts', () => {
     GlobalConfig.set(dockerAdminConfig);
     pipFileLock.default.pipenv.version = '==2020.8.13';
     fs.readLocalFile.mockResolvedValueOnce(JSON.stringify(pipFileLock));
-    const execSnapshots = mockExecAll(exec);
+    const execSnapshots = mockExecAll();
     git.getRepoStatus.mockResolvedValue({
       modified: ['Pipfile.lock'],
     } as StatusResult);
@@ -209,7 +208,7 @@ describe('modules/manager/pipenv/artifacts', () => {
       '/tmp/renovate/cache/others/pipenv'
     );
     fs.readLocalFile.mockResolvedValueOnce(JSON.stringify(pipFileLock));
-    const execSnapshots = mockExecAll(exec);
+    const execSnapshots = mockExecAll();
     git.getRepoStatus.mockResolvedValue({
       modified: ['Pipfile.lock'],
     } as StatusResult);
@@ -232,7 +231,7 @@ describe('modules/manager/pipenv/artifacts', () => {
       '/tmp/renovate/cache/others/pipenv'
     );
     fs.readLocalFile.mockResolvedValueOnce(JSON.stringify(pipFileLock));
-    const execSnapshots = mockExecAll(exec);
+    const execSnapshots = mockExecAll();
     git.getRepoStatus.mockResolvedValue({
       modified: ['Pipfile.lock'],
     } as StatusResult);
