@@ -8,7 +8,6 @@ import { getHermitEnvs } from './hermit';
 import type { ExecOptions, RawExecOptions, VolumeOption } from './types';
 import { exec } from '.';
 
-
 const getHermitEnvsMock = mockedFunction(getHermitEnvs);
 
 jest.mock('./hermit', () => ({
