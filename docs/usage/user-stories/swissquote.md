@@ -59,7 +59,7 @@ How long do you think it will take to deploy that single library update?
 That’s unfortunate, but it will happen if your team or company exists for long enough.
 Upgrading libraries is not only about bumping versions, sometimes it’s also about replacing a library by another library.
 
-## How do you see your dependencies ?
+## How do you see your dependencies?
 
 Look at your software as if it was a train.
 You are the locomotive and each wagon is a dependency, how long would your train be?
@@ -79,8 +79,8 @@ Maybe a little, but I have seen cases very close to those.
 Let me ask you some questions about your projects:
 
 - How many times did you create a project and never upgrade its dependencies?
-- How many times did you have to get back to an old project, and had to use a new library but couldn’t because there is another library at an old version that isn’t compatible ?
-- How fast can you upgrade a single dependency on all your applications ?
+- How many times did you have to get back to an old project, and had to use a new library but couldn’t because there is another library at an old version that isn’t compatible?
+- How fast can you upgrade a single dependency on all your applications?
 
 As time goes forward, projects come and go, you will most likely have decade-old, and recent ones.
 Some might be using the latest version of Java with the latest Spring, some with slightly outdated libraries and others might be using Stripes and libraries that have had no release in 7 years.
@@ -96,7 +96,7 @@ There is a fix to make on that project, the last person working on it left three
 I’ve identified three main approaches people use to upgrade their dependencies at Swissquote:
 
 1. Critical fixes only; update dependencies that have a CVE attached
-1. Opportunistic; also known as the boy scout rule, leave the project with more up-to-date dependencies than you found it.
+1. Opportunistic; also known as the boy scout rule, leave the project with more up-to-date dependencies than you found it
 1. Update your dependencies regularly; manually or with a tool
 
 ### Critical Fixes only
@@ -148,7 +148,7 @@ This helped a lot to reduce the noise in PRs, the second month we got 400 Pull R
 - You need to be confident that your code coverage will warn you in case of updates. At the beginning we missed quite a few breaking updates because the build was green but the application broke as soon as it was deployed.
 - Once you’re confident enough, auto-merge is a must have. In our team we enabled Renovate on about 100 of our repositories and generally spend 1–2 hours per week to stay up-to-date
 - “On the bleeding edge it’s not the edge that’s bleeding; it’s you”. When updating to a new major version as soon as it’s released you might encounter some surprises. It happened to us a few times that a patch version breaks the library. Usually a fix came out the next day, but we still spent a few hours debugging why the update broke our applications. We’ve opened quite a few Issues and sent some PRs to fix issues like this
-- Updating dependencies is one thing, but when should you release them ? As our team mostly provides libraries, we don’t want to release them on every dependency upgrade (as this would create PRs downstream and create noise for them). We’ve decided to release right after critical upgrades or contributions and a dashboard informs us when a repository hasn’t been released for 30 days
+- Updating dependencies is one thing, but when should you release them? As our team mostly provides libraries, we don’t want to release them on every dependency upgrade (as this would create PRs downstream and create noise for them). We’ve decided to release right after critical upgrades or contributions and a dashboard informs us when a repository hasn’t been released for 30 days
 
 ### A word on Renovate
 
@@ -195,7 +195,7 @@ We don’t force any team to use Renovate, each team can decide to opt-in and do
 
 Not all teams are using Renovate at this stage, but prefer to manually update their dependencies, we would like to enable Renovate at least for critical dependencies in all repositories and hope to make it useful and easy so they choose by themselves to adopt it for more dependencies.
 
-## How should I get started with Renovate ?
+## How should I get started with Renovate?
 
 If this article convinced you, how should you get started?
 
@@ -203,9 +203,9 @@ If this article convinced you, how should you get started?
 1. You can now enable Renovate and will receive a Pull Request to add a configuration file, **read this first PR carefully** as it will explain what kind of PRs you are going to receive and when
 1. Make sure to **pick a schedule**, otherwise you will receive PRs at any time of the day. Our team schedules all third party dependencies on the weekend, automatically merging when the tests pass and we investigate the failing ones on Monday morning
 1. **Group Pull Requests**, if every PR has to go through CI, it can become quite heavy, once most PRs succeed, you can start grouping minor and patch updates so that you get a single PR per repository. Investigating issues becomes a bit trickier because of that. To give you some numbers out of 90 repositories enabled with Renovate, we have on average 4 PRs to investigate per week. Everything else is automatically merged
-1. **Enable auto merging after some time**, make sure your tests are solid and that you won’t upgrade something that wasn’t tested and will break once in production.
+1. **Enable auto merging after some time**, make sure your tests are solid and that you won’t upgrade something that wasn’t tested and will break once in production
 
-## Is all this effort worth it ?
+## Is all this effort worth it?
 
 The short answer is yes !
 
