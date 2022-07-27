@@ -36,10 +36,10 @@ function parseDashboardIssue(issueBody: string): DependencyDashboard {
       dependencyDashboardChecks[branchName] = type;
     });
   }
-  const rebaseAll = checkRebaseAll(issueBody);
+  const dependencyDashboardRebaseAllOpen = checkRebaseAll(issueBody);
   return {
     dependencyDashboardChecks,
-    dependencyDashboardRebaseAllOpen: rebaseAll,
+    dependencyDashboardRebaseAllOpen,
   };
 }
 
