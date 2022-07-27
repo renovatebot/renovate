@@ -1884,7 +1884,6 @@ describe('workers/repository/update/branch/index', () => {
     it('returns nowork if the updates are same', async () => {
       git.branchExists.mockReturnValue(true);
       git.getBranchCommit.mockReturnValue('111');
-      git.getBranchCommit.mockReturnValue('111');
       platform.getBranchPr.mockResolvedValue(
         partial<Pr>({
           sourceBranch: 'old/some-branch',

@@ -1,6 +1,7 @@
 import { RenovateConfig, getConfig, git, mocked } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import * as _repoCache from '../../../util/cache/repository';
+import type { BranchCache } from '../../../util/cache/repository/types';
 import { Limit, isLimitReached } from '../../global/limits';
 import { BranchConfig, BranchResult } from '../../types';
 import * as _branchWorker from '../update/branch';
@@ -79,6 +80,22 @@ describe('workers/repository/process/write', () => {
       GlobalConfig.set({ dryRun: 'full' });
       await writeUpdates({ config }, branches);
       expect(isLimitReached(Limit.Branches)).toBeTrue();
+    });
+
+    it('return nowork if same updates', async () => {
+      const branches: BranchConfig[] = [
+        { branchName: 'new/some-branch' } as BranchConfig,
+      ];
+      repoCache.getCache.mockReturnValueOnce({
+        branches: [{ branchName: 'new/some-branch' } as BranchCache],
+      });
+      branchWorker.processBranch.mockResolvedValueOnce({
+        configAndManagersHash: '111',
+        branchExists: true,
+        result: BranchResult.NoWork,
+      });
+      git.branchExists.mockReturnValue(true);
+      expect(await writeUpdates({ config }, branches)).toBe('done');
     });
   });
 });
