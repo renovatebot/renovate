@@ -1,5 +1,7 @@
 import type { RenovateConfig } from '../../../config/types';
 import { addMeta, logger, removeMeta } from '../../../logger';
+import { getCache } from '../../../util/cache/repository';
+import type { BranchCache } from '../../../util/cache/repository/types';
 import { branchExists } from '../../../util/git';
 import { Limit, incLimitedValue, setMaxLimit } from '../../global/limits';
 import { BranchConfig, BranchResult } from '../../types';
@@ -21,6 +23,8 @@ export async function writeUpdates(
       .sort()
       .join(', ')}`
   );
+  const cache = getCache();
+  const { branches: cachedBranches = [] } = cache;
   const prsRemaining = await getPrsRemaining(config, branches);
   logger.debug({ prsRemaining }, 'Calculated maximum PRs remaining this run');
   setMaxLimit(Limit.PullRequests, prsRemaining);
@@ -31,11 +35,13 @@ export async function writeUpdates(
     'Calculated maximum branches remaining this run'
   );
   setMaxLimit(Limit.Branches, branchesRemaining);
-
   for (const branch of branches) {
     addMeta({ branch: branch.branchName });
     const branchExisted = branchExists(branch.branchName);
-    const res = await processBranch(branch);
+    const branchCache =
+      cachedBranches?.find((br) => br.branchName === branch.branchName) ??
+      ({} as BranchCache);
+    const res = await processBranch(branch, branchCache);
     branch.prBlockedBy = res?.prBlockedBy;
     branch.prNo = res?.prNo;
     branch.result = res?.result;

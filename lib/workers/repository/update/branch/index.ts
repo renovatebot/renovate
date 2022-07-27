@@ -27,7 +27,6 @@ import {
 import { hashBody } from '../../../../modules/platform/pr-body';
 import { BranchStatus, PrState } from '../../../../types';
 import { ExternalHostError } from '../../../../types/errors/external-host-error';
-import { getCache } from '../../../../util/cache/repository';
 import type { BranchCache } from '../../../../util/cache/repository/types';
 import { getElapsedDays } from '../../../../util/date';
 import { emojify } from '../../../../util/emoji';
@@ -85,19 +84,20 @@ export interface ProcessBranchResult {
 }
 
 function canSkipBranchUpdateCheck(
-  config: BranchConfig,
+  branchName: string,
   branchCache: BranchCache,
   configAndManagersHash: string
 ): boolean {
-  const branchCommit = getBranchCommit(config?.branchName);
+  const branchCommit = getBranchCommit(branchName);
 
   return (
-    branchCommit === branchCache?.sha &&
+    branchCommit === branchCache.sha &&
     configAndManagersHash === branchCache.configAndManagersHash
   );
 }
 export async function processBranch(
-  branchConfig: BranchConfig
+  branchConfig: BranchConfig,
+  branchCache: BranchCache
 ): Promise<ProcessBranchResult> {
   let config: BranchConfig = { ...branchConfig };
   logger.trace({ config }, 'processBranch()');
@@ -119,12 +119,6 @@ export async function processBranch(
       logger.debug('Found existing branch with branchPrefixOld');
     }
   }
-
-  const cache = getCache();
-  const { branches = [] } = cache;
-  const branchCache =
-    branches?.find((branch) => branch.branchName === config.branchName) ??
-    ({} as BranchCache);
 
   let branchPr = await platform.getBranchPr(config.branchName);
   logger.debug(`branchExists=${branchExists}`);
@@ -407,7 +401,11 @@ export async function processBranch(
     logger.debug(`Using reuseExistingBranch: ${config.reuseExistingBranch}`);
     if (
       config.reuseExistingBranch &&
-      canSkipBranchUpdateCheck(config, branchCache, configAndManagersHash)
+      canSkipBranchUpdateCheck(
+        config.branchName,
+        branchCache,
+        configAndManagersHash
+      )
     ) {
       logger.debug('According to branch cache, no updates are necessary');
       return {
