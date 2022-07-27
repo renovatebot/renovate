@@ -26,7 +26,8 @@ If the title of the article is of any help, the idea would be to keep your depen
 
 ## I don’t feel like upgrading, what if ...
 
-But what if the upgrades do the complete opposite? What if the new version introduces a new security issue?
+But what if the upgrades do the complete opposite?
+What if the new version introduces a new security issue?
 
 For example, a new version of a dependency could be victim of a supply chain attack. If you never update your dependencies, you won’t get the infected version. Sounds fair, right ?
 
