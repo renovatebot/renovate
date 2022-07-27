@@ -4,10 +4,7 @@ import type { ECRClientConfig } from '@aws-sdk/client-ecr';
 import is from '@sindresorhus/is';
 import { parse } from 'auth-header';
 import hasha from 'hasha';
-import {
-  HOST_DISABLED,
-  PAGE_NOT_FOUND_ERROR,
-} from '../../../constants/error-messages';
+import { HOST_DISABLED } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import type { HostRule } from '../../../types';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
@@ -70,14 +67,12 @@ export async function getAuthHeaders(
         // TODO: add cache test
         await http.getJson(apiCheckUrl, options);
 
-    if (apiCheckResponse.statusCode === 200) {
+    if (
+      apiCheckResponse.statusCode === 200 ||
+      apiCheckResponse.statusCode === 405
+    ) {
       logger.debug({ apiCheckUrl }, 'No registry auth required');
       return {};
-    }
-    if (apiCheckResponse.statusCode === 404) {
-      logger.debug({ apiCheckUrl }, 'Page Not Found');
-      // throw error up to be caught and potentially retried with library/ prefix
-      throw new Error(PAGE_NOT_FOUND_ERROR);
     }
     if (
       apiCheckResponse.statusCode !== 401 ||
@@ -209,9 +204,6 @@ export async function getAuthHeaders(
     if (err.statusCode >= 500 && err.statusCode < 600) {
       throw new ExternalHostError(err);
     }
-    if (err.message === PAGE_NOT_FOUND_ERROR) {
-      throw err;
-    }
     if (err.message === HOST_DISABLED) {
       logger.trace({ registryHost, dockerRepository, err }, 'Host disabled');
       return null;
@@ -325,6 +317,20 @@ export function extractDigestFromResponseBody(
 
 export function isECRMaxResultsError(err: HttpError): boolean {
   const resp = err.response as HttpResponse<any> | undefined;
+  return !!(
+    resp?.statusCode === 405 &&
+    resp.headers?.['docker-distribution-api-version'] &&
+    // https://docs.aws.amazon.com/AmazonECR/latest/APIReference/API_DescribeRepositories.html#ECR-DescribeRepositories-request-maxResults
+    resp.body?.['errors']?.[0]?.message?.includes(
+      'Member must have value less than or equal to 1000'
+    )
+  );
+}
+
+export function isECRMaxResultsResponse(
+  res: HttpResponse<{ tags: string[] }>
+): boolean {
+  const resp = res as HttpResponse<any> | undefined;
   return !!(
     resp?.statusCode === 405 &&
     resp.headers?.['docker-distribution-api-version'] &&
@@ -723,7 +729,7 @@ export class DockerDatasource extends Datasource {
       return null;
     }
     let page = 1;
-    let foundMaxResultsError = false;
+    let foundMaxResults = false;
     do {
       let res: HttpResponse<{ tags: string[] }>;
       try {
@@ -733,17 +739,24 @@ export class DockerDatasource extends Datasource {
         });
       } catch (err) {
         if (
-          !foundMaxResultsError &&
+          !foundMaxResults &&
           err instanceof HttpError &&
           isECRMaxResultsError(err)
         ) {
           const maxResults = 1000;
           url = `${registryHost}/${dockerRepository}/tags/list?n=${maxResults}`;
           url = ensurePathPrefix(url, '/v2');
-          foundMaxResultsError = true;
+          foundMaxResults = true;
           continue;
         }
         throw err;
+      }
+      if (!foundMaxResults && isECRMaxResultsResponse(res)) {
+        const maxResults = 1000;
+        url = `${registryHost}/${dockerRepository}/tags/list?n=${maxResults}`;
+        url = ensurePathPrefix(url, '/v2');
+        foundMaxResults = true;
+        continue;
       }
       tags = tags.concat(res.body.tags);
       const linkHeader = parseLinkHeader(res.headers.link);
@@ -777,10 +790,7 @@ export class DockerDatasource extends Datasource {
       if (err instanceof ExternalHostError) {
         throw err;
       }
-      if (
-        (err.statusCode === 404 || err.message === PAGE_NOT_FOUND_ERROR) &&
-        !dockerRepository.includes('/')
-      ) {
+      if (err.statusCode === 404 && !dockerRepository.includes('/')) {
         logger.debug(
           `Retrying Tags for ${registryHost}/${dockerRepository} using library/ prefix`
         );

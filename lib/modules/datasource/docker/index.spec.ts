@@ -2,10 +2,7 @@ import * as _AWS from '@aws-sdk/client-ecr';
 import { getDigest, getPkgReleases } from '..';
 import * as httpMock from '../../../../test/http-mock';
 import { mocked, partial } from '../../../../test/util';
-import {
-  EXTERNAL_HOST_ERROR,
-  PAGE_NOT_FOUND_ERROR,
-} from '../../../constants/error-messages';
+import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages';
 import * as _hostRules from '../../../util/host-rules';
 import { Http } from '../../../util/http';
 import { MediaType } from './types';
@@ -108,22 +105,6 @@ describe('modules/datasource/docker/index', () => {
   });
 
   describe('getAuthHeaders', () => {
-    it('throw page not found exception', async () => {
-      httpMock
-        .scope('https://my.local.registry')
-        .get('/v2/repo/tags/list?n=1000')
-        .reply(404, {});
-
-      await expect(
-        getAuthHeaders(
-          http,
-          'https://my.local.registry',
-          'repo',
-          'https://my.local.registry/v2/repo/tags/list?n=1000'
-        )
-      ).rejects.toThrow(PAGE_NOT_FOUND_ERROR);
-    });
-
     it('returns "authType token" if both provided', async () => {
       httpMock
         .scope('https://my.local.registry')
@@ -765,6 +746,62 @@ describe('modules/datasource/docker/index', () => {
           registryUrl: 'https://ecr-proxy.company.com',
           releases: [],
           sourceUrl: 'https://github.com/renovatebot/renovate',
+        });
+      });
+
+      describe('when making requests that interact with an ECR proxy without authentication', () => {
+        it('resolves requests to ECR proxy', async () => {
+          httpMock
+            .scope('https://ecr-proxy.company.com/v2')
+            .get('/node/tags/list?n=10000')
+            .reply(405, '', {})
+            .get('/node/tags/list?n=10000')
+            .reply(
+              405,
+              {
+                errors: [
+                  {
+                    code: 'UNSUPPORTED',
+                    message:
+                      "Invalid parameter at 'maxResults' failed to satisfy constraint: 'Member must have value less than or equal to 1000'",
+                  },
+                ],
+              },
+              {
+                'Docker-Distribution-Api-Version': 'registry/2.0',
+              }
+            )
+            .get('/')
+            .reply(200)
+            .get('/node/tags/list?n=1000')
+            .reply(200, { tags: ['some'] }, {})
+            .get('/node/manifests/some')
+            .reply(200, {
+              schemaVersion: 2,
+              mediaType: MediaType.manifestV2,
+              config: { digest: 'some-config-digest' },
+            })
+            .get('/')
+            .reply(200)
+            .get('/node/blobs/some-config-digest')
+            .reply(200, {
+              config: {
+                Labels: {
+                  'org.opencontainers.image.source':
+                    'https://github.com/renovatebot/renovate',
+                },
+              },
+            });
+          expect(
+            await getPkgReleases({
+              datasource: DockerDatasource.id,
+              depName: 'ecr-proxy.company.com/node',
+            })
+          ).toEqual({
+            registryUrl: 'https://ecr-proxy.company.com',
+            releases: [],
+            sourceUrl: 'https://github.com/renovatebot/renovate',
+          });
         });
       });
 
