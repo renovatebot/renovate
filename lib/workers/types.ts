@@ -146,3 +146,9 @@ export interface DepWarnings {
   warnings: string[];
   warningFiles: string[];
 }
+
+export interface SelectAllConfig extends RenovateConfig {
+  dependencyDashboardRebaseAllOpen?: boolean;
+  dependencyDashboardAllPending?: boolean;
+  dependencyDashboardAllRateLimited?: boolean;
+}

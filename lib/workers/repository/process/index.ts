@@ -34,11 +34,12 @@ async function getBaseBranchConfig(
 
     // Retrieve config file name autodetected for this repo
     const cache = getCache();
-    const configFileName = cache.configFileName;
+    // TODO: types (#7154)
+    const configFileName = cache.configFileName!;
 
     try {
       baseBranchConfig = await platform.getJsonFile(
-        configFileName!,
+        configFileName,
         config.repository,
         baseBranch
       );

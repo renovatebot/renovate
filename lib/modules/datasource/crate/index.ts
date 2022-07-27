@@ -208,7 +208,7 @@ export class CrateDatasource extends Datasource {
     const host = url.hostname;
     const hash = hasha(url.pathname, {
       algorithm: 'sha256',
-    }).substr(0, 7);
+    }).substring(0, 7);
 
     return `crate-registry-${proto}-${host}-${hash}`;
   }
