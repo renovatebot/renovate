@@ -25,7 +25,7 @@ Follow these best practices when you're working on our code.
 Simple code is easy to read, review and maintain.
 Choose to write verbose and understandable code instead of "clever" code which might take someone a few attempts to understand what it does.
 
-- #### Write single purpose functions
+#### Write single purpose functions
 
 Single purpose functions are easier to understand, test and debug.
 
