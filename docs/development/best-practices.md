@@ -22,7 +22,8 @@ Follow these best practices when you're working on our code.
 
 ### Write simple code
 
-Simple code is easy to read and review.
+Simple code is easy to read, review and maintain.
+Choose to write verbose and understandable code instead of "clever" code which might take someone a few attempts to understand what it does.
 
 - #### Write single purpose functions
 
