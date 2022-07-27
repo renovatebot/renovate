@@ -917,7 +917,7 @@ describe('modules/datasource/docker/index', () => {
         .head('/library/some-dep/manifests/' + currentDigest)
         .reply(200, '', { 'content-type': MediaType.manifestV2 })
         .get('/library/some-dep/manifests/' + currentDigest)
-        .replyWithError({ statusCode: 404 });
+        .reply(404, {});
       httpMock
         .scope(baseUrl)
         .get('/')
@@ -1001,7 +1001,7 @@ describe('modules/datasource/docker/index', () => {
           config: { digest: 'some-config-digest' },
         })
         .get('/library/some-dep/blobs/some-config-digest')
-        .replyWithError({ statusCode: 404 });
+        .reply(404, {});
       httpMock
         .scope(baseUrl)
         .get('/', undefined, { badheaders: ['authorization'] })
@@ -1028,7 +1028,7 @@ describe('modules/datasource/docker/index', () => {
         .get('/', undefined, { badheaders: ['authorization'] })
         .reply(200, { token: 'some-token' })
         .head('/library/some-dep/manifests/some-digest')
-        .replyWithError({ statusCode: 404 });
+        .reply(404, {});
       httpMock
         .scope(baseUrl)
         .get('/', undefined, { badheaders: ['authorization'] })
