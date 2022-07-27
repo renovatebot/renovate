@@ -15,7 +15,7 @@ export class ConfigMigrationSemanticFactory {
 
   private create(isTitle = false): CommitMessage {
     const { commitMessage } = this.config;
-    const topic = isTitle
+    const commitMessageTopic = isTitle
       ? `Migrate renovate config`
       : `Migrate config ${this.configFile}`;
 
@@ -26,7 +26,7 @@ export class ConfigMigrationSemanticFactory {
 
     this.config.commitMessageTopic =
       this.config.commitMessageTopic === 'dependency {{depName}}'
-        ? topic
+        ? commitMessageTopic
         : this.config.commitMessageTopic;
 
     this.config.commitMessageExtra = '';
@@ -41,7 +41,7 @@ export class ConfigMigrationSemanticFactory {
         commitMessagePrefix: '',
       });
     } else {
-      commit.subject = topic;
+      commit.subject = commitMessageTopic;
     }
 
     return commit;
