@@ -21,7 +21,7 @@ Every dependency, while solving an issue for you, will also bring new risks to y
 
 If the title of the article is of any help, the idea would be to keep your dependencies up-to-date to fix bugs, security issues, and more.
 
-## I don’t feel like upgrading, what if …
+## I don’t feel like upgrading, what if ...
 
 But what if the upgrades do the complete opposite? What if the new version introduces a new security issue?
 
