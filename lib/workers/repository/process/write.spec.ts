@@ -1,5 +1,6 @@
 import { RenovateConfig, getConfig, git, mocked } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
+import * as _repoCache from '../../../util/cache/repository';
 import { Limit, isLimitReached } from '../../global/limits';
 import { BranchConfig, BranchResult } from '../../types';
 import * as _branchWorker from '../update/branch';
@@ -7,9 +8,11 @@ import * as _limits from './limits';
 import { writeUpdates } from './write';
 
 jest.mock('../../../util/git');
+jest.mock('../../../util/cache/repository');
 
 const branchWorker = mocked(_branchWorker);
 const limits = mocked(_limits);
+const repoCache = mocked(_repoCache);
 
 branchWorker.processBranch = jest.fn();
 
@@ -33,6 +36,7 @@ describe('workers/repository/process/write', () => {
         {},
         {},
       ] as never;
+      repoCache.getCache.mockReturnValue({});
       git.branchExists.mockReturnValue(true);
       branchWorker.processBranch.mockResolvedValueOnce({
         configAndManagersHash: '111',
@@ -62,6 +66,7 @@ describe('workers/repository/process/write', () => {
 
     it('increments branch counter', async () => {
       const branches: BranchConfig[] = [{}] as never;
+      repoCache.getCache.mockReturnValueOnce({});
       branchWorker.processBranch.mockResolvedValueOnce({
         configAndManagersHash: '111',
         branchExists: true,
