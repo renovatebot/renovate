@@ -88,18 +88,17 @@ export function getDepWarningsDashboard(
     return '';
   }
 
-  let depWarnings = '';
-  warnings.forEach((w) => {
-    const dep = w.replace('Failed to look up dependency ', '');
-    depWarnings += '`' + dep + '`, ';
-  });
+  const depWarnings = warnings
+    .map((w) => w.replace('Failed to look up dependency ', ''))
+    .map((dep) => '`' + dep + '`')
+    .join(', ');
 
   logger.debug({ warnings, warningFiles }, 'Found package lookup warnings');
   let warningText = emojify(
     `\n---\n\n### :warning: Dependency Lookup Warnings :warning:\n\n`
   );
   warningText += `-   Renovate failed to look up the following dependencies: `;
-  warningText += depWarnings.substring(0, depWarnings.length - 2); // append after removing the last comma
+  warningText += depWarnings.substring(0, depWarnings.length); // append after removing the last comma
   warningText += '.\n\nFiles affected: ';
   warningText += warningFiles.map((f) => '`' + f + '`').join(', ');
   warningText += '\n\n---\n\n';
