@@ -98,7 +98,7 @@ export function getDepWarningsDashboard(
     `\n---\n\n### :warning: Dependency Lookup Warnings :warning:\n\n`
   );
   warningText += `-   Renovate failed to look up the following dependencies: `;
-  warningText += depWarnings.substring(0, depWarnings.length); // append after removing the last comma
+  warningText += depWarnings;
   warningText += '.\n\nFiles affected: ';
   warningText += warningFiles.map((f) => '`' + f + '`').join(', ');
   warningText += '\n\n---\n\n';
