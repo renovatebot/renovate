@@ -83,3 +83,15 @@ In the example above, it will only show a text if `isMajor=true` and `hasRelease
 Returns `true` if at least one expression is `true`.
 
 `{{#if (or isPatch isSingleVersion}}Small update, safer to merge and release.{{else}}Check out the changelog for all versions before merging!{{/if}}`
+
+### prettyNewVersion
+
+Returns the newVersion value with `v` as a prefix.
+
+If you want for example to create a pr title having the changed version:
+
+`{ "commitMessageExtra": "{{prettyNewVersion}}" }`
+
+### prettyNewMajor
+
+Returns the newMajor value with `v` as a prefix.
