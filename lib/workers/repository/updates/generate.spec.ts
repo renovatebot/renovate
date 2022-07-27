@@ -564,8 +564,7 @@ describe('workers/repository/updates/generate', () => {
       );
     });
 
-    it('Hasan test repro', () => {
-      // TODO #7154 incompatible types
+    it('use prettyNewVersion in pr title', () => {
       const branch: BranchUpgradeConfig[] = [
         {
           ...defaultConfig,
@@ -580,10 +579,6 @@ describe('workers/repository/updates/generate', () => {
           newValue: '1.2.0',
           isSingleVersion: true,
           newVersion: 'v1.2.0',
-          foo: 1,
-          group: {
-            foo: 2,
-          },
         } as BranchUpgradeConfig,
       ];
       const res = generateBranchConfig(branch);
@@ -592,8 +587,7 @@ describe('workers/repository/updates/generate', () => {
       );
     });
 
-    it('Hasan test 22', () => {
-      // TODO #7154 incompatible types
+    it('use prettyNewMajor in pr title', () => {
       const branch: BranchUpgradeConfig[] = [
         {
           ...defaultConfig,
@@ -604,19 +598,14 @@ describe('workers/repository/updates/generate', () => {
           semanticCommits: 'enabled',
           semanticCommitType: 'chore',
           semanticCommitScope: '{{packageFileDir}}',
-          newValue: '1.2.0',
-          isSingleVersion: true,
-          newVersion: 'v1.2.0',
-          foo: 1,
-          group: {
-            foo: 2,
-          },
+          commitMessageExtra: '{{prettyNewMajor}}',
+          newValue: '3.2.0',
+          newVersion: 'v3.2.0',
+          newMajor: 3,
         } as BranchUpgradeConfig,
       ];
       const res = generateBranchConfig(branch);
-      expect(res.prTitle).toBe(
-        'chore(foo/bar): update dependency some-dep v1.2.0'
-      );
+      expect(res.prTitle).toBe('chore(foo/bar): update dependency some-dep v3');
     });
 
     it('adds commit message body', () => {
