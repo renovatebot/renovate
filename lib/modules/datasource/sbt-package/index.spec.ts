@@ -197,5 +197,43 @@ describe('modules/datasource/sbt-package/index', () => {
         releases: [{ version: '1.2.3' }],
       });
     });
+
+    it('falls back to Maven for GitLab-hosted packages', async () => {
+      httpMock
+        .scope('https://gitlab.com/api/v4/projects/123/packages/maven/')
+        .get('/org/example/example/maven-metadata.xml')
+        .reply(
+          200,
+          `
+          <?xml version="1.0" encoding="UTF-8"?>
+            <metadata>
+              <groupId>org.example</groupId>
+              <artifactId>package</artifactId>
+              <versioning>
+                <latest>1.2.3</latest>
+                <release>1.2.3</release>
+                <versions>
+                  <version>1.2.3</version>
+                </versions>
+              </versioning>
+            </metadata>
+          `
+        )
+        .head('/org/example/example/1.2.3/example-1.2.3.pom')
+        .reply(200)
+        .get('/org/example/example/1.2.3/example-1.2.3.pom')
+        .reply(200);
+
+      const res = await getPkgReleases({
+        versioning: mavenVersioning.id,
+        datasource: SbtPackageDatasource.id,
+        depName: 'org.example:example',
+        registryUrls: [
+          'https://gitlab.com/api/v4/projects/123/packages/maven/',
+        ],
+      });
+
+      expect(res).toMatchObject({});
+    });
   });
 });
