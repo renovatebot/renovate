@@ -7,7 +7,9 @@ They come in many different flavors including services, daemons, and webapps, an
 While there are many topics of interest when talking about software maintenance, today’s topic is software dependencies.
 We’ll see in this article why it’s important to keep them up-to-date and why it’s not as simple as one may think.
 
-Software dependencies have been a heavily discussed topic in the past months. One aspect that’s discussed a lot is security issues like the recent [log4shell](https://en.wikipedia.org/wiki/Log4Shell), [Supply chain attacks](https://blog.sonatype.com/npm-project-used-by-millions-hijacked-in-supply-chain-attack), [an expiring SSL Certificate](https://www.webnic.cc/root-ssl-certificate-expiry-and-what-happens-next-for-brands/). But there are also other aspects like bugs caused by your dependencies.
+Software dependencies have been a heavily discussed topic in the past months.
+One aspect that’s discussed a lot is security issues like the recent [log4shell](https://en.wikipedia.org/wiki/Log4Shell), [Supply chain attacks](https://blog.sonatype.com/npm-project-used-by-millions-hijacked-in-supply-chain-attack), [an expiring SSL Certificate](https://www.webnic.cc/root-ssl-certificate-expiry-and-what-happens-next-for-brands/).
+But there are also other aspects like bugs caused by your dependencies.
 
 Depending on third-party software is a sword of Damocles; you never know when a new issue will force you to drop everything to upgrade your software.
 
