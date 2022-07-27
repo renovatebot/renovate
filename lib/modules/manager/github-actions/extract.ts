@@ -1,13 +1,13 @@
+import { load } from 'js-yaml';
 import { logger } from '../../../logger';
 import { newlineRegex, regEx } from '../../../util/regex';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
 import * as dockerVersioning from '../../versioning/docker';
 import { getDep } from '../dockerfile/extract';
 import type { PackageDependency, PackageFile } from '../types';
+import type { Container, Workflow } from './types';
 
-const dockerRe = regEx(
-  /^\s+(?:(?:container|image): ['"]?|uses: ['"]?docker:\/\/)([^'"]+)\s*$/
-);
+const dockerActionRe = regEx(/^\s+uses: ['"]?docker:\/\/([^'"]+)\s*$/);
 const actionRe = regEx(
   /^\s+-?\s+?uses: (?<replaceString>['"]?(?<depName>[\w-]+\/[\w-]+)(?<path>\/.*)?@(?<currentValue>[^\s'"]+)['"]?(?:\s+#\s+(?:renovate:\s+)?tag=(?<tag>\S+))?)/
 );
@@ -17,13 +17,25 @@ const shaRe = regEx(/^[a-z0-9]{40}|[a-z0-9]{64}$/);
 
 export function extractPackageFile(content: string): PackageFile | null {
   logger.trace('github-actions.extractPackageFile()');
+  const deps = [
+    ...extractActionsFromPackageFile(content),
+    ...extractContainersFromPackageFile(content),
+  ];
+  if (!deps.length) {
+    return null;
+  }
+  return { deps };
+}
+
+function extractActionsFromPackageFile(content: string): PackageDependency[] {
+  logger.trace('github-actions.extractActionsFromPackageFile()');
   const deps: PackageDependency[] = [];
   for (const line of content.split(newlineRegex)) {
     if (line.trim().startsWith('#')) {
       continue;
     }
 
-    const dockerMatch = dockerRe.exec(line);
+    const dockerMatch = dockerActionRe.exec(line);
     if (dockerMatch) {
       const [, currentFrom] = dockerMatch;
       const dep = getDep(currentFrom);
@@ -70,8 +82,57 @@ export function extractPackageFile(content: string): PackageFile | null {
       deps.push(dep);
     }
   }
-  if (!deps.length) {
+  return deps;
+}
+
+function extractContainer(
+  container: string | Container
+): PackageDependency | null {
+  if (container === null) {
     return null;
   }
-  return { deps };
+
+  let dep: PackageDependency;
+  if (typeof container === 'string') {
+    dep = getDep(container);
+  } else if (typeof container === 'object') {
+    dep = getDep(container.image);
+  } else {
+    return null;
+  }
+
+  dep.versioning = dockerVersioning.id;
+  return dep;
+}
+
+function extractContainersFromPackageFile(
+  content: string
+): PackageDependency[] {
+  logger.trace('github-actions.extractContainersFromPackageFile()');
+  const deps: PackageDependency[] = [];
+
+  const pkg = load(content, { json: true }) as Workflow;
+  if (!pkg) {
+    return [];
+  }
+
+  for (const j in pkg.jobs ?? {}) {
+    const job = pkg.jobs[j];
+
+    const dep = extractContainer(job.container);
+    if (dep !== null) {
+      dep.depType = 'container';
+      deps.push(dep);
+    }
+
+    for (const s in job.services ?? {}) {
+      const dep = extractContainer(job.services[s]);
+      if (dep !== null) {
+        dep.depType = 'service';
+        deps.push(dep);
+      }
+    }
+  }
+
+  return deps;
 }

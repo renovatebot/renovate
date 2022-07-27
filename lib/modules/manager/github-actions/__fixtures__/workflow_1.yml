@@ -36,7 +36,6 @@ jobs:
     services:
       redis:
         image: redis:5
-      # TODO: Support services without image keyword
       postgres: postgres:10
   container-job-with-image-keyword:
     runs-on: ubuntu-latest
