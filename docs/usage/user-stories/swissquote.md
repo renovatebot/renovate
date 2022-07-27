@@ -183,7 +183,9 @@ If this article convinced you, how should you get started ?
 
 The short answer is yes !
 
-It took us almost a year, way longer than we thought, to catch up with the latest version of everything in our technical stack. But once we were confident enough in our tests to enable automatic merging of pull-requests we were statisfied of the work we did to update our software stack. We knew we would be ready when an unplanned change arrives.
+It took us almost a year, way longer than we thought, to catch up with the latest version of everything in our technical stack.
+But once we were confident enough in our tests to enable automatic merging of pull-requests we were satisfied of the work we did to update our software stack.
+We knew we would be ready when an unplanned change arrives.
 
 When that day came, in december 2021 with Log4Shell, it was a matter of hours to release the freshly merged Pull Requests, deploy the few applications we had, and notify the teams depending on our libraries. We were so quick to do it, in fact, that we had to do that three times with the chain of vulnerabilities that was found in log4j that week.
 
