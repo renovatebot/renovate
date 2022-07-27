@@ -146,7 +146,7 @@ This helped a lot to reduce the noise in PRs, the second month we got 400 Pull R
 ## What we learned from automating dependencies updates
 
 - You need to be confident that your code coverage will warn you in case of updates. At the beginning we missed quite a few breaking updates because the build was green but the application broke as soon as it was deployed.
-- Once you’re confident enough, auto-merge is a must have. In our team we enabled Renovate on ~100 of our repositories and generally spend 1–2 hours per week to stay up-to-date
+- Once you’re confident enough, auto-merge is a must have. In our team we enabled Renovate on about 100 of our repositories and generally spend 1–2 hours per week to stay up-to-date
 - “On the bleeding edge it’s not the edge that’s bleeding; it’s you”. When updating to a new major version as soon as it’s released you might encounter some surprises. It happened to us a few times that a patch version breaks the library. Usually a fix came out the next day, but we still spent a few hours debugging why the update broke our applications. We’ve opened quite a few Issues and sent some PRs to fix issues like this
 - Updating dependencies is one thing, but when should you release them ? As our team mostly provides libraries, we don’t want to release them on every dependency upgrade (as this would create PRs downstream and create noise for them). We’ve decided to release right after critical upgrades or contributions and a dashboard informs us when a repository hasn’t been released for 30 days
 
