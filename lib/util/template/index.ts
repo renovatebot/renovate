@@ -23,7 +23,12 @@ handlebars.registerHelper('containsString', (str, subStr) =>
   str?.includes(subStr)
 );
 
-handlebars.registerHelper('isFirstCharacterV', (str) => str?.charAt(0) === 'v');
+handlebars.registerHelper('prettifyVersion', (version) => {
+  if (version?.charAt(0) !== 'v') {
+    return 'v'.concat(version);
+  }
+  return version;
+});
 
 handlebars.registerHelper({
   and(...args) {

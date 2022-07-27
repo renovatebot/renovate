@@ -81,10 +81,16 @@ describe('util/template/index', () => {
     expect(output).toBe('foo');
   });
 
-  it('appends v to version when needed', () => {
-    const userTemplate =
-      '{{#if (isFirstCharacterV newVersion)}}{{newVersion}}{{else}}v{{newVersion}}{{/if}}';
+  it('does not append v to version when present', () => {
+    const userTemplate = '{{{prettifyNewVersion newVersion}}}';
     const input = { newVersion: 'v5.1.2' };
+    const output = template.compile(userTemplate, input);
+    expect(output).toBe('v5.1.2');
+  });
+
+  it('appends v to version when present', () => {
+    const userTemplate = '{{{prettifyNewVersion newVersion}}}';
+    const input = { newVersion: '5.1.2' };
     const output = template.compile(userTemplate, input);
     expect(output).toBe('v5.1.2');
   });

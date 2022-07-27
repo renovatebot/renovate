@@ -1637,8 +1637,7 @@ const options: RenovateOptions[] = [
     name: 'prettyNewVersion',
     description: 'Filed exposed to templating to append v to newVersion',
     type: 'string',
-    default:
-      '{{#if (isFirstCharacterV newVersion)}}{{{newVersion}}}{{else}}v{{{newVersion}}}{{/if}}',
+    default: '{{{prettifyVersion newVersion}}}',
     cli: false,
   },
   {
