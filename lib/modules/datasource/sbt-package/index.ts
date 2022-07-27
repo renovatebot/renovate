@@ -144,13 +144,14 @@ export class SbtPackageDatasource extends MavenDatasource {
   }
 
   private isGitlab(url: string): boolean {
-    let result = false;
     const parsedUrl = parseUrl(url);
     if (parsedUrl) {
       const { hostname } = parsedUrl;
-      result = hostname.endsWith('.gitlab.com') || hostname === 'gitlab.com';
+      if (hostname === 'gitlab.com') {
+        return true;
+      }
     }
-    return result;
+    return false;
   }
 
   override async getReleases(
