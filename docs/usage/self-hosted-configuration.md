@@ -131,7 +131,6 @@ By default, Renovate uses a child process to run such tools, so they must be:
 
 - installed before running Renovate
 - available in the path
-- managed by Hermit
 
 But you can tell Renovate to use "sidecar" containers for third-party tools by setting `binarySource=docker`.
 For this to work, `docker` needs to be installed and the Docker socket available to Renovate.
