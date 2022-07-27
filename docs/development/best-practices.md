@@ -190,7 +190,7 @@ try {
 }
 ```
 
-## Aysnc functions
+## Async functions
 
 Never use `Promise.resolve` in async functions.
 Never use `Promise.reject` in async functions, instead throw an `Error` class type.
