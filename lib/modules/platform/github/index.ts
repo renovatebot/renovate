@@ -617,7 +617,9 @@ export async function getPrList(): Promise<Pr[]> {
         : null;
     // TODO: check null `repo` (#7154)
     const prCache = await getPrCache(githubApi, repo!, username);
-    config.prList = Object.values(prCache);
+    config.prList = Object.values(prCache).sort(
+      ({ number: a }, { number: b }) => (a > b ? -1 : 1)
+    );
   }
 
   return config.prList;
