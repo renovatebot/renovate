@@ -82,14 +82,14 @@ describe('util/template/index', () => {
   });
 
   it('does not append v to version when present', () => {
-    const userTemplate = '{{{prettifyNewVersion newVersion}}}';
+    const userTemplate = '{{{prettifyVersion newVersion}}}';
     const input = { newVersion: 'v5.1.2' };
     const output = template.compile(userTemplate, input);
     expect(output).toBe('v5.1.2');
   });
 
   it('appends v to version when present', () => {
-    const userTemplate = '{{{prettifyNewVersion newVersion}}}';
+    const userTemplate = '{{{prettifyVersion newVersion}}}';
     const input = { newVersion: '5.1.2' };
     const output = template.compile(userTemplate, input);
     expect(output).toBe('v5.1.2');
