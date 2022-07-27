@@ -1982,7 +1982,7 @@ describe('modules/platform/github/index', () => {
   });
 
   describe('findPr(branchName, prTitle, state)', () => {
-    it('returns true if no title and all state', async () => {
+    it('finds PR by branch name', async () => {
       const scope = httpMock
         .scope(githubApiHost)
         .get(
@@ -2016,13 +2016,15 @@ describe('modules/platform/github/index', () => {
         renovateUsername: 'me',
       });
 
-      const res = await github.findPr({
-        branchName: 'branch-a',
+      const res = await github.findPr({ branchName: 'branch-a' });
+
+      expect(res).toMatchObject({
+        number: 1,
+        sourceBranch: 'branch-a',
       });
-      expect(res).toBeDefined();
     });
 
-    it('returns true if not open', async () => {
+    it('finds PR with non-open state', async () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
       scope
@@ -2043,7 +2045,37 @@ describe('modules/platform/github/index', () => {
         branchName: 'branch-a',
         state: PrState.NotOpen,
       });
-      expect(res).toBeDefined();
+
+      expect(res).toMatchObject({
+        number: 1,
+        sourceBranch: 'branch-a',
+        state: 'closed',
+      });
+    });
+
+    it('skips PR with non-matching title', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      scope
+        .get(
+          '/repos/some/repo/pulls?per_page=100&state=all&sort=updated&direction=desc&page=1'
+        )
+        .reply(200, [
+          {
+            number: 1,
+            head: { ref: 'branch-a', repo: { full_name: 'some/repo' } },
+            title: 'foo',
+            state: PrState.Closed,
+          },
+        ]);
+      await github.initRepo({ repository: 'some/repo' } as never);
+
+      const res = await github.findPr({
+        branchName: 'branch-a',
+        prTitle: 'bar',
+      });
+
+      expect(res).toBeNull();
     });
 
     it('caches pr list', async () => {
