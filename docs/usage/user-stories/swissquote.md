@@ -16,8 +16,11 @@ Depending on third-party software is a sword of Damocles; you never know when a 
 ![An XKCD Comic about software dependencies](./swissquote_xkcd.png)
 This XKCD comic feels always relevant when talking about dependencies : <https://xkcd.com/2347/>
 
-Each software dependency is a risk. For example: SQL Injections, is the ORM you are using properly escaping the content you are passing to it? Will your current driver be able to connect to your database if it gets upgraded ?
-Every dependency, while solving an issue for you, will also bring new risks to your software. How can you mitigate those risks ?
+Each software dependency is a risk.
+For example: SQL Injections, is the ORM you are using properly escaping the content you are passing to it?
+Will your current driver be able to connect to your database if it gets upgraded?
+Every dependency, while solving an issue for you, will also bring new risks to your software.
+How can you mitigate those risks?
 
 If the title of the article is of any help, the idea would be to keep your dependencies up-to-date to fix bugs, security issues, and more.
 
