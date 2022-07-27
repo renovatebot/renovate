@@ -24,7 +24,7 @@ How can you mitigate those risks?
 
 If the title of the article is of any help, the idea would be to keep your dependencies up-to-date to fix bugs, security issues, and more.
 
-## I don’t feel like upgrading, what if ...
+## I don’t feel like upgrading, what if?
 
 But what if the upgrades do the complete opposite?
 What if the new version introduces a new security issue?
@@ -71,7 +71,7 @@ There is a chance you need to know how each library works, and your present and 
 Which of these two would you prefer to start with:
 
 - A project that is fairly up-to-date where you can bump the dependency, run the deployment pipeline and go back to your day
-- A project that wasn’t touched in years; every dependency is outdated and Continuous Integration is red on all branches if running at all
+- A project that wasn’t touched in years; every dependency is outdated and Continuous Integration is red on all branches, if running at all
 
 Am I exaggerating with my examples?
 Maybe a little, but I have seen cases very close to those.
@@ -145,7 +145,7 @@ This helped a lot to reduce the noise in PRs, the second month we got 400 Pull R
 
 ## What we learned from automating dependencies updates
 
-- You need to be confident that your code coverage will warn you in case of updates. At the beginning we missed quite a few breaking updates because the build was green but the application broke as soon as it was deployed.
+- You need to be confident that your code coverage will warn you in case of updates. At the beginning we missed quite a few breaking updates because the build was green but the application broke as soon as it was deployed
 - Once you’re confident enough, auto-merge is a must have. In our team we enabled Renovate on about 100 of our repositories and generally spend 1–2 hours per week to stay up-to-date
 - “On the bleeding edge it’s not the edge that’s bleeding; it’s you”. When updating to a new major version as soon as it’s released you might encounter some surprises. It happened to us a few times that a patch version breaks the library. Usually a fix came out the next day, but we still spent a few hours debugging why the update broke our applications. We’ve opened quite a few Issues and sent some PRs to fix issues like this
 - Updating dependencies is one thing, but when should you release them? As our team mostly provides libraries, we don’t want to release them on every dependency upgrade (as this would create PRs downstream and create noise for them). We’ve decided to release right after critical upgrades or contributions and a dashboard informs us when a repository hasn’t been released for 30 days
@@ -186,6 +186,8 @@ Here is the dashboard for our current scheduler:
 
 We don’t force any team to use Renovate, each team can decide to opt-in and do it for each project separately.
 
+Some statistics:
+
 - 824 repositories enabled out of about 2000 active repositories
 - 8000 PRs were merged since we installed Renovate
 - 239 PRs were merged last month
@@ -193,7 +195,8 @@ We don’t force any team to use Renovate, each team can decide to opt-in and do
 
 ## The future of Renovate at Swissquote
 
-Not all teams are using Renovate at this stage, but prefer to manually update their dependencies, we would like to enable Renovate at least for critical dependencies in all repositories and hope to make it useful and easy so they choose by themselves to adopt it for more dependencies.
+Not all teams are using Renovate at this stage, as some teams prefer to manually update their dependencies.
+We would like to enable Renovate for critical dependencies in all repositories and hope to make it useful and easy so other teams will adopt it for more dependencies.
 
 ## How should I get started with Renovate?
 
@@ -207,14 +210,14 @@ If this article convinced you, how should you get started?
 
 ## Is all this effort worth it?
 
-The short answer is yes !
+The short answer is yes!
 
 It took us almost a year, way longer than we thought, to catch up with the latest version of everything in our technical stack.
-But once we were confident enough in our tests to enable automatic merging of pull-requests we were satisfied of the work we did to update our software stack.
+But once we were confident enough in our tests to enable automatic merging of Pull Requests we were satisfied of the work we did to update our software stack.
 We knew we would be ready when an unplanned change arrives.
 
 When that day came, in December 2021 with Log4Shell, it was a matter of hours to release the freshly merged Pull Requests, deploy the few applications we had, and notify the teams depending on our libraries.
-We were so quick to do it, in fact, that we had to do that three times with the chain of vulnerabilities that was found in log4j that week.
+We were so quick to do it, in fact, that we had to do that three times with the chain of vulnerabilities that was found in Log4j that week.
 
 Keep in mind though that keeping your dependencies up-to-date is not just about the tooling ([Renovate](https://www.mend.io/free-developer-tools/renovate/), [Dependabot](https://github.com/features/security), [Snyk](https://snyk.io/product/open-source-security-management/), ...), you will find a tool that fits your use case.
 
@@ -224,6 +227,6 @@ It’s also about having a process:
 - How will you handle the PR that doesn’t build?
 - The new major version of an external library that’s not yet compatible with the rest of your libraries?
 - When will you release this constant flow of library updates?
-- Do you want PRs during the day? during the night? on weekends only?
+- Do you want PRs during the day? During the night? Or on weekends only?
 
 We know the answers for our situation, we’ll let you decide what the answers are for you. :smile:
