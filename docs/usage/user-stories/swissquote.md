@@ -8,13 +8,13 @@ While there are many topics of interest when talking about software maintenance,
 We’ll see in this article why it’s important to keep them up-to-date and why it’s not as simple as one may think.
 
 Software dependencies have been a heavily discussed topic in the past months.
-One aspect that’s discussed a lot is security issues like the recent [log4shell](https://en.wikipedia.org/wiki/Log4Shell), [Supply chain attacks](https://blog.sonatype.com/npm-project-used-by-millions-hijacked-in-supply-chain-attack), [an expiring SSL Certificate](https://www.webnic.cc/root-ssl-certificate-expiry-and-what-happens-next-for-brands/).
+One aspect that’s discussed a lot is security issues like the recent [Log4Shell](https://en.wikipedia.org/wiki/Log4Shell), [Supply chain attacks](https://blog.sonatype.com/npm-project-used-by-millions-hijacked-in-supply-chain-attack), [an expiring SSL Certificate](https://www.webnic.cc/root-ssl-certificate-expiry-and-what-happens-next-for-brands/).
 But there are also other aspects like bugs caused by your dependencies.
 
 Depending on third-party software is a sword of Damocles; you never know when a new issue will force you to drop everything to upgrade your software.
 
 ![An XKCD Comic about software dependencies](./swissquote_xkcd.png)
-This XKCD comic feels always relevant when talking about dependencies : <https://xkcd.com/2347/>
+This XKCD comic is always relevant when talking about dependencies: <https://xkcd.com/2347/>
 
 Each software dependency is a risk.
 For example: SQL Injections, is the ORM you are using properly escaping the content you are passing to it?
