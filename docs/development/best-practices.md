@@ -143,6 +143,8 @@ Use `UTC` to be time zone independent.
   - huge strings like the Renovate PR body text
   - huge complex objects where you only need to test parts
 - Avoid exporting functions purely for the purpose of testing unless you really need to
+- Avoid cast or prefer `x as T` instead of `<T>x` cast
+  - Use `partial<T>()` from `test/util` If only a partial object is required,
 
 ### Fixtures
 

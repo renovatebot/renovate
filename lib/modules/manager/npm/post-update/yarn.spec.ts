@@ -2,7 +2,6 @@ import fs from 'fs-extra';
 import {
   ExecSnapshots,
   envMock,
-  exec,
   mockExecAll,
   mockExecSequence,
 } from '../../../../../test/exec-util';
@@ -18,7 +17,6 @@ import * as yarnHelper from './yarn';
 jest.mock('fs-extra', () =>
   require('../../../../../test/fixtures').Fixtures.fsExtra()
 );
-jest.mock('../../../../util/exec/common');
 jest.mock('../../../../util/exec/env');
 jest.mock('./node-version');
 jest.mock('../../../datasource');
@@ -44,7 +42,7 @@ describe('modules/manager/npm/post-update/yarn', () => {
     jest.clearAllMocks();
     Fixtures.reset();
     docker.resetPrefetchedImages();
-    GlobalConfig.set({ localDir: '.' });
+    GlobalConfig.set({ localDir: '.', cacheDir: '/tmp/cache' });
   });
 
   it.each([
@@ -62,8 +60,8 @@ describe('modules/manager/npm/post-update/yarn', () => {
         },
         '/some-dir'
       );
-      GlobalConfig.set({ localDir: '/' });
-      const execSnapshots = mockExecAll(exec, {
+      GlobalConfig.set({ localDir: '/', cacheDir: '/tmp/cache' });
+      const execSnapshots = mockExecAll({
         stdout: yarnVersion,
         stderr: '',
       });
@@ -95,7 +93,7 @@ describe('modules/manager/npm/post-update/yarn', () => {
       },
       'some-dir'
     );
-    const execSnapshots = mockExecAll(exec, {
+    const execSnapshots = mockExecAll({
       stdout: '3.0.0',
       stderr: '',
     });
@@ -112,14 +110,18 @@ describe('modules/manager/npm/post-update/yarn', () => {
   });
 
   it('allows and ignore scripts', async () => {
-    GlobalConfig.set({ localDir: '.', allowScripts: true });
+    GlobalConfig.set({
+      localDir: '.',
+      allowScripts: true,
+      cacheDir: '/tmp/cache',
+    });
     Fixtures.mock(
       {
         'yarn.lock': 'package-lock-contents',
       },
       'some-dir'
     );
-    const execSnapshots = mockExecAll(exec, {
+    const execSnapshots = mockExecAll({
       stdout: '3.0.0',
       stderr: '',
     });
@@ -141,7 +143,7 @@ describe('modules/manager/npm/post-update/yarn', () => {
       },
       'some-dir'
     );
-    const execSnapshots = mockExecAll(exec, {
+    const execSnapshots = mockExecAll({
       stdout: '2.1.0',
       stderr: '',
     });
@@ -170,7 +172,7 @@ describe('modules/manager/npm/post-update/yarn', () => {
         },
         'some-dir'
       );
-      const execSnapshots = mockExecAll(exec, {
+      const execSnapshots = mockExecAll({
         stdout: yarnVersion,
         stderr: '',
       });
@@ -205,7 +207,7 @@ describe('modules/manager/npm/post-update/yarn', () => {
         },
         'some-dir'
       );
-      const execSnapshots = mockExecAll(exec, {
+      const execSnapshots = mockExecAll({
         stdout: yarnVersion,
         stderr: '',
       });
@@ -234,7 +236,7 @@ describe('modules/manager/npm/post-update/yarn', () => {
         },
         'some-dir'
       );
-      const execSnapshots = mockExecAll(exec, {
+      const execSnapshots = mockExecAll({
         stdout: yarnVersion,
         stderr: '',
       });
@@ -276,7 +278,7 @@ describe('modules/manager/npm/post-update/yarn', () => {
         },
         'some-dir'
       );
-      const execSnapshots = mockExecAll(exec, {
+      const execSnapshots = mockExecAll({
         stdout: yarnVersion,
         stderr: '',
       });
@@ -319,7 +321,7 @@ describe('modules/manager/npm/post-update/yarn', () => {
         },
         'some-dir'
       );
-      const execSnapshots = mockExecAll(exec, {
+      const execSnapshots = mockExecAll({
         stdout: yarnVersion,
         stderr: '',
       });
@@ -342,7 +344,7 @@ describe('modules/manager/npm/post-update/yarn', () => {
 
   it('catches errors', async () => {
     Fixtures.mock({});
-    const execSnapshots = mockExecAll(exec, new Error('some-error'));
+    const execSnapshots = mockExecAll(new Error('some-error'));
     const res = await yarnHelper.generateLockFile('some-dir', {});
     expect(fs.readFile).toHaveBeenCalledTimes(1);
     expect(res.error).toBeTrue();
@@ -352,7 +354,11 @@ describe('modules/manager/npm/post-update/yarn', () => {
 
   it('supports corepack', async () => {
     process.env.BUILDPACK = 'true';
-    GlobalConfig.set({ localDir: '.', binarySource: 'install' });
+    GlobalConfig.set({
+      localDir: '.',
+      binarySource: 'install',
+      cacheDir: '/tmp/cache',
+    });
     Fixtures.mock(
       {
         'package.json': '{ "packageManager": "yarn@3.0.0" }',
@@ -363,7 +369,7 @@ describe('modules/manager/npm/post-update/yarn', () => {
     mockedFunction(getPkgReleases).mockResolvedValueOnce({
       releases: [{ version: '0.10.0' }],
     });
-    const execSnapshots = mockExecAll(exec, {
+    const execSnapshots = mockExecAll({
       stdout: '2.1.0',
       stderr: '',
     });
@@ -395,7 +401,11 @@ describe('modules/manager/npm/post-update/yarn', () => {
     // sanity check for later refactorings
     expect(plocktest1YarnLockV1).toBeTruthy();
     process.env.BUILDPACK = 'true';
-    GlobalConfig.set({ localDir: '.', binarySource: 'install' });
+    GlobalConfig.set({
+      localDir: '.',
+      binarySource: 'install',
+      cacheDir: '/tmp/cache',
+    });
     Fixtures.mock(
       {
         'package.json':
@@ -407,7 +417,7 @@ describe('modules/manager/npm/post-update/yarn', () => {
     mockedFunction(getPkgReleases).mockResolvedValueOnce({
       releases: [{ version: '1.22.18' }, { version: '2.4.3' }],
     });
-    const execSnapshots = mockExecAll(exec, {
+    const execSnapshots = mockExecAll({
       stdout: '2.1.0',
       stderr: '',
     });
@@ -429,7 +439,7 @@ describe('modules/manager/npm/post-update/yarn', () => {
     // sanity check for later refactorings
     expect(plocktest1YarnLockV1).toBeTruthy();
     expect(plocktest1PackageJson).toBeTruthy();
-    GlobalConfig.set({ localDir: '.' });
+    GlobalConfig.set({ localDir: '.', cacheDir: '/tmp/cache' });
     Fixtures.mock(
       {
         'package.json': plocktest1PackageJson,
@@ -442,7 +452,7 @@ describe('modules/manager/npm/post-update/yarn', () => {
     mockedFunction(getPkgReleases).mockResolvedValueOnce({
       releases: [{ version: '1.22.18' }],
     });
-    const execSnapshots = mockExecSequence(exec, [
+    const execSnapshots = mockExecSequence([
       { stdout: '', stderr: '' },
       { stdout: '', stderr: '' },
       { stdout: '', stderr: '' },
@@ -467,7 +477,11 @@ describe('modules/manager/npm/post-update/yarn', () => {
     // sanity check for later refactorings
     expect(plocktest1YarnLockV1).toBeTruthy();
     expect(plocktest1PackageJson).toBeTruthy();
-    GlobalConfig.set({ localDir: '.', binarySource: 'docker' });
+    GlobalConfig.set({
+      localDir: '.',
+      binarySource: 'docker',
+      cacheDir: '/tmp/cache',
+    });
     Fixtures.mock(
       {
         'package.json': plocktest1PackageJson,
@@ -480,7 +494,7 @@ describe('modules/manager/npm/post-update/yarn', () => {
     mockedFunction(getPkgReleases).mockResolvedValueOnce({
       releases: [{ version: '1.22.18' }],
     });
-    const execSnapshots = mockExecAll(exec, { stdout: '', stderr: '' });
+    const execSnapshots = mockExecAll({ stdout: '', stderr: '' });
     const config = partial<PostUpdateConfig<NpmManagerData>>({});
     const res = await yarnHelper.generateLockFile('some-dir', {}, config);
     expect(res.lockFile).toBe(plocktest1YarnLockV1);
@@ -489,7 +503,7 @@ describe('modules/manager/npm/post-update/yarn', () => {
       { cmd: 'docker pull renovate/node', options },
       {
         cmd:
-          `docker run --rm --name=renovate_node --label=renovate_child -v ".":"." -e CI -w "some-dir" renovate/node ` +
+          `docker run --rm --name=renovate_node --label=renovate_child -v ".":"." -v "/tmp/cache":"/tmp/cache" -e CI -e BUILDPACK_CACHE_DIR -w "some-dir" renovate/node ` +
           `bash -l -c "` +
           `install-tool yarn-slim 1.22.18` +
           ` && ` +
@@ -512,7 +526,7 @@ describe('modules/manager/npm/post-update/yarn', () => {
         },
         '/'
       );
-      GlobalConfig.set({ localDir: '/tmp/renovate' });
+      GlobalConfig.set({ localDir: '/tmp/renovate', cacheDir: '/tmp/cache' });
       expect(await yarnHelper.checkYarnrc('.')).toEqual({
         offlineMirror: true,
         yarnPath: '.yarn/cli.js',
@@ -540,7 +554,7 @@ describe('modules/manager/npm/post-update/yarn', () => {
         },
         '/'
       );
-      GlobalConfig.set({ localDir: '/tmp/renovate' });
+      GlobalConfig.set({ localDir: '/tmp/renovate', cacheDir: '/tmp/cache' });
       expect(await yarnHelper.checkYarnrc('.')).toEqual({
         offlineMirror: true,
         yarnPath: null,
@@ -555,7 +569,7 @@ describe('modules/manager/npm/post-update/yarn', () => {
         },
         '/'
       );
-      GlobalConfig.set({ localDir: '/tmp' });
+      GlobalConfig.set({ localDir: '/tmp', cacheDir: '/tmp/cache' });
       expect(await yarnHelper.checkYarnrc('renovate')).toEqual({
         offlineMirror: false,
         yarnPath: null,
@@ -569,7 +583,7 @@ describe('modules/manager/npm/post-update/yarn', () => {
         },
         '/tmp/renovate'
       );
-      GlobalConfig.set({ localDir: '/tmp/renovate' });
+      GlobalConfig.set({ localDir: '/tmp/renovate', cacheDir: '/tmp/cache' });
       const { offlineMirror, yarnPath } = await yarnHelper.checkYarnrc('.');
       expect(offlineMirror).toBeFalse();
       expect(yarnPath).toBeNull();
