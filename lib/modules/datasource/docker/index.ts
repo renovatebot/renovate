@@ -801,7 +801,10 @@ export class DockerDatasource extends Datasource {
       if (err instanceof ExternalHostError) {
         throw err;
       }
-      if (err.statusCode === 404 && !dockerRepository.includes('/')) {
+      if (
+        (err.statusCode === 404 || err.message === PAGE_NOT_FOUND_ERROR) &&
+        !dockerRepository.includes('/')
+      ) {
         logger.debug(
           `Retrying Tags for ${registryHost}/${dockerRepository} using library/ prefix`
         );
