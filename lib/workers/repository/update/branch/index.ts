@@ -398,6 +398,7 @@ export async function processBranch(
     } else {
       config = { ...config, ...(await shouldReuseExistingBranch(config)) };
     }
+    // TODO: types (#7154)
     logger.debug(`Using reuseExistingBranch: ${config.reuseExistingBranch}`);
     if (
       config.reuseExistingBranch &&
@@ -572,10 +573,7 @@ export async function processBranch(
           await deleteBranchSilently(config.branchName);
         }
         logger.debug('Branch is automerged - returning');
-        return {
-          branchExists: false,
-          result: BranchResult.Automerged,
-        };
+        return { branchExists: false, result: BranchResult.Automerged };
       }
       if (mergeStatus === 'off schedule') {
         logger.debug(
@@ -775,9 +773,10 @@ export async function processBranch(
         content +=
           ' - you rename this PR\'s title to start with "rebase!" to trigger it manually';
         content += '\n\nThe artifact failure details are included below:\n\n';
+        // TODO: types (#7154)
         config.artifactErrors.forEach((error) => {
-          content += `##### File name: ${error.lockFile}\n\n`;
-          content += `\`\`\`\n${error.stderr}\n\`\`\`\n\n`;
+          content += `##### File name: ${error.lockFile!}\n\n`;
+          content += `\`\`\`\n${error.stderr!}\n\`\`\`\n\n`;
         });
         content = platform.massageMarkdown(content);
         if (
