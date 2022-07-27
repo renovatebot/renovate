@@ -5,8 +5,12 @@ import { updateArtifacts } from './artifacts';
 import { extractPackageFile } from './extract';
 import { updateDependency } from './update';
 
-export const language = ProgrammingLanguage.Golang;
 export { extractPackageFile, updateDependency, updateArtifacts };
+
+export const displayName = 'Go Modules';
+export const url = 'https://go.dev/ref/mod';
+
+export const language = ProgrammingLanguage.Golang;
 
 export const defaultConfig = {
   fileMatch: ['(^|/)go.mod$'],

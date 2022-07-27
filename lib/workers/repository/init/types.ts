@@ -1,7 +1,7 @@
-export type RepoConfigError = {
+export interface RepoConfigError {
   validationError: string;
   validationMessage: string;
-};
+}
 
 export interface RepoFileConfig {
   configFileName?: string;

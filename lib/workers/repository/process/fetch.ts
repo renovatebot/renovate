@@ -69,7 +69,8 @@ async function fetchDepUpdates(
         dep.warnings ??= [];
         dep.warnings.push({
           topic: 'Lookup Error',
-          message: `${depName}: ${cause.message}`,
+          // TODO: types (#7154)
+          message: `${depName!}: ${cause.message}`,
         });
       }
     }
