@@ -61,6 +61,7 @@ export const exposedConfigOptions = [
   'prBodyDefinitions',
   'prBodyNotes',
   'prTitle',
+  'prettyNewMajor',
   'prettyNewVersion',
   'semanticCommitScope',
   'semanticCommitType',
