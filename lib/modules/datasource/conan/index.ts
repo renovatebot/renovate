@@ -7,7 +7,16 @@ import { ensureTrailingSlash, joinUrlParts } from '../../../util/url';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
 import { conanDatasourceRegex, datasource, defaultRegistryUrl } from './common';
-import type { ConanJSON, ConanYAML } from './types';
+import type { ConanJSON, ConanRevisionsJSON, ConanYAML } from './types';
+
+function getRevision(packageName: string): string | undefined {
+  const splitted = packageName.split('#');
+  if (splitted.length <= 1) {
+    return undefined;
+  } else {
+    return splitted[1];
+  }
+}
 
 export class ConanDatasource extends Datasource {
   static readonly id = datasource;
@@ -50,6 +59,21 @@ export class ConanDatasource extends Datasource {
     };
   }
 
+  async getNewDigest(
+    url: string,
+    packageName: string
+  ): Promise<string | undefined> {
+    const revisionLookUp = joinUrlParts(
+      url,
+      `v2/conans/${packageName}/revisions`
+    );
+    const revisionRep = await this.http.getJson<ConanRevisionsJSON>(
+      revisionLookUp
+    );
+    const revisions = revisionRep?.body.revisions;
+    return revisions ? revisions[0].revision : undefined;
+  }
+
   @cache({
     namespace: `datasource-${datasource}`,
     key: ({ registryUrl, packageName }: GetReleasesConfig) =>
@@ -62,10 +86,12 @@ export class ConanDatasource extends Datasource {
     packageName,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     const depName = packageName.split('/')[0];
-    const userAndChannel = '@' + packageName.split('@')[1];
+    const userAndChannel = '@' + packageName.split('@')[1].split('#')[0];
+    const revision = getRevision(packageName);
     if (
       is.string(registryUrl) &&
-      ensureTrailingSlash(registryUrl) === defaultRegistryUrl
+      ensureTrailingSlash(registryUrl) === defaultRegistryUrl &&
+      is.undefined(revision)
     ) {
       return this.getConanCenterReleases(depName, userAndChannel);
     }
@@ -87,8 +113,17 @@ export class ConanDatasource extends Datasource {
             if (fromMatch?.groups?.version && fromMatch?.groups?.userChannel) {
               const version = fromMatch.groups.version;
               if (fromMatch.groups.userChannel === userAndChannel) {
+                let newDigest: string | undefined = undefined;
+                if (revision) {
+                  const currentPackageName = `${depName}/${version}${userAndChannel.replace(
+                    '@',
+                    '/'
+                  )}`;
+                  newDigest = await this.getNewDigest(url, currentPackageName);
+                }
                 const result: Release = {
                   version,
+                  newDigest,
                 };
                 dep.releases.push(result);
               }
