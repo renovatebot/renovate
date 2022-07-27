@@ -650,7 +650,7 @@ describe('modules/platform/github/index', () => {
 
       const res = await github.getPrList();
 
-      expect(res).toMatchObject([{ number: 1 }, { number: 2 }, { number: 3 }]);
+      expect(res).toMatchObject([{ number: 3 }, { number: 2 }, { number: 1 }]);
     });
 
     it('synchronizes cache', async () => {
@@ -687,14 +687,14 @@ describe('modules/platform/github/index', () => {
       const res2 = await github.getPrList();
 
       expect(res1).toMatchObject([
-        { number: 1, title: 'PR #1' },
-        { number: 2, title: 'PR #2' },
         { number: 3, title: 'PR #3' },
+        { number: 2, title: 'PR #2' },
+        { number: 1, title: 'PR #1' },
       ]);
       expect(res2).toMatchObject([
-        { number: 1, title: 'PR #1 (updated)' },
-        { number: 2, title: 'PR #2 (updated)' },
         { number: 3, title: 'PR #3 (updated)' },
+        { number: 2, title: 'PR #2 (updated)' },
+        { number: 1, title: 'PR #1 (updated)' },
       ]);
     });
 
@@ -1008,43 +1008,6 @@ describe('modules/platform/github/index', () => {
       } as any);
       const pr = await github.getBranchPr('somebranch');
       expect(pr).toBeNull();
-    });
-
-    it('should cache and return the PR object in fork mode', async () => {
-      const scope = httpMock.scope(githubApiHost);
-      forkInitRepoMock(scope, 'some/repo', true);
-      scope
-        .patch('/repos/forked/repo/git/refs/heads/master')
-        .reply(200)
-        .get(
-          '/repos/some/repo/pulls?per_page=100&state=all&sort=updated&direction=desc&page=1'
-        )
-        .reply(200, [
-          {
-            number: 90,
-            base: { sha: '1234' },
-            head: { ref: 'somebranch', repo: { full_name: 'other/repo' } },
-            state: PrState.Open,
-            title: 'Some title',
-          },
-          {
-            number: 91,
-            base: { sha: '1234' },
-            head: { ref: 'somebranch', repo: { full_name: 'some/repo' } },
-            state: PrState.Open,
-            title: 'Wrong PR',
-          },
-        ]);
-      await github.initRepo({
-        repository: 'some/repo',
-        forkMode: true,
-      } as any);
-
-      const pr = await github.getBranchPr('somebranch');
-      const pr2 = await github.getBranchPr('somebranch');
-
-      expect(pr).toMatchSnapshot({ number: 90 });
-      expect(pr2).toEqual(pr);
     });
   });
 
