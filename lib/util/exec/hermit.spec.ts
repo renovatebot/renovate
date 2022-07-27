@@ -36,11 +36,12 @@ describe('util/exec/hermit', () => {
       await writeLocalFile('bin/hermit', 'bar');
 
       const nestedCwd = 'nested/other/directory';
+      const localDir = GlobalConfig.get('localDir') ?? '';
 
-      expect(await findHermitCwd(nestedCwd)).toBe(`nested/bin`);
-      expect(await findHermitCwd('nested')).toBe(`nested/bin`);
-      expect(await findHermitCwd('')).toBe(`bin`);
-      expect(await findHermitCwd('other/directory')).toBe(`bin`);
+      expect(await findHermitCwd(nestedCwd)).toBe(`${localDir}/nested/bin`);
+      expect(await findHermitCwd('nested')).toBe(`${localDir}/nested/bin`);
+      expect(await findHermitCwd('')).toBe(`${localDir}/bin`);
+      expect(await findHermitCwd('other/directory')).toBe(`${localDir}/bin`);
     });
 
     it('should throw error when hermit cwd is not found', async () => {

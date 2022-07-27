@@ -18,7 +18,7 @@ export async function findHermitCwd(cwd: string): Promise<string> {
     throw new Error(`hermit not found for ${cwd}`);
   }
 
-  return upath.dirname(hermitFile);
+  return upath.join(GlobalConfig.get('localDir'), upath.dirname(hermitFile));
 }
 
 export async function getHermitEnvs(
