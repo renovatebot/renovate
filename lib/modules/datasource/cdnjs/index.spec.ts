@@ -7,6 +7,7 @@ import { CdnJsDatasource } from '.';
 const baseUrl = 'https://api.cdnjs.com/';
 
 const pathFor = (s: string): string =>
+  // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
   `/libraries/${s.split('/').shift()}?fields=homepage,repository,assets`;
 
 describe('modules/datasource/cdnjs/index', () => {

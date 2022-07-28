@@ -54,6 +54,7 @@ export class AdoptiumJavaDatasource extends Datasource {
   @cache({
     namespace: `datasource-${datasource}`,
     key: ({ registryUrl, packageName }: GetReleasesConfig) =>
+      // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
       `${registryUrl}:${getImageType(packageName)}`,
   })
   async getReleases({
@@ -65,6 +66,7 @@ export class AdoptiumJavaDatasource extends Datasource {
       { registryUrl, packageName, imageType },
       'fetching java release'
     );
+    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
     const url = `${registryUrl}v3/info/release_versions?page_size=${pageSize}&image_type=${imageType}&project=jdk&release_type=ga&sort_method=DATE&sort_order=DESC&vendor=adoptium`;
 
     const result: ReleaseResult = {
