@@ -564,7 +564,7 @@ describe('workers/repository/updates/generate', () => {
       );
     });
 
-    it('use prettyNewVersion in pr title', () => {
+    it('use pretty new version in pr title', () => {
       const branch: BranchUpgradeConfig[] = [
         {
           ...defaultConfig,
@@ -587,7 +587,7 @@ describe('workers/repository/updates/generate', () => {
       );
     });
 
-    it('use prettyNewMajor in pr title', () => {
+    it('use pretty new major in pr title', () => {
       const branch: BranchUpgradeConfig[] = [
         {
           ...defaultConfig,
