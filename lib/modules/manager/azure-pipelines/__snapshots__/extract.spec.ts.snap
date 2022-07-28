@@ -46,6 +46,33 @@ Array [
 ]
 `;
 
+exports[`modules/manager/azure-pipelines/extract extractPackageFile() should extract jobs 1`] = `
+Array [
+  Object {
+    "currentValue": "3",
+    "depName": "Bash",
+  },
+]
+`;
+
+exports[`modules/manager/azure-pipelines/extract extractPackageFile() should extract stages 1`] = `
+Array [
+  Object {
+    "currentValue": "3",
+    "depName": "Bash",
+  },
+]
+`;
+
+exports[`modules/manager/azure-pipelines/extract extractPackageFile() should extract steps 1`] = `
+Array [
+  Object {
+    "currentValue": "3",
+    "depName": "Bash",
+  },
+]
+`;
+
 exports[`modules/manager/azure-pipelines/extract extractRepository() should extract repository information 1`] = `
 Object {
   "autoReplaceStringTemplate": "refs/tags/{{newValue}}",
