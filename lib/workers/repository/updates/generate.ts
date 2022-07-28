@@ -130,7 +130,7 @@ export function generateBranchConfig(
     if (pendingVersionsLength) {
       upgrade.displayPending = `\`${upgrade
         .pendingVersions!.slice(-1)
-        .pop()}\``;
+        .pop()!}\``;
       if (pendingVersionsLength > 1) {
         upgrade.displayPending += ` (+${pendingVersionsLength - 1})`;
       }
