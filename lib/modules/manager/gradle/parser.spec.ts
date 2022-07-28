@@ -1,5 +1,5 @@
 import { Fixtures } from '../../../../test/fixtures';
-import { fs } from '../../../../test/util';
+import { fs, logger } from '../../../../test/util';
 import {
   GOOGLE_REPO,
   GRADLE_PLUGIN_PORTAL_REPO,
@@ -278,7 +278,11 @@ describe('modules/manager/gradle/parser', () => {
         'apply from: "foo/bar.gradle"',
         {},
         '',
-        1
+        3
+      );
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        { scriptFile: 'foo/bar.gradle' },
+        `Max recursion depth reached`
       );
       expect(vars).toBeEmpty();
     });

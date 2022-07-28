@@ -2,6 +2,8 @@ import URL from 'url';
 import is from '@sindresorhus/is';
 import delay from 'delay';
 import fs from 'fs-extra';
+// TODO: check if bug is fixed (#7154)
+// eslint-disable-next-line import/no-named-as-default
 import simpleGit, {
   Options,
   ResetMode,
@@ -39,6 +41,7 @@ import {
   getCachedModifiedResult,
   setCachedModifiedResult,
 } from './modified-cache';
+import { getCachedBranchParentShaResult } from './parent-sha-cache';
 import { configSigningKey, writePrivateKey } from './private-key';
 import type {
   CommitFilesConfig,
@@ -196,7 +199,8 @@ async function fetchBranchCommits(): Promise<void> {
   const opts = ['ls-remote', '--heads', config.url];
   if (config.extraCloneOpts) {
     Object.entries(config.extraCloneOpts).forEach((e) =>
-      opts.unshift(e[0], `${e[1]}`)
+      // TODO: types (#7154)
+      opts.unshift(e[0], `${e[1]!}`)
     );
   }
   try {
@@ -269,7 +273,7 @@ export function setGitAuthor(gitAuthor: string | undefined): void {
     const error = new Error(CONFIG_VALIDATION);
     error.validationSource = 'None';
     error.validationError = 'Invalid gitAuthor';
-    error.validationMessage = `gitAuthor is not parsed as valid RFC5322 format: ${gitAuthor}`;
+    error.validationMessage = `gitAuthor is not parsed as valid RFC5322 format: ${gitAuthor!}`;
     throw error;
   }
   config.gitAuthorName = gitAuthorParsed.name;
@@ -377,7 +381,8 @@ export async function syncGit(): Promise<void> {
       }
       if (config.extraCloneOpts) {
         Object.entries(config.extraCloneOpts).forEach((e) =>
-          opts.push(e[0], `${e[1]}`)
+          // TODO: types (#7154)
+          opts.push(e[0], `${e[1]!}`)
         );
       }
       const emptyDirAndClone = async (): Promise<void> => {
@@ -467,9 +472,15 @@ export function getBranchCommit(branchName: string): CommitSha | null {
 export async function getBranchParentSha(
   branchName: string
 ): Promise<CommitSha | null> {
+  const branchSha = getBranchCommit(branchName);
+  let parentSha = getCachedBranchParentShaResult(branchName, branchSha);
+  if (parentSha !== null) {
+    return parentSha;
+  }
+
   try {
-    const branchSha = getBranchCommit(branchName);
-    const parentSha = await git.revparse([`${branchSha}^`]);
+    // TODO: branchSha can be null (#7154)
+    parentSha = await git.revparse([`${branchSha!}^`]);
     return parentSha;
   } catch (err) {
     logger.debug({ err }, 'Error getting branch parent sha');
@@ -1076,7 +1087,8 @@ export function getUrl({
   repository: string;
 }): string {
   if (protocol === 'ssh') {
-    return `git@${hostname}:${repository}.git`;
+    // TODO: types (#7154)
+    return `git@${hostname!}:${repository}.git`;
   }
   return URL.format({
     protocol: protocol ?? 'https',
