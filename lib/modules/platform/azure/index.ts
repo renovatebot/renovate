@@ -114,7 +114,6 @@ export async function getRepos(): Promise<string[]> {
   const azureApiGit = await azureApi.gitApi();
   const repos = await azureApiGit.getRepositories();
   // TODO: types (#7154)
-  // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
   return repos.map((repo) => `${repo.project?.name}/${repo.name}`);
 }
 
@@ -688,7 +687,6 @@ export async function mergePr({
     `Updating PR ${pullRequestId} to status ${PullRequestStatus.Completed} (${
       PullRequestStatus[PullRequestStatus.Completed]
     }) with lastMergeSourceCommit ${
-      // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
       pr.lastMergeSourceCommit?.commitId
     } using mergeStrategy ${mergeMethod} (${
       GitPullRequestMergeStrategy[mergeMethod]
