@@ -9,8 +9,8 @@ import type { ChangeLogResult } from './types';
 export * from './types';
 
 class SourceUrlContainer {
-  private readonly sourceUrl;
-  private readonly orgSourceUrl;
+  private readonly sourceUrl: string;
+  private readonly orgSourceUrl: string;
 
   constructor(config: BranchUpgradeConfig) {
     this.orgSourceUrl = config.sourceUrl as string;
