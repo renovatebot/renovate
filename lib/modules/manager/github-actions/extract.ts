@@ -5,7 +5,7 @@ import { GithubTagsDatasource } from '../../datasource/github-tags';
 import * as dockerVersioning from '../../versioning/docker';
 import { getDep } from '../dockerfile/extract';
 import type { PackageDependency, PackageFile } from '../types';
-import type { Container, Workflow } from './types';
+import type { Container, Job, Workflow } from './types';
 
 const dockerActionRe = regEx(/^\s+uses: ['"]?docker:\/\/([^'"]+)\s*$/);
 const actionRe = regEx(
@@ -86,9 +86,9 @@ function extractActionsFromPackageFile(content: string): PackageDependency[] {
 }
 
 function extractContainer(
-  container: string | Container
+  container: string | Container | undefined
 ): PackageDependency | null {
-  if (container === null) {
+  if (container === undefined) {
     return null;
   }
 
@@ -116,23 +116,23 @@ function extractContainersFromPackageFile(
     return [];
   }
 
-  for (const j in pkg.jobs ?? {}) {
-    const job = pkg.jobs[j];
-
+  Object.entries(pkg.jobs ?? {}).forEach(([, job]: [string, Job]) => {
     const dep = extractContainer(job.container);
     if (dep !== null) {
       dep.depType = 'container';
       deps.push(dep);
     }
 
-    for (const s in job.services ?? {}) {
-      const dep = extractContainer(job.services[s]);
-      if (dep !== null) {
-        dep.depType = 'service';
-        deps.push(dep);
+    Object.entries(job.services ?? {}).forEach(
+      ([, service]: [string, string | Container]) => {
+        const dep = extractContainer(service);
+        if (dep !== null) {
+          dep.depType = 'service';
+          deps.push(dep);
+        }
       }
-    }
-  }
+    );
+  });
 
   return deps;
 }
