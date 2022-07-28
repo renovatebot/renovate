@@ -15,18 +15,6 @@ const actionRe = regEx(
 // SHA1 or SHA256, see https://github.blog/2020-10-19-git-2-29-released/
 const shaRe = regEx(/^[a-z0-9]{40}|[a-z0-9]{64}$/);
 
-export function extractPackageFile(content: string): PackageFile | null {
-  logger.trace('github-actions.extractPackageFile()');
-  const deps = [
-    ...extractActionsFromPackageFile(content),
-    ...extractContainersFromPackageFile(content),
-  ];
-  if (!deps.length) {
-    return null;
-  }
-  return { deps };
-}
-
 function extractActionsFromPackageFile(content: string): PackageDependency[] {
   logger.trace('github-actions.extractActionsFromPackageFile()');
   const deps: PackageDependency[] = [];
@@ -95,10 +83,8 @@ function extractContainer(
   let dep: PackageDependency;
   if (typeof container === 'string') {
     dep = getDep(container);
-  } else if (typeof container === 'object') {
-    dep = getDep(container.image);
   } else {
-    return null;
+    dep = getDep(container.image ?? '');
   }
 
   dep.versioning = dockerVersioning.id;
@@ -112,9 +98,6 @@ function extractContainersFromPackageFile(
   const deps: PackageDependency[] = [];
 
   const pkg = load(content, { json: true }) as Workflow;
-  if (!pkg) {
-    return [];
-  }
 
   Object.entries(pkg.jobs ?? {}).forEach(([, job]: [string, Job]) => {
     const dep = extractContainer(job.container);
@@ -135,4 +118,16 @@ function extractContainersFromPackageFile(
   });
 
   return deps;
+}
+
+export function extractPackageFile(content: string): PackageFile | null {
+  logger.trace('github-actions.extractPackageFile()');
+  const deps = [
+    ...extractActionsFromPackageFile(content),
+    ...extractContainersFromPackageFile(content),
+  ];
+  if (!deps.length) {
+    return null;
+  }
+  return { deps };
 }
