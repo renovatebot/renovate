@@ -23,7 +23,6 @@ export class CondaDatasource extends Datasource {
   @cache({
     namespace: `datasource-${datasource}`,
     key: ({ registryUrl, packageName }: GetReleasesConfig) =>
-      // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
       `${registryUrl}:${packageName}`,
   })
   async getReleases({
@@ -32,7 +31,6 @@ export class CondaDatasource extends Datasource {
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     logger.trace({ registryUrl, packageName }, 'fetching conda package');
 
-    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
     const url = `${registryUrl}${packageName}`;
 
     const result: ReleaseResult = {
