@@ -1166,6 +1166,16 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
+    name: 'overwriteSourceUrl',
+    description:
+      'If set, Renovate will use this url to fetch changelogs for a matched dependency. Valid only within a `packageRules` object.',
+    type: 'string',
+    stage: 'pr',
+    parent: 'packageRules',
+    cli: false,
+    env: false,
+  },
+  {
     name: 'pinDigests',
     description: 'Whether to add digests to Dockerfile source images.',
     type: 'boolean',

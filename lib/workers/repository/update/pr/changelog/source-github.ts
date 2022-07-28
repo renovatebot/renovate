@@ -121,7 +121,7 @@ export async function getChangeLogJSON(
 
   const cacheNamespace = 'changelog-github-release';
   function getCacheKey(prev: string, next: string): string {
-    return `${manager}:${depName}:${prev}:${next}`;
+    return `${repository}:${manager}:${depName}:${prev}:${next}`;
   }
 
   const changelogReleases: ChangeLogRelease[] = [];

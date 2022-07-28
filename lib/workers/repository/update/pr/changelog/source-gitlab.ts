@@ -95,7 +95,7 @@ export async function getChangeLogJSON(
   }
 
   function getCacheKey(prev: string, next: string): string {
-    return `${manager}:${depName}:${prev}:${next}`;
+    return `${pathname}:${manager}:${depName}:${prev}:${next}`;
   }
 
   const changelogReleases: ChangeLogRelease[] = [];

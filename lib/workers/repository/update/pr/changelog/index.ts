@@ -8,9 +8,33 @@ import type { ChangeLogResult } from './types';
 
 export * from './types';
 
+class SourceUrlContainer {
+  private readonly sourceUrl;
+  private readonly orgSourceUrl;
+
+  constructor(config: BranchUpgradeConfig) {
+    this.orgSourceUrl = config.sourceUrl as string;
+    if (config.overwriteSourceUrl) {
+      this.sourceUrl = config.overwriteSourceUrl as string;
+    } else {
+      this.sourceUrl = config.sourceUrl as string;
+    }
+  }
+
+  get(): string {
+    return this.sourceUrl;
+  }
+
+  restore(): string {
+    return this.orgSourceUrl;
+  }
+}
+
 export async function getChangeLogJSON(
   config: BranchUpgradeConfig
 ): Promise<ChangeLogResult | null> {
+  const srcUrlContainer = new SourceUrlContainer(config);
+  config.sourceUrl = srcUrlContainer.get();
   const { sourceUrl, versioning, currentVersion, newVersion } = config;
   try {
     if (!(sourceUrl && currentVersion && newVersion)) {
@@ -43,6 +67,8 @@ export async function getChangeLogJSON(
         );
         break;
     }
+
+    config.sourceUrl = srcUrlContainer.restore();
 
     return res;
   } catch (err) /* istanbul ignore next */ {

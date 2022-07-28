@@ -59,7 +59,7 @@ export function getCachedReleaseList(
   // TODO: types (#7154)
   const cacheKey = `getReleaseList-${project.apiBaseUrl!}-${
     project.repository
-  }`;
+  }-${project.depName!}`;
   const cachedResult = memCache.get<Promise<ChangeLogNotes[]>>(cacheKey);
   // istanbul ignore if
   if (cachedResult !== undefined) {
@@ -390,13 +390,15 @@ export async function addReleaseNotes(
     return input;
   }
   const output: ChangeLogResult = { ...input, versions: [] };
-  const { repository, sourceDirectory } = input.project;
+  const { depName, repository, sourceDirectory } = input.project;
   const cacheNamespace = `changelog-${input.project.type}-notes@v2`;
+
   function getCacheKey(version: string): string {
-    return `${repository}:${
+    return `${depName!}:${repository}:${
       sourceDirectory ? `${sourceDirectory}:` : ''
     }${version}`;
   }
+
   for (const v of input.versions) {
     let releaseNotes: ChangeLogNotes | null | undefined;
     const cacheKey = getCacheKey(v.version);
