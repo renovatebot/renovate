@@ -73,9 +73,7 @@ function extractActionsFromPackageFile(content: string): PackageDependency[] {
   return deps;
 }
 
-function extractContainer(
-  container: string | Container | undefined
-): PackageDependency {
+function extractContainer(container: string | Container): PackageDependency {
   let dep: PackageDependency;
   if (typeof container === 'string') {
     dep = getDep(container);
