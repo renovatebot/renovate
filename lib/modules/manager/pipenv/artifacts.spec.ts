@@ -5,9 +5,9 @@ import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import * as docker from '../../../util/exec/docker';
 import type { StatusResult } from '../../../util/git/types';
+import { getPkgReleases as _getPkgReleases } from '../../datasource';
 import type { UpdateArtifactsConfig } from '../types';
 import * as pipenv from '.';
-import { getPkgReleases as _getPkgReleases } from '../../datasource';
 
 jest.mock('../../../util/exec/env');
 jest.mock('../../../util/git');
