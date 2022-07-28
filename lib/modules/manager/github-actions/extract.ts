@@ -75,11 +75,7 @@ function extractActionsFromPackageFile(content: string): PackageDependency[] {
 
 function extractContainer(
   container: string | Container | undefined
-): PackageDependency | null {
-  if (container === undefined) {
-    return null;
-  }
-
+): PackageDependency {
   let dep: PackageDependency;
   if (typeof container === 'string') {
     dep = getDep(container);
@@ -100,8 +96,8 @@ function extractContainersFromPackageFile(
   const pkg = load(content, { json: true }) as Workflow;
 
   Object.entries(pkg.jobs ?? {}).forEach(([, job]: [string, Job]) => {
-    const dep = extractContainer(job.container);
-    if (dep !== null) {
+    if (job.container !== undefined) {
+      const dep = extractContainer(job.container);
       dep.depType = 'container';
       deps.push(dep);
     }
@@ -109,10 +105,8 @@ function extractContainersFromPackageFile(
     Object.entries(job.services ?? {}).forEach(
       ([, service]: [string, string | Container]) => {
         const dep = extractContainer(service);
-        if (dep !== null) {
-          dep.depType = 'service';
-          deps.push(dep);
-        }
+        dep.depType = 'service';
+        deps.push(dep);
       }
     );
   });
