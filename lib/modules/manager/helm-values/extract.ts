@@ -1,5 +1,6 @@
 import { load } from 'js-yaml';
 import { logger } from '../../../logger';
+import { regEx } from '../../../util/regex';
 import { id as dockerVersioning } from '../../versioning/docker';
 import { getDep } from '../dockerfile/extract';
 import type { PackageDependency, PackageFile } from '../types';
@@ -78,10 +79,15 @@ function findDependencies(
 export function extractPackageFile(content: string): PackageFile | null {
   let parsedContent: Record<string, unknown> | HelmDockerImageDependency;
   try {
+    // This regex checks if type of tag: version is double and ends with 0 if yes modify it to string
+    const newContent = content.replace(
+      regEx(/(?<tag>tag:(\s*))(?<ver>\d+\.\d*0)(?<spaces>\s*\n)/g),
+      '$<tag>"$<ver>"$<spaces>'
+    );
     // a parser that allows extracting line numbers would be preferable, with
     // the current approach we need to match anything we find again during the update
     // TODO: fix me (#9610)
-    parsedContent = load(content, { json: true }) as any;
+    parsedContent = load(newContent, { json: true }) as any;
   } catch (err) {
     logger.debug({ err }, 'Failed to parse helm-values YAML');
     return null;

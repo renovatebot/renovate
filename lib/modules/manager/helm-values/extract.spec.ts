@@ -75,13 +75,13 @@ describe('modules/manager/helm-values/extract', () => {
         deps: [
           {
             depName: 'docker.io/mjnagel/postgresql12',
-            currentValue: '12.1',
+            currentValue: '12.10',
             datasource: 'docker',
-            replaceString: '12.1',
+            replaceString: '12.10',
             versioning: 'docker',
             currentDigest: undefined,
             autoReplaceStringTemplate:
-              '"{{newValue}}{{#if newDigest}}@{{newDigest}}{{/if}}"',
+              '{{newValue}}{{#if newDigest}}@{{newDigest}}{{/if}}',
           },
           {
             depName: 'docker.io/bitnami/postgres-exporter',
