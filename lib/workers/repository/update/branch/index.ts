@@ -95,6 +95,7 @@ function canSkipBranchUpdateCheck(
     configAndManagersHash === branchCache.configAndManagersHash
   );
 }
+
 export async function processBranch(
   branchConfig: BranchConfig,
   branchCache: BranchCache
