@@ -24,10 +24,8 @@ handlebars.registerHelper('containsString', (str, subStr) =>
 );
 
 handlebars.registerHelper('prettifyVersion', (version: string | number) => {
-  if (is.string(version)) {
-    if (version?.charAt(0) === 'v') {
-      return version;
-    }
+  if (is.string(version) && version?.charAt(0) === 'v') {
+    return version;
   }
   return `v${version}`;
 });
