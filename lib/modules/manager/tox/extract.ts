@@ -1,6 +1,6 @@
 // based on https://www.python.org/dev/peps/pep-0508/#names
-import is from '@sindresorhus/is';
 import { RANGE_PATTERN } from '@renovatebot/pep440';
+import is from '@sindresorhus/is';
 import { logger } from '../../../logger';
 import { newlineRegex, regEx } from '../../../util/regex';
 import { PypiDatasource } from '../../datasource/pypi';
@@ -17,7 +17,7 @@ function getSectionName(str: string): string {
  * by indent
  */
 function getParamName(str: string): string {
-  const param = regEx(/^([\w\.\-\_]+)\s*=\s*.*?\s*$/);
+  const param = regEx(/^([\w.\-_]+)\s*=\s*.*?\s*$/);
   const [, parmName] = param.exec(str) ?? [];
   return parmName;
 }
@@ -88,8 +88,8 @@ export function extractPackageFile(
 
   let sectionName: string | null = null;
   let paramName: string | null = null;
-  let inDeps: boolean = false;
-  let isTestEnv: boolean = false;
+  let inDeps = false;
+  let isTestEnv = false;
 
   const deps: PackageDependency[] = [];
   const testEnvRegex = regEx(/^(testenv)\S*\s*$/);
@@ -118,7 +118,7 @@ export function extractPackageFile(
           // Can also have deps on this line, so just remove the preceeding
           // deps =
           line = line.replace(depsReplaceRegex, '');
-        } else if (is.string(paramName) && paramName != 'deps') {
+        } else if (is.string(paramName) && paramName !== 'deps') {
           inDeps = false;
           return;
         }
