@@ -145,6 +145,7 @@ Supported tools for dynamic install are:
 - `cargo`
 - `composer`
 - `flux`
+- `gradle-wrapper`
 - `jb`
 - `jsonnet-bundler`
 - `mix`

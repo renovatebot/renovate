@@ -13,7 +13,6 @@ import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
 import {
   extraEnv,
   getJavaContraint,
-  getJavaVersioning,
   gradleWrapperFileName,
   prepareGradleCommand,
 } from './utils';
@@ -88,12 +87,16 @@ export async function updateArtifacts({
     logger.debug(`Updating gradle wrapper: "${cmd}"`);
     const execOptions: ExecOptions = {
       docker: {
-        image: 'java',
-        tagConstraint:
-          config.constraints?.java ?? getJavaContraint(config.currentValue!),
-        tagScheme: getJavaVersioning(),
+        image: 'sidecar',
       },
       extraEnv,
+      toolConstraints: [
+        {
+          toolName: 'java',
+          constraint:
+            config.constraints?.java ?? getJavaContraint(config.currentValue),
+        },
+      ],
     };
     try {
       await exec(cmd, execOptions);

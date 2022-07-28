@@ -3,8 +3,8 @@ import { extractGradleVersion, getJavaContraint } from './utils';
 
 describe('modules/manager/gradle-wrapper/util', () => {
   describe('getJavaContraint()', () => {
-    it('return null for global mode', () => {
-      expect(getJavaContraint('6')).toBeNull();
+    it('return ^8.0.0 for global mode', () => {
+      expect(getJavaContraint('4')).toBe('^8.0.0');
     });
 
     it('return ^11.0.0 for docker mode and undefined gradle', () => {
