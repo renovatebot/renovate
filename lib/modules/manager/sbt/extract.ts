@@ -112,6 +112,17 @@ const isVarDef = (str: string): boolean =>
     /^\s*(private\s*)?(lazy\s*)?val\s+[_a-zA-Z][_a-zA-Z0-9]*\s*=\s*"[^"]*"\s*$/
   ).test(str);
 
+/**
+ *
+ * Check if variable definition is referencing another variable
+ * @param str line
+ * @returns {boolean}
+ */
+const isVarDefRefVar = (str: string): boolean =>
+  regEx(
+    /^\s*(private\s*)?(lazy\s*)?val\s+[_a-zA-Z][_a-zA-Z0-9]*\s*=\s*[_a-zA-Z][_a-zA-Z0-9]*(\.[_a-zA-Z][_a-zA-Z0-9]*)*\s*$/
+  ).test(str);
+
 const isVarSeqSingleLine = (str: string): boolean =>
   regEx(
     /^\s*(private\s*)?(lazy\s*)?val\s+[_a-zA-Z][_a-zA-Z0-9]*\s*=\s*(Seq|List|Stream)\(.*\).*\s*$/
@@ -122,10 +133,17 @@ const isVarSeqMultipleLine = (str: string): boolean =>
     /^\s*(private\s*)?(lazy\s*)?val\s+[_a-zA-Z][_a-zA-Z0-9]*\s*=\s*(Seq|List|Stream)\(.*[^)]*.*$/
   ).test(str);
 
+const isObjectLine = (str: string): boolean =>
+  regEx(/object\s+(\w+)\s+{/).test(str);
+
+const isObjectEndedLine = (str: string): boolean =>
+  regEx(/^\s*}\s*$/).test(str);
+
 const getVarName = (str: string): string =>
-  str
-    .replace(regEx(/^\s*(private\s*)?(lazy\s*)?val\s+/), '')
-    .replace(regEx(/\s*=\s*"[^"]*"\s*$/), '');
+  str.replace(
+    regEx(/^\s*(private\s*)?(lazy\s*)?val\s+([_a-zA-Z][_a-zA-Z0-9]*)\s*=.*$/),
+    '$3'
+  );
 
 const isVarName = (str: string): boolean =>
   // allow dot annotation
@@ -150,27 +168,22 @@ function parseDepExpr(
   const { scalaVersion, variables, lineIndex, globalVariables } = ctx;
   let { depType } = ctx;
 
-  const getLastDotAnnotation = (longVar: string): string =>
-    longVar?.match('.') ? longVar.split('.').pop() ?? '' : '';
-
   const isValidToken = (str: string): boolean =>
     isStringLiteral(str) ||
     (isVarName(str) &&
-      (Boolean(variables[getLastDotAnnotation(str)]) ||
-        Boolean(globalVariables[getLastDotAnnotation(str)])));
+      (Boolean(variables[str]) || Boolean(globalVariables[str])));
 
   const resolveToken = (str: string): string => {
     if (isStringLiteral(str)) {
       return str.replace(regEx(/^"/), '').replace(regEx(/"$/), '');
     }
-    const varName = getLastDotAnnotation(str);
-    if (variables[varName]) {
-      ctx.lookupVariableFile = variables[varName].sourceFile;
-      return variables[varName].val;
+    if (variables[str]) {
+      ctx.lookupVariableFile = variables[str].sourceFile;
+      return variables[str].val;
     }
-    if (globalVariables[varName]) {
-      ctx.lookupVariableFile = globalVariables[varName].sourceFile;
-      return globalVariables[varName].val;
+    if (globalVariables[str]) {
+      ctx.lookupVariableFile = globalVariables[str].sourceFile;
+      return globalVariables[str].val;
     }
     return str;
   };
@@ -219,7 +232,6 @@ function parseDepExpr(
   if (scopeOp && scopeOp !== '%') {
     return null;
   }
-
   const groupId = resolveToken(rawGroupId);
   const depName = `${groupId}:${resolveToken(rawArtifactId)}`;
   const artifactId =
@@ -240,20 +252,16 @@ function parseDepExpr(
     fileReplacePosition: lineIndex,
   };
 
-  if (variables[rawVersion]) {
+  if (variables[rawVersion] || globalVariables[rawVersion]) {
     result.groupName = `${rawVersion}`;
   }
 
-  if (variables[getLastDotAnnotation(rawVersion)]) {
-    const actualVar = getLastDotAnnotation(rawVersion);
-    result.fileReplacePosition = variables[actualVar].lineIndex;
-    result.groupName = actualVar;
-    result.editFile = variables[actualVar].sourceFile;
-  } else if (globalVariables[getLastDotAnnotation(rawVersion)]) {
-    const actualVar = getLastDotAnnotation(rawVersion);
-    result.fileReplacePosition = globalVariables[actualVar].lineIndex;
-    result.groupName = actualVar;
-    result.editFile = globalVariables[actualVar].sourceFile;
+  if (variables[rawVersion]) {
+    result.fileReplacePosition = variables[rawVersion].lineIndex;
+    result.editFile = variables[rawVersion].sourceFile;
+  } else if (globalVariables[rawVersion]) {
+    result.fileReplacePosition = globalVariables[rawVersion].lineIndex;
+    result.editFile = globalVariables[rawVersion].sourceFile;
   }
 
   if (depType) {
@@ -271,7 +279,12 @@ function parseSbtLine(
 ): PackageFile & ParseOptions {
   const { deps, registryUrls = [], variables = {}, globalVariables = {} } = acc;
 
-  let { isMultiDeps, scalaVersion, packageFileVersion } = acc;
+  let {
+    isMultiDeps,
+    scalaVersion,
+    packageFileVersion,
+    variableParentKey = '',
+  } = acc;
 
   const ctx: ParseContext = {
     scalaVersion,
@@ -298,6 +311,19 @@ function parseSbtLine(
     } else if (isScalaVersionVariable(line)) {
       isMultiDeps = false;
       scalaVersionVariable = getScalaVersionVariable(line);
+      const scalaVar =
+        variables[scalaVersionVariable] ??
+        globalVariables[scalaVersionVariable];
+      if (scalaVar) {
+        scalaVersion = normalizeScalaVersion(scalaVar.val);
+        dep = {
+          datasource: MavenDatasource.id,
+          depName: 'scala',
+          packageName: 'org.scala-lang:scala-library',
+          currentValue: scalaVar.val,
+          separateMinorPatch: true,
+        };
+      }
     } else if (isPackageFileVersion(line)) {
       packageFileVersion = getPackageFileVersion(line);
     } else if (isResolver(line)) {
@@ -318,14 +344,43 @@ function parseSbtLine(
       dep = parseDepExpr(depExpr, {
         ...ctx,
       });
+    } else if (isObjectLine(line)) {
+      const objectName = line.replace(regEx(/object\s+(\w+)\s+{/), '$1');
+      variableParentKey =
+        variableParentKey === ''
+          ? objectName
+          : `${variableParentKey}.${objectName.trim()}`;
+    } else if (isObjectEndedLine(line)) {
+      variableParentKey = variableParentKey.split('.').slice(0, -1).join('.');
     } else if (isVarDef(line)) {
-      variables[getVarName(line)] = getVarInfo(line, ctx);
+      const key = variableParentKey === '' ? '' : `${variableParentKey}.`;
+      variables[key + getVarName(line)] = getVarInfo(line, ctx);
+    } else if (isVarDefRefVar(line)) {
+      const rightPart = line
+        .replace(
+          regEx(
+            /^\s*(private\s*)?(lazy\s*)?val\s+[_a-zA-Z][_a-zA-Z0-9]*\s*=\s*(.*)\s*$/
+          ),
+          '$3'
+        )
+        .trim();
+      const isVarExist = variables[rightPart] || globalVariables[rightPart];
+      if (isVarExist) {
+        const key =
+          (variableParentKey === '' ? '' : `${variableParentKey}.`) +
+          getVarName(line);
+        variables[key] = isVarExist;
+      }
     } else if (isVarDependency(line)) {
       isMultiDeps = false;
-      const depExpr = line.replace(
-        regEx(/^\s*(private\s*)?(lazy\s*)?val\s[_a-zA-Z][_a-zA-Z0-9]*\s*=\s*/),
-        ''
-      );
+      const depExpr = line
+        .replace(
+          regEx(
+            /^\s*(private\s*)?(lazy\s*)?val\s[_a-zA-Z][_a-zA-Z0-9]*\s*=\s*/
+          ),
+          ''
+        )
+        .replace(/\s*(force|withSources|exclude(All)?).*$/, '');
       dep = parseDepExpr(depExpr, {
         ...ctx,
       });
@@ -351,7 +406,9 @@ function parseSbtLine(
       isMultiDeps = true;
     } else if (isMultiDeps) {
       const rightPart = line.replace(regEx(/^[\s,]*/), '');
-      const depExpr = rightPart.replace(regEx(/[\s,]*$/), '');
+      const depExpr = rightPart
+        .replace(regEx(/[\s,]*$/), '')
+        .replace(/\s*(force|withSources|exclude(All)?).*$/, '');
       dep = parseDepExpr(depExpr, {
         ...ctx,
       });
@@ -377,6 +434,7 @@ function parseSbtLine(
     return {
       ...acc,
       isMultiDeps,
+      variableParentKey,
       scalaVersion:
         scalaVersion ||
         (scalaVersionVariable &&
@@ -401,7 +459,10 @@ export function extractFile(
   }
   const equalsToNewLineRe = regEx(/=\s*\n/, 'gm');
   const goodContentForParsing = content.replace(equalsToNewLineRe, '=');
-  const lines = goodContentForParsing.split(newlineRegex).map(stripComment);
+  const lines = goodContentForParsing
+    .split(newlineRegex)
+    .map(stripComment)
+    .map((str) => str.replace(regEx(/\/\*\*.*\*\*\//), ''));
 
   const acc: PackageFile & ParseOptions = {
     registryUrls: [MAVEN_REPO],
@@ -457,32 +518,10 @@ function prepareLoadPackageFiles(
   };
 }
 
-function getLocalBaseDir(packageFiles: string[]): string {
-  packageFiles.sort();
-  return packageFiles[0].split('/').slice(0, -1).join('/');
-}
-
-function folderGroup(baseDir: string, packageFile: string): string {
-  let group = '';
-  let dirs: string[] = [];
-  if (baseDir === '') {
-    dirs = packageFile.split('/');
-  } else {
-    dirs = packageFile.replace(baseDir, '').split('/').slice(1);
-  }
-  if (dirs.length > 1) {
-    group = dirs[0];
-  }
-  return group;
-}
-
 export async function extractAllPackageFiles(
   _config: ExtractConfig,
   packageFiles: string[]
 ): Promise<PackageFile[] | null> {
-  // baseDir will group folder to lookup in it's scope
-  const baseDir = getLocalBaseDir(packageFiles);
-
   // Read packages and store in groupPackageFileContent
   // group package file by its folder
   const groupPackageFileContent: GroupFilenameContent = {};
@@ -492,7 +531,8 @@ export async function extractAllPackageFiles(
       logger.trace({ packageFile }, 'packageFile has no content');
       continue;
     }
-    const group = folderGroup(baseDir, packageFile);
+    const paths = packageFile.split('/');
+    const group = paths.length > 1 ? paths[0] : '';
     if (!groupPackageFileContent[group]) {
       groupPackageFileContent[group] = [];
     }
@@ -504,10 +544,10 @@ export async function extractAllPackageFiles(
   // 3. Project's scalaVersion - use in parseDepExpr to add suffix eg. "_2.13"
   const { globalVariables, registryUrls, scalaVersion } =
     prepareLoadPackageFiles(_config, [
-      ...groupPackageFileContent[''], // root
       ...(groupPackageFileContent['project']
         ? groupPackageFileContent['project']
         : []), // in project/ folder
+      ...(groupPackageFileContent[''] ? groupPackageFileContent[''] : []), // root
     ]);
 
   const mapDepsToPackageFile: Record<string, PackageDependency[]> = {};

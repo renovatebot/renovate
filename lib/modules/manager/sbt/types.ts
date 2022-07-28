@@ -15,6 +15,7 @@ export interface ParseContext {
 }
 
 export interface ParseOptions {
+  variableParentKey?: string;
   isMultiDeps?: boolean;
   scalaVersion?: string | null;
   variables?: Variables;
