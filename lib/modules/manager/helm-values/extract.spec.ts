@@ -69,7 +69,11 @@ describe('modules/manager/helm-values/extract', () => {
       seventhImage:
         registry: docker.io
         repository: bitnami/postgres-exporter4
-        tag: '10.90'`;
+        tag: '10.90'
+      eighthImage:
+        registry: docker.io
+        repository: bitnami/postgres-exporter5
+        tag: 1.3`;
       const result = extractPackageFile(input);
       expect(result).toEqual({
         deps: [
@@ -132,6 +136,16 @@ describe('modules/manager/helm-values/extract', () => {
             currentDigest: undefined,
             autoReplaceStringTemplate:
               '{{newValue}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          },
+          {
+            depName: 'docker.io/bitnami/postgres-exporter5',
+            currentValue: '1.3',
+            datasource: 'docker',
+            replaceString: '1.3',
+            versioning: 'docker',
+            currentDigest: undefined,
+            autoReplaceStringTemplate:
+              '"{{newValue}}{{#if newDigest}}@{{newDigest}}{{/if}}"',
           },
         ],
       });
