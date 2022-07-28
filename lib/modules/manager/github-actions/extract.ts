@@ -84,7 +84,7 @@ function extractContainer(
   if (typeof container === 'string') {
     dep = getDep(container);
   } else {
-    dep = getDep(container.image ?? '');
+    dep = getDep(container?.image);
   }
 
   dep.versioning = dockerVersioning.id;
