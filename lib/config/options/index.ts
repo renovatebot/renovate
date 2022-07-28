@@ -1634,20 +1634,6 @@ const options: RenovateOptions[] = [
     cli: false,
   },
   {
-    name: 'prettyNewVersion',
-    description: 'Filed exposed to templating to append v to newVersion',
-    type: 'string',
-    default: '{{{prettifyVersion newVersion}}}',
-    cli: false,
-  },
-  {
-    name: 'prettyNewMajor',
-    description: 'Filed exposed to templating to append v to newMajor',
-    type: 'string',
-    default: 'v{{{newMajor}}}',
-    cli: false,
-  },
-  {
     name: 'commitMessageExtra',
     description:
       'Extra description used after the commit message topic - typically the version.',

@@ -94,4 +94,11 @@ describe('util/template/index', () => {
     const output = template.compile(userTemplate, input);
     expect(output).toBe('v5.1.2');
   });
+
+  it('appends v to newMajor', () => {
+    const userTemplate = '{{{prettifyVersion newMajor}}}';
+    const input = { newMajor: 5 };
+    const output = template.compile(userTemplate, input);
+    expect(output).toBe('v5');
+  });
 });

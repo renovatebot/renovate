@@ -23,11 +23,13 @@ handlebars.registerHelper('containsString', (str, subStr) =>
   str?.includes(subStr)
 );
 
-handlebars.registerHelper('prettifyVersion', (version) => {
-  if (version?.charAt(0) !== 'v') {
-    return 'v'.concat(version);
+handlebars.registerHelper('prettifyVersion', (version: string | number) => {
+  if (is.string(version)) {
+    if (version?.charAt(0) === 'v') {
+      return version;
+    }
   }
-  return version;
+  return `v${version}`;
 });
 
 handlebars.registerHelper({
@@ -66,8 +68,6 @@ export const exposedConfigOptions = [
   'prBodyDefinitions',
   'prBodyNotes',
   'prTitle',
-  'prettyNewMajor',
-  'prettyNewVersion',
   'semanticCommitScope',
   'semanticCommitType',
   'separateMajorMinor',
