@@ -14,6 +14,7 @@ But there are also other aspects like bugs caused by your dependencies.
 Depending on third-party software is a sword of Damocles; you never know when a new issue will force you to drop everything to upgrade your software.
 
 ![An XKCD Comic about software dependencies](./swissquote_xkcd.png)
+
 This XKCD comic is always relevant when talking about dependencies: <https://xkcd.com/2347/>
 
 Each software dependency is a risk.
@@ -89,6 +90,7 @@ Every company that’s been around for sometime has that old project still runni
 People talk about it laughingly but become livid when a request comes to change anything in it.
 
 ![A person sweating profusely at the idea of having to touch an old project](./swissquote_sweating_guy.jpg)
+
 There is a fix to make on that project, the last person working on it left three years ago.
 
 ## Dependencies at Swissquote
@@ -132,6 +134,7 @@ On our first try, we enabled 30 repositories, a cron task was running every hour
 We received 700 Pull Requests in the first month, it was a never ending Pull Request whack-a-mole every time we merged one, another replaced it.
 
 ![A cat playing Whack-a-mole with a finger](./swissquote_cat_whack_a_mole.gif)
+
 Me and my team merging Pull Requests.
 
 The awesome thing with Renovate is that it’s very configurable, and this configuration can be shared.
