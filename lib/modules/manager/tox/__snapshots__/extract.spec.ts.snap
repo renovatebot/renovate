@@ -1,0 +1,89 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`modules/manager/tox/extract extractPackageFile() extracts dependencies 1`] = `
+Object {
+  "deps": Array [
+    Object {
+      "currentValue": "==1.0.0",
+      "currentVersion": "1.0.0",
+      "datasource": "pypi",
+      "depName": "base-test-env",
+      "depType": "test",
+    },
+    Object {
+      "currentValue": ">=3.1.24",
+      "datasource": "pypi",
+      "depName": "basic1",
+      "depType": "test",
+    },
+    Object {
+      "currentValue": ">=21.3",
+      "datasource": "pypi",
+      "depName": "basic2",
+      "depType": "test",
+    },
+    Object {
+      "currentValue": "<=21.3",
+      "datasource": "pypi",
+      "depName": "basic3",
+      "depType": "test",
+    },
+    Object {
+      "currentValue": "<1.0.0",
+      "datasource": "pypi",
+      "depName": "basic4",
+      "depType": "test",
+    },
+    Object {
+      "currentValue": ">1.0.0",
+      "datasource": "pypi",
+      "depName": "basic5",
+      "depType": "test",
+    },
+    Object {
+      "currentValue": "==1.0.0",
+      "currentVersion": "1.0.0",
+      "datasource": "pypi",
+      "depName": "basic6",
+      "depType": "test",
+    },
+    Object {
+      "currentValue": "~=1.0.0",
+      "datasource": "pypi",
+      "depName": "basic7",
+      "depType": "test",
+    },
+    Object {
+      "currentValue": ">=2.9.3",
+      "datasource": "pypi",
+      "depName": "single-line",
+      "depType": "test",
+    },
+    Object {
+      "currentValue": ">=2.16",
+      "datasource": "pypi",
+      "depName": "comment-deps1",
+      "depType": "test",
+    },
+    Object {
+      "currentValue": ">=1.19.4",
+      "datasource": "pypi",
+      "depName": "equals1",
+      "depType": "test",
+    },
+    Object {
+      "currentValue": undefined,
+      "datasource": "pypi",
+      "depName": "dep-combos1",
+      "depType": "test",
+    },
+    Object {
+      "currentValue": "==1.0.0",
+      "currentVersion": "1.0.0",
+      "datasource": "pypi",
+      "depName": "dep-combos2",
+      "depType": "test",
+    },
+  ],
+}
+`;

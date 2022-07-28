@@ -11,6 +11,7 @@ Renovate supports the following Python package managers:
 - `pipenv` (e.g. `Pipfile`)
 - `setup.py` file
 - `setup.cfg` file
+- `tox.ini` file
 
 ## Versioning support
 
