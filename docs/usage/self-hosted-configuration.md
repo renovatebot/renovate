@@ -141,10 +141,15 @@ This mode means that Renovate will dynamically install the version of tools avai
 
 Supported tools for dynamic install are:
 
+- `bundler`
+- `cargo`
 - `composer`
 - `flux`
 - `jb`
+- `jsonnet-bundler`
+- `mix`
 - `npm`
+- `pipenv`
 
 Tools not on this list fall back to `binarySource=global`.
 
