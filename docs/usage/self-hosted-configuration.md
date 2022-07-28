@@ -143,6 +143,7 @@ Supported tools for dynamic install are:
 
 - `composer`
 - `flux`
+- `gradle-wrapper`
 - `jb`
 - `npm`
 
