@@ -28,7 +28,6 @@ function extractActionsFromPackageFile(content: string): PackageDependency[] {
       const [, currentFrom] = dockerMatch;
       const dep = getDep(currentFrom);
       dep.depType = 'docker';
-      dep.versioning = dockerVersioning.id;
       deps.push(dep);
       continue;
     }
@@ -80,8 +79,6 @@ function extractContainer(container: string | Container): PackageDependency {
   } else {
     dep = getDep(container?.image);
   }
-
-  dep.versioning = dockerVersioning.id;
   return dep;
 }
 

@@ -157,7 +157,6 @@ Array [
     "depName": "replicated/dockerfilelint",
     "depType": "docker",
     "replaceString": "replicated/dockerfilelint",
-    "versioning": "docker",
   },
   Object {
     "autoReplaceStringTemplate": "{{depName}}/cli@{{#if newDigest}}{{newDigest}}{{#if newValue}} # tag={{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}",
@@ -178,7 +177,6 @@ Array [
     "depName": "node",
     "depType": "docker",
     "replaceString": "node:6@sha256:7b65413af120ec5328077775022c78101f103258a1876ec2f83890bce416e896",
-    "versioning": "docker",
   },
   Object {
     "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
@@ -188,7 +186,6 @@ Array [
     "depName": "node",
     "depType": "container",
     "replaceString": "node:16-bullseye",
-    "versioning": "docker",
   },
   Object {
     "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
@@ -198,7 +195,6 @@ Array [
     "depName": "redis",
     "depType": "service",
     "replaceString": "redis:5",
-    "versioning": "docker",
   },
   Object {
     "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
@@ -208,7 +204,6 @@ Array [
     "depName": "postgres",
     "depType": "service",
     "replaceString": "postgres:10",
-    "versioning": "docker",
   },
   Object {
     "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
@@ -218,7 +213,6 @@ Array [
     "depName": "node",
     "depType": "container",
     "replaceString": "node:16-bullseye",
-    "versioning": "docker",
   },
 ]
 `;
