@@ -90,21 +90,22 @@ function extractContainersFromPackageFile(
 
   const pkg = load(content, { json: true }) as Workflow;
 
-  Object.entries(pkg.jobs ?? {}).forEach(([, job]: [string, Job]) => {
+  for (const [, job] of Object.entries(pkg.jobs ?? {}) as [string, Job][]) {
     if (job.container !== undefined) {
       const dep = extractContainer(job.container);
       dep.depType = 'container';
       deps.push(dep);
     }
 
-    Object.entries(job.services ?? {}).forEach(
-      ([, service]: [string, string | Container]) => {
-        const dep = extractContainer(service);
-        dep.depType = 'service';
-        deps.push(dep);
-      }
-    );
-  });
+    for (const [, service] of Object.entries(job.services ?? {}) as [
+      string,
+      string | Container
+    ][]) {
+      const dep = extractContainer(service);
+      dep.depType = 'service';
+      deps.push(dep);
+    }
+  }
 
   return deps;
 }
