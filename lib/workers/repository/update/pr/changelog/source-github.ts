@@ -46,7 +46,8 @@ export async function getChangeLogJSON(
   }
   const version = allVersioning.get(versioning);
   const { protocol, host, pathname } = URL.parse(sourceUrl);
-  const baseUrl = `${protocol}//${host}/`;
+  // TODO: types (#7154)
+  const baseUrl = `${protocol!}//${host!}/`;
   const url = sourceUrl.startsWith('https://github.com/')
     ? 'https://api.github.com/'
     : sourceUrl;

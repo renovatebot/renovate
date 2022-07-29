@@ -76,7 +76,8 @@ If you need any further assistance then you can also [request help here](${
     let files: string[] = [];
     for (const [manager, managerFiles] of Object.entries(packageFiles)) {
       files = files.concat(
-        managerFiles.map((file) => ` * \`${file.packageFile}\` (${manager})`)
+        // TODO: types (#7154)
+        managerFiles.map((file) => ` * \`${file.packageFile!}\` (${manager})`)
       );
     }
     prBody =
@@ -89,7 +90,8 @@ If you need any further assistance then you can also [request help here](${
   }
   let configDesc = '';
   if (GlobalConfig.get('dryRun')) {
-    logger.info(`DRY-RUN: Would check branch ${config.onboardingBranch}`);
+    // TODO: types (#7154)
+    logger.info(`DRY-RUN: Would check branch ${config.onboardingBranch!}`);
   } else if (await isBranchModified(config.onboardingBranch!)) {
     configDesc = emojify(
       `### Configuration\n\n:abcd: Renovate has detected a custom config for this PR. Feel free to ask for [help](${
@@ -133,7 +135,8 @@ If you need any further assistance then you can also [request help here](${
     // Check if existing PR needs updating
     const prBodyHash = hashBody(prBody);
     if (existingPr.bodyStruct?.hash === prBodyHash) {
-      logger.debug(`${existingPr.displayNumber} does not need updating`);
+      // TODO: types (#7154)
+      logger.debug(`${existingPr.displayNumber!} does not need updating`);
       return;
     }
     // PR must need updating
