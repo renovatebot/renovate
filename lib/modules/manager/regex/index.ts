@@ -1,6 +1,7 @@
 import is from '@sindresorhus/is';
 import type { RegexManagerTemplates } from '../../../config/types';
 import type {
+  CustomExtractConfig,
   ExtractConfig,
   PackageDependency,
   PackageFile,
@@ -15,11 +16,15 @@ export const defaultConfig = {
 
 export const supportedDatasources = ['*'];
 
+export interface RegexManagerInterface extends CustomExtractConfig {
+  matchStrings: string[];
+}
 export function extractPackageFile(
   content: string,
   packageFile: string,
-  config: ExtractConfig
+  extractConfig: ExtractConfig
 ): Result<PackageFile | null> {
+  const config = { ...extractConfig } as RegexManagerInterface;
   let deps: PackageDependency[];
   switch (config.matchStringsStrategy) {
     default:

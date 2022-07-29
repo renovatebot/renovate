@@ -1,4 +1,5 @@
 import is from '@sindresorhus/is';
+import type { RegexManagerInterface } from '.';
 import { regEx } from '../../../util/regex';
 import type { CustomExtractConfig, PackageDependency } from '../types';
 import type { RecursionParameter } from './types';
@@ -13,10 +14,11 @@ import {
 export function handleAny(
   content: string,
   packageFile: string,
-  config: CustomExtractConfig
+  extractConfig: CustomExtractConfig
 ): PackageDependency[] {
-  return config
-    .matchStrings!.map((matchString) => regEx(matchString, 'g'))
+  const config = { ...extractConfig } as RegexManagerInterface;
+  return config.matchStrings
+    .map((matchString) => regEx(matchString, 'g'))
     .flatMap((regex) => regexMatchAll(regex, content)) // match all regex to content, get all matches, reduce to single array
     .map((matchResult) =>
       createDependency(
@@ -31,10 +33,11 @@ export function handleAny(
 export function handleCombination(
   content: string,
   packageFile: string,
-  config: CustomExtractConfig
+  extractConfig: CustomExtractConfig
 ): PackageDependency[] {
-  const matches = config
-    .matchStrings!.map((matchString) => regEx(matchString, 'g'))
+  const config = { ...extractConfig } as RegexManagerInterface;
+  const matches = config.matchStrings
+    .map((matchString) => regEx(matchString, 'g'))
     .flatMap((regex) => regexMatchAll(regex, content)); // match all regex to content, get all matches, reduce to single array
 
   if (!matches.length) {
@@ -55,9 +58,10 @@ export function handleCombination(
 export function handleRecursive(
   content: string,
   packageFile: string,
-  config: CustomExtractConfig
+  extractConfig: CustomExtractConfig
 ): PackageDependency[] {
-  const regexes = config.matchStrings!.map((matchString) =>
+  const config = { ...extractConfig } as RegexManagerInterface;
+  const regexes = config.matchStrings.map((matchString) =>
     regEx(matchString, 'g')
   );
 
