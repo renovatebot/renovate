@@ -93,34 +93,61 @@ describe('util/git/get-file-cache', () => {
       });
     });
 
-    // it('replaces value when SHA has changed', () => {
-    //   setCachedFile('foo', '111', false);
-    //   setCachedFile('foo', '121', false);
-    //   setCachedFile('foo', '131', false);
-    //   expect(repoCache).toEqual({
-    //     branches: [{ branchName: 'foo', sha: '131', isModified: false }],
-    //   });
-    // });
+    it('replaces SHA when it has changed', () => {
+      setCachedFile('foo', '111', 'some-file', 'old-content');
+      setCachedFile('foo', '121', 'some-file', 'old-content');
+      expect(repoCache).toEqual({
+        branches: [
+          {
+            branchName: 'foo',
+            sha: '121',
+            contents: { 'some-file': 'old-content' },
+          },
+        ],
+      });
+    });
 
-    // it('replaces value when both value and SHA have changed', () => {
-    //   setCachedFile('foo', '111', false);
-    //   setCachedFile('foo', 'aaa', true);
-    //   expect(repoCache).toEqual({
-    //     branches: [{ branchName: 'foo', sha: 'aaa', isModified: true }],
-    //   });
-    // });
+    it('replaces value and SHA when both have changed', () => {
+      setCachedFile('foo', '111', 'some-file', 'old-content');
+      setCachedFile('foo', '121', 'some-file', 'new-content');
+      expect(repoCache).toEqual({
+        branches: [
+          {
+            branchName: 'foo',
+            sha: '121',
+            contents: { 'some-file': 'new-content' },
+          },
+        ],
+      });
+    });
 
-    // it('handles multiple branches', () => {
-    //   setCachedFile('foo-1', '111', false);
-    //   setCachedFile('foo-2', 'aaa', true);
-    //   setCachedFile('foo-3', '222', false);
-    //   expect(repoCache).toEqual({
-    //     branches: [
-    //       { branchName: 'foo-1', sha: '111', isModified: false },
-    //       { branchName: 'foo-2', sha: 'aaa', isModified: true },
-    //       { branchName: 'foo-3', sha: '222', isModified: false },
-    //     ],
-    //   });
-    // });
+    it('handles multiple branches and filePaths', () => {
+      setCachedFile('foo-1', '111', 'some-file', 'content');
+      setCachedFile('foo-2', '121', 'some-file', 'content');
+      setCachedFile('foo-3', '222', 'file-1', 'file-1-content');
+      setCachedFile('foo-3', '222', 'file-2', 'file-2-content');
+      expect(repoCache).toEqual({
+        branches: [
+          {
+            branchName: 'foo-1',
+            sha: '111',
+            contents: { 'some-file': 'content' },
+          },
+          {
+            branchName: 'foo-2',
+            sha: '121',
+            contents: { 'some-file': 'content' },
+          },
+          {
+            branchName: 'foo-3',
+            sha: '222',
+            contents: {
+              'file-1': 'file-1-content',
+              'file-2': 'file-2-content',
+            },
+          },
+        ],
+      });
+    });
   });
 });

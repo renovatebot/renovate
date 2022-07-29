@@ -37,6 +37,7 @@ import {
   setCachedConflictResult,
 } from './conflicts-cache';
 import { checkForPlatformFailure, handleCommitError } from './error';
+import { getCachedFile, setCachedFile } from './get-file-cache';
 import {
   getCachedModifiedResult,
   setCachedModifiedResult,
@@ -52,7 +53,6 @@ import type {
   StorageConfig,
   TreeItem,
 } from './types';
-import { getCachedFile } from './get-file-cache';
 
 export { setNoVerify } from './config';
 export { setPrivateKey } from './private-key';
@@ -844,6 +844,12 @@ export async function getFile(
   await syncGit();
   try {
     content = await git.show(['origin/' + branchName + ':' + filePath]);
+    setCachedFile(
+      branchName,
+      config.branchCommits[branchName],
+      filePath,
+      content
+    );
     return content;
   } catch (err) {
     const errChecked = checkForPlatformFailure(err);
