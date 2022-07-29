@@ -9,7 +9,7 @@ import {
   isActiveConfidenceLevel,
   satisfiesConfidenceLevel,
 } from '../../../../util/merge-confidence';
-import { applyPackageRules } from '../../../../util/package-rules/package-rules';
+import { applyPackageRules } from '../../../../util/package-rules';
 import type { LookupUpdateConfig, UpdateResult } from './types';
 import { getUpdateType } from './update-type';
 

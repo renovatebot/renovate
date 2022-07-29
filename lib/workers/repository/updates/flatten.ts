@@ -6,7 +6,7 @@ import {
 import type { RenovateConfig } from '../../../config/types';
 import { getDefaultConfig } from '../../../modules/datasource';
 import { get } from '../../../modules/manager';
-import { applyPackageRules } from '../../../util/package-rules/package-rules';
+import { applyPackageRules } from '../../../util/package-rules';
 import { regEx } from '../../../util/regex';
 import { parseUrl } from '../../../util/url';
 import type { BranchUpgradeConfig } from '../../types';

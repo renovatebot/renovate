@@ -14,7 +14,7 @@ import type {
 } from '../../../modules/manager/types';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { clone } from '../../../util/clone';
-import { applyPackageRules } from '../../../util/package-rules/package-rules';
+import { applyPackageRules } from '../../../util/package-rules';
 import { PackageFiles } from '../package-files';
 import { lookupUpdates } from './lookup';
 import type { LookupUpdateConfig } from './lookup/types';

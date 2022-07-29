@@ -5,7 +5,12 @@ import { mergeChildConfig } from '../../config';
 import type { PackageRule, PackageRuleInputConfig } from '../../config/types';
 import { logger } from '../../logger';
 import * as allVersioning from '../../modules/versioning';
-import { configRegexPredicate, regEx } from '../regex';
+import { configRegexPredicate } from '../regex';
+import matchers from './api';
+import type { MatcherApi } from './types';
+
+export const getMatchers = (): Map<string, MatcherApi> => matchers;
+export const getMatcherList = (): string[] => Array.from(matchers.keys());
 
 function matchesRule(
   inputConfig: PackageRuleInputConfig,
@@ -17,7 +22,6 @@ function matchesRule(
     lockFiles,
     depType,
     depTypes,
-    depName,
     currentValue,
     currentVersion,
     lockedVersion,
@@ -38,30 +42,34 @@ function matchesRule(
   const matchManagers = packageRule.matchManagers ?? [];
   const matchDatasources = packageRule.matchDatasources ?? [];
   const matchDepTypes = packageRule.matchDepTypes ?? [];
-  const matchPackageNames = packageRule.matchPackageNames ?? [];
-  let matchPackagePatterns = packageRule.matchPackagePatterns ?? [];
-  const matchPackagePrefixes = packageRule.matchPackagePrefixes ?? [];
-  const excludePackageNames = packageRule.excludePackageNames ?? [];
-  const excludePackagePatterns = packageRule.excludePackagePatterns ?? [];
-  const excludePackagePrefixes = packageRule.excludePackagePrefixes ?? [];
   const matchSourceUrlPrefixes = packageRule.matchSourceUrlPrefixes ?? [];
   const matchSourceUrls = packageRule.matchSourceUrls ?? [];
   const matchCurrentVersion = packageRule.matchCurrentVersion ?? null;
   const matchUpdateTypes = packageRule.matchUpdateTypes ?? [];
+
   let positiveMatch = false;
-  // Massage a positive patterns patch if an exclude one is present
-  if (
-    (excludePackageNames.length ||
-      excludePackagePatterns.length ||
-      excludePackagePrefixes.length) &&
-    !(
-      matchPackageNames.length ||
-      matchPackagePatterns.length ||
-      matchPackagePrefixes.length
-    )
-  ) {
-    matchPackagePatterns = ['.*'];
+  let matchApplied = false;
+  for (const [, matcher] of getMatchers()) {
+    const isMatch = matcher.matches(inputConfig, packageRule);
+
+    // no rules are defined
+    if (is.nullOrUndefined(isMatch)) {
+      continue;
+    }
+
+    matchApplied = true;
+
+    // mark that one of the rules has matched
+    if (isMatch) {
+      positiveMatch = true;
+    }
   }
+
+  // not a single match rule is defined assume match everything
+  if (!matchApplied) {
+    positiveMatch = true;
+  }
+
   if (matchFiles.length) {
     const isMatch = matchFiles.some(
       (fileName) =>
@@ -149,72 +157,20 @@ function matchesRule(
     }
     positiveMatch = true;
   }
-  if (
-    matchPackageNames.length ||
-    matchPackagePatterns.length ||
-    matchPackagePrefixes.length
-  ) {
-    if (!depName) {
+
+  for (const [, matcher] of getMatchers()) {
+    const isExclude = matcher.excludes(inputConfig, packageRule);
+
+    // no rules are defined
+    if (is.nullOrUndefined(isExclude)) {
+      continue;
+    }
+
+    if (isExclude) {
       return false;
     }
-    let isMatch = matchPackageNames.includes(depName);
-    // name match is "or" so we check patterns if we didn't match names
-    if (!isMatch) {
-      for (const packagePattern of matchPackagePatterns) {
-        const packageRegex = regEx(
-          packagePattern === '^*$' || packagePattern === '*'
-            ? '.*'
-            : packagePattern
-        );
-        if (packageRegex.test(depName)) {
-          logger.trace(`${depName} matches against ${String(packageRegex)}`);
-          isMatch = true;
-        }
-      }
-    }
-    // prefix match is also "or"
-    if (!isMatch && matchPackagePrefixes.length) {
-      isMatch = matchPackagePrefixes.some((prefix) =>
-        depName.startsWith(prefix)
-      );
-    }
-    if (!isMatch) {
-      return false;
-    }
-    positiveMatch = true;
   }
-  if (excludePackageNames.length) {
-    const isMatch = depName && excludePackageNames.includes(depName);
-    if (isMatch) {
-      return false;
-    }
-    positiveMatch = true;
-  }
-  if (depName && excludePackagePatterns.length) {
-    let isMatch = false;
-    for (const pattern of excludePackagePatterns) {
-      const packageRegex = regEx(
-        pattern === '^*$' || pattern === '*' ? '.*' : pattern
-      );
-      if (packageRegex.test(depName)) {
-        logger.trace(`${depName} matches against ${String(packageRegex)}`);
-        isMatch = true;
-      }
-    }
-    if (isMatch) {
-      return false;
-    }
-    positiveMatch = true;
-  }
-  if (depName && excludePackagePrefixes.length) {
-    const isMatch = excludePackagePrefixes.some((prefix) =>
-      depName.startsWith(prefix)
-    );
-    if (isMatch) {
-      return false;
-    }
-    positiveMatch = true;
-  }
+
   if (matchSourceUrlPrefixes.length) {
     const upperCaseSourceUrl = sourceUrl?.toUpperCase();
     const isMatch = matchSourceUrlPrefixes.some((prefix) =>

@@ -16,7 +16,7 @@ import { getRangeStrategy } from '../../../../modules/manager';
 import * as allVersioning from '../../../../modules/versioning';
 import { ExternalHostError } from '../../../../types/errors/external-host-error';
 import { clone } from '../../../../util/clone';
-import { applyPackageRules } from '../../../../util/package-rules/package-rules';
+import { applyPackageRules } from '../../../../util/package-rules';
 import { regEx } from '../../../../util/regex';
 import { getBucket } from './bucket';
 import { mergeConfigConstraints } from './common';
