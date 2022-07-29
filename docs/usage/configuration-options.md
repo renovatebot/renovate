@@ -192,7 +192,7 @@ Acceptable values are:
 Not all platforms support all pull request merge strategies.
 In cases where a merge strategy is not supported by the platform, Renovate will hold off on merging instead of silently merging in a way you didn't wish for.
 
-The only platforms that support `automergeStrategy` is Bitbucket Cloud and Gitea.
+The only platforms that support `automergeStrategy` are Bitbucket Cloud and Gitea.
 
 ## automergeType
 
