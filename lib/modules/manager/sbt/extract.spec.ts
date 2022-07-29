@@ -305,6 +305,46 @@ describe('modules/manager/sbt/extract', () => {
         packageFileVersion: undefined,
       });
     });
+
+    it('extract deps line with force withSource exclude excludeAll', () => {
+      const content = `
+      name := "renovatebot-sbt-example"
+
+      scalaVersion := "2.13.8"
+
+      libraryDependencies ++= Seq(
+            "com.lightbend.akka" %% "akka-stream-alpakka-csv" % "2.0.0" excludeAll ExclusionRule(organization = "com.typesafe.akka"),
+            "com.lightbend.akka" %% "akka-stream-alpakka-s3" % "2.0.1" force(),
+      )`;
+      expect(extractFile(content)).toMatchObject({
+        deps: [
+          {
+            registryUrls: ['https://repo.maven.apache.org/maven2'],
+            datasource: 'maven',
+            depName: 'scala',
+            packageName: 'org.scala-lang:scala-library',
+            currentValue: '2.13.8',
+            separateMinorPatch: true,
+          },
+          {
+            registryUrls: ['https://repo.maven.apache.org/maven2'],
+            depName: 'com.lightbend.akka:akka-stream-alpakka-csv',
+            fileReplacePosition: 6,
+            packageName: 'com.lightbend.akka:akka-stream-alpakka-csv_2.13',
+            currentValue: '2.0.0',
+            datasource: 'sbt-package',
+          },
+          {
+            registryUrls: ['https://repo.maven.apache.org/maven2'],
+            depName: 'com.lightbend.akka:akka-stream-alpakka-s3',
+            packageName: 'com.lightbend.akka:akka-stream-alpakka-s3_2.13',
+            currentValue: '2.0.1',
+            datasource: 'sbt-package',
+          },
+        ],
+        packageFileVersion: undefined,
+      });
+    });
   });
 
   describe('extractAllPackageFiles()', () => {
