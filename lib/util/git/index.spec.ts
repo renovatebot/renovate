@@ -394,20 +394,25 @@ describe('util/git/index', () => {
 
   describe('getFile(filePath, branchName)', () => {
     it('gets the file', async () => {
-      getFileCache.getCachedFile.mockReturnValue(null);
+      getFileCache.getCachedFile.mockReturnValueOnce(null);
       const res = await git.getFile('master_file');
       expect(res).toBe(defaultBranch);
     });
 
     it('short cuts 404', async () => {
-      getFileCache.getCachedFile.mockReturnValue(null);
+      getFileCache.getCachedFile.mockReturnValueOnce(null);
       const res = await git.getFile('some-missing-path');
       expect(res).toBeNull();
     });
 
     it('returns null for 404', async () => {
-      getFileCache.getCachedFile.mockReturnValue(null);
+      getFileCache.getCachedFile.mockReturnValueOnce(null);
       expect(await git.getFile('some-path', 'some-branch')).toBeNull();
+    });
+
+    it('returns cached content', async () => {
+      getFileCache.getCachedFile.mockReturnValueOnce('content');
+      expect(await git.getFile('some-path', 'some-branch')).toBe('content');
     });
   });
 
