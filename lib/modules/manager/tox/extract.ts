@@ -6,9 +6,9 @@ import { newlineRegex, regEx } from '../../../util/regex';
 import { PypiDatasource } from '../../datasource/pypi';
 import type { PackageDependency, PackageFile, Result } from '../types';
 
-function getSectionName(str: string): string {
-  const [, sectionName] = regEx(/^\s*\[\s*(\S*)\s*]\s*$/).exec(str) ?? [];
-  return sectionName;
+function getSectionName(str: string): string | null {
+  const result = regEx(/^\s*\[\s*(?<sectionName>\S+)\s*]\s*$/).exec(str);
+  return result?.groups?.sectionName ?? null;
 }
 
 /**
@@ -16,10 +16,9 @@ function getSectionName(str: string): string {
  * Do not allow starting with spaces, this is how deps arrays are declared,
  * by indent
  */
-function getParamName(str: string): string {
-  const param = regEx(/^([\w.\-_]+)\s*=\s*.*?\s*$/);
-  const [, parmName] = param.exec(str) ?? [];
-  return parmName;
+function getParamName(str: string): string | null {
+  const result = regEx(/^(?<paramName>[\w.\-_]+)\s*=\s*.*?\s*$/).exec(str);
+  return result?.groups?.paramName ?? null;
 }
 
 /**
@@ -96,13 +95,13 @@ export function extractPackageFile(
 
   content
     .split(newlineRegex)
-    .map((line) => line.replace(regEx(/#.*$/), '').trimEnd())
+    .filter( line => !regEx(/#.*$/).test(line))
     .forEach((rawLine) => {
       let line = rawLine;
       const newSectionName = getSectionName(line);
 
       // Keep track of when sections change
-      if (is.string(newSectionName)) {
+      if (newSectionName) {
         sectionName = newSectionName;
         isTestEnv = testEnvRegex.test(sectionName);
         inDeps = false;
@@ -111,20 +110,20 @@ export function extractPackageFile(
 
       // Only parse if inside testenv and param name is deps =
       const depsReplaceRegex = regEx(/^deps\s*=\s*/);
-      if (isTestEnv === true) {
+      if (isTestEnv) {
         paramName = getParamName(line);
-        if (is.string(paramName) && paramName === 'deps') {
+        if (paramName === 'deps') {
           inDeps = true;
           // Can also have deps on this line, so just remove the preceeding
           // deps =
           line = line.replace(depsReplaceRegex, '');
-        } else if (is.string(paramName) && paramName !== 'deps') {
+        } else if (paramName !== 'deps') {
           inDeps = false;
           return;
         }
       }
 
-      if (inDeps === true) {
+      if (inDeps) {
         const dep = parseDep(line);
         if (dep) {
           deps.push(dep);
