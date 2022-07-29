@@ -1,4 +1,3 @@
-import { expect } from '@jest/globals';
 import * as httpMock from '../../../../test/http-mock';
 import { setBaseUrl } from '../../../util/http/bitbucket';
 import * as utils from './utils';
