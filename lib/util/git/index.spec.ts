@@ -11,6 +11,7 @@ import * as _repoCache from '../cache/repository';
 import type { BranchCache } from '../cache/repository/types';
 import { newlineRegex, regEx } from '../regex';
 import * as _conflictsCache from './conflicts-cache';
+import * as _getFileCache from './get-file-cache';
 import * as _modifiedCache from './modified-cache';
 import * as _parentShaCache from './parent-sha-cache';
 import type { FileChange } from './types';
@@ -18,12 +19,14 @@ import * as git from '.';
 import { setNoVerify } from '.';
 
 jest.mock('./conflicts-cache');
+jest.mock('./get-file-cache');
 jest.mock('./modified-cache');
 jest.mock('./parent-sha-cache');
 jest.mock('delay');
 jest.mock('../cache/repository');
 const repoCache = mocked(_repoCache);
 const conflictsCache = mocked(_conflictsCache);
+const getFileCache = mocked(_getFileCache);
 const modifiedCache = mocked(_modifiedCache);
 const parentShaCache = mocked(_parentShaCache);
 // Class is no longer exported
@@ -391,16 +394,19 @@ describe('util/git/index', () => {
 
   describe('getFile(filePath, branchName)', () => {
     it('gets the file', async () => {
+      getFileCache.getCachedFile.mockReturnValue(null);
       const res = await git.getFile('master_file');
       expect(res).toBe(defaultBranch);
     });
 
     it('short cuts 404', async () => {
+      getFileCache.getCachedFile.mockReturnValue(null);
       const res = await git.getFile('some-missing-path');
       expect(res).toBeNull();
     });
 
     it('returns null for 404', async () => {
+      getFileCache.getCachedFile.mockReturnValue(null);
       expect(await git.getFile('some-path', 'some-branch')).toBeNull();
     });
   });
