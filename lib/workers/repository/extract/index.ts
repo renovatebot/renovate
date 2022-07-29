@@ -3,11 +3,9 @@ import { getManagerConfig, mergeChildConfig } from '../../../config';
 import type { ManagerConfig, RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
 import { getManagerList } from '../../../modules/manager';
-import type {
-  PackageFile,
-  WorkerExtractConfig,
-} from '../../../modules/manager/types';
+import type { PackageFile } from '../../../modules/manager/types';
 import { getFileList } from '../../../util/git';
+import type { WorkerExtractConfig } from '../../types';
 import { getMatchingFiles } from './file-match';
 import { getManagerPackageFiles } from './manager-files';
 
