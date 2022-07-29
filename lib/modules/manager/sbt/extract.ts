@@ -1,3 +1,4 @@
+import upath from 'upath';
 import { logger } from '../../../logger';
 import { readLocalFile } from '../../../util/fs';
 import { newlineRegex, regEx } from '../../../util/regex';
@@ -493,7 +494,6 @@ export function extractFile(
 }
 
 function prepareLoadPackageFiles(
-  _config: ExtractConfig,
   packageFilesContent: { packageFile: string; content: string }[]
 ): {
   globalVariables: ParseOptions['variables'];
@@ -540,34 +540,26 @@ export async function extractAllPackageFiles(
   const groupPackageFileContent: GroupFilenameContent = {};
   for (const packageFile of packageFiles) {
     const content = await readLocalFile(packageFile, 'utf8');
-    if (!content) {
-      logger.trace({ packageFile }, 'packageFile has no content');
-      continue;
+    if (content) {
+      const group = upath.dirname(packageFile);
+      groupPackageFileContent[group] ??= [];
+      groupPackageFileContent[group].push({ packageFile, content });
     }
-    const paths = packageFile.split('/');
-    const group = paths.length > 1 ? paths[0] : '';
-    if (!groupPackageFileContent[group]) {
-      groupPackageFileContent[group] = [];
-    }
-    groupPackageFileContent[group].push({ packageFile, content });
+    logger.trace({ packageFile }, 'packageFile has no content');
   }
 
   // 1. globalVariables from project/ and root package file
   // 2. registry from all package file
   // 3. Project's scalaVersion - use in parseDepExpr to add suffix eg. "_2.13"
   const { globalVariables, registryUrls, scalaVersion } =
-    prepareLoadPackageFiles(_config, [
-      ...(groupPackageFileContent['project']
-        ? groupPackageFileContent['project']
-        : []), // in project/ folder
-      ...(groupPackageFileContent[''] ? groupPackageFileContent[''] : []), // root
+    prepareLoadPackageFiles([
+      ...(groupPackageFileContent['project'] ?? []), // in project/ folder
+      ...(groupPackageFileContent['.'] ?? []), // root
     ]);
 
   const mapDepsToPackageFile: Record<string, PackageDependency[]> = {};
   // Start extract all package files
-  for (const [, packageFileContents] of Object.entries(
-    groupPackageFileContent
-  )) {
+  for (const packageFileContents of Object.values(groupPackageFileContent)) {
     // Extract package file by its group
     // local variable is share within its group
     for (const { packageFile, content } of packageFileContents) {
@@ -610,5 +602,5 @@ export async function extractAllPackageFiles(
     })
   );
 
-  return formatedDeps.length > 0 ? formatedDeps : null;
+  return formatedDeps.length ? formatedDeps : null;
 }
