@@ -1,17 +1,16 @@
 import type { RenovateConfig } from '../../../../config/types';
-import { clone } from '../../../../util/clone';
 import * as template from '../../../../util/template';
 import type { CommitMessage } from '../../model/commit-message';
 import { CommitMessageFactory } from '../../model/commit-message-factory';
 
-export class ConfigMigrationSemanticFactory {
-  private readonly config: RenovateConfig;
+export class ConfigMigrationCommitMessageFactory {
   private commitMessage: string | null = null;
   private prTitle: string | null = null;
 
-  constructor(config: RenovateConfig, private readonly configFile: string) {
-    this.config = clone(config);
-  }
+  constructor(
+    private readonly config: RenovateConfig,
+    private readonly configFile: string
+  ) {}
 
   private create(isTitle = false): CommitMessage {
     const { commitMessage } = this.config;

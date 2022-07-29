@@ -3,7 +3,7 @@ import type { RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
 import { commitAndPush } from '../../../../modules/platform/commit';
 import { getMigrationBranchName } from '../common';
-import { ConfigMigrationSemanticFactory } from './commit-message';
+import { ConfigMigrationCommitMessageFactory } from './commit-message';
 import type { MigratedData } from './migrated-data';
 
 export function createConfigMigrationBranch(
@@ -15,7 +15,7 @@ export function createConfigMigrationBranch(
   const configFileName = migratedConfigData.filename;
   logger.debug('Creating config migration branch');
 
-  const semanticFactory = new ConfigMigrationSemanticFactory(
+  const semanticFactory = new ConfigMigrationCommitMessageFactory(
     config,
     configFileName
   );

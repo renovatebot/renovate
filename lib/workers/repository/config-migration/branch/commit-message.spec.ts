@@ -1,13 +1,15 @@
 import { getConfig } from '../../../../config/defaults';
+import type { RenovateConfig } from '../../../../config/types';
 import * as template from '../../../../util/template';
-import { ConfigMigrationSemanticFactory } from './commit-message';
+import { ConfigMigrationCommitMessageFactory } from './commit-message';
 
 describe('workers/repository/config-migration/branch/commit-message', () => {
-  const config = getConfig();
   const fileName = 'renovate.json';
   const templateCompileSpy = jest.spyOn(template, 'compile');
+  let config: RenovateConfig;
 
   beforeEach(() => {
+    config = getConfig();
     jest.clearAllMocks();
   });
 
@@ -17,7 +19,7 @@ describe('workers/repository/config-migration/branch/commit-message', () => {
 
   it('creates semantic commit message', () => {
     config.semanticCommits = 'enabled';
-    const semanticFactory = new ConfigMigrationSemanticFactory(
+    const semanticFactory = new ConfigMigrationCommitMessageFactory(
       config,
       fileName
     );
@@ -32,7 +34,7 @@ describe('workers/repository/config-migration/branch/commit-message', () => {
 
   it('creates semantic pr title', () => {
     config.semanticCommits = 'enabled';
-    const semanticFactory = new ConfigMigrationSemanticFactory(
+    const semanticFactory = new ConfigMigrationCommitMessageFactory(
       config,
       fileName
     );
@@ -47,7 +49,7 @@ describe('workers/repository/config-migration/branch/commit-message', () => {
 
   it('creates non-semantic commit message', () => {
     config.semanticCommits = 'disabled';
-    const semanticFactory = new ConfigMigrationSemanticFactory(
+    const semanticFactory = new ConfigMigrationCommitMessageFactory(
       config,
       fileName
     );
@@ -62,7 +64,7 @@ describe('workers/repository/config-migration/branch/commit-message', () => {
 
   it('creates non-semantic pr title', () => {
     config.semanticCommits = 'disabled';
-    const semanticFactory = new ConfigMigrationSemanticFactory(
+    const semanticFactory = new ConfigMigrationCommitMessageFactory(
       config,
       fileName
     );
@@ -74,7 +76,7 @@ describe('workers/repository/config-migration/branch/commit-message', () => {
   it('returns default values when commitMessage template string is empty', () => {
     config.semanticCommits = 'disabled';
     config.commitMessage = '';
-    const semanticFactory = new ConfigMigrationSemanticFactory(
+    const semanticFactory = new ConfigMigrationCommitMessageFactory(
       config,
       fileName
     );

@@ -8,7 +8,7 @@ import {
   isBranchModified,
 } from '../../../../util/git';
 import { getMigrationBranchName } from '../common';
-import { ConfigMigrationSemanticFactory } from './commit-message';
+import { ConfigMigrationCommitMessageFactory } from './commit-message';
 import type { MigratedData } from './migrated-data';
 
 export async function rebaseMigrationBranch(
@@ -38,7 +38,7 @@ export async function rebaseMigrationBranch(
     return null;
   }
 
-  const semanticFactory = new ConfigMigrationSemanticFactory(
+  const semanticFactory = new ConfigMigrationCommitMessageFactory(
     config,
     configFileName
   );
