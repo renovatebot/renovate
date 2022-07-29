@@ -19,7 +19,7 @@ import type {
 } from './types';
 
 const stripComment = (str: string): string =>
-  str.replace(regEx(/(^|\s+)\/\/.*$/), '');
+  str.replace(regEx(/(^|\s+)\/\/.*$/), '').replace(regEx(/\/\*\*.*\*\*\//), '');
 
 const isSingleLineDep = (str: string): boolean =>
   regEx(/^\s*(libraryDependencies|dependencyOverrides)\s*\+=\s*/).test(str);
@@ -165,24 +165,36 @@ function parseDepExpr(
   expr: string,
   ctx: ParseContext
 ): PackageDependency | null {
-  const { scalaVersion, variables, lineIndex, globalVariables } = ctx;
+  const {
+    scalaVersion,
+    variables,
+    lineIndex,
+    globalVariables,
+    localVariables,
+  } = ctx;
   let { depType } = ctx;
 
   const isValidToken = (str: string): boolean =>
     isStringLiteral(str) ||
     (isVarName(str) &&
-      (Boolean(variables[str]) || Boolean(globalVariables[str])));
+      (Boolean(localVariables[str]) ||
+        Boolean(variables[str]) ||
+        Boolean(globalVariables[str])));
 
   const resolveToken = (str: string): string => {
     if (isStringLiteral(str)) {
       return str.replace(regEx(/^"/), '').replace(regEx(/"$/), '');
     }
+    if (localVariables[str]) {
+      ctx.lookupVariableFile = variables[str]?.sourceFile || '';
+      return localVariables[str].val;
+    }
     if (variables[str]) {
-      ctx.lookupVariableFile = variables[str].sourceFile;
+      ctx.lookupVariableFile = variables[str]?.sourceFile || '';
       return variables[str].val;
     }
     if (globalVariables[str]) {
-      ctx.lookupVariableFile = globalVariables[str].sourceFile;
+      ctx.lookupVariableFile = globalVariables[str]?.sourceFile || '';
       return globalVariables[str].val;
     }
     return str;
@@ -252,16 +264,14 @@ function parseDepExpr(
     fileReplacePosition: lineIndex,
   };
 
-  if (variables[rawVersion] || globalVariables[rawVersion]) {
+  const varDep =
+    localVariables[rawVersion] ||
+    variables[rawVersion] ||
+    globalVariables[rawVersion];
+  if (varDep) {
     result.groupName = `${rawVersion}`;
-  }
-
-  if (variables[rawVersion]) {
-    result.fileReplacePosition = variables[rawVersion].lineIndex;
-    result.editFile = variables[rawVersion].sourceFile;
-  } else if (globalVariables[rawVersion]) {
-    result.fileReplacePosition = globalVariables[rawVersion].lineIndex;
-    result.editFile = globalVariables[rawVersion].sourceFile;
+    result.fileReplacePosition = varDep.lineIndex;
+    result.editFile = varDep.sourceFile;
   }
 
   if (depType) {
@@ -284,6 +294,7 @@ function parseSbtLine(
     scalaVersion,
     packageFileVersion,
     variableParentKey = '',
+    localVariables = {},
   } = acc;
 
   const ctx: ParseContext = {
@@ -292,6 +303,7 @@ function parseSbtLine(
     lookupVariableFile: acc.packageFile!,
     lineIndex,
     globalVariables,
+    localVariables,
   };
 
   let dep: PackageDependency | null = null;
@@ -312,6 +324,7 @@ function parseSbtLine(
       isMultiDeps = false;
       scalaVersionVariable = getScalaVersionVariable(line);
       const scalaVar =
+        localVariables[scalaVersionVariable] ??
         variables[scalaVersionVariable] ??
         globalVariables[scalaVersionVariable];
       if (scalaVar) {
@@ -352,8 +365,10 @@ function parseSbtLine(
           : `${variableParentKey}.${objectName.trim()}`;
     } else if (isObjectEndedLine(line)) {
       variableParentKey = variableParentKey.split('.').slice(0, -1).join('.');
+      localVariables = {};
     } else if (isVarDef(line)) {
       const key = variableParentKey === '' ? '' : `${variableParentKey}.`;
+      localVariables[getVarName(line)] = getVarInfo(line, ctx);
       variables[key + getVarName(line)] = getVarInfo(line, ctx);
     } else if (isVarDefRefVar(line)) {
       const rightPart = line
@@ -459,10 +474,7 @@ export function extractFile(
   }
   const equalsToNewLineRe = regEx(/=\s*\n/, 'gm');
   const goodContentForParsing = content.replace(equalsToNewLineRe, '=');
-  const lines = goodContentForParsing
-    .split(newlineRegex)
-    .map(stripComment)
-    .map((str) => str.replace(regEx(/\/\*\*.*\*\*\//), ''));
+  const lines = goodContentForParsing.split(newlineRegex).map(stripComment);
 
   const acc: PackageFile & ParseOptions = {
     registryUrls: [MAVEN_REPO],
@@ -471,6 +483,7 @@ export function extractFile(
     scalaVersion: null,
     variables: {},
     globalVariables: {},
+    localVariables: {},
     ...defaultAcc,
   };
 
@@ -565,15 +578,22 @@ export async function extractAllPackageFiles(
         scalaVersion,
         globalVariables,
       });
-      if (res) {
-        if (res?.deps) {
-          for (const dep of res.deps) {
-            const variableSourceFile = dep?.editFile ?? packageFile;
-            dep.registryUrls = [...new Set(dep.registryUrls)];
-            if (!mapDepsToPackageFile[variableSourceFile]) {
-              mapDepsToPackageFile[variableSourceFile] = [];
-            }
-            // merge dep by file
+
+      if (res?.deps) {
+        for (const dep of res.deps) {
+          // "dep?.editFile" is the source of variable that package version is referecing with
+          // "packageFile" is where package usage was found
+          const variableSourceFile = dep?.editFile ?? packageFile;
+          dep.registryUrls = [...new Set(dep.registryUrls)];
+          if (!mapDepsToPackageFile[variableSourceFile]) {
+            mapDepsToPackageFile[variableSourceFile] = [];
+          }
+          const isExist = mapDepsToPackageFile[variableSourceFile].find(
+            (val) =>
+              val.packageName === dep.packageName &&
+              val.currentValue === dep.currentValue
+          );
+          if (!isExist) {
             mapDepsToPackageFile[variableSourceFile].push(dep);
           }
         }
@@ -581,24 +601,14 @@ export async function extractAllPackageFiles(
     }
   }
 
-  // Filter unique package
-  // As we merge all package to single package file
-  // Packages are counted in submodule but it's the same one
-  // by packageName and currentValue
-  const finalPackages = Object.entries(mapDepsToPackageFile).map(
+  // Format from Record<packageFile, Dependency[]>
+  // to {packageFile:string, deps: Dependency[]}[]
+  const formatedDeps = Object.entries(mapDepsToPackageFile).map(
     ([packageFile, deps]) => ({
       packageFile,
-      deps: deps.filter(
-        (val, idx, self) =>
-          idx ===
-          self.findIndex(
-            (dep) =>
-              dep.packageName === val.packageName &&
-              dep.currentValue === val.currentValue
-          )
-      ),
+      deps,
     })
   );
 
-  return finalPackages.length > 0 ? finalPackages : null;
+  return formatedDeps.length > 0 ? formatedDeps : null;
 }
