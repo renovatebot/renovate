@@ -277,7 +277,7 @@ describe('modules/datasource/docker/index', () => {
         .get('/')
         .reply(401, '', {
           'www-authenticate':
-            'Bearer realm="https://auth.docker.io/token",service="registry.docker.io",scope="repository:library/some-dep:pull  "',
+            'Bearer realm="https://auth.docker.io/token",service="registry.docker.io",scope="repository:library/some-dep:pull"',
         })
         .head('/library/some-dep/manifests/latest')
         .reply(200, {}, { 'docker-content-digest': 'some-digest' });
@@ -303,7 +303,7 @@ describe('modules/datasource/docker/index', () => {
         .twice()
         .reply(401, '', {
           'www-authenticate':
-            'Bearer realm="https://auth.docker.io/token",service="registry.docker.io",scope="repository:library/some-dep:pull  "',
+            'Bearer realm="https://auth.docker.io/token",service="registry.docker.io",scope="repository:library/some-dep:pull"',
         })
         .head('/library/some-dep/manifests/some-new-value')
         .reply(200, undefined, {})
@@ -551,7 +551,7 @@ describe('modules/datasource/docker/index', () => {
         .get('/')
         .reply(401, '', {
           'www-authenticate':
-            'Bearer realm="https://auth.docker.io/token",service="registry.docker.io",scope="repository:library/some-other-dep:pull  "',
+            'Bearer realm="https://auth.docker.io/token",service="registry.docker.io",scope="repository:library/some-other-dep:pull"',
         })
         .head('/library/some-other-dep/manifests/8.0.0-alpine')
         .reply(200, {}, { 'docker-content-digest': 'some-digest' });
@@ -775,7 +775,7 @@ describe('modules/datasource/docker/index', () => {
         .times(3)
         .reply(401, '', {
           'www-authenticate':
-            'Bearer realm="https://auth.docker.io/token",service="registry.docker.io",scope="repository:library/some-dep:pull  "',
+            'Bearer realm="https://auth.docker.io/token",service="registry.docker.io",scope="repository:library/some-dep:pull"',
         })
         .head('/library/some-dep/manifests/' + currentDigest)
         .reply(200, '', { 'content-type': MediaType.ociManifestV1 })
@@ -794,7 +794,7 @@ describe('modules/datasource/docker/index', () => {
         .get('/')
         .reply(401, '', {
           'www-authenticate':
-            'Bearer realm="https://auth.docker.io/token",service="registry.docker.io",scope="repository:library/some-dep:pull  "',
+            'Bearer realm="https://auth.docker.io/token",service="registry.docker.io",scope="repository:library/some-dep:pull"',
         })
         .get('/library/some-dep/manifests/some-new-value')
         .reply(
@@ -847,7 +847,7 @@ describe('modules/datasource/docker/index', () => {
         .times(3)
         .reply(401, '', {
           'www-authenticate':
-            'Bearer realm="https://auth.docker.io/token",service="registry.docker.io",scope="repository:library/some-dep:pull  "',
+            'Bearer realm="https://auth.docker.io/token",service="registry.docker.io",scope="repository:library/some-dep:pull"',
         })
         .head('/library/some-dep/manifests/' + currentDigest)
         .reply(200, '', { 'content-type': MediaType.ociManifestV1 })
@@ -865,7 +865,7 @@ describe('modules/datasource/docker/index', () => {
         .get('/')
         .reply(401, '', {
           'www-authenticate':
-            'Bearer realm="https://auth.docker.io/token",service="registry.docker.io",scope="repository:library/some-dep:pull  "',
+            'Bearer realm="https://auth.docker.io/token",service="registry.docker.io",scope="repository:library/some-dep:pull"',
         })
         .get('/library/some-dep/manifests/some-new-value')
         .reply(200, {
@@ -1456,7 +1456,7 @@ describe('modules/datasource/docker/index', () => {
         .get('/library/node/tags/list?n=10000')
         .reply(401, '', {
           'www-authenticate':
-            'Bearer realm="https://auth.docker.io/token",service="registry.docker.io",scope="repository:library/node:pull  "',
+            'Bearer realm="https://auth.docker.io/token",service="registry.docker.io",scope="repository:library/node:pull"',
         })
         .get('/library/node/tags/list?n=10000')
         .reply(200, { tags }, {})
@@ -1484,7 +1484,7 @@ describe('modules/datasource/docker/index', () => {
         .get('/library/node/tags/list?n=10000')
         .reply(401, '', {
           'www-authenticate':
-            'Bearer realm="https://auth.docker.io/token",service="registry.docker.io",scope="repository:library/node:pull  "',
+            'Bearer realm="https://auth.docker.io/token",service="registry.docker.io",scope="repository:library/node:pull"',
         })
         .get('/library/node/tags/list?n=10000')
         .reply(200, { tags }, {})
@@ -1551,7 +1551,7 @@ describe('modules/datasource/docker/index', () => {
         .get('/my/node/tags/list?n=10000')
         .reply(401, '', {
           'www-authenticate':
-            'Bearer realm="https://auth.docker.io/token",service="registry.docker.io",scope="repository:my/node:pull  "',
+            'Bearer realm="https://auth.docker.io/token",service="registry.docker.io",scope="repository:my/node:pull"',
         })
         .get('/my/node/tags/list?n=10000')
         .reply(200, { tags: ['1.0.0'] }, {})
