@@ -178,9 +178,6 @@ export function generateBranchConfig(
         )})`;
       }
       upgrade.commitMessagePrefix = CommitMessage.formatPrefix(semanticPrefix!);
-      upgrade.toLowerCase =
-        regEx(/[A-Z]/).exec(upgrade.semanticCommitType!) === null &&
-        !upgrade.semanticCommitType!.startsWith(':');
     }
     // Compile a few times in case there are nested templates
     upgrade.commitMessage = template.compile(
