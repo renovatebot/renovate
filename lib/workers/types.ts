@@ -10,7 +10,6 @@ import type {
 import type { Release } from '../modules/datasource/types';
 import type {
   ArtifactError,
-  CustomExtractConfig,
   ExtractConfig,
   LookupUpdate,
   PackageDependency,
@@ -127,9 +126,7 @@ export interface BranchConfig
   isConflicted?: boolean;
 }
 
-export interface WorkerExtractConfig
-  extends ExtractConfig,
-    Partial<CustomExtractConfig> {
+export interface WorkerExtractConfig extends ExtractConfig {
   manager: string;
   fileList: string[];
   fileMatch?: string[];
@@ -140,7 +137,6 @@ export interface WorkerExtractConfig
   enabledManagers?: string[];
   enabled?: boolean;
 }
-
 export interface DepWarnings {
   warnings: string[];
   warningFiles: string[];

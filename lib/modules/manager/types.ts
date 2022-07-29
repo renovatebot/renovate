@@ -1,7 +1,6 @@
 import type { ReleaseType } from 'semver';
 import type {
   MatchStringsStrategy,
-  RegExManager,
   RegexManagerTemplates,
   UpdateType,
   ValidationMessage,
@@ -27,17 +26,6 @@ export interface CustomExtractConfig extends RegexManagerTemplates {
   autoReplaceStringTemplate?: string;
   matchStrings?: string[];
   matchStringsStrategy?: MatchStringsStrategy;
-}
-
-export interface WorkerExtractConfig extends ExtractConfig {
-  manager: string;
-  fileList?: string[];
-  fileMatch?: string[];
-  enabled?: boolean;
-  includePaths?: string[];
-  ignorePaths?: string[];
-  regexManagers?: RegExManager[];
-  enabledManagers?: string[];
 }
 
 export interface UpdateArtifactsConfig {
