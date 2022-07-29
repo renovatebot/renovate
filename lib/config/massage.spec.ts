@@ -46,6 +46,21 @@ describe('config/massage', () => {
       expect(res.packageRules).toHaveLength(3);
     });
 
+    it('filters packageRules with only match/exclude', () => {
+      const config: RenovateConfig = {
+        packageRules: [
+          {
+            matchBaseBranches: ['main'],
+            major: {
+              enabled: true,
+            },
+          },
+        ],
+      };
+      const res = massage.massageConfig(config);
+      expect(res.packageRules).toHaveLength(1);
+    });
+
     it('does not massage lockFileMaintenance', () => {
       const config: RenovateConfig = {
         packageRules: [
