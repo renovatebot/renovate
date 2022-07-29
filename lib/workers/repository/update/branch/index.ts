@@ -278,7 +278,6 @@ export async function processBranch(
         'Branch + PR exists but is not scheduled -- will update if necessary'
       );
     }
-    await checkoutBranch(config.baseBranch!);
     //stability checks
     if (
       config.upgrades.some(
@@ -372,6 +371,7 @@ export async function processBranch(
     // TODO: types (#7154)
     logger.debug(`Using reuseExistingBranch: ${config.reuseExistingBranch!}`);
     const res = await getUpdatedPackageFiles(config);
+    await checkoutBranch(config.baseBranch!);
     // istanbul ignore if
     if (res.artifactErrors && config.artifactErrors) {
       res.artifactErrors = config.artifactErrors.concat(res.artifactErrors);

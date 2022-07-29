@@ -10,6 +10,7 @@ import type {
 import {
   getBranchCommit,
   getBranchParentSha,
+  getFile,
   isBranchModified,
 } from '../../util/git';
 import type { BranchConfig, BranchUpgradeConfig } from '../types';
@@ -71,6 +72,29 @@ async function generateBranchCache(
     const upgrades: BranchUpgradeCache[] = branch.upgrades
       ? branch.upgrades.map(generateBranchUpgradeCache)
       : [];
+
+    const contents: Record<string, string> = {};
+
+    for (const upgrade of branch.upgrades) {
+      const packageFile = upgrade.packageFile ?? '';
+      if (packageFile) {
+        const packageFileContent = await getFile(
+          packageFile,
+          branch.branchName
+        );
+        if (packageFileContent) {
+          contents[packageFile] = packageFileContent;
+        }
+      }
+      const lockFile = upgrade.lockFile ?? upgrade.lockFiles?.[0] ?? '';
+      if (lockFile) {
+        const lockFileContent = await getFile(lockFile, branch.branchName);
+        if (lockFileContent) {
+          contents[lockFile] = lockFileContent;
+        }
+      }
+    }
+
     return {
       branchName,
       sha,
@@ -79,6 +103,7 @@ async function generateBranchCache(
       automerge,
       isModified,
       upgrades,
+      contents,
     };
   } catch (error) {
     const err = error.err || error; // external host error nests err
