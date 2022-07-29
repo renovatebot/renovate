@@ -626,7 +626,7 @@ export class DockerDatasource extends Datasource {
           currentDigest
         );
         if (!configDigest) {
-          return undefined;
+          return null;
         }
 
         const configResponse = await this.getImageConfig(
