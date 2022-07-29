@@ -52,6 +52,7 @@ import type {
   StorageConfig,
   TreeItem,
 } from './types';
+import { getCachedFile } from './get-file-cache';
 
 export { setNoVerify } from './config';
 export { setPrivateKey } from './private-key';
@@ -828,13 +829,21 @@ export async function getBranchFiles(
 
 export async function getFile(
   filePath: string,
-  branchName?: string
+  _branchName?: string
 ): Promise<string | null> {
+  const branchName = _branchName ?? config.currentBranch;
+  let content = getCachedFile(
+    branchName,
+    config.branchCommits[branchName],
+    filePath
+  );
+  if (content !== null) {
+    return content;
+  }
+
   await syncGit();
   try {
-    const content = await git.show([
-      'origin/' + (branchName ?? config.currentBranch) + ':' + filePath,
-    ]);
+    content = await git.show(['origin/' + branchName + ':' + filePath]);
     return content;
   } catch (err) {
     const errChecked = checkForPlatformFailure(err);
