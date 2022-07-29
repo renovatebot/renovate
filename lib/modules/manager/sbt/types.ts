@@ -7,11 +7,12 @@ type Variables = Record<string, VariableContext>;
 
 export interface ParseContext {
   scalaVersion?: string | null;
-  variables: Variables;
+  localVariables: Variables; // variable within "object" scope ex.scalaVersion
+  variables: Variables; // variable that can be use outside scope ex."Versions.ScalaVersion"
   lineIndex: number;
   lookupVariableFile?: string;
   depType?: string;
-  readonly globalVariables: Variables;
+  readonly globalVariables: Variables; // variable from root and project/ folder
 }
 
 export interface ParseOptions {
@@ -19,6 +20,7 @@ export interface ParseOptions {
   isMultiDeps?: boolean;
   scalaVersion?: string | null;
   variables?: Variables;
+  localVariables?: Variables;
   readonly globalVariables?: Variables;
 }
 
