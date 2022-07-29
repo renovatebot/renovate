@@ -1,5 +1,4 @@
 import is from '@sindresorhus/is';
-import type { RegexManagerInterface } from '.';
 import { regEx } from '../../../util/regex';
 import type { CustomExtractConfig, PackageDependency } from '../types';
 import type { RecursionParameter } from './types';
@@ -10,6 +9,7 @@ import {
   mergeGroups,
   regexMatchAll,
 } from './utils';
+import type { RegexManagerInterface } from '.';
 
 export function handleAny(
   content: string,
