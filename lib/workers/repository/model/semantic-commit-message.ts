@@ -14,6 +14,7 @@ export interface SemanticCommitMessageJSON extends CommitMessageJSON {
  * [optional footer]
  */
 export class SemanticCommitMessage extends CommitMessage {
+  private static readonly SEPARATOR: string = ':';
   private static readonly REGEXP =
     /^(?<type>[\w]+)(\((?<scope>[\w-]+)\))?(?<breaking>!)?: ((?<issue>([A-Z]+-|#)[\d]+) )?(?<description>.*)/;
 
@@ -38,6 +39,14 @@ export class SemanticCommitMessage extends CommitMessage {
     message.subject = groups.description;
 
     return message;
+  }
+
+  override formatPrefix(): string {
+    if (!this.prefix) {
+      return '';
+    }
+
+    return `${this.prefix}${SemanticCommitMessage.SEPARATOR}`;
   }
 
   override toJSON(): SemanticCommitMessageJSON {

@@ -81,7 +81,7 @@ describe('workers/repository/onboarding/branch/create', () => {
     describe('applies the commitMessagePrefix value', () => {
       it('to the default commit message', async () => {
         const prefix = 'RENOV-123';
-        const message = `${prefix}: add renovate.json`;
+        const message = `${prefix} add renovate.json`;
 
         config.commitMessagePrefix = prefix;
 
@@ -105,7 +105,7 @@ describe('workers/repository/onboarding/branch/create', () => {
         const prefix = 'RENOV-123';
         const text =
           "Cause your deps need an update and if they dont update, well they're no deps of mine";
-        const message = `${prefix}: ${text.charAt(0).toLowerCase()}${text.slice(
+        const message = `${prefix} ${text.charAt(0).toLowerCase()}${text.slice(
           1
         )}`;
 

@@ -6,9 +6,9 @@ describe('workers/repository/model/custom-commit-message', () => {
       subject                                      | prefix             | result
       ${'test'}                                    | ${''}              | ${'Test'}
       ${'  test  '}                                | ${'  '}            | ${'Test'}
-      ${'test'}                                    | ${'fix'}           | ${'fix: test'}
+      ${'test'}                                    | ${'fix'}           | ${'fix test'}
       ${'test'}                                    | ${'fix:'}          | ${'fix: test'}
-      ${'Message    With   Extra  Whitespaces   '} | ${'  refactor   '} | ${'refactor: message With Extra Whitespaces'}
+      ${'Message    With   Extra  Whitespaces   '} | ${'  refactor   '} | ${'refactor message With Extra Whitespaces'}
     `(
       'given subject $subject and prefix $prefix as arguments, returns $result',
       ({
