@@ -1,18 +1,18 @@
-import { BaseBranchesMatcher } from './baseBranches';
-import { CurrentVersionMatcher } from './currentVersion';
+import { BaseBranchesMatcher } from './base-branches';
+import { CurrentVersionMatcher } from './current-version';
 import { DatasourcesMatcher } from './datasources';
-import { DepTypesMatcher } from './depTypes';
+import { DepTypesMatcher } from './dep-types';
 import { FilesMatcher } from './files';
 import { LanguagesMatcher } from './languages';
 import { ManagersMatcher } from './managers';
-import { PackageNameMatcher } from './packageNames';
-import { PackagePatternsMatcher } from './packagePatterns';
-import { PackagePrefixesMatcher } from './packagePrefixes';
+import { PackageNameMatcher } from './package-names';
+import { PackagePatternsMatcher } from './package-patterns';
+import { PackagePrefixesMatcher } from './package-prefixes';
 import { PathsMatcher } from './paths';
-import { SourceUrlPrefixesMatcher } from './sourceUrlPrefixes';
-import { SourceUrlsMatcher } from './sourceUrls';
+import { SourceUrlPrefixesMatcher } from './sourceurl-prefixes';
+import { SourceUrlsMatcher } from './sourceurls';
 import type { MatcherApi } from './types';
-import { UpdateTypesMatcher } from './updateTypes';
+import { UpdateTypesMatcher } from './update-types';
 
 const api = new Map<string, MatcherApi[]>();
 export default api;
