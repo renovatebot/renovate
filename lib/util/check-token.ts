@@ -21,7 +21,7 @@ export function checkGithubToken(
 
   const githubDeps: string[] = [];
   for (const files of Object.values(packageFiles ?? {})) {
-    for (const file of files) {
+    for (const file of files ?? []) {
       for (const dep of file.deps ?? []) {
         if (
           dep.datasource === GithubTagsDatasource.id ||
