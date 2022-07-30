@@ -111,17 +111,25 @@ export async function processBranch(
     // Check if branch already existed
     const existingPr = branchPr ? undefined : await prAlreadyExisted(config);
     if (existingPr && !dependencyDashboardCheck) {
-      logger.debug(
-        { prTitle: config.prTitle },
-        'Closed PR already exists. Skipping branch.'
-      );
-      await handlepr(config, existingPr);
-      return {
-        branchExists: false,
-        prNo: existingPr.number,
-        result: BranchResult.AlreadyExisted,
-      };
+      if (
+        existingPr.state === 'merged' &&
+        !gitBranchExists(config.branchName)
+      ) {
+        config.automerge = false;
+      } else {
+        logger.debug(
+          { prTitle: config.prTitle },
+          'Closed PR already exists. Skipping branch.'
+        );
+        await handlepr(config, existingPr);
+        return {
+          branchExists: false,
+          prNo: existingPr.number,
+          result: BranchResult.AlreadyExisted,
+        };
+      }
     }
+
     // istanbul ignore if
     if (!branchExists && config.dependencyDashboardApproval) {
       if (dependencyDashboardCheck) {
