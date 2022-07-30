@@ -141,10 +141,7 @@ describe('modules/manager/hermit/artifacts', () => {
       readlinkMock.mockResolvedValue(null);
       GlobalConfig.set({ localDir: '' });
 
-      mockExecAll({
-        stdout: '',
-        stderr: '',
-      });
+      mockExecAll();
 
       getRepoStatusMock.mockResolvedValue(
         partial<StatusResult>({
