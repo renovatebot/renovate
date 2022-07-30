@@ -5,17 +5,6 @@ import { GithubTagsDatasource } from '../modules/datasource/github-tags';
 import type { PackageFile } from '../modules/manager/types';
 import * as memCache from '../util/cache/memory';
 import * as hostRules from './host-rules';
-import { parseUrl } from './url';
-
-function isGithubUrl(url: string | null | undefined): boolean {
-  const parsedUrl = parseUrl(url);
-  if (!parsedUrl) {
-    return false;
-  }
-
-  const { hostname } = parsedUrl;
-  return hostname.endsWith('.github.com') || hostname === 'github.com';
-}
 
 export function checkGithubToken(
   packageFiles: Record<string, PackageFile[]> | undefined
@@ -36,8 +25,7 @@ export function checkGithubToken(
       for (const dep of file.deps ?? []) {
         if (
           dep.datasource === GithubTagsDatasource.id ||
-          dep.datasource === GithubReleasesDatasource.id ||
-          isGithubUrl(dep.sourceUrl)
+          dep.datasource === GithubReleasesDatasource.id
         ) {
           dep.skipReason = 'github-token-required';
           if (dep.depName) {

@@ -66,23 +66,6 @@ describe('util/check-token', () => {
     expect(logger.logger.warn).toHaveBeenCalled();
   });
 
-  it('logs warning for github-based sourceUrl', () => {
-    hostRules.find.mockReturnValueOnce({});
-    checkGithubToken({
-      npm: [
-        {
-          deps: [
-            {
-              depName: 'foo/bar',
-              sourceUrl: 'https://github.com/foo/bar.git',
-            },
-          ],
-        },
-      ],
-    });
-    expect(logger.logger.warn).toHaveBeenCalled();
-  });
-
   it('logs warning once', () => {
     hostRules.find.mockReturnValueOnce({});
     const packageFiles: Record<string, PackageFile[]> = {
@@ -96,10 +79,6 @@ describe('util/check-token', () => {
             {
               depName: 'bar/bar',
               datasource: GithubReleasesDatasource.id,
-            },
-            {
-              depName: 'baz/baz',
-              sourceUrl: 'https://github.com/baz/baz.git',
             },
           ],
         },
