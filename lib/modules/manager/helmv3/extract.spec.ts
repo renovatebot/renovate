@@ -1,14 +1,14 @@
-import { fs } from '../../../../test/util';
+import { fs, partial } from '../../../../test/util';
 import { DockerDatasource } from '../../datasource/docker';
 import type { ExtractConfig } from '../types';
 import { extractPackageFile } from '.';
 
 jest.mock('../../../util/fs');
-const config = {
+const config = partial<ExtractConfig>({
   registryAliases: {
     stable: 'https://charts.helm.sh/stable',
   },
-} as ExtractConfig;
+});
 
 describe('modules/manager/helmv3/extract', () => {
   describe('extractPackageFile()', () => {

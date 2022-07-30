@@ -60,7 +60,7 @@ export function extractPackageFile(
   manager: string,
   content: string,
   fileName: string,
-  config?: ExtractConfig
+  config: ExtractConfig
 ): Result<PackageFile | null> {
   if (!managers.has(manager)) {
     return null;

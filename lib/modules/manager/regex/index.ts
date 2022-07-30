@@ -1,41 +1,44 @@
 import is from '@sindresorhus/is';
 import type { RegexManagerTemplates } from '../../../config/types';
 import type {
-  CustomExtractConfig,
   ExtractConfig,
   PackageDependency,
   PackageFile,
   Result,
 } from '../types';
 import { handleAny, handleCombination, handleRecursive } from './strategies';
+import type { RegexManagerInterface } from './types';
 import { validMatchFields } from './utils';
 
 export const defaultConfig = {
   pinDigests: false,
 };
-
 export const supportedDatasources = ['*'];
 
-export interface RegexManagerInterface extends CustomExtractConfig {
-  matchStrings: string[];
-}
 export function extractPackageFile(
   content: string,
   packageFile: string,
-  extractConfig: ExtractConfig
+  config: ExtractConfig
 ): Result<PackageFile | null> {
-  const config = { ...extractConfig } as RegexManagerInterface;
   let deps: PackageDependency[];
   switch (config.matchStringsStrategy) {
     default:
     case 'any':
-      deps = handleAny(content, packageFile, config);
+      deps = handleAny(content, packageFile, config as RegexManagerInterface);
       break;
     case 'combination':
-      deps = handleCombination(content, packageFile, config);
+      deps = handleCombination(
+        content,
+        packageFile,
+        config as RegexManagerInterface
+      );
       break;
     case 'recursive':
-      deps = handleRecursive(content, packageFile, config);
+      deps = handleRecursive(
+        content,
+        packageFile,
+        config as RegexManagerInterface
+      );
       break;
   }
 
