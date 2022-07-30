@@ -12,8 +12,11 @@ export class DatasourcesMatcher extends Matcher {
     { datasource }: PackageRuleInputConfig,
     { matchDatasources }: PackageRule
   ): boolean | null {
-    if (is.undefined(matchDatasources) || is.undefined(datasource)) {
+    if (is.undefined(matchDatasources)) {
       return null;
+    }
+    if (is.undefined(datasource)) {
+      return false;
     }
     return matchDatasources.includes(datasource);
   }

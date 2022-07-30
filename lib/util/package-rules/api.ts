@@ -14,20 +14,25 @@ import { SourceUrlsMatcher } from './sourceUrls';
 import type { MatcherApi } from './types';
 import { UpdateTypesMatcher } from './updateTypes';
 
-const api = new Map<string, MatcherApi>();
+const api = new Map<string, MatcherApi[]>();
 export default api;
 
-api.set(PackageNameMatcher.id, new PackageNameMatcher());
-api.set(PackagePatternsMatcher.id, new PackagePatternsMatcher());
-api.set(PackagePrefixesMatcher.id, new PackagePrefixesMatcher());
-api.set(FilesMatcher.id, new FilesMatcher());
-api.set(PathsMatcher.id, new PathsMatcher());
-api.set(DepTypesMatcher.id, new DepTypesMatcher());
-api.set(LanguagesMatcher.id, new LanguagesMatcher());
-api.set(BaseBranchesMatcher.id, new BaseBranchesMatcher());
-api.set(ManagersMatcher.id, new ManagersMatcher());
-api.set(DatasourcesMatcher.id, new DatasourcesMatcher());
-api.set(UpdateTypesMatcher.id, new UpdateTypesMatcher());
-api.set(SourceUrlPrefixesMatcher.id, new SourceUrlPrefixesMatcher());
-api.set(SourceUrlsMatcher.id, new SourceUrlsMatcher());
-api.set(CurrentVersionMatcher.id, new CurrentVersionMatcher());
+// each manager under the same key will use a logical OR, if multiple matchers are applied AND will be used
+api.set('package', [
+  new PackageNameMatcher(),
+  new PackagePatternsMatcher(),
+  new PackagePrefixesMatcher(),
+]);
+api.set(FilesMatcher.id, [new FilesMatcher()]);
+api.set(PathsMatcher.id, [new PathsMatcher()]);
+api.set(DepTypesMatcher.id, [new DepTypesMatcher()]);
+api.set(LanguagesMatcher.id, [new LanguagesMatcher()]);
+api.set(BaseBranchesMatcher.id, [new BaseBranchesMatcher()]);
+api.set(ManagersMatcher.id, [new ManagersMatcher()]);
+api.set(DatasourcesMatcher.id, [new DatasourcesMatcher()]);
+api.set(UpdateTypesMatcher.id, [new UpdateTypesMatcher()]);
+api.set('source-url', [
+  new SourceUrlsMatcher(),
+  new SourceUrlPrefixesMatcher(),
+]);
+api.set(CurrentVersionMatcher.id, [new CurrentVersionMatcher()]);

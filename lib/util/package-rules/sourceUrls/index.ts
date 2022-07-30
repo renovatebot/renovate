@@ -12,8 +12,11 @@ export class SourceUrlsMatcher extends Matcher {
     { sourceUrl }: PackageRuleInputConfig,
     { matchSourceUrls }: PackageRule
   ): boolean | null {
-    if (is.undefined(matchSourceUrls) || is.undefined(sourceUrl)) {
+    if (is.undefined(matchSourceUrls)) {
       return null;
+    }
+    if (is.undefined(sourceUrl)) {
+      return false;
     }
 
     const upperCaseSourceUrl = sourceUrl?.toUpperCase();

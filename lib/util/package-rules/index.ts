@@ -5,9 +5,9 @@ import type { PackageRule, PackageRuleInputConfig } from '../../config/types';
 import { logger } from '../../logger';
 import matchers from './api';
 import type { MatcherApi } from './types';
+import { matchOR, excludeOR } from './utils';
 
-export const getMatchers = (): Map<string, MatcherApi> => matchers;
-export const getMatcherList = (): string[] => Array.from(matchers.keys());
+export const getMatchers = (): Map<string, MatcherApi[]> => matchers;
 
 function matchesRule(
   inputConfig: PackageRuleInputConfig,
@@ -16,8 +16,8 @@ function matchesRule(
   let positiveMatch = true;
   let matchApplied = false;
   // matches
-  for (const [, matcher] of getMatchers()) {
-    const isMatch = matcher.matches(inputConfig, packageRule);
+  for (const [, groupMatchers] of getMatchers()) {
+    const isMatch = matchOR(groupMatchers, inputConfig, packageRule);
 
     // no rules are defined
     if (is.nullOrUndefined(isMatch)) {
@@ -26,24 +26,24 @@ function matchesRule(
 
     matchApplied = true;
 
-    // mark that one of the rules has matched
-    if (!isMatch) {
+    if (!is.truthy(isMatch)) {
       positiveMatch = false;
     }
   }
 
-  // not a single match rule is defined assume match everything
+  // not a single match rule is defined --> assume to match everything
   if (!matchApplied) {
     positiveMatch = true;
   }
 
+  // nothing has been matched
   if (!positiveMatch) {
     return false;
   }
 
   // excludes
-  for (const [, matcher] of getMatchers()) {
-    const isExclude = matcher.excludes(inputConfig, packageRule);
+  for (const [, groupExcludes] of getMatchers()) {
+    const isExclude = excludeOR(groupExcludes, inputConfig, packageRule);
 
     // no rules are defined
     if (is.nullOrUndefined(isExclude)) {

@@ -12,12 +12,12 @@ export class UpdateTypesMatcher extends Matcher {
     { updateType, isBump }: PackageRuleInputConfig,
     { matchUpdateTypes }: PackageRule
   ): boolean | null {
-    if (is.undefined(matchUpdateTypes) || is.undefined(isBump)) {
+    if (is.undefined(matchUpdateTypes)) {
       return null;
     }
     return (
-      (updateType && matchUpdateTypes.includes(updateType)) ||
-      (isBump && matchUpdateTypes.includes('bump'))
+      (is.truthy(updateType) && matchUpdateTypes.includes(updateType)) ||
+      (is.truthy(isBump) && matchUpdateTypes.includes('bump'))
     );
   }
 }

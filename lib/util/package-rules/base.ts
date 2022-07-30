@@ -23,6 +23,7 @@ export abstract class Matcher implements MatcherApi {
    * @param inputConfig
    * @param packageRule
    */
+  /* istanbul ignore next */
   matches(
     inputConfig: PackageRuleInputConfig,
     packageRule: PackageRule
