@@ -79,6 +79,11 @@ const allToolConfig: Record<string, ToolConfig> = {
     depName: 'poetry',
     versioning: pep440VersioningId,
   },
+  python: {
+    datasource: 'github-releases',
+    depName: 'containerbase/python-prebuild',
+    versioning: pep440VersioningId,
+  },
   yarn: {
     datasource: 'npm',
     depName: 'yarn',
