@@ -1,15 +1,13 @@
 import { getConfig } from '../../../../config/defaults';
-import type { RenovateConfig } from '../../../../config/types';
 import * as template from '../../../../util/template';
 import { ConfigMigrationCommitMessageFactory } from './commit-message';
 
 describe('workers/repository/config-migration/branch/commit-message', () => {
+  const config = getConfig();
   const fileName = 'renovate.json';
   const templateCompileSpy = jest.spyOn(template, 'compile');
-  let config: RenovateConfig;
 
   beforeEach(() => {
-    config = getConfig();
     jest.clearAllMocks();
   });
 

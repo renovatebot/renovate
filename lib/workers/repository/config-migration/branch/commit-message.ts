@@ -18,27 +18,20 @@ export class ConfigMigrationCommitMessageFactory {
       ? `Migrate renovate config`
       : `Migrate config ${this.configFile}`;
 
-    this.config.commitMessageAction =
-      this.config.commitMessageAction === 'Update'
-        ? ''
-        : this.config.commitMessageAction;
+    const config = {
+      ...this.config,
+      semanticCommitScope: 'config',
+      commitMessagePrefix: '',
+      commitMessageExtra: '',
+      commitMessageAction: '',
+      commitMessageTopic,
+    };
 
-    this.config.commitMessageTopic =
-      this.config.commitMessageTopic === 'dependency {{depName}}'
-        ? commitMessageTopic
-        : this.config.commitMessageTopic;
-
-    this.config.commitMessageExtra = '';
-    this.config.semanticCommitScope = 'config';
-
-    const commitMessageFactory = new CommitMessageFactory(this.config);
+    const commitMessageFactory = new CommitMessageFactory(config);
     const commit = commitMessageFactory.create();
 
     if (commitMessage) {
-      commit.subject = template.compile(commitMessage, {
-        ...this.config,
-        commitMessagePrefix: '',
-      });
+      commit.subject = template.compile(commitMessage, config);
     } else {
       commit.subject = commitMessageTopic;
     }
