@@ -15,7 +15,7 @@ const actionRe = regEx(
 // SHA1 or SHA256, see https://github.blog/2020-10-19-git-2-29-released/
 const shaRe = regEx(/^[a-z0-9]{40}|[a-z0-9]{64}$/);
 
-function extractActionsFromPackageFile(content: string): PackageDependency[] {
+function extractWithRegex(content: string): PackageDependency[] {
   logger.trace('github-actions.extractActionsFromPackageFile()');
   const deps: PackageDependency[] = [];
   for (const line of content.split(newlineRegex)) {
@@ -82,9 +82,7 @@ function extractContainer(container: string | Container): PackageDependency {
   return dep;
 }
 
-function extractContainersFromPackageFile(
-  content: string
-): PackageDependency[] {
+function extractWithYAMLParser(content: string): PackageDependency[] {
   logger.trace('github-actions.extractContainersFromPackageFile()');
   const deps: PackageDependency[] = [];
 
@@ -113,8 +111,8 @@ function extractContainersFromPackageFile(
 export function extractPackageFile(content: string): PackageFile | null {
   logger.trace('github-actions.extractPackageFile()');
   const deps = [
-    ...extractActionsFromPackageFile(content),
-    ...extractContainersFromPackageFile(content),
+    ...extractWithRegex(content),
+    ...extractWithYAMLParser(content),
   ];
   if (!deps.length) {
     return null;
