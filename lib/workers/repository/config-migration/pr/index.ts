@@ -49,6 +49,7 @@ ${
 
 :question: Got questions? Does something look wrong to you? Please don't hesitate to [request help here](${
       // TODO: types (#7154)
+      // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
       config.productLinks?.help
     }).\n\n`
   );
