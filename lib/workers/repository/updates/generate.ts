@@ -170,6 +170,7 @@ export function generateBranchConfig(
     // Use templates to generate strings
     if (upgrade.semanticCommits === 'enabled' && !upgrade.commitMessagePrefix) {
       logger.trace('Upgrade has semantic commits enabled');
+      upgrade.useSemanticCommit = true;
       let semanticPrefix = upgrade.semanticCommitType;
       if (upgrade.semanticCommitScope) {
         semanticPrefix += `(${template.compile(
@@ -178,6 +179,9 @@ export function generateBranchConfig(
         )})`;
       }
       upgrade.commitMessagePrefix = CommitMessage.formatPrefix(semanticPrefix!);
+      upgrade.toLowerCase =
+        regEx(/[A-Z]/).exec(upgrade.semanticCommitType!) === null &&
+        !upgrade.semanticCommitType!.startsWith(':');
     }
     // Compile a few times in case there are nested templates
     upgrade.commitMessage = template.compile(
@@ -203,7 +207,14 @@ export function generateBranchConfig(
     if (upgrade.toLowerCase) {
       // We only need to lowercase the first line
       const splitMessage = upgrade.commitMessage.split(newlineRegex);
-      splitMessage[0] = splitMessage[0].toLowerCase();
+      // Do not lowercase semantic prefix
+      if (upgrade.useSemanticCommit && upgrade.commitMessagePrefix) {
+        const splitSubject = splitMessage[0].split(':');
+        splitSubject[1] = splitSubject[1].toLowerCase();
+        splitMessage[0] = splitSubject.join(':');
+      } else {
+        splitMessage[0] = splitMessage[0].toLowerCase();
+      }
       upgrade.commitMessage = splitMessage.join('\n');
     }
     if (upgrade.commitBody) {

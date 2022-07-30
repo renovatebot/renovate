@@ -480,11 +480,11 @@ describe('workers/repository/updates/generate', () => {
       ];
       const res = generateBranchConfig(branch);
       expect(res.prTitle).toBe(
-        'chore(package): Update dependency some-dep to v1.2.0'
+        'chore(package): update dependency some-dep to v1.2.0'
       );
     });
 
-    it('supports uppercase in semantic commit scope', () => {
+    it('supports uppercase in semantic-commit prefix', () => {
       // TODO #7154 incompatible types
       const branch: BranchUpgradeConfig[] = [
         {
@@ -505,8 +505,31 @@ describe('workers/repository/updates/generate', () => {
       ];
       const res = generateBranchConfig(branch);
       expect(res.prTitle).toBe(
-        'chore(PACKAGE): Update dependency some-dep to v1.2.0'
+        'chore(PACKAGE): update dependency some-dep to v1.2.0'
       );
+    });
+
+    it('works correctly with empty semantic prefix', () => {
+      // TODO #7154 incompatible types
+      const branch: BranchUpgradeConfig[] = [
+        {
+          ...defaultConfig,
+          manager: 'some-manager',
+          depName: 'some-dep',
+          semanticCommits: 'enabled',
+          semanticCommitType: '',
+          semanticCommitScope: '',
+          newValue: '1.2.0',
+          isSingleVersion: true,
+          newVersion: '1.2.0',
+          foo: 1,
+          group: {
+            foo: 2,
+          },
+        } as BranchUpgradeConfig,
+      ];
+      const res = generateBranchConfig(branch);
+      expect(res.prTitle).toBe('update dependency some-dep to v1.2.0');
     });
 
     it('scopes monorepo commits', () => {
@@ -531,7 +554,7 @@ describe('workers/repository/updates/generate', () => {
         } as BranchUpgradeConfig,
       ];
       const res = generateBranchConfig(branch);
-      expect(res.prTitle).toBe('chore(): Update dependency some-dep to v1.2.0');
+      expect(res.prTitle).toBe('chore(): update dependency some-dep to v1.2.0');
     });
 
     it('scopes monorepo commits with nested package files using parent directory', () => {
@@ -558,7 +581,7 @@ describe('workers/repository/updates/generate', () => {
       ];
       const res = generateBranchConfig(branch);
       expect(res.prTitle).toBe(
-        'chore(bar): Update dependency some-dep to v1.2.0'
+        'chore(bar): update dependency some-dep to v1.2.0'
       );
     });
 
@@ -585,7 +608,7 @@ describe('workers/repository/updates/generate', () => {
       ];
       const res = generateBranchConfig(branch);
       expect(res.prTitle).toBe(
-        'chore(foo/bar): Update dependency some-dep to v1.2.0'
+        'chore(foo/bar): update dependency some-dep to v1.2.0'
       );
     });
 

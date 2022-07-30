@@ -62,6 +62,8 @@ export interface BranchUpgradeConfig
   repoName?: string;
   minimumConfidence?: MergeConfidence;
   sourceDirectory?: string;
+  useSemanticCommit?: boolean;
+  toLowerCase?: boolean;
 
   updatedPackageFiles?: FileChange[];
   updatedArtifacts?: FileChange[];
