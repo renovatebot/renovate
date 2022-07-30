@@ -13,6 +13,13 @@ describe('util/check-token', () => {
     memCache.reset();
   });
 
+  it('does nothing if data is empty', () => {
+    hostRules.find.mockReturnValue({});
+    checkGithubToken(undefined);
+    expect(logger.logger.trace).not.toHaveBeenCalled();
+    expect(logger.logger.warn).not.toHaveBeenCalled();
+  });
+
   it('returns early if GitHub token is found', () => {
     hostRules.find.mockReturnValueOnce({ token: '123' });
     checkGithubToken({});
