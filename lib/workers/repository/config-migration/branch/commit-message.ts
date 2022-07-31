@@ -17,12 +17,12 @@ export class ConfigMigrationCommitMessageFactory {
     let { commitMessageAction, commitMessageTopic } = this.config;
 
     if (commitMessageAction === 'Update') {
-        commitMessageAction = '';
-     }
+      commitMessageAction = '';
+    }
 
-     if (commitMessageTopic === 'dependency {{depName}}') {
-        commitMessageTopic = messageTopic;
-      }
+    if (commitMessageTopic === 'dependency {{depName}}') {
+      commitMessageTopic = messageTopic;
+    }
 
     const config = {
       ...this.config,
