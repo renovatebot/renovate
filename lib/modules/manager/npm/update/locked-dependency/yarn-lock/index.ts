@@ -12,6 +12,8 @@ export function updateLockedDependency(
   const { depName, currentVersion, newVersion, lockFile, lockFileContent } =
     config;
   logger.debug(
+    // TODO: types (#7154)
+    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
     `npm.updateLockedDependency: ${depName}@${currentVersion} -> ${newVersion} [${lockFile}]`
   );
   let yarnLock: YarnLock;
@@ -41,11 +43,15 @@ export function updateLockedDependency(
       );
       if (newLockedDeps.length) {
         logger.debug(
+          // TODO: types (#7154)
+          // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
           `${depName}@${currentVersion} not found in ${lockFile} but ${depName}@${newVersion} was - looks like it's already updated`
         );
         return { status: 'already-updated' };
       }
       logger.debug(
+        // TODO: types (#7154)
+        // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
         `${depName}@${currentVersion} not found in ${lockFile} - cannot update`
       );
       return { status: 'update-failed' };

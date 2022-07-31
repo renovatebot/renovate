@@ -1,3 +1,5 @@
+// TODO: types (#7154)
+/* eslint-disable @typescript-eslint/restrict-template-expressions */
 import URL from 'url';
 import { PlatformId } from '../../../constants';
 import { logger } from '../../../logger';
