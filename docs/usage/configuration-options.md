@@ -1845,6 +1845,30 @@ For example to apply a special label for Major updates:
 }
 ```
 
+### overwriteSourceUrl
+
+Use this field to set the source URL for release notes retrieval.
+Most commonly used for dependencies missing one.
+
+Using this field we can specify the exact url to fetch release notes from.
+
+Example setting source URL for package "dummy":
+
+```json
+{
+  "packageRules": [
+    {
+      "matchPackageNames": ["dummy"],
+      "overwriteSourceUrl": "https://github.com/org/dummy"
+    }
+  ]
+}
+```
+
+<!-- prettier-ignore -->
+!!! note
+Supported platforms are GitHub and GitLab only.
+
 ### replacementName
 
 This config option only works with the `npm` manager.
