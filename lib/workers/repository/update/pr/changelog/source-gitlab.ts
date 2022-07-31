@@ -38,7 +38,7 @@ export async function getChangeLogJSON(
   const newVersion = config.newVersion!;
   const sourceUrl = config.sourceUrl!;
   const depName = config.depName!;
-  const manager = config.manager;
+  const datasource = config.datasource!;
   const sourceDirectory = config.sourceDirectory!;
 
   logger.trace('getChangeLogJSON for gitlab');
@@ -95,7 +95,7 @@ export async function getChangeLogJSON(
   }
 
   function getCacheKey(prev: string, next: string): string {
-    return `${pathname}:${manager}:${depName}:${prev}:${next}`;
+    return `${pathname}:${datasource}:${depName}:${prev}:${next}`;
   }
 
   const changelogReleases: ChangeLogRelease[] = [];
