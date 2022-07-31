@@ -86,10 +86,10 @@ function canSkipBranchUpdateCheck(
   branchCache: BranchCache,
   configAndManagersHash: string
 ): boolean {
-  const branchCommit = getBranchCommit(branchName);
+  const branchCommitSha = getBranchCommit(branchName);
 
   return (
-    branchCommit === branchCache.sha &&
+    branchCommitSha === branchCache.sha &&
     configAndManagersHash === branchCache.configAndManagersHash
   );
 }
