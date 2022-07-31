@@ -48,16 +48,20 @@ export async function checkConfigMigrationBranch(
   };
 
   const branchPr = await migrationPrExists(configMigrationBranch); // handles open/autoClosed PRs
-  const closedPr = branchPr ? undefined : await platform.findPr(closedPrConfig); // handles closed PR
 
-  // found closed migration PR
-  if (closedPr) {
-    logger.debug(
-      { prTitle: closedPr.title },
-      'Closed PR already exists. Skipping branch.'
-    );
-    await handlepr(branchConfig, closedPr);
-    return null;
+  if (!branchPr) {
+    // handles closed PR
+    const closedPr = await platform.findPr(closedPrConfig);
+
+    // found closed migration PR
+    if (closedPr) {
+      logger.debug(
+        { prTitle: closedPr.title },
+        'Closed PR already exists. Skipping branch.'
+      );
+      await handlepr(branchConfig, closedPr);
+      return null;
+    }
   }
 
   if (branchPr) {
