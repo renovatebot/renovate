@@ -12,10 +12,7 @@ export class ConfigMigrationCommitMessageFactory {
     private readonly configFile: string
   ) {}
 
-  private create(isTitle = false): CommitMessage {
-    const messageTopic = isTitle
-      ? `Migrate renovate config`
-      : `Migrate config ${this.configFile}`;
+  private create(messageTopic: string): CommitMessage {
     const { commitMessage } = this.config;
     let { commitMessageAction, commitMessageTopic } = this.config;
 
@@ -50,14 +47,16 @@ export class ConfigMigrationCommitMessageFactory {
 
   getCommitMessage(): string {
     if (this.commitMessage === null) {
-      this.commitMessage = this.create().toString();
+      this.commitMessage = this.create(
+        `Migrate config ${this.configFile}`
+      ).toString();
     }
     return this.commitMessage;
   }
 
   getPrTitle(): string {
     if (this.prTitle === null) {
-      this.prTitle = this.create(true).toString();
+      this.prTitle = this.create(`Migrate renovate config`).toString();
     }
     return this.prTitle;
   }
