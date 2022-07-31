@@ -13,17 +13,25 @@ export class ConfigMigrationCommitMessageFactory {
   ) {}
 
   private create(isTitle = false): CommitMessage {
-    const { commitMessage } = this.config;
-    const commitMessageTopic = isTitle
+    const messageTopic = isTitle
       ? `Migrate renovate config`
       : `Migrate config ${this.configFile}`;
+    const { commitMessage } = this.config;
+    let { commitMessageAction, commitMessageTopic } = this.config;
+
+    commitMessageAction =
+      commitMessageAction === 'Update' ? '' : commitMessageAction;
+
+    commitMessageTopic =
+      commitMessageTopic === 'dependency {{depName}}'
+        ? messageTopic
+        : commitMessageTopic;
 
     const config = {
       ...this.config,
       semanticCommitScope: 'config',
-      commitMessagePrefix: '',
       commitMessageExtra: '',
-      commitMessageAction: '',
+      commitMessageAction,
       commitMessageTopic,
     };
 
@@ -31,9 +39,10 @@ export class ConfigMigrationCommitMessageFactory {
     const commit = commitMessageFactory.create();
 
     if (commitMessage) {
+      config.commitMessagePrefix = '';
       commit.subject = template.compile(commitMessage, config);
     } else {
-      commit.subject = commitMessageTopic;
+      commit.subject = messageTopic;
     }
 
     return commit;
