@@ -31,11 +31,11 @@ describe('workers/repository/process/write', () => {
   describe('writeUpdates()', () => {
     it('stops after automerge', async () => {
       const branches: BranchConfig[] = [
-        {},
-        {},
-        { automergeType: 'pr-comment', ignoreTests: true },
-        {},
-        {},
+        { upgrades: [] },
+        { upgrades: [] },
+        { automergeType: 'pr-comment', ignoreTests: true, upgrades: [] },
+        { upgrades: [] },
+        { upgrades: [] },
       ] as never;
       repoCache.getCache.mockReturnValue({});
       git.branchExists.mockReturnValue(true);
@@ -66,7 +66,7 @@ describe('workers/repository/process/write', () => {
     });
 
     it('increments branch counter', async () => {
-      const branches: BranchConfig[] = [{}] as never;
+      const branches: BranchConfig[] = [{ upgrades: [] }] as never;
       repoCache.getCache.mockReturnValueOnce({});
       branchWorker.processBranch.mockResolvedValueOnce({
         configAndManagersHash: '111',
@@ -84,7 +84,7 @@ describe('workers/repository/process/write', () => {
 
     it('return nowork if same updates', async () => {
       const branches: BranchConfig[] = [
-        { branchName: 'new/some-branch' } as BranchConfig,
+        { branchName: 'new/some-branch', upgrades: [] } as never,
       ];
       repoCache.getCache.mockReturnValueOnce({
         branches: [{ branchName: 'new/some-branch' } as BranchCache],
