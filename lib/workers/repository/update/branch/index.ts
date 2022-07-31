@@ -74,7 +74,6 @@ async function deleteBranchSilently(branchName: string): Promise<void> {
 }
 
 export interface ProcessBranchResult {
-  configAndManagersHash?: string;
   branchExists: boolean;
   prBlockedBy?: PrBlockedBy;
   prNo?: number;
@@ -385,7 +384,7 @@ export async function processBranch(
       config = { ...config, ...(await shouldReuseExistingBranch(config)) };
     }
     // TODO: types (#7154)
-    logger.debug(`Using reuseExistingBranch: ${config.reuseExistingBranch}`);
+    logger.debug(`Using reuseExistingBranch: ${config.reuseExistingBranch!}`);
     if (
       config.reuseExistingBranch &&
       canSkipBranchUpdateCheck(
@@ -562,10 +561,7 @@ export async function processBranch(
         logger.debug(
           'Branch cannot automerge now because automergeSchedule is off schedule - skipping'
         );
-        return {
-          branchExists,
-          result: BranchResult.NotScheduled,
-        };
+        return { branchExists, result: BranchResult.NotScheduled };
       }
       if (
         mergeStatus === 'stale' &&
@@ -662,11 +658,7 @@ export async function processBranch(
       logger.warn({ err }, `Error updating branch`);
     }
     // Don't throw here - we don't want to stop the other renovations
-    return {
-      branchExists,
-      prNo: branchPr?.number,
-      result: BranchResult.Error,
-    };
+    return { branchExists, prNo: branchPr?.number, result: BranchResult.Error };
   }
   try {
     logger.debug('Ensuring PR');
@@ -696,11 +688,7 @@ export async function processBranch(
         };
       }
       if (prBlockedBy === 'AwaitingTests') {
-        return {
-          branchExists,
-          prBlockedBy,
-          result: BranchResult.Pending,
-        };
+        return { branchExists, prBlockedBy, result: BranchResult.Pending };
       }
       if (prBlockedBy === 'BranchAutomerge') {
         return {
@@ -710,18 +698,10 @@ export async function processBranch(
         };
       }
       if (prBlockedBy === 'Error') {
-        return {
-          branchExists,
-          prBlockedBy,
-          result: BranchResult.Error,
-        };
+        return { branchExists, prBlockedBy, result: BranchResult.Error };
       }
       logger.warn({ prBlockedBy }, 'Unknown PrBlockedBy result');
-      return {
-        branchExists,
-        prBlockedBy,
-        result: BranchResult.Error,
-      };
+      return { branchExists, prBlockedBy, result: BranchResult.Error };
     }
     if (ensurePrResult.type === 'with-pr') {
       const { pr } = ensurePrResult;
@@ -775,10 +755,7 @@ export async function processBranch(
         logger.debug('PR is configured for automerge');
         const prAutomergeResult = await checkAutoMerge(pr, config);
         if (prAutomergeResult?.automerged) {
-          return {
-            branchExists,
-            result: BranchResult.Automerged,
-          };
+          return { branchExists, result: BranchResult.Automerged };
         }
       } else {
         logger.debug('PR is not configured for automerge');
@@ -802,9 +779,5 @@ export async function processBranch(
       result: BranchResult.PrCreated,
     };
   }
-  return {
-    branchExists,
-    prNo: branchPr?.number,
-    result: BranchResult.Done,
-  };
+  return { branchExists, prNo: branchPr?.number, result: BranchResult.Done };
 }
