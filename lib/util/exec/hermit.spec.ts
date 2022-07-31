@@ -1,6 +1,5 @@
 import tmp, { DirectoryResult } from 'tmp-promise';
 import { mockExecAll } from '../../../test/exec-util';
-
 import { GlobalConfig } from '../../config/global';
 import { writeLocalFile } from '../fs';
 import { findHermitCwd, getHermitEnvs, isHermit } from './hermit';
@@ -36,7 +35,6 @@ describe('util/exec/hermit', () => {
       await writeLocalFile('bin/hermit', 'bar');
 
       const nestedCwd = 'nested/other/directory';
-      const localDir = GlobalConfig.get('localDir') ?? '';
 
       expect(await findHermitCwd(nestedCwd)).toBe(`${localDir}/nested/bin`);
       expect(await findHermitCwd('nested')).toBe(`${localDir}/nested/bin`);
@@ -58,7 +56,7 @@ describe('util/exec/hermit', () => {
         stdout: `GOBIN=/usr/src/app/repository-a/.hermit/go/bin
 PATH=/usr/src/app/repository-a/bin
 `,
-      } as ExecResult);
+      });
 
       const resp = await getHermitEnvs({} as RawExecOptions);
 
