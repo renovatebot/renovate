@@ -6,6 +6,7 @@ import { ensureTrailingSlash } from '../../../util/url';
 import * as ivyVersioning from '../../versioning/ivy';
 import { compare } from '../../versioning/maven/compare';
 import { Datasource } from '../datasource';
+import { MavenDatasource } from '../maven';
 import { MAVEN_REPO } from '../maven/common';
 import { downloadHttpProtocol } from '../maven/util';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
@@ -189,6 +190,12 @@ export class SbtPackageDatasource extends Datasource {
           dependencyUrl,
           releases: versions.map((v) => ({ version: v })),
         };
+      } else {
+        // Try to find new releases with the maven datasource implementation
+        return await new MavenDatasource().getReleases({
+          packageName,
+          registryUrl,
+        });
       }
     }
 
