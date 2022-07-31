@@ -261,7 +261,7 @@ export async function ensureDependencyDashboard(
   }
 
   const warn = getDepWarningsDashboard(packageFiles);
-  if (warn.length) {
+  if (warn) {
     issueBody += warn;
     issueBody += '\n';
   }
