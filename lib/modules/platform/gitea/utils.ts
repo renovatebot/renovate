@@ -1,3 +1,4 @@
+import type { MergeStrategy } from '../../../config/types';
 import { PlatformId } from '../../../constants';
 import { CONFIG_GIT_URL_UNAVAILABLE } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
@@ -5,7 +6,7 @@ import * as hostRules from '../../../util/host-rules';
 import { regEx } from '../../../util/regex';
 import { parseUrl } from '../../../util/url';
 import type { GitUrlOption } from '../types';
-import type { Repo } from './gitea-helper';
+import type { PRMergeMethod, Repo } from './gitea-helper';
 
 export function smartLinks(body: string): string {
   return body?.replace(regEx(/\]\(\.\.\/pull\//g), '](pulls/');
@@ -39,7 +40,6 @@ export function getRepoUrl(
     if (!url) {
       throw new Error(CONFIG_GIT_URL_UNAVAILABLE);
     }
-    url.protocol = url.protocol?.slice(0, -1) ?? 'https';
     url.username = opts.token ?? '';
     url.pathname = `${url.pathname}${repo.full_name}.git`;
     logger.debug(
@@ -60,4 +60,22 @@ export function getRepoUrl(
   }
   repoUrl.username = opts.token ?? '';
   return repoUrl.toString();
+}
+
+export function getMergeMethod(
+  strategy: MergeStrategy | undefined
+): PRMergeMethod | null {
+  switch (strategy) {
+    case 'fast-forward':
+      return 'rebase';
+    case 'merge-commit':
+      return 'merge';
+    case 'rebase':
+      return 'rebase-merge';
+    case 'squash':
+      return strategy;
+    case 'auto':
+    default:
+      return null;
+  }
 }
