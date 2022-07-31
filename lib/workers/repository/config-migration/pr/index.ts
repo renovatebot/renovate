@@ -25,12 +25,12 @@ export async function ensureConfigMigrationPr(
     'configuration-options/#configmigration'
   );
   const branchName = getMigrationBranchName(config);
-  const semanticFactory = new ConfigMigrationCommitMessageFactory(
+  const commitMessageFactory = new ConfigMigrationCommitMessageFactory(
     config,
     migratedConfigData.filename
   );
 
-  const prTitle = semanticFactory.getPrTitle();
+  const prTitle = commitMessageFactory.getPrTitle();
   const existingPr = await platform.getBranchPr(branchName);
   const filename = migratedConfigData.filename;
   logger.debug('Filling in config migration PR template');

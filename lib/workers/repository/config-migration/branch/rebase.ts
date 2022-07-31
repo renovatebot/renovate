@@ -38,11 +38,11 @@ export async function rebaseMigrationBranch(
     return null;
   }
 
-  const semanticFactory = new ConfigMigrationCommitMessageFactory(
+  const commitMessageFactory = new ConfigMigrationCommitMessageFactory(
     config,
     configFileName
   );
-  const commitMessage = semanticFactory.getCommitMessage();
+  const commitMessage = commitMessageFactory.getCommitMessage();
 
   return commitAndPush({
     branchName,

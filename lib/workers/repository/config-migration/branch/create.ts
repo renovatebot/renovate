@@ -15,12 +15,12 @@ export function createConfigMigrationBranch(
   const configFileName = migratedConfigData.filename;
   logger.debug('Creating config migration branch');
 
-  const semanticFactory = new ConfigMigrationCommitMessageFactory(
+  const commitMessageFactory = new ConfigMigrationCommitMessageFactory(
     config,
     configFileName
   );
 
-  const commitMessage = semanticFactory.getCommitMessage();
+  const commitMessage = commitMessageFactory.getCommitMessage();
 
   // istanbul ignore if
   if (GlobalConfig.get('dryRun')) {
