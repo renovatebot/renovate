@@ -16,7 +16,7 @@ const actionRe = regEx(
 const shaRe = regEx(/^[a-z0-9]{40}|[a-z0-9]{64}$/);
 
 function extractWithRegex(content: string): PackageDependency[] {
-  logger.trace('github-actions.extractActionsFromPackageFile()');
+  logger.trace('github-actions.extractWithRegex()');
   const deps: PackageDependency[] = [];
   for (const line of content.split(newlineRegex)) {
     if (line.trim().startsWith('#')) {
@@ -83,7 +83,7 @@ function extractContainer(container: string | Container): PackageDependency {
 }
 
 function extractWithYAMLParser(content: string): PackageDependency[] {
-  logger.trace('github-actions.extractContainersFromPackageFile()');
+  logger.trace('github-actions.extractWithYAMLParser()');
   const deps: PackageDependency[] = [];
 
   const pkg = load(content, { json: true }) as Workflow;
