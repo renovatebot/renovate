@@ -10,10 +10,10 @@ export * from './types';
 
 class SourceUrlContainer {
   private readonly sourceUrl: string;
-  private readonly orgSourceUrl: string;
+  private readonly originalSourceUrl: string;
 
   constructor(config: BranchUpgradeConfig) {
-    this.orgSourceUrl = config.sourceUrl as string;
+    this.originalSourceUrl = config.sourceUrl as string;
     if (config.overwriteSourceUrl) {
       this.sourceUrl = config.overwriteSourceUrl as string;
     } else {
@@ -26,7 +26,7 @@ class SourceUrlContainer {
   }
 
   restore(): string {
-    return this.orgSourceUrl;
+    return this.originalSourceUrl;
   }
 }
 
