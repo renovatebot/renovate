@@ -18,6 +18,8 @@ export function getLernaVersion(
   const lernaDep = lernaPackageFile.deps?.find((d) => d.depName === 'lerna');
   if (!lernaDep || !semver.validRange(lernaDep.currentValue)) {
     logger.warn(
+      // TODO: types (#7154)
+      // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
       `Could not detect lerna version in ${lernaPackageFile.packageFile}, using 'latest'`
     );
     return 'latest';

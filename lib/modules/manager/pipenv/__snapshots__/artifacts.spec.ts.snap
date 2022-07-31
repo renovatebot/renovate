@@ -99,19 +99,19 @@ Array [
 exports[`modules/manager/pipenv/artifacts supports docker mode 1`] = `
 Array [
   Object {
-    "cmd": "docker pull renovate/python:latest",
+    "cmd": "docker pull renovate/sidecar",
     "options": Object {
       "encoding": "utf-8",
     },
   },
   Object {
-    "cmd": "docker ps --filter name=renovate_python -aq",
+    "cmd": "docker ps --filter name=renovate_sidecar -aq",
     "options": Object {
       "encoding": "utf-8",
     },
   },
   Object {
-    "cmd": "docker run --rm --name=renovate_python --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/renovate/cache\\":\\"/tmp/renovate/cache\\" -e PIPENV_CACHE_DIR -e BUILDPACK_CACHE_DIR -w \\"/tmp/github/some/repo\\" renovate/python:latest bash -l -c \\"pip install --user pipenv && pipenv lock\\"",
+    "cmd": "docker run --rm --name=renovate_sidecar --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/renovate/cache\\":\\"/tmp/renovate/cache\\" -e PIPENV_CACHE_DIR -e BUILDPACK_CACHE_DIR -w \\"/tmp/github/some/repo\\" renovate/sidecar bash -l -c \\"install-tool python 3.10.2 && pip install --user pipenv && pipenv lock\\"",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -136,19 +136,19 @@ Array [
 exports[`modules/manager/pipenv/artifacts uses pipenv version from Pipfile 1`] = `
 Array [
   Object {
-    "cmd": "docker pull renovate/python",
+    "cmd": "docker pull renovate/sidecar",
     "options": Object {
       "encoding": "utf-8",
     },
   },
   Object {
-    "cmd": "docker ps --filter name=renovate_python -aq",
+    "cmd": "docker ps --filter name=renovate_sidecar -aq",
     "options": Object {
       "encoding": "utf-8",
     },
   },
   Object {
-    "cmd": "docker run --rm --name=renovate_python --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/renovate/cache\\":\\"/tmp/renovate/cache\\" -e PIPENV_CACHE_DIR -e BUILDPACK_CACHE_DIR -w \\"/tmp/github/some/repo\\" renovate/python bash -l -c \\"pip install --user pipenv==2020.8.13 && pipenv lock\\"",
+    "cmd": "docker run --rm --name=renovate_sidecar --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/renovate/cache\\":\\"/tmp/renovate/cache\\" -e PIPENV_CACHE_DIR -e BUILDPACK_CACHE_DIR -w \\"/tmp/github/some/repo\\" renovate/sidecar bash -l -c \\"install-tool python 3.10.2 && pip install --user pipenv==2020.8.13 && pipenv lock\\"",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -173,19 +173,19 @@ Array [
 exports[`modules/manager/pipenv/artifacts uses pipenv version from Pipfile dev packages 1`] = `
 Array [
   Object {
-    "cmd": "docker pull renovate/python",
+    "cmd": "docker pull renovate/sidecar",
     "options": Object {
       "encoding": "utf-8",
     },
   },
   Object {
-    "cmd": "docker ps --filter name=renovate_python -aq",
+    "cmd": "docker ps --filter name=renovate_sidecar -aq",
     "options": Object {
       "encoding": "utf-8",
     },
   },
   Object {
-    "cmd": "docker run --rm --name=renovate_python --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/renovate/cache\\":\\"/tmp/renovate/cache\\" -e PIPENV_CACHE_DIR -e BUILDPACK_CACHE_DIR -w \\"/tmp/github/some/repo\\" renovate/python bash -l -c \\"pip install --user pipenv==2020.8.13 && pipenv lock\\"",
+    "cmd": "docker run --rm --name=renovate_sidecar --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/renovate/cache\\":\\"/tmp/renovate/cache\\" -e PIPENV_CACHE_DIR -e BUILDPACK_CACHE_DIR -w \\"/tmp/github/some/repo\\" renovate/sidecar bash -l -c \\"install-tool python 3.10.2 && pip install --user pipenv==2020.8.13 && pipenv lock\\"",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -210,19 +210,19 @@ Array [
 exports[`modules/manager/pipenv/artifacts uses pipenv version from config 1`] = `
 Array [
   Object {
-    "cmd": "docker pull renovate/python",
+    "cmd": "docker pull renovate/sidecar",
     "options": Object {
       "encoding": "utf-8",
     },
   },
   Object {
-    "cmd": "docker ps --filter name=renovate_python -aq",
+    "cmd": "docker ps --filter name=renovate_sidecar -aq",
     "options": Object {
       "encoding": "utf-8",
     },
   },
   Object {
-    "cmd": "docker run --rm --name=renovate_python --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/renovate/cache\\":\\"/tmp/renovate/cache\\" -e PIPENV_CACHE_DIR -e BUILDPACK_CACHE_DIR -w \\"/tmp/github/some/repo\\" renovate/python bash -l -c \\"pip install --user pipenv==2020.1.1 && pipenv lock\\"",
+    "cmd": "docker run --rm --name=renovate_sidecar --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/renovate/cache\\":\\"/tmp/renovate/cache\\" -e PIPENV_CACHE_DIR -e BUILDPACK_CACHE_DIR -w \\"/tmp/github/some/repo\\" renovate/sidecar bash -l -c \\"install-tool python 3.10.2 && pip install --user pipenv==2020.1.1 && pipenv lock\\"",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
