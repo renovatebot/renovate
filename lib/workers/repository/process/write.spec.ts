@@ -40,22 +40,18 @@ describe('workers/repository/process/write', () => {
       repoCache.getCache.mockReturnValue({});
       git.branchExists.mockReturnValue(true);
       branchWorker.processBranch.mockResolvedValueOnce({
-        configAndManagersHash: '111',
         branchExists: true,
         result: BranchResult.PrCreated,
       });
       branchWorker.processBranch.mockResolvedValueOnce({
-        configAndManagersHash: '111',
         branchExists: false,
         result: BranchResult.AlreadyExisted,
       });
       branchWorker.processBranch.mockResolvedValueOnce({
-        configAndManagersHash: '111',
         branchExists: false,
         result: BranchResult.Automerged,
       });
       branchWorker.processBranch.mockResolvedValueOnce({
-        configAndManagersHash: '111',
         branchExists: false,
         result: BranchResult.Automerged,
       });
@@ -69,7 +65,6 @@ describe('workers/repository/process/write', () => {
       const branches: BranchConfig[] = [{ upgrades: [] }] as never;
       repoCache.getCache.mockReturnValueOnce({});
       branchWorker.processBranch.mockResolvedValueOnce({
-        configAndManagersHash: '111',
         branchExists: true,
         result: BranchResult.PrCreated,
       });
@@ -84,13 +79,19 @@ describe('workers/repository/process/write', () => {
 
     it('return nowork if same updates', async () => {
       const branches: BranchConfig[] = [
-        { branchName: 'new/some-branch', upgrades: [] } as never,
+        {
+          branchName: 'new/some-branch',
+          upgrades: [
+            {
+              manager: 'npm',
+            },
+          ],
+        } as never,
       ];
       repoCache.getCache.mockReturnValueOnce({
         branches: [{ branchName: 'new/some-branch' } as BranchCache],
       });
       branchWorker.processBranch.mockResolvedValueOnce({
-        configAndManagersHash: '111',
         branchExists: true,
         result: BranchResult.NoWork,
       });
