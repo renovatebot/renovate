@@ -133,7 +133,7 @@ On our first try, we enabled 30 repositories, a cron task was running every hour
 
 We received 700 Pull Requests in the first month, it was a never ending Pull Request whack-a-mole every time we merged one, another replaced it.
 
-![A cat playing Whack-a-mole with a finger](../assets/images/swissquote_cat_whack_a_mole.gif)
+![A cat playing Whack-a-mole with a finger](../assets/images/swissquote_cat_whack_a_mole.jpg)
 
 Me and my team merging Pull Requests.
 
