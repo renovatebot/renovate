@@ -24,62 +24,46 @@ export class CurrentVersionMatcher extends Matcher {
       return null;
     }
 
-    let positiveMatch = false;
-    const unconstrainedValue = !!lockedVersion && is.undefined(currentValue);
+    if (is.nullOrUndefined(currentValue)) {
+      return false;
+    }
+
+    const isUnconstrainedValue = !!lockedVersion;
     const version = allVersioning.get(versioning);
     const matchCurrentVersionStr = matchCurrentVersion.toString();
     const matchCurrentVersionPred = configRegexPredicate(
       matchCurrentVersionStr
     );
+
     if (matchCurrentVersionPred) {
-      if (
-        !unconstrainedValue &&
-        (!currentValue || !matchCurrentVersionPred(currentValue))
-      ) {
-        return false;
-      }
-      positiveMatch = true;
-    } else if (version.isVersion(matchCurrentVersionStr)) {
-      let isMatch = false;
+      return !(!isUnconstrainedValue && !matchCurrentVersionPred(currentValue));
+    }
+    if (version.isVersion(matchCurrentVersionStr)) {
       try {
-        isMatch =
-          unconstrainedValue ||
-          !!(
-            currentValue &&
-            version.matches(matchCurrentVersionStr, currentValue)
-          );
-      } catch (err) {
-        // Do nothing
-      }
-      if (!isMatch) {
-        return false;
-      }
-      positiveMatch = true;
-    } else {
-      const compareVersion =
-        currentValue && version.isVersion(currentValue)
-          ? currentValue // it's a version so we can match against it
-          : lockedVersion ?? currentVersion; // need to match against this currentVersion, if available
-      if (compareVersion) {
-        // istanbul ignore next
-        if (version.isVersion(compareVersion)) {
-          const isMatch = version.matches(compareVersion, matchCurrentVersion);
-          // istanbul ignore if
-          if (!isMatch) {
-            return false;
-          }
-          positiveMatch = true;
-        } else {
-          return false;
-        }
-      } else {
-        logger.debug(
-          { matchCurrentVersionStr, currentValue },
-          'Could not find a version to compare'
+        return (
+          isUnconstrainedValue ||
+          version.matches(matchCurrentVersionStr, currentValue)
         );
+      } catch (err) {
         return false;
       }
     }
-    return positiveMatch;
+
+    const compareVersion = version.isVersion(currentValue)
+      ? currentValue // it's a version so we can match against it
+      : lockedVersion ?? currentVersion; // need to match against this currentVersion, if available
+    if (compareVersion) {
+      // istanbul ignore next
+      if (version.isVersion(compareVersion)) {
+        // istanbul ignore if
+        return version.matches(compareVersion, matchCurrentVersion);
+      }
+      return false;
+    }
+    logger.debug(
+      { matchCurrentVersionStr, currentValue },
+      'Could not find a version to compare'
+    );
+    return false;
   }
 }
