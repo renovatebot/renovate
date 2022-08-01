@@ -1634,6 +1634,20 @@ const options: RenovateOptions[] = [
     cli: false,
   },
   {
+    name: 'prettyVersion',
+    description: 'the new version value with v prepended to it.',
+    type: 'string',
+    default: '{{prettifyVersion newVersion}}',
+    cli: false,
+  },
+  {
+    name: 'prettyNewMajor',
+    description: 'The new major value with v prepended to it',
+    type: 'string',
+    default: '{{prettifyVersion newMajor}}',
+    cli: false,
+  },
+  {
     name: 'commitMessageExtra',
     description:
       'Extra description used after the commit message topic - typically the version.',
