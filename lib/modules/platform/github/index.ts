@@ -1,3 +1,5 @@
+// TODO: types (#7154)
+/* eslint-disable @typescript-eslint/restrict-template-expressions */
 import URL from 'url';
 import is from '@sindresorhus/is';
 import delay from 'delay';
@@ -632,13 +634,25 @@ export async function findPr({
 }: FindPRConfig): Promise<Pr | null> {
   logger.debug(`findPr(${branchName}, ${prTitle}, ${state})`);
   const prList = await getPrList();
-  const pr = prList.find(
-    (p) =>
-      p.sourceBranch === branchName &&
-      (!prTitle || p.title === prTitle) &&
-      matchesState(p.state, state) &&
-      (config.forkMode || config.repository === p.sourceRepo) // #5188
-  );
+  const pr = prList.find((p) => {
+    if (p.sourceBranch !== branchName) {
+      return false;
+    }
+
+    if (prTitle && prTitle !== p.title) {
+      return false;
+    }
+
+    if (!matchesState(p.state, state)) {
+      return false;
+    }
+
+    if (!config.forkMode && config.repository !== p.sourceRepo) {
+      return false;
+    }
+
+    return true;
+  });
   if (pr) {
     logger.debug(`Found PR #${pr.number}`);
   }

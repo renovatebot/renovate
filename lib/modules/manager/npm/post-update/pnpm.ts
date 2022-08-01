@@ -32,7 +32,7 @@ export async function generateLockFile(
     const pnpmToolConstraint: ToolConstraint = {
       toolName: 'pnpm',
       constraint:
-        config.constraints?.pnpm ?? (await getPnpmContraint(lockFileDir)),
+        config.constraints?.pnpm ?? (await getPnpmConstraint(lockFileDir)),
     };
     const tagConstraint =
       getNodeUpdate(upgrades) ?? (await getNodeConstraint(config));
@@ -98,7 +98,7 @@ export async function generateLockFile(
   return { lockFile };
 }
 
-async function getPnpmContraint(
+async function getPnpmConstraint(
   lockFileDir: string
 ): Promise<string | undefined> {
   let result: string | undefined;

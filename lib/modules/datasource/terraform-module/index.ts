@@ -80,6 +80,8 @@ export class TerraformModuleDatasource extends TerraformDatasource {
     let pkgUrl: string;
 
     try {
+      // TODO: types (#7154)
+      // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
       pkgUrl = `${registryUrl}${serviceDiscovery['modules.v1']}${repository}`;
       res = (await this.http.getJson<TerraformRelease>(pkgUrl)).body;
       const returnedName = res.namespace + '/' + res.name + '/' + res.provider;
@@ -123,6 +125,8 @@ export class TerraformModuleDatasource extends TerraformDatasource {
     let res: TerraformModuleVersions;
     let pkgUrl: string;
     try {
+      // TODO: types (#7154)
+      // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
       pkgUrl = `${registryUrl}${serviceDiscovery['modules.v1']}${repository}/versions`;
       res = (await this.http.getJson<TerraformModuleVersions>(pkgUrl)).body;
       if (res.modules.length < 1) {
