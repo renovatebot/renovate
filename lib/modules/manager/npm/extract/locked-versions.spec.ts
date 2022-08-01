@@ -211,7 +211,7 @@ describe('modules/manager/npm/extract/locked-versions', () => {
       ]);
     });
 
-    it("uses yarn.lock but doesn't override contraints", async () => {
+    it("uses yarn.lock but doesn't override constraints", async () => {
       const yarnVersion = '3.2.0';
       const lockfileVersion = 8;
       const isYarn1 = false;
