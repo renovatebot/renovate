@@ -19,23 +19,22 @@ function checkRebaseAll(issueBody: string): boolean {
   return issueBody.includes(' - [x] <!-- rebase-all-open-prs -->');
 }
 
-function getCheckedBranches(issueBody: string): RegExpMatchArray | null {
+function getCheckedBranches(issueBody: string): Record<string, string> {
   const checkMatch = ' - \\[x\\] <!-- ([a-zA-Z]+)-branch=([^\\s]+) -->';
-  return issueBody.match(regEx(checkMatch, 'g'));
-}
-
-function parseDashboardIssue(issueBody: string): DependencyDashboard {
-  const checked = getCheckedBranches(issueBody);
+  const checked = issueBody.match(regEx(checkMatch, 'g'));
   const dependencyDashboardChecks: Record<string, string> = {};
   if (checked?.length) {
-    // duplicate regex is temporary, will be changed in #15912
-    const checkMatch = ' - \\[x\\] <!-- ([a-zA-Z]+)-branch=([^\\s]+) -->';
     const re = regEx(checkMatch);
     checked.forEach((check) => {
       const [, type, branchName] = re.exec(check)!;
       dependencyDashboardChecks[branchName] = type;
     });
   }
+  return dependencyDashboardChecks;
+}
+
+function parseDashboardIssue(issueBody: string): DependencyDashboard {
+  const dependencyDashboardChecks = getCheckedBranches(issueBody);
   const dependencyDashboardRebaseAllOpen = checkRebaseAll(issueBody);
   return {
     dependencyDashboardChecks,
