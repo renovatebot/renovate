@@ -50,7 +50,7 @@ export async function prepareGradleCommand(
  * @param gradleVersion current gradle version
  * @returns A Java semver range
  */
-export function getJavaContraint(
+export function getJavaConstraint(
   gradleVersion: string | null | undefined
 ): string | null {
   const major = gradleVersion ? gradleVersioning.getMajor(gradleVersion) : null;
