@@ -12,23 +12,14 @@ export class ConfigMigrationCommitMessageFactory {
     private readonly configFile: string
   ) {}
 
-  private create(messageTopic: string): CommitMessage {
+  private create(commitMessageTopic: string): CommitMessage {
     const { commitMessage } = this.config;
-    let { commitMessageAction, commitMessageTopic } = this.config;
-
-    if (commitMessageAction === 'Update') {
-      commitMessageAction = '';
-    }
-
-    if (commitMessageTopic === 'dependency {{depName}}') {
-      commitMessageTopic = messageTopic;
-    }
 
     const config = {
       ...this.config,
       semanticCommitScope: 'config',
       commitMessageExtra: '',
-      commitMessageAction,
+      commitMessageAction: '',
       commitMessageTopic,
     };
 
@@ -39,7 +30,7 @@ export class ConfigMigrationCommitMessageFactory {
       config.commitMessagePrefix = '';
       commit.subject = template.compile(commitMessage, config);
     } else {
-      commit.subject = messageTopic;
+      commit.subject = commitMessageTopic;
     }
 
     return commit;
