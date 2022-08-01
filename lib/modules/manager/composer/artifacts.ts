@@ -43,7 +43,7 @@ function findGithubPersonnalAccessToken(
 }
 
 function isPersonnalAccessToken(token: string): boolean {
-  return /^ghp_/.test(token);
+  return regEx(/^ghp_/).test(token);
 }
 
 function getAuthJson(): string | null {
