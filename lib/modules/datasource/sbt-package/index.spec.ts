@@ -17,6 +17,14 @@ describe('modules/datasource/sbt-package/index', () => {
     ).toMatchSnapshot();
   });
 
+  it('uses proper hostType', () => {
+    const ds = new SbtPackageDatasource();
+    expect(ds).toMatchObject({
+      id: SbtPackageDatasource.id,
+      http: { hostType: 'sbt' },
+    });
+  });
+
   describe('getPkgReleases', () => {
     it('returns null in case of errors', async () => {
       httpMock
