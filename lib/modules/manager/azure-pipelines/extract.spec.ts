@@ -1,5 +1,6 @@
 import { Fixtures } from '../../../../test/fixtures';
 import {
+  extractAzurePipelinesTasks,
   extractContainer,
   extractRepository,
   parseAzurePipelines,
@@ -14,6 +15,7 @@ const azurePipelinesNoDependency = Fixtures.get(
 const azurePipelinesStages = Fixtures.get('azure-pipelines-stages.yaml');
 const azurePipelinesJobs = Fixtures.get('azure-pipelines-jobs.yaml');
 const azurePipelinesSteps = Fixtures.get('azure-pipelines-steps.yaml');
+const azurePipelinesAlias = Fixtures.get('azure-pipelines-alias.yaml');
 
 describe('modules/manager/azure-pipelines/extract', () => {
   it('should parse a valid azure-pipelines file', () => {
@@ -92,6 +94,19 @@ describe('modules/manager/azure-pipelines/extract', () => {
     });
   });
 
+  describe('extractAzurePipelinesTasks()', () => {
+    it('should extract azure-pipelines task information', () => {
+      expect(extractAzurePipelinesTasks('Bash@3')).toMatchSnapshot({
+        depName: 'Bash',
+        currentValue: '3',
+      });
+    });
+
+    it('should return null for invalid task format', () => {
+      expect(extractAzurePipelinesTasks('Bash_3')).toBeNull();
+    });
+  });
+
   describe('extractPackageFile()', () => {
     it('returns null for invalid azure pipelines files', () => {
       expect(extractPackageFile('', 'azure-pipelines.yaml')).toBeNull();
@@ -134,6 +149,14 @@ describe('modules/manager/azure-pipelines/extract', () => {
       );
       expect(res?.deps).toMatchSnapshot();
       expect(res?.deps).toHaveLength(1);
+    });
+
+    it('should return null when task alias used', () => {
+      const res = extractPackageFile(
+        azurePipelinesAlias,
+        'azure-pipelines.yaml'
+      );
+      expect(res).toBeNull();
     });
   });
 });

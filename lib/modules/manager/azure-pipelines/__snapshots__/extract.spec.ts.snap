@@ -1,5 +1,12 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`modules/manager/azure-pipelines/extract extractAzurePipelinesTasks() should extract azure-pipelines task information 1`] = `
+Object {
+  "currentValue": "3",
+  "depName": "Bash",
+}
+`;
+
 exports[`modules/manager/azure-pipelines/extract extractContainer() should extract container information 1`] = `
 Object {
   "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
