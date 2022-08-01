@@ -341,11 +341,12 @@ Array [
     },
   },
   Object {
-    "cmd": "docker run --rm --name=renovate_php --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/renovate/cache\\":\\"/tmp/renovate/cache\\" -e COMPOSER_CACHE_DIR -w \\"/tmp/github/some/repo\\" renovate/php:7.3 bash -l -c \\"install-tool composer 1.10.17 && composer update --with-dependencies --ignore-platform-reqs --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins\\"",
+    "cmd": "docker run --rm --name=renovate_php --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/renovate/cache\\":\\"/tmp/renovate/cache\\" -e COMPOSER_CACHE_DIR -e BUILDPACK_CACHE_DIR -w \\"/tmp/github/some/repo\\" renovate/php:7.3 bash -l -c \\"install-tool composer 1.10.17 && composer update --with-dependencies --ignore-platform-reqs --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins\\"",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
       "env": Object {
+        "BUILDPACK_CACHE_DIR": "/tmp/renovate/cache/buildpack",
         "COMPOSER_CACHE_DIR": "/tmp/renovate/cache/others/composer",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",

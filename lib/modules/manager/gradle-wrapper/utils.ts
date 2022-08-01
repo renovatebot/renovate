@@ -4,7 +4,6 @@ import { logger } from '../../../logger';
 import { chmodLocalFile, statLocalFile } from '../../../util/fs';
 import { newlineRegex, regEx } from '../../../util/regex';
 import gradleVersioning from '../../versioning/gradle';
-import { id as npmVersioning } from '../../versioning/npm';
 import type { GradleVersionExtract } from './types';
 
 export const extraEnv = {
@@ -51,13 +50,10 @@ export async function prepareGradleCommand(
  * @param gradleVersion current gradle version
  * @returns A Java semver range
  */
-export function getJavaContraint(gradleVersion: string): string | null {
-  if (GlobalConfig.get('binarySource') !== 'docker') {
-    // ignore
-    return null;
-  }
-
-  const major = gradleVersioning.getMajor(gradleVersion);
+export function getJavaConstraint(
+  gradleVersion: string | null | undefined
+): string | null {
+  const major = gradleVersion ? gradleVersioning.getMajor(gradleVersion) : null;
   if (major && major >= 7) {
     return '^16.0.0';
   }
@@ -66,10 +62,6 @@ export function getJavaContraint(gradleVersion: string): string | null {
     return '^8.0.0';
   }
   return '^11.0.0';
-}
-
-export function getJavaVersioning(): string {
-  return npmVersioning;
 }
 
 // https://regex101.com/r/IcOs7P/1

@@ -76,8 +76,18 @@ export async function updateArtifacts({
   const execOptions: ExecOptions = {
     cwdFile: packageFileName,
     docker: {
-      image: 'elixir',
+      image: 'sidecar',
     },
+    toolConstraints: [
+      {
+        toolName: 'erlang',
+        // https://hexdocs.pm/elixir/1.13.4/compatibility-and-deprecations.html#compatibility-between-elixir-and-erlang-otp
+        constraint: '^24',
+      },
+      {
+        toolName: 'elixir',
+      },
+    ],
     preCommands,
   };
   const command = [

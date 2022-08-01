@@ -7,6 +7,9 @@ import * as rubyVersioning from '../../versioning/ruby';
 export { extractPackageFile } from './extract';
 export { updateArtifacts } from './artifacts';
 
+export const displayName = 'CocoaPods';
+export const url = 'https://cocoapods.org';
+
 export const defaultConfig = {
   fileMatch: ['(^|/)Podfile$'],
   versioning: rubyVersioning.id,

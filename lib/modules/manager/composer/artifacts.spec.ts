@@ -1,5 +1,5 @@
 import { join } from 'upath';
-import { envMock, exec, mockExecAll } from '../../../../test/exec-util';
+import { envMock, mockExecAll } from '../../../../test/exec-util';
 import { env, fs, git, mocked, partial } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
@@ -13,7 +13,6 @@ import type { UpdateArtifactsConfig } from '../types';
 import * as composer from '.';
 import { GitTagsDatasource } from '../../datasource/git-tags';
 
-jest.mock('../../../util/exec/common');
 jest.mock('../../../util/exec/env');
 jest.mock('../../datasource');
 jest.mock('../../../util/fs');
@@ -79,7 +78,7 @@ describe('modules/manager/composer/artifacts', () => {
 
   it('returns null if unchanged', async () => {
     fs.readLocalFile.mockResolvedValueOnce('{}');
-    const execSnapshots = mockExecAll(exec);
+    const execSnapshots = mockExecAll();
     fs.readLocalFile.mockResolvedValueOnce('{}');
     git.getRepoStatus.mockResolvedValueOnce(repoStatus);
     GlobalConfig.set({
@@ -138,7 +137,7 @@ describe('modules/manager/composer/artifacts', () => {
       token: 'abcdef0123456789',
     });
     fs.readLocalFile.mockResolvedValueOnce('{}');
-    const execSnapshots = mockExecAll(exec);
+    const execSnapshots = mockExecAll();
     fs.readLocalFile.mockResolvedValueOnce('{}');
     const authConfig = {
       ...config,
@@ -213,7 +212,7 @@ describe('modules/manager/composer/artifacts', () => {
 
   it('returns updated composer.lock', async () => {
     fs.readLocalFile.mockResolvedValueOnce('{}');
-    const execSnapshots = mockExecAll(exec);
+    const execSnapshots = mockExecAll();
     fs.readLocalFile.mockResolvedValueOnce('{}');
     git.getRepoStatus.mockResolvedValueOnce({
       ...repoStatus,
@@ -236,7 +235,7 @@ describe('modules/manager/composer/artifacts', () => {
     const baz = join('vendor/baz/Baz.php');
     fs.localPathExists.mockResolvedValueOnce(true);
     fs.readLocalFile.mockResolvedValueOnce('{}');
-    const execSnapshots = mockExecAll(exec);
+    const execSnapshots = mockExecAll();
     git.getRepoStatus.mockResolvedValueOnce({
       ...repoStatus,
       modified: ['composer.lock', foo],
@@ -265,7 +264,7 @@ describe('modules/manager/composer/artifacts', () => {
 
   it('performs lockFileMaintenance', async () => {
     fs.readLocalFile.mockResolvedValueOnce('{}');
-    const execSnapshots = mockExecAll(exec);
+    const execSnapshots = mockExecAll();
     fs.readLocalFile.mockResolvedValueOnce('{  }');
     git.getRepoStatus.mockResolvedValueOnce({
       ...repoStatus,
@@ -289,7 +288,7 @@ describe('modules/manager/composer/artifacts', () => {
     GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
     fs.readLocalFile.mockResolvedValueOnce('{}');
 
-    const execSnapshots = mockExecAll(exec);
+    const execSnapshots = mockExecAll();
 
     fs.readLocalFile.mockResolvedValueOnce('{  }');
 
@@ -323,7 +322,7 @@ describe('modules/manager/composer/artifacts', () => {
   it('supports global mode', async () => {
     GlobalConfig.set({ ...adminConfig, binarySource: 'global' });
     fs.readLocalFile.mockResolvedValueOnce('{}');
-    const execSnapshots = mockExecAll(exec);
+    const execSnapshots = mockExecAll();
     fs.readLocalFile.mockResolvedValueOnce('{ }');
     git.getRepoStatus.mockResolvedValueOnce({
       ...repoStatus,
@@ -393,7 +392,7 @@ describe('modules/manager/composer/artifacts', () => {
 
   it('disables ignorePlatformReqs', async () => {
     fs.readLocalFile.mockResolvedValueOnce('{}');
-    const execSnapshots = mockExecAll(exec);
+    const execSnapshots = mockExecAll();
     fs.readLocalFile.mockResolvedValueOnce('{ }');
     git.getRepoStatus.mockResolvedValueOnce({
       ...repoStatus,
@@ -415,7 +414,7 @@ describe('modules/manager/composer/artifacts', () => {
 
   it('adds all ignorePlatformReq items', async () => {
     fs.readLocalFile.mockResolvedValueOnce('{}');
-    const execSnapshots = mockExecAll(exec);
+    const execSnapshots = mockExecAll();
     fs.readLocalFile.mockResolvedValueOnce('{ }');
     git.getRepoStatus.mockResolvedValueOnce({
       ...repoStatus,
@@ -439,7 +438,7 @@ describe('modules/manager/composer/artifacts', () => {
     fs.readLocalFile.mockResolvedValueOnce(
       '{"packages":[{"name":"symfony/flex","version":"1.17.1"}]}'
     );
-    const execSnapshots = mockExecAll(exec);
+    const execSnapshots = mockExecAll();
     fs.readLocalFile.mockResolvedValueOnce('{ }');
     git.getRepoStatus.mockResolvedValueOnce({
       ...repoStatus,
@@ -463,7 +462,7 @@ describe('modules/manager/composer/artifacts', () => {
     fs.readLocalFile.mockResolvedValueOnce(
       '{"packages-dev":[{"name":"symfony/flex","version":"1.17.1"}]}'
     );
-    const execSnapshots = mockExecAll(exec);
+    const execSnapshots = mockExecAll();
     fs.readLocalFile.mockResolvedValueOnce('{ }');
     git.getRepoStatus.mockResolvedValueOnce({
       ...repoStatus,
@@ -485,7 +484,7 @@ describe('modules/manager/composer/artifacts', () => {
 
   it('does not disable plugins when configured globally', async () => {
     fs.readLocalFile.mockResolvedValueOnce('{}');
-    const execSnapshots = mockExecAll(exec);
+    const execSnapshots = mockExecAll();
     fs.readLocalFile.mockResolvedValueOnce('{}');
     git.getRepoStatus.mockResolvedValueOnce(repoStatus);
     GlobalConfig.set({ ...adminConfig, allowPlugins: true });
@@ -502,7 +501,7 @@ describe('modules/manager/composer/artifacts', () => {
 
   it('disable plugins when configured locally', async () => {
     fs.readLocalFile.mockResolvedValueOnce('{}');
-    const execSnapshots = mockExecAll(exec);
+    const execSnapshots = mockExecAll();
     fs.readLocalFile.mockResolvedValueOnce('{}');
     git.getRepoStatus.mockResolvedValueOnce(repoStatus);
     GlobalConfig.set({ ...adminConfig, allowPlugins: true });

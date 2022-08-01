@@ -1,3 +1,5 @@
+// TODO: types (#7154)
+/* eslint-disable @typescript-eslint/restrict-template-expressions */
 import URL from 'url';
 import { PlatformId } from '../../../constants';
 import { logger } from '../../../logger';
@@ -84,6 +86,13 @@ export class BaseGoDatasource {
       return null;
     }
     logger.debug({ goModule, goSourceUrl }, 'Go lookup source url');
+    return this.detectDatasource(goSourceUrl, goModule);
+  }
+
+  private static detectDatasource(
+    goSourceUrl: string,
+    goModule: string
+  ): DataSource | null {
     if (goSourceUrl?.startsWith('https://github.com/')) {
       return {
         datasource: GithubTagsDatasource.id,
@@ -172,6 +181,15 @@ export class BaseGoDatasource {
     logger.debug({ goModule, goImportURL }, 'Go lookup import url');
     // get server base url from import url
     const parsedUrl = URL.parse(goImportURL);
+
+    const datasource = this.detectDatasource(
+      goImportURL.replace(regEx(/\.git$/), ''),
+      goModule
+    );
+    if (datasource !== null) {
+      return datasource;
+    }
+    // fall back to old behaviour if detection did not work
 
     // split the go module from the URL: host/go/module -> go/module
     // TODO: `parsedUrl.pathname` can be undefined
