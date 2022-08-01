@@ -636,7 +636,7 @@ This option is evaluated at PR/MR creation time.
 
 <!-- prettier-ignore -->
 !!! note
-    GitLab and Gitea implements draft status by checking whether the PR's title starts with certain strings.
+    GitLab and Gitea implement draft status by checking if the PR's title starts with certain strings.
     This means that `draftPR` on GitLab and Gitea are incompatible with the legacy method of triggering Renovate to rebase a PR by renaming the PR to start with `rebase!`.
 
 ## enabled
