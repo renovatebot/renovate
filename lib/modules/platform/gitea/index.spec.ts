@@ -1088,7 +1088,7 @@ describe('modules/platform/gitea/index', () => {
       );
     });
 
-    it("doesn't support platform automerge", async () => {
+    it('continues if platform automerge is not supported', async () => {
       helper.createPR.mockResolvedValueOnce(mockNewPR);
       await initFakeRepo();
       const res = await gitea.createPr({
