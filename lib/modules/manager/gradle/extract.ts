@@ -87,7 +87,7 @@ export async function extractAllPackageFiles(
     } catch (err) {
       logger.warn(
         { err, config, packageFile },
-        `Failed to process Gradle file: ${packageFile}`
+        `Failed to process Gradle file`
       );
     }
   }

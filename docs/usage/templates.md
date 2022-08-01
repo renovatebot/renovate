@@ -87,6 +87,6 @@ Returns `true` if at least one expression is `true`.
 ## prettifyVersion
 
 Prepends `v` to start of `newMajor` or `newVersion` or any string not starting with `v`.
-If you want for example to create a pr title having the changed version:
+For example, to create a PR title with the changed version:
 
 `{ "commitMessageExtra": "{{prettifyVersion newVersion}}" }`
