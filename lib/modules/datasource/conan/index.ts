@@ -6,17 +6,13 @@ import { GithubHttp } from '../../../util/http/github';
 import { ensureTrailingSlash, joinUrlParts } from '../../../util/url';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
-import { conanDatasourceRegex, datasource, defaultRegistryUrl } from './common';
+import {
+  conanDatasourceRegex,
+  datasource,
+  defaultRegistryUrl,
+  getRevision,
+} from './common';
 import type { ConanJSON, ConanRevisionsJSON, ConanYAML } from './types';
-
-function getRevision(packageName: string): string | undefined {
-  const splitted = packageName.split('#');
-  if (splitted.length <= 1) {
-    return undefined;
-  } else {
-    return splitted[1];
-  }
-}
 
 export class ConanDatasource extends Datasource {
   static readonly id = datasource;
@@ -72,6 +68,30 @@ export class ConanDatasource extends Datasource {
     );
     const revisions = revisionRep?.body.revisions;
     return revisions ? revisions[0].revision : undefined;
+  }
+
+  @cache({
+    namespace: `datasource-${datasource}-revisions`,
+    key: ({ registryUrl, packageName }: GetReleasesConfig) =>
+      // TODO: types (#7154)
+      // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+      `${registryUrl}:${packageName}`,
+  })
+  override async getDigest(
+    { registryUrl, packageName }: GetReleasesConfig,
+    newValue?: string
+  ): Promise<string | null> {
+    const revision = getRevision(packageName);
+    if (is.undefined(revision) || is.undefined(registryUrl)) {
+      return null;
+    } else {
+      const url = ensureTrailingSlash(registryUrl);
+      const packageNameWithoutRevision = packageName
+        .split('#')[0]
+        .replace('@', '/');
+      const digest = await this.getNewDigest(url, packageNameWithoutRevision);
+      return digest ? digest : null;
+    }
   }
 
   @cache({

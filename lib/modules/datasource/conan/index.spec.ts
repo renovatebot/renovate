@@ -1,8 +1,8 @@
-import { getPkgReleases } from '..';
+import { getDigest, getPkgReleases } from '..';
 import { Fixtures } from '../../../../test/fixtures';
 import * as httpMock from '../../../../test/http-mock';
 import * as conan from '../../versioning/conan';
-import type { GetPkgReleasesConfig } from '../types';
+import type { GetDigestInputConfig, GetPkgReleasesConfig } from '../types';
 import { defaultRegistryUrl } from './common';
 import { ConanDatasource } from '.';
 
@@ -25,9 +25,34 @@ const config: GetPkgReleasesConfig = {
   registryUrls: [nonDefaultRegistryUrl],
 };
 
+const digestConfig: GetDigestInputConfig = {
+  depName: '',
+  datasource,
+  registryUrls: [nonDefaultRegistryUrl],
+};
+
 describe('modules/datasource/conan/index', () => {
   beforeEach(() => {
     config.registryUrls = [nonDefaultRegistryUrl];
+  });
+
+  describe('getDigest', () => {
+    it('handles package without digest', async () => {
+      digestConfig.packageName = 'fakepackage/1.2@_/_';
+      expect(await getDigest(digestConfig)).toBeNull();
+    });
+
+    it('handles digest', async () => {
+      const version = '1.8.1';
+      httpMock
+        .scope(nonDefaultRegistryUrl)
+        .get(`/v2/conans/poco/${version}/_/_/revisions`)
+        .reply(200, pocoRevisions['1.8.1']);
+      digestConfig.packageName = `poco/${version}@_/_#4fc13d60fd91ba44fefe808ad719a5af`;
+      expect(await getDigest(digestConfig)).toBe(
+        '3a9b47caee2e2c1d3fb7d97788339aa8'
+      );
+    });
   });
 
   describe('getReleases', () => {
