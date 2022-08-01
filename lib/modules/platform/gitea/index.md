@@ -19,7 +19,7 @@ Either the account should have full name and email address set to allow Renovate
 ## Unsupported platform features/concepts
 
 - **Adding reviewers to PRs not supported**: Gitea versions older than v1.14.0 do not have the required API.
-- **Setting platformAutomerge To PRs not supported**: Gitea versions older than v1.17.0 do not have the required API.
+- **Setting `platformAutomerge` to use platform-native automerge for PRs not supported**: Gitea versions older than v1.17.0 do not have the required API.
 
 ## Features awaiting implementation
 
