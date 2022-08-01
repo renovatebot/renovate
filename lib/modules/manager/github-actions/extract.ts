@@ -5,7 +5,7 @@ import { GithubTagsDatasource } from '../../datasource/github-tags';
 import * as dockerVersioning from '../../versioning/docker';
 import { getDep } from '../dockerfile/extract';
 import type { PackageDependency, PackageFile } from '../types';
-import type { Container, Job, Workflow } from './types';
+import type { Container, Workflow } from './types';
 
 const dockerActionRe = regEx(/^\s+uses: ['"]?docker:\/\/([^'"]+)\s*$/);
 const actionRe = regEx(
@@ -88,17 +88,14 @@ function extractWithYAMLParser(content: string): PackageDependency[] {
 
   const pkg = load(content, { json: true }) as Workflow;
 
-  for (const [, job] of Object.entries(pkg.jobs ?? {}) as [string, Job][]) {
+  for (const job of Object.values(pkg.jobs ?? [])) {
     if (job.container !== undefined) {
       const dep = extractContainer(job.container);
       dep.depType = 'container';
       deps.push(dep);
     }
 
-    for (const [, service] of Object.entries(job.services ?? {}) as [
-      string,
-      string | Container
-    ][]) {
+    for (const service of Object.values(job.services ?? [])) {
       const dep = extractContainer(service);
       dep.depType = 'service';
       deps.push(dep);
