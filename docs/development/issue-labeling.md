@@ -103,7 +103,7 @@ Use [this search](https://github.com/renovatebot/renovate/issues?q=is%3Aissue+is
 </details>
 
 Use these to mark the platform that is affected by this issue.
-Keep in mind that an issue can be both affecting a platform and a self hosted instance.
+Keep in mind that an issue can be both affecting a platform and a self-hosted instance.
 
 ### Core
 
@@ -112,7 +112,9 @@ Keep in mind that an issue can be both affecting a platform and a self hosted in
 
     core:automerge
     core:changelogs
+    core:config
     core:dashboard
+    core:git
     core:onboarding
     core:schedule
 
@@ -137,8 +139,8 @@ Use a `datasource:` label when it is applicable specifically to particular datas
 
     worker:branch
     worker:global
-    worker:onboarding
     worker:pr
+    worker:repository
 
 </details>
 
@@ -189,7 +191,7 @@ Add the label `reproduction:provided` once there is a public reproduction.
 
 Add a label `duplicate` to issues/PRs that are a duplicate of an earlier issue/PR.
 
-### Self hosted
+### Self-hosted
 
 <details>
     <summary>Self hosted</summary>

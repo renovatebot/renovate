@@ -114,7 +114,7 @@ describe('modules/platform/gitea/index', () => {
       state: 'closed',
       body: 'other-content',
       assignees: [],
-      labels: [],
+      labels: undefined as never, // coverage
     },
     {
       number: 3,
@@ -179,7 +179,7 @@ describe('modules/platform/gitea/index', () => {
     helper = mocked(await import('./gitea-helper'));
     logger = mocked((await import('../../../logger')).logger);
     gitvcs = require('../../../util/git');
-    gitvcs.isBranchStale.mockResolvedValue(false);
+    gitvcs.isBranchBehindBase.mockResolvedValue(false);
     gitvcs.getBranchCommit.mockReturnValue(mockCommitHash);
     hostRules = mocked(await import('../../../util/host-rules'));
     hostRules.clear();
@@ -453,6 +453,8 @@ describe('modules/platform/gitea/index', () => {
       };
       await gitea.initRepo(repoCfg);
 
+      // TODO: types (#7154)
+      // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
       const url = new URL(`${mockRepo.clone_url}`);
       url.username = token;
       expect(gitvcs.initRepo).toHaveBeenCalledWith(
@@ -478,6 +480,8 @@ describe('modules/platform/gitea/index', () => {
       };
       await gitea.initRepo(repoCfg);
 
+      // TODO: types (#7154)
+      // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
       const url = new URL(`${mockRepo.clone_url}`);
       url.username = token;
       expect(gitvcs.initRepo).toHaveBeenCalledWith(
@@ -1087,6 +1091,7 @@ describe('modules/platform/gitea/index', () => {
         await gitea.mergePr({
           branchName: 'some-branch',
           id: 1,
+          strategy: 'squash',
         })
       ).toBe(false);
     });
@@ -1768,6 +1773,14 @@ describe('modules/platform/gitea/index', () => {
       } as never);
       await initFakeRepo({ full_name: 'some/repo' });
       await expect(gitea.getJsonFile('file.json')).rejects.toThrow();
+    });
+
+    it('returns null on missing content', async () => {
+      helper.getRepoContents.mockResolvedValueOnce(
+        partial<ght.RepoContents>({})
+      );
+      await initFakeRepo({ full_name: 'some/repo' });
+      expect(await gitea.getJsonFile('file.json')).toBeNull();
     });
 
     it('throws on errors', async () => {

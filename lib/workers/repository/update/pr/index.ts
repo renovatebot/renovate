@@ -6,8 +6,14 @@ import {
   PLATFORM_RATE_LIMIT_EXCEEDED,
   REPOSITORY_CHANGED,
 } from '../../../../constants/error-messages';
+import { pkg } from '../../../../expose.cjs';
 import { logger } from '../../../../logger';
-import { PlatformPrOptions, Pr, platform } from '../../../../modules/platform';
+import {
+  PlatformPrOptions,
+  Pr,
+  PrDebugData,
+  platform,
+} from '../../../../modules/platform';
 import { ensureComment } from '../../../../modules/platform/comment';
 import { hashBody } from '../../../../modules/platform/pr-body';
 import { BranchStatus } from '../../../../types';
@@ -45,17 +51,28 @@ export function getPlatformPrOptions(
   };
 }
 
-export type ResultWithPr = {
+export interface ResultWithPr {
   type: 'with-pr';
   pr: Pr;
-};
+}
 
-export type ResultWithoutPr = {
+export interface ResultWithoutPr {
   type: 'without-pr';
   prBlockedBy: PrBlockedBy;
-};
+}
 
 export type EnsurePrResult = ResultWithPr | ResultWithoutPr;
+
+export function updatePrDebugData(
+  debugData: PrDebugData | undefined
+): PrDebugData {
+  const createdByRenovateVersion = debugData?.createdInVer ?? pkg.version;
+  const updatedByRenovateVersion = pkg.version;
+  return {
+    createdInVer: createdByRenovateVersion,
+    updatedInVer: updatedByRenovateVersion,
+  };
+}
 
 // Ensures that PR exists with matching title/body
 export async function ensurePr(
@@ -171,16 +188,20 @@ export async function ensurePr(
   function getRepoNameWithSourceDirectory(
     upgrade: BranchUpgradeConfig
   ): string {
-    return `${upgrade.repoName}${
+    // TODO: types (#7154)
+    return `${upgrade.repoName!}${
       upgrade.sourceDirectory ? `:${upgrade.sourceDirectory}` : ''
     }`;
   }
 
   // Get changelog and then generate template strings
   for (const upgrade of upgrades) {
-    const upgradeKey = `${upgrade.depType}-${upgrade.depName}-${
+    // TODO: types (#7154)
+    const upgradeKey = `${upgrade.depType!}-${upgrade.depName!}-${
       upgrade.manager
-    }-${upgrade.currentVersion ?? upgrade.currentValue}-${upgrade.newVersion}`;
+    }-${
+      upgrade.currentVersion ?? upgrade.currentValue!
+    }-${upgrade.newVersion!}`;
     if (processedUpgrades.includes(upgradeKey)) {
       continue;
     }
@@ -231,7 +252,8 @@ export async function ensurePr(
   for (const upgrade of config.upgrades) {
     let notesSourceUrl = upgrade.releases?.[0]?.releaseNotes?.notesSourceUrl;
     if (!notesSourceUrl) {
-      notesSourceUrl = `${upgrade.sourceUrl}${
+      // TODO: types (#7154)
+      notesSourceUrl = `${upgrade.sourceUrl!}${
         upgrade.sourceDirectory ? `:${upgrade.sourceDirectory}` : ''
       }`;
     }
@@ -249,7 +271,9 @@ export async function ensurePr(
     }
   }
 
-  const prBody = await getPrBody(config);
+  const prBody = await getPrBody(config, {
+    debugData: updatePrDebugData(existingPr?.bodyStruct?.debugData),
+  });
 
   try {
     if (existingPr) {
@@ -273,7 +297,8 @@ export async function ensurePr(
         existingPrTitle === newPrTitle &&
         existingPrBodyHash === newPrBodyHash
       ) {
-        logger.debug(`${existingPr.displayNumber} does not need updating`);
+        // TODO: types (#7154)
+        logger.debug(`${existingPr.displayNumber!} does not need updating`);
         return { type: 'with-pr', pr: existingPr };
       }
       // PR must need updating
@@ -334,6 +359,7 @@ export async function ensurePr(
           platformOptions: getPlatformPrOptions(config),
           draftPR: config.draftPR,
         });
+
         incLimitedValue(Limit.PullRequests);
         logger.info({ pr: pr?.number, prTitle }, 'PR created');
       } catch (err) {
@@ -394,7 +420,8 @@ export async function ensurePr(
       } else {
         await addParticipants(config, pr);
       }
-      logger.debug(`Created ${pr.displayNumber}`);
+      // TODO: types (#7154)
+      logger.debug(`Created ${pr.displayNumber!}`);
       return { type: 'with-pr', pr };
     }
   } catch (err) {

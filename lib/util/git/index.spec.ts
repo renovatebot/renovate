@@ -1,27 +1,36 @@
 import fs from 'fs-extra';
 import Git from 'simple-git';
 import tmp from 'tmp-promise';
-import { mocked } from '../../../test/util';
+import { mocked, partial } from '../../../test/util';
 import { GlobalConfig } from '../../config/global';
 import {
   CONFIG_VALIDATION,
   INVALID_PATH,
 } from '../../constants/error-messages';
+import * as _repoCache from '../cache/repository';
+import type { BranchCache } from '../cache/repository/types';
 import { newlineRegex, regEx } from '../regex';
 import * as _conflictsCache from './conflicts-cache';
+import * as _modifiedCache from './modified-cache';
+import * as _parentShaCache from './parent-sha-cache';
 import type { FileChange } from './types';
 import * as git from '.';
 import { setNoVerify } from '.';
 
 jest.mock('./conflicts-cache');
+jest.mock('./modified-cache');
+jest.mock('./parent-sha-cache');
 jest.mock('delay');
+jest.mock('../cache/repository');
+const repoCache = mocked(_repoCache);
 const conflictsCache = mocked(_conflictsCache);
-
+const modifiedCache = mocked(_modifiedCache);
+const parentShaCache = mocked(_parentShaCache);
 // Class is no longer exported
 const SimpleGit = Git().constructor as { prototype: ReturnType<typeof Git> };
 
 describe('util/git/index', () => {
-  jest.setTimeout(25000);
+  jest.setTimeout(60000);
 
   const masterCommitDate = new Date();
   masterCommitDate.setMilliseconds(0);
@@ -107,17 +116,18 @@ describe('util/git/index', () => {
     // override some local git settings for better testing
     const local = Git(tmpDir.path);
     await local.addConfig('commit.gpgsign', 'false');
+    parentShaCache.getCachedBranchParentShaResult.mockReturnValue(null);
   });
 
   afterEach(async () => {
-    await tmpDir.cleanup();
-    await origin.cleanup();
+    await tmpDir?.cleanup();
+    await origin?.cleanup();
     jest.restoreAllMocks();
   });
 
   afterAll(async () => {
     process.env = OLD_ENV;
-    await base.cleanup();
+    await base?.cleanup();
   });
 
   describe('gitRetry', () => {
@@ -198,7 +208,8 @@ describe('util/git/index', () => {
     it('should exclude submodules', async () => {
       const repo = Git(base.path);
       await repo.submoduleAdd(base.path, 'submodule');
-      await repo.commit('Add submodule');
+      await repo.submoduleAdd(base.path, 'file');
+      await repo.commit('Add submodules');
       await git.initRepo({
         cloneSubmodules: true,
         url: base.path,
@@ -234,22 +245,38 @@ describe('util/git/index', () => {
     });
   });
 
-  describe('isBranchStale()', () => {
+  describe('isBranchBehindBase()', () => {
     it('should return false if same SHA as master', async () => {
-      expect(await git.isBranchStale('renovate/future_branch')).toBeFalse();
+      repoCache.getCache.mockReturnValueOnce({});
+      expect(
+        await git.isBranchBehindBase('renovate/future_branch')
+      ).toBeFalse();
     });
 
     it('should return true if SHA different from master', async () => {
-      expect(await git.isBranchStale('renovate/past_branch')).toBeTrue();
+      repoCache.getCache.mockReturnValueOnce({});
+      expect(await git.isBranchBehindBase('renovate/past_branch')).toBeTrue();
     });
 
     it('should return result even if non-default and not under branchPrefix', async () => {
-      expect(await git.isBranchStale('develop')).toBeTrue();
-      expect(await git.isBranchStale('develop')).toBeTrue(); // cache
+      const parentSha = 'SHA';
+      const branchCache = partial<BranchCache>({
+        branchName: 'develop',
+        parentSha: parentSha,
+      });
+      repoCache.getCache.mockReturnValueOnce({}).mockReturnValueOnce({
+        branches: [branchCache],
+      });
+      expect(await git.isBranchBehindBase('develop')).toBeTrue();
+      expect(await git.isBranchBehindBase('develop')).toBeTrue(); // cache
     });
   });
 
   describe('isBranchModified()', () => {
+    beforeEach(() => {
+      modifiedCache.getCachedModifiedResult.mockReturnValue(null);
+    });
+
     it('should return false when branch is not found', async () => {
       expect(await git.isBranchModified('renovate/not_found')).toBeFalse();
     });
@@ -268,6 +295,11 @@ describe('util/git/index', () => {
 
     it('should return true when custom author is unknown', async () => {
       expect(await git.isBranchModified('renovate/custom_author')).toBeTrue();
+    });
+
+    it('should return value stored in modifiedCacheResult', async () => {
+      modifiedCache.getCachedModifiedResult.mockReturnValue(true);
+      expect(await git.isBranchModified('renovate/future_branch')).toBeTrue();
     });
   });
 
@@ -290,8 +322,13 @@ describe('util/git/index', () => {
       expect(parentSha).toEqual(git.getBranchCommit(defaultBranch));
     });
 
-    it('should return false if not found', async () => {
+    it('should return null if not found', async () => {
       expect(await git.getBranchParentSha('not_found')).toBeNull();
+    });
+
+    it('should return cached value', async () => {
+      parentShaCache.getCachedBranchParentShaResult.mockReturnValueOnce('111');
+      expect(await git.getBranchParentSha('not_found')).toBe('111');
     });
   });
 

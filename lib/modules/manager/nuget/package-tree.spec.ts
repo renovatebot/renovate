@@ -154,5 +154,11 @@ describe('modules/manager/nuget/package-tree', () => {
         'Circular reference detected in NuGet package files'
       );
     });
+
+    it('skips on invalid xml file', async () => {
+      git.getFileList.mockResolvedValue(['foo/bar.csproj']);
+      Fixtures.mock({ '/tmp/repo/foo/bar.csproj': '<invalid' });
+      expect(await getDependentPackageFiles('foo/bar.csproj')).toEqual([]);
+    });
   });
 });

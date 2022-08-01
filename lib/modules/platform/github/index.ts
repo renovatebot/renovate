@@ -1,3 +1,5 @@
+// TODO: types (#7154)
+/* eslint-disable @typescript-eslint/restrict-template-expressions */
 import URL from 'url';
 import is from '@sindresorhus/is';
 import delay from 'delay';
@@ -116,14 +118,15 @@ export async function detectGhe(token: string): Promise<void> {
 
 export async function initPlatform({
   endpoint,
-  token,
+  token: originalToken,
   username,
   gitAuthor,
 }: PlatformParams): Promise<PlatformResult> {
+  let token = originalToken;
   if (!token) {
-    throw new Error('Init: You must configure a GitHub personal access token');
+    throw new Error('Init: You must configure a GitHub token');
   }
-
+  token = token.replace(/^ghs_/, 'x-access-token:ghs_');
   platformConfig.isGHApp = token.startsWith('x-access-token:');
 
   if (endpoint) {
@@ -164,6 +167,7 @@ export async function initPlatform({
     endpoint: platformConfig.endpoint,
     gitAuthor: gitAuthor ?? discoveredGitAuthor,
     renovateUsername,
+    token,
   };
 
   return platformResult;
@@ -615,7 +619,9 @@ export async function getPrList(): Promise<Pr[]> {
         : null;
     // TODO: check null `repo` (#7154)
     const prCache = await getPrCache(githubApi, repo!, username);
-    config.prList = Object.values(prCache);
+    config.prList = Object.values(prCache).sort(
+      ({ number: a }, { number: b }) => (a > b ? -1 : 1)
+    );
   }
 
   return config.prList;
@@ -628,13 +634,25 @@ export async function findPr({
 }: FindPRConfig): Promise<Pr | null> {
   logger.debug(`findPr(${branchName}, ${prTitle}, ${state})`);
   const prList = await getPrList();
-  const pr = prList.find(
-    (p) =>
-      p.sourceBranch === branchName &&
-      (!prTitle || p.title === prTitle) &&
-      matchesState(p.state, state) &&
-      (config.forkMode || config.repository === p.sourceRepo) // #5188
-  );
+  const pr = prList.find((p) => {
+    if (p.sourceBranch !== branchName) {
+      return false;
+    }
+
+    if (prTitle && prTitle !== p.title) {
+      return false;
+    }
+
+    if (!matchesState(p.state, state)) {
+      return false;
+    }
+
+    if (!config.forkMode && config.repository !== p.sourceRepo) {
+      return false;
+    }
+
+    return true;
+  });
   if (pr) {
     logger.debug(`Found PR #${pr.number}`);
   }
