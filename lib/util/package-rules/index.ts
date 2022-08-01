@@ -5,7 +5,7 @@ import type { PackageRule, PackageRuleInputConfig } from '../../config/types';
 import { logger } from '../../logger';
 import matchers from './api';
 import type { MatcherApi } from './types';
-import { matchOR, excludeOR } from './utils';
+import { excludeOR, matchOR } from './utils';
 
 export const getMatchers = (): Map<string, MatcherApi[]> => matchers;
 

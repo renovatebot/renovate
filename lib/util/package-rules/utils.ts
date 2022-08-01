@@ -49,3 +49,7 @@ export function excludeOR(
   }
   return matchApplied ? positiveMatch : null;
 }
+
+export function massagePattern(pattern: string): string {
+  return pattern === '^*$' || pattern === '*' ? '.*' : pattern;
+}

@@ -16,6 +16,7 @@ export class PathsMatcher extends Matcher {
     if (is.undefined(matchPaths) || is.undefined(packageFile)) {
       return null;
     }
+
     return matchPaths.some(
       (rulePath) =>
         packageFile.includes(rulePath) ||

@@ -6,7 +6,7 @@ import type {
 import { Matcher } from '../base';
 
 export class PackageNameMatcher extends Matcher {
-  static readonly id: string = 'packageName';
+  static readonly id: string = 'package-name';
 
   override matches(
     { depName }: PackageRuleInputConfig,

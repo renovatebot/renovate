@@ -12,7 +12,7 @@ export class DepTypesMatcher extends Matcher {
     { depTypes, depType }: PackageRuleInputConfig,
     { matchDepTypes }: PackageRule
   ): boolean | null {
-    if (is.undefined(matchDepTypes) || is.undefined(depType)) {
+    if (is.undefined(matchDepTypes)) {
       return null;
     }
 

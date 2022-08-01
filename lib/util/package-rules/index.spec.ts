@@ -167,8 +167,8 @@ describe('util/package-rules/index', () => {
         },
       ],
     };
-    // const res = applyPackageRules(dep);
-    // expect(res.enabled).toBeTrue(); // TODO re enable
+    const res = applyPackageRules(dep);
+    expect(res.enabled).toBeTrue();
     const res2 = applyPackageRules({ ...dep, depName: 'anything' });
     expect(res2.enabled).toBeFalse();
   });

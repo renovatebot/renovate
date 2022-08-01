@@ -6,30 +6,26 @@ import type {
 import { logger } from '../../../logger';
 import { regEx } from '../../regex';
 import { Matcher } from '../base';
+import { massagePattern } from '../utils';
 
 export class PackagePatternsMatcher extends Matcher {
-  static readonly id: string = 'packagePatterns';
+  static readonly id: string = 'package-patterns';
 
   override matches(
     { depName, updateType }: PackageRuleInputConfig,
     { matchPackagePatterns }: PackageRule
   ): boolean | null {
-    // ignore lockFileMaintenance because for backwards compatibility
-    if (
-      is.undefined(matchPackagePatterns) ||
-      is.undefined(depName) ||
-      updateType === 'lockFileMaintenance'
-    ) {
+    // if a pattern is defined but no depName is available for comparison, return false
+    // if (is.undefined(depName) && !is.undefined(matchPackagePatterns)) {
+    //   return false;
+    // }
+    if (is.undefined(depName) || is.undefined(matchPackagePatterns)) {
       return null;
     }
 
     let isMatch = false;
     for (const packagePattern of matchPackagePatterns) {
-      const packageRegex = regEx(
-        packagePattern === '^*$' || packagePattern === '*'
-          ? '.*'
-          : packagePattern
-      );
+      const packageRegex = regEx(massagePattern(packagePattern));
       if (packageRegex.test(depName)) {
         logger.trace(`${depName} matches against ${String(packageRegex)}`);
         isMatch = true;
@@ -42,20 +38,14 @@ export class PackagePatternsMatcher extends Matcher {
     { depName, updateType }: PackageRuleInputConfig,
     { excludePackagePatterns }: PackageRule
   ): boolean | null {
-    // ignore lockFileMaintenance because for backwards compatibility
-    if (
-      is.undefined(excludePackagePatterns) ||
-      is.undefined(depName) ||
-      updateType === 'lockFileMaintenance'
-    ) {
+    // ignore lockFileMaintenance for backwards compatibility
+    if (is.undefined(excludePackagePatterns) || is.undefined(depName)) {
       return null;
     }
 
     let isMatch = false;
     for (const pattern of excludePackagePatterns) {
-      const packageRegex = regEx(
-        pattern === '^*$' || pattern === '*' ? '.*' : pattern
-      );
+      const packageRegex = regEx(massagePattern(pattern));
       if (packageRegex.test(depName)) {
         logger.trace(`${depName} matches against ${String(packageRegex)}`);
         isMatch = true;
