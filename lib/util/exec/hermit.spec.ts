@@ -3,7 +3,7 @@ import { mockExecAll } from '../../../test/exec-util';
 import { GlobalConfig } from '../../config/global';
 import { writeLocalFile } from '../fs';
 import { findHermitCwd, getHermitEnvs, isHermit } from './hermit';
-import type { ExecResult, RawExecOptions } from './types';
+import type { RawExecOptions } from './types';
 
 describe('util/exec/hermit', () => {
   describe('isHermit', () => {
