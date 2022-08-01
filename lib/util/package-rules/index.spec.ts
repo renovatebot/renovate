@@ -157,20 +157,19 @@ describe('util/package-rules/index', () => {
 
   it('ignores patterns if lock file maintenance', () => {
     const dep = {
-      enabled: true,
-      matchPackagePatterns: ['.*'],
+      automerge: true,
       updateType: 'lockFileMaintenance' as UpdateType,
       packageRules: [
         {
           excludePackagePatterns: ['^foo'],
-          enabled: false,
+          automerge: false,
         },
       ],
     };
     const res = applyPackageRules(dep);
-    expect(res.enabled).toBeFalse();
+    expect(res.automerge).toBeFalse();
     const res2 = applyPackageRules({ ...dep, depName: 'foo' });
-    expect(res2.enabled).toBeTrue();
+    expect(res2.automerge).toBeTrue();
   });
 
   it('matches anything if missing inclusive rules', () => {
