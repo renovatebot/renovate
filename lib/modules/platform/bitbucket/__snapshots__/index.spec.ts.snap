@@ -150,6 +150,18 @@ Object {
 }
 `;
 
+exports[`modules/platform/bitbucket/index initPlatform() should init with token 1`] = `
+Object {
+  "endpoint": "https://api.bitbucket.org/",
+}
+`;
+
+exports[`modules/platform/bitbucket/index initPlatform() should init with username/password 1`] = `
+Object {
+  "endpoint": "https://api.bitbucket.org/",
+}
+`;
+
 exports[`modules/platform/bitbucket/index initRepo() works 1`] = `
 Object {
   "defaultBranch": "master",

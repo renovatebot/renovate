@@ -69,7 +69,7 @@ describe('modules/platform/bitbucket/index', () => {
   }
 
   describe('initPlatform()', () => {
-    it('should throw if no username/password', async () => {
+    it('should throw if no token or username/password', async () => {
       expect.assertions(1);
       await expect(bitbucket.initPlatform({})).rejects.toThrow();
     });
@@ -85,12 +85,21 @@ describe('modules/platform/bitbucket/index', () => {
       );
     });
 
-    it('should init', async () => {
+    it('should init with username/password', async () => {
       httpMock.scope(baseUrl).get('/2.0/user').reply(200);
       expect(
         await bitbucket.initPlatform({
           username: 'abc',
           password: '123',
+        })
+      ).toMatchSnapshot();
+    });
+
+    it('should init with token', async () => {
+      httpMock.scope(baseUrl).get('/2.0/user').reply(200);
+      expect(
+        await bitbucket.initPlatform({
+          token: 'token',
         })
       ).toMatchSnapshot();
     });
