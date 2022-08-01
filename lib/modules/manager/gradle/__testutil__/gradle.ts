@@ -20,7 +20,11 @@ function parseJavaVersion(javaVersionOutput: string | undefined): number {
   if (enforceJava) {
     throw Error(`This test suite needs Java and ${failIfNoJavaEnv} is set. However, we cannot parse the Java version.
 The output of java -version was:
-${javaVersionOutput}`);
+${
+  // TODO: types (#7154)
+  // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+  javaVersionOutput
+}`);
   }
   return 0;
 }
