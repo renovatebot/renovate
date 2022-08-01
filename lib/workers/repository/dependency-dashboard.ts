@@ -20,15 +20,10 @@ function checkRebaseAll(issueBody: string): boolean {
 }
 
 function getCheckedBranches(issueBody: string): Record<string, string> {
-  const checkMatch = ' - \\[x\\] <!-- ([a-zA-Z]+)-branch=([^\\s]+) -->';
-  const checked = issueBody.match(regEx(checkMatch, 'g'));
+  const checkMatch = /- \[x\] <!-- ([a-zA-Z]+)-branch=([^\s]+) -->/g;
   const dependencyDashboardChecks: Record<string, string> = {};
-  if (checked?.length) {
-    const re = regEx(checkMatch);
-    checked.forEach((check) => {
-      const [, type, branchName] = re.exec(check)!;
-      dependencyDashboardChecks[branchName] = type;
-    });
+  for (const [, type, branchName] of issueBody.matchAll(regEx(checkMatch))) {
+    dependencyDashboardChecks[branchName] = type;
   }
   return dependencyDashboardChecks;
 }
