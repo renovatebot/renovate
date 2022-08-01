@@ -1020,6 +1020,98 @@ describe('modules/platform/gitea/index', () => {
         })
       ).rejects.toThrow();
     });
+
+    it('should use platform automerge', async () => {
+      helper.createPR.mockResolvedValueOnce(mockNewPR);
+      await initFakePlatform('1.17.0');
+      await initFakeRepo();
+      const res = await gitea.createPr({
+        sourceBranch: mockNewPR.head.label,
+        targetBranch: 'master',
+        prTitle: mockNewPR.title,
+        prBody: mockNewPR.body,
+        platformOptions: { usePlatformAutomerge: true },
+      });
+
+      expect(res).toHaveProperty('number', mockNewPR.number);
+      expect(res).toHaveProperty('targetBranch', mockNewPR.base.ref);
+
+      expect(helper.createPR).toHaveBeenCalledTimes(1);
+      expect(helper.createPR).toHaveBeenCalledWith(mockRepo.full_name, {
+        base: mockNewPR.base.ref,
+        head: mockNewPR.head.label,
+        title: mockNewPR.title,
+        body: mockNewPR.body,
+        labels: [],
+      });
+      expect(helper.mergePR).toHaveBeenCalledWith(
+        mockRepo.full_name,
+        mockNewPR.number,
+        {
+          Do: 'rebase',
+          merge_when_checks_succeed: true,
+        }
+      );
+    });
+
+    it('continues on platform automerge error', async () => {
+      helper.createPR.mockResolvedValueOnce(mockNewPR);
+      await initFakePlatform('1.17.0');
+      await initFakeRepo();
+      helper.mergePR.mockRejectedValueOnce(new Error('fake'));
+      const res = await gitea.createPr({
+        sourceBranch: mockNewPR.head.label,
+        targetBranch: 'master',
+        prTitle: mockNewPR.title,
+        prBody: mockNewPR.body,
+        platformOptions: { usePlatformAutomerge: true },
+      });
+
+      expect(res).toHaveProperty('number', mockNewPR.number);
+      expect(res).toHaveProperty('targetBranch', mockNewPR.base.ref);
+
+      expect(helper.createPR).toHaveBeenCalledTimes(1);
+      expect(helper.createPR).toHaveBeenCalledWith(mockRepo.full_name, {
+        base: mockNewPR.base.ref,
+        head: mockNewPR.head.label,
+        title: mockNewPR.title,
+        body: mockNewPR.body,
+        labels: [],
+      });
+      expect(helper.mergePR).toHaveBeenCalledWith(
+        mockRepo.full_name,
+        mockNewPR.number,
+        {
+          Do: 'rebase',
+          merge_when_checks_succeed: true,
+        }
+      );
+    });
+
+    it("doesn't support platform automerge", async () => {
+      helper.createPR.mockResolvedValueOnce(mockNewPR);
+      await initFakeRepo();
+      const res = await gitea.createPr({
+        sourceBranch: mockNewPR.head.label,
+        targetBranch: 'master',
+        prTitle: mockNewPR.title,
+        prBody: mockNewPR.body,
+        platformOptions: { usePlatformAutomerge: true },
+      });
+
+      expect(res).toHaveProperty('number', mockNewPR.number);
+      expect(res).toHaveProperty('targetBranch', mockNewPR.base.ref);
+
+      expect(helper.createPR).toHaveBeenCalledTimes(1);
+      expect(helper.createPR).toHaveBeenCalledWith(mockRepo.full_name, {
+        base: mockNewPR.base.ref,
+        head: mockNewPR.head.label,
+        title: mockNewPR.title,
+        body: mockNewPR.body,
+        labels: [],
+      });
+      expect(helper.mergePR).not.toHaveBeenCalled();
+    });
   });
 
   describe('updatePr', () => {
@@ -1076,11 +1168,9 @@ describe('modules/platform/gitea/index', () => {
         })
       ).toBe(true);
       expect(helper.mergePR).toHaveBeenCalledTimes(1);
-      expect(helper.mergePR).toHaveBeenCalledWith(
-        mockRepo.full_name,
-        1,
-        'rebase'
-      );
+      expect(helper.mergePR).toHaveBeenCalledWith(mockRepo.full_name, 1, {
+        Do: 'rebase',
+      });
     });
 
     it('should return false when merging fails', async () => {
