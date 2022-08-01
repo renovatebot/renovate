@@ -12,6 +12,7 @@ import { PackagistDatasource } from '../../datasource/packagist';
 import type { UpdateArtifactsConfig } from '../types';
 import * as composer from '.';
 import { GitTagsDatasource } from '../../datasource/git-tags';
+import { ensureCacheDir } from '../../../util/fs';
 
 jest.mock('../../../util/exec/env');
 jest.mock('../../datasource');
@@ -152,10 +153,52 @@ describe('modules/manager/composer/artifacts', () => {
         config: authConfig,
       })
     ).toBeNull();
-    expect(execSnapshots).toMatchSnapshot();
+    expect(execSnapshots).toHaveLength(1);
+    const firstExecEnvironment = execSnapshots[0]?.options?.env;
+    expect(firstExecEnvironment).toContainKey('COMPOSER_AUTH');
+    expect(firstExecEnvironment?.COMPOSER_AUTH).toEqual(
+      '{"github-oauth":{"github.com":"ghp_git-tags-token"},' +
+        '"gitlab-token":{"gitlab.com":"gitlab-token"},' +
+        '"gitlab-domains":["gitlab.com"],' +
+        '"http-basic":{' +
+        '"packagist.renovatebot.com":{"username":"some-username","password":"some-password"},' +
+        '"artifactory.yyyyyyy.com":{"username":"some-other-username","password":"some-other-password"}' +
+        '},' +
+        '"bearer":{"packages-bearer.example.com":"abcdef0123456789"}}'
+    );
   });
 
   it('git-tags hostRule for github.com set github-token in COMPOSER_AUTH', async () => {
+    hostRules.add({
+      hostType: GitTagsDatasource.id,
+      matchHost: 'github.com',
+      token: 'ghp_token',
+    });
+    fs.readLocalFile.mockResolvedValueOnce('{}');
+    const execSnapshots = mockExecAll();
+    fs.readLocalFile.mockResolvedValueOnce('{}');
+    const authConfig = {
+      ...config,
+      registryUrls: ['https://packagist.renovatebot.com'],
+    };
+    git.getRepoStatus.mockResolvedValueOnce(repoStatus);
+    expect(
+      await composer.updateArtifacts({
+        packageFileName: 'composer.json',
+        updatedDeps: [],
+        newPackageFileContent: '{}',
+        config: authConfig,
+      })
+    ).toBeNull();
+    expect(execSnapshots).toHaveLength(1);
+    const firstExecEnvironment = execSnapshots[0]?.options?.env;
+    expect(firstExecEnvironment).toContainKey('COMPOSER_AUTH');
+    expect(firstExecEnvironment?.COMPOSER_AUTH).toEqual(
+      '{"github-oauth":{"github.com":"ghp_token"}}'
+    );
+  });
+
+  it('Skip github application access token hostRules in COMPOSER_AUTH', async () => {
     hostRules.add({
       hostType: PlatformId.Github,
       matchHost: 'api.github.com',
@@ -167,7 +210,7 @@ describe('modules/manager/composer/artifacts', () => {
       token: 'ghp_token',
     });
     fs.readLocalFile.mockResolvedValueOnce('{}');
-    const execSnapshots = mockExecAll(exec);
+    const execSnapshots = mockExecAll();
     fs.readLocalFile.mockResolvedValueOnce('{}');
     const authConfig = {
       ...config,
@@ -182,32 +225,12 @@ describe('modules/manager/composer/artifacts', () => {
         config: authConfig,
       })
     ).toBeNull();
-    expect(execSnapshots).toMatchSnapshot();
-  });
-
-  it('Skip github application access token hostRules in COMPOSER_AUTH', async () => {
-    hostRules.add({
-      hostType: GitTagsDatasource.id,
-      matchHost: 'github.com',
-      token: 'ghp_token',
-    });
-    fs.readLocalFile.mockResolvedValueOnce('{}');
-    const execSnapshots = mockExecAll(exec);
-    fs.readLocalFile.mockResolvedValueOnce('{}');
-    const authConfig = {
-      ...config,
-      registryUrls: ['https://packagist.renovatebot.com'],
-    };
-    git.getRepoStatus.mockResolvedValueOnce(repoStatus);
-    expect(
-      await composer.updateArtifacts({
-        packageFileName: 'composer.json',
-        updatedDeps: [],
-        newPackageFileContent: '{}',
-        config: authConfig,
-      })
-    ).toBeNull();
-    expect(execSnapshots).toMatchSnapshot();
+    expect(execSnapshots).toHaveLength(1);
+    const firstExecEnvironment = execSnapshots[0]?.options?.env;
+    expect(firstExecEnvironment).toContainKey('COMPOSER_AUTH');
+    expect(firstExecEnvironment?.COMPOSER_AUTH).toEqual(
+      '{"github-oauth":{"github.com":"ghp_token"}}'
+    );
   });
 
   it('returns updated composer.lock', async () => {
