@@ -35,7 +35,7 @@ import type { HostRuleSearch } from '../../../util/host-rules';
 function findGithubPersonnalAccessToken(
   search: HostRuleSearch
 ): string | undefined {
-  const token = hostRules.find(search)?.token?.replace('x-access-token:', '');
+  const token = hostRules.find(search)?.token;
   if (isPersonnalAccessToken(token)) {
     return token;
   }
