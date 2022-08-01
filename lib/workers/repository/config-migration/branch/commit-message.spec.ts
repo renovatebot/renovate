@@ -1,11 +1,9 @@
 import { getConfig } from '../../../../config/defaults';
-import * as template from '../../../../util/template';
 import { ConfigMigrationCommitMessageFactory } from './commit-message';
 
 describe('workers/repository/config-migration/branch/commit-message', () => {
   const config = getConfig();
   const fileName = 'renovate.json';
-  const templateCompileSpy = jest.spyOn(template, 'compile');
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -24,10 +22,6 @@ describe('workers/repository/config-migration/branch/commit-message', () => {
     expect(commitMessageFactory.getCommitMessage()).toBe(
       'chore(config): migrate config renovate.json'
     );
-    expect(commitMessageFactory.getCommitMessage()).toBe(
-      'chore(config): migrate config renovate.json'
-    );
-    expect(templateCompileSpy).toHaveBeenCalledTimes(1);
   });
 
   it('creates semantic pr title', () => {
@@ -39,10 +33,6 @@ describe('workers/repository/config-migration/branch/commit-message', () => {
     expect(commitMessageFactory.getPrTitle()).toBe(
       'chore(config): migrate renovate config'
     );
-    expect(commitMessageFactory.getPrTitle()).toBe(
-      'chore(config): migrate renovate config'
-    );
-    expect(templateCompileSpy).toHaveBeenCalledTimes(1);
   });
 
   it('creates non-semantic commit message', () => {
@@ -54,10 +44,6 @@ describe('workers/repository/config-migration/branch/commit-message', () => {
     expect(commitMessageFactory.getCommitMessage()).toBe(
       'Migrate config renovate.json'
     );
-    expect(commitMessageFactory.getCommitMessage()).toBe(
-      'Migrate config renovate.json'
-    );
-    expect(templateCompileSpy).toHaveBeenCalledTimes(1);
   });
 
   it('creates non-semantic pr title', () => {
@@ -67,8 +53,6 @@ describe('workers/repository/config-migration/branch/commit-message', () => {
       fileName
     );
     expect(commitMessageFactory.getPrTitle()).toBe('Migrate renovate config');
-    expect(commitMessageFactory.getPrTitle()).toBe('Migrate renovate config');
-    expect(templateCompileSpy).toHaveBeenCalledTimes(1);
   });
 
   it('returns default values when commitMessage template string is empty', () => {
@@ -79,9 +63,5 @@ describe('workers/repository/config-migration/branch/commit-message', () => {
       fileName
     );
     expect(commitMessageFactory.getPrTitle()).toBe('Migrate renovate config');
-    expect(commitMessageFactory.getCommitMessage()).toBe(
-      'Migrate config renovate.json'
-    );
-    expect(templateCompileSpy).toHaveBeenCalledTimes(0);
   });
 });

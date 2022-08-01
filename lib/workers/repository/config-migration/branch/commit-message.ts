@@ -4,9 +4,6 @@ import type { CommitMessage } from '../../model/commit-message';
 import { CommitMessageFactory } from '../../model/commit-message-factory';
 
 export class ConfigMigrationCommitMessageFactory {
-  private commitMessage: string | null = null;
-  private prTitle: string | null = null;
-
   constructor(
     private readonly config: RenovateConfig,
     private readonly configFile: string
@@ -37,18 +34,10 @@ export class ConfigMigrationCommitMessageFactory {
   }
 
   getCommitMessage(): string {
-    if (this.commitMessage === null) {
-      this.commitMessage = this.create(
-        `Migrate config ${this.configFile}`
-      ).toString();
-    }
-    return this.commitMessage;
+    return this.create(`Migrate config ${this.configFile}`).toString();
   }
 
   getPrTitle(): string {
-    if (this.prTitle === null) {
-      this.prTitle = this.create(`Migrate renovate config`).toString();
-    }
-    return this.prTitle;
+    return this.create(`Migrate renovate config`).toString();
   }
 }
