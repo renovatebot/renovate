@@ -53,6 +53,11 @@ const allToolConfig: Record<string, ToolConfig> = {
     depName: 'helm/helm',
     versioning: semverVersioningId,
   },
+  java: {
+    datasource: 'adoptium-java',
+    depName: 'java',
+    versioning: npmVersioningId,
+  },
   jb: {
     datasource: 'github-releases',
     depName: 'jsonnet-bundler/jsonnet-bundler',
@@ -72,6 +77,11 @@ const allToolConfig: Record<string, ToolConfig> = {
   poetry: {
     datasource: 'pypi',
     depName: 'poetry',
+    versioning: pep440VersioningId,
+  },
+  python: {
+    datasource: 'github-releases',
+    depName: 'containerbase/python-prebuild',
     versioning: pep440VersioningId,
   },
   yarn: {
