@@ -35,7 +35,7 @@ export interface RawExecOptions extends ChildProcessSpawnOptions {
    */
   encoding: string;
   maxBuffer?: number | undefined;
-  cwd?: string | undefined;
+  cwd?: string;
 }
 
 // TODO: rename #16653
