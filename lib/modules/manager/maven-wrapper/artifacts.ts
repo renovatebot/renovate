@@ -6,7 +6,7 @@ import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { exec } from '../../../util/exec';
 import type { ExecOptions } from '../../../util/exec/types';
-import { chmod, readLocalFile, stat } from '../../../util/fs';
+import { chmodLocalFile, readLocalFile, statLocalFile } from '../../../util/fs';
 import { getRepoStatus } from '../../../util/git';
 import type { StatusResult } from '../../../util/git/types';
 import mavenVersioning from '../../versioning/maven';
@@ -23,11 +23,11 @@ import type {
  * @param mavenVersion current maven version
  * @returns A Java semver range
  */
-function getJavaContraint(mavenVersion: string): string | null {
-  const major = mavenVersioning.getMajor(mavenVersion);
-  const minor = mavenVersioning.getMinor(mavenVersion);
-  if (major >= 3) {
-    return minor >= 1 ? '^8.0.0' : '^7.0.0';
+function getJavaContraint(mavenVersion: string | undefined): string | null {
+  const major = mavenVersion && mavenVersioning.getMajor(mavenVersion);
+  const minor = mavenVersion && mavenVersioning.getMinor(mavenVersion);
+  if (major && major >= 3) {
+    return minor && minor >= 1 ? '^8.0.0' : '^7.0.0';
   }
 
   return '^5.0.0';
@@ -96,7 +96,7 @@ export async function updateArtifacts({
       )
     ).filter(Boolean);
     logger.debug(
-      { files: updateArtifactsResult.map((r) => r.file.path) },
+      { files: updateArtifactsResult.map((r) => r?.file?.path) },
       `Returning updated maven-wrapper files`
     );
     return updateArtifactsResult;
@@ -142,7 +142,7 @@ async function executeWrapperCommand(
   }
 }
 
-async function createWrapperCommand(): Promise<string> {
+async function createWrapperCommand(): Promise<string | null> {
   const projectDir = GlobalConfig.get('localDir');
   const wrapperExecutableFileName = mavenWrapperFileName();
   const wrapperFullyQualifiedPath = upath.resolve(
@@ -152,7 +152,7 @@ async function createWrapperCommand(): Promise<string> {
   return await prepareCommand(
     wrapperExecutableFileName,
     projectDir,
-    await stat(wrapperFullyQualifiedPath).catch(() => null),
+    await statLocalFile(wrapperFullyQualifiedPath).catch(() => null),
     `wrapper:wrapper`
   );
 }
@@ -170,16 +170,19 @@ function mavenWrapperFileName(): string {
 
 async function prepareCommand(
   fileName: string,
-  cwd: string,
+  cwd: string | undefined,
   pathFileStats: Stats | null,
   args: string | null
-): Promise<string> {
+): Promise<string | null> {
   // istanbul ignore if
   if (pathFileStats?.isFile() === true) {
     // if the file is not executable by others
     if ((pathFileStats.mode & 0o1) === 0) {
       // add the execution permission to the owner, group and others
-      await chmod(upath.join(cwd, fileName), pathFileStats.mode | 0o111);
+      await chmodLocalFile(
+        upath.join(cwd, fileName),
+        pathFileStats.mode | 0o111
+      );
     }
     if (args === null) {
       return fileName;
