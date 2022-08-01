@@ -845,6 +845,8 @@ export class DockerDatasource extends Datasource {
       registryUrl!
     );
     logger.debug(
+      // TODO: types (#7154)
+      // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
       `getDigest(${registryHost}, ${dockerRepository}, ${newValue})`
     );
     const newTag = newValue ?? 'latest';

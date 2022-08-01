@@ -1517,7 +1517,7 @@ const options: RenovateOptions[] = [
     type: 'string',
     allowedValues: ['auto', 'fast-forward', 'merge-commit', 'rebase', 'squash'],
     default: 'auto',
-    supportedPlatforms: ['bitbucket'],
+    supportedPlatforms: ['bitbucket', 'gitea'],
   },
   {
     name: 'automergeComment',
