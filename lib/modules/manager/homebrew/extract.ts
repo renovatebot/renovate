@@ -166,6 +166,8 @@ export function extractPackageFile(content: string): PackageFile | null {
     skipReason = 'invalid-sha256';
   }
   const dep: PackageDependency = {
+    // TODO: types (#7154)
+    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
     depName: `${ownerName}/${repoName}`,
     managerData: { ownerName, repoName, sha256, url },
     currentValue,
