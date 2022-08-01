@@ -86,7 +86,4 @@ Returns `true` if at least one expression is `true`.
 
 ## prettifyVersion
 
-Prepends `v` to start of `newMajor` or `newVersion` or any string not starting with `v`.
-For example, to create a PR title with the changed version:
-
-`{ "commitMessageExtra": "{{prettifyVersion newVersion}}" }`
+Prepends `v` to a string or a number value.
