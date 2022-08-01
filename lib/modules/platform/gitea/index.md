@@ -14,6 +14,7 @@ Let Renovate use your PAT by doing _one_ of the following:
 - Set your PAT when you run Renovate in the CLI with `--token=`
 
 Remember to set `platform=gitea` somewhere in your Renovate config file.
+Either the account should have full name and email address set to allow Renovate to estabilish Git identity, or the `gitAuthor` config option should be set.
 
 ## Unsupported platform features/concepts
 
@@ -21,4 +22,4 @@ Remember to set `platform=gitea` somewhere in your Renovate config file.
 
 ## Features awaiting implementation
 
-- The `automergeStrategy` configuration option has not been implemented for this platform, and all values behave as if the value `auto` was used. Renovate will use the merge strategy configured in the Gitea repository itself, and this cannot be overridden yet
+- none
