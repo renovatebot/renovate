@@ -8,6 +8,7 @@ import { BranchStatus, PrState, VulnerabilityAlert } from '../../../types';
 import * as git from '../../../util/git';
 import * as hostRules from '../../../util/host-rules';
 import { BitbucketHttp, setBaseUrl } from '../../../util/http/bitbucket';
+import type { InternalHttpOptions } from '../../../util/http/types';
 import { regEx } from '../../../util/regex';
 import { sanitize } from '../../../util/sanitize';
 import type {
@@ -27,7 +28,6 @@ import type {
   RepoResult,
   UpdatePrConfig,
 } from '../types';
-import { InternalHttpOptions } from '../../../util/http/types';
 import { smartTruncate } from '../utils/pr-body';
 import { readOnlyIssueBody } from '../utils/read-only-issue-body';
 import * as comments from './comments';
@@ -57,7 +57,7 @@ export async function initPlatform({
   password,
   token,
 }: PlatformParams): Promise<PlatformResult> {
-  if (!token && !(username && password)) {
+  if (!(username && password) && !token) {
     throw new Error(
       'Init: You must either configure a Bitbucket token or username and password'
     );
