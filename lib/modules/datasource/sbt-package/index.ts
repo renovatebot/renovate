@@ -2,7 +2,8 @@ import { XmlDocument } from 'xmldoc';
 import { logger } from '../../../logger';
 import { Http } from '../../../util/http';
 import { regEx } from '../../../util/regex';
-import { ensureTrailingSlash, parseUrl } from '../../../util/url';
+import { ensureTrailingSlash } from '../../../util/url';
+import { detectPlatform } from '../../platform/util';
 import * as ivyVersioning from '../../versioning/ivy';
 import { compare } from '../../versioning/maven/compare';
 import { MavenDatasource } from '../maven';
@@ -143,17 +144,6 @@ export class SbtPackageDatasource extends MavenDatasource {
     return result;
   }
 
-  private isGitlab(url: string): boolean {
-    const parsedUrl = parseUrl(url);
-    if (parsedUrl) {
-      const { hostname } = parsedUrl;
-      if (hostname === 'gitlab.com') {
-        return true;
-      }
-    }
-    return false;
-  }
-
   override async getReleases(
     config: GetReleasesConfig
   ): Promise<ReleaseResult | null> {
@@ -163,7 +153,8 @@ export class SbtPackageDatasource extends MavenDatasource {
       return null;
     }
 
-    if (this.isGitlab(registryUrl)) {
+    const platform = detectPlatform(registryUrl);
+    if (platform === 'gitlab') {
       const mavenReleases = await super.getReleases(config);
       return mavenReleases;
     }
