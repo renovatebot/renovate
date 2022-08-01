@@ -518,7 +518,7 @@ const platform: Platform = {
         } else {
           logger.debug(
             { prNumber: gpr.number },
-            'Gitea-native automerge: not supported on this Gitea version. Requires >=1.17.0'
+            'Gitea-native automerge: not supported on this version of Gitea. Use 1.17.0 or newer.'
           );
         }
       }
