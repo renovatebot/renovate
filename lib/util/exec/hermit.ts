@@ -24,7 +24,7 @@ export async function findHermitCwd(cwd: string): Promise<string> {
 export async function getHermitEnvs(
   rawOptions: RawExecOptions
 ): Promise<Record<string, string>> {
-  const cwd = rawOptions.cwd?.toString() ?? '';
+  const cwd = rawOptions.cwd ?? '';
   const hermitCwd = await findHermitCwd(cwd);
   logger.debug({ cwd, hermitCwd }, 'fetching hermit environment variables');
   // with -r will output the raw unquoted environment variables to consume
