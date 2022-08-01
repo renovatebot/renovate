@@ -56,6 +56,7 @@ describe('util/exec/hermit', () => {
         stdout: `GOBIN=/usr/src/app/repository-a/.hermit/go/bin
 PATH=/usr/src/app/repository-a/bin
 `,
+        stderr: '',
       });
 
       const resp = await getHermitEnvs({} as RawExecOptions);
