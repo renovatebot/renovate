@@ -73,7 +73,7 @@ describe('modules/manager/pip_requirements/artifacts', () => {
     ['dependency w/o extras', 'atomicwrites', newPackageFileContent],
     ['dependency with extras', 'boto3-stubs', newPackageFileContentWithExtra],
   ])(
-    'returns updated file',
+    'returns updated file for %s',
     async (
       _description: string,
       depName: string,
