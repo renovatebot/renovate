@@ -55,10 +55,7 @@ export class ConanDatasource extends Datasource {
     };
   }
 
-  async getNewDigest(
-    url: string,
-    packageName: string
-  ): Promise<string | undefined> {
+  async getNewDigest(url: string, packageName: string): Promise<string | null> {
     const revisionLookUp = joinUrlParts(
       url,
       `v2/conans/${packageName}/revisions`
@@ -67,7 +64,7 @@ export class ConanDatasource extends Datasource {
       revisionLookUp
     );
     const revisions = revisionRep?.body.revisions;
-    return revisions ? revisions[0].revision : undefined;
+    return revisions ? revisions[0].revision : null;
   }
 
   @cache({
@@ -86,9 +83,11 @@ export class ConanDatasource extends Datasource {
       return null;
     } else {
       const url = ensureTrailingSlash(registryUrl);
-      const packageNameWithoutRevision = packageName
-        .split('#')[0]
-        .replace('@', '/');
+      const depName = packageName.split('/')[0];
+      const userAndChannel = '/' + packageName.split('@')[1].split('#')[0];
+      const packageNameWithoutRevision = newValue
+        ? `${depName}/${newValue}${userAndChannel}`
+        : packageName.split('#')[0].replace('@', '/');
       const digest = await this.getNewDigest(url, packageNameWithoutRevision);
       return digest ? digest : null;
     }
@@ -107,11 +106,9 @@ export class ConanDatasource extends Datasource {
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     const depName = packageName.split('/')[0];
     const userAndChannel = '@' + packageName.split('@')[1].split('#')[0];
-    const revision = getRevision(packageName);
     if (
       is.string(registryUrl) &&
-      ensureTrailingSlash(registryUrl) === defaultRegistryUrl &&
-      is.nullOrUndefined(revision)
+      ensureTrailingSlash(registryUrl) === defaultRegistryUrl
     ) {
       return this.getConanCenterReleases(depName, userAndChannel);
     }
@@ -133,17 +130,8 @@ export class ConanDatasource extends Datasource {
             if (fromMatch?.groups?.version && fromMatch?.groups?.userChannel) {
               const version = fromMatch.groups.version;
               if (fromMatch.groups.userChannel === userAndChannel) {
-                let newDigest: string | undefined = undefined;
-                if (revision) {
-                  const currentPackageName = `${depName}/${version}${userAndChannel.replace(
-                    '@',
-                    '/'
-                  )}`;
-                  newDigest = await this.getNewDigest(url, currentPackageName);
-                }
                 const result: Release = {
                   version,
-                  newDigest,
                 };
                 dep.releases.push(result);
               }
