@@ -67,7 +67,7 @@ export function requireComposerDependencyInstallation(
   );
 }
 
-export function extractContraints(
+export function extractConstraints(
   composerJson: ComposerConfig,
   lockParsed: ComposerLock
 ): Record<string, string> {
