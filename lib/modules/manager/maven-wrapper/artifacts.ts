@@ -9,29 +9,13 @@ import type { ExecOptions } from '../../../util/exec/types';
 import { chmodLocalFile, readLocalFile, statLocalFile } from '../../../util/fs';
 import { getRepoStatus } from '../../../util/git';
 import type { StatusResult } from '../../../util/git/types';
-import mavenVersioning from '../../versioning/maven';
+
 import { id as npmVersioning } from '../../versioning/npm';
 import type {
   UpdateArtifact,
   UpdateArtifactsConfig,
   UpdateArtifactsResult,
 } from '../types';
-
-/**
- * Find compatible java version for maven.
- * see https://maven.apache.org/developers/compatibility-plan.html
- * @param mavenVersion current maven version
- * @returns A Java semver range
- */
-function getJavaContraint(mavenVersion: string | undefined): string | null {
-  const major = mavenVersion && mavenVersioning.getMajor(mavenVersion);
-  const minor = mavenVersion && mavenVersioning.getMinor(mavenVersion);
-  if (major && major >= 3) {
-    return minor && minor >= 1 ? '^8.0.0' : '^7.0.0';
-  }
-
-  return '^5.0.0';
-}
 
 async function addIfUpdated(
   status: StatusResult,
@@ -94,9 +78,11 @@ export async function updateArtifacts({
           addIfUpdated(status, fileProjectPath)
         )
       )
-    ).filter(Boolean);
+    )
+      .filter(Boolean)
+      .map((result) => result as UpdateArtifactsResult);
     logger.debug(
-      { files: updateArtifactsResult.map((r) => r?.file?.path) },
+      { files: updateArtifactsResult.map((r) => r.file?.path) },
       `Returning updated maven-wrapper files`
     );
     return updateArtifactsResult;
@@ -121,8 +107,7 @@ async function executeWrapperCommand(
   const execOptions: ExecOptions = {
     docker: {
       image: 'java',
-      tagConstraint:
-        config.constraints?.java ?? getJavaContraint(config.currentValue),
+      tagConstraint: config.constraints?.java ?? '^8.0.0',
       tagScheme: npmVersioning,
     },
     // extraEnv,
