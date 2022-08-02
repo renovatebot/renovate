@@ -9,10 +9,10 @@ export const conanDatasourceRegex = regEx(
   'gim'
 );
 
-export function getRevision(packageName: string): string | undefined {
+export function getRevision(packageName: string): string | null {
   const splitted = packageName.split('#');
   if (splitted.length <= 1) {
-    return undefined;
+    return null;
   } else {
     return splitted[1];
   }

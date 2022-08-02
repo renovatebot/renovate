@@ -26,7 +26,7 @@ const config: GetPkgReleasesConfig = {
 };
 
 const digestConfig: GetDigestInputConfig = {
-  depName: '',
+  depName: 'fake',
   datasource,
   registryUrls: [nonDefaultRegistryUrl],
 };
