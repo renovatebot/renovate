@@ -18,6 +18,8 @@ export class PuppetForgeDatasource extends Datasource {
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     // https://forgeapi.puppet.com
     const moduleSlug = packageName.replace('/', '-');
+    // TODO: types (#7154)
+    /* eslint-disable-next-line @typescript-eslint/restrict-template-expressions */
     const url = `${registryUrl}/v3/modules/${moduleSlug}?exclude_fields=current_release`;
 
     let module: PuppetModule;
