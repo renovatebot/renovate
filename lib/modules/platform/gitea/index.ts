@@ -36,7 +36,12 @@ import type {
 } from '../types';
 import { smartTruncate } from '../utils/pr-body';
 import * as helper from './gitea-helper';
-import { getRepoUrl, smartLinks, trimTrailingApiPath } from './utils';
+import {
+  getMergeMethod,
+  getRepoUrl,
+  smartLinks,
+  trimTrailingApiPath,
+} from './utils';
 
 interface GiteaRepoConfig {
   repository: string;
@@ -556,9 +561,13 @@ const platform: Platform = {
     });
   },
 
-  async mergePr({ id }: MergePRConfig): Promise<boolean> {
+  async mergePr({ id, strategy }: MergePRConfig): Promise<boolean> {
     try {
-      await helper.mergePR(config.repository, id, config.mergeMethod);
+      await helper.mergePR(
+        config.repository,
+        id,
+        getMergeMethod(strategy) ?? config.mergeMethod
+      );
       return true;
     } catch (err) {
       logger.warn({ err, id }, 'Merging of PR failed');

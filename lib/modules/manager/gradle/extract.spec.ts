@@ -49,7 +49,7 @@ describe('modules/manager/gradle/extract', () => {
 
     expect(logger.logger.warn).toHaveBeenCalledWith(
       { err, config: {}, packageFile: filename },
-      `Failed to process Gradle file: ${filename}`
+      `Failed to process Gradle file`
     );
   });
 
