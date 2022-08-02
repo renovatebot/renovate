@@ -128,15 +128,13 @@ export function addMetaData(
     dep.sourceUrl = dep.changelogUrl;
   }
 
-  if (dep.homepage) {
+  if (dep.homepage && !dep.sourceUrl) {
     const platform = detectPlatform(dep.homepage);
     if (platform === 'github' || platform === 'gitlab') {
-      if (!dep.sourceUrl) {
-        dep.sourceUrl = dep.homepage;
-        if (shouldDeleteHomepage(dep.sourceUrl, dep.homepage)) {
-          // remove homepage if its not a link to a path in a github/gitlab repo.
-          delete dep.homepage;
-        }
+      dep.sourceUrl = dep.homepage;
+      if (shouldDeleteHomepage(dep.sourceUrl, dep.homepage)) {
+        // remove homepage if its not a link to a path in a github/gitlab repo.
+        delete dep.homepage;
       }
     }
   }
