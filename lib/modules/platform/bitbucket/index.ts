@@ -74,6 +74,7 @@ export async function initPlatform({
     useCache: false,
   };
   if (token) {
+    options.token = token;
     options.headers = { Authorization: `Bearer ${token}` };
   } else {
     options.username = username;
@@ -199,14 +200,12 @@ export async function initRepo({
   // TODO #7154
   const hostnameWithoutApiPrefix = regEx(/api[.|-](.+)/).exec(hostname!)?.[1];
 
-  const auth: string = opts.token
+  const auth = opts.token
     ? `x-token-auth:${opts.token}`
-    : // TODO: types (#7154)
-      // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-      `${opts.username}:${opts.password}`;
+    : `${opts.username!}:${opts.password!}`;
   const url = git.getUrl({
     protocol: 'https',
-    auth: auth,
+    auth,
     hostname: hostnameWithoutApiPrefix,
     repository,
   });

@@ -3,9 +3,9 @@ import type { logger as _logger } from '../../../logger';
 import { BranchStatus, PrState } from '../../../types';
 import type * as _git from '../../../util/git';
 import { setBaseUrl } from '../../../util/http/bitbucket';
-import type { Platform, RepoParams } from '../types';
+import type { Platform, PlatformResult, RepoParams } from '../types';
 
-const baseUrl = 'https://api.bitbucket.org';
+const baseUrl = 'https://api.bitbucket.org/';
 
 const pr = {
   id: 5,
@@ -86,22 +86,28 @@ describe('modules/platform/bitbucket/index', () => {
     });
 
     it('should init with username/password', async () => {
+      const expectedResult: PlatformResult = {
+        endpoint: baseUrl,
+      };
       httpMock.scope(baseUrl).get('/2.0/user').reply(200);
       expect(
         await bitbucket.initPlatform({
           username: 'abc',
           password: '123',
         })
-      ).toMatchSnapshot();
+      ).toEqual(expectedResult);
     });
 
     it('should init with only token', async () => {
+      const expectedResult: PlatformResult = {
+        endpoint: baseUrl,
+      };
       httpMock.scope(baseUrl).get('/2.0/user').reply(200);
       expect(
         await bitbucket.initPlatform({
           token: 'token',
         })
-      ).toMatchSnapshot();
+      ).toEqual(expectedResult);
     });
 
     it('should warn for missing "profile" scope', async () => {
