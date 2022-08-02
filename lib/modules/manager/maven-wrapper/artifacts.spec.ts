@@ -13,6 +13,10 @@ const adminConfig: RepoGlobalConfig = {
 };
 
 describe('modules/manager/maven-wrapper/artifacts', () => {
+  afterEach(() => {
+    GlobalConfig.reset();
+  });
+
   it('Should not update if there is no dep with maven:wrapper', async () => {
     const updatedDeps = await updateArtifacts({
       packageFileName: 'maven-wrapper',
