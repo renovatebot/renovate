@@ -3,7 +3,8 @@ import { getCache } from '../../util/cache/repository';
 import type { EnsureCommentConfig, EnsureCommentRemovalConfig } from './types';
 import { platform } from '.';
 
-const hash = (content: string): string => hasha(content, { algorithm: 'sha1' });
+// use sha512: https://www.npmjs.com/package/hasha#algorithm
+const hash = (content: string): string => hasha(content);
 
 export async function ensureComment(
   commentConfig: EnsureCommentConfig
