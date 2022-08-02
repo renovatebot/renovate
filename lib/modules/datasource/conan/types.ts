@@ -3,7 +3,8 @@ export interface ConanJSON {
 }
 
 export interface ConanRevisionJSON {
-  revision?: string;
+  revision: string;
+  time: string
 }
 
 export interface ConanRevisionsJSON {
