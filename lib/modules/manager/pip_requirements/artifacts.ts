@@ -6,6 +6,9 @@ import type { ExecOptions } from '../../../util/exec/types';
 import { readLocalFile } from '../../../util/fs';
 import { newlineRegex, regEx } from '../../../util/regex';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
+import { extrasPattern } from './extract';
+
+const extrasAndEqualsRegex = regEx(`^${extrasPattern}==`);
 
 export async function updateArtifacts({
   packageFileName,
@@ -25,10 +28,13 @@ export async function updateArtifacts({
       .split(newlineRegex)
       .map((line) => line.trim());
     for (const dep of updatedDeps) {
+      const depName = dep.depName!;
       const hashLine = lines.find(
         (line) =>
           // TODO: types (#7154)
-          line.startsWith(`${dep.depName!}==`) && line.includes('--hash=')
+          line.startsWith(depName) &&
+          extrasAndEqualsRegex.test(line.substring(depName.length)) &&
+          line.includes('--hash=')
       );
       if (hashLine) {
         const depConstraint = hashLine.split(' ')[0];
