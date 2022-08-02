@@ -54,6 +54,8 @@ interface GiteaRepoConfig {
   cloneSubmodules: boolean;
 }
 
+const DRAFT_PREFIX = 'WIP: ';
+
 const defaults = {
   hostType: PlatformId.Gitea,
   endpoint: 'https://gitea.com/',
@@ -96,11 +98,19 @@ function toRenovatePR(data: helper.PR): Pr | null {
     return null;
   }
 
+  let title = data.title;
+  let isDraft = false;
+  if (title.startsWith(DRAFT_PREFIX)) {
+    title = title.substring(DRAFT_PREFIX.length);
+    isDraft = true;
+  }
+
   return {
     number: data.number,
     displayNumber: `Pull Request #${data.number}`,
     state: data.state,
-    title: data.title,
+    title,
+    isDraft,
     bodyStruct: getPrBodyStruct(data.body),
     sha: data.head.sha,
     sourceBranch: data.head.label,
@@ -474,14 +484,19 @@ const platform: Platform = {
   async createPr({
     sourceBranch,
     targetBranch,
-    prTitle: title,
+    prTitle,
     prBody: rawBody,
     labels: labelNames,
     platformOptions,
+    draftPR,
   }: CreatePRConfig): Promise<Pr> {
+    let title = prTitle;
     const base = targetBranch;
     const head = sourceBranch;
     const body = sanitize(rawBody);
+    if (draftPR) {
+      title = DRAFT_PREFIX + title;
+    }
 
     logger.debug(`Creating pull request: ${title} (${head} => ${base})`);
     try {
@@ -578,10 +593,15 @@ const platform: Platform = {
 
   async updatePr({
     number,
-    prTitle: title,
+    prTitle,
     prBody: body,
     state,
   }: UpdatePrConfig): Promise<void> {
+    let title = prTitle;
+    if ((await getPrList()).find((pr) => pr.number === number)?.isDraft) {
+      title = DRAFT_PREFIX + title;
+    }
+
     await helper.updatePR(config.repository, number, {
       title,
       ...(body && { body }),
