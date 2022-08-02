@@ -1,2 +1,0 @@
-steps:
-  - bash: 'echo Hello World'

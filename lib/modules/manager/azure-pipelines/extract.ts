@@ -118,39 +118,42 @@ export function extractPackageFile(
     }
   }
 
-  if (!is.nullOrUndefined(pkg.stages)) {
-    const tasks = pkg.stages
-      .flatMap((stage) =>
-        stage.jobs?.flatMap((job) =>
-          job.steps?.flatMap((step) => extractAzurePipelinesTasks(step.task))
-        )
-      )
-      .filter((task) => !is.nullOrUndefined(task));
-
-    if (is.array<PackageDependency>(tasks)) {
-      deps.push(...tasks);
+  if (is.nonEmptyArray(pkg.stages)) {
+    for (const { jobs } of pkg.stages) {
+      if (is.nonEmptyArray(jobs)) {
+        for (const { steps } of jobs) {
+          if (is.nonEmptyArray(steps)) {
+            for (const step of steps) {
+              const task = extractAzurePipelinesTasks(step.task);
+              if (task) {
+                deps.push(task);
+              }
+            }
+          }
+        }
+      }
     }
   }
 
-  if (!is.nullOrUndefined(pkg.jobs)) {
-    const tasks = pkg.jobs
-      .flatMap((job) =>
-        job.steps?.flatMap((step) => extractAzurePipelinesTasks(step.task))
-      )
-      .filter((dep) => !is.nullOrUndefined(dep));
-
-    if (is.array<PackageDependency>(tasks)) {
-      deps.push(...tasks);
+  if (is.nonEmptyArray(pkg.jobs)) {
+    for (const { steps } of pkg.jobs) {
+      if (is.nonEmptyArray(steps)) {
+        for (const step of steps) {
+          const task = extractAzurePipelinesTasks(step.task);
+          if (task) {
+            deps.push(task);
+          }
+        }
+      }
     }
   }
 
-  if (!is.nullOrUndefined(pkg.steps)) {
-    const tasks = pkg.steps
-      ?.flatMap((step) => extractAzurePipelinesTasks(step.task))
-      .filter((dep) => !is.nullOrUndefined(dep));
-
-    if (is.array<PackageDependency>(tasks)) {
-      deps.push(...tasks);
+  if (is.nonEmptyArray(pkg.steps)) {
+    for (const step of pkg.steps) {
+      const task = extractAzurePipelinesTasks(step.task);
+      if (task) {
+        deps.push(task);
+      }
     }
   }
 
