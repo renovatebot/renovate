@@ -479,7 +479,11 @@ export async function updatePr({
   }
 
   const updateStateCmd = new UpdatePullRequestStatusCommand(updateStateInput);
-  await codeCommitClient.send(updateStateCmd);
+  try {
+    await codeCommitClient.send(updateStateCmd);
+  } catch (err) {
+    // do nothing, it's ok to fail sometimes when trying to update from open to open or from closed to closed.
+  }
 }
 
 export async function mergePr({
