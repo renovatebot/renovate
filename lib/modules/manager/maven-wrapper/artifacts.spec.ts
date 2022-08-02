@@ -55,4 +55,23 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
 
     expect(updatedDeps).toEqual(expected);
   });
+
+  it('Should not update deps when maven-wrapper.properties is not in git change', async () => {
+    git.getRepoStatus.mockResolvedValueOnce(
+      partial<StatusResult>({
+        modified: ['maven.mvn/wrapper/not-maven-wrapper.properties'],
+      })
+    );
+
+    GlobalConfig.set(adminConfig);
+
+    const updatedDeps = await updateArtifacts({
+      packageFileName: 'maven',
+      newPackageFileContent: '',
+      updatedDeps: [{ depName: 'org.apache.maven.wrapper:maven-wrapper' }],
+      config: { newValue: '3.3.1' },
+    });
+
+    expect(updatedDeps).toEqual([]);
+  });
 });
