@@ -25,6 +25,10 @@ function checkApproveAllPendingPR(issueBody: string): boolean {
   return issueBody.includes(' - [x] <!-- approve-all-pending-prs -->');
 }
 
+function checkRebaseAll(issueBody: string): boolean {
+  return issueBody.includes(' - [x] <!-- rebase-all-open-prs -->');
+}
+
 function selectAllRelevantBranches(issueBody: string): string[] {
   const checkedBranches = [];
   if (checkOpenAllRateLimitedPR(issueBody)) {
@@ -42,27 +46,25 @@ function selectAllRelevantBranches(issueBody: string): string[] {
   return checkedBranches;
 }
 
-function parseDashboardIssue(issueBody: string): DependencyDashboard {
-  const checkMatch = ' - \\[x\\] <!-- ([a-zA-Z]+)-branch=([^\\s]+) -->';
+function getCheckedBranches(issueBody: string): Record<string, string> {
+  const checkMatch = /- \[x\] <!-- ([a-zA-Z]+)-branch=([^\s]+) -->/g;
   const generalCheckMatch = ' <!-- ([a-zA-Z]+)-branch=([^\\s]+) -->';
-  const checked = issueBody.match(regEx(checkMatch, 'g')) ?? [];
-  const allRelevantBranches = selectAllRelevantBranches(issueBody);
-  checked.push(...allRelevantBranches);
   const dependencyDashboardChecks: Record<string, string> = {};
-  if (checked?.length) {
-    const re = regEx(generalCheckMatch);
-    checked.forEach((check) => {
-      const [, type, branchName] = re.exec(check)!;
-      dependencyDashboardChecks[branchName] = type;
-    });
+  for (const [, type, branchName] of issueBody.matchAll(regEx(checkMatch))) {
+    dependencyDashboardChecks[branchName] = type;
   }
-  const checkedRebaseAll = issueBody.includes(
-    ' - [x] <!-- rebase-all-open-prs -->'
-  );
-  let dependencyDashboardRebaseAllOpen = false;
-  if (checkedRebaseAll) {
-    dependencyDashboardRebaseAllOpen = true;
-  }
+  const allRelevantBranches = selectAllRelevantBranches(issueBody);
+  const re = regEx(generalCheckMatch);
+  allRelevantBranches.forEach((branch) => {
+    const [, type, branchName] = re.exec(branch)!;
+    dependencyDashboardChecks[branchName] = type;
+  });
+  return dependencyDashboardChecks;
+}
+
+function parseDashboardIssue(issueBody: string): DependencyDashboard {
+  const dependencyDashboardChecks = getCheckedBranches(issueBody);
+  const dependencyDashboardRebaseAllOpen = checkRebaseAll(issueBody);
   const dependencyDashboardAllPending = checkApproveAllPendingPR(issueBody);
   const dependencyDashboardAllRateLimited =
     checkOpenAllRateLimitedPR(issueBody);
@@ -73,6 +75,38 @@ function parseDashboardIssue(issueBody: string): DependencyDashboard {
     dependencyDashboardAllRateLimited,
   };
 }
+
+// function parseDashboardIssue(issueBody: string): DependencyDashboard {
+//   const checkMatch = ' - \\[x\\] <!-- ([a-zA-Z]+)-branch=([^\\s]+) -->';
+//   const generalCheckMatch = ' <!-- ([a-zA-Z]+)-branch=([^\\s]+) -->';
+//   const checked = issueBody.match(regEx(checkMatch, 'g')) ?? [];
+//   const allRelevantBranches = selectAllRelevantBranches(issueBody);
+//   checked.push(...allRelevantBranches);
+//   const dependencyDashboardChecks: Record<string, string> = {};
+//   if (checked?.length) {
+//     const re = regEx(generalCheckMatch);
+//     checked.forEach((check) => {
+//       const [, type, branchName] = re.exec(check)!;
+//       dependencyDashboardChecks[branchName] = type;
+//     });
+//   }
+//   const checkedRebaseAll = issueBody.includes(
+//     ' - [x] <!-- rebase-all-open-prs -->'
+//   );
+//   let dependencyDashboardRebaseAllOpen = false;
+//   if (checkedRebaseAll) {
+//     dependencyDashboardRebaseAllOpen = true;
+//   }
+//   const dependencyDashboardAllPending = checkApproveAllPendingPR(issueBody);
+//   const dependencyDashboardAllRateLimited =
+//     checkOpenAllRateLimitedPR(issueBody);
+//   return {
+//     dependencyDashboardChecks,
+//     dependencyDashboardRebaseAllOpen,
+//     dependencyDashboardAllPending,
+//     dependencyDashboardAllRateLimited,
+//   };
+// }
 
 export async function readDashboardBody(
   config: SelectAllConfig
