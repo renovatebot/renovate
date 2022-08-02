@@ -215,7 +215,9 @@ export async function updateArtifacts({
       {
         artifactError: {
           lockFile: lockFileName,
-          stderr: err.message,
+          stderr: err.stderr,
+          stdout: err.stdout,
+          message: err.message,
         },
       },
     ];

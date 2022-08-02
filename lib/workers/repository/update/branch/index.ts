@@ -17,6 +17,7 @@ import {
 } from '../../../../constants/error-messages';
 import { logger, removeMeta } from '../../../../logger';
 import { getAdditionalFiles } from '../../../../modules/manager/npm/post-update';
+import type { ArtifactError } from '../../../../modules/manager/types';
 import { Pr, platform } from '../../../../modules/platform';
 import {
   ensureComment,
@@ -698,9 +699,16 @@ export async function processBranch(
           ' - you rename this PR\'s title to start with "rebase!" to trigger it manually';
         content += '\n\nThe artifact failure details are included below:\n\n';
         // TODO: types (#7154)
+
+        const stringifyArtifactError = (err: ArtifactError): string => {
+          const msg: (string | undefined)[] = [];
+          msg.push(err.message, err.stderr, err.stdout);
+          return msg.filter((m) => !!m).join('\n');
+        };
+
         config.artifactErrors.forEach((error) => {
           content += `##### File name: ${error.lockFile!}\n\n`;
-          content += `\`\`\`\n${error.stderr!}\n\`\`\`\n\n`;
+          content += `\`\`\`\n${stringifyArtifactError(error)}\n\`\`\`\n\n`;
         });
         content = platform.massageMarkdown(content);
         if (

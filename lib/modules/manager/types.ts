@@ -192,7 +192,9 @@ export interface Upgrade<T = Record<string, any>>
 
 export interface ArtifactError {
   lockFile?: string;
+  message?: string;
   stderr?: string;
+  stdout?: string;
 }
 
 export interface UpdateArtifactsResult {

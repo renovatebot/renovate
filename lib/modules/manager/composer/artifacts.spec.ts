@@ -5,6 +5,7 @@ import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import { PlatformId } from '../../../constants';
 import * as docker from '../../../util/exec/docker';
+import { ExecError, ExecErrorData } from '../../../util/exec/exec-error';
 import type { StatusResult } from '../../../util/git/types';
 import * as hostRules from '../../../util/host-rules';
 import * as _datasource from '../../datasource';
@@ -293,11 +294,13 @@ describe('modules/manager/composer/artifacts', () => {
   });
 
   it('catches unmet requirements errors', async () => {
+    const message = 'Process exited with exit code "2"';
     const stderr =
       'fooYour requirements could not be resolved to an installable set of packages.bar';
+    const stdout = '';
     fs.readLocalFile.mockResolvedValueOnce('{}');
     fs.writeLocalFile.mockImplementationOnce(() => {
-      throw new Error(stderr);
+      throw new ExecError(message, partial<ExecErrorData>({ stderr, stdout }));
     });
     expect(
       await composer.updateArtifacts({
@@ -307,7 +310,14 @@ describe('modules/manager/composer/artifacts', () => {
         config,
       })
     ).toMatchSnapshot([
-      { artifactError: { lockFile: 'composer.lock', stderr } },
+      {
+        artifactError: {
+          lockFile: 'composer.lock',
+          message,
+          stdout,
+          stderr,
+        },
+      },
     ]);
   });
 

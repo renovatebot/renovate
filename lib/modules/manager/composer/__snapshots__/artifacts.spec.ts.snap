@@ -29,7 +29,9 @@ Array [
   Object {
     "artifactError": Object {
       "lockFile": "composer.lock",
-      "stderr": "not found",
+      "message": "not found",
+      "stderr": undefined,
+      "stdout": undefined,
     },
   },
 ]
@@ -40,7 +42,9 @@ Array [
   Object {
     "artifactError": Object {
       "lockFile": "composer.lock",
+      "message": "Process exited with exit code \\"2\\"",
       "stderr": "fooYour requirements could not be resolved to an installable set of packages.bar",
+      "stdout": "",
     },
   },
 ]
