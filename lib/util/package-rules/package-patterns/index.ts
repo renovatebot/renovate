@@ -15,12 +15,12 @@ export class PackagePatternsMatcher extends Matcher {
     { depName, updateType }: PackageRuleInputConfig,
     { matchPackagePatterns }: PackageRule
   ): boolean | null {
-    // if a pattern is defined but no depName is available for comparison, return false
-    // if (is.undefined(depName) && !is.undefined(matchPackagePatterns)) {
-    //   return false;
-    // }
-    if (is.undefined(depName) || is.undefined(matchPackagePatterns)) {
+    if (is.undefined(matchPackagePatterns)) {
       return null;
+    }
+
+    if (is.undefined(depName)) {
+      return false;
     }
 
     let isMatch = false;
@@ -39,8 +39,11 @@ export class PackagePatternsMatcher extends Matcher {
     { excludePackagePatterns }: PackageRule
   ): boolean | null {
     // ignore lockFileMaintenance for backwards compatibility
-    if (is.undefined(excludePackagePatterns) || is.undefined(depName)) {
+    if (is.undefined(excludePackagePatterns)) {
       return null;
+    }
+    if (is.undefined(depName)) {
+      return false;
     }
 
     let isMatch = false;

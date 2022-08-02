@@ -12,9 +12,13 @@ export class FilesMatcher extends Matcher {
     { packageFile, lockFiles }: PackageRuleInputConfig,
     { matchFiles }: PackageRule
   ): boolean | null {
-    if (is.undefined(matchFiles) || is.undefined(packageFile)) {
+    if (is.undefined(matchFiles)) {
       return null;
     }
+    if (is.undefined(packageFile)) {
+      return false;
+    }
+
     return matchFiles.some(
       (fileName) =>
         packageFile === fileName ||

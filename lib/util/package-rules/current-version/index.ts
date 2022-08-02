@@ -52,13 +52,11 @@ export class CurrentVersionMatcher extends Matcher {
     const compareVersion = version.isVersion(currentValue)
       ? currentValue // it's a version so we can match against it
       : lockedVersion ?? currentVersion; // need to match against this currentVersion, if available
-    if (compareVersion) {
-      // istanbul ignore next
-      if (version.isVersion(compareVersion)) {
-        // istanbul ignore if
-        return version.matches(compareVersion, matchCurrentVersion);
-      }
+    if (is.undefined(compareVersion)) {
       return false;
+    }
+    if (version.isVersion(compareVersion)) {
+      return version.matches(compareVersion, matchCurrentVersion);
     }
     logger.debug(
       { matchCurrentVersionStr, currentValue },

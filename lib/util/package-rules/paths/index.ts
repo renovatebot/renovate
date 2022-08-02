@@ -13,8 +13,11 @@ export class PathsMatcher extends Matcher {
     { packageFile }: PackageRuleInputConfig,
     { matchPaths }: PackageRule
   ): boolean | null {
-    if (is.undefined(matchPaths) || is.undefined(packageFile)) {
+    if (is.undefined(matchPaths)) {
       return null;
+    }
+    if (is.undefined(packageFile)) {
+      return false;
     }
 
     return matchPaths.some(

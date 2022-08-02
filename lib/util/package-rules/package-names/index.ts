@@ -12,8 +12,11 @@ export class PackageNameMatcher extends Matcher {
     { depName }: PackageRuleInputConfig,
     { matchPackageNames }: PackageRule
   ): boolean | null {
-    if (is.undefined(matchPackageNames) || is.undefined(depName)) {
+    if (is.undefined(matchPackageNames)) {
       return null;
+    }
+    if (is.undefined(depName)) {
+      return false;
     }
     return matchPackageNames.includes(depName);
   }
@@ -22,8 +25,11 @@ export class PackageNameMatcher extends Matcher {
     { depName }: PackageRuleInputConfig,
     { excludePackageNames }: PackageRule
   ): boolean | null {
-    if (is.undefined(excludePackageNames) || is.undefined(depName)) {
+    if (is.undefined(excludePackageNames)) {
       return null;
+    }
+    if (is.undefined(depName)) {
+      return false;
     }
     return excludePackageNames.includes(depName);
   }
