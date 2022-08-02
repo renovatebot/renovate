@@ -14,6 +14,6 @@ export interface RecursionParameter {
   combinedGroups: Record<string, string>;
 }
 
-export interface RegexManagerInterface extends CustomExtractConfig {
+export interface RegexManagerConfig extends CustomExtractConfig {
   matchStrings: string[];
 }

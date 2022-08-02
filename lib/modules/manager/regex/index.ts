@@ -7,7 +7,7 @@ import type {
   Result,
 } from '../types';
 import { handleAny, handleCombination, handleRecursive } from './strategies';
-import type { RegexManagerInterface } from './types';
+import type { RegexManagerConfig } from './types';
 import { validMatchFields } from './utils';
 
 export const defaultConfig = {
@@ -24,20 +24,20 @@ export function extractPackageFile(
   switch (config.matchStringsStrategy) {
     default:
     case 'any':
-      deps = handleAny(content, packageFile, config as RegexManagerInterface);
+      deps = handleAny(content, packageFile, config as RegexManagerConfig);
       break;
     case 'combination':
       deps = handleCombination(
         content,
         packageFile,
-        config as RegexManagerInterface
+        config as RegexManagerConfig
       );
       break;
     case 'recursive':
       deps = handleRecursive(
         content,
         packageFile,
-        config as RegexManagerInterface
+        config as RegexManagerConfig
       );
       break;
   }

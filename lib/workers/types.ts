@@ -137,6 +137,7 @@ export interface WorkerExtractConfig extends ExtractConfig {
   enabledManagers?: string[];
   enabled?: boolean;
 }
+
 export interface DepWarnings {
   warnings: string[];
   warningFiles: string[];
