@@ -487,6 +487,7 @@ const platform: Platform = {
     prTitle,
     prBody: rawBody,
     labels: labelNames,
+    platformOptions,
     draftPR,
   }: CreatePRConfig): Promise<Pr> {
     let title = prTitle;
@@ -509,6 +510,33 @@ const platform: Platform = {
         body,
         labels: labels.filter(is.number),
       });
+
+      if (platformOptions?.usePlatformAutomerge) {
+        if (semver.gte(defaults.version, '1.17.0')) {
+          try {
+            await helper.mergePR(config.repository, gpr.number, {
+              // TODO: pass strategy (#16884)
+              Do: config.mergeMethod,
+              merge_when_checks_succeed: true,
+            });
+
+            logger.debug(
+              { prNumber: gpr.number },
+              'Gitea-native automerge: success'
+            );
+          } catch (err) {
+            logger.warn(
+              { err, prNumber: gpr.number },
+              'Gitea-native automerge: fail'
+            );
+          }
+        } else {
+          logger.debug(
+            { prNumber: gpr.number },
+            'Gitea-native automerge: not supported on this version of Gitea. Use 1.17.0 or newer.'
+          );
+        }
+      }
 
       const pr = toRenovatePR(gpr);
       if (!pr) {
@@ -583,11 +611,9 @@ const platform: Platform = {
 
   async mergePr({ id, strategy }: MergePRConfig): Promise<boolean> {
     try {
-      await helper.mergePR(
-        config.repository,
-        id,
-        getMergeMethod(strategy) ?? config.mergeMethod
-      );
+      await helper.mergePR(config.repository, id, {
+        Do: getMergeMethod(strategy) ?? config.mergeMethod,
+      });
       return true;
     } catch (err) {
       logger.warn({ err, id }, 'Merging of PR failed');

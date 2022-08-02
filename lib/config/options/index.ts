@@ -2316,6 +2316,7 @@ const options: RenovateOptions[] = [
     name: 'platformAutomerge',
     description: `Controls if platform-native auto-merge is used.`,
     type: 'boolean',
+    supportedPlatforms: ['azure', 'gitea', 'github', 'gitlab'],
     default: false,
   },
   {
