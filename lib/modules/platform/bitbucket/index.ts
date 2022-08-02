@@ -199,7 +199,6 @@ export async function initRepo({
   // TODO #7154
   const hostnameWithoutApiPrefix = regEx(/api[.|-](.+)/).exec(hostname!)?.[1];
 
-  // https://developer.atlassian.com/cloud/bitbucket/rest/intro/#repository-cloning
   const auth: string = opts.token
     ? `x-token-auth:${opts.token}`
     : // TODO: types (#7154)
