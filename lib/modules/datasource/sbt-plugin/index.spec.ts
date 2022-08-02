@@ -18,6 +18,14 @@ describe('modules/datasource/sbt-plugin/index', () => {
     expect(parseIndexDir(sbtPluginIndex)).toMatchSnapshot();
   });
 
+  it('uses proper hostType', () => {
+    const ds = new SbtPluginDatasource();
+    expect(ds).toMatchObject({
+      id: SbtPluginDatasource.id,
+      http: { hostType: 'sbt' },
+    });
+  });
+
   describe('getPkgReleases', () => {
     beforeEach(() => {
       httpMock
