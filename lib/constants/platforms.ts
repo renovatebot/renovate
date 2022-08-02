@@ -3,6 +3,7 @@ export const enum PlatformId {
   Azure = 'azure',
   Bitbucket = 'bitbucket',
   BitbucketServer = 'bitbucket-server',
+  CodeCommit = 'codecommit',
   Gitea = 'gitea',
   Github = 'github',
   Gitlab = 'gitlab',

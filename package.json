@@ -133,6 +133,7 @@
     "node": "^14.15.0 || >=16.13.0"
   },
   "dependencies": {
+    "@aws-sdk/client-codecommit": "3.137.0",
     "@aws-sdk/client-ec2": "3.112.0",
     "@aws-sdk/client-ecr": "3.112.0",
     "@aws-sdk/client-s3": "3.113.0",
@@ -147,6 +148,7 @@
     "@yarnpkg/core": "3.1.0",
     "@yarnpkg/parsers": "2.5.1",
     "auth-header": "1.0.0",
+    "aws4": "1.11.0",
     "azure-devops-node-api": "11.2.0",
     "bunyan": "1.8.15",
     "cacache": "16.1.1",
@@ -212,6 +214,7 @@
     "upath": "2.0.1",
     "url-join": "4.0.1",
     "validate-npm-package-name": "4.0.0",
+    "web-encoding": "1.1.5",
     "xmldoc": "1.2.0"
   },
   "optionalDependencies": {
@@ -227,6 +230,7 @@
     "@renovate/eslint-plugin": "https://github.com/renovatebot/eslint-plugin#v0.0.4",
     "@semantic-release/exec": "6.0.3",
     "@types/auth-header": "1.0.2",
+    "@types/aws4": "1.11.2",
     "@types/bunyan": "1.8.8",
     "@types/cacache": "15.0.1",
     "@types/callsite": "1.0.31",
