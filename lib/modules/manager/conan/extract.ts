@@ -1,6 +1,7 @@
 import is from '@sindresorhus/is';
 import { regEx } from '../../../util/regex';
 import type { PackageDependency, PackageFile } from '../types';
+import { isComment } from './common';
 
 const regex = regEx(
   `(?<name>[-_a-z0-9]+)/(?<version>[^@\n{*"']+)(?<userChannel>@[-_a-zA-Z0-9]+/[^#\n.{*"' ]+)?#?(?<revision>[-_a-f0-9]+[^\n{*"'])?`
@@ -16,10 +17,6 @@ function setDepType(content: string, originalType: string): string {
     depType = 'requires';
   }
   return depType;
-}
-
-function isComment(line: string): boolean {
-  return line.trim().startsWith('#');
 }
 
 export function extractPackageFile(content: string): PackageFile | null {
