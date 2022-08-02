@@ -4,7 +4,7 @@ import parse from 'github-url-from-git';
 import { DateTime } from 'luxon';
 import * as hostRules from '../../util/host-rules';
 import { regEx } from '../../util/regex';
-import { parseUrl, validateUrl } from '../../util/url';
+import { parseUrl, trimTrailingSlash, validateUrl } from '../../util/url';
 import { detectPlatform } from '../platform/util';
 import { manualChangelogUrls, manualSourceUrls } from './metadata-manual';
 import type { ReleaseResult } from './types';
@@ -128,8 +128,17 @@ export function addMetaData(
     dep.sourceUrl = dep.changelogUrl;
   }
 
-  if (dep.homepage && !dep.sourceUrl) {
-    setSourceUrlToHomepage(dep);
+  if (dep.homepage) {
+    const platform = detectPlatform(dep.homepage);
+    if (platform === 'github' || platform === 'gitlab') {
+      if (!dep.sourceUrl) {
+        dep.sourceUrl = dep.homepage;
+        if (shouldDeleteHomepage(dep.sourceUrl, dep.homepage)) {
+          // remove homepage if its not a link to a path in a github/gitlab repo.
+          delete dep.homepage;
+        }
+      }
+    }
   }
   const extraBaseUrls = [];
   // istanbul ignore next
@@ -170,21 +179,6 @@ export function addMetaData(
   }
 }
 
-export function setSourceUrlToHomepage(dep: ReleaseResult): void {
-  if (!dep?.homepage) {
-    return;
-  }
-  const platform = detectPlatform(dep.homepage);
-  if (platform !== 'github' && platform !== 'gitlab') {
-    return;
-  }
-  dep.sourceUrl = dep.homepage;
-  if (shouldDeleteHomepage(dep.sourceUrl, dep.homepage)) {
-    // remove homepage if its not a link to a path in a github/gitlab repo.
-    delete dep.homepage;
-  }
-}
-
 export function shouldDeleteHomepage(
   sourceUrl: string,
   homepage: string
@@ -201,9 +195,8 @@ export function shouldDeleteHomepage(
   if (is.nullOrUndefined(homepageParsed)) {
     return false;
   }
-  let hPath = homepageParsed.pathname;
-  if (hPath.charAt(hPath.length - 1) === '/') {
-    hPath = hPath.substring(0, hPath.length - 1); // remove last slash
-  }
-  return hPath === sourceUrlParsed.pathname;
+  return (
+    trimTrailingSlash(homepageParsed.pathname) ===
+    trimTrailingSlash(sourceUrlParsed.pathname)
+  );
 }

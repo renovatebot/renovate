@@ -2,7 +2,6 @@ import { MavenDatasource } from './maven';
 import {
   addMetaData,
   massageGithubUrl,
-  setSourceUrlToHomepage,
   shouldDeleteHomepage,
 } from './metadata';
 import { NpmDatasource } from './npm';
@@ -359,13 +358,13 @@ describe('modules/datasource/metadata', () => {
         { version: '1.0.3', releaseTimestamp: '2000-01-03T14:34:56.000+02:00' },
       ],
     };
-    setSourceUrlToHomepage(dep);
+    addMetaData(dep, MavenDatasource.id, 'foobar');
     expect(dep).toMatchObject({
       sourceUrl: 'https://gitlab.com/meno/repo',
       releases: [
         {
           version: '1.0.1',
-          releaseTimestamp: '2000-01-01T12:34:56',
+          releaseTimestamp: '2000-01-01T12:34:56.000Z',
         },
         {
           version: '1.0.2',
@@ -373,7 +372,7 @@ describe('modules/datasource/metadata', () => {
         },
         {
           version: '1.0.3',
-          releaseTimestamp: '2000-01-03T14:34:56.000+02:00',
+          releaseTimestamp: '2000-01-03T12:34:56.000Z',
         },
       ],
     });
@@ -388,13 +387,13 @@ describe('modules/datasource/metadata', () => {
         { version: '1.0.3', releaseTimestamp: '2000-01-03T14:34:56.000+02:00' },
       ],
     };
-    setSourceUrlToHomepage(dep);
+    addMetaData(dep, MavenDatasource.id, 'foobar');
     expect(dep).toMatchObject({
       homepage: 'https://somesource.com/',
       releases: [
         {
           version: '1.0.1',
-          releaseTimestamp: '2000-01-01T12:34:56',
+          releaseTimestamp: '2000-01-01T12:34:56.000Z',
         },
         {
           version: '1.0.2',
@@ -402,7 +401,7 @@ describe('modules/datasource/metadata', () => {
         },
         {
           version: '1.0.3',
-          releaseTimestamp: '2000-01-03T14:34:56.000+02:00',
+          releaseTimestamp: '2000-01-03T12:34:56.000Z',
         },
       ],
     });
