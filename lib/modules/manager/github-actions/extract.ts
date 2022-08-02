@@ -88,14 +88,14 @@ function extractWithYAMLParser(content: string): PackageDependency[] {
 
   const pkg = load(content, { json: true }) as Workflow;
 
-  for (const job of Object.values(pkg.jobs ?? [])) {
+  for (const job of Object.values(pkg.jobs ?? {})) {
     if (job.container !== undefined) {
       const dep = extractContainer(job.container);
       dep.depType = 'container';
       deps.push(dep);
     }
 
-    for (const service of Object.values(job.services ?? [])) {
+    for (const service of Object.values(job.services ?? {})) {
       const dep = extractContainer(service);
       dep.depType = 'service';
       deps.push(dep);
