@@ -151,7 +151,8 @@ export class PackageFiles {
       for (const manager of managers) {
         deps += `<details><summary>${manager}</summary>\n<blockquote>\n\n`;
         for (const packageFile of packageFiles[manager]) {
-          deps += `<details><summary>${packageFile.packageFile}</summary>\n\n`;
+          // TODO: types (#7154)
+          deps += `<details><summary>${packageFile.packageFile!}</summary>\n\n`;
           for (const dep of packageFile.deps) {
             const ver = dep.currentValue;
             const digest = dep.currentDigest;
@@ -159,7 +160,8 @@ export class PackageFiles {
               ver && digest
                 ? `${ver}@${digest}`
                 : `${digest ?? ver ?? placeHolder}`;
-            deps += ` - \`${dep.depName} ${version}\`\n`;
+            // TODO: types (#7154)
+            deps += ` - \`${dep.depName!} ${version}\`\n`;
           }
           deps += '\n</details>\n\n';
         }

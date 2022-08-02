@@ -35,8 +35,9 @@ export function generateBranchName(update: RenovateConfig): void {
   // Check whether to use a group name
   if (update.groupName) {
     logger.debug('Using group branchName template');
+    // TODO: types (#7154)
     logger.debug(
-      `Dependency ${update.depName} is part of group ${update.groupName}`
+      `Dependency ${update.depName!} is part of group ${update.groupName}`
     );
     update.groupSlug = slugify(update.groupSlug ?? update.groupName, {
       lower: true,
@@ -83,7 +84,8 @@ export function generateBranchName(update: RenovateConfig): void {
 
     const hash = hasha(hashInput);
 
-    update.branchName = `${update.branchPrefix}${hash.slice(0, hashLength)}`;
+    // TODO: types (#7154)
+    update.branchName = `${update.branchPrefix!}${hash.slice(0, hashLength)}`;
   } else {
     update.branchName = template.compile(update.branchName!, update);
 

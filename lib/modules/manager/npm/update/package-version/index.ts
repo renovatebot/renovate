@@ -12,6 +12,7 @@ export function bumpPackageVersion(
     { bumpVersion, currentValue },
     'Checking if we should bump package.json version'
   );
+  // TODO: types (#7154)
   let newPjVersion: string | null;
   let bumpedContent = content;
   try {
@@ -33,7 +34,7 @@ export function bumpPackageVersion(
     logger.debug({ newPjVersion });
     bumpedContent = content.replace(
       regEx(`(?<version>"version":\\s*")[^"]*`),
-      `$<version>${newPjVersion}`
+      `$<version>${newPjVersion!}`
     );
     if (bumpedContent === content) {
       logger.debug('Version was already bumped');

@@ -1,5 +1,6 @@
 import is from '@sindresorhus/is';
 import { loadAll } from 'js-yaml';
+import { logger } from '../../../logger';
 import { GitTagsDatasource } from '../../datasource/git-tags';
 import { HelmDatasource } from '../../datasource/helm';
 import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
@@ -45,7 +46,7 @@ function createDependency(
 
 export function extractPackageFile(
   content: string,
-  _fileName: string,
+  fileName: string,
   _config?: ExtractConfig
 ): PackageFile | null {
   // check for argo reference. API version for the kind attribute is used
@@ -53,7 +54,13 @@ export function extractPackageFile(
     return null;
   }
 
-  const definitions = loadAll(content) as ApplicationDefinition[];
+  let definitions: ApplicationDefinition[];
+  try {
+    definitions = loadAll(content) as ApplicationDefinition[];
+  } catch (err) {
+    logger.debug({ err, fileName }, 'Failed to parse ArgoCD definition.');
+    return null;
+  }
 
   const deps = definitions
     .map((definition) => createDependency(definition))
