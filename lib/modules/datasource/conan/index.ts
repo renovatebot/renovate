@@ -82,7 +82,7 @@ export class ConanDatasource extends Datasource {
     newValue?: string
   ): Promise<string | null> {
     const revision = getRevision(packageName);
-    if (is.undefined(revision) || is.undefined(registryUrl)) {
+    if (!revision || is.undefined(registryUrl)) {
       return null;
     } else {
       const url = ensureTrailingSlash(registryUrl);
@@ -111,7 +111,7 @@ export class ConanDatasource extends Datasource {
     if (
       is.string(registryUrl) &&
       ensureTrailingSlash(registryUrl) === defaultRegistryUrl &&
-      is.undefined(revision)
+      is.nullOrUndefined(revision)
     ) {
       return this.getConanCenterReleases(depName, userAndChannel);
     }
