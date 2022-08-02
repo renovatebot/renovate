@@ -10,7 +10,7 @@ import { chmodLocalFile, readLocalFile, statLocalFile } from '../../../util/fs';
 import { getRepoStatus } from '../../../util/git';
 import type { StatusResult } from '../../../util/git/types';
 
-import { id as npmVersioning } from '../../versioning/npm';
+import { id as semver } from '../../versioning/semver';
 import type {
   UpdateArtifact,
   UpdateArtifactsConfig,
@@ -108,7 +108,7 @@ async function executeWrapperCommand(
     docker: {
       image: 'java',
       tagConstraint: config.constraints?.java ?? '^8.0.0',
-      tagScheme: npmVersioning,
+      tagScheme: semver,
     },
     // extraEnv,
   };
