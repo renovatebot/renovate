@@ -1,3 +1,5 @@
+// TODO: types (#7154)
+/* eslint-disable @typescript-eslint/restrict-template-expressions */
 import { quote } from 'shlex';
 import { GlobalConfig } from '../../../config/global';
 import { logger } from '../../../logger';
@@ -65,7 +67,7 @@ export function requireComposerDependencyInstallation(
   );
 }
 
-export function extractContraints(
+export function extractConstraints(
   composerJson: ComposerConfig,
   lockParsed: ComposerLock
 ): Record<string, string> {
