@@ -15,7 +15,7 @@ export class PackageFiles {
       { baseBranch },
       `PackageFiles.add() - Package file saved for branch`
     );
-    this.data.set(baseBranch, packageFiles);
+    this.data.set(baseBranch, clone(packageFiles));
   }
 
   public static clear(): void {
@@ -24,42 +24,6 @@ export class PackageFiles {
       'PackageFiles.clear() - Package files deleted'
     );
     this.data.clear();
-  }
-
-  /**
-   * Removes the last dependency/entry in the PackageFiles data
-   * i.e. the last line in the tobe generated detected dependency section
-   * @Returns true if anything that translates to a markdown written line was deleted
-   *          otherwise false is returned
-   */
-  private static pop(): boolean {
-    // get detected managers list of the last listed base branch
-    const [branch, managers] = Array.from(this.data).pop() ?? [];
-    if (!branch) {
-      return false;
-    }
-
-    // delete base branch listing if it has no managers left
-    if (!managers || is.emptyObject(managers)) {
-      return this.data.delete(branch);
-    }
-
-    // get all manifest files for the last listed manager
-    const [manager, packageFiles] = Object.entries(managers).pop() ?? [];
-
-    // delete current manager if it has no manifest files left
-    if (!packageFiles || is.emptyArray(packageFiles)) {
-      return delete managers[manager!];
-    }
-
-    // delete manifest file if it has no deps left
-    const len = packageFiles.length - 1;
-    if (is.emptyArray(packageFiles[len].deps)) {
-      return !!packageFiles.pop();
-    }
-
-    // remove the last listed dependency
-    return !!packageFiles[len].deps.pop();
   }
 
   /**
@@ -77,10 +41,6 @@ export class PackageFiles {
     maxLength: number,
     setHeader = true
   ): string {
-    const org = this.data; // backup data
-    // deep clone data
-    this.data = new Map(clone(Array.from(this.data))); // only mutate cloned data
-
     const note =
       '> **Note**\n> Detected dependencies section has been truncated\n';
     const title = `## Detected dependencies\n\n`;
@@ -93,11 +53,17 @@ export class PackageFiles {
     let header = '';
     let removed = false;
     let truncated = false;
+    let restore: (() => void) | null = null;
 
     do {
       // shorten markdown until it fits
       md = PackageFiles.getDashboardMarkdown(config, false);
       if (md.length > mdMaxLength) {
+        // backup data
+        if (!restore) {
+          restore = this.backup();
+        }
+        // truncate data
         removed = PackageFiles.pop();
       }
       if (removed) {
@@ -105,7 +71,9 @@ export class PackageFiles {
       }
     } while (removed && md.length > mdMaxLength);
 
-    this.data = org; // restore original PackageFiles data
+    if (restore) {
+      restore();
+    } // restore original PackageFiles data
 
     header += title;
     header += truncated ? note : '';
@@ -171,5 +139,51 @@ export class PackageFiles {
     }
 
     return (setTitle ? title : '') + deps;
+  }
+
+  private static backup(): () => void {
+    const backup = this.data; // backup data
+    // deep clone data
+    this.data = new Map(clone(Array.from(this.data))); // only mutate cloned data
+
+    return () => {
+      this.data = backup;
+    };
+  }
+
+  /**
+   * Removes the last dependency/entry in the PackageFiles data
+   * i.e. the last line in the tobe generated detected dependency section
+   * @Returns true if anything that translates to a markdown written line was deleted
+   *          otherwise false is returned
+   */
+  private static pop(): boolean {
+    // get detected managers list of the last listed base branch
+    const [branch, managers] = Array.from(this.data).pop() ?? [];
+    if (!branch) {
+      return false;
+    }
+
+    // delete base branch listing if it has no managers left
+    if (!managers || is.emptyObject(managers)) {
+      return this.data.delete(branch);
+    }
+
+    // get all manifest files for the last listed manager
+    const [manager, packageFiles] = Object.entries(managers).pop() ?? [];
+
+    // delete current manager if it has no manifest files left
+    if (!packageFiles || is.emptyArray(packageFiles)) {
+      return delete managers[manager!];
+    }
+
+    // delete manifest file if it has no deps left
+    const len = packageFiles.length - 1;
+    if (is.emptyArray(packageFiles[len].deps)) {
+      return !!packageFiles.pop();
+    }
+
+    // remove the last listed dependency
+    return !!packageFiles[len].deps.pop();
   }
 }
