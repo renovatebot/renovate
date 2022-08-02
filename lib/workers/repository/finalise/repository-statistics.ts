@@ -2,6 +2,8 @@ import type { RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
 import type { Pr } from '../../../modules/platform';
 import { PrState } from '../../../types';
+import { getCache } from '../../../util/cache/repository';
+import type { BranchCache } from '../../../util/cache/repository/types';
 
 export function runRenovateRepoStats(
   config: RenovateConfig,
@@ -32,4 +34,56 @@ export function runRenovateRepoStats(
     }
   }
   logger.debug({ stats: prStats }, `Renovate repository PR statistics`);
+}
+
+interface BranchMetadata {
+  branchName: string;
+  sha: string | null;
+  parentSha: string | null;
+  automerge: boolean;
+  isModified: boolean;
+}
+
+interface BaseBranchMetadata {
+  branchName: string;
+  sha: string;
+}
+
+export function runBranchSummery(): void {
+  const { scan, branches } = getCache();
+
+  const baseMetadata: BaseBranchMetadata[] = [];
+  for (const [branchName, cached] of Object.entries(scan ?? {})) {
+    baseMetadata.push({ branchName, sha: cached.sha });
+  }
+
+  function unwrap({
+    branchName,
+    sha,
+    parentSha,
+    automerge,
+    isModified,
+  }: BranchCache): BranchMetadata {
+    return { branchName, sha, parentSha, automerge, isModified };
+  }
+
+  const branchMetadata: BranchMetadata[] = [];
+  const inactiveBranches: string[] = [];
+
+  for (const branch of branches ?? []) {
+    if (!branch?.sha) {
+      inactiveBranches.push(branch.branchName);
+      continue;
+    }
+    branchMetadata.push(unwrap(branch));
+  }
+
+  logger.debug(
+    {
+      baseBranches: baseMetadata,
+      branches: branchMetadata,
+      inactiveBranches,
+    },
+    'Branch summary'
+  );
 }

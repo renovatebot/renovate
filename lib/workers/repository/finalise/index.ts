@@ -9,7 +9,10 @@ import { MigratedDataFactory } from '../config-migration/branch/migrated-data';
 import { ensureConfigMigrationPr } from '../config-migration/pr';
 import { PackageFiles } from '../package-files';
 import { pruneStaleBranches } from './prune';
-import { runRenovateRepoStats } from './repository-statistics';
+import {
+  runBranchSummery,
+  runRenovateRepoStats,
+} from './repository-statistics';
 
 // istanbul ignore next
 export async function finaliseRepo(
@@ -47,5 +50,6 @@ export async function finaliseRepo(
     logger.debug('Repo is activated');
     config.repoIsActivated = true;
   }
+  runBranchSummery();
   runRenovateRepoStats(config, prList);
 }

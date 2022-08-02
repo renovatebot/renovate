@@ -3,10 +3,20 @@ import {
   RenovateConfig,
   getConfig,
   mockedFunction,
+  partial,
 } from '../../../../test/util';
 import { logger } from '../../../logger';
 import { platform } from '../../../modules/platform';
-import { runRenovateRepoStats } from './repository-statistics';
+import * as cache from '../../../util/cache/repository';
+import type {
+  BaseBranchCache,
+  BranchCache,
+  RepoCacheData,
+} from '../../../util/cache/repository/types';
+import {
+  runBranchSummery,
+  runRenovateRepoStats,
+} from './repository-statistics';
 
 jest.mock('../../../modules/platform/github/pr');
 jest.mock('../../../util/http/github');
@@ -39,6 +49,85 @@ describe('workers/repository/finalise/repository-statistics', () => {
           },
         },
         `Renovate repository PR statistics`
+      );
+    });
+  });
+
+  describe('runBranchSummery', () => {
+    const cacheSpy = jest.spyOn(cache, 'getCache');
+
+    beforeEach(() => {
+      jest.resetAllMocks();
+    });
+
+    it('processes cache with baseBranches only', () => {
+      const sha = '793221454914cdc422e1a8f0ca27b96fe39ff9ad';
+      const main = partial<BaseBranchCache>({ sha });
+      const dev = partial<BaseBranchCache>({ sha });
+      const cache = partial<RepoCacheData>({ scan: { main, dev } });
+      cacheSpy.mockReturnValueOnce(cache);
+      runBranchSummery();
+      expect(logger.debug).toHaveBeenCalledWith(
+        {
+          baseBranches: [
+            {
+              branchName: 'main',
+              sha,
+            },
+            {
+              branchName: 'dev',
+              sha,
+            },
+          ],
+          branches: [],
+          inactiveBranches: [],
+        },
+        `Branch summary`
+      );
+    });
+
+    it('processes cache with baseBranches and branches', () => {
+      const sha = '793221454914cdc422e1a8f0ca27b96fe39ff9ad';
+      const parentSha = '793221454914cdc422e1a8f0ca27b96fe39ff9ad';
+      const main = partial<BaseBranchCache>({ sha });
+      const dev = partial<BaseBranchCache>({ sha });
+      const branchData = partial<BranchCache>({
+        sha,
+        parentSha,
+        isModified: false,
+        automerge: false,
+      });
+      const branches: BranchCache[] = [
+        { ...branchData, branchName: 'b1' },
+        {
+          ...branchData,
+          branchName: 'b2',
+        },
+        partial<BranchCache>({ branchName: 'b3' }),
+      ];
+      const cache = partial<RepoCacheData>({ scan: { main, dev }, branches });
+
+      cacheSpy.mockReturnValueOnce(cache);
+      runBranchSummery();
+      expect(logger.debug).toHaveBeenCalledWith(
+        {
+          baseBranches: [
+            {
+              branchName: 'main',
+              sha,
+            },
+            {
+              branchName: 'dev',
+              sha,
+            },
+          ],
+          branches: [
+            { ...branchData, branchName: 'b1' },
+            { ...branchData, branchName: 'b2' },
+          ],
+          inactiveBranches: ['b3'],
+        },
+        `Branch summary`
       );
     });
   });
