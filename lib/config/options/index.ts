@@ -1635,16 +1635,16 @@ const options: RenovateOptions[] = [
   },
   {
     name: 'prettyVersion',
-    description: 'the new version value with v prepended to it.',
+    description: 'The new version value with v prepended to it.',
     type: 'string',
-    default: '{{prettifyVersion newVersion}}',
+    default: `{{{replace '^v*' 'v' newVersion}}}`,
     cli: false,
   },
   {
     name: 'prettyNewMajor',
     description: 'The new major value with v prepended to it',
     type: 'string',
-    default: '{{prettifyVersion newMajor}}',
+    default: 'v{{newMajor}}',
     cli: false,
   },
   {

@@ -575,7 +575,7 @@ describe('workers/repository/updates/generate', () => {
           semanticCommits: 'enabled',
           semanticCommitType: 'chore',
           semanticCommitScope: '{{packageFileDir}}',
-          commitMessageExtra: '{{prettyVersion}}',
+          commitMessageExtra: '{{{prettyVersion}}}',
           newValue: '1.2.0',
           isSingleVersion: true,
           newVersion: 'v1.2.0',

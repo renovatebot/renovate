@@ -23,13 +23,6 @@ handlebars.registerHelper('containsString', (str, subStr) =>
   str?.includes(subStr)
 );
 
-handlebars.registerHelper('prettifyVersion', (version: string | number) => {
-  if (is.string(version) && version.charAt(0) === 'v') {
-    return version;
-  }
-  return `v${version}`;
-});
-
 handlebars.registerHelper({
   and(...args) {
     // Need to remove the 'options', as last parameter
