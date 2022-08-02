@@ -1,10 +1,7 @@
 import is from '@sindresorhus/is';
 import minimatch from 'minimatch';
-import type {
-  PackageRule,
-  PackageRuleInputConfig,
-} from '../../../config/types';
-import { Matcher } from '../base';
+import type { PackageRule, PackageRuleInputConfig } from '../../config/types';
+import { Matcher } from './base';
 
 export class PathsMatcher extends Matcher {
   static readonly id: string = 'paths';

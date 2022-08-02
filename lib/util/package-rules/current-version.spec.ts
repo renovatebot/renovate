@@ -1,7 +1,7 @@
-import pep440 from '../../../modules/versioning/pep440';
-import { CurrentVersionMatcher } from './index';
+import pep440 from '../../modules/versioning/pep440';
+import { CurrentVersionMatcher } from './current-version';
 
-describe('util/package-rules/current-version/index', () => {
+describe('util/package-rules/current-version', () => {
   const matcher = new CurrentVersionMatcher();
 
   afterEach(() => {

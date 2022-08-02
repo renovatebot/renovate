@@ -1,6 +1,6 @@
-import { PackagePrefixesMatcher } from './index';
+import { PackagePrefixesMatcher } from './package-prefixes';
 
-describe('util/package-rules/package-prefixes/index', () => {
+describe('util/package-rules/package-prefixes', () => {
   const packagePrefixesMatcher = new PackagePrefixesMatcher();
 
   describe('match', () => {

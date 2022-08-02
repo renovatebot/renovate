@@ -1,16 +1,16 @@
-import { PathsMatcher } from './index';
+import { FilesMatcher } from './files';
 
-describe('util/package-rules/paths/index', () => {
-  const pathsMatcher = new PathsMatcher();
+describe('util/package-rules/files', () => {
+  const fileMatcher = new FilesMatcher();
 
   describe('match', () => {
     it('should return false if packageFile is not defined', () => {
-      const result = pathsMatcher.matches(
+      const result = fileMatcher.matches(
         {
           packageFile: undefined,
         },
         {
-          matchPaths: ['opentelemetry/http'],
+          matchFiles: ['frontend/package.json'],
         }
       );
       expect(result).not.toBeNull();

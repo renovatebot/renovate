@@ -1,6 +1,6 @@
-import { PackagePatternsMatcher } from './index';
+import { PackagePatternsMatcher } from './package-patterns';
 
-describe('util/package-rules/package-patterns/index', () => {
+describe('util/package-rules/package-patterns', () => {
   const packageNameMatcher = new PackagePatternsMatcher();
 
   describe('match', () => {

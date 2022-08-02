@@ -1,10 +1,7 @@
 import is from '@sindresorhus/is';
-import type {
-  PackageRule,
-  PackageRuleInputConfig,
-} from '../../../config/types';
-import { configRegexPredicate } from '../../regex';
-import { Matcher } from '../base';
+import type { PackageRule, PackageRuleInputConfig } from '../../config/types';
+import { configRegexPredicate } from '../regex';
+import { Matcher } from './base';
 
 export class BaseBranchesMatcher extends Matcher {
   static readonly id: string = 'base-branches';

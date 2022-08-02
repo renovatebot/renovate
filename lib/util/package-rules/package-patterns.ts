@@ -1,12 +1,9 @@
 import is from '@sindresorhus/is';
-import type {
-  PackageRule,
-  PackageRuleInputConfig,
-} from '../../../config/types';
-import { logger } from '../../../logger';
-import { regEx } from '../../regex';
-import { Matcher } from '../base';
-import { massagePattern } from '../utils';
+import type { PackageRule, PackageRuleInputConfig } from '../../config/types';
+import { logger } from '../../logger';
+import { regEx } from '../regex';
+import { Matcher } from './base';
+import { massagePattern } from './utils';
 
 export class PackagePatternsMatcher extends Matcher {
   static readonly id: string = 'package-patterns';
