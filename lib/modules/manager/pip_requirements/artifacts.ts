@@ -27,7 +27,8 @@ export async function updateArtifacts({
     for (const dep of updatedDeps) {
       const hashLine = lines.find(
         (line) =>
-          line.startsWith(`${dep.depName}==`) && line.includes('--hash=')
+          // TODO: types (#7154)
+          line.startsWith(`${dep.depName!}==`) && line.includes('--hash=')
       );
       if (hashLine) {
         const depConstraint = hashLine.split(' ')[0];
@@ -42,7 +43,6 @@ export async function updateArtifacts({
       cwdFile: '.',
       docker: {
         image: 'python',
-        tagScheme: 'pip_requirements',
       },
       preCommands: ['pip install hashin'],
     };

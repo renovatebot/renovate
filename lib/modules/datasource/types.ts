@@ -72,6 +72,8 @@ export interface ReleaseResult {
   replacementVersion?: string;
 }
 
+export type RegistryStrategy = 'first' | 'hunt' | 'merge';
+
 export interface DatasourceApi extends ModuleApi {
   id: string;
   getDigest?(config: DigestConfig, newValue?: string): Promise<string | null>;
@@ -86,7 +88,7 @@ export interface DatasourceApi extends ModuleApi {
    * hunt: registryUrls will be tried in order until one returns a result
    * merge: all registryUrls will be tried and the results merged if more than one returns a result
    */
-  registryStrategy?: 'first' | 'hunt' | 'merge';
+  registryStrategy?: RegistryStrategy;
 
   /**
    * Whether custom registryUrls are allowed.
