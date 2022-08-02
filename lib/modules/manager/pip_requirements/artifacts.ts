@@ -43,7 +43,6 @@ export async function updateArtifacts({
       cwdFile: '.',
       docker: {
         image: 'python',
-        tagScheme: 'pip_requirements',
       },
       preCommands: ['pip install hashin'],
     };

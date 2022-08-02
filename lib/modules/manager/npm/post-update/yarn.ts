@@ -195,6 +195,8 @@ export async function generateLockFile(
 
     if (yarnUpdate && !isYarn1) {
       logger.debug('Updating Yarn binary');
+      // TODO: types (#7154)
+      // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
       commands.push(`yarn set version ${yarnUpdate.newValue}`);
     }
 
@@ -219,6 +221,8 @@ export async function generateLockFile(
         // `yarn up` updates to the latest release, so the range should be specified
         commands.push(
           `yarn up ${lockUpdates
+            // TODO: types (#7154)
+            // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
             .map((update) => `${update.depName}@${update.newValue}`)
             .filter(uniqueStrings)
             .join(' ')}${cmdOptions}`
