@@ -118,7 +118,7 @@ export async function processBranch(
       ) {
         logger.debug(
           { prTitle: config.prTitle },
-          'Merged PR already exists. Creating new PR with automerge disbaled.'
+          'Merged PR already exists. Creating new PR with automerge disabled.'
         );
         config.automerge = false;
       } else {
