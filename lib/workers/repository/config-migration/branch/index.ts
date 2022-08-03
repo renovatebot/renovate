@@ -26,7 +26,7 @@ export async function checkConfigMigrationBranch(
     config,
     migratedConfigData.filename
   );
-  const prTitle = commitMessageFactory.create().toString();
+  const prTitle = commitMessageFactory.getPrTitle();
   const closedPrConfig: FindPRConfig = {
     branchName: configMigrationBranch,
     prTitle,
