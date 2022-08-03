@@ -8,9 +8,6 @@ import { ConanDatasource } from '.';
 
 const pocoJson = Fixtures.get('poco.json');
 const pocoRevisions = Fixtures.getJson('poco_revisions.json');
-const malformedPocoRevisions = Fixtures.getJson(
-  'poco_revisions_malformed.json'
-);
 const pocoYamlGitHubContent = Fixtures.get('poco.yaml');
 const malformedJson = Fixtures.get('malformed.json');
 const fakeJson = Fixtures.get('fake.json');
@@ -48,7 +45,8 @@ describe('modules/datasource/conan/index', () => {
         .scope(nonDefaultRegistryUrl)
         .get(`/v2/conans/poco/${version}/_/_/revisions`)
         .reply(200, pocoRevisions['1.8.1']);
-      digestConfig.packageName = `poco/${version}@_/_#4fc13d60fd91ba44fefe808ad719a5af`;
+      digestConfig.packageName = `poco/${version}@_/_`;
+      digestConfig.currentDigest = '4fc13d60fd91ba44fefe808ad719a5af';
       expect(await getDigest(digestConfig)).toBe(
         '3a9b47caee2e2c1d3fb7d97788339aa8'
       );
@@ -138,93 +136,6 @@ describe('modules/datasource/conan/index', () => {
           },
           {
             version: '1.10.0',
-          },
-          {
-            version: '1.10.1',
-          },
-        ],
-      });
-    });
-
-    it('processes real versioned data real data with revisions', async () => {
-      httpMock
-        .scope(nonDefaultRegistryUrl)
-        .get('/v2/conans/search?q=poco')
-        .reply(200, pocoJson);
-      for (const version of ['1.8.1', '1.9.3', '1.9.4', '1.10.0', '1.10.1']) {
-        httpMock
-          .scope(nonDefaultRegistryUrl)
-          .get(`/v2/conans/poco/${version}/_/_/revisions`)
-          .reply(200, pocoRevisions[version]);
-      }
-      config.depName = 'poco';
-      expect(
-        await getPkgReleases({
-          ...config,
-          packageName: 'poco/1.2@_/_#4fc13d60fd91ba44fefe808ad719a5af',
-        })
-      ).toEqual({
-        registryUrl: 'https://not.conan.io',
-        releases: [
-          {
-            version: '1.8.1',
-            newDigest: '3a9b47caee2e2c1d3fb7d97788339aa8',
-          },
-          {
-            version: '1.9.3',
-            newDigest: 'dc80dcf02da270cc5f629c00df151a56',
-          },
-          {
-            version: '1.9.4',
-            newDigest: '736fdb96cd0add0cf85ca420e0bac453',
-          },
-          {
-            version: '1.10.0',
-            newDigest: '7c3fbb12b69d7e7fd7134ba1efb04d5e',
-          },
-          {
-            version: '1.10.1',
-            newDigest: '32815db5b18046e4f8879af7bb743422',
-          },
-        ],
-      });
-    });
-
-    it('processes maformed revisions', async () => {
-      httpMock
-        .scope(nonDefaultRegistryUrl)
-        .get('/v2/conans/search?q=poco')
-        .reply(200, pocoJson);
-      for (const version of ['1.8.1', '1.9.3', '1.9.4', '1.10.0', '1.10.1']) {
-        httpMock
-          .scope(nonDefaultRegistryUrl)
-          .get(`/v2/conans/poco/${version}/_/_/revisions`)
-          .reply(200, malformedPocoRevisions[version]);
-      }
-      config.depName = 'poco';
-      expect(
-        await getPkgReleases({
-          ...config,
-          packageName: 'poco/1.2@_/_#4fc13d60fd91ba44fefe808ad719a5af',
-        })
-      ).toEqual({
-        registryUrl: 'https://not.conan.io',
-        releases: [
-          {
-            version: '1.8.1',
-            newDigest: '3a9b47caee2e2c1d3fb7d97788339aa8',
-          },
-          {
-            version: '1.9.3',
-            newDigest: 'dc80dcf02da270cc5f629c00df151a56',
-          },
-          {
-            version: '1.9.4',
-            newDigest: '736fdb96cd0add0cf85ca420e0bac453',
-          },
-          {
-            version: '1.10.0',
-            newDigest: '7c3fbb12b69d7e7fd7134ba1efb04d5e',
           },
           {
             version: '1.10.1',

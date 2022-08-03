@@ -42,7 +42,7 @@ describe('modules/manager/conan/extract', () => {
           currentValue: '1.17.2',
           depName: 'cairo',
           depType: 'requires',
-          packageName: 'cairo/1.17.2@_/_#aff2d03608351db075ec1348a3afc9ff',
+          packageName: 'cairo/1.17.2@_/_',
           replaceString: 'cairo/1.17.2@_/_#aff2d03608351db075ec1348a3afc9ff',
         },
         {
@@ -103,7 +103,7 @@ describe('modules/manager/conan/extract', () => {
           currentValue: '0.63.0',
           depName: 'meson',
           depType: 'build_requires',
-          packageName: 'meson/0.63.0@_/_#bc592346b33fd19c1fbffce25d1e4236',
+          packageName: 'meson/0.63.0@_/_',
           replaceString: 'meson/0.63.0@_/_#bc592346b33fd19c1fbffce25d1e4236',
         },
       ]);
@@ -208,7 +208,7 @@ describe('modules/manager/conan/extract', () => {
           currentValue: '1.0',
           depName: 'req_l',
           depType: 'requires',
-          packageName: 'req_l/1.0@user/stable#bc592346b33fd19c1fbffce25d1e4236',
+          packageName: 'req_l/1.0@user/stable',
           replaceString:
             'req_l/1.0@user/stable#bc592346b33fd19c1fbffce25d1e4236',
         },

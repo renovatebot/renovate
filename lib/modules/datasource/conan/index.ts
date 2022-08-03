@@ -5,13 +5,13 @@ import { cache } from '../../../util/cache/package/decorator';
 import { GithubHttp } from '../../../util/http/github';
 import { ensureTrailingSlash, joinUrlParts } from '../../../util/url';
 import { Datasource } from '../datasource';
-import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
-import {
-  conanDatasourceRegex,
-  datasource,
-  defaultRegistryUrl,
-  getRevision,
-} from './common';
+import type {
+  DigestConfig,
+  GetReleasesConfig,
+  Release,
+  ReleaseResult,
+} from '../types';
+import { conanDatasourceRegex, datasource, defaultRegistryUrl } from './common';
 import type { ConanJSON, ConanRevisionsJSON, ConanYAML } from './types';
 
 export class ConanDatasource extends Datasource {
@@ -55,18 +55,6 @@ export class ConanDatasource extends Datasource {
     };
   }
 
-  async getNewDigest(url: string, packageName: string): Promise<string | null> {
-    const revisionLookUp = joinUrlParts(
-      url,
-      `v2/conans/${packageName}/revisions`
-    );
-    const revisionRep = await this.http.getJson<ConanRevisionsJSON>(
-      revisionLookUp
-    );
-    const revisions = revisionRep?.body.revisions;
-    return revisions ? revisions[0].revision : null;
-  }
-
   @cache({
     namespace: `datasource-${datasource}-revisions`,
     key: ({ registryUrl, packageName }: GetReleasesConfig) =>
@@ -75,21 +63,27 @@ export class ConanDatasource extends Datasource {
       `${registryUrl}:${packageName}`,
   })
   override async getDigest(
-    { registryUrl, packageName }: GetReleasesConfig,
+    { registryUrl, packageName, currentDigest }: DigestConfig,
     newValue?: string
   ): Promise<string | null> {
-    const revision = getRevision(packageName);
-    if (!revision || is.undefined(registryUrl)) {
+    if (is.undefined(currentDigest) || is.undefined(registryUrl)) {
       return null;
     } else {
       const url = ensureTrailingSlash(registryUrl);
       const depName = packageName.split('/')[0];
-      const userAndChannel = '/' + packageName.split('@')[1].split('#')[0];
-      const packageNameWithoutRevision = newValue
+      const userAndChannel = '/' + packageName.split('@')[1];
+      const packageRoute = newValue
         ? `${depName}/${newValue}${userAndChannel}`
-        : packageName.split('#')[0].replace('@', '/');
-      const digest = await this.getNewDigest(url, packageNameWithoutRevision);
-      return digest ? digest : null;
+        : packageName.replace('@', '/');
+      const revisionLookUp = joinUrlParts(
+        url,
+        `v2/conans/${packageRoute}/revisions`
+      );
+      const revisionRep = await this.http.getJson<ConanRevisionsJSON>(
+        revisionLookUp
+      );
+      const revisions = revisionRep?.body.revisions;
+      return revisions ? revisions[0].revision : null;
     }
   }
 
@@ -105,7 +99,7 @@ export class ConanDatasource extends Datasource {
     packageName,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     const depName = packageName.split('/')[0];
-    const userAndChannel = '@' + packageName.split('@')[1].split('#')[0];
+    const userAndChannel = '@' + packageName.split('@')[1];
     if (
       is.string(registryUrl) &&
       ensureTrailingSlash(registryUrl) === defaultRegistryUrl

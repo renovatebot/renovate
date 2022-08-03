@@ -67,7 +67,6 @@ export function extractPackageFile(content: string): PackageFile | null {
               dep.currentDigest = matches.groups.revision;
               dep.autoReplaceStringTemplate = `{{depName}}/{{newValue}}${userAndChannel}{{#if newDigest}}#{{newDigest}}{{/if}}`;
               dep.replaceString = `${replaceString}#${dep.currentDigest}`;
-              dep.packageName = `${packageName}#${dep.currentDigest}`;
             }
 
             deps.push(dep);
