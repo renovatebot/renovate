@@ -1,7 +1,8 @@
 import { dequal } from 'dequal';
+import { logger } from '../../../logger';
 import type { PackageDependency, PackageFile } from '../types';
 import { parse } from './parser';
-import type { RuleMeta } from './types';
+import type { ParsedResult, RuleMeta } from './types';
 import { ruleMappers } from './util';
 
 // TODO: remove it (#9667)
@@ -26,28 +27,48 @@ function getRuleDefinition(
 
 export function extractPackageFile(
   content: string,
-  _fileName?: string
+  packageFile: string
 ): PackageFile | null {
   const deps: PackageDependency[] = [];
 
-  const parsed = parse(content);
-  if (parsed) {
-    const { targets, meta: meta } = parsed;
-    for (let i = 0; i < targets.length; i += 1) {
-      const target = targets[i];
-      const { rule } = target;
-      const mapperFn = ruleMappers[rule];
-      if (mapperFn) {
-        const dep = mapperFn(target);
-        if (dep) {
-          const def = getRuleDefinition(content, meta, i);
-          if (def) {
-            dep.managerData = { def };
-            deps.push(dep);
-          }
-        }
-      }
+  let parsed: ParsedResult | null = null;
+  try {
+    parsed = parse(content);
+  } catch (err) /* istanbul ignore next */ {
+    logger.debug({ err, packageFile }, 'Bazel parsing error');
+  }
+
+  if (!parsed) {
+    return null;
+  }
+
+  const { targets, meta: meta } = parsed;
+  for (let i = 0; i < targets.length; i += 1) {
+    const target = targets[i];
+    const { rule } = target;
+    const mapperFn = ruleMappers[rule];
+
+    // istanbul ignore if
+    if (!mapperFn) {
+      continue;
     }
+
+    const dep = mapperFn(target);
+
+    // istanbul ignore if
+    if (!dep) {
+      continue;
+    }
+
+    const def = getRuleDefinition(content, meta, i);
+
+    // istanbul ignore if
+    if (!def) {
+      continue;
+    }
+
+    dep.managerData = { def };
+    deps.push(dep);
   }
 
   return deps.length ? { deps } : null;

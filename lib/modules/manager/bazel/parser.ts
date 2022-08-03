@@ -5,6 +5,7 @@ import * as memCache from '../../../util/cache/memory';
 import { regEx } from '../../../util/regex';
 import type { MetaPath, ParsedResult, Target, TargetAttribute } from './types';
 import { ruleMappers } from './util';
+import { logger } from 'handlebars';
 
 function isTarget(target: Partial<Target>): target is Target {
   return !!target.rule && !!target.name;
@@ -32,6 +33,11 @@ const starlark = lang.createLang('starlark');
 
 const ruleRegex = regEx(`^${Object.keys(ruleMappers).join('|')}$`);
 
+/**
+ * Matches rule type:
+ * - `git_repository`
+ * - `go_repository`
+ **/
 const ruleSym = q.sym<Ctx>(ruleRegex, (ctx, { value, offset }) => {
   ctx.currentTarget.rule = value;
 
@@ -43,6 +49,12 @@ const ruleSym = q.sym<Ctx>(ruleRegex, (ctx, { value, offset }) => {
   return ctx;
 });
 
+/**
+ * Matches key-value pairs:
+ * - `tag = "1.2.3"`
+ * - `name = "foobar"`
+ * - `deps = ["foo", "bar"]`
+ **/
 const kwParams = q
   .sym<Ctx>((ctx, { value }) => {
     ctx.currentAttrKey = value;
@@ -55,6 +67,7 @@ const kwParams = q
   })
   .op('=')
   .alt(
+    // string case
     q.str((ctx, { offset, value }) => {
       ctx.currentTarget[ctx.currentAttrKey!] = value;
       ctx.meta.push({
@@ -63,6 +76,7 @@ const kwParams = q
       });
       return ctx;
     }),
+    // array of strings case
     q.tree({
       type: 'wrapped-tree',
       maxDepth: 1,
@@ -86,6 +100,11 @@ const kwParams = q
     })
   );
 
+/**
+ * Matches rule signature, i.e. content of `git_repository(...)`
+ *
+ * @param search something to match inside parens
+ */
 function ruleCall(search: q.QueryBuilder<Ctx>): q.QueryBuilder<Ctx> {
   return q.tree({
     type: 'wrapped-tree',
@@ -124,9 +143,20 @@ function ruleCall(search: q.QueryBuilder<Ctx>): q.QueryBuilder<Ctx> {
   });
 }
 
+/**
+ * Matches regular rules:
+ * - `git_repository(...)`
+ * - `go_repository(...)`
+ */
 const regularRule = ruleSym.join(ruleCall(kwParams));
 
 const maybeFirstArg = q.begin<Ctx>().join(ruleSym).op(',');
+
+/**
+ * Matches "maybe"-form rules:
+ * - `maybe(git_repository, ...)`
+ * - `maybe(go_repository, ...)`
+ */
 const maybeRule = q
   .sym<Ctx>(
     'maybe',
