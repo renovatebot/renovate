@@ -688,6 +688,7 @@ export async function mergePr({
     `Updating PR ${pullRequestId} to status ${PullRequestStatus.Completed} (${
       PullRequestStatus[PullRequestStatus.Completed]
     }) with lastMergeSourceCommit ${
+      // TODO: types (#7154)
       // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
       pr.lastMergeSourceCommit?.commitId
     } using mergeStrategy ${mergeMethod} (${
