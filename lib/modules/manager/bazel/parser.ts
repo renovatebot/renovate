@@ -10,7 +10,8 @@ function isTarget(target: Partial<Target>): target is Target {
   return !!target.rule && !!target.name;
 }
 
-interface Ctx extends ParsedResult {
+interface Ctx {
+  result: ParsedResult;
   currentTarget: Partial<Target>;
   currentAttrKey?: string;
   currentAttrVal?: TargetAttribute;
@@ -21,8 +22,7 @@ interface Ctx extends ParsedResult {
 }
 
 const emptyCtx: Ctx = {
-  targets: [],
-  meta: [],
+  result: { targets: [], meta: [] },
   currentTarget: {},
   currentMetaPath: [],
   ruleIndex: 0,
@@ -69,7 +69,7 @@ const kwParams = q
     // string case
     q.str((ctx, { offset, value }) => {
       ctx.currentTarget[ctx.currentAttrKey!] = value;
-      ctx.meta.push({
+      ctx.result.meta.push({
         path: [...ctx.currentMetaPath],
         data: { offset: offset, length: value.length },
       });
@@ -84,7 +84,7 @@ const kwParams = q
         return ctx;
       },
       search: q.str<Ctx>((ctx, { value, offset }) => {
-        ctx.meta.push({
+        ctx.result.meta.push({
           path: [...ctx.currentMetaPath, ctx.currentArray!.length],
           data: { offset: offset, length: value.length },
         });
@@ -122,7 +122,7 @@ function ruleCall(search: q.QueryBuilder<Ctx>): q.QueryBuilder<Ctx> {
           const ruleEndOffset = lastElem.offset + endsWith.value.length;
           const offset = ctx.ruleStartOffset;
           const length = ruleEndOffset - ctx.ruleStartOffset;
-          ctx.meta.push({
+          ctx.result.meta.push({
             path: [ctx.ruleIndex],
             data: { offset, length },
           });
@@ -131,7 +131,7 @@ function ruleCall(search: q.QueryBuilder<Ctx>): q.QueryBuilder<Ctx> {
       }
 
       if (isTarget(ctx.currentTarget)) {
-        ctx.targets.push(ctx.currentTarget);
+        ctx.result.targets.push(ctx.currentTarget);
       }
       ctx.currentTarget = {};
       ctx.ruleIndex += 1;
@@ -196,8 +196,7 @@ export function parse(input: string, ctx = emptyCtx): ParsedResult | null {
   let result: ParsedResult | null = null;
 
   if (parsedResult) {
-    const { targets, meta } = parsedResult;
-    result = { targets, meta };
+    result = parsedResult.result;
   }
 
   memCache.set(cacheKey, result);
