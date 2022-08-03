@@ -74,7 +74,6 @@ export async function initPlatform({
     useCache: false,
   };
   if (token) {
-    options.token = token;
     options.headers = { Authorization: `Bearer ${token}` };
   } else {
     options.username = username;
