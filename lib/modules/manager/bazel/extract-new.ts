@@ -46,21 +46,19 @@ export function extractPackageFile(
   for (let i = 0; i < targets.length; i += 1) {
     const target = targets[i];
     const { rule } = target;
-    const mapperFn = ruleMappers[rule];
 
+    const mapperFn = ruleMappers[rule];
     // istanbul ignore if: not easily testable
     if (!mapperFn) {
       continue;
     }
 
     const dep = mapperFn(target);
-
     if (!dep) {
       continue;
     }
 
     const def = getRuleDefinition(content, meta, i);
-
     // istanbul ignore if: not easily testable
     if (!def) {
       continue;

@@ -5,7 +5,6 @@ import * as memCache from '../../../util/cache/memory';
 import { regEx } from '../../../util/regex';
 import type { MetaPath, ParsedResult, Target, TargetAttribute } from './types';
 import { ruleMappers } from './util';
-import { logger } from 'handlebars';
 
 function isTarget(target: Partial<Target>): target is Target {
   return !!target.rule && !!target.name;
