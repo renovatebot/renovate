@@ -16,7 +16,8 @@ export function getGitAuthenticatedEnvironmentVariables(
 ): NodeJS.ProcessEnv {
   if (!token) {
     logger.warn(
-      `Could not create environment variable for ${matchHost} as token was empty`
+      // TODO: types (#7154)
+      `Could not create environment variable for ${matchHost!} as token was empty`
     );
     return { ...environmentVariables };
   }
