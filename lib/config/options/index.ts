@@ -1634,26 +1634,12 @@ const options: RenovateOptions[] = [
     cli: false,
   },
   {
-    name: 'prettyVersion',
-    description: 'The new version value with v prepended to it.',
-    type: 'string',
-    default: `{{{replace '^v*' 'v' newVersion}}}`,
-    cli: false,
-  },
-  {
-    name: 'prettyNewMajor',
-    description: 'The new major value with v prepended to it',
-    type: 'string',
-    default: 'v{{newMajor}}',
-    cli: false,
-  },
-  {
     name: 'commitMessageExtra',
     description:
       'Extra description used after the commit message topic - typically the version.',
     type: 'string',
     default:
-      'to {{#if isPinDigest}}{{{newDigestShort}}}{{else}}{{#if isMajor}}v{{{newMajor}}}{{else}}{{#if isSingleVersion}}v{{{newVersion}}}{{else}}{{#if newValue}}{{{newValue}}}{{else}}{{{newDigestShort}}}{{/if}}{{/if}}{{/if}}{{/if}}',
+      'to {{#if isPinDigest}}{{{newDigestShort}}}{{else}}{{#if isMajor}}v{{{newMajor}}}{{else}}{{#if isSingleVersion}}{{prettyVersion}}{{else}}{{#if newValue}}{{{newValue}}}{{else}}{{{newDigestShort}}}{{/if}}{{/if}}{{/if}}{{/if}}',
     cli: false,
   },
   {

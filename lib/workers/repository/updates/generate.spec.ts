@@ -564,7 +564,7 @@ describe('workers/repository/updates/generate', () => {
       );
     });
 
-    it('use pretty new version in pr title', () => {
+    it('use prettyVersion in pr title when there is a v', () => {
       const branch: BranchUpgradeConfig[] = [
         {
           ...defaultConfig,
@@ -575,8 +575,8 @@ describe('workers/repository/updates/generate', () => {
           semanticCommits: 'enabled',
           semanticCommitType: 'chore',
           semanticCommitScope: '{{packageFileDir}}',
-          commitMessageExtra: '{{{prettyVersion}}}',
-          newValue: '1.2.0',
+          commitMessageExtra: '{{prettyVersion}}',
+          newValue: 'v1.2.0',
           isSingleVersion: true,
           newVersion: 'v1.2.0',
         } as BranchUpgradeConfig,
@@ -587,7 +587,7 @@ describe('workers/repository/updates/generate', () => {
       );
     });
 
-    it('use pretty new major in pr title', () => {
+    it('use prettyVersion in pr title there is no v', () => {
       const branch: BranchUpgradeConfig[] = [
         {
           ...defaultConfig,
@@ -598,14 +598,38 @@ describe('workers/repository/updates/generate', () => {
           semanticCommits: 'enabled',
           semanticCommitType: 'chore',
           semanticCommitScope: '{{packageFileDir}}',
-          commitMessageExtra: '{{prettyNewMajor}}',
+          commitMessageExtra: '{{prettyVersion}}',
           newValue: '3.2.0',
-          newVersion: 'v3.2.0',
+          newVersion: '3.2.0',
           newMajor: 3,
         } as BranchUpgradeConfig,
       ];
       const res = generateBranchConfig(branch);
-      expect(res.prTitle).toBe('chore(foo/bar): update dependency some-dep v3');
+      expect(res.prTitle).toBe(
+        'chore(foo/bar): update dependency some-dep v3.2.0'
+      );
+    });
+
+    it('Default commitMessageExtra pr title', () => {
+      const branch: BranchUpgradeConfig[] = [
+        {
+          ...defaultConfig,
+          manager: 'some-manager',
+          depName: 'some-dep',
+          packageFile: 'foo/bar/package.json',
+          packageFileDir: 'foo/bar',
+          semanticCommits: 'enabled',
+          semanticCommitType: 'chore',
+          semanticCommitScope: '{{packageFileDir}}',
+          newValue: 'v1.2.0',
+          isSingleVersion: true,
+          newVersion: 'v1.2.0',
+        } as BranchUpgradeConfig,
+      ];
+      const res = generateBranchConfig(branch);
+      expect(res.prTitle).toBe(
+        'chore(foo/bar): update dependency some-dep to v1.2.0'
+      );
     });
 
     it('adds commit message body', () => {

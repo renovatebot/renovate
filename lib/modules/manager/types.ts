@@ -112,6 +112,8 @@ export interface Package<T> extends ManagerData<T> {
   currentRawValue?: string;
   major?: { enabled?: boolean };
   prettyDepType?: string;
+
+  prettyVersion?: string;
 }
 
 export interface LookupUpdate {

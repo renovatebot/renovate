@@ -2136,22 +2136,6 @@ Here's an example of how you would define PR priority so that devDependencies ar
 
 The PR title is important for some of Renovate's matching algorithms (e.g. determining whether to recreate a PR or not) so ideally don't modify it much.
 
-## prettyNewMajor
-
-This option allows editing `newMajor` value by templating, it is defaulted to prepend `v` to the `newMajor` value.
-
-For example, to create a PR title with the changed version:
-
-`{ "commitMessageExtra": "{{prettyNewMajor}}" }`
-
-## prettyVersion
-
-This option allows editing `newVersion` value by templating, it is defaulted to prepend `v` to the `newVersion` value.
-
-For example, to create a PR title with the changed version:
-
-`{ "commitMessageExtra": "{{prettyNewVersion}}" }`
-
 ## printConfig
 
 This option is useful for troubleshooting, particularly if using presets.
