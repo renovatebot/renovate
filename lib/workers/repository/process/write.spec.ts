@@ -1,9 +1,15 @@
-import { RenovateConfig, getConfig, git, mocked } from '../../../../test/util';
+import {
+  RenovateConfig,
+  getConfig,
+  git,
+  mocked,
+  partial,
+} from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import * as _repoCache from '../../../util/cache/repository';
 import type { BranchCache } from '../../../util/cache/repository/types';
 import { Limit, isLimitReached } from '../../global/limits';
-import { BranchConfig, BranchResult } from '../../types';
+import { BranchConfig, BranchResult, BranchUpgradeConfig } from '../../types';
 import * as _branchWorker from '../update/branch';
 import * as _limits from './limits';
 import { writeUpdates } from './write';
@@ -30,13 +36,19 @@ beforeEach(() => {
 describe('workers/repository/process/write', () => {
   describe('writeUpdates()', () => {
     it('stops after automerge', async () => {
-      const branches: BranchConfig[] = [
-        { upgrades: [] },
-        { upgrades: [] },
-        { automergeType: 'pr-comment', ignoreTests: true, upgrades: [] },
-        { upgrades: [] },
-        { upgrades: [] },
-      ] as never;
+      const branches = partial<BranchConfig[]>([
+        { branchName: 'test_branch', manager: 'npm', upgrades: [] },
+        { branchName: 'test_branch', manager: 'npm', upgrades: [] },
+        {
+          branchName: 'test_branch',
+          manager: 'npm',
+          automergeType: 'pr-comment',
+          ignoreTests: true,
+          upgrades: [],
+        },
+        { branchName: 'test_branch', manager: 'npm', upgrades: [] },
+        { branchName: 'test_branch', manager: 'npm', upgrades: [] },
+      ]);
       repoCache.getCache.mockReturnValue({});
       git.branchExists.mockReturnValue(true);
       branchWorker.processBranch.mockResolvedValueOnce({
@@ -62,7 +74,9 @@ describe('workers/repository/process/write', () => {
     });
 
     it('increments branch counter', async () => {
-      const branches: BranchConfig[] = [{ upgrades: [] }] as never;
+      const branches = partial<BranchConfig[]>([
+        { branchName: 'test_branch', manager: 'npm', upgrades: [] },
+      ]);
       repoCache.getCache.mockReturnValueOnce({});
       branchWorker.processBranch.mockResolvedValueOnce({
         branchExists: true,
@@ -78,16 +92,17 @@ describe('workers/repository/process/write', () => {
     });
 
     it('return nowork if same updates', async () => {
-      const branches: BranchConfig[] = [
+      const branches = partial<BranchConfig[]>([
         {
           branchName: 'new/some-branch',
+          manager: 'npm',
           upgrades: [
             {
               manager: 'npm',
-            },
+            } as BranchUpgradeConfig,
           ],
-        } as never,
-      ];
+        },
+      ]);
       repoCache.getCache.mockReturnValueOnce({
         branches: [{ branchName: 'new/some-branch' } as BranchCache],
       });
