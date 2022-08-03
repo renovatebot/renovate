@@ -42,7 +42,7 @@ export async function rebaseMigrationBranch(
     config,
     configFileName
   );
-  const commitMessage = commitMessageFactory.create();
+  const commitMessage = commitMessageFactory.getCommitMessage();
 
   return commitAndPush({
     branchName,
