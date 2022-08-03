@@ -196,8 +196,8 @@ export function parse(input: string, ctx = emptyCtx): ParsedResult | null {
   let result: ParsedResult | null = null;
 
   if (parsedResult) {
-    const { targets, meta: meta } = parsedResult;
-    result = { targets, meta: meta };
+    const { targets, meta } = parsedResult;
+    result = { targets, meta };
   }
 
   memCache.set(cacheKey, result);
