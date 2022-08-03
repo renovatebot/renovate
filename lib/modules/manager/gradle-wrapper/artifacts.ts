@@ -12,7 +12,7 @@ import { newlineRegex } from '../../../util/regex';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
 import {
   extraEnv,
-  getJavaContraint,
+  getJavaConstraint,
   gradleWrapperFileName,
   prepareGradleCommand,
 } from './utils';
@@ -94,7 +94,7 @@ export async function updateArtifacts({
         {
           toolName: 'java',
           constraint:
-            config.constraints?.java ?? getJavaContraint(config.currentValue),
+            config.constraints?.java ?? getJavaConstraint(config.currentValue),
         },
       ],
     };

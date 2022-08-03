@@ -55,7 +55,7 @@ export function getBundlerConstraint(
   const { bundler } = constraints;
 
   if (bundler) {
-    logger.debug('Using bundler contraint from config');
+    logger.debug('Using bundler constraint from config');
     return bundler;
   } else {
     const bundledWith = regEx(/\nBUNDLED WITH\n\s+(.*?)(\n|$)/).exec(

@@ -1,27 +1,30 @@
 import { Fixtures } from '../../../../test/fixtures';
 import {
+  extractAzurePipelinesTasks,
   extractContainer,
   extractRepository,
   parseAzurePipelines,
 } from './extract';
 import { extractPackageFile } from '.';
 
+const azurePipelinesFilename = 'azure-pipelines.yaml';
+
 const azurePipelines = Fixtures.get('azure-pipelines.yaml');
-
-const azurePipelinesInvalid = Fixtures.get('azure-pipelines-invalid.yaml');
-
 const azurePipelinesNoDependency = Fixtures.get(
   'azure-pipelines-no-dependency.yaml'
 );
+const azurePipelinesStages = Fixtures.get('azure-pipelines-stages.yaml');
+const azurePipelinesJobs = Fixtures.get('azure-pipelines-jobs.yaml');
+const azurePipelinesSteps = Fixtures.get('azure-pipelines-steps.yaml');
 
 describe('modules/manager/azure-pipelines/extract', () => {
   it('should parse a valid azure-pipelines file', () => {
-    const file = parseAzurePipelines(azurePipelines, 'some-file');
+    const file = parseAzurePipelines(azurePipelines, azurePipelinesFilename);
     expect(file).not.toBeNull();
   });
 
   it('return null on an invalid file', () => {
-    const file = parseAzurePipelines(azurePipelinesInvalid, 'some-file');
+    const file = parseAzurePipelines('}', azurePipelinesFilename);
     expect(file).toBeNull();
   });
 
@@ -33,7 +36,7 @@ describe('modules/manager/azure-pipelines/extract', () => {
           name: 'user/repo',
           ref: 'refs/tags/v1.0.0',
         })
-      ).toMatchSnapshot({
+      ).toMatchObject({
         depName: 'user/repo',
         packageName: 'https://github.com/user/repo.git',
       });
@@ -76,7 +79,7 @@ describe('modules/manager/azure-pipelines/extract', () => {
         extractContainer({
           image: 'ubuntu:16.04',
         })
-      ).toMatchSnapshot({
+      ).toMatchObject({
         depName: 'ubuntu',
         currentValue: '16.04',
         datasource: 'docker',
@@ -88,21 +91,82 @@ describe('modules/manager/azure-pipelines/extract', () => {
     });
   });
 
+  describe('extractAzurePipelinesTasks()', () => {
+    it('should extract azure-pipelines task information', () => {
+      expect(extractAzurePipelinesTasks('Bash@3')).toEqual({
+        depName: 'Bash',
+        currentValue: '3',
+      });
+    });
+
+    it('should return null for invalid task format', () => {
+      expect(extractAzurePipelinesTasks('Bash_3')).toBeNull();
+    });
+  });
+
   describe('extractPackageFile()', () => {
     it('returns null for invalid azure pipelines files', () => {
-      expect(extractPackageFile('', 'some-file')).toBeNull();
+      expect(extractPackageFile('}', azurePipelinesFilename)).toBeNull();
     });
 
     it('extracts dependencies', () => {
-      const res = extractPackageFile(azurePipelines, 'some-file');
-      expect(res?.deps).toMatchSnapshot();
+      const res = extractPackageFile(azurePipelines, azurePipelinesFilename);
+      expect(res?.deps).toMatchObject([
+        {
+          depName: 'user/repo',
+          currentValue: 'v0.5.1',
+          datasource: 'git-tags',
+        },
+        {
+          depName: 'ubuntu',
+          currentValue: '16.04',
+          datasource: 'docker',
+        },
+        {
+          depName: 'python',
+          currentValue: '3.7',
+          datasource: 'docker',
+        },
+      ]);
       expect(res?.deps).toHaveLength(3);
     });
 
     it('should return null when there is no dependency found', () => {
       expect(
-        extractPackageFile(azurePipelinesNoDependency, 'some-file')
+        extractPackageFile(azurePipelinesNoDependency, azurePipelinesFilename)
       ).toBeNull();
+    });
+
+    it('should extract stages', () => {
+      const res = extractPackageFile(
+        azurePipelinesStages,
+        azurePipelinesFilename
+      );
+      expect(res?.deps).toEqual([{ depName: 'Bash', currentValue: '3' }]);
+    });
+
+    it('should extract jobs', () => {
+      const res = extractPackageFile(
+        azurePipelinesJobs,
+        azurePipelinesFilename
+      );
+      expect(res?.deps).toEqual([{ depName: 'Bash', currentValue: '3' }]);
+    });
+
+    it('should extract steps', () => {
+      const res = extractPackageFile(
+        azurePipelinesSteps,
+        azurePipelinesFilename
+      );
+      expect(res?.deps).toEqual([{ depName: 'Bash', currentValue: '3' }]);
+    });
+
+    it('should return null when task alias used', () => {
+      const content = `
+      steps:
+      - bash: 'echo Hello World'`;
+      const res = extractPackageFile(content, azurePipelinesFilename);
+      expect(res).toBeNull();
     });
   });
 });

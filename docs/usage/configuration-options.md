@@ -636,12 +636,12 @@ If you want the PRs created by Renovate to be considered as drafts rather than n
 }
 ```
 
-This option is evaluated at PR/MR creation time and is only supported on the following platforms: GitHub, GitLab, Azure.
+This option is evaluated at PR/MR creation time.
 
 <!-- prettier-ignore -->
 !!! note
-    GitLab implements draft status by checking whether the PR's title starts with certain strings.
-    This means that `draftPR` on GitLab is incompatible with the legacy method of triggering Renovate to rebase a PR by renaming the PR to start with `rebase!`.
+    GitLab and Gitea implement draft status by checking if the PR's title starts with certain strings.
+    This means that `draftPR` on GitLab and Gitea are incompatible with the legacy method of triggering Renovate to rebase a PR by renaming the PR to start with `rebase!`.
 
 ## enabled
 
@@ -1915,6 +1915,8 @@ Note that the outcome of `rebaseWhen=auto` can differ when `platformAutomerge=tr
 Normally when you set `rebaseWhen=auto` Renovate rebases any branch that's behind the base branch automatically, and some people rely on that.
 This behavior is no longer guaranteed when you enable `platformAutomerge` because the platform might automerge a branch which is not up-to-date.
 For example, GitHub might automerge a Renovate branch even if it's behind the base branch at the time.
+
+Please check platform specific docs for version requirements.
 
 ## platformCommit
 
