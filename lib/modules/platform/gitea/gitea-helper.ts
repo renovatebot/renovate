@@ -175,9 +175,10 @@ export type PRSearchParams = {
   labels?: number[];
 };
 
-export type PRMergeParams = {
+export interface PRMergeParams {
   Do: PRMergeMethod;
-};
+  merge_when_checks_succeed?: boolean;
+}
 
 export type CommentCreateParams = CommentUpdateParams;
 
@@ -307,10 +308,9 @@ export async function closePR(
 export async function mergePR(
   repoPath: string,
   idx: number,
-  method: PRMergeMethod,
+  params: PRMergeParams,
   options?: GiteaHttpOptions
 ): Promise<void> {
-  const params: PRMergeParams = { Do: method };
   const url = `${API_PATH}/repos/${repoPath}/pulls/${idx}/merge`;
   await giteaHttp.postJson(url, {
     ...options,
