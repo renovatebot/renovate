@@ -1166,6 +1166,19 @@ If the value starts with `http(s)` then it will only match against URLs which st
 Otherwise, it will be matched by checking if the URL's hostname matches the `matchHost` directly or ends with it.
 When checking the end of the hostname, a single dot is prefixed to the value of `matchHost`, if one is not already present, to ensure it can only match against whole domain segments.
 
+Short hostnames like `domain.com` only work for registries without paths.
+If your registry uses paths then you must set the full path, like this:
+
+```json
+{
+  "hostRules": [
+    {
+      "matchHost": "https://gitlab.myorg.com/api/v4/packages/npm/"
+    }
+  ]
+}
+```
+
 ### timeout
 
 Use this figure to adjust the timeout for queries.
