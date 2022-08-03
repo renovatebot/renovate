@@ -1074,7 +1074,11 @@ When this field is enabled, Renovate will abort its run if it encounters either 
 
 ### authType
 
-This can be used with `token` to create a custom http `authorization` header.
+You may use the `authType` option to create a custom HTTP `authorization` header.
+For `authType` to work, you must also set your own `token`.
+
+Do not set `authType=Bearer`: it's the default setting for Renovate anyway.
+Do not set a username or password when you're using `authType`, as `authType` doesn't use usernames or passwords.
 
 An example for npm basic auth with token:
 
