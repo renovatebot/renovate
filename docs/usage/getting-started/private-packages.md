@@ -324,6 +324,18 @@ npmRegistries:
 For each known NuGet registry, Renovate searches for `hostRules` with `hostType=nuget` and matching host.
 For those found, a command similar to the following is run: `dotnet nuget add source ${registryInfo.feedUrl} --configfile ${nugetConfigFile} --username ${username} --password ${password} --store-password-in-clear-text`
 
+password should be encoded to base64
+```js
+hostRules: [
+    {
+      matchHost: "https://pkgs.dev.azure.com/<org>/",
+      hostType: "nuget",
+      username: "user",
+      password: "<Encrypted PAT Token>"
+    }
+  ]
+```
+
 ### poetry
 
 For every Poetry source, a `hostRules` search is done and then any found credentials are added to env like `POETRY_HTTP_BASIC_X_USERNAME` and `POETRY_HTTP_BASIC_X_PASSWORD`, where `X` represents the normalized name of the source in `pyproject.toml`.
