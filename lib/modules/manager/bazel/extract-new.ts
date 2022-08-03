@@ -27,7 +27,7 @@ function getRuleDefinition(
 
 export function extractPackageFile(
   content: string,
-  packageFile: string
+  packageFile?: string
 ): PackageFile | null {
   const deps: PackageDependency[] = [];
 
