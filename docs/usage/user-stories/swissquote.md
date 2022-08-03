@@ -222,7 +222,6 @@ We knew we would be ready when an unplanned change arrives.
 When that day came, in December 2021 with Log4Shell, it was a matter of hours to release the freshly merged Pull Requests, deploy the few applications we had, and notify the teams depending on our libraries.
 We were so quick to do it, in fact, that we had to do that three times with the chain of vulnerabilities that was found in Log4j that week.
 
-
 Keep in mind that keeping your dependencies up-to-date is not just about the tooling, it’s also about having a process:
 
 - When will you merge this PR?
