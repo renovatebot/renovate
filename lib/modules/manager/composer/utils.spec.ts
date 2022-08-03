@@ -1,13 +1,21 @@
 import { GlobalConfig } from '../../../config/global';
 import {
   extractConstraints,
+  findGithubPersonnalAccessToken,
   getComposerArguments,
+  isPersonnalAccessToken,
   requireComposerDependencyInstallation,
 } from './utils';
+import * as hostRules from '../../../util/host-rules';
+import { GitTagsDatasource } from '../../datasource/git-tags';
 
 jest.mock('../../datasource');
 
 describe('modules/manager/composer/utils', () => {
+  beforeEach(() => {
+    hostRules.clear();
+  });
+
   describe('extractConstraints', () => {
     it('returns from require', () => {
       expect(
@@ -238,6 +246,59 @@ describe('modules/manager/composer/utils', () => {
           packages: [{ name: 'symfony/console', version: '5.4.0' }],
         })
       ).toBeFalse();
+    });
+  });
+
+  describe('findGithubPersonnalAccessToken', () => {
+    it('returns the token string when hostRule match search with a valid personal access token', () => {
+      const TOKEN_STRING = 'ghp_TOKEN';
+      hostRules.add({
+        hostType: GitTagsDatasource.id,
+        matchHost: 'github.com',
+        token: TOKEN_STRING,
+      });
+      expect(
+        findGithubPersonnalAccessToken({
+          hostType: GitTagsDatasource.id,
+          url: 'https://github.com',
+        })
+      ).toEqual(TOKEN_STRING);
+    });
+
+    it('returns undefined when hostRule match search with a invalid personal access token', () => {
+      const TOKEN_STRING = 'NOT_A_PERSONAL_ACCESS_TOKEN';
+      hostRules.add({
+        hostType: GitTagsDatasource.id,
+        matchHost: 'github.com',
+        token: TOKEN_STRING,
+      });
+      expect(
+        findGithubPersonnalAccessToken({
+          hostType: GitTagsDatasource.id,
+          url: 'https://github.com',
+        })
+      ).toBeUndefined();
+    });
+
+    it('returns undefined when no hostRule match search', () => {
+      expect(
+        findGithubPersonnalAccessToken({
+          hostType: GitTagsDatasource.id,
+          url: 'https://github.com',
+        })
+      ).toBeUndefined();
+    });
+  });
+
+  describe('isPersonnalAccessToken', () => {
+    it('returns true when string is a github personnal access token', () => {
+      expect(isPersonnalAccessToken('ghp_XXXXXX')).toBeTrue();
+    });
+    it('returns false when string is a github application token', () => {
+      expect(isPersonnalAccessToken('ghs_XXXXXX')).toBeFalse();
+    });
+    it('returns false when string is not a token at all', () => {
+      expect(isPersonnalAccessToken('XXXXXX')).toBeFalse();
     });
   });
 });

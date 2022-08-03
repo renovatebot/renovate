@@ -25,26 +25,12 @@ import type { AuthJson, ComposerLock } from './types';
 import {
   composerVersioningId,
   extractConstraints,
+  findGithubPersonnalAccessToken,
   getComposerArguments,
   getPhpConstraint,
   requireComposerDependencyInstallation,
 } from './utils';
 import { GitTagsDatasource } from '../../datasource/git-tags';
-import type { HostRuleSearch } from '../../../util/host-rules';
-
-function findGithubPersonnalAccessToken(
-  search: HostRuleSearch
-): string | undefined {
-  const token = hostRules.find(search)?.token;
-  if (isPersonnalAccessToken(token)) {
-    return token;
-  }
-  return undefined;
-}
-
-function isPersonnalAccessToken(token: string): boolean {
-  return regEx(/^ghp_/).test(token);
-}
 
 function getAuthJson(): string | null {
   const authJson: AuthJson = {};

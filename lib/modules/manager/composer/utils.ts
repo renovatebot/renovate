@@ -7,6 +7,8 @@ import type { ToolConstraint } from '../../../util/exec/types';
 import { api, id as composerVersioningId } from '../../versioning/composer';
 import type { UpdateArtifactsConfig } from '../types';
 import type { ComposerConfig, ComposerLock } from './types';
+import { HostRuleSearch, find as findHostRule } from '../../../util/host-rules';
+import { regEx } from '../../../util/regex';
 
 export { composerVersioningId };
 
@@ -105,4 +107,18 @@ export function extractConstraints(
     res.composer = `^${major}.${minor}`;
   }
   return res;
+}
+
+export function findGithubPersonnalAccessToken(
+  search: HostRuleSearch
+): string | undefined {
+  const token = findHostRule(search)?.token;
+  if (token && isPersonnalAccessToken(token)) {
+    return token;
+  }
+  return undefined;
+}
+
+export function isPersonnalAccessToken(token: string): boolean {
+  return regEx(/^ghp_/).test(token);
 }
