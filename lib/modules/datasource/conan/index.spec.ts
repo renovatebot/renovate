@@ -44,10 +44,10 @@ describe('modules/datasource/conan/index', () => {
       httpMock
         .scope(nonDefaultRegistryUrl)
         .get(`/v2/conans/poco/${version}/_/_/revisions`)
-        .reply(200, pocoRevisions['1.8.1']);
+        .reply(200, pocoRevisions[version]);
       digestConfig.packageName = `poco/${version}@_/_`;
       digestConfig.currentDigest = '4fc13d60fd91ba44fefe808ad719a5af';
-      expect(await getDigest(digestConfig)).toBe(
+      expect(await getDigest(digestConfig, version)).toBe(
         '3a9b47caee2e2c1d3fb7d97788339aa8'
       );
     });

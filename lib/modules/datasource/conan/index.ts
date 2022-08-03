@@ -57,34 +57,31 @@ export class ConanDatasource extends Datasource {
 
   @cache({
     namespace: `datasource-${datasource}-revisions`,
-    key: ({ registryUrl, packageName }: GetReleasesConfig) =>
+    key: ({ registryUrl, packageName }: DigestConfig, newValue?: string) =>
       // TODO: types (#7154)
       // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-      `${registryUrl}:${packageName}`,
+      `${registryUrl}:${packageName}:${newValue}`,
   })
   override async getDigest(
-    { registryUrl, packageName, currentDigest }: DigestConfig,
+    { registryUrl, packageName }: DigestConfig,
     newValue?: string
   ): Promise<string | null> {
-    if (is.undefined(currentDigest) || is.undefined(registryUrl)) {
+    if (is.undefined(newValue) || is.undefined(registryUrl)) {
       return null;
-    } else {
-      const url = ensureTrailingSlash(registryUrl);
-      const depName = packageName.split('/')[0];
-      const userAndChannel = '/' + packageName.split('@')[1];
-      const packageRoute = newValue
-        ? `${depName}/${newValue}${userAndChannel}`
-        : packageName.replace('@', '/');
-      const revisionLookUp = joinUrlParts(
-        url,
-        `v2/conans/${packageRoute}/revisions`
-      );
-      const revisionRep = await this.http.getJson<ConanRevisionsJSON>(
-        revisionLookUp
-      );
-      const revisions = revisionRep?.body.revisions;
-      return revisions ? revisions[0].revision : null;
     }
+    const url = ensureTrailingSlash(registryUrl);
+    const depName = packageName.split('/')[0];
+    const userAndChannel = '/' + packageName.split('@')[1];
+    const packageRoute = `${depName}/${newValue}${userAndChannel}`;
+    const revisionLookUp = joinUrlParts(
+      url,
+      `v2/conans/${packageRoute}/revisions`
+    );
+    const revisionRep = await this.http.getJson<ConanRevisionsJSON>(
+      revisionLookUp
+    );
+    const revisions = revisionRep?.body.revisions;
+    return revisions ? revisions[0].revision : null;
   }
 
   @cache({
