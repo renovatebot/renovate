@@ -192,8 +192,6 @@ Acceptable values are:
 Not all platforms support all pull request merge strategies.
 In cases where a merge strategy is not supported by the platform, Renovate will hold off on merging instead of silently merging in a way you didn't wish for.
 
-The only platform that supports `automergeStrategy` is Bitbucket Cloud.
-
 ## automergeType
 
 This setting is only applicable if you opt in to configure `automerge` to `true` for any of your dependencies.
@@ -634,12 +632,12 @@ If you want the PRs created by Renovate to be considered as drafts rather than n
 }
 ```
 
-This option is evaluated at PR/MR creation time and is only supported on the following platforms: GitHub, GitLab, Azure.
+This option is evaluated at PR/MR creation time.
 
 <!-- prettier-ignore -->
 !!! note
-    GitLab implements draft status by checking whether the PR's title starts with certain strings.
-    This means that `draftPR` on GitLab is incompatible with the legacy method of triggering Renovate to rebase a PR by renaming the PR to start with `rebase!`.
+    GitLab and Gitea implement draft status by checking if the PR's title starts with certain strings.
+    This means that `draftPR` on GitLab and Gitea are incompatible with the legacy method of triggering Renovate to rebase a PR by renaming the PR to start with `rebase!`.
 
 ## enabled
 
@@ -1914,6 +1912,8 @@ Normally when you set `rebaseWhen=auto` Renovate rebases any branch that's behin
 This behavior is no longer guaranteed when you enable `platformAutomerge` because the platform might automerge a branch which is not up-to-date.
 For example, GitHub might automerge a Renovate branch even if it's behind the base branch at the time.
 
+Please check platform specific docs for version requirements.
+
 ## platformCommit
 
 Only use this option if you run Renovate as a [GitHub App](https://docs.github.com/en/developers/apps/getting-started-with-apps/about-apps).
@@ -2314,7 +2314,7 @@ This can be used to narrow down the search area to prevent multiple matches.
 But the `recursive` strategy still allows the matching of multiple dependencies as described below.
 All matches of the first `matchStrings` pattern are detected, then each of these matches will used as basis be used as the input for the next `matchStrings` pattern, and so on.
 If the next `matchStrings` pattern has multiple matches then it will split again.
-This process will be followed as long there is a match plus a next `matchingStrings` pattern is available or a dependency is detected.
+This process will be followed as long there is a match plus a next `matchingStrings` pattern is available.
 
 Matched groups will be available in subsequent matching layers.
 
@@ -2744,8 +2744,18 @@ This works because Renovate will add a "renovate/stability-days" pending status 
 
 ## stopUpdatingLabel
 
-On supported platforms it is possible to add a label to a PR to request Renovate stop updating the PR.
-By default this label is `"stop-updating"` but you can configure it to anything you want by changing this `stopUpdatingLabel` field.
+This feature only works on supported platforms, check the table above.
+
+If you want Renovate to stop updating a PR, you can apply a label to the PR.
+By default, Renovate listens to the label: `"stop-updating"`.
+
+You can set your own label name with the `"stopUpdatingLabel"` field:
+
+```json
+{
+  "stopUpdatingLabel": "take-a-break-renovate"
+}
+```
 
 ## suppressNotifications
 

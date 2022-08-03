@@ -4,10 +4,10 @@ import * as cargoVersioning from '../../versioning/cargo';
 import { updateArtifacts } from './artifacts';
 import { extractPackageFile } from './extract';
 
-const language = ProgrammingLanguage.Rust;
+export const language = ProgrammingLanguage.Rust;
 export const supportsLockFileMaintenance = true;
 
-export { extractPackageFile, updateArtifacts, language };
+export { extractPackageFile, updateArtifacts };
 
 export const defaultConfig = {
   commitMessageTopic: 'Rust crate {{depName}}',

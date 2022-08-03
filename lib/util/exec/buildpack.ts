@@ -9,6 +9,7 @@ import { id as npmVersioningId } from '../../modules/versioning/npm';
 import { id as pep440VersioningId } from '../../modules/versioning/pep440';
 import { id as rubyVersioningId } from '../../modules/versioning/ruby';
 import { id as semverVersioningId } from '../../modules/versioning/semver';
+import { id as semverCoercedVersioningId } from '../../modules/versioning/semver-coerced';
 import type { Opt, ToolConfig, ToolConstraint } from './types';
 
 const allToolConfig: Record<string, ToolConfig> = {
@@ -32,6 +33,16 @@ const allToolConfig: Record<string, ToolConfig> = {
     depName: 'corepack',
     versioning: npmVersioningId,
   },
+  erlang: {
+    datasource: 'github-releases',
+    depName: 'containerbase/erlang-prebuild',
+    versioning: semverCoercedVersioningId,
+  },
+  elixir: {
+    datasource: 'github-releases',
+    depName: 'elixir-lang/elixir',
+    versioning: semverVersioningId,
+  },
   flux: {
     datasource: 'github-releases',
     depName: 'fluxcd/flux2',
@@ -41,6 +52,11 @@ const allToolConfig: Record<string, ToolConfig> = {
     datasource: 'github-releases',
     depName: 'helm/helm',
     versioning: semverVersioningId,
+  },
+  java: {
+    datasource: 'adoptium-java',
+    depName: 'java',
+    versioning: npmVersioningId,
   },
   jb: {
     datasource: 'github-releases',
@@ -61,6 +77,11 @@ const allToolConfig: Record<string, ToolConfig> = {
   poetry: {
     datasource: 'pypi',
     depName: 'poetry',
+    versioning: pep440VersioningId,
+  },
+  python: {
+    datasource: 'github-releases',
+    depName: 'containerbase/python-prebuild',
     versioning: pep440VersioningId,
   },
   yarn: {

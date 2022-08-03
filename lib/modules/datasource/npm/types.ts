@@ -7,7 +7,7 @@ export interface NpmrcRules {
   packageRules: PackageRule[];
 }
 
-export type NpmResponseVersion = {
+export interface NpmResponseVersion {
   repository?: {
     url: string;
     directory: string;
@@ -17,7 +17,7 @@ export type NpmResponseVersion = {
   gitHead?: string;
   dependencies?: Record<string, string>;
   devDependencies?: Record<string, string>;
-};
+}
 
 export interface NpmResponse {
   _id: string;

@@ -184,5 +184,3 @@ Object {
   "sourceUrl": "http://example.com",
 }
 `;
-
-exports[`modules/datasource/dart/index getReleases throws for 5xx 1`] = `[Error: external-host-error]`;
