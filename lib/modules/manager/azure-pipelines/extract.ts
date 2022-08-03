@@ -1,4 +1,3 @@
-import is from '@sindresorhus/is';
 import { load } from 'js-yaml';
 import { logger } from '../../../logger';
 import { regEx } from '../../../util/regex';
@@ -92,68 +91,44 @@ export function extractPackageFile(
     return null;
   }
 
-  // grab the repositories tags
-  if (
-    !is.nullOrUndefined(pkg.resources) &&
-    is.nonEmptyArray(pkg.resources.repositories)
-  ) {
-    for (const repository of pkg.resources.repositories) {
-      const dep = extractRepository(repository);
-      if (dep) {
-        deps.push(dep);
-      }
+  for (const repository of pkg.resources?.repositories ?? []) {
+    const dep = extractRepository(repository);
+    if (dep) {
+      deps.push(dep);
     }
   }
 
-  // grab the containers tags
-  if (
-    !is.nullOrUndefined(pkg.resources) &&
-    is.nonEmptyArray(pkg.resources.containers)
-  ) {
-    for (const container of pkg.resources.containers) {
-      const dep = extractContainer(container);
-      if (dep) {
-        deps.push(dep);
-      }
+  for (const container of pkg.resources?.containers ?? []) {
+    const dep = extractContainer(container);
+    if (dep) {
+      deps.push(dep);
     }
   }
 
-  if (is.nonEmptyArray(pkg.stages)) {
-    for (const { jobs } of pkg.stages) {
-      if (is.nonEmptyArray(jobs)) {
-        for (const { steps } of jobs) {
-          if (is.nonEmptyArray(steps)) {
-            for (const step of steps) {
-              const task = extractAzurePipelinesTasks(step.task);
-              if (task) {
-                deps.push(task);
-              }
-            }
-          }
+  for (const { jobs } of pkg.stages ?? []) {
+    for (const { steps } of jobs ?? []) {
+      for (const step of steps ?? []) {
+        const task = extractAzurePipelinesTasks(step.task);
+        if (task) {
+          deps.push(task);
         }
       }
     }
   }
 
-  if (is.nonEmptyArray(pkg.jobs)) {
-    for (const { steps } of pkg.jobs) {
-      if (is.nonEmptyArray(steps)) {
-        for (const step of steps) {
-          const task = extractAzurePipelinesTasks(step.task);
-          if (task) {
-            deps.push(task);
-          }
-        }
-      }
-    }
-  }
-
-  if (is.nonEmptyArray(pkg.steps)) {
-    for (const step of pkg.steps) {
+  for (const { steps } of pkg.jobs ?? []) {
+    for (const step of steps ?? []) {
       const task = extractAzurePipelinesTasks(step.task);
       if (task) {
         deps.push(task);
       }
+    }
+  }
+
+  for (const step of pkg.steps ?? []) {
+    const task = extractAzurePipelinesTasks(step.task);
+    if (task) {
+      deps.push(task);
     }
   }
 
