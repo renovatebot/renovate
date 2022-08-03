@@ -390,6 +390,7 @@ export async function processBranch(
       canSkipBranchUpdateCheck(
         config.branchName,
         branchCache,
+        // TODO: types (#7154)
         config.configAndManagersHash!
       )
     ) {
