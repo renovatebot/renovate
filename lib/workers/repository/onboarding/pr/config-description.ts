@@ -33,9 +33,9 @@ export function getConfigDesc(
   config: RenovateConfig,
   packageFiles?: Record<string, PackageFile[]>
 ): string {
-  // TODO #7154
+  // TODO: type (#7154)
   const configFile = configFileNames.includes(config.onboardingConfigFileName!)
-    ? config.onboardingConfigFileName
+    ? config.onboardingConfigFileName!
     : defaultConfigFile;
   logger.debug('getConfigDesc()');
   logger.trace({ config });

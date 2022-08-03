@@ -2,7 +2,10 @@ import * as _AWS from '@aws-sdk/client-ecr';
 import { getDigest, getPkgReleases } from '..';
 import * as httpMock from '../../../../test/http-mock';
 import { mocked, partial } from '../../../../test/util';
-import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages';
+import {
+  EXTERNAL_HOST_ERROR,
+  PAGE_NOT_FOUND_ERROR,
+} from '../../../constants/error-messages';
 import * as _hostRules from '../../../util/host-rules';
 import { Http } from '../../../util/http';
 import { MediaType } from './types';
@@ -105,6 +108,22 @@ describe('modules/datasource/docker/index', () => {
   });
 
   describe('getAuthHeaders', () => {
+    it('throw page not found exception', async () => {
+      httpMock
+        .scope('https://my.local.registry')
+        .get('/v2/repo/tags/list?n=1000')
+        .reply(404, {});
+
+      await expect(
+        getAuthHeaders(
+          http,
+          'https://my.local.registry',
+          'repo',
+          'https://my.local.registry/v2/repo/tags/list?n=1000'
+        )
+      ).rejects.toThrow(PAGE_NOT_FOUND_ERROR);
+    });
+
     it('returns "authType token" if both provided', async () => {
       httpMock
         .scope('https://my.local.registry')
@@ -1132,6 +1151,8 @@ describe('modules/datasource/docker/index', () => {
             Labels: {
               'org.opencontainers.image.source':
                 'https://github.com/renovatebot/renovate',
+              'org.opencontainers.image.revision':
+                'ab7ddb5e3c5c3b402acd7c3679d4e415f8092dde',
             },
           },
         });
@@ -1162,6 +1183,7 @@ describe('modules/datasource/docker/index', () => {
           },
         ],
         sourceUrl: 'https://github.com/renovatebot/renovate',
+        gitRef: 'ab7ddb5e3c5c3b402acd7c3679d4e415f8092dde',
       });
     });
 

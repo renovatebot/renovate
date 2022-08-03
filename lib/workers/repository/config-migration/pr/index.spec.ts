@@ -12,6 +12,7 @@ import { GlobalConfig } from '../../../../config/global';
 import { logger } from '../../../../logger';
 import type { Pr } from '../../../../modules/platform';
 import { hashBody } from '../../../../modules/platform/pr-body';
+import { ConfigMigrationCommitMessageFactory } from '../branch/commit-message';
 import type { MigratedData } from '../branch/migrated-data';
 import { ensureConfigMigrationPr } from '.';
 
@@ -22,6 +23,10 @@ describe('workers/repository/config-migration/pr/index', () => {
   const { configFileName, migratedContent } = Fixtures.getJson(
     './migrated-data.json'
   );
+  const prTitle = new ConfigMigrationCommitMessageFactory(
+    {},
+    configFileName
+  ).getPrTitle();
   const migratedData: MigratedData = {
     content: migratedContent,
     filename: configFileName,
@@ -70,7 +75,7 @@ describe('workers/repository/config-migration/pr/index', () => {
     it('Founds an open PR and as it is up to date and returns', async () => {
       hash = hashBody(createPrBody);
       platform.getBranchPr.mockResolvedValueOnce(
-        mock<Pr>({ bodyStruct: { hash } })
+        mock<Pr>({ bodyStruct: { hash }, title: prTitle })
       );
       await ensureConfigMigrationPr(config, migratedData);
       expect(platform.updatePr).toHaveBeenCalledTimes(0);
@@ -83,6 +88,17 @@ describe('workers/repository/config-migration/pr/index', () => {
       );
       await ensureConfigMigrationPr(config, migratedData);
       expect(platform.updatePr).toHaveBeenCalledTimes(1);
+      expect(platform.createPr).toHaveBeenCalledTimes(0);
+    });
+
+    it('updates an open PR with unexpected PR title', async () => {
+      hash = hashBody(createPrBody);
+      platform.getBranchPr.mockResolvedValueOnce(
+        mock<Pr>({ bodyStruct: { hash }, title: 'unexpected PR title' })
+      );
+      await ensureConfigMigrationPr(config, migratedData);
+      expect(platform.updatePr).toHaveBeenCalledTimes(1);
+      expect(platform.updatePr.mock.calls[0][0]).toMatchObject({ prTitle });
       expect(platform.createPr).toHaveBeenCalledTimes(0);
     });
 
@@ -181,7 +197,7 @@ describe('workers/repository/config-migration/pr/index', () => {
       );
       expect(platform.createPr).toHaveBeenCalledTimes(1);
       expect(platform.createPr.mock.calls[0][0].prTitle).toBe(
-        'Migrate config renovate.json'
+        'Migrate renovate config'
       );
     });
 
@@ -199,7 +215,7 @@ describe('workers/repository/config-migration/pr/index', () => {
       );
       expect(platform.createPr).toHaveBeenCalledTimes(1);
       expect(platform.createPr.mock.calls[0][0].prTitle).toBe(
-        'chore(config): migrate config renovate.json'
+        'chore(config): migrate renovate config'
       );
     });
 

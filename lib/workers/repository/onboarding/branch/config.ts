@@ -40,7 +40,8 @@ async function getOnboardingConfig(
 
   if (!orgPreset) {
     // Check for org/.{{platform}}
-    const platform = GlobalConfig.get('platform');
+    // TODO: types (#7154)
+    const platform = GlobalConfig.get('platform')!;
     try {
       const repo = `${orgName}/.${platform}`;
       const presetName = 'renovate-config';
