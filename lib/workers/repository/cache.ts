@@ -71,7 +71,7 @@ async function generateBranchCache(
     const upgrades: BranchUpgradeCache[] = branch.upgrades
       ? branch.upgrades.map(generateBranchUpgradeCache)
       : [];
-    const configAndManagersHash = branch.configAndManagersHash;
+    const branchConfigHash = branch.branchConfigHash;
     return {
       branchName,
       sha,
@@ -80,7 +80,7 @@ async function generateBranchCache(
       automerge,
       isModified,
       upgrades,
-      configAndManagersHash,
+      branchConfigHash,
     };
   } catch (error) {
     const err = error.err || error; // external host error nests err

@@ -83,13 +83,13 @@ export interface ProcessBranchResult {
 function canSkipBranchUpdateCheck(
   branchName: string,
   branchCache: BranchCache,
-  configAndManagersHash: string
+  branchConfigHash: string
 ): boolean {
   const branchCommitSha = getBranchCommit(branchName);
 
   return (
     branchCommitSha === branchCache.sha &&
-    configAndManagersHash === branchCache.configAndManagersHash
+    branchConfigHash === branchCache.branchConfigHash
   );
 }
 
@@ -391,7 +391,7 @@ export async function processBranch(
         config.branchName,
         branchCache,
         // TODO: types (#7154)
-        config.configAndManagersHash!
+        config.branchConfigHash!
       )
     ) {
       logger.debug('According to branch cache, no updates are necessary');
