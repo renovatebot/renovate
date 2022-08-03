@@ -12,7 +12,6 @@ import { PackagistDatasource } from '../../datasource/packagist';
 import type { UpdateArtifactsConfig } from '../types';
 import * as composer from '.';
 import { GitTagsDatasource } from '../../datasource/git-tags';
-import { ensureCacheDir } from '../../../util/fs';
 
 jest.mock('../../../util/exec/env');
 jest.mock('../../datasource');
@@ -153,19 +152,23 @@ describe('modules/manager/composer/artifacts', () => {
         config: authConfig,
       })
     ).toBeNull();
-    expect(execSnapshots).toHaveLength(1);
-    const firstExecEnvironment = execSnapshots[0]?.options?.env;
-    expect(firstExecEnvironment).toContainKey('COMPOSER_AUTH');
-    expect(firstExecEnvironment?.COMPOSER_AUTH).toEqual(
-      '{"github-oauth":{"github.com":"ghp_git-tags-token"},' +
-        '"gitlab-token":{"gitlab.com":"gitlab-token"},' +
-        '"gitlab-domains":["gitlab.com"],' +
-        '"http-basic":{' +
-        '"packagist.renovatebot.com":{"username":"some-username","password":"some-password"},' +
-        '"artifactory.yyyyyyy.com":{"username":"some-other-username","password":"some-other-password"}' +
-        '},' +
-        '"bearer":{"packages-bearer.example.com":"abcdef0123456789"}}'
-    );
+    expect(execSnapshots).toMatchObject([
+      {
+        options: {
+          env: {
+            COMPOSER_AUTH:
+              '{"github-oauth":{"github.com":"ghp_git-tags-token"},' +
+              '"gitlab-token":{"gitlab.com":"gitlab-token"},' +
+              '"gitlab-domains":["gitlab.com"],' +
+              '"http-basic":{' +
+              '"packagist.renovatebot.com":{"username":"some-username","password":"some-password"},' +
+              '"artifactory.yyyyyyy.com":{"username":"some-other-username","password":"some-other-password"}' +
+              '},' +
+              '"bearer":{"packages-bearer.example.com":"abcdef0123456789"}}',
+          },
+        },
+      },
+    ]);
   });
 
   it('git-tags hostRule for github.com set github-token in COMPOSER_AUTH', async () => {
@@ -190,12 +193,16 @@ describe('modules/manager/composer/artifacts', () => {
         config: authConfig,
       })
     ).toBeNull();
-    expect(execSnapshots).toHaveLength(1);
-    const firstExecEnvironment = execSnapshots[0]?.options?.env;
-    expect(firstExecEnvironment).toContainKey('COMPOSER_AUTH');
-    expect(firstExecEnvironment?.COMPOSER_AUTH).toEqual(
-      '{"github-oauth":{"github.com":"ghp_token"}}'
-    );
+
+    expect(execSnapshots).toMatchObject([
+      {
+        options: {
+          env: {
+            COMPOSER_AUTH: '{"github-oauth":{"github.com":"ghp_token"}}',
+          },
+        },
+      },
+    ]);
   });
 
   it('Skip github application access token hostRules in COMPOSER_AUTH', async () => {
@@ -225,12 +232,15 @@ describe('modules/manager/composer/artifacts', () => {
         config: authConfig,
       })
     ).toBeNull();
-    expect(execSnapshots).toHaveLength(1);
-    const firstExecEnvironment = execSnapshots[0]?.options?.env;
-    expect(firstExecEnvironment).toContainKey('COMPOSER_AUTH');
-    expect(firstExecEnvironment?.COMPOSER_AUTH).toEqual(
-      '{"github-oauth":{"github.com":"ghp_token"}}'
-    );
+    expect(execSnapshots).toMatchObject([
+      {
+        options: {
+          env: {
+            COMPOSER_AUTH: '{"github-oauth":{"github.com":"ghp_token"}}',
+          },
+        },
+      },
+    ]);
   });
 
   it('returns updated composer.lock', async () => {
