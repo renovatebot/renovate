@@ -291,7 +291,7 @@ export async function resolveConfigPresets(
   // First, merge all the preset configs from left to right
   if (inputConfig.extends?.length) {
     for (const preset of inputConfig.extends) {
-      if (shallowResolve && !shouldShallowResolve(preset)) {
+      if (shallowResolve && skipDuringShallowResolve(preset)) {
         unresolvedPresets.push(preset);
         continue;
       }
@@ -318,7 +318,7 @@ export async function resolveConfigPresets(
         if (shallowResolve && presetConfig?.extends) {
           // save extends array to not lose values from it
           for (const extend of presetConfig.extends) {
-            if (!shouldShallowResolve(extend)) {
+            if (skipDuringShallowResolve(extend)) {
               unresolvedPresets.push(extend);
             }
           }
@@ -387,8 +387,8 @@ function handleExtendsArray(
   if (!config.extends?.length) {
     return;
   }
-  const filteredPresets = config.extends.filter(
-    (e) => !shouldShallowResolve(e)
+  const filteredPresets = config.extends.filter((e) =>
+    skipDuringShallowResolve(e)
   );
   const uniqueExtends = new Set([...filteredPresets, ...unresolvedPresets]);
   config.extends = Array.from(uniqueExtends);
@@ -398,11 +398,11 @@ function handleExtendsArray(
   }
 }
 
-export function shouldShallowResolve(presetSource: string): boolean {
+export function skipDuringShallowResolve(presetSource: string): boolean {
   if (whitesourcePresetRegex.test(presetSource)) {
-    return false;
+    return true;
   }
-  return (
+  return !(
     presetSource.startsWith('github>') ||
     presetSource.startsWith('gitlab>') ||
     presetSource.startsWith('gitea>') ||
