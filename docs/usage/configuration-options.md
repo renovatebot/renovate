@@ -192,8 +192,6 @@ Acceptable values are:
 Not all platforms support all pull request merge strategies.
 In cases where a merge strategy is not supported by the platform, Renovate will hold off on merging instead of silently merging in a way you didn't wish for.
 
-The only platform that supports `automergeStrategy` is Bitbucket Cloud.
-
 ## automergeType
 
 This setting is only applicable if you opt in to configure `automerge` to `true` for any of your dependencies.
@@ -634,12 +632,12 @@ If you want the PRs created by Renovate to be considered as drafts rather than n
 }
 ```
 
-This option is evaluated at PR/MR creation time and is only supported on the following platforms: GitHub, GitLab, Azure.
+This option is evaluated at PR/MR creation time.
 
 <!-- prettier-ignore -->
 !!! note
-    GitLab implements draft status by checking whether the PR's title starts with certain strings.
-    This means that `draftPR` on GitLab is incompatible with the legacy method of triggering Renovate to rebase a PR by renaming the PR to start with `rebase!`.
+    GitLab and Gitea implement draft status by checking if the PR's title starts with certain strings.
+    This means that `draftPR` on GitLab and Gitea are incompatible with the legacy method of triggering Renovate to rebase a PR by renaming the PR to start with `rebase!`.
 
 ## enabled
 
@@ -1076,7 +1074,11 @@ When this field is enabled, Renovate will abort its run if it encounters either 
 
 ### authType
 
-This can be used with `token` to create a custom http `authorization` header.
+You may use the `authType` option to create a custom HTTP `authorization` header.
+For `authType` to work, you must also set your own `token`.
+
+Do not set `authType=Bearer`: it's the default setting for Renovate anyway.
+Do not set a username or password when you're using `authType`, as `authType` doesn't use usernames or passwords.
 
 An example for npm basic auth with token:
 
@@ -1913,6 +1915,8 @@ Note that the outcome of `rebaseWhen=auto` can differ when `platformAutomerge=tr
 Normally when you set `rebaseWhen=auto` Renovate rebases any branch that's behind the base branch automatically, and some people rely on that.
 This behavior is no longer guaranteed when you enable `platformAutomerge` because the platform might automerge a branch which is not up-to-date.
 For example, GitHub might automerge a Renovate branch even if it's behind the base branch at the time.
+
+Please check platform specific docs for version requirements.
 
 ## platformCommit
 

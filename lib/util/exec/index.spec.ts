@@ -1,8 +1,4 @@
-import {
-  ExecOptions as ChildProcessExecOptions,
-  exec as _cpExec,
-} from 'child_process';
-import { envMock } from '../../../test/exec-util';
+import { exec as cpExec, envMock } from '../../../test/exec-util';
 import { GlobalConfig } from '../../config/global';
 import type { RepoGlobalConfig } from '../../config/types';
 import { TEMPORARY_ERROR } from '../../constants/error-messages';
@@ -10,9 +6,6 @@ import * as dockerModule from './docker';
 import type { ExecOptions, RawExecOptions, VolumeOption } from './types';
 import { exec } from '.';
 
-const cpExec: jest.Mock<typeof _cpExec> = _cpExec as any;
-
-jest.mock('child_process');
 jest.mock('../../modules/datasource');
 
 interface TestInput {
@@ -732,12 +725,12 @@ describe('util/exec/index', () => {
     process.env = procEnv;
 
     const actualCmd: string[] = [];
-    const actualOpts: ChildProcessExecOptions[] = [];
-    cpExec.mockImplementation((execCmd, execOpts, callback) => {
+    const actualOpts: RawExecOptions[] = [];
+    cpExec.mockImplementation((execCmd, execOpts) => {
       actualCmd.push(execCmd);
       actualOpts.push(execOpts);
-      callback(null, { stdout: '', stderr: '' });
-      return undefined as never;
+
+      return Promise.resolve({ stdout: '', stderr: '' });
     });
     GlobalConfig.set({ ...globalConfig, localDir: cwd, ...adminConfig });
     await exec(cmd as string, inOpts);
@@ -750,10 +743,9 @@ describe('util/exec/index', () => {
     process.env = processEnv;
 
     const actualCmd: string[] = [];
-    cpExec.mockImplementation((execCmd, execOpts, callback) => {
+    cpExec.mockImplementation((execCmd) => {
       actualCmd.push(execCmd);
-      callback(null, { stdout: '', stderr: '' });
-      return undefined as never;
+      return Promise.resolve({ stdout: '', stderr: '' });
     });
 
     GlobalConfig.set({ ...globalConfig, binarySource: 'global' });

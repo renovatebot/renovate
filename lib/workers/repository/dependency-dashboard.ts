@@ -4,10 +4,12 @@ import { nameFromLevel } from 'bunyan';
 import { GlobalConfig } from '../../config/global';
 import type { RenovateConfig } from '../../config/types';
 import { getProblems, logger } from '../../logger';
+import type { PackageFile } from '../../modules/manager/types';
 import { platform } from '../../modules/platform';
 import { regEx } from '../../util/regex';
 import * as template from '../../util/template';
 import { BranchConfig, BranchResult, SelectAllConfig } from '../types';
+import { getDepWarningsDashboard } from './errors-warnings';
 import { PackageFiles } from './package-files';
 
 interface DependencyDashboard {
@@ -76,38 +78,6 @@ function parseDashboardIssue(issueBody: string): DependencyDashboard {
   };
 }
 
-// function parseDashboardIssue(issueBody: string): DependencyDashboard {
-//   const checkMatch = ' - \\[x\\] <!-- ([a-zA-Z]+)-branch=([^\\s]+) -->';
-//   const generalCheckMatch = ' <!-- ([a-zA-Z]+)-branch=([^\\s]+) -->';
-//   const checked = issueBody.match(regEx(checkMatch, 'g')) ?? [];
-//   const allRelevantBranches = selectAllRelevantBranches(issueBody);
-//   checked.push(...allRelevantBranches);
-//   const dependencyDashboardChecks: Record<string, string> = {};
-//   if (checked?.length) {
-//     const re = regEx(generalCheckMatch);
-//     checked.forEach((check) => {
-//       const [, type, branchName] = re.exec(check)!;
-//       dependencyDashboardChecks[branchName] = type;
-//     });
-//   }
-//   const checkedRebaseAll = issueBody.includes(
-//     ' - [x] <!-- rebase-all-open-prs -->'
-//   );
-//   let dependencyDashboardRebaseAllOpen = false;
-//   if (checkedRebaseAll) {
-//     dependencyDashboardRebaseAllOpen = true;
-//   }
-//   const dependencyDashboardAllPending = checkApproveAllPendingPR(issueBody);
-//   const dependencyDashboardAllRateLimited =
-//     checkOpenAllRateLimitedPR(issueBody);
-//   return {
-//     dependencyDashboardChecks,
-//     dependencyDashboardRebaseAllOpen,
-//     dependencyDashboardAllPending,
-//     dependencyDashboardAllRateLimited,
-//   };
-// }
-
 export async function readDashboardBody(
   config: SelectAllConfig
 ): Promise<void> {
@@ -132,12 +102,14 @@ function getListItem(branch: BranchConfig, type: string): string {
   let item = ' - [ ] ';
   item += `<!-- ${type}-branch=${branch.branchName} -->`;
   if (branch.prNo) {
-    item += `[${branch.prTitle}](../pull/${branch.prNo})`;
+    // TODO: types (#7154)
+    item += `[${branch.prTitle!}](../pull/${branch.prNo})`;
   } else {
     item += branch.prTitle;
   }
   const uniquePackages = [
-    ...new Set(branch.upgrades.map((upgrade) => `\`${upgrade.depName}\``)),
+    // TODO: types (#7154)
+    ...new Set(branch.upgrades.map((upgrade) => `\`${upgrade.depName!}\``)),
   ];
   if (uniquePackages.length < 2) {
     return item + '\n';
@@ -172,7 +144,8 @@ function appendRepoProblems(config: RenovateConfig, issueBody: string): string {
 
 export async function ensureDependencyDashboard(
   config: SelectAllConfig,
-  allBranches: BranchConfig[]
+  allBranches: BranchConfig[],
+  packageFiles: Record<string, PackageFile[]> = {}
 ): Promise<void> {
   // legacy/migrated issue
   const reuseTitle = 'Update Dependencies (Renovate Bot)';
@@ -230,6 +203,7 @@ export async function ensureDependencyDashboard(
   }
 
   issueBody = appendRepoProblems(config, issueBody);
+
   const pendingApprovals = branches.filter(
     (branch) => branch.result === BranchResult.NeedsApproval
   );
@@ -335,6 +309,13 @@ export async function ensureDependencyDashboard(
     }
     issueBody += '\n';
   }
+
+  const warn = getDepWarningsDashboard(packageFiles);
+  if (warn) {
+    issueBody += warn;
+    issueBody += '\n';
+  }
+
   const otherRes = [
     BranchResult.Pending,
     BranchResult.NeedsApproval,

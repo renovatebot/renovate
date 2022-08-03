@@ -169,7 +169,11 @@ export async function getReleases(
     if (is.nonEmptyString(packageBaseAddress)) {
       const nuspecUrl = `${ensureTrailingSlash(
         packageBaseAddress
-      )}${pkgName.toLowerCase()}/${latestStable}/${pkgName.toLowerCase()}.nuspec`;
+      )}${pkgName.toLowerCase()}/${
+        // TODO: types (#7154)
+        // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+        latestStable
+      }/${pkgName.toLowerCase()}.nuspec`;
       const metaresult = await http.get(nuspecUrl);
       const nuspec = new XmlDocument(metaresult.body);
       const sourceUrl = nuspec.valueWithPath('metadata.repository@url');

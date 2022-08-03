@@ -1,6 +1,7 @@
 import { getPkgReleases } from '..';
 import { Fixtures } from '../../../../test/fixtures';
 import * as httpMock from '../../../../test/http-mock';
+import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages';
 import { GalaxyDatasource } from '.';
 
 const baseUrl = 'https://galaxy.ansible.com/';
@@ -103,17 +104,12 @@ describe('modules/datasource/galaxy/index', () => {
         .scope(baseUrl)
         .get('/api/v1/roles/?owner__username=some_crate&name=undefined')
         .reply(502);
-      let e;
-      try {
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource: GalaxyDatasource.id,
           depName: 'some_crate',
-        });
-      } catch (err) {
-        e = err;
-      }
-      expect(e).toBeDefined();
-      expect(e).toMatchSnapshot();
+        })
+      ).rejects.toThrow(EXTERNAL_HOST_ERROR);
     });
 
     it('throws for 404', async () => {
