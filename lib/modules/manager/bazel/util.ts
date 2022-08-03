@@ -8,8 +8,7 @@ import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { GoDatasource } from '../../datasource/go';
 import { id as dockerVersioning } from '../../versioning/docker';
 import type { PackageDependency } from '../types';
-import type { Target } from './parser';
-import type { UrlParsedResult } from './types';
+import type { Target, UrlParsedResult } from './types';
 
 export function parseUrl(
   urlString: string | undefined | null
