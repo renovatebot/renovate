@@ -701,16 +701,24 @@ export async function processBranch(
         content += '\n\nThe artifact failure details are included below:\n\n';
         // TODO: types (#7154)
 
-        const artifactErrorToString = (err: ArtifactError): string => {
-          return [err.message, err.stderr, err.stdout]
-            .filter((m) => !!m)
-            .join('\n')
-            .replace(regEx(/\r?\n$/), ''); //remove trailing newline
+        const stringifyArtifactError = (err: ArtifactError): string => {
+          const error = {
+            message: err.message,
+            stderr: err.stderr,
+            stdout: err.stdout,
+          };
+          const res: string[] = [];
+          for (const [k, v] of Object.entries(error)) {
+            if (v) {
+              res.push(`${k}: ${v}`);
+            }
+          }
+          return res.join('\n').replace(regEx(/\r?\n$/), ''); //remove trailing newline
         };
 
         config.artifactErrors.forEach((error) => {
           content += `##### File name: ${error.lockFile!}\n\n`;
-          content += `\`\`\`\n${artifactErrorToString(error)}\n\`\`\`\n\n`;
+          content += `\`\`\`\n${stringifyArtifactError(error)}\n\`\`\`\n\n`;
         });
         content = platform.massageMarkdown(content);
         if (
