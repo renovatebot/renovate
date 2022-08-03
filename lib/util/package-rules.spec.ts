@@ -167,9 +167,9 @@ describe('util/package-rules', () => {
       ],
     };
     const res = applyPackageRules(dep);
-    expect(res.automerge).toBeTrue();
-    const res2 = applyPackageRules({ ...dep, depName: 'anything' });
-    expect(res2.automerge).toBeFalse();
+    expect(res.automerge).toBeFalse();
+    const res2 = applyPackageRules({ ...dep, depName: 'foo' });
+    expect(res2.automerge).toBeTrue();
   });
 
   it('matches anything if missing inclusive rules', () => {
