@@ -66,6 +66,8 @@ function getGitEnvironmentVariables(): NodeJS.ProcessEnv {
       const httpUrl = createURLFromHostOrURL(hostRule.matchHost!)?.toString();
       if (validateUrl(httpUrl)) {
         logger.debug(
+          // TODO: types (#7154)
+          // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
           `Adding Git authentication for Go Module retrieval for ${httpUrl} using token auth.`
         );
         environmentVariables = getGitAuthenticatedEnvironmentVariables(
@@ -90,6 +92,8 @@ function getUpdateImportPathCmds(
   const updateImportCommands = updatedDeps
     .map((dep) => dep.depName!)
     .filter((x) => !x.startsWith('gopkg.in'))
+    // TODO: types (#7154)
+    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
     .map((depName) => `mod upgrade --mod-name=${depName} -t=${newMajor}`);
 
   if (updateImportCommands.length > 0) {

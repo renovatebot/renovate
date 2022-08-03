@@ -142,7 +142,7 @@ describe('workers/repository/onboarding/branch/index', () => {
       expect(res.repoIsOnboarded).toBeTrue();
     });
 
-    it('handles skipped onboarding, requireConfig=true, and no config file', async () => {
+    it('handles skipped onboarding, requireConfig=required, and no config file', async () => {
       config.requireConfig = 'required';
       config.onboarding = false;
       git.getFileList.mockResolvedValueOnce(['package.json']);

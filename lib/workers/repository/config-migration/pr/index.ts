@@ -11,6 +11,7 @@ import { joinUrlParts } from '../../../../util/url';
 import { getPlatformPrOptions } from '../../update/pr';
 import { prepareLabels } from '../../update/pr/labels';
 import { addParticipants } from '../../update/pr/participants';
+import { ConfigMigrationCommitMessageFactory } from '../branch/commit-message';
 import type { MigratedData } from '../branch/migrated-data';
 import { getMigrationBranchName } from '../common';
 
@@ -24,7 +25,12 @@ export async function ensureConfigMigrationPr(
     'configuration-options/#configmigration'
   );
   const branchName = getMigrationBranchName(config);
-  const prTitle = 'Migrate Renovate config';
+  const commitMessageFactory = new ConfigMigrationCommitMessageFactory(
+    config,
+    migratedConfigData.filename
+  );
+
+  const prTitle = commitMessageFactory.getPrTitle();
   const existingPr = await platform.getBranchPr(branchName);
   const filename = migratedConfigData.filename;
   logger.debug('Filling in config migration PR template');
@@ -42,6 +48,8 @@ ${
 }
 
 :question: Got questions? Does something look wrong to you? Please don't hesitate to [request help here](${
+      // TODO: types (#7154)
+      // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
       config.productLinks?.help
     }).\n\n`
   );
@@ -60,7 +68,10 @@ ${
     logger.debug('Found open migration PR');
     // Check if existing PR needs updating
     const prBodyHash = hashBody(prBody);
-    if (existingPr.bodyStruct?.hash === prBodyHash) {
+    if (
+      existingPr.bodyStruct?.hash === prBodyHash &&
+      existingPr.title === prTitle
+    ) {
       logger.debug({ pr: existingPr.number }, `Does not need updating`);
       return;
     }
@@ -70,7 +81,7 @@ ${
     } else {
       await platform.updatePr({
         number: existingPr.number,
-        prTitle: existingPr.title,
+        prTitle,
         prBody,
       });
       logger.info({ pr: existingPr.number }, 'Migration PR updated');

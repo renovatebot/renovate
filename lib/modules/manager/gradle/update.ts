@@ -24,6 +24,8 @@ export function updateDependency({
       return fileContent;
     }
     if (version === currentValue || upgrade.groupName) {
+      // TODO: types (#7154)
+      // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
       return `${leftPart}${newValue}${restPart}`;
     }
     logger.debug({ depName, version, currentValue, newValue }, 'Unknown value');

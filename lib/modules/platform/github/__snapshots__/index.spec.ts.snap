@@ -14,20 +14,6 @@ Object {
 }
 `;
 
-exports[`modules/platform/github/index getBranchPr(branchName) should cache and return the PR object in fork mode 1`] = `
-Object {
-  "bodyStruct": Object {
-    "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-  },
-  "displayNumber": "Pull Request #90",
-  "number": 90,
-  "sourceBranch": "somebranch",
-  "sourceRepo": "other/repo",
-  "state": "open",
-  "title": "Some title",
-}
-`;
-
 exports[`modules/platform/github/index getBranchPr(branchName) should reopen and cache autoclosed PR 1`] = `
 Object {
   "bodyStruct": Object {
@@ -118,6 +104,7 @@ Object {
   "endpoint": "https://ghe.renovatebot.com/",
   "gitAuthor": "undefined <user@domain.com>",
   "renovateUsername": "renovate-bot",
+  "token": "123test",
 }
 `;
 
@@ -126,6 +113,7 @@ Object {
   "endpoint": "https://ghe.renovatebot.com/",
   "gitAuthor": "undefined <user@domain.com>",
   "renovateUsername": "renovate-bot",
+  "token": "123test",
 }
 `;
 
@@ -134,6 +122,7 @@ Object {
   "endpoint": "https://api.github.com/",
   "gitAuthor": undefined,
   "renovateUsername": "renovate-bot",
+  "token": "123test",
 }
 `;
 
@@ -142,6 +131,7 @@ Object {
   "endpoint": "https://api.github.com/",
   "gitAuthor": undefined,
   "renovateUsername": "renovate-bot",
+  "token": "123test",
 }
 `;
 
@@ -150,6 +140,7 @@ Object {
   "endpoint": "https://api.github.com/",
   "gitAuthor": "undefined <user@domain.com>",
   "renovateUsername": "renovate-bot",
+  "token": "123test",
 }
 `;
 
@@ -158,6 +149,7 @@ Object {
   "endpoint": "https://api.github.com/",
   "gitAuthor": "renovate@whitesourcesoftware.com",
   "renovateUsername": "renovate-bot",
+  "token": "123test",
 }
 `;
 

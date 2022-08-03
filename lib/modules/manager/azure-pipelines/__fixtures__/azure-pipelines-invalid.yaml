@@ -1,3 +1,0 @@
-steps:
-- bash: echo "hello"
-  displayName: echo
