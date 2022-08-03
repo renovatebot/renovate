@@ -34,7 +34,7 @@ import {
 } from '../../versioning/docker';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
-import { sourceLabels } from './common';
+import { gitRefLabel, sourceLabels } from './common';
 import {
   Image,
   ImageList,
@@ -845,6 +845,8 @@ export class DockerDatasource extends Datasource {
       registryUrl!
     );
     logger.debug(
+      // TODO: types (#7154)
+      // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
       `getDigest(${registryHost}, ${dockerRepository}, ${newValue})`
     );
     const newTag = newValue ?? 'latest';
@@ -934,6 +936,9 @@ export class DockerDatasource extends Datasource {
       latestTag
     );
     if (labels) {
+      if (is.nonEmptyString(labels[gitRefLabel])) {
+        ret.gitRef = labels[gitRefLabel];
+      }
       for (const label of sourceLabels) {
         if (is.nonEmptyString(labels[label])) {
           ret.sourceUrl = labels[label];
