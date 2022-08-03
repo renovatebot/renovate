@@ -4,7 +4,7 @@ import { parse } from './parser';
 import type { RuleMeta } from './types';
 import { ruleMappers } from './util';
 
-// TODO: remove it
+// TODO: remove it (#9667)
 function getRuleDefinition(
   content: string,
   meta: RuleMeta[],

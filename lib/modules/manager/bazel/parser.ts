@@ -35,7 +35,7 @@ const ruleRegex = regEx(`^${Object.keys(ruleMappers).join('|')}$`);
 const ruleSym = q.sym<Ctx>(ruleRegex, (ctx, { value, offset }) => {
   ctx.currentTarget.rule = value;
 
-  // TODO: remove it
+  // TODO: remove it (#9667)
   if (!is.number(ctx.ruleStartOffset)) {
     ctx.ruleStartOffset = offset;
   }
@@ -96,7 +96,7 @@ function ruleCall(search: q.QueryBuilder<Ctx>): q.QueryBuilder<Ctx> {
     },
     search,
     postHandler: (ctx, tree) => {
-      // TODO: remove it
+      // TODO: remove it (#9667)
       if (is.number(ctx.ruleStartOffset) && tree.type === 'wrapped-tree') {
         const { children, endsWith } = tree;
         const lastElem = children[children.length - 1];
@@ -130,7 +130,7 @@ const maybeFirstArg = q.begin<Ctx>().join(ruleSym).op(',');
 const maybeRule = q
   .sym<Ctx>(
     'maybe',
-    // TODO: remove it
+    // TODO: remove it (#9667)
     (ctx, { offset }) => {
       if (!is.number(ctx.ruleStartOffset)) {
         ctx.ruleStartOffset = offset;
