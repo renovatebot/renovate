@@ -41,6 +41,7 @@ import {
   isActiveConfidenceLevel,
   satisfiesConfidenceLevel,
 } from '../../../../util/merge-confidence';
+import { regEx } from '../../../../util/regex';
 import { Limit, isLimitReached } from '../../../global/limits';
 import { BranchConfig, BranchResult, PrBlockedBy } from '../../../types';
 import { ensurePr, getPlatformPrOptions, updatePrDebugData } from '../pr';
@@ -700,15 +701,16 @@ export async function processBranch(
         content += '\n\nThe artifact failure details are included below:\n\n';
         // TODO: types (#7154)
 
-        const stringifyArtifactError = (err: ArtifactError): string => {
-          const msg: (string | undefined)[] = [];
-          msg.push(err.message, err.stderr, err.stdout);
-          return msg.filter((m) => !!m).join('\n');
+        const artifactErrorToString = (err: ArtifactError): string => {
+          return [err.message, err.stderr, err.stdout]
+            .filter((m) => !!m)
+            .join('\n')
+            .replace(regEx(/\r?\n$/), ''); //remove trailing newline
         };
 
         config.artifactErrors.forEach((error) => {
           content += `##### File name: ${error.lockFile!}\n\n`;
-          content += `\`\`\`\n${stringifyArtifactError(error)}\n\`\`\`\n\n`;
+          content += `\`\`\`\n${artifactErrorToString(error)}\n\`\`\`\n\n`;
         });
         content = platform.massageMarkdown(content);
         if (
