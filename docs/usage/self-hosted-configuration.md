@@ -107,7 +107,7 @@ All text inside the start and end `/` will be treated as a regular expression.
 }
 ```
 
-You can negate the regex by putting a `!` in front. If using negations all repositories, expect those who match the regex, are added to the result:
+You can negate the regex by putting a `!` in front. If using negations, all repositories expect those who match the regex are added to the result:
 
 ```json
 {
