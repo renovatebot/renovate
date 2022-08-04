@@ -2,7 +2,7 @@ import { PrDebugData, platform } from '../../../../../modules/platform';
 import { regEx } from '../../../../../util/regex';
 import { toBase64 } from '../../../../../util/string';
 import * as template from '../../../../../util/template';
-import { ensureTrailingSlash } from '../../../../../util/url';
+import { joinUrlParts } from '../../../../../util/url';
 import type { BranchConfig } from '../../../../types';
 import { getChangelogs } from './changelogs';
 import { getPrConfigDescription } from './config-description';
@@ -23,7 +23,7 @@ function massageUpdateMetadata(config: BranchConfig): void {
     } = upgrade;
     // TODO: types (#7154)
     let depNameLinked = upgrade.depName!;
-    const slashPrefixRe = regEx('^/+');
+    //const slashPrefixRe = regEx('^/+');
     const primaryLink = homepage ?? sourceUrl ?? dependencyUrl;
     if (primaryLink) {
       depNameLinked = `[${depNameLinked}](${primaryLink})`;
@@ -46,10 +46,7 @@ function massageUpdateMetadata(config: BranchConfig): void {
     if (sourceUrl) {
       let fullUrl = sourceUrl;
       if (sourceDirectory) {
-        fullUrl =
-          ensureTrailingSlash(sourceUrl) +
-          'tree/HEAD/' +
-          sourceDirectory.replace(slashPrefixRe, '');
+        fullUrl = joinUrlParts(sourceUrl, 'tree/HEAD/', sourceDirectory);
       }
       references.push(`[source](${fullUrl})`);
     }
