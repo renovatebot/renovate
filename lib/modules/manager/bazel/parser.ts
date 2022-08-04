@@ -2,9 +2,8 @@ import crypto from 'crypto';
 import is from '@sindresorhus/is';
 import { lang, query as q } from 'good-enough-parser';
 import * as memCache from '../../../util/cache/memory';
-import { regEx } from '../../../util/regex';
+import { supportedRulesRegex } from './common';
 import type { MetaPath, ParsedResult, Target, TargetAttribute } from './types';
-import { ruleMappers } from './util';
 
 function isTarget(target: Partial<Target>): target is Target {
   return !!target.rule && !!target.name;
@@ -30,14 +29,12 @@ const emptyCtx: Ctx = {
 
 const starlark = lang.createLang('starlark');
 
-const ruleRegex = regEx(`^${Object.keys(ruleMappers).join('|')}$`);
-
 /**
  * Matches rule type:
  * - `git_repository`
  * - `go_repository`
  **/
-const ruleSym = q.sym<Ctx>(ruleRegex, (ctx, { value, offset }) => {
+const ruleSym = q.sym<Ctx>(supportedRulesRegex, (ctx, { value, offset }) => {
   ctx.currentTarget.rule = value;
 
   // TODO: remove it (#9667)

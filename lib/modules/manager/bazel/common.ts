@@ -1,5 +1,6 @@
 import { parse as _parse } from 'url';
 import is from '@sindresorhus/is';
+import { dequal } from 'dequal';
 import parseGithubUrl from 'github-url-from-git';
 import { regEx } from '../../../util/regex';
 import { DockerDatasource } from '../../datasource/docker';
@@ -8,7 +9,8 @@ import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { GoDatasource } from '../../datasource/go';
 import { id as dockerVersioning } from '../../versioning/docker';
 import type { PackageDependency } from '../types';
-import type { Target, UrlParsedResult } from './types';
+import type { RuleMeta, Target, UrlParsedResult } from './types';
+import { logger } from '../../../logger';
 
 export function parseUrl(
   urlString: string | undefined | null
@@ -220,13 +222,51 @@ export function dockerDependency({
   return dep;
 }
 
-export const ruleMappers: Record<
-  string,
-  (_: Target) => PackageDependency | null
-> = {
+type DependencyExtractor = (_: Target) => PackageDependency | null;
+type DependencyExtractorRegistry = Record<string, DependencyExtractor>;
+
+const dependencyExtractorRegistry: DependencyExtractorRegistry = {
   git_repository: gitDependency,
   go_repository: goDependency,
   http_archive: httpDependency,
   http_file: httpDependency,
   container_pull: dockerDependency,
 };
+
+const supportedRules = Object.keys(dependencyExtractorRegistry);
+
+export const supportedRulesRegex = regEx(`^${supportedRules.join('|')}$`);
+
+export function extractDepFromTarget(target: Target): PackageDependency | null {
+  const dependencyExtractor = dependencyExtractorRegistry[target.rule];
+  // istanbul ignore if: should not happen
+  if (!dependencyExtractor) {
+    logger.warn(
+      `Bazel dependency extractor function not found for ${target.rule}`
+    );
+    return null;
+  }
+  return dependencyExtractor(target);
+}
+
+// TODO: remove it (#9667)
+export function getRuleDefinition(
+  content: string,
+  meta: RuleMeta[],
+  ruleIndex: number
+): string | null {
+  let result: string | null = null;
+
+  const rulePath = [ruleIndex];
+  const ruleMeta = meta.find(({ path }) => dequal(path, rulePath));
+  if (ruleMeta) {
+    const {
+      data: { offset, length },
+    } = ruleMeta;
+    const begin = offset;
+    const end = offset + length;
+    result = content.slice(begin, end);
+  }
+
+  return result;
+}
