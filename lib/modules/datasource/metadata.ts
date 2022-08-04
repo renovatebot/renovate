@@ -174,16 +174,16 @@ export function addMetaData(
 }
 
 export function shouldDeleteHomepage(
-  sourceUrl: string | null | undefined,
+  massagedSourceUrl: string | null | undefined,
   homepage: string | undefined
 ): boolean {
-  if (is.nullOrUndefined(sourceUrl) || is.undefined(homepage)) {
+  if (is.nullOrUndefined(massagedSourceUrl) || is.undefined(homepage)) {
     return false;
   }
-  if (sourceUrl === homepage) {
+  if (massagedSourceUrl === homepage) {
     return true;
   }
-  const sourceUrlParsed = parseUrl(sourceUrl);
+  const sourceUrlParsed = parseUrl(massagedSourceUrl);
   if (is.nullOrUndefined(sourceUrlParsed)) {
     return false;
   }
