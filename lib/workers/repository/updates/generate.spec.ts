@@ -80,6 +80,7 @@ describe('workers/repository/updates/generate', () => {
         newValue: '^1.0.0',
         newVersion: '1.0.1',
         reuseLockFiles: true,
+        prettyVersion: 'v1.0.1',
         upgrades: [
           {
             branchName: 'some-branch',
@@ -90,6 +91,7 @@ describe('workers/repository/updates/generate', () => {
             lockedVersion: '1.0.0',
             newValue: '^1.0.0',
             newVersion: '1.0.1',
+            prettyVersion: 'v1.0.1',
           },
         ],
       });
@@ -608,6 +610,27 @@ describe('workers/repository/updates/generate', () => {
       expect(res.prTitle).toBe(
         'chore(foo/bar): update dependency some-dep v3.2.0'
       );
+    });
+
+    it('use newMajor in pr title with v', () => {
+      const branch: BranchUpgradeConfig[] = [
+        {
+          ...defaultConfig,
+          manager: 'some-manager',
+          depName: 'some-dep',
+          packageFile: 'foo/bar/package.json',
+          packageFileDir: 'foo/bar',
+          semanticCommits: 'enabled',
+          semanticCommitType: 'chore',
+          semanticCommitScope: '{{packageFileDir}}',
+          commitMessageExtra: 'v{{newMajor}}',
+          newValue: '3.2.0',
+          newVersion: '3.2.0',
+          newMajor: 3,
+        } as BranchUpgradeConfig,
+      ];
+      const res = generateBranchConfig(branch);
+      expect(res.prTitle).toBe('chore(foo/bar): update dependency some-dep v3');
     });
 
     it('Default commitMessageExtra pr title', () => {
