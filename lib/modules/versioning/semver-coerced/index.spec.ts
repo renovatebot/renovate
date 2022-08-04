@@ -57,6 +57,22 @@ describe('modules/versioning/semver-coerced/index', () => {
       expect(semverCoerced.getPatch('v3.1.2-foo')).toBe(2);
     });
 
+    it('should return patch version number for none semver vX.Y two', () => {
+      expect(semverCoerced.getPatch('v3.1')).toBe(0);
+    });
+
+    it('should return patch version number for none semver X.Y two', () => {
+      expect(semverCoerced.getPatch('3.1')).toBe(0);
+    });
+
+    it('should return patch version number for none semver vX single', () => {
+      expect(semverCoerced.getPatch('v3')).toBe(0);
+    });
+
+    it('should return patch version number for none semver X single', () => {
+      expect(semverCoerced.getPatch('3')).toBe(0);
+    });
+
     it('invalid version', () => {
       expect(semverCoerced.getMajor('xxx')).toBeNull();
     });
@@ -123,6 +139,50 @@ describe('modules/versioning/semver-coerced/index', () => {
   describe('.isStable(input)', () => {
     it('should return true for a stable version', () => {
       expect(semverCoerced.isStable('1.0.0')).toBeTrue();
+    });
+
+    it('should return true for a stable version with v prefix', () => {
+      expect(semverCoerced.isStable('v1.3.5')).toBeTrue();
+    });
+
+    it('should return true for a stable vX.Y version', () => {
+      expect(semverCoerced.isStable('v2.1')).toBeTrue();
+    });
+
+    it('should return true for a stable X.Y version', () => {
+      expect(semverCoerced.isStable('3.4')).toBeTrue();
+    });
+
+    it('should return true for a stable shortest version with v', () => {
+      expect(semverCoerced.isStable('v2')).toBeTrue();
+    });
+
+    it('should return true for a stable shortest version', () => {
+      expect(semverCoerced.isStable('2')).toBeTrue();
+    });
+
+    it('should return false for a prerelease alpha version', () => {
+      expect(semverCoerced.isStable('v1.0.0-alpha')).toBeFalse();
+    });
+
+    it('should return false for a prerelease beta version without v', () => {
+      expect(semverCoerced.isStable('1.0.0-Beta.1')).toBeFalse();
+    });
+
+    it('should return false for a prerelease beta version', () => {
+      expect(semverCoerced.isStable('v1.0.0-Beta.1')).toBeFalse();
+    });
+
+    it('should return false for a RC version without v', () => {
+      expect(semverCoerced.isStable('1.0.0-rc2')).toBeFalse();
+    });
+
+    it('should return false for a RC version', () => {
+      expect(semverCoerced.isStable('v1.0.0-rc2')).toBeFalse();
+    });
+
+    it('should return true for a short prerelease version', () => {
+      expect(semverCoerced.isStable('1.0-Beta.0')).toBeFalse();
     });
 
     it('should return false for an prerelease version', () => {
