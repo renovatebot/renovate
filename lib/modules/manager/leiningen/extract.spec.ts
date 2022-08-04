@@ -16,6 +16,7 @@ describe('modules/manager/leiningen/extract', () => {
     expect(extractFromVectors('')).toBeEmptyArray();
     expect(extractFromVectors('[]')).toBeEmptyArray();
     expect(extractFromVectors('[[]]')).toBeEmptyArray();
+    expect(extractFromVectors('[#_[foo/bar "1.2.3"]]')).toBeEmptyArray();
     expect(extractFromVectors('[[foo/bar "1.2.3"]]')).toEqual([
       {
         datasource: ClojureDatasource.id,
