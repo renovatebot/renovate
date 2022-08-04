@@ -151,10 +151,10 @@ export function addMetaData(
           extraBaseUrls,
         }) || dep.sourceUrl;
     }
-    if (shouldDeleteHomepage(dep.sourceUrl, dep.homepage)) {
-      // remove homepage if its not a link to a path
-      delete dep.homepage;
-    }
+  }
+  if (shouldDeleteHomepage(dep.sourceUrl, dep.homepage)) {
+    // remove homepage if its not a link to a path
+    delete dep.homepage;
   }
   // Clean up any empty urls
   const urlKeys: (keyof ReleaseResult)[] = [
@@ -174,16 +174,17 @@ export function addMetaData(
 }
 
 export function shouldDeleteHomepage(
-  massagedSourceUrl: string | null | undefined,
+  sourceUrl: string | null | undefined,
   homepage: string | undefined
 ): boolean {
-  if (is.nullOrUndefined(massagedSourceUrl) || is.undefined(homepage)) {
+  if (is.nullOrUndefined(sourceUrl) || is.undefined(homepage)) {
     return false;
   }
-  if (massagedSourceUrl === homepage) {
+  const massageSourceUrl = massageUrl(sourceUrl);
+  if (massageSourceUrl === homepage) {
     return true;
   }
-  const sourceUrlParsed = parseUrl(massagedSourceUrl);
+  const sourceUrlParsed = parseUrl(massageSourceUrl);
   if (is.nullOrUndefined(sourceUrlParsed)) {
     return false;
   }
