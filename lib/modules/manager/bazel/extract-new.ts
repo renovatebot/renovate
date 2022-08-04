@@ -32,6 +32,7 @@ export function extractPackageFile(
     const def = getRuleDefinition(content, meta, idx);
     // istanbul ignore if: should not happen
     if (!def) {
+      logger.warn({ dep }, `Bazel: can't extract definition fragment`);
       continue;
     }
 
