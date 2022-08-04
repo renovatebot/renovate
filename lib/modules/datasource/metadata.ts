@@ -180,11 +180,11 @@ export function shouldDeleteHomepage(
   if (is.nullOrUndefined(sourceUrl) || is.undefined(homepage)) {
     return false;
   }
-  const massageSourceUrl = massageUrl(sourceUrl);
-  if (massageSourceUrl === homepage) {
+  const massagedSourceUrl = massageUrl(sourceUrl);
+  if (massagedSourceUrl === homepage) {
     return true;
   }
-  const sourceUrlParsed = parseUrl(massageSourceUrl);
+  const sourceUrlParsed = parseUrl(massagedSourceUrl);
   if (is.nullOrUndefined(sourceUrlParsed)) {
     return false;
   }
