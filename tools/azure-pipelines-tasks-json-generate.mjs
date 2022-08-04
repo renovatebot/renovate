@@ -55,5 +55,5 @@ await (async () => {
     2
   );
 
-  await fs.writeFile(`./data/azure-pipelines-tasks-info.json`, data);
+  await fs.writeFile(`./data/azure-pipelines-tasks.json`, data);
 })();
