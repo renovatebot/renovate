@@ -51,7 +51,7 @@ export function getNodeUpdate(upgrades: Upgrade[]): string | undefined {
   return upgrades.find((u) => u.depName === 'node')?.newValue;
 }
 
-export async function getNodeToolContraint(
+export async function getNodeToolConstraint(
   config: Partial<PostUpdateConfig>,
   upgrades: Upgrade[]
 ): Promise<ToolConstraint> {

@@ -3,7 +3,7 @@ import { envMock, mockExecAll } from '../../../../../test/exec-util';
 import { Fixtures } from '../../../../../test/fixtures';
 import { env, fs, mockedFunction } from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
-import { getNodeToolContraint } from './node-version';
+import { getNodeToolConstraint } from './node-version';
 import * as npmHelper from './npm';
 
 jest.mock('../../../../util/exec/env');
@@ -18,7 +18,7 @@ describe('modules/manager/npm/post-update/npm', () => {
     jest.resetModules();
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
     GlobalConfig.set({ localDir: '' });
-    mockedFunction(getNodeToolContraint).mockResolvedValueOnce({
+    mockedFunction(getNodeToolConstraint).mockResolvedValueOnce({
       toolName: 'node',
       constraint: '16.16.0',
     });

@@ -1,7 +1,7 @@
 import { fs } from '../../../../../test/util';
 import {
   getNodeConstraint,
-  getNodeToolContraint,
+  getNodeToolConstraint,
   getNodeUpdate,
 } from './node-version';
 
@@ -64,7 +64,7 @@ describe('modules/manager/npm/post-update/node-version', () => {
   describe('getNodeToolContraint()', () => {
     it('returns getNodeUpdate', async () => {
       expect(
-        await getNodeToolContraint(config, [
+        await getNodeToolConstraint(config, [
           { depName: 'node', newValue: '16.15.0' },
         ])
       ).toEqual({
@@ -74,7 +74,7 @@ describe('modules/manager/npm/post-update/node-version', () => {
     });
 
     it('returns getNodeConstraint', async () => {
-      expect(await getNodeToolContraint(config, [])).toEqual({
+      expect(await getNodeToolConstraint(config, [])).toEqual({
         toolName: 'node',
         constraint: '^12.16.0',
       });
