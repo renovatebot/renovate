@@ -63,6 +63,11 @@ const allToolConfig: Record<string, ToolConfig> = {
     depName: 'jsonnet-bundler/jsonnet-bundler',
     versioning: semverVersioningId,
   },
+  node: {
+    datasource: 'node',
+    depName: 'node',
+    versioning: npmVersioningId,
+  },
   npm: {
     datasource: 'npm',
     depName: 'npm',
