@@ -87,7 +87,16 @@ It takes a [minimatch](https://www.npmjs.com/package/minimatch) glob-style or re
 
 If you set multiple filters, then the matches of each filter are added to the overall result.
 
-If you use an environment variable or the CLI to set the value for `autodiscoverFilter`, then you must avoid commas `,`.
+If you use an environment variable or the CLI to set the value for `autodiscoverFilter`, then commas `,` are not supported.
+Commas will be used as delimiter for a new filter.
+
+```
+# DO NOT use commas inside the filter if your are using env or cli variables to configure it.
+RENOVATE_AUTODISCOVER_FILTER="/myapp/{readme.md,src/**}"
+
+# in this example you can use regex instead
+RENOVATE_AUTODISCOVER_FILTER="/myapp/(readme\.md|src/.*)/"
+```
 
 **Minimatch**:
 
@@ -108,7 +117,7 @@ All text inside the start and end `/` will be treated as a regular expression.
 ```
 
 You can negate the regex by putting a `!` in front.
-If using negations, all repositories expect those who match the regex are added to the result:
+If using negations, all repositories except those who match the regex are added to the result:
 
 ```json
 {
