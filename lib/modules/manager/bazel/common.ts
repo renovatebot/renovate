@@ -2,6 +2,7 @@ import { parse as _parse } from 'url';
 import is from '@sindresorhus/is';
 import { dequal } from 'dequal';
 import parseGithubUrl from 'github-url-from-git';
+import { logger } from '../../../logger';
 import { regEx } from '../../../util/regex';
 import { DockerDatasource } from '../../datasource/docker';
 import { GithubReleasesDatasource } from '../../datasource/github-releases';
@@ -10,7 +11,6 @@ import { GoDatasource } from '../../datasource/go';
 import { id as dockerVersioning } from '../../versioning/docker';
 import type { PackageDependency } from '../types';
 import type { RuleMeta, Target, UrlParsedResult } from './types';
-import { logger } from '../../../logger';
 
 export function parseUrl(
   urlString: string | undefined | null
