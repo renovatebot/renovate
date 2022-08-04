@@ -23,7 +23,6 @@ function massageUpdateMetadata(config: BranchConfig): void {
     } = upgrade;
     // TODO: types (#7154)
     let depNameLinked = upgrade.depName!;
-    //const slashPrefixRe = regEx('^/+');
     const primaryLink = homepage ?? sourceUrl ?? dependencyUrl;
     if (primaryLink) {
       depNameLinked = `[${depNameLinked}](${primaryLink})`;
