@@ -76,6 +76,7 @@ export function exec(cmd: string, opts: RawExecOptions): Promise<ExecResult> {
     // handle process events
     cp.on('error', (error) => {
       kill(cp, 'SIGTERM');
+      // rethrowing, use originally emitted error message
       reject(new ExecError(error.message, rejectInfo(), error));
     });
 
@@ -83,16 +84,23 @@ export function exec(cmd: string, opts: RawExecOptions): Promise<ExecResult> {
       if (NONTERM.includes(signal)) {
         return;
       }
-
       if (signal) {
-        const message = `Process signaled with "${signal}"`;
         kill(cp, signal);
-        reject(new ExecError(message, { ...rejectInfo(), signal }));
+        reject(
+          new ExecError(`Command failed: ${cmd}\nInterrupted by ${signal}`, {
+            ...rejectInfo(),
+            signal,
+          })
+        );
         return;
       }
       if (code !== 0) {
-        const message = `Process exited with exit code "${code}"`;
-        reject(new ExecError(message, { ...rejectInfo(), exitCode: code }));
+        reject(
+          new ExecError(`Command failed: ${cmd}\n${stringify(stderr)}`, {
+            ...rejectInfo(),
+            exitCode: code,
+          })
+        );
         return;
       }
       resolve({
