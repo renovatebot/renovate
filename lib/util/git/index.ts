@@ -964,8 +964,7 @@ export async function prepareCommit({
       commitRes.summary &&
       commitRes.summary.changes === 0 &&
       commitRes.summary.insertions === 0 &&
-      commitRes.summary.deletions === 0 &&
-      !force
+      commitRes.summary.deletions === 0
     ) {
       logger.warn({ commitRes }, 'Detected empty commit - aborting git push');
       return null;
