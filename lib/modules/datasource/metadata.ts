@@ -151,10 +151,10 @@ export function addMetaData(
           extraBaseUrls,
         }) || dep.sourceUrl;
     }
-  }
-  if (shouldDeleteHomepage(dep.sourceUrl, dep.homepage)) {
-    // remove homepage if its not a link to a path
-    delete dep.homepage;
+    if (shouldDeleteHomepage(dep.sourceUrl, dep.homepage)) {
+      // remove homepage if its not a link to a path
+      delete dep.homepage;
+    }
   }
   // Clean up any empty urls
   const urlKeys: (keyof ReleaseResult)[] = [
