@@ -170,7 +170,7 @@ const rule = q.alt<Ctx>(maybeRule, regularRule);
 
 const query = q.tree<Ctx>({
   type: 'root-tree',
-  maxDepth: 256,
+  maxDepth: 16,
   search: rule,
 });
 
