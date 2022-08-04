@@ -130,7 +130,7 @@
   },
   "engines-next": {
     "description": "Versions other than the below are deprecated and a warning will be logged",
-    "node": "^14.15.0 || >=16.13.0"
+    "node": ">=16.13.0"
   },
   "dependencies": {
     "@aws-sdk/client-ec2": "3.112.0",
