@@ -3,7 +3,7 @@ import { Decorator, decorate } from '../util/decorator';
 import { getTracer } from '.';
 
 /**
- * The cache decorator parameters.
+ * The instrumentation decorator parameters.
  */
 interface SpanParameters {
   /**
