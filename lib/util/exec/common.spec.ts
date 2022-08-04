@@ -200,7 +200,7 @@ describe('util/exec/common', () => {
       ).rejects.toMatchObject({
         cmd,
         signal: exitSignal,
-        message: `Command failed: ${cmd}\n`,
+        message: `Command failed: ${cmd}\nInterrupted by ${exitSignal}`,
       });
     });
 

@@ -84,14 +84,23 @@ export function exec(cmd: string, opts: RawExecOptions): Promise<ExecResult> {
       if (NONTERM.includes(signal)) {
         return;
       }
-      const message = `Command failed: ${cmd}\n${stringify(stderr)}`;
       if (signal) {
         kill(cp, signal);
-        reject(new ExecError(message, { ...rejectInfo(), signal }));
+        reject(
+          new ExecError(`Command failed: ${cmd}\nInterrupted by ${signal}`, {
+            ...rejectInfo(),
+            signal,
+          })
+        );
         return;
       }
       if (code !== 0) {
-        reject(new ExecError(message, { ...rejectInfo(), exitCode: code }));
+        reject(
+          new ExecError(`Command failed: ${cmd}\n${stringify(stderr)}`, {
+            ...rejectInfo(),
+            exitCode: code,
+          })
+        );
         return;
       }
       resolve({
