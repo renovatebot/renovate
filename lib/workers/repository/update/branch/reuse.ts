@@ -32,7 +32,7 @@ export async function shouldReuseExistingBranch(
   // Check for existing PR
   const pr = await platform.getBranchPr(branchName);
 
-  if (pr) {
+  if (!config.recreateMergedPr && pr) {
     if (pr.title?.startsWith('rebase!')) {
       logger.debug(`Manual rebase requested via PR title for #${pr.number}`);
       return result;

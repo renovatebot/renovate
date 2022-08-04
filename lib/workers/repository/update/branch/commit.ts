@@ -29,6 +29,21 @@ export function commitFilesToBranch(
   }
   if (!is.nonEmptyArray(updatedFiles)) {
     logger.debug(`No files to commit`);
+    if (config.recreateMergedPr) {
+      // force push
+      logger.debug('Force push changes because we are recreating a mergedPR.');
+      try {
+        return commitAndPush({
+          branchName: config.branchName,
+          files: updatedFiles,
+          message: config.commitMessage!,
+          force: true,
+          platformCommit: !!config.platformCommit,
+        });
+      } catch (err) {
+        logger.debug(err.message);
+      }
+    }
     return Promise.resolve(null);
   }
   const fileLength = [...new Set(updatedFiles.map((file) => file.path))].length;
@@ -49,7 +64,8 @@ export function commitFilesToBranch(
     );
     throw new Error(CONFIG_SECRETS_EXPOSED);
   }
-
+  // eslint-disable-next-line no-console
+  console.log('NEEDS COMMITING');
   // API will know whether to create new branch or not
   return commitAndPush({
     branchName: config.branchName,

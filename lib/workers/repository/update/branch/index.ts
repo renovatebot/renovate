@@ -112,14 +112,12 @@ export async function processBranch(
     const existingPr = branchPr ? undefined : await prAlreadyExisted(config);
     if (existingPr && !dependencyDashboardCheck) {
       // If merged pr exists recreate new pr with new branch
-      if (
-        existingPr.state === 'merged' &&
-        !gitBranchExists(config.branchName)
-      ) {
+      if (existingPr.state === 'merged') {
         logger.debug(
           { prTitle: config.prTitle },
           'Merged PR already exists. Creating new PR with automerge disabled.'
         );
+        config.recreateMergedPr = true;
         config.automerge = false;
       } else {
         logger.debug(
