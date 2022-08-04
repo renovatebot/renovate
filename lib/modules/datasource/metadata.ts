@@ -128,7 +128,7 @@ export function addMetaData(
     dep.sourceUrl = dep.changelogUrl;
   }
 
-  if (dep.homepage && !dep.sourceUrl) {
+  if (!dep.sourceUrl && dep.homepage) {
     const platform = detectPlatform(dep.homepage);
     if (platform === 'github' || platform === 'gitlab') {
       dep.sourceUrl = dep.homepage;
