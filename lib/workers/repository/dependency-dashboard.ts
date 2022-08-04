@@ -48,19 +48,30 @@ function selectAllRelevantBranches(issueBody: string): string[] {
   return checkedBranches;
 }
 
-function getCheckedBranches(issueBody: string): Record<string, string> {
-  const checkMatch = /- \[x\] <!-- ([a-zA-Z]+)-branch=([^\s]+) -->/g;
+function getAllSelectedBranches(
+  issueBody: string,
+  dependencyDashboardChecks: Record<string, string>
+): Record<string, string> {
   const generalCheckMatch = ' <!-- ([a-zA-Z]+)-branch=([^\\s]+) -->';
-  const dependencyDashboardChecks: Record<string, string> = {};
-  for (const [, type, branchName] of issueBody.matchAll(regEx(checkMatch))) {
-    dependencyDashboardChecks[branchName] = type;
-  }
   const allRelevantBranches = selectAllRelevantBranches(issueBody);
   const re = regEx(generalCheckMatch);
   allRelevantBranches.forEach((branch) => {
     const [, type, branchName] = re.exec(branch)!;
     dependencyDashboardChecks[branchName] = type;
   });
+  return dependencyDashboardChecks;
+}
+
+function getCheckedBranches(issueBody: string): Record<string, string> {
+  const checkMatch = /- \[x\] <!-- ([a-zA-Z]+)-branch=([^\s]+) -->/g;
+  let dependencyDashboardChecks: Record<string, string> = {};
+  for (const [, type, branchName] of issueBody.matchAll(regEx(checkMatch))) {
+    dependencyDashboardChecks[branchName] = type;
+  }
+  dependencyDashboardChecks = getAllSelectedBranches(
+    issueBody,
+    dependencyDashboardChecks
+  );
   return dependencyDashboardChecks;
 }
 
