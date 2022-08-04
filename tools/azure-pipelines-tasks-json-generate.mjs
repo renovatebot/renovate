@@ -2,6 +2,7 @@ import os from 'os';
 import { promisify } from 'util';
 import fs from 'fs-extra';
 import g from 'glob';
+import JSON5 from 'json5';
 import shell from 'shelljs';
 import Git from 'simple-git';
 import path from 'upath';
@@ -31,15 +32,13 @@ await (async () => {
   const tasks = {};
 
   for (const file of files) {
-    const revs = (await git.raw(['rev-list', 'master', '--', file])).split(
-      '\n'
-    );
+    const revs = (await git.raw(['rev-list', 'HEAD', '--', file])).split('\n');
     shell.echo(`Parsing ${file}`);
     for (const rev of revs) {
       try {
         const content = await git.show([`${rev}:${file}`]);
         /** @type {{name: string, version: {Major: number, Minor: number, Patch: number}}} */
-        const parsedContent = JSON.parse(content);
+        const parsedContent = JSON5.parse(content);
         const version = `${parsedContent.version.Major}.${parsedContent.version.Minor}.${parsedContent.version.Patch}`;
         tasks[parsedContent.name] =
           tasks[parsedContent.name]?.add(version) ?? new Set([version]);
