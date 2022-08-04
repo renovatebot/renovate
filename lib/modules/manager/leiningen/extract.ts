@@ -174,7 +174,9 @@ function collectDeps(
   return result;
 }
 
-export function extractPackageFile(content: string): PackageFile {
+export function extractPackageFile(input: string): PackageFile {
+  const content = input.replace(regEx(/#_\[[^\]]*?\]/g), '');
+
   const registryUrls = extractLeinRepos(content);
   const vars = extractVariables(content);
 
