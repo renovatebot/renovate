@@ -4,10 +4,12 @@ import { nameFromLevel } from 'bunyan';
 import { GlobalConfig } from '../../config/global';
 import type { RenovateConfig } from '../../config/types';
 import { getProblems, logger } from '../../logger';
+import type { PackageFile } from '../../modules/manager/types';
 import { platform } from '../../modules/platform';
 import { regEx } from '../../util/regex';
 import * as template from '../../util/template';
 import { BranchConfig, BranchResult, SelectAllConfig } from '../types';
+import { getDepWarningsDashboard } from './errors-warnings';
 import { PackageFiles } from './package-files';
 
 interface DependencyDashboard {
@@ -15,25 +17,26 @@ interface DependencyDashboard {
   dependencyDashboardRebaseAllOpen: boolean;
 }
 
-function parseDashboardIssue(issueBody: string): DependencyDashboard {
-  const checkMatch = ' - \\[x\\] <!-- ([a-zA-Z]+)-branch=([^\\s]+) -->';
-  const checked = issueBody.match(regEx(checkMatch, 'g'));
+function checkRebaseAll(issueBody: string): boolean {
+  return issueBody.includes(' - [x] <!-- rebase-all-open-prs -->');
+}
+
+function getCheckedBranches(issueBody: string): Record<string, string> {
+  const checkMatch = /- \[x\] <!-- ([a-zA-Z]+)-branch=([^\s]+) -->/g;
   const dependencyDashboardChecks: Record<string, string> = {};
-  if (checked?.length) {
-    const re = regEx(checkMatch);
-    checked.forEach((check) => {
-      const [, type, branchName] = re.exec(check)!;
-      dependencyDashboardChecks[branchName] = type;
-    });
+  for (const [, type, branchName] of issueBody.matchAll(regEx(checkMatch))) {
+    dependencyDashboardChecks[branchName] = type;
   }
-  const checkedRebaseAll = issueBody.includes(
-    ' - [x] <!-- rebase-all-open-prs -->'
-  );
-  let dependencyDashboardRebaseAllOpen = false;
-  if (checkedRebaseAll) {
-    dependencyDashboardRebaseAllOpen = true;
-  }
-  return { dependencyDashboardChecks, dependencyDashboardRebaseAllOpen };
+  return dependencyDashboardChecks;
+}
+
+function parseDashboardIssue(issueBody: string): DependencyDashboard {
+  const dependencyDashboardChecks = getCheckedBranches(issueBody);
+  const dependencyDashboardRebaseAllOpen = checkRebaseAll(issueBody);
+  return {
+    dependencyDashboardChecks,
+    dependencyDashboardRebaseAllOpen,
+  };
 }
 
 export async function readDashboardBody(
@@ -102,7 +105,8 @@ function appendRepoProblems(config: RenovateConfig, issueBody: string): string {
 
 export async function ensureDependencyDashboard(
   config: SelectAllConfig,
-  allBranches: BranchConfig[]
+  allBranches: BranchConfig[],
+  packageFiles: Record<string, PackageFile[]> = {}
 ): Promise<void> {
   // legacy/migrated issue
   const reuseTitle = 'Update Dependencies (Renovate Bot)';
@@ -256,6 +260,13 @@ export async function ensureDependencyDashboard(
     }
     issueBody += '\n';
   }
+
+  const warn = getDepWarningsDashboard(packageFiles);
+  if (warn) {
+    issueBody += warn;
+    issueBody += '\n';
+  }
+
   const otherRes = [
     BranchResult.Pending,
     BranchResult.NeedsApproval,
