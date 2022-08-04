@@ -132,10 +132,6 @@ export function addMetaData(
     const platform = detectPlatform(dep.homepage);
     if (platform === 'github' || platform === 'gitlab') {
       dep.sourceUrl = dep.homepage;
-      if (shouldDeleteHomepage(dep.sourceUrl, dep.homepage)) {
-        // remove homepage if its not a link to a path in a github/gitlab repo.
-        delete dep.homepage;
-      }
     }
   }
   const extraBaseUrls = [];
@@ -155,10 +151,10 @@ export function addMetaData(
           extraBaseUrls,
         }) || dep.sourceUrl;
     }
-
-    if (dep.homepage && dep.homepage === dep.sourceUrl) {
-      delete dep.homepage;
-    }
+  }
+  if (shouldDeleteHomepage(dep.sourceUrl, dep.homepage)) {
+    // remove homepage if its not a link to a path
+    delete dep.homepage;
   }
   // Clean up any empty urls
   const urlKeys: (keyof ReleaseResult)[] = [
@@ -178,14 +174,16 @@ export function addMetaData(
 }
 
 export function shouldDeleteHomepage(
-  sourceUrl: string,
-  homepage: string
+  sourceUrl: string | null | undefined,
+  homepage: string | undefined
 ): boolean {
-  const massagedSourceUrl = massageUrl(sourceUrl);
-  if (massagedSourceUrl === homepage) {
+  if (is.nullOrUndefined(sourceUrl) || is.undefined(homepage)) {
+    return false;
+  }
+  if (sourceUrl === homepage) {
     return true;
   }
-  const sourceUrlParsed = parseUrl(massagedSourceUrl);
+  const sourceUrlParsed = parseUrl(sourceUrl);
   if (is.nullOrUndefined(sourceUrlParsed)) {
     return false;
   }
