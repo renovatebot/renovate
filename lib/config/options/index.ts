@@ -254,7 +254,7 @@ const options: RenovateOptions[] = [
       'If set to `true` then Renovate creates draft PRs, instead of normal status PRs.',
     type: 'boolean',
     default: false,
-    supportedPlatforms: ['github', 'gitlab', 'azure'],
+    supportedPlatforms: ['azure', 'gitea', 'github', 'gitlab'],
   },
   {
     name: 'dryRun',
@@ -1517,7 +1517,7 @@ const options: RenovateOptions[] = [
     type: 'string',
     allowedValues: ['auto', 'fast-forward', 'merge-commit', 'rebase', 'squash'],
     default: 'auto',
-    supportedPlatforms: ['bitbucket'],
+    supportedPlatforms: ['bitbucket', 'gitea'],
   },
   {
     name: 'automergeComment',
@@ -2316,6 +2316,7 @@ const options: RenovateOptions[] = [
     name: 'platformAutomerge',
     description: `Controls if platform-native auto-merge is used.`,
     type: 'boolean',
+    supportedPlatforms: ['azure', 'gitea', 'github', 'gitlab'],
     default: false,
   },
   {

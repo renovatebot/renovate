@@ -36,7 +36,12 @@ import type {
 } from '../types';
 import { smartTruncate } from '../utils/pr-body';
 import * as helper from './gitea-helper';
-import { getRepoUrl, smartLinks, trimTrailingApiPath } from './utils';
+import {
+  getMergeMethod,
+  getRepoUrl,
+  smartLinks,
+  trimTrailingApiPath,
+} from './utils';
 
 interface GiteaRepoConfig {
   repository: string;
@@ -48,6 +53,8 @@ interface GiteaRepoConfig {
   defaultBranch: string;
   cloneSubmodules: boolean;
 }
+
+const DRAFT_PREFIX = 'WIP: ';
 
 const defaults = {
   hostType: PlatformId.Gitea,
@@ -91,11 +98,19 @@ function toRenovatePR(data: helper.PR): Pr | null {
     return null;
   }
 
+  let title = data.title;
+  let isDraft = false;
+  if (title.startsWith(DRAFT_PREFIX)) {
+    title = title.substring(DRAFT_PREFIX.length);
+    isDraft = true;
+  }
+
   return {
     number: data.number,
     displayNumber: `Pull Request #${data.number}`,
     state: data.state,
-    title: data.title,
+    title,
+    isDraft,
     bodyStruct: getPrBodyStruct(data.body),
     sha: data.head.sha,
     sourceBranch: data.head.label,
@@ -469,13 +484,19 @@ const platform: Platform = {
   async createPr({
     sourceBranch,
     targetBranch,
-    prTitle: title,
+    prTitle,
     prBody: rawBody,
     labels: labelNames,
+    platformOptions,
+    draftPR,
   }: CreatePRConfig): Promise<Pr> {
+    let title = prTitle;
     const base = targetBranch;
     const head = sourceBranch;
     const body = sanitize(rawBody);
+    if (draftPR) {
+      title = DRAFT_PREFIX + title;
+    }
 
     logger.debug(`Creating pull request: ${title} (${head} => ${base})`);
     try {
@@ -489,6 +510,33 @@ const platform: Platform = {
         body,
         labels: labels.filter(is.number),
       });
+
+      if (platformOptions?.usePlatformAutomerge) {
+        if (semver.gte(defaults.version, '1.17.0')) {
+          try {
+            await helper.mergePR(config.repository, gpr.number, {
+              // TODO: pass strategy (#16884)
+              Do: config.mergeMethod,
+              merge_when_checks_succeed: true,
+            });
+
+            logger.debug(
+              { prNumber: gpr.number },
+              'Gitea-native automerge: success'
+            );
+          } catch (err) {
+            logger.warn(
+              { err, prNumber: gpr.number },
+              'Gitea-native automerge: fail'
+            );
+          }
+        } else {
+          logger.debug(
+            { prNumber: gpr.number },
+            'Gitea-native automerge: not supported on this version of Gitea. Use 1.17.0 or newer.'
+          );
+        }
+      }
 
       const pr = toRenovatePR(gpr);
       if (!pr) {
@@ -545,10 +593,15 @@ const platform: Platform = {
 
   async updatePr({
     number,
-    prTitle: title,
+    prTitle,
     prBody: body,
     state,
   }: UpdatePrConfig): Promise<void> {
+    let title = prTitle;
+    if ((await getPrList()).find((pr) => pr.number === number)?.isDraft) {
+      title = DRAFT_PREFIX + title;
+    }
+
     await helper.updatePR(config.repository, number, {
       title,
       ...(body && { body }),
@@ -556,9 +609,11 @@ const platform: Platform = {
     });
   },
 
-  async mergePr({ id }: MergePRConfig): Promise<boolean> {
+  async mergePr({ id, strategy }: MergePRConfig): Promise<boolean> {
     try {
-      await helper.mergePR(config.repository, id, config.mergeMethod);
+      await helper.mergePR(config.repository, id, {
+        Do: getMergeMethod(strategy) ?? config.mergeMethod,
+      });
       return true;
     } catch (err) {
       logger.warn({ err, id }, 'Merging of PR failed');

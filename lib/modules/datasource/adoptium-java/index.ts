@@ -55,6 +55,8 @@ export class AdoptiumJavaDatasource extends Datasource {
   @cache({
     namespace: `datasource-${datasource}`,
     key: ({ registryUrl, packageName }: GetReleasesConfig) =>
+      // TODO: types (#7154)
+      // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
       `${registryUrl}:${getImageType(packageName)}`,
   })
   async getReleases({

@@ -169,6 +169,8 @@ export async function getReleases(
     if (is.nonEmptyString(packageBaseAddress)) {
       const nuspecUrl = joinUrlParts(
         packageBaseAddress,
+        // TODO: types (#7154)
+        // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
         `${pkgName.toLowerCase()}/${latestStable}/${pkgName.toLowerCase()}.nuspec`
       );
       const metaresult = await http.get(nuspecUrl);
