@@ -32,19 +32,6 @@ export async function checkConfigMigrationBranch(
     prTitle,
     state: PrState.Closed,
   };
-  const branchConfig: BranchConfig = {
-    prTitle,
-    manager: '',
-    upgrades: [],
-    branchName: configMigrationBranch,
-    userStrings: {
-      ignoreTopic: 'Renovate Ignore Notification',
-      ignoreMajor: '',
-      ignoreDigest: '',
-      ignoreOther: '',
-    },
-    suppressNotifications: config.suppressNotifications,
-  };
 
   const branchPr = await migrationPrExists(configMigrationBranch); // handles open/autoClosed PRs
 
@@ -58,6 +45,19 @@ export async function checkConfigMigrationBranch(
         { prTitle: closedPr.title },
         'Closed PR already exists. Skipping branch.'
       );
+      const branchConfig: BranchConfig = {
+        prTitle,
+        manager: '',
+        upgrades: [],
+        branchName: configMigrationBranch,
+        userStrings: {
+          ignoreTopic: 'Renovate Ignore Notification',
+          ignoreMajor: '',
+          ignoreDigest: '',
+          ignoreOther: '',
+        },
+        suppressNotifications: config.suppressNotifications,
+      };
       await handlepr(branchConfig, closedPr);
       return null;
     }
