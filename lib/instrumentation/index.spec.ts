@@ -3,7 +3,7 @@ import * as api from '@opentelemetry/api';
 import { NoopTracerProvider } from '@opentelemetry/api/build/src/trace/NoopTracerProvider';
 import { MultiSpanProcessor } from '@opentelemetry/sdk-trace-base/build/src/MultiSpanProcessor';
 import { NodeTracerProvider } from '@opentelemetry/sdk-trace-node';
-import { getTracerProvider, init } from './index';
+import { getTracerProvider, init, instrument } from './index';
 
 jest.unmock('.');
 
@@ -72,5 +72,29 @@ describe('instrumentation/index', () => {
     const provider = nodeProvider.getActiveSpanProcessor();
     expect(provider).toBeInstanceOf(MultiSpanProcessor);
     expect(provider).toMatchSnapshot();
+  });
+
+  describe('instrument', () => {
+    it('should return result', async () => {
+      const value = 'testResult';
+      const result = await instrument('test', async () => {
+        return await new Promise((resolve) => {
+          resolve(value);
+        });
+      });
+      expect(result).toStrictEqual(value);
+    });
+
+    it('should rethrow exception', async () => {
+      const error = new Error('testError');
+      await expect(
+        instrument('test', async () => {
+          throw error;
+          return await new Promise((resolve) => {
+            resolve('');
+          });
+        })
+      ).rejects.toThrow();
+    });
   });
 });

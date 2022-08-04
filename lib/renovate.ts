@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { getTracer, shutdown as telemetryShutdown } from './instrumentation'; // has to be imported before logger and other libraries which are instrumentalised
+import { instrument, shutdown as telemetryShutdown } from './instrumentation'; // has to be imported before logger and other libraries which are instrumentalised
 import { logger } from './logger';
 import * as proxy from './proxy';
 import * as globalWorker from './workers/global';
@@ -14,12 +14,10 @@ proxy.bootstrap();
 
 // eslint-disable-next-line @typescript-eslint/no-floating-promises
 (async (): Promise<void> => {
-  const tracer = getTracer();
-  process.exitCode = await tracer.startActiveSpan('run', async (span) => {
-    const exitCode = await globalWorker.start();
-    span.end();
-    return exitCode;
-  });
+  process.exitCode = await instrument(
+    'run',
+    async () => await globalWorker.start()
+  );
   await telemetryShutdown(); //gracefully shutdown OpenTelemetry
 
   // istanbul ignore if

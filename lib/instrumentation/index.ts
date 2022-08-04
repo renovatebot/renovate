@@ -1,5 +1,10 @@
 import { ClientRequest } from 'http';
-import type { Tracer, TracerProvider } from '@opentelemetry/api';
+import type {
+  Context,
+  SpanOptions,
+  Tracer,
+  TracerProvider,
+} from '@opentelemetry/api';
 import * as api from '@opentelemetry/api';
 import { ProxyTracerProvider, SpanStatusCode } from '@opentelemetry/api';
 import { AsyncLocalStorageContextManager } from '@opentelemetry/context-async-hooks';
@@ -98,6 +103,45 @@ export function getTracerProvider(): TracerProvider {
   return api.trace.getTracerProvider();
 }
 
-export function getTracer(): Tracer {
+function getTracer(): Tracer {
   return getTracerProvider().getTracer('renovate');
+}
+
+export async function instrument<F extends () => Promise<unknown>>(
+  name: string,
+  fn: F
+): Promise<ReturnType<F>>;
+export async function instrument<F extends () => Promise<unknown>>(
+  name: string,
+  fn: F,
+  options: SpanOptions
+): Promise<ReturnType<F>>;
+export async function instrument<F extends () => Promise<unknown>>(
+  name: string,
+  fn: F,
+  options?: SpanOptions,
+  context?: Context
+): Promise<ReturnType<F>> {
+  const massagedOptions = options ?? {};
+  const massagedContext = context ?? api.context.active();
+
+  return await getTracer().startActiveSpan(
+    name,
+    massagedOptions,
+    massagedContext,
+    async (span) => {
+      try {
+        const result = await fn();
+        span.end();
+        return result;
+      } catch (e) {
+        span.setStatus({
+          code: SpanStatusCode.ERROR,
+          message: e,
+        });
+        span.end();
+        throw e;
+      }
+    }
+  );
 }

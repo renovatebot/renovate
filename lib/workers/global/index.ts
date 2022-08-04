@@ -15,7 +15,7 @@ import type {
 } from '../../config/types';
 import { CONFIG_PRESETS_INVALID } from '../../constants/error-messages';
 import { pkg } from '../../expose.cjs';
-import { getTracer } from '../../instrumentation';
+import { instrument } from '../../instrumentation';
 import { getProblems, logger, setMeta } from '../../logger';
 import * as hostRules from '../../util/host-rules';
 import * as repositoryWorker from '../repository';
@@ -105,10 +105,9 @@ export async function resolveGlobalExtends(
 }
 
 export async function start(): Promise<number> {
-  const tracer = getTracer();
   let config: AllConfig;
   try {
-    await tracer.startActiveSpan('load config', async (span) => {
+    await instrument('load config', async () => {
       // read global config from file, env and cli args
       config = await getGlobalConfig();
       if (config?.globalExtends) {
@@ -133,18 +132,12 @@ export async function start(): Promise<number> {
 
       // validate secrets. Will throw and abort if invalid
       validateConfigSecrets(config);
-
-      span.end();
     });
 
     // autodiscover repositories (needs to come after platform initialization)
-    config = await tracer.startActiveSpan(
+    config = await instrument(
       'discover repositories',
-      async (span) => {
-        await autodiscoverRepositories(config);
-        span.end();
-        return config;
-      }
+      async () => await autodiscoverRepositories(config)
     );
 
     if (is.nonEmptyString(config.writeDiscoveredRepos)) {
@@ -161,17 +154,9 @@ export async function start(): Promise<number> {
       if (haveReachedLimits()) {
         break;
       }
-      await tracer.startActiveSpan(
+      await instrument(
         'renovate repository',
-        {
-          attributes: {
-            repository:
-              typeof repository === 'string'
-                ? repository
-                : repository.repository,
-          },
-        },
-        async (span) => {
+        async () => {
           const repoConfig = await getRepositoryConfig(config, repository);
           if (repoConfig.hostRules) {
             logger.debug('Reinitializing hostRules for repo');
@@ -181,8 +166,14 @@ export async function start(): Promise<number> {
           }
           await repositoryWorker.renovateRepository(repoConfig);
           setMeta({});
-
-          span.end();
+        },
+        {
+          attributes: {
+            repository:
+              typeof repository === 'string'
+                ? repository
+                : repository.repository,
+          },
         }
       );
     }

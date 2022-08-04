@@ -1,6 +1,6 @@
 import type { Attributes, SpanKind } from '@opentelemetry/api';
 import { Decorator, decorate } from '../util/decorator';
-import { getTracer } from '.';
+import { instrument as instrumentFunc } from '.';
 
 /**
  * The instrumentation decorator parameters.
@@ -37,19 +37,10 @@ export function instrument<T>({
   kind,
 }: SpanParameters): Decorator<T> {
   return decorate(async ({ callback }) => {
-    const tracer = getTracer();
-    return await tracer.startActiveSpan(
-      name,
-      {
-        attributes,
-        root: ignoreParentSpan,
-        kind,
-      },
-      async (span) => {
-        const result = await callback();
-        span.end();
-        return result;
-      }
-    );
+    return await instrumentFunc(name, async () => await callback(), {
+      attributes,
+      root: ignoreParentSpan,
+      kind,
+    });
   });
 }

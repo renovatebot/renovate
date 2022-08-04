@@ -3,7 +3,7 @@ import { GlobalConfig } from '../../config/global';
 import { applySecretsToConfig } from '../../config/secrets';
 import type { RenovateConfig } from '../../config/types';
 import { pkg } from '../../expose.cjs';
-import { getTracer } from '../../instrumentation';
+import { instrument } from '../../instrumentation';
 import { logger, setMeta } from '../../logger';
 import { removeDanglingContainers } from '../../util/exec/docker';
 import { deleteLocalFile, privateCacheDir } from '../../util/fs';
@@ -24,8 +24,6 @@ export async function renovateRepository(
   repoConfig: RenovateConfig,
   canRetry = true
 ): Promise<ProcessResult | undefined> {
-  const tracer = getTracer();
-
   splitInit();
   let config = GlobalConfig.set(
     applySecretsToConfig(repoConfig, undefined, false)
@@ -42,30 +40,22 @@ export async function renovateRepository(
     logger.debug('Using localDir: ' + localDir);
     config = await initRepo(config);
     addSplit('init');
-    const { branches, branchList, packageFiles } = await tracer.startActiveSpan(
+    const { branches, branchList, packageFiles } = await instrument(
       'extractDependencies',
-      async (span) => {
-        const res = await extractDependencies(config);
-        span.end();
-        return res;
-      }
+      async () => await extractDependencies(config)
     );
     if (
       GlobalConfig.get('dryRun') !== 'lookup' &&
       GlobalConfig.get('dryRun') !== 'extract'
     ) {
-      await tracer.startActiveSpan('ensure onboarding PR', async (span) => {
-        await ensureOnboardingPr(config, packageFiles, branches);
-        span.end();
-      });
+      await instrument(
+        'ensure onboarding PR',
+        async () => await ensureOnboardingPr(config, packageFiles, branches)
+      );
 
-      const res = await tracer.startActiveSpan(
+      const res = await instrument(
         'update repository',
-        async (span) => {
-          const res = await updateRepo(config, branches);
-          span.end();
-          return res;
-        }
+        async () => await updateRepo(config, branches)
       );
       setMeta({ repository: config.repository });
       addSplit('update');
