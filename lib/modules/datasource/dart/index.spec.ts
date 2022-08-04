@@ -1,6 +1,7 @@
 import { getPkgReleases } from '..';
 import { Fixtures } from '../../../../test/fixtures';
 import * as httpMock from '../../../../test/http-mock';
+import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages';
 import { DartDatasource } from '.';
 
 const body = Fixtures.getJson('shared_preferences.json');
@@ -63,17 +64,12 @@ describe('modules/datasource/dart/index', () => {
 
     it('throws for 5xx', async () => {
       httpMock.scope(baseUrl).get('/shared_preferences').reply(502);
-      let e;
-      try {
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource: DartDatasource.id,
           depName: 'shared_preferences',
-        });
-      } catch (err) {
-        e = err;
-      }
-      expect(e).toBeDefined();
-      expect(e).toMatchSnapshot();
+        })
+      ).rejects.toThrow(EXTERNAL_HOST_ERROR);
     });
 
     it('returns null for unknown error', async () => {

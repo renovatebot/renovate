@@ -31,7 +31,8 @@ export async function getRepositoryConfig(
     globalConfig,
     is.string(repository) ? { repository } : repository
   );
-  const platform = GlobalConfig.get('platform');
+  // TODO: types (#7154)
+  const platform = GlobalConfig.get('platform')!;
   repoConfig.localDir = upath.join(
     repoConfig.baseDir,
     `./repos/${platform}/${repoConfig.repository}`
