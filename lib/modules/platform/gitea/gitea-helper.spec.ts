@@ -351,11 +351,9 @@ describe('modules/platform/gitea/gitea-helper', () => {
         .post(`/repos/${mockRepo.full_name}/pulls/${mockPR.number}/merge`)
         .reply(200);
 
-      const res = await ght.mergePR(
-        mockRepo.full_name,
-        mockPR.number,
-        'rebase'
-      );
+      const res = await ght.mergePR(mockRepo.full_name, mockPR.number, {
+        Do: 'rebase',
+      });
       expect(res).toBeUndefined();
     });
   });
