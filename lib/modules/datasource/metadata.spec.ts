@@ -2,6 +2,7 @@ import { MavenDatasource } from './maven';
 import {
   addMetaData,
   massageGithubUrl,
+  massageUrl,
   shouldDeleteHomepage,
 } from './metadata';
 import { NpmDatasource } from './npm';
@@ -412,26 +413,32 @@ describe('modules/datasource/metadata', () => {
       shouldDeleteHomepage('not a url', 'https://gitlab.com/org/repo')
     ).toBeFalsy();
     expect(
-      shouldDeleteHomepage('https://gitlab.com/org/repo', 'not a url')
+      shouldDeleteHomepage(
+        massageUrl('https://gitlab.com/org/repo'),
+        'not a url'
+      )
     ).toBeFalsy();
     expect(
-      shouldDeleteHomepage('https://gitlab.com/org', 'https://gitlab.com/org/')
+      shouldDeleteHomepage(
+        massageUrl('https://gitlab.com/org'),
+        'https://gitlab.com/org/'
+      )
     ).toBeTruthy();
     expect(
       shouldDeleteHomepage(
-        'https://gitlab.com/org/repo/',
+        massageUrl('https://gitlab.com/org/repo/'),
         'https://gitlab.com/org/repo'
       )
     ).toBeTruthy();
     expect(
       shouldDeleteHomepage(
-        'https://github.com/org/repo/path/',
+        massageUrl('https://github.com/org/repo/path/'),
         'https://github.com/org/repo/path/'
       )
     ).toBeFalsy();
     expect(
       shouldDeleteHomepage(
-        'https://gitlab.com/org/repo/',
+        massageUrl('https://gitlab.com/org/repo/'),
         'https://gitlab.com/org/repo/path/to/something/'
       )
     ).toBeFalsy();
