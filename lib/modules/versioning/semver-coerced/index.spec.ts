@@ -188,6 +188,12 @@ describe('modules/versioning/semver-coerced/index', () => {
     it('should return false for an prerelease version', () => {
       expect(semverCoerced.isStable('v1.0-alpha')).toBeFalse();
     });
+
+    it('should return false for not semver', () => {
+      expect(semverCoerced.isStable('two1.0')).toBeFalse();
+      expect(semverCoerced.isStable('ver1.2.3')).toBeFalse();
+      expect(semverCoerced.isStable('r3.0')).toBeFalse();
+    });
   });
 
   describe('.isValid(input)', () => {
