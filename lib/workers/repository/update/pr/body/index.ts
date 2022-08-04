@@ -23,6 +23,7 @@ function massageUpdateMetadata(config: BranchConfig): void {
     } = upgrade;
     // TODO: types (#7154)
     let depNameLinked = upgrade.depName!;
+    const slashPrefixRe = regEx('^/+');
     const primaryLink = homepage ?? sourceUrl ?? dependencyUrl;
     if (primaryLink) {
       depNameLinked = `[${depNameLinked}](${primaryLink})`;
@@ -48,7 +49,7 @@ function massageUpdateMetadata(config: BranchConfig): void {
         fullUrl =
           ensureTrailingSlash(sourceUrl) +
           'tree/HEAD/' +
-          sourceDirectory.replace('^/?/', '');
+          sourceDirectory.replace(slashPrefixRe, '');
       }
       references.push(`[source](${fullUrl})`);
     }
