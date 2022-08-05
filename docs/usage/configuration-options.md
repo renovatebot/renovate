@@ -1906,7 +1906,7 @@ If enabled Renovate will pin Docker images by means of their SHA256 digest and n
 
 <!-- prettier-ignore -->
 !!! warning
-    Before you enable `platformAutomerge` you must tell your Git hosting platform what test(s) must pass before the PR is allowed to be auto-merged.
+    Before you enable `platformAutomerge` you should enable your Git hosting platform's capabilities to enforce test passing before PR merge.
     If you don't do this, the platform might merge Renovate PRs even if the repository's tests haven't started, are in still in progress, or possibly even when they have failed. 
     On GitHub this is called "Require status checks before merging", which you can find in the "Branch protection rules" section of the settings for your repository.
     [GitHub docs, about protected branches](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/defining-the-mergeability-of-pull-requests/about-protected-branches)
