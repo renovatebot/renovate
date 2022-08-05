@@ -21,9 +21,7 @@ describe('modules/manager/bazel/update', () => {
       const upgrade = {
         depName: 'build_bazel_rules_nodejs',
         depType: 'git_repository',
-        managerData: {
-          def: input,
-        },
+        managerData: { def: input },
         currentValue: '0.1.8',
         newValue: '0.2.0',
       };
@@ -50,9 +48,7 @@ describe('modules/manager/bazel/update', () => {
       const upgrade = {
         depName: 'build_bazel_rules_nodejs',
         depType: 'git_repository',
-        managerData: {
-          def: input,
-        },
+        managerData: { def: input },
         currentValue: '0.1.8',
         newValue: '0.2.0',
       };
