@@ -182,7 +182,7 @@ export function generateBranchConfig(
         regEx(/[A-Z]/).exec(upgrade.semanticCommitType!) === null &&
         !upgrade.semanticCommitType!.startsWith(':');
     }
-    // prettify newVersion and newMajor  for printing
+    // prettify newVersion and newMajor for printing
     if (upgrade.newVersion) {
       upgrade.prettyNewVersion = upgrade.newVersion.startsWith('v')
         ? upgrade.newVersion
