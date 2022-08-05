@@ -15,7 +15,6 @@ import type { RuleMeta, Target, UrlParsedResult } from './types';
 export function parseUrl(
   urlString: string | undefined | null
 ): UrlParsedResult | null {
-  // istanbul ignore if
   if (!urlString) {
     return null;
   }
@@ -46,7 +45,6 @@ export function parseUrl(
   if (currentValue) {
     return { datasource, repo, currentValue };
   }
-  // istanbul ignore next
   return null;
 }
 
@@ -239,7 +237,6 @@ export const supportedRulesRegex = regEx(`^${supportedRules.join('|')}$`);
 
 export function extractDepFromTarget(target: Target): PackageDependency | null {
   const dependencyExtractor = dependencyExtractorRegistry[target.rule];
-  // istanbul ignore if: should not happen
   if (!dependencyExtractor) {
     logger.warn(
       `Bazel dependency extractor function not found for ${target.rule}`
