@@ -1,5 +1,24 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`modules/manager/sbt/extract extractPackageFile() extract addCompilerPlugin 1`] = `
+Object {
+  "deps": Array [
+    Object {
+      "currentValue": "0.3.0",
+      "datasource": "sbt-plugin",
+      "depName": "org.scala-tools.sxr:sxr",
+      "depType": "plugin",
+      "packageName": "org.scala-tools.sxr:sxr",
+      "registryUrls": Array [
+        "https://repo.maven.apache.org/maven2",
+        "https://dl.bintray.com/sbt/sbt-plugin-releases",
+      ],
+    },
+  ],
+  "packageFileVersion": undefined,
+}
+`;
+
 exports[`modules/manager/sbt/extract extractPackageFile() extract deps from native scala file with private variables 1`] = `
 Object {
   "deps": Array [

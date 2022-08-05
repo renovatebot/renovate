@@ -298,5 +298,21 @@ describe('modules/manager/sbt/extract', () => {
         packageFileVersion: undefined,
       });
     });
+
+    it('extract addCompilerPlugin', () => {
+      expect(
+        extractPackageFile(`
+        addCompilerPlugin("org.scala-tools.sxr" %% "sxr" % "0.3.0")
+        `)
+      ).toMatchSnapshot({
+        deps: [
+          {
+            packageName: 'org.scala-tools.sxr:sxr',
+            currentValue: '0.3.0',
+          },
+        ],
+        packageFileVersion: undefined,
+      });
+    });
   });
 });
