@@ -44,7 +44,7 @@ export async function updateArtifacts({
       docker: {
         image: 'sidecar',
       },
-      preCommands: ['pip install hashin'],
+      preCommands: ['pip install --user hashin'],
       toolConstraints: [
         { toolName: 'python', constraint: config.constraints?.python },
       ],

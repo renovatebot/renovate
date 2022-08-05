@@ -167,7 +167,7 @@ describe('modules/manager/pip_requirements/artifacts', () => {
           'bash -l -c "' +
           'install-tool python 3.10.2 ' +
           '&& ' +
-          'pip install hashin ' +
+          'pip install --user hashin ' +
           '&& ' +
           'hashin atomicwrites==1.4.0 -r requirements.txt' +
           '"',
@@ -198,7 +198,7 @@ describe('modules/manager/pip_requirements/artifacts', () => {
     ]);
     expect(execSnapshots).toMatchObject([
       { cmd: 'install-tool python 3.10.2' },
-      { cmd: 'pip install hashin' },
+      { cmd: 'pip install --user hashin' },
       {
         cmd: 'hashin atomicwrites==1.4.0 -r requirements.txt',
         options: { cwd: '/tmp/github/some/repo' },
