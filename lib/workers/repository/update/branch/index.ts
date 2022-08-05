@@ -394,7 +394,7 @@ export async function processBranch(
         config.branchFingerprint!
       )
     ) {
-      logger.debug('According to branch cache, no updates are necessary');
+      logger.debug('Branch fingerprint is unchanged, no updates are necessary');
       return {
         branchExists: true,
         prNo: branchPr?.number,
