@@ -25,7 +25,7 @@ describe('modules/manager/bazel/update', () => {
         currentValue: '0.1.8',
         newValue: '0.2.0',
       };
-      const output = input.replaceAll('0.1.8', '0.2.0');
+      const output = input.replace('0.1.8', '0.2.0');
 
       const res = await updateDependency({
         fileContent: input,
@@ -52,7 +52,7 @@ describe('modules/manager/bazel/update', () => {
         currentValue: '0.1.8',
         newValue: '0.2.0',
       };
-      const output = input.replaceAll('0.1.8', '0.2.0');
+      const output = input.replace('0.1.8', '0.2.0');
 
       const res = await updateDependency({
         fileContent: input,
@@ -93,8 +93,8 @@ describe('modules/manager/bazel/update', () => {
       };
 
       const output = input
-        .replaceAll(`tag="${currentValue}"`, `tag="${newValue}"`)
-        .replaceAll(currentDigest, newDigest);
+        .replace(`tag="${currentValue}"`, `tag="${newValue}"`)
+        .replace(currentDigest, newDigest);
 
       const res = await updateDependency({ fileContent: input, upgrade });
 
@@ -126,7 +126,7 @@ describe('modules/manager/bazel/update', () => {
         updateType: 'major' as UpdateType,
       };
 
-      const output = input.replaceAll(
+      const output = input.replace(
         `"${currentDigest}"`,
         `"${newDigest}",  # ${newValue}`
       );
@@ -169,8 +169,9 @@ describe('modules/manager/bazel/update', () => {
         .digest('hex');
 
       const output = input
-        .replaceAll(currentDigest, newDigest)
-        .replaceAll(inputHash, outputHash);
+        .replace(currentDigest, newDigest)
+        .replace(currentDigest, newDigest)
+        .replace(inputHash, outputHash);
 
       httpMock
         .scope('https://github.com')
@@ -214,8 +215,9 @@ describe('modules/manager/bazel/update', () => {
         .digest('hex');
 
       const output = input
-        .replaceAll(currentValue, newValue)
-        .replaceAll(inputHash, outputHash);
+        .replace(currentValue, newValue)
+        .replace(currentValue, newValue)
+        .replace(inputHash, outputHash);
 
       httpMock
         .scope('https://github.com')
@@ -257,8 +259,9 @@ describe('modules/manager/bazel/update', () => {
         .digest('hex');
 
       const output = input
-        .replaceAll(currentValue, newValue)
-        .replaceAll(inputHash, outputHash);
+        .replace(currentValue, newValue)
+        .replace(currentValue, newValue)
+        .replace(inputHash, outputHash);
 
       httpMock
         .scope('https://github.com')
@@ -380,8 +383,10 @@ describe('modules/manager/bazel/update', () => {
         .digest('hex');
 
       const output = input
-        .replaceAll(currentValue, newValue)
-        .replaceAll(inputHash, outputHash);
+        .replace(currentValue, newValue)
+        .replace(currentValue, newValue)
+        .replace(currentValue, newValue)
+        .replace(inputHash, outputHash);
 
       httpMock
         .scope('https://github.com')
@@ -432,8 +437,10 @@ describe('modules/manager/bazel/update', () => {
         .digest('hex');
 
       const output = input
-        .replaceAll(currentValue, newValue)
-        .replaceAll(inputHash, outputHash);
+        .replace(currentValue, newValue)
+        .replace(currentValue, newValue)
+        .replace(currentValue, newValue)
+        .replace(inputHash, outputHash);
 
       httpMock
         .scope('https://github.com')
