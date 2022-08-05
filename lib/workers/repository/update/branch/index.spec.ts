@@ -88,14 +88,15 @@ function findFileContent(
 }
 
 describe('workers/repository/update/branch/index', () => {
+  let config: BranchConfig;
+  let branchCache = {} as BranchCache;
+
   describe('processBranch', () => {
     const updatedPackageFiles: PackageFilesResult = {
       updatedPackageFiles: [],
       artifactErrors: [],
       updatedArtifacts: [],
     };
-    let config: BranchConfig;
-    let branchCache = {} as BranchCache;
 
     beforeEach(() => {
       git.branchExists.mockReturnValue(false);
@@ -1778,66 +1779,70 @@ describe('workers/repository/update/branch/index', () => {
         result: 'no-work',
       });
     });
+  });
 
-    describe('canSkipBranchUpdateCheck()', () => {
-      it('returns false if no cache', () => {
-        git.getBranchCommit.mockReturnValueOnce('111');
-        expect(
-          branchWorker.canSkipBranchUpdateCheck(
-            'new/some-branch',
-            branchCache,
-            '222'
-          )
-        ).toBe(false);
-      });
+  describe('canSkipBranchUpdateCheck()', () => {
+    it('returns false if no cache', () => {
+      git.getBranchCommit.mockReturnValueOnce('111');
+      branchCache = {
+        branchName: 'new/some-branch',
+        sha: '111',
+      } as BranchCache;
+      expect(
+        branchWorker.canSkipBranchUpdateCheck(
+          'new/some-branch',
+          branchCache,
+          '222'
+        )
+      ).toBe(false);
+    });
 
-      it('returns false if branch sha is different', () => {
-        git.getBranchCommit.mockReturnValueOnce('111');
-        branchCache = {
-          branchName: 'new/some-branch',
-          sha: '222',
-          branchFingerprint: '222',
-        } as BranchCache;
-        expect(
-          branchWorker.canSkipBranchUpdateCheck(
-            'new/some-branch',
-            branchCache,
-            '222'
-          )
-        ).toBe(false);
-      });
+    it('returns false if branch sha is different', () => {
+      git.getBranchCommit.mockReturnValueOnce('111');
+      branchCache = {
+        branchName: 'new/some-branch',
+        sha: '222',
+        branchFingerprint: '222',
+      } as BranchCache;
+      expect(
+        branchWorker.canSkipBranchUpdateCheck(
+          'new/some-branch',
+          branchCache,
+          '222'
+        )
+      ).toBe(false);
+    });
 
-      it('returns false when fingerprints are not same', () => {
-        git.getBranchCommit.mockReturnValueOnce('111');
-        branchCache = {
-          branchName: 'new/some-branch',
-          sha: '111',
-          branchFingerprint: '211',
-        } as BranchCache;
-        expect(
-          branchWorker.canSkipBranchUpdateCheck(
-            'new/some-branch',
-            branchCache,
-            '222'
-          )
-        ).toBe(false);
-      });
+    it('returns false when fingerprints are not same', () => {
+      git.getBranchCommit.mockReturnValueOnce('111');
+      branchCache = {
+        branchName: 'new/some-branch',
+        sha: '111',
+        branchFingerprint: '211',
+      } as BranchCache;
+      expect(
+        branchWorker.canSkipBranchUpdateCheck(
+          'new/some-branch',
+          branchCache,
+          '222'
+        )
+      ).toBe(false);
+    });
 
-      it('returns true', () => {
-        git.getBranchCommit.mockReturnValueOnce('111');
-        branchCache = {
-          branchName: 'new/some-branch',
-          sha: '111',
-          branchFingerprint: '222',
-        } as BranchCache;
-        expect(
-          branchWorker.canSkipBranchUpdateCheck(
-            'new/some-branch',
-            branchCache,
-            '222'
-          )
-        ).toBe(true);
-      });
+    it('returns true', () => {
+      git.getBranchCommit.mockReturnValueOnce('111');
+      branchCache = {
+        branchName: 'new/some-branch',
+        sha: '111',
+        branchFingerprint: '222',
+      } as BranchCache;
+      expect(
+        branchWorker.canSkipBranchUpdateCheck(
+          'new/some-branch',
+          branchCache,
+          '222'
+        )
+      ).toBe(true);
     });
   });
 });
