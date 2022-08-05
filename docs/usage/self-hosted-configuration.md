@@ -149,8 +149,11 @@ Supported tools for dynamic install are:
 - `jb`
 - `jsonnet-bundler`
 - `mix`
-- `npm`
+- `npm` (including `yarn`, `pnpm` and `lerna`)
 - `pipenv`
+- `pip-compile`
+- `pip_requirements`
+- `poetry`
 
 If all projects are managed by Hermit, you can tell Renovate to use the tooling versions specified in each project via Hermit by setting `binarySource=hermit`.
 
