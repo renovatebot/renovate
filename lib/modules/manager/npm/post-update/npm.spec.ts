@@ -268,6 +268,8 @@ describe('modules/manager/npm/post-update/npm', () => {
           '-w "some-dir" ' +
           'renovate/node ' +
           'bash -l -c "' +
+          'install-tool node 16.16.0 ' +
+          '&& ' +
           'install-tool npm 6.0.0 ' +
           '&& ' +
           'hash -d npm 2>/dev/null || true ' +
@@ -296,6 +298,7 @@ describe('modules/manager/npm/post-update/npm', () => {
     expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
     expect(res.lockFile).toBe('package-lock-contents');
     expect(execSnapshots).toMatchObject([
+      { cmd: 'install-tool node 16.16.0' },
       { cmd: 'install-tool npm 6.0.0' },
       { cmd: 'hash -d npm 2>/dev/null || true' },
       {
