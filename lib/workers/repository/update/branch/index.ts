@@ -80,17 +80,29 @@ export interface ProcessBranchResult {
   result: BranchResult;
 }
 
-function canSkipBranchUpdateCheck(
+export function canSkipBranchUpdateCheck(
   branchName: string,
   branchCache: BranchCache,
   branchFingerprint: string
 ): boolean {
   const branchCommitSha = getBranchCommit(branchName);
 
-  return (
-    branchCommitSha === branchCache.sha &&
-    branchFingerprint === branchCache.branchFingerprint
-  );
+  if (!branchCache.branchFingerprint) {
+    logger.debug('Branch fingerprint not found in cache, cannot skip branch');
+    return false;
+  }
+  if (branchCommitSha !== branchCache.sha) {
+    logger.debug('Last commit is different, cannot skip branch.');
+    return false;
+  }
+  if (branchFingerprint !== branchCache.branchFingerprint) {
+    logger.debug(
+      'Branch fingerprint not same as cached fingerprint, cannot skip branch'
+    );
+    return false;
+  }
+  logger.debug('Branch fingerprint is unchanged, no updates are necessary');
+  return true;
 }
 
 export async function processBranch(
@@ -394,7 +406,6 @@ export async function processBranch(
         config.branchFingerprint!
       )
     ) {
-      logger.debug('Branch fingerprint is unchanged, no updates are necessary');
       return {
         branchExists: true,
         prNo: branchPr?.number,

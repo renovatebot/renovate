@@ -1,3 +1,5 @@
+import is from '@sindresorhus/is';
+import hasha from 'hasha';
 import {
   defaultConfig,
   fs,
@@ -13,6 +15,7 @@ import {
   REPOSITORY_CHANGED,
 } from '../../../../constants/error-messages';
 import { logger } from '../../../../logger';
+import { hashMap } from '../../../../modules/manager';
 import * as _npmPostExtract from '../../../../modules/manager/npm/post-update';
 import type { WriteExistingFilesResult } from '../../../../modules/manager/npm/post-update/types';
 import { hashBody } from '../../../../modules/platform/pr-body';
@@ -1754,16 +1757,85 @@ describe('workers/repository/update/branch/index', () => {
         branchPrefixOld: 'old/',
         reuseExistingBranch: true,
       };
+      const branchManagersFingerprint = hasha(
+        inconfig.upgrades
+          .map((upgrade) => hashMap.get(upgrade.manager) ?? upgrade.manager)
+          .filter(is.string)
+      );
+      inconfig.branchFingerprint = hasha([
+        JSON.stringify(inconfig),
+        branchManagersFingerprint,
+      ]);
       branchCache = {
         branchName: 'new/some-branch',
-        parentSha: '111',
         sha: '111',
+        branchFingerprint: inconfig.branchFingerprint,
       } as BranchCache;
 
       expect(await branchWorker.processBranch(inconfig, branchCache)).toEqual({
         branchExists: true,
         prNo: undefined,
         result: 'no-work',
+      });
+    });
+
+    describe('canSkipBranchUpdateCheck()', () => {
+      it('returns false if no cache', () => {
+        git.getBranchCommit.mockReturnValueOnce('111');
+        expect(
+          branchWorker.canSkipBranchUpdateCheck(
+            'new/some-branch',
+            branchCache,
+            '222'
+          )
+        ).toBe(false);
+      });
+
+      it('returns false if branch sha is different', () => {
+        git.getBranchCommit.mockReturnValueOnce('111');
+        branchCache = {
+          branchName: 'new/some-branch',
+          sha: '222',
+        } as BranchCache;
+        expect(
+          branchWorker.canSkipBranchUpdateCheck(
+            'new/some-branch',
+            branchCache,
+            '222'
+          )
+        ).toBe(false);
+      });
+
+      it('returns false when fingerprints are not same', () => {
+        git.getBranchCommit.mockReturnValueOnce('111');
+        branchCache = {
+          branchName: 'new/some-branch',
+          sha: '111',
+          branchFingerprint: '211',
+        } as BranchCache;
+        expect(
+          branchWorker.canSkipBranchUpdateCheck(
+            'new/some-branch',
+            branchCache,
+            '222'
+          )
+        ).toBe(false);
+      });
+
+      it('returns true', () => {
+        git.getBranchCommit.mockReturnValueOnce('111');
+        branchCache = {
+          branchName: 'new/some-branch',
+          sha: '111',
+          branchFingerprint: '222',
+        } as BranchCache;
+        expect(
+          branchWorker.canSkipBranchUpdateCheck(
+            'new/some-branch',
+            branchCache,
+            '222'
+          )
+        ).toBe(true);
       });
     });
   });
