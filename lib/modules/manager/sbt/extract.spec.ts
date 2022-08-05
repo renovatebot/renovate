@@ -304,7 +304,7 @@ describe('modules/manager/sbt/extract', () => {
         extractPackageFile(`
         addCompilerPlugin("org.scala-tools.sxr" %% "sxr" % "0.3.0")
         `)
-      ).toMatchSnapshot({
+      ).toMatchObject({
         deps: [
           {
             packageName: 'org.scala-tools.sxr:sxr',
