@@ -74,9 +74,7 @@ export async function checkYarnrc(
   return { offlineMirror, yarnPath };
 }
 
-export function getOptimizeCommand(
-  fileName = '/home/ubuntu/.npm-global/lib/node_modules/yarn/lib/cli.js'
-): string {
+export function getOptimizeCommand(fileName: string): string {
   return `sed -i 's/ steps,/ steps.slice(0,1),/' ${quote(fileName)}`;
 }
 
