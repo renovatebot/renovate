@@ -155,7 +155,10 @@ function matchesRule(
     matchPackagePrefixes.length
   ) {
     if (!depName) {
-      return matchPackagePatterns.length !== 0;
+      return (
+        is.undefined(packageRule.matchPackagePatterns) ||
+        packageRule.matchPackagePatterns.length !== 0
+      );
     }
     let isMatch = matchPackageNames.includes(depName);
     // name match is "or" so we check patterns if we didn't match names
