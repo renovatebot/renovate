@@ -1,9 +1,14 @@
-import tmp, { DirectoryResult } from 'tmp-promise';
+import _findUp from 'find-up';
+import upath from 'upath';
 import { mockExecAll } from '../../../test/exec-util';
+import { mockedFunction } from '../../../test/util';
 import { GlobalConfig } from '../../config/global';
-import { writeLocalFile } from '../fs';
 import { findHermitCwd, getHermitEnvs, isHermit } from './hermit';
 import type { RawExecOptions } from './types';
+
+jest.mock('find-up');
+const findUp = mockedFunction(_findUp);
+const localDir = '/tmp/renovate/repository/project-a';
 
 describe('util/exec/hermit', () => {
   describe('isHermit', () => {
@@ -16,34 +21,25 @@ describe('util/exec/hermit', () => {
   });
 
   describe('findHermitCwd', () => {
-    let localDirResult: DirectoryResult;
-    let localDir: string;
-
-    beforeEach(async () => {
-      localDirResult = await tmp.dir({ unsafeCleanup: true });
-      localDir = localDirResult.path;
-
+    beforeEach(() => {
       GlobalConfig.set({ localDir });
     });
 
-    afterEach(async () => {
-      await localDirResult?.cleanup();
-    });
-
     it('should find the closest hermit cwd to the given path', async () => {
-      await writeLocalFile('nested/bin/hermit', 'foo');
-      await writeLocalFile('bin/hermit', 'bar');
-
+      findUp.mockResolvedValue(upath.join(localDir, 'nested/bin/hermit'));
       const nestedCwd = 'nested/other/directory';
 
       expect(await findHermitCwd(nestedCwd)).toBe(`${localDir}/nested/bin`);
       expect(await findHermitCwd('nested')).toBe(`${localDir}/nested/bin`);
+
+      findUp.mockResolvedValue(upath.join(localDir, 'bin/hermit'));
       expect(await findHermitCwd('')).toBe(`${localDir}/bin`);
       expect(await findHermitCwd('other/directory')).toBe(`${localDir}/bin`);
     });
 
     it('should throw error when hermit cwd is not found', async () => {
       const err = new Error('hermit not found for other/directory');
+      findUp.mockResolvedValue('');
 
       await expect(findHermitCwd('other/directory')).rejects.toThrow(err);
     });
@@ -51,7 +47,7 @@ describe('util/exec/hermit', () => {
 
   describe('getHermitEnvs', () => {
     it('should return hermit environment variables when hermit env returns successfully', async () => {
-      await writeLocalFile('bin/hermit', 'bar');
+      findUp.mockResolvedValue(upath.join(localDir, 'bin/hermit'));
       mockExecAll({
         stdout: `GOBIN=/usr/src/app/repository-a/.hermit/go/bin
 PATH=/usr/src/app/repository-a/bin
