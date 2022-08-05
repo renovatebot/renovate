@@ -88,11 +88,9 @@ export function canSkipBranchUpdateCheck(
   const branchCommitSha = getBranchCommit(branchName);
 
   if (!branchCache.branchFingerprint) {
-    logger.debug('Branch fingerprint not found in cache, cannot skip branch');
     return false;
   }
   if (branchCommitSha !== branchCache.sha) {
-    logger.debug('Last commit is different, cannot skip branch.');
     return false;
   }
   if (branchFingerprint !== branchCache.branchFingerprint) {
@@ -101,6 +99,7 @@ export function canSkipBranchUpdateCheck(
     );
     return false;
   }
+
   logger.debug('Branch fingerprint is unchanged, no updates are necessary');
   return true;
 }
