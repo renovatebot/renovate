@@ -140,6 +140,7 @@ async function prepareRawExec(
     logger.debug('Using buildpack dynamic installs');
     rawCommands = [
       ...(await generateInstallCommands(opts.toolConstraints)),
+      ...(opts.preCommands ?? []),
       ...rawCommands,
     ];
   } else if (isHermit()) {
