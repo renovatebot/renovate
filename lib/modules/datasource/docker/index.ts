@@ -34,7 +34,7 @@ import {
 } from '../../versioning/docker';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
-import { sourceLabels } from './common';
+import { gitRefLabel, sourceLabels } from './common';
 import {
   Image,
   ImageList,
@@ -936,6 +936,9 @@ export class DockerDatasource extends Datasource {
       latestTag
     );
     if (labels) {
+      if (is.nonEmptyString(labels[gitRefLabel])) {
+        ret.gitRef = labels[gitRefLabel];
+      }
       for (const label of sourceLabels) {
         if (is.nonEmptyString(labels[label])) {
           ret.sourceUrl = labels[label];
