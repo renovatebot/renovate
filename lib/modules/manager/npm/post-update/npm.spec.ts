@@ -258,15 +258,15 @@ describe('modules/manager/npm/post-update/npm', () => {
     expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
     expect(res.lockFile).toBe('package-lock-contents');
     expect(execSnapshots).toMatchObject([
-      { cmd: 'docker pull renovate/node' },
-      { cmd: 'docker ps --filter name=renovate_node -aq' },
+      { cmd: 'docker pull renovate/sidecar' },
+      { cmd: 'docker ps --filter name=renovate_sidecar -aq' },
       {
         cmd:
-          'docker run --rm --name=renovate_node --label=renovate_child ' +
+          'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
           '-v "/tmp":"/tmp" ' +
           '-e BUILDPACK_CACHE_DIR ' +
           '-w "some-dir" ' +
-          'renovate/node ' +
+          'renovate/sidecar ' +
           'bash -l -c "' +
           'install-tool node 16.16.0 ' +
           '&& ' +
