@@ -51,7 +51,7 @@ export async function writeUpdates(
         .map((upgrade) => hashMap.get(upgrade.manager) ?? upgrade.manager)
         .filter(is.string)
     );
-    branch.branchConfigHash = hasha([JSON.stringify(config), managersHash]);
+    branch.branchFingerprint = hasha([JSON.stringify(config), managersHash]);
     const res = await processBranch(branch, branchCache);
     branch.prBlockedBy = res?.prBlockedBy;
     branch.prNo = res?.prNo;
