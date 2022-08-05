@@ -46,6 +46,10 @@ describe('util/exec/hermit', () => {
   });
 
   describe('getHermitEnvs', () => {
+    beforeEach(() => {
+      GlobalConfig.set({ localDir });
+    });
+
     it('should return hermit environment variables when hermit env returns successfully', async () => {
       findUp.mockResolvedValue(upath.join(localDir, 'bin/hermit'));
       mockExecAll({
