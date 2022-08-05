@@ -288,6 +288,8 @@ export interface PostUpdateConfig<T = Record<string, any>>
   skipInstalls?: boolean;
   ignoreScripts?: boolean;
 
+  packageFile?: string;
+
   upgrades: Upgrade[];
   npmLock?: string;
   yarnLock?: string;

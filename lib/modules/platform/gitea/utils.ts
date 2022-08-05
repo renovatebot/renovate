@@ -6,7 +6,7 @@ import * as hostRules from '../../../util/host-rules';
 import { regEx } from '../../../util/regex';
 import { parseUrl } from '../../../util/url';
 import type { GitUrlOption } from '../types';
-import type { PRMergeMethod, Repo } from './gitea-helper';
+import type { PRMergeMethod, Repo } from './types';
 
 export function smartLinks(body: string): string {
   return body?.replace(regEx(/\]\(\.\.\/pull\//g), '](pulls/');

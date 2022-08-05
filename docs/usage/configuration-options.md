@@ -1481,6 +1481,10 @@ For example you have multiple `package.json` and want to use `dependencyDashboar
 Important to know: Renovate will evaluate all `packageRules` and not stop once it gets a first match.
 You should order your `packageRules` in order of importance so that later rules can override settings from earlier rules if needed.
 
+<!-- prettier-ignore -->
+!!! warning
+    Avoid nesting any `object`-type configuration in a `packageRules` array, such as a `major` or `minor` block.
+
 ### allowedVersions
 
 Use this - usually within a packageRule - to limit how far to upgrade a dependency.

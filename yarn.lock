@@ -2624,10 +2624,10 @@
   resolved "https://registry.yarnpkg.com/@types/node/-/node-18.6.3.tgz#4e4a95b6fe44014563ceb514b2598b3e623d1c98"
   integrity sha512-6qKpDtoaYLM+5+AFChLhHermMQxc3TOEFIDzrZLPRGHPrLEwqFkkT5Kx3ju05g6X7uDPazz3jHbKPX0KzCjntg==
 
-"@types/node@16.11.45":
-  version "16.11.45"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-16.11.45.tgz#155b13a33c665ef2b136f7f245fa525da419e810"
-  integrity sha512-3rKg/L5x0rofKuuUt5zlXzOnKyIHXmIu5R8A0TuNDMF2062/AOIDBciFIjToLEJ/9F9DzkHNot+BpNsMI1OLdQ==
+"@types/node@16.11.46":
+  version "16.11.46"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-16.11.46.tgz#26047602eefa47b36759d9ebb1b55ad08ce97a73"
+  integrity sha512-x+sfpb2dMrhCQPL4NAGs64Z9hh0t72aP0dg+PuZidmPr/0Gj5ELQTjD/t46dq3DF/8ZvSHOaIyDIbAsdPshyVQ==
 
 "@types/node@^13.7.0":
   version "13.13.52"
@@ -5092,10 +5092,10 @@ globrex@^0.1.2:
   resolved "https://registry.yarnpkg.com/globrex/-/globrex-0.1.2.tgz#dd5d9ec826232730cd6793a5e33a9302985e6098"
   integrity sha512-uHJgbwAMwNFf5mLst7IWLNg14x1CkeqglJb/K3doi4dw6q2IvAAmM/Y81kevy83wP+Sst+nutFTYOGg3d1lsxg==
 
-good-enough-parser@1.1.7:
-  version "1.1.7"
-  resolved "https://registry.yarnpkg.com/good-enough-parser/-/good-enough-parser-1.1.7.tgz#a1f6a2fbc10e351dcbb61e322a5f17bbc43bd1eb"
-  integrity sha512-2E03CBmbGc61rDA6TbDsTGm1UywMviza5N1APzp6YtFcB9g6bjWwDIG54EeNQdavOhLGivsMh1U8tB+v5mzE7Q==
+good-enough-parser@1.1.10:
+  version "1.1.10"
+  resolved "https://registry.yarnpkg.com/good-enough-parser/-/good-enough-parser-1.1.10.tgz#bcf5f59369f7fe3f0f621c8b2365171e4f41faf0"
+  integrity sha512-xSMiofggibG9rSt5P92ygB2tcgzgPMCVWPoI5sjnuNu5Id+p4zj4zYXkmQuKvD+c19ZUBfNCL0MFdnti/IBF1g==
   dependencies:
     "@thi.ng/zipper" "1.0.3"
     "@types/moo" "0.5.5"
