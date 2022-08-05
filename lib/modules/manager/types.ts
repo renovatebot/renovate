@@ -113,7 +113,8 @@ export interface Package<T> extends ManagerData<T> {
   major?: { enabled?: boolean };
   prettyDepType?: string;
 
-  prettyVersion?: string;
+  prettyNewMajor?: string;
+  prettyNewVersion?: string;
 }
 
 export interface LookupUpdate {

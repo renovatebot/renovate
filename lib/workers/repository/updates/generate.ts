@@ -182,11 +182,14 @@ export function generateBranchConfig(
         regEx(/[A-Z]/).exec(upgrade.semanticCommitType!) === null &&
         !upgrade.semanticCommitType!.startsWith(':');
     }
-    // prettify version for printing
+    // prettify newVersion and newMajor  for printing
     if (upgrade.newVersion) {
-      upgrade.prettyVersion = upgrade.newVersion.startsWith('v')
+      upgrade.prettyNewVersion = upgrade.newVersion.startsWith('v')
         ? upgrade.newVersion
         : `v${upgrade.newVersion}`;
+    }
+    if (upgrade.newMajor) {
+      upgrade.prettyNewMajor = `v${upgrade.newMajor}`;
     }
     // Compile a few times in case there are nested templates
     upgrade.commitMessage = template.compile(
