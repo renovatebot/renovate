@@ -122,7 +122,7 @@ export function isDynamicInstall(
     );
     return false;
   }
-  return !!toolConstraints?.every((toolConstraint) =>
+  return !toolConstraints || toolConstraints.every((toolConstraint) =>
     supportsDynamicInstall(toolConstraint.toolName)
   );
 }
