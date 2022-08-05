@@ -846,6 +846,20 @@ describe('util/exec/index', () => {
     await expect(promise).rejects.toThrow('No tool releases found.');
   });
 
+  it('Supports binarySource=install preCommands', async () => {
+    process.env = processEnv;
+    const actualCmd: string[] = [];
+    cpExec.mockImplementation((execCmd) => {
+      actualCmd.push(execCmd);
+      return Promise.resolve({ stdout: '', stderr: '' });
+    });
+
+    GlobalConfig.set({ ...globalConfig, binarySource: 'install' });
+    process.env.BUILDPACK = 'true';
+    await exec('foobar', { preCommands: ['install-pip foobar'] });
+    expect(actualCmd).toEqual([`install-pip foobar`, `foobar`]);
+  });
+
   it('only calls removeDockerContainer in catch block is useDocker is set', async () => {
     cpExec.mockImplementation(() => {
       throw new Error('some error occurred');
