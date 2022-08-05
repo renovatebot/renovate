@@ -25,7 +25,7 @@ import { uniqueStrings } from '../../../../util/string';
 import { NpmDatasource } from '../../../datasource/npm';
 import type { PostUpdateConfig, Upgrade } from '../../types';
 import type { NpmManagerData } from '../types';
-import { getNodeConstraint, getNodeUpdate } from './node-version';
+import { getNodeToolConstraint } from './node-version';
 import type { GenerateLockFileResult } from './types';
 
 export async function checkYarnrc(
@@ -94,7 +94,9 @@ export async function generateLockFile(
   logger.debug(`Spawning yarn install to create ${lockFileName}`);
   let lockFile: string | null = null;
   try {
-    const toolConstraints: ToolConstraint[] = [];
+    const toolConstraints: ToolConstraint[] = [
+      await getNodeToolConstraint(config, upgrades),
+    ];
     const yarnUpdate = upgrades.find(isYarnUpdate);
     const yarnCompatibility = yarnUpdate
       ? yarnUpdate.newValue
@@ -174,15 +176,12 @@ export async function generateLockFile(
         extraEnv.YARN_ENABLE_SCRIPTS = '0';
       }
     }
-    const tagConstraint =
-      getNodeUpdate(upgrades) ?? (await getNodeConstraint(config));
+
     const execOptions: ExecOptions = {
       cwdFile: lockFileName,
       extraEnv,
       docker: {
-        image: 'node',
-        tagScheme: 'node',
-        tagConstraint,
+        image: 'sidecar',
       },
       preCommands,
       toolConstraints,
