@@ -1355,7 +1355,7 @@ async function tryPrAutomerge(
     if (semver.satisfies(platformConfig.gheVersion!, '<3.3.0')) {
       logger.debug(
         { prNumber },
-        'GitHub-native automerge: not supported on this GHE version. Requires >=3.3.0'
+        'GitHub-native automerge: not supported on this version of GHE. Use 3.3.0 or newer.'
       );
       return;
     }

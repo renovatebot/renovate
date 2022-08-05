@@ -10,6 +10,6 @@ body:
     id: describe-proposed-changes
     attributes:
       label: Describe the proposed change(s).
-      description: 'Do not report any security concerns here. Email renovate-disclosure@whitesourcesoftware.com instead.'
+      description: 'Do not report any security concerns here. Email renovate-disclosure@mend.io instead.'
     validations:
       required: true
