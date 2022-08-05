@@ -36,14 +36,15 @@ describe('modules/manager/bazel/update', () => {
     });
 
     it('updates maybe(git_repository) tag', async () => {
-      const input = `
+      const input =
+        `
         maybe(
           git_repository,
           name = "build_bazel_rules_nodejs",
           remote = "https://github.com/bazelbuild/rules_nodejs.git",
           tag = "0.1.8",
         )
-      `.trim();
+      `.trim() + '\n';
 
       const upgrade = {
         depName: 'build_bazel_rules_nodejs',
