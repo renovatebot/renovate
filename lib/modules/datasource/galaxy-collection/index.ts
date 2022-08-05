@@ -3,7 +3,7 @@ import pMap from 'p-map';
 import { logger } from '../../../logger';
 import { cache } from '../../../util/cache/package/decorator';
 import type { HttpResponse } from '../../../util/http/types';
-import { ensureTrailingSlash, joinUrlParts } from '../../../util/url';
+import { joinUrlPartsWithTrailingSlash } from '../../../util/url';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
 import type {
@@ -38,12 +38,9 @@ export class GalaxyCollectionDatasource extends Datasource {
 
     const [namespace, projectName] = packageName.split('.');
 
-    // joinUrlParts (url-join) removes the trailing slash, so adding it back
-    const baseUrl = ensureTrailingSlash(
-      joinUrlParts(
-        registryUrl,
-        `api/v2/collections/${namespace}/${projectName}/`
-      )
+    const baseUrl = joinUrlPartsWithTrailingSlash(
+      registryUrl,
+      `api/v2/collections/${namespace}/${projectName}/`
     );
 
     let baseUrlResponse: HttpResponse<BaseProjectResult>;
@@ -63,8 +60,7 @@ export class GalaxyCollectionDatasource extends Datasource {
 
     const baseProject = baseUrlResponse.body;
 
-    // joinUrlParts (url-join) removes the trailing slash, so adding it back
-    const versionsUrl = ensureTrailingSlash(joinUrlParts(baseUrl, 'versions/'));
+    const versionsUrl = joinUrlPartsWithTrailingSlash(baseUrl, 'versions/');
 
     let versionsUrlResponse: HttpResponse<VersionsProjectResult>;
     try {

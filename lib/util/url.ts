@@ -9,6 +9,13 @@ export function joinUrlParts(...parts: string[]): string {
   return urlJoin(...parts);
 }
 
+/**
+ * joinUrlParts (url-join) removes the trailing slash, so adding it back
+ */
+export function joinUrlPartsWithTrailingSlash(...parts: string[]): string {
+  return ensureTrailingSlash(joinUrlParts(...parts));
+}
+
 export function ensurePathPrefix(url: string, prefix: string): string {
   const parsed = new URL(url);
   const fullPath = parsed.pathname + parsed.search;
