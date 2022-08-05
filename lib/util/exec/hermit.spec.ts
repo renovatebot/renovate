@@ -30,16 +30,17 @@ describe('util/exec/hermit', () => {
       const nestedCwd = 'nested/other/directory';
 
       expect(await findHermitCwd(nestedCwd)).toBe(`${localDir}/nested/bin`);
+      findUp.mockResolvedValueOnce(upath.join(localDir, 'nested/bin/hermit'));
       expect(await findHermitCwd('nested')).toBe(`${localDir}/nested/bin`);
 
       findUp.mockResolvedValueOnce(upath.join(localDir, 'bin/hermit'));
       expect(await findHermitCwd('')).toBe(`${localDir}/bin`);
+      findUp.mockResolvedValueOnce(upath.join(localDir, 'bin/hermit'));
       expect(await findHermitCwd('other/directory')).toBe(`${localDir}/bin`);
     });
 
     it('should throw error when hermit cwd is not found', async () => {
       const err = new Error('hermit not found for other/directory');
-      findUp.mockResolvedValue('');
 
       await expect(findHermitCwd('other/directory')).rejects.toThrow(err);
     });
