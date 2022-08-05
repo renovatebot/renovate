@@ -40,7 +40,9 @@ export class GalaxyCollectionDatasource extends Datasource {
 
     const baseUrl = joinUrlPartsWithTrailingSlash(
       registryUrl,
-      `api/v2/collections/${namespace}/${projectName}/`
+      'api/v2/collections',
+      namespace,
+      projectName
     );
 
     let baseUrlResponse: HttpResponse<BaseProjectResult>;
