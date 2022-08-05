@@ -51,6 +51,7 @@
   ;; You can also strings like ["group-id/name" version] for instances
   ;; where the dependency name isn't a valid symbol literal.
   :dependencies [[org.clojure/clojure,"1.3.0"]
+                 #_[org.clojure/clojure "9.9.9"]
                  [org.jclouds/jclouds "1.0" :classifier "jdk15"]
                  [net.sf.ehcache/ehcache "2.3.1" :extension "pom"]
                  [log4j "1.2.15" :exclusions [[javax.mail/mail :extension "jar"]
@@ -59,6 +60,7 @@
                                               com.sun.jmx/jmxri]]
                  ["net.3scale/3scale-api" "3.0.2"]
                  [org.lwjgl.lwjgl/lwjgl "2.8.5"]
+                 #_[org.lwjgl.lwjgl/lwjgl "0.0.0"]
                  [org.lwjgl.lwjgl/lwjgl-platform "2.8.5"
                   :classifier "natives-osx"
                   ;; LWJGL stores natives in the root of the jar; this

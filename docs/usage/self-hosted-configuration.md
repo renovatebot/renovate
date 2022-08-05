@@ -152,6 +152,8 @@ Supported tools for dynamic install are:
 - `npm`
 - `pipenv`
 
+If all projects are managed by Hermit, you can tell Renovate to use the tooling versions specified in each project via Hermit by setting `binarySource=hermit`.
+
 Tools not on this list fall back to `binarySource=global`.
 
 ## cacheDir

@@ -1,11 +1,19 @@
 import { exec as cpExec, envMock } from '../../../test/exec-util';
+import { mockedFunction } from '../../../test/util';
 import { GlobalConfig } from '../../config/global';
 import type { RepoGlobalConfig } from '../../config/types';
 import { TEMPORARY_ERROR } from '../../constants/error-messages';
 import * as dockerModule from './docker';
+import { getHermitEnvs } from './hermit';
 import type { ExecOptions, RawExecOptions, VolumeOption } from './types';
 import { exec } from '.';
 
+const getHermitEnvsMock = mockedFunction(getHermitEnvs);
+
+jest.mock('./hermit', () => ({
+  ...jest.requireActual('./hermit'),
+  getHermitEnvs: jest.fn(),
+}));
 jest.mock('../../modules/datasource');
 
 interface TestInput {
@@ -15,6 +23,7 @@ interface TestInput {
   outCmd: string[];
   outOpts: RawExecOptions[];
   adminConfig?: Partial<RepoGlobalConfig>;
+  hermitEnvs?: Record<string, string>;
 }
 
 describe('util/exec/index', () => {
@@ -710,6 +719,46 @@ describe('util/exec/index', () => {
         },
       },
     ],
+
+    [
+      'Hermit',
+      {
+        processEnv: {
+          ...envMock.basic,
+          CUSTOM_KEY: 'CUSTOM_VALUE',
+          PATH: '/home/user-a/bin;/usr/local/bin',
+        },
+        inCmd,
+        inOpts: {
+          cwd,
+        },
+        outCmd: [inCmd],
+        outOpts: [
+          {
+            cwd,
+            encoding,
+            env: {
+              ...envMock.basic,
+              CUSTOM_KEY: 'CUSTOM_OVERRIDEN_VALUE',
+              GOBIN: '/usr/src/app/repository-a/.hermit/go/bin',
+              PATH: '/usr/src/app/repository-a/bin/;/home/user-a/bin;/usr/local/bin;',
+            },
+            timeout: 900000,
+            maxBuffer: 10485760,
+          },
+        ],
+        hermitEnvs: {
+          GOBIN: '/usr/src/app/repository-a/.hermit/go/bin',
+          PATH: '/usr/src/app/repository-a/bin/;/home/user-a/bin;/usr/local/bin;',
+        },
+        adminConfig: {
+          customEnvVariables: {
+            CUSTOM_KEY: 'CUSTOM_OVERRIDEN_VALUE',
+          },
+          binarySource: 'hermit',
+        },
+      },
+    ],
   ];
 
   test.each(testInputs)('%s', async (_msg, testOpts) => {
@@ -720,6 +769,7 @@ describe('util/exec/index', () => {
       outCmd: outCommand,
       outOpts,
       adminConfig = {} as any,
+      hermitEnvs,
     } = testOpts;
 
     process.env = procEnv;
@@ -733,6 +783,10 @@ describe('util/exec/index', () => {
       return Promise.resolve({ stdout: '', stderr: '' });
     });
     GlobalConfig.set({ ...globalConfig, localDir: cwd, ...adminConfig });
+    if (hermitEnvs !== undefined) {
+      getHermitEnvsMock.mockResolvedValue(hermitEnvs);
+    }
+
     await exec(cmd as string, inOpts);
 
     expect(actualCmd).toEqual(outCommand);
