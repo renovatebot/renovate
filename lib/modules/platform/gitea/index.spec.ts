@@ -21,7 +21,21 @@ import { BranchStatus, PrState } from '../../../types';
 import type * as _git from '../../../util/git';
 import { setBaseUrl } from '../../../util/http/gitea';
 import type { PlatformResult } from '../types';
-import type * as ght from './gitea-helper';
+import type {
+  Branch,
+  CombinedCommitStatus,
+  Comment,
+  CommitStatus,
+  CommitStatusType,
+  CommitUser,
+  Issue,
+  Label,
+  PR,
+  PRState,
+  Repo,
+  RepoContents,
+  User,
+} from './types';
 
 /**
  * latest tested gitea version.
@@ -37,14 +51,14 @@ describe('modules/platform/gitea/index', () => {
 
   const mockCommitHash = '0d9c7726c3d628b7e28af234595cfd20febdbf8e';
 
-  const mockUser: ght.User = {
+  const mockUser: User = {
     id: 1,
     username: 'renovate',
     full_name: 'Renovate Bot',
     email: 'renovate@example.com',
   };
 
-  const mockRepo = partial<ght.Repo>({
+  const mockRepo = partial<Repo>({
     allow_rebase: true,
     clone_url: 'https://gitea.renovatebot.com/some/repo.git',
     ssh_url: 'git@gitea.renovatebot.com/some/repo.git',
@@ -57,11 +71,11 @@ describe('modules/platform/gitea/index', () => {
     },
   });
 
-  type MockPr = ght.PR & Required<Pick<ght.PR, 'head' | 'base'>>;
+  type MockPr = PR & Required<Pick<PR, 'head' | 'base'>>;
 
-  const mockRepos: ght.Repo[] = [
-    partial<ght.Repo>({ full_name: 'a/b' }),
-    partial<ght.Repo>({ full_name: 'c/d' }),
+  const mockRepos: Repo[] = [
+    partial<Repo>({ full_name: 'a/b' }),
+    partial<Repo>({ full_name: 'c/d' }),
   ];
 
   const mockPRs: MockPr[] = [
@@ -78,7 +92,7 @@ describe('modules/platform/gitea/index', () => {
       head: {
         label: 'some-head-branch',
         sha: 'some-head-sha',
-        repo: partial<ght.Repo>({ full_name: mockRepo.full_name }),
+        repo: partial<Repo>({ full_name: mockRepo.full_name }),
       },
     }),
     partial<MockPr>({
@@ -94,7 +108,7 @@ describe('modules/platform/gitea/index', () => {
       head: {
         label: 'other-head-branch',
         sha: 'other-head-sha',
-        repo: partial<ght.Repo>({ full_name: mockRepo.full_name }),
+        repo: partial<Repo>({ full_name: mockRepo.full_name }),
       },
     }),
     partial<MockPr>({
@@ -110,12 +124,12 @@ describe('modules/platform/gitea/index', () => {
       head: {
         label: 'draft-head-branch',
         sha: 'draft-head-sha',
-        repo: partial<ght.Repo>({ full_name: mockRepo.full_name }),
+        repo: partial<Repo>({ full_name: mockRepo.full_name }),
       },
     }),
   ];
 
-  const mockIssues: ght.Issue[] = [
+  const mockIssues: Issue[] = [
     {
       number: 1,
       title: 'open-issue',
@@ -158,18 +172,18 @@ describe('modules/platform/gitea/index', () => {
     },
   ];
 
-  const mockComments: ght.Comment[] = [
+  const mockComments: Comment[] = [
     { id: 11, body: 'some-body' },
     { id: 12, body: 'other-body' },
     { id: 13, body: '### some-topic\n\nsome-content' },
   ];
 
-  const mockRepoLabels: ght.Label[] = [
+  const mockRepoLabels: Label[] = [
     { id: 1, name: 'some-label', description: 'its a me', color: '#000000' },
     { id: 2, name: 'other-label', description: 'labelario', color: '#ffffff' },
   ];
 
-  const mockOrgLabels: ght.Label[] = [
+  const mockOrgLabels: Label[] = [
     {
       id: 3,
       name: 'some-org-label',
@@ -210,7 +224,7 @@ describe('modules/platform/gitea/index', () => {
   }
 
   function initFakeRepo(
-    repo?: Partial<ght.Repo>,
+    repo?: Partial<Repo>,
     config?: Partial<RepoParams>
   ): Promise<RepoResult> {
     helper.getRepo.mockResolvedValueOnce({ ...mockRepo, ...repo });
@@ -592,8 +606,8 @@ describe('modules/platform/gitea/index', () => {
     const getBranchStatus = async (state: string): Promise<BranchStatus> => {
       await initFakeRepo();
       helper.getCombinedCommitStatus.mockResolvedValueOnce(
-        partial<ght.CombinedCommitStatus>({
-          worstStatus: state as ght.CommitStatusType,
+        partial<CombinedCommitStatus>({
+          worstStatus: state as CommitStatusType,
         })
       );
 
@@ -638,7 +652,7 @@ describe('modules/platform/gitea/index', () => {
   describe('getBranchStatusCheck', () => {
     it('should return null with no results', async () => {
       helper.getCombinedCommitStatus.mockResolvedValueOnce(
-        partial<ght.CombinedCommitStatus>({
+        partial<CombinedCommitStatus>({
           statuses: [],
         })
       );
@@ -650,8 +664,8 @@ describe('modules/platform/gitea/index', () => {
 
     it('should return null with no matching results', async () => {
       helper.getCombinedCommitStatus.mockResolvedValueOnce(
-        partial<ght.CombinedCommitStatus>({
-          statuses: [partial<ght.CommitStatus>({ context: 'other-context' })],
+        partial<CombinedCommitStatus>({
+          statuses: [partial<CommitStatus>({ context: 'other-context' })],
         })
       );
 
@@ -662,9 +676,9 @@ describe('modules/platform/gitea/index', () => {
 
     it('should return yellow with unknown status', async () => {
       helper.getCombinedCommitStatus.mockResolvedValueOnce(
-        partial<ght.CombinedCommitStatus>({
+        partial<CombinedCommitStatus>({
           statuses: [
-            partial<ght.CommitStatus>({
+            partial<CommitStatus>({
               context: 'some-context',
             }),
           ],
@@ -678,9 +692,9 @@ describe('modules/platform/gitea/index', () => {
 
     it('should return green of matching result', async () => {
       helper.getCombinedCommitStatus.mockResolvedValueOnce(
-        partial<ght.CombinedCommitStatus>({
+        partial<CombinedCommitStatus>({
           statuses: [
-            partial<ght.CommitStatus>({
+            partial<CommitStatus>({
               status: 'success',
               context: 'some-context',
             }),
@@ -714,7 +728,7 @@ describe('modules/platform/gitea/index', () => {
       await initFakeRepo();
 
       helper.searchPRs.mockResolvedValueOnce([
-        partial<ght.PR>({
+        partial<PR>({
           number: 3,
           title: 'Third-party PR',
           body: 'other random pull request',
@@ -727,7 +741,7 @@ describe('modules/platform/gitea/index', () => {
           head: {
             label: 'other-head-branch',
             sha: 'other-head-sha',
-            repo: partial<ght.Repo>({ full_name: mockRepo.full_name }),
+            repo: partial<Repo>({ full_name: mockRepo.full_name }),
           },
           user: { username: 'not-renovate' },
         }),
@@ -755,10 +769,10 @@ describe('modules/platform/gitea/index', () => {
       const mockPR = mockPRs[0];
       helper.searchPRs.mockResolvedValueOnce(mockPRs);
       helper.getBranch.mockResolvedValueOnce(
-        partial<ght.Branch>({
+        partial<Branch>({
           commit: {
             id: mockCommitHash,
-            author: partial<ght.CommitUser>({
+            author: partial<CommitUser>({
               email: 'renovate@whitesourcesoftware.com',
             }),
           },
@@ -844,7 +858,7 @@ describe('modules/platform/gitea/index', () => {
       expect(
         await gitea.findPr({
           branchName: mockPR.head.label,
-          state: `!${mockPR.state}` as ght.PRState,
+          state: `!${mockPR.state}` as PRState,
         })
       ).toBeNull();
     });
@@ -894,7 +908,7 @@ describe('modules/platform/gitea/index', () => {
       head: {
         label: 'pr-branch',
         sha: mockCommitHash,
-        repo: partial<ght.Repo>({ full_name: mockRepo.full_name }),
+        repo: partial<Repo>({ full_name: mockRepo.full_name }),
       },
       base: {
         ref: mockRepo.default_branch,
@@ -1040,7 +1054,7 @@ describe('modules/platform/gitea/index', () => {
     });
 
     it('should abort when response for created pull request is invalid', async () => {
-      helper.createPR.mockResolvedValueOnce(partial<ght.PR>({}));
+      helper.createPR.mockResolvedValueOnce(partial<PR>({}));
 
       await initFakeRepo();
       await expect(
@@ -1290,9 +1304,7 @@ describe('modules/platform/gitea/index', () => {
       };
 
       helper.searchIssues.mockResolvedValueOnce(mockIssues);
-      helper.createIssue.mockResolvedValueOnce(
-        partial<ght.Issue>({ number: 42 })
-      );
+      helper.createIssue.mockResolvedValueOnce(partial<Issue>({ number: 42 }));
 
       await initFakeRepo();
       const res = await gitea.ensureIssue(mockIssue);
@@ -1313,18 +1325,16 @@ describe('modules/platform/gitea/index', () => {
         once: false,
         labels: ['Renovate', 'Maintenance'],
       };
-      const mockLabels: ght.Label[] = [
-        partial<ght.Label>({ id: 1, name: 'Renovate' }),
-        partial<ght.Label>({ id: 3, name: 'Maintenance' }),
+      const mockLabels: Label[] = [
+        partial<Label>({ id: 1, name: 'Renovate' }),
+        partial<Label>({ id: 3, name: 'Maintenance' }),
       ];
 
       helper.getRepoLabels.mockResolvedValueOnce(partial(mockLabels));
       helper.getOrgLabels.mockResolvedValueOnce([]);
 
       helper.searchIssues.mockResolvedValueOnce(mockIssues);
-      helper.createIssue.mockResolvedValueOnce(
-        partial<ght.Issue>({ number: 42 })
-      );
+      helper.createIssue.mockResolvedValueOnce(partial<Issue>({ number: 42 }));
 
       await initFakeRepo();
       const res = await gitea.ensureIssue(mockIssue);
@@ -1365,11 +1375,11 @@ describe('modules/platform/gitea/index', () => {
     });
 
     it('should not update labels when not necessary', async () => {
-      const mockLabels: ght.Label[] = [
-        partial<ght.Label>({ id: 1, name: 'Renovate' }),
-        partial<ght.Label>({ id: 3, name: 'Maintenance' }),
+      const mockLabels: Label[] = [
+        partial<Label>({ id: 1, name: 'Renovate' }),
+        partial<Label>({ id: 3, name: 'Maintenance' }),
       ];
-      const mockIssue: ght.Issue = {
+      const mockIssue: Issue = {
         number: 10,
         title: 'label-issue',
         body: 'label-body',
@@ -1396,11 +1406,11 @@ describe('modules/platform/gitea/index', () => {
     });
 
     it('should update labels when missing', async () => {
-      const mockLabels: ght.Label[] = [
-        partial<ght.Label>({ id: 1, name: 'Renovate' }),
-        partial<ght.Label>({ id: 3, name: 'Maintenance' }),
+      const mockLabels: Label[] = [
+        partial<Label>({ id: 1, name: 'Renovate' }),
+        partial<Label>({ id: 3, name: 'Maintenance' }),
       ];
-      const mockIssue: ght.Issue = {
+      const mockIssue: Issue = {
         number: 10,
         title: 'label-issue',
         body: 'label-body',
@@ -1434,12 +1444,12 @@ describe('modules/platform/gitea/index', () => {
     });
 
     it('should reset labels when others have been set', async () => {
-      const mockLabels: ght.Label[] = [
-        partial<ght.Label>({ id: 1, name: 'Renovate' }),
-        partial<ght.Label>({ id: 2, name: 'Other label' }),
-        partial<ght.Label>({ id: 3, name: 'Maintenance' }),
+      const mockLabels: Label[] = [
+        partial<Label>({ id: 1, name: 'Renovate' }),
+        partial<Label>({ id: 2, name: 'Other label' }),
+        partial<Label>({ id: 3, name: 'Maintenance' }),
       ];
-      const mockIssue: ght.Issue = {
+      const mockIssue: Issue = {
         number: 10,
         title: 'label-issue',
         body: 'label-body',
@@ -1546,9 +1556,7 @@ describe('modules/platform/gitea/index', () => {
     it('should reset issue cache when creating an issue', async () => {
       helper.searchIssues.mockResolvedValueOnce(mockIssues);
       helper.searchIssues.mockResolvedValueOnce(mockIssues);
-      helper.createIssue.mockResolvedValueOnce(
-        partial<ght.Issue>({ number: 42 })
-      );
+      helper.createIssue.mockResolvedValueOnce(partial<Issue>({ number: 42 }));
 
       await initFakeRepo();
       await gitea.ensureIssue({
@@ -1627,9 +1635,7 @@ describe('modules/platform/gitea/index', () => {
   describe('ensureComment', () => {
     it('should add comment with topic if not found', async () => {
       helper.getComments.mockResolvedValueOnce(mockComments);
-      helper.createComment.mockResolvedValueOnce(
-        partial<ght.Comment>({ id: 42 })
-      );
+      helper.createComment.mockResolvedValueOnce(partial<Comment>({ id: 42 }));
 
       await initFakeRepo();
       const res = await gitea.ensureComment({
@@ -1651,9 +1657,7 @@ describe('modules/platform/gitea/index', () => {
 
     it('should add comment without topic if not found', async () => {
       helper.getComments.mockResolvedValueOnce(mockComments);
-      helper.createComment.mockResolvedValueOnce(
-        partial<ght.Comment>({ id: 42 })
-      );
+      helper.createComment.mockResolvedValueOnce(partial<Comment>({ id: 42 }));
 
       await initFakeRepo();
       const res = await gitea.ensureComment({
@@ -1674,9 +1678,7 @@ describe('modules/platform/gitea/index', () => {
 
     it('should update comment with topic if found', async () => {
       helper.getComments.mockResolvedValueOnce(mockComments);
-      helper.updateComment.mockResolvedValueOnce(
-        partial<ght.Comment>({ id: 13 })
-      );
+      helper.updateComment.mockResolvedValueOnce(partial<Comment>({ id: 13 }));
 
       await initFakeRepo();
       const res = await gitea.ensureComment({
@@ -1917,9 +1919,7 @@ describe('modules/platform/gitea/index', () => {
     });
 
     it('returns null on missing content', async () => {
-      helper.getRepoContents.mockResolvedValueOnce(
-        partial<ght.RepoContents>({})
-      );
+      helper.getRepoContents.mockResolvedValueOnce(partial<RepoContents>({}));
       await initFakeRepo({ full_name: 'some/repo' });
       expect(await gitea.getJsonFile('file.json')).toBeNull();
     });

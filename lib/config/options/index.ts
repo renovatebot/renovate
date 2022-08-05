@@ -278,7 +278,7 @@ const options: RenovateOptions[] = [
       'Controls how third-party tools like npm or Gradle are called: directly, via Docker sidecar containers, or via dynamic install.',
     globalOnly: true,
     type: 'string',
-    allowedValues: ['global', 'docker', 'install'],
+    allowedValues: ['global', 'docker', 'install', 'hermit'],
     default: 'global',
   },
   {
