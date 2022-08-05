@@ -46,14 +46,14 @@ export async function writeUpdates(
       cachedBranches?.find((br) => br.branchName === branch.branchName) ??
       ({} as BranchCache);
 
-    const managersFingerprintHash = hasha(
+    const branchManagersFingerprint = hasha(
       branch.upgrades
         .map((upgrade) => hashMap.get(upgrade.manager) ?? upgrade.manager)
         .filter(is.string)
     );
     branch.branchFingerprint = hasha([
       JSON.stringify(config),
-      managersFingerprintHash,
+      branchManagersFingerprint,
     ]);
     const res = await processBranch(branch, branchCache);
     branch.prBlockedBy = res?.prBlockedBy;
