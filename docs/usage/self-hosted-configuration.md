@@ -87,7 +87,7 @@ It takes a [minimatch](https://www.npmjs.com/package/minimatch) glob-style or re
 
 If you set multiple filters, then the matches of each filter are added to the overall result.
 
-If you use an environment variable or the CLI to set the value for `autodiscoverFilter`, then commas `,` are not supported.
+If you use an environment variable or the CLI to set the value for `autodiscoverFilter`, then commas `,` within filters are not supported.
 Commas will be used as delimiter for a new filter.
 
 ```
