@@ -110,8 +110,6 @@ export async function generateLockFile(
     const isYarnModeAvailable =
       minYarnVersion && semver.gte(minYarnVersion, '3.0.0');
 
-    const preCommands: string[] = [];
-
     const yarnTool: ToolConstraint = {
       toolName: 'yarn',
       constraint: '^1.22.18', // needs to be a v1 yarn, otherwise v2 will be installed
@@ -183,7 +181,6 @@ export async function generateLockFile(
       docker: {
         image: 'sidecar',
       },
-      preCommands,
       toolConstraints,
     };
     // istanbul ignore if
