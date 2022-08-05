@@ -91,16 +91,15 @@ export function canSkipBranchUpdateCheck(
     return false;
   }
   if (branchCommitSha !== branchCache.sha) {
+    logger.debug('Branch fingerprint check skipped due to changed SHA');
     return false;
   }
   if (branchFingerprint !== branchCache.branchFingerprint) {
-    logger.debug(
-      'Branch fingerprint not same as cached fingerprint, cannot skip branch'
-    );
+    logger.debug('Branch fingerprint has changed, full check required');
     return false;
   }
 
-  logger.debug('Branch fingerprint is unchanged, no updates are necessary');
+  logger.debug('Branch fingerprint is unchanged, updates check can be skipped');
   return true;
 }
 
