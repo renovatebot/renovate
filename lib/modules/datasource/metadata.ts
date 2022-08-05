@@ -121,9 +121,9 @@ export function addMetaData(
   }
 
   if (
+    !dep.sourceUrl &&
     dep.changelogUrl &&
-    detectPlatform(dep.changelogUrl) === 'github' &&
-    !dep.sourceUrl
+    detectPlatform(dep.changelogUrl) === 'github'
   ) {
     dep.sourceUrl = dep.changelogUrl;
   }
@@ -153,7 +153,6 @@ export function addMetaData(
     }
   }
   if (shouldDeleteHomepage(dep.sourceUrl, dep.homepage)) {
-    // remove homepage if its not a link to a path
     delete dep.homepage;
   }
   // Clean up any empty urls
@@ -173,6 +172,7 @@ export function addMetaData(
   }
 }
 
+// remove homepage if its not a link to a path or if its same as sourceurl.
 export function shouldDeleteHomepage(
   sourceUrl: string | null | undefined,
   homepage: string | undefined
