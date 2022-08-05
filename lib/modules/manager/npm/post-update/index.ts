@@ -36,6 +36,7 @@ import type {
   ArtifactError,
   DetermineLockFileDirsResult,
   WriteExistingFilesResult,
+  YarnRcYmlFile,
 } from './types';
 import * as yarn from './yarn';
 
@@ -408,6 +409,7 @@ async function updateYarnOffline(
   }
 }
 
+// TODO: move to ./yarn.ts
 // exported for testing
 export async function updateYarnBinary(
   lockFileDir: string,
@@ -423,8 +425,15 @@ export async function updateYarnBinary(
       return existingYarnrcYmlContent;
     }
 
-    const oldYarnPath = (load(yarnrcYml) as Record<string, string>).yarnPath;
-    const newYarnPath = (load(newYarnrcYml) as Record<string, string>).yarnPath;
+    const oldYarnPath = (load(yarnrcYml) as YarnRcYmlFile)?.yarnPath;
+    const newYarnPath = (load(newYarnrcYml) as YarnRcYmlFile)?.yarnPath;
+    if (
+      !is.nonEmptyStringAndNotWhitespace(oldYarnPath) ||
+      !is.nonEmptyStringAndNotWhitespace(newYarnPath)
+    ) {
+      return existingYarnrcYmlContent;
+    }
+
     const oldYarnFullPath = upath.join(lockFileDir, oldYarnPath);
     const newYarnFullPath = upath.join(lockFileDir, newYarnPath);
     logger.debug({ oldYarnPath, newYarnPath }, 'Found updated Yarn binary');
