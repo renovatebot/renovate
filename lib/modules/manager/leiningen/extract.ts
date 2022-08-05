@@ -35,6 +35,7 @@ export function extractFromVectors(
   let vecPos = 0;
   let artifactId = '';
   let version = '';
+  let commentLevel = 0;
 
   const isSpace = (ch: string | null): boolean =>
     !!ch && regEx(/[\s,]/).test(ch);
@@ -43,7 +44,7 @@ export function extractFromVectors(
     s.replace(regEx(/^"/), '').replace(regEx(/"$/), '');
 
   const yieldDep = (): void => {
-    if (artifactId && version) {
+    if (!commentLevel && artifactId && version) {
       const depName = expandDepName(cleanStrLiteral(artifactId));
       if (version.startsWith('~')) {
         const varName = version.replace(regEx(/^~\s*/), '');
@@ -73,6 +74,11 @@ export function extractFromVectors(
   let prevChar: string | null = null;
   while (idx < str.length) {
     const char = str.charAt(idx);
+
+    if (str.substring(idx).startsWith('#_[')) {
+      commentLevel = balance;
+    }
+
     if (char === '[') {
       balance += 1;
       if (balance === 2) {
@@ -80,6 +86,13 @@ export function extractFromVectors(
       }
     } else if (char === ']') {
       balance -= 1;
+
+      if (commentLevel === balance) {
+        artifactId = '';
+        version = '';
+        commentLevel = 0;
+      }
+
       if (balance === 1) {
         yieldDep();
       } else if (balance === 0) {
