@@ -42,10 +42,14 @@ export async function writeUpdates(
   for (const branch of branches) {
     addMeta({ branch: branch.branchName });
     const branchExisted = branchExists(branch.branchName);
-    const branchCache =
-      cachedBranches?.find((br) => br.branchName === branch.branchName) ??
-      ({} as BranchCache);
+    let branchCache = cachedBranches?.find(
+      (br) => br.branchName === branch.branchName
+    );
 
+    if (!branchCache) {
+      logger.debug(`No branch cache found for ${branch.branchName}`);
+      branchCache = {} as BranchCache;
+    }
     const branchManagersFingerprint = hasha(
       branch.upgrades
         .map((upgrade) => hashMap.get(upgrade.manager) ?? upgrade.manager)

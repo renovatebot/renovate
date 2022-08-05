@@ -1796,6 +1796,7 @@ describe('workers/repository/update/branch/index', () => {
         branchCache = {
           branchName: 'new/some-branch',
           sha: '222',
+          branchFingerprint: '222',
         } as BranchCache;
         expect(
           branchWorker.canSkipBranchUpdateCheck(
