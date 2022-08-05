@@ -12,7 +12,7 @@ import * as docker from '../../../../util/exec/docker';
 import { getPkgReleases } from '../../../datasource';
 import type { PostUpdateConfig } from '../../types';
 import type { NpmManagerData } from '../types';
-import { getNodeToolContraint } from './node-version';
+import { getNodeToolConstraint } from './node-version';
 import * as yarnHelper from './yarn';
 
 jest.mock('fs-extra', () =>
@@ -44,7 +44,7 @@ describe('modules/manager/npm/post-update/yarn', () => {
     Fixtures.reset();
     GlobalConfig.set({ localDir: '.', cacheDir: '/tmp/cache' });
     docker.resetPrefetchedImages();
-    mockedFunction(getNodeToolContraint).mockResolvedValueOnce({
+    mockedFunction(getNodeToolConstraint).mockResolvedValueOnce({
       toolName: 'node',
       constraint: '16.16.0',
     });
