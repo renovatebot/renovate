@@ -112,9 +112,6 @@ export interface Package<T> extends ManagerData<T> {
   currentRawValue?: string;
   major?: { enabled?: boolean };
   prettyDepType?: string;
-
-  prettyNewMajor?: string;
-  prettyNewVersion?: string;
 }
 
 export interface LookupUpdate {
@@ -184,6 +181,8 @@ export interface Upgrade<T = Record<string, any>>
   newName?: string;
   newValue?: string;
   packageFile?: string;
+  prettyNewMajor?: string;
+  prettyNewVersion?: string;
   rangeStrategy?: RangeStrategy;
   newVersion?: string;
   updateType?: UpdateType;
