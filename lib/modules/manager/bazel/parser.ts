@@ -175,7 +175,7 @@ const query = q.tree<Ctx>({
 });
 
 function getCacheKey(input: string): string {
-  const hash = hasha(input, { algorithm: 'sha512' });
+  const hash = hasha(input);
   return `bazel-parser-${hash}`;
 }
 
