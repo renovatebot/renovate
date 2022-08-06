@@ -76,6 +76,7 @@ export interface CommitFilesConfig {
   message: string;
   force?: boolean;
   platformCommit?: boolean;
+  recreateMergedPr?: boolean;
 }
 
 export type BranchName = string;

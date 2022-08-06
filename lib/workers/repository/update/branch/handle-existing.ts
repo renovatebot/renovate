@@ -34,14 +34,14 @@ export async function handlepr(config: BranchConfig, pr: Pr): Promise<void> {
         });
       }
     }
+    if (branchExists(config.branchName)) {
+      if (GlobalConfig.get('dryRun')) {
+        logger.info('DRY-RUN: Would delete branch ' + config.branchName);
+      } else {
+        await deleteBranch(config.branchName);
+      }
+    }
   } else if (pr.state === PrState.Merged) {
     logger.debug({ pr: pr.number }, 'Merged PR found');
-  }
-  if (branchExists(config.branchName)) {
-    if (GlobalConfig.get('dryRun')) {
-      logger.info('DRY-RUN: Would delete branch ' + config.branchName);
-    } else {
-      await deleteBranch(config.branchName);
-    }
   }
 }

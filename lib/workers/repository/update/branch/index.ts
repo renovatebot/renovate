@@ -112,14 +112,12 @@ export async function processBranch(
     const existingPr = branchPr ? undefined : await prAlreadyExisted(config);
     if (existingPr && !dependencyDashboardCheck) {
       // If merged pr exists recreate new pr with new branch
-      if (
-        existingPr.state === 'merged' &&
-        !gitBranchExists(config.branchName)
-      ) {
+      if (existingPr.state === 'merged') {
         logger.debug(
           { prTitle: config.prTitle },
           'Merged PR already exists. Creating new PR with automerge disabled.'
         );
+        config.recreateMergedPr = true;
         config.automerge = false;
       } else {
         logger.debug(
@@ -379,6 +377,11 @@ export async function processBranch(
         prNo: branchPr?.number,
         result: BranchResult.NoWork,
       };
+    } else if (config.recreateMergedPr) {
+      logger.debug(
+        'Rebase branch cause the commits from old branch have already been merged.'
+      );
+      config.reuseExistingBranch = false;
     } else {
       config = { ...config, ...(await shouldReuseExistingBranch(config)) };
     }
