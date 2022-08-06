@@ -46,8 +46,10 @@ export async function writeUpdates(
       (br) => br.branchName === branch.branchName
     );
 
-    if (!branchCache) {
-      logger.debug(`No branch cache found for ${branch.branchName}`);
+    if (branchCache === undefined) {
+      if (config.repositoryCache === 'enabled') {
+        logger.debug(`No branch cache found for ${branch.branchName}`);
+      }
       branchCache = {} as BranchCache;
     }
     const branchManagersFingerprint = hasha(

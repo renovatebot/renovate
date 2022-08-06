@@ -2,6 +2,7 @@ import {
   RenovateConfig,
   getConfig,
   git,
+  logger,
   mocked,
   partial,
 } from '../../../../test/util';
@@ -112,6 +113,31 @@ describe('workers/repository/process/write', () => {
       });
       git.branchExists.mockReturnValue(true);
       expect(await writeUpdates({ config }, branches)).toBe('done');
+    });
+
+    it('shows debug log when the cache is enabled, but branch cache not found', async () => {
+      const branches = partial<BranchConfig[]>([
+        {
+          branchName: 'new/some-branch',
+          manager: 'npm',
+          upgrades: [
+            {
+              manager: 'npm',
+            } as BranchUpgradeConfig,
+          ],
+        },
+      ]);
+      repoCache.getCache.mockReturnValueOnce({});
+      branchWorker.processBranch.mockResolvedValueOnce({
+        branchExists: true,
+        result: BranchResult.NoWork,
+      });
+      git.branchExists.mockReturnValue(true);
+      config.repositoryCache = 'enabled';
+      await writeUpdates(config, branches);
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        'No branch cache found for new/some-branch'
+      );
     });
   });
 });
