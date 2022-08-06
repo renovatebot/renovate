@@ -1,7 +1,7 @@
 import { parse } from './parser';
 
 describe('modules/manager/bazel/parser', () => {
-  it('parses rules input', async () => {
+  it('parses rules input', () => {
     const input = `go_repository(
       deps = ["foo", "bar"],
       name = "com_github_google_uuid",
@@ -9,7 +9,7 @@ describe('modules/manager/bazel/parser', () => {
       commit = "dec09d789f3dba190787f8b4454c7d3c936fed9e",
     )`;
 
-    const res = await parse(input);
+    const res = parse(input);
     expect(res).toEqual({
       meta: [
         { data: { length: 3, offset: 30 }, path: [0, 'deps', 0] },
@@ -31,7 +31,7 @@ describe('modules/manager/bazel/parser', () => {
     });
   });
 
-  it('parses maybe input', async () => {
+  it('parses maybe input', () => {
     const input = `maybe(
       go_repository,
       deps = ["foo", "bar"],
@@ -40,7 +40,7 @@ describe('modules/manager/bazel/parser', () => {
       commit = "dec09d789f3dba190787f8b4454c7d3c936fed9e",
     )`;
 
-    const res = await parse(input);
+    const res = parse(input);
     expect(res).toEqual({
       meta: [
         { data: { length: 3, offset: 43 }, path: [0, 'deps', 0] },
