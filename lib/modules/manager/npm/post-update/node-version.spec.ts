@@ -61,7 +61,7 @@ describe('modules/manager/npm/post-update/node-version', () => {
     });
   });
 
-  describe('getNodeToolContraint()', () => {
+  describe('getNodeToolConstraint()', () => {
     it('returns getNodeUpdate', async () => {
       expect(
         await getNodeToolConstraint(config, [

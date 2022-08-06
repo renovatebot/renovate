@@ -1,5 +1,4 @@
 import is from '@sindresorhus/is';
-import { logger } from '../logger';
 import { getLanguageList, getManagerList } from '../modules/manager';
 import { configRegexPredicate, isConfigRegex, regEx } from '../util/regex';
 import * as template from '../util/template';
@@ -9,7 +8,7 @@ import {
 } from '../workers/repository/update/branch/schedule';
 import { migrateConfig } from './migration';
 import { getOptions } from './options';
-import { getPreset, resolveConfigPresets } from './presets';
+import { resolveConfigPresets } from './presets';
 import type {
   RenovateConfig,
   RenovateOptions,
@@ -272,18 +271,6 @@ export async function validateConfig(
             if (key === 'extends') {
               for (const subval of val) {
                 if (is.string(subval)) {
-                  try {
-                    await getPreset(subval, config);
-                  } catch (err) {
-                    logger.debug(
-                      { err, preset: subval },
-                      `Could not resolve preset during config validation`
-                    );
-                    errors.push({
-                      topic: 'Configuration Warning',
-                      message: `Invalid Preset ${subval}`,
-                    });
-                  }
                   if (
                     parentName === 'packageRules' &&
                     subval.startsWith('group:')
