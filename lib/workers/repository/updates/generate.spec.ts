@@ -136,7 +136,7 @@ describe('workers/repository/updates/generate', () => {
           branchName: 'some-branch',
           prTitle: 'some-title',
           commitMessageExtra:
-            'to {{#if isMajor}}v{{newMajor}}{{else}}{{#unless isRange}}v{{/unless}}{{newValue}}{{/if}}',
+            'to {{#if isMajor}}{{prettyNewMajor}}{{else}}{{#unless isRange}}v{{/unless}}{{newValue}}{{/if}}',
           foo: 1,
           newValue: '5.1.2',
           newVersion: '5.1.2',
@@ -156,7 +156,7 @@ describe('workers/repository/updates/generate', () => {
           branchName: 'some-branch',
           prTitle: 'some-title',
           commitMessageExtra:
-            'to {{#if isMajor}}v{{newMajor}}{{else}}{{#unless isRange}}v{{/unless}}{{newValue}}{{/if}}',
+            'to {{#if isMajor}}{{prettyNewMajor}}{{else}}{{#unless isRange}}v{{/unless}}{{newValue}}{{/if}}',
           foo: 1,
           newValue: '5.1.2',
           newVersion: '5.1.2',
@@ -177,7 +177,7 @@ describe('workers/repository/updates/generate', () => {
           branchName: 'some-branch',
           prTitle: 'some-title',
           commitMessageExtra:
-            'to {{#if isMajor}}v{{newMajor}}{{else}}{{#unless isRange}}v{{/unless}}{{newValue}}{{/if}}',
+            'to {{#if isMajor}}{{prettyNewMajor}}{{else}}{{#unless isRange}}v{{/unless}}{{newValue}}{{/if}}',
           foo: 1,
           newValue: '5.1.2',
           newVersion: '5.1.2',
@@ -208,7 +208,7 @@ describe('workers/repository/updates/generate', () => {
           branchName: 'some-branch',
           prTitle: 'some-title',
           commitMessageExtra:
-            'to {{#if isMajor}}v{{newMajor}}{{else}}{{#unless isRange}}v{{/unless}}{{newValue}}{{/if}}',
+            'to {{#if isMajor}}{{prettyNewMajor}}{{else}}{{#unless isRange}}v{{/unless}}{{newValue}}{{/if}}',
           foo: 1,
           newValue: '5.1.2',
           newVersion: '5.1.2',
@@ -222,7 +222,7 @@ describe('workers/repository/updates/generate', () => {
           branchName: 'some-branch',
           prTitle: 'some-title',
           commitMessageExtra:
-            'to {{#if isMajor}}v{{newMajor}}{{else}}{{#unless isRange}}v{{/unless}}{{newValue}}{{/if}}',
+            'to {{#if isMajor}}{{prettyNewMajor}}{{else}}{{#unless isRange}}v{{/unless}}{{newValue}}{{/if}}',
           foo: 1,
           newValue: '5.2.0',
           newVersion: '5.2.0',
@@ -244,7 +244,7 @@ describe('workers/repository/updates/generate', () => {
           branchName: 'some-branch',
           prTitle: 'some-title',
           commitMessageExtra:
-            'to {{#if isMajor}}v{{newMajor}}{{else}}{{#unless isRange}}v{{/unless}}{{newValue}}{{/if}}',
+            'to {{#if isMajor}}{{prettyNewMajor}}{{else}}{{#unless isRange}}v{{/unless}}{{newValue}}{{/if}}',
           foo: 1,
           newValue: '5.1.2',
           newVersion: '5.1.2',
@@ -260,7 +260,7 @@ describe('workers/repository/updates/generate', () => {
           branchName: 'some-branch',
           prTitle: 'some-title',
           commitMessageExtra:
-            'to {{#if isMajor}}v{{newMajor}}{{else}}{{#unless isRange}}v{{/unless}}{{newValue}}{{/if}}',
+            'to {{#if isMajor}}{{prettyNewMajor}}{{else}}{{#unless isRange}}v{{/unless}}{{newValue}}{{/if}}',
           foo: 1,
           newValue: '1.1.0',
           newVersion: '1.1.0',
@@ -287,7 +287,7 @@ describe('workers/repository/updates/generate', () => {
           branchName: 'some-branch',
           prTitle: 'some-title',
           commitMessageExtra:
-            'to {{#if isMajor}}v{{newMajor}}{{else}}{{#unless isRange}}v{{/unless}}{{newValue}}{{/if}}',
+            'to {{#if isMajor}}{{prettyNewMajor}}{{else}}{{#unless isRange}}v{{/unless}}{{newValue}}{{/if}}',
           foo: 1,
           newValue: '^6.0',
           newVersion: '6.0.3',
@@ -303,7 +303,7 @@ describe('workers/repository/updates/generate', () => {
           branchName: 'some-branch',
           prTitle: 'some-title',
           commitMessageExtra:
-            'to {{#if isMajor}}v{{newMajor}}{{else}}{{#unless isRange}}v{{/unless}}{{newValue}}{{/if}}',
+            'to {{#if isMajor}}{{prettyNewMajor}}{{else}}{{#unless isRange}}v{{/unless}}{{newValue}}{{/if}}',
           foo: 1,
           newValue: '^6.0',
           newVersion: '6.0.1',
@@ -330,7 +330,7 @@ describe('workers/repository/updates/generate', () => {
           branchName: 'some-branch',
           prTitle: 'some-title',
           commitMessageExtra:
-            'to {{#if isMajor}}v{{newMajor}}{{else}}{{#unless isRange}}v{{/unless}}{{newValue}}{{/if}}',
+            'to {{#if isMajor}}{{prettyNewMajor}}{{else}}{{#unless isRange}}v{{/unless}}{{newValue}}{{/if}}',
           foo: 1,
           newValue: '^6.0.1',
           newVersion: '6.0.2',
@@ -346,7 +346,7 @@ describe('workers/repository/updates/generate', () => {
           branchName: 'some-branch',
           prTitle: 'some-title',
           commitMessageExtra:
-            'to {{#if isMajor}}v{{newMajor}}{{else}}{{#unless isRange}}v{{/unless}}{{newValue}}{{/if}}',
+            'to {{#if isMajor}}{{prettyNewMajor}}{{else}}{{#unless isRange}}v{{/unless}}{{newValue}}{{/if}}',
           foo: 1,
           newValue: '^6.0.0',
           newVersion: '6.0.2',
@@ -373,7 +373,7 @@ describe('workers/repository/updates/generate', () => {
           branchName: 'some-branch',
           prTitle: 'some-title',
           commitMessageExtra:
-            'to {{#if isMajor}}v{{newMajor}}{{else}}{{#unless isRange}}v{{/unless}}{{newValue}}{{/if}}',
+            'to {{#if isMajor}}{{prettyNewMajor}}{{else}}{{#unless isRange}}v{{/unless}}{{newValue}}{{/if}}',
           isDigest: true,
           currentDigest: 'abcdefghijklmnopqrstuvwxyz',
           newDigest: '123abcdefghijklmnopqrstuvwxyz',
@@ -389,7 +389,7 @@ describe('workers/repository/updates/generate', () => {
           branchName: 'some-branch',
           prTitle: 'some-title',
           commitMessageExtra:
-            'to {{#if isMajor}}v{{newMajor}}{{else}}{{#unless isRange}}v{{/unless}}{{newValue}}{{/if}}',
+            'to {{#if isMajor}}{{prettyNewMajor}}{{else}}{{#unless isRange}}v{{/unless}}{{newValue}}{{/if}}',
           foo: 1,
           newValue: 'zzzzzzzzzz',
           group: {
@@ -430,7 +430,7 @@ describe('workers/repository/updates/generate', () => {
           branchName: 'some-branch',
           prTitle: 'some-title',
           commitMessageExtra:
-            'to {{#if isMajor}}v{{newMajor}}{{else}}{{#unless isRange}}v{{/unless}}{{newValue}}{{/if}}',
+            'to {{#if isMajor}}{{prettyNewMajor}}{{else}}{{#unless isRange}}v{{/unless}}{{newValue}}{{/if}}',
           foo: 1,
           newValue: '>= 5.1.2',
           newVersion: '5.1.2',
@@ -446,7 +446,7 @@ describe('workers/repository/updates/generate', () => {
           branchName: 'some-branch',
           prTitle: 'some-title',
           commitMessageExtra:
-            'to {{#if isMajor}}v{{newMajor}}{{else}}{{#unless isRange}}v{{/unless}}{{newValue}}{{/if}}',
+            'to {{#if isMajor}}{{prettyNewMajor}}{{else}}{{#unless isRange}}v{{/unless}}{{newValue}}{{/if}}',
           foo: 1,
           newValue: '^5,1,2',
           newVersion: '5.1.2',
