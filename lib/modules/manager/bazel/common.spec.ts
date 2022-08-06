@@ -5,19 +5,19 @@ import {
   gitDependency,
   goDependency,
   httpDependency,
-  parseUrl,
+  parseArchiveUrl,
 } from './common';
 
 describe('modules/manager/bazel/common', () => {
   test('parseUrl', () => {
-    expect(parseUrl('')).toBeNull();
-    expect(parseUrl(null)).toBeNull();
-    expect(parseUrl(null)).toBeNull();
-    expect(parseUrl('https://example.com/')).toBeNull();
-    expect(parseUrl('https://github.com/foo/bar')).toBeNull();
+    expect(parseArchiveUrl('')).toBeNull();
+    expect(parseArchiveUrl(null)).toBeNull();
+    expect(parseArchiveUrl(null)).toBeNull();
+    expect(parseArchiveUrl('https://example.com/')).toBeNull();
+    expect(parseArchiveUrl('https://github.com/foo/bar')).toBeNull();
 
     expect(
-      parseUrl(
+      parseArchiveUrl(
         'https://github.com/foo/bar/archive/abcdef0123abcdef0123abcdef0123abcdef0123.tar.gz'
       )
     ).toEqual({
@@ -27,7 +27,7 @@ describe('modules/manager/bazel/common', () => {
     });
 
     expect(
-      parseUrl(
+      parseArchiveUrl(
         'https://github.com/foo/bar/releases/download/1.2.3/foobar-1.2.3.tar.gz'
       )
     ).toEqual({

@@ -1,6 +1,6 @@
-import crypto from 'crypto';
 import is from '@sindresorhus/is';
 import { lang, query as q } from 'good-enough-parser';
+import hasha from 'hasha';
 import * as memCache from '../../../util/cache/memory';
 import { supportedRulesRegex } from './common';
 import type { MetaPath, ParsedResult, Target, TargetAttribute } from './types';
@@ -174,13 +174,16 @@ const query = q.tree<Ctx>({
   search: rule,
 });
 
-function getCacheKey(input: string): string {
-  const hash = crypto.createHash('md5').update(input).digest('hex');
+async function getCacheKey(input: string): Promise<string> {
+  const hash = await hasha.async(input, { algorithm: 'sha512' });
   return `bazel-parser-${hash}`;
 }
 
-export function parse(input: string, ctx = emptyCtx): ParsedResult | null {
-  const cacheKey = getCacheKey(input);
+export async function parse(
+  input: string,
+  ctx = emptyCtx
+): Promise<ParsedResult | null> {
+  const cacheKey = await getCacheKey(input);
 
   const cachedResult = memCache.get<ParsedResult | null>(cacheKey);
   // istanbul ignore if

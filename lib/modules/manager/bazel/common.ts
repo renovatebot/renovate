@@ -1,9 +1,9 @@
-import { parse as _parse } from 'url';
 import is from '@sindresorhus/is';
 import { dequal } from 'dequal';
 import parseGithubUrl from 'github-url-from-git';
 import { logger } from '../../../logger';
 import { regEx } from '../../../util/regex';
+import { parseUrl } from '../../../util/url';
 import { DockerDatasource } from '../../datasource/docker';
 import { GithubReleasesDatasource } from '../../datasource/github-releases';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
@@ -12,17 +12,17 @@ import { id as dockerVersioning } from '../../versioning/docker';
 import type { PackageDependency } from '../types';
 import type { RuleMeta, Target, UrlParsedResult } from './types';
 
-export function parseUrl(
+export function parseArchiveUrl(
   urlString: string | undefined | null
 ): UrlParsedResult | null {
   if (!urlString) {
     return null;
   }
-  const url = _parse(urlString);
-  if (url.host !== 'github.com' || !url.path) {
+  const url = parseUrl(urlString);
+  if (!url || url.host !== 'github.com' || !url.pathname) {
     return null;
   }
-  const path = url.path.split('/').slice(1);
+  const path = url.pathname.split('/').slice(1);
   const repo = path[0] + '/' + path[1];
   let datasource = '';
   let currentValue: string | null = null;
@@ -158,10 +158,10 @@ export function httpDependency({
   ) {
     let parsedUrl: UrlParsedResult | null = null;
     if (is.string(url)) {
-      parsedUrl = parseUrl(url);
+      parsedUrl = parseArchiveUrl(url);
     } else if (is.array(urls, is.string)) {
       for (const u of urls) {
-        parsedUrl = parseUrl(u);
+        parsedUrl = parseArchiveUrl(u);
         if (parsedUrl) {
           break;
         }

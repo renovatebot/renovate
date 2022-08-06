@@ -1,26 +1,28 @@
 import { Fixtures } from '../../../../test/fixtures';
-import { extractPackageFile } from '.';
+import { extractPackageFile as extract } from '.';
+
+const extractPackageFile = (content: string) => extract(content, 'WORKSPACE');
 
 describe('modules/manager/bazel/extract', () => {
   describe('extractPackageFile()', () => {
-    it('returns empty if fails to parse', () => {
-      const res = extractPackageFile('blahhhhh:foo:@what\n');
+    it('returns empty if fails to parse', async () => {
+      const res = await extractPackageFile('blahhhhh:foo:@what\n');
       expect(res).toBeNull();
     });
 
-    it('returns empty if cannot parse dependency', () => {
-      const res = extractPackageFile('git_repository(\n  nothing\n)\n');
+    it('returns empty if cannot parse dependency', async () => {
+      const res = await extractPackageFile('git_repository(\n  nothing\n)\n');
       expect(res).toBeNull();
     });
 
-    it('extracts multiple types of dependencies', () => {
-      const res = extractPackageFile(Fixtures.get('WORKSPACE1'));
+    it('extracts multiple types of dependencies', async () => {
+      const res = await extractPackageFile(Fixtures.get('WORKSPACE1'));
       expect(res?.deps).toHaveLength(17);
       expect(res?.deps).toMatchSnapshot();
     });
 
-    it('extracts github tags', () => {
-      const res = extractPackageFile(Fixtures.get('WORKSPACE2'));
+    it('extracts github tags', async () => {
+      const res = await extractPackageFile(Fixtures.get('WORKSPACE2'));
       expect(res?.deps).toMatchSnapshot([
         { packageName: 'lmirosevic/GBDeviceInfo' },
         { packageName: 'nelhage/rules_boost' },
@@ -30,15 +32,15 @@ describe('modules/manager/bazel/extract', () => {
       ]);
     });
 
-    it('handle comments and strings', () => {
-      const res = extractPackageFile(Fixtures.get('WORKSPACE3'));
+    it('handle comments and strings', async () => {
+      const res = await extractPackageFile(Fixtures.get('WORKSPACE3'));
       expect(res?.deps).toMatchSnapshot([
         { packageName: 'nelhage/rules_boost' },
       ]);
     });
 
-    it('extracts dependencies from *.bzl files', () => {
-      const res = extractPackageFile(Fixtures.get('repositories.bzl'));
+    it('extracts dependencies from *.bzl files', async () => {
+      const res = await extractPackageFile(Fixtures.get('repositories.bzl'));
       expect(res?.deps).toMatchSnapshot([
         {
           currentDigest: '0356bef3fbbabec5f0e196ecfacdeb6db62d48c0',
@@ -55,8 +57,8 @@ describe('modules/manager/bazel/extract', () => {
       ]);
     });
 
-    it('extracts dependencies for container_pull deptype', () => {
-      const res = extractPackageFile(
+    it('extracts dependencies for container_pull deptype', async () => {
+      const res = await extractPackageFile(
         `
         container_pull(
           name="hasura",
@@ -79,8 +81,8 @@ describe('modules/manager/bazel/extract', () => {
       ]);
     });
 
-    it('check remote option in go_repository', () => {
-      const successStory = extractPackageFile(
+    it('check remote option in go_repository', async () => {
+      const successStory = await extractPackageFile(
         `
 go_repository(
   name = "test_repository",
@@ -95,7 +97,7 @@ go_repository(
         'github.com/test/uuid-fork'
       );
 
-      const badStory = extractPackageFile(
+      const badStory = await extractPackageFile(
         `
 go_repository(
   name = "test_repository",
@@ -107,7 +109,7 @@ go_repository(
       );
       expect(badStory?.deps[0].skipReason).toBe('unsupported-remote');
 
-      const gheStory = extractPackageFile(
+      const gheStory = await extractPackageFile(
         `
 go_repository(
   name = "test_repository",
@@ -119,7 +121,7 @@ go_repository(
       );
       expect(gheStory?.deps[0].skipReason).toBe('unsupported-remote');
 
-      const gitlabRemote = extractPackageFile(
+      const gitlabRemote = await extractPackageFile(
         `
 go_repository(
   name = "test_repository",
