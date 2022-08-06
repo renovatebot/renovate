@@ -289,7 +289,8 @@ describe('workers/repository/update/branch/index', () => {
         state: PrState.Merged,
       } as Pr);
       await branchWorker.processBranch(config);
-      expect(reuse.shouldReuseExistingBranch).toHaveBeenCalledTimes(1);
+      expect(reuse.shouldReuseExistingBranch).toHaveBeenCalledTimes(0);
+      expect(getUpdated.getUpdatedPackageFiles).toHaveBeenCalledTimes(1);
     });
 
     it('throws error if closed PR found', async () => {
