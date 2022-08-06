@@ -146,7 +146,8 @@ export async function lookupUpdates(
         if (!rollback) {
           res.warnings.push({
             topic: depName,
-            message: `Can't find version matching ${currentValue} for ${depName}`,
+            // TODO: types (#7154)
+            message: `Can't find version matching ${currentValue!} for ${depName}`,
           });
           return res;
         }
