@@ -33,12 +33,12 @@ describe('util/exec/buildpack', () => {
       process.env.BUILDPACK = 'true';
       const toolConstraints: ToolConstraint[] = [
         { toolName: 'node' },
-        { toolName: 'npm' },
+        { toolName: 'invalid' },
       ];
       expect(isDynamicInstall(toolConstraints)).toBeFalse();
     });
 
-    it('returns false if supported tools', () => {
+    it('returns true if supported tools', () => {
       GlobalConfig.set({ binarySource: 'install' });
       process.env.BUILDPACK = 'true';
       const toolConstraints: ToolConstraint[] = [{ toolName: 'npm' }];
