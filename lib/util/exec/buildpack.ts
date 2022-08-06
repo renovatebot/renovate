@@ -63,6 +63,16 @@ const allToolConfig: Record<string, ToolConfig> = {
     depName: 'jsonnet-bundler/jsonnet-bundler',
     versioning: semverVersioningId,
   },
+  lerna: {
+    datasource: 'npm',
+    depName: 'lerna',
+    versioning: npmVersioningId,
+  },
+  node: {
+    datasource: 'node',
+    depName: 'node',
+    versioning: npmVersioningId,
+  },
   npm: {
     datasource: 'npm',
     depName: 'npm',
@@ -117,8 +127,11 @@ export function isDynamicInstall(
     );
     return false;
   }
-  return !!toolConstraints?.every((toolConstraint) =>
-    supportsDynamicInstall(toolConstraint.toolName)
+  return (
+    !toolConstraints ||
+    toolConstraints.every((toolConstraint) =>
+      supportsDynamicInstall(toolConstraint.toolName)
+    )
   );
 }
 
