@@ -4,15 +4,15 @@ import { extractDepFromTarget, getRuleDefinition } from './common';
 import { parse } from './parser';
 import type { ParsedResult } from './types';
 
-export async function extractPackageFile(
+export function extractPackageFile(
   content: string,
   packageFile: string
-): Promise<PackageFile | null> {
+): PackageFile | null {
   const deps: PackageDependency[] = [];
 
   let parsed: ParsedResult | null = null;
   try {
-    parsed = await parse(content);
+    parsed = parse(content);
   } catch (err) /* istanbul ignore next */ {
     logger.debug({ err, packageFile }, 'Bazel parsing error');
   }

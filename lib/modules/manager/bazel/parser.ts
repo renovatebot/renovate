@@ -174,16 +174,13 @@ const query = q.tree<Ctx>({
   search: rule,
 });
 
-async function getCacheKey(input: string): Promise<string> {
-  const hash = await hasha.async(input, { algorithm: 'sha512' });
+function getCacheKey(input: string): string {
+  const hash = hasha(input, { algorithm: 'sha512' });
   return `bazel-parser-${hash}`;
 }
 
-export async function parse(
-  input: string,
-  ctx = emptyCtx
-): Promise<ParsedResult | null> {
-  const cacheKey = await getCacheKey(input);
+export function parse(input: string, ctx = emptyCtx): ParsedResult | null {
+  const cacheKey = getCacheKey(input);
 
   const cachedResult = memCache.get<ParsedResult | null>(cacheKey);
   // istanbul ignore if
