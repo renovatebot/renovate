@@ -1,4 +1,3 @@
-import * as httpMock from '../../test/http-mock';
 import type { RenovateConfig } from './types';
 import * as configValidation from './validation';
 
@@ -630,24 +629,7 @@ describe('config/validation', () => {
 
     it('validates preset values', async () => {
       const config = {
-        extends: ['config:base', ':pinVersions', 42] as never,
-      };
-      const { warnings, errors } = await configValidation.validateConfig(
-        config,
-        true
-      );
-      expect(warnings).toHaveLength(0);
-      expect(errors).toHaveLength(1);
-    });
-
-    it('validates if presets exist', async () => {
-      httpMock
-        .scope('https://registry.npmjs.org')
-        .get('/renovate-config-doesntExist')
-        .reply(500);
-
-      const config = {
-        extends: ['config:base', 'doesntExist'] as never,
+        extends: ['foo', 'bar', 42] as never,
       };
       const { warnings, errors } = await configValidation.validateConfig(
         config,
