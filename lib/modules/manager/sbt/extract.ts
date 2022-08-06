@@ -13,8 +13,8 @@ import type { ParseContext, ParseOptions } from './types';
 
 const stripComment = (str: string): string =>
   str
-    .replace(regEx(/(^|\s+)\/\/.*$/), '')
-    .replace(regEx(/\/(\*)+.*(\*)+\//), ''); /** allow comment */
+    .replace(regEx(/(?:^|\s+)\/\/.*$/), '')
+    .replace(regEx(/\/\*.*?\*\//g), '');
 
 const isSingleLineDep = (str: string): boolean =>
   regEx(/^\s*(libraryDependencies|dependencyOverrides)\s*\+=\s*/).test(str);
