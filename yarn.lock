@@ -8525,10 +8525,10 @@ signale@^1.2.1:
     figures "^2.0.0"
     pkg-conf "^2.1.0"
 
-simple-git@3.10.0:
-  version "3.10.0"
-  resolved "https://registry.yarnpkg.com/simple-git/-/simple-git-3.10.0.tgz#f20031dd121d3c49e215ef0186a102bece3f89b2"
-  integrity sha512-2w35xrS5rVtAW0g67LqtxCZN5cdddz/woQRfS0OJXaljXEoTychZ4jnE+CQgra/wX4ZvHeiChTUMenCwfIYEYw==
+simple-git@3.11.0:
+  version "3.11.0"
+  resolved "https://registry.yarnpkg.com/simple-git/-/simple-git-3.11.0.tgz#fd8c98756f671e8056d7c0023394dadf1e3124b7"
+  integrity sha512-XULamN/hxviH/ABjDbxJqUTpH59Pn3fHRtwZZZ6v7KWTLE3wKl6CLB0SPXFfzjalQ5hUp+R5DWX2X8rKm4crvw==
   dependencies:
     "@kwsites/file-exists" "^1.1.1"
     "@kwsites/promise-deferred" "^1.1.1"
@@ -9112,10 +9112,10 @@ type-detect@4.0.8, type-detect@^4.0.8:
   resolved "https://registry.yarnpkg.com/type-detect/-/type-detect-4.0.8.tgz#7646fb5f18871cfbb7749e69bd39a6388eb7450c"
   integrity sha512-0fr/mIH1dlO+x7TlcMy+bIDqKPsw/70tVyeHW787goQjhmqaZe10uwLujubK9q9Lg6Fiho1KUKDYz0Z7k7g5/g==
 
-type-fest@2.17.0:
-  version "2.17.0"
-  resolved "https://registry.yarnpkg.com/type-fest/-/type-fest-2.17.0.tgz#c677030ce61e5be0c90c077d52571eb73c506ea9"
-  integrity sha512-U+g3/JVXnOki1kLSc+xZGPRll3Ah9u2VIG6Sn9iH9YX6UkPERmt6O/0fIyTgsd2/whV0+gAaHAg8fz6sG1QzMA==
+type-fest@2.18.0:
+  version "2.18.0"
+  resolved "https://registry.yarnpkg.com/type-fest/-/type-fest-2.18.0.tgz#fdef3a74e0a9e68ebe46054836650fb91ac3881e"
+  integrity sha512-pRS+/yrW5TjPPHNOvxhbNZexr2bS63WjrMU8a+VzEBhUi9Tz1pZeD+vQz3ut0svZ46P+SRqMEPnJmk2XnvNzTw==
 
 type-fest@^0.13.1:
   version "0.13.1"
