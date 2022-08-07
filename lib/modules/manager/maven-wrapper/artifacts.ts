@@ -26,6 +26,7 @@ import type {
 function getJavaContraint(mavenVersion: string | undefined): string | null {
   const major = mavenVersion && mavenVersioning.getMajor(mavenVersion);
   const minor = mavenVersion && mavenVersioning.getMinor(mavenVersion);
+
   if (major && major >= 3) {
     return minor && minor >= 1 ? '^8.0.0' : '^7.0.0';
   }
@@ -54,7 +55,7 @@ export async function updateArtifacts({
   newPackageFileContent,
   updatedDeps,
   config,
-}: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
+}: UpdateArtifact): Promise<(UpdateArtifactsResult | null)[] | null> {
   try {
     logger.debug({ updatedDeps }, 'maven-wrapper.updateArtifacts()');
 
@@ -70,6 +71,7 @@ export async function updateArtifacts({
     }
 
     const cmd = await createWrapperCommand();
+
     if (!cmd) {
       logger.info('No mvnw found - skipping Artifacts update');
       return null;
@@ -157,7 +159,6 @@ async function createWrapperCommand(): Promise<string | null> {
   );
 }
 
-// TODO: Generify with gradle wrapper?
 function mavenWrapperFileName(): string {
   if (
     os.platform() === 'win32' &&
