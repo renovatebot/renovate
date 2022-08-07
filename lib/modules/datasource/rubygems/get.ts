@@ -259,6 +259,8 @@ export class InternalRubyGemsDatasource extends Datasource {
   @cache({
     namespace: 'datasource-rubygem-nexus',
     key: ({ packageName, registryUrl }: GetReleasesConfig) =>
+      // TODO: types (#7154)
+      // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
       `${registryUrl}:${packageName}`,
   })
   async getReleasesFromNexus(
