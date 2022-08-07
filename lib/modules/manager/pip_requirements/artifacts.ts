@@ -27,7 +27,7 @@ function dependencyAndHashPattern(depName: string): RegExp {
   //
   // Use a non-greedy wildcard for the range pattern; otherwise, we would
   // include all but the last hash specifier into depConstraint.
-  return new RegExp(
+  return regEx(
     `^\\s*(?<depConstraint>${escapedDepName}${extrasPattern}\\s*==.*?\\S)\\s+--hash=`,
     'm'
   );
