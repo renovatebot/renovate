@@ -112,23 +112,24 @@ Array [
 exports[`modules/manager/poetry/artifacts returns updated poetry.lock using docker (constraints) 1`] = `
 Array [
   Object {
-    "cmd": "docker pull renovate/python:2.7.5",
+    "cmd": "docker pull renovate/sidecar",
     "options": Object {
       "encoding": "utf-8",
     },
   },
   Object {
-    "cmd": "docker ps --filter name=renovate_python -aq",
+    "cmd": "docker ps --filter name=renovate_sidecar -aq",
     "options": Object {
       "encoding": "utf-8",
     },
   },
   Object {
-    "cmd": "docker run --rm --name=renovate_python --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -w \\"/tmp/github/some/repo\\" renovate/python:2.7.5 bash -l -c \\"install-tool poetry 1.2.0 && poetry update --lock --no-interaction dep1\\"",
+    "cmd": "docker run --rm --name=renovate_sidecar --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/cache\\":\\"/tmp/cache\\" -e BUILDPACK_CACHE_DIR -w \\"/tmp/github/some/repo\\" renovate/sidecar bash -l -c \\"install-tool python 1.2.0 && pip install --user 'poetry>=1.0' && poetry update --lock --no-interaction dep1\\"",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
       "env": Object {
+        "BUILDPACK_CACHE_DIR": "/tmp/cache/buildpack",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
         "HTTP_PROXY": "http://example.com",
@@ -147,23 +148,24 @@ Array [
 exports[`modules/manager/poetry/artifacts returns updated poetry.lock using docker 1`] = `
 Array [
   Object {
-    "cmd": "docker pull renovate/python:3.4.2",
+    "cmd": "docker pull renovate/sidecar",
     "options": Object {
       "encoding": "utf-8",
     },
   },
   Object {
-    "cmd": "docker ps --filter name=renovate_python -aq",
+    "cmd": "docker ps --filter name=renovate_sidecar -aq",
     "options": Object {
       "encoding": "utf-8",
     },
   },
   Object {
-    "cmd": "docker run --rm --name=renovate_python --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -w \\"/tmp/github/some/repo\\" renovate/python:3.4.2 bash -l -c \\"install-tool poetry 1.2.0 && poetry update --lock --no-interaction dep1\\"",
+    "cmd": "docker run --rm --name=renovate_sidecar --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/cache\\":\\"/tmp/cache\\" -e BUILDPACK_CACHE_DIR -w \\"/tmp/github/some/repo\\" renovate/sidecar bash -l -c \\"install-tool python 1.2.0 && pip install --user 'poetry>=1.0' && poetry update --lock --no-interaction dep1\\"",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
       "env": Object {
+        "BUILDPACK_CACHE_DIR": "/tmp/cache/buildpack",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
         "HTTP_PROXY": "http://example.com",

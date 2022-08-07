@@ -419,4 +419,34 @@ describe('modules/manager/regex/index', () => {
     expect(res).toMatchSnapshot();
     expect(res?.deps).toHaveLength(4);
   });
+
+  it('extracts with recursive strategy and without depName', async () => {
+    const config: CustomExtractConfig = {
+      matchStrings: [
+        'jacoco\\s*{[^}]*}',
+        'toolVersion\\s*=\\s*\\"(?<currentValue>\\S*)\\"\\s*',
+      ],
+      matchStringsStrategy: 'recursive',
+      depNameTemplate: 'org.jacoco:jacoco',
+      datasourceTemplate: 'maven',
+    };
+    const res = await extractPackageFile(
+      `
+    jacoco {
+      toolVersion = "0.8.7"
+    }
+    `,
+      'build.gradle.kts',
+      config
+    );
+    expect(res).toMatchObject({
+      deps: [
+        {
+          depName: 'org.jacoco:jacoco',
+          currentValue: '0.8.7',
+          datasource: 'maven',
+        },
+      ],
+    });
+  });
 });

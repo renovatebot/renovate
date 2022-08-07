@@ -107,7 +107,7 @@ export interface RepoGlobalConfig {
   allowPostUpgradeCommandTemplating?: boolean;
   allowScripts?: boolean;
   allowedPostUpgradeCommands?: string[];
-  binarySource?: 'docker' | 'global' | 'install';
+  binarySource?: 'docker' | 'global' | 'install' | 'hermit';
   customEnvVariables?: Record<string, string>;
   dockerChildPrefix?: string;
   dockerImagePrefix?: string;
@@ -212,7 +212,6 @@ export interface RenovateConfig
   dependencyDashboardAutoclose?: boolean;
   dependencyDashboardChecks?: Record<string, string>;
   dependencyDashboardIssue?: number;
-  dependencyDashboardRebaseAllOpen?: boolean;
   dependencyDashboardTitle?: string;
   dependencyDashboardHeader?: string;
   dependencyDashboardFooter?: string;
@@ -242,7 +241,10 @@ export interface RenovateConfig
   constraints?: Record<string, string>;
 }
 
-export interface AllConfig extends RenovateConfig, GlobalOnlyConfig {}
+export interface AllConfig
+  extends RenovateConfig,
+    GlobalOnlyConfig,
+    RepoGlobalConfig {}
 
 export interface AssigneesAndReviewersConfig {
   assigneesFromCodeOwners?: boolean;

@@ -1,7 +1,95 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`workers/repository/dependency-dashboard ensureDependencyDashboard() checks detected dependencies section dependency dashboard lookup warnings Dependency Lookup Warnings message in issues body 1`] = `
+"This issue lists Renovate updates and detected dependencies. Read the [Dependency Dashboard](https://docs.renovatebot.com/key-concepts/dashboard/) docs to learn more.
+
+
+---
+
+### ⚠ Dependency Lookup Warnings ⚠
+
+-   Renovate failed to look up the following dependencies: \`dependency-2\`.
+
+Files affected: \`package.json\`
+
+---
+
+
+This repository currently has no open or pending branches.
+
+## Detected dependencies
+
+<details><summary>Branch main</summary>
+<blockquote>
+
+<details><summary>npm</summary>
+<blockquote>
+
+<details><summary>package.json</summary>
+
+
+</details>
+
+</blockquote>
+</details>
+
+</blockquote>
+</details>
+
+<details><summary>Branch dev</summary>
+<blockquote>
+
+<details><summary>dockerfile</summary>
+<blockquote>
+
+<details><summary>Dockerfile</summary>
+
+ - \`ubuntu 20.04\`
+
+</details>
+
+</blockquote>
+</details>
+
+<details><summary>npm</summary>
+<blockquote>
+
+<details><summary>package.json</summary>
+
+ - \`cookie-parser ^1.4.5\`
+ - \`express ~4.17.1\`
+ - \`express-handlebars >=5.3.4\`
+ - \`geoip-lite 1.4.*\`
+ - \`nodemailer 6.7.0\`
+ - \`redis 3.1.2-3.4.0\`
+ - \`dotenv 10.0.0\`
+ - \`nodemon 2.0.14\`
+
+</details>
+
+</blockquote>
+</details>
+
+<details><summary>poetry</summary>
+<blockquote>
+
+<details><summary>pyproject.toml</summary>
+
+ - \`six <=1.3.0\`
+
+</details>
+
+</blockquote>
+</details>
+
+</blockquote>
+</details>
+
+"
+`;
+
 exports[`workers/repository/dependency-dashboard ensureDependencyDashboard() checks detected dependencies section multi base branch repo add detected dependencies to the Dependency Dashboard body 1`] = `
-"This issue provides visibility into Renovate updates and their statuses. [Learn more](https://docs.renovatebot.com/key-concepts/dashboard/)
+"This issue lists Renovate updates and detected dependencies. Read the [Dependency Dashboard](https://docs.renovatebot.com/key-concepts/dashboard/) docs to learn more.
 
 This repository currently has no open or pending branches.
 
@@ -109,7 +197,7 @@ This repository currently has no open or pending branches.
 `;
 
 exports[`workers/repository/dependency-dashboard ensureDependencyDashboard() checks detected dependencies section multi base branch repo show default message in issues body when packageFiles is empty 1`] = `
-"This issue provides visibility into Renovate updates and their statuses. [Learn more](https://docs.renovatebot.com/key-concepts/dashboard/)
+"This issue lists Renovate updates and detected dependencies. Read the [Dependency Dashboard](https://docs.renovatebot.com/key-concepts/dashboard/) docs to learn more.
 
 This repository currently has no open or pending branches.
 
@@ -176,7 +264,7 @@ None detected
 `;
 
 exports[`workers/repository/dependency-dashboard ensureDependencyDashboard() checks detected dependencies section multi base branch repo show default message in issues body when when packageFiles is null 1`] = `
-"This issue provides visibility into Renovate updates and their statuses. [Learn more](https://docs.renovatebot.com/key-concepts/dashboard/)
+"This issue lists Renovate updates and detected dependencies. Read the [Dependency Dashboard](https://docs.renovatebot.com/key-concepts/dashboard/) docs to learn more.
 
 This repository currently has no open or pending branches.
 
@@ -243,7 +331,7 @@ None detected
 `;
 
 exports[`workers/repository/dependency-dashboard ensureDependencyDashboard() checks detected dependencies section single base branch repo add detected dependencies to the Dependency Dashboard body 1`] = `
-"This issue provides visibility into Renovate updates and their statuses. [Learn more](https://docs.renovatebot.com/key-concepts/dashboard/)
+"This issue lists Renovate updates and detected dependencies. Read the [Dependency Dashboard](https://docs.renovatebot.com/key-concepts/dashboard/) docs to learn more.
 
 This repository currently has no open or pending branches.
 
@@ -296,7 +384,7 @@ This repository currently has no open or pending branches.
 `;
 
 exports[`workers/repository/dependency-dashboard ensureDependencyDashboard() checks detected dependencies section single base branch repo show default message in issues body when packageFiles is empty 1`] = `
-"This issue provides visibility into Renovate updates and their statuses. [Learn more](https://docs.renovatebot.com/key-concepts/dashboard/)
+"This issue lists Renovate updates and detected dependencies. Read the [Dependency Dashboard](https://docs.renovatebot.com/key-concepts/dashboard/) docs to learn more.
 
 This repository currently has no open or pending branches.
 
@@ -308,7 +396,7 @@ None detected
 `;
 
 exports[`workers/repository/dependency-dashboard ensureDependencyDashboard() checks detected dependencies section single base branch repo show default message in issues body when when packageFiles is null 1`] = `
-"This issue provides visibility into Renovate updates and their statuses. [Learn more](https://docs.renovatebot.com/key-concepts/dashboard/)
+"This issue lists Renovate updates and detected dependencies. Read the [Dependency Dashboard](https://docs.renovatebot.com/key-concepts/dashboard/) docs to learn more.
 
 This repository currently has no open or pending branches.
 
@@ -320,7 +408,7 @@ None detected
 `;
 
 exports[`workers/repository/dependency-dashboard ensureDependencyDashboard() checks detected dependencies section single base branch repo shows different combinations of version+digest for a given dependency 1`] = `
-"This issue provides visibility into Renovate updates and their statuses. [Learn more](https://docs.renovatebot.com/key-concepts/dashboard/)
+"This issue lists Renovate updates and detected dependencies. Read the [Dependency Dashboard](https://docs.renovatebot.com/key-concepts/dashboard/) docs to learn more.
 
 This repository currently has no open or pending branches.
 
@@ -360,7 +448,7 @@ This repository currently has no open or pending branches.
 `;
 
 exports[`workers/repository/dependency-dashboard ensureDependencyDashboard() contains logged problems 1`] = `
-"This issue provides visibility into Renovate updates and their statuses. [Learn more](https://docs.renovatebot.com/key-concepts/dashboard/)
+"This issue lists Renovate updates and detected dependencies. Read the [Dependency Dashboard](https://docs.renovatebot.com/key-concepts/dashboard/) docs to learn more.
 
 ## Repository problems
 
@@ -414,7 +502,7 @@ And this is a footer for repository:test
 `;
 
 exports[`workers/repository/dependency-dashboard ensureDependencyDashboard() rechecks branches 1`] = `
-"This issue provides visibility into Renovate updates and their statuses. [Learn more](https://docs.renovatebot.com/key-concepts/dashboard/)
+"This issue lists Renovate updates and detected dependencies. Read the [Dependency Dashboard](https://docs.renovatebot.com/key-concepts/dashboard/) docs to learn more.
 
 ## Pending Approval
 

@@ -506,7 +506,7 @@ describe('workers/repository/updates/generate', () => {
         } as BranchUpgradeConfig,
       ];
       const res = generateBranchConfig(branch);
-      expect(res.prTitle).toBe('chore: update dependency some-dep to v1.2.0');
+      expect(res.prTitle).toBe('chore(): update dependency some-dep to v1.2.0');
     });
 
     it('scopes monorepo commits with nested package files using parent directory', () => {
@@ -916,35 +916,36 @@ describe('workers/repository/updates/generate', () => {
       ]);
     });
 
-    it('fixes commit message with body', () => {
+    it('merge excludeCommitPaths if appears in upgrade', () => {
       const branch: BranchUpgradeConfig[] = [
         {
           manager: 'some-manager',
+          depName: 'some-dep1',
           branchName: 'some-branch',
-          commitMessage: 'update to vv1.2.0',
-          commitBody: 'some body',
+          prTitle: 'some-title',
+          newValue: '0.6.0',
+        },
+        {
+          manager: 'some-other-manager',
+          depName: 'some-dep2',
+          branchName: 'some-branch',
+          prTitle: 'some-title',
+          newValue: '0.8.0',
+          excludeCommitPaths: ['some/path', 'some/other/path'],
+        },
+        {
+          manager: 'some-manager-3',
+          depName: 'some-dep3',
+          branchName: 'some-branch',
+          prTitle: 'some-title',
+          newValue: '0.9.0',
+          excludeCommitPaths: ['some/path', 'some/other-manager/path'],
         },
       ];
       const res = generateBranchConfig(branch);
-      expect(res.commitMessage).toBe('Update to v1.2.0\n\nsome body');
-    });
-
-    it('generates semantic commit message properly', () => {
-      const branch: BranchUpgradeConfig[] = [
-        {
-          ...defaultConfig,
-          manager: 'some-manager',
-          branchName: 'some-branch',
-          semanticCommits: 'enabled',
-          semanticCommitType: 'chore',
-          semanticCommitScope: 'deps',
-          depName: 'some-dep',
-          newValue: '1.2.0',
-        } as BranchUpgradeConfig,
-      ];
-      const res = generateBranchConfig(branch);
-      expect(res.commitMessage).toBe(
-        'chore(deps): update dependency some-dep to 1.2.0'
+      const excludeCommitPaths = res.excludeCommitPaths ?? [];
+      expect(excludeCommitPaths.sort()).toStrictEqual(
+        ['some/path', 'some/other/path', 'some/other-manager/path'].sort()
       );
     });
   });

@@ -1,28 +1,29 @@
 import is from '@sindresorhus/is';
-import { fs, loadFixture } from '../../../../test/util';
+import { Fixtures } from '../../../../test/fixtures';
+import { fs } from '../../../../test/util';
 import { isValid } from '../../versioning/ruby';
 import { extractPackageFile } from '.';
 
 jest.mock('../../../util/fs');
 
-const railsGemfile = loadFixture('Gemfile.rails');
-const railsGemfileLock = loadFixture('Gemfile.rails.lock');
+const railsGemfile = Fixtures.get('Gemfile.rails');
+const railsGemfileLock = Fixtures.get('Gemfile.rails.lock');
 
-const sourceGroupGemfile = loadFixture('Gemfile.sourceGroup');
-const webPackerGemfile = loadFixture('Gemfile.webpacker');
-const webPackerGemfileLock = loadFixture('Gemfile.webpacker.lock');
-const mastodonGemfile = loadFixture('Gemfile.mastodon');
-const mastodonGemfileLock = loadFixture('Gemfile.mastodon.lock');
-const rubyCIGemfileLock = loadFixture('Gemfile.rubyci.lock');
+const sourceGroupGemfile = Fixtures.get('Gemfile.sourceGroup');
+const webPackerGemfile = Fixtures.get('Gemfile.webpacker');
+const webPackerGemfileLock = Fixtures.get('Gemfile.webpacker.lock');
+const mastodonGemfile = Fixtures.get('Gemfile.mastodon');
+const mastodonGemfileLock = Fixtures.get('Gemfile.mastodon.lock');
+const rubyCIGemfileLock = Fixtures.get('Gemfile.rubyci.lock');
 
-const rubyCIGemfile = loadFixture('Gemfile.rubyci');
-const gitlabFossGemfileLock = loadFixture('Gemfile.gitlab-foss.lock');
-const gitlabFossGemfile = loadFixture('Gemfile.gitlab-foss');
-const sourceBlockGemfile = loadFixture('Gemfile.sourceBlock');
-const sourceBlockWithNewLinesGemfileLock = loadFixture(
+const rubyCIGemfile = Fixtures.get('Gemfile.rubyci');
+const gitlabFossGemfileLock = Fixtures.get('Gemfile.gitlab-foss.lock');
+const gitlabFossGemfile = Fixtures.get('Gemfile.gitlab-foss');
+const sourceBlockGemfile = Fixtures.get('Gemfile.sourceBlock');
+const sourceBlockWithNewLinesGemfileLock = Fixtures.get(
   'Gemfile.sourceBlockWithNewLines.lock'
 );
-const sourceBlockWithNewLinesGemfile = loadFixture(
+const sourceBlockWithNewLinesGemfile = Fixtures.get(
   'Gemfile.sourceBlockWithNewLines'
 );
 

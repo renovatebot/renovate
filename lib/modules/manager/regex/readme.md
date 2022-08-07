@@ -6,6 +6,9 @@ This manager is unique in Renovate in that:
 - Through the use of the `regexManagers` config, multiple "regex managers" can be created for the same repository
 - It can extract any `datasource`
 
+We have [additional Handlebars helpers](https://docs.renovatebot.com/templates/#additional-handlebars-helpers) which help you perform common transformations on the regex manager's template fields.
+Also read the documentation for the [`regexManagers` config option](https://docs.renovatebot.com/configuration-options/#regexmanagers).
+
 ### Required Fields
 
 The first two required fields are `fileMatch` and `matchStrings`.
@@ -47,6 +50,9 @@ You would need to capture the `currentValue` using a named capture group, like s
 If you're looking for an online regex testing tool that supports capture groups, try [https://regex101.com/](<https://regex101.com/?flavor=javascript&flags=g&regex=ENV%20YARN_VERSION%3D(%3F%3CcurrentValue%3E.*%3F)%5Cn&testString=FROM%20node%3A12%0AENV%20YARN_VERSION%3D1.19.1%0ARUN%20curl%20-o-%20-L%20https%3A%2F%2Fyarnpkg.com%2Finstall.sh%20%7C%20bash%20-s%20--%20--version%20%24%7BYARN_VERSION%7D>).
 Be aware that backslashes (`'\'`) of the resulting regex have to still be escaped e.g. `\n\s` --> `\\n\\s`.
 You can use the Code Generator in the sidebar and copy the regex in the generated "Alternative syntax" comment into JSON.
+
+The `regex` manager uses [RE2](https://github.com/google/re2/wiki/WhyRE2) which does not support [backreferences and lookahead assertions](https://github.com/uhop/node-re2#limitations-things-re2-does-not-support).
+The `regex` manager matches are done per-file and not per-line, you should be aware when using the `^` and/or `$` regex assertions.
 
 ### Configuration templates
 

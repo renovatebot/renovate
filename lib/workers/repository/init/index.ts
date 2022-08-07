@@ -19,7 +19,8 @@ function initializeConfig(config: RenovateConfig): RenovateConfig {
 
 function warnOnUnsupportedOptions(config: RenovateConfig): void {
   if (config.filterUnavailableUsers && !platform.filterUnavailableUsers) {
-    const platform = GlobalConfig.get('platform');
+    // TODO: types (#7154)
+    const platform = GlobalConfig.get('platform')!;
     logger.warn(
       `Configuration option 'filterUnavailableUsers' is not supported on the current platform '${platform}'.`
     );

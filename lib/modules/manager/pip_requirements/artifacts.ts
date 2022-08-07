@@ -27,7 +27,8 @@ export async function updateArtifacts({
     for (const dep of updatedDeps) {
       const hashLine = lines.find(
         (line) =>
-          line.startsWith(`${dep.depName}==`) && line.includes('--hash=')
+          // TODO: types (#7154)
+          line.startsWith(`${dep.depName!}==`) && line.includes('--hash=')
       );
       if (hashLine) {
         const depConstraint = hashLine.split(' ')[0];
@@ -41,10 +42,12 @@ export async function updateArtifacts({
     const execOptions: ExecOptions = {
       cwdFile: '.',
       docker: {
-        image: 'python',
-        tagScheme: 'pip_requirements',
+        image: 'sidecar',
       },
-      preCommands: ['pip install hashin'],
+      preCommands: ['pip install --user hashin'],
+      toolConstraints: [
+        { toolName: 'python', constraint: config.constraints?.python },
+      ],
     };
     await exec(cmd, execOptions);
     const newContent = await readLocalFile(packageFileName, 'utf8');

@@ -16,7 +16,6 @@ import type {
   ToolConstraint,
 } from '../../../../util/exec/types';
 import {
-  deleteLocalFile,
   localPathIsFile,
   readLocalFile,
   writeLocalFile,
@@ -26,7 +25,7 @@ import { uniqueStrings } from '../../../../util/string';
 import { NpmDatasource } from '../../../datasource/npm';
 import type { PostUpdateConfig, Upgrade } from '../../types';
 import type { NpmManagerData } from '../types';
-import { getNodeConstraint, getNodeUpdate } from './node-version';
+import { getNodeToolConstraint } from './node-version';
 import type { GenerateLockFileResult } from './types';
 
 export async function checkYarnrc(
@@ -75,9 +74,7 @@ export async function checkYarnrc(
   return { offlineMirror, yarnPath };
 }
 
-export function getOptimizeCommand(
-  fileName = '/home/ubuntu/.npm-global/lib/node_modules/yarn/lib/cli.js'
-): string {
+export function getOptimizeCommand(fileName: string): string {
   return `sed -i 's/ steps,/ steps.slice(0,1),/' ${quote(fileName)}`;
 }
 
@@ -95,7 +92,9 @@ export async function generateLockFile(
   logger.debug(`Spawning yarn install to create ${lockFileName}`);
   let lockFile: string | null = null;
   try {
-    const toolConstraints: ToolConstraint[] = [];
+    const toolConstraints: ToolConstraint[] = [
+      await getNodeToolConstraint(config, upgrades),
+    ];
     const yarnUpdate = upgrades.find(isYarnUpdate);
     const yarnCompatibility = yarnUpdate
       ? yarnUpdate.newValue
@@ -108,8 +107,6 @@ export async function generateLockFile(
       minYarnVersion && semver.gte(minYarnVersion, '2.2.0');
     const isYarnModeAvailable =
       minYarnVersion && semver.gte(minYarnVersion, '3.0.0');
-
-    const preCommands: string[] = [];
 
     const yarnTool: ToolConstraint = {
       toolName: 'yarn',
@@ -175,17 +172,13 @@ export async function generateLockFile(
         extraEnv.YARN_ENABLE_SCRIPTS = '0';
       }
     }
-    const tagConstraint =
-      getNodeUpdate(upgrades) ?? (await getNodeConstraint(config));
+
     const execOptions: ExecOptions = {
       cwdFile: lockFileName,
       extraEnv,
       docker: {
-        image: 'node',
-        tagScheme: 'node',
-        tagConstraint,
+        image: 'sidecar',
       },
-      preCommands,
       toolConstraints,
     };
     // istanbul ignore if
@@ -196,6 +189,8 @@ export async function generateLockFile(
 
     if (yarnUpdate && !isYarn1) {
       logger.debug('Updating Yarn binary');
+      // TODO: types (#7154)
+      // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
       commands.push(`yarn set version ${yarnUpdate.newValue}`);
     }
 
@@ -220,6 +215,8 @@ export async function generateLockFile(
         // `yarn up` updates to the latest release, so the range should be specified
         commands.push(
           `yarn up ${lockUpdates
+            // TODO: types (#7154)
+            // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
             .map((update) => `${update.depName}@${update.newValue}`)
             .filter(uniqueStrings)
             .join(' ')}${cmdOptions}`
@@ -251,12 +248,19 @@ export async function generateLockFile(
       logger.debug(
         `Removing ${lockFileName} first due to lock file maintenance upgrade`
       );
+
+      // Note: Instead of just deleting the `yarn.lock` file, we just wipe it
+      // and keep an empty lock file. Deleting the lock file could result in different
+      // Yarn semantics. e.g. Yarn 2+ will error when `yarn install` is executed in
+      // a subdirectory which is not part of a Yarn workspace. Yarn suggests to create
+      // an empty lock file if a subdirectory should be treated as its own workspace.
+      // https://github.com/yarnpkg/berry/blob/20612e82d26ead5928cc27bf482bb8d62dde87d3/packages/yarnpkg-core/sources/Project.ts#L284.
       try {
-        await deleteLocalFile(lockFileName);
+        await writeLocalFile(lockFileName, '');
       } catch (err) /* istanbul ignore next */ {
         logger.debug(
           { err, lockFileName },
-          'Error removing yarn.lock for lock file maintenance'
+          'Error clearing `yarn.lock` for lock file maintenance'
         );
       }
     }

@@ -1,6 +1,11 @@
 import { RenovateConfig, getConfig } from '../../../test/util';
 import type { PackageFile } from '../../modules/manager/types';
-import { getDepWarnings, getErrors, getWarnings } from './errors-warnings';
+import {
+  getDepWarningsDashboard,
+  getDepWarningsPR,
+  getErrors,
+  getWarnings,
+} from './errors-warnings';
 
 describe('workers/repository/errors-warnings', () => {
   describe('getWarnings()', () => {
@@ -31,14 +36,20 @@ describe('workers/repository/errors-warnings', () => {
         "
       `);
     });
+
+    it('getWarning returns empty string', () => {
+      config.warnings = [];
+      const res = getWarnings(config);
+      expect(res).toBe('');
+    });
   });
 
-  describe('getDepWarnings()', () => {
+  describe('getDepWarningsPR()', () => {
     beforeEach(() => {
       jest.resetAllMocks();
     });
 
-    it('returns warning text', () => {
+    it('returns pr warning text', () => {
       const packageFiles: Record<string, PackageFile[]> = {
         npm: [
           {
@@ -70,7 +81,8 @@ describe('workers/repository/errors-warnings', () => {
           },
         ],
       };
-      const res = getDepWarnings(packageFiles);
+
+      const res = getDepWarningsPR(packageFiles);
       expect(res).toMatchInlineSnapshot(`
         "
         ---
@@ -86,6 +98,73 @@ describe('workers/repository/errors-warnings', () => {
 
         "
       `);
+    });
+
+    it('PR warning returns empty string', () => {
+      const packageFiles: Record<string, PackageFile[]> = {};
+      const res = getDepWarningsPR(packageFiles);
+      expect(res).toBe('');
+    });
+  });
+
+  describe('getDepWarningsDashboard()', () => {
+    beforeEach(() => {
+      jest.resetAllMocks();
+    });
+
+    it('returns dependency dashboard warning text', () => {
+      const packageFiles: Record<string, PackageFile[]> = {
+        npm: [
+          {
+            packageFile: 'package.json',
+            deps: [
+              {
+                warnings: [{ message: 'dependency-1', topic: '' }],
+              },
+              {},
+            ],
+          },
+          {
+            packageFile: 'backend/package.json',
+            deps: [
+              {
+                warnings: [{ message: 'dependency-1', topic: '' }],
+              },
+            ],
+          },
+        ],
+        dockerfile: [
+          {
+            packageFile: 'Dockerfile',
+            deps: [
+              {
+                warnings: [{ message: 'dependency-2', topic: '' }],
+              },
+            ],
+          },
+        ],
+      };
+      const res = getDepWarningsDashboard(packageFiles);
+      expect(res).toMatchInlineSnapshot(`
+        "
+        ---
+
+        ### ⚠ Dependency Lookup Warnings ⚠
+
+        -   Renovate failed to look up the following dependencies: \`dependency-1\`, \`dependency-2\`.
+
+        Files affected: \`package.json\`, \`backend/package.json\`, \`Dockerfile\`
+
+        ---
+
+        "
+      `);
+    });
+
+    it('dependency dashboard warning returns empty string', () => {
+      const packageFiles: Record<string, PackageFile[]> = {};
+      const res = getDepWarningsDashboard(packageFiles);
+      expect(res).toBe('');
     });
   });
 
@@ -116,6 +195,12 @@ describe('workers/repository/errors-warnings', () => {
         ---
         "
       `);
+    });
+
+    it('getError returns empty string', () => {
+      config.errors = [];
+      const res = getErrors(config);
+      expect(res).toBe('');
     });
   });
 });
