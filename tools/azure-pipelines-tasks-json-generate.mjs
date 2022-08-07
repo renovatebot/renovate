@@ -8,9 +8,16 @@ import Git from 'simple-git';
 import path from 'upath';
 
 const glob = promisify(g);
-
 const localPath = path.join(os.tmpdir(), 'azure-pipelines-tasks');
 
+/**
+ * This script:
+ *  1. Clones the Azure Pipelines Tasks repo
+ *  2. Finds all `task.json` files
+ *  3. For each `task.json` it finds each commit that has that file
+ *  4. For each commit it gets the `task.json` content and extracts the task name and version
+ *  5. After all the `task.json` files have been processed it writes the results to `./data/azure-pipelines-tasks.json`
+ */
 await (async () => {
   await fs.ensureDir(localPath);
   const git = Git(localPath);
@@ -24,6 +31,7 @@ await (async () => {
     );
   }
 
+  // Find all `task.json` files
   const files = (await glob(path.join(localPath, '**/task.json'))).map((file) =>
     file.replace(`${localPath}/`, '')
   );
@@ -32,10 +40,12 @@ await (async () => {
   const tasks = {};
 
   for (const file of files) {
+    // Find all commits that have the file
     const revs = (await git.raw(['rev-list', 'HEAD', '--', file])).split('\n');
     shell.echo(`Parsing ${file}`);
     for (const rev of revs) {
       try {
+        // Get the content of the file at the commit
         const content = await git.show([`${rev}:${file}`]);
         /** @type {{name: string, version: {Major: number, Minor: number, Patch: number}}} */
         const parsedContent = JSON5.parse(content);
