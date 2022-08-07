@@ -172,7 +172,9 @@ export function addMetaData(
   }
 }
 
-// remove homepage if its not a link to a path or if its same as sourceurl.
+// remove homepage if both sourceUrl and homepage exists and:
+// 1. homepage its not a link to a repository subpath
+// 2. or both are the same
 export function shouldDeleteHomepage(
   sourceUrl: string | null | undefined,
   homepage: string | undefined
