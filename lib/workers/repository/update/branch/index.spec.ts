@@ -270,18 +270,7 @@ describe('workers/repository/update/branch/index', () => {
       expect(reuse.shouldReuseExistingBranch).toHaveBeenCalledTimes(0);
     });
 
-    it('skips branch if merged PR found but old branch exists', async () => {
-      schedule.isScheduledNow.mockReturnValueOnce(false);
-      git.branchExists.mockReturnValue(true);
-      checkExisting.prAlreadyExisted.mockResolvedValueOnce({
-        number: 13,
-        state: PrState.Merged,
-      } as Pr);
-      await branchWorker.processBranch(config);
-      expect(reuse.shouldReuseExistingBranch).toHaveBeenCalledTimes(0);
-    });
-
-    it('does not skip branch if merged PR found and no old branch exists', async () => {
+    it('recreates pr when if merged pr already exists', async () => {
       schedule.isScheduledNow.mockReturnValueOnce(true);
       git.branchExists.mockReturnValue(false);
       checkExisting.prAlreadyExisted.mockResolvedValueOnce({
@@ -289,6 +278,10 @@ describe('workers/repository/update/branch/index', () => {
         state: PrState.Merged,
       } as Pr);
       await branchWorker.processBranch(config);
+      expect(logger.debug).toHaveBeenCalledWith(
+        { prTitle: config.prTitle },
+        'Merged PR already exists. Creating new PR with automerge disabled.'
+      );
       expect(reuse.shouldReuseExistingBranch).toHaveBeenCalledTimes(0);
       expect(getUpdated.getUpdatedPackageFiles).toHaveBeenCalledTimes(1);
     });
