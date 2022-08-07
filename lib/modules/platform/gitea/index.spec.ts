@@ -97,6 +97,22 @@ describe('modules/platform/gitea/index', () => {
         repo: partial<ght.Repo>({ full_name: mockRepo.full_name }),
       },
     }),
+    partial<MockPr>({
+      number: 3,
+      title: 'WIP: Draft PR',
+      body: 'other random pull request',
+      state: PrState.Open,
+      diff_url: 'https://gitea.renovatebot.com/some/repo/pulls/3.diff',
+      created_at: '2011-08-18T22:30:39Z',
+      closed_at: '2016-01-09T10:03:22Z',
+      mergeable: true,
+      base: { ref: 'draft-base-branch' },
+      head: {
+        label: 'draft-head-branch',
+        sha: 'draft-head-sha',
+        repo: partial<ght.Repo>({ full_name: mockRepo.full_name }),
+      },
+    }),
   ];
 
   const mockIssues: ght.Issue[] = [
@@ -848,6 +864,21 @@ describe('modules/platform/gitea/index', () => {
       expect(res).toHaveProperty('state', mockPR.state);
     });
 
+    it('should find pull request with draft', async () => {
+      const mockPR = mockPRs[2];
+      helper.searchPRs.mockResolvedValueOnce(mockPRs);
+      await initFakeRepo();
+
+      const res = await gitea.findPr({
+        branchName: mockPR.head.label,
+        prTitle: 'Draft PR',
+        state: mockPR.state,
+      });
+      expect(res).toHaveProperty('sourceBranch', mockPR.head.label);
+      expect(res).toHaveProperty('title', 'Draft PR');
+      expect(res).toHaveProperty('state', mockPR.state);
+    });
+
     it('should return null for missing pull request', async () => {
       helper.searchPRs.mockResolvedValueOnce(mockPRs);
       await initFakeRepo();
@@ -912,6 +943,7 @@ describe('modules/platform/gitea/index', () => {
         targetBranch: 'master',
         prTitle: mockNewPR.title,
         prBody: mockNewPR.body,
+        draftPR: true,
       });
 
       expect(res).toHaveProperty('number', mockNewPR.number);
@@ -921,7 +953,7 @@ describe('modules/platform/gitea/index', () => {
       expect(helper.createPR).toHaveBeenCalledWith(mockRepo.full_name, {
         base: mockNewPR.base.ref,
         head: mockNewPR.head.label,
-        title: mockNewPR.title,
+        title: `WIP: ${mockNewPR.title}`,
         body: mockNewPR.body,
         labels: [],
       });
@@ -1020,10 +1052,103 @@ describe('modules/platform/gitea/index', () => {
         })
       ).rejects.toThrow();
     });
+
+    it('should use platform automerge', async () => {
+      helper.createPR.mockResolvedValueOnce(mockNewPR);
+      await initFakePlatform('1.17.0');
+      await initFakeRepo();
+      const res = await gitea.createPr({
+        sourceBranch: mockNewPR.head.label,
+        targetBranch: 'master',
+        prTitle: mockNewPR.title,
+        prBody: mockNewPR.body,
+        platformOptions: { usePlatformAutomerge: true },
+      });
+
+      expect(res).toHaveProperty('number', mockNewPR.number);
+      expect(res).toHaveProperty('targetBranch', mockNewPR.base.ref);
+
+      expect(helper.createPR).toHaveBeenCalledTimes(1);
+      expect(helper.createPR).toHaveBeenCalledWith(mockRepo.full_name, {
+        base: mockNewPR.base.ref,
+        head: mockNewPR.head.label,
+        title: mockNewPR.title,
+        body: mockNewPR.body,
+        labels: [],
+      });
+      expect(helper.mergePR).toHaveBeenCalledWith(
+        mockRepo.full_name,
+        mockNewPR.number,
+        {
+          Do: 'rebase',
+          merge_when_checks_succeed: true,
+        }
+      );
+    });
+
+    it('continues on platform automerge error', async () => {
+      helper.createPR.mockResolvedValueOnce(mockNewPR);
+      await initFakePlatform('1.17.0');
+      await initFakeRepo();
+      helper.mergePR.mockRejectedValueOnce(new Error('fake'));
+      const res = await gitea.createPr({
+        sourceBranch: mockNewPR.head.label,
+        targetBranch: 'master',
+        prTitle: mockNewPR.title,
+        prBody: mockNewPR.body,
+        platformOptions: { usePlatformAutomerge: true },
+      });
+
+      expect(res).toHaveProperty('number', mockNewPR.number);
+      expect(res).toHaveProperty('targetBranch', mockNewPR.base.ref);
+
+      expect(helper.createPR).toHaveBeenCalledTimes(1);
+      expect(helper.createPR).toHaveBeenCalledWith(mockRepo.full_name, {
+        base: mockNewPR.base.ref,
+        head: mockNewPR.head.label,
+        title: mockNewPR.title,
+        body: mockNewPR.body,
+        labels: [],
+      });
+      expect(helper.mergePR).toHaveBeenCalledWith(
+        mockRepo.full_name,
+        mockNewPR.number,
+        {
+          Do: 'rebase',
+          merge_when_checks_succeed: true,
+        }
+      );
+    });
+
+    it('continues if platform automerge is not supported', async () => {
+      helper.createPR.mockResolvedValueOnce(mockNewPR);
+      await initFakeRepo();
+      const res = await gitea.createPr({
+        sourceBranch: mockNewPR.head.label,
+        targetBranch: 'master',
+        prTitle: mockNewPR.title,
+        prBody: mockNewPR.body,
+        platformOptions: { usePlatformAutomerge: true },
+      });
+
+      expect(res).toHaveProperty('number', mockNewPR.number);
+      expect(res).toHaveProperty('targetBranch', mockNewPR.base.ref);
+
+      expect(helper.createPR).toHaveBeenCalledTimes(1);
+      expect(helper.createPR).toHaveBeenCalledWith(mockRepo.full_name, {
+        base: mockNewPR.base.ref,
+        head: mockNewPR.head.label,
+        title: mockNewPR.title,
+        body: mockNewPR.body,
+        labels: [],
+      });
+      expect(helper.mergePR).not.toHaveBeenCalled();
+    });
   });
 
   describe('updatePr', () => {
     it('should update pull request with title', async () => {
+      helper.searchPRs.mockResolvedValueOnce(mockPRs);
       await initFakeRepo();
       await gitea.updatePr({ number: 1, prTitle: 'New Title' });
 
@@ -1034,6 +1159,7 @@ describe('modules/platform/gitea/index', () => {
     });
 
     it('should update pull request with title and body', async () => {
+      helper.searchPRs.mockResolvedValueOnce(mockPRs);
       await initFakeRepo();
       await gitea.updatePr({
         number: 1,
@@ -1048,7 +1174,24 @@ describe('modules/platform/gitea/index', () => {
       });
     });
 
+    it('should update pull request with draft', async () => {
+      helper.searchPRs.mockResolvedValueOnce(mockPRs);
+      await initFakeRepo();
+      await gitea.updatePr({
+        number: 3,
+        prTitle: 'New Title',
+        prBody: 'New Body',
+      });
+
+      expect(helper.updatePR).toHaveBeenCalledTimes(1);
+      expect(helper.updatePR).toHaveBeenCalledWith(mockRepo.full_name, 3, {
+        title: 'WIP: New Title',
+        body: 'New Body',
+      });
+    });
+
     it('should close pull request', async () => {
+      helper.searchPRs.mockResolvedValueOnce(mockPRs);
       await initFakeRepo();
       await gitea.updatePr({
         number: 1,
@@ -1076,11 +1219,9 @@ describe('modules/platform/gitea/index', () => {
         })
       ).toBe(true);
       expect(helper.mergePR).toHaveBeenCalledTimes(1);
-      expect(helper.mergePR).toHaveBeenCalledWith(
-        mockRepo.full_name,
-        1,
-        'rebase'
-      );
+      expect(helper.mergePR).toHaveBeenCalledWith(mockRepo.full_name, 1, {
+        Do: 'rebase',
+      });
     });
 
     it('should return false when merging fails', async () => {

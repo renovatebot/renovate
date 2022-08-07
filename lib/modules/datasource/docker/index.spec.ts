@@ -1151,6 +1151,8 @@ describe('modules/datasource/docker/index', () => {
             Labels: {
               'org.opencontainers.image.source':
                 'https://github.com/renovatebot/renovate',
+              'org.opencontainers.image.revision':
+                'ab7ddb5e3c5c3b402acd7c3679d4e415f8092dde',
             },
           },
         });
@@ -1181,6 +1183,7 @@ describe('modules/datasource/docker/index', () => {
           },
         ],
         sourceUrl: 'https://github.com/renovatebot/renovate',
+        gitRef: 'ab7ddb5e3c5c3b402acd7c3679d4e415f8092dde',
       });
     });
 
