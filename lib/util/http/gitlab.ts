@@ -3,7 +3,7 @@ import { PlatformId } from '../../constants';
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import { parseLinkHeader, parseUrl } from '../url';
-import type { HttpResponse, InternalHttpOptions } from './types';
+import type { HttpOptions, HttpResponse, InternalHttpOptions } from './types';
 import { Http } from '.';
 
 let baseUrl = 'https://gitlab.com/api/v4/';
@@ -11,13 +11,8 @@ export const setBaseUrl = (url: string): void => {
   baseUrl = url;
 };
 
-interface GitlabInternalOptions extends InternalHttpOptions {
-  body?: string;
-}
-
-export interface GitlabHttpOptions extends InternalHttpOptions {
+export interface GitlabHttpOptions extends HttpOptions {
   paginate?: boolean;
-  token?: string;
 }
 
 export class GitlabHttp extends Http<GitlabHttpOptions, GitlabHttpOptions> {
@@ -27,7 +22,7 @@ export class GitlabHttp extends Http<GitlabHttpOptions, GitlabHttpOptions> {
 
   protected override async request<T>(
     url: string | URL,
-    options?: GitlabInternalOptions & GitlabHttpOptions
+    options?: InternalHttpOptions & GitlabHttpOptions
   ): Promise<HttpResponse<T>> {
     const opts = {
       baseUrl,
