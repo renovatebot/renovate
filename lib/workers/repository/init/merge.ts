@@ -27,16 +27,21 @@ export async function detectRepoFileConfig(): Promise<RepoFileConfig> {
   const cache = getCache();
   let { configFileName } = cache;
   if (configFileName) {
-    let configFileParsed = (await platform.getJsonFile(configFileName))!;
+    let configFileRaw: string | undefined = (await platform.getRawFile(
+      configFileName
+    ))!;
+    let configFileParsed = JSON5.parse(configFileRaw);
     if (configFileParsed) {
       if (configFileName === 'package.json') {
         configFileParsed = configFileParsed.renovate;
+        configFileRaw = undefined;
       }
-      return { configFileName, configFileParsed };
+      return { configFileName, configFileRaw, configFileParsed };
     }
     logger.debug('Existing config file no longer exists');
   }
   const fileList = await getFileList();
+
   async function detectConfigFile(): Promise<string | null> {
     for (const fileName of configFileNames) {
       if (fileName === 'package.json') {
@@ -57,6 +62,7 @@ export async function detectRepoFileConfig(): Promise<RepoFileConfig> {
     }
     return null;
   }
+
   configFileName = (await detectConfigFile()) ?? undefined;
   if (!configFileName) {
     logger.debug('No renovate config file found');
@@ -66,6 +72,7 @@ export async function detectRepoFileConfig(): Promise<RepoFileConfig> {
   logger.debug(`Found ${configFileName} config file`);
   // TODO #7154
   let configFileParsed: any;
+  let rawFileContents;
   if (configFileName === 'package.json') {
     // We already know it parses
     configFileParsed = JSON.parse(
@@ -78,7 +85,7 @@ export async function detectRepoFileConfig(): Promise<RepoFileConfig> {
     }
     logger.debug({ config: configFileParsed }, 'package.json>renovate config');
   } else {
-    let rawFileContents = await readLocalFile(configFileName, 'utf8');
+    rawFileContents = await readLocalFile(configFileName, 'utf8');
     // istanbul ignore if
     if (!is.string(rawFileContents)) {
       logger.warn({ configFileName }, 'Null contents when reading config file');
@@ -153,7 +160,7 @@ export async function detectRepoFileConfig(): Promise<RepoFileConfig> {
       'Repository config'
     );
   }
-  return { configFileName, configFileParsed };
+  return { configFileName, configFileRaw: rawFileContents, configFileParsed };
 }
 
 export function checkForRepoConfigError(repoConfig: RepoFileConfig): void {
