@@ -617,33 +617,35 @@ export class DockerDatasource extends Datasource {
       );
 
       if (
-        manifestResponse?.headers['content-type'] === MediaType.manifestV2 ||
-        manifestResponse?.headers['content-type'] === MediaType.ociManifestV1
+        manifestResponse?.headers['content-type'] !== MediaType.manifestV2 &&
+        manifestResponse?.headers['content-type'] !== MediaType.ociManifestV1
       ) {
-        const configDigest = await this.getConfigDigest(
-          registryHost,
-          dockerRepository,
-          currentDigest
-        );
-        if (!configDigest) {
-          return null;
-        }
+        return null;
+      }
 
-        const configResponse = await this.getImageConfig(
-          registryHost,
-          dockerRepository,
-          configDigest
-        );
-        if (configResponse) {
-          const architecture = configResponse.body.architecture ?? null;
-          logger.debug(
-            `Current digest ${currentDigest} relates to architecture ${
-              architecture ?? 'null'
-            }`
-          );
+      const configDigest = await this.getConfigDigest(
+        registryHost,
+        dockerRepository,
+        currentDigest
+      );
+      if (!configDigest) {
+        return null;
+      }
 
-          return architecture;
-        }
+      const configResponse = await this.getImageConfig(
+        registryHost,
+        dockerRepository,
+        configDigest
+      );
+      if (configResponse) {
+        const architecture = configResponse.body.architecture ?? null;
+        logger.debug(
+          `Current digest ${currentDigest} relates to architecture ${
+            architecture ?? 'null'
+          }`
+        );
+
+        return architecture;
       }
     } catch (err) /* istanbul ignore next */ {
       if (err.statusCode !== 404) {
