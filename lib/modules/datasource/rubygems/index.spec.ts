@@ -1,6 +1,7 @@
 import { getPkgReleases } from '..';
 import { Fixtures } from '../../../../test/fixtures';
 import * as httpMock from '../../../../test/http-mock';
+import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages';
 import * as rubyVersioning from '../../versioning/ruby';
 import { resetCache } from './get-rubygems-org';
 import { RubyGemsDatasource } from '.';
@@ -239,6 +240,39 @@ describe('modules/datasource/rubygems/index', () => {
         ],
         registryUrl: 'http://localhost:8081/repository/gems',
       });
+    });
+
+    it('Throws error from nexus server', async () => {
+      const newparams = { ...params };
+      newparams.registryUrls = ['http://localhost:8081/repository/gems'];
+      httpMock
+        .scope('http://localhost:8081/repository/gems')
+        .get('/api/v1/gems/rails.json')
+        .reply(404);
+      httpMock
+        .scope('http://localhost:8081')
+        .get('/service/rest/v1/status')
+        .reply(504, {}, { server: [`Nexus/`] });
+      await expect(getPkgReleases(newparams)).rejects.toThrow(
+        EXTERNAL_HOST_ERROR
+      );
+    });
+
+    it('Not a nexus server', async () => {
+      const newparams = { ...params };
+      newparams.registryUrls = ['http://localhost:8081/repository/gems'];
+      httpMock
+        .scope('http://localhost:8081/repository/gems')
+        .get('/api/v1/gems/rails.json')
+        .reply(404)
+        .get('/api/v1/dependencies?gems=rails')
+        .reply(404);
+      httpMock
+        .scope('http://localhost:8081')
+        .get('/service/rest/v1/status')
+        .reply(200, {}, {});
+      const res = await getPkgReleases(newparams);
+      expect(res).toBeNull();
     });
 
     it('paginates from nexus', async () => {
