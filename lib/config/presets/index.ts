@@ -371,31 +371,29 @@ export async function resolveConfigPresets(
   logger.trace({ config: inputConfig }, 'Input config');
   logger.trace({ config }, 'Resolved config');
   if (shallowResolve) {
-    handleExtendsArray(config, unresolvedPresets);
+    config.extends = mergeUnresolvedPresets(config.extends, unresolvedPresets);
+    if (config?.extends?.length === 0) {
+      delete config.extends;
+    }
   }
   return config;
 }
 
-// handleExtendsArray:
-// This function edits extends array presets when shallowResolve is enabled
-// 1. remove resolved external presets from the extends array.
+// This function returns unresolved presets array when shallowResolve is enabled
+// 1. remove resolved external presets from the array.
 // 2. clean duplicate presets keys (from different resolution levels).
-function handleExtendsArray(
-  config: AllConfig,
+function mergeUnresolvedPresets(
+  presets: string[] | undefined,
   unresolvedPresets: string[]
-): void {
-  if (!config.extends?.length) {
-    return;
+): string[] {
+  if (!presets?.length) {
+    return [];
   }
-  const filteredPresets = config.extends.filter((e) =>
+  const presetsClone: string[] = JSON.parse(JSON.stringify(presets));
+  const currentUnresolved = presetsClone.filter((e) =>
     skipDuringShallowResolve(e)
   );
-  const uniqueExtends = new Set([...filteredPresets, ...unresolvedPresets]);
-  config.extends = Array.from(uniqueExtends);
-  if (config?.extends?.length === 0) {
-    // clean empty extends array
-    delete config.extends;
-  }
+  return Array.from(new Set([...currentUnresolved, ...unresolvedPresets]));
 }
 
 export function skipDuringShallowResolve(presetSource: string): boolean {
