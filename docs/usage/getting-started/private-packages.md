@@ -322,18 +322,18 @@ npmRegistries:
 ### nuget
 
 For each known NuGet registry, Renovate searches for `hostRules` with `hostType=nuget` and matching host.
-For those found, a command similar to the following is run: `dotnet nuget add source ${registryInfo.feedUrl} --configfile ${nugetConfigFile} --username ${username} --password ${password} --store-password-in-clear-text`
+For those found, a command similar to the following is
+run: `dotnet nuget add source ${registryInfo.feedUrl} --configfile ${nugetConfigFile} --username ${username} --password ${password} --store-password-in-clear-text`
 
-password should be encoded to base64
 ```js
 hostRules: [
-    {
-      matchHost: "https://pkgs.dev.azure.com/<org>/",
-      hostType: "nuget",
-      username: "user",
-      password: "<Encrypted PAT Token>"
-    }
-  ]
+  {
+    matchHost: "https://pkgs.dev.azure.com/<org>/",
+    hostType: "nuget",
+    username: "user",
+    password: "<Encrypted PAT Token>"
+  }
+]
 ```
 
 ### poetry
