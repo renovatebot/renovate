@@ -328,12 +328,12 @@ run: `dotnet nuget add source ${registryInfo.feedUrl} --configfile ${nugetConfig
 ```js
 hostRules: [
   {
-    matchHost: "https://pkgs.dev.azure.com/<org>/",
-    hostType: "nuget",
-    username: "user",
-    password: "<Encrypted PAT Token>"
-  }
-]
+    matchHost: 'https://pkgs.dev.azure.com/<org>/',
+    hostType: 'nuget',
+    username: 'user',
+    password: '<Encrypted PAT Token>',
+  },
+];
 ```
 
 ### poetry
