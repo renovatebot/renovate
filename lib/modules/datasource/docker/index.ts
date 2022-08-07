@@ -34,7 +34,7 @@ import {
 } from '../../versioning/docker';
 import { Datasource } from '../datasource';
 import type { DigestConfig, GetReleasesConfig, ReleaseResult } from '../types';
-import { sourceLabels } from './common';
+import { gitRefLabel, sourceLabels } from './common';
 import {
   Image,
   ImageConfig,
@@ -944,9 +944,9 @@ export class DockerDatasource extends Datasource {
       registryUrl!
     );
     logger.debug(
-      `getDigest(${registryHost}, ${dockerRepository}, ${
-        newValue ?? 'undefined'
-      })`
+      // TODO: types (#7154)
+      // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+      `getDigest(${registryHost}, ${dockerRepository}, ${newValue})`
     );
     const newTag = newValue ?? 'latest';
     let digest: string | null = null;
@@ -1082,6 +1082,9 @@ export class DockerDatasource extends Datasource {
       latestTag
     );
     if (labels) {
+      if (is.nonEmptyString(labels[gitRefLabel])) {
+        ret.gitRef = labels[gitRefLabel];
+      }
       for (const label of sourceLabels) {
         if (is.nonEmptyString(labels[label])) {
           ret.sourceUrl = labels[label];
