@@ -8,8 +8,6 @@ import {
 } from '../../../../test/util';
 import * as _migrateAndValidate from '../../../config/migrate-validate';
 import * as _migrate from '../../../config/migration';
-import { logger } from '../../../logger';
-import * as memCache from '../../../util/cache/memory';
 import { initRepoCache } from '../../../util/cache/repository/init';
 import {
   checkForRepoConfigError,
@@ -38,7 +36,6 @@ jest.mock('../../../config/migrate-validate');
 describe('workers/repository/init/merge', () => {
   describe('detectRepoFileConfig()', () => {
     beforeEach(async () => {
-      memCache.init();
       await initRepoCache({});
     });
 
@@ -57,24 +54,14 @@ describe('workers/repository/init/merge', () => {
         },
       });
       fs.readLocalFile.mockResolvedValue(pJson);
-      platform.getRawFile.mockResolvedValueOnce(pJson);
+      platform.getJsonFile.mockResolvedValueOnce(pJson);
       expect(await detectRepoFileConfig()).toEqual({
         configFileName: 'package.json',
         configFileParsed: { prHourlyLimit: 10 },
-        configFileRaw: undefined,
       });
-      // get from memCache
       expect(await detectRepoFileConfig()).toEqual({
         configFileName: 'package.json',
-        configFileParsed: { prHourlyLimit: 10 },
-        configFileRaw: undefined,
-      });
-      memCache.reset();
-      // get from repoCache
-      expect(await detectRepoFileConfig()).toEqual({
-        configFileName: 'package.json',
-        configFileParsed: { prHourlyLimit: 10 },
-        configFileRaw: undefined,
+        configFileParsed: undefined,
       });
     });
 
@@ -85,7 +72,7 @@ describe('workers/repository/init/merge', () => {
         renovate: 'github>renovatebot/renovate',
       });
       fs.readLocalFile.mockResolvedValue(pJson);
-      platform.getRawFile.mockResolvedValueOnce(pJson);
+      platform.getJsonFile.mockResolvedValueOnce(pJson);
       expect(await detectRepoFileConfig()).toEqual({
         configFileName: 'package.json',
         configFileParsed: { extends: ['github>renovatebot/renovate'] },
@@ -120,15 +107,13 @@ describe('workers/repository/init/merge', () => {
     });
 
     it('finds and parse renovate.json5', async () => {
-      const configFileRaw = `{
-        // this is json5 format
-      }`;
       git.getFileList.mockResolvedValue(['package.json', 'renovate.json5']);
-      fs.readLocalFile.mockResolvedValue(configFileRaw);
+      fs.readLocalFile.mockResolvedValue(`{
+        // this is json5 format
+      }`);
       expect(await detectRepoFileConfig()).toEqual({
         configFileName: 'renovate.json5',
         configFileParsed: {},
-        configFileRaw,
       });
     });
 
@@ -141,7 +126,6 @@ describe('workers/repository/init/merge', () => {
       expect(await detectRepoFileConfig()).toEqual({
         configFileName: '.github/renovate.json',
         configFileParsed: {},
-        configFileRaw: '{}',
       });
     });
 
@@ -154,27 +138,23 @@ describe('workers/repository/init/merge', () => {
       expect(await detectRepoFileConfig()).toEqual({
         configFileName: '.gitlab/renovate.json',
         configFileParsed: {},
-        configFileRaw: '{}',
       });
     });
 
     it('finds .renovaterc.json', async () => {
       git.getFileList.mockResolvedValue(['package.json', '.renovaterc.json']);
       fs.readLocalFile.mockResolvedValue('{}');
-      platform.getRawFile.mockResolvedValueOnce('{"something":"new"}');
+      platform.getJsonFile.mockResolvedValueOnce('{"something":"new"}');
       expect(await detectRepoFileConfig()).toEqual({
         configFileName: '.renovaterc.json',
         configFileParsed: {},
-        configFileRaw: '{}',
       });
-      memCache.reset();
-      expect(await detectRepoFileConfig()).toEqual({
-        configFileName: '.renovaterc.json',
-        configFileParsed: {
-          something: 'new',
-        },
-        configFileRaw: '{"something":"new"}',
-      });
+      expect(await detectRepoFileConfig()).toMatchInlineSnapshot(`
+        Object {
+          "configFileName": ".renovaterc.json",
+          "configFileParsed": "{\\"something\\":\\"new\\"}",
+        }
+      `);
     });
   });
 
@@ -194,8 +174,6 @@ describe('workers/repository/init/merge', () => {
 
   describe('mergeRenovateConfig()', () => {
     beforeEach(() => {
-      // memCache.reset();
-      platform.getRawFile.mockResolvedValueOnce(null);
       migrate.migrateConfig.mockReturnValue({
         isMigrated: false,
         migratedConfig: {},
@@ -216,9 +194,6 @@ describe('workers/repository/init/merge', () => {
       }
       expect(e).toBeDefined();
       expect(e?.toString()).toBe('Error: config-validation');
-      expect(logger.debug).toHaveBeenCalledWith(
-        'Existing config file no longer exists'
-      );
     });
 
     it('migrates nested config', async () => {
@@ -249,9 +224,6 @@ describe('workers/repository/init/merge', () => {
           },
         ],
       });
-      expect(logger.debug).toHaveBeenCalledWith(
-        'Existing config file no longer exists'
-      );
     });
 
     it('continues if no errors', async () => {
@@ -263,9 +235,6 @@ describe('workers/repository/init/merge', () => {
       });
       config.extends = [':automergeDisabled'];
       expect(await mergeRenovateConfig(config)).toBeDefined();
-      expect(logger.debug).toHaveBeenCalledWith(
-        'Existing config file no longer exists'
-      );
     });
   });
 });

@@ -17,7 +17,6 @@ import {
 import { logger } from '../../../logger';
 import * as npmApi from '../../../modules/datasource/npm';
 import { platform } from '../../../modules/platform';
-import * as memCache from '../../../util/cache/memory';
 import { getCache } from '../../../util/cache/repository';
 import { readLocalFile } from '../../../util/fs';
 import { getFileList } from '../../../util/git';
@@ -25,31 +24,19 @@ import * as hostRules from '../../../util/host-rules';
 import type { RepoFileConfig } from './types';
 
 export async function detectRepoFileConfig(): Promise<RepoFileConfig> {
-  const cacheKey = 'detectRepoFileConfig';
-  let repoFileConfig = memCache.get<RepoFileConfig>(cacheKey);
-  if (repoFileConfig) {
-    return repoFileConfig;
-  }
   const cache = getCache();
   let { configFileName } = cache;
   if (configFileName) {
-    let configFileRaw: string | undefined = (await platform.getRawFile(
-      configFileName
-    ))!;
-    let configFileParsed = JSON5.parse(configFileRaw);
+    let configFileParsed = (await platform.getJsonFile(configFileName))!;
     if (configFileParsed) {
       if (configFileName === 'package.json') {
         configFileParsed = configFileParsed.renovate;
-        configFileRaw = undefined;
       }
-      repoFileConfig = { configFileName, configFileRaw, configFileParsed };
-      memCache.set(cacheKey, repoFileConfig);
-      return repoFileConfig;
+      return { configFileName, configFileParsed };
     }
     logger.debug('Existing config file no longer exists');
   }
   const fileList = await getFileList();
-
   async function detectConfigFile(): Promise<string | null> {
     for (const fileName of configFileNames) {
       if (fileName === 'package.json') {
@@ -70,7 +57,6 @@ export async function detectRepoFileConfig(): Promise<RepoFileConfig> {
     }
     return null;
   }
-
   configFileName = (await detectConfigFile()) ?? undefined;
   if (!configFileName) {
     logger.debug('No renovate config file found');
@@ -80,7 +66,6 @@ export async function detectRepoFileConfig(): Promise<RepoFileConfig> {
   logger.debug(`Found ${configFileName} config file`);
   // TODO #7154
   let configFileParsed: any;
-  let rawFileContents;
   if (configFileName === 'package.json') {
     // We already know it parses
     configFileParsed = JSON.parse(
@@ -93,7 +78,7 @@ export async function detectRepoFileConfig(): Promise<RepoFileConfig> {
     }
     logger.debug({ config: configFileParsed }, 'package.json>renovate config');
   } else {
-    rawFileContents = await readLocalFile(configFileName, 'utf8');
+    let rawFileContents = await readLocalFile(configFileName, 'utf8');
     // istanbul ignore if
     if (!is.string(rawFileContents)) {
       logger.warn({ configFileName }, 'Null contents when reading config file');
@@ -116,12 +101,10 @@ export async function detectRepoFileConfig(): Promise<RepoFileConfig> {
         );
         const validationError = 'Invalid JSON5 (parsing failed)';
         const validationMessage = `JSON5.parse error:  ${String(err.message)}`;
-        repoFileConfig = {
+        return {
           configFileName,
           configFileParseError: { validationError, validationMessage },
         };
-        memCache.set(cacheKey, repoFileConfig);
-        return repoFileConfig;
       }
     } else {
       let allowDuplicateKeys = true;
@@ -132,12 +115,10 @@ export async function detectRepoFileConfig(): Promise<RepoFileConfig> {
       if (jsonValidationError) {
         const validationError = 'Invalid JSON (parsing failed)';
         const validationMessage = jsonValidationError;
-        repoFileConfig = {
+        return {
           configFileName,
           configFileParseError: { validationError, validationMessage },
         };
-        memCache.set(cacheKey, repoFileConfig);
-        return repoFileConfig;
       }
       allowDuplicateKeys = false;
       jsonValidationError = jsonValidator.validate(
@@ -147,12 +128,10 @@ export async function detectRepoFileConfig(): Promise<RepoFileConfig> {
       if (jsonValidationError) {
         const validationError = 'Duplicate keys in JSON';
         const validationMessage = JSON.stringify(jsonValidationError);
-        repoFileConfig = {
+        return {
           configFileName,
           configFileParseError: { validationError, validationMessage },
         };
-        memCache.set(cacheKey, repoFileConfig);
-        return repoFileConfig;
       }
       try {
         configFileParsed = JSON5.parse(rawFileContents);
@@ -163,12 +142,10 @@ export async function detectRepoFileConfig(): Promise<RepoFileConfig> {
         );
         const validationError = 'Invalid JSON (parsing failed)';
         const validationMessage = `JSON.parse error:  ${String(err.message)}`;
-        repoFileConfig = {
+        return {
           configFileName,
           configFileParseError: { validationError, validationMessage },
         };
-        memCache.set(cacheKey, repoFileConfig);
-        return repoFileConfig;
       }
     }
     logger.debug(
@@ -176,13 +153,7 @@ export async function detectRepoFileConfig(): Promise<RepoFileConfig> {
       'Repository config'
     );
   }
-  repoFileConfig = {
-    configFileName,
-    configFileRaw: rawFileContents,
-    configFileParsed,
-  };
-  memCache.set(cacheKey, repoFileConfig);
-  return repoFileConfig;
+  return { configFileName, configFileParsed };
 }
 
 export function checkForRepoConfigError(repoConfig: RepoFileConfig): void {
