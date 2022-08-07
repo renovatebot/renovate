@@ -2624,10 +2624,10 @@
   resolved "https://registry.yarnpkg.com/@types/node/-/node-18.6.3.tgz#4e4a95b6fe44014563ceb514b2598b3e623d1c98"
   integrity sha512-6qKpDtoaYLM+5+AFChLhHermMQxc3TOEFIDzrZLPRGHPrLEwqFkkT5Kx3ju05g6X7uDPazz3jHbKPX0KzCjntg==
 
-"@types/node@16.11.46":
-  version "16.11.46"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-16.11.46.tgz#26047602eefa47b36759d9ebb1b55ad08ce97a73"
-  integrity sha512-x+sfpb2dMrhCQPL4NAGs64Z9hh0t72aP0dg+PuZidmPr/0Gj5ELQTjD/t46dq3DF/8ZvSHOaIyDIbAsdPshyVQ==
+"@types/node@16.11.47":
+  version "16.11.47"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-16.11.47.tgz#efa9e3e0f72e7aa6a138055dace7437a83d9f91c"
+  integrity sha512-fpP+jk2zJ4VW66+wAMFoBJlx1bxmBKx4DUFf68UHgdGCOuyUTDlLWqsaNPJh7xhNDykyJ9eIzAygilP/4WoN8g==
 
 "@types/node@^13.7.0":
   version "13.13.52"
@@ -5092,10 +5092,10 @@ globrex@^0.1.2:
   resolved "https://registry.yarnpkg.com/globrex/-/globrex-0.1.2.tgz#dd5d9ec826232730cd6793a5e33a9302985e6098"
   integrity sha512-uHJgbwAMwNFf5mLst7IWLNg14x1CkeqglJb/K3doi4dw6q2IvAAmM/Y81kevy83wP+Sst+nutFTYOGg3d1lsxg==
 
-good-enough-parser@1.1.10:
-  version "1.1.10"
-  resolved "https://registry.yarnpkg.com/good-enough-parser/-/good-enough-parser-1.1.10.tgz#bcf5f59369f7fe3f0f621c8b2365171e4f41faf0"
-  integrity sha512-xSMiofggibG9rSt5P92ygB2tcgzgPMCVWPoI5sjnuNu5Id+p4zj4zYXkmQuKvD+c19ZUBfNCL0MFdnti/IBF1g==
+good-enough-parser@1.1.14:
+  version "1.1.14"
+  resolved "https://registry.yarnpkg.com/good-enough-parser/-/good-enough-parser-1.1.14.tgz#32a400d89cebd5e1d75828da16b86a33af8db2b8"
+  integrity sha512-HaVgaqJhU7rS7r3wprWmQOXxN8FFkjyss2cQWaJZqTL0bYE5shtpwC4aY2I7ZaMLuxhj06MRD87XqNsw8Os8uw==
   dependencies:
     "@thi.ng/zipper" "1.0.3"
     "@types/moo" "0.5.5"
@@ -9112,10 +9112,10 @@ type-detect@4.0.8, type-detect@^4.0.8:
   resolved "https://registry.yarnpkg.com/type-detect/-/type-detect-4.0.8.tgz#7646fb5f18871cfbb7749e69bd39a6388eb7450c"
   integrity sha512-0fr/mIH1dlO+x7TlcMy+bIDqKPsw/70tVyeHW787goQjhmqaZe10uwLujubK9q9Lg6Fiho1KUKDYz0Z7k7g5/g==
 
-type-fest@2.17.0:
-  version "2.17.0"
-  resolved "https://registry.yarnpkg.com/type-fest/-/type-fest-2.17.0.tgz#c677030ce61e5be0c90c077d52571eb73c506ea9"
-  integrity sha512-U+g3/JVXnOki1kLSc+xZGPRll3Ah9u2VIG6Sn9iH9YX6UkPERmt6O/0fIyTgsd2/whV0+gAaHAg8fz6sG1QzMA==
+type-fest@2.18.0:
+  version "2.18.0"
+  resolved "https://registry.yarnpkg.com/type-fest/-/type-fest-2.18.0.tgz#fdef3a74e0a9e68ebe46054836650fb91ac3881e"
+  integrity sha512-pRS+/yrW5TjPPHNOvxhbNZexr2bS63WjrMU8a+VzEBhUi9Tz1pZeD+vQz3ut0svZ46P+SRqMEPnJmk2XnvNzTw==
 
 type-fest@^0.13.1:
   version "0.13.1"
