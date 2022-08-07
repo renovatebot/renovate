@@ -21,9 +21,9 @@ export function getCodeCommitUrl(
   if (!is.string(dateTime)) {
     throw new Error(REPOSITORY_UNINITIATED);
   }
-  // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
+
   const token: string = dateTime + 'Z' + signer.signature();
-  return `https://${credentials.accessKeyId}:${token}@git-codecommit.${region}.amazonaws.com/v1/repos/RenovateTest1`;
+  return `https://${credentials.accessKeyId}:${token}@git-codecommit.${region}.amazonaws.com/v1/repos/${repoName}`;
 }
 
 export function getNewBranchName(branchName?: string): string | undefined {

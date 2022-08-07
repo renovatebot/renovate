@@ -1,39 +1,8 @@
-import {
-  CodeCommitClient,
-  CreatePullRequestCommand,
-  CreatePullRequestInput,
-  CreatePullRequestOutput,
-  GetFileCommand,
-  GetFileInput,
-  GetFileOutput,
-  GetPullRequestCommand,
-  GetPullRequestInput,
-  GetPullRequestOutput,
-  GetRepositoryCommand,
-  GetRepositoryInput,
-  GetRepositoryOutput,
-  ListPullRequestsCommand,
-  ListPullRequestsInput,
-  ListPullRequestsOutput,
-  ListRepositoriesCommand,
-  ListRepositoriesInput,
-  ListRepositoriesOutput,
-  MergeBranchesByFastForwardCommand,
-  MergeBranchesByFastForwardInput,
-  MergeBranchesBySquashCommand,
-  MergeBranchesBySquashInput,
-  PullRequestStatusEnum,
-  UpdatePullRequestDescriptionCommand,
-  UpdatePullRequestDescriptionInput,
-  UpdatePullRequestStatusCommand,
-  UpdatePullRequestStatusInput,
-  UpdatePullRequestTitleCommand,
-  UpdatePullRequestTitleInput,
-} from '@aws-sdk/client-codecommit';
+import { PullRequestStatusEnum } from '@aws-sdk/client-codecommit';
 import type { Credentials } from '@aws-sdk/types';
-
 import JSON5 from 'json5';
 import {
+  PLATFORM_BAD_CREDENTIALS,
   REPOSITORY_EMPTY,
   REPOSITORY_NOT_FOUND,
 } from '../../../constants/error-messages';
@@ -60,6 +29,7 @@ import type {
   UpdatePrConfig,
 } from '../types';
 import { smartTruncate } from '../utils/pr-body';
+import * as client from './codecommit-client';
 import { getCodeCommitUrl, getNewBranchName } from './util';
 
 const decoder = new TextDecoder();
@@ -68,19 +38,13 @@ const decoder = new TextDecoder();
 // const defaults = {
 //   hostType: PlatformId.CodeCommit
 // };
-let codeCommitClient: CodeCommitClient;
-let credentials: Credentials;
 
-//todo renove extras in config
 interface Config {
-  repoForceRebase?: boolean;
-  repoId?: string;
-  arn?: string;
-  fileList?: null;
   repository?: string;
   defaultBranch?: string;
   region?: string;
   prList?: Pr[];
+  credentials?: Credentials;
 }
 
 const config: Config = {};
@@ -89,15 +53,10 @@ export function initPlatform({
   endpoint,
   username,
   password,
-  gitAuthor,
 }: PlatformParams): Promise<PlatformResult> {
   let accessKeyId = username;
   let secretAccessKey = password;
   let region;
-
-  if (!gitAuthor) {
-    throw new Error('Init: You must configure a git username');
-  }
 
   if (!accessKeyId) {
     accessKeyId = process.env.AWS_ACCESS_KEY_ID;
@@ -110,7 +69,7 @@ export function initPlatform({
     const codeCommitMatch = regionReg.exec(endpoint);
     region = codeCommitMatch?.groups?.region;
     if (!region) {
-      logger.warn('cant parse region, check your endpoint');
+      logger.warn("Can't parse region, make sure your endpoint is correct");
     }
   } else {
     region = process.env.AWS_REGION;
@@ -122,15 +81,13 @@ export function initPlatform({
     );
   }
   config.region = region;
-  credentials = {
+  const credentials = {
     accessKeyId: accessKeyId,
     secretAccessKey: secretAccessKey,
   };
+  config.credentials = credentials;
 
-  codeCommitClient = new CodeCommitClient({
-    region: region,
-    credentials: credentials,
-  });
+  client.buildCodeCommitClient(region, credentials);
 
   const platformConfig: PlatformResult = {
     endpoint: region,
@@ -147,27 +104,24 @@ export async function initRepo({
 
   config.repository = repository;
 
-  const url = getCodeCommitUrl(config.region!, repository, credentials);
-  await git.initRepo({
-    ...config,
-    url,
-  });
-
-  //todo this code could be GetRepoByName function
-  const getRepositoryInput: GetRepositoryInput = {
-    repositoryName: `${repository}`,
-  };
-  let repo: GetRepositoryOutput;
-  const getRepoCmd = new GetRepositoryCommand(getRepositoryInput);
+  const url = getCodeCommitUrl(config.region!, repository, config.credentials!);
   try {
-    repo = await codeCommitClient.send(getRepoCmd);
+    await git.initRepo({
+      ...config,
+      url,
+    });
+  } catch (err) {
+    throw new Error(PLATFORM_BAD_CREDENTIALS);
+  }
+
+  let repo;
+  try {
+    repo = await client.getRepositoryInfo(repository);
   } catch (error) {
     logger.error({ repository }, 'Could not find repository');
     throw new Error(REPOSITORY_NOT_FOUND);
   }
 
-  // TODO:do we need this check?
-  // istanbul ignore if
   if (!repo) {
     logger.error({ repository }, 'Could not find repository');
     throw new Error(REPOSITORY_NOT_FOUND);
@@ -175,20 +129,15 @@ export async function initRepo({
 
   logger.debug({ repositoryDetails: repo }, 'Repository details');
   const metadata = repo.repositoryMetadata;
-  // istanbul ignore if
+
   if (!metadata || !metadata.defaultBranch) {
     logger.debug('Repo is empty');
     throw new Error(REPOSITORY_EMPTY);
   }
 
-  config.repoId = metadata.repositoryId;
-  config.arn = metadata.Arn;
-
   const defaultBranch = metadata.defaultBranch;
   config.defaultBranch = defaultBranch;
   logger.debug(`${repository} default branch = ${defaultBranch}`);
-
-  config.repoForceRebase = false;
 
   return {
     defaultBranch,
@@ -199,17 +148,12 @@ export async function initRepo({
 export async function getPrList(): Promise<Pr[]> {
   logger.debug('getPrList()');
 
-  const input: ListPullRequestsInput = {
-    repositoryName: config.repository,
-    pullRequestStatus: PullRequestStatusEnum.OPEN,
-  };
-  const cmd = new ListPullRequestsCommand(input);
-  const listPrIdsRes: ListPullRequestsOutput = await codeCommitClient.send(cmd);
+  const listPrsResponse = await client.listPullRequests(config.repository!);
 
-  const prIds = listPrIdsRes.pullRequestIds ?? [];
+  const prIds = listPrsResponse.pullRequestIds ?? [];
   const fetchedPrs: Pr[] = [];
   for (const prId of prIds) {
-    const prRes = await getPrCodeCommit(prId);
+    const prRes = await client.getPr(prId);
     if (!prRes || !prRes.pullRequest) {
       continue;
     }
@@ -277,35 +221,7 @@ export async function getBranchPr(branchName: string): Promise<Pr | null> {
     branchName,
     state: PrState.Open,
   });
-  const res = existingPr ? getPr(existingPr.number) : null;
-  // if (!res) {
-  //   const getBranchInput: GetBranchInput = {
-  //     branchName: branchName,
-  //     repositoryName: config.repository
-  //   }
-  //
-  //   const getBranchCmd = new GetBranchCommand(getBranchInput);
-  //   const data = await codeCommitClient.send(getBranchCmd);
-  //   if(!data.branch) {
-  //     const getBranchDefault: GetBranchInput = {
-  //       branchName: config.defaultBranch,
-  //       repositoryName: config.repository
-  //     }
-  //
-  //     const branchDefaultCmd = new GetBranchCommand(getBranchDefault);
-  //     const defaultBranch = await codeCommitClient.send(branchDefaultCmd);
-  //     // create branch
-  //     const branchInput: CreateBranchInput = {
-  //       branchName: branchName,
-  //       repositoryName: config.repository,
-  //       commitId: defaultBranch.branch?.commitId,
-  //     }
-  //
-  //     const createBranch = new CreateBranchCommand(branchInput);
-  //     await codeCommitClient.send(createBranch);
-  //   }
-  // }
-  return res;
+  return existingPr ? getPr(existingPr.number) : null;
 }
 
 export async function getPr(pullRequestId: number): Promise<Pr | null> {
@@ -314,7 +230,7 @@ export async function getPr(pullRequestId: number): Promise<Pr | null> {
     return null;
   }
 
-  const prRes = await getPrCodeCommit(`${pullRequestId}`);
+  const prRes = await client.getPr(`${pullRequestId}`);
   if (!prRes || !prRes.pullRequest) {
     return null;
   }
@@ -330,19 +246,25 @@ export async function getPr(pullRequestId: number): Promise<Pr | null> {
 export async function getRepos(): Promise<string[]> {
   logger.debug('Autodiscovering AWS CodeCommit repositories');
 
-  const listRepoInput: ListRepositoriesInput = {};
-  const listReposCmd = new ListRepositoriesCommand(listRepoInput);
-  let reposRes: ListRepositoriesOutput;
+  let reposRes;
   try {
-    reposRes = await codeCommitClient.send(listReposCmd);
-    //todo do we need pagination? whats the maximum number of repositories that returns?
+    reposRes = await client.listRepositories();
+    //todo ask if we need pagination? maximum number of repos is 1000 without pagination.
   } catch (error) {
     logger.error({ error }, 'Could not retrieve repositories');
     return [];
-    //todo do we throw error here?
+  }
+  if (!reposRes.repositories) {
+    return [];
+  }
+  const res: string[] = [];
+  for (const repo of reposRes.repositories) {
+    if (repo.repositoryName) {
+      res.push(repo.repositoryName);
+    }
   }
 
-  return reposRes.repositories!.map((repo) => `${repo.repositoryName}`);
+  return res;
 }
 
 export function massageMarkdown(input: string): string {
@@ -357,8 +279,8 @@ export function massageMarkdown(input: string): string {
     .replace(regEx(`\n---\n\n.*?<!-- rebase-check -->.*?\n`), '')
     .replace(regEx(/\]\(\.\.\/pull\//g), '](../../pull-requests/')
     .replace(
-      regEx(/<!--renovate-debug:(?<payload>.*?)-->/),
-      `[//]: # (<payload>)`
+      regEx(/(?<hiddenComment><!--renovate-debug:.*?-->)/),
+      '[//]: # ($<hiddenComment>)'
     );
 }
 
@@ -379,15 +301,13 @@ export async function getRawFile(
   repoName?: string,
   branchOrTag?: string
 ): Promise<string | null> {
-  const fileInput: GetFileInput = {
-    repositoryName: repoName,
-    filePath: fileName,
-    commitSpecifier: branchOrTag,
-  };
-  const fileCmd: GetFileCommand = new GetFileCommand(fileInput);
-  let fileRes: GetFileOutput;
+  let fileRes;
   try {
-    fileRes = await codeCommitClient.send(fileCmd);
+    fileRes = await client.getFile(
+      repoName ?? config.repository,
+      fileName,
+      branchOrTag
+    );
   } catch (error) {
     logger.error({ error }, 'Could not retrieve file');
     return null;
@@ -396,7 +316,7 @@ export async function getRawFile(
 }
 
 export function getRepoForceRebase(): Promise<boolean> {
-  return Promise.resolve(config.repoForceRebase === true);
+  return Promise.resolve(false);
 }
 
 export async function createPr({
@@ -409,21 +329,12 @@ export async function createPr({
   const targetRefName = targetBranch;
   const description = smartTruncate(sanitize(body), 10239);
 
-  const createPrInput: CreatePullRequestInput = {
-    title: title,
-    description: sanitize(description),
-    targets: [
-      {
-        sourceReference: sourceRefName,
-        destinationReference: targetRefName,
-        repositoryName: config.repository,
-      },
-    ],
-  };
-  const prCmd = new CreatePullRequestCommand(createPrInput);
-
-  const prCreateRes: CreatePullRequestOutput = await codeCommitClient.send(
-    prCmd
+  const prCreateRes = await client.createPr(
+    title,
+    sanitize(description),
+    sourceRefName,
+    targetRefName,
+    config.repository
   );
 
   if (!prCreateRes.pullRequest?.pullRequestStatus) {
@@ -452,35 +363,22 @@ export async function updatePr({
   logger.debug(`updatePr(${prNo}, ${title}, body)`);
 
   if (body) {
-    const updateDescInput: UpdatePullRequestDescriptionInput = {
-      pullRequestId: `${prNo}`,
-      description: smartTruncate(sanitize(body), 10239),
-    };
-    const prDescCmd = new UpdatePullRequestDescriptionCommand(updateDescInput);
-    await codeCommitClient.send(prDescCmd);
+    await client.updatePrDescription(
+      `${prNo}`,
+      smartTruncate(sanitize(body), 10239)
+    );
   }
 
   if (title) {
-    const updateTitleInput: UpdatePullRequestTitleInput = {
-      pullRequestId: `${prNo}`,
-      title: title,
-    };
-    const updateTitleCmd = new UpdatePullRequestTitleCommand(updateTitleInput);
-    await codeCommitClient.send(updateTitleCmd);
+    await client.updatePrTitle(`${prNo}`, title);
   }
 
-  const updateStateInput: UpdatePullRequestStatusInput = {
-    pullRequestId: `${prNo}`,
-    pullRequestStatus: PullRequestStatusEnum.OPEN,
-  };
-
-  if (state === PrState.Closed) {
-    updateStateInput.pullRequestStatus = PullRequestStatusEnum.CLOSED;
-  }
-
-  const updateStateCmd = new UpdatePullRequestStatusCommand(updateStateInput);
+  const prStatusInput =
+    state === PrState.Closed
+      ? PullRequestStatusEnum.CLOSED
+      : PullRequestStatusEnum.OPEN;
   try {
-    await codeCommitClient.send(updateStateCmd);
+    await client.updatePrStatus(`${prNo}`, prStatusInput);
   } catch (err) {
     // do nothing, it's ok to fail sometimes when trying to update from open to open or from closed to closed.
   }
@@ -493,7 +391,7 @@ export async function mergePr({
 }: MergePRConfig): Promise<boolean> {
   logger.debug(`mergePr(${pullRequestId}, ${branchName!})`);
 
-  const prOut = await getPrCodeCommit(`${pullRequestId}`);
+  const prOut = await client.getPr(`${pullRequestId}`);
   if (!prOut) {
     return false;
   }
@@ -505,24 +403,18 @@ export async function mergePr({
   }
 
   if (strategy === 'auto' || strategy === 'squash') {
-    const squashInput: MergeBranchesBySquashInput = {
-      repositoryName: targets[0].repositoryName,
-      sourceCommitSpecifier: targets[0].sourceReference,
-      destinationCommitSpecifier: targets[0].destinationReference,
-      commitMessage: pReq?.title,
-      targetBranch: targets[0].destinationReference,
-    };
-    const squashCmd = new MergeBranchesBySquashCommand(squashInput);
-    await codeCommitClient.send(squashCmd);
+    await client.squashMerge(
+      targets[0].repositoryName!,
+      targets[0].sourceReference!,
+      targets[0].destinationReference!,
+      pReq?.title
+    );
   } else if (strategy === 'fast-forward') {
-    const squashInput: MergeBranchesByFastForwardInput = {
-      repositoryName: targets[0].repositoryName,
-      sourceCommitSpecifier: targets[0].sourceReference,
-      destinationCommitSpecifier: targets[0].destinationReference,
-      targetBranch: targets[0].destinationReference,
-    };
-    const squashCmd = new MergeBranchesByFastForwardCommand(squashInput);
-    await codeCommitClient.send(squashCmd);
+    await client.fastForwardMerge(
+      targets[0].repositoryName!,
+      targets[0].sourceReference!,
+      targets[0].destinationReference!
+    );
   } else {
     logger.debug(`unsupported strategy`);
     return false;
@@ -532,31 +424,13 @@ export async function mergePr({
     `Updating PR ${pullRequestId} to status ${PullRequestStatusEnum.CLOSED}`
   );
 
-  const updateStateInput: UpdatePullRequestStatusInput = {
-    pullRequestId: `${pullRequestId}`,
-    pullRequestStatus: PullRequestStatusEnum.CLOSED,
-  };
-
-  const updateStateCmd = new UpdatePullRequestStatusCommand(updateStateInput);
-
   try {
-    const response = await codeCommitClient.send(updateStateCmd);
-
-    // let retries = 0;
+    const response = await client.updatePrStatus(
+      `${pullRequestId}`,
+      PullRequestStatusEnum.CLOSED
+    );
     const isClosed =
       response.pullRequest?.pullRequestStatus === PullRequestStatusEnum.CLOSED;
-    // while (!isClosed && retries < 5) {
-    //   retries += 1;
-    //   const sleepMs = retries * 1000;
-    //   logger.trace(
-    //     {pullRequestId, status: pr.status, retries},
-    //     `Updated PR to closed status but change has not taken effect yet. Retrying...`
-    //   );
-    //
-    //   await delay(sleepMs);
-    //   pr = await azureApiGit.getPullRequestById(pullRequestId, config.project);
-    //   isClosed = pr.status === PullRequestStatus.Completed;
-    // }
 
     if (!isClosed) {
       logger.warn(
@@ -571,62 +445,9 @@ export async function mergePr({
   }
 }
 
-async function getPrCodeCommit(
-  prId: string
-): Promise<GetPullRequestOutput | undefined> {
-  const prInput: GetPullRequestInput = {
-    pullRequestId: prId,
-  };
-  const cmdPr = new GetPullRequestCommand(prInput);
-  let res = undefined;
-  try {
-    res = await codeCommitClient.send(cmdPr);
-  } catch (err) {
-    logger.debug({ err }, 'failed to get PR using prId');
-  }
-  return res;
-}
-
-//   addAssignees,xxx
-//   addReviewers,xxx
-
-//   ensureIssue, xxx
-//   ensureIssueClosing,xxx
-//   findIssue,xxx
-//   getIssue,xxx
-//   getIssueList,xxx
-//   initRepo,
-//   getPrList,
-//   findPr,
-//   getBranchPr,
-//   getPr,
-//   initPlatform,
-//   getRepos
-//   massageMarkdown,
-//   getRepoForceRebase,
-//   getRawFile,
-//   getJsonFile,
-//   getVulnerabilityAlerts, xxxxxxxxxxxxxxxxxx
-//   getBranchStatus,      ?????????????????????
-//   getBranchStatusCheck, ?????????????????????
-//   setBranchStatus,      ?????????????????????
-//   deleteLabel,          what's this for???
-//   ensureComment,        what do we use this for
-//   ensureCommentRemoval, what do we use this for
-//   createPr,
-//   updatePr,
-//   mergePr, in progress
-
-// Issue
-
 /* istanbul ignore next */
 export function findIssue(title: string): Promise<Issue | null> {
-  logger.debug(`findIssue(${title})`);
-  // This is used by Renovate when creating its own issues,
-  // e.g. for deprecated package warnings,
-  // config error notifications, or "dependencyDashboard"
-  //
-  // CodeCommit Server does not have issues
+  // CodeCommit does not have issues
   return Promise.resolve(null);
 }
 
@@ -634,55 +455,40 @@ export function findIssue(title: string): Promise<Issue | null> {
 export function ensureIssue({
   title,
 }: EnsureIssueConfig): Promise<EnsureIssueResult | null> {
-  logger.warn({ title }, 'Cannot ensure issue');
-  // This is used by Renovate when creating its own issues,
-  // e.g. for deprecated package warnings,
-  // config error notifications, or "dependencyDashboard"
-  //
-  // CodeCommit Server does not have issues
+  // CodeCommit does not have issues
   return Promise.resolve(null);
 }
 
 /* istanbul ignore next */
 export function getIssueList(): Promise<Issue[]> {
-  logger.debug(`getIssueList()`);
-  // This is used by Renovate when creating its own issues,
-  // e.g. for deprecated package warnings,
-  // config error notifications, or "dependencyDashboard"
-  //
-  // CodeCommit Server does not have issues
+  // CodeCommit does not have issues
   return Promise.resolve([]);
 }
 
 /* istanbul ignore next */
 export function ensureIssueClosing(title: string): Promise<void> {
-  logger.debug(`ensureIssueClosing(${title})`);
-  // This is used by Renovate when creating its own issues,
-  // e.g. for deprecated package warnings,
-  // config error notifications, or "dependencyDashboard"
-  //
-  // CodeCommit Server does not have issues
+  // CodeCommit does not have issues
   return Promise.resolve();
 }
 
+/* istanbul ignore next */
 export function addAssignees(iid: number, assignees: string[]): Promise<void> {
-  logger.debug(`addAssignees(${iid}, [${assignees.join(', ')}])`);
-  // This is used by Renovate when creating its own issues,
-  // e.g. for deprecated package warnings,
-  // config error notifications, or "dependencyDashboard"
-  //
-  // CodeCommit Server does not have issues
+  // CodeCommit does not support adding assignees
   return Promise.resolve();
 }
 
+/* istanbul ignore next */
 export function addReviewers(prNo: number, reviewers: string[]): Promise<void> {
+  // CodeCommit does not support adding reviewers
   return Promise.resolve();
 }
 
+/* istanbul ignore next */
 export function deleteLabel(prNumber: number, label: string): Promise<void> {
   return Promise.resolve();
 }
 
+/* istanbul ignore next */
 export function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
   return Promise.resolve([]);
 }
@@ -693,7 +499,7 @@ export async function getBranchStatus(
 ): Promise<BranchStatus> {
   //todo delete this
   logger.debug(`getBranchStatus(${branchName})`);
-  await getPrCodeCommit(branchName);
+  await client.getPr(`1`);
   // logger.debug({ branch: branchName, statuses }, 'branch status check result');
   // if (!statuses.length) {
   //   logger.debug('empty branch status check result = returning "pending"');
@@ -746,64 +552,17 @@ export function ensureCommentRemoval(
   return Promise.resolve();
 }
 
-// export async function commitFiles({
-//                                     branchName,
-//                                     files,
-//                                     message,
-//                                     force,
-//                                     platformCommit,
-//                                   }: CommitFilesConfig): Promise<CommitSha | null> {
-//
-//   // take last commit
-//   const getBranchInput: GetBranchInput = {
-//     branchName: config.defaultBranch,
-//     repositoryName: config.repository
-//   }
-//
-//   const getBranchMain = new GetBranchCommand(getBranchInput);
-//   const data = await codeCommitClient.send(getBranchMain);
-//   const commitId = data.branch?.commitId;
-//
-//
-//   // create branch
-//   const branchInput: CreateBranchInput = {
-//     branchName: branchName,
-//     repositoryName: config.repository,
-//     commitId: commitId
-//   }
-//
-//   const createBranch = new CreateBranchCommand(branchInput);
-//   await codeCommitClient.send(createBranch);
-//   // get created branch commit
-//   const getNewBranchInput:GetBranchInput = {
-//     branchName:branchName,
-//     repositoryName: config.repository,
-//   };
-//
-//   const newBranchCmd = new GetBranchCommand(getNewBranchInput);
-//   const newBranchData = await codeCommitClient.send(newBranchCmd);
-//
-//
-//
-//   // commit files
-//   // const encoder = new TextEncoder();
-//   // let convertedToUint8Array = encoder.encode('{\\n  \\"name\\": \\"renovate_tutorial\\",\\n  \\"version\\": \\"0.0.1\\",\\n  \\"description\\": \\"A simple package json for Renovate tutorial use only\\",\\n  \\"author\\": \\"Philip\\",\\n  \\"license\\": \\"Apache-2.0\\",\\n  \\"dependencies\\": {\\n    \\"commander\\": \\"2.20.3\\",\\n    \\"lodash\\": \\"4.16.0\\",\\n\\t\\"six\\": \\"0.0.6\\",\\n    \\"@date-io/date-fns\\": \\"2.10.0\\",\\n    \\"@date-io/moment\\": \\"2.10.0\\"\\n  }\\n}\\n');
-//    const commitInput: CreateCommitInput = {
-//     repositoryName: 'RenovateTest1',
-//     branchName: 'firstBranch',
-//     commitMessage: 'this is my first commit',
-//     authorName: 'Stinky',
-//     parentCommitId: newBranchData.branch?.commitId,
-//     putFiles: [{
-//       filePath: 'C:\\tests\\newProject\\package.json',
-//       fileMode: 'NORMAL',
-//     }],
-//   }
-//   let createCommit = new CreateCommitCommand(commitInput);
-//
-//     const data = await client.send(createCommit);
-//
-//
-//
-//   return commitSha;
-// }
+//   addAssignees, not supported
+//   addReviewers, not supported
+//   ensureIssue, not supported
+//   ensureIssueClosing,not supported
+//   findIssue,not supported
+//   getIssue,not supported
+//   getIssueList,not supported
+//   getVulnerabilityAlerts, not supported
+//   getBranchStatus,      which flow is this?
+//   getBranchStatusCheck, which flow is this?
+//   setBranchStatus,      which flow is this?
+//   deleteLabel,          what's this for??? we cant put labels on prs not supported
+//   ensureComment,        which flow is this?
+//   ensureCommentRemoval, which flow is this?
