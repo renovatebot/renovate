@@ -28,7 +28,10 @@ export async function updateArtifacts({
       .split(newlineRegex)
       .map((line) => line.trim());
     for (const dep of updatedDeps) {
-      const depName = dep.depName!;
+      if (!dep.depName) {
+        continue;
+      }
+      const depName = dep.depName;
       const hashLine = lines.find(
         (line) =>
           // TODO: types (#7154)
