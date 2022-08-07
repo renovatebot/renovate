@@ -277,20 +277,30 @@ describe('workers/repository/update/branch/index', () => {
         number: 13,
         state: PrState.Merged,
       } as Pr);
-      await branchWorker.processBranch(config);
+      getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
+        updatedPackageFiles: [{}],
+      } as PackageFilesResult);
+      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+        artifactErrors: [{}],
+        updatedArtifacts: [{}],
+      } as WriteExistingFilesResult);
+      const processBranchResult = await branchWorker.processBranch(config);
+      expect(processBranchResult).toEqual({
+        branchExists: true,
+        prNo: undefined,
+        result: 'pr-created',
+      });
       expect(logger.debug).toHaveBeenCalledWith(
         { prTitle: config.prTitle },
         'Merged PR already exists. Creating new PR with automerge disabled.'
       );
-      expect(reuse.shouldReuseExistingBranch).toHaveBeenCalledTimes(0);
-      expect(getUpdated.getUpdatedPackageFiles).toHaveBeenCalledTimes(1);
     });
 
     it('throws error if closed PR found', async () => {
       schedule.isScheduledNow.mockReturnValueOnce(false);
       git.branchExists.mockReturnValue(true);
       platform.getBranchPr.mockResolvedValueOnce({
-        state: PrState.Merged,
+        state: PrState.Closed,
       } as Pr);
       git.isBranchModified.mockResolvedValueOnce(true);
       await expect(branchWorker.processBranch(config)).rejects.toThrow(
