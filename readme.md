@@ -55,6 +55,8 @@ This means that Renovate:
 
 ## Using Renovate
 
+Get started with Renovate by checking out our [tutorial](https://github.com/renovatebot/tutorial).
+
 ### GitHub
 
 It's easiest to use the hosted Renovate app.

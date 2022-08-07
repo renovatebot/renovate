@@ -5,6 +5,7 @@ import { logger } from '../../logger';
 import { getPkgReleases } from '../../modules/datasource';
 import * as allVersioning from '../../modules/versioning';
 import { id as composerVersioningId } from '../../modules/versioning/composer';
+import { id as nodeVersioningId } from '../../modules/versioning/node';
 import { id as npmVersioningId } from '../../modules/versioning/npm';
 import { id as pep440VersioningId } from '../../modules/versioning/pep440';
 import { id as rubyVersioningId } from '../../modules/versioning/ruby';
@@ -63,6 +64,16 @@ const allToolConfig: Record<string, ToolConfig> = {
     depName: 'jsonnet-bundler/jsonnet-bundler',
     versioning: semverVersioningId,
   },
+  lerna: {
+    datasource: 'npm',
+    depName: 'lerna',
+    versioning: npmVersioningId,
+  },
+  node: {
+    datasource: 'node',
+    depName: 'node',
+    versioning: nodeVersioningId,
+  },
   npm: {
     datasource: 'npm',
     depName: 'npm',
@@ -117,8 +128,11 @@ export function isDynamicInstall(
     );
     return false;
   }
-  return !!toolConstraints?.every((toolConstraint) =>
-    supportsDynamicInstall(toolConstraint.toolName)
+  return (
+    !toolConstraints ||
+    toolConstraints.every((toolConstraint) =>
+      supportsDynamicInstall(toolConstraint.toolName)
+    )
   );
 }
 
