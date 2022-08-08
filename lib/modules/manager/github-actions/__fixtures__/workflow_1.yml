@@ -30,3 +30,14 @@ jobs:
     steps:
       - name: Node 6 test
         uses: docker://node:6@sha256:7b65413af120ec5328077775022c78101f103258a1876ec2f83890bce416e896
+  container-job:
+    runs-on: ubuntu-latest
+    container: node:16-bullseye
+    services:
+      redis:
+        image: redis:5
+      postgres: postgres:10
+  container-job-with-image-keyword:
+    runs-on: ubuntu-latest
+    container:
+      image: node:16-bullseye
