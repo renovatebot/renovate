@@ -7,6 +7,7 @@ import { exec } from '../../../util/exec';
 import type { ExecOptions } from '../../../util/exec/types';
 import {
   deleteLocalFile,
+  ensureCacheDir,
   readLocalFile,
   writeLocalFile,
 } from '../../../util/fs';
@@ -130,6 +131,9 @@ export async function updateArtifacts({
           constraint,
         },
       ],
+      extraEnv: {
+        PIP_CACHE_DIR: await ensureCacheDir('pip'),
+      },
     };
     logger.debug({ cmd }, 'pip-compile command');
     await exec(cmd, execOptions);
