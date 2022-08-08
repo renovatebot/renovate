@@ -68,9 +68,12 @@ export async function updateArtifacts({
     const execOptions: ExecOptions = {
       cwdFile: '.',
       docker: {
-        image: 'python',
+        image: 'sidecar',
       },
-      preCommands: ['pip install hashin'],
+      preCommands: ['pip install --user hashin'],
+      toolConstraints: [
+        { toolName: 'python', constraint: config.constraints?.python },
+      ],
     };
     await exec(cmd, execOptions);
     const newContent = await readLocalFile(packageFileName, 'utf8');

@@ -1,9 +1,5 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`modules/manager/npm/post-update/npm catches errors 1`] = `Array []`;
-
-exports[`modules/manager/npm/post-update/npm finds npm globally 1`] = `Array []`;
-
 exports[`modules/manager/npm/post-update/npm generates lock files 1`] = `
 Array [
   Object {
@@ -44,8 +40,6 @@ Array [
   },
 ]
 `;
-
-exports[`modules/manager/npm/post-update/npm performs full install 1`] = `Array []`;
 
 exports[`modules/manager/npm/post-update/npm performs lock file maintenance 1`] = `
 Array [
@@ -202,9 +196,3 @@ Array [
   },
 ]
 `;
-
-exports[`modules/manager/npm/post-update/npm performs npm-shrinkwrap.json updates (no package-lock.json) 1`] = `Array []`;
-
-exports[`modules/manager/npm/post-update/npm performs npm-shrinkwrap.json updates 1`] = `Array []`;
-
-exports[`modules/manager/npm/post-update/npm uses docker npm 1`] = `Array []`;

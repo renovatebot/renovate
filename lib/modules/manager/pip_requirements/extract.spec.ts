@@ -119,7 +119,7 @@ describe('modules/manager/pip_requirements/extract', () => {
         'http://$PIP_TEST_TOKEN:example.com/private-pypi/',
         'http://${PIP_TEST_TOKEN}:example.com/private-pypi/',
         'http://$PIP_TEST_TOKEN:example.com/private-pypi/',
-        'http://${PIP_TEST_TOKEN}:example.com/private-pypi/',
+        'http://${PIP_TEST_TOKEN1}:example.com/private-pypi/',
       ]);
     });
 
@@ -131,7 +131,7 @@ describe('modules/manager/pip_requirements/extract', () => {
         'http://its-a-secret:example.com/private-pypi/',
         'http://its-a-secret:example.com/private-pypi/',
         'http://its-a-secret:example.com/private-pypi/',
-        'http://its-a-secret:example.com/private-pypi/',
+        'http://${PIP_TEST_TOKEN1}:example.com/private-pypi/',
       ]);
     });
 
