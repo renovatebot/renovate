@@ -221,13 +221,13 @@ export async function ensureDependencyDashboard(
   if (pendingApprovals.length) {
     issueBody += '## Pending Approval\n\n';
     issueBody += `These branches will be created by Renovate only once you click their checkbox below.\n\n`;
+    for (const branch of pendingApprovals) {
+      issueBody += getListItem(branch, 'approve');
+    }
     if (pendingApprovals.length > 1) {
       issueBody += ' - [ ] ';
       issueBody += '<!-- approve-all-pending-prs -->';
       issueBody += '⚠ **Approve all pending PRs** ⚠\n';
-    }
-    for (const branch of pendingApprovals) {
-      issueBody += getListItem(branch, 'approve');
     }
     issueBody += '\n';
   }
@@ -253,13 +253,13 @@ export async function ensureDependencyDashboard(
     issueBody += '## Rate Limited\n\n';
     issueBody +=
       'These updates are currently rate limited. Click on a checkbox below to force their creation now.\n\n';
+    for (const branch of rateLimited) {
+      issueBody += getListItem(branch, 'unlimit');
+    }
     if (rateLimited.length > 1) {
       issueBody += ' - [ ] ';
       issueBody += '<!-- open-all-rate-limited-prs -->';
       issueBody += '⚠ **Open all rate-limited PRs** ⚠\n';
-    }
-    for (const branch of rateLimited) {
-      issueBody += getListItem(branch, 'unlimit');
     }
     issueBody += '\n';
   }

@@ -610,9 +610,9 @@ describe('workers/repository/dependency-dashboard', () => {
 
         These branches will be created by Renovate only once you click their checkbox below.
 
-         - [x] <!-- approve-all-pending-prs -->**Approve all pending PRs**
          - [ ] <!-- approve-branch=branchName1 -->pr1
-         - [ ] <!-- approve-branch=branchName2 -->pr2`,
+         - [ ] <!-- approve-branch=branchName2 -->pr2
+         - [x] <!-- approve-all-pending-prs -->**Approve all pending PRs**`,
       });
       await dependencyDashboard.ensureDependencyDashboard(config, branches);
       const checkApprovePendingSelectAll = regEx(
