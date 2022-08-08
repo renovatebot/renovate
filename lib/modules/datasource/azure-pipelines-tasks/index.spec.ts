@@ -11,46 +11,21 @@ describe('modules/datasource/azure-pipelines-tasks/index', () => {
     ).toBeNull();
   });
 
-  it('returns single version', async () => {
+  it('supports built-in tasks', async () => {
     expect(
       await getPkgReleases({
         datasource: AzurePipelinesTasksDatasource.id,
-        depName: 'Bash',
+        depName: 'AutomatedAnalysis',
       })
-    ).toEqual({ releases: [{ version: '3' }] });
-  });
-
-  it('returns multiple versions', async () => {
-    expect(
-      await getPkgReleases({
-        datasource: AzurePipelinesTasksDatasource.id,
-        depName: 'AzureFileCopy',
-      })
-    ).toEqual({
-      releases: [
-        { version: '1' },
-        { version: '2' },
-        { version: '3' },
-        { version: '4' },
-        { version: '5' },
-      ],
-    });
+    ).toEqual({ releases: [{ version: '0.171.0' }, { version: '0.198.0' }] });
   });
 
   it('is case insensitive', async () => {
     expect(
       await getPkgReleases({
         datasource: AzurePipelinesTasksDatasource.id,
-        depName: 'AzUrEfIlEcOpY',
+        depName: 'automatedanalysis',
       })
-    ).toEqual({
-      releases: [
-        { version: '1' },
-        { version: '2' },
-        { version: '3' },
-        { version: '4' },
-        { version: '5' },
-      ],
-    });
+    ).toEqual({ releases: [{ version: '0.171.0' }, { version: '0.198.0' }] });
   });
 });
