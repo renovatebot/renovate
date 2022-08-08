@@ -648,9 +648,13 @@ export class DockerDatasource extends Datasource {
         return architecture;
       }
     } catch (err) /* istanbul ignore next */ {
-      if (err.statusCode !== 404) {
+      if (err.statusCode !== 404 || err.message === PAGE_NOT_FOUND_ERROR) {
         throw err;
       }
+      logger.debug(
+        { registryHost, dockerRepository, currentDigest, err },
+        'Unknown error getting image architecture'
+      );
     }
 
     return undefined;
