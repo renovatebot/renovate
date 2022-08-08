@@ -135,6 +135,7 @@ describe('modules/manager/pipenv/artifacts', () => {
     fs.ensureCacheDir.mockResolvedValueOnce(
       '/tmp/renovate/cache/others/pipenv'
     );
+    fs.ensureCacheDir.mockResolvedValueOnce('/tmp/renovate/cache/others/pip');
     fs.readLocalFile.mockResolvedValueOnce(JSON.stringify(pipFileLock));
     const execSnapshots = mockExecAll();
     git.getRepoStatus.mockResolvedValue({
@@ -158,6 +159,7 @@ describe('modules/manager/pipenv/artifacts', () => {
     fs.ensureCacheDir.mockResolvedValueOnce(
       '/tmp/renovate/cache/others/pipenv'
     );
+    fs.ensureCacheDir.mockResolvedValueOnce('/tmp/renovate/cache/others/pip');
     fs.readLocalFile.mockResolvedValueOnce(JSON.stringify(pipFileLock));
     const execSnapshots = mockExecAll();
     git.getRepoStatus.mockResolvedValue({
