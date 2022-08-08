@@ -62,9 +62,10 @@ describe('workers/repository/finalise/repository-statistics', () => {
 
     it('processes cache with baseBranches only', () => {
       const sha = '793221454914cdc422e1a8f0ca27b96fe39ff9ad';
-      const main = partial<BaseBranchCache>({ sha });
-      const dev = partial<BaseBranchCache>({ sha });
-      const cache = partial<RepoCacheData>({ scan: { main, dev } });
+      const baseCache = partial<BaseBranchCache>({ sha });
+      const cache = partial<RepoCacheData>({
+        scan: { main: baseCache, dev: baseCache },
+      });
       cacheSpy.mockReturnValueOnce(cache);
       runBranchSummery();
       expect(logger.debug).toHaveBeenCalledWith(
@@ -89,23 +90,25 @@ describe('workers/repository/finalise/repository-statistics', () => {
     it('processes cache with baseBranches and branches', () => {
       const sha = '793221454914cdc422e1a8f0ca27b96fe39ff9ad';
       const parentSha = '793221454914cdc422e1a8f0ca27b96fe39ff9ad';
-      const main = partial<BaseBranchCache>({ sha });
-      const dev = partial<BaseBranchCache>({ sha });
-      const branchData = partial<BranchCache>({
+      const baseCache = partial<BaseBranchCache>({ sha });
+      const branchCache = partial<BranchCache>({
         sha,
         parentSha,
         isModified: false,
         automerge: false,
       });
       const branches: BranchCache[] = [
-        { ...branchData, branchName: 'b1' },
+        { ...branchCache, branchName: 'b1' },
         {
-          ...branchData,
+          ...branchCache,
           branchName: 'b2',
         },
         partial<BranchCache>({ branchName: 'b3' }),
       ];
-      const cache = partial<RepoCacheData>({ scan: { main, dev }, branches });
+      const cache = partial<RepoCacheData>({
+        scan: { main: baseCache, dev: baseCache },
+        branches,
+      });
 
       cacheSpy.mockReturnValueOnce(cache);
       runBranchSummery();
@@ -122,8 +125,8 @@ describe('workers/repository/finalise/repository-statistics', () => {
             },
           ],
           branches: [
-            { ...branchData, branchName: 'b1' },
-            { ...branchData, branchName: 'b2' },
+            { ...branchCache, branchName: 'b1' },
+            { ...branchCache, branchName: 'b2' },
           ],
           inactiveBranches: ['b3'],
         },
