@@ -1,4 +1,3 @@
-import is from '@sindresorhus/is';
 import { lang, query as q } from 'good-enough-parser';
 import { parseUrl } from '../../../util/url';
 import { MavenDatasource } from '../../datasource/maven';
