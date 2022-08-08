@@ -95,7 +95,7 @@ export async function extractDependencies(
     addSplit('extract');
     for (const baseBranch of config.baseBranches) {
       if (branchExists(baseBranch)) {
-        addMeta({ baseBranch: baseBranch });
+        addMeta({ baseBranch });
         const baseBranchConfig = await getBaseBranchConfig(baseBranch, config);
         const packageFiles = extracted[baseBranch];
         const baseBranchRes = await lookup(baseBranchConfig, packageFiles);
