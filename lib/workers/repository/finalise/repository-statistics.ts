@@ -71,7 +71,7 @@ export function runBranchSummery(): void {
   const inactiveBranches: string[] = [];
 
   for (const branch of branches ?? []) {
-    if (!branch?.sha) {
+    if (!branch.sha) {
       inactiveBranches.push(branch.branchName);
       continue;
     }
