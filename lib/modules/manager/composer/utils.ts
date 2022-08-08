@@ -109,16 +109,16 @@ export function extractConstraints(
   return res;
 }
 
-export function findGithubPersonnalAccessToken(
+export function findGithubPersonalAccessToken(
   search: HostRuleSearch
 ): string | undefined {
   const token = findHostRule(search)?.token;
-  if (token && isPersonnalAccessToken(token)) {
+  if (token && isPersonalAccessToken(token)) {
     return token;
   }
   return undefined;
 }
 
-export function isPersonnalAccessToken(token: string): boolean {
+export function isPersonalAccessToken(token: string): boolean {
   return regEx(/^ghp_/).test(token);
 }
