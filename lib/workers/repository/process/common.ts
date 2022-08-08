@@ -4,9 +4,5 @@ export function baseBranchesEqualsDefault({
   baseBranches,
   defaultBranch,
 }: RenovateConfig): boolean {
-  return (
-    !!defaultBranch &&
-    baseBranches?.length === 1 &&
-    baseBranches.includes(defaultBranch)
-  );
+  return baseBranches?.toString() === [defaultBranch].toString();
 }

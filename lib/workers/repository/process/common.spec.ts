@@ -29,8 +29,8 @@ describe('workers/repository/process/common', () => {
       ).toBeFalse();
 
       expect(baseBranchesEqualsDefault({ baseBranches: ['dev'] })).toBeFalse();
-
       expect(baseBranchesEqualsDefault({ defaultBranch: 'main' })).toBeFalse();
+      expect(baseBranchesEqualsDefault({})).toBeFalse();
     });
   });
 });
