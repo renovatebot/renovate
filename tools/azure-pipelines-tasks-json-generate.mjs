@@ -50,8 +50,9 @@ await (async () => {
         /** @type {{name: string, version: {Major: number, Minor: number, Patch: number}}} */
         const parsedContent = JSON5.parse(content);
         const version = `${parsedContent.version.Major}.${parsedContent.version.Minor}.${parsedContent.version.Patch}`;
-        tasks[parsedContent.name] =
-          tasks[parsedContent.name]?.add(version) ?? new Set([version]);
+        tasks[parsedContent.name.toLowerCase()] =
+          tasks[parsedContent.name.toLowerCase()]?.add(version) ??
+          new Set([version]);
       } catch (e) {
         shell.echo(`Failed to parse ${file} at ${rev}`);
         shell.echo(e.toString());
