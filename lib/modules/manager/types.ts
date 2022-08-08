@@ -181,8 +181,6 @@ export interface Upgrade<T = Record<string, any>>
   newName?: string;
   newValue?: string;
   packageFile?: string;
-  prettyNewMajor?: string;
-  prettyNewVersion?: string;
   rangeStrategy?: RangeStrategy;
   newVersion?: string;
   updateType?: UpdateType;
