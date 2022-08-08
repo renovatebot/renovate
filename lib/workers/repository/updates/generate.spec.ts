@@ -80,6 +80,7 @@ describe('workers/repository/updates/generate', () => {
         newValue: '^1.0.0',
         newVersion: '1.0.1',
         reuseLockFiles: true,
+        prettyNewVersion: 'v1.0.1',
         upgrades: [
           {
             branchName: 'some-branch',
@@ -90,6 +91,7 @@ describe('workers/repository/updates/generate', () => {
             lockedVersion: '1.0.0',
             newValue: '^1.0.0',
             newVersion: '1.0.1',
+            prettyNewVersion: 'v1.0.1',
           },
         ],
       });
@@ -134,7 +136,7 @@ describe('workers/repository/updates/generate', () => {
           branchName: 'some-branch',
           prTitle: 'some-title',
           commitMessageExtra:
-            'to {{#if isMajor}}v{{newMajor}}{{else}}{{#unless isRange}}v{{/unless}}{{newValue}}{{/if}}',
+            'to {{#if isMajor}}{{prettyNewMajor}}{{else}}{{#unless isRange}}v{{/unless}}{{newValue}}{{/if}}',
           foo: 1,
           newValue: '5.1.2',
           newVersion: '5.1.2',
@@ -154,7 +156,7 @@ describe('workers/repository/updates/generate', () => {
           branchName: 'some-branch',
           prTitle: 'some-title',
           commitMessageExtra:
-            'to {{#if isMajor}}v{{newMajor}}{{else}}{{#unless isRange}}v{{/unless}}{{newValue}}{{/if}}',
+            'to {{#if isMajor}}{{prettyNewMajor}}{{else}}{{#unless isRange}}v{{/unless}}{{newValue}}{{/if}}',
           foo: 1,
           newValue: '5.1.2',
           newVersion: '5.1.2',
@@ -175,7 +177,7 @@ describe('workers/repository/updates/generate', () => {
           branchName: 'some-branch',
           prTitle: 'some-title',
           commitMessageExtra:
-            'to {{#if isMajor}}v{{newMajor}}{{else}}{{#unless isRange}}v{{/unless}}{{newValue}}{{/if}}',
+            'to {{#if isMajor}}{{prettyNewMajor}}{{else}}{{#unless isRange}}v{{/unless}}{{newValue}}{{/if}}',
           foo: 1,
           newValue: '5.1.2',
           newVersion: '5.1.2',
@@ -206,7 +208,7 @@ describe('workers/repository/updates/generate', () => {
           branchName: 'some-branch',
           prTitle: 'some-title',
           commitMessageExtra:
-            'to {{#if isMajor}}v{{newMajor}}{{else}}{{#unless isRange}}v{{/unless}}{{newValue}}{{/if}}',
+            'to {{#if isMajor}}{{prettyNewMajor}}{{else}}{{#unless isRange}}v{{/unless}}{{newValue}}{{/if}}',
           foo: 1,
           newValue: '5.1.2',
           newVersion: '5.1.2',
@@ -220,7 +222,7 @@ describe('workers/repository/updates/generate', () => {
           branchName: 'some-branch',
           prTitle: 'some-title',
           commitMessageExtra:
-            'to {{#if isMajor}}v{{newMajor}}{{else}}{{#unless isRange}}v{{/unless}}{{newValue}}{{/if}}',
+            'to {{#if isMajor}}{{prettyNewMajor}}{{else}}{{#unless isRange}}v{{/unless}}{{newValue}}{{/if}}',
           foo: 1,
           newValue: '5.2.0',
           newVersion: '5.2.0',
@@ -242,7 +244,7 @@ describe('workers/repository/updates/generate', () => {
           branchName: 'some-branch',
           prTitle: 'some-title',
           commitMessageExtra:
-            'to {{#if isMajor}}v{{newMajor}}{{else}}{{#unless isRange}}v{{/unless}}{{newValue}}{{/if}}',
+            'to {{#if isMajor}}{{prettyNewMajor}}{{else}}{{#unless isRange}}v{{/unless}}{{newValue}}{{/if}}',
           foo: 1,
           newValue: '5.1.2',
           newVersion: '5.1.2',
@@ -258,7 +260,7 @@ describe('workers/repository/updates/generate', () => {
           branchName: 'some-branch',
           prTitle: 'some-title',
           commitMessageExtra:
-            'to {{#if isMajor}}v{{newMajor}}{{else}}{{#unless isRange}}v{{/unless}}{{newValue}}{{/if}}',
+            'to {{#if isMajor}}{{prettyNewMajor}}{{else}}{{#unless isRange}}v{{/unless}}{{newValue}}{{/if}}',
           foo: 1,
           newValue: '1.1.0',
           newVersion: '1.1.0',
@@ -285,7 +287,7 @@ describe('workers/repository/updates/generate', () => {
           branchName: 'some-branch',
           prTitle: 'some-title',
           commitMessageExtra:
-            'to {{#if isMajor}}v{{newMajor}}{{else}}{{#unless isRange}}v{{/unless}}{{newValue}}{{/if}}',
+            'to {{#if isMajor}}{{prettyNewMajor}}{{else}}{{#unless isRange}}v{{/unless}}{{newValue}}{{/if}}',
           foo: 1,
           newValue: '^6.0',
           newVersion: '6.0.3',
@@ -301,7 +303,7 @@ describe('workers/repository/updates/generate', () => {
           branchName: 'some-branch',
           prTitle: 'some-title',
           commitMessageExtra:
-            'to {{#if isMajor}}v{{newMajor}}{{else}}{{#unless isRange}}v{{/unless}}{{newValue}}{{/if}}',
+            'to {{#if isMajor}}{{prettyNewMajor}}{{else}}{{#unless isRange}}v{{/unless}}{{newValue}}{{/if}}',
           foo: 1,
           newValue: '^6.0',
           newVersion: '6.0.1',
@@ -328,7 +330,7 @@ describe('workers/repository/updates/generate', () => {
           branchName: 'some-branch',
           prTitle: 'some-title',
           commitMessageExtra:
-            'to {{#if isMajor}}v{{newMajor}}{{else}}{{#unless isRange}}v{{/unless}}{{newValue}}{{/if}}',
+            'to {{#if isMajor}}{{prettyNewMajor}}{{else}}{{#unless isRange}}v{{/unless}}{{newValue}}{{/if}}',
           foo: 1,
           newValue: '^6.0.1',
           newVersion: '6.0.2',
@@ -344,7 +346,7 @@ describe('workers/repository/updates/generate', () => {
           branchName: 'some-branch',
           prTitle: 'some-title',
           commitMessageExtra:
-            'to {{#if isMajor}}v{{newMajor}}{{else}}{{#unless isRange}}v{{/unless}}{{newValue}}{{/if}}',
+            'to {{#if isMajor}}{{prettyNewMajor}}{{else}}{{#unless isRange}}v{{/unless}}{{newValue}}{{/if}}',
           foo: 1,
           newValue: '^6.0.0',
           newVersion: '6.0.2',
@@ -371,7 +373,7 @@ describe('workers/repository/updates/generate', () => {
           branchName: 'some-branch',
           prTitle: 'some-title',
           commitMessageExtra:
-            'to {{#if isMajor}}v{{newMajor}}{{else}}{{#unless isRange}}v{{/unless}}{{newValue}}{{/if}}',
+            'to {{#if isMajor}}{{prettyNewMajor}}{{else}}{{#unless isRange}}v{{/unless}}{{newValue}}{{/if}}',
           isDigest: true,
           currentDigest: 'abcdefghijklmnopqrstuvwxyz',
           newDigest: '123abcdefghijklmnopqrstuvwxyz',
@@ -387,7 +389,7 @@ describe('workers/repository/updates/generate', () => {
           branchName: 'some-branch',
           prTitle: 'some-title',
           commitMessageExtra:
-            'to {{#if isMajor}}v{{newMajor}}{{else}}{{#unless isRange}}v{{/unless}}{{newValue}}{{/if}}',
+            'to {{#if isMajor}}{{prettyNewMajor}}{{else}}{{#unless isRange}}v{{/unless}}{{newValue}}{{/if}}',
           foo: 1,
           newValue: 'zzzzzzzzzz',
           group: {
@@ -428,7 +430,7 @@ describe('workers/repository/updates/generate', () => {
           branchName: 'some-branch',
           prTitle: 'some-title',
           commitMessageExtra:
-            'to {{#if isMajor}}v{{newMajor}}{{else}}{{#unless isRange}}v{{/unless}}{{newValue}}{{/if}}',
+            'to {{#if isMajor}}{{prettyNewMajor}}{{else}}{{#unless isRange}}v{{/unless}}{{newValue}}{{/if}}',
           foo: 1,
           newValue: '>= 5.1.2',
           newVersion: '5.1.2',
@@ -444,7 +446,7 @@ describe('workers/repository/updates/generate', () => {
           branchName: 'some-branch',
           prTitle: 'some-title',
           commitMessageExtra:
-            'to {{#if isMajor}}v{{newMajor}}{{else}}{{#unless isRange}}v{{/unless}}{{newValue}}{{/if}}',
+            'to {{#if isMajor}}{{prettyNewMajor}}{{else}}{{#unless isRange}}v{{/unless}}{{newValue}}{{/if}}',
           foo: 1,
           newValue: '^5,1,2',
           newVersion: '5.1.2',
@@ -556,6 +558,95 @@ describe('workers/repository/updates/generate', () => {
           group: {
             foo: 2,
           },
+        } as BranchUpgradeConfig,
+      ];
+      const res = generateBranchConfig(branch);
+      expect(res.prTitle).toBe(
+        'chore(foo/bar): update dependency some-dep to v1.2.0'
+      );
+    });
+
+    it('use prettyVersion in pr title when there is a v', () => {
+      const branch: BranchUpgradeConfig[] = [
+        {
+          ...defaultConfig,
+          manager: 'some-manager',
+          depName: 'some-dep',
+          packageFile: 'foo/bar/package.json',
+          packageFileDir: 'foo/bar',
+          semanticCommits: 'enabled',
+          semanticCommitType: 'chore',
+          semanticCommitScope: '{{packageFileDir}}',
+          commitMessageExtra: '{{prettyNewVersion}}',
+          newValue: 'v1.2.0',
+          isSingleVersion: true,
+          newVersion: 'v1.2.0',
+        } as BranchUpgradeConfig,
+      ];
+      const res = generateBranchConfig(branch);
+      expect(res.prTitle).toBe(
+        'chore(foo/bar): update dependency some-dep v1.2.0'
+      );
+    });
+
+    it('use prettyVersion in pr title there is no v', () => {
+      const branch: BranchUpgradeConfig[] = [
+        {
+          ...defaultConfig,
+          manager: 'some-manager',
+          depName: 'some-dep',
+          packageFile: 'foo/bar/package.json',
+          packageFileDir: 'foo/bar',
+          semanticCommits: 'enabled',
+          semanticCommitType: 'chore',
+          semanticCommitScope: '{{packageFileDir}}',
+          commitMessageExtra: '{{prettyNewVersion}}',
+          newValue: '3.2.0',
+          newVersion: '3.2.0',
+          newMajor: 3,
+        } as BranchUpgradeConfig,
+      ];
+      const res = generateBranchConfig(branch);
+      expect(res.prTitle).toBe(
+        'chore(foo/bar): update dependency some-dep v3.2.0'
+      );
+    });
+
+    it('use newMajor in pr title with v', () => {
+      const branch: BranchUpgradeConfig[] = [
+        {
+          ...defaultConfig,
+          manager: 'some-manager',
+          depName: 'some-dep',
+          packageFile: 'foo/bar/package.json',
+          packageFileDir: 'foo/bar',
+          semanticCommits: 'enabled',
+          semanticCommitType: 'chore',
+          semanticCommitScope: '{{packageFileDir}}',
+          commitMessageExtra: '{{prettyNewMajor}}',
+          newValue: '3.2.0',
+          newVersion: '3.2.0',
+          newMajor: 3,
+        } as BranchUpgradeConfig,
+      ];
+      const res = generateBranchConfig(branch);
+      expect(res.prTitle).toBe('chore(foo/bar): update dependency some-dep v3');
+    });
+
+    it('Default commitMessageExtra pr title', () => {
+      const branch: BranchUpgradeConfig[] = [
+        {
+          ...defaultConfig,
+          manager: 'some-manager',
+          depName: 'some-dep',
+          packageFile: 'foo/bar/package.json',
+          packageFileDir: 'foo/bar',
+          semanticCommits: 'enabled',
+          semanticCommitType: 'chore',
+          semanticCommitScope: '{{packageFileDir}}',
+          newValue: 'v1.2.0',
+          isSingleVersion: true,
+          newVersion: 'v1.2.0',
         } as BranchUpgradeConfig,
       ];
       const res = generateBranchConfig(branch);
