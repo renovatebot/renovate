@@ -15,7 +15,7 @@ Depending on third-party software is a sword of Damocles; you never know when a 
 
 ![An XKCD Comic about software dependencies](../assets/images/swissquote_xkcd.png)
 
-This XKCD comic is always relevant when talking about dependencies: <https://xkcd.com/2347/>
+[XKCD comic 2347](https://xkcd.com/2347/) is always relevant when talking about dependencies.
 
 Each software dependency is a risk.
 For example: SQL Injections, is the ORM you are using properly escaping the content you are passing to it?
@@ -166,7 +166,7 @@ Some features and options we enjoy:
 - [Integration with GitHub’s Dependabot alerts](https://docs.renovatebot.com/configuration-options/#vulnerabilityalerts) to raise the priority and send security remediation PRs as soon as possible
 - Each rule can be customized either globally [or specified per package](https://docs.renovatebot.com/configuration-options/#packagerules)
 - Works with your [private package registry](https://docs.renovatebot.com/getting-started/private-packages/)
-- Supports dozens of [languages and package managers](https://docs.renovatebot.com/modules/manager/#supported-managers): Maven, Docker, NPM, Docker Compose, Python
+- Supports more than 70 [languages and package managers](https://docs.renovatebot.com/modules/manager/#supported-managers): Maven, Docker, npm, Docker Compose, Python
 - If you are using dependencies in a custom way, [there is a special regexManager](https://docs.renovatebot.com/configuration-options/#regexmanagers) that allows you to transform patterns into dependencies
 
 There is an [on-premise option](https://www.mend.io/free-developer-tools/renovate/on-premises/), but you can also have it as [an app on GitHub.com](https://github.com/marketplace/renovate).
