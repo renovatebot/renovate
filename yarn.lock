@@ -5169,10 +5169,10 @@ globrex@^0.1.2:
   resolved "https://registry.yarnpkg.com/globrex/-/globrex-0.1.2.tgz#dd5d9ec826232730cd6793a5e33a9302985e6098"
   integrity sha512-uHJgbwAMwNFf5mLst7IWLNg14x1CkeqglJb/K3doi4dw6q2IvAAmM/Y81kevy83wP+Sst+nutFTYOGg3d1lsxg==
 
-good-enough-parser@1.1.17:
-  version "1.1.17"
-  resolved "https://registry.yarnpkg.com/good-enough-parser/-/good-enough-parser-1.1.17.tgz#251813af64df247c1c22667707e44565562464fc"
-  integrity sha512-75ht5MX3K9CR6LoLiEHNS7KMyuACU4S2Z7XlIyuRuFMpYKtVrH1DjVGhq7p88KAb1uVAwU3eEaP1Q8A3ShSF+A==
+good-enough-parser@1.1.18:
+  version "1.1.18"
+  resolved "https://registry.yarnpkg.com/good-enough-parser/-/good-enough-parser-1.1.18.tgz#f7a2ad9849b891277d1a0b740f304a0fec2b55d9"
+  integrity sha512-qn0UlqAp6r9ZBuGzT3dTOrqDR43NCm2HAoqCKuMoEbp8H6zy55JGlDxdGWVBnpIydwSjx9tqSSlKlaBSDqkUFA==
   dependencies:
     "@thi.ng/zipper" "1.0.3"
     "@types/moo" "0.5.5"

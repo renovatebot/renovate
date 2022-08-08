@@ -1,7 +1,8 @@
 val ScalaVersion = "2.12.10"
 val versionExample = "0.0.8"
+val fileVersion = "3.2.1"
 
-version := "3.2.1"
+version := fileVersion
 
 scalaVersion := ScalaVersion
 
