@@ -508,7 +508,7 @@ exports[`workers/repository/dependency-dashboard ensureDependencyDashboard() rec
 
 These branches will be created by Renovate only once you click their checkbox below.
 
- - [ ] <!-- approve-all-pending-prs -->**Approve all pending PRs**
+ - [ ] <!-- approve-all-pending-prs -->⚠ **Approve all pending PRs** ⚠
  - [ ] <!-- approve-branch=branchName1 -->pr1
  - [ ] <!-- approve-branch=branchName2 -->pr2
 

@@ -224,7 +224,7 @@ export async function ensureDependencyDashboard(
     if (pendingApprovals.length > 1) {
       issueBody += ' - [ ] ';
       issueBody += '<!-- approve-all-pending-prs -->';
-      issueBody += '**Approve all pending PRs**\n';
+      issueBody += '⚠ **Approve all pending PRs** ⚠\n';
     }
     for (const branch of pendingApprovals) {
       issueBody += getListItem(branch, 'approve');
@@ -256,7 +256,7 @@ export async function ensureDependencyDashboard(
     if (rateLimited.length > 1) {
       issueBody += ' - [ ] ';
       issueBody += '<!-- open-all-rate-limited-prs -->';
-      issueBody += '**Open all rate-limited PRs**\n';
+      issueBody += '⚠ **Open all rate-limited PRs** ⚠\n';
     }
     for (const branch of rateLimited) {
       issueBody += getListItem(branch, 'unlimit');
