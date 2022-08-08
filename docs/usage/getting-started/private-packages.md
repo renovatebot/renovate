@@ -122,10 +122,18 @@ The following details the most common/popular manager artifacts updating and how
 ### composer
 
 Any `hostRules` token for `github.com` or `gitlab.com` are found and written out to `COMPOSER_AUTH` in env for Composer to parse.
-For `github.com`, `hostType=git-tags` can be used to narrow down the use of the PAT for this use case only.
 Any `hostRules` with `hostType=packagist` are also included.
+For dependencies on `github.com` without a packagist server, a hostRule with `hostType=git-tags` should be used with a personal access token (not an application token). A hostRule with `hostType=github` whould override the default renovate application token for everything else and cause unwanted side effects.
 
-If you are using a `github.com` repository make sure the hostRule contains a personnal access token, not an application token. The repository in `composer.json` should have the `vcs` type with a `https` url.
+The repository in `composer.json` should have the `vcs` type with a `https` url. Ex:
+
+```json
+"repositories": [
+    {
+      "type": "vcs",
+      "url": "https://github.com/organization/private-repository",
+    },
+```
 
 ### gomod
 
