@@ -71,11 +71,11 @@ export function runBranchSummery(): void {
   const inactiveBranches: string[] = [];
 
   for (const branch of branches ?? []) {
-    if (!branch.sha) {
+    if (branch.sha) {
+      branchMetadata.push(unwrap(branch));
+    } else {
       inactiveBranches.push(branch.branchName);
-      continue;
     }
-    branchMetadata.push(unwrap(branch));
   }
 
   logger.debug(
