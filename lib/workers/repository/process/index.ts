@@ -84,7 +84,7 @@ export async function extractDependencies(
     logger.debug({ baseBranches: config.baseBranches }, 'baseBranches');
     const extracted: Record<string, Record<string, PackageFile[]>> = {};
     for (const baseBranch of config.baseBranches) {
-      addMeta({ baseBranch: baseBranch });
+      addMeta({ baseBranch });
       if (branchExists(baseBranch)) {
         const baseBranchConfig = await getBaseBranchConfig(baseBranch, config);
         extracted[baseBranch] = await extract(baseBranchConfig);
