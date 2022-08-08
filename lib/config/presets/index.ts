@@ -389,10 +389,7 @@ function mergeUnresolvedPresets(
   if (!presets?.length) {
     return [];
   }
-  const presetsClone: string[] = JSON.parse(JSON.stringify(presets));
-  const currentUnresolved = presetsClone.filter((e) =>
-    skipDuringShallowResolve(e)
-  );
+  const currentUnresolved = presets.filter((e) => skipDuringShallowResolve(e));
   return Array.from(new Set([...currentUnresolved, ...unresolvedPresets]));
 }
 
