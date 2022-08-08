@@ -3,7 +3,7 @@ import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { exec } from '../../../util/exec';
 import type { ExecOptions } from '../../../util/exec/types';
-import { readLocalFile } from '../../../util/fs';
+import { ensureCacheDir, readLocalFile } from '../../../util/fs';
 import { newlineRegex, regEx } from '../../../util/regex';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
 
@@ -48,6 +48,9 @@ export async function updateArtifacts({
       toolConstraints: [
         { toolName: 'python', constraint: config.constraints?.python },
       ],
+      extraEnv: {
+        PIP_CACHE_DIR: await ensureCacheDir('pip'),
+      },
     };
     await exec(cmd, execOptions);
     const newContent = await readLocalFile(packageFileName, 'utf8');
