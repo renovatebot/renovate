@@ -8,6 +8,7 @@ import { exec } from '../../../util/exec';
 import type { ExecOptions } from '../../../util/exec/types';
 import {
   deleteLocalFile,
+  ensureCacheDir,
   getSiblingFileName,
   readLocalFile,
   writeLocalFile,
@@ -175,10 +176,10 @@ export async function updateArtifacts({
     const constraint = getPythonConstraint(existingLockFileContent, config);
     const poetryVersion =
       config.constraints?.poetry ?? getPoetryRequirement(newPackageFileContent);
-    const extraEnv = getSourceCredentialVars(
-      newPackageFileContent,
-      packageFileName
-    );
+    const extraEnv = {
+      ...getSourceCredentialVars(newPackageFileContent, packageFileName),
+      PIP_CACHE_DIR: await ensureCacheDir('pip'),
+    };
 
     const execOptions: ExecOptions = {
       cwdFile: packageFileName,
