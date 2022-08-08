@@ -1,4 +1,4 @@
-import { getPkgReleases } from '../index';
+import { getPkgReleases } from '..';
 import { AzurePipelinesTasksDatasource } from '.';
 
 describe('modules/datasource/azure-pipelines-tasks/index', () => {
