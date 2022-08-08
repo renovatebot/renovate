@@ -65,81 +65,61 @@ describe('modules/manager/pip_requirements/artifacts', () => {
     ).toBeNull();
   });
 
-  it.each([
-    ['dependency w/o extras', 'atomicwrites', 'atomicwrites==1.4.0'],
-    [
-      'dependency with extras',
-      'boto3-stubs',
-      'boto3-stubs[iam] == 1.24.36.post1',
-    ],
-  ])(
-    'returns null if %s unchanged',
-    async (
-      _description: string,
-      depName: string,
-      expectedDependencyConstraint: string
-    ) => {
-      fs.readLocalFile.mockResolvedValueOnce(newPackageFileContent);
-      const execSnapshots = mockExecAll();
-      expect(
-        await updateArtifacts({
-          packageFileName: 'requirements.txt',
-          updatedDeps: [{ depName: depName }],
-          newPackageFileContent,
-          config,
-        })
-      ).toBeNull();
+  it('returns null if unchanged', async () => {
+    fs.readLocalFile.mockResolvedValueOnce(newPackageFileContent);
+    const execSnapshots = mockExecAll();
+    expect(
+      await updateArtifacts({
+        packageFileName: 'requirements.txt',
+        updatedDeps: [{ depName: 'atomicwrites' }, { depName: 'boto3-stubs' }],
+        newPackageFileContent,
+        config,
+      })
+    ).toBeNull();
 
-      expect(execSnapshots).toMatchObject([
-        {
-          cmd: `hashin ${expectedDependencyConstraint} -r requirements.txt`,
-          options: { cwd: '/tmp/github/some/repo' },
-        },
-      ]);
-    }
-  );
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'hashin atomicwrites==1.4.0 -r requirements.txt',
+        options: { cwd: '/tmp/github/some/repo' },
+      },
+      {
+        cmd: "hashin 'boto3-stubs[iam] == 1.24.36.post1' -r requirements.txt",
+        options: { cwd: '/tmp/github/some/repo' },
+      },
+    ]);
+  });
 
-  it.each([
-    ['dependency w/o extras', 'atomicwrites', 'atomicwrites==1.4.0'],
-    [
-      'dependency with extras',
-      'boto3-stubs',
-      'boto3-stubs[iam] == 1.24.36.post1',
-    ],
-  ])(
-    'returns updated file for %s',
-    async (
-      _description: string,
-      depName: string,
-      expectedDependencyConstraint: string
-    ) => {
-      fs.readLocalFile.mockResolvedValueOnce('new content');
-      const execSnapshots = mockExecAll();
-      expect(
-        await updateArtifacts({
-          packageFileName: 'requirements.txt',
-          updatedDeps: [{ depName }],
-          newPackageFileContent,
-          config,
-        })
-      ).toEqual([
-        {
-          file: {
-            type: 'addition',
-            path: 'requirements.txt',
-            contents: 'new content',
-          },
+  it('returns updated file', async () => {
+    fs.readLocalFile.mockResolvedValueOnce('new content');
+    const execSnapshots = mockExecAll();
+    expect(
+      await updateArtifacts({
+        packageFileName: 'requirements.txt',
+        updatedDeps: [{ depName: 'atomicwrites' }, { depName: 'boto3-stubs' }],
+        newPackageFileContent,
+        config,
+      })
+    ).toEqual([
+      {
+        file: {
+          type: 'addition',
+          path: 'requirements.txt',
+          contents: 'new content',
         },
-      ]);
+      },
+    ]);
 
-      expect(execSnapshots).toMatchObject([
-        {
-          cmd: `hashin ${expectedDependencyConstraint} -r requirements.txt`,
-          options: { cwd: '/tmp/github/some/repo' },
-        },
-      ]);
-    }
-  );
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'hashin atomicwrites==1.4.0 -r requirements.txt',
+        options: { cwd: '/tmp/github/some/repo' },
+      },
+      {
+        cmd: "hashin 'boto3-stubs[iam] == 1.24.36.post1' -r requirements.txt",
+        options: { cwd: '/tmp/github/some/repo' },
+      },
+    ]);
+  });
 
   it('catches and returns errors', async () => {
     const execSnapshots = mockExecAll();
