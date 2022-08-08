@@ -138,7 +138,7 @@ async function createWrapperCommand(): Promise<string | null> {
   return await prepareCommand(
     wrapperExecutableFileName,
     projectDir,
-    await statLocalFile(wrapperFullyQualifiedPath).catch(() => null),
+    await statLocalFile(wrapperFullyQualifiedPath),
     `wrapper:wrapper`
   );
 }
