@@ -152,9 +152,9 @@ Supported tools for dynamic install are:
 - `mix`
 - `node`
 - `npm`
-- `pipenv`
-- `pip-compile`
 - `pip_requirements`
+- `pip-compile`
+- `pipenv`
 - `pnpm`
 - `poetry`
 - `python`
