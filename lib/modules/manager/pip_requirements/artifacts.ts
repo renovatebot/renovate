@@ -1,4 +1,5 @@
 import is from '@sindresorhus/is';
+import { quote } from 'shlex';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { exec } from '../../../util/exec';
@@ -58,7 +59,7 @@ export async function updateArtifacts({
         // If there's a match, then the regular expression guarantees
         // that the named subgroup deepConstraint did match as well.
         const depConstraint = depAndHashMatch.groups!.depConstraint;
-        cmd.push(`hashin ${depConstraint} -r ${packageFileName}`);
+        cmd.push(`hashin ${quote(depConstraint)} -r ${quote(packageFileName)}`);
       }
     }
     if (!cmd.length) {
