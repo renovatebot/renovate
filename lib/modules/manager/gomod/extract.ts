@@ -5,6 +5,7 @@ import { GoDatasource } from '../../datasource/go';
 import { GolangVersionDatasource } from '../../datasource/golang-version';
 import { isVersion } from '../../versioning/semver';
 import type { PackageDependency, PackageFile } from '../types';
+import type { MultiLineParseResult } from './types';
 
 function getDep(
   lineNumber: number,
@@ -103,7 +104,7 @@ function parseMultiLine(
   lines: string[],
   matchRegex: RegExp,
   blockType: 'require' | 'replace'
-): { reachedLine: number; detectedDeps: PackageDependency[] } {
+): MultiLineParseResult {
   const deps: PackageDependency[] = [];
   let lineNumber = startingLine;
   let line = '';
