@@ -134,7 +134,8 @@ export class CrateDatasource extends Datasource {
     // throttling of one request per second.
     const crateUrl = joinUrlParts(
       CrateDatasource.CRATES_IO_API_BASE_URL,
-      `crates/${packageName}`,
+      'crates',
+      packageName,
       '?include='
     );
 
