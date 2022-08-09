@@ -261,9 +261,9 @@ describe('modules/datasource/metadata', () => {
     );
   });
 
-  it('Should delete homepage if its not a link to a path in github repo', () => {
+  it('Should remove homepage and set to sourceUrl when not a link to a path in repo', () => {
     const dep = {
-      homepage: 'https://github.com/foo/bar',
+      homepage: 'https://github.com/foo/bar', // link is at repo root
       releases: [
         { version: '1.0.1', releaseTimestamp: '2000-01-01T12:34:56' },
         { version: '1.0.2', releaseTimestamp: '2000-01-02T12:34:56.000Z' },
@@ -292,7 +292,7 @@ describe('modules/datasource/metadata', () => {
 
   it('Should delete homepage if its same as sourceUrl after massage', () => {
     const dep = {
-      homepage: 'http://somesource.com',
+      homepage: 'http://www.somesource.com',
       sourceUrl: 'http://somesource.com',
       releases: [
         { version: '1.0.1', releaseTimestamp: '2000-01-01T12:34:56' },
@@ -320,9 +320,10 @@ describe('modules/datasource/metadata', () => {
     });
   });
 
-  it('Should delete gitlab homepage if its same as sourceUrl after massage', () => {
+  it('Should delete gitlab homepage if its same as sourceUrl', () => {
     const dep = {
       sourceUrl: 'https://gitlab.com/meno/repo',
+      homepage: 'https://gitlab.com/meno/repo',
       releases: [
         { version: '1.0.1', releaseTimestamp: '2000-01-01T12:34:56' },
         { version: '1.0.2', releaseTimestamp: '2000-01-02T12:34:56.000Z' },
@@ -407,33 +408,18 @@ describe('modules/datasource/metadata', () => {
     });
   });
 
-  it('should delete homepage', () => {
-    expect(
-      shouldDeleteHomepage('not a url', 'https://gitlab.com/org/repo')
-    ).toBeFalsy();
-    expect(
-      shouldDeleteHomepage('https://gitlab.com/org/repo', 'not a url')
-    ).toBeFalsy();
-    expect(
-      shouldDeleteHomepage('https://gitlab.com/org', 'https://gitlab.com/org/')
-    ).toBeTruthy();
-    expect(
-      shouldDeleteHomepage(
-        'https://gitlab.com/org/repo/',
-        'https://gitlab.com/org/repo'
-      )
-    ).toBeTruthy();
-    expect(
-      shouldDeleteHomepage(
-        'https://github.com/org/repo/path/',
-        'https://github.com/org/repo/path/'
-      )
-    ).toBeFalsy();
-    expect(
-      shouldDeleteHomepage(
-        'https://gitlab.com/org/repo/',
-        'https://gitlab.com/org/repo/path/to/something/'
-      )
-    ).toBeFalsy();
-  });
+  test.each`
+    sourceUrl                              | homepage                                            | expected
+    ${'not a url'}                         | ${'https://gitlab.com/org/repo'}                    | ${false}
+    ${'https://gitlab.com/org/repo'}       | ${'not a url'}                                      | ${false}
+    ${'https://gitlab.com/org'}            | ${'https://gitlab.com/org/'}                        | ${true}
+    ${'https://gitlab.com/org/repo/'}      | ${'https://gitlab.com/org/repo'}                    | ${true}
+    ${'https://github.com/org/repo/path/'} | ${'https://github.com/org/repo/path/'}              | ${false}
+    ${'https://gitlab.com/org/repo/'}      | ${'https://gitlab.com/org/repo/path/to/something/'} | ${false}
+  `(
+    'shouldDeleteHomepage($sourceUrl, $homepage) -> $expected',
+    ({ sourceUrl, homepage, expected }) => {
+      expect(shouldDeleteHomepage(sourceUrl, homepage)).toBe(expected);
+    }
+  );
 });
