@@ -42,28 +42,30 @@ describe('modules/manager/json-jsonata/index', () => {
     };
     const res = await extractPackageFile(json, 'unused', config);
 
-    expect(res.deps).toHaveLength(1);
-    expect(res.deps.filter((dep) => dep.depName === 'foo')).toHaveLength(1);
-    expect(res.deps.filter((dep) => dep.packageName === 'fii')).toHaveLength(1);
-    expect(res.deps.filter((dep) => dep.currentValue === '1.2.3')).toHaveLength(
-      1
-    );
-    expect(res.deps.filter((dep) => dep.currentDigest === '1234')).toHaveLength(
-      1
-    );
-    expect(res.deps.filter((dep) => dep.datasource === 'nuget')).toHaveLength(
-      1
-    );
-    expect(res.deps.filter((dep) => dep.versioning === 'maven')).toHaveLength(
+    expect(res?.deps).toHaveLength(1);
+    expect(res?.deps.filter((dep) => dep.depName === 'foo')).toHaveLength(1);
+    expect(res?.deps.filter((dep) => dep.packageName === 'fii')).toHaveLength(
       1
     );
     expect(
-      res.deps.filter((dep) => dep.extractVersion === 'custom-extract-version')
+      res?.deps.filter((dep) => dep.currentValue === '1.2.3')
     ).toHaveLength(1);
     expect(
-      res.deps.filter((dep) => dep.registryUrls.includes('http://brr.brr/'))
+      res?.deps.filter((dep) => dep.currentDigest === '1234')
     ).toHaveLength(1);
-    expect(res.deps.filter((dep) => dep.depType === 'dev')).toHaveLength(1);
+    expect(res?.deps.filter((dep) => dep.datasource === 'nuget')).toHaveLength(
+      1
+    );
+    expect(res?.deps.filter((dep) => dep.versioning === 'maven')).toHaveLength(
+      1
+    );
+    expect(
+      res?.deps.filter((dep) => dep.extractVersion === 'custom-extract-version')
+    ).toHaveLength(1);
+    expect(
+      res?.deps.filter((dep) => dep.registryUrls?.includes('http://brr.brr/'))
+    ).toHaveLength(1);
+    expect(res?.deps.filter((dep) => dep.depType === 'dev')).toHaveLength(1);
   });
 
   it('applies templates', async () => {
@@ -119,58 +121,62 @@ describe('modules/manager/json-jsonata/index', () => {
     };
     const res = await extractPackageFile(json, 'unused', config);
 
-    expect(res.deps).toHaveLength(2);
+    expect(res?.deps).toHaveLength(2);
 
-    expect(res.deps.filter((dep) => dep.depName === 'foo')).toHaveLength(1);
-    expect(res.deps.filter((dep) => dep.packageName === 'fii')).toHaveLength(1);
-    expect(res.deps.filter((dep) => dep.currentValue === '1.2.3')).toHaveLength(
-      1
-    );
-    expect(res.deps.filter((dep) => dep.currentDigest === '1234')).toHaveLength(
-      1
-    );
-    expect(res.deps.filter((dep) => dep.datasource === 'nuget')).toHaveLength(
-      1
-    );
-    expect(res.deps.filter((dep) => dep.versioning === 'maven')).toHaveLength(
+    expect(res?.deps.filter((dep) => dep.depName === 'foo')).toHaveLength(1);
+    expect(res?.deps.filter((dep) => dep.packageName === 'fii')).toHaveLength(
       1
     );
     expect(
-      res.deps.filter((dep) => dep.extractVersion === 'custom-extract-version')
+      res?.deps.filter((dep) => dep.currentValue === '1.2.3')
     ).toHaveLength(1);
     expect(
-      res.deps.filter((dep) => dep.registryUrls.includes('http://brr.brr/'))
+      res?.deps.filter((dep) => dep.currentDigest === '1234')
     ).toHaveLength(1);
-    expect(res.deps.filter((dep) => dep.depType === 'dev')).toHaveLength(1);
+    expect(res?.deps.filter((dep) => dep.datasource === 'nuget')).toHaveLength(
+      1
+    );
+    expect(res?.deps.filter((dep) => dep.versioning === 'maven')).toHaveLength(
+      1
+    );
+    expect(
+      res?.deps.filter((dep) => dep.extractVersion === 'custom-extract-version')
+    ).toHaveLength(1);
+    expect(
+      res?.deps.filter((dep) => dep.registryUrls?.includes('http://brr.brr/'))
+    ).toHaveLength(1);
+    expect(res?.deps.filter((dep) => dep.depType === 'dev')).toHaveLength(1);
 
     expect(
-      res.deps.filter((dep) => dep.depName === 'default-dep-name')
+      res?.deps.filter((dep) => dep.depName === 'default-dep-name')
     ).toHaveLength(1);
     expect(
-      res.deps.filter((dep) => dep.packageName === 'default-package-name')
+      res?.deps.filter((dep) => dep.packageName === 'default-package-name')
     ).toHaveLength(1);
     expect(
-      res.deps.filter((dep) => dep.currentValue === 'default-current-value')
+      res?.deps.filter((dep) => dep.currentValue === 'default-current-value')
     ).toHaveLength(1);
     expect(
-      res.deps.filter((dep) => dep.currentDigest === 'default-current-digest')
+      res?.deps.filter((dep) => dep.currentDigest === 'default-current-digest')
     ).toHaveLength(1);
     expect(
-      res.deps.filter((dep) => dep.datasource === 'default-datasource')
+      res?.deps.filter((dep) => dep.datasource === 'default-datasource')
     ).toHaveLength(1);
     expect(
-      res.deps.filter((dep) => dep.versioning === 'default-versioning')
+      res?.deps.filter((dep) => dep.versioning === 'default-versioning')
     ).toHaveLength(1);
     expect(
-      res.deps.filter((dep) => dep.extractVersion === 'default-extract-version')
-    ).toHaveLength(1);
-    expect(
-      res.deps.filter((dep) =>
-        dep.registryUrls.includes('http://default.registry.url/')
+      res?.deps.filter(
+        (dep) => dep.extractVersion === 'default-extract-version'
       )
     ).toHaveLength(1);
     expect(
-      res.deps.filter((dep) => dep.depType === 'default-dep-type')
+      res?.deps.filter((dep) =>
+        dep.registryUrls?.includes('http://default.registry.url/')
+      )
+    ).toHaveLength(1);
+    expect(
+      res?.deps.filter((dep) => dep.depType === 'default-dep-type')
     ).toHaveLength(1);
   });
 
@@ -231,7 +237,7 @@ describe('modules/manager/json-jsonata/index', () => {
       matchQueries: [`{"depName": "foo"}`, `{"depName": "bar"}`],
     };
     const res = await extractPackageFile('{}', 'unused', config);
-    expect(res.deps).toHaveLength(2);
+    expect(res?.deps).toHaveLength(2);
   });
 
   it('extracts dependency with autoReplaceStringTemplate', async () => {
@@ -240,6 +246,6 @@ describe('modules/manager/json-jsonata/index', () => {
       autoReplaceStringTemplate: 'auto-replace-string-template',
     };
     const res = await extractPackageFile('{}', 'values.yaml', config);
-    expect(res.autoReplaceStringTemplate).toBe('auto-replace-string-template');
+    expect(res?.autoReplaceStringTemplate).toBe('auto-replace-string-template');
   });
 });
