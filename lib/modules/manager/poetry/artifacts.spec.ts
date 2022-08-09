@@ -19,6 +19,8 @@ jest.mock('../../../util/exec/env');
 jest.mock('../../datasource');
 jest.mock('../../../util/host-rules');
 
+process.env.BUILDPACK = 'true';
+
 const fs: jest.Mocked<typeof _fs> = _fs as any;
 const datasource = mocked(_datasource);
 const hostRules = mocked(_hostRules);
@@ -231,6 +233,57 @@ describe('modules/manager/poetry/artifacts', () => {
       })
     ).not.toBeNull();
     expect(execSnapshots).toMatchSnapshot();
+  });
+
+  it('returns updated poetry.lock using install mode', async () => {
+    GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
+    // poetry.lock
+    fs.readFile.mockResolvedValueOnce(
+      '[metadata]\npython-versions = "~2.7 || ^3.4"' as any
+    );
+    const execSnapshots = mockExecAll();
+    fs.readFile.mockReturnValueOnce('New poetry.lock' as any);
+    // poetry
+    datasource.getPkgReleases.mockResolvedValueOnce({
+      releases: [
+        { version: '1.0.0' },
+        { version: '1.1.0' },
+        { version: '1.2.0' },
+      ],
+    });
+    // python
+    datasource.getPkgReleases.mockResolvedValueOnce({
+      releases: [{ version: '2.7.5' }, { version: '3.3.2' }],
+    });
+    const updatedDeps = [{ depName: 'dep1' }];
+    expect(
+      await updateArtifacts({
+        packageFileName: 'pyproject.toml',
+        updatedDeps,
+        newPackageFileContent: pyproject1toml,
+        config: {
+          ...config,
+          constraints: {},
+        },
+      })
+    ).toEqual([
+      {
+        file: {
+          type: 'addition',
+          path: 'poetry.lock',
+          contents: 'New poetry.lock',
+        },
+      },
+    ]);
+
+    expect(execSnapshots).toMatchObject([
+      { cmd: 'install-tool python 1.2.0' },
+      { cmd: "pip install --user 'poetry>=1.0'" },
+      {
+        cmd: 'poetry update --lock --no-interaction dep1',
+        options: { cwd: '/tmp/github/some/repo' },
+      },
+    ]);
   });
 
   it('catches errors', async () => {

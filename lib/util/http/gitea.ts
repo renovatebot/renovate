@@ -9,9 +9,8 @@ export const setBaseUrl = (newBaseUrl: string): void => {
   baseUrl = newBaseUrl.replace(/\/*$/, '/'); // TODO #12875
 };
 
-export interface GiteaHttpOptions extends InternalHttpOptions {
+export interface GiteaHttpOptions extends HttpOptions {
   paginate?: boolean;
-  token?: string;
 }
 
 function getPaginationContainer<T = unknown>(body: unknown): T[] | null {

@@ -156,6 +156,7 @@ Object {
       "newVersion": "0.5.8",
       "prTitle": "some-title",
       "prettyDepType": "dependency",
+      "prettyNewVersion": "v0.5.8",
     },
   ],
 }
@@ -221,6 +222,7 @@ Object {
   "prBodyColumns": Array [],
   "prTitle": "some-title",
   "prettyDepType": "dependency",
+  "prettyNewVersion": "v1.0.1",
   "releaseTimestamp": undefined,
   "reuseLockFiles": true,
   "upgrades": Array [
@@ -240,6 +242,7 @@ Object {
       "newVersion": "1.0.1",
       "prTitle": "some-title",
       "prettyDepType": "dependency",
+      "prettyNewVersion": "v1.0.1",
     },
   ],
 }

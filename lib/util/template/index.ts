@@ -117,6 +117,8 @@ export const allowedFields = {
     'The name of the directory that the dependency was found in, without full path',
   platform: 'VCS platform in use, e.g. "github", "gitlab", etc.',
   prettyDepType: 'Massaged depType',
+  prettyNewMajor: 'The new major value with v prepended to it.',
+  prettyNewVersion: 'The new version value with v prepended to it.',
   project: 'ChangeLogProject object',
   recreateClosed: 'If true, this PR will be recreated if closed',
   references: 'A list of references for the upgrade',
