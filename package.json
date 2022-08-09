@@ -51,8 +51,9 @@
     "test-schema": "run-s create-json-schema",
     "tsc": "tsc",
     "type-check": "run-s generate:* \"tsc --noEmit {@}\" --",
-    "update:distro-info": "node tools/distro-json-generate.mjs",
-    "update:azure-pipelines-tasks": "node tools/azure-pipelines-tasks-json-generate.mjs",
+    "update-static-data": "run-s update-static-data:*",
+    "update-static-data:distro-info": "node tools/distro-json-generate.mjs",
+    "update-static-data:azure-pipelines-tasks": "node tools/azure-pipelines-tasks-json-generate.mjs",
     "verify": "node tools/verify.mjs"
   },
   "repository": {
