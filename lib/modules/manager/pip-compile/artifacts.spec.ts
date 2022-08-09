@@ -1,8 +1,7 @@
-import _fs from 'fs-extra';
 import { join } from 'upath';
 import { envMock, mockExecAll } from '../../../../test/exec-util';
 import { Fixtures } from '../../../../test/fixtures';
-import { env, git } from '../../../../test/util';
+import { env, fs, git } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import { logger } from '../../../logger';
@@ -12,13 +11,11 @@ import type { UpdateArtifactsConfig } from '../types';
 import { constructPipCompileCmd } from './artifacts';
 import { updateArtifacts } from '.';
 
-jest.mock('fs-extra');
 jest.mock('../../../util/exec/env');
+jest.mock('../../../util/fs');
 jest.mock('../../../util/git');
 jest.mock('../../../util/host-rules');
 jest.mock('../../../util/http');
-
-const fs: jest.Mocked<typeof _fs> = _fs as any;
 
 const adminConfig: RepoGlobalConfig = {
   // `join` fixes Windows CI
@@ -45,6 +42,7 @@ describe('modules/manager/pip-compile/artifacts', () => {
   });
 
   it('returns if no requirements.txt found', async () => {
+    const execSnapshots = mockExecAll();
     expect(
       await updateArtifacts({
         packageFileName: 'requirements.in',
@@ -53,12 +51,13 @@ describe('modules/manager/pip-compile/artifacts', () => {
         config,
       })
     ).toBeNull();
+    expect(execSnapshots).toEqual([]);
   });
 
   it('returns null if unchanged', async () => {
-    fs.readFile.mockResolvedValueOnce('content' as any);
+    fs.readLocalFile.mockResolvedValueOnce('content');
     const execSnapshots = mockExecAll();
-    fs.readFile.mockResolvedValueOnce('content' as any);
+    fs.readLocalFile.mockResolvedValueOnce('content');
     expect(
       await updateArtifacts({
         packageFileName: 'requirements.in',
@@ -67,16 +66,18 @@ describe('modules/manager/pip-compile/artifacts', () => {
         config,
       })
     ).toBeNull();
-    expect(execSnapshots).toMatchSnapshot();
+    expect(execSnapshots).toMatchObject([
+      { cmd: 'pip-compile requirements.in' },
+    ]);
   });
 
   it('returns updated requirements.txt', async () => {
-    fs.readFile.mockResolvedValueOnce('current requirements.txt' as any);
+    fs.readLocalFile.mockResolvedValueOnce('current requirements.txt');
     const execSnapshots = mockExecAll();
     git.getRepoStatus.mockResolvedValue({
       modified: ['requirements.txt'],
     } as StatusResult);
-    fs.readFile.mockResolvedValueOnce('New requirements.txt' as any);
+    fs.readLocalFile.mockResolvedValueOnce('New requirements.txt');
     expect(
       await updateArtifacts({
         packageFileName: 'requirements.in',
@@ -85,7 +86,9 @@ describe('modules/manager/pip-compile/artifacts', () => {
         config: { ...config, constraints: { python: '3.7' } },
       })
     ).not.toBeNull();
-    expect(execSnapshots).toMatchSnapshot();
+    expect(execSnapshots).toMatchObject([
+      { cmd: 'pip-compile requirements.in' },
+    ]);
   });
 
   it('supports docker mode', async () => {
@@ -94,7 +97,8 @@ describe('modules/manager/pip-compile/artifacts', () => {
     git.getRepoStatus.mockResolvedValue({
       modified: ['requirements.txt'],
     } as StatusResult);
-    fs.readFile.mockResolvedValueOnce('new lock' as any);
+    fs.readLocalFile.mockResolvedValueOnce('new lock');
+    fs.ensureCacheDir.mockResolvedValueOnce('/tmp/renovate/cache/others/pip');
     expect(
       await updateArtifacts({
         packageFileName: 'requirements.in',
@@ -127,13 +131,13 @@ describe('modules/manager/pip-compile/artifacts', () => {
     ]);
   });
 
-  it('supports iunstall mode', async () => {
+  it('supports install mode', async () => {
     GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
     const execSnapshots = mockExecAll();
     git.getRepoStatus.mockResolvedValue({
       modified: ['requirements.txt'],
     } as StatusResult);
-    fs.readFile.mockResolvedValueOnce('new lock' as any);
+    fs.readLocalFile.mockResolvedValueOnce('new lock');
     expect(
       await updateArtifacts({
         packageFileName: 'requirements.in',
@@ -154,8 +158,9 @@ describe('modules/manager/pip-compile/artifacts', () => {
   });
 
   it('catches errors', async () => {
-    fs.readFile.mockResolvedValueOnce('Current requirements.txt' as any);
-    fs.outputFile.mockImplementationOnce(() => {
+    const execSnapshots = mockExecAll();
+    fs.readLocalFile.mockResolvedValueOnce('Current requirements.txt');
+    fs.writeLocalFile.mockImplementationOnce(() => {
       throw new Error('not found');
     });
     expect(
@@ -170,15 +175,16 @@ describe('modules/manager/pip-compile/artifacts', () => {
         artifactError: { lockFile: 'requirements.txt', stderr: 'not found' },
       },
     ]);
+    expect(execSnapshots).toEqual([]);
   });
 
   it('returns updated requirements.txt when doing lockfile maintenance', async () => {
-    fs.readFile.mockResolvedValueOnce('Current requirements.txt' as any);
+    fs.readLocalFile.mockResolvedValueOnce('Current requirements.txt');
     const execSnapshots = mockExecAll();
     git.getRepoStatus.mockResolvedValue({
       modified: ['requirements.txt'],
     } as StatusResult);
-    fs.readFile.mockReturnValueOnce('New requirements.txt' as any);
+    fs.readLocalFile.mockResolvedValueOnce('New requirements.txt');
     expect(
       await updateArtifacts({
         packageFileName: 'requirements.in',
@@ -187,7 +193,9 @@ describe('modules/manager/pip-compile/artifacts', () => {
         config: lockMaintenanceConfig,
       })
     ).not.toBeNull();
-    expect(execSnapshots).toMatchSnapshot();
+    expect(execSnapshots).toMatchObject([
+      { cmd: 'pip-compile requirements.in' },
+    ]);
   });
 
   it('uses pipenv version from config', async () => {
@@ -196,7 +204,8 @@ describe('modules/manager/pip-compile/artifacts', () => {
     git.getRepoStatus.mockResolvedValue({
       modified: ['requirements.txt'],
     } as StatusResult);
-    fs.readFile.mockResolvedValueOnce('new lock' as any);
+    fs.readLocalFile.mockResolvedValueOnce('new lock');
+    fs.ensureCacheDir.mockResolvedValueOnce('/tmp/renovate/cache/others/pip');
     expect(
       await updateArtifacts({
         packageFileName: 'requirements.in',
