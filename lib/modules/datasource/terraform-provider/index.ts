@@ -120,7 +120,7 @@ export class TerraformProviderDatasource extends TerraformDatasource {
     if (latestVersion) {
       latestVersion.releaseTimestamp = res.published_at;
     }
-    dep.homepage = joinUrlParts(registryUrl, `providers/${repository}`);
+    dep.homepage = joinUrlParts(registryUrl, 'providers', repository);
     return dep;
   }
 
@@ -249,7 +249,10 @@ export class TerraformProviderDatasource extends TerraformDatasource {
       async (platform) => {
         const buildURL = joinUrlParts(
           backendURL,
-          `${version}/download/${platform.os}/${platform.arch}`
+          version,
+          'download',
+          platform.os,
+          platform.arch
         );
         try {
           const res = (

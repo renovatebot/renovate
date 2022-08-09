@@ -118,7 +118,9 @@ export class SbtPackageDatasource extends MavenDatasource {
       for (const pomFileName of pomFileNames) {
         const pomUrl = joinUrlParts(
           searchRoot,
-          `${artifactDir}/${version}/${pomFileName}`
+          artifactDir,
+          version,
+          pomFileName
         );
         const { body: content } = await downloadHttpProtocol(this.http, pomUrl);
 

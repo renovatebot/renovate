@@ -410,7 +410,10 @@ export class DockerDatasource extends Datasource {
       ].join(', ');
       const url = joinUrlParts(
         registryHost,
-        `v2/${dockerRepository}/manifests/${tag}`
+        'v2',
+        dockerRepository,
+        'manifests',
+        tag
       );
       const manifestResponse = await this.http[mode](url, {
         headers,
@@ -603,7 +606,10 @@ export class DockerDatasource extends Datasource {
       }
       const url = joinUrlParts(
         registryHost,
-        `v2/${dockerRepository}/blobs/${configDigest}`
+        'v2',
+        dockerRepository,
+        'blobs',
+        configDigest
       );
       const configResponse = await this.http.get(url, {
         headers,
@@ -747,7 +753,8 @@ export class DockerDatasource extends Datasource {
           const maxResults = 1000;
           url = joinUrlParts(
             registryHost,
-            `${dockerRepository}/tags/list`,
+            dockerRepository,
+            'tags/list',
             `?n=${maxResults}`
           );
           url = ensurePathPrefix(url, '/v2');

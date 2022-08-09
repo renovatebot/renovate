@@ -115,7 +115,7 @@ export async function getReleases(
   pkgName: string
 ): Promise<ReleaseResult | null> {
   const baseUrl = feedUrl.replace(regEx(/\/*$/), '');
-  const url = joinUrlParts(baseUrl, `${pkgName.toLowerCase()}/index.json`);
+  const url = joinUrlParts(baseUrl, pkgName.toLowerCase(), 'index.json');
   const packageRegistration = await http.getJson<PackageRegistration>(url);
   const catalogPages = packageRegistration.body.items || [];
   const catalogPagesQueue = catalogPages.map(
@@ -169,9 +169,10 @@ export async function getReleases(
     if (is.nonEmptyString(packageBaseAddress)) {
       const nuspecUrl = joinUrlParts(
         packageBaseAddress,
+        pkgName.toLowerCase(),
         // TODO: types (#7154)
-        // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-        `${pkgName.toLowerCase()}/${latestStable}/${pkgName.toLowerCase()}.nuspec`
+        latestStable!,
+        `${pkgName.toLowerCase()}.nuspec`
       );
       const metaresult = await http.get(nuspecUrl);
       const nuspec = new XmlDocument(metaresult.body);

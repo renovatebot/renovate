@@ -44,8 +44,10 @@ export class HexDatasource extends Datasource {
       : '';
     const hexUrl = joinUrlParts(
       registryUrl,
-      `api/${organizationUrlPrefix}`,
-      `packages/${hexPackageName}`
+      'api',
+      organizationUrlPrefix,
+      'packages',
+      hexPackageName
     );
 
     let response: HttpResponse<HexRelease>;

@@ -24,7 +24,7 @@ export class DartDatasource extends Datasource {
       return null;
     }
     let result: ReleaseResult | null = null;
-    const pkgUrl = joinUrlParts(registryUrl, `api/packages/${packageName}`);
+    const pkgUrl = joinUrlParts(registryUrl, 'api/packages', packageName);
 
     let raw: HttpResponse<DartResult> | null = null;
     try {

@@ -36,7 +36,9 @@ export class GitlabReleasesDatasource extends Datasource {
     const urlEncodedRepo = encodeURIComponent(packageName);
     const apiUrl = joinUrlParts(
       registryUrl,
-      `api/v4/projects/${urlEncodedRepo}/releases`
+      'api/v4/projects',
+      urlEncodedRepo,
+      'releases'
     );
 
     try {

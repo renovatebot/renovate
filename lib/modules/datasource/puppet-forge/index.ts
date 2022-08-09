@@ -26,7 +26,8 @@ export class PuppetForgeDatasource extends Datasource {
     const moduleSlug = packageName.replace('/', '-');
     const url = joinUrlParts(
       registryUrl,
-      `v3/modules/${moduleSlug}`,
+      'v3/modules',
+      moduleSlug,
       '?exclude_fields=current_release'
     );
 

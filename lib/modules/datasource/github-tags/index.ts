@@ -53,7 +53,9 @@ export class GithubTagsDatasource extends GithubReleasesDatasource {
     try {
       const url = joinUrlParts(
         apiBaseUrl,
-        `repos/${githubRepo}/commits`,
+        'repos',
+        githubRepo,
+        'commits',
         '?per_page=1'
       );
       const res = await this.http.getJson<{ sha: string }[]>(url);

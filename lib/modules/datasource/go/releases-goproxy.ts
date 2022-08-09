@@ -200,10 +200,7 @@ export class GoProxyDatasource extends Datasource {
   }
 
   async listVersions(baseUrl: string, packageName: string): Promise<string[]> {
-    const url = joinUrlParts(
-      baseUrl,
-      `${this.encodeCase(packageName)}/@v/list`
-    );
+    const url = joinUrlParts(baseUrl, this.encodeCase(packageName), '@v/list');
     const { body } = await this.http.get(url);
     return body
       .split(regEx(/\s+/))
@@ -218,7 +215,9 @@ export class GoProxyDatasource extends Datasource {
   ): Promise<Release> {
     const url = joinUrlParts(
       baseUrl,
-      `${this.encodeCase(packageName)}/@v/${version}.info`
+      this.encodeCase(packageName),
+      '@v',
+      `${version}.info`
     );
     const res = await this.http.getJson<VersionInfo>(url);
 
