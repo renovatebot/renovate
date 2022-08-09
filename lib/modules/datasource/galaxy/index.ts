@@ -40,10 +40,7 @@ export class GalaxyDatasource extends Datasource {
       registryUrl,
       'api/v1/roles'
     )}/?owner__username=${userName}&name=${projectName}`;
-    const galaxyProjectUrl = joinUrlParts(
-      registryUrl,
-      `${userName}/${projectName}`
-    );
+    const galaxyProjectUrl = joinUrlParts(registryUrl, userName, projectName);
 
     let raw: HttpResponse<GalaxyResult> | null = null;
     try {
