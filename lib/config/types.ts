@@ -178,13 +178,20 @@ export interface RegExManager extends RegexManagerTemplates {
   autoReplaceStringTemplate?: string;
 }
 
-export interface JSONataManager {
+export interface JSONataManagerTemplates {
+  depNameTemplate?: string;
+  packageNameTemplate?: string;
+  datasourceTemplate?: string;
+  versioningTemplate?: string;
+  depTypeTemplate?: string;
+  currentValueTemplate?: string;
+  currentDigestTemplate?: string;
+  extractVersionTemplate?: string;
+  registryUrlTemplate?: string;
+}
+export interface JSONataManager extends JSONataManagerTemplates {
   fileMatch: string[];
   matchQueries: string[];
-  depNameTemplate?: string;
-  datasourceTemplate?: string;
-  packageNameTemplate?: string;
-  versioningTemplate?: string;
   autoReplaceStringTemplate?: string;
 }
 

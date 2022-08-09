@@ -1,5 +1,6 @@
 import { logger } from '../../../logger';
-import { CustomExtractConfig, defaultConfig, extractPackageFile } from '.';
+import type { CustomExtractConfig } from './types';
+import { defaultConfig, extractPackageFile } from '.';
 
 describe('modules/manager/json-jsonata/index', () => {
   it('has default config', () => {
@@ -214,7 +215,7 @@ describe('modules/manager/json-jsonata/index', () => {
     expect(res).toBeNull();
     expect(logger.warn).toHaveBeenCalledWith(
       expect.anything(),
-      'Error compiling template for custom manager'
+      'Error compiling template for JSONata manager'
     );
   });
 

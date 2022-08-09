@@ -1,13 +1,10 @@
-import { URL } from 'url';
+import is from '@sindresorhus/is';
 import jsonata from 'jsonata';
+import type { JSONataManagerTemplates } from '../../../config/types';
 import { logger } from '../../../logger';
-import * as template from '../../../util/template';
-import type {
-  ExtractConfig,
-  PackageDependency,
-  PackageFile,
-  Result,
-} from '../types';
+import type { PackageDependency, PackageFile, Result } from '../types';
+import type { CustomExtractConfig } from './types';
+import { createDependency } from './utils';
 
 export const supportedDatasources: string[] = ['*'];
 
@@ -15,21 +12,11 @@ export const defaultConfig = {
   fileMatch: [],
 };
 
-export interface CustomExtractConfig extends ExtractConfig {
-  matchQueries: string[];
-  autoReplaceStringTemplate?: string;
-  depNameTemplate?: string;
-  packageNameTemplate?: string;
-  datasourceTemplate?: string;
-  versioningTemplate?: string;
-  depTypeTemplate?: string;
-}
-
 export interface CustomPackageFile extends PackageFile {
   matchQueries: string[];
 }
 
-export function testJsonQuery(query): void {
+export function testJsonQuery(query: string): void {
   jsonata(query);
 }
 
@@ -45,53 +32,6 @@ const validMatchFields = [
   'depType',
 ];
 
-function createDependency(
-  queryResult: Record<string, string>,
-  config: CustomExtractConfig
-): PackageDependency {
-  const dependency: PackageDependency = {};
-
-  function updateDependency(field: string, value: string): void {
-    switch (field) {
-      case 'registryUrl':
-        // check if URL is valid and pack inside an array
-        try {
-          const url = new URL(value).toString();
-          dependency.registryUrls = [url];
-        } catch (err) {
-          logger.warn({ value }, 'Invalid json manager registryUrl');
-        }
-        break;
-      default:
-        dependency[field] = value;
-        break;
-    }
-  }
-
-  for (const field of validMatchFields) {
-    const fieldTemplate = `${field}Template`;
-    if (config[fieldTemplate]) {
-      try {
-        const compiled = template.compile(
-          config[fieldTemplate] as string,
-          queryResult,
-          false
-        );
-        updateDependency(field, compiled);
-      } catch (err) {
-        logger.warn(
-          { template: config[fieldTemplate] },
-          'Error compiling template for custom manager'
-        );
-        return null;
-      }
-    } else if (queryResult[field]) {
-      updateDependency(field, queryResult[field]);
-    }
-  }
-  return dependency;
-}
-
 function handleMatching(
   json: unknown,
   packageFile: string,
@@ -101,7 +41,8 @@ function handleMatching(
     .flatMap((matchQuery) => jsonata(matchQuery).evaluate(json) || [])
     .map((queryResult) =>
       createDependency(queryResult as Record<string, string>, config)
-    );
+    )
+    .filter(is.truthy);
 }
 
 export function extractPackageFile(
@@ -125,11 +66,16 @@ export function extractPackageFile(
   deps = handleMatching(json, packageFile, config);
 
   // filter all null values
-  deps = deps.filter(Boolean);
+  deps = deps.filter(is.truthy);
   if (deps.length) {
-    const res: CustomPackageFile = { deps, matchQueries: config.matchQueries };
+    const res: CustomPackageFile & JSONataManagerTemplates = {
+      deps,
+      matchQueries: config.matchQueries,
+    };
     // copy over templates for autoreplace
-    for (const field of validMatchFields.map((f) => `${f}Template`)) {
+    for (const field of validMatchFields.map(
+      (f) => `${f}Template` as keyof JSONataManagerTemplates
+    )) {
       if (config[field]) {
         res[field] = config[field];
       }
