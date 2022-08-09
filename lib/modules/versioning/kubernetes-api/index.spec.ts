@@ -35,13 +35,13 @@ describe('modules/versioning/kubernetes-api/index', () => {
   });
 
   test.each`
-    version       | major | minor   | patch
-    ${'v1'}       | ${1}  | ${null} | ${null}
-    ${'v2'}       | ${2}  | ${null} | ${null}
-    ${'v1alpha1'} | ${1}  | ${null} | ${null}
-    ${'v1alpha2'} | ${1}  | ${null} | ${null}
-    ${'v1beta1'}  | ${1}  | ${null} | ${null}
-    ${'v1beta2'}  | ${1}  | ${null} | ${null}
+    version       | major | minor | patch
+    ${'v1'}       | ${1}  | ${0}  | ${0}
+    ${'v2'}       | ${2}  | ${0}  | ${0}
+    ${'v1alpha1'} | ${1}  | ${0}  | ${0}
+    ${'v1alpha2'} | ${1}  | ${0}  | ${0}
+    ${'v1beta1'}  | ${1}  | ${0}  | ${0}
+    ${'v1beta2'}  | ${1}  | ${0}  | ${0}
   `(
     'getMajor, getMinor, getPatch for "$version"',
     ({ version, major, minor, patch }) => {

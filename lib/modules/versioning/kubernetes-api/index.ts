@@ -1,7 +1,5 @@
-import { regEx } from '../../../util/regex';
-import { GenericVersioningApi } from '../generic';
+import { RegExpVersion, RegExpVersioningApi } from '../regex';
 import type { VersioningApi } from '../types';
-import type { KubernetesApiVersion } from './types';
 
 export const id = 'kubernetes-api';
 export const displayName = 'kubernetes-api';
@@ -10,19 +8,35 @@ export const urls = [
 ];
 export const supportsRanges = false;
 
-const kubernetesApiRegex = regEx(
-  '^(?<apiGroup>\\S+\\/)?v(?<version>\\d+)(?<prerelease>(?:alpha|beta)\\d+)?$'
-);
+export class KubernetesApiVersioningApi extends RegExpVersioningApi {
+  private static readonly versionRegex =
+    '^(?:(?<compatibility>\\S+)\\/)?v(?<major>\\d+)(?<prerelease>(?:alpha|beta)\\d+)?$';
 
-export class KubernetesApiVersioningApi extends GenericVersioningApi<KubernetesApiVersion> {
-  protected _parse(version: string): KubernetesApiVersion | null {
-    if (version) {
-      const matchGroups = kubernetesApiRegex.exec(version)?.groups;
-      if (matchGroups) {
-        const { apiGroup, version, prerelease } = matchGroups;
-        return { apiGroup, release: [parseInt(version, 10)], prerelease };
-      }
+  public constructor() {
+    super(KubernetesApiVersioningApi.versionRegex);
+  }
+
+  protected override _parse(version: string): RegExpVersion | null {
+    const parsed = super._parse(version);
+    if (parsed) {
+      return parsed;
     }
+
+    const groups = this._config?.exec(version)?.groups;
+
+    if (!groups) {
+      return null;
+    }
+
+    if (groups) {
+      const { compatibility, version, prerelease } = groups;
+      return {
+        compatibility,
+        release: [parseInt(version, 10)],
+        prerelease,
+      };
+    }
+
     return null;
   }
 }
