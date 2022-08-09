@@ -183,7 +183,7 @@ describe('workers/repository/updates/branchify', () => {
         },
       ]);
       const res = await branchifyUpgrades(config, {});
-      expect(embedChangelogs).toHaveBeenCalled();
+      expect(embedChangelogs).toHaveBeenCalledOnce();
       expect(Object.keys(res.branches)).toHaveLength(2);
     });
   });
