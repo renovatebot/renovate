@@ -34,6 +34,6 @@ jobs:
         with:
           author: 'Renovate Bot <renovate@whitesourcesoftware.com>'
           branch: 'chore/update-static-data'
-          commit-message: 'ci(data): automatic update of static data'
+          commit-message: 'fix(data): automatic update of static data'
           committer: 'Renovate Bot <renovate@whitesourcesoftware.com>'
-          title: 'ci(data): automatic update of static data'
+          title: 'fix(data): automatic update of static data'
