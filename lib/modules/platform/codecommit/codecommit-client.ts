@@ -3,6 +3,15 @@ import {
   CreatePullRequestCommand,
   CreatePullRequestInput,
   CreatePullRequestOutput,
+  DeleteCommentContentCommand,
+  DeleteCommentContentInput,
+  DeleteCommentContentOutput,
+  DescribePullRequestEventsCommand,
+  DescribePullRequestEventsInput,
+  DescribePullRequestEventsOutput,
+  GetCommentsForPullRequestCommand,
+  GetCommentsForPullRequestInput,
+  GetCommentsForPullRequestOutput,
   GetFileCommand,
   GetFileInput,
   GetFileOutput,
@@ -24,7 +33,14 @@ import {
   MergeBranchesBySquashCommand,
   MergeBranchesBySquashInput,
   MergeBranchesBySquashOutput,
+  PostCommentForPullRequestCommand,
+  PostCommentForPullRequestInput,
+  PostCommentForPullRequestOutput,
+  PullRequestEventType,
   PullRequestStatusEnum,
+  UpdateCommentCommand,
+  UpdateCommentInput,
+  UpdateCommentOutput,
   UpdatePullRequestDescriptionCommand,
   UpdatePullRequestDescriptionInput,
   UpdatePullRequestDescriptionOutput,
@@ -37,120 +53,6 @@ import {
 } from '@aws-sdk/client-codecommit';
 import type { Credentials } from '@aws-sdk/types';
 import { logger } from '../../../logger';
-
-export async function fastForwardMerge(
-  repositoryName: string,
-  sourceReference: string,
-  destinationReference: string
-): Promise<MergeBranchesByFastForwardOutput> {
-  const squashInput: MergeBranchesByFastForwardInput = {
-    repositoryName: repositoryName,
-    sourceCommitSpecifier: sourceReference,
-    destinationCommitSpecifier: destinationReference,
-    targetBranch: destinationReference,
-  };
-  const squashCmd = new MergeBranchesByFastForwardCommand(squashInput);
-  return await codeCommitClient.send(squashCmd);
-}
-
-export async function squashMerge(
-  repositoryName: string,
-  sourceReference: string,
-  destinationReference: string,
-  title: string | undefined
-): Promise<MergeBranchesBySquashOutput> {
-  const squashInput: MergeBranchesBySquashInput = {
-    repositoryName: repositoryName,
-    sourceCommitSpecifier: sourceReference,
-    destinationCommitSpecifier: destinationReference,
-    commitMessage: title,
-    targetBranch: destinationReference,
-  };
-  const squashCmd = new MergeBranchesBySquashCommand(squashInput);
-  return await codeCommitClient.send(squashCmd);
-}
-
-export async function updatePrStatus(
-  prNo: string,
-  prStatusInput: PullRequestStatusEnum.CLOSED | PullRequestStatusEnum.OPEN
-): Promise<UpdatePullRequestStatusOutput> {
-  const updateStateInput: UpdatePullRequestStatusInput = {
-    pullRequestId: prNo,
-    pullRequestStatus: prStatusInput,
-  };
-  const updateStateCmd = new UpdatePullRequestStatusCommand(updateStateInput);
-  return await codeCommitClient.send(updateStateCmd);
-}
-
-export async function updatePrTitle(
-  prNo: string,
-  title: string
-): Promise<UpdatePullRequestTitleOutput> {
-  const updateTitleInput: UpdatePullRequestTitleInput = {
-    pullRequestId: `${prNo}`,
-    title: title,
-  };
-  const updateTitleCmd = new UpdatePullRequestTitleCommand(updateTitleInput);
-  return await codeCommitClient.send(updateTitleCmd);
-}
-
-export async function updatePrDescription(
-  prNo: string,
-  body: string
-): Promise<UpdatePullRequestDescriptionOutput> {
-  const updateDescInput: UpdatePullRequestDescriptionInput = {
-    pullRequestId: prNo,
-    description: body,
-  };
-  const prDescCmd = new UpdatePullRequestDescriptionCommand(updateDescInput);
-  return await codeCommitClient.send(prDescCmd);
-}
-
-export async function createPr(
-  title: string,
-  description: string,
-  sourceRefName: string,
-  targetRefName: string,
-  repository: string | undefined
-): Promise<CreatePullRequestOutput> {
-  const createPrInput: CreatePullRequestInput = {
-    title: title,
-    description: description,
-    targets: [
-      {
-        sourceReference: sourceRefName,
-        destinationReference: targetRefName,
-        repositoryName: repository,
-      },
-    ],
-  };
-  const prCmd = new CreatePullRequestCommand(createPrInput);
-  return await codeCommitClient.send(prCmd);
-}
-
-export async function getFile(
-  repoName: string | undefined,
-  fileName: string,
-  branchOrTag: string | undefined
-): Promise<GetFileOutput> {
-  const fileInput: GetFileInput = {
-    repositoryName: repoName,
-    filePath: fileName,
-    commitSpecifier: branchOrTag,
-  };
-  const fileCmd: GetFileCommand = new GetFileCommand(fileInput);
-  return await codeCommitClient.send(fileCmd);
-}
-
-export async function listPullRequests(
-  repository: string
-): Promise<ListPullRequestsOutput> {
-  const input: ListPullRequestsInput = {
-    repositoryName: repository,
-  };
-  const cmd = new ListPullRequestsCommand(input);
-  return await codeCommitClient.send(cmd);
-}
 
 let codeCommitClient: CodeCommitClient;
 
@@ -167,26 +69,204 @@ export function buildCodeCommitClient(
   return codeCommitClient;
 }
 
+export async function deleteComment(
+  commentIdToRemove: string
+): Promise<DeleteCommentContentOutput> {
+  const input: DeleteCommentContentInput = {
+    commentId: commentIdToRemove,
+  };
+  const cmd = new DeleteCommentContentCommand(input);
+  return await codeCommitClient.send(cmd);
+}
+
+export async function getPrComments(
+  repository: string,
+  prId: string
+): Promise<GetCommentsForPullRequestOutput> {
+  const input: GetCommentsForPullRequestInput = {
+    repositoryName: repository,
+    pullRequestId: prId,
+  };
+  const cmd = new GetCommentsForPullRequestCommand(input);
+  return await codeCommitClient.send(cmd);
+}
+
+export async function updateComment(
+  commentId: string,
+  body: string
+): Promise<UpdateCommentOutput> {
+  const input: UpdateCommentInput = {
+    commentId: commentId,
+    content: body,
+  };
+  const cmd = new UpdateCommentCommand(input);
+  return await codeCommitClient.send(cmd);
+}
+
+export async function createPrComment(
+  prNo: string,
+  repository: string | undefined,
+  body: string,
+  beforeCommitId: string,
+  afterCommitId: string
+): Promise<PostCommentForPullRequestOutput> {
+  const input: PostCommentForPullRequestInput = {
+    pullRequestId: prNo,
+    repositoryName: repository,
+    content: body,
+    afterCommitId: beforeCommitId,
+    beforeCommitId: afterCommitId,
+  };
+  const cmd = new PostCommentForPullRequestCommand(input);
+  return await codeCommitClient.send(cmd);
+}
+
+export async function getPrEvents(
+  prNo: string
+): Promise<DescribePullRequestEventsOutput> {
+  const input: DescribePullRequestEventsInput = {
+    pullRequestId: prNo,
+    pullRequestEventType:
+      PullRequestEventType.PULL_REQUEST_SOURCE_REFERENCE_UPDATED,
+  };
+  const cmd = new DescribePullRequestEventsCommand(input);
+  return await codeCommitClient.send(cmd);
+}
+
+export async function fastForwardMerge(
+  repositoryName: string,
+  sourceReference: string,
+  destinationReference: string
+): Promise<MergeBranchesByFastForwardOutput> {
+  const input: MergeBranchesByFastForwardInput = {
+    repositoryName: repositoryName,
+    sourceCommitSpecifier: sourceReference,
+    destinationCommitSpecifier: destinationReference,
+    targetBranch: destinationReference,
+  };
+  const cmd = new MergeBranchesByFastForwardCommand(input);
+  return await codeCommitClient.send(cmd);
+}
+
+export async function squashMerge(
+  repositoryName: string,
+  sourceReference: string,
+  destinationReference: string,
+  title: string | undefined
+): Promise<MergeBranchesBySquashOutput> {
+  const input: MergeBranchesBySquashInput = {
+    repositoryName: repositoryName,
+    sourceCommitSpecifier: sourceReference,
+    destinationCommitSpecifier: destinationReference,
+    commitMessage: title,
+    targetBranch: destinationReference,
+  };
+  const cmd = new MergeBranchesBySquashCommand(input);
+  return await codeCommitClient.send(cmd);
+}
+
+export async function updatePrStatus(
+  prNo: string,
+  prStatusInput: PullRequestStatusEnum.CLOSED | PullRequestStatusEnum.OPEN
+): Promise<UpdatePullRequestStatusOutput> {
+  const input: UpdatePullRequestStatusInput = {
+    pullRequestId: prNo,
+    pullRequestStatus: prStatusInput,
+  };
+  const cmd = new UpdatePullRequestStatusCommand(input);
+  return await codeCommitClient.send(cmd);
+}
+
+export async function updatePrTitle(
+  prNo: string,
+  title: string
+): Promise<UpdatePullRequestTitleOutput> {
+  const input: UpdatePullRequestTitleInput = {
+    pullRequestId: `${prNo}`,
+    title: title,
+  };
+  const cmd = new UpdatePullRequestTitleCommand(input);
+  return await codeCommitClient.send(cmd);
+}
+
+export async function updatePrDescription(
+  prNo: string,
+  body: string
+): Promise<UpdatePullRequestDescriptionOutput> {
+  const input: UpdatePullRequestDescriptionInput = {
+    pullRequestId: prNo,
+    description: body,
+  };
+  const cmd = new UpdatePullRequestDescriptionCommand(input);
+  return await codeCommitClient.send(cmd);
+}
+
+export async function createPr(
+  title: string,
+  description: string,
+  sourceRefName: string,
+  targetRefName: string,
+  repository: string | undefined
+): Promise<CreatePullRequestOutput> {
+  const input: CreatePullRequestInput = {
+    title: title,
+    description: description,
+    targets: [
+      {
+        sourceReference: sourceRefName,
+        destinationReference: targetRefName,
+        repositoryName: repository,
+      },
+    ],
+  };
+  const cmd = new CreatePullRequestCommand(input);
+  return await codeCommitClient.send(cmd);
+}
+
+export async function getFile(
+  repoName: string | undefined,
+  fileName: string,
+  branchOrTag: string | undefined
+): Promise<GetFileOutput> {
+  const input: GetFileInput = {
+    repositoryName: repoName,
+    filePath: fileName,
+    commitSpecifier: branchOrTag,
+  };
+  const cmd: GetFileCommand = new GetFileCommand(input);
+  return await codeCommitClient.send(cmd);
+}
+
+export async function listPullRequests(
+  repository: string
+): Promise<ListPullRequestsOutput> {
+  const input: ListPullRequestsInput = {
+    repositoryName: repository,
+  };
+  const cmd = new ListPullRequestsCommand(input);
+  return await codeCommitClient.send(cmd);
+}
+
 export async function getRepositoryInfo(
   repository: string
 ): Promise<GetRepositoryOutput> {
-  const getRepositoryInput: GetRepositoryInput = {
+  const input: GetRepositoryInput = {
     repositoryName: `${repository}`,
   };
-  const getRepoCmd = new GetRepositoryCommand(getRepositoryInput);
-  return await codeCommitClient.send(getRepoCmd);
+  const cmd = new GetRepositoryCommand(input);
+  return await codeCommitClient.send(cmd);
 }
 
 export async function getPr(
   prId: string
 ): Promise<GetPullRequestOutput | undefined> {
-  const prInput: GetPullRequestInput = {
+  const input: GetPullRequestInput = {
     pullRequestId: prId,
   };
-  const cmdPr = new GetPullRequestCommand(prInput);
+  const cmd = new GetPullRequestCommand(input);
   let res;
   try {
-    res = await codeCommitClient.send(cmdPr);
+    res = await codeCommitClient.send(cmd);
   } catch (err) {
     logger.debug({ err }, 'failed to get PR using prId');
   }
@@ -194,7 +274,7 @@ export async function getPr(
 }
 
 export async function listRepositories(): Promise<ListRepositoriesOutput> {
-  const listRepoInput: ListRepositoriesInput = {};
-  const listReposCmd = new ListRepositoriesCommand(listRepoInput);
-  return await codeCommitClient.send(listReposCmd);
+  const input: ListRepositoriesInput = {};
+  const cmd = new ListRepositoriesCommand(input);
+  return await codeCommitClient.send(cmd);
 }

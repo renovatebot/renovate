@@ -1,16 +1,12 @@
 import type { logger as _logger } from '../../../logger';
 import { PrState } from '../../../types';
-import type * as _git from '../../../util/git';
 import type { Platform } from '../types';
 import { massageMarkdown } from './index';
-// const mod = require('@aws-sdk/client-codecommit')
-// const codeCommitClient = mod['CodeCommit'];
 
 jest.mock('@aws-sdk/client-codecommit');
 
 describe('modules/platform/codecommit/index', () => {
   let codeCommit: Platform;
-  let git: jest.Mocked<typeof _git>;
   let logger: jest.Mocked<typeof _logger>;
   let codeCommitClient: any;
 
@@ -24,9 +20,6 @@ describe('modules/platform/codecommit/index', () => {
     codeCommitClient = mod['CodeCommit'];
     codeCommit = await import('.');
     logger = (await import('../../../logger')).logger as any;
-    git = require('../../../util/git');
-    git.branchExists.mockReturnValue(true);
-    git.isBranchBehindBase.mockResolvedValue(false);
 
     await codeCommit.initPlatform({
       endpoint: 'https://git-codecommit.eu-central-1.amazonaws.com/',
@@ -123,7 +116,7 @@ describe('modules/platform/codecommit/index', () => {
         pullRequestStatus: 'OPEN',
         pullRequestTargets: [
           {
-            sourceReference: 'refs/heads/sourceBranchName',
+            sourceReference: 'refs/heads/sourceBranch',
             destinationReference: 'refs/heads/targetBranch',
           },
         ],
@@ -139,22 +132,26 @@ describe('modules/platform/codecommit/index', () => {
     it('gets PR list by author', async () => {
       prepareMocksForListPr();
       const res = await codeCommit.getPrList();
-      expect(res).toMatchObject({
-        sourceBranch: 'refs/heads/sourceBranchName',
-        state: 'OPEN',
-        number: 1,
-        title: 'someTitle',
-      });
+      expect(res).toMatchObject([
+        {
+          sourceBranch: 'refs/heads/sourceBranch',
+          targetBranch: 'refs/heads/targetBranch',
+          state: 'open',
+          number: 1,
+          title: 'someTitle',
+        },
+      ]);
     });
   });
 
   describe('getBranchPr()', () => {
     it('codecommit find PR for branch', async () => {
       prepareMocksForListPr();
-      const res = await codeCommit.getBranchPr('sourceBranchName');
+      const res = await codeCommit.getBranchPr('sourceBranch');
       expect(res).toMatchObject({
-        sourceBranch: 'refs/heads/sourceBranchName',
-        state: 'OPEN',
+        sourceBranch: 'refs/heads/sourceBranch',
+        targetBranch: 'refs/heads/targetBranch',
+        state: 'open',
         number: 1,
         title: 'someTitle',
       });
@@ -171,13 +168,14 @@ describe('modules/platform/codecommit/index', () => {
     it('finds pr', async () => {
       prepareMocksForListPr();
       const res = await codeCommit.findPr({
-        branchName: 'sourceBranchName',
+        branchName: 'sourceBranch',
         prTitle: 'someTitle',
         state: PrState.Open,
       });
       expect(res).toMatchObject({
-        sourceBranch: 'refs/heads/sourceBranchName',
-        state: 'OPEN',
+        sourceBranch: 'refs/heads/sourceBranch',
+        targetBranch: 'refs/heads/targetBranch',
+        state: 'open',
         number: 1,
         title: 'someTitle',
       });
@@ -192,7 +190,7 @@ describe('modules/platform/codecommit/index', () => {
           pullRequestStatus: 'OPEN',
           pullRequestTargets: [
             {
-              sourceReference: 'refs/heads/sourceBranchName',
+              sourceReference: 'refs/heads/sourceBranch',
               destinationReference: 'refs/heads/targetBranch',
             },
           ],
@@ -204,8 +202,9 @@ describe('modules/platform/codecommit/index', () => {
 
       const res = await codeCommit.getPr(1);
       expect(res).toMatchObject({
-        sourceBranch: 'refs/heads/sourceBranchName',
-        state: 'OPEN',
+        sourceBranch: 'refs/heads/sourceBranch',
+        targetBranch: 'refs/heads/targetBranch',
+        state: 'open',
         number: 1,
         title: 'someTitle',
       });
@@ -215,10 +214,12 @@ describe('modules/platform/codecommit/index', () => {
   describe('getJsonFile()', () => {
     it('returns file content', async () => {
       const data = { foo: 'bar' };
+      const encoder = new TextEncoder();
+      const int8arrData = encoder.encode(JSON.stringify(data));
       jest
         .spyOn(codeCommitClient.prototype, 'send')
         .mockImplementationOnce(() => {
-          return JSON.stringify(data);
+          return { fileContent: int8arrData };
         });
       const res = await codeCommit.getJsonFile('file.json');
       expect(res).toEqual(data);
@@ -231,543 +232,481 @@ describe('modules/platform/codecommit/index', () => {
           foo: 'bar'
         }
       `;
+      const encoder = new TextEncoder();
+      const int8arrData = encoder.encode(json5Data);
       jest
         .spyOn(codeCommitClient.prototype, 'send')
         .mockImplementationOnce(() => {
-          return JSON.stringify(json5Data);
+          return { fileContent: int8arrData };
         });
       const res = await codeCommit.getJsonFile('file.json');
       expect(res).toEqual({ foo: 'bar' });
     });
   });
-});
-
-/*
-describe('modules/platform/bitbucket/index', () => {
-
 
   describe('createPr()', () => {
     it('posts PR', async () => {
-      const scope = await initRepoMock();
-      scope
-        .get('/2.0/repositories/some/repo/default-reviewers')
-        .reply(200, {
-          values: [{ uuid: '{1234-5678}' }],
-        })
-        .post('/2.0/repositories/some/repo/pullrequests')
-        .reply(200, { id: 5 });
-      const pr = await bitbucket.createPr({
-        sourceBranch: 'branch',
-        targetBranch: 'master',
-        prTitle: 'title',
-        prBody: 'body',
-        platformOptions: {
-          bbUseDefaultReviewers: true,
+      const prRes = {
+        pullRequest: {
+          pullRequestId: '1',
+          pullRequestStatus: 'OPEN',
+          title: 'someTitle',
         },
-      });
-      expect(pr?.number).toBe(5);
-    });
-
-    it('removes inactive reviewers when updating pr', async () => {
-      const inactiveReviewer = {
-        display_name: 'Bob Smith',
-        uuid: '{d2238482-2e9f-48b3-8630-de22ccb9e42f}',
-        account_id: '123',
       };
-      const activeReviewer = {
-        display_name: 'Jane Smith',
-        uuid: '{90b6646d-1724-4a64-9fd9-539515fe94e9}',
-        account_id: '456',
-      };
-      const scope = await initRepoMock();
-      scope
-        .get('/2.0/repositories/some/repo/default-reviewers')
-        .reply(200, {
-          values: [activeReviewer, inactiveReviewer],
-        })
-        .post('/2.0/repositories/some/repo/pullrequests')
-        .reply(400, {
-          type: 'error',
-          error: {
-            fields: {
-              reviewers: ['Malformed reviewers list'],
-            },
-            message: 'reviewers: Malformed reviewers list',
-          },
-        })
-        .get('/2.0/users/%7Bd2238482-2e9f-48b3-8630-de22ccb9e42f%7D')
-        .reply(200, {
-          account_status: 'inactive',
-        })
-        .get('/2.0/users/%7B90b6646d-1724-4a64-9fd9-539515fe94e9%7D')
-        .reply(200, {
-          account_status: 'active',
-        })
-        .post('/2.0/repositories/some/repo/pullrequests')
-        .reply(200, { id: 5 });
-      const pr = await bitbucket.createPr({
-        sourceBranch: 'branch',
-        targetBranch: 'master',
-        prTitle: 'title',
-        prBody: 'body',
-        platformOptions: {
-          bbUseDefaultReviewers: true,
-        },
-      });
-      expect(pr?.number).toBe(5);
-    });
-
-    it('removes default reviewers no longer member of the workspace when creating pr', async () => {
-      const notMemberReviewer = {
-        display_name: 'Bob Smith',
-        uuid: '{d2238482-2e9f-48b3-8630-de22ccb9e42f}',
-        account_id: '123',
-      };
-      const memberReviewer = {
-        display_name: 'Jane Smith',
-        uuid: '{90b6646d-1724-4a64-9fd9-539515fe94e9}',
-        account_id: '456',
-      };
-      const scope = await initRepoMock();
-      scope
-        .get('/2.0/repositories/some/repo/default-reviewers')
-        .reply(200, {
-          values: [memberReviewer, notMemberReviewer],
-        })
-        .post('/2.0/repositories/some/repo/pullrequests')
-        .reply(400, {
-          type: 'error',
-          error: {
-            fields: {
-              reviewers: [
-                'Bob Smith is not a member of this workspace and cannot be added to this pull request',
-              ],
-            },
-            message:
-              'reviewers: Bob Smith is not a member of this workspace and cannot be added to this pull request',
-          },
-        })
-        .get(
-          '/2.0/workspaces/some/members/%7Bd2238482-2e9f-48b3-8630-de22ccb9e42f%7D'
-        )
-        .reply(404)
-        .get(
-          '/2.0/workspaces/some/members/%7B90b6646d-1724-4a64-9fd9-539515fe94e9%7D'
-        )
-        .reply(200)
-        .post('/2.0/repositories/some/repo/pullrequests')
-        .reply(200, { id: 5 });
-      const pr = await bitbucket.createPr({
-        sourceBranch: 'branch',
-        targetBranch: 'master',
-        prTitle: 'title',
-        prBody: 'body',
-        platformOptions: {
-          bbUseDefaultReviewers: true,
-        },
-      });
-      expect(pr?.number).toBe(5);
-    });
-
-    it('throws exception when unable to check default reviewers workspace membership', async () => {
-      const reviewer = {
-        display_name: 'Bob Smith',
-        uuid: '{d2238482-2e9f-48b3-8630-de22ccb9e42f}',
-        account_id: '123',
-      };
-      const scope = await initRepoMock();
-      scope
-        .get('/2.0/repositories/some/repo/default-reviewers')
-        .reply(200, {
-          values: [reviewer],
-        })
-        .post('/2.0/repositories/some/repo/pullrequests')
-        .reply(400, {
-          type: 'error',
-          error: {
-            fields: {
-              reviewers: [
-                'Bob Smith is not a member of this workspace and cannot be added to this pull request',
-              ],
-            },
-            message:
-              'reviewers: Bob Smith is not a member of this workspace and cannot be added to this pull request',
-          },
-        })
-        .get(
-          '/2.0/workspaces/some/members/%7Bd2238482-2e9f-48b3-8630-de22ccb9e42f%7D'
-        )
-        .reply(401);
-      await expect(() =>
-        bitbucket.createPr({
-          sourceBranch: 'branch',
-          targetBranch: 'master',
-          prTitle: 'title',
-          prBody: 'body',
-          platformOptions: {
-            bbUseDefaultReviewers: true,
-          },
-        })
-      ).rejects.toThrow(new Error('Response code 401 (Unauthorized)'));
-    });
-
-    it('rethrows exception when PR create error due to unknown reviewers error', async () => {
-      const reviewer = {
-        display_name: 'Jane Smith',
-        uuid: '{90b6646d-1724-4a64-9fd9-539515fe94e9}',
-      };
-
-      const scope = await initRepoMock();
-      scope
-        .get('/2.0/repositories/some/repo/default-reviewers')
-        .reply(200, {
-          values: [reviewer],
-        })
-        .post('/2.0/repositories/some/repo/pullrequests')
-        .reply(400, {
-          type: 'error',
-          error: {
-            fields: {
-              reviewers: ['Some other unhandled error'],
-            },
-            message: 'Some other unhandled error',
-          },
+      jest
+        .spyOn(codeCommitClient.prototype, 'send')
+        .mockImplementationOnce(() => {
+          return Promise.resolve(prRes);
         });
-      await expect(() =>
-        bitbucket.createPr({
-          sourceBranch: 'branch',
-          targetBranch: 'master',
-          prTitle: 'title',
-          prBody: 'body',
-          platformOptions: {
-            bbUseDefaultReviewers: true,
-          },
-        })
-      ).rejects.toThrow(new Error('Response code 400 (Bad Request)'));
-    });
 
-    it('rethrows exception when PR create error not due to reviewers field', async () => {
-      const reviewer = {
-        display_name: 'Jane Smith',
-        uuid: '{90b6646d-1724-4a64-9fd9-539515fe94e9}',
-      };
+      const pr = await codeCommit.createPr({
+        sourceBranch: 'sourceBranch',
+        targetBranch: 'targetBranch',
+        prTitle: 'mytitle',
+        prBody: 'mybody',
+      });
 
-      const scope = await initRepoMock();
-      scope
-        .get('/2.0/repositories/some/repo/default-reviewers')
-        .reply(200, {
-          values: [reviewer],
-        })
-        .post('/2.0/repositories/some/repo/pullrequests')
-        .reply(400, {
-          type: 'error',
-          error: {
-            fields: {
-              description: ['Some other unhandled error'],
-            },
-            message: 'Some other unhandled error',
-          },
-        });
-      await expect(() =>
-        bitbucket.createPr({
-          sourceBranch: 'branch',
-          targetBranch: 'master',
-          prTitle: 'title',
-          prBody: 'body',
-          platformOptions: {
-            bbUseDefaultReviewers: true,
-          },
-        })
-      ).rejects.toThrow(new Error('Response code 400 (Bad Request)'));
+      expect(pr).toMatchObject({
+        number: 1,
+        state: 'open',
+        title: 'someTitle',
+        sourceBranch: 'sourceBranch',
+        targetBranch: 'targetBranch',
+        sourceRepo: undefined,
+      });
     });
   });
 
-
   describe('updatePr()', () => {
-    it('puts PR', async () => {
-      const reviewer = {
-        display_name: 'Jane Smith',
-        uuid: '{90b6646d-1724-4a64-9fd9-539515fe94e9}',
-      };
-      const scope = await initRepoMock();
-      scope
-        .get('/2.0/repositories/some/repo/pullrequests/5')
-        .reply(200, { reviewers: [reviewer] })
-        .put('/2.0/repositories/some/repo/pullrequests/5')
-        .reply(200);
-      await expect(
-        bitbucket.updatePr({ number: 5, prTitle: 'title', prBody: 'body' })
-      ).toResolve();
-    });
-
-    it('removes inactive reviewers when updating pr', async () => {
-      const inactiveReviewer = {
-        display_name: 'Bob Smith',
-        uuid: '{d2238482-2e9f-48b3-8630-de22ccb9e42f}',
-        account_id: '123',
-      };
-      const activeReviewer = {
-        display_name: 'Jane Smith',
-        uuid: '{90b6646d-1724-4a64-9fd9-539515fe94e9}',
-        account_id: '456',
-      };
-      const scope = await initRepoMock();
-      scope
-        .get('/2.0/repositories/some/repo/pullrequests/5')
-        .reply(200, { reviewers: [activeReviewer, inactiveReviewer] })
-        .put('/2.0/repositories/some/repo/pullrequests/5')
-        .reply(400, {
-          type: 'error',
-          error: {
-            fields: {
-              reviewers: ['Malformed reviewers list'],
-            },
-            message: 'reviewers: Malformed reviewers list',
-          },
-        })
-        .get('/2.0/users/%7Bd2238482-2e9f-48b3-8630-de22ccb9e42f%7D')
-        .reply(200, {
-          account_status: 'inactive',
-        })
-        .get('/2.0/users/%7B90b6646d-1724-4a64-9fd9-539515fe94e9%7D')
-        .reply(200, {
-          account_status: 'active',
-        })
-        .put('/2.0/repositories/some/repo/pullrequests/5')
-        .reply(200);
-      await expect(
-        bitbucket.updatePr({ number: 5, prTitle: 'title', prBody: 'body' })
-      ).toResolve();
-    });
-
-    it('removes reviewers no longer member of the workspace when updating pr', async () => {
-      const notMemberReviewer = {
-        display_name: 'Bob Smith',
-        uuid: '{d2238482-2e9f-48b3-8630-de22ccb9e42f}',
-        account_id: '123',
-      };
-      const memberReviewer = {
-        display_name: 'Jane Smith',
-        uuid: '{90b6646d-1724-4a64-9fd9-539515fe94e9}',
-        account_id: '456',
-      };
-      const scope = await initRepoMock();
-      scope
-        .get('/2.0/repositories/some/repo/pullrequests/5')
-        .reply(200, { reviewers: [memberReviewer, notMemberReviewer] })
-        .put('/2.0/repositories/some/repo/pullrequests/5')
-        .reply(400, {
-          type: 'error',
-          error: {
-            fields: {
-              reviewers: [
-                'Bob Smith is not a member of this workspace and cannot be added to this pull request',
-              ],
-            },
-            message:
-              'reviewers: Bob Smith is not a member of this workspace and cannot be added to this pull request',
-          },
-        })
-        .get(
-          '/2.0/workspaces/some/members/%7Bd2238482-2e9f-48b3-8630-de22ccb9e42f%7D'
-        )
-        .reply(404)
-        .get(
-          '/2.0/workspaces/some/members/%7B90b6646d-1724-4a64-9fd9-539515fe94e9%7D'
-        )
-        .reply(200)
-        .put('/2.0/repositories/some/repo/pullrequests/5')
-        .reply(200);
+    it('updates PR', async () => {
+      jest.spyOn(codeCommitClient.prototype, 'send').mockImplementation(() => {
+        return Promise.resolve();
+      });
 
       await expect(
-        bitbucket.updatePr({ number: 5, prTitle: 'title', prBody: 'body' })
+        codeCommit.updatePr({
+          number: 1,
+          prTitle: 'title',
+          prBody: 'body',
+          state: PrState.Open,
+        })
       ).toResolve();
-    });
-
-    it('throws exception when unable to check reviewers workspace membership', async () => {
-      const reviewer = {
-        display_name: 'Bob Smith',
-        uuid: '{d2238482-2e9f-48b3-8630-de22ccb9e42f}',
-        account_id: '123',
-      };
-      const scope = await initRepoMock();
-      scope
-        .get('/2.0/repositories/some/repo/pullrequests/5')
-        .reply(200, { reviewers: [reviewer] })
-        .put('/2.0/repositories/some/repo/pullrequests/5')
-        .reply(400, {
-          type: 'error',
-          error: {
-            fields: {
-              reviewers: [
-                'Bob Smith is not a member of this workspace and cannot be added to this pull request',
-              ],
-            },
-            message:
-              'reviewers: Bob Smith is not a member of this workspace and cannot be added to this pull request',
-          },
-        })
-        .get(
-          '/2.0/workspaces/some/members/%7Bd2238482-2e9f-48b3-8630-de22ccb9e42f%7D'
-        )
-        .reply(401);
-      await expect(() =>
-        bitbucket.updatePr({ number: 5, prTitle: 'title', prBody: 'body' })
-      ).rejects.toThrow(new Error('Response code 401 (Unauthorized)'));
-    });
-
-    it('rethrows exception when PR update error due to unknown reviewers error', async () => {
-      const reviewer = {
-        display_name: 'Jane Smith',
-        uuid: '{90b6646d-1724-4a64-9fd9-539515fe94e9}',
-      };
-
-      const scope = await initRepoMock();
-      scope
-        .get('/2.0/repositories/some/repo/pullrequests/5')
-        .reply(200, { reviewers: [reviewer] })
-        .put('/2.0/repositories/some/repo/pullrequests/5')
-        .reply(400, {
-          type: 'error',
-          error: {
-            fields: {
-              reviewers: ['Some other unhandled error'],
-            },
-            message: 'Some other unhandled error',
-          },
-        });
-      await expect(() =>
-        bitbucket.updatePr({ number: 5, prTitle: 'title', prBody: 'body' })
-      ).rejects.toThrowErrorMatchingSnapshot();
-    });
-
-    it('rethrows exception when PR create error not due to reviewers field', async () => {
-      const reviewer = {
-        display_name: 'Jane Smith',
-        uuid: '{90b6646d-1724-4a64-9fd9-539515fe94e9}',
-      };
-
-      const scope = await initRepoMock();
-      scope
-        .get('/2.0/repositories/some/repo/pullrequests/5')
-        .reply(200, { reviewers: [reviewer] })
-        .put('/2.0/repositories/some/repo/pullrequests/5')
-        .reply(400, {
-          type: 'error',
-          error: {
-            fields: {
-              description: ['Some other unhandled error'],
-            },
-            message: 'Some other unhandled error',
-          },
-        });
-      await expect(() =>
-        bitbucket.updatePr({ number: 5, prTitle: 'title', prBody: 'body' })
-      ).rejects.toThrow(new Error('Response code 400 (Bad Request)'));
-    });
-
-    it('throws an error on failure to get current list of reviewers', async () => {
-      const scope = await initRepoMock();
-      scope
-        .get('/2.0/repositories/some/repo/pullrequests/5')
-        .reply(500, undefined);
-      await expect(() =>
-        bitbucket.updatePr({ number: 5, prTitle: 'title', prBody: 'body' })
-      ).rejects.toThrowErrorMatchingSnapshot();
-    });
-
-    it('closes PR', async () => {
-      const scope = await initRepoMock();
-      scope
-        .get('/2.0/repositories/some/repo/pullrequests/5')
-        .reply(200, { values: [pr] })
-        .put('/2.0/repositories/some/repo/pullrequests/5')
-        .reply(200)
-        .post('/2.0/repositories/some/repo/pullrequests/5/decline')
-        .reply(200);
-
-      expect(
-        await bitbucket.updatePr({
-          number: pr.id,
-          prTitle: pr.title,
-          state: PrState.Closed,
-        })
-      ).toBeUndefined();
     });
   });
 
   describe('mergePr()', () => {
-    it('posts Merge with optional merge strategy', async () => {
-      const scope = await initRepoMock();
-      scope.post('/2.0/repositories/some/repo/pullrequests/5/merge').reply(200);
+    it('checks that rebase is not supported', async () => {
       expect(
-        await bitbucket.mergePr({
+        await codeCommit.mergePr({
           branchName: 'branch',
-          id: 5,
+          id: 1,
+          strategy: 'rebase',
         })
-      ).toBeTrue();
+      ).toBeFalse();
     });
 
     it('posts Merge with auto', async () => {
-      const scope = await initRepoMock();
-      scope.post('/2.0/repositories/some/repo/pullrequests/5/merge').reply(200);
+      const prRes = {
+        pullRequest: {
+          title: 'someTitle',
+          pullRequestStatus: 'OPEN',
+          pullRequestTargets: [
+            {
+              sourceReference: 'refs/heads/sourceBranch',
+              destinationReference: 'refs/heads/targetBranch',
+            },
+          ],
+        },
+      };
+      //getPr()
+      jest
+        .spyOn(codeCommitClient.prototype, 'send')
+        .mockImplementationOnce(() => {
+          return Promise.resolve(prRes);
+        });
+      //squash merge
+      jest
+        .spyOn(codeCommitClient.prototype, 'send')
+        .mockImplementationOnce(() => {
+          return Promise.resolve();
+        });
+      const updateStatusRes = {
+        pullRequest: {
+          pullRequestStatus: 'OPEN',
+        },
+      };
+      //updateStatus
+      jest
+        .spyOn(codeCommitClient.prototype, 'send')
+        .mockImplementationOnce(() => {
+          return Promise.resolve(updateStatusRes);
+        });
       expect(
-        await bitbucket.mergePr({
+        await codeCommit.mergePr({
           branchName: 'branch',
-          id: 5,
+          id: 1,
           strategy: 'auto',
         })
       ).toBeTrue();
     });
 
-    it('posts Merge with merge-commit', async () => {
-      const scope = await initRepoMock();
-      scope.post('/2.0/repositories/some/repo/pullrequests/5/merge').reply(200);
-      expect(
-        await bitbucket.mergePr({
-          branchName: 'branch',
-          id: 5,
-          strategy: 'merge-commit',
-        })
-      ).toBeTrue();
-    });
-
     it('posts Merge with squash', async () => {
-      const scope = await initRepoMock();
-      scope.post('/2.0/repositories/some/repo/pullrequests/5/merge').reply(200);
+      const prRes = {
+        pullRequest: {
+          title: 'someTitle',
+          pullRequestStatus: 'OPEN',
+          pullRequestTargets: [
+            {
+              sourceReference: 'refs/heads/sourceBranch',
+              destinationReference: 'refs/heads/targetBranch',
+            },
+          ],
+        },
+      };
+      //getPr()
+      jest
+        .spyOn(codeCommitClient.prototype, 'send')
+        .mockImplementationOnce(() => {
+          return Promise.resolve(prRes);
+        });
+      //squash merge
+      jest
+        .spyOn(codeCommitClient.prototype, 'send')
+        .mockImplementationOnce(() => {
+          return Promise.resolve();
+        });
+      const updateStatusRes = {
+        pullRequest: {
+          pullRequestStatus: 'OPEN',
+        },
+      };
+      //updateStatus
+      jest
+        .spyOn(codeCommitClient.prototype, 'send')
+        .mockImplementationOnce(() => {
+          return Promise.resolve(updateStatusRes);
+        });
       expect(
-        await bitbucket.mergePr({
+        await codeCommit.mergePr({
           branchName: 'branch',
           id: 5,
           strategy: 'squash',
         })
-      ).toBe(true);
-    });
-
-    it('does not post Merge with rebase', async () => {
-      await bitbucket.mergePr({
-        branchName: 'branch',
-        id: 5,
-        strategy: 'rebase',
-      });
-      expect(httpMock.getTrace()).toBeEmptyArray();
+      ).toBeTrue();
     });
 
     it('posts Merge with fast-forward', async () => {
-      const scope = await initRepoMock();
-      scope.post('/2.0/repositories/some/repo/pullrequests/5/merge').reply(200);
+      const prRes = {
+        pullRequest: {
+          title: 'someTitle',
+          pullRequestStatus: 'OPEN',
+          pullRequestTargets: [
+            {
+              sourceReference: 'refs/heads/sourceBranch',
+              destinationReference: 'refs/heads/targetBranch',
+            },
+          ],
+        },
+      };
+      //getPr()
+      jest
+        .spyOn(codeCommitClient.prototype, 'send')
+        .mockImplementationOnce(() => {
+          return Promise.resolve(prRes);
+        });
+      //squash merge
+      jest
+        .spyOn(codeCommitClient.prototype, 'send')
+        .mockImplementationOnce(() => {
+          return Promise.resolve();
+        });
+      const updateStatusRes = {
+        pullRequest: {
+          pullRequestStatus: 'OPEN',
+        },
+      };
+      //updateStatus
+      jest
+        .spyOn(codeCommitClient.prototype, 'send')
+        .mockImplementationOnce(() => {
+          return Promise.resolve(updateStatusRes);
+        });
       expect(
-        await bitbucket.mergePr({
+        await codeCommit.mergePr({
           branchName: 'branch',
-          id: 5,
+          id: 1,
           strategy: 'fast-forward',
         })
-      ).toBeTrue();
+      ).toBe(true);
+    });
+
+    it('checks that merge-commit is not supported', async () => {
+      const prRes = {
+        pullRequest: {
+          title: 'someTitle',
+          pullRequestStatus: 'OPEN',
+          pullRequestTargets: [
+            {
+              sourceReference: 'refs/heads/sourceBranch',
+              destinationReference: 'refs/heads/targetBranch',
+            },
+          ],
+        },
+      };
+      //getPr()
+      jest
+        .spyOn(codeCommitClient.prototype, 'send')
+        .mockImplementationOnce(() => {
+          return Promise.resolve(prRes);
+        });
+      expect(
+        await codeCommit.mergePr({
+          branchName: 'branch',
+          id: 1,
+          strategy: 'merge-commit',
+        })
+      ).toBeFalse();
     });
   });
 
+  describe('ensureComment', () => {
+    it('adds comment if missing', async () => {
+      const commentsRes = {
+        commentsForPullRequestData: [
+          {
+            pullRequestId: '1',
+            repositoryName: 'someRepo',
+            beforeCommitId: 'beforeCommitId',
+            afterCommitId: 'afterCommitId',
+            comments: [
+              {
+                commentId: '1',
+                content: 'my comment content',
+              },
+            ],
+          },
+        ],
+      };
+      jest
+        .spyOn(codeCommitClient.prototype, 'send')
+        .mockImplementationOnce(() => {
+          return Promise.resolve(commentsRes);
+        });
+      const eventsRes = {
+        pullRequestEvents: [
+          {
+            pullRequestSourceReferenceUpdatedEventMetadata: {
+              beforeCommitId: 'beforeCid',
+              afterCommitId: 'afterCid',
+            },
+          },
+        ],
+      };
+      jest
+        .spyOn(codeCommitClient.prototype, 'send')
+        .mockImplementationOnce(() => {
+          return Promise.resolve(eventsRes);
+        });
+      //create comment
+      jest
+        .spyOn(codeCommitClient.prototype, 'send')
+        .mockImplementationOnce(() => {
+          return Promise.resolve();
+        });
+      const res = await codeCommit.ensureComment({
+        number: 42,
+        topic: 'some-subject',
+        content: 'some\ncontent',
+      });
+      expect(res).toBeTrue();
+      expect(logger.info).toHaveBeenCalledWith(
+        { repository: undefined, prNo: 42, topic: 'some-subject' },
+        'Comment added'
+      );
+    });
 
+    it('updates comment if different content', async () => {
+      const commentsRes = {
+        commentsForPullRequestData: [
+          {
+            pullRequestId: '1',
+            repositoryName: 'someRepo',
+            beforeCommitId: 'beforeCommitId',
+            afterCommitId: 'afterCommitId',
+            comments: [
+              {
+                commentId: '1',
+                content: '### some-subject\n\n - my comment content',
+              },
+            ],
+          },
+        ],
+      };
+      jest
+        .spyOn(codeCommitClient.prototype, 'send')
+        .mockImplementationOnce(() => {
+          return Promise.resolve(commentsRes);
+        });
+      //create comment
+      jest
+        .spyOn(codeCommitClient.prototype, 'send')
+        .mockImplementationOnce(() => {
+          return Promise.resolve();
+        });
+      const res = await codeCommit.ensureComment({
+        number: 42,
+        topic: 'some-subject',
+        content: 'some\ncontent',
+      });
+      expect(res).toBeTrue();
+      expect(logger.debug).toHaveBeenCalledWith(
+        { repository: undefined, prNo: 42, topic: 'some-subject' },
+        'Comment updated'
+      );
+    });
 
+    it('does nothing if comment exists and is the same', async () => {
+      const commentsRes = {
+        commentsForPullRequestData: [
+          {
+            pullRequestId: '1',
+            repositoryName: 'someRepo',
+            beforeCommitId: 'beforeCommitId',
+            afterCommitId: 'afterCommitId',
+            comments: [
+              {
+                commentId: '1',
+                content: '### some-subject\n\nmy comment content',
+              },
+            ],
+          },
+        ],
+      };
+      jest
+        .spyOn(codeCommitClient.prototype, 'send')
+        .mockImplementationOnce(() => {
+          return Promise.resolve(commentsRes);
+        });
+      const res = await codeCommit.ensureComment({
+        number: 42,
+        topic: 'some-subject',
+        content: 'my comment content',
+      });
+      expect(res).toBeTrue();
+      expect(logger.debug).toHaveBeenCalledWith(
+        { repository: undefined, prNo: 42, topic: 'some-subject' },
+        'Comment is already update-to-date'
+      );
+    });
 
+    it('does nothing if comment exists and is the same when there is no topic', async () => {
+      const commentsRes = {
+        commentsForPullRequestData: [
+          {
+            pullRequestId: '1',
+            repositoryName: 'someRepo',
+            beforeCommitId: 'beforeCommitId',
+            afterCommitId: 'afterCommitId',
+            comments: [
+              {
+                commentId: '1',
+                content: 'my comment content',
+              },
+            ],
+          },
+        ],
+      };
+      jest
+        .spyOn(codeCommitClient.prototype, 'send')
+        .mockImplementationOnce(() => {
+          return Promise.resolve(commentsRes);
+        });
+      const res = await codeCommit.ensureComment({
+        number: 42,
+        topic: null,
+        content: 'my comment content',
+      });
+      expect(res).toBeTrue();
+      expect(logger.debug).toHaveBeenCalledWith(
+        { repository: undefined, prNo: 42, topic: null },
+        'Comment is already update-to-date'
+      );
+    });
+  });
+
+  describe('ensureCommentRemoval', () => {
+    it('deletes comment by topic if found', async () => {
+      const commentsRes = {
+        commentsForPullRequestData: [
+          {
+            pullRequestId: '1',
+            repositoryName: 'someRepo',
+            beforeCommitId: 'beforeCommitId',
+            afterCommitId: 'afterCommitId',
+            comments: [
+              {
+                commentId: '1',
+                content: '### some-subject\n\nmy comment content',
+              },
+            ],
+          },
+        ],
+      };
+      jest
+        .spyOn(codeCommitClient.prototype, 'send')
+        .mockImplementationOnce(() => {
+          return Promise.resolve(commentsRes);
+        });
+      jest
+        .spyOn(codeCommitClient.prototype, 'send')
+        .mockImplementationOnce(() => {
+          return Promise.resolve();
+        });
+      await codeCommit.ensureCommentRemoval({
+        type: 'by-topic',
+        number: 42,
+        topic: 'some-subject',
+      });
+      expect(logger.debug).toHaveBeenCalledWith(
+        'comment "some-subject" in #42 is removed'
+      );
+    });
+
+    it('deletes comment by content if found', async () => {
+      const commentsRes = {
+        commentsForPullRequestData: [
+          {
+            pullRequestId: '1',
+            repositoryName: 'someRepo',
+            beforeCommitId: 'beforeCommitId',
+            afterCommitId: 'afterCommitId',
+            comments: [
+              {
+                commentId: '1',
+                content: 'my comment content',
+              },
+            ],
+          },
+        ],
+      };
+      jest
+        .spyOn(codeCommitClient.prototype, 'send')
+        .mockImplementationOnce(() => {
+          return Promise.resolve(commentsRes);
+        });
+      jest
+        .spyOn(codeCommitClient.prototype, 'send')
+        .mockImplementationOnce(() => {
+          return Promise.resolve();
+        });
+      await codeCommit.ensureCommentRemoval({
+        type: 'by-content',
+        number: 42,
+        content: 'my comment content',
+      });
+      expect(logger.debug).toHaveBeenCalledWith(
+        'comment "my comment content" in PR #42 was removed'
+      );
+    });
+  });
 });
-*/

@@ -22,8 +22,9 @@ export function getCodeCommitUrl(
     throw new Error(REPOSITORY_UNINITIATED);
   }
 
+  const accessKeyId = credentials.accessKeyId!;
   const token: string = dateTime + 'Z' + signer.signature();
-  return `https://${credentials.accessKeyId}:${token}@git-codecommit.${region}.amazonaws.com/v1/repos/${repoName}`;
+  return `https://${accessKeyId}:${token}@git-codecommit.${region}.amazonaws.com/v1/repos/${repoName}`;
 }
 
 export function getNewBranchName(branchName?: string): string | undefined {

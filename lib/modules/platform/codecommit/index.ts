@@ -34,11 +34,6 @@ import { getCodeCommitUrl, getNewBranchName } from './util';
 
 const decoder = new TextDecoder();
 
-// todo check what is this for
-// const defaults = {
-//   hostType: PlatformId.CodeCommit
-// };
-
 interface Config {
   repository?: string;
   defaultBranch?: string;
@@ -103,7 +98,11 @@ export async function initRepo({
   logger.debug(`initRepo("${repository}")`);
 
   config.repository = repository;
-
+  //todo do we need host rules here?
+  // const opts = hostRules.find({
+  //   hostType: PlatformId.Bitbucket,
+  //   url: defaults.endpoint,
+  // });
   const url = getCodeCommitUrl(config.region!, repository, config.credentials!);
   try {
     await git.initRepo({
@@ -154,6 +153,8 @@ export async function getPrList(): Promise<Pr[]> {
   const fetchedPrs: Pr[] = [];
   for (const prId of prIds) {
     const prRes = await client.getPr(prId);
+
+    // istanbul ignore if
     if (!prRes || !prRes.pullRequest) {
       continue;
     }
@@ -161,7 +162,10 @@ export async function getPrList(): Promise<Pr[]> {
     const pr: Pr = {
       targetBranch: prInfo.pullRequestTargets![0].destinationReference!,
       sourceBranch: prInfo.pullRequestTargets![0].sourceReference!,
-      state: prInfo.pullRequestStatus!,
+      state:
+        prInfo.pullRequestStatus === PullRequestStatusEnum.OPEN
+          ? PrState.Open
+          : PrState.Closed,
       number: Number(prId),
       title: prInfo.title!,
     };
@@ -185,7 +189,7 @@ export async function findPr({
     const refsHeadBranchName = getNewBranchName(branchName);
     prsFiltered = prs.filter(
       (item) => item.sourceBranch === refsHeadBranchName
-    ); //todo sourcebranch refs/heads/name while branch name is simple name
+    );
 
     if (prTitle) {
       prsFiltered = prsFiltered.filter((item) => item.title === prTitle);
@@ -193,17 +197,12 @@ export async function findPr({
 
     switch (state) {
       case PrState.All:
-        // no more filter needed, we can go further...
         break;
       case PrState.NotOpen:
-        prsFiltered = prsFiltered.filter(
-          (item) => item.state !== PullRequestStatusEnum.OPEN
-        );
+        prsFiltered = prsFiltered.filter((item) => item.state !== PrState.Open);
         break;
       default:
-        prsFiltered = prsFiltered.filter(
-          (item) => item.state === PullRequestStatusEnum.OPEN
-        );
+        prsFiltered = prsFiltered.filter((item) => item.state === PrState.Open);
         break;
     }
   } catch (err) {
@@ -226,20 +225,37 @@ export async function getBranchPr(branchName: string): Promise<Pr | null> {
 
 export async function getPr(pullRequestId: number): Promise<Pr | null> {
   logger.debug(`getPr(${pullRequestId})`);
+
+  // istanbul ignore if
   if (!pullRequestId) {
     return null;
   }
 
   const prRes = await client.getPr(`${pullRequestId}`);
+
+  // istanbul ignore if
   if (!prRes || !prRes.pullRequest) {
     return null;
   }
+
   const prInfo = prRes.pullRequest;
+  let prState: PrState;
+  if (prInfo.pullRequestTargets![0].mergeMetadata?.isMerged) {
+    prState = PrState.Merged;
+  } else {
+    prState =
+      prInfo.pullRequestStatus === PullRequestStatusEnum.OPEN
+        ? PrState.Open
+        : PrState.Closed;
+  }
+
   return {
     sourceBranch: prInfo.pullRequestTargets![0].sourceReference!,
-    state: prInfo.pullRequestStatus!,
+    state: prState,
     number: Number(pullRequestId),
     title: prInfo.title!,
+    targetBranch: prInfo.pullRequestTargets![0].destinationReference!,
+    sha: prInfo.revisionId,
   };
 }
 
@@ -249,16 +265,14 @@ export async function getRepos(): Promise<string[]> {
   let reposRes;
   try {
     reposRes = await client.listRepositories();
-    //todo ask if we need pagination? maximum number of repos is 1000 without pagination.
+    //todo do we need pagination? maximum number of repos is 1000 without pagination.
   } catch (error) {
     logger.error({ error }, 'Could not retrieve repositories');
     return [];
   }
-  if (!reposRes.repositories) {
-    return [];
-  }
+
   const res: string[] = [];
-  for (const repo of reposRes.repositories) {
+  for (const repo of reposRes.repositories ?? []) {
     if (repo.repositoryName) {
       res.push(repo.repositoryName);
     }
@@ -337,17 +351,22 @@ export async function createPr({
     config.repository
   );
 
-  if (!prCreateRes.pullRequest?.pullRequestStatus) {
-    throw new Error('Could not create pr, missing prStatus');
+  // istanbul ignore if
+  if (
+    !prCreateRes.pullRequest ||
+    !prCreateRes.pullRequest?.pullRequestStatus ||
+    !prCreateRes.pullRequest?.title
+  ) {
+    throw new Error('Could not create pr, missing PR info');
   }
-  if (!prCreateRes.pullRequest?.title) {
-    throw new Error('Could not create pr, missing prTitle');
-  }
+
   return {
-    createdAt: prCreateRes.pullRequest?.creationDate?.toLocaleString(),
-    number: Number(prCreateRes.pullRequest?.pullRequestId),
-    state: prCreateRes.pullRequest?.pullRequestStatus,
-    title: prCreateRes.pullRequest?.title,
+    number: Number(prCreateRes.pullRequest.pullRequestId),
+    state:
+      prCreateRes.pullRequest.pullRequestStatus === PullRequestStatusEnum.OPEN
+        ? PrState.Open
+        : PrState.Closed,
+    title: prCreateRes.pullRequest.title,
     sourceBranch: sourceBranch,
     targetBranch: targetBranch,
     sourceRepo: config.repository,
@@ -386,47 +405,59 @@ export async function updatePr({
 
 export async function mergePr({
   branchName,
-  id: pullRequestId,
+  id: prNo,
   strategy,
 }: MergePRConfig): Promise<boolean> {
-  logger.debug(`mergePr(${pullRequestId}, ${branchName!})`);
+  logger.debug(`mergePr(${prNo}, ${branchName!})`);
 
-  const prOut = await client.getPr(`${pullRequestId}`);
+  const prOut = await client.getPr(`${prNo}`);
+
+  // istanbul ignore if
   if (!prOut) {
     return false;
   }
   const pReq = prOut.pullRequest;
   const targets = pReq?.pullRequestTargets;
 
+  // istanbul ignore if
   if (!targets) {
     return false;
   }
 
-  if (strategy === 'auto' || strategy === 'squash') {
-    await client.squashMerge(
-      targets[0].repositoryName!,
-      targets[0].sourceReference!,
-      targets[0].destinationReference!,
-      pReq?.title
-    );
-  } else if (strategy === 'fast-forward') {
-    await client.fastForwardMerge(
-      targets[0].repositoryName!,
-      targets[0].sourceReference!,
-      targets[0].destinationReference!
-    );
-  } else {
-    logger.debug(`unsupported strategy`);
+  if (strategy === 'rebase') {
+    logger.warn('CodeCommit does not support a "rebase" strategy.');
     return false;
   }
 
-  logger.trace(
-    `Updating PR ${pullRequestId} to status ${PullRequestStatusEnum.CLOSED}`
-  );
+  try {
+    if (strategy === 'auto' || strategy === 'squash') {
+      await client.squashMerge(
+        targets[0].repositoryName!,
+        targets[0].sourceReference!,
+        targets[0].destinationReference!,
+        pReq?.title
+      );
+    } else if (strategy === 'fast-forward') {
+      await client.fastForwardMerge(
+        targets[0].repositoryName!,
+        targets[0].sourceReference!,
+        targets[0].destinationReference!
+      );
+    } else {
+      logger.debug(`unsupported strategy`);
+      return false;
+    }
+  } catch (err) {
+    logger.debug({ err }, `PR merge error`);
+    logger.info({ pr: prNo }, 'PR automerge failed');
+    return false;
+  }
+
+  logger.trace(`Updating PR ${prNo} to status ${PullRequestStatusEnum.CLOSED}`);
 
   try {
     const response = await client.updatePrStatus(
-      `${pullRequestId}`,
+      `${prNo}`,
       PullRequestStatusEnum.CLOSED
     );
     const isClosed =
@@ -434,7 +465,10 @@ export async function mergePr({
 
     if (!isClosed) {
       logger.warn(
-        { pullRequestId, status: response.pullRequest?.pullRequestStatus },
+        {
+          pullRequestId: prNo,
+          status: response.pullRequest?.pullRequestStatus,
+        },
         `Expected PR to have status`
       );
     }
@@ -494,37 +528,22 @@ export function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
 }
 
 // Returns the combined status for a branch.
-export async function getBranchStatus(
-  branchName: string
-): Promise<BranchStatus> {
-  //todo delete this
+export function getBranchStatus(branchName: string): Promise<BranchStatus> {
   logger.debug(`getBranchStatus(${branchName})`);
-  await client.getPr(`1`);
-  // logger.debug({ branch: branchName, statuses }, 'branch status check result');
-  // if (!statuses.length) {
-  //   logger.debug('empty branch status check result = returning "pending"');
-  //   return BranchStatus.yellow;
-  // }
-  // const noOfFailures = statuses.filter(
-  //   (status: { state: string }) =>
-  //     status.state === 'FAILED' || status.state === 'STOPPED'
-  // ).length;
-  // if (noOfFailures) {
-  //   return BranchStatus.red;
-  // }
-  // const noOfPending = statuses.filter(
-  //   (status: { state: string }) => status.state === 'INPROGRESS'
-  // ).length;
-  // if (noOfPending) {
-  //   return BranchStatus.yellow;
-  // }
-  return BranchStatus.green;
+  logger.debug(
+    'returning branch status yellow, because getBranchStatus isnt supported on aws yet'
+  );
+  return Promise.resolve(BranchStatus.yellow);
 }
 
 export function getBranchStatusCheck(
   branchName: string,
   context: string
 ): Promise<BranchStatus | null> {
+  logger.debug(`getBranchStatusCheck(${branchName}, context=${context})`);
+  logger.debug(
+    'returning null, because getBranchStatusCheck is not supported on aws yet'
+  );
   return Promise.resolve(null);
 }
 
@@ -538,31 +557,137 @@ export function setBranchStatus({
   return Promise.resolve();
 }
 
-export function ensureComment({
+export async function ensureComment({
   number,
   topic,
   content,
 }: EnsureCommentConfig): Promise<boolean> {
-  return Promise.resolve(true);
+  logger.debug(`ensureComment(${number}, ${topic!}, content)`);
+  const header = topic ? `### ${topic}\n\n` : '';
+  const body = `${header}${sanitize(content)}`;
+  let prCommentsResponse;
+  try {
+    prCommentsResponse = await client.getPrComments(
+      config.repository!,
+      `${number}`
+    );
+  } catch (err) {
+    logger.debug({ err }, 'Unable to retrieve pr comments');
+  }
+
+  let commentId = undefined;
+  let commentNeedsUpdating = false;
+
+  // istanbul ignore if
+  if (!prCommentsResponse || !prCommentsResponse.commentsForPullRequestData) {
+    return false;
+  }
+  for (const commentObj of prCommentsResponse.commentsForPullRequestData) {
+    if (!commentObj || !commentObj?.comments) {
+      continue;
+    }
+    const firstCommentContent = commentObj.comments[0].content;
+    if (
+      (topic && firstCommentContent?.startsWith(header)) ||
+      (!topic && firstCommentContent === body)
+    ) {
+      commentId = commentObj.comments[0].commentId;
+      commentNeedsUpdating = firstCommentContent !== body;
+      break;
+    }
+  }
+
+  if (!commentId) {
+    const prEvent = await client.getPrEvents(`${number}`);
+
+    // istanbul ignore if
+    if (!prEvent || !prEvent.pullRequestEvents) {
+      return false;
+    }
+
+    const event =
+      prEvent.pullRequestEvents[0]
+        .pullRequestSourceReferenceUpdatedEventMetadata;
+
+    // istanbul ignore if
+    if (!event || !event.beforeCommitId || !event.afterCommitId) {
+      return false;
+    }
+
+    await client.createPrComment(
+      `${number}`,
+      config.repository,
+      body,
+      event.beforeCommitId,
+      event.afterCommitId
+    );
+    logger.info(
+      { repository: config.repository, prNo: number, topic },
+      'Comment added'
+    );
+  } else if (commentNeedsUpdating && commentId) {
+    await client.updateComment(commentId, body);
+
+    logger.debug(
+      { repository: config.repository, prNo: number, topic },
+      'Comment updated'
+    );
+  } else {
+    logger.debug(
+      { repository: config.repository, prNo: number, topic },
+      'Comment is already update-to-date'
+    );
+  }
+
+  return true;
 }
 
-export function ensureCommentRemoval(
-  deleteConfig: EnsureCommentRemovalConfig
+export async function ensureCommentRemoval(
+  removeConfig: EnsureCommentRemovalConfig
 ): Promise<void> {
-  return Promise.resolve();
-}
+  const { number: prNo } = removeConfig;
+  const key =
+    removeConfig.type === 'by-topic'
+      ? removeConfig.topic
+      : removeConfig.content;
+  logger.debug(`Ensuring comment "${key}" in #${prNo} is removed`);
 
-//   addAssignees, not supported
-//   addReviewers, not supported
-//   ensureIssue, not supported
-//   ensureIssueClosing,not supported
-//   findIssue,not supported
-//   getIssue,not supported
-//   getIssueList,not supported
-//   getVulnerabilityAlerts, not supported
-//   getBranchStatus,      which flow is this?
-//   getBranchStatusCheck, which flow is this?
-//   setBranchStatus,      which flow is this?
-//   deleteLabel,          what's this for??? we cant put labels on prs not supported
-//   ensureComment,        which flow is this?
-//   ensureCommentRemoval, which flow is this?
+  let prCommentsResponse;
+  try {
+    prCommentsResponse = await client.getPrComments(
+      config.repository!,
+      `${prNo}`
+    );
+  } catch (err) {
+    logger.debug({ err }, 'Unable to retrieve pr comments');
+    return;
+  }
+
+  // istanbul ignore if
+  if (!prCommentsResponse || !prCommentsResponse.commentsForPullRequestData) {
+    return;
+  }
+
+  let commentIdToRemove;
+  for (const commentObj of prCommentsResponse.commentsForPullRequestData) {
+    if (!commentObj || !commentObj?.comments) {
+      continue;
+    }
+    for (const comment of commentObj.comments) {
+      if (
+        (removeConfig.type === 'by-topic' &&
+          comment.content?.startsWith(`### ${removeConfig.topic}\n\n`)) ||
+        (removeConfig.type === 'by-content' &&
+          removeConfig.content === comment.content?.trim())
+      ) {
+        commentIdToRemove = comment.commentId;
+        break;
+      }
+    }
+    if (commentIdToRemove) {
+      await client.deleteComment(commentIdToRemove);
+      logger.debug(`comment "${key}" in PR #${prNo} was removed`);
+      break;
+    }
+  }
+}
