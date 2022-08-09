@@ -7,7 +7,8 @@ import type { BranchUpgradeConfig } from '../../types';
 import { getChangeLogJSON } from '../update/pr/changelog';
 
 async function embedChangelog(upgrade: BranchUpgradeConfig): Promise<void> {
-  if (upgrade.logJSON) {
+  // getChangeLogJSON returns null on error, so don't try again
+  if (upgrade.logJSON !== undefined) {
     return;
   }
   upgrade.logJSON = await getChangeLogJSON(upgrade);
