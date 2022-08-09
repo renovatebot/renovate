@@ -80,4 +80,47 @@ describe('util/template/index', () => {
     const output = template.compile(userTemplate, undefined as never);
     expect(output).toBe('foo');
   });
+
+  describe('proxyCompileInput', () => {
+    const allowedField = 'body';
+    const forbiddenField = 'foobar';
+
+    type TestCompileInput = Record<
+      typeof allowedField | typeof forbiddenField,
+      unknown
+    >;
+
+    const compileInput: TestCompileInput = {
+      [allowedField]: 'allowed',
+      [forbiddenField]: 'forbidden',
+    };
+
+    it('accessing allowed files', () => {
+      const p = template.proxyCompileInput(compileInput);
+
+      expect(p[allowedField]).toBe('allowed');
+      expect(p[forbiddenField]).toBeUndefined();
+    });
+
+    it('supports object nesting', () => {
+      const proxy = template.proxyCompileInput({
+        [allowedField]: compileInput,
+      });
+
+      const obj = proxy[allowedField] as TestCompileInput;
+      expect(obj[allowedField]).toBe('allowed');
+      expect(obj[forbiddenField]).toBeUndefined();
+    });
+
+    it('supports array nesting', () => {
+      const proxy = template.proxyCompileInput({
+        [allowedField]: [compileInput],
+      });
+
+      const arr = proxy[allowedField] as TestCompileInput[];
+      const obj = arr[0];
+      expect(obj[allowedField]).toBe('allowed');
+      expect(obj[forbiddenField]).toBeUndefined();
+    });
+  });
 });
