@@ -15,8 +15,6 @@ export class AzurePipelinesTasksDatasource extends Datasource {
     );
   }
 
-  override readonly caching = true;
-
   override readonly customRegistrySupport = false;
 
   override readonly defaultVersioning = versioning;
