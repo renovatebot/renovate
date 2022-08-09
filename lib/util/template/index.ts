@@ -44,6 +44,7 @@ export const exposedConfigOptions = [
   'branchName',
   'branchPrefix',
   'branchTopic',
+  'commitBody',
   'commitMessage',
   'commitMessageAction',
   'commitMessageExtra',
@@ -186,7 +187,8 @@ function getFilteredObject(input: CompileInput): FilteredObject {
   return res;
 }
 
-const templateRegex = /{{(#(if|unless) )?([a-zA-Z]+)}}/g; // TODO #12873
+const templateRegex =
+  /{{(?:#(?:if|unless|with|each) )?([a-zA-Z.]+)(?: as \| [a-zA-Z.]+ \|)?}}/g; // TODO #12873
 
 export function compile(
   template: string,
@@ -199,14 +201,34 @@ export function compile(
   if (filterFields) {
     const matches = template.matchAll(templateRegex);
     for (const match of matches) {
-      const varName = match[3];
-      if (!allowedFieldsList.includes(varName)) {
-        logger.info(
-          { varName, template },
-          'Disallowed variable name in template'
-        );
+      const varNames = match[1].split('.');
+      for (const varName of varNames) {
+        if (!allowedFieldsList.includes(varName)) {
+          logger.info(
+            { varName, template },
+            'Disallowed variable name in template'
+          );
+        }
       }
     }
   }
   return handlebars.compile(template)(filteredInput);
+}
+
+export function containsTemplates(
+  value: unknown,
+  templates: string | string[]
+): boolean {
+  if (!is.string(value)) {
+    return false;
+  }
+  for (const m of [...value.matchAll(templateRegex)]) {
+    for (const template of is.string(templates) ? [templates] : templates) {
+      if (m[1] === template || m[1].startsWith(`${template}.`)) {
+        return true;
+      }
+    }
+  }
+
+  return false;
 }
