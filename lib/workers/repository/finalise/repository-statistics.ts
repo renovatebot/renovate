@@ -49,22 +49,22 @@ interface BaseBranchMetadata {
   sha: string;
 }
 
+function unwrap({
+  branchName,
+  sha,
+  parentSha,
+  automerge,
+  isModified,
+}: BranchCache): BranchMetadata {
+  return { branchName, sha, parentSha, automerge, isModified };
+}
+
 export function runBranchSummery(): void {
   const { scan, branches } = getCache();
 
   const baseMetadata: BaseBranchMetadata[] = [];
   for (const [branchName, cached] of Object.entries(scan ?? {})) {
     baseMetadata.push({ branchName, sha: cached.sha });
-  }
-
-  function unwrap({
-    branchName,
-    sha,
-    parentSha,
-    automerge,
-    isModified,
-  }: BranchCache): BranchMetadata {
-    return { branchName, sha, parentSha, automerge, isModified };
   }
 
   const branchMetadata: BranchMetadata[] = [];

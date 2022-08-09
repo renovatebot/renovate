@@ -31,7 +31,6 @@ describe('workers/repository/finalise/repository-statistics', () => {
 
   describe('runRenovateRepoStats', () => {
     beforeEach(() => {
-      jest.resetAllMocks();
       config = getConfig();
       mockedFunction(platform.getPrList).mockReturnValue(prJson);
       config.repository = 'owner/repo';
@@ -55,10 +54,6 @@ describe('workers/repository/finalise/repository-statistics', () => {
 
   describe('runBranchSummery', () => {
     const cacheSpy = jest.spyOn(cache, 'getCache');
-
-    beforeEach(() => {
-      jest.resetAllMocks();
-    });
 
     it('processes cache with baseBranches only', () => {
       const sha = '793221454914cdc422e1a8f0ca27b96fe39ff9ad';
