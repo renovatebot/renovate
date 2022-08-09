@@ -22,7 +22,7 @@ Follow these best practices when you're working on our code.
 
 - Use `function foo(){...}` to declare named functions
 - Use function declaration instead of assigning function expression into local variables (`const f = function(){...}`) (TypeScript already prevents rebinding functions)
-  - Exception: if the function accesses the outer scope's `this` then use arrow functions assigned to variables instead of function declarations 
+  - Exception: if the function accesses the outer scope's `this` then use arrow functions assigned to variables instead of function declarations
 - Regular functions (as opposed to arrow functions and methods) _should not_ access `this`
 - Only use nested functions when the [lexical scope](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Closures) is used
 
