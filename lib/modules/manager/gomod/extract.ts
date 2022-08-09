@@ -92,6 +92,22 @@ export function extractPackageFile(content: string): PackageFile | null {
             logger.trace(`No multi-line match: ${line}`);
           }
         } while (line.trim() !== ')');
+      } else if (line.trim() === 'replace (') {
+        logger.trace(`Matched multi-line replace on line ${lineNumber}`);
+        do {
+          lineNumber += 1;
+          line = lines[lineNumber];
+          const multiMatch = regEx(
+            /^\s+[^\s]+[\s]+[=][>]\s+([^\s]+)\s+([^\s]+)/
+          ).exec(line);
+          logger.trace(`replaceLine: "${line}"`);
+          if (multiMatch && !line.endsWith('// indirect')) {
+            logger.trace({ lineNumber }, `require line: "${line}"`);
+            const dep = getDep(lineNumber, multiMatch, 'replace');
+            dep.managerData!.multiLine = true;
+            deps.push(dep);
+          }
+        } while (line.trim() !== ')');
       }
     }
   } catch (err) /* istanbul ignore next */ {
