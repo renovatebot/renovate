@@ -47,7 +47,7 @@ function generateBranchUpgradeCache(
 async function generateBranchCache(
   branch: BranchConfig
 ): Promise<BranchCache | null> {
-  const { branchName } = branch;
+  const { branchName, baseBranch } = branch;
   try {
     const sha = getBranchCommit(branchName) ?? null;
     let prNo = null;
@@ -73,6 +73,7 @@ async function generateBranchCache(
       : [];
     return {
       branchName,
+      baseBranch,
       sha,
       parentSha,
       prNo,

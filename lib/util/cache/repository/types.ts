@@ -25,6 +25,7 @@ export interface BranchUpgradeCache {
 export interface BranchCache {
   automerge: boolean;
   branchName: string;
+  baseBranch: string | undefined;
   isModified: boolean;
   prNo: number | null;
   sha: string | null;

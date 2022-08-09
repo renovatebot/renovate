@@ -38,8 +38,9 @@ export function runRenovateRepoStats(
 
 interface BranchMetadata {
   branchName: string;
-  sha: string | null;
-  parentSha: string | null;
+  branchSha: string | null;
+  baseBranch: string | undefined;
+  baseBranchSha: string | null;
   automerge: boolean;
   isModified: boolean;
 }
@@ -49,14 +50,22 @@ interface BaseBranchMetadata {
   sha: string;
 }
 
-function unwrap({
+export function unwrap({
   branchName,
-  sha,
-  parentSha,
+  sha: branchSha,
+  baseBranch,
+  parentSha: baseBranchSha,
   automerge,
   isModified,
 }: BranchCache): BranchMetadata {
-  return { branchName, sha, parentSha, automerge, isModified };
+  return {
+    branchName,
+    branchSha,
+    baseBranch,
+    baseBranchSha,
+    automerge,
+    isModified,
+  };
 }
 
 export function runBranchSummery(): void {

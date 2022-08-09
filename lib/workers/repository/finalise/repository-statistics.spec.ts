@@ -16,6 +16,7 @@ import type {
 import {
   runBranchSummery,
   runRenovateRepoStats,
+  unwrap,
 } from './repository-statistics';
 
 jest.mock('../../../modules/platform/github/pr');
@@ -85,10 +86,12 @@ describe('workers/repository/finalise/repository-statistics', () => {
     it('processes cache with baseBranches and branches', () => {
       const sha = '793221454914cdc422e1a8f0ca27b96fe39ff9ad';
       const parentSha = '793221454914cdc422e1a8f0ca27b96fe39ff9ad';
+      const baseBranch = 'base-branch';
       const baseCache = partial<BaseBranchCache>({ sha });
       const branchCache = partial<BranchCache>({
         sha,
         parentSha,
+        baseBranch,
         isModified: false,
         automerge: false,
       });
@@ -120,8 +123,8 @@ describe('workers/repository/finalise/repository-statistics', () => {
             },
           ],
           branches: [
-            { ...branchCache, branchName: 'b1' },
-            { ...branchCache, branchName: 'b2' },
+            { ...unwrap(branchCache), branchName: 'b1' },
+            { ...unwrap(branchCache), branchName: 'b2' },
           ],
           inactiveBranches: ['b3'],
         },
