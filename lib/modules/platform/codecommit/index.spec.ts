@@ -668,7 +668,7 @@ describe('modules/platform/codecommit/index', () => {
         topic: 'some-subject',
       });
       expect(logger.debug).toHaveBeenCalledWith(
-        'comment "some-subject" in #42 is removed'
+        'comment "some-subject" in PR #42 was removed'
       );
     });
 
