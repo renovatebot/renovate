@@ -1492,7 +1492,7 @@ export async function mergePr({
     logger.debug('Found approving reviews');
   }
   const url = `repos/${
-    config?.parentRepo ?? config.repository
+    config.parentRepo ?? config.repository
   }/pulls/${prNo}/merge`;
   const options: any = {
     body: {} as { merge_method?: string },
