@@ -18,6 +18,34 @@ Follow these best practices when you're working on our code.
 // istanbul ignore next: can never happen
 ```
 
+### Functions
+
+- Use `function foo(){...}` to declare named functions
+- Use function declaration instead of assigning function expression into local variables (`const f = function(){...}`) (Typescript already prevents rebinding functions)
+  - Exception: Use arrow functions assigned to variables instead of function declarations if the function accesses the outer scope's `this`.
+- Regular functions (as opposed to arrow functions and methods) _should not_ access `this`
+- Use nested functions only when the [lexical scope](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Closures) is utilized
+
+#### Use arrow functions in expressions
+
+Avoid
+
+```ts
+bar(function(){...})
+```
+
+Use
+
+```ts
+bar(() => {
+  this.doSomething();
+});
+```
+
+Function expressions may only be used if dynamically rebinding `this` is needed (Generally `this` pointer _should not_ be rebound).
+
+[[Source](https://google.github.io/styleguide/tsguide.html#function-declarations)]
+
 ## Code simplicity
 
 ### Write simple code
