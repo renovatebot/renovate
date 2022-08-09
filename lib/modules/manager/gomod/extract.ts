@@ -102,7 +102,7 @@ export function extractPackageFile(content: string): PackageFile | null {
           ).exec(line);
           logger.trace(`replaceLine: "${line}"`);
           if (multiMatch && !line.endsWith('// indirect')) {
-            logger.trace({ lineNumber }, `require line: "${line}"`);
+            logger.trace({ lineNumber }, `replace line: "${line}"`);
             const dep = getDep(lineNumber, multiMatch, 'replace');
             dep.managerData!.multiLine = true;
             deps.push(dep);
