@@ -174,7 +174,7 @@ describe('modules/manager/sbt/extract', () => {
         )
         libraryDependencies += "org.example" %% "bar" % "0.0.2"
       `;
-      expect(extractPackageFile(content)).toMatchObject({
+      expect(extractPackageFile(content)).toMatchSnapshot({
         deps: [
           {
             packageName: 'org.scala-lang:scala-library',
