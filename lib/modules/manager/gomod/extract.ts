@@ -79,13 +79,13 @@ export function extractPackageFile(content: string): PackageFile | null {
       if (line.trim() === 'require (') {
         logger.trace(`Matched multi-line require on line ${lineNumber}`);
         const matcher = regEx(/^\s+([^\s]+)\s+([^\s]+)/);
-        const { newLine, detectedDeps } = parseMultiLine(
+        const { reachedLine, detectedDeps } = parseMultiLine(
           lineNumber,
           lines,
           matcher,
           'require'
         );
-        lineNumber = newLine;
+        lineNumber = reachedLine;
         deps.push(...detectedDeps);
       }
     }
@@ -99,30 +99,27 @@ export function extractPackageFile(content: string): PackageFile | null {
 }
 
 function parseMultiLine(
-  lineNumber: number,
+  startingLine: number,
   lines: string[],
   matchRegex: RegExp,
   blockType: 'require' | 'replace'
-): { newLine: number; detectedDeps: PackageDependency[] } {
+): { reachedLine: number; detectedDeps: PackageDependency[] } {
   const deps: PackageDependency[] = [];
-  let currentLineNumber = lineNumber;
+  let lineNumber = startingLine;
   let line = '';
   do {
-    currentLineNumber += 1;
-    line = lines[currentLineNumber];
+    lineNumber += 1;
+    line = lines[lineNumber];
     const multiMatch = matchRegex.exec(line);
     logger.trace(`${blockType}: "${line}"`);
     if (multiMatch && !line.endsWith('// indirect')) {
-      logger.trace(
-        { currentLine: currentLineNumber },
-        `${blockType} line: "${line}"`
-      );
-      const dep = getDep(currentLineNumber, multiMatch, blockType);
+      logger.trace({ lineNumber }, `${blockType} line: "${line}"`);
+      const dep = getDep(lineNumber, multiMatch, blockType);
       dep.managerData!.multiLine = true;
       deps.push(dep);
     } else if (line.trim() !== ')') {
       logger.trace(`No multi-line match: ${line}`);
     }
   } while (line.trim() !== ')');
-  return { newLine: currentLineNumber, detectedDeps: deps };
+  return { reachedLine: lineNumber, detectedDeps: deps };
 }
