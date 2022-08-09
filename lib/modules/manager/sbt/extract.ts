@@ -1,4 +1,6 @@
 import { lang, query as q } from 'good-enough-parser';
+import { logger } from '../../../logger';
+import { regEx } from '../../../util/regex';
 import { parseUrl } from '../../../util/url';
 import { MavenDatasource } from '../../datasource/maven';
 import { SbtPackageDatasource } from '../../datasource/sbt-package';
@@ -207,7 +209,7 @@ const sbtPackageMatch = q
   .handler(depHandler);
 
 const sbtPluginMatch = q
-  .sym<Ctx>('addSbtPlugin')
+  .sym<Ctx>(regEx(/^(?:addSbtPlugin|addCompilerPlugin)$/))
   .tree({
     type: 'wrapped-tree',
     maxDepth: 1,
@@ -275,8 +277,9 @@ export function extractPackageFile(
       registryUrls: [MAVEN_REPO],
     });
   } catch (err) /* istanbul ignore next */ {
-    // no-op
+    logger.warn({ err }, 'Sbt parsing error');
   }
+
   if (!parsedResult) {
     return null;
   }
