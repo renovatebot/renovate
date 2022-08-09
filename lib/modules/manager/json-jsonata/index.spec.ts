@@ -1,5 +1,5 @@
 import { logger } from '../../../logger';
-import type { CustomExtractConfig } from './types';
+import type { JsonataExtractConfig } from '../types';
 import { defaultConfig, extractPackageFile } from '.';
 
 describe('modules/manager/json-jsonata/index', () => {
@@ -186,7 +186,7 @@ describe('modules/manager/json-jsonata/index', () => {
     const res = await extractPackageFile(
       'not-json',
       'foo-file',
-      {} as CustomExtractConfig
+      {} as JsonataExtractConfig
     );
     expect(res).toBeNull();
     expect(logger.warn).toHaveBeenCalledWith(

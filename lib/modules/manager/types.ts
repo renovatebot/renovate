@@ -5,6 +5,7 @@ import type {
   UpdateType,
   ValidationMessage,
 } from '../../config/types';
+import type { JSONataManagerTemplates } from '../../config/types';
 import type { ProgrammingLanguage } from '../../constants';
 import type { ModuleApi, RangeStrategy, SkipReason } from '../../types';
 import type { FileChange } from '../../util/git/types';
@@ -28,6 +29,13 @@ export interface CustomExtractConfig
   autoReplaceStringTemplate?: string;
   matchStrings: string[];
   matchStringsStrategy?: MatchStringsStrategy;
+}
+
+export interface JsonataExtractConfig
+  extends ExtractConfig,
+    JSONataManagerTemplates {
+  autoReplaceStringTemplate?: string;
+  matchQueries: string[];
 }
 
 export interface UpdateArtifactsConfig {

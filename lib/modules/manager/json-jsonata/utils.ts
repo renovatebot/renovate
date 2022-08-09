@@ -2,8 +2,7 @@ import { URL } from 'url';
 import type { JSONataManagerTemplates } from '../../../config/types';
 import { logger } from '../../../logger';
 import * as template from '../../../util/template';
-import type { PackageDependency } from '../types';
-import type { CustomExtractConfig } from './types';
+import type { JsonataExtractConfig, PackageDependency } from '../types';
 
 export const validMatchFields = [
   'depName',
@@ -21,7 +20,7 @@ type ValidMatchFields = typeof validMatchFields[number];
 
 export function createDependency(
   queryResult: Record<string, string>,
-  config: CustomExtractConfig
+  config: JsonataExtractConfig
 ): PackageDependency | null {
   const dependency: PackageDependency = {};
 

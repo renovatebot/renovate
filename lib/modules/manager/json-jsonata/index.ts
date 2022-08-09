@@ -2,8 +2,12 @@ import is from '@sindresorhus/is';
 import jsonata from 'jsonata';
 import type { JSONataManagerTemplates } from '../../../config/types';
 import { logger } from '../../../logger';
-import type { PackageDependency, PackageFile, Result } from '../types';
-import type { CustomExtractConfig } from './types';
+import type {
+  JsonataExtractConfig,
+  PackageDependency,
+  PackageFile,
+  Result,
+} from '../types';
 import { createDependency } from './utils';
 
 export const supportedDatasources: string[] = ['*'];
@@ -35,7 +39,7 @@ const validMatchFields = [
 function handleMatching(
   json: unknown,
   packageFile: string,
-  config: CustomExtractConfig
+  config: JsonataExtractConfig
 ): PackageDependency[] {
   return config.matchQueries
     .flatMap((matchQuery) => jsonata(matchQuery).evaluate(json) || [])
@@ -48,7 +52,7 @@ function handleMatching(
 export function extractPackageFile(
   content: string,
   packageFile: string,
-  config: CustomExtractConfig
+  config: JsonataExtractConfig
 ): Result<PackageFile | null> {
   let deps: PackageDependency[];
 
