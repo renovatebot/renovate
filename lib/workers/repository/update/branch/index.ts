@@ -40,8 +40,10 @@ import {
   isActiveConfidenceLevel,
   satisfiesConfidenceLevel,
 } from '../../../../util/merge-confidence';
+import * as template from '../../../../util/template';
 import { Limit, isLimitReached } from '../../../global/limits';
 import { BranchConfig, BranchResult, PrBlockedBy } from '../../../types';
+import { embedChangelog, needsChangelogs } from '../../changelog';
 import { ensurePr, getPlatformPrOptions, updatePrDebugData } from '../pr';
 import { checkAutoMerge } from '../pr/automerge';
 import { getPrBody } from '../pr/body';
@@ -475,6 +477,20 @@ export async function processBranch(
           result: BranchResult.NoWork,
         };
       }
+    }
+
+    // compile commit message with body, which maybe needs changelogs
+    if (config.commitBody) {
+      // commitBody maybe needs changelogs
+      if (needsChangelogs(config, ['commitBody'])) {
+        await embedChangelog(config);
+      }
+      config.commitMessage = `${config.commitMessage!}\n\n${template.compile(
+        config.commitBody,
+        config
+      )}`;
+
+      logger.trace(`commitMessage: ` + JSON.stringify(config.commitMessage));
     }
 
     const commitSha = await commitFilesToBranch(config);
