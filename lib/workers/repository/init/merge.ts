@@ -27,18 +27,17 @@ export async function detectRepoFileConfig(): Promise<RepoFileConfig> {
   const cache = getCache();
   let { configFileName } = cache;
   if (configFileName) {
-    let configFileRaw = (await platform.getRawFile(
-      configFileName
-    ));
-    let configFileParsed = JSON5.parse(configFileRaw);
-    if (configFileParsed) {
-      if (configFileName === 'package.json') {
-        configFileParsed = configFileParsed.renovate;
-        configFileRaw = undefined;
+    const configFileRaw = await platform.getRawFile(configFileName);
+    if (configFileRaw) {
+      let configFileParsed = JSON5.parse(configFileRaw);
+      if (configFileName !== 'package.json') {
+        return { configFileName, configFileRaw, configFileParsed };
       }
-      return { configFileName, configFileRaw, configFileParsed };
+      configFileParsed = configFileParsed.renovate;
+      return { configFileName, configFileParsed }; // don't return raw 'package.json'
+    } else {
+      logger.debug('Existing config file no longer exists');
     }
-    logger.debug('Existing config file no longer exists');
   }
   const fileList = await getFileList();
 
