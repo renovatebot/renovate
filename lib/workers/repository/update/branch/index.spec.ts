@@ -664,6 +664,7 @@ describe('workers/repository/update/branch/index', () => {
         prNo: undefined,
         result: 'pending',
       });
+
       expect(automerge.tryBranchAutomerge).toHaveBeenCalledTimes(0);
       expect(prWorker.ensurePr).toHaveBeenCalledTimes(0);
     });
