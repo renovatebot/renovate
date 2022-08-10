@@ -485,9 +485,14 @@ export async function processBranch(
       // if (config.fetchReleaseNotes && needsChangelogs(config, ['commitBody'])) {
       //   await embedChangelog(config);
       // }
+      // changelog is on first upgrade
       config.commitMessage = `${config.commitMessage!}\n\n${template.compile(
         config.commitBody,
-        config
+        {
+          ...config,
+          logJSON: config.upgrades[0].logJSON,
+          releases: config.upgrades[0].releases,
+        }
       )}`;
 
       logger.trace(`commitMessage: ` + JSON.stringify(config.commitMessage));
