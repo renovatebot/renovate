@@ -51,7 +51,9 @@ export async function renovateRepository(
       addSplit('onboarding');
       if (config.fetchReleaseNotes && config.repoIsOnboarded) {
         logger.info('Fetching changelogs');
-        await embedChangelogs(branches);
+        for (const branch of branches) {
+          await embedChangelogs(branch.upgrades);
+        }
       }
       addSplit('changelogs');
       const res = await updateRepo(config, branches);
