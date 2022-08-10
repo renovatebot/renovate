@@ -28,5 +28,4 @@ The `12.15` tag may or may not point to any of the available `12.15.x` tags, inc
 
 **Are commit hashes supported?**
 
-No.
-Renovate ignores Docker image tags that look like a Git commit hash.
+No, Renovate ignores Docker image tags that look like a Git commit hash.
