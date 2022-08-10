@@ -155,9 +155,11 @@ function matchesRule(
     matchPackagePrefixes.length
   ) {
     if (!depName) {
+      // if using the default rules return true else false
       return (
-        is.undefined(packageRule.matchPackagePatterns) ||
-        packageRule.matchPackagePatterns.length !== 0
+        is.undefined(packageRule.matchPackagePatterns) &&
+        is.undefined(packageRule.matchPackageNames) &&
+        is.undefined(packageRule.matchPackagePrefixes)
       );
     }
     let isMatch = matchPackageNames.includes(depName);
