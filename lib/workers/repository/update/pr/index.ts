@@ -27,7 +27,7 @@ import type {
   BranchUpgradeConfig,
   PrBlockedBy,
 } from '../../../types';
-import { embedChangelogs } from '../../changelog';
+// import { embedChangelogs } from '../../changelog';
 import { resolveBranchStatus } from '../branch/status-checks';
 import { getPrBody } from './body';
 import { ChangeLogError } from './changelog/types';
@@ -195,8 +195,11 @@ export async function ensurePr(
     }`;
   }
 
-  // fetch changelogs when not already done;
-  await embedChangelogs(upgrades);
+  // TODO: defer fetching changelogs (#17020)
+  // if (config.fetchReleaseNotes) {
+  //   // fetch changelogs when not already done;
+  //   await embedChangelogs(upgrades);
+  // }
 
   // Get changelog and then generate template strings
   for (const upgrade of upgrades) {

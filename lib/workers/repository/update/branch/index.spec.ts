@@ -46,6 +46,7 @@ jest.mock('./automerge');
 jest.mock('./commit');
 jest.mock('../pr');
 jest.mock('../pr/automerge');
+jest.mock('../../changelog');
 jest.mock('../../../../util/exec');
 jest.mock('../../../../util/merge-confidence');
 jest.mock('../../../../util/sanitize');
@@ -656,13 +657,13 @@ describe('workers/repository/update/branch/index', () => {
           ...config,
           ignoreTests: true,
           prCreation: 'not-pending',
+          commitBody: '[skip-ci]',
         })
       ).toEqual({
         branchExists: true,
         prNo: undefined,
         result: 'pending',
       });
-
       expect(automerge.tryBranchAutomerge).toHaveBeenCalledTimes(0);
       expect(prWorker.ensurePr).toHaveBeenCalledTimes(0);
     });
