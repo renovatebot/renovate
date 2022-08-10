@@ -127,6 +127,7 @@ describe('util/template/index', () => {
       expect(obj[forbiddenField]).toBeUndefined();
     });
   });
+
   describe('containsTemplate', () => {
     it('supports null', () => {
       expect(template.containsTemplates(null, 'logJSON')).toBeFalse();
