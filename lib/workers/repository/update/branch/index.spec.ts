@@ -940,6 +940,10 @@ describe('workers/repository/update/branch/index', () => {
         prNo: undefined,
         result: 'pr-edited',
       });
+      expect(logger.info).toHaveBeenCalledWith(
+        `DRY-RUN: Would update existing PR to indicate that rebasing is not possible`
+      );
+      expect(platform.updatePr).toHaveBeenCalledTimes(0);
     });
 
     it('branch pr no schedule lockfile (dry run)', async () => {
