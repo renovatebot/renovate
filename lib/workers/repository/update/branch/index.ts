@@ -198,15 +198,21 @@ export async function processBranch(
             });
             const newBodyHash = hashBody(newBody);
             if (newBodyHash !== branchPr.bodyStruct?.hash) {
-              logger.debug(
-                'Updating existing PR to indicate that rebasing is not possible'
-              );
-              await platform.updatePr({
-                number: branchPr.number,
-                prTitle: branchPr.title,
-                prBody: newBody,
-                platformOptions: getPlatformPrOptions(config),
-              });
+              if (GlobalConfig.get('dryRun')) {
+                logger.info(
+                  `DRY-RUN: Would update existing PR to indicate that rebasing is not possible`
+                );
+              } else {
+                logger.debug(
+                  'Updating existing PR to indicate that rebasing is not possible'
+                );
+                await platform.updatePr({
+                  number: branchPr.number,
+                  prTitle: branchPr.title,
+                  prBody: newBody,
+                  platformOptions: getPlatformPrOptions(config),
+                });
+              }
             }
             return {
               branchExists,
