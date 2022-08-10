@@ -9,6 +9,7 @@ import { deleteLocalFile, privateCacheDir } from '../../util/fs';
 import * as queue from '../../util/http/queue';
 import { addSplit, getSplits, splitInit } from '../../util/split';
 import { setBranchCache } from './cache';
+import { embedChangelogs } from './changelog';
 import { ensureDependencyDashboard } from './dependency-dashboard';
 import handleError from './error';
 import { finaliseRepo } from './finalise';
@@ -47,6 +48,14 @@ export async function renovateRepository(
       GlobalConfig.get('dryRun') !== 'extract'
     ) {
       await ensureOnboardingPr(config, packageFiles, branches);
+      addSplit('onboarding');
+      if (config.fetchReleaseNotes && config.repoIsOnboarded) {
+        logger.info('Fetching changelogs');
+        for (const branch of branches) {
+          await embedChangelogs(branch.upgrades);
+        }
+      }
+      addSplit('changelogs');
       const res = await updateRepo(config, branches);
       setMeta({ repository: config.repository });
       addSplit('update');
@@ -59,7 +68,7 @@ export async function renovateRepository(
         }
         logger.debug(`Automerged but already retried once`);
       } else {
-        await ensureDependencyDashboard(config, branches);
+        await ensureDependencyDashboard(config, branches, packageFiles);
       }
       await finaliseRepo(config, branchList);
       // TODO #7154

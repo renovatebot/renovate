@@ -713,6 +713,41 @@ describe('workers/repository/dependency-dashboard', () => {
           await dryRun(branches, platform);
         });
       });
+
+      describe('dependency dashboard lookup warnings', () => {
+        beforeEach(() => {
+          PackageFiles.add('main', packageFiles);
+          PackageFiles.add('dev', packageFiles);
+        });
+
+        afterEach(() => {
+          PackageFiles.clear();
+        });
+
+        it('Dependency Lookup Warnings message in issues body', async () => {
+          const branches: BranchConfig[] = [];
+          PackageFiles.add('main', {
+            npm: [{ packageFile: 'package.json', deps: [] }],
+          });
+          const dep = [
+            {
+              warnings: [{ message: 'dependency-2', topic: '' }],
+            },
+          ];
+          const packageFiles: Record<string, PackageFile[]> = {
+            npm: [{ packageFile: 'package.json', deps: dep }],
+          };
+          await dependencyDashboard.ensureDependencyDashboard(
+            config,
+            branches,
+            packageFiles
+          );
+          expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
+          expect(platform.ensureIssue.mock.calls[0][0].body).toMatchSnapshot();
+          // same with dry run
+          await dryRun(branches, platform);
+        });
+      });
     });
   });
 });
