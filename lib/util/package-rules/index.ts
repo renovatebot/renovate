@@ -5,7 +5,7 @@ import type { PackageRule, PackageRuleInputConfig } from '../../config/types';
 import { logger } from '../../logger';
 import matchers from './api';
 import type { MatcherApi } from './types';
-import { excludeOR, matchOR } from './utils';
+import { matcherOR } from './utils';
 
 export const getMatchers = (): Map<string, MatcherApi[]> => matchers;
 
@@ -17,7 +17,12 @@ function matchesRule(
   let matchApplied = false;
   // matches
   for (const [, groupMatchers] of getMatchers()) {
-    const isMatch = matchOR(groupMatchers, inputConfig, packageRule);
+    const isMatch = matcherOR(
+      'matches',
+      groupMatchers,
+      inputConfig,
+      packageRule
+    );
 
     // no rules are defined
     if (is.nullOrUndefined(isMatch)) {
@@ -43,7 +48,12 @@ function matchesRule(
 
   // excludes
   for (const [, groupExcludes] of getMatchers()) {
-    const isExclude = excludeOR(groupExcludes, inputConfig, packageRule);
+    const isExclude = matcherOR(
+      'excludes',
+      groupExcludes,
+      inputConfig,
+      packageRule
+    );
 
     // no rules are defined
     if (is.nullOrUndefined(isExclude)) {
