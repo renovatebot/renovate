@@ -43,17 +43,26 @@ describe('modules/manager/gomod/extract', () => {
 
     it('extracts multi-line replace', () => {
       const goMod = `
-      go 1.18
-      replace (
-        k8s.io/client-go => k8s.io/client-go v0.21.9
-        k8s.io/cloud-provider => k8s.io/cloud-provider v0.17.3
-        k8s.io/cluster-bootstrap => k8s.io/cluster-bootstrap v0.17.3
-        k8s.io/code-generator => k8s.io/code-generator v0.17.3
+replace golang.org/x/foo => github.com/pravesht/gocql v0.0.0
+replace (
+      k8s.io/client-go => k8s.io/client-go v0.21.9
+      k8s.io/cloud-provider => k8s.io/cloud-provider v0.17.3
+      k8s.io/cluster-bootstrap => k8s.io/cluster-bootstrap v0.17.3
+      k8s.io/code-generator => k8s.io/code-generator v0.17.3
       )`;
       const res = extractPackageFile(goMod);
       expect(res).toEqual({
         constraints: {},
         deps: [
+          {
+            managerData: {
+              lineNumber: 1,
+            },
+            depName: 'github.com/pravesht/gocql',
+            depType: 'replace',
+            currentValue: 'v0.0.0',
+            datasource: 'go',
+          },
           {
             managerData: {
               lineNumber: 3,
