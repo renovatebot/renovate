@@ -1,10 +1,10 @@
 import type { ExtractResult } from '../../workers/repository/process/extract-update';
 import { getCache } from '../cache/repository';
 import type { OnboardingBranchCache } from '../cache/repository/types';
-import { getBranchCommit } from '.';
 
 export function getCachedOnboardingBranch(
-  branchName: string,
+  branchSha: string,
+  baseBranchSha: string,
   baseBranchName: string
 ): OnboardingBranchCache | null {
   const cache = getCache();
@@ -12,12 +12,11 @@ export function getCachedOnboardingBranch(
   if (!onboardingBranch || onboardingBranch?.sha === null) {
     return null;
   }
-  const branchSha = getBranchCommit(branchName);
-  const parentSha = getBranchCommit(baseBranchName);
+
   onboardingBranch.parentSha ??= cache.scan?.[baseBranchName].sha;
   if (
     onboardingBranch?.sha !== branchSha ||
-    onboardingBranch.parentSha !== parentSha
+    onboardingBranch.parentSha !== baseBranchSha
   ) {
     return null;
   }
@@ -25,8 +24,8 @@ export function getCachedOnboardingBranch(
 }
 
 export function setOnboardingBranchCache(
-  branchName: string,
-  baseBranchName: string,
+  branchSha: string,
+  baseBranchSha: string,
   isOnboarded: boolean,
   extractedDependencies?: ExtractResult
 ): void {
@@ -34,12 +33,10 @@ export function setOnboardingBranchCache(
   const { onboardingBranch = {} as OnboardingBranchCache } = cache;
 
   onboardingBranch.isOnboarded = isOnboarded;
-  onboardingBranch.sha = getBranchCommit(branchName)!;
-  onboardingBranch.parentSha = getBranchCommit(baseBranchName)!;
+  onboardingBranch.sha = branchSha;
+  onboardingBranch.parentSha = baseBranchSha;
   if (extractedDependencies) {
     onboardingBranch.extractedDependencies = extractedDependencies;
   }
-  cache.onboardingBranch ??= onboardingBranch;
-  // eslint-disable-next-line no-console
-  console.log(cache);
+  cache.onboardingBranch = onboardingBranch;
 }

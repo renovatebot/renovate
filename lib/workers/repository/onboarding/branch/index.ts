@@ -1,5 +1,5 @@
 import { mergeChildConfig } from '../../../../config';
-// import { GlobalConfig } from '../../../../config/global';
+import { GlobalConfig } from '../../../../config/global';
 import type { RenovateConfig } from '../../../../config/types';
 import {
   REPOSITORY_FORKED,
@@ -7,7 +7,11 @@ import {
 } from '../../../../constants/error-messages';
 import { logger } from '../../../../logger';
 import { platform } from '../../../../modules/platform';
-import { setGitAuthor } from '../../../../util/git';
+import {
+  checkoutBranch,
+  getBranchCommit,
+  setGitAuthor,
+} from '../../../../util/git';
 import {
   getCachedOnboardingBranch,
   setOnboardingBranchCache,
@@ -26,9 +30,12 @@ export async function checkOnboardingBranch(
   logger.trace({ config });
   let onboardingBranch = config.onboardingBranch;
   let repoIsOnboarded: boolean;
+  const onboardingBranchSha = getBranchCommit(onboardingBranch!);
+  const baseBranchSha = getBranchCommit(config.baseBranch!);
   // TODO #7154
   const cachedOnboardingBranch = getCachedOnboardingBranch(
-    config.onboardingBranch!,
+    onboardingBranchSha!,
+    baseBranchSha!,
     config.baseBranch!
   );
   if (cachedOnboardingBranch === null) {
@@ -39,8 +46,8 @@ export async function checkOnboardingBranch(
   }
   // TODO #7154
   setOnboardingBranchCache(
-    config.onboardingBranch!,
-    config.baseBranch!,
+    onboardingBranchSha!,
+    baseBranchSha!,
     repoIsOnboarded
   );
   if (repoIsOnboarded) {
@@ -64,7 +71,7 @@ export async function checkOnboardingBranch(
           'Branch updated'
         );
         // TODO #7154
-        setOnboardingBranchCache(commit, config.baseBranch!, true);
+        setOnboardingBranchCache(commit, baseBranchSha!, true);
       }
     }
     // istanbul ignore if
@@ -96,13 +103,13 @@ export async function checkOnboardingBranch(
         'Branch created'
       );
       // TODO #7154
-      setOnboardingBranchCache(commit, config.baseBranch!, true);
+      setOnboardingBranchCache(commit, baseBranchSha!, true);
     }
   }
-  // if (!GlobalConfig.get('dryRun')) {
-  //   // TODO #7154
-  //   await checkoutBranch(onboardingBranch!);
-  // }
+  if (!GlobalConfig.get('dryRun')) {
+    // TODO #7154
+    await checkoutBranch(onboardingBranch!);
+  }
   // TODO #7154
   const branchList = [onboardingBranch!];
   return { ...config, repoIsOnboarded, onboardingBranch, branchList };

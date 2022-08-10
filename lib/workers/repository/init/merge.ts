@@ -27,12 +27,16 @@ export async function detectRepoFileConfig(): Promise<RepoFileConfig> {
   const cache = getCache();
   let { configFileName } = cache;
   if (configFileName) {
-    let configFileParsed = (await platform.getJsonFile(configFileName))!;
-    if (configFileParsed) {
-      if (configFileName === 'package.json') {
-        configFileParsed = configFileParsed.renovate;
+    try {
+      let configFileParsed = (await platform.getJsonFile(configFileName))!;
+      if (configFileParsed) {
+        if (configFileName === 'package.json') {
+          configFileParsed = configFileParsed.renovate;
+        }
+        return { configFileName, configFileParsed };
       }
-      return { configFileName, configFileParsed };
+    } catch (err) {
+      // probably file doesn't exist
     }
     logger.debug('Existing config file no longer exists');
   }
@@ -173,7 +177,7 @@ export async function mergeRenovateConfig(
 ): Promise<RenovateConfig> {
   let returnConfig = { ...config };
   let repoConfig: RepoFileConfig = {};
-  if (config.requireConfig !== 'ignored') {
+  if (config.repoIsOnboarded && config.requireConfig !== 'ignored') {
     repoConfig = await detectRepoFileConfig();
   }
   const configFileParsed = repoConfig?.configFileParsed || {};
