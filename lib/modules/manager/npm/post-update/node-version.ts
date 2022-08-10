@@ -1,5 +1,6 @@
 import semver from 'semver';
 import { logger } from '../../../../logger';
+import type { ToolConstraint } from '../../../../util/exec/types';
 import { getSiblingFileName, readLocalFile } from '../../../../util/fs';
 import { newlineRegex, regEx } from '../../../../util/regex';
 import type { PostUpdateConfig, Upgrade } from '../../types';
@@ -35,9 +36,10 @@ export async function getNodeConstraint(
   config: Partial<PostUpdateConfig>
 ): Promise<string | null> {
   const { packageFile } = config;
+  // TODO: fix types (#7154)
   const constraint =
-    (await getNodeFile(getSiblingFileName(packageFile, '.nvmrc'))) ??
-    (await getNodeFile(getSiblingFileName(packageFile, '.node-version'))) ??
+    (await getNodeFile(getSiblingFileName(packageFile!, '.nvmrc'))) ??
+    (await getNodeFile(getSiblingFileName(packageFile!, '.node-version'))) ??
     getPackageJsonConstraint(config);
   if (!constraint) {
     logger.debug('No node constraint found - using latest');
@@ -47,4 +49,17 @@ export async function getNodeConstraint(
 
 export function getNodeUpdate(upgrades: Upgrade[]): string | undefined {
   return upgrades.find((u) => u.depName === 'node')?.newValue;
+}
+
+export async function getNodeToolConstraint(
+  config: Partial<PostUpdateConfig>,
+  upgrades: Upgrade[]
+): Promise<ToolConstraint> {
+  const constraint =
+    getNodeUpdate(upgrades) ?? (await getNodeConstraint(config));
+
+  return {
+    toolName: 'node',
+    constraint,
+  };
 }

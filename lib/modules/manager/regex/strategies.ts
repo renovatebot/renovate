@@ -1,7 +1,7 @@
 import is from '@sindresorhus/is';
 import { regEx } from '../../../util/regex';
-import type { CustomExtractConfig, PackageDependency } from '../types';
-import type { RecursionParameter } from './types';
+import type { PackageDependency } from '../types';
+import type { RecursionParameter, RegexManagerConfig } from './types';
 import {
   createDependency,
   isValidDependency,
@@ -13,7 +13,7 @@ import {
 export function handleAny(
   content: string,
   packageFile: string,
-  config: CustomExtractConfig
+  config: RegexManagerConfig
 ): PackageDependency[] {
   return config.matchStrings
     .map((matchString) => regEx(matchString, 'g'))
@@ -31,7 +31,7 @@ export function handleAny(
 export function handleCombination(
   content: string,
   packageFile: string,
-  config: CustomExtractConfig
+  config: RegexManagerConfig
 ): PackageDependency[] {
   const matches = config.matchStrings
     .map((matchString) => regEx(matchString, 'g'))
@@ -55,7 +55,7 @@ export function handleCombination(
 export function handleRecursive(
   content: string,
   packageFile: string,
-  config: CustomExtractConfig
+  config: RegexManagerConfig
 ): PackageDependency[] {
   const regexes = config.matchStrings.map((matchString) =>
     regEx(matchString, 'g')
