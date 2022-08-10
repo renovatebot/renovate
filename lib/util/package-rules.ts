@@ -155,7 +155,7 @@ function matchesRule(
     matchPackagePrefixes.length
   ) {
     if (!depName) {
-      // if using the default rules return true else false
+      // if using the default rules, return true else false
       return (
         is.undefined(packageRule.matchPackagePatterns) &&
         is.undefined(packageRule.matchPackageNames) &&
