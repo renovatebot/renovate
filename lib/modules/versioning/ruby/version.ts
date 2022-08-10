@@ -31,8 +31,22 @@ const parse = (version: string): RubyVersion => ({
 const adapt = (left: string, right: string): string =>
   left.split('.').slice(0, right.split('.').length).join('.');
 
-const floor = (version: string): string =>
-  [...releaseSegments(version).slice(0, -1), 0].join('.');
+const trimZeroes = (version: string): string => {
+  const segments = version.split('.');
+  while (segments.length > 0 && segments[segments.length - 1] === '0') {
+    segments.pop();
+  }
+  return segments.join('.');
+};
+
+// Returns the upper bound of `~>` operator.
+const pgteUpperBound = (version: string): string => {
+  const segments = releaseSegments(version);
+  if (segments.length > 1) {
+    segments.pop();
+  }
+  return incrementLastSegment(segments.join('.'));
+};
 
 // istanbul ignore next
 const incrementLastSegment = (version: string): string => {
@@ -119,4 +133,4 @@ const decrement = (version: string): string => {
   return nextSegments.reverse().join('.');
 };
 
-export { parse, floor, increment, decrement };
+export { parse, adapt, trimZeroes, pgteUpperBound, increment, decrement };
