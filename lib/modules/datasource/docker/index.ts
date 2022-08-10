@@ -338,7 +338,7 @@ export function isECRMaxResultsError(err: HttpError): boolean {
 export const defaultConfig = {
   commitMessageTopic: '{{{depName}}} Docker tag',
   commitMessageExtra:
-    'to {{#if isMajor}}{{{prettyNewMajor}}}{{else}}{{{prettyNewVersion}}}{{/if}}',
+    'to v{{#if isMajor}}{{{newMajor}}}{{else}}{{{newVersion}}}{{/if}}',
   digest: {
     branchTopic: '{{{depNameSanitized}}}-{{{currentValue}}}',
     commitMessageExtra: 'to {{newDigestShort}}',
