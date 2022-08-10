@@ -41,7 +41,7 @@ describe('modules/manager/gomod/extract', () => {
       expect(res?.filter((e) => e.skipReason)).toHaveLength(0);
     });
 
-    it('extracts multi-line replace', () => {
+    it('extracts replace directives from multi-line and single line', () => {
       const goMod = `
 replace golang.org/x/foo => github.com/pravesht/gocql v0.0.0
 replace (
