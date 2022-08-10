@@ -1,5 +1,5 @@
 import { mergeChildConfig } from '../../../../config';
-import { GlobalConfig } from '../../../../config/global';
+// import { GlobalConfig } from '../../../../config/global';
 import type { RenovateConfig } from '../../../../config/types';
 import {
   REPOSITORY_FORKED,
@@ -7,7 +7,11 @@ import {
 } from '../../../../constants/error-messages';
 import { logger } from '../../../../logger';
 import { platform } from '../../../../modules/platform';
-import { checkoutBranch, setGitAuthor } from '../../../../util/git';
+import { setGitAuthor } from '../../../../util/git';
+import {
+  getCachedOnboardingBranch,
+  setOnboardingBranchCache,
+} from '../../../../util/git/onboarding-branch-cache';
 import { extractAllDependencies } from '../../extract';
 import { mergeRenovateConfig } from '../../init/merge';
 import { isOnboarded, onboardingPrExists } from './check';
@@ -21,7 +25,24 @@ export async function checkOnboardingBranch(
   logger.debug('checkOnboarding()');
   logger.trace({ config });
   let onboardingBranch = config.onboardingBranch;
-  const repoIsOnboarded = await isOnboarded(config);
+  let repoIsOnboarded: boolean;
+  // TODO #7154
+  const cachedOnboardingBranch = getCachedOnboardingBranch(
+    config.onboardingBranch!,
+    config.baseBranch!
+  );
+  if (cachedOnboardingBranch === null) {
+    repoIsOnboarded = await isOnboarded(config);
+  } else {
+    logger.debug('Using cached result for isOnboarded');
+    repoIsOnboarded = cachedOnboardingBranch.isOnboarded;
+  }
+  // TODO #7154
+  setOnboardingBranchCache(
+    config.onboardingBranch!,
+    config.baseBranch!,
+    repoIsOnboarded
+  );
   if (repoIsOnboarded) {
     logger.debug('Repo is onboarded');
     return { ...config, repoIsOnboarded };
@@ -32,14 +53,19 @@ export async function checkOnboardingBranch(
   logger.debug('Repo is not onboarded');
   // global gitAuthor will need to be used
   setGitAuthor(config.gitAuthor);
+
   if (await onboardingPrExists(config)) {
     logger.debug('Onboarding PR already exists');
-    const commit = await rebaseOnboardingBranch(config);
-    if (commit) {
-      logger.info(
-        { branch: config.onboardingBranch, commit, onboarding: true },
-        'Branch updated'
-      );
+    if (cachedOnboardingBranch === null) {
+      const commit = await rebaseOnboardingBranch(config);
+      if (commit) {
+        logger.info(
+          { branch: config.onboardingBranch, commit, onboarding: true },
+          'Branch updated'
+        );
+        // TODO #7154
+        setOnboardingBranchCache(commit, config.baseBranch!, true);
+      }
     }
     // istanbul ignore if
     if (platform.refreshPr) {
@@ -69,12 +95,14 @@ export async function checkOnboardingBranch(
         { branch: onboardingBranch, commit, onboarding: true },
         'Branch created'
       );
+      // TODO #7154
+      setOnboardingBranchCache(commit, config.baseBranch!, true);
     }
   }
-  if (!GlobalConfig.get('dryRun')) {
-    // TODO #7154
-    await checkoutBranch(onboardingBranch!);
-  }
+  // if (!GlobalConfig.get('dryRun')) {
+  //   // TODO #7154
+  //   await checkoutBranch(onboardingBranch!);
+  // }
   // TODO #7154
   const branchList = [onboardingBranch!];
   return { ...config, repoIsOnboarded, onboardingBranch, branchList };

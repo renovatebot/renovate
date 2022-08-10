@@ -1,5 +1,6 @@
 import type { PackageFile } from '../../../modules/manager/types';
 import type { RepoInitConfig } from '../../../workers/repository/init/types';
+import type { ExtractResult } from '../../../workers/repository/process/extract-update';
 import type { GitConflictsCache } from '../../git/types';
 
 export interface BaseBranchCache {
@@ -32,6 +33,13 @@ export interface BranchCache {
   upgrades: BranchUpgradeCache[];
 }
 
+export interface OnboardingBranchCache {
+  isOnboarded: boolean;
+  parentSha?: string;
+  sha: string;
+  extractedDependencies?: ExtractResult;
+}
+
 export interface RepoCacheData {
   configFileName?: string;
   semanticCommits?: 'enabled' | 'disabled';
@@ -44,6 +52,7 @@ export interface RepoCacheData {
   };
   gitConflicts?: GitConflictsCache;
   prComments?: Record<number, Record<string, string>>;
+  onboardingBranch?: OnboardingBranchCache;
 }
 
 export interface RepoCacheRecord {
