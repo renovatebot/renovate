@@ -318,7 +318,7 @@ describe('modules/manager/gomod/update', () => {
       expect(res).toContain('github.com/caarlos0/env/v6 v6.1.0');
     });
 
-    it('handles multiline replace updates', () => {
+    it('handles multiline replace update', () => {
       const fileContent = `
       go 1.18
       replace (
