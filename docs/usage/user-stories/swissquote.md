@@ -101,7 +101,7 @@ I’ve identified three main approaches people use to upgrade their dependencies
 1. Opportunistic; also known as the boy scout rule, leave the project with more up-to-date dependencies than you found it
 1. Update your dependencies regularly; manually or with a tool
 
-### Critical Fixes only
+### Critical fixes only
 
 Every once in a while, a library gets an update that fixes a vulnerability.
 Our security team is on the lookout for critical vulnerabilities and will quickly warn all impacted teams if an update needs to be done.
@@ -126,12 +126,12 @@ Maybe there is even a way to automate that?
 
 #### Let's give Renovate a try
 
-One day in November 2019, I discovered that [Renovate](https://www.mend.io/free-developer-tools/renovate/) provides a Docker image that you can run on premise with your own package registries.
+One day in November 2019, I discovered that [Renovate](https://www.mend.io/free-developer-tools/renovate/) provides a Docker image that you can run on-premise with your own package registries.
 The app creates Pull Requests automatically to inform you of dependencies updates and the CI can then build it automatically so you know if it’s safe to merge or not.
 
 On our first try, we enabled 30 repositories, a cron task was running every hour to create Pull Requests.
 
-We received 700 Pull Requests in the first month, it was a never ending Pull Request whack-a-mole every time we merged one, another replaced it.
+We received 700 Pull Requests in the first month, it was a never ending Pull Request whack-a-mole: every time we merged one, another replaced it.
 
 ![A cat playing Whack-a-mole with a finger](../assets/images/swissquote_cat_whack_a_mole.jpg)
 
@@ -216,7 +216,7 @@ If this article convinced you, how should you get started?
 The short answer is yes!
 
 It took us almost a year, way longer than we thought, to catch up with the latest version of everything in our technical stack.
-But once we were confident enough in our tests to enable automatic merging of Pull Requests we were satisfied of the work we did to update our software stack.
+But once we were confident enough in our tests to enable automatic merging of Pull Requests we were satisfied with the work we did to update our software stack.
 We knew we would be ready when an unplanned change arrives.
 
 When that day came, in December 2021 with Log4Shell, it was a matter of hours to release the freshly merged Pull Requests, deploy the few applications we had, and notify the teams depending on our libraries.
