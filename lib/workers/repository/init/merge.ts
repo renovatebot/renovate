@@ -27,9 +27,9 @@ export async function detectRepoFileConfig(): Promise<RepoFileConfig> {
   const cache = getCache();
   let { configFileName } = cache;
   if (configFileName) {
-    let configFileRaw: string | undefined = (await platform.getRawFile(
+    let configFileRaw = (await platform.getRawFile(
       configFileName
-    ))!;
+    ));
     let configFileParsed = JSON5.parse(configFileRaw);
     if (configFileParsed) {
       if (configFileName === 'package.json') {
