@@ -401,7 +401,7 @@ export class DockerDatasource extends Datasource {
         dockerRepository
       );
       if (!headers) {
-        logger.debug('No docker auth found - returning');
+        logger.warn('No docker auth found - returning');
         return null;
       }
       headers.accept = [
@@ -490,9 +490,9 @@ export class DockerDatasource extends Datasource {
       registryHost,
       dockerRepository
     );
-    // istanbul ignore if: Should never be happen
+    // istanbul ignore if: Should never happen
     if (!headers) {
-      logger.debug('No docker auth found - returning');
+      logger.warn('No docker auth found - returning');
       return undefined;
     }
     const url = `${registryHost}/v2/${dockerRepository}/blobs/${configDigest}`;
@@ -696,9 +696,9 @@ export class DockerDatasource extends Datasource {
         registryHost,
         dockerRepository
       );
-      // istanbul ignore if: Should never be happen
+      // istanbul ignore if: Should never happen
       if (!headers) {
-        logger.debug('No docker auth found - returning');
+        logger.warn('No docker auth found - returning');
         return {};
       }
       const url = `${registryHost}/v2/${dockerRepository}/blobs/${configDigest}`;
