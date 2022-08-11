@@ -19,7 +19,8 @@ describe('modules/manager/maven-wrapper/extract', () => {
           replaceString:
             'https://artifactory.tools.bol.com/artifactory/maven-bol/org/apache/maven/apache-maven/3.8.4/apache-maven-3.8.4-bin.zip',
           datasource: 'maven',
-          depName: 'org.apache.maven:apache-maven',
+          depName: 'maven',
+          packageName: 'org.apache.maven:apache-maven',
           versioning: 'maven',
         },
         {
@@ -27,7 +28,8 @@ describe('modules/manager/maven-wrapper/extract', () => {
           replaceString:
             'https://artifactory.tools.bol.com/artifactory/maven-bol/org/apache/maven/wrapper/maven-wrapper/3.1.0/maven-wrapper-3.1.0.jar',
           datasource: 'maven',
-          depName: 'org.apache.maven.wrapper:maven-wrapper',
+          depName: 'maven-wrapper',
+          packageName: 'org.apache.maven.wrapper:maven-wrapper',
           versioning: 'maven',
         },
       ]);
@@ -42,7 +44,8 @@ describe('modules/manager/maven-wrapper/extract', () => {
           replaceString:
             'https://repo.maven.apache.org/maven2/io/takari/maven-wrapper/0.5.6/maven-wrapper-0.5.6.jar',
           datasource: 'maven',
-          depName: 'org.apache.maven.wrapper:maven-wrapper',
+          depName: 'maven-wrapper',
+          packageName: 'org.apache.maven.wrapper:maven-wrapper',
           versioning: 'maven',
         },
       ]);
@@ -56,7 +59,8 @@ describe('modules/manager/maven-wrapper/extract', () => {
           replaceString:
             'https://repo.maven.apache.org/maven2/org/apache/maven/apache-maven/3.5.4/apache-maven-3.5.4-bin.zip',
           datasource: 'maven',
-          depName: 'org.apache.maven:apache-maven',
+          depName: 'maven',
+          packageName: 'org.apache.maven:apache-maven',
           versioning: 'maven',
         },
       ]);

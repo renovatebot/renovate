@@ -1,25 +1,34 @@
+import type { Stats } from 'fs';
+import os from 'os';
 import type { StatusResult } from 'simple-git';
-import { resolve } from 'upath';
-import { git, partial } from '../../../../test/util';
+import { fs, git, partial } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import { updateArtifacts } from './artifacts';
 
+jest.mock('../../../util/fs');
 jest.mock('../../../util/git');
-jest.mock('os');
+jest.spyOn(os, 'platform').mockImplementation(() => 'darwin');
 
-const fixtures = resolve(__dirname, './__fixtures__');
 const adminConfig: RepoGlobalConfig = {
-  localDir: resolve(fixtures, './'),
+  localDir: './',
 };
 
 describe('modules/manager/maven-wrapper/artifacts', () => {
+  beforeEach(() => {
+    fs.statLocalFile.mockResolvedValue(
+      partial<Stats>({
+        isFile: () => true,
+        mode: 0o555,
+      })
+    );
+  });
+
   afterEach(() => {
     GlobalConfig.reset();
   });
 
   it('Should not update if there is no dep with maven:wrapper', async () => {
-    require('os').__setPlatform('darwin');
     const updatedDeps = await updateArtifacts({
       packageFileName: 'maven-wrapper',
       newPackageFileContent: '',
@@ -30,14 +39,13 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
   });
 
   it('Should return java 7.0 when current value is larger then 3', async () => {
-    require('os').__setPlatform('darwin');
     git.getRepoStatus.mockResolvedValueOnce(
       partial<StatusResult>({
         modified: ['maven.mvn/wrapper/maven-wrapper.properties'],
       })
     );
-
     GlobalConfig.set(adminConfig);
+
     const updatedDeps = await updateArtifacts({
       packageFileName: 'maven',
       newPackageFileContent: '',
@@ -48,7 +56,7 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
     const expected = [
       {
         file: {
-          contents: null,
+          contents: undefined,
           path: 'maven.mvn/wrapper/maven-wrapper.properties',
           type: 'addition',
         },
@@ -64,8 +72,8 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
         modified: ['maven.mvn/wrapper/maven-wrapper.properties'],
       })
     );
-
     GlobalConfig.set(adminConfig);
+
     const updatedDeps = await updateArtifacts({
       packageFileName: 'maven',
       newPackageFileContent: '',
@@ -76,7 +84,7 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
     const expected = [
       {
         file: {
-          contents: null,
+          contents: undefined,
           path: 'maven.mvn/wrapper/maven-wrapper.properties',
           type: 'addition',
         },
@@ -92,7 +100,6 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
         modified: ['maven.mvn/wrapper/not-maven-wrapper.properties'],
       })
     );
-
     GlobalConfig.set(adminConfig);
 
     const updatedDeps = await updateArtifacts({
@@ -133,7 +140,10 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
       })
     );
     GlobalConfig.set(adminConfig);
-    require('os').__setPlatform('win32');
+
+    jest.spyOn(os, 'platform').mockImplementation(() => 'win32');
+
+    fs.statLocalFile.mockResolvedValue(null);
     const updatedDeps = await updateArtifacts({
       packageFileName: 'maven',
       newPackageFileContent: '',

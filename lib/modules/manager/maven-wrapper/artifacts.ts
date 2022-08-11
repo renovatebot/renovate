@@ -1,5 +1,6 @@
 import type { Stats } from 'fs';
 import os from 'os';
+import is from '@sindresorhus/is';
 import upath from 'upath';
 import { GlobalConfig } from '../../../config/global';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
@@ -54,7 +55,6 @@ export async function updateArtifacts({
     }
 
     const cmd = await createWrapperCommand();
-
     if (!cmd) {
       logger.info('No mvnw found - skipping Artifacts update');
       return null;
@@ -73,15 +73,10 @@ export async function updateArtifacts({
         packageFileName.replace('.mvn/wrapper/maven-wrapper.properties', '') +
         filename
     );
-    const updateArtifactsResult = (
-      await Promise.all(
-        artifactFileNames.map((fileProjectPath) =>
-          addIfUpdated(status, fileProjectPath)
-        )
-      )
-    )
-      .filter(is.truthy)
-      .map((result) => result as UpdateArtifactsResult);
+    const updateArtifactsResult = await (
+      await getUpdatedArtifacts(status, artifactFileNames)
+    ).filter(is.truthy);
+
     logger.debug(
       { files: updateArtifactsResult.map((r) => r.file?.path) },
       `Returning updated maven-wrapper files`
@@ -98,6 +93,17 @@ export async function updateArtifacts({
       },
     ];
   }
+}
+
+async function getUpdatedArtifacts(
+  status: StatusResult,
+  artifactFileNames: string[]
+) {
+  const updatedResults: (UpdateArtifactsResult | null)[] = [];
+  for (const artifactFileName of artifactFileNames) {
+    updatedResults.push(await addIfUpdated(status, artifactFileName));
+  }
+  return updatedResults;
 }
 
 async function executeWrapperCommand(
@@ -174,6 +180,5 @@ async function prepareCommand(
     }
     return `${fileName} ${args}`;
   }
-  /* eslint-enable no-bitwise */
   return null;
 }
