@@ -281,17 +281,19 @@ export async function generateLockFile(
       },
       'lock file error'
     );
-    if (err.stderr) {
-      if (err.stderr.includes('ENOSPC: no space left on device')) {
-        throw new Error(SYSTEM_INSUFFICIENT_DISK_SPACE);
-      }
-      if (
-        err.stderr.includes('The registry may be down.') ||
-        err.stderr.includes('getaddrinfo ENOTFOUND registry.yarnpkg.com') ||
-        err.stderr.includes('getaddrinfo ENOTFOUND registry.npmjs.org')
-      ) {
-        throw new ExternalHostError(err, NpmDatasource.id);
-      }
+    const stdouterr = String(err.stdout) + String(err.stderr);
+    if (
+      stdouterr.includes('ENOSPC: no space left on device') ||
+      stdouterr.includes('Out of diskspace')
+    ) {
+      throw new Error(SYSTEM_INSUFFICIENT_DISK_SPACE);
+    }
+    if (
+      stdouterr.includes('The registry may be down.') ||
+      stdouterr.includes('getaddrinfo ENOTFOUND registry.yarnpkg.com') ||
+      stdouterr.includes('getaddrinfo ENOTFOUND registry.npmjs.org')
+    ) {
+      throw new ExternalHostError(err, NpmDatasource.id);
     }
     return { error: true, stderr: err.stderr, stdout: err.stdout };
   }
