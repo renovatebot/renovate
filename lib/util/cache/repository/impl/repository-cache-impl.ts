@@ -11,12 +11,12 @@ import {
 } from '../common';
 import type { CacheClient } from '../types';
 import { RepoCacheBase } from './base';
-import { CacheClientFactory } from './cache-client-factory';
+import { CacheClientFactory } from './client/cache-client-factory';
 
 const compress = promisify(zlib.brotliCompress);
 const decompress = promisify(zlib.brotliDecompress);
 
-export class RepositoryCacheHandler extends RepoCacheBase {
+export class RepositoryCacheImpl extends RepoCacheBase {
   private cacheClient: CacheClient;
   private oldHash: string | null = null;
 

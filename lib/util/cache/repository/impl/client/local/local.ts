@@ -1,8 +1,8 @@
 import upath from 'upath';
-import { GlobalConfig } from '../../../../config/global';
-import { logger } from '../../../../logger';
-import { outputCacheFile, readCacheFile } from '../../../fs';
-import type { CacheClient, RepoCacheRecord } from '../types';
+import { GlobalConfig } from '../../../../../../config/global';
+import { logger } from '../../../../../../logger';
+import { outputCacheFile, readCacheFile } from '../../../../../fs';
+import type { CacheClient, RepoCacheRecord } from '../../../types';
 
 export class LocalRepoCache implements CacheClient {
   constructor(private platform: string, private repository: string) {}
