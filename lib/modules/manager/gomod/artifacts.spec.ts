@@ -212,6 +212,14 @@ describe('modules/manager/gomod/artifacts', () => {
     hostRules.find.mockReturnValueOnce({
       token: 'some-token',
     });
+    hostRules.getAll.mockReturnValueOnce([
+      {
+        token: 'some-token',
+        hostType: PlatformId.Github,
+        matchHost: 'api.github.com',
+      },
+      { token: 'some-other-token', matchHost: 'https://gitea.com' },
+    ]);
     fs.readLocalFile.mockResolvedValueOnce('Current go.sum');
     // TODO: #7154 can be null
     fs.readLocalFile.mockResolvedValueOnce(null as never); // vendor modules filename
