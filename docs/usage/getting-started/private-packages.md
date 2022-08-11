@@ -330,7 +330,7 @@ hostRules: [
     matchHost: 'https://pkgs.dev.azure.com/<org>/',
     hostType: 'nuget',
     username: 'user',
-    password: '<Encrypted PAT Token>',
+    password: '<PAT>',
   },
 ];
 ```
