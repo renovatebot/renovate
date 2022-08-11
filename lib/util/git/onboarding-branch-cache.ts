@@ -9,15 +9,15 @@ export function getCachedOnboardingBranch(
   baseBranchName: string
 ): OnboardingBranchCache | null {
   const cache = getCache();
-  const { onboardingBranch } = cache;
-  if (!onboardingBranch || onboardingBranch.sha === null) {
+  const { onboarding: onboardingBranch } = cache;
+  if (!onboardingBranch) {
     return null;
   }
 
-  onboardingBranch.parentSha ??= cache.scan?.[baseBranchName].sha;
+  onboardingBranch.defaultBranchSha ??= cache.scan?.[baseBranchName].sha;
   if (
-    onboardingBranch.sha !== branchSha ||
-    onboardingBranch.parentSha !== baseBranchSha
+    onboardingBranch.onboardingBranchSha !== branchSha ||
+    onboardingBranch.defaultBranchSha !== baseBranchSha
   ) {
     return null;
   }
@@ -31,14 +31,13 @@ export function setOnboardingBranchCache(
   extractedDependencies?: ExtractResult
 ): void {
   const cache = getCache();
-  const onboardingBranch =
-    cache.onboardingBranch ?? ({} as OnboardingBranchCache);
+  const onboardingBranch = cache.onboarding ?? ({} as OnboardingBranchCache);
 
   onboardingBranch.isOnboarded = isOnboarded;
-  onboardingBranch.sha = branchSha;
-  onboardingBranch.parentSha = baseBranchSha;
+  onboardingBranch.onboardingBranchSha = branchSha;
+  onboardingBranch.defaultBranchSha = baseBranchSha;
   if (extractedDependencies) {
     onboardingBranch.extractedDependencies = extractedDependencies;
   }
-  cache.onboardingBranch = onboardingBranch;
+  cache.onboarding = onboardingBranch;
 }
