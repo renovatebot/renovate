@@ -74,7 +74,7 @@ export function generateBranchConfig(
   const newValue: string[] = [];
   const toVersions: string[] = [];
   const toValues = new Set<string>();
-  branchUpgrades.forEach((upg) => {
+  for (const upg of branchUpgrades) {
     if (!depNames.includes(upg.depName!)) {
       depNames.push(upg.depName!);
     }
@@ -82,20 +82,27 @@ export function generateBranchConfig(
       toVersions.push(upg.newVersion!);
     }
     toValues.add(upg.newValue!);
+    // prettify newVersion and newMajor for printing
+    if (upg.newVersion) {
+      upg.prettyNewVersion = upg.newVersion.startsWith('v')
+        ? upg.newVersion
+        : `v${upg.newVersion}`;
+    }
+    if (upg.newMajor) {
+      upg.prettyNewMajor = `v${upg.newMajor}`;
+    }
     if (upg.commitMessageExtra) {
       const extra = template.compile(upg.commitMessageExtra, upg);
       if (!newValue.includes(extra)) {
         newValue.push(extra);
       }
     }
-  });
+  }
   const groupEligible =
     depNames.length > 1 ||
     toVersions.length > 1 ||
     (!toVersions[0] && newValue.length > 1);
-  if (newValue.length > 1 && !groupEligible) {
-    branchUpgrades[0].commitMessageExtra = `to v${toVersions[0]}`;
-  }
+
   const typesGroup =
     depNames.length > 1 && !hasGroupName && isTypesGroup(branchUpgrades);
   logger.trace(`groupEligible: ${groupEligible}`);
@@ -104,6 +111,12 @@ export function generateBranchConfig(
   let releaseTimestamp: string;
   for (const branchUpgrade of branchUpgrades) {
     let upgrade: BranchUpgradeConfig = { ...branchUpgrade };
+
+    // needs to be done for each upgrade, as we reorder them below
+    if (newValue.length > 1 && !groupEligible) {
+      upgrade.commitMessageExtra = `to v${toVersions[0]}`;
+    }
+
     if (upgrade.currentDigest) {
       upgrade.currentDigestShort =
         upgrade.currentDigestShort ??
@@ -182,6 +195,7 @@ export function generateBranchConfig(
         regEx(/[A-Z]/).exec(upgrade.semanticCommitType!) === null &&
         !upgrade.semanticCommitType!.startsWith(':');
     }
+
     // Compile a few times in case there are nested templates
     upgrade.commitMessage = template.compile(
       upgrade.commitMessage ?? '',
@@ -363,7 +377,7 @@ export function generateBranchConfig(
     config.updateType = 'major';
   }
   config.constraints = {};
-  for (const upgrade of config.upgrades || []) {
+  for (const upgrade of config.upgrades) {
     if (upgrade.constraints) {
       config.constraints = { ...config.constraints, ...upgrade.constraints };
     }
