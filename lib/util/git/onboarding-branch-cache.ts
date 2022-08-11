@@ -1,4 +1,3 @@
-// istanbul ignore file
 import type { ExtractResult } from '../../workers/repository/process/extract-update';
 import { getCache } from '../cache/repository';
 import type { OnboardingBranchCache } from '../cache/repository/types';
