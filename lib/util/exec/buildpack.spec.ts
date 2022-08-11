@@ -33,12 +33,12 @@ describe('util/exec/buildpack', () => {
       process.env.BUILDPACK = 'true';
       const toolConstraints: ToolConstraint[] = [
         { toolName: 'node' },
-        { toolName: 'npm' },
+        { toolName: 'invalid' },
       ];
       expect(isDynamicInstall(toolConstraints)).toBeFalse();
     });
 
-    it('returns false if supported tools', () => {
+    it('returns true if supported tools', () => {
       GlobalConfig.set({ binarySource: 'install' });
       process.env.BUILDPACK = 'true';
       const toolConstraints: ToolConstraint[] = [{ toolName: 'npm' }];
@@ -47,8 +47,14 @@ describe('util/exec/buildpack', () => {
   });
 
   describe('resolveConstraint()', () => {
-    beforeEach(() => {
-      datasource.getPkgReleases.mockResolvedValue({
+    it('returns from config', async () => {
+      expect(
+        await resolveConstraint({ toolName: 'composer', constraint: '1.1.0' })
+      ).toBe('1.1.0');
+    });
+
+    it('returns highest stable', async () => {
+      datasource.getPkgReleases.mockResolvedValueOnce({
         releases: [
           { version: '1.0.0' },
           { version: '1.1.0' },
@@ -58,20 +64,11 @@ describe('util/exec/buildpack', () => {
           { version: '2.2.0-pre.0' },
         ],
       });
-    });
-
-    it('returns from config', async () => {
-      expect(
-        await resolveConstraint({ toolName: 'composer', constraint: '1.1.0' })
-      ).toBe('1.1.0');
-    });
-
-    it('returns highest stable', async () => {
       expect(await resolveConstraint({ toolName: 'composer' })).toBe('2.1.0');
     });
 
     it('returns highest unstable', async () => {
-      datasource.getPkgReleases.mockResolvedValue({
+      datasource.getPkgReleases.mockResolvedValueOnce({
         releases: [{ version: '2.0.14-b.1' }, { version: '2.1.0-a.1' }],
       });
       expect(await resolveConstraint({ toolName: 'composer' })).toBe(
@@ -80,7 +77,7 @@ describe('util/exec/buildpack', () => {
     });
 
     it('respects latest', async () => {
-      datasource.getPkgReleases.mockResolvedValue({
+      datasource.getPkgReleases.mockResolvedValueOnce({
         tags: {
           latest: '2.0.14',
         },
@@ -97,17 +94,12 @@ describe('util/exec/buildpack', () => {
     });
 
     it('throws for unknown tools', async () => {
-      datasource.getPkgReleases.mockReset();
-      datasource.getPkgReleases.mockResolvedValueOnce({
-        releases: [],
-      });
       await expect(resolveConstraint({ toolName: 'whoops' })).rejects.toThrow(
         'Invalid tool to install: whoops'
       );
     });
 
     it('throws no releases', async () => {
-      datasource.getPkgReleases.mockReset();
       datasource.getPkgReleases.mockResolvedValueOnce({
         releases: [],
       });
@@ -117,7 +109,6 @@ describe('util/exec/buildpack', () => {
     });
 
     it('falls back to latest version if no compatible release', async () => {
-      datasource.getPkgReleases.mockReset();
       datasource.getPkgReleases.mockResolvedValueOnce({
         releases: [{ version: '1.2.3' }],
       });
@@ -127,7 +118,6 @@ describe('util/exec/buildpack', () => {
     });
 
     it('falls back to latest version if invalid constraint', async () => {
-      datasource.getPkgReleases.mockReset();
       datasource.getPkgReleases.mockResolvedValueOnce({
         releases: [{ version: '1.2.3' }],
       });
@@ -135,6 +125,30 @@ describe('util/exec/buildpack', () => {
         await resolveConstraint({ toolName: 'composer', constraint: 'whoops' })
       ).toBe('1.2.3');
     });
+
+    it.each`
+      version         | expected
+      ${'^3.9.0'}     | ${'3.10.4'}
+      ${'^3.9'}       | ${'3.10.4'}
+      ${'3.9.*'}      | ${'3.9.1'}
+      ${'>3.8,<3.10'} | ${'3.9.1'}
+      ${'==3.9.1'}    | ${'3.10.4'}
+    `(
+      'supports python ranges "$version" == "$expected"',
+      async ({ version: constraint, expected }) => {
+        datasource.getPkgReleases.mockResolvedValueOnce({
+          releases: [
+            { version: '3.9.0' },
+            { version: '3.9.1' },
+            { version: '3.10.0' },
+            { version: '3.10.4' },
+          ],
+        });
+        expect(
+          await resolveConstraint({ toolName: 'python', constraint })
+        ).toBe(expected);
+      }
+    );
   });
 
   describe('generateInstallCommands()', () => {
@@ -156,19 +170,18 @@ describe('util/exec/buildpack', () => {
           toolName: 'composer',
         },
       ];
-      expect(await generateInstallCommands(toolConstraints))
-        .toMatchInlineSnapshot(`
-        Array [
-          "install-tool composer 2.1.0",
-        ]
-      `);
+      expect(await generateInstallCommands(toolConstraints)).toEqual([
+        'install-tool composer 2.1.0',
+      ]);
     });
 
     it('hashes npm', async () => {
       const toolConstraints: ToolConstraint[] = [{ toolName: 'npm' }];
       const res = await generateInstallCommands(toolConstraints);
-      expect(res).toHaveLength(2);
-      expect(res[1]).toBe('hash -d npm 2>/dev/null || true');
+      expect(res).toEqual([
+        'install-tool npm 2.1.0',
+        'hash -d npm 2>/dev/null || true',
+      ]);
     });
   });
 });

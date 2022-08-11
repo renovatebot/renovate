@@ -4,43 +4,40 @@ import type { CommitMessage } from '../../model/commit-message';
 import { CommitMessageFactory } from '../../model/commit-message-factory';
 
 export class ConfigMigrationCommitMessageFactory {
-  private readonly config: RenovateConfig;
+  constructor(
+    private readonly config: RenovateConfig,
+    private readonly configFile: string
+  ) {}
 
-  private readonly configFile: string;
-
-  constructor(config: RenovateConfig, configFile: string) {
-    this.config = config;
-    this.configFile = configFile;
-  }
-
-  create(): CommitMessage {
+  private create(commitMessageTopic: string): CommitMessage {
     const { commitMessage } = this.config;
 
-    this.config.commitMessageAction =
-      this.config.commitMessageAction === 'Update'
-        ? ''
-        : this.config.commitMessageAction;
+    const config = {
+      ...this.config,
+      semanticCommitScope: 'config',
+      commitMessageExtra: '',
+      commitMessageAction: '',
+      commitMessageTopic,
+    };
 
-    this.config.commitMessageTopic =
-      this.config.commitMessageTopic === 'dependency {{depName}}'
-        ? `Migrate config ${this.configFile}`
-        : this.config.commitMessageTopic;
-
-    this.config.commitMessageExtra = '';
-    this.config.semanticCommitScope = 'config';
-
-    const commitMessageFactory = new CommitMessageFactory(this.config);
+    const commitMessageFactory = new CommitMessageFactory(config);
     const commit = commitMessageFactory.create();
 
     if (commitMessage) {
-      commit.subject = template.compile(commitMessage, {
-        ...this.config,
-        commitMessagePrefix: '',
-      });
+      config.commitMessagePrefix = '';
+      commit.subject = template.compile(commitMessage, config);
     } else {
-      commit.subject = `Migrate config ${this.configFile}`;
+      commit.subject = commitMessageTopic;
     }
 
     return commit;
+  }
+
+  getCommitMessage(): string {
+    return this.create(`Migrate config ${this.configFile}`).toString();
+  }
+
+  getPrTitle(): string {
+    return this.create(`Migrate renovate config`).toString();
   }
 }

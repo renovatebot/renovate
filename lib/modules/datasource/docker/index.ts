@@ -34,7 +34,7 @@ import {
 } from '../../versioning/docker';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
-import { sourceLabels } from './common';
+import { gitRefLabel, sourceLabels } from './common';
 import {
   Image,
   ImageList,
@@ -335,10 +335,10 @@ export function isECRMaxResultsError(err: HttpError): boolean {
   );
 }
 
-export const defaultConfig = {
+const defaultConfig = {
   commitMessageTopic: '{{{depName}}} Docker tag',
   commitMessageExtra:
-    'to v{{#if isMajor}}{{{newMajor}}}{{else}}{{{newVersion}}}{{/if}}',
+    'to {{#if isMajor}}{{{prettyNewMajor}}}{{else}}{{{prettyNewVersion}}}{{/if}}',
   digest: {
     branchTopic: '{{{depNameSanitized}}}-{{{currentValue}}}',
     commitMessageExtra: 'to {{newDigestShort}}',
@@ -376,6 +376,8 @@ export class DockerDatasource extends Datasource {
   override readonly defaultVersioning = dockerVersioningId;
 
   override readonly defaultRegistryUrls = [DOCKER_HUB];
+
+  override readonly defaultConfig = defaultConfig;
 
   constructor() {
     super(DockerDatasource.id);
@@ -936,6 +938,9 @@ export class DockerDatasource extends Datasource {
       latestTag
     );
     if (labels) {
+      if (is.nonEmptyString(labels[gitRefLabel])) {
+        ret.gitRef = labels[gitRefLabel];
+      }
       for (const label of sourceLabels) {
         if (is.nonEmptyString(labels[label])) {
           ret.sourceUrl = labels[label];

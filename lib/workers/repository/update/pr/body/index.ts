@@ -2,7 +2,7 @@ import { PrDebugData, platform } from '../../../../../modules/platform';
 import { regEx } from '../../../../../util/regex';
 import { toBase64 } from '../../../../../util/string';
 import * as template from '../../../../../util/template';
-import { ensureTrailingSlash } from '../../../../../util/url';
+import { joinUrlParts } from '../../../../../util/url';
 import type { BranchConfig } from '../../../../types';
 import { getChangelogs } from './changelogs';
 import { getPrConfigDescription } from './config-description';
@@ -45,10 +45,7 @@ function massageUpdateMetadata(config: BranchConfig): void {
     if (sourceUrl) {
       let fullUrl = sourceUrl;
       if (sourceDirectory) {
-        fullUrl =
-          ensureTrailingSlash(sourceUrl) +
-          'tree/HEAD/' +
-          sourceDirectory.replace('^/?/', '');
+        fullUrl = joinUrlParts(sourceUrl, 'tree/HEAD/', sourceDirectory);
       }
       references.push(`[source](${fullUrl})`);
     }
