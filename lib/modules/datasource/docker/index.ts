@@ -481,7 +481,7 @@ export class DockerDatasource extends Datasource {
     dockerRepository: string,
     configDigest: string
   ): Promise<HttpResponse<ImageConfig> | undefined> {
-    logger.debug(
+    logger.trace(
       `getImageConfig(${registryHost}, ${dockerRepository}, ${configDigest})`
     );
 
