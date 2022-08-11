@@ -232,7 +232,7 @@ const options: RenovateOptions[] = [
   {
     name: 'repositoryCacheType',
     description:
-      'This option decides the type of reoisitroy cache renovate will use.',
+      'Set the type of renovate repository cache if repositoryCache is enabled.',
     globalOnly: true,
     type: 'string',
     stage: 'repository',

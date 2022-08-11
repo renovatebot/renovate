@@ -628,8 +628,6 @@ JSON files will be stored inside the `cacheDir` beside the existing file-based p
 
 ## repositoryCacheType
 
-placeholder to pass tests
-
 ## requireConfig
 
 By default, Renovate needs a Renovate config file in each repository where it runs before it will propose any dependency updates.
