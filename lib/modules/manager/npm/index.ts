@@ -16,7 +16,7 @@ export const language = ProgrammingLanguage.JavaScript;
 export const supportsLockFileMaintenance = true;
 
 export const defaultConfig = {
-  fileMatch: ['(^|/)package.json$'],
+  fileMatch: ['(^|/)package\\.json$'],
   rollbackPrs: true,
   versioning: npmVersioning.id,
   digest: {

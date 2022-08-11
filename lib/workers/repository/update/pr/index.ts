@@ -391,7 +391,7 @@ export async function ensurePr(
     ) {
       const topic = 'Branch automerge failure';
       let content =
-        'This PR was configured for branch automerge, however this is not possible so it has been raised as a PR instead.';
+        'This PR was configured for branch automerge. However, this is not possible, so it has been raised as a PR instead.';
       if (config.branchAutomergeFailureMessage === 'branch status error') {
         content += '\n___\n * Branch has one or more failed status checks';
       }

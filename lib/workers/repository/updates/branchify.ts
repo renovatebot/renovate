@@ -3,7 +3,7 @@ import type { Merge } from 'type-fest';
 import type { RenovateConfig, ValidationMessage } from '../../../config/types';
 import { addMeta, logger, removeMeta } from '../../../logger';
 import type { BranchConfig, BranchUpgradeConfig } from '../../types';
-import { embedChangelogs } from '../changelog';
+import { embedChangelogs, needsChangelogs } from '../changelog';
 import { flattenUpdates } from './flatten';
 import { generateBranchConfig } from './generate';
 
@@ -38,9 +38,6 @@ export async function branchifyUpgrades(
     );
   }
   logger.debug(`Returning ${Object.keys(branchUpgrades).length} branch(es)`);
-  if (config.fetchReleaseNotes) {
-    await embedChangelogs(branchUpgrades);
-  }
   for (const branchName of Object.keys(branchUpgrades)) {
     // Add branch name to metadata before generating branch config
     addMeta({
@@ -74,6 +71,18 @@ export async function branchifyUpgrades(
         return true;
       })
       .reverse();
+
+    if (config.fetchReleaseNotes && config.repoIsOnboarded) {
+      const branches = branchUpgrades[branchName].filter(needsChangelogs);
+      if (branches.length) {
+        logger.info(
+          { branches: branches.map((b) => b.branchName) },
+          'Fetching changelogs early'
+        );
+        await embedChangelogs(branches);
+      }
+    }
+
     const branch = generateBranchConfig(branchUpgrades[branchName]);
     branch.branchName = branchName;
     branch.packageFiles = packageFiles;
