@@ -71,7 +71,7 @@ export async function checkOnboardingBranch(
           'Branch updated'
         );
         // TODO #7154
-        setOnboardingBranchCache(commit, baseBranchSha!, true);
+        setOnboardingBranchCache(commit, baseBranchSha!, false);
       }
     }
     // istanbul ignore if
@@ -103,7 +103,7 @@ export async function checkOnboardingBranch(
         'Branch created'
       );
       // TODO #7154
-      setOnboardingBranchCache(commit, baseBranchSha!, true);
+      setOnboardingBranchCache(commit, baseBranchSha!, false);
     }
   }
   if (!GlobalConfig.get('dryRun')) {
