@@ -329,7 +329,7 @@ hostRules: [
   {
     matchHost: 'https://pkgs.dev.azure.com/<org>/',
     hostType: 'nuget',
-    username: 'user',
+    username: 'user', // doesn't matter for azure
     password: '<PAT>',
   },
 ];
