@@ -4,7 +4,6 @@ import { branchExists } from '../../../util/git';
 import { Limit, incLimitedValue, setMaxLimit } from '../../global/limits';
 import { BranchConfig, BranchResult } from '../../types';
 import { processBranch } from '../update/branch';
-import { baseBranchesEqualsDefault } from './common';
 import { getBranchesRemaining, getPrsRemaining } from './limits';
 
 export type WriteUpdateResult = 'done' | 'automerged';
@@ -34,13 +33,10 @@ export async function writeUpdates(
   setMaxLimit(Limit.Branches, branchesRemaining);
 
   for (const branch of branches) {
-    const meta: Record<string, string> = { branch: branch.branchName };
-    if (
-      config.baseBranches?.length &&
-      branch.baseBranch &&
-      !baseBranchesEqualsDefault(config)
-    ) {
-      meta['baseBranch'] = branch.baseBranch;
+    const { baseBranch, branchName } = branch;
+    const meta: Record<string, string> = { branch: branchName };
+    if (config.baseBranches?.length && baseBranch) {
+      meta['baseBranch'] = baseBranch;
     }
     addMeta(meta);
     const branchExisted = branchExists(branch.branchName);

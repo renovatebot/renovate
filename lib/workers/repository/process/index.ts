@@ -12,7 +12,6 @@ import { branchExists } from '../../../util/git';
 import { addSplit } from '../../../util/split';
 import type { BranchConfig } from '../../types';
 import { readDashboardBody } from '../dependency-dashboard';
-import { baseBranchesEqualsDefault } from './common';
 import { ExtractResult, extract, lookup, update } from './extract-update';
 import type { WriteUpdateResult } from './write';
 
@@ -85,9 +84,7 @@ export async function extractDependencies(
     logger.debug({ baseBranches: config.baseBranches }, 'baseBranches');
     const extracted: Record<string, Record<string, PackageFile[]>> = {};
     for (const baseBranch of config.baseBranches) {
-      if (!baseBranchesEqualsDefault(config)) {
-        addMeta({ baseBranch });
-      }
+      addMeta({ baseBranch });
       if (branchExists(baseBranch)) {
         const baseBranchConfig = await getBaseBranchConfig(baseBranch, config);
         extracted[baseBranch] = await extract(baseBranchConfig);
@@ -98,9 +95,7 @@ export async function extractDependencies(
     addSplit('extract');
     for (const baseBranch of config.baseBranches) {
       if (branchExists(baseBranch)) {
-        if (!baseBranchesEqualsDefault(config)) {
-          addMeta({ baseBranch });
-        }
+        addMeta({ baseBranch });
         const baseBranchConfig = await getBaseBranchConfig(baseBranch, config);
         const packageFiles = extracted[baseBranch];
         const baseBranchRes = await lookup(baseBranchConfig, packageFiles);
