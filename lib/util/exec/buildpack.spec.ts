@@ -131,7 +131,6 @@ describe('util/exec/buildpack', () => {
       ${'^3.9.0'}     | ${'3.10.4'}
       ${'^3.9'}       | ${'3.10.4'}
       ${'3.9.*'}      | ${'3.9.1'}
-      ${'3.9.1'}      | ${'3.9.1'}
       ${'>3.8,<3.10'} | ${'3.9.1'}
       ${'==3.9.1'}    | ${'3.10.4'}
     `(
@@ -171,19 +170,18 @@ describe('util/exec/buildpack', () => {
           toolName: 'composer',
         },
       ];
-      expect(await generateInstallCommands(toolConstraints))
-        .toMatchInlineSnapshot(`
-        Array [
-          "install-tool composer 3.10.4",
-        ]
-      `);
+      expect(await generateInstallCommands(toolConstraints)).toEqual([
+        'install-tool composer 2.1.0',
+      ]);
     });
 
     it('hashes npm', async () => {
       const toolConstraints: ToolConstraint[] = [{ toolName: 'npm' }];
       const res = await generateInstallCommands(toolConstraints);
-      expect(res).toHaveLength(2);
-      expect(res[1]).toBe('hash -d npm 2>/dev/null || true');
+      expect(res).toEqual([
+        'install-tool npm 2.1.0',
+        'hash -d npm 2>/dev/null || true',
+      ]);
     });
   });
 });
