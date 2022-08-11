@@ -58,3 +58,8 @@ export interface RepoCache {
   save(): Promise<void>;
   getData(): RepoCacheData;
 }
+
+export interface CacheClient {
+  read(): Promise<string | undefined>;
+  write(data: RepoCacheRecord): Promise<void>;
+}

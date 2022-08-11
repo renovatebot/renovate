@@ -11,6 +11,7 @@ export type RenovateConfigStage =
   | 'pr';
 
 export type RepositoryCacheConfig = 'disabled' | 'enabled' | 'reset';
+export type RepositoryCacheType = 'local' | string;
 export type DryRunConfig = 'extract' | 'lookup' | 'full';
 export type RequiredConfig = 'required' | 'optional' | 'ignored';
 
@@ -64,6 +65,7 @@ export interface RenovateSharedConfig {
   recreateClosed?: boolean;
   repository?: string;
   repositoryCache?: RepositoryCacheConfig;
+  repositoryCacheType?: RepositoryCacheType;
   schedule?: string[];
   automergeSchedule?: string[];
   semanticCommits?: 'auto' | 'enabled' | 'disabled';
@@ -160,6 +162,7 @@ export type RenovateRepository =
       repository: string;
       secrets?: Record<string, string>;
     };
+
 export interface RegexManagerTemplates {
   depNameTemplate?: string;
   packageNameTemplate?: string;
@@ -171,6 +174,7 @@ export interface RegexManagerTemplates {
   extractVersionTemplate?: string;
   registryUrlTemplate?: string;
 }
+
 export interface RegExManager extends RegexManagerTemplates {
   fileMatch: string[];
   matchStrings: string[];
