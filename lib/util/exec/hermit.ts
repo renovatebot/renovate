@@ -12,7 +12,8 @@ export function isHermit(): boolean {
 }
 
 export async function findHermitCwd(cwd: string): Promise<string> {
-  const hermitFile = await findUpLocal('bin/hermit', cwd);
+  const relativeCwd = upath.relative(GlobalConfig.get('localDir') ?? '', cwd);
+  const hermitFile = await findUpLocal('bin/hermit', relativeCwd);
 
   if (hermitFile === null) {
     throw new Error(`hermit not found for ${cwd}`);

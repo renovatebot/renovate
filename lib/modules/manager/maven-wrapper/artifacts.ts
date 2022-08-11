@@ -80,7 +80,7 @@ export async function updateArtifacts({
         )
       )
     )
-      .filter(Boolean)
+      .filter(is.truthy)
       .map((result) => result as UpdateArtifactsResult);
     logger.debug(
       { files: updateArtifactsResult.map((r) => r.file?.path) },
