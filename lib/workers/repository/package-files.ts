@@ -11,7 +11,7 @@ export class PackageFiles {
   ): void {
     logger.debug(
       { baseBranch },
-      `PackageFiles.add() - Package file saved for branch`
+      `PackageFiles.add() - Package file saved for base branch`
     );
     this.data.set(baseBranch, packageFiles);
   }

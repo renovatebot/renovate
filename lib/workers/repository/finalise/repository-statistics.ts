@@ -36,7 +36,7 @@ export function runRenovateRepoStats(
   logger.debug({ stats: prStats }, `Renovate repository PR statistics`);
 }
 
-interface BranchMetadata {
+export interface BranchMetadata {
   branchName: string;
   branchSha: string | null;
   baseBranch: string | undefined;
@@ -45,9 +45,15 @@ interface BranchMetadata {
   isModified: boolean;
 }
 
-interface BaseBranchMetadata {
+export interface BaseBranchMetadata {
   branchName: string;
   sha: string;
+}
+
+export interface BranchSummary {
+  baseBranches: BaseBranchMetadata[];
+  branches: BranchMetadata[];
+  inactiveBranches: string[];
 }
 
 export function unwrap({
@@ -87,12 +93,11 @@ export function runBranchSummery(): void {
     }
   }
 
-  logger.debug(
-    {
-      baseBranches: baseMetadata,
-      branches: branchMetadata,
-      inactiveBranches,
-    },
-    'Branch summary'
-  );
+  const res: BranchSummary = {
+    baseBranches: baseMetadata,
+    branches: branchMetadata,
+    inactiveBranches,
+  };
+
+  logger.debug(res, 'Branch summary');
 }
