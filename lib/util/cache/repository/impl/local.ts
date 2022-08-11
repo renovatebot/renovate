@@ -23,7 +23,8 @@ export class LocalRepoCache implements CacheClient {
       const rawCache = await readCacheFile(cacheFileName, 'utf8');
       data = JSON.parse(rawCache);
     } catch (err) {
-      logger.debug({ cacheFileName }, 'Repository cache not found');
+      logger.debug({ cacheFileName }, 'Repository local cache not found');
+      throw err;
     }
     return data;
   }

@@ -6,7 +6,7 @@ import { LocalRepoCache } from './local';
 type CacheType = 'local' | 'redis' | 'S3';
 
 export class CacheClientFactory {
-  private static client: CacheClient;
+  private static client: CacheClient | null;
 
   static get(repository: string, type: RepositoryCacheType): CacheClient {
     if (this.client) {
@@ -27,13 +27,16 @@ export class CacheClientFactory {
         this.client = new LocalRepoCache(platform!, repository);
         break;
       case 'redis':
-        break;
       case 'S3':
-        break;
       default:
         break;
     }
 
-    return this.client;
+    return this.client!;
+  }
+
+  // TODO: remove once redis and s3 are implemented
+  static reset(): void {
+    this.client = null;
   }
 }
