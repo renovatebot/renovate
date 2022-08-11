@@ -31,16 +31,16 @@ export async function checkOnboardingBranch(
   let onboardingBranch = config.onboardingBranch;
   let repoIsOnboarded: boolean;
   const onboardingBranchSha = getBranchCommit(onboardingBranch!);
-  const baseBranchSha = getBranchCommit(config.baseBranch!);
+  const baseBranchSha = getBranchCommit(config.defaultBranch!);
   // TODO #7154
   const cachedOnboardingBranch = getCachedOnboardingBranch(
     onboardingBranchSha!,
     baseBranchSha!,
-    config.baseBranch!
+    config.defaultBranch!
   );
   if (cachedOnboardingBranch === null) {
     repoIsOnboarded = await isOnboarded(config);
-  } else {
+  } /* istanbul ignore next*/ else {
     logger.debug('Using cached result for isOnboarded');
     repoIsOnboarded = cachedOnboardingBranch.isOnboarded;
   }
