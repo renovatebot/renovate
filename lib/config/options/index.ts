@@ -235,6 +235,7 @@ const options: RenovateOptions[] = [
       'Set the type of renovate repository cache if repositoryCache is not disabled.',
     globalOnly: true,
     type: 'string',
+    allowedValues: ['local'],
     stage: 'repository',
     default: 'local',
     experimental: true,

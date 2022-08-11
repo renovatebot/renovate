@@ -12,15 +12,15 @@ export class CacheClientFactory {
       return this.client;
     }
 
-    const platform = GlobalConfig.get('platform');
+    const platform = GlobalConfig.get('platform')!;
 
     switch (cacheType) {
       case 'local':
-        this.client = new LocalRepoCache(platform!, repository);
+        this.client = new LocalRepoCache(platform, repository);
         break;
       // istanbul ignore next: untestable
       default:
-        this.client = new LocalRepoCache(platform!, repository);
+        this.client = new LocalRepoCache(platform, repository);
         logger.warn(
           { cacheType },
           `Repository cache type not supported using type "local" instead`
