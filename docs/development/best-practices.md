@@ -222,12 +222,12 @@ Use `UTC` to be time zone independent.
 
 ## Fixtures
 
-- Use `Fixtures` class for loading fixtures
+- Use `Fixture` class for loading fixtures
 
 ```ts
-Fixtures.get('./file.json'); // for loading string data
-Fixtures.getJson('./file.json'); // for loading and parsing objects
-Fixtures.getBinary('./file.json'); // for retrieving a buffer
+Fixture.get('./file.json'); // for loading string data
+Fixture.getJson('./file.json'); // for loading and parsing objects
+Fixture.getBinary('./file.json'); // for retrieving a buffer
 ```
 
 ## Working with vanilla JS files (renovate/tools only)

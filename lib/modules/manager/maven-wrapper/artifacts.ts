@@ -38,7 +38,7 @@ export async function updateArtifacts({
   newPackageFileContent,
   updatedDeps,
   config,
-}: UpdateArtifact): Promise<(UpdateArtifactsResult | null)[] | null> {
+}: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
   try {
     logger.debug({ updatedDeps }, 'maven-wrapper.updateArtifacts()');
 
