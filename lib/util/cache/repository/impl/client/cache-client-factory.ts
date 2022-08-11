@@ -21,7 +21,8 @@ export class CacheClientFactory {
       // istanbul ignore next: untestable
       default:
         this.client = new LocalRepoCache(platform!, repository);
-        logger.info(
+        logger.warn(
+          { cacheType },
           `Repository cache type not supported using type "local" instead`
         );
         break;
