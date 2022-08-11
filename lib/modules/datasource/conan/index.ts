@@ -70,12 +70,13 @@ export class ConanDatasource extends Datasource {
     }
     const url = ensureTrailingSlash(registryUrl);
     const depName = packageName.split('/')[0];
-    const userAndChannel = '/' + packageName.split('@')[1];
-    const packageRoute = `${depName}/${newValue}${userAndChannel}`;
+    const userAndChannel = packageName.split('@')[1];
     const revisionLookUp = joinUrlParts(
       url,
       'v2/conans/',
-      packageRoute,
+      depName,
+      newValue,
+      userAndChannel,
       '/revisions'
     );
     const revisionRep = await this.http.getJson<ConanRevisionsJSON>(
