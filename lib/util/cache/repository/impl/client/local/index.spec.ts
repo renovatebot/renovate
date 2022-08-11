@@ -3,7 +3,6 @@ import zlib from 'zlib';
 import hasha from 'hasha';
 import { fs } from '../../../../../../../test/util';
 import { GlobalConfig } from '../../../../../../config/global';
-import { logger } from '../../../../../../logger';
 import { CACHE_REVISION } from '../../../common';
 import type { RepoCacheData, RepoCacheRecord } from '../../../types';
 import { RepositoryCacheImpl } from '../../repository-cache-impl';
@@ -25,7 +24,7 @@ async function createCacheRecord(
   return { revision, repository, payload, hash };
 }
 
-describe('util/cache/repository/impl/client/local/local', () => {
+describe('util/cache/repository/impl/client/local/index', () => {
   beforeEach(() => {
     GlobalConfig.set({ cacheDir: '/tmp/cache', platform: 'github' });
   });
@@ -133,6 +132,7 @@ describe('util/cache/repository/impl/client/local/local', () => {
   it('saves modified cache data to file', async () => {
     const oldCacheRecord = createCacheRecord({ semanticCommits: 'enabled' });
     fs.readCacheFile.mockResolvedValueOnce(JSON.stringify(oldCacheRecord));
+    CacheClientFactory.reset(); // coverage
     const localRepoCache = new RepositoryCacheImpl('some/repo');
     await localRepoCache.load();
     const data = localRepoCache.getData();
@@ -145,12 +145,6 @@ describe('util/cache/repository/impl/client/local/local', () => {
     expect(fs.outputCacheFile).toHaveBeenCalledWith(
       '/tmp/cache/renovate/repository/github/some/repo.json',
       JSON.stringify(newCacheRecord)
-    );
-    // TODO: remove once implemented, this test file should test local client only
-    CacheClientFactory.reset();
-    new RepositoryCacheImpl('some/repo', 'redis'); // coverage
-    expect(logger.info).toHaveBeenCalledWith(
-      `Repository cache type: redis not supported using type "local" instead`
     );
   });
 });

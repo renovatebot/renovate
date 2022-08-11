@@ -11,7 +11,7 @@ export type RenovateConfigStage =
   | 'pr';
 
 export type RepositoryCacheConfig = 'disabled' | 'enabled' | 'reset';
-export type RepositoryCacheType = 'local' | 'redis' | 's3';
+export type RepositoryCacheType = 'local'; // add "s3" and "redis" once implemented
 export type DryRunConfig = 'extract' | 'lookup' | 'full';
 export type RequiredConfig = 'required' | 'optional' | 'ignored';
 
@@ -162,7 +162,6 @@ export type RenovateRepository =
       repository: string;
       secrets?: Record<string, string>;
     };
-
 export interface RegexManagerTemplates {
   depNameTemplate?: string;
   packageNameTemplate?: string;
@@ -174,7 +173,6 @@ export interface RegexManagerTemplates {
   extractVersionTemplate?: string;
   registryUrlTemplate?: string;
 }
-
 export interface RegExManager extends RegexManagerTemplates {
   fileMatch: string[];
   matchStrings: string[];

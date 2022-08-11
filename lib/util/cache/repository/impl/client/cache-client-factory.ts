@@ -2,7 +2,7 @@ import { GlobalConfig } from '../../../../../config/global';
 import type { RepositoryCacheType } from '../../../../../config/types';
 import { logger } from '../../../../../logger';
 import type { CacheClient } from '../../types';
-import { LocalRepoCache } from './local/local';
+import { LocalRepoCache } from './local';
 
 export class CacheClientFactory {
   private static client: CacheClient | null;
@@ -18,12 +18,11 @@ export class CacheClientFactory {
       case 'local':
         this.client = new LocalRepoCache(platform!, repository);
         break;
-      case 'redis':
-      case 's3':
+      // istanbul ignore next: untestable
       default:
         this.client = new LocalRepoCache(platform!, repository);
         logger.info(
-          `Repository cache type: ${cacheType} not supported using type "local" instead`
+          `Repository cache type not supported using type "local" instead`
         );
         break;
     }
@@ -31,7 +30,6 @@ export class CacheClientFactory {
     return this.client;
   }
 
-  // TODO: remove once redis and s3 are implemented
   static reset(): void {
     this.client = null;
   }
