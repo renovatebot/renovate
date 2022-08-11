@@ -26,6 +26,7 @@ import type {
 } from '../types';
 
 const githubApiUrls = new Set([
+  'github.com',
   'api.github.com',
   'https://api.github.com',
   'https://api.github.com/',
