@@ -4,7 +4,7 @@ export interface ConanJSON {
 
 export interface ConanRevisionJSON {
   revision: string;
-  time: string
+  time: string;
 }
 
 export interface ConanRevisionsJSON {
@@ -13,4 +13,9 @@ export interface ConanRevisionsJSON {
 
 export interface ConanYAML {
   versions?: Record<string, unknown>;
+}
+
+export interface ConanPackage {
+  depName: string;
+  userAndChannel: string;
 }

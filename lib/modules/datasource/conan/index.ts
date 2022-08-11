@@ -11,7 +11,12 @@ import type {
   Release,
   ReleaseResult,
 } from '../types';
-import { conanDatasourceRegex, datasource, defaultRegistryUrl } from './common';
+import {
+  conanDatasourceRegex,
+  datasource,
+  defaultRegistryUrl,
+  getConanPackage,
+} from './common';
 import type { ConanJSON, ConanRevisionsJSON, ConanYAML } from './types';
 
 export class ConanDatasource extends Datasource {
@@ -69,14 +74,13 @@ export class ConanDatasource extends Datasource {
       return null;
     }
     const url = ensureTrailingSlash(registryUrl);
-    const depName = packageName.split('/')[0];
-    const userAndChannel = packageName.split('@')[1];
+    const conanPackage = getConanPackage(packageName);
     const revisionLookUp = joinUrlParts(
       url,
       'v2/conans/',
-      depName,
+      conanPackage.depName,
       newValue,
-      userAndChannel,
+      conanPackage.userAndChannel,
       '/revisions'
     );
     const revisionRep = await this.http.getJson<ConanRevisionsJSON>(
@@ -97,8 +101,9 @@ export class ConanDatasource extends Datasource {
     registryUrl,
     packageName,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    const depName = packageName.split('/')[0];
-    const userAndChannel = '@' + packageName.split('@')[1];
+    const conanPackage = getConanPackage(packageName);
+    const depName = conanPackage.depName;
+    const userAndChannel = '@' + conanPackage.userAndChannel;
     if (
       is.string(registryUrl) &&
       ensureTrailingSlash(registryUrl) === defaultRegistryUrl
