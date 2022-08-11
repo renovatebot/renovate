@@ -68,6 +68,7 @@ describe('modules/manager/gomod/artifacts', () => {
     env.getChildProcessEnv.mockReturnValue({ ...envMock.basic, ...goEnv });
     GlobalConfig.set(adminConfig);
     docker.resetPrefetchedImages();
+    hostRules.getAll.mockReturnValue([]);
   });
 
   afterEach(() => {
@@ -237,6 +238,11 @@ describe('modules/manager/gomod/artifacts', () => {
     });
     hostRules.getAll.mockReturnValueOnce([
       {
+        token: 'some-token',
+        hostType: PlatformId.Github,
+        matchHost: 'api.github.com',
+      },
+      {
         token: 'some-enterprise-token',
         matchHost: 'github.enterprise.com',
         hostType: PlatformId.Github,
@@ -258,34 +264,34 @@ describe('modules/manager/gomod/artifacts', () => {
         config,
       })
     ).not.toBeNull();
-    expect(execSnapshots).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({
-          options: expect.objectContaining({
-            env: expect.objectContaining({
-              GIT_CONFIG_COUNT: '6',
-              GIT_CONFIG_KEY_0:
-                'url.https://ssh:some-token@github.com/.insteadOf',
-              GIT_CONFIG_KEY_1:
-                'url.https://git:some-token@github.com/.insteadOf',
-              GIT_CONFIG_KEY_2: 'url.https://some-token@github.com/.insteadOf',
-              GIT_CONFIG_KEY_3:
-                'url.https://ssh:some-enterprise-token@github.enterprise.com/.insteadOf',
-              GIT_CONFIG_KEY_4:
-                'url.https://git:some-enterprise-token@github.enterprise.com/.insteadOf',
-              GIT_CONFIG_KEY_5:
-                'url.https://some-enterprise-token@github.enterprise.com/.insteadOf',
-              GIT_CONFIG_VALUE_0: 'ssh://git@github.com/',
-              GIT_CONFIG_VALUE_1: 'git@github.com:',
-              GIT_CONFIG_VALUE_2: 'https://github.com/',
-              GIT_CONFIG_VALUE_3: 'ssh://git@github.enterprise.com/',
-              GIT_CONFIG_VALUE_4: 'git@github.enterprise.com:',
-              GIT_CONFIG_VALUE_5: 'https://github.enterprise.com/',
-            }),
-          }),
-        }),
-      ])
-    );
+    expect(execSnapshots).toMatchObject([
+      { cmd: 'docker pull renovate/go:latest' },
+      { cmd: 'docker ps --filter name=renovate_go -aq' },
+      {
+        options: {
+          env: {
+            GIT_CONFIG_COUNT: '6',
+            GIT_CONFIG_KEY_0:
+              'url.https://ssh:some-token@github.com/.insteadOf',
+            GIT_CONFIG_KEY_1:
+              'url.https://git:some-token@github.com/.insteadOf',
+            GIT_CONFIG_KEY_2: 'url.https://some-token@github.com/.insteadOf',
+            GIT_CONFIG_KEY_3:
+              'url.https://ssh:some-enterprise-token@github.enterprise.com/.insteadOf',
+            GIT_CONFIG_KEY_4:
+              'url.https://git:some-enterprise-token@github.enterprise.com/.insteadOf',
+            GIT_CONFIG_KEY_5:
+              'url.https://some-enterprise-token@github.enterprise.com/.insteadOf',
+            GIT_CONFIG_VALUE_0: 'ssh://git@github.com/',
+            GIT_CONFIG_VALUE_1: 'git@github.com:',
+            GIT_CONFIG_VALUE_2: 'https://github.com/',
+            GIT_CONFIG_VALUE_3: 'ssh://git@github.enterprise.com/',
+            GIT_CONFIG_VALUE_4: 'git@github.enterprise.com:',
+            GIT_CONFIG_VALUE_5: 'https://github.enterprise.com/',
+          },
+        },
+      },
+    ]);
   });
 
   it('supports docker mode with single credential', async () => {
@@ -491,42 +497,33 @@ describe('modules/manager/gomod/artifacts', () => {
         expect.objectContaining({
           options: expect.objectContaining({
             env: expect.objectContaining({
-              GIT_CONFIG_COUNT: '12',
+              GIT_CONFIG_COUNT: '9',
               GIT_CONFIG_KEY_0:
                 'url.https://ssh:some-token@github.com/.insteadOf',
               GIT_CONFIG_KEY_1:
                 'url.https://git:some-token@github.com/.insteadOf',
               GIT_CONFIG_KEY_2: 'url.https://some-token@github.com/.insteadOf',
               GIT_CONFIG_KEY_3:
-                'url.https://ssh:some-token@api.github.com/.insteadOf',
-              GIT_CONFIG_KEY_4:
-                'url.https://git:some-token@api.github.com/.insteadOf',
-              GIT_CONFIG_KEY_5:
-                'url.https://some-token@api.github.com/.insteadOf',
-              GIT_CONFIG_KEY_6:
                 'url.https://ssh:some-enterprise-token@github.enterprise.com/.insteadOf',
-              GIT_CONFIG_KEY_7:
+              GIT_CONFIG_KEY_4:
                 'url.https://git:some-enterprise-token@github.enterprise.com/.insteadOf',
-              GIT_CONFIG_KEY_8:
+              GIT_CONFIG_KEY_5:
                 'url.https://some-enterprise-token@github.enterprise.com/.insteadOf',
-              GIT_CONFIG_KEY_9:
+              GIT_CONFIG_KEY_6:
                 'url.https://gitlab-ci-token:some-gitlab-token@gitlab.enterprise.com/.insteadOf',
-              GIT_CONFIG_KEY_10:
+              GIT_CONFIG_KEY_7:
                 'url.https://gitlab-ci-token:some-gitlab-token@gitlab.enterprise.com/.insteadOf',
-              GIT_CONFIG_KEY_11:
+              GIT_CONFIG_KEY_8:
                 'url.https://gitlab-ci-token:some-gitlab-token@gitlab.enterprise.com/.insteadOf',
               GIT_CONFIG_VALUE_0: 'ssh://git@github.com/',
               GIT_CONFIG_VALUE_1: 'git@github.com:',
               GIT_CONFIG_VALUE_2: 'https://github.com/',
-              GIT_CONFIG_VALUE_3: 'ssh://git@api.github.com/',
-              GIT_CONFIG_VALUE_4: 'git@api.github.com:',
-              GIT_CONFIG_VALUE_5: 'https://api.github.com/',
-              GIT_CONFIG_VALUE_6: 'ssh://git@github.enterprise.com/',
-              GIT_CONFIG_VALUE_7: 'git@github.enterprise.com:',
-              GIT_CONFIG_VALUE_8: 'https://github.enterprise.com/',
-              GIT_CONFIG_VALUE_9: 'ssh://git@gitlab.enterprise.com/',
-              GIT_CONFIG_VALUE_10: 'git@gitlab.enterprise.com:',
-              GIT_CONFIG_VALUE_11: 'https://gitlab.enterprise.com/',
+              GIT_CONFIG_VALUE_3: 'ssh://git@github.enterprise.com/',
+              GIT_CONFIG_VALUE_4: 'git@github.enterprise.com:',
+              GIT_CONFIG_VALUE_5: 'https://github.enterprise.com/',
+              GIT_CONFIG_VALUE_6: 'ssh://git@gitlab.enterprise.com/',
+              GIT_CONFIG_VALUE_7: 'git@gitlab.enterprise.com:',
+              GIT_CONFIG_VALUE_8: 'https://gitlab.enterprise.com/',
             }),
           }),
         }),
