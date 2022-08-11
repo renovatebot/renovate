@@ -195,7 +195,7 @@ describe('util/git/auth', () => {
       expect(
         getGitAuthenticatedEnvironmentVariables('https://gitlab.com/', {
           token: 'token1234',
-          matchHost: 'github.com',
+          matchHost: 'gitlab.com',
         })
       ).toStrictEqual({
         GIT_CONFIG_COUNT: '3',
