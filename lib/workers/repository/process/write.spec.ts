@@ -7,9 +7,9 @@ import {
   partial,
 } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
+import { addMeta } from '../../../logger';
 import * as _repoCache from '../../../util/cache/repository';
 import type { BranchCache } from '../../../util/cache/repository/types';
-import { addMeta } from '../../../logger';
 import { Limit, isLimitReached } from '../../global/limits';
 import { BranchConfig, BranchResult, BranchUpgradeConfig } from '../../types';
 import * as _branchWorker from '../update/branch';
@@ -78,8 +78,8 @@ describe('workers/repository/process/write', () => {
     it('increments branch counter', async () => {
       const branchName = 'branchName';
       const branches: BranchConfig[] = [
-        partial<BranchConfig>({ baseBranch: 'main', branchName, upgrades: []}),
-        partial<BranchConfig>({ baseBranch: 'dev', branchName, upgrades: []}),
+        partial<BranchConfig>({ baseBranch: 'main', branchName, upgrades: [] }),
+        partial<BranchConfig>({ baseBranch: 'dev', branchName, upgrades: [] }),
       ] as never;
       repoCache.getCache.mockReturnValueOnce({});
       branchWorker.processBranch.mockResolvedValueOnce({
