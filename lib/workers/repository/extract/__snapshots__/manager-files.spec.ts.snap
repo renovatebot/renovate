@@ -1,11 +1,11 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`workers/repository/extract/manager-files getManagerPackageFiles() returns files with extractAllPackageFiles 1`] = `
-Array [
-  Object {
-    "constraints": Object {},
-    "deps": Array [
-      Object {
+[
+  {
+    "constraints": {},
+    "deps": [
+      {
         "currentValue": "2.0.0",
         "datasource": "npm",
         "depIndex": 0,
@@ -16,7 +16,7 @@ Array [
     ],
     "lernaClient": undefined,
     "lernaPackages": undefined,
-    "managerData": Object {
+    "managerData": {
       "hasPackageManager": false,
       "lernaJsonFile": undefined,
       "yarnZeroInstall": false,

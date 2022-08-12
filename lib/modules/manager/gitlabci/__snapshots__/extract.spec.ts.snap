@@ -1,10 +1,10 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`modules/manager/gitlabci/extract extractAllPackageFiles() extracts multiple image lines 1`] = `
-Array [
-  Object {
-    "deps": Array [
-      Object {
+[
+  {
+    "deps": [
+      {
         "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
         "currentDigest": undefined,
         "currentValue": "2.5.0",
@@ -13,7 +13,7 @@ Array [
         "depType": "image",
         "replaceString": "ruby:2.5.0",
       },
-      Object {
+      {
         "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
         "currentDigest": undefined,
         "currentValue": "latest",
@@ -22,7 +22,7 @@ Array [
         "depType": "image",
         "replaceString": "hadolint/hadolint:latest",
       },
-      Object {
+      {
         "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
         "currentDigest": undefined,
         "currentValue": "latest",
@@ -31,7 +31,7 @@ Array [
         "depType": "image",
         "replaceString": "docker:latest",
       },
-      Object {
+      {
         "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
         "currentDigest": undefined,
         "currentValue": "dind",
@@ -40,7 +40,7 @@ Array [
         "depType": "service-image",
         "replaceString": "docker:dind",
       },
-      Object {
+      {
         "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
         "currentDigest": undefined,
         "currentValue": "latest",
@@ -49,7 +49,7 @@ Array [
         "depType": "image",
         "replaceString": "docker:latest",
       },
-      Object {
+      {
         "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
         "currentDigest": undefined,
         "currentValue": "dind",
@@ -58,7 +58,7 @@ Array [
         "depType": "service-image",
         "replaceString": "docker:dind",
       },
-      Object {
+      {
         "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
         "currentDigest": undefined,
         "currentValue": "1.15",
@@ -67,7 +67,7 @@ Array [
         "depType": "image-name",
         "replaceString": "image-name-test:1.15",
       },
-      Object {
+      {
         "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
         "currentDigest": undefined,
         "currentValue": "1.15",
@@ -83,10 +83,10 @@ Array [
 `;
 
 exports[`modules/manager/gitlabci/extract extractAllPackageFiles() extracts multiple image lines with comments 1`] = `
-Array [
-  Object {
-    "deps": Array [
-      Object {
+[
+  {
+    "deps": [
+      {
         "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
         "currentDigest": undefined,
         "currentValue": "19.70.8-slim",
@@ -95,7 +95,7 @@ Array [
         "depType": "image-name",
         "replaceString": "renovate/renovate:19.70.8-slim",
       },
-      Object {
+      {
         "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
         "currentDigest": undefined,
         "currentValue": "10.4.11",
@@ -104,7 +104,7 @@ Array [
         "depType": "service-image",
         "replaceString": "mariadb:10.4.11",
       },
-      Object {
+      {
         "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
         "currentDigest": undefined,
         "currentValue": "1.0.0",
@@ -120,10 +120,10 @@ Array [
 `;
 
 exports[`modules/manager/gitlabci/extract extractAllPackageFiles() extracts multiple included image lines 1`] = `
-Array [
-  Object {
-    "deps": Array [
-      Object {
+[
+  {
+    "deps": [
+      {
         "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
         "currentDigest": undefined,
         "currentValue": "19.70.8-slim",
@@ -132,7 +132,7 @@ Array [
         "depType": "image-name",
         "replaceString": "renovate/renovate:19.70.8-slim",
       },
-      Object {
+      {
         "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
         "currentDigest": undefined,
         "currentValue": "10.4.11",
@@ -141,7 +141,7 @@ Array [
         "depType": "service-image",
         "replaceString": "mariadb:10.4.11",
       },
-      Object {
+      {
         "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
         "currentDigest": undefined,
         "currentValue": "1.0.0",
@@ -153,9 +153,9 @@ Array [
     ],
     "packageFile": "lib/modules/manager/gitlabci/__fixtures__/gitlab-ci.3.yaml",
   },
-  Object {
-    "deps": Array [
-      Object {
+  {
+    "deps": [
+      {
         "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
         "currentDigest": undefined,
         "currentValue": "12",
@@ -167,9 +167,9 @@ Array [
     ],
     "packageFile": "lib/modules/manager/gitlabci/__fixtures__/include.1.yml",
   },
-  Object {
-    "deps": Array [
-      Object {
+  {
+    "deps": [
+      {
         "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
         "currentDigest": undefined,
         "currentValue": "3.11",
@@ -185,10 +185,10 @@ Array [
 `;
 
 exports[`modules/manager/gitlabci/extract extractAllPackageFiles() extracts multiple named services 1`] = `
-Array [
-  Object {
-    "deps": Array [
-      Object {
+[
+  {
+    "deps": [
+      {
         "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
         "currentDigest": undefined,
         "currentValue": "19.70.8-slim",
@@ -197,7 +197,7 @@ Array [
         "depType": "image-name",
         "replaceString": "renovate/renovate:19.70.8-slim",
       },
-      Object {
+      {
         "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
         "currentDigest": undefined,
         "currentValue": "1.0.0",
@@ -206,7 +206,7 @@ Array [
         "depType": "service-image",
         "replaceString": "other/image1:1.0.0",
       },
-      Object {
+      {
         "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
         "currentDigest": undefined,
         "currentValue": "1.0.0",
@@ -215,7 +215,7 @@ Array [
         "depType": "service-image",
         "replaceString": "other/image2:1.0.0",
       },
-      Object {
+      {
         "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
         "currentDigest": "sha256:a5a65569456f221ee1f8a0b3b4e2d440eb5830772d9440c9b30b1dbfd454c778",
         "currentValue": "12.3-1",
@@ -224,7 +224,7 @@ Array [
         "depType": "service-image",
         "replaceString": "mooseagency/postgresql:12.3-1@sha256:a5a65569456f221ee1f8a0b3b4e2d440eb5830772d9440c9b30b1dbfd454c778",
       },
-      Object {
+      {
         "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
         "currentDigest": undefined,
         "currentValue": "10.4.11",
@@ -233,7 +233,7 @@ Array [
         "depType": "service-image",
         "replaceString": "mariadb:10.4.11",
       },
-      Object {
+      {
         "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
         "currentDigest": undefined,
         "currentValue": "11.7",
@@ -242,7 +242,7 @@ Array [
         "depType": "service-image",
         "replaceString": "postgres:11.7",
       },
-      Object {
+      {
         "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
         "currentDigest": undefined,
         "currentValue": "latest",
@@ -251,7 +251,7 @@ Array [
         "depType": "service-image",
         "replaceString": "redis:latest",
       },
-      Object {
+      {
         "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
         "currentDigest": undefined,
         "currentValue": "latest",
@@ -260,7 +260,7 @@ Array [
         "depType": "service-image",
         "replaceString": "registry.example.com/myimage:latest",
       },
-      Object {
+      {
         "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
         "currentDigest": "sha256:0ecb2ad60",
         "currentValue": undefined,
@@ -269,7 +269,7 @@ Array [
         "depType": "service-image",
         "replaceString": "myimage@sha256:0ecb2ad60",
       },
-      Object {
+      {
         "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
         "currentDigest": undefined,
         "currentValue": "7-jre8",
@@ -285,10 +285,10 @@ Array [
 `;
 
 exports[`modules/manager/gitlabci/extract extractAllPackageFiles() extracts named services 1`] = `
-Array [
-  Object {
-    "deps": Array [
-      Object {
+[
+  {
+    "deps": [
+      {
         "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
         "currentDigest": undefined,
         "currentValue": "19.70.8-slim",
@@ -297,7 +297,7 @@ Array [
         "depType": "image-name",
         "replaceString": "renovate/renovate:19.70.8-slim",
       },
-      Object {
+      {
         "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
         "currentDigest": undefined,
         "currentValue": "10.4.11",
@@ -306,7 +306,7 @@ Array [
         "depType": "service-image",
         "replaceString": "mariadb:10.4.11",
       },
-      Object {
+      {
         "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
         "currentDigest": undefined,
         "currentValue": "1.0.0",
