@@ -679,8 +679,7 @@ describe('workers/repository/updates/generate', () => {
         } as BranchUpgradeConfig,
       ];
       const res = generateBranchConfig(branch);
-      expect(res.commitMessage).toMatchSnapshot();
-      expect(res.commitMessage).toContain('\n');
+      expect(res.commitMessage).toBe('Update dependency some-dep to v1.2.0');
     });
 
     it('supports manual prTitle', () => {
