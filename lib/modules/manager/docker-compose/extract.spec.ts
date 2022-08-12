@@ -5,6 +5,9 @@ const yamlFile1 = Fixtures.get('docker-compose.1.yml');
 const yamlFile3 = Fixtures.get('docker-compose.3.yml');
 const yamlFile3NoVersion = Fixtures.get('docker-compose.3-no-version.yml');
 const yamlFile3DefaultValue = Fixtures.get('docker-compose.3-default-val.yml');
+const yamlFile3RegistryAlias = Fixtures.get(
+  'docker-compose.3-registry-alias.yml'
+);
 
 describe('modules/manager/docker-compose/extract', () => {
   describe('extractPackageFile()', () => {
@@ -53,6 +56,70 @@ describe('modules/manager/docker-compose/extract', () => {
         ]
       `);
       expect(res?.deps).toHaveLength(1);
+    });
+
+    it('extracts image and replaces registry', () => {
+      const res = extractPackageFile(yamlFile3RegistryAlias, undefined, {
+        registryAliases: {
+          'quay.io': 'my-quay-mirror.registry.com',
+        },
+      });
+      expect(res).toEqual({
+        deps: [
+          {
+            autoReplaceStringTemplate:
+              'quay.io/nginx:{{#if newValue}}{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+            currentDigest: undefined,
+            currentValue: '0.0.1',
+            datasource: 'docker',
+            depName: 'my-quay-mirror.registry.com/nginx',
+            replaceString: 'quay.io/nginx:0.0.1',
+          },
+        ],
+      });
+    });
+
+    it('extracts image but no replacement', () => {
+      const res = extractPackageFile(yamlFile3RegistryAlias, undefined, {
+        registryAliases: {
+          'index.docker.io': 'my-docker-mirror.registry.com',
+        },
+      });
+      expect(res).toEqual({
+        deps: [
+          {
+            autoReplaceStringTemplate:
+              '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+            currentDigest: undefined,
+            currentValue: '0.0.1',
+            datasource: 'docker',
+            depName: 'quay.io/nginx',
+            replaceString: 'quay.io/nginx:0.0.1',
+          },
+        ],
+      });
+    });
+
+    it('extracts image and no double replacement', () => {
+      const res = extractPackageFile(yamlFile3RegistryAlias, undefined, {
+        registryAliases: {
+          'quay.io': 'my-quay-mirror.registry.com',
+          'my-quay-mirror.registry.com': 'quay.io',
+        },
+      });
+      expect(res).toEqual({
+        deps: [
+          {
+            autoReplaceStringTemplate:
+              'quay.io/nginx:{{#if newValue}}{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+            currentDigest: undefined,
+            currentValue: '0.0.1',
+            datasource: 'docker',
+            depName: 'my-quay-mirror.registry.com/nginx',
+            replaceString: 'quay.io/nginx:0.0.1',
+          },
+        ],
+      });
     });
   });
 });
