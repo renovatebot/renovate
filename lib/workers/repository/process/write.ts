@@ -43,14 +43,15 @@ export async function writeUpdates(
     addMeta({ branch: branch.branchName });
     const branchExisted = branchExists(branch.branchName);
     let branchCache = {} as BranchCache;
-    if (cachedBranches.length) {
+    if (branchExisted) {
       branchCache =
         cachedBranches?.find((br) => br.branchName === branch.branchName) ??
         ({} as BranchCache);
-    }
 
-    if (branchExisted && Object.keys(branchCache).length === 0) {
-      if (config.repositoryCache === 'enabled') {
+      if (
+        config.repositoryCache === 'enabled' &&
+        Object.keys(branchCache).length === 0
+      ) {
         logger.debug(`No branch cache found for ${branch.branchName}`);
       }
     }
