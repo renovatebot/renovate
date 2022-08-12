@@ -5,7 +5,7 @@ import type { StatusResult } from 'simple-git';
 import { fs, git, partial, env } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
-import { updateArtifacts } from './artifacts';
+import { updateArtifacts } from '.';
 
 jest.mock('../../../util/fs');
 jest.mock('../../../util/git');
