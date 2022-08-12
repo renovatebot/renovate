@@ -13,3 +13,7 @@ export interface RecursionParameter {
   index: number;
   combinedGroups: Record<string, string>;
 }
+
+export interface RegexManagerConfig extends CustomExtractConfig {
+  matchStrings: string[];
+}

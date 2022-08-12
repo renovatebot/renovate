@@ -134,6 +134,7 @@ describe('modules/manager/pip_requirements/artifacts', () => {
   it('supports docker mode', async () => {
     GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
     fs.readLocalFile.mockResolvedValueOnce('new content');
+    fs.ensureCacheDir.mockResolvedValueOnce('/tmp/cache');
     const execSnapshots = mockExecAll();
 
     expect(
@@ -161,6 +162,7 @@ describe('modules/manager/pip_requirements/artifacts', () => {
           'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
           '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
           '-v "/tmp/renovate/cache":"/tmp/renovate/cache" ' +
+          '-e PIP_CACHE_DIR ' +
           '-e BUILDPACK_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
           'renovate/sidecar ' +

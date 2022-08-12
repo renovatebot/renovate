@@ -24,6 +24,7 @@ import * as _participants from './participants';
 import { ensurePr } from '.';
 
 jest.mock('../../../../util/git');
+jest.mock('../../changelog');
 
 jest.mock('../../../global/limits');
 const limits = mocked(_limits);

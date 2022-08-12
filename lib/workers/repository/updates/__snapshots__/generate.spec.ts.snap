@@ -1,7 +1,5 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`workers/repository/updates/generate generateBranchConfig() adds commit message body 1`] = `"Update dependency some-dep to v1.2.0\\n\\n[skip-ci]"`;
-
 exports[`workers/repository/updates/generate generateBranchConfig() handles @types specially (reversed) 1`] = `
 Object {
   "addLabels": Array [],
@@ -156,6 +154,7 @@ Object {
       "newVersion": "0.5.8",
       "prTitle": "some-title",
       "prettyDepType": "dependency",
+      "prettyNewVersion": "v0.5.8",
     },
   ],
 }
@@ -221,6 +220,7 @@ Object {
   "prBodyColumns": Array [],
   "prTitle": "some-title",
   "prettyDepType": "dependency",
+  "prettyNewVersion": "v1.0.1",
   "releaseTimestamp": undefined,
   "reuseLockFiles": true,
   "upgrades": Array [
@@ -240,6 +240,7 @@ Object {
       "newVersion": "1.0.1",
       "prTitle": "some-title",
       "prettyDepType": "dependency",
+      "prettyNewVersion": "v1.0.1",
     },
   ],
 }
