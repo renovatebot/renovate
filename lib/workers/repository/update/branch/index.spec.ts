@@ -3,6 +3,7 @@ import {
   fs,
   git,
   mocked,
+  mockedFunction,
   partial,
   platform,
 } from '../../../../../test/util';
@@ -24,6 +25,7 @@ import * as _sanitize from '../../../../util/sanitize';
 import * as _limits from '../../../global/limits';
 import type { BranchConfig, BranchUpgradeConfig } from '../../../types';
 import { BranchResult } from '../../../types';
+import { needsChangelogs } from '../../changelog';
 import type { Pr } from '../../onboarding/branch/check';
 import * as _prWorker from '../pr';
 import type { ResultWithPr } from '../pr';
@@ -652,12 +654,16 @@ describe('workers/repository/update/branch/index', () => {
         artifactErrors: [],
         updatedArtifacts: [partial<FileChange>({})],
       } as WriteExistingFilesResult);
+
+      mockedFunction(needsChangelogs).mockReturnValueOnce(true);
+
       expect(
         await branchWorker.processBranch({
           ...config,
           ignoreTests: true,
           prCreation: 'not-pending',
           commitBody: '[skip-ci]',
+          fetchReleaseNotes: true,
         })
       ).toEqual({
         branchExists: true,

@@ -43,6 +43,7 @@ import {
 import * as template from '../../../../util/template';
 import { Limit, isLimitReached } from '../../../global/limits';
 import { BranchConfig, BranchResult, PrBlockedBy } from '../../../types';
+import { embedChangelog, needsChangelogs } from '../../changelog';
 // import { embedChangelog, needsChangelogs } from '../../changelog';
 import { ensurePr, getPlatformPrOptions, updatePrDebugData } from '../pr';
 import { checkAutoMerge } from '../pr/automerge';
@@ -487,10 +488,11 @@ export async function processBranch(
 
     // compile commit message with body, which maybe needs changelogs
     if (config.commitBody) {
-      // TODO: defer fetching changelogs (#17020)
-      // if (config.fetchReleaseNotes && needsChangelogs(config, ['commitBody'])) {
-      //   await embedChangelog(config);
-      // }
+      if (config.fetchReleaseNotes && needsChangelogs(config, ['commitBody'])) {
+        // we only need first upgrade, the others are only needed on PR update
+        // we add it to first, so PR fetch can skip fetching for that update
+        await embedChangelog(config.upgrades[0]);
+      }
       // changelog is on first upgrade
       config.commitMessage = `${config.commitMessage!}\n\n${template.compile(
         config.commitBody,
