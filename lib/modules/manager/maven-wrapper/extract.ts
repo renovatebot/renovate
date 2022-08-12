@@ -3,7 +3,7 @@ import { newlineRegex, regEx } from '../../../util/regex';
 import { MavenDatasource } from '../../datasource/maven';
 import { id as versioning } from '../../versioning/maven';
 import type { PackageDependency, PackageFile } from '../types';
-import type { MavenVersionExtract } from './types';
+import type { MavenVersionExtract, Version } from './types';
 
 // https://regex101.com/r/IcOs7P/1
 const DISTRIBUTION_URL_REGEX = regEx(
@@ -16,15 +16,14 @@ const WRAPPER_URL_REGEX = regEx(
 
 function extractVersions(fileContent: string): MavenVersionExtract {
   const lines = fileContent?.split(newlineRegex) ?? [];
-  const maven = extractLineInfo(lines, DISTRIBUTION_URL_REGEX);
-  const wrapper = extractLineInfo(lines, WRAPPER_URL_REGEX);
+  const maven = extractLineInfo(lines, DISTRIBUTION_URL_REGEX) || undefined;
+  const wrapper = extractLineInfo(lines, WRAPPER_URL_REGEX) || undefined;
   return { maven, wrapper };
 }
 
-function extractLineInfo(lines: string[], regex: RegExp): any {
-  return lines
-    .filter((line) => line.match(regex))
-    .map((line) => {
+function extractLineInfo(lines: string[], regex: RegExp): Version | null {
+  for (const line of lines) {
+    if (line.match(regex)) {
       const match = regex.exec(line);
       if (match?.groups) {
         return {
@@ -33,7 +32,9 @@ function extractLineInfo(lines: string[], regex: RegExp): any {
         };
       }
       return null;
-    })[0];
+    }
+  }
+  return null;
 }
 
 export function extractPackageFile(fileContent: string): PackageFile | null {
@@ -44,7 +45,7 @@ export function extractPackageFile(fileContent: string): PackageFile | null {
     if (extractResult.maven?.version) {
       const maven: PackageDependency = {
         depName: 'maven',
-        packageName:  'org.apache.maven:apache-maven',
+        packageName: 'org.apache.maven:apache-maven',
         currentValue: extractResult.maven?.version,
         replaceString: extractResult.maven?.url,
         datasource: MavenDatasource.id,

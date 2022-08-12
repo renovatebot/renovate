@@ -1,7 +1,8 @@
 import type { Stats } from 'fs';
+import { envMock, mockExecAll } from '../../../../test/exec-util';
 import os from 'os';
 import type { StatusResult } from 'simple-git';
-import { fs, git, partial } from '../../../../test/util';
+import { fs, git, partial, env } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import { updateArtifacts } from './artifacts';
@@ -9,6 +10,7 @@ import { updateArtifacts } from './artifacts';
 jest.mock('../../../util/fs');
 jest.mock('../../../util/git');
 jest.spyOn(os, 'platform').mockImplementation(() => 'darwin');
+jest.mock('../../../util/exec/env');
 
 const adminConfig: RepoGlobalConfig = {
   localDir: './',
@@ -22,6 +24,12 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
         mode: 0o555,
       })
     );
+
+    env.getChildProcessEnv.mockReturnValue({
+      ...envMock.basic,
+      LANG: 'en_US.UTF-8',
+      LC_ALL: 'en_US',
+    });
   });
 
   afterEach(() => {
@@ -45,7 +53,7 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
       })
     );
     GlobalConfig.set(adminConfig);
-
+    const execSnapshots = mockExecAll();
     const updatedDeps = await updateArtifacts({
       packageFileName: 'maven',
       newPackageFileContent: '',
@@ -62,7 +70,7 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
         },
       },
     ];
-
+    expect(execSnapshots).toMatchSnapshot();
     expect(updatedDeps).toEqual(expected);
   });
 
@@ -73,6 +81,7 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
       })
     );
     GlobalConfig.set(adminConfig);
+    const execSnapshots = mockExecAll();
 
     const updatedDeps = await updateArtifacts({
       packageFileName: 'maven',
@@ -90,7 +99,7 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
         },
       },
     ];
-
+    expect(execSnapshots).toMatchSnapshot();
     expect(updatedDeps).toEqual(expected);
   });
 
@@ -101,14 +110,14 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
       })
     );
     GlobalConfig.set(adminConfig);
-
+    const execSnapshots = mockExecAll();
     const updatedDeps = await updateArtifacts({
       packageFileName: 'maven',
       newPackageFileContent: '',
       updatedDeps: [{ depName: 'org.apache.maven.wrapper:maven-wrapper' }],
       config: { newValue: '3.3.1' },
     });
-
+    expect(execSnapshots).toMatchSnapshot();
     expect(updatedDeps).toEqual([]);
   });
 
@@ -119,6 +128,7 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
       updatedDeps: [{ depName: 'org.apache.maven.wrapper:maven-wrapper' }],
       config: { newValue: '3.3.1' },
     });
+    const execSnapshots = mockExecAll();
 
     const expectedError = [
       {
@@ -129,7 +139,7 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
         },
       },
     ];
-
+    expect(execSnapshots).toMatchSnapshot();
     expect(updatedDeps).toEqual(expectedError);
   });
 
@@ -140,7 +150,7 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
       })
     );
     GlobalConfig.set(adminConfig);
-
+    const execSnapshots = mockExecAll();
     jest.spyOn(os, 'platform').mockImplementation(() => 'win32');
 
     fs.statLocalFile.mockResolvedValue(null);
@@ -150,7 +160,7 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
       updatedDeps: [{ depName: 'org.apache.maven.wrapper:maven-wrapper' }],
       config: { newValue: '3.3.1' },
     });
-
+    expect(execSnapshots).toMatchSnapshot();
     expect(updatedDeps).toBeNull();
   });
 });
