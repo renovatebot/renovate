@@ -31,6 +31,17 @@ const staticGroups = {
       },
     ],
   },
+  allPatches: {
+    description: 'Group all `patch` updates together.',
+    packageRules: [
+      {
+        matchPackagePatterns: ['*'],
+        matchUpdateTypes: ['patch'],
+        groupName: 'all patches dependencies',
+        groupSlug: 'all-patch',
+      },
+    ],
+  },
   nodeJs: {
     description:
       "Group anything that looks like Node.js together so that it's updated together.",
