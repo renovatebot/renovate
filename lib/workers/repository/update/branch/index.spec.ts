@@ -5,6 +5,7 @@ import {
   fs,
   git,
   mocked,
+  mockedFunction,
   partial,
   platform,
 } from '../../../../../test/util';
@@ -29,6 +30,7 @@ import * as _sanitize from '../../../../util/sanitize';
 import * as _limits from '../../../global/limits';
 import type { BranchConfig, BranchUpgradeConfig } from '../../../types';
 import { BranchResult } from '../../../types';
+import { needsChangelogs } from '../../changelog';
 import type { Pr } from '../../onboarding/branch/check';
 import * as _prWorker from '../pr';
 import type { ResultWithPr } from '../pr';
@@ -51,6 +53,7 @@ jest.mock('./automerge');
 jest.mock('./commit');
 jest.mock('../pr');
 jest.mock('../pr/automerge');
+jest.mock('../../changelog');
 jest.mock('../../../../util/exec');
 jest.mock('../../../../util/merge-confidence');
 jest.mock('../../../../util/sanitize');
@@ -668,7 +671,10 @@ describe('workers/repository/update/branch/index', () => {
         ...config,
         ignoreTests: true,
         prCreation: 'not-pending',
+        commitBody: '[skip-ci]',
+        fetchReleaseNotes: true,
       } as BranchConfig;
+      mockedFunction(needsChangelogs).mockReturnValueOnce(true);
       expect(await branchWorker.processBranch(inconfig, branchCache)).toEqual({
         branchExists: true,
         prNo: undefined,
@@ -968,6 +974,10 @@ describe('workers/repository/update/branch/index', () => {
         prNo: undefined,
         result: 'pr-edited',
       });
+      expect(logger.info).toHaveBeenCalledWith(
+        `DRY-RUN: Would update existing PR to indicate that rebasing is not possible`
+      );
+      expect(platform.updatePr).toHaveBeenCalledTimes(0);
     });
 
     it('branch pr no schedule lockfile (dry run)', async () => {

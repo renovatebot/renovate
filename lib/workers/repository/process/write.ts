@@ -40,7 +40,12 @@ export async function writeUpdates(
   setMaxLimit(Limit.Branches, branchesRemaining);
 
   for (const branch of branches) {
-    addMeta({ branch: branch.branchName });
+    const { baseBranch, branchName } = branch;
+    const meta: Record<string, string> = { branch: branchName };
+    if (config.baseBranches?.length && baseBranch) {
+      meta['baseBranch'] = baseBranch;
+    }
+    addMeta(meta);
     const branchExisted = branchExists(branch.branchName);
     let branchCache = {} as BranchCache;
     if (branchExisted) {
@@ -79,6 +84,6 @@ export async function writeUpdates(
       incLimitedValue(Limit.Branches);
     }
   }
-  removeMeta(['branch']);
+  removeMeta(['branch', 'baseBranch']);
   return 'done';
 }
