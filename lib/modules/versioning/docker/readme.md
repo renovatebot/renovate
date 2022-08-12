@@ -1,4 +1,4 @@
-Docker doesn't really have _versioning_, instead it has "tags".
+Docker images don't really have _versions_, instead they have "tags".
 Tags are often used by Docker image authors as a form of versioning.
 
 Renovate tries to follow the most common _conventions_ that are used to tag Docker images.
