@@ -15,10 +15,22 @@ Similarly, a user on `12.14` expects to be upgraded to `12.15` and not `12.15.0`
 
 Docker image authors can use whatever tag they want, it's a "wild west".
 Docker tags don't always follow SemVer.
+This means that Renovate tries to accept and sort SemVer-like versions, but this won't always work.
 
-This means that Renovate can only try to accept and sort SemVer-like versions, this won't always work though.
-You may need to help Renovate and create your own custom rules for some Docker images.
-TODO: find link to section that explains creating own Docker versioning/rules.
+You may need to help Renovate and create your own rules for some Docker images.
+For example:
+
+```json
+{
+  "packageRules": [
+    {
+      "matchDatasources": ["docker"],
+      "matchPackageNames": ["badly-versioned-docker-image"],
+      "versioning": "loose"
+    }
+  ]
+}
+```
 
 **Are ranges supported?**
 
