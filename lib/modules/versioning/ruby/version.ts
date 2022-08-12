@@ -28,6 +28,15 @@ const parse = (version: string): RubyVersion => ({
   prerelease: prerelease(version),
 });
 
+const floor = (version: string): string => {
+  const segments = releaseSegments(version);
+  if (segments.length <= 1) {
+    // '~> 2' is equivalent to '~> 2.0', thus no need to floor
+    return segments.join('.');
+  }
+  return [...segments.slice(0, -1), 0].join('.');
+};
+
 const adapt = (left: string, right: string): string =>
   left.split('.').slice(0, right.split('.').length).join('.');
 
@@ -133,4 +142,12 @@ const decrement = (version: string): string => {
   return nextSegments.reverse().join('.');
 };
 
-export { parse, adapt, trimZeroes, pgteUpperBound, increment, decrement };
+export {
+  parse,
+  adapt,
+  floor,
+  trimZeroes,
+  pgteUpperBound,
+  increment,
+  decrement,
+};
