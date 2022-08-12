@@ -8,7 +8,7 @@ import { id as composerVersioningId } from '../../modules/versioning/composer';
 import { id as nodeVersioningId } from '../../modules/versioning/node';
 import { id as npmVersioningId } from '../../modules/versioning/npm';
 import { id as pep440VersioningId } from '../../modules/versioning/pep440';
-import { id as poetryVersioningId } from '../../modules/versioning/poetry';
+import { id as pythonVersioningId } from '../../modules/versioning/python';
 import { id as rubyVersioningId } from '../../modules/versioning/ruby';
 import { id as semverVersioningId } from '../../modules/versioning/semver';
 import { id as semverCoercedVersioningId } from '../../modules/versioning/semver-coerced';
@@ -94,7 +94,7 @@ const allToolConfig: Record<string, ToolConfig> = {
   python: {
     datasource: 'github-releases',
     depName: 'containerbase/python-prebuild',
-    versioning: poetryVersioningId,
+    versioning: pythonVersioningId,
   },
   yarn: {
     datasource: 'npm',
