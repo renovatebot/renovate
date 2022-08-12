@@ -91,6 +91,8 @@ describe('workers/repository/update/pr/index', () => {
         platform.createPr.mockResolvedValueOnce(pr);
         limits.isLimitReached.mockReturnValueOnce(true);
 
+        config.fetchReleaseNotes = true;
+
         const res = await ensurePr(config);
 
         expect(res).toEqual({ type: 'without-pr', prBlockedBy: 'RateLimited' });
