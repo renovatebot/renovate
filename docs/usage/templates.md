@@ -13,6 +13,8 @@ You can recognize templates when you see strings like `{{depName}}` in configura
 Below you can find lists of fields/values that you can use in templates.
 Some are configuration options passed through, while others are generated as part of Renovate's run.
 
+`logJSON` and `releases` are only allowed in `commitBody` template.
+
 ## Exposed config options
 
 <!-- Autogenerate in https://github.com/renovatebot/renovate -->

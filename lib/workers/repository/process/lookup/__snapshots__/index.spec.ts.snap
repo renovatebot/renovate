@@ -6,6 +6,7 @@ Array [
     "isPin": true,
     "newMajor": 0,
     "newValue": "0.4.4",
+    "newVersion": "0.4.4",
     "updateType": "pin",
   },
   Object {
@@ -40,6 +41,7 @@ Array [
     "isPin": true,
     "newMajor": 0,
     "newValue": "==0.9.4",
+    "newVersion": "0.9.4",
     "updateType": "pin",
   },
   Object {
@@ -311,6 +313,7 @@ Array [
     "isPin": true,
     "newMajor": 0,
     "newValue": "0.9.7",
+    "newVersion": "0.9.7",
     "updateType": "pin",
   },
   Object {
@@ -357,6 +360,7 @@ Array [
     "isPin": true,
     "newMajor": 1,
     "newValue": "1.4.1",
+    "newVersion": "1.4.1",
     "updateType": "pin",
   },
 ]
@@ -452,6 +456,7 @@ Array [
     "isPin": true,
     "newMajor": 0,
     "newValue": "0.4.4",
+    "newVersion": "0.4.4",
     "updateType": "pin",
   },
   Object {
@@ -1119,6 +1124,7 @@ Array [
     "isPin": true,
     "newMajor": 0,
     "newValue": "0.4.4",
+    "newVersion": "0.4.4",
     "updateType": "pin",
   },
   Object {
@@ -1148,6 +1154,7 @@ Array [
     "isPin": true,
     "newMajor": 0,
     "newValue": "0.4.4",
+    "newVersion": "0.4.4",
     "updateType": "pin",
   },
   Object {
@@ -1207,6 +1214,7 @@ Array [
     "isPin": true,
     "newMajor": 1,
     "newValue": "1.3.0",
+    "newVersion": "1.3.0",
     "updateType": "pin",
   },
   Object {
@@ -1447,6 +1455,7 @@ Array [
     "isPin": true,
     "newMajor": 1,
     "newValue": "1.0.1",
+    "newVersion": "1.0.1",
     "updateType": "pin",
   },
   Object {
@@ -1547,6 +1556,7 @@ Array [
     "isPin": true,
     "newMajor": 1,
     "newValue": "1.3.0",
+    "newVersion": "1.3.0",
     "updateType": "pin",
   },
   Object {
@@ -1596,6 +1606,7 @@ Array [
     "isPin": true,
     "newMajor": 1,
     "newValue": "1.0.0",
+    "newVersion": "1.0.0",
     "updateType": "pin",
   },
   Object {
