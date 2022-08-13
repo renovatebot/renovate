@@ -59,17 +59,17 @@ export async function writeUpdates(
       ) {
         logger.debug(`No branch cache found for ${branch.branchName}`);
       }
-
-      const branchManagersFingerprint = hasha(
-        branch.upgrades
-          .map((upgrade) => hashMap.get(upgrade.manager) ?? upgrade.manager)
-          .filter(is.string)
-      );
-      branch.branchFingerprint = hasha([
-        JSON.stringify(config),
-        branchManagersFingerprint,
-      ]);
     }
+    const branchManagersFingerprint = hasha(
+      branch.upgrades
+        .map((upgrade) => hashMap.get(upgrade.manager) ?? upgrade.manager)
+        .filter(is.string)
+    );
+    branch.branchFingerprint = hasha([
+      JSON.stringify(config),
+      branchManagersFingerprint,
+    ]);
+
     const res = await processBranch(branch, branchCache);
     branch.prBlockedBy = res?.prBlockedBy;
     branch.prNo = res?.prNo;
