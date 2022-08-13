@@ -1531,11 +1531,6 @@ Use the syntax `!/ /` like the following:
 }
 ```
 
-### matchDepTypes
-
-Use this field if you want to limit a `packageRule` to certain `depType` values.
-Invalid if used outside of a `packageRule`.
-
 ### excludePackageNames
 
 **Important**: Do not mix this up with the option `ignoreDeps`.
@@ -1593,22 +1588,6 @@ See also `matchPackagePrefixes`.
 
 The above will match all package names starting with `eslint` but exclude ones starting with `eslint-foo`.
 
-### matchLanguages
-
-Use this field to restrict rules to a particular language. e.g.
-
-```json
-{
-  "packageRules": [
-    {
-      "matchPackageNames": ["request"],
-      "matchLanguages": ["python"],
-      "enabled": false
-    }
-  ]
-}
-```
-
 ### matchBaseBranches
 
 Use this field to restrict rules to a particular branch. e.g.
@@ -1634,37 +1613,6 @@ This field also supports Regular Expressions if they begin and end with `/`. e.g
       "matchBaseBranches": ["/^release\\/.*/"],
       "excludePackagePatterns": ["^eslint"],
       "enabled": false
-    }
-  ]
-}
-```
-
-### matchManagers
-
-Use this field to restrict rules to a particular package manager. e.g.
-
-```json
-{
-  "packageRules": [
-    {
-      "matchPackageNames": ["node"],
-      "matchManagers": ["dockerfile"],
-      "enabled": false
-    }
-  ]
-}
-```
-
-### matchDatasources
-
-Use this field to restrict rules to a particular datasource. e.g.
-
-```json
-{
-  "packageRules": [
-    {
-      "matchDatasources": ["orb"],
-      "labels": ["circleci-orb!!"]
     }
   ]
 }
@@ -1713,6 +1661,26 @@ Use the syntax `!/ /` like this:
 }
 ```
 
+### matchDatasources
+
+Use this field to restrict rules to a particular datasource. e.g.
+
+```json
+{
+  "packageRules": [
+    {
+      "matchDatasources": ["orb"],
+      "labels": ["circleci-orb!!"]
+    }
+  ]
+}
+```
+
+### matchDepTypes
+
+Use this field if you want to limit a `packageRule` to certain `depType` values.
+Invalid if used outside of a `packageRule`.
+
 ### matchFiles
 
 Renovate will compare `matchFiles` for an exact match against the dependency's package file or lock file.
@@ -1724,6 +1692,38 @@ For example the following would match `package.json` but not `package/frontend/p
 ```
 
 Use `matchPaths` instead if you need more flexible matching.
+
+### matchLanguages
+
+Use this field to restrict rules to a particular language. e.g.
+
+```json
+{
+  "packageRules": [
+    {
+      "matchPackageNames": ["request"],
+      "matchLanguages": ["python"],
+      "enabled": false
+    }
+  ]
+}
+```
+
+### matchManagers
+
+Use this field to restrict rules to a particular package manager. e.g.
+
+```json
+{
+  "packageRules": [
+    {
+      "matchPackageNames": ["node"],
+      "matchManagers": ["dockerfile"],
+      "enabled": false
+    }
+  ]
+}
+```
 
 ### matchPackageNames
 
