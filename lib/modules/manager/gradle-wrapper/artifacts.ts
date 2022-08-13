@@ -87,10 +87,9 @@ export async function updateArtifacts({
     } else {
       cmd += ` --gradle-version ${quote(config.newValue!)}`;
     }
-    cmd += ` --project-dir ${localGradleDir}`;
-
     logger.debug(`Updating gradle wrapper: "${cmd}"`);
     const execOptions: ExecOptions = {
+      cwdFile: gradlewFile,
       docker: {
         image: 'sidecar',
       },

@@ -26,6 +26,7 @@ export async function prepareGradleCommand(
   gradlewFile: string,
   args: string | null
 ): Promise<string | null> {
+  const gradlewName = gradleWrapperFileName();
   const gradlewStat = await statLocalFile(gradlewFile);
   // istanbul ignore if
   if (gradlewStat?.isFile() === true) {
@@ -35,9 +36,9 @@ export async function prepareGradleCommand(
       await chmodLocalFile(gradlewFile, gradlewStat.mode | 0o111);
     }
     if (args === null) {
-      return gradlewFile;
+      return gradlewName;
     }
-    return `${gradlewFile} ${args}`;
+    return `${gradlewName} ${args}`;
   }
   /* eslint-enable no-bitwise */
   return null;
