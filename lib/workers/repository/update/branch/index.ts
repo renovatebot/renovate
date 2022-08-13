@@ -45,7 +45,6 @@ import * as template from '../../../../util/template';
 import { Limit, isLimitReached } from '../../../global/limits';
 import { BranchConfig, BranchResult, PrBlockedBy } from '../../../types';
 import { embedChangelog, needsChangelogs } from '../../changelog';
-// import { embedChangelog, needsChangelogs } from '../../changelog';
 import { ensurePr, getPlatformPrOptions, updatePrDebugData } from '../pr';
 import { checkAutoMerge } from '../pr/automerge';
 import { getPrBody } from '../pr/body';
@@ -90,7 +89,7 @@ export function canSkipBranchUpdateCheck(
 ): boolean {
   const branchCommitSha = getBranchCommit(branchName);
 
-  if (!branchCache.branchFingerprint) {
+  if (!branchCache.branchFingerprint || branchFingerprint) {
     return false;
   }
   if (branchCommitSha !== branchCache.sha) {
