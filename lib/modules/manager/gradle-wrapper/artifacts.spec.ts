@@ -227,6 +227,12 @@ describe('modules/manager/gradle-wrapper/artifacts', () => {
         },
       }))
     );
-    expect(execSnapshots).toMatchSnapshot();
+    expect(execSnapshots).toMatchObject([
+      {
+        options: {
+          cwd: '/root/project/lib/modules/manager/gradle-wrapper/__fixtures__/testFiles/sub',
+        },
+      },
+    ]);
   });
 });
