@@ -89,7 +89,7 @@ export function canSkipBranchUpdateCheck(
 ): boolean {
   const branchCommitSha = getBranchCommit(branchName);
 
-  if (!branchCache.branchFingerprint || branchFingerprint) {
+  if (!branchCache.branchFingerprint) {
     return false;
   }
   if (branchCommitSha !== branchCache.sha) {
