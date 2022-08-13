@@ -111,7 +111,7 @@ describe('modules/manager/gradle-wrapper/artifacts', () => {
     );
     GlobalConfig.set({ ...adminConfig, localDir: 'some-dir' });
     const res = await gradleWrapper.updateArtifacts({
-      packageFileName: 'gradle-wrapper.properties',
+      packageFileName: 'gradle/wrapper/gradle-wrapper.properties',
       updatedDeps: [],
       newPackageFileContent: '',
       config: {},
@@ -128,7 +128,7 @@ describe('modules/manager/gradle-wrapper/artifacts', () => {
       })
     );
     const res = await gradleWrapper.updateArtifacts({
-      packageFileName: 'gradle-wrapper.properties',
+      packageFileName: 'gradle/wrapper/gradle-wrapper.properties',
       updatedDeps: [],
       newPackageFileContent: '',
       config,
@@ -156,7 +156,7 @@ describe('modules/manager/gradle-wrapper/artifacts', () => {
     const execSnapshots = mockExecAll();
 
     const result = await gradleWrapper.updateArtifacts({
-      packageFileName: 'gradle-wrapper.properties',
+      packageFileName: 'gradle/wrapper/gradle-wrapper.properties',
       updatedDeps: [],
       newPackageFileContent: `distributionSha256Sum=336b6898b491f6334502d8074a6b8c2d73ed83b92123106bd4bf837f04111043\ndistributionUrl=https\\://services.gradle.org/distributions/gradle-6.3-bin.zip`,
       config: {
@@ -178,7 +178,7 @@ describe('modules/manager/gradle-wrapper/artifacts', () => {
       .reply(404);
 
     const result = await gradleWrapper.updateArtifacts({
-      packageFileName: 'gradle-wrapper.properties',
+      packageFileName: 'gradle/wrapper/gradle-wrapper.properties',
       updatedDeps: [],
       newPackageFileContent: `distributionSha256Sum=336b6898b491f6334502d8074a6b8c2d73ed83b92123106bd4bf837f04111043\ndistributionUrl=https\\://services.gradle.org/distributions/gradle-6.3-bin.zip`,
       config,
@@ -187,7 +187,7 @@ describe('modules/manager/gradle-wrapper/artifacts', () => {
     expect(result).toEqual([
       {
         artifactError: {
-          lockFile: 'gradle-wrapper.properties',
+          lockFile: 'gradle/wrapper/gradle-wrapper.properties',
           stderr: 'Response code 404 (Not Found)',
         },
       },
