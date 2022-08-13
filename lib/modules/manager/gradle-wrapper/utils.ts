@@ -23,22 +23,21 @@ export function gradleWrapperFileName(): string {
 }
 
 export async function prepareGradleCommand(
-  gradlewName: string,
+  gradlewFile: string,
   args: string | null
 ): Promise<string | null> {
-  const gradlewFile = gradleWrapperFileName();
   const gradlewStat = await statLocalFile(gradlewFile);
   // istanbul ignore if
   if (gradlewStat?.isFile() === true) {
     // if the file is not executable by others
     if ((gradlewStat.mode & 0o1) === 0) {
       // add the execution permission to the owner, group and others
-      await chmodLocalFile(gradlewName, gradlewStat.mode | 0o111);
+      await chmodLocalFile(gradlewFile, gradlewStat.mode | 0o111);
     }
     if (args === null) {
-      return gradlewName;
+      return gradlewFile;
     }
-    return `${gradlewName} ${args}`;
+    return `${gradlewFile} ${args}`;
   }
   /* eslint-enable no-bitwise */
   return null;

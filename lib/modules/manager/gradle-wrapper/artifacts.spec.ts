@@ -193,4 +193,40 @@ describe('modules/manager/gradle-wrapper/artifacts', () => {
       },
     ]);
   });
+
+  it('handles gradle-wrapper in subdirectory', async () => {
+    git.getRepoStatus.mockResolvedValue({
+      modified: [
+        'sub/gradle/wrapper/gradle-wrapper.properties',
+        'sub/gradlew',
+        'sub/gradlew.bat',
+      ],
+    } as StatusResult);
+
+    const execSnapshots = mockExecAll();
+
+    const res = await gradleWrapper.updateArtifacts({
+      packageFileName: 'sub/gradle/wrapper/gradle-wrapper.properties',
+      updatedDeps: [],
+      newPackageFileContent: await readString(
+        `./expectedFiles/gradle/wrapper/gradle-wrapper.properties`
+      ),
+      config: { ...config, newValue: '6.3' },
+    });
+
+    expect(res).toEqual(
+      [
+        'sub/gradle/wrapper/gradle-wrapper.properties',
+        'sub/gradlew',
+        'sub/gradlew.bat',
+      ].map((fileProjectPath) => ({
+        file: {
+          type: 'addition',
+          path: fileProjectPath,
+          contents: 'test',
+        },
+      }))
+    );
+    expect(execSnapshots).toMatchSnapshot();
+  });
 });
