@@ -144,7 +144,7 @@ describe('workers/repository/process/write', () => {
         branchExists: true,
         result: BranchResult.NoWork,
       });
-      git.branchExists.mockReturnValue(true);
+      git.branchExists.mockReturnValueOnce(true);
       config.repositoryCache = 'enabled';
       await writeUpdates(config, branches);
       expect(logger.logger.debug).toHaveBeenCalledWith(
