@@ -847,6 +847,18 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
+    name: 'registryUrls',
+    description:
+      'List of URLs to try for dependency lookup. Package manager specific.',
+    type: 'array',
+    subType: 'string',
+    default: null,
+    parent: 'packageRules',
+    stage: 'branch',
+    cli: false,
+    env: false,
+  },
+  {
     name: 'extractVersion',
     description:
       "A regex (`re2`) to extract a version from a datasource's raw version string.",
