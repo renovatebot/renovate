@@ -50,7 +50,7 @@ The following configuration is also available for each `jsonManager` element, ag
 - `registryUrlTemplate`.
 - `depTypeTemplate`.
 
-## Example queries
+### Example queries
 
 Below are some example queries for the generic JSON manager. You can also use the [JSONata test website](https://try.jsonata.org) to experiment with queries.
 
