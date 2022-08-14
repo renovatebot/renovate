@@ -44,7 +44,7 @@ interface Config {
 
 const config: Config = {};
 
-export function initPlatform({
+export async function initPlatform({
   endpoint,
   username,
   password,
@@ -75,19 +75,25 @@ export function initPlatform({
       'Init: You must configure a AWS user(accessKeyId), password(secretAccessKey) and endpoint/AWS_REGION'
     );
   }
+
   config.region = region;
   const credentials = {
-    accessKeyId: accessKeyId,
-    secretAccessKey: secretAccessKey,
+    accessKeyId,
+    secretAccessKey,
   };
   config.credentials = credentials;
 
   client.buildCodeCommitClient(region, credentials);
 
+  try {
+    // check if credentials work, listRepositories doesn't need repository name input
+    await client.listRepositories();
+  } catch (error) {
+    throw new Error(PLATFORM_BAD_CREDENTIALS);
+  }
+
   const platformConfig: PlatformResult = {
-    endpoint: region,
-    token: secretAccessKey,
-    renovateUsername: accessKeyId,
+    endpoint: endpoint ?? `https://git-codecommit.${region}.amazonaws.com`,
   };
   return Promise.resolve(platformConfig);
 }
@@ -98,11 +104,6 @@ export async function initRepo({
   logger.debug(`initRepo("${repository}")`);
 
   config.repository = repository;
-  //todo do we need host rules here?
-  // const opts = hostRules.find({
-  //   hostType: PlatformId.Bitbucket,
-  //   url: defaults.endpoint,
-  // });
   const url = getCodeCommitUrl(config.region!, repository, config.credentials!);
   try {
     await git.initRepo({
