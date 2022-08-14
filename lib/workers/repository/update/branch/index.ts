@@ -546,43 +546,44 @@ export async function processBranch(
       }
 
       commitSha = await commitFilesToBranch(config);
-      // istanbul ignore if
-      if (branchPr && platform.refreshPr) {
-        await platform.refreshPr(branchPr.number);
-      }
-      if (!commitSha && !branchExists) {
-        return {
-          branchExists,
-          prNo: branchPr?.number,
-          result: BranchResult.NoWork,
-        };
-      }
-      if (commitSha) {
-        const action = branchExists ? 'updated' : 'created';
-        logger.info({ commitSha }, `Branch ${action}`);
-      }
-      // Set branch statuses
-      await setArtifactErrorStatus(config);
-      await setStability(config);
-      await setConfidence(config);
-
-      // break if we pushed a new commit because status check are pretty sure pending but maybe not reported yet
-      // but do not break when there are artifact errors
-      if (
-        !config.artifactErrors?.length &&
-        !userRebaseRequested &&
-        commitSha &&
-        config.prCreation !== 'immediate'
-      ) {
-        logger.debug({ commitSha }, `Branch status pending`);
-        return {
-          branchExists: true,
-          prNo: branchPr?.number,
-          result: BranchResult.Pending,
-          updateBranchFingerprint: !!commitSha,
-        };
-      }
     }
+    // istanbul ignore if
+    if (branchPr && platform.refreshPr) {
+      await platform.refreshPr(branchPr.number);
+    }
+    if (!commitSha && !branchExists) {
+      return {
+        branchExists,
+        prNo: branchPr?.number,
+        result: BranchResult.NoWork,
+      };
+    }
+    if (commitSha) {
+      const action = branchExists ? 'updated' : 'created';
+      logger.info({ commitSha }, `Branch ${action}`);
+    }
+    // Set branch statuses
+    await setArtifactErrorStatus(config);
+    await setStability(config);
+    await setConfidence(config);
+
+    // break if we pushed a new commit because status check are pretty sure pending but maybe not reported yet
+    // but do not break when there are artifact errors
+    if (
+      !config.artifactErrors?.length &&
+      !userRebaseRequested &&
+      commitSha &&
+      config.prCreation !== 'immediate'
+    ) {
+      logger.debug({ commitSha }, `Branch status pending`);
+      return {
+        branchExists: true,
+        prNo: branchPr?.number,
+        result: BranchResult.Pending,
+        updateBranchFingerprint: !!commitSha,
+      };
+    }
+
     // Try to automerge branch and finish if successful, but only if branch already existed before this run
     if (branchExists || config.ignoreTests) {
       const mergeStatus = await tryBranchAutomerge(config);
