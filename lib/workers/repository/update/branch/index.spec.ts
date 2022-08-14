@@ -1143,7 +1143,6 @@ describe('workers/repository/update/branch/index', () => {
     it('skips branch update if same updates', async () => {
       git.branchExists.mockReturnValueOnce(true);
       git.getBranchCommit.mockReturnValue('111');
-      git.getBranchCommit.mockReturnValue('111');
       platform.getBranchPr.mockResolvedValueOnce(
         partial<Pr>({
           sourceBranch: 'old/some-branch',
@@ -1156,6 +1155,7 @@ describe('workers/repository/update/branch/index', () => {
         branchPrefix: 'new/',
         branchPrefixOld: 'old/',
         branchFingerprint: '111',
+        reuseExistingBranch: true,
       };
       const branchCache = partial<BranchCache>({
         branchName: 'new/some-branch',
@@ -1169,7 +1169,7 @@ describe('workers/repository/update/branch/index', () => {
       expect(await branchWorker.processBranch(inconfig, branchCache)).toEqual({
         branchExists: true,
         prNo: undefined,
-        result: 'error',
+        result: 'done',
         updateBranchFingerprint: false,
       });
       expect(commit.commitFilesToBranch).not.toHaveBeenCalled();

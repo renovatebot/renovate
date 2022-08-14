@@ -411,8 +411,6 @@ export async function processBranch(
         )
       )
     ) {
-      //eslint-disable-next-line
-      console.log('ASDFGHJK');
       await checkoutBranch(config.baseBranch!);
       const res = await getUpdatedPackageFiles(config);
       // istanbul ignore if
