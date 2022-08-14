@@ -7,7 +7,7 @@ import { clone } from '../../util/clone';
 export class PackageFiles {
   private static data = new Map<string, Record<string, PackageFile[]> | null>();
 
-  public static add(
+  static add(
     baseBranch: string,
     packageFiles: Record<string, PackageFile[]> | null
   ): void {
@@ -18,7 +18,7 @@ export class PackageFiles {
     this.data.set(baseBranch, clone(packageFiles));
   }
 
-  public static clear(): void {
+  static clear(): void {
     logger.debug(
       { baseBranches: [...this.data.keys()] },
       'PackageFiles.clear() - Package files deleted'
@@ -31,12 +31,12 @@ export class PackageFiles {
    * i.e. It has length smaller than maxLength.
    * This does not mutate the original PackageFiles data
    * Note:  setHeader=false is used for testing purposes only
-   *        Mainly for comparing the output of getTruncatedMarkdown and getDashboardMarkdown
+   *        Mainly for comparing truncated and non-truncated markdown
    * @param config
    * @param maxLength
    * @param setHeader
    */
-  public static getTruncatedMarkdown(
+  static getDashboardMarkdown(
     config: RenovateConfig,
     maxLength: number,
     setHeader = true
@@ -57,7 +57,7 @@ export class PackageFiles {
 
     do {
       // shorten markdown until it fits
-      md = PackageFiles.getDashboardMarkdown(config, false);
+      md = PackageFiles.getDashboardMarkdownInternal(config);
       if (md.length > mdMaxLength) {
         // backup data
         if (!restore) {
@@ -83,16 +83,9 @@ export class PackageFiles {
 
   /**
    * Generates the "detected dependencies" markdown
-   * Note:  setTitle=false is used for testing purposes only
-   *        Mainly for comparing the output of getDashboardMarkdown and getTruncatedMarkdown
    * @param config
-   * @param setTitle
    */
-  public static getDashboardMarkdown(
-    config: RenovateConfig,
-    setTitle = true
-  ): string {
-    const title = `## Detected dependencies\n\n`;
+  private static getDashboardMarkdownInternal(config: RenovateConfig): string {
     const none = 'None detected\n\n';
     const pad = this.data.size > 1; // padding condition for a multi base branch repo
     let deps = '';
@@ -138,7 +131,7 @@ export class PackageFiles {
       deps += pad ? '</blockquote>\n</details>\n\n' : '';
     }
 
-    return (setTitle ? title : '') + deps;
+    return deps;
   }
 
   private static backup(): () => void {

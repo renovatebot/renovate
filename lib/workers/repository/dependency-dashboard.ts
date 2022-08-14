@@ -5,6 +5,7 @@ import { GlobalConfig } from '../../config/global';
 import type { RenovateConfig } from '../../config/types';
 import { getProblems, logger } from '../../logger';
 import { platform } from '../../modules/platform';
+import { GitHubMaxPrBodyLen } from '../../modules/platform/github';
 import { regEx } from '../../util/regex';
 import * as template from '../../util/template';
 import { BranchConfig, BranchResult, SelectAllConfig } from '../types';
@@ -324,9 +325,9 @@ export async function ensureDependencyDashboard(
 
   // fit the detected dependencies section
   const footer = getFooter(config);
-  issueBody += PackageFiles.getTruncatedMarkdown(
+  issueBody += PackageFiles.getDashboardMarkdown(
     config,
-    60000 - issueBody.length - footer.length
+    GitHubMaxPrBodyLen - issueBody.length - footer.length
   );
 
   issueBody += footer;

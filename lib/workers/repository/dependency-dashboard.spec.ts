@@ -15,7 +15,10 @@ import type {
   PackageFile,
 } from '../../modules/manager/types';
 import type { Platform } from '../../modules/platform';
-import { massageMarkdown } from '../../modules/platform/github';
+import {
+  GitHubMaxPrBodyLen,
+  massageMarkdown,
+} from '../../modules/platform/github';
 import { BranchConfig, BranchResult, BranchUpgradeConfig } from '../types';
 import * as dependencyDashboard from './dependency-dashboard';
 import { PackageFiles } from './package-files';
@@ -694,14 +697,14 @@ describe('workers/repository/dependency-dashboard', () => {
 
         it('truncates the body of a really big repo', async () => {
           const branches: BranchConfig[] = [];
-          const maxMdLength = 60000;
           const packageFilesBigRepo = genRandPackageFile(100, 700);
           PackageFiles.clear();
           PackageFiles.add('main', packageFilesBigRepo);
           await dependencyDashboard.ensureDependencyDashboard(config, branches);
           expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
           expect(
-            platform.ensureIssue.mock.calls[0][0].body.length < maxMdLength
+            platform.ensureIssue.mock.calls[0][0].body.length <
+              GitHubMaxPrBodyLen
           ).toBeTrue();
 
           // same with dry run
@@ -709,7 +712,7 @@ describe('workers/repository/dependency-dashboard', () => {
         });
       });
 
-      describe('PackageFiles.getTruncatedMarkdown()', () => {
+      describe('PackageFiles.getDashboardMarkdown()', () => {
         const note =
           '> **Note**\n> Detected dependencies section has been truncated\n';
         const title = `## Detected dependencies\n\n`;
@@ -724,10 +727,13 @@ describe('workers/repository/dependency-dashboard', () => {
 
         it('does not truncates as there is enough space to fit', () => {
           PackageFiles.add('main', packageFiles);
-          const nonTruncated = PackageFiles.getDashboardMarkdown(config);
+          const nonTruncated = PackageFiles.getDashboardMarkdown(
+            config,
+            Infinity
+          );
           const len = (title + note + nonTruncated).length;
-          const truncated = PackageFiles.getTruncatedMarkdown(config, len);
-          const truncatedWithTitle = PackageFiles.getTruncatedMarkdown(
+          const truncated = PackageFiles.getDashboardMarkdown(config, len);
+          const truncatedWithTitle = PackageFiles.getDashboardMarkdown(
             config,
             len
           );
@@ -738,10 +744,10 @@ describe('workers/repository/dependency-dashboard', () => {
         it('removes a branch with no managers', () => {
           PackageFiles.add('main', packageFiles);
           PackageFiles.add('dev', packageFilesWithDigest);
-          const md = PackageFiles.getDashboardMarkdown(config, false);
+          const md = PackageFiles.getDashboardMarkdown(config, Infinity, false);
           const len = md.length;
           PackageFiles.add('empty/branch', {});
-          const truncated = PackageFiles.getTruncatedMarkdown(
+          const truncated = PackageFiles.getDashboardMarkdown(
             config,
             len,
             false
@@ -752,10 +758,10 @@ describe('workers/repository/dependency-dashboard', () => {
 
         it('removes a manager with no package files', () => {
           PackageFiles.add('main', packageFiles);
-          const md = PackageFiles.getDashboardMarkdown(config, false);
+          const md = PackageFiles.getDashboardMarkdown(config, Infinity, false);
           const len = md.length;
           PackageFiles.add('dev', { dockerfile: [] });
-          const truncated = PackageFiles.getTruncatedMarkdown(
+          const truncated = PackageFiles.getDashboardMarkdown(
             config,
             len,
             false
@@ -765,7 +771,7 @@ describe('workers/repository/dependency-dashboard', () => {
         });
 
         it('does nothing when there are no base branches left', () => {
-          const truncated = PackageFiles.getTruncatedMarkdown(
+          const truncated = PackageFiles.getDashboardMarkdown(
             config,
             -1,
             false
@@ -775,10 +781,10 @@ describe('workers/repository/dependency-dashboard', () => {
 
         it('removes an entire base branch', () => {
           PackageFiles.add('main', packageFiles);
-          const md = PackageFiles.getDashboardMarkdown(config);
+          const md = PackageFiles.getDashboardMarkdown(config, Infinity);
           const len = md.length + note.length;
           PackageFiles.add('dev', packageFilesWithDigest);
-          const truncated = PackageFiles.getTruncatedMarkdown(config, len);
+          const truncated = PackageFiles.getDashboardMarkdown(config, len);
           expect(truncated.includes('dev')).toBeFalse();
           expect(truncated.length === len).toBeTrue();
         });
@@ -786,13 +792,13 @@ describe('workers/repository/dependency-dashboard', () => {
         it('ensures original data is unchanged', () => {
           PackageFiles.add('main', packageFiles);
           PackageFiles.add('dev', packageFilesWithDigest);
-          const pre = PackageFiles.getDashboardMarkdown(config);
-          const truncated = PackageFiles.getTruncatedMarkdown(
+          const pre = PackageFiles.getDashboardMarkdown(config, Infinity);
+          const truncated = PackageFiles.getDashboardMarkdown(
             config,
             -1,
             false
           );
-          const post = PackageFiles.getDashboardMarkdown(config);
+          const post = PackageFiles.getDashboardMarkdown(config, Infinity);
           expect(truncated).toBe('');
           expect(pre === post).toBeTrue();
           expect(post.includes('main')).toBeTrue();
