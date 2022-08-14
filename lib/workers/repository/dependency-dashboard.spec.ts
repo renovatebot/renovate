@@ -668,7 +668,7 @@ describe('workers/repository/dependency-dashboard', () => {
         title: 'Dependency Dashboard',
         body: `This issue contains a list of Renovate updates and their statuses.
         ## Rate Limited
-        These updates are currently rate limited. Click on a checkbox below to force their creation now.
+        These updates are currently rate-limited. Click on a checkbox below to force their creation now.
          - [x] <!-- open-all-rate-limited-prs -->**Open all rate-limited PRs**
          - [ ] <!-- unlimit-branch=branchName1 -->pr1
          - [ ] <!-- unlimit-branch=branchName2 -->pr2`,
