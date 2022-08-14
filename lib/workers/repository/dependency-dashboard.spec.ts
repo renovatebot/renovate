@@ -128,7 +128,7 @@ describe('workers/repository/dependency-dashboard', () => {
       });
     });
 
-    it('reads dashboard body open all rate limited', async () => {
+    it('reads dashboard body open all rate-limited', async () => {
       const conf: RenovateConfig = {};
       conf.prCreation = 'approval';
       platform.findIssue.mockResolvedValueOnce({
