@@ -362,7 +362,7 @@ export async function processBranch(
       config.reuseExistingBranch = false;
     } else if (userApproveAllPendingPR) {
       logger.debug(
-        'Manual Approve All Pending PRs requested via Dependency Dashboard'
+        'A user manually approved all pending PRs via the Dependency Dashboard.'
       );
     } else if (userOpenAllRateLimtedPR) {
       logger.debug(
