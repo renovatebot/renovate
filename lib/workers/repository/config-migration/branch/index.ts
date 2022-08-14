@@ -1,11 +1,14 @@
 import { GlobalConfig } from '../../../../config/global';
 import type { RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
-import { FindPRConfig, platform } from '../../../../modules/platform';
+import { FindPRConfig, Pr, platform } from '../../../../modules/platform';
+import { ensureComment } from '../../../../modules/platform/comment';
 import { PrState } from '../../../../types';
-import { checkoutBranch } from '../../../../util/git';
-import type { BranchConfig } from '../../../types';
-import { handlepr } from '../../update/branch/handle-existing';
+import {
+  branchExists,
+  checkoutBranch,
+  deleteBranch,
+} from '../../../../util/git';
 import { getMigrationBranchName } from '../common';
 import { ConfigMigrationCommitMessageFactory } from './commit-message';
 import { createConfigMigrationBranch } from './create';
@@ -22,20 +25,21 @@ export async function checkConfigMigrationBranch(
     return null;
   }
   const configMigrationBranch = getMigrationBranchName(config);
-  const commitMessageFactory = new ConfigMigrationCommitMessageFactory(
-    config,
-    migratedConfigData.filename
-  );
-  const prTitle = commitMessageFactory.getPrTitle();
-  const closedPrConfig: FindPRConfig = {
-    branchName: configMigrationBranch,
-    prTitle,
-    state: PrState.Closed,
-  };
 
   const branchPr = await migrationPrExists(configMigrationBranch); // handles open/autoClosed PRs
 
   if (!branchPr) {
+    const commitMessageFactory = new ConfigMigrationCommitMessageFactory(
+      config,
+      migratedConfigData.filename
+    );
+    const prTitle = commitMessageFactory.getPrTitle();
+    const closedPrConfig: FindPRConfig = {
+      branchName: configMigrationBranch,
+      prTitle,
+      state: PrState.Closed,
+    };
+
     // handles closed PR
     const closedPr = await platform.findPr(closedPrConfig);
 
@@ -45,20 +49,7 @@ export async function checkConfigMigrationBranch(
         { prTitle: closedPr.title },
         'Closed PR already exists. Skipping branch.'
       );
-      const branchConfig: BranchConfig = {
-        prTitle,
-        manager: '',
-        upgrades: [],
-        branchName: configMigrationBranch,
-        userStrings: {
-          ignoreTopic: 'Renovate Ignore Notification',
-          ignoreMajor: '',
-          ignoreDigest: '',
-          ignoreOther: '',
-        },
-        suppressNotifications: config.suppressNotifications,
-      };
-      await handlepr(branchConfig, closedPr);
+      await handlepr(config, closedPr);
       return null;
     }
   }
@@ -87,4 +78,32 @@ export async function checkConfigMigrationBranch(
 
 export async function migrationPrExists(branchName: string): Promise<boolean> {
   return !!(await platform.getBranchPr(branchName));
+}
+
+async function handlepr(config: RenovateConfig, pr: Pr): Promise<void> {
+  if (
+    pr.state === PrState.Closed &&
+    !config.suppressNotifications!.includes('prIgnoreNotification')
+  ) {
+    if (GlobalConfig.get('dryRun')) {
+      logger.info(
+        `DRY-RUN: Would ensure closed PR comment in PR #${pr.number}`
+      );
+    } else {
+      const content =
+        '\n\nIf this PR was closed by mistake or you changed your mind, you can simply rename this PR and you will soon get a fresh replacement PR opened.';
+      await ensureComment({
+        number: pr.number,
+        topic: 'Renovate Ignore Notification',
+        content,
+      });
+    }
+    if (branchExists(pr.sourceBranch)) {
+      if (GlobalConfig.get('dryRun')) {
+        logger.info('DRY-RUN: Would delete branch ' + pr.sourceBranch);
+      } else {
+        await deleteBranch(pr.sourceBranch);
+      }
+    }
+  }
 }
