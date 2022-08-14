@@ -752,7 +752,6 @@ export async function processBranch(
           branchExists,
           prBlockedBy,
           result: BranchResult.Done,
-
           updateBranchFingerprint: !!commitSha,
         };
       }
