@@ -31,6 +31,21 @@ describe('modules/manager/asdf/extract', () => {
       ]);
     });
 
+    it('ignores supported tooling with ref: versioning', () => {
+      const res = extractPackageFile('nodejs ref:234abc4\n');
+      expect(res.deps).toEqual([]);
+    });
+
+    it('ignores supported tooling with path: versioning', () => {
+      const res = extractPackageFile('nodejs path:/path/to/tooling\n');
+      expect(res.deps).toEqual([]);
+    });
+
+    it('ignores supported tooling with system versioning', () => {
+      const res = extractPackageFile('nodejs system\n');
+      expect(res.deps).toEqual([]);
+    });
+
     describe('comment handling', () => {
       it('ignores comments at the end of lines', () => {
         const res = extractPackageFile('nodejs 16.16.0 # this is a comment\n');
@@ -61,6 +76,11 @@ describe('modules/manager/asdf/extract', () => {
             packageName: 'nodejs/node',
           },
         ]);
+      });
+
+      it('ignores supported tooling with a renovate:ignore comment', () => {
+        const res = extractPackageFile('nodejs 16.16.0 # renovate:ignore\n');
+        expect(res.deps).toEqual([]);
       });
     });
   });
