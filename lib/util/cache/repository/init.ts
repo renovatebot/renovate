@@ -1,4 +1,3 @@
-import { GlobalConfig } from '../../../config/global';
 import type { RenovateConfig } from '../../../config/types';
 import { RepositoryCacheImpl } from './impl/repository-cache-impl';
 import { resetCache, setCache } from '.';
@@ -9,10 +8,9 @@ import { resetCache, setCache } from '.';
 export async function initRepoCache(config: RenovateConfig): Promise<void> {
   resetCache();
 
-  const { platform } = GlobalConfig.get();
   const { repository, repositoryCache, repositoryCacheType: type } = config;
 
-  if (repositoryCache === 'disabled' || !platform || !repository) {
+  if (repositoryCache === 'disabled' || !repository) {
     return;
   }
 
