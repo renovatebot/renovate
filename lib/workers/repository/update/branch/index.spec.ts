@@ -212,7 +212,6 @@ describe('workers/repository/update/branch/index', () => {
         branchExists: false,
         prNo: undefined,
         result: 'error',
-        updateBranchFingerprint: false,
       });
     });
 
@@ -231,7 +230,6 @@ describe('workers/repository/update/branch/index', () => {
         branchExists: false,
         prNo: undefined,
         result: 'error',
-        updateBranchFingerprint: false,
       });
     });
 
@@ -318,7 +316,6 @@ describe('workers/repository/update/branch/index', () => {
         branchExists: true,
         prNo: undefined,
         result: 'error',
-        updateBranchFingerprint: false,
       });
     });
 
@@ -384,7 +381,6 @@ describe('workers/repository/update/branch/index', () => {
         branchExists: true,
         prNo: undefined,
         result: 'error',
-        updateBranchFingerprint: false,
       });
     });
 
@@ -908,7 +904,6 @@ describe('workers/repository/update/branch/index', () => {
         branchExists: false,
         prNo: undefined,
         result: 'error',
-        updateBranchFingerprint: false,
       });
     });
 

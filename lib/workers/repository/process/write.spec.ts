@@ -1,3 +1,5 @@
+import is from '@sindresorhus/is';
+import hasha from 'hasha';
 import {
   RenovateConfig,
   getConfig,
@@ -8,6 +10,7 @@ import {
 } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import { addMeta } from '../../../logger';
+import { hashMap } from '../../../modules/manager';
 import * as _repoCache from '../../../util/cache/repository';
 import type { BranchCache } from '../../../util/cache/repository/types';
 import { Limit, isLimitReached } from '../../global/limits';
@@ -125,6 +128,46 @@ describe('workers/repository/process/write', () => {
       });
       git.branchExists.mockReturnValue(true);
       expect(await writeUpdates({ config }, branches)).toBe('done');
+    });
+
+    it('updates branch fingerprint when commit is made', async () => {
+      const branches = partial<BranchConfig[]>([
+        {
+          branchName: 'new/some-branch',
+          manager: 'npm',
+          upgrades: [
+            {
+              manager: 'npm',
+            } as BranchUpgradeConfig,
+          ],
+        },
+      ]);
+      repoCache.getCache.mockReturnValueOnce({
+        branches: [
+          {
+            branchName: 'new/some-branch',
+            branchFingerprint: '222',
+          } as BranchCache,
+        ],
+      });
+      branchWorker.processBranch.mockResolvedValueOnce({
+        branchExists: true,
+        result: BranchResult.Done,
+        updateBranchFingerprint: true,
+      });
+      git.branchExists.mockReturnValue(true);
+      const branchManagersFingerprint = hasha(
+        branches[0].upgrades
+          .map((upgrade) => hashMap.get(upgrade.manager) ?? upgrade.manager)
+          .filter(is.string)
+      );
+      const fingerprint = hasha([
+        JSON.stringify(branches[0]),
+        branchManagersFingerprint,
+      ]);
+
+      expect(await writeUpdates({ config }, branches)).toBe('done');
+      expect(branches[0].branchFingerprint).toBe(fingerprint);
     });
 
     it('shows debug log when the cache is enabled, but branch cache not found', async () => {

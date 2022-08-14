@@ -63,7 +63,7 @@ export async function writeUpdates(
         .filter(is.string)
     );
     branch.branchFingerprint = hasha([
-      JSON.stringify(config),
+      JSON.stringify(branch),
       branchManagersFingerprint,
     ]);
 
