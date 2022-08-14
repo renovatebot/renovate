@@ -1,8 +1,7 @@
-import _fs from 'fs-extra';
 import { join } from 'upath';
 import { envMock, mockExecAll } from '../../../../test/exec-util';
 import { Fixtures } from '../../../../test/fixtures';
-import { env, git } from '../../../../test/util';
+import { env, fs, git } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import { logger } from '../../../logger';
@@ -12,13 +11,11 @@ import type { UpdateArtifactsConfig } from '../types';
 import { constructPipCompileCmd } from './artifacts';
 import { updateArtifacts } from '.';
 
-jest.mock('fs-extra');
 jest.mock('../../../util/exec/env');
+jest.mock('../../../util/fs');
 jest.mock('../../../util/git');
 jest.mock('../../../util/host-rules');
 jest.mock('../../../util/http');
-
-const fs: jest.Mocked<typeof _fs> = _fs as any;
 
 const adminConfig: RepoGlobalConfig = {
   // `join` fixes Windows CI
@@ -26,6 +23,8 @@ const adminConfig: RepoGlobalConfig = {
   cacheDir: join('/tmp/renovate/cache'),
 };
 const dockerAdminConfig = { ...adminConfig, binarySource: 'docker' };
+
+process.env.BUILDPACK = 'true';
 
 const config: UpdateArtifactsConfig = {};
 const lockMaintenanceConfig = { ...config, isLockFileMaintenance: true };
@@ -43,6 +42,7 @@ describe('modules/manager/pip-compile/artifacts', () => {
   });
 
   it('returns if no requirements.txt found', async () => {
+    const execSnapshots = mockExecAll();
     expect(
       await updateArtifacts({
         packageFileName: 'requirements.in',
@@ -51,12 +51,13 @@ describe('modules/manager/pip-compile/artifacts', () => {
         config,
       })
     ).toBeNull();
+    expect(execSnapshots).toEqual([]);
   });
 
   it('returns null if unchanged', async () => {
-    fs.readFile.mockResolvedValueOnce('content' as any);
+    fs.readLocalFile.mockResolvedValueOnce('content');
     const execSnapshots = mockExecAll();
-    fs.readFile.mockReturnValueOnce('content' as any);
+    fs.readLocalFile.mockResolvedValueOnce('content');
     expect(
       await updateArtifacts({
         packageFileName: 'requirements.in',
@@ -65,16 +66,18 @@ describe('modules/manager/pip-compile/artifacts', () => {
         config,
       })
     ).toBeNull();
-    expect(execSnapshots).toMatchSnapshot();
+    expect(execSnapshots).toMatchObject([
+      { cmd: 'pip-compile requirements.in' },
+    ]);
   });
 
   it('returns updated requirements.txt', async () => {
-    fs.readFile.mockResolvedValueOnce('current requirements.txt' as any);
+    fs.readLocalFile.mockResolvedValueOnce('current requirements.txt');
     const execSnapshots = mockExecAll();
     git.getRepoStatus.mockResolvedValue({
       modified: ['requirements.txt'],
     } as StatusResult);
-    fs.readFile.mockReturnValueOnce('New requirements.txt' as any);
+    fs.readLocalFile.mockResolvedValueOnce('New requirements.txt');
     expect(
       await updateArtifacts({
         packageFileName: 'requirements.in',
@@ -83,7 +86,9 @@ describe('modules/manager/pip-compile/artifacts', () => {
         config: { ...config, constraints: { python: '3.7' } },
       })
     ).not.toBeNull();
-    expect(execSnapshots).toMatchSnapshot();
+    expect(execSnapshots).toMatchObject([
+      { cmd: 'pip-compile requirements.in' },
+    ]);
   });
 
   it('supports docker mode', async () => {
@@ -92,21 +97,70 @@ describe('modules/manager/pip-compile/artifacts', () => {
     git.getRepoStatus.mockResolvedValue({
       modified: ['requirements.txt'],
     } as StatusResult);
-    fs.readFile.mockReturnValueOnce('new lock' as any);
+    fs.readLocalFile.mockResolvedValueOnce('new lock');
+    fs.ensureCacheDir.mockResolvedValueOnce('/tmp/renovate/cache/others/pip');
     expect(
       await updateArtifacts({
         packageFileName: 'requirements.in',
         updatedDeps: [],
         newPackageFileContent: 'some new content',
-        config,
+        config: { ...config, constraints: { python: '3.10.2' } },
       })
     ).not.toBeNull();
-    expect(execSnapshots).toMatchSnapshot();
+
+    expect(execSnapshots).toMatchObject([
+      { cmd: 'docker pull renovate/sidecar' },
+      { cmd: 'docker ps --filter name=renovate_sidecar -aq' },
+      {
+        cmd:
+          'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
+          '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
+          '-v "/tmp/renovate/cache":"/tmp/renovate/cache" ' +
+          '-e PIP_CACHE_DIR ' +
+          '-e BUILDPACK_CACHE_DIR ' +
+          '-w "/tmp/github/some/repo" ' +
+          'renovate/sidecar ' +
+          'bash -l -c "' +
+          'install-tool python 3.10.2 ' +
+          '&& ' +
+          'pip install --user pip-tools ' +
+          '&& ' +
+          'pip-compile requirements.in' +
+          '"',
+      },
+    ]);
+  });
+
+  it('supports install mode', async () => {
+    GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
+    const execSnapshots = mockExecAll();
+    git.getRepoStatus.mockResolvedValue({
+      modified: ['requirements.txt'],
+    } as StatusResult);
+    fs.readLocalFile.mockResolvedValueOnce('new lock');
+    expect(
+      await updateArtifacts({
+        packageFileName: 'requirements.in',
+        updatedDeps: [],
+        newPackageFileContent: 'some new content',
+        config: { ...config, constraints: { python: '3.10.2' } },
+      })
+    ).not.toBeNull();
+
+    expect(execSnapshots).toMatchObject([
+      { cmd: 'install-tool python 3.10.2' },
+      { cmd: 'pip install --user pip-tools' },
+      {
+        cmd: 'pip-compile requirements.in',
+        options: { cwd: '/tmp/github/some/repo' },
+      },
+    ]);
   });
 
   it('catches errors', async () => {
-    fs.readFile.mockResolvedValueOnce('Current requirements.txt' as any);
-    fs.outputFile.mockImplementationOnce(() => {
+    const execSnapshots = mockExecAll();
+    fs.readLocalFile.mockResolvedValueOnce('Current requirements.txt');
+    fs.writeLocalFile.mockImplementationOnce(() => {
       throw new Error('not found');
     });
     expect(
@@ -121,15 +175,16 @@ describe('modules/manager/pip-compile/artifacts', () => {
         artifactError: { lockFile: 'requirements.txt', stderr: 'not found' },
       },
     ]);
+    expect(execSnapshots).toEqual([]);
   });
 
   it('returns updated requirements.txt when doing lockfile maintenance', async () => {
-    fs.readFile.mockResolvedValueOnce('Current requirements.txt' as any);
+    fs.readLocalFile.mockResolvedValueOnce('Current requirements.txt');
     const execSnapshots = mockExecAll();
     git.getRepoStatus.mockResolvedValue({
       modified: ['requirements.txt'],
     } as StatusResult);
-    fs.readFile.mockReturnValueOnce('New requirements.txt' as any);
+    fs.readLocalFile.mockResolvedValueOnce('New requirements.txt');
     expect(
       await updateArtifacts({
         packageFileName: 'requirements.in',
@@ -138,7 +193,9 @@ describe('modules/manager/pip-compile/artifacts', () => {
         config: lockMaintenanceConfig,
       })
     ).not.toBeNull();
-    expect(execSnapshots).toMatchSnapshot();
+    expect(execSnapshots).toMatchObject([
+      { cmd: 'pip-compile requirements.in' },
+    ]);
   });
 
   it('uses pipenv version from config', async () => {
@@ -147,16 +204,41 @@ describe('modules/manager/pip-compile/artifacts', () => {
     git.getRepoStatus.mockResolvedValue({
       modified: ['requirements.txt'],
     } as StatusResult);
-    fs.readFile.mockReturnValueOnce('new lock' as any);
+    fs.readLocalFile.mockResolvedValueOnce('new lock');
+    fs.ensureCacheDir.mockResolvedValueOnce('/tmp/renovate/cache/others/pip');
     expect(
       await updateArtifacts({
         packageFileName: 'requirements.in',
         updatedDeps: [],
         newPackageFileContent: 'some new content',
-        config: { ...config, constraints: { pipTools: '1.2.3' } },
+        config: {
+          ...config,
+          constraints: { python: '3.10.2', pipTools: '==1.2.3' },
+        },
       })
     ).not.toBeNull();
-    expect(execSnapshots).toMatchSnapshot();
+
+    expect(execSnapshots).toMatchObject([
+      { cmd: 'docker pull renovate/sidecar' },
+      { cmd: 'docker ps --filter name=renovate_sidecar -aq' },
+      {
+        cmd:
+          'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
+          '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
+          '-v "/tmp/renovate/cache":"/tmp/renovate/cache" ' +
+          '-e PIP_CACHE_DIR ' +
+          '-e BUILDPACK_CACHE_DIR ' +
+          '-w "/tmp/github/some/repo" ' +
+          'renovate/sidecar ' +
+          'bash -l -c "' +
+          'install-tool python 3.10.2 ' +
+          '&& ' +
+          'pip install --user pip-tools==1.2.3 ' +
+          '&& ' +
+          'pip-compile requirements.in' +
+          '"',
+      },
+    ]);
   });
 
   describe('constructPipCompileCmd()', () => {

@@ -184,7 +184,7 @@ describe('util/exec/common', () => {
         exec(cmd, partial<RawExecOptions>({ encoding: 'utf8' }))
       ).rejects.toMatchObject({
         cmd,
-        message: 'Process exited with exit code "1"',
+        message: `Command failed: ${cmd}\n${stderr}`,
         exitCode,
         stderr,
       });
@@ -200,7 +200,7 @@ describe('util/exec/common', () => {
       ).rejects.toMatchObject({
         cmd,
         signal: exitSignal,
-        message: 'Process signaled with "SIGTERM"',
+        message: `Command failed: ${cmd}\nInterrupted by ${exitSignal}`,
       });
     });
 
