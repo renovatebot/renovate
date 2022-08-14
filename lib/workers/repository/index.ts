@@ -9,7 +9,6 @@ import { deleteLocalFile, privateCacheDir } from '../../util/fs';
 import * as queue from '../../util/http/queue';
 import { addSplit, getSplits, splitInit } from '../../util/split';
 import { setBranchCache } from './cache';
-import { embedChangelogs } from './changelog';
 import { ensureDependencyDashboard } from './dependency-dashboard';
 import handleError from './error';
 import { finaliseRepo } from './finalise';
@@ -49,13 +48,6 @@ export async function renovateRepository(
     ) {
       await ensureOnboardingPr(config, packageFiles, branches);
       addSplit('onboarding');
-      if (config.fetchReleaseNotes && config.repoIsOnboarded) {
-        logger.info('Fetching changelogs');
-        for (const branch of branches) {
-          await embedChangelogs(branch.upgrades);
-        }
-      }
-      addSplit('changelogs');
       const res = await updateRepo(config, branches);
       setMeta({ repository: config.repository });
       addSplit('update');
