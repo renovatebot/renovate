@@ -119,6 +119,7 @@ export class SbtPluginDatasource extends SbtPackageDatasource {
 
       const dependencyUrl = `${searchRoot}/${artifact}`;
 
+      logger.trace({ dependency: packageName, versions }, `Package versions`);
       if (versions) {
         return {
           ...urls,

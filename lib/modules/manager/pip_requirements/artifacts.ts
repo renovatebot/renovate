@@ -3,7 +3,7 @@ import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { exec } from '../../../util/exec';
 import type { ExecOptions } from '../../../util/exec/types';
-import { readLocalFile } from '../../../util/fs';
+import { ensureCacheDir, readLocalFile } from '../../../util/fs';
 import { newlineRegex, regEx } from '../../../util/regex';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
 
@@ -42,10 +42,15 @@ export async function updateArtifacts({
     const execOptions: ExecOptions = {
       cwdFile: '.',
       docker: {
-        image: 'python',
-        tagScheme: 'pip_requirements',
+        image: 'sidecar',
       },
-      preCommands: ['pip install hashin'],
+      preCommands: ['pip install --user hashin'],
+      toolConstraints: [
+        { toolName: 'python', constraint: config.constraints?.python },
+      ],
+      extraEnv: {
+        PIP_CACHE_DIR: await ensureCacheDir('pip'),
+      },
     };
     await exec(cmd, execOptions);
     const newContent = await readLocalFile(packageFileName, 'utf8');

@@ -9,7 +9,25 @@ export const displayName = 'Coerced Semantic Versioning';
 export const urls = ['https://semver.org/'];
 export const supportsRanges = false;
 
-const { is: isStable } = stable;
+function isStable(version: string): boolean {
+  // matching a version with the semver prefix
+  // v1.2.3, 1.2.3, v1.2, 1.2, v1, 1
+  const regx = regEx(
+    /^v?(?<major>\d+)(?<minor>\.\d+)?(?<patch>\.\d+)?(?<others>.+)?/
+  );
+  const m = regx.exec(version);
+
+  if (!m?.groups) {
+    return false;
+  }
+
+  const major = m.groups['major'];
+  const newMinor = m.groups['minor'] ?? '.0';
+  const newPatch = m.groups['patch'] ?? '.0';
+  const others = m.groups['others'] ?? '';
+  const fixed = major + newMinor + newPatch + others;
+  return stable.is(fixed);
+}
 
 function sortVersions(a: string, b: string): number {
   const aCoerced = semver.coerce(a);
@@ -29,7 +47,8 @@ function getMinor(a: string | SemVer): number | null {
 }
 
 function getPatch(a: string | SemVer): number | null {
-  return semver.patch(a);
+  const aCoerced = semver.coerce(a);
+  return aCoerced ? semver.patch(aCoerced) : null;
 }
 
 function matches(version: string, range: string): boolean {
@@ -77,9 +96,10 @@ function isLessThanRange(version: string, range: string): boolean {
 function isGreaterThan(version: string, other: string): boolean {
   const coercedVersion = semver.coerce(version);
   const coercedOther = semver.coerce(other);
-  return coercedVersion && coercedOther
-    ? semver.gt(coercedVersion, coercedOther)
-    : false;
+  if (!coercedVersion || !coercedOther) {
+    return false;
+  }
+  return semver.gt(coercedVersion, coercedOther);
 }
 
 const startsWithNumberRegex = regEx(`^\\d`);

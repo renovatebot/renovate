@@ -3,9 +3,10 @@ import { logger } from '../../../logger';
 import { Http } from '../../../util/http';
 import { regEx } from '../../../util/regex';
 import { ensureTrailingSlash } from '../../../util/url';
+import { detectPlatform } from '../../platform/util';
 import * as ivyVersioning from '../../versioning/ivy';
 import { compare } from '../../versioning/maven/compare';
-import { Datasource } from '../datasource';
+import { MavenDatasource } from '../maven';
 import { MAVEN_REPO } from '../maven/common';
 import { downloadHttpProtocol } from '../maven/util';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
@@ -15,8 +16,8 @@ import {
   parseIndexDir,
 } from './util';
 
-export class SbtPackageDatasource extends Datasource {
-  static id = 'sbt-package';
+export class SbtPackageDatasource extends MavenDatasource {
+  static override id = 'sbt-package';
 
   override readonly defaultRegistryUrls = [MAVEN_REPO];
 
@@ -143,13 +144,19 @@ export class SbtPackageDatasource extends Datasource {
     return result;
   }
 
-  async getReleases({
-    packageName,
-    registryUrl,
-  }: GetReleasesConfig): Promise<ReleaseResult | null> {
+  override async getReleases(
+    config: GetReleasesConfig
+  ): Promise<ReleaseResult | null> {
+    const { packageName, registryUrl } = config;
     // istanbul ignore if
     if (!registryUrl) {
       return null;
+    }
+
+    const platform = detectPlatform(registryUrl);
+    if (platform === 'gitlab') {
+      const mavenReleases = await super.getReleases(config);
+      return mavenReleases;
     }
 
     const [groupId, artifactId] = packageName.split(':');
@@ -183,6 +190,7 @@ export class SbtPackageDatasource extends Datasource {
 
       const dependencyUrl = searchRoot;
 
+      logger.trace({ dependency: packageName, versions }, `Package versions`);
       if (versions) {
         return {
           ...urls,

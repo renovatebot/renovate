@@ -23,6 +23,28 @@ import { getFileList } from '../../../util/git';
 import * as hostRules from '../../../util/host-rules';
 import type { RepoFileConfig } from './types';
 
+async function detectConfigFile(): Promise<string | null> {
+  const fileList = await getFileList();
+  for (const fileName of configFileNames) {
+    if (fileName === 'package.json') {
+      try {
+        const pJson = JSON.parse(
+          (await readLocalFile('package.json', 'utf8'))!
+        );
+        if (pJson.renovate) {
+          logger.debug('Using package.json for global renovate config');
+          return 'package.json';
+        }
+      } catch (err) {
+        // Do nothing
+      }
+    } else if (fileList.includes(fileName)) {
+      return fileName;
+    }
+  }
+  return null;
+}
+
 export async function detectRepoFileConfig(): Promise<RepoFileConfig> {
   const cache = getCache();
   let { configFileName } = cache;
@@ -35,27 +57,6 @@ export async function detectRepoFileConfig(): Promise<RepoFileConfig> {
       return { configFileName, configFileParsed };
     }
     logger.debug('Existing config file no longer exists');
-  }
-  const fileList = await getFileList();
-  async function detectConfigFile(): Promise<string | null> {
-    for (const fileName of configFileNames) {
-      if (fileName === 'package.json') {
-        try {
-          const pJson = JSON.parse(
-            (await readLocalFile('package.json', 'utf8'))!
-          );
-          if (pJson.renovate) {
-            logger.debug('Using package.json for global renovate config');
-            return 'package.json';
-          }
-        } catch (err) {
-          // Do nothing
-        }
-      } else if (fileList.includes(fileName)) {
-        return fileName;
-      }
-    }
-    return null;
   }
   configFileName = (await detectConfigFile()) ?? undefined;
   if (!configFileName) {
