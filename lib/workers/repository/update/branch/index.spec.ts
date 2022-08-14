@@ -1140,6 +1140,41 @@ describe('workers/repository/update/branch/index', () => {
       expect(commit.commitFilesToBranch).not.toHaveBeenCalled();
     });
 
+    it('skips branch update if same updates', async () => {
+      git.branchExists.mockReturnValueOnce(true);
+      git.getBranchCommit.mockReturnValue('111');
+      git.getBranchCommit.mockReturnValue('111');
+      platform.getBranchPr.mockResolvedValueOnce(
+        partial<Pr>({
+          sourceBranch: 'old/some-branch',
+          state: PrState.Open,
+        })
+      );
+      const inconfig = {
+        ...config,
+        branchName: 'new/some-branch',
+        branchPrefix: 'new/',
+        branchPrefixOld: 'old/',
+        branchFingerprint: '111',
+      };
+      const branchCache = partial<BranchCache>({
+        branchName: 'new/some-branch',
+        branchFingerprint: '111',
+        parentSha: '111',
+        sha: '111',
+      });
+      repoCache.getCache.mockReturnValueOnce({
+        branches: [branchCache],
+      });
+      expect(await branchWorker.processBranch(inconfig, branchCache)).toEqual({
+        branchExists: true,
+        prNo: undefined,
+        result: 'error',
+        updateBranchFingerprint: false,
+      });
+      expect(commit.commitFilesToBranch).not.toHaveBeenCalled();
+    });
+
     it('updates branch if stopUpdatingLabel presents and PR rebase/retry box checked', async () => {
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce(
         partial<PackageFilesResult>({
@@ -1780,22 +1815,6 @@ describe('workers/repository/update/branch/index', () => {
       branchCache = {
         branchName: 'new/some-branch',
         sha: '111',
-      } as BranchCache;
-      expect(
-        branchWorker.canSkipBranchUpdateCheck(
-          'new/some-branch',
-          branchCache,
-          '222'
-        )
-      ).toBe(false);
-    });
-
-    it('returns false if branch sha is different', () => {
-      git.getBranchCommit.mockReturnValueOnce('111');
-      branchCache = {
-        branchName: 'new/some-branch',
-        sha: '222',
-        branchFingerprint: '222',
       } as BranchCache;
       expect(
         branchWorker.canSkipBranchUpdateCheck(

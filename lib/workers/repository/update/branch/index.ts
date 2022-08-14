@@ -88,15 +88,10 @@ export function canSkipBranchUpdateCheck(
   branchCache: BranchCache,
   branchFingerprint: string
 ): boolean {
-  const branchCommitSha = getBranchCommit(branchName);
-
   if (!branchCache.branchFingerprint) {
     return false;
   }
-  if (branchCommitSha !== branchCache.sha) {
-    logger.debug('Branch fingerprint check skipped due to changed SHA');
-    return false;
-  }
+
   if (branchFingerprint !== branchCache.branchFingerprint) {
     logger.debug('Branch fingerprint has changed, full check required');
     return false;
@@ -416,6 +411,8 @@ export async function processBranch(
         )
       )
     ) {
+      //eslint-disable-next-line
+      console.log('ASDFGHJK');
       await checkoutBranch(config.baseBranch!);
       const res = await getUpdatedPackageFiles(config);
       // istanbul ignore if
