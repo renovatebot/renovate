@@ -20,21 +20,21 @@ export function extractPackageFile(content: string): PackageFile {
   const regex =
     /^(?<content>(?<toolname>(\w+))\s+(?<version>(\d[\d.]+\d)))([^#]*(#(?<comment>(.*))))?/gm;
 
-  const deps = [...content.matchAll(regex)]
-    .filter((match) => !!match.groups)
-    .map((match) => match.groups!)
-    .filter((groups) => upgradeableTooling[groups['toolname']])
-    .filter((groups) => !isSkipComment((groups['comment'] ?? '').trim()))
-    .map((groups) => {
-      const tool = upgradeableTooling[groups['toolname']];
+  const deps: PackageDependency[] = [];
+
+  for (const match of [...content.matchAll(regex)].filter((m) => !!m.groups)) {
+    const groups = match.groups!;
+    const supportedTool = upgradeableTooling[groups['toolname']];
+    if (supportedTool && !isSkipComment((groups['comment'] ?? '').trim())) {
       const dep: PackageDependency = {
-        depName: tool.depName,
+        depName: supportedTool.depName,
         currentValue: groups['content'].trim(),
-        datasource: tool.datasource,
-        packageName: tool.packageName,
+        datasource: supportedTool.datasource,
+        packageName: supportedTool.packageName,
       };
-      return dep;
-    });
+      deps.push(dep);
+    }
+  }
 
   return { deps };
 }

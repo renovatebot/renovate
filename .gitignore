@@ -26,6 +26,3 @@ test/datasource/nuget/_fixtures/obj
 
 # testing
 /docker-compose.yml
-
-# version management
-.tool-versions
