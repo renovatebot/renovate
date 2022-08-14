@@ -641,7 +641,7 @@ describe('workers/repository/dependency-dashboard', () => {
       ).toBeTrue();
     });
 
-    it('dependency Dashboard Open All Rate Limited', async () => {
+    it('dependency Dashboard Open All rate-limited', async () => {
       const branches: BranchConfig[] = [
         {
           ...mock<BranchConfig>(),
