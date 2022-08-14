@@ -31,7 +31,7 @@ describe('modules/manager/gomod/extract', () => {
           }),
         ])
       );
-      expect(res?.constraints?.go).toBe('^1.13');
+      expect(res?.extractedConstraints?.go).toBe('^1.13');
     });
 
     it('extracts multi-line requires', () => {

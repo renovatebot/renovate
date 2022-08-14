@@ -51,7 +51,7 @@ function getGoDep(lineNumber: number, goVer: string): PackageDependency {
 
 export function extractPackageFile(content: string): PackageFile | null {
   logger.trace({ content }, 'gomod.extractPackageFile()');
-  const constraints: Record<string, any> = {};
+  const extractedConstraints: Record<string, any> = {};
   const deps: PackageDependency[] = [];
   try {
     const lines = content.split(newlineRegex);
@@ -61,7 +61,7 @@ export function extractPackageFile(content: string): PackageFile | null {
       if (goVer && semver.validRange(goVer)) {
         const dep = getGoDep(lineNumber, goVer);
         deps.push(dep);
-        constraints.go = line.replace('go ', '^');
+        extractedConstraints.go = line.replace('go ', '^');
       }
       const replaceMatch = regEx(
         /^replace\s+[^\s]+[\s]+[=][>]\s+([^\s]+)\s+([^\s]+)/
@@ -100,5 +100,5 @@ export function extractPackageFile(content: string): PackageFile | null {
   if (!deps.length) {
     return null;
   }
-  return { constraints, deps };
+  return { extractedConstraints, deps };
 }
