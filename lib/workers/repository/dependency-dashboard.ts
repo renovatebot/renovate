@@ -19,6 +19,17 @@ interface DependencyDashboard {
   dependencyDashboardAllRateLimited: boolean;
 }
 
+const checkMatchRate = ' - \\[ \\] <!-- unlimit-branch=([^\\s]+) -->';
+const rateLimitedRe = regEx(checkMatchRate, 'g');
+const checkMatchPendingApproval =
+  ' - \\[ \\] <!-- approve-branch=([^\\s]+) -->';
+const pendingApprovalRe = regEx(checkMatchPendingApproval, 'g');
+const checkMatchGeneral = ' <!-- ([a-zA-Z]+)-branch=([^\\s]+) -->';
+const generalBranchRe = regEx(checkMatchGeneral);
+const checkMatchMarkedBranches =
+  ' - \\[x\\] <!-- ([a-zA-Z]+)-branch=([^\\s]+) -->';
+const markedBranchesRe = regEx(checkMatchMarkedBranches, 'g');
+
 function checkOpenAllRateLimitedPR(issueBody: string): boolean {
   return issueBody.includes(' - [x] <!-- open-all-rate-limited-prs -->');
 }
@@ -34,15 +45,11 @@ function checkRebaseAll(issueBody: string): boolean {
 function selectAllRelevantBranches(issueBody: string): string[] {
   const checkedBranches = [];
   if (checkOpenAllRateLimitedPR(issueBody)) {
-    const checkMatchRate = ' - \\[ \\] <!-- unlimit-branch=([^\\s]+) -->';
-    const checkedRate = issueBody.match(regEx(checkMatchRate, 'g')) ?? [];
+    const checkedRate = issueBody.match(rateLimitedRe) ?? [];
     checkedBranches.push(...checkedRate);
   }
   if (checkApproveAllPendingPR(issueBody)) {
-    const checkMatchPendingApproval =
-      ' - \\[ \\] <!-- approve-branch=([^\\s]+) -->';
-    const checkedPending =
-      issueBody.match(regEx(checkMatchPendingApproval, 'g')) ?? [];
+    const checkedPending = issueBody.match(regEx(pendingApprovalRe, 'g')) ?? [];
     checkedBranches.push(...checkedPending);
   }
   return checkedBranches;
@@ -52,20 +59,17 @@ function getAllSelectedBranches(
   issueBody: string,
   dependencyDashboardChecks: Record<string, string>
 ): Record<string, string> {
-  const generalCheckMatch = ' <!-- ([a-zA-Z]+)-branch=([^\\s]+) -->';
   const allRelevantBranches = selectAllRelevantBranches(issueBody);
-  const re = regEx(generalCheckMatch);
   allRelevantBranches.forEach((branch) => {
-    const [, type, branchName] = re.exec(branch)!;
+    const [, type, branchName] = generalBranchRe.exec(branch)!;
     dependencyDashboardChecks[branchName] = type;
   });
   return dependencyDashboardChecks;
 }
 
 function getCheckedBranches(issueBody: string): Record<string, string> {
-  const checkMatch = /- \[x\] <!-- ([a-zA-Z]+)-branch=([^\s]+) -->/g;
   let dependencyDashboardChecks: Record<string, string> = {};
-  for (const [, type, branchName] of issueBody.matchAll(regEx(checkMatch))) {
+  for (const [, type, branchName] of issueBody.matchAll(markedBranchesRe)) {
     dependencyDashboardChecks[branchName] = type;
   }
   dependencyDashboardChecks = getAllSelectedBranches(
