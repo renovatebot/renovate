@@ -71,6 +71,9 @@ export async function writeUpdates(
     branch.prBlockedBy = res?.prBlockedBy;
     branch.prNo = res?.prNo;
     branch.result = res?.result;
+    if (!(res?.branchExists && res?.updateBranchFingerprint)) {
+      branch.branchFingerprint = branchCache.branchFingerprint;
+    }
     if (
       branch.result === BranchResult.Automerged &&
       branch.automergeType !== 'pr-comment'
