@@ -140,7 +140,7 @@ module.exports = {
   hostRules: [
     {
       matchHost: 'your.host.io',
-      hostType: 'helm'
+      hostType: 'helm',
       username: '<your-username>',
       password: process.env.SELF_HOSTED_HELM_CHARTS_PASSWORD,
     },
@@ -322,18 +322,17 @@ npmRegistries:
 ### nuget
 
 For each known NuGet registry, Renovate searches for `hostRules` with `hostType=nuget` and matching host.
-For those found, a command similar to the following is
-run: `dotnet nuget add source ${registryInfo.feedUrl} --configfile ${nugetConfigFile} --username ${username} --password ${password} --store-password-in-clear-text`
+For those found, a command like the following is run: `dotnet nuget add source ${registryInfo.feedUrl} --configfile ${nugetConfigFile} --username ${username} --password ${password} --store-password-in-clear-text`.
 
 ```js
 hostRules: [
   {
-    matchHost: "https://pkgs.dev.azure.com/<org>/",
-    hostType: "nuget",
-    username: "user",
-    password: "<Encrypted PAT Token>"
-  }
-]
+    matchHost: 'https://pkgs.dev.azure.com/<org>/',
+    hostType: 'nuget',
+    username: 'user', // doesn't matter for azure
+    password: '<PAT>',
+  },
+];
 ```
 
 ### poetry

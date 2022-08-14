@@ -148,9 +148,17 @@ Supported tools for dynamic install are:
 - `gradle-wrapper`
 - `jb`
 - `jsonnet-bundler`
+- `lerna`
 - `mix`
+- `node`
 - `npm`
+- `pip_requirements`
+- `pip-compile`
 - `pipenv`
+- `pnpm`
+- `poetry`
+- `python`
+- `yarn`
 
 If all projects are managed by Hermit, you can tell Renovate to use the tooling versions specified in each project via Hermit by setting `binarySource=hermit`.
 
@@ -608,7 +616,7 @@ Elements in the `repositories` array can be an object if you wish to define addi
   repositories: [
     { repository: 'g/r1', bumpVersion: true },
     'g/r2'
-  ],
+  ]
 }
 ```
 
