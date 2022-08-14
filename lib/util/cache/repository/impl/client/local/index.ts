@@ -19,7 +19,6 @@ export class LocalRepoCache implements CacheClient {
     const cacheFileName = this.getCacheFileName();
     let data: string | undefined;
     try {
-      const cacheFileName = this.getCacheFileName();
       const rawCache = await readCacheFile(cacheFileName, 'utf8');
       data = JSON.parse(rawCache);
     } catch (err) {
