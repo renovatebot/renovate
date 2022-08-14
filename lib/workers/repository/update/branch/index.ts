@@ -366,7 +366,7 @@ export async function processBranch(
       );
     } else if (userOpenAllRateLimtedPR) {
       logger.debug(
-        'Manual Open All Rate limited PRs requested via Dependency Dashboard'
+        'A user manually approved all rate-limited PRs via the Dependency Dashboard.'
       );
     } else if (branchExists && config.rebaseWhen === 'never') {
       logger.debug('rebaseWhen=never so skipping branch update check');
