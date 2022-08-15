@@ -63,11 +63,11 @@ export async function writeUpdates(
       meta['baseBranch'] = baseBranch;
     }
     addMeta(meta);
-    const branchExisted = branchExists(branch.branchName);
+    const branchExisted = branchExists(branchName);
     let branchCache = {} as BranchCache;
     if (branchExisted && config.repositoryCache === 'enabled') {
       branchCache =
-        cachedBranches?.find((br) => br.branchName === branch.branchName) ??
+        cachedBranches?.find((br) => br.branchName === branchName) ??
         ({} as BranchCache);
 
       if (Object.keys(branchCache).length === 0) {

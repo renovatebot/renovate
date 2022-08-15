@@ -127,7 +127,8 @@ describe('workers/repository/process/write', () => {
         result: BranchResult.NoWork,
       });
       git.branchExists.mockReturnValue(true);
-      expect(await writeUpdates({ config }, branches)).toBe('done');
+      config.repositoryCache = 'enabled';
+      expect(await writeUpdates(config, branches)).toBe('done');
     });
 
     it('updates branch fingerprint when commit is made', async () => {
@@ -137,7 +138,7 @@ describe('workers/repository/process/write', () => {
           manager: 'npm',
           upgrades: [
             {
-              manager: 'npm',
+              manager: 'unknown-manager',
             } as BranchUpgradeConfig,
           ],
         },
@@ -165,8 +166,8 @@ describe('workers/repository/process/write', () => {
         JSON.stringify(branches[0]),
         branchManagersFingerprint,
       ]);
-
-      expect(await writeUpdates({ config }, branches)).toBe('done');
+      config.repositoryCache = 'enabled';
+      expect(await writeUpdates(config, branches)).toBe('done');
       expect(branches[0].branchFingerprint).toBe(fingerprint);
     });
 
