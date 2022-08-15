@@ -1002,10 +1002,12 @@ describe('workers/repository/update/branch/index', () => {
     });
 
     it('branch pr no schedule (dry run)', async () => {
-      getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
-        updatedPackageFiles: [{}],
-        artifactErrors: [{}],
-      } as PackageFilesResult);
+      getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce(
+        partial<PackageFilesResult>({
+          updatedPackageFiles: [],
+          artifactErrors: [],
+        })
+      );
       npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
         artifactErrors: [],
         updatedArtifacts: [partial<FileChange>({})],
@@ -1027,17 +1029,20 @@ describe('workers/repository/update/branch/index', () => {
       } as ResultWithPr);
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
       GlobalConfig.set({ ...adminConfig, dryRun: 'full' });
-      // TODO: some error
-      const inconfig = {
-        ...config,
-        artifactErrors: [{}],
-      } as BranchConfig;
-      expect(await branchWorker.processBranch(inconfig)).toEqual({
+      expect(
+        await branchWorker.processBranch({
+          ...config,
+          artifactErrors: [],
+        })
+      ).toEqual({
         branchExists: true,
         prNo: undefined,
         result: 'done',
         updateBranchFingerprint: false,
       });
+      expect(logger.info).toHaveBeenCalledWith(
+        'DRY-RUN: Would ensure comment removal in PR #undefined'
+      );
     });
 
     it('branch pr no schedule', async () => {
