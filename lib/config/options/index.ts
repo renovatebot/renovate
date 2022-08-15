@@ -828,6 +828,9 @@ const options: RenovateOptions[] = [
       'helmfile',
       'gitlabci',
       'dockerfile',
+      'docker-compose',
+      'kubernetes',
+      'ansible',
     ],
   },
   {
