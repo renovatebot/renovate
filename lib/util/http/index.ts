@@ -95,7 +95,7 @@ async function gotRoutine<T>(
 export class Http<GetOptions = HttpOptions, PostOptions = HttpPostOptions> {
   private options?: GotOptions;
 
-  constructor(private hostType: string, options: HttpOptions = {}) {
+  constructor(protected hostType: string, options: HttpOptions = {}) {
     this.options = merge<GotOptions>(options, { context: { hostType } });
   }
 

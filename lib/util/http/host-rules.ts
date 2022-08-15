@@ -10,7 +10,7 @@ import type { HostRule } from '../../types';
 import * as hostRules from '../host-rules';
 import type { GotOptions } from './types';
 
-function findMatchingRules(options: GotOptions, url: string): HostRule {
+export function findMatchingRules(options: GotOptions, url: string): HostRule {
   const { hostType } = options;
   let res = hostRules.find({ hostType, url });
 

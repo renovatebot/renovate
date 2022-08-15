@@ -4,6 +4,7 @@ import * as packageCache from '../../../../util/cache/package';
 import type {
   GithubGraphqlResponse,
   GithubHttp,
+  GithubHttpOptions,
 } from '../../../../util/http/github';
 import type { GetReleasesConfig } from '../../types';
 import { getApiBaseUrl } from '../common';
@@ -164,12 +165,14 @@ export abstract class AbstractGithubDatasourceCache<
 
   private async query(
     baseUrl: string,
-    variables: GithubQueryParams
+    variables: GithubQueryParams,
+    options: GithubHttpOptions
   ): Promise<QueryResponse<FetchedItem> | Error> {
     try {
       const graphqlRes = await this.http.postJson<
         GithubGraphqlResponse<QueryResponse<FetchedItem>>
       >('/graphql', {
+        ...options,
         baseUrl,
         body: { query: this.graphqlQuery, variables },
       });
@@ -264,7 +267,9 @@ export abstract class AbstractGithubDatasourceCache<
           : this.maxPrefetchPages;
         let stopIteration = false;
         while (pagesRemained > 0 && !stopIteration) {
-          const res = await this.query(baseUrl, variables);
+          const res = await this.query(baseUrl, variables, {
+            repository: packageName,
+          });
           if (res instanceof Error) {
             if (
               res.message.startsWith(
