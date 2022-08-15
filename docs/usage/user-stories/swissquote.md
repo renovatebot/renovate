@@ -13,9 +13,10 @@ But there are also other aspects like bugs caused by your dependencies.
 
 Depending on third-party software is a sword of Damocles; you never know when a new issue will force you to drop everything to upgrade your software.
 
-![An XKCD Comic about software dependencies](../assets/images/swissquote_xkcd.png)
-
-[XKCD comic 2347](https://xkcd.com/2347/) is always relevant when talking about dependencies.
+<figure markdown>
+  ![XKCD 2347](../assets/images/swissquote_xkcd.png){ loading=lazy }
+  <figcaption><a href=https://xkcd.com/2347/ target=_blank>XKCD comic 2347</a> is always relevant when talking about dependencies.</figcaption>
+</figure>
 
 Each software dependency is a risk.
 For example: SQL Injections, is the ORM you are using properly escaping the content you are passing to it?
@@ -89,7 +90,10 @@ Some might be using the latest version of Java with the latest Spring, some with
 Every company that’s been around for sometime has that old project still running.
 People talk about it laughingly but become livid when a request comes to change anything in it.
 
-![A person sweating profusely at the idea of having to touch an old project](../assets/images/swissquote_sweating_guy.jpg)
+<figure markdown>
+  ![Sweating person](../assets/images/swissquote_sweating_guy.jpg){ loading=lazy }
+  <figcaption>A person sweating profusely at the idea of having to touch an old project.</figcaption>
+</figure>
 
 There is a fix to make on that project, the last person working on it left three years ago.
 
@@ -133,9 +137,10 @@ On our first try, we enabled 30 repositories, a cron task was running every hour
 
 We received 700 Pull Requests in the first month, it was a never ending Pull Request whack-a-mole: every time we merged one, another replaced it.
 
-![A cat playing Whack-a-mole with a finger](../assets/images/swissquote_cat_whack_a_mole.jpg)
-
-Me and my team merging Pull Requests.
+<figure markdown>
+  ![A cat playing Whack-a-mole with a finger](../assets/images/swissquote_cat_whack_a_mole.jpg){ loading=lazy }
+  <figcaption>Me and my team merging Pull Requests.</figcaption>
+</figure>
 
 The awesome thing with Renovate is that it’s very configurable, and this configuration can be shared.
 Very early on we created a shared configuration for our team with some custom policies, here are a few things we decided to do:
@@ -185,7 +190,10 @@ We started to collect metrics and store the logs separately for each repository.
 
 Here is the dashboard for our current scheduler:
 
-![A dashboard we made at Swissquote to keep our Renovate runs in check, July 2022](../assets/images/swissquote_stats.png)
+<figure markdown>
+  ![Swissquote scheduler dashboard](../assets/images/swissquote_stats.png){ loading=lazy }
+  <figcaption>A dashboard we made at Swissquote to keep our Renovate runs in check, July 2022.</figcaption>
+</figure>
 
 We don’t force any team to use Renovate, each team can decide to opt-in and do it for each project separately.
 
