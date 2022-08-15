@@ -1,6 +1,7 @@
 import { PullRequestStatusEnum } from '@aws-sdk/client-codecommit';
 import type { Credentials } from '@aws-sdk/types';
 import JSON5 from 'json5';
+import { TextDecoder } from 'web-encoding';
 import {
   PLATFORM_BAD_CREDENTIALS,
   REPOSITORY_EMPTY,
@@ -29,6 +30,7 @@ import type {
   UpdatePrConfig,
 } from '../types';
 import { smartTruncate } from '../utils/pr-body';
+// eslint-disable-next-line import/named
 import * as client from './codecommit-client';
 import { getCodeCommitUrl, getNewBranchName } from './util';
 
@@ -85,12 +87,9 @@ export async function initPlatform({
 
   client.buildCodeCommitClient(region, credentials);
 
-  try {
-    // check if credentials work, listRepositories doesn't need repository name input
-    await client.listRepositories();
-  } catch (error) {
-    throw new Error(PLATFORM_BAD_CREDENTIALS);
-  }
+  // check if credentials work, listRepositories doesn't need repository name input
+  await client.listRepositories();
+  // error could be either bad credentials or no permission rules set for the current user
 
   const platformConfig: PlatformResult = {
     endpoint: endpoint ?? `https://git-codecommit.${region}.amazonaws.com`,
@@ -107,18 +106,18 @@ export async function initRepo({
   const url = getCodeCommitUrl(config.region!, repository, config.credentials!);
   try {
     await git.initRepo({
-      ...config,
       url,
     });
   } catch (err) {
+    logger.debug({ err }, 'Failed to git init');
     throw new Error(PLATFORM_BAD_CREDENTIALS);
   }
 
   let repo;
   try {
     repo = await client.getRepositoryInfo(repository);
-  } catch (error) {
-    logger.error({ repository }, 'Could not find repository');
+  } catch (err) {
+    logger.error({ err }, 'Could not find repository');
     throw new Error(REPOSITORY_NOT_FOUND);
   }
 

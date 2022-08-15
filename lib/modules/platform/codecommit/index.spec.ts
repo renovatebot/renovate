@@ -1,5 +1,11 @@
+import {
+  PLATFORM_BAD_CREDENTIALS,
+  REPOSITORY_EMPTY,
+  REPOSITORY_NOT_FOUND,
+} from '../../../constants/error-messages';
 import type { logger as _logger } from '../../../logger';
 import { PrState } from '../../../types';
+import type * as _git from '../../../util/git';
 import type { Platform } from '../types';
 import { massageMarkdown } from './index';
 
@@ -8,14 +14,15 @@ jest.mock('@aws-sdk/client-codecommit');
 describe('modules/platform/codecommit/index', () => {
   let codeCommit: Platform;
   let logger: jest.Mocked<typeof _logger>;
+  let git: jest.Mocked<typeof _git>;
   let codeCommitClient: any;
 
   beforeEach(async () => {
-    // reset module
     jest.resetModules();
     jest.mock('../../../util/git');
     jest.mock('../../../util/host-rules');
     jest.mock('../../../logger');
+    git = require('../../../util/git');
     const mod = require('@aws-sdk/client-codecommit');
     codeCommitClient = mod['CodeCommit'];
     codeCommit = await import('.');
@@ -38,28 +45,49 @@ describe('modules/platform/codecommit/index', () => {
   });
 
   describe('initPlatform()', () => {
-    it('should throw if no username/password', () => {
-      expect(() => codeCommit.initPlatform({})).toThrow(
+    it('should throw if no username/password', async () => {
+      let error;
+      try {
+        await codeCommit.initPlatform({});
+      } catch (e) {
+        error = e.message;
+      }
+      expect(error).toBe(
         'Init: You must configure a AWS user(accessKeyId), password(secretAccessKey) and endpoint/AWS_REGION'
       );
+
+      // this simplier syntax is not working for me,
+      // expect( () => codeCommit.initPlatform({})).toThrow(
+      //   'Init: You must configure a AWS user(accessKeyId), password(secretAccessKey) and endpoint/AWS_REGION'
+      // );
     });
 
-    it('should show warning message if custom endpoint', () => {
-      expect(() =>
-        codeCommit.initPlatform({
+    it('should show warning message if custom endpoint', async () => {
+      let error;
+      try {
+        await codeCommit.initPlatform({
           endpoint: 'endpoint',
           username: 'abc',
           password: '123',
-        })
-      ).toThrow(
+        });
+      } catch (e) {
+        error = e.message;
+      }
+      expect(error).toBe(
         'Init: You must configure a AWS user(accessKeyId), password(secretAccessKey) and endpoint/AWS_REGION'
       );
+
       expect(logger.warn).toHaveBeenCalledWith(
         "Can't parse region, make sure your endpoint is correct"
       );
     });
 
     it('should init', async () => {
+      jest
+        .spyOn(codeCommitClient.prototype, 'send')
+        .mockImplementationOnce(() => {
+          return Promise.resolve();
+        });
       expect(
         await codeCommit.initPlatform({
           endpoint: 'https://git-codecommit.REGION.amazonaws.com/',
@@ -67,9 +95,107 @@ describe('modules/platform/codecommit/index', () => {
           password: '123',
         })
       ).toEqual({
-        endpoint: 'REGION',
-        token: '123',
-        renovateUsername: 'abc',
+        endpoint: 'https://git-codecommit.REGION.amazonaws.com/',
+      });
+    });
+  });
+
+  describe('initRepos()', () => {
+    it('fails to git.initRepo', async () => {
+      jest.spyOn(git, 'initRepo').mockImplementationOnce(() => {
+        throw new Error('any error');
+      });
+      let error;
+      try {
+        await codeCommit.initRepo({
+          repository: 'repositoryName',
+        });
+      } catch (e) {
+        error = e.message;
+      }
+      expect(error).toBe(PLATFORM_BAD_CREDENTIALS);
+    });
+
+    it('fails on getRepositoryInfo', async () => {
+      jest.spyOn(git, 'initRepo').mockImplementationOnce(() => {
+        return Promise.resolve();
+      });
+      jest
+        .spyOn(codeCommitClient.prototype, 'send')
+        .mockImplementationOnce(() => {
+          throw new Error('Could not find repository');
+        });
+      let error;
+      try {
+        await codeCommit.initRepo({
+          repository: 'repositoryName',
+        });
+      } catch (e) {
+        error = e.message;
+      }
+      expect(error).toBe(REPOSITORY_NOT_FOUND);
+    });
+
+    it('getRepositoryInfo returns bad results', async () => {
+      jest.spyOn(git, 'initRepo').mockImplementationOnce(() => {
+        return Promise.resolve();
+      });
+      jest
+        .spyOn(codeCommitClient.prototype, 'send')
+        .mockImplementationOnce(() => {
+          return Promise.resolve();
+        });
+      let error;
+      try {
+        await codeCommit.initRepo({
+          repository: 'repositoryName',
+        });
+      } catch (e) {
+        error = e.message;
+      }
+      expect(error).toBe(REPOSITORY_NOT_FOUND);
+    });
+
+    it('getRepositoryInfo returns bad results 2', async () => {
+      jest.spyOn(git, 'initRepo').mockImplementationOnce(() => {
+        return Promise.resolve();
+      });
+      jest
+        .spyOn(codeCommitClient.prototype, 'send')
+        .mockImplementationOnce(() => {
+          return Promise.resolve({ repo: {} });
+        });
+      let error;
+      try {
+        await codeCommit.initRepo({
+          repository: 'repositoryName',
+        });
+      } catch (e) {
+        error = e.message;
+      }
+      expect(error).toBe(REPOSITORY_EMPTY);
+    });
+
+    it('initiates repo successfully', async () => {
+      jest.spyOn(git, 'initRepo').mockImplementationOnce(() => {
+        return Promise.resolve();
+      });
+      jest
+        .spyOn(codeCommitClient.prototype, 'send')
+        .mockImplementationOnce(() => {
+          return Promise.resolve({
+            repositoryMetadata: {
+              defaultBranch: 'main',
+            },
+          });
+        });
+      const repoResult = await codeCommit.initRepo({
+        repository: 'repositoryName',
+      });
+
+      expect(repoResult).toEqual({
+        defaultBranch: 'main',
+        isFork: false,
       });
     });
   });
