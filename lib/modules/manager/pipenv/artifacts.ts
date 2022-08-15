@@ -99,13 +99,18 @@ export async function updateArtifacts({
       cwdFile: pipfileName,
       extraEnv: {
         PIPENV_CACHE_DIR: await ensureCacheDir('pipenv'),
+        PIP_CACHE_DIR: await ensureCacheDir('pip'),
       },
       docker: {
-        image: 'python',
-        tagConstraint,
-        tagScheme: 'pep440',
+        image: 'sidecar',
       },
       preCommands: [`pip install --user ${quote(`pipenv${pipenvConstraint}`)}`],
+      toolConstraints: [
+        {
+          toolName: 'python',
+          constraint: tagConstraint,
+        },
+      ],
     };
     logger.debug({ cmd }, 'pipenv lock command');
     await exec(cmd, execOptions);

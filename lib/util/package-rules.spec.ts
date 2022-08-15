@@ -157,20 +157,54 @@ describe('util/package-rules', () => {
 
   it('ignores patterns if lock file maintenance', () => {
     const dep = {
-      enabled: true,
-      matchPackagePatterns: ['.*'],
+      automerge: true,
       updateType: 'lockFileMaintenance' as UpdateType,
       packageRules: [
         {
           excludePackagePatterns: ['^foo'],
-          enabled: false,
+          automerge: false,
         },
       ],
     };
     const res = applyPackageRules(dep);
-    expect(res.enabled).toBeTrue();
-    const res2 = applyPackageRules({ ...dep, depName: 'anything' });
-    expect(res2.enabled).toBeFalse();
+    expect(res.automerge).toBeFalse();
+    const res2 = applyPackageRules({ ...dep, depName: 'foo' });
+    expect(res2.automerge).toBeTrue();
+  });
+
+  it('do not apply rule with empty matchPackagePattern', () => {
+    const dep = {
+      automerge: true,
+      updateType: 'lockFileMaintenance' as UpdateType,
+      packageRules: [
+        {
+          matchPackagePatterns: [],
+          excludePackagePatterns: ['^foo'],
+          automerge: false,
+        },
+      ],
+    };
+    const res = applyPackageRules(dep);
+    expect(res.automerge).toBeTrue();
+    const res2 = applyPackageRules({ ...dep, depName: 'foo' });
+    expect(res2.automerge).toBeTrue();
+  });
+
+  it('do apply rule with matchPackageName', () => {
+    const dep = {
+      automerge: true,
+      updateType: 'lockFileMaintenance' as UpdateType,
+      packageRules: [
+        {
+          matchPackageNames: ['foo'],
+          automerge: false,
+        },
+      ],
+    };
+    const res = applyPackageRules(dep);
+    expect(res.automerge).toBeTrue();
+    const res2 = applyPackageRules({ ...dep, depName: 'foo' });
+    expect(res2.automerge).toBeFalse();
   });
 
   it('matches anything if missing inclusive rules', () => {
