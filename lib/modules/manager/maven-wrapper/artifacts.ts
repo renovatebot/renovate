@@ -73,7 +73,7 @@ export async function updateArtifacts({
         packageFileName.replace('.mvn/wrapper/maven-wrapper.properties', '') +
         filename
     );
-    const updateArtifactsResult = await (
+    const updateArtifactsResult = (
       await getUpdatedArtifacts(status, artifactFileNames)
     ).filter(is.truthy);
 
@@ -98,7 +98,7 @@ export async function updateArtifacts({
 async function getUpdatedArtifacts(
   status: StatusResult,
   artifactFileNames: string[]
-) {
+): Promise<(UpdateArtifactsResult | null)[]> {
   const updatedResults: (UpdateArtifactsResult | null)[] = [];
   for (const artifactFileName of artifactFileNames) {
     updatedResults.push(await addIfUpdated(status, artifactFileName));

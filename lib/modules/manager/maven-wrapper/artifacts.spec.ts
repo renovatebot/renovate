@@ -1,8 +1,8 @@
 import type { Stats } from 'fs';
-import { envMock, mockExecAll } from '../../../../test/exec-util';
 import os from 'os';
 import type { StatusResult } from 'simple-git';
-import { fs, git, partial, env } from '../../../../test/util';
+import { envMock, mockExecAll } from '../../../../test/exec-util';
+import { env, fs, git, partial } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import { updateArtifacts } from '.';
