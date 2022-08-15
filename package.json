@@ -52,8 +52,9 @@
     "tsc": "tsc",
     "type-check": "run-s generate:* \"tsc --noEmit {@}\" --",
     "update-static-data": "run-s update-static-data:*",
-    "update-static-data:distro-info": "node tools/distro-json-generate.mjs",
-    "update-static-data:azure-pipelines-tasks": "node tools/azure-pipelines-tasks-json-generate.mjs",
+    "update-static-data:distro-info": "node tools/static-data/generate-distro-info.mjs",
+    "update-static-data:azure-pipelines-tasks": "node tools/static-data/generate-azure-pipelines-tasks.mjs",
+    "update-static-data:node-schedule": "node tools/static-data/generate-node-schedule.mjs",
     "verify": "node tools/verify.mjs"
   },
   "repository": {

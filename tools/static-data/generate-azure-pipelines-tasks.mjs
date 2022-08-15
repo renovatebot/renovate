@@ -6,6 +6,7 @@ import JSON5 from 'json5';
 import shell from 'shelljs';
 import Git from 'simple-git';
 import path from 'upath';
+import { updateJsonFile } from './utils.mjs';
 
 const glob = promisify(g);
 const localPath = path.join(os.tmpdir(), 'azure-pipelines-tasks');
@@ -19,6 +20,7 @@ const localPath = path.join(os.tmpdir(), 'azure-pipelines-tasks');
  *  5. After all the `task.json` files have been processed it writes the results to `./data/azure-pipelines-tasks.json`
  */
 await (async () => {
+  shell.echo('Generating azure pipelines tasks');
   await fs.ensureDir(localPath);
   const git = Git(localPath);
 
@@ -66,5 +68,5 @@ await (async () => {
     2
   );
 
-  await fs.writeFile(`./data/azure-pipelines-tasks.json`, data);
+  await updateJsonFile(`./data/azure-pipelines-tasks.json`, data);
 })();
