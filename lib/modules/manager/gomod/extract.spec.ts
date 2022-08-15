@@ -56,7 +56,7 @@ replace (
 )`;
       const res = extractPackageFile(goMod);
       expect(res).toEqual({
-        constraints: {
+        extractedConstraints: {
           go: '^1.18',
         },
         deps: [
