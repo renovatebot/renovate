@@ -288,7 +288,7 @@ export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
       const authUrl = new URL(resolveBaseUrl(opts.baseUrl!, url));
 
       if (opts.repository) {
-        // set authUrl to https://api.gihub.com/repos/org/repo or https://gihub.domain.com/api/v3/repos/org/repo
+        // set authUrl to https://api.github.com/repos/org/repo or https://gihub.domain.com/api/v3/repos/org/repo
         authUrl.hash = '';
         authUrl.search = '';
         authUrl.pathname = joinUrlParts(
