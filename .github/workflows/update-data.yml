@@ -29,6 +29,9 @@ jobs:
       - name: Update data
         run: yarn run update-static-data
 
+      - name: prettify
+        run: yarn prettier-fix
+
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@923ad837f191474af6b1721408744feb989a4c27 # tag=v4.0.4
         with:
@@ -37,3 +40,4 @@ jobs:
           commit-message: 'fix(data): automatic update of static data'
           committer: 'Renovate Bot <renovate@whitesourcesoftware.com>'
           title: 'fix(data): automatic update of static data'
+          assignees: rarkins,viceice

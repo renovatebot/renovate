@@ -89,6 +89,7 @@ describe('website-docs', () => {
     Matcher which checks if the argument is within the received array (or string)
     on an error, it throws a custom message.
   */
+  // eslint-disable-next-line jest/no-standalone-expect
   expect.extend({
     toContainOption<T extends string>(received: T[], argument: T) {
       if (received.includes(argument)) {
