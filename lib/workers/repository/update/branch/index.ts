@@ -40,8 +40,11 @@ import {
   isActiveConfidenceLevel,
   satisfiesConfidenceLevel,
 } from '../../../../util/merge-confidence';
+import * as template from '../../../../util/template';
 import { Limit, isLimitReached } from '../../../global/limits';
 import { BranchConfig, BranchResult, PrBlockedBy } from '../../../types';
+import { embedChangelog, needsChangelogs } from '../../changelog';
+// import { embedChangelog, needsChangelogs } from '../../changelog';
 import { ensurePr, getPlatformPrOptions, updatePrDebugData } from '../pr';
 import { checkAutoMerge } from '../pr/automerge';
 import { getPrBody } from '../pr/body';
@@ -481,6 +484,26 @@ export async function processBranch(
           result: BranchResult.NoWork,
         };
       }
+    }
+
+    // compile commit message with body, which maybe needs changelogs
+    if (config.commitBody) {
+      if (config.fetchReleaseNotes && needsChangelogs(config, ['commitBody'])) {
+        // we only need first upgrade, the others are only needed on PR update
+        // we add it to first, so PR fetch can skip fetching for that update
+        await embedChangelog(config.upgrades[0]);
+      }
+      // changelog is on first upgrade
+      config.commitMessage = `${config.commitMessage!}\n\n${template.compile(
+        config.commitBody,
+        {
+          ...config,
+          logJSON: config.upgrades[0].logJSON,
+          releases: config.upgrades[0].releases,
+        }
+      )}`;
+
+      logger.trace(`commitMessage: ` + JSON.stringify(config.commitMessage));
     }
 
     const commitSha = await commitFilesToBranch(config);
