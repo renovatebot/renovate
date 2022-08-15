@@ -5,7 +5,7 @@ import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
 
 export function extractPackageFile(
   content: string,
-  _filename: string,
+  _filename = '',
   config: ExtractConfig = {}
 ): PackageFile | null {
   const deps: PackageDependency[] = [];
