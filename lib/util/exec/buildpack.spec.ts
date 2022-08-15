@@ -132,9 +132,9 @@ describe('util/exec/buildpack', () => {
       ${'^3.9'}       | ${'3.10.4'}
       ${'3.9.*'}      | ${'3.9.1'}
       ${'>3.8,<3.10'} | ${'3.9.1'}
-      ${'==3.9.1'}    | ${'3.10.4'}
+      ${'==3.9.*'}    | ${'3.9.1'}
     `(
-      'supports python ranges "$version" == "$expected"',
+      'supports python ranges "$version" => "$expected"',
       async ({ version: constraint, expected }) => {
         datasource.getPkgReleases.mockResolvedValueOnce({
           releases: [
