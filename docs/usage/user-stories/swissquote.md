@@ -92,10 +92,8 @@ People talk about it laughingly but become livid when a request comes to change 
 
 <figure markdown>
   ![Sweating person](../assets/images/swissquote_sweating_guy.jpg){ loading=lazy }
-  <figcaption>A person sweating profusely at the idea of having to touch an old project.</figcaption>
+  <figcaption>There is a fix to make on that project, the last person working on it left three years ago.</figcaption>
 </figure>
-
-There is a fix to make on that project, the last person working on it left three years ago.
 
 ## Dependencies at Swissquote
 
