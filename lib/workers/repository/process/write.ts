@@ -79,21 +79,22 @@ export async function writeUpdates(
         .map((upgrade) => hashMap.get(upgrade.manager) ?? upgrade.manager)
         .filter(is.string)
     );
-    branch.branchFingerprint = hasha([
+    const branchFingerprint = hasha([
       JSON.stringify(branch),
       branchManagersFingerprint,
     ]);
     branch.skipBranchUpdate = canSkipBranchUpdateCheck(
       branchCache,
-      branch.branchFingerprint
+      branchFingerprint
     );
     const res = await processBranch(branch);
     branch.prBlockedBy = res?.prBlockedBy;
     branch.prNo = res?.prNo;
     branch.result = res?.result;
-    if (!(res?.branchExists && res?.updateBranchFingerprint)) {
-      branch.branchFingerprint = branchCache.branchFingerprint;
-    }
+    branch.branchFingerprint = res?.updateBranchFingerprint
+      ? branchFingerprint
+      : branchCache.branchFingerprint;
+
     if (
       branch.result === BranchResult.Automerged &&
       branch.automergeType !== 'pr-comment'
