@@ -127,6 +127,7 @@ export interface BranchConfig
   stopUpdating?: boolean;
   isConflicted?: boolean;
   branchFingerprint?: string;
+  skipBranchUpdate?: boolean;
 }
 
 export interface WorkerExtractConfig extends ExtractConfig {

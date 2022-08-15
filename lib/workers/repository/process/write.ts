@@ -13,6 +13,23 @@ import { getBranchesRemaining, getPrsRemaining } from './limits';
 
 export type WriteUpdateResult = 'done' | 'automerged';
 
+export function canSkipBranchUpdateCheck(
+  branchCache: BranchCache,
+  branchFingerprint: string
+): boolean {
+  if (!branchCache.branchFingerprint) {
+    return false;
+  }
+
+  if (branchFingerprint !== branchCache.branchFingerprint) {
+    logger.debug('Branch fingerprint has changed, full check required');
+    return false;
+  }
+
+  logger.debug('Branch fingerprint is unchanged, updates check can be skipped');
+  return true;
+}
+
 export async function writeUpdates(
   config: RenovateConfig,
   allBranches: BranchConfig[]
@@ -66,8 +83,11 @@ export async function writeUpdates(
       JSON.stringify(branch),
       branchManagersFingerprint,
     ]);
-
-    const res = await processBranch(branch, branchCache);
+    branch.skipBranchUpdate = canSkipBranchUpdateCheck(
+      branchCache,
+      branch.branchFingerprint
+    );
+    const res = await processBranch(branch);
     branch.prBlockedBy = res?.prBlockedBy;
     branch.prNo = res?.prNo;
     branch.result = res?.result;

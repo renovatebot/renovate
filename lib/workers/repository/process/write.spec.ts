@@ -17,7 +17,7 @@ import { Limit, isLimitReached } from '../../global/limits';
 import { BranchConfig, BranchResult, BranchUpgradeConfig } from '../../types';
 import * as _branchWorker from '../update/branch';
 import * as _limits from './limits';
-import { writeUpdates } from './write';
+import { canSkipBranchUpdateCheck, writeUpdates } from './write';
 
 jest.mock('../../../util/git');
 jest.mock('../../../util/cache/repository');
@@ -193,6 +193,36 @@ describe('workers/repository/process/write', () => {
       expect(logger.logger.debug).toHaveBeenCalledWith(
         'No branch cache found for new/some-branch'
       );
+    });
+  });
+
+  describe('canSkipBranchUpdateCheck()', () => {
+    let branchCache = {} as BranchCache;
+
+    it('returns false if no cache', () => {
+      branchCache = {
+        branchName: 'new/some-branch',
+        sha: '111',
+      } as BranchCache;
+      expect(canSkipBranchUpdateCheck(branchCache, '222')).toBe(false);
+    });
+
+    it('returns false when fingerprints are not same', () => {
+      branchCache = {
+        branchName: 'new/some-branch',
+        sha: '111',
+        branchFingerprint: '211',
+      } as BranchCache;
+      expect(canSkipBranchUpdateCheck(branchCache, '222')).toBe(false);
+    });
+
+    it('returns true', () => {
+      branchCache = {
+        branchName: 'new/some-branch',
+        sha: '111',
+        branchFingerprint: '222',
+      } as BranchCache;
+      expect(canSkipBranchUpdateCheck(branchCache, '222')).toBe(true);
     });
   });
 });

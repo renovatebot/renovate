@@ -25,7 +25,6 @@ import {
 import { hashBody } from '../../../../modules/platform/pr-body';
 import { BranchStatus, PrState } from '../../../../types';
 import { ExternalHostError } from '../../../../types/errors/external-host-error';
-import type { BranchCache } from '../../../../util/cache/repository/types';
 import { getElapsedDays } from '../../../../util/date';
 import { emojify } from '../../../../util/emoji';
 import {
@@ -83,27 +82,8 @@ export interface ProcessBranchResult {
   updateBranchFingerprint?: boolean;
 }
 
-export function canSkipBranchUpdateCheck(
-  branchName: string,
-  branchCache: BranchCache,
-  branchFingerprint: string
-): boolean {
-  if (!branchCache.branchFingerprint) {
-    return false;
-  }
-
-  if (branchFingerprint !== branchCache.branchFingerprint) {
-    logger.debug('Branch fingerprint has changed, full check required');
-    return false;
-  }
-
-  logger.debug('Branch fingerprint is unchanged, updates check can be skipped');
-  return true;
-}
-
 export async function processBranch(
-  branchConfig: BranchConfig,
-  branchCache: BranchCache
+  branchConfig: BranchConfig
 ): Promise<ProcessBranchResult> {
   let commitSha: string | null = null;
   let config: BranchConfig = { ...branchConfig };
@@ -400,17 +380,7 @@ export async function processBranch(
     }
     // TODO: types (#7154)
     logger.debug(`Using reuseExistingBranch: ${config.reuseExistingBranch!}`);
-    if (
-      !(
-        config.reuseExistingBranch &&
-        canSkipBranchUpdateCheck(
-          config.branchName,
-          branchCache,
-          // TODO: types (#7154)
-          config.branchFingerprint!
-        )
-      )
-    ) {
+    if (!(config.reuseExistingBranch && config.skipBranchUpdate)) {
       await checkoutBranch(config.baseBranch!);
       const res = await getUpdatedPackageFiles(config);
       // istanbul ignore if

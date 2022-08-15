@@ -19,7 +19,6 @@ import type { WriteExistingFilesResult } from '../../../../modules/manager/npm/p
 import { hashBody } from '../../../../modules/platform/pr-body';
 import { PrState } from '../../../../types';
 import * as _repoCache from '../../../../util/cache/repository';
-import type { BranchCache } from '../../../../util/cache/repository/types';
 import * as _exec from '../../../../util/exec';
 import type { FileChange, StatusResult } from '../../../../util/git/types';
 import * as _mergeConfidence from '../../../../util/merge-confidence';
@@ -89,7 +88,6 @@ function findFileContent(
 
 describe('workers/repository/update/branch/index', () => {
   let config: BranchConfig;
-  let branchCache = {} as BranchCache;
 
   describe('processBranch', () => {
     const updatedPackageFiles: PackageFilesResult = {
@@ -137,7 +135,7 @@ describe('workers/repository/update/branch/index', () => {
 
     it('skips branch if not scheduled and branch does not exist', async () => {
       schedule.isScheduledNow.mockReturnValueOnce(false);
-      const res = await branchWorker.processBranch(config, branchCache);
+      const res = await branchWorker.processBranch(config);
       expect(res).toEqual({
         branchExists: false,
         prNo: undefined,
@@ -149,7 +147,7 @@ describe('workers/repository/update/branch/index', () => {
       schedule.isScheduledNow.mockReturnValueOnce(false);
       config.updateNotScheduled = false;
       git.branchExists.mockReturnValue(true);
-      const res = await branchWorker.processBranch(config, branchCache);
+      const res = await branchWorker.processBranch(config);
       expect(res).toEqual({
         branchExists: true,
         prNo: undefined,
@@ -172,7 +170,7 @@ describe('workers/repository/update/branch/index', () => {
       ];
 
       git.branchExists.mockReturnValue(false);
-      const res = await branchWorker.processBranch(config, branchCache);
+      const res = await branchWorker.processBranch(config);
       expect(res).toEqual({
         branchExists: false,
         prNo: undefined,
@@ -189,7 +187,7 @@ describe('workers/repository/update/branch/index', () => {
           stabilityDays: 1,
         },
       ];
-      const res = await branchWorker.processBranch(config, branchCache);
+      const res = await branchWorker.processBranch(config);
       expect(res).toEqual({
         branchExists: false,
         prNo: undefined,
@@ -207,7 +205,7 @@ describe('workers/repository/update/branch/index', () => {
       ];
       mergeConfidence.isActiveConfidenceLevel.mockReturnValue(true);
       mergeConfidence.satisfiesConfidenceLevel.mockReturnValueOnce(false);
-      const res = await branchWorker.processBranch(config, branchCache);
+      const res = await branchWorker.processBranch(config);
       expect(res).toEqual({
         branchExists: false,
         prNo: undefined,
@@ -225,7 +223,7 @@ describe('workers/repository/update/branch/index', () => {
       ];
       mergeConfidence.isActiveConfidenceLevel.mockReturnValue(true);
       mergeConfidence.satisfiesConfidenceLevel.mockReturnValueOnce(true);
-      const res = await branchWorker.processBranch(config, branchCache);
+      const res = await branchWorker.processBranch(config);
       expect(res).toEqual({
         branchExists: false,
         prNo: undefined,
@@ -241,7 +239,7 @@ describe('workers/repository/update/branch/index', () => {
         state: PrState.Open,
       } as Pr);
       git.isBranchModified.mockResolvedValueOnce(false);
-      await branchWorker.processBranch(config, branchCache);
+      await branchWorker.processBranch(config);
       expect(reuse.shouldReuseExistingBranch).toHaveBeenCalled();
     });
 
@@ -253,7 +251,7 @@ describe('workers/repository/update/branch/index', () => {
         number: 13,
         state: PrState.Closed,
       } as Pr);
-      await branchWorker.processBranch(config, branchCache);
+      await branchWorker.processBranch(config);
       expect(reuse.shouldReuseExistingBranch).toHaveBeenCalledTimes(0);
     });
 
@@ -265,7 +263,7 @@ describe('workers/repository/update/branch/index', () => {
         number: 13,
         state: PrState.Closed,
       } as Pr);
-      await branchWorker.processBranch(config, branchCache);
+      await branchWorker.processBranch(config);
       expect(reuse.shouldReuseExistingBranch).toHaveBeenCalledTimes(0);
     });
 
@@ -276,7 +274,7 @@ describe('workers/repository/update/branch/index', () => {
         number: 13,
         state: PrState.Closed,
       } as Pr);
-      await branchWorker.processBranch(config, branchCache);
+      await branchWorker.processBranch(config);
       expect(reuse.shouldReuseExistingBranch).toHaveBeenCalledTimes(0);
     });
 
@@ -287,7 +285,7 @@ describe('workers/repository/update/branch/index', () => {
         number: 13,
         state: PrState.Merged,
       } as Pr);
-      await branchWorker.processBranch(config, branchCache);
+      await branchWorker.processBranch(config);
       expect(reuse.shouldReuseExistingBranch).toHaveBeenCalledTimes(0);
     });
 
@@ -298,9 +296,9 @@ describe('workers/repository/update/branch/index', () => {
         state: PrState.Merged,
       } as Pr);
       git.isBranchModified.mockResolvedValueOnce(true);
-      await expect(
-        branchWorker.processBranch(config, branchCache)
-      ).rejects.toThrow(REPOSITORY_CHANGED);
+      await expect(branchWorker.processBranch(config)).rejects.toThrow(
+        REPOSITORY_CHANGED
+      );
     });
 
     it('does not skip branch if edited PR found with rebaseLabel', async () => {
@@ -311,7 +309,7 @@ describe('workers/repository/update/branch/index', () => {
         labels: ['rebase'],
       } as Pr);
       git.isBranchModified.mockResolvedValueOnce(true);
-      const res = await branchWorker.processBranch(config, branchCache);
+      const res = await branchWorker.processBranch(config);
       expect(res).toEqual({
         branchExists: true,
         prNo: undefined,
@@ -331,7 +329,7 @@ describe('workers/repository/update/branch/index', () => {
         body: '**Rebasing**: something',
       } as Pr);
       git.isBranchModified.mockResolvedValueOnce(true);
-      const res = await branchWorker.processBranch(config, branchCache);
+      const res = await branchWorker.processBranch(config);
       expect(res).toEqual({
         branchExists: true,
         prNo: undefined,
@@ -352,7 +350,7 @@ describe('workers/repository/update/branch/index', () => {
       } as Pr);
       git.isBranchModified.mockResolvedValueOnce(false);
       config.baseBranch = 'master';
-      const res = await branchWorker.processBranch(config, branchCache);
+      const res = await branchWorker.processBranch(config);
       expect(res).toEqual({
         branchExists: true,
         prNo: undefined,
@@ -363,7 +361,7 @@ describe('workers/repository/update/branch/index', () => {
     it('skips branch if branch edited and no PR found', async () => {
       git.branchExists.mockReturnValue(true);
       git.isBranchModified.mockResolvedValueOnce(true);
-      const res = await branchWorker.processBranch(config, branchCache);
+      const res = await branchWorker.processBranch(config);
       expect(res).toEqual({
         branchExists: true,
         prNo: undefined,
@@ -376,7 +374,7 @@ describe('workers/repository/update/branch/index', () => {
       git.isBranchModified.mockResolvedValueOnce(true);
       git.getBranchCommit.mockReturnValue('123test');
       platform.findPr.mockResolvedValueOnce({ sha: '123test' } as any);
-      const res = await branchWorker.processBranch(config, branchCache);
+      const res = await branchWorker.processBranch(config);
       expect(res).toEqual({
         branchExists: true,
         prNo: undefined,
@@ -389,7 +387,7 @@ describe('workers/repository/update/branch/index', () => {
       git.isBranchModified.mockResolvedValueOnce(true);
       git.getBranchCommit.mockReturnValueOnce('123test');
       platform.findPr.mockResolvedValueOnce({ sha: 'def456' } as any);
-      const res = await branchWorker.processBranch(config, branchCache);
+      const res = await branchWorker.processBranch(config);
       expect(res).toEqual({
         branchExists: true,
         prNo: undefined,
@@ -407,7 +405,7 @@ describe('workers/repository/update/branch/index', () => {
       });
       limits.isLimitReached.mockReturnValueOnce(true);
       limits.isLimitReached.mockReturnValueOnce(false);
-      expect(await branchWorker.processBranch(config, branchCache)).toEqual({
+      expect(await branchWorker.processBranch(config)).toEqual({
         branchExists: false,
         prNo: undefined,
         result: 'branch-limit-reached',
@@ -428,7 +426,7 @@ describe('workers/repository/update/branch/index', () => {
         prBlockedBy: 'RateLimited',
       });
       limits.isLimitReached.mockReturnValue(false);
-      expect(await branchWorker.processBranch(config, branchCache)).toEqual({
+      expect(await branchWorker.processBranch(config)).toEqual({
         branchExists: true,
         prBlockedBy: 'RateLimited',
         result: 'pr-limit-reached',
@@ -447,7 +445,7 @@ describe('workers/repository/update/branch/index', () => {
       git.branchExists.mockReturnValue(false);
       limits.isLimitReached.mockReturnValueOnce(false);
       limits.isLimitReached.mockReturnValueOnce(true);
-      expect(await branchWorker.processBranch(config, branchCache)).toEqual({
+      expect(await branchWorker.processBranch(config)).toEqual({
         branchExists: false,
         prNo: undefined,
         result: 'commit-limit-reached',
@@ -464,7 +462,7 @@ describe('workers/repository/update/branch/index', () => {
       });
       git.branchExists.mockReturnValue(false);
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
-      expect(await branchWorker.processBranch(config, branchCache)).toEqual({
+      expect(await branchWorker.processBranch(config)).toEqual({
         branchExists: false,
         prNo: undefined,
         result: 'no-work',
@@ -480,7 +478,7 @@ describe('workers/repository/update/branch/index', () => {
         updatedArtifacts: [],
       });
       config.pendingChecks = true;
-      expect(await branchWorker.processBranch(config, branchCache)).toEqual({
+      expect(await branchWorker.processBranch(config)).toEqual({
         branchExists: false,
         prNo: undefined,
         result: 'pending',
@@ -498,7 +496,7 @@ describe('workers/repository/update/branch/index', () => {
       git.branchExists.mockReturnValue(true);
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
       automerge.tryBranchAutomerge.mockResolvedValueOnce('automerged');
-      await branchWorker.processBranch(config, branchCache);
+      await branchWorker.processBranch(config);
       expect(automerge.tryBranchAutomerge).toHaveBeenCalledTimes(1);
       expect(prWorker.ensurePr).toHaveBeenCalledTimes(0);
     });
@@ -513,13 +511,10 @@ describe('workers/repository/update/branch/index', () => {
       } as WriteExistingFilesResult);
       git.branchExists.mockReturnValue(false);
       automerge.tryBranchAutomerge.mockResolvedValueOnce('automerged');
-      await branchWorker.processBranch(
-        {
-          ...config,
-          ignoreTests: true,
-        },
-        branchCache
-      );
+      await branchWorker.processBranch({
+        ...config,
+        ignoreTests: true,
+      });
       expect(automerge.tryBranchAutomerge).toHaveBeenCalledTimes(1);
       expect(prWorker.ensurePr).toHaveBeenCalledTimes(0);
     });
@@ -536,7 +531,7 @@ describe('workers/repository/update/branch/index', () => {
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
       automerge.tryBranchAutomerge.mockResolvedValueOnce('automerged');
       GlobalConfig.set({ ...adminConfig, dryRun: 'full' });
-      await branchWorker.processBranch(config, branchCache);
+      await branchWorker.processBranch(config);
       expect(automerge.tryBranchAutomerge).toHaveBeenCalledTimes(1);
       expect(prWorker.ensurePr).toHaveBeenCalledTimes(0);
       expect(git.deleteBranch).toHaveBeenCalledTimes(0);
@@ -557,7 +552,7 @@ describe('workers/repository/update/branch/index', () => {
         type: 'without-pr',
         prBlockedBy: 'NeedsApproval',
       });
-      expect(await branchWorker.processBranch(config, branchCache)).toEqual({
+      expect(await branchWorker.processBranch(config)).toEqual({
         branchExists: true,
         prBlockedBy: 'NeedsApproval',
         result: 'needs-pr-approval',
@@ -581,7 +576,7 @@ describe('workers/repository/update/branch/index', () => {
         type: 'without-pr',
         prBlockedBy: 'AwaitingTests',
       });
-      expect(await branchWorker.processBranch(config, branchCache)).toEqual({
+      expect(await branchWorker.processBranch(config)).toEqual({
         branchExists: true,
         prBlockedBy: 'AwaitingTests',
         result: 'pending',
@@ -605,7 +600,7 @@ describe('workers/repository/update/branch/index', () => {
         type: 'without-pr',
         prBlockedBy: 'BranchAutomerge',
       });
-      expect(await branchWorker.processBranch(config, branchCache)).toEqual({
+      expect(await branchWorker.processBranch(config)).toEqual({
         branchExists: true,
         prBlockedBy: 'BranchAutomerge',
         result: 'done',
@@ -629,7 +624,7 @@ describe('workers/repository/update/branch/index', () => {
         type: 'without-pr',
         prBlockedBy: 'Error',
       });
-      expect(await branchWorker.processBranch(config, branchCache)).toEqual({
+      expect(await branchWorker.processBranch(config)).toEqual({
         branchExists: true,
         prBlockedBy: 'Error',
         result: 'error',
@@ -653,7 +648,7 @@ describe('workers/repository/update/branch/index', () => {
         type: 'without-pr',
         prBlockedBy: 'whoops' as any,
       });
-      expect(await branchWorker.processBranch(config, branchCache)).toEqual({
+      expect(await branchWorker.processBranch(config)).toEqual({
         branchExists: true,
         prBlockedBy: 'whoops',
         result: 'error',
@@ -678,7 +673,7 @@ describe('workers/repository/update/branch/index', () => {
         fetchReleaseNotes: true,
       } as BranchConfig;
       mockedFunction(needsChangelogs).mockReturnValueOnce(true);
-      expect(await branchWorker.processBranch(inconfig, branchCache)).toEqual({
+      expect(await branchWorker.processBranch(inconfig)).toEqual({
         branchExists: true,
         prNo: undefined,
         result: 'pending',
@@ -705,10 +700,7 @@ describe('workers/repository/update/branch/index', () => {
       } as ResultWithPr);
       prAutomerge.checkAutoMerge.mockResolvedValueOnce({ automerged: true });
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
-      await branchWorker.processBranch(
-        { ...config, automerge: true },
-        branchCache
-      );
+      await branchWorker.processBranch({ ...config, automerge: true });
       expect(prWorker.ensurePr).toHaveBeenCalledTimes(1);
       expect(platform.ensureCommentRemoval).toHaveBeenCalledTimes(0);
       expect(prAutomerge.checkAutoMerge).toHaveBeenCalledTimes(1);
@@ -730,14 +722,11 @@ describe('workers/repository/update/branch/index', () => {
       } as ResultWithPr);
       prAutomerge.checkAutoMerge.mockResolvedValueOnce({ automerged: false });
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
-      await branchWorker.processBranch(
-        {
-          ...config,
-          automerge: true,
-          rebaseWhen: 'conflicted',
-        },
-        branchCache
-      );
+      await branchWorker.processBranch({
+        ...config,
+        automerge: true,
+        rebaseWhen: 'conflicted',
+      });
       expect(prWorker.ensurePr).toHaveBeenCalledTimes(1);
       expect(platform.ensureCommentRemoval).toHaveBeenCalledTimes(0);
       expect(prAutomerge.checkAutoMerge).toHaveBeenCalledTimes(1);
@@ -765,9 +754,7 @@ describe('workers/repository/update/branch/index', () => {
         automerge: true,
         rebaseWhen: 'conflicted',
       };
-      await expect(
-        branchWorker.processBranch(inconfig, branchCache)
-      ).resolves.toEqual({
+      await expect(branchWorker.processBranch(inconfig)).resolves.toEqual({
         branchExists: true,
         result: BranchResult.NotScheduled,
         updateBranchFingerprint: false,
@@ -796,7 +783,7 @@ describe('workers/repository/update/branch/index', () => {
       } as ResultWithPr);
       prAutomerge.checkAutoMerge.mockResolvedValueOnce({ automerged: true });
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
-      await branchWorker.processBranch(config, branchCache);
+      await branchWorker.processBranch(config);
       expect(platform.ensureComment).toHaveBeenCalledTimes(1);
       expect(prWorker.ensurePr).toHaveBeenCalledTimes(1);
       expect(prAutomerge.checkAutoMerge).toHaveBeenCalledTimes(0);
@@ -819,7 +806,7 @@ describe('workers/repository/update/branch/index', () => {
       prAutomerge.checkAutoMerge.mockResolvedValueOnce({ automerged: true });
       config.releaseTimestamp = '2018-04-26T05:15:51.877Z';
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
-      await branchWorker.processBranch(config, branchCache);
+      await branchWorker.processBranch(config);
       expect(platform.ensureComment).toHaveBeenCalledTimes(1);
       expect(prWorker.ensurePr).toHaveBeenCalledTimes(1);
       expect(prAutomerge.checkAutoMerge).toHaveBeenCalledTimes(0);
@@ -842,7 +829,7 @@ describe('workers/repository/update/branch/index', () => {
       prAutomerge.checkAutoMerge.mockResolvedValueOnce({ automerged: true });
       config.releaseTimestamp = new Date().toISOString();
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
-      await branchWorker.processBranch(config, branchCache);
+      await branchWorker.processBranch(config);
       expect(platform.ensureComment).toHaveBeenCalledTimes(1);
       expect(prWorker.ensurePr).toHaveBeenCalledTimes(1);
       expect(prAutomerge.checkAutoMerge).toHaveBeenCalledTimes(0);
@@ -864,9 +851,9 @@ describe('workers/repository/update/branch/index', () => {
       } as ResultWithPr);
       prAutomerge.checkAutoMerge.mockResolvedValueOnce({ automerged: true });
       config.releaseTimestamp = new Date().toISOString();
-      await expect(
-        branchWorker.processBranch(config, branchCache)
-      ).rejects.toThrow(Error(MANAGER_LOCKFILE_ERROR));
+      await expect(branchWorker.processBranch(config)).rejects.toThrow(
+        Error(MANAGER_LOCKFILE_ERROR)
+      );
     });
 
     it('ensures PR and adds lock file error comment recreate closed', async () => {
@@ -886,7 +873,7 @@ describe('workers/repository/update/branch/index', () => {
       } as ResultWithPr);
       prAutomerge.checkAutoMerge.mockResolvedValueOnce({ automerged: true });
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
-      await branchWorker.processBranch(config, branchCache);
+      await branchWorker.processBranch(config);
       expect(platform.ensureComment).toHaveBeenCalledTimes(1);
       expect(prWorker.ensurePr).toHaveBeenCalledTimes(1);
       expect(prAutomerge.checkAutoMerge).toHaveBeenCalledTimes(0);
@@ -896,10 +883,7 @@ describe('workers/repository/update/branch/index', () => {
       getUpdated.getUpdatedPackageFiles.mockImplementationOnce(() => {
         throw new Error('some error');
       });
-      const processBranchResult = await branchWorker.processBranch(
-        config,
-        branchCache
-      );
+      const processBranchResult = await branchWorker.processBranch(config);
       expect(processBranchResult).toEqual({
         branchExists: false,
         prNo: undefined,
@@ -915,10 +899,7 @@ describe('workers/repository/update/branch/index', () => {
         artifactErrors: [{}],
         updatedArtifacts: [{}],
       } as WriteExistingFilesResult);
-      const processBranchResult = await branchWorker.processBranch(
-        config,
-        branchCache
-      );
+      const processBranchResult = await branchWorker.processBranch(config);
       expect(processBranchResult).toEqual({
         branchExists: true,
         prNo: undefined,
@@ -940,10 +921,7 @@ describe('workers/repository/update/branch/index', () => {
       prWorker.ensurePr.mockImplementationOnce(() => {
         throw new Error('some error');
       });
-      const processBranchResult = await branchWorker.processBranch(
-        config,
-        branchCache
-      );
+      const processBranchResult = await branchWorker.processBranch(config);
       expect(processBranchResult).toEqual({
         branchExists: true,
         prNo: undefined,
@@ -958,7 +936,7 @@ describe('workers/repository/update/branch/index', () => {
         state: PrState.Closed,
       } as Pr);
       GlobalConfig.set({ ...adminConfig, dryRun: 'full' });
-      expect(await branchWorker.processBranch(config, branchCache)).toEqual({
+      expect(await branchWorker.processBranch(config)).toEqual({
         branchExists: false,
         prNo: undefined,
         result: 'already-existed',
@@ -976,7 +954,7 @@ describe('workers/repository/update/branch/index', () => {
       } as Pr);
       git.isBranchModified.mockResolvedValueOnce(true);
       GlobalConfig.set({ ...adminConfig, dryRun: 'full' });
-      expect(await branchWorker.processBranch(config, branchCache)).toEqual({
+      expect(await branchWorker.processBranch(config)).toEqual({
         branchExists: true,
         prNo: undefined,
         result: 'pr-edited',
@@ -1015,7 +993,7 @@ describe('workers/repository/update/branch/index', () => {
         reuseExistingBranch: false,
         updatedArtifacts: [{ type: 'deletion', path: 'dummy' }],
       } as BranchConfig;
-      expect(await branchWorker.processBranch(inconfig, branchCache)).toEqual({
+      expect(await branchWorker.processBranch(inconfig)).toEqual({
         branchExists: true,
         prNo: undefined,
         result: 'done',
@@ -1054,7 +1032,7 @@ describe('workers/repository/update/branch/index', () => {
         ...config,
         artifactErrors: [{}],
       } as BranchConfig;
-      expect(await branchWorker.processBranch(inconfig, branchCache)).toEqual({
+      expect(await branchWorker.processBranch(inconfig)).toEqual({
         branchExists: true,
         prNo: undefined,
         result: 'done',
@@ -1092,7 +1070,7 @@ describe('workers/repository/update/branch/index', () => {
         reuseExistingBranch: false,
         updatedArtifacts: [{ type: 'deletion', path: 'dummy' }],
       } as BranchConfig;
-      expect(await branchWorker.processBranch(inconfig, branchCache)).toEqual({
+      expect(await branchWorker.processBranch(inconfig)).toEqual({
         branchExists: true,
         prNo: undefined,
         result: 'done',
@@ -1127,7 +1105,7 @@ describe('workers/repository/update/branch/index', () => {
         dependencyDashboardChecks: { 'renovate/some-branch': 'true' },
         updatedArtifacts: [{ type: 'deletion', path: 'dummy' }],
       } as BranchConfig;
-      expect(await branchWorker.processBranch(inconfig, branchCache)).toEqual({
+      expect(await branchWorker.processBranch(inconfig)).toEqual({
         branchExists: true,
         prNo: undefined,
         result: 'no-work',
@@ -1151,17 +1129,9 @@ describe('workers/repository/update/branch/index', () => {
         branchPrefixOld: 'old/',
         branchFingerprint: '111',
         reuseExistingBranch: true,
+        skipBranchUpdate: true,
       };
-      const branchCache = partial<BranchCache>({
-        branchName: 'new/some-branch',
-        branchFingerprint: '111',
-        parentSha: '111',
-        sha: '111',
-      });
-      repoCache.getCache.mockReturnValueOnce({
-        branches: [branchCache],
-      });
-      expect(await branchWorker.processBranch(inconfig, branchCache)).toEqual({
+      expect(await branchWorker.processBranch(inconfig)).toEqual({
         branchExists: true,
         prNo: undefined,
         result: 'done',
@@ -1200,7 +1170,7 @@ describe('workers/repository/update/branch/index', () => {
         reuseExistingBranch: false,
         updatedArtifacts: [{ type: 'deletion', path: 'dummy' }],
       } as BranchConfig;
-      expect(await branchWorker.processBranch(inconfig, branchCache)).toEqual({
+      expect(await branchWorker.processBranch(inconfig)).toEqual({
         branchExists: true,
         prNo: undefined,
         result: 'done',
@@ -1284,7 +1254,7 @@ describe('workers/repository/update/branch/index', () => {
           } as BranchUpgradeConfig,
         ],
       } as BranchConfig;
-      const result = await branchWorker.processBranch(inconfig, branchCache);
+      const result = await branchWorker.processBranch(inconfig);
       expect(result).toEqual({
         branchExists: true,
         prNo: undefined,
@@ -1360,22 +1330,19 @@ describe('workers/repository/update/branch/index', () => {
 
       exec.exec.mockRejectedValue(new Error('Meh, this went wrong!'));
 
-      await branchWorker.processBranch(
-        {
-          ...config,
-          upgrades: [
-            {
-              ...defaultConfig,
-              depName: 'some-dep-name',
-              postUpgradeTasks: {
-                commands: ['exit 1'],
-                fileFilters: ['modified_file', 'deleted_file'],
-              },
-            } as never,
-          ],
-        },
-        branchCache
-      );
+      await branchWorker.processBranch({
+        ...config,
+        upgrades: [
+          {
+            ...defaultConfig,
+            depName: 'some-dep-name',
+            postUpgradeTasks: {
+              commands: ['exit 1'],
+              fileFilters: ['modified_file', 'deleted_file'],
+            },
+          } as never,
+        ],
+      });
 
       const errorMessage = expect.stringContaining('Meh, this went wrong!');
       expect(platform.ensureComment).toHaveBeenCalledWith(
@@ -1461,7 +1428,7 @@ describe('workers/repository/update/branch/index', () => {
           } as BranchUpgradeConfig,
         ],
       } as BranchConfig;
-      const result = await branchWorker.processBranch(inconfig, branchCache);
+      const result = await branchWorker.processBranch(inconfig);
       expect(result).toEqual({
         branchExists: true,
         prNo: undefined,
@@ -1585,7 +1552,7 @@ describe('workers/repository/update/branch/index', () => {
         ],
       };
 
-      const result = await branchWorker.processBranch(inconfig, branchCache);
+      const result = await branchWorker.processBranch(inconfig);
 
       expect(result).toEqual({
         branchExists: true,
@@ -1731,7 +1698,7 @@ describe('workers/repository/update/branch/index', () => {
         ],
       };
 
-      const result = await branchWorker.processBranch(inconfig, branchCache);
+      const result = await branchWorker.processBranch(inconfig);
       expect(result).toEqual({
         branchExists: true,
         prNo: undefined,
@@ -1761,10 +1728,7 @@ describe('workers/repository/update/branch/index', () => {
       git.branchExists.mockReturnValue(true);
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
       expect(
-        await branchWorker.processBranch(
-          { ...config, rebaseWhen: 'never' },
-          branchCache
-        )
+        await branchWorker.processBranch({ ...config, rebaseWhen: 'never' })
       ).toMatchObject({ result: BranchResult.NoWork });
       expect(commit.commitFilesToBranch).not.toHaveBeenCalled();
     });
@@ -1791,7 +1755,7 @@ describe('workers/repository/update/branch/index', () => {
         branchPrefix: 'new/',
         branchPrefixOld: 'old/',
       };
-      expect(await branchWorker.processBranch(inconfig, branchCache)).toEqual({
+      expect(await branchWorker.processBranch(inconfig)).toEqual({
         branchExists: true,
         prNo: undefined,
         result: 'done',
@@ -1801,55 +1765,6 @@ describe('workers/repository/update/branch/index', () => {
       expect(logger.debug).toHaveBeenCalledWith(
         'No package files need updating'
       );
-    });
-  });
-
-  describe('canSkipBranchUpdateCheck()', () => {
-    it('returns false if no cache', () => {
-      git.getBranchCommit.mockReturnValueOnce('111');
-      branchCache = {
-        branchName: 'new/some-branch',
-        sha: '111',
-      } as BranchCache;
-      expect(
-        branchWorker.canSkipBranchUpdateCheck(
-          'new/some-branch',
-          branchCache,
-          '222'
-        )
-      ).toBe(false);
-    });
-
-    it('returns false when fingerprints are not same', () => {
-      git.getBranchCommit.mockReturnValueOnce('111');
-      branchCache = {
-        branchName: 'new/some-branch',
-        sha: '111',
-        branchFingerprint: '211',
-      } as BranchCache;
-      expect(
-        branchWorker.canSkipBranchUpdateCheck(
-          'new/some-branch',
-          branchCache,
-          '222'
-        )
-      ).toBe(false);
-    });
-
-    it('returns true', () => {
-      git.getBranchCommit.mockReturnValueOnce('111');
-      branchCache = {
-        branchName: 'new/some-branch',
-        sha: '111',
-        branchFingerprint: '222',
-      } as BranchCache;
-      expect(
-        branchWorker.canSkipBranchUpdateCheck(
-          'new/some-branch',
-          branchCache,
-          '222'
-        )
-      ).toBe(true);
     });
   });
 });
