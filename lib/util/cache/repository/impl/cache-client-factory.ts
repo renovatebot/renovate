@@ -1,8 +1,8 @@
-import { GlobalConfig } from '../../../../../config/global';
-import type { RepositoryCacheType } from '../../../../../config/types';
-import { logger } from '../../../../../logger';
-import type { CacheClient } from '../../types';
-import { LocalRepoCache } from './local';
+import { GlobalConfig } from '../../../../config/global';
+import type { RepositoryCacheType } from '../../../../config/types';
+import { logger } from '../../../../logger';
+import type { CacheClient } from '../types';
+import { LocalRepoCache } from './client/local';
 
 export class CacheClientFactory {
   private static client: CacheClient | null;

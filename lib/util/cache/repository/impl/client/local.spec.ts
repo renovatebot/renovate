@@ -1,14 +1,14 @@
 import { promisify } from 'util';
 import zlib from 'zlib';
 import hasha from 'hasha';
-import { fs } from '../../../../../../../test/util';
-import { GlobalConfig } from '../../../../../../config/global';
-import { CACHE_REVISION } from '../../../common';
-import type { RepoCacheData, RepoCacheRecord } from '../../../types';
-import { RepositoryCacheImpl } from '../../repository-cache-impl';
+import { fs } from '../../../../../../test/util';
+import { GlobalConfig } from '../../../../../config/global';
+import { CACHE_REVISION } from '../../common';
+import type { RepoCacheData, RepoCacheRecord } from '../../types';
 import { CacheClientFactory } from '../cache-client-factory';
+import { RepositoryCacheImpl } from '../repository-cache-impl';
 
-jest.mock('../../../../../fs');
+jest.mock('../../../../fs');
 
 const compress = promisify(zlib.brotliCompress);
 
@@ -24,7 +24,7 @@ async function createCacheRecord(
   return { revision, repository, payload, hash };
 }
 
-describe('util/cache/repository/impl/client/local/index', () => {
+describe('util/cache/repository/impl/client/local', () => {
   beforeEach(() => {
     GlobalConfig.set({ cacheDir: '/tmp/cache', platform: 'github' });
   });

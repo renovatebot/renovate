@@ -1,10 +1,12 @@
-import { RepoCacheBase } from './impl/base';
+import { RepositoryCacheNullImpl } from './impl/repository-cache-null-impl';
 import type { RepoCache, RepoCacheData } from './types';
 
-let repoCache: RepoCache = new RepoCacheBase();
+// This will be overwritten with initRepoCache()
+// Used primarily as a placeholder and for testing
+let repoCache: RepoCache = new RepositoryCacheNullImpl();
 
 export function resetCache(): void {
-  setCache(new RepoCacheBase());
+  setCache(new RepositoryCacheNullImpl());
 }
 
 export function setCache(cache: RepoCache): void {

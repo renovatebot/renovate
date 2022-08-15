@@ -9,26 +9,25 @@ import {
   isValidRev11,
   isValidRev12,
 } from '../common';
-import type { CacheClient } from '../types';
-import { RepoCacheBase } from './base';
-import { CacheClientFactory } from './client/cache-client-factory';
+import type { CacheClient, RepoCache, RepoCacheData } from '../types';
+import { CacheClientFactory } from './cache-client-factory';
 
 const compress = promisify(zlib.brotliCompress);
 const decompress = promisify(zlib.brotliDecompress);
 
-export class RepositoryCacheImpl extends RepoCacheBase {
+export class RepositoryCacheImpl implements RepoCache {
   private cacheClient: CacheClient;
   private oldHash: string | null = null;
+  private data: RepoCacheData = {};
 
   constructor(
-    private readonly repository: string,
+    protected readonly repository: string,
     type: RepositoryCacheType = 'local'
   ) {
-    super();
     this.cacheClient = CacheClientFactory.get(repository, type);
   }
 
-  override async load(): Promise<void> {
+  async load(): Promise<void> {
     try {
       const oldCache = await this.cacheClient.read();
 
@@ -62,16 +61,19 @@ export class RepositoryCacheImpl extends RepoCacheBase {
     }
   }
 
-  override async save(): Promise<void> {
+  async save(): Promise<void> {
     const revision = CACHE_REVISION;
     const repository = this.repository;
-    const data = this.getData();
-    const jsonStr = JSON.stringify(data);
+    const jsonStr = JSON.stringify(this.data);
     const hash = await hasha.async(jsonStr, { algorithm: 'sha256' });
     if (hash !== this.oldHash) {
       const compressed = await compress(jsonStr);
       const payload = compressed.toString('base64');
       await this.cacheClient.write({ revision, repository, payload, hash });
     }
+  }
+
+  getData(): RepoCacheData {
+    return this.data;
   }
 }

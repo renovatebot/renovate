@@ -1,5 +1,6 @@
 import type { RenovateConfig } from '../../../config/types';
 import { RepositoryCacheImpl } from './impl/repository-cache-impl';
+import { RepositoryCacheNullImpl } from './impl/repository-cache-null-impl';
 import { resetCache, setCache } from '.';
 
 /**
@@ -10,19 +11,20 @@ export async function initRepoCache(config: RenovateConfig): Promise<void> {
 
   const { repository, repositoryCache, repositoryCacheType: type } = config;
 
-  if (repositoryCache === 'disabled' || !repository) {
+  if (repositoryCache === 'disabled') {
+    setCache(new RepositoryCacheNullImpl());
     return;
   }
 
   if (repositoryCache === 'enabled') {
-    const cache = new RepositoryCacheImpl(repository, type);
+    const cache = new RepositoryCacheImpl(repository!, type);
     await cache.load();
     setCache(cache);
     return;
   }
 
   if (repositoryCache === 'reset') {
-    const cache = new RepositoryCacheImpl(repository, type);
+    const cache = new RepositoryCacheImpl(repository!, type);
     await cache.save();
     setCache(cache);
     return;
