@@ -4,6 +4,7 @@ import { extractPackageFile } from '.';
 const kubernetesImagesFile = Fixtures.get('kubernetes.yaml');
 const kubernetesConfigMapFile = Fixtures.get('configmap.yaml');
 const kubernetesArraySyntaxFile = Fixtures.get('array-syntax.yaml');
+const kubernetesRegistryAlias = Fixtures.get('kubernetes.registry-alias.yaml');
 const otherYamlFile = Fixtures.get('gitlab-ci.yaml');
 
 describe('modules/manager/kubernetes/extract', () => {
@@ -84,6 +85,70 @@ kind: ConfigMap
 <
 `;
       expect(extractPackageFile(invalidYaml, 'file.yaml')).toBeNull();
+    });
+
+    it('extracts images and replaces registries', () => {
+      const res = extractPackageFile(kubernetesRegistryAlias, 'file.yaml', {
+        registryAliases: {
+          'quay.io': 'my-quay-mirror.registry.com',
+        },
+      });
+      expect(res).toEqual({
+        deps: [
+          {
+            autoReplaceStringTemplate:
+              'quay.io/node:{{#if newValue}}{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+            currentDigest: undefined,
+            currentValue: '0.0.1',
+            datasource: 'docker',
+            depName: 'my-quay-mirror.registry.com/node',
+            replaceString: 'quay.io/node:0.0.1',
+          },
+        ],
+      });
+    });
+
+    it('extracts images but does no replacement', () => {
+      const res = extractPackageFile(kubernetesRegistryAlias, 'file.yaml', {
+        registryAliases: {
+          'index.docker.io': 'my-docker-mirror.registry.com',
+        },
+      });
+      expect(res).toEqual({
+        deps: [
+          {
+            autoReplaceStringTemplate:
+              '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+            currentDigest: undefined,
+            currentValue: '0.0.1',
+            datasource: 'docker',
+            depName: 'quay.io/node',
+            replaceString: 'quay.io/node:0.0.1',
+          },
+        ],
+      });
+    });
+
+    it('extracts images and does no double replacements', () => {
+      const res = extractPackageFile(kubernetesRegistryAlias, 'file.yaml', {
+        registryAliases: {
+          'quay.io': 'my-quay-mirror.registry.com',
+          'my-quay-mirror.registry.com': 'quay.io',
+        },
+      });
+      expect(res).toEqual({
+        deps: [
+          {
+            autoReplaceStringTemplate:
+              'quay.io/node:{{#if newValue}}{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+            currentDigest: undefined,
+            currentValue: '0.0.1',
+            datasource: 'docker',
+            depName: 'my-quay-mirror.registry.com/node',
+            replaceString: 'quay.io/node:0.0.1',
+          },
+        ],
+      });
     });
   });
 });

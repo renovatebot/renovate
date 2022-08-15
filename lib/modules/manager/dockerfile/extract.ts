@@ -171,9 +171,7 @@ export function getDep(
     )?.groups;
     if (groups) {
       const dep = {
-        ...getDep(
-          `${value}/${groups.depName}` /*, specifyReplaceString, registryAliases (This may be favorable but can lead to loops)*/
-        ),
+        ...getDep(`${value}/${groups.depName}`),
         replaceString: currentFrom,
       };
       dep.autoReplaceStringTemplate = getAutoReplaceTemplate(dep)!;
@@ -356,7 +354,11 @@ export function extractPackageFile(
           'Skipping alias COPY --from'
         );
       } else if (Number.isNaN(Number(copyFromMatch.groups.image))) {
-        const dep = getDep(copyFromMatch.groups.image);
+        const dep = getDep(
+          copyFromMatch.groups.image,
+          undefined,
+          config.registryAliases
+        );
         const lineNumberRanges: number[][] = [
           [lineNumberInstrStart, lineNumber],
         ];

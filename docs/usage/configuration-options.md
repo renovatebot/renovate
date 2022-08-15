@@ -2525,6 +2525,10 @@ This feature works with the following managers:
 - [`helmv3`](/modules/manager/helmv3/)
 - [`helmfile`](/modules/manager/helmfile/)
 - [`gitlabci`](/modules/manager/gitlabci/)
+- [`dockerfile`](/modules/manager/dockerfile)
+- [`docker-compose`](/modules/manager/docker-compose)
+- [`kubernetes`](/modules/manager/kubernetes)
+- [`ansible`](/modules/manager/ansible)
 
 ## registryUrls
 

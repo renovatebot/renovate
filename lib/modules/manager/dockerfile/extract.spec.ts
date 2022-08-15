@@ -1024,6 +1024,78 @@ describe('modules/manager/dockerfile/extract', () => {
     });
   });
 
+  it('handles empty optional parameters', () => {
+    const res = extractPackageFile('FROM quay.io/myName/myPackage:0.6.2\n');
+    expect(res).toEqual({
+      deps: [
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentDigest: undefined,
+          currentValue: '0.6.2',
+          datasource: 'docker',
+          depName: 'quay.io/myName/myPackage',
+          depType: 'final',
+          replaceString: 'quay.io/myName/myPackage:0.6.2',
+        },
+      ],
+    });
+  });
+
+  it('handles registry alias', () => {
+    const res = extractPackageFile(
+      'FROM quay.io/myName/myPackage:0.6.2\n',
+      'Dockerfile',
+      {
+        registryAliases: {
+          'quay.io': 'my-quay-mirror.registry.com',
+          'index.docker.io': 'my-docker-mirror.registry.com',
+        },
+      }
+    );
+    expect(res).toEqual({
+      deps: [
+        {
+          autoReplaceStringTemplate:
+            'quay.io/myName/myPackage:{{#if newValue}}{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentDigest: undefined,
+          currentValue: '0.6.2',
+          datasource: 'docker',
+          depName: 'my-quay-mirror.registry.com/myName/myPackage',
+          depType: 'final',
+          replaceString: 'quay.io/myName/myPackage:0.6.2',
+        },
+      ],
+    });
+  });
+
+  it('handles empty registry', () => {
+    const res = extractPackageFile(
+      'FROM myName/myPackage:0.6.2\n',
+      'Dockerfile',
+      {
+        registryAliases: {
+          'quay.io': 'my-quay-mirror.registry.com',
+          'index.docker.io': 'my-docker-mirror.registry.com',
+        },
+      }
+    );
+    expect(res).toEqual({
+      deps: [
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentDigest: undefined,
+          currentValue: '0.6.2',
+          datasource: 'docker',
+          depName: 'myName/myPackage',
+          depType: 'final',
+          replaceString: 'myName/myPackage:0.6.2',
+        },
+      ],
+    });
+  });
+
   describe('getDep()', () => {
     it('rejects null', () => {
       expect(getDep(null)).toEqual({ skipReason: 'invalid-value' });

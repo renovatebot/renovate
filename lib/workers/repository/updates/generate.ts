@@ -223,12 +223,7 @@ export function generateBranchConfig(
       splitMessage[0] = splitMessage[0].toLowerCase();
       upgrade.commitMessage = splitMessage.join('\n');
     }
-    if (upgrade.commitBody) {
-      upgrade.commitMessage = `${upgrade.commitMessage}\n\n${template.compile(
-        upgrade.commitBody,
-        upgrade
-      )}`;
-    }
+
     logger.trace(`commitMessage: ` + JSON.stringify(upgrade.commitMessage));
     if (upgrade.prTitle) {
       upgrade.prTitle = template.compile(upgrade.prTitle, upgrade);
