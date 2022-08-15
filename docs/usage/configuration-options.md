@@ -2529,6 +2529,7 @@ This feature works with the following managers:
 - [`docker-compose`](/modules/manager/docker-compose)
 - [`kubernetes`](/modules/manager/kubernetes)
 - [`ansible`](/modules/manager/ansible)
+- [`droneci`](/modules/manager/droneci)
 
 ## registryUrls
 

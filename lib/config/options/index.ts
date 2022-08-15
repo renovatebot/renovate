@@ -831,6 +831,7 @@ const options: RenovateOptions[] = [
       'docker-compose',
       'kubernetes',
       'ansible',
+      'droneci',
     ],
   },
   {
