@@ -2,7 +2,7 @@ import is from '@sindresorhus/is';
 import { load } from 'js-yaml';
 import { logger } from '../../../logger';
 import { readLocalFile } from '../../../util/fs';
-import { regEx } from '../../../util/regex';
+import { trimLeadingSlash } from '../../../util/url';
 import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
 import type { GitlabPipeline, Image, Job, Services } from './types';
 import { getGitlabDep, replaceReferenceTags } from './utils';
@@ -146,7 +146,7 @@ export async function extractAllPackageFiles(
     if (is.array(doc?.include)) {
       for (const includeObj of doc.include) {
         if (is.string(includeObj.local)) {
-          const fileObj = includeObj.local.replace(regEx(/^\//), '');
+          const fileObj = trimLeadingSlash(includeObj.local);
           if (!seen.has(fileObj)) {
             seen.add(fileObj);
             filesToExamine.push(fileObj);
@@ -154,7 +154,7 @@ export async function extractAllPackageFiles(
         }
       }
     } else if (is.string(doc?.include)) {
-      const fileObj = doc.include.replace(regEx(/^\//), '');
+      const fileObj = trimLeadingSlash(doc.include);
       if (!seen.has(fileObj)) {
         seen.add(fileObj);
         filesToExamine.push(fileObj);

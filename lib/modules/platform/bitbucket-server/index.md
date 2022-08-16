@@ -67,4 +67,4 @@ You should then get a "Configure Renovate" onboarding PR in any projects that `@
 ## Supported versions
 
 We support all Bitbucket Server versions which are not EOL.
-See [Atlassian Support End of Life Policy](https://confluence.atlassian.com/support/atlassian-support-end-of-life-policy-201851003.html#AtlassianSupportEndofLifePolicy-BitbucketServer) for uptodate versions.
+See [Atlassian Support End of Life Policy](https://confluence.atlassian.com/support/atlassian-support-end-of-life-policy-201851003.html#AtlassianSupportEndofLifePolicy-BitbucketServer) for up-to-date versions.

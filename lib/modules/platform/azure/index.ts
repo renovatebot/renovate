@@ -688,6 +688,7 @@ export async function mergePr({
     `Updating PR ${pullRequestId} to status ${PullRequestStatus.Completed} (${
       PullRequestStatus[PullRequestStatus.Completed]
     }) with lastMergeSourceCommit ${
+      // TODO: types (#7154)
       // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
       pr.lastMergeSourceCommit?.commitId
     } using mergeStrategy ${mergeMethod} (${
@@ -723,7 +724,7 @@ export async function mergePr({
         `Expected PR to have status ${
           PullRequestStatus[PullRequestStatus.Completed]
           // TODO #7154
-        }, however it is ${PullRequestStatus[pr.status!]}.`
+        }. However, it is ${PullRequestStatus[pr.status!]}.`
       );
     }
     return true;

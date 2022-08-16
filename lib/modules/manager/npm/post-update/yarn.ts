@@ -25,7 +25,7 @@ import { uniqueStrings } from '../../../../util/string';
 import { NpmDatasource } from '../../../datasource/npm';
 import type { PostUpdateConfig, Upgrade } from '../../types';
 import type { NpmManagerData } from '../types';
-import { getNodeConstraint, getNodeUpdate } from './node-version';
+import { getNodeToolConstraint } from './node-version';
 import type { GenerateLockFileResult } from './types';
 
 export async function checkYarnrc(
@@ -74,9 +74,7 @@ export async function checkYarnrc(
   return { offlineMirror, yarnPath };
 }
 
-export function getOptimizeCommand(
-  fileName = '/home/ubuntu/.npm-global/lib/node_modules/yarn/lib/cli.js'
-): string {
+export function getOptimizeCommand(fileName: string): string {
   return `sed -i 's/ steps,/ steps.slice(0,1),/' ${quote(fileName)}`;
 }
 
@@ -94,7 +92,9 @@ export async function generateLockFile(
   logger.debug(`Spawning yarn install to create ${lockFileName}`);
   let lockFile: string | null = null;
   try {
-    const toolConstraints: ToolConstraint[] = [];
+    const toolConstraints: ToolConstraint[] = [
+      await getNodeToolConstraint(config, upgrades),
+    ];
     const yarnUpdate = upgrades.find(isYarnUpdate);
     const yarnCompatibility = yarnUpdate
       ? yarnUpdate.newValue
@@ -107,8 +107,6 @@ export async function generateLockFile(
       minYarnVersion && semver.gte(minYarnVersion, '2.2.0');
     const isYarnModeAvailable =
       minYarnVersion && semver.gte(minYarnVersion, '3.0.0');
-
-    const preCommands: string[] = [];
 
     const yarnTool: ToolConstraint = {
       toolName: 'yarn',
@@ -174,17 +172,13 @@ export async function generateLockFile(
         extraEnv.YARN_ENABLE_SCRIPTS = '0';
       }
     }
-    const tagConstraint =
-      getNodeUpdate(upgrades) ?? (await getNodeConstraint(config));
+
     const execOptions: ExecOptions = {
       cwdFile: lockFileName,
       extraEnv,
       docker: {
-        image: 'node',
-        tagScheme: 'node',
-        tagConstraint,
+        image: 'sidecar',
       },
-      preCommands,
       toolConstraints,
     };
     // istanbul ignore if
@@ -195,6 +189,8 @@ export async function generateLockFile(
 
     if (yarnUpdate && !isYarn1) {
       logger.debug('Updating Yarn binary');
+      // TODO: types (#7154)
+      // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
       commands.push(`yarn set version ${yarnUpdate.newValue}`);
     }
 
@@ -219,6 +215,8 @@ export async function generateLockFile(
         // `yarn up` updates to the latest release, so the range should be specified
         commands.push(
           `yarn up ${lockUpdates
+            // TODO: types (#7154)
+            // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
             .map((update) => `${update.depName}@${update.newValue}`)
             .filter(uniqueStrings)
             .join(' ')}${cmdOptions}`
@@ -283,17 +281,19 @@ export async function generateLockFile(
       },
       'lock file error'
     );
-    if (err.stderr) {
-      if (err.stderr.includes('ENOSPC: no space left on device')) {
-        throw new Error(SYSTEM_INSUFFICIENT_DISK_SPACE);
-      }
-      if (
-        err.stderr.includes('The registry may be down.') ||
-        err.stderr.includes('getaddrinfo ENOTFOUND registry.yarnpkg.com') ||
-        err.stderr.includes('getaddrinfo ENOTFOUND registry.npmjs.org')
-      ) {
-        throw new ExternalHostError(err, NpmDatasource.id);
-      }
+    const stdouterr = String(err.stdout) + String(err.stderr);
+    if (
+      stdouterr.includes('ENOSPC: no space left on device') ||
+      stdouterr.includes('Out of diskspace')
+    ) {
+      throw new Error(SYSTEM_INSUFFICIENT_DISK_SPACE);
+    }
+    if (
+      stdouterr.includes('The registry may be down.') ||
+      stdouterr.includes('getaddrinfo ENOTFOUND registry.yarnpkg.com') ||
+      stdouterr.includes('getaddrinfo ENOTFOUND registry.npmjs.org')
+    ) {
+      throw new ExternalHostError(err, NpmDatasource.id);
     }
     return { error: true, stderr: err.stderr, stdout: err.stdout };
   }

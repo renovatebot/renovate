@@ -5,9 +5,10 @@ import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import type { HostRule } from '../../../types';
 import { exec } from '../../../util/exec';
-import type { ExecOptions, ToolConstraint } from '../../../util/exec/types';
+import type { ExecOptions } from '../../../util/exec/types';
 import {
   deleteLocalFile,
+  ensureCacheDir,
   getSiblingFileName,
   readLocalFile,
   writeLocalFile,
@@ -172,27 +173,24 @@ export async function updateArtifacts({
           .join(' ')}`
       );
     }
-    const tagConstraint = getPythonConstraint(existingLockFileContent, config);
-    const constraint =
+    const constraint = getPythonConstraint(existingLockFileContent, config);
+    const poetryVersion =
       config.constraints?.poetry ?? getPoetryRequirement(newPackageFileContent);
-    const extraEnv = getSourceCredentialVars(
-      newPackageFileContent,
-      packageFileName
-    );
-    const toolConstraint: ToolConstraint = {
-      toolName: 'poetry',
-      constraint,
+    const extraEnv = {
+      ...getSourceCredentialVars(newPackageFileContent, packageFileName),
+      PIP_CACHE_DIR: await ensureCacheDir('pip'),
     };
 
     const execOptions: ExecOptions = {
       cwdFile: packageFileName,
       extraEnv,
       docker: {
-        image: 'python',
-        tagConstraint,
-        tagScheme: 'poetry',
+        image: 'sidecar',
       },
-      toolConstraints: [toolConstraint],
+      toolConstraints: [{ toolName: 'python', constraint }],
+      preCommands: [
+        `pip install --user ${quote(`poetry${poetryVersion ?? ''}`)}`,
+      ],
     };
     await exec(cmd, execOptions);
     const newPoetryLockContent = await readLocalFile(lockFileName, 'utf8');

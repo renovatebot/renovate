@@ -1,3 +1,5 @@
+// TODO: types (#7154)
+/* eslint-disable @typescript-eslint/restrict-template-expressions */
 import URL from 'url';
 import is from '@sindresorhus/is';
 import delay from 'delay';
@@ -81,6 +83,8 @@ const githubApi = new githubHttp.GithubHttp();
 
 let config: LocalRepoConfig;
 let platformConfig: PlatformConfig;
+
+export const GitHubMaxPrBodyLen = 60000;
 
 export function resetConfigs(): void {
   config = {} as never;
@@ -617,7 +621,9 @@ export async function getPrList(): Promise<Pr[]> {
         : null;
     // TODO: check null `repo` (#7154)
     const prCache = await getPrCache(githubApi, repo!, username);
-    config.prList = Object.values(prCache);
+    config.prList = Object.values(prCache).sort(
+      ({ number: a }, { number: b }) => (a > b ? -1 : 1)
+    );
   }
 
   return config.prList;
@@ -630,13 +636,25 @@ export async function findPr({
 }: FindPRConfig): Promise<Pr | null> {
   logger.debug(`findPr(${branchName}, ${prTitle}, ${state})`);
   const prList = await getPrList();
-  const pr = prList.find(
-    (p) =>
-      p.sourceBranch === branchName &&
-      (!prTitle || p.title === prTitle) &&
-      matchesState(p.state, state) &&
-      (config.forkMode || config.repository === p.sourceRepo) // #5188
-  );
+  const pr = prList.find((p) => {
+    if (p.sourceBranch !== branchName) {
+      return false;
+    }
+
+    if (prTitle && prTitle !== p.title) {
+      return false;
+    }
+
+    if (!matchesState(p.state, state)) {
+      return false;
+    }
+
+    if (!config.forkMode && config.repository !== p.sourceRepo) {
+      return false;
+    }
+
+    return true;
+  });
   if (pr) {
     logger.debug(`Found PR #${pr.number}`);
   }
@@ -1339,7 +1357,7 @@ async function tryPrAutomerge(
     if (semver.satisfies(platformConfig.gheVersion!, '<3.3.0')) {
       logger.debug(
         { prNumber },
-        'GitHub-native automerge: not supported on this GHE version. Requires >=3.3.0'
+        'GitHub-native automerge: not supported on this version of GHE. Use 3.3.0 or newer.'
       );
       return;
     }
@@ -1562,7 +1580,7 @@ export async function mergePr({
 
 export function massageMarkdown(input: string): string {
   if (platformConfig.isGhe) {
-    return smartTruncate(input, 60000);
+    return smartTruncate(input, GitHubMaxPrBodyLen);
   }
   const massagedInput = massageMarkdownLinks(input)
     // to be safe, replace all github.com links with renovatebot redirector
@@ -1572,7 +1590,7 @@ export function massageMarkdown(input: string): string {
     )
     .replace(regEx(/]\(https:\/\/github\.com\//g), '](https://togithub.com/')
     .replace(regEx(/]: https:\/\/github\.com\//g), ']: https://togithub.com/');
-  return smartTruncate(massagedInput, 60000);
+  return smartTruncate(massagedInput, GitHubMaxPrBodyLen);
 }
 
 export async function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
