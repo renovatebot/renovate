@@ -17,6 +17,8 @@ const RE_MULTIPLE_DASH = regEx(/--+/g);
  * - leading dot/leading dot after slash
  * - trailing dot
  * - whitespace
+ * - special characters
+ * - leading or trailing dashes
  * - chained dashes(breaks markdown comments) are replaced by single dash
  */
 function cleanBranchName(branchName: string): string {
@@ -25,7 +27,7 @@ function cleanBranchName(branchName: string): string {
     .replace(regEx(/^\.|\.$/), '') // leading or trailing dot
     .replace(regEx(/\/\./g), '/') // leading dot after slash
     .replace(regEx(/\s/g), '') // whitespace
-    .replace(regEx(/[[\]?:\\^~]/g), '-') // massage out all these characters: : ? [ \ ^ ~
+    .replace(regEx(/[[\]?:\\^~]/g), '-') // massage out all these characters: [ ] ? : \ ^ ~
     .replace(regEx(/(^|\/)-+/g), '$1') // leading dashes
     .replace(regEx(/-+(\/|$)/g), '$1') // trailing dashes
     .replace(RE_MULTIPLE_DASH, '-'); // chained dashes
