@@ -230,14 +230,14 @@ describe('workers/repository/updates/branch-name', () => {
             groupName: 'invalid branch name.lock',
             group: { branchName: 'renovate/{{groupSlug}}' },
           },
-          expectedBranchName: 'renovate/invalid-branch-name',
+          expectedBranchName: 'renovate/invalid-branch-namelock',
         },
         {
           upgrade: {
             groupName: '.a-bad-  name:@.lock',
             group: { branchName: 'renovate/{{groupSlug}}' },
           },
-          expectedBranchName: 'renovate/a-bad-name-@',
+          expectedBranchName: 'renovate/a-bad-namelock',
         },
         {
           upgrade: { branchName: 'renovate/bad-branch-name1..' },
