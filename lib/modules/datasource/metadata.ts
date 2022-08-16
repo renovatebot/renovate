@@ -172,9 +172,9 @@ export function addMetaData(
   }
 }
 
-// remove homepage if both sourceUrl and homepage exists and:
-// 1. homepage its not a link to a repository subpath
-// 2. or both are the same
+// remove homepage when:
+// 1. its a github or gitlab url and not a path within the repo
+// 2. or its equal to sourceURl
 export function shouldDeleteHomepage(
   sourceUrl: string | null | undefined,
   homepage: string | undefined
@@ -183,19 +183,20 @@ export function shouldDeleteHomepage(
     return false;
   }
   const massagedSourceUrl = massageUrl(sourceUrl);
-  if (massagedSourceUrl === homepage) {
-    return true;
+  const platform = detectPlatform(homepage);
+  if (platform === 'github' || platform === 'gitlab') {
+    const sourceUrlParsed = parseUrl(massagedSourceUrl);
+    if (is.nullOrUndefined(sourceUrlParsed)) {
+      return false;
+    }
+    const homepageParsed = parseUrl(homepage);
+    if (is.nullOrUndefined(homepageParsed)) {
+      return false;
+    }
+    return (
+      trimTrailingSlash(homepageParsed.pathname) ===
+      trimTrailingSlash(sourceUrlParsed.pathname)
+    );
   }
-  const sourceUrlParsed = parseUrl(massagedSourceUrl);
-  if (is.nullOrUndefined(sourceUrlParsed)) {
-    return false;
-  }
-  const homepageParsed = parseUrl(homepage);
-  if (is.nullOrUndefined(homepageParsed)) {
-    return false;
-  }
-  return (
-    trimTrailingSlash(homepageParsed.pathname) ===
-    trimTrailingSlash(sourceUrlParsed.pathname)
-  );
+  return massagedSourceUrl === homepage;
 }

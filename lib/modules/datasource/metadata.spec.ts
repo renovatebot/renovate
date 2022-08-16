@@ -302,6 +302,8 @@ describe('modules/datasource/metadata', () => {
     };
     addMetaData(dep, MavenDatasource.id, 'foobar');
     expect(dep).toMatchObject({
+      homepage: 'http://www.somesource.com',
+      sourceUrl: 'http://somesource.com',
       releases: [
         {
           version: '1.0.1',
@@ -316,7 +318,6 @@ describe('modules/datasource/metadata', () => {
           releaseTimestamp: '2000-01-03T12:34:56.000Z',
         },
       ],
-      sourceUrl: 'http://somesource.com',
     });
   });
 
