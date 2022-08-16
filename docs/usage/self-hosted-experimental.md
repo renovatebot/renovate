@@ -49,4 +49,5 @@ Read [platform details](modules/platform/gitlab/index.md) to learn why we need t
 
 ## `OTEL_EXPORTER_OTLP_ENDPOINT`
 
-If set, Renovate will export OpenTelemetry data to the supplied endpoint. For more information see [the OpenTelemetry docs](opentelemetry.md)
+If set, Renovate will export OpenTelemetry data to the supplied endpoint.
+For more information see [the OpenTelemetry docs](opentelemetry.md).
