@@ -229,6 +229,7 @@ describe('modules/manager/gradle-wrapper/artifacts', () => {
     );
     expect(execSnapshots).toMatchObject([
       {
+        cmd: '<gradlew> wrapper --gradle-version 6.3',
         options: {
           cwd: '/root/project/lib/modules/manager/gradle-wrapper/__fixtures__/testFiles/sub',
         },
