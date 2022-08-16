@@ -5,7 +5,7 @@ export interface RepoConfigError {
 
 export interface RepoFileConfig {
   configFileName?: string;
-  configFileRaw: string | null;
+  configFileRaw?: string;
   configFileParsed?: any;
   configFileParseError?: RepoConfigError;
 }
