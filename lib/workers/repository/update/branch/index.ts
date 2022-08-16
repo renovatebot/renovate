@@ -79,7 +79,7 @@ export interface ProcessBranchResult {
   prBlockedBy?: PrBlockedBy;
   prNo?: number;
   result: BranchResult;
-  updateBranchFingerprint?: boolean;
+  commitSha?: string | null;
 }
 
 export async function processBranch(
@@ -550,7 +550,7 @@ export async function processBranch(
         branchExists: true,
         prNo: branchPr?.number,
         result: BranchResult.Pending,
-        updateBranchFingerprint: !!commitSha,
+        commitSha,
       };
     }
 
@@ -574,7 +574,7 @@ export async function processBranch(
         return {
           branchExists,
           result: BranchResult.NotScheduled,
-          updateBranchFingerprint: !!commitSha,
+          commitSha,
         };
       }
       if (
@@ -695,7 +695,7 @@ export async function processBranch(
           branchExists,
           prBlockedBy,
           result: BranchResult.PrLimitReached,
-          updateBranchFingerprint: !!commitSha,
+          commitSha,
         };
       }
       // TODO: ensurePr should check for automerge itself (#9719)
@@ -704,7 +704,7 @@ export async function processBranch(
           branchExists,
           prBlockedBy,
           result: BranchResult.NeedsPrApproval,
-          updateBranchFingerprint: !!commitSha,
+          commitSha,
         };
       }
       if (prBlockedBy === 'AwaitingTests') {
@@ -712,7 +712,7 @@ export async function processBranch(
           branchExists,
           prBlockedBy,
           result: BranchResult.Pending,
-          updateBranchFingerprint: !!commitSha,
+          commitSha,
         };
       }
       if (prBlockedBy === 'BranchAutomerge') {
@@ -720,7 +720,7 @@ export async function processBranch(
           branchExists,
           prBlockedBy,
           result: BranchResult.Done,
-          updateBranchFingerprint: !!commitSha,
+          commitSha,
         };
       }
       if (prBlockedBy === 'Error') {
@@ -728,7 +728,7 @@ export async function processBranch(
           branchExists,
           prBlockedBy,
           result: BranchResult.Error,
-          updateBranchFingerprint: !!commitSha,
+          commitSha,
         };
       }
       logger.warn({ prBlockedBy }, 'Unknown PrBlockedBy result');
@@ -736,7 +736,7 @@ export async function processBranch(
         branchExists,
         prBlockedBy,
         result: BranchResult.Error,
-        updateBranchFingerprint: !!commitSha,
+        commitSha,
       };
     }
     if (ensurePrResult.type === 'with-pr') {
@@ -794,7 +794,7 @@ export async function processBranch(
           return {
             branchExists,
             result: BranchResult.Automerged,
-            updateBranchFingerprint: !!commitSha,
+            commitSha,
           };
         }
       } else {
@@ -817,13 +817,13 @@ export async function processBranch(
       branchExists: true,
       prNo: branchPr?.number,
       result: BranchResult.PrCreated,
-      updateBranchFingerprint: !!commitSha,
+      commitSha,
     };
   }
   return {
     branchExists,
     prNo: branchPr?.number,
     result: BranchResult.Done,
-    updateBranchFingerprint: !!commitSha,
+    commitSha,
   };
 }

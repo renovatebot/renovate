@@ -430,7 +430,7 @@ describe('workers/repository/update/branch/index', () => {
         branchExists: true,
         prBlockedBy: 'RateLimited',
         result: 'pr-limit-reached',
-        updateBranchFingerprint: true,
+        commitSha: '123test',
       });
     });
 
@@ -556,7 +556,7 @@ describe('workers/repository/update/branch/index', () => {
         branchExists: true,
         prBlockedBy: 'NeedsApproval',
         result: 'needs-pr-approval',
-        updateBranchFingerprint: false,
+        commitSha: null,
       });
     });
 
@@ -580,7 +580,7 @@ describe('workers/repository/update/branch/index', () => {
         branchExists: true,
         prBlockedBy: 'AwaitingTests',
         result: 'pending',
-        updateBranchFingerprint: false,
+        commitSha: null,
       });
     });
 
@@ -604,7 +604,7 @@ describe('workers/repository/update/branch/index', () => {
         branchExists: true,
         prBlockedBy: 'BranchAutomerge',
         result: 'done',
-        updateBranchFingerprint: false,
+        commitSha: null,
       });
     });
 
@@ -628,7 +628,7 @@ describe('workers/repository/update/branch/index', () => {
         branchExists: true,
         prBlockedBy: 'Error',
         result: 'error',
-        updateBranchFingerprint: false,
+        commitSha: null,
       });
     });
 
@@ -652,7 +652,7 @@ describe('workers/repository/update/branch/index', () => {
         branchExists: true,
         prBlockedBy: 'whoops',
         result: 'error',
-        updateBranchFingerprint: false,
+        commitSha: null,
       });
     });
 
@@ -677,7 +677,7 @@ describe('workers/repository/update/branch/index', () => {
         branchExists: true,
         prNo: undefined,
         result: 'pending',
-        updateBranchFingerprint: true,
+        commitSha: '123test',
       });
 
       expect(automerge.tryBranchAutomerge).toHaveBeenCalledTimes(0);
@@ -757,7 +757,7 @@ describe('workers/repository/update/branch/index', () => {
       await expect(branchWorker.processBranch(inconfig)).resolves.toEqual({
         branchExists: true,
         result: BranchResult.NotScheduled,
-        updateBranchFingerprint: false,
+        commitSha: null,
       });
       expect(logger.debug).toHaveBeenCalledWith(
         'Branch cannot automerge now because automergeSchedule is off schedule - skipping'
@@ -904,7 +904,7 @@ describe('workers/repository/update/branch/index', () => {
         branchExists: true,
         prNo: undefined,
         result: 'pr-created',
-        updateBranchFingerprint: true,
+        commitSha: '123test',
       });
     });
 
@@ -926,7 +926,7 @@ describe('workers/repository/update/branch/index', () => {
         branchExists: true,
         prNo: undefined,
         result: 'done',
-        updateBranchFingerprint: true,
+        commitSha: '123test',
       });
     });
 
@@ -997,7 +997,7 @@ describe('workers/repository/update/branch/index', () => {
         branchExists: true,
         prNo: undefined,
         result: 'done',
-        updateBranchFingerprint: false,
+        commitSha: null,
       });
     });
 
@@ -1038,7 +1038,7 @@ describe('workers/repository/update/branch/index', () => {
         branchExists: true,
         prNo: undefined,
         result: 'done',
-        updateBranchFingerprint: false,
+        commitSha: null,
       });
       expect(logger.info).toHaveBeenCalledWith(
         'DRY-RUN: Would ensure comment removal in PR #undefined'
@@ -1079,7 +1079,7 @@ describe('workers/repository/update/branch/index', () => {
         branchExists: true,
         prNo: undefined,
         result: 'done',
-        updateBranchFingerprint: false,
+        commitSha: null,
       });
     });
 
@@ -1140,7 +1140,7 @@ describe('workers/repository/update/branch/index', () => {
         branchExists: true,
         prNo: undefined,
         result: 'done',
-        updateBranchFingerprint: false,
+        commitSha: null,
       });
       expect(commit.commitFilesToBranch).not.toHaveBeenCalled();
     });
@@ -1179,7 +1179,7 @@ describe('workers/repository/update/branch/index', () => {
         branchExists: true,
         prNo: undefined,
         result: 'done',
-        updateBranchFingerprint: false,
+        commitSha: null,
       });
       expect(commit.commitFilesToBranch).toHaveBeenCalled();
     });
@@ -1264,7 +1264,7 @@ describe('workers/repository/update/branch/index', () => {
         branchExists: true,
         prNo: undefined,
         result: 'done',
-        updateBranchFingerprint: false,
+        commitSha: null,
       });
       const errorMessage = expect.stringContaining(
         "Post-upgrade command 'disallowed task' has not been added to the allowed list in allowedPostUpgradeCommand"
@@ -1438,7 +1438,7 @@ describe('workers/repository/update/branch/index', () => {
         branchExists: true,
         prNo: undefined,
         result: 'done',
-        updateBranchFingerprint: false,
+        commitSha: null,
       });
       expect(exec.exec).toHaveBeenCalledWith('echo {{{versioning}}}', {
         cwd: '/localDir',
@@ -1563,7 +1563,7 @@ describe('workers/repository/update/branch/index', () => {
         branchExists: true,
         prNo: undefined,
         result: 'done',
-        updateBranchFingerprint: false,
+        commitSha: null,
       });
       expect(exec.exec).toHaveBeenNthCalledWith(1, 'echo some-dep-name-1', {
         cwd: '/localDir',
@@ -1708,7 +1708,7 @@ describe('workers/repository/update/branch/index', () => {
         branchExists: true,
         prNo: undefined,
         result: 'done',
-        updateBranchFingerprint: false,
+        commitSha: null,
       });
       expect(exec.exec).toHaveBeenNthCalledWith(1, 'echo hardcoded-string', {
         cwd: '/localDir',
@@ -1764,10 +1764,46 @@ describe('workers/repository/update/branch/index', () => {
         branchExists: true,
         prNo: undefined,
         result: 'done',
-        updateBranchFingerprint: true,
+        commitSha: '123test',
       });
       expect(logger.debug).toHaveBeenCalledWith('Found existing branch PR');
       expect(logger.debug).toHaveBeenCalledWith(
+        'No package files need updating'
+      );
+    });
+
+    it('does nothing when branchPrefixOld/branch and its pr exists but updates not necessary', async () => {
+      getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
+        ...updatedPackageFiles,
+      });
+      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+        artifactErrors: [],
+        updatedArtifacts: [],
+      });
+      git.branchExists.mockReturnValueOnce(false);
+      git.branchExists.mockReturnValueOnce(true);
+      platform.getBranchPr.mockResolvedValueOnce(
+        partial<Pr>({
+          sourceBranch: 'old/some-branch',
+          state: PrState.Open,
+        })
+      );
+      config.reuseExistingBranch = true;
+      config.skipBranchUpdate = true;
+      const inconfig = {
+        ...config,
+        branchName: 'new/some-branch',
+        branchPrefix: 'new/',
+        branchPrefixOld: 'old/',
+      };
+      expect(await branchWorker.processBranch(inconfig)).toEqual({
+        branchExists: true,
+        prNo: undefined,
+        result: 'done',
+        commitSha: null,
+      });
+      expect(logger.debug).toHaveBeenCalledWith('Found existing branch PR');
+      expect(logger.debug).not.toHaveBeenCalledWith(
         'No package files need updating'
       );
     });

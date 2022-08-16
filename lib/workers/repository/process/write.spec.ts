@@ -154,7 +154,7 @@ describe('workers/repository/process/write', () => {
       branchWorker.processBranch.mockResolvedValueOnce({
         branchExists: true,
         result: BranchResult.Done,
-        updateBranchFingerprint: true,
+        commitSha: 'some-value',
       });
       git.branchExists.mockReturnValue(true);
       const branchManagersFingerprint = hasha(
