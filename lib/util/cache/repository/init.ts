@@ -1,6 +1,6 @@
 import type { RenovateConfig } from '../../../config/types';
 import { CacheFactory } from './impl/cache-factory';
-import { NullRepositoryCache } from './impl/null-repository-cache';
+import { RepoCacheNull } from './impl/null';
 import { resetCache, setCache } from '.';
 
 /**
@@ -12,7 +12,7 @@ export async function initRepoCache(config: RenovateConfig): Promise<void> {
   const { repository, repositoryCache, repositoryCacheType: type } = config;
 
   if (repositoryCache === 'disabled') {
-    setCache(new NullRepositoryCache());
+    setCache(new RepoCacheNull());
     return;
   }
 

@@ -14,7 +14,7 @@ import type { RepoCache, RepoCacheData, RepoCacheRecord } from '../types';
 const compress = promisify(zlib.brotliCompress);
 const decompress = promisify(zlib.brotliDecompress);
 
-export abstract class RepositoryCacheBase implements RepoCache {
+export abstract class RepoCacheBase implements RepoCache {
   protected platform: string;
   private oldHash: string | null = null;
   private data: RepoCacheData = {};

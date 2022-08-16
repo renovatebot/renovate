@@ -7,7 +7,7 @@ import { logger } from '../../../../logger';
 import { CACHE_REVISION } from '../common';
 import type { RepoCacheData, RepoCacheRecord } from '../types';
 import { CacheFactory } from './cache-factory';
-import { LocalRepositoryCache } from './local';
+import { RepoCacheLocal } from './local';
 
 jest.mock('../../../fs');
 
@@ -143,9 +143,9 @@ describe('util/cache/repository/impl/local', () => {
     const newCacheRecord = await createCacheRecord({
       semanticCommits: 'disabled',
     });
-    expect(localRepoCache instanceof LocalRepositoryCache).toBeTrue();
+    expect(localRepoCache instanceof RepoCacheLocal).toBeTrue();
     expect(logger.warn).toHaveBeenCalledWith(
-      { parsedType: 'protocol:', cacheType },
+      { cacheType },
       `Repository cache type not supported using type "local" instead`
     );
     expect(fs.outputCacheFile).toHaveBeenCalledWith(

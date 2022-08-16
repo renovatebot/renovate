@@ -3,9 +3,9 @@ import { GlobalConfig } from '../../../../config/global';
 import { logger } from '../../../../logger';
 import { outputCacheFile, readCacheFile } from '../../../fs';
 import type { RepoCacheRecord } from '../types';
-import { RepositoryCacheBase } from './repository-cache-base';
+import { RepoCacheBase } from './base';
 
-export class LocalRepositoryCache extends RepositoryCacheBase {
+export class RepoCacheLocal extends RepoCacheBase {
   constructor(repository: string) {
     super(repository);
   }

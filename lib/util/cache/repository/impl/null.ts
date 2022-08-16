@@ -1,6 +1,6 @@
 import type { RepoCache, RepoCacheData } from '../types';
 
-export class NullRepositoryCache implements RepoCache {
+export class RepoCacheNull implements RepoCache {
   protected data: RepoCacheData = {};
 
   // istanbul ignore next
