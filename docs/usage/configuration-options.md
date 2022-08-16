@@ -1631,7 +1631,7 @@ This field also supports Regular Expressions if they begin and end with `/`. e.g
 {
   "packageRules": [
     {
-      "matchBaseBranches": ["/^release\\/.*/"],
+      "matchBaseBranches": ["/^release\/.*/"],
       "excludePackagePatterns": ["^eslint"],
       "enabled": false
     }
