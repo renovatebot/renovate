@@ -1,11 +1,14 @@
 import upath from 'upath';
-import { GlobalConfig } from '../../../../../config/global';
-import { logger } from '../../../../../logger';
-import { outputCacheFile, readCacheFile } from '../../../../fs';
-import type { CacheClient, RepoCacheRecord } from '../../types';
+import { GlobalConfig } from '../../../../config/global';
+import { logger } from '../../../../logger';
+import { outputCacheFile, readCacheFile } from '../../../fs';
+import type { RepoCacheRecord } from '../types';
+import { RepositoryCacheBase } from './repository-cache-base';
 
-export class LocalRepoCache implements CacheClient {
-  constructor(private platform: string, private repository: string) {}
+export class LocalRepositoryCache extends RepositoryCacheBase {
+  constructor(repository: string) {
+    super(repository);
+  }
 
   public getCacheFileName(): string {
     const cacheDir = GlobalConfig.get('cacheDir');

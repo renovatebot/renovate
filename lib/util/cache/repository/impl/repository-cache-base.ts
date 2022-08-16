@@ -1,7 +1,7 @@
 import { promisify } from 'util';
 import zlib from 'zlib';
 import hasha from 'hasha';
-import type { RepositoryCacheType } from '../../../../config/types';
+import { GlobalConfig } from '../../../../config/global';
 import { logger } from '../../../../logger';
 import {
   CACHE_REVISION,
@@ -9,27 +9,27 @@ import {
   isValidRev11,
   isValidRev12,
 } from '../common';
-import type { CacheClient, RepoCache, RepoCacheData } from '../types';
-import { CacheClientFactory } from './cache-client-factory';
+import type { RepoCache, RepoCacheData, RepoCacheRecord } from '../types';
 
 const compress = promisify(zlib.brotliCompress);
 const decompress = promisify(zlib.brotliDecompress);
 
-export class RepositoryCacheImpl implements RepoCache {
-  private cacheClient: CacheClient;
+export abstract class RepositoryCacheBase implements RepoCache {
+  protected platform: string;
   private oldHash: string | null = null;
   private data: RepoCacheData = {};
 
-  constructor(
-    protected readonly repository: string,
-    type: RepositoryCacheType = 'local'
-  ) {
-    this.cacheClient = CacheClientFactory.get(repository, type);
+  protected constructor(protected readonly repository: string) {
+    this.platform = GlobalConfig.get('platform')!;
   }
+
+  protected abstract read(): Promise<string | undefined>;
+
+  protected abstract write(data: RepoCacheRecord): Promise<void>;
 
   async load(): Promise<void> {
     try {
-      const oldCache = await this.cacheClient.read();
+      const oldCache = await this.read();
 
       if (isValidRev12(oldCache, this.repository)) {
         const compressed = Buffer.from(oldCache.payload, 'base64');
@@ -69,7 +69,7 @@ export class RepositoryCacheImpl implements RepoCache {
     if (hash !== this.oldHash) {
       const compressed = await compress(jsonStr);
       const payload = compressed.toString('base64');
-      await this.cacheClient.write({ revision, repository, payload, hash });
+      await this.write({ revision, repository, payload, hash });
     }
   }
 
