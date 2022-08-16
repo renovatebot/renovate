@@ -32,7 +32,7 @@ const checkMatchMarkedBranches =
 const markedBranchesRe = regEx(checkMatchMarkedBranches, 'g');
 
 function checkOpenAllRateLimitedPR(issueBody: string): boolean {
-  return issueBody.includes(' - [x] <!-- open-all-rate-limited-prs -->');
+  return issueBody.includes(' - [x] <!-- create-all-rate-limited-prs -->');
 }
 
 function checkApproveAllPendingPR(issueBody: string): boolean {
@@ -263,8 +263,8 @@ export async function ensureDependencyDashboard(
     }
     if (rateLimited.length > 1) {
       issueBody += ' - [ ] ';
-      issueBody += '<!-- open-all-rate-limited-prs -->';
-      issueBody += '🔐 **Open all rate-limited PRs at once** 🔐\n';
+      issueBody += '<!-- create-all-rate-limited-prs -->';
+      issueBody += '🔐 **Create all rate-limited PRs at once** 🔐\n';
     }
     issueBody += '\n';
   }

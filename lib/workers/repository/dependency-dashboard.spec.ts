@@ -138,8 +138,8 @@ describe('workers/repository/dependency-dashboard', () => {
         title: '',
         number: 1,
         body: Fixtures.get('master-issue_with_8_PR.txt').replace(
-          '- [ ] <!-- open-all-rate-limited-prs -->',
-          '- [x] <!-- open-all-rate-limited-prs -->'
+          '- [ ] <!-- create-all-rate-limited-prs -->',
+          '- [x] <!-- create-all-rate-limited-prs -->'
         ),
       });
       await dependencyDashboard.readDashboardBody(conf);
@@ -672,13 +672,13 @@ describe('workers/repository/dependency-dashboard', () => {
         body: `This issue contains a list of Renovate updates and their statuses.
         ## Rate-limited
         These updates are currently rate-limited. Click on a checkbox below to force their creation now.
-         - [x] <!-- open-all-rate-limited-prs -->**Open all rate-limited PRs**
+         - [x] <!-- create-all-rate-limited-prs -->**Open all rate-limited PRs**
          - [ ] <!-- unlimit-branch=branchName1 -->pr1
          - [ ] <!-- unlimit-branch=branchName2 -->pr2`,
       });
       await dependencyDashboard.ensureDependencyDashboard(config, branches);
       const checkRateLimitedSelectAll = regEx(
-        / - \[ ] <!-- open-all-rate-limited-prs -->/g
+        / - \[ ] <!-- create-all-rate-limited-prs -->/g
       );
       const checkRateLimitedBranch1 = regEx(
         / - \[ ] <!-- unlimit-branch=branchName1 -->pr1/g

@@ -1779,7 +1779,7 @@ describe('workers/repository/update/branch/index', () => {
         title: 'unlimited!',
         state: PrState.Open,
         bodyStruct: {
-          hash: hashBody(`- [x] <!-- open-all-rate-limited-prs -->`),
+          hash: hashBody(`- [x] <!-- create-all-rate-limited-prs -->`),
           rebaseRequested: false,
         },
       } as Pr);

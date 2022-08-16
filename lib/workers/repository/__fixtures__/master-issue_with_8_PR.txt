@@ -21,7 +21,7 @@ These updates are currently rate-limited. Click on a checkbox below to force the
 
  - [ ] <!-- unlimit-branch=branchName5 -->pr5
  - [ ] <!-- unlimit-branch=branchName6 -->pr6
- - [ ] <!-- open-all-rate-limited-prs -->🔐 **Open all rate-limited PRs at once** 🔐
+ - [ ] <!-- create-all-rate-limited-prs -->🔐 **Create all rate-limited PRs at once** 🔐
 
 ## Errored
 
