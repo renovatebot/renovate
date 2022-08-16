@@ -10,11 +10,11 @@ const otherYamlFile = Fixtures.get('gitlab-ci.yaml');
 describe('modules/manager/kubernetes/extract', () => {
   describe('extractPackageFile()', () => {
     it('returns null for empty', () => {
-      expect(extractPackageFile('', 'file.yaml')).toBeNull();
+      expect(extractPackageFile('', 'file.yaml', {})).toBeNull();
     });
 
     it('returns only API version', () => {
-      const res = extractPackageFile(kubernetesConfigMapFile, 'file.yaml');
+      const res = extractPackageFile(kubernetesConfigMapFile, 'file.yaml', {});
       expect(res?.deps).toStrictEqual([
         {
           currentValue: 'v1',
@@ -24,7 +24,7 @@ describe('modules/manager/kubernetes/extract', () => {
     });
 
     it('extracts multiple Kubernetes configurations', () => {
-      const res = extractPackageFile(kubernetesImagesFile, 'file.yaml');
+      const res = extractPackageFile(kubernetesImagesFile, 'file.yaml', {});
       expect(res?.deps).toStrictEqual([
         {
           autoReplaceStringTemplate:
@@ -56,7 +56,11 @@ describe('modules/manager/kubernetes/extract', () => {
     });
 
     it('extracts image line in a YAML array', () => {
-      const res = extractPackageFile(kubernetesArraySyntaxFile, 'file.yaml');
+      const res = extractPackageFile(
+        kubernetesArraySyntaxFile,
+        'file.yaml',
+        {}
+      );
       expect(res?.deps).toStrictEqual([
         {
           autoReplaceStringTemplate:
@@ -76,7 +80,7 @@ describe('modules/manager/kubernetes/extract', () => {
     });
 
     it('ignores non-Kubernetes YAML files', () => {
-      expect(extractPackageFile(otherYamlFile, 'file.yaml')).toBeNull();
+      expect(extractPackageFile(otherYamlFile, 'file.yaml', {})).toBeNull();
     });
 
     it('handles invalid YAML files', () => {
@@ -84,7 +88,7 @@ describe('modules/manager/kubernetes/extract', () => {
 kind: ConfigMap
 <
 `;
-      expect(extractPackageFile(invalidYaml, 'file.yaml')).toBeNull();
+      expect(extractPackageFile(invalidYaml, 'file.yaml', {})).toBeNull();
     });
 
     it('extracts images and replaces registries', () => {

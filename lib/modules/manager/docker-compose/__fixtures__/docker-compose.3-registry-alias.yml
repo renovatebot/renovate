@@ -1,4 +1,0 @@
-version: "3"
-services:
-  nginx:
-    image: quay.io/nginx:0.0.1

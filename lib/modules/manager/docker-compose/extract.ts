@@ -30,8 +30,8 @@ class LineMapper {
 
 export function extractPackageFile(
   content: string,
-  fileName?: string,
-  extractConfig: ExtractConfig = {}
+  fileName: string,
+  extractConfig: ExtractConfig
 ): PackageFile | null {
   logger.debug('docker-compose.extractPackageFile()');
   let config: DockerComposeConfig;
@@ -72,11 +72,7 @@ export function extractPackageFile(
     const deps = Object.values(services || {})
       .filter((service) => is.string(service?.image) && !service?.build)
       .map((service) => {
-        const dep = getDep(
-          service.image,
-          undefined,
-          extractConfig.registryAliases
-        );
+        const dep = getDep(service.image, true, extractConfig.registryAliases);
         const lineNumber = lineMapper.pluckLineNumber(service.image);
         // istanbul ignore if
         if (!lineNumber) {

@@ -6,8 +6,8 @@ import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
 
 export function extractPackageFile(
   content: string,
-  _filename = '',
-  config: ExtractConfig = {}
+  _filename: string,
+  config: ExtractConfig
 ): PackageFile | null {
   logger.trace('ansible.extractPackageFile()');
   let deps: PackageDependency[] = [];
@@ -16,7 +16,7 @@ export function extractPackageFile(
     const match = re.exec(line);
     if (match) {
       const currentFrom = match[1];
-      const dep = getDep(currentFrom, undefined, config.registryAliases);
+      const dep = getDep(currentFrom, true, config.registryAliases);
       logger.debug(
         {
           depName: dep.depName,
