@@ -5,8 +5,8 @@ import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
 
 export function extractPackageFile(
   content: string,
-  _filename = '',
-  config: ExtractConfig = {}
+  _filename: string,
+  config: ExtractConfig
 ): PackageFile | null {
   const deps: PackageDependency[] = [];
   try {
@@ -38,11 +38,7 @@ export function extractPackageFile(
               currentFrom += finalLineMatch.groups.currentFrom;
               replaceString += '\n' + finalLineMatch.groups.replaceString;
 
-              const dep = getDep(
-                currentFrom,
-                undefined,
-                config.registryAliases
-              );
+              const dep = getDep(currentFrom, true, config.registryAliases);
               dep.depType = 'docker';
               dep.replaceString = replaceString;
               if (dep.autoReplaceStringTemplate) {
@@ -64,7 +60,7 @@ export function extractPackageFile(
         if (match?.groups) {
           const dep = getDep(
             match.groups.currentFrom,
-            undefined,
+            true,
             config.registryAliases
           );
           dep.depType = 'docker';

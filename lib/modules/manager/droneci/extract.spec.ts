@@ -7,18 +7,18 @@ const droneciRegistryAlias = Fixtures.get('.drone2.yml');
 describe('modules/manager/droneci/extract', () => {
   describe('extractPackageFile()', () => {
     it('returns null for empty', () => {
-      expect(extractPackageFile('nothing here')).toBeNull();
+      expect(extractPackageFile('nothing here', '', {})).toBeNull();
     });
 
     it('extracts multiple image lines', () => {
-      const res = extractPackageFile(Fixtures.get('.drone.yml'));
+      const res = extractPackageFile(Fixtures.get('.drone.yml'), '', {});
       expect(res?.deps).toMatchSnapshot();
       expect(res?.deps).toHaveLength(6);
     });
   });
 
   it('extracts image and replaces registry', () => {
-    const res = extractPackageFile(droneciRegistryAlias, undefined, {
+    const res = extractPackageFile(droneciRegistryAlias, '', {
       registryAliases: {
         'quay.io': 'my-quay-mirror.registry.com',
       },
@@ -40,7 +40,7 @@ describe('modules/manager/droneci/extract', () => {
   });
 
   it('extracts image but no replacement', () => {
-    const res = extractPackageFile(droneciRegistryAlias, undefined, {
+    const res = extractPackageFile(droneciRegistryAlias, '', {
       registryAliases: {
         'index.docker.io': 'my-docker-mirror.registry.com',
       },
@@ -62,7 +62,7 @@ describe('modules/manager/droneci/extract', () => {
   });
 
   it('extracts image and no double replacement', () => {
-    const res = extractPackageFile(droneciRegistryAlias, undefined, {
+    const res = extractPackageFile(droneciRegistryAlias, '', {
       registryAliases: {
         'quay.io': 'my-quay-mirror.registry.com',
         'my-quay-mirror.registry.com': 'quay.io',

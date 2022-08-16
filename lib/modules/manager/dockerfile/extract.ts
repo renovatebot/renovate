@@ -228,8 +228,8 @@ export function getDep(
 
 export function extractPackageFile(
   content: string,
-  _filename = '',
-  config: ExtractConfig = {}
+  _filename: string,
+  config: ExtractConfig
 ): PackageFile | null {
   const deps: PackageDependency[] = [];
   const stageNames: string[] = [];
@@ -326,7 +326,7 @@ export function extractPackageFile(
       } else if (fromImage && stageNames.includes(fromImage)) {
         logger.debug({ image: fromImage }, 'Skipping alias FROM');
       } else {
-        const dep = getDep(fromImage, undefined, config.registryAliases);
+        const dep = getDep(fromImage, true, config.registryAliases);
         processDepForAutoReplace(dep, lineNumberRanges, lines, lineFeed);
         logger.trace(
           {
@@ -356,7 +356,7 @@ export function extractPackageFile(
       } else if (Number.isNaN(Number(copyFromMatch.groups.image))) {
         const dep = getDep(
           copyFromMatch.groups.image,
-          undefined,
+          true,
           config.registryAliases
         );
         const lineNumberRanges: number[][] = [
