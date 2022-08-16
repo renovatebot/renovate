@@ -335,10 +335,10 @@ export function isECRMaxResultsError(err: HttpError): boolean {
   );
 }
 
-export const defaultConfig = {
+const defaultConfig = {
   commitMessageTopic: '{{{depName}}} Docker tag',
   commitMessageExtra:
-    'to v{{#if isMajor}}{{{newMajor}}}{{else}}{{{newVersion}}}{{/if}}',
+    'to {{#if isMajor}}{{{prettyNewMajor}}}{{else}}{{{prettyNewVersion}}}{{/if}}',
   digest: {
     branchTopic: '{{{depNameSanitized}}}-{{{currentValue}}}',
     commitMessageExtra: 'to {{newDigestShort}}',
@@ -376,6 +376,8 @@ export class DockerDatasource extends Datasource {
   override readonly defaultVersioning = dockerVersioningId;
 
   override readonly defaultRegistryUrls = [DOCKER_HUB];
+
+  override readonly defaultConfig = defaultConfig;
 
   constructor() {
     super(DockerDatasource.id);

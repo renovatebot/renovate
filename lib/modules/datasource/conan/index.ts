@@ -5,9 +5,19 @@ import { cache } from '../../../util/cache/package/decorator';
 import { GithubHttp } from '../../../util/http/github';
 import { ensureTrailingSlash, joinUrlParts } from '../../../util/url';
 import { Datasource } from '../datasource';
-import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
-import { conanDatasourceRegex, datasource, defaultRegistryUrl } from './common';
-import type { ConanJSON, ConanYAML } from './types';
+import type {
+  DigestConfig,
+  GetReleasesConfig,
+  Release,
+  ReleaseResult,
+} from '../types';
+import {
+  conanDatasourceRegex,
+  datasource,
+  defaultRegistryUrl,
+  getConanPackage,
+} from './common';
+import type { ConanJSON, ConanRevisionsJSON, ConanYAML } from './types';
 
 export class ConanDatasource extends Datasource {
   static readonly id = datasource;
@@ -51,6 +61,36 @@ export class ConanDatasource extends Datasource {
   }
 
   @cache({
+    namespace: `datasource-${datasource}-revisions`,
+    key: ({ registryUrl, packageName }: DigestConfig, newValue?: string) =>
+      // TODO: types (#7154)
+      `${registryUrl!}:${packageName}:${newValue!}`,
+  })
+  override async getDigest(
+    { registryUrl, packageName }: DigestConfig,
+    newValue?: string
+  ): Promise<string | null> {
+    if (is.undefined(newValue) || is.undefined(registryUrl)) {
+      return null;
+    }
+    const url = ensureTrailingSlash(registryUrl);
+    const conanPackage = getConanPackage(packageName);
+    const revisionLookUp = joinUrlParts(
+      url,
+      'v2/conans/',
+      conanPackage.depName,
+      newValue,
+      conanPackage.userAndChannel,
+      '/revisions'
+    );
+    const revisionRep = await this.http.getJson<ConanRevisionsJSON>(
+      revisionLookUp
+    );
+    const revisions = revisionRep?.body.revisions;
+    return revisions?.[0].revision ?? null;
+  }
+
+  @cache({
     namespace: `datasource-${datasource}`,
     key: ({ registryUrl, packageName }: GetReleasesConfig) =>
       // TODO: types (#7154)
@@ -61,8 +101,9 @@ export class ConanDatasource extends Datasource {
     registryUrl,
     packageName,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    const depName = packageName.split('/')[0];
-    const userAndChannel = '@' + packageName.split('@')[1];
+    const conanPackage = getConanPackage(packageName);
+    const depName = conanPackage.depName;
+    const userAndChannel = '@' + conanPackage.userAndChannel;
     if (
       is.string(registryUrl) &&
       ensureTrailingSlash(registryUrl) === defaultRegistryUrl
