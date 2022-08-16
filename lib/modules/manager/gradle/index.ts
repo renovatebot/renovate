@@ -23,6 +23,6 @@ export const defaultConfig = {
   versioning: gradleVersioning.id,
 };
 
-export const categories: Category[] = ['jvm'];
+export const categories: Category[] = ['java'];
 
 export const supportedDatasources = [MavenDatasource.id];

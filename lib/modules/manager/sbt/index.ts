@@ -18,4 +18,4 @@ export const defaultConfig = {
   versioning: ivyVersioning.id,
 };
 
-export const categories: Category[] = ['jvm'];
+export const categories: Category[] = ['java'];

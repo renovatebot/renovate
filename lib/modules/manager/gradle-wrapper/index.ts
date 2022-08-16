@@ -10,6 +10,6 @@ export const defaultConfig = {
   versioning,
 };
 
-export const categories: Category[] = ['jvm'];
+export const categories: Category[] = ['java'];
 
 export const supportedDatasources = [GradleVersionDatasource.id];

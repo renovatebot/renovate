@@ -9,6 +9,6 @@ export const defaultConfig = {
   versioning: mavenVersioning.id,
 };
 
-export const categories: Category[] = ['jvm'];
+export const categories: Category[] = ['java'];
 
 export const supportedDatasources = [ClojureDatasource.id];
