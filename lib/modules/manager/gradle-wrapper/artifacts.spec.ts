@@ -278,13 +278,15 @@ describe('modules/manager/gradle-wrapper/artifacts', () => {
 
   it('handles gradle-wrapper in subdirectory', async () => {
     const execSnapshots = mockExecAll();
-    git.getRepoStatus.mockResolvedValue({
-      modified: [
-        'sub/gradle/wrapper/gradle-wrapper.properties',
-        'sub/gradlew',
-        'sub/gradlew.bat',
-      ],
-    } as StatusResult);
+    git.getRepoStatus.mockResolvedValue(
+      partial<StatusResult>({
+        modified: [
+          'sub/gradle/wrapper/gradle-wrapper.properties',
+          'sub/gradlew',
+          'sub/gradlew.bat',
+        ],
+      })
+    );
 
     const res = await updateArtifacts({
       packageFileName: 'sub/gradle/wrapper/gradle-wrapper.properties',
