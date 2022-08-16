@@ -1,20 +1,15 @@
 import { cache } from '../../../util/cache/package/decorator';
-import { HttpError } from '../../../util/http';
-import { parseUrl } from '../../../util/url';
 import * as rubyVersioning from '../../versioning/ruby';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 import { InternalRubyGemsDatasource } from './get';
-import { RubyGemsOrgDatasource } from './get-rubygems-org';
+import { VersionsDatasource } from './versions-datasource';
 
 export class RubyGemsDatasource extends Datasource {
   static readonly id = 'rubygems';
 
   constructor() {
     super(RubyGemsDatasource.id);
-    this.rubyGemsOrgDatasource = new RubyGemsOrgDatasource(
-      RubyGemsDatasource.id
-    );
     this.internalRubyGemsDatasource = new InternalRubyGemsDatasource(
       RubyGemsDatasource.id
     );
@@ -26,7 +21,9 @@ export class RubyGemsDatasource extends Datasource {
 
   override readonly registryStrategy = 'hunt';
 
-  private readonly rubyGemsOrgDatasource: RubyGemsOrgDatasource;
+  private readonly versionsDatasources: {
+    [key: string]: VersionsDatasource;
+  } = {};
 
   private readonly internalRubyGemsDatasource: InternalRubyGemsDatasource;
 
@@ -37,19 +34,23 @@ export class RubyGemsDatasource extends Datasource {
   })
   async getReleases({
     packageName,
-    registryUrl,
+    registryUrl = 'https://rubygems.org',
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    if (parseUrl(registryUrl)?.hostname === 'rubygems.org') {
-      return this.rubyGemsOrgDatasource.getReleases({ packageName });
+    if (!this.versionsDatasources[registryUrl]) {
+      this.versionsDatasources[registryUrl] = new VersionsDatasource(
+        RubyGemsDatasource.id,
+        registryUrl
+      );
     }
+
     try {
-      return await this.internalRubyGemsDatasource.getReleases({
+      return await this.versionsDatasources[registryUrl].getReleases({
         packageName,
         registryUrl,
       });
     } catch (error) {
-      if (error instanceof HttpError && error.response?.statusCode === 404) {
-        return this.rubyGemsOrgDatasource.getReleases({
+      if (error.reason === 'not_supported') {
+        return this.internalRubyGemsDatasource.getReleases({
           packageName,
           registryUrl,
         });

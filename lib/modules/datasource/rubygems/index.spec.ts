@@ -2,7 +2,7 @@ import { getPkgReleases } from '..';
 import { Fixtures } from '../../../../test/fixtures';
 import * as httpMock from '../../../../test/http-mock';
 import * as rubyVersioning from '../../versioning/ruby';
-import { resetCache } from './get-rubygems-org';
+import { resetCache } from './versions-datasource';
 import { RubyGemsDatasource } from '.';
 
 const rubygemsOrgVersions = Fixtures?.get('rubygems-org.txt');
@@ -39,8 +39,13 @@ describe('modules/datasource/rubygems/index', () => {
     it('returns null for missing pkg', async () => {
       httpMock
         .scope('https://firstparty.com')
+        .get('/basepath/versions')
+        .reply(404);
+      httpMock
+        .scope('https://firstparty.com')
         .get('/basepath/api/v1/gems/rails.json')
         .reply(200);
+      httpMock.scope('https://thirdparty.com').get('/versions').reply(404);
       httpMock
         .scope('https://thirdparty.com')
         .get('/api/v1/gems/rails.json')
@@ -54,7 +59,11 @@ describe('modules/datasource/rubygems/index', () => {
       httpMock
         .scope('https://rubygems.org')
         .get('/versions')
-        .reply(200, rubygemsOrgVersions);
+        .reply(404, rubygemsOrgVersions);
+      httpMock
+        .scope('https://rubygems.org')
+        .get('/api/v1/gems/rails.json')
+        .reply(200);
       const res = await getPkgReleases(newparams);
       expect(res).toBeNull();
     });
@@ -90,11 +99,7 @@ describe('modules/datasource/rubygems/index', () => {
       httpMock
         .scope('https://enterprise.contribsys.com')
         .get('/versions')
-        .reply(200, contribsysComVersions)
-        .get('/api/v1/gems/sidekiq-ent.json')
-        .reply(404, {})
-        .get('/api/v1/dependencies?gems=sidekiq-ent')
-        .reply(404, {});
+        .reply(200, contribsysComVersions);
       const res = await getPkgReleases(newparams);
       expect(res).not.toBeNull();
       expect(res?.releases).toHaveLength(39);
@@ -133,6 +138,8 @@ describe('modules/datasource/rubygems/index', () => {
     it('works with real data', async () => {
       httpMock
         .scope('https://thirdparty.com/')
+        .get('/versions')
+        .reply(404)
         .get('/api/v1/gems/rails.json')
         .reply(200, railsInfo)
         .get('/api/v1/versions/rails.json')
@@ -146,10 +153,14 @@ describe('modules/datasource/rubygems/index', () => {
     it('uses multiple source urls', async () => {
       httpMock
         .scope('https://thirdparty.com/')
+        .get('/versions')
+        .reply(404)
         .get('/api/v1/gems/rails.json')
         .reply(401);
       httpMock
         .scope('https://firstparty.com/')
+        .get('/basepath/versions')
+        .reply(404)
         .get('/basepath/api/v1/gems/rails.json')
         .reply(200, railsInfo)
         .get('/basepath/api/v1/versions/rails.json')
@@ -163,10 +174,14 @@ describe('modules/datasource/rubygems/index', () => {
     it('returns null if mismatched name', async () => {
       httpMock
         .scope('https://thirdparty.com/')
+        .get('/versions')
+        .reply(404)
         .get('/api/v1/gems/rails.json')
         .reply(200, { ...railsInfo, name: 'oooops' });
       httpMock
         .scope('https://firstparty.com/')
+        .get('/basepath/versions')
+        .reply(404)
         .get('/basepath/api/v1/gems/rails.json')
         .reply(200);
       expect(await getPkgReleases(params)).toBeNull();
@@ -175,6 +190,8 @@ describe('modules/datasource/rubygems/index', () => {
     it('falls back to info when version request fails', async () => {
       httpMock
         .scope('https://thirdparty.com/')
+        .get('/versions')
+        .reply(404)
         .get('/api/v1/gems/rails.json')
         .reply(200, railsInfo)
         .get('/api/v1/versions/rails.json')
@@ -187,12 +204,16 @@ describe('modules/datasource/rubygems/index', () => {
     it('errors when version request fails with anything other than 400 or 404', async () => {
       httpMock
         .scope('https://thirdparty.com/')
+        .get('/versions')
+        .reply(404)
         .get('/api/v1/gems/rails.json')
         .reply(200, railsInfo)
         .get('/api/v1/versions/rails.json')
         .reply(500, {});
       httpMock
         .scope('https://firstparty.com/basepath')
+        .get('/versions')
+        .reply(404)
         .get('/api/v1/gems/rails.json')
         .reply(500);
       expect(await getPkgReleases(params)).toBeNull();
@@ -201,6 +222,8 @@ describe('modules/datasource/rubygems/index', () => {
     it('falls back to dependencies api', async () => {
       httpMock
         .scope('https://thirdparty.com/')
+        .get('/versions')
+        .reply(404)
         .get('/api/v1/gems/rails.json')
         .reply(404, railsInfo)
         .get('/api/v1/dependencies?gems=rails')
@@ -215,6 +238,8 @@ describe('modules/datasource/rubygems/index', () => {
       newparams.registryUrls = ['https://rubygems.pkg.github.com/example'];
       httpMock
         .scope('https://rubygems.pkg.github.com/example')
+        .get('/versions')
+        .reply(404)
         .get('/api/v1/dependencies?gems=rails')
         .reply(200, emptyMarshalArray);
       expect(await getPkgReleases(newparams)).toBeNull();
@@ -225,6 +250,8 @@ describe('modules/datasource/rubygems/index', () => {
       newparams.registryUrls = ['https://rubygems.pkg.github.com/example'];
       httpMock
         .scope('https://rubygems.pkg.github.com/example')
+        .get('/versions')
+        .reply(404)
         .get('/api/v1/dependencies?gems=rails')
         .reply(200, railsDependencies);
       const res = await getPkgReleases(newparams);
