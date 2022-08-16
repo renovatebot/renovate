@@ -41,8 +41,8 @@ describe('modules/manager/docker-compose/extract', () => {
     it('extracts default variable values for version 3', () => {
       const res = extractPackageFile(yamlFile3DefaultValue);
       expect(res?.deps).toMatchInlineSnapshot(`
-        Array [
-          Object {
+        [
+          {
             "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
             "currentDigest": "sha256:abcd",
             "currentValue": "5.0.0",

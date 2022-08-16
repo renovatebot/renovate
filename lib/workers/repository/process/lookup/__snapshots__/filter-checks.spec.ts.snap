@@ -1,23 +1,23 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`workers/repository/process/lookup/filter-checks .filterInternalChecks() picks up minimumConfidence settings from updateType 1`] = `
-Object {
+{
   "pendingChecks": false,
-  "pendingReleases": Array [
-    Object {
+  "pendingReleases": [
+    {
       "releaseTimestamp": "2021-01-03T00:00:00.000Z",
       "version": "1.0.2",
     },
-    Object {
+    {
       "releaseTimestamp": "2021-01-05T00:00:00.000Z",
       "version": "1.0.3",
     },
-    Object {
+    {
       "releaseTimestamp": "2021-01-07T00:00:00.000Z",
       "version": "1.0.4",
     },
   ],
-  "release": Object {
+  "release": {
     "releaseTimestamp": "2021-01-01T00:00:01.000Z",
     "version": "1.0.1",
   },
@@ -25,10 +25,10 @@ Object {
 `;
 
 exports[`workers/repository/process/lookup/filter-checks .filterInternalChecks() picks up stabilityDays settings from hostRules 1`] = `
-Object {
+{
   "pendingChecks": false,
-  "pendingReleases": Array [],
-  "release": Object {
+  "pendingReleases": [],
+  "release": {
     "releaseTimestamp": "2021-01-07T00:00:00.000Z",
     "version": "1.0.4",
   },
@@ -36,15 +36,15 @@ Object {
 `;
 
 exports[`workers/repository/process/lookup/filter-checks .filterInternalChecks() picks up stabilityDays settings from updateType 1`] = `
-Object {
+{
   "pendingChecks": false,
-  "pendingReleases": Array [
-    Object {
+  "pendingReleases": [
+    {
       "releaseTimestamp": "2021-01-07T00:00:00.000Z",
       "version": "1.0.4",
     },
   ],
-  "release": Object {
+  "release": {
     "releaseTimestamp": "2021-01-05T00:00:00.000Z",
     "version": "1.0.3",
   },
@@ -52,10 +52,10 @@ Object {
 `;
 
 exports[`workers/repository/process/lookup/filter-checks .filterInternalChecks() returns latest release if internalChecksFilter=none 1`] = `
-Object {
+{
   "pendingChecks": false,
-  "pendingReleases": Array [],
-  "release": Object {
+  "pendingReleases": [],
+  "release": {
     "releaseTimestamp": "2021-01-07T00:00:00.000Z",
     "version": "1.0.4",
   },
@@ -63,19 +63,19 @@ Object {
 `;
 
 exports[`workers/repository/process/lookup/filter-checks .filterInternalChecks() returns non-latest release if internalChecksFilter=flexible and some pass checks 1`] = `
-Object {
+{
   "pendingChecks": false,
-  "pendingReleases": Array [
-    Object {
+  "pendingReleases": [
+    {
       "releaseTimestamp": "2021-01-05T00:00:00.000Z",
       "version": "1.0.3",
     },
-    Object {
+    {
       "releaseTimestamp": "2021-01-07T00:00:00.000Z",
       "version": "1.0.4",
     },
   ],
-  "release": Object {
+  "release": {
     "releaseTimestamp": "2021-01-03T00:00:00.000Z",
     "version": "1.0.2",
   },
@@ -83,19 +83,19 @@ Object {
 `;
 
 exports[`workers/repository/process/lookup/filter-checks .filterInternalChecks() returns non-latest release if internalChecksFilter=strict and some pass checks 1`] = `
-Object {
+{
   "pendingChecks": false,
-  "pendingReleases": Array [
-    Object {
+  "pendingReleases": [
+    {
       "releaseTimestamp": "2021-01-05T00:00:00.000Z",
       "version": "1.0.3",
     },
-    Object {
+    {
       "releaseTimestamp": "2021-01-07T00:00:00.000Z",
       "version": "1.0.4",
     },
   ],
-  "release": Object {
+  "release": {
     "releaseTimestamp": "2021-01-03T00:00:00.000Z",
     "version": "1.0.2",
   },
@@ -103,10 +103,10 @@ Object {
 `;
 
 exports[`workers/repository/process/lookup/filter-checks .filterInternalChecks() returns non-pending latest release if internalChecksFilter=flexible and none pass checks 1`] = `
-Object {
+{
   "pendingChecks": false,
-  "pendingReleases": Array [],
-  "release": Object {
+  "pendingReleases": [],
+  "release": {
     "releaseTimestamp": "2021-01-07T00:00:00.000Z",
     "version": "1.0.4",
   },
@@ -114,10 +114,10 @@ Object {
 `;
 
 exports[`workers/repository/process/lookup/filter-checks .filterInternalChecks() returns pending latest release if internalChecksFilter=strict and none pass checks 1`] = `
-Object {
+{
   "pendingChecks": true,
-  "pendingReleases": Array [],
-  "release": Object {
+  "pendingReleases": [],
+  "release": {
     "releaseTimestamp": "2021-01-07T00:00:00.000Z",
     "version": "1.0.4",
   },
