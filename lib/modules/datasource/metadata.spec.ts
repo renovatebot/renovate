@@ -410,13 +410,17 @@ describe('modules/datasource/metadata', () => {
   });
 
   test.each`
-    sourceUrl                              | homepage                                            | expected
-    ${'not a url'}                         | ${'https://gitlab.com/org/repo'}                    | ${false}
-    ${'https://gitlab.com/org/repo'}       | ${'not a url'}                                      | ${false}
-    ${'https://gitlab.com/org'}            | ${'https://gitlab.com/org/'}                        | ${true}
-    ${'https://gitlab.com/org/repo/'}      | ${'https://gitlab.com/org/repo'}                    | ${true}
-    ${'https://github.com/org/repo/path/'} | ${'https://github.com/org/repo/path/'}              | ${false}
-    ${'https://gitlab.com/org/repo/'}      | ${'https://gitlab.com/org/repo/path/to/something/'} | ${false}
+    sourceUrl                              | homepage                                                                   | expected
+    ${'not a url'}                         | ${'https://gitlab.com/org/repo'}                                           | ${false}
+    ${'https://gitlab.com/org/repo'}       | ${'not a url'}                                                             | ${false}
+    ${'https://gitlab.com/org'}            | ${'https://gitlab.com/org/'}                                               | ${true}
+    ${'https://gitlab.com/org/repo/'}      | ${'https://gitlab.com/org/repo'}                                           | ${true}
+    ${'https://github.com/org/repo/path/'} | ${'https://github.com/org/repo/path/'}                                     | ${false}
+    ${'https://gitlab.com/org/repo/'}      | ${'https://gitlab.com/org/repo/path/to/something/'}                        | ${false}
+    ${'https://gitlab.com/org/repo/'}      | ${null}                                                                    | ${false}
+    ${'https://gitlab.com/org/repo/'}      | ${undefined}                                                               | ${false}
+    ${'https://gitlab.com/org/repo/'}      | ${'github.com'}                                                            | ${false}
+    ${'https://github.com/bitnami/charts'} | ${'https://github.com/bitnami/charts/tree/master/bitnami/kube-prometheus'} | ${false}
   `(
     'shouldDeleteHomepage($sourceUrl, $homepage) -> $expected',
     ({ sourceUrl, homepage, expected }) => {

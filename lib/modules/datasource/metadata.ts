@@ -172,9 +172,9 @@ export function addMetaData(
   }
 }
 
-// remove homepage when:
-// 1. its a github or gitlab url and not a path within the repo
-// 2. or its equal to sourceURl
+// Remove homepage when:
+// 1. its a github or gitlab url and not a path within the repo.
+// 2. or if its equal to sourceURl
 export function shouldDeleteHomepage(
   sourceUrl: string | null | undefined,
   homepage: string | undefined
@@ -190,12 +190,10 @@ export function shouldDeleteHomepage(
       return false;
     }
     const homepageParsed = parseUrl(homepage);
-    if (is.nullOrUndefined(homepageParsed)) {
-      return false;
-    }
     return (
+      homepageParsed !== null &&
       trimTrailingSlash(homepageParsed.pathname) ===
-      trimTrailingSlash(sourceUrlParsed.pathname)
+        trimTrailingSlash(sourceUrlParsed.pathname)
     );
   }
   return massagedSourceUrl === homepage;
