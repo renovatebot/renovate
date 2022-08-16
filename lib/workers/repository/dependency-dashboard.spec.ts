@@ -612,7 +612,7 @@ describe('workers/repository/dependency-dashboard', () => {
 
          - [ ] <!-- approve-branch=branchName1 -->pr1
          - [ ] <!-- approve-branch=branchName2 -->pr2
-         - [x] <!-- approve-all-pending-prs -->**Approve all pending PRs**`,
+         - [x] <!-- approve-all-pending-prs -->🔐 **Create all pending approval PRs at once** 🔐`,
       });
       await dependencyDashboard.ensureDependencyDashboard(config, branches);
       const checkApprovePendingSelectAll = regEx(

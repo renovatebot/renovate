@@ -231,7 +231,7 @@ export async function ensureDependencyDashboard(
     if (pendingApprovals.length > 1) {
       issueBody += ' - [ ] ';
       issueBody += '<!-- approve-all-pending-prs -->';
-      issueBody += '⚠ **Approve all pending PRs** ⚠\n';
+      issueBody += '🔐 **Create all pending approval PRs at once** 🔐\n';
     }
     issueBody += '\n';
   }
@@ -263,7 +263,7 @@ export async function ensureDependencyDashboard(
     if (rateLimited.length > 1) {
       issueBody += ' - [ ] ';
       issueBody += '<!-- open-all-rate-limited-prs -->';
-      issueBody += '⚠ **Open all rate-limited PRs** ⚠\n';
+      issueBody += '🔐 **Open all rate-limited PRs at once** 🔐\n';
     }
     issueBody += '\n';
   }
