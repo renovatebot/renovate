@@ -46,3 +46,7 @@ If set, Renovate will use this string as GitLab server version instead of checki
 This can be useful when you use the GitLab `CI_JOB_TOKEN` to authenticate Renovate.
 
 Read [platform details](modules/platform/gitlab/index.md) to learn why we need the server version on GitLab.
+
+## `OTEL_EXPORTER_OTLP_ENDPOINT`
+
+If set, Renovate will export OpenTelemetry data to the supplied endpoint. For more information see [the OpenTelemetry docs](opentelemetry.md)

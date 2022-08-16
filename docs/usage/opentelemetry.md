@@ -5,6 +5,8 @@ description: How to use OpenTelemetry with Renovate
 
 # OpenTelemetry and Renovate
 
+**THIS FEATURE IS EXPERIMENTAL** and is subject to change in minor version.
+
 Renovate supports OpenTelemetry which is an emerging monitoring standard.
 
 OpenTelemetry supports three types of observability data:
@@ -13,7 +15,7 @@ OpenTelemetry supports three types of observability data:
 - metrics
 - logs
 
-Renovate can only sent traces and only via the OpenTelemetryProtocol (OTLP), other observability data or transfer protocols are not supported.
+Renovate can only send traces and only via the OpenTelemetryProtocol (OTLP), other observability data or transfer protocols are not supported.
 
 ## Usage
 
