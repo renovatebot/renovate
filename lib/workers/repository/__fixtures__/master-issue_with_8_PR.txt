@@ -15,7 +15,7 @@ These updates are awaiting their schedule. Click on a checkbox to get an update 
  - [ ] <!-- unschedule-branch=branchName3 -->pr3
  - [ ] <!-- unschedule-branch=branchName4 -->pr4
 
-## Rate Limited
+## Rate-Limited
 
 These updates are currently rate-limited. Click on a checkbox below to force their creation now.
 

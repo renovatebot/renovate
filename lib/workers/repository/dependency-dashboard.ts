@@ -255,7 +255,7 @@ export async function ensureDependencyDashboard(
       branch.result === BranchResult.CommitLimitReached
   );
   if (rateLimited.length) {
-    issueBody += '## Rate Limited\n\n';
+    issueBody += '## Rate-Limited\n\n';
     issueBody +=
       'These updates are currently rate-limited. Click on a checkbox below to force their creation now.\n\n';
     for (const branch of rateLimited) {
