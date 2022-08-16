@@ -1,12 +1,12 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`logger/err-serializer got sanitize http error 1`] = `
-Object {
+{
   "code": "ERR_NON_2XX_3XX_RESPONSE",
   "message": "Response code 412 (Precondition Failed)",
   "name": "HTTPError",
-  "options": Object {
-    "headers": Object {
+  "options": {
+    "headers": {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
@@ -18,13 +18,13 @@ Object {
     "url": "https://**redacted**@github.com/api",
     "username": "",
   },
-  "response": Object {
-    "body": Object {
-      "err": Object {
+  "response": {
+    "body": {
+      "err": {
         "message": "failed",
       },
     },
-    "headers": Object {
+    "headers": {
       "content-type": "application/json",
     },
     "httpVersion": null,

@@ -1100,7 +1100,7 @@ describe('workers/repository/update/branch/index', () => {
           updatedArtifacts: [{ type: 'deletion', path: 'dummy' }],
         })
       ).toMatchInlineSnapshot(`
-        Object {
+        {
           "branchExists": true,
           "prNo": undefined,
           "result": "no-work",
@@ -1141,7 +1141,7 @@ describe('workers/repository/update/branch/index', () => {
           updatedArtifacts: [{ type: 'deletion', path: 'dummy' }],
         })
       ).toMatchInlineSnapshot(`
-        Object {
+        {
           "branchExists": true,
           "prNo": undefined,
           "result": "done",

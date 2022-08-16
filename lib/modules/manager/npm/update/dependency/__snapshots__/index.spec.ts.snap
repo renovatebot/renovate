@@ -1,3 +1,3 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`modules/manager/npm/update/dependency/index .updateDependency(fileContent, depType, depName, newValue) replaces a github fully specified version 1`] = `"{\\"dependencies\\":{\\"n\\":\\"git+https://github.com/owner/n#v1.1.0\\"}}"`;
+exports[`modules/manager/npm/update/dependency/index .updateDependency(fileContent, depType, depName, newValue) replaces a github fully specified version 1`] = `"{"dependencies":{"n":"git+https://github.com/owner/n#v1.1.0"}}"`;
