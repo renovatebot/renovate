@@ -92,7 +92,7 @@ describe('modules/datasource/golang-version/index', () => {
     it('returns null for error 404', async () => {
       httpMock
         .scope('https://raw.githubusercontent.com')
-        .get('/golang/website/master/internal/history/release.go')
+        .get('/golang/website/HEAD/internal/history/release.go')
         .reply(404);
       expect(
         await getPkgReleases({ datasource, depName: 'golang' })
