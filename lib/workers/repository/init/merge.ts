@@ -83,7 +83,7 @@ export async function detectRepoFileConfig(): Promise<RepoFileConfig> {
     }
     logger.debug({ config: configFileParsed }, 'package.json>renovate config');
   } else {
-    configFileRaw = (await readLocalFile(configFileName, 'utf8'));
+    configFileRaw = await readLocalFile(configFileName, 'utf8');
     // istanbul ignore if
     if (!is.string(configFileRaw)) {
       logger.warn({ configFileName }, 'Null contents when reading config file');
