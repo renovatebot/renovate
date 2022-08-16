@@ -261,7 +261,7 @@ describe('modules/datasource/metadata', () => {
     );
   });
 
-  it('Should remove homepage and set to sourceUrl when not a link to a path in repo', () => {
+  it('Should remove homepage when homepage and sourceUrl are same', () => {
     const dep = {
       homepage: 'https://github.com/foo/bar', // link is at repo root
       releases: [
