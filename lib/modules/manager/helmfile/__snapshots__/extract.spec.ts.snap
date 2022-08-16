@@ -1,32 +1,32 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`modules/manager/helmfile/extract extractPackageFile() parses multidoc yaml 1`] = `
-Object {
+{
   "datasource": "helm",
-  "deps": Array [
-    Object {
+  "deps": [
+    {
       "depName": "manifests",
       "skipReason": "local-chart",
     },
-    Object {
+    {
       "currentValue": "7.4.3",
       "depName": "rabbitmq",
-      "registryUrls": Array [
+      "registryUrls": [
         "https://charts.bitnami.com/bitnami",
       ],
     },
-    Object {
+    {
       "currentValue": "13.7",
       "depName": "kube-prometheus-stack",
-      "registryUrls": Array [
+      "registryUrls": [
         "https://prometheus-community.github.io/helm-charts",
       ],
     },
-    Object {
+    {
       "depName": "invalid",
       "skipReason": "invalid-name",
     },
-    Object {
+    {
       "depName": "external-dns",
       "skipReason": "invalid-version",
     },
@@ -35,10 +35,10 @@ Object {
 `;
 
 exports[`modules/manager/helmfile/extract extractPackageFile() skip chart that does not have specified version 1`] = `
-Object {
+{
   "datasource": "helm",
-  "deps": Array [
-    Object {
+  "deps": [
+    {
       "depName": "example",
       "skipReason": "invalid-version",
     },
@@ -47,21 +47,21 @@ Object {
 `;
 
 exports[`modules/manager/helmfile/extract extractPackageFile() skip chart with special character in the name 1`] = `
-Object {
+{
   "datasource": "helm",
-  "deps": Array [
-    Object {
+  "deps": [
+    {
       "currentValue": "1.0.0",
       "depName": "example/example",
-      "registryUrls": Array [
+      "registryUrls": [
         "https://kiwigrid.github.io",
       ],
       "skipReason": "unsupported-chart-type",
     },
-    Object {
+    {
       "currentValue": "1.0.0",
       "depName": "example?example",
-      "registryUrls": Array [
+      "registryUrls": [
         "https://kiwigrid.github.io",
       ],
       "skipReason": "unsupported-chart-type",
@@ -71,13 +71,13 @@ Object {
 `;
 
 exports[`modules/manager/helmfile/extract extractPackageFile() skip chart with unknown repository 1`] = `
-Object {
+{
   "datasource": "helm",
-  "deps": Array [
-    Object {
+  "deps": [
+    {
       "currentValue": "1.0.0",
       "depName": "example",
-      "registryUrls": Array [],
+      "registryUrls": [],
       "skipReason": "unknown-registry",
     },
   ],
@@ -85,13 +85,13 @@ Object {
 `;
 
 exports[`modules/manager/helmfile/extract extractPackageFile() skip if repository details are not specified 1`] = `
-Object {
+{
   "datasource": "helm",
-  "deps": Array [
-    Object {
+  "deps": [
+    {
       "currentValue": "1.0.0",
       "depName": "example",
-      "registryUrls": Array [],
+      "registryUrls": [],
       "skipReason": "unknown-registry",
     },
   ],
@@ -99,10 +99,10 @@ Object {
 `;
 
 exports[`modules/manager/helmfile/extract extractPackageFile() skip local charts 1`] = `
-Object {
+{
   "datasource": "helm",
-  "deps": Array [
-    Object {
+  "deps": [
+    {
       "depName": "example",
       "skipReason": "local-chart",
     },
@@ -111,21 +111,21 @@ Object {
 `;
 
 exports[`modules/manager/helmfile/extract extractPackageFile() skip templetized release with invalid characters 1`] = `
-Object {
+{
   "datasource": "helm",
-  "deps": Array [
-    Object {
+  "deps": [
+    {
       "currentValue": "1.0.0",
       "depName": "!!!!--!",
-      "registryUrls": Array [
+      "registryUrls": [
         "https://charts.helm.sh/stable",
       ],
       "skipReason": "unsupported-chart-type",
     },
-    Object {
+    {
       "currentValue": "1.0.0",
       "depName": "example",
-      "registryUrls": Array [
+      "registryUrls": [
         "https://charts.helm.sh/stable",
       ],
     },

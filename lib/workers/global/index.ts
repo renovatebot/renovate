@@ -16,7 +16,6 @@ import type {
 import { CONFIG_PRESETS_INVALID } from '../../constants/error-messages';
 import { pkg } from '../../expose.cjs';
 import { getProblems, logger, setMeta } from '../../logger';
-import { writeFile } from '../../util/fs';
 import * as hostRules from '../../util/host-rules';
 import * as repositoryWorker from '../repository';
 import { autodiscoverRepositories } from './autodiscover';
@@ -32,7 +31,8 @@ export async function getRepositoryConfig(
     globalConfig,
     is.string(repository) ? { repository } : repository
   );
-  const platform = GlobalConfig.get('platform');
+  // TODO: types (#7154)
+  const platform = GlobalConfig.get('platform')!;
   repoConfig.localDir = upath.join(
     repoConfig.baseDir,
     `./repos/${platform}/${repoConfig.repository}`
@@ -56,7 +56,7 @@ function haveReachedLimits(): boolean {
 
 /* istanbul ignore next */
 function checkEnv(): void {
-  const range = pkg.engines!.node;
+  const range = pkg.engines!.node!;
   const rangeNext = pkg['engines-next']?.node;
   if (process.release?.name !== 'node' || !process.versions?.node) {
     logger.warn(
@@ -133,7 +133,7 @@ export async function start(): Promise<number> {
 
     if (is.nonEmptyString(config.writeDiscoveredRepos)) {
       const content = JSON.stringify(config.repositories);
-      await writeFile(config.writeDiscoveredRepos, content);
+      await fs.writeFile(config.writeDiscoveredRepos, content);
       logger.info(
         `Written discovered repositories to ${config.writeDiscoveredRepos}`
       );

@@ -1,13 +1,13 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`modules/manager/composer/artifacts adds all ignorePlatformReq items 1`] = `
-Array [
-  Object {
+[
+  {
     "cmd": "composer update --with-dependencies --ignore-platform-req ext-posix --ignore-platform-req ext-sodium --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins",
-    "options": Object {
+    "options": {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
-      "env": Object {
+      "env": {
         "COMPOSER_CACHE_DIR": "/tmp/renovate/cache/others/composer",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -25,9 +25,9 @@ Array [
 `;
 
 exports[`modules/manager/composer/artifacts catches errors 1`] = `
-Array [
-  Object {
-    "artifactError": Object {
+[
+  {
+    "artifactError": {
       "lockFile": "composer.lock",
       "stderr": "not found",
     },
@@ -36,9 +36,9 @@ Array [
 `;
 
 exports[`modules/manager/composer/artifacts catches unmet requirements errors 1`] = `
-Array [
-  Object {
-    "artifactError": Object {
+[
+  {
+    "artifactError": {
       "lockFile": "composer.lock",
       "stderr": "fooYour requirements could not be resolved to an installable set of packages.bar",
     },
@@ -47,13 +47,13 @@ Array [
 `;
 
 exports[`modules/manager/composer/artifacts disable plugins when configured locally 1`] = `
-Array [
-  Object {
+[
+  {
     "cmd": "composer update foo bar --with-dependencies --ignore-platform-reqs --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins",
-    "options": Object {
+    "options": {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
-      "env": Object {
+      "env": {
         "COMPOSER_CACHE_DIR": "/tmp/renovate/cache/others/composer",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -71,13 +71,13 @@ Array [
 `;
 
 exports[`modules/manager/composer/artifacts disables ignorePlatformReqs 1`] = `
-Array [
-  Object {
+[
+  {
     "cmd": "composer update --with-dependencies --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins",
-    "options": Object {
+    "options": {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
-      "env": Object {
+      "env": {
         "COMPOSER_CACHE_DIR": "/tmp/renovate/cache/others/composer",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -95,13 +95,13 @@ Array [
 `;
 
 exports[`modules/manager/composer/artifacts does not disable plugins when configured globally 1`] = `
-Array [
-  Object {
+[
+  {
     "cmd": "composer update foo bar --with-dependencies --ignore-platform-reqs --no-ansi --no-interaction --no-scripts --no-autoloader",
-    "options": Object {
+    "options": {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
-      "env": Object {
+      "env": {
         "COMPOSER_CACHE_DIR": "/tmp/renovate/cache/others/composer",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -119,13 +119,13 @@ Array [
 `;
 
 exports[`modules/manager/composer/artifacts installs before running the update when symfony flex is installed 1`] = `
-Array [
-  Object {
+[
+  {
     "cmd": "composer install --ignore-platform-reqs --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins",
-    "options": Object {
+    "options": {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
-      "env": Object {
+      "env": {
         "COMPOSER_CACHE_DIR": "/tmp/renovate/cache/others/composer",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -139,12 +139,12 @@ Array [
       "timeout": 900000,
     },
   },
-  Object {
+  {
     "cmd": "composer update --with-dependencies --ignore-platform-reqs --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins",
-    "options": Object {
+    "options": {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
-      "env": Object {
+      "env": {
         "COMPOSER_CACHE_DIR": "/tmp/renovate/cache/others/composer",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -162,13 +162,13 @@ Array [
 `;
 
 exports[`modules/manager/composer/artifacts installs before running the update when symfony flex is installed as dev 1`] = `
-Array [
-  Object {
+[
+  {
     "cmd": "composer install --ignore-platform-reqs --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins",
-    "options": Object {
+    "options": {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
-      "env": Object {
+      "env": {
         "COMPOSER_CACHE_DIR": "/tmp/renovate/cache/others/composer",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -182,12 +182,12 @@ Array [
       "timeout": 900000,
     },
   },
-  Object {
+  {
     "cmd": "composer update --with-dependencies --ignore-platform-reqs --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins",
-    "options": Object {
+    "options": {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
-      "env": Object {
+      "env": {
         "COMPOSER_CACHE_DIR": "/tmp/renovate/cache/others/composer",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -205,13 +205,13 @@ Array [
 `;
 
 exports[`modules/manager/composer/artifacts performs lockFileMaintenance 1`] = `
-Array [
-  Object {
+[
+  {
     "cmd": "composer update --ignore-platform-reqs --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins",
-    "options": Object {
+    "options": {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
-      "env": Object {
+      "env": {
         "COMPOSER_CACHE_DIR": "/tmp/renovate/cache/others/composer",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -229,13 +229,13 @@ Array [
 `;
 
 exports[`modules/manager/composer/artifacts returns null if unchanged 1`] = `
-Array [
-  Object {
+[
+  {
     "cmd": "composer update foo bar --with-dependencies --ignore-platform-reqs --no-ansi --no-interaction",
-    "options": Object {
+    "options": {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
-      "env": Object {
+      "env": {
         "COMPOSER_CACHE_DIR": "/tmp/renovate/cache/others/composer",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -253,13 +253,13 @@ Array [
 `;
 
 exports[`modules/manager/composer/artifacts returns updated composer.lock 1`] = `
-Array [
-  Object {
+[
+  {
     "cmd": "composer update --with-dependencies --ignore-platform-reqs --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins",
-    "options": Object {
+    "options": {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
-      "env": Object {
+      "env": {
         "COMPOSER_CACHE_DIR": "/tmp/renovate/cache/others/composer",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -277,25 +277,26 @@ Array [
 `;
 
 exports[`modules/manager/composer/artifacts supports docker mode 1`] = `
-Array [
-  Object {
+[
+  {
     "cmd": "docker pull renovate/php:7.3",
-    "options": Object {
+    "options": {
       "encoding": "utf-8",
     },
   },
-  Object {
+  {
     "cmd": "docker ps --filter name=renovate_php -aq",
-    "options": Object {
+    "options": {
       "encoding": "utf-8",
     },
   },
-  Object {
-    "cmd": "docker run --rm --name=renovate_php --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/renovate/cache\\":\\"/tmp/renovate/cache\\" -e COMPOSER_CACHE_DIR -w \\"/tmp/github/some/repo\\" renovate/php:7.3 bash -l -c \\"install-tool composer 1.10.17 && composer update --with-dependencies --ignore-platform-reqs --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins\\"",
-    "options": Object {
+  {
+    "cmd": "docker run --rm --name=renovate_php --label=renovate_child -v "/tmp/github/some/repo":"/tmp/github/some/repo" -v "/tmp/renovate/cache":"/tmp/renovate/cache" -e COMPOSER_CACHE_DIR -e BUILDPACK_CACHE_DIR -w "/tmp/github/some/repo" renovate/php:7.3 bash -l -c "install-tool composer 1.10.17 && composer update --with-dependencies --ignore-platform-reqs --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins"",
+    "options": {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
-      "env": Object {
+      "env": {
+        "BUILDPACK_CACHE_DIR": "/tmp/renovate/cache/buildpack",
         "COMPOSER_CACHE_DIR": "/tmp/renovate/cache/others/composer",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -313,13 +314,13 @@ Array [
 `;
 
 exports[`modules/manager/composer/artifacts supports global mode 1`] = `
-Array [
-  Object {
+[
+  {
     "cmd": "composer update --with-dependencies --ignore-platform-reqs --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins",
-    "options": Object {
+    "options": {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
-      "env": Object {
+      "env": {
         "COMPOSER_CACHE_DIR": "/tmp/renovate/cache/others/composer",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -337,13 +338,13 @@ Array [
 `;
 
 exports[`modules/manager/composer/artifacts supports vendor directory update 1`] = `
-Array [
-  Object {
+[
+  {
     "cmd": "composer update --with-dependencies --ignore-platform-reqs --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins",
-    "options": Object {
+    "options": {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
-      "env": Object {
+      "env": {
         "COMPOSER_CACHE_DIR": "/tmp/renovate/cache/others/composer",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -361,14 +362,14 @@ Array [
 `;
 
 exports[`modules/manager/composer/artifacts uses hostRules to set COMPOSER_AUTH 1`] = `
-Array [
-  Object {
+[
+  {
     "cmd": "composer update --with-dependencies --ignore-platform-reqs --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins",
-    "options": Object {
+    "options": {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
-      "env": Object {
-        "COMPOSER_AUTH": "{\\"github-oauth\\":{\\"github.com\\":\\"github-token\\"},\\"gitlab-token\\":{\\"gitlab.com\\":\\"gitlab-token\\"},\\"gitlab-domains\\":[\\"gitlab.com\\"],\\"http-basic\\":{\\"packagist.renovatebot.com\\":{\\"username\\":\\"some-username\\",\\"password\\":\\"some-password\\"},\\"artifactory.yyyyyyy.com\\":{\\"username\\":\\"some-other-username\\",\\"password\\":\\"some-other-password\\"}},\\"bearer\\":{\\"packages-bearer.example.com\\":\\"abcdef0123456789\\"}}",
+      "env": {
+        "COMPOSER_AUTH": "{"github-oauth":{"github.com":"github-token"},"gitlab-token":{"gitlab.com":"gitlab-token"},"gitlab-domains":["gitlab.com"],"http-basic":{"packagist.renovatebot.com":{"username":"some-username","password":"some-password"},"artifactory.yyyyyyy.com":{"username":"some-other-username","password":"some-other-password"}},"bearer":{"packages-bearer.example.com":"abcdef0123456789"}}",
         "COMPOSER_CACHE_DIR": "/tmp/renovate/cache/others/composer",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",

@@ -141,10 +141,26 @@ This mode means that Renovate will dynamically install the version of tools avai
 
 Supported tools for dynamic install are:
 
+- `bundler`
+- `cargo`
 - `composer`
 - `flux`
+- `gradle-wrapper`
 - `jb`
+- `jsonnet-bundler`
+- `lerna`
+- `mix`
+- `node`
 - `npm`
+- `pip_requirements`
+- `pip-compile`
+- `pipenv`
+- `pnpm`
+- `poetry`
+- `python`
+- `yarn`
+
+If all projects are managed by Hermit, you can tell Renovate to use the tooling versions specified in each project via Hermit by setting `binarySource=hermit`.
 
 Tools not on this list fall back to `binarySource=global`.
 
@@ -383,7 +399,7 @@ To handle the case where the underlying Git processes appear to hang, configure 
 ## gitUrl
 
 Override the default resolution for Git remote, e.g. to switch GitLab from HTTPS to SSH-based.
-Currently works for GitLab only.
+Currently works for Bitbucket Server and GitLab only.
 
 Possible values:
 

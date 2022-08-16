@@ -6,18 +6,18 @@ import upath from 'upath';
 import { migrateConfig } from '../../../../config/migration';
 import type { AllConfig, RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
-import { readFile } from '../../../../util/fs';
+import { readSystemFile } from '../../../../util/fs';
 
 export async function getParsedContent(file: string): Promise<RenovateConfig> {
   switch (upath.extname(file)) {
     case '.yaml':
     case '.yml':
-      return load(await readFile(file, 'utf8'), {
+      return load(await readSystemFile(file, 'utf8'), {
         json: true,
       }) as RenovateConfig;
     case '.json5':
     case '.json':
-      return JSON5.parse(await readFile(file, 'utf8'));
+      return JSON5.parse(await readSystemFile(file, 'utf8'));
     case '.js': {
       const tmpConfig = await import(file);
       let config = tmpConfig.default ? tmpConfig.default : tmpConfig;
@@ -53,7 +53,7 @@ export async function getConfig(env: NodeJS.ProcessEnv): Promise<AllConfig> {
   } catch (err) {
     // istanbul ignore if
     if (err instanceof SyntaxError || err instanceof TypeError) {
-      logger.fatal(`Could not parse config file \n ${err.stack}`);
+      logger.fatal(`Could not parse config file \n ${err.stack!}`);
       process.exit(1);
     } else if (err instanceof ReferenceError) {
       logger.fatal(

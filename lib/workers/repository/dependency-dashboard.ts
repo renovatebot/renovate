@@ -4,10 +4,13 @@ import { nameFromLevel } from 'bunyan';
 import { GlobalConfig } from '../../config/global';
 import type { RenovateConfig } from '../../config/types';
 import { getProblems, logger } from '../../logger';
+import type { PackageFile } from '../../modules/manager/types';
 import { platform } from '../../modules/platform';
+import { GitHubMaxPrBodyLen } from '../../modules/platform/github';
 import { regEx } from '../../util/regex';
 import * as template from '../../util/template';
-import { BranchConfig, BranchResult } from '../types';
+import { BranchConfig, BranchResult, SelectAllConfig } from '../types';
+import { getDepWarningsDashboard } from './errors-warnings';
 import { PackageFiles } from './package-files';
 
 interface DependencyDashboard {
@@ -15,28 +18,31 @@ interface DependencyDashboard {
   dependencyDashboardRebaseAllOpen: boolean;
 }
 
-function parseDashboardIssue(issueBody: string): DependencyDashboard {
-  const checkMatch = ' - \\[x\\] <!-- ([a-zA-Z]+)-branch=([^\\s]+) -->';
-  const checked = issueBody.match(regEx(checkMatch, 'g'));
-  const dependencyDashboardChecks: Record<string, string> = {};
-  if (checked?.length) {
-    const re = regEx(checkMatch);
-    checked.forEach((check) => {
-      const [, type, branchName] = re.exec(check)!;
-      dependencyDashboardChecks[branchName] = type;
-    });
-  }
-  const checkedRebaseAll = issueBody.includes(
-    ' - [x] <!-- rebase-all-open-prs -->'
-  );
-  let dependencyDashboardRebaseAllOpen = false;
-  if (checkedRebaseAll) {
-    dependencyDashboardRebaseAllOpen = true;
-  }
-  return { dependencyDashboardChecks, dependencyDashboardRebaseAllOpen };
+function checkRebaseAll(issueBody: string): boolean {
+  return issueBody.includes(' - [x] <!-- rebase-all-open-prs -->');
 }
 
-export async function readDashboardBody(config: RenovateConfig): Promise<void> {
+function getCheckedBranches(issueBody: string): Record<string, string> {
+  const checkMatch = /- \[x\] <!-- ([a-zA-Z]+)-branch=([^\s]+) -->/g;
+  const dependencyDashboardChecks: Record<string, string> = {};
+  for (const [, type, branchName] of issueBody.matchAll(regEx(checkMatch))) {
+    dependencyDashboardChecks[branchName] = type;
+  }
+  return dependencyDashboardChecks;
+}
+
+function parseDashboardIssue(issueBody: string): DependencyDashboard {
+  const dependencyDashboardChecks = getCheckedBranches(issueBody);
+  const dependencyDashboardRebaseAllOpen = checkRebaseAll(issueBody);
+  return {
+    dependencyDashboardChecks,
+    dependencyDashboardRebaseAllOpen,
+  };
+}
+
+export async function readDashboardBody(
+  config: SelectAllConfig
+): Promise<void> {
   config.dependencyDashboardChecks = {};
   const stringifiedConfig = JSON.stringify(config);
   if (
@@ -58,12 +64,14 @@ function getListItem(branch: BranchConfig, type: string): string {
   let item = ' - [ ] ';
   item += `<!-- ${type}-branch=${branch.branchName} -->`;
   if (branch.prNo) {
-    item += `[${branch.prTitle}](../pull/${branch.prNo})`;
+    // TODO: types (#7154)
+    item += `[${branch.prTitle!}](../pull/${branch.prNo})`;
   } else {
     item += branch.prTitle;
   }
   const uniquePackages = [
-    ...new Set(branch.upgrades.map((upgrade) => `\`${upgrade.depName}\``)),
+    // TODO: types (#7154)
+    ...new Set(branch.upgrades.map((upgrade) => `\`${upgrade.depName!}\``)),
   ];
   if (uniquePackages.length < 2) {
     return item + '\n';
@@ -97,8 +105,9 @@ function appendRepoProblems(config: RenovateConfig, issueBody: string): string {
 }
 
 export async function ensureDependencyDashboard(
-  config: RenovateConfig,
-  allBranches: BranchConfig[]
+  config: SelectAllConfig,
+  allBranches: BranchConfig[],
+  packageFiles: Record<string, PackageFile[]> = {}
 ): Promise<void> {
   // legacy/migrated issue
   const reuseTitle = 'Update Dependencies (Renovate Bot)';
@@ -252,6 +261,13 @@ export async function ensureDependencyDashboard(
     }
     issueBody += '\n';
   }
+
+  const warn = getDepWarningsDashboard(packageFiles);
+  if (warn) {
+    issueBody += warn;
+    issueBody += '\n';
+  }
+
   const otherRes = [
     BranchResult.Pending,
     BranchResult.NeedsApproval,
@@ -318,14 +334,14 @@ export async function ensureDependencyDashboard(
       'This repository currently has no open or pending branches.\n\n';
   }
 
-  issueBody += PackageFiles.getDashboardMarkdown(config);
+  // fit the detected dependencies section
+  const footer = getFooter(config);
+  issueBody += PackageFiles.getDashboardMarkdown(
+    config,
+    GitHubMaxPrBodyLen - issueBody.length - footer.length
+  );
 
-  if (config.dependencyDashboardFooter?.length) {
-    issueBody +=
-      '---\n' +
-      template.compile(config.dependencyDashboardFooter, config) +
-      '\n';
-  }
+  issueBody += footer;
 
   if (config.dependencyDashboardIssue) {
     const updatedIssue = await platform.getIssue?.(
@@ -363,4 +379,16 @@ export async function ensureDependencyDashboard(
       confidential: config.confidential,
     });
   }
+}
+
+function getFooter(config: RenovateConfig): string {
+  let footer = '';
+  if (config.dependencyDashboardFooter?.length) {
+    footer +=
+      '---\n' +
+      template.compile(config.dependencyDashboardFooter, config) +
+      '\n';
+  }
+
+  return footer;
 }

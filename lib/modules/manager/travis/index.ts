@@ -9,7 +9,7 @@ export const language = ProgrammingLanguage.NodeJS;
 export const supportedDatasources = [GithubTagsDatasource.id];
 
 export const defaultConfig = {
-  fileMatch: ['^.travis.yml$'],
+  fileMatch: ['^\\.travis\\.yml$'],
   major: {
     enabled: false,
   },

@@ -5,11 +5,11 @@ import * as rubyVersioning from '../../versioning/ruby';
 import { resetCache } from './versions-datasource';
 import { RubyGemsDatasource } from '.';
 
-const rubygemsOrgVersions = Fixtures?.get('rubygems-org.txt');
-const contribsysComVersions = Fixtures?.get('contribsys-com-versions.txt');
-const railsInfo = Fixtures?.getJson('rails/info.json');
-const railsVersions = Fixtures?.getJson('rails/versions.json');
-const railsDependencies = Fixtures?.getBinary('dependencies-rails.dat');
+const rubygemsOrgVersions = Fixtures.get('rubygems-org.txt');
+const contribsysComVersions = Fixtures.get('contribsys-com-versions.txt');
+const railsInfo = Fixtures.getJson('rails/info.json');
+const railsVersions = Fixtures.getJson('rails/versions.json');
+const railsDependencies = Fixtures.getBinary('dependencies-rails.dat');
 const emptyMarshalArray = Buffer.from([4, 8, 91, 0]);
 
 describe('modules/datasource/rubygems/index', () => {

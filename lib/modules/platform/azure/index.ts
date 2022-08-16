@@ -113,6 +113,8 @@ export async function getRepos(): Promise<string[]> {
   logger.debug('Autodiscovering Azure DevOps repositories');
   const azureApiGit = await azureApi.gitApi();
   const repos = await azureApiGit.getRepositories();
+  // TODO: types (#7154)
+  // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
   return repos.map((repo) => `${repo.project?.name}/${repo.name}`);
 }
 
@@ -211,7 +213,8 @@ export async function initRepo({
     hostType: defaults.hostType,
     url: defaults.endpoint,
   });
-  const manualUrl = `${defaults.endpoint}${encodeURIComponent(
+  // TODO: types (#7154)
+  const manualUrl = `${defaults.endpoint!}${encodeURIComponent(
     projectName
   )}/_git/${encodeURIComponent(repoName)}`;
   const url = repo.remoteUrl ?? manualUrl;
@@ -514,7 +517,7 @@ export async function ensureComment({
   topic,
   content,
 }: EnsureCommentConfig): Promise<boolean> {
-  logger.debug(`ensureComment(${number}, ${topic}, content)`);
+  logger.debug(`ensureComment(${number}, ${topic!}, content)`);
   const header = topic ? `### ${topic}\n\n` : '';
   const body = `${header}${sanitize(content)}`;
   const azureApiGit = await azureApi.gitApi();
@@ -630,7 +633,7 @@ export async function setBranchStatus({
   url: targetUrl,
 }: BranchStatusConfig): Promise<void> {
   logger.debug(
-    `setBranchStatus(${branchName}, ${context}, ${description}, ${state}, ${targetUrl})`
+    `setBranchStatus(${branchName}, ${context}, ${description}, ${state}, ${targetUrl!})`
   );
   const azureApiGit = await azureApi.gitApi();
   const branch = await azureApiGit.getBranch(
@@ -656,7 +659,7 @@ export async function mergePr({
   branchName,
   id: pullRequestId,
 }: MergePRConfig): Promise<boolean> {
-  logger.debug(`mergePr(${pullRequestId}, ${branchName})`);
+  logger.debug(`mergePr(${pullRequestId}, ${branchName!})`);
   const azureApiGit = await azureApi.gitApi();
 
   let pr = await azureApiGit.getPullRequestById(pullRequestId, config.project);
@@ -685,6 +688,8 @@ export async function mergePr({
     `Updating PR ${pullRequestId} to status ${PullRequestStatus.Completed} (${
       PullRequestStatus[PullRequestStatus.Completed]
     }) with lastMergeSourceCommit ${
+      // TODO: types (#7154)
+      // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
       pr.lastMergeSourceCommit?.commitId
     } using mergeStrategy ${mergeMethod} (${
       GitPullRequestMergeStrategy[mergeMethod]
@@ -719,7 +724,7 @@ export async function mergePr({
         `Expected PR to have status ${
           PullRequestStatus[PullRequestStatus.Completed]
           // TODO #7154
-        }, however it is ${PullRequestStatus[pr.status!]}.`
+        }. However, it is ${PullRequestStatus[pr.status!]}.`
       );
     }
     return true;
@@ -736,7 +741,8 @@ export function massageMarkdown(input: string): string {
       'you tick the rebase/retry checkbox',
       'rename PR to start with "rebase!"'
     )
-    .replace(regEx(`\n---\n\n.*?<!-- rebase-check -->.*?\n`), '');
+    .replace(regEx(`\n---\n\n.*?<!-- rebase-check -->.*?\n`), '')
+    .replace(regEx(/<!--renovate-debug:.*?-->/), '');
 }
 
 /* istanbul ignore next */
