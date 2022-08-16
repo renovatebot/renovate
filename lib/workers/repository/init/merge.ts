@@ -70,7 +70,7 @@ export async function detectRepoFileConfig(): Promise<RepoFileConfig> {
   logger.debug(`Found ${configFileName} config file`);
   // TODO #7154
   let configFileParsed: any;
-  let rawFileContents;
+  let configFileRaw: string | null;
   if (configFileName === 'package.json') {
     // We already know it parses
     configFileParsed = JSON.parse(
@@ -83,7 +83,7 @@ export async function detectRepoFileConfig(): Promise<RepoFileConfig> {
     }
     logger.debug({ config: configFileParsed }, 'package.json>renovate config');
   } else {
-    rawFileContents = await readLocalFile(configFileName, 'utf8');
+    configFileRaw = await readLocalFile(configFileName, 'utf8');
     // istanbul ignore if
     if (!is.string(rawFileContents)) {
       logger.warn({ configFileName }, 'Null contents when reading config file');
@@ -158,7 +158,7 @@ export async function detectRepoFileConfig(): Promise<RepoFileConfig> {
       'Repository config'
     );
   }
-  return { configFileName, configFileRaw: rawFileContents, configFileParsed };
+  return { configFileName, configFileRaw, configFileParsed };
 }
 
 export function checkForRepoConfigError(repoConfig: RepoFileConfig): void {
