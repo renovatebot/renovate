@@ -7,7 +7,7 @@ WebApi {
     "token": "testtoken",
   },
   "isNoProxyHost": [Function],
-  "options": Object {
+  "options": {
     "ignoreSslError": false,
   },
   "rest": RestClient {
@@ -23,13 +23,13 @@ WebApi {
       "_maxRedirects": 50,
       "_maxRetries": 1,
       "_socketTimeout": undefined,
-      "handlers": Array [
+      "handlers": [
         BearerCredentialHandler {
           "allowCrossOriginAuthentication": true,
           "token": "testtoken",
         },
       ],
-      "requestOptions": Object {
+      "requestOptions": {
         "ignoreSslError": false,
       },
     },
@@ -37,7 +37,7 @@ WebApi {
   "serverUrl": "https://dev.azure.com/renovate2",
   "vsoClient": VsoClient {
     "_initializationPromise": Promise {},
-    "_locationsByAreaPromises": Object {},
+    "_locationsByAreaPromises": {},
     "basePath": "/renovate2",
     "baseUrl": "https://dev.azure.com/renovate2",
     "restClient": RestClient {
@@ -53,13 +53,13 @@ WebApi {
         "_maxRedirects": 50,
         "_maxRetries": 1,
         "_socketTimeout": undefined,
-        "handlers": Array [
+        "handlers": [
           BearerCredentialHandler {
             "allowCrossOriginAuthentication": true,
             "token": "testtoken",
           },
         ],
-        "requestOptions": Object {
+        "requestOptions": {
           "ignoreSslError": false,
         },
       },
@@ -76,7 +76,7 @@ WebApi {
     "username": "user",
   },
   "isNoProxyHost": [Function],
-  "options": Object {
+  "options": {
     "ignoreSslError": false,
   },
   "rest": RestClient {
@@ -92,14 +92,14 @@ WebApi {
       "_maxRedirects": 50,
       "_maxRetries": 1,
       "_socketTimeout": undefined,
-      "handlers": Array [
+      "handlers": [
         BasicCredentialHandler {
           "allowCrossOriginAuthentication": true,
           "password": "pass",
           "username": "user",
         },
       ],
-      "requestOptions": Object {
+      "requestOptions": {
         "ignoreSslError": false,
       },
     },
@@ -107,7 +107,7 @@ WebApi {
   "serverUrl": "https://dev.azure.com/renovate3",
   "vsoClient": VsoClient {
     "_initializationPromise": Promise {},
-    "_locationsByAreaPromises": Object {},
+    "_locationsByAreaPromises": {},
     "basePath": "/renovate3",
     "baseUrl": "https://dev.azure.com/renovate3",
     "restClient": RestClient {
@@ -123,14 +123,14 @@ WebApi {
         "_maxRedirects": 50,
         "_maxRetries": 1,
         "_socketTimeout": undefined,
-        "handlers": Array [
+        "handlers": [
           BasicCredentialHandler {
             "allowCrossOriginAuthentication": true,
             "password": "pass",
             "username": "user",
           },
         ],
-        "requestOptions": Object {
+        "requestOptions": {
           "ignoreSslError": false,
         },
       },
@@ -146,7 +146,7 @@ WebApi {
     "token": "123test",
   },
   "isNoProxyHost": [Function],
-  "options": Object {
+  "options": {
     "ignoreSslError": false,
   },
   "rest": RestClient {
@@ -162,13 +162,13 @@ WebApi {
       "_maxRedirects": 50,
       "_maxRetries": 1,
       "_socketTimeout": undefined,
-      "handlers": Array [
+      "handlers": [
         BearerCredentialHandler {
           "allowCrossOriginAuthentication": true,
           "token": "123test",
         },
       ],
-      "requestOptions": Object {
+      "requestOptions": {
         "ignoreSslError": false,
       },
     },
@@ -176,7 +176,7 @@ WebApi {
   "serverUrl": "https://dev.azure.com/renovate1",
   "vsoClient": VsoClient {
     "_initializationPromise": Promise {},
-    "_locationsByAreaPromises": Object {},
+    "_locationsByAreaPromises": {},
     "basePath": "/renovate1",
     "baseUrl": "https://dev.azure.com/renovate1",
     "restClient": RestClient {
@@ -192,13 +192,13 @@ WebApi {
         "_maxRedirects": 50,
         "_maxRetries": 1,
         "_socketTimeout": undefined,
-        "handlers": Array [
+        "handlers": [
           BearerCredentialHandler {
             "allowCrossOriginAuthentication": true,
             "token": "123test",
           },
         ],
-        "requestOptions": Object {
+        "requestOptions": {
           "ignoreSslError": false,
         },
       },

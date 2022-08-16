@@ -1,35 +1,45 @@
-import { gte, lte } from '@renovatebot/ruby-semver';
-import { logger } from '../../../../logger';
-import { EQUAL, GT, GTE, LT, LTE, NOT_EQUAL, PGTE } from '../operator';
-import { parse as parseRange } from '../range';
-import { decrement, floor, increment } from '../version';
+import { gt, gte, lt } from '@renovatebot/ruby-semver';
+import { GTE, LT, LTE, NOT_EQUAL, PGTE } from '../operator';
+import { Range, parseRanges, stringifyRanges } from '../range';
+import { adapt, trimZeroes } from '../version';
+import { replacePart } from './replace';
 
 export default ({ range, to }: { range: string; to: string }): string => {
-  const ranges = range.split(',').map(parseRange);
-  const results = ranges.map(({ operator, version: ver, delimiter }) => {
+  const parts = parseRanges(range).map((part): Range => {
+    const { operator, version: ver } = part;
     switch (operator) {
-      case GT:
-        return lte(to, ver)
-          ? `${GT}${delimiter}${ver}`
-          : `${GT}${delimiter}${decrement(to)}`;
+      // Update upper bound (`<` and `<=`) ranges only if the new version violates them
       case LT:
-        return gte(to, ver)
-          ? `${LT}${delimiter}${increment(ver, to)}`
-          : `${LT}${delimiter}${ver}`;
-      case PGTE:
-        return `${operator}${delimiter}${floor(to)}`;
-      case GTE:
+        return gte(to, ver) ? replacePart(part, to) : part;
       case LTE:
-      case EQUAL:
-        return `${operator}${delimiter}${to}`;
+        return gt(to, ver) ? replacePart(part, to) : part;
+      // `~>` ranges.
+      case PGTE: {
+        // Try to add / remove extra `>=` constraint.
+        const trimmed = adapt(to, ver);
+        if (trimZeroes(trimmed) === trimZeroes(to)) {
+          // E.g. `'~> 5.2', '>= 5.2.0'`. In this case the latter is redundant.
+          return { ...part, version: trimmed, companion: undefined };
+        } else {
+          // E.g. `'~> 5.2', '>= 5.2.1'`.
+          return {
+            ...part,
+            version: trimmed,
+            companion: { operator: GTE, delimiter: ' ', version: to },
+          };
+        }
+      }
       case NOT_EQUAL:
-        return `${NOT_EQUAL}${delimiter}${ver}`;
-      // istanbul ignore next
+        if (lt(ver, to)) {
+          // The version to exclude is now out of range.
+          return { ...part, operator: GTE, version: to };
+        }
+        return part;
       default:
-        logger.warn(`Unsupported operator '${operator}'`);
-        return null;
+        // For `=` and lower bound ranges, always keep it stick to the new version.
+        return replacePart(part, to);
     }
   });
 
-  return results.join(', ');
+  return stringifyRanges(parts);
 };
