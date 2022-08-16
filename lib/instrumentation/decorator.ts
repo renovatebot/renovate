@@ -28,7 +28,7 @@ interface SpanParameters {
 }
 
 /**
- * caches the result of a decorated method.
+ * instruments a decorated method.
  */
 export function instrument<T>({
   name,
