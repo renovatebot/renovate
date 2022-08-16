@@ -107,7 +107,7 @@ export async function resolveGlobalExtends(
 export async function start(): Promise<number> {
   let config: AllConfig;
   try {
-    await instrument('load config', async () => {
+    await instrument('config', async () => {
       // read global config from file, env and cli args
       config = await getGlobalConfig();
       if (config?.globalExtends) {
@@ -136,7 +136,7 @@ export async function start(): Promise<number> {
 
     // autodiscover repositories (needs to come after platform initialization)
     config = await instrument(
-      'discover repositories',
+      'discover',
       async () => await autodiscoverRepositories(config)
     );
 
@@ -155,7 +155,7 @@ export async function start(): Promise<number> {
         break;
       }
       await instrument(
-        'renovate repository',
+        'repository',
         async () => {
           const repoConfig = await getRepositoryConfig(config, repository);
           if (repoConfig.hostRules) {
