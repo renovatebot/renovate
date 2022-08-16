@@ -24,6 +24,7 @@ import { regEx } from '../../../util/regex';
 import {
   ensurePathPrefix,
   ensureTrailingSlash,
+  joinUrlParts,
   parseLinkHeader,
   parseUrl,
   trimTrailingSlash,
@@ -495,7 +496,13 @@ export class DockerDatasource extends Datasource {
       logger.warn('No docker auth found - returning');
       return undefined;
     }
-    const url = `${registryHost}/v2/${dockerRepository}/blobs/${configDigest}`;
+    const url = joinUrlParts(
+      registryHost,
+      'v2',
+      dockerRepository,
+      'blobs',
+      configDigest
+    );
     return await this.http.getJson<ImageConfig>(url, {
       headers,
       noAuth: true,
