@@ -143,7 +143,7 @@ describe('modules/datasource/docker/index', () => {
 
       // do not inline, otherwise we get false positive from codeql
       expect(headers).toMatchInlineSnapshot(`
-        Object {
+        {
           "authorization": "some-authType some-token",
         }
       `);
@@ -167,7 +167,7 @@ describe('modules/datasource/docker/index', () => {
 
       // do not inline, otherwise we get false positive from codeql
       expect(headers).toMatchInlineSnapshot(`
-        Object {
+        {
           "authorization": "Bearer some-token",
         }
       `);
@@ -217,7 +217,7 @@ describe('modules/datasource/docker/index', () => {
 
       // do not inline, otherwise we get false positive from codeql
       expect(headers).toMatchInlineSnapshot(`
-        Object {
+        {
           "authorization": "Bearer some-token",
         }
       `);

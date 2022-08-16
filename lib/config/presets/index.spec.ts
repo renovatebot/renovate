@@ -858,11 +858,11 @@ describe('config/presets/index', () => {
     it('handles renamed monorepos', async () => {
       const res = await presets.getPreset('monorepo:opentelemetry', {});
       expect(res).toMatchInlineSnapshot(`
-        Object {
-          "description": Array [
+        {
+          "description": [
             "opentelemetry-js monorepo",
           ],
-          "matchSourceUrlPrefixes": Array [
+          "matchSourceUrlPrefixes": [
             "https://github.com/open-telemetry/opentelemetry-js",
           ],
         }
@@ -872,17 +872,17 @@ describe('config/presets/index', () => {
     it('handles renamed monorepo groups', async () => {
       const res = await presets.getPreset('group:opentelemetryMonorepo', {});
       expect(res).toMatchInlineSnapshot(`
-        Object {
-          "packageRules": Array [
-            Object {
-              "description": Array [
+        {
+          "packageRules": [
+            {
+              "description": [
                 "Group packages from opentelemetry-js monorepo together.",
               ],
-              "extends": Array [
+              "extends": [
                 "monorepo:opentelemetry-js",
               ],
               "groupName": "opentelemetry-js monorepo",
-              "matchUpdateTypes": Array [
+              "matchUpdateTypes": [
                 "digest",
                 "patch",
                 "minor",

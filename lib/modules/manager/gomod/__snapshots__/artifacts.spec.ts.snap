@@ -1,18 +1,18 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`modules/manager/gomod/artifacts catches errors 1`] = `Array []`;
+exports[`modules/manager/gomod/artifacts catches errors 1`] = `[]`;
 
 exports[`modules/manager/gomod/artifacts does not execute go mod tidy when none of gomodTidy and gomodUpdateImportPaths are set 1`] = `
-Array [
-  Object {
-    "file": Object {
+[
+  {
+    "file": {
       "contents": "New go.sum",
       "path": "go.sum",
       "type": "addition",
     },
   },
-  Object {
-    "file": Object {
+  {
+    "file": {
       "contents": "New main.go",
       "path": "go.mod",
       "type": "addition",
@@ -22,13 +22,13 @@ Array [
 `;
 
 exports[`modules/manager/gomod/artifacts does not execute go mod tidy when none of gomodTidy and gomodUpdateImportPaths are set 2`] = `
-Array [
-  Object {
+[
+  {
     "cmd": "go get -d -t ./...",
-    "options": Object {
+    "options": {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
-      "env": Object {
+      "env": {
         "CGO_ENABLED": "1",
         "GOFLAGS": "-modcacherw",
         "GOINSECURE": "insecure.example.com/*",
@@ -51,16 +51,16 @@ Array [
 ]
 `;
 
-exports[`modules/manager/gomod/artifacts returns if no go.sum found 1`] = `Array []`;
+exports[`modules/manager/gomod/artifacts returns if no go.sum found 1`] = `[]`;
 
 exports[`modules/manager/gomod/artifacts returns null if unchanged 1`] = `
-Array [
-  Object {
+[
+  {
     "cmd": "go get -d -t ./...",
-    "options": Object {
+    "options": {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
-      "env": Object {
+      "env": {
         "CGO_ENABLED": "1",
         "GOFLAGS": "-modcacherw",
         "GOINSECURE": "insecure.example.com/*",
@@ -84,13 +84,13 @@ Array [
 `;
 
 exports[`modules/manager/gomod/artifacts returns updated go.sum 1`] = `
-Array [
-  Object {
+[
+  {
     "cmd": "go get -d -t ./...",
-    "options": Object {
+    "options": {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
-      "env": Object {
+      "env": {
         "CGO_ENABLED": "1",
         "GOFLAGS": "-modcacherw",
         "GOINSECURE": "insecure.example.com/*",
@@ -114,16 +114,16 @@ Array [
 `;
 
 exports[`modules/manager/gomod/artifacts skips gomodTidy without gomodUpdateImportPaths on major update 1`] = `
-Array [
-  Object {
-    "file": Object {
+[
+  {
+    "file": {
       "contents": "New go.sum",
       "path": "go.sum",
       "type": "addition",
     },
   },
-  Object {
-    "file": Object {
+  {
+    "file": {
       "contents": "New main.go",
       "path": "go.mod",
       "type": "addition",
@@ -133,13 +133,13 @@ Array [
 `;
 
 exports[`modules/manager/gomod/artifacts skips gomodTidy without gomodUpdateImportPaths on major update 2`] = `
-Array [
-  Object {
+[
+  {
     "cmd": "go get -d -t ./...",
-    "options": Object {
+    "options": {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
-      "env": Object {
+      "env": {
         "CGO_ENABLED": "1",
         "GOFLAGS": "-modcacherw",
         "GOINSECURE": "insecure.example.com/*",
@@ -163,13 +163,13 @@ Array [
 `;
 
 exports[`modules/manager/gomod/artifacts skips updating import paths for gopkg.in dependencies 1`] = `
-Array [
-  Object {
+[
+  {
     "cmd": "go get -d -t ./...",
-    "options": Object {
+    "options": {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
-      "env": Object {
+      "env": {
         "CGO_ENABLED": "1",
         "GOFLAGS": "-modcacherw",
         "GOINSECURE": "insecure.example.com/*",
@@ -189,12 +189,12 @@ Array [
       "timeout": 900000,
     },
   },
-  Object {
+  {
     "cmd": "go mod tidy",
-    "options": Object {
+    "options": {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
-      "env": Object {
+      "env": {
         "CGO_ENABLED": "1",
         "GOFLAGS": "-modcacherw",
         "GOINSECURE": "insecure.example.com/*",
@@ -214,12 +214,12 @@ Array [
       "timeout": 900000,
     },
   },
-  Object {
+  {
     "cmd": "go mod tidy",
-    "options": Object {
+    "options": {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
-      "env": Object {
+      "env": {
         "CGO_ENABLED": "1",
         "GOFLAGS": "-modcacherw",
         "GOINSECURE": "insecure.example.com/*",
@@ -243,13 +243,13 @@ Array [
 `;
 
 exports[`modules/manager/gomod/artifacts skips updating import paths with gomodUpdateImportPaths on v0 to v1 1`] = `
-Array [
-  Object {
+[
+  {
     "cmd": "go get -d -t ./...",
-    "options": Object {
+    "options": {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
-      "env": Object {
+      "env": {
         "CGO_ENABLED": "1",
         "GOFLAGS": "-modcacherw",
         "GOINSECURE": "insecure.example.com/*",
@@ -273,34 +273,40 @@ Array [
 `;
 
 exports[`modules/manager/gomod/artifacts supports docker mode with credentials 1`] = `
-Array [
-  Object {
+[
+  {
     "cmd": "docker pull renovate/go:latest",
-    "options": Object {
+    "options": {
       "encoding": "utf-8",
     },
   },
-  Object {
+  {
     "cmd": "docker ps --filter name=renovate_go -aq",
-    "options": Object {
+    "options": {
       "encoding": "utf-8",
     },
   },
-  Object {
-    "cmd": "docker run --rm --name=renovate_go --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/renovate/cache\\":\\"/tmp/renovate/cache\\" -e GOPROXY -e GOPRIVATE -e GONOPROXY -e GONOSUMDB -e GOINSECURE -e GOFLAGS -e CGO_ENABLED -e GIT_CONFIG_KEY_0 -e GIT_CONFIG_VALUE_0 -e GIT_CONFIG_KEY_1 -e GIT_CONFIG_VALUE_1 -e GIT_CONFIG_KEY_2 -e GIT_CONFIG_VALUE_2 -e GIT_CONFIG_COUNT -e BUILDPACK_CACHE_DIR -w \\"/tmp/github/some/repo\\" renovate/go:latest bash -l -c \\"go get -d -t ./...\\"",
-    "options": Object {
+  {
+    "cmd": "docker run --rm --name=renovate_go --label=renovate_child -v "/tmp/github/some/repo":"/tmp/github/some/repo" -v "/tmp/renovate/cache":"/tmp/renovate/cache" -e GOPROXY -e GOPRIVATE -e GONOPROXY -e GONOSUMDB -e GOINSECURE -e GOFLAGS -e CGO_ENABLED -e GIT_CONFIG_KEY_0 -e GIT_CONFIG_VALUE_0 -e GIT_CONFIG_KEY_1 -e GIT_CONFIG_VALUE_1 -e GIT_CONFIG_KEY_2 -e GIT_CONFIG_VALUE_2 -e GIT_CONFIG_COUNT -e GIT_CONFIG_KEY_3 -e GIT_CONFIG_VALUE_3 -e GIT_CONFIG_KEY_4 -e GIT_CONFIG_VALUE_4 -e GIT_CONFIG_KEY_5 -e GIT_CONFIG_VALUE_5 -e BUILDPACK_CACHE_DIR -w "/tmp/github/some/repo" renovate/go:latest bash -l -c "go get -d -t ./..."",
+    "options": {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
-      "env": Object {
+      "env": {
         "BUILDPACK_CACHE_DIR": "/tmp/renovate/cache/buildpack",
         "CGO_ENABLED": "1",
-        "GIT_CONFIG_COUNT": "3",
+        "GIT_CONFIG_COUNT": "6",
         "GIT_CONFIG_KEY_0": "url.https://ssh:some-token@github.com/.insteadOf",
         "GIT_CONFIG_KEY_1": "url.https://git:some-token@github.com/.insteadOf",
         "GIT_CONFIG_KEY_2": "url.https://some-token@github.com/.insteadOf",
+        "GIT_CONFIG_KEY_3": "url.https://ssh:some-other-token@gitea.com/.insteadOf",
+        "GIT_CONFIG_KEY_4": "url.https://git:some-other-token@gitea.com/.insteadOf",
+        "GIT_CONFIG_KEY_5": "url.https://some-other-token@gitea.com/.insteadOf",
         "GIT_CONFIG_VALUE_0": "ssh://git@github.com/",
         "GIT_CONFIG_VALUE_1": "git@github.com:",
         "GIT_CONFIG_VALUE_2": "https://github.com/",
+        "GIT_CONFIG_VALUE_3": "ssh://git@gitea.com/",
+        "GIT_CONFIG_VALUE_4": "git@gitea.com:",
+        "GIT_CONFIG_VALUE_5": "https://gitea.com/",
         "GOFLAGS": "-modcacherw",
         "GOINSECURE": "insecure.example.com/*",
         "GONOPROXY": "noproxy.example.com/*",
@@ -323,25 +329,25 @@ Array [
 `;
 
 exports[`modules/manager/gomod/artifacts supports docker mode with goModTidy 1`] = `
-Array [
-  Object {
+[
+  {
     "cmd": "docker pull renovate/go:latest",
-    "options": Object {
+    "options": {
       "encoding": "utf-8",
     },
   },
-  Object {
+  {
     "cmd": "docker ps --filter name=renovate_go -aq",
-    "options": Object {
+    "options": {
       "encoding": "utf-8",
     },
   },
-  Object {
-    "cmd": "docker run --rm --name=renovate_go --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/renovate/cache\\":\\"/tmp/renovate/cache\\" -e GOPROXY -e GOPRIVATE -e GONOPROXY -e GONOSUMDB -e GOINSECURE -e GOFLAGS -e CGO_ENABLED -e BUILDPACK_CACHE_DIR -w \\"/tmp/github/some/repo\\" renovate/go:latest bash -l -c \\"go get -d -t ./... && go mod tidy && go mod tidy\\"",
-    "options": Object {
+  {
+    "cmd": "docker run --rm --name=renovate_go --label=renovate_child -v "/tmp/github/some/repo":"/tmp/github/some/repo" -v "/tmp/renovate/cache":"/tmp/renovate/cache" -e GOPROXY -e GOPRIVATE -e GONOPROXY -e GONOSUMDB -e GOINSECURE -e GOFLAGS -e CGO_ENABLED -e BUILDPACK_CACHE_DIR -w "/tmp/github/some/repo" renovate/go:latest bash -l -c "go get -d -t ./... && go mod tidy && go mod tidy"",
+    "options": {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
-      "env": Object {
+      "env": {
         "BUILDPACK_CACHE_DIR": "/tmp/renovate/cache/buildpack",
         "CGO_ENABLED": "1",
         "GOFLAGS": "-modcacherw",
@@ -366,25 +372,25 @@ Array [
 `;
 
 exports[`modules/manager/gomod/artifacts supports docker mode with gomodTidy1.17 1`] = `
-Array [
-  Object {
+[
+  {
     "cmd": "docker pull renovate/go:latest",
-    "options": Object {
+    "options": {
       "encoding": "utf-8",
     },
   },
-  Object {
+  {
     "cmd": "docker ps --filter name=renovate_go -aq",
-    "options": Object {
+    "options": {
       "encoding": "utf-8",
     },
   },
-  Object {
-    "cmd": "docker run --rm --name=renovate_go --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/renovate/cache\\":\\"/tmp/renovate/cache\\" -e GOPROXY -e GOPRIVATE -e GONOPROXY -e GONOSUMDB -e GOINSECURE -e GOFLAGS -e CGO_ENABLED -e BUILDPACK_CACHE_DIR -w \\"/tmp/github/some/repo\\" renovate/go:latest bash -l -c \\"go get -d -t ./... && go mod tidy -compat=1.17 && go mod tidy -compat=1.17\\"",
-    "options": Object {
+  {
+    "cmd": "docker run --rm --name=renovate_go --label=renovate_child -v "/tmp/github/some/repo":"/tmp/github/some/repo" -v "/tmp/renovate/cache":"/tmp/renovate/cache" -e GOPROXY -e GOPRIVATE -e GONOPROXY -e GONOSUMDB -e GOINSECURE -e GOFLAGS -e CGO_ENABLED -e BUILDPACK_CACHE_DIR -w "/tmp/github/some/repo" renovate/go:latest bash -l -c "go get -d -t ./... && go mod tidy -compat=1.17 && go mod tidy -compat=1.17"",
+    "options": {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
-      "env": Object {
+      "env": {
         "BUILDPACK_CACHE_DIR": "/tmp/renovate/cache/buildpack",
         "CGO_ENABLED": "1",
         "GOFLAGS": "-modcacherw",
@@ -409,25 +415,25 @@ Array [
 `;
 
 exports[`modules/manager/gomod/artifacts supports docker mode without credentials 1`] = `
-Array [
-  Object {
+[
+  {
     "cmd": "docker pull renovate/go:latest",
-    "options": Object {
+    "options": {
       "encoding": "utf-8",
     },
   },
-  Object {
+  {
     "cmd": "docker ps --filter name=renovate_go -aq",
-    "options": Object {
+    "options": {
       "encoding": "utf-8",
     },
   },
-  Object {
-    "cmd": "docker run --rm --name=renovate_go --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/renovate/cache\\":\\"/tmp/renovate/cache\\" -e GOPROXY -e GOPRIVATE -e GONOPROXY -e GONOSUMDB -e GOINSECURE -e GOFLAGS -e CGO_ENABLED -e BUILDPACK_CACHE_DIR -w \\"/tmp/github/some/repo\\" renovate/go:latest bash -l -c \\"go get -d -t ./...\\"",
-    "options": Object {
+  {
+    "cmd": "docker run --rm --name=renovate_go --label=renovate_child -v "/tmp/github/some/repo":"/tmp/github/some/repo" -v "/tmp/renovate/cache":"/tmp/renovate/cache" -e GOPROXY -e GOPRIVATE -e GONOPROXY -e GONOSUMDB -e GOINSECURE -e GOFLAGS -e CGO_ENABLED -e BUILDPACK_CACHE_DIR -w "/tmp/github/some/repo" renovate/go:latest bash -l -c "go get -d -t ./..."",
+    "options": {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
-      "env": Object {
+      "env": {
         "BUILDPACK_CACHE_DIR": "/tmp/renovate/cache/buildpack",
         "CGO_ENABLED": "1",
         "GOFLAGS": "-modcacherw",
@@ -452,13 +458,13 @@ Array [
 `;
 
 exports[`modules/manager/gomod/artifacts supports global mode 1`] = `
-Array [
-  Object {
+[
+  {
     "cmd": "go get -d -t ./...",
-    "options": Object {
+    "options": {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
-      "env": Object {
+      "env": {
         "CGO_ENABLED": "1",
         "GOFLAGS": "-modcacherw",
         "GOINSECURE": "insecure.example.com/*",
@@ -482,13 +488,13 @@ Array [
 `;
 
 exports[`modules/manager/gomod/artifacts supports vendor directory update 1`] = `
-Array [
-  Object {
+[
+  {
     "cmd": "go get -d -t ./...",
-    "options": Object {
+    "options": {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
-      "env": Object {
+      "env": {
         "CGO_ENABLED": "1",
         "GOFLAGS": "-modcacherw",
         "GOINSECURE": "insecure.example.com/*",
@@ -508,12 +514,12 @@ Array [
       "timeout": 900000,
     },
   },
-  Object {
+  {
     "cmd": "go mod tidy",
-    "options": Object {
+    "options": {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
-      "env": Object {
+      "env": {
         "CGO_ENABLED": "1",
         "GOFLAGS": "-modcacherw",
         "GOINSECURE": "insecure.example.com/*",
@@ -533,12 +539,12 @@ Array [
       "timeout": 900000,
     },
   },
-  Object {
+  {
     "cmd": "go mod vendor",
-    "options": Object {
+    "options": {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
-      "env": Object {
+      "env": {
         "CGO_ENABLED": "1",
         "GOFLAGS": "-modcacherw",
         "GOINSECURE": "insecure.example.com/*",
@@ -558,12 +564,12 @@ Array [
       "timeout": 900000,
     },
   },
-  Object {
+  {
     "cmd": "go mod tidy",
-    "options": Object {
+    "options": {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
-      "env": Object {
+      "env": {
         "CGO_ENABLED": "1",
         "GOFLAGS": "-modcacherw",
         "GOINSECURE": "insecure.example.com/*",
@@ -583,12 +589,12 @@ Array [
       "timeout": 900000,
     },
   },
-  Object {
+  {
     "cmd": "go mod tidy",
-    "options": Object {
+    "options": {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
-      "env": Object {
+      "env": {
         "CGO_ENABLED": "1",
         "GOFLAGS": "-modcacherw",
         "GOINSECURE": "insecure.example.com/*",
@@ -612,13 +618,13 @@ Array [
 `;
 
 exports[`modules/manager/gomod/artifacts updates import paths with gomodUpdateImportPaths 1`] = `
-Array [
-  Object {
+[
+  {
     "cmd": "go get -d -t ./...",
-    "options": Object {
+    "options": {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
-      "env": Object {
+      "env": {
         "CGO_ENABLED": "1",
         "GOFLAGS": "-modcacherw",
         "GOINSECURE": "insecure.example.com/*",
@@ -638,12 +644,12 @@ Array [
       "timeout": 900000,
     },
   },
-  Object {
+  {
     "cmd": "go install github.com/marwan-at-work/mod/cmd/mod@latest",
-    "options": Object {
+    "options": {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
-      "env": Object {
+      "env": {
         "CGO_ENABLED": "1",
         "GOFLAGS": "-modcacherw",
         "GOINSECURE": "insecure.example.com/*",
@@ -663,12 +669,12 @@ Array [
       "timeout": 900000,
     },
   },
-  Object {
+  {
     "cmd": "mod upgrade --mod-name=github.com/google/go-github/v24 -t=28",
-    "options": Object {
+    "options": {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
-      "env": Object {
+      "env": {
         "CGO_ENABLED": "1",
         "GOFLAGS": "-modcacherw",
         "GOINSECURE": "insecure.example.com/*",
@@ -688,12 +694,12 @@ Array [
       "timeout": 900000,
     },
   },
-  Object {
+  {
     "cmd": "go mod tidy",
-    "options": Object {
+    "options": {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
-      "env": Object {
+      "env": {
         "CGO_ENABLED": "1",
         "GOFLAGS": "-modcacherw",
         "GOINSECURE": "insecure.example.com/*",
@@ -713,12 +719,12 @@ Array [
       "timeout": 900000,
     },
   },
-  Object {
+  {
     "cmd": "go mod tidy",
-    "options": Object {
+    "options": {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
-      "env": Object {
+      "env": {
         "CGO_ENABLED": "1",
         "GOFLAGS": "-modcacherw",
         "GOINSECURE": "insecure.example.com/*",
@@ -742,13 +748,13 @@ Array [
 `;
 
 exports[`modules/manager/gomod/artifacts updates import paths with latest tool version on invalid version constraint 1`] = `
-Array [
-  Object {
+[
+  {
     "cmd": "go get -d -t ./...",
-    "options": Object {
+    "options": {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
-      "env": Object {
+      "env": {
         "CGO_ENABLED": "1",
         "GOFLAGS": "-modcacherw",
         "GOINSECURE": "insecure.example.com/*",
@@ -768,12 +774,12 @@ Array [
       "timeout": 900000,
     },
   },
-  Object {
+  {
     "cmd": "go install github.com/marwan-at-work/mod/cmd/mod@latest",
-    "options": Object {
+    "options": {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
-      "env": Object {
+      "env": {
         "CGO_ENABLED": "1",
         "GOFLAGS": "-modcacherw",
         "GOINSECURE": "insecure.example.com/*",
@@ -793,12 +799,12 @@ Array [
       "timeout": 900000,
     },
   },
-  Object {
+  {
     "cmd": "mod upgrade --mod-name=github.com/google/go-github/v24 -t=28",
-    "options": Object {
+    "options": {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
-      "env": Object {
+      "env": {
         "CGO_ENABLED": "1",
         "GOFLAGS": "-modcacherw",
         "GOINSECURE": "insecure.example.com/*",
@@ -818,12 +824,12 @@ Array [
       "timeout": 900000,
     },
   },
-  Object {
+  {
     "cmd": "go mod tidy",
-    "options": Object {
+    "options": {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
-      "env": Object {
+      "env": {
         "CGO_ENABLED": "1",
         "GOFLAGS": "-modcacherw",
         "GOINSECURE": "insecure.example.com/*",
@@ -843,12 +849,12 @@ Array [
       "timeout": 900000,
     },
   },
-  Object {
+  {
     "cmd": "go mod tidy",
-    "options": Object {
+    "options": {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
-      "env": Object {
+      "env": {
         "CGO_ENABLED": "1",
         "GOFLAGS": "-modcacherw",
         "GOINSECURE": "insecure.example.com/*",
@@ -872,13 +878,13 @@ Array [
 `;
 
 exports[`modules/manager/gomod/artifacts updates import paths with specific tool version from constraint 1`] = `
-Array [
-  Object {
+[
+  {
     "cmd": "go get -d -t ./...",
-    "options": Object {
+    "options": {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
-      "env": Object {
+      "env": {
         "CGO_ENABLED": "1",
         "GOFLAGS": "-modcacherw",
         "GOINSECURE": "insecure.example.com/*",
@@ -898,12 +904,12 @@ Array [
       "timeout": 900000,
     },
   },
-  Object {
+  {
     "cmd": "go install github.com/marwan-at-work/mod/cmd/mod@v1.2.3",
-    "options": Object {
+    "options": {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
-      "env": Object {
+      "env": {
         "CGO_ENABLED": "1",
         "GOFLAGS": "-modcacherw",
         "GOINSECURE": "insecure.example.com/*",
@@ -923,12 +929,12 @@ Array [
       "timeout": 900000,
     },
   },
-  Object {
+  {
     "cmd": "mod upgrade --mod-name=github.com/google/go-github/v24 -t=28",
-    "options": Object {
+    "options": {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
-      "env": Object {
+      "env": {
         "CGO_ENABLED": "1",
         "GOFLAGS": "-modcacherw",
         "GOINSECURE": "insecure.example.com/*",
@@ -948,12 +954,12 @@ Array [
       "timeout": 900000,
     },
   },
-  Object {
+  {
     "cmd": "go mod tidy",
-    "options": Object {
+    "options": {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
-      "env": Object {
+      "env": {
         "CGO_ENABLED": "1",
         "GOFLAGS": "-modcacherw",
         "GOINSECURE": "insecure.example.com/*",
@@ -973,12 +979,12 @@ Array [
       "timeout": 900000,
     },
   },
-  Object {
+  {
     "cmd": "go mod tidy",
-    "options": Object {
+    "options": {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
-      "env": Object {
+      "env": {
         "CGO_ENABLED": "1",
         "GOFLAGS": "-modcacherw",
         "GOINSECURE": "insecure.example.com/*",
