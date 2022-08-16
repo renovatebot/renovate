@@ -132,7 +132,7 @@ describe('util/cache/repository/impl/local', () => {
 
   it('saves modified cache data to file', async () => {
     const oldCacheRecord = createCacheRecord({ semanticCommits: 'enabled' });
-    const cacheType = 'unsupported';
+    const cacheType = 'protocol://domain/path';
     fs.readCacheFile.mockResolvedValueOnce(JSON.stringify(oldCacheRecord));
     const localRepoCache = CacheFactory.get('some/repo', cacheType);
     await localRepoCache.load();
@@ -145,7 +145,7 @@ describe('util/cache/repository/impl/local', () => {
     });
     expect(localRepoCache instanceof LocalRepositoryCache).toBeTrue();
     expect(logger.warn).toHaveBeenCalledWith(
-      { cacheType },
+      { parsedType: 'protocol:', cacheType },
       `Repository cache type not supported using type "local" instead`
     );
     expect(fs.outputCacheFile).toHaveBeenCalledWith(
