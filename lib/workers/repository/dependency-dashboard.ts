@@ -6,6 +6,7 @@ import type { RenovateConfig } from '../../config/types';
 import { getProblems, logger } from '../../logger';
 import type { PackageFile } from '../../modules/manager/types';
 import { platform } from '../../modules/platform';
+import { GitHubMaxPrBodyLen } from '../../modules/platform/github';
 import { regEx } from '../../util/regex';
 import * as template from '../../util/template';
 import { BranchConfig, BranchResult, SelectAllConfig } from '../types';
@@ -397,14 +398,14 @@ export async function ensureDependencyDashboard(
       'This repository currently has no open or pending branches.\n\n';
   }
 
-  issueBody += PackageFiles.getDashboardMarkdown(config);
+  // fit the detected dependencies section
+  const footer = getFooter(config);
+  issueBody += PackageFiles.getDashboardMarkdown(
+    config,
+    GitHubMaxPrBodyLen - issueBody.length - footer.length
+  );
 
-  if (config.dependencyDashboardFooter?.length) {
-    issueBody +=
-      '---\n' +
-      template.compile(config.dependencyDashboardFooter, config) +
-      '\n';
-  }
+  issueBody += footer;
 
   if (config.dependencyDashboardIssue) {
     const updatedIssue = await platform.getIssue?.(
@@ -442,4 +443,16 @@ export async function ensureDependencyDashboard(
       confidential: config.confidential,
     });
   }
+}
+
+function getFooter(config: RenovateConfig): string {
+  let footer = '';
+  if (config.dependencyDashboardFooter?.length) {
+    footer +=
+      '---\n' +
+      template.compile(config.dependencyDashboardFooter, config) +
+      '\n';
+  }
+
+  return footer;
 }
