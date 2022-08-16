@@ -1,22 +1,24 @@
 import semver from 'semver';
-import { quote } from 'shlex';
 import upath from 'upath';
 import { GlobalConfig } from '../../../../config/global';
 import { TEMPORARY_ERROR } from '../../../../constants/error-messages';
 import { logger } from '../../../../logger';
 import { exec } from '../../../../util/exec';
-import type { ExecOptions, ExtraEnv } from '../../../../util/exec/types';
+import type {
+  ExecOptions,
+  ExtraEnv,
+  ToolConstraint,
+} from '../../../../util/exec/types';
 import type { PackageFile, PostUpdateConfig } from '../../types';
-import { getNodeConstraint } from './node-version';
+import { getNodeToolConstraint } from './node-version';
 import type { GenerateLockFileResult } from './types';
-import { getOptimizeCommand } from './yarn';
 
 // Exported for testability
 export function getLernaVersion(
   lernaPackageFile: Partial<PackageFile>
 ): string {
   const lernaDep = lernaPackageFile.deps?.find((d) => d.depName === 'lerna');
-  if (!lernaDep || !semver.validRange(lernaDep.currentValue)) {
+  if (!lernaDep?.currentValue || !semver.validRange(lernaDep.currentValue)) {
     logger.warn(
       // TODO: types (#7154)
       // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
@@ -24,8 +26,7 @@ export function getLernaVersion(
     );
     return 'latest';
   }
-  // TODO #7154
-  return lernaDep.currentValue!;
+  return lernaDep.currentValue;
 }
 
 export async function generateLockFiles(
@@ -41,28 +42,34 @@ export async function generateLockFiles(
     return { error: false };
   }
   logger.debug(`Spawning lerna with ${lernaClient} to create lock files`);
-  const preCommands: string[] = [];
+  const toolConstraints: ToolConstraint[] = [
+    await getNodeToolConstraint(config, []),
+  ];
   const cmd: string[] = [];
   let cmdOptions = '';
   try {
     if (lernaClient === 'yarn') {
-      let installYarn = 'npm i -g yarn';
+      const yarnTool: ToolConstraint = {
+        toolName: 'yarn',
+        constraint: '^1.22.18', // needs to be a v1 yarn, otherwise v2 will be installed
+      };
       const yarnCompatibility = config.constraints?.yarn;
       if (semver.validRange(yarnCompatibility)) {
-        installYarn += `@${quote(yarnCompatibility)}`;
+        yarnTool.constraint = yarnCompatibility;
       }
-      preCommands.push(installYarn);
+      toolConstraints.push(yarnTool);
       if (skipInstalls !== false) {
-        preCommands.push(getOptimizeCommand());
+        // The following change causes Yarn 1.x to exit gracefully after updating the lock file but without installing node_modules
+        yarnTool.toolName = 'yarn-slim';
       }
       cmdOptions = '--ignore-scripts --ignore-engines --ignore-platform';
     } else if (lernaClient === 'npm') {
-      let installNpm = 'npm i -g npm';
+      const npmTool: ToolConstraint = { toolName: 'npm' };
       const npmCompatibility = config.constraints?.npm;
       if (semver.validRange(npmCompatibility)) {
-        installNpm += `@${quote(npmCompatibility)} || true`;
+        npmTool.constraint = npmCompatibility;
       }
-      preCommands.push(installNpm, 'hash -d npm 2>/dev/null || true');
+      toolConstraints.push(npmTool);
       cmdOptions = '--ignore-scripts  --no-audit';
       if (skipInstalls !== false) {
         cmdOptions += ' --package-lock-only';
@@ -77,7 +84,6 @@ export async function generateLockFiles(
       lernaCommand = lernaCommand.replace('--ignore-scripts ', '');
     }
     lernaCommand += cmdOptions;
-    const tagConstraint = await getNodeConstraint(config);
     const extraEnv: ExtraEnv = {
       NPM_CONFIG_CACHE: env.NPM_CONFIG_CACHE,
       npm_config_store: env.npm_config_store,
@@ -86,11 +92,9 @@ export async function generateLockFiles(
       cwdFile: upath.join(lockFileDir, 'package.json'),
       extraEnv,
       docker: {
-        image: 'node',
-        tagScheme: 'node',
-        tagConstraint,
+        image: 'sidecar',
       },
-      preCommands,
+      toolConstraints,
     };
     // istanbul ignore if
     if (GlobalConfig.get('exposeAllEnv')) {
@@ -99,7 +103,7 @@ export async function generateLockFiles(
     }
     const lernaVersion = getLernaVersion(lernaPackageFile);
     logger.debug('Using lerna version ' + lernaVersion);
-    preCommands.push(`npm i -g lerna@${quote(lernaVersion)}`);
+    toolConstraints.push({ toolName: 'lerna', constraint: lernaVersion });
     cmd.push('lerna info || echo "Ignoring lerna info failure"');
     cmd.push(`${lernaClient} install ${cmdOptions}`);
     cmd.push(lernaCommand);

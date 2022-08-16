@@ -2,7 +2,7 @@
 --extra-index-url http://$PIP_TEST_TOKEN:example.com/private-pypi/
 --extra-index-url http://${PIP_TEST_TOKEN}:example.com/private-pypi/
 --extra-index-url "http://$PIP_TEST_TOKEN:example.com/private-pypi/"
---extra-index-url "http://${PIP_TEST_TOKEN}:example.com/private-pypi/"
+--extra-index-url "http://${PIP_TEST_TOKEN1}:example.com/private-pypi/"
 # Packages
 Django[argon2]==2.0.12
 celery [redis]==4.1.1

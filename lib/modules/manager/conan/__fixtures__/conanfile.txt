@@ -2,6 +2,7 @@
 poco/1.9.4
 zlib/[~1.2.3, loose=False]  
 fake/8.62.134@test/dev
+cairo/1.17.2@_/_#aff2d03608351db075ec1348a3afc9ff
 
 [build_requires]
 7zip/[>1.1 <2.1, include_prerelease=True]
@@ -13,6 +14,7 @@ cmake/[>1.1 || 0.8]
 cryptopp/[1.2.7 || >=1.2.9 <2.0.0]@test/local
 #commentedout/1.2
 # commentedout/3.4
+meson/0.63.0@_/_#bc592346b33fd19c1fbffce25d1e4236
 
 [generators]
 xcode
