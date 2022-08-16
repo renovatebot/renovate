@@ -292,6 +292,21 @@ exports[`modules/manager/sbt/extract extractPackageFile() extracts deps when sca
 Object {
   "deps": Array [
     Object {
+      "currentValue": "2.12.10",
+      "datasource": "maven",
+      "depName": "scala",
+      "packageName": "org.scala-lang:scala-library",
+      "registryUrls": Array [
+        "https://repo.maven.apache.org/maven2",
+        "https://example.com/repos/1/",
+        "https://example.com/repos/2/",
+        "https://example.com/repos/3/",
+        "https://example.com/repos/4/",
+        "https://example.com/repos/5/",
+      ],
+      "separateMinorPatch": true,
+    },
+    Object {
       "currentValue": "0.0.1",
       "datasource": "sbt-package",
       "depName": "org.example:foo",
@@ -432,6 +447,16 @@ exports[`modules/manager/sbt/extract extractPackageFile() extracts deps when sca
 Object {
   "deps": Array [
     Object {
+      "currentValue": "2.12.10",
+      "datasource": "maven",
+      "depName": "scala",
+      "packageName": "org.scala-lang:scala-library",
+      "registryUrls": Array [
+        "https://repo.maven.apache.org/maven2",
+      ],
+      "separateMinorPatch": true,
+    },
+    Object {
       "currentValue": "0.0.2",
       "datasource": "sbt-package",
       "depName": "org.example:bar",
@@ -448,6 +473,16 @@ Object {
 exports[`modules/manager/sbt/extract extractPackageFile() extracts deps when scala version is defined in a variable with a trailing comma 1`] = `
 Object {
   "deps": Array [
+    Object {
+      "currentValue": "2.12.10",
+      "datasource": "maven",
+      "depName": "scala",
+      "packageName": "org.scala-lang:scala-library",
+      "registryUrls": Array [
+        "https://repo.maven.apache.org/maven2",
+      ],
+      "separateMinorPatch": true,
+    },
     Object {
       "currentValue": "0.0.2",
       "datasource": "sbt-package",

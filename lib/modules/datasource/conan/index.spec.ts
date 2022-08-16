@@ -1,12 +1,13 @@
-import { getPkgReleases } from '..';
+import { getDigest, getPkgReleases } from '..';
 import { Fixtures } from '../../../../test/fixtures';
 import * as httpMock from '../../../../test/http-mock';
 import * as conan from '../../versioning/conan';
-import type { GetPkgReleasesConfig } from '../types';
+import type { GetDigestInputConfig, GetPkgReleasesConfig } from '../types';
 import { defaultRegistryUrl } from './common';
 import { ConanDatasource } from '.';
 
 const pocoJson = Fixtures.get('poco.json');
+const pocoRevisions = Fixtures.getJson('poco_revisions.json');
 const pocoYamlGitHubContent = Fixtures.get('poco.yaml');
 const malformedJson = Fixtures.get('malformed.json');
 const fakeJson = Fixtures.get('fake.json');
@@ -21,9 +22,35 @@ const config: GetPkgReleasesConfig = {
   registryUrls: [nonDefaultRegistryUrl],
 };
 
+const digestConfig: GetDigestInputConfig = {
+  depName: 'fake',
+  datasource,
+  registryUrls: [nonDefaultRegistryUrl],
+};
+
 describe('modules/datasource/conan/index', () => {
   beforeEach(() => {
     config.registryUrls = [nonDefaultRegistryUrl];
+  });
+
+  describe('getDigest', () => {
+    it('handles package without digest', async () => {
+      digestConfig.packageName = 'fakepackage/1.2@_/_';
+      expect(await getDigest(digestConfig)).toBeNull();
+    });
+
+    it('handles digest', async () => {
+      const version = '1.8.1';
+      httpMock
+        .scope(nonDefaultRegistryUrl)
+        .get(`/v2/conans/poco/${version}/_/_/revisions`)
+        .reply(200, pocoRevisions[version]);
+      digestConfig.packageName = `poco/${version}@_/_`;
+      digestConfig.currentDigest = '4fc13d60fd91ba44fefe808ad719a5af';
+      expect(await getDigest(digestConfig, version)).toBe(
+        '3a9b47caee2e2c1d3fb7d97788339aa8'
+      );
+    });
   });
 
   describe('getReleases', () => {
@@ -117,7 +144,7 @@ describe('modules/datasource/conan/index', () => {
       });
     });
 
-    it('uses github isntead of conan center', async () => {
+    it('uses github instead of conan center', async () => {
       httpMock
         .scope('https://api.github.com')
         .get(
