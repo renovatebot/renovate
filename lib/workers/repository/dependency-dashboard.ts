@@ -257,7 +257,7 @@ export async function ensureDependencyDashboard(
   if (rateLimited.length) {
     issueBody += '## Rate Limited\n\n';
     issueBody +=
-      'These updates are currently rate limited. Click on a checkbox below to force their creation now.\n\n';
+      'These updates are currently rate-limited. Click on a checkbox below to force their creation now.\n\n';
     for (const branch of rateLimited) {
       issueBody += getListItem(branch, 'unlimit');
     }
