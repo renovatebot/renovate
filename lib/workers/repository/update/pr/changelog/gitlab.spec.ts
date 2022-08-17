@@ -326,7 +326,7 @@ describe('workers/repository/update/pr/changelog/gitlab', () => {
         platform: PlatformId.Gitlab,
         endpoint: 'https://git.test.com/api/v4/',
         sourceUrl,
-        overwriteSourceUrl: replacementSourceUrl,
+        customChangelogUrl: replacementSourceUrl,
       };
       hostRules.add({
         hostType: PlatformId.Gitlab,

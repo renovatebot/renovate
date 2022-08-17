@@ -8,34 +8,11 @@ import type { ChangeLogResult } from './types';
 
 export * from './types';
 
-class SourceUrlContainer {
-  private readonly sourceUrl: string;
-  private readonly originalSourceUrl: string;
-
-  constructor(config: BranchUpgradeConfig) {
-    this.originalSourceUrl = config.sourceUrl as string;
-    if (config.overwriteSourceUrl) {
-      this.sourceUrl = config.overwriteSourceUrl as string;
-    } else {
-      this.sourceUrl = config.sourceUrl as string;
-    }
-  }
-
-  get(): string {
-    return this.sourceUrl;
-  }
-
-  restore(): string {
-    return this.originalSourceUrl;
-  }
-}
-
 export async function getChangeLogJSON(
   config: BranchUpgradeConfig
 ): Promise<ChangeLogResult | null> {
-  const srcUrlContainer = new SourceUrlContainer(config);
-  config.sourceUrl = srcUrlContainer.get();
-  const { sourceUrl, versioning, currentVersion, newVersion } = config;
+  const { versioning, currentVersion, newVersion } = config;
+  const sourceUrl = (config.customChangelogUrl as string) ?? config.sourceUrl!;
   try {
     if (!(sourceUrl && currentVersion && newVersion)) {
       return null;
@@ -67,8 +44,6 @@ export async function getChangeLogJSON(
         );
         break;
     }
-
-    config.sourceUrl = srcUrlContainer.restore();
 
     return res;
   } catch (err) /* istanbul ignore next */ {

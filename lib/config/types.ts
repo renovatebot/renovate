@@ -303,7 +303,7 @@ export interface PackageRule
   matchSourceUrls?: string[];
   matchUpdateTypes?: UpdateType[];
   registryUrls?: string[];
-  overwriteSourceUrl?: string;
+  customChangelogUrl?: string;
 }
 
 export interface ValidationMessage {

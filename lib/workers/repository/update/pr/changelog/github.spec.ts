@@ -271,7 +271,7 @@ describe('workers/repository/update/pr/changelog/github', () => {
       const config = {
         ...upgrade,
         endpoint: 'https://github-enterprise.example.com/',
-        overwriteSourceUrl: replacementSourceUrl,
+        customChangelogUrl: replacementSourceUrl,
       };
       hostRules.add({
         hostType: PlatformId.Github,
@@ -334,7 +334,7 @@ describe('workers/repository/update/pr/changelog/github', () => {
         ...upgrade,
         sourceUrl,
         endpoint: 'https://github-enterprise.example.com/',
-        overwriteSourceUrl: replacementSourceUrl,
+        customChangelogUrl: replacementSourceUrl,
       };
       hostRules.add({
         hostType: PlatformId.Github,
