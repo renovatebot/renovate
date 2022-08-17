@@ -2,7 +2,7 @@
 
 exports[`instrumentation/index activate console logger 1`] = `
 MultiSpanProcessor {
-  "_spanProcessors": Array [
+  "_spanProcessors": [
     SimpleSpanProcessor {
       "_exporter": ConsoleSpanExporter {},
       "_shutdownOnce": BindOnceFuture {
@@ -22,7 +22,7 @@ MultiSpanProcessor {
 
 exports[`instrumentation/index activate console logger and remote logger 1`] = `
 MultiSpanProcessor {
-  "_spanProcessors": Array [
+  "_spanProcessors": [
     SimpleSpanProcessor {
       "_exporter": ConsoleSpanExporter {},
       "_shutdownOnce": BindOnceFuture {
@@ -39,9 +39,9 @@ MultiSpanProcessor {
     BatchSpanProcessor {
       "_exportTimeoutMillis": 30000,
       "_exporter": OTLPTraceExporter {
-        "DEFAULT_HEADERS": Object {},
+        "DEFAULT_HEADERS": {},
         "_concurrencyLimit": Infinity,
-        "_sendingPromises": Array [],
+        "_sendingPromises": [],
         "_shutdownOnce": BindOnceFuture {
           "_callback": [Function],
           "_deferred": Deferred {
@@ -54,12 +54,12 @@ MultiSpanProcessor {
         },
         "agent": undefined,
         "compression": "none",
-        "headers": Object {},
+        "headers": {},
         "shutdown": [Function],
         "timeoutMillis": 10000,
         "url": "https://collector.example.com/v1/traces",
       },
-      "_finishedSpans": Array [],
+      "_finishedSpans": [],
       "_maxExportBatchSize": 512,
       "_maxQueueSize": 2048,
       "_scheduledDelayMillis": 5000,
@@ -80,13 +80,13 @@ MultiSpanProcessor {
 
 exports[`instrumentation/index activate remote logger 1`] = `
 MultiSpanProcessor {
-  "_spanProcessors": Array [
+  "_spanProcessors": [
     BatchSpanProcessor {
       "_exportTimeoutMillis": 30000,
       "_exporter": OTLPTraceExporter {
-        "DEFAULT_HEADERS": Object {},
+        "DEFAULT_HEADERS": {},
         "_concurrencyLimit": Infinity,
-        "_sendingPromises": Array [],
+        "_sendingPromises": [],
         "_shutdownOnce": BindOnceFuture {
           "_callback": [Function],
           "_deferred": Deferred {
@@ -99,12 +99,12 @@ MultiSpanProcessor {
         },
         "agent": undefined,
         "compression": "none",
-        "headers": Object {},
+        "headers": {},
         "shutdown": [Function],
         "timeoutMillis": 10000,
         "url": "https://collector.example.com/v1/traces",
       },
-      "_finishedSpans": Array [],
+      "_finishedSpans": [],
       "_maxExportBatchSize": 512,
       "_maxQueueSize": 2048,
       "_scheduledDelayMillis": 5000,
