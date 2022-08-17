@@ -724,7 +724,7 @@ export async function mergePr({
         `Expected PR to have status ${
           PullRequestStatus[PullRequestStatus.Completed]
           // TODO #7154
-        }, however it is ${PullRequestStatus[pr.status!]}.`
+        }. However, it is ${PullRequestStatus[pr.status!]}.`
       );
     }
     return true;

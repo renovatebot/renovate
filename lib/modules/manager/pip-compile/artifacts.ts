@@ -7,6 +7,7 @@ import { exec } from '../../../util/exec';
 import type { ExecOptions } from '../../../util/exec/types';
 import {
   deleteLocalFile,
+  ensureCacheDir,
   readLocalFile,
   writeLocalFile,
 } from '../../../util/fs';
@@ -114,18 +115,25 @@ export async function updateArtifacts({
       inputFileName,
       outputFileName
     );
-    const tagConstraint = getPythonConstraint(config);
+    const constraint = getPythonConstraint(config);
     const pipToolsConstraint = getPipToolsConstraint(config);
     const execOptions: ExecOptions = {
       cwdFile: inputFileName,
       docker: {
-        image: 'python',
-        tagConstraint,
-        tagScheme: 'pep440',
+        image: 'sidecar',
       },
       preCommands: [
         `pip install --user ${quote(`pip-tools${pipToolsConstraint}`)}`,
       ],
+      toolConstraints: [
+        {
+          toolName: 'python',
+          constraint,
+        },
+      ],
+      extraEnv: {
+        PIP_CACHE_DIR: await ensureCacheDir('pip'),
+      },
     };
     logger.debug({ cmd }, 'pip-compile command');
     await exec(cmd, execOptions);

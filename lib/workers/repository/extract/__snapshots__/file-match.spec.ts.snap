@@ -1,38 +1,38 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`workers/repository/extract/file-match filterIgnoredFiles() ignores partial matches 1`] = `
-Array [
+[
   "package.json",
 ]
 `;
 
 exports[`workers/repository/extract/file-match filterIgnoredFiles() returns minimatch matches 1`] = `
-Array [
+[
   "package.json",
 ]
 `;
 
 exports[`workers/repository/extract/file-match getIncludedFiles() returns exact matches 1`] = `
-Array [
+[
   "frontend/package.json",
 ]
 `;
 
 exports[`workers/repository/extract/file-match getIncludedFiles() returns minimatch matches 1`] = `
-Array [
+[
   "frontend/package.json",
 ]
 `;
 
 exports[`workers/repository/extract/file-match getMatchingFiles() deduplicates 1`] = `
-Array [
+[
   "frontend/package.json",
   "package.json",
 ]
 `;
 
 exports[`workers/repository/extract/file-match getMatchingFiles() returns npm files 1`] = `
-Array [
+[
   "frontend/package.json",
   "package.json",
 ]
