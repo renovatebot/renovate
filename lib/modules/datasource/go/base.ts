@@ -20,6 +20,9 @@ export class BaseGoDatasource {
   private static readonly gitlabRegExp = regEx(
     /^(?<regExpUrl>gitlab\.[^/]*)\/(?<regExpPath>.+?)(?:\/v\d+)?[/]?$/
   );
+  private static readonly gitVcsRegexp = regEx(
+    /^(?:[^/]+)\/(?<module>.*)\.git(?:$|\/)/
+  );
 
   private static readonly id = 'go';
   private static readonly http = new Http(BaseGoDatasource.id);
@@ -112,14 +115,12 @@ export class BaseGoDatasource {
       BaseGoDatasource.gitlabRegExp.exec(goModule)?.groups?.regExpPath;
     if (gitlabUrl && gitlabUrlName) {
       if (gitlabModuleName?.startsWith(gitlabUrlName)) {
-        if (gitlabModuleName.includes('.git')) {
+        const vcsIndicatedModule = BaseGoDatasource.gitVcsRegexp.exec(goModule);
+        if (vcsIndicatedModule?.groups?.module) {
           return {
             datasource: GitlabTagsDatasource.id,
             registryUrl: gitlabUrl,
-            packageName: gitlabModuleName.substring(
-              0,
-              gitlabModuleName.indexOf('.git')
-            ),
+            packageName: vcsIndicatedModule.groups?.module,
           };
         }
         return {
@@ -148,6 +149,16 @@ export class BaseGoDatasource {
       const packageName = trimLeadingSlash(`${parsedUrl.pathname}`);
 
       const registryUrl = `${parsedUrl.protocol}//${parsedUrl.host}`;
+
+      // a .git path indicates a concrete git repository, which can be different from metadata returned by gitlab
+      const vcsIndicatedModule = BaseGoDatasource.gitVcsRegexp.exec(goModule);
+      if (vcsIndicatedModule?.groups?.module) {
+        return {
+          datasource: GitlabTagsDatasource.id,
+          registryUrl,
+          packageName: vcsIndicatedModule.groups?.module,
+        };
+      }
 
       return {
         datasource: GitlabTagsDatasource.id,
