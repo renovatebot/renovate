@@ -22,7 +22,8 @@ Configuring or overriding the default `versioning` can be particularly helpful f
 
 - Although you can reconfigure versioning per-manager or per-datasource, it's unlikely that such a broad change would ever be needed
 - More commonly you would need to configure `versioning` for individual packages or potentially package patterns
-- The best way to do this is with `packageRules`, with a combination of `matchManagers`, `matchDatasources`, `matchPackageNames` and `matchPackagePatterns`
+- The best way to do this is with `packageRules`, with a combination of `matchManagers`, `matchDatasources`, `matchPackageNames` and `matchPackagePatterns`.
+  Avoid configuring `versioning` in a rule that also uses `matchUpdateTypes`, as the update types aren't known at the time the `versioning` is applied.
 
 ## Examples of versioning overrides
 

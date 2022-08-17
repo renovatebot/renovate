@@ -1,47 +1,47 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`modules/manager/npm/extract/pnpm .detectPnpmWorkspaces() uses pnpm workspaces 1`] = `
-Array [
-  Object {
+[
+  {
     "packageFile": "package.json",
     "pnpmShrinkwrap": "pnpm-lock.yaml",
   },
-  Object {
+  {
     "packageFile": "nested-packages/group/a/package.json",
     "packageJsonName": "@demo/nested-group-a",
     "pnpmShrinkwrap": "pnpm-lock.yaml",
   },
-  Object {
+  {
     "packageFile": "nested-packages/group/b/package.json",
     "packageJsonName": "@demo/nested-group-b",
     "pnpmShrinkwrap": "pnpm-lock.yaml",
   },
-  Object {
+  {
     "packageFile": "non-nested-packages/a/package.json",
     "packageJsonName": "@demo/non-nested-a",
     "pnpmShrinkwrap": "pnpm-lock.yaml",
   },
-  Object {
+  {
     "packageFile": "non-nested-packages/b/package.json",
     "packageJsonName": "@demo/non-nested-b",
     "pnpmShrinkwrap": "pnpm-lock.yaml",
   },
-  Object {
+  {
     "packageFile": "solo-package/package.json",
     "packageJsonName": "@demo/solo",
     "pnpmShrinkwrap": "pnpm-lock.yaml",
   },
-  Object {
+  {
     "packageFile": "solo-package-leading-dot-slash/package.json",
     "packageJsonName": "@demo/solo-leading-dot-slash",
     "pnpmShrinkwrap": "pnpm-lock.yaml",
   },
-  Object {
+  {
     "packageFile": "solo-package-leading-double-dot-slash/package.json",
     "packageJsonName": "@demo/solo-leading-double-dot-slash",
     "pnpmShrinkwrap": "pnpm-lock.yaml",
   },
-  Object {
+  {
     "packageFile": "solo-package-trailing-slash/package.json",
     "packageJsonName": "@demo/solo-trailing-slash",
     "pnpmShrinkwrap": "pnpm-lock.yaml",
