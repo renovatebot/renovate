@@ -1,151 +1,151 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`modules/manager/deps-edn/extract extractPackageFile extractPackageFile 1`] = `
-Array [
-  Object {
+[
+  {
     "currentValue": "0.1.2",
     "datasource": "clojure",
     "depName": "persistent-sorted-set",
     "packageName": "persistent-sorted-set:persistent-sorted-set",
-    "registryUrls": Array [
+    "registryUrls": [
       "https://deps.com/foo/bar",
       "https://my.auth.com/repo",
       "s3://my-bucket/maven/releases",
     ],
-    "replaceString": "{:mvn/version,\\"0.1.2\\"}",
+    "replaceString": "{:mvn/version,"0.1.2"}",
   },
-  Object {
+  {
     "currentValue": "0.7.418",
     "datasource": "clojure",
     "depName": "io.github.nextjournal/clerk",
     "packageName": "io.github.nextjournal:clerk",
-    "registryUrls": Array [
+    "registryUrls": [
       "https://deps.com/foo/bar",
       "https://my.auth.com/repo",
       "s3://my-bucket/maven/releases",
     ],
-    "replaceString": "{:mvn/version \\"0.7.418\\"}",
+    "replaceString": "{:mvn/version "0.7.418"}",
   },
-  Object {
+  {
     "currentValue": "1.9.0",
     "datasource": "clojure",
     "depName": "org.clojure/clojure",
     "depType": "1.9",
     "packageName": "org.clojure:clojure",
-    "registryUrls": Array [
+    "registryUrls": [
       "https://deps.com/foo/bar",
       "https://my.auth.com/repo",
       "s3://my-bucket/maven/releases",
     ],
-    "replaceString": "{:mvn/version \\"1.9.0\\"}",
+    "replaceString": "{:mvn/version "1.9.0"}",
   },
-  Object {
+  {
     "currentValue": "1.10.0",
     "datasource": "clojure",
     "depName": "org.clojure/clojure",
     "depType": "1.10",
     "packageName": "org.clojure:clojure",
-    "registryUrls": Array [
+    "registryUrls": [
       "https://deps.com/foo/bar",
       "https://my.auth.com/repo",
       "s3://my-bucket/maven/releases",
     ],
-    "replaceString": "{:mvn/version \\"1.10.0\\"}",
+    "replaceString": "{:mvn/version "1.10.0"}",
   },
-  Object {
+  {
     "currentValue": "1.10.520",
     "datasource": "clojure",
     "depName": "org.clojure/clojurescript",
     "depType": "dev",
     "packageName": "org.clojure:clojurescript",
-    "registryUrls": Array [
+    "registryUrls": [
       "https://deps.com/foo/bar",
       "https://my.auth.com/repo",
       "s3://my-bucket/maven/releases",
     ],
-    "replaceString": "{:mvn/version \\"1.10.520\\"}",
+    "replaceString": "{:mvn/version "1.10.520"}",
   },
-  Object {
+  {
     "currentValue": "0.2.11",
     "datasource": "clojure",
     "depName": "org.clojure/tools.namespace",
     "depType": "dev",
     "packageName": "org.clojure:tools.namespace",
-    "registryUrls": Array [
+    "registryUrls": [
       "https://deps.com/foo/bar",
       "https://my.auth.com/repo",
       "s3://my-bucket/maven/releases",
     ],
-    "replaceString": "{:mvn/version \\"0.2.11\\"}",
+    "replaceString": "{:mvn/version "0.2.11"}",
   },
-  Object {
+  {
     "currentValue": "1.10.520",
     "datasource": "clojure",
     "depName": "org.clojure/clojurescript",
     "depType": "test",
     "packageName": "org.clojure:clojurescript",
-    "registryUrls": Array [
+    "registryUrls": [
       "https://deps.com/foo/bar",
       "https://my.auth.com/repo",
       "s3://my-bucket/maven/releases",
     ],
-    "replaceString": "{:mvn/version \\"1.10.520\\"}",
+    "replaceString": "{:mvn/version "1.10.520"}",
   },
-  Object {
+  {
     "currentValue": "0.0-389",
     "datasource": "github-tags",
     "depName": "lambdaisland/kaocha",
     "depType": "test",
     "packageName": "lambdaisland/kaocha",
-    "replaceString": "{:git/url \\"https://github.com/lambdaisland/kaocha.git\\"
-                                   :git/tag \\"0.0-389\\"}",
+    "replaceString": "{:git/url "https://github.com/lambdaisland/kaocha.git"
+                                   :git/tag "0.0-389"}",
     "sourceUrl": "https://github.com/lambdaisland/kaocha",
   },
-  Object {
+  {
     "currentValue": "0.0-21",
     "datasource": "github-tags",
     "depName": "io.github.lambdaisland/kaocha-cljs",
     "depType": "test",
     "packageName": "lambdaisland/kaocha-cljs",
-    "replaceString": "{:git/tag \\"0.0-21\\"}",
+    "replaceString": "{:git/tag "0.0-21"}",
   },
-  Object {
+  {
     "currentValue": "0.0-389",
     "datasource": "gitlab-tags",
     "depName": "lambdaisland/kaocha",
     "depType": "test-gitlab",
     "packageName": "lambdaisland/kaocha",
-    "replaceString": "{:git/url \\"https://gitlab.com/lambdaisland/kaocha.git\\"
-                                   :git/tag \\"0.0-389\\"}",
+    "replaceString": "{:git/url "https://gitlab.com/lambdaisland/kaocha.git"
+                                   :git/tag "0.0-389"}",
     "sourceUrl": "https://gitlab.com/lambdaisland/kaocha",
   },
-  Object {
+  {
     "currentValue": "0.0-21",
     "datasource": "gitlab-tags",
     "depName": "com.gitlab.lambdaisland/kaocha-cljs",
     "depType": "test-gitlab",
     "packageName": "lambdaisland/kaocha-cljs",
-    "replaceString": "{:git/tag \\"0.0-21\\"}",
+    "replaceString": "{:git/tag "0.0-21"}",
   },
-  Object {
+  {
     "currentValue": "0.0-389",
     "datasource": "gitlab-tags",
     "depName": "lambdaisland/kaocha",
     "depType": "test-bitbucket",
     "packageName": "lambdaisland/kaocha",
-    "replaceString": "{:git/url \\"https://bitbucket.org/lambdaisland/kaocha.git\\"
-                                   :git/tag \\"0.0-389\\"}",
+    "replaceString": "{:git/url "https://bitbucket.org/lambdaisland/kaocha.git"
+                                   :git/tag "0.0-389"}",
     "sourceUrl": "https://bitbucket.org/lambdaisland/kaocha",
   },
-  Object {
+  {
     "currentValue": "0.0-21",
     "datasource": "bitbucket-tags",
     "depName": "org.bitbucket.lambdaisland/kaocha-cljs",
     "depType": "test-bitbucket",
     "packageName": "lambdaisland/kaocha-cljs",
-    "replaceString": "{:git/tag \\"0.0-21\\"}",
+    "replaceString": "{:git/tag "0.0-21"}",
   },
-  Object {
+  {
     "currentDigest": "123",
     "currentDigestShort": "123",
     "currentValue": null,
@@ -153,68 +153,68 @@ Array [
     "depName": "foo/foo",
     "depType": "test-git",
     "packageName": "git@example.com/foo.git",
-    "replaceString": "{:git/url \\"git@example.com/foo.git\\" :git/sha \\"123\\"}",
+    "replaceString": "{:git/url "git@example.com/foo.git" :git/sha "123"}",
   },
-  Object {
+  {
     "currentValue": null,
     "datasource": "git-refs",
     "depName": "bar/bar",
     "depType": "test-git",
     "packageName": "https://example.com/bar.git",
-    "replaceString": "{:git/url \\"https://example.com/bar.git\\"}",
+    "replaceString": "{:git/url "https://example.com/bar.git"}",
     "sourceUrl": "https://example.com/bar",
   },
-  Object {
+  {
     "currentValue": "0.21.1",
     "datasource": "clojure",
     "depName": "cider/cider-nrepl",
     "depType": "repl",
     "packageName": "cider:cider-nrepl",
-    "registryUrls": Array [
+    "registryUrls": [
       "https://deps.com/foo/bar",
       "https://my.auth.com/repo",
       "s3://my-bucket/maven/releases",
     ],
-    "replaceString": "{:mvn/version \\"0.21.1\\"}",
+    "replaceString": "{:mvn/version "0.21.1"}",
   },
-  Object {
+  {
     "currentValue": "0.6.0",
     "datasource": "clojure",
     "depName": "nrepl/nrepl",
     "depType": "repl",
     "packageName": "nrepl:nrepl",
-    "registryUrls": Array [
+    "registryUrls": [
       "https://deps.com/foo/bar",
       "https://my.auth.com/repo",
       "s3://my-bucket/maven/releases",
     ],
-    "replaceString": "{:mvn/version \\"0.6.0\\"}",
+    "replaceString": "{:mvn/version "0.6.0"}",
   },
-  Object {
+  {
     "currentValue": "0.2.11",
     "datasource": "clojure",
     "depName": "org.clojure/tools.namespace",
     "depType": "repl",
     "packageName": "org.clojure:tools.namespace",
-    "registryUrls": Array [
+    "registryUrls": [
       "https://deps.com/foo/bar",
       "https://my.auth.com/repo",
       "s3://my-bucket/maven/releases",
     ],
-    "replaceString": "{:mvn/version \\"0.2.11\\"}",
+    "replaceString": "{:mvn/version "0.2.11"}",
   },
-  Object {
+  {
     "currentValue": "0.9.5703",
     "datasource": "clojure",
     "depName": "com.datomic/datomic-free",
     "depType": "datomic",
     "packageName": "com.datomic:datomic-free",
-    "registryUrls": Array [
+    "registryUrls": [
       "https://deps.com/foo/bar",
       "https://my.auth.com/repo",
       "s3://my-bucket/maven/releases",
     ],
-    "replaceString": "{:mvn/version  \\"0.9.5703\\"}",
+    "replaceString": "{:mvn/version  "0.9.5703"}",
   },
 ]
 `;

@@ -1,39 +1,39 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`workers/repository/updates/generate generateBranchConfig() handles @types specially (reversed) 1`] = `
-Object {
-  "addLabels": Array [],
+{
+  "addLabels": [],
   "automerge": false,
   "branchName": "some-branch",
   "commitMessage": "",
-  "constraints": Object {},
+  "constraints": {},
   "depName": "some-dep",
   "dependencyDashboardApproval": false,
   "dependencyDashboardPrApproval": false,
   "displayFrom": "",
   "displayPending": "",
   "displayTo": "0.6.0",
-  "labels": Array [
+  "labels": [
     "a",
     "c",
     "b",
   ],
   "manager": "some-manager",
   "newValue": "0.6.0",
-  "prBodyColumns": Array [],
+  "prBodyColumns": [],
   "prTitle": "some-title",
   "prettyDepType": "dependency",
   "releaseTimestamp": undefined,
   "reuseLockFiles": true,
-  "upgrades": Array [
-    Object {
+  "upgrades": [
+    {
       "branchName": "some-branch",
       "commitMessage": "",
       "depName": "some-dep",
       "displayFrom": "",
       "displayPending": "",
       "displayTo": "0.6.0",
-      "labels": Array [
+      "labels": [
         "a",
         "c",
       ],
@@ -42,7 +42,7 @@ Object {
       "prTitle": "some-title",
       "prettyDepType": "dependency",
     },
-    Object {
+    {
       "branchName": "some-branch",
       "commitBodyTable": true,
       "commitMessage": "",
@@ -51,7 +51,7 @@ Object {
       "displayFrom": "",
       "displayPending": "",
       "displayTo": "1.0.0",
-      "labels": Array [
+      "labels": [
         "a",
         "b",
       ],
@@ -60,14 +60,14 @@ Object {
       "prTitle": "some-other-title",
       "prettyDepType": "dependency",
     },
-    Object {
+    {
       "branchName": "some-branch",
       "commitMessage": "",
       "depName": "@types/some-dep",
       "displayFrom": "",
       "displayPending": "",
       "displayTo": "0.5.7",
-      "labels": Array [
+      "labels": [
         "a",
       ],
       "manager": "some-manager",
@@ -80,13 +80,13 @@ Object {
 `;
 
 exports[`workers/repository/updates/generate generateBranchConfig() handles @types specially 1`] = `
-Object {
-  "addLabels": Array [],
+{
+  "addLabels": [],
   "automerge": false,
   "branchName": "some-branch",
   "commitBodyTable": true,
   "commitMessage": "\\n\\n| datasource | package         | from  | to    |\\n| ---------- | --------------- | ----- | ----- |\\n| npm        | @types/some-dep | 0.5.7 | 0.5.8 |\\n",
-  "constraints": Object {},
+  "constraints": {},
   "datasource": "npm",
   "depName": "some-dep",
   "dependencyDashboardApproval": false,
@@ -96,17 +96,17 @@ Object {
   "displayTo": "0.6.0",
   "hasTypes": true,
   "isRange": false,
-  "labels": Array [],
+  "labels": [],
   "manager": "some-manager",
   "newValue": "0.6.0",
-  "prBodyColumns": Array [],
+  "prBodyColumns": [],
   "prTitle": "some-title",
   "prettyDepType": "dependency",
   "recreateClosed": false,
   "releaseTimestamp": undefined,
   "reuseLockFiles": true,
-  "upgrades": Array [
-    Object {
+  "upgrades": [
+    {
       "branchName": "some-branch",
       "commitBodyTable": true,
       "commitMessage": "",
@@ -122,7 +122,7 @@ Object {
       "prettyDepType": "dependency",
       "recreateClosed": false,
     },
-    Object {
+    {
       "branchName": "some-branch",
       "commitBodyTable": true,
       "commitMessage": "",
@@ -137,7 +137,7 @@ Object {
       "prTitle": "some-other-title",
       "prettyDepType": "dependency",
     },
-    Object {
+    {
       "branchName": "some-branch",
       "commitBodyTable": true,
       "commitMessage": "",
@@ -161,27 +161,27 @@ Object {
 `;
 
 exports[`workers/repository/updates/generate generateBranchConfig() handles lockFileMaintenance 1`] = `
-Object {
-  "addLabels": Array [],
+{
+  "addLabels": [],
   "automerge": false,
   "branchName": "some-branch",
   "commitMessage": "",
-  "constraints": Object {},
+  "constraints": {},
   "dependencyDashboardApproval": false,
   "dependencyDashboardPrApproval": false,
   "displayFrom": "",
   "displayPending": "",
   "displayTo": "",
   "isLockFileMaintenance": true,
-  "labels": Array [],
+  "labels": [],
   "manager": "some-manager",
-  "prBodyColumns": Array [],
+  "prBodyColumns": [],
   "prTitle": "some-title",
   "prettyDepType": "dependency",
   "releaseTimestamp": undefined,
   "reuseLockFiles": true,
-  "upgrades": Array [
-    Object {
+  "upgrades": [
+    {
       "branchName": "some-branch",
       "commitMessage": "",
       "displayFrom": "",
@@ -197,12 +197,12 @@ Object {
 `;
 
 exports[`workers/repository/updates/generate generateBranchConfig() handles lockFileUpdate 1`] = `
-Object {
-  "addLabels": Array [],
+{
+  "addLabels": [],
   "automerge": false,
   "branchName": "some-branch",
   "commitMessage": "",
-  "constraints": Object {},
+  "constraints": {},
   "currentValue": "^1.0.0",
   "currentVersion": "1.0.0",
   "dependencyDashboardApproval": false,
@@ -212,19 +212,19 @@ Object {
   "displayTo": "1.0.1",
   "isLockfileUpdate": true,
   "isRange": false,
-  "labels": Array [],
+  "labels": [],
   "lockedVersion": "1.0.0",
   "manager": "some-manager",
   "newValue": "^1.0.0",
   "newVersion": "1.0.1",
-  "prBodyColumns": Array [],
+  "prBodyColumns": [],
   "prTitle": "some-title",
   "prettyDepType": "dependency",
   "prettyNewVersion": "v1.0.1",
   "releaseTimestamp": undefined,
   "reuseLockFiles": true,
-  "upgrades": Array [
-    Object {
+  "upgrades": [
+    {
       "branchName": "some-branch",
       "commitMessage": "",
       "currentValue": "^1.0.0",

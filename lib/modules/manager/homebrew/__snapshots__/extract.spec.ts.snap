@@ -1,13 +1,13 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`modules/manager/homebrew/extract extractPackageFile() extracts "archive" github dependency 1`] = `
-Object {
-  "deps": Array [
-    Object {
+{
+  "deps": [
+    {
       "currentValue": "v0.8.2",
       "datasource": "github-tags",
       "depName": "bazelbuild/bazel-watcher",
-      "managerData": Object {
+      "managerData": {
         "ownerName": "bazelbuild",
         "repoName": "bazel-watcher",
         "sha256": "26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4",
@@ -19,13 +19,13 @@ Object {
 `;
 
 exports[`modules/manager/homebrew/extract extractPackageFile() extracts "releases" github dependency 1`] = `
-Object {
-  "deps": Array [
-    Object {
+{
+  "deps": [
+    {
       "currentValue": "v0.16.1",
       "datasource": "github-tags",
       "depName": "aide/aide",
-      "managerData": Object {
+      "managerData": {
         "ownerName": "aide",
         "repoName": "aide",
         "sha256": "0f2b7cecc70c1a27d35c06c98804fcdb9f326630de5d035afc447122186010b7",
@@ -37,13 +37,13 @@ Object {
 `;
 
 exports[`modules/manager/homebrew/extract extractPackageFile() handles no space before class header 1`] = `
-Object {
-  "deps": Array [
-    Object {
+{
+  "deps": [
+    {
       "currentValue": "v0.8.2",
       "datasource": "github-tags",
       "depName": "bazelbuild/bazel-watcher",
-      "managerData": Object {
+      "managerData": {
         "ownerName": "bazelbuild",
         "repoName": "bazel-watcher",
         "sha256": "26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4",
@@ -55,13 +55,13 @@ Object {
 `;
 
 exports[`modules/manager/homebrew/extract extractPackageFile() skips github dependency with wrong format 1`] = `
-Object {
-  "deps": Array [
-    Object {
+{
+  "deps": [
+    {
       "currentValue": null,
       "datasource": undefined,
       "depName": "Acmetool",
-      "managerData": Object {
+      "managerData": {
         "ownerName": null,
         "repoName": null,
         "sha256": "6f2cf5cfb987a2df2f791c162209039804fd8fd12692da69f52153ec9668e9ca",
@@ -74,13 +74,13 @@ Object {
 `;
 
 exports[`modules/manager/homebrew/extract extractPackageFile() skips if invalid url 1`] = `
-Object {
-  "deps": Array [
-    Object {
+{
+  "deps": [
+    {
       "currentValue": null,
       "datasource": undefined,
       "depName": "Ibazel",
-      "managerData": Object {
+      "managerData": {
         "ownerName": null,
         "repoName": null,
         "sha256": "26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4",
@@ -93,13 +93,13 @@ Object {
 `;
 
 exports[`modules/manager/homebrew/extract extractPackageFile() skips if invalid url protocol 1`] = `
-Object {
-  "deps": Array [
-    Object {
+{
+  "deps": [
+    {
       "currentValue": null,
       "datasource": undefined,
       "depName": "Ibazel",
-      "managerData": Object {
+      "managerData": {
         "ownerName": null,
         "repoName": null,
         "sha256": "26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4",
@@ -112,13 +112,13 @@ Object {
 `;
 
 exports[`modules/manager/homebrew/extract extractPackageFile() skips if sha256 field is invalid 1`] = `
-Object {
-  "deps": Array [
-    Object {
+{
+  "deps": [
+    {
       "currentValue": "v0.8.2",
       "datasource": "github-tags",
       "depName": "bazelbuild/bazel-watcher",
-      "managerData": Object {
+      "managerData": {
         "ownerName": "bazelbuild",
         "repoName": "bazel-watcher",
         "sha256": "26f5125218fad2741d3caf937b0229",
@@ -131,13 +131,13 @@ Object {
 `;
 
 exports[`modules/manager/homebrew/extract extractPackageFile() skips if there is no sha256 field 1`] = `
-Object {
-  "deps": Array [
-    Object {
+{
+  "deps": [
+    {
       "currentValue": "v0.8.2",
       "datasource": "github-tags",
       "depName": "bazelbuild/bazel-watcher",
-      "managerData": Object {
+      "managerData": {
         "ownerName": "bazelbuild",
         "repoName": "bazel-watcher",
         "sha256": null,
@@ -150,13 +150,13 @@ Object {
 `;
 
 exports[`modules/manager/homebrew/extract extractPackageFile() skips if there is no url field 1`] = `
-Object {
-  "deps": Array [
-    Object {
+{
+  "deps": [
+    {
       "currentValue": null,
       "datasource": undefined,
       "depName": "Ibazel",
-      "managerData": Object {
+      "managerData": {
         "ownerName": null,
         "repoName": null,
         "sha256": "26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4",
@@ -169,13 +169,13 @@ Object {
 `;
 
 exports[`modules/manager/homebrew/extract extractPackageFile() skips sourceforge dependency 1 1`] = `
-Object {
-  "deps": Array [
-    Object {
+{
+  "deps": [
+    {
       "currentValue": null,
       "datasource": undefined,
       "depName": "Aalib",
-      "managerData": Object {
+      "managerData": {
         "ownerName": null,
         "repoName": null,
         "sha256": "fbddda9230cf6ee2a4f5706b4b11e2190ae45f5eda1f0409dc4f99b35e0a70ee",
@@ -188,13 +188,13 @@ Object {
 `;
 
 exports[`modules/manager/homebrew/extract extractPackageFile() skips sourceforge dependency 2 1`] = `
-Object {
-  "deps": Array [
-    Object {
+{
+  "deps": [
+    {
       "currentValue": null,
       "datasource": undefined,
       "depName": "Aap",
-      "managerData": Object {
+      "managerData": {
         "ownerName": null,
         "repoName": null,
         "sha256": "3f53b2fc277756042449416150acc477f29de93692944f8a77e8cef285a1efd8",
