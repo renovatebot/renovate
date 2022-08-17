@@ -4,7 +4,6 @@ import type { RepoCache } from '../types';
 import { RepoCacheLocal } from './local';
 
 export class CacheFactory {
-
   static get(
     repository: string,
     cacheType: RepositoryCacheType = 'local'
@@ -12,7 +11,7 @@ export class CacheFactory {
     switch (cacheType) {
       case 'local':
         return new RepoCacheLocal(repository);
-      default:        
+      default:
         logger.warn(
           { cacheType },
           `Repository cache type not supported using type "local" instead`
