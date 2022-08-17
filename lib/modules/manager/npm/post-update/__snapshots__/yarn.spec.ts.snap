@@ -1,13 +1,13 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`modules/manager/npm/post-update/yarn allows and ignore scripts 1`] = `
-Array [
-  Object {
+[
+  {
     "cmd": "yarn install --mode=update-lockfile",
-    "options": Object {
+    "options": {
       "cwd": "some-dir",
       "encoding": "utf-8",
-      "env": Object {
+      "env": {
         "CI": "true",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -28,13 +28,13 @@ Array [
 `;
 
 exports[`modules/manager/npm/post-update/yarn catches errors 1`] = `
-Array [
-  Object {
+[
+  {
     "cmd": "yarn install --ignore-engines --ignore-platform --network-timeout 100000 --ignore-scripts",
-    "options": Object {
+    "options": {
       "cwd": "some-dir",
       "encoding": "utf-8",
-      "env": Object {
+      "env": {
         "CI": "true",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -52,13 +52,13 @@ Array [
 `;
 
 exports[`modules/manager/npm/post-update/yarn does not use global cache if zero install is detected 1`] = `
-Array [
-  Object {
+[
+  {
     "cmd": "yarn install",
-    "options": Object {
+    "options": {
       "cwd": "some-dir",
       "encoding": "utf-8",
-      "env": Object {
+      "env": {
         "CI": "true",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -79,13 +79,13 @@ Array [
 `;
 
 exports[`modules/manager/npm/post-update/yarn generates lock files using yarn v1.22.0 1`] = `
-Array [
-  Object {
+[
+  {
     "cmd": "yarn install --ignore-engines --ignore-platform --network-timeout 100000 --ignore-scripts",
-    "options": Object {
+    "options": {
       "cwd": "/some-dir",
       "encoding": "utf-8",
-      "env": Object {
+      "env": {
         "CI": "true",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -100,12 +100,12 @@ Array [
       "timeout": 900000,
     },
   },
-  Object {
+  {
     "cmd": "npx yarn-deduplicate --strategy fewer",
-    "options": Object {
+    "options": {
       "cwd": "/some-dir",
       "encoding": "utf-8",
-      "env": Object {
+      "env": {
         "CI": "true",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -120,12 +120,12 @@ Array [
       "timeout": 900000,
     },
   },
-  Object {
+  {
     "cmd": "yarn install --ignore-engines --ignore-platform --network-timeout 100000 --ignore-scripts",
-    "options": Object {
+    "options": {
       "cwd": "/some-dir",
       "encoding": "utf-8",
-      "env": Object {
+      "env": {
         "CI": "true",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -140,12 +140,12 @@ Array [
       "timeout": 900000,
     },
   },
-  Object {
+  {
     "cmd": "npx yarn-deduplicate --strategy highest",
-    "options": Object {
+    "options": {
       "cwd": "/some-dir",
       "encoding": "utf-8",
-      "env": Object {
+      "env": {
         "CI": "true",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -160,12 +160,12 @@ Array [
       "timeout": 900000,
     },
   },
-  Object {
+  {
     "cmd": "yarn install --ignore-engines --ignore-platform --network-timeout 100000 --ignore-scripts",
-    "options": Object {
+    "options": {
       "cwd": "/some-dir",
       "encoding": "utf-8",
-      "env": Object {
+      "env": {
         "CI": "true",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -184,13 +184,13 @@ Array [
 `;
 
 exports[`modules/manager/npm/post-update/yarn generates lock files using yarn v2.1.0 1`] = `
-Array [
-  Object {
+[
+  {
     "cmd": "yarn install",
-    "options": Object {
+    "options": {
       "cwd": "/some-dir",
       "encoding": "utf-8",
-      "env": Object {
+      "env": {
         "CI": "true",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -213,13 +213,13 @@ Array [
 `;
 
 exports[`modules/manager/npm/post-update/yarn generates lock files using yarn v2.2.0 1`] = `
-Array [
-  Object {
+[
+  {
     "cmd": "yarn install",
-    "options": Object {
+    "options": {
       "cwd": "/some-dir",
       "encoding": "utf-8",
-      "env": Object {
+      "env": {
         "CI": "true",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -238,12 +238,12 @@ Array [
       "timeout": 900000,
     },
   },
-  Object {
+  {
     "cmd": "yarn dedupe --strategy highest",
-    "options": Object {
+    "options": {
       "cwd": "/some-dir",
       "encoding": "utf-8",
-      "env": Object {
+      "env": {
         "CI": "true",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -266,13 +266,13 @@ Array [
 `;
 
 exports[`modules/manager/npm/post-update/yarn generates lock files using yarn v3.0.0 1`] = `
-Array [
-  Object {
+[
+  {
     "cmd": "yarn install --mode=update-lockfile",
-    "options": Object {
+    "options": {
       "cwd": "/some-dir",
       "encoding": "utf-8",
-      "env": Object {
+      "env": {
         "CI": "true",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -290,12 +290,12 @@ Array [
       "timeout": 900000,
     },
   },
-  Object {
+  {
     "cmd": "yarn dedupe --strategy highest --mode=update-lockfile",
-    "options": Object {
+    "options": {
       "cwd": "/some-dir",
       "encoding": "utf-8",
-      "env": Object {
+      "env": {
         "CI": "true",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -317,13 +317,13 @@ Array [
 `;
 
 exports[`modules/manager/npm/post-update/yarn only skips build if skipInstalls is false 1`] = `
-Array [
-  Object {
+[
+  {
     "cmd": "yarn install --mode=skip-build",
-    "options": Object {
+    "options": {
       "cwd": "some-dir",
       "encoding": "utf-8",
-      "env": Object {
+      "env": {
         "CI": "true",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -340,12 +340,12 @@ Array [
       "timeout": 900000,
     },
   },
-  Object {
+  {
     "cmd": "yarn dedupe --strategy highest --mode=skip-build",
-    "options": Object {
+    "options": {
       "cwd": "some-dir",
       "encoding": "utf-8",
-      "env": Object {
+      "env": {
         "CI": "true",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -366,13 +366,13 @@ Array [
 `;
 
 exports[`modules/manager/npm/post-update/yarn performs lock file maintenance in subdirectory independent workspaces using yarn v1.22.0 1`] = `
-Array [
-  Object {
+[
+  {
     "cmd": "yarn install --ignore-engines --ignore-platform --network-timeout 100000 --ignore-scripts",
-    "options": Object {
+    "options": {
       "cwd": "some-dir/sub_workspace",
       "encoding": "utf-8",
-      "env": Object {
+      "env": {
         "CI": "true",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -386,12 +386,12 @@ Array [
       "timeout": 900000,
     },
   },
-  Object {
+  {
     "cmd": "npx yarn-deduplicate --strategy fewer",
-    "options": Object {
+    "options": {
       "cwd": "some-dir/sub_workspace",
       "encoding": "utf-8",
-      "env": Object {
+      "env": {
         "CI": "true",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -405,12 +405,12 @@ Array [
       "timeout": 900000,
     },
   },
-  Object {
+  {
     "cmd": "yarn install --ignore-engines --ignore-platform --network-timeout 100000 --ignore-scripts",
-    "options": Object {
+    "options": {
       "cwd": "some-dir/sub_workspace",
       "encoding": "utf-8",
-      "env": Object {
+      "env": {
         "CI": "true",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -424,12 +424,12 @@ Array [
       "timeout": 900000,
     },
   },
-  Object {
+  {
     "cmd": "npx yarn-deduplicate --strategy highest",
-    "options": Object {
+    "options": {
       "cwd": "some-dir/sub_workspace",
       "encoding": "utf-8",
-      "env": Object {
+      "env": {
         "CI": "true",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -443,12 +443,12 @@ Array [
       "timeout": 900000,
     },
   },
-  Object {
+  {
     "cmd": "yarn install --ignore-engines --ignore-platform --network-timeout 100000 --ignore-scripts",
-    "options": Object {
+    "options": {
       "cwd": "some-dir/sub_workspace",
       "encoding": "utf-8",
-      "env": Object {
+      "env": {
         "CI": "true",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -466,13 +466,13 @@ Array [
 `;
 
 exports[`modules/manager/npm/post-update/yarn performs lock file maintenance in subdirectory independent workspaces using yarn v2.1.0 1`] = `
-Array [
-  Object {
+[
+  {
     "cmd": "yarn install",
-    "options": Object {
+    "options": {
       "cwd": "some-dir/sub_workspace",
       "encoding": "utf-8",
-      "env": Object {
+      "env": {
         "CI": "true",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -494,13 +494,13 @@ Array [
 `;
 
 exports[`modules/manager/npm/post-update/yarn performs lock file maintenance in subdirectory independent workspaces using yarn v2.2.0 1`] = `
-Array [
-  Object {
+[
+  {
     "cmd": "yarn install",
-    "options": Object {
+    "options": {
       "cwd": "some-dir/sub_workspace",
       "encoding": "utf-8",
-      "env": Object {
+      "env": {
         "CI": "true",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -518,12 +518,12 @@ Array [
       "timeout": 900000,
     },
   },
-  Object {
+  {
     "cmd": "yarn dedupe --strategy highest",
-    "options": Object {
+    "options": {
       "cwd": "some-dir/sub_workspace",
       "encoding": "utf-8",
-      "env": Object {
+      "env": {
         "CI": "true",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -545,13 +545,13 @@ Array [
 `;
 
 exports[`modules/manager/npm/post-update/yarn performs lock file maintenance in subdirectory independent workspaces using yarn v3.0.0 1`] = `
-Array [
-  Object {
+[
+  {
     "cmd": "yarn install --mode=update-lockfile",
-    "options": Object {
+    "options": {
       "cwd": "some-dir/sub_workspace",
       "encoding": "utf-8",
-      "env": Object {
+      "env": {
         "CI": "true",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -568,12 +568,12 @@ Array [
       "timeout": 900000,
     },
   },
-  Object {
+  {
     "cmd": "yarn dedupe --strategy highest --mode=update-lockfile",
-    "options": Object {
+    "options": {
       "cwd": "some-dir/sub_workspace",
       "encoding": "utf-8",
-      "env": Object {
+      "env": {
         "CI": "true",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -594,13 +594,13 @@ Array [
 `;
 
 exports[`modules/manager/npm/post-update/yarn performs lock file maintenance using yarn v1.22.0 1`] = `
-Array [
-  Object {
+[
+  {
     "cmd": "yarn install --ignore-engines --ignore-platform --network-timeout 100000 --ignore-scripts",
-    "options": Object {
+    "options": {
       "cwd": "some-dir",
       "encoding": "utf-8",
-      "env": Object {
+      "env": {
         "CI": "true",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -614,12 +614,12 @@ Array [
       "timeout": 900000,
     },
   },
-  Object {
+  {
     "cmd": "npx yarn-deduplicate --strategy fewer",
-    "options": Object {
+    "options": {
       "cwd": "some-dir",
       "encoding": "utf-8",
-      "env": Object {
+      "env": {
         "CI": "true",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -633,12 +633,12 @@ Array [
       "timeout": 900000,
     },
   },
-  Object {
+  {
     "cmd": "yarn install --ignore-engines --ignore-platform --network-timeout 100000 --ignore-scripts",
-    "options": Object {
+    "options": {
       "cwd": "some-dir",
       "encoding": "utf-8",
-      "env": Object {
+      "env": {
         "CI": "true",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -652,12 +652,12 @@ Array [
       "timeout": 900000,
     },
   },
-  Object {
+  {
     "cmd": "npx yarn-deduplicate --strategy highest",
-    "options": Object {
+    "options": {
       "cwd": "some-dir",
       "encoding": "utf-8",
-      "env": Object {
+      "env": {
         "CI": "true",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -671,12 +671,12 @@ Array [
       "timeout": 900000,
     },
   },
-  Object {
+  {
     "cmd": "yarn install --ignore-engines --ignore-platform --network-timeout 100000 --ignore-scripts",
-    "options": Object {
+    "options": {
       "cwd": "some-dir",
       "encoding": "utf-8",
-      "env": Object {
+      "env": {
         "CI": "true",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -694,13 +694,13 @@ Array [
 `;
 
 exports[`modules/manager/npm/post-update/yarn performs lock file maintenance using yarn v2.1.0 1`] = `
-Array [
-  Object {
+[
+  {
     "cmd": "yarn install",
-    "options": Object {
+    "options": {
       "cwd": "some-dir",
       "encoding": "utf-8",
-      "env": Object {
+      "env": {
         "CI": "true",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -722,13 +722,13 @@ Array [
 `;
 
 exports[`modules/manager/npm/post-update/yarn performs lock file maintenance using yarn v2.2.0 1`] = `
-Array [
-  Object {
+[
+  {
     "cmd": "yarn install",
-    "options": Object {
+    "options": {
       "cwd": "some-dir",
       "encoding": "utf-8",
-      "env": Object {
+      "env": {
         "CI": "true",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -746,12 +746,12 @@ Array [
       "timeout": 900000,
     },
   },
-  Object {
+  {
     "cmd": "yarn dedupe --strategy highest",
-    "options": Object {
+    "options": {
       "cwd": "some-dir",
       "encoding": "utf-8",
-      "env": Object {
+      "env": {
         "CI": "true",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -773,13 +773,13 @@ Array [
 `;
 
 exports[`modules/manager/npm/post-update/yarn performs lock file updates and full install using yarn v1.22.0 1`] = `
-Array [
-  Object {
+[
+  {
     "cmd": "yarn install --ignore-engines --ignore-platform --network-timeout 100000 --ignore-scripts",
-    "options": Object {
+    "options": {
       "cwd": "some-dir",
       "encoding": "utf-8",
-      "env": Object {
+      "env": {
         "CI": "true",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -793,12 +793,12 @@ Array [
       "timeout": 900000,
     },
   },
-  Object {
+  {
     "cmd": "yarn upgrade some-dep --ignore-engines --ignore-platform --network-timeout 100000 --ignore-scripts",
-    "options": Object {
+    "options": {
       "cwd": "some-dir",
       "encoding": "utf-8",
-      "env": Object {
+      "env": {
         "CI": "true",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -816,13 +816,13 @@ Array [
 `;
 
 exports[`modules/manager/npm/post-update/yarn performs lock file updates using yarn v1.22.0 1`] = `
-Array [
-  Object {
+[
+  {
     "cmd": "yarn install --ignore-engines --ignore-platform --network-timeout 100000 --ignore-scripts",
-    "options": Object {
+    "options": {
       "cwd": "some-dir",
       "encoding": "utf-8",
-      "env": Object {
+      "env": {
         "CI": "true",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -836,12 +836,12 @@ Array [
       "timeout": 900000,
     },
   },
-  Object {
+  {
     "cmd": "yarn upgrade some-dep --ignore-engines --ignore-platform --network-timeout 100000 --ignore-scripts",
-    "options": Object {
+    "options": {
       "cwd": "some-dir",
       "encoding": "utf-8",
-      "env": Object {
+      "env": {
         "CI": "true",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -859,13 +859,13 @@ Array [
 `;
 
 exports[`modules/manager/npm/post-update/yarn performs lock file updates using yarn v2.1.0 1`] = `
-Array [
-  Object {
+[
+  {
     "cmd": "yarn install",
-    "options": Object {
+    "options": {
       "cwd": "some-dir",
       "encoding": "utf-8",
-      "env": Object {
+      "env": {
         "CI": "true",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -883,12 +883,12 @@ Array [
       "timeout": 900000,
     },
   },
-  Object {
+  {
     "cmd": "yarn up some-dep@^1.0.0",
-    "options": Object {
+    "options": {
       "cwd": "some-dir",
       "encoding": "utf-8",
-      "env": Object {
+      "env": {
         "CI": "true",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -910,13 +910,13 @@ Array [
 `;
 
 exports[`modules/manager/npm/post-update/yarn performs lock file updates using yarn v3.0.0 1`] = `
-Array [
-  Object {
+[
+  {
     "cmd": "yarn install --mode=update-lockfile",
-    "options": Object {
+    "options": {
       "cwd": "some-dir",
       "encoding": "utf-8",
-      "env": Object {
+      "env": {
         "CI": "true",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -933,12 +933,12 @@ Array [
       "timeout": 900000,
     },
   },
-  Object {
+  {
     "cmd": "yarn up some-dep@^1.0.0 --mode=update-lockfile",
-    "options": Object {
+    "options": {
       "cwd": "some-dir",
       "encoding": "utf-8",
-      "env": Object {
+      "env": {
         "CI": "true",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -959,13 +959,13 @@ Array [
 `;
 
 exports[`modules/manager/npm/post-update/yarn performs yarn binary update using yarn v1.22.0 1`] = `
-Array [
-  Object {
+[
+  {
     "cmd": "yarn set version 3.0.1",
-    "options": Object {
+    "options": {
       "cwd": "some-dir",
       "encoding": "utf-8",
-      "env": Object {
+      "env": {
         "CI": "true",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -982,12 +982,12 @@ Array [
       "timeout": 900000,
     },
   },
-  Object {
+  {
     "cmd": "yarn install --mode=update-lockfile",
-    "options": Object {
+    "options": {
       "cwd": "some-dir",
       "encoding": "utf-8",
-      "env": Object {
+      "env": {
         "CI": "true",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -1008,13 +1008,13 @@ Array [
 `;
 
 exports[`modules/manager/npm/post-update/yarn performs yarn binary update using yarn v2.1.0 1`] = `
-Array [
-  Object {
+[
+  {
     "cmd": "yarn set version 3.0.1",
-    "options": Object {
+    "options": {
       "cwd": "some-dir",
       "encoding": "utf-8",
-      "env": Object {
+      "env": {
         "CI": "true",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -1031,12 +1031,12 @@ Array [
       "timeout": 900000,
     },
   },
-  Object {
+  {
     "cmd": "yarn install --mode=update-lockfile",
-    "options": Object {
+    "options": {
       "cwd": "some-dir",
       "encoding": "utf-8",
-      "env": Object {
+      "env": {
         "CI": "true",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",

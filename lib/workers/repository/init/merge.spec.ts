@@ -150,9 +150,9 @@ describe('workers/repository/init/merge', () => {
         configFileParsed: {},
       });
       expect(await detectRepoFileConfig()).toMatchInlineSnapshot(`
-        Object {
+        {
           "configFileName": ".renovaterc.json",
-          "configFileParsed": "{\\"something\\":\\"new\\"}",
+          "configFileParsed": "{"something":"new"}",
         }
       `);
     });
