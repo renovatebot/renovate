@@ -88,6 +88,24 @@ At a high level: critical = needs immediate fix, important = to be prioritized a
 
 Use [this search](https://github.com/renovatebot/renovate/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+-label%3Apriority-1-critical+-label%3Apriority-2-high+-label%3Apriority-3-medium+-label%3Apriority-4-low++-label%3Apriority-5-triage) to find any issues which are missing a priority label.
 
+### Impact
+
+<details>
+    <summary>Impact</summary>
+
+    impact:small
+    impact:medium
+    impact:large
+
+</details>
+
+Use these to assign a impact level to an issue.
+Do we mean?
+
+- Impact on usability for end users
+- Impact on maintainers, like "amount of hassle/work this takes to complete"
+- Impact as risk of ...
+
 ### Platform
 
 <details>
