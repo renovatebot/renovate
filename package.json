@@ -194,7 +194,7 @@
     "minimatch": "5.1.0",
     "moo": "0.5.1",
     "nanoid": "3.3.4",
-    "node-html-parser": "5.3.3",
+    "node-html-parser": "5.4.1",
     "openpgp": "5.4.0",
     "p-all": "3.0.0",
     "p-map": "4.0.0",
