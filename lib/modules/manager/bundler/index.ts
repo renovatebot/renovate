@@ -5,6 +5,7 @@ import * as rubyVersioning from '../../versioning/ruby';
 import { updateArtifacts } from './artifacts';
 import { extractPackageFile } from './extract';
 import { getRangeStrategy } from './range';
+import { updateDependency } from './update';
 import { updateLockedDependency } from './update-locked';
 
 export const language = ProgrammingLanguage.Ruby;
@@ -19,6 +20,7 @@ export {
   extractPackageFile, // Mandatory unless extractAllPackageFiles is used instead
   updateArtifacts, // Optional
   getRangeStrategy, // Optional
+  updateDependency,
   updateLockedDependency,
 };
 
