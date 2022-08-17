@@ -23,16 +23,16 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: yarn
 
-      - name: Installing dependencies
+      - name: Install dependencies
         run: yarn install --frozen-lockfile
 
-      - name: Update data
+      - name: Update static data
         run: yarn run update-static-data
 
-      - name: prettify
+      - name: Run Prettier
         run: yarn prettier-fix
 
-      - name: Create Pull Request
+      - name: Create pull request
         uses: peter-evans/create-pull-request@20dac2ed4875a1a8422d233a68f69088637446df # tag=v4.1.0
         with:
           author: 'Renovate Bot <renovate@whitesourcesoftware.com>'
