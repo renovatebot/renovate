@@ -51,9 +51,15 @@ The [GitHub App associated email](https://github.community/t/logging-into-git-as
 It needs to have the user id _and_ the username followed by the `users.noreply.`-domain of either github.com or the GitHub Enterprise Server.
 A way to get the user id of a GitHub app is to [query the user API](https://docs.github.com/en/rest/reference/users#get-a-user) at `api.github.com/user/self-hosted-renovate[bot]` (github.com) or `github.enterprise.com/api/v3/uer/self-hosted-renovate[bot]` (GitHub Enterprise Server).
 
-**`token:"x-access-token:${github-app-installation}"`**
+**`token:"ghs_123exampletoken"`**
 
-The token needs to be prefixed with `x-access-token` and be a [GitHub App Installation token](https://docs.github.com/en/developers/apps/building-github-apps/authenticating-with-github-apps#authenticating-as-an-installation).
+You must use a [GitHub App Installation token](https://docs.github.com/en/developers/apps/building-github-apps/authenticating-with-github-apps#authenticating-as-an-installation).
+
+Previously, the token had to be prefixed with `x-access-token:`.
+We recommend you replace any prefixed tokens with normal tokens.
+We will drop support for prefixed tokens in the future.
+
+Any tokens that do not start with `ghs_` (for example tokens from GitHub Enterprise Server versions before version `3.2`) must be prefixed with `x-access-token:`.
 
 <!-- prettier-ignore -->
 !!! note

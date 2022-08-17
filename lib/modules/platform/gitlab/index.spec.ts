@@ -36,7 +36,7 @@ describe('modules/platform/gitlab/index', () => {
     jest.mock('../../../util/git');
     git = require('../../../util/git');
     git.branchExists.mockReturnValue(true);
-    git.isBranchStale.mockResolvedValue(true);
+    git.isBranchBehindBase.mockResolvedValue(true);
     git.getBranchCommit.mockReturnValue(
       '0d9c7726c3d628b7e28af234595cfd20febdbf8e'
     );
@@ -202,7 +202,7 @@ describe('modules/platform/gitlab/index', () => {
           repository: 'some/repo/project',
         })
       ).toMatchInlineSnapshot(`
-        Object {
+        {
           "defaultBranch": "master",
           "isFork": false,
         }
@@ -306,7 +306,7 @@ describe('modules/platform/gitlab/index', () => {
           repository: 'some/repo/project',
         })
       ).toMatchInlineSnapshot(`
-        Object {
+        {
           "defaultBranch": "master",
           "isFork": false,
         }
@@ -1472,7 +1472,7 @@ describe('modules/platform/gitlab/index', () => {
           },
         })
       ).toMatchInlineSnapshot(`
-        Object {
+        {
           "displayNumber": "Merge Request #12345",
           "id": 1,
           "iid": 12345,
@@ -1588,7 +1588,7 @@ describe('modules/platform/gitlab/index', () => {
           },
         })
       ).toMatchInlineSnapshot(`
-        Object {
+        {
           "displayNumber": "Merge Request #12345",
           "id": 1,
           "iid": 12345,
@@ -1640,7 +1640,7 @@ describe('modules/platform/gitlab/index', () => {
           },
         })
       ).toMatchInlineSnapshot(`
-        Object {
+        {
           "displayNumber": "Merge Request #12345",
           "id": 1,
           "iid": 12345,
@@ -1692,7 +1692,7 @@ describe('modules/platform/gitlab/index', () => {
           },
         })
       ).toMatchInlineSnapshot(`
-        Object {
+        {
           "displayNumber": "Merge Request #12345",
           "id": 1,
           "iid": 12345,

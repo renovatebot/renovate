@@ -1,7 +1,7 @@
 import upath from 'upath';
 import { logger } from '../../../logger';
 import { readLocalFile } from '../../../util/fs';
-import { MavenDatasource, defaultRegistryUrls } from '../../datasource/maven';
+import { MavenDatasource } from '../../datasource/maven';
 import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
 import { parseCatalog } from './extract/catalog';
 import { parseGradle, parseProps } from './parser';
@@ -87,7 +87,7 @@ export async function extractAllPackageFiles(
     } catch (err) {
       logger.warn(
         { err, config, packageFile },
-        `Failed to process Gradle file: ${packageFile}`
+        `Failed to process Gradle file`
       );
     }
   }
@@ -110,12 +110,14 @@ export async function extractAllPackageFiles(
       }
 
       dep.registryUrls = [
-        ...new Set([
-          ...defaultRegistryUrls,
-          ...(dep.registryUrls ?? []),
-          ...registryUrls,
-        ]),
+        ...new Set([...registryUrls, ...(dep.registryUrls ?? [])]),
       ];
+
+      if (!dep.depType) {
+        dep.depType = key.startsWith('buildSrc')
+          ? 'devDependencies'
+          : 'dependencies';
+      }
 
       const depAlreadyInPkgFile = pkgFile.deps.some(
         (item) =>

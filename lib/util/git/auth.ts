@@ -1,6 +1,7 @@
 import gitUrlParse from 'git-url-parse';
 import { PlatformId } from '../../constants';
 import { logger } from '../../logger';
+import { detectPlatform } from '../../modules/platform/util';
 import type { HostRule } from '../../types';
 import { regEx } from '../regex';
 import type { AuthenticationRule } from './types';
@@ -16,7 +17,8 @@ export function getGitAuthenticatedEnvironmentVariables(
 ): NodeJS.ProcessEnv {
   if (!token) {
     logger.warn(
-      `Could not create environment variable for ${matchHost} as token was empty`
+      // TODO: types (#7154)
+      `Could not create environment variable for ${matchHost!} as token was empty`
     );
     return { ...environmentVariables };
   }
@@ -65,11 +67,15 @@ export function getGitAuthenticatedEnvironmentVariables(
 
 function getAuthenticationRulesWithToken(
   url: string,
-  hostType: string | undefined,
+  hostType: string | undefined | null,
   authToken: string
 ): AuthenticationRule[] {
   let token = authToken;
-  if (hostType === PlatformId.Gitlab) {
+  let type = hostType;
+  if (!type) {
+    type = detectPlatform(url);
+  }
+  if (type === PlatformId.Gitlab) {
     token = `gitlab-ci-token:${authToken}`;
   }
   return getAuthenticationRules(url, token);
@@ -86,6 +92,15 @@ export function getAuthenticationRules(
   const authenticationRules = [];
   const hasUser = token.split(':').length > 1;
   const insteadUrl = gitUrlParse(gitUrl);
+
+  // Workaround for https://github.com/IonicaBizau/parse-path/issues/38
+  if (insteadUrl.port && insteadUrl.resource.endsWith(`:${insteadUrl.port}`)) {
+    insteadUrl.resource = insteadUrl.resource.substring(
+      0,
+      insteadUrl.resource.length - `:${insteadUrl.port}`.length
+    );
+  }
+
   const url = { ...insteadUrl };
   const protocol = regEx(/^https?$/).test(url.protocol)
     ? url.protocol

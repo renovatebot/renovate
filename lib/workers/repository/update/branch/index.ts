@@ -40,9 +40,12 @@ import {
   isActiveConfidenceLevel,
   satisfiesConfidenceLevel,
 } from '../../../../util/merge-confidence';
+import * as template from '../../../../util/template';
 import { Limit, isLimitReached } from '../../../global/limits';
 import { BranchConfig, BranchResult, PrBlockedBy } from '../../../types';
-import { ensurePr, getPlatformPrOptions } from '../pr';
+import { embedChangelog, needsChangelogs } from '../../changelog';
+// import { embedChangelog, needsChangelogs } from '../../changelog';
+import { ensurePr, getPlatformPrOptions, updatePrDebugData } from '../pr';
 import { checkAutoMerge } from '../pr/automerge';
 import { getPrBody } from '../pr/body';
 import { setArtifactErrorStatus } from './artifacts';
@@ -192,20 +195,27 @@ export async function processBranch(
             logger.debug('Manual rebase has been requested for PR');
           } else {
             const newBody = await getPrBody(branchConfig, {
+              debugData: updatePrDebugData(existingPr?.bodyStruct?.debugData),
               rebasingNotice:
                 'Renovate will not automatically rebase this PR, because other commits have been found.',
             });
             const newBodyHash = hashBody(newBody);
             if (newBodyHash !== branchPr.bodyStruct?.hash) {
-              logger.debug(
-                'Updating existing PR to indicate that rebasing is not possible'
-              );
-              await platform.updatePr({
-                number: branchPr.number,
-                prTitle: branchPr.title,
-                prBody: newBody,
-                platformOptions: getPlatformPrOptions(config),
-              });
+              if (GlobalConfig.get('dryRun')) {
+                logger.info(
+                  `DRY-RUN: Would update existing PR to indicate that rebasing is not possible`
+                );
+              } else {
+                logger.debug(
+                  'Updating existing PR to indicate that rebasing is not possible'
+                );
+                await platform.updatePr({
+                  number: branchPr.number,
+                  prTitle: branchPr.title,
+                  prBody: newBody,
+                  platformOptions: getPlatformPrOptions(config),
+                });
+              }
             }
             return {
               branchExists,
@@ -368,7 +378,8 @@ export async function processBranch(
     } else {
       config = { ...config, ...(await shouldReuseExistingBranch(config)) };
     }
-    logger.debug(`Using reuseExistingBranch: ${config.reuseExistingBranch}`);
+    // TODO: types (#7154)
+    logger.debug(`Using reuseExistingBranch: ${config.reuseExistingBranch!}`);
     const res = await getUpdatedPackageFiles(config);
     // istanbul ignore if
     if (res.artifactErrors && config.artifactErrors) {
@@ -473,6 +484,26 @@ export async function processBranch(
           result: BranchResult.NoWork,
         };
       }
+    }
+
+    // compile commit message with body, which maybe needs changelogs
+    if (config.commitBody) {
+      if (config.fetchReleaseNotes && needsChangelogs(config, ['commitBody'])) {
+        // we only need first upgrade, the others are only needed on PR update
+        // we add it to first, so PR fetch can skip fetching for that update
+        await embedChangelog(config.upgrades[0]);
+      }
+      // changelog is on first upgrade
+      config.commitMessage = `${config.commitMessage!}\n\n${template.compile(
+        config.commitBody,
+        {
+          ...config,
+          logJSON: config.upgrades[0].logJSON,
+          releases: config.upgrades[0].releases,
+        }
+      )}`;
+
+      logger.trace(`commitMessage: ` + JSON.stringify(config.commitMessage));
     }
 
     const commitSha = await commitFilesToBranch(config);
@@ -695,9 +726,10 @@ export async function processBranch(
         content +=
           ' - you rename this PR\'s title to start with "rebase!" to trigger it manually';
         content += '\n\nThe artifact failure details are included below:\n\n';
+        // TODO: types (#7154)
         config.artifactErrors.forEach((error) => {
-          content += `##### File name: ${error.lockFile}\n\n`;
-          content += `\`\`\`\n${error.stderr}\n\`\`\`\n\n`;
+          content += `##### File name: ${error.lockFile!}\n\n`;
+          content += `\`\`\`\n${error.stderr!}\n\`\`\`\n\n`;
         });
         content = platform.massageMarkdown(content);
         if (

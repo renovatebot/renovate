@@ -10,13 +10,7 @@ import type { StatusResult } from '../../../util/git/types';
 import { Http } from '../../../util/http';
 import { newlineRegex } from '../../../util/regex';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
-import {
-  extraEnv,
-  getJavaContraint,
-  getJavaVersioning,
-  gradleWrapperFileName,
-  prepareGradleCommand,
-} from './utils';
+import { extraEnv, getJavaConstraint, prepareGradleCommand } from './utils';
 
 const http = new Http('gradle-wrapper');
 
@@ -61,12 +55,12 @@ export async function updateArtifacts({
 }: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
   try {
     logger.debug({ updatedDeps }, 'gradle-wrapper.updateArtifacts()');
-    const gradlewFile = gradleWrapperFileName();
-    let cmd = await prepareGradleCommand(gradlewFile, `wrapper`);
+    let cmd = await prepareGradleCommand();
     if (!cmd) {
       logger.info('No gradlew found - skipping Artifacts update');
       return null;
     }
+    cmd += ' wrapper';
     const distributionUrl = getDistributionUrl(newPackageFileContent);
     if (distributionUrl) {
       cmd += ` --gradle-distribution-url ${distributionUrl}`;
@@ -88,12 +82,16 @@ export async function updateArtifacts({
     logger.debug(`Updating gradle wrapper: "${cmd}"`);
     const execOptions: ExecOptions = {
       docker: {
-        image: 'java',
-        tagConstraint:
-          config.constraints?.java ?? getJavaContraint(config.currentValue!),
-        tagScheme: getJavaVersioning(),
+        image: 'sidecar',
       },
       extraEnv,
+      toolConstraints: [
+        {
+          toolName: 'java',
+          constraint:
+            config.constraints?.java ?? getJavaConstraint(config.currentValue),
+        },
+      ],
     };
     try {
       await exec(cmd, execOptions);
