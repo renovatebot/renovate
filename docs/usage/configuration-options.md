@@ -1321,6 +1321,8 @@ If you want Renovate to do so then define a `labels` array of one or more label 
 If you want the same label(s) for every PR then you can configure it at the top level of config.
 However you can also fully override them on a per-package basis.
 
+Labels are only added at PR creation time and are not added to existing PRs.
+
 Consider this example:
 
 ```json
@@ -2525,11 +2527,6 @@ This feature works with the following managers:
 - [`helmv3`](/modules/manager/helmv3/)
 - [`helmfile`](/modules/manager/helmfile/)
 - [`gitlabci`](/modules/manager/gitlabci/)
-- [`dockerfile`](/modules/manager/dockerfile)
-- [`docker-compose`](/modules/manager/docker-compose)
-- [`kubernetes`](/modules/manager/kubernetes)
-- [`ansible`](/modules/manager/ansible)
-- [`droneci`](/modules/manager/droneci)
 
 ## registryUrls
 
