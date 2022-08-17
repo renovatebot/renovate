@@ -8,7 +8,8 @@
   "extensions": [
     "dbaeumer.vscode-eslint",
     "esbenp.prettier-vscode",
-    "orta.vscode-jest"
+    "orta.vscode-jest",
+    "EditorConfig.editorconfig"
   ],
   "runArgs": [
     "--cap-add=SYS_PTRACE",

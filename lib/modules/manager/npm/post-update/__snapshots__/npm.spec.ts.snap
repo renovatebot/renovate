@@ -1,13 +1,13 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`modules/manager/npm/post-update/npm generates lock files 1`] = `
-Array [
-  Object {
+[
+  {
     "cmd": "npm install --no-audit --ignore-scripts",
-    "options": Object {
+    "options": {
       "cwd": "some-dir",
       "encoding": "utf-8",
-      "env": Object {
+      "env": {
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
         "HTTP_PROXY": "http://example.com",
@@ -20,12 +20,12 @@ Array [
       "timeout": 900000,
     },
   },
-  Object {
+  {
     "cmd": "npm dedupe",
-    "options": Object {
+    "options": {
       "cwd": "some-dir",
       "encoding": "utf-8",
-      "env": Object {
+      "env": {
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
         "HTTP_PROXY": "http://example.com",
@@ -42,13 +42,13 @@ Array [
 `;
 
 exports[`modules/manager/npm/post-update/npm performs lock file maintenance 1`] = `
-Array [
-  Object {
+[
+  {
     "cmd": "npm install --package-lock-only --no-audit --ignore-scripts",
-    "options": Object {
+    "options": {
       "cwd": "some-dir",
       "encoding": "utf-8",
-      "env": Object {
+      "env": {
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
         "HTTP_PROXY": "http://example.com",
@@ -65,13 +65,13 @@ Array [
 `;
 
 exports[`modules/manager/npm/post-update/npm performs lock file updates 1`] = `
-Array [
-  Object {
+[
+  {
     "cmd": "npm install --package-lock-only --no-audit --ignore-scripts some-dep@1.0.1",
-    "options": Object {
+    "options": {
       "cwd": "some-dir",
       "encoding": "utf-8",
-      "env": Object {
+      "env": {
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
         "HTTP_PROXY": "http://example.com",
@@ -89,85 +89,85 @@ Array [
 
 exports[`modules/manager/npm/post-update/npm performs lock file updates retaining the package.json counterparts 1`] = `
 "{
-  \\"name\\": \\"update-lockfile-massage-1\\",
-  \\"version\\": \\"1.0.0\\",
-  \\"lockfileVersion\\": 2,
-  \\"requires\\": true,
-  \\"packages\\": {
-    \\"\\": {
-      \\"name\\": \\"update-lockfile-massage-1\\",
-      \\"version\\": \\"1.0.0\\",
-      \\"dependencies\\": {
-        \\"postcss\\": \\"^8.0.0\\"
+  "name": "update-lockfile-massage-1",
+  "version": "1.0.0",
+  "lockfileVersion": 2,
+  "requires": true,
+  "packages": {
+    "": {
+      "name": "update-lockfile-massage-1",
+      "version": "1.0.0",
+      "dependencies": {
+        "postcss": "^8.0.0"
       }
     },
-    \\"node_modules/nanoid\\": {
-      \\"version\\": \\"3.3.1\\",
-      \\"resolved\\": \\"https://registry.npmjs.org/nanoid/-/nanoid-3.3.1.tgz\\",
-      \\"integrity\\": \\"sha512-n6Vs/3KGyxPQd6uO0eH4Bv0ojGSUvuLlIHtC3Y0kEO23YRge8H9x1GCzLn28YX0H66pMkxuaeESFq4tKISKwdw==\\",
-      \\"bin\\": {
-        \\"nanoid\\": \\"bin/nanoid.cjs\\"
+    "node_modules/nanoid": {
+      "version": "3.3.1",
+      "resolved": "https://registry.npmjs.org/nanoid/-/nanoid-3.3.1.tgz",
+      "integrity": "sha512-n6Vs/3KGyxPQd6uO0eH4Bv0ojGSUvuLlIHtC3Y0kEO23YRge8H9x1GCzLn28YX0H66pMkxuaeESFq4tKISKwdw==",
+      "bin": {
+        "nanoid": "bin/nanoid.cjs"
       },
-      \\"engines\\": {
-        \\"node\\": \\"^10 || ^12 || ^13.7 || ^14 || >=15.0.1\\"
+      "engines": {
+        "node": "^10 || ^12 || ^13.7 || ^14 || >=15.0.1"
       }
     },
-    \\"node_modules/picocolors\\": {
-      \\"version\\": \\"1.0.0\\",
-      \\"resolved\\": \\"https://registry.npmjs.org/picocolors/-/picocolors-1.0.0.tgz\\",
-      \\"integrity\\": \\"sha512-1fygroTLlHu66zi26VoTDv8yRgm0Fccecssto+MhsZ0D/DGW2sm8E8AjW7NU5VVTRt5GxbeZ5qBuJr+HyLYkjQ==\\"
+    "node_modules/picocolors": {
+      "version": "1.0.0",
+      "resolved": "https://registry.npmjs.org/picocolors/-/picocolors-1.0.0.tgz",
+      "integrity": "sha512-1fygroTLlHu66zi26VoTDv8yRgm0Fccecssto+MhsZ0D/DGW2sm8E8AjW7NU5VVTRt5GxbeZ5qBuJr+HyLYkjQ=="
     },
-    \\"node_modules/postcss\\": {
-      \\"version\\": \\"8.4.8\\",
-      \\"resolved\\": \\"https://registry.npmjs.org/postcss/-/postcss-8.4.8.tgz\\",
-      \\"integrity\\": \\"sha512-2tXEqGxrjvAO6U+CJzDL2Fk2kPHTv1jQsYkSoMeOis2SsYaXRO2COxTdQp99cYvif9JTXaAk9lYGc3VhJt7JPQ==\\",
-      \\"dependencies\\": {
-        \\"nanoid\\": \\"^3.3.1\\",
-        \\"picocolors\\": \\"^1.0.0\\",
-        \\"source-map-js\\": \\"^1.0.2\\"
+    "node_modules/postcss": {
+      "version": "8.4.8",
+      "resolved": "https://registry.npmjs.org/postcss/-/postcss-8.4.8.tgz",
+      "integrity": "sha512-2tXEqGxrjvAO6U+CJzDL2Fk2kPHTv1jQsYkSoMeOis2SsYaXRO2COxTdQp99cYvif9JTXaAk9lYGc3VhJt7JPQ==",
+      "dependencies": {
+        "nanoid": "^3.3.1",
+        "picocolors": "^1.0.0",
+        "source-map-js": "^1.0.2"
       },
-      \\"engines\\": {
-        \\"node\\": \\"^10 || ^12 || >=14\\"
+      "engines": {
+        "node": "^10 || ^12 || >=14"
       },
-      \\"funding\\": {
-        \\"type\\": \\"opencollective\\",
-        \\"url\\": \\"https://opencollective.com/postcss/\\"
+      "funding": {
+        "type": "opencollective",
+        "url": "https://opencollective.com/postcss/"
       }
     },
-    \\"node_modules/source-map-js\\": {
-      \\"version\\": \\"1.0.2\\",
-      \\"resolved\\": \\"https://registry.npmjs.org/source-map-js/-/source-map-js-1.0.2.tgz\\",
-      \\"integrity\\": \\"sha512-R0XvVJ9WusLiqTCEiGCmICCMplcCkIwwR11mOSD9CR5u+IXYdiseeEuXCVAjS54zqwkLcPNnmU4OeJ6tUrWhDw==\\",
-      \\"engines\\": {
-        \\"node\\": \\">=0.10.0\\"
+    "node_modules/source-map-js": {
+      "version": "1.0.2",
+      "resolved": "https://registry.npmjs.org/source-map-js/-/source-map-js-1.0.2.tgz",
+      "integrity": "sha512-R0XvVJ9WusLiqTCEiGCmICCMplcCkIwwR11mOSD9CR5u+IXYdiseeEuXCVAjS54zqwkLcPNnmU4OeJ6tUrWhDw==",
+      "engines": {
+        "node": ">=0.10.0"
       }
     }
   },
-  \\"dependencies\\": {
-    \\"nanoid\\": {
-      \\"version\\": \\"3.3.1\\",
-      \\"resolved\\": \\"https://registry.npmjs.org/nanoid/-/nanoid-3.3.1.tgz\\",
-      \\"integrity\\": \\"sha512-n6Vs/3KGyxPQd6uO0eH4Bv0ojGSUvuLlIHtC3Y0kEO23YRge8H9x1GCzLn28YX0H66pMkxuaeESFq4tKISKwdw==\\"
+  "dependencies": {
+    "nanoid": {
+      "version": "3.3.1",
+      "resolved": "https://registry.npmjs.org/nanoid/-/nanoid-3.3.1.tgz",
+      "integrity": "sha512-n6Vs/3KGyxPQd6uO0eH4Bv0ojGSUvuLlIHtC3Y0kEO23YRge8H9x1GCzLn28YX0H66pMkxuaeESFq4tKISKwdw=="
     },
-    \\"picocolors\\": {
-      \\"version\\": \\"1.0.0\\",
-      \\"resolved\\": \\"https://registry.npmjs.org/picocolors/-/picocolors-1.0.0.tgz\\",
-      \\"integrity\\": \\"sha512-1fygroTLlHu66zi26VoTDv8yRgm0Fccecssto+MhsZ0D/DGW2sm8E8AjW7NU5VVTRt5GxbeZ5qBuJr+HyLYkjQ==\\"
+    "picocolors": {
+      "version": "1.0.0",
+      "resolved": "https://registry.npmjs.org/picocolors/-/picocolors-1.0.0.tgz",
+      "integrity": "sha512-1fygroTLlHu66zi26VoTDv8yRgm0Fccecssto+MhsZ0D/DGW2sm8E8AjW7NU5VVTRt5GxbeZ5qBuJr+HyLYkjQ=="
     },
-    \\"postcss\\": {
-      \\"version\\": \\"8.4.8\\",
-      \\"resolved\\": \\"https://registry.npmjs.org/postcss/-/postcss-8.4.8.tgz\\",
-      \\"integrity\\": \\"sha512-2tXEqGxrjvAO6U+CJzDL2Fk2kPHTv1jQsYkSoMeOis2SsYaXRO2COxTdQp99cYvif9JTXaAk9lYGc3VhJt7JPQ==\\",
-      \\"requires\\": {
-        \\"nanoid\\": \\"^3.3.1\\",
-        \\"picocolors\\": \\"^1.0.0\\",
-        \\"source-map-js\\": \\"^1.0.2\\"
+    "postcss": {
+      "version": "8.4.8",
+      "resolved": "https://registry.npmjs.org/postcss/-/postcss-8.4.8.tgz",
+      "integrity": "sha512-2tXEqGxrjvAO6U+CJzDL2Fk2kPHTv1jQsYkSoMeOis2SsYaXRO2COxTdQp99cYvif9JTXaAk9lYGc3VhJt7JPQ==",
+      "requires": {
+        "nanoid": "^3.3.1",
+        "picocolors": "^1.0.0",
+        "source-map-js": "^1.0.2"
       }
     },
-    \\"source-map-js\\": {
-      \\"version\\": \\"1.0.2\\",
-      \\"resolved\\": \\"https://registry.npmjs.org/source-map-js/-/source-map-js-1.0.2.tgz\\",
-      \\"integrity\\": \\"sha512-R0XvVJ9WusLiqTCEiGCmICCMplcCkIwwR11mOSD9CR5u+IXYdiseeEuXCVAjS54zqwkLcPNnmU4OeJ6tUrWhDw==\\"
+    "source-map-js": {
+      "version": "1.0.2",
+      "resolved": "https://registry.npmjs.org/source-map-js/-/source-map-js-1.0.2.tgz",
+      "integrity": "sha512-R0XvVJ9WusLiqTCEiGCmICCMplcCkIwwR11mOSD9CR5u+IXYdiseeEuXCVAjS54zqwkLcPNnmU4OeJ6tUrWhDw=="
     }
   }
 }
@@ -175,13 +175,13 @@ exports[`modules/manager/npm/post-update/npm performs lock file updates retainin
 `;
 
 exports[`modules/manager/npm/post-update/npm performs lock file updates retaining the package.json counterparts 2`] = `
-Array [
-  Object {
+[
+  {
     "cmd": "npm install --package-lock-only --no-audit --ignore-scripts postcss@8.4.8",
-    "options": Object {
+    "options": {
       "cwd": "some-dir",
       "encoding": "utf-8",
-      "env": Object {
+      "env": {
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
         "HTTP_PROXY": "http://example.com",

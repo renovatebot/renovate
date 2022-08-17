@@ -1,19 +1,19 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`modules/datasource/gitlab-tags/index getReleases returns tags from custom registry 1`] = `
-Object {
+{
   "registryUrl": "https://gitlab.company.com/api/v4",
-  "releases": Array [
-    Object {
+  "releases": [
+    {
       "gitRef": "v1.0.0",
       "releaseTimestamp": "2020-03-04T18:01:37.000Z",
       "version": "v1.0.0",
     },
-    Object {
+    {
       "gitRef": "v1.1.0",
       "version": "v1.1.0",
     },
-    Object {
+    {
       "gitRef": "v1.1.1",
       "version": "v1.1.1",
     },
@@ -23,19 +23,19 @@ Object {
 `;
 
 exports[`modules/datasource/gitlab-tags/index getReleases returns tags from custom registry in sub path 1`] = `
-Object {
+{
   "registryUrl": "https://my.company.com/gitlab",
-  "releases": Array [
-    Object {
+  "releases": [
+    {
       "gitRef": "v1.0.0",
       "releaseTimestamp": "2020-03-04T18:01:37.000Z",
       "version": "v1.0.0",
     },
-    Object {
+    {
       "gitRef": "v1.1.0",
       "version": "v1.1.0",
     },
-    Object {
+    {
       "gitRef": "v1.1.1",
       "version": "v1.1.1",
     },
@@ -45,14 +45,14 @@ Object {
 `;
 
 exports[`modules/datasource/gitlab-tags/index getReleases returns tags with default registry 1`] = `
-Object {
+{
   "registryUrl": "https://gitlab.com",
-  "releases": Array [
-    Object {
+  "releases": [
+    {
       "gitRef": "v1.0.0",
       "version": "v1.0.0",
     },
-    Object {
+    {
       "gitRef": "v1.1.0",
       "version": "v1.1.0",
     },
