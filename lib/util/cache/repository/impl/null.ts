@@ -4,13 +4,13 @@ export class RepoCacheNull implements RepoCache {
   private data: RepoCacheData = {};
 
   // istanbul ignore next
-  async load(): Promise<void> {
-    await Promise.resolve();
+  load(): Promise<void> {
+    return Promise.resolve();
   }
 
   // istanbul ignore next
-  async save(): Promise<void> {
-    await Promise.resolve();
+  save(): Promise<void> {
+    return Promise.resolve();
   }
 
   getData(): RepoCacheData {
