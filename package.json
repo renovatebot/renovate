@@ -13,7 +13,6 @@
     "clean-cache": "node tools/clean-cache.mjs",
     "compile:ts": "tsc -p tsconfig.app.json",
     "config-validator": "node -r ts-node/register/transpile-only -- lib/config-validator.ts",
-    "create-json-schema": "node -r ts-node/register/transpile-only -- tools/generate-schema.ts && prettier --write --cache \"renovate-schema.json\"",
     "debug": "node --inspect-brk -r ts-node/register/transpile-only  -- lib/renovate.ts",
     "doc-fix": "run-s markdown-lint-fix prettier-fix",
     "doc-fence-check": "node tools/check-fenced-code.mjs",
@@ -21,6 +20,7 @@
     "eslint-fix": "eslint --cache --fix . --report-unused-disable-directives",
     "generate": "run-s generate:*",
     "generate:imports": "node tools/generate-imports.mjs",
+    "generate:json-schema": "node -r ts-node/register/transpile-only -- tools/generate-schema.ts && prettier --write --cache \"renovate-schema.json\"",
     "git-check": "node tools/check-git-version.mjs",
     "jest": "cross-env LOG_LEVEL=fatal jest --logHeapUsage",
     "jest:14": "run-s \"jest {@}\" --",
@@ -48,7 +48,7 @@
     "test": "run-s lint test-schema type-check strict-check jest",
     "test-dirty": "git diff --exit-code",
     "test-e2e": "yarn pack && cd test/e2e && yarn install --no-lockfile --ignore-optional --prod && yarn test",
-    "test-schema": "run-s create-json-schema",
+    "test-schema": "run-s generate:json-schema",
     "tsc": "tsc",
     "type-check": "run-s generate:* \"tsc --noEmit {@}\" --",
     "update-static-data": "run-s update-static-data:*",
@@ -311,6 +311,7 @@
     "**/json-schema": "^0.4.0"
   },
   "files": [
-    "dist"
+    "dist",
+    "renovate-schema.json"
   ]
 }
