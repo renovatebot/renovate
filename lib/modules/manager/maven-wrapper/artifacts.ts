@@ -10,6 +10,7 @@ import type { ExecOptions } from '../../../util/exec/types';
 import { chmodLocalFile, readLocalFile, statLocalFile } from '../../../util/fs';
 import { getRepoStatus } from '../../../util/git';
 import type { StatusResult } from '../../../util/git/types';
+import mavenVersioning from '../../versioning/maven';
 
 import { id as semver } from '../../versioning/semver';
 import type {
@@ -106,6 +107,33 @@ async function getUpdatedArtifacts(
   return updatedResults;
 }
 
+/**
+ * Find compatible java version for maven.
+ * see https://maven.apache.org/developers/compatibility-plan.html
+ * @param mavenWrapperVersion current maven version
+ * @returns A Java semver range
+ */
+export function getJavaConstraint(
+  mavenWrapperVersion: string | null | undefined
+): string | null {
+  const major = mavenWrapperVersion
+    ? mavenVersioning.getMajor(mavenWrapperVersion)
+    : null;
+  const minor = mavenWrapperVersion
+    ? mavenVersioning.getMinor(mavenWrapperVersion)
+    : null;
+
+  if (major && major >= 3 && minor && minor >= 1) {
+    return '^16.0.0';
+  }
+
+  if (major && major == 3 && minor !== null && minor < 1) {
+    return '^7.0.0';
+  }
+
+  return '^5.0.0';
+}
+
 async function executeWrapperCommand(
   cmd: string,
   config: UpdateArtifactsConfig
@@ -114,10 +142,10 @@ async function executeWrapperCommand(
   const execOptions: ExecOptions = {
     docker: {
       image: 'java',
-      tagConstraint: config.constraints?.java ?? '^8.0.0',
+      tagConstraint:
+        config.constraints?.java ?? getJavaConstraint(config.currentValue),
       tagScheme: semver,
     },
-    // extraEnv,
   };
 
   try {

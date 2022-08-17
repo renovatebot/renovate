@@ -6,6 +6,7 @@ import { env, fs, git, partial } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import { updateArtifacts } from '.';
+import * as execModule from '../../../util/exec';
 
 jest.mock('../../../util/fs');
 jest.mock('../../../util/git');
@@ -46,7 +47,7 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
     expect(updatedDeps).toBeNull();
   });
 
-  it('Should return java 7.0 when current value is larger then 3', async () => {
+  it('Should return java 7.0 when current maven version is 3.0.0', async () => {
     git.getRepoStatus.mockResolvedValueOnce(
       partial<StatusResult>({
         modified: ['maven.mvn/wrapper/maven-wrapper.properties'],
@@ -58,7 +59,7 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
       packageFileName: 'maven',
       newPackageFileContent: '',
       updatedDeps: [{ depName: 'org.apache.maven.wrapper:maven-wrapper' }],
-      config: { currentValue: '3.3.1', newValue: '3.3.1' },
+      config: { currentValue: '3.0.0', newValue: '3.3.1' },
     });
 
     const expected = [
@@ -87,7 +88,7 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
       packageFileName: 'maven',
       newPackageFileContent: '',
       updatedDeps: [{ depName: 'org.apache.maven.wrapper:maven-wrapper' }],
-      config: { newValue: '3.3.1' },
+      config: { currentValue: '3.3.1', newValue: '3.3.1' },
     });
 
     const expected = [
@@ -162,5 +163,27 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
     });
     expect(execSnapshots).toMatchSnapshot();
     expect(updatedDeps).toBeNull();
+  });
+
+  it('Should throw an error when it cant update', async () => {
+    git.getRepoStatus.mockResolvedValueOnce(
+      partial<StatusResult>({
+        modified: ['maven.mvn/wrapper/maven-wrapper.properties'],
+      })
+    );
+    GlobalConfig.set(adminConfig);
+    const execSnapshots = mockExecAll();
+    jest.spyOn(execModule, 'exec').mockImplementation(() => {
+      throw new Error();
+    });
+    const updatedDeps = await updateArtifacts({
+      packageFileName: 'maven',
+      newPackageFileContent: '',
+      updatedDeps: [{ depName: 'org.apache.maven.wrapper:maven-wrapper' }],
+      config: { currentValue: '3.0.0', newValue: '3.3.1' },
+    });
+
+    expect(execSnapshots).toMatchSnapshot();
+    expect(updatedDeps).toEqual([]);
   });
 });
