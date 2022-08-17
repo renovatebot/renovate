@@ -1316,8 +1316,8 @@ Use this configuration option for shared config across npm/Yarn/pnpm and meteor 
 
 ## labels
 
-By default, Renovate won't add any labels to its PRs.
-If you want Renovate to do so then define a `labels` array of one or more label strings.
+By default, Renovate won't add any labels to PRs.
+If you want Renovate to add labels to PRs it creates then define a `labels` array of one or more label strings.
 If you want the same label(s) for every PR then you can configure it at the top level of config.
 However you can also fully override them on a per-package basis.
 
@@ -1336,6 +1336,14 @@ Consider this example:
 ```
 
 With the above config, every PR raised by Renovate will have the label `dependencies` while PRs containing `eslint`-related packages will instead have the label `linting`.
+
+Labels are only added at the time of PR creation, meaning:
+
+- You can remove labels which Renovate adds, and it won't add them back, and
+- If you change your config, the labels settings won't be applied to any existing PRs
+
+The `labels` array is non-mergeable, meaning if multiple `packageRules` are matched then the last value for `labels` will be used.
+If you wish too add labels, see the `addLabels` config option, which is instead mergeable.
 
 ## lockFileMaintenance
 
