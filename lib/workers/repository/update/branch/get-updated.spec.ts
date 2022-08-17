@@ -223,11 +223,11 @@ describe('workers/repository/update/branch/get-updated', () => {
       });
       const res = await getUpdatedPackageFiles(config);
       expect(res).toMatchInlineSnapshot(`
-        Object {
-          "artifactErrors": Array [],
+        {
+          "artifactErrors": [],
           "reuseExistingBranch": undefined,
-          "updatedArtifacts": Array [],
-          "updatedPackageFiles": Array [],
+          "updatedArtifacts": [],
+          "updatedPackageFiles": [],
         }
       `);
     });
@@ -400,11 +400,11 @@ describe('workers/repository/update/branch/get-updated', () => {
       });
       const res = await getUpdatedPackageFiles(config);
       expect(res).toMatchInlineSnapshot(`
-        Object {
-          "artifactErrors": Array [],
+        {
+          "artifactErrors": [],
           "reuseExistingBranch": undefined,
-          "updatedArtifacts": Array [],
-          "updatedPackageFiles": Array [],
+          "updatedArtifacts": [],
+          "updatedPackageFiles": [],
         }
       `);
     });
@@ -423,11 +423,11 @@ describe('workers/repository/update/branch/get-updated', () => {
       });
       const res = await getUpdatedPackageFiles(config);
       expect(res).toMatchInlineSnapshot(`
-        Object {
-          "artifactErrors": Array [],
+        {
+          "artifactErrors": [],
           "reuseExistingBranch": false,
-          "updatedArtifacts": Array [],
-          "updatedPackageFiles": Array [],
+          "updatedArtifacts": [],
+          "updatedPackageFiles": [],
         }
       `);
     });
@@ -448,11 +448,11 @@ describe('workers/repository/update/branch/get-updated', () => {
       });
       const res = await getUpdatedPackageFiles(config);
       expect(res).toMatchInlineSnapshot(`
-        Object {
-          "artifactErrors": Array [],
+        {
+          "artifactErrors": [],
           "reuseExistingBranch": false,
-          "updatedArtifacts": Array [],
-          "updatedPackageFiles": Array [],
+          "updatedArtifacts": [],
+          "updatedPackageFiles": [],
         }
       `);
     });
