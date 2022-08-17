@@ -1,5 +1,6 @@
 import is from '@sindresorhus/is';
 import hasha from 'hasha';
+import stringify from 'safe-stable-stringify';
 import type { RenovateConfig } from '../../../config/types';
 import { addMeta, logger, removeMeta } from '../../../logger';
 import { hashMap } from '../../../modules/manager';
@@ -80,7 +81,7 @@ export async function writeUpdates(
         .filter(is.string)
     );
     const branchFingerprint = hasha([
-      JSON.stringify(branch),
+      stringify(branch),
       branchManagersFingerprint,
     ]);
     branch.skipBranchUpdate = canSkipBranchUpdateCheck(
