@@ -85,10 +85,23 @@ export function determineLockFileDirs(
     };
   }
 
+  function getPackageFile(fileName: string): Partial<PackageFile> {
+    logger.trace('Looking for packageFile: ' + fileName);
+
+    for (const packageFile of packageFiles.npm!) {
+      if (packageFile.packageFile === fileName) {
+        logger.trace({ packageFile }, 'Found packageFile');
+        return packageFile;
+      }
+      logger.trace('No match');
+    }
+    return {};
+  }
+
   // TODO #7154
   for (const p of config.updatedPackageFiles!) {
     logger.trace(`Checking ${String(p.path)} for lock files`);
-    const packageFile = getPackageFile(p.path, packageFiles.npm!);
+    const packageFile = getPackageFile(p.path);
     // lerna first
     if (packageFile.managerData?.lernaJsonFile && packageFile.npmLock) {
       logger.debug(`${packageFile.packageFile} has lerna lock file`);
@@ -113,22 +126,6 @@ export function determineLockFileDirs(
     pnpmShrinkwrapDirs: getDirs(pnpmShrinkwrapDirs),
     lernaJsonFiles: getDirs(lernaJsonFiles),
   };
-}
-
-function getPackageFile(
-  fileName: string,
-  npmPackageFiles: Partial<PackageFile>[]
-): Partial<PackageFile> {
-  logger.trace('Looking for packageFile: ' + fileName);
-
-  for (const packageFile of npmPackageFiles) {
-    if (packageFile.packageFile === fileName) {
-      logger.trace({ packageFile }, 'Found packageFile');
-      return packageFile;
-    }
-    logger.trace('No match');
-  }
-  return {};
 }
 
 export async function writeExistingFiles(
