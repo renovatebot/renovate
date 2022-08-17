@@ -1343,7 +1343,7 @@ Labels are only added at the time of PR creation, meaning:
 - If you change your config, the labels settings won't be applied to any existing PRs
 
 The `labels` array is non-mergeable, meaning if multiple `packageRules` are matched then the last value for `labels` will be used.
-If you wish too add labels, see the `addLabels` config option, which is instead mergeable.
+If you wish to instead add/combine labels, see the `addLabels` config option, which is mergeable.
 
 ## lockFileMaintenance
 
