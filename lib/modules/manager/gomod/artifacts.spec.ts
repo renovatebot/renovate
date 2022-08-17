@@ -133,6 +133,7 @@ describe('modules/manager/gomod/artifacts', () => {
       modified: ['go.sum'],
     } as StatusResult);
     fs.readLocalFile.mockResolvedValueOnce('New go.sum');
+    fs.readLocalFile.mockResolvedValueOnce(gomod1);
     expect(
       await gomod.updateArtifacts({
         packageFileName: 'go.mod',
@@ -142,10 +143,10 @@ describe('modules/manager/gomod/artifacts', () => {
       })
     ).toEqual([
       {
-        // TODO: fix test
-        artifactError: {
-          lockFile: 'go.sum',
-          stderr: "Cannot read properties of undefined (reading 'replace')",
+        file: {
+          contents: 'New go.sum',
+          path: 'go.sum',
+          type: 'addition',
         },
       },
     ]);
@@ -264,6 +265,7 @@ describe('modules/manager/gomod/artifacts', () => {
       modified: ['go.sum'],
     } as StatusResult);
     fs.readLocalFile.mockResolvedValueOnce('New go.sum');
+    fs.readLocalFile.mockResolvedValueOnce(gomod1);
     expect(
       await gomod.updateArtifacts({
         packageFileName: 'go.mod',
@@ -273,10 +275,10 @@ describe('modules/manager/gomod/artifacts', () => {
       })
     ).toEqual([
       {
-        // TODO: fix test
-        artifactError: {
-          lockFile: 'go.sum',
-          stderr: "Cannot read properties of undefined (reading 'replace')",
+        file: {
+          contents: 'New go.sum',
+          path: 'go.sum',
+          type: 'addition',
         },
       },
     ]);
@@ -320,6 +322,7 @@ describe('modules/manager/gomod/artifacts', () => {
       modified: ['go.sum'],
     } as StatusResult);
     fs.readLocalFile.mockResolvedValueOnce('New go.sum');
+    fs.readLocalFile.mockResolvedValueOnce(gomod1);
     expect(
       await gomod.updateArtifacts({
         packageFileName: 'go.mod',
@@ -329,10 +332,10 @@ describe('modules/manager/gomod/artifacts', () => {
       })
     ).toEqual([
       {
-        // TODO: fix test
-        artifactError: {
-          lockFile: 'go.sum',
-          stderr: "Cannot read properties of undefined (reading 'replace')",
+        file: {
+          contents: 'New go.sum',
+          path: 'go.sum',
+          type: 'addition',
         },
       },
     ]);
@@ -358,6 +361,7 @@ describe('modules/manager/gomod/artifacts', () => {
       modified: ['go.sum'],
     } as StatusResult);
     fs.readLocalFile.mockResolvedValueOnce('New go.sum');
+    fs.readLocalFile.mockResolvedValueOnce(gomod1);
     expect(
       await gomod.updateArtifacts({
         packageFileName: 'go.mod',
@@ -367,10 +371,10 @@ describe('modules/manager/gomod/artifacts', () => {
       })
     ).toEqual([
       {
-        // TODO: fix test
-        artifactError: {
-          lockFile: 'go.sum',
-          stderr: "Cannot read properties of undefined (reading 'replace')",
+        file: {
+          contents: 'New go.sum',
+          path: 'go.sum',
+          type: 'addition',
         },
       },
     ]);
@@ -402,6 +406,7 @@ describe('modules/manager/gomod/artifacts', () => {
       modified: ['go.sum'],
     } as StatusResult);
     fs.readLocalFile.mockResolvedValueOnce('New go.sum');
+    fs.readLocalFile.mockResolvedValueOnce(gomod1);
     expect(
       await gomod.updateArtifacts({
         packageFileName: 'go.mod',
@@ -411,10 +416,10 @@ describe('modules/manager/gomod/artifacts', () => {
       })
     ).toEqual([
       {
-        // TODO: fix test
-        artifactError: {
-          lockFile: 'go.sum',
-          stderr: "Cannot read properties of undefined (reading 'replace')",
+        file: {
+          contents: 'New go.sum',
+          path: 'go.sum',
+          type: 'addition',
         },
       },
     ]);
@@ -504,6 +509,7 @@ describe('modules/manager/gomod/artifacts', () => {
       modified: ['go.sum'],
     } as StatusResult);
     fs.readLocalFile.mockResolvedValueOnce('New go.sum');
+    fs.readLocalFile.mockResolvedValueOnce(gomod1);
     expect(
       await gomod.updateArtifacts({
         packageFileName: 'go.mod',
@@ -513,10 +519,10 @@ describe('modules/manager/gomod/artifacts', () => {
       })
     ).toEqual([
       {
-        // TODO: fix test
-        artifactError: {
-          lockFile: 'go.sum',
-          stderr: "Cannot read properties of undefined (reading 'replace')",
+        file: {
+          contents: 'New go.sum',
+          path: 'go.sum',
+          type: 'addition',
         },
       },
     ]);
@@ -566,6 +572,7 @@ describe('modules/manager/gomod/artifacts', () => {
       modified: ['go.sum'],
     } as StatusResult);
     fs.readLocalFile.mockResolvedValueOnce('New go.sum');
+    fs.readLocalFile.mockResolvedValueOnce(gomod1);
     expect(
       await gomod.updateArtifacts({
         packageFileName: 'go.mod',
@@ -575,10 +582,10 @@ describe('modules/manager/gomod/artifacts', () => {
       })
     ).toEqual([
       {
-        // TODO: fix test
-        artifactError: {
-          lockFile: 'go.sum',
-          stderr: "Cannot read properties of undefined (reading 'replace')",
+        file: {
+          contents: 'New go.sum',
+          path: 'go.sum',
+          type: 'addition',
         },
       },
     ]);
@@ -625,6 +632,7 @@ describe('modules/manager/gomod/artifacts', () => {
       modified: ['go.sum'],
     } as StatusResult);
     fs.readLocalFile.mockResolvedValueOnce('New go.sum');
+    fs.readLocalFile.mockResolvedValueOnce(gomod1);
     expect(
       await gomod.updateArtifacts({
         packageFileName: 'go.mod',
@@ -634,10 +642,10 @@ describe('modules/manager/gomod/artifacts', () => {
       })
     ).toEqual([
       {
-        // TODO: fix test
-        artifactError: {
-          lockFile: 'go.sum',
-          stderr: "Cannot read properties of undefined (reading 'replace')",
+        file: {
+          contents: 'New go.sum',
+          path: 'go.sum',
+          type: 'addition',
         },
       },
     ]);
@@ -693,6 +701,7 @@ describe('modules/manager/gomod/artifacts', () => {
       modified: ['go.sum'],
     } as StatusResult);
     fs.readLocalFile.mockResolvedValueOnce('New go.sum');
+    fs.readLocalFile.mockResolvedValueOnce(gomod1);
     expect(
       await gomod.updateArtifacts({
         packageFileName: 'go.mod',
@@ -702,10 +711,10 @@ describe('modules/manager/gomod/artifacts', () => {
       })
     ).toEqual([
       {
-        // TODO: fix test
-        artifactError: {
-          lockFile: 'go.sum',
-          stderr: "Cannot read properties of undefined (reading 'replace')",
+        file: {
+          contents: 'New go.sum',
+          path: 'go.sum',
+          type: 'addition',
         },
       },
     ]);
@@ -760,6 +769,7 @@ describe('modules/manager/gomod/artifacts', () => {
       modified: ['go.sum'],
     } as StatusResult);
     fs.readLocalFile.mockResolvedValueOnce('New go.sum');
+    fs.readLocalFile.mockResolvedValueOnce(gomod1);
     expect(
       await gomod.updateArtifacts({
         packageFileName: 'go.mod',
@@ -769,10 +779,10 @@ describe('modules/manager/gomod/artifacts', () => {
       })
     ).toEqual([
       {
-        // TODO: fix test
-        artifactError: {
-          lockFile: 'go.sum',
-          stderr: "Cannot read properties of undefined (reading 'replace')",
+        file: {
+          contents: 'New go.sum',
+          path: 'go.sum',
+          type: 'addition',
         },
       },
     ]);
@@ -835,6 +845,7 @@ describe('modules/manager/gomod/artifacts', () => {
       modified: ['go.sum'],
     } as StatusResult);
     fs.readLocalFile.mockResolvedValueOnce('New go.sum');
+    fs.readLocalFile.mockResolvedValueOnce(gomod1);
     expect(
       await gomod.updateArtifacts({
         packageFileName: 'go.mod',
@@ -844,10 +855,10 @@ describe('modules/manager/gomod/artifacts', () => {
       })
     ).toEqual([
       {
-        // TODO: fix test
-        artifactError: {
-          lockFile: 'go.sum',
-          stderr: "Cannot read properties of undefined (reading 'replace')",
+        file: {
+          contents: 'New go.sum',
+          path: 'go.sum',
+          type: 'addition',
         },
       },
     ]);
