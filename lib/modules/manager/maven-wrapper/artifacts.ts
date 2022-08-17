@@ -123,12 +123,12 @@ export function getJavaConstraint(
     ? mavenVersioning.getMinor(mavenWrapperVersion)
     : null;
 
-  if (major && major >= 3 && minor && minor >= 1) {
-    return '^16.0.0';
-  }
-
   if (major && major == 3 && minor !== null && minor < 1) {
     return '^7.0.0';
+  }
+
+  if (major && major >= 3) {
+    return '^16.0.0';
   }
 
   return '^5.0.0';
