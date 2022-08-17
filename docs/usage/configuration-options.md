@@ -1845,7 +1845,7 @@ For example to apply a special label for Major updates:
 }
 ```
 
-### overwriteSourceUrl
+### customChangelogUrl
 
 Use this field to set the source URL for release notes retrieval.
 Most commonly used for dependencies missing one.
