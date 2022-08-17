@@ -230,14 +230,14 @@ describe('workers/repository/updates/branch-name', () => {
             groupName: 'invalid branch name.lock',
             group: { branchName: 'renovate/{{groupSlug}}' },
           },
-          expectedBranchName: 'renovate/invalid-branch-namelock',
+          expectedBranchName: 'renovate/invalid-branch-name',
         },
         {
           upgrade: {
             groupName: '.a-bad-  name:@.lock',
             group: { branchName: 'renovate/{{groupSlug}}' },
           },
-          expectedBranchName: 'renovate/a-bad-namelock',
+          expectedBranchName: 'renovate/a-bad-name-@',
         },
         {
           upgrade: { branchName: 'renovate/bad-branch-name1..' },
@@ -292,6 +292,36 @@ describe('workers/repository/updates/branch-name', () => {
         generateBranchName(fixture.upgrade);
         expect(fixture.upgrade.branchName).toEqual(fixture.expectedBranchName);
       });
+    });
+
+    it('strict branch slugify enabled', () => {
+      const upgrade: RenovateConfig = {
+        strictBranchSlugify: true,
+        groupName: '[some] group name.#$%version',
+        group: {
+          branchName: '{{groupSlug}}-{{branchTopic}}',
+          branchTopic: 'grouptopic',
+        },
+      };
+      generateBranchName(upgrade);
+      expect(upgrade.branchName).toBe(
+        'some-group-namedollarpercentversion-grouptopic'
+      );
+    });
+
+    it('strict branch slugify disabled', () => {
+      const upgrade: RenovateConfig = {
+        strictBranchSlugify: false,
+        groupName: '[some] group name.#$%version',
+        group: {
+          branchName: '{{groupSlug}}-{{branchTopic}}',
+          branchTopic: 'grouptopic',
+        },
+      };
+      generateBranchName(upgrade);
+      expect(upgrade.branchName).toBe(
+        'some-group-name.dollarpercentversion-grouptopic'
+      );
     });
   });
 });

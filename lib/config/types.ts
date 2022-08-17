@@ -69,6 +69,7 @@ export interface RenovateSharedConfig {
   semanticCommits?: 'auto' | 'enabled' | 'disabled';
   semanticCommitScope?: string | null;
   semanticCommitType?: string;
+  strictBranchSlugify?: boolean;
   suppressNotifications?: string[];
   timezone?: string;
   unicodeEmoji?: boolean;

@@ -2911,3 +2911,7 @@ To disable the vulnerability alerts feature, set `enabled=false` in a `vulnerabi
   }
 }
 ```
+
+## strictBranchSlugify
+
+By default, Renovate does not use strict-mode when slugifying the branch name. To enforce strict-mode and prevent any special characters within the branch name, set this to `true`
