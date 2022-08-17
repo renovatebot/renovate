@@ -1,13 +1,13 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`modules/manager/npm/post-update/pnpm catches errors 1`] = `
-Array [
-  Object {
+[
+  {
     "cmd": "pnpm install --recursive --lockfile-only --ignore-scripts --ignore-pnpmfile",
-    "options": Object {
+    "options": {
       "cwd": "some-dir",
       "encoding": "utf-8",
-      "env": Object {
+      "env": {
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
         "HTTP_PROXY": "http://example.com",
@@ -24,13 +24,13 @@ Array [
 `;
 
 exports[`modules/manager/npm/post-update/pnpm finds pnpm globally 1`] = `
-Array [
-  Object {
+[
+  {
     "cmd": "pnpm install --recursive --lockfile-only --ignore-scripts --ignore-pnpmfile",
-    "options": Object {
+    "options": {
       "cwd": "some-dir",
       "encoding": "utf-8",
-      "env": Object {
+      "env": {
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
         "HTTP_PROXY": "http://example.com",
@@ -47,13 +47,13 @@ Array [
 `;
 
 exports[`modules/manager/npm/post-update/pnpm generates lock files 1`] = `
-Array [
-  Object {
+[
+  {
     "cmd": "pnpm install --recursive --lockfile-only --ignore-scripts --ignore-pnpmfile",
-    "options": Object {
+    "options": {
       "cwd": "some-dir",
       "encoding": "utf-8",
-      "env": Object {
+      "env": {
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
         "HTTP_PROXY": "http://example.com",
@@ -70,13 +70,13 @@ Array [
 `;
 
 exports[`modules/manager/npm/post-update/pnpm performs lock file maintenance 1`] = `
-Array [
-  Object {
+[
+  {
     "cmd": "pnpm install --recursive --lockfile-only --ignore-scripts --ignore-pnpmfile",
-    "options": Object {
+    "options": {
       "cwd": "some-dir",
       "encoding": "utf-8",
-      "env": Object {
+      "env": {
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
         "HTTP_PROXY": "http://example.com",
@@ -93,13 +93,13 @@ Array [
 `;
 
 exports[`modules/manager/npm/post-update/pnpm uses constraint version if parent json has constraints 1`] = `
-Array [
-  Object {
+[
+  {
     "cmd": "pnpm install --recursive --lockfile-only --ignore-scripts --ignore-pnpmfile",
-    "options": Object {
+    "options": {
       "cwd": "some-folder",
       "encoding": "utf-8",
-      "env": Object {
+      "env": {
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
         "HTTP_PROXY": "http://example.com",
@@ -116,13 +116,13 @@ Array [
 `;
 
 exports[`modules/manager/npm/post-update/pnpm uses packageManager version and puts it into constraint 1`] = `
-Array [
-  Object {
+[
+  {
     "cmd": "pnpm install --recursive --lockfile-only --ignore-scripts --ignore-pnpmfile",
-    "options": Object {
+    "options": {
       "cwd": "some-folder",
       "encoding": "utf-8",
-      "env": Object {
+      "env": {
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
         "HTTP_PROXY": "http://example.com",
@@ -139,13 +139,13 @@ Array [
 `;
 
 exports[`modules/manager/npm/post-update/pnpm uses the new version if packageManager is updated 1`] = `
-Array [
-  Object {
+[
+  {
     "cmd": "pnpm install --recursive --lockfile-only --ignore-scripts --ignore-pnpmfile",
-    "options": Object {
+    "options": {
       "cwd": "some-dir",
       "encoding": "utf-8",
-      "env": Object {
+      "env": {
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
         "HTTP_PROXY": "http://example.com",
