@@ -1,78 +1,78 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`modules/manager/helmsman/extract extractPackageFile() extract deps 1`] = `
-Object {
-  "deps": Array [
-    Object {
+{
+  "deps": [
+    {
       "currentValue": "19.0.3",
       "datasource": "helm",
       "depName": "kube-prometheus",
       "packageName": "kube-prometheus-stack",
-      "registryUrls": Array [
+      "registryUrls": [
         "https://prometheus-community.github.io/helm-charts",
       ],
     },
-    Object {
+    {
       "currentValue": "2.6.0",
       "datasource": "helm",
       "depName": "loki",
       "packageName": "loki",
-      "registryUrls": Array [
+      "registryUrls": [
         "https://grafana.github.io/helm-charts",
       ],
     },
-    Object {
+    {
       "currentValue": "0.7.7",
       "datasource": "helm",
       "depName": "tempo",
       "packageName": "tempo",
-      "registryUrls": Array [
+      "registryUrls": [
         "https://grafana.github.io/helm-charts",
       ],
     },
-    Object {
+    {
       "currentValue": "0.6.0",
       "datasource": "helm",
       "depName": "otlp-collector",
       "packageName": "opentelemetry-collector",
-      "registryUrls": Array [
+      "registryUrls": [
         "https://open-telemetry.github.io/opentelemetry-helm-charts",
       ],
     },
-    Object {
+    {
       "currentValue": "0.25.0",
       "datasource": "helm",
       "depName": "strimzi-operator",
       "packageName": "strimzi-kafka-operator",
-      "registryUrls": Array [
+      "registryUrls": [
         "https://strimzi.io/charts/",
       ],
     },
-    Object {
+    {
       "datasource": "helm",
       "depName": "strimzi-operator-missing-version",
       "skipReason": "no-version",
     },
-    Object {
+    {
       "currentValue": "2.6.0",
       "datasource": "helm",
       "depName": "loki-no-registry-ref",
       "packageName": "loki",
       "skipReason": "no-repository",
     },
-    Object {
+    {
       "currentValue": "0.7.7",
       "datasource": "helm",
       "depName": "tempo-no-registry-ref",
       "skipReason": "invalid-url",
     },
-    Object {
+    {
       "currentValue": "19.0.3",
       "datasource": "helm",
       "depName": "kube-prometheus-no-lookup-name",
       "skipReason": "invalid-name",
     },
-    Object {
+    {
       "currentValue": "0.6.0",
       "datasource": "helm",
       "depName": "otlp-collector-no-chart",

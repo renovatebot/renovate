@@ -47,6 +47,7 @@ export async function renovateRepository(
       GlobalConfig.get('dryRun') !== 'extract'
     ) {
       await ensureOnboardingPr(config, packageFiles, branches);
+      addSplit('onboarding');
       const res = await updateRepo(config, branches);
       setMeta({ repository: config.repository });
       addSplit('update');
@@ -59,7 +60,7 @@ export async function renovateRepository(
         }
         logger.debug(`Automerged but already retried once`);
       } else {
-        await ensureDependencyDashboard(config, branches);
+        await ensureDependencyDashboard(config, branches, packageFiles);
       }
       await finaliseRepo(config, branchList);
       // TODO #7154

@@ -7,7 +7,7 @@ export const defaultConfig = {
   fileMatch: ['buildkite\\.ya?ml', '\\.buildkite/.+\\.ya?ml$'],
   commitMessageTopic: 'buildkite plugin {{depName}}',
   commitMessageExtra:
-    'to {{#if isMajor}}v{{{newMajor}}}{{else}}{{{newValue}}}{{/if}}',
+    'to {{#if isMajor}}{{{prettyNewMajor}}}{{else}}{{{newValue}}}{{/if}}',
 };
 
 export const supportedDatasources = [GithubTagsDatasource.id];
