@@ -109,10 +109,10 @@ const getNewValue = ({
   } else {
     switch (rangeStrategy) {
       case 'update-lockfile':
-        if (satisfies(newVersion, currentValue)) {
-          newValue = currentValue;
+        if (satisfies(newVersion, vtrim(currentValue))) {
+          newValue = vtrim(currentValue);
         } else {
-          newValue = getNewValue({
+          return getNewValue({
             currentValue,
             rangeStrategy: 'replace',
             currentVersion,
