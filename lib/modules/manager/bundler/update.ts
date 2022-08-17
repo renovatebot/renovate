@@ -38,6 +38,7 @@ export function updateDependency({
   } catch (err) {
     // istanbul ignore next
     logger.debug({ err }, 'updateDependency error');
+    // istanbul ignore next
     return null;
   }
 }
