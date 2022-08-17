@@ -11,15 +11,15 @@ const d4 = Fixtures.get('4.Dockerfile');
 describe('modules/manager/dockerfile/extract', () => {
   describe('extractPackageFile()', () => {
     it('handles no FROM', () => {
-      const res = extractPackageFile('no from!');
+      const res = extractPackageFile('no from!', '', {});
       expect(res).toBeNull();
     });
 
     it('handles naked dep', () => {
-      const res = extractPackageFile('FROM node\n')?.deps;
+      const res = extractPackageFile('FROM node\n', '', {})?.deps;
       expect(res).toMatchInlineSnapshot(`
-        Array [
-          Object {
+        [
+          {
             "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
             "currentDigest": undefined,
             "currentValue": undefined,
@@ -33,10 +33,10 @@ describe('modules/manager/dockerfile/extract', () => {
     });
 
     it('is case insensitive', () => {
-      const res = extractPackageFile('From node\n')?.deps;
+      const res = extractPackageFile('From node\n', '', {})?.deps;
       expect(res).toMatchInlineSnapshot(`
-        Array [
-          Object {
+        [
+          {
             "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
             "currentDigest": undefined,
             "currentValue": undefined,
@@ -50,10 +50,10 @@ describe('modules/manager/dockerfile/extract', () => {
     });
 
     it('handles tag', () => {
-      const res = extractPackageFile('FROM node:8.9.0-alpine\n')?.deps;
+      const res = extractPackageFile('FROM node:8.9.0-alpine\n', '', {})?.deps;
       expect(res).toMatchInlineSnapshot(`
-        Array [
-          Object {
+        [
+          {
             "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
             "currentDigest": undefined,
             "currentValue": "8.9.0-alpine",
@@ -68,11 +68,13 @@ describe('modules/manager/dockerfile/extract', () => {
 
     it('handles digest', () => {
       const res = extractPackageFile(
-        'FROM node@sha256:eb85fc5b1198f5e1ec025ea07586bdbbf397e7d82df66c90d7511f533517e063\n'
+        'FROM node@sha256:eb85fc5b1198f5e1ec025ea07586bdbbf397e7d82df66c90d7511f533517e063\n',
+        '',
+        {}
       )?.deps;
       expect(res).toMatchInlineSnapshot(`
-        Array [
-          Object {
+        [
+          {
             "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
             "currentDigest": "sha256:eb85fc5b1198f5e1ec025ea07586bdbbf397e7d82df66c90d7511f533517e063",
             "currentValue": undefined,
@@ -87,11 +89,13 @@ describe('modules/manager/dockerfile/extract', () => {
 
     it('handles tag and digest', () => {
       const res = extractPackageFile(
-        'FROM node:8.9.0@sha256:eb85fc5b1198f5e1ec025ea07586bdbbf397e7d82df66c90d7511f533517e063\n'
+        'FROM node:8.9.0@sha256:eb85fc5b1198f5e1ec025ea07586bdbbf397e7d82df66c90d7511f533517e063\n',
+        '',
+        {}
       )?.deps;
       expect(res).toMatchInlineSnapshot(`
-        Array [
-          Object {
+        [
+          {
             "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
             "currentDigest": "sha256:eb85fc5b1198f5e1ec025ea07586bdbbf397e7d82df66c90d7511f533517e063",
             "currentValue": "8.9.0",
@@ -105,10 +109,14 @@ describe('modules/manager/dockerfile/extract', () => {
     });
 
     it('handles from as', () => {
-      const res = extractPackageFile('FROM node:8.9.0-alpine as base\n')?.deps;
+      const res = extractPackageFile(
+        'FROM node:8.9.0-alpine as base\n',
+        '',
+        {}
+      )?.deps;
       expect(res).toMatchInlineSnapshot(`
-        Array [
-          Object {
+        [
+          {
             "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
             "currentDigest": undefined,
             "currentValue": "8.9.0-alpine",
@@ -123,11 +131,13 @@ describe('modules/manager/dockerfile/extract', () => {
 
     it('handles comments', () => {
       const res = extractPackageFile(
-        '# some comment\n# another\n\nFROM node\n'
+        '# some comment\n# another\n\nFROM node\n',
+        '',
+        {}
       )?.deps;
       expect(res).toMatchInlineSnapshot(`
-        Array [
-          Object {
+        [
+          {
             "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
             "currentDigest": undefined,
             "currentValue": undefined,
@@ -142,11 +152,13 @@ describe('modules/manager/dockerfile/extract', () => {
 
     it('handles custom hosts', () => {
       const res = extractPackageFile(
-        'FROM registry2.something.info/node:8\n'
+        'FROM registry2.something.info/node:8\n',
+        '',
+        {}
       )?.deps;
       expect(res).toMatchInlineSnapshot(`
-        Array [
-          Object {
+        [
+          {
             "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
             "currentDigest": undefined,
             "currentValue": "8",
@@ -161,11 +173,13 @@ describe('modules/manager/dockerfile/extract', () => {
 
     it('handles custom hosts and suffix', () => {
       const res = extractPackageFile(
-        'FROM registry2.something.info/node:8-alpine\n'
+        'FROM registry2.something.info/node:8-alpine\n',
+        '',
+        {}
       )?.deps;
       expect(res).toMatchInlineSnapshot(`
-        Array [
-          Object {
+        [
+          {
             "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
             "currentDigest": undefined,
             "currentValue": "8-alpine",
@@ -180,11 +194,13 @@ describe('modules/manager/dockerfile/extract', () => {
 
     it('handles custom hosts with port', () => {
       const res = extractPackageFile(
-        'FROM registry2.something.info:5005/node:8\n'
+        'FROM registry2.something.info:5005/node:8\n',
+        '',
+        {}
       )?.deps;
       expect(res).toMatchInlineSnapshot(`
-        Array [
-          Object {
+        [
+          {
             "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
             "currentDigest": undefined,
             "currentValue": "8",
@@ -201,11 +217,13 @@ describe('modules/manager/dockerfile/extract', () => {
 
     it('handles custom hosts with port without tag', () => {
       const res = extractPackageFile(
-        'FROM registry2.something.info:5005/node\n'
+        'FROM registry2.something.info:5005/node\n',
+        '',
+        {}
       )?.deps;
       expect(res).toMatchInlineSnapshot(`
-        Array [
-          Object {
+        [
+          {
             "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
             "currentDigest": undefined,
             "currentValue": undefined,
@@ -220,9 +238,9 @@ describe('modules/manager/dockerfile/extract', () => {
     });
 
     it('handles quay hosts with port', () => {
-      const res = extractPackageFile('FROM quay.io:1234/node\n')?.deps;
+      const res = extractPackageFile('FROM quay.io:1234/node\n', '', {})?.deps;
       expect(res?.[0]).toMatchInlineSnapshot(`
-        Object {
+        {
           "autoReplaceStringTemplate": "{{packageName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
           "currentDigest": undefined,
           "currentValue": undefined,
@@ -236,10 +254,10 @@ describe('modules/manager/dockerfile/extract', () => {
     });
 
     it('handles namespaced images', () => {
-      const res = extractPackageFile('FROM mynamespace/node:8\n')?.deps;
+      const res = extractPackageFile('FROM mynamespace/node:8\n', '', {})?.deps;
       expect(res).toMatchInlineSnapshot(`
-        Array [
-          Object {
+        [
+          {
             "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
             "currentDigest": undefined,
             "currentValue": "8",
@@ -254,11 +272,13 @@ describe('modules/manager/dockerfile/extract', () => {
 
     it('handles custom hosts with namespace', () => {
       const res = extractPackageFile(
-        'FROM registry2.something.info/someaccount/node:8\n'
+        'FROM registry2.something.info/someaccount/node:8\n',
+        '',
+        {}
       )?.deps;
       expect(res).toMatchInlineSnapshot(`
-        Array [
-          Object {
+        [
+          {
             "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
             "currentDigest": undefined,
             "currentValue": "8",
@@ -273,11 +293,13 @@ describe('modules/manager/dockerfile/extract', () => {
 
     it('handles abnormal spacing', () => {
       const res = extractPackageFile(
-        'FROM    registry.allmine.info:5005/node:8.7.0\n\n'
+        'FROM    registry.allmine.info:5005/node:8.7.0\n\n',
+        '',
+        {}
       )?.deps;
       expect(res).toMatchInlineSnapshot(`
-        Array [
-          Object {
+        [
+          {
             "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
             "currentDigest": undefined,
             "currentValue": "8.7.0",
@@ -292,11 +314,13 @@ describe('modules/manager/dockerfile/extract', () => {
 
     it('extracts multiple FROM tags', () => {
       const res = extractPackageFile(
-        'FROM node:6.12.3 as frontend\n\n# comment\nENV foo=bar\nFROM python:3.6-slim\n'
+        'FROM node:6.12.3 as frontend\n\n# comment\nENV foo=bar\nFROM python:3.6-slim\n',
+        '',
+        {}
       )?.deps;
       expect(res).toMatchInlineSnapshot(`
-        Array [
-          Object {
+        [
+          {
             "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
             "currentDigest": undefined,
             "currentValue": "6.12.3",
@@ -305,7 +329,7 @@ describe('modules/manager/dockerfile/extract', () => {
             "depType": "stage",
             "replaceString": "node:6.12.3",
           },
-          Object {
+          {
             "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
             "currentDigest": undefined,
             "currentValue": "3.6-slim",
@@ -320,17 +344,19 @@ describe('modules/manager/dockerfile/extract', () => {
     });
 
     it('skips scratches', () => {
-      const res = extractPackageFile('FROM scratch\nADD foo\n');
+      const res = extractPackageFile('FROM scratch\nADD foo\n', '', {});
       expect(res).toBeNull();
     });
 
     it('skips named multistage FROM tags', () => {
       const res = extractPackageFile(
-        'FROM node:6.12.3 as frontend\n\n# comment\nENV foo=bar\nFROM frontend\n'
+        'FROM node:6.12.3 as frontend\n\n# comment\nENV foo=bar\nFROM frontend\n',
+        '',
+        {}
       )?.deps;
       expect(res).toMatchInlineSnapshot(`
-        Array [
-          Object {
+        [
+          {
             "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
             "currentDigest": undefined,
             "currentValue": "6.12.3",
@@ -346,11 +372,13 @@ describe('modules/manager/dockerfile/extract', () => {
 
     it('handles COPY --from', () => {
       const res = extractPackageFile(
-        'FROM scratch\nCOPY --from=gcr.io/k8s-skaffold/skaffold:v0.11.0 /usr/bin/skaffold /usr/bin/skaffold\n'
+        'FROM scratch\nCOPY --from=gcr.io/k8s-skaffold/skaffold:v0.11.0 /usr/bin/skaffold /usr/bin/skaffold\n',
+        '',
+        {}
       )?.deps;
       expect(res).toMatchInlineSnapshot(`
-        Array [
-          Object {
+        [
+          {
             "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
             "currentDigest": undefined,
             "currentValue": "v0.11.0",
@@ -365,11 +393,13 @@ describe('modules/manager/dockerfile/extract', () => {
 
     it('skips named multistage COPY --from tags', () => {
       const res = extractPackageFile(
-        'FROM node:6.12.3 as frontend\n\n# comment\nENV foo=bar\nCOPY --from=frontend /usr/bin/node /usr/bin/node\n'
+        'FROM node:6.12.3 as frontend\n\n# comment\nENV foo=bar\nCOPY --from=frontend /usr/bin/node /usr/bin/node\n',
+        '',
+        {}
       )?.deps;
       expect(res).toMatchInlineSnapshot(`
-        Array [
-          Object {
+        [
+          {
             "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
             "currentDigest": undefined,
             "currentValue": "6.12.3",
@@ -385,11 +415,13 @@ describe('modules/manager/dockerfile/extract', () => {
 
     it('skips index reference COPY --from tags', () => {
       const res = extractPackageFile(
-        'FROM node:6.12.3 as frontend\n\n# comment\nENV foo=bar\nCOPY --from=0 /usr/bin/node /usr/bin/node\n'
+        'FROM node:6.12.3 as frontend\n\n# comment\nENV foo=bar\nCOPY --from=0 /usr/bin/node /usr/bin/node\n',
+        '',
+        {}
       )?.deps;
       expect(res).toMatchInlineSnapshot(`
-        Array [
-          Object {
+        [
+          {
             "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
             "currentDigest": undefined,
             "currentValue": "6.12.3",
@@ -405,11 +437,13 @@ describe('modules/manager/dockerfile/extract', () => {
 
     it('detects ["stage"] and ["final"] deps of docker multi-stage build.', () => {
       const res = extractPackageFile(
-        'FROM node:8.15.1-alpine as skippedfrom\nFROM golang:1.7.3 as builder\n\n# comment\nWORKDIR /go/src/github.com/alexellis/href-counter/\nRUN go get -d -v golang.org/x/net/html  \nCOPY app.go    .\nRUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o app .\n\nFROM alpine:latest  \nRUN apk --no-cache add ca-certificates\nWORKDIR /root/\nCOPY --from=builder /go/src/github.com/alexellis/href-counter/app .\nCMD ["./app"]\n'
+        'FROM node:8.15.1-alpine as skippedfrom\nFROM golang:1.7.3 as builder\n\n# comment\nWORKDIR /go/src/github.com/alexellis/href-counter/\nRUN go get -d -v golang.org/x/net/html  \nCOPY app.go    .\nRUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o app .\n\nFROM alpine:latest  \nRUN apk --no-cache add ca-certificates\nWORKDIR /root/\nCOPY --from=builder /go/src/github.com/alexellis/href-counter/app .\nCMD ["./app"]\n',
+        '',
+        {}
       )?.deps;
       expect(res).toMatchInlineSnapshot(`
-        Array [
-          Object {
+        [
+          {
             "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
             "currentDigest": undefined,
             "currentValue": "8.15.1-alpine",
@@ -418,7 +452,7 @@ describe('modules/manager/dockerfile/extract', () => {
             "depType": "stage",
             "replaceString": "node:8.15.1-alpine",
           },
-          Object {
+          {
             "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
             "currentDigest": undefined,
             "currentValue": "1.7.3",
@@ -427,7 +461,7 @@ describe('modules/manager/dockerfile/extract', () => {
             "depType": "stage",
             "replaceString": "golang:1.7.3",
           },
-          Object {
+          {
             "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
             "currentDigest": undefined,
             "currentValue": "latest",
@@ -447,10 +481,10 @@ describe('modules/manager/dockerfile/extract', () => {
     });
 
     it('extracts images on adjacent lines', () => {
-      const res = extractPackageFile(d1)?.deps;
+      const res = extractPackageFile(d1, '', {})?.deps;
       expect(res).toMatchInlineSnapshot(`
-        Array [
-          Object {
+        [
+          {
             "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
             "currentDigest": "sha256:d743b4141b02fcfb8beb68f92b4cd164f60ee457bf2d053f36785bf86de16b0d",
             "currentValue": "8.11.3-alpine",
@@ -459,7 +493,7 @@ describe('modules/manager/dockerfile/extract', () => {
             "depType": "stage",
             "replaceString": "node:8.11.3-alpine@sha256:d743b4141b02fcfb8beb68f92b4cd164f60ee457bf2d053f36785bf86de16b0d",
           },
-          Object {
+          {
             "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
             "currentDigest": undefined,
             "currentValue": "1.1.1",
@@ -474,10 +508,10 @@ describe('modules/manager/dockerfile/extract', () => {
     });
 
     it('extracts images from all sorts of (maybe multiline) FROM and COPY --from statements', () => {
-      const res = extractPackageFile(d2)?.deps;
+      const res = extractPackageFile(d2, '', {})?.deps;
       expect(res).toMatchInlineSnapshot(`
-        Array [
-          Object {
+        [
+          {
             "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
             "currentDigest": undefined,
             "currentValue": undefined,
@@ -486,7 +520,7 @@ describe('modules/manager/dockerfile/extract', () => {
             "depType": "stage",
             "replaceString": "image1",
           },
-          Object {
+          {
             "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
             "currentDigest": "sha256:abcdef",
             "currentValue": "1.0.0",
@@ -495,7 +529,7 @@ describe('modules/manager/dockerfile/extract', () => {
             "depType": "stage",
             "replaceString": "image2:1.0.0@sha256:abcdef",
           },
-          Object {
+          {
             "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
             "currentDigest": undefined,
             "currentValue": undefined,
@@ -504,7 +538,7 @@ describe('modules/manager/dockerfile/extract', () => {
             "depType": "stage",
             "replaceString": "image4",
           },
-          Object {
+          {
             "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
             "currentDigest": undefined,
             "currentValue": undefined,
@@ -513,7 +547,7 @@ describe('modules/manager/dockerfile/extract', () => {
             "depType": "stage",
             "replaceString": "image5",
           },
-          Object {
+          {
             "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
             "currentDigest": undefined,
             "currentValue": undefined,
@@ -522,7 +556,7 @@ describe('modules/manager/dockerfile/extract', () => {
             "depType": "stage",
             "replaceString": "image6",
           },
-          Object {
+          {
             "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
             "currentDigest": "sha256:abcdef",
             "currentValue": "1.0.0",
@@ -531,7 +565,7 @@ describe('modules/manager/dockerfile/extract', () => {
             "depType": "stage",
             "replaceString": "image7:1.0.0@sha256:abcdef",
           },
-          Object {
+          {
             "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
             "currentDigest": undefined,
             "currentValue": undefined,
@@ -540,7 +574,7 @@ describe('modules/manager/dockerfile/extract', () => {
             "depType": "stage",
             "replaceString": "image11",
           },
-          Object {
+          {
             "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
             "currentDigest": undefined,
             "currentValue": undefined,
@@ -549,7 +583,7 @@ describe('modules/manager/dockerfile/extract', () => {
             "depType": "stage",
             "replaceString": "image12",
           },
-          Object {
+          {
             "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
             "currentDigest": undefined,
             "currentValue": undefined,
@@ -564,10 +598,10 @@ describe('modules/manager/dockerfile/extract', () => {
     });
 
     it('handles calico/node', () => {
-      const res = extractPackageFile('FROM calico/node\n')?.deps;
+      const res = extractPackageFile('FROM calico/node\n', '', {})?.deps;
       expect(res).toMatchInlineSnapshot(`
-        Array [
-          Object {
+        [
+          {
             "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
             "currentDigest": undefined,
             "currentValue": undefined,
@@ -581,10 +615,10 @@ describe('modules/manager/dockerfile/extract', () => {
     });
 
     it('handles ubuntu', () => {
-      const res = extractPackageFile('FROM ubuntu:18.04\n')?.deps;
+      const res = extractPackageFile('FROM ubuntu:18.04\n', '', {})?.deps;
       expect(res).toMatchInlineSnapshot(`
-        Array [
-          Object {
+        [
+          {
             "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
             "currentDigest": undefined,
             "currentValue": "18.04",
@@ -599,7 +633,7 @@ describe('modules/manager/dockerfile/extract', () => {
     });
 
     it('handles debian with codename', () => {
-      const res = extractPackageFile('FROM debian:buster\n')?.deps;
+      const res = extractPackageFile('FROM debian:buster\n', '', {})?.deps;
       expect(res).toEqual([
         {
           autoReplaceStringTemplate:
@@ -616,7 +650,7 @@ describe('modules/manager/dockerfile/extract', () => {
     });
 
     it('handles debian with prefixes', () => {
-      const res = extractPackageFile('FROM amd64/debian:10\n')?.deps;
+      const res = extractPackageFile('FROM amd64/debian:10\n', '', {})?.deps;
       expect(res).toEqual([
         {
           autoReplaceStringTemplate:
@@ -634,10 +668,10 @@ describe('modules/manager/dockerfile/extract', () => {
     });
 
     it('handles prefixes', () => {
-      const res = extractPackageFile('FROM amd64/ubuntu:18.04\n')?.deps;
+      const res = extractPackageFile('FROM amd64/ubuntu:18.04\n', '', {})?.deps;
       expect(res).toMatchInlineSnapshot(`
-        Array [
-          Object {
+        [
+          {
             "autoReplaceStringTemplate": "{{packageName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
             "currentDigest": undefined,
             "currentValue": "18.04",
@@ -654,11 +688,13 @@ describe('modules/manager/dockerfile/extract', () => {
 
     it('handles implausible line continuation', () => {
       const res = extractPackageFile(
-        'FROM alpine:3.5\n\nRUN something \\'
+        'FROM alpine:3.5\n\nRUN something \\',
+        '',
+        {}
       )?.deps;
       expect(res).toMatchInlineSnapshot(`
-        Array [
-          Object {
+        [
+          {
             "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
             "currentDigest": undefined,
             "currentValue": "3.5",
@@ -672,10 +708,10 @@ describe('modules/manager/dockerfile/extract', () => {
     });
 
     it('handles multi-line FROM with space after escape character', () => {
-      const res = extractPackageFile('FROM \\ \nnginx:1.20\n')?.deps;
+      const res = extractPackageFile('FROM \\ \nnginx:1.20\n', '', {})?.deps;
       expect(res).toMatchInlineSnapshot(`
-        Array [
-          Object {
+        [
+          {
             "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
             "currentDigest": undefined,
             "currentValue": "1.20",
@@ -689,10 +725,14 @@ describe('modules/manager/dockerfile/extract', () => {
     });
 
     it('handles FROM without ARG default value', () => {
-      const res = extractPackageFile('ARG img_base\nFROM $img_base\n')?.deps;
+      const res = extractPackageFile(
+        'ARG img_base\nFROM $img_base\n',
+        '',
+        {}
+      )?.deps;
       expect(res).toMatchInlineSnapshot(`
-        Array [
-          Object {
+        [
+          {
             "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
             "datasource": "docker",
             "depType": "final",
@@ -705,11 +745,13 @@ describe('modules/manager/dockerfile/extract', () => {
 
     it('handles FROM with empty ARG default value', () => {
       const res = extractPackageFile(
-        'ARG patch1=""\nARG patch2=\nFROM nginx:1.20${patch1}$patch2\n'
+        'ARG patch1=""\nARG patch2=\nFROM nginx:1.20${patch1}$patch2\n',
+        '',
+        {}
       )?.deps;
       expect(res).toMatchInlineSnapshot(`
-        Array [
-          Object {
+        [
+          {
             "autoReplaceStringTemplate": "FROM nginx:{{#if newValue}}{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}\${patch1}$patch2",
             "currentDigest": undefined,
             "currentValue": "1.20",
@@ -724,18 +766,20 @@ describe('modules/manager/dockerfile/extract', () => {
 
     it('handles FROM with version in ARG value', () => {
       const res = extractPackageFile(
-        'ARG\tVARIANT="1.60.0-bullseye"\nFROM\trust:${VARIANT}\n'
+        'ARG\tVARIANT="1.60.0-bullseye"\nFROM\trust:${VARIANT}\n',
+        '',
+        {}
       )?.deps;
       expect(res).toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "autoReplaceStringTemplate": "ARG\tVARIANT=\\"{{#if newValue}}{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}\\"",
+        [
+          {
+            "autoReplaceStringTemplate": "ARG	VARIANT="{{#if newValue}}{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}"",
             "currentDigest": undefined,
             "currentValue": "1.60.0-bullseye",
             "datasource": "docker",
             "depName": "rust",
             "depType": "final",
-            "replaceString": "ARG\tVARIANT=\\"1.60.0-bullseye\\"",
+            "replaceString": "ARG	VARIANT="1.60.0-bullseye"",
           },
         ]
       `);
@@ -743,11 +787,13 @@ describe('modules/manager/dockerfile/extract', () => {
 
     it('handles FROM with version in ARG default value', () => {
       const res = extractPackageFile(
-        'ARG IMAGE_VERSION=${IMAGE_VERSION:-ubuntu:xenial}\nfrom ${IMAGE_VERSION} as base\n'
+        'ARG IMAGE_VERSION=${IMAGE_VERSION:-ubuntu:xenial}\nfrom ${IMAGE_VERSION} as base\n',
+        '',
+        {}
       )?.deps;
       expect(res).toMatchInlineSnapshot(`
-        Array [
-          Object {
+        [
+          {
             "autoReplaceStringTemplate": "ARG IMAGE_VERSION=\${IMAGE_VERSION:-ubuntu:{{#if newValue}}{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}}",
             "currentValue": "xenial",
             "datasource": "docker",
@@ -763,11 +809,13 @@ describe('modules/manager/dockerfile/extract', () => {
     it('handles FROM with digest in ARG default value', () => {
       const res = extractPackageFile(
         'ARG sha_digest=sha256:ab37242e81cbc031b2600eef4440fe87055a05c14b40686df85078cc5086c98f\n' +
-          '      FROM gcr.io/distroless/java17@$sha_digest'
+          '      FROM gcr.io/distroless/java17@$sha_digest',
+        '',
+        {}
       )?.deps;
       expect(res).toMatchInlineSnapshot(`
-        Array [
-          Object {
+        [
+          {
             "autoReplaceStringTemplate": "ARG sha_digest={{#if newDigest}}{{newDigest}}{{/if}}",
             "currentDigest": "sha256:ab37242e81cbc031b2600eef4440fe87055a05c14b40686df85078cc5086c98f",
             "currentValue": undefined,
@@ -782,11 +830,13 @@ describe('modules/manager/dockerfile/extract', () => {
 
     it('handles FROM with overwritten ARG value', () => {
       const res = extractPackageFile(
-        'ARG base=nginx:1.19\nFROM $base as stage1\nARG base=nginx:1.20\nFROM --platform=amd64 $base as stage2\n'
+        'ARG base=nginx:1.19\nFROM $base as stage1\nARG base=nginx:1.20\nFROM --platform=amd64 $base as stage2\n',
+        '',
+        {}
       )?.deps;
       expect(res).toMatchInlineSnapshot(`
-        Array [
-          Object {
+        [
+          {
             "autoReplaceStringTemplate": "ARG base=nginx:{{#if newValue}}{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
             "currentDigest": undefined,
             "currentValue": "1.19",
@@ -795,7 +845,7 @@ describe('modules/manager/dockerfile/extract', () => {
             "depType": "stage",
             "replaceString": "ARG base=nginx:1.19",
           },
-          Object {
+          {
             "autoReplaceStringTemplate": "ARG base=nginx:{{#if newValue}}{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
             "currentDigest": undefined,
             "currentValue": "1.20",
@@ -810,11 +860,13 @@ describe('modules/manager/dockerfile/extract', () => {
 
     it('handles FROM with multiple ARG values', () => {
       const res = extractPackageFile(
-        'ARG CUDA=9.2\nARG LINUX_VERSION ubuntu16.04\nFROM nvidia/cuda:${CUDA}-devel-${LINUX_VERSION}\n'
+        'ARG CUDA=9.2\nARG LINUX_VERSION ubuntu16.04\nFROM nvidia/cuda:${CUDA}-devel-${LINUX_VERSION}\n',
+        '',
+        {}
       )?.deps;
       expect(res).toMatchInlineSnapshot(`
-        Array [
-          Object {
+        [
+          {
             "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
             "currentDigest": undefined,
             "currentValue": "9.2-devel-ubuntu16.04",
@@ -828,12 +880,16 @@ describe('modules/manager/dockerfile/extract', () => {
     });
 
     it('skips scratch if provided in ARG value', () => {
-      const res = extractPackageFile('ARG img="scratch"\nFROM $img as base\n');
+      const res = extractPackageFile(
+        'ARG img="scratch"\nFROM $img as base\n',
+        '',
+        {}
+      );
       expect(res).toBeNull();
     });
 
     it('extracts images from multi-line ARG statements', () => {
-      const res = extractPackageFile(d3)?.deps;
+      const res = extractPackageFile(d3, '', {})?.deps;
       expect(res).toEqual([
         {
           autoReplaceStringTemplate:
@@ -875,11 +931,13 @@ describe('modules/manager/dockerfile/extract', () => {
 
     it('ignores parser directives in wrong order', () => {
       const res = extractPackageFile(
-        '# dummy\n# escape = `\n\nFROM\\\nnginx:1.20'
+        '# dummy\n# escape = `\n\nFROM\\\nnginx:1.20',
+        '',
+        {}
       )?.deps;
       expect(res).toMatchInlineSnapshot(`
-        Array [
-          Object {
+        [
+          {
             "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
             "currentDigest": undefined,
             "currentValue": "1.20",
@@ -893,7 +951,7 @@ describe('modules/manager/dockerfile/extract', () => {
     });
 
     it('handles an alternative escape character', () => {
-      const res = extractPackageFile(d4)?.deps;
+      const res = extractPackageFile(d4, '', {})?.deps;
       expect(res).toEqual([
         {
           autoReplaceStringTemplate:
@@ -954,18 +1012,20 @@ describe('modules/manager/dockerfile/extract', () => {
 
     it('handles FROM with version in ARG default value and quotes', () => {
       const res = extractPackageFile(
-        'ARG REF_NAME=${REF_NAME:-"gcr.io/distroless/static-debian11:nonroot@sha256:abc"}\nfrom ${REF_NAME}'
+        'ARG REF_NAME=${REF_NAME:-"gcr.io/distroless/static-debian11:nonroot@sha256:abc"}\nfrom ${REF_NAME}',
+        '',
+        {}
       )?.deps;
       expect(res).toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "autoReplaceStringTemplate": "ARG REF_NAME=\${REF_NAME:-\\"gcr.io/distroless/static-debian11:{{#if newValue}}{{newValue}}{{/if}}@{{#if newDigest}}{{newDigest}}{{/if}}\\"}",
+        [
+          {
+            "autoReplaceStringTemplate": "ARG REF_NAME=\${REF_NAME:-"gcr.io/distroless/static-debian11:{{#if newValue}}{{newValue}}{{/if}}@{{#if newDigest}}{{newDigest}}{{/if}}"}",
             "currentDigest": "sha256:abc",
             "currentValue": "nonroot",
             "datasource": "docker",
             "depName": "gcr.io/distroless/static-debian11",
             "depType": "final",
-            "replaceString": "ARG REF_NAME=\${REF_NAME:-\\"gcr.io/distroless/static-debian11:nonroot@sha256:abc\\"}",
+            "replaceString": "ARG REF_NAME=\${REF_NAME:-"gcr.io/distroless/static-debian11:nonroot@sha256:abc"}",
           },
         ]
       `);
@@ -973,7 +1033,9 @@ describe('modules/manager/dockerfile/extract', () => {
 
     it('handles version in ARG and digest in FROM with CRLF linefeed', () => {
       const res = extractPackageFile(
-        'ARG IMAGE_TAG=14.04\r\n#something unrelated\r\nFROM ubuntu:$IMAGE_TAG@sha256:abc\r\n'
+        'ARG IMAGE_TAG=14.04\r\n#something unrelated\r\nFROM ubuntu:$IMAGE_TAG@sha256:abc\r\n',
+        '',
+        {}
       )?.deps;
       expect(res).toEqual([
         {
@@ -999,7 +1061,9 @@ describe('modules/manager/dockerfile/extract', () => {
           'ARG NODE_IMAGE_NAME=node\n' +
           'ARG NODE_IMAGE_TAG="16.14.2-alpine3.14"\n' +
           'ARG DUMMY_PREFIX=\n' +
-          'FROM ${DUMMY_PREFIX}${NODE_IMAGE_HOST}${NODE_IMAGE_NAME}:${NODE_IMAGE_TAG}${NODE_IMAGE_HASH} as yarn\n'
+          'FROM ${DUMMY_PREFIX}${NODE_IMAGE_HOST}${NODE_IMAGE_NAME}:${NODE_IMAGE_TAG}${NODE_IMAGE_HASH} as yarn\n',
+        '',
+        {}
       )?.deps;
       expect(res).toEqual([
         {
@@ -1024,6 +1088,82 @@ describe('modules/manager/dockerfile/extract', () => {
     });
   });
 
+  it('handles empty optional parameters', () => {
+    const res = extractPackageFile(
+      'FROM quay.io/myName/myPackage:0.6.2\n',
+      '',
+      {}
+    );
+    expect(res).toEqual({
+      deps: [
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentDigest: undefined,
+          currentValue: '0.6.2',
+          datasource: 'docker',
+          depName: 'quay.io/myName/myPackage',
+          depType: 'final',
+          replaceString: 'quay.io/myName/myPackage:0.6.2',
+        },
+      ],
+    });
+  });
+
+  it('handles registry alias', () => {
+    const res = extractPackageFile(
+      'FROM quay.io/myName/myPackage:0.6.2\n',
+      'Dockerfile',
+      {
+        registryAliases: {
+          'quay.io': 'my-quay-mirror.registry.com',
+          'index.docker.io': 'my-docker-mirror.registry.com',
+        },
+      }
+    );
+    expect(res).toEqual({
+      deps: [
+        {
+          autoReplaceStringTemplate:
+            'quay.io/myName/myPackage:{{#if newValue}}{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentDigest: undefined,
+          currentValue: '0.6.2',
+          datasource: 'docker',
+          depName: 'my-quay-mirror.registry.com/myName/myPackage',
+          depType: 'final',
+          replaceString: 'quay.io/myName/myPackage:0.6.2',
+        },
+      ],
+    });
+  });
+
+  it('handles empty registry', () => {
+    const res = extractPackageFile(
+      'FROM myName/myPackage:0.6.2\n',
+      'Dockerfile',
+      {
+        registryAliases: {
+          'quay.io': 'my-quay-mirror.registry.com',
+          'index.docker.io': 'my-docker-mirror.registry.com',
+        },
+      }
+    );
+    expect(res).toEqual({
+      deps: [
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentDigest: undefined,
+          currentValue: '0.6.2',
+          datasource: 'docker',
+          depName: 'myName/myPackage',
+          depType: 'final',
+          replaceString: 'myName/myPackage:0.6.2',
+        },
+      ],
+    });
+  });
+
   describe('getDep()', () => {
     it('rejects null', () => {
       expect(getDep(null)).toEqual({ skipReason: 'invalid-value' });
@@ -1032,7 +1172,7 @@ describe('modules/manager/dockerfile/extract', () => {
     it('handles default environment variable values', () => {
       const res = getDep('${REDIS_IMAGE:-redis:5.0.0@sha256:abcd}');
       expect(res).toMatchInlineSnapshot(`
-        Object {
+        {
           "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
           "currentDigest": "sha256:abcd",
           "currentValue": "5.0.0",
@@ -1044,7 +1184,7 @@ describe('modules/manager/dockerfile/extract', () => {
 
       const res2 = getDep('${REDIS_IMAGE:-redis:5.0.0}');
       expect(res2).toMatchInlineSnapshot(`
-        Object {
+        {
           "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
           "currentValue": "5.0.0",
           "datasource": "docker",
@@ -1055,7 +1195,7 @@ describe('modules/manager/dockerfile/extract', () => {
 
       const res3 = getDep('${REDIS_IMAGE:-redis@sha256:abcd}');
       expect(res3).toMatchInlineSnapshot(`
-        Object {
+        {
           "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
           "currentDigest": "sha256:abcd",
           "datasource": "docker",
@@ -1068,7 +1208,7 @@ describe('modules/manager/dockerfile/extract', () => {
         '${REF_NAME:-"gcr.io/distroless/static-debian11:nonroot@sha256:abc"}'
       );
       expect(res4).toMatchInlineSnapshot(`
-        Object {
+        {
           "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
           "currentDigest": "sha256:abc",
           "currentValue": "nonroot",
@@ -1082,7 +1222,7 @@ describe('modules/manager/dockerfile/extract', () => {
         '${REF_NAME:+-gcr.io/distroless/static-debian11:nonroot@sha256:abc}'
       );
       expect(res5).toMatchInlineSnapshot(`
-        Object {
+        {
           "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
           "datasource": "docker",
           "replaceString": "\${REF_NAME:+-gcr.io/distroless/static-debian11:nonroot@sha256:abc}",
@@ -1094,7 +1234,7 @@ describe('modules/manager/dockerfile/extract', () => {
     it('skips tag containing a variable', () => {
       const res = getDep('mcr.microsoft.com/dotnet/sdk:5.0${IMAGESUFFIX}');
       expect(res).toMatchInlineSnapshot(`
-        Object {
+        {
           "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
           "datasource": "docker",
           "replaceString": "mcr.microsoft.com/dotnet/sdk:5.0\${IMAGESUFFIX}",
@@ -1106,7 +1246,7 @@ describe('modules/manager/dockerfile/extract', () => {
     it('skips depName containing a non default variable at start', () => {
       const res = getDep('$CI_REGISTRY/alpine:3.15');
       expect(res).toMatchInlineSnapshot(`
-        Object {
+        {
           "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
           "datasource": "docker",
           "replaceString": "$CI_REGISTRY/alpine:3.15",
@@ -1118,7 +1258,7 @@ describe('modules/manager/dockerfile/extract', () => {
     it('skips depName containing a non default variable with brackets at start', () => {
       const res = getDep('${CI_REGISTRY}/alpine:3.15');
       expect(res).toMatchInlineSnapshot(`
-        Object {
+        {
           "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
           "datasource": "docker",
           "replaceString": "\${CI_REGISTRY}/alpine:3.15",
@@ -1130,7 +1270,7 @@ describe('modules/manager/dockerfile/extract', () => {
     it('skips depName containing a non default variable', () => {
       const res = getDep('docker.io/$PREFIX/alpine:3.15');
       expect(res).toMatchInlineSnapshot(`
-        Object {
+        {
           "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
           "datasource": "docker",
           "replaceString": "docker.io/$PREFIX/alpine:3.15",
@@ -1142,7 +1282,7 @@ describe('modules/manager/dockerfile/extract', () => {
     it('skips depName containing a non default variable with brackets', () => {
       const res = getDep('docker.io/${PREFIX}/alpine:3.15');
       expect(res).toMatchInlineSnapshot(`
-        Object {
+        {
           "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
           "datasource": "docker",
           "replaceString": "docker.io/\${PREFIX}/alpine:3.15",
