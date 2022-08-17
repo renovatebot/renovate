@@ -15,13 +15,11 @@ const compress = promisify(zlib.brotliCompress);
 const decompress = promisify(zlib.brotliDecompress);
 
 export abstract class RepoCacheBase implements RepoCache {
-  protected platform: string;
+  protected platform = GlobalConfig.get('platform')!;
   private oldHash: string | null = null;
   private data: RepoCacheData = {};
 
-  protected constructor(protected readonly repository: string) {
-    this.platform = GlobalConfig.get('platform')!;
-  }
+  protected constructor(protected readonly repository: string) {}
 
   protected abstract read(): Promise<string | undefined>;
 

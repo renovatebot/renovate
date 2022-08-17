@@ -1,7 +1,7 @@
 import type { RepoCache, RepoCacheData } from '../types';
 
 export class RepoCacheNull implements RepoCache {
-  protected data: RepoCacheData = {};
+  private data: RepoCacheData = {};
 
   // istanbul ignore next
   async load(): Promise<void> {

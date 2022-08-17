@@ -10,15 +10,7 @@ export class RepoCacheLocal extends RepoCacheBase {
     super(repository);
   }
 
-  public getCacheFileName(): string {
-    const cacheDir = GlobalConfig.get('cacheDir');
-    const repoCachePath = '/renovate/repository/';
-    const platform = this.platform;
-    const fileName = `${this.repository}.json`;
-    return upath.join(cacheDir, repoCachePath, platform, fileName);
-  }
-
-  async read(): Promise<string | undefined> {
+  protected async read(): Promise<string | undefined> {
     const cacheFileName = this.getCacheFileName();
     let data: string | undefined;
     try {
@@ -31,8 +23,16 @@ export class RepoCacheLocal extends RepoCacheBase {
     return data;
   }
 
-  async write(data: RepoCacheRecord): Promise<void> {
+  protected async write(data: RepoCacheRecord): Promise<void> {
     const cacheFileName = this.getCacheFileName();
     await outputCacheFile(cacheFileName, JSON.stringify(data));
+  }
+
+  private getCacheFileName(): string {
+    const cacheDir = GlobalConfig.get('cacheDir');
+    const repoCachePath = '/renovate/repository/';
+    const platform = this.platform;
+    const fileName = `${this.repository}.json`;
+    return upath.join(cacheDir, repoCachePath, platform, fileName);
   }
 }
