@@ -4,6 +4,7 @@ import { updateDependency } from '.';
 
 const gomod1 = Fixtures.get('1/go.mod');
 const gomod2 = Fixtures.get('2/go.mod');
+const gomod3 = Fixtures.get('3/go.mod');
 
 describe('modules/manager/gomod/update', () => {
   describe('updateDependency', () => {
@@ -16,6 +17,18 @@ describe('modules/manager/gomod/update', () => {
       };
       const res = updateDependency({ fileContent: gomod1, upgrade });
       expect(res).not.toEqual(gomod1);
+      expect(res).toContain(upgrade.newValue);
+    });
+
+    it('replaces golang version update', () => {
+      const upgrade = {
+        depName: 'go',
+        managerData: { lineNumber: 2 },
+        newValue: '1.18',
+        depType: 'golang',
+      };
+      const res = updateDependency({ fileContent: gomod3, upgrade });
+      expect(res).not.toEqual(gomod3);
       expect(res).toContain(upgrade.newValue);
     });
 
@@ -303,6 +316,26 @@ describe('modules/manager/gomod/update', () => {
       const res = updateDependency({ fileContent: gomod1, upgrade });
       expect(res).not.toEqual(gomod1);
       expect(res).toContain('github.com/caarlos0/env/v6 v6.1.0');
+    });
+
+    it('handles multiline replace update', () => {
+      const fileContent = `
+      go 1.18
+      replace (
+        k8s.io/client-go => k8s.io/client-go v0.21.9
+      )`;
+      const upgrade = {
+        depName: 'k8s.io/client-go',
+        managerData: { lineNumber: 3, multiLine: true },
+        newValue: 'v2.2.2',
+        depType: 'replace',
+        currentValue: 'v0.21.9',
+        newMajor: 2,
+        updateType: 'major' as UpdateType,
+      };
+      const res = updateDependency({ fileContent, upgrade });
+      expect(res).not.toEqual(fileContent);
+      expect(res).toContain('k8s.io/client-go/v2 => k8s.io/client-go v2.2.2');
     });
 
     it('should return null for replacement', () => {

@@ -1,6 +1,7 @@
 import { getPkgReleases } from '..';
 import { Fixtures } from '../../../../test/fixtures';
 import * as httpMock from '../../../../test/http-mock';
+import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages';
 import { HelmDatasource } from '.';
 
 // Truncated index.yaml file
@@ -84,18 +85,13 @@ describe('modules/datasource/helm/index', () => {
         .scope('https://example-repository.com')
         .get('/index.yaml')
         .reply(502);
-      let e;
-      try {
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource: HelmDatasource.id,
           depName: 'some_chart',
           registryUrls: ['https://example-repository.com'],
-        });
-      } catch (err) {
-        e = err;
-      }
-      expect(e).toBeDefined();
-      expect(e).toMatchSnapshot();
+        })
+      ).rejects.toThrow(EXTERNAL_HOST_ERROR);
     });
 
     it('returns null for unknown error', async () => {
@@ -187,24 +183,6 @@ describe('modules/datasource/helm/index', () => {
         registryUrl: 'https://example-repository.com/subdir',
         sourceUrl: 'https://github.com/datawire/ambassador',
         releases: expect.toBeArrayOfSize(27),
-      });
-    });
-
-    it('returns home and source metadata of the most recent version', async () => {
-      httpMock
-        .scope('https://example-repository.com')
-        .get('/index.yaml')
-        .reply(200, indexYaml);
-      const releases = await getPkgReleases({
-        datasource: HelmDatasource.id,
-        depName: 'cluster-autoscaler',
-        registryUrls: ['https://example-repository.com'],
-      });
-      expect(releases).not.toBeNull();
-      expect(releases).toMatchObject({
-        homepage: 'https://www.autoscaler.io/9.11.0',
-        sourceDirectory: 'cluster-autoscaler#9.11.0',
-        sourceUrl: 'https://github.com/kubernetes/autoscaler',
       });
     });
   });

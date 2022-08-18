@@ -3,6 +3,7 @@ import {
   fs,
   git,
   mocked,
+  mockedFunction,
   partial,
   platform,
 } from '../../../../../test/util';
@@ -24,6 +25,7 @@ import * as _sanitize from '../../../../util/sanitize';
 import * as _limits from '../../../global/limits';
 import type { BranchConfig, BranchUpgradeConfig } from '../../../types';
 import { BranchResult } from '../../../types';
+import { needsChangelogs } from '../../changelog';
 import type { Pr } from '../../onboarding/branch/check';
 import * as _prWorker from '../pr';
 import type { ResultWithPr } from '../pr';
@@ -46,6 +48,7 @@ jest.mock('./automerge');
 jest.mock('./commit');
 jest.mock('../pr');
 jest.mock('../pr/automerge');
+jest.mock('../../changelog');
 jest.mock('../../../../util/exec');
 jest.mock('../../../../util/merge-confidence');
 jest.mock('../../../../util/sanitize');
@@ -311,6 +314,10 @@ describe('workers/repository/update/branch/index', () => {
 
     it('skips branch if edited PR found', async () => {
       schedule.isScheduledNow.mockReturnValueOnce(false);
+      jest.spyOn(prWorker, 'updatePrDebugData').mockReturnValueOnce({
+        updatedInVer: '1.0.3',
+        createdInVer: '1.0.2',
+      });
       git.branchExists.mockReturnValue(true);
       platform.getBranchPr.mockResolvedValueOnce({
         state: PrState.Open,
@@ -327,6 +334,10 @@ describe('workers/repository/update/branch/index', () => {
 
     it('skips branch if target branch changed', async () => {
       schedule.isScheduledNow.mockReturnValueOnce(false);
+      jest.spyOn(prWorker, 'updatePrDebugData').mockReturnValueOnce({
+        updatedInVer: '1.0.3',
+        createdInVer: '1.0.2',
+      });
       git.branchExists.mockReturnValue(true);
       platform.getBranchPr.mockResolvedValueOnce({
         state: PrState.Open,
@@ -643,11 +654,16 @@ describe('workers/repository/update/branch/index', () => {
         artifactErrors: [],
         updatedArtifacts: [partial<FileChange>({})],
       } as WriteExistingFilesResult);
+
+      mockedFunction(needsChangelogs).mockReturnValueOnce(true);
+
       expect(
         await branchWorker.processBranch({
           ...config,
           ignoreTests: true,
           prCreation: 'not-pending',
+          commitBody: '[skip-ci]',
+          fetchReleaseNotes: true,
         })
       ).toEqual({
         branchExists: true,
@@ -918,6 +934,10 @@ describe('workers/repository/update/branch/index', () => {
 
     it('branch pr no rebase (dry run)', async () => {
       git.branchExists.mockReturnValue(true);
+      jest.spyOn(prWorker, 'updatePrDebugData').mockReturnValueOnce({
+        updatedInVer: '1.0.3',
+        createdInVer: '1.0.2',
+      });
       platform.getBranchPr.mockResolvedValueOnce({
         state: PrState.Open,
       } as Pr);
@@ -928,6 +948,10 @@ describe('workers/repository/update/branch/index', () => {
         prNo: undefined,
         result: 'pr-edited',
       });
+      expect(logger.info).toHaveBeenCalledWith(
+        `DRY-RUN: Would update existing PR to indicate that rebasing is not possible`
+      );
+      expect(platform.updatePr).toHaveBeenCalledTimes(0);
     });
 
     it('branch pr no schedule lockfile (dry run)', async () => {
@@ -967,10 +991,12 @@ describe('workers/repository/update/branch/index', () => {
     });
 
     it('branch pr no schedule (dry run)', async () => {
-      getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
-        updatedPackageFiles: [{}],
-        artifactErrors: [{}],
-      } as PackageFilesResult);
+      getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce(
+        partial<PackageFilesResult>({
+          updatedPackageFiles: [],
+          artifactErrors: [],
+        })
+      );
       npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
         artifactErrors: [],
         updatedArtifacts: [partial<FileChange>({})],
@@ -995,13 +1021,16 @@ describe('workers/repository/update/branch/index', () => {
       expect(
         await branchWorker.processBranch({
           ...config,
-          artifactErrors: [{}],
+          artifactErrors: [],
         })
       ).toEqual({
         branchExists: true,
         prNo: undefined,
         result: 'done',
       });
+      expect(logger.info).toHaveBeenCalledWith(
+        'DRY-RUN: Would ensure comment removal in PR #undefined'
+      );
     });
 
     it('branch pr no schedule', async () => {
@@ -1071,7 +1100,7 @@ describe('workers/repository/update/branch/index', () => {
           updatedArtifacts: [{ type: 'deletion', path: 'dummy' }],
         })
       ).toMatchInlineSnapshot(`
-        Object {
+        {
           "branchExists": true,
           "prNo": undefined,
           "result": "no-work",
@@ -1112,7 +1141,7 @@ describe('workers/repository/update/branch/index', () => {
           updatedArtifacts: [{ type: 'deletion', path: 'dummy' }],
         })
       ).toMatchInlineSnapshot(`
-        Object {
+        {
           "branchExists": true,
           "prNo": undefined,
           "result": "done",

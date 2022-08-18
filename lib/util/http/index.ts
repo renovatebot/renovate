@@ -1,6 +1,6 @@
-import crypto from 'crypto';
 import merge from 'deepmerge';
 import got, { Options, RequestError, Response } from 'got';
+import hasha from 'hasha';
 import { HOST_DISABLED } from '../../constants/error-messages';
 import { pkg } from '../../expose.cjs';
 import { logger } from '../../logger';
@@ -128,22 +128,20 @@ export class Http<GetOptions = HttpOptions, PostOptions = HttpPostOptions> {
 
     options = applyHostRules(url, options);
     if (options.enabled === false) {
+      logger.debug({ url }, 'Host is disabled - rejecting request');
       throw new Error(HOST_DISABLED);
     }
     options = applyAuthorization(options);
 
-    const cacheKey = crypto
-      .createHash('md5')
-      .update(
-        'got-' +
-          JSON.stringify({
-            url,
-            headers: options.headers,
-            method: options.method,
-          })
-      )
-      .digest('hex');
-
+    // use sha512: https://www.npmjs.com/package/hasha#algorithm
+    const cacheKey = hasha([
+      'got-',
+      JSON.stringify({
+        url,
+        headers: options.headers,
+        method: options.method,
+      }),
+    ]);
     let resPromise;
 
     // Cache GET requests unless useCache=false
@@ -268,7 +266,8 @@ export class Http<GetOptions = HttpOptions, PostOptions = HttpPostOptions> {
   }
 
   stream(url: string, options?: HttpOptions): NodeJS.ReadableStream {
-    const combinedOptions: any = {
+    // TODO: fix types (#7154)
+    let combinedOptions: any = {
       method: 'get',
       ...this.options,
       hostType: this.hostType,
@@ -282,6 +281,12 @@ export class Http<GetOptions = HttpOptions, PostOptions = HttpPostOptions> {
     }
 
     applyDefaultHeaders(combinedOptions);
+    combinedOptions = applyHostRules(resolvedUrl, combinedOptions);
+    if (combinedOptions.enabled === false) {
+      throw new Error(HOST_DISABLED);
+    }
+    combinedOptions = applyAuthorization(combinedOptions);
+
     return got.stream(resolvedUrl, combinedOptions);
   }
 }

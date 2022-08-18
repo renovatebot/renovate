@@ -3,81 +3,104 @@ import type { RenovateConfig } from '../../config/types';
 import { logger } from '../../logger';
 import type { PackageFile } from '../../modules/manager/types';
 import { emojify } from '../../util/emoji';
+import type { DepWarnings } from '../types';
 
 export function getWarnings(config: RenovateConfig): string {
-  const warnings = config.warnings!;
-  if (!warnings.length) {
+  if (!config.warnings?.length) {
     return '';
   }
-  let warningText = `\n# Warnings (${warnings.length})\n\n`;
+  let warningText = `\n# Warnings (${config.warnings.length})\n\n`;
   warningText += `Please correct - or verify that you can safely ignore - these warnings before you merge this PR.\n\n`;
-  warnings.forEach((w) => {
+  for (const w of config.warnings) {
     warningText += `-   \`${w.topic}\`: ${w.message}\n`;
-  });
+  }
   warningText += '\n---\n';
   return warningText;
 }
 
 export function getErrors(config: RenovateConfig): string {
-  let errorText = '';
-  const errors = config.errors!;
-  if (!errors.length) {
+  if (!config.errors?.length) {
     return '';
   }
-  errorText = `\n# Errors (${errors.length})\n\n`;
+  let errorText = `\n# Errors (${config.errors.length})\n\n`;
   errorText += `Renovate has found errors that you should fix (in this branch) before finishing this PR.\n\n`;
-  errors.forEach((e) => {
+  for (const e of config.errors) {
     errorText += `-   \`${e.topic}\`: ${e.message}\n`;
-  });
+  }
   errorText += '\n---\n';
   return errorText;
 }
 
-export function getDepWarnings(
+function getDepWarnings(
   packageFiles: Record<string, PackageFile[]>
-): string {
-  let warningText = '';
-  try {
-    const warnings: string[] = [];
-    const warningFiles: string[] = [];
-    for (const files of Object.values(packageFiles || {})) {
-      for (const file of files || []) {
-        if (file.deps) {
-          for (const dep of file.deps || []) {
-            if (dep.warnings?.length) {
-              const message = dep.warnings[0].message;
-              if (!warnings.includes(message)) {
-                warnings.push(message);
-              }
-              if (!warningFiles.includes(file.packageFile!)) {
-                warningFiles.push(file.packageFile!);
-              }
+): DepWarnings {
+  const warnings: string[] = [];
+  const warningFiles: string[] = [];
+  for (const files of Object.values(packageFiles ?? {})) {
+    for (const file of files ?? []) {
+      // TODO: remove condition when type is fixed (#7154)
+      if (file.packageFile) {
+        for (const dep of file.deps ?? []) {
+          for (const w of dep.warnings ?? []) {
+            const message = w.message;
+            if (!warnings.includes(message)) {
+              warnings.push(message);
+            }
+            if (!warningFiles.includes(file.packageFile)) {
+              warningFiles.push(file.packageFile);
             }
           }
         }
       }
     }
-    if (!warnings.length) {
-      return '';
-    }
-    logger.debug(
-      { warnings, warningFiles },
-      'Found package lookup warnings in onboarding'
-    );
-    warningText = emojify(
-      `\n---\n\n### :warning: Dependency Lookup Warnings :warning:\n\n`
-    );
-    warningText += `Please correct - or verify that you can safely ignore - these lookup failures before you merge this PR.\n\n`;
-    warnings.forEach((w) => {
-      warningText += `-   \`${w}\`\n`;
-    });
-    warningText +=
-      '\nFiles affected: ' +
-      warningFiles.map((f) => '`' + f + '`').join(', ') +
-      '\n\n';
-  } catch (err) {
-    // istanbul ignore next
-    logger.error({ err }, 'Error generating dep warnings text');
   }
+  return { warnings, warningFiles };
+}
+
+export function getDepWarningsPR(
+  packageFiles: Record<string, PackageFile[]>
+): string {
+  const { warnings, warningFiles } = getDepWarnings(packageFiles);
+  let warningText = '';
+  if (!warnings.length) {
+    return '';
+  }
+  logger.debug({ warnings, warningFiles }, 'Found package lookup warnings');
+  warningText = emojify(
+    `\n---\n\n### :warning: Dependency Lookup Warnings :warning:\n\n`
+  );
+  warningText += `Please correct - or verify that you can safely ignore - these lookup failures before you merge this PR.\n\n`;
+  for (const w of warnings) {
+    warningText += `-   \`${w}\`\n`;
+  }
+  warningText +=
+    '\nFiles affected: ' +
+    warningFiles.map((f) => '`' + f + '`').join(', ') +
+    '\n\n';
+  return warningText;
+}
+
+export function getDepWarningsDashboard(
+  packageFiles: Record<string, PackageFile[]>
+): string {
+  const { warnings, warningFiles } = getDepWarnings(packageFiles);
+  if (!warnings.length) {
+    return '';
+  }
+
+  const depWarnings = warnings
+    .map((w) => w.replace('Failed to look up dependency ', ''))
+    .map((dep) => '`' + dep + '`')
+    .join(', ');
+
+  logger.debug({ warnings, warningFiles }, 'Found package lookup warnings');
+  let warningText = emojify(
+    `\n---\n\n### :warning: Dependency Lookup Warnings :warning:\n\n`
+  );
+  warningText += `-   Renovate failed to look up the following dependencies: `;
+  warningText += depWarnings;
+  warningText += '.\n\nFiles affected: ';
+  warningText += warningFiles.map((f) => '`' + f + '`').join(', ');
+  warningText += '\n\n---\n\n';
   return warningText;
 }

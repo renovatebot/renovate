@@ -1,5 +1,5 @@
 import is from '@sindresorhus/is';
-import simpleGit from 'simple-git';
+import { simpleGit } from 'simple-git';
 import { logger } from '../../../logger';
 import { cache } from '../../../util/cache/package/decorator';
 import { simpleGitConfig } from '../../../util/git/config';

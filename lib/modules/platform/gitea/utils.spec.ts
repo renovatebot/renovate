@@ -1,7 +1,7 @@
 import { partial } from '../../../../test/util';
 import { CONFIG_GIT_URL_UNAVAILABLE } from '../../../constants/error-messages';
-import type { Repo } from './gitea-helper';
-import { getRepoUrl, trimTrailingApiPath } from './utils';
+import type { Repo } from './types';
+import { getMergeMethod, getRepoUrl, trimTrailingApiPath } from './utils';
 
 describe('modules/platform/gitea/utils', () => {
   const mockRepo = partial<Repo>({
@@ -42,5 +42,17 @@ describe('modules/platform/gitea/utils', () => {
         CONFIG_GIT_URL_UNAVAILABLE
       );
     });
+  });
+
+  it.each`
+    value             | expected
+    ${'auto'}         | ${null}
+    ${undefined}      | ${null}
+    ${'fast-forward'} | ${'rebase'}
+    ${'merge-commit'} | ${'merge'}
+    ${'rebase'}       | ${'rebase-merge'}
+    ${'squash'}       | ${'squash'}
+  `('getMergeMethod("$value") == "$expected"', ({ value, expected }) => {
+    expect(getMergeMethod(value)).toBe(expected);
   });
 });

@@ -1,30 +1,43 @@
+import type { Stats } from 'fs';
+import os from 'os';
+import { fs, partial } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
-import { extractGradleVersion, getJavaContraint } from './utils';
+import {
+  extractGradleVersion,
+  getJavaConstraint,
+  gradleWrapperFileName,
+  prepareGradleCommand,
+} from './utils';
+
+const platform = jest.spyOn(os, 'platform');
+jest.mock('../../../util/fs');
 
 describe('modules/manager/gradle-wrapper/util', () => {
-  describe('getJavaContraint()', () => {
-    it('return null for global mode', () => {
-      expect(getJavaContraint('6')).toBeNull();
+  beforeEach(() => GlobalConfig.reset());
+
+  describe('getJavaConstraint()', () => {
+    it('return ^8.0.0 for global mode', () => {
+      expect(getJavaConstraint('4')).toBe('^8.0.0');
     });
 
     it('return ^11.0.0 for docker mode and undefined gradle', () => {
       GlobalConfig.set({ binarySource: 'docker' });
-      expect(getJavaContraint('')).toBe('^11.0.0');
+      expect(getJavaConstraint('')).toBe('^11.0.0');
     });
 
     it('return ^8.0.0 for docker gradle < 5', () => {
       GlobalConfig.set({ binarySource: 'docker' });
-      expect(getJavaContraint('4.9')).toBe('^8.0.0');
+      expect(getJavaConstraint('4.9')).toBe('^8.0.0');
     });
 
     it('return ^11.0.0 for docker gradle >=5 && <7', () => {
       GlobalConfig.set({ binarySource: 'docker' });
-      expect(getJavaContraint('6.0')).toBe('^11.0.0');
+      expect(getJavaConstraint('6.0')).toBe('^11.0.0');
     });
 
     it('return ^16.0.0 for docker gradle >= 7', () => {
       GlobalConfig.set({ binarySource: 'docker' });
-      expect(getJavaContraint('7.0.1')).toBe('^16.0.0');
+      expect(getJavaConstraint('7.0.1')).toBe('^16.0.0');
     });
   });
 
@@ -32,6 +45,40 @@ describe('modules/manager/gradle-wrapper/util', () => {
     it('works for undefined', () => {
       // TODO #7154
       expect(extractGradleVersion(undefined as never)).toBeNull();
+    });
+  });
+
+  describe('gradleWrapperFileName()', () => {
+    it('works on windows', () => {
+      platform.mockReturnValueOnce('win32');
+      expect(gradleWrapperFileName()).toBe('gradlew.bat');
+    });
+
+    it('works on linux', () => {
+      platform.mockReturnValueOnce('linux');
+      expect(gradleWrapperFileName()).toBe('./gradlew');
+    });
+  });
+
+  describe('prepareGradleCommand', () => {
+    it('works', async () => {
+      platform.mockReturnValueOnce('linux');
+      fs.statLocalFile.mockResolvedValue(
+        partial<Stats>({
+          isFile: () => true,
+          mode: 0o550,
+        })
+      );
+      expect(await prepareGradleCommand('./gradlew')).toBe('./gradlew');
+    });
+
+    it('returns null', async () => {
+      fs.statLocalFile.mockResolvedValue(
+        partial<Stats>({
+          isFile: () => false,
+        })
+      );
+      expect(await prepareGradleCommand('./gradlew')).toBeNull();
     });
   });
 });

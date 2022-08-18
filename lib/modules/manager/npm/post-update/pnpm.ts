@@ -13,7 +13,7 @@ import type {
 import { deleteLocalFile, readLocalFile } from '../../../../util/fs';
 import type { PostUpdateConfig, Upgrade } from '../../types';
 import type { NpmPackage } from '../extract/types';
-import { getNodeConstraint, getNodeUpdate } from './node-version';
+import { getNodeToolConstraint } from './node-version';
 import type { GenerateLockFileResult, PnpmLockFile } from './types';
 
 export async function generateLockFile(
@@ -32,10 +32,9 @@ export async function generateLockFile(
     const pnpmToolConstraint: ToolConstraint = {
       toolName: 'pnpm',
       constraint:
-        config.constraints?.pnpm ?? (await getPnpmContraint(lockFileDir)),
+        config.constraints?.pnpm ?? (await getPnpmConstraint(lockFileDir)),
     };
-    const tagConstraint =
-      getNodeUpdate(upgrades) ?? (await getNodeConstraint(config));
+
     const extraEnv: ExtraEnv = {
       NPM_CONFIG_CACHE: env.NPM_CONFIG_CACHE,
       npm_config_store: env.npm_config_store,
@@ -44,11 +43,12 @@ export async function generateLockFile(
       cwdFile: lockFileName,
       extraEnv,
       docker: {
-        image: 'node',
-        tagScheme: 'node',
-        tagConstraint,
+        image: 'sidecar',
       },
-      toolConstraints: [pnpmToolConstraint],
+      toolConstraints: [
+        await getNodeToolConstraint(config, upgrades),
+        pnpmToolConstraint,
+      ],
     };
     // istanbul ignore if
     if (GlobalConfig.get('exposeAllEnv')) {
@@ -98,7 +98,7 @@ export async function generateLockFile(
   return { lockFile };
 }
 
-async function getPnpmContraint(
+async function getPnpmConstraint(
   lockFileDir: string
 ): Promise<string | undefined> {
   let result: string | undefined;

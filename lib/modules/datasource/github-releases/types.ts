@@ -1,4 +1,4 @@
-export type GithubRelease = {
+export interface GithubRelease {
   id: number;
   tag_name: string;
   published_at: string;
@@ -9,10 +9,11 @@ export type GithubRelease = {
   html_url: string;
   name: string;
   body: string;
-};
+}
 
 export interface GithubReleaseAsset {
   name: string;
+  url: string;
   browser_download_url: string;
   size: number;
 }

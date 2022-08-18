@@ -1,6 +1,7 @@
 // TODO #7154
 import is from '@sindresorhus/is';
 import minimatch from 'minimatch';
+import { mergeChildConfig } from '../../../../config';
 import { GlobalConfig } from '../../../../config/global';
 import { addMeta, logger } from '../../../../logger';
 import type { ArtifactError } from '../../../../modules/manager/types';
@@ -17,10 +18,10 @@ import { sanitize } from '../../../../util/sanitize';
 import { compile } from '../../../../util/template';
 import type { BranchConfig, BranchUpgradeConfig } from '../../../types';
 
-export type PostUpgradeCommandsExecutionResult = {
+export interface PostUpgradeCommandsExecutionResult {
   updatedArtifacts: FileChange[];
   artifactErrors: ArtifactError[];
-};
+}
 
 export async function postUpgradeCommandsExecutor(
   filteredUpgradeCommands: BranchUpgradeConfig[],
@@ -66,7 +67,7 @@ export async function postUpgradeCommandsExecutor(
         ) {
           try {
             const compiledCmd = allowPostUpgradeCommandTemplating
-              ? compile(cmd, upgrade)
+              ? compile(cmd, mergeChildConfig(config, upgrade))
               : cmd;
 
             logger.debug({ cmd: compiledCmd }, 'Executing post-upgrade task');

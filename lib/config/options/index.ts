@@ -129,6 +129,10 @@ const options: RenovateOptions[] = [
     stage: 'repository',
     type: 'boolean',
     default: false,
+    experimental: true,
+    experimentalDescription:
+      'Config migration PRs are still being improved, in particular to reduce the amount of reordering and whitespace changes.',
+    experimentalIssues: [16359],
   },
   {
     name: 'productLinks',
@@ -250,7 +254,7 @@ const options: RenovateOptions[] = [
       'If set to `true` then Renovate creates draft PRs, instead of normal status PRs.',
     type: 'boolean',
     default: false,
-    supportedPlatforms: ['github', 'gitlab', 'azure'],
+    supportedPlatforms: ['azure', 'gitea', 'github', 'gitlab'],
   },
   {
     name: 'dryRun',
@@ -274,7 +278,7 @@ const options: RenovateOptions[] = [
       'Controls how third-party tools like npm or Gradle are called: directly, via Docker sidecar containers, or via dynamic install.',
     globalOnly: true,
     type: 'string',
-    allowedValues: ['global', 'docker', 'install'],
+    allowedValues: ['global', 'docker', 'install', 'hermit'],
     default: 'global',
   },
   {
@@ -465,7 +469,7 @@ const options: RenovateOptions[] = [
       'Any text added here will be placed first in the Dependency Dashboard issue body.',
     type: 'string',
     default:
-      'This issue provides visibility into Renovate updates and their statuses. [Learn more](https://docs.renovatebot.com/key-concepts/dashboard/)',
+      'This issue lists Renovate updates and detected dependencies. Read the [Dependency Dashboard](https://docs.renovatebot.com/key-concepts/dashboard/) docs to learn more.',
   },
   {
     name: 'dependencyDashboardFooter',
@@ -818,7 +822,17 @@ const options: RenovateOptions[] = [
       type: 'string',
       format: 'uri',
     },
-    supportedManagers: ['helm-requirements', 'helmv3', 'helmfile'],
+    supportedManagers: [
+      'helm-requirements',
+      'helmv3',
+      'helmfile',
+      'gitlabci',
+      'dockerfile',
+      'docker-compose',
+      'kubernetes',
+      'ansible',
+      'droneci',
+    ],
   },
   {
     name: 'defaultRegistryUrls',
@@ -1354,7 +1368,7 @@ const options: RenovateOptions[] = [
       branchTopic: '{{{depNameSanitized}}}-replacement',
       commitMessageAction: 'Replace',
       commitMessageExtra:
-        'with {{newName}} {{#if isMajor}}v{{{newMajor}}}{{else}}{{#if isSingleVersion}}v{{{newVersion}}}{{else}}{{{newValue}}}{{/if}}{{/if}}',
+        'with {{newName}} {{#if isMajor}}{{{prettyNewMajor}}}{{else}}{{#if isSingleVersion}}{{{prettyNewVersion}}}{{else}}{{{newValue}}}{{/if}}{{/if}}',
       prBodyNotes: [
         'This is a special PR that replaces `{{{depNameSanitized}}}` with the community suggested minimal stable replacement version.',
       ],
@@ -1513,7 +1527,7 @@ const options: RenovateOptions[] = [
     type: 'string',
     allowedValues: ['auto', 'fast-forward', 'merge-commit', 'rebase', 'squash'],
     default: 'auto',
-    supportedPlatforms: ['bitbucket'],
+    supportedPlatforms: ['bitbucket', 'gitea'],
   },
   {
     name: 'automergeComment',
@@ -1635,7 +1649,7 @@ const options: RenovateOptions[] = [
       'Extra description used after the commit message topic - typically the version.',
     type: 'string',
     default:
-      'to {{#if isPinDigest}}{{{newDigestShort}}}{{else}}{{#if isMajor}}v{{{newMajor}}}{{else}}{{#if isSingleVersion}}v{{{newVersion}}}{{else}}{{#if newValue}}{{{newValue}}}{{else}}{{{newDigestShort}}}{{/if}}{{/if}}{{/if}}{{/if}}',
+      'to {{#if isPinDigest}}{{{newDigestShort}}}{{else}}{{#if isMajor}}{{prettyNewMajor}}{{else}}{{#if isSingleVersion}}{{prettyNewVersion}}{{else}}{{#if newValue}}{{{newValue}}}{{else}}{{{newDigestShort}}}{{/if}}{{/if}}{{/if}}{{/if}}',
     cli: false,
   },
   {
@@ -1853,6 +1867,7 @@ const options: RenovateOptions[] = [
     type: 'array',
     default: [],
     allowedValues: [
+      'bundlerConservative',
       'gomodMassage',
       'gomodUpdateImportPaths',
       'gomodTidy',
@@ -2294,6 +2309,7 @@ const options: RenovateOptions[] = [
     description:
       'Overrides the default resolution for Git remote, e.g. to switch GitLab from HTTPS to SSH-based.',
     type: 'string',
+    supportedPlatforms: ['gitlab', 'bitbucket-server'],
     allowedValues: ['default', 'ssh', 'endpoint'],
     default: 'default',
     stage: 'repository',
@@ -2310,6 +2326,7 @@ const options: RenovateOptions[] = [
     name: 'platformAutomerge',
     description: `Controls if platform-native auto-merge is used.`,
     type: 'boolean',
+    supportedPlatforms: ['azure', 'gitea', 'github', 'gitlab'],
     default: false,
   },
   {
