@@ -10,6 +10,9 @@ import * as template from '../../../util/template';
 const MIN_HASH_LENGTH = 6;
 
 const RE_MULTIPLE_DASH = regEx(/--+/g);
+
+const RE_SPECIAL_CHARS_STRICT = regEx(/[`~!@#$%^&*()_=+[\]\\|{};':",.<>?]/g);
+
 /**
  * Clean git branch name
  *
@@ -43,7 +46,6 @@ export function generateBranchName(update: RenovateConfig): void {
     );
     update.groupSlug = slugify(update.groupSlug ?? update.groupName, {
       lower: true,
-      strict: update.strictBranchSlugify,
     });
     if (update.updateType === 'major' && update.separateMajorMinor) {
       if (update.separateMultipleMajor) {
@@ -95,6 +97,10 @@ export function generateBranchName(update: RenovateConfig): void {
     // Compile extra times in case of nested templates
     update.branchName = template.compile(update.branchName, update);
     update.branchName = template.compile(update.branchName, update);
+  }
+
+  if (update.branchNameStrict) {
+    update.branchName = update.branchName.replace(RE_SPECIAL_CHARS_STRICT, '-'); // massage out all these special characters that slip through slugify
   }
 
   update.branchName = cleanBranchName(update.branchName);

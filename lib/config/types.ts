@@ -28,6 +28,7 @@ export interface RenovateSharedConfig {
   branchPrefix?: string;
   branchPrefixOld?: string;
   branchName?: string;
+  branchNameStrict?: boolean;
   manager?: string | null;
   commitMessage?: string;
   commitMessagePrefix?: string;
@@ -69,7 +70,6 @@ export interface RenovateSharedConfig {
   semanticCommits?: 'auto' | 'enabled' | 'disabled';
   semanticCommitScope?: string | null;
   semanticCommitType?: string;
-  strictBranchSlugify?: boolean;
   suppressNotifications?: string[];
   timezone?: string;
   unicodeEmoji?: boolean;

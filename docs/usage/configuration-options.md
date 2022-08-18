@@ -287,6 +287,12 @@ If you truly need to configure this then it probably means either:
 - You are hopefully mistaken, and there's a better approach you should use, so open a new "config help" discussion at the [Renovate discussions tab](https://github.com/renovatebot/renovate/discussions) or
 - You have a use case we didn't expect and we should have a feature request from you to add it to the project
 
+## branchNameStrict
+
+By default, Renovate does not use strict-mode when slugifying the branch name. This means that certain special characters such as `.` may end up within the branch name.
+
+By setting this configuration to `true`, all special characters will be removed from the branch name, resulting in a branch name consisting exclusively of alphabetic characters separated by `-`.
+
 ## branchPrefix
 
 You can modify this field if you want to change the prefix used.
@@ -2773,12 +2779,6 @@ You can set your own label name with the `"stopUpdatingLabel"` field:
   "stopUpdatingLabel": "take-a-break-renovate"
 }
 ```
-
-## strictBranchSlugify
-
-By default, Renovate does not use strict-mode when slugifying the branch name. This means that certain special characters such as `.` may end up within the branch name.
-
-By setting this configuration to `true`, all special characters will be removed from the branch name, resulting in a branch name consistingly exclusively of alphabetic characters seperated by `-`.
 
 ## suppressNotifications
 
