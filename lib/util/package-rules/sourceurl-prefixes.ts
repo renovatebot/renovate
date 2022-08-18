@@ -3,8 +3,6 @@ import type { PackageRule, PackageRuleInputConfig } from '../../config/types';
 import { Matcher } from './base';
 
 export class SourceUrlPrefixesMatcher extends Matcher {
-  static readonly id: string = 'source-url-prefixes';
-
   override matches(
     { sourceUrl }: PackageRuleInputConfig,
     { matchSourceUrlPrefixes }: PackageRule

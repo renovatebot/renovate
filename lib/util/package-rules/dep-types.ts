@@ -3,8 +3,6 @@ import type { PackageRule, PackageRuleInputConfig } from '../../config/types';
 import { Matcher } from './base';
 
 export class DepTypesMatcher extends Matcher {
-  static readonly id: string = 'deptypes';
-
   override matches(
     { depTypes, depType }: PackageRuleInputConfig,
     { matchDepTypes }: PackageRule

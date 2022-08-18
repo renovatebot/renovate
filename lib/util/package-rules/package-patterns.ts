@@ -6,8 +6,6 @@ import { Matcher } from './base';
 import { massagePattern } from './utils';
 
 export class PackagePatternsMatcher extends Matcher {
-  static readonly id: string = 'package-patterns';
-
   override matches(
     { depName, updateType }: PackageRuleInputConfig,
     { matchPackagePatterns }: PackageRule

@@ -6,8 +6,6 @@ import { configRegexPredicate } from '../regex';
 import { Matcher } from './base';
 
 export class CurrentVersionMatcher extends Matcher {
-  static readonly id: string = 'current-version';
-
   override matches(
     {
       versioning,

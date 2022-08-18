@@ -3,8 +3,6 @@ import type { PackageRule, PackageRuleInputConfig } from '../../config/types';
 import { Matcher } from './base';
 
 export class UpdateTypesMatcher extends Matcher {
-  static readonly id: string = 'update-types';
-
   override matches(
     { updateType, isBump }: PackageRuleInputConfig,
     { matchUpdateTypes }: PackageRule

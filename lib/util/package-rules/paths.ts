@@ -4,8 +4,6 @@ import type { PackageRule, PackageRuleInputConfig } from '../../config/types';
 import { Matcher } from './base';
 
 export class PathsMatcher extends Matcher {
-  static readonly id: string = 'paths';
-
   override matches(
     { packageFile }: PackageRuleInputConfig,
     { matchPaths }: PackageRule

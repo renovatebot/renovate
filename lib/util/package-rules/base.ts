@@ -2,8 +2,6 @@ import type { PackageRule, PackageRuleInputConfig } from '../../config/types';
 import type { MatcherApi } from './types';
 
 export abstract class Matcher implements MatcherApi {
-  static defaultMatchPatterns?: string[];
-
   /**
    * Test exclusion packageRule against inputConfig
    * @return null if no rules are defined, true if exclusion should be applied and else false

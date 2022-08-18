@@ -4,10 +4,7 @@ import { mergeChildConfig } from '../../config';
 import type { PackageRule, PackageRuleInputConfig } from '../../config/types';
 import { logger } from '../../logger';
 import matchers from './api';
-import type { MatcherApi } from './types';
 import { matcherOR } from './utils';
-
-export const getMatchers = (): Map<string, MatcherApi[]> => matchers;
 
 function matchesRule(
   inputConfig: PackageRuleInputConfig,
@@ -16,7 +13,7 @@ function matchesRule(
   let positiveMatch = true;
   let matchApplied = false;
   // matches
-  for (const [, groupMatchers] of getMatchers()) {
+  for (const groupMatchers of matchers) {
     const isMatch = matcherOR(
       'matches',
       groupMatchers,
@@ -47,7 +44,7 @@ function matchesRule(
   }
 
   // excludes
-  for (const [, groupExcludes] of getMatchers()) {
+  for (const groupExcludes of matchers) {
     const isExclude = matcherOR(
       'excludes',
       groupExcludes,

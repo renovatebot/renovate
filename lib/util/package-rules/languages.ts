@@ -3,8 +3,6 @@ import type { PackageRule, PackageRuleInputConfig } from '../../config/types';
 import { Matcher } from './base';
 
 export class LanguagesMatcher extends Matcher {
-  static readonly id: string = 'languages';
-
   override matches(
     { language }: PackageRuleInputConfig,
     { matchLanguages }: PackageRule

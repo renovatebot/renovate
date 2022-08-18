@@ -3,8 +3,6 @@ import type { PackageRule, PackageRuleInputConfig } from '../../config/types';
 import { Matcher } from './base';
 
 export class DatasourcesMatcher extends Matcher {
-  static readonly id: string = 'datasources';
-
   override matches(
     { datasource }: PackageRuleInputConfig,
     { matchDatasources }: PackageRule

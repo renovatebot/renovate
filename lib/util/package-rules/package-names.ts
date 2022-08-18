@@ -3,8 +3,6 @@ import type { PackageRule, PackageRuleInputConfig } from '../../config/types';
 import { Matcher } from './base';
 
 export class PackageNameMatcher extends Matcher {
-  static readonly id: string = 'package-name';
-
   override matches(
     { depName }: PackageRuleInputConfig,
     { matchPackageNames }: PackageRule

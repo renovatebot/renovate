@@ -3,8 +3,6 @@ import type { PackageRule, PackageRuleInputConfig } from '../../config/types';
 import { Matcher } from './base';
 
 export class FilesMatcher extends Matcher {
-  static readonly id: string = 'files';
-
   override matches(
     { packageFile, lockFiles }: PackageRuleInputConfig,
     { matchFiles }: PackageRule

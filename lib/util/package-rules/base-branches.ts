@@ -4,8 +4,6 @@ import { configRegexPredicate } from '../regex';
 import { Matcher } from './base';
 
 export class BaseBranchesMatcher extends Matcher {
-  static readonly id: string = 'base-branches';
-
   override matches(
     { baseBranch }: PackageRuleInputConfig,
     { matchBaseBranches }: PackageRule
