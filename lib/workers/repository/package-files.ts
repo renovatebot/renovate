@@ -1,5 +1,4 @@
 import is from '@sindresorhus/is';
-import type { RenovateConfig } from '../../config/types';
 import { logger } from '../../logger';
 import type { PackageFile } from '../../modules/manager/types';
 import { clone } from '../../util/clone';
@@ -15,7 +14,7 @@ export class PackageFiles {
       { baseBranch },
       `PackageFiles.add() - Package file saved for branch`
     );
-    this.data.set(baseBranch, clone(packageFiles));
+    this.data.set(baseBranch, packageFiles);
   }
 
   static clear(): void {
@@ -32,15 +31,10 @@ export class PackageFiles {
    * This does not mutate the original PackageFiles data
    * Note:  setHeader=false is used for testing purposes only
    *        Mainly for comparing truncated and non-truncated markdown
-   * @param config
    * @param maxLength
    * @param setHeader
    */
-  static getDashboardMarkdown(
-    config: RenovateConfig,
-    maxLength: number,
-    setHeader = true
-  ): string {
+  static getDashboardMarkdown(maxLength: number, setHeader = true): string {
     const note =
       '> **Note**\n> Detected dependencies section has been truncated\n';
     const title = `## Detected dependencies\n\n`;
@@ -53,27 +47,29 @@ export class PackageFiles {
     let header = '';
     let removed = false;
     let truncated = false;
-    let restore: (() => void) | null = null;
+
+    const data = new Map(clone(Array.from(this.data)));
+
+    // filter all deps with skip reason
+    for (const managers of [...data.values()].filter(is.truthy)) {
+      for (const files of Object.values(managers).filter(is.truthy)) {
+        for (const file of files.filter((f) => is.truthy(f.deps))) {
+          file.deps = file.deps.filter(is.truthy).filter((d) => !d.skipReason);
+        }
+      }
+    }
 
     do {
       // shorten markdown until it fits
-      md = PackageFiles.getDashboardMarkdownInternal(config);
+      md = PackageFiles.getDashboardMarkdownInternal(data);
       if (md.length > mdMaxLength) {
-        // backup data
-        if (!restore) {
-          restore = this.backup();
-        }
         // truncate data
-        removed = PackageFiles.pop();
+        removed = PackageFiles.pop(data);
       }
       if (removed) {
         truncated = true; // used to set the truncation Note
       }
     } while (removed && md.length > mdMaxLength);
-
-    if (restore) {
-      restore();
-    } // restore original PackageFiles data
 
     header += title;
     header += truncated ? note : '';
@@ -83,14 +79,16 @@ export class PackageFiles {
 
   /**
    * Generates the "detected dependencies" markdown
-   * @param config
+   * @param data
    */
-  private static getDashboardMarkdownInternal(config: RenovateConfig): string {
+  private static getDashboardMarkdownInternal(
+    data: Map<string, Record<string, PackageFile[]> | null>
+  ): string {
     const none = 'None detected\n\n';
-    const pad = this.data.size > 1; // padding condition for a multi base branch repo
+    const pad = data.size > 1; // padding condition for a multi base branch repo
     let deps = '';
 
-    for (const [branch, packageFiles] of this.data) {
+    for (const [branch, packageFiles] of data) {
       deps += pad
         ? `<details><summary>Branch ${branch}</summary>\n<blockquote>\n\n`
         : '';
@@ -107,8 +105,6 @@ export class PackageFiles {
         continue;
       }
 
-      const placeHolder = `no version found`;
-
       for (const manager of managers) {
         deps += `<details><summary>${manager}</summary>\n<blockquote>\n\n`;
         for (const packageFile of packageFiles[manager]) {
@@ -118,9 +114,7 @@ export class PackageFiles {
             const ver = dep.currentValue;
             const digest = dep.currentDigest;
             const version =
-              ver && digest
-                ? `${ver}@${digest}`
-                : `${digest ?? ver ?? placeHolder}`;
+              ver && digest ? `${ver}@${digest}` : `${digest ?? ver!}`;
             // TODO: types (#7154)
             deps += ` - \`${dep.depName!} ${version}\`\n`;
           }
@@ -134,40 +128,33 @@ export class PackageFiles {
     return deps;
   }
 
-  private static backup(): () => void {
-    const backup = this.data; // backup data
-    // deep clone data
-    this.data = new Map(clone(Array.from(this.data))); // only mutate cloned data
-
-    return () => {
-      this.data = backup;
-    };
-  }
-
   /**
    * Removes the last dependency/entry in the PackageFiles data
    * i.e. the last line in the tobe generated detected dependency section
+   * @param data
    * @Returns true if anything that translates to a markdown written line was deleted
    *          otherwise false is returned
    */
-  private static pop(): boolean {
+  private static pop(
+    data: Map<string, Record<string, PackageFile[]> | null>
+  ): boolean {
     // get detected managers list of the last listed base branch
-    const [branch, managers] = Array.from(this.data).pop() ?? [];
+    const [branch, managers] = Array.from(data).pop() ?? [];
     if (!branch) {
       return false;
     }
 
     // delete base branch listing if it has no managers left
     if (!managers || is.emptyObject(managers)) {
-      return this.data.delete(branch);
+      return data.delete(branch);
     }
 
     // get all manifest files for the last listed manager
-    const [manager, packageFiles] = Object.entries(managers).pop() ?? [];
+    const [manager, packageFiles] = Object.entries(managers).pop()!;
 
     // delete current manager if it has no manifest files left
     if (!packageFiles || is.emptyArray(packageFiles)) {
-      return delete managers[manager!];
+      return delete managers[manager];
     }
 
     // delete manifest file if it has no deps left
