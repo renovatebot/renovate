@@ -8,10 +8,10 @@ import * as docker from '../../../util/exec/docker';
 import type { StatusResult } from '../../../util/git/types';
 import * as hostRules from '../../../util/host-rules';
 import * as _datasource from '../../datasource';
+import { GitTagsDatasource } from '../../datasource/git-tags';
 import { PackagistDatasource } from '../../datasource/packagist';
 import type { UpdateArtifactsConfig } from '../types';
 import * as composer from '.';
-import { GitTagsDatasource } from '../../datasource/git-tags';
 
 jest.mock('../../../util/exec/env');
 jest.mock('../../datasource');

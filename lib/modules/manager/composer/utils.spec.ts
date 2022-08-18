@@ -1,4 +1,6 @@
 import { GlobalConfig } from '../../../config/global';
+import * as hostRules from '../../../util/host-rules';
+import { GitTagsDatasource } from '../../datasource/git-tags';
 import {
   extractConstraints,
   findGithubPersonalAccessToken,
@@ -6,8 +8,6 @@ import {
   isPersonalAccessToken,
   requireComposerDependencyInstallation,
 } from './utils';
-import * as hostRules from '../../../util/host-rules';
-import { GitTagsDatasource } from '../../datasource/git-tags';
 
 jest.mock('../../datasource');
 
@@ -294,9 +294,11 @@ describe('modules/manager/composer/utils', () => {
     it('returns true when string is a github personnal access token', () => {
       expect(isPersonalAccessToken('ghp_XXXXXX')).toBeTrue();
     });
+
     it('returns false when string is a github application token', () => {
       expect(isPersonalAccessToken('ghs_XXXXXX')).toBeFalse();
     });
+
     it('returns false when string is not a token at all', () => {
       expect(isPersonalAccessToken('XXXXXX')).toBeFalse();
     });

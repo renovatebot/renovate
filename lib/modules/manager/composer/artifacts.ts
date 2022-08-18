@@ -19,6 +19,7 @@ import {
 import { getRepoStatus } from '../../../util/git';
 import * as hostRules from '../../../util/host-rules';
 import { regEx } from '../../../util/regex';
+import { GitTagsDatasource } from '../../datasource/git-tags';
 import { PackagistDatasource } from '../../datasource/packagist';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
 import type { AuthJson, ComposerLock } from './types';
@@ -30,7 +31,6 @@ import {
   getPhpConstraint,
   requireComposerDependencyInstallation,
 } from './utils';
-import { GitTagsDatasource } from '../../datasource/git-tags';
 
 function getAuthJson(): string | null {
   const authJson: AuthJson = {};
