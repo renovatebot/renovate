@@ -181,7 +181,6 @@ describe('workers/repository/init/merge', () => {
 
   describe('mergeRenovateConfig()', () => {
     beforeEach(() => {
-      platform.getRawFile.mockResolvedValueOnce(null);
       migrate.migrateConfig.mockReturnValue({
         isMigrated: false,
         migratedConfig: {},
