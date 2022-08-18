@@ -7,7 +7,7 @@
     "renovate-config-validator": "dist/config-validator.js"
   },
   "scripts": {
-    "build": "run-s clean generate:* compile:*",
+    "build": "run-s clean generate:* compile:* create-json-schema",
     "build:docs": "run-s \"release:prepare {@}\" --",
     "clean": "rimraf dist tmp",
     "clean-cache": "node tools/clean-cache.mjs",
@@ -255,7 +255,7 @@
     "@types/nock": "10.0.3",
     "@types/node": "16.11.47",
     "@types/parse-link-header": "2.0.0",
-    "@types/semver": "7.3.10",
+    "@types/semver": "7.3.11",
     "@types/semver-stable": "3.0.0",
     "@types/semver-utils": "1.1.1",
     "@types/shelljs": "0.8.11",
@@ -311,6 +311,7 @@
     "**/json-schema": "^0.4.0"
   },
   "files": [
-    "dist"
+    "dist",
+    "renovate-schema.json"
   ]
 }
