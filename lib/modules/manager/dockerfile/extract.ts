@@ -4,7 +4,7 @@ import { escapeRegExp, newlineRegex, regEx } from '../../../util/regex';
 import { DockerDatasource } from '../../datasource/docker';
 import * as debianVersioning from '../../versioning/debian';
 import * as ubuntuVersioning from '../../versioning/ubuntu';
-import type { PackageDependency, PackageFile } from '../types';
+import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
 
 const variableMarker = '$';
 
@@ -226,7 +226,11 @@ export function getDep(
   return dep;
 }
 
-export function extractPackageFile(content: string): PackageFile | null {
+export function extractPackageFile(
+  content: string,
+  _filename: string,
+  config: ExtractConfig
+): PackageFile | null {
   const deps: PackageDependency[] = [];
   const stageNames: string[] = [];
   const args: Record<string, string> = {};
@@ -322,7 +326,7 @@ export function extractPackageFile(content: string): PackageFile | null {
       } else if (fromImage && stageNames.includes(fromImage)) {
         logger.debug({ image: fromImage }, 'Skipping alias FROM');
       } else {
-        const dep = getDep(fromImage);
+        const dep = getDep(fromImage, true, config.registryAliases);
         processDepForAutoReplace(dep, lineNumberRanges, lines, lineFeed);
         logger.trace(
           {
@@ -350,7 +354,11 @@ export function extractPackageFile(content: string): PackageFile | null {
           'Skipping alias COPY --from'
         );
       } else if (Number.isNaN(Number(copyFromMatch.groups.image))) {
-        const dep = getDep(copyFromMatch.groups.image);
+        const dep = getDep(
+          copyFromMatch.groups.image,
+          true,
+          config.registryAliases
+        );
         const lineNumberRanges: number[][] = [
           [lineNumberInstrStart, lineNumber],
         ];

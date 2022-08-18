@@ -1,9 +1,13 @@
 import { logger } from '../../../logger';
 import { newlineRegex, regEx } from '../../../util/regex';
 import { getDep } from '../dockerfile/extract';
-import type { PackageDependency, PackageFile } from '../types';
+import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
 
-export function extractPackageFile(content: string): PackageFile | null {
+export function extractPackageFile(
+  content: string,
+  _filename: string,
+  config: ExtractConfig
+): PackageFile | null {
   const deps: PackageDependency[] = [];
   try {
     const lines = content.split(newlineRegex);
@@ -34,7 +38,7 @@ export function extractPackageFile(content: string): PackageFile | null {
               currentFrom += finalLineMatch.groups.currentFrom;
               replaceString += '\n' + finalLineMatch.groups.replaceString;
 
-              const dep = getDep(currentFrom);
+              const dep = getDep(currentFrom, true, config.registryAliases);
               dep.depType = 'docker';
               dep.replaceString = replaceString;
               if (dep.autoReplaceStringTemplate) {
@@ -54,7 +58,11 @@ export function extractPackageFile(content: string): PackageFile | null {
           /^\s* image:\s*'?"?(?<currentFrom>[^\s'"]+)'?"?\s*$/
         ).exec(line);
         if (match?.groups) {
-          const dep = getDep(match.groups.currentFrom);
+          const dep = getDep(
+            match.groups.currentFrom,
+            true,
+            config.registryAliases
+          );
           dep.depType = 'docker';
           deps.push(dep);
         }
