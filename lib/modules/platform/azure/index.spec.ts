@@ -523,17 +523,18 @@ describe('modules/platform/azure/index', () => {
 
     it('should return yellow if status is unknown', async () => {
       await initRepo({ repository: 'some/repo' });
-      azureApi.gitApi.mockImplementationOnce(
-        () =>
-          ({
-            getBranch: jest.fn(() => ({ commit: { commitId: 'abcd1234' } })),
-            getStatuses: jest.fn(() => [
-              {
-                state: -1,
-                context: { genre: 'a-genre', name: 'a-name' },
-              },
-            ]),
-          } as any)
+      azureApi.gitApi.mockResolvedValueOnce(
+        partial<IGitApi>({
+          getBranch: jest
+            .fn()
+            .mockResolvedValue({ commit: { commitId: 'abcd1234' } }),
+          getStatuses: jest.fn().mockResolvedValue([
+            {
+              state: -1,
+              context: { genre: 'a-genre', name: 'a-name' },
+            },
+          ]),
+        })
       );
       const res = await azure.getBranchStatusCheck(
         'somebranch',
