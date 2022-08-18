@@ -11,7 +11,6 @@ export const extraEnv = {
     '-Dorg.gradle.parallel=true -Dorg.gradle.configureondemand=true -Dorg.gradle.daemon=false -Dorg.gradle.caching=false',
 };
 
-// istanbul ignore next
 export function gradleWrapperFileName(): string {
   if (
     os.platform() === 'win32' &&
@@ -23,22 +22,16 @@ export function gradleWrapperFileName(): string {
 }
 
 export async function prepareGradleCommand(
-  gradlewName: string,
-  args: string | null
+  gradlewFile: string
 ): Promise<string | null> {
-  const gradlewFile = gradleWrapperFileName();
   const gradlewStat = await statLocalFile(gradlewFile);
-  // istanbul ignore if
   if (gradlewStat?.isFile() === true) {
     // if the file is not executable by others
     if ((gradlewStat.mode & 0o1) === 0) {
       // add the execution permission to the owner, group and others
-      await chmodLocalFile(gradlewName, gradlewStat.mode | 0o111);
+      await chmodLocalFile(gradlewFile, gradlewStat.mode | 0o111);
     }
-    if (args === null) {
-      return gradlewName;
-    }
-    return `${gradlewName} ${args}`;
+    return gradleWrapperFileName();
   }
   /* eslint-enable no-bitwise */
   return null;
@@ -50,7 +43,7 @@ export async function prepareGradleCommand(
  * @param gradleVersion current gradle version
  * @returns A Java semver range
  */
-export function getJavaContraint(
+export function getJavaConstraint(
   gradleVersion: string | null | undefined
 ): string | null {
   const major = gradleVersion ? gradleVersioning.getMajor(gradleVersion) : null;

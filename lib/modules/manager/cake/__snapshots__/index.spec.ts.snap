@@ -1,38 +1,38 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`modules/manager/cake/index extracts 1`] = `
-Object {
-  "deps": Array [
-    Object {
+{
+  "deps": [
+    {
       "currentValue": "1.1.1",
       "datasource": "nuget",
       "depName": "Foo.Foo",
     },
-    Object {
+    {
       "currentValue": "6.6.6",
       "datasource": "nuget",
       "depName": "Bim.Bim",
     },
-    Object {
+    {
       "currentValue": "2.2.2",
       "datasource": "nuget",
       "depName": "Bar.Bar",
-      "registryUrls": Array [
+      "registryUrls": [
         "https://example.com",
       ],
     },
-    Object {
+    {
       "currentValue": "3.3.3",
       "datasource": "nuget",
       "depName": "Baz.Baz",
       "skipReason": "unsupported-url",
     },
-    Object {
+    {
       "currentValue": "1.0.3",
       "datasource": "nuget",
       "depName": "Cake.7zip",
     },
-    Object {
+    {
       "currentValue": "1.0.0",
       "datasource": "nuget",
       "depName": "Cake.asciidoctorj",

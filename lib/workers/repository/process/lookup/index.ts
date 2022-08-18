@@ -206,20 +206,21 @@ export async function lookupUpdates(
       res.currentVersion = currentVersion!;
       if (
         currentValue &&
-        // TODO #7154
-        currentVersion! &&
+        currentVersion &&
         rangeStrategy === 'pin' &&
         !versioning.isSingleVersion(currentValue)
       ) {
         res.updates.push({
           updateType: 'pin',
           isPin: true,
+          // TODO: newValue can be null! (#7154)
           newValue: versioning.getNewValue({
             currentValue,
             rangeStrategy,
             currentVersion,
             newVersion: currentVersion,
           })!,
+          newVersion: currentVersion,
           newMajor: versioning.getMajor(currentVersion)!,
         });
       }
