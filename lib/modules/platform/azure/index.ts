@@ -134,7 +134,7 @@ export async function getRawFile(
     repoId = config.repoId;
   }
 
-  if (!repoId) {
+  if (!is.string(repoId)) {
     return null;
   }
 
