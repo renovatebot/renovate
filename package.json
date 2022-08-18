@@ -7,7 +7,7 @@
     "renovate-config-validator": "dist/config-validator.js"
   },
   "scripts": {
-    "build": "run-s clean generate:* compile:*",
+    "build": "run-s clean generate:* compile:* create-json-schema",
     "build:docs": "run-s \"release:prepare {@}\" --",
     "clean": "rimraf dist tmp",
     "clean-cache": "node tools/clean-cache.mjs",
@@ -204,7 +204,7 @@
     "minimatch": "5.1.0",
     "moo": "0.5.1",
     "nanoid": "3.3.4",
-    "node-html-parser": "5.3.3",
+    "node-html-parser": "5.4.1",
     "openpgp": "5.4.0",
     "p-all": "3.0.0",
     "p-map": "4.0.0",
@@ -265,7 +265,7 @@
     "@types/nock": "10.0.3",
     "@types/node": "16.11.47",
     "@types/parse-link-header": "2.0.0",
-    "@types/semver": "7.3.10",
+    "@types/semver": "7.3.11",
     "@types/semver-stable": "3.0.0",
     "@types/semver-utils": "1.1.1",
     "@types/shelljs": "0.8.11",
@@ -286,7 +286,7 @@
     "eslint-formatter-gha": "1.4.1",
     "eslint-import-resolver-typescript": "3.4.0",
     "eslint-plugin-import": "2.26.0",
-    "eslint-plugin-jest": "26.8.0",
+    "eslint-plugin-jest": "26.8.2",
     "eslint-plugin-jest-formatting": "3.1.0",
     "eslint-plugin-promise": "6.0.0",
     "eslint-plugin-typescript-enum": "2.1.0",
@@ -321,6 +321,7 @@
     "**/json-schema": "^0.4.0"
   },
   "files": [
-    "dist"
+    "dist",
+    "renovate-schema.json"
   ]
 }
