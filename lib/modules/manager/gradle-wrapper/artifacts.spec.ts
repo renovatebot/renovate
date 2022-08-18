@@ -275,4 +275,53 @@ describe('modules/manager/gradle-wrapper/artifacts', () => {
     ]);
     expect(execSnapshots).toBeEmptyArray();
   });
+
+  it('handles gradle-wrapper in subdirectory', async () => {
+    const execSnapshots = mockExecAll();
+    git.getRepoStatus.mockResolvedValue(
+      partial<StatusResult>({
+        modified: [
+          'sub/gradle/wrapper/gradle-wrapper.properties',
+          'sub/gradlew',
+          'sub/gradlew.bat',
+        ],
+      })
+    );
+
+    const res = await updateArtifacts({
+      packageFileName: 'sub/gradle/wrapper/gradle-wrapper.properties',
+      updatedDeps: [],
+      newPackageFileContent: Fixtures.get(
+        'expectedFiles/gradle/wrapper/gradle-wrapper.properties'
+      ),
+      config: { ...config, newValue: '6.3' },
+    });
+
+    expect(res).toEqual(
+      [
+        'sub/gradle/wrapper/gradle-wrapper.properties',
+        'sub/gradlew',
+        'sub/gradlew.bat',
+      ].map((fileProjectPath) => ({
+        file: {
+          type: 'addition',
+          path: fileProjectPath,
+          contents: 'test',
+        },
+      }))
+    );
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: './gradlew wrapper --gradle-distribution-url https://services.gradle.org/distributions/gradle-6.3-bin.zip',
+        options: {
+          cwd: '/tmp/github/some/repo/sub',
+          encoding: 'utf-8',
+          env: {
+            GRADLE_OPTS:
+              '-Dorg.gradle.parallel=true -Dorg.gradle.configureondemand=true -Dorg.gradle.daemon=false -Dorg.gradle.caching=false',
+          },
+        },
+      },
+    ]);
+  });
 });
