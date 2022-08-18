@@ -1,6 +1,7 @@
 import gitUrlParse from 'git-url-parse';
 import { PlatformId } from '../../constants';
 import { logger } from '../../logger';
+import { detectPlatform } from '../../modules/platform/util';
 import type { HostRule } from '../../types';
 import { regEx } from '../regex';
 import type { AuthenticationRule } from './types';
@@ -66,11 +67,15 @@ export function getGitAuthenticatedEnvironmentVariables(
 
 function getAuthenticationRulesWithToken(
   url: string,
-  hostType: string | undefined,
+  hostType: string | undefined | null,
   authToken: string
 ): AuthenticationRule[] {
   let token = authToken;
-  if (hostType === PlatformId.Gitlab) {
+  let type = hostType;
+  if (!type) {
+    type = detectPlatform(url);
+  }
+  if (type === PlatformId.Gitlab) {
     token = `gitlab-ci-token:${authToken}`;
   }
   return getAuthenticationRules(url, token);

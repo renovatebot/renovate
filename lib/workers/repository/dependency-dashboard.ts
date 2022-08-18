@@ -6,6 +6,7 @@ import type { RenovateConfig } from '../../config/types';
 import { getProblems, logger } from '../../logger';
 import type { PackageFile } from '../../modules/manager/types';
 import { platform } from '../../modules/platform';
+import { GitHubMaxPrBodyLen } from '../../modules/platform/github';
 import { regEx } from '../../util/regex';
 import * as template from '../../util/template';
 import { BranchConfig, BranchResult, SelectAllConfig } from '../types';
@@ -17,25 +18,26 @@ interface DependencyDashboard {
   dependencyDashboardRebaseAllOpen: boolean;
 }
 
-function parseDashboardIssue(issueBody: string): DependencyDashboard {
-  const checkMatch = ' - \\[x\\] <!-- ([a-zA-Z]+)-branch=([^\\s]+) -->';
-  const checked = issueBody.match(regEx(checkMatch, 'g'));
+function checkRebaseAll(issueBody: string): boolean {
+  return issueBody.includes(' - [x] <!-- rebase-all-open-prs -->');
+}
+
+function getCheckedBranches(issueBody: string): Record<string, string> {
+  const checkMatch = /- \[x\] <!-- ([a-zA-Z]+)-branch=([^\s]+) -->/g;
   const dependencyDashboardChecks: Record<string, string> = {};
-  if (checked?.length) {
-    const re = regEx(checkMatch);
-    checked.forEach((check) => {
-      const [, type, branchName] = re.exec(check)!;
-      dependencyDashboardChecks[branchName] = type;
-    });
+  for (const [, type, branchName] of issueBody.matchAll(regEx(checkMatch))) {
+    dependencyDashboardChecks[branchName] = type;
   }
-  const checkedRebaseAll = issueBody.includes(
-    ' - [x] <!-- rebase-all-open-prs -->'
-  );
-  let dependencyDashboardRebaseAllOpen = false;
-  if (checkedRebaseAll) {
-    dependencyDashboardRebaseAllOpen = true;
-  }
-  return { dependencyDashboardChecks, dependencyDashboardRebaseAllOpen };
+  return dependencyDashboardChecks;
+}
+
+function parseDashboardIssue(issueBody: string): DependencyDashboard {
+  const dependencyDashboardChecks = getCheckedBranches(issueBody);
+  const dependencyDashboardRebaseAllOpen = checkRebaseAll(issueBody);
+  return {
+    dependencyDashboardChecks,
+    dependencyDashboardRebaseAllOpen,
+  };
 }
 
 export async function readDashboardBody(
@@ -332,14 +334,14 @@ export async function ensureDependencyDashboard(
       'This repository currently has no open or pending branches.\n\n';
   }
 
-  issueBody += PackageFiles.getDashboardMarkdown(config);
+  // fit the detected dependencies section
+  const footer = getFooter(config);
+  issueBody += PackageFiles.getDashboardMarkdown(
+    config,
+    GitHubMaxPrBodyLen - issueBody.length - footer.length
+  );
 
-  if (config.dependencyDashboardFooter?.length) {
-    issueBody +=
-      '---\n' +
-      template.compile(config.dependencyDashboardFooter, config) +
-      '\n';
-  }
+  issueBody += footer;
 
   if (config.dependencyDashboardIssue) {
     const updatedIssue = await platform.getIssue?.(
@@ -377,4 +379,16 @@ export async function ensureDependencyDashboard(
       confidential: config.confidential,
     });
   }
+}
+
+function getFooter(config: RenovateConfig): string {
+  let footer = '';
+  if (config.dependencyDashboardFooter?.length) {
+    footer +=
+      '---\n' +
+      template.compile(config.dependencyDashboardFooter, config) +
+      '\n';
+  }
+
+  return footer;
 }

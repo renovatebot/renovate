@@ -1,0 +1,8 @@
+kind: pipeline
+name: Test
+
+steps:
+  - name: mix
+    image: quay.io/elixir:1.8.1-alpine
+    environment:
+      DB_HOST: mysql
