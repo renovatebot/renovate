@@ -5,8 +5,8 @@ import { envMock, mockExecAll } from '../../../../test/exec-util';
 import { env, fs, git, partial } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
-import { updateArtifacts } from '.';
 import * as execModule from '../../../util/exec';
+import { updateArtifacts } from '.';
 
 jest.mock('../../../util/fs');
 jest.mock('../../../util/git');

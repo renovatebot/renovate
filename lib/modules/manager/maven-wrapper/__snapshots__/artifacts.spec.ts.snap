@@ -48,55 +48,7 @@ Array [
 ]
 `;
 
-exports[`modules/manager/maven-wrapper/artifacts Should return java 7.0 when current maven version is 3.3.0 1`] = `
-Array [
-  Object {
-    "cmd": "./mvnw wrapper:wrapper",
-    "options": Object {
-      "cwd": "./",
-      "encoding": "utf-8",
-      "env": Object {
-        "HOME": "/home/user",
-        "HTTPS_PROXY": "https://example.com",
-        "HTTP_PROXY": "http://example.com",
-        "LANG": "en_US.UTF-8",
-        "LC_ALL": "en_US",
-        "NO_PROXY": "localhost",
-        "PATH": "/tmp/path",
-      },
-      "maxBuffer": 10485760,
-      "timeout": 900000,
-    },
-  },
-]
-`;
-
-exports[`modules/manager/maven-wrapper/artifacts Should return java 7.0 when current value is larger then 3 1`] = `
-Array [
-  Object {
-    "cmd": "./mvnw wrapper:wrapper",
-    "options": Object {
-      "cwd": "./",
-      "encoding": "utf-8",
-      "env": Object {
-        "HOME": "/home/user",
-        "HTTPS_PROXY": "https://example.com",
-        "HTTP_PROXY": "http://example.com",
-        "LANG": "en_US.UTF-8",
-        "LC_ALL": "en_US",
-        "NO_PROXY": "localhost",
-        "PATH": "/tmp/path",
-      },
-      "maxBuffer": 10485760,
-      "timeout": 900000,
-    },
-  },
-]
-`;
-
 exports[`modules/manager/maven-wrapper/artifacts Should return null when cmd is not found 1`] = `Array []`;
-
-exports[`modules/manager/maven-wrapper/artifacts Should return null when cmd is not found 2`] = `Array []`;
 
 exports[`modules/manager/maven-wrapper/artifacts Should throw an error when it cant update 1`] = `Array []`;
 

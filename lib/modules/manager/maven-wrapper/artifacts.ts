@@ -123,7 +123,7 @@ export function getJavaConstraint(
     ? mavenVersioning.getMinor(mavenWrapperVersion)
     : null;
 
-  if (major && major == 3 && minor !== null && minor < 1) {
+  if (major && major === 3 && minor !== null && minor < 1) {
     return '^7.0.0';
   }
 
