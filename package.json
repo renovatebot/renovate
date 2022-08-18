@@ -7,7 +7,7 @@
     "renovate-config-validator": "dist/config-validator.js"
   },
   "scripts": {
-    "build": "run-s clean generate:* compile:*",
+    "build": "run-s clean generate:* compile:* create-json-schema",
     "build:docs": "run-s \"release:prepare {@}\" --",
     "clean": "rimraf dist tmp",
     "clean-cache": "node tools/clean-cache.mjs",
@@ -311,6 +311,7 @@
     "**/json-schema": "^0.4.0"
   },
   "files": [
-    "dist"
+    "dist",
+    "renovate-schema.json"
   ]
 }
