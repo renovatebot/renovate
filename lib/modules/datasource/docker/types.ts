@@ -106,3 +106,11 @@ export interface RegistryRepository {
   registryHost: string;
   dockerRepository: string;
 }
+
+/**
+ * OCI Image Configuration
+ * https://github.com/opencontainers/image-spec/blob/main/config.md
+ */
+export interface ImageConfig {
+  readonly architecture: string;
+}
