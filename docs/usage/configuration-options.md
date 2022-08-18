@@ -2776,8 +2776,9 @@ You can set your own label name with the `"stopUpdatingLabel"` field:
 
 ## strictBranchSlugify
 
-By default, Renovate does not use strict-mode when slugifying the branch name.
-To enforce strict-mode and prevent any special characters within the branch name, set this to `true`.
+By default, Renovate does not use strict-mode when slugifying the branch name. This means that certain special characters such as `.` may end up within the branch name.
+
+By setting this configuration to `true`, all special characters will be removed from the branch name, resulting in a branch name consistingly exclusively of alphabetic characters seperated by `-`.
 
 ## suppressNotifications
 
