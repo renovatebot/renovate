@@ -100,11 +100,8 @@ Use [this search](https://github.com/renovatebot/renovate/issues?q=is%3Aissue+is
 </details>
 
 Use these to assign a impact level to an issue.
-Do we mean?
-
-- Impact on usability for end users
-- Impact on maintainers, like "amount of hassle/work this takes to complete"
-- Impact as risk of ...
+Impact means risk to the end users or their use cases.
+It does _not_ mean "amount of work for the maintainers".
 
 ### Platform
 
