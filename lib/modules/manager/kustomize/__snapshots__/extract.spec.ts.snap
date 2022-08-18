@@ -1,9 +1,9 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`modules/manager/kustomize/extract extractPackageFile() extracts from digest 1`] = `
-Object {
-  "deps": Array [
-    Object {
+{
+  "deps": [
+    {
       "currentDigest": "sha256:b0cfe264cb1143c7c660ddfd5c482464997d62d6bc9f97f8fdf3deefce881a8c",
       "currentValue": undefined,
       "datasource": "docker",
@@ -11,7 +11,7 @@ Object {
       "depType": "Kustomization",
       "replaceString": "sha256:b0cfe264cb1143c7c660ddfd5c482464997d62d6bc9f97f8fdf3deefce881a8c",
     },
-    Object {
+    {
       "currentDigest": "sha256:b0cfe264cb1143c7c660ddfd5c482464997d62d6bc9f97f8fdf3deefce881a8c",
       "currentValue": "11",
       "datasource": "docker",
@@ -19,20 +19,20 @@ Object {
       "depType": "Kustomization",
       "replaceString": "sha256:b0cfe264cb1143c7c660ddfd5c482464997d62d6bc9f97f8fdf3deefce881a8c",
     },
-    Object {
+    {
       "currentDigest": "sha256:b0cfe264cb1143c7c660ddfd5c482464997d62d6bc9f97f8fdf3deefce881a8c",
       "currentValue": 11,
       "depName": "postgres",
       "depType": "Kustomization",
       "skipReason": "invalid-dependency-specification",
     },
-    Object {
+    {
       "currentValue": 2641143766,
       "depName": "postgres",
       "depType": "Kustomization",
       "skipReason": "invalid-value",
     },
-    Object {
+    {
       "currentValue": "b0cfe264cb1143c7c660ddfd5c482464997d62d6bc9f97f8fdf3deefce881a8c",
       "depName": "postgres",
       "depType": "Kustomization",
@@ -43,9 +43,9 @@ Object {
 `;
 
 exports[`modules/manager/kustomize/extract extractPackageFile() extracts from newTag 1`] = `
-Object {
-  "deps": Array [
-    Object {
+{
+  "deps": [
+    {
       "currentDigest": undefined,
       "currentValue": "11",
       "datasource": "docker",
@@ -53,7 +53,7 @@ Object {
       "depType": "Kustomization",
       "replaceString": "11",
     },
-    Object {
+    {
       "currentDigest": "sha256:b0cfe264cb1143c7c660ddfd5c482464997d62d6bc9f97f8fdf3deefce881a8c",
       "currentValue": "11",
       "datasource": "docker",
@@ -61,7 +61,7 @@ Object {
       "depType": "Kustomization",
       "replaceString": "11@sha256:b0cfe264cb1143c7c660ddfd5c482464997d62d6bc9f97f8fdf3deefce881a8c",
     },
-    Object {
+    {
       "currentValue": "sha256:b0cfe264cb1143c7c660ddfd5c482464997d62d6bc9f97f8fdf3deefce881a8c",
       "depName": "postgres",
       "depType": "Kustomization",
@@ -72,14 +72,14 @@ Object {
 `;
 
 exports[`modules/manager/kustomize/extract extractPackageFile() extracts http dependency 1`] = `
-Array [
-  Object {
+[
+  {
     "currentValue": "v0.0.1",
     "datasource": "github-tags",
     "depName": "user/repo",
     "depType": "Kustomization",
   },
-  Object {
+  {
     "currentValue": "1.19.0",
     "datasource": "github-tags",
     "depName": "fluxcd/flux",
@@ -89,15 +89,15 @@ Array [
 `;
 
 exports[`modules/manager/kustomize/extract extractPackageFile() extracts multiple image lines 1`] = `
-Array [
-  Object {
+[
+  {
     "currentValue": "v0.0.1",
     "datasource": "git-tags",
     "depName": "moredhel/remote-kustomize",
     "depType": "Kustomization",
     "packageName": "https://moredhel/remote-kustomize.git",
   },
-  Object {
+  {
     "currentValue": "v0.0.1",
     "datasource": "git-tags",
     "depName": "moredhel/remote-kustomize",
@@ -108,9 +108,9 @@ Array [
 `;
 
 exports[`modules/manager/kustomize/extract extractPackageFile() extracts newName 1`] = `
-Object {
-  "deps": Array [
-    Object {
+{
+  "deps": [
+    {
       "currentDigest": "sha256:b0cfe264cb1143c7c660ddfd5c482464997d62d6bc9f97f8fdf3deefce881a8c",
       "currentValue": "11",
       "datasource": "docker",
@@ -118,7 +118,7 @@ Object {
       "depType": "Kustomization",
       "replaceString": "awesome/postgres:11@sha256:b0cfe264cb1143c7c660ddfd5c482464997d62d6bc9f97f8fdf3deefce881a8c",
     },
-    Object {
+    {
       "currentDigest": undefined,
       "currentValue": "11",
       "datasource": "docker",
@@ -126,7 +126,7 @@ Object {
       "depType": "Kustomization",
       "replaceString": "awesome/postgres:11",
     },
-    Object {
+    {
       "currentDigest": "sha256:b0cfe264cb1143c7c660ddfd5c482464997d62d6bc9f97f8fdf3deefce881a8c",
       "currentValue": undefined,
       "datasource": "docker",
@@ -139,8 +139,8 @@ Object {
 `;
 
 exports[`modules/manager/kustomize/extract extractPackageFile() extracts ssh dependency 1`] = `
-Array [
-  Object {
+[
+  {
     "currentValue": "v0.0.1",
     "datasource": "github-tags",
     "depName": "moredhel/remote-kustomize",
@@ -150,8 +150,8 @@ Array [
 `;
 
 exports[`modules/manager/kustomize/extract extractPackageFile() extracts ssh dependency with a subdir 1`] = `
-Array [
-  Object {
+[
+  {
     "currentValue": "v2.0.0",
     "datasource": "github-tags",
     "depName": "kubernetes-sigs/kustomize",
@@ -161,14 +161,14 @@ Array [
 `;
 
 exports[`modules/manager/kustomize/extract extractPackageFile() parses helmChart field 1`] = `
-Object {
-  "deps": Array [
-    Object {
+{
+  "deps": [
+    {
       "currentValue": "3.1.3",
       "datasource": "helm",
       "depName": "minecraft",
       "depType": "HelmChart",
-      "registryUrls": Array [
+      "registryUrls": [
         "https://itzg.github.io/minecraft-server-charts",
       ],
     },
@@ -177,20 +177,20 @@ Object {
 `;
 
 exports[`modules/manager/kustomize/extract extractPackageFile() should extract bases resources and components from their respective blocks 1`] = `
-Array [
-  Object {
+[
+  {
     "currentValue": "v0.0.1",
     "datasource": "github-tags",
     "depName": "moredhel/remote-kustomize",
     "depType": "Kustomization",
   },
-  Object {
+  {
     "currentValue": "1.19.0",
     "datasource": "github-tags",
     "depName": "fluxcd/flux",
     "depType": "Kustomization",
   },
-  Object {
+  {
     "currentValue": "1.18.0",
     "datasource": "github-tags",
     "depName": "fluxcd/flux",
@@ -200,20 +200,20 @@ Array [
 `;
 
 exports[`modules/manager/kustomize/extract extractPackageFile() should extract dependencies when kind is Component 1`] = `
-Array [
-  Object {
+[
+  {
     "currentValue": "1.19.0",
     "datasource": "github-tags",
     "depName": "fluxcd/flux",
     "depType": "Component",
   },
-  Object {
+  {
     "currentValue": "1.18.0",
     "datasource": "github-tags",
     "depName": "fluxcd/flux",
     "depType": "Component",
   },
-  Object {
+  {
     "currentDigest": undefined,
     "currentValue": "v0.1.0",
     "datasource": "docker",
@@ -225,8 +225,8 @@ Array [
 `;
 
 exports[`modules/manager/kustomize/extract extractPackageFile() should extract out image versions 1`] = `
-Array [
-  Object {
+[
+  {
     "currentDigest": undefined,
     "currentValue": "v0.1.0",
     "datasource": "docker",
@@ -234,7 +234,7 @@ Array [
     "depType": "Kustomization",
     "replaceString": "v0.1.0",
   },
-  Object {
+  {
     "currentDigest": undefined,
     "currentValue": "v0.0.1",
     "datasource": "docker",
@@ -242,7 +242,7 @@ Array [
     "depType": "Kustomization",
     "replaceString": "v0.0.1",
   },
-  Object {
+  {
     "currentDigest": undefined,
     "currentValue": "v0.0.2",
     "datasource": "docker",
@@ -250,7 +250,7 @@ Array [
     "depType": "Kustomization",
     "replaceString": "v0.0.2",
   },
-  Object {
+  {
     "currentDigest": undefined,
     "currentValue": "v0.0.3",
     "datasource": "docker",
@@ -258,7 +258,7 @@ Array [
     "depType": "Kustomization",
     "replaceString": "v0.0.3",
   },
-  Object {
+  {
     "currentDigest": undefined,
     "currentValue": "v0.0.4",
     "datasource": "docker",
@@ -266,7 +266,7 @@ Array [
     "depType": "Kustomization",
     "replaceString": "v0.0.4",
   },
-  Object {
+  {
     "currentValue": 2.5,
     "depName": "nginx",
     "depType": "Kustomization",

@@ -1,8 +1,8 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`config/presets/azure/index fetchJSONFile() returns JSON 1`] = `
-Array [
-  Array [
+[
+  [
     "123456",
     "some-filename.json",
     undefined,
