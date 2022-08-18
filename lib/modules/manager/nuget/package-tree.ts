@@ -1,10 +1,10 @@
+import is from '@sindresorhus/is';
 import Graph from 'graph-data-structure';
 import minimatch from 'minimatch';
 import upath from 'upath';
-import xmldoc from 'xmldoc';
 import { logger } from '../../../logger';
-import { readLocalFile } from '../../../util/fs';
 import { getFileList } from '../../../util/git';
+import { readFileAsXmlDocument } from './util';
 
 export const NUGET_CENTRAL_FILE = 'Directory.Packages.props';
 export const MSBUILD_CENTRAL_FILE = 'Packages.props';
@@ -38,14 +38,17 @@ export async function getDependentPackageFiles(
   }
 
   for (const f of packageFiles) {
-    const packageFileContent = await readLocalFile(f, 'utf8');
+    const doc = await readFileAsXmlDocument(f);
+    if (!doc) {
+      continue;
+    }
 
-    const doc = new xmldoc.XmlDocument(packageFileContent);
     const projectReferenceAttributes = doc
       .childrenNamed('ItemGroup')
       .map((ig) => ig.childrenNamed('ProjectReference'))
       .flat()
-      .map((pf) => pf.attr['Include']);
+      .map((pf) => pf.attr['Include'])
+      .filter(is.nonEmptyString);
 
     const projectReferences = projectReferenceAttributes.map((a) =>
       upath.normalize(a)

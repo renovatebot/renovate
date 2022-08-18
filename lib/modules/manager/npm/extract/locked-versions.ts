@@ -21,23 +21,22 @@ export async function getLockedVersions(
         lockFileCache[yarnLock] = await getYarnLock(yarnLock);
       }
       const { lockfileVersion, isYarn1 } = lockFileCache[yarnLock];
-      if (!isYarn1) {
+      if (!isYarn1 && !packageFile.constraints?.yarn) {
         if (lockfileVersion && lockfileVersion >= 8) {
           // https://github.com/yarnpkg/berry/commit/9bcd27ae34aee77a567dd104947407532fa179b3
-          // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
           packageFile.constraints!.yarn = '^3.0.0';
         } else if (lockfileVersion && lockfileVersion >= 6) {
           // https://github.com/yarnpkg/berry/commit/f753790380cbda5b55d028ea84b199445129f9ba
-          // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
           packageFile.constraints!.yarn = '^2.2.0';
         } else {
-          // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
           packageFile.constraints!.yarn = '^2.0.0';
         }
       }
       for (const dep of packageFile.deps) {
         dep.lockedVersion =
           lockFileCache[yarnLock].lockedVersions[
+            // TODO: types (#7154)
+            // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
             `${dep.depName}@${dep.currentValue}`
           ];
         if (
@@ -49,7 +48,9 @@ export async function getLockedVersions(
         }
       }
     } else if (npmLock) {
-      logger.debug('Found ' + npmLock + ' for ' + packageFile.packageFile);
+      // TODO: types (#7154)
+      // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+      logger.debug(`Found ${npmLock} for ${packageFile.packageFile}`);
       lockFiles.push(npmLock);
       if (!lockFileCache[npmLock]) {
         logger.trace('Retrieving/parsing ' + npmLock);
@@ -63,13 +64,11 @@ export async function getLockedVersions(
             packageFile.constraints.npm += ' <7';
           }
         } else {
-          // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
           packageFile.constraints!.npm = '<7';
         }
       }
       for (const dep of packageFile.deps) {
         dep.lockedVersion = semver.valid(
-          // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
           lockFileCache[npmLock].lockedVersions[dep.depName!]
         );
       }

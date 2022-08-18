@@ -169,7 +169,7 @@ export async function getRawFile(
   const repo = urlEscape(repoName ?? config.repository);
   const url =
     `projects/${repo}/repository/files/${escapedFileName}?ref=` +
-    (branchOrTag || `HEAD`);
+    (branchOrTag ?? `HEAD`);
   const res = await gitlabApi.getJson<{ content: string }>(url);
   const buf = res.body.content;
   const str = Buffer.from(buf, 'base64').toString();
@@ -181,7 +181,7 @@ export async function getJsonFile(
   repoName?: string,
   branchOrTag?: string
 ): Promise<any | null> {
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+  // TODO #7154
   const raw = (await getRawFile(fileName, repoName, branchOrTag)) as string;
   return JSON5.parse(raw);
 }
@@ -218,12 +218,13 @@ function getRepoUrl(
       );
     }
 
-    // TODO: null check #7154
+    // TODO: null check (#7154)
     const { protocol, host, pathname } = parseUrl(defaults.endpoint)!;
     const newPathname = pathname.slice(0, pathname.indexOf('/api'));
     const url = URL.format({
       protocol: protocol.slice(0, -1) || 'https',
-      auth: 'oauth2:' + opts.token,
+      // TODO: types (#7154)
+      auth: `oauth2:${opts.token!}`,
       host,
       pathname: newPathname + '/' + repository + '.git',
     });
@@ -233,7 +234,8 @@ function getRepoUrl(
 
   logger.debug({ url: res.body.http_url_to_repo }, `using http URL`);
   const repoUrl = URL.parse(`${res.body.http_url_to_repo}`);
-  repoUrl.auth = 'oauth2:' + opts.token;
+  // TODO: types (#7154)
+  repoUrl.auth = `oauth2:${opts.token!}`;
   return URL.format(repoUrl);
 }
 
@@ -356,7 +358,10 @@ async function getStatus(
 ): Promise<GitlabBranchStatus[]> {
   const branchSha = git.getBranchCommit(branchName);
   try {
-    const url = `projects/${config.repository}/repository/commits/${branchSha}/statuses`;
+    // TODO: types (#7154)
+    const url = `projects/${
+      config.repository
+    }/repository/commits/${branchSha!}/statuses`;
 
     return (
       await gitlabApi.getJson<GitlabBranchStatus[]>(url, {
@@ -579,7 +584,7 @@ export async function createPr({
         remove_source_branch: true,
         title,
         description,
-        labels: (labels || []).join(','),
+        labels: (labels ?? []).join(','),
         squash: config.squash,
       },
     }
@@ -610,7 +615,7 @@ export async function getPr(iid: number): Promise<Pr> {
     displayNumber: `Merge Request #${mr.iid}`,
     bodyStruct: getPrBodyStruct(mr.description),
     state: mr.state === 'opened' ? PrState.Open : mr.state,
-    hasAssignees: !!(mr.assignee?.id || mr.assignees?.[0]?.id),
+    hasAssignees: !!(mr.assignee?.id ?? mr.assignees?.[0]?.id),
     hasReviewers: !!mr.reviewers?.length,
     title: mr.title,
     labels: mr.labels,
@@ -634,8 +639,7 @@ export async function updatePr({
   const newState = {
     [PrState.Closed]: 'close',
     [PrState.Open]: 'reopen',
-    // TODO: null check #7154
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+    // TODO: null check (#7154)
   }[state!];
   await gitlabApi.putJson(
     `projects/${config.repository}/merge_requests/${iid}`,
@@ -714,7 +718,7 @@ export async function findPr({
   prTitle,
   state = PrState.All,
 }: FindPRConfig): Promise<Pr | null> {
-  logger.debug(`findPr(${branchName}, ${prTitle}, ${state})`);
+  logger.debug(`findPr(${branchName}, ${prTitle!}, ${state})`);
   const prList = await getPrList();
   return (
     prList.find(
@@ -761,7 +765,8 @@ export async function setBranchStatus({
   // First, get the branch commit SHA
   const branchSha = git.getBranchCommit(branchName);
   // Now, check the statuses for that commit
-  const url = `projects/${config.repository}/statuses/${branchSha}`;
+  // TODO: types (#7154)
+  const url = `projects/${config.repository}/statuses/${branchSha!}`;
   let state = 'success';
   if (renovateState === BranchStatus.yellow) {
     state = 'pending';
@@ -893,7 +898,7 @@ export async function ensureIssue({
             body: {
               title,
               description,
-              labels: (labels || issue.labels || []).join(','),
+              labels: (labels ?? issue.labels ?? []).join(','),
               confidential: confidential ?? false,
             },
           }
@@ -905,7 +910,7 @@ export async function ensureIssue({
         body: {
           title,
           description,
-          labels: (labels || []).join(','),
+          labels: (labels ?? []).join(','),
           confidential: confidential ?? false,
         },
       });
@@ -1019,7 +1024,7 @@ export async function deleteLabel(
   logger.debug(`Deleting label ${label} from #${issueNo}`);
   try {
     const pr = await getPr(issueNo);
-    const labels = (pr.labels || [])
+    const labels = (pr.labels ?? [])
       .filter((l: string) => l !== label)
       .join(',');
     await gitlabApi.putJson(
@@ -1093,14 +1098,15 @@ export async function ensureComment({
   let body: string;
   let commentId: number | undefined;
   let commentNeedsUpdating: boolean | undefined;
+  // TODO: types (#7154)
   if (topic) {
-    logger.debug(`Ensuring comment "${massagedTopic}" in #${number}`);
+    logger.debug(`Ensuring comment "${massagedTopic!}" in #${number}`);
     body = `### ${topic}\n\n${sanitizedContent}`;
     body = body
       .replace(regEx(/Pull Request/g), 'Merge Request')
       .replace(regEx(/PR/g), 'MR');
     comments.forEach((comment: { body: string; id: number }) => {
-      if (comment.body.startsWith(`### ${massagedTopic}\n\n`)) {
+      if (comment.body.startsWith(`### ${massagedTopic!}\n\n`)) {
         commentId = comment.id;
         commentNeedsUpdating = comment.body !== body;
       }

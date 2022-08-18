@@ -31,11 +31,12 @@ for (const version of Object.keys(nodeSchedule)) {
 export function findScheduleForCodename(
   codename: string
 ): NodeJsScheduleWithVersion | null {
-  return nodeCodenames.get(codename?.toUpperCase()) || null;
+  return nodeCodenames.get(codename?.toUpperCase()) ?? null;
 }
 
 export function findScheduleForVersion(version: string): NodeJsSchedule | null {
   const major = semver.getMajor(version);
-  const schedule = nodeSchedule[`v${major}`];
+  // TODO: types (#7154)
+  const schedule = nodeSchedule[`v${major!}`];
   return schedule;
 }

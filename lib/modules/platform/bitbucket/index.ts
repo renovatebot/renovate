@@ -89,7 +89,7 @@ export async function initPlatform({
   }
   // TODO: Add a connection check that endpoint/username/password combination are valid (#9594)
   const platformConfig: PlatformResult = {
-    endpoint: endpoint || BITBUCKET_PROD_ENDPOINT,
+    endpoint: endpoint ?? BITBUCKET_PROD_ENDPOINT,
   };
   return Promise.resolve(platformConfig);
 }
@@ -125,7 +125,7 @@ export async function getRawFile(
 
   const url =
     `/2.0/repositories/${repo}/src/` +
-    (finalBranchOrTag || `HEAD`) +
+    (finalBranchOrTag ?? `HEAD`) +
     `/${path}`;
   const res = await bitbucketHttp.get(url);
   return res.body;
@@ -136,7 +136,7 @@ export async function getJsonFile(
   repoName?: string,
   branchOrTag?: string
 ): Promise<any | null> {
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+  // TODO #7154
   const raw = (await getRawFile(fileName, repoName, branchOrTag)) as string;
   return JSON5.parse(raw);
 }
@@ -189,11 +189,13 @@ export async function initRepo({
   // Converts API hostnames to their respective HTTP git hosts:
   // `api.bitbucket.org`  to `bitbucket.org`
   // `api-staging.<host>` to `staging.<host>`
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+  // TODO #7154
   const hostnameWithoutApiPrefix = regEx(/api[.|-](.+)/).exec(hostname!)?.[1];
 
   const url = git.getUrl({
     protocol: 'https',
+    // TODO: types (#7154)
+    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
     auth: `${opts.username}:${opts.password}`,
     hostname: hostnameWithoutApiPrefix,
     repository,
@@ -249,6 +251,8 @@ export async function findPr({
   prTitle,
   state = PrState.All,
 }: FindPRConfig): Promise<Pr | null> {
+  // TODO: types (#7154)
+  // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
   logger.debug(`findPr(${branchName}, ${prTitle}, ${state})`);
   const prList = await getPrList();
   const pr = prList.find(
@@ -330,6 +334,8 @@ async function getStatus(
 ): Promise<utils.BitbucketStatus[]> {
   const sha = await getBranchCommit(branchName);
   return utils.accumulateValues<utils.BitbucketStatus>(
+    // TODO: types (#7154)
+    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
     `/2.0/repositories/${config.repository}/commit/${sha}/statuses`,
     'get',
     { useCache }
@@ -374,7 +380,7 @@ export async function getBranchStatusCheck(
 ): Promise<BranchStatus | null> {
   const statuses = await getStatus(branchName);
   const bbState = statuses.find((status) => status.key === context)?.state;
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+  // TODO #7154
   return bbToRenovateStatusMapping[bbState!] || null;
 }
 
@@ -388,7 +394,7 @@ export async function setBranchStatus({
   const sha = await getBranchCommit(branchName);
 
   // TargetUrl can not be empty so default to bitbucket
-  const url = targetUrl || /* istanbul ignore next */ 'https://bitbucket.org';
+  const url = targetUrl ?? /* istanbul ignore next */ 'https://bitbucket.org';
 
   const body = {
     name: context,
@@ -399,6 +405,8 @@ export async function setBranchStatus({
   };
 
   await bitbucketHttp.postJson(
+    // TODO: types (#7154)
+    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
     `/2.0/repositories/${config.repository}/commit/${sha}/statuses/build`,
     { body }
   );
@@ -468,7 +476,8 @@ export function massageMarkdown(input: string): string {
     .replace(regEx(/<\/?summary>/g), '**')
     .replace(regEx(/<\/?details>/g), '')
     .replace(regEx(`\n---\n\n.*?<!-- rebase-check -->.*?\n`), '')
-    .replace(regEx(/\]\(\.\.\/pull\//g), '](../../pull-requests/');
+    .replace(regEx(/\]\(\.\.\/pull\//g), '](../../pull-requests/')
+    .replace(regEx(/<!--renovate-debug:.*?-->/), '');
 }
 
 export async function ensureIssue({
@@ -595,8 +604,8 @@ export async function addReviewers(
 ): Promise<void> {
   logger.debug(`Adding reviewers '${reviewers.join(', ')}' to #${prId}`);
 
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-  const { title } = (await getPr(prId)) as Pr;
+  // TODO #7154
+  const { title } = (await getPr(prId))!;
 
   const body = {
     title,
@@ -846,6 +855,8 @@ export async function mergePr({
   id: prNo,
   strategy: mergeStrategy,
 }: MergePRConfig): Promise<boolean> {
+  // TODO: types (#7154)
+  // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
   logger.debug(`mergePr(${prNo}, ${branchName}, ${mergeStrategy})`);
 
   // Bitbucket Cloud does not support a rebase-alike; https://jira.atlassian.com/browse/BCLOUD-16610

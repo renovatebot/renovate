@@ -25,7 +25,7 @@ export async function extractPackageFile(
     let sourceMatch: RegExpMatchArray | null = null;
     for (const delimiter of delimiters) {
       sourceMatch =
-        sourceMatch ||
+        sourceMatch ??
         regEx(`^source ${delimiter}([^${delimiter}]+)${delimiter}\\s*$`).exec(
           line
         );
@@ -191,6 +191,8 @@ export async function extractPackageFile(
       res.lockFiles = [gemfileLock];
       const lockedEntries = extractLockFileEntries(lockContent);
       for (const dep of res.deps) {
+        // TODO: types (#7154)
+        // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
         const lockedDepValue = lockedEntries.get(`${dep.depName}`);
         if (lockedDepValue) {
           dep.lockedVersion = lockedDepValue;

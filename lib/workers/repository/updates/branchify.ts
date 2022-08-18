@@ -1,8 +1,9 @@
+// TODO #7154
 import type { Merge } from 'type-fest';
 import type { RenovateConfig, ValidationMessage } from '../../../config/types';
 import { addMeta, logger, removeMeta } from '../../../logger';
 import type { BranchConfig, BranchUpgradeConfig } from '../../types';
-import { embedChangelogs } from '../changelog';
+import { embedChangelogs, needsChangelogs } from '../changelog';
 import { flattenUpdates } from './flatten';
 import { generateBranchConfig } from './generate';
 
@@ -37,22 +38,20 @@ export async function branchifyUpgrades(
     );
   }
   logger.debug(`Returning ${Object.keys(branchUpgrades).length} branch(es)`);
-  if (config.fetchReleaseNotes) {
-    await embedChangelogs(branchUpgrades);
-  }
   for (const branchName of Object.keys(branchUpgrades)) {
     // Add branch name to metadata before generating branch config
     addMeta({
       branch: branchName,
     });
-    const seenUpdates = {};
+    const seenUpdates: Record<string, string> = {};
     // Filter out duplicates
     branchUpgrades[branchName] = branchUpgrades[branchName]
       .reverse()
       .filter((upgrade) => {
         const { manager, packageFile, depName, currentValue, newValue } =
           upgrade;
-        const upgradeKey = `${packageFile}:${depName}:${currentValue}`;
+        // TODO: types (#7154)
+        const upgradeKey = `${packageFile!}:${depName!}:${currentValue!}`;
         const previousNewValue = seenUpdates[upgradeKey];
         if (previousNewValue && previousNewValue !== newValue) {
           logger.info(
@@ -68,17 +67,35 @@ export async function branchifyUpgrades(
           );
           return false;
         }
-        seenUpdates[upgradeKey] = newValue;
+        seenUpdates[upgradeKey] = newValue!;
         return true;
       })
       .reverse();
+
+    if (config.fetchReleaseNotes && config.repoIsOnboarded) {
+      const branches = branchUpgrades[branchName].filter((upg) =>
+        needsChangelogs(upg)
+      );
+      if (branches.length) {
+        logger.warn(
+          {
+            branches: branches.map((b) => b.branchName),
+            docs: 'https://docs.renovatebot.com/templates/',
+          },
+          'Fetching changelogs early is deprecated. Remove `logJSON` and `releases` from config templates. They are only allowed in `commitBody` template. See template docs for allowed templates'
+        );
+        await embedChangelogs(branches);
+      }
+    }
+
     const branch = generateBranchConfig(branchUpgrades[branchName]);
     branch.branchName = branchName;
     branch.packageFiles = packageFiles;
     branches.push(branch);
   }
   removeMeta(['branch']);
-  logger.debug(`config.repoIsOnboarded=${config.repoIsOnboarded}`);
+  // TODO: types (#7154)
+  logger.debug(`config.repoIsOnboarded=${config.repoIsOnboarded!}`);
   const branchList = config.repoIsOnboarded
     ? branches.map((upgrade) => upgrade.branchName)
     : config.branchList;
@@ -93,7 +110,7 @@ export async function branchifyUpgrades(
         const key = `${sourceUrl}|${newVersion}`;
         branchUpdates[key] = branchUpdates[key] || {};
         if (!branchUpdates[key][branchName]) {
-          branchUpdates[key][branchName] = depName;
+          branchUpdates[key][branchName] = depName!;
         }
       }
     }
@@ -110,9 +127,9 @@ export async function branchifyUpgrades(
     logger.debug({ err }, 'Error checking branch duplicates');
   }
   return {
-    errors: config.errors.concat(errors),
-    warnings: config.warnings.concat(warnings),
+    errors: config.errors!.concat(errors),
+    warnings: config.warnings!.concat(warnings),
     branches,
-    branchList,
+    branchList: branchList!,
   };
 }

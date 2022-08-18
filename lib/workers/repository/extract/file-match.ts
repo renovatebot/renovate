@@ -40,8 +40,10 @@ export function getFilteredFileList(
   fileList: string[]
 ): string[] {
   const { includePaths, ignorePaths } = config;
-  let filteredList = getIncludedFiles(fileList, includePaths);
-  filteredList = filterIgnoredFiles(filteredList, ignorePaths);
+  // TODO #7154
+
+  let filteredList = getIncludedFiles(fileList, includePaths!);
+  filteredList = filterIgnoredFiles(filteredList, ignorePaths!);
   return filteredList;
 }
 
@@ -52,8 +54,9 @@ export function getMatchingFiles(
   const fileList = getFilteredFileList(config, allFiles);
   const { fileMatch, manager } = config;
   let matchedFiles: string[] = [];
-  for (const match of fileMatch) {
-    logger.debug(`Using file match: ${match} for manager ${manager}`);
+  // TODO: types (#7154)
+  for (const match of fileMatch!) {
+    logger.debug(`Using file match: ${match} for manager ${manager!}`);
     const re = regEx(match);
     matchedFiles = matchedFiles.concat(
       fileList.filter((file) => re.test(file))

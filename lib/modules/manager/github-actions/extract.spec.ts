@@ -1,29 +1,48 @@
 import { Fixtures } from '../../../../test/fixtures';
-import { extractPackageFile } from './extract';
+import { extractPackageFile } from '.';
 
 describe('modules/manager/github-actions/extract', () => {
   describe('extractPackageFile()', () => {
     it('returns null for empty', () => {
-      expect(extractPackageFile('nothing here')).toBeNull();
+      expect(
+        extractPackageFile('nothing here', 'empty-workflow.yml')
+      ).toBeNull();
+    });
+
+    it('returns null for invalid yaml', () => {
+      expect(
+        extractPackageFile('nothing here: [', 'invalid-workflow.yml')
+      ).toBeNull();
     });
 
     it('extracts multiple docker image lines from yaml configuration file', () => {
-      const res = extractPackageFile(Fixtures.get('workflow_1.yml'));
-      expect(res.deps).toMatchSnapshot();
-      expect(res.deps.filter((d) => d.datasource === 'docker')).toHaveLength(2);
+      const res = extractPackageFile(
+        Fixtures.get('workflow_1.yml'),
+        'workflow_1.yml'
+      );
+      expect(res?.deps).toMatchSnapshot();
+      expect(res?.deps.filter((d) => d.datasource === 'docker')).toHaveLength(
+        6
+      );
     });
 
     it('extracts multiple action tag lines from yaml configuration file', () => {
-      const res = extractPackageFile(Fixtures.get('workflow_2.yml'));
-      expect(res.deps).toMatchSnapshot();
+      const res = extractPackageFile(
+        Fixtures.get('workflow_2.yml'),
+        'workflow_2.yml'
+      );
+      expect(res?.deps).toMatchSnapshot();
       expect(
-        res.deps.filter((d) => d.datasource === 'github-tags')
+        res?.deps.filter((d) => d.datasource === 'github-tags')
       ).toHaveLength(8);
     });
 
     it('extracts multiple action tag lines with double quotes and comments', () => {
-      const res = extractPackageFile(Fixtures.get('workflow_3.yml'));
-      expect(res.deps).toMatchSnapshot([
+      const res = extractPackageFile(
+        Fixtures.get('workflow_3.yml'),
+        'workflow_3.yml'
+      );
+      expect(res?.deps).toMatchSnapshot([
         {
           currentValue: 'v0.13.1',
           datasource: 'github-tags',
@@ -76,8 +95,8 @@ describe('modules/manager/github-actions/extract', () => {
             - name: "quoted, no comment, outdated"
               uses: "actions/setup-java@v2"`;
 
-      const res = extractPackageFile(yamlContent);
-      expect(res.deps).toMatchObject([
+      const res = extractPackageFile(yamlContent, 'workflow.yml');
+      expect(res?.deps).toMatchObject([
         {
           depName: 'actions/setup-node',
           commitMessageTopic: '{{{depName}}} action',

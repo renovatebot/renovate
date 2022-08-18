@@ -124,6 +124,17 @@ const options: RenovateOptions[] = [
     cli: false,
   },
   {
+    name: 'configMigration',
+    description: 'Enable this to get config migration PRs when needed.',
+    stage: 'repository',
+    type: 'boolean',
+    default: false,
+    experimental: true,
+    experimentalDescription:
+      'Config migration PRs are still being improved, in particular to reduce the amount of reordering and whitespace changes.',
+    experimentalIssues: [16359],
+  },
+  {
     name: 'productLinks',
     description: 'Links which are used in PRs, issues and comments.',
     type: 'object',
@@ -152,8 +163,7 @@ const options: RenovateOptions[] = [
   },
   {
     name: 'extends',
-    description:
-      'Configuration presets to use or extend. Note: This config option does not work if you use a `config.js` file.',
+    description: 'Configuration presets to use or extend.',
     stage: 'package',
     type: 'array',
     subType: 'string',
@@ -217,6 +227,7 @@ const options: RenovateOptions[] = [
     allowedValues: ['disabled', 'enabled', 'reset'],
     stage: 'repository',
     default: 'disabled',
+    experimental: true,
   },
   {
     name: 'force',
@@ -235,6 +246,7 @@ const options: RenovateOptions[] = [
     stage: 'global',
     type: 'boolean',
     default: true,
+    globalOnly: true,
   },
   {
     name: 'draftPR',
@@ -242,7 +254,7 @@ const options: RenovateOptions[] = [
       'If set to `true` then Renovate creates draft PRs, instead of normal status PRs.',
     type: 'boolean',
     default: false,
-    supportedPlatforms: ['github', 'gitlab', 'azure'],
+    supportedPlatforms: ['azure', 'gitea', 'github', 'gitlab'],
   },
   {
     name: 'dryRun',
@@ -256,9 +268,8 @@ const options: RenovateOptions[] = [
   {
     name: 'printConfig',
     description:
-      'If enabled, Renovate logs the fullly resolved config for each repo, plus the fully resolved presets.',
+      'If enabled, Renovate logs the fully resolved config for each repo, plus the fully resolved presets.',
     type: 'boolean',
-    globalOnly: true,
     default: false,
   },
   {
@@ -267,7 +278,7 @@ const options: RenovateOptions[] = [
       'Controls how third-party tools like npm or Gradle are called: directly, via Docker sidecar containers, or via dynamic install.',
     globalOnly: true,
     type: 'string',
-    allowedValues: ['global', 'docker', 'install'],
+    allowedValues: ['global', 'docker', 'install', 'hermit'],
     default: 'global',
   },
   {
@@ -276,6 +287,7 @@ const options: RenovateOptions[] = [
       'If set, this Redis URL will be used for caching instead of the file system.',
     stage: 'global',
     type: 'string',
+    globalOnly: true,
   },
   {
     name: 'baseDir',
@@ -283,6 +295,7 @@ const options: RenovateOptions[] = [
       'The base directory for Renovate to store local files, including repository files and cache. If left empty, Renovate will create its own temporary directory to use.',
     stage: 'global',
     type: 'string',
+    globalOnly: true,
   },
   {
     name: 'cacheDir',
@@ -336,6 +349,7 @@ const options: RenovateOptions[] = [
     description: 'Log file path.',
     stage: 'global',
     type: 'string',
+    globalOnly: true,
   },
   {
     name: 'logFileLevel',
@@ -343,6 +357,7 @@ const options: RenovateOptions[] = [
     stage: 'global',
     type: 'string',
     default: 'debug',
+    globalOnly: true,
   },
   {
     name: 'logContext',
@@ -454,7 +469,7 @@ const options: RenovateOptions[] = [
       'Any text added here will be placed first in the Dependency Dashboard issue body.',
     type: 'string',
     default:
-      'This issue provides visibility into Renovate updates and their statuses. [Learn more](https://docs.renovatebot.com/key-concepts/dashboard/)',
+      'This issue lists Renovate updates and detected dependencies. Read the [Dependency Dashboard](https://docs.renovatebot.com/key-concepts/dashboard/) docs to learn more.',
   },
   {
     name: 'dependencyDashboardFooter',
@@ -527,6 +542,16 @@ const options: RenovateOptions[] = [
   {
     name: 'schedule',
     description: 'Limit branch creation to these times of day or week.',
+    type: 'array',
+    subType: 'string',
+    allowString: true,
+    cli: true,
+    env: false,
+    default: ['at any time'],
+  },
+  {
+    name: 'automergeSchedule',
+    description: 'Limit automerge to these times of day or week.',
     type: 'array',
     subType: 'string',
     allowString: true,
@@ -674,6 +699,7 @@ const options: RenovateOptions[] = [
     stage: 'global',
     type: 'boolean',
     default: false,
+    globalOnly: true,
   },
   {
     name: 'autodiscoverFilter',
@@ -681,6 +707,7 @@ const options: RenovateOptions[] = [
     stage: 'global',
     type: 'string',
     default: null,
+    globalOnly: true,
   },
   {
     name: 'prCommitsPerRunLimit',
@@ -689,6 +716,7 @@ const options: RenovateOptions[] = [
     stage: 'global',
     type: 'integer',
     default: 0,
+    globalOnly: true,
   },
   {
     name: 'repositories',
@@ -696,6 +724,7 @@ const options: RenovateOptions[] = [
     stage: 'global',
     type: 'array',
     cli: false,
+    globalOnly: true,
   },
   {
     name: 'baseBranches',
@@ -785,15 +814,25 @@ const options: RenovateOptions[] = [
     globalOnly: true,
   },
   {
-    name: 'aliases',
-    description: 'Aliases for registries, package manager specific.',
+    name: 'registryAliases',
+    description: 'Aliases for registries.',
     type: 'object',
     default: {},
     additionalProperties: {
       type: 'string',
       format: 'uri',
     },
-    supportedManagers: ['helm-requirements', 'helmv3', 'helmfile'],
+    supportedManagers: [
+      'helm-requirements',
+      'helmv3',
+      'helmfile',
+      'gitlabci',
+      'dockerfile',
+      'docker-compose',
+      'kubernetes',
+      'ansible',
+      'droneci',
+    ],
   },
   {
     name: 'defaultRegistryUrls',
@@ -1226,7 +1265,7 @@ const options: RenovateOptions[] = [
     name: 'bumpVersion',
     description: 'Bump the version in the package file being updated.',
     type: 'string',
-    allowedValues: ['major', 'minor', 'patch'],
+    allowedValues: ['major', 'minor', 'patch', 'prerelease'],
     supportedManagers: ['helmv3', 'npm', 'maven', 'sbt'],
   },
   // Major/Minor/Patch
@@ -1329,7 +1368,7 @@ const options: RenovateOptions[] = [
       branchTopic: '{{{depNameSanitized}}}-replacement',
       commitMessageAction: 'Replace',
       commitMessageExtra:
-        'with {{newName}} {{#if isMajor}}v{{{newMajor}}}{{else}}{{#if isSingleVersion}}v{{{newVersion}}}{{else}}{{{newValue}}}{{/if}}{{/if}}',
+        'with {{newName}} {{#if isMajor}}{{{prettyNewMajor}}}{{else}}{{#if isSingleVersion}}{{{prettyNewVersion}}}{{else}}{{{newValue}}}{{/if}}{{/if}}',
       prBodyNotes: [
         'This is a special PR that replaces `{{{depNameSanitized}}}` with the community suggested minimal stable replacement version.',
       ],
@@ -1488,7 +1527,7 @@ const options: RenovateOptions[] = [
     type: 'string',
     allowedValues: ['auto', 'fast-forward', 'merge-commit', 'rebase', 'squash'],
     default: 'auto',
-    supportedPlatforms: ['bitbucket'],
+    supportedPlatforms: ['bitbucket', 'gitea'],
   },
   {
     name: 'automergeComment',
@@ -1520,6 +1559,7 @@ const options: RenovateOptions[] = [
       groupName: null,
       schedule: [],
       dependencyDashboardApproval: false,
+      stabilityDays: 0,
       rangeStrategy: 'update-lockfile',
       commitMessageSuffix: '[SECURITY]',
       branchTopic: `{{{datasource}}}-{{{depName}}}-vulnerability`,
@@ -1609,7 +1649,7 @@ const options: RenovateOptions[] = [
       'Extra description used after the commit message topic - typically the version.',
     type: 'string',
     default:
-      'to {{#if isPinDigest}}{{{newDigestShort}}}{{else}}{{#if isMajor}}v{{{newMajor}}}{{else}}{{#if isSingleVersion}}v{{{newVersion}}}{{else}}{{#if newValue}}{{{newValue}}}{{else}}{{{newDigestShort}}}{{/if}}{{/if}}{{/if}}{{/if}}',
+      'to {{#if isPinDigest}}{{{newDigestShort}}}{{else}}{{#if isMajor}}{{prettyNewMajor}}{{else}}{{#if isSingleVersion}}{{prettyNewVersion}}{{else}}{{#if newValue}}{{{newValue}}}{{else}}{{{newDigestShort}}}{{/if}}{{/if}}{{/if}}{{/if}}',
     cli: false,
   },
   {
@@ -1827,6 +1867,7 @@ const options: RenovateOptions[] = [
     type: 'array',
     default: [],
     allowedValues: [
+      'bundlerConservative',
       'gomodMassage',
       'gomodUpdateImportPaths',
       'gomodTidy',
@@ -2268,6 +2309,7 @@ const options: RenovateOptions[] = [
     description:
       'Overrides the default resolution for Git remote, e.g. to switch GitLab from HTTPS to SSH-based.',
     type: 'string',
+    supportedPlatforms: ['gitlab', 'bitbucket-server'],
     allowedValues: ['default', 'ssh', 'endpoint'],
     default: 'default',
     stage: 'repository',
@@ -2284,6 +2326,7 @@ const options: RenovateOptions[] = [
     name: 'platformAutomerge',
     description: `Controls if platform-native auto-merge is used.`,
     type: 'boolean',
+    supportedPlatforms: ['azure', 'gitea', 'github', 'gitlab'],
     default: false,
   },
   {

@@ -29,13 +29,11 @@ export class GalaxyDatasource extends Datasource {
     const userName = lookUp[0];
     const projectName = lookUp[1];
 
-    const galaxyAPIUrl =
-      registryUrl +
-      'api/v1/roles/?owner__username=' +
-      userName +
-      '&name=' +
-      projectName;
-    const galaxyProjectUrl = registryUrl + userName + '/' + projectName;
+    // TODO: types (#7154)
+    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+    const galaxyAPIUrl = `${registryUrl}api/v1/roles/?owner__username=${userName}&name=${projectName}`;
+    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+    const galaxyProjectUrl = `${registryUrl}${userName}/${projectName}`;
 
     let raw: HttpResponse<GalaxyResult> | null = null;
     try {

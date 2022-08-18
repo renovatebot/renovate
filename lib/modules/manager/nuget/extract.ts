@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import { XmlDocument, XmlElement, XmlNode } from 'xmldoc';
 import { logger } from '../../../logger';
 import { getSiblingFileName, localPathExists } from '../../../util/fs';
@@ -44,14 +45,13 @@ function extractDepsFromXml(xmlNode: XmlDocument): PackageDependency[] {
     if (elemNames.has(name)) {
       const depName = attr?.Include || attr?.Update;
       const version =
-        attr?.Version ||
-        child.valueWithPath('Version') ||
-        attr?.VersionOverride ||
+        attr?.Version ??
+        child.valueWithPath('Version') ??
+        attr?.VersionOverride ??
         child.valueWithPath('VersionOverride');
-      const currentValue = checkVersion
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-        ?.exec(version!)
-        ?.groups?.currentValue?.trim();
+      const currentValue = is.nonEmptyStringAndNotWhitespace(version)
+        ? checkVersion.exec(version)?.groups?.currentValue?.trim()
+        : undefined;
       if (depName && currentValue) {
         results.push({
           datasource: NugetDatasource.id,

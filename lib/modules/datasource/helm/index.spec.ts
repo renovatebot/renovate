@@ -1,6 +1,7 @@
 import { getPkgReleases } from '..';
 import { Fixtures } from '../../../../test/fixtures';
 import * as httpMock from '../../../../test/http-mock';
+import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages';
 import { HelmDatasource } from '.';
 
 // Truncated index.yaml file
@@ -16,7 +17,7 @@ describe('modules/datasource/helm/index', () => {
       expect(
         await getPkgReleases({
           datasource: HelmDatasource.id,
-          depName: undefined,
+          depName: undefined as never, // #7154
           registryUrls: ['https://example-repository.com'],
         })
       ).toBeNull();
@@ -41,7 +42,7 @@ describe('modules/datasource/helm/index', () => {
       httpMock
         .scope('https://example-repository.com')
         .get('/index.yaml')
-        .reply(200, null);
+        .reply(200);
       expect(
         await getPkgReleases({
           datasource: HelmDatasource.id,
@@ -84,18 +85,13 @@ describe('modules/datasource/helm/index', () => {
         .scope('https://example-repository.com')
         .get('/index.yaml')
         .reply(502);
-      let e;
-      try {
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource: HelmDatasource.id,
           depName: 'some_chart',
           registryUrls: ['https://example-repository.com'],
-        });
-      } catch (err) {
-        e = err;
-      }
-      expect(e).toBeDefined();
-      expect(e).toMatchSnapshot();
+        })
+      ).rejects.toThrow(EXTERNAL_HOST_ERROR);
     });
 
     it('returns null for unknown error', async () => {

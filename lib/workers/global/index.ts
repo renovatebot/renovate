@@ -5,6 +5,7 @@ import semver from 'semver';
 import upath from 'upath';
 import * as configParser from '../../config';
 import { mergeChildConfig } from '../../config';
+import { GlobalConfig } from '../../config/global';
 import { resolveConfigPresets } from '../../config/presets';
 import { validateConfigSecrets } from '../../config/secrets';
 import type {
@@ -15,7 +16,6 @@ import type {
 import { CONFIG_PRESETS_INVALID } from '../../constants/error-messages';
 import { pkg } from '../../expose.cjs';
 import { getProblems, logger, setMeta } from '../../logger';
-import { writeFile } from '../../util/fs';
 import * as hostRules from '../../util/host-rules';
 import * as repositoryWorker from '../repository';
 import { autodiscoverRepositories } from './autodiscover';
@@ -31,9 +31,11 @@ export async function getRepositoryConfig(
     globalConfig,
     is.string(repository) ? { repository } : repository
   );
+  // TODO: types (#7154)
+  const platform = GlobalConfig.get('platform')!;
   repoConfig.localDir = upath.join(
     repoConfig.baseDir,
-    `./repos/${repoConfig.platform}/${repoConfig.repository}`
+    `./repos/${platform}/${repoConfig.repository}`
   );
   await fs.ensureDir(repoConfig.localDir);
   delete repoConfig.baseDir;
@@ -54,7 +56,7 @@ function haveReachedLimits(): boolean {
 
 /* istanbul ignore next */
 function checkEnv(): void {
-  const range = pkg.engines.node;
+  const range = pkg.engines!.node!;
   const rangeNext = pkg['engines-next']?.node;
   if (process.release?.name !== 'node' || !process.versions?.node) {
     logger.warn(
@@ -116,6 +118,9 @@ export async function start(): Promise<number> {
     // initialize all submodules
     config = await globalInitialize(config);
 
+    // Set platform and endpoint in case local presets are used
+    GlobalConfig.set({ platform: config.platform, endpoint: config.endpoint });
+
     await validatePresets(config);
 
     checkEnv();
@@ -128,7 +133,7 @@ export async function start(): Promise<number> {
 
     if (is.nonEmptyString(config.writeDiscoveredRepos)) {
       const content = JSON.stringify(config.repositories);
-      await writeFile(config.writeDiscoveredRepos, content);
+      await fs.writeFile(config.writeDiscoveredRepos, content);
       logger.info(
         `Written discovered repositories to ${config.writeDiscoveredRepos}`
       );
@@ -136,7 +141,7 @@ export async function start(): Promise<number> {
     }
 
     // Iterate through repositories sequentially
-    for (const repository of config.repositories) {
+    for (const repository of config.repositories!) {
       if (haveReachedLimits()) {
         break;
       }
@@ -156,13 +161,13 @@ export async function start(): Promise<number> {
     } else {
       logger.fatal({ err }, `Fatal error: ${String(err.message)}`);
     }
-    if (!config) {
+    if (!config!) {
       // return early if we can't parse config options
       logger.debug(`Missing config`);
       return 2;
     }
   } finally {
-    await globalFinalize(config);
+    await globalFinalize(config!);
     logger.debug(`Renovate exiting`);
   }
   const loggerErrors = getProblems().filter((p) => p.level >= ERROR);

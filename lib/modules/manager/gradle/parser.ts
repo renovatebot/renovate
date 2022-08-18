@@ -1,6 +1,8 @@
 import url from 'url';
 import is from '@sindresorhus/is';
+import upath from 'upath';
 import { logger } from '../../../logger';
+import { getSiblingFileName, readLocalFile } from '../../../util/fs';
 import { newlineRegex, regEx } from '../../../util/regex';
 import type { PackageDependency } from '../types';
 import {
@@ -120,7 +122,6 @@ function handleAssignment({
   if (dep) {
     dep.groupName = key;
     dep.managerData = {
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
       fileReplacePosition: valToken.offset + dep.depName!.length + 1,
       packageFile,
     };
@@ -149,7 +150,6 @@ function processDepString({
   const dep = parseDependencyString(token.value);
   if (dep) {
     dep.managerData = {
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
       fileReplacePosition: token.offset + dep.depName!.length + 1,
       packageFile,
     };
@@ -185,6 +185,8 @@ function processDepInterpolation({
         const lastToken = token.children[token.children.length - 1];
         if (
           lastToken.type === TokenType.String &&
+          // TODO: types (#7154)
+          // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
           lastToken.value.startsWith(`:${dep.currentValue}`)
         ) {
           packageFile = packageFileOrig;
@@ -278,10 +280,28 @@ function processPlugin({
 
 function processCustomRegistryUrl({
   tokenMap,
+  variables,
 }: SyntaxHandlerInput): SyntaxHandlerOutput {
-  const registryUrl = tokenMap.registryUrl?.value;
+  let localVariables = variables;
+  if (tokenMap.keyToken?.value === 'name') {
+    localVariables = {
+      ...variables,
+      name: {
+        key: 'name',
+        value: tokenMap.valToken.value,
+      },
+    };
+  }
+
+  let registryUrl: string | null = tokenMap.registryUrl?.value;
+  if (tokenMap.registryUrl?.type === TokenType.StringInterpolation) {
+    const token = tokenMap.registryUrl as StringInterpolation;
+    registryUrl = interpolateString(token.children, localVariables);
+  }
+
   try {
     if (registryUrl) {
+      registryUrl = registryUrl.replace(regEx(/\\/g), '');
       const { host, protocol } = url.parse(registryUrl);
       if (host && protocol) {
         return { urls: [registryUrl] };
@@ -303,7 +323,6 @@ function processPredefinedRegistryUrl({
     google: GOOGLE_REPO,
     gradlePluginPortal: GRADLE_PLUGIN_PORTAL_REPO,
   }[registryName];
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
   return { urls: [registryUrl!] };
 }
 
@@ -316,6 +335,7 @@ const annoyingMethods = new Set([
   'mutableListOf',
   'setOf',
   'mutableSetOf',
+  'stages', // https://github.com/ajoberstar/reckon
 ]);
 
 function processLongFormDep({
@@ -367,9 +387,11 @@ function processLibraryDep(input: SyntaxHandlerInput): SyntaxHandlerOutput {
 
   if (groupId && artifactId) {
     res.vars = { [key]: { key, value, fileReplacePosition, packageFile } };
-    const versionRefToken = tokenMap.version;
-    if (versionRefToken) {
-      const version: Token = { ...versionRefToken, type: TokenType.Word };
+    const version = tokenMap.version;
+    if (version) {
+      if (tokenMap.versionType?.value === 'versionRef') {
+        version.type = TokenType.Word;
+      }
       const depRes = processLongFormDep({
         ...input,
         tokenMap: { ...input.tokenMap, version },
@@ -380,7 +402,50 @@ function processLibraryDep(input: SyntaxHandlerInput): SyntaxHandlerOutput {
   return res;
 }
 
+function processApplyFrom({
+  tokenMap,
+  variables,
+}: SyntaxHandlerInput): SyntaxHandlerOutput {
+  let scriptFile: string | null = tokenMap.scriptFile?.value ?? null;
+  if (tokenMap.scriptFile?.type === TokenType.StringInterpolation) {
+    const token = tokenMap.scriptFile as StringInterpolation;
+    scriptFile = interpolateString(token.children, variables);
+  }
+
+  if (tokenMap.parentPath) {
+    let parentPath: string | null = tokenMap.parentPath.value ?? null;
+    if (tokenMap.parentPath.type === TokenType.Word) {
+      parentPath = coercePotentialString(tokenMap.parentPath, variables);
+    } else if (tokenMap.parentPath.type === TokenType.StringInterpolation) {
+      const token = tokenMap.parentPath as StringInterpolation;
+      parentPath = interpolateString(token.children, variables);
+    }
+    if (parentPath && scriptFile) {
+      scriptFile = upath.join(parentPath, scriptFile);
+    }
+  }
+
+  return { scriptFile };
+}
+
 const matcherConfigs: SyntaxMatchConfig[] = [
+  {
+    // ext.foo = 'baz'
+    // project.foo = 'baz'
+    // rootProject.foo = 'baz'
+    matchers: [
+      {
+        matchType: TokenType.Word,
+        matchValue: ['ext', 'project', 'rootProject'],
+      },
+      { matchType: TokenType.Dot },
+      { matchType: TokenType.Word, tokenMapKey: 'keyToken' },
+      { matchType: TokenType.Assignment },
+      { matchType: TokenType.String, tokenMapKey: 'valToken' },
+      endOfInstruction,
+    ],
+    handler: handleAssignment,
+  },
   {
     // foo.bar = 'baz'
     matchers: [
@@ -530,8 +595,42 @@ const matcherConfigs: SyntaxMatchConfig[] = [
         matchValue: 'maven',
       },
       { matchType: TokenType.LeftParen },
-      { matchType: TokenType.String, tokenMapKey: 'registryUrl' },
+      {
+        matchType: [TokenType.String, TokenType.StringInterpolation],
+        tokenMapKey: 'registryUrl',
+      },
       { matchType: TokenType.RightParen },
+      endOfInstruction,
+    ],
+    handler: processCustomRegistryUrl,
+  },
+  {
+    // maven { name = "baz"; url = "https://maven.springframework.org/${name}" }
+    matchers: [
+      {
+        matchType: TokenType.Word,
+        matchValue: 'maven',
+      },
+      { matchType: TokenType.LeftBrace },
+      {
+        matchType: TokenType.Word,
+        matchValue: 'name',
+        tokenMapKey: 'keyToken',
+      },
+      { matchType: TokenType.Assignment },
+      {
+        matchType: [TokenType.String, TokenType.StringInterpolation],
+        tokenMapKey: 'valToken',
+      },
+      {
+        matchType: TokenType.Word,
+        matchValue: 'url',
+      },
+      { matchType: TokenType.Assignment },
+      {
+        matchType: [TokenType.String, TokenType.StringInterpolation],
+        tokenMapKey: 'registryUrl',
+      },
       endOfInstruction,
     ],
     handler: processCustomRegistryUrl,
@@ -549,7 +648,10 @@ const matcherConfigs: SyntaxMatchConfig[] = [
         matchValue: 'url',
       },
       { matchType: TokenType.Assignment },
-      { matchType: TokenType.String, tokenMapKey: 'registryUrl' },
+      {
+        matchType: [TokenType.String, TokenType.StringInterpolation],
+        tokenMapKey: 'registryUrl',
+      },
       endOfInstruction,
     ],
     handler: processCustomRegistryUrl,
@@ -572,7 +674,10 @@ const matcherConfigs: SyntaxMatchConfig[] = [
         matchValue: 'uri',
       },
       { matchType: TokenType.LeftParen },
-      { matchType: TokenType.String, tokenMapKey: 'registryUrl' },
+      {
+        matchType: [TokenType.String, TokenType.StringInterpolation],
+        tokenMapKey: 'registryUrl',
+      },
       { matchType: TokenType.RightParen },
       endOfInstruction,
     ],
@@ -590,7 +695,10 @@ const matcherConfigs: SyntaxMatchConfig[] = [
         matchType: TokenType.Word,
         matchValue: 'url',
       },
-      { matchType: TokenType.String, tokenMapKey: 'registryUrl' },
+      {
+        matchType: [TokenType.String, TokenType.StringInterpolation],
+        tokenMapKey: 'registryUrl',
+      },
       endOfInstruction,
     ],
     handler: processCustomRegistryUrl,
@@ -599,7 +707,10 @@ const matcherConfigs: SyntaxMatchConfig[] = [
     // url 'https://repo.spring.io/snapshot/'
     matchers: [
       { matchType: TokenType.Word, matchValue: ['uri', 'url'] },
-      { matchType: TokenType.String, tokenMapKey: 'registryUrl' },
+      {
+        matchType: [TokenType.String, TokenType.StringInterpolation],
+        tokenMapKey: 'registryUrl',
+      },
       endOfInstruction,
     ],
     handler: processCustomRegistryUrl,
@@ -609,7 +720,10 @@ const matcherConfigs: SyntaxMatchConfig[] = [
     matchers: [
       { matchType: TokenType.Word, matchValue: ['uri', 'url'] },
       { matchType: TokenType.LeftParen },
-      { matchType: TokenType.String, tokenMapKey: 'registryUrl' },
+      {
+        matchType: [TokenType.String, TokenType.StringInterpolation],
+        tokenMapKey: 'registryUrl',
+      },
       { matchType: TokenType.RightParen },
       endOfInstruction,
     ],
@@ -617,6 +731,7 @@ const matcherConfigs: SyntaxMatchConfig[] = [
   },
   {
     // library("foobar", "foo", "bar").versionRef("foo.bar")
+    // library("foobar", "foo", "bar").version("1.2.3")
     matchers: [
       { matchType: TokenType.Word, matchValue: 'library' },
       { matchType: TokenType.LeftParen },
@@ -627,7 +742,11 @@ const matcherConfigs: SyntaxMatchConfig[] = [
       { matchType: potentialStringTypes, tokenMapKey: 'artifactId' },
       { matchType: TokenType.RightParen },
       { matchType: TokenType.Dot },
-      { matchType: TokenType.Word, matchValue: 'versionRef' },
+      {
+        matchType: TokenType.Word,
+        matchValue: ['versionRef', 'version'],
+        tokenMapKey: 'versionType',
+      },
       { matchType: TokenType.LeftParen },
       { matchType: TokenType.String, tokenMapKey: 'version' },
       { matchType: TokenType.RightParen },
@@ -831,6 +950,159 @@ const matcherConfigs: SyntaxMatchConfig[] = [
     ],
     handler: processLongFormDep,
   },
+  {
+    // apply from: 'foo.gradle'
+    // apply from: "${somedir}/foo.gradle"
+    matchers: [
+      { matchType: TokenType.Word, matchValue: 'apply' },
+      { matchType: TokenType.Word, matchValue: 'from' },
+      { matchType: TokenType.Colon },
+      {
+        matchType: [TokenType.String, TokenType.StringInterpolation],
+        tokenMapKey: 'scriptFile',
+      },
+    ],
+    handler: processApplyFrom,
+  },
+  {
+    // apply from: file("${somedir}/foo.gradle")
+    matchers: [
+      { matchType: TokenType.Word, matchValue: 'apply' },
+      { matchType: TokenType.Word, matchValue: 'from' },
+      { matchType: TokenType.Colon },
+      { matchType: TokenType.Word, matchValue: 'file' },
+      { matchType: TokenType.LeftParen },
+      {
+        matchType: [TokenType.String, TokenType.StringInterpolation],
+        tokenMapKey: 'scriptFile',
+      },
+      { matchType: TokenType.RightParen },
+    ],
+    handler: processApplyFrom,
+  },
+  {
+    // apply from: new File("${somedir}/foo.gradle")
+    matchers: [
+      { matchType: TokenType.Word, matchValue: 'apply' },
+      { matchType: TokenType.Word, matchValue: 'from' },
+      { matchType: TokenType.Colon },
+      { matchType: TokenType.Word, matchValue: 'new' },
+      { matchType: TokenType.Word, matchValue: 'File' },
+      { matchType: TokenType.LeftParen },
+      {
+        matchType: [TokenType.String, TokenType.StringInterpolation],
+        tokenMapKey: 'scriptFile',
+      },
+      { matchType: TokenType.RightParen },
+    ],
+    handler: processApplyFrom,
+  },
+  {
+    // apply from: new File(somedir, "${otherdir}/foo.gradle")
+    // apply from: new File("${somedir}", "${otherdir}/foo.gradle")
+    matchers: [
+      { matchType: TokenType.Word, matchValue: 'apply' },
+      { matchType: TokenType.Word, matchValue: 'from' },
+      { matchType: TokenType.Colon },
+      { matchType: TokenType.Word, matchValue: 'new' },
+      { matchType: TokenType.Word, matchValue: 'File' },
+      { matchType: TokenType.LeftParen },
+      {
+        matchType: [
+          TokenType.Word,
+          TokenType.String,
+          TokenType.StringInterpolation,
+        ],
+        tokenMapKey: 'parentPath',
+      },
+      { matchType: TokenType.Comma },
+      {
+        matchType: [TokenType.String, TokenType.StringInterpolation],
+        tokenMapKey: 'scriptFile',
+      },
+      { matchType: TokenType.RightParen },
+    ],
+    handler: processApplyFrom,
+  },
+  {
+    // apply from: project.file("${somedir}/foo.gradle")
+    // apply from: rootProject.file("${somedir}/foo.gradle")
+    matchers: [
+      { matchType: TokenType.Word, matchValue: 'apply' },
+      { matchType: TokenType.Word, matchValue: 'from' },
+      { matchType: TokenType.Colon },
+      { matchType: TokenType.Word, matchValue: ['project', 'rootProject'] },
+      { matchType: TokenType.Dot },
+      { matchType: TokenType.Word, matchValue: 'file' },
+      { matchType: TokenType.LeftParen },
+      {
+        matchType: [TokenType.String, TokenType.StringInterpolation],
+        tokenMapKey: 'scriptFile',
+      },
+      { matchType: TokenType.RightParen },
+    ],
+    handler: processApplyFrom,
+  },
+  {
+    // apply(from = 'foo.gradle')
+    // apply(from = "${somedir}/foo.gradle")
+    matchers: [
+      { matchType: TokenType.Word, matchValue: 'apply' },
+      { matchType: TokenType.LeftParen },
+      { matchType: TokenType.Word, matchValue: 'from' },
+      { matchType: TokenType.Assignment },
+      {
+        matchType: [TokenType.String, TokenType.StringInterpolation],
+        tokenMapKey: 'scriptFile',
+      },
+      { matchType: TokenType.RightParen },
+    ],
+    handler: processApplyFrom,
+  },
+  {
+    // apply(from = File("${somedir}/foo.gradle"))
+    matchers: [
+      { matchType: TokenType.Word, matchValue: 'apply' },
+      { matchType: TokenType.LeftParen },
+      { matchType: TokenType.Word, matchValue: 'from' },
+      { matchType: TokenType.Assignment },
+      { matchType: TokenType.Word, matchValue: 'File' },
+      { matchType: TokenType.LeftParen },
+      {
+        matchType: [TokenType.String, TokenType.StringInterpolation],
+        tokenMapKey: 'scriptFile',
+      },
+      { matchType: TokenType.RightParen },
+    ],
+    handler: processApplyFrom,
+  },
+  {
+    // apply(from = File(somedir, "${otherdir}/foo.gradle"))
+    // apply(from = File("${somedir}", "${otherdir}/foo.gradle")
+    matchers: [
+      { matchType: TokenType.Word, matchValue: 'apply' },
+      { matchType: TokenType.LeftParen },
+      { matchType: TokenType.Word, matchValue: 'from' },
+      { matchType: TokenType.Assignment },
+      { matchType: TokenType.Word, matchValue: 'File' },
+      { matchType: TokenType.LeftParen },
+      {
+        matchType: [
+          TokenType.Word,
+          TokenType.String,
+          TokenType.StringInterpolation,
+        ],
+        tokenMapKey: 'parentPath',
+      },
+      { matchType: TokenType.Comma },
+      {
+        matchType: [TokenType.String, TokenType.StringInterpolation],
+        tokenMapKey: 'scriptFile',
+      },
+      { matchType: TokenType.RightParen },
+    ],
+    handler: processApplyFrom,
+  },
 ];
 
 function tryMatch({
@@ -855,11 +1127,43 @@ function tryMatch({
   return null;
 }
 
-export function parseGradle(
+async function parseInlineScriptFile(
+  scriptFile: string,
+  variables: PackageVariables,
+  recursionDepth: number,
+  packageFile = ''
+): Promise<SyntaxHandlerOutput> {
+  if (recursionDepth > 2) {
+    logger.debug({ scriptFile }, `Max recursion depth reached`);
+    return null;
+  }
+
+  if (!regEx(/\.gradle(\.kts)?$/).test(scriptFile)) {
+    logger.warn({ scriptFile }, `Only Gradle files can be included`);
+    return null;
+  }
+
+  const scriptFilePath = getSiblingFileName(packageFile, scriptFile);
+  const scriptFileContent = await readLocalFile(scriptFilePath, 'utf8');
+  if (!scriptFileContent) {
+    logger.debug({ scriptFilePath }, `Failed to process included Gradle file`);
+    return null;
+  }
+
+  return parseGradle(
+    scriptFileContent,
+    variables,
+    scriptFilePath,
+    recursionDepth + 1
+  );
+}
+
+export async function parseGradle(
   input: string,
   initVars: PackageVariables = {},
-  packageFile?: string
-): ParseGradleResult {
+  packageFile?: string,
+  recursionDepth = 0
+): Promise<ParseGradleResult> {
   let vars: PackageVariables = { ...initVars };
   const deps: PackageDependency<GradleManagerData>[] = [];
   const urls: string[] = [];
@@ -867,7 +1171,15 @@ export function parseGradle(
   const tokens = tokenize(input);
   let prevTokensLength = tokens.length;
   while (tokens.length) {
-    const matchResult = tryMatch({ tokens, variables: vars, packageFile });
+    let matchResult = tryMatch({ tokens, variables: vars, packageFile });
+    if (matchResult?.scriptFile) {
+      matchResult = await parseInlineScriptFile(
+        matchResult.scriptFile,
+        vars,
+        recursionDepth,
+        packageFile
+      );
+    }
     if (matchResult?.deps?.length) {
       deps.push(...matchResult.deps);
     }
@@ -883,6 +1195,8 @@ export function parseGradle(
       // Should not happen, but it's better to be prepared
       logger.warn(
         { packageFile },
+        // TODO: types (#7154)
+        // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
         `${packageFile} parsing error, results can be incomplete`
       );
       break;
@@ -895,7 +1209,7 @@ export function parseGradle(
 
 const propWord = '[a-zA-Z_][a-zA-Z0-9_]*(?:\\.[a-zA-Z_][a-zA-Z0-9_]*)*';
 const propRegex = regEx(
-  `^(?<leftPart>\\s*(?<key>${propWord})\\s*=\\s*['"]?)(?<value>[^\\s'"]+)['"]?\\s*$`
+  `^(?<leftPart>\\s*(?<key>${propWord})\\s*[= :]\\s*['"]?)(?<value>[^\\s'"]+)['"]?\\s*$`
 );
 
 export function parseProps(
@@ -916,7 +1230,6 @@ export function parseProps(
             ...dep,
             managerData: {
               fileReplacePosition:
-                // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
                 offset + leftPart.length + dep.depName!.length + 1,
               packageFile,
             },

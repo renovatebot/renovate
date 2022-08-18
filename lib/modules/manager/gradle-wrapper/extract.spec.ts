@@ -1,21 +1,21 @@
-import { loadFixture } from '../../../../test/util';
-import { extractPackageFile } from './extract';
+import { Fixtures } from '../../../../test/fixtures';
+import { extractPackageFile } from '.';
 
-const typeBinFileContent = loadFixture('gradle-wrapper-bin.properties');
-const typeAllFileContent = loadFixture('gradle-wrapper-all.properties');
-const prereleaseVersionFileContent = loadFixture(
+const typeBinFileContent = Fixtures.get('gradle-wrapper-bin.properties');
+const typeAllFileContent = Fixtures.get('gradle-wrapper-all.properties');
+const prereleaseVersionFileContent = Fixtures.get(
   'gradle-wrapper-prerelease.properties'
 );
-const unknownFormatFileContent = loadFixture(
+const unknownFormatFileContent = Fixtures.get(
   'gradle-wrapper-unknown-format.properties'
 );
-const whitespacePropertiesFile = loadFixture(
+const whitespacePropertiesFile = Fixtures.get(
   'gradle-wrapper-whitespace.properties'
 );
-const customTypeBinFileContent = loadFixture(
+const customTypeBinFileContent = Fixtures.get(
   'custom-gradle-wrapper-bin.properties'
 );
-const customTypeAllFileContent = loadFixture(
+const customTypeAllFileContent = Fixtures.get(
   'custom-gradle-wrapper-all.properties'
 );
 
@@ -32,7 +32,7 @@ describe('modules/manager/gradle-wrapper/extract', () => {
 
     it('extracts version for property file with distribution type "bin" in distributionUrl', () => {
       const res = extractPackageFile(typeBinFileContent);
-      expect(res.deps).toEqual([
+      expect(res?.deps).toEqual([
         {
           currentValue: '4.8',
           replaceString:
@@ -46,7 +46,7 @@ describe('modules/manager/gradle-wrapper/extract', () => {
 
     it('extracts version for property file with distribution type "all" in distributionUrl', () => {
       const res = extractPackageFile(typeAllFileContent);
-      expect(res.deps).toEqual([
+      expect(res?.deps).toEqual([
         {
           currentValue: '4.10.3',
           replaceString:
@@ -60,7 +60,7 @@ describe('modules/manager/gradle-wrapper/extract', () => {
 
     it('extracts version for property file with prerelease version in distributionUrl', () => {
       const res = extractPackageFile(prereleaseVersionFileContent);
-      expect(res.deps).toEqual([
+      expect(res?.deps).toEqual([
         {
           currentValue: '7.0-milestone-1',
           replaceString:
@@ -74,7 +74,7 @@ describe('modules/manager/gradle-wrapper/extract', () => {
 
     it('extracts version for property file with unnecessary whitespace in distributionUrl', () => {
       const res = extractPackageFile(whitespacePropertiesFile);
-      expect(res.deps).toEqual([
+      expect(res?.deps).toEqual([
         {
           currentValue: '4.10.3',
           replaceString:
@@ -88,7 +88,7 @@ describe('modules/manager/gradle-wrapper/extract', () => {
 
     it('extracts version for property file with custom distribution of type "bin" in distributionUrl', () => {
       const res = extractPackageFile(customTypeBinFileContent);
-      expect(res.deps).toEqual([
+      expect(res?.deps).toEqual([
         {
           currentValue: '1.3.7',
           replaceString:
@@ -102,7 +102,7 @@ describe('modules/manager/gradle-wrapper/extract', () => {
 
     it('extracts version for property file with custom distribution of type "all" in distributionUrl', () => {
       const res = extractPackageFile(customTypeAllFileContent);
-      expect(res.deps).toEqual([
+      expect(res?.deps).toEqual([
         {
           currentValue: '6.6.6',
           replaceString:

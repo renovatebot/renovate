@@ -150,9 +150,9 @@ describe('workers/repository/init/merge', () => {
         configFileParsed: {},
       });
       expect(await detectRepoFileConfig()).toMatchInlineSnapshot(`
-        Object {
+        {
           "configFileName": ".renovaterc.json",
-          "configFileParsed": "{\\"something\\":\\"new\\"}",
+          "configFileParsed": "{"something":"new"}",
         }
       `);
     });
@@ -186,29 +186,44 @@ describe('workers/repository/init/merge', () => {
       migrateAndValidate.migrateAndValidate.mockResolvedValueOnce({
         errors: [{ topic: 'dep', message: 'test error' }],
       });
-      let e: Error;
+      let e: Error | undefined;
       try {
         await mergeRenovateConfig(config);
       } catch (err) {
         e = err;
       }
       expect(e).toBeDefined();
-      expect(e.toString()).toBe('Error: config-validation');
+      expect(e?.toString()).toBe('Error: config-validation');
     });
 
     it('migrates nested config', async () => {
       git.getFileList.mockResolvedValue(['renovate.json']);
       fs.readLocalFile.mockResolvedValue('{}');
-      migrateAndValidate.migrateAndValidate.mockResolvedValue({
-        warnings: [],
-        errors: [],
+      migrateAndValidate.migrateAndValidate.mockImplementation((_, c) => {
+        // We shouldn't see packageRules here (avoids #14827).
+        // (someday the validation should probably be reworked to know about `sourceUrl` from the repo config, but that day isn't today)
+        expect(c).not.toHaveProperty('packageRules');
+        return Promise.resolve({
+          ...c,
+          warnings: [],
+          errors: [],
+        });
       });
-      migrate.migrateConfig.mockReturnValueOnce({
+      migrate.migrateConfig.mockImplementation((c) => ({
         isMigrated: true,
-        migratedConfig: {},
+        migratedConfig: c,
+      }));
+      config.extends = [':automergeAll'];
+      config.packageRules = [{ extends: ['monorepo:react'] }];
+      const ret = await mergeRenovateConfig(config);
+      expect(ret).toMatchObject({
+        automerge: true,
+        packageRules: [
+          {
+            matchSourceUrlPrefixes: ['https://github.com/facebook/react'],
+          },
+        ],
       });
-      config.extends = [':automergeDisabled'];
-      expect(await mergeRenovateConfig(config)).toBeDefined();
     });
 
     it('continues if no errors', async () => {

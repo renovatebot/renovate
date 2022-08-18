@@ -35,6 +35,7 @@ export function getEnvName(option: ParseConfigOptions): string {
 }
 
 const renameKeys = {
+  aliases: 'registryAliases',
   azureAutoComplete: 'platformAutomerge', // migrate: azureAutoComplete
   gitLabAutomerge: 'platformAutomerge', // migrate: gitLabAutomerge
 };
@@ -107,18 +108,18 @@ export function getConfig(inputEnv: NodeJS.ProcessEnv): AllConfig {
           const coerce = coersions[option.type];
           config[option.name] = coerce(envVal);
           if (option.name === 'dryRun') {
-            if (config[option.name] === 'true') {
+            if ((config[option.name] as string) === 'true') {
               logger.warn(
                 'env config dryRun property has been changed to full'
               );
               config[option.name] = 'full';
-            } else if (config[option.name] === 'false') {
+            } else if ((config[option.name] as string) === 'false') {
               logger.warn(
                 'env config dryRun property has been changed to null'
               );
-              config[option.name] = null;
-            } else if (config[option.name] === 'null') {
-              config[option.name] = null;
+              delete config[option.name];
+            } else if ((config[option.name] as string) === 'null') {
+              delete config[option.name];
             }
           }
           if (option.name === 'requireConfig') {

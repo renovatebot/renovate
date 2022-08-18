@@ -185,22 +185,25 @@ function getNewValue({
   if (isVersion(currentValue)) {
     newValue = newVersion;
   } else if (regEx(/^[~^](0\.[1-9][0-9]*)$/).test(currentValue)) {
-    const operator = currentValue.substr(0, 1);
+    const operator = currentValue.substring(0, 1);
     // handle ~0.4 case first
     if (toMajor === 0) {
-      newValue = `${operator}0.${toMinor}`;
+      // TODO: types (#7154)
+      newValue = `${operator}0.${toMinor!}`;
     } else {
-      newValue = `${operator}${toMajor}.0`;
+      // TODO: types (#7154)
+      newValue = `${operator}${toMajor!}.0`;
     }
   } else if (regEx(/^[~^]([0-9]*)$/).test(currentValue)) {
     // handle ~4 case
-    const operator = currentValue.substr(0, 1);
-    newValue = `${operator}${toMajor}`;
+    const operator = currentValue.substring(0, 1);
+    // TODO: types (#7154)
+    newValue = `${operator}${toMajor!}`;
   } else if (
     toMajor &&
     regEx(/^[~^]([0-9]*(?:\.[0-9]*)?)$/).test(currentValue)
   ) {
-    const operator = currentValue.substr(0, 1);
+    const operator = currentValue.substring(0, 1);
     // handle ~4.1 case
     if ((currentMajor && toMajor > currentMajor) || !toMinor) {
       newValue = `${operator}${toMajor}.0`;
@@ -216,7 +219,7 @@ function getNewValue({
     newValue = npm.getNewValue({
       currentValue: normalizeVersion(currentValue),
       rangeStrategy,
-      currentVersion: normalizeVersion(currentVersion),
+      currentVersion: padZeroes(normalizeVersion(currentVersion)),
       newVersion: padZeroes(normalizeVersion(newVersion)),
     });
   }

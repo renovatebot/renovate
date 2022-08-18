@@ -35,6 +35,8 @@ function getPackageSource(repository: any): PackageSource {
     if (is.nonEmptyString(repository.directory)) {
       res.sourceDirectory = repository.directory;
     }
+    // TODO: types (#7154)
+    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
     const sourceUrlCopy = `${res.sourceUrl}`;
     const sourceUrlSplit: string[] = sourceUrlCopy.split('/');
     if (sourceUrlSplit.length > 7 && sourceUrlSplit[2] === 'github.com') {
@@ -88,8 +90,8 @@ export async function getDependency(
     }
 
     const latestVersion = res.versions[res['dist-tags']?.latest ?? ''];
-    res.repository = res.repository || latestVersion?.repository;
-    res.homepage = res.homepage || latestVersion?.homepage;
+    res.repository ??= latestVersion?.repository;
+    res.homepage ??= latestVersion?.homepage;
 
     const { sourceUrl, sourceDirectory } = getPackageSource(res.repository);
 
@@ -194,6 +196,7 @@ export async function getDependency(
       }
       throw new ExternalHostError(err);
     }
+    logger.debug({ err }, 'Unknown npm lookup error');
     return null;
   }
 }

@@ -23,6 +23,9 @@ env:
   NPM_VERSION: ${{ github.event.client_payload.version }}
   NPM_TAG: ${{ github.event.client_payload.tag }}
 
+permissions:
+  contents: read
+
 jobs:
   release-npm:
     runs-on: ubuntu-latest
@@ -40,7 +43,7 @@ jobs:
           ref: ${{ env.GIT_SHA }}
 
       - name: Set up Node.js ${{ env.NODE_VERSION }}
-        uses: actions/setup-node@17f8bd926464a1afa4c6a11669539e9c1ba77048 # tag=v3.2.0
+        uses: actions/setup-node@2fddd8803e2f5c9604345a0b591c3020ee971a93 # tag=v3.4.1
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: yarn

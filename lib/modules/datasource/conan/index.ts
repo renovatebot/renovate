@@ -5,9 +5,19 @@ import { cache } from '../../../util/cache/package/decorator';
 import { GithubHttp } from '../../../util/http/github';
 import { ensureTrailingSlash, joinUrlParts } from '../../../util/url';
 import { Datasource } from '../datasource';
-import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
-import { conanDatasourceRegex, datasource, defaultRegistryUrl } from './common';
-import type { ConanJSON, ConanYAML } from './types';
+import type {
+  DigestConfig,
+  GetReleasesConfig,
+  Release,
+  ReleaseResult,
+} from '../types';
+import {
+  conanDatasourceRegex,
+  datasource,
+  defaultRegistryUrl,
+  getConanPackage,
+} from './common';
+import type { ConanJSON, ConanRevisionsJSON, ConanYAML } from './types';
 
 export class ConanDatasource extends Datasource {
   static readonly id = datasource;
@@ -44,23 +54,56 @@ export class ConanDatasource extends Datasource {
       json: true,
     }) as ConanYAML;
     return {
-      releases: Object.keys(doc?.versions || {}).map((version) => ({
+      releases: Object.keys(doc?.versions ?? {}).map((version) => ({
         version,
       })),
     };
   }
 
   @cache({
+    namespace: `datasource-${datasource}-revisions`,
+    key: ({ registryUrl, packageName }: DigestConfig, newValue?: string) =>
+      // TODO: types (#7154)
+      `${registryUrl!}:${packageName}:${newValue!}`,
+  })
+  override async getDigest(
+    { registryUrl, packageName }: DigestConfig,
+    newValue?: string
+  ): Promise<string | null> {
+    if (is.undefined(newValue) || is.undefined(registryUrl)) {
+      return null;
+    }
+    const url = ensureTrailingSlash(registryUrl);
+    const conanPackage = getConanPackage(packageName);
+    const revisionLookUp = joinUrlParts(
+      url,
+      'v2/conans/',
+      conanPackage.depName,
+      newValue,
+      conanPackage.userAndChannel,
+      '/revisions'
+    );
+    const revisionRep = await this.http.getJson<ConanRevisionsJSON>(
+      revisionLookUp
+    );
+    const revisions = revisionRep?.body.revisions;
+    return revisions?.[0].revision ?? null;
+  }
+
+  @cache({
     namespace: `datasource-${datasource}`,
     key: ({ registryUrl, packageName }: GetReleasesConfig) =>
+      // TODO: types (#7154)
+      // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
       `${registryUrl}:${packageName}`,
   })
   async getReleases({
     registryUrl,
     packageName,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    const depName = packageName.split('/')[0];
-    const userAndChannel = '@' + packageName.split('@')[1];
+    const conanPackage = getConanPackage(packageName);
+    const depName = conanPackage.depName;
+    const userAndChannel = '@' + conanPackage.userAndChannel;
     if (
       is.string(registryUrl) &&
       ensureTrailingSlash(registryUrl) === defaultRegistryUrl
@@ -80,7 +123,7 @@ export class ConanDatasource extends Datasource {
           logger.trace({ lookupUrl }, 'Got conan api result');
           const dep: ReleaseResult = { releases: [] };
 
-          for (const resultString of Object.values(versions.results || {})) {
+          for (const resultString of Object.values(versions.results ?? {})) {
             const fromMatch = conanDatasourceRegex.exec(resultString);
             if (fromMatch?.groups?.version && fromMatch?.groups?.userChannel) {
               const version = fromMatch.groups.version;

@@ -1,10 +1,12 @@
 import { Readable } from 'stream';
 import is from '@sindresorhus/is';
+import type { IGitApi } from 'azure-devops-node-api/GitApi';
 import {
   GitPullRequestMergeStrategy,
   GitStatusState,
   PullRequestStatus,
 } from 'azure-devops-node-api/interfaces/GitInterfaces.js';
+import { partial } from '../../../../test/util';
 import {
   REPOSITORY_ARCHIVED,
   REPOSITORY_NOT_FOUND,
@@ -41,7 +43,7 @@ describe('modules/platform/azure/index', () => {
     logger = (await import('../../../logger')).logger as never;
     git = require('../../../util/git');
     git.branchExists.mockReturnValue(true);
-    git.isBranchStale.mockResolvedValue(false);
+    git.isBranchBehindBase.mockResolvedValue(false);
     hostRules.find.mockReturnValue({
       token: 'token',
     });
@@ -167,13 +169,13 @@ describe('modules/platform/azure/index', () => {
     if (is.string(args)) {
       return azure.initRepo({
         repository: args,
-      } as any);
+      });
     }
 
     return azure.initRepo({
       repository: 'some/repo',
       ...args,
-    } as any);
+    });
   }
 
   describe('initRepo', () => {
@@ -1308,6 +1310,10 @@ describe('modules/platform/azure/index', () => {
   });
 
   describe('getJsonFile()', () => {
+    beforeEach(async () => {
+      await initRepo();
+    });
+
     it('returns file content', async () => {
       const data = { foo: 'bar' };
       azureApi.gitApi.mockImplementationOnce(
@@ -1395,6 +1401,16 @@ describe('modules/platform/azure/index', () => {
       const res = await azure.getJsonFile('file.json', 'foo/bar');
       expect(res).toEqual(data);
       expect(gitApiMock.getItemContent.mock.calls).toMatchSnapshot();
+    });
+
+    it('returns null', async () => {
+      azureApi.gitApi.mockResolvedValueOnce(
+        partial<IGitApi>({
+          getRepositories: jest.fn(() => Promise.resolve([])),
+        })
+      );
+      const res = await azure.getJsonFile('file.json', 'foo/bar');
+      expect(res).toBeNull();
     });
   });
 });

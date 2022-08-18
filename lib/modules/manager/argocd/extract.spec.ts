@@ -1,5 +1,5 @@
 import { Fixtures } from '../../../../test/fixtures';
-import { extractPackageFile } from './extract';
+import { extractPackageFile } from '.';
 
 const validApplication = Fixtures.get('validApplication.yml');
 const malformedApplication = Fixtures.get('malformedApplications.yml');
@@ -10,6 +10,12 @@ describe('modules/manager/argocd/extract', () => {
   describe('extractPackageFile()', () => {
     it('returns null for empty', () => {
       expect(extractPackageFile('nothing here', 'applications.yml')).toBeNull();
+    });
+
+    it('returns null for invalid', () => {
+      expect(
+        extractPackageFile(`${malformedApplication}\n123`, 'applications.yml')
+      ).toBeNull();
     });
 
     it('return null for kubernetes manifest', () => {
@@ -27,9 +33,29 @@ describe('modules/manager/argocd/extract', () => {
 
     it('full test', () => {
       const result = extractPackageFile(validApplication, 'applications.yml');
-      expect(result).not.toBeNull();
-      expect(result.deps).toBeArrayOfSize(3);
-      expect(result.deps).toMatchSnapshot();
+      expect(result).toEqual({
+        deps: [
+          {
+            currentValue: '2.4.1',
+            datasource: 'helm',
+            depName: 'kube-state-metrics',
+            registryUrls: [
+              'https://prometheus-community.github.io/helm-charts',
+            ],
+          },
+          {
+            currentValue: '0.0.2',
+            datasource: 'helm',
+            depName: 'traefik',
+            registryUrls: ['gs://helm-charts-internal'],
+          },
+          {
+            currentValue: 'v1.2.0',
+            datasource: 'git-tags',
+            depName: 'https://git.example.com/foo/bar.git',
+          },
+        ],
+      });
     });
 
     it('supports applicationsets', () => {

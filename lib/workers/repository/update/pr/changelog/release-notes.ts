@@ -1,3 +1,4 @@
+// TODO #7154
 import URL from 'url';
 import is from '@sindresorhus/is';
 import { DateTime } from 'luxon';
@@ -7,12 +8,14 @@ import * as memCache from '../../../../../util/cache/memory';
 import * as packageCache from '../../../../../util/cache/package';
 import { linkify } from '../../../../../util/markdown';
 import { newlineRegex, regEx } from '../../../../../util/regex';
+import type { BranchUpgradeConfig } from '../../../../types';
 import * as github from './github';
 import * as gitlab from './gitlab';
 import type {
   ChangeLogFile,
   ChangeLogNotes,
   ChangeLogProject,
+  ChangeLogRelease,
   ChangeLogResult,
 } from './types';
 
@@ -20,16 +23,17 @@ const markdown = new MarkdownIt('zero');
 markdown.enable(['heading', 'lheading']);
 
 export async function getReleaseList(
-  project: ChangeLogProject
+  project: ChangeLogProject,
+  release: ChangeLogRelease
 ): Promise<ChangeLogNotes[]> {
   logger.trace('getReleaseList()');
   const { apiBaseUrl, repository, type } = project;
   try {
     switch (type) {
       case 'gitlab':
-        return await gitlab.getReleaseList(apiBaseUrl, repository);
+        return await gitlab.getReleaseList(project, release);
       case 'github':
-        return await github.getReleaseList(apiBaseUrl, repository);
+        return await github.getReleaseList(project, release);
 
       default:
         logger.warn({ apiBaseUrl, repository, type }, 'Invalid project type');
@@ -49,15 +53,19 @@ export async function getReleaseList(
 }
 
 export function getCachedReleaseList(
-  project: ChangeLogProject
+  project: ChangeLogProject,
+  release: ChangeLogRelease
 ): Promise<ChangeLogNotes[]> {
-  const cacheKey = `getReleaseList-${project.apiBaseUrl}-${project.repository}`;
+  // TODO: types (#7154)
+  const cacheKey = `getReleaseList-${project.apiBaseUrl!}-${
+    project.repository
+  }`;
   const cachedResult = memCache.get<Promise<ChangeLogNotes[]>>(cacheKey);
   // istanbul ignore if
   if (cachedResult !== undefined) {
     return cachedResult;
   }
-  const promisedRes = getReleaseList(project);
+  const promisedRes = getReleaseList(project, release);
   memCache.set(cacheKey, promisedRes);
   return promisedRes;
 }
@@ -66,7 +74,7 @@ export function massageBody(
   input: string | undefined | null,
   baseUrl: string
 ): string {
-  let body = input || '';
+  let body = input ?? '';
   // Convert line returns
   body = body.replace(regEx(/\r\n/g), '\n');
   // semantic-release cleanup
@@ -95,20 +103,35 @@ export function massageBody(
 
 export async function getReleaseNotes(
   project: ChangeLogProject,
-  version: string
+  release: ChangeLogRelease,
+  config: BranchUpgradeConfig
 ): Promise<ChangeLogNotes | null> {
   const { depName, repository } = project;
-  logger.trace(`getReleaseNotes(${repository}, ${version}, ${depName})`);
-  const releases = await getCachedReleaseList(project);
+  const { version, gitRef } = release;
+  // TODO: types (#7154)
+  logger.trace(`getReleaseNotes(${repository}, ${version}, ${depName!})`);
+  const releases = await getCachedReleaseList(project, release);
   logger.trace({ releases }, 'Release list from getReleaseList');
   let releaseNotes: ChangeLogNotes | null = null;
 
-  let matchedRelease = getExactReleaseMatch(depName, version, releases);
+  let matchedRelease = getExactReleaseMatch(depName!, version, releases);
   if (is.undefined(matchedRelease)) {
     // no exact match of a release then check other cases
     matchedRelease = releases.find(
-      (r) => r.tag === version || r.tag === `v${version}`
+      (r) =>
+        r.tag === version ||
+        r.tag === `v${version}` ||
+        r.tag === gitRef ||
+        r.tag === `v${gitRef}`
     );
+  }
+  if (is.undefined(matchedRelease) && config.extractVersion) {
+    const extractVersionRegEx = regEx(config.extractVersion);
+    matchedRelease = releases.find((r) => {
+      const extractedVersion = extractVersionRegEx.exec(r.tag!)?.groups
+        ?.version;
+      return version === extractedVersion;
+    });
   }
   releaseNotes = await releaseNotesResult(matchedRelease, project);
   logger.trace({ releaseNotes });
@@ -123,7 +146,7 @@ function getExactReleaseMatch(
   const exactReleaseReg = regEx(`${depName}[@_-]v?${version}`);
   const candidateReleases = releases.filter((r) => r.tag?.endsWith(version));
   const matchedRelease = candidateReleases.find((r) =>
-    exactReleaseReg.test(r.tag)
+    exactReleaseReg.test(r.tag!)
   );
   return matchedRelease;
 }
@@ -141,9 +164,10 @@ async function releaseNotesResult(
     // there is a ready link
     releaseNotes.url = releaseMatch.url;
   } else {
+    // TODO: types (#7154)
     releaseNotes.url = baseUrl.includes('gitlab')
-      ? `${baseUrl}${repository}/tags/${releaseMatch.tag}`
-      : `${baseUrl}${repository}/releases/${releaseMatch.tag}`;
+      ? `${baseUrl}${repository}/tags/${releaseMatch.tag!}`
+      : `${baseUrl}${repository}/releases/${releaseMatch.tag!}`;
   }
   // set body for release notes
   releaseNotes.body = massageBody(releaseNotes.body, baseUrl);
@@ -170,9 +194,9 @@ function sectionize(text: string, level: number): string[] {
   const tokens = markdown.parse(text, undefined);
   tokens.forEach((token) => {
     if (token.type === 'heading_open') {
-      const lev = +token.tag.substr(1);
+      const lev = +token.tag.substring(1);
       if (lev <= level) {
-        sections.push([lev, token.map[0]]);
+        sections.push([lev, token.map![0]]);
       }
     }
   });
@@ -201,8 +225,10 @@ function isUrl(url: string): boolean {
 
 export async function getReleaseNotesMdFileInner(
   project: ChangeLogProject
-): Promise<ChangeLogFile> | null {
-  const { apiBaseUrl, repository, sourceDirectory, type } = project;
+): Promise<ChangeLogFile | null> {
+  const { repository, type } = project;
+  const apiBaseUrl = project.apiBaseUrl!;
+  const sourceDirectory = project.sourceDirectory!;
   try {
     switch (type) {
       case 'gitlab':
@@ -241,9 +267,10 @@ export async function getReleaseNotesMdFileInner(
 export function getReleaseNotesMdFile(
   project: ChangeLogProject
 ): Promise<ChangeLogFile | null> {
+  // TODO: types (#7154)
   const cacheKey = `getReleaseNotesMdFile@v2-${project.repository}${
     project.sourceDirectory ? `-${project.sourceDirectory}` : ''
-  }-${project.apiBaseUrl}`;
+  }-${project.apiBaseUrl!}`;
   const cachedResult = memCache.get<Promise<ChangeLogFile | null>>(cacheKey);
   // istanbul ignore if
   if (cachedResult !== undefined) {
@@ -256,9 +283,10 @@ export function getReleaseNotesMdFile(
 
 export async function getReleaseNotesMd(
   project: ChangeLogProject,
-  version: string
+  release: ChangeLogRelease
 ): Promise<ChangeLogNotes | null> {
   const { baseUrl, repository } = project;
+  const version = release.version;
   logger.trace(`getReleaseNotesMd(${repository}, ${version})`);
   const skippedRepos = ['facebook/react-native'];
   // istanbul ignore if
@@ -337,7 +365,7 @@ export async function getReleaseNotesMd(
 export function releaseNotesCacheMinutes(releaseDate?: string | Date): number {
   const dt = is.date(releaseDate)
     ? DateTime.fromJSDate(releaseDate)
-    : DateTime.fromISO(releaseDate);
+    : DateTime.fromISO(releaseDate!);
 
   const now = DateTime.local();
 
@@ -352,8 +380,10 @@ export function releaseNotesCacheMinutes(releaseDate?: string | Date): number {
   return 14495; // 5 minutes shy of 10 days
 }
 
+// TODO #7154 allow `null` and `undefined`
 export async function addReleaseNotes(
-  input: ChangeLogResult
+  input: ChangeLogResult,
+  config: BranchUpgradeConfig
 ): Promise<ChangeLogResult> {
   if (!input?.versions || !input.project?.type) {
     logger.debug('Missing project or versions');
@@ -368,15 +398,15 @@ export async function addReleaseNotes(
     }${version}`;
   }
   for (const v of input.versions) {
-    let releaseNotes: ChangeLogNotes;
+    let releaseNotes: ChangeLogNotes | null | undefined;
     const cacheKey = getCacheKey(v.version);
     releaseNotes = await packageCache.get(cacheNamespace, cacheKey);
     // istanbul ignore else: no cache tests
     if (!releaseNotes) {
-      releaseNotes = await getReleaseNotesMd(input.project, v.version);
+      releaseNotes = await getReleaseNotesMd(input.project, v);
       // istanbul ignore else: should be tested
       if (!releaseNotes) {
-        releaseNotes = await getReleaseNotes(input.project, v.version);
+        releaseNotes = await getReleaseNotes(input.project, v, config);
       }
       // Small hack to force display of release notes when there is a compare url
       if (!releaseNotes && v.compare.url) {
@@ -390,11 +420,11 @@ export async function addReleaseNotes(
         cacheMinutes
       );
     }
-    output.versions.push({
+    output.versions!.push({
       ...v,
-      releaseNotes,
+      releaseNotes: releaseNotes!,
     });
-    output.hasReleaseNotes = output.hasReleaseNotes || !!releaseNotes;
+    output.hasReleaseNotes = !!output.hasReleaseNotes || !!releaseNotes;
   }
   return output;
 }

@@ -1,9 +1,11 @@
+// TODO #7154
 import { GlobalConfig } from '../../../../config/global';
 import type { RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
 import { platform } from '../../../../modules/platform';
 import { BranchStatus } from '../../../../types';
 import { mergeBranch } from '../../../../util/git';
+import { isScheduledNow } from './schedule';
 import { resolveBranchStatus } from './status-checks';
 
 export type AutomergeResult =
@@ -13,6 +15,7 @@ export type AutomergeResult =
   | 'failed'
   | 'no automerge'
   | 'stale'
+  | 'off schedule'
   | 'not ready';
 
 export async function tryBranchAutomerge(
@@ -22,21 +25,25 @@ export async function tryBranchAutomerge(
   if (!(config.automerge && config.automergeType === 'branch')) {
     return 'no automerge';
   }
-  const existingPr = await platform.getBranchPr(config.branchName);
+  if (!isScheduledNow(config, 'automergeSchedule')) {
+    return 'off schedule';
+  }
+  const existingPr = await platform.getBranchPr(config.branchName!);
   if (existingPr) {
     return 'automerge aborted - PR exists';
   }
   const branchStatus = await resolveBranchStatus(
-    config.branchName,
+    config.branchName!,
     config.ignoreTests
   );
   if (branchStatus === BranchStatus.green) {
     logger.debug(`Automerging branch`);
     try {
       if (GlobalConfig.get('dryRun')) {
-        logger.info(`DRY-RUN: Would automerge branch ${config.branchName}`);
+        // TODO: types (#7154)
+        logger.info(`DRY-RUN: Would automerge branch ${config.branchName!}`);
       } else {
-        await mergeBranch(config.branchName);
+        await mergeBranch(config.branchName!);
       }
       logger.info({ branch: config.branchName }, 'Branch automerged');
       return 'automerged'; // Branch no longer exists

@@ -190,19 +190,28 @@ function massageRegistryUrls(registryUrls: string[]): string[] {
 function resolveRegistryUrls(
   datasource: DatasourceApi,
   defaultRegistryUrls: string[] | undefined,
-  registryUrls: string[] | undefined
+  registryUrls: string[] | undefined,
+  additionalRegistryUrls: string[] | undefined
 ): string[] {
   if (!datasource.customRegistrySupport) {
     if (
       is.nonEmptyArray(registryUrls) ||
-      is.nonEmptyArray(defaultRegistryUrls)
+      is.nonEmptyArray(defaultRegistryUrls) ||
+      is.nonEmptyArray(additionalRegistryUrls)
     ) {
       logger.warn(
-        { datasource: datasource.id, registryUrls, defaultRegistryUrls },
+        {
+          datasource: datasource.id,
+          registryUrls,
+          defaultRegistryUrls,
+          additionalRegistryUrls,
+        },
         'Custom registries are not allowed for this datasource and will be ignored'
       );
     }
-    return datasource.defaultRegistryUrls ?? [];
+    return is.function_(datasource.defaultRegistryUrls)
+      ? datasource.defaultRegistryUrls()
+      : datasource.defaultRegistryUrls ?? [];
   }
   const customUrls = registryUrls?.filter(Boolean);
   let resolvedUrls: string[] = [];
@@ -210,19 +219,29 @@ function resolveRegistryUrls(
     resolvedUrls = [...customUrls];
   } else if (is.nonEmptyArray(defaultRegistryUrls)) {
     resolvedUrls = [...defaultRegistryUrls];
+    resolvedUrls = resolvedUrls.concat(additionalRegistryUrls ?? []);
+  } else if (is.function_(datasource.defaultRegistryUrls)) {
+    resolvedUrls = [...datasource.defaultRegistryUrls()];
+    resolvedUrls = resolvedUrls.concat(additionalRegistryUrls ?? []);
   } else if (is.nonEmptyArray(datasource.defaultRegistryUrls)) {
     resolvedUrls = [...datasource.defaultRegistryUrls];
+    resolvedUrls = resolvedUrls.concat(additionalRegistryUrls ?? []);
   }
   return massageRegistryUrls(resolvedUrls);
 }
 
-export function getDefaultVersioning(datasourceName: string): string {
+export function getDefaultVersioning(
+  datasourceName: string | undefined
+): string {
+  if (!datasourceName) {
+    return 'semver';
+  }
   const datasource = getDatasourceFor(datasourceName);
   // istanbul ignore if: wrong regex manager config?
   if (!datasource) {
     logger.warn({ datasourceName }, 'Missing datasource!');
   }
-  return datasource?.defaultVersioning || 'semver';
+  return datasource?.defaultVersioning ?? 'semver';
 }
 
 function applyReplacements(
@@ -263,10 +282,11 @@ async function fetchReleases(
   registryUrls = resolveRegistryUrls(
     datasource,
     config.defaultRegistryUrls,
-    registryUrls
+    registryUrls,
+    config.additionalRegistryUrls
   );
   let dep: ReleaseResult | null = null;
-  const registryStrategy = datasource.registryStrategy || 'hunt';
+  const registryStrategy = datasource.registryStrategy ?? 'hunt';
   try {
     if (is.nonEmptyArray(registryUrls)) {
       if (registryStrategy === 'first') {
@@ -321,7 +341,7 @@ export async function getPkgReleases(
     logger.warn('No datasource found');
     return null;
   }
-  const packageName = config.packageName || config.depName;
+  const packageName = config.packageName ?? config.depName;
   if (!packageName) {
     logger.error({ config }, 'Datasource getReleases without packageName');
     return null;
@@ -359,7 +379,7 @@ export async function getPkgReleases(
   }
   // Use the datasource's default versioning if none is configured
   const versioning =
-    config.versioning || getDefaultVersioning(config.datasource);
+    config.versioning ?? getDefaultVersioning(config.datasource);
   const version = allVersioning.get(versioning);
 
   // Filter and sort valid versions
@@ -376,7 +396,7 @@ export async function getPkgReleases(
   );
   // Filter releases for compatibility
   for (const [constraintName, constraintValue] of Object.entries(
-    config.constraints || {}
+    config.constraints ?? {}
   )) {
     // Currently we only support if the constraint is a plain version
     // TODO: Support range/range compatibility filtering #8476
@@ -417,7 +437,8 @@ function getDigestConfig(
   const [registryUrl] = resolveRegistryUrls(
     datasource,
     config.defaultRegistryUrls,
-    config.registryUrls
+    config.registryUrls,
+    config.additionalRegistryUrls
   );
   return { packageName, registryUrl, currentValue, currentDigest };
 }
@@ -432,7 +453,6 @@ export function getDigest(
     return Promise.resolve(null);
   }
   const digestConfig = getDigestConfig(datasource, config);
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
   return datasource.getDigest!(digestConfig, value);
 }
 
@@ -441,6 +461,6 @@ export function getDefaultConfig(
 ): Promise<Record<string, unknown>> {
   const loadedDatasource = getDatasourceFor(datasource);
   return Promise.resolve<Record<string, unknown>>(
-    loadedDatasource?.defaultConfig || Object.create({})
+    loadedDatasource?.defaultConfig ?? Object.create({})
   );
 }

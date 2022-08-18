@@ -9,6 +9,7 @@ Multi-platform and multi-language.
 [![codecov](https://codecov.io/gh/renovatebot/renovate/branch/main/graph/badge.svg)](https://codecov.io/gh/renovatebot/renovate)
 [![Renovate enabled](https://img.shields.io/badge/renovate-enabled-brightgreen.svg)](https://renovatebot.com/)
 [![Build status](https://github.com/renovatebot/renovate/workflows/build/badge.svg)](https://github.com/renovatebot/renovate/actions)
+![Docker Pulls](https://img.shields.io/docker/pulls/renovate/renovate?color=turquoise)
 
 ## Why Use Renovate?
 
@@ -53,6 +54,8 @@ This means that Renovate:
 - Will autodetect settings where possible
 
 ## Using Renovate
+
+Get started with Renovate by checking out our [tutorial](https://github.com/renovatebot/tutorial).
 
 ### GitHub
 
@@ -105,10 +108,11 @@ To run your own instance of Renovate you have several options:
 ## Contributing
 
 If you want to contribute to Renovate or get a local copy running, please read the instructions in [.github/contributing.md](.github/contributing.md).
+To get started look at the [list of good first issues](https://github.com/renovatebot/renovate/contribute).
 
 ## Security / Disclosure
 
-If you find any bug with Renovate that may be a security problem, then e-mail us at: [renovate-disclosure@whitesourcesoftware.com](mailto:renovate-disclosure@whitesourcesoftware.com).
+If you find any bug with Renovate that may be a security problem, then e-mail us at: [renovate-disclosure@mend.io](mailto:renovate-disclosure@mend.io).
 This way we can evaluate the bug and hopefully fix it before it gets abused.
 Please give us enough time to investigate the bug before you report it anywhere else.
 

@@ -1,8 +1,10 @@
 import is from '@sindresorhus/is';
 import { regEx } from '../../../util/regex';
-import type { CustomExtractConfig, PackageDependency } from '../types';
+import type { PackageDependency } from '../types';
+import type { RecursionParameter, RegexManagerConfig } from './types';
 import {
   createDependency,
+  isValidDependency,
   mergeExtractionTemplate,
   mergeGroups,
   regexMatchAll,
@@ -11,7 +13,7 @@ import {
 export function handleAny(
   content: string,
   packageFile: string,
-  config: CustomExtractConfig
+  config: RegexManagerConfig
 ): PackageDependency[] {
   return config.matchStrings
     .map((matchString) => regEx(matchString, 'g'))
@@ -22,13 +24,14 @@ export function handleAny(
         config
       )
     )
-    .filter(is.truthy);
+    .filter(is.truthy)
+    .filter(isValidDependency);
 }
 
 export function handleCombination(
   content: string,
   packageFile: string,
-  config: CustomExtractConfig
+  config: RegexManagerConfig
 ): PackageDependency[] {
   const matches = config.matchStrings
     .map((matchString) => regEx(matchString, 'g'))
@@ -44,43 +47,57 @@ export function handleCombination(
       replaceString: match?.groups?.currentValue ? match[0] : undefined,
     }))
     .reduce((base, addition) => mergeExtractionTemplate(base, addition));
-  return [createDependency(extraction, config)].filter(is.truthy);
+  return [createDependency(extraction, config)]
+    .filter(is.truthy)
+    .filter(isValidDependency);
 }
 
 export function handleRecursive(
   content: string,
   packageFile: string,
-  config: CustomExtractConfig,
-  index = 0,
-  combinedGroups: Record<string, string> = {}
+  config: RegexManagerConfig
 ): PackageDependency[] {
   const regexes = config.matchStrings.map((matchString) =>
     regEx(matchString, 'g')
   );
-  // abort if we have no matchString anymore
-  if (!regexes[index]) {
-    return [];
-  }
-  return regexMatchAll(regexes[index], content)
-    .flatMap((match) => {
-      // if we have a depName and a currentValue which have the minimal viable definition
-      if (match?.groups?.depName && match?.groups?.currentValue) {
-        return createDependency(
-          {
-            groups: mergeGroups(combinedGroups, match.groups),
-            replaceString: match[0],
-          },
-          config
-        );
-      }
 
-      return handleRecursive(
-        match[0],
-        packageFile,
-        config,
-        index + 1,
-        mergeGroups(combinedGroups, match.groups || {})
-      );
-    })
-    .filter(is.truthy);
+  return processRecursive({
+    content,
+    packageFile,
+    config,
+    index: 0,
+    combinedGroups: {},
+    regexes,
+  })
+    .filter(is.truthy)
+    .filter(isValidDependency);
+}
+
+function processRecursive(parameters: RecursionParameter): PackageDependency[] {
+  const {
+    content,
+    index,
+    combinedGroups,
+    regexes,
+    config,
+  }: RecursionParameter = parameters;
+  // abort if we have no matchString anymore
+  if (regexes.length === index) {
+    const result = createDependency(
+      {
+        groups: combinedGroups,
+        replaceString: content,
+      },
+      config
+    );
+    return result ? [result] : [];
+  }
+  return regexMatchAll(regexes[index], content).flatMap((match) => {
+    return processRecursive({
+      ...parameters,
+      content: match[0],
+      index: index + 1,
+      combinedGroups: mergeGroups(combinedGroups, match.groups ?? {}),
+    });
+  });
 }

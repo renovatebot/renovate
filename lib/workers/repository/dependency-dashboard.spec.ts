@@ -5,26 +5,61 @@ import {
   RenovateConfig,
   getConfig,
   logger,
+  mockedFunction,
   platform,
 } from '../../../test/util';
 import { GlobalConfig } from '../../config/global';
 import { PlatformId } from '../../constants';
+import type {
+  PackageDependency,
+  PackageFile,
+} from '../../modules/manager/types';
 import type { Platform } from '../../modules/platform';
+import {
+  GitHubMaxPrBodyLen,
+  massageMarkdown,
+} from '../../modules/platform/github';
 import { BranchConfig, BranchResult, BranchUpgradeConfig } from '../types';
 import * as dependencyDashboard from './dependency-dashboard';
 import { PackageFiles } from './package-files';
 
 type PrUpgrade = BranchUpgradeConfig;
 
+const massageMdSpy = jest.spyOn(platform, 'massageMarkdown');
 let config: RenovateConfig;
 
 beforeEach(() => {
   jest.clearAllMocks();
+  massageMdSpy.mockImplementation(massageMarkdown);
   config = getConfig();
   config.platform = PlatformId.Github;
   config.errors = [];
   config.warnings = [];
 });
+
+function genRandString(length: number): string {
+  let result = '';
+  const chars = 'abcdefghijklmnopqrstuvwxyz';
+  const charsLen = chars.length;
+  for (let i = 0; i < length; i++) {
+    result += chars.charAt(Math.floor(Math.random() * charsLen));
+  }
+  return result;
+}
+
+function genRandPackageFile(
+  depsNum: number,
+  depNameLen: number
+): Record<string, PackageFile[]> {
+  const deps: PackageDependency[] = [];
+  for (let i = 0; i < depsNum; i++) {
+    deps.push({
+      depName: genRandString(depNameLen),
+      currentValue: '1.0.0',
+    });
+  }
+  return { npm: [{ packageFile: 'package.json', deps }] };
+}
 
 async function dryRun(
   branches: BranchConfig[],
@@ -517,7 +552,7 @@ describe('workers/repository/dependency-dashboard', () => {
       config.dependencyDashboard = true;
       config.dependencyDashboardChecks = { branchName2: 'approve-branch' };
       config.dependencyDashboardIssue = 1;
-      platform.getIssue.mockResolvedValueOnce({
+      mockedFunction(platform.getIssue!).mockResolvedValueOnce({
         title: 'Dependency Dashboard',
         body: `This issue contains a list of Renovate updates and their statuses.
 
@@ -558,6 +593,9 @@ describe('workers/repository/dependency-dashboard', () => {
 
     describe('checks detected dependencies section', () => {
       const packageFiles = Fixtures.getJson('./package-files.json');
+      const packageFilesWithDigest = Fixtures.getJson(
+        './package-files-digest.json'
+      );
       let config: RenovateConfig;
 
       beforeAll(() => {
@@ -568,11 +606,8 @@ describe('workers/repository/dependency-dashboard', () => {
 
       describe('single base branch repo', () => {
         beforeEach(() => {
-          PackageFiles.add('main', packageFiles);
-        });
-
-        afterEach(() => {
           PackageFiles.clear();
+          PackageFiles.add('main', packageFiles);
         });
 
         it('add detected dependencies to the Dependency Dashboard body', async () => {
@@ -601,6 +636,17 @@ describe('workers/repository/dependency-dashboard', () => {
           const branches: BranchConfig[] = [];
           PackageFiles.clear();
           PackageFiles.add('main', null);
+          await dependencyDashboard.ensureDependencyDashboard(config, branches);
+          expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
+          expect(platform.ensureIssue.mock.calls[0][0].body).toMatchSnapshot();
+
+          // same with dry run
+          await dryRun(branches, platform);
+        });
+
+        it('shows different combinations of version+digest for a given dependency', async () => {
+          const branches: BranchConfig[] = [];
+          PackageFiles.add('main', packageFilesWithDigest);
           await dependencyDashboard.ensureDependencyDashboard(config, branches);
           expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
           expect(platform.ensureIssue.mock.calls[0][0].body).toMatchSnapshot();
@@ -612,12 +658,9 @@ describe('workers/repository/dependency-dashboard', () => {
 
       describe('multi base branch repo', () => {
         beforeEach(() => {
+          PackageFiles.clear();
           PackageFiles.add('main', packageFiles);
           PackageFiles.add('dev', packageFiles);
-        });
-
-        afterEach(() => {
-          PackageFiles.clear();
         });
 
         it('add detected dependencies to the Dependency Dashboard body', async () => {
@@ -650,6 +693,151 @@ describe('workers/repository/dependency-dashboard', () => {
 
           // same with dry run
           await dryRun(branches, platform);
+        });
+
+        it('truncates the body of a really big repo', async () => {
+          const branches: BranchConfig[] = [];
+          const packageFilesBigRepo = genRandPackageFile(100, 700);
+          PackageFiles.clear();
+          PackageFiles.add('main', packageFilesBigRepo);
+          await dependencyDashboard.ensureDependencyDashboard(config, branches);
+          expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
+          expect(
+            platform.ensureIssue.mock.calls[0][0].body.length <
+              GitHubMaxPrBodyLen
+          ).toBeTrue();
+
+          // same with dry run
+          await dryRun(branches, platform);
+        });
+      });
+
+      describe('dependency dashboard lookup warnings', () => {
+        beforeEach(() => {
+          PackageFiles.add('main', packageFiles);
+          PackageFiles.add('dev', packageFiles);
+        });
+
+        afterEach(() => {
+          PackageFiles.clear();
+        });
+
+        it('Dependency Lookup Warnings message in issues body', async () => {
+          const branches: BranchConfig[] = [];
+          PackageFiles.add('main', {
+            npm: [{ packageFile: 'package.json', deps: [] }],
+          });
+          const dep = [
+            {
+              warnings: [{ message: 'dependency-2', topic: '' }],
+            },
+          ];
+          const packageFiles: Record<string, PackageFile[]> = {
+            npm: [{ packageFile: 'package.json', deps: dep }],
+          };
+          await dependencyDashboard.ensureDependencyDashboard(
+            config,
+            branches,
+            packageFiles
+          );
+          expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
+          expect(platform.ensureIssue.mock.calls[0][0].body).toMatchSnapshot();
+          // same with dry run
+          await dryRun(branches, platform);
+        });
+      });
+
+      describe('PackageFiles.getDashboardMarkdown()', () => {
+        const note =
+          '> **Note**\n> Detected dependencies section has been truncated\n';
+        const title = `## Detected dependencies\n\n`;
+
+        beforeEach(() => {
+          PackageFiles.clear();
+        });
+
+        afterAll(() => {
+          jest.resetAllMocks();
+        });
+
+        it('does not truncates as there is enough space to fit', () => {
+          PackageFiles.add('main', packageFiles);
+          const nonTruncated = PackageFiles.getDashboardMarkdown(
+            config,
+            Infinity
+          );
+          const len = (title + note + nonTruncated).length;
+          const truncated = PackageFiles.getDashboardMarkdown(config, len);
+          const truncatedWithTitle = PackageFiles.getDashboardMarkdown(
+            config,
+            len
+          );
+          expect(truncated.length === nonTruncated.length).toBeTrue();
+          expect(truncatedWithTitle.includes(note)).toBeFalse();
+        });
+
+        it('removes a branch with no managers', () => {
+          PackageFiles.add('main', packageFiles);
+          PackageFiles.add('dev', packageFilesWithDigest);
+          const md = PackageFiles.getDashboardMarkdown(config, Infinity, false);
+          const len = md.length;
+          PackageFiles.add('empty/branch', {});
+          const truncated = PackageFiles.getDashboardMarkdown(
+            config,
+            len,
+            false
+          );
+          expect(truncated.includes('empty/branch')).toBeFalse();
+          expect(truncated.length === len).toBeTrue();
+        });
+
+        it('removes a manager with no package files', () => {
+          PackageFiles.add('main', packageFiles);
+          const md = PackageFiles.getDashboardMarkdown(config, Infinity, false);
+          const len = md.length;
+          PackageFiles.add('dev', { dockerfile: [] });
+          const truncated = PackageFiles.getDashboardMarkdown(
+            config,
+            len,
+            false
+          );
+          expect(truncated.includes('dev')).toBeFalse();
+          expect(truncated.length === len).toBeTrue();
+        });
+
+        it('does nothing when there are no base branches left', () => {
+          const truncated = PackageFiles.getDashboardMarkdown(
+            config,
+            -1,
+            false
+          );
+          expect(truncated).toBe('');
+        });
+
+        it('removes an entire base branch', () => {
+          PackageFiles.add('main', packageFiles);
+          const md = PackageFiles.getDashboardMarkdown(config, Infinity);
+          const len = md.length + note.length;
+          PackageFiles.add('dev', packageFilesWithDigest);
+          const truncated = PackageFiles.getDashboardMarkdown(config, len);
+          expect(truncated.includes('dev')).toBeFalse();
+          expect(truncated.length === len).toBeTrue();
+        });
+
+        it('ensures original data is unchanged', () => {
+          PackageFiles.add('main', packageFiles);
+          PackageFiles.add('dev', packageFilesWithDigest);
+          const pre = PackageFiles.getDashboardMarkdown(config, Infinity);
+          const truncated = PackageFiles.getDashboardMarkdown(
+            config,
+            -1,
+            false
+          );
+          const post = PackageFiles.getDashboardMarkdown(config, Infinity);
+          expect(truncated).toBe('');
+          expect(pre === post).toBeTrue();
+          expect(post.includes('main')).toBeTrue();
+          expect(post.includes('dev')).toBeTrue();
         });
       });
     });

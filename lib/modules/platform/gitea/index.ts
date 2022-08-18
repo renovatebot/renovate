@@ -1,4 +1,3 @@
-import URL from 'url';
 import is from '@sindresorhus/is';
 import JSON5 from 'json5';
 import semver from 'semver';
@@ -14,7 +13,6 @@ import {
 import { logger } from '../../../logger';
 import { BranchStatus, PrState, VulnerabilityAlert } from '../../../types';
 import * as git from '../../../util/git';
-import * as hostRules from '../../../util/host-rules';
 import { setBaseUrl } from '../../../util/http/gitea';
 import { sanitize } from '../../../util/sanitize';
 import { ensureTrailingSlash } from '../../../util/url';
@@ -38,18 +36,34 @@ import type {
 } from '../types';
 import { smartTruncate } from '../utils/pr-body';
 import * as helper from './gitea-helper';
-import { smartLinks, trimTrailingApiPath } from './utils';
+import type {
+  CombinedCommitStatus,
+  Comment,
+  IssueState,
+  Label,
+  PR,
+  PRMergeMethod,
+  Repo,
+} from './types';
+import {
+  getMergeMethod,
+  getRepoUrl,
+  smartLinks,
+  trimTrailingApiPath,
+} from './utils';
 
 interface GiteaRepoConfig {
   repository: string;
-  mergeMethod: helper.PRMergeMethod;
+  mergeMethod: PRMergeMethod;
 
   prList: Promise<Pr[]> | null;
   issueList: Promise<Issue[]> | null;
-  labelList: Promise<helper.Label[]> | null;
+  labelList: Promise<Label[]> | null;
   defaultBranch: string;
   cloneSubmodules: boolean;
 }
+
+const DRAFT_PREFIX = 'WIP: ';
 
 const defaults = {
   hostType: PlatformId.Gitea,
@@ -61,7 +75,7 @@ let config: GiteaRepoConfig = {} as any;
 let botUserID: number;
 let botUserName: string;
 
-function toRenovateIssue(data: helper.Issue): Issue {
+function toRenovateIssue(data: Issue): Issue {
   return {
     number: data.number,
     state: data.state,
@@ -70,7 +84,8 @@ function toRenovateIssue(data: helper.Issue): Issue {
   };
 }
 
-function toRenovatePR(data: helper.PR): Pr | null {
+// TODO #7154
+function toRenovatePR(data: PR): Pr | null {
   if (!data) {
     return null;
   }
@@ -92,11 +107,19 @@ function toRenovatePR(data: helper.PR): Pr | null {
     return null;
   }
 
+  let title = data.title;
+  let isDraft = false;
+  if (title.startsWith(DRAFT_PREFIX)) {
+    title = title.substring(DRAFT_PREFIX.length);
+    isDraft = true;
+  }
+
   return {
     number: data.number,
     displayNumber: `Pull Request #${data.number}`,
     state: data.state,
-    title: data.title,
+    title,
+    isDraft,
     bodyStruct: getPrBodyStruct(data.body),
     sha: data.head.sha,
     sourceBranch: data.head.label,
@@ -106,7 +129,7 @@ function toRenovatePR(data: helper.PR): Pr | null {
     cannotMergeReason: data.mergeable
       ? undefined
       : `pr.mergeable="${data.mergeable}"`,
-    hasAssignees: !!(data.assignee?.login || is.nonEmptyArray(data.assignees)),
+    hasAssignees: !!(data.assignee?.login ?? is.nonEmptyArray(data.assignees)),
   };
 }
 
@@ -122,20 +145,20 @@ function matchesState(actual: string, expected: string): boolean {
 }
 
 function findCommentByTopic(
-  comments: helper.Comment[],
+  comments: Comment[],
   topic: string
-): helper.Comment | null {
+): Comment | null {
   return comments.find((c) => c.body.startsWith(`### ${topic}\n\n`)) ?? null;
 }
 
 function findCommentByContent(
-  comments: helper.Comment[],
+  comments: Comment[],
   content: string
-): helper.Comment | null {
+): Comment | null {
   return comments.find((c) => c.body.trim() === content) ?? null;
 }
 
-function getLabelList(): Promise<helper.Label[]> {
+function getLabelList(): Promise<Label[]> {
   if (config.labelList === null) {
     const repoLabels = helper
       .getRepoLabels(config.repository, {
@@ -157,11 +180,11 @@ function getLabelList(): Promise<helper.Label[]> {
       .catch((err) => {
         // Will fail if owner of repo is not org or Gitea version < 1.12
         logger.debug(`Unable to fetch organization labels`);
-        return [] as helper.Label[];
+        return [] as Label[];
       });
 
     config.labelList = Promise.all([repoLabels, orgLabels]).then((labels) =>
-      ([] as helper.Label[]).concat(...labels)
+      ([] as Label[]).concat(...labels)
     );
   }
 
@@ -195,7 +218,7 @@ const platform: Platform = {
     let gitAuthor: string;
     try {
       const user = await helper.getCurrentUser({ token });
-      gitAuthor = `${user.full_name || user.username} <${user.email}>`;
+      gitAuthor = `${user.full_name ?? user.username} <${user.email}>`;
       botUserID = user.id;
       botUserName = user.username;
       defaults.version = await helper.getVersion({ token });
@@ -228,20 +251,17 @@ const platform: Platform = {
     repoName?: string,
     branchOrTag?: string
   ): Promise<any | null> {
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-    const raw = (await platform.getRawFile(
-      fileName,
-      repoName,
-      branchOrTag
-    )) as string;
+    // TODO #7154
+    const raw = (await platform.getRawFile(fileName, repoName, branchOrTag))!;
     return JSON5.parse(raw);
   },
 
   async initRepo({
     repository,
     cloneSubmodules,
+    gitUrl,
   }: RepoParams): Promise<RepoResult> {
-    let repo: helper.Repo;
+    let repo: Repo;
 
     config = {} as any;
     config.repository = repository;
@@ -298,18 +318,12 @@ const platform: Platform = {
     config.defaultBranch = repo.default_branch;
     logger.debug(`${repository} default branch = ${config.defaultBranch}`);
 
-    // Find options for current host and determine Git endpoint
-    const opts = hostRules.find({
-      hostType: PlatformId.Gitea,
-      url: defaults.endpoint,
-    });
-    const gitEndpoint = URL.parse(repo.clone_url);
-    gitEndpoint.auth = opts.token ?? null;
+    const url = getRepoUrl(repo, gitUrl, defaults.endpoint);
 
     // Initialize Git storage
     await git.initRepo({
       ...config,
-      url: URL.format(gitEndpoint),
+      url,
     });
 
     // Reset cached resources
@@ -348,7 +362,7 @@ const platform: Platform = {
       // Create new status for branch commit
       const branchCommit = git.getBranchCommit(branchName);
       // TODO: check branchCommit
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+
       await helper.createCommitStatus(config.repository, branchCommit!, {
         state: helper.renovateToGiteaStatusMapping[state] || 'pending',
         context,
@@ -366,7 +380,7 @@ const platform: Platform = {
   },
 
   async getBranchStatus(branchName: string): Promise<BranchStatus> {
-    let ccs: helper.CombinedCommitStatus;
+    let ccs: CombinedCommitStatus;
     try {
       ccs = await helper.getCombinedCommitStatus(config.repository, branchName);
     } catch (err) {
@@ -383,7 +397,7 @@ const platform: Platform = {
 
     logger.debug({ ccs }, 'Branch status check result');
     return (
-      helper.giteaToRenovateStatusMapping[ccs.worstStatus] ||
+      helper.giteaToRenovateStatusMapping[ccs.worstStatus] ??
       BranchStatus.yellow
     );
   },
@@ -442,7 +456,7 @@ const platform: Platform = {
 
       // Add pull request to cache for further lookups / queries
       if (config.prList !== null) {
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+        // TODO #7154
         (await config.prList).push(pr!);
       }
     }
@@ -460,7 +474,7 @@ const platform: Platform = {
     prTitle: title,
     state = PrState.All,
   }: FindPRConfig): Promise<Pr | null> {
-    logger.debug(`findPr(${branchName}, ${title}, ${state})`);
+    logger.debug(`findPr(${branchName}, ${title!}, ${state})`);
     const prList = await platform.getPrList();
     const pr = prList.find(
       (p) =>
@@ -479,13 +493,19 @@ const platform: Platform = {
   async createPr({
     sourceBranch,
     targetBranch,
-    prTitle: title,
+    prTitle,
     prBody: rawBody,
     labels: labelNames,
+    platformOptions,
+    draftPR,
   }: CreatePRConfig): Promise<Pr> {
+    let title = prTitle;
     const base = targetBranch;
     const head = sourceBranch;
     const body = sanitize(rawBody);
+    if (draftPR) {
+      title = DRAFT_PREFIX + title;
+    }
 
     logger.debug(`Creating pull request: ${title} (${head} => ${base})`);
     try {
@@ -499,6 +519,33 @@ const platform: Platform = {
         body,
         labels: labels.filter(is.number),
       });
+
+      if (platformOptions?.usePlatformAutomerge) {
+        if (semver.gte(defaults.version, '1.17.0')) {
+          try {
+            await helper.mergePR(config.repository, gpr.number, {
+              // TODO: pass strategy (#16884)
+              Do: config.mergeMethod,
+              merge_when_checks_succeed: true,
+            });
+
+            logger.debug(
+              { prNumber: gpr.number },
+              'Gitea-native automerge: success'
+            );
+          } catch (err) {
+            logger.warn(
+              { err, prNumber: gpr.number },
+              'Gitea-native automerge: fail'
+            );
+          }
+        } else {
+          logger.debug(
+            { prNumber: gpr.number },
+            'Gitea-native automerge: not supported on this version of Gitea. Use 1.17.0 or newer.'
+          );
+        }
+      }
 
       const pr = toRenovatePR(gpr);
       if (!pr) {
@@ -555,10 +602,15 @@ const platform: Platform = {
 
   async updatePr({
     number,
-    prTitle: title,
+    prTitle,
     prBody: body,
     state,
   }: UpdatePrConfig): Promise<void> {
+    let title = prTitle;
+    if ((await getPrList()).find((pr) => pr.number === number)?.isDraft) {
+      title = DRAFT_PREFIX + title;
+    }
+
     await helper.updatePR(config.repository, number, {
       title,
       ...(body && { body }),
@@ -566,9 +618,11 @@ const platform: Platform = {
     });
   },
 
-  async mergePr({ id }: MergePRConfig): Promise<boolean> {
+  async mergePr({ id, strategy }: MergePRConfig): Promise<boolean> {
     try {
-      await helper.mergePR(config.repository, id, config.mergeMethod);
+      await helper.mergePR(config.repository, id, {
+        Do: getMergeMethod(strategy) ?? config.mergeMethod,
+      });
       return true;
     } catch (err) {
       logger.warn({ err, id }, 'Merging of PR failed');
@@ -616,8 +670,9 @@ const platform: Platform = {
     if (!issue) {
       return null;
     }
-    logger.debug(`Found Issue #${issue.number}`);
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+    // TODO: types (#7154)
+    logger.debug(`Found Issue #${issue.number!}`);
+    // TODO #7154
     return getIssue!(issue.number!);
   },
 
@@ -666,8 +721,9 @@ const platform: Platform = {
         // Close any duplicate issues
         for (const issue of issues) {
           if (issue.state === 'open' && issue.number !== activeIssue.number) {
-            logger.warn(`Closing duplicate Issue #${issue.number}`);
-            // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+            // TODO: types (#7154)
+            logger.warn(`Closing duplicate Issue #${issue.number!}`);
+            // TODO #7154
             await helper.closeIssue(config.repository, issue.number!);
           }
         }
@@ -679,23 +735,23 @@ const platform: Platform = {
           activeIssue.state === 'open'
         ) {
           logger.debug(
-            `Issue #${activeIssue.number} is open and up to date - nothing to do`
+            // TODO: types (#7154)
+            `Issue #${activeIssue.number!} is open and up to date - nothing to do`
           );
           return null;
         }
 
         // Update issue body and re-open if enabled
-        logger.debug(`Updating Issue #${activeIssue.number}`);
+        // TODO: types (#7154)
+        logger.debug(`Updating Issue #${activeIssue.number!}`);
         const existingIssue = await helper.updateIssue(
           config.repository,
-          // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+          // TODO #7154
           activeIssue.number!,
           {
             body,
             title,
-            state: shouldReOpen
-              ? 'open'
-              : (activeIssue.state as helper.IssueState),
+            state: shouldReOpen ? 'open' : (activeIssue.state as IssueState),
           }
         );
 
@@ -711,7 +767,7 @@ const platform: Platform = {
         ) {
           await helper.updateIssueLabels(
             config.repository,
-            // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+            // TODO #7154
             activeIssue.number!,
             {
               labels,
@@ -745,7 +801,7 @@ const platform: Platform = {
     for (const issue of issueList) {
       if (issue.state === 'open' && issue.title === title) {
         logger.debug({ number: issue.number }, 'Closing issue');
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+        // TODO #7154
         await helper.closeIssue(config.repository, issue.number!);
       }
     }
@@ -775,7 +831,7 @@ const platform: Platform = {
       const commentList = await helper.getComments(config.repository, issue);
 
       // Search comment by either topic or exact body
-      let comment: helper.Comment | null = null;
+      let comment: Comment | null = null;
       if (topic) {
         comment = findCommentByTopic(commentList, topic);
         body = `### ${topic}\n\n${body}`;
@@ -818,7 +874,7 @@ const platform: Platform = {
     logger.debug(`Ensuring comment "${key}" in #${issue} is removed`);
     const commentList = await helper.getComments(config.repository, issue);
 
-    let comment: helper.Comment | null = null;
+    let comment: Comment | null = null;
     if (deleteConfig.type === 'by-topic') {
       comment = findCommentByTopic(commentList, deleteConfig.topic);
     } else if (deleteConfig.type === 'by-content') {

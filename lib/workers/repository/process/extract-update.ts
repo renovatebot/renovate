@@ -1,9 +1,11 @@
+// TODO #7154
 import is from '@sindresorhus/is';
 import hasha from 'hasha';
 import type { RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
 import type { PackageFile } from '../../../modules/manager/types';
 import { getCache } from '../../../util/cache/repository';
+import { checkGithubToken as ensureGithubToken } from '../../../util/check-token';
 import { checkoutBranch, getBranchCommit } from '../../../util/git';
 import type { BranchConfig } from '../../types';
 import { extractAllDependencies } from '../extract';
@@ -13,18 +15,30 @@ import { fetchUpdates } from './fetch';
 import { sortBranches } from './sort';
 import { WriteUpdateResult, writeUpdates } from './write';
 
-export type ExtractResult = {
+export interface ExtractResult {
   branches: BranchConfig[];
   branchList: string[];
   packageFiles: Record<string, PackageFile[]>;
-};
+}
+
+export interface StatsResult {
+  fileCount: number;
+  depCount: number;
+}
+
+export interface Stats {
+  managers: Record<string, StatsResult>;
+  total: StatsResult;
+}
 
 // istanbul ignore next
-function extractStats(packageFiles: Record<string, PackageFile[]>): any {
+function extractStats(
+  packageFiles: Record<string, PackageFile[]>
+): Stats | null {
   if (!packageFiles) {
-    return {};
+    return null;
   }
-  const stats = {
+  const stats: Stats = {
     managers: {},
     total: {
       fileCount: 0,
@@ -52,11 +66,11 @@ export async function extract(
 ): Promise<Record<string, PackageFile[]>> {
   logger.debug('extract()');
   const { baseBranch } = config;
-  const baseBranchSha = getBranchCommit(baseBranch);
+  const baseBranchSha = getBranchCommit(baseBranch!);
   let packageFiles: Record<string, PackageFile[]>;
   const cache = getCache();
   cache.scan ||= {};
-  const cachedExtract = cache.scan[baseBranch];
+  const cachedExtract = cache.scan[baseBranch!];
   const configHash = hasha(JSON.stringify(config));
   // istanbul ignore if
   if (
@@ -78,10 +92,10 @@ export async function extract(
       logger.info({ err }, 'Error deleting cached dep updates');
     }
   } else {
-    await checkoutBranch(baseBranch);
+    await checkoutBranch(baseBranch!);
     packageFiles = await extractAllDependencies(config);
-    cache.scan[baseBranch] = {
-      sha: baseBranchSha,
+    cache.scan[baseBranch!] = {
+      sha: baseBranchSha!,
       configHash,
       packageFiles,
     };
@@ -91,7 +105,7 @@ export async function extract(
       : [baseBranch];
     Object.keys(cache.scan).forEach((branchName) => {
       if (!baseBranches.includes(branchName)) {
-        delete cache.scan[branchName];
+        delete cache.scan![branchName];
       }
     });
   }
@@ -101,6 +115,7 @@ export async function extract(
     `Dependency extraction complete`
   );
   logger.trace({ config: packageFiles }, 'packageFiles');
+  ensureGithubToken(packageFiles);
   return packageFiles;
 }
 
@@ -114,7 +129,10 @@ export async function lookup(
     config,
     packageFiles
   );
-  logger.debug({ config: packageFiles }, 'packageFiles with updates');
+  logger.debug(
+    { baseBranch: config.baseBranch, config: packageFiles },
+    'packageFiles with updates'
+  );
   sortBranches(branches);
   return { branches, branchList, packageFiles };
 }

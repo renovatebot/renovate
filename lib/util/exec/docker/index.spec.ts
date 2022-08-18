@@ -1,8 +1,4 @@
-import {
-  exec,
-  mockExecAll,
-  mockExecSequence,
-} from '../../../../test/exec-util';
+import { mockExecAll, mockExecSequence } from '../../../../test/exec-util';
 import { GlobalConfig } from '../../../config/global';
 import { SYSTEM_INSUFFICIENT_MEMORY } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
@@ -16,8 +12,6 @@ import {
   removeDockerContainer,
   resetPrefetchedImages,
 } from '.';
-
-jest.mock('child_process');
 
 const getPkgReleases: jest.Mock<typeof _getPkgReleases> =
   _getPkgReleases as any;
@@ -34,13 +28,13 @@ describe('util/exec/docker/index', () => {
     });
 
     it('runs prefetch command', async () => {
-      const execSnapshots = mockExecAll(exec);
+      const execSnapshots = mockExecAll();
       await prefetchDockerImage('foo:1.2.3');
       expect(execSnapshots).toMatchObject([{ cmd: 'docker pull foo:1.2.3' }]);
     });
 
     it('performs prefetch once for each image', async () => {
-      const execSnapshots = mockExecAll(exec);
+      const execSnapshots = mockExecAll();
       await prefetchDockerImage('foo:1.0.0');
       await prefetchDockerImage('foo:2.0.0');
       await prefetchDockerImage('bar:3.0.0');
@@ -110,25 +104,22 @@ describe('util/exec/docker/index', () => {
 
   describe('removeDockerContainer', () => {
     it('gracefully handles container list error', async () => {
-      mockExecAll(exec, new Error('unknown'));
+      mockExecAll(new Error('unknown'));
       await expect(removeDockerContainer('bar', 'foo_')).resolves.not.toThrow();
     });
 
     it('gracefully handles container removal error', async () => {
-      mockExecSequence(exec, [
-        { stdout: '12345', stderr: '' },
-        new Error('unknown'),
-      ]);
+      mockExecSequence([{ stdout: '12345', stderr: '' }, new Error('unknown')]);
       await expect(removeDockerContainer('bar', 'foo_')).resolves.not.toThrow();
     });
 
     it('gracefully handles empty container list', async () => {
-      mockExecAll(exec, { stdout: '\n', stderr: '' });
+      mockExecAll({ stdout: '\n', stderr: '' });
       await expect(removeDockerContainer('bar', 'foo_')).resolves.not.toThrow();
     });
 
     it('runs Docker commands for container removal', async () => {
-      const execSnapshots = mockExecSequence(exec, [
+      const execSnapshots = mockExecSequence([
         { stdout: '12345', stderr: '' },
         { stdout: '', stderr: '' },
       ]);
@@ -146,7 +137,7 @@ describe('util/exec/docker/index', () => {
     });
 
     it('short-circuits in non-Docker environment', async () => {
-      const execSnapshots = mockExecAll(exec);
+      const execSnapshots = mockExecAll();
       GlobalConfig.set({ binarySource: 'global' });
       await removeDanglingContainers();
       expect(execSnapshots).toBeEmpty();
@@ -155,7 +146,7 @@ describe('util/exec/docker/index', () => {
     it('handles insufficient memory error', async () => {
       const err: Error & { errno: string } = new Error() as never;
       err.errno = 'ENOMEM';
-      mockExecAll(exec, err);
+      mockExecAll(err);
       await expect(removeDanglingContainers).rejects.toThrow(
         SYSTEM_INSUFFICIENT_MEMORY
       );
@@ -164,7 +155,7 @@ describe('util/exec/docker/index', () => {
     it('handles missing Docker daemon', async () => {
       const err: Error & { stderr: string } = new Error() as never;
       err.stderr = 'Cannot connect to the Docker daemon';
-      const execSnapshots = mockExecAll(exec, err);
+      const execSnapshots = mockExecAll(err);
       await removeDanglingContainers();
       expect(execSnapshots).toMatchObject([
         { cmd: 'docker ps --filter label=renovate_child -aq' },
@@ -174,7 +165,7 @@ describe('util/exec/docker/index', () => {
     });
 
     it('handles unknown error', async () => {
-      const execSnapshots = mockExecAll(exec, new Error('unknown'));
+      const execSnapshots = mockExecAll(new Error('unknown'));
       await removeDanglingContainers();
       expect(execSnapshots).toMatchObject([
         { cmd: 'docker ps --filter label=renovate_child -aq' },
@@ -184,7 +175,7 @@ describe('util/exec/docker/index', () => {
     });
 
     it('handles empty container list ', async () => {
-      const execSnapshots = mockExecAll(exec, { stdout: '\n\n\n', stderr: '' });
+      const execSnapshots = mockExecAll({ stdout: '\n\n\n', stderr: '' });
       await removeDanglingContainers();
       expect(execSnapshots).toMatchObject([
         { cmd: 'docker ps --filter label=renovate_child -aq' },
@@ -195,7 +186,7 @@ describe('util/exec/docker/index', () => {
     });
 
     it('removes containers', async () => {
-      const execSnapshots = mockExecSequence(exec, [
+      const execSnapshots = mockExecSequence([
         { stdout: '111\n222\n333', stderr: '' },
         { stdout: '', stderr: '' },
       ]);
@@ -208,7 +199,7 @@ describe('util/exec/docker/index', () => {
   });
 
   describe('generateDockerCommand', () => {
-    const preCommands = [null, 'foo', undefined];
+    const preCommands = [null as never, 'foo', undefined as never];
     const commands = ['bar'];
     const envVars = ['FOO', 'BAR'];
     const image = 'sample_image';
@@ -233,7 +224,7 @@ describe('util/exec/docker/index', () => {
     });
 
     it('returns executable command', async () => {
-      mockExecAll(exec);
+      mockExecAll();
       const res = await generateDockerCommand(
         commands,
         preCommands,
@@ -243,7 +234,7 @@ describe('util/exec/docker/index', () => {
     });
 
     it('handles volumes', async () => {
-      mockExecAll(exec);
+      mockExecAll();
       const volumes: VolumeOption[] = [
         '/tmp/foo',
         ['/tmp/bar', `/tmp/bar`],
@@ -262,7 +253,7 @@ describe('util/exec/docker/index', () => {
     });
 
     it('handles tag parameter', async () => {
-      mockExecAll(exec);
+      mockExecAll();
       const res = await generateDockerCommand(commands, preCommands, {
         ...dockerOptions,
         tag: '1.2.3',
@@ -271,7 +262,7 @@ describe('util/exec/docker/index', () => {
     });
 
     it('handles tag constraint', async () => {
-      mockExecAll(exec);
+      mockExecAll();
       getPkgReleases.mockResolvedValueOnce({
         releases: [
           { version: '1.2.3' },

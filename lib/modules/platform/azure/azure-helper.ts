@@ -18,7 +18,7 @@ export async function getRefs(
   repoId: string,
   branchName?: string
 ): Promise<GitRef[]> {
-  logger.debug(`getRefs(${repoId}, ${branchName})`);
+  logger.debug(`getRefs(${repoId}, ${branchName!})`);
   const azureApiGit = await azureApi.gitApi();
   const refs = await azureApiGit.getRefs(
     repoId,
@@ -49,9 +49,8 @@ export async function getAzureBranchObj(
     };
   }
   return {
-    // TODO: fix undefined
+    // TODO: fix undefined (#7154)
     name: getNewBranchName(branchName)!,
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
     oldObjectId: refs[0].objectId!,
   };
 }
@@ -124,7 +123,8 @@ export async function getMergeMethod(
   const isRelevantScope = (scope: Scope): boolean => {
     if (
       scope.matchKind === 'DefaultBranch' &&
-      (!branchRef || branchRef === `refs/heads/${defaultBranch}`)
+      // TODO: types (#7154)
+      (!branchRef || branchRef === `refs/heads/${defaultBranch!}`)
     ) {
       return true;
     }
@@ -134,10 +134,10 @@ export async function getMergeMethod(
     if (!branchRef) {
       return true;
     }
+    // TODO #7154
     return scope.matchKind === 'Exact'
       ? scope.refName === branchRef
-      : // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-        branchRef.startsWith(scope.refName!);
+      : branchRef.startsWith(scope.refName!);
   };
 
   const policyConfigurations = (
@@ -150,7 +150,8 @@ export async function getMergeMethod(
     .map((p) => p.settings)[0];
 
   logger.trace(
-    `getMergeMethod(${repoId}, ${project}, ${branchRef}) determining mergeMethod from matched policy:\n${JSON.stringify(
+    // TODO: types (#7154)
+    `getMergeMethod(${repoId}, ${project}, ${branchRef!}) determining mergeMethod from matched policy:\n${JSON.stringify(
       policyConfigurations,
       null,
       4

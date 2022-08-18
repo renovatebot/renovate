@@ -144,7 +144,7 @@ export async function getJsonFile(
   repoName?: string,
   branchOrTag?: string
 ): Promise<any | null> {
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+  // TODO #7154
   const raw = (await getRawFile(fileName, repoName, branchOrTag)) as string;
   return JSON5.parse(raw);
 }
@@ -154,6 +154,7 @@ export async function initRepo({
   repository,
   cloneSubmodules,
   ignorePrAuthor,
+  gitUrl,
 }: RepoParams): Promise<RepoResult> {
   logger.debug(`initRepo("${JSON.stringify({ repository }, null, 2)}")`);
   const opts = hostRules.find({
@@ -189,17 +190,18 @@ export async function initRepo({
       throw new Error(REPOSITORY_EMPTY);
     }
 
-    const gitUrl = utils.getRepoGitUrl(
+    const url = utils.getRepoGitUrl(
       config.repositorySlug,
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+      // TODO #7154
       defaults.endpoint!,
+      gitUrl,
       info,
       opts
     );
 
     await git.initRepo({
       ...config,
-      url: gitUrl,
+      url,
       cloneSubmodules,
       fullClone: true,
     });
@@ -263,7 +265,7 @@ export async function getPr(
     reviewers: res.body.reviewers.map((r) => r.user.name),
   };
   pr.hasReviewers = is.nonEmptyArray(pr.reviewers);
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+  // TODO #7154
   pr.version = updatePrVersion(pr.number, pr.version!);
 
   return pr;
@@ -323,7 +325,7 @@ export async function findPr({
   state = PrState.All,
   refreshCache,
 }: FindPRConfig): Promise<Pr | null> {
-  logger.debug(`findPr(${branchName}, "${prTitle}", "${state}")`);
+  logger.debug(`findPr(${branchName}, "${prTitle!}", "${state}")`);
   const prList = await getPrList(refreshCache);
   const pr = prList.find(isRelevantPr(branchName, prTitle, state));
   if (pr) {
@@ -360,7 +362,8 @@ async function getStatus(
 
   return (
     await bitbucketServerHttp.getJson<utils.BitbucketCommitStatus>(
-      `./rest/build-status/1.0/commits/stats/${branchCommit}`,
+      // TODO: types (#7154)
+      `./rest/build-status/1.0/commits/stats/${branchCommit!}`,
       {
         useCache,
       }
@@ -408,7 +411,8 @@ function getStatusCheck(
   const branchCommit = git.getBranchCommit(branchName);
 
   return utils.accumulateValues(
-    `./rest/build-status/1.0/commits/${branchCommit}`,
+    // TODO: types (#7154)
+    `./rest/build-status/1.0/commits/${branchCommit!}`,
     'get',
     { useCache }
   );
@@ -464,7 +468,7 @@ export async function setBranchStatus({
     const body: any = {
       key: context,
       description,
-      url: targetUrl || 'https://renovatebot.com',
+      url: targetUrl ?? 'https://renovatebot.com',
     };
 
     switch (state) {
@@ -481,7 +485,8 @@ export async function setBranchStatus({
     }
 
     await bitbucketServerHttp.postJson(
-      `./rest/build-status/1.0/commits/${branchCommit}`,
+      // TODO: types (#7154)
+      `./rest/build-status/1.0/commits/${branchCommit!}`,
       { body }
     );
 
@@ -563,8 +568,7 @@ export async function addReviewers(
       throw new Error(REPOSITORY_NOT_FOUND);
     }
 
-    // TODO: can `reviewers` be undefined?
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+    // TODO: can `reviewers` be undefined? (#7154)
     const reviewersSet = new Set([...pr.reviewers!, ...reviewers]);
 
     await bitbucketServerHttp.putJson(
@@ -835,7 +839,7 @@ export async function createPr({
     ...utils.prInfo(prInfoRes.body),
   };
 
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+  // TODO #7154
   updatePrVersion(pr.number, pr.version!);
 
   // istanbul ignore if
@@ -886,10 +890,10 @@ export async function updatePr({
     updatePrVersion(prNo, updatedPr.version);
 
     const currentState = updatedPr.state;
+    // TODO #7154
     const newState = {
       [PrState.Open]: 'OPEN',
       [PrState.Closed]: 'DECLINED',
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
     }[state!];
 
     if (
@@ -935,7 +939,7 @@ export async function mergePr({
   branchName,
   id: prNo,
 }: MergePRConfig): Promise<boolean> {
-  logger.debug(`mergePr(${prNo}, ${branchName})`);
+  logger.debug(`mergePr(${prNo}, ${branchName!})`);
   // Used for "automerge" feature
   try {
     const pr = await getPr(prNo);
@@ -943,7 +947,10 @@ export async function mergePr({
       throw Object.assign(new Error(REPOSITORY_NOT_FOUND), { statusCode: 404 });
     }
     const { body } = await bitbucketServerHttp.postJson<{ version: number }>(
-      `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests/${prNo}/merge?version=${pr.version}`
+      // TODO: types (#7154)
+      `./rest/api/1.0/projects/${config.projectKey}/repos/${
+        config.repositorySlug
+      }/pull-requests/${prNo}/merge?version=${pr.version!}`
     );
     updatePrVersion(prNo, body.version);
   } catch (err) {

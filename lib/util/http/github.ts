@@ -18,6 +18,7 @@ import { parseLinkHeader } from '../url';
 import type { GotLegacyError } from './legacy';
 import type {
   GraphqlOptions,
+  HttpOptions,
   HttpPostOptions,
   HttpResponse,
   InternalHttpOptions,
@@ -30,29 +31,28 @@ export const setBaseUrl = (url: string): void => {
   baseUrl = url;
 };
 
-interface GithubInternalOptions extends InternalHttpOptions {
-  body?: string;
-}
-
-export interface GithubHttpOptions extends InternalHttpOptions {
+export interface GithubHttpOptions extends HttpOptions {
   paginate?: boolean | string;
   paginationField?: string;
   pageLimit?: number;
-  token?: string;
 }
 
 interface GithubGraphqlRepoData<T = unknown> {
   repository?: T;
 }
 
-interface GithubGraphqlResponse<T = unknown> {
-  data?: T;
-  errors?: {
-    type?: string;
-    message: string;
-    locations: unknown;
-  }[];
-}
+export type GithubGraphqlResponse<T = unknown> =
+  | {
+      data: T;
+      errors?: never;
+    }
+  | {
+      data?: never;
+      errors: {
+        type?: string;
+        message: string;
+      }[];
+    };
 
 function handleGotError(
   err: GotLegacyError,
@@ -186,7 +186,7 @@ interface GraphqlPageCacheItem {
   pageSize: number;
 }
 
-type GraphqlPageCache = Record<string, GraphqlPageCacheItem>;
+export type GraphqlPageCache = Record<string, GraphqlPageCacheItem>;
 
 function getGraphqlPageSize(
   fieldName: string,
@@ -270,7 +270,7 @@ export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
 
   protected override async request<T>(
     url: string | URL,
-    options?: GithubInternalOptions & GithubHttpOptions,
+    options?: InternalHttpOptions & GithubHttpOptions,
     okToRetry = true
   ): Promise<HttpResponse<T>> {
     const opts = {

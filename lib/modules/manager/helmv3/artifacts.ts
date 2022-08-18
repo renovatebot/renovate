@@ -6,8 +6,8 @@ import { logger } from '../../../logger';
 import { exec } from '../../../util/exec';
 import type { ExecOptions, ToolConstraint } from '../../../util/exec/types';
 import {
+  getParentDir,
   getSiblingFileName,
-  getSubDirectory,
   privateCacheDir,
   readLocalFile,
   writeLocalFile,
@@ -92,7 +92,7 @@ async function helmCommands(
 
   cmd.push(
     `helm dependency update ${helmConfigParameters.join(' ')} ${quote(
-      getSubDirectory(manifestPath)
+      getParentDir(manifestPath)
     )}`
   );
 
@@ -129,10 +129,10 @@ export async function updateArtifacts({
     const locks = yaml.load(existingLockFileContent) as ChartDefinition; //TODO #9610
 
     const chartDefinitions: ChartDefinition[] = [];
-    // prioritize alias naming for Helm repositories
-    if (config.aliases) {
+    // prioritize registryAlias naming for Helm repositories
+    if (config.registryAliases) {
       chartDefinitions.push({
-        dependencies: aliasRecordToRepositories(config.aliases),
+        dependencies: aliasRecordToRepositories(config.registryAliases),
       });
     }
     chartDefinitions.push(packages, locks);

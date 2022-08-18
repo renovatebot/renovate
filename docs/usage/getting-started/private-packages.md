@@ -322,7 +322,18 @@ npmRegistries:
 ### nuget
 
 For each known NuGet registry, Renovate searches for `hostRules` with `hostType=nuget` and matching host.
-For those found, a command similar to the following is run: `dotnet nuget add source ${registryInfo.feedUrl} --configfile ${nugetConfigFile} --username ${username} --password ${password} --store-password-in-clear-text`
+For those found, a command like the following is run: `dotnet nuget add source ${registryInfo.feedUrl} --configfile ${nugetConfigFile} --username ${username} --password ${password} --store-password-in-clear-text`.
+
+```js
+hostRules: [
+  {
+    matchHost: 'https://pkgs.dev.azure.com/<org>/',
+    hostType: 'nuget',
+    username: 'user', // doesn't matter for azure
+    password: '<PAT>',
+  },
+];
+```
 
 ### poetry
 
@@ -371,8 +382,8 @@ The solution to this is that you should break your presets into public and priva
 
 ### Encrypting secrets
 
-It is strongly recommended that you don't commit secrets to repositories, including private ones, and this includes secrets needed by Renovate to access private modules.
-Therefore the preferred approach to secrets is that the bot administrator configures them as `hostRules` which are then applied to all repositories which the bot accesses.
+It is strongly recommended that you avoid committing secrets to repositories, including private ones, and this includes secrets needed by Renovate to access private modules.
+The preferred approach to secrets is that the bot administrator configures them as `hostRules` which are then applied to all repositories which the bot accesses.
 
 If you need to provide credentials to the hosted Renovate App, please do this:
 

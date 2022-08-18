@@ -40,8 +40,7 @@ export function setPlatformApi(name: string): void {
 export async function initPlatform(config: AllConfig): Promise<AllConfig> {
   setPrivateKey(config.gitPrivateKey);
   setNoVerify(config.gitNoVerify ?? []);
-  // TODO: `platform` #7154
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+  // TODO: `platform` (#7154)
   setPlatformApi(config.platform!);
   // TODO: types
   const platformInfo = await platform.initPlatform(config);
@@ -57,10 +56,13 @@ export async function initPlatform(config: AllConfig): Promise<AllConfig> {
   // This is done for validation and will be overridden later once repo config is incorporated
   setGitAuthor(returnConfig.gitAuthor);
   const platformRule: HostRule = {
-    // TODO: null check #7154
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+    // TODO: null check (#7154)
     matchHost: URL.parse(returnConfig.endpoint).hostname!,
   };
+  // There might have been platform-specific modifications to the token
+  if (returnConfig.token) {
+    config.token = returnConfig.token;
+  }
   (
     ['token', 'username', 'password'] as ('token' | 'username' | 'password')[]
   ).forEach((field) => {

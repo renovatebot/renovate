@@ -13,7 +13,6 @@ export async function fetchJSONFile(
   try {
     raw = await platform.getRawFile(fileName, repo);
   } catch (err) {
-    // istanbul ignore if: not testable with nock
     if (err instanceof ExternalHostError) {
       throw err;
     }
@@ -26,9 +25,11 @@ export async function fetchJSONFile(
     throw new Error(PRESET_DEP_NOT_FOUND);
   }
 
-  // TODO: null check #7154
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-  return parsePreset(raw!);
+  if (!raw) {
+    throw new Error(PRESET_DEP_NOT_FOUND);
+  }
+
+  return parsePreset(raw);
 }
 
 export function getPresetFromEndpoint(

@@ -5,6 +5,7 @@ import type {
   DatasourceApi,
   DigestConfig,
   GetReleasesConfig,
+  RegistryStrategy,
   ReleaseResult,
 } from './types';
 
@@ -19,11 +20,11 @@ export abstract class Datasource implements DatasourceApi {
 
   defaultConfig: Record<string, unknown> | undefined;
 
-  defaultRegistryUrls: string[] | undefined;
+  defaultRegistryUrls?: string[] | (() => string[]);
 
   defaultVersioning: string | undefined;
 
-  registryStrategy: 'first' | 'hunt' | 'merge' | undefined = 'first';
+  registryStrategy: RegistryStrategy | undefined = 'first';
 
   protected http: Http;
 

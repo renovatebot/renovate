@@ -1,3 +1,5 @@
+// TODO: types (#7154)
+/* eslint-disable @typescript-eslint/restrict-template-expressions */
 import * as semver from 'semver';
 import { SemVer, parseRange } from 'semver-utils';
 import { logger } from '../../../logger';
@@ -89,7 +91,7 @@ export function fixParsedRange(range: string): any {
         major,
       };
 
-      let full = `${operator || ''}${major}`;
+      let full = `${operator ?? ''}${major}`;
       if (minor) {
         NewSemVer.minor = minor;
         full = `${full}.${minor}`;

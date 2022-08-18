@@ -25,18 +25,19 @@ export async function updateLockedDependency(
     allowHigherOrRemoved = false,
   } = config;
   logger.debug(
+    // TODO: types (#7154)
+    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
     `npm.updateLockedDependency: ${depName}@${currentVersion} -> ${newVersion} [${lockFile}]`
   );
   try {
     let packageJson: PackageJson;
     let packageLockJson: PackageLockOrEntry;
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+    // TODO #7154
     const detectedIndent = detectIndent(lockFileContent!).indent || '  ';
     let newPackageJsonContent: string | null | undefined;
     try {
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+      // TODO #7154
       packageJson = JSON.parse(packageFileContent!);
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
       packageLockJson = JSON.parse(lockFileContent!);
     } catch (err) {
       logger.warn({ err }, 'Failed to parse files');
@@ -46,11 +47,13 @@ export async function updateLockedDependency(
     const lockedDeps = getLockedDependencies(
       packageLockJson,
       depName,
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+      // TODO #7154
       currentVersion!
     );
     if (lockedDeps.some((dep) => dep.bundled)) {
       logger.info(
+        // TODO: types (#7154)
+        // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
         `Package ${depName}@${currentVersion} is bundled and cannot be updated`
       );
       return { status: 'update-failed' };
@@ -64,12 +67,16 @@ export async function updateLockedDependency(
       let status: 'update-failed' | 'already-updated';
       if (newLockedDeps.length) {
         logger.debug(
+          // TODO: types (#7154)
+          // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
           `${depName}@${currentVersion} not found in ${lockFile} but ${depName}@${newVersion} was - looks like it's already updated`
         );
         status = 'already-updated';
       } else {
         if (lockfileVersion !== 1) {
           logger.debug(
+            // TODO: types (#7154)
+            // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
             `Found lockfileVersion ${packageLockJson.lockfileVersion}`
           );
           status = 'update-failed';
@@ -105,6 +112,8 @@ export async function updateLockedDependency(
           }
         } else {
           logger.debug(
+            // TODO: types (#7154)
+            // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
             `${depName}@${currentVersion} not found in ${lockFile} - cannot update`
           );
           status = 'update-failed';
@@ -129,7 +138,7 @@ export async function updateLockedDependency(
       packageJson,
       packageLockJson,
       depName,
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+      // TODO #7154
       currentVersion!,
       newVersion
     );
@@ -152,6 +161,8 @@ export async function updateLockedDependency(
         // Parent dependency is compatible with the new version we want
         logger.debug(
           `${depName} can be updated to ${newVersion} in-range with matching constraint "${constraint}" in ${
+            // TODO: types (#7154)
+            // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
             parentDepName ? `${parentDepName}@${parentVersion}` : packageFile
           }`
         );
@@ -203,7 +214,7 @@ export async function updateLockedDependency(
           newVersion,
         })!;
         newPackageJsonContent = updateDependency({
-          // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+          // TODO #7154
           fileContent: packageFileContent!,
           upgrade: { depName, depType, newValue },
         });
@@ -226,7 +237,7 @@ export async function updateLockedDependency(
         ...config,
         ...parentUpdate,
         lockFileContent: newLockFileContent,
-        packageFileContent: newPackageJsonContent || packageFileContent,
+        packageFileContent: newPackageJsonContent ?? packageFileContent,
       };
       const parentUpdateResult = await updateLockedDependency(
         parentUpdateConfig,
@@ -235,6 +246,8 @@ export async function updateLockedDependency(
       // istanbul ignore if: hard to test due to recursion
       if (!parentUpdateResult.files) {
         logger.debug(
+          // TODO: types (#7154)
+          // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
           `Update of ${depName} to ${newVersion} impossible due to failed update of parent ${parentUpdate.depName} to ${parentUpdate.newVersion}`
         );
         return { status: 'update-failed' };

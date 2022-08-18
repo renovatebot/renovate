@@ -172,7 +172,7 @@ export class GoProxyDatasource extends Datasource {
   static parsedNoproxy: Record<string, RegExp | null> = {};
 
   static parseNoproxy(
-    input: unknown = process.env.GONOPROXY || process.env.GOPRIVATE
+    input: unknown = process.env.GONOPROXY ?? process.env.GOPRIVATE
   ): RegExp | null {
     if (!is.string(input)) {
       return null;
@@ -229,6 +229,8 @@ export class GoProxyDatasource extends Datasource {
   static getCacheKey({ packageName }: GetReleasesConfig): string {
     const goproxy = process.env.GOPROXY;
     const noproxy = GoProxyDatasource.parseNoproxy();
+    // TODO: types (#7154)
+    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
     return `${packageName}@@${goproxy}@@${noproxy?.toString()}`;
   }
 }

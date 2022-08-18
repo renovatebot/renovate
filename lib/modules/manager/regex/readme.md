@@ -6,9 +6,13 @@ This manager is unique in Renovate in that:
 - Through the use of the `regexManagers` config, multiple "regex managers" can be created for the same repository
 - It can extract any `datasource`
 
+We have [additional Handlebars helpers](https://docs.renovatebot.com/templates/#additional-handlebars-helpers) which help you perform common transformations on the regex manager's template fields.
+Also read the documentation for the [`regexManagers` config option](https://docs.renovatebot.com/configuration-options/#regexmanagers).
+
 ### Required Fields
 
-The first two required fields are `fileMatch` and `matchStrings`. `fileMatch` works the same as any manager, while `matchStrings` is a `regexManagers` concept and is used for configuring a regular expression with named capture groups.
+The first two required fields are `fileMatch` and `matchStrings`.
+`fileMatch` works the same as any manager, while `matchStrings` is a `regexManagers` concept and is used for configuring a regular expression with named capture groups.
 
 In order for Renovate to look up a dependency and decide about updates, it then needs the following information about each dependency:
 
@@ -47,9 +51,13 @@ If you're looking for an online regex testing tool that supports capture groups,
 Be aware that backslashes (`'\'`) of the resulting regex have to still be escaped e.g. `\n\s` --> `\\n\\s`.
 You can use the Code Generator in the sidebar and copy the regex in the generated "Alternative syntax" comment into JSON.
 
+The `regex` manager uses [RE2](https://github.com/google/re2/wiki/WhyRE2) which does not support [backreferences and lookahead assertions](https://github.com/uhop/node-re2#limitations-things-re2-does-not-support).
+The `regex` manager matches are done per-file and not per-line, you should be aware when using the `^` and/or `$` regex assertions.
+
 ### Configuration templates
 
-In many cases, named capture groups alone won't be enough and you'll need to configure Renovate with additional information about how to look up a dependency. Continuing the above example with Yarn, here is the full config:
+In many cases, named capture groups alone won't be enough and you'll need to configure Renovate with additional information about how to look up a dependency.
+Continuing the above example with Yarn, here is the full config:
 
 ```json
 {
@@ -66,7 +74,8 @@ In many cases, named capture groups alone won't be enough and you'll need to con
 
 ### Advanced Capture
 
-Let's say that your `Dockerfile` has many `ENV` variables you want to keep updated and you prefer not to write one `regexManagers` rule per variable. Instead you could enhance your `Dockerfile` like the following:
+Let's say that your `Dockerfile` has many `ENV` variables you want to keep updated and you prefer not to write one `regexManagers` rule per variable.
+Instead you could enhance your `Dockerfile` like the following:
 
 ```Dockerfile
 ARG IMAGE=node:12@sha256:6e5264cd4cfaefd7174b2bc10c7f9a1c2b99d98d127fc57a802d264da9fb43bd
@@ -104,6 +113,9 @@ The above (obviously not a complete `Dockerfile`, but abbreviated for this examp
 }
 ```
 
-In the above the `versioningTemplate` is not actually necessary because Renovate already defaults to `semver` versioning, but it has been included to help illustrate why we call these fields _templates_. They are named this way because they are compiled using Handlebars and so can be composed from values you collect in named capture groups. You will usually want to use the tripe brace `{{{ }}}` template (e.v. `{{{versioning}}}` to be safe because Handlebars escapes special characters by default with double braces.
+In the above the `versioningTemplate` is not actually necessary because Renovate already defaults to `semver` versioning, but it has been included to help illustrate why we call these fields _templates_.
+They are named this way because they are compiled using Handlebars and so can be composed from values you collect in named capture groups.
+You will usually want to use the tripe brace `{{{ }}}` template (e.v. `{{{versioning}}}` to be safe because Handlebars escapes special characters by default with double braces.
 
-By adding the comments to the `Dockerfile`, you can see that instead of four separate `regexManagers` being required, there is now only one - and the `Dockerfile` itself is now somewhat better documented too. The syntax we used there is completely arbitrary and you may choose your own instead if you prefer - just be sure to update your `matchStrings` regex.
+By adding the comments to the `Dockerfile`, you can see that instead of four separate `regexManagers` being required, there is now only one - and the `Dockerfile` itself is now somewhat better documented too.
+The syntax we used there is completely arbitrary and you may choose your own instead if you prefer - just be sure to update your `matchStrings` regex.

@@ -2,12 +2,12 @@ import { ProgrammingLanguage } from '../../../constants';
 import { DockerDatasource } from '../../datasource/docker';
 import { extractPackageFile } from './extract';
 
-const language = ProgrammingLanguage.Docker;
+export const language = ProgrammingLanguage.Docker;
 
-export { extractPackageFile, language };
+export { extractPackageFile };
 
 export const defaultConfig = {
-  fileMatch: ['(^|/).drone.yml$'],
+  fileMatch: ['(^|/)\\.drone\\.yml$'],
 };
 
 export const supportedDatasources = [DockerDatasource.id];

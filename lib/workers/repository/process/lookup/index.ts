@@ -19,6 +19,7 @@ import { clone } from '../../../../util/clone';
 import { applyPackageRules } from '../../../../util/package-rules';
 import { regEx } from '../../../../util/regex';
 import { getBucket } from './bucket';
+import { mergeConfigConstraints } from './common';
 import { getCurrentVersion } from './current';
 import { filterVersions } from './filter';
 import { filterInternalChecks } from './filter-checks';
@@ -44,7 +45,7 @@ export async function lookupUpdates(
     isVulnerabilityAlert,
     updatePinnedDependencies,
   } = config;
-  const unconstrainedValue = lockedVersion && is.undefined(currentValue);
+  const unconstrainedValue = !!lockedVersion && is.undefined(currentValue);
   const res: UpdateResult = {
     updates: [],
     warnings: [],
@@ -67,11 +68,14 @@ export async function lookupUpdates(
     if (unconstrainedValue || isValid) {
       if (
         !updatePinnedDependencies &&
-        versioning.isSingleVersion(currentValue)
+        // TODO #7154
+        versioning.isSingleVersion(currentValue!)
       ) {
         res.skipReason = 'is-pinned';
         return res;
       }
+
+      config = mergeConfigConstraints(config);
 
       const dependency = clone(await getPkgReleases(config));
       if (!dependency) {
@@ -132,7 +136,9 @@ export async function lookupUpdates(
       }
       // Check that existing constraint can be satisfied
       const allSatisfyingVersions = allVersions.filter(
-        (v) => unconstrainedValue || versioning.matches(v.version, currentValue)
+        (v) =>
+          // TODO #7154
+          unconstrainedValue || versioning.matches(v.version, currentValue!)
       );
       if (rollbackPrs && !allSatisfyingVersions.length) {
         const rollback = getRollbackUpdate(config, allVersions, versioning);
@@ -140,7 +146,8 @@ export async function lookupUpdates(
         if (!rollback) {
           res.warnings.push({
             topic: depName,
-            message: `Can't find version matching ${currentValue} for ${depName}`,
+            // TODO: types (#7154)
+            message: `Can't find version matching ${currentValue!} for ${depName}`,
           });
           return res;
         }
@@ -152,10 +159,11 @@ export async function lookupUpdates(
           updateType: 'replacement',
           newName: dependency.replacementName,
           newValue: versioning.getNewValue({
-            currentValue,
+            // TODO #7154
+            currentValue: currentValue!,
             newVersion: dependency.replacementVersion,
-            rangeStrategy,
-          }),
+            rangeStrategy: rangeStrategy!,
+          })!,
         });
       }
       // istanbul ignore next
@@ -171,30 +179,31 @@ export async function lookupUpdates(
         .map((release) => release.version);
       let currentVersion: string;
       if (rangeStrategy === 'update-lockfile') {
-        currentVersion = lockedVersion;
+        currentVersion = lockedVersion!;
       }
+      // TODO #7154
       currentVersion ??=
         getCurrentVersion(
-          currentValue,
-          lockedVersion,
+          currentValue!,
+          lockedVersion!,
           versioning,
-          rangeStrategy,
-          latestVersion,
+          rangeStrategy!,
+          latestVersion!,
           nonDeprecatedVersions
-        ) ||
+        ) ??
         getCurrentVersion(
-          currentValue,
-          lockedVersion,
+          currentValue!,
+          lockedVersion!,
           versioning,
-          rangeStrategy,
-          latestVersion,
+          rangeStrategy!,
+          latestVersion!,
           allVersions.map((v) => v.version)
-        );
+        )!;
       // istanbul ignore if
-      if (!currentVersion && lockedVersion) {
+      if (!currentVersion! && lockedVersion) {
         return res;
       }
-      res.currentVersion = currentVersion;
+      res.currentVersion = currentVersion!;
       if (
         currentValue &&
         currentVersion &&
@@ -204,25 +213,28 @@ export async function lookupUpdates(
         res.updates.push({
           updateType: 'pin',
           isPin: true,
+          // TODO: newValue can be null! (#7154)
           newValue: versioning.getNewValue({
             currentValue,
             rangeStrategy,
             currentVersion,
             newVersion: currentVersion,
-          }),
-          newMajor: versioning.getMajor(currentVersion),
+          })!,
+          newVersion: currentVersion,
+          newMajor: versioning.getMajor(currentVersion)!,
         });
       }
       // istanbul ignore if
-      if (!versioning.isVersion(currentVersion)) {
+      if (!versioning.isVersion(currentVersion!)) {
         res.skipReason = 'invalid-version';
         return res;
       }
       // Filter latest, unstable, etc
+      // TODO #7154
       let filteredReleases = filterVersions(
         config,
-        currentVersion,
-        latestVersion,
+        currentVersion!,
+        latestVersion!,
         allVersions,
         versioning
       ).filter(
@@ -237,7 +249,8 @@ export async function lookupUpdates(
       for (const release of filteredReleases) {
         const bucket = getBucket(
           config,
-          currentVersion,
+          // TODO #7154
+          currentVersion!,
           release.version,
           versioning
         );
@@ -269,16 +282,20 @@ export async function lookupUpdates(
         const update = generateUpdate(
           config,
           versioning,
-          rangeStrategy,
-          lockedVersion || currentVersion,
+          // TODO #7154
+
+          rangeStrategy!,
+          lockedVersion ?? currentVersion!,
           bucket,
           release
         );
         if (pendingChecks) {
           update.pendingChecks = pendingChecks;
         }
-        if (pendingReleases.length) {
-          update.pendingVersions = pendingReleases.map((r) => r.version);
+
+        // TODO #7154
+        if (pendingReleases!.length) {
+          update.pendingVersions = pendingReleases!.map((r) => r.version);
         }
         if (!update.newValue || update.newValue === currentValue) {
           if (!lockedVersion) {
@@ -295,7 +312,8 @@ export async function lookupUpdates(
           res.isSingleVersion = true;
         }
         res.isSingleVersion =
-          res.isSingleVersion || !!versioning.isSingleVersion(update.newValue);
+          !!res.isSingleVersion ||
+          !!versioning.isSingleVersion(update.newValue);
 
         res.updates.push(update);
       }
@@ -326,7 +344,8 @@ export async function lookupUpdates(
           // digest update
           res.updates.push({
             updateType: 'digest',
-            newValue: currentValue,
+            // TODO #7154
+            newValue: currentValue!,
           });
         }
       } else if (pinDigests) {
@@ -336,21 +355,25 @@ export async function lookupUpdates(
           res.updates.push({
             isPinDigest: true,
             updateType: 'pinDigest',
-            newValue: currentValue,
+            // TODO #7154
+            newValue: currentValue!,
           });
         }
       }
       if (versioning.valueToVersion) {
-        res.currentVersion = versioning.valueToVersion(res.currentVersion);
+        // TODO #7154
+        res.currentVersion = versioning.valueToVersion(res.currentVersion!);
         for (const update of res.updates || []) {
-          update.newVersion = versioning.valueToVersion(update.newVersion);
+          // TODO #7154
+          update.newVersion = versioning.valueToVersion(update.newVersion!);
         }
       }
       // update digest for all
       for (const update of res.updates) {
         if (pinDigests || currentDigest) {
+          // TODO #7154
           update.newDigest =
-            update.newDigest || (await getDigest(config, update.newValue));
+            update.newDigest ?? (await getDigest(config, update.newValue))!;
         }
       }
     }
@@ -364,12 +387,19 @@ export async function lookupUpdates(
         (update) =>
           update.newValue !== currentValue ||
           update.isLockfileUpdate ||
-          (update.newDigest && !update.newDigest.startsWith(currentDigest))
+          // TODO #7154
+          (update.newDigest && !update.newDigest.startsWith(currentDigest!))
       );
     // If range strategy specified in config is 'in-range-only', also strip out updates where currentValue !== newValue
     if (config.rangeStrategy === 'in-range-only') {
       res.updates = res.updates.filter(
         (update) => update.newValue === currentValue
+      );
+    }
+    // Handle a weird edge case involving followTag and fallbacks
+    if (rollbackPrs && followTag) {
+      res.updates = res.updates.filter(
+        (update) => res.updates.length === 1 || update.updateType !== 'rollback'
       );
     }
   } catch (err) /* istanbul ignore next */ {

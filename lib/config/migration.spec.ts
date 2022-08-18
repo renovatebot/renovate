@@ -304,8 +304,10 @@ describe('config/migration', () => {
       expect(isMigrated).toBeTrue();
       expect(migratedConfig).toMatchSnapshot();
       expect(migratedConfig.lockFileMaintenance?.packageRules).toHaveLength(1);
+      // TODO: fix types #7154
       expect(
-        migratedConfig.lockFileMaintenance?.packageRules[0].respectLatest
+        (migratedConfig.lockFileMaintenance as RenovateConfig)
+          ?.packageRules?.[0].respectLatest
       ).toBeFalse();
     });
 
@@ -676,7 +678,7 @@ describe('config/migration', () => {
     const { isMigrated, migratedConfig } =
       configMigration.migrateConfig(config);
     expect(isMigrated).toBe(true);
-    expect(migratedConfig).toMatchInlineSnapshot(`Object {}`);
+    expect(migratedConfig).toMatchInlineSnapshot(`{}`);
   });
 
   it('migrates azureAutoComplete', () => {

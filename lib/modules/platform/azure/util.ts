@@ -26,7 +26,8 @@ export function getGitStatusContextCombinedName(
     return undefined;
   }
   const combinedName = `${context.genre ? `${context.genre}/` : ''}${
-    context.name
+    // TODO: types (#7154)
+    context.name!
   }`;
   logger.trace(`Got combined context name of ${combinedName}`);
   return combinedName;
@@ -55,7 +56,7 @@ export function getBranchNameWithoutRefsheadsPrefix(
   branchPath: string | undefined
 ): string | undefined {
   if (!branchPath) {
-    logger.error(`getBranchNameWithoutRefsheadsPrefix(${branchPath})`);
+    logger.error(`getBranchNameWithoutRefsheadsPrefix(undefined)`);
     return undefined;
   }
   if (!branchPath.startsWith('refs/heads/')) {
@@ -71,7 +72,7 @@ export function getBranchNameWithoutRefsPrefix(
   branchPath?: string
 ): string | undefined {
   if (!branchPath) {
-    logger.error(`getBranchNameWithoutRefsPrefix(${branchPath})`);
+    logger.error(`getBranchNameWithoutRefsPrefix(undefined)`);
     return undefined;
   }
   if (!branchPath.startsWith('refs/')) {
@@ -90,7 +91,8 @@ const stateMap = {
 
 export function getRenovatePRFormat(azurePr: GitPullRequest): AzurePr {
   const number = azurePr.pullRequestId;
-  const displayNumber = `Pull Request #${number}`;
+  // TODO: types (#7154)
+  const displayNumber = `Pull Request #${number!}`;
 
   const sourceBranch = getBranchNameWithoutRefsheadsPrefix(
     azurePr.sourceRefName
@@ -101,7 +103,8 @@ export function getRenovatePRFormat(azurePr: GitPullRequest): AzurePr {
   const bodyStruct = getPrBodyStruct(azurePr.description);
 
   const createdAt = azurePr.creationDate?.toISOString();
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+
+  // TODO #7154
   const state = stateMap[azurePr.status!] ?? PrState.Open;
 
   const sourceRefName = azurePr.sourceRefName;
@@ -183,6 +186,6 @@ export function getRepoByName(
       (r) =>
         project === r?.project?.name?.toLowerCase() &&
         repo === r?.name?.toLowerCase()
-    ) || null
+    ) ?? null
   );
 }

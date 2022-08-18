@@ -2,6 +2,7 @@ import type { Merge } from 'type-fest';
 import type {
   GroupConfig,
   LegacyAdminConfig,
+  RegExManager,
   RenovateConfig,
   RenovateSharedConfig,
   ValidationMessage,
@@ -9,6 +10,7 @@ import type {
 import type { Release } from '../modules/datasource/types';
 import type {
   ArtifactError,
+  ExtractConfig,
   LookupUpdate,
   PackageDependency,
   PackageFile,
@@ -37,11 +39,9 @@ export interface BranchUpgradeConfig
   currentDigest?: string;
   currentDigestShort?: string;
   currentValue?: string;
-  endpoint?: string;
   excludeCommitPaths?: string[];
   githubName?: string;
   group?: GroupConfig;
-  constraints?: Record<string, string>;
   groupName?: string;
   groupSlug?: string;
   language?: string;
@@ -56,6 +56,8 @@ export interface BranchUpgradeConfig
   prBodyTemplate?: string;
   prPriority?: number;
   prTitle?: string;
+  prettyNewMajor?: string;
+  prettyNewVersion?: string;
   releases?: ReleaseWithNotes[];
   releaseTimestamp?: string;
   repoName?: string;
@@ -65,7 +67,7 @@ export interface BranchUpgradeConfig
   updatedPackageFiles?: FileChange[];
   updatedArtifacts?: FileChange[];
 
-  logJSON?: ChangeLogResult;
+  logJSON?: ChangeLogResult | null;
 
   hasReleaseNotes?: boolean;
   homepage?: string;
@@ -124,4 +126,27 @@ export interface BranchConfig
   prNo?: number;
   stopUpdating?: boolean;
   isConflicted?: boolean;
+}
+
+export interface WorkerExtractConfig extends ExtractConfig {
+  manager: string;
+  fileList: string[];
+  fileMatch?: string[];
+  updateInternalDeps?: boolean;
+  includePaths?: string[];
+  ignorePaths?: string[];
+  regexManagers?: RegExManager[];
+  enabledManagers?: string[];
+  enabled?: boolean;
+}
+
+export interface DepWarnings {
+  warnings: string[];
+  warningFiles: string[];
+}
+
+export interface SelectAllConfig extends RenovateConfig {
+  dependencyDashboardRebaseAllOpen?: boolean;
+  dependencyDashboardAllPending?: boolean;
+  dependencyDashboardAllRateLimited?: boolean;
 }

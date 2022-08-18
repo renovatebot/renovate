@@ -13,12 +13,16 @@ import {
 } from '../../../../util/git';
 import * as template from '../../../../util/template';
 import type { BranchConfig } from '../../../types';
+import {
+  getDepWarningsPR,
+  getErrors,
+  getWarnings,
+} from '../../errors-warnings';
 import { getPlatformPrOptions } from '../../update/pr';
 import { prepareLabels } from '../../update/pr/labels';
 import { addParticipants } from '../../update/pr/participants';
 import { getBaseBranchDesc } from './base-branch';
 import { getConfigDesc } from './config-description';
-import { getDepWarnings, getErrors, getWarnings } from './errors-warnings';
 import { getPrList } from './pr-list';
 
 export async function ensureOnboardingPr(
@@ -31,9 +35,12 @@ export async function ensureOnboardingPr(
   }
   logger.debug('ensureOnboardingPr()');
   logger.trace({ config });
-  const existingPr = await platform.getBranchPr(config.onboardingBranch);
+  // TODO #7154
+  const existingPr = await platform.getBranchPr(config.onboardingBranch!);
   logger.debug('Filling in onboarding PR template');
-  let prTemplate = `Welcome to [Renovate](${config.productLinks.homepage})! This is an onboarding PR to help you understand and configure settings before regular Pull Requests begin.\n\n`;
+  let prTemplate = `Welcome to [Renovate](${
+    config.productLinks!.homepage
+  })! This is an onboarding PR to help you understand and configure settings before regular Pull Requests begin.\n\n`;
   prTemplate +=
     config.requireConfig === 'required'
       ? emojify(
@@ -42,6 +49,7 @@ export async function ensureOnboardingPr(
       : emojify(
           `:vertical_traffic_light: Renovate will begin keeping your dependencies up-to-date only once you merge or close this Pull Request.\n\n`
         );
+  // TODO #7154
   prTemplate += emojify(
     `
 
@@ -55,8 +63,12 @@ export async function ensureOnboardingPr(
 
 ---
 
-:question: Got questions? Check out Renovate's [Docs](${config.productLinks.documentation}), particularly the Getting Started section.
-If you need any further assistance then you can also [request help here](${config.productLinks.help}).
+:question: Got questions? Check out Renovate's [Docs](${
+      config.productLinks!.documentation
+    }), particularly the Getting Started section.
+If you need any further assistance then you can also [request help here](${
+      config.productLinks!.help
+    }).
 `
   );
   let prBody = prTemplate;
@@ -64,7 +76,8 @@ If you need any further assistance then you can also [request help here](${confi
     let files: string[] = [];
     for (const [manager, managerFiles] of Object.entries(packageFiles)) {
       files = files.concat(
-        managerFiles.map((file) => ` * \`${file.packageFile}\` (${manager})`)
+        // TODO: types (#7154)
+        managerFiles.map((file) => ` * \`${file.packageFile!}\` (${manager})`)
       );
     }
     prBody =
@@ -77,29 +90,32 @@ If you need any further assistance then you can also [request help here](${confi
   }
   let configDesc = '';
   if (GlobalConfig.get('dryRun')) {
-    logger.info(`DRY-RUN: Would check branch ${config.onboardingBranch}`);
-  } else if (await isBranchModified(config.onboardingBranch)) {
+    // TODO: types (#7154)
+    logger.info(`DRY-RUN: Would check branch ${config.onboardingBranch!}`);
+  } else if (await isBranchModified(config.onboardingBranch!)) {
     configDesc = emojify(
-      `### Configuration\n\n:abcd: Renovate has detected a custom config for this PR. Feel free to ask for [help](${config.productLinks.help}) if you have any doubts and would like it reviewed.\n\n`
+      `### Configuration\n\n:abcd: Renovate has detected a custom config for this PR. Feel free to ask for [help](${
+        config.productLinks!.help
+      }) if you have any doubts and would like it reviewed.\n\n`
     );
     const isConflicted = await isBranchConflicted(
-      config.baseBranch,
-      config.onboardingBranch
+      config.baseBranch!,
+      config.onboardingBranch!
     );
     if (isConflicted) {
       configDesc += emojify(
-        `:warning: This PR has a merge conflict, however Renovate is unable to automatically fix that due to edits in this branch. Please resolve the merge conflict manually.\n\n`
+        `:warning: This PR has a merge conflict. However, Renovate is unable to automatically fix that due to edits in this branch. Please resolve the merge conflict manually.\n\n`
       );
     } else {
       configDesc += `Important: Now that this branch is edited, Renovate can't rebase it from the base branch any more. If you make changes to the base branch that could impact this onboarding PR, please merge them manually.\n\n`;
     }
   } else {
-    configDesc = getConfigDesc(config, packageFiles);
+    configDesc = getConfigDesc(config, packageFiles!);
   }
   prBody = prBody.replace('{{CONFIG}}\n', configDesc);
   prBody = prBody.replace(
     '{{WARNINGS}}\n',
-    getWarnings(config) + getDepWarnings(packageFiles)
+    getWarnings(config) + getDepWarningsPR(packageFiles!)
   );
   prBody = prBody.replace('{{ERRORS}}\n', getErrors(config));
   prBody = prBody.replace('{{BASEBRANCH}}\n', getBaseBranchDesc(config));
@@ -119,7 +135,8 @@ If you need any further assistance then you can also [request help here](${confi
     // Check if existing PR needs updating
     const prBodyHash = hashBody(prBody);
     if (existingPr.bodyStruct?.hash === prBodyHash) {
-      logger.debug(`${existingPr.displayNumber} does not need updating`);
+      // TODO: types (#7154)
+      logger.debug(`${existingPr.displayNumber!} does not need updating`);
       return;
     }
     // PR must need updating
@@ -141,16 +158,17 @@ If you need any further assistance then you can also [request help here](${confi
     if (GlobalConfig.get('dryRun')) {
       logger.info('DRY-RUN: Would create onboarding PR');
     } else {
+      // TODO #7154
       const pr = await platform.createPr({
-        sourceBranch: config.onboardingBranch,
-        targetBranch: config.defaultBranch,
-        prTitle: config.onboardingPrTitle,
+        sourceBranch: config.onboardingBranch!,
+        targetBranch: config.defaultBranch!,
+        prTitle: config.onboardingPrTitle!,
         prBody,
         labels,
         platformOptions: getPlatformPrOptions({ ...config, automerge: false }),
       });
-      logger.info({ pr: pr.displayNumber }, 'Onboarding PR created');
-      await addParticipants(config, pr);
+      logger.info({ pr: pr!.displayNumber }, 'Onboarding PR created');
+      await addParticipants(config, pr!);
     }
   } catch (err) {
     if (
@@ -162,7 +180,7 @@ If you need any further assistance then you can also [request help here](${confi
       logger.warn(
         'Onboarding PR already exists but cannot find it. It was probably created by a different user.'
       );
-      await deleteBranch(config.onboardingBranch);
+      await deleteBranch(config.onboardingBranch!);
       return;
     }
     throw err;

@@ -2,7 +2,6 @@ import is from '@sindresorhus/is';
 import handlebars from 'handlebars';
 import { GlobalConfig } from '../../config/global';
 import { logger } from '../../logger';
-import { clone } from '../clone';
 
 handlebars.registerHelper('encodeURIComponent', encodeURIComponent);
 
@@ -17,10 +16,10 @@ handlebars.registerHelper(
     (context || '').replace(new RegExp(find, 'g'), replace) // TODO #12873
 );
 
-handlebars.registerHelper('lowercase', (str: string) => str.toLowerCase());
+handlebars.registerHelper('lowercase', (str: string) => str?.toLowerCase());
 
-handlebars.registerHelper('containsString', (str, subStr, options) =>
-  str.includes(subStr)
+handlebars.registerHelper('containsString', (str, subStr) =>
+  str?.includes(subStr)
 );
 
 handlebars.registerHelper({
@@ -44,6 +43,7 @@ export const exposedConfigOptions = [
   'branchName',
   'branchPrefix',
   'branchTopic',
+  'commitBody',
   'commitMessage',
   'commitMessageAction',
   'commitMessageExtra',
@@ -71,6 +71,9 @@ export const allowedFields = {
   currentValue: 'The extracted current value of the dependency being updated',
   currentVersion:
     'The version that would be currently installed. For example, if currentValue is ^3.0.0 then currentVersion might be 3.1.0.',
+  currentDigest: 'The extracted current digest of the dependency being updated',
+  currentDigestShort:
+    'The extracted current short digest of the dependency being updated',
   datasource: 'The datasource used to look up the upgrade',
   depName: 'The name of the dependency being updated',
   depNameLinked:
@@ -114,6 +117,8 @@ export const allowedFields = {
     'The name of the directory that the dependency was found in, without full path',
   platform: 'VCS platform in use, e.g. "github", "gitlab", etc.',
   prettyDepType: 'Massaged depType',
+  prettyNewMajor: 'The new major value with v prepended to it.',
+  prettyNewVersion: 'The new version value with v prepended to it.',
   project: 'ChangeLogProject object',
   recreateClosed: 'If true, this PR will be recreated if closed',
   references: 'A list of references for the upgrade',
@@ -140,6 +145,9 @@ const prBodyFields = [
   'table',
   'notes',
   'changelogs',
+  'hasWarningsErrors',
+  'errors',
+  'warnings',
   'configDescription',
   'controls',
   'footer',
@@ -154,31 +162,39 @@ const allowedFieldsList = Object.keys(allowedFields)
 
 type CompileInput = Record<string, unknown>;
 
-type FilteredObject = Record<string, CompileInput | CompileInput[] | unknown>;
+const allowedTemplateFields = new Set([
+  ...Object.keys(allowedFields),
+  ...exposedConfigOptions,
+]);
 
-function getFilteredObject(input: CompileInput): FilteredObject {
-  const obj = clone(input);
-  const res: FilteredObject = {};
-  const allAllowed = [
-    ...Object.keys(allowedFields),
-    ...exposedConfigOptions,
-  ].sort();
-  for (const field of allAllowed) {
-    const value = obj[field];
-    if (is.array(value)) {
-      res[field] = value
-        .filter(is.plainObject)
-        .map((element) => getFilteredObject(element as CompileInput));
-    } else if (is.plainObject(value)) {
-      res[field] = getFilteredObject(value);
-    } else if (!is.undefined(value)) {
-      res[field] = value;
+const compileInputProxyHandler: ProxyHandler<CompileInput> = {
+  get(target: CompileInput, prop: keyof CompileInput): unknown {
+    if (!allowedTemplateFields.has(prop)) {
+      return undefined;
     }
-  }
-  return res;
+
+    const value = target[prop];
+
+    if (is.array(value)) {
+      return value
+        .filter(is.plainObject)
+        .map((element) => proxyCompileInput(element as CompileInput));
+    }
+
+    if (is.plainObject(value)) {
+      return proxyCompileInput(value);
+    }
+
+    return value;
+  },
+};
+
+export function proxyCompileInput(input: CompileInput): CompileInput {
+  return new Proxy<CompileInput>(input, compileInputProxyHandler);
 }
 
-const templateRegex = /{{(#(if|unless) )?([a-zA-Z]+)}}/g; // TODO #12873
+const templateRegex =
+  /{{(?:#(?:if|unless|with|each) )?([a-zA-Z.]+)(?: as \| [a-zA-Z.]+ \|)?}}/g; // TODO #12873
 
 export function compile(
   template: string,
@@ -186,19 +202,39 @@ export function compile(
   filterFields = true
 ): string {
   const data = { ...GlobalConfig.get(), ...input };
-  const filteredInput = filterFields ? getFilteredObject(data) : data;
+  const filteredInput = filterFields ? proxyCompileInput(data) : data;
   logger.trace({ template, filteredInput }, 'Compiling template');
   if (filterFields) {
     const matches = template.matchAll(templateRegex);
     for (const match of matches) {
-      const varName = match[3];
-      if (!allowedFieldsList.includes(varName)) {
-        logger.info(
-          { varName, template },
-          'Disallowed variable name in template'
-        );
+      const varNames = match[1].split('.');
+      for (const varName of varNames) {
+        if (!allowedFieldsList.includes(varName)) {
+          logger.info(
+            { varName, template },
+            'Disallowed variable name in template'
+          );
+        }
       }
     }
   }
   return handlebars.compile(template)(filteredInput);
+}
+
+export function containsTemplates(
+  value: unknown,
+  templates: string | string[]
+): boolean {
+  if (!is.string(value)) {
+    return false;
+  }
+  for (const m of [...value.matchAll(templateRegex)]) {
+    for (const template of is.string(templates) ? [templates] : templates) {
+      if (m[1] === template || m[1].startsWith(`${template}.`)) {
+        return true;
+      }
+    }
+  }
+
+  return false;
 }

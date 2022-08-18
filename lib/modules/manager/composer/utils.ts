@@ -1,3 +1,5 @@
+// TODO: types (#7154)
+/* eslint-disable @typescript-eslint/restrict-template-expressions */
 import { quote } from 'shlex';
 import { GlobalConfig } from '../../../config/global';
 import { logger } from '../../../logger';
@@ -18,10 +20,8 @@ export function getComposerArguments(
 
   if (config.composerIgnorePlatformReqs) {
     if (config.composerIgnorePlatformReqs.length === 0) {
-      // TODO: toolConstraint.constraint can be null or undefined?
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+      // TODO: toolConstraint.constraint can be null or undefined? (#7154)
       const major = api.getMajor(toolConstraint.constraint!);
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
       const minor = api.getMinor(toolConstraint.constraint!);
       args += api.matches(`${major}.${minor}`, '^2.2')
         ? " --ignore-platform-req='ext-*' --ignore-platform-req='lib-*'"
@@ -67,7 +67,7 @@ export function requireComposerDependencyInstallation(
   );
 }
 
-export function extractContraints(
+export function extractConstraints(
   composerJson: ComposerConfig,
   lockParsed: ComposerLock
 ): Record<string, string> {

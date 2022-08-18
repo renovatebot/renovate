@@ -44,6 +44,7 @@ export interface LookupUpdateConfig
   datasource: string;
   depName: string;
   minimumConfidence?: string;
+  extractedConstraints?: Record<string, string>;
 }
 
 export interface UpdateResult {
@@ -52,10 +53,10 @@ export interface UpdateResult {
   dependencyUrl?: string;
   homepage?: string;
   deprecationMessage?: string;
-  sourceUrl?: string;
+  sourceUrl?: string | null;
   currentVersion?: string;
   isSingleVersion?: boolean;
-  skipReason: SkipReason;
+  skipReason?: SkipReason;
   releases: Release[];
   fixedVersion?: string;
   updates: LookupUpdate[];

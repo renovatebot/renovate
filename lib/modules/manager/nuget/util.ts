@@ -1,4 +1,3 @@
-import cryptoRandomString from 'crypto-random-string';
 import upath from 'upath';
 import { XmlDocument } from 'xmldoc';
 import { logger } from '../../../logger';
@@ -7,20 +6,18 @@ import { regEx } from '../../../util/regex';
 import { defaultRegistryUrls } from '../../datasource/nuget';
 import type { Registry } from './types';
 
-async function readFileAsXmlDocument(
+export async function readFileAsXmlDocument(
   file: string
 ): Promise<XmlDocument | undefined> {
   try {
-    return new XmlDocument(await readLocalFile(file, 'utf8'));
+    // TODO #7154
+    const doc = new XmlDocument((await readLocalFile(file, 'utf8'))!);
+    // don't return empty documents
+    return doc?.firstChild ? doc : undefined;
   } catch (err) {
-    logger.debug({ err }, `failed to parse '${file}' as XML document`);
+    logger.debug({ err, file }, `failed to parse file as XML document`);
     return undefined;
   }
-}
-
-/* istanbul ignore next */
-export function getRandomString(): string {
-  return cryptoRandomString({ length: 16 });
 }
 
 const defaultRegistries = defaultRegistryUrls.map(

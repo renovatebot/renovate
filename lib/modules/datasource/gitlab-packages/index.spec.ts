@@ -42,7 +42,7 @@ describe('modules/datasource/gitlab-packages/index', () => {
         depName: 'user/project1:mypkg',
       });
       expect(res).toMatchSnapshot();
-      expect(res.releases).toHaveLength(3);
+      expect(res?.releases).toHaveLength(3);
     });
 
     it('returns null for 404', async () => {

@@ -4,6 +4,7 @@ import { GlobalConfig } from '../../../config/global';
 import { PlatformId } from '../../../constants';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
+import type { HostRule } from '../../../types';
 import { exec } from '../../../util/exec';
 import type { ExecOptions } from '../../../util/exec/types';
 import {
@@ -24,6 +25,13 @@ import type {
   UpdateArtifactsResult,
 } from '../types';
 
+const githubApiUrls = new Set([
+  'github.com',
+  'api.github.com',
+  'https://api.github.com',
+  'https://api.github.com/',
+]);
+
 function getGitEnvironmentVariables(): NodeJS.ProcessEnv {
   let environmentVariables: NodeJS.ProcessEnv = {};
 
@@ -41,9 +49,12 @@ function getGitEnvironmentVariables(): NodeJS.ProcessEnv {
   }
 
   // get extra host rules for other git-based Go Module hosts
-  const hostRules = getAll() || [];
+  // filter rules without `matchHost` and `token` and github api github rules
+  const hostRules = getAll()
+    .filter((r) => r.matchHost && r.token)
+    .filter((r) => !githubToken || !githubApiUrls.has(r.matchHost!));
 
-  const goGitAllowedHostType: (string | undefined)[] = [
+  const goGitAllowedHostType = new Set<string>([
     // All known git platforms
     PlatformId.Azure,
     PlatformId.Bitbucket,
@@ -51,35 +62,51 @@ function getGitEnvironmentVariables(): NodeJS.ProcessEnv {
     PlatformId.Gitea,
     PlatformId.Github,
     PlatformId.Gitlab,
-    // plus all without a host type (=== undefined)
-    undefined,
-  ];
+  ]);
 
-  // for each hostRule we add additional authentication variables to the environmentVariables
+  // for each hostRule without hostType we add additional authentication variables to the environmentVariables
   for (const hostRule of hostRules) {
-    if (
-      hostRule?.token &&
-      hostRule.matchHost &&
-      goGitAllowedHostType.includes(hostRule.hostType)
-    ) {
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-      const httpUrl = createURLFromHostOrURL(hostRule.matchHost!)?.toString();
-      if (validateUrl(httpUrl)) {
-        logger.debug(
-          `Adding Git authentication for Go Module retrieval for ${httpUrl} using token auth.`
-        );
-        environmentVariables = getGitAuthenticatedEnvironmentVariables(
-          // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-          httpUrl!,
-          hostRule,
-          environmentVariables
-        );
-      } else {
-        logger.warn(
-          `Could not parse registryUrl ${hostRule.matchHost} or not using http(s). Ignoring`
-        );
-      }
+    if (!hostRule.hostType) {
+      environmentVariables = addAuthFromHostRule(
+        hostRule,
+        environmentVariables
+      );
     }
+  }
+
+  // for each hostRule with hostType we add additional authentication variables to the environmentVariables
+  for (const hostRule of hostRules) {
+    if (hostRule.hostType && goGitAllowedHostType.has(hostRule.hostType)) {
+      environmentVariables = addAuthFromHostRule(
+        hostRule,
+        environmentVariables
+      );
+    }
+  }
+  return environmentVariables;
+}
+
+function addAuthFromHostRule(
+  hostRule: HostRule,
+  env: NodeJS.ProcessEnv
+): NodeJS.ProcessEnv {
+  let environmentVariables = env;
+  const httpUrl = createURLFromHostOrURL(hostRule.matchHost!)?.toString();
+  if (validateUrl(httpUrl)) {
+    logger.debug(
+      // TODO: types (#7154)
+      // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+      `Adding Git authentication for Go Module retrieval for ${httpUrl} using token auth.`
+    );
+    environmentVariables = getGitAuthenticatedEnvironmentVariables(
+      httpUrl!,
+      hostRule,
+      environmentVariables
+    );
+  } else {
+    logger.warn(
+      `Could not parse registryUrl ${hostRule.matchHost!} or not using http(s). Ignoring`
+    );
   }
   return environmentVariables;
 }
@@ -89,9 +116,10 @@ function getUpdateImportPathCmds(
   { constraints, newMajor }: UpdateArtifactsConfig
 ): string[] {
   const updateImportCommands = updatedDeps
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
     .map((dep) => dep.depName!)
     .filter((x) => !x.startsWith('gopkg.in'))
+    // TODO: types (#7154)
+    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
     .map((depName) => `mod upgrade --mod-name=${depName} -t=${newMajor}`);
 
   if (updateImportCommands.length > 0) {
@@ -164,6 +192,19 @@ export async function updateArtifacts({
     // Regex match inline replace directive, example:
     // replace golang.org/x/net v1.2.3 => example.com/fork/net v1.4.5
     // https://go.dev/ref/mod#go-mod-file-replace
+
+    // replace bracket after comments, so it doesn't break the regex, doing a complex regex causes problems
+    // when there's a comment and ")" after it, the regex will read replace block until comment.. and stop.
+    massagedGoMod = massagedGoMod
+      .split('\n')
+      .map((line) => {
+        if (line.trim().startsWith('//')) {
+          return line.replace(')', 'renovate-replace-bracket');
+        }
+        return line;
+      })
+      .join('\n');
+
     const inlineReplaceRegEx = regEx(
       /(\r?\n)(replace\s+[^\s]+\s+=>\s+\.\.\/.*)/g
     );
@@ -188,12 +229,14 @@ export async function updateArtifacts({
       match.replace(/(\r?\n)/g, '$1// renovate-replace ');
 
     // Comment out golang replace directives
-    massagedGoMod = newGoModContent
+    massagedGoMod = massagedGoMod
       .replace(inlineReplaceRegEx, inlineCommentOut)
       .replace(blockReplaceRegEx, blockCommentOut);
 
     if (massagedGoMod !== newGoModContent) {
-      logger.debug('Removed some relative replace statements from go.mod');
+      logger.debug(
+        'Removed some relative replace statements and comments from go.mod'
+      );
     }
   }
   try {
@@ -209,6 +252,7 @@ export async function updateArtifacts({
         GONOPROXY: process.env.GONOPROXY,
         GONOSUMDB: process.env.GONOSUMDB,
         GOSUMDB: process.env.GOSUMDB,
+        GOINSECURE: process.env.GOINSECURE,
         GOFLAGS: useModcacherw(config.constraints?.go) ? '-modcacherw' : null,
         CGO_ENABLED: GlobalConfig.get('binarySource') === 'docker' ? '0' : null,
         ...getGitEnvironmentVariables(),
@@ -230,7 +274,6 @@ export async function updateArtifacts({
     const isImportPathUpdateRequired =
       config.postUpdateOptions?.includes('gomodUpdateImportPaths') &&
       config.updateType === 'major' &&
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
       config.newMajor! > 1;
     if (isImportPathUpdateRequired) {
       const updateImportCmds = getUpdateImportPathCmds(updatedDeps, config);
@@ -336,9 +379,10 @@ export async function updateArtifacts({
       }
     }
 
-    const finalGoModContent = (
-      await readLocalFile(goModFileName, 'utf8')
-    ).replace(regEx(/\/\/ renovate-replace /g), '');
+    // TODO: throws in tests (#7154)
+    const finalGoModContent = (await readLocalFile(goModFileName, 'utf8'))!
+      .replace(regEx(/\/\/ renovate-replace /g), '')
+      .replace(regEx(/renovate-replace-bracket/g), ')');
     if (finalGoModContent !== newGoModContent) {
       logger.debug('Found updated go.mod after go.sum update');
       res.push({

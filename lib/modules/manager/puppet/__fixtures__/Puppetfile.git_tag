@@ -1,0 +1,19 @@
+mod 'apache',
+  :git => 'https://gitlab.com/example/project.git',
+  :tag => '0.9.0'
+
+mod 'stdlib',
+  :git => 'git@gitlab.com:example/project_stdlib.git',
+  :tag => '5.0.0'
+
+mod 'multiple_dirs_ssh',
+  :git => 'git@gitlab.com:dir1/dir2/project.git',
+  :tag => '1.0.0'
+
+mod 'multiple_dirs_https',
+  :git => 'https://gitlab.com/dir1/dir2/project.git',
+  :tag => '1.9.0'
+
+mod 'invalid_url',
+  :git => 'hello world',
+  :tag => '0.0.0'

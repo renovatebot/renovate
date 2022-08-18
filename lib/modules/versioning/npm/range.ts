@@ -56,6 +56,7 @@ function replaceCaretValue(oldValue: string, newValue: string): string {
   return needReplace ? resultTuple.join('.') : oldValue;
 }
 
+// TODO: #7154
 export function getNewValue({
   currentValue,
   rangeStrategy,
@@ -92,21 +93,24 @@ export function getNewValue({
       // TODO fix this
       const splitCurrent = currentValue.split(element.operator);
       splitCurrent.pop();
-      return splitCurrent.join(element.operator) + newValue;
+      // TODO: types (#7154)
+      return `${splitCurrent.join(element.operator)}${newValue!}`;
     }
     if (parsedRange.length > 1) {
       const previousElement = parsedRange[parsedRange.length - 2];
       if (previousElement.operator === '-') {
         const splitCurrent = currentValue.split('-');
         splitCurrent.pop();
-        return splitCurrent.join('-') + '- ' + newValue;
+        // TODO: types (#7154)
+        return `${splitCurrent.join('-')}- ${newValue!}`;
       }
       if (element.operator?.startsWith('>')) {
         logger.warn(`Complex ranges ending in greater than are not supported`);
         return null;
       }
     }
-    return `${currentValue} || ${newValue}`;
+    // TODO: types (#7154)
+    return `${currentValue} || ${newValue!}`;
   }
   const toVersionMajor = major(newVersion);
   const toVersionMinor = minor(newVersion);
@@ -234,7 +238,8 @@ export function getNewValue({
       const newMajor = toVersionMajor + 1;
       res = `<${newMajor}.0.0`;
     } else if (element.patch) {
-      res = `<${increment(newVersion, 'patch')}`;
+      // TODO: types (#7154)
+      res = `<${increment(newVersion, 'patch')!}`;
     } else if (element.minor) {
       res = `<${toVersionMajor}.${toVersionMinor + 1}`;
     } else {
