@@ -26,7 +26,7 @@ const RE_SPECIAL_CHARS_STRICT = regEx(/[`~!@#$%^&*()_=+[\]\\|{};':",.<>?]/g);
  */
 function cleanBranchName(
   branchName: string,
-  branchNameStrict: boolean
+  branchNameStrict?: boolean
 ): string {
   let cleanedBranchName = branchName;
 
