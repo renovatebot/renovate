@@ -88,6 +88,17 @@ export function extractPackageFile(content: string): PackageFile | null {
         );
         lineNumber = reachedLine;
         deps.push(...detectedDeps);
+      } else if (line.trim() === 'replace (') {
+        logger.trace(`Matched multi-line replace on line ${lineNumber}`);
+        const matcher = regEx(/^\s+[^\s]+[\s]+[=][>]\s+([^\s]+)\s+([^\s]+)/);
+        const { reachedLine, detectedDeps } = parseMultiLine(
+          lineNumber,
+          lines,
+          matcher,
+          'replace'
+        );
+        lineNumber = reachedLine;
+        deps.push(...detectedDeps);
       }
     }
   } catch (err) /* istanbul ignore next */ {

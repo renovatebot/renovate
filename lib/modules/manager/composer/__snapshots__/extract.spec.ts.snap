@@ -1,399 +1,399 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`modules/manager/composer/extract extractPackageFile() extracts dependencies with lock file 1`] = `
-Object {
-  "deps": Array [
-    Object {
+{
+  "deps": [
+    {
       "currentValue": ">=5.3.2",
       "datasource": "packagist",
       "depName": "php",
       "depType": "require",
       "skipReason": "unsupported",
     },
-    Object {
+    {
       "currentValue": "dev-master",
       "datasource": "packagist",
       "depName": "symfony/assetic-bundle",
       "depType": "require",
     },
-    Object {
+    {
       "currentValue": "dev-master",
       "datasource": "packagist",
       "depName": "symfony/monolog-bundle",
       "depType": "require",
     },
-    Object {
+    {
       "currentValue": "dev-master",
       "datasource": "packagist",
       "depName": "symfony/swiftmailer-bundle",
       "depType": "require",
     },
-    Object {
+    {
       "currentValue": "2.1.*",
       "datasource": "packagist",
       "depName": "symfony/symfony",
       "depType": "require",
     },
-    Object {
+    {
       "currentValue": "2.2.2",
       "datasource": "packagist",
       "depName": "doctrine/common",
       "depType": "require",
     },
-    Object {
+    {
       "currentValue": "dev-master",
       "datasource": "packagist",
       "depName": "doctrine/doctrine-bundle",
       "depType": "require",
     },
-    Object {
+    {
       "currentValue": "dev-master",
       "datasource": "packagist",
       "depName": "doctrine/doctrine-fixtures-bundle",
       "depType": "require",
     },
-    Object {
+    {
       "currentValue": "2.2.x-dev",
       "datasource": "packagist",
       "depName": "doctrine/orm",
       "depType": "require",
     },
-    Object {
+    {
       "currentValue": "dev-master",
       "datasource": "packagist",
       "depName": "exercise/elastica-bundle",
       "depType": "require",
     },
-    Object {
+    {
       "currentValue": "dev-master",
       "datasource": "packagist",
       "depName": "friendsofsymfony/rest-bundle",
       "depType": "require",
     },
-    Object {
+    {
       "currentValue": "*",
       "datasource": "packagist",
       "depName": "friendsofsymfony/user-bundle",
       "depType": "require",
     },
-    Object {
+    {
       "currentValue": "*",
       "datasource": "packagist",
       "depName": "fzaninotto/faker",
       "depType": "require",
     },
-    Object {
+    {
       "currentValue": "1.0.1",
       "datasource": "packagist",
       "depName": "jms/di-extra-bundle",
       "depType": "require",
     },
-    Object {
+    {
       "currentValue": "*",
       "datasource": "packagist",
       "depName": "jms/payment-core-bundle",
       "depType": "require",
     },
-    Object {
+    {
       "currentValue": "1.1.0",
       "datasource": "packagist",
       "depName": "jms/security-extra-bundle",
       "depType": "require",
     },
-    Object {
+    {
       "currentValue": "dev-master",
       "datasource": "packagist",
       "depName": "knplabs/knp-menu-bundle",
       "depType": "require",
     },
-    Object {
+    {
       "currentValue": "dev-master",
       "datasource": "packagist",
       "depName": "knplabs/knp-paginator-bundle",
       "depType": "require",
     },
-    Object {
+    {
       "currentValue": "dev-master",
       "datasource": "packagist",
       "depName": "liip/imagine-bundle",
       "depType": "require",
     },
-    Object {
+    {
       "currentValue": "dev-master",
       "datasource": "packagist",
       "depName": "merk/dough-bundle",
       "depType": "require",
     },
-    Object {
+    {
       "currentValue": "dev-master",
       "datasource": "packagist",
       "depName": "sensio/distribution-bundle",
       "depType": "require",
     },
-    Object {
+    {
       "currentValue": "dev-master",
       "datasource": "packagist",
       "depName": "sensio/framework-extra-bundle",
       "depType": "require",
     },
-    Object {
+    {
       "currentValue": "dev-master",
       "datasource": "packagist",
       "depName": "sensio/generator-bundle",
       "depType": "require",
     },
-    Object {
+    {
       "currentValue": "dev-master",
       "datasource": "packagist",
       "depName": "simplethings/entity-audit-bundle",
       "depType": "require",
     },
-    Object {
+    {
       "currentValue": "dev-master",
       "datasource": "packagist",
       "depName": "stof/doctrine-extensions-bundle",
       "depType": "require",
     },
-    Object {
+    {
       "currentValue": "dev-master",
       "datasource": "packagist",
       "depName": "twig/extensions",
       "depType": "require",
     },
-    Object {
+    {
       "currentValue": "2.3.*",
       "datasource": "packagist",
       "depName": "behat/behat",
       "depType": "require-dev",
     },
-    Object {
+    {
       "currentValue": "*",
       "datasource": "packagist",
       "depName": "behat/behat-bundle",
       "depType": "require-dev",
     },
-    Object {
+    {
       "currentValue": "*",
       "datasource": "packagist",
       "depName": "behat/mink-bundle",
       "depType": "require-dev",
     },
-    Object {
+    {
       "currentValue": "*",
       "datasource": "packagist",
       "depName": "behat/sahi-client",
       "depType": "require-dev",
     },
-    Object {
+    {
       "currentValue": "*",
       "datasource": "packagist",
       "depName": "behat/common-contexts",
       "depType": "require-dev",
     },
-    Object {
+    {
       "currentValue": "^1.10.0",
       "datasource": "packagist",
       "depName": "composer/composer",
       "depType": "require-dev",
     },
   ],
-  "lockFiles": Array [
+  "lockFiles": [
     "composer.lock",
   ],
 }
 `;
 
 exports[`modules/manager/composer/extract extractPackageFile() extracts dependencies with no lock file 1`] = `
-Object {
-  "deps": Array [
-    Object {
+{
+  "deps": [
+    {
       "currentValue": ">=5.3.2",
       "datasource": "packagist",
       "depName": "php",
       "depType": "require",
       "skipReason": "unsupported",
     },
-    Object {
+    {
       "currentValue": "dev-master",
       "datasource": "packagist",
       "depName": "symfony/assetic-bundle",
       "depType": "require",
     },
-    Object {
+    {
       "currentValue": "dev-master",
       "datasource": "packagist",
       "depName": "symfony/monolog-bundle",
       "depType": "require",
     },
-    Object {
+    {
       "currentValue": "dev-master",
       "datasource": "packagist",
       "depName": "symfony/swiftmailer-bundle",
       "depType": "require",
     },
-    Object {
+    {
       "currentValue": "2.1.*",
       "datasource": "packagist",
       "depName": "symfony/symfony",
       "depType": "require",
     },
-    Object {
+    {
       "currentValue": "2.2.2",
       "datasource": "packagist",
       "depName": "doctrine/common",
       "depType": "require",
     },
-    Object {
+    {
       "currentValue": "dev-master",
       "datasource": "packagist",
       "depName": "doctrine/doctrine-bundle",
       "depType": "require",
     },
-    Object {
+    {
       "currentValue": "dev-master",
       "datasource": "packagist",
       "depName": "doctrine/doctrine-fixtures-bundle",
       "depType": "require",
     },
-    Object {
+    {
       "currentValue": "2.2.x-dev",
       "datasource": "packagist",
       "depName": "doctrine/orm",
       "depType": "require",
     },
-    Object {
+    {
       "currentValue": "dev-master",
       "datasource": "packagist",
       "depName": "exercise/elastica-bundle",
       "depType": "require",
     },
-    Object {
+    {
       "currentValue": "dev-master",
       "datasource": "packagist",
       "depName": "friendsofsymfony/rest-bundle",
       "depType": "require",
     },
-    Object {
+    {
       "currentValue": "*",
       "datasource": "packagist",
       "depName": "friendsofsymfony/user-bundle",
       "depType": "require",
     },
-    Object {
+    {
       "currentValue": "*",
       "datasource": "packagist",
       "depName": "fzaninotto/faker",
       "depType": "require",
     },
-    Object {
+    {
       "currentValue": "1.0.1",
       "datasource": "packagist",
       "depName": "jms/di-extra-bundle",
       "depType": "require",
     },
-    Object {
+    {
       "currentValue": "*",
       "datasource": "packagist",
       "depName": "jms/payment-core-bundle",
       "depType": "require",
     },
-    Object {
+    {
       "currentValue": "1.1.0",
       "datasource": "packagist",
       "depName": "jms/security-extra-bundle",
       "depType": "require",
     },
-    Object {
+    {
       "currentValue": "dev-master",
       "datasource": "packagist",
       "depName": "knplabs/knp-menu-bundle",
       "depType": "require",
     },
-    Object {
+    {
       "currentValue": "dev-master",
       "datasource": "packagist",
       "depName": "knplabs/knp-paginator-bundle",
       "depType": "require",
     },
-    Object {
+    {
       "currentValue": "dev-master",
       "datasource": "packagist",
       "depName": "liip/imagine-bundle",
       "depType": "require",
     },
-    Object {
+    {
       "currentValue": "dev-master",
       "datasource": "packagist",
       "depName": "merk/dough-bundle",
       "depType": "require",
     },
-    Object {
+    {
       "currentValue": "dev-master",
       "datasource": "packagist",
       "depName": "sensio/distribution-bundle",
       "depType": "require",
     },
-    Object {
+    {
       "currentValue": "dev-master",
       "datasource": "packagist",
       "depName": "sensio/framework-extra-bundle",
       "depType": "require",
     },
-    Object {
+    {
       "currentValue": "dev-master",
       "datasource": "packagist",
       "depName": "sensio/generator-bundle",
       "depType": "require",
     },
-    Object {
+    {
       "currentValue": "dev-master",
       "datasource": "packagist",
       "depName": "simplethings/entity-audit-bundle",
       "depType": "require",
     },
-    Object {
+    {
       "currentValue": "dev-master",
       "datasource": "packagist",
       "depName": "stof/doctrine-extensions-bundle",
       "depType": "require",
     },
-    Object {
+    {
       "currentValue": "dev-master",
       "datasource": "packagist",
       "depName": "twig/extensions",
       "depType": "require",
     },
-    Object {
+    {
       "currentValue": "2.3.*",
       "datasource": "packagist",
       "depName": "behat/behat",
       "depType": "require-dev",
     },
-    Object {
+    {
       "currentValue": "*",
       "datasource": "packagist",
       "depName": "behat/behat-bundle",
       "depType": "require-dev",
     },
-    Object {
+    {
       "currentValue": "*",
       "datasource": "packagist",
       "depName": "behat/mink-bundle",
       "depType": "require-dev",
     },
-    Object {
+    {
       "currentValue": "*",
       "datasource": "packagist",
       "depName": "behat/sahi-client",
       "depType": "require-dev",
     },
-    Object {
+    {
       "currentValue": "*",
       "datasource": "packagist",
       "depName": "behat/common-contexts",
       "depType": "require-dev",
     },
-    Object {
+    {
       "currentValue": "^1.10.0",
       "datasource": "packagist",
       "depName": "composer/composer",
@@ -404,107 +404,107 @@ Object {
 `;
 
 exports[`modules/manager/composer/extract extractPackageFile() extracts object registryUrls 1`] = `
-Object {
-  "deps": Array [
-    Object {
+{
+  "deps": [
+    {
       "currentValue": ">=5.5",
       "datasource": "packagist",
       "depName": "php",
       "depType": "require",
       "skipReason": "unsupported",
     },
-    Object {
+    {
       "currentValue": "~1.0.12",
       "datasource": "packagist",
       "depName": "composer/installers",
       "depType": "require",
     },
-    Object {
+    {
       "currentValue": "*",
       "datasource": "packagist",
       "depName": "johnpbloch/wordpress",
       "depType": "require",
     },
-    Object {
+    {
       "currentValue": "^2.0.1",
       "datasource": "packagist",
       "depName": "vlucas/phpdotenv",
       "depType": "require",
     },
-    Object {
+    {
       "currentValue": "^1.0",
       "datasource": "packagist",
       "depName": "oscarotero/env",
       "depType": "require",
     },
-    Object {
+    {
       "currentValue": "*",
       "datasource": "packagist",
       "depName": "wpackagist-plugin/tinymce-advanced",
       "depType": "require",
     },
-    Object {
+    {
       "currentValue": "*",
       "datasource": "packagist",
       "depName": "wpackagist-plugin/acf-content-analysis-for-yoast-seo",
       "depType": "require",
     },
-    Object {
+    {
       "currentValue": "*",
       "datasource": "packagist",
       "depName": "wpackagist-plugin/duplicate-post",
       "depType": "require",
     },
-    Object {
+    {
       "currentValue": "*",
       "datasource": "packagist",
       "depName": "wpackagist-plugin/simple-image-sizes",
       "depType": "require",
     },
-    Object {
+    {
       "currentValue": "*",
       "datasource": "packagist",
       "depName": "wpackagist-plugin/wordpress-seo",
       "depType": "require",
     },
-    Object {
+    {
       "currentValue": "*",
       "datasource": "packagist",
       "depName": "wpackagist-plugin/timber-library",
       "depType": "require",
     },
-    Object {
+    {
       "currentValue": "*",
       "datasource": "packagist",
       "depName": "wp-sync-db/wp-sync-db",
       "depType": "require",
     },
-    Object {
+    {
       "currentValue": "*",
       "datasource": "packagist",
       "depName": "asha23/wp-seed-timber",
       "depType": "require",
     },
   ],
-  "managerData": Object {
+  "managerData": {
     "composerJsonType": "project",
   },
-  "registryUrls": Array [
+  "registryUrls": [
     "https://wpackagist.org",
   ],
 }
 `;
 
 exports[`modules/manager/composer/extract extractPackageFile() extracts object repositories and registryUrls with lock file 1`] = `
-Object {
-  "deps": Array [
-    Object {
+{
+  "deps": [
+    {
       "currentValue": "*",
       "datasource": "packagist",
       "depName": "aws/aws-sdk-php",
       "depType": "require",
     },
-    Object {
+    {
       "currentValue": "dev-trunk",
       "datasource": "git-tags",
       "depName": "awesome/vcs",
@@ -512,7 +512,7 @@ Object {
       "lockedVersion": "1.1.0",
       "packageName": "https://my-vcs.example/my-vcs-repo",
     },
-    Object {
+    {
       "currentValue": ">=7.0.2",
       "datasource": "git-tags",
       "depName": "awesome/git",
@@ -521,10 +521,10 @@ Object {
       "packageName": "git@my-git.example:my-git-repo",
     },
   ],
-  "lockFiles": Array [
+  "lockFiles": [
     "composer.lock",
   ],
-  "registryUrls": Array [
+  "registryUrls": [
     "https://wpackagist.org",
     "https://packagist.org",
   ],
@@ -532,62 +532,62 @@ Object {
 `;
 
 exports[`modules/manager/composer/extract extractPackageFile() extracts registryUrls 1`] = `
-Object {
-  "deps": Array [
-    Object {
+{
+  "deps": [
+    {
       "currentValue": "*",
       "datasource": "packagist",
       "depName": "aws/aws-sdk-php",
       "depType": "require",
     },
-    Object {
+    {
       "currentValue": "^1.10.0",
       "datasource": "packagist",
       "depName": "composer/composer",
       "depType": "require",
     },
-    Object {
+    {
       "currentValue": "dev-trunk",
       "datasource": "packagist",
       "depName": "wpackagist-plugin/akismet",
       "depType": "require",
     },
-    Object {
+    {
       "currentValue": ">=7.0.2",
       "datasource": "packagist",
       "depName": "wpackagist-plugin/wordpress-seo",
       "depType": "require",
     },
-    Object {
+    {
       "currentValue": "*",
       "datasource": "packagist",
       "depName": "wpackagist-theme/hueman",
       "depType": "require",
     },
   ],
-  "registryUrls": Array [
+  "registryUrls": [
     "https://wpackagist.org",
   ],
 }
 `;
 
 exports[`modules/manager/composer/extract extractPackageFile() extracts repositories and registryUrls 1`] = `
-Object {
-  "deps": Array [
-    Object {
+{
+  "deps": [
+    {
       "currentValue": "*",
       "datasource": "packagist",
       "depName": "aws/aws-sdk-php",
       "depType": "require",
     },
-    Object {
+    {
       "currentValue": "dev-trunk",
       "datasource": "git-tags",
       "depName": "awesome/vcs",
       "depType": "require",
       "packageName": "https://my-vcs.example/my-vcs-repo",
     },
-    Object {
+    {
       "currentValue": ">=7.0.2",
       "datasource": "git-tags",
       "depName": "awesome/git",
@@ -595,7 +595,7 @@ Object {
       "packageName": "https://my-git.example/my-git-repo",
     },
   ],
-  "registryUrls": Array [
+  "registryUrls": [
     "https://wpackagist.org",
     "https://gitlab.vendor.com/api/v4/group/2/-/packages/composer",
     "https://packagist.org",

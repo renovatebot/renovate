@@ -1,8 +1,8 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`modules/manager/droneci/extract extractPackageFile() extracts multiple image lines 1`] = `
-Array [
-  Object {
+[
+  {
     "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
     "currentDigest": undefined,
     "currentValue": "1.8.1-alpine",
@@ -11,7 +11,7 @@ Array [
     "depType": "docker",
     "replaceString": "elixir:1.8.1-alpine",
   },
-  Object {
+  {
     "autoReplaceStringTemplate": "{{packageName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
     "currentDigest": "sha256:36adc17e9cceab32179d3314da9cb9c737ffb11f0de4e688f407ad6d9ca32201",
     "currentValue": "10.0.0",
@@ -21,7 +21,7 @@ Array [
     "packageName": "amd64/node",
     "replaceString": "amd64/node:10.0.0@sha256:36adc17e9cceab32179d3314da9cb9c737ffb11f0de4e688f407ad6d9ca32201",
   },
-  Object {
+  {
     "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
     "currentDigest": undefined,
     "currentValue": "5.7.24",
@@ -30,7 +30,7 @@ Array [
     "depType": "docker",
     "replaceString": "mysql:5.7.24",
   },
-  Object {
+  {
     "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
     "currentDigest": undefined,
     "currentValue": "alpine",
@@ -39,27 +39,29 @@ Array [
     "depType": "docker",
     "replaceString": "redis:alpine",
   },
-  Object {
-    "autoReplaceStringTemplate": "\\"{{packageName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}\\\\\n            @{{newDigest}}{{/if}}\\"",
+  {
+    "autoReplaceStringTemplate": ""{{packageName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}\\
+            @{{newDigest}}{{/if}}"",
     "currentDigest": "sha256:36adc17e9cceab32179d3314da9cb9c737ffb11f0de4e688f407ad6d9ca32201",
     "currentValue": "10.0.0",
     "datasource": "docker",
     "depName": "node",
     "depType": "docker",
     "packageName": "amd64/node",
-    "replaceString": "\\\"amd64/node:10.0.0\\\\
-            @sha256:36adc17e9cceab32179d3314da9cb9c737ffb11f0de4e688f407ad6d9ca32201\\\"",
+    "replaceString": ""amd64/node:10.0.0\\
+            @sha256:36adc17e9cceab32179d3314da9cb9c737ffb11f0de4e688f407ad6d9ca32201"",
   },
-  Object {
-    "autoReplaceStringTemplate": "\\"{{packageName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}\\\\\n            @{{newDigest}}{{/if}}\\"",
+  {
+    "autoReplaceStringTemplate": ""{{packageName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}\\
+            @{{newDigest}}{{/if}}"",
     "currentDigest": "sha256:36adc17e9cceab32179d3314da9cb9c737ffb11f0de4e688f407ad6d9ca32201",
     "currentValue": "10.0.0",
     "datasource": "docker",
     "depName": "node",
     "depType": "docker",
     "packageName": "amd64/node",
-    "replaceString": "'amd64/node\\\\
-            :10.0.0\\\\
+    "replaceString": "'amd64/node\\
+            :10.0.0\\
             @sha256:36adc17e9cceab32179d3314da9cb9c737ffb11f0de4e688f407ad6d9ca32201'",
   },
 ]

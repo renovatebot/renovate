@@ -1,19 +1,19 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`modules/datasource/galaxy/index getReleases processes real data 1`] = `
-Object {
+{
   "dependencyUrl": "https://galaxy.ansible.com/yatesr/timezone",
   "registryUrl": "https://galaxy.ansible.com/",
-  "releases": Array [
-    Object {
+  "releases": [
+    {
       "releaseTimestamp": "2015-11-17T00:43:42.000Z",
       "version": "1.0.0",
     },
-    Object {
+    {
       "releaseTimestamp": "2017-09-25T00:27:37.000Z",
       "version": "1.1.0",
     },
-    Object {
+    {
       "releaseTimestamp": "2019-10-28T01:40:43.000Z",
       "version": "1.2.0",
     },

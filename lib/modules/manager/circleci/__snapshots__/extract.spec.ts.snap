@@ -1,8 +1,8 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`modules/manager/circleci/extract extractPackageFile() extracts image without leading dash 1`] = `
-Array [
-  Object {
+[
+  {
     "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
     "currentDigest": undefined,
     "currentValue": "14.8.0",
@@ -16,8 +16,8 @@ Array [
 `;
 
 exports[`modules/manager/circleci/extract extractPackageFile() extracts multiple image lines 1`] = `
-Array [
-  Object {
+[
+  {
     "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
     "currentDigest": undefined,
     "currentValue": undefined,
@@ -27,7 +27,7 @@ Array [
     "replaceString": "node",
     "versioning": "docker",
   },
-  Object {
+  {
     "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
     "currentDigest": undefined,
     "currentValue": "4",
@@ -37,7 +37,7 @@ Array [
     "replaceString": "node:4",
     "versioning": "docker",
   },
-  Object {
+  {
     "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
     "currentDigest": undefined,
     "currentValue": "6",
@@ -47,7 +47,7 @@ Array [
     "replaceString": "node:6",
     "versioning": "docker",
   },
-  Object {
+  {
     "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
     "currentDigest": undefined,
     "currentValue": "8.9.0",
@@ -61,8 +61,8 @@ Array [
 `;
 
 exports[`modules/manager/circleci/extract extractPackageFile() extracts orbs too 1`] = `
-Array [
-  Object {
+[
+  {
     "commitMessageTopic": "{{{depName}}} orb",
     "currentValue": "4.1.0",
     "datasource": "orb",
@@ -72,7 +72,7 @@ Array [
     "rangeStrategy": "pin",
     "versioning": "npm",
   },
-  Object {
+  {
     "commitMessageTopic": "{{{depName}}} orb",
     "currentValue": undefined,
     "datasource": "orb",
@@ -82,7 +82,7 @@ Array [
     "rangeStrategy": "pin",
     "versioning": "npm",
   },
-  Object {
+  {
     "commitMessageTopic": "{{{depName}}} orb",
     "currentValue": "volatile",
     "datasource": "orb",
@@ -92,7 +92,7 @@ Array [
     "rangeStrategy": "pin",
     "versioning": "npm",
   },
-  Object {
+  {
     "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
     "currentDigest": "sha256:3870d35b962a943df72d948580fc66ceaaee1c4fbd205930f32e0f0760eb1077",
     "currentValue": "3.7",
@@ -102,7 +102,7 @@ Array [
     "replaceString": "python:3.7@sha256:3870d35b962a943df72d948580fc66ceaaee1c4fbd205930f32e0f0760eb1077",
     "versioning": "docker",
   },
-  Object {
+  {
     "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
     "currentDigest": "sha256:3870d35b962a943df72d948580fc66ceaaee1c4fbd205930f32e0f0760eb1077",
     "currentValue": "3.7",
@@ -112,7 +112,7 @@ Array [
     "replaceString": "python:3.7@sha256:3870d35b962a943df72d948580fc66ceaaee1c4fbd205930f32e0f0760eb1077",
     "versioning": "docker",
   },
-  Object {
+  {
     "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
     "currentDigest": "sha256:3870d35b962a943df72d948580fc66ceaaee1c4fbd205930f32e0f0760eb1077",
     "currentValue": "3.7",
@@ -122,7 +122,7 @@ Array [
     "replaceString": "python:3.7@sha256:3870d35b962a943df72d948580fc66ceaaee1c4fbd205930f32e0f0760eb1077",
     "versioning": "docker",
   },
-  Object {
+  {
     "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
     "currentDigest": "sha256:3870d35b962a943df72d948580fc66ceaaee1c4fbd205930f32e0f0760eb1077",
     "currentValue": "3.7",
@@ -132,7 +132,7 @@ Array [
     "replaceString": "python:3.7@sha256:3870d35b962a943df72d948580fc66ceaaee1c4fbd205930f32e0f0760eb1077",
     "versioning": "docker",
   },
-  Object {
+  {
     "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
     "currentDigest": "sha256:eb6325b75c1c70b4992eaa1bdd29e24e5f14d5324b4714a49f3e67783473214b",
     "currentValue": "3-6",
@@ -142,7 +142,7 @@ Array [
     "replaceString": "pypy:3-6@sha256:eb6325b75c1c70b4992eaa1bdd29e24e5f14d5324b4714a49f3e67783473214b",
     "versioning": "docker",
   },
-  Object {
+  {
     "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
     "currentDigest": "sha256:3870d35b962a943df72d948580fc66ceaaee1c4fbd205930f32e0f0760eb1077",
     "currentValue": "3.7",
