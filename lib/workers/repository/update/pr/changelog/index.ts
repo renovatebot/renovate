@@ -12,7 +12,7 @@ export async function getChangeLogJSON(
   config: BranchUpgradeConfig
 ): Promise<ChangeLogResult | null> {
   const { versioning, currentVersion, newVersion } = config;
-  const sourceUrl = (config.customChangelogUrl as string) ?? config.sourceUrl!;
+  const sourceUrl = config.customChangelogUrl ?? config.sourceUrl!;
   try {
     if (!(sourceUrl && currentVersion && newVersion)) {
       return null;

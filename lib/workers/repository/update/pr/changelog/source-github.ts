@@ -36,7 +36,7 @@ export async function getChangeLogJSON(
   const versioning = config.versioning!;
   const currentVersion = config.currentVersion!;
   const newVersion = config.newVersion!;
-  const sourceUrl = (config.customChangelogUrl as string) ?? config.sourceUrl!;
+  const sourceUrl = config.customChangelogUrl ?? config.sourceUrl!;
   const sourceDirectory = config.sourceDirectory!;
   const depName = config.depName!;
   const datasource = config.datasource!;

@@ -32,6 +32,7 @@ export interface RenovateSharedConfig {
   commitMessage?: string;
   commitMessagePrefix?: string;
   confidential?: boolean;
+  customChangelogUrl?: string;
   draftPR?: boolean;
   enabled?: boolean;
   enabledManagers?: string[];
@@ -303,7 +304,6 @@ export interface PackageRule
   matchSourceUrls?: string[];
   matchUpdateTypes?: UpdateType[];
   registryUrls?: string[];
-  customChangelogUrl?: string;
 }
 
 export interface ValidationMessage {
