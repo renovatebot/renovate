@@ -24,9 +24,18 @@ const RE_SPECIAL_CHARS_STRICT = regEx(/[`~!@#$%^&*()_=+[\]\\|{};':",.<>?]/g);
  * - leading or trailing dashes
  * - chained dashes(breaks markdown comments) are replaced by single dash
  */
-function cleanBranchName(branchName: string): string {
+function cleanBranchName(
+  branchName: string,
+  branchNameStrict: boolean
+): string {
+  let cleanedBranchName = branchName;
+
+  if (branchNameStrict) {
+    cleanedBranchName = cleanedBranchName.replace(RE_SPECIAL_CHARS_STRICT, '-'); // massage out all special characters that slip through slugify
+  }
+
   return cleanGitRef
-    .clean(branchName)
+    .clean(cleanedBranchName)
     .replace(regEx(/^\.|\.$/), '') // leading or trailing dot
     .replace(regEx(/\/\./g), '/') // leading dot after slash
     .replace(regEx(/\s/g), '') // whitespace
@@ -99,9 +108,8 @@ export function generateBranchName(update: RenovateConfig): void {
     update.branchName = template.compile(update.branchName, update);
   }
 
-  if (update.branchNameStrict) {
-    update.branchName = update.branchName.replace(RE_SPECIAL_CHARS_STRICT, '-'); // massage out all these special characters that slip through slugify
-  }
-
-  update.branchName = cleanBranchName(update.branchName);
+  update.branchName = cleanBranchName(
+    update.branchName,
+    update.branchNameStrict
+  );
 }
