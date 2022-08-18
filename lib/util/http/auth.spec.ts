@@ -16,8 +16,8 @@ describe('util/http/auth', () => {
       applyAuthorization(opts);
 
       expect(opts).toMatchInlineSnapshot(`
-        Object {
-          "headers": Object {
+        {
+          "headers": {
             "authorization": "token",
           },
           "hostname": "amazon.com",
@@ -36,8 +36,8 @@ describe('util/http/auth', () => {
       applyAuthorization(opts);
 
       expect(opts).toMatchInlineSnapshot(`
-        Object {
-          "headers": Object {
+        {
+          "headers": {
             "authorization": "Basic OlhYWFg=",
           },
           "hostType": "gitea",
@@ -56,8 +56,8 @@ describe('util/http/auth', () => {
       applyAuthorization(opts);
 
       expect(opts).toMatchInlineSnapshot(`
-        Object {
-          "headers": Object {
+        {
+          "headers": {
             "authorization": "token XXXX",
           },
           "hostType": "gitea",
@@ -93,8 +93,8 @@ describe('util/http/auth', () => {
       applyAuthorization(opts);
 
       expect(opts).toMatchInlineSnapshot(`
-        Object {
-          "headers": Object {
+        {
+          "headers": {
             "authorization": "token ZZZZ",
           },
           "hostType": "github-releases",
@@ -114,8 +114,8 @@ describe('util/http/auth', () => {
       applyAuthorization(opts);
 
       expect(opts).toMatchInlineSnapshot(`
-        Object {
-          "headers": Object {
+        {
+          "headers": {
             "Private-token": "0123456789012345test",
           },
           "hostType": "gitlab",
@@ -135,8 +135,8 @@ describe('util/http/auth', () => {
       applyAuthorization(opts);
 
       expect(opts).toMatchInlineSnapshot(`
-        Object {
-          "headers": Object {
+        {
+          "headers": {
             "authorization": "Bearer a40bdd925a0c0b9c4cdd19d101c0df3b2bcd063ab7ad6706f03bcffcec01test",
           },
           "hostType": "gitlab",

@@ -1,27 +1,27 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`modules/datasource/aws-machine-image/index getSortedAwsMachineImages() with 1 returned image 1`] = `
-Array [
-  Object {
-    "args": Array [
+[
+  {
+    "args": [
       DescribeImagesCommand {
-        "input": Object {
-          "Filters": Array [
-            Object {
+        "input": {
+          "Filters": [
+            {
               "Name": "owner-id",
-              "Values": Array [
+              "Values": [
                 "602401143452",
               ],
             },
-            Object {
+            {
               "Name": "name",
-              "Values": Array [
+              "Values": [
                 "1image",
               ],
             },
           ],
         },
-        "middlewareStack": Object {
+        "middlewareStack": {
           "add": [Function],
           "addRelativeTo": [Function],
           "applyToStack": [Function],
@@ -39,23 +39,23 @@ Array [
     "errorWithCallStack": [Error],
     "exception": undefined,
     "firstArg": DescribeImagesCommand {
-      "input": Object {
-        "Filters": Array [
-          Object {
+      "input": {
+        "Filters": [
+          {
             "Name": "owner-id",
-            "Values": Array [
+            "Values": [
               "602401143452",
             ],
           },
-          Object {
+          {
             "Name": "name",
-            "Values": Array [
+            "Values": [
               "1image",
             ],
           },
         ],
       },
-      "middlewareStack": Object {
+      "middlewareStack": {
         "add": [Function],
         "addRelativeTo": [Function],
         "applyToStack": [Function],
@@ -68,23 +68,23 @@ Array [
       },
     },
     "lastArg": DescribeImagesCommand {
-      "input": Object {
-        "Filters": Array [
-          Object {
+      "input": {
+        "Filters": [
+          {
             "Name": "owner-id",
-            "Values": Array [
+            "Values": [
               "602401143452",
             ],
           },
-          Object {
+          {
             "Name": "name",
-            "Values": Array [
+            "Values": [
               "1image",
             ],
           },
         ],
       },
-      "middlewareStack": Object {
+      "middlewareStack": {
         "add": [Function],
         "addRelativeTo": [Function],
         "applyToStack": [Function],
@@ -99,7 +99,7 @@ Array [
     "proxy": [Function],
     "returnValue": Promise {},
     "thisValue": EC2Client {
-      "config": Object {
+      "config": {
         "apiVersion": "2016-11-15",
         "base64Decoder": [Function],
         "base64Encoder": [Function],
@@ -112,13 +112,13 @@ Array [
         "disableHostPrefix": false,
         "endpoint": [Function],
         "isCustomEndpoint": false,
-        "logger": Object {},
+        "logger": {},
         "maxAttempts": [Function],
         "region": [Function],
         "regionInfoProvider": [Function],
         "requestHandler": NodeHttpHandler {
           "configProvider": Promise {},
-          "metadata": Object {
+          "metadata": {
             "handlerProtocol": "http/1.1",
           },
         },
@@ -138,7 +138,7 @@ Array [
         "utf8Decoder": [Function],
         "utf8Encoder": [Function],
       },
-      "middlewareStack": Object {
+      "middlewareStack": {
         "add": [Function],
         "addRelativeTo": [Function],
         "applyToStack": [Function],
@@ -155,27 +155,27 @@ Array [
 `;
 
 exports[`modules/datasource/aws-machine-image/index getSortedAwsMachineImages() with 3 returned images 1`] = `
-Array [
-  Object {
-    "args": Array [
+[
+  {
+    "args": [
       DescribeImagesCommand {
-        "input": Object {
-          "Filters": Array [
-            Object {
+        "input": {
+          "Filters": [
+            {
               "Name": "owner-id",
-              "Values": Array [
+              "Values": [
                 "602401143452",
               ],
             },
-            Object {
+            {
               "Name": "name",
-              "Values": Array [
+              "Values": [
                 "3images",
               ],
             },
           ],
         },
-        "middlewareStack": Object {
+        "middlewareStack": {
           "add": [Function],
           "addRelativeTo": [Function],
           "applyToStack": [Function],
@@ -193,23 +193,23 @@ Array [
     "errorWithCallStack": [Error],
     "exception": undefined,
     "firstArg": DescribeImagesCommand {
-      "input": Object {
-        "Filters": Array [
-          Object {
+      "input": {
+        "Filters": [
+          {
             "Name": "owner-id",
-            "Values": Array [
+            "Values": [
               "602401143452",
             ],
           },
-          Object {
+          {
             "Name": "name",
-            "Values": Array [
+            "Values": [
               "3images",
             ],
           },
         ],
       },
-      "middlewareStack": Object {
+      "middlewareStack": {
         "add": [Function],
         "addRelativeTo": [Function],
         "applyToStack": [Function],
@@ -222,23 +222,23 @@ Array [
       },
     },
     "lastArg": DescribeImagesCommand {
-      "input": Object {
-        "Filters": Array [
-          Object {
+      "input": {
+        "Filters": [
+          {
             "Name": "owner-id",
-            "Values": Array [
+            "Values": [
               "602401143452",
             ],
           },
-          Object {
+          {
             "Name": "name",
-            "Values": Array [
+            "Values": [
               "3images",
             ],
           },
         ],
       },
-      "middlewareStack": Object {
+      "middlewareStack": {
         "add": [Function],
         "addRelativeTo": [Function],
         "applyToStack": [Function],
@@ -253,7 +253,7 @@ Array [
     "proxy": [Function],
     "returnValue": Promise {},
     "thisValue": EC2Client {
-      "config": Object {
+      "config": {
         "apiVersion": "2016-11-15",
         "base64Decoder": [Function],
         "base64Encoder": [Function],
@@ -266,13 +266,13 @@ Array [
         "disableHostPrefix": false,
         "endpoint": [Function],
         "isCustomEndpoint": false,
-        "logger": Object {},
+        "logger": {},
         "maxAttempts": [Function],
         "region": [Function],
         "regionInfoProvider": [Function],
         "requestHandler": NodeHttpHandler {
           "configProvider": Promise {},
-          "metadata": Object {
+          "metadata": {
             "handlerProtocol": "http/1.1",
           },
         },
@@ -292,7 +292,7 @@ Array [
         "utf8Decoder": [Function],
         "utf8Encoder": [Function],
       },
-      "middlewareStack": Object {
+      "middlewareStack": {
         "add": [Function],
         "addRelativeTo": [Function],
         "applyToStack": [Function],
@@ -309,27 +309,27 @@ Array [
 `;
 
 exports[`modules/datasource/aws-machine-image/index getSortedAwsMachineImages() without returned images 1`] = `
-Array [
-  Object {
-    "args": Array [
+[
+  {
+    "args": [
       DescribeImagesCommand {
-        "input": Object {
-          "Filters": Array [
-            Object {
+        "input": {
+          "Filters": [
+            {
               "Name": "owner-id",
-              "Values": Array [
+              "Values": [
                 "602401143452",
               ],
             },
-            Object {
+            {
               "Name": "name",
-              "Values": Array [
+              "Values": [
                 "noiamge",
               ],
             },
           ],
         },
-        "middlewareStack": Object {
+        "middlewareStack": {
           "add": [Function],
           "addRelativeTo": [Function],
           "applyToStack": [Function],
@@ -347,23 +347,23 @@ Array [
     "errorWithCallStack": [Error],
     "exception": undefined,
     "firstArg": DescribeImagesCommand {
-      "input": Object {
-        "Filters": Array [
-          Object {
+      "input": {
+        "Filters": [
+          {
             "Name": "owner-id",
-            "Values": Array [
+            "Values": [
               "602401143452",
             ],
           },
-          Object {
+          {
             "Name": "name",
-            "Values": Array [
+            "Values": [
               "noiamge",
             ],
           },
         ],
       },
-      "middlewareStack": Object {
+      "middlewareStack": {
         "add": [Function],
         "addRelativeTo": [Function],
         "applyToStack": [Function],
@@ -376,23 +376,23 @@ Array [
       },
     },
     "lastArg": DescribeImagesCommand {
-      "input": Object {
-        "Filters": Array [
-          Object {
+      "input": {
+        "Filters": [
+          {
             "Name": "owner-id",
-            "Values": Array [
+            "Values": [
               "602401143452",
             ],
           },
-          Object {
+          {
             "Name": "name",
-            "Values": Array [
+            "Values": [
               "noiamge",
             ],
           },
         ],
       },
-      "middlewareStack": Object {
+      "middlewareStack": {
         "add": [Function],
         "addRelativeTo": [Function],
         "applyToStack": [Function],
@@ -407,7 +407,7 @@ Array [
     "proxy": [Function],
     "returnValue": Promise {},
     "thisValue": EC2Client {
-      "config": Object {
+      "config": {
         "apiVersion": "2016-11-15",
         "base64Decoder": [Function],
         "base64Encoder": [Function],
@@ -420,13 +420,13 @@ Array [
         "disableHostPrefix": false,
         "endpoint": [Function],
         "isCustomEndpoint": false,
-        "logger": Object {},
+        "logger": {},
         "maxAttempts": [Function],
         "region": [Function],
         "regionInfoProvider": [Function],
         "requestHandler": NodeHttpHandler {
           "configProvider": Promise {},
-          "metadata": Object {
+          "metadata": {
             "handlerProtocol": "http/1.1",
           },
         },
@@ -446,7 +446,7 @@ Array [
         "utf8Decoder": [Function],
         "utf8Encoder": [Function],
       },
-      "middlewareStack": Object {
+      "middlewareStack": {
         "add": [Function],
         "addRelativeTo": [Function],
         "applyToStack": [Function],

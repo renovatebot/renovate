@@ -1,0 +1,43 @@
+name: 'Update static data'
+on:
+  schedule:
+    - cron: '0 0 * * 0' # Every Sunday at midnight
+  workflow_dispatch:
+
+env:
+  NODE_VERSION: 16
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  update-data:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b # tag=v3.0.2
+
+      - name: Set up Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@2fddd8803e2f5c9604345a0b591c3020ee971a93 # tag=v3.4.1
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: yarn
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Update static data
+        run: yarn run update-static-data
+
+      - name: Run Prettier
+        run: yarn prettier-fix
+
+      - name: Create pull request
+        uses: peter-evans/create-pull-request@18f90432bedd2afd6a825469ffd38aa24712a91d # tag=v4.1.1
+        with:
+          author: 'Renovate Bot <renovate@whitesourcesoftware.com>'
+          branch: 'chore/update-static-data'
+          commit-message: 'fix(data): automatic update of static data'
+          committer: 'Renovate Bot <renovate@whitesourcesoftware.com>'
+          title: 'fix(data): automatic update of static data'
+          assignees: rarkins,viceice

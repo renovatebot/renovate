@@ -1316,8 +1316,8 @@ Use this configuration option for shared config across npm/Yarn/pnpm and meteor 
 
 ## labels
 
-By default, Renovate won't add any labels to its PRs.
-If you want Renovate to do so then define a `labels` array of one or more label strings.
+By default, Renovate won't add any labels to PRs.
+If you want Renovate to add labels to PRs it creates then define a `labels` array of one or more label strings.
 If you want the same label(s) for every PR then you can configure it at the top level of config.
 However you can also fully override them on a per-package basis.
 
@@ -1336,6 +1336,14 @@ Consider this example:
 ```
 
 With the above config, every PR raised by Renovate will have the label `dependencies` while PRs containing `eslint`-related packages will instead have the label `linting`.
+
+Renovate only adds labels when it creates the PR, which means:
+
+- If you remove labels which Renovate added, it won't re-apply them
+- If you change your config, the new/changed labels are not applied to any open PRs
+
+The `labels` array is non-mergeable, meaning if multiple `packageRules` match then Renovate uses the last value for `labels`.
+If you want to add/combine labels, use the `addLabels` config option, which is mergeable.
 
 ## lockFileMaintenance
 
@@ -1480,6 +1488,10 @@ For example you have multiple `package.json` and want to use `dependencyDashboar
 
 Important to know: Renovate will evaluate all `packageRules` and not stop once it gets a first match.
 You should order your `packageRules` in order of importance so that later rules can override settings from earlier rules if needed.
+
+<!-- prettier-ignore -->
+!!! warning
+    Avoid nesting any `object`-type configuration in a `packageRules` array, such as a `major` or `minor` block.
 
 ### allowedVersions
 
@@ -1899,6 +1911,15 @@ Add to this object if you wish to define rules that apply only to PRs that pin d
 If enabled Renovate will pin Docker images by means of their SHA256 digest and not only by tag so that they are immutable.
 
 ## platformAutomerge
+
+<!-- prettier-ignore -->
+!!! warning
+    Before you enable `platformAutomerge` you should enable your Git hosting platform's capabilities to enforce test passing before PR merge.
+    If you don't do this, the platform might merge Renovate PRs even if the repository's tests haven't started, are in still in progress, or possibly even when they have failed.
+    On GitHub this is called "Require status checks before merging", which you can find in the "Branch protection rules" section of the settings for your repository.
+    [GitHub docs, about protected branches](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/defining-the-mergeability-of-pull-requests/about-protected-branches)
+    [GitHub docs, require status checks before merging](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/defining-the-mergeability-of-pull-requests/about-protected-branches#require-status-checks-before-merging)
+    If you're using another platform, search their documentation for a similar feature.
 
 If you have enabled `automerge` and set `automergeType=pr` in the Renovate config, then you can also set `platformAutomerge` to `true` to speed up merging via the platform's native automerge functionality.
 
@@ -2512,6 +2533,11 @@ This feature works with the following managers:
 - [`helmv3`](/modules/manager/helmv3/)
 - [`helmfile`](/modules/manager/helmfile/)
 - [`gitlabci`](/modules/manager/gitlabci/)
+- [`dockerfile`](/modules/manager/dockerfile)
+- [`docker-compose`](/modules/manager/docker-compose)
+- [`kubernetes`](/modules/manager/kubernetes)
+- [`ansible`](/modules/manager/ansible)
+- [`droneci`](/modules/manager/droneci)
 
 ## registryUrls
 
