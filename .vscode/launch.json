@@ -17,6 +17,20 @@
     {
       "type": "node",
       "request": "launch",
+      "name": "debug (clean cache)",
+      "program": "${workspaceFolder}/lib/renovate.ts",
+      "env": {
+        "LOG_LEVEL": "debug"
+      },
+      "preLaunchTask": "npm: clean-cache",
+      "console": "integratedTerminal",
+      "runtimeArgs": ["-r", "ts-node/register/transpile-only"],
+      "protocol": "inspector",
+      "skipFiles": ["<node_internals>/**/*.js"]
+    },
+    {
+      "type": "node",
+      "request": "launch",
       "name": "Jest Current File",
       "program": "${workspaceFolder}/node_modules/.bin/jest",
       "args": [

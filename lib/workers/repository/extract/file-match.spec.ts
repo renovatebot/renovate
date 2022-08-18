@@ -53,7 +53,7 @@ describe('workers/repository/extract/file-match', () => {
       includePaths: [],
       ignorePaths: [],
       manager: 'npm',
-      fileMatch: ['(^|/)package.json$'],
+      fileMatch: ['(^|/)package\\.json$'],
     };
 
     it('returns npm files', () => {

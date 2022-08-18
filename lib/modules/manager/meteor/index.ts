@@ -6,7 +6,7 @@ export { extractPackageFile } from './extract';
 export const language = ProgrammingLanguage.JavaScript;
 
 export const defaultConfig = {
-  fileMatch: ['(^|/)package.js$'],
+  fileMatch: ['(^|/)package\\.js$'],
 };
 
 export const supportedDatasources = [NpmDatasource.id];

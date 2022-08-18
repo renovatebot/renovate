@@ -1,11 +1,11 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`modules/datasource/cdnjs/index getReleases filters releases by asset presence 1`] = `
-Object {
+{
   "homepage": "http://bulma.io",
   "registryUrl": "https://api.cdnjs.com/",
-  "releases": Array [
-    Object {
+  "releases": [
+    {
       "version": "0.7.5",
     },
   ],
@@ -14,111 +14,111 @@ Object {
 `;
 
 exports[`modules/datasource/cdnjs/index getReleases processes real data 1`] = `
-Object {
+{
   "homepage": "https://d3js.org/d3-force/",
   "registryUrl": "https://api.cdnjs.com/",
-  "releases": Array [
-    Object {
+  "releases": [
+    {
       "newDigest": "sha256-DNKhvPNPQByxMloPGL2GfmxYsbWDcrznYp+/r4eXs+o=",
       "version": "0.0.1",
     },
-    Object {
+    {
       "newDigest": "sha256-yrh9ylv/W7CahimBrLMhf4X7uVuO3pTHHRKASy4nmt8=",
       "version": "0.0.2",
     },
-    Object {
+    {
       "newDigest": "sha256-NuLk1K9PD9BeilzdXFVmimrPbt5kURq5mhCqb8WQ8qk=",
       "version": "0.0.3",
     },
-    Object {
+    {
       "newDigest": "sha256-7hyoFVueIL/RLbMcV01X6kfVEB0/WpEWKyf7W716Pqs=",
       "version": "0.0.4",
     },
-    Object {
+    {
       "newDigest": "sha256-otPu46hPGgaRCnEkZuH3VQ9dKT6H7uzcAmrjvtCXIzQ=",
       "version": "0.1.0",
     },
-    Object {
+    {
       "newDigest": "sha256-VRq0I3f7XeNjPc3fa/jPoCVWii+1VAMS5GSc98yOjeQ=",
       "version": "0.2.0",
     },
-    Object {
+    {
       "newDigest": "sha256-R5hN8fDqziJDFPXVYztdJ0VcuA4NVaiMmYpIO7QkHMc=",
       "version": "0.2.1",
     },
-    Object {
+    {
       "newDigest": "sha256-4jWVeft3EbQiO6mOzBN5gQISLLtiVk1gjk3sTBzxqWE=",
       "version": "0.2.2",
     },
-    Object {
+    {
       "newDigest": "sha256-v/EpI8zylc/rx6tNiqL631j1d1C2BbPJGpgyJHIidt0=",
       "version": "0.3.0",
     },
-    Object {
+    {
       "newDigest": "sha256-h5Ap2n1itK1bTRb5syvo31u3huhwOvIvv8YAq45SMHE=",
       "version": "0.4.0",
     },
-    Object {
+    {
       "newDigest": "sha256-nqSSxi5zHLx8IDv465yKPl7iQa9bKmB1tO1CYwHfORI=",
       "version": "0.4.1",
     },
-    Object {
+    {
       "newDigest": "sha256-FEYdY1bzDtPA2tvvyXVSgl/y9EIjF/L5+de3tD4OTF4=",
       "version": "0.5.0",
     },
-    Object {
+    {
       "newDigest": "sha256-b07xptMLcxLFDYrlbaq7z9oD+Qe5X0jNjEqpRArWPJU=",
       "version": "0.6.0",
     },
-    Object {
+    {
       "newDigest": "sha256-SYfALXpqoQWY7PB5stjN2B10R0t6B8OizEug3nV5hgk=",
       "version": "0.6.1",
     },
-    Object {
+    {
       "newDigest": "sha256-SG9SrF1YlltbriU+Z6Q7bvTgRJPw4XZBW4KjulEHiFQ=",
       "version": "0.6.2",
     },
-    Object {
+    {
       "newDigest": "sha256-3/LnH5zecwn1jl4B8/VwDUKLxHvD4tQv9pecq4I+lY0=",
       "version": "0.6.3",
     },
-    Object {
+    {
       "newDigest": "sha256-U93AQ12JgwO+Crpoop0f4VVtgo5EWyy5Ac/VDbr9nrw=",
       "version": "0.7.0",
     },
-    Object {
+    {
       "newDigest": "sha256-C4xhHucs90cw3YQ2Kry4IjovxF6hzXIXlt7XLSgn4uw=",
       "version": "0.7.1",
     },
-    Object {
+    {
       "newDigest": "sha256-hRMRHUxlb4+aq13/P/Fk7RmVGX8r0n7psFs7cysjtQo=",
       "version": "1.0.0",
     },
-    Object {
+    {
       "newDigest": "sha256-BkiOgLEeo2ERn7/yYgsU+t97dOXWuUP8nOc6T7sf4aQ=",
       "version": "1.0.1",
     },
-    Object {
+    {
       "newDigest": "sha256-a2jXPrguES4/PmuoJJaVi+Qev/ZUGmIOJmG0/LIIcME=",
       "version": "1.0.2",
     },
-    Object {
+    {
       "newDigest": "sha256-Pco5eBqSA/Wozq5wQVuZ5YuRC8Zn4EfBbht4kK09hms=",
       "version": "1.0.3",
     },
-    Object {
+    {
       "newDigest": "sha256-T7VhvwL3G9POw0nHoRgl4OP0PmfiAHZObfHza0Lbp3s=",
       "version": "1.0.4",
     },
-    Object {
+    {
       "newDigest": "sha256-NqhhKDL7mFceODpyCsdd1vUHIgOK96DJNDUKtYJyHo8=",
       "version": "1.0.5",
     },
-    Object {
+    {
       "newDigest": "sha256-5D0Nfdo36KQmwzPqSzwmgaB81NzrlAAenDn9CXxO9eA=",
       "version": "1.0.6",
     },
-    Object {
+    {
       "newDigest": "sha256-gp0SbnQfnXL6TyrP5b7JAifyBupTdBDiYpRArpdhIKg=",
       "version": "1.1.0",
     },

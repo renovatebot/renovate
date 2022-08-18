@@ -1,54 +1,54 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`modules/manager/swift/index extractPackageFile() parses multiple packages 1`] = `
-Object {
-  "deps": Array [
-    Object {
-      "currentValue": "\\"master\\"
+{
+  "deps": [
+    {
+      "currentValue": ""master"
         ",
       "datasource": "git-tags",
       "depName": "0x7fs/CountedSet",
       "packageName": "https://github.com/0x7fs/CountedSet",
     },
-    Object {
+    {
       "currentValue": "0.1.0",
       "datasource": "git-tags",
       "depName": "avito-tech/GraphiteClient",
       "packageName": "https://github.com/avito-tech/GraphiteClient.git",
     },
-    Object {
+    {
       "currentValue": "1.0.16",
       "datasource": "git-tags",
       "depName": "IBM-Swift/BlueSignals",
       "packageName": "https://github.com/IBM-Swift/BlueSignals.git",
     },
-    Object {
-      "currentValue": "\\"UpdateSocket\\"
+    {
+      "currentValue": ""UpdateSocket"
         ",
       "datasource": "git-tags",
       "depName": "beefon/Shout",
       "packageName": "https://github.com/beefon/Shout",
     },
-    Object {
+    {
       "currentValue": "3.0.6",
       "datasource": "git-tags",
       "depName": "daltoniam/Starscream",
       "packageName": "https://github.com/daltoniam/Starscream.git",
     },
-    Object {
+    {
       "currentValue": "1.4.6",
       "datasource": "git-tags",
       "depName": "httpswift/swifter",
       "packageName": "https://github.com/httpswift/swifter.git",
     },
-    Object {
-      "currentValue": "from : \\"0.9.6\\"",
+    {
+      "currentValue": "from : "0.9.6"",
       "datasource": "git-tags",
       "depName": "weichsel/ZIPFoundation",
       "packageName": "https://github.com/weichsel/ZIPFoundation/",
     },
-    Object {
-      "currentValue": "\\"swift-5.0-branch\\"
+    {
+      "currentValue": ""swift-5.0-branch"
     ",
       "datasource": "git-tags",
       "depName": "apple/swift-package-manager",
@@ -60,10 +60,10 @@ Object {
 `;
 
 exports[`modules/manager/swift/index extractPackageFile() parses package descriptions 1`] = `
-Object {
-  "deps": Array [
-    Object {
-      "currentValue": "from:\\"1.2.3\\"",
+{
+  "deps": [
+    {
+      "currentValue": "from:"1.2.3"",
       "datasource": "git-tags",
       "depName": "vapor/vapor",
       "packageName": "https://github.com/vapor/vapor.git",
@@ -74,10 +74,10 @@ Object {
 `;
 
 exports[`modules/manager/swift/index extractPackageFile() parses package descriptions 2`] = `
-Object {
-  "deps": Array [
-    Object {
-      "currentValue": "\\"1.2.3\\"...",
+{
+  "deps": [
+    {
+      "currentValue": ""1.2.3"...",
       "datasource": "git-tags",
       "depName": "vapor/vapor",
       "packageName": "https://github.com/vapor/vapor.git",
@@ -88,10 +88,10 @@ Object {
 `;
 
 exports[`modules/manager/swift/index extractPackageFile() parses package descriptions 3`] = `
-Object {
-  "deps": Array [
-    Object {
-      "currentValue": "\\"1.2.3\\"...\\"1.2.4\\"",
+{
+  "deps": [
+    {
+      "currentValue": ""1.2.3"..."1.2.4"",
       "datasource": "git-tags",
       "depName": "vapor/vapor",
       "packageName": "https://github.com/vapor/vapor.git",
@@ -102,10 +102,10 @@ Object {
 `;
 
 exports[`modules/manager/swift/index extractPackageFile() parses package descriptions 4`] = `
-Object {
-  "deps": Array [
-    Object {
-      "currentValue": "\\"1.2.3\\"..<\\"1.2.4\\"",
+{
+  "deps": [
+    {
+      "currentValue": ""1.2.3"..<"1.2.4"",
       "datasource": "git-tags",
       "depName": "vapor/vapor",
       "packageName": "https://github.com/vapor/vapor.git",
@@ -116,10 +116,10 @@ Object {
 `;
 
 exports[`modules/manager/swift/index extractPackageFile() parses package descriptions 5`] = `
-Object {
-  "deps": Array [
-    Object {
-      "currentValue": "...\\"1.2.3\\"",
+{
+  "deps": [
+    {
+      "currentValue": "..."1.2.3"",
       "datasource": "git-tags",
       "depName": "vapor/vapor",
       "packageName": "https://github.com/vapor/vapor.git",
@@ -130,10 +130,10 @@ Object {
 `;
 
 exports[`modules/manager/swift/index extractPackageFile() parses package descriptions 6`] = `
-Object {
-  "deps": Array [
-    Object {
-      "currentValue": "..<\\"1.2.3\\"",
+{
+  "deps": [
+    {
+      "currentValue": "..<"1.2.3"",
       "datasource": "git-tags",
       "depName": "vapor/vapor",
       "packageName": "https://github.com/vapor/vapor.git",

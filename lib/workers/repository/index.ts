@@ -47,6 +47,7 @@ export async function renovateRepository(
       GlobalConfig.get('dryRun') !== 'extract'
     ) {
       await ensureOnboardingPr(config, packageFiles, branches);
+      addSplit('onboarding');
       const res = await updateRepo(config, branches);
       setMeta({ repository: config.repository });
       addSplit('update');

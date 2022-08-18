@@ -134,13 +134,16 @@ export async function getRawFile(
     repoId = config.repoId;
   }
 
+  if (!repoId) {
+    return null;
+  }
+
   const versionDescriptor: GitVersionDescriptor = {
     version: branchOrTag,
   } as GitVersionDescriptor;
 
   const buf = await azureApiGit.getItemContent(
-    // TODO #7154
-    repoId!,
+    repoId,
     fileName,
     undefined,
     undefined,
@@ -161,8 +164,7 @@ export async function getJsonFile(
   branchOrTag?: string
 ): Promise<any | null> {
   const raw = await getRawFile(fileName, repoName, branchOrTag);
-  // TODO #7154
-  return JSON5.parse(raw!);
+  return raw ? JSON5.parse(raw) : null;
 }
 
 export async function initRepo({
@@ -724,7 +726,7 @@ export async function mergePr({
         `Expected PR to have status ${
           PullRequestStatus[PullRequestStatus.Completed]
           // TODO #7154
-        }, however it is ${PullRequestStatus[pr.status!]}.`
+        }. However, it is ${PullRequestStatus[pr.status!]}.`
       );
     }
     return true;
