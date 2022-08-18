@@ -1,1362 +1,1362 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`modules/datasource/rubygems/index getReleases returns a dep for GitHub Packages package hit 1`] = `
-Object {
+{
   "registryUrl": "https://rubygems.pkg.github.com/example",
-  "releases": Array [
-    Object {
+  "releases": [
+    {
       "rubyPlatform": "ruby",
       "version": "0.8.0",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "0.8.5",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "0.9.0",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "0.9.1",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "0.9.2",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "0.9.3",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "0.9.4",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "0.9.4.1",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "0.9.5",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "0.10.0",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "0.10.1",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "0.11.0",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "0.11.1",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "0.12.0",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "0.12.1",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "0.13.0",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "0.13.1",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "0.14.1",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "0.14.2",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "0.14.3",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "0.14.4",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "1.0.0",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "1.1.0",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "1.1.1",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "1.1.2",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "1.1.3",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "1.1.4",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "1.1.5",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "1.1.6",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "1.2.0",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "1.2.1",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "1.2.2",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "1.2.3",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "1.2.4",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "1.2.5",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "1.2.6",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "2.0.0",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "2.0.1",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "2.0.2",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "2.0.4",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "2.0.5",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "2.1.0",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "2.1.1",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "2.1.2",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "2.2.2",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "2.2.3",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "2.3.2",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "2.3.3",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "2.3.4",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "2.3.5",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "2.3.6",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "2.3.7",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "2.3.8.pre1",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "2.3.8",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "2.3.9.pre",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "2.3.9",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "2.3.10",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "2.3.11",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "2.3.12",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "2.3.14",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "2.3.15",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "2.3.16",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "2.3.17",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "2.3.18",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "3.0.0.beta",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "3.0.0.beta2",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "3.0.0.beta3",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "3.0.0.beta4",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "3.0.0.rc",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "3.0.0.rc2",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "3.0.0",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "3.0.1",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "3.0.2",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "3.0.3",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "3.0.4.rc1",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "3.0.4",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "3.0.5.rc1",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "3.0.5",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "3.0.6.rc1",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "3.0.6.rc2",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "3.0.6",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "3.0.7.rc1",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "3.0.7.rc2",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "3.0.7",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "3.0.8.rc1",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "3.0.8.rc2",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "3.0.8.rc4",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "3.0.8",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "3.0.9.rc1",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "3.0.9.rc3",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "3.0.9.rc4",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "3.0.9.rc5",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "3.0.9",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "3.0.10.rc1",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "3.0.10",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "3.0.11",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "3.0.12.rc1",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "3.0.12",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "3.0.13.rc1",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "3.0.13",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "3.0.14",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "3.0.15",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "3.0.16",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "3.0.17",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "3.0.18",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "3.0.19",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "3.0.20",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "3.1.0.beta1",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "3.1.0.rc1",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "3.1.0.rc2",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "3.1.0.rc3",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "3.1.0.rc4",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "3.1.0.rc5",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "3.1.0.rc6",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "3.1.0.rc8",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "3.1.0",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "3.1.1.rc1",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "3.1.1.rc2",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "3.1.1.rc3",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "3.1.1",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "3.1.2.rc1",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "3.1.2.rc2",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "3.1.2",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "3.1.3",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "3.1.4.rc1",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "3.1.4",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "3.1.5.rc1",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "3.1.5",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "3.1.6",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "3.1.7",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "3.1.8",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "3.1.9",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "3.1.10",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "3.1.11",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "3.1.12",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "3.2.0.rc1",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "3.2.0.rc2",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "3.2.0",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "3.2.1",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "3.2.2.rc1",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "3.2.2",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "3.2.3.rc1",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "3.2.3.rc2",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "3.2.3",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "3.2.4.rc1",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "3.2.4",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "3.2.5",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "3.2.6",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "3.2.7.rc1",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "3.2.7",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "3.2.8.rc1",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "3.2.8.rc2",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "3.2.8",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "3.2.9.rc1",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "3.2.9.rc2",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "3.2.9.rc3",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "3.2.9",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "3.2.10",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "3.2.11",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "3.2.12",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "3.2.13.rc1",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "3.2.13.rc2",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "3.2.13",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "3.2.14.rc1",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "3.2.14.rc2",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "3.2.14",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "3.2.15.rc1",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "3.2.15.rc2",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "3.2.15.rc3",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "3.2.15",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "3.2.16",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "3.2.17",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "3.2.18",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "3.2.19",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "3.2.20",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "3.2.21",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "3.2.22",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "3.2.22.1",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "3.2.22.2",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "3.2.22.3",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "3.2.22.4",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "3.2.22.5",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "4.0.0.beta1",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "4.0.0.rc1",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "4.0.0.rc2",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "4.0.0",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "4.0.1.rc1",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "4.0.1.rc2",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "4.0.1.rc3",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "4.0.1.rc4",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "4.0.1",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "4.0.2",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "4.0.3",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "4.0.4.rc1",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "4.0.4",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "4.0.5",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "4.0.6.rc1",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "4.0.6.rc2",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "4.0.6.rc3",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "4.0.6",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "4.0.7",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "4.0.8",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "4.0.9",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "4.0.10.rc1",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "4.0.10.rc2",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "4.0.10",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "4.0.11",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "4.0.11.1",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "4.0.12",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "4.0.13.rc1",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "4.0.13",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "4.1.0.beta1",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "4.1.0.beta2",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "4.1.0.rc1",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "4.1.0.rc2",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "4.1.0",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "4.1.1",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "4.1.2.rc1",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "4.1.2.rc2",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "4.1.2.rc3",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "4.1.2",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "4.1.3",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "4.1.4",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "4.1.5",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "4.1.6.rc1",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "4.1.6.rc2",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "4.1.6",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "4.1.7",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "4.1.7.1",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "4.1.8",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "4.1.9.rc1",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "4.1.9",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "4.1.10.rc1",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "4.1.10.rc2",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "4.1.10.rc3",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "4.1.10.rc4",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "4.1.10",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "4.1.11",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "4.1.12.rc1",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "4.1.12",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "4.1.13.rc1",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "4.1.13",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "4.1.14.rc1",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "4.1.14.rc2",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "4.1.14",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "4.1.14.1",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "4.1.14.2",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "4.1.15.rc1",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "4.1.15",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "4.1.16.rc1",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "4.1.16",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "4.2.0.beta1",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "4.2.0.beta2",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "4.2.0.beta3",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "4.2.0.beta4",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "4.2.0.rc1",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "4.2.0.rc2",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "4.2.0.rc3",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "4.2.0",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "4.2.1.rc1",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "4.2.1.rc2",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "4.2.1.rc3",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "4.2.1.rc4",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "4.2.1",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "4.2.2",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "4.2.3.rc1",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "4.2.3",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "4.2.4.rc1",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "4.2.4",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "4.2.5.rc1",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "4.2.5.rc2",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "4.2.5",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "4.2.5.1",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "4.2.5.2",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "4.2.6.rc1",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "4.2.6",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "4.2.7.rc1",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "4.2.7",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "4.2.7.1",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "4.2.8.rc1",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "4.2.8",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "4.2.9.rc1",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "4.2.9.rc2",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "4.2.9",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "4.2.10.rc1",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "4.2.10",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "4.2.11",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "5.0.0.beta1",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "5.0.0.beta1.1",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "5.0.0.beta2",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "5.0.0.beta3",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "5.0.0.beta4",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "5.0.0.racecar1",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "5.0.0.rc1",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "5.0.0.rc2",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "5.0.0",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "5.0.0.1",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "5.0.1.rc1",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "5.0.1.rc2",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "5.0.1",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "5.0.2.rc1",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "5.0.2",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "5.0.3",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "5.0.4.rc1",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "5.0.4",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "5.0.5.rc1",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "5.0.5.rc2",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "5.0.5",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "5.0.6.rc1",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "5.0.6",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "5.0.7",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "5.0.7.1",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "5.1.0.beta1",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "5.1.0.rc1",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "5.1.0.rc2",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "5.1.0",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "5.1.1",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "5.1.2.rc1",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "5.1.2",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "5.1.3.rc1",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "5.1.3.rc2",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "5.1.3.rc3",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "5.1.3",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "5.1.4.rc1",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "5.1.4",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "5.1.5.rc1",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "5.1.5",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "5.1.6",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "5.1.6.1",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "5.2.0.beta1",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "5.2.0.beta2",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "5.2.0.rc1",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "5.2.0.rc2",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "5.2.0",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "5.2.1.rc1",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "5.2.1",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "5.2.1.1",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "5.2.2.rc1",
     },
-    Object {
+    {
       "rubyPlatform": "ruby",
       "version": "5.2.2",
     },
@@ -1365,13 +1365,13 @@ Object {
 `;
 
 exports[`modules/datasource/rubygems/index getReleases returns a dep for rubygems.org package hit 1`] = `
-Object {
+{
   "registryUrl": "https://rubygems.org",
-  "releases": Array [
-    Object {
+  "releases": [
+    {
       "version": "0.1.0",
     },
-    Object {
+    {
       "version": "0.1.1",
     },
   ],
@@ -1379,2377 +1379,2377 @@ Object {
 `;
 
 exports[`modules/datasource/rubygems/index getReleases uses multiple source urls 1`] = `
-Object {
+{
   "homepage": "http://rubyonrails.org",
   "registryUrl": "https://firstparty.com/basepath",
-  "releases": Array [
-    Object {
+  "releases": [
+    {
       "releaseTimestamp": "2009-07-25T18:01:56.000Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 0",
       "version": "0.8.0",
     },
-    Object {
+    {
       "releaseTimestamp": "2009-07-25T18:01:56.000Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 0",
       "version": "0.8.5",
     },
-    Object {
+    {
       "releaseTimestamp": "2009-07-25T18:01:56.000Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 0",
       "version": "0.9.0",
     },
-    Object {
+    {
       "releaseTimestamp": "2009-07-25T18:01:56.000Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 0",
       "version": "0.9.1",
     },
-    Object {
+    {
       "releaseTimestamp": "2009-07-25T18:01:56.000Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 0",
       "version": "0.9.2",
     },
-    Object {
+    {
       "releaseTimestamp": "2009-07-25T18:01:55.000Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 0",
       "version": "0.9.3",
     },
-    Object {
+    {
       "releaseTimestamp": "2009-07-25T18:01:55.000Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 0",
       "version": "0.9.4",
     },
-    Object {
+    {
       "releaseTimestamp": "2009-07-25T18:01:55.000Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 0",
       "version": "0.9.4.1",
     },
-    Object {
+    {
       "releaseTimestamp": "2009-07-25T18:01:55.000Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 0",
       "version": "0.9.5",
     },
-    Object {
+    {
       "releaseTimestamp": "2009-07-25T18:01:58.000Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 0",
       "version": "0.10.0",
     },
-    Object {
+    {
       "releaseTimestamp": "2009-07-25T18:01:58.000Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 0",
       "version": "0.10.1",
     },
-    Object {
+    {
       "releaseTimestamp": "2009-07-25T18:01:58.000Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 0",
       "version": "0.11.0",
     },
-    Object {
+    {
       "releaseTimestamp": "2009-07-25T18:01:58.000Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 0",
       "version": "0.11.1",
     },
-    Object {
+    {
       "releaseTimestamp": "2009-07-25T18:01:58.000Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 0",
       "version": "0.12.0",
     },
-    Object {
+    {
       "releaseTimestamp": "2009-07-25T18:01:57.000Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 0",
       "version": "0.12.1",
     },
-    Object {
+    {
       "releaseTimestamp": "2009-07-25T18:01:57.000Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 0",
       "version": "0.13.0",
     },
-    Object {
+    {
       "releaseTimestamp": "2009-07-25T18:01:57.000Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 0",
       "version": "0.13.1",
     },
-    Object {
+    {
       "releaseTimestamp": "2009-07-25T18:01:57.000Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 0",
       "version": "0.14.1",
     },
-    Object {
+    {
       "releaseTimestamp": "2009-07-25T18:01:57.000Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 0",
       "version": "0.14.2",
     },
-    Object {
+    {
       "releaseTimestamp": "2009-07-25T18:01:56.000Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 0",
       "version": "0.14.3",
     },
-    Object {
+    {
       "releaseTimestamp": "2009-07-25T18:01:56.000Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 0",
       "version": "0.14.4",
     },
-    Object {
+    {
       "releaseTimestamp": "2009-07-25T18:01:55.000Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 0",
       "version": "1.0.0",
     },
-    Object {
+    {
       "releaseTimestamp": "2009-07-25T18:01:55.000Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 0",
       "version": "1.1.0",
     },
-    Object {
+    {
       "releaseTimestamp": "2009-07-25T18:01:55.000Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 0",
       "version": "1.1.1",
     },
-    Object {
+    {
       "releaseTimestamp": "2009-07-25T18:01:54.000Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 0",
       "version": "1.1.2",
     },
-    Object {
+    {
       "releaseTimestamp": "2009-07-25T18:01:54.000Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 0",
       "version": "1.1.3",
     },
-    Object {
+    {
       "releaseTimestamp": "2009-07-25T18:01:54.000Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 0",
       "version": "1.1.4",
     },
-    Object {
+    {
       "releaseTimestamp": "2009-07-25T18:01:54.000Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 0",
       "version": "1.1.5",
     },
-    Object {
+    {
       "releaseTimestamp": "2009-07-25T18:01:54.000Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 0",
       "version": "1.1.6",
     },
-    Object {
+    {
       "releaseTimestamp": "2009-07-25T18:01:53.000Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 0",
       "version": "1.2.0",
     },
-    Object {
+    {
       "releaseTimestamp": "2009-07-25T18:01:52.000Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 0",
       "version": "1.2.1",
     },
-    Object {
+    {
       "releaseTimestamp": "2009-07-25T18:01:52.000Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 0",
       "version": "1.2.2",
     },
-    Object {
+    {
       "releaseTimestamp": "2009-07-25T18:01:52.000Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 0",
       "version": "1.2.3",
     },
-    Object {
+    {
       "releaseTimestamp": "2009-07-25T18:01:52.000Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 0",
       "version": "1.2.4",
     },
-    Object {
+    {
       "releaseTimestamp": "2009-07-25T18:01:52.000Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 0",
       "version": "1.2.5",
     },
-    Object {
+    {
       "releaseTimestamp": "2009-07-25T18:01:51.000Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 0",
       "version": "1.2.6",
     },
-    Object {
+    {
       "releaseTimestamp": "2009-07-25T18:01:51.000Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 0",
       "version": "2.0.0",
     },
-    Object {
+    {
       "releaseTimestamp": "2009-07-25T18:01:51.000Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 0",
       "version": "2.0.1",
     },
-    Object {
+    {
       "releaseTimestamp": "2009-07-25T18:01:51.000Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 0",
       "version": "2.0.2",
     },
-    Object {
+    {
       "releaseTimestamp": "2009-07-25T18:01:51.000Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 0",
       "version": "2.0.4",
     },
-    Object {
+    {
       "releaseTimestamp": "2009-07-25T18:01:50.000Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 0",
       "version": "2.0.5",
     },
-    Object {
+    {
       "releaseTimestamp": "2009-07-25T18:01:50.000Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 0",
       "version": "2.1.0",
     },
-    Object {
+    {
       "releaseTimestamp": "2009-07-25T18:01:50.000Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 0",
       "version": "2.1.1",
     },
-    Object {
+    {
       "releaseTimestamp": "2009-07-25T18:01:50.000Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 0",
       "version": "2.1.2",
     },
-    Object {
+    {
       "releaseTimestamp": "2009-07-25T18:01:49.000Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 0",
       "version": "2.2.2",
     },
-    Object {
+    {
       "releaseTimestamp": "2009-09-28T09:25:13.132Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 0",
       "version": "2.2.3",
     },
-    Object {
+    {
       "releaseTimestamp": "2009-07-25T18:01:49.000Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 0",
       "version": "2.3.2",
     },
-    Object {
+    {
       "releaseTimestamp": "2009-08-05T13:21:07.000Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 0",
       "version": "2.3.3",
     },
-    Object {
+    {
       "releaseTimestamp": "2009-09-04T17:33:48.000Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 0",
       "version": "2.3.4",
     },
-    Object {
+    {
       "releaseTimestamp": "2009-11-27T00:12:56.921Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 0",
       "version": "2.3.5",
     },
-    Object {
+    {
       "releaseTimestamp": "2010-05-23T07:49:23.602Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 0",
       "version": "2.3.6",
     },
-    Object {
+    {
       "releaseTimestamp": "2010-05-24T08:23:05.731Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 0",
       "version": "2.3.7",
     },
-    Object {
+    {
       "releaseTimestamp": "2010-05-24T21:17:25.987Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": "> 1.3.1",
       "version": "2.3.8.pre1",
     },
-    Object {
+    {
       "releaseTimestamp": "2010-05-25T04:53:06.895Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 0",
       "version": "2.3.8",
     },
-    Object {
+    {
       "releaseTimestamp": "2010-08-30T03:32:34.689Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": "> 1.3.1",
       "version": "2.3.9.pre",
     },
-    Object {
+    {
       "releaseTimestamp": "2010-09-04T21:54:41.257Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 0",
       "version": "2.3.9",
     },
-    Object {
+    {
       "releaseTimestamp": "2010-10-14T20:53:17.413Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 0",
       "version": "2.3.10",
     },
-    Object {
+    {
       "releaseTimestamp": "2011-02-08T21:17:36.254Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 0",
       "version": "2.3.11",
     },
-    Object {
+    {
       "releaseTimestamp": "2011-06-08T00:22:06.357Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 0",
       "version": "2.3.12",
     },
-    Object {
+    {
       "releaseTimestamp": "2011-08-16T22:01:21.962Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 0",
       "version": "2.3.14",
     },
-    Object {
+    {
       "releaseTimestamp": "2013-01-08T20:08:28.812Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 0",
       "version": "2.3.15",
     },
-    Object {
+    {
       "releaseTimestamp": "2013-01-28T21:01:30.451Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 0",
       "version": "2.3.16",
     },
-    Object {
+    {
       "releaseTimestamp": "2013-02-11T18:17:30.726Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 0",
       "version": "2.3.17",
     },
-    Object {
+    {
       "releaseTimestamp": "2013-03-18T17:13:25.422Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 0",
       "version": "2.3.18",
     },
-    Object {
+    {
       "releaseTimestamp": "2010-02-05T03:02:19.496Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": "> 1.3.1",
       "version": "3.0.0.beta",
     },
-    Object {
+    {
       "releaseTimestamp": "2010-04-01T21:26:26.222Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.0.0.beta2",
     },
-    Object {
+    {
       "releaseTimestamp": "2010-04-13T19:23:14.932Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.0.0.beta3",
     },
-    Object {
+    {
       "releaseTimestamp": "2010-06-08T22:33:16.046Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.0.0.beta4",
     },
-    Object {
+    {
       "releaseTimestamp": "2010-07-26T21:43:12.765Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.0.0.rc",
     },
-    Object {
+    {
       "releaseTimestamp": "2010-08-24T03:04:45.033Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.0.0.rc2",
     },
-    Object {
+    {
       "releaseTimestamp": "2010-08-29T23:11:11.490Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.0.0",
     },
-    Object {
+    {
       "releaseTimestamp": "2010-10-14T20:55:44.846Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.0.1",
     },
-    Object {
+    {
       "releaseTimestamp": "2010-11-15T19:33:41.460Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.0.2",
     },
-    Object {
+    {
       "releaseTimestamp": "2010-11-16T16:29:00.892Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.0.3",
     },
-    Object {
+    {
       "releaseTimestamp": "2011-01-30T23:00:37.572Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.0.4.rc1",
     },
-    Object {
+    {
       "releaseTimestamp": "2011-02-08T21:17:48.221Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.0.4",
     },
-    Object {
+    {
       "releaseTimestamp": "2011-02-23T19:08:34.691Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.0.5.rc1",
     },
-    Object {
+    {
       "releaseTimestamp": "2011-02-27T02:30:55.377Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.0.5",
     },
-    Object {
+    {
       "releaseTimestamp": "2011-03-29T20:47:15.107Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.0.6.rc1",
     },
-    Object {
+    {
       "releaseTimestamp": "2011-03-31T05:28:51.216Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.0.6.rc2",
     },
-    Object {
+    {
       "releaseTimestamp": "2011-04-05T23:05:21.745Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.0.6",
     },
-    Object {
+    {
       "releaseTimestamp": "2011-04-14T21:57:06.386Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.0.7.rc1",
     },
-    Object {
+    {
       "releaseTimestamp": "2011-04-15T17:33:53.132Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.0.7.rc2",
     },
-    Object {
+    {
       "releaseTimestamp": "2011-04-18T21:05:54.308Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.0.7",
     },
-    Object {
+    {
       "releaseTimestamp": "2011-05-26T00:11:36.891Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.0.8.rc1",
     },
-    Object {
+    {
       "releaseTimestamp": "2011-05-27T16:32:24.502Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.0.8.rc2",
     },
-    Object {
+    {
       "releaseTimestamp": "2011-05-31T00:08:18.745Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.0.8.rc4",
     },
-    Object {
+    {
       "releaseTimestamp": "2011-06-08T00:16:45.270Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.0.8",
     },
-    Object {
+    {
       "releaseTimestamp": "2011-06-08T21:20:17.404Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.0.9.rc1",
     },
-    Object {
+    {
       "releaseTimestamp": "2011-06-09T22:51:39.349Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.0.9.rc3",
     },
-    Object {
+    {
       "releaseTimestamp": "2011-06-12T21:24:34.980Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.0.9.rc4",
     },
-    Object {
+    {
       "releaseTimestamp": "2011-06-12T21:30:07.555Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.0.9.rc5",
     },
-    Object {
+    {
       "releaseTimestamp": "2011-06-16T10:05:11.080Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.0.9",
     },
-    Object {
+    {
       "releaseTimestamp": "2011-08-05T00:12:05.290Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.0.10.rc1",
     },
-    Object {
+    {
       "releaseTimestamp": "2011-08-16T22:14:17.045Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.0.10",
     },
-    Object {
+    {
       "releaseTimestamp": "2011-11-18T01:23:23.249Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.0.11",
     },
-    Object {
+    {
       "releaseTimestamp": "2012-02-22T21:39:19.764Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.0.12.rc1",
     },
-    Object {
+    {
       "releaseTimestamp": "2012-03-01T17:52:15.609Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.0.12",
     },
-    Object {
+    {
       "releaseTimestamp": "2012-05-28T19:01:47.715Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.0.13.rc1",
     },
-    Object {
+    {
       "releaseTimestamp": "2012-05-31T18:24:59.747Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.0.13",
     },
-    Object {
+    {
       "releaseTimestamp": "2012-06-12T21:26:07.460Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.0.14",
     },
-    Object {
+    {
       "releaseTimestamp": "2012-06-13T03:07:06.509Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.0.15",
     },
-    Object {
+    {
       "releaseTimestamp": "2012-07-26T22:08:54.212Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.0.16",
     },
-    Object {
+    {
       "releaseTimestamp": "2012-08-09T21:16:44.882Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.0.17",
     },
-    Object {
+    {
       "releaseTimestamp": "2013-01-02T21:19:52.960Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.0.18",
     },
-    Object {
+    {
       "releaseTimestamp": "2013-01-08T20:08:33.922Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.0.19",
     },
-    Object {
+    {
       "releaseTimestamp": "2013-01-28T21:01:34.374Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.0.20",
     },
-    Object {
+    {
       "releaseTimestamp": "2011-05-05T01:23:18.105Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.1.0.beta1",
     },
-    Object {
+    {
       "releaseTimestamp": "2011-05-22T02:26:25.383Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.1.0.rc1",
     },
-    Object {
+    {
       "releaseTimestamp": "2011-06-08T00:16:57.976Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.1.0.rc2",
     },
-    Object {
+    {
       "releaseTimestamp": "2011-06-08T21:27:28.270Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.1.0.rc3",
     },
-    Object {
+    {
       "releaseTimestamp": "2011-06-09T22:56:24.880Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.1.0.rc4",
     },
-    Object {
+    {
       "releaseTimestamp": "2011-07-25T23:05:19.817Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.1.0.rc5",
     },
-    Object {
+    {
       "releaseTimestamp": "2011-08-16T22:33:32.921Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.1.0.rc6",
     },
-    Object {
+    {
       "releaseTimestamp": "2011-08-29T03:27:19.194Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.1.0.rc8",
     },
-    Object {
+    {
       "releaseTimestamp": "2011-08-31T02:18:30.035Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.1.0",
     },
-    Object {
+    {
       "releaseTimestamp": "2011-09-15T00:27:03.617Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.1.1.rc1",
     },
-    Object {
+    {
       "releaseTimestamp": "2011-09-29T22:17:03.417Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.1.1.rc2",
     },
-    Object {
+    {
       "releaseTimestamp": "2011-10-06T02:31:00.452Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.1.1.rc3",
     },
-    Object {
+    {
       "releaseTimestamp": "2011-10-07T15:30:09.628Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.1.1",
     },
-    Object {
+    {
       "releaseTimestamp": "2011-11-14T14:17:34.523Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.1.2.rc1",
     },
-    Object {
+    {
       "releaseTimestamp": "2011-11-14T15:49:20.198Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.1.2.rc2",
     },
-    Object {
+    {
       "releaseTimestamp": "2011-11-18T01:33:32.509Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.1.2",
     },
-    Object {
+    {
       "releaseTimestamp": "2011-11-20T22:52:57.492Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.1.3",
     },
-    Object {
+    {
       "releaseTimestamp": "2012-02-22T21:39:29.633Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.1.4.rc1",
     },
-    Object {
+    {
       "releaseTimestamp": "2012-03-01T17:52:28.342Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.1.4",
     },
-    Object {
+    {
       "releaseTimestamp": "2012-05-28T19:01:51.050Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.1.5.rc1",
     },
-    Object {
+    {
       "releaseTimestamp": "2012-05-31T18:25:06.617Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.1.5",
     },
-    Object {
+    {
       "releaseTimestamp": "2012-06-12T21:26:16.856Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.1.6",
     },
-    Object {
+    {
       "releaseTimestamp": "2012-07-26T22:09:00.975Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.1.7",
     },
-    Object {
+    {
       "releaseTimestamp": "2012-08-09T21:20:27.129Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.1.8",
     },
-    Object {
+    {
       "releaseTimestamp": "2013-01-02T21:19:56.845Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.1.9",
     },
-    Object {
+    {
       "releaseTimestamp": "2013-01-08T20:08:37.727Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.1.10",
     },
-    Object {
+    {
       "releaseTimestamp": "2013-02-11T18:17:37.200Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.1.11",
     },
-    Object {
+    {
       "releaseTimestamp": "2013-03-18T17:13:29.344Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.1.12",
     },
-    Object {
+    {
       "releaseTimestamp": "2011-12-20T00:41:10.661Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.2.0.rc1",
     },
-    Object {
+    {
       "releaseTimestamp": "2012-01-04T21:05:27.454Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.2.0.rc2",
     },
-    Object {
+    {
       "releaseTimestamp": "2012-01-20T16:47:48.848Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.2.0",
     },
-    Object {
+    {
       "releaseTimestamp": "2012-01-26T23:09:41.494Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.2.1",
     },
-    Object {
+    {
       "releaseTimestamp": "2012-02-22T21:39:35.308Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.2.2.rc1",
     },
-    Object {
+    {
       "releaseTimestamp": "2012-03-01T17:52:33.094Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.2.2",
     },
-    Object {
+    {
       "releaseTimestamp": "2012-03-27T17:11:24.443Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.2.3.rc1",
     },
-    Object {
+    {
       "releaseTimestamp": "2012-03-29T16:14:14.715Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.2.3.rc2",
     },
-    Object {
+    {
       "releaseTimestamp": "2012-03-30T22:26:20.685Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.2.3",
     },
-    Object {
+    {
       "releaseTimestamp": "2012-05-28T19:01:55.834Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.2.4.rc1",
     },
-    Object {
+    {
       "releaseTimestamp": "2012-05-31T18:25:13.532Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.2.4",
     },
-    Object {
+    {
       "releaseTimestamp": "2012-06-01T03:39:04.678Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.2.5",
     },
-    Object {
+    {
       "releaseTimestamp": "2012-06-12T21:26:21.434Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.2.6",
     },
-    Object {
+    {
       "releaseTimestamp": "2012-07-23T21:45:55.204Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.2.7.rc1",
     },
-    Object {
+    {
       "releaseTimestamp": "2012-07-26T22:09:06.275Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.2.7",
     },
-    Object {
+    {
       "releaseTimestamp": "2012-08-01T20:57:56.061Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.2.8.rc1",
     },
-    Object {
+    {
       "releaseTimestamp": "2012-08-03T14:29:05.254Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.2.8.rc2",
     },
-    Object {
+    {
       "releaseTimestamp": "2012-08-09T21:23:34.632Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.2.8",
     },
-    Object {
+    {
       "releaseTimestamp": "2012-10-29T17:07:08.109Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.2.9.rc1",
     },
-    Object {
+    {
       "releaseTimestamp": "2012-11-01T17:39:37.178Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.2.9.rc2",
     },
-    Object {
+    {
       "releaseTimestamp": "2012-11-09T18:00:50.077Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.2.9.rc3",
     },
-    Object {
+    {
       "releaseTimestamp": "2012-11-12T15:21:34.822Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.2.9",
     },
-    Object {
+    {
       "releaseTimestamp": "2013-01-02T21:20:01.186Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.2.10",
     },
-    Object {
+    {
       "releaseTimestamp": "2013-01-08T20:08:45.798Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.2.11",
     },
-    Object {
+    {
       "releaseTimestamp": "2013-02-11T18:17:41.481Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.2.12",
     },
-    Object {
+    {
       "releaseTimestamp": "2013-02-27T20:25:46.062Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.2.13.rc1",
     },
-    Object {
+    {
       "releaseTimestamp": "2013-03-06T23:06:19.052Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.2.13.rc2",
     },
-    Object {
+    {
       "releaseTimestamp": "2013-03-18T17:13:33.058Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.2.13",
     },
-    Object {
+    {
       "releaseTimestamp": "2013-07-13T00:25:39.110Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.2.14.rc1",
     },
-    Object {
+    {
       "releaseTimestamp": "2013-07-16T16:13:33.339Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.2.14.rc2",
     },
-    Object {
+    {
       "releaseTimestamp": "2013-07-22T16:44:50.870Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.2.14",
     },
-    Object {
+    {
       "releaseTimestamp": "2013-10-03T18:54:09.709Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.2.15.rc1",
     },
-    Object {
+    {
       "releaseTimestamp": "2013-10-04T20:48:45.484Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.2.15.rc2",
     },
-    Object {
+    {
       "releaseTimestamp": "2013-10-11T21:17:17.374Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.2.15.rc3",
     },
-    Object {
+    {
       "releaseTimestamp": "2013-10-16T17:23:10.503Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.2.15",
     },
-    Object {
+    {
       "releaseTimestamp": "2013-12-03T19:01:19.549Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.2.16",
     },
-    Object {
+    {
       "releaseTimestamp": "2014-02-18T18:54:56.443Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.2.17",
     },
-    Object {
+    {
       "releaseTimestamp": "2014-05-06T16:17:02.829Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.8.7",
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.2.18",
     },
-    Object {
+    {
       "releaseTimestamp": "2014-07-02T17:02:48.733Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.8.7",
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.2.19",
     },
-    Object {
+    {
       "releaseTimestamp": "2014-10-30T18:37:26.434Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.8.7",
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.2.20",
     },
-    Object {
+    {
       "releaseTimestamp": "2014-11-17T16:00:44.994Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.8.7",
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.2.21",
     },
-    Object {
+    {
       "releaseTimestamp": "2015-06-16T18:06:38.294Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.8.7",
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.2.22",
     },
-    Object {
+    {
       "releaseTimestamp": "2016-01-25T19:26:12.364Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.8.7",
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.2.22.1",
     },
-    Object {
+    {
       "releaseTimestamp": "2016-02-29T19:24:19.757Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.8.7",
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.2.22.2",
     },
-    Object {
+    {
       "releaseTimestamp": "2016-08-11T17:34:59.710Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.8.7",
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.2.22.3",
     },
-    Object {
+    {
       "releaseTimestamp": "2016-08-11T19:20:46.883Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.8.7",
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.2.22.4",
     },
-    Object {
+    {
       "releaseTimestamp": "2016-09-14T21:19:01.962Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.8.7",
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.2.22.5",
     },
-    Object {
+    {
       "releaseTimestamp": "2013-02-26T00:05:43.566Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.0.0.beta1",
     },
-    Object {
+    {
       "releaseTimestamp": "2013-04-29T15:39:05.085Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.0.0.rc1",
     },
-    Object {
+    {
       "releaseTimestamp": "2013-06-11T20:26:00.144Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.0.0.rc2",
     },
-    Object {
+    {
       "releaseTimestamp": "2013-06-25T14:32:58.526Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.0.0",
     },
-    Object {
+    {
       "releaseTimestamp": "2013-10-17T16:46:23.993Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.0.1.rc1",
     },
-    Object {
+    {
       "releaseTimestamp": "2013-10-21T22:01:19.341Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.0.1.rc2",
     },
-    Object {
+    {
       "releaseTimestamp": "2013-10-23T21:41:08.791Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.0.1.rc3",
     },
-    Object {
+    {
       "releaseTimestamp": "2013-10-30T20:49:25.297Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.0.1.rc4",
     },
-    Object {
+    {
       "releaseTimestamp": "2013-11-01T19:08:16.307Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.0.1",
     },
-    Object {
+    {
       "releaseTimestamp": "2013-12-03T19:01:29.867Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.0.2",
     },
-    Object {
+    {
       "releaseTimestamp": "2014-02-18T18:49:43.150Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.0.3",
     },
-    Object {
+    {
       "releaseTimestamp": "2014-03-11T17:31:18.568Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.0.4.rc1",
     },
-    Object {
+    {
       "releaseTimestamp": "2014-03-14T17:37:07.331Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.0.4",
     },
-    Object {
+    {
       "releaseTimestamp": "2014-05-06T16:13:27.132Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.0.5",
     },
-    Object {
+    {
       "releaseTimestamp": "2014-05-27T16:06:55.364Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.0.6.rc1",
     },
-    Object {
+    {
       "releaseTimestamp": "2014-06-16T16:16:01.642Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.0.6.rc2",
     },
-    Object {
+    {
       "releaseTimestamp": "2014-06-23T17:24:41.466Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.0.6.rc3",
     },
-    Object {
+    {
       "releaseTimestamp": "2014-06-26T16:30:13.579Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.0.6",
     },
-    Object {
+    {
       "releaseTimestamp": "2014-07-02T17:04:32.418Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.0.7",
     },
-    Object {
+    {
       "releaseTimestamp": "2014-07-02T19:42:37.603Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.0.8",
     },
-    Object {
+    {
       "releaseTimestamp": "2014-08-18T17:03:01.087Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.0.9",
     },
-    Object {
+    {
       "releaseTimestamp": "2014-08-19T20:48:29.471Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.0.10.rc1",
     },
-    Object {
+    {
       "releaseTimestamp": "2014-09-08T17:55:45.314Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.0.10.rc2",
     },
-    Object {
+    {
       "releaseTimestamp": "2014-09-11T17:33:15.455Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.0.10",
     },
-    Object {
+    {
       "releaseTimestamp": "2014-10-30T18:37:38.192Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.0.11",
     },
-    Object {
+    {
       "releaseTimestamp": "2014-11-19T19:09:54.075Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.0.11.1",
     },
-    Object {
+    {
       "releaseTimestamp": "2014-11-17T16:01:00.306Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.0.12",
     },
-    Object {
+    {
       "releaseTimestamp": "2015-01-02T00:54:54.587Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.0.13.rc1",
     },
-    Object {
+    {
       "releaseTimestamp": "2015-01-06T20:08:59.935Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.0.13",
     },
-    Object {
+    {
       "releaseTimestamp": "2013-12-18T00:15:16.640Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.1.0.beta1",
     },
-    Object {
+    {
       "releaseTimestamp": "2014-02-18T18:52:57.614Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.1.0.beta2",
     },
-    Object {
+    {
       "releaseTimestamp": "2014-02-18T20:59:23.632Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.1.0.rc1",
     },
-    Object {
+    {
       "releaseTimestamp": "2014-03-25T20:12:47.195Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.1.0.rc2",
     },
-    Object {
+    {
       "releaseTimestamp": "2014-04-08T19:21:51.275Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.1.0",
     },
-    Object {
+    {
       "releaseTimestamp": "2014-05-06T16:11:31.458Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.1.1",
     },
-    Object {
+    {
       "releaseTimestamp": "2014-05-27T16:12:48.106Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.1.2.rc1",
     },
-    Object {
+    {
       "releaseTimestamp": "2014-06-16T16:30:46.332Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.1.2.rc2",
     },
-    Object {
+    {
       "releaseTimestamp": "2014-06-23T17:28:46.002Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.1.2.rc3",
     },
-    Object {
+    {
       "releaseTimestamp": "2014-06-26T14:50:09.079Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.1.2",
     },
-    Object {
+    {
       "releaseTimestamp": "2014-07-02T17:06:42.181Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.1.3",
     },
-    Object {
+    {
       "releaseTimestamp": "2014-07-02T19:53:35.556Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.1.4",
     },
-    Object {
+    {
       "releaseTimestamp": "2014-08-18T17:01:03.727Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.1.5",
     },
-    Object {
+    {
       "releaseTimestamp": "2014-08-19T20:52:47.110Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.1.6.rc1",
     },
-    Object {
+    {
       "releaseTimestamp": "2014-09-08T18:13:12.723Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.1.6.rc2",
     },
-    Object {
+    {
       "releaseTimestamp": "2014-09-11T17:26:04.576Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.1.6",
     },
-    Object {
+    {
       "releaseTimestamp": "2014-10-30T18:37:49.213Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.1.7",
     },
-    Object {
+    {
       "releaseTimestamp": "2014-11-19T19:12:12.692Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.1.7.1",
     },
-    Object {
+    {
       "releaseTimestamp": "2014-11-17T16:01:13.385Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.1.8",
     },
-    Object {
+    {
       "releaseTimestamp": "2015-01-02T01:11:10.973Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.1.9.rc1",
     },
-    Object {
+    {
       "releaseTimestamp": "2015-01-06T20:04:31.185Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.1.9",
     },
-    Object {
+    {
       "releaseTimestamp": "2015-02-20T22:25:09.666Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.1.10.rc1",
     },
-    Object {
+    {
       "releaseTimestamp": "2015-02-25T22:22:40.645Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.1.10.rc2",
     },
-    Object {
+    {
       "releaseTimestamp": "2015-03-02T21:39:47.964Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.1.10.rc3",
     },
-    Object {
+    {
       "releaseTimestamp": "2015-03-12T21:32:52.724Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.1.10.rc4",
     },
-    Object {
+    {
       "releaseTimestamp": "2015-03-19T16:50:27.388Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.1.10",
     },
-    Object {
+    {
       "releaseTimestamp": "2015-06-16T18:00:13.043Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.1.11",
     },
-    Object {
+    {
       "releaseTimestamp": "2015-06-22T14:05:08.486Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.1.12.rc1",
     },
-    Object {
+    {
       "releaseTimestamp": "2015-06-25T21:26:08.544Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.1.12",
     },
-    Object {
+    {
       "releaseTimestamp": "2015-08-14T15:13:26.943Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.1.13.rc1",
     },
-    Object {
+    {
       "releaseTimestamp": "2015-08-24T18:02:56.741Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.1.13",
     },
-    Object {
+    {
       "releaseTimestamp": "2015-10-30T20:45:42.801Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.1.14.rc1",
     },
-    Object {
+    {
       "releaseTimestamp": "2015-11-05T02:55:44.276Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.1.14.rc2",
     },
-    Object {
+    {
       "releaseTimestamp": "2015-11-12T18:20:40.613Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.1.14",
     },
-    Object {
+    {
       "releaseTimestamp": "2016-01-25T19:26:27.339Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.1.14.1",
     },
-    Object {
+    {
       "releaseTimestamp": "2016-02-29T19:19:55.523Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.1.14.2",
     },
-    Object {
+    {
       "releaseTimestamp": "2016-03-01T18:43:40.764Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.1.15.rc1",
     },
-    Object {
+    {
       "releaseTimestamp": "2016-03-07T22:37:14.594Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.1.15",
     },
-    Object {
+    {
       "releaseTimestamp": "2016-07-02T02:15:20.923Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.1.16.rc1",
     },
-    Object {
+    {
       "releaseTimestamp": "2016-07-12T22:20:56.527Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.1.16",
     },
-    Object {
+    {
       "releaseTimestamp": "2014-08-20T02:34:44.046Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.2.0.beta1",
     },
-    Object {
+    {
       "releaseTimestamp": "2014-09-29T17:16:38.761Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.2.0.beta2",
     },
-    Object {
+    {
       "releaseTimestamp": "2014-10-30T18:37:59.690Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.2.0.beta3",
     },
-    Object {
+    {
       "releaseTimestamp": "2014-10-30T22:13:30.689Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.2.0.beta4",
     },
-    Object {
+    {
       "releaseTimestamp": "2014-11-28T17:53:27.822Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.2.0.rc1",
     },
-    Object {
+    {
       "releaseTimestamp": "2014-12-05T23:20:12.824Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.2.0.rc2",
     },
-    Object {
+    {
       "releaseTimestamp": "2014-12-13T02:58:44.762Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.2.0.rc3",
     },
-    Object {
+    {
       "releaseTimestamp": "2014-12-20T00:15:37.476Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.2.0",
     },
-    Object {
+    {
       "releaseTimestamp": "2015-02-20T22:21:34.214Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.2.1.rc1",
     },
-    Object {
+    {
       "releaseTimestamp": "2015-02-25T22:19:50.245Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.2.1.rc2",
     },
-    Object {
+    {
       "releaseTimestamp": "2015-03-02T21:35:50.169Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.2.1.rc3",
     },
-    Object {
+    {
       "releaseTimestamp": "2015-03-12T21:25:52.551Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.2.1.rc4",
     },
-    Object {
+    {
       "releaseTimestamp": "2015-03-19T16:42:01.191Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.2.1",
     },
-    Object {
+    {
       "releaseTimestamp": "2015-06-16T18:03:17.061Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.2.2",
     },
-    Object {
+    {
       "releaseTimestamp": "2015-06-22T14:23:17.788Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.2.3.rc1",
     },
-    Object {
+    {
       "releaseTimestamp": "2015-06-25T21:30:57.890Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.2.3",
     },
-    Object {
+    {
       "releaseTimestamp": "2015-08-14T15:21:15.566Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.2.4.rc1",
     },
-    Object {
+    {
       "releaseTimestamp": "2015-08-24T18:27:12.716Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.2.4",
     },
-    Object {
+    {
       "releaseTimestamp": "2015-10-30T20:47:59.397Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.2.5.rc1",
     },
-    Object {
+    {
       "releaseTimestamp": "2015-11-05T03:02:33.340Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.2.5.rc2",
     },
-    Object {
+    {
       "releaseTimestamp": "2015-11-12T17:06:55.226Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.2.5",
     },
-    Object {
+    {
       "releaseTimestamp": "2016-01-25T19:26:41.410Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.2.5.1",
     },
-    Object {
+    {
       "releaseTimestamp": "2016-02-29T19:17:10.564Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.2.5.2",
     },
-    Object {
+    {
       "releaseTimestamp": "2016-03-01T18:37:54.172Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.2.6.rc1",
     },
-    Object {
+    {
       "releaseTimestamp": "2016-03-07T22:33:22.563Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.2.6",
     },
-    Object {
+    {
       "releaseTimestamp": "2016-07-01T00:33:36.424Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.2.7.rc1",
     },
-    Object {
+    {
       "releaseTimestamp": "2016-07-13T02:57:05.601Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.2.7",
     },
-    Object {
+    {
       "releaseTimestamp": "2016-08-11T17:35:16.160Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.2.7.1",
     },
-    Object {
+    {
       "releaseTimestamp": "2017-02-10T02:46:51.222Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.2.8.rc1",
     },
-    Object {
+    {
       "releaseTimestamp": "2017-02-21T16:08:53.220Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.2.8",
     },
-    Object {
+    {
       "releaseTimestamp": "2017-06-13T18:50:29.897Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.2.9.rc1",
     },
-    Object {
+    {
       "releaseTimestamp": "2017-06-19T22:28:22.086Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.2.9.rc2",
     },
-    Object {
+    {
       "releaseTimestamp": "2017-06-26T21:30:56.077Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.2.9",
     },
-    Object {
+    {
       "releaseTimestamp": "2017-09-20T19:42:33.297Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.2.10.rc1",
     },
-    Object {
+    {
       "releaseTimestamp": "2017-09-27T14:29:42.567Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.2.10",
     },
-    Object {
+    {
       "releaseTimestamp": "2018-11-27T20:07:25.845Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.2.11",
     },
-    Object {
+    {
       "releaseTimestamp": "2015-12-18T21:18:13.306Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
       "rubygemsVersion": ">= 1.8.11",
       "version": "5.0.0.beta1",
     },
-    Object {
+    {
       "releaseTimestamp": "2016-01-25T19:26:49.903Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
       "rubygemsVersion": ">= 1.8.11",
       "version": "5.0.0.beta1.1",
     },
-    Object {
+    {
       "releaseTimestamp": "2016-02-01T22:06:25.279Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
       "rubygemsVersion": ">= 1.8.11",
       "version": "5.0.0.beta2",
     },
-    Object {
+    {
       "releaseTimestamp": "2016-02-24T16:16:22.722Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
       "rubygemsVersion": ">= 1.8.11",
       "version": "5.0.0.beta3",
     },
-    Object {
+    {
       "releaseTimestamp": "2016-04-27T20:55:26.508Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
       "rubygemsVersion": ">= 1.8.11",
       "version": "5.0.0.beta4",
     },
-    Object {
+    {
       "releaseTimestamp": "2016-05-06T22:02:43.345Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
       "rubygemsVersion": ">= 1.8.11",
       "version": "5.0.0.racecar1",
     },
-    Object {
+    {
       "releaseTimestamp": "2016-05-06T21:57:46.793Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
       "rubygemsVersion": ">= 1.8.11",
       "version": "5.0.0.rc1",
     },
-    Object {
+    {
       "releaseTimestamp": "2016-06-22T20:03:41.237Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
       "rubygemsVersion": ">= 1.8.11",
       "version": "5.0.0.rc2",
     },
-    Object {
+    {
       "releaseTimestamp": "2016-06-30T21:32:45.255Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
       "rubygemsVersion": ">= 1.8.11",
       "version": "5.0.0",
     },
-    Object {
+    {
       "releaseTimestamp": "2016-08-11T17:35:27.196Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
       "rubygemsVersion": ">= 1.8.11",
       "version": "5.0.0.1",
     },
-    Object {
+    {
       "releaseTimestamp": "2016-11-30T20:02:44.553Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
       "rubygemsVersion": ">= 1.8.11",
       "version": "5.0.1.rc1",
     },
-    Object {
+    {
       "releaseTimestamp": "2016-12-09T19:13:12.953Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
       "rubygemsVersion": ">= 1.8.11",
       "version": "5.0.1.rc2",
     },
-    Object {
+    {
       "releaseTimestamp": "2016-12-21T00:07:46.527Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
       "rubygemsVersion": ">= 1.8.11",
       "version": "5.0.1",
     },
-    Object {
+    {
       "releaseTimestamp": "2017-02-25T00:55:48.618Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
       "rubygemsVersion": ">= 1.8.11",
       "version": "5.0.2.rc1",
     },
-    Object {
+    {
       "releaseTimestamp": "2017-03-01T23:13:53.219Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
       "rubygemsVersion": ">= 1.8.11",
       "version": "5.0.2",
     },
-    Object {
+    {
       "releaseTimestamp": "2017-05-12T20:08:33.226Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
       "rubygemsVersion": ">= 1.8.11",
       "version": "5.0.3",
     },
-    Object {
+    {
       "releaseTimestamp": "2017-06-14T20:49:29.610Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
       "rubygemsVersion": ">= 1.8.11",
       "version": "5.0.4.rc1",
     },
-    Object {
+    {
       "releaseTimestamp": "2017-06-19T21:58:56.501Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
       "rubygemsVersion": ">= 1.8.11",
       "version": "5.0.4",
     },
-    Object {
+    {
       "releaseTimestamp": "2017-07-19T19:43:58.280Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
       "rubygemsVersion": ">= 1.8.11",
       "version": "5.0.5.rc1",
     },
-    Object {
+    {
       "releaseTimestamp": "2017-07-25T20:26:10.369Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
       "rubygemsVersion": ">= 1.8.11",
       "version": "5.0.5.rc2",
     },
-    Object {
+    {
       "releaseTimestamp": "2017-07-31T19:05:29.060Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
       "rubygemsVersion": ">= 1.8.11",
       "version": "5.0.5",
     },
-    Object {
+    {
       "releaseTimestamp": "2017-08-24T19:21:20.599Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
       "rubygemsVersion": ">= 1.8.11",
       "version": "5.0.6.rc1",
     },
-    Object {
+    {
       "releaseTimestamp": "2017-09-08T00:47:42.201Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
       "rubygemsVersion": ">= 1.8.11",
       "version": "5.0.6",
     },
-    Object {
+    {
       "releaseTimestamp": "2018-03-29T18:18:14.388Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
       "rubygemsVersion": ">= 1.8.11",
       "version": "5.0.7",
     },
-    Object {
+    {
       "releaseTimestamp": "2018-11-27T20:09:36.347Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
       "rubygemsVersion": ">= 1.8.11",
       "version": "5.0.7.1",
     },
-    Object {
+    {
       "releaseTimestamp": "2017-02-23T20:00:44.720Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
       "rubygemsVersion": ">= 1.8.11",
       "version": "5.1.0.beta1",
     },
-    Object {
+    {
       "releaseTimestamp": "2017-03-20T18:57:56.595Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
       "rubygemsVersion": ">= 1.8.11",
       "version": "5.1.0.rc1",
     },
-    Object {
+    {
       "releaseTimestamp": "2017-04-21T01:31:13.442Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
       "rubygemsVersion": ">= 1.8.11",
       "version": "5.1.0.rc2",
     },
-    Object {
+    {
       "releaseTimestamp": "2017-04-27T21:00:47.670Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
       "rubygemsVersion": ">= 1.8.11",
       "version": "5.1.0",
     },
-    Object {
+    {
       "releaseTimestamp": "2017-05-12T20:11:39.743Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
       "rubygemsVersion": ">= 1.8.11",
       "version": "5.1.1",
     },
-    Object {
+    {
       "releaseTimestamp": "2017-06-20T17:03:49.322Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
       "rubygemsVersion": ">= 1.8.11",
       "version": "5.1.2.rc1",
     },
-    Object {
+    {
       "releaseTimestamp": "2017-06-26T21:51:41.161Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
       "rubygemsVersion": ">= 1.8.11",
       "version": "5.1.2",
     },
-    Object {
+    {
       "releaseTimestamp": "2017-07-19T19:38:05.393Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
       "rubygemsVersion": ">= 1.8.11",
       "version": "5.1.3.rc1",
     },
-    Object {
+    {
       "releaseTimestamp": "2017-07-25T20:18:18.420Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
       "rubygemsVersion": ">= 1.8.11",
       "version": "5.1.3.rc2",
     },
-    Object {
+    {
       "releaseTimestamp": "2017-07-31T19:12:53.241Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
       "rubygemsVersion": ">= 1.8.11",
       "version": "5.1.3.rc3",
     },
-    Object {
+    {
       "releaseTimestamp": "2017-08-03T19:15:15.370Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
       "rubygemsVersion": ">= 1.8.11",
       "version": "5.1.3",
     },
-    Object {
+    {
       "releaseTimestamp": "2017-08-24T19:37:37.728Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
       "rubygemsVersion": ">= 1.8.11",
       "version": "5.1.4.rc1",
     },
-    Object {
+    {
       "releaseTimestamp": "2017-09-08T00:52:07.791Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
       "rubygemsVersion": ">= 1.8.11",
       "version": "5.1.4",
     },
-    Object {
+    {
       "releaseTimestamp": "2018-02-01T19:00:37.520Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
       "rubygemsVersion": ">= 1.8.11",
       "version": "5.1.5.rc1",
     },
-    Object {
+    {
       "releaseTimestamp": "2018-02-14T20:02:02.541Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
       "rubygemsVersion": ">= 1.8.11",
       "version": "5.1.5",
     },
-    Object {
+    {
       "releaseTimestamp": "2018-03-29T18:29:03.149Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
       "rubygemsVersion": ">= 1.8.11",
       "version": "5.1.6",
     },
-    Object {
+    {
       "releaseTimestamp": "2018-11-27T20:11:47.585Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
       "rubygemsVersion": ">= 1.8.11",
       "version": "5.1.6.1",
     },
-    Object {
+    {
       "releaseTimestamp": "2017-11-27T19:19:13.809Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
       "rubygemsVersion": ">= 1.8.11",
       "version": "5.2.0.beta1",
     },
-    Object {
+    {
       "releaseTimestamp": "2017-11-28T05:04:37.765Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
       "rubygemsVersion": ">= 1.8.11",
       "version": "5.2.0.beta2",
     },
-    Object {
+    {
       "releaseTimestamp": "2018-01-30T23:38:56.843Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
       "rubygemsVersion": ">= 1.8.11",
       "version": "5.2.0.rc1",
     },
-    Object {
+    {
       "releaseTimestamp": "2018-03-20T17:54:58.165Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
       "rubygemsVersion": ">= 1.8.11",
       "version": "5.2.0.rc2",
     },
-    Object {
+    {
       "releaseTimestamp": "2018-04-09T20:07:04.834Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
       "rubygemsVersion": ">= 1.8.11",
       "version": "5.2.0",
     },
-    Object {
+    {
       "releaseTimestamp": "2018-07-30T20:22:38.749Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
       "rubygemsVersion": ">= 1.8.11",
       "version": "5.2.1.rc1",
     },
-    Object {
+    {
       "releaseTimestamp": "2018-08-07T21:44:52.020Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
       "rubygemsVersion": ">= 1.8.11",
       "version": "5.2.1",
     },
-    Object {
+    {
       "releaseTimestamp": "2018-11-27T20:14:16.796Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
       "rubygemsVersion": ">= 1.8.11",
       "version": "5.2.1.1",
     },
-    Object {
+    {
       "releaseTimestamp": "2018-11-28T22:55:23.827Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
       "rubygemsVersion": ">= 1.8.11",
       "version": "5.2.2.rc1",
     },
-    Object {
+    {
       "releaseTimestamp": "2018-12-04T18:15:02.233Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
@@ -3762,13 +3762,13 @@ Object {
 `;
 
 exports[`modules/datasource/rubygems/index getReleases uses rubygems.org if no registry urls were provided 1`] = `
-Object {
+{
   "registryUrl": "https://rubygems.org",
-  "releases": Array [
-    Object {
+  "releases": [
+    {
       "version": "0.1.0",
     },
-    Object {
+    {
       "version": "0.1.1",
     },
   ],
@@ -3776,2377 +3776,2377 @@ Object {
 `;
 
 exports[`modules/datasource/rubygems/index getReleases works with real data 1`] = `
-Object {
+{
   "homepage": "http://rubyonrails.org",
   "registryUrl": "https://thirdparty.com",
-  "releases": Array [
-    Object {
+  "releases": [
+    {
       "releaseTimestamp": "2009-07-25T18:01:56.000Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 0",
       "version": "0.8.0",
     },
-    Object {
+    {
       "releaseTimestamp": "2009-07-25T18:01:56.000Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 0",
       "version": "0.8.5",
     },
-    Object {
+    {
       "releaseTimestamp": "2009-07-25T18:01:56.000Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 0",
       "version": "0.9.0",
     },
-    Object {
+    {
       "releaseTimestamp": "2009-07-25T18:01:56.000Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 0",
       "version": "0.9.1",
     },
-    Object {
+    {
       "releaseTimestamp": "2009-07-25T18:01:56.000Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 0",
       "version": "0.9.2",
     },
-    Object {
+    {
       "releaseTimestamp": "2009-07-25T18:01:55.000Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 0",
       "version": "0.9.3",
     },
-    Object {
+    {
       "releaseTimestamp": "2009-07-25T18:01:55.000Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 0",
       "version": "0.9.4",
     },
-    Object {
+    {
       "releaseTimestamp": "2009-07-25T18:01:55.000Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 0",
       "version": "0.9.4.1",
     },
-    Object {
+    {
       "releaseTimestamp": "2009-07-25T18:01:55.000Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 0",
       "version": "0.9.5",
     },
-    Object {
+    {
       "releaseTimestamp": "2009-07-25T18:01:58.000Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 0",
       "version": "0.10.0",
     },
-    Object {
+    {
       "releaseTimestamp": "2009-07-25T18:01:58.000Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 0",
       "version": "0.10.1",
     },
-    Object {
+    {
       "releaseTimestamp": "2009-07-25T18:01:58.000Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 0",
       "version": "0.11.0",
     },
-    Object {
+    {
       "releaseTimestamp": "2009-07-25T18:01:58.000Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 0",
       "version": "0.11.1",
     },
-    Object {
+    {
       "releaseTimestamp": "2009-07-25T18:01:58.000Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 0",
       "version": "0.12.0",
     },
-    Object {
+    {
       "releaseTimestamp": "2009-07-25T18:01:57.000Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 0",
       "version": "0.12.1",
     },
-    Object {
+    {
       "releaseTimestamp": "2009-07-25T18:01:57.000Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 0",
       "version": "0.13.0",
     },
-    Object {
+    {
       "releaseTimestamp": "2009-07-25T18:01:57.000Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 0",
       "version": "0.13.1",
     },
-    Object {
+    {
       "releaseTimestamp": "2009-07-25T18:01:57.000Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 0",
       "version": "0.14.1",
     },
-    Object {
+    {
       "releaseTimestamp": "2009-07-25T18:01:57.000Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 0",
       "version": "0.14.2",
     },
-    Object {
+    {
       "releaseTimestamp": "2009-07-25T18:01:56.000Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 0",
       "version": "0.14.3",
     },
-    Object {
+    {
       "releaseTimestamp": "2009-07-25T18:01:56.000Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 0",
       "version": "0.14.4",
     },
-    Object {
+    {
       "releaseTimestamp": "2009-07-25T18:01:55.000Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 0",
       "version": "1.0.0",
     },
-    Object {
+    {
       "releaseTimestamp": "2009-07-25T18:01:55.000Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 0",
       "version": "1.1.0",
     },
-    Object {
+    {
       "releaseTimestamp": "2009-07-25T18:01:55.000Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 0",
       "version": "1.1.1",
     },
-    Object {
+    {
       "releaseTimestamp": "2009-07-25T18:01:54.000Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 0",
       "version": "1.1.2",
     },
-    Object {
+    {
       "releaseTimestamp": "2009-07-25T18:01:54.000Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 0",
       "version": "1.1.3",
     },
-    Object {
+    {
       "releaseTimestamp": "2009-07-25T18:01:54.000Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 0",
       "version": "1.1.4",
     },
-    Object {
+    {
       "releaseTimestamp": "2009-07-25T18:01:54.000Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 0",
       "version": "1.1.5",
     },
-    Object {
+    {
       "releaseTimestamp": "2009-07-25T18:01:54.000Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 0",
       "version": "1.1.6",
     },
-    Object {
+    {
       "releaseTimestamp": "2009-07-25T18:01:53.000Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 0",
       "version": "1.2.0",
     },
-    Object {
+    {
       "releaseTimestamp": "2009-07-25T18:01:52.000Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 0",
       "version": "1.2.1",
     },
-    Object {
+    {
       "releaseTimestamp": "2009-07-25T18:01:52.000Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 0",
       "version": "1.2.2",
     },
-    Object {
+    {
       "releaseTimestamp": "2009-07-25T18:01:52.000Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 0",
       "version": "1.2.3",
     },
-    Object {
+    {
       "releaseTimestamp": "2009-07-25T18:01:52.000Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 0",
       "version": "1.2.4",
     },
-    Object {
+    {
       "releaseTimestamp": "2009-07-25T18:01:52.000Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 0",
       "version": "1.2.5",
     },
-    Object {
+    {
       "releaseTimestamp": "2009-07-25T18:01:51.000Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 0",
       "version": "1.2.6",
     },
-    Object {
+    {
       "releaseTimestamp": "2009-07-25T18:01:51.000Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 0",
       "version": "2.0.0",
     },
-    Object {
+    {
       "releaseTimestamp": "2009-07-25T18:01:51.000Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 0",
       "version": "2.0.1",
     },
-    Object {
+    {
       "releaseTimestamp": "2009-07-25T18:01:51.000Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 0",
       "version": "2.0.2",
     },
-    Object {
+    {
       "releaseTimestamp": "2009-07-25T18:01:51.000Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 0",
       "version": "2.0.4",
     },
-    Object {
+    {
       "releaseTimestamp": "2009-07-25T18:01:50.000Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 0",
       "version": "2.0.5",
     },
-    Object {
+    {
       "releaseTimestamp": "2009-07-25T18:01:50.000Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 0",
       "version": "2.1.0",
     },
-    Object {
+    {
       "releaseTimestamp": "2009-07-25T18:01:50.000Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 0",
       "version": "2.1.1",
     },
-    Object {
+    {
       "releaseTimestamp": "2009-07-25T18:01:50.000Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 0",
       "version": "2.1.2",
     },
-    Object {
+    {
       "releaseTimestamp": "2009-07-25T18:01:49.000Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 0",
       "version": "2.2.2",
     },
-    Object {
+    {
       "releaseTimestamp": "2009-09-28T09:25:13.132Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 0",
       "version": "2.2.3",
     },
-    Object {
+    {
       "releaseTimestamp": "2009-07-25T18:01:49.000Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 0",
       "version": "2.3.2",
     },
-    Object {
+    {
       "releaseTimestamp": "2009-08-05T13:21:07.000Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 0",
       "version": "2.3.3",
     },
-    Object {
+    {
       "releaseTimestamp": "2009-09-04T17:33:48.000Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 0",
       "version": "2.3.4",
     },
-    Object {
+    {
       "releaseTimestamp": "2009-11-27T00:12:56.921Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 0",
       "version": "2.3.5",
     },
-    Object {
+    {
       "releaseTimestamp": "2010-05-23T07:49:23.602Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 0",
       "version": "2.3.6",
     },
-    Object {
+    {
       "releaseTimestamp": "2010-05-24T08:23:05.731Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 0",
       "version": "2.3.7",
     },
-    Object {
+    {
       "releaseTimestamp": "2010-05-24T21:17:25.987Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": "> 1.3.1",
       "version": "2.3.8.pre1",
     },
-    Object {
+    {
       "releaseTimestamp": "2010-05-25T04:53:06.895Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 0",
       "version": "2.3.8",
     },
-    Object {
+    {
       "releaseTimestamp": "2010-08-30T03:32:34.689Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": "> 1.3.1",
       "version": "2.3.9.pre",
     },
-    Object {
+    {
       "releaseTimestamp": "2010-09-04T21:54:41.257Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 0",
       "version": "2.3.9",
     },
-    Object {
+    {
       "releaseTimestamp": "2010-10-14T20:53:17.413Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 0",
       "version": "2.3.10",
     },
-    Object {
+    {
       "releaseTimestamp": "2011-02-08T21:17:36.254Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 0",
       "version": "2.3.11",
     },
-    Object {
+    {
       "releaseTimestamp": "2011-06-08T00:22:06.357Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 0",
       "version": "2.3.12",
     },
-    Object {
+    {
       "releaseTimestamp": "2011-08-16T22:01:21.962Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 0",
       "version": "2.3.14",
     },
-    Object {
+    {
       "releaseTimestamp": "2013-01-08T20:08:28.812Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 0",
       "version": "2.3.15",
     },
-    Object {
+    {
       "releaseTimestamp": "2013-01-28T21:01:30.451Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 0",
       "version": "2.3.16",
     },
-    Object {
+    {
       "releaseTimestamp": "2013-02-11T18:17:30.726Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 0",
       "version": "2.3.17",
     },
-    Object {
+    {
       "releaseTimestamp": "2013-03-18T17:13:25.422Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 0",
       "version": "2.3.18",
     },
-    Object {
+    {
       "releaseTimestamp": "2010-02-05T03:02:19.496Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": "> 1.3.1",
       "version": "3.0.0.beta",
     },
-    Object {
+    {
       "releaseTimestamp": "2010-04-01T21:26:26.222Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.0.0.beta2",
     },
-    Object {
+    {
       "releaseTimestamp": "2010-04-13T19:23:14.932Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.0.0.beta3",
     },
-    Object {
+    {
       "releaseTimestamp": "2010-06-08T22:33:16.046Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.0.0.beta4",
     },
-    Object {
+    {
       "releaseTimestamp": "2010-07-26T21:43:12.765Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.0.0.rc",
     },
-    Object {
+    {
       "releaseTimestamp": "2010-08-24T03:04:45.033Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.0.0.rc2",
     },
-    Object {
+    {
       "releaseTimestamp": "2010-08-29T23:11:11.490Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.0.0",
     },
-    Object {
+    {
       "releaseTimestamp": "2010-10-14T20:55:44.846Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.0.1",
     },
-    Object {
+    {
       "releaseTimestamp": "2010-11-15T19:33:41.460Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.0.2",
     },
-    Object {
+    {
       "releaseTimestamp": "2010-11-16T16:29:00.892Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.0.3",
     },
-    Object {
+    {
       "releaseTimestamp": "2011-01-30T23:00:37.572Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.0.4.rc1",
     },
-    Object {
+    {
       "releaseTimestamp": "2011-02-08T21:17:48.221Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.0.4",
     },
-    Object {
+    {
       "releaseTimestamp": "2011-02-23T19:08:34.691Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.0.5.rc1",
     },
-    Object {
+    {
       "releaseTimestamp": "2011-02-27T02:30:55.377Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.0.5",
     },
-    Object {
+    {
       "releaseTimestamp": "2011-03-29T20:47:15.107Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.0.6.rc1",
     },
-    Object {
+    {
       "releaseTimestamp": "2011-03-31T05:28:51.216Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.0.6.rc2",
     },
-    Object {
+    {
       "releaseTimestamp": "2011-04-05T23:05:21.745Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.0.6",
     },
-    Object {
+    {
       "releaseTimestamp": "2011-04-14T21:57:06.386Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.0.7.rc1",
     },
-    Object {
+    {
       "releaseTimestamp": "2011-04-15T17:33:53.132Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.0.7.rc2",
     },
-    Object {
+    {
       "releaseTimestamp": "2011-04-18T21:05:54.308Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.0.7",
     },
-    Object {
+    {
       "releaseTimestamp": "2011-05-26T00:11:36.891Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.0.8.rc1",
     },
-    Object {
+    {
       "releaseTimestamp": "2011-05-27T16:32:24.502Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.0.8.rc2",
     },
-    Object {
+    {
       "releaseTimestamp": "2011-05-31T00:08:18.745Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.0.8.rc4",
     },
-    Object {
+    {
       "releaseTimestamp": "2011-06-08T00:16:45.270Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.0.8",
     },
-    Object {
+    {
       "releaseTimestamp": "2011-06-08T21:20:17.404Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.0.9.rc1",
     },
-    Object {
+    {
       "releaseTimestamp": "2011-06-09T22:51:39.349Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.0.9.rc3",
     },
-    Object {
+    {
       "releaseTimestamp": "2011-06-12T21:24:34.980Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.0.9.rc4",
     },
-    Object {
+    {
       "releaseTimestamp": "2011-06-12T21:30:07.555Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.0.9.rc5",
     },
-    Object {
+    {
       "releaseTimestamp": "2011-06-16T10:05:11.080Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.0.9",
     },
-    Object {
+    {
       "releaseTimestamp": "2011-08-05T00:12:05.290Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.0.10.rc1",
     },
-    Object {
+    {
       "releaseTimestamp": "2011-08-16T22:14:17.045Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.0.10",
     },
-    Object {
+    {
       "releaseTimestamp": "2011-11-18T01:23:23.249Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.0.11",
     },
-    Object {
+    {
       "releaseTimestamp": "2012-02-22T21:39:19.764Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.0.12.rc1",
     },
-    Object {
+    {
       "releaseTimestamp": "2012-03-01T17:52:15.609Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.0.12",
     },
-    Object {
+    {
       "releaseTimestamp": "2012-05-28T19:01:47.715Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.0.13.rc1",
     },
-    Object {
+    {
       "releaseTimestamp": "2012-05-31T18:24:59.747Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.0.13",
     },
-    Object {
+    {
       "releaseTimestamp": "2012-06-12T21:26:07.460Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.0.14",
     },
-    Object {
+    {
       "releaseTimestamp": "2012-06-13T03:07:06.509Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.0.15",
     },
-    Object {
+    {
       "releaseTimestamp": "2012-07-26T22:08:54.212Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.0.16",
     },
-    Object {
+    {
       "releaseTimestamp": "2012-08-09T21:16:44.882Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.0.17",
     },
-    Object {
+    {
       "releaseTimestamp": "2013-01-02T21:19:52.960Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.0.18",
     },
-    Object {
+    {
       "releaseTimestamp": "2013-01-08T20:08:33.922Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.0.19",
     },
-    Object {
+    {
       "releaseTimestamp": "2013-01-28T21:01:34.374Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.0.20",
     },
-    Object {
+    {
       "releaseTimestamp": "2011-05-05T01:23:18.105Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.1.0.beta1",
     },
-    Object {
+    {
       "releaseTimestamp": "2011-05-22T02:26:25.383Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.1.0.rc1",
     },
-    Object {
+    {
       "releaseTimestamp": "2011-06-08T00:16:57.976Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.1.0.rc2",
     },
-    Object {
+    {
       "releaseTimestamp": "2011-06-08T21:27:28.270Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.1.0.rc3",
     },
-    Object {
+    {
       "releaseTimestamp": "2011-06-09T22:56:24.880Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.1.0.rc4",
     },
-    Object {
+    {
       "releaseTimestamp": "2011-07-25T23:05:19.817Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.1.0.rc5",
     },
-    Object {
+    {
       "releaseTimestamp": "2011-08-16T22:33:32.921Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.1.0.rc6",
     },
-    Object {
+    {
       "releaseTimestamp": "2011-08-29T03:27:19.194Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.1.0.rc8",
     },
-    Object {
+    {
       "releaseTimestamp": "2011-08-31T02:18:30.035Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.1.0",
     },
-    Object {
+    {
       "releaseTimestamp": "2011-09-15T00:27:03.617Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.1.1.rc1",
     },
-    Object {
+    {
       "releaseTimestamp": "2011-09-29T22:17:03.417Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.1.1.rc2",
     },
-    Object {
+    {
       "releaseTimestamp": "2011-10-06T02:31:00.452Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.1.1.rc3",
     },
-    Object {
+    {
       "releaseTimestamp": "2011-10-07T15:30:09.628Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.1.1",
     },
-    Object {
+    {
       "releaseTimestamp": "2011-11-14T14:17:34.523Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.1.2.rc1",
     },
-    Object {
+    {
       "releaseTimestamp": "2011-11-14T15:49:20.198Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.1.2.rc2",
     },
-    Object {
+    {
       "releaseTimestamp": "2011-11-18T01:33:32.509Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.1.2",
     },
-    Object {
+    {
       "releaseTimestamp": "2011-11-20T22:52:57.492Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.1.3",
     },
-    Object {
+    {
       "releaseTimestamp": "2012-02-22T21:39:29.633Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.1.4.rc1",
     },
-    Object {
+    {
       "releaseTimestamp": "2012-03-01T17:52:28.342Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.1.4",
     },
-    Object {
+    {
       "releaseTimestamp": "2012-05-28T19:01:51.050Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.1.5.rc1",
     },
-    Object {
+    {
       "releaseTimestamp": "2012-05-31T18:25:06.617Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.1.5",
     },
-    Object {
+    {
       "releaseTimestamp": "2012-06-12T21:26:16.856Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.1.6",
     },
-    Object {
+    {
       "releaseTimestamp": "2012-07-26T22:09:00.975Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.1.7",
     },
-    Object {
+    {
       "releaseTimestamp": "2012-08-09T21:20:27.129Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.1.8",
     },
-    Object {
+    {
       "releaseTimestamp": "2013-01-02T21:19:56.845Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.1.9",
     },
-    Object {
+    {
       "releaseTimestamp": "2013-01-08T20:08:37.727Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.1.10",
     },
-    Object {
+    {
       "releaseTimestamp": "2013-02-11T18:17:37.200Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.1.11",
     },
-    Object {
+    {
       "releaseTimestamp": "2013-03-18T17:13:29.344Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.1.12",
     },
-    Object {
+    {
       "releaseTimestamp": "2011-12-20T00:41:10.661Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.2.0.rc1",
     },
-    Object {
+    {
       "releaseTimestamp": "2012-01-04T21:05:27.454Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.2.0.rc2",
     },
-    Object {
+    {
       "releaseTimestamp": "2012-01-20T16:47:48.848Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.2.0",
     },
-    Object {
+    {
       "releaseTimestamp": "2012-01-26T23:09:41.494Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.2.1",
     },
-    Object {
+    {
       "releaseTimestamp": "2012-02-22T21:39:35.308Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.2.2.rc1",
     },
-    Object {
+    {
       "releaseTimestamp": "2012-03-01T17:52:33.094Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.2.2",
     },
-    Object {
+    {
       "releaseTimestamp": "2012-03-27T17:11:24.443Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.2.3.rc1",
     },
-    Object {
+    {
       "releaseTimestamp": "2012-03-29T16:14:14.715Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.2.3.rc2",
     },
-    Object {
+    {
       "releaseTimestamp": "2012-03-30T22:26:20.685Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.2.3",
     },
-    Object {
+    {
       "releaseTimestamp": "2012-05-28T19:01:55.834Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.2.4.rc1",
     },
-    Object {
+    {
       "releaseTimestamp": "2012-05-31T18:25:13.532Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.2.4",
     },
-    Object {
+    {
       "releaseTimestamp": "2012-06-01T03:39:04.678Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.2.5",
     },
-    Object {
+    {
       "releaseTimestamp": "2012-06-12T21:26:21.434Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.2.6",
     },
-    Object {
+    {
       "releaseTimestamp": "2012-07-23T21:45:55.204Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.2.7.rc1",
     },
-    Object {
+    {
       "releaseTimestamp": "2012-07-26T22:09:06.275Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.2.7",
     },
-    Object {
+    {
       "releaseTimestamp": "2012-08-01T20:57:56.061Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.2.8.rc1",
     },
-    Object {
+    {
       "releaseTimestamp": "2012-08-03T14:29:05.254Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.2.8.rc2",
     },
-    Object {
+    {
       "releaseTimestamp": "2012-08-09T21:23:34.632Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.2.8",
     },
-    Object {
+    {
       "releaseTimestamp": "2012-10-29T17:07:08.109Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.2.9.rc1",
     },
-    Object {
+    {
       "releaseTimestamp": "2012-11-01T17:39:37.178Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.2.9.rc2",
     },
-    Object {
+    {
       "releaseTimestamp": "2012-11-09T18:00:50.077Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.2.9.rc3",
     },
-    Object {
+    {
       "releaseTimestamp": "2012-11-12T15:21:34.822Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.2.9",
     },
-    Object {
+    {
       "releaseTimestamp": "2013-01-02T21:20:01.186Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.2.10",
     },
-    Object {
+    {
       "releaseTimestamp": "2013-01-08T20:08:45.798Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.2.11",
     },
-    Object {
+    {
       "releaseTimestamp": "2013-02-11T18:17:41.481Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.2.12",
     },
-    Object {
+    {
       "releaseTimestamp": "2013-02-27T20:25:46.062Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.2.13.rc1",
     },
-    Object {
+    {
       "releaseTimestamp": "2013-03-06T23:06:19.052Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.2.13.rc2",
     },
-    Object {
+    {
       "releaseTimestamp": "2013-03-18T17:13:33.058Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.2.13",
     },
-    Object {
+    {
       "releaseTimestamp": "2013-07-13T00:25:39.110Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.2.14.rc1",
     },
-    Object {
+    {
       "releaseTimestamp": "2013-07-16T16:13:33.339Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.2.14.rc2",
     },
-    Object {
+    {
       "releaseTimestamp": "2013-07-22T16:44:50.870Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.2.14",
     },
-    Object {
+    {
       "releaseTimestamp": "2013-10-03T18:54:09.709Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.2.15.rc1",
     },
-    Object {
+    {
       "releaseTimestamp": "2013-10-04T20:48:45.484Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.2.15.rc2",
     },
-    Object {
+    {
       "releaseTimestamp": "2013-10-11T21:17:17.374Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.2.15.rc3",
     },
-    Object {
+    {
       "releaseTimestamp": "2013-10-16T17:23:10.503Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.2.15",
     },
-    Object {
+    {
       "releaseTimestamp": "2013-12-03T19:01:19.549Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.2.16",
     },
-    Object {
+    {
       "releaseTimestamp": "2014-02-18T18:54:56.443Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.2.17",
     },
-    Object {
+    {
       "releaseTimestamp": "2014-05-06T16:17:02.829Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.8.7",
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.2.18",
     },
-    Object {
+    {
       "releaseTimestamp": "2014-07-02T17:02:48.733Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.8.7",
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.2.19",
     },
-    Object {
+    {
       "releaseTimestamp": "2014-10-30T18:37:26.434Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.8.7",
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.2.20",
     },
-    Object {
+    {
       "releaseTimestamp": "2014-11-17T16:00:44.994Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.8.7",
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.2.21",
     },
-    Object {
+    {
       "releaseTimestamp": "2015-06-16T18:06:38.294Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.8.7",
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.2.22",
     },
-    Object {
+    {
       "releaseTimestamp": "2016-01-25T19:26:12.364Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.8.7",
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.2.22.1",
     },
-    Object {
+    {
       "releaseTimestamp": "2016-02-29T19:24:19.757Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.8.7",
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.2.22.2",
     },
-    Object {
+    {
       "releaseTimestamp": "2016-08-11T17:34:59.710Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.8.7",
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.2.22.3",
     },
-    Object {
+    {
       "releaseTimestamp": "2016-08-11T19:20:46.883Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.8.7",
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.2.22.4",
     },
-    Object {
+    {
       "releaseTimestamp": "2016-09-14T21:19:01.962Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.8.7",
       "rubygemsVersion": ">= 1.3.6",
       "version": "3.2.22.5",
     },
-    Object {
+    {
       "releaseTimestamp": "2013-02-26T00:05:43.566Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.0.0.beta1",
     },
-    Object {
+    {
       "releaseTimestamp": "2013-04-29T15:39:05.085Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.0.0.rc1",
     },
-    Object {
+    {
       "releaseTimestamp": "2013-06-11T20:26:00.144Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.0.0.rc2",
     },
-    Object {
+    {
       "releaseTimestamp": "2013-06-25T14:32:58.526Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.0.0",
     },
-    Object {
+    {
       "releaseTimestamp": "2013-10-17T16:46:23.993Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.0.1.rc1",
     },
-    Object {
+    {
       "releaseTimestamp": "2013-10-21T22:01:19.341Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.0.1.rc2",
     },
-    Object {
+    {
       "releaseTimestamp": "2013-10-23T21:41:08.791Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.0.1.rc3",
     },
-    Object {
+    {
       "releaseTimestamp": "2013-10-30T20:49:25.297Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.0.1.rc4",
     },
-    Object {
+    {
       "releaseTimestamp": "2013-11-01T19:08:16.307Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.0.1",
     },
-    Object {
+    {
       "releaseTimestamp": "2013-12-03T19:01:29.867Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.0.2",
     },
-    Object {
+    {
       "releaseTimestamp": "2014-02-18T18:49:43.150Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.0.3",
     },
-    Object {
+    {
       "releaseTimestamp": "2014-03-11T17:31:18.568Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.0.4.rc1",
     },
-    Object {
+    {
       "releaseTimestamp": "2014-03-14T17:37:07.331Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.0.4",
     },
-    Object {
+    {
       "releaseTimestamp": "2014-05-06T16:13:27.132Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.0.5",
     },
-    Object {
+    {
       "releaseTimestamp": "2014-05-27T16:06:55.364Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.0.6.rc1",
     },
-    Object {
+    {
       "releaseTimestamp": "2014-06-16T16:16:01.642Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.0.6.rc2",
     },
-    Object {
+    {
       "releaseTimestamp": "2014-06-23T17:24:41.466Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.0.6.rc3",
     },
-    Object {
+    {
       "releaseTimestamp": "2014-06-26T16:30:13.579Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.0.6",
     },
-    Object {
+    {
       "releaseTimestamp": "2014-07-02T17:04:32.418Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.0.7",
     },
-    Object {
+    {
       "releaseTimestamp": "2014-07-02T19:42:37.603Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.0.8",
     },
-    Object {
+    {
       "releaseTimestamp": "2014-08-18T17:03:01.087Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.0.9",
     },
-    Object {
+    {
       "releaseTimestamp": "2014-08-19T20:48:29.471Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.0.10.rc1",
     },
-    Object {
+    {
       "releaseTimestamp": "2014-09-08T17:55:45.314Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.0.10.rc2",
     },
-    Object {
+    {
       "releaseTimestamp": "2014-09-11T17:33:15.455Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.0.10",
     },
-    Object {
+    {
       "releaseTimestamp": "2014-10-30T18:37:38.192Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.0.11",
     },
-    Object {
+    {
       "releaseTimestamp": "2014-11-19T19:09:54.075Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.0.11.1",
     },
-    Object {
+    {
       "releaseTimestamp": "2014-11-17T16:01:00.306Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.0.12",
     },
-    Object {
+    {
       "releaseTimestamp": "2015-01-02T00:54:54.587Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.0.13.rc1",
     },
-    Object {
+    {
       "releaseTimestamp": "2015-01-06T20:08:59.935Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.0.13",
     },
-    Object {
+    {
       "releaseTimestamp": "2013-12-18T00:15:16.640Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.1.0.beta1",
     },
-    Object {
+    {
       "releaseTimestamp": "2014-02-18T18:52:57.614Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.1.0.beta2",
     },
-    Object {
+    {
       "releaseTimestamp": "2014-02-18T20:59:23.632Z",
       "rubyPlatform": "ruby",
       "rubyVersion": null,
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.1.0.rc1",
     },
-    Object {
+    {
       "releaseTimestamp": "2014-03-25T20:12:47.195Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.1.0.rc2",
     },
-    Object {
+    {
       "releaseTimestamp": "2014-04-08T19:21:51.275Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.1.0",
     },
-    Object {
+    {
       "releaseTimestamp": "2014-05-06T16:11:31.458Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.1.1",
     },
-    Object {
+    {
       "releaseTimestamp": "2014-05-27T16:12:48.106Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.1.2.rc1",
     },
-    Object {
+    {
       "releaseTimestamp": "2014-06-16T16:30:46.332Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.1.2.rc2",
     },
-    Object {
+    {
       "releaseTimestamp": "2014-06-23T17:28:46.002Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.1.2.rc3",
     },
-    Object {
+    {
       "releaseTimestamp": "2014-06-26T14:50:09.079Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.1.2",
     },
-    Object {
+    {
       "releaseTimestamp": "2014-07-02T17:06:42.181Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.1.3",
     },
-    Object {
+    {
       "releaseTimestamp": "2014-07-02T19:53:35.556Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.1.4",
     },
-    Object {
+    {
       "releaseTimestamp": "2014-08-18T17:01:03.727Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.1.5",
     },
-    Object {
+    {
       "releaseTimestamp": "2014-08-19T20:52:47.110Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.1.6.rc1",
     },
-    Object {
+    {
       "releaseTimestamp": "2014-09-08T18:13:12.723Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.1.6.rc2",
     },
-    Object {
+    {
       "releaseTimestamp": "2014-09-11T17:26:04.576Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.1.6",
     },
-    Object {
+    {
       "releaseTimestamp": "2014-10-30T18:37:49.213Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.1.7",
     },
-    Object {
+    {
       "releaseTimestamp": "2014-11-19T19:12:12.692Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.1.7.1",
     },
-    Object {
+    {
       "releaseTimestamp": "2014-11-17T16:01:13.385Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.1.8",
     },
-    Object {
+    {
       "releaseTimestamp": "2015-01-02T01:11:10.973Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.1.9.rc1",
     },
-    Object {
+    {
       "releaseTimestamp": "2015-01-06T20:04:31.185Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.1.9",
     },
-    Object {
+    {
       "releaseTimestamp": "2015-02-20T22:25:09.666Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.1.10.rc1",
     },
-    Object {
+    {
       "releaseTimestamp": "2015-02-25T22:22:40.645Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.1.10.rc2",
     },
-    Object {
+    {
       "releaseTimestamp": "2015-03-02T21:39:47.964Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.1.10.rc3",
     },
-    Object {
+    {
       "releaseTimestamp": "2015-03-12T21:32:52.724Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.1.10.rc4",
     },
-    Object {
+    {
       "releaseTimestamp": "2015-03-19T16:50:27.388Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.1.10",
     },
-    Object {
+    {
       "releaseTimestamp": "2015-06-16T18:00:13.043Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.1.11",
     },
-    Object {
+    {
       "releaseTimestamp": "2015-06-22T14:05:08.486Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.1.12.rc1",
     },
-    Object {
+    {
       "releaseTimestamp": "2015-06-25T21:26:08.544Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.1.12",
     },
-    Object {
+    {
       "releaseTimestamp": "2015-08-14T15:13:26.943Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.1.13.rc1",
     },
-    Object {
+    {
       "releaseTimestamp": "2015-08-24T18:02:56.741Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.1.13",
     },
-    Object {
+    {
       "releaseTimestamp": "2015-10-30T20:45:42.801Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.1.14.rc1",
     },
-    Object {
+    {
       "releaseTimestamp": "2015-11-05T02:55:44.276Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.1.14.rc2",
     },
-    Object {
+    {
       "releaseTimestamp": "2015-11-12T18:20:40.613Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.1.14",
     },
-    Object {
+    {
       "releaseTimestamp": "2016-01-25T19:26:27.339Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.1.14.1",
     },
-    Object {
+    {
       "releaseTimestamp": "2016-02-29T19:19:55.523Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.1.14.2",
     },
-    Object {
+    {
       "releaseTimestamp": "2016-03-01T18:43:40.764Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.1.15.rc1",
     },
-    Object {
+    {
       "releaseTimestamp": "2016-03-07T22:37:14.594Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.1.15",
     },
-    Object {
+    {
       "releaseTimestamp": "2016-07-02T02:15:20.923Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.1.16.rc1",
     },
-    Object {
+    {
       "releaseTimestamp": "2016-07-12T22:20:56.527Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.1.16",
     },
-    Object {
+    {
       "releaseTimestamp": "2014-08-20T02:34:44.046Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.2.0.beta1",
     },
-    Object {
+    {
       "releaseTimestamp": "2014-09-29T17:16:38.761Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.2.0.beta2",
     },
-    Object {
+    {
       "releaseTimestamp": "2014-10-30T18:37:59.690Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.2.0.beta3",
     },
-    Object {
+    {
       "releaseTimestamp": "2014-10-30T22:13:30.689Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.2.0.beta4",
     },
-    Object {
+    {
       "releaseTimestamp": "2014-11-28T17:53:27.822Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.2.0.rc1",
     },
-    Object {
+    {
       "releaseTimestamp": "2014-12-05T23:20:12.824Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.2.0.rc2",
     },
-    Object {
+    {
       "releaseTimestamp": "2014-12-13T02:58:44.762Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.2.0.rc3",
     },
-    Object {
+    {
       "releaseTimestamp": "2014-12-20T00:15:37.476Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.2.0",
     },
-    Object {
+    {
       "releaseTimestamp": "2015-02-20T22:21:34.214Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.2.1.rc1",
     },
-    Object {
+    {
       "releaseTimestamp": "2015-02-25T22:19:50.245Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.2.1.rc2",
     },
-    Object {
+    {
       "releaseTimestamp": "2015-03-02T21:35:50.169Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.2.1.rc3",
     },
-    Object {
+    {
       "releaseTimestamp": "2015-03-12T21:25:52.551Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.2.1.rc4",
     },
-    Object {
+    {
       "releaseTimestamp": "2015-03-19T16:42:01.191Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.2.1",
     },
-    Object {
+    {
       "releaseTimestamp": "2015-06-16T18:03:17.061Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.2.2",
     },
-    Object {
+    {
       "releaseTimestamp": "2015-06-22T14:23:17.788Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.2.3.rc1",
     },
-    Object {
+    {
       "releaseTimestamp": "2015-06-25T21:30:57.890Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.2.3",
     },
-    Object {
+    {
       "releaseTimestamp": "2015-08-14T15:21:15.566Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.2.4.rc1",
     },
-    Object {
+    {
       "releaseTimestamp": "2015-08-24T18:27:12.716Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.2.4",
     },
-    Object {
+    {
       "releaseTimestamp": "2015-10-30T20:47:59.397Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.2.5.rc1",
     },
-    Object {
+    {
       "releaseTimestamp": "2015-11-05T03:02:33.340Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.2.5.rc2",
     },
-    Object {
+    {
       "releaseTimestamp": "2015-11-12T17:06:55.226Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.2.5",
     },
-    Object {
+    {
       "releaseTimestamp": "2016-01-25T19:26:41.410Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.2.5.1",
     },
-    Object {
+    {
       "releaseTimestamp": "2016-02-29T19:17:10.564Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.2.5.2",
     },
-    Object {
+    {
       "releaseTimestamp": "2016-03-01T18:37:54.172Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.2.6.rc1",
     },
-    Object {
+    {
       "releaseTimestamp": "2016-03-07T22:33:22.563Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.2.6",
     },
-    Object {
+    {
       "releaseTimestamp": "2016-07-01T00:33:36.424Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.2.7.rc1",
     },
-    Object {
+    {
       "releaseTimestamp": "2016-07-13T02:57:05.601Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.2.7",
     },
-    Object {
+    {
       "releaseTimestamp": "2016-08-11T17:35:16.160Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.2.7.1",
     },
-    Object {
+    {
       "releaseTimestamp": "2017-02-10T02:46:51.222Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.2.8.rc1",
     },
-    Object {
+    {
       "releaseTimestamp": "2017-02-21T16:08:53.220Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.2.8",
     },
-    Object {
+    {
       "releaseTimestamp": "2017-06-13T18:50:29.897Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.2.9.rc1",
     },
-    Object {
+    {
       "releaseTimestamp": "2017-06-19T22:28:22.086Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.2.9.rc2",
     },
-    Object {
+    {
       "releaseTimestamp": "2017-06-26T21:30:56.077Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.2.9",
     },
-    Object {
+    {
       "releaseTimestamp": "2017-09-20T19:42:33.297Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.2.10.rc1",
     },
-    Object {
+    {
       "releaseTimestamp": "2017-09-27T14:29:42.567Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.2.10",
     },
-    Object {
+    {
       "releaseTimestamp": "2018-11-27T20:07:25.845Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
       "rubygemsVersion": ">= 1.8.11",
       "version": "4.2.11",
     },
-    Object {
+    {
       "releaseTimestamp": "2015-12-18T21:18:13.306Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
       "rubygemsVersion": ">= 1.8.11",
       "version": "5.0.0.beta1",
     },
-    Object {
+    {
       "releaseTimestamp": "2016-01-25T19:26:49.903Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
       "rubygemsVersion": ">= 1.8.11",
       "version": "5.0.0.beta1.1",
     },
-    Object {
+    {
       "releaseTimestamp": "2016-02-01T22:06:25.279Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
       "rubygemsVersion": ">= 1.8.11",
       "version": "5.0.0.beta2",
     },
-    Object {
+    {
       "releaseTimestamp": "2016-02-24T16:16:22.722Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
       "rubygemsVersion": ">= 1.8.11",
       "version": "5.0.0.beta3",
     },
-    Object {
+    {
       "releaseTimestamp": "2016-04-27T20:55:26.508Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
       "rubygemsVersion": ">= 1.8.11",
       "version": "5.0.0.beta4",
     },
-    Object {
+    {
       "releaseTimestamp": "2016-05-06T22:02:43.345Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
       "rubygemsVersion": ">= 1.8.11",
       "version": "5.0.0.racecar1",
     },
-    Object {
+    {
       "releaseTimestamp": "2016-05-06T21:57:46.793Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
       "rubygemsVersion": ">= 1.8.11",
       "version": "5.0.0.rc1",
     },
-    Object {
+    {
       "releaseTimestamp": "2016-06-22T20:03:41.237Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
       "rubygemsVersion": ">= 1.8.11",
       "version": "5.0.0.rc2",
     },
-    Object {
+    {
       "releaseTimestamp": "2016-06-30T21:32:45.255Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
       "rubygemsVersion": ">= 1.8.11",
       "version": "5.0.0",
     },
-    Object {
+    {
       "releaseTimestamp": "2016-08-11T17:35:27.196Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
       "rubygemsVersion": ">= 1.8.11",
       "version": "5.0.0.1",
     },
-    Object {
+    {
       "releaseTimestamp": "2016-11-30T20:02:44.553Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
       "rubygemsVersion": ">= 1.8.11",
       "version": "5.0.1.rc1",
     },
-    Object {
+    {
       "releaseTimestamp": "2016-12-09T19:13:12.953Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
       "rubygemsVersion": ">= 1.8.11",
       "version": "5.0.1.rc2",
     },
-    Object {
+    {
       "releaseTimestamp": "2016-12-21T00:07:46.527Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
       "rubygemsVersion": ">= 1.8.11",
       "version": "5.0.1",
     },
-    Object {
+    {
       "releaseTimestamp": "2017-02-25T00:55:48.618Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
       "rubygemsVersion": ">= 1.8.11",
       "version": "5.0.2.rc1",
     },
-    Object {
+    {
       "releaseTimestamp": "2017-03-01T23:13:53.219Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
       "rubygemsVersion": ">= 1.8.11",
       "version": "5.0.2",
     },
-    Object {
+    {
       "releaseTimestamp": "2017-05-12T20:08:33.226Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
       "rubygemsVersion": ">= 1.8.11",
       "version": "5.0.3",
     },
-    Object {
+    {
       "releaseTimestamp": "2017-06-14T20:49:29.610Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
       "rubygemsVersion": ">= 1.8.11",
       "version": "5.0.4.rc1",
     },
-    Object {
+    {
       "releaseTimestamp": "2017-06-19T21:58:56.501Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
       "rubygemsVersion": ">= 1.8.11",
       "version": "5.0.4",
     },
-    Object {
+    {
       "releaseTimestamp": "2017-07-19T19:43:58.280Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
       "rubygemsVersion": ">= 1.8.11",
       "version": "5.0.5.rc1",
     },
-    Object {
+    {
       "releaseTimestamp": "2017-07-25T20:26:10.369Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
       "rubygemsVersion": ">= 1.8.11",
       "version": "5.0.5.rc2",
     },
-    Object {
+    {
       "releaseTimestamp": "2017-07-31T19:05:29.060Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
       "rubygemsVersion": ">= 1.8.11",
       "version": "5.0.5",
     },
-    Object {
+    {
       "releaseTimestamp": "2017-08-24T19:21:20.599Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
       "rubygemsVersion": ">= 1.8.11",
       "version": "5.0.6.rc1",
     },
-    Object {
+    {
       "releaseTimestamp": "2017-09-08T00:47:42.201Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
       "rubygemsVersion": ">= 1.8.11",
       "version": "5.0.6",
     },
-    Object {
+    {
       "releaseTimestamp": "2018-03-29T18:18:14.388Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
       "rubygemsVersion": ">= 1.8.11",
       "version": "5.0.7",
     },
-    Object {
+    {
       "releaseTimestamp": "2018-11-27T20:09:36.347Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
       "rubygemsVersion": ">= 1.8.11",
       "version": "5.0.7.1",
     },
-    Object {
+    {
       "releaseTimestamp": "2017-02-23T20:00:44.720Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
       "rubygemsVersion": ">= 1.8.11",
       "version": "5.1.0.beta1",
     },
-    Object {
+    {
       "releaseTimestamp": "2017-03-20T18:57:56.595Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
       "rubygemsVersion": ">= 1.8.11",
       "version": "5.1.0.rc1",
     },
-    Object {
+    {
       "releaseTimestamp": "2017-04-21T01:31:13.442Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
       "rubygemsVersion": ">= 1.8.11",
       "version": "5.1.0.rc2",
     },
-    Object {
+    {
       "releaseTimestamp": "2017-04-27T21:00:47.670Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
       "rubygemsVersion": ">= 1.8.11",
       "version": "5.1.0",
     },
-    Object {
+    {
       "releaseTimestamp": "2017-05-12T20:11:39.743Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
       "rubygemsVersion": ">= 1.8.11",
       "version": "5.1.1",
     },
-    Object {
+    {
       "releaseTimestamp": "2017-06-20T17:03:49.322Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
       "rubygemsVersion": ">= 1.8.11",
       "version": "5.1.2.rc1",
     },
-    Object {
+    {
       "releaseTimestamp": "2017-06-26T21:51:41.161Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
       "rubygemsVersion": ">= 1.8.11",
       "version": "5.1.2",
     },
-    Object {
+    {
       "releaseTimestamp": "2017-07-19T19:38:05.393Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
       "rubygemsVersion": ">= 1.8.11",
       "version": "5.1.3.rc1",
     },
-    Object {
+    {
       "releaseTimestamp": "2017-07-25T20:18:18.420Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
       "rubygemsVersion": ">= 1.8.11",
       "version": "5.1.3.rc2",
     },
-    Object {
+    {
       "releaseTimestamp": "2017-07-31T19:12:53.241Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
       "rubygemsVersion": ">= 1.8.11",
       "version": "5.1.3.rc3",
     },
-    Object {
+    {
       "releaseTimestamp": "2017-08-03T19:15:15.370Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
       "rubygemsVersion": ">= 1.8.11",
       "version": "5.1.3",
     },
-    Object {
+    {
       "releaseTimestamp": "2017-08-24T19:37:37.728Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
       "rubygemsVersion": ">= 1.8.11",
       "version": "5.1.4.rc1",
     },
-    Object {
+    {
       "releaseTimestamp": "2017-09-08T00:52:07.791Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
       "rubygemsVersion": ">= 1.8.11",
       "version": "5.1.4",
     },
-    Object {
+    {
       "releaseTimestamp": "2018-02-01T19:00:37.520Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
       "rubygemsVersion": ">= 1.8.11",
       "version": "5.1.5.rc1",
     },
-    Object {
+    {
       "releaseTimestamp": "2018-02-14T20:02:02.541Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
       "rubygemsVersion": ">= 1.8.11",
       "version": "5.1.5",
     },
-    Object {
+    {
       "releaseTimestamp": "2018-03-29T18:29:03.149Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
       "rubygemsVersion": ">= 1.8.11",
       "version": "5.1.6",
     },
-    Object {
+    {
       "releaseTimestamp": "2018-11-27T20:11:47.585Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
       "rubygemsVersion": ">= 1.8.11",
       "version": "5.1.6.1",
     },
-    Object {
+    {
       "releaseTimestamp": "2017-11-27T19:19:13.809Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
       "rubygemsVersion": ">= 1.8.11",
       "version": "5.2.0.beta1",
     },
-    Object {
+    {
       "releaseTimestamp": "2017-11-28T05:04:37.765Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
       "rubygemsVersion": ">= 1.8.11",
       "version": "5.2.0.beta2",
     },
-    Object {
+    {
       "releaseTimestamp": "2018-01-30T23:38:56.843Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
       "rubygemsVersion": ">= 1.8.11",
       "version": "5.2.0.rc1",
     },
-    Object {
+    {
       "releaseTimestamp": "2018-03-20T17:54:58.165Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
       "rubygemsVersion": ">= 1.8.11",
       "version": "5.2.0.rc2",
     },
-    Object {
+    {
       "releaseTimestamp": "2018-04-09T20:07:04.834Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
       "rubygemsVersion": ">= 1.8.11",
       "version": "5.2.0",
     },
-    Object {
+    {
       "releaseTimestamp": "2018-07-30T20:22:38.749Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
       "rubygemsVersion": ">= 1.8.11",
       "version": "5.2.1.rc1",
     },
-    Object {
+    {
       "releaseTimestamp": "2018-08-07T21:44:52.020Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
       "rubygemsVersion": ">= 1.8.11",
       "version": "5.2.1",
     },
-    Object {
+    {
       "releaseTimestamp": "2018-11-27T20:14:16.796Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
       "rubygemsVersion": ">= 1.8.11",
       "version": "5.2.1.1",
     },
-    Object {
+    {
       "releaseTimestamp": "2018-11-28T22:55:23.827Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
       "rubygemsVersion": ">= 1.8.11",
       "version": "5.2.2.rc1",
     },
-    Object {
+    {
       "releaseTimestamp": "2018-12-04T18:15:02.233Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",

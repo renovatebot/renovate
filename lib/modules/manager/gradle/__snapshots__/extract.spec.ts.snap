@@ -1,30 +1,30 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`modules/manager/gradle/extract extracts from cross-referenced files 1`] = `
-Array [
-  Object {
+[
+  {
     "datasource": "maven",
-    "deps": Array [
-      Object {
+    "deps": [
+      {
         "currentValue": "1.2.3",
         "depName": "foo:bar",
         "depType": "dependencies",
         "fileReplacePosition": 4,
         "groupName": "baz",
-        "managerData": Object {
+        "managerData": {
           "fileReplacePosition": 4,
           "packageFile": "gradle.properties",
         },
-        "registryUrls": Array [
+        "registryUrls": [
           "https://example.com",
         ],
       },
     ],
     "packageFile": "gradle.properties",
   },
-  Object {
+  {
     "datasource": "maven",
-    "deps": Array [],
+    "deps": [],
     "packageFile": "build.gradle",
   },
 ]

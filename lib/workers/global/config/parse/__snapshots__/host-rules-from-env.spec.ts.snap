@@ -1,8 +1,8 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`workers/global/config/parse/host-rules-from-env regression test for #10937 1`] = `
-Array [
-  Object {
+[
+  {
     "hostType": "git-tags",
     "matchHost": "gitlab.example-domain.net",
     "password": "some-password",
@@ -12,8 +12,8 @@ Array [
 `;
 
 exports[`workers/global/config/parse/host-rules-from-env supports datasource env token 1`] = `
-Array [
-  Object {
+[
+  {
     "hostType": "pypi",
     "token": "some-token",
   },
@@ -21,8 +21,8 @@ Array [
 `;
 
 exports[`workers/global/config/parse/host-rules-from-env supports docker username/password 1`] = `
-Array [
-  Object {
+[
+  {
     "hostType": "docker",
     "password": "some-password",
     "username": "some-username",
@@ -31,13 +31,13 @@ Array [
 `;
 
 exports[`workers/global/config/parse/host-rules-from-env supports domain and host names with case insensitivity 1`] = `
-Array [
-  Object {
+[
+  {
     "hostType": "github-tags",
     "matchHost": "github.com",
     "token": "some-token",
   },
-  Object {
+  {
     "hostType": "pypi",
     "matchHost": "my.custom.host",
     "password": "some-password",
@@ -46,8 +46,8 @@ Array [
 `;
 
 exports[`workers/global/config/parse/host-rules-from-env supports password-only 1`] = `
-Array [
-  Object {
+[
+  {
     "hostType": "npm",
     "password": "some-password",
   },
