@@ -1,255 +1,255 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`modules/manager/leiningen/extract extractPackageFile 1`] = `
-Object {
-  "deps": Array [
-    Object {
+{
+  "deps": [
+    {
       "currentValue": "1.3.0",
       "datasource": "clojure",
       "depName": "org.clojure:clojure",
       "depType": "dependencies",
-      "registryUrls": Array [
+      "registryUrls": [
         "https://download.java.net/maven/2",
         "https://oss.sonatype.org/content/repositories/releases",
         "https://blueant.com/archiva/snapshots",
         "https://blueant.com/archiva/internal",
       ],
     },
-    Object {
+    {
       "currentValue": "1.0",
       "datasource": "clojure",
       "depName": "org.jclouds:jclouds",
       "depType": "dependencies",
-      "registryUrls": Array [
+      "registryUrls": [
         "https://download.java.net/maven/2",
         "https://oss.sonatype.org/content/repositories/releases",
         "https://blueant.com/archiva/snapshots",
         "https://blueant.com/archiva/internal",
       ],
     },
-    Object {
+    {
       "currentValue": "2.3.1",
       "datasource": "clojure",
       "depName": "net.sf.ehcache:ehcache",
       "depType": "dependencies",
-      "registryUrls": Array [
+      "registryUrls": [
         "https://download.java.net/maven/2",
         "https://oss.sonatype.org/content/repositories/releases",
         "https://blueant.com/archiva/snapshots",
         "https://blueant.com/archiva/internal",
       ],
     },
-    Object {
+    {
       "currentValue": "1.2.15",
       "datasource": "clojure",
       "depName": "log4j:log4j",
       "depType": "dependencies",
-      "registryUrls": Array [
+      "registryUrls": [
         "https://download.java.net/maven/2",
         "https://oss.sonatype.org/content/repositories/releases",
         "https://blueant.com/archiva/snapshots",
         "https://blueant.com/archiva/internal",
       ],
     },
-    Object {
+    {
       "currentValue": "3.0.2",
       "datasource": "clojure",
       "depName": "net.3scale:3scale-api",
       "depType": "dependencies",
-      "registryUrls": Array [
+      "registryUrls": [
         "https://download.java.net/maven/2",
         "https://oss.sonatype.org/content/repositories/releases",
         "https://blueant.com/archiva/snapshots",
         "https://blueant.com/archiva/internal",
       ],
     },
-    Object {
+    {
       "currentValue": "2.8.5",
       "datasource": "clojure",
       "depName": "org.lwjgl.lwjgl:lwjgl",
       "depType": "dependencies",
-      "registryUrls": Array [
+      "registryUrls": [
         "https://download.java.net/maven/2",
         "https://oss.sonatype.org/content/repositories/releases",
         "https://blueant.com/archiva/snapshots",
         "https://blueant.com/archiva/internal",
       ],
     },
-    Object {
+    {
       "currentValue": "2.8.5",
       "datasource": "clojure",
       "depName": "org.lwjgl.lwjgl:lwjgl-platform",
       "depType": "dependencies",
-      "registryUrls": Array [
+      "registryUrls": [
         "https://download.java.net/maven/2",
         "https://oss.sonatype.org/content/repositories/releases",
         "https://blueant.com/archiva/snapshots",
         "https://blueant.com/archiva/internal",
       ],
     },
-    Object {
+    {
       "currentValue": "1.4.0",
       "datasource": "clojure",
       "depName": "org.clojure:clojure",
       "depType": "dependencies",
-      "registryUrls": Array [
+      "registryUrls": [
         "https://download.java.net/maven/2",
         "https://oss.sonatype.org/content/repositories/releases",
         "https://blueant.com/archiva/snapshots",
         "https://blueant.com/archiva/internal",
       ],
     },
-    Object {
+    {
       "currentValue": "1.5.0",
       "datasource": "clojure",
       "depName": "org.clojure:clojure",
       "depType": "dependencies",
-      "registryUrls": Array [
+      "registryUrls": [
         "https://download.java.net/maven/2",
         "https://oss.sonatype.org/content/repositories/releases",
         "https://blueant.com/archiva/snapshots",
         "https://blueant.com/archiva/internal",
       ],
     },
-    Object {
+    {
       "currentValue": "0.2.4",
       "datasource": "clojure",
       "depName": "clj-stacktrace:clj-stacktrace",
       "depType": "dependencies",
       "groupName": "clj-stacktrace-version",
-      "registryUrls": Array [
+      "registryUrls": [
         "https://download.java.net/maven/2",
         "https://oss.sonatype.org/content/repositories/releases",
         "https://blueant.com/archiva/snapshots",
         "https://blueant.com/archiva/internal",
       ],
     },
-    Object {
+    {
       "currentValue": "0.12.0",
       "datasource": "clojure",
       "depName": "clj-time:clj-time",
       "depType": "managed-dependencies",
-      "registryUrls": Array [
+      "registryUrls": [
         "https://download.java.net/maven/2",
         "https://oss.sonatype.org/content/repositories/releases",
         "https://blueant.com/archiva/snapshots",
         "https://blueant.com/archiva/internal",
       ],
     },
-    Object {
+    {
       "currentValue": "1.4.6",
       "datasource": "clojure",
       "depName": "me.raynes:fs",
       "depType": "managed-dependencies",
-      "registryUrls": Array [
+      "registryUrls": [
         "https://download.java.net/maven/2",
         "https://oss.sonatype.org/content/repositories/releases",
         "https://blueant.com/archiva/snapshots",
         "https://blueant.com/archiva/internal",
       ],
     },
-    Object {
+    {
       "currentValue": "1.1.1",
       "datasource": "clojure",
       "depName": "lein-pprint:lein-pprint",
       "depType": "plugins",
-      "registryUrls": Array [
+      "registryUrls": [
         "https://download.java.net/maven/2",
         "https://oss.sonatype.org/content/repositories/releases",
         "https://blueant.com/archiva/snapshots",
         "https://blueant.com/archiva/internal",
       ],
     },
-    Object {
+    {
       "currentValue": "0.1.0",
       "datasource": "clojure",
       "depName": "lein-assoc:lein-assoc",
       "depType": "plugins",
-      "registryUrls": Array [
+      "registryUrls": [
         "https://download.java.net/maven/2",
         "https://oss.sonatype.org/content/repositories/releases",
         "https://blueant.com/archiva/snapshots",
         "https://blueant.com/archiva/internal",
       ],
     },
-    Object {
+    {
       "currentValue": "1.1.1",
       "datasource": "clojure",
       "depName": "s3-wagon-private:s3-wagon-private",
       "depType": "plugins",
-      "registryUrls": Array [
+      "registryUrls": [
         "https://download.java.net/maven/2",
         "https://oss.sonatype.org/content/repositories/releases",
         "https://blueant.com/archiva/snapshots",
         "https://blueant.com/archiva/internal",
       ],
     },
-    Object {
+    {
       "currentValue": "0.0.1",
       "datasource": "clojure",
       "depName": "lein-foo:lein-foo",
       "depType": "plugins",
-      "registryUrls": Array [
+      "registryUrls": [
         "https://download.java.net/maven/2",
         "https://oss.sonatype.org/content/repositories/releases",
         "https://blueant.com/archiva/snapshots",
         "https://blueant.com/archiva/internal",
       ],
     },
-    Object {
+    {
       "currentValue": "0.0.1",
       "datasource": "clojure",
       "depName": "lein-bar:lein-bar",
       "depType": "plugins",
-      "registryUrls": Array [
+      "registryUrls": [
         "https://download.java.net/maven/2",
         "https://oss.sonatype.org/content/repositories/releases",
         "https://blueant.com/archiva/snapshots",
         "https://blueant.com/archiva/internal",
       ],
     },
-    Object {
+    {
       "currentValue": "0.7.1",
       "datasource": "clojure",
       "depName": "cider:cider-nrepl",
       "depType": "plugins",
-      "registryUrls": Array [
+      "registryUrls": [
         "https://download.java.net/maven/2",
         "https://oss.sonatype.org/content/repositories/releases",
         "https://blueant.com/archiva/snapshots",
         "https://blueant.com/archiva/internal",
       ],
     },
-    Object {
+    {
       "currentValue": "1.3.13",
       "datasource": "clojure",
       "depName": "com.theoryinpractise:clojure-maven-plugin",
       "depType": "pom-plugins",
-      "registryUrls": Array [
+      "registryUrls": [
         "https://download.java.net/maven/2",
         "https://oss.sonatype.org/content/repositories/releases",
         "https://blueant.com/archiva/snapshots",
         "https://blueant.com/archiva/internal",
       ],
     },
-    Object {
+    {
       "currentValue": "2.1",
       "datasource": "clojure",
       "depName": "org.apache.tomcat.maven:tomcat7-maven-plugin",
       "depType": "pom-plugins",
-      "registryUrls": Array [
+      "registryUrls": [
         "https://download.java.net/maven/2",
         "https://oss.sonatype.org/content/repositories/releases",
         "https://blueant.com/archiva/snapshots",
         "https://blueant.com/archiva/internal",
       ],
     },
-    Object {
+    {
       "currentValue": "1.9.68",
       "datasource": "clojure",
       "depName": "com.google.appengine:appengine-maven-plugin",
       "depType": "pom-plugins",
-      "registryUrls": Array [
+      "registryUrls": [
         "https://download.java.net/maven/2",
         "https://oss.sonatype.org/content/repositories/releases",
         "https://blueant.com/archiva/snapshots",

@@ -12,7 +12,7 @@ import { regEx } from '../../../util/regex';
 import type { NewValueConfig, VersioningApi } from '../types';
 import { isSingleOperator, isValidOperator } from './operator';
 import { ltr, parse as parseRange } from './range';
-import { bump, pin, replace } from './strategies';
+import { bump, pin, replace, widen } from './strategies';
 import { parse as parseVersion } from './version';
 
 export const id = 'ruby';
@@ -127,9 +127,14 @@ const getNewValue = ({
         newValue = bump({ range: vtrim(currentValue), to: vtrim(newVersion) });
         break;
       case 'auto':
-      case 'widen':
       case 'replace':
         newValue = replace({
+          range: vtrim(currentValue),
+          to: vtrim(newVersion),
+        });
+        break;
+      case 'widen':
+        newValue = widen({
           range: vtrim(currentValue),
           to: vtrim(newVersion),
         });
