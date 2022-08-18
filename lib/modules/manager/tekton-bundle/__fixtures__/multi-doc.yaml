@@ -1,0 +1,37 @@
+---
+bundle: gcr.io/tekton-releases/catalog/upstream/plain
+---
+bundle: gcr.io/tekton-releases/catalog/upstream/tag:1.0
+---
+bundle: gcr.io/tekton-releases/catalog/upstream/digest@sha256:01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+---
+bundle: gcr.io/tekton-releases/catalog/upstream/full:1.0@sha256:01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+---
+items:
+- bundle: gcr.io/tekton-releases/catalog/upstream/in-array
+---
+spec:
+  bundle: gcr.io/tekton-releases/catalog/upstream/in-object
+---
+root:
+  items:
+  - spec:
+      bundles:
+      - bundle: >-
+          gcr.io/tekton-releases/catalog/upstream/super-nested
+---
+- bundle: gcr.io/tekton-releases/catalog/upstream/top-array
+---
+bundle: true
+---
+bundle: []
+---
+bundle: {}
+---
+bundle: 99
+---
+# bundle: gcr.io/tekton-releases/catalog/upstream/ignored
+---
+blunder: gcr.io/tekton-releases/catalog/upstream/also-ignored
+---
+bundle: ""
