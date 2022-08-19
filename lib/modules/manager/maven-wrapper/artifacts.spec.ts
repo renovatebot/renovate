@@ -47,7 +47,7 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
     expect(updatedDeps).toBeNull();
   });
 
-  it('Should return java 7.0 when current maven version is 3.0.0', async () => {
+  it('Should return java 8.0 when current maven version is lower then 3.0.0', async () => {
     git.getRepoStatus.mockResolvedValueOnce(
       partial<StatusResult>({
         modified: ['maven.mvn/wrapper/maven-wrapper.properties'],
@@ -59,7 +59,7 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
       packageFileName: 'maven',
       newPackageFileContent: '',
       updatedDeps: [{ depName: 'org.apache.maven.wrapper:maven-wrapper' }],
-      config: { currentValue: '3.0.0', newValue: '3.3.1' },
+      config: { currentValue: '2.0.0', newValue: '3.3.1' },
     });
 
     const expected = [
