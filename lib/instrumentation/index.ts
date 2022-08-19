@@ -128,16 +128,15 @@ export async function instrument<F extends () => Promise<unknown>>(
     context,
     async (span) => {
       try {
-        const result = await fn();
-        span.end();
-        return result;
+        return await fn();
       } catch (e) {
         span.setStatus({
           code: SpanStatusCode.ERROR,
           message: e,
         });
-        span.end();
         throw e;
+      } finally {
+        span.end();
       }
     }
   );
