@@ -205,6 +205,7 @@ describe('modules/platform/gitlab/index', () => {
         {
           "defaultBranch": "master",
           "isFork": false,
+          "repoCacheId": "undefined",
         }
       `);
     });
@@ -309,6 +310,7 @@ describe('modules/platform/gitlab/index', () => {
         {
           "defaultBranch": "master",
           "isFork": false,
+          "repoCacheId": "undefined",
         }
       `);
     });

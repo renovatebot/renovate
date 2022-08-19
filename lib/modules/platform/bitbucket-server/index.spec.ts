@@ -309,7 +309,12 @@ describe('modules/platform/bitbucket-server/index', () => {
               endpoint: 'https://stash.renovatebot.com/vcs/',
               repository: 'SOME/repo',
             })
-          ).toEqual({ defaultBranch: 'master', isFork: false });
+          ).toEqual({
+            defaultBranch: 'master',
+            isFork: false,
+            repoCacheId: '13076',
+            repoCacheId: '13076',
+          });
         });
 
         it('gitUrl ssh returns ssh url', async () => {
@@ -335,7 +340,11 @@ describe('modules/platform/bitbucket-server/index', () => {
           expect(git.initRepo).toHaveBeenCalledWith(
             expect.objectContaining({ url: sshLink('SOME', 'repo') })
           );
-          expect(res).toEqual({ defaultBranch: 'master', isFork: false });
+          expect(res).toEqual({
+            defaultBranch: 'master',
+            isFork: false,
+            repoCacheId: '13076',
+          });
         });
 
         it('gitURL endpoint returns generates endpoint URL', async () => {
@@ -365,7 +374,11 @@ describe('modules/platform/bitbucket-server/index', () => {
               url: link,
             })
           );
-          expect(res).toEqual({ defaultBranch: 'master', isFork: false });
+          expect(res).toEqual({
+            defaultBranch: 'master',
+            isFork: false,
+            repoCacheId: '13076',
+          });
         });
 
         it('gitUrl default returns http from API with injected auth', async () => {
@@ -396,7 +409,11 @@ describe('modules/platform/bitbucket-server/index', () => {
               ),
             })
           );
-          expect(res).toEqual({ defaultBranch: 'master', isFork: false });
+          expect(res).toEqual({
+            defaultBranch: 'master',
+            isFork: false,
+            repoCacheId: '13076',
+          });
         });
 
         it('uses ssh url from API if http not in API response', async () => {

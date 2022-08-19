@@ -170,6 +170,7 @@ exports[`modules/platform/bitbucket-server/index endpoint with no path initRepo(
 {
   "defaultBranch": "master",
   "isFork": false,
+  "repoCacheId": "13076",
 }
 `;
 
@@ -177,6 +178,7 @@ exports[`modules/platform/bitbucket-server/index endpoint with no path initRepo(
 {
   "defaultBranch": "master",
   "isFork": false,
+  "repoCacheId": "13076",
 }
 `;
 
@@ -184,6 +186,7 @@ exports[`modules/platform/bitbucket-server/index endpoint with no path initRepo(
 {
   "defaultBranch": "master",
   "isFork": false,
+  "repoCacheId": "13076",
 }
 `;
 
@@ -191,6 +194,7 @@ exports[`modules/platform/bitbucket-server/index endpoint with no path initRepo(
 {
   "defaultBranch": "master",
   "isFork": false,
+  "repoCacheId": "13076",
 }
 `;
 
@@ -382,6 +386,7 @@ exports[`modules/platform/bitbucket-server/index endpoint with path initRepo() g
 {
   "defaultBranch": "master",
   "isFork": false,
+  "repoCacheId": "13076",
 }
 `;
 
@@ -389,6 +394,7 @@ exports[`modules/platform/bitbucket-server/index endpoint with path initRepo() u
 {
   "defaultBranch": "master",
   "isFork": false,
+  "repoCacheId": "13076",
 }
 `;
 
@@ -396,6 +402,7 @@ exports[`modules/platform/bitbucket-server/index endpoint with path initRepo() u
 {
   "defaultBranch": "master",
   "isFork": false,
+  "repoCacheId": "13076",
 }
 `;
 
@@ -403,6 +410,7 @@ exports[`modules/platform/bitbucket-server/index endpoint with path initRepo() w
 {
   "defaultBranch": "master",
   "isFork": false,
+  "repoCacheId": "13076",
 }
 `;
 

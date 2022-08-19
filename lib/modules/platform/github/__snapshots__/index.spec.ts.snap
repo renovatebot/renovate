@@ -157,6 +157,7 @@ exports[`modules/platform/github/index initRepo detects fork default branch mism
 {
   "defaultBranch": "master",
   "isFork": false,
+  "repoCacheId": undefined,
 }
 `;
 
@@ -164,6 +165,7 @@ exports[`modules/platform/github/index initRepo should fork when forkMode 1`] = 
 {
   "defaultBranch": "master",
   "isFork": false,
+  "repoCacheId": undefined,
 }
 `;
 
@@ -171,6 +173,7 @@ exports[`modules/platform/github/index initRepo should merge 1`] = `
 {
   "defaultBranch": "master",
   "isFork": false,
+  "repoCacheId": undefined,
 }
 `;
 
@@ -178,6 +181,7 @@ exports[`modules/platform/github/index initRepo should not guess at merge 1`] = 
 {
   "defaultBranch": "master",
   "isFork": false,
+  "repoCacheId": undefined,
 }
 `;
 
@@ -185,6 +189,7 @@ exports[`modules/platform/github/index initRepo should rebase 1`] = `
 {
   "defaultBranch": "master",
   "isFork": false,
+  "repoCacheId": undefined,
 }
 `;
 
@@ -192,6 +197,7 @@ exports[`modules/platform/github/index initRepo should squash 1`] = `
 {
   "defaultBranch": "master",
   "isFork": false,
+  "repoCacheId": undefined,
 }
 `;
 
@@ -199,6 +205,7 @@ exports[`modules/platform/github/index initRepo should update fork when forkMode
 {
   "defaultBranch": "master",
   "isFork": false,
+  "repoCacheId": undefined,
 }
 `;
 
