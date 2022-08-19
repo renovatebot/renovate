@@ -79,6 +79,16 @@ describe('modules/manager/npm/post-update/index', () => {
           rangeStrategy: 'widen',
         },
         {
+          depName: 'core-js',
+          isRemediation: true,
+          managerData: {
+            lernaJsonFile: 'lerna.json',
+          },
+          npmLock: 'randomFolder/package-lock.json',
+          lockFiles: ['randomFolder/package-lock.json'],
+          rangeStrategy: 'pin',
+        },
+        {
           isLockfileUpdate: true,
           npmLock: 'package-lock.json',
         },
@@ -207,6 +217,19 @@ describe('modules/manager/npm/post-update/index', () => {
         ['yarn.lock'],
         ['packages/pnpm/pnpm-lock.yaml'],
       ]);
+    });
+
+    it('works only on relevant folders', async () => {
+      git.getFile.mockResolvedValueOnce(
+        Fixtures.get('update-lockfile-massage-1/package-lock.json')
+      );
+      await expect(
+        writeExistingFiles(updateConfig, additionalFiles)
+      ).resolves.toBeUndefined();
+
+      expect(fs.writeLocalFile).toHaveBeenCalledTimes(2);
+      expect(fs.deleteLocalFile).not.toHaveBeenCalled();
+      expect(git.getFile).toHaveBeenCalledOnce();
     });
 
     it('has no npm files', async () => {
