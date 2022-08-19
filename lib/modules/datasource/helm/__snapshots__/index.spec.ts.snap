@@ -1,114 +1,114 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`modules/datasource/helm/index getReleases returns list of versions for normal response 1`] = `
-Object {
+{
   "homepage": "https://www.getambassador.io/",
   "registryUrl": "https://example-repository.com",
-  "releases": Array [
-    Object {
+  "releases": [
+    {
       "version": "1.0.0",
     },
-    Object {
+    {
       "releaseTimestamp": "2019-02-14T15:25:43.743Z",
       "version": "1.1.0",
     },
-    Object {
+    {
       "releaseTimestamp": "2019-02-14T16:55:51.519Z",
       "version": "1.1.1",
     },
-    Object {
+    {
       "releaseTimestamp": "2019-02-15T23:56:28.304Z",
       "version": "1.1.2",
     },
-    Object {
+    {
       "releaseTimestamp": "2019-02-22T16:28:27.398Z",
       "version": "1.1.3",
     },
-    Object {
+    {
       "releaseTimestamp": "2019-02-24T04:55:38.454Z",
       "version": "1.1.4",
     },
-    Object {
+    {
       "releaseTimestamp": "2019-03-21T15:25:53.910Z",
       "version": "1.1.5",
     },
-    Object {
+    {
       "releaseTimestamp": "2019-03-22T14:26:18.094Z",
       "version": "2.0.0",
     },
-    Object {
+    {
       "releaseTimestamp": "2019-04-06T13:26:04.916Z",
       "version": "2.0.1",
     },
-    Object {
+    {
       "releaseTimestamp": "2019-04-08T13:26:12.863Z",
       "version": "2.0.2",
     },
-    Object {
+    {
       "releaseTimestamp": "2019-04-23T14:57:59.089Z",
       "version": "2.1.0",
     },
-    Object {
+    {
       "releaseTimestamp": "2019-04-23T19:56:09.380Z",
       "version": "2.2.0",
     },
-    Object {
+    {
       "releaseTimestamp": "2019-04-27T01:56:41.147Z",
       "version": "2.2.1",
     },
-    Object {
+    {
       "releaseTimestamp": "2019-04-29T20:56:20.987Z",
       "version": "2.2.2",
     },
-    Object {
+    {
       "releaseTimestamp": "2019-05-01T14:27:55.475Z",
       "version": "2.2.3",
     },
-    Object {
+    {
       "releaseTimestamp": "2019-05-01T19:56:23.829Z",
       "version": "2.2.4",
     },
-    Object {
+    {
       "releaseTimestamp": "2019-05-06T20:56:39.732Z",
       "version": "2.2.5",
     },
-    Object {
+    {
       "releaseTimestamp": "2019-05-06T21:28:21.342Z",
       "version": "2.3.0",
     },
-    Object {
+    {
       "releaseTimestamp": "2019-05-08T19:26:25.925Z",
       "version": "2.3.1",
     },
-    Object {
+    {
       "releaseTimestamp": "2019-05-09T17:29:35.612Z",
       "version": "2.4.0",
     },
-    Object {
+    {
       "releaseTimestamp": "2019-05-15T07:56:25.942Z",
       "version": "2.4.1",
     },
-    Object {
+    {
       "releaseTimestamp": "2019-05-16T21:56:48.001Z",
       "version": "2.5.0",
     },
-    Object {
+    {
       "releaseTimestamp": "2019-05-20T23:56:32.309Z",
       "version": "2.5.1",
     },
-    Object {
+    {
       "releaseTimestamp": "2019-05-24T10:56:37.781Z",
       "version": "2.6.0",
     },
-    Object {
+    {
       "releaseTimestamp": "2019-05-27T23:28:25.443Z",
       "version": "2.6.1",
     },
-    Object {
+    {
       "releaseTimestamp": "2019-05-31T18:57:01.540Z",
       "version": "2.6.2",
     },
-    Object {
+    {
       "releaseTimestamp": "2019-06-02T08:56:36.119Z",
       "version": "2.7.0",
     },

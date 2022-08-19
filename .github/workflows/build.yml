@@ -85,7 +85,7 @@ jobs:
         run: yarn build
 
       - name: Unit tests
-        run: yarn jest:${{ env.NODE_VERSION }} --maxWorkers=2 --ci --coverage ${{ env.coverage }}
+        run: yarn jest --ci --coverage ${{ env.coverage }}
 
       - name: Codecov
         uses: codecov/codecov-action@81cd2dc8148241f03f5839d295e000b8f761e378 # tag=v3.1.0

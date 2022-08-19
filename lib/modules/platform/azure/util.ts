@@ -181,11 +181,13 @@ export function getRepoByName(
   project = project.toLowerCase();
   repo = repo.toLowerCase();
 
-  return (
-    repos?.find(
-      (r) =>
-        project === r?.project?.name?.toLowerCase() &&
-        repo === r?.name?.toLowerCase()
-    ) ?? null
+  const foundRepo = repos?.find(
+    (r) =>
+      project === r?.project?.name?.toLowerCase() &&
+      repo === r?.name?.toLowerCase()
   );
+  if (!foundRepo) {
+    logger.debug(`Repo not found: ${name}`);
+  }
+  return foundRepo ?? null;
 }

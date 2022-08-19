@@ -36,6 +36,14 @@ describe('workers/repository/changelog/index', () => {
           commitBody: '{{#if logJSON.hasReleaseNotes}}has changelog{{/if}}',
         })
       )
+    ).toBeFalse();
+    expect(
+      needsChangelogs(
+        partial<BranchUpgradeConfig>({
+          commitBody: '{{#if logJSON.hasReleaseNotes}}has changelog{{/if}}',
+        }),
+        ['commitBody']
+      )
     ).toBeTrue();
   });
 });

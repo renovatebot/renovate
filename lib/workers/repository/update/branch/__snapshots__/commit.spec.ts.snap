@@ -1,12 +1,12 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`workers/repository/update/branch/commit commitFilesToBranch commits files 1`] = `
-Array [
-  Array [
-    Object {
+[
+  [
+    {
       "branchName": "renovate/some-branch",
-      "files": Array [
-        Object {
+      "files": [
+        {
           "contents": "some contents",
           "path": "package.json",
           "type": "addition",
@@ -21,12 +21,12 @@ Array [
 `;
 
 exports[`workers/repository/update/branch/commit commitFilesToBranch commits via platform 1`] = `
-Array [
-  Array [
-    Object {
+[
+  [
+    {
       "branchName": "renovate/some-branch",
-      "files": Array [
-        Object {
+      "files": [
+        {
           "contents": "some contents",
           "path": "package.json",
           "type": "addition",

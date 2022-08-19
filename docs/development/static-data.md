@@ -5,5 +5,5 @@ This is either because the data changes infrequently or would be infeasible to p
 
 ## Updating static data
 
-Static data is updated weekly with a [GitHub Actions workflow](https://github.com/renovate/renovate/actions/workflows/update-data.yml).
+Static data is updated weekly with a [GitHub Actions workflow](https://github.com/renovatebot/renovate/actions/workflows/update-data.yml).
 You can also update it manually by running `yarn run update-static-data`.
