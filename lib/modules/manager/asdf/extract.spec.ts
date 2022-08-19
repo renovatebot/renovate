@@ -10,6 +10,7 @@ describe('modules/manager/asdf/extract', () => {
           datasource: 'github-tags',
           depName: 'node',
           packageName: 'nodejs/node',
+          versioning: 'node',
         },
       ]);
     });
@@ -27,6 +28,7 @@ describe('modules/manager/asdf/extract', () => {
           datasource: 'github-tags',
           depName: 'node',
           packageName: 'nodejs/node',
+          versioning: 'node',
         },
       ]);
     });
@@ -55,11 +57,12 @@ describe('modules/manager/asdf/extract', () => {
             datasource: 'github-tags',
             depName: 'node',
             packageName: 'nodejs/node',
+            versioning: 'node',
           },
         ]);
       });
 
-      it('ignores lines that are just comments at the end of lines', () => {
+      it('ignores lines that are just comments', () => {
         const res = extractPackageFile('# this is a full line comment\n');
         expect(res.deps).toEqual([]);
       });
@@ -74,6 +77,7 @@ describe('modules/manager/asdf/extract', () => {
             datasource: 'github-tags',
             depName: 'node',
             packageName: 'nodejs/node',
+            versioning: 'node',
           },
         ]);
       });
