@@ -147,7 +147,7 @@
     "@renovatebot/ruby-semver": "1.1.4",
     "@sindresorhus/is": "4.6.0",
     "@types/tmp": "0.2.3",
-    "@yarnpkg/core": "3.1.0",
+    "@yarnpkg/core": "3.2.3",
     "@yarnpkg/parsers": "2.5.1",
     "auth-header": "1.0.0",
     "azure-devops-node-api": "11.2.0",
@@ -247,6 +247,7 @@
     "@types/js-yaml": "4.0.5",
     "@types/json-dup-key-validator": "1.0.0",
     "@types/linkify-markdown": "1.0.1",
+    "@types/lodash": "4.14.184",
     "@types/luxon": "3.0.0",
     "@types/markdown-it": "12.2.3",
     "@types/markdown-table": "2.0.0",
@@ -308,7 +309,8 @@
     "unified": "9.2.2"
   },
   "resolutions": {
-    "**/json-schema": "^0.4.0"
+    "**/json-schema": "^0.4.0",
+    "@yarnpkg/core/clipanion": "3.2.0-rc.4"
   },
   "files": [
     "dist",
