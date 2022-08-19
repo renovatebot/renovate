@@ -121,6 +121,38 @@ describe('modules/manager/pip_requirements/artifacts', () => {
     ]);
   });
 
+  it('ignores falsy depNames', async () => {
+    fs.readLocalFile.mockResolvedValueOnce('new content');
+    const execSnapshots = mockExecAll();
+    expect(
+      await updateArtifacts({
+        packageFileName: 'requirements.txt',
+        updatedDeps: [
+          { depName: '' },
+          { depName: 'atomicwrites' },
+          { depName: undefined },
+        ],
+        newPackageFileContent,
+        config,
+      })
+    ).toEqual([
+      {
+        file: {
+          type: 'addition',
+          path: 'requirements.txt',
+          contents: 'new content',
+        },
+      },
+    ]);
+
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'hashin atomicwrites==1.4.0 -r requirements.txt',
+        options: { cwd: '/tmp/github/some/repo' },
+      },
+    ]);
+  });
+
   it('catches and returns errors', async () => {
     const execSnapshots = mockExecAll();
     fs.readLocalFile.mockImplementation(() => {
