@@ -4,13 +4,21 @@ import { join } from 'upath';
 import { envMock, mockExecAll } from '../../../../test/exec-util';
 import { Fixtures } from '../../../../test/fixtures';
 import * as httpMock from '../../../../test/http-mock';
-import { env, fs, git, mockedFunction, partial } from '../../../../test/util';
+import {
+  env,
+  fs,
+  git,
+  logger,
+  mockedFunction,
+  partial,
+} from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import { resetPrefetchedImages } from '../../../util/exec/docker';
 import type { StatusResult } from '../../../util/git/types';
 import { getPkgReleases } from '../../datasource';
 import type { UpdateArtifactsConfig } from '../types';
+import { updateBuildFile } from './artifacts';
 import { updateArtifacts } from '.';
 
 jest.mock('../../../util/fs');
@@ -324,6 +332,70 @@ describe('modules/manager/gradle-wrapper/artifacts', () => {
           },
         },
       ]);
+    });
+  });
+
+  describe('updateBuildFile()', () => {
+    it('updates wrapper configuration in gradle build file', async () => {
+      fs.readLocalFile.mockResolvedValueOnce(
+        Fixtures.get('testFiles/build.gradle.kts')
+      );
+
+      fs.writeLocalFile.mockImplementationOnce(
+        (fileName: string, fileContent: string | Buffer): Promise<void> => {
+          expect(fileContent).toBe(
+            Fixtures.get('expectedFiles/build.gradle.kts')
+          );
+          return Promise.resolve();
+        }
+      );
+
+      const res = await updateBuildFile('', {
+        gradleVersion: '6.3',
+        distributionSha256Sum:
+          '038794feef1f4745c6347107b6726279d1c824f3fc634b60f86ace1e9fbd1768',
+        distributionUrl:
+          'https://services.gradle.org/distributions/gradle-6.3-bin.zip',
+      });
+      expect(res).toBe('build.gradle.kts');
+    });
+
+    it('gradle build file update skips missing distributionSha256Sum property', async () => {
+      fs.localPathExists.mockResolvedValueOnce(true);
+      fs.readLocalFile.mockResolvedValueOnce(
+        Fixtures.get('testFiles/build.gradle')
+      );
+
+      fs.writeLocalFile.mockImplementationOnce(
+        (fileName: string, fileContent: string | Buffer): Promise<void> => {
+          expect(fileContent).toBe(Fixtures.get('expectedFiles/build.gradle'));
+          return Promise.resolve();
+        }
+      );
+
+      const res = await updateBuildFile('', {
+        gradleVersion: '6.3',
+        distributionSha256Sum: null,
+        distributionUrl:
+          'https://services.gradle.org/distributions/gradle-6.3-bin.zip',
+      });
+      expect(res).toBe('build.gradle');
+    });
+
+    it('gradle build file update returns early if file not found', async () => {
+      fs.readLocalFile.mockResolvedValueOnce(null);
+
+      const res = await updateBuildFile('', {
+        gradleVersion: '6.3',
+        distributionSha256Sum:
+          '038794feef1f4745c6347107b6726279d1c824f3fc634b60f86ace1e9fbd1768',
+        distributionUrl:
+          'https://services.gradle.org/distributions/gradle-6.3-bin.zip',
+      });
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        'build.gradle or build.gradle.kts not found'
+      );
+      expect(res).toBe('build.gradle.kts');
     });
   });
 });
