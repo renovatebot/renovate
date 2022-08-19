@@ -71,10 +71,10 @@ export function init(): void {
         ) => {
           // ignore 404 errors when the branch protection of Github could not be found. This is expected if no rules are configured
           if (
-            !(request instanceof ClientRequest) ||
-            (request.host === `api.github.com` &&
-              request.path.endsWith(`/protection`) &&
-              response.statusCode === 404)
+            request instanceof ClientRequest &&
+            request.host === `api.github.com` &&
+            request.path.endsWith(`/protection`) &&
+            response.statusCode === 404
           ) {
             span.setStatus({ code: SpanStatusCode.OK });
           }
@@ -119,16 +119,13 @@ export async function instrument<F extends () => Promise<unknown>>(
 export async function instrument<F extends () => Promise<unknown>>(
   name: string,
   fn: F,
-  options?: SpanOptions,
-  context?: Context
+  options: SpanOptions = {},
+  context: Context = api.context.active()
 ): Promise<ReturnType<F>> {
-  const massagedOptions = options ?? {};
-  const massagedContext = context ?? api.context.active();
-
   return await getTracer().startActiveSpan(
     name,
-    massagedOptions,
-    massagedContext,
+    options,
+    context,
     async (span) => {
       try {
         const result = await fn();
