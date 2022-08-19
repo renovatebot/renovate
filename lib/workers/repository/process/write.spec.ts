@@ -1,5 +1,12 @@
-import { RenovateConfig, getConfig, git, mocked } from '../../../../test/util';
+import {
+  RenovateConfig,
+  getConfig,
+  git,
+  mocked,
+  partial,
+} from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
+import { addMeta } from '../../../logger';
 import { Limit, isLimitReached } from '../../global/limits';
 import { BranchConfig, BranchResult } from '../../types';
 import * as _branchWorker from '../update/branch';
@@ -57,7 +64,11 @@ describe('workers/repository/process/write', () => {
     });
 
     it('increments branch counter', async () => {
-      const branches: BranchConfig[] = [{}] as never;
+      const branchName = 'branchName';
+      const branches: BranchConfig[] = [
+        partial<BranchConfig>({ baseBranch: 'main', branchName }),
+        partial<BranchConfig>({ baseBranch: 'dev', branchName }),
+      ] as never;
       branchWorker.processBranch.mockResolvedValueOnce({
         branchExists: true,
         result: BranchResult.PrCreated,
@@ -67,8 +78,17 @@ describe('workers/repository/process/write', () => {
       limits.getBranchesRemaining.mockResolvedValueOnce(1);
       expect(isLimitReached(Limit.Branches)).toBeFalse();
       GlobalConfig.set({ dryRun: 'full' });
-      await writeUpdates({ config }, branches);
+      config.baseBranches = ['main', 'dev'];
+      await writeUpdates(config, branches);
       expect(isLimitReached(Limit.Branches)).toBeTrue();
+      expect(addMeta).toHaveBeenCalledWith({
+        baseBranch: 'main',
+        branch: branchName,
+      });
+      expect(addMeta).toHaveBeenCalledWith({
+        baseBranch: 'dev',
+        branch: branchName,
+      });
     });
   });
 });

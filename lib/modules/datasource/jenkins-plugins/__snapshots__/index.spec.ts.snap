@@ -1,386 +1,386 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`modules/datasource/jenkins-plugins/index getReleases returns package releases for a hit for info and miss for releases 1`] = `
-Object {
-  "releases": Array [],
+{
+  "releases": [],
   "sourceUrl": "https://github.com/jenkinsci/email-ext-plugin",
 }
 `;
 
 exports[`modules/datasource/jenkins-plugins/index getReleases returns package releases for a hit for info and releases 1`] = `
-Object {
+{
   "registryUrl": "https://updates.jenkins.io",
-  "releases": Array [
-    Object {
+  "releases": [
+    {
       "downloadUrl": "http://updates.jenkins-ci.org/download/plugins/email-ext/2.10/email-ext.hpi",
       "version": "2.10",
     },
-    Object {
+    {
       "downloadUrl": "http://updates.jenkins-ci.org/download/plugins/email-ext/2.11/email-ext.hpi",
       "releaseTimestamp": "2011-02-20T00:00:00.000Z",
       "version": "2.11",
     },
-    Object {
+    {
       "downloadUrl": "http://updates.jenkins-ci.org/download/plugins/email-ext/2.12/email-ext.hpi",
       "releaseTimestamp": "2011-02-26T00:00:00.000Z",
       "version": "2.12",
     },
-    Object {
+    {
       "downloadUrl": "http://updates.jenkins-ci.org/download/plugins/email-ext/2.13/email-ext.hpi",
       "releaseTimestamp": "2011-03-23T00:00:00.000Z",
       "version": "2.13",
     },
-    Object {
+    {
       "downloadUrl": "http://updates.jenkins-ci.org/download/plugins/email-ext/2.14.1/email-ext.hpi",
       "releaseTimestamp": "2011-07-01T00:00:00.000Z",
       "version": "2.14.1",
     },
-    Object {
+    {
       "downloadUrl": "http://updates.jenkins-ci.org/download/plugins/email-ext/2.14/email-ext.hpi",
       "releaseTimestamp": "2011-04-22T00:00:00.000Z",
       "version": "2.14",
     },
-    Object {
+    {
       "downloadUrl": "http://updates.jenkins-ci.org/download/plugins/email-ext/2.15/email-ext.hpi",
       "releaseTimestamp": "2011-09-05T00:00:00.000Z",
       "version": "2.15",
     },
-    Object {
+    {
       "downloadUrl": "http://updates.jenkins-ci.org/download/plugins/email-ext/2.16/email-ext.hpi",
       "releaseTimestamp": "2011-11-08T00:00:00.000Z",
       "version": "2.16",
     },
-    Object {
+    {
       "downloadUrl": "http://updates.jenkins-ci.org/download/plugins/email-ext/2.18/email-ext.hpi",
       "releaseTimestamp": "2012-02-01T00:00:00.000Z",
       "version": "2.18",
     },
-    Object {
+    {
       "downloadUrl": "http://updates.jenkins-ci.org/download/plugins/email-ext/2.19/email-ext.hpi",
       "releaseTimestamp": "2012-03-24T00:00:00.000Z",
       "version": "2.19",
     },
-    Object {
+    {
       "downloadUrl": "http://updates.jenkins-ci.org/download/plugins/email-ext/2.20/email-ext.hpi",
       "releaseTimestamp": "2012-04-12T00:00:00.000Z",
       "version": "2.20",
     },
-    Object {
+    {
       "downloadUrl": "http://updates.jenkins-ci.org/download/plugins/email-ext/2.21/email-ext.hpi",
       "releaseTimestamp": "2012-05-16T00:00:00.000Z",
       "version": "2.21",
     },
-    Object {
+    {
       "downloadUrl": "http://updates.jenkins-ci.org/download/plugins/email-ext/2.22/email-ext.hpi",
       "releaseTimestamp": "2012-06-16T00:00:00.000Z",
       "version": "2.22",
     },
-    Object {
+    {
       "downloadUrl": "http://updates.jenkins-ci.org/download/plugins/email-ext/2.24.1/email-ext.hpi",
       "releaseTimestamp": "2012-07-20T00:00:00.000Z",
       "version": "2.24.1",
     },
-    Object {
+    {
       "downloadUrl": "http://updates.jenkins-ci.org/download/plugins/email-ext/2.25/email-ext.hpi",
       "releaseTimestamp": "2012-12-13T00:00:00.000Z",
       "version": "2.25",
     },
-    Object {
+    {
       "downloadUrl": "http://updates.jenkins-ci.org/download/plugins/email-ext/2.27.1/email-ext.hpi",
       "releaseTimestamp": "2013-03-05T00:00:00.000Z",
       "version": "2.27.1",
     },
-    Object {
+    {
       "downloadUrl": "http://updates.jenkins-ci.org/download/plugins/email-ext/2.27/email-ext.hpi",
       "releaseTimestamp": "2013-03-02T00:00:00.000Z",
       "version": "2.27",
     },
-    Object {
+    {
       "downloadUrl": "http://updates.jenkins-ci.org/download/plugins/email-ext/2.28/email-ext.hpi",
       "releaseTimestamp": "2013-04-05T00:00:00.000Z",
       "version": "2.28",
     },
-    Object {
+    {
       "downloadUrl": "http://updates.jenkins-ci.org/download/plugins/email-ext/2.29/email-ext.hpi",
       "releaseTimestamp": "2013-05-07T00:00:00.000Z",
       "version": "2.29",
     },
-    Object {
+    {
       "downloadUrl": "http://updates.jenkins-ci.org/download/plugins/email-ext/2.30.1/email-ext.hpi",
       "releaseTimestamp": "2013-05-24T00:00:00.000Z",
       "version": "2.30.1",
     },
-    Object {
+    {
       "downloadUrl": "http://updates.jenkins-ci.org/download/plugins/email-ext/2.30.2/email-ext.hpi",
       "releaseTimestamp": "2013-05-24T00:00:00.000Z",
       "version": "2.30.2",
     },
-    Object {
+    {
       "downloadUrl": "http://updates.jenkins-ci.org/download/plugins/email-ext/2.30/email-ext.hpi",
       "releaseTimestamp": "2013-05-24T00:00:00.000Z",
       "version": "2.30",
     },
-    Object {
+    {
       "downloadUrl": "http://updates.jenkins-ci.org/download/plugins/email-ext/2.31/email-ext.hpi",
       "releaseTimestamp": "2013-08-12T00:00:00.000Z",
       "version": "2.31",
     },
-    Object {
+    {
       "downloadUrl": "http://updates.jenkins-ci.org/download/plugins/email-ext/2.32/email-ext.hpi",
       "releaseTimestamp": "2013-08-14T00:00:00.000Z",
       "version": "2.32",
     },
-    Object {
+    {
       "downloadUrl": "http://updates.jenkins-ci.org/download/plugins/email-ext/2.33/email-ext.hpi",
       "releaseTimestamp": "2013-09-13T00:00:00.000Z",
       "version": "2.33",
     },
-    Object {
+    {
       "downloadUrl": "http://updates.jenkins-ci.org/download/plugins/email-ext/2.34/email-ext.hpi",
       "releaseTimestamp": "2013-09-15T00:00:00.000Z",
       "version": "2.34",
     },
-    Object {
+    {
       "downloadUrl": "http://updates.jenkins-ci.org/download/plugins/email-ext/2.35.1/email-ext.hpi",
       "releaseTimestamp": "2013-10-15T00:00:00.000Z",
       "version": "2.35.1",
     },
-    Object {
+    {
       "downloadUrl": "http://updates.jenkins-ci.org/download/plugins/email-ext/2.35/email-ext.hpi",
       "releaseTimestamp": "2013-10-12T00:00:00.000Z",
       "version": "2.35",
     },
-    Object {
+    {
       "downloadUrl": "http://updates.jenkins-ci.org/download/plugins/email-ext/2.36/email-ext.hpi",
       "releaseTimestamp": "2013-10-26T00:00:00.000Z",
       "version": "2.36",
     },
-    Object {
+    {
       "downloadUrl": "http://updates.jenkins-ci.org/download/plugins/email-ext/2.37.1/email-ext.hpi",
       "releaseTimestamp": "2014-01-11T00:00:00.000Z",
       "version": "2.37.1",
     },
-    Object {
+    {
       "downloadUrl": "http://updates.jenkins-ci.org/download/plugins/email-ext/2.37.2.2/email-ext.hpi",
       "releaseTimestamp": "2014-03-08T00:00:00.000Z",
       "version": "2.37.2.2",
     },
-    Object {
+    {
       "downloadUrl": "http://updates.jenkins-ci.org/download/plugins/email-ext/2.37.2/email-ext.hpi",
       "releaseTimestamp": "2014-01-26T00:00:00.000Z",
       "version": "2.37.2",
     },
-    Object {
+    {
       "downloadUrl": "http://updates.jenkins-ci.org/download/plugins/email-ext/2.37/email-ext.hpi",
       "releaseTimestamp": "2014-01-09T00:00:00.000Z",
       "version": "2.37",
     },
-    Object {
+    {
       "downloadUrl": "http://updates.jenkins-ci.org/download/plugins/email-ext/2.38.1/email-ext.hpi",
       "releaseTimestamp": "2014-06-02T00:00:00.000Z",
       "version": "2.38.1",
     },
-    Object {
+    {
       "downloadUrl": "http://updates.jenkins-ci.org/download/plugins/email-ext/2.38.2/email-ext.hpi",
       "releaseTimestamp": "2014-08-26T00:00:00.000Z",
       "version": "2.38.2",
     },
-    Object {
+    {
       "downloadUrl": "http://updates.jenkins-ci.org/download/plugins/email-ext/2.38/email-ext.hpi",
       "releaseTimestamp": "2014-05-24T00:00:00.000Z",
       "version": "2.38",
     },
-    Object {
+    {
       "downloadUrl": "http://updates.jenkins-ci.org/download/plugins/email-ext/2.39.3/email-ext.hpi",
       "releaseTimestamp": "2015-03-26T00:00:00.000Z",
       "version": "2.39.3",
     },
-    Object {
+    {
       "downloadUrl": "http://updates.jenkins-ci.org/download/plugins/email-ext/2.39/email-ext.hpi",
       "releaseTimestamp": "2014-11-16T00:00:00.000Z",
       "version": "2.39",
     },
-    Object {
+    {
       "downloadUrl": "http://updates.jenkins-ci.org/download/plugins/email-ext/2.40.1/email-ext.hpi",
       "releaseTimestamp": "2015-05-04T00:00:00.000Z",
       "version": "2.40.1",
     },
-    Object {
+    {
       "downloadUrl": "http://updates.jenkins-ci.org/download/plugins/email-ext/2.40.2/email-ext.hpi",
       "releaseTimestamp": "2015-05-13T00:00:00.000Z",
       "version": "2.40.2",
     },
-    Object {
+    {
       "downloadUrl": "http://updates.jenkins-ci.org/download/plugins/email-ext/2.40.3/email-ext.hpi",
       "releaseTimestamp": "2015-05-20T00:00:00.000Z",
       "version": "2.40.3",
     },
-    Object {
+    {
       "downloadUrl": "http://updates.jenkins-ci.org/download/plugins/email-ext/2.40.4/email-ext.hpi",
       "releaseTimestamp": "2015-05-25T00:00:00.000Z",
       "version": "2.40.4",
     },
-    Object {
+    {
       "downloadUrl": "http://updates.jenkins-ci.org/download/plugins/email-ext/2.40.5/email-ext.hpi",
       "releaseTimestamp": "2015-06-09T00:00:00.000Z",
       "version": "2.40.5",
     },
-    Object {
+    {
       "downloadUrl": "http://updates.jenkins-ci.org/download/plugins/email-ext/2.40/email-ext.hpi",
       "releaseTimestamp": "2015-04-28T00:00:00.000Z",
       "version": "2.40",
     },
-    Object {
+    {
       "downloadUrl": "http://updates.jenkins-ci.org/download/plugins/email-ext/2.41.2/email-ext.hpi",
       "releaseTimestamp": "2016-02-18T00:00:00.000Z",
       "version": "2.41.2",
     },
-    Object {
+    {
       "downloadUrl": "http://updates.jenkins-ci.org/download/plugins/email-ext/2.41.3/email-ext.hpi",
       "releaseTimestamp": "2016-02-24T00:00:00.000Z",
       "version": "2.41.3",
     },
-    Object {
+    {
       "downloadUrl": "http://updates.jenkins-ci.org/download/plugins/email-ext/2.41/email-ext.hpi",
       "releaseTimestamp": "2016-02-08T00:00:00.000Z",
       "version": "2.41",
     },
-    Object {
+    {
       "downloadUrl": "http://updates.jenkins-ci.org/download/plugins/email-ext/2.42/email-ext.hpi",
       "releaseTimestamp": "2016-04-18T00:00:00.000Z",
       "version": "2.42",
     },
-    Object {
+    {
       "downloadUrl": "http://updates.jenkins-ci.org/download/plugins/email-ext/2.43/email-ext.hpi",
       "releaseTimestamp": "2016-06-04T00:00:00.000Z",
       "version": "2.43",
     },
-    Object {
+    {
       "downloadUrl": "http://updates.jenkins-ci.org/download/plugins/email-ext/2.44/email-ext.hpi",
       "releaseTimestamp": "2016-06-13T00:00:00.000Z",
       "version": "2.44",
     },
-    Object {
+    {
       "downloadUrl": "http://updates.jenkins-ci.org/download/plugins/email-ext/2.45/email-ext.hpi",
       "releaseTimestamp": "2016-07-31T00:00:00.000Z",
       "version": "2.45",
     },
-    Object {
+    {
       "downloadUrl": "http://updates.jenkins-ci.org/download/plugins/email-ext/2.46/email-ext.hpi",
       "releaseTimestamp": "2016-08-04T00:00:00.000Z",
       "version": "2.46",
     },
-    Object {
+    {
       "downloadUrl": "http://updates.jenkins-ci.org/download/plugins/email-ext/2.47/email-ext.hpi",
       "releaseTimestamp": "2016-08-07T00:00:00.000Z",
       "version": "2.47",
     },
-    Object {
+    {
       "downloadUrl": "http://updates.jenkins-ci.org/download/plugins/email-ext/2.50/email-ext.hpi",
       "releaseTimestamp": "2016-09-24T00:00:00.000Z",
       "version": "2.50",
     },
-    Object {
+    {
       "downloadUrl": "http://updates.jenkins-ci.org/download/plugins/email-ext/2.51/email-ext.hpi",
       "releaseTimestamp": "2016-09-28T00:00:00.000Z",
       "version": "2.51",
     },
-    Object {
+    {
       "downloadUrl": "http://updates.jenkins-ci.org/download/plugins/email-ext/2.52/email-ext.hpi",
       "releaseTimestamp": "2016-10-23T00:00:00.000Z",
       "version": "2.52",
     },
-    Object {
+    {
       "downloadUrl": "http://updates.jenkins-ci.org/download/plugins/email-ext/2.53/email-ext.hpi",
       "releaseTimestamp": "2016-12-23T00:00:00.000Z",
       "version": "2.53",
     },
-    Object {
+    {
       "downloadUrl": "http://updates.jenkins-ci.org/download/plugins/email-ext/2.54/email-ext.hpi",
       "releaseTimestamp": "2017-01-22T00:00:00.000Z",
       "version": "2.54",
     },
-    Object {
+    {
       "downloadUrl": "http://updates.jenkins-ci.org/download/plugins/email-ext/2.55/email-ext.hpi",
       "releaseTimestamp": "2017-02-11T00:00:00.000Z",
       "version": "2.55",
     },
-    Object {
+    {
       "downloadUrl": "http://updates.jenkins-ci.org/download/plugins/email-ext/2.56/email-ext.hpi",
       "releaseTimestamp": "2017-02-14T00:00:00.000Z",
       "version": "2.56",
     },
-    Object {
+    {
       "downloadUrl": "http://updates.jenkins-ci.org/download/plugins/email-ext/2.57.1/email-ext.hpi",
       "releaseTimestamp": "2017-03-20T00:00:00.000Z",
       "version": "2.57.1",
     },
-    Object {
+    {
       "downloadUrl": "http://updates.jenkins-ci.org/download/plugins/email-ext/2.57.2/email-ext.hpi",
       "releaseTimestamp": "2017-04-10T00:00:00.000Z",
       "version": "2.57.2",
     },
-    Object {
+    {
       "downloadUrl": "http://updates.jenkins-ci.org/download/plugins/email-ext/2.57/email-ext.hpi",
       "releaseTimestamp": "2017-02-18T00:00:00.000Z",
       "version": "2.57",
     },
-    Object {
+    {
       "downloadUrl": "http://updates.jenkins-ci.org/download/plugins/email-ext/2.58/email-ext.hpi",
       "releaseTimestamp": "2017-06-29T00:00:00.000Z",
       "version": "2.58",
     },
-    Object {
+    {
       "downloadUrl": "http://updates.jenkins-ci.org/download/plugins/email-ext/2.59/email-ext.hpi",
       "releaseTimestamp": "2017-09-12T00:00:00.000Z",
       "version": "2.59",
     },
-    Object {
+    {
       "downloadUrl": "http://updates.jenkins-ci.org/download/plugins/email-ext/2.60/email-ext.hpi",
       "releaseTimestamp": "2017-09-19T00:00:00.000Z",
       "version": "2.60",
     },
-    Object {
+    {
       "downloadUrl": "http://updates.jenkins-ci.org/download/plugins/email-ext/2.61/email-ext.hpi",
       "releaseTimestamp": "2017-10-27T00:00:00.000Z",
       "version": "2.61",
     },
-    Object {
+    {
       "downloadUrl": "http://updates.jenkins-ci.org/download/plugins/email-ext/2.62.1/email-ext.hpi",
       "releaseTimestamp": "2019-02-27T00:00:00.000Z",
       "version": "2.62.1",
     },
-    Object {
+    {
       "downloadUrl": "http://updates.jenkins-ci.org/download/plugins/email-ext/2.62/email-ext.hpi",
       "releaseTimestamp": "2018-03-23T00:00:00.000Z",
       "version": "2.62",
     },
-    Object {
+    {
       "downloadUrl": "http://updates.jenkins-ci.org/download/plugins/email-ext/2.63/email-ext.hpi",
       "releaseTimestamp": "2018-08-05T00:00:00.000Z",
       "version": "2.63",
     },
-    Object {
+    {
       "downloadUrl": "http://updates.jenkins-ci.org/download/plugins/email-ext/2.64/email-ext.hpi",
       "releaseTimestamp": "2019-02-27T00:00:00.000Z",
       "version": "2.64",
     },
-    Object {
+    {
       "downloadUrl": "http://updates.jenkins-ci.org/download/plugins/email-ext/2.65/email-ext.hpi",
       "releaseTimestamp": "2019-02-27T00:00:00.000Z",
       "version": "2.65",
     },
-    Object {
+    {
       "downloadUrl": "http://updates.jenkins-ci.org/download/plugins/email-ext/2.66/email-ext.hpi",
       "releaseTimestamp": "2019-03-21T00:00:00.000Z",
       "version": "2.66",
     },
-    Object {
+    {
       "downloadUrl": "http://updates.jenkins-ci.org/download/plugins/email-ext/2.68/email-ext.hpi",
       "releaseTimestamp": "2019-10-04T00:00:00.000Z",
       "version": "2.68",
     },
-    Object {
+    {
       "downloadUrl": "http://updates.jenkins-ci.org/download/plugins/email-ext/2.69/email-ext.hpi",
       "releaseTimestamp": "2020-02-26T00:00:00.000Z",
       "version": "2.69",

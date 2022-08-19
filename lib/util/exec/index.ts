@@ -7,6 +7,7 @@ import { generateInstallCommands, isDynamicInstall } from './buildpack';
 import { rawExec } from './common';
 import { generateDockerCommand, removeDockerContainer } from './docker';
 import { getChildProcessEnv } from './env';
+import { getHermitEnvs, isHermit } from './hermit';
 import type {
   DockerOptions,
   ExecOptions,
@@ -139,8 +140,19 @@ async function prepareRawExec(
     logger.debug('Using buildpack dynamic installs');
     rawCommands = [
       ...(await generateInstallCommands(opts.toolConstraints)),
+      ...(opts.preCommands ?? []),
       ...rawCommands,
     ];
+  } else if (isHermit()) {
+    const hermitEnvVars = await getHermitEnvs(rawOptions);
+    logger.debug(
+      { hermitEnvVars },
+      'merging hermit environment variables into the execution options'
+    );
+    rawOptions.env = {
+      ...rawOptions.env,
+      ...hermitEnvVars,
+    };
   }
 
   return { rawCommands, rawOptions };

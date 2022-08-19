@@ -223,6 +223,7 @@ const repoGroups = {
   webdriverio: 'https://github.com/webdriverio/webdriverio',
   workbox: 'https://github.com/googlechrome/workbox',
   xterm: 'https://github.com/xtermjs/xterm.js',
+  'xunit-dotnet': 'https://github.com/xunit/xunit',
   'zxing-net': 'https://github.com/micjahn/ZXing.Net',
 };
 

@@ -190,6 +190,7 @@ export class SbtPackageDatasource extends MavenDatasource {
 
       const dependencyUrl = searchRoot;
 
+      logger.trace({ dependency: packageName, versions }, `Package versions`);
       if (versions) {
         return {
           ...urls,

@@ -9,6 +9,6 @@ export const language = ProgrammingLanguage.Python;
 export const supportedDatasources = [DockerDatasource.id];
 
 export const defaultConfig = {
-  fileMatch: ['(^|/).python-version$'],
+  fileMatch: ['(^|/)\\.python-version$'],
   versioning: dockerVersioning.id,
 };

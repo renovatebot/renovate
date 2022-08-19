@@ -162,7 +162,7 @@ export async function updateDependency({
       return null;
     }
 
-    let existingRegExStr = `${upgrade.depType}\\([^\\)]+name\\s*=\\s*"${upgrade.depName}"(.*\\n)+?\\s*\\)`;
+    let existingRegExStr = `(?:maybe\\s*\\(\\s*)?${upgrade.depType}(?:\\(|,)[^\\)]+name\\s*=\\s*"${upgrade.depName}"(.*\\n)+?\\s*\\)`;
     if (newDef.endsWith('\n')) {
       existingRegExStr += '\n';
     }

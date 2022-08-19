@@ -65,6 +65,7 @@ export interface ReleaseResult {
   changelogUrl?: string;
   dependencyUrl?: string;
   homepage?: string;
+  gitRef?: string;
   sourceUrl?: string | null;
   sourceDirectory?: string;
   registryUrl?: string;

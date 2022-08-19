@@ -101,7 +101,7 @@ describe('workers/repository/update/pr/body/index', () => {
         dependencyUrl: 'https://github.com/foo/bar',
         homepage: 'https://example.com',
         references:
-          '[homepage](https://example.com), [source](https://github.com/foo/bar.git/tree/HEAD//baz), [changelog](https://raw.githubusercontent.com/foo/bar/tree/main/CHANGELOG.md)',
+          '[homepage](https://example.com), [source](https://github.com/foo/bar.git/tree/HEAD/baz), [changelog](https://raw.githubusercontent.com/foo/bar/tree/main/CHANGELOG.md)',
         sourceDirectory: '/baz',
         sourceUrl: 'https://github.com/foo/bar.git',
       });
