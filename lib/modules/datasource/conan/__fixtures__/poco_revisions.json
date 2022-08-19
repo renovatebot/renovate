@@ -1,0 +1,51 @@
+{
+  "1.10.1": {
+      "reference": "poco/1.10.1@_/_",
+      "revisions": [
+          {
+              "revision": "32815db5b18046e4f8879af7bb743422",
+              "time": "2022-07-18T09:38:37.372+0000"
+          }
+      ]
+  },
+  "1.10.0": {
+    "reference": "poco/1.10.0@_/_",
+    "revisions": [
+        {
+            "revision": "7c3fbb12b69d7e7fd7134ba1efb04d5e",
+            "time": "2022-07-18T09:38:37.768+0000"
+        }
+      ]
+  },
+  "1.9.4": {
+    "reference": "poco/1.9.4@_/_",
+    "revisions": [
+        {
+            "revision": "736fdb96cd0add0cf85ca420e0bac453",
+            "time": "2022-07-18T09:38:38.396+0000"
+        }
+    ]
+  },
+  "1.9.3": {
+      "reference": "poco/1.9.3@_/_",
+      "revisions": [
+          {
+              "revision": "dc80dcf02da270cc5f629c00df151a56",
+              "time": "2022-07-18T09:38:38.975+0000"
+          },
+          {
+              "revision": "92b4e6cf83f6be0b9589ba61cc4a5b4e",
+              "time": "2022-07-11T16:37:30.926+0000"
+          }
+      ]
+  },
+  "1.8.1": {
+      "reference": "poco/1.8.1@_/_",
+      "revisions": [
+          {
+              "revision": "3a9b47caee2e2c1d3fb7d97788339aa8",
+              "time": "2022-07-18T09:38:38.815+0000"
+          }
+      ]
+    }
+}

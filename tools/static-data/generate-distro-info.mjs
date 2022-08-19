@@ -1,6 +1,6 @@
-import fs from 'fs-extra';
 import got from 'got';
 import shell from 'shelljs';
+import { updateJsonFile } from './utils.mjs';
 
 const ubuntuUrl = 'https://debian.pages.debian.net/distro-info-data/ubuntu.csv';
 const debianUrl = 'https://debian.pages.debian.net/distro-info-data/debian.csv';
@@ -48,21 +48,6 @@ function csvToJson(raw) {
 }
 
 /**
- * Update given file with new provided data.
- * @param {string} file Path to a data file
- * @param {string} newData New data to be written
- */
-async function updateJsonFile(file, newData) {
-  try {
-    shell.echo(`Updating ${file}`);
-    await fs.writeFile(file, newData);
-  } catch (e) {
-    shell.echo(e.toString());
-    shell.exit(1);
-  }
-}
-
-/**
  * Fetch CSV and update data file.
  * @param {string} url Url to CSV
  * @param {string} file File path to update
@@ -75,6 +60,7 @@ async function update(url, file) {
 }
 
 await (async () => {
+  shell.echo('Generating distro info');
   await update(ubuntuUrl, `./data/ubuntu-distro-info.json`);
   await update(debianUrl, `./data/debian-distro-info.json`);
 })();

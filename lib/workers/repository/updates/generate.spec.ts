@@ -242,9 +242,10 @@ describe('workers/repository/updates/generate', () => {
           depName: 'depB',
           groupName: 'some-group',
           branchName: 'some-branch',
-          prTitle: 'some-title',
+          commitMessage:
+            '{{{groupName}}} {{{commitMessageExtra}}} {{{commitMessageSuffix}}}',
           commitMessageExtra:
-            'to {{#if isMajor}}{{prettyNewMajor}}{{else}}{{#unless isRange}}v{{/unless}}{{newValue}}{{/if}}',
+            'to {{#if isMajor}}{{prettyNewMajor}}{{else}}{{prettyNewVersion}}{{/if}}',
           foo: 1,
           newValue: '5.1.2',
           newVersion: '5.1.2',
@@ -252,15 +253,18 @@ describe('workers/repository/updates/generate', () => {
             foo: 2,
           },
           releaseTimestamp: '2017-02-07T20:01:41+00:00',
+          updateType: 'minor',
+          separateMinorPatch: true,
         },
         {
           manager: 'some-manager',
           depName: 'depA',
           groupName: 'some-group',
           branchName: 'some-branch',
-          prTitle: 'some-title',
+          commitMessage:
+            '{{{groupName}}} {{{commitMessageExtra}}} {{{commitMessageSuffix}}}',
           commitMessageExtra:
-            'to {{#if isMajor}}{{prettyNewMajor}}{{else}}{{#unless isRange}}v{{/unless}}{{newValue}}{{/if}}',
+            'to {{#if isMajor}}{{prettyNewMajor}}{{else}}{{prettyNewVersion}}{{/if}}',
           foo: 1,
           newValue: '1.1.0',
           newVersion: '1.1.0',
@@ -268,14 +272,20 @@ describe('workers/repository/updates/generate', () => {
             foo: 2,
           },
           releaseTimestamp: '2017-02-08T20:01:41+00:00',
+          updateType: 'minor',
+          separateMinorPatch: true,
         },
       ];
       const res = generateBranchConfig(branch);
-      expect(res.foo).toBe(2);
-      expect(res.singleVersion).toBeUndefined();
-      expect(res.recreateClosed).toBeTrue();
-      expect(res.groupName).toBeDefined();
-      expect(res.releaseTimestamp).toBe('2017-02-08T20:01:41+00:00');
+      expect(res).toMatchObject({
+        foo: 2,
+        isGroup: true,
+        recreateClosed: true,
+        prTitle: 'some-group (minor)',
+        commitMessage: 'some-group',
+        groupName: 'some-group',
+        releaseTimestamp: '2017-02-08T20:01:41+00:00',
+      });
     });
 
     it('groups multiple upgrades different version but same value', () => {
@@ -669,8 +679,7 @@ describe('workers/repository/updates/generate', () => {
         } as BranchUpgradeConfig,
       ];
       const res = generateBranchConfig(branch);
-      expect(res.commitMessage).toMatchSnapshot();
-      expect(res.commitMessage).toContain('\n');
+      expect(res.commitMessage).toBe('Update dependency some-dep to v1.2.0');
     });
 
     it('supports manual prTitle', () => {

@@ -401,8 +401,8 @@ describe('workers/repository/process/lookup/index', () => {
       httpMock.scope('https://registry.npmjs.org').get('/q').reply(200, qJson);
       const res = await lookup.lookupUpdates(config);
       expect(res.updates).toMatchInlineSnapshot(`
-        Array [
-          Object {
+        [
+          {
             "bucket": "non-major",
             "isLockfileUpdate": true,
             "isRange": true,

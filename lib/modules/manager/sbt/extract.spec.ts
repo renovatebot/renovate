@@ -1,5 +1,7 @@
 import { Fixtures } from '../../../../test/fixtures';
-import { extractPackageFile } from '.';
+import { extractPackageFile as extract } from '.';
+
+const extractPackageFile = (content: string) => extract(content, 'build.sbt');
 
 const sbt = Fixtures.get(`sample.sbt`);
 const sbtScalaVersionVariable = Fixtures.get(`scala-version-variable.sbt`);
@@ -14,6 +16,7 @@ describe('modules/manager/sbt/extract', () => {
     it('returns null for empty', () => {
       expect(extractPackageFile('')).toBeNull();
       expect(extractPackageFile('non-sense')).toBeNull();
+      expect(extractPackageFile('version := "1.2.3"')).toBeNull();
       expect(
         extractPackageFile('libraryDependencies += "foo" % "bar" % ???')
       ).toBeNull();
@@ -31,9 +34,6 @@ describe('modules/manager/sbt/extract', () => {
       expect(extractPackageFile('libraryDependencies += "foo"')).toBeNull();
       expect(
         extractPackageFile('libraryDependencies += "foo" % "bar" %')
-      ).toBeNull();
-      expect(
-        extractPackageFile('libraryDependencies += "foo" % "bar" % "baz" %%')
       ).toBeNull();
     });
 
@@ -66,6 +66,10 @@ describe('modules/manager/sbt/extract', () => {
     it('extracts deps when scala version is defined in a variable', () => {
       expect(extractPackageFile(sbtScalaVersionVariable)).toMatchSnapshot({
         deps: [
+          {
+            packageName: 'org.scala-lang:scala-library',
+            currentValue: '2.12.10',
+          },
           { packageName: 'org.example:foo', currentValue: '0.0.1' },
           { packageName: 'org.example:bar_2.12', currentValue: '0.0.2' },
           { packageName: 'org.example:baz_2.12', currentValue: '0.0.3' },
@@ -74,10 +78,24 @@ describe('modules/manager/sbt/extract', () => {
           { packageName: 'org.example:quuz_2.12', currentValue: '0.0.6' },
           { packageName: 'org.example:corge', currentValue: '0.0.7' },
           { packageName: 'org.example:grault', currentValue: '0.0.8' },
-          { packageName: 'org.example:waldo', currentValue: '0.0.9' },
+          {
+            datasource: 'sbt-plugin',
+            packageName: 'org.example:waldo',
+            currentValue: '0.0.9',
+          },
         ],
-
         packageFileVersion: '3.2.1',
+      });
+    });
+
+    it('extracts packageFileVersion when scala version is defined in a variable', () => {
+      const content = `
+        val fileVersion = "1.2.3"
+        version := fileVersion
+        libraryDependencies += "foo" % "bar" % "0.0.1"
+      `;
+      expect(extractPackageFile(content)).toMatchObject({
+        packageFileVersion: '1.2.3',
       });
     });
 
@@ -157,7 +175,16 @@ describe('modules/manager/sbt/extract', () => {
         libraryDependencies += "org.example" %% "bar" % "0.0.2"
       `;
       expect(extractPackageFile(content)).toMatchSnapshot({
-        deps: [{ packageName: 'org.example:bar_2.12', currentValue: '0.0.2' }],
+        deps: [
+          {
+            packageName: 'org.scala-lang:scala-library',
+            currentValue: '2.12.10',
+          },
+          {
+            packageName: 'org.example:bar_2.12',
+            currentValue: '0.0.2',
+          },
+        ],
       });
     });
 
@@ -188,6 +215,10 @@ describe('modules/manager/sbt/extract', () => {
       `;
       expect(extractPackageFile(content)).toMatchSnapshot({
         deps: [
+          {
+            packageName: 'org.scala-lang:scala-library',
+            currentValue: '2.12.10',
+          },
           {
             packageName: 'org.example:bar_2.12',
             currentValue: '0.0.2',
@@ -307,6 +338,7 @@ describe('modules/manager/sbt/extract', () => {
       ).toMatchObject({
         deps: [
           {
+            datasource: 'sbt-plugin',
             packageName: 'org.scala-tools.sxr:sxr',
             currentValue: '0.3.0',
           },

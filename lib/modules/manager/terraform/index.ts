@@ -22,8 +22,7 @@ export const supportedDatasources = [
 
 export const supportsLockFileMaintenance = true;
 export const defaultConfig = {
-  commitMessageTopic:
-    'Terraform {{managerData.terraformDependencyType}} {{depName}}',
+  commitMessageTopic: 'Terraform {{depName}}',
   fileMatch: ['\\.tf$'],
   versioning: hashicorpVersioning.id,
   pinDigests: false,

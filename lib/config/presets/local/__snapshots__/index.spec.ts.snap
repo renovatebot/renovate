@@ -1,8 +1,8 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`config/presets/local/index getPreset() forwards to azure 1`] = `
-Array [
-  Array [
+[
+  [
     "some/repo",
     "default",
     undefined,
@@ -13,8 +13,8 @@ Array [
 `;
 
 exports[`config/presets/local/index getPreset() forwards to bitbucket 1`] = `
-Array [
-  Array [
+[
+  [
     "some/repo",
     "default",
     undefined,
@@ -25,8 +25,8 @@ Array [
 `;
 
 exports[`config/presets/local/index getPreset() forwards to custom bitbucket-server 1`] = `
-Array [
-  Array [
+[
+  [
     "some/repo",
     "default",
     undefined,
@@ -37,8 +37,8 @@ Array [
 `;
 
 exports[`config/presets/local/index getPreset() forwards to custom gitea 1`] = `
-Array [
-  Array [
+[
+  [
     "some/repo",
     "default",
     undefined,
@@ -49,8 +49,8 @@ Array [
 `;
 
 exports[`config/presets/local/index getPreset() forwards to custom github 1`] = `
-Array [
-  Array [
+[
+  [
     "some/repo",
     "default",
     undefined,
@@ -61,8 +61,8 @@ Array [
 `;
 
 exports[`config/presets/local/index getPreset() forwards to custom github with a tag 1`] = `
-Array [
-  Array [
+[
+  [
     "some/repo",
     "default",
     undefined,
@@ -73,8 +73,8 @@ Array [
 `;
 
 exports[`config/presets/local/index getPreset() forwards to custom gitlab 1`] = `
-Array [
-  Array [
+[
+  [
     "some/repo",
     "default",
     undefined,
@@ -85,8 +85,8 @@ Array [
 `;
 
 exports[`config/presets/local/index getPreset() forwards to custom gitlab with a tag 1`] = `
-Array [
-  Array [
+[
+  [
     "some/repo",
     "default",
     undefined,
@@ -97,8 +97,8 @@ Array [
 `;
 
 exports[`config/presets/local/index getPreset() forwards to gitea 1`] = `
-Array [
-  Array [
+[
+  [
     "some/repo",
     "default",
     undefined,
@@ -109,8 +109,8 @@ Array [
 `;
 
 exports[`config/presets/local/index getPreset() forwards to github 1`] = `
-Array [
-  Array [
+[
+  [
     "some/repo",
     "default",
     undefined,
@@ -121,8 +121,8 @@ Array [
 `;
 
 exports[`config/presets/local/index getPreset() forwards to github with a tag 1`] = `
-Array [
-  Array [
+[
+  [
     "some/repo",
     "default",
     undefined,
@@ -133,8 +133,8 @@ Array [
 `;
 
 exports[`config/presets/local/index getPreset() forwards to gitlab 1`] = `
-Array [
-  Array [
+[
+  [
     "some/repo",
     "default",
     undefined,
@@ -145,8 +145,8 @@ Array [
 `;
 
 exports[`config/presets/local/index getPreset() forwards to gitlab with a tag 1`] = `
-Array [
-  Array [
+[
+  [
     "some/repo",
     "default",
     undefined,

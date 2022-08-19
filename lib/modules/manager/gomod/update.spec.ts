@@ -318,6 +318,26 @@ describe('modules/manager/gomod/update', () => {
       expect(res).toContain('github.com/caarlos0/env/v6 v6.1.0');
     });
 
+    it('handles multiline replace update', () => {
+      const fileContent = `
+      go 1.18
+      replace (
+        k8s.io/client-go => k8s.io/client-go v0.21.9
+      )`;
+      const upgrade = {
+        depName: 'k8s.io/client-go',
+        managerData: { lineNumber: 3, multiLine: true },
+        newValue: 'v2.2.2',
+        depType: 'replace',
+        currentValue: 'v0.21.9',
+        newMajor: 2,
+        updateType: 'major' as UpdateType,
+      };
+      const res = updateDependency({ fileContent, upgrade });
+      expect(res).not.toEqual(fileContent);
+      expect(res).toContain('k8s.io/client-go/v2 => k8s.io/client-go v2.2.2');
+    });
+
     it('should return null for replacement', () => {
       const res = updateDependency({
         fileContent: '',

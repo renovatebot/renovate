@@ -67,12 +67,12 @@ export function generateBranchName(update: RenovateConfig): void {
     }
 
     const additionalBranchPrefix = template.compile(
-      String(update.additionalBranchPrefix || ''),
+      String(update.additionalBranchPrefix ?? ''),
       update
     );
 
     const branchTopic = template.compile(
-      String(update.branchTopic || ''),
+      String(update.branchTopic ?? ''),
       update
     );
 

@@ -1,1514 +1,1514 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`modules/datasource/gradle-version/index getReleases calls configured registryUrls 1`] = `
-Object {
+{
   "homepage": "https://gradle.org",
-  "releases": Array [
-    Object {
+  "releases": [
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2009-07-20T06:50:13.000Z",
       "version": "0.7",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2009-09-28T12:01:59.000Z",
       "version": "0.8",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2010-08-03T21:04:33.000Z",
       "version": "0.9-rc-1",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2010-10-26T21:24:05.000Z",
       "version": "0.9-rc-2",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2010-11-20T02:17:50.000Z",
       "version": "0.9-rc-3",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2010-12-19T01:50:06.000Z",
       "version": "0.9",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2011-01-02T00:40:57.000Z",
       "version": "0.9.1",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2011-01-23T02:34:21.000Z",
       "version": "0.9.2",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2011-02-27T03:13:20.000Z",
       "version": "1.0-milestone-1",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2011-04-07T06:32:55.000Z",
       "version": "1.0-milestone-2",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2011-04-25T07:40:11.000Z",
       "version": "1.0-milestone-3",
     },
-    Object {
+    {
       "isDeprecated": true,
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2011-07-28T08:38:22.000Z",
       "version": "1.0-milestone-4",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2011-10-25T03:56:08.000Z",
       "version": "1.0-milestone-5",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2011-11-17T05:54:12.000Z",
       "version": "1.0-milestone-6",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2012-01-05T10:24:43.000Z",
       "version": "1.0-milestone-7",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2012-02-20T17:53:57.000Z",
       "version": "1.0-milestone-8a",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2012-02-14T01:24:51.000Z",
       "version": "1.0-milestone-8",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2012-03-13T16:10:09.000Z",
       "version": "1.0-milestone-9",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2012-04-11T11:13:24.000Z",
       "version": "1.0-rc-1",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2012-04-24T23:52:37.000Z",
       "version": "1.0-rc-2",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2012-04-29T23:51:52.000Z",
       "version": "1.0-rc-3",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2012-06-12T00:56:21.000Z",
       "version": "1.0",
     },
-    Object {
+    {
       "registryUrl": "http://baz.qux",
       "version": "1.0.1",
     },
-    Object {
+    {
       "registryUrl": "http://baz.qux",
       "version": "1.0.2",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2012-07-24T13:44:04.000Z",
       "version": "1.1-rc-1",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2012-07-26T07:51:03.000Z",
       "version": "1.1-rc-2",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2012-07-31T13:24:32.000Z",
       "version": "1.1",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2012-09-04T17:49:54.000Z",
       "version": "1.2-rc-1",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2012-09-12T10:46:02.000Z",
       "version": "1.2",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2012-11-12T13:52:52.000Z",
       "version": "1.3-rc-1",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2012-11-15T15:53:43.000Z",
       "version": "1.3-rc-2",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2012-11-20T11:37:38.000Z",
       "version": "1.3",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2013-01-17T00:12:57.000Z",
       "version": "1.4-rc-1",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2013-01-22T03:06:32.000Z",
       "version": "1.4-rc-2",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2013-01-25T03:51:46.000Z",
       "version": "1.4-rc-3",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2013-01-28T03:42:46.000Z",
       "version": "1.4",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2013-03-11T12:03:20.000Z",
       "version": "1.5-rc-1",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2013-03-17T01:15:16.000Z",
       "version": "1.5-rc-2",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2013-03-21T15:57:09.000Z",
       "version": "1.5-rc-3",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2013-03-27T14:09:35.000Z",
       "version": "1.5",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2013-04-30T13:19:00.000Z",
       "version": "1.6-rc-1",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2013-05-07T09:12:14.000Z",
       "version": "1.6",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2013-07-02T14:56:30.000Z",
       "version": "1.7-rc-1",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2013-07-29T12:04:21.000Z",
       "version": "1.7-rc-2",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2013-08-06T11:19:56.000Z",
       "version": "1.7",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2013-09-10T13:04:52.000Z",
       "version": "1.8-rc-1",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2013-09-19T05:33:14.000Z",
       "version": "1.8-rc-2",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2013-09-24T07:32:33.000Z",
       "version": "1.8",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2013-10-23T09:46:18.000Z",
       "version": "1.9-rc-1",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2013-10-28T09:33:20.000Z",
       "version": "1.9-rc-2",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2013-11-07T12:26:42.000Z",
       "version": "1.9-rc-3",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2013-11-18T09:32:42.000Z",
       "version": "1.9-rc-4",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2013-11-19T08:20:02.000Z",
       "version": "1.9",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2013-12-04T15:41:28.000Z",
       "version": "1.10-rc-1",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2013-12-11T10:54:54.000Z",
       "version": "1.10-rc-2",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2013-12-17T09:28:15.000Z",
       "version": "1.10",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2014-01-31T03:34:53.000Z",
       "version": "1.11-rc-1",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2014-02-11T11:34:39.000Z",
       "version": "1.11",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2014-04-16T08:46:26.000Z",
       "version": "1.12-rc-1",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2014-04-23T11:20:55.000Z",
       "version": "1.12-rc-2",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2014-04-29T09:24:31.000Z",
       "version": "1.12",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2014-06-06T07:02:41.000Z",
       "version": "2.0-rc-1",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2014-06-23T08:02:36.000Z",
       "version": "2.0-rc-2",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2014-07-01T07:45:34.000Z",
       "version": "2.0",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2014-08-19T19:44:09.000Z",
       "version": "2.1-rc-1",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2014-08-28T02:32:29.000Z",
       "version": "2.1-rc-2",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2014-09-01T10:35:49.000Z",
       "version": "2.1-rc-3",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2014-09-03T09:20:53.000Z",
       "version": "2.1-rc-4",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2014-09-08T10:40:39.000Z",
       "version": "2.1",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2014-10-20T16:32:57.000Z",
       "version": "2.2-rc-1",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2014-11-03T17:04:04.000Z",
       "version": "2.2-rc-2",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2014-11-10T13:31:44.000Z",
       "version": "2.2",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2014-11-17T10:12:37.000Z",
       "version": "2.2.1-rc-1",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2014-11-24T09:45:35.000Z",
       "version": "2.2.1",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2015-01-27T14:02:32.000Z",
       "version": "2.3-rc-1",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2015-02-04T10:54:13.000Z",
       "version": "2.3-rc-2",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2015-02-08T18:37:59.000Z",
       "version": "2.3-rc-3",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2015-02-11T16:39:22.000Z",
       "version": "2.3-rc-4",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2015-02-16T05:09:33.000Z",
       "version": "2.3",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2015-04-23T03:15:23.000Z",
       "version": "2.4-rc-1",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2015-04-29T04:50:20.000Z",
       "version": "2.4-rc-2",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2015-05-05T08:09:24.000Z",
       "version": "2.4",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2015-06-23T18:04:52.000Z",
       "version": "2.5-rc-1",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2015-07-02T15:15:59.000Z",
       "version": "2.5-rc-2",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2015-07-08T07:38:37.000Z",
       "version": "2.5",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2015-07-28T17:16:43.000Z",
       "version": "2.6-rc-1",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2015-08-04T10:48:06.000Z",
       "version": "2.6-rc-2",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2015-08-10T13:15:06.000Z",
       "version": "2.6",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2015-08-28T14:09:28.000Z",
       "version": "2.7-rc-1",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2015-09-05T14:06:15.000Z",
       "version": "2.7-rc-2",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2015-09-14T07:26:16.000Z",
       "version": "2.7",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2015-09-30T17:11:02.000Z",
       "version": "2.8-rc-1",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2015-10-15T12:42:08.000Z",
       "version": "2.8-rc-2",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2015-10-20T03:46:36.000Z",
       "version": "2.8",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2015-11-03T23:02:18.000Z",
       "version": "2.9-rc-1",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2015-11-17T07:02:17.000Z",
       "version": "2.9",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2015-12-08T22:48:11.000Z",
       "version": "2.10-rc-1",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2015-12-18T16:40:26.000Z",
       "version": "2.10-rc-2",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2015-12-21T21:15:04.000Z",
       "version": "2.10",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2016-01-20T08:41:54.000Z",
       "version": "2.11-rc-1",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2016-02-02T16:24:31.000Z",
       "version": "2.11-rc-2",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2016-02-03T19:09:22.000Z",
       "version": "2.11-rc-3",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2016-02-08T07:59:16.000Z",
       "version": "2.11",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2016-03-07T17:41:18.000Z",
       "version": "2.12-rc-1",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2016-03-14T08:32:03.000Z",
       "version": "2.12",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2016-04-06T11:02:11.000Z",
       "version": "2.13-rc-1",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2016-04-19T14:52:40.000Z",
       "version": "2.13-rc-2",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2016-04-25T04:10:10.000Z",
       "version": "2.13",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2016-05-18T09:38:24.000Z",
       "version": "2.14-rc-1",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2016-05-27T17:56:24.000Z",
       "version": "2.14-rc-2",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2016-05-30T11:21:11.000Z",
       "version": "2.14-rc-3",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2016-06-03T11:08:27.000Z",
       "version": "2.14-rc-4",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2016-06-07T13:58:17.000Z",
       "version": "2.14-rc-5",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2016-06-10T18:19:46.000Z",
       "version": "2.14-rc-6",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2016-06-14T07:16:37.000Z",
       "version": "2.14",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2016-06-29T05:13:03.000Z",
       "version": "2.14.1-rc-1",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2016-07-11T10:58:27.000Z",
       "version": "2.14.1-rc-2",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2016-07-18T06:38:37.000Z",
       "version": "2.14.1",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2016-06-08T01:31:48.000Z",
       "version": "3.0-milestone-1",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2016-06-21T22:41:28.000Z",
       "version": "3.0-milestone-2",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2016-08-02T06:13:35.000Z",
       "version": "3.0-rc-1",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2016-08-08T13:34:10.000Z",
       "version": "3.0-rc-2",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2016-08-15T13:15:01.000Z",
       "version": "3.0",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2016-09-12T12:34:24.000Z",
       "version": "3.1-rc-1",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2016-09-19T10:53:53.000Z",
       "version": "3.1",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2016-10-24T19:47:25.000Z",
       "version": "3.2-rc-1",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2016-10-31T16:08:22.000Z",
       "version": "3.2-rc-2",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2016-11-07T15:32:33.000Z",
       "version": "3.2-rc-3",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2016-11-14T12:32:59.000Z",
       "version": "3.2",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2016-11-22T15:19:54.000Z",
       "version": "3.2.1",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2016-12-19T16:07:24.000Z",
       "version": "3.3-rc-1",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2017-01-03T15:31:04.000Z",
       "version": "3.3",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2017-01-26T15:48:49.000Z",
       "version": "3.4-rc-1",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2017-02-06T21:17:28.000Z",
       "version": "3.4-rc-2",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2017-02-13T14:55:27.000Z",
       "version": "3.4-rc-3",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2017-02-20T14:49:26.000Z",
       "version": "3.4",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2017-03-03T19:45:41.000Z",
       "version": "3.4.1",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2017-03-22T15:16:07.000Z",
       "version": "3.5-rc-1",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2017-03-27T15:56:23.000Z",
       "version": "3.5-rc-2",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2017-04-04T15:04:13.000Z",
       "version": "3.5-rc-3",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2017-04-10T13:37:25.000Z",
       "version": "3.5",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2017-06-16T14:36:27.000Z",
       "version": "3.5.1",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2017-04-28T07:45:09.000Z",
       "version": "4.0-milestone-1",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2017-05-17T14:33:24.000Z",
       "version": "4.0-milestone-2",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2017-05-30T16:26:17.000Z",
       "version": "4.0-rc-1",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2017-06-07T15:22:36.000Z",
       "version": "4.0-rc-2",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2017-06-12T15:04:44.000Z",
       "version": "4.0-rc-3",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2017-06-14T15:11:08.000Z",
       "version": "4.0",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2017-07-07T14:02:41.000Z",
       "version": "4.0.1",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2017-07-26T16:19:18.000Z",
       "version": "4.0.2",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2017-06-20T17:05:46.000Z",
       "version": "4.1-milestone-1",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2017-07-20T15:22:15.000Z",
       "version": "4.1-rc-1",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2017-07-31T14:29:43.000Z",
       "version": "4.1-rc-2",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2017-08-07T14:38:48.000Z",
       "version": "4.1",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2017-09-07T08:12:16.000Z",
       "version": "4.2-rc-1",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2017-09-13T12:23:10.000Z",
       "version": "4.2-rc-2",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2017-09-20T14:48:23.000Z",
       "version": "4.2",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2017-10-02T15:36:21.000Z",
       "version": "4.2.1",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2017-10-12T16:14:16.000Z",
       "version": "4.3-rc-1",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2017-10-18T07:37:14.000Z",
       "version": "4.3-rc-2",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2017-10-24T14:26:33.000Z",
       "version": "4.3-rc-3",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2017-10-26T16:25:57.000Z",
       "version": "4.3-rc-4",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2017-10-30T15:43:29.000Z",
       "version": "4.3",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2017-11-08T08:59:45.000Z",
       "version": "4.3.1",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2017-11-21T15:31:05.000Z",
       "version": "4.4-rc-1",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2017-11-24T10:35:28.000Z",
       "version": "4.4-rc-2",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2017-11-27T10:31:38.000Z",
       "version": "4.4-rc-3",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2017-11-28T12:36:59.000Z",
       "version": "4.4-rc-4",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2017-11-30T15:21:37.000Z",
       "version": "4.4-rc-5",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2017-12-04T08:48:15.000Z",
       "version": "4.4-rc-6",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2017-12-06T09:05:06.000Z",
       "version": "4.4",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2017-12-20T15:45:23.000Z",
       "version": "4.4.1",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2018-01-09T01:05:27.000Z",
       "version": "4.5-rc-1",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2018-01-22T16:42:44.000Z",
       "version": "4.5-rc-2",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2018-01-24T17:04:52.000Z",
       "version": "4.5",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2018-02-05T13:22:49.000Z",
       "version": "4.5.1",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2018-02-16T16:28:07.000Z",
       "version": "4.6-rc-1",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2018-02-21T15:28:42.000Z",
       "version": "4.6-rc-2",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2018-02-28T13:36:36.000Z",
       "version": "4.6",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2018-04-03T11:36:02.000Z",
       "version": "4.7-rc-1",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2018-04-13T12:53:23.000Z",
       "version": "4.7-rc-2",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2018-04-18T09:09:12.000Z",
       "version": "4.7",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2018-05-15T17:32:33.000Z",
       "version": "4.8-rc-1",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2018-05-24T09:28:21.000Z",
       "version": "4.8-rc-2",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2018-05-31T14:04:36.000Z",
       "version": "4.8-rc-3",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2018-06-04T10:39:58.000Z",
       "version": "4.8",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2018-06-21T07:53:06.000Z",
       "version": "4.8.1",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2018-07-03T13:14:46.000Z",
       "version": "4.9-rc-1",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2018-07-11T00:46:40.000Z",
       "version": "4.9-rc-2",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2018-07-16T08:14:03.000Z",
       "version": "4.9",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2018-08-09T06:19:37.000Z",
       "version": "4.10-rc-1",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2018-08-14T18:00:01.000Z",
       "version": "4.10-rc-2",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2018-08-23T12:07:56.000Z",
       "version": "4.10-rc-3",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2018-08-27T18:35:06.000Z",
       "version": "4.10",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2018-09-12T11:33:27.000Z",
       "version": "4.10.1",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2018-09-19T18:10:15.000Z",
       "version": "4.10.2",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2018-12-05T00:50:54.000Z",
       "version": "4.10.3",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2018-10-02T22:46:15.000Z",
       "version": "5.0-milestone-1",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2018-10-30T13:59:22.000Z",
       "version": "5.0-rc-1",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2018-11-12T08:05:41.000Z",
       "version": "5.0-rc-2",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2018-11-14T16:01:47.000Z",
       "version": "5.0-rc-3",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2018-11-20T09:26:42.000Z",
       "version": "5.0-rc-4",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2018-11-22T19:58:45.000Z",
       "version": "5.0-rc-5",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2018-11-26T11:48:43.000Z",
       "version": "5.0",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2018-12-03T17:41:47.000Z",
       "version": "5.1-milestone-1",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2018-12-13T06:00:04.000Z",
       "version": "5.1-rc-1",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2018-12-17T22:42:01.000Z",
       "version": "5.1-rc-2",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2018-12-21T23:03:45.000Z",
       "version": "5.1-rc-3",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2019-01-02T18:57:47.000Z",
       "version": "5.1",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2019-01-10T23:05:02.000Z",
       "version": "5.1.1",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2019-01-28T22:56:04.000Z",
       "version": "5.2-rc-1",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2019-02-04T11:16:48.000Z",
       "version": "5.2",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2019-02-08T19:00:10.000Z",
       "version": "5.2.1",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2019-03-05T20:52:02.000Z",
       "version": "5.3-rc-1",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2019-03-11T21:07:26.000Z",
       "version": "5.3-rc-2",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2019-03-13T20:27:08.000Z",
       "version": "5.3-rc-3",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2019-03-20T11:03:29.000Z",
       "version": "5.3",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2019-03-28T09:09:23.000Z",
       "version": "5.3.1",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2019-04-10T01:15:32.000Z",
       "version": "5.4-rc-1",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2019-04-16T02:44:16.000Z",
       "version": "5.4",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2019-04-26T08:14:42.000Z",
       "version": "5.4.1",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2019-05-29T11:51:19.000Z",
       "version": "5.5-rc-1",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2019-06-07T09:06:57.000Z",
       "version": "5.5-rc-2",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2019-06-14T23:15:38.000Z",
       "version": "5.5-rc-3",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2019-06-24T15:24:32.000Z",
       "version": "5.5-rc-4",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2019-06-28T17:36:05.000Z",
       "version": "5.5",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2019-07-10T20:38:12.000Z",
       "version": "5.5.1",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2019-07-29T11:26:26.000Z",
       "version": "5.6-rc-1",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2019-08-07T15:03:42.000Z",
       "version": "5.6-rc-2",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2019-08-14T21:05:25.000Z",
       "version": "5.6",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2019-08-28T02:49:34.000Z",
       "version": "5.6.1",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2019-09-05T16:13:54.000Z",
       "version": "5.6.2",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2019-10-18T00:28:36.000Z",
       "version": "5.6.3",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2019-11-01T20:42:00.000Z",
       "version": "5.6.4",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2019-10-18T19:24:16.000Z",
       "version": "6.0-rc-1",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2019-10-30T16:03:21.000Z",
       "version": "6.0-rc-2",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2019-11-05T17:56:39.000Z",
       "version": "6.0-rc-3",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2019-11-08T18:12:12.000Z",
       "version": "6.0",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2019-11-18T20:25:01.000Z",
       "version": "6.0.1",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2019-11-20T13:24:05.000Z",
       "version": "6.1-milestone-1",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2019-11-28T10:17:55.000Z",
       "version": "6.1-milestone-2",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2019-12-03T14:13:33.000Z",
       "version": "6.1-milestone-3",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2019-12-19T21:56:43.000Z",
       "version": "6.1-rc-1",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2020-01-07T21:17:05.000Z",
       "version": "6.1-rc-2",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2020-01-13T16:23:24.000Z",
       "version": "6.1-rc-3",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2020-01-15T23:56:46.000Z",
       "version": "6.1",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2020-01-24T22:30:24.000Z",
       "version": "6.1.1",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2020-02-03T12:30:03.000Z",
       "version": "6.2-rc-1",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2020-02-11T22:14:00.000Z",
       "version": "6.2-rc-2",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2020-02-13T01:29:14.000Z",
       "version": "6.2-rc-3",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2020-02-17T08:32:01.000Z",
       "version": "6.2",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2020-02-24T20:24:10.000Z",
       "version": "6.2.1",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2020-03-04T08:49:31.000Z",
       "version": "6.2.2",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2020-03-11T21:41:14.000Z",
       "version": "6.3-rc-1",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2020-03-17T12:40:36.000Z",
       "version": "6.3-rc-2",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2020-03-18T15:26:49.000Z",
       "version": "6.3-rc-3",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2020-03-20T05:39:45.000Z",
       "version": "6.3-rc-4",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2020-03-24T19:52:07.000Z",
       "version": "6.3",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2020-04-15T20:28:39.000Z",
       "version": "6.4-rc-1",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2020-04-22T16:32:05.000Z",
       "version": "6.4-rc-2",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2020-04-28T19:00:39.000Z",
       "version": "6.4-rc-3",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2020-04-30T21:23:30.000Z",
       "version": "6.4-rc-4",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2020-05-05T19:18:55.000Z",
       "version": "6.4",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2020-05-15T19:43:40.000Z",
       "version": "6.4.1",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2020-05-07T13:55:06.000Z",
       "version": "6.5-milestone-1",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2020-05-15T09:40:06.000Z",
       "version": "6.5-milestone-2",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2020-05-26T20:04:48.000Z",
       "version": "6.5-rc-1",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2020-06-02T20:46:21.000Z",
       "version": "6.5",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2020-06-30T06:32:47.000Z",
       "version": "6.5.1",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2020-06-11T20:24:18.000Z",
       "version": "6.6-milestone-1",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2020-06-23T12:28:34.000Z",
       "version": "6.6-milestone-2",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2020-07-07T16:09:51.000Z",
       "version": "6.6-milestone-3",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2020-07-13T13:53:25.000Z",
       "version": "6.6-rc-1",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2020-07-20T21:43:44.000Z",
       "version": "6.6-rc-2",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2020-07-24T14:04:09.000Z",
       "version": "6.6-rc-3",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2020-07-30T14:48:24.000Z",
       "version": "6.6-rc-4",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2020-08-03T18:54:44.000Z",
       "version": "6.6-rc-5",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2020-08-05T19:57:44.000Z",
       "version": "6.6-rc-6",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2020-08-10T22:06:19.000Z",
       "version": "6.6",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2020-08-25T16:29:12.000Z",
       "version": "6.6.1",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2020-09-11T16:17:05.000Z",
       "version": "6.7-rc-1",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2020-09-25T20:14:44.000Z",
       "version": "6.7-rc-2",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2020-09-30T19:16:51.000Z",
       "version": "6.7-rc-3",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2020-10-08T16:57:38.000Z",
       "version": "6.7-rc-4",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2020-10-12T19:09:40.000Z",
       "version": "6.7-rc-5",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2020-10-14T16:13:12.000Z",
       "version": "6.7",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2020-11-16T17:09:24.000Z",
       "version": "6.7.1",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2020-10-13T06:59:06.000Z",
       "version": "6.8-milestone-1",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2020-10-28T05:55:18.000Z",
       "version": "6.8-milestone-2",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2020-11-15T20:00:53.000Z",
       "version": "6.8-milestone-3",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2020-11-26T09:25:43.000Z",
       "version": "6.8-rc-1",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2020-12-17T14:24:52.000Z",
       "version": "6.8-rc-3",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2020-12-22T08:44:10.000Z",
       "version": "6.8-rc-4",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2021-01-04T20:22:03.000Z",
       "version": "6.8-rc-5",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2021-01-08T16:38:46.000Z",
       "version": "6.8",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2021-01-22T13:20:08.000Z",
       "version": "6.8.1",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2021-02-05T12:53:00.000Z",
       "version": "6.8.2",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2021-02-22T16:13:28.000Z",
       "version": "6.8.3",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2021-02-03T22:00:23.000Z",
       "version": "7.0-milestone-1",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2021-02-23T23:02:54.000Z",
       "version": "7.0-milestone-2",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2021-03-13T01:03:21.000Z",
       "version": "7.0-milestone-3",
     },
-    Object {
+    {
       "registryUrl": "https://foo.bar",
       "releaseTimestamp": "2021-03-23T01:02:30.000Z",
       "version": "7.0-rc-1",
@@ -1519,1208 +1519,1208 @@ Object {
 `;
 
 exports[`modules/datasource/gradle-version/index getReleases processes real data 1`] = `
-Object {
+{
   "homepage": "https://gradle.org",
   "registryUrl": "https://services.gradle.org/versions/all",
-  "releases": Array [
-    Object {
+  "releases": [
+    {
       "releaseTimestamp": "2009-07-20T06:50:13.000Z",
       "version": "0.7",
     },
-    Object {
+    {
       "releaseTimestamp": "2009-09-28T12:01:59.000Z",
       "version": "0.8",
     },
-    Object {
+    {
       "releaseTimestamp": "2010-08-03T21:04:33.000Z",
       "version": "0.9-rc-1",
     },
-    Object {
+    {
       "releaseTimestamp": "2010-10-26T21:24:05.000Z",
       "version": "0.9-rc-2",
     },
-    Object {
+    {
       "releaseTimestamp": "2010-11-20T02:17:50.000Z",
       "version": "0.9-rc-3",
     },
-    Object {
+    {
       "releaseTimestamp": "2010-12-19T01:50:06.000Z",
       "version": "0.9",
     },
-    Object {
+    {
       "releaseTimestamp": "2011-01-02T00:40:57.000Z",
       "version": "0.9.1",
     },
-    Object {
+    {
       "releaseTimestamp": "2011-01-23T02:34:21.000Z",
       "version": "0.9.2",
     },
-    Object {
+    {
       "releaseTimestamp": "2011-02-27T03:13:20.000Z",
       "version": "1.0-milestone-1",
     },
-    Object {
+    {
       "releaseTimestamp": "2011-04-07T06:32:55.000Z",
       "version": "1.0-milestone-2",
     },
-    Object {
+    {
       "releaseTimestamp": "2011-04-25T07:40:11.000Z",
       "version": "1.0-milestone-3",
     },
-    Object {
+    {
       "isDeprecated": true,
       "releaseTimestamp": "2011-07-28T08:38:22.000Z",
       "version": "1.0-milestone-4",
     },
-    Object {
+    {
       "releaseTimestamp": "2011-10-25T03:56:08.000Z",
       "version": "1.0-milestone-5",
     },
-    Object {
+    {
       "releaseTimestamp": "2011-11-17T05:54:12.000Z",
       "version": "1.0-milestone-6",
     },
-    Object {
+    {
       "releaseTimestamp": "2012-01-05T10:24:43.000Z",
       "version": "1.0-milestone-7",
     },
-    Object {
+    {
       "releaseTimestamp": "2012-02-20T17:53:57.000Z",
       "version": "1.0-milestone-8a",
     },
-    Object {
+    {
       "releaseTimestamp": "2012-02-14T01:24:51.000Z",
       "version": "1.0-milestone-8",
     },
-    Object {
+    {
       "releaseTimestamp": "2012-03-13T16:10:09.000Z",
       "version": "1.0-milestone-9",
     },
-    Object {
+    {
       "releaseTimestamp": "2012-04-11T11:13:24.000Z",
       "version": "1.0-rc-1",
     },
-    Object {
+    {
       "releaseTimestamp": "2012-04-24T23:52:37.000Z",
       "version": "1.0-rc-2",
     },
-    Object {
+    {
       "releaseTimestamp": "2012-04-29T23:51:52.000Z",
       "version": "1.0-rc-3",
     },
-    Object {
+    {
       "releaseTimestamp": "2012-06-12T00:56:21.000Z",
       "version": "1.0",
     },
-    Object {
+    {
       "releaseTimestamp": "2012-07-24T13:44:04.000Z",
       "version": "1.1-rc-1",
     },
-    Object {
+    {
       "releaseTimestamp": "2012-07-26T07:51:03.000Z",
       "version": "1.1-rc-2",
     },
-    Object {
+    {
       "releaseTimestamp": "2012-07-31T13:24:32.000Z",
       "version": "1.1",
     },
-    Object {
+    {
       "releaseTimestamp": "2012-09-04T17:49:54.000Z",
       "version": "1.2-rc-1",
     },
-    Object {
+    {
       "releaseTimestamp": "2012-09-12T10:46:02.000Z",
       "version": "1.2",
     },
-    Object {
+    {
       "releaseTimestamp": "2012-11-12T13:52:52.000Z",
       "version": "1.3-rc-1",
     },
-    Object {
+    {
       "releaseTimestamp": "2012-11-15T15:53:43.000Z",
       "version": "1.3-rc-2",
     },
-    Object {
+    {
       "releaseTimestamp": "2012-11-20T11:37:38.000Z",
       "version": "1.3",
     },
-    Object {
+    {
       "releaseTimestamp": "2013-01-17T00:12:57.000Z",
       "version": "1.4-rc-1",
     },
-    Object {
+    {
       "releaseTimestamp": "2013-01-22T03:06:32.000Z",
       "version": "1.4-rc-2",
     },
-    Object {
+    {
       "releaseTimestamp": "2013-01-25T03:51:46.000Z",
       "version": "1.4-rc-3",
     },
-    Object {
+    {
       "releaseTimestamp": "2013-01-28T03:42:46.000Z",
       "version": "1.4",
     },
-    Object {
+    {
       "releaseTimestamp": "2013-03-11T12:03:20.000Z",
       "version": "1.5-rc-1",
     },
-    Object {
+    {
       "releaseTimestamp": "2013-03-17T01:15:16.000Z",
       "version": "1.5-rc-2",
     },
-    Object {
+    {
       "releaseTimestamp": "2013-03-21T15:57:09.000Z",
       "version": "1.5-rc-3",
     },
-    Object {
+    {
       "releaseTimestamp": "2013-03-27T14:09:35.000Z",
       "version": "1.5",
     },
-    Object {
+    {
       "releaseTimestamp": "2013-04-30T13:19:00.000Z",
       "version": "1.6-rc-1",
     },
-    Object {
+    {
       "releaseTimestamp": "2013-05-07T09:12:14.000Z",
       "version": "1.6",
     },
-    Object {
+    {
       "releaseTimestamp": "2013-07-02T14:56:30.000Z",
       "version": "1.7-rc-1",
     },
-    Object {
+    {
       "releaseTimestamp": "2013-07-29T12:04:21.000Z",
       "version": "1.7-rc-2",
     },
-    Object {
+    {
       "releaseTimestamp": "2013-08-06T11:19:56.000Z",
       "version": "1.7",
     },
-    Object {
+    {
       "releaseTimestamp": "2013-09-10T13:04:52.000Z",
       "version": "1.8-rc-1",
     },
-    Object {
+    {
       "releaseTimestamp": "2013-09-19T05:33:14.000Z",
       "version": "1.8-rc-2",
     },
-    Object {
+    {
       "releaseTimestamp": "2013-09-24T07:32:33.000Z",
       "version": "1.8",
     },
-    Object {
+    {
       "releaseTimestamp": "2013-10-23T09:46:18.000Z",
       "version": "1.9-rc-1",
     },
-    Object {
+    {
       "releaseTimestamp": "2013-10-28T09:33:20.000Z",
       "version": "1.9-rc-2",
     },
-    Object {
+    {
       "releaseTimestamp": "2013-11-07T12:26:42.000Z",
       "version": "1.9-rc-3",
     },
-    Object {
+    {
       "releaseTimestamp": "2013-11-18T09:32:42.000Z",
       "version": "1.9-rc-4",
     },
-    Object {
+    {
       "releaseTimestamp": "2013-11-19T08:20:02.000Z",
       "version": "1.9",
     },
-    Object {
+    {
       "releaseTimestamp": "2013-12-04T15:41:28.000Z",
       "version": "1.10-rc-1",
     },
-    Object {
+    {
       "releaseTimestamp": "2013-12-11T10:54:54.000Z",
       "version": "1.10-rc-2",
     },
-    Object {
+    {
       "releaseTimestamp": "2013-12-17T09:28:15.000Z",
       "version": "1.10",
     },
-    Object {
+    {
       "releaseTimestamp": "2014-01-31T03:34:53.000Z",
       "version": "1.11-rc-1",
     },
-    Object {
+    {
       "releaseTimestamp": "2014-02-11T11:34:39.000Z",
       "version": "1.11",
     },
-    Object {
+    {
       "releaseTimestamp": "2014-04-16T08:46:26.000Z",
       "version": "1.12-rc-1",
     },
-    Object {
+    {
       "releaseTimestamp": "2014-04-23T11:20:55.000Z",
       "version": "1.12-rc-2",
     },
-    Object {
+    {
       "releaseTimestamp": "2014-04-29T09:24:31.000Z",
       "version": "1.12",
     },
-    Object {
+    {
       "releaseTimestamp": "2014-06-06T07:02:41.000Z",
       "version": "2.0-rc-1",
     },
-    Object {
+    {
       "releaseTimestamp": "2014-06-23T08:02:36.000Z",
       "version": "2.0-rc-2",
     },
-    Object {
+    {
       "releaseTimestamp": "2014-07-01T07:45:34.000Z",
       "version": "2.0",
     },
-    Object {
+    {
       "releaseTimestamp": "2014-08-19T19:44:09.000Z",
       "version": "2.1-rc-1",
     },
-    Object {
+    {
       "releaseTimestamp": "2014-08-28T02:32:29.000Z",
       "version": "2.1-rc-2",
     },
-    Object {
+    {
       "releaseTimestamp": "2014-09-01T10:35:49.000Z",
       "version": "2.1-rc-3",
     },
-    Object {
+    {
       "releaseTimestamp": "2014-09-03T09:20:53.000Z",
       "version": "2.1-rc-4",
     },
-    Object {
+    {
       "releaseTimestamp": "2014-09-08T10:40:39.000Z",
       "version": "2.1",
     },
-    Object {
+    {
       "releaseTimestamp": "2014-10-20T16:32:57.000Z",
       "version": "2.2-rc-1",
     },
-    Object {
+    {
       "releaseTimestamp": "2014-11-03T17:04:04.000Z",
       "version": "2.2-rc-2",
     },
-    Object {
+    {
       "releaseTimestamp": "2014-11-10T13:31:44.000Z",
       "version": "2.2",
     },
-    Object {
+    {
       "releaseTimestamp": "2014-11-17T10:12:37.000Z",
       "version": "2.2.1-rc-1",
     },
-    Object {
+    {
       "releaseTimestamp": "2014-11-24T09:45:35.000Z",
       "version": "2.2.1",
     },
-    Object {
+    {
       "releaseTimestamp": "2015-01-27T14:02:32.000Z",
       "version": "2.3-rc-1",
     },
-    Object {
+    {
       "releaseTimestamp": "2015-02-04T10:54:13.000Z",
       "version": "2.3-rc-2",
     },
-    Object {
+    {
       "releaseTimestamp": "2015-02-08T18:37:59.000Z",
       "version": "2.3-rc-3",
     },
-    Object {
+    {
       "releaseTimestamp": "2015-02-11T16:39:22.000Z",
       "version": "2.3-rc-4",
     },
-    Object {
+    {
       "releaseTimestamp": "2015-02-16T05:09:33.000Z",
       "version": "2.3",
     },
-    Object {
+    {
       "releaseTimestamp": "2015-04-23T03:15:23.000Z",
       "version": "2.4-rc-1",
     },
-    Object {
+    {
       "releaseTimestamp": "2015-04-29T04:50:20.000Z",
       "version": "2.4-rc-2",
     },
-    Object {
+    {
       "releaseTimestamp": "2015-05-05T08:09:24.000Z",
       "version": "2.4",
     },
-    Object {
+    {
       "releaseTimestamp": "2015-06-23T18:04:52.000Z",
       "version": "2.5-rc-1",
     },
-    Object {
+    {
       "releaseTimestamp": "2015-07-02T15:15:59.000Z",
       "version": "2.5-rc-2",
     },
-    Object {
+    {
       "releaseTimestamp": "2015-07-08T07:38:37.000Z",
       "version": "2.5",
     },
-    Object {
+    {
       "releaseTimestamp": "2015-07-28T17:16:43.000Z",
       "version": "2.6-rc-1",
     },
-    Object {
+    {
       "releaseTimestamp": "2015-08-04T10:48:06.000Z",
       "version": "2.6-rc-2",
     },
-    Object {
+    {
       "releaseTimestamp": "2015-08-10T13:15:06.000Z",
       "version": "2.6",
     },
-    Object {
+    {
       "releaseTimestamp": "2015-08-28T14:09:28.000Z",
       "version": "2.7-rc-1",
     },
-    Object {
+    {
       "releaseTimestamp": "2015-09-05T14:06:15.000Z",
       "version": "2.7-rc-2",
     },
-    Object {
+    {
       "releaseTimestamp": "2015-09-14T07:26:16.000Z",
       "version": "2.7",
     },
-    Object {
+    {
       "releaseTimestamp": "2015-09-30T17:11:02.000Z",
       "version": "2.8-rc-1",
     },
-    Object {
+    {
       "releaseTimestamp": "2015-10-15T12:42:08.000Z",
       "version": "2.8-rc-2",
     },
-    Object {
+    {
       "releaseTimestamp": "2015-10-20T03:46:36.000Z",
       "version": "2.8",
     },
-    Object {
+    {
       "releaseTimestamp": "2015-11-03T23:02:18.000Z",
       "version": "2.9-rc-1",
     },
-    Object {
+    {
       "releaseTimestamp": "2015-11-17T07:02:17.000Z",
       "version": "2.9",
     },
-    Object {
+    {
       "releaseTimestamp": "2015-12-08T22:48:11.000Z",
       "version": "2.10-rc-1",
     },
-    Object {
+    {
       "releaseTimestamp": "2015-12-18T16:40:26.000Z",
       "version": "2.10-rc-2",
     },
-    Object {
+    {
       "releaseTimestamp": "2015-12-21T21:15:04.000Z",
       "version": "2.10",
     },
-    Object {
+    {
       "releaseTimestamp": "2016-01-20T08:41:54.000Z",
       "version": "2.11-rc-1",
     },
-    Object {
+    {
       "releaseTimestamp": "2016-02-02T16:24:31.000Z",
       "version": "2.11-rc-2",
     },
-    Object {
+    {
       "releaseTimestamp": "2016-02-03T19:09:22.000Z",
       "version": "2.11-rc-3",
     },
-    Object {
+    {
       "releaseTimestamp": "2016-02-08T07:59:16.000Z",
       "version": "2.11",
     },
-    Object {
+    {
       "releaseTimestamp": "2016-03-07T17:41:18.000Z",
       "version": "2.12-rc-1",
     },
-    Object {
+    {
       "releaseTimestamp": "2016-03-14T08:32:03.000Z",
       "version": "2.12",
     },
-    Object {
+    {
       "releaseTimestamp": "2016-04-06T11:02:11.000Z",
       "version": "2.13-rc-1",
     },
-    Object {
+    {
       "releaseTimestamp": "2016-04-19T14:52:40.000Z",
       "version": "2.13-rc-2",
     },
-    Object {
+    {
       "releaseTimestamp": "2016-04-25T04:10:10.000Z",
       "version": "2.13",
     },
-    Object {
+    {
       "releaseTimestamp": "2016-05-18T09:38:24.000Z",
       "version": "2.14-rc-1",
     },
-    Object {
+    {
       "releaseTimestamp": "2016-05-27T17:56:24.000Z",
       "version": "2.14-rc-2",
     },
-    Object {
+    {
       "releaseTimestamp": "2016-05-30T11:21:11.000Z",
       "version": "2.14-rc-3",
     },
-    Object {
+    {
       "releaseTimestamp": "2016-06-03T11:08:27.000Z",
       "version": "2.14-rc-4",
     },
-    Object {
+    {
       "releaseTimestamp": "2016-06-07T13:58:17.000Z",
       "version": "2.14-rc-5",
     },
-    Object {
+    {
       "releaseTimestamp": "2016-06-10T18:19:46.000Z",
       "version": "2.14-rc-6",
     },
-    Object {
+    {
       "releaseTimestamp": "2016-06-14T07:16:37.000Z",
       "version": "2.14",
     },
-    Object {
+    {
       "releaseTimestamp": "2016-06-29T05:13:03.000Z",
       "version": "2.14.1-rc-1",
     },
-    Object {
+    {
       "releaseTimestamp": "2016-07-11T10:58:27.000Z",
       "version": "2.14.1-rc-2",
     },
-    Object {
+    {
       "releaseTimestamp": "2016-07-18T06:38:37.000Z",
       "version": "2.14.1",
     },
-    Object {
+    {
       "releaseTimestamp": "2016-06-08T01:31:48.000Z",
       "version": "3.0-milestone-1",
     },
-    Object {
+    {
       "releaseTimestamp": "2016-06-21T22:41:28.000Z",
       "version": "3.0-milestone-2",
     },
-    Object {
+    {
       "releaseTimestamp": "2016-08-02T06:13:35.000Z",
       "version": "3.0-rc-1",
     },
-    Object {
+    {
       "releaseTimestamp": "2016-08-08T13:34:10.000Z",
       "version": "3.0-rc-2",
     },
-    Object {
+    {
       "releaseTimestamp": "2016-08-15T13:15:01.000Z",
       "version": "3.0",
     },
-    Object {
+    {
       "releaseTimestamp": "2016-09-12T12:34:24.000Z",
       "version": "3.1-rc-1",
     },
-    Object {
+    {
       "releaseTimestamp": "2016-09-19T10:53:53.000Z",
       "version": "3.1",
     },
-    Object {
+    {
       "releaseTimestamp": "2016-10-24T19:47:25.000Z",
       "version": "3.2-rc-1",
     },
-    Object {
+    {
       "releaseTimestamp": "2016-10-31T16:08:22.000Z",
       "version": "3.2-rc-2",
     },
-    Object {
+    {
       "releaseTimestamp": "2016-11-07T15:32:33.000Z",
       "version": "3.2-rc-3",
     },
-    Object {
+    {
       "releaseTimestamp": "2016-11-14T12:32:59.000Z",
       "version": "3.2",
     },
-    Object {
+    {
       "releaseTimestamp": "2016-11-22T15:19:54.000Z",
       "version": "3.2.1",
     },
-    Object {
+    {
       "releaseTimestamp": "2016-12-19T16:07:24.000Z",
       "version": "3.3-rc-1",
     },
-    Object {
+    {
       "releaseTimestamp": "2017-01-03T15:31:04.000Z",
       "version": "3.3",
     },
-    Object {
+    {
       "releaseTimestamp": "2017-01-26T15:48:49.000Z",
       "version": "3.4-rc-1",
     },
-    Object {
+    {
       "releaseTimestamp": "2017-02-06T21:17:28.000Z",
       "version": "3.4-rc-2",
     },
-    Object {
+    {
       "releaseTimestamp": "2017-02-13T14:55:27.000Z",
       "version": "3.4-rc-3",
     },
-    Object {
+    {
       "releaseTimestamp": "2017-02-20T14:49:26.000Z",
       "version": "3.4",
     },
-    Object {
+    {
       "releaseTimestamp": "2017-03-03T19:45:41.000Z",
       "version": "3.4.1",
     },
-    Object {
+    {
       "releaseTimestamp": "2017-03-22T15:16:07.000Z",
       "version": "3.5-rc-1",
     },
-    Object {
+    {
       "releaseTimestamp": "2017-03-27T15:56:23.000Z",
       "version": "3.5-rc-2",
     },
-    Object {
+    {
       "releaseTimestamp": "2017-04-04T15:04:13.000Z",
       "version": "3.5-rc-3",
     },
-    Object {
+    {
       "releaseTimestamp": "2017-04-10T13:37:25.000Z",
       "version": "3.5",
     },
-    Object {
+    {
       "releaseTimestamp": "2017-06-16T14:36:27.000Z",
       "version": "3.5.1",
     },
-    Object {
+    {
       "releaseTimestamp": "2017-04-28T07:45:09.000Z",
       "version": "4.0-milestone-1",
     },
-    Object {
+    {
       "releaseTimestamp": "2017-05-17T14:33:24.000Z",
       "version": "4.0-milestone-2",
     },
-    Object {
+    {
       "releaseTimestamp": "2017-05-30T16:26:17.000Z",
       "version": "4.0-rc-1",
     },
-    Object {
+    {
       "releaseTimestamp": "2017-06-07T15:22:36.000Z",
       "version": "4.0-rc-2",
     },
-    Object {
+    {
       "releaseTimestamp": "2017-06-12T15:04:44.000Z",
       "version": "4.0-rc-3",
     },
-    Object {
+    {
       "releaseTimestamp": "2017-06-14T15:11:08.000Z",
       "version": "4.0",
     },
-    Object {
+    {
       "releaseTimestamp": "2017-07-07T14:02:41.000Z",
       "version": "4.0.1",
     },
-    Object {
+    {
       "releaseTimestamp": "2017-07-26T16:19:18.000Z",
       "version": "4.0.2",
     },
-    Object {
+    {
       "releaseTimestamp": "2017-06-20T17:05:46.000Z",
       "version": "4.1-milestone-1",
     },
-    Object {
+    {
       "releaseTimestamp": "2017-07-20T15:22:15.000Z",
       "version": "4.1-rc-1",
     },
-    Object {
+    {
       "releaseTimestamp": "2017-07-31T14:29:43.000Z",
       "version": "4.1-rc-2",
     },
-    Object {
+    {
       "releaseTimestamp": "2017-08-07T14:38:48.000Z",
       "version": "4.1",
     },
-    Object {
+    {
       "releaseTimestamp": "2017-09-07T08:12:16.000Z",
       "version": "4.2-rc-1",
     },
-    Object {
+    {
       "releaseTimestamp": "2017-09-13T12:23:10.000Z",
       "version": "4.2-rc-2",
     },
-    Object {
+    {
       "releaseTimestamp": "2017-09-20T14:48:23.000Z",
       "version": "4.2",
     },
-    Object {
+    {
       "releaseTimestamp": "2017-10-02T15:36:21.000Z",
       "version": "4.2.1",
     },
-    Object {
+    {
       "releaseTimestamp": "2017-10-12T16:14:16.000Z",
       "version": "4.3-rc-1",
     },
-    Object {
+    {
       "releaseTimestamp": "2017-10-18T07:37:14.000Z",
       "version": "4.3-rc-2",
     },
-    Object {
+    {
       "releaseTimestamp": "2017-10-24T14:26:33.000Z",
       "version": "4.3-rc-3",
     },
-    Object {
+    {
       "releaseTimestamp": "2017-10-26T16:25:57.000Z",
       "version": "4.3-rc-4",
     },
-    Object {
+    {
       "releaseTimestamp": "2017-10-30T15:43:29.000Z",
       "version": "4.3",
     },
-    Object {
+    {
       "releaseTimestamp": "2017-11-08T08:59:45.000Z",
       "version": "4.3.1",
     },
-    Object {
+    {
       "releaseTimestamp": "2017-11-21T15:31:05.000Z",
       "version": "4.4-rc-1",
     },
-    Object {
+    {
       "releaseTimestamp": "2017-11-24T10:35:28.000Z",
       "version": "4.4-rc-2",
     },
-    Object {
+    {
       "releaseTimestamp": "2017-11-27T10:31:38.000Z",
       "version": "4.4-rc-3",
     },
-    Object {
+    {
       "releaseTimestamp": "2017-11-28T12:36:59.000Z",
       "version": "4.4-rc-4",
     },
-    Object {
+    {
       "releaseTimestamp": "2017-11-30T15:21:37.000Z",
       "version": "4.4-rc-5",
     },
-    Object {
+    {
       "releaseTimestamp": "2017-12-04T08:48:15.000Z",
       "version": "4.4-rc-6",
     },
-    Object {
+    {
       "releaseTimestamp": "2017-12-06T09:05:06.000Z",
       "version": "4.4",
     },
-    Object {
+    {
       "releaseTimestamp": "2017-12-20T15:45:23.000Z",
       "version": "4.4.1",
     },
-    Object {
+    {
       "releaseTimestamp": "2018-01-09T01:05:27.000Z",
       "version": "4.5-rc-1",
     },
-    Object {
+    {
       "releaseTimestamp": "2018-01-22T16:42:44.000Z",
       "version": "4.5-rc-2",
     },
-    Object {
+    {
       "releaseTimestamp": "2018-01-24T17:04:52.000Z",
       "version": "4.5",
     },
-    Object {
+    {
       "releaseTimestamp": "2018-02-05T13:22:49.000Z",
       "version": "4.5.1",
     },
-    Object {
+    {
       "releaseTimestamp": "2018-02-16T16:28:07.000Z",
       "version": "4.6-rc-1",
     },
-    Object {
+    {
       "releaseTimestamp": "2018-02-21T15:28:42.000Z",
       "version": "4.6-rc-2",
     },
-    Object {
+    {
       "releaseTimestamp": "2018-02-28T13:36:36.000Z",
       "version": "4.6",
     },
-    Object {
+    {
       "releaseTimestamp": "2018-04-03T11:36:02.000Z",
       "version": "4.7-rc-1",
     },
-    Object {
+    {
       "releaseTimestamp": "2018-04-13T12:53:23.000Z",
       "version": "4.7-rc-2",
     },
-    Object {
+    {
       "releaseTimestamp": "2018-04-18T09:09:12.000Z",
       "version": "4.7",
     },
-    Object {
+    {
       "releaseTimestamp": "2018-05-15T17:32:33.000Z",
       "version": "4.8-rc-1",
     },
-    Object {
+    {
       "releaseTimestamp": "2018-05-24T09:28:21.000Z",
       "version": "4.8-rc-2",
     },
-    Object {
+    {
       "releaseTimestamp": "2018-05-31T14:04:36.000Z",
       "version": "4.8-rc-3",
     },
-    Object {
+    {
       "releaseTimestamp": "2018-06-04T10:39:58.000Z",
       "version": "4.8",
     },
-    Object {
+    {
       "releaseTimestamp": "2018-06-21T07:53:06.000Z",
       "version": "4.8.1",
     },
-    Object {
+    {
       "releaseTimestamp": "2018-07-03T13:14:46.000Z",
       "version": "4.9-rc-1",
     },
-    Object {
+    {
       "releaseTimestamp": "2018-07-11T00:46:40.000Z",
       "version": "4.9-rc-2",
     },
-    Object {
+    {
       "releaseTimestamp": "2018-07-16T08:14:03.000Z",
       "version": "4.9",
     },
-    Object {
+    {
       "releaseTimestamp": "2018-08-09T06:19:37.000Z",
       "version": "4.10-rc-1",
     },
-    Object {
+    {
       "releaseTimestamp": "2018-08-14T18:00:01.000Z",
       "version": "4.10-rc-2",
     },
-    Object {
+    {
       "releaseTimestamp": "2018-08-23T12:07:56.000Z",
       "version": "4.10-rc-3",
     },
-    Object {
+    {
       "releaseTimestamp": "2018-08-27T18:35:06.000Z",
       "version": "4.10",
     },
-    Object {
+    {
       "releaseTimestamp": "2018-09-12T11:33:27.000Z",
       "version": "4.10.1",
     },
-    Object {
+    {
       "releaseTimestamp": "2018-09-19T18:10:15.000Z",
       "version": "4.10.2",
     },
-    Object {
+    {
       "releaseTimestamp": "2018-12-05T00:50:54.000Z",
       "version": "4.10.3",
     },
-    Object {
+    {
       "releaseTimestamp": "2018-10-02T22:46:15.000Z",
       "version": "5.0-milestone-1",
     },
-    Object {
+    {
       "releaseTimestamp": "2018-10-30T13:59:22.000Z",
       "version": "5.0-rc-1",
     },
-    Object {
+    {
       "releaseTimestamp": "2018-11-12T08:05:41.000Z",
       "version": "5.0-rc-2",
     },
-    Object {
+    {
       "releaseTimestamp": "2018-11-14T16:01:47.000Z",
       "version": "5.0-rc-3",
     },
-    Object {
+    {
       "releaseTimestamp": "2018-11-20T09:26:42.000Z",
       "version": "5.0-rc-4",
     },
-    Object {
+    {
       "releaseTimestamp": "2018-11-22T19:58:45.000Z",
       "version": "5.0-rc-5",
     },
-    Object {
+    {
       "releaseTimestamp": "2018-11-26T11:48:43.000Z",
       "version": "5.0",
     },
-    Object {
+    {
       "releaseTimestamp": "2018-12-03T17:41:47.000Z",
       "version": "5.1-milestone-1",
     },
-    Object {
+    {
       "releaseTimestamp": "2018-12-13T06:00:04.000Z",
       "version": "5.1-rc-1",
     },
-    Object {
+    {
       "releaseTimestamp": "2018-12-17T22:42:01.000Z",
       "version": "5.1-rc-2",
     },
-    Object {
+    {
       "releaseTimestamp": "2018-12-21T23:03:45.000Z",
       "version": "5.1-rc-3",
     },
-    Object {
+    {
       "releaseTimestamp": "2019-01-02T18:57:47.000Z",
       "version": "5.1",
     },
-    Object {
+    {
       "releaseTimestamp": "2019-01-10T23:05:02.000Z",
       "version": "5.1.1",
     },
-    Object {
+    {
       "releaseTimestamp": "2019-01-28T22:56:04.000Z",
       "version": "5.2-rc-1",
     },
-    Object {
+    {
       "releaseTimestamp": "2019-02-04T11:16:48.000Z",
       "version": "5.2",
     },
-    Object {
+    {
       "releaseTimestamp": "2019-02-08T19:00:10.000Z",
       "version": "5.2.1",
     },
-    Object {
+    {
       "releaseTimestamp": "2019-03-05T20:52:02.000Z",
       "version": "5.3-rc-1",
     },
-    Object {
+    {
       "releaseTimestamp": "2019-03-11T21:07:26.000Z",
       "version": "5.3-rc-2",
     },
-    Object {
+    {
       "releaseTimestamp": "2019-03-13T20:27:08.000Z",
       "version": "5.3-rc-3",
     },
-    Object {
+    {
       "releaseTimestamp": "2019-03-20T11:03:29.000Z",
       "version": "5.3",
     },
-    Object {
+    {
       "releaseTimestamp": "2019-03-28T09:09:23.000Z",
       "version": "5.3.1",
     },
-    Object {
+    {
       "releaseTimestamp": "2019-04-10T01:15:32.000Z",
       "version": "5.4-rc-1",
     },
-    Object {
+    {
       "releaseTimestamp": "2019-04-16T02:44:16.000Z",
       "version": "5.4",
     },
-    Object {
+    {
       "releaseTimestamp": "2019-04-26T08:14:42.000Z",
       "version": "5.4.1",
     },
-    Object {
+    {
       "releaseTimestamp": "2019-05-29T11:51:19.000Z",
       "version": "5.5-rc-1",
     },
-    Object {
+    {
       "releaseTimestamp": "2019-06-07T09:06:57.000Z",
       "version": "5.5-rc-2",
     },
-    Object {
+    {
       "releaseTimestamp": "2019-06-14T23:15:38.000Z",
       "version": "5.5-rc-3",
     },
-    Object {
+    {
       "releaseTimestamp": "2019-06-24T15:24:32.000Z",
       "version": "5.5-rc-4",
     },
-    Object {
+    {
       "releaseTimestamp": "2019-06-28T17:36:05.000Z",
       "version": "5.5",
     },
-    Object {
+    {
       "releaseTimestamp": "2019-07-10T20:38:12.000Z",
       "version": "5.5.1",
     },
-    Object {
+    {
       "releaseTimestamp": "2019-07-29T11:26:26.000Z",
       "version": "5.6-rc-1",
     },
-    Object {
+    {
       "releaseTimestamp": "2019-08-07T15:03:42.000Z",
       "version": "5.6-rc-2",
     },
-    Object {
+    {
       "releaseTimestamp": "2019-08-14T21:05:25.000Z",
       "version": "5.6",
     },
-    Object {
+    {
       "releaseTimestamp": "2019-08-28T02:49:34.000Z",
       "version": "5.6.1",
     },
-    Object {
+    {
       "releaseTimestamp": "2019-09-05T16:13:54.000Z",
       "version": "5.6.2",
     },
-    Object {
+    {
       "releaseTimestamp": "2019-10-18T00:28:36.000Z",
       "version": "5.6.3",
     },
-    Object {
+    {
       "releaseTimestamp": "2019-11-01T20:42:00.000Z",
       "version": "5.6.4",
     },
-    Object {
+    {
       "releaseTimestamp": "2019-10-18T19:24:16.000Z",
       "version": "6.0-rc-1",
     },
-    Object {
+    {
       "releaseTimestamp": "2019-10-30T16:03:21.000Z",
       "version": "6.0-rc-2",
     },
-    Object {
+    {
       "releaseTimestamp": "2019-11-05T17:56:39.000Z",
       "version": "6.0-rc-3",
     },
-    Object {
+    {
       "releaseTimestamp": "2019-11-08T18:12:12.000Z",
       "version": "6.0",
     },
-    Object {
+    {
       "releaseTimestamp": "2019-11-18T20:25:01.000Z",
       "version": "6.0.1",
     },
-    Object {
+    {
       "releaseTimestamp": "2019-11-20T13:24:05.000Z",
       "version": "6.1-milestone-1",
     },
-    Object {
+    {
       "releaseTimestamp": "2019-11-28T10:17:55.000Z",
       "version": "6.1-milestone-2",
     },
-    Object {
+    {
       "releaseTimestamp": "2019-12-03T14:13:33.000Z",
       "version": "6.1-milestone-3",
     },
-    Object {
+    {
       "releaseTimestamp": "2019-12-19T21:56:43.000Z",
       "version": "6.1-rc-1",
     },
-    Object {
+    {
       "releaseTimestamp": "2020-01-07T21:17:05.000Z",
       "version": "6.1-rc-2",
     },
-    Object {
+    {
       "releaseTimestamp": "2020-01-13T16:23:24.000Z",
       "version": "6.1-rc-3",
     },
-    Object {
+    {
       "releaseTimestamp": "2020-01-15T23:56:46.000Z",
       "version": "6.1",
     },
-    Object {
+    {
       "releaseTimestamp": "2020-01-24T22:30:24.000Z",
       "version": "6.1.1",
     },
-    Object {
+    {
       "releaseTimestamp": "2020-02-03T12:30:03.000Z",
       "version": "6.2-rc-1",
     },
-    Object {
+    {
       "releaseTimestamp": "2020-02-11T22:14:00.000Z",
       "version": "6.2-rc-2",
     },
-    Object {
+    {
       "releaseTimestamp": "2020-02-13T01:29:14.000Z",
       "version": "6.2-rc-3",
     },
-    Object {
+    {
       "releaseTimestamp": "2020-02-17T08:32:01.000Z",
       "version": "6.2",
     },
-    Object {
+    {
       "releaseTimestamp": "2020-02-24T20:24:10.000Z",
       "version": "6.2.1",
     },
-    Object {
+    {
       "releaseTimestamp": "2020-03-04T08:49:31.000Z",
       "version": "6.2.2",
     },
-    Object {
+    {
       "releaseTimestamp": "2020-03-11T21:41:14.000Z",
       "version": "6.3-rc-1",
     },
-    Object {
+    {
       "releaseTimestamp": "2020-03-17T12:40:36.000Z",
       "version": "6.3-rc-2",
     },
-    Object {
+    {
       "releaseTimestamp": "2020-03-18T15:26:49.000Z",
       "version": "6.3-rc-3",
     },
-    Object {
+    {
       "releaseTimestamp": "2020-03-20T05:39:45.000Z",
       "version": "6.3-rc-4",
     },
-    Object {
+    {
       "releaseTimestamp": "2020-03-24T19:52:07.000Z",
       "version": "6.3",
     },
-    Object {
+    {
       "releaseTimestamp": "2020-04-15T20:28:39.000Z",
       "version": "6.4-rc-1",
     },
-    Object {
+    {
       "releaseTimestamp": "2020-04-22T16:32:05.000Z",
       "version": "6.4-rc-2",
     },
-    Object {
+    {
       "releaseTimestamp": "2020-04-28T19:00:39.000Z",
       "version": "6.4-rc-3",
     },
-    Object {
+    {
       "releaseTimestamp": "2020-04-30T21:23:30.000Z",
       "version": "6.4-rc-4",
     },
-    Object {
+    {
       "releaseTimestamp": "2020-05-05T19:18:55.000Z",
       "version": "6.4",
     },
-    Object {
+    {
       "releaseTimestamp": "2020-05-15T19:43:40.000Z",
       "version": "6.4.1",
     },
-    Object {
+    {
       "releaseTimestamp": "2020-05-07T13:55:06.000Z",
       "version": "6.5-milestone-1",
     },
-    Object {
+    {
       "releaseTimestamp": "2020-05-15T09:40:06.000Z",
       "version": "6.5-milestone-2",
     },
-    Object {
+    {
       "releaseTimestamp": "2020-05-26T20:04:48.000Z",
       "version": "6.5-rc-1",
     },
-    Object {
+    {
       "releaseTimestamp": "2020-06-02T20:46:21.000Z",
       "version": "6.5",
     },
-    Object {
+    {
       "releaseTimestamp": "2020-06-30T06:32:47.000Z",
       "version": "6.5.1",
     },
-    Object {
+    {
       "releaseTimestamp": "2020-06-11T20:24:18.000Z",
       "version": "6.6-milestone-1",
     },
-    Object {
+    {
       "releaseTimestamp": "2020-06-23T12:28:34.000Z",
       "version": "6.6-milestone-2",
     },
-    Object {
+    {
       "releaseTimestamp": "2020-07-07T16:09:51.000Z",
       "version": "6.6-milestone-3",
     },
-    Object {
+    {
       "releaseTimestamp": "2020-07-13T13:53:25.000Z",
       "version": "6.6-rc-1",
     },
-    Object {
+    {
       "releaseTimestamp": "2020-07-20T21:43:44.000Z",
       "version": "6.6-rc-2",
     },
-    Object {
+    {
       "releaseTimestamp": "2020-07-24T14:04:09.000Z",
       "version": "6.6-rc-3",
     },
-    Object {
+    {
       "releaseTimestamp": "2020-07-30T14:48:24.000Z",
       "version": "6.6-rc-4",
     },
-    Object {
+    {
       "releaseTimestamp": "2020-08-03T18:54:44.000Z",
       "version": "6.6-rc-5",
     },
-    Object {
+    {
       "releaseTimestamp": "2020-08-05T19:57:44.000Z",
       "version": "6.6-rc-6",
     },
-    Object {
+    {
       "releaseTimestamp": "2020-08-10T22:06:19.000Z",
       "version": "6.6",
     },
-    Object {
+    {
       "releaseTimestamp": "2020-08-25T16:29:12.000Z",
       "version": "6.6.1",
     },
-    Object {
+    {
       "releaseTimestamp": "2020-09-11T16:17:05.000Z",
       "version": "6.7-rc-1",
     },
-    Object {
+    {
       "releaseTimestamp": "2020-09-25T20:14:44.000Z",
       "version": "6.7-rc-2",
     },
-    Object {
+    {
       "releaseTimestamp": "2020-09-30T19:16:51.000Z",
       "version": "6.7-rc-3",
     },
-    Object {
+    {
       "releaseTimestamp": "2020-10-08T16:57:38.000Z",
       "version": "6.7-rc-4",
     },
-    Object {
+    {
       "releaseTimestamp": "2020-10-12T19:09:40.000Z",
       "version": "6.7-rc-5",
     },
-    Object {
+    {
       "releaseTimestamp": "2020-10-14T16:13:12.000Z",
       "version": "6.7",
     },
-    Object {
+    {
       "releaseTimestamp": "2020-11-16T17:09:24.000Z",
       "version": "6.7.1",
     },
-    Object {
+    {
       "releaseTimestamp": "2020-10-13T06:59:06.000Z",
       "version": "6.8-milestone-1",
     },
-    Object {
+    {
       "releaseTimestamp": "2020-10-28T05:55:18.000Z",
       "version": "6.8-milestone-2",
     },
-    Object {
+    {
       "releaseTimestamp": "2020-11-15T20:00:53.000Z",
       "version": "6.8-milestone-3",
     },
-    Object {
+    {
       "releaseTimestamp": "2020-11-26T09:25:43.000Z",
       "version": "6.8-rc-1",
     },
-    Object {
+    {
       "releaseTimestamp": "2020-12-17T14:24:52.000Z",
       "version": "6.8-rc-3",
     },
-    Object {
+    {
       "releaseTimestamp": "2020-12-22T08:44:10.000Z",
       "version": "6.8-rc-4",
     },
-    Object {
+    {
       "releaseTimestamp": "2021-01-04T20:22:03.000Z",
       "version": "6.8-rc-5",
     },
-    Object {
+    {
       "releaseTimestamp": "2021-01-08T16:38:46.000Z",
       "version": "6.8",
     },
-    Object {
+    {
       "releaseTimestamp": "2021-01-22T13:20:08.000Z",
       "version": "6.8.1",
     },
-    Object {
+    {
       "releaseTimestamp": "2021-02-05T12:53:00.000Z",
       "version": "6.8.2",
     },
-    Object {
+    {
       "releaseTimestamp": "2021-02-22T16:13:28.000Z",
       "version": "6.8.3",
     },
-    Object {
+    {
       "releaseTimestamp": "2021-02-03T22:00:23.000Z",
       "version": "7.0-milestone-1",
     },
-    Object {
+    {
       "releaseTimestamp": "2021-02-23T23:02:54.000Z",
       "version": "7.0-milestone-2",
     },
-    Object {
+    {
       "releaseTimestamp": "2021-03-13T01:03:21.000Z",
       "version": "7.0-milestone-3",
     },
-    Object {
+    {
       "releaseTimestamp": "2021-03-23T01:02:30.000Z",
       "version": "7.0-rc-1",
     },

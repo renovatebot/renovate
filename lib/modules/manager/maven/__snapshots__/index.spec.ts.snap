@@ -1,208 +1,208 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`modules/manager/maven/index extractAllPackageFiles should return package files info 1`] = `
-Array [
-  Object {
+[
+  {
     "datasource": "maven",
-    "deps": Array [
-      Object {
+    "deps": [
+      {
         "currentValue": "42",
         "datasource": "maven",
         "depName": "org.example:parent",
         "depType": "parent",
         "fileReplacePosition": 186,
-        "registryUrls": Array [
+        "registryUrls": [
           "https://repo.maven.apache.org/maven2",
           "https://maven.atlassian.com/content/repositories/atlassian-public/",
         ],
       },
-      Object {
+      {
         "currentValue": "0.0.1",
         "datasource": "maven",
         "depName": "org.example:foo",
         "depType": "compile",
         "fileReplacePosition": 905,
-        "registryUrls": Array [
+        "registryUrls": [
           "https://repo.maven.apache.org/maven2",
           "https://maven.atlassian.com/content/repositories/atlassian-public/",
         ],
       },
-      Object {
+      {
         "currentValue": "1.0.0",
         "datasource": "maven",
         "depName": "org.example:bar",
         "depType": "compile",
         "fileReplacePosition": 1093,
-        "registryUrls": Array [
+        "registryUrls": [
           "https://repo.maven.apache.org/maven2",
           "https://maven.atlassian.com/content/repositories/atlassian-public/",
         ],
       },
-      Object {
+      {
         "currentValue": "2.4.2",
         "datasource": "maven",
         "depName": "org.apache.maven.plugins:maven-release-plugin",
         "depType": "build",
         "fileReplacePosition": 1347,
-        "registryUrls": Array [
+        "registryUrls": [
           "https://repo.maven.apache.org/maven2",
           "https://maven.atlassian.com/content/repositories/atlassian-public/",
         ],
       },
-      Object {
+      {
         "currentValue": "1.8.1",
         "datasource": "maven",
         "depName": "org.apache.maven.scm:maven-scm-provider-gitexe",
         "depType": "build",
         "fileReplacePosition": 1545,
-        "registryUrls": Array [
+        "registryUrls": [
           "https://repo.maven.apache.org/maven2",
           "https://maven.atlassian.com/content/repositories/atlassian-public/",
         ],
       },
-      Object {
+      {
         "currentValue": "1.0",
         "datasource": "maven",
         "depName": "org.example:extension-artefact",
         "depType": "build",
         "fileReplacePosition": 2276,
-        "registryUrls": Array [
+        "registryUrls": [
           "https://repo.maven.apache.org/maven2",
           "https://maven.atlassian.com/content/repositories/atlassian-public/",
         ],
       },
-      Object {
+      {
         "currentValue": "0.0.1",
         "datasource": "maven",
         "depName": "org.example:\${artifact-id-placeholder}",
         "depType": "compile",
         "fileReplacePosition": 2484,
-        "registryUrls": Array [
+        "registryUrls": [
           "https://repo.maven.apache.org/maven2",
           "https://maven.atlassian.com/content/repositories/atlassian-public/",
         ],
         "skipReason": "name-placeholder",
       },
-      Object {
+      {
         "currentValue": "0.0.1",
         "datasource": "maven",
         "depName": "\${group-id-placeholder}:baz",
         "depType": "compile",
         "fileReplacePosition": 2634,
-        "registryUrls": Array [
+        "registryUrls": [
           "https://repo.maven.apache.org/maven2",
           "https://maven.atlassian.com/content/repositories/atlassian-public/",
         ],
         "skipReason": "name-placeholder",
       },
-      Object {
+      {
         "currentValue": "1.2.3.4",
         "datasource": "maven",
         "depName": "org.example:quux",
         "depType": "compile",
         "fileReplacePosition": 698,
         "groupName": "quuxVersion",
-        "registryUrls": Array [
+        "registryUrls": [
           "https://repo.maven.apache.org/maven2",
           "https://maven.atlassian.com/content/repositories/atlassian-public/",
         ],
       },
-      Object {
+      {
         "currentValue": "1.2.3.4",
         "datasource": "maven",
         "depName": "org.example:quux-test",
         "depType": "compile",
         "fileReplacePosition": 698,
         "groupName": "quuxVersion",
-        "registryUrls": Array [
+        "registryUrls": [
           "https://repo.maven.apache.org/maven2",
           "https://maven.atlassian.com/content/repositories/atlassian-public/",
         ],
       },
-      Object {
+      {
         "currentValue": "1.2.3",
         "datasource": "maven",
         "depName": "org.example:quuz",
         "depType": "test",
         "fileReplacePosition": 3086,
-        "registryUrls": Array [
+        "registryUrls": [
           "https://repo.maven.apache.org/maven2",
           "https://maven.atlassian.com/content/repositories/atlassian-public/",
         ],
       },
-      Object {
+      {
         "currentValue": "it's not a version",
         "datasource": "maven",
         "depName": "org.example:quuuz",
         "depType": "compile",
         "fileReplacePosition": 3252,
-        "registryUrls": Array [
+        "registryUrls": [
           "https://repo.maven.apache.org/maven2",
           "https://maven.atlassian.com/content/repositories/atlassian-public/",
         ],
       },
-      Object {
+      {
         "currentValue": "[1.0.0]",
         "datasource": "maven",
         "depName": "org.example:hard-range",
         "depType": "compile",
         "fileReplacePosition": 3410,
-        "registryUrls": Array [
+        "registryUrls": [
           "https://repo.maven.apache.org/maven2",
           "https://maven.atlassian.com/content/repositories/atlassian-public/",
         ],
       },
-      Object {
+      {
         "currentValue": "1.0.0",
         "datasource": "maven",
         "depName": "org.example:optional",
         "depType": "optional",
         "fileReplacePosition": 3555,
-        "registryUrls": Array [
+        "registryUrls": [
           "https://repo.maven.apache.org/maven2",
           "https://maven.atlassian.com/content/repositories/atlassian-public/",
         ],
       },
-      Object {
+      {
         "currentValue": "1.0",
         "datasource": "maven",
         "depName": "org.example:relocation-artifact",
         "fileReplacePosition": 3787,
-        "registryUrls": Array [
+        "registryUrls": [
           "https://repo.maven.apache.org/maven2",
           "https://maven.atlassian.com/content/repositories/atlassian-public/",
         ],
       },
-      Object {
+      {
         "currentValue": "\${profile-placeholder}",
         "datasource": "maven",
         "depName": "org.example:profile-artifact",
         "depType": "compile",
         "fileReplacePosition": 4119,
-        "registryUrls": Array [
+        "registryUrls": [
           "https://repo.maven.apache.org/maven2",
           "https://maven.atlassian.com/content/repositories/atlassian-public/",
         ],
         "skipReason": "version-placeholder",
       },
-      Object {
+      {
         "currentValue": "2.17",
         "datasource": "maven",
         "depName": "org.example:profile-build-artefact",
         "depType": "build",
         "fileReplacePosition": 4375,
-        "registryUrls": Array [
+        "registryUrls": [
           "https://repo.maven.apache.org/maven2",
           "https://maven.atlassian.com/content/repositories/atlassian-public/",
         ],
       },
-      Object {
+      {
         "currentValue": "2.17",
         "datasource": "maven",
         "depName": "org.apache.maven.plugins:maven-checkstyle-plugin",
         "depType": "build",
         "fileReplacePosition": 4769,
-        "registryUrls": Array [
+        "registryUrls": [
           "https://repo.maven.apache.org/maven2",
           "https://maven.atlassian.com/content/repositories/atlassian-public/",
         ],
@@ -216,23 +216,23 @@ Array [
 `;
 
 exports[`modules/manager/maven/index updateDependency should include registryUrls from parent pom files 1`] = `
-Array [
-  Object {
+[
+  {
     "datasource": "maven",
-    "deps": Array [
-      Object {
+    "deps": [
+      {
         "currentValue": "42",
         "datasource": "maven",
         "depName": "org.example:child",
         "depType": "parent",
         "fileReplacePosition": 185,
-        "registryUrls": Array [
+        "registryUrls": [
           "https://repo.maven.apache.org/maven2",
           "http://example.com/nexus/xyz",
           "http://example.com/",
         ],
       },
-      Object {
+      {
         "currentValue": "1.2.3.4",
         "datasource": "maven",
         "depName": "org.example:quux",
@@ -240,7 +240,7 @@ Array [
         "editFile": "parent.pom.xml",
         "fileReplacePosition": 470,
         "groupName": "quuxVersion",
-        "registryUrls": Array [
+        "registryUrls": [
           "https://repo.maven.apache.org/maven2",
           "http://example.com/",
           "http://example.com/nexus/xyz",
@@ -250,151 +250,151 @@ Array [
     "packageFile": "parent.pom.xml",
     "parent": "child.pom.xml",
   },
-  Object {
+  {
     "datasource": "maven",
-    "deps": Array [
-      Object {
+    "deps": [
+      {
         "currentValue": "42",
         "datasource": "maven",
         "depName": "org.example:parent",
         "depType": "parent",
         "fileReplacePosition": 186,
-        "registryUrls": Array [
+        "registryUrls": [
           "https://repo.maven.apache.org/maven2",
           "http://example.com/",
           "http://example.com/nexus/xyz",
         ],
       },
-      Object {
+      {
         "currentValue": "0.0.1",
         "datasource": "maven",
         "depName": "org.example:foo",
         "depType": "compile",
         "fileReplacePosition": 806,
-        "registryUrls": Array [
+        "registryUrls": [
           "https://repo.maven.apache.org/maven2",
           "http://example.com/",
           "http://example.com/nexus/xyz",
         ],
       },
-      Object {
+      {
         "currentValue": "1.0.0",
         "datasource": "maven",
         "depName": "org.example:bar",
         "depType": "compile",
         "fileReplacePosition": 954,
-        "registryUrls": Array [
+        "registryUrls": [
           "https://repo.maven.apache.org/maven2",
           "http://example.com/",
           "http://example.com/nexus/xyz",
         ],
       },
-      Object {
+      {
         "currentValue": "2.4.2",
         "datasource": "maven",
         "depName": "org.apache.maven.plugins:maven-release-plugin",
         "depType": "build",
         "fileReplacePosition": 1188,
-        "registryUrls": Array [
+        "registryUrls": [
           "https://repo.maven.apache.org/maven2",
           "http://example.com/",
           "http://example.com/nexus/xyz",
         ],
       },
-      Object {
+      {
         "currentValue": "1.8.1",
         "datasource": "maven",
         "depName": "org.apache.maven.scm:maven-scm-provider-gitexe",
         "depType": "build",
         "fileReplacePosition": 1386,
-        "registryUrls": Array [
+        "registryUrls": [
           "https://repo.maven.apache.org/maven2",
           "http://example.com/",
           "http://example.com/nexus/xyz",
         ],
       },
-      Object {
+      {
         "currentValue": "0.0.1",
         "datasource": "maven",
         "depName": "org.example:\${artifact-id-placeholder}",
         "depType": "compile",
         "fileReplacePosition": 2131,
-        "registryUrls": Array [
+        "registryUrls": [
           "https://repo.maven.apache.org/maven2",
           "http://example.com/",
           "http://example.com/nexus/xyz",
         ],
         "skipReason": "name-placeholder",
       },
-      Object {
+      {
         "currentValue": "0.0.1",
         "datasource": "maven",
         "depName": "\${group-id-placeholder}:baz",
         "depType": "compile",
         "fileReplacePosition": 2281,
-        "registryUrls": Array [
+        "registryUrls": [
           "https://repo.maven.apache.org/maven2",
           "http://example.com/",
           "http://example.com/nexus/xyz",
         ],
         "skipReason": "name-placeholder",
       },
-      Object {
+      {
         "currentValue": "1.2.3",
         "datasource": "maven",
         "depName": "org.example:quuz",
         "depType": "compile",
         "fileReplacePosition": 2574,
-        "registryUrls": Array [
+        "registryUrls": [
           "https://repo.maven.apache.org/maven2",
           "http://example.com/",
           "http://example.com/nexus/xyz",
         ],
       },
-      Object {
+      {
         "currentValue": "it's not a version",
         "datasource": "maven",
         "depName": "org.example:quuuz",
         "depType": "compile",
         "fileReplacePosition": 2714,
-        "registryUrls": Array [
+        "registryUrls": [
           "https://repo.maven.apache.org/maven2",
           "http://example.com/",
           "http://example.com/nexus/xyz",
         ],
       },
-      Object {
+      {
         "currentValue": "[1.0.0]",
         "datasource": "maven",
         "depName": "org.example:hard-range",
         "depType": "compile",
         "fileReplacePosition": 2872,
-        "registryUrls": Array [
+        "registryUrls": [
           "https://repo.maven.apache.org/maven2",
           "http://example.com/",
           "http://example.com/nexus/xyz",
         ],
       },
-      Object {
+      {
         "currentValue": "\${profile-placeholder}",
         "datasource": "maven",
         "depName": "org.example:profile-artifact",
         "depType": "compile",
         "fileReplacePosition": 3134,
-        "registryUrls": Array [
+        "registryUrls": [
           "https://repo.maven.apache.org/maven2",
           "http://example.com/",
           "http://example.com/nexus/xyz",
         ],
         "skipReason": "version-placeholder",
       },
-      Object {
+      {
         "currentValue": "2.17",
         "datasource": "maven",
         "depName": "org.apache.maven.plugins:maven-checkstyle-plugin",
         "depType": "build",
         "fileReplacePosition": 3410,
-        "registryUrls": Array [
+        "registryUrls": [
           "https://repo.maven.apache.org/maven2",
           "http://example.com/",
           "http://example.com/nexus/xyz",
