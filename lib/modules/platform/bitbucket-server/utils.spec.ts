@@ -60,6 +60,7 @@ function infoMock(
       });
     }
     return {
+      id: 123,
       project: { key: projectKey },
       origin: { name: repositorySlug, slug: repositorySlug },
       links,

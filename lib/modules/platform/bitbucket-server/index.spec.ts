@@ -313,7 +313,6 @@ describe('modules/platform/bitbucket-server/index', () => {
             defaultBranch: 'master',
             isFork: false,
             repoCacheId: '13076',
-            repoCacheId: '13076',
           });
         });
 
