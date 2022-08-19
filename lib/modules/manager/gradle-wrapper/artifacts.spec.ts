@@ -64,264 +64,266 @@ describe('modules/manager/gradle-wrapper/artifacts', () => {
     });
   });
 
-  it('replaces existing value', async () => {
-    const execSnapshots = mockExecAll();
-    git.getRepoStatus.mockResolvedValue(
-      partial<StatusResult>({
-        modified: [
+  describe('updateArtifacts()', () => {
+    it('replaces existing value', async () => {
+      const execSnapshots = mockExecAll();
+      git.getRepoStatus.mockResolvedValue(
+        partial<StatusResult>({
+          modified: [
+            'gradle/wrapper/gradle-wrapper.properties',
+            'gradlew',
+            'gradlew.bat',
+          ],
+        })
+      );
+
+      const res = await updateArtifacts({
+        packageFileName: 'gradle/wrapper/gradle-wrapper.properties',
+        updatedDeps: [],
+        newPackageFileContent: Fixtures.get(
+          'expectedFiles/gradle/wrapper/gradle-wrapper.properties'
+        ),
+        config: { ...config, newValue: '6.3' },
+      });
+
+      expect(res).toEqual(
+        [
           'gradle/wrapper/gradle-wrapper.properties',
           'gradlew',
           'gradlew.bat',
-        ],
-      })
-    );
-
-    const res = await updateArtifacts({
-      packageFileName: 'gradle/wrapper/gradle-wrapper.properties',
-      updatedDeps: [],
-      newPackageFileContent: Fixtures.get(
-        'expectedFiles/gradle/wrapper/gradle-wrapper.properties'
-      ),
-      config: { ...config, newValue: '6.3' },
-    });
-
-    expect(res).toEqual(
-      [
-        'gradle/wrapper/gradle-wrapper.properties',
-        'gradlew',
-        'gradlew.bat',
-      ].map((fileProjectPath) => ({
-        file: {
-          type: 'addition',
-          path: fileProjectPath,
-          contents: 'test',
-        },
-      }))
-    );
-    expect(execSnapshots).toMatchObject([
-      {
-        cmd: './gradlew wrapper --gradle-distribution-url https://services.gradle.org/distributions/gradle-6.3-bin.zip',
-        options: {
-          cwd: '/tmp/github/some/repo',
-          encoding: 'utf-8',
-          env: {
-            GRADLE_OPTS:
-              '-Dorg.gradle.parallel=true -Dorg.gradle.configureondemand=true -Dorg.gradle.daemon=false -Dorg.gradle.caching=false',
+        ].map((fileProjectPath) => ({
+          file: {
+            type: 'addition',
+            path: fileProjectPath,
+            contents: 'test',
+          },
+        }))
+      );
+      expect(execSnapshots).toMatchObject([
+        {
+          cmd: './gradlew wrapper --gradle-distribution-url https://services.gradle.org/distributions/gradle-6.3-bin.zip',
+          options: {
+            cwd: '/tmp/github/some/repo',
+            encoding: 'utf-8',
+            env: {
+              GRADLE_OPTS:
+                '-Dorg.gradle.parallel=true -Dorg.gradle.configureondemand=true -Dorg.gradle.daemon=false -Dorg.gradle.caching=false',
+            },
           },
         },
-      },
-    ]);
-  });
-
-  it('gradlew not found', async () => {
-    const execSnapshots = mockExecAll();
-    fs.statLocalFile.mockResolvedValue(
-      partial<Stats>({
-        isFile: () => false,
-        mode: 0o555,
-      })
-    );
-
-    const result = await updateArtifacts({
-      packageFileName: 'gradle/wrapper/gradle-wrapper.properties',
-      updatedDeps: [],
-      newPackageFileContent: '',
-      config: {},
+      ]);
     });
 
-    expect(result).toBeNull();
-    expect(execSnapshots).toBeEmptyArray();
-  });
-
-  it('gradlew failed', async () => {
-    const execSnapshots = mockExecAll(new Error('failed'));
-    git.getRepoStatus.mockResolvedValueOnce(
-      partial<StatusResult>({
-        modified: [],
-      })
-    );
-    const result = await updateArtifacts({
-      packageFileName: 'gradle/wrapper/gradle-wrapper.properties',
-      updatedDeps: [],
-      newPackageFileContent: '',
-      config,
-    });
-
-    expect(result).toBeEmptyArray();
-    expect(execSnapshots).toMatchObject([
-      {
-        cmd: './gradlew wrapper --gradle-version 5.6.4',
-        options: { cwd: '/tmp/github/some/repo' },
-      },
-    ]);
-  });
-
-  it('updates distributionSha256Sum (docker)', async () => {
-    const execSnapshots = mockExecAll();
-    httpMock
-      .scope('https://services.gradle.org')
-      .get('/distributions/gradle-6.3-bin.zip.sha256')
-      .reply(
-        200,
-        '038794feef1f4745c6347107b6726279d1c824f3fc634b60f86ace1e9fbd1768'
+    it('gradlew not found', async () => {
+      const execSnapshots = mockExecAll();
+      fs.statLocalFile.mockResolvedValue(
+        partial<Stats>({
+          isFile: () => false,
+          mode: 0o555,
+        })
       );
-    git.getRepoStatus.mockResolvedValueOnce(
-      partial<StatusResult>({
-        modified: ['gradle/wrapper/gradle-wrapper.properties'],
-      })
-    );
-    GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
 
-    const result = await updateArtifacts({
-      packageFileName: 'gradle/wrapper/gradle-wrapper.properties',
-      updatedDeps: [],
-      newPackageFileContent: `distributionSha256Sum=336b6898b491f6334502d8074a6b8c2d73ed83b92123106bd4bf837f04111043\ndistributionUrl=https\\://services.gradle.org/distributions/gradle-6.3-bin.zip`,
-      config,
+      const result = await updateArtifacts({
+        packageFileName: 'gradle/wrapper/gradle-wrapper.properties',
+        updatedDeps: [],
+        newPackageFileContent: '',
+        config: {},
+      });
+
+      expect(result).toBeNull();
+      expect(execSnapshots).toBeEmptyArray();
     });
 
-    expect(result).toEqual([
-      {
-        file: {
-          contents: 'test',
-          path: 'gradle/wrapper/gradle-wrapper.properties',
-          type: 'addition',
-        },
-      },
-    ]);
-    expect(execSnapshots).toMatchObject([
-      { cmd: 'docker pull renovate/sidecar' },
-      { cmd: 'docker ps --filter name=renovate_sidecar -aq' },
-      {
-        cmd:
-          'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
-          '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
-          '-v "/tmp/cache":"/tmp/cache" ' +
-          '-e GRADLE_OPTS ' +
-          '-e BUILDPACK_CACHE_DIR ' +
-          '-w "/tmp/github/some/repo" ' +
-          'renovate/sidecar' +
-          ' bash -l -c "' +
-          'install-tool java 11.0.1' +
-          ' && ' +
-          './gradlew wrapper --gradle-distribution-url https://services.gradle.org/distributions/gradle-6.3-bin.zip --gradle-distribution-sha256-sum 038794feef1f4745c6347107b6726279d1c824f3fc634b60f86ace1e9fbd1768' +
-          '"',
-        options: { cwd: '/tmp/github/some/repo' },
-      },
-    ]);
-  });
-
-  it('updates distributionSha256Sum (install)', async () => {
-    const execSnapshots = mockExecAll();
-    httpMock
-      .scope('https://services.gradle.org')
-      .get('/distributions/gradle-6.3-bin.zip.sha256')
-      .reply(
-        200,
-        '038794feef1f4745c6347107b6726279d1c824f3fc634b60f86ace1e9fbd1768'
+    it('gradlew failed', async () => {
+      const execSnapshots = mockExecAll(new Error('failed'));
+      git.getRepoStatus.mockResolvedValueOnce(
+        partial<StatusResult>({
+          modified: [],
+        })
       );
-    git.getRepoStatus.mockResolvedValueOnce(
-      partial<StatusResult>({
-        modified: ['gradle/wrapper/gradle-wrapper.properties'],
-      })
-    );
-    GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
+      const result = await updateArtifacts({
+        packageFileName: 'gradle/wrapper/gradle-wrapper.properties',
+        updatedDeps: [],
+        newPackageFileContent: '',
+        config,
+      });
 
-    const result = await updateArtifacts({
-      packageFileName: 'gradle/wrapper/gradle-wrapper.properties',
-      updatedDeps: [],
-      newPackageFileContent: `distributionSha256Sum=336b6898b491f6334502d8074a6b8c2d73ed83b92123106bd4bf837f04111043\ndistributionUrl=https\\://services.gradle.org/distributions/gradle-6.3-bin.zip`,
-      config,
+      expect(result).toBeEmptyArray();
+      expect(execSnapshots).toMatchObject([
+        {
+          cmd: './gradlew wrapper --gradle-version 5.6.4',
+          options: { cwd: '/tmp/github/some/repo' },
+        },
+      ]);
     });
 
-    expect(result).toEqual([
-      {
-        file: {
-          contents: 'test',
-          path: 'gradle/wrapper/gradle-wrapper.properties',
-          type: 'addition',
+    it('updates distributionSha256Sum (docker)', async () => {
+      const execSnapshots = mockExecAll();
+      httpMock
+        .scope('https://services.gradle.org')
+        .get('/distributions/gradle-6.3-bin.zip.sha256')
+        .reply(
+          200,
+          '038794feef1f4745c6347107b6726279d1c824f3fc634b60f86ace1e9fbd1768'
+        );
+      git.getRepoStatus.mockResolvedValueOnce(
+        partial<StatusResult>({
+          modified: ['gradle/wrapper/gradle-wrapper.properties'],
+        })
+      );
+      GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
+
+      const result = await updateArtifacts({
+        packageFileName: 'gradle/wrapper/gradle-wrapper.properties',
+        updatedDeps: [],
+        newPackageFileContent: `distributionSha256Sum=336b6898b491f6334502d8074a6b8c2d73ed83b92123106bd4bf837f04111043\ndistributionUrl=https\\://services.gradle.org/distributions/gradle-6.3-bin.zip`,
+        config,
+      });
+
+      expect(result).toEqual([
+        {
+          file: {
+            contents: 'test',
+            path: 'gradle/wrapper/gradle-wrapper.properties',
+            type: 'addition',
+          },
         },
-      },
-    ]);
-    expect(execSnapshots).toMatchObject([
-      { cmd: 'install-tool java 11.0.1' },
-      {
-        cmd: './gradlew wrapper --gradle-distribution-url https://services.gradle.org/distributions/gradle-6.3-bin.zip --gradle-distribution-sha256-sum 038794feef1f4745c6347107b6726279d1c824f3fc634b60f86ace1e9fbd1768',
-        options: { cwd: '/tmp/github/some/repo' },
-      },
-    ]);
-  });
-
-  it('distributionSha256Sum 404', async () => {
-    const execSnapshots = mockExecAll();
-    httpMock
-      .scope('https://services.gradle.org')
-      .get('/distributions/gradle-6.3-bin.zip.sha256')
-      .reply(404);
-
-    const result = await updateArtifacts({
-      packageFileName: 'gradle/wrapper/gradle-wrapper.properties',
-      updatedDeps: [],
-      newPackageFileContent: `distributionSha256Sum=336b6898b491f6334502d8074a6b8c2d73ed83b92123106bd4bf837f04111043\ndistributionUrl=https\\://services.gradle.org/distributions/gradle-6.3-bin.zip`,
-      config,
+      ]);
+      expect(execSnapshots).toMatchObject([
+        { cmd: 'docker pull renovate/sidecar' },
+        { cmd: 'docker ps --filter name=renovate_sidecar -aq' },
+        {
+          cmd:
+            'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
+            '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
+            '-v "/tmp/cache":"/tmp/cache" ' +
+            '-e GRADLE_OPTS ' +
+            '-e BUILDPACK_CACHE_DIR ' +
+            '-w "/tmp/github/some/repo" ' +
+            'renovate/sidecar' +
+            ' bash -l -c "' +
+            'install-tool java 11.0.1' +
+            ' && ' +
+            './gradlew wrapper --gradle-distribution-url https://services.gradle.org/distributions/gradle-6.3-bin.zip --gradle-distribution-sha256-sum 038794feef1f4745c6347107b6726279d1c824f3fc634b60f86ace1e9fbd1768' +
+            '"',
+          options: { cwd: '/tmp/github/some/repo' },
+        },
+      ]);
     });
 
-    expect(result).toEqual([
-      {
-        artifactError: {
-          lockFile: 'gradle/wrapper/gradle-wrapper.properties',
-          stderr: 'Response code 404 (Not Found)',
-        },
-      },
-    ]);
-    expect(execSnapshots).toBeEmptyArray();
-  });
+    it('updates distributionSha256Sum (install)', async () => {
+      const execSnapshots = mockExecAll();
+      httpMock
+        .scope('https://services.gradle.org')
+        .get('/distributions/gradle-6.3-bin.zip.sha256')
+        .reply(
+          200,
+          '038794feef1f4745c6347107b6726279d1c824f3fc634b60f86ace1e9fbd1768'
+        );
+      git.getRepoStatus.mockResolvedValueOnce(
+        partial<StatusResult>({
+          modified: ['gradle/wrapper/gradle-wrapper.properties'],
+        })
+      );
+      GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
 
-  it('handles gradle-wrapper in subdirectory', async () => {
-    const execSnapshots = mockExecAll();
-    git.getRepoStatus.mockResolvedValue(
-      partial<StatusResult>({
-        modified: [
+      const result = await updateArtifacts({
+        packageFileName: 'gradle/wrapper/gradle-wrapper.properties',
+        updatedDeps: [],
+        newPackageFileContent: `distributionSha256Sum=336b6898b491f6334502d8074a6b8c2d73ed83b92123106bd4bf837f04111043\ndistributionUrl=https\\://services.gradle.org/distributions/gradle-6.3-bin.zip`,
+        config,
+      });
+
+      expect(result).toEqual([
+        {
+          file: {
+            contents: 'test',
+            path: 'gradle/wrapper/gradle-wrapper.properties',
+            type: 'addition',
+          },
+        },
+      ]);
+      expect(execSnapshots).toMatchObject([
+        { cmd: 'install-tool java 11.0.1' },
+        {
+          cmd: './gradlew wrapper --gradle-distribution-url https://services.gradle.org/distributions/gradle-6.3-bin.zip --gradle-distribution-sha256-sum 038794feef1f4745c6347107b6726279d1c824f3fc634b60f86ace1e9fbd1768',
+          options: { cwd: '/tmp/github/some/repo' },
+        },
+      ]);
+    });
+
+    it('distributionSha256Sum 404', async () => {
+      const execSnapshots = mockExecAll();
+      httpMock
+        .scope('https://services.gradle.org')
+        .get('/distributions/gradle-6.3-bin.zip.sha256')
+        .reply(404);
+
+      const result = await updateArtifacts({
+        packageFileName: 'gradle/wrapper/gradle-wrapper.properties',
+        updatedDeps: [],
+        newPackageFileContent: `distributionSha256Sum=336b6898b491f6334502d8074a6b8c2d73ed83b92123106bd4bf837f04111043\ndistributionUrl=https\\://services.gradle.org/distributions/gradle-6.3-bin.zip`,
+        config,
+      });
+
+      expect(result).toEqual([
+        {
+          artifactError: {
+            lockFile: 'gradle/wrapper/gradle-wrapper.properties',
+            stderr: 'Response code 404 (Not Found)',
+          },
+        },
+      ]);
+      expect(execSnapshots).toBeEmptyArray();
+    });
+
+    it('handles gradle-wrapper in subdirectory', async () => {
+      const execSnapshots = mockExecAll();
+      git.getRepoStatus.mockResolvedValue(
+        partial<StatusResult>({
+          modified: [
+            'sub/gradle/wrapper/gradle-wrapper.properties',
+            'sub/gradlew',
+            'sub/gradlew.bat',
+          ],
+        })
+      );
+
+      const res = await updateArtifacts({
+        packageFileName: 'sub/gradle/wrapper/gradle-wrapper.properties',
+        updatedDeps: [],
+        newPackageFileContent: Fixtures.get(
+          'expectedFiles/gradle/wrapper/gradle-wrapper.properties'
+        ),
+        config: { ...config, newValue: '6.3' },
+      });
+
+      expect(res).toEqual(
+        [
           'sub/gradle/wrapper/gradle-wrapper.properties',
           'sub/gradlew',
           'sub/gradlew.bat',
-        ],
-      })
-    );
-
-    const res = await updateArtifacts({
-      packageFileName: 'sub/gradle/wrapper/gradle-wrapper.properties',
-      updatedDeps: [],
-      newPackageFileContent: Fixtures.get(
-        'expectedFiles/gradle/wrapper/gradle-wrapper.properties'
-      ),
-      config: { ...config, newValue: '6.3' },
-    });
-
-    expect(res).toEqual(
-      [
-        'sub/gradle/wrapper/gradle-wrapper.properties',
-        'sub/gradlew',
-        'sub/gradlew.bat',
-      ].map((fileProjectPath) => ({
-        file: {
-          type: 'addition',
-          path: fileProjectPath,
-          contents: 'test',
-        },
-      }))
-    );
-    expect(execSnapshots).toMatchObject([
-      {
-        cmd: './gradlew wrapper --gradle-distribution-url https://services.gradle.org/distributions/gradle-6.3-bin.zip',
-        options: {
-          cwd: '/tmp/github/some/repo/sub',
-          encoding: 'utf-8',
-          env: {
-            GRADLE_OPTS:
-              '-Dorg.gradle.parallel=true -Dorg.gradle.configureondemand=true -Dorg.gradle.daemon=false -Dorg.gradle.caching=false',
+        ].map((fileProjectPath) => ({
+          file: {
+            type: 'addition',
+            path: fileProjectPath,
+            contents: 'test',
+          },
+        }))
+      );
+      expect(execSnapshots).toMatchObject([
+        {
+          cmd: './gradlew wrapper --gradle-distribution-url https://services.gradle.org/distributions/gradle-6.3-bin.zip',
+          options: {
+            cwd: '/tmp/github/some/repo/sub',
+            encoding: 'utf-8',
+            env: {
+              GRADLE_OPTS:
+                '-Dorg.gradle.parallel=true -Dorg.gradle.configureondemand=true -Dorg.gradle.daemon=false -Dorg.gradle.caching=false',
+            },
           },
         },
-      },
-    ]);
+      ]);
+    });
   });
 });
