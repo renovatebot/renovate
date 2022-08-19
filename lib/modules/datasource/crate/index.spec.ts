@@ -9,6 +9,7 @@ import * as httpMock from '../../../../test/http-mock';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages';
+// import { logger } from '../../../logger';
 import * as memCache from '../../../util/cache/memory';
 import { RegistryFlavor, RegistryInfo } from './types';
 import { CrateDatasource } from '.';
@@ -90,6 +91,23 @@ describe('modules/datasource/crate/index', () => {
         'abcd',
       ]);
       expect(CrateDatasource.getIndexSuffix('abcde')).toStrictEqual([
+        'ab',
+        'cd',
+        'abcde',
+      ]);
+      expect(CrateDatasource.getIndexSuffix('A')).toStrictEqual(['1', 'a']);
+      expect(CrateDatasource.getIndexSuffix('AB')).toStrictEqual(['2', 'ab']);
+      expect(CrateDatasource.getIndexSuffix('ABC')).toStrictEqual([
+        '3',
+        'a',
+        'abc',
+      ]);
+      expect(CrateDatasource.getIndexSuffix('ABCD')).toStrictEqual([
+        'ab',
+        'cd',
+        'abcd',
+      ]);
+      expect(CrateDatasource.getIndexSuffix('ABCDE')).toStrictEqual([
         'ab',
         'cd',
         'abcde',
