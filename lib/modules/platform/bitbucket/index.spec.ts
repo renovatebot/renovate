@@ -5,7 +5,7 @@ import type * as _git from '../../../util/git';
 import { setBaseUrl } from '../../../util/http/bitbucket';
 import type { Platform, PlatformResult, RepoParams } from '../types';
 
-const baseUrl = 'https://api.bitbucket.org/';
+const baseUrl = 'https://api.bitbucket.org';
 
 const pr = {
   id: 5,
@@ -92,6 +92,7 @@ describe('modules/platform/bitbucket/index', () => {
       httpMock.scope(baseUrl).get('/2.0/user').reply(200);
       expect(
         await bitbucket.initPlatform({
+          endpoint: baseUrl,
           username: 'abc',
           password: '123',
         })
@@ -105,7 +106,8 @@ describe('modules/platform/bitbucket/index', () => {
       httpMock.scope(baseUrl).get('/2.0/user').reply(200);
       expect(
         await bitbucket.initPlatform({
-          token: 'token',
+          endpoint: baseUrl,
+          token: 'abc',
         })
       ).toEqual(expectedResult);
     });

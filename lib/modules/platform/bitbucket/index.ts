@@ -8,7 +8,7 @@ import { BranchStatus, PrState, VulnerabilityAlert } from '../../../types';
 import * as git from '../../../util/git';
 import * as hostRules from '../../../util/host-rules';
 import { BitbucketHttp, setBaseUrl } from '../../../util/http/bitbucket';
-import type { InternalHttpOptions } from '../../../util/http/types';
+import type { HttpOptions } from '../../../util/http/types';
 import { regEx } from '../../../util/regex';
 import { sanitize } from '../../../util/sanitize';
 import type {
@@ -70,11 +70,11 @@ export async function initPlatform({
   }
   setBaseUrl(defaults.endpoint);
   renovateUserUuid = null;
-  const options: InternalHttpOptions = {
+  const options: HttpOptions = {
     useCache: false,
   };
   if (token) {
-    options.headers = { Authorization: `Bearer ${token}` };
+    options.token = token;
   } else {
     options.username = username;
     options.password = password;
