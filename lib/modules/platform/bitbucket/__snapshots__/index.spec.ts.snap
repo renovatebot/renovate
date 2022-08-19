@@ -144,12 +144,6 @@ exports[`modules/platform/bitbucket/index getPrList() filters PR list by author 
 ]
 `;
 
-exports[`modules/platform/bitbucket/index initPlatform() should init 1`] = `
-{
-  "endpoint": "https://api.bitbucket.org/",
-}
-`;
-
 exports[`modules/platform/bitbucket/index initRepo() works 1`] = `
 {
   "defaultBranch": "master",
