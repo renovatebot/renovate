@@ -331,16 +331,21 @@ export class CrateDatasource extends Datasource {
   public static getIndexSuffix(packageName: string): string[] {
     const len = packageName.length;
 
+    // Cargo packages indexing follows the rule defined here.
+    // [https://doc.rust-lang.org/cargo/reference/registries.html#index-format]
+    // As they are stored in the files, package name should be case sensitive.
+    const pkgName = packageName.toLocaleLowerCase();
+
     if (len === 1) {
-      return ['1', packageName];
+      return ['1', pkgName];
     }
     if (len === 2) {
-      return ['2', packageName];
+      return ['2', pkgName];
     }
     if (len === 3) {
-      return ['3', packageName[0], packageName];
+      return ['3', pkgName[0], pkgName];
     }
 
-    return [packageName.slice(0, 2), packageName.slice(2, 4), packageName];
+    return [pkgName.slice(0, 2), pkgName.slice(2, 4), pkgName];
   }
 }
