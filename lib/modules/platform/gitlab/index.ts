@@ -326,6 +326,7 @@ export async function initRepo({
   const repoConfig: RepoResult = {
     defaultBranch: config.defaultBranch,
     isFork: !!res.body.forked_from_project,
+    repoCacheId: `${res.body.id}`,
   };
   return repoConfig;
 }

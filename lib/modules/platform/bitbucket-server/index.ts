@@ -210,6 +210,7 @@ export async function initRepo({
     const repoConfig: RepoResult = {
       defaultBranch: branchRes.body.displayId,
       isFork: !!info.origin,
+      repoCacheId: `${info.id}`,
     };
 
     return repoConfig;

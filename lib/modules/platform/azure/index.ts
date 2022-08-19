@@ -230,6 +230,7 @@ export async function initRepo({
   const repoConfig: RepoResult = {
     defaultBranch,
     isFork: false,
+    repoCacheId: repo.id!,
   };
   return repoConfig;
 }

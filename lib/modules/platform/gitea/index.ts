@@ -334,6 +334,7 @@ const platform: Platform = {
     return {
       defaultBranch: config.defaultBranch,
       isFork: !!repo.fork,
+      repoCacheId: `${defaults.endpoint}#${repo.id}`,
     };
   },
 

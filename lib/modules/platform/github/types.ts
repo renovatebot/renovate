@@ -111,6 +111,7 @@ export interface LocalRepoConfig {
 export type BranchProtection = any;
 
 export interface GhRepo {
+  repoCacheId: string;
   isFork: boolean;
   isArchived: boolean;
   nameWithOwner: string;
