@@ -7,7 +7,7 @@
     "renovate-config-validator": "dist/config-validator.js"
   },
   "scripts": {
-    "build": "run-s clean generate:* compile:*",
+    "build": "run-s clean generate:* compile:* create-json-schema",
     "build:docs": "run-s \"release:prepare {@}\" --",
     "clean": "rimraf dist tmp",
     "clean-cache": "node tools/clean-cache.mjs",
@@ -147,7 +147,7 @@
     "@renovatebot/ruby-semver": "1.1.4",
     "@sindresorhus/is": "4.6.0",
     "@types/tmp": "0.2.3",
-    "@yarnpkg/core": "3.1.0",
+    "@yarnpkg/core": "3.2.3",
     "@yarnpkg/parsers": "2.5.1",
     "auth-header": "1.0.0",
     "azure-devops-node-api": "11.2.0",
@@ -187,7 +187,7 @@
     "json-dup-key-validator": "1.0.3",
     "json-stringify-pretty-compact": "3.0.0",
     "json5": "2.2.1",
-    "luxon": "2.5.0",
+    "luxon": "3.0.1",
     "markdown-it": "13.0.1",
     "markdown-table": "2.0.0",
     "marshal": "0.5.4",
@@ -248,15 +248,16 @@
     "@types/js-yaml": "4.0.5",
     "@types/json-dup-key-validator": "1.0.0",
     "@types/linkify-markdown": "1.0.1",
-    "@types/luxon": "2.4.0",
+    "@types/lodash": "4.14.184",
+    "@types/luxon": "3.0.0",
     "@types/markdown-it": "12.2.3",
     "@types/markdown-table": "2.0.0",
     "@types/marshal": "0.5.1",
     "@types/moo": "0.5.5",
     "@types/nock": "10.0.3",
-    "@types/node": "16.11.47",
+    "@types/node": "16.11.48",
     "@types/parse-link-header": "2.0.0",
-    "@types/semver": "7.3.10",
+    "@types/semver": "7.3.12",
     "@types/semver-stable": "3.0.0",
     "@types/semver-utils": "1.1.1",
     "@types/shelljs": "0.8.11",
@@ -309,9 +310,11 @@
     "unified": "9.2.2"
   },
   "resolutions": {
-    "**/json-schema": "^0.4.0"
+    "**/json-schema": "^0.4.0",
+    "@yarnpkg/core/clipanion": "3.2.0-rc.4"
   },
   "files": [
-    "dist"
+    "dist",
+    "renovate-schema.json"
   ]
 }

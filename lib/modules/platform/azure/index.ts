@@ -135,6 +135,7 @@ export async function getRawFile(
   }
 
   if (!repoId) {
+    logger.debug('No repoId so cannot getRawFile');
     return null;
   }
 
