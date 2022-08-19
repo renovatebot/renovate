@@ -31,7 +31,6 @@ function extractLineInfo(lines: string[], regex: RegExp): Version | null {
           version: match.groups.version,
         };
       }
-      return null;
     }
   }
   return null;
@@ -41,31 +40,29 @@ export function extractPackageFile(fileContent: string): PackageFile | null {
   logger.trace('maven-wrapper.extractPackageFile()');
   const extractResult = extractVersions(fileContent);
   const deps = [];
-  if (extractResult) {
-    if (extractResult.maven?.version) {
-      const maven: PackageDependency = {
-        depName: 'maven',
-        packageName: 'org.apache.maven:apache-maven',
-        currentValue: extractResult.maven?.version,
-        replaceString: extractResult.maven?.url,
-        datasource: MavenDatasource.id,
-        versioning,
-      };
-      deps.push(maven);
-    }
 
-    if (extractResult.wrapper?.version) {
-      const wrapper: PackageDependency = {
-        depName: 'maven-wrapper',
-        packageName: 'org.apache.maven.wrapper:maven-wrapper',
-        currentValue: extractResult.wrapper?.version,
-        replaceString: extractResult.wrapper?.url,
-        datasource: MavenDatasource.id,
-        versioning,
-      };
-      deps.push(wrapper);
-    }
-    return { deps };
+  if (extractResult.maven?.version) {
+    const maven: PackageDependency = {
+      depName: 'maven',
+      packageName: 'org.apache.maven:apache-maven',
+      currentValue: extractResult.maven?.version,
+      replaceString: extractResult.maven?.url,
+      datasource: MavenDatasource.id,
+      versioning,
+    };
+    deps.push(maven);
   }
-  return null;
+
+  if (extractResult.wrapper?.version) {
+    const wrapper: PackageDependency = {
+      depName: 'maven-wrapper',
+      packageName: 'org.apache.maven.wrapper:maven-wrapper',
+      currentValue: extractResult.wrapper?.version,
+      replaceString: extractResult.wrapper?.url,
+      datasource: MavenDatasource.id,
+      versioning,
+    };
+    deps.push(wrapper);
+  }
+  return { deps };
 }
