@@ -19,7 +19,6 @@ declare global {
   }
 }
 
-// eslint-disable-next-line jest/no-standalone-expect
 expect.extend({
   toMigrate(
     CustomMigration: MigrationConstructor,
