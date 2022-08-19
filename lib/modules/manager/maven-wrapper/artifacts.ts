@@ -119,19 +119,12 @@ export function getJavaConstraint(
   const major = mavenWrapperVersion
     ? mavenVersioning.getMajor(mavenWrapperVersion)
     : null;
-  const minor = mavenWrapperVersion
-    ? mavenVersioning.getMinor(mavenWrapperVersion)
-    : null;
-
-  if (major && major === 3 && minor !== null && minor < 1) {
-    return '^7.0.0';
-  }
 
   if (major && major >= 3) {
-    return '^16.0.0';
+    return '^17.0.0';
   }
 
-  return '^5.0.0';
+  return '^8.0.0';
 }
 
 async function executeWrapperCommand(
