@@ -4415,10 +4415,10 @@ eslint-import-resolver-node@^0.3.6:
     debug "^3.2.7"
     resolve "^1.20.0"
 
-eslint-import-resolver-typescript@3.4.0:
-  version "3.4.0"
-  resolved "https://registry.yarnpkg.com/eslint-import-resolver-typescript/-/eslint-import-resolver-typescript-3.4.0.tgz#a7e334b86d638f49956f2b0dfbde29daa9c32dcd"
-  integrity sha512-rBCgiEovwX/HQ8ESWV+XIWZaFiRtDeAXNZdcTATB8UbMuadc9qfGOlIP+vy+c7nsgfEBN4NTwy5qunGNptDP0Q==
+eslint-import-resolver-typescript@3.4.1:
+  version "3.4.1"
+  resolved "https://registry.yarnpkg.com/eslint-import-resolver-typescript/-/eslint-import-resolver-typescript-3.4.1.tgz#072e5f7b4bf5d62d32d0b3a071fe551b45d15454"
+  integrity sha512-rcD4V2nnxk76JF6nuLcclGpya18KLhr/lwpl5xFXrVWZtdRSepfCGHk/oFn9HNstWX317Nuo/E3Z1vymPyPhlQ==
   dependencies:
     debug "^4.3.4"
     enhanced-resolve "^5.10.0"
