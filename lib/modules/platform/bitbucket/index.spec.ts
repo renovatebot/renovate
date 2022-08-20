@@ -138,7 +138,7 @@ describe('modules/platform/bitbucket/index', () => {
   });
 
   describe('initRepo()', () => {
-    it('works', async () => {
+    it('works with username and password', async () => {
       httpMock
         .scope(baseUrl)
         .get('/2.0/repositories/some/repo')
@@ -148,6 +148,22 @@ describe('modules/platform/bitbucket/index', () => {
           repository: 'some/repo',
         })
       ).toMatchSnapshot();
+    });
+
+    it('works with only token', async () => {
+      hostRules.clear();
+      hostRules.find.mockReturnValue({
+        token: 'abc',
+      });
+      httpMock
+        .scope(baseUrl)
+        .get('/2.0/repositories/some/repo')
+        .reply(200, { owner: {}, mainbranch: { name: 'master' } });
+      expect(
+        await bitbucket.initRepo({
+          repository: 'some/repo',
+        })
+      ).toEqual({ defaultBranch: 'master', isFork: false });
     });
   });
 
