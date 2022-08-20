@@ -762,16 +762,10 @@ describe('workers/repository/dependency-dashboard', () => {
 
         it('does not truncates as there is enough space to fit', () => {
           PackageFiles.add('main', packageFiles);
-          const nonTruncated = PackageFiles.getDashboardMarkdown(
-            config,
-            Infinity
-          );
+          const nonTruncated = PackageFiles.getDashboardMarkdown(Infinity);
           const len = (title + note + nonTruncated).length;
-          const truncated = PackageFiles.getDashboardMarkdown(config, len);
-          const truncatedWithTitle = PackageFiles.getDashboardMarkdown(
-            config,
-            len
-          );
+          const truncated = PackageFiles.getDashboardMarkdown(len);
+          const truncatedWithTitle = PackageFiles.getDashboardMarkdown(len);
           expect(truncated.length === nonTruncated.length).toBeTrue();
           expect(truncatedWithTitle.includes(note)).toBeFalse();
         });
@@ -779,47 +773,35 @@ describe('workers/repository/dependency-dashboard', () => {
         it('removes a branch with no managers', () => {
           PackageFiles.add('main', packageFiles);
           PackageFiles.add('dev', packageFilesWithDigest);
-          const md = PackageFiles.getDashboardMarkdown(config, Infinity, false);
+          const md = PackageFiles.getDashboardMarkdown(Infinity, false);
           const len = md.length;
           PackageFiles.add('empty/branch', {});
-          const truncated = PackageFiles.getDashboardMarkdown(
-            config,
-            len,
-            false
-          );
+          const truncated = PackageFiles.getDashboardMarkdown(len, false);
           expect(truncated.includes('empty/branch')).toBeFalse();
           expect(truncated.length === len).toBeTrue();
         });
 
         it('removes a manager with no package files', () => {
           PackageFiles.add('main', packageFiles);
-          const md = PackageFiles.getDashboardMarkdown(config, Infinity, false);
+          const md = PackageFiles.getDashboardMarkdown(Infinity, false);
           const len = md.length;
           PackageFiles.add('dev', { dockerfile: [] });
-          const truncated = PackageFiles.getDashboardMarkdown(
-            config,
-            len,
-            false
-          );
+          const truncated = PackageFiles.getDashboardMarkdown(len, false);
           expect(truncated.includes('dev')).toBeFalse();
           expect(truncated.length === len).toBeTrue();
         });
 
         it('does nothing when there are no base branches left', () => {
-          const truncated = PackageFiles.getDashboardMarkdown(
-            config,
-            -1,
-            false
-          );
+          const truncated = PackageFiles.getDashboardMarkdown(-1, false);
           expect(truncated).toBe('');
         });
 
         it('removes an entire base branch', () => {
           PackageFiles.add('main', packageFiles);
-          const md = PackageFiles.getDashboardMarkdown(config, Infinity);
+          const md = PackageFiles.getDashboardMarkdown(Infinity);
           const len = md.length + note.length;
           PackageFiles.add('dev', packageFilesWithDigest);
-          const truncated = PackageFiles.getDashboardMarkdown(config, len);
+          const truncated = PackageFiles.getDashboardMarkdown(len);
           expect(truncated.includes('dev')).toBeFalse();
           expect(truncated.length === len).toBeTrue();
         });
@@ -827,13 +809,9 @@ describe('workers/repository/dependency-dashboard', () => {
         it('ensures original data is unchanged', () => {
           PackageFiles.add('main', packageFiles);
           PackageFiles.add('dev', packageFilesWithDigest);
-          const pre = PackageFiles.getDashboardMarkdown(config, Infinity);
-          const truncated = PackageFiles.getDashboardMarkdown(
-            config,
-            -1,
-            false
-          );
-          const post = PackageFiles.getDashboardMarkdown(config, Infinity);
+          const pre = PackageFiles.getDashboardMarkdown(Infinity);
+          const truncated = PackageFiles.getDashboardMarkdown(-1, false);
+          const post = PackageFiles.getDashboardMarkdown(Infinity);
           expect(truncated).toBe('');
           expect(pre === post).toBeTrue();
           expect(post.includes('main')).toBeTrue();
