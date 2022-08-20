@@ -12,6 +12,9 @@ export const presets: Record<string, Preset> = {
     circleci: {
       enabled: false,
     },
+    woodpecker: {
+      enabled: true,
+    },
   },
   enableMajor: {
     description: 'Enable Docker `major` updates.',

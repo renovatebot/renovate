@@ -832,6 +832,7 @@ const options: RenovateOptions[] = [
       'kubernetes',
       'ansible',
       'droneci',
+      'woodpecker',
     ],
   },
   {
