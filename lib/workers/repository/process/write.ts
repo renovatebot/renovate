@@ -1,4 +1,5 @@
 import is from '@sindresorhus/is';
+import fs from 'fs-extra';
 import hasha from 'hasha';
 import stringify from 'safe-stable-stringify';
 import type { RenovateConfig } from '../../../config/types';
@@ -58,6 +59,7 @@ export async function writeUpdates(
   setMaxLimit(Limit.Branches, branchesRemaining);
 
   for (const branch of branches) {
+    await fs.writeFile('branch-data.json', JSON.stringify(branch));
     const { baseBranch, branchName } = branch;
     const meta: Record<string, string> = { branch: branchName };
     if (config.baseBranches?.length && baseBranch) {
@@ -76,9 +78,13 @@ export async function writeUpdates(
       }
     }
     const branchManagersFingerprint = hasha(
-      branch.upgrades
-        .map((upgrade) => hashMap.get(upgrade.manager) ?? upgrade.manager)
-        .filter(is.string)
+      [
+        ...new Set(
+          branch.upgrades
+            .map((upgrade) => hashMap.get(upgrade.manager) ?? upgrade.manager)
+            .filter(is.string)
+        ),
+      ].sort()
     );
     const branchFingerprint = hasha([
       stringify(branch),
@@ -88,6 +94,8 @@ export async function writeUpdates(
       branchCache,
       branchFingerprint
     );
+    // eslint-disable-next-line no-console
+    console.log('SKIP', branch.skipBranchUpdate);
     const res = await processBranch(branch);
     branch.prBlockedBy = res?.prBlockedBy;
     branch.prNo = res?.prNo;

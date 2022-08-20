@@ -158,9 +158,13 @@ describe('workers/repository/process/write', () => {
       });
       git.branchExists.mockReturnValue(true);
       const branchManagersFingerprint = hasha(
-        branches[0].upgrades
-          .map((upgrade) => hashMap.get(upgrade.manager) ?? upgrade.manager)
-          .filter(is.string)
+        [
+          ...new Set(
+            branches[0].upgrades
+              .map((upgrade) => hashMap.get(upgrade.manager) ?? upgrade.manager)
+              .filter(is.string)
+          ),
+        ].sort()
       );
       const fingerprint = hasha([
         JSON.stringify(branches[0]),
