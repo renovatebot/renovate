@@ -4556,78 +4556,80 @@
   "version" "1.4.1"
   dependencies:
     "@actions/core" "^1.2.6"
-    "eslint-formatter-json" "^8.0.0"
-    "eslint-formatter-stylish" "^8.0.0"
+    eslint-formatter-json "^8.0.0"
+    eslint-formatter-stylish "^8.0.0"
 
-"eslint-formatter-json@^8.0.0":
-  "integrity" "sha512-zMYHg0iA4AH534aUJyh7PR+f7xzAsd0kLEFzo4U3TN60l3zt5/7Ukbv2VmQcSl/bOFdOkhRhB9+U52plxp8o8Q=="
-  "resolved" "https://registry.npmjs.org/eslint-formatter-json/-/eslint-formatter-json-8.3.0.tgz"
-  "version" "8.3.0"
+eslint-formatter-json@^8.0.0:
+  version "8.3.0"
+  resolved "https://registry.yarnpkg.com/eslint-formatter-json/-/eslint-formatter-json-8.3.0.tgz#5674d87c80e23a92bbaecc906b1c153e67e547f9"
+  integrity sha512-zMYHg0iA4AH534aUJyh7PR+f7xzAsd0kLEFzo4U3TN60l3zt5/7Ukbv2VmQcSl/bOFdOkhRhB9+U52plxp8o8Q==
 
-"eslint-formatter-stylish@^8.0.0":
-  "integrity" "sha512-4QKzT/NPD6VjFDhdUHnp/6bRODXg2G44SCEC4tc8MMErBffHojbVzcje0H7ql7aJQ277OBGCpe8mjjiNmdCxBg=="
-  "resolved" "https://registry.npmjs.org/eslint-formatter-stylish/-/eslint-formatter-stylish-8.3.0.tgz"
-  "version" "8.3.0"
+eslint-formatter-stylish@^8.0.0:
+  version "8.3.0"
+  resolved "https://registry.yarnpkg.com/eslint-formatter-stylish/-/eslint-formatter-stylish-8.3.0.tgz#554d8d0ef666605ab22880f356d1b74d900f4d41"
+  integrity sha512-4QKzT/NPD6VjFDhdUHnp/6bRODXg2G44SCEC4tc8MMErBffHojbVzcje0H7ql7aJQ277OBGCpe8mjjiNmdCxBg==
   dependencies:
-    "chalk" "^4.0.0"
-    "strip-ansi" "^6.0.1"
-    "text-table" "^0.2.0"
+    chalk "^4.0.0"
+    strip-ansi "^6.0.1"
+    text-table "^0.2.0"
 
-"eslint-import-resolver-node@^0.3.6":
-  "integrity" "sha512-0En0w03NRVMn9Uiyn8YRPDKvWjxCWkslUEhGNTdGx15RvPJYQ+lbOlqrlNI2vEAs4pDYK4f/HN2TbDmk5TP0iw=="
-  "resolved" "https://registry.npmjs.org/eslint-import-resolver-node/-/eslint-import-resolver-node-0.3.6.tgz"
-  "version" "0.3.6"
+eslint-import-resolver-node@^0.3.6:
+  version "0.3.6"
+  resolved "https://registry.yarnpkg.com/eslint-import-resolver-node/-/eslint-import-resolver-node-0.3.6.tgz#4048b958395da89668252001dbd9eca6b83bacbd"
+  integrity sha512-0En0w03NRVMn9Uiyn8YRPDKvWjxCWkslUEhGNTdGx15RvPJYQ+lbOlqrlNI2vEAs4pDYK4f/HN2TbDmk5TP0iw==
   dependencies:
-    "debug" "^3.2.7"
-    "resolve" "^1.20.0"
+    debug "^3.2.7"
+    resolve "^1.20.0"
 
-"eslint-import-resolver-typescript@3.4.0":
-  "integrity" "sha512-rBCgiEovwX/HQ8ESWV+XIWZaFiRtDeAXNZdcTATB8UbMuadc9qfGOlIP+vy+c7nsgfEBN4NTwy5qunGNptDP0Q=="
-  "resolved" "https://registry.npmjs.org/eslint-import-resolver-typescript/-/eslint-import-resolver-typescript-3.4.0.tgz"
-  "version" "3.4.0"
+eslint-import-resolver-typescript@3.4.1:
+  version "3.4.1"
+  resolved "https://registry.yarnpkg.com/eslint-import-resolver-typescript/-/eslint-import-resolver-typescript-3.4.1.tgz#072e5f7b4bf5d62d32d0b3a071fe551b45d15454"
+  integrity sha512-rcD4V2nnxk76JF6nuLcclGpya18KLhr/lwpl5xFXrVWZtdRSepfCGHk/oFn9HNstWX317Nuo/E3Z1vymPyPhlQ==
   dependencies:
-    "debug" "^4.3.4"
-    "enhanced-resolve" "^5.10.0"
-    "get-tsconfig" "^4.2.0"
-    "globby" "^13.1.2"
-    "is-core-module" "^2.9.0"
-    "is-glob" "^4.0.3"
-    "synckit" "^0.8.1"
+    debug "^4.3.4"
+    enhanced-resolve "^5.10.0"
+    get-tsconfig "^4.2.0"
+    globby "^13.1.2"
+    is-core-module "^2.9.0"
+    is-glob "^4.0.3"
+    synckit "^0.8.1"
 
-"eslint-module-utils@^2.7.3":
-  "version" "2.7.3"
+eslint-module-utils@^2.7.3:
+  version "2.7.4"
+  resolved "https://registry.yarnpkg.com/eslint-module-utils/-/eslint-module-utils-2.7.4.tgz#4f3e41116aaf13a20792261e61d3a2e7e0583974"
+  integrity sha512-j4GT+rqzCoRKHwURX7pddtIPGySnX9Si/cgMI5ztrcqOPtk5dDEeZ34CQVPphnqkJytlc97Vuk05Um2mJ3gEQA==
   dependencies:
-    "debug" "^3.2.7"
-    "find-up" "^2.1.0"
+    debug "^3.2.7"
 
-"eslint-plugin-import@*", "eslint-plugin-import@2.26.0":
-  "integrity" "sha512-hYfi3FXaM8WPLf4S1cikh/r4IxnO6zrhZbEGz2b660EJRbuxgpDS5gkCuYgGWg2xxh2rBuIr4Pvhve/7c31koA=="
-  "resolved" "https://registry.npmjs.org/eslint-plugin-import/-/eslint-plugin-import-2.26.0.tgz"
-  "version" "2.26.0"
+eslint-plugin-import@2.26.0:
+  version "2.26.0"
+  resolved "https://registry.yarnpkg.com/eslint-plugin-import/-/eslint-plugin-import-2.26.0.tgz#f812dc47be4f2b72b478a021605a59fc6fe8b88b"
+  integrity sha512-hYfi3FXaM8WPLf4S1cikh/r4IxnO6zrhZbEGz2b660EJRbuxgpDS5gkCuYgGWg2xxh2rBuIr4Pvhve/7c31koA==
   dependencies:
-    "array-includes" "^3.1.4"
-    "array.prototype.flat" "^1.2.5"
-    "debug" "^2.6.9"
-    "doctrine" "^2.1.0"
-    "eslint-import-resolver-node" "^0.3.6"
-    "eslint-module-utils" "^2.7.3"
-    "has" "^1.0.3"
-    "is-core-module" "^2.8.1"
-    "is-glob" "^4.0.3"
-    "minimatch" "^3.1.2"
-    "object.values" "^1.1.5"
-    "resolve" "^1.22.0"
-    "tsconfig-paths" "^3.14.1"
+    array-includes "^3.1.4"
+    array.prototype.flat "^1.2.5"
+    debug "^2.6.9"
+    doctrine "^2.1.0"
+    eslint-import-resolver-node "^0.3.6"
+    eslint-module-utils "^2.7.3"
+    has "^1.0.3"
+    is-core-module "^2.8.1"
+    is-glob "^4.0.3"
+    minimatch "^3.1.2"
+    object.values "^1.1.5"
+    resolve "^1.22.0"
+    tsconfig-paths "^3.14.1"
 
-"eslint-plugin-jest-formatting@3.1.0":
-  "integrity" "sha512-XyysraZ1JSgGbLSDxjj5HzKKh0glgWf+7CkqxbTqb7zEhW7X2WHo5SBQ8cGhnszKN+2Lj3/oevBlHNbHezoc/A=="
-  "resolved" "https://registry.npmjs.org/eslint-plugin-jest-formatting/-/eslint-plugin-jest-formatting-3.1.0.tgz"
-  "version" "3.1.0"
+eslint-plugin-jest-formatting@3.1.0:
+  version "3.1.0"
+  resolved "https://registry.yarnpkg.com/eslint-plugin-jest-formatting/-/eslint-plugin-jest-formatting-3.1.0.tgz#b26dd5a40f432b642dcc880021a771bb1c93dcd2"
+  integrity sha512-XyysraZ1JSgGbLSDxjj5HzKKh0glgWf+7CkqxbTqb7zEhW7X2WHo5SBQ8cGhnszKN+2Lj3/oevBlHNbHezoc/A==
 
-"eslint-plugin-jest@26.8.2":
-  "integrity" "sha512-67oh0FKaku9y48OpLzL3uK9ckrgLb83Sp5gxxTbtOGDw9lq6D8jw/Psj/9CipkbK406I2M7mvx1q+pv/MdbvxA=="
-  "resolved" "https://registry.npmjs.org/eslint-plugin-jest/-/eslint-plugin-jest-26.8.2.tgz"
-  "version" "26.8.2"
+eslint-plugin-jest@26.8.2:
+  version "26.8.2"
+  resolved "https://registry.yarnpkg.com/eslint-plugin-jest/-/eslint-plugin-jest-26.8.2.tgz#42a1248a5ade2bc589eb0f9c4e0608dd89b18cf3"
+  integrity sha512-67oh0FKaku9y48OpLzL3uK9ckrgLb83Sp5gxxTbtOGDw9lq6D8jw/Psj/9CipkbK406I2M7mvx1q+pv/MdbvxA==
+
   dependencies:
     "@typescript-eslint/utils" "^5.10.0"
 
