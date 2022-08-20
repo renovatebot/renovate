@@ -84,6 +84,8 @@ const githubApi = new githubHttp.GithubHttp();
 let config: LocalRepoConfig;
 let platformConfig: PlatformConfig;
 
+export const GitHubMaxPrBodyLen = 60000;
+
 export function resetConfigs(): void {
   config = {} as never;
   platformConfig = {
@@ -1578,7 +1580,7 @@ export async function mergePr({
 
 export function massageMarkdown(input: string): string {
   if (platformConfig.isGhe) {
-    return smartTruncate(input, 60000);
+    return smartTruncate(input, GitHubMaxPrBodyLen);
   }
   const massagedInput = massageMarkdownLinks(input)
     // to be safe, replace all github.com links with renovatebot redirector
@@ -1588,7 +1590,7 @@ export function massageMarkdown(input: string): string {
     )
     .replace(regEx(/]\(https:\/\/github\.com\//g), '](https://togithub.com/')
     .replace(regEx(/]: https:\/\/github\.com\//g), ']: https://togithub.com/');
-  return smartTruncate(massagedInput, 60000);
+  return smartTruncate(massagedInput, GitHubMaxPrBodyLen);
 }
 
 export async function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {

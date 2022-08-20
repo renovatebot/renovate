@@ -1,39 +1,39 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`modules/manager/jenkins/extract extractPackageFile() extracts multiple image lines in text format 1`] = `
-Array [
-  Object {
+[
+  {
     "currentValue": "1.2.3",
     "datasource": "jenkins-plugins",
     "depName": "email-ext",
     "versioning": "maven",
   },
-  Object {
+  {
     "currentValue": "4.4.10-2.0",
     "datasource": "jenkins-plugins",
     "depName": "apache-httpcomponents-client-4-api",
     "versioning": "maven",
   },
-  Object {
+  {
     "currentValue": "1.2",
     "datasource": "jenkins-plugins",
     "depName": "authentication-tokens",
     "versioning": "maven",
   },
-  Object {
+  {
     "currentValue": "1.21.0",
     "datasource": "jenkins-plugins",
     "depName": "blueocean",
     "versioning": "maven",
   },
-  Object {
+  {
     "currentValue": "4.2.0",
     "datasource": "jenkins-plugins",
     "depName": "git",
     "skipReason": "ignored",
     "versioning": "maven",
   },
-  Object {
+  {
     "currentValue": "3.3.1",
     "datasource": "jenkins-plugins",
     "depName": "git-client",
@@ -44,54 +44,54 @@ Array [
 `;
 
 exports[`modules/manager/jenkins/extract extractPackageFile() extracts multiple image lines in yaml format 1`] = `
-Array [
-  Object {
+[
+  {
     "currentValue": "latest",
     "datasource": "jenkins-plugins",
     "depName": "git",
     "skipReason": "unsupported-version",
     "versioning": "maven",
   },
-  Object {
+  {
     "currentValue": "2.10",
     "datasource": "jenkins-plugins",
     "depName": "job-import-plugin",
     "versioning": "maven",
   },
-  Object {
+  {
     "currentValue": "2.1",
     "datasource": "jenkins-plugins",
     "depName": "invalid-version-plugin",
     "skipReason": "invalid-version",
     "versioning": "maven",
   },
-  Object {
+  {
     "currentValue": "2.10",
     "datasource": "jenkins-plugins",
     "depName": "ignore-plugin",
     "skipReason": "ignored",
     "versioning": "maven",
   },
-  Object {
+  {
     "datasource": "jenkins-plugins",
     "depName": "docker",
     "skipReason": "no-version",
     "versioning": "maven",
   },
-  Object {
+  {
     "currentValue": "experimental",
     "datasource": "jenkins-plugins",
     "depName": "cloudbees-bitbucket-branch-source",
     "skipReason": "unsupported-version",
     "versioning": "maven",
   },
-  Object {
+  {
     "datasource": "jenkins-plugins",
     "depName": "script-security",
     "skipReason": "internal-package",
     "versioning": "maven",
   },
-  Object {
+  {
     "currentValue": "2.19-rc289.d09828a05a74",
     "datasource": "jenkins-plugins",
     "depName": "workflow-step-api",

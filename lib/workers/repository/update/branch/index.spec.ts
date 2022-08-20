@@ -991,10 +991,12 @@ describe('workers/repository/update/branch/index', () => {
     });
 
     it('branch pr no schedule (dry run)', async () => {
-      getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
-        updatedPackageFiles: [{}],
-        artifactErrors: [{}],
-      } as PackageFilesResult);
+      getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce(
+        partial<PackageFilesResult>({
+          updatedPackageFiles: [],
+          artifactErrors: [],
+        })
+      );
       npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
         artifactErrors: [],
         updatedArtifacts: [partial<FileChange>({})],
@@ -1019,13 +1021,16 @@ describe('workers/repository/update/branch/index', () => {
       expect(
         await branchWorker.processBranch({
           ...config,
-          artifactErrors: [{}],
+          artifactErrors: [],
         })
       ).toEqual({
         branchExists: true,
         prNo: undefined,
         result: 'done',
       });
+      expect(logger.info).toHaveBeenCalledWith(
+        'DRY-RUN: Would ensure comment removal in PR #undefined'
+      );
     });
 
     it('branch pr no schedule', async () => {
@@ -1095,7 +1100,7 @@ describe('workers/repository/update/branch/index', () => {
           updatedArtifacts: [{ type: 'deletion', path: 'dummy' }],
         })
       ).toMatchInlineSnapshot(`
-        Object {
+        {
           "branchExists": true,
           "prNo": undefined,
           "result": "no-work",
@@ -1136,7 +1141,7 @@ describe('workers/repository/update/branch/index', () => {
           updatedArtifacts: [{ type: 'deletion', path: 'dummy' }],
         })
       ).toMatchInlineSnapshot(`
-        Object {
+        {
           "branchExists": true,
           "prNo": undefined,
           "result": "done",
