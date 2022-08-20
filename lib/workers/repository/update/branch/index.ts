@@ -653,6 +653,7 @@ export async function processBranch(
         branchExists: true,
         prNo: branchPr?.number,
         result: BranchResult.Error,
+        commitSha,
       };
     } else if (
       err.messagee &&
@@ -676,6 +677,7 @@ export async function processBranch(
       branchExists,
       prNo: branchPr?.number,
       result: BranchResult.Error,
+      commitSha,
     };
   }
   try {
