@@ -1,5 +1,4 @@
 import { Fixtures } from '../../../../test/fixtures';
-import * as expectedDeps from './__fixtures__/deps.json';
 import { extractPackageFile } from '.';
 
 const yamlFile = Fixtures.get('.woodpecker.yml');
@@ -20,8 +19,82 @@ describe('modules/manager/woodpecker/extract', () => {
 
     it('extracts multiple image lines', () => {
       const res = extractPackageFile(yamlFile, '', {});
-      expect(res?.deps).toEqual(expectedDeps.deps);
-      expect(res?.deps).toHaveLength(8);
+      expect(res).toEqual({
+        deps: [
+          {
+            depName: 'quay.io/something/redis',
+            currentValue: 'alpine',
+            currentDigest: undefined,
+            replaceString: 'quay.io/something/redis:alpine',
+            autoReplaceStringTemplate:
+              '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+            datasource: 'docker',
+          },
+          {
+            depName: 'node',
+            currentValue: '10.0.0',
+            currentDigest: undefined,
+            replaceString: 'node:10.0.0',
+            autoReplaceStringTemplate:
+              '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+            datasource: 'docker',
+          },
+          {
+            depName: 'postgres',
+            currentValue: '9.4.0',
+            currentDigest: undefined,
+            replaceString: 'postgres:9.4.0',
+            autoReplaceStringTemplate:
+              '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+            datasource: 'docker',
+          },
+          {
+            depName: 'dockersamples/examplevotingapp_vote',
+            currentValue: 'before',
+            currentDigest: undefined,
+            replaceString: 'dockersamples/examplevotingapp_vote:before',
+            autoReplaceStringTemplate:
+              '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+            datasource: 'docker',
+          },
+          {
+            depName: 'dockersamples/examplevotingapp_result',
+            currentValue: 'before',
+            currentDigest: undefined,
+            replaceString: 'dockersamples/examplevotingapp_result:before',
+            autoReplaceStringTemplate:
+              '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+            datasource: 'docker',
+          },
+          {
+            depName: 'dockersamples/examplevotingapp_worker',
+            currentValue: undefined,
+            currentDigest: undefined,
+            replaceString: 'dockersamples/examplevotingapp_worker',
+            autoReplaceStringTemplate:
+              '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+            datasource: 'docker',
+          },
+          {
+            depName: 'dockersamples/visualizer',
+            currentValue: 'stable',
+            currentDigest: undefined,
+            replaceString: 'dockersamples/visualizer:stable',
+            autoReplaceStringTemplate:
+              '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+            datasource: 'docker',
+          },
+          {
+            depName: 'app-local-debug',
+            currentValue: undefined,
+            currentDigest: undefined,
+            replaceString: 'app-local-debug',
+            autoReplaceStringTemplate:
+              '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+            datasource: 'docker',
+          },
+        ],
+      });
     });
 
     it('extracts image and replaces registry', () => {

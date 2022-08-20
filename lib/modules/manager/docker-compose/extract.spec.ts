@@ -1,7 +1,7 @@
 import { Fixtures } from '../../../../test/fixtures';
 import { extractPackageFile } from '.';
 
-const yamlFile1 = Fixtures.get('.woodpecker.yml');
+const yamlFile1 = Fixtures.get('docker-compose.1.yml');
 const yamlFile3 = Fixtures.get('docker-compose.3.yml');
 const yamlFile3NoVersion = Fixtures.get('docker-compose.3-no-version.yml');
 const yamlFile3DefaultValue = Fixtures.get('docker-compose.3-default-val.yml');
