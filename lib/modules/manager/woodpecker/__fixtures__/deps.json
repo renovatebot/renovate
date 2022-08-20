@@ -1,0 +1,58 @@
+{
+  "deps": [
+    {
+      "depName": "quay.io/something/redis",
+      "currentValue": "alpine",
+      "replaceString": "quay.io/something/redis:alpine",
+      "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+      "datasource": "docker"
+    },
+    {
+      "depName": "node",
+      "currentValue": "10.0.0",
+      "replaceString": "node:10.0.0",
+      "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+      "datasource": "docker"
+    },
+    {
+      "depName": "postgres",
+      "currentValue": "9.4.0",
+      "replaceString": "postgres:9.4.0",
+      "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+      "datasource": "docker"
+    },
+    {
+      "depName": "dockersamples/examplevotingapp_vote",
+      "currentValue": "before",
+      "replaceString": "dockersamples/examplevotingapp_vote:before",
+      "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+      "datasource": "docker"
+    },
+    {
+      "depName": "dockersamples/examplevotingapp_result",
+      "currentValue": "before",
+      "replaceString": "dockersamples/examplevotingapp_result:before",
+      "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+      "datasource": "docker"
+    },
+    {
+      "depName": "dockersamples/examplevotingapp_worker",
+      "replaceString": "dockersamples/examplevotingapp_worker",
+      "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+      "datasource": "docker"
+    },
+    {
+      "depName": "dockersamples/visualizer",
+      "currentValue": "stable",
+      "replaceString": "dockersamples/visualizer:stable",
+      "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+      "datasource": "docker"
+    },
+    {
+      "depName": "app-local-debug",
+      "replaceString": "app-local-debug",
+      "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+      "datasource": "docker"
+    }
+  ]
+}

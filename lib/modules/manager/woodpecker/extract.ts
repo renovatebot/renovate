@@ -1,32 +1,9 @@
 import is from '@sindresorhus/is';
 import { load } from 'js-yaml';
 import { logger } from '../../../logger';
-import { newlineRegex, regEx } from '../../../util/regex';
 import { getDep } from '../dockerfile/extract';
 import type { ExtractConfig, PackageFile } from '../types';
 import type { WoodpeckerConfig } from './types';
-
-class LineMapper {
-  private imageLines: { line: string; lineNumber: number; used: boolean }[];
-
-  constructor(content: string, filter: RegExp) {
-    this.imageLines = [...content.split(newlineRegex).entries()]
-      .filter((entry) => filter.test(entry[1]))
-      .map(([lineNumber, line]) => ({ lineNumber, line, used: false }));
-  }
-
-  pluckLineNumber(imageName: string | undefined): number | null {
-    const lineMeta = this.imageLines.find(
-      ({ line, used }) => !used && imageName && line.includes(imageName)
-    );
-    // istanbul ignore if
-    if (!lineMeta) {
-      return null;
-    }
-    lineMeta.used = true; // unset plucked lines so duplicates are skipped
-    return lineMeta.lineNumber;
-  }
-}
 
 export function extractPackageFile(
   content: string,
@@ -53,32 +30,24 @@ export function extractPackageFile(
       return null;
     }
   } catch (err) {
-    logger.debug({ err }, 'err');
-    logger.debug({ fileName }, 'Parsing Woodpecker Configuration config YAML');
+    logger.debug(
+      { fileName, err },
+      'Parsing Woodpecker Configuration config YAML'
+    );
     return null;
   }
   try {
-    const lineMapper = new LineMapper(content, regEx(/^\s*image:/));
-
     // Image name/tags for services are only eligible for update if they don't
     // use variables and if the image is not built locally
     const deps = Object.values(config.pipeline ?? {})
       .filter((step) => is.string(step?.image))
-      .map((step) => {
-        const dep = getDep(step.image, true, extractConfig.registryAliases);
-        const lineNumber = lineMapper.pluckLineNumber(step.image);
-        // istanbul ignore if
-        if (!lineNumber) {
-          return null;
-        }
-        return dep;
-      })
+      .map((step) => getDep(step.image, true, extractConfig.registryAliases))
       .filter(is.truthy);
 
     logger.trace({ deps }, 'Woodpecker Configuration image');
-    return { deps };
-  } catch (err) /* istanbul ignore next */ {
-    logger.warn(
+    return deps.length ? { deps } : null;
+  } catch (err) {
+    logger.debug(
       { fileName, content, err },
       'Error extracting Woodpecker Configuration file'
     );

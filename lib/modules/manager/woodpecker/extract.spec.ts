@@ -1,4 +1,5 @@
 import { Fixtures } from '../../../../test/fixtures';
+import * as expectedDeps from './__fixtures__/deps.json';
 import { extractPackageFile } from '.';
 
 const yamlFile = Fixtures.get('.woodpecker.yml');
@@ -17,15 +18,9 @@ describe('modules/manager/woodpecker/extract', () => {
       expect(extractPackageFile('nothing here\n:::::::', '', {})).toBeNull();
     });
 
-    it('extracts multiple image lines for version 1', () => {
+    it('extracts multiple image lines', () => {
       const res = extractPackageFile(yamlFile, '', {});
-      expect(res?.deps).toMatchSnapshot();
-      expect(res?.deps).toHaveLength(8);
-    });
-
-    it('extracts multiple image lines for version 3', () => {
-      const res = extractPackageFile(yamlFile, '', {});
-      expect(res?.deps).toMatchSnapshot();
+      expect(res?.deps).toEqual(expectedDeps.deps);
       expect(res?.deps).toHaveLength(8);
     });
 
