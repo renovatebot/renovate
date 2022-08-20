@@ -2358,6 +2358,20 @@ const options: RenovateOptions[] = [
     type: 'boolean',
     default: false,
   },
+  {
+    name: 'allowExtraConfig',
+    description: 'Allow to use extra configuration fields.',
+    type: 'boolean',
+    default: false,
+    globalOnly: true,
+  },
+  {
+    name: 'skipConfigValidation',
+    description: 'Skip configuration validation completely.',
+    type: 'boolean',
+    default: false,
+    globalOnly: true,
+  },
 ];
 
 export function getOptions(): RenovateOptions[] {

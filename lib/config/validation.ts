@@ -86,6 +86,26 @@ function getDeprecationMessage(option: string): string | undefined {
   return deprecatedOptions[option];
 }
 
+function isExtraConfigAllowed(): boolean {
+  const cmdLineArgs = process.argv.filter((arg: string) =>
+    arg.includes('--allow-extra-config')
+  );
+  if (cmdLineArgs.length) {
+    return true;
+  }
+  return false;
+}
+
+function isSkippedValidation(): boolean {
+  const cmdLineArgs = process.argv.filter((arg: string) =>
+    arg.includes('--skip-config-validation')
+  );
+  if (cmdLineArgs.length) {
+    return true;
+  }
+  return false;
+}
+
 export function getParentName(parentPath: string | undefined): string {
   return parentPath
     ? parentPath
@@ -117,6 +137,10 @@ export async function validateConfig(
   }
   let errors: ValidationMessage[] = [];
   let warnings: ValidationMessage[] = [];
+
+  if (isSkippedValidation()) {
+    return { errors, warnings };
+  }
 
   for (const [key, val] of Object.entries(config)) {
     const currentPath = parentPath ? `${parentPath}.${key}` : key;
@@ -205,10 +229,12 @@ export async function validateConfig(
         });
       }
       if (!optionTypes[key]) {
-        errors.push({
-          topic: 'Configuration Error',
-          message: `Invalid configuration option: ${currentPath}`,
-        });
+        if (!isExtraConfigAllowed()) {
+          errors.push({
+            topic: 'Configuration Error',
+            message: `Invalid configuration option: ${currentPath}. Run the server with '--allow-extra-config' flag if you want to allow extra configurations`,
+          });
+        }
       } else if (key === 'schedule') {
         const [validSchedule, errorMessage] = hasValidSchedule(val as string[]);
         if (!validSchedule) {

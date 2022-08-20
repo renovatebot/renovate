@@ -152,6 +152,33 @@ describe('config/validation', () => {
       expect(errors).toMatchSnapshot();
     });
 
+    it('allow extra configuration', async () => {
+      process.argv.push('--allow-extra-config');
+      const config = {
+        myoption: true,
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        config
+      );
+      expect(warnings).toHaveLength(0);
+      expect(errors).toHaveLength(0);
+      expect(errors).toMatchSnapshot();
+    });
+
+    it('skip config validation', async () => {
+      process.argv.push('--skip-config-validation');
+      const config = {
+        myoption: true,
+        prTitle: false,
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        config
+      );
+      expect(warnings).toHaveLength(0);
+      expect(errors).toHaveLength(0);
+      expect(errors).toMatchSnapshot();
+    });
+
     it.each([
       ['empty configuration', {}],
       ['configuration with enabledManagers empty', { enabledManagers: [] }],

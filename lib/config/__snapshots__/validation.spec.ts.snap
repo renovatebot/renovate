@@ -1,5 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`config/validation validateConfig(config) allow extra configuration 1`] = `[]`;
+
 exports[`config/validation validateConfig(config) catches invalid allowedVersions regex 1`] = `
 [
   {
@@ -234,6 +236,8 @@ exports[`config/validation validateConfig(config) selectors outside packageRules
   },
 ]
 `;
+
+exports[`config/validation validateConfig(config) skip config validation 1`] = `[]`;
 
 exports[`config/validation validateConfig(config) validates regEx for each fileMatch 1`] = `
 [

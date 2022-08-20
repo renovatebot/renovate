@@ -2930,3 +2930,22 @@ To disable the vulnerability alerts feature, set `enabled=false` in a `vulnerabi
   }
 }
 ```
+
+## Other custom configurations
+
+Now you can set your own extra configurations.
+This feature was requested [here](https://github.com/renovatebot/renovate/issues/16987).
+To allow the extra configurations, run the server with the `--allow-extra-config` flag.
+
+```sh
+yarn start org/repo --allow-extra-config
+```
+
+This flag lets the validat or skip the type validation for the custom configurations.
+So for these custom configurations, renovate is not responsible for the validation.
+
+You can also skip the config validation completely using the `--skip-config-validation` flag.
+
+```sh
+yarn start org/repo --skip-config-validation
+```
