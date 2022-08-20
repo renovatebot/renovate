@@ -91,6 +91,18 @@ export const presets: Record<string, Preset> = {
       },
     ],
   },
+  'now-to-vercel': {
+    description: '`now` was renamed to `vercel`.',
+    packageRules: [
+      {
+        matchCurrentVersion: '>=21.0.0',
+        matchDatasources: ['npm'],
+        matchPackageNames: ['now'],
+        replacementName: 'vercel',
+        replacementVersion: '21.0.0',
+      },
+    ],
+  },
   'redux-devtools-extension-to-scope': {
     description:
       'The `redux-devtools-extension` package was renamed to `@redux-devtools/extension`.',
