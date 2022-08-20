@@ -1,5 +1,4 @@
 import is from '@sindresorhus/is';
-import fs from 'fs-extra';
 import hasha from 'hasha';
 import stringify from 'safe-stable-stringify';
 import type { RenovateConfig } from '../../../config/types';
