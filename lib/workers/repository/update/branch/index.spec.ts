@@ -208,6 +208,7 @@ describe('workers/repository/update/branch/index', () => {
       const res = await branchWorker.processBranch(config);
       expect(res).toEqual({
         branchExists: false,
+        commitSha: null,
         prNo: undefined,
         result: 'error',
       });
@@ -226,6 +227,7 @@ describe('workers/repository/update/branch/index', () => {
       const res = await branchWorker.processBranch(config);
       expect(res).toEqual({
         branchExists: false,
+        commitSha: null,
         prNo: undefined,
         result: 'error',
       });
@@ -313,6 +315,7 @@ describe('workers/repository/update/branch/index', () => {
       expect(res).toEqual({
         branchExists: true,
         prNo: undefined,
+        commitSha: null,
         result: 'error',
       });
     });
@@ -377,6 +380,7 @@ describe('workers/repository/update/branch/index', () => {
       const res = await branchWorker.processBranch(config);
       expect(res).toEqual({
         branchExists: true,
+        commitSha: null,
         prNo: undefined,
         result: 'error',
       });
@@ -886,6 +890,7 @@ describe('workers/repository/update/branch/index', () => {
       const processBranchResult = await branchWorker.processBranch(config);
       expect(processBranchResult).toEqual({
         branchExists: false,
+        commitSha: null,
         prNo: undefined,
         result: 'error',
       });
