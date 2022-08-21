@@ -38,7 +38,7 @@ export interface RepoInfo {
   mainbranch: string;
   mergeMethod: string;
   has_issues: boolean;
-  repoCacheId: string;
+  uuid: string;
 }
 
 export type BitbucketBranchState = 'SUCCESSFUL' | 'FAILED' | 'INPROGRESS';
@@ -62,7 +62,7 @@ export function repoInfoTransformer(repoInfoBody: RepoInfoBody): RepoInfo {
     mainbranch: repoInfoBody.mainbranch.name,
     mergeMethod: 'merge',
     has_issues: repoInfoBody.has_issues,
-    repoCacheId: repoInfoBody.uuid,
+    uuid: repoInfoBody.uuid,
   };
 }
 

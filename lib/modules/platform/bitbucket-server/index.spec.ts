@@ -309,10 +309,9 @@ describe('modules/platform/bitbucket-server/index', () => {
               endpoint: 'https://stash.renovatebot.com/vcs/',
               repository: 'SOME/repo',
             })
-          ).toEqual({
+          ).toMatchObject({
             defaultBranch: 'master',
             isFork: false,
-            repoCacheId: '13076',
           });
         });
 
@@ -339,10 +338,9 @@ describe('modules/platform/bitbucket-server/index', () => {
           expect(git.initRepo).toHaveBeenCalledWith(
             expect.objectContaining({ url: sshLink('SOME', 'repo') })
           );
-          expect(res).toEqual({
+          expect(res).toMatchObject({
             defaultBranch: 'master',
             isFork: false,
-            repoCacheId: '13076',
           });
         });
 
@@ -373,10 +371,9 @@ describe('modules/platform/bitbucket-server/index', () => {
               url: link,
             })
           );
-          expect(res).toEqual({
+          expect(res).toMatchObject({
             defaultBranch: 'master',
             isFork: false,
-            repoCacheId: '13076',
           });
         });
 
@@ -408,10 +405,9 @@ describe('modules/platform/bitbucket-server/index', () => {
               ),
             })
           );
-          expect(res).toEqual({
+          expect(res).toMatchObject({
             defaultBranch: 'master',
             isFork: false,
-            repoCacheId: '13076',
           });
         });
 

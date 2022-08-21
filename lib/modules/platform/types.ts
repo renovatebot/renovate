@@ -28,7 +28,7 @@ export interface PlatformResult {
 export interface RepoResult {
   defaultBranch: string;
   isFork: boolean;
-  repoCacheId: string;
+  repoFingerprint: string;
 }
 
 export type GitUrlOption = 'default' | 'ssh' | 'endpoint';

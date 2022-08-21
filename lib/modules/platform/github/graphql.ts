@@ -1,7 +1,7 @@
 export const repoInfoQuery = `
 query($owner: String!, $name: String!) {
   repository(owner: $owner, name: $name) {
-    repoCacheId: id
+    id
     isFork
     isArchived
     nameWithOwner

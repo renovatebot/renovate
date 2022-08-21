@@ -39,6 +39,7 @@ import type {
   RepoResult,
   UpdatePrConfig,
 } from '../types';
+import { repoFingerprint } from '../util';
 import { smartTruncate } from '../utils/pr-body';
 import type {
   BbsConfig,
@@ -210,7 +211,7 @@ export async function initRepo({
     const repoConfig: RepoResult = {
       defaultBranch: branchRes.body.displayId,
       isFork: !!info.origin,
-      repoCacheId: `${info.id}`,
+      repoFingerprint: repoFingerprint(info.id, defaults.endpoint),
     };
 
     return repoConfig;

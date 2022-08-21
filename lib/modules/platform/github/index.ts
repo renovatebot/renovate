@@ -56,6 +56,7 @@ import type {
   RepoResult,
   UpdatePrConfig,
 } from '../types';
+import { repoFingerprint } from '../util';
 import { smartTruncate } from '../utils/pr-body';
 import { coerceRestPr } from './common';
 import {
@@ -512,7 +513,7 @@ export async function initRepo({
   const repoConfig: RepoResult = {
     defaultBranch: config.defaultBranch,
     isFork: repo.isFork === true,
-    repoCacheId: repo.repoCacheId,
+    repoFingerprint: repoFingerprint(repo.id, platformConfig.endpoint),
   };
   return repoConfig;
 }
