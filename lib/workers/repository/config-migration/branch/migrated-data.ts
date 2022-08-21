@@ -45,7 +45,9 @@ export async function applyPrettierFormatting(
       prettierExists =
         packageJsonContent && JSON.parse(packageJsonContent).prettier;
     } catch {
-      logger.warn('Invalid JSON found in package.json');
+      logger.warn(
+        'applyPrettierFormatting() - Error processing package.json file'
+      );
     }
   }
 
@@ -86,8 +88,11 @@ export class MigratedDataFactory {
   private static async build(): Promise<MigratedData | null> {
     let res: MigratedData | null = null;
     try {
-      const rc = await detectRepoFileConfig();
-      const configFileParsed = rc?.configFileParsed || {};
+      const {
+        configFileName: filename = '',
+        configFileRaw: raw,
+        configFileParsed = {},
+      } = await detectRepoFileConfig();
 
       // get migrated config
       const { isMigrated, migratedConfig } = migrateConfig(configFileParsed);
@@ -97,9 +102,6 @@ export class MigratedDataFactory {
 
       delete migratedConfig.errors;
       delete migratedConfig.warnings;
-
-      const filename = rc.configFileName ?? '';
-      const raw = await readLocalFile(filename, 'utf8');
 
       // indent defaults to 2 spaces
       // TODO #7154
