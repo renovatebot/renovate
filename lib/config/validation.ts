@@ -2,6 +2,7 @@ import is from '@sindresorhus/is';
 import { getLanguageList, getManagerList } from '../modules/manager';
 import { configRegexPredicate, isConfigRegex, regEx } from '../util/regex';
 import * as template from '../util/template';
+import { parseConfigs } from '../workers/global/config/parse';
 import {
   hasValidSchedule,
   hasValidTimezone,
@@ -86,26 +87,6 @@ function getDeprecationMessage(option: string): string | undefined {
   return deprecatedOptions[option];
 }
 
-function isExtraConfigAllowed(): boolean {
-  const cmdLineArgs = process.argv.filter((arg: string) =>
-    arg.includes('--allow-extra-config')
-  );
-  if (cmdLineArgs.length) {
-    return true;
-  }
-  return false;
-}
-
-function isSkippedValidation(): boolean {
-  const cmdLineArgs = process.argv.filter((arg: string) =>
-    arg.includes('--skip-config-validation')
-  );
-  if (cmdLineArgs.length) {
-    return true;
-  }
-  return false;
-}
-
 export function getParentName(parentPath: string | undefined): string {
   return parentPath
     ? parentPath
@@ -138,7 +119,10 @@ export async function validateConfig(
   let errors: ValidationMessage[] = [];
   let warnings: ValidationMessage[] = [];
 
-  if (isSkippedValidation()) {
+  // Get env and argv configuration
+  const cfg = await parseConfigs(process.env, process.argv);
+
+  if (cfg.skipConfigValidation) {
     return { errors, warnings };
   }
 
@@ -229,7 +213,7 @@ export async function validateConfig(
         });
       }
       if (!optionTypes[key]) {
-        if (!isExtraConfigAllowed()) {
+        if (!cfg.allowExtraConfig) {
           errors.push({
             topic: 'Configuration Error',
             message: `Invalid configuration option: ${currentPath}. Run the server with '--allow-extra-config' flag if you want to allow extra configurations`,

@@ -160,9 +160,8 @@ describe('config/validation', () => {
       const { warnings, errors } = await configValidation.validateConfig(
         config
       );
-      expect(warnings).toHaveLength(0);
-      expect(errors).toHaveLength(0);
-      expect(errors).toMatchSnapshot();
+      expect(warnings).toBeEmptyArray();
+      expect(errors).toBeEmptyArray();
     });
 
     it('skip config validation', async () => {
@@ -174,9 +173,8 @@ describe('config/validation', () => {
       const { warnings, errors } = await configValidation.validateConfig(
         config
       );
-      expect(warnings).toHaveLength(0);
-      expect(errors).toHaveLength(0);
-      expect(errors).toMatchSnapshot();
+      expect(warnings).toBeEmptyArray();
+      expect(errors).toBeEmptyArray();
     });
 
     it.each([
