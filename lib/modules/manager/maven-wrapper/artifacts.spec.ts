@@ -71,7 +71,26 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
         },
       },
     ];
-    expect(execSnapshots).toMatchSnapshot();
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: './mvnw wrapper:wrapper',
+        options: {
+          cwd: './',
+          encoding: 'utf-8',
+          env: {
+            HOME: '/home/user',
+            HTTPS_PROXY: 'https://example.com',
+            HTTP_PROXY: 'http://example.com',
+            LANG: 'en_US.UTF-8',
+            LC_ALL: 'en_US',
+            NO_PROXY: 'localhost',
+            PATH: '/tmp/path',
+          },
+          maxBuffer: 10485760,
+          timeout: 900000,
+        },
+      },
+    ]);
     expect(updatedDeps).toEqual(expected);
   });
 
@@ -82,7 +101,6 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
       })
     );
     GlobalConfig.set(adminConfig);
-    const execSnapshots = mockExecAll();
 
     const updatedDeps = await updateArtifacts({
       packageFileName: 'maven',
@@ -100,7 +118,6 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
         },
       },
     ];
-    expect(execSnapshots).toMatchSnapshot();
     expect(updatedDeps).toEqual(expected);
   });
 
@@ -111,14 +128,12 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
       })
     );
     GlobalConfig.set(adminConfig);
-    const execSnapshots = mockExecAll();
     const updatedDeps = await updateArtifacts({
       packageFileName: 'maven',
       newPackageFileContent: '',
       updatedDeps: [{ depName: 'org.apache.maven.wrapper:maven-wrapper' }],
       config: { newValue: '3.3.1' },
     });
-    expect(execSnapshots).toMatchSnapshot();
     expect(updatedDeps).toEqual([]);
   });
 
@@ -129,7 +144,6 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
       updatedDeps: [{ depName: 'org.apache.maven.wrapper:maven-wrapper' }],
       config: { newValue: '3.3.1' },
     });
-    const execSnapshots = mockExecAll();
 
     const expectedError = [
       {
@@ -140,7 +154,7 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
         },
       },
     ];
-    expect(execSnapshots).toMatchSnapshot();
+
     expect(updatedDeps).toEqual(expectedError);
   });
 
@@ -151,7 +165,6 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
       })
     );
     GlobalConfig.set(adminConfig);
-    const execSnapshots = mockExecAll();
     jest.spyOn(os, 'platform').mockImplementation(() => 'win32');
 
     fs.statLocalFile.mockResolvedValue(null);
@@ -161,7 +174,6 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
       updatedDeps: [{ depName: 'org.apache.maven.wrapper:maven-wrapper' }],
       config: { newValue: '3.3.1' },
     });
-    expect(execSnapshots).toMatchSnapshot();
     expect(updatedDeps).toBeNull();
   });
 
@@ -172,7 +184,6 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
       })
     );
     GlobalConfig.set(adminConfig);
-    const execSnapshots = mockExecAll();
     jest.spyOn(execModule, 'exec').mockImplementation(() => {
       throw new Error();
     });
@@ -183,7 +194,6 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
       config: { currentValue: '3.0.0', newValue: '3.3.1' },
     });
 
-    expect(execSnapshots).toMatchSnapshot();
     expect(updatedDeps).toEqual([]);
   });
 });
