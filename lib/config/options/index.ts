@@ -832,7 +832,17 @@ const options: RenovateOptions[] = [
       type: 'string',
       format: 'uri',
     },
-    supportedManagers: ['helm-requirements', 'helmv3', 'helmfile', 'gitlabci'],
+    supportedManagers: [
+      'helm-requirements',
+      'helmv3',
+      'helmfile',
+      'gitlabci',
+      'dockerfile',
+      'docker-compose',
+      'kubernetes',
+      'ansible',
+      'droneci',
+    ],
   },
   {
     name: 'defaultRegistryUrls',
@@ -2351,6 +2361,12 @@ const options: RenovateOptions[] = [
     type: 'boolean',
     default: false,
     supportedPlatforms: ['github'],
+  },
+  {
+    name: 'branchNameStrict',
+    description: `Whether to be strict about the use of special characters within the branch name.`,
+    type: 'boolean',
+    default: false,
   },
 ];
 
