@@ -31,15 +31,15 @@ function getCachedTags(
 }
 
 export async function getChangeLogJSON(
-  config: BranchUpgradeConfig
+  config: BranchUpgradeConfig,
+  sourceUrl: string
 ): Promise<ChangeLogResult | null> {
   const versioning = config.versioning!;
   const currentVersion = config.currentVersion!;
   const newVersion = config.newVersion!;
-  const sourceUrl = config.customChangelogUrl ?? config.sourceUrl!;
   const sourceDirectory = config.sourceDirectory!;
   const depName = config.depName!;
-  const datasource = config.datasource!;
+  const manager = config.manager;
   if (sourceUrl === 'https://github.com/DefinitelyTyped/DefinitelyTyped') {
     logger.trace('No release notes for @types');
     return null;
@@ -60,19 +60,19 @@ export async function getChangeLogJSON(
     if (host!.endsWith('.github.com') || host === 'github.com') {
       if (!GlobalConfig.get().githubTokenWarn) {
         logger.debug(
-          { datasource, depName, sourceUrl },
+          { manager, depName, sourceUrl },
           'GitHub token warning has been suppressed. Skipping release notes retrieval'
         );
         return null;
       }
       logger.warn(
-        { datasource, depName, sourceUrl },
+        { manager, depName, sourceUrl },
         'No github.com token has been configured. Skipping release notes retrieval'
       );
       return { error: ChangeLogError.MissingGithubToken };
     }
     logger.debug(
-      { datasource, depName, sourceUrl },
+      { manager, depName, sourceUrl },
       'Repository URL does not match any known github hosts - skipping changelog retrieval'
     );
     return null;
@@ -121,7 +121,7 @@ export async function getChangeLogJSON(
 
   const cacheNamespace = 'changelog-github-release';
   function getCacheKey(prev: string, next: string): string {
-    return `${repository}:${datasource}:${depName}:${prev}:${next}`;
+    return `${sourceUrl}:${depName}:${prev}:${next}`;
   }
 
   const changelogReleases: ChangeLogRelease[] = [];

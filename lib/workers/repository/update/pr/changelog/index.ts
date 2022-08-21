@@ -31,10 +31,10 @@ export async function getChangeLogJSON(
 
     switch (platform) {
       case 'gitlab':
-        res = await sourceGitlab.getChangeLogJSON(config);
+        res = await sourceGitlab.getChangeLogJSON(config, sourceUrl);
         break;
       case 'github':
-        res = await sourceGithub.getChangeLogJSON(config);
+        res = await sourceGithub.getChangeLogJSON(config, sourceUrl);
         break;
 
       default:

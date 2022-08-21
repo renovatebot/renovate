@@ -31,14 +31,13 @@ function getCachedTags(
 }
 
 export async function getChangeLogJSON(
-  config: BranchUpgradeConfig
+  config: BranchUpgradeConfig,
+  sourceUrl: string
 ): Promise<ChangeLogResult | null> {
   const versioning = config.versioning!;
   const currentVersion = config.currentVersion!;
   const newVersion = config.newVersion!;
-  const sourceUrl = config.customChangelogUrl ?? config.sourceUrl!;
   const depName = config.depName!;
-  const datasource = config.datasource!;
   const sourceDirectory = config.sourceDirectory!;
 
   logger.trace('getChangeLogJSON for gitlab');
@@ -95,7 +94,7 @@ export async function getChangeLogJSON(
   }
 
   function getCacheKey(prev: string, next: string): string {
-    return `${pathname}:${datasource}:${depName}:${prev}:${next}`;
+    return `${sourceUrl}:${depName}:${prev}:${next}`;
   }
 
   const changelogReleases: ChangeLogRelease[] = [];
