@@ -2362,6 +2362,12 @@ const options: RenovateOptions[] = [
     default: false,
     supportedPlatforms: ['github'],
   },
+  {
+    name: 'branchNameStrict',
+    description: `Whether to be strict about the use of special characters within the branch name.`,
+    type: 'boolean',
+    default: false,
+  },
 ];
 
 export function getOptions(): RenovateOptions[] {

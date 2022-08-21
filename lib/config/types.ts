@@ -28,6 +28,7 @@ export interface RenovateSharedConfig {
   branchPrefix?: string;
   branchPrefixOld?: string;
   branchName?: string;
+  branchNameStrict?: boolean;
   manager?: string | null;
   commitMessage?: string;
   commitMessagePrefix?: string;
