@@ -179,7 +179,8 @@ export async function updateArtifacts({
 
     const status = await getRepoStatus();
     const artifactFileNames = [
-      ...[packageFileName, buildFileName],
+      packageFileName,
+      buildFileName,
       ...['gradle/wrapper/gradle-wrapper.jar', 'gradlew', 'gradlew.bat'].map(
         (filename) => join(localGradleDir, filename)
       ),
