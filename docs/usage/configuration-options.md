@@ -1863,8 +1863,8 @@ For example to apply a special label for Major updates:
 
 ### customChangelogUrl
 
-Use this field to set the source URL for release notes retrieval.
-Most commonly used for dependencies missing one.
+Use this field to set the source URL for a package, including overriding an existing one.
+Source URLs are necessary in order to look up release notes.
 
 Using this field we can specify the exact url to fetch release notes from.
 
@@ -1875,7 +1875,7 @@ Example setting source URL for package "dummy":
   "packageRules": [
     {
       "matchPackageNames": ["dummy"],
-      "overwriteSourceUrl": "https://github.com/org/dummy"
+      "customChangelogUrl": "https://github.com/org/dummy"
     }
   ]
 }
@@ -1883,7 +1883,7 @@ Example setting source URL for package "dummy":
 
 <!-- prettier-ignore -->
 !!! note
-Supported platforms are GitHub and GitLab only.
+Renovate can fetch changelogs from GitHub and GitLab platforms only, and setting the URL to an unsupported host/platform type won't change that.
 
 ### replacementName
 
