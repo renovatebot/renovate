@@ -201,13 +201,11 @@ describe('modules/platform/gitlab/index', () => {
         await gitlab.initRepo({
           repository: 'some/repo/project',
         })
-      ).toMatchInlineSnapshot(`
-        {
-          "defaultBranch": "master",
-          "isFork": false,
-          "repoFingerprint": "da93a8517fc0ba0b0f0ee4b4881f86f26b88b14053d682be13079028db0e93a27097dd058c1ba858d0aa41f5db74e89217e653e22217589daeccaa08030b5aed",
-        }
-      `);
+      ).toEqual({
+        defaultBranch: 'master',
+        isFork: false,
+        repoFingerprint: expect.any(String),
+      });
     });
 
     it('should throw an error if receiving an error', async () => {
@@ -306,13 +304,11 @@ describe('modules/platform/gitlab/index', () => {
         await gitlab.initRepo({
           repository: 'some/repo/project',
         })
-      ).toMatchInlineSnapshot(`
-        {
-          "defaultBranch": "master",
-          "isFork": false,
-          "repoFingerprint": "da93a8517fc0ba0b0f0ee4b4881f86f26b88b14053d682be13079028db0e93a27097dd058c1ba858d0aa41f5db74e89217e653e22217589daeccaa08030b5aed",
-        }
-      `);
+      ).toEqual({
+        defaultBranch: 'master',
+        isFork: false,
+        repoFingerprint: expect.any(String),
+      });
     });
 
     it('should use ssh_url_to_repo if gitUrl is set to ssh', async () => {
