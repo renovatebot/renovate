@@ -14,6 +14,7 @@ import { getTags } from './github';
 import { addReleaseNotes } from './release-notes';
 import { getInRangeReleases } from './releases';
 import { ChangeLogError, ChangeLogRelease, ChangeLogResult } from './types';
+import { slugifyUrl } from './index';
 
 function getCachedTags(
   endpoint: string,
@@ -31,12 +32,12 @@ function getCachedTags(
 }
 
 export async function getChangeLogJSON(
-  config: BranchUpgradeConfig,
-  sourceUrl: string
+  config: BranchUpgradeConfig
 ): Promise<ChangeLogResult | null> {
   const versioning = config.versioning!;
   const currentVersion = config.currentVersion!;
   const newVersion = config.newVersion!;
+  const sourceUrl = config.sourceUrl!;
   const sourceDirectory = config.sourceDirectory!;
   const depName = config.depName!;
   const manager = config.manager;
@@ -120,8 +121,9 @@ export async function getChangeLogJSON(
   }
 
   const cacheNamespace = 'changelog-github-release';
+
   function getCacheKey(prev: string, next: string): string {
-    return `${sourceUrl}:${depName}:${prev}:${next}`;
+    return `${slugifyUrl(sourceUrl)}:${depName}:${prev}:${next}`;
   }
 
   const changelogReleases: ChangeLogRelease[] = [];

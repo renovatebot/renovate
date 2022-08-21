@@ -1,6 +1,8 @@
+import slugify from 'slugify';
 import { logger } from '../../../../../logger';
 import { detectPlatform } from '../../../../../modules/platform/util';
 import * as allVersioning from '../../../../../modules/versioning';
+import { regEx } from '../../../../../util/regex';
 import type { BranchUpgradeConfig } from '../../../../types';
 import * as sourceGithub from './source-github';
 import * as sourceGitlab from './source-gitlab';
@@ -8,11 +10,17 @@ import type { ChangeLogResult } from './types';
 
 export * from './types';
 
+export function slugifyUrl(url: string): string {
+  const r = regEx(/(:?[:/.])+/g);
+  return slugify(url.replace(r, ' '));
+}
+
 export async function getChangeLogJSON(
-  config: BranchUpgradeConfig
+  _config: BranchUpgradeConfig
 ): Promise<ChangeLogResult | null> {
+  const sourceUrl = _config.customChangelogUrl ?? _config.sourceUrl!;
+  const config: BranchUpgradeConfig = { ..._config, sourceUrl };
   const { versioning, currentVersion, newVersion } = config;
-  const sourceUrl = config.customChangelogUrl ?? config.sourceUrl!;
   try {
     if (!(sourceUrl && currentVersion && newVersion)) {
       return null;
@@ -31,10 +39,10 @@ export async function getChangeLogJSON(
 
     switch (platform) {
       case 'gitlab':
-        res = await sourceGitlab.getChangeLogJSON(config, sourceUrl);
+        res = await sourceGitlab.getChangeLogJSON(config);
         break;
       case 'github':
-        res = await sourceGithub.getChangeLogJSON(config, sourceUrl);
+        res = await sourceGithub.getChangeLogJSON(config);
         break;
 
       default:

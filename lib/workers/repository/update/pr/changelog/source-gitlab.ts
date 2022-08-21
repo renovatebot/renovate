@@ -11,6 +11,7 @@ import { getTags } from './gitlab';
 import { addReleaseNotes } from './release-notes';
 import { getInRangeReleases } from './releases';
 import type { ChangeLogRelease, ChangeLogResult } from './types';
+import { slugifyUrl } from './index';
 
 const cacheNamespace = 'changelog-gitlab-release';
 
@@ -31,12 +32,12 @@ function getCachedTags(
 }
 
 export async function getChangeLogJSON(
-  config: BranchUpgradeConfig,
-  sourceUrl: string
+  config: BranchUpgradeConfig
 ): Promise<ChangeLogResult | null> {
   const versioning = config.versioning!;
   const currentVersion = config.currentVersion!;
   const newVersion = config.newVersion!;
+  const sourceUrl = config.sourceUrl!;
   const depName = config.depName!;
   const sourceDirectory = config.sourceDirectory!;
 
@@ -94,7 +95,7 @@ export async function getChangeLogJSON(
   }
 
   function getCacheKey(prev: string, next: string): string {
-    return `${sourceUrl}:${depName}:${prev}:${next}`;
+    return `${slugifyUrl(sourceUrl)}:${depName}:${prev}:${next}`;
   }
 
   const changelogReleases: ChangeLogRelease[] = [];
