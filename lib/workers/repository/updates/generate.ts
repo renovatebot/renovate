@@ -84,9 +84,9 @@ export function generateBranchConfig(
     toValues.add(upg.newValue!);
     // prettify newVersion and newMajor for printing
     if (upg.newVersion) {
-      upg.prettyNewVersion = upg.newVersion.startsWith('v')
-        ? upg.newVersion
-        : `v${upg.newVersion}`;
+      upg.prettyNewVersion = semver.valid(upg.newVersion)
+        ? `v${upg.newVersion}`
+        : upg.newVersion;
     }
     if (upg.newMajor) {
       upg.prettyNewMajor = `v${upg.newMajor}`;
