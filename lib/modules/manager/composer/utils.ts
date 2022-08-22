@@ -75,7 +75,22 @@ export function extractConstraints(
 
   // extract php
   if (composerJson.config?.platform?.php) {
-    res.php = composerJson.config.platform.php;
+    const major = api.getMajor(composerJson.config.platform.php);
+    const minor = api.getMinor(composerJson.config.platform.php);
+    const patch = api.getPatch(composerJson.config.platform.php);
+
+    // handle where x is taken by composer to mean lowest patch of the lowest minor (x.0.0)
+    if (minor === null || minor === 0) {
+      res.php = `${major}.0.0`;
+    }
+    // handle where x.x is taken by composer to mean lowest patch (x.x.0)
+    else if (patch === null || patch === 0) {
+      res.php = `${major}.${minor}.0`;
+    }
+    // handle non-existent patch numbers
+    else {
+      res.php = `<=${major}.${minor}.${patch}`;
+    }
   } else if (composerJson.require?.php) {
     res.php = composerJson.require.php;
   }
