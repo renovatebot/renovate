@@ -86,9 +86,9 @@ describe('workers/repository/dependency-dashboard', () => {
         title: '',
         number: 1,
         body:
-          Fixtures.get('master-issue_with_8_PR.txt').replace(
-            '- [ ] <!-- approve-branch=branchName1 -->pr1',
-            '- [x] <!-- approve-branch=branchName1 -->pr1'
+          Fixtures.get('dependency-dashboard-with-8-PR.txt').replace(
+            '- [ ]',
+            '- [x]'
           ) + '\n\n - [x] <!-- rebase-all-open-prs -->',
       });
       await dependencyDashboard.readDashboardBody(conf);
@@ -111,7 +111,7 @@ describe('workers/repository/dependency-dashboard', () => {
       platform.findIssue.mockResolvedValueOnce({
         title: '',
         number: 1,
-        body: Fixtures.get('master-issue_with_8_PR.txt').replace(
+        body: Fixtures.get('dependency-dashboard-with-8-PR.txt').replace(
           '- [ ] <!-- approve-all-pending-prs -->',
           '- [x] <!-- approve-all-pending-prs -->'
         ),
@@ -137,7 +137,7 @@ describe('workers/repository/dependency-dashboard', () => {
       platform.findIssue.mockResolvedValueOnce({
         title: '',
         number: 1,
-        body: Fixtures.get('master-issue_with_8_PR.txt').replace(
+        body: Fixtures.get('dependency-dashboard-with-8-PR.txt').replace(
           '- [ ] <!-- create-all-rate-limited-prs -->',
           '- [x] <!-- create-all-rate-limited-prs -->'
         ),
@@ -359,7 +359,7 @@ describe('workers/repository/dependency-dashboard', () => {
         config.dependencyDashboardTitle
       );
       expect(platform.ensureIssue.mock.calls[0][0].body).toBe(
-        Fixtures.get('master-issue_with_8_PR.txt')
+        Fixtures.get('dependency-dashboard-with-8-PR.txt')
       );
 
       // same with dry run
@@ -396,7 +396,7 @@ describe('workers/repository/dependency-dashboard', () => {
         config.dependencyDashboardTitle
       );
       expect(platform.ensureIssue.mock.calls[0][0].body).toBe(
-        Fixtures.get('master-issue_with_2_PR_edited.txt')
+        Fixtures.get('dependency-dashboard-with-2-PR-edited.txt')
       );
 
       // same with dry run
@@ -441,7 +441,7 @@ describe('workers/repository/dependency-dashboard', () => {
         config.dependencyDashboardTitle
       );
       expect(platform.ensureIssue.mock.calls[0][0].body).toBe(
-        Fixtures.get('master-issue_with_3_PR_in_progress.txt')
+        Fixtures.get('dependency-dashboard-with-3-PR-in-progress.txt')
       );
 
       // same with dry run
@@ -476,7 +476,7 @@ describe('workers/repository/dependency-dashboard', () => {
         config.dependencyDashboardTitle
       );
       expect(platform.ensureIssue.mock.calls[0][0].body).toBe(
-        Fixtures.get('master-issue_with_2_PR_closed_ignored.txt')
+        Fixtures.get('dependency-dashboard-with-2-PR-closed-ignored.txt')
       );
 
       // same with dry run
@@ -526,7 +526,7 @@ describe('workers/repository/dependency-dashboard', () => {
         config.dependencyDashboardTitle
       );
       expect(platform.ensureIssue.mock.calls[0][0].body).toBe(
-        Fixtures.get('master-issue_with_3_PR_in_approval.txt')
+        Fixtures.get('dependency-dashboard-with-3-PR-in-approval.txt')
       );
 
       // same with dry run
@@ -936,16 +936,10 @@ describe('workers/repository/dependency-dashboard', () => {
 
         it('does not truncates as there is enough space to fit', () => {
           PackageFiles.add('main', packageFiles);
-          const nonTruncated = PackageFiles.getDashboardMarkdown(
-            config,
-            Infinity
-          );
+          const nonTruncated = PackageFiles.getDashboardMarkdown(Infinity);
           const len = (title + note + nonTruncated).length;
-          const truncated = PackageFiles.getDashboardMarkdown(config, len);
-          const truncatedWithTitle = PackageFiles.getDashboardMarkdown(
-            config,
-            len
-          );
+          const truncated = PackageFiles.getDashboardMarkdown(len);
+          const truncatedWithTitle = PackageFiles.getDashboardMarkdown(len);
           expect(truncated.length === nonTruncated.length).toBeTrue();
           expect(truncatedWithTitle.includes(note)).toBeFalse();
         });
@@ -953,47 +947,35 @@ describe('workers/repository/dependency-dashboard', () => {
         it('removes a branch with no managers', () => {
           PackageFiles.add('main', packageFiles);
           PackageFiles.add('dev', packageFilesWithDigest);
-          const md = PackageFiles.getDashboardMarkdown(config, Infinity, false);
+          const md = PackageFiles.getDashboardMarkdown(Infinity, false);
           const len = md.length;
           PackageFiles.add('empty/branch', {});
-          const truncated = PackageFiles.getDashboardMarkdown(
-            config,
-            len,
-            false
-          );
+          const truncated = PackageFiles.getDashboardMarkdown(len, false);
           expect(truncated.includes('empty/branch')).toBeFalse();
           expect(truncated.length === len).toBeTrue();
         });
 
         it('removes a manager with no package files', () => {
           PackageFiles.add('main', packageFiles);
-          const md = PackageFiles.getDashboardMarkdown(config, Infinity, false);
+          const md = PackageFiles.getDashboardMarkdown(Infinity, false);
           const len = md.length;
           PackageFiles.add('dev', { dockerfile: [] });
-          const truncated = PackageFiles.getDashboardMarkdown(
-            config,
-            len,
-            false
-          );
+          const truncated = PackageFiles.getDashboardMarkdown(len, false);
           expect(truncated.includes('dev')).toBeFalse();
           expect(truncated.length === len).toBeTrue();
         });
 
         it('does nothing when there are no base branches left', () => {
-          const truncated = PackageFiles.getDashboardMarkdown(
-            config,
-            -1,
-            false
-          );
+          const truncated = PackageFiles.getDashboardMarkdown(-1, false);
           expect(truncated).toBe('');
         });
 
         it('removes an entire base branch', () => {
           PackageFiles.add('main', packageFiles);
-          const md = PackageFiles.getDashboardMarkdown(config, Infinity);
+          const md = PackageFiles.getDashboardMarkdown(Infinity);
           const len = md.length + note.length;
           PackageFiles.add('dev', packageFilesWithDigest);
-          const truncated = PackageFiles.getDashboardMarkdown(config, len);
+          const truncated = PackageFiles.getDashboardMarkdown(len);
           expect(truncated.includes('dev')).toBeFalse();
           expect(truncated.length === len).toBeTrue();
         });
@@ -1001,13 +983,9 @@ describe('workers/repository/dependency-dashboard', () => {
         it('ensures original data is unchanged', () => {
           PackageFiles.add('main', packageFiles);
           PackageFiles.add('dev', packageFilesWithDigest);
-          const pre = PackageFiles.getDashboardMarkdown(config, Infinity);
-          const truncated = PackageFiles.getDashboardMarkdown(
-            config,
-            -1,
-            false
-          );
-          const post = PackageFiles.getDashboardMarkdown(config, Infinity);
+          const pre = PackageFiles.getDashboardMarkdown(Infinity);
+          const truncated = PackageFiles.getDashboardMarkdown(-1, false);
+          const post = PackageFiles.getDashboardMarkdown(Infinity);
           expect(truncated).toBe('');
           expect(pre === post).toBeTrue();
           expect(post.includes('main')).toBeTrue();
