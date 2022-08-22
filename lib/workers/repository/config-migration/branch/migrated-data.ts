@@ -89,7 +89,7 @@ export class MigratedDataFactory {
     let res: MigratedData | null = null;
     try {
       const {
-        configFileName: filename = '',
+        configFileName,
         configFileRaw: raw,
         configFileParsed = {},
       } = await detectRepoFileConfig();
@@ -107,6 +107,7 @@ export class MigratedDataFactory {
       // TODO #7154
       const indent = detectIndent(raw!);
       const indentSpace = indent.indent ?? '  ';
+      const filename = configFileName!;
       let content: string;
 
       if (filename.endsWith('.json5')) {
