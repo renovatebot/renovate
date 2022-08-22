@@ -31,10 +31,13 @@ export class RepoCacheS3 extends RepoCacheBase {
       const { Body: res } = await this.s3Client.send(
         new GetObjectCommand(s3Params)
       );
-      logger.debug('RepoCacheS3.read() - success');
       if (res instanceof Readable) {
+        logger.debug('RepoCacheS3.read() - success');
         return JSON.parse(await streamToString(res));
       }
+      logger.warn(
+        `RepoCacheS3.read() - failure - expecting Readable return type got '${typeof res}' type instead`
+      );
     } catch (err) {
       logger.warn({ err }, 'RepoCacheS3.read() - failure');
     }

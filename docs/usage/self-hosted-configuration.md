@@ -628,6 +628,25 @@ JSON files will be stored inside the `cacheDir` beside the existing file-based p
 
 ## repositoryCacheType
 
+Set this to an S3 URI to enable S3 backed repository cache.
+
+```ts
+{
+  repositoryCacheType: 's3://bucket-name';
+}
+```
+
+<!-- prettier-ignore -->
+!!! note
+    The following environment variables should be set in order for the S3 client to work.
+
+```
+    AWS_ACCESS_KEY_ID
+    AWS_SECRET_ACCESS_KEY
+    AWS_SESSION_TOKEN
+    AWS_REGION
+```
+
 ## requireConfig
 
 By default, Renovate needs a Renovate config file in each repository where it runs before it will propose any dependency updates.
