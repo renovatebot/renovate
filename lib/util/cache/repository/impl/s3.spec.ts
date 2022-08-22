@@ -11,6 +11,7 @@ import { GlobalConfig } from '../../../../config/global';
 import { logger } from '../../../../logger';
 import * as s3Wrapper from '../../../s3';
 import type { RepoCacheRecord } from '../types';
+import { CacheFactory } from './cache-factory';
 import { RepoCacheS3 } from './s3';
 
 describe('util/cache/repository/impl/s3', () => {
@@ -35,6 +36,15 @@ describe('util/cache/repository/impl/s3', () => {
     await expect(s3Cache.read()).toResolve();
     expect(logger.warn).toHaveBeenCalledTimes(0);
     expect(logger.debug).toHaveBeenCalledWith('RepoCacheS3.read() - success');
+  });
+
+  it('gets an unexpected response from s3', async () => {
+    s3Mock.on(GetObjectCommand).resolvesOnce({});
+    const s3Cache = new RepoCacheS3(repository, url);
+    await expect(s3Cache.read()).toResolve();
+    expect(logger.warn).toHaveBeenCalledWith(
+      "RepoCacheS3.read() - failure - expecting Readable return type got 'undefined' type instead"
+    );
   });
 
   it('fails to read from s3', async () => {
@@ -71,5 +81,10 @@ describe('util/cache/repository/impl/s3', () => {
       { err },
       'RepoCacheS3.write() - failure'
     );
+  });
+
+  it('creates an S3 client using the cache factory', () => {
+    const cache = CacheFactory.get(repository, url);
+    expect(cache instanceof RepoCacheS3).toBeTrue();
   });
 });
