@@ -22,6 +22,10 @@ root:
 ---
 - bundle: gcr.io/tekton-releases/catalog/upstream/top-array
 ---
+spec:
+  - name: bundle
+    value: gcr.io/tekton-releases/catalog/upstream/resolution
+---
 bundle: true
 ---
 bundle: []

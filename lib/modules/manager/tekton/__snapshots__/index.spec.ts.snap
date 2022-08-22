@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`modules/manager/tekton-bundle/index extractPackageFile() extracts deps from a file 1`] = `
+exports[`modules/manager/tekton/index extractPackageFile() extracts deps from a file 1`] = `
 Object {
   "deps": Array [
     Object {
@@ -74,6 +74,15 @@ Object {
       "depName": "gcr.io/tekton-releases/catalog/upstream/top-array",
       "depType": "tekton-bundle",
       "replaceString": "gcr.io/tekton-releases/catalog/upstream/top-array",
+    },
+    Object {
+      "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+      "currentDigest": undefined,
+      "currentValue": "0.0",
+      "datasource": "docker",
+      "depName": "gcr.io/tekton-releases/catalog/upstream/resolution",
+      "depType": "tekton-bundle",
+      "replaceString": "gcr.io/tekton-releases/catalog/upstream/resolution",
     },
   ],
 }

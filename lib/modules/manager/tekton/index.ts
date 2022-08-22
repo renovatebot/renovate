@@ -15,7 +15,7 @@ export const defaultConfig = {
   // For example, to match all the YAML files in a repository, add
   // the following to renovate.json in the corresponding git repo:
   //  {
-  //    "tekton-bundle": {
+  //    "tekton": {
   //      "fileMatch": ['\\.yaml$', '\\.yml$']
   //    }
   //  }
@@ -28,7 +28,7 @@ export function extractPackageFile(
   content: string,
   fileName: string
 ): PackageFile | null {
-  logger.trace('tekton-bundle.extractPackageFile()');
+  logger.trace('tekton.extractPackageFile()');
   const deps: PackageDependency[] = [];
   let docs: any[];
   try {
@@ -36,7 +36,7 @@ export function extractPackageFile(
   } catch (err) {
     logger.debug(
       { err, fileName },
-      'Failed to parse YAML resource to find tekton-bundle'
+      'Failed to parse YAML resource to find tekton references'
     );
     return null;
   }
@@ -62,7 +62,24 @@ function getDeps(doc: any): PackageDependency[] {
             currentValue: dep.currentValue,
             currentDigest: dep.currentDigest,
           },
-          'Tekton bundle dependency found'
+          'Tekton bundle dependency found in .bundle reference'
+        );
+        deps.push(dep);
+      }
+    } else if (
+      key === 'name' &&
+      value === 'bundle' &&
+      is.string(doc['value'])
+    ) {
+      const dep = createDep(doc['value']);
+      if (dep !== null) {
+        logger.trace(
+          {
+            depName: dep.depName,
+            currentValue: dep.currentValue,
+            currentDigest: dep.currentDigest,
+          },
+          'Tekton bundle dependency found in .value reference'
         );
         deps.push(dep);
       }
