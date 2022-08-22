@@ -21,7 +21,7 @@ export abstract class RepoCacheBase implements RepoCache {
 
   protected constructor(protected readonly repository: string) {}
 
-  protected abstract read(): Promise<string | undefined>;
+  protected abstract read(): Promise<unknown>;
 
   protected abstract write(data: RepoCacheRecord): Promise<void>;
 
