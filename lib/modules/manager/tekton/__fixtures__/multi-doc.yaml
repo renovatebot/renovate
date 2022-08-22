@@ -1,41 +1,146 @@
 ---
-bundle: gcr.io/tekton-releases/catalog/upstream/plain
+kind: Pipeline
+spec:
+  tasks:
+  - taskRef:
+      bundle: gcr.io/tekton-releases/catalog/upstream/plain
 ---
-bundle: gcr.io/tekton-releases/catalog/upstream/tag:1.0
+kind: Pipeline
+spec:
+  tasks:
+  - taskRef:
+      bundle: gcr.io/tekton-releases/catalog/upstream/tag:1.0
 ---
-bundle: gcr.io/tekton-releases/catalog/upstream/digest@sha256:01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+kind: Pipeline
+spec:
+  tasks:
+  - taskRef:
+      bundle: gcr.io/tekton-releases/catalog/upstream/digest@sha256:01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
 ---
-bundle: gcr.io/tekton-releases/catalog/upstream/full:1.0@sha256:01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+kind: Pipeline
+spec:
+  tasks:
+  - taskRef:
+      bundle: gcr.io/tekton-releases/catalog/upstream/full:1.0@sha256:01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
 ---
+kind: Pipeline
+spec:
+  tasks:
+  - taskRef:
+      bundle: gcr.io/tekton-releases/catalog/upstream/pipeline-resolver
+---
+kind: List
 items:
-- bundle: gcr.io/tekton-releases/catalog/upstream/in-array
+- kind: Pipeline
+  spec:
+    tasks:
+    - taskRef:
+        bundle: >-
+          gcr.io/tekton-releases/catalog/upstream/list-pipeline
+- kind: PipelineRun
+  spec:
+    pipelineRef:
+      bundle: >-
+        gcr.io/tekton-releases/catalog/upstream/list-pipeline-run
+- kind: TaskRun
+  spec:
+    taskRef:
+      bundle: >-
+        gcr.io/tekton-releases/catalog/upstream/list-task-run
 ---
+kind: TriggerTemplate
 spec:
-  bundle: gcr.io/tekton-releases/catalog/upstream/in-object
+  resourcetemplates:
+  - kind: TaskRun
+    spec:
+      taskRef:
+        bundle: gcr.io/tekton-releases/catalog/upstream/trigger-template-task-run
+  - kind: TaskRun
+    spec:
+      taskRef:
+        resolver: bundles
+        resource:
+        - name: bundle
+          value: gcr.io/tekton-releases/catalog/upstream/trigger-template-task-run-resolver
+  - kind: PipelineRun
+    spec:
+      pipelineRef:
+        bundle: gcr.io/tekton-releases/catalog/upstream/trigger-template-pipeline-run
+  - kind: PipelineRun
+    spec:
+      pipelineRef:
+        resolver: bundles
+        resource:
+        - name: bundle
+          value: gcr.io/tekton-releases/catalog/upstream/trigger-template-pipeline-run-resolver
 ---
-root:
-  items:
-  - spec:
-      bundles:
-      - bundle: >-
-          gcr.io/tekton-releases/catalog/upstream/super-nested
----
-- bundle: gcr.io/tekton-releases/catalog/upstream/top-array
----
+kind: TaskRun
 spec:
-  - name: bundle
-    value: gcr.io/tekton-releases/catalog/upstream/resolution
+  taskRef:
+    resolver: bundles
+    resource:
+    - name: bundle
+      value: gcr.io/tekton-releases/catalog/upstream/task-run
 ---
-bundle: true
+kind: TaskRun
+spec:
+  taskRef:
+    resolver: bundles
+    resource:
+    - name: bundle
+      value: gcr.io/tekton-releases/catalog/upstream/task-run-resolver
 ---
-bundle: []
+kind: PipelineRun
+spec:
+  pipelineRef:
+    bundle: gcr.io/tekton-releases/catalog/upstream/pipeline-run
 ---
-bundle: {}
+kind: PipelineRun
+spec:
+  pipelineRef:
+    resolver: bundles
+    resource:
+    - name: bundle
+      value: gcr.io/tekton-releases/catalog/upstream/pipeline-run-resolver
 ---
-bundle: 99
+kind: Pipeline
+spec:
+  tasks:
+  - taskRef:
+      bundle: true
 ---
-# bundle: gcr.io/tekton-releases/catalog/upstream/ignored
+kind: Pipeline
+spec:
+  tasks:
+  - taskRef:
+      bundle: []
 ---
-blunder: gcr.io/tekton-releases/catalog/upstream/also-ignored
+kind: Pipeline
+spec:
+  tasks:
+  - taskRef:
+      bundle: {}
 ---
-bundle: ""
+kind: Pipeline
+spec:
+  tasks:
+  - taskRef:
+      bundle: 99
+---
+# kind: Pipeline
+# spec:
+#   tasks:
+#   - taskRef:
+#       bundle: gcr.io/tekton-releases/catalog/upstream/ignored
+---
+kind: Pipeline
+spec:
+  tasks:
+  - taskRef:
+      blunder: gcr.io/tekton-releases/catalog/upstream/also-ignored
+---
+kind: Pipeline
+spec:
+  tasks:
+  - taskRef:
+      bundle: ""

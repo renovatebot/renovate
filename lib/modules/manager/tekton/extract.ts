@@ -3,6 +3,7 @@ import { loadAll } from 'js-yaml';
 import { logger } from '../../../logger';
 import { getDep } from '../dockerfile/extract';
 import type { PackageDependency, PackageFile } from '../types';
+import type { TektonBundle, TektonResource } from './types';
 
 export function extractPackageFile(
   content: string,
@@ -12,11 +13,11 @@ export function extractPackageFile(
   const deps: PackageDependency[] = [];
   let docs: any[];
   try {
-    docs = loadAll(content) as any[];
+    docs = loadAll(content) as TektonResource[];
   } catch (err) {
     logger.debug(
       { err, fileName },
-      'Failed to parse YAML resource to find tekton references'
+      'Failed to parse YAML resource as a Tekton resource'
     );
     return null;
   }
@@ -29,53 +30,68 @@ export function extractPackageFile(
   return { deps };
 }
 
-function getDeps(doc: any): PackageDependency[] {
-  const deps = [];
-  for (const key in doc) {
-    const value = doc[key];
-    if (key === 'bundle' && is.string(value) && !is.emptyString(value)) {
-      const dep = createDep(value);
-      logger.trace(
-        {
-          depName: dep.depName,
-          currentValue: dep.currentValue,
-          currentDigest: dep.currentDigest,
-        },
-        'Tekton bundle dependency found in .bundle reference'
-      );
-      deps.push(dep);
-    } else if (
-      key === 'name' &&
-      value === 'bundle' &&
-      is.string(doc['value']) &&
-      !is.emptyString(doc['value'])
-    ) {
-      const dep = createDep(doc['value']);
-      logger.trace(
-        {
-          depName: dep.depName,
-          currentValue: dep.currentValue,
-          currentDigest: dep.currentDigest,
-        },
-        'Tekton bundle dependency found in .value reference'
-      );
-      deps.push(dep);
-    } else if (is.array(value)) {
-      for (const val of value) {
-        deps.push(...getDeps(val));
-      }
-    } else if (is.object(value)) {
-      deps.push(...getDeps(value));
+function getDeps(doc: TektonResource): PackageDependency[] {
+  const deps: PackageDependency[] = [];
+
+  // Handle TaskRun resource
+  addDep(doc?.spec?.taskRef, deps);
+
+  // Handle PipelineRun resource
+  addDep(doc?.spec?.pipelineRef, deps);
+
+  // Handle Pipeline resource
+  for (const task of doc?.spec?.tasks ?? []) {
+    addDep(task?.taskRef, deps);
+  }
+
+  // Handle TriggerTemplate resource
+  for (const resource of doc?.spec?.resourcetemplates ?? []) {
+    addDep(resource?.spec?.taskRef, deps);
+    addDep(resource?.spec?.pipelineRef, deps);
+  }
+
+  // Handle list of TektonResources
+  const items = doc?.items ?? [];
+  if (items.length > 0) {
+    for (const item of doc?.items || []) {
+      deps.push(...getDeps(item));
     }
   }
+
   return deps;
 }
 
-function createDep(imageRef: string): PackageDependency {
+function addDep(ref: TektonBundle, deps: PackageDependency[]): void {
+  let imageRef = '';
+  // Find a bundle reference from the Bundle resolver
+  if (ref?.resolver === 'bundles') {
+    for (const field of ref?.resource ?? []) {
+      if (field.name === 'bundle') {
+        imageRef = field.value;
+        break;
+      }
+    }
+  }
+  if (!is.string(imageRef) || is.emptyString(imageRef)) {
+    // Fallback to older style bundle reference
+    imageRef = ref?.bundle;
+    if (!is.string(imageRef) || is.emptyString(imageRef)) {
+      return;
+    }
+  }
+
   const dep = getDep(imageRef);
   // If a tag is not found, assume the lowest possible version. This will
   // ensure the version update is successful, and properly pin the digest.
   dep.currentValue = dep.currentValue ?? '0.0';
   dep.depType = 'tekton-bundle';
-  return dep;
+  logger.trace(
+    {
+      depName: dep.depName,
+      currentValue: dep.currentValue,
+      currentDigest: dep.currentDigest,
+    },
+    'Tekton bundle dependency found'
+  );
+  deps.push(dep);
 }
