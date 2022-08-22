@@ -47,6 +47,18 @@ describe('util/cache/repository/impl/s3', () => {
     );
   });
 
+  it('doesnt warn when no cache is found', async () => {
+    const NoSuchKeyErr = new Error('NoSuchKey');
+    NoSuchKeyErr.name = 'NoSuchKey';
+    s3Mock.on(GetObjectCommand).rejectsOnce(NoSuchKeyErr);
+    const s3Cache = new RepoCacheS3(repository, url);
+    await expect(s3Cache.read()).toResolve();
+    expect(logger.warn).toHaveBeenCalledTimes(0);
+    expect(logger.debug).toHaveBeenCalledWith(
+      `RepoCacheS3.read() - 'NoSuchKey'`
+    );
+  });
+
   it('fails to read from s3', async () => {
     s3Mock.on(GetObjectCommand).rejectsOnce(err);
     const s3Cache = new RepoCacheS3(repository, url);
