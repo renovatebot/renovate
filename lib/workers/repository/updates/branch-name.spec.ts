@@ -146,6 +146,22 @@ describe('workers/repository/updates/branch-name', () => {
       expect(upgrade.branchName).toBe('renovate/jest-42.x');
     });
 
+    it('realistic defaults with strict branch name enabled', () => {
+      const upgrade: RenovateConfig = {
+        branchNameStrict: true,
+        branchName:
+          '{{{branchPrefix}}}{{{additionalBranchPrefix}}}{{{branchTopic}}}',
+        branchTopic:
+          '{{{depNameSanitized}}}-{{{newMajor}}}{{#if isPatch}}.{{{newMinor}}}{{/if}}.x{{#if isLockfileUpdate}}-lockfile{{/if}}',
+        branchPrefix: 'renovate/',
+        depNameSanitized: 'jest',
+        newMajor: '42',
+        group: {},
+      };
+      generateBranchName(upgrade);
+      expect(upgrade.branchName).toBe('renovate/jest-42-x');
+    });
+
     it('hashedBranchLength hashing', () => {
       const upgrade: RenovateConfig = {
         branchName:
@@ -292,6 +308,36 @@ describe('workers/repository/updates/branch-name', () => {
         generateBranchName(fixture.upgrade);
         expect(fixture.upgrade.branchName).toEqual(fixture.expectedBranchName);
       });
+    });
+
+    it('strict branch name enabled group', () => {
+      const upgrade: RenovateConfig = {
+        branchNameStrict: true,
+        groupName: 'some group name `~#$%^&*()-_=+[]{}|;,./<>? .version',
+        group: {
+          branchName: '{{groupSlug}}-{{branchTopic}}',
+          branchTopic: 'grouptopic',
+        },
+      };
+      generateBranchName(upgrade);
+      expect(upgrade.branchName).toBe(
+        'some-group-name-dollarpercentand-or-lessgreater-version-grouptopic'
+      );
+    });
+
+    it('strict branch name disabled', () => {
+      const upgrade: RenovateConfig = {
+        branchNameStrict: false,
+        groupName: '[some] group name.#$%version',
+        group: {
+          branchName: '{{groupSlug}}-{{branchTopic}}',
+          branchTopic: 'grouptopic',
+        },
+      };
+      generateBranchName(upgrade);
+      expect(upgrade.branchName).toBe(
+        'some-group-name.dollarpercentversion-grouptopic'
+      );
     });
   });
 });

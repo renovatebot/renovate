@@ -10,6 +10,9 @@ import * as template from '../../../util/template';
 const MIN_HASH_LENGTH = 6;
 
 const RE_MULTIPLE_DASH = regEx(/--+/g);
+
+const RE_SPECIAL_CHARS_STRICT = regEx(/[`~!@#$%^&*()_=+[\]\\|{};':",.<>?]/g);
+
 /**
  * Clean git branch name
  *
@@ -17,15 +20,26 @@ const RE_MULTIPLE_DASH = regEx(/--+/g);
  * - leading dot/leading dot after slash
  * - trailing dot
  * - whitespace
+ * - special characters
+ * - leading or trailing dashes
  * - chained dashes(breaks markdown comments) are replaced by single dash
  */
-function cleanBranchName(branchName: string): string {
+function cleanBranchName(
+  branchName: string,
+  branchNameStrict?: boolean
+): string {
+  let cleanedBranchName = branchName;
+
+  if (branchNameStrict) {
+    cleanedBranchName = cleanedBranchName.replace(RE_SPECIAL_CHARS_STRICT, '-'); // massage out all special characters that slip through slugify
+  }
+
   return cleanGitRef
-    .clean(branchName)
+    .clean(cleanedBranchName)
     .replace(regEx(/^\.|\.$/), '') // leading or trailing dot
     .replace(regEx(/\/\./g), '/') // leading dot after slash
     .replace(regEx(/\s/g), '') // whitespace
-    .replace(regEx(/[[\]?:\\^~]/g), '-') // massage out all these characters: : ? [ \ ^ ~
+    .replace(regEx(/[[\]?:\\^~]/g), '-') // massage out all these characters: [ ] ? : \ ^ ~
     .replace(regEx(/(^|\/)-+/g), '$1') // leading dashes
     .replace(regEx(/-+(\/|$)/g), '$1') // trailing dashes
     .replace(RE_MULTIPLE_DASH, '-'); // chained dashes
@@ -94,5 +108,8 @@ export function generateBranchName(update: RenovateConfig): void {
     update.branchName = template.compile(update.branchName, update);
   }
 
-  update.branchName = cleanBranchName(update.branchName);
+  update.branchName = cleanBranchName(
+    update.branchName,
+    update.branchNameStrict
+  );
 }

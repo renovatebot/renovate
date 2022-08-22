@@ -287,6 +287,12 @@ If you truly need to configure this then it probably means either:
 - You are hopefully mistaken, and there's a better approach you should use, so open a new "config help" discussion at the [Renovate discussions tab](https://github.com/renovatebot/renovate/discussions) or
 - You have a use case we didn't expect and we should have a feature request from you to add it to the project
 
+## branchNameStrict
+
+By default, Renovate does not use strict-mode when slugifying the branch name. This means that certain special characters such as `.` may end up within the branch name.
+
+By setting this configuration to `true`, all special characters will be removed from the branch name, resulting in a branch name consisting exclusively of alphabetic characters separated by `-`.
+
 ## branchPrefix
 
 You can modify this field if you want to change the prefix used.
@@ -447,6 +453,10 @@ After we changed the [`baseBranches`](https://docs.renovatebot.com/configuration
 !!! info
     This feature writes plain JSON for `.json` files, and JSON5 for `.json5` files.
     JSON5 content can potentially be down leveled (`.json` files) and all comments will be removed.
+
+<!-- prettier-ignore -->
+!!! note
+    Closing the config migration PR will cause it to be ignored and not being reopend/recreated in the future.',
 
 ## configWarningReuseIssue
 
