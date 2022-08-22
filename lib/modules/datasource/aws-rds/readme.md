@@ -54,17 +54,17 @@ You have to use the regex manager for this.
 Here's an example of using the regex manager to configure this datasource:
 
 ```json
-"regexManagers": [
+{
+  "regexManagers": [
     {
-        "fileMatch": [
-            "\\.yaml$"
-        ],
-        "matchStrings": [
-            ".*amiFilter=(?<lookupName>.+?)[ ]*\n[ ]*(?<depName>[a-zA-Z0-9-_:]*)[ ]*?:[ ]*?[\"|']?(?<currentValue>[.\\d]+)[\"|']?.*"
-        ],
-        "datasourceTemplate": "aws-rds"
+      "fileMatch": ["\\.yaml$"],
+      "matchStrings": [
+        ".*amiFilter=(?<lookupName>.+?)[ ]*\n[ ]*(?<depName>[a-zA-Z0-9-_:]*)[ ]*?:[ ]*?[\"|']?(?<currentValue>[.\\d]+)[\"|']?.*"
+      ],
+      "datasourceTemplate": "aws-rds"
     }
-]
+  ]
+}
 ```
 
 This would match every YAML file, and would recognize the following lines:
