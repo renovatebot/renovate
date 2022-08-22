@@ -32,14 +32,20 @@ export class RepoCacheS3 extends RepoCacheBase {
         new GetObjectCommand(s3Params)
       );
       if (res instanceof Readable) {
-        logger.debug('RepoCacheS3.read() - success');
-        return JSON.parse(await streamToString(res));
+        const data: string = JSON.parse(await streamToString(res));
+        logger.debug('RepoCacheS3.read() - success'); // parse can throw
+        return data;
       }
       logger.warn(
         `RepoCacheS3.read() - failure - expecting Readable return type got '${typeof res}' type instead`
       );
     } catch (err) {
-      logger.warn({ err }, 'RepoCacheS3.read() - failure');
+      // https://docs.aws.amazon.com/AmazonS3/latest/API/ErrorResponses.html
+      if (err?.name === 'NoSuchKey') {
+        logger.debug(`RepoCacheS3.read() - 'NoSuchKey'`);
+      } else {
+        logger.warn({ err }, 'RepoCacheS3.read() - failure');
+      }
     }
     return undefined;
   }
@@ -50,7 +56,7 @@ export class RepoCacheS3 extends RepoCacheBase {
       Bucket: this.bucket,
       Key: cacheFileName,
       Body: JSON.stringify(data),
-      ContentType: 'text/plain',
+      ContentType: 'application/json',
     };
     try {
       const res = await this.s3Client.send(new PutObjectCommand(s3Params));
