@@ -230,6 +230,16 @@ const options: RenovateOptions[] = [
     experimental: true,
   },
   {
+    name: 'repositoryCacheType',
+    description:
+      'Set the type of renovate repository cache if repositoryCache is not disabled.',
+    globalOnly: true,
+    type: 'string',
+    stage: 'repository',
+    default: 'local',
+    experimental: true,
+  },
+  {
     name: 'force',
     description:
       'Any configuration set in this object will force override existing settings.',

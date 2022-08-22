@@ -67,6 +67,7 @@ describe('modules/platform/gitea/gitea-helper', () => {
   };
 
   const mockRepo: Repo = {
+    id: 123,
     allow_rebase: true,
     allow_rebase_explicit: true,
     allow_merge_commits: true,
