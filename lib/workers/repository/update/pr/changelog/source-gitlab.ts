@@ -7,11 +7,11 @@ import * as memCache from '../../../../../util/cache/memory';
 import * as packageCache from '../../../../../util/cache/package';
 import { regEx } from '../../../../../util/regex';
 import type { BranchUpgradeConfig } from '../../../../types';
+import { slugifyUrl } from './common';
 import { getTags } from './gitlab';
 import { addReleaseNotes } from './release-notes';
 import { getInRangeReleases } from './releases';
 import type { ChangeLogRelease, ChangeLogResult } from './types';
-import { slugifyUrl } from './index';
 
 const cacheNamespace = 'changelog-gitlab-release';
 

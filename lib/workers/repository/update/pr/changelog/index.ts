@@ -1,19 +1,12 @@
-import slugify from 'slugify';
 import { logger } from '../../../../../logger';
 import { detectPlatform } from '../../../../../modules/platform/util';
 import * as allVersioning from '../../../../../modules/versioning';
-import { regEx } from '../../../../../util/regex';
 import type { BranchUpgradeConfig } from '../../../../types';
 import * as sourceGithub from './source-github';
 import * as sourceGitlab from './source-gitlab';
 import type { ChangeLogResult } from './types';
 
 export * from './types';
-
-export function slugifyUrl(url: string): string {
-  const r = regEx(/(:?[:/.])+/g);
-  return slugify(url.replace(r, ' '));
-}
 
 export async function getChangeLogJSON(
   _config: BranchUpgradeConfig

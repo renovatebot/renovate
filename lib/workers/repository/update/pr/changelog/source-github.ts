@@ -10,11 +10,11 @@ import * as packageCache from '../../../../../util/cache/package';
 import * as hostRules from '../../../../../util/host-rules';
 import { regEx } from '../../../../../util/regex';
 import type { BranchUpgradeConfig } from '../../../../types';
+import { slugifyUrl } from './common';
 import { getTags } from './github';
 import { addReleaseNotes } from './release-notes';
 import { getInRangeReleases } from './releases';
 import { ChangeLogError, ChangeLogRelease, ChangeLogResult } from './types';
-import { slugifyUrl } from './index';
 
 function getCachedTags(
   endpoint: string,
