@@ -231,6 +231,7 @@ exports[`modules/platform/gitea/index initRepo should fall back to merge method 
 {
   "defaultBranch": "master",
   "isFork": false,
+  "repoFingerprint": "c48ad9428365701f1a7f4798a410db2401b13267c205e345beb5b469a4a1480b163e1ce663ce483cfe579b2748a807cbeeba2035dc55eca5fe46d60d182510ec",
 }
 `;
 
@@ -238,6 +239,7 @@ exports[`modules/platform/gitea/index initRepo should fall back to merge method 
 {
   "defaultBranch": "master",
   "isFork": false,
+  "repoFingerprint": "c48ad9428365701f1a7f4798a410db2401b13267c205e345beb5b469a4a1480b163e1ce663ce483cfe579b2748a807cbeeba2035dc55eca5fe46d60d182510ec",
 }
 `;
 
@@ -245,5 +247,6 @@ exports[`modules/platform/gitea/index initRepo should fall back to merge method 
 {
   "defaultBranch": "master",
   "isFork": false,
+  "repoFingerprint": "c48ad9428365701f1a7f4798a410db2401b13267c205e345beb5b469a4a1480b163e1ce663ce483cfe579b2748a807cbeeba2035dc55eca5fe46d60d182510ec",
 }
 `;
