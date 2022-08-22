@@ -2,7 +2,6 @@ import is from '@sindresorhus/is';
 import { getLanguageList, getManagerList } from '../modules/manager';
 import { configRegexPredicate, isConfigRegex, regEx } from '../util/regex';
 import * as template from '../util/template';
-import { parseConfigs } from '../workers/global/config/parse';
 import {
   hasValidSchedule,
   hasValidTimezone,
@@ -99,6 +98,7 @@ export function getParentName(parentPath: string | undefined): string {
 
 export async function validateConfig(
   config: RenovateConfig,
+  earlyCfg: RenovateConfig,
   isPreset?: boolean,
   parentPath?: string
 ): Promise<ValidationResult> {
@@ -119,10 +119,7 @@ export async function validateConfig(
   let errors: ValidationMessage[] = [];
   let warnings: ValidationMessage[] = [];
 
-  // Get env and argv configuration
-  const cfg = await parseConfigs(process.env, process.argv);
-
-  if (cfg.skipConfigValidation) {
+  if (earlyCfg.skipConfigValidation) {
     return { errors, warnings };
   }
 
@@ -213,7 +210,7 @@ export async function validateConfig(
         });
       }
       if (!optionTypes[key]) {
-        if (!cfg.allowExtraConfig) {
+        if (!earlyCfg.allowExtraConfig) {
           errors.push({
             topic: 'Configuration Error',
             message: `Invalid configuration option: ${currentPath}. Run the server with '--allow-extra-config' flag if you want to allow extra configurations`,
@@ -271,6 +268,7 @@ export async function validateConfig(
               if (is.object(subval)) {
                 const subValidation = await validateConfig(
                   subval as RenovateConfig,
+                  earlyCfg,
                   isPreset,
                   `${currentPath}[${subIndex}]`
                 );
@@ -569,6 +567,7 @@ export async function validateConfig(
               if (!ignoredObjects.includes(key)) {
                 const subValidation = await validateConfig(
                   val,
+                  earlyCfg,
                   isPreset,
                   currentPath
                 );

@@ -80,7 +80,6 @@ export interface RenovateSharedConfig {
 // Config options used only within the global worker
 // The below should contain config options where stage=global
 export interface GlobalOnlyConfig {
-  allowExtraConfig?: boolean;
   autodiscover?: boolean;
   autodiscoverFilter?: string;
   baseDir?: string;
@@ -98,7 +97,6 @@ export interface GlobalOnlyConfig {
   redisUrl?: string;
   repositories?: RenovateRepository[];
   platform?: string;
-  skipConfigValidation?: boolean;
   endpoint?: string;
 }
 
@@ -191,6 +189,7 @@ export interface RenovateConfig
     AssigneesAndReviewersConfig,
     ConfigMigration,
     Record<string, unknown> {
+  allowExtraConfig?: boolean;
   depName?: string;
   baseBranches?: string[];
   useBaseBranchConfig?: UseBaseBranchConfigType;
@@ -230,6 +229,8 @@ export interface RenovateConfig
 
   repoIsOnboarded?: boolean;
   repoIsActivated?: boolean;
+
+  skipConfigValidation?: boolean;
 
   updateInternalDeps?: boolean;
   updateType?: UpdateType;

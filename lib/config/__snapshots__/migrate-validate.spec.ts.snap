@@ -4,7 +4,7 @@ exports[`config/migrate-validate migrateAndValidate() handles invalid 1`] = `
 {
   "errors": [
     {
-      "message": "Invalid configuration option: foo",
+      "message": "Invalid configuration option: foo. Run the server with '--allow-extra-config' flag if you want to allow extra configurations",
       "topic": "Configuration Error",
     },
   ],

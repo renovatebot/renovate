@@ -15,6 +15,11 @@ Please also see [Self-Hosted Experimental Options](./self-hosted-experimental.md
 
 ## allowCustomCrateRegistries
 
+## allowExtraConfig
+
+Set to `true` to allow your own config variable.
+`yarn start --allow-extra-config`.
+
 ## allowPlugins
 
 ## allowPostUpgradeCommandTemplating
@@ -687,6 +692,11 @@ It could then be used in a repository config or preset like so:
 ```
 
 Secret names must start with an upper or lower case character and can have only characters, digits, or underscores.
+
+## skipConfigValidation
+
+Set to `true` to skip the config validation completely.
+`yarn start --skip-config-validation`.
 
 ## skipInstalls
 

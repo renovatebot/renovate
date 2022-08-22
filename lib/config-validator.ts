@@ -8,6 +8,7 @@ import { migrateConfig } from './config/migration';
 import type { RenovateConfig } from './config/types';
 import { validateConfig } from './config/validation';
 import { logger } from './logger';
+import { parseConfigs } from './workers/global/config/parse';
 import {
   getConfig as getFileConfig,
   getParsedContent,
@@ -32,8 +33,9 @@ async function validate(
       'Config migration necessary'
     );
   }
+  const earlyCfg = await parseConfigs(process.env, process.argv);
   const massagedConfig = massageConfig(migratedConfig);
-  const res = await validateConfig(massagedConfig, isPreset);
+  const res = await validateConfig(massagedConfig, earlyCfg, isPreset);
   if (res.errors.length) {
     logger.error({ errors: res.errors }, `${desc} contains errors`);
     returnVal = 1;
