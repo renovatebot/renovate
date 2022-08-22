@@ -10,9 +10,9 @@ export class RepoCacheLocal extends RepoCacheBase {
     super(repository);
   }
 
-  protected async read(): Promise<string | undefined> {
+  protected async read(): Promise<unknown> {
     const cacheFileName = this.getCacheFileName();
-    let data: string | undefined;
+    let data: unknown;
     try {
       const rawCache = await readCacheFile(cacheFileName, 'utf8');
       data = JSON.parse(rawCache);
