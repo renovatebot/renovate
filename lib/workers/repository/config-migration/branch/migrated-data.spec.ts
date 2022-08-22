@@ -110,12 +110,12 @@ describe('workers/repository/config-migration/branch/migrated-data', () => {
     });
 
     it('Returns nothing due to detectRepoFileConfig throwing', async () => {
-      const message = 'error-message';
-      mockedFunction(detectRepoFileConfig).mockRejectedValueOnce({ message });
+      const err = new Error('error-message');
+      mockedFunction(detectRepoFileConfig).mockRejectedValueOnce(err);
       MigratedDataFactory.reset();
       await expect(MigratedDataFactory.getAsync()).resolves.toBeNull();
       expect(logger.debug).toHaveBeenCalledWith(
-        { err: { message } },
+        { err },
         'MigratedDataFactory.getAsync() Error initializing renovate MigratedData'
       );
     });
