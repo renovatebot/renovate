@@ -13,7 +13,6 @@ describe('util/package-rules/package-names', () => {
           matchPackageNames: ['@opentelemetry/http'],
         }
       );
-      expect(result).not.toBeNull();
       expect(result).toBeFalse();
     });
   });
@@ -28,7 +27,6 @@ describe('util/package-rules/package-names', () => {
           excludePackageNames: ['@opentelemetry/http'],
         }
       );
-      expect(result).not.toBeNull();
       expect(result).toBeFalse();
     });
   });

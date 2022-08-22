@@ -13,7 +13,6 @@ describe('util/package-rules/package-patterns', () => {
           matchPackagePatterns: ['@opentelemetry/http'],
         }
       );
-      expect(result).not.toBeNull();
       expect(result).toBeFalse();
     });
   });

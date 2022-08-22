@@ -14,22 +14,22 @@ import { SourceUrlsMatcher } from './sourceurls';
 import type { MatcherApi } from './types';
 import { UpdateTypesMatcher } from './update-types';
 
-const api: MatcherApi[][] = [];
-export default api;
+const matchers: MatcherApi[][] = [];
+export default matchers;
 
 // each manager under the same key will use a logical OR, if multiple matchers are applied AND will be used
-api.push([
+matchers.push([
   new PackageNameMatcher(),
   new PackagePatternsMatcher(),
   new PackagePrefixesMatcher(),
 ]);
-api.push([new FilesMatcher()]);
-api.push([new PathsMatcher()]);
-api.push([new DepTypesMatcher()]);
-api.push([new LanguagesMatcher()]);
-api.push([new BaseBranchesMatcher()]);
-api.push([new ManagersMatcher()]);
-api.push([new DatasourcesMatcher()]);
-api.push([new UpdateTypesMatcher()]);
-api.push([new SourceUrlsMatcher(), new SourceUrlPrefixesMatcher()]);
-api.push([new CurrentVersionMatcher()]);
+matchers.push([new FilesMatcher()]);
+matchers.push([new PathsMatcher()]);
+matchers.push([new DepTypesMatcher()]);
+matchers.push([new LanguagesMatcher()]);
+matchers.push([new BaseBranchesMatcher()]);
+matchers.push([new ManagersMatcher()]);
+matchers.push([new DatasourcesMatcher()]);
+matchers.push([new UpdateTypesMatcher()]);
+matchers.push([new SourceUrlsMatcher(), new SourceUrlPrefixesMatcher()]);
+matchers.push([new CurrentVersionMatcher()]);

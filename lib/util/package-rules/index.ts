@@ -3,7 +3,7 @@ import slugify from 'slugify';
 import { mergeChildConfig } from '../../config';
 import type { PackageRule, PackageRuleInputConfig } from '../../config/types';
 import { logger } from '../../logger';
-import matchers from './api';
+import matchers from './matchers';
 import { matcherOR } from './utils';
 
 function matchesRule(
@@ -74,7 +74,7 @@ export function applyPackageRules<T extends PackageRuleInputConfig>(
     { dependency: config.depName, packageRules },
     `Checking against ${packageRules.length} packageRules`
   );
-  packageRules.forEach((packageRule) => {
+  for (const packageRule of packageRules) {
     // This rule is considered matched if there was at least one positive match and no negative matches
     if (matchesRule(config, packageRule)) {
       // Package rule config overrides any existing config
@@ -95,6 +95,6 @@ export function applyPackageRules<T extends PackageRuleInputConfig>(
       delete config.matchDepTypes;
       delete config.matchCurrentVersion;
     }
-  });
+  }
   return config;
 }

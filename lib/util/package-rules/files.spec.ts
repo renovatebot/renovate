@@ -13,7 +13,6 @@ describe('util/package-rules/files', () => {
           matchFiles: ['frontend/package.json'],
         }
       );
-      expect(result).not.toBeNull();
       expect(result).toBeFalse();
     });
   });

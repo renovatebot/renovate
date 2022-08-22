@@ -13,7 +13,6 @@ describe('util/package-rules/package-prefixes', () => {
           matchPackagePrefixes: ['@opentelemetry'],
         }
       );
-      expect(result).not.toBeNull();
       expect(result).toBeFalse();
     });
   });
@@ -28,7 +27,6 @@ describe('util/package-rules/package-prefixes', () => {
           excludePackagePrefixes: ['@opentelemetry'],
         }
       );
-      expect(result).not.toBeNull();
       expect(result).toBeFalse();
     });
   });

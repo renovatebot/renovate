@@ -13,7 +13,6 @@ describe('util/package-rules/paths', () => {
           matchPaths: ['opentelemetry/http'],
         }
       );
-      expect(result).not.toBeNull();
       expect(result).toBeFalse();
     });
   });

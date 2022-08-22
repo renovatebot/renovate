@@ -21,11 +21,8 @@ export abstract class Matcher implements MatcherApi {
    * @param inputConfig
    * @param packageRule
    */
-  /* istanbul ignore next */
-  matches(
+  abstract matches(
     inputConfig: PackageRuleInputConfig,
     packageRule: PackageRule
-  ): boolean | null {
-    return null;
-  }
+  ): boolean | null;
 }
