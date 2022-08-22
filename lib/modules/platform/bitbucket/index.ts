@@ -28,6 +28,7 @@ import type {
   RepoResult,
   UpdatePrConfig,
 } from '../types';
+import { repoFingerprint } from '../util';
 import { smartTruncate } from '../utils/pr-body';
 import { readOnlyIssueBody } from '../utils/read-only-issue-body';
 import * as comments from './comments';
@@ -217,6 +218,7 @@ export async function initRepo({
   const repoConfig: RepoResult = {
     defaultBranch: info.mainbranch,
     isFork: info.isFork,
+    repoFingerprint: repoFingerprint(info.uuid, defaults.endpoint),
   };
   return repoConfig;
 }
