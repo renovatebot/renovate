@@ -40,6 +40,7 @@ import type {
   RepoResult,
   UpdatePrConfig,
 } from '../types';
+import { repoFingerprint } from '../util';
 import { smartTruncate } from '../utils/pr-body';
 import * as azureApi from './azure-got-wrapper';
 import * as azureHelper from './azure-helper';
@@ -135,6 +136,7 @@ export async function getRawFile(
   }
 
   if (!repoId) {
+    logger.debug('No repoId so cannot getRawFile');
     return null;
   }
 
@@ -229,6 +231,7 @@ export async function initRepo({
   const repoConfig: RepoResult = {
     defaultBranch,
     isFork: false,
+    repoFingerprint: repoFingerprint(repo.id!, defaults.endpoint),
   };
   return repoConfig;
 }
