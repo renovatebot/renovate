@@ -57,6 +57,7 @@ export interface User {
 }
 
 export interface Repo {
+  id: number;
   allow_merge_commits: boolean;
   allow_rebase: boolean;
   allow_rebase_explicit: boolean;

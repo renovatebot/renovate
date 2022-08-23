@@ -201,12 +201,11 @@ describe('modules/platform/gitlab/index', () => {
         await gitlab.initRepo({
           repository: 'some/repo/project',
         })
-      ).toMatchInlineSnapshot(`
-        {
-          "defaultBranch": "master",
-          "isFork": false,
-        }
-      `);
+      ).toEqual({
+        defaultBranch: 'master',
+        isFork: false,
+        repoFingerprint: expect.any(String),
+      });
     });
 
     it('should throw an error if receiving an error', async () => {
@@ -305,12 +304,11 @@ describe('modules/platform/gitlab/index', () => {
         await gitlab.initRepo({
           repository: 'some/repo/project',
         })
-      ).toMatchInlineSnapshot(`
-        {
-          "defaultBranch": "master",
-          "isFork": false,
-        }
-      `);
+      ).toEqual({
+        defaultBranch: 'master',
+        isFork: false,
+        repoFingerprint: expect.any(String),
+      });
     });
 
     it('should use ssh_url_to_repo if gitUrl is set to ssh', async () => {
