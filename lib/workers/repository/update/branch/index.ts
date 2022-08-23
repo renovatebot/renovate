@@ -115,7 +115,7 @@ export async function processBranch(
     // Check if branch already existed
     const existingPr = branchPr ? undefined : await prAlreadyExisted(config);
     if (existingPr && !dependencyDashboardCheck) {
-      // If merged pr exists recreate new pr with new branch
+      // Recreates pr if merged pr already exists
       if (existingPr.state === 'merged') {
         logger.debug(
           { prTitle: config.prTitle },
