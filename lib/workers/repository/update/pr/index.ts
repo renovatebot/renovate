@@ -27,6 +27,8 @@ import type {
   BranchUpgradeConfig,
   PrBlockedBy,
 } from '../../../types';
+import { embedChangelogs } from '../../changelog';
+// import { embedChangelogs } from '../../changelog';
 import { resolveBranchStatus } from '../branch/status-checks';
 import { getPrBody } from './body';
 import { ChangeLogError } from './changelog/types';
@@ -192,6 +194,11 @@ export async function ensurePr(
     return `${upgrade.repoName!}${
       upgrade.sourceDirectory ? `:${upgrade.sourceDirectory}` : ''
     }`;
+  }
+
+  if (config.fetchReleaseNotes) {
+    // fetch changelogs when not already done;
+    await embedChangelogs(upgrades);
   }
 
   // Get changelog and then generate template strings

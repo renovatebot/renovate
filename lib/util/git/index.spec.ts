@@ -1036,4 +1036,10 @@ describe('util/git/index', () => {
       );
     });
   });
+
+  describe('getSubmodules', () => {
+    it('should return empty array', async () => {
+      expect(await git.getSubmodules()).toHaveLength(0);
+    });
+  });
 });

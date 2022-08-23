@@ -1,323 +1,323 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`modules/manager/cocoapods/extract extractPackageFile() extracts from complex file 1`] = `
-Array [
-  Object {
+[
+  {
     "currentValue": "~> 6.5.0",
     "datasource": "pod",
     "depName": "IQKeyboardManager",
     "groupName": "IQKeyboardManager",
-    "managerData": Object {
+    "managerData": {
       "lineNumber": 8,
     },
-    "registryUrls": Array [
+    "registryUrls": [
       "https://github.com/CocoaPods/Specs.git",
     ],
   },
-  Object {
+  {
     "currentValue": "~> 1.28.3",
     "datasource": "pod",
     "depName": "CYLTabBarController",
     "groupName": "CYLTabBarController",
-    "managerData": Object {
+    "managerData": {
       "lineNumber": 9,
     },
-    "registryUrls": Array [
+    "registryUrls": [
       "https://github.com/CocoaPods/Specs.git",
     ],
   },
-  Object {
+  {
     "currentValue": "~> 3.1.4",
     "datasource": "pod",
     "depName": "PureLayout",
     "groupName": "PureLayout",
-    "managerData": Object {
+    "managerData": {
       "lineNumber": 11,
     },
-    "registryUrls": Array [
+    "registryUrls": [
       "https://github.com/CocoaPods/Specs.git",
     ],
   },
-  Object {
+  {
     "currentValue": "~> 3.2.1",
     "datasource": "pod",
     "depName": "AFNetworking/Serialization",
     "groupName": "AFNetworking",
-    "managerData": Object {
+    "managerData": {
       "lineNumber": 12,
     },
-    "registryUrls": Array [
+    "registryUrls": [
       "https://github.com/CocoaPods/Specs.git",
     ],
   },
-  Object {
+  {
     "currentValue": "~> 3.2.1",
     "datasource": "pod",
     "depName": "AFNetworking/Security",
     "groupName": "AFNetworking",
-    "managerData": Object {
+    "managerData": {
       "lineNumber": 13,
     },
-    "registryUrls": Array [
+    "registryUrls": [
       "https://github.com/CocoaPods/Specs.git",
     ],
   },
-  Object {
+  {
     "currentValue": "~> 3.2.1",
     "datasource": "pod",
     "depName": "AFNetworking/Reachability",
     "groupName": "AFNetworking",
-    "managerData": Object {
+    "managerData": {
       "lineNumber": 14,
     },
-    "registryUrls": Array [
+    "registryUrls": [
       "https://github.com/CocoaPods/Specs.git",
     ],
   },
-  Object {
+  {
     "currentValue": "~> 3.2.1",
     "datasource": "pod",
     "depName": "AFNetworking/NSURLSession",
     "groupName": "AFNetworking",
-    "managerData": Object {
+    "managerData": {
       "lineNumber": 15,
     },
-    "registryUrls": Array [
+    "registryUrls": [
       "https://github.com/CocoaPods/Specs.git",
     ],
   },
-  Object {
+  {
     "currentValue": "~> 1.1.0",
     "datasource": "pod",
     "depName": "MBProgressHUD",
     "groupName": "MBProgressHUD",
-    "managerData": Object {
+    "managerData": {
       "lineNumber": 17,
     },
-    "registryUrls": Array [
+    "registryUrls": [
       "https://github.com/CocoaPods/Specs.git",
     ],
   },
-  Object {
+  {
     "currentValue": "~> 3.1.16",
     "datasource": "pod",
     "depName": "MJRefresh",
     "groupName": "MJRefresh",
-    "managerData": Object {
+    "managerData": {
       "lineNumber": 18,
     },
-    "registryUrls": Array [
+    "registryUrls": [
       "https://github.com/CocoaPods/Specs.git",
     ],
   },
-  Object {
+  {
     "currentValue": "~> 3.1.0",
     "datasource": "pod",
     "depName": "MJExtension",
     "groupName": "MJExtension",
-    "managerData": Object {
+    "managerData": {
       "lineNumber": 19,
     },
-    "registryUrls": Array [
+    "registryUrls": [
       "https://github.com/CocoaPods/Specs.git",
     ],
   },
-  Object {
+  {
     "currentValue": "~> 2.1.2",
     "datasource": "pod",
     "depName": "TYPagerController",
     "groupName": "TYPagerController",
-    "managerData": Object {
+    "managerData": {
       "lineNumber": 20,
     },
-    "registryUrls": Array [
+    "registryUrls": [
       "https://github.com/CocoaPods/Specs.git",
     ],
   },
-  Object {
+  {
     "currentValue": "~> 1.0.4",
     "datasource": "pod",
     "depName": "YYImage",
     "groupName": "YYImage",
-    "managerData": Object {
+    "managerData": {
       "lineNumber": 21,
     },
-    "registryUrls": Array [
+    "registryUrls": [
       "https://github.com/CocoaPods/Specs.git",
     ],
   },
-  Object {
+  {
     "currentValue": "~> 5.0",
     "datasource": "pod",
     "depName": "SDWebImage",
     "groupName": "SDWebImage",
-    "managerData": Object {
+    "managerData": {
       "lineNumber": 22,
     },
-    "registryUrls": Array [
+    "registryUrls": [
       "https://github.com/CocoaPods/Specs.git",
     ],
   },
-  Object {
+  {
     "currentValue": "~> 1.80",
     "datasource": "pod",
     "depName": "SDCycleScrollView",
     "groupName": "SDCycleScrollView",
-    "managerData": Object {
+    "managerData": {
       "lineNumber": 23,
     },
-    "registryUrls": Array [
+    "registryUrls": [
       "https://github.com/CocoaPods/Specs.git",
     ],
   },
-  Object {
+  {
     "currentValue": "~> 2.0",
     "datasource": "pod",
     "depName": "NullSafe",
     "groupName": "NullSafe",
-    "managerData": Object {
+    "managerData": {
       "lineNumber": 24,
     },
-    "registryUrls": Array [
+    "registryUrls": [
       "https://github.com/CocoaPods/Specs.git",
     ],
   },
-  Object {
+  {
     "currentValue": "~> 3.2.1",
     "datasource": "pod",
     "depName": "TZImagePickerController",
     "groupName": "TZImagePickerController",
-    "managerData": Object {
+    "managerData": {
       "lineNumber": 26,
     },
-    "registryUrls": Array [
+    "registryUrls": [
       "https://github.com/CocoaPods/Specs.git",
     ],
   },
-  Object {
+  {
     "currentValue": "~> 2.5.1",
     "datasource": "pod",
     "depName": "TOCropViewController",
     "groupName": "TOCropViewController",
-    "managerData": Object {
+    "managerData": {
       "lineNumber": 27,
     },
-    "registryUrls": Array [
+    "registryUrls": [
       "https://github.com/CocoaPods/Specs.git",
     ],
   },
-  Object {
+  {
     "currentValue": "~> 2.7.5",
     "datasource": "pod",
     "depName": "FMDB",
     "groupName": "FMDB",
-    "managerData": Object {
+    "managerData": {
       "lineNumber": 31,
     },
-    "registryUrls": Array [
+    "registryUrls": [
       "https://github.com/CocoaPods/Specs.git",
     ],
   },
-  Object {
+  {
     "currentValue": "~> 1.0.1",
     "datasource": "pod",
     "depName": "FDStackView",
     "groupName": "FDStackView",
-    "managerData": Object {
+    "managerData": {
       "lineNumber": 32,
     },
-    "registryUrls": Array [
+    "registryUrls": [
       "https://github.com/CocoaPods/Specs.git",
     ],
   },
-  Object {
+  {
     "depName": "LYEmptyView",
     "groupName": "LYEmptyView",
     "skipReason": "unknown-version",
   },
-  Object {
+  {
     "currentValue": "~> 1.0.22",
     "datasource": "pod",
     "depName": "MMKV",
     "groupName": "MMKV",
-    "managerData": Object {
+    "managerData": {
       "lineNumber": 35,
     },
-    "registryUrls": Array [
+    "registryUrls": [
       "https://github.com/CocoaPods/Specs.git",
     ],
   },
-  Object {
+  {
     "depName": "fishhook",
     "groupName": "fishhook",
     "skipReason": "unknown-version",
   },
-  Object {
+  {
     "currentValue": "~> 3.5.3",
     "datasource": "pod",
     "depName": "CocoaLumberjack",
     "groupName": "CocoaLumberjack",
-    "managerData": Object {
+    "managerData": {
       "lineNumber": 39,
     },
-    "registryUrls": Array [
+    "registryUrls": [
       "https://github.com/CocoaPods/Specs.git",
     ],
   },
-  Object {
+  {
     "currentValue": "~> 1.2",
     "datasource": "pod",
     "depName": "GZIP",
     "groupName": "GZIP",
-    "managerData": Object {
+    "managerData": {
       "lineNumber": 41,
     },
-    "registryUrls": Array [
+    "registryUrls": [
       "https://github.com/CocoaPods/Specs.git",
     ],
   },
-  Object {
+  {
     "currentValue": "~> 2.3",
     "datasource": "pod",
     "depName": "LBXScan/LBXNative",
     "groupName": "LBXScan",
-    "managerData": Object {
+    "managerData": {
       "lineNumber": 43,
     },
-    "registryUrls": Array [
+    "registryUrls": [
       "https://github.com/CocoaPods/Specs.git",
     ],
   },
-  Object {
+  {
     "currentValue": "~> 2.3",
     "datasource": "pod",
     "depName": "LBXScan/LBXZXing",
     "groupName": "LBXScan",
-    "managerData": Object {
+    "managerData": {
       "lineNumber": 44,
     },
-    "registryUrls": Array [
+    "registryUrls": [
       "https://github.com/CocoaPods/Specs.git",
     ],
   },
-  Object {
+  {
     "currentValue": "~> 2.3",
     "datasource": "pod",
     "depName": "LBXScan/UI",
     "groupName": "LBXScan",
-    "managerData": Object {
+    "managerData": {
       "lineNumber": 46,
     },
-    "registryUrls": Array [
+    "registryUrls": [
       "https://github.com/CocoaPods/Specs.git",
     ],
   },
-  Object {
+  {
     "depName": "MLeaksFinder",
     "groupName": "MLeaksFinder",
     "skipReason": "unknown-version",
   },
-  Object {
+  {
     "depName": "FBMemoryProfiler",
     "groupName": "FBMemoryProfiler",
     "skipReason": "unknown-version",
@@ -326,115 +326,115 @@ Array [
 `;
 
 exports[`modules/manager/cocoapods/extract extractPackageFile() extracts from simple file 1`] = `
-Array [
-  Object {
+[
+  {
     "depName": "a",
     "groupName": "a",
     "skipReason": "unknown-version",
   },
-  Object {
+  {
     "depName": "a/sub",
     "groupName": "a",
     "skipReason": "unknown-version",
   },
-  Object {
+  {
     "currentValue": "1.2.3",
     "datasource": "pod",
     "depName": "b",
     "groupName": "b",
-    "managerData": Object {
+    "managerData": {
       "lineNumber": 4,
     },
-    "registryUrls": Array [
+    "registryUrls": [
       "https://github.com/Artsy/Specs.git",
     ],
   },
-  Object {
+  {
     "currentValue": "1.2.3",
     "datasource": "pod",
     "depName": "c",
     "groupName": "c",
-    "managerData": Object {
+    "managerData": {
       "lineNumber": 5,
     },
-    "registryUrls": Array [
+    "registryUrls": [
       "https://github.com/Artsy/Specs.git",
     ],
   },
-  Object {
+  {
     "depName": "d",
     "groupName": "d",
     "skipReason": "path-dependency",
   },
-  Object {
+  {
     "depName": "e",
     "groupName": "e",
     "skipReason": "git-dependency",
   },
-  Object {
+  {
     "depName": "f",
     "groupName": "f",
     "skipReason": "git-dependency",
   },
-  Object {
+  {
     "currentValue": "3.2.1",
     "datasource": "git-tags",
     "depName": "g",
-    "managerData": Object {
+    "managerData": {
       "lineNumber": 9,
     },
     "packageName": "g.git",
   },
-  Object {
+  {
     "currentValue": "0.0.1",
     "datasource": "github-tags",
     "depName": "h",
-    "managerData": Object {
+    "managerData": {
       "lineNumber": 10,
     },
     "packageName": "foo/foo",
   },
-  Object {
+  {
     "currentValue": "0.0.1",
     "datasource": "github-tags",
     "depName": "i",
-    "managerData": Object {
+    "managerData": {
       "lineNumber": 11,
     },
     "packageName": "foo/foo",
   },
-  Object {
+  {
     "currentValue": "0.1.0",
     "datasource": "gitlab-tags",
     "depName": "j",
-    "managerData": Object {
+    "managerData": {
       "lineNumber": 12,
     },
     "packageName": "bar/bar",
   },
-  Object {
+  {
     "currentValue": "0.1.0",
     "datasource": "gitlab-tags",
     "depName": "k",
-    "managerData": Object {
+    "managerData": {
       "lineNumber": 13,
     },
     "packageName": "bar/bar",
   },
-  Object {
+  {
     "currentValue": "1.0.0",
     "datasource": "git-tags",
     "depName": "l",
-    "managerData": Object {
+    "managerData": {
       "lineNumber": 14,
     },
     "packageName": "https://example.com/baz/baz.git",
   },
-  Object {
+  {
     "currentValue": "1.0.0",
     "datasource": "git-tags",
     "depName": "m",
-    "managerData": Object {
+    "managerData": {
       "lineNumber": 15,
     },
     "packageName": "git@example.com:baz/baz.git",

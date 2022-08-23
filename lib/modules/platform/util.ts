@@ -1,3 +1,4 @@
+import hasha from 'hasha';
 import {
   GITHUB_API_USING_HOST_TYPES,
   GITLAB_API_USING_HOST_TYPES,
@@ -34,4 +35,13 @@ export function detectPlatform(url: string): 'gitlab' | 'github' | null {
   }
 
   return null;
+}
+
+export function repoFingerprint(
+  repoId: number | string,
+  endpoint: string | undefined
+): string {
+  const input = endpoint ? `${endpoint}::${repoId}` : `${repoId}`;
+  const fingerprint = hasha(input);
+  return fingerprint;
 }

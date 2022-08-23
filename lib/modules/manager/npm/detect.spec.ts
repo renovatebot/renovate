@@ -11,12 +11,12 @@ describe('modules/manager/npm/detect', () => {
       );
       const res = await detectGlobalConfig();
       expect(res).toMatchInlineSnapshot(`
-Object {
-  "npmrc": "registry=https://registry.npmjs.org
-",
-  "npmrcMerge": true,
-}
-`);
+        {
+          "npmrc": "registry=https://registry.npmjs.org
+        ",
+          "npmrcMerge": true,
+        }
+      `);
       expect(res.npmrc).toBeDefined();
       expect(res.npmrcMerge).toBe(true);
     });

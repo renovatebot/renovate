@@ -1,17 +1,17 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`config/presets/index getPreset gets linters 1`] = `
-Object {
-  "description": Array [
+{
+  "description": [
     "All lint-related packages.",
   ],
-  "extends": Array [
+  "extends": [
     "packages:emberTemplateLint",
     "packages:eslint",
     "packages:stylelint",
     "packages:tslint",
   ],
-  "matchPackageNames": Array [
+  "matchPackageNames": [
     "remark-lint",
   ],
 }
@@ -24,10 +24,10 @@ exports[`config/presets/index getPreset handles 404 packages 2`] = `undefined`;
 exports[`config/presets/index getPreset handles 404 packages 3`] = `undefined`;
 
 exports[`config/presets/index resolvePreset migrates automerge in presets 1`] = `
-Object {
+{
   "automergeType": "pr",
   "branchPrefix": "renovate/",
-  "description": Array [
+  "description": [
     "Prefix \`renovate/\` to all branch names.",
     "If Renovate detects semantic commits, it will use semantic commit type \`fix\` for dependencies and \`chore\` for all others.",
     "Require all status checks to pass before any automerging.",
@@ -35,41 +35,41 @@ Object {
   ],
   "ignoreTests": false,
   "ignoreUnstable": true,
-  "labels": Array [
+  "labels": [
     "dependencies",
   ],
-  "lockFileMaintenance": Object {
+  "lockFileMaintenance": {
     "automerge": true,
     "enabled": true,
-    "schedule": Array [
+    "schedule": [
       "before 8am on Monday",
     ],
   },
-  "major": Object {
+  "major": {
     "automerge": false,
   },
-  "minor": Object {
+  "minor": {
     "automerge": true,
   },
-  "packageRules": Array [
-    Object {
-      "matchPackagePatterns": Array [
+  "packageRules": [
+    {
+      "matchPackagePatterns": [
         "*",
       ],
       "semanticCommitType": "chore",
     },
-    Object {
-      "matchDepTypes": Array [
+    {
+      "matchDepTypes": [
         "dependencies",
         "require",
       ],
       "semanticCommitType": "fix",
     },
-    Object {
-      "matchDatasources": Array [
+    {
+      "matchDatasources": [
         "maven",
       ],
-      "matchDepTypes": Array [
+      "matchDepTypes": [
         "compile",
         "provided",
         "runtime",
@@ -79,20 +79,20 @@ Object {
       ],
       "semanticCommitType": "fix",
     },
-    Object {
-      "matchPackagePatterns": Array [
+    {
+      "matchPackagePatterns": [
         "*",
       ],
       "rangeStrategy": "replace",
     },
-    Object {
-      "matchDepTypes": Array [
+    {
+      "matchDepTypes": [
         "devDependencies",
       ],
       "rangeStrategy": "pin",
     },
-    Object {
-      "matchDepTypes": Array [
+    {
+      "matchDepTypes": [
         "peerDependencies",
       ],
       "rangeStrategy": "widen",
@@ -101,7 +101,7 @@ Object {
   "prCreation": "immediate",
   "rebaseWhen": "behind-base-branch",
   "respectLatest": true,
-  "schedule": Array [
+  "schedule": [
     "before 8am",
   ],
   "semanticCommits": "enabled",
@@ -112,12 +112,12 @@ Object {
 `;
 
 exports[`config/presets/index resolvePreset resolves eslint 1`] = `
-Object {
-  "matchPackageNames": Array [
+{
+  "matchPackageNames": [
     "@types/eslint",
     "babel-eslint",
   ],
-  "matchPackagePrefixes": Array [
+  "matchPackagePrefixes": [
     "@typescript-eslint/",
     "eslint",
   ],
@@ -125,20 +125,20 @@ Object {
 `;
 
 exports[`config/presets/index resolvePreset resolves linters 1`] = `
-Object {
-  "description": Array [
+{
+  "description": [
     "All lint-related packages.",
   ],
-  "matchPackageNames": Array [
+  "matchPackageNames": [
     "@types/eslint",
     "babel-eslint",
     "codelyzer",
     "remark-lint",
   ],
-  "matchPackagePatterns": Array [
-    "\\\\btslint\\\\b",
+  "matchPackagePatterns": [
+    "\\btslint\\b",
   ],
-  "matchPackagePrefixes": Array [
+  "matchPackagePrefixes": [
     "ember-template-lint",
     "@typescript-eslint/",
     "eslint",
@@ -148,26 +148,26 @@ Object {
 `;
 
 exports[`config/presets/index resolvePreset resolves nested groups 1`] = `
-Object {
-  "description": Array [
+{
+  "description": [
     "Update lint packages automatically if tests pass.",
   ],
-  "packageRules": Array [
-    Object {
+  "packageRules": [
+    {
       "automerge": true,
-      "description": Array [
+      "description": [
         "All lint-related packages.",
       ],
-      "matchPackageNames": Array [
+      "matchPackageNames": [
         "@types/eslint",
         "babel-eslint",
         "codelyzer",
         "remark-lint",
       ],
-      "matchPackagePatterns": Array [
-        "\\\\btslint\\\\b",
+      "matchPackagePatterns": [
+        "\\btslint\\b",
       ],
-      "matchPackagePrefixes": Array [
+      "matchPackagePrefixes": [
         "ember-template-lint",
         "@typescript-eslint/",
         "eslint",
@@ -179,8 +179,8 @@ Object {
 `;
 
 exports[`config/presets/index resolvePreset resolves self-hosted presets without baseConfig 1`] = `
-Object {
-  "labels": Array [
+{
+  "labels": [
     "self-hosted resolved",
   ],
 }

@@ -406,7 +406,7 @@ export abstract class AbstractGithubDatasourceCache<
     updateDuration: DurationLikeObject,
     cacheItems: Record<string, StoredItem>
   ): boolean {
-    if (!changelogRelease) {
+    if (!changelogRelease?.date) {
       return false;
     }
 

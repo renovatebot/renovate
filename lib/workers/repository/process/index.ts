@@ -3,7 +3,7 @@ import { mergeChildConfig } from '../../../config';
 import { GlobalConfig } from '../../../config/global';
 import type { RenovateConfig } from '../../../config/types';
 import { CONFIG_VALIDATION } from '../../../constants/error-messages';
-import { logger } from '../../../logger';
+import { addMeta, logger, removeMeta } from '../../../logger';
 import type { PackageFile } from '../../../modules/manager/types';
 import { platform } from '../../../modules/platform';
 import { getCache } from '../../../util/cache/repository';
@@ -84,6 +84,7 @@ export async function extractDependencies(
     logger.debug({ baseBranches: config.baseBranches }, 'baseBranches');
     const extracted: Record<string, Record<string, PackageFile[]>> = {};
     for (const baseBranch of config.baseBranches) {
+      addMeta({ baseBranch });
       if (branchExists(baseBranch)) {
         const baseBranchConfig = await getBaseBranchConfig(baseBranch, config);
         extracted[baseBranch] = await extract(baseBranchConfig);
@@ -94,6 +95,7 @@ export async function extractDependencies(
     addSplit('extract');
     for (const baseBranch of config.baseBranches) {
       if (branchExists(baseBranch)) {
+        addMeta({ baseBranch });
         const baseBranchConfig = await getBaseBranchConfig(baseBranch, config);
         const packageFiles = extracted[baseBranch];
         const baseBranchRes = await lookup(baseBranchConfig, packageFiles);
@@ -102,6 +104,7 @@ export async function extractDependencies(
         res.packageFiles = res.packageFiles || baseBranchRes?.packageFiles; // Use the first branch
       }
     }
+    removeMeta(['baseBranch']);
   } else {
     logger.debug('No baseBranches');
     const packageFiles = await extract(config);
