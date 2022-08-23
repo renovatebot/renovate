@@ -21,7 +21,7 @@ export class RepoCacheS3 extends RepoCacheBase {
     this.s3Client = getS3Client();
   }
 
-  async read(): Promise<string | undefined> {
+  async read(): Promise<string | null> {
     const cacheFileName = this.getCacheFileName();
     const s3Params: GetObjectCommandInput = {
       Bucket: this.bucket,
@@ -32,7 +32,7 @@ export class RepoCacheS3 extends RepoCacheBase {
         new GetObjectCommand(s3Params)
       );
       if (res instanceof Readable) {
-        const data: string = JSON.parse(await streamToString(res));
+        const data = JSON.parse(await streamToString(res));
         logger.debug('RepoCacheS3.read() - success'); // parse can throw
         return data;
       }
@@ -47,7 +47,7 @@ export class RepoCacheS3 extends RepoCacheBase {
         logger.warn({ err }, 'RepoCacheS3.read() - failure');
       }
     }
-    return undefined;
+    return null;
   }
 
   async write(data: RepoCacheRecord): Promise<void> {
