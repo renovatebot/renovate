@@ -64,19 +64,19 @@ export abstract class RepoCacheBase implements RepoCache {
 
       if (isValidRev12(oldCache, this.repository)) {
         await this.restoreFromRev12(oldCache);
-        logger.debug('Repository cache is restored from 12 revision');
+        logger.debug('Repository cache is restored from revision 12');
         return;
       }
 
       if (isValidRev11(oldCache, this.repository)) {
         this.restoreFromRev11(oldCache);
-        logger.debug('Repository cache is restored from 11 revision');
+        logger.debug('Repository cache is restored from revision 11');
         return;
       }
 
       if (isValidRev10(oldCache, this.repository)) {
         this.restoreFromRev10(oldCache);
-        logger.debug('Repository cache is restored from 10 revision');
+        logger.debug('Repository cache is restored from revision 10');
         return;
       }
 
