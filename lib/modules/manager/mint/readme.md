@@ -2,8 +2,6 @@ Renovate supports updating Mintfiles.
 
 [`yonaskolb/Mint` repository on GitHub](https://github.com/yonaskolb/Mint)
 
-**note**
-
 You need to state the version of library in Mintfile.
 
 ```
