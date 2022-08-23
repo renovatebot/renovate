@@ -64,24 +64,6 @@ export abstract class RepoCacheBase implements RepoCache {
     this.data = oldCache;
   }
 
-  private async restoreFromRev12(oldCache: RepoCacheRecordV12): Promise<void> {
-    const compressed = Buffer.from(oldCache.payload, 'base64');
-    const uncompressed = await decompress(compressed);
-    const jsonStr = uncompressed.toString('utf8');
-    this.data = JSON.parse(jsonStr);
-    this.oldHash = oldCache.hash;
-  }
-
-  private restoreFromRev11(oldCache: RepoCacheRecordV11): void {
-    this.data = oldCache.data;
-  }
-
-  private restoreFromRev10(oldCache: RepoCacheRecordV10): void {
-    delete oldCache.repository;
-    delete oldCache.revision;
-    this.data = oldCache;
-  }
-
   async load(): Promise<void> {
     try {
       const data = await this.read();
