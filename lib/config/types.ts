@@ -34,6 +34,7 @@ export interface RenovateSharedConfig {
   commitMessage?: string;
   commitMessagePrefix?: string;
   confidential?: boolean;
+  customChangelogUrl?: string;
   draftPR?: boolean;
   enabled?: boolean;
   enabledManagers?: string[];
