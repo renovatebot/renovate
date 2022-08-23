@@ -124,7 +124,7 @@ export async function updateArtifacts({
     }
     cmd += ' wrapper';
 
-    let checksum = null;
+    let checksum: string | null = null;
     const distributionUrl = getDistributionUrl(newPackageFileContent);
     if (distributionUrl) {
       cmd += ` --gradle-distribution-url ${distributionUrl}`;
