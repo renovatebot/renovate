@@ -128,6 +128,15 @@ describe('util/cache/repository/impl/local', () => {
     expect(data).toBeEmpty();
   });
 
+  it('handles invalid json', async () => {
+    fs.readCacheFile.mockResolvedValue('{1');
+    const localRepoCache = CacheFactory.get('some/repo', 'local');
+
+    await localRepoCache.load();
+
+    expect(localRepoCache.getData()).toBeEmpty();
+  });
+
   it('resets if repository does not match', async () => {
     const cacheRecord = createCacheRecord({ semanticCommits: 'enabled' });
     fs.readCacheFile.mockResolvedValueOnce(JSON.stringify(cacheRecord));
@@ -135,7 +144,7 @@ describe('util/cache/repository/impl/local', () => {
     const localRepoCache = CacheFactory.get('some/repo', 'local');
     await localRepoCache.load();
 
-    expect(localRepoCache.getData()).toEqual({});
+    expect(localRepoCache.getData()).toBeEmpty();
   });
 
   it('saves modified cache data to file', async () => {

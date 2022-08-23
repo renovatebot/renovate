@@ -22,7 +22,7 @@ export abstract class RepoCacheBase implements RepoCache {
 
   protected constructor(protected readonly repository: string) {}
 
-  protected abstract read(): Promise<unknown>;
+  protected abstract read(): Promise<string | null>;
 
   protected abstract write(data: RepoCacheRecord): Promise<void>;
 
@@ -63,7 +63,7 @@ export abstract class RepoCacheBase implements RepoCache {
 
       logger.debug('Repository cache is invalid');
     } catch (err) {
-      logger.debug('Error reading repository cache');
+      logger.debug({ err }, 'Error reading repository cache');
     }
   }
 
