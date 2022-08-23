@@ -71,12 +71,13 @@ export async function updateBuildFile(
     buildFileName = join(localGradleDir, 'build.gradle.kts');
   }
 
-  let buildFileContent = await readLocalFile(buildFileName, 'utf8');
+  const buildFileContent = await readLocalFile(buildFileName, 'utf8');
   if (!buildFileContent) {
     logger.debug('build.gradle or build.gradle.kts not found');
     return buildFileName;
   }
 
+  let buildFileUpdated = buildFileContent;
   for (const [propertyName, newValue] of Object.entries(wrapperProperties)) {
     if (!newValue) {
       continue;
@@ -89,8 +90,8 @@ export async function updateBuildFile(
         .sym<Ctx>(propertyName)
         .op('=')
         .str((ctx, { value, offset }) => {
-          buildFileContent = replaceAt(
-            buildFileContent!,
+          buildFileUpdated = replaceAt(
+            buildFileUpdated,
             offset,
             value,
             newValue
@@ -98,10 +99,10 @@ export async function updateBuildFile(
           return ctx;
         }),
     });
-    groovy.query(buildFileContent, query, []);
+    groovy.query(buildFileUpdated, query, []);
   }
 
-  await writeLocalFile(buildFileName, buildFileContent);
+  await writeLocalFile(buildFileName, buildFileUpdated);
 
   return buildFileName;
 }
