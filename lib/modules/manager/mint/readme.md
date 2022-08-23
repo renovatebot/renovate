@@ -1,4 +1,4 @@
-### Renovate supports Mintfile updates
+Renovate supports updating Mintfiles.
 
 - [yonaskolb/Mint](https://github.com/yonaskolb/Mint)
 
