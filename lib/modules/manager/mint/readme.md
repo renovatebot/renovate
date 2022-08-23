@@ -5,7 +5,7 @@ Renovate supports updating Mintfiles.
 You must put the library version in the Mintfile:
 
 ```
-// ok
+// Good:
 SwiftGen/SwiftGen@6.6.1
 realm/SwiftLint @ 0.48.0
 
