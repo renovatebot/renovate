@@ -1,12 +1,12 @@
 import type { ExtractResult } from '../../workers/repository/process/extract-update';
 import { getCache } from '../cache/repository';
-import type { OnboardingBranchCache } from '../cache/repository/types';
+import type { OnboardingCache } from '../cache/repository/types';
 
 export function getCachedOnboardingBranch(
   branchSha: string,
   baseBranchSha: string,
   baseBranchName: string
-): OnboardingBranchCache | null {
+): OnboardingCache | null {
   const cache = getCache();
   const { onboarding: onboardingBranch } = cache;
   if (!onboardingBranch) {
@@ -30,7 +30,7 @@ export function setOnboardingBranchCache(
   extractedDependencies?: ExtractResult
 ): void {
   const cache = getCache();
-  const onboardingBranch = cache.onboarding ?? ({} as OnboardingBranchCache);
+  const onboardingBranch = cache.onboarding ?? ({} as OnboardingCache);
 
   onboardingBranch.isOnboarded = isOnboarded;
   onboardingBranch.onboardingBranchSha = branchSha;

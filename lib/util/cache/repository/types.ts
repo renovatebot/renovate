@@ -33,7 +33,7 @@ export interface BranchCache {
   upgrades: BranchUpgradeCache[];
 }
 
-export interface OnboardingBranchCache {
+export interface OnboardingCache {
   isOnboarded: boolean;
   defaultBranchSha?: string;
   onboardingBranchSha: string;
@@ -52,7 +52,7 @@ export interface RepoCacheData {
   };
   gitConflicts?: GitConflictsCache;
   prComments?: Record<number, Record<string, string>>;
-  onboarding?: OnboardingBranchCache;
+  onboarding?: OnboardingCache;
 }
 
 export interface RepoCacheRecord {
