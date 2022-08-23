@@ -49,14 +49,12 @@ function checkRebaseAll(issueBody: string): boolean {
 function selectAllRelevantBranches(issueBody: string): string[] {
   const checkedBranches = [];
   if (checkOpenAllRateLimitedPR(issueBody)) {
-    const checkedRate = [...issueBody.matchAll(rateLimitedRe)];
-    for (const match of checkedRate) {
+    for (const match of issueBody.matchAll(rateLimitedRe)) {
       checkedBranches.push(match[0]);
     }
   }
   if (checkApproveAllPendingPR(issueBody)) {
-    const checkedPending = [...issueBody.matchAll(pendingApprovalRe)];
-    for (const match of checkedPending) {
+    for (const match of issueBody.matchAll(pendingApprovalRe)) {
       checkedBranches.push(match[0]);
     }
   }
