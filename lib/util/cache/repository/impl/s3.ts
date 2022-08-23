@@ -32,17 +32,16 @@ export class RepoCacheS3 extends RepoCacheBase {
         new GetObjectCommand(s3Params)
       );
       if (res instanceof Readable) {
-        const data = JSON.parse(await streamToString(res));
-        logger.debug('RepoCacheS3.read() - success'); // parse can throw
-        return data;
+        logger.debug('RepoCacheS3.read() - success');
+        return await streamToString(res);
       }
       logger.warn(
         `RepoCacheS3.read() - failure - expecting Readable return type got '${typeof res}' type instead`
       );
     } catch (err) {
       // https://docs.aws.amazon.com/AmazonS3/latest/API/ErrorResponses.html
-      if (err?.name === 'NoSuchKey') {
-        logger.debug(`RepoCacheS3.read() - 'NoSuchKey'`);
+      if (err.name === 'NoSuchKey') {
+        logger.debug('RepoCacheS3.read() - No cached file found');
       } else {
         logger.warn({ err }, 'RepoCacheS3.read() - failure');
       }

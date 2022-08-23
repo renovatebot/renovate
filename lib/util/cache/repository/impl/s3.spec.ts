@@ -55,7 +55,7 @@ describe('util/cache/repository/impl/s3', () => {
     await expect(s3Cache.read()).toResolve();
     expect(logger.warn).toHaveBeenCalledTimes(0);
     expect(logger.debug).toHaveBeenCalledWith(
-      `RepoCacheS3.read() - 'NoSuchKey'`
+      `RepoCacheS3.read() - No cached file found`
     );
   });
 
