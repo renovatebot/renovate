@@ -199,13 +199,6 @@ exports[`modules/platform/gitea/index getPrList should return list of pull reque
 ]
 `;
 
-exports[`modules/platform/gitea/index getRepos should return an array of repos 1`] = `
-[
-  "a/b",
-  "c/d",
-]
-`;
-
 exports[`modules/platform/gitea/index initPlatform() should support custom endpoint 1`] = `
 {
   "endpoint": "https://gitea.renovatebot.com/",
