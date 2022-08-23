@@ -36,7 +36,11 @@ jest.mock('../../../config/migrate-validate');
 describe('workers/repository/init/merge', () => {
   describe('detectRepoFileConfig()', () => {
     beforeEach(async () => {
-      await initRepoCache({});
+      await initRepoCache({
+        isFork: false,
+        defaultBranch: 'main',
+        repoFingerprint: '0123456789abcdef',
+      });
     });
 
     it('returns config if not found', async () => {

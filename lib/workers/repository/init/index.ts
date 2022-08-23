@@ -32,9 +32,12 @@ export async function initRepo(
 ): Promise<RenovateConfig> {
   PackageFiles.clear();
   let config: RenovateConfig = initializeConfig(config_);
+
   await resetCaches();
-  config = await initApis(config);
-  await initializeCaches(config);
+  const workerPlatformConfig = await initApis(config);
+  config = workerPlatformConfig;
+  await initializeCaches(workerPlatformConfig);
+
   config = await getRepoConfig(config);
   checkIfConfigured(config);
   warnOnUnsupportedOptions(config);

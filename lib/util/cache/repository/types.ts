@@ -65,7 +65,11 @@ export interface RepoCacheRecordV12 {
   hash: string;
 }
 
-export type RepoCacheRecord = RepoCacheRecordV12;
+export interface RepoCacheRecordV13 extends RepoCacheRecordV12 {
+  fingerprint: string;
+}
+
+export type RepoCacheWritableRecord = RepoCacheRecordV12 | RepoCacheRecordV13;
 
 export interface RepoCache {
   load(): Promise<void>;

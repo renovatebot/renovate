@@ -1,6 +1,6 @@
 import { mocked } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
-import type { RenovateConfig } from '../../../config/types';
+import type { WorkerPlatformConfig } from '../../../workers/repository/init/apis';
 import * as _fs from '../../fs';
 import { initRepoCache } from './init';
 import { getCache, resetCache, saveCache } from '.';
@@ -16,10 +16,13 @@ describe('util/cache/repository/index', () => {
     GlobalConfig.set({ cacheDir: '/tmp/cache', platform: 'github' });
   });
 
-  const config: RenovateConfig = {
+  const config: WorkerPlatformConfig = {
     platform: 'github',
     repository: 'some/repo',
     repositoryCache: 'enabled',
+    repoFingerprint: '0123456789abcdef',
+    defaultBranch: 'main',
+    isFork: false,
   };
 
   it('returns if cache not enabled', async () => {

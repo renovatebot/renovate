@@ -1,4 +1,4 @@
-import type { RenovateConfig } from '../../../config/types';
+import type { WorkerPlatformConfig } from '../../../workers/repository/init/apis';
 import { CacheFactory } from './impl/cache-factory';
 import { RepoCacheNull } from './impl/null';
 import { resetCache, setCache } from '.';
@@ -6,10 +6,17 @@ import { resetCache, setCache } from '.';
 /**
  * Extracted to separate file in order to avoid circular module dependencies.
  */
-export async function initRepoCache(config: RenovateConfig): Promise<void> {
+export async function initRepoCache(
+  config: WorkerPlatformConfig
+): Promise<void> {
   resetCache();
 
-  const { repository, repositoryCache, repositoryCacheType: type } = config;
+  const {
+    repository,
+    repositoryCache,
+    repositoryCacheType: type = 'local',
+    repoFingerprint,
+  } = config;
 
   if (repositoryCache === 'disabled') {
     setCache(new RepoCacheNull());
@@ -17,14 +24,14 @@ export async function initRepoCache(config: RenovateConfig): Promise<void> {
   }
 
   if (repositoryCache === 'enabled') {
-    const cache = CacheFactory.get(repository!, type);
+    const cache = CacheFactory.get(repository!, repoFingerprint, type);
     await cache.load();
     setCache(cache);
     return;
   }
 
   if (repositoryCache === 'reset') {
-    const cache = CacheFactory.get(repository!, type);
+    const cache = CacheFactory.get(repository!, repoFingerprint, type);
     await cache.save();
     setCache(cache);
     return;
