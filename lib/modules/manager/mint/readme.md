@@ -9,6 +9,6 @@ You must put the library version in the Mintfile:
 SwiftGen/SwiftGen@6.6.1
 realm/SwiftLint @ 0.48.0
 
-// no
+// Bad:
 yonaskolb/xcodegen
 ```
