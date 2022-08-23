@@ -337,15 +337,21 @@ describe('modules/manager/gradle-wrapper/artifacts', () => {
 
   describe('updateBuildFile()', () => {
     it('updates wrapper configuration in gradle build file', async () => {
-      fs.readLocalFile.mockResolvedValueOnce(
-        Fixtures.get('testFiles/build.gradle.kts')
-      );
+      fs.readLocalFile.mockResolvedValueOnce(`
+            tasks.named("wrapper", Wrapper::class) {
+              gradleVersion = '5.6.2'
+              distributionSha256Sum="027fdd265d277bae65a0d349b6b8da02135b0b8e14ba891e26281fa877fe37a2"
+              distributionUrl = "https://services.gradle.org/distributions/gradle-5.6.2-bin.zip"
+            }`);
 
       fs.writeLocalFile.mockImplementationOnce(
         (fileName: string, fileContent: string | Buffer): Promise<void> => {
-          expect(fileContent).toBe(
-            Fixtures.get('expectedFiles/build.gradle.kts')
-          );
+          expect(fileContent).toBe(`
+            tasks.named("wrapper", Wrapper::class) {
+              gradleVersion = '6.3'
+              distributionSha256Sum="038794feef1f4745c6347107b6726279d1c824f3fc634b60f86ace1e9fbd1768"
+              distributionUrl = "https://services.gradle.org/distributions/gradle-6.3-bin.zip"
+            }`);
           return Promise.resolve();
         }
       );
@@ -362,13 +368,19 @@ describe('modules/manager/gradle-wrapper/artifacts', () => {
 
     it('gradle build file update skips missing distributionSha256Sum property', async () => {
       fs.localPathExists.mockResolvedValueOnce(true);
-      fs.readLocalFile.mockResolvedValueOnce(
-        Fixtures.get('testFiles/build.gradle')
-      );
+      fs.readLocalFile.mockResolvedValueOnce(`
+            wrapper {
+              gradleVersion = '5.6.2'
+              distributionUrl = "https://services.gradle.org/distributions/gradle-$gradleVersion-all.zip"
+            }`);
 
       fs.writeLocalFile.mockImplementationOnce(
         (fileName: string, fileContent: string | Buffer): Promise<void> => {
-          expect(fileContent).toBe(Fixtures.get('expectedFiles/build.gradle'));
+          expect(fileContent).toBe(`
+            wrapper {
+              gradleVersion = '6.3'
+              distributionUrl = "https://services.gradle.org/distributions/gradle-$gradleVersion-all.zip"
+            }`);
           return Promise.resolve();
         }
       );
