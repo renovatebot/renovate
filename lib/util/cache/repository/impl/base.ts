@@ -1,5 +1,6 @@
 import { promisify } from 'util';
 import zlib from 'zlib';
+import is from '@sindresorhus/is';
 import hasha from 'hasha';
 import { GlobalConfig } from '../../../../config/global';
 import { logger } from '../../../../logger';
@@ -27,7 +28,14 @@ export abstract class RepoCacheBase implements RepoCache {
 
   async load(): Promise<void> {
     try {
-      const oldCache = await this.read();
+      const data = await this.read();
+      if (!is.string(data)) {
+        logger.debug(
+          `RepoCacheBase.load() - expecting data of type 'string' received '${typeof data}' instead - skipping`
+        );
+        return;
+      }
+      const oldCache = JSON.parse(data);
 
       if (isValidRev12(oldCache, this.repository)) {
         const compressed = Buffer.from(oldCache.payload, 'base64');
