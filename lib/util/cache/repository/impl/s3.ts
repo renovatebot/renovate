@@ -35,6 +35,11 @@ export class RepoCacheS3 extends RepoCacheBase {
         logger.debug('RepoCacheS3.read() - success');
         return await streamToString(res);
       }
+      // istanbul ignore if: untestable - node's Blob is incompatible with DOM's Blob
+      if (res instanceof Blob) {
+        logger.debug('RepoCacheS3.read() - success');
+        return res.toString();
+      }
       logger.warn(
         `RepoCacheS3.read() - failure - expecting Readable return type got '${typeof res}' type instead`
       );
