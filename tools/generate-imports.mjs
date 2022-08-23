@@ -173,8 +173,7 @@ async function generateHash() {
   }
 }
 
-// eslint-disable-next-line @typescript-eslint/no-floating-promises
-(async () => {
+await (async () => {
   try {
     // data-files
     await generateData();

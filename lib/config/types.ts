@@ -11,6 +11,7 @@ export type RenovateConfigStage =
   | 'pr';
 
 export type RepositoryCacheConfig = 'disabled' | 'enabled' | 'reset';
+export type RepositoryCacheType = 'local' | string;
 export type DryRunConfig = 'extract' | 'lookup' | 'full';
 export type RequiredConfig = 'required' | 'optional' | 'ignored';
 
@@ -28,10 +29,12 @@ export interface RenovateSharedConfig {
   branchPrefix?: string;
   branchPrefixOld?: string;
   branchName?: string;
+  branchNameStrict?: boolean;
   manager?: string | null;
   commitMessage?: string;
   commitMessagePrefix?: string;
   confidential?: boolean;
+  customChangelogUrl?: string;
   draftPR?: boolean;
   enabled?: boolean;
   enabledManagers?: string[];
@@ -64,6 +67,7 @@ export interface RenovateSharedConfig {
   recreateClosed?: boolean;
   repository?: string;
   repositoryCache?: RepositoryCacheConfig;
+  repositoryCacheType?: RepositoryCacheType;
   schedule?: string[];
   automergeSchedule?: string[];
   semanticCommits?: 'auto' | 'enabled' | 'disabled';
@@ -107,7 +111,7 @@ export interface RepoGlobalConfig {
   allowPostUpgradeCommandTemplating?: boolean;
   allowScripts?: boolean;
   allowedPostUpgradeCommands?: string[];
-  binarySource?: 'docker' | 'global' | 'install';
+  binarySource?: 'docker' | 'global' | 'install' | 'hermit';
   customEnvVariables?: Record<string, string>;
   dockerChildPrefix?: string;
   dockerImagePrefix?: string;
@@ -212,7 +216,6 @@ export interface RenovateConfig
   dependencyDashboardAutoclose?: boolean;
   dependencyDashboardChecks?: Record<string, string>;
   dependencyDashboardIssue?: number;
-  dependencyDashboardRebaseAllOpen?: boolean;
   dependencyDashboardTitle?: string;
   dependencyDashboardHeader?: string;
   dependencyDashboardFooter?: string;
@@ -242,7 +245,10 @@ export interface RenovateConfig
   constraints?: Record<string, string>;
 }
 
-export interface AllConfig extends RenovateConfig, GlobalOnlyConfig {}
+export interface AllConfig
+  extends RenovateConfig,
+    GlobalOnlyConfig,
+    RepoGlobalConfig {}
 
 export interface AssigneesAndReviewersConfig {
   assigneesFromCodeOwners?: boolean;

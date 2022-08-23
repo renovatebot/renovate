@@ -50,10 +50,10 @@ export function filterVersions(
       const versionRelease = releases.find(
         (release) => release.version === v.version
       );
-      // TODO #7154
+      // TODO: types (#7154)
       if (versionRelease!.isDeprecated) {
         logger.trace(
-          `Skipping ${config.depName}@${v.version} because it is deprecated`
+          `Skipping ${config.depName!}@${v.version} because it is deprecated`
         );
         return false;
       }

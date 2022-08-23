@@ -20,7 +20,7 @@ export function createConfigMigrationBranch(
     configFileName
   );
 
-  const commitMessage = commitMessageFactory.create();
+  const commitMessage = commitMessageFactory.getCommitMessage();
 
   // istanbul ignore if
   if (GlobalConfig.get('dryRun')) {

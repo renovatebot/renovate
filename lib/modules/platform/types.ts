@@ -21,12 +21,14 @@ export interface PlatformParams {
 export interface PlatformResult {
   endpoint: string;
   renovateUsername?: string;
+  token?: string;
   gitAuthor?: string;
 }
 
 export interface RepoResult {
   defaultBranch: string;
   isFork: boolean;
+  repoFingerprint: string;
 }
 
 export type GitUrlOption = 'default' | 'ssh' | 'endpoint';
@@ -43,9 +45,15 @@ export interface RepoParams {
   ignorePrAuthor?: boolean;
 }
 
+export interface PrDebugData {
+  createdInVer: string;
+  updatedInVer: string;
+}
+
 export interface PrBodyStruct {
   hash: string;
   rebaseRequested?: boolean;
+  debugData?: PrDebugData;
 }
 
 /**

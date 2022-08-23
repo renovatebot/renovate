@@ -3,7 +3,11 @@ import { GlobalConfig } from '../../../../config/global';
 import type { RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
 import { commitAndPush } from '../../../../modules/platform/commit';
-import { getFile, isBranchModified, isBranchStale } from '../../../../util/git';
+import {
+  getFile,
+  isBranchBehindBase,
+  isBranchModified,
+} from '../../../../util/git';
 import { OnboardingCommitMessageFactory } from './commit-message';
 import { getOnboardingConfigContents } from './config';
 
@@ -27,7 +31,7 @@ export async function rebaseOnboardingBranch(
   // TODO #7154
   if (
     contents === existingContents &&
-    !(await isBranchStale(config.onboardingBranch!))
+    !(await isBranchBehindBase(config.onboardingBranch!))
   ) {
     logger.debug('Onboarding branch is up to date');
     return null;

@@ -90,19 +90,19 @@
     "codename": "Jessie",
     "series": "jessie",
     "created": "2013-05-04",
-    "release": "2015-04-25",
+    "release": "2015-04-26",
     "eol": "2018-06-17",
     "eol_lts": "2020-06-30",
-    "eol_elts": "2022-06-30"
+    "eol_elts": "2025-06-30"
   },
   "v9": {
     "codename": "Stretch",
     "series": "stretch",
-    "created": "2015-04-25",
+    "created": "2015-04-26",
     "release": "2017-06-17",
     "eol": "2020-07-06",
     "eol_lts": "2022-06-30",
-    "eol_elts": "2024-06-30"
+    "eol_elts": "2027-06-30"
   },
   "v10": {
     "codename": "Buster",
@@ -111,7 +111,7 @@
     "release": "2019-07-06",
     "eol": "2022-08-14",
     "eol_lts": "2024-06-30",
-    "eol_elts": "2026-06-30"
+    "eol_elts": "2029-06-30"
   },
   "v11": {
     "codename": "Bullseye",

@@ -39,6 +39,7 @@ import type {
   RepoResult,
   UpdatePrConfig,
 } from '../types';
+import { repoFingerprint } from '../util';
 import { smartTruncate } from '../utils/pr-body';
 import type {
   BbsConfig,
@@ -154,6 +155,7 @@ export async function initRepo({
   repository,
   cloneSubmodules,
   ignorePrAuthor,
+  gitUrl,
 }: RepoParams): Promise<RepoResult> {
   logger.debug(`initRepo("${JSON.stringify({ repository }, null, 2)}")`);
   const opts = hostRules.find({
@@ -189,17 +191,18 @@ export async function initRepo({
       throw new Error(REPOSITORY_EMPTY);
     }
 
-    const gitUrl = utils.getRepoGitUrl(
+    const url = utils.getRepoGitUrl(
       config.repositorySlug,
       // TODO #7154
       defaults.endpoint!,
+      gitUrl,
       info,
       opts
     );
 
     await git.initRepo({
       ...config,
-      url: gitUrl,
+      url,
       cloneSubmodules,
       fullClone: true,
     });
@@ -208,6 +211,7 @@ export async function initRepo({
     const repoConfig: RepoResult = {
       defaultBranch: branchRes.body.displayId,
       isFork: !!info.origin,
+      repoFingerprint: repoFingerprint(info.id, defaults.endpoint),
     };
 
     return repoConfig;
@@ -323,7 +327,7 @@ export async function findPr({
   state = PrState.All,
   refreshCache,
 }: FindPRConfig): Promise<Pr | null> {
-  logger.debug(`findPr(${branchName}, "${prTitle}", "${state}")`);
+  logger.debug(`findPr(${branchName}, "${prTitle!}", "${state}")`);
   const prList = await getPrList(refreshCache);
   const pr = prList.find(isRelevantPr(branchName, prTitle, state));
   if (pr) {
@@ -360,7 +364,8 @@ async function getStatus(
 
   return (
     await bitbucketServerHttp.getJson<utils.BitbucketCommitStatus>(
-      `./rest/build-status/1.0/commits/stats/${branchCommit}`,
+      // TODO: types (#7154)
+      `./rest/build-status/1.0/commits/stats/${branchCommit!}`,
       {
         useCache,
       }
@@ -408,7 +413,8 @@ function getStatusCheck(
   const branchCommit = git.getBranchCommit(branchName);
 
   return utils.accumulateValues(
-    `./rest/build-status/1.0/commits/${branchCommit}`,
+    // TODO: types (#7154)
+    `./rest/build-status/1.0/commits/${branchCommit!}`,
     'get',
     { useCache }
   );
@@ -481,7 +487,8 @@ export async function setBranchStatus({
     }
 
     await bitbucketServerHttp.postJson(
-      `./rest/build-status/1.0/commits/${branchCommit}`,
+      // TODO: types (#7154)
+      `./rest/build-status/1.0/commits/${branchCommit!}`,
       { body }
     );
 
@@ -934,7 +941,7 @@ export async function mergePr({
   branchName,
   id: prNo,
 }: MergePRConfig): Promise<boolean> {
-  logger.debug(`mergePr(${prNo}, ${branchName})`);
+  logger.debug(`mergePr(${prNo}, ${branchName!})`);
   // Used for "automerge" feature
   try {
     const pr = await getPr(prNo);
@@ -942,7 +949,10 @@ export async function mergePr({
       throw Object.assign(new Error(REPOSITORY_NOT_FOUND), { statusCode: 404 });
     }
     const { body } = await bitbucketServerHttp.postJson<{ version: number }>(
-      `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests/${prNo}/merge?version=${pr.version}`
+      // TODO: types (#7154)
+      `./rest/api/1.0/projects/${config.projectKey}/repos/${
+        config.repositorySlug
+      }/pull-requests/${prNo}/merge?version=${pr.version!}`
     );
     updatePrVersion(prNo, body.version);
   } catch (err) {

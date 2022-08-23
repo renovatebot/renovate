@@ -15,18 +15,16 @@ export interface ManagerData<T> {
   managerData?: T;
 }
 
-export interface ExtractConfig {
+export interface ExtractConfig extends CustomExtractConfig {
   registryAliases?: Record<string, string>;
   npmrc?: string;
   npmrcMerge?: boolean;
   skipInstalls?: boolean;
 }
 
-export interface CustomExtractConfig
-  extends ExtractConfig,
-    RegexManagerTemplates {
+export interface CustomExtractConfig extends RegexManagerTemplates {
   autoReplaceStringTemplate?: string;
-  matchStrings: string[];
+  matchStrings?: string[];
   matchStringsStrategy?: MatchStringsStrategy;
 }
 
@@ -287,6 +285,8 @@ export interface PostUpdateConfig<T = Record<string, any>>
   postUpdateOptions?: string[];
   skipInstalls?: boolean;
   ignoreScripts?: boolean;
+
+  packageFile?: string;
 
   upgrades: Upgrade[];
   npmLock?: string;

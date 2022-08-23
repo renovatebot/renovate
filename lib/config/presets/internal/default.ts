@@ -2,21 +2,21 @@ import type { Preset } from '../types';
 
 export const presets: Record<string, Preset> = {
   enableRenovate: {
-    description: 'Enable Renovate',
+    description: 'Enable Renovate.',
     enabled: true,
   },
   disableRenovate: {
-    description: 'Disable Renovate',
+    description: 'Disable Renovate.',
     enabled: false,
   },
   disableMajorUpdates: {
-    description: 'Disables major updates',
+    description: 'Disable `major` updates.',
     major: {
       enabled: false,
     },
   },
   disableDomain: {
-    description: 'Disable requests to a particular domain',
+    description: 'Disable requests to a particular domain.',
     hostRules: [
       {
         matchHost: '{{arg0}}',
@@ -25,7 +25,7 @@ export const presets: Record<string, Preset> = {
     ],
   },
   disableHost: {
-    description: 'Disable requests to a particular host',
+    description: 'Disable requests to a particular host.',
     hostRules: [
       {
         matchHost: 'https://{{arg0}}',
@@ -34,14 +34,14 @@ export const presets: Record<string, Preset> = {
     ],
   },
   enablePreCommit: {
-    description: 'Enable the pre-commit manager',
+    description: 'Enable the pre-commit manager.',
     'pre-commit': {
       enabled: true,
     },
   },
   ignoreModulesAndTests: {
     description:
-      'Ignore `node_modules`, `bower_components`, `vendor` and various test/tests directories',
+      'Ignore `node_modules`, `bower_components`, `vendor` and various test/tests directories.',
     ignorePaths: [
       '**/node_modules/**',
       '**/bower_components/**',
@@ -55,22 +55,21 @@ export const presets: Record<string, Preset> = {
   },
   includeNodeModules: {
     description:
-      'Include <code>package.json</code> files found within <code>node_modules</code> folders or <code>bower_components</code>.',
+      'Include `package.json` files found within `node_modules` folders or `bower_components`.',
     ignorePaths: [],
   },
   pinVersions: {
     description:
-      'Use version pinning (maintain a single version only and not SemVer ranges)',
+      'Use version pinning (maintain a single version only and not SemVer ranges).',
     rangeStrategy: 'pin',
   },
   preserveSemverRanges: {
     description:
-      'Preserve (but continue to upgrade) any existing SemVer ranges',
+      'Preserve (but continue to upgrade) any existing SemVer ranges.',
     packageRules: [{ matchPackagePatterns: ['*'], rangeStrategy: 'replace' }],
   },
   pinAllExceptPeerDependencies: {
-    description:
-      'Pin dependency versions for all except <code>peerDependencies</code>',
+    description: 'Pin all dependency versions except `peerDependencies`.',
     packageRules: [
       {
         matchPackagePatterns: ['*'],
@@ -84,7 +83,7 @@ export const presets: Record<string, Preset> = {
   },
   pinDependencies: {
     description:
-      'Pin dependency versions where <code>depType=dependencies</code>. Usually applies only to non-dev dependencies in <code>package.json</code>',
+      'Pin dependency versions where `depType=dependencies`. Usually applies only to non-dev dependencies in `package.json`.',
     packageRules: [
       {
         matchDepTypes: ['dependencies'],
@@ -93,7 +92,7 @@ export const presets: Record<string, Preset> = {
     ],
   },
   pinDevDependencies: {
-    description: 'Pin dependency versions for <code>devDependencies</code>',
+    description: 'Pin dependency versions for `devDependencies`.',
     packageRules: [
       {
         matchDepTypes: ['devDependencies'],
@@ -103,7 +102,7 @@ export const presets: Record<string, Preset> = {
   },
   pinOnlyDevDependencies: {
     description:
-      'Pin dependency versions for <code>devDependencies</code> and retain SemVer ranges for others',
+      'Pin dependency versions for `devDependencies` and retain SemVer ranges for others.',
     packageRules: [
       {
         matchPackagePatterns: ['*'],
@@ -120,52 +119,51 @@ export const presets: Record<string, Preset> = {
     ],
   },
   autodetectPinVersions: {
-    description: 'Autodetect whether to pin dependencies or maintain ranges',
+    description: 'Autodetect whether to pin dependencies or maintain ranges.',
     rangeStrategy: 'auto',
   },
   separateMajorReleases: {
     description:
-      'Separate major versions of dependencies into individual branches/PRs',
+      'Separate `major` versions of dependencies into individual branches/PRs.',
     separateMajorMinor: true,
   },
   separateMultipleMajorReleases: {
     description:
-      'Separate each available major versions of dependencies into individual branches/PRs',
+      'Separate each `major` version of dependencies into individual branches/PRs.',
     separateMajorMinor: true,
     separateMultipleMajor: true,
   },
   separatePatchReleases: {
     description:
-      'Separate patch and minor releases of dependencies into separate PRs',
+      'Separate `patch` and `minor` releases of dependencies into separate PRs.',
     separateMinorPatch: true,
   },
   combinePatchMinorReleases: {
     description:
-      'Do not separate patch and minor upgrades into separate PRs for the same dependency',
+      'Do not separate `patch` and `minor` upgrades into separate PRs for the same dependency.',
     separateMinorPatch: false,
   },
   renovatePrefix: {
-    description: 'Use <code>renovate/</code> as prefix for all branch names',
+    description: 'Prefix `renovate/` to all branch names.',
     branchPrefix: 'renovate/',
   },
   semanticCommitType: {
     description:
-      'Use <code>{{arg0}}</code> as semantic commit type for commit messages and PR titles',
+      'Use `{{arg0}}` as semantic commit type for commit messages and PR titles.',
     semanticCommitType: '{{arg0}}',
   },
   semanticPrefixChore: {
     description:
-      'Use <code>chore</code> as semantic commit type for commit messages and PR titles',
+      'Use `chore` as semantic commit type for commit messages and PR titles.',
     extends: [':semanticCommitType(chore)'],
   },
   semanticPrefixFix: {
     description:
-      'Use <code>fix</code> as semantic commit type for commit messages and PR titles',
+      'Use `fix` as semantic commit type for commit messages and PR titles.',
     extends: [':semanticCommitType(fix)'],
   },
   disablePeerDependencies: {
-    description:
-      'Do not renovate <code>peerDependencies</code> versions/ranges',
+    description: 'Do not renovate `peerDependencies` versions/ranges.',
     packageRules: [
       {
         matchDepTypes: ['peerDependencies'],
@@ -174,7 +172,7 @@ export const presets: Record<string, Preset> = {
     ],
   },
   disableDevDependencies: {
-    description: 'Do not renovate <code>devDependencies</code> versions/ranges',
+    description: 'Do not renovate `devDependencies` versions/ranges.',
     packageRules: [
       {
         matchDepTypes: ['devDependencies'],
@@ -183,14 +181,14 @@ export const presets: Record<string, Preset> = {
     ],
   },
   disableDigestUpdates: {
-    description: 'Disable digest and Git hash updates',
+    description: 'Disable `digest` and Git hash updates.',
     digest: {
       enabled: false,
     },
   },
   semanticPrefixFixDepsChoreOthers: {
     description:
-      'If semantic commits detected, use semantic commit type <code>fix</code> for dependencies and <code>chore</code> for all others',
+      'If Renovate detects semantic commits, it will use semantic commit type `fix` for dependencies and `chore` for all others.',
     packageRules: [
       {
         matchPackagePatterns: ['*'],
@@ -216,7 +214,7 @@ export const presets: Record<string, Preset> = {
   },
   semanticCommitTypeAll: {
     description:
-      'If semantic commits detected, use semantic commit type <code>{{arg0}}</code> for all',
+      'If Renovate detects semantic commits, it will use semantic commit type `{{arg0}}` for all commits.',
     packageRules: [
       {
         matchPackagePatterns: ['*'],
@@ -226,64 +224,64 @@ export const presets: Record<string, Preset> = {
   },
   rebaseStalePrs: {
     description:
-      'Rebase existing PRs any time the base branch has been updated',
+      'Rebase existing PRs any time the base branch has been updated.',
     rebaseWhen: 'behind-base-branch',
   },
   prImmediately: {
-    description: 'Raise PRs immediately (after branch is created)',
+    description: 'Raise PRs immediately (after branch is created).',
     prCreation: 'immediate',
   },
   prNotPending: {
     description:
-      'Wait until branch tests have passed or failed before creating the PR',
+      'Wait for branch tests to pass or fail before creating the PR.',
     prCreation: 'not-pending',
   },
   prHourlyLimitNone: {
-    description: 'Removes rate limit for PR creation per hour',
+    description: 'Removes rate limit for PR creation per hour.',
     prHourlyLimit: 0,
   },
   prHourlyLimit1: {
-    description: 'Rate limit PR creation to a maximum of one per hour',
+    description: 'Rate limit PR creation to a maximum of one per hour.',
     prHourlyLimit: 1,
   },
   prHourlyLimit2: {
-    description: 'Rate limit PR creation to a maximum of two per hour',
+    description: 'Rate limit PR creation to a maximum of two per hour.',
     prHourlyLimit: 2,
   },
   prHourlyLimit4: {
-    description: 'Rate limit PR creation to a maximum of four per hour',
+    description: 'Rate limit PR creation to a maximum of four per hour.',
     prHourlyLimit: 4,
   },
   prConcurrentLimitNone: {
-    description: 'Remove limit for open PRs at any time',
+    description: 'Remove limit for open PRs at any time.',
     prConcurrentLimit: 0,
   },
   prConcurrentLimit10: {
-    description: 'Limit to maximum 10 open PRs at any time',
+    description: 'Limit to maximum 10 open PRs at any time.',
     prConcurrentLimit: 10,
   },
   prConcurrentLimit20: {
-    description: 'Limit to maximum 20 open PRs at any time',
+    description: 'Limit to maximum 20 open PRs at any time.',
     prConcurrentLimit: 20,
   },
   disableRateLimiting: {
-    description: 'Remove hourly and concurrent rate limits',
+    description: 'Remove hourly and concurrent rate limits.',
     prConcurrentLimit: 0,
     prHourlyLimit: 0,
   },
   automergeDisabled: {
     description:
-      'Disable automerging feature - wait for humans to merge all PRs',
+      'Disable automerging feature - wait for humans to merge all PRs.',
     automerge: false,
   },
   automergeDigest: {
-    description: 'Automerge digest upgrades if they pass tests',
+    description: 'Automerge `digest` upgrades if they pass tests.',
     digest: {
       automerge: true,
     },
   },
   automergePatch: {
-    description: 'Automerge patch upgrades if they pass tests',
+    description: 'Automerge `patch` upgrades if they pass tests.',
     separateMinorPatch: true,
     patch: {
       automerge: true,
@@ -296,7 +294,7 @@ export const presets: Record<string, Preset> = {
     },
   },
   automergeMinor: {
-    description: 'Automerge patch and minor upgrades if they pass tests',
+    description: 'Automerge `patch` and `minor` upgrades if they pass tests.',
     minor: {
       automerge: true,
     },
@@ -311,43 +309,45 @@ export const presets: Record<string, Preset> = {
     },
   },
   automergeMajor: {
-    description: 'Automerge all upgrades (including major) if they pass tests',
+    description:
+      'Automerge all upgrades (including `major`) if they pass tests.',
     automerge: true,
   },
   automergeAll: {
-    description: 'Automerge all upgrades (including major) if they pass tests',
+    description:
+      'Automerge all upgrades (including `major`) if they pass tests.',
     automerge: true,
   },
   automergeBranch: {
     description:
-      'If automerging, push the new commit directly to base branch (no PR)',
+      'If automerging, push the new commit directly to the base branch (no PR).',
     automergeType: 'branch',
   },
   automergePr: {
-    description: 'Raise a PR first before any automerging',
+    description: 'Raise a PR first before any automerging.',
     automergeType: 'pr',
   },
   automergeRequireAllStatusChecks: {
-    description: 'Require all status checks to pass before any automerging',
+    description: 'Require all status checks to pass before any automerging.',
     ignoreTests: false,
   },
   skipStatusChecks: {
-    description: 'Skip status checks and automerge right away',
+    description: 'Skip status checks and automerge right away.',
     ignoreTests: true,
   },
   maintainLockFilesDisabled: {
     description:
-      'Update existing lock files only when <code>package.json</code> is modified',
+      'Update existing lock files only when `package.json` is modified.',
     lockFileMaintenance: {
       enabled: false,
     },
   },
   pinDigestsDisabled: {
-    description: 'Disable pinning of Docker dependency digests',
+    description: 'Disable pinning of Docker dependency digests.',
     pinDigests: false,
   },
   maintainLockFilesWeekly: {
-    description: 'Run lock file maintenance (updates) early Monday mornings',
+    description: 'Run lock file maintenance (updates) early Monday mornings.',
     lockFileMaintenance: {
       enabled: true,
       extends: ['schedule:weekly'],
@@ -355,7 +355,7 @@ export const presets: Record<string, Preset> = {
   },
   maintainLockFilesMonthly: {
     description:
-      'Run lock file maintenance (updates) on the first day of each month',
+      'Run lock file maintenance (updates) on the first day of each month.',
     lockFileMaintenance: {
       enabled: true,
       extends: ['schedule:monthly'],
@@ -363,23 +363,23 @@ export const presets: Record<string, Preset> = {
   },
   ignoreUnstable: {
     description:
-      'Upgrade to unstable versions only if the existing version is unstable',
+      'Upgrade to unstable versions only if the existing version is unstable.',
     ignoreUnstable: true,
   },
   respectLatest: {
-    description: 'Upgrade versions up to the "latest" tag in npm registry',
+    description: 'Upgrade versions up to the "latest" tag in the npm registry.',
     respectLatest: true,
   },
   updateNotScheduled: {
-    description: 'Keep existing branches updated even when not scheduled',
+    description: 'Keep existing branches updated even when not scheduled.',
     updateNotScheduled: true,
   },
   noUnscheduledUpdates: {
-    description: 'Make no updates to branches when not scheduled',
+    description: 'Only update branches when scheduled.',
     updateNotScheduled: false,
   },
   automergeLinters: {
-    description: 'Update lint packages automatically if tests pass',
+    description: 'Update lint packages automatically if tests pass.',
     packageRules: [
       {
         extends: ['packages:linters'],
@@ -388,7 +388,7 @@ export const presets: Record<string, Preset> = {
     ],
   },
   automergeTesters: {
-    description: 'Update testing packages automatically if tests pass',
+    description: 'Update testing packages automatically if tests pass.',
     packageRules: [
       {
         extends: ['packages:test'],
@@ -397,7 +397,7 @@ export const presets: Record<string, Preset> = {
     ],
   },
   automergeTypes: {
-    description: 'Update `@types/*` packages automatically if tests pass',
+    description: 'Update `@types/*` packages automatically if tests pass.',
     packageRules: [
       {
         matchPackagePrefixes: ['@types/'],
@@ -406,7 +406,7 @@ export const presets: Record<string, Preset> = {
     ],
   },
   doNotPinPackage: {
-    description: 'Disable version pinning for <code>{{arg0}}</code>',
+    description: 'Disable version pinning for `{{arg0}}`.',
     packageRules: [
       {
         matchPackageNames: ['{{arg0}}'],
@@ -415,7 +415,7 @@ export const presets: Record<string, Preset> = {
     ],
   },
   pinSkipCi: {
-    description: 'Add [skip ci] to commit message body whenever pinning',
+    description: 'Add `[skip ci]` to commit message body whenever pinning.',
     pin: {
       commitBody: '[skip ci]',
     },
@@ -425,19 +425,19 @@ export const presets: Record<string, Preset> = {
     commitBody: 'Signed-off-by: {{{gitAuthor}}}',
   },
   npm: {
-    description: 'Keep <code>package.json</code> npm dependencies updated',
+    description: 'Keep `package.json` npm dependencies updated.',
     npm: {
       enabled: true,
     },
   },
   gomod: {
-    description: 'Enable Go modules support',
+    description: 'Enable Go modules support.',
     gomod: {
       enabled: true,
     },
   },
   onlyNpm: {
-    description: 'Renovate only npm dependencies',
+    description: 'Renovate only npm dependencies.',
     docker: {
       enabled: false,
     },
@@ -446,19 +446,19 @@ export const presets: Record<string, Preset> = {
     },
   },
   docker: {
-    description: 'Keep Dockerfile FROM sources updated',
+    description: 'Keep Dockerfile `FROM` sources updated.',
     docker: {
       enabled: true,
     },
   },
   meteor: {
-    description: 'Keep Meteor Npm.depends packages updated',
+    description: 'Keep Meteor Npm.depends packages updated.',
     meteor: {
       enabled: true,
     },
   },
   group: {
-    description: 'Group {{arg1}} packages into same branch/PR',
+    description: 'Group `{{arg1}}` packages into same branch/PR.',
     packageRules: [
       {
         extends: ['{{arg0}}'],
@@ -467,70 +467,69 @@ export const presets: Record<string, Preset> = {
     ],
   },
   label: {
-    description: 'Apply label <code>{{arg0}}</code> to PRs',
+    description: 'Apply label `{{arg0}}` to PRs.',
     labels: ['{{arg0}}'],
   },
   labels: {
-    description:
-      'Apply labels <code>{{arg0}}</code> and <code>{{arg1}}</code> to PRs',
+    description: 'Apply labels `{{arg0}}` and `{{arg1}}` to PRs.',
     labels: ['{{arg0}}', '{{arg1}}'],
   },
   assignee: {
-    description: 'Assign PRs to <code>{{arg0}}</code>',
+    description: 'Assign PRs to `{{arg0}}`.',
     assignees: ['{{arg0}}'],
   },
   reviewer: {
-    description: 'Add <code>{{arg0}}</code> as reviewer for PRs',
+    description: 'Add `{{arg0}}` as reviewer for PRs.',
     reviewers: ['{{arg0}}'],
   },
   assignAndReview: {
-    description: 'Set <code>{{arg0}}</code> as assignee and reviewer of PRs',
+    description: 'Set `{{arg0}}` as assignee and reviewer of PRs.',
     extends: [':assignee({{arg0}})', ':reviewer({{arg0}})'],
   },
   enableVulnerabilityAlerts: {
-    description: 'Raise PR when vulnerability alerts are detected',
+    description: 'Raise PR when vulnerability alerts are detected.',
     vulnerabilityAlerts: {
       enabled: true,
     },
   },
   enableVulnerabilityAlertsWithLabel: {
     description:
-      'Raise PR when vulnerability alerts are detected with label <code>{{arg0}}</code>',
+      'Raise PR when vulnerability alerts are detected with label `{{arg0}}`.',
     vulnerabilityAlerts: {
       enabled: true,
       labels: ['{{arg0}}'],
     },
   },
   disableVulnerabilityAlerts: {
-    description: 'Disable vulnerability alerts completely',
+    description: 'Disable vulnerability alerts completely.',
     vulnerabilityAlerts: {
       enabled: false,
     },
   },
   semanticCommits: {
-    description: 'Use semantic prefixes for commit messages and PR titles',
+    description: 'Use semantic prefixes for commit messages and PR titles.',
     semanticCommits: 'enabled',
   },
   semanticCommitsDisabled: {
-    description: 'Disable semantic prefixes for commit messages and PR titles',
+    description: 'Disable semantic prefixes for commit messages and PR titles.',
     semanticCommits: 'disabled',
   },
   disableLockFiles: {
-    description: 'Disable lock file updates',
+    description: 'Disable lock file updates.',
     updateLockFiles: false,
   },
   semanticCommitScope: {
     description:
-      'Use semantic commit scope <code>{{arg0}}</code> for all commits and PR titles',
+      'Use semantic commit scope `{{arg0}}` for all commits and PR titles.',
     semanticCommitScope: '{{arg0}}',
   },
   semanticCommitScopeDisabled: {
-    description: 'Disable semantic commit scope for all commits and PR titles',
+    description: 'Disable semantic commit scope for all commits and PR titles.',
     semanticCommitScope: null,
   },
   widenPeerDependencies: {
     description:
-      'Always widen peerDependencies SemVer ranges when updating, instead of replacing',
+      'Always widen `peerDependencies` SemVer ranges when updating, instead of replacing.',
     packageRules: [
       {
         matchDepTypes: ['peerDependencies'],
@@ -539,24 +538,24 @@ export const presets: Record<string, Preset> = {
     ],
   },
   dependencyDashboard: {
-    description: 'Enable Renovate Dependency Dashboard creation',
+    description: 'Enable Renovate Dependency Dashboard creation.',
     dependencyDashboard: true,
   },
   disableDependencyDashboard: {
-    description: 'Disable Renovate Dependency Dashboard creation',
+    description: 'Disable Renovate Dependency Dashboard creation.',
     dependencyDashboard: false,
   },
   dependencyDashboardApproval: {
-    description: 'Enable Renovate Dependency Dashboard approval workflow',
+    description: 'Enable Renovate Dependency Dashboard approval workflow.',
     dependencyDashboardApproval: true,
   },
   timezone: {
-    description: 'Evaluate schedules according to timezone {{arg0}}',
+    description: 'Evaluate schedules according to timezone `{{arg0}}`.',
     timezone: '{{arg0}}',
   },
   pathSemanticCommitType: {
     description:
-      'Use semanticCommitType {{arg0}} for all package files matching path {{arg1}}',
+      'Use semanticCommitType `{{arg0}}` for all package files matching path `{{arg1}}`.',
     packageRules: [
       {
         matchPaths: ['{{arg0}}'],
@@ -566,7 +565,7 @@ export const presets: Record<string, Preset> = {
   },
   followTag: {
     description:
-      'For package <code>{{arg0}}</code>, strictly follow release tag <code>{{arg1}}</code>',
+      'For package `{{arg0}}`, strictly follow release tag `{{arg1}}`.',
     packageRules: [
       {
         matchPackageNames: ['{{arg0}}'],
@@ -576,7 +575,7 @@ export const presets: Record<string, Preset> = {
   },
   githubComToken: {
     description:
-      'Use provided token for github.com lookups. Do not configure this if you are already running on github.com',
+      'Use provided token for `github.com` lookups. Do not configure this if you are already running on `github.com`.',
     hostRules: [
       {
         matchHost: 'github.com',
@@ -587,7 +586,7 @@ export const presets: Record<string, Preset> = {
     ],
   },
   disablePrControls: {
-    description: 'Remove the checkbox controls from PRs',
+    description: 'Remove the checkbox controls from PRs.',
     prBodyTemplate:
       '{{{header}}}{{{table}}}{{{notes}}}{{{changelogs}}}{{{configDescription}}}{{{footer}}}',
   },

@@ -56,8 +56,7 @@ async function processFile(file) {
   });
 }
 
-// eslint-disable-next-line @typescript-eslint/no-floating-promises
-(async () => {
+await (async () => {
   const files = await glob(markdownGlob);
 
   for (const file of files) {

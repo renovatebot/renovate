@@ -31,7 +31,8 @@ export async function getRepositoryConfig(
     globalConfig,
     is.string(repository) ? { repository } : repository
   );
-  const platform = GlobalConfig.get('platform');
+  // TODO: types (#7154)
+  const platform = GlobalConfig.get('platform')!;
   repoConfig.localDir = upath.join(
     repoConfig.baseDir,
     `./repos/${platform}/${repoConfig.repository}`
@@ -55,7 +56,7 @@ function haveReachedLimits(): boolean {
 
 /* istanbul ignore next */
 function checkEnv(): void {
-  const range = pkg.engines!.node;
+  const range = pkg.engines!.node!;
   const rangeNext = pkg['engines-next']?.node;
   if (process.release?.name !== 'node' || !process.versions?.node) {
     logger.warn(

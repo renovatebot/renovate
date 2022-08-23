@@ -1,10 +1,10 @@
-import { loadJsonFixture } from '../../../../../../../test/util';
+import { Fixtures } from '../../../../../../../test/fixtures';
 import { findDepConstraints } from './dep-constraints';
 
 jest.mock('../../../../../../util/fs');
 
-const packageJson = loadJsonFixture('package.json');
-const packageLockJson = loadJsonFixture('package-lock.json');
+const packageJson = Fixtures.getJson('package.json');
+const packageLockJson = Fixtures.getJson('package-lock.json');
 
 describe('modules/manager/npm/update/locked-dependency/package-lock/dep-constraints', () => {
   describe('findDepConstraints()', () => {

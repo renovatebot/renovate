@@ -18,10 +18,10 @@ import { sanitize } from '../../../../util/sanitize';
 import { compile } from '../../../../util/template';
 import type { BranchConfig, BranchUpgradeConfig } from '../../../types';
 
-export type PostUpgradeCommandsExecutionResult = {
+export interface PostUpgradeCommandsExecutionResult {
   updatedArtifacts: FileChange[];
   artifactErrors: ArtifactError[];
-};
+}
 
 export async function postUpgradeCommandsExecutor(
   filteredUpgradeCommands: BranchUpgradeConfig[],

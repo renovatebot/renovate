@@ -1,10 +1,10 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`modules/manager/npm/extract/index .extractPackageFile() catches invalid names 1`] = `
-Object {
-  "constraints": Object {},
-  "deps": Array [
-    Object {
+{
+  "constraints": {},
+  "deps": [
+    {
       "depName": "kgabis/parson",
       "depType": "dependencies",
       "prettyDepType": "dependency",
@@ -13,7 +13,7 @@ Object {
   ],
   "lernaClient": undefined,
   "lernaPackages": undefined,
-  "managerData": Object {
+  "managerData": {
     "hasPackageManager": false,
     "lernaJsonFile": undefined,
     "yarnZeroInstall": false,
@@ -31,29 +31,29 @@ Object {
 `;
 
 exports[`modules/manager/npm/extract/index .extractPackageFile() extracts engines 1`] = `
-Object {
-  "constraints": Object {
+{
+  "constraints": {
     "node": ">= 8.9.2",
     "npm": "^8.0.0",
     "vscode": ">=1.49.3",
     "yarn": "disabled",
   },
-  "deps": Array [
-    Object {
+  "deps": [
+    {
       "currentValue": "1.6.0",
       "datasource": "npm",
       "depName": "angular",
       "depType": "dependencies",
       "prettyDepType": "dependency",
     },
-    Object {
+    {
       "currentValue": "1.6.0",
       "datasource": "npm",
       "depName": "@angular/cli",
       "depType": "devDependencies",
       "prettyDepType": "devDependency",
     },
-    Object {
+    {
       "currentValue": "*",
       "datasource": "npm",
       "depName": "foo",
@@ -61,14 +61,14 @@ Object {
       "prettyDepType": "devDependency",
       "skipReason": "any-version",
     },
-    Object {
+    {
       "currentValue": "file:../foo/bar",
       "depName": "bar",
       "depType": "devDependencies",
       "prettyDepType": "devDependency",
       "skipReason": "file",
     },
-    Object {
+    {
       "currentValue": "",
       "datasource": "npm",
       "depName": "baz",
@@ -76,21 +76,21 @@ Object {
       "prettyDepType": "devDependency",
       "skipReason": "empty",
     },
-    Object {
+    {
       "currentValue": "latest",
       "depName": "other",
       "depType": "devDependencies",
       "prettyDepType": "devDependency",
       "skipReason": "unknown-version",
     },
-    Object {
+    {
       "currentValue": ">=1.7.0 <2.0.0",
       "depName": "atom",
       "depType": "engines",
       "prettyDepType": "engine",
       "skipReason": "unknown-engines",
     },
-    Object {
+    {
       "commitMessageTopic": "Node.js",
       "currentValue": ">= 8.9.2",
       "datasource": "github-tags",
@@ -100,7 +100,7 @@ Object {
       "prettyDepType": "engine",
       "versioning": "node",
     },
-    Object {
+    {
       "commitMessageTopic": "npm",
       "currentValue": "^8.0.0",
       "datasource": "npm",
@@ -108,7 +108,7 @@ Object {
       "depType": "engines",
       "prettyDepType": "engine",
     },
-    Object {
+    {
       "commitMessageTopic": "pnpm",
       "currentValue": "^1.2.0",
       "datasource": "npm",
@@ -116,7 +116,7 @@ Object {
       "depType": "engines",
       "prettyDepType": "engine",
     },
-    Object {
+    {
       "commitMessageTopic": "Yarn",
       "currentValue": "disabled",
       "datasource": "npm",
@@ -125,7 +125,7 @@ Object {
       "prettyDepType": "engine",
       "skipReason": "unknown-version",
     },
-    Object {
+    {
       "currentValue": ">=1.49.3",
       "datasource": "github-tags",
       "depName": "vscode",
@@ -136,7 +136,7 @@ Object {
   ],
   "lernaClient": undefined,
   "lernaPackages": undefined,
-  "managerData": Object {
+  "managerData": {
     "hasPackageManager": false,
     "lernaJsonFile": undefined,
     "yarnZeroInstall": false,
@@ -154,24 +154,24 @@ Object {
 `;
 
 exports[`modules/manager/npm/extract/index .extractPackageFile() extracts non-npmjs 1`] = `
-Object {
-  "constraints": Object {},
-  "deps": Array [
-    Object {
+{
+  "constraints": {},
+  "deps": [
+    {
       "currentValue": "github:owner/a",
       "depName": "a",
       "depType": "dependencies",
       "prettyDepType": "dependency",
       "skipReason": "unknown-version",
     },
-    Object {
+    {
       "currentValue": "github:owner/b#master",
       "depName": "b",
       "depType": "dependencies",
       "prettyDepType": "dependency",
       "skipReason": "unversioned-reference",
     },
-    Object {
+    {
       "currentRawValue": "github:owner/c#v1.1.0",
       "currentValue": "v1.1.0",
       "datasource": "github-tags",
@@ -183,14 +183,14 @@ Object {
       "prettyDepType": "dependency",
       "sourceUrl": "https://github.com/owner/c",
     },
-    Object {
+    {
       "currentValue": "github:owner/d#a7g3eaf",
       "depName": "d",
       "depType": "dependencies",
       "prettyDepType": "dependency",
       "skipReason": "unversioned-reference",
     },
-    Object {
+    {
       "currentDigest": "49b5aca613b33c5b626ae68c03a385f25c142f55",
       "currentRawValue": "github:owner/e#49b5aca613b33c5b626ae68c03a385f25c142f55",
       "currentValue": null,
@@ -202,7 +202,7 @@ Object {
       "prettyDepType": "dependency",
       "sourceUrl": "https://github.com/owner/e",
     },
-    Object {
+    {
       "currentRawValue": "owner/f#v2.0.0",
       "currentValue": "v2.0.0",
       "datasource": "github-tags",
@@ -214,35 +214,35 @@ Object {
       "prettyDepType": "dependency",
       "sourceUrl": "https://github.com/owner/f",
     },
-    Object {
+    {
       "currentValue": "gitlab:owner/g#v1.0.0",
       "depName": "g",
       "depType": "dependencies",
       "prettyDepType": "dependency",
       "skipReason": "unknown-version",
     },
-    Object {
+    {
       "currentValue": "github:-hello/world#v1.0.0",
       "depName": "h",
       "depType": "dependencies",
       "prettyDepType": "dependency",
       "skipReason": "unknown-version",
     },
-    Object {
+    {
       "currentValue": "@foo/bar#v2.0.0",
       "depName": "i",
       "depType": "dependencies",
       "prettyDepType": "dependency",
       "skipReason": "unknown-version",
     },
-    Object {
+    {
       "currentValue": "github:frank#v0.0.1",
       "depName": "j",
       "depType": "dependencies",
       "prettyDepType": "dependency",
       "skipReason": "unknown-version",
     },
-    Object {
+    {
       "currentDigest": "49b5aca",
       "currentRawValue": "github:owner/k#49b5aca",
       "currentValue": null,
@@ -254,7 +254,7 @@ Object {
       "prettyDepType": "dependency",
       "sourceUrl": "https://github.com/owner/k",
     },
-    Object {
+    {
       "currentDigest": "abcdef0",
       "currentRawValue": "github:owner/l.git#abcdef0",
       "currentValue": null,
@@ -266,7 +266,7 @@ Object {
       "prettyDepType": "dependency",
       "sourceUrl": "https://github.com/owner/l",
     },
-    Object {
+    {
       "currentRawValue": "https://github.com/owner/m.git#v1.0.0",
       "currentValue": "v1.0.0",
       "datasource": "github-tags",
@@ -278,7 +278,7 @@ Object {
       "prettyDepType": "dependency",
       "sourceUrl": "https://github.com/owner/m",
     },
-    Object {
+    {
       "currentRawValue": "git+https://github.com/owner/n#v2.0.0",
       "currentValue": "v2.0.0",
       "datasource": "github-tags",
@@ -290,7 +290,7 @@ Object {
       "prettyDepType": "dependency",
       "sourceUrl": "https://github.com/owner/n",
     },
-    Object {
+    {
       "currentRawValue": "git@github.com:owner/o.git#v2.0.0",
       "currentValue": "v2.0.0",
       "datasource": "github-tags",
@@ -302,7 +302,7 @@ Object {
       "prettyDepType": "dependency",
       "sourceUrl": "https://github.com/owner/o",
     },
-    Object {
+    {
       "currentRawValue": "Owner/P.git#v2.0.0",
       "currentValue": "v2.0.0",
       "datasource": "github-tags",
@@ -317,7 +317,7 @@ Object {
   ],
   "lernaClient": undefined,
   "lernaPackages": undefined,
-  "managerData": Object {
+  "managerData": {
     "hasPackageManager": false,
     "lernaJsonFile": undefined,
     "yarnZeroInstall": false,
@@ -335,10 +335,10 @@ Object {
 `;
 
 exports[`modules/manager/npm/extract/index .extractPackageFile() extracts npm package alias 1`] = `
-Object {
-  "constraints": Object {},
-  "deps": Array [
-    Object {
+{
+  "constraints": {},
+  "deps": [
+    {
       "currentValue": "1",
       "datasource": "npm",
       "depName": "a",
@@ -347,7 +347,7 @@ Object {
       "packageName": "foo",
       "prettyDepType": "dependency",
     },
-    Object {
+    {
       "currentValue": "1.2.3",
       "datasource": "npm",
       "depName": "b",
@@ -356,7 +356,7 @@ Object {
       "packageName": "@foo/bar",
       "prettyDepType": "dependency",
     },
-    Object {
+    {
       "currentValue": "npm:foo",
       "depName": "c",
       "depType": "dependencies",
@@ -367,7 +367,7 @@ Object {
   ],
   "lernaClient": undefined,
   "lernaPackages": undefined,
-  "managerData": Object {
+  "managerData": {
     "hasPackageManager": false,
     "lernaJsonFile": undefined,
     "yarnZeroInstall": false,
@@ -385,12 +385,12 @@ Object {
 `;
 
 exports[`modules/manager/npm/extract/index .extractPackageFile() extracts packageManager 1`] = `
-Object {
-  "constraints": Object {
+{
+  "constraints": {
     "yarn": "3.0.0",
   },
-  "deps": Array [
-    Object {
+  "deps": [
+    {
       "commitMessageTopic": "Yarn",
       "currentValue": "3.0.0",
       "datasource": "npm",
@@ -402,7 +402,7 @@ Object {
   ],
   "lernaClient": undefined,
   "lernaPackages": undefined,
-  "managerData": Object {
+  "managerData": {
     "hasPackageManager": true,
     "lernaJsonFile": undefined,
     "yarnZeroInstall": false,
@@ -420,12 +420,12 @@ Object {
 `;
 
 exports[`modules/manager/npm/extract/index .extractPackageFile() extracts volta 1`] = `
-Object {
-  "constraints": Object {
+{
+  "constraints": {
     "node": "8.9.2",
   },
-  "deps": Array [
-    Object {
+  "deps": [
+    {
       "commitMessageTopic": "Node.js",
       "currentValue": "8.9.2",
       "datasource": "github-tags",
@@ -435,7 +435,7 @@ Object {
       "prettyDepType": "engine",
       "versioning": "node",
     },
-    Object {
+    {
       "commitMessageTopic": "Node.js",
       "currentValue": "8.9.2",
       "datasource": "github-tags",
@@ -445,7 +445,7 @@ Object {
       "prettyDepType": "volta",
       "versioning": "node",
     },
-    Object {
+    {
       "commitMessageTopic": "Yarn",
       "currentValue": "1.12.3",
       "datasource": "npm",
@@ -453,14 +453,14 @@ Object {
       "depType": "volta",
       "prettyDepType": "volta",
     },
-    Object {
+    {
       "currentValue": "5.9.0",
       "datasource": "npm",
       "depName": "npm",
       "depType": "volta",
       "prettyDepType": "volta",
     },
-    Object {
+    {
       "currentValue": "6.11.2",
       "depName": "pnpm",
       "depType": "volta",
@@ -470,7 +470,7 @@ Object {
   ],
   "lernaClient": undefined,
   "lernaPackages": undefined,
-  "managerData": Object {
+  "managerData": {
     "hasPackageManager": false,
     "lernaJsonFile": undefined,
     "yarnZeroInstall": false,
@@ -488,12 +488,12 @@ Object {
 `;
 
 exports[`modules/manager/npm/extract/index .extractPackageFile() extracts volta yarn unknown-version 1`] = `
-Object {
-  "constraints": Object {
+{
+  "constraints": {
     "node": "8.9.2",
   },
-  "deps": Array [
-    Object {
+  "deps": [
+    {
       "commitMessageTopic": "Node.js",
       "currentValue": "8.9.2",
       "datasource": "github-tags",
@@ -503,7 +503,7 @@ Object {
       "prettyDepType": "engine",
       "versioning": "node",
     },
-    Object {
+    {
       "commitMessageTopic": "Node.js",
       "currentValue": "8.9.2",
       "datasource": "github-tags",
@@ -513,7 +513,7 @@ Object {
       "prettyDepType": "volta",
       "versioning": "node",
     },
-    Object {
+    {
       "commitMessageTopic": "Yarn",
       "currentValue": "unknown",
       "datasource": "npm",
@@ -525,7 +525,7 @@ Object {
   ],
   "lernaClient": undefined,
   "lernaPackages": undefined,
-  "managerData": Object {
+  "managerData": {
     "hasPackageManager": false,
     "lernaJsonFile": undefined,
     "yarnZeroInstall": false,
@@ -543,118 +543,118 @@ Object {
 `;
 
 exports[`modules/manager/npm/extract/index .extractPackageFile() finds "npmClient":"npm" in lerna.json 1`] = `
-Object {
-  "constraints": Object {},
-  "deps": Array [
-    Object {
+{
+  "constraints": {},
+  "deps": [
+    {
       "currentValue": "6.5.0",
       "datasource": "npm",
       "depName": "autoprefixer",
       "depType": "dependencies",
       "prettyDepType": "dependency",
     },
-    Object {
+    {
       "currentValue": "~1.6.0",
       "datasource": "npm",
       "depName": "bower",
       "depType": "dependencies",
       "prettyDepType": "dependency",
     },
-    Object {
+    {
       "currentValue": "13.1.0",
       "datasource": "npm",
       "depName": "browserify",
       "depType": "dependencies",
       "prettyDepType": "dependency",
     },
-    Object {
+    {
       "currentValue": "0.9.2",
       "datasource": "npm",
       "depName": "browserify-css",
       "depType": "dependencies",
       "prettyDepType": "dependency",
     },
-    Object {
+    {
       "currentValue": "=0.22.0",
       "datasource": "npm",
       "depName": "cheerio",
       "depType": "dependencies",
       "prettyDepType": "dependency",
     },
-    Object {
+    {
       "currentValue": "1.21.0",
       "datasource": "npm",
       "depName": "config",
       "depType": "dependencies",
       "prettyDepType": "dependency",
     },
-    Object {
+    {
       "depName": "enabled",
       "depType": "devDependencies",
       "prettyDepType": "devDependency",
       "skipReason": "invalid-value",
     },
-    Object {
+    {
       "currentValue": "^1.5.8",
       "datasource": "npm",
       "depName": "angular",
       "depType": "devDependencies",
       "prettyDepType": "devDependency",
     },
-    Object {
+    {
       "currentValue": "1.5.8",
       "datasource": "npm",
       "depName": "angular-touch",
       "depType": "devDependencies",
       "prettyDepType": "devDependency",
     },
-    Object {
+    {
       "currentValue": "1.5.8",
       "datasource": "npm",
       "depName": "angular-sanitize",
       "depType": "devDependencies",
       "prettyDepType": "devDependency",
     },
-    Object {
+    {
       "currentValue": "4.0.0-beta.1",
       "datasource": "npm",
       "depName": "@angular/core",
       "depType": "devDependencies",
       "prettyDepType": "devDependency",
     },
-    Object {
+    {
       "currentValue": "1.21.0",
       "datasource": "npm",
       "depName": "config",
       "depType": "resolutions",
       "prettyDepType": "resolutions",
     },
-    Object {
+    {
       "currentValue": "8.0.0",
       "datasource": "npm",
       "depName": "@angular/cli",
       "depType": "resolutions",
-      "managerData": Object {
+      "managerData": {
         "key": "**/@angular/cli",
       },
       "prettyDepType": "resolutions",
     },
-    Object {
+    {
       "currentValue": "1.33.0",
       "datasource": "npm",
       "depName": "angular",
       "depType": "resolutions",
-      "managerData": Object {
+      "managerData": {
         "key": "**/angular",
       },
       "prettyDepType": "resolutions",
     },
-    Object {
+    {
       "currentValue": "1.0.0",
       "datasource": "npm",
       "depName": "glob",
       "depType": "resolutions",
-      "managerData": Object {
+      "managerData": {
         "key": "config/glob",
       },
       "prettyDepType": "resolutions",
@@ -662,7 +662,7 @@ Object {
   ],
   "lernaClient": "npm",
   "lernaPackages": undefined,
-  "managerData": Object {
+  "managerData": {
     "hasPackageManager": false,
     "lernaJsonFile": "lerna.json",
     "yarnZeroInstall": false,
@@ -680,118 +680,118 @@ Object {
 `;
 
 exports[`modules/manager/npm/extract/index .extractPackageFile() finds "npmClient":"yarn" in lerna.json 1`] = `
-Object {
-  "constraints": Object {},
-  "deps": Array [
-    Object {
+{
+  "constraints": {},
+  "deps": [
+    {
       "currentValue": "6.5.0",
       "datasource": "npm",
       "depName": "autoprefixer",
       "depType": "dependencies",
       "prettyDepType": "dependency",
     },
-    Object {
+    {
       "currentValue": "~1.6.0",
       "datasource": "npm",
       "depName": "bower",
       "depType": "dependencies",
       "prettyDepType": "dependency",
     },
-    Object {
+    {
       "currentValue": "13.1.0",
       "datasource": "npm",
       "depName": "browserify",
       "depType": "dependencies",
       "prettyDepType": "dependency",
     },
-    Object {
+    {
       "currentValue": "0.9.2",
       "datasource": "npm",
       "depName": "browserify-css",
       "depType": "dependencies",
       "prettyDepType": "dependency",
     },
-    Object {
+    {
       "currentValue": "=0.22.0",
       "datasource": "npm",
       "depName": "cheerio",
       "depType": "dependencies",
       "prettyDepType": "dependency",
     },
-    Object {
+    {
       "currentValue": "1.21.0",
       "datasource": "npm",
       "depName": "config",
       "depType": "dependencies",
       "prettyDepType": "dependency",
     },
-    Object {
+    {
       "depName": "enabled",
       "depType": "devDependencies",
       "prettyDepType": "devDependency",
       "skipReason": "invalid-value",
     },
-    Object {
+    {
       "currentValue": "^1.5.8",
       "datasource": "npm",
       "depName": "angular",
       "depType": "devDependencies",
       "prettyDepType": "devDependency",
     },
-    Object {
+    {
       "currentValue": "1.5.8",
       "datasource": "npm",
       "depName": "angular-touch",
       "depType": "devDependencies",
       "prettyDepType": "devDependency",
     },
-    Object {
+    {
       "currentValue": "1.5.8",
       "datasource": "npm",
       "depName": "angular-sanitize",
       "depType": "devDependencies",
       "prettyDepType": "devDependency",
     },
-    Object {
+    {
       "currentValue": "4.0.0-beta.1",
       "datasource": "npm",
       "depName": "@angular/core",
       "depType": "devDependencies",
       "prettyDepType": "devDependency",
     },
-    Object {
+    {
       "currentValue": "1.21.0",
       "datasource": "npm",
       "depName": "config",
       "depType": "resolutions",
       "prettyDepType": "resolutions",
     },
-    Object {
+    {
       "currentValue": "8.0.0",
       "datasource": "npm",
       "depName": "@angular/cli",
       "depType": "resolutions",
-      "managerData": Object {
+      "managerData": {
         "key": "**/@angular/cli",
       },
       "prettyDepType": "resolutions",
     },
-    Object {
+    {
       "currentValue": "1.33.0",
       "datasource": "npm",
       "depName": "angular",
       "depType": "resolutions",
-      "managerData": Object {
+      "managerData": {
         "key": "**/angular",
       },
       "prettyDepType": "resolutions",
     },
-    Object {
+    {
       "currentValue": "1.0.0",
       "datasource": "npm",
       "depName": "glob",
       "depType": "resolutions",
-      "managerData": Object {
+      "managerData": {
         "key": "config/glob",
       },
       "prettyDepType": "resolutions",
@@ -799,7 +799,7 @@ Object {
   ],
   "lernaClient": "yarn",
   "lernaPackages": undefined,
-  "managerData": Object {
+  "managerData": {
     "hasPackageManager": false,
     "lernaJsonFile": "lerna.json",
     "yarnZeroInstall": false,
@@ -817,118 +817,118 @@ Object {
 `;
 
 exports[`modules/manager/npm/extract/index .extractPackageFile() finds a lock file 1`] = `
-Object {
-  "constraints": Object {},
-  "deps": Array [
-    Object {
+{
+  "constraints": {},
+  "deps": [
+    {
       "currentValue": "6.5.0",
       "datasource": "npm",
       "depName": "autoprefixer",
       "depType": "dependencies",
       "prettyDepType": "dependency",
     },
-    Object {
+    {
       "currentValue": "~1.6.0",
       "datasource": "npm",
       "depName": "bower",
       "depType": "dependencies",
       "prettyDepType": "dependency",
     },
-    Object {
+    {
       "currentValue": "13.1.0",
       "datasource": "npm",
       "depName": "browserify",
       "depType": "dependencies",
       "prettyDepType": "dependency",
     },
-    Object {
+    {
       "currentValue": "0.9.2",
       "datasource": "npm",
       "depName": "browserify-css",
       "depType": "dependencies",
       "prettyDepType": "dependency",
     },
-    Object {
+    {
       "currentValue": "=0.22.0",
       "datasource": "npm",
       "depName": "cheerio",
       "depType": "dependencies",
       "prettyDepType": "dependency",
     },
-    Object {
+    {
       "currentValue": "1.21.0",
       "datasource": "npm",
       "depName": "config",
       "depType": "dependencies",
       "prettyDepType": "dependency",
     },
-    Object {
+    {
       "depName": "enabled",
       "depType": "devDependencies",
       "prettyDepType": "devDependency",
       "skipReason": "invalid-value",
     },
-    Object {
+    {
       "currentValue": "^1.5.8",
       "datasource": "npm",
       "depName": "angular",
       "depType": "devDependencies",
       "prettyDepType": "devDependency",
     },
-    Object {
+    {
       "currentValue": "1.5.8",
       "datasource": "npm",
       "depName": "angular-touch",
       "depType": "devDependencies",
       "prettyDepType": "devDependency",
     },
-    Object {
+    {
       "currentValue": "1.5.8",
       "datasource": "npm",
       "depName": "angular-sanitize",
       "depType": "devDependencies",
       "prettyDepType": "devDependency",
     },
-    Object {
+    {
       "currentValue": "4.0.0-beta.1",
       "datasource": "npm",
       "depName": "@angular/core",
       "depType": "devDependencies",
       "prettyDepType": "devDependency",
     },
-    Object {
+    {
       "currentValue": "1.21.0",
       "datasource": "npm",
       "depName": "config",
       "depType": "resolutions",
       "prettyDepType": "resolutions",
     },
-    Object {
+    {
       "currentValue": "8.0.0",
       "datasource": "npm",
       "depName": "@angular/cli",
       "depType": "resolutions",
-      "managerData": Object {
+      "managerData": {
         "key": "**/@angular/cli",
       },
       "prettyDepType": "resolutions",
     },
-    Object {
+    {
       "currentValue": "1.33.0",
       "datasource": "npm",
       "depName": "angular",
       "depType": "resolutions",
-      "managerData": Object {
+      "managerData": {
         "key": "**/angular",
       },
       "prettyDepType": "resolutions",
     },
-    Object {
+    {
       "currentValue": "1.0.0",
       "datasource": "npm",
       "depName": "glob",
       "depType": "resolutions",
-      "managerData": Object {
+      "managerData": {
         "key": "config/glob",
       },
       "prettyDepType": "resolutions",
@@ -936,7 +936,7 @@ Object {
   ],
   "lernaClient": undefined,
   "lernaPackages": undefined,
-  "managerData": Object {
+  "managerData": {
     "hasPackageManager": false,
     "lernaJsonFile": undefined,
     "yarnZeroInstall": false,
@@ -954,12 +954,12 @@ Object {
 `;
 
 exports[`modules/manager/npm/extract/index .extractPackageFile() finds complex yarn workspaces 1`] = `
-Object {
-  "constraints": Object {},
-  "deps": Array [],
+{
+  "constraints": {},
+  "deps": [],
   "lernaClient": "npm",
   "lernaPackages": undefined,
-  "managerData": Object {
+  "managerData": {
     "hasPackageManager": false,
     "lernaJsonFile": "lerna.json",
     "yarnZeroInstall": false,
@@ -972,125 +972,125 @@ Object {
   "pnpmShrinkwrap": undefined,
   "skipInstalls": true,
   "yarnLock": undefined,
-  "yarnWorkspacesPackages": Array [
+  "yarnWorkspacesPackages": [
     "packages/*",
   ],
 }
 `;
 
 exports[`modules/manager/npm/extract/index .extractPackageFile() finds lerna 1`] = `
-Object {
-  "constraints": Object {},
-  "deps": Array [
-    Object {
+{
+  "constraints": {},
+  "deps": [
+    {
       "currentValue": "6.5.0",
       "datasource": "npm",
       "depName": "autoprefixer",
       "depType": "dependencies",
       "prettyDepType": "dependency",
     },
-    Object {
+    {
       "currentValue": "~1.6.0",
       "datasource": "npm",
       "depName": "bower",
       "depType": "dependencies",
       "prettyDepType": "dependency",
     },
-    Object {
+    {
       "currentValue": "13.1.0",
       "datasource": "npm",
       "depName": "browserify",
       "depType": "dependencies",
       "prettyDepType": "dependency",
     },
-    Object {
+    {
       "currentValue": "0.9.2",
       "datasource": "npm",
       "depName": "browserify-css",
       "depType": "dependencies",
       "prettyDepType": "dependency",
     },
-    Object {
+    {
       "currentValue": "=0.22.0",
       "datasource": "npm",
       "depName": "cheerio",
       "depType": "dependencies",
       "prettyDepType": "dependency",
     },
-    Object {
+    {
       "currentValue": "1.21.0",
       "datasource": "npm",
       "depName": "config",
       "depType": "dependencies",
       "prettyDepType": "dependency",
     },
-    Object {
+    {
       "depName": "enabled",
       "depType": "devDependencies",
       "prettyDepType": "devDependency",
       "skipReason": "invalid-value",
     },
-    Object {
+    {
       "currentValue": "^1.5.8",
       "datasource": "npm",
       "depName": "angular",
       "depType": "devDependencies",
       "prettyDepType": "devDependency",
     },
-    Object {
+    {
       "currentValue": "1.5.8",
       "datasource": "npm",
       "depName": "angular-touch",
       "depType": "devDependencies",
       "prettyDepType": "devDependency",
     },
-    Object {
+    {
       "currentValue": "1.5.8",
       "datasource": "npm",
       "depName": "angular-sanitize",
       "depType": "devDependencies",
       "prettyDepType": "devDependency",
     },
-    Object {
+    {
       "currentValue": "4.0.0-beta.1",
       "datasource": "npm",
       "depName": "@angular/core",
       "depType": "devDependencies",
       "prettyDepType": "devDependency",
     },
-    Object {
+    {
       "currentValue": "1.21.0",
       "datasource": "npm",
       "depName": "config",
       "depType": "resolutions",
       "prettyDepType": "resolutions",
     },
-    Object {
+    {
       "currentValue": "8.0.0",
       "datasource": "npm",
       "depName": "@angular/cli",
       "depType": "resolutions",
-      "managerData": Object {
+      "managerData": {
         "key": "**/@angular/cli",
       },
       "prettyDepType": "resolutions",
     },
-    Object {
+    {
       "currentValue": "1.33.0",
       "datasource": "npm",
       "depName": "angular",
       "depType": "resolutions",
-      "managerData": Object {
+      "managerData": {
         "key": "**/angular",
       },
       "prettyDepType": "resolutions",
     },
-    Object {
+    {
       "currentValue": "1.0.0",
       "datasource": "npm",
       "depName": "glob",
       "depType": "resolutions",
-      "managerData": Object {
+      "managerData": {
         "key": "config/glob",
       },
       "prettyDepType": "resolutions",
@@ -1098,7 +1098,7 @@ Object {
   ],
   "lernaClient": "npm",
   "lernaPackages": undefined,
-  "managerData": Object {
+  "managerData": {
     "hasPackageManager": false,
     "lernaJsonFile": "lerna.json",
     "yarnZeroInstall": false,
@@ -1116,12 +1116,12 @@ Object {
 `;
 
 exports[`modules/manager/npm/extract/index .extractPackageFile() finds simple yarn workspaces 1`] = `
-Object {
-  "constraints": Object {},
-  "deps": Array [],
+{
+  "constraints": {},
+  "deps": [],
   "lernaClient": "npm",
   "lernaPackages": undefined,
-  "managerData": Object {
+  "managerData": {
     "hasPackageManager": false,
     "lernaJsonFile": "lerna.json",
     "yarnZeroInstall": false,
@@ -1134,19 +1134,19 @@ Object {
   "pnpmShrinkwrap": undefined,
   "skipInstalls": true,
   "yarnLock": undefined,
-  "yarnWorkspacesPackages": Array [
+  "yarnWorkspacesPackages": [
     "packages/*",
   ],
 }
 `;
 
 exports[`modules/manager/npm/extract/index .extractPackageFile() finds simple yarn workspaces with lerna.json and useWorkspaces: true 1`] = `
-Object {
-  "constraints": Object {},
-  "deps": Array [],
+{
+  "constraints": {},
+  "deps": [],
   "lernaClient": undefined,
   "lernaPackages": undefined,
-  "managerData": Object {
+  "managerData": {
     "hasPackageManager": false,
     "lernaJsonFile": undefined,
     "yarnZeroInstall": false,
@@ -1159,125 +1159,125 @@ Object {
   "pnpmShrinkwrap": undefined,
   "skipInstalls": true,
   "yarnLock": undefined,
-  "yarnWorkspacesPackages": Array [
+  "yarnWorkspacesPackages": [
     "packages/*",
   ],
 }
 `;
 
 exports[`modules/manager/npm/extract/index .extractPackageFile() returns an array of dependencies 1`] = `
-Object {
-  "constraints": Object {},
-  "deps": Array [
-    Object {
+{
+  "constraints": {},
+  "deps": [
+    {
       "currentValue": "6.5.0",
       "datasource": "npm",
       "depName": "autoprefixer",
       "depType": "dependencies",
       "prettyDepType": "dependency",
     },
-    Object {
+    {
       "currentValue": "~1.6.0",
       "datasource": "npm",
       "depName": "bower",
       "depType": "dependencies",
       "prettyDepType": "dependency",
     },
-    Object {
+    {
       "currentValue": "13.1.0",
       "datasource": "npm",
       "depName": "browserify",
       "depType": "dependencies",
       "prettyDepType": "dependency",
     },
-    Object {
+    {
       "currentValue": "0.9.2",
       "datasource": "npm",
       "depName": "browserify-css",
       "depType": "dependencies",
       "prettyDepType": "dependency",
     },
-    Object {
+    {
       "currentValue": "=0.22.0",
       "datasource": "npm",
       "depName": "cheerio",
       "depType": "dependencies",
       "prettyDepType": "dependency",
     },
-    Object {
+    {
       "currentValue": "1.21.0",
       "datasource": "npm",
       "depName": "config",
       "depType": "dependencies",
       "prettyDepType": "dependency",
     },
-    Object {
+    {
       "depName": "enabled",
       "depType": "devDependencies",
       "prettyDepType": "devDependency",
       "skipReason": "invalid-value",
     },
-    Object {
+    {
       "currentValue": "^1.5.8",
       "datasource": "npm",
       "depName": "angular",
       "depType": "devDependencies",
       "prettyDepType": "devDependency",
     },
-    Object {
+    {
       "currentValue": "1.5.8",
       "datasource": "npm",
       "depName": "angular-touch",
       "depType": "devDependencies",
       "prettyDepType": "devDependency",
     },
-    Object {
+    {
       "currentValue": "1.5.8",
       "datasource": "npm",
       "depName": "angular-sanitize",
       "depType": "devDependencies",
       "prettyDepType": "devDependency",
     },
-    Object {
+    {
       "currentValue": "4.0.0-beta.1",
       "datasource": "npm",
       "depName": "@angular/core",
       "depType": "devDependencies",
       "prettyDepType": "devDependency",
     },
-    Object {
+    {
       "currentValue": "1.21.0",
       "datasource": "npm",
       "depName": "config",
       "depType": "resolutions",
       "prettyDepType": "resolutions",
     },
-    Object {
+    {
       "currentValue": "8.0.0",
       "datasource": "npm",
       "depName": "@angular/cli",
       "depType": "resolutions",
-      "managerData": Object {
+      "managerData": {
         "key": "**/@angular/cli",
       },
       "prettyDepType": "resolutions",
     },
-    Object {
+    {
       "currentValue": "1.33.0",
       "datasource": "npm",
       "depName": "angular",
       "depType": "resolutions",
-      "managerData": Object {
+      "managerData": {
         "key": "**/angular",
       },
       "prettyDepType": "resolutions",
     },
-    Object {
+    {
       "currentValue": "1.0.0",
       "datasource": "npm",
       "depName": "glob",
       "depType": "resolutions",
-      "managerData": Object {
+      "managerData": {
         "key": "config/glob",
       },
       "prettyDepType": "resolutions",
@@ -1285,7 +1285,7 @@ Object {
   ],
   "lernaClient": undefined,
   "lernaPackages": undefined,
-  "managerData": Object {
+  "managerData": {
     "hasPackageManager": false,
     "lernaJsonFile": undefined,
     "yarnZeroInstall": false,
@@ -1303,100 +1303,100 @@ Object {
 `;
 
 exports[`modules/manager/npm/extract/index .extractPackageFile() returns an array of dependencies with resolution comments 1`] = `
-Object {
-  "constraints": Object {},
-  "deps": Array [
-    Object {
+{
+  "constraints": {},
+  "deps": [
+    {
       "currentValue": "6.5.0",
       "datasource": "npm",
       "depName": "autoprefixer",
       "depType": "dependencies",
       "prettyDepType": "dependency",
     },
-    Object {
+    {
       "currentValue": "~1.6.0",
       "datasource": "npm",
       "depName": "bower",
       "depType": "dependencies",
       "prettyDepType": "dependency",
     },
-    Object {
+    {
       "currentValue": "13.1.0",
       "datasource": "npm",
       "depName": "browserify",
       "depType": "dependencies",
       "prettyDepType": "dependency",
     },
-    Object {
+    {
       "currentValue": "0.9.2",
       "datasource": "npm",
       "depName": "browserify-css",
       "depType": "dependencies",
       "prettyDepType": "dependency",
     },
-    Object {
+    {
       "currentValue": "=0.22.0",
       "datasource": "npm",
       "depName": "cheerio",
       "depType": "dependencies",
       "prettyDepType": "dependency",
     },
-    Object {
+    {
       "currentValue": "1.21.0",
       "datasource": "npm",
       "depName": "config",
       "depType": "dependencies",
       "prettyDepType": "dependency",
     },
-    Object {
+    {
       "depName": "enabled",
       "depType": "devDependencies",
       "prettyDepType": "devDependency",
       "skipReason": "invalid-value",
     },
-    Object {
+    {
       "currentValue": "^1.5.8",
       "datasource": "npm",
       "depName": "angular",
       "depType": "devDependencies",
       "prettyDepType": "devDependency",
     },
-    Object {
+    {
       "currentValue": "1.5.8",
       "datasource": "npm",
       "depName": "angular-touch",
       "depType": "devDependencies",
       "prettyDepType": "devDependency",
     },
-    Object {
+    {
       "currentValue": "1.5.8",
       "datasource": "npm",
       "depName": "angular-sanitize",
       "depType": "devDependencies",
       "prettyDepType": "devDependency",
     },
-    Object {
+    {
       "currentValue": "4.0.0-beta.1",
       "datasource": "npm",
       "depName": "@angular/core",
       "depType": "devDependencies",
       "prettyDepType": "devDependency",
     },
-    Object {
+    {
       "depName": undefined,
       "depType": "resolutions",
-      "managerData": Object {
+      "managerData": {
         "key": "//",
       },
       "prettyDepType": "resolutions",
       "skipReason": "invalid-name",
     },
-    Object {
+    {
       "currentValue": "1.21.0",
       "datasource": "npm",
       "depName": "config",
       "depType": "resolutions",
-      "managerData": Object {
+      "managerData": {
         "key": "**/config",
       },
       "prettyDepType": "resolutions",
@@ -1404,7 +1404,7 @@ Object {
   ],
   "lernaClient": undefined,
   "lernaPackages": undefined,
-  "managerData": Object {
+  "managerData": {
     "hasPackageManager": false,
     "lernaJsonFile": undefined,
     "yarnZeroInstall": false,
@@ -1417,123 +1417,123 @@ Object {
   "pnpmShrinkwrap": undefined,
   "skipInstalls": true,
   "yarnLock": undefined,
-  "yarnWorkspacesPackages": Array [],
+  "yarnWorkspacesPackages": [],
 }
 `;
 
 exports[`modules/manager/npm/extract/index .extractPackageFile() sets skipInstalls false if Yarn zero-install is used 1`] = `
-Object {
-  "constraints": Object {},
-  "deps": Array [
-    Object {
+{
+  "constraints": {},
+  "deps": [
+    {
       "currentValue": "6.5.0",
       "datasource": "npm",
       "depName": "autoprefixer",
       "depType": "dependencies",
       "prettyDepType": "dependency",
     },
-    Object {
+    {
       "currentValue": "~1.6.0",
       "datasource": "npm",
       "depName": "bower",
       "depType": "dependencies",
       "prettyDepType": "dependency",
     },
-    Object {
+    {
       "currentValue": "13.1.0",
       "datasource": "npm",
       "depName": "browserify",
       "depType": "dependencies",
       "prettyDepType": "dependency",
     },
-    Object {
+    {
       "currentValue": "0.9.2",
       "datasource": "npm",
       "depName": "browserify-css",
       "depType": "dependencies",
       "prettyDepType": "dependency",
     },
-    Object {
+    {
       "currentValue": "=0.22.0",
       "datasource": "npm",
       "depName": "cheerio",
       "depType": "dependencies",
       "prettyDepType": "dependency",
     },
-    Object {
+    {
       "currentValue": "1.21.0",
       "datasource": "npm",
       "depName": "config",
       "depType": "dependencies",
       "prettyDepType": "dependency",
     },
-    Object {
+    {
       "depName": "enabled",
       "depType": "devDependencies",
       "prettyDepType": "devDependency",
       "skipReason": "invalid-value",
     },
-    Object {
+    {
       "currentValue": "^1.5.8",
       "datasource": "npm",
       "depName": "angular",
       "depType": "devDependencies",
       "prettyDepType": "devDependency",
     },
-    Object {
+    {
       "currentValue": "1.5.8",
       "datasource": "npm",
       "depName": "angular-touch",
       "depType": "devDependencies",
       "prettyDepType": "devDependency",
     },
-    Object {
+    {
       "currentValue": "1.5.8",
       "datasource": "npm",
       "depName": "angular-sanitize",
       "depType": "devDependencies",
       "prettyDepType": "devDependency",
     },
-    Object {
+    {
       "currentValue": "4.0.0-beta.1",
       "datasource": "npm",
       "depName": "@angular/core",
       "depType": "devDependencies",
       "prettyDepType": "devDependency",
     },
-    Object {
+    {
       "currentValue": "1.21.0",
       "datasource": "npm",
       "depName": "config",
       "depType": "resolutions",
       "prettyDepType": "resolutions",
     },
-    Object {
+    {
       "currentValue": "8.0.0",
       "datasource": "npm",
       "depName": "@angular/cli",
       "depType": "resolutions",
-      "managerData": Object {
+      "managerData": {
         "key": "**/@angular/cli",
       },
       "prettyDepType": "resolutions",
     },
-    Object {
+    {
       "currentValue": "1.33.0",
       "datasource": "npm",
       "depName": "angular",
       "depType": "resolutions",
-      "managerData": Object {
+      "managerData": {
         "key": "**/angular",
       },
       "prettyDepType": "resolutions",
     },
-    Object {
+    {
       "currentValue": "1.0.0",
       "datasource": "npm",
       "depName": "glob",
       "depType": "resolutions",
-      "managerData": Object {
+      "managerData": {
         "key": "config/glob",
       },
       "prettyDepType": "resolutions",
@@ -1541,7 +1541,7 @@ Object {
   ],
   "lernaClient": undefined,
   "lernaPackages": undefined,
-  "managerData": Object {
+  "managerData": {
     "hasPackageManager": false,
     "lernaJsonFile": undefined,
     "yarnZeroInstall": true,

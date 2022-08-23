@@ -10,7 +10,12 @@ import mavenVersion from '../../versioning/maven';
 import * as mavenVersioning from '../../versioning/maven';
 import { compare } from '../../versioning/maven/compare';
 import { Datasource } from '../datasource';
-import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
+import type {
+  GetReleasesConfig,
+  RegistryStrategy,
+  Release,
+  ReleaseResult,
+} from '../types';
 import { MAVEN_REPO } from './common';
 import type { MavenDependency, ReleaseMap } from './types';
 import {
@@ -57,9 +62,9 @@ export class MavenDatasource extends Datasource {
 
   override readonly defaultRegistryUrls = defaultRegistryUrls;
 
-  override readonly defaultVersioning = mavenVersioning.id;
+  override readonly defaultVersioning: string = mavenVersioning.id;
 
-  override readonly registryStrategy = 'merge';
+  override readonly registryStrategy: RegistryStrategy = 'merge';
 
   constructor(id = MavenDatasource.id) {
     super(id);

@@ -28,6 +28,8 @@ describe('modules/datasource/github-tags/cache', () => {
             type: 'Tag',
             target: {
               hash: 'abc',
+            },
+            tagger: {
               releaseTimestamp: '2020-04-09T10:00:00.000Z',
             },
           },

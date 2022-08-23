@@ -4,12 +4,23 @@ import parse from 'github-url-from-git';
 import { DateTime } from 'luxon';
 import * as hostRules from '../../util/host-rules';
 import { regEx } from '../../util/regex';
-import { validateUrl } from '../../util/url';
+import { parseUrl, validateUrl } from '../../util/url';
 import { manualChangelogUrls, manualSourceUrls } from './metadata-manual';
 import type { ReleaseResult } from './types';
 
 const githubPages = regEx('^https://([^.]+).github.com/([^/]+)$');
 const gitPrefix = regEx('^git:/?/?');
+
+export function massageUrl(sourceUrl: string): string {
+  const parsedUrl = URL.parse(sourceUrl);
+  if (!parsedUrl?.hostname) {
+    return '';
+  }
+  if (parsedUrl.hostname.includes('gitlab')) {
+    return massageGitlabUrl(sourceUrl);
+  }
+  return massageGithubUrl(sourceUrl);
+}
 
 export function massageGithubUrl(url: string): string {
   let massagedUrl = url;
@@ -34,7 +45,7 @@ export function massageGithubUrl(url: string): string {
 function massageGitlabUrl(url: string): string {
   return url
     .replace('http:', 'https:')
-    .replace(regEx(/^git:\/?\/?/), 'https://')
+    .replace(gitPrefix, 'https://')
     .replace(regEx(/\/tree\/.*$/i), '')
     .replace(regEx(/\/$/i), '')
     .replace('.git', '');
@@ -114,12 +125,15 @@ export function addMetaData(
   ) {
     dep.sourceUrl = dep.changelogUrl;
   }
-  // prettier-ignore
-  if (dep.homepage?.includes('github.com')) { // lgtm [js/incomplete-url-substring-sanitization]
-    if (!dep.sourceUrl) {
-      dep.sourceUrl = dep.homepage;
+
+  if (dep.homepage) {
+    const parsedHomePage = parseUrl(dep.homepage);
+    if (parsedHomePage?.hostname.includes('github')) {
+      if (!dep.sourceUrl) {
+        dep.sourceUrl = dep.homepage;
+      }
+      delete dep.homepage;
     }
-    delete dep.homepage;
   }
   const extraBaseUrls = [];
   // istanbul ignore next
@@ -128,21 +142,15 @@ export function addMetaData(
   });
   extraBaseUrls.push('gitlab.com');
   if (dep.sourceUrl) {
-    const parsedUrl = URL.parse(dep.sourceUrl);
-    if (parsedUrl?.hostname) {
-      let massagedUrl;
-      if (parsedUrl.hostname.includes('gitlab')) {
-        massagedUrl = massageGitlabUrl(dep.sourceUrl);
-      } else {
-        massagedUrl = massageGithubUrl(dep.sourceUrl);
-      }
+    const massagedUrl = massageUrl(dep.sourceUrl);
+    if (is.emptyString(massagedUrl)) {
+      delete dep.sourceUrl;
+    } else {
       // try massaging it
       dep.sourceUrl =
         parse(massagedUrl, {
           extraBaseUrls,
         }) || dep.sourceUrl;
-    } else {
-      delete dep.sourceUrl;
     }
   }
 

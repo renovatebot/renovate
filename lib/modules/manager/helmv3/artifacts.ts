@@ -6,8 +6,8 @@ import { logger } from '../../../logger';
 import { exec } from '../../../util/exec';
 import type { ExecOptions, ToolConstraint } from '../../../util/exec/types';
 import {
+  getParentDir,
   getSiblingFileName,
-  getSubDirectory,
   privateCacheDir,
   readLocalFile,
   writeLocalFile,
@@ -92,7 +92,7 @@ async function helmCommands(
 
   cmd.push(
     `helm dependency update ${helmConfigParameters.join(' ')} ${quote(
-      getSubDirectory(manifestPath)
+      getParentDir(manifestPath)
     )}`
   );
 

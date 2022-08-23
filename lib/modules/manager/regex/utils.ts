@@ -1,4 +1,5 @@
 import { URL } from 'url';
+import is from '@sindresorhus/is';
 import type { RegexManagerTemplates } from '../../../config/types';
 import { logger } from '../../../logger';
 import * as template from '../../../util/template';
@@ -96,4 +97,17 @@ export function mergeExtractionTemplate(
     groups: mergeGroups(base.groups, addition.groups),
     replaceString: addition.replaceString ?? base.replaceString,
   };
+}
+
+export function isValidDependency({
+  depName,
+  currentValue,
+  currentDigest,
+}: PackageDependency): boolean {
+  // check if all the fields are set
+  return (
+    is.nonEmptyStringAndNotWhitespace(depName) &&
+    (is.nonEmptyStringAndNotWhitespace(currentDigest) ||
+      is.nonEmptyStringAndNotWhitespace(currentValue))
+  );
 }

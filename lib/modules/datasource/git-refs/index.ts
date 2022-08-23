@@ -1,3 +1,4 @@
+import { logger } from '../../../logger';
 import { cache } from '../../../util/cache/package/decorator';
 import { regEx } from '../../../util/regex';
 import type { DigestConfig, GetReleasesConfig, ReleaseResult } from '../types';
@@ -23,7 +24,13 @@ export class GitRefsDatasource extends GitDatasource {
   override async getReleases({
     packageName,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    const rawRefs: RawRefs[] | null = await this.getRawRefs({ packageName });
+    let rawRefs: RawRefs[] | null = null;
+
+    try {
+      rawRefs = await this.getRawRefs({ packageName });
+    } catch (err) /* istanbul ignore next */ {
+      logger.debug({ err }, 'Error getting git-refs');
+    }
 
     if (!rawRefs) {
       return null;
@@ -44,7 +51,7 @@ export class GitRefsDatasource extends GitDatasource {
       releases: uniqueRefs.map((ref) => ({
         version: ref,
         gitRef: ref,
-        newDigest: rawRefs.find((rawRef) => rawRef.value === ref)?.hash,
+        newDigest: rawRefs!.find((rawRef) => rawRef.value === ref)?.hash,
       })),
     };
 

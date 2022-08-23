@@ -24,7 +24,7 @@ export interface MediaObject {
 export interface ImageListImage extends MediaObject {
   readonly mediaType: MediaType.manifestV1 | MediaType.manifestV2;
 
-  readonly platform: Record<string, unknown>;
+  readonly platform: OciPlatform;
 }
 
 /**
@@ -46,6 +46,19 @@ export interface Image extends MediaObject {
   readonly mediaType: MediaType.manifestV2;
 
   readonly config: MediaObject;
+}
+
+/**
+ * OCI platform properties
+ * https://github.com/opencontainers/image-spec/blob/main/image-index.md
+ */
+export interface OciPlatform {
+  architecture?: string;
+  features?: string[];
+  os?: string;
+  'os.features'?: string[];
+  'os.version'?: string;
+  variant?: string;
 }
 
 /**
@@ -75,7 +88,7 @@ export interface OciImage {
 
 export interface OciImageListManifest extends OciDescriptor {
   readonly mediaType?: MediaType.ociManifestV1 | MediaType.ociManifestIndexV1;
-  readonly platform: Record<string, unknown>;
+  readonly platform: OciPlatform;
 }
 
 /**
@@ -92,4 +105,12 @@ export interface OciImageList {
 export interface RegistryRepository {
   registryHost: string;
   dockerRepository: string;
+}
+
+/**
+ * OCI Image Configuration
+ * https://github.com/opencontainers/image-spec/blob/main/config.md
+ */
+export interface ImageConfig {
+  readonly architecture: string;
 }

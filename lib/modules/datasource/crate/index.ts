@@ -5,7 +5,7 @@ import { GlobalConfig } from '../../../config/global';
 import { logger } from '../../../logger';
 import * as memCache from '../../../util/cache/memory';
 import { cache } from '../../../util/cache/package/decorator';
-import { privateCacheDir, readFile } from '../../../util/fs';
+import { privateCacheDir, readCacheFile } from '../../../util/fs';
 import { simpleGitConfig } from '../../../util/git/config';
 import { newlineRegex, regEx } from '../../../util/regex';
 import { parseUrl } from '../../../util/url';
@@ -38,6 +38,8 @@ export class CrateDatasource extends Datasource {
   @cache({
     namespace: `datasource-${CrateDatasource.id}`,
     key: ({ registryUrl, packageName }: GetReleasesConfig) =>
+      // TODO: types (#7154)
+      // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
       `${registryUrl}/${packageName}`,
     cacheable: ({ registryUrl }: GetReleasesConfig) =>
       CrateDatasource.areReleasesCacheable(registryUrl),
@@ -160,7 +162,7 @@ export class CrateDatasource extends Datasource {
         info.clonePath,
         ...CrateDatasource.getIndexSuffix(packageName)
       );
-      return readFile(path, 'utf8');
+      return readCacheFile(path, 'utf8');
     }
 
     if (info.flavor === RegistryFlavor.CratesIo) {
@@ -208,7 +210,7 @@ export class CrateDatasource extends Datasource {
     const host = url.hostname;
     const hash = hasha(url.pathname, {
       algorithm: 'sha256',
-    }).substr(0, 7);
+    }).substring(0, 7);
 
     return `crate-registry-${proto}-${host}-${hash}`;
   }

@@ -22,9 +22,10 @@ export function getChangelogs(config: BranchConfig): string {
 
   for (const upgrade of config.upgrades) {
     if (upgrade.hasReleaseNotes && upgrade.repoName) {
+      // TODO: types (#7154)
       upgrade.releaseNotesSummaryTitle = `${upgrade.repoName}${
         countReleaseNodesByRepoName[upgrade.repoName] > 1
-          ? ` (${upgrade.depName})`
+          ? ` (${upgrade.depName!})`
           : ''
       }`;
     }

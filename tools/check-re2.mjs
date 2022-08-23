@@ -1,7 +1,6 @@
 import shell from 'shelljs';
 
-// eslint-disable-next-line @typescript-eslint/no-floating-promises
-(async () => {
+await (async () => {
   shell.echo('-n', 'Checking re2 ... ');
   try {
     const { default: RE2 } = await import('re2');

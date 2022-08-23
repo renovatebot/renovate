@@ -27,6 +27,7 @@ import type {
   RepoResult,
   UpdatePrConfig,
 } from '../types';
+import { repoFingerprint } from '../util';
 import { smartTruncate } from '../utils/pr-body';
 import { readOnlyIssueBody } from '../utils/read-only-issue-body';
 import * as comments from './comments';
@@ -194,6 +195,8 @@ export async function initRepo({
 
   const url = git.getUrl({
     protocol: 'https',
+    // TODO: types (#7154)
+    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
     auth: `${opts.username}:${opts.password}`,
     hostname: hostnameWithoutApiPrefix,
     repository,
@@ -207,6 +210,7 @@ export async function initRepo({
   const repoConfig: RepoResult = {
     defaultBranch: info.mainbranch,
     isFork: info.isFork,
+    repoFingerprint: repoFingerprint(info.uuid, defaults.endpoint),
   };
   return repoConfig;
 }
@@ -249,6 +253,8 @@ export async function findPr({
   prTitle,
   state = PrState.All,
 }: FindPRConfig): Promise<Pr | null> {
+  // TODO: types (#7154)
+  // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
   logger.debug(`findPr(${branchName}, ${prTitle}, ${state})`);
   const prList = await getPrList();
   const pr = prList.find(
@@ -330,6 +336,8 @@ async function getStatus(
 ): Promise<utils.BitbucketStatus[]> {
   const sha = await getBranchCommit(branchName);
   return utils.accumulateValues<utils.BitbucketStatus>(
+    // TODO: types (#7154)
+    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
     `/2.0/repositories/${config.repository}/commit/${sha}/statuses`,
     'get',
     { useCache }
@@ -399,6 +407,8 @@ export async function setBranchStatus({
   };
 
   await bitbucketHttp.postJson(
+    // TODO: types (#7154)
+    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
     `/2.0/repositories/${config.repository}/commit/${sha}/statuses/build`,
     { body }
   );
@@ -468,7 +478,8 @@ export function massageMarkdown(input: string): string {
     .replace(regEx(/<\/?summary>/g), '**')
     .replace(regEx(/<\/?details>/g), '')
     .replace(regEx(`\n---\n\n.*?<!-- rebase-check -->.*?\n`), '')
-    .replace(regEx(/\]\(\.\.\/pull\//g), '](../../pull-requests/');
+    .replace(regEx(/\]\(\.\.\/pull\//g), '](../../pull-requests/')
+    .replace(regEx(/<!--renovate-debug:.*?-->/), '');
 }
 
 export async function ensureIssue({
@@ -846,6 +857,8 @@ export async function mergePr({
   id: prNo,
   strategy: mergeStrategy,
 }: MergePRConfig): Promise<boolean> {
+  // TODO: types (#7154)
+  // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
   logger.debug(`mergePr(${prNo}, ${branchName}, ${mergeStrategy})`);
 
   // Bitbucket Cloud does not support a rebase-alike; https://jira.atlassian.com/browse/BCLOUD-16610

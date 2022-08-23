@@ -72,7 +72,7 @@ body:
     id: describe-bug
     attributes:
       label: Describe the bug
-      description: 'Do not report any security concerns here. Email [renovate-disclosure@whitesourcesoftware.com](mailto:renovate-disclosure@whitesourcesoftware.com) instead.'
+      description: 'Do not report any security concerns here. Email [renovate-disclosure@mend.io](mailto:renovate-disclosure@mend.io) instead.'
     validations:
       required: true
 

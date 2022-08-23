@@ -1,8 +1,8 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`workers/repository/update/pr/changelog/release-notes getReleaseList() should return release list for github repo 1`] = `
-Array [
-  Object {
+[
+  {
     "body": undefined,
     "id": undefined,
     "name": undefined,
@@ -10,7 +10,7 @@ Array [
     "tag": "v1.0.0",
     "url": undefined,
   },
-  Object {
+  {
     "body": "some body #123, [#124](https://github.com/some/yet-other-repository/issues/124)",
     "id": undefined,
     "name": undefined,
@@ -22,15 +22,15 @@ Array [
 `;
 
 exports[`workers/repository/update/pr/changelog/release-notes getReleaseList() should return release list for gitlab.com project 1`] = `
-Array [
-  Object {
+[
+  {
     "body": undefined,
     "name": undefined,
     "notesSourceUrl": "https://gitlab.com/api/v4/projects/some%2Fyet-other-repository/releases",
     "tag": "v1.0.0",
     "url": "https://gitlab.com/api/v4/projects/some%2Fyet-other-repository/releases/v1.0.0",
   },
-  Object {
+  {
     "body": undefined,
     "name": undefined,
     "notesSourceUrl": "https://gitlab.com/api/v4/projects/some%2Fyet-other-repository/releases",
@@ -41,15 +41,15 @@ Array [
 `;
 
 exports[`workers/repository/update/pr/changelog/release-notes getReleaseList() should return release list for self hosted gitlab project 1`] = `
-Array [
-  Object {
+[
+  {
     "body": undefined,
     "name": undefined,
     "notesSourceUrl": "https://my.custom.domain/api/v4/projects/some%2Fyet-other-repository/releases",
     "tag": "v1.0.0",
     "url": "https://my.custom.domain/api/v4/projects/some%2Fyet-other-repository/releases/v1.0.0",
   },
-  Object {
+  {
     "body": undefined,
     "name": undefined,
     "notesSourceUrl": "https://my.custom.domain/api/v4/projects/some%2Fyet-other-repository/releases",
@@ -60,7 +60,7 @@ Array [
 `;
 
 exports[`workers/repository/update/pr/changelog/release-notes getReleaseNotesMd() ReleaseNotes Correctness handles gitlab sourceDirectory 1`] = `
-Object {
+{
   "body": "-   add new auth, fix accept header and base path in mock
 
 Closes ADAPT-207
@@ -75,7 +75,7 @@ See merge request itentialopensource/adapter-utils!177
 `;
 
 exports[`workers/repository/update/pr/changelog/release-notes getReleaseNotesMd() ReleaseNotes Correctness parses adapter-utils 4.33.0 1`] = `
-Object {
+{
   "body": "-   add new auth, fix accept header and base path in mock
 
 Closes ADAPT-207
@@ -90,7 +90,7 @@ See merge request itentialopensource/adapter-utils!177
 `;
 
 exports[`workers/repository/update/pr/changelog/release-notes getReleaseNotesMd() ReleaseNotes Correctness parses yargs 15.2.0 1`] = `
-Object {
+{
   "body": "##### ⚠ BREAKING CHANGES
 
 -   **deps:** yargs-parser@17.0.0 no longer implicitly creates arrays out of boolean
@@ -121,7 +121,7 @@ Object {
 `;
 
 exports[`workers/repository/update/pr/changelog/release-notes getReleaseNotesMd() ReleaseNotes Correctness parses yargs 15.3.0 1`] = `
-Object {
+{
   "body": "##### Features
 
 -   **yargs-parser:** introduce single-digit boolean aliases ([#1576](https://www.github.com/yargs/yargs/issues/1576)) ([3af7f04](https://www.github.com/yargs/yargs/commit/3af7f04cdbfcbd4b3f432aca5144d43f21958c39))
@@ -137,7 +137,7 @@ Object {
 `;
 
 exports[`workers/repository/update/pr/changelog/release-notes getReleaseNotesMd() handles github sourceDirectory 1`] = `
-Object {
+{
   "body": "-   Fix \`condenseFlow\` output (quote keys for sure, instead of spaces), [#371](https://github.com/nodeca/js-yaml/issues/371), [#370](https://github.com/nodeca/js-yaml/issues/370).
 -   Dump astrals as codepoints instead of surrogate pair, [#368](https://github.com/nodeca/js-yaml/issues/368).
 ",
@@ -147,7 +147,7 @@ Object {
 `;
 
 exports[`workers/repository/update/pr/changelog/release-notes getReleaseNotesMd() parses angular.js 1`] = `
-Object {
+{
   "body": "#### Bug Fixes
 
 -   **input:** add \`drop\` event support for IE
@@ -178,7 +178,7 @@ Object {
 `;
 
 exports[`workers/repository/update/pr/changelog/release-notes getReleaseNotesMd() parses gitlab.com/gitlab-org/gitter/webapp 1`] = `
-Object {
+{
   "body": "-   Removing markup from a part of the French translation, <https://gitlab.com/gitlab-org/gitter/webapp/-/merge_requests/1878>
 -   Fix typo documentation -> documentation, <https://gitlab.com/gitlab-org/gitter/webapp/-/merge_requests/1880>
     -   Thanks to [@auua](https://gitlab.com/auua) for the contribution
@@ -195,7 +195,7 @@ Object {
 `;
 
 exports[`workers/repository/update/pr/changelog/release-notes getReleaseNotesMd() parses jest 1`] = `
-Object {
+{
   "body": "##### Fixes
 
 -   \`[jest-resolve]\` Use \`module.builtinModules\` as \`BUILTIN_MODULES\` when it
@@ -262,7 +262,7 @@ Object {
     ([#4730](https://github.com/facebook/jest/pull/4730))
 -   \`[jest-runtime]\` Use realpath to match transformers
     ([#5000](https://github.com/facebook/jest/pull/5000))
--   \`[expect]\` \\\\[**BREAKING**] Replace identity equality with Object.is in toBe
+-   \`[expect]\` \\[**BREAKING**] Replace identity equality with Object.is in toBe
     matcher ([#4917](https://github.com/facebook/jest/pull/4917))
 
 ##### Features
@@ -283,18 +283,18 @@ Object {
     ([#4866](https://github.com/facebook/jest/pull/4866))
 -   \`[eslint-plugin-jest]\` Add \`prefer-to-have-length\` lint rule.
     ([#4771](https://github.com/facebook/jest/pull/4771))
--   \`[jest-environment-jsdom]\` \\\\[**BREAKING**] Upgrade to JSDOM@11
+-   \`[jest-environment-jsdom]\` \\[**BREAKING**] Upgrade to JSDOM@11
     ([#4770](https://github.com/facebook/jest/pull/4770))
--   \`[jest-environment-*]\` \\\\[**BREAKING**] Add Async Test Environment APIs, dispose
+-   \`[jest-environment-*]\` \\[**BREAKING**] Add Async Test Environment APIs, dispose
     is now teardown ([#4506](https://github.com/facebook/jest/pull/4506))
 -   \`[jest-cli]\` Add an option to clear the cache
     ([#4430](https://github.com/facebook/jest/pull/4430))
 -   \`[babel-plugin-jest-hoist]\` Improve error message, that the second argument of
     \`jest.mock\` must be an inline function
     ([#4593](https://github.com/facebook/jest/pull/4593))
--   \`[jest-snapshot]\` \\\\[**BREAKING**] Concatenate name of test and snapshot
+-   \`[jest-snapshot]\` \\[**BREAKING**] Concatenate name of test and snapshot
     ([#4460](https://github.com/facebook/jest/pull/4460))
--   \`[jest-cli]\` \\\\[**BREAKING**] Fail if no tests are found
+-   \`[jest-cli]\` \\[**BREAKING**] Fail if no tests are found
     ([#3672](https://github.com/facebook/jest/pull/3672))
 -   \`[jest-diff]\` Highlight only last of odd length leading spaces
     ([#4558](https://github.com/facebook/jest/pull/4558))
@@ -328,7 +328,7 @@ Object {
     ([#4614](https://github.com/facebook/jest/pull/4614))
 -   \`[jest-runtime]\` Support sourcemaps in transformers
     ([#3458](https://github.com/facebook/jest/pull/3458))
--   \`[jest-snapshot]\` \\\\[**BREAKING**] Add a serializer for \`jest.fn\` to allow a
+-   \`[jest-snapshot]\` \\[**BREAKING**] Add a serializer for \`jest.fn\` to allow a
     snapshot of a jest mock ([#4668](https://github.com/facebook/jest/pull/4668))
 -   \`[jest-worker]\` Initial version of parallel worker abstraction, say hello!
     ([#4497](https://github.com/facebook/jest/pull/4497))
@@ -350,7 +350,7 @@ Object {
     ([#5093](https://github.com/facebook/jest/pull/5093))
 -   \`[jest-util]\` \`jest-util\` should not depend on \`jest-mock\`
     ([#4992](https://github.com/facebook/jest/pull/4992))
--   \`[*]\` \\\\[**BREAKING**] Drop support for Node.js version 4
+-   \`[*]\` \\[**BREAKING**] Drop support for Node.js version 4
     ([#4769](https://github.com/facebook/jest/pull/4769))
 -   \`[docs]\` Wrap code comments at 80 characters
     ([#4781](https://github.com/facebook/jest/pull/4781))
@@ -388,7 +388,7 @@ Object {
 `;
 
 exports[`workers/repository/update/pr/changelog/release-notes getReleaseNotesMd() parses js-yaml 1`] = `
-Object {
+{
   "body": "-   Fix \`condenseFlow\` output (quote keys for sure, instead of spaces), [#371](https://github.com/nodeca/js-yaml/issues/371), [#370](https://github.com/nodeca/js-yaml/issues/370).
 -   Dump astrals as codepoints instead of surrogate pair, [#368](https://github.com/nodeca/js-yaml/issues/368).
 ",
@@ -398,7 +398,7 @@ Object {
 `;
 
 exports[`workers/repository/update/pr/changelog/release-notes getReleaseNotesMd() parses self hosted gitlab 1`] = `
-Object {
+{
   "body": "-   Removing markup from a part of the French translation, <https://gitlab.com/gitlab-org/gitter/webapp/-/merge_requests/1878>
 -   Fix typo documentation -> documentation, <https://gitlab.com/gitlab-org/gitter/webapp/-/merge_requests/1880>
     -   Thanks to [@auua](https://gitlab.com/auua) for the contribution

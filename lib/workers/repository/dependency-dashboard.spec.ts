@@ -15,7 +15,10 @@ import type {
   PackageFile,
 } from '../../modules/manager/types';
 import type { Platform } from '../../modules/platform';
-import { massageMarkdown } from '../../modules/platform/github';
+import {
+  GitHubMaxPrBodyLen,
+  massageMarkdown,
+} from '../../modules/platform/github';
 import { BranchConfig, BranchResult, BranchUpgradeConfig } from '../types';
 import * as dependencyDashboard from './dependency-dashboard';
 import { PackageFiles } from './package-files';
@@ -52,7 +55,7 @@ function genRandPackageFile(
   for (let i = 0; i < depsNum; i++) {
     deps.push({
       depName: genRandString(depNameLen),
-      currentVersion: '1.0.0',
+      currentValue: '1.0.0',
     });
   }
   return { npm: [{ packageFile: 'package.json', deps }] };
@@ -82,8 +85,10 @@ describe('workers/repository/dependency-dashboard', () => {
         title: '',
         number: 1,
         body:
-          Fixtures.get('master-issue_with_8_PR.txt').replace('- [ ]', '- [x]') +
-          '\n\n - [x] <!-- rebase-all-open-prs -->',
+          Fixtures.get('dependency-dashboard-with-8-PR.txt').replace(
+            '- [ ]',
+            '- [x]'
+          ) + '\n\n - [x] <!-- rebase-all-open-prs -->',
       });
       await dependencyDashboard.readDashboardBody(conf);
       expect(conf).toEqual({
@@ -299,7 +304,7 @@ describe('workers/repository/dependency-dashboard', () => {
         config.dependencyDashboardTitle
       );
       expect(platform.ensureIssue.mock.calls[0][0].body).toBe(
-        Fixtures.get('master-issue_with_8_PR.txt')
+        Fixtures.get('dependency-dashboard-with-8-PR.txt')
       );
 
       // same with dry run
@@ -336,7 +341,7 @@ describe('workers/repository/dependency-dashboard', () => {
         config.dependencyDashboardTitle
       );
       expect(platform.ensureIssue.mock.calls[0][0].body).toBe(
-        Fixtures.get('master-issue_with_2_PR_edited.txt')
+        Fixtures.get('dependency-dashboard-with-2-PR-edited.txt')
       );
 
       // same with dry run
@@ -381,7 +386,7 @@ describe('workers/repository/dependency-dashboard', () => {
         config.dependencyDashboardTitle
       );
       expect(platform.ensureIssue.mock.calls[0][0].body).toBe(
-        Fixtures.get('master-issue_with_3_PR_in_progress.txt')
+        Fixtures.get('dependency-dashboard-with-3-PR-in-progress.txt')
       );
 
       // same with dry run
@@ -416,7 +421,7 @@ describe('workers/repository/dependency-dashboard', () => {
         config.dependencyDashboardTitle
       );
       expect(platform.ensureIssue.mock.calls[0][0].body).toBe(
-        Fixtures.get('master-issue_with_2_PR_closed_ignored.txt')
+        Fixtures.get('dependency-dashboard-with-2-PR-closed-ignored.txt')
       );
 
       // same with dry run
@@ -466,7 +471,7 @@ describe('workers/repository/dependency-dashboard', () => {
         config.dependencyDashboardTitle
       );
       expect(platform.ensureIssue.mock.calls[0][0].body).toBe(
-        Fixtures.get('master-issue_with_3_PR_in_approval.txt')
+        Fixtures.get('dependency-dashboard-with-3-PR-in-approval.txt')
       );
 
       // same with dry run
@@ -603,11 +608,8 @@ describe('workers/repository/dependency-dashboard', () => {
 
       describe('single base branch repo', () => {
         beforeEach(() => {
-          PackageFiles.add('main', packageFiles);
-        });
-
-        afterEach(() => {
           PackageFiles.clear();
+          PackageFiles.add('main', packageFiles);
         });
 
         it('add detected dependencies to the Dependency Dashboard body', async () => {
@@ -658,12 +660,9 @@ describe('workers/repository/dependency-dashboard', () => {
 
       describe('multi base branch repo', () => {
         beforeEach(() => {
+          PackageFiles.clear();
           PackageFiles.add('main', packageFiles);
           PackageFiles.add('dev', packageFiles);
-        });
-
-        afterEach(() => {
-          PackageFiles.clear();
         });
 
         it('add detected dependencies to the Dependency Dashboard body', async () => {
@@ -700,17 +699,125 @@ describe('workers/repository/dependency-dashboard', () => {
 
         it('truncates the body of a really big repo', async () => {
           const branches: BranchConfig[] = [];
-          const truncatedLength = 60000;
           const packageFilesBigRepo = genRandPackageFile(100, 700);
+          PackageFiles.clear();
           PackageFiles.add('main', packageFilesBigRepo);
           await dependencyDashboard.ensureDependencyDashboard(config, branches);
           expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
-          expect(platform.ensureIssue.mock.calls[0][0].body).toHaveLength(
-            truncatedLength
-          );
+          expect(
+            platform.ensureIssue.mock.calls[0][0].body.length <
+              GitHubMaxPrBodyLen
+          ).toBeTrue();
 
           // same with dry run
           await dryRun(branches, platform);
+        });
+      });
+
+      describe('dependency dashboard lookup warnings', () => {
+        beforeEach(() => {
+          PackageFiles.add('main', packageFiles);
+          PackageFiles.add('dev', packageFiles);
+        });
+
+        afterEach(() => {
+          PackageFiles.clear();
+        });
+
+        it('Dependency Lookup Warnings message in issues body', async () => {
+          const branches: BranchConfig[] = [];
+          PackageFiles.add('main', {
+            npm: [{ packageFile: 'package.json', deps: [] }],
+          });
+          const dep = [
+            {
+              warnings: [{ message: 'dependency-2', topic: '' }],
+            },
+          ];
+          const packageFiles: Record<string, PackageFile[]> = {
+            npm: [{ packageFile: 'package.json', deps: dep }],
+          };
+          await dependencyDashboard.ensureDependencyDashboard(
+            config,
+            branches,
+            packageFiles
+          );
+          expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
+          expect(platform.ensureIssue.mock.calls[0][0].body).toMatchSnapshot();
+          // same with dry run
+          await dryRun(branches, platform);
+        });
+      });
+
+      describe('PackageFiles.getDashboardMarkdown()', () => {
+        const note =
+          '> **Note**\n> Detected dependencies section has been truncated\n';
+        const title = `## Detected dependencies\n\n`;
+
+        beforeEach(() => {
+          PackageFiles.clear();
+        });
+
+        afterAll(() => {
+          jest.resetAllMocks();
+        });
+
+        it('does not truncates as there is enough space to fit', () => {
+          PackageFiles.add('main', packageFiles);
+          const nonTruncated = PackageFiles.getDashboardMarkdown(Infinity);
+          const len = (title + note + nonTruncated).length;
+          const truncated = PackageFiles.getDashboardMarkdown(len);
+          const truncatedWithTitle = PackageFiles.getDashboardMarkdown(len);
+          expect(truncated.length === nonTruncated.length).toBeTrue();
+          expect(truncatedWithTitle.includes(note)).toBeFalse();
+        });
+
+        it('removes a branch with no managers', () => {
+          PackageFiles.add('main', packageFiles);
+          PackageFiles.add('dev', packageFilesWithDigest);
+          const md = PackageFiles.getDashboardMarkdown(Infinity, false);
+          const len = md.length;
+          PackageFiles.add('empty/branch', {});
+          const truncated = PackageFiles.getDashboardMarkdown(len, false);
+          expect(truncated.includes('empty/branch')).toBeFalse();
+          expect(truncated.length === len).toBeTrue();
+        });
+
+        it('removes a manager with no package files', () => {
+          PackageFiles.add('main', packageFiles);
+          const md = PackageFiles.getDashboardMarkdown(Infinity, false);
+          const len = md.length;
+          PackageFiles.add('dev', { dockerfile: [] });
+          const truncated = PackageFiles.getDashboardMarkdown(len, false);
+          expect(truncated.includes('dev')).toBeFalse();
+          expect(truncated.length === len).toBeTrue();
+        });
+
+        it('does nothing when there are no base branches left', () => {
+          const truncated = PackageFiles.getDashboardMarkdown(-1, false);
+          expect(truncated).toBe('');
+        });
+
+        it('removes an entire base branch', () => {
+          PackageFiles.add('main', packageFiles);
+          const md = PackageFiles.getDashboardMarkdown(Infinity);
+          const len = md.length + note.length;
+          PackageFiles.add('dev', packageFilesWithDigest);
+          const truncated = PackageFiles.getDashboardMarkdown(len);
+          expect(truncated.includes('dev')).toBeFalse();
+          expect(truncated.length === len).toBeTrue();
+        });
+
+        it('ensures original data is unchanged', () => {
+          PackageFiles.add('main', packageFiles);
+          PackageFiles.add('dev', packageFilesWithDigest);
+          const pre = PackageFiles.getDashboardMarkdown(Infinity);
+          const truncated = PackageFiles.getDashboardMarkdown(-1, false);
+          const post = PackageFiles.getDashboardMarkdown(Infinity);
+          expect(truncated).toBe('');
+          expect(pre === post).toBeTrue();
+          expect(post.includes('main')).toBeTrue();
+          expect(post.includes('dev')).toBeTrue();
         });
       });
     });

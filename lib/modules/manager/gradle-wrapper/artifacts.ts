@@ -1,5 +1,6 @@
 import is from '@sindresorhus/is';
 import { quote } from 'shlex';
+import { dirname, join } from 'upath';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { exec } from '../../../util/exec';
@@ -12,8 +13,7 @@ import { newlineRegex } from '../../../util/regex';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
 import {
   extraEnv,
-  getJavaContraint,
-  getJavaVersioning,
+  getJavaConstraint,
   gradleWrapperFileName,
   prepareGradleCommand,
 } from './utils';
@@ -61,12 +61,15 @@ export async function updateArtifacts({
 }: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
   try {
     logger.debug({ updatedDeps }, 'gradle-wrapper.updateArtifacts()');
-    const gradlewFile = gradleWrapperFileName();
-    let cmd = await prepareGradleCommand(gradlewFile, `wrapper`);
+    const localGradleDir = join(dirname(packageFileName), '../../');
+    const gradlewFile = join(localGradleDir, gradleWrapperFileName());
+
+    let cmd = await prepareGradleCommand(gradlewFile);
     if (!cmd) {
       logger.info('No gradlew found - skipping Artifacts update');
       return null;
     }
+    cmd += ' wrapper';
     const distributionUrl = getDistributionUrl(newPackageFileContent);
     if (distributionUrl) {
       cmd += ` --gradle-distribution-url ${distributionUrl}`;
@@ -87,13 +90,18 @@ export async function updateArtifacts({
     }
     logger.debug(`Updating gradle wrapper: "${cmd}"`);
     const execOptions: ExecOptions = {
+      cwdFile: gradlewFile,
       docker: {
-        image: 'java',
-        tagConstraint:
-          config.constraints?.java ?? getJavaContraint(config.currentValue!),
-        tagScheme: getJavaVersioning(),
+        image: 'sidecar',
       },
       extraEnv,
+      toolConstraints: [
+        {
+          toolName: 'java',
+          constraint:
+            config.constraints?.java ?? getJavaConstraint(config.currentValue),
+        },
+      ],
     };
     try {
       await exec(cmd, execOptions);

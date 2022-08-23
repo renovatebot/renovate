@@ -1,6 +1,6 @@
 import upath from 'upath';
 import { mocked } from '../../../../../test/util';
-import { readFile } from '../../../../util/fs';
+import { readSystemFile } from '../../../../util/fs';
 import getArgv from './__fixtures__/argv';
 import * as _hostRulesFromEnv from './host-rules-from-env';
 
@@ -99,7 +99,7 @@ describe('workers/global/config/parse/index', () => {
         RENOVATE_PRIVATE_KEY_PATH: privateKeyPath,
         RENOVATE_PRIVATE_KEY_PATH_OLD: privateKeyPathOld,
       };
-      const expected = await readFile(privateKeyPath, 'utf8');
+      const expected = await readSystemFile(privateKeyPath, 'utf8');
       const parsedConfig = await configParser.parseConfigs(env, defaultArgv);
 
       expect(parsedConfig).toContainEntries([['privateKey', expected]]);

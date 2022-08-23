@@ -55,6 +55,8 @@ This means that Renovate:
 
 ## Using Renovate
 
+Get started with Renovate by checking out our [tutorial](https://github.com/renovatebot/tutorial).
+
 ### GitHub
 
 It's easiest to use the hosted Renovate app.
@@ -110,7 +112,7 @@ To get started look at the [list of good first issues](https://github.com/renova
 
 ## Security / Disclosure
 
-If you find any bug with Renovate that may be a security problem, then e-mail us at: [renovate-disclosure@whitesourcesoftware.com](mailto:renovate-disclosure@whitesourcesoftware.com).
+If you find any bug with Renovate that may be a security problem, then e-mail us at: [renovate-disclosure@mend.io](mailto:renovate-disclosure@mend.io).
 This way we can evaluate the bug and hopefully fix it before it gets abused.
 Please give us enough time to investigate the bug before you report it anywhere else.
 

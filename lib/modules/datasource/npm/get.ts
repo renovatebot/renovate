@@ -35,6 +35,8 @@ function getPackageSource(repository: any): PackageSource {
     if (is.nonEmptyString(repository.directory)) {
       res.sourceDirectory = repository.directory;
     }
+    // TODO: types (#7154)
+    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
     const sourceUrlCopy = `${res.sourceUrl}`;
     const sourceUrlSplit: string[] = sourceUrlCopy.split('/');
     if (sourceUrlSplit.length > 7 && sourceUrlSplit[2] === 'github.com') {

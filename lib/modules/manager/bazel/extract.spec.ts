@@ -1,5 +1,7 @@
 import { Fixtures } from '../../../../test/fixtures';
-import { extractPackageFile } from '.';
+import { extractPackageFile as extract } from '.';
+
+const extractPackageFile = (content: string) => extract(content, 'WORKSPACE');
 
 describe('modules/manager/bazel/extract', () => {
   describe('extractPackageFile()', () => {

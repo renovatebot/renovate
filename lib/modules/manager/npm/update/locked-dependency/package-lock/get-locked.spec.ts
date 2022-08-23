@@ -1,10 +1,10 @@
-import { loadJsonFixture } from '../../../../../../../test/util';
+import { Fixtures } from '../../../../../../../test/fixtures';
 import { getLockedDependencies } from './get-locked';
 
 jest.mock('../../../../../../util/fs');
 
-const packageLockJson = loadJsonFixture('package-lock.json');
-const bundledPackageLockJson = loadJsonFixture('bundled.package-lock.json');
+const packageLockJson = Fixtures.getJson('package-lock.json');
+const bundledPackageLockJson = Fixtures.getJson('bundled.package-lock.json');
 
 describe('modules/manager/npm/update/locked-dependency/package-lock/get-locked', () => {
   describe('getLockedDependencies()', () => {

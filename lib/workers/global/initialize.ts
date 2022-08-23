@@ -28,6 +28,9 @@ async function setDirectories(input: AllConfig): Promise<AllConfig> {
     logger.debug('Using cacheDir: ' + config.cacheDir);
   }
   await fs.ensureDir(config.cacheDir);
+  if (config.binarySource === 'docker' || config.binarySource === 'install') {
+    await fs.ensureDir(upath.join(config.cacheDir, 'buildpack'));
+  }
   return config;
 }
 
@@ -53,7 +56,7 @@ function setGlobalHostRules(config: RenovateConfig): void {
 }
 
 export async function globalInitialize(
-  config_: RenovateConfig
+  config_: AllConfig
 ): Promise<RenovateConfig> {
   let config = config_;
   await checkVersions();

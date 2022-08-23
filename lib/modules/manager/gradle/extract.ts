@@ -1,7 +1,7 @@
 import upath from 'upath';
 import { logger } from '../../../logger';
 import { readLocalFile } from '../../../util/fs';
-import { MavenDatasource, defaultRegistryUrls } from '../../datasource/maven';
+import { MavenDatasource } from '../../datasource/maven';
 import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
 import { parseCatalog } from './extract/catalog';
 import { parseGradle, parseProps } from './parser';
@@ -74,7 +74,7 @@ export async function extractAllPackageFiles(
           deps,
           urls,
           vars: gradleVars,
-        } = parseGradle(content, vars, packageFile);
+        } = await parseGradle(content, vars, packageFile);
         urls.forEach((url) => {
           if (!registryUrls.includes(url)) {
             registryUrls.push(url);
@@ -87,7 +87,7 @@ export async function extractAllPackageFiles(
     } catch (err) {
       logger.warn(
         { err, config, packageFile },
-        `Failed to process Gradle file: ${packageFile}`
+        `Failed to process Gradle file`
       );
     }
   }
@@ -100,18 +100,35 @@ export async function extractAllPackageFiles(
     const key = dep.managerData?.packageFile;
     // istanbul ignore else
     if (key) {
-      const pkgFile: PackageFile = packageFilesByName[key];
-      const { deps } = pkgFile;
-      deps.push({
-        ...dep,
-        registryUrls: [
-          ...new Set([
-            ...defaultRegistryUrls,
-            ...(dep.registryUrls ?? []),
-            ...registryUrls,
-          ]),
-        ],
-      });
+      let pkgFile = packageFilesByName[key];
+      if (!pkgFile) {
+        pkgFile = {
+          packageFile: key,
+          datasource,
+          deps: [],
+        } as PackageFile;
+      }
+
+      dep.registryUrls = [
+        ...new Set([...registryUrls, ...(dep.registryUrls ?? [])]),
+      ];
+
+      if (!dep.depType) {
+        dep.depType = key.startsWith('buildSrc')
+          ? 'devDependencies'
+          : 'dependencies';
+      }
+
+      const depAlreadyInPkgFile = pkgFile.deps.some(
+        (item) =>
+          item.depName === dep.depName &&
+          item.managerData?.fileReplacePosition ===
+            dep.managerData?.fileReplacePosition
+      );
+      if (!depAlreadyInPkgFile) {
+        pkgFile.deps.push(dep);
+      }
+
       packageFilesByName[key] = pkgFile;
     } else {
       logger.warn({ dep }, `Failed to process Gradle dependency`);
