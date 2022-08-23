@@ -1,6 +1,6 @@
 Renovate supports updating Mintfiles.
 
-- [yonaskolb/Mint](https://github.com/yonaskolb/Mint)
+[`yonaskolb/Mint` repository on GitHub](https://github.com/yonaskolb/Mint)
 
 **note**
 
