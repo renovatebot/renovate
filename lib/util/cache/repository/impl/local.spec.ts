@@ -144,7 +144,7 @@ describe('util/cache/repository/impl/local', () => {
     const localRepoCache = CacheFactory.get('some/repo', 'local');
     await localRepoCache.load();
 
-    expect(localRepoCache.getData()).toEqual({});
+    expect(localRepoCache.getData()).toBeEmpty();
   });
 
   it('saves modified cache data to file', async () => {
