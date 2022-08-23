@@ -33,11 +33,13 @@ export function setCachedConflictResult(
   isConflicted: boolean
 ): void {
   const cache = getCache();
-  cache.gitConflicts ??= {};
-  const { gitConflicts } = cache;
+  const { gitConflicts = {} } = cache;
 
   let targetBranchConflicts = gitConflicts[targetBranchName];
-  if (targetBranchConflicts?.targetBranchSha !== targetBranchSha) {
+  if (
+    !targetBranchConflicts?.targetBranchSha ||
+    targetBranchConflicts?.targetBranchSha !== targetBranchSha
+  ) {
     gitConflicts[targetBranchName] = {
       targetBranchSha,
       sourceBranches: {},
