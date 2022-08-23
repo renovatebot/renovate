@@ -124,7 +124,8 @@ export abstract class RepoCacheBase implements RepoCache {
        * This allows us to migrate all the repositories gradually.
        */
       const fingerprintBucketIndex = parseInt(fingerprint.charAt(0), 16);
-      if (fingerprintBucketIndex > 0) {
+      const maxMigratedIdx = 0; // TODO: increase me
+      if (fingerprintBucketIndex > maxMigratedIdx) {
         const revision = 12;
         await this.write({
           revision,

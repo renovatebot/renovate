@@ -282,33 +282,36 @@ describe('util/cache/repository/impl/local', () => {
       ${'d'} | ${12}
       ${'e'} | ${12}
       ${'f'} | ${12}
-    `('Bucket: %i', async ({ bucket, revision }) => {
-      const cacheRecord = await createCacheRecord({
-        semanticCommits: 'enabled',
-      });
-      const fingerprint = `${String(bucket)}0123456789abcdef`;
+    `(
+      'Store bucket $bucket at revision $revision',
+      async ({ bucket, revision }) => {
+        const cacheRecord = await createCacheRecord({
+          semanticCommits: 'enabled',
+        });
+        const fingerprint = `${String(bucket)}0123456789abcdef`;
 
-      fs.readCacheFile.mockResolvedValue(
-        JSON.stringify({
-          ...cacheRecord,
-          revision: 12,
+        fs.readCacheFile.mockResolvedValue(
+          JSON.stringify({
+            ...cacheRecord,
+            revision: 12,
+            fingerprint,
+          })
+        );
+
+        const localRepoCache = CacheFactory.get(
+          'some/repo',
           fingerprint,
-        })
-      );
+          'local'
+        );
+        await localRepoCache.load();
+        const data = localRepoCache.getData();
+        data.semanticCommits = 'disabled';
+        await localRepoCache.save();
 
-      const localRepoCache = CacheFactory.get(
-        'some/repo',
-        fingerprint,
-        'local'
-      );
-      await localRepoCache.load();
-      const data = localRepoCache.getData();
-      data.semanticCommits = 'disabled';
-      await localRepoCache.save();
-
-      const rawJson = fs.outputCacheFile.mock.calls[0][1] as string;
-      const stored = JSON.parse(rawJson);
-      expect(stored).toMatchObject({ revision });
-    });
+        const rawJson = fs.outputCacheFile.mock.calls[0][1] as string;
+        const stored = JSON.parse(rawJson);
+        expect(stored).toMatchObject({ revision });
+      }
+    );
   });
 });
