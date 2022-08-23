@@ -26,6 +26,7 @@ describe('workers/repository/init/apis', () => {
       platform.initRepo.mockResolvedValueOnce({
         defaultBranch: 'master',
         isFork: false,
+        repoFingerprint: '123',
       });
       const workerPlatformConfig = await initApis(config);
       expect(workerPlatformConfig).toBeTruthy();
@@ -35,6 +36,7 @@ describe('workers/repository/init/apis', () => {
       platform.initRepo.mockResolvedValueOnce({
         defaultBranch: 'master',
         isFork: false,
+        repoFingerprint: '123',
       });
       platform.getJsonFile.mockResolvedValueOnce({ enabled: false });
       await expect(
@@ -49,6 +51,7 @@ describe('workers/repository/init/apis', () => {
       platform.initRepo.mockResolvedValueOnce({
         defaultBranch: 'master',
         isFork: true,
+        repoFingerprint: '123',
       });
       platform.getJsonFile.mockResolvedValueOnce({ includeForks: false });
       await expect(
@@ -63,6 +66,7 @@ describe('workers/repository/init/apis', () => {
       platform.initRepo.mockResolvedValueOnce({
         defaultBranch: 'master',
         isFork: false,
+        repoFingerprint: '123',
       });
       platform.getJsonFile.mockRejectedValue(new Error());
       await expect(
@@ -79,6 +83,7 @@ describe('workers/repository/init/apis', () => {
       platform.initRepo.mockResolvedValueOnce({
         defaultBranch: 'master',
         isFork: false,
+        repoFingerprint: '123',
       });
       platform.getJsonFile.mockResolvedValueOnce({ includeForks: false });
       const workerPlatformConfig = await initApis({
@@ -100,6 +105,7 @@ describe('workers/repository/init/apis', () => {
       platform.initRepo.mockResolvedValueOnce({
         defaultBranch: 'master',
         isFork: false,
+        repoFingerprint: '123',
       });
       platform.getJsonFile.mockResolvedValueOnce({ includeForks: false });
       const workerPlatformConfig = await initApis({
@@ -116,6 +122,7 @@ describe('workers/repository/init/apis', () => {
       platform.initRepo.mockResolvedValueOnce({
         defaultBranch: 'master',
         isFork: false,
+        repoFingerprint: '123',
       });
       platform.getJsonFile.mockResolvedValueOnce({ includeForks: false });
       const workerPlatformConfig = await initApis({

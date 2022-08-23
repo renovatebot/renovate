@@ -315,5 +315,38 @@ describe('workers/repository/update/pr/changelog/gitlab', () => {
         ],
       });
     });
+
+    it('supports overwriting sourceUrl for self-hosted gitlab changelog', async () => {
+      httpMock.scope('https://git.test.com').persist().get(/.*/).reply(200, []);
+      const sourceUrl = 'https://git.test.com/meno/dropzone/';
+      const replacementSourceUrl =
+        'https://git.test.com/replacement/sourceurl/';
+      const config = {
+        ...upgrade,
+        platform: PlatformId.Gitlab,
+        endpoint: 'https://git.test.com/api/v4/',
+        sourceUrl,
+        customChangelogUrl: replacementSourceUrl,
+      };
+      hostRules.add({
+        hostType: PlatformId.Gitlab,
+        matchHost: 'https://git.test.com/',
+        token: 'abc',
+      });
+      process.env.GITHUB_ENDPOINT = '';
+      expect(await getChangeLogJSON(config)).toMatchObject({
+        hasReleaseNotes: false,
+        project: {
+          apiBaseUrl: 'https://git.test.com/api/v4/',
+          baseUrl: 'https://git.test.com/',
+          depName: 'renovate',
+          repository: 'replacement/sourceurl',
+          sourceDirectory: undefined,
+          sourceUrl: 'https://git.test.com/replacement/sourceurl/',
+          type: 'gitlab',
+        },
+      });
+      expect(config.sourceUrl).toBe(sourceUrl); // ensure unmodified function argument
+    });
   });
 });
