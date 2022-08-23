@@ -280,7 +280,34 @@ describe('workers/repository/update/branch/index', () => {
       expect(reuse.shouldReuseExistingBranch).toHaveBeenCalledTimes(0);
     });
 
-    it('recreates pr when if merged pr already exists', async () => {
+    it('recreates pr using old branch when it exists for a merged pr', async () => {
+      schedule.isScheduledNow.mockReturnValueOnce(true);
+      git.branchExists.mockReturnValue(true);
+      checkExisting.prAlreadyExisted.mockResolvedValueOnce({
+        number: 13,
+        state: PrState.Merged,
+      } as Pr);
+      getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
+        updatedPackageFiles: [{}],
+      } as PackageFilesResult);
+      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+        artifactErrors: [{}],
+        updatedArtifacts: [{}],
+      } as WriteExistingFilesResult);
+      const processBranchResult = await branchWorker.processBranch(config);
+      expect(processBranchResult).toEqual({
+        branchExists: true,
+        commitSha: '123test',
+        prNo: undefined,
+        result: 'done',
+      });
+      expect(logger.debug).toHaveBeenCalledWith(
+        { prTitle: config.prTitle },
+        'Merged PR already exists. Creating new PR with automerge disabled.'
+      );
+    });
+
+    it('recreates pr using new branch when merged pr exists but branch is deleted', async () => {
       schedule.isScheduledNow.mockReturnValueOnce(true);
       git.branchExists.mockReturnValue(false);
       checkExisting.prAlreadyExisted.mockResolvedValueOnce({
@@ -297,6 +324,7 @@ describe('workers/repository/update/branch/index', () => {
       const processBranchResult = await branchWorker.processBranch(config);
       expect(processBranchResult).toEqual({
         branchExists: true,
+        commitSha: '123test',
         prNo: undefined,
         result: 'pr-created',
       });

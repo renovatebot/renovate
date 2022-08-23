@@ -55,8 +55,7 @@ export function commitFilesToBranch(
     branchName: config.branchName,
     files: updatedFiles,
     message: config.commitMessage!,
-    force: !!config.forceCommit,
+    force: config.recreateMergedPr ?? !!config.forceCommit,
     platformCommit: !!config.platformCommit,
-    recreateMergedPr: !!config.recreateMergedPr,
   });
 }

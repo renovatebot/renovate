@@ -878,7 +878,6 @@ export async function prepareCommit({
   files,
   message,
   force = false,
-  recreateMergedPr = false,
 }: CommitFilesConfig): Promise<CommitResult | null> {
   const localDir = GlobalConfig.get('localDir')!;
   await syncGit();
@@ -974,11 +973,7 @@ export async function prepareCommit({
       { deletedFiles, ignoredFiles, result: commitRes },
       `git commit`
     );
-    if (
-      !recreateMergedPr &&
-      !force &&
-      !(await hasDiff(`origin/${branchName}`))
-    ) {
+    if (!force && !(await hasDiff(`origin/${branchName}`))) {
       logger.debug(
         { branchName, deletedFiles, addedModifiedFiles, ignoredFiles },
         'No file changes detected. Skipping commit'

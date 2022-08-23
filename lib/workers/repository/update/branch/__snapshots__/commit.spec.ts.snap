@@ -15,7 +15,6 @@ exports[`workers/repository/update/branch/commit commitFilesToBranch commits fil
       "force": false,
       "message": "some commit message",
       "platformCommit": false,
-      "recreateMergedPr": false,
     },
   ],
 ]
@@ -36,7 +35,6 @@ exports[`workers/repository/update/branch/commit commitFilesToBranch commits via
       "force": false,
       "message": "some commit message",
       "platformCommit": true,
-      "recreateMergedPr": false,
     },
   ],
 ]
