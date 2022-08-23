@@ -213,7 +213,7 @@ export async function validateConfig(
         if (!earlyCfg.allowExtraConfig) {
           errors.push({
             topic: 'Configuration Error',
-            message: `Invalid configuration option: ${currentPath}. Run the server with '--allow-extra-config' flag if you want to allow extra configurations`,
+            message: `Invalid configuration option: ${currentPath}. Run the Renovate bot with the '--allow-extra-config' flag if you want to allow extra configurations`,
           });
         }
       } else if (key === 'schedule') {

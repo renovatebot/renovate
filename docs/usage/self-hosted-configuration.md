@@ -18,7 +18,16 @@ Please also see [Self-Hosted Experimental Options](./self-hosted-experimental.md
 ## allowExtraConfig
 
 Set to `true` to allow your own config variable.
-`yarn start --allow-extra-config`.
+
+Example:
+
+```bash
+yarn start --allow-extra-config
+```
+
+This option is useful for those who wants to add custom configurations.
+
+The extraneous options won't be used by the renovate as they are not understood by Renovate.
 
 ## allowPlugins
 
@@ -698,7 +707,14 @@ Secret names must start with an upper or lower case character and can have only 
 ## skipConfigValidation
 
 Set to `true` to skip the config validation completely.
-`yarn start --skip-config-validation`.
+
+Example:
+
+```bash
+yarn start --skip-config-validation
+```
+
+This option is useful for those who wants to add custom configurations.
 
 ## skipInstalls
 

@@ -2370,7 +2370,7 @@ const options: RenovateOptions[] = [
   },
   {
     name: 'allowExtraConfig',
-    description: 'Allow to use extra configuration fields.',
+    description: 'Allow to use extraneous configuration fields.',
     type: 'boolean',
     default: false,
     globalOnly: true,
