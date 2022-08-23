@@ -46,12 +46,16 @@ function checkRebaseAll(issueBody: string): boolean {
 function selectAllRelevantBranches(issueBody: string): string[] {
   const checkedBranches = [];
   if (checkOpenAllRateLimitedPR(issueBody)) {
-    const checkedRate = issueBody.match(rateLimitedRe) ?? [];
-    checkedBranches.push(...checkedRate);
+    const checkedRate = [...issueBody.matchAll(rateLimitedRe)];
+    for (const match of checkedRate) {
+      checkedBranches.push(match[0]);
+    }
   }
   if (checkApproveAllPendingPR(issueBody)) {
-    const checkedPending = issueBody.match(regEx(pendingApprovalRe, 'g')) ?? [];
-    checkedBranches.push(...checkedPending);
+    const checkedPending = [...issueBody.matchAll(pendingApprovalRe)];
+    for (const match of checkedPending) {
+      checkedBranches.push(match[0]);
+    }
   }
   return checkedBranches;
 }
@@ -61,10 +65,10 @@ function getAllSelectedBranches(
   dependencyDashboardChecks: Record<string, string>
 ): Record<string, string> {
   const allRelevantBranches = selectAllRelevantBranches(issueBody);
-  allRelevantBranches.forEach((branch) => {
+  for (const branch of allRelevantBranches) {
     const [, type, branchName] = generalBranchRe.exec(branch)!;
     dependencyDashboardChecks[branchName] = type;
-  });
+  }
   return dependencyDashboardChecks;
 }
 

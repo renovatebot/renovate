@@ -49,6 +49,7 @@ import type {
   RepoResult,
   UpdatePrConfig,
 } from '../types';
+import { repoFingerprint } from '../util';
 import { smartTruncate } from '../utils/pr-body';
 import { getUserID, gitlabApi, isUserBusy } from './http';
 import { getMR, updateMR } from './merge-request';
@@ -245,6 +246,7 @@ export async function initRepo({
   cloneSubmodules,
   ignorePrAuthor,
   gitUrl,
+  endpoint,
 }: RepoParams): Promise<RepoResult> {
   config = {} as any;
   config.repository = urlEscape(repository);
@@ -326,6 +328,7 @@ export async function initRepo({
   const repoConfig: RepoResult = {
     defaultBranch: config.defaultBranch,
     isFork: !!res.body.forked_from_project,
+    repoFingerprint: repoFingerprint(res.body.id, defaults.endpoint),
   };
   return repoConfig;
 }

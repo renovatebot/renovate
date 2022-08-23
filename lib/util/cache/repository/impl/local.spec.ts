@@ -35,6 +35,14 @@ describe('util/cache/repository/impl/local', () => {
     expect(localRepoCache.getData()).toBeEmpty();
   });
 
+  it('skip when receives non-string data', async () => {
+    const localRepoCache = CacheFactory.get('some/repo', 'local');
+    await localRepoCache.load(); // readCacheFile is mocked but has no return value set - therefore returns undefined
+    expect(logger.debug).toHaveBeenCalledWith(
+      "RepoCacheBase.load() - expecting data of type 'string' received 'undefined' instead - skipping"
+    );
+  });
+
   it('loads previously stored cache from disk', async () => {
     const data: RepoCacheData = { semanticCommits: 'enabled' };
     const cacheRecord = await createCacheRecord(data);
@@ -120,6 +128,15 @@ describe('util/cache/repository/impl/local', () => {
     expect(data).toBeEmpty();
   });
 
+  it('handles invalid json', async () => {
+    fs.readCacheFile.mockResolvedValue('{1');
+    const localRepoCache = CacheFactory.get('some/repo', 'local');
+
+    await localRepoCache.load();
+
+    expect(localRepoCache.getData()).toBeEmpty();
+  });
+
   it('resets if repository does not match', async () => {
     const cacheRecord = createCacheRecord({ semanticCommits: 'enabled' });
     fs.readCacheFile.mockResolvedValueOnce(JSON.stringify(cacheRecord));
@@ -127,7 +144,7 @@ describe('util/cache/repository/impl/local', () => {
     const localRepoCache = CacheFactory.get('some/repo', 'local');
     await localRepoCache.load();
 
-    expect(localRepoCache.getData()).toEqual({});
+    expect(localRepoCache.getData()).toBeEmpty();
   });
 
   it('saves modified cache data to file', async () => {
