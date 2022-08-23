@@ -20,16 +20,19 @@ interface DependencyDashboard {
   dependencyDashboardAllRateLimited: boolean;
 }
 
-const checkMatchRate = ' - \\[ \\] <!-- unlimit-branch=([^\\s]+) -->';
-const rateLimitedRe = regEx(checkMatchRate, 'g');
-const checkMatchPendingApproval =
-  ' - \\[ \\] <!-- approve-branch=([^\\s]+) -->';
-const pendingApprovalRe = regEx(checkMatchPendingApproval, 'g');
-const checkMatchGeneral = ' <!-- ([a-zA-Z]+)-branch=([^\\s]+) -->';
-const generalBranchRe = regEx(checkMatchGeneral);
-const checkMatchMarkedBranches =
-  ' - \\[x\\] <!-- ([a-zA-Z]+)-branch=([^\\s]+) -->';
-const markedBranchesRe = regEx(checkMatchMarkedBranches, 'g');
+const rateLimitedRe = regEx(
+  ' - \\[ \\] <!-- unlimit-branch=([^\\s]+) -->',
+  'g'
+);
+const pendingApprovalRe = regEx(
+  ' - \\[ \\] <!-- approve-branch=([^\\s]+) -->',
+  'g'
+);
+const generalBranchRe = regEx(' <!-- ([a-zA-Z]+)-branch=([^\\s]+) -->');
+const markedBranchesRe = regEx(
+  ' - \\[x\\] <!-- ([a-zA-Z]+)-branch=([^\\s]+) -->',
+  'g'
+);
 
 function checkOpenAllRateLimitedPR(issueBody: string): boolean {
   return issueBody.includes(' - [x] <!-- create-all-rate-limited-prs -->');
