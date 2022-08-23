@@ -12,15 +12,12 @@ export class RepoCacheLocal extends RepoCacheBase {
 
   protected async read(): Promise<unknown> {
     const cacheFileName = this.getCacheFileName();
-    let data: unknown;
     try {
-      const rawCache = await readCacheFile(cacheFileName, 'utf8');
-      data = JSON.parse(rawCache);
+      return await readCacheFile(cacheFileName, 'utf8');
     } catch (err) {
       logger.debug({ cacheFileName }, 'Repository local cache not found');
       throw err;
     }
-    return data;
   }
 
   protected async write(data: RepoCacheRecord): Promise<void> {

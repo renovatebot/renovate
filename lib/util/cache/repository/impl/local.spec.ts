@@ -35,6 +35,14 @@ describe('util/cache/repository/impl/local', () => {
     expect(localRepoCache.getData()).toBeEmpty();
   });
 
+  it('skip when receives non-string data', async () => {
+    const localRepoCache = CacheFactory.get('some/repo', 'local');
+    await localRepoCache.load(); // readCacheFile is mocked but has no return value set - therefore returns undefined
+    expect(logger.debug).toHaveBeenCalledWith(
+      "RepoCacheBase.load() - expecting data of type 'string' received 'undefined' instead - skipping"
+    );
+  });
+
   it('loads previously stored cache from disk', async () => {
     const data: RepoCacheData = { semanticCommits: 'enabled' };
     const cacheRecord = await createCacheRecord(data);
