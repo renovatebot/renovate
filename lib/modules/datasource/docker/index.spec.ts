@@ -545,6 +545,27 @@ describe('modules/datasource/docker/index', () => {
       expect(res).toBe('some-digest');
     });
 
+    it('supports token with no service', async () => {
+      httpMock
+        .scope(baseUrl)
+        .get('/')
+        .reply(401, '', {
+          'www-authenticate':
+            'Bearer realm="https://auth.docker.io/token",scope=""',
+        })
+        .head('/library/some-other-dep/manifests/8.0.0-alpine')
+        .reply(200, {}, { 'docker-content-digest': 'some-digest' });
+      httpMock
+        .scope(authUrl)
+        .get('/token?service=&scope=repository:library/some-other-dep:pull')
+        .reply(200, { access_token: 'test' });
+      const res = await getDigest(
+        { datasource: 'docker', depName: 'some-other-dep' },
+        '8.0.0-alpine'
+      );
+      expect(res).toBe('some-digest');
+    });
+
     it('supports scoped names', async () => {
       httpMock
         .scope(baseUrl)
