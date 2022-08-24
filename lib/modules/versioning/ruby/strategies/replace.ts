@@ -1,103 +1,52 @@
-import { satisfies } from '@renovatebot/ruby-semver';
 import { logger } from '../../../../logger';
-import bump from './bump';
+import { EQUAL, GT, GTE, LT, LTE, NOT_EQUAL, PGTE } from '../operator';
+import { Range, parseRanges, satisfiesRange, stringifyRanges } from '../range';
+import { adapt, decrement, floor, increment } from '../version';
 
-function countInstancesOf(str: string, char: string): number {
-  return str.split(char).length - 1;
-}
-
-function isMajorRange(range: string): boolean {
-  const splitRange = range.split(',').map((part) => part.trim());
-  return (
-    splitRange.length === 1 &&
-    splitRange[0]?.startsWith('~>') &&
-    countInstancesOf(splitRange[0], '.') === 0
-  );
-}
-
-function isCommonRubyMajorRange(range: string): boolean {
-  const splitRange = range.split(',').map((part) => part.trim());
-  return (
-    splitRange.length === 2 &&
-    splitRange[0]?.startsWith('~>') &&
-    countInstancesOf(splitRange[0], '.') === 1 &&
-    splitRange[1]?.startsWith('>=')
-  );
-}
-
-function isCommonRubyMinorRange(range: string): boolean {
-  const splitRange = range.split(',').map((part) => part.trim());
-  return (
-    splitRange.length === 2 &&
-    splitRange[0]?.startsWith('~>') &&
-    countInstancesOf(splitRange[0], '.') === 2 &&
-    splitRange[1]?.startsWith('>=')
-  );
-}
-
-function reduceOnePrecision(version: string): string {
-  const versionParts = version.split('.');
-  // istanbul ignore if
-  if (versionParts.length === 1) {
-    return version;
+// Common logic for replace, widen, and bump strategies
+// It basically makes the range stick to the new version.
+export function replacePart(part: Range, to: string): Range {
+  const { operator, version: ver, companion } = part;
+  switch (operator) {
+    case LT:
+      return { ...part, version: increment(ver, to) };
+    case LTE:
+      return { ...part, version: to };
+    case PGTE:
+      if (companion) {
+        return {
+          ...part,
+          version: floor(adapt(to, ver)),
+          companion: { ...companion, version: to },
+        };
+      } else {
+        return { ...part, version: floor(adapt(to, ver)) };
+      }
+    case GT:
+      return { ...part, version: decrement(to) };
+    case GTE:
+    case EQUAL:
+      return { ...part, version: to };
+    case NOT_EQUAL:
+      return part;
+    // istanbul ignore next
+    default:
+      logger.warn(`Unsupported operator '${operator}'`);
+      return { operator: '', delimiter: ' ', version: '' };
   }
-  versionParts.pop();
-  return versionParts.join('.');
 }
 
-export function matchPrecision(existing: string, next: string): string {
-  let res = next;
-  while (res.split('.').length > existing.split('.').length) {
-    res = reduceOnePrecision(res);
-  }
-  return res;
-}
-
-export default ({ to, range }: { range: string; to: string }): string => {
-  if (satisfies(to, range)) {
-    return range;
-  }
-  let newRange;
-  if (isCommonRubyMajorRange(range)) {
-    const firstPart = reduceOnePrecision(to);
-    newRange = `~> ${firstPart}, >= ${to}`;
-  } else if (isCommonRubyMinorRange(range)) {
-    const firstPart = reduceOnePrecision(to) + '.0';
-    newRange = `~> ${firstPart}, >= ${to}`;
-  } else if (isMajorRange(range)) {
-    const majorPart = to.split('.')[0];
-    newRange = '~>' + (range.includes(' ') ? ' ' : '') + majorPart;
-  } else {
-    const lastPart = range
-      .split(',')
-      .map((part) => part.trim())
-      .slice(-1)
-      .join();
-    const lastPartPrecision = lastPart.split('.').length;
-    const toPrecision = to.split('.').length;
-    let massagedTo: string = to;
-    if (!lastPart.startsWith('<') && toPrecision > lastPartPrecision) {
-      massagedTo = to.split('.').slice(0, lastPartPrecision).join('.');
+export default ({ range, to }: { range: string; to: string }): string => {
+  const parts = parseRanges(range).map((part): Range => {
+    if (satisfiesRange(to, part)) {
+      // The new version satisfies the range. Keep it as-is.
+      // Note that consecutive `~>` and `>=` parts are combined into one Range object,
+      // therefore both parts are updated if the new version violates one of them.
+      return part;
     }
-    const newLastPart = bump({ to: massagedTo, range: lastPart });
-    newRange = range.replace(lastPart, newLastPart);
-    const firstPart = range
-      .split(',')
-      .map((part) => part.trim())
-      .shift();
-    if (firstPart && !satisfies(to, firstPart)) {
-      let newFirstPart = bump({ to: massagedTo, range: firstPart });
-      newFirstPart = matchPrecision(firstPart, newFirstPart);
-      newRange = newRange.replace(firstPart, newFirstPart);
-    }
-  }
-  // istanbul ignore if
-  if (!satisfies(to, newRange)) {
-    logger.warn(
-      { range, to, newRange },
-      'Ruby versioning getNewValue problem: to version is not satisfied by new range'
-    );
-    return range;
-  }
-  return newRange;
+
+    return replacePart(part, to);
+  });
+
+  return stringifyRanges(parts);
 };

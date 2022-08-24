@@ -536,7 +536,7 @@ describe('util/http/github', () => {
         });
       expect(
         await githubApi.queryRepoField(graphqlQuery, 'testItem')
-      ).toMatchInlineSnapshot(`Array []`);
+      ).toMatchInlineSnapshot(`[]`);
     });
 
     it('queryRepo', async () => {

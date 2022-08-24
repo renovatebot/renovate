@@ -2,8 +2,8 @@
 
 exports[`util/template/index string to pretty JSON  1`] = `
 "{
-  \\"some\\": {
-    \\"fancy\\": \\"json\\"
+  "some": {
+    "fancy": "json"
   }
 }"
 `;

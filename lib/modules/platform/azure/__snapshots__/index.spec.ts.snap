@@ -1,8 +1,8 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`modules/platform/azure/index createPr() should create and return a PR object 1`] = `
-Object {
-  "bodyStruct": Object {
+{
+  "bodyStruct": {
     "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
   },
   "createdAt": undefined,
@@ -17,8 +17,8 @@ Object {
 `;
 
 exports[`modules/platform/azure/index createPr() should create and return a PR object from base branch 1`] = `
-Object {
-  "bodyStruct": Object {
+{
+  "bodyStruct": {
     "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
   },
   "createdAt": undefined,
@@ -33,20 +33,20 @@ Object {
 `;
 
 exports[`modules/platform/azure/index createPr() should create and return a PR object with auto-complete set 1`] = `
-Object {
-  "autoCompleteSetBy": Object {
+{
+  "autoCompleteSetBy": {
     "id": 123,
   },
-  "bodyStruct": Object {
+  "bodyStruct": {
     "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
   },
-  "completionOptions": Object {
+  "completionOptions": {
     "deleteSourceBranch": true,
     "mergeCommitMessage": "The Title",
     "squashMerge": true,
   },
   "createdAt": undefined,
-  "createdBy": Object {
+  "createdBy": {
     "id": 123,
   },
   "displayNumber": "Pull Request #456",
@@ -61,12 +61,12 @@ Object {
 `;
 
 exports[`modules/platform/azure/index createPr() should create and return an approved PR object 1`] = `
-Object {
-  "bodyStruct": Object {
+{
+  "bodyStruct": {
     "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
   },
   "createdAt": undefined,
-  "createdBy": Object {
+  "createdBy": {
     "id": 123,
     "url": "user-url",
   },
@@ -81,18 +81,18 @@ Object {
 `;
 
 exports[`modules/platform/azure/index deleteLabel() Should delete a label 1`] = `
-Array [
-  Array [],
-  Array [],
+[
+  [],
+  [],
 ]
 `;
 
 exports[`modules/platform/azure/index ensureComment adds comment if missing 1`] = `
-Array [
-  Array [
-    Object {
-      "comments": Array [
-        Object {
+[
+  [
+    {
+      "comments": [
+        {
           "commentType": 1,
           "content": "### some-subject
 
@@ -109,22 +109,22 @@ content",
 ]
 `;
 
-exports[`modules/platform/azure/index ensureComment adds comment if missing 2`] = `Array []`;
+exports[`modules/platform/azure/index ensureComment adds comment if missing 2`] = `[]`;
 
-exports[`modules/platform/azure/index ensureComment does nothing if comment exists and is the same 1`] = `Array []`;
+exports[`modules/platform/azure/index ensureComment does nothing if comment exists and is the same 1`] = `[]`;
 
-exports[`modules/platform/azure/index ensureComment does nothing if comment exists and is the same 2`] = `Array []`;
+exports[`modules/platform/azure/index ensureComment does nothing if comment exists and is the same 2`] = `[]`;
 
-exports[`modules/platform/azure/index ensureComment does nothing if comment exists and is the same when there is no topic 1`] = `Array []`;
+exports[`modules/platform/azure/index ensureComment does nothing if comment exists and is the same when there is no topic 1`] = `[]`;
 
-exports[`modules/platform/azure/index ensureComment does nothing if comment exists and is the same when there is no topic 2`] = `Array []`;
+exports[`modules/platform/azure/index ensureComment does nothing if comment exists and is the same when there is no topic 2`] = `[]`;
 
-exports[`modules/platform/azure/index ensureComment updates comment if missing 1`] = `Array []`;
+exports[`modules/platform/azure/index ensureComment updates comment if missing 1`] = `[]`;
 
 exports[`modules/platform/azure/index ensureComment updates comment if missing 2`] = `
-Array [
-  Array [
-    Object {
+[
+  [
+    {
       "content": "### some-subject
 
 some
@@ -140,8 +140,8 @@ content",
 `;
 
 exports[`modules/platform/azure/index findPr(branchName, prTitle, state) returns pr if found it all state 1`] = `
-Object {
-  "bodyStruct": Object {
+{
+  "bodyStruct": {
     "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
   },
   "createdAt": undefined,
@@ -159,8 +159,8 @@ Object {
 `;
 
 exports[`modules/platform/azure/index findPr(branchName, prTitle, state) returns pr if found it close 1`] = `
-Object {
-  "bodyStruct": Object {
+{
+  "bodyStruct": {
     "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
   },
   "createdAt": undefined,
@@ -178,8 +178,8 @@ Object {
 `;
 
 exports[`modules/platform/azure/index findPr(branchName, prTitle, state) returns pr if found it open 1`] = `
-Object {
-  "bodyStruct": Object {
+{
+  "bodyStruct": {
     "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
   },
   "createdAt": undefined,
@@ -197,8 +197,8 @@ Object {
 `;
 
 exports[`modules/platform/azure/index findPr(branchName, prTitle, state) returns pr if found not open 1`] = `
-Object {
-  "bodyStruct": Object {
+{
+  "bodyStruct": {
     "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
   },
   "createdAt": undefined,
@@ -216,8 +216,8 @@ Object {
 `;
 
 exports[`modules/platform/azure/index getJsonFile() supports fetch from another repo 1`] = `
-Array [
-  Array [
+[
+  [
     "123456",
     "file.json",
     undefined,
@@ -232,14 +232,14 @@ Array [
 `;
 
 exports[`modules/platform/azure/index getPr(prNo) should return a pr in the right format 1`] = `
-Object {
-  "bodyStruct": Object {
+{
+  "bodyStruct": {
     "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
   },
   "createdAt": undefined,
   "displayNumber": "Pull Request #1234",
   "hasReviewers": false,
-  "labels": Array [
+  "labels": [
     "renovate",
   ],
   "number": 1234,
@@ -252,41 +252,42 @@ Object {
 `;
 
 exports[`modules/platform/azure/index getRepos() should return an array of repos 1`] = `
-Array [
-  Array [],
+[
+  [],
 ]
 `;
 
 exports[`modules/platform/azure/index getRepos() should return an array of repos 2`] = `
-Array [
+[
   "prj1/repo1",
   "prj1/repo2",
 ]
 `;
 
 exports[`modules/platform/azure/index initPlatform() should init 1`] = `
-Object {
+{
   "endpoint": "https://dev.azure.com/renovate12345/",
 }
 `;
 
 exports[`modules/platform/azure/index initRepo should initialise the config for a repo 1`] = `
-Array [
-  Array [],
+[
+  [],
 ]
 `;
 
 exports[`modules/platform/azure/index initRepo should initialise the config for a repo 2`] = `
-Object {
+{
   "defaultBranch": "defBr",
   "isFork": false,
+  "repoFingerprint": "02574de485149547c1a071aa7921da3d0afadcd6162f3bd49ba3ced29be589f8b9bac689fd0badb212bd21c3f48bd8566beaf31cdca2b083bd855808a9c129e2",
 }
 `;
 
 exports[`modules/platform/azure/index updatePr(prNo, title, body) should close the PR 1`] = `
-Array [
-  Array [
-    Object {
+[
+  [
+    {
       "description": "Hello world again",
       "status": 2,
       "title": "The New Title",
@@ -298,16 +299,16 @@ Array [
 `;
 
 exports[`modules/platform/azure/index updatePr(prNo, title, body) should reopen the PR 1`] = `
-Array [
-  Array [
-    Object {
+[
+  [
+    {
       "status": 1,
     },
     "1",
     1234,
   ],
-  Array [
-    Object {
+  [
+    {
       "description": "Hello world again",
       "title": "The New Title",
     },
@@ -318,9 +319,9 @@ Array [
 `;
 
 exports[`modules/platform/azure/index updatePr(prNo, title, body) should update the PR 1`] = `
-Array [
-  Array [
-    Object {
+[
+  [
+    {
       "description": "Hello world again",
       "title": "The New Title",
     },
@@ -331,9 +332,9 @@ Array [
 `;
 
 exports[`modules/platform/azure/index updatePr(prNo, title, body) should update the PR without description 1`] = `
-Array [
-  Array [
-    Object {
+[
+  [
+    {
       "title": "The New Title - autoclose",
     },
     "1",

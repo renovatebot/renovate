@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: node-pod
+  labels:
+    app: node
+spec:
+  containers:
+    - name: node
+    image: quay.io/node:0.0.1
+    ports:
+    - containerPort: 80
