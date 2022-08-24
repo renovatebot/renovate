@@ -2373,14 +2373,18 @@ const options: RenovateOptions[] = [
     description: 'Allow to use extraneous configuration fields.',
     type: 'boolean',
     default: false,
+    cli: false,
     globalOnly: true,
+    env: false,
   },
   {
     name: 'skipConfigValidation',
     description: 'Skip configuration validation completely.',
     type: 'boolean',
     default: false,
+    cli: false,
     globalOnly: true,
+    env: false,
   },
 ];
 

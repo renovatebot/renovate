@@ -17,7 +17,9 @@ Please also see [Self-Hosted Experimental Options](./self-hosted-experimental.md
 
 ## allowExtraConfig
 
-Set to `true` to allow your own config variable.
+This option is only available via command line option `--allow-extra-config`.
+
+You can allow custom configurations in the `renovate.json` by using this command line option.
 
 Example:
 
@@ -706,7 +708,9 @@ Secret names must start with an upper or lower case character and can have only 
 
 ## skipConfigValidation
 
-Set to `true` to skip the config validation completely.
+This option is only available via command line option `--skip-config-validation`.
+
+You can skip Renovate's config validation by using this command line option.
 
 Example:
 
