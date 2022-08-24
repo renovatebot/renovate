@@ -303,7 +303,7 @@ describe('workers/repository/update/branch/index', () => {
       });
       expect(logger.debug).toHaveBeenCalledWith(
         { prTitle: config.prTitle },
-        'Merged PR already exists. Creating new PR with automerge disabled.'
+        'Merged PR already exists. Creating new PR with automerge disabled'
       );
     });
 
@@ -330,7 +330,7 @@ describe('workers/repository/update/branch/index', () => {
       });
       expect(logger.debug).toHaveBeenCalledWith(
         { prTitle: config.prTitle },
-        'Merged PR already exists. Creating new PR with automerge disabled.'
+        'Merged PR already exists. Creating new PR with automerge disabled'
       );
     });
 

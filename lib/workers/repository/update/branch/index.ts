@@ -82,6 +82,18 @@ export interface ProcessBranchResult {
   commitSha?: string | null;
 }
 
+interface RecreateMergedPrConfig {
+  recreateMergedPr: boolean;
+  automerge: boolean;
+}
+
+function recreateMergedPrConfig(branchPr: Pr | null): RecreateMergedPrConfig {
+  return {
+    recreateMergedPr: !branchPr,
+    automerge: false,
+  };
+}
+
 export async function processBranch(
   branchConfig: BranchConfig
 ): Promise<ProcessBranchResult> {
@@ -113,16 +125,23 @@ export async function processBranch(
   const artifactErrorTopic = emojify(':warning: Artifact update problem');
   try {
     // Check if branch already existed
-    const existingPr = branchPr ? undefined : await prAlreadyExisted(config);
+    const existingPr = await prAlreadyExisted(config);
     if (existingPr && !dependencyDashboardCheck) {
       // Recreates pr if merged pr already exists
       if (existingPr.state === 'merged') {
-        logger.debug(
-          { prTitle: config.prTitle },
-          'Merged PR already exists. Creating new PR with automerge disabled.'
-        );
-        config.recreateMergedPr = true;
-        config.automerge = false;
+        if (config.automerge) {
+          logger.debug(
+            'Merged pr with the same title already exists, disable automerge'
+          );
+        }
+
+        config = { ...config, ...recreateMergedPrConfig(branchPr) };
+        if (config.recreateMergedPr) {
+          logger.debug(
+            { prTitle: config.prTitle },
+            'Merged PR already exists. Creating new PR with automerge disabled'
+          );
+        }
       } else {
         logger.debug(
           { prTitle: config.prTitle },
