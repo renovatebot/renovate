@@ -6,8 +6,8 @@ let s3Instance: S3 | undefined;
 export function getS3Client(): S3 {
   if (!s3Instance) {
     s3Instance = new S3({
-      ...(process.env.AWS_ENDPOINT && { endpoint: process.env.AWS_ENDPOINT }),
-      ...(process.env.AWS_PATH_STYLE && { forcePathStyle: true }),
+      ...(process.env.S3_ENDPOINT && { endpoint: process.env.S3_ENDPOINT }),
+      ...(process.env.S3_FORCE_PATH_STYLE && { forcePathStyle: true }),
     });
   }
   return s3Instance;
