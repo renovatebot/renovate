@@ -2,7 +2,7 @@ import is from '@sindresorhus/is';
 import type { RepoCacheRecord } from './types';
 
 // Increment this whenever there could be incompatibilities between old and new cache structure
-export const CACHE_REVISION = 1;
+export const CACHE_REVISION = 13;
 
 export function isValidCacheRecord(input: unknown): input is RepoCacheRecord {
   return (
