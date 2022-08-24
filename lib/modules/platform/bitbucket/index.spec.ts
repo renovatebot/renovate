@@ -163,7 +163,12 @@ describe('modules/platform/bitbucket/index', () => {
         await bitbucket.initRepo({
           repository: 'some/repo',
         })
-      ).toEqual({ defaultBranch: 'master', isFork: false });
+      ).toEqual({
+        defaultBranch: 'master',
+        isFork: false,
+        repoFingerprint:
+          '56653db0e9341ef4957c92bb78ee668b0a3f03c75b77db94d520230557385fca344cc1f593191e3594183b5b050909d29996c040045e8852f21774617b240642',
+      });
     });
   });
 
