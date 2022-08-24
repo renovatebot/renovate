@@ -1,3 +1,10 @@
+<!-- hide table of contents in navigation sidebar -->
+<style>
+.md-nav--primary .md-nav__link[for=__toc] ~ .md-nav {
+    display: none;
+}
+</style>
+
 # How Swissquote is keeping software dependencies up-to-date with Renovate
 
 > This article was originally published on [Medium](https://medium.com/swissquote-engineering/how-swissquote-is-keeping-software-dependencies-up-to-date-with-renovate-6246e8b20437) by [Stéphane Goetz](https://onigoetz.ch/), Principal Software Engineer at [Swissquote Bank](https://github.com/swissquote/)

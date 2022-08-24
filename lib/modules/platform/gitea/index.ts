@@ -346,7 +346,7 @@ const platform: Platform = {
         uid: botUserID,
         archived: false,
       });
-      return repos.map((r) => r.full_name);
+      return repos.filter((r) => !r.mirror).map((r) => r.full_name);
     } catch (err) {
       logger.error({ err }, 'Gitea getRepos() error');
       throw err;
