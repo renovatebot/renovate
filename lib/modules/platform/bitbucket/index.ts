@@ -60,7 +60,7 @@ export async function initPlatform({
 }: PlatformParams): Promise<PlatformResult> {
   if (!(username && password) && !token) {
     throw new Error(
-      'Init: You must either configure a Bitbucket token or username and password'
+      'Init: You must configure either a Bitbucket token or username and password'
     );
   }
   if (endpoint && endpoint !== BITBUCKET_PROD_ENDPOINT) {
