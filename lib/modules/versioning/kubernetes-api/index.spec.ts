@@ -52,17 +52,25 @@ describe('modules/versioning/kubernetes-api/index', () => {
   );
 
   test.each`
-    version       | other         | expected
-    ${'v1'}       | ${'v1'}       | ${true}
-    ${'v1'}       | ${'v2'}       | ${false}
-    ${'v1'}       | ${'v1alpha1'} | ${false}
-    ${'v1'}       | ${'v1alpha2'} | ${false}
-    ${'v1'}       | ${'v1beta1'}  | ${false}
-    ${'v1'}       | ${'v1beta2'}  | ${false}
-    ${'v1alpha1'} | ${'v1alpha1'} | ${true}
-    ${'v1alpha1'} | ${'v1alpha2'} | ${false}
-    ${'v1alpha1'} | ${'v1beta1'}  | ${false}
-    ${'v1alpha1'} | ${'v1beta2'}  | ${false}
+    version       | other                     | expected
+    ${'v1'}       | ${'v1'}                   | ${true}
+    ${'v1'}       | ${'v2'}                   | ${false}
+    ${'v1'}       | ${'v1alpha1'}             | ${false}
+    ${'v1'}       | ${'v1alpha2'}             | ${false}
+    ${'v1'}       | ${'v1beta1'}              | ${false}
+    ${'v1'}       | ${'v1beta2'}              | ${false}
+    ${'v1alpha1'} | ${'v1alpha1'}             | ${true}
+    ${'v1alpha1'} | ${'v1alpha2'}             | ${false}
+    ${'v1alpha1'} | ${'v1beta1'}              | ${false}
+    ${'v1alpha1'} | ${'v1beta2'}              | ${false}
+    ${'apps/v1'}  | ${'apps/v1'}              | ${true}
+    ${'apps/v1'}  | ${'apps/v2'}              | ${false}
+    ${'apps/v1'}  | ${'apps/v1alpha1'}        | ${false}
+    ${'apps/v1'}  | ${'apps/v1beta1'}         | ${false}
+    ${'apps/v1'}  | ${'autoscaling/v1'}       | ${true}
+    ${'apps/v1'}  | ${'autoscaling/v2'}       | ${false}
+    ${'apps/v1'}  | ${'autoscaling/v1alpha1'} | ${false}
+    ${'apps/v1'}  | ${'autoscaling/v1beta1'}  | ${false}
   `(
     'equals("$version", "$other") === $expected',
     ({ version, other, expected }) => {
