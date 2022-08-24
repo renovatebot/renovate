@@ -1,10 +1,10 @@
-import gitUrlParse from 'git-url-parse';
 import { PlatformId } from '../../constants';
 import { logger } from '../../logger';
-import { detectPlatform } from '../../modules/platform/util';
 import type { HostRule } from '../../types';
+import { detectPlatform } from '../common';
 import { regEx } from '../regex';
 import type { AuthenticationRule } from './types';
+import { parseGitUrl } from './url';
 
 /**
  * Add authorization to a Git Url and returns a new environment variables object
@@ -91,15 +91,7 @@ export function getAuthenticationRules(
 ): AuthenticationRule[] {
   const authenticationRules = [];
   const hasUser = token.split(':').length > 1;
-  const insteadUrl = gitUrlParse(gitUrl);
-
-  // Workaround for https://github.com/IonicaBizau/parse-path/issues/38
-  if (insteadUrl.port && insteadUrl.resource.endsWith(`:${insteadUrl.port}`)) {
-    insteadUrl.resource = insteadUrl.resource.substring(
-      0,
-      insteadUrl.resource.length - `:${insteadUrl.port}`.length
-    );
-  }
+  const insteadUrl = parseGitUrl(gitUrl);
 
   const url = { ...insteadUrl };
   const protocol = regEx(/^https?$/).test(url.protocol)
