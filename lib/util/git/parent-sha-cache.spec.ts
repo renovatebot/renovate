@@ -1,7 +1,10 @@
 import { mocked } from '../../../test/util';
 import * as _repositoryCache from '../cache/repository';
 import type { BranchCache, RepoCacheData } from '../cache/repository/types';
-import { getCachedBranchParentShaResult } from './parent-sha-cache';
+import {
+  getCachedBranchParentShaResult,
+  setCachedBranchParentShaResult,
+} from './parent-sha-cache';
 
 jest.mock('../cache/repository');
 const repositoryCache = mocked(_repositoryCache);
@@ -66,6 +69,32 @@ describe('util/git/parent-sha-cache', () => {
         ],
       });
       expect(getCachedBranchParentShaResult('foo', '111')).toBe('000');
+    });
+  });
+
+  describe('setCachedBranchParentShaResult', () => {
+    it('populates cache if it is empty', () => {
+      setCachedBranchParentShaResult('foo', '111');
+      expect(repoCache?.branches?.[0].parentSha).toBe('111');
+    });
+
+    it('handles more than one branch', () => {
+      repoCache.branches = [
+        {
+          branchName: 'not_foo',
+          sha: '111',
+        } as BranchCache,
+        {
+          branchName: 'foo',
+          sha: '112',
+        } as BranchCache,
+      ];
+      setCachedBranchParentShaResult('foo', '111');
+      const branch = repoCache.branches?.find(
+        (branch) => branch.branchName === 'foo'
+      );
+      expect(repoCache?.branches?.[0].parentSha).toBeUndefined();
+      expect(branch?.parentSha).toBe('111');
     });
   });
 });
