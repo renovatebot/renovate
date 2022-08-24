@@ -287,6 +287,17 @@ If you truly need to configure this then it probably means either:
 - You are hopefully mistaken, and there's a better approach you should use, so open a new "config help" discussion at the [Renovate discussions tab](https://github.com/renovatebot/renovate/discussions) or
 - You have a use case we didn't expect and we should have a feature request from you to add it to the project
 
+## branchNameStrict
+
+By default, Renovate doesn't care about special characters when slugifying the branch name.
+This means that special characters like `.` may end up in the branch name.
+
+When you set `branchNameStrict` to `true`:
+
+- all special characters are removed
+- only alphabetic characters are allowed
+- hyphens `-` are used to separate sections
+
 ## branchPrefix
 
 You can modify this field if you want to change the prefix used.
@@ -447,6 +458,10 @@ After we changed the [`baseBranches`](https://docs.renovatebot.com/configuration
 !!! info
     This feature writes plain JSON for `.json` files, and JSON5 for `.json5` files.
     JSON5 content can potentially be down leveled (`.json` files) and all comments will be removed.
+
+<!-- prettier-ignore -->
+!!! note
+    Closing the config migration PR will cause it to be ignored and not being reopend/recreated in the future.',
 
 ## configWarningReuseIssue
 
@@ -1316,8 +1331,8 @@ Use this configuration option for shared config across npm/Yarn/pnpm and meteor 
 
 ## labels
 
-By default, Renovate won't add any labels to its PRs.
-If you want Renovate to do so then define a `labels` array of one or more label strings.
+By default, Renovate won't add any labels to PRs.
+If you want Renovate to add labels to PRs it creates then define a `labels` array of one or more label strings.
 If you want the same label(s) for every PR then you can configure it at the top level of config.
 However you can also fully override them on a per-package basis.
 
@@ -1336,6 +1351,14 @@ Consider this example:
 ```
 
 With the above config, every PR raised by Renovate will have the label `dependencies` while PRs containing `eslint`-related packages will instead have the label `linting`.
+
+Renovate only adds labels when it creates the PR, which means:
+
+- If you remove labels which Renovate added, it won't re-apply them
+- If you change your config, the new/changed labels are not applied to any open PRs
+
+The `labels` array is non-mergeable, meaning if multiple `packageRules` match then Renovate uses the last value for `labels`.
+If you want to add/combine labels, use the `addLabels` config option, which is mergeable.
 
 ## lockFileMaintenance
 
@@ -1852,6 +1875,30 @@ For example to apply a special label for Major updates:
   ]
 }
 ```
+
+### customChangelogUrl
+
+Use this field to set the source URL for a package, including overriding an existing one.
+Source URLs are necessary in order to look up release notes.
+
+Using this field we can specify the exact url to fetch release notes from.
+
+Example setting source URL for package "dummy":
+
+```json
+{
+  "packageRules": [
+    {
+      "matchPackageNames": ["dummy"],
+      "customChangelogUrl": "https://github.com/org/dummy"
+    }
+  ]
+}
+```
+
+<!-- prettier-ignore -->
+!!! note
+Renovate can fetch changelogs from GitHub and GitLab platforms only, and setting the URL to an unsupported host/platform type won't change that.
 
 ### replacementName
 
@@ -2525,6 +2572,11 @@ This feature works with the following managers:
 - [`helmv3`](/modules/manager/helmv3/)
 - [`helmfile`](/modules/manager/helmfile/)
 - [`gitlabci`](/modules/manager/gitlabci/)
+- [`dockerfile`](/modules/manager/dockerfile)
+- [`docker-compose`](/modules/manager/docker-compose)
+- [`kubernetes`](/modules/manager/kubernetes)
+- [`ansible`](/modules/manager/ansible)
+- [`droneci`](/modules/manager/droneci)
 
 ## registryUrls
 
