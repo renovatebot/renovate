@@ -1,5 +1,5 @@
 import { Fixtures } from '../../../../test/fixtures';
-import { extractPackageFile } from '../mint/extract';
+import { extractPackageFile } from '.';
 
 const simpleMintfile = Fixtures.get('simple.Mintfile');
 const noVersionMintfile = Fixtures.get('noVersion.Mintfile');
@@ -9,7 +9,7 @@ describe('modules/manager/mint/extract', () => {
   describe('extractPackageFile()', () => {
     it('Makefile With Version Description', () => {
       const res = extractPackageFile(simpleMintfile);
-      expect(res!.deps).toEqual([
+      expect(res).toEqual({ deps: [
         {
           depName: 'SwiftGen/SwiftGen',
           currentValue: '6.6.1',
@@ -28,7 +28,7 @@ describe('modules/manager/mint/extract', () => {
           datasource: 'git-tags',
           packageName: 'https://github.com/realm/SwiftLint.git',
         },
-      ]);
+      ]});
     });
 
     it('Makefile Without Version Description', () => {
