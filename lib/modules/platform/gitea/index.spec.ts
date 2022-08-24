@@ -76,6 +76,7 @@ describe('modules/platform/gitea/index', () => {
   const mockRepos: Repo[] = [
     partial<Repo>({ full_name: 'a/b' }),
     partial<Repo>({ full_name: 'c/d' }),
+    partial<Repo>({ full_name: 'e/f', mirror: true }),
   ];
 
   const mockPRs: MockPr[] = [
@@ -303,7 +304,7 @@ describe('modules/platform/gitea/index', () => {
       helper.searchRepos.mockResolvedValueOnce(mockRepos);
 
       const repos = await gitea.getRepos();
-      expect(repos).toMatchSnapshot();
+      expect(repos).toEqual(['a/b', 'c/d']);
     });
   });
 
