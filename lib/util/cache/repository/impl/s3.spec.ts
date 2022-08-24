@@ -79,10 +79,6 @@ describe('util/cache/repository/impl/s3', () => {
     const s3Cache = new RepoCacheS3(repository, url);
     await expect(s3Cache.write(repoCache)).toResolve();
     expect(logger.warn).toHaveBeenCalledTimes(0);
-    expect(logger.debug).toHaveBeenCalledWith(
-      { res: s3Params },
-      'RepoCacheS3.write() - success'
-    );
   });
 
   it('fails to write to s3', async () => {

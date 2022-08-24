@@ -58,8 +58,7 @@ export class RepoCacheS3 extends RepoCacheBase {
       ContentType: 'application/json',
     };
     try {
-      const res = await this.s3Client.send(new PutObjectCommand(s3Params));
-      logger.debug({ res }, 'RepoCacheS3.write() - success');
+      await this.s3Client.send(new PutObjectCommand(s3Params));
     } catch (err) {
       logger.warn({ err }, 'RepoCacheS3.write() - failure');
     }
