@@ -42,20 +42,22 @@ describe('modules/manager/mint/extract', () => {
         SwiftGen/SwiftGen@6.6.1
         yonaskolb/xcodegen
         realm/SwiftLint @ 0.48.0`);
-      expect(res!.deps).toEqual([
-        {
-          depName: 'SwiftGen/SwiftGen',
-          currentValue: '6.6.1',
-          datasource: 'git-tags',
-          packageName: 'https://github.com/SwiftGen/SwiftGen.git',
-        },
-        {
-          depName: 'realm/SwiftLint',
-          currentValue: '0.48.0',
-          datasource: 'git-tags',
-          packageName: 'https://github.com/realm/SwiftLint.git',
-        },
-      ]);
+      expect(res).toEqual({
+        deps: [
+          {
+            depName: 'SwiftGen/SwiftGen',
+            currentValue: '6.6.1',
+            datasource: 'git-tags',
+            packageName: 'https://github.com/SwiftGen/SwiftGen.git',
+          },
+          {
+            depName: 'realm/SwiftLint',
+            currentValue: '0.48.0',
+            datasource: 'git-tags',
+            packageName: 'https://github.com/realm/SwiftLint.git',
+          },
+        ],
+      });
     });
   });
 });
