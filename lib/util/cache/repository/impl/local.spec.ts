@@ -161,4 +161,20 @@ describe('util/cache/repository/impl/local', () => {
       JSON.stringify(newCacheRecord)
     );
   });
+
+  it('does not write cache left intact', async () => {
+    const oldCacheRecord = createCacheRecord({ semanticCommits: 'enabled' });
+    const cacheType = 'protocol://domain/path';
+    fs.readCacheFile.mockResolvedValueOnce(JSON.stringify(oldCacheRecord));
+    const localRepoCache = CacheFactory.get(
+      'some/repo',
+      '0123456789abcdef',
+      cacheType
+    );
+
+    await localRepoCache.load();
+    await localRepoCache.save();
+
+    expect(fs.outputCacheFile).not.toHaveBeenCalledWith();
+  });
 });
