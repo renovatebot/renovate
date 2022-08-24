@@ -287,6 +287,17 @@ If you truly need to configure this then it probably means either:
 - You are hopefully mistaken, and there's a better approach you should use, so open a new "config help" discussion at the [Renovate discussions tab](https://github.com/renovatebot/renovate/discussions) or
 - You have a use case we didn't expect and we should have a feature request from you to add it to the project
 
+## branchNameStrict
+
+By default, Renovate doesn't care about special characters when slugifying the branch name.
+This means that special characters like `.` may end up in the branch name.
+
+When you set `branchNameStrict` to `true`:
+
+- all special characters are removed
+- only alphabetic characters are allowed
+- hyphens `-` are used to separate sections
+
 ## branchPrefix
 
 You can modify this field if you want to change the prefix used.
@@ -447,6 +458,10 @@ After we changed the [`baseBranches`](https://docs.renovatebot.com/configuration
 !!! info
     This feature writes plain JSON for `.json` files, and JSON5 for `.json5` files.
     JSON5 content can potentially be down leveled (`.json` files) and all comments will be removed.
+
+<!-- prettier-ignore -->
+!!! note
+    Closing the config migration PR will cause it to be ignored and not being reopend/recreated in the future.',
 
 ## configWarningReuseIssue
 
@@ -1860,6 +1875,30 @@ For example to apply a special label for Major updates:
   ]
 }
 ```
+
+### customChangelogUrl
+
+Use this field to set the source URL for a package, including overriding an existing one.
+Source URLs are necessary in order to look up release notes.
+
+Using this field we can specify the exact url to fetch release notes from.
+
+Example setting source URL for package "dummy":
+
+```json
+{
+  "packageRules": [
+    {
+      "matchPackageNames": ["dummy"],
+      "customChangelogUrl": "https://github.com/org/dummy"
+    }
+  ]
+}
+```
+
+<!-- prettier-ignore -->
+!!! note
+Renovate can fetch changelogs from GitHub and GitLab platforms only, and setting the URL to an unsupported host/platform type won't change that.
 
 ### replacementName
 
