@@ -88,6 +88,27 @@ Here is an example of some host rules:
 Renovate applies theses `hostRules` to every HTTP(s) request which is sent, so they are largely independent of any platform or datasource logic.
 With `hostRules` in place, private package lookups should all work.
 
+### GitHub (and Enterprise) repo scoped credentials
+
+If you need to use seperate credentials for a single GitHub repo which is different from the default, then you can configure `hostRules` like this:
+
+```json
+{
+  "hostRules": [
+    {
+      "matchHost": "https://api.github.com/repos/org/repo",
+      "token": "abc123"
+    },
+    {
+      "matchHost": "https://gihub.domain.com/api/v3/repos/org/repo",
+      "token": "abc123"
+    }
+  ]
+}
+```
+
+Then renovate will use that credentials for all requests which relates to `org/repo`.
+
 ## Looking up Release Notes
 
 When Renovate creates Pull Requests, its default behavior is to locate and embed release notes/changelogs of packages.
