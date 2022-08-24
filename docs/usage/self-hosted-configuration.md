@@ -616,7 +616,7 @@ Elements in the `repositories` array can be an object if you wish to define addi
   repositories: [
     { repository: 'g/r1', bumpVersion: true },
     'g/r2'
-  ]
+  ],
 }
 ```
 
