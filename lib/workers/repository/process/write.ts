@@ -96,9 +96,10 @@ export async function writeUpdates(
     branch.prBlockedBy = res?.prBlockedBy;
     branch.prNo = res?.prNo;
     branch.result = res?.result;
-    branch.branchFingerprint = res?.commitSha
-      ? branchFingerprint
-      : branchCache.branchFingerprint;
+    branch.branchFingerprint =
+      !branchCache.branchFingerprint || res?.commitSha
+        ? branchFingerprint
+        : branchCache.branchFingerprint;
 
     if (
       branch.result === BranchResult.Automerged &&
