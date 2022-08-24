@@ -230,6 +230,16 @@ const options: RenovateOptions[] = [
     experimental: true,
   },
   {
+    name: 'repositoryCacheType',
+    description:
+      'Set the type of renovate repository cache if repositoryCache is not disabled.',
+    globalOnly: true,
+    type: 'string',
+    stage: 'repository',
+    default: 'local',
+    experimental: true,
+  },
+  {
     name: 'force',
     description:
       'Any configuration set in this object will force override existing settings.',
@@ -1172,6 +1182,16 @@ const options: RenovateOptions[] = [
     type: 'string',
     parent: 'packageRules',
     stage: 'package',
+    cli: false,
+    env: false,
+  },
+  {
+    name: 'customChangelogUrl',
+    description:
+      'If set, Renovate will use this url to fetch changelogs for a matched dependency. Valid only within a `packageRules` object.',
+    type: 'string',
+    stage: 'pr',
+    parent: 'packageRules',
     cli: false,
     env: false,
   },
