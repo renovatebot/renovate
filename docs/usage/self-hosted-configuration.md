@@ -19,6 +19,10 @@ Please also see [Self-Hosted Experimental Options](./self-hosted-experimental.md
 
 This option is only available via command line option `--allow-extra-config`.
 
+Sometimes, you may want to customize the Renovate and pass the custom configurations if you are self-hosted Renovate user.
+
+By default, Renovate does not allow custom configurations and it will trigger error.
+
 You can allow custom configurations in the `renovate.json` by using this command line option.
 
 Example:
@@ -26,10 +30,6 @@ Example:
 ```bash
 yarn start --allow-extra-config
 ```
-
-This option is useful for those who wants to add custom configurations.
-
-The extraneous options won't be used by the renovate as they are not understood by Renovate.
 
 ## allowPlugins
 
