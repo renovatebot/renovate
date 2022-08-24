@@ -109,6 +109,38 @@ If you need to use seperate credentials for a single GitHub repo which is differ
 
 Then renovate will use that credentials for all requests which relates to `org/repo`.
 
+Here's a sample for `gomod` with private github.com repos (assume this config is used on `github.com/some-other-org` repo):
+
+```json
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "dependencyDashboard": true,
+  "hostRules": [
+    {
+      "matchHost": "https://gitlab.com",
+      "token": "glpat-token_for_different_git_platform",
+      "hostType": "gitlab"
+    },
+    {
+      "matchHost": "https://github.com/some-org",
+      "token": "ghp_token_for_different_org",
+      "hostType": "go"
+    },
+    {
+      "matchHost": "https://api.github.com/repos/some-org",
+      "token": "ghp_token_for_different_org",
+      "hostType": "github"
+    }
+  ],
+  "customEnvVariables": {
+    "GOPRIVATE": "github.com/some-org,github.com/some-other-org,gitlab.com/some-org",
+    "GONOSUMDB": "github.com/some-org,github.com/some-other-org,gitlab.com/some-org",
+    "GONOPROXY": "github.com/some-org,github.com/some-other-org,gitlab.com/some-org"
+  },
+  "postUpdateOptions": ["gomodTidy"]
+}
+```
+
 ## Looking up Release Notes
 
 When Renovate creates Pull Requests, its default behavior is to locate and embed release notes/changelogs of packages.
