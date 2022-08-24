@@ -135,7 +135,9 @@ describe('util/cache/repository/impl/local', () => {
   });
 
   it('saves modified cache data to file', async () => {
-    const oldCacheRecord = createCacheRecord({ semanticCommits: 'enabled' });
+    const oldCacheRecord = await createCacheRecord({
+      semanticCommits: 'enabled',
+    });
     const cacheType = 'protocol://domain/path';
     fs.readCacheFile.mockResolvedValueOnce(JSON.stringify(oldCacheRecord));
     const localRepoCache = CacheFactory.get(
@@ -163,7 +165,9 @@ describe('util/cache/repository/impl/local', () => {
   });
 
   it('does not write cache that is not changed', async () => {
-    const oldCacheRecord = createCacheRecord({ semanticCommits: 'enabled' });
+    const oldCacheRecord = await createCacheRecord({
+      semanticCommits: 'enabled',
+    });
     const cacheType = 'protocol://domain/path';
     fs.readCacheFile.mockResolvedValueOnce(JSON.stringify(oldCacheRecord));
     const localRepoCache = CacheFactory.get(
