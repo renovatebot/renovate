@@ -1,5 +1,5 @@
+<!-- hide table of contents in navigation sidebar -->
 <style>
-/* hide table of contents in navigation sidebar */
 .md-nav--primary .md-nav__link[for=__toc] ~ .md-nav {
     display: none;
 }
