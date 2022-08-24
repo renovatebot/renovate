@@ -362,9 +362,6 @@ const defaultConfig = {
       branchTopic: 'digests-pin',
     },
   },
-  group: {
-    commitMessageTopic: '{{{groupName}}} Docker tags',
-  },
 };
 
 function findLatestStable(tags: string[]): string | null {

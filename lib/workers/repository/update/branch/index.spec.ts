@@ -487,6 +487,7 @@ describe('workers/repository/update/branch/index', () => {
         prBlockedBy: 'RateLimited',
       });
       limits.isLimitReached.mockReturnValue(false);
+      git.getBranchCommit.mockReturnValue('123test');
       expect(await branchWorker.processBranch(config)).toEqual({
         branchExists: true,
         prBlockedBy: 'RateLimited',
@@ -571,6 +572,7 @@ describe('workers/repository/update/branch/index', () => {
         updatedArtifacts: [partial<FileChange>({})],
       } as WriteExistingFilesResult);
       git.branchExists.mockReturnValue(false);
+      git.getBranchCommit.mockReturnValue('123test');
       automerge.tryBranchAutomerge.mockResolvedValueOnce('automerged');
       await branchWorker.processBranch({
         ...config,
@@ -734,6 +736,7 @@ describe('workers/repository/update/branch/index', () => {
         fetchReleaseNotes: true,
       } as BranchConfig;
       mockedFunction(needsChangelogs).mockReturnValueOnce(true);
+      git.getBranchCommit.mockReturnValue('123test');
       expect(await branchWorker.processBranch(inconfig)).toEqual({
         branchExists: true,
         prNo: undefined,
@@ -961,6 +964,7 @@ describe('workers/repository/update/branch/index', () => {
         artifactErrors: [{}],
         updatedArtifacts: [{}],
       } as WriteExistingFilesResult);
+      git.getBranchCommit.mockReturnValue('123test');
       const processBranchResult = await branchWorker.processBranch(config);
       expect(processBranchResult).toEqual({
         branchExists: true,
@@ -983,6 +987,7 @@ describe('workers/repository/update/branch/index', () => {
       prWorker.ensurePr.mockImplementationOnce(() => {
         throw new Error('some error');
       });
+      git.getBranchCommit.mockReturnValue('123test');
       const processBranchResult = await branchWorker.processBranch(config);
       expect(processBranchResult).toEqual({
         branchExists: true,
@@ -1822,6 +1827,7 @@ describe('workers/repository/update/branch/index', () => {
         branchPrefix: 'new/',
         branchPrefixOld: 'old/',
       };
+      git.getBranchCommit.mockReturnValue('123test');
       expect(await branchWorker.processBranch(inconfig)).toEqual({
         branchExists: true,
         prNo: undefined,
