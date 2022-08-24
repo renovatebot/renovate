@@ -294,6 +294,13 @@ describe('workers/repository/update/branch/index', () => {
         artifactErrors: [{}],
         updatedArtifacts: [{}],
       } as WriteExistingFilesResult);
+      platform.getBranchPr.mockResolvedValueOnce({
+        state: PrState.Open,
+      } as Pr);
+      checkExisting.prAlreadyExisted.mockResolvedValueOnce({
+        state: PrState.Merged,
+      } as Pr);
+      config.automerge = true;
       const processBranchResult = await branchWorker.processBranch(config);
       expect(processBranchResult).toEqual({
         branchExists: true,
@@ -301,9 +308,12 @@ describe('workers/repository/update/branch/index', () => {
         prNo: undefined,
         result: 'done',
       });
-      expect(logger.debug).toHaveBeenCalledWith(
+      expect(logger.debug).not.toHaveBeenCalledWith(
         { prTitle: config.prTitle },
         'Merged PR already exists. Creating new PR with automerge disabled'
+      );
+      expect(logger.debug).toHaveBeenCalledWith(
+        'Merged pr with the same title already exists, disable automerge'
       );
     });
 
@@ -321,6 +331,10 @@ describe('workers/repository/update/branch/index', () => {
         artifactErrors: [{}],
         updatedArtifacts: [{}],
       } as WriteExistingFilesResult);
+      platform.getBranchPr.mockResolvedValueOnce(null);
+      checkExisting.prAlreadyExisted.mockResolvedValueOnce({
+        state: PrState.Merged,
+      } as Pr);
       const processBranchResult = await branchWorker.processBranch(config);
       expect(processBranchResult).toEqual({
         branchExists: true,
