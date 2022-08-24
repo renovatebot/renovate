@@ -37,8 +37,5 @@ example, the following config will match all the YAML files in a repository:
 }
 ```
 
-If a tag is not provided in the Tekton Bundle reference, the version `0.0` is assumed. This helps
-ensure updates are not missed. If this behavior is not desirable, add an explicit tag to the
-corresponding Tekton Bundle reference. See the
-[versioning](https://docs.renovatebot.com/modules/versioning/) documentation for details on the
-existing versioning rules and possible alterations.
+See the [versioning](https://docs.renovatebot.com/modules/versioning/) documentation for details on
+the existing versioning rules and possible alterations.

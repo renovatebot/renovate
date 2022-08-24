@@ -6,7 +6,7 @@ Object {
     Object {
       "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
       "currentDigest": undefined,
-      "currentValue": "0.0",
+      "currentValue": undefined,
       "datasource": "docker",
       "depName": "gcr.io/tekton-releases/catalog/upstream/plain",
       "depType": "tekton-bundle",
@@ -24,7 +24,7 @@ Object {
     Object {
       "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
       "currentDigest": "sha256:01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
-      "currentValue": "0.0",
+      "currentValue": undefined,
       "datasource": "docker",
       "depName": "gcr.io/tekton-releases/catalog/upstream/digest",
       "depType": "tekton-bundle",
@@ -42,7 +42,7 @@ Object {
     Object {
       "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
       "currentDigest": undefined,
-      "currentValue": "0.0",
+      "currentValue": undefined,
       "datasource": "docker",
       "depName": "gcr.io/tekton-releases/catalog/upstream/pipeline-resolver",
       "depType": "tekton-bundle",
@@ -51,7 +51,7 @@ Object {
     Object {
       "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
       "currentDigest": undefined,
-      "currentValue": "0.0",
+      "currentValue": undefined,
       "datasource": "docker",
       "depName": "gcr.io/tekton-releases/catalog/upstream/list-pipeline",
       "depType": "tekton-bundle",
@@ -60,7 +60,7 @@ Object {
     Object {
       "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
       "currentDigest": undefined,
-      "currentValue": "0.0",
+      "currentValue": undefined,
       "datasource": "docker",
       "depName": "gcr.io/tekton-releases/catalog/upstream/list-pipeline-run",
       "depType": "tekton-bundle",
@@ -69,7 +69,7 @@ Object {
     Object {
       "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
       "currentDigest": undefined,
-      "currentValue": "0.0",
+      "currentValue": undefined,
       "datasource": "docker",
       "depName": "gcr.io/tekton-releases/catalog/upstream/list-task-run",
       "depType": "tekton-bundle",
@@ -78,7 +78,7 @@ Object {
     Object {
       "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
       "currentDigest": undefined,
-      "currentValue": "0.0",
+      "currentValue": undefined,
       "datasource": "docker",
       "depName": "gcr.io/tekton-releases/catalog/upstream/trigger-template-task-run",
       "depType": "tekton-bundle",
@@ -87,7 +87,7 @@ Object {
     Object {
       "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
       "currentDigest": undefined,
-      "currentValue": "0.0",
+      "currentValue": undefined,
       "datasource": "docker",
       "depName": "gcr.io/tekton-releases/catalog/upstream/trigger-template-task-run-resolver",
       "depType": "tekton-bundle",
@@ -96,7 +96,7 @@ Object {
     Object {
       "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
       "currentDigest": undefined,
-      "currentValue": "0.0",
+      "currentValue": undefined,
       "datasource": "docker",
       "depName": "gcr.io/tekton-releases/catalog/upstream/trigger-template-pipeline-run",
       "depType": "tekton-bundle",
@@ -105,7 +105,7 @@ Object {
     Object {
       "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
       "currentDigest": undefined,
-      "currentValue": "0.0",
+      "currentValue": undefined,
       "datasource": "docker",
       "depName": "gcr.io/tekton-releases/catalog/upstream/trigger-template-pipeline-run-resolver",
       "depType": "tekton-bundle",
@@ -114,7 +114,7 @@ Object {
     Object {
       "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
       "currentDigest": undefined,
-      "currentValue": "0.0",
+      "currentValue": undefined,
       "datasource": "docker",
       "depName": "gcr.io/tekton-releases/catalog/upstream/task-run",
       "depType": "tekton-bundle",
@@ -123,7 +123,7 @@ Object {
     Object {
       "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
       "currentDigest": undefined,
-      "currentValue": "0.0",
+      "currentValue": undefined,
       "datasource": "docker",
       "depName": "gcr.io/tekton-releases/catalog/upstream/task-run-resolver",
       "depType": "tekton-bundle",
@@ -132,7 +132,7 @@ Object {
     Object {
       "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
       "currentDigest": undefined,
-      "currentValue": "0.0",
+      "currentValue": undefined,
       "datasource": "docker",
       "depName": "gcr.io/tekton-releases/catalog/upstream/pipeline-run",
       "depType": "tekton-bundle",
@@ -141,7 +141,7 @@ Object {
     Object {
       "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
       "currentDigest": undefined,
-      "currentValue": "0.0",
+      "currentValue": undefined,
       "datasource": "docker",
       "depName": "gcr.io/tekton-releases/catalog/upstream/pipeline-run-resolver",
       "depType": "tekton-bundle",

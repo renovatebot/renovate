@@ -11,7 +11,7 @@ export function extractPackageFile(
 ): PackageFile | null {
   logger.trace('tekton.extractPackageFile()');
   const deps: PackageDependency[] = [];
-  let docs: any[];
+  let docs: TektonResource[];
   try {
     docs = loadAll(content) as TektonResource[];
   } catch (err) {
@@ -32,28 +32,31 @@ export function extractPackageFile(
 
 function getDeps(doc: TektonResource): PackageDependency[] {
   const deps: PackageDependency[] = [];
+  if (is.falsy(doc)) {
+    return deps;
+  }
 
   // Handle TaskRun resource
-  addDep(doc?.spec?.taskRef, deps);
+  addDep(doc.spec?.taskRef, deps);
 
   // Handle PipelineRun resource
-  addDep(doc?.spec?.pipelineRef, deps);
+  addDep(doc.spec?.pipelineRef, deps);
 
   // Handle Pipeline resource
-  for (const task of doc?.spec?.tasks ?? []) {
-    addDep(task?.taskRef, deps);
+  for (const task of doc.spec?.tasks ?? []) {
+    addDep(task.taskRef, deps);
   }
 
   // Handle TriggerTemplate resource
-  for (const resource of doc?.spec?.resourcetemplates ?? []) {
+  for (const resource of doc.spec?.resourcetemplates ?? []) {
     addDep(resource?.spec?.taskRef, deps);
     addDep(resource?.spec?.pipelineRef, deps);
   }
 
   // Handle list of TektonResources
-  const items = doc?.items ?? [];
+  const items = doc.items ?? [];
   if (items.length > 0) {
-    for (const item of doc?.items || []) {
+    for (const item of doc.items || []) {
       deps.push(...getDeps(item));
     }
   }
@@ -81,9 +84,6 @@ function addDep(ref: TektonBundle, deps: PackageDependency[]): void {
   }
 
   const dep = getDep(imageRef);
-  // If a tag is not found, assume the lowest possible version. This will
-  // ensure the version update is successful, and properly pin the digest.
-  dep.currentValue = dep.currentValue ?? '0.0';
   dep.depType = 'tekton-bundle';
   logger.trace(
     {
