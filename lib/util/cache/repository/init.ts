@@ -1,14 +1,12 @@
-import type { WorkerPlatformConfig } from '../../../workers/repository/init/apis';
 import { CacheFactory } from './impl/cache-factory';
 import { RepoCacheNull } from './impl/null';
+import type { RepoCacheConfig } from './types';
 import { resetCache, setCache } from '.';
 
 /**
  * Extracted to separate file in order to avoid circular module dependencies.
  */
-export async function initRepoCache(
-  config: WorkerPlatformConfig
-): Promise<void> {
+export async function initRepoCache(config: RepoCacheConfig): Promise<void> {
   resetCache();
 
   const {

@@ -1,8 +1,8 @@
 import { mocked } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
-import type { WorkerPlatformConfig } from '../../../workers/repository/init/apis';
 import * as _fs from '../../fs';
 import { initRepoCache } from './init';
+import type { RepoCacheConfig } from './types';
 import { getCache, resetCache, saveCache } from '.';
 
 jest.mock('../../fs');
@@ -16,13 +16,10 @@ describe('util/cache/repository/index', () => {
     GlobalConfig.set({ cacheDir: '/tmp/cache', platform: 'github' });
   });
 
-  const config: WorkerPlatformConfig = {
-    platform: 'github',
+  const config: RepoCacheConfig = {
     repository: 'some/repo',
     repositoryCache: 'enabled',
     repoFingerprint: '0123456789abcdef',
-    defaultBranch: 'main',
-    isFork: false,
   };
 
   it('returns if cache not enabled', async () => {
