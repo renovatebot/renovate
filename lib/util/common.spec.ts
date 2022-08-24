@@ -1,7 +1,7 @@
 import { detectPlatform } from './common';
 import * as hostRules from './host-rules';
 
-describe('util/commont', () => {
+describe('util/common', () => {
   beforeEach(() => hostRules.clear());
 
   describe('detectPlatform', () => {
