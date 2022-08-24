@@ -32,6 +32,7 @@ import type {
 import { smartTruncate } from '../utils/pr-body';
 // eslint-disable-next-line import/named
 import * as client from './codecommit-client';
+import { getUserArn, initIamClient } from './iam-client';
 import { getCodeCommitUrl, getNewBranchName } from './util';
 
 const decoder = new TextDecoder();
@@ -42,6 +43,7 @@ interface Config {
   region?: string;
   prList?: Pr[];
   credentials?: Credentials;
+  userArn?: string;
 }
 
 const config: Config = {};
@@ -84,12 +86,11 @@ export async function initPlatform({
     secretAccessKey,
   };
   config.credentials = credentials;
+  initIamClient(region, credentials);
+  const userArn = await getUserArn();
+  config.userArn = userArn;
 
   client.buildCodeCommitClient(region, credentials);
-
-  // check if credentials work, listRepositories doesn't need repository name input
-  await client.listRepositories();
-  // error could be either bad credentials or no permission rules set for the current user
 
   const platformConfig: PlatformResult = {
     endpoint: endpoint ?? `https://git-codecommit.${region}.amazonaws.com`,
@@ -147,7 +148,10 @@ export async function initRepo({
 export async function getPrList(): Promise<Pr[]> {
   logger.debug('getPrList()');
 
-  const listPrsResponse = await client.listPullRequests(config.repository!);
+  const listPrsResponse = await client.listPullRequests(
+    config.repository!,
+    config.userArn!
+  );
 
   const prIds = listPrsResponse.pullRequestIds ?? [];
   const fetchedPrs: Pr[] = [];

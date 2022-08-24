@@ -238,10 +238,12 @@ export async function getFile(
 }
 
 export async function listPullRequests(
-  repository: string
+  repository: string,
+  userArn: string
 ): Promise<ListPullRequestsOutput> {
   const input: ListPullRequestsInput = {
     repositoryName: repository,
+    authorArn: userArn,
   };
   const cmd = new ListPullRequestsCommand(input);
   return await codeCommitClient.send(cmd);
