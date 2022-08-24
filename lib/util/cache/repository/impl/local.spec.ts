@@ -162,7 +162,7 @@ describe('util/cache/repository/impl/local', () => {
     );
   });
 
-  it('does not write cache left intact', async () => {
+  it('does not write cache that is not changed', async () => {
     const oldCacheRecord = createCacheRecord({ semanticCommits: 'enabled' });
     const cacheType = 'protocol://domain/path';
     fs.readCacheFile.mockResolvedValueOnce(JSON.stringify(oldCacheRecord));
