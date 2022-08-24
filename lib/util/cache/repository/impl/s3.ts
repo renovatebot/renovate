@@ -1,4 +1,3 @@
-import { Blob } from 'buffer';
 import { Readable } from 'stream';
 import {
   GetObjectCommand,
