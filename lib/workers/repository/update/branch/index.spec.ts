@@ -1837,6 +1837,7 @@ describe('workers/repository/update/branch/index', () => {
           rebaseRequested: false,
         },
       } as Pr);
+      git.getBranchCommit.mockReturnValue('123test');
       expect(
         await branchWorker.processBranch({
           ...config,
@@ -1868,6 +1869,7 @@ describe('workers/repository/update/branch/index', () => {
           rebaseRequested: false,
         },
       } as Pr);
+      git.getBranchCommit.mockReturnValue('123test');
       expect(
         await branchWorker.processBranch({
           ...config,
