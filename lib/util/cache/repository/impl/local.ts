@@ -2,7 +2,7 @@ import upath from 'upath';
 import { GlobalConfig } from '../../../../config/global';
 import { logger } from '../../../../logger';
 import { outputCacheFile, readCacheFile } from '../../../fs';
-import type { RepoCacheWritableRecord } from '../types';
+import type { RepoCacheRecord } from '../types';
 import { RepoCacheBase } from './base';
 
 export class RepoCacheLocal extends RepoCacheBase {
@@ -20,7 +20,7 @@ export class RepoCacheLocal extends RepoCacheBase {
     return null;
   }
 
-  protected async write(data: RepoCacheWritableRecord): Promise<void> {
+  protected async write(data: RepoCacheRecord): Promise<void> {
     const cacheFileName = this.getCacheFileName();
     await outputCacheFile(cacheFileName, JSON.stringify(data));
   }
