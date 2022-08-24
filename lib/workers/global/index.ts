@@ -135,9 +135,8 @@ export async function start(): Promise<number> {
     });
 
     // autodiscover repositories (needs to come after platform initialization)
-    config = await instrument(
-      'discover',
-      async () => await autodiscoverRepositories(config)
+    config = await instrument('discover', () =>
+      autodiscoverRepositories(config)
     );
 
     if (is.nonEmptyString(config.writeDiscoveredRepos)) {

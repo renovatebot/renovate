@@ -75,7 +75,24 @@ describe('instrumentation/index', () => {
   });
 
   describe('instrument', () => {
-    it('should return result', async () => {
+    it('should return result', () => {
+      const value = 'testResult';
+      const result = instrument('test', () => {
+        return value;
+      });
+      expect(result).toStrictEqual(value);
+    });
+
+    it('should rethrow exception', () => {
+      const error = new Error('testError');
+      expect(() =>
+        instrument('test', () => {
+          throw error;
+        })
+      ).toThrow(error);
+    });
+
+    it('should return result for async fn', async () => {
       const value = 'testResult';
       const result = await instrument('test', async () => {
         return await new Promise((resolve) => {
@@ -85,7 +102,7 @@ describe('instrumentation/index', () => {
       expect(result).toStrictEqual(value);
     });
 
-    it('should rethrow exception', async () => {
+    it('should rethrow exception for async fn', async () => {
       const error = new Error('testError');
       await expect(
         instrument('test', async () => {
@@ -94,7 +111,7 @@ describe('instrumentation/index', () => {
             resolve('');
           });
         })
-      ).rejects.toThrow();
+      ).rejects.toThrow(error);
     });
   });
 });

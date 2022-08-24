@@ -14,10 +14,7 @@ proxy.bootstrap();
 
 // eslint-disable-next-line @typescript-eslint/no-floating-promises
 (async (): Promise<void> => {
-  process.exitCode = await instrument(
-    'run',
-    async () => await globalWorker.start()
-  );
+  process.exitCode = await instrument('run', () => globalWorker.start());
   await telemetryShutdown(); //gracefully shutdown OpenTelemetry
 
   // istanbul ignore if

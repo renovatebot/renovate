@@ -1,6 +1,7 @@
 import { ClientRequest } from 'http';
 import type {
   Context,
+  Span,
   SpanOptions,
   Tracer,
   TracerProvider,
@@ -86,6 +87,7 @@ export function init(): void {
 }
 
 /* istanbul ignore next */
+
 // https://github.com/open-telemetry/opentelemetry-js-api/issues/34
 export async function shutdown(): Promise<void> {
   const traceProvider = getTracerProvider();
@@ -107,37 +109,44 @@ function getTracer(): Tracer {
   return getTracerProvider().getTracer('renovate');
 }
 
-export async function instrument<F extends () => Promise<unknown>>(
+export function instrument<F extends (span: Span) => ReturnType<F>>(
   name: string,
   fn: F
-): Promise<ReturnType<F>>;
-export async function instrument<F extends () => Promise<unknown>>(
+): ReturnType<F>;
+export function instrument<F extends (span: Span) => ReturnType<F>>(
   name: string,
   fn: F,
   options: SpanOptions
-): Promise<ReturnType<F>>;
-export async function instrument<F extends () => Promise<unknown>>(
+): ReturnType<F>;
+export function instrument<F extends (span: Span) => ReturnType<F>>(
   name: string,
   fn: F,
   options: SpanOptions = {},
   context: Context = api.context.active()
-): Promise<ReturnType<F>> {
-  return await getTracer().startActiveSpan(
-    name,
-    options,
-    context,
-    async (span) => {
-      try {
-        return await fn();
-      } catch (e) {
-        span.setStatus({
-          code: SpanStatusCode.ERROR,
-          message: e,
-        });
-        throw e;
-      } finally {
-        span.end();
+): ReturnType<F> {
+  return getTracer().startActiveSpan(name, options, context, (span: Span) => {
+    try {
+      const ret = fn(span);
+      if (ret instanceof Promise) {
+        return ret
+          .catch((e) => {
+            span.setStatus({
+              code: SpanStatusCode.ERROR,
+              message: e,
+            });
+            throw e;
+          })
+          .finally(() => span.end()) as ReturnType<F>;
       }
+      span.end();
+      return ret;
+    } catch (e) {
+      span.setStatus({
+        code: SpanStatusCode.ERROR,
+        message: e,
+      });
+      span.end();
+      throw e;
     }
-  );
+  });
 }

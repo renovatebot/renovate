@@ -42,7 +42,7 @@ export async function renovateRepository(
     addSplit('init');
     const { branches, branchList, packageFiles } = await instrument(
       'extract',
-      async () => await extractDependencies(config)
+      () => extractDependencies(config)
     );
     if (
       GlobalConfig.get('dryRun') !== 'lookup' &&
@@ -54,9 +54,8 @@ export async function renovateRepository(
       );
       addSplit('onboarding');
 
-      const res = await instrument(
-        'update',
-        async () => await updateRepo(config, branches)
+      const res = await instrument('update', () =>
+        updateRepo(config, branches)
       );
       setMeta({ repository: config.repository });
       addSplit('update');
