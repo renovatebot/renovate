@@ -107,9 +107,10 @@ If you need to use seperate credentials for a single GitHub repo which is differ
 }
 ```
 
-Then renovate will use that credentials for all requests which relates to `org/repo`.
+Renovate will use those credentials for all requests to `org/repo`.
 
-Here's a sample for `gomod` with private github.com repos (assume this config is used on `github.com/some-other-org` repo):
+Here's an example for `gomod` with private github.com repos.
+Assume this config is used on the `github.com/some-other-org` repo:
 
 ```json
 {
