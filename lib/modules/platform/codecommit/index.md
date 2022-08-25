@@ -26,6 +26,6 @@ or as environment variables:
 
 ## Unsupported platform features/concepts
 
-- Adding assignees/reviewers to PRs is not supported
+- Adding assignees is not supported
 - auto-merge doesn't work currently
 - rebaseLabel isn't supported
