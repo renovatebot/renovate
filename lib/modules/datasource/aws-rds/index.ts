@@ -32,10 +32,12 @@ export class AwsRdsDataSource extends Datasource {
     const response = await this.rds.getValue().send(cmd);
     const versions = response.DBEngineVersions ?? [];
     return {
-      releases: versions.map((version) => ({
-        version: version.EngineVersion as string,
-        isDeprecated: version.Status === 'deprecated',
-      })),
+      releases: versions
+        .filter((version) => version.EngineVersion)
+        .map((version) => ({
+          version: version.EngineVersion as string,
+          isDeprecated: version.Status === 'deprecated',
+        })),
     };
   }
 }
