@@ -97,7 +97,7 @@ export async function writeUpdates(
     branch.prNo = res?.prNo;
     branch.result = res?.result;
     branch.branchFingerprint =
-      !branchCache.branchFingerprint || res?.commitSha
+      res?.commitSha || !branchCache.branchFingerprint
         ? branchFingerprint
         : branchCache.branchFingerprint;
 
