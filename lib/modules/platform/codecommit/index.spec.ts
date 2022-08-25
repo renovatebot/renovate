@@ -1,3 +1,4 @@
+import { TextEncoder } from 'web-encoding';
 import {
   PLATFORM_BAD_CREDENTIALS,
   REPOSITORY_EMPTY,
@@ -10,12 +11,14 @@ import type { Platform } from '../types';
 import { massageMarkdown } from './index';
 
 jest.mock('@aws-sdk/client-codecommit');
+jest.mock('@aws-sdk/client-iam');
 
 describe('modules/platform/codecommit/index', () => {
   let codeCommit: Platform;
   let logger: jest.Mocked<typeof _logger>;
   let git: jest.Mocked<typeof _git>;
   let codeCommitClient: any;
+  let iamClient: any;
 
   beforeEach(async () => {
     jest.resetModules();
@@ -27,7 +30,11 @@ describe('modules/platform/codecommit/index', () => {
     codeCommitClient = mod['CodeCommit'];
     codeCommit = await import('.');
     logger = (await import('../../../logger')).logger as any;
-
+    const modIam = require('@aws-sdk/client-iam');
+    iamClient = modIam['IAM'];
+    jest.spyOn(iamClient.prototype, 'send').mockImplementationOnce(() => {
+      throw new Error('User: aws:arn:example:123456 has no permissions');
+    });
     await codeCommit.initPlatform({
       endpoint: 'https://git-codecommit.eu-central-1.amazonaws.com/',
       username: 'accessKeyId',
@@ -83,6 +90,9 @@ describe('modules/platform/codecommit/index', () => {
     });
 
     it('should init', async () => {
+      jest.spyOn(iamClient.prototype, 'send').mockImplementationOnce(() => {
+        throw new Error('User: aws:arn:example:123456 has no permissions');
+      });
       jest
         .spyOn(codeCommitClient.prototype, 'send')
         .mockImplementationOnce(() => {
@@ -186,6 +196,7 @@ describe('modules/platform/codecommit/index', () => {
           return Promise.resolve({
             repositoryMetadata: {
               defaultBranch: 'main',
+              repositoryId: 'id',
             },
           });
         });
@@ -194,6 +205,8 @@ describe('modules/platform/codecommit/index', () => {
       });
 
       expect(repoResult).toEqual({
+        repoFingerprint:
+          'f0bcfd81abefcdf9ae5e5de58d1a868317503ea76422309bc212d1ef25a1e67789d0bfa752a7e2abd4510f4f3e4f60cdaf6202a42883fb97bb7110ab3600785e',
         defaultBranch: 'main',
         isFork: false,
       });
@@ -219,6 +232,17 @@ describe('modules/platform/codecommit/index', () => {
 
       const res = await codeCommit.getRepos();
       expect(res).toEqual(['repoName']);
+    });
+
+    it('returns empty if error', async () => {
+      jest
+        .spyOn(codeCommitClient.prototype, 'send')
+        .mockImplementationOnce(() => {
+          throw new Error('something');
+        });
+
+      const res = await codeCommit.getRepos();
+      expect(res).toEqual([]);
     });
   });
 
@@ -270,6 +294,143 @@ describe('modules/platform/codecommit/index', () => {
     });
   });
 
+  describe('findPr()', () => {
+    it('finds pr', async () => {
+      const res = await codeCommit.findPr({
+        branchName: 'sourceBranch',
+        prTitle: 'someTitle',
+        state: PrState.Open,
+      });
+      expect(res).toMatchObject({
+        sourceBranch: 'refs/heads/sourceBranch',
+        targetBranch: 'refs/heads/targetBranch',
+        state: 'open',
+        number: 1,
+        title: 'someTitle',
+      });
+    });
+
+    it('throws error on findPr', async () => {
+      const err = new Error('failed');
+      jest
+        .spyOn(codeCommitClient.prototype, 'send')
+        .mockImplementationOnce(() => {
+          throw err;
+        });
+      const res = await codeCommit.findPr({
+        branchName: 'sourceBranch',
+        prTitle: 'someTitle',
+        state: PrState.Open,
+      });
+      expect(res).toBeNull();
+      expect(logger.error).toHaveBeenCalledWith({ err }, 'findPr error');
+    });
+
+    it('returns empty list in case prs dont exist yet', async () => {
+      jest
+        .spyOn(codeCommitClient.prototype, 'send')
+        .mockImplementationOnce(() => {
+          return Promise.resolve({ pullRequestIds: [] });
+        });
+      const res = await codeCommit.findPr({
+        branchName: 'sourceBranch',
+        prTitle: 'someTitle',
+        state: PrState.Open,
+      });
+      expect(res).toBeNull();
+    });
+
+    it('finds any pr with that title in regardless of state', async () => {
+      prepareMocksForListPr();
+      const res = await codeCommit.findPr({
+        branchName: 'sourceBranch',
+        prTitle: 'someTitle',
+        state: PrState.All,
+      });
+      expect(res).toMatchObject({
+        sourceBranch: 'refs/heads/sourceBranch',
+        targetBranch: 'refs/heads/targetBranch',
+        state: 'open',
+        number: 1,
+        title: 'someTitle',
+      });
+    });
+
+    it('finds closed/merged pr', async () => {
+      //getPrList()
+      jest
+        .spyOn(codeCommitClient.prototype, 'send')
+        .mockImplementationOnce(() => {
+          return Promise.resolve({ pullRequestIds: ['1'] });
+        });
+      const prRes = {
+        pullRequest: {
+          title: 'someTitle',
+          pullRequestStatus: PrState.NotOpen,
+          pullRequestTargets: [
+            {
+              sourceReference: 'refs/heads/sourceBranch',
+              destinationReference: 'refs/heads/targetBranch',
+            },
+          ],
+        },
+      };
+      //getPr()
+      jest.spyOn(codeCommitClient.prototype, 'send').mockImplementation(() => {
+        return Promise.resolve(prRes);
+      });
+      const res = await codeCommit.findPr({
+        branchName: 'sourceBranch',
+        prTitle: 'someTitle',
+        state: PrState.NotOpen,
+      });
+      expect(res).toMatchObject({
+        sourceBranch: 'refs/heads/sourceBranch',
+        targetBranch: 'refs/heads/targetBranch',
+        state: 'closed',
+        number: 1,
+        title: 'someTitle',
+      });
+    });
+
+    it('finds closed or merged pr', async () => {
+      //getPrList()
+      jest
+        .spyOn(codeCommitClient.prototype, 'send')
+        .mockImplementationOnce(() => {
+          return Promise.resolve({ pullRequestIds: ['1'] });
+        });
+      const prRes = {
+        pullRequest: {
+          title: 'someTitle',
+          pullRequestStatus: PrState.Closed,
+          pullRequestTargets: [
+            {
+              sourceReference: 'refs/heads/sourceBranch',
+              destinationReference: 'refs/heads/targetBranch',
+            },
+          ],
+        },
+      };
+      //getPr()
+      jest.spyOn(codeCommitClient.prototype, 'send').mockImplementation(() => {
+        return Promise.resolve(prRes);
+      });
+      const res = await codeCommit.findPr({
+        branchName: 'sourceBranch',
+        prTitle: 'someTitle',
+        state: PrState.Closed,
+      });
+      expect(res).toMatchObject({
+        sourceBranch: 'refs/heads/sourceBranch',
+        targetBranch: 'refs/heads/targetBranch',
+        state: 'closed',
+        number: 1,
+        title: 'someTitle',
+      });
+    });
+  });
+
   describe('getBranchPr()', () => {
     it('codecommit find PR for branch', async () => {
       prepareMocksForListPr();
@@ -287,24 +448,6 @@ describe('modules/platform/codecommit/index', () => {
       prepareMocksForListPr();
       const res = await codeCommit.getBranchPr('branch_without_pr');
       expect(res).toBeNull();
-    });
-  });
-
-  describe('findPr()', () => {
-    it('finds pr', async () => {
-      prepareMocksForListPr();
-      const res = await codeCommit.findPr({
-        branchName: 'sourceBranch',
-        prTitle: 'someTitle',
-        state: PrState.Open,
-      });
-      expect(res).toMatchObject({
-        sourceBranch: 'refs/heads/sourceBranch',
-        targetBranch: 'refs/heads/targetBranch',
-        state: 'open',
-        number: 1,
-        title: 'someTitle',
-      });
     });
   });
 
@@ -334,6 +477,15 @@ describe('modules/platform/codecommit/index', () => {
         number: 1,
         title: 'someTitle',
       });
+    });
+
+    it('returns null in case input is null', async () => {
+      jest.spyOn(codeCommitClient.prototype, 'send').mockImplementation(() => {
+        throw new Error('bad creds');
+      });
+
+      const res = await codeCommit.getPr(1);
+      expect(res).toBeNull();
     });
   });
 
@@ -367,6 +519,64 @@ describe('modules/platform/codecommit/index', () => {
         });
       const res = await codeCommit.getJsonFile('file.json');
       expect(res).toEqual({ foo: 'bar' });
+    });
+
+    it('errors out', async () => {
+      jest
+        .spyOn(codeCommitClient.prototype, 'send')
+        .mockImplementationOnce(() => {
+          throw new Error('bad filename');
+        });
+      const res = await codeCommit.getJsonFile('file.json');
+      expect(res).toBeNull();
+    });
+  });
+
+  describe('getRawFile()', () => {
+    it('returns file content', async () => {
+      const data = { foo: 'bar' };
+      const encoder = new TextEncoder();
+      const int8arrData = encoder.encode(JSON.stringify(data));
+      jest
+        .spyOn(codeCommitClient.prototype, 'send')
+        .mockImplementationOnce(() => {
+          return { fileContent: int8arrData };
+        });
+      const res = await codeCommit.getRawFile('file.json');
+      expect(res).toBe('{"foo":"bar"}');
+    });
+
+    it('returns file content in json5 format', async () => {
+      const json5Data = `
+        {
+          // json5 comment
+          foo: 'bar'
+        }
+      `;
+      const encoder = new TextEncoder();
+      const int8arrData = encoder.encode(json5Data);
+      jest
+        .spyOn(codeCommitClient.prototype, 'send')
+        .mockImplementationOnce(() => {
+          return { fileContent: int8arrData };
+        });
+      const res = await codeCommit.getRawFile('file.json');
+      expect(res).toBe(`
+        {
+          // json5 comment
+          foo: 'bar'
+        }
+      `);
+    });
+
+    it('errors out', async () => {
+      jest
+        .spyOn(codeCommitClient.prototype, 'send')
+        .mockImplementationOnce(() => {
+          throw new Error('bad filename');
+        });
+      const res = await codeCommit.getRawFile('file.json');
+      expect(res).toBeNull();
     });
   });
 
@@ -409,6 +619,35 @@ describe('modules/platform/codecommit/index', () => {
         return Promise.resolve();
       });
 
+      await expect(
+        codeCommit.updatePr({
+          number: 1,
+          prTitle: 'title',
+          prBody: 'body',
+          state: PrState.Open,
+        })
+      ).toResolve();
+    });
+
+    it('updates PR regardless of status failure', async () => {
+      // updatePrDescription
+      jest
+        .spyOn(codeCommitClient.prototype, 'send')
+        .mockImplementationOnce(() => {
+          return Promise.resolve();
+        });
+      // updatePrTitle
+      jest
+        .spyOn(codeCommitClient.prototype, 'send')
+        .mockImplementationOnce(() => {
+          return Promise.resolve();
+        });
+      // updatePrStatus
+      jest
+        .spyOn(codeCommitClient.prototype, 'send')
+        .mockImplementationOnce(() => {
+          throw new Error('update status failure');
+        });
       await expect(
         codeCommit.updatePr({
           number: 1,

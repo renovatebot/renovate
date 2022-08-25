@@ -1,15 +1,14 @@
+import * as iam from './iam-client';
+
 describe('modules/platform/codecommit/iam-client', () => {
   let iamClient: any;
-  let iam: any;
 
   beforeEach(() => {
     jest.resetModules();
     jest.mock('@aws-sdk/client-iam');
     const mod = require('@aws-sdk/client-iam');
     iamClient = mod['IAM'];
-
-    iam = require('./iam-client');
-    iam.initIamClient('eu-east', {
+    iam.initIamClient('eu-east-1', {
       accessKeyId: 'aaa',
       secretAccessKey: 'bbb',
     });

@@ -29,6 +29,7 @@ import type {
   RepoResult,
   UpdatePrConfig,
 } from '../types';
+import { repoFingerprint } from '../util';
 import { smartTruncate } from '../utils/pr-body';
 // eslint-disable-next-line import/named
 import * as client from './codecommit-client';
@@ -87,8 +88,7 @@ export async function initPlatform({
   };
   config.credentials = credentials;
   initIamClient(region, credentials);
-  const userArn = await getUserArn();
-  config.userArn = userArn;
+  config.userArn = await getUserArn();
 
   client.buildCodeCommitClient(region, credentials);
 
@@ -100,6 +100,7 @@ export async function initPlatform({
 
 export async function initRepo({
   repository,
+  endpoint,
 }: RepoParams): Promise<RepoResult> {
   logger.debug(`initRepo("${repository}")`);
 
@@ -130,7 +131,7 @@ export async function initRepo({
   logger.debug({ repositoryDetails: repo }, 'Repository details');
   const metadata = repo.repositoryMetadata;
 
-  if (!metadata || !metadata.defaultBranch) {
+  if (!metadata || !metadata.defaultBranch || !metadata.repositoryId) {
     logger.debug('Repo is empty');
     throw new Error(REPOSITORY_EMPTY);
   }
@@ -140,6 +141,7 @@ export async function initRepo({
   logger.debug(`${repository} default branch = ${defaultBranch}`);
 
   return {
+    repoFingerprint: repoFingerprint(metadata.repositoryId, endpoint),
     defaultBranch,
     isFork: false,
   };
@@ -152,9 +154,14 @@ export async function getPrList(): Promise<Pr[]> {
     config.repository!,
     config.userArn!
   );
+  const fetchedPrs: Pr[] = [];
+
+  if (listPrsResponse && !listPrsResponse.pullRequestIds) {
+    return fetchedPrs;
+  }
 
   const prIds = listPrsResponse.pullRequestIds ?? [];
-  const fetchedPrs: Pr[] = [];
+
   for (const prId of prIds) {
     const prRes = await client.getPr(prId);
 
@@ -229,15 +236,8 @@ export async function getBranchPr(branchName: string): Promise<Pr | null> {
 
 export async function getPr(pullRequestId: number): Promise<Pr | null> {
   logger.debug(`getPr(${pullRequestId})`);
-
-  // istanbul ignore if
-  if (!pullRequestId) {
-    return null;
-  }
-
   const prRes = await client.getPr(`${pullRequestId}`);
 
-  // istanbul ignore if
   if (!prRes || !prRes.pullRequest) {
     return null;
   }
@@ -269,7 +269,7 @@ export async function getRepos(): Promise<string[]> {
   let reposRes;
   try {
     reposRes = await client.listRepositories();
-    //todo do we need pagination? maximum number of repos is 1000 without pagination.
+    //todo do we need pagination? maximum number of repos is 1000 without pagination, also the same for free account
   } catch (error) {
     logger.error({ error }, 'Could not retrieve repositories');
     return [];
@@ -511,7 +511,6 @@ export function ensureIssueClosing(title: string): Promise<void> {
 
 /* istanbul ignore next */
 export function addAssignees(iid: number, assignees: string[]): Promise<void> {
-  // CodeCommit does not support adding assignees
   return Promise.resolve();
 }
 
