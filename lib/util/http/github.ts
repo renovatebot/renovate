@@ -314,7 +314,7 @@ export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
 
     try {
       const result = await super.request<T>(url, opts);
-      if (options?.paginate) {
+      if (opts.paginate) {
         // Check if result is paginated
         const pageLimit = opts.pageLimit ?? 10;
         const linkHeader = parseLinkHeader(result?.headers?.link);
