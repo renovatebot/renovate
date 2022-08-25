@@ -181,6 +181,12 @@ For example:
 }
 ```
 
+## containerbaseDir
+
+This directory is used to cache downloads when `binarySource=docker` or `binarySource=install`.
+
+Use this option if you need such downloads to be stored outside of Renovate's regular cache directory (`cacheDir`).
+
 ## customEnvVariables
 
 This configuration will be applied after all other environment variables so you can use it to override defaults.

@@ -29,5 +29,14 @@ describe('workers/global/initialize', () => {
       git.validateGitVersion.mockResolvedValueOnce(true);
       await expect(globalInitialize(config)).toResolve();
     });
+
+    it('supports containerbase cache dir', async () => {
+      const config: AllConfig = {
+        binarySource: 'docker',
+        containerbaseDir: '/tmp/containerbase',
+      };
+      git.validateGitVersion.mockResolvedValueOnce(true);
+      await expect(globalInitialize(config)).toResolve();
+    });
   });
 });
