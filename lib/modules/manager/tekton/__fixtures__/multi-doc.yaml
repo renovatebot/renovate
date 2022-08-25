@@ -3,31 +3,16 @@ kind: Pipeline
 spec:
   tasks:
   - taskRef:
-      bundle: gcr.io/tekton-releases/catalog/upstream/plain
+      bundle: gcr.io/tekton-releases/catalog/upstream/pipeline:1.0@sha256:01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
 ---
 kind: Pipeline
 spec:
   tasks:
   - taskRef:
-      bundle: gcr.io/tekton-releases/catalog/upstream/tag:1.0
----
-kind: Pipeline
-spec:
-  tasks:
-  - taskRef:
-      bundle: gcr.io/tekton-releases/catalog/upstream/digest@sha256:01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
----
-kind: Pipeline
-spec:
-  tasks:
-  - taskRef:
-      bundle: gcr.io/tekton-releases/catalog/upstream/full:1.0@sha256:01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
----
-kind: Pipeline
-spec:
-  tasks:
-  - taskRef:
-      bundle: gcr.io/tekton-releases/catalog/upstream/pipeline-resolver
+      resolver: bundles
+      resource:
+      - name: bundle
+        value: gcr.io/tekton-releases/catalog/upstream/pipeline-resolver:1.0@sha256:01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
 ---
 kind: List
 items:
@@ -113,34 +98,5 @@ kind: Pipeline
 spec:
   tasks:
   - taskRef:
-      bundle: []
----
-kind: Pipeline
-spec:
-  tasks:
-  - taskRef:
-      bundle: {}
----
-kind: Pipeline
-spec:
-  tasks:
-  - taskRef:
-      bundle: 99
----
-# kind: Pipeline
-# spec:
-#   tasks:
-#   - taskRef:
-#       bundle: gcr.io/tekton-releases/catalog/upstream/ignored
----
-kind: Pipeline
-spec:
-  tasks:
-  - taskRef:
-      blunder: gcr.io/tekton-releases/catalog/upstream/also-ignored
----
-kind: Pipeline
-spec:
-  tasks:
-  - taskRef:
       bundle: ""
+---
