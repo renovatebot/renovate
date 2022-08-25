@@ -1,18 +1,49 @@
 import { Readable } from 'stream';
 import {
   GetObjectCommand,
+  GetObjectCommandInput,
   PutObjectCommand,
   PutObjectCommandInput,
+  PutObjectCommandOutput,
   S3,
 } from '@aws-sdk/client-s3';
 import { mockClient } from 'aws-sdk-client-mock';
 import { partial } from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
 import { logger } from '../../../../logger';
+import { parseS3Url } from '../../../s3';
 import * as s3Wrapper from '../../../s3';
 import type { RepoCacheRecord } from '../types';
 import { CacheFactory } from './cache-factory';
 import { RepoCacheS3 } from './s3';
+
+function createGetObjectCommandInput(
+  repository: string,
+  url: string
+): GetObjectCommandInput {
+  const platform = GlobalConfig.get('platform') ?? 'github';
+  return {
+    Bucket: parseS3Url(url)?.Bucket,
+    Key: `${platform}/${repository}/cache.json`,
+  };
+}
+
+function createPutObjectCommandInput(
+  repository: string,
+  url: string,
+  data: RepoCacheRecord
+): PutObjectCommandInput {
+  return {
+    ...createGetObjectCommandInput(repository, url),
+    Body: JSON.stringify(data),
+    ContentType: 'application/json',
+  };
+}
+
+/*
+ * Note: MockedClient.on(Command, input) will match input (using Sinon matchers) to the actual
+ *       'new Command(actualInput)' call within the tested code segment.
+ */
 
 describe('util/cache/repository/impl/s3', () => {
   const s3WrapperSpy = jest.spyOn(s3Wrapper, 'getS3Client');
@@ -21,6 +52,8 @@ describe('util/cache/repository/impl/s3', () => {
   const repoCache = partial<RepoCacheRecord>({ payload: 'payload' });
   const url = 's3://bucket-name';
   const err = new Error('error');
+  let getObjectCommandInput: GetObjectCommandInput;
+  let putObjectCommandInput: PutObjectCommandInput;
 
   beforeEach(() => {
     GlobalConfig.set({ platform: 'github' });
@@ -28,10 +61,18 @@ describe('util/cache/repository/impl/s3', () => {
     s3Mock.reset();
     // every test function should have its own s3 instance for it to work
     s3WrapperSpy.mockReturnValueOnce(new S3({}));
+    getObjectCommandInput = createGetObjectCommandInput(repository, url);
+    putObjectCommandInput = createPutObjectCommandInput(
+      repository,
+      url,
+      repoCache
+    );
   });
 
   it('successfully reads from s3', async () => {
-    s3Mock.on(GetObjectCommand).resolvesOnce({ Body: Readable.from(['{}']) });
+    s3Mock
+      .on(GetObjectCommand, getObjectCommandInput)
+      .resolvesOnce({ Body: Readable.from(['{}']) });
     const s3Cache = new RepoCacheS3(repository, url);
     await expect(s3Cache.read()).toResolve();
     expect(logger.warn).toHaveBeenCalledTimes(0);
@@ -39,7 +80,7 @@ describe('util/cache/repository/impl/s3', () => {
   });
 
   it('gets an unexpected response from s3', async () => {
-    s3Mock.on(GetObjectCommand).resolvesOnce({});
+    s3Mock.on(GetObjectCommand, getObjectCommandInput).resolvesOnce({});
     const s3Cache = new RepoCacheS3(repository, url);
     await expect(s3Cache.read()).toResolve();
     expect(logger.warn).toHaveBeenCalledWith(
@@ -50,7 +91,9 @@ describe('util/cache/repository/impl/s3', () => {
   it('doesnt warn when no cache is found', async () => {
     const NoSuchKeyErr = new Error('NoSuchKey');
     NoSuchKeyErr.name = 'NoSuchKey';
-    s3Mock.on(GetObjectCommand).rejectsOnce(NoSuchKeyErr);
+    s3Mock
+      .on(GetObjectCommand, getObjectCommandInput)
+      .rejectsOnce(NoSuchKeyErr);
     const s3Cache = new RepoCacheS3(repository, url);
     await expect(s3Cache.read()).toResolve();
     expect(logger.warn).toHaveBeenCalledTimes(0);
@@ -60,7 +103,7 @@ describe('util/cache/repository/impl/s3', () => {
   });
 
   it('fails to read from s3', async () => {
-    s3Mock.on(GetObjectCommand).rejectsOnce(err);
+    s3Mock.on(GetObjectCommand, getObjectCommandInput).rejectsOnce(err);
     const s3Cache = new RepoCacheS3(repository, url);
     await expect(s3Cache.read()).toResolve();
     expect(logger.warn).toHaveBeenCalledWith(
@@ -70,19 +113,19 @@ describe('util/cache/repository/impl/s3', () => {
   });
 
   it('successfully writes to s3', async () => {
-    const s3Params: PutObjectCommandInput = {
-      Bucket: 'bucket',
-      Key: 'key',
-      Body: 'body',
+    const putObjectCommandOutput: PutObjectCommandOutput = {
+      $metadata: { attempts: 1, httpStatusCode: 200, totalRetryDelay: 0 },
     };
-    s3Mock.on(PutObjectCommand).resolvesOnce(s3Params);
+    s3Mock
+      .on(PutObjectCommand, putObjectCommandInput)
+      .resolvesOnce(putObjectCommandOutput);
     const s3Cache = new RepoCacheS3(repository, url);
     await expect(s3Cache.write(repoCache)).toResolve();
     expect(logger.warn).toHaveBeenCalledTimes(0);
   });
 
   it('fails to write to s3', async () => {
-    s3Mock.on(PutObjectCommand).rejectsOnce(err);
+    s3Mock.on(PutObjectCommand, putObjectCommandInput).rejectsOnce(err);
     const s3Cache = new RepoCacheS3(repository, url);
     await expect(s3Cache.write(repoCache)).toResolve();
     expect(logger.warn).toHaveBeenCalledWith(
