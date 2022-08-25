@@ -120,7 +120,13 @@ describe('workers/repository/process/write', () => {
         },
       ]);
       repoCache.getCache.mockReturnValueOnce({
-        branches: [{ branchName: 'new/some-branch' } as BranchCache],
+        branches: [
+          {
+            branchName: 'new/some-branch',
+            sha: '111',
+            branchFingerprint: '111',
+          } as BranchCache,
+        ],
       });
       branchWorker.processBranch.mockResolvedValueOnce({
         branchExists: true,
