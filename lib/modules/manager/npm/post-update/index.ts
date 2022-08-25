@@ -180,6 +180,9 @@ export async function writeExistingFiles(
           const widens: string[] = [];
           let lockFileChanged = false;
           for (const upgrade of config.upgrades) {
+            if (upgrade.lockFiles && !upgrade.lockFiles.includes(npmLock)) {
+              continue;
+            }
             if (
               upgrade.rangeStrategy === 'widen' &&
               upgrade.npmLock === npmLock

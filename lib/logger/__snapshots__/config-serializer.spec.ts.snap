@@ -1,14 +1,14 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`logger/config-serializer squashes templates 1`] = `
-Object {
+{
   "nottoken": "b",
   "prBody": "[Template]",
 }
 `;
 
 exports[`logger/config-serializer suppresses content 1`] = `
-Object {
+{
   "content": "[content]",
 }
 `;

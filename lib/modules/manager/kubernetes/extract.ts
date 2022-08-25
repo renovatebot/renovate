@@ -3,12 +3,13 @@ import { loadAll } from 'js-yaml';
 import { logger } from '../../../logger';
 import { newlineRegex, regEx } from '../../../util/regex';
 import { getDep } from '../dockerfile/extract';
-import type { PackageDependency, PackageFile } from '../types';
+import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
 import type { KubernetesConfiguration } from './types';
 
 export function extractPackageFile(
   content: string,
-  fileName: string
+  fileName: string,
+  config: ExtractConfig
 ): PackageFile | null {
   logger.trace('kubernetes.extractPackageFile()');
 
@@ -20,21 +21,24 @@ export function extractPackageFile(
   }
 
   const deps: PackageDependency[] = [
-    ...extractImages(content),
+    ...extractImages(content, config),
     ...extractApis(content, fileName),
   ];
 
   return deps.length ? { deps } : null;
 }
 
-function extractImages(content: string): PackageDependency[] {
+function extractImages(
+  content: string,
+  config: ExtractConfig
+): PackageDependency[] {
   const deps: PackageDependency[] = [];
 
   for (const line of content.split(newlineRegex)) {
     const match = regEx(/^\s*-?\s*image:\s*'?"?([^\s'"]+)'?"?\s*$/).exec(line);
     if (match) {
       const currentFrom = match[1];
-      const dep = getDep(currentFrom);
+      const dep = getDep(currentFrom, true, config.registryAliases);
       logger.debug(
         {
           depName: dep.depName,

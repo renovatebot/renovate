@@ -1,20 +1,20 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`modules/manager/cocoapods/artifacts dynamically selects Docker image tag 1`] = `
-Array [
-  Object {
+[
+  {
     "cmd": "docker pull renovate/ruby:2.7.4",
-    "options": Object {
+    "options": {
       "encoding": "utf-8",
     },
   },
-  Object {
-    "cmd": "docker run --rm --name=renovate_ruby --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/cache\\":\\"/tmp/cache\\" -e BUILDPACK_CACHE_DIR -w \\"/tmp/github/some/repo\\" renovate/ruby:2.7.4 bash -l -c \\"install-tool cocoapods 1.2.4 && pod install\\"",
-    "options": Object {
+  {
+    "cmd": "docker run --rm --name=renovate_ruby --label=renovate_child -v "/tmp/github/some/repo":"/tmp/github/some/repo" -v "/tmp/cache":"/tmp/cache" -e BUILDPACK_CACHE_DIR -w "/tmp/github/some/repo" renovate/ruby:2.7.4 bash -l -c "install-tool cocoapods 1.2.4 && pod install"",
+    "options": {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
-      "env": Object {
-        "BUILDPACK_CACHE_DIR": "/tmp/cache/buildpack",
+      "env": {
+        "BUILDPACK_CACHE_DIR": "/tmp/cache/containerbase",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
         "HTTP_PROXY": "http://example.com",
@@ -31,20 +31,20 @@ Array [
 `;
 
 exports[`modules/manager/cocoapods/artifacts falls back to the \`latest\` Docker image tag 1`] = `
-Array [
-  Object {
+[
+  {
     "cmd": "docker pull renovate/ruby:latest",
-    "options": Object {
+    "options": {
       "encoding": "utf-8",
     },
   },
-  Object {
-    "cmd": "docker run --rm --name=renovate_ruby --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/cache\\":\\"/tmp/cache\\" -e BUILDPACK_CACHE_DIR -w \\"/tmp/github/some/repo\\" renovate/ruby:latest bash -l -c \\"install-tool cocoapods 1.2.4 && pod install\\"",
-    "options": Object {
+  {
+    "cmd": "docker run --rm --name=renovate_ruby --label=renovate_child -v "/tmp/github/some/repo":"/tmp/github/some/repo" -v "/tmp/cache":"/tmp/cache" -e BUILDPACK_CACHE_DIR -w "/tmp/github/some/repo" renovate/ruby:latest bash -l -c "install-tool cocoapods 1.2.4 && pod install"",
+    "options": {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
-      "env": Object {
-        "BUILDPACK_CACHE_DIR": "/tmp/cache/buildpack",
+      "env": {
+        "BUILDPACK_CACHE_DIR": "/tmp/cache/containerbase",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
         "HTTP_PROXY": "http://example.com",
@@ -60,20 +60,20 @@ Array [
 ]
 `;
 
-exports[`modules/manager/cocoapods/artifacts returns null for invalid local directory 1`] = `Array []`;
+exports[`modules/manager/cocoapods/artifacts returns null for invalid local directory 1`] = `[]`;
 
-exports[`modules/manager/cocoapods/artifacts returns null if no Podfile.lock found 1`] = `Array []`;
+exports[`modules/manager/cocoapods/artifacts returns null if no Podfile.lock found 1`] = `[]`;
 
-exports[`modules/manager/cocoapods/artifacts returns null if no updatedDeps were provided 1`] = `Array []`;
+exports[`modules/manager/cocoapods/artifacts returns null if no updatedDeps were provided 1`] = `[]`;
 
 exports[`modules/manager/cocoapods/artifacts returns null if unchanged 1`] = `
-Array [
-  Object {
+[
+  {
     "cmd": "pod install",
-    "options": Object {
+    "options": {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
-      "env": Object {
+      "env": {
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
         "HTTP_PROXY": "http://example.com",
@@ -89,16 +89,16 @@ Array [
 ]
 `;
 
-exports[`modules/manager/cocoapods/artifacts returns null if updatedDeps is empty 1`] = `Array []`;
+exports[`modules/manager/cocoapods/artifacts returns null if updatedDeps is empty 1`] = `[]`;
 
 exports[`modules/manager/cocoapods/artifacts returns pod exec error 1`] = `
-Array [
-  Object {
+[
+  {
     "cmd": "pod install",
-    "options": Object {
+    "options": {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
-      "env": Object {
+      "env": {
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
         "HTTP_PROXY": "http://example.com",
@@ -115,9 +115,9 @@ Array [
 `;
 
 exports[`modules/manager/cocoapods/artifacts returns updated Podfile 1`] = `
-Array [
-  Object {
-    "file": Object {
+[
+  {
+    "file": {
       "contents": "New Podfile",
       "path": "Podfile.lock",
       "type": "addition",
@@ -127,20 +127,20 @@ Array [
 `;
 
 exports[`modules/manager/cocoapods/artifacts returns updated Podfile 2`] = `
-Array [
-  Object {
+[
+  {
     "cmd": "docker pull renovate/ruby:2.7.4",
-    "options": Object {
+    "options": {
       "encoding": "utf-8",
     },
   },
-  Object {
-    "cmd": "docker run --rm --name=renovate_ruby --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/cache\\":\\"/tmp/cache\\" -e BUILDPACK_CACHE_DIR -w \\"/tmp/github/some/repo\\" renovate/ruby:2.7.4 bash -l -c \\"install-tool cocoapods 3.1.0 && gem install cocoapods-acknowledgements && pod install\\"",
-    "options": Object {
+  {
+    "cmd": "docker run --rm --name=renovate_ruby --label=renovate_child -v "/tmp/github/some/repo":"/tmp/github/some/repo" -v "/tmp/cache":"/tmp/cache" -e BUILDPACK_CACHE_DIR -w "/tmp/github/some/repo" renovate/ruby:2.7.4 bash -l -c "install-tool cocoapods 3.1.0 && gem install cocoapods-acknowledgements && pod install"",
+    "options": {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
-      "env": Object {
-        "BUILDPACK_CACHE_DIR": "/tmp/cache/buildpack",
+      "env": {
+        "BUILDPACK_CACHE_DIR": "/tmp/cache/containerbase",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
         "HTTP_PROXY": "http://example.com",
@@ -157,30 +157,30 @@ Array [
 `;
 
 exports[`modules/manager/cocoapods/artifacts returns updated Podfile and Pods files 1`] = `
-Array [
-  Object {
-    "file": Object {
+[
+  {
+    "file": {
       "contents": "New Podfile",
       "path": "Podfile.lock",
       "type": "addition",
     },
   },
-  Object {
-    "file": Object {
+  {
+    "file": {
       "contents": undefined,
       "path": "Pods/Manifest.lock",
       "type": "addition",
     },
   },
-  Object {
-    "file": Object {
+  {
+    "file": {
       "contents": undefined,
       "path": "Pods/New",
       "type": "addition",
     },
   },
-  Object {
-    "file": Object {
+  {
+    "file": {
       "path": "Pods/Deleted",
       "type": "deletion",
     },
@@ -189,20 +189,20 @@ Array [
 `;
 
 exports[`modules/manager/cocoapods/artifacts returns updated Podfile and Pods files 2`] = `
-Array [
-  Object {
+[
+  {
     "cmd": "docker pull renovate/ruby:2.7.4",
-    "options": Object {
+    "options": {
       "encoding": "utf-8",
     },
   },
-  Object {
-    "cmd": "docker run --rm --name=renovate_ruby --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/cache\\":\\"/tmp/cache\\" -e BUILDPACK_CACHE_DIR -w \\"/tmp/github/some/repo\\" renovate/ruby:2.7.4 bash -l -c \\"install-tool cocoapods 3.1.0 && pod install\\"",
-    "options": Object {
+  {
+    "cmd": "docker run --rm --name=renovate_ruby --label=renovate_child -v "/tmp/github/some/repo":"/tmp/github/some/repo" -v "/tmp/cache":"/tmp/cache" -e BUILDPACK_CACHE_DIR -w "/tmp/github/some/repo" renovate/ruby:2.7.4 bash -l -c "install-tool cocoapods 3.1.0 && pod install"",
+    "options": {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
-      "env": Object {
-        "BUILDPACK_CACHE_DIR": "/tmp/cache/buildpack",
+      "env": {
+        "BUILDPACK_CACHE_DIR": "/tmp/cache/containerbase",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
         "HTTP_PROXY": "http://example.com",

@@ -11,6 +11,7 @@ export type RenovateConfigStage =
   | 'pr';
 
 export type RepositoryCacheConfig = 'disabled' | 'enabled' | 'reset';
+export type RepositoryCacheType = 'local' | string;
 export type DryRunConfig = 'extract' | 'lookup' | 'full';
 export type RequiredConfig = 'required' | 'optional' | 'ignored';
 
@@ -28,10 +29,12 @@ export interface RenovateSharedConfig {
   branchPrefix?: string;
   branchPrefixOld?: string;
   branchName?: string;
+  branchNameStrict?: boolean;
   manager?: string | null;
   commitMessage?: string;
   commitMessagePrefix?: string;
   confidential?: boolean;
+  customChangelogUrl?: string;
   draftPR?: boolean;
   enabled?: boolean;
   enabledManagers?: string[];
@@ -64,6 +67,7 @@ export interface RenovateSharedConfig {
   recreateClosed?: boolean;
   repository?: string;
   repositoryCache?: RepositoryCacheConfig;
+  repositoryCacheType?: RepositoryCacheType;
   schedule?: string[];
   automergeSchedule?: string[];
   semanticCommits?: 'auto' | 'enabled' | 'disabled';
@@ -83,6 +87,7 @@ export interface GlobalOnlyConfig {
   autodiscoverFilter?: string;
   baseDir?: string;
   cacheDir?: string;
+  containerbaseDir?: string;
   detectHostRulesFromEnv?: boolean;
   forceCli?: boolean;
   gitNoVerify?: GitNoVerifyOption[];
@@ -122,6 +127,7 @@ export interface RepoGlobalConfig {
   privateKeyOld?: string;
   localDir?: string;
   cacheDir?: string;
+  containerbaseDir?: string;
   platform?: string;
   endpoint?: string;
 }

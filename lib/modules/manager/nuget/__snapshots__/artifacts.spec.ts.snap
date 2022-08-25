@@ -1,13 +1,13 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`modules/manager/nuget/artifacts aborts if lock file is unchanged 1`] = `
-Array [
-  Object {
+[
+  {
     "cmd": "dotnet restore 'path/with space/project.csproj' --force-evaluate --configfile /tmp/renovate/cache/__renovate-private-cache/nuget/nuget.config",
-    "options": Object {
+    "options": {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
-      "env": Object {
+      "env": {
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
         "HTTP_PROXY": "http://example.com",
@@ -25,13 +25,13 @@ Array [
 `;
 
 exports[`modules/manager/nuget/artifacts authenticates at registries 1`] = `
-Array [
-  Object {
+[
+  {
     "cmd": "dotnet nuget add source https://my-registry.example.org/ --configfile /tmp/renovate/cache/__renovate-private-cache/nuget/nuget.config --name myRegistry --username some-username --password some-password --store-password-in-clear-text",
-    "options": Object {
+    "options": {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
-      "env": Object {
+      "env": {
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
         "HTTP_PROXY": "http://example.com",
@@ -45,12 +45,12 @@ Array [
       "timeout": 900000,
     },
   },
-  Object {
+  {
     "cmd": "dotnet restore project.csproj --force-evaluate --configfile /tmp/renovate/cache/__renovate-private-cache/nuget/nuget.config",
-    "options": Object {
+    "options": {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
-      "env": Object {
+      "env": {
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
         "HTTP_PROXY": "http://example.com",
@@ -68,13 +68,13 @@ Array [
 `;
 
 exports[`modules/manager/nuget/artifacts performs lock file maintenance 1`] = `
-Array [
-  Object {
+[
+  {
     "cmd": "dotnet restore project.csproj --force-evaluate --configfile /tmp/renovate/cache/__renovate-private-cache/nuget/nuget.config",
-    "options": Object {
+    "options": {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
-      "env": Object {
+      "env": {
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
         "HTTP_PROXY": "http://example.com",
@@ -92,13 +92,13 @@ Array [
 `;
 
 exports[`modules/manager/nuget/artifacts strips protocol version from feed url 1`] = `
-Array [
-  Object {
+[
+  {
     "cmd": "dotnet nuget add source https://my-registry.example.org/ --configfile /tmp/renovate/cache/__renovate-private-cache/nuget/nuget.config --name myRegistry",
-    "options": Object {
+    "options": {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
-      "env": Object {
+      "env": {
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
         "HTTP_PROXY": "http://example.com",
@@ -112,12 +112,12 @@ Array [
       "timeout": 900000,
     },
   },
-  Object {
+  {
     "cmd": "dotnet restore project.csproj --force-evaluate --configfile /tmp/renovate/cache/__renovate-private-cache/nuget/nuget.config",
-    "options": Object {
+    "options": {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
-      "env": Object {
+      "env": {
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
         "HTTP_PROXY": "http://example.com",
@@ -135,26 +135,26 @@ Array [
 `;
 
 exports[`modules/manager/nuget/artifacts supports docker mode 1`] = `
-Array [
-  Object {
+[
+  {
     "cmd": "docker pull renovate/dotnet",
-    "options": Object {
+    "options": {
       "encoding": "utf-8",
     },
   },
-  Object {
+  {
     "cmd": "docker ps --filter name=renovate_dotnet -aq",
-    "options": Object {
+    "options": {
       "encoding": "utf-8",
     },
   },
-  Object {
-    "cmd": "docker run --rm --name=renovate_dotnet --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/renovate/cache\\":\\"/tmp/renovate/cache\\" -e NUGET_PACKAGES -e BUILDPACK_CACHE_DIR -w \\"/tmp/github/some/repo\\" renovate/dotnet bash -l -c \\"dotnet restore project.csproj --force-evaluate --configfile /tmp/renovate/cache/__renovate-private-cache/nuget/nuget.config\\"",
-    "options": Object {
+  {
+    "cmd": "docker run --rm --name=renovate_dotnet --label=renovate_child -v "/tmp/github/some/repo":"/tmp/github/some/repo" -v "/tmp/renovate/cache":"/tmp/renovate/cache" -e NUGET_PACKAGES -e BUILDPACK_CACHE_DIR -w "/tmp/github/some/repo" renovate/dotnet bash -l -c "dotnet restore project.csproj --force-evaluate --configfile /tmp/renovate/cache/__renovate-private-cache/nuget/nuget.config"",
+    "options": {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
-      "env": Object {
-        "BUILDPACK_CACHE_DIR": "/tmp/renovate/cache/buildpack",
+      "env": {
+        "BUILDPACK_CACHE_DIR": "/tmp/renovate/cache/containerbase",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
         "HTTP_PROXY": "http://example.com",
@@ -172,13 +172,13 @@ Array [
 `;
 
 exports[`modules/manager/nuget/artifacts supports global mode 1`] = `
-Array [
-  Object {
+[
+  {
     "cmd": "dotnet restore project.csproj --force-evaluate --configfile /tmp/renovate/cache/__renovate-private-cache/nuget/nuget.config",
-    "options": Object {
+    "options": {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
-      "env": Object {
+      "env": {
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
         "HTTP_PROXY": "http://example.com",
@@ -196,13 +196,13 @@ Array [
 `;
 
 exports[`modules/manager/nuget/artifacts updates lock file 1`] = `
-Array [
-  Object {
+[
+  {
     "cmd": "dotnet restore project.csproj --force-evaluate --configfile /tmp/renovate/cache/__renovate-private-cache/nuget/nuget.config",
-    "options": Object {
+    "options": {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
-      "env": Object {
+      "env": {
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
         "HTTP_PROXY": "http://example.com",
