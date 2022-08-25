@@ -137,7 +137,7 @@ describe('modules/datasource/sbt-plugin/index', () => {
         );
     });
 
-    // TODO: fix mocks
+    // TODO(on: '2022-8-24', to: 'viceice') fix mocks
     afterEach(() => httpMock.clear(false));
 
     it('returns null in case of errors', async () => {
