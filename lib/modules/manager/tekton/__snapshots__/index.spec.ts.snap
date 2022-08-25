@@ -1,9 +1,9 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`modules/manager/tekton/index extractPackageFile() extracts deps from a file 1`] = `
-Object {
-  "deps": Array [
-    Object {
+{
+  "deps": [
+    {
       "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
       "currentDigest": "sha256:01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
       "currentValue": "1.0",
@@ -12,7 +12,7 @@ Object {
       "depType": "tekton-bundle",
       "replaceString": "gcr.io/tekton-releases/catalog/upstream/pipeline:1.0@sha256:01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
     },
-    Object {
+    {
       "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
       "currentDigest": "sha256:01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
       "currentValue": "1.0",
@@ -21,7 +21,7 @@ Object {
       "depType": "tekton-bundle",
       "replaceString": "gcr.io/tekton-releases/catalog/upstream/pipeline-resolver:1.0@sha256:01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
     },
-    Object {
+    {
       "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
       "currentDigest": undefined,
       "currentValue": undefined,
@@ -30,7 +30,7 @@ Object {
       "depType": "tekton-bundle",
       "replaceString": "gcr.io/tekton-releases/catalog/upstream/list-pipeline",
     },
-    Object {
+    {
       "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
       "currentDigest": undefined,
       "currentValue": undefined,
@@ -39,7 +39,7 @@ Object {
       "depType": "tekton-bundle",
       "replaceString": "gcr.io/tekton-releases/catalog/upstream/list-pipeline-run",
     },
-    Object {
+    {
       "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
       "currentDigest": undefined,
       "currentValue": undefined,
@@ -48,7 +48,7 @@ Object {
       "depType": "tekton-bundle",
       "replaceString": "gcr.io/tekton-releases/catalog/upstream/list-task-run",
     },
-    Object {
+    {
       "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
       "currentDigest": undefined,
       "currentValue": undefined,
@@ -57,7 +57,7 @@ Object {
       "depType": "tekton-bundle",
       "replaceString": "gcr.io/tekton-releases/catalog/upstream/trigger-template-task-run",
     },
-    Object {
+    {
       "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
       "currentDigest": undefined,
       "currentValue": undefined,
@@ -66,7 +66,7 @@ Object {
       "depType": "tekton-bundle",
       "replaceString": "gcr.io/tekton-releases/catalog/upstream/trigger-template-task-run-resolver",
     },
-    Object {
+    {
       "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
       "currentDigest": undefined,
       "currentValue": undefined,
@@ -75,7 +75,7 @@ Object {
       "depType": "tekton-bundle",
       "replaceString": "gcr.io/tekton-releases/catalog/upstream/trigger-template-pipeline-run",
     },
-    Object {
+    {
       "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
       "currentDigest": undefined,
       "currentValue": undefined,
@@ -84,7 +84,7 @@ Object {
       "depType": "tekton-bundle",
       "replaceString": "gcr.io/tekton-releases/catalog/upstream/trigger-template-pipeline-run-resolver",
     },
-    Object {
+    {
       "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
       "currentDigest": undefined,
       "currentValue": undefined,
@@ -93,7 +93,7 @@ Object {
       "depType": "tekton-bundle",
       "replaceString": "gcr.io/tekton-releases/catalog/upstream/task-run",
     },
-    Object {
+    {
       "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
       "currentDigest": undefined,
       "currentValue": undefined,
@@ -102,7 +102,7 @@ Object {
       "depType": "tekton-bundle",
       "replaceString": "gcr.io/tekton-releases/catalog/upstream/task-run-resolver",
     },
-    Object {
+    {
       "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
       "currentDigest": undefined,
       "currentValue": undefined,
@@ -111,7 +111,7 @@ Object {
       "depType": "tekton-bundle",
       "replaceString": "gcr.io/tekton-releases/catalog/upstream/pipeline-run",
     },
-    Object {
+    {
       "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
       "currentDigest": undefined,
       "currentValue": undefined,
