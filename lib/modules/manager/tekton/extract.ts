@@ -65,10 +65,13 @@ function getDeps(doc: TektonResource): PackageDependency[] {
 }
 
 function addDep(ref: TektonBundle, deps: PackageDependency[]): void {
+  if (is.falsy(ref)) {
+    return;
+  }
   let imageRef = '';
   // Find a bundle reference from the Bundle resolver
-  if (ref?.resolver === 'bundles') {
-    for (const field of ref?.resource ?? []) {
+  if (ref.resolver === 'bundles') {
+    for (const field of ref.resource ?? []) {
       if (field.name === 'bundle') {
         imageRef = field.value;
         break;
@@ -77,7 +80,7 @@ function addDep(ref: TektonBundle, deps: PackageDependency[]): void {
   }
   if (!is.string(imageRef) || is.emptyString(imageRef)) {
     // Fallback to older style bundle reference
-    imageRef = ref?.bundle;
+    imageRef = ref.bundle;
     if (!is.string(imageRef) || is.emptyString(imageRef)) {
       return;
     }
