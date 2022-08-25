@@ -120,6 +120,14 @@ exports[`modules/manager/tekton/index extractPackageFile() extracts deps from a 
       "depType": "tekton-bundle",
       "replaceString": "gcr.io/tekton-releases/catalog/upstream/pipeline-run-resolver",
     },
+    {
+      "depType": "tekton-bundle",
+      "skipReason": "invalid-value",
+    },
+    {
+      "depType": "tekton-bundle",
+      "skipReason": "invalid-value",
+    },
   ],
 }
 `;

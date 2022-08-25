@@ -78,10 +78,11 @@ function addDep(ref: TektonBundle, deps: PackageDependency[]): void {
       }
     }
   }
-  if (!is.string(imageRef) || is.emptyString(imageRef)) {
+
+  if (is.emptyStringOrWhitespace(imageRef)) {
     // Fallback to older style bundle reference
     imageRef = ref.bundle;
-    if (!is.string(imageRef) || is.emptyString(imageRef)) {
+    if (is.emptyStringOrWhitespace(imageRef)) {
       return;
     }
   }

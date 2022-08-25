@@ -100,3 +100,12 @@ spec:
   - taskRef:
       bundle: ""
 ---
+kind: Pipeline
+spec:
+  tasks:
+  - taskRef:
+      resolver: bundles
+      resource:
+      - name: bundle
+        value: ""
+---
