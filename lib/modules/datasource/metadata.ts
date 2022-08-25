@@ -5,7 +5,7 @@ import { DateTime } from 'luxon';
 import * as hostRules from '../../util/host-rules';
 import { regEx } from '../../util/regex';
 import { parseUrl, trimTrailingSlash, validateUrl } from '../../util/url';
-import { detectPlatform } from '../platform/util';
+import { detectPlatform } from '../../util/common';
 import { manualChangelogUrls, manualSourceUrls } from './metadata-manual';
 import type { ReleaseResult } from './types';
 
