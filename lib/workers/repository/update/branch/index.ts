@@ -35,8 +35,8 @@ import {
   isBranchConflicted,
   isBranchModified,
 } from '../../../../util/git';
-import { setCachedBranchParentShaResult } from '../../../../util/git/parent-sha-cache';
 import { setCachedConflictResult } from '../../../../util/git/conflicts-cache';
+import { setCachedBranchParentShaResult } from '../../../../util/git/parent-sha-cache';
 import {
   getMergeConfidenceLevel,
   isActiveConfidenceLevel,
@@ -537,7 +537,7 @@ export async function processBranch(
       setCachedBranchParentShaResult(
         config.branchName,
         getBranchCommit(config.defaultBranch!)!
-        );
+      );
       // TODO #7154
       setCachedConflictResult(
         config.defaultBranch!,
