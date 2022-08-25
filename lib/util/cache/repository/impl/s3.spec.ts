@@ -5,7 +5,7 @@ import {
   PutObjectCommand,
   PutObjectCommandInput,
   PutObjectCommandOutput,
-  S3,
+  S3Client,
 } from '@aws-sdk/client-s3';
 import { mockClient } from 'aws-sdk-client-mock';
 import { partial } from '../../../../../test/util';
@@ -47,7 +47,7 @@ function createPutObjectCommandInput(
 
 describe('util/cache/repository/impl/s3', () => {
   const s3WrapperSpy = jest.spyOn(s3Wrapper, 'getS3Client');
-  const s3Mock = mockClient(S3);
+  const s3Mock = mockClient(S3Client);
   const repository = 'org/repo';
   const repoCache = partial<RepoCacheRecord>({ payload: 'payload' });
   const url = 's3://bucket-name';
@@ -60,7 +60,7 @@ describe('util/cache/repository/impl/s3', () => {
     jest.clearAllMocks();
     s3Mock.reset();
     // every test function should have its own s3 instance for it to work
-    s3WrapperSpy.mockReturnValueOnce(new S3({}));
+    s3WrapperSpy.mockReturnValueOnce(new S3Client({}));
     getObjectCommandInput = createGetObjectCommandInput(repository, url);
     putObjectCommandInput = createPutObjectCommandInput(
       repository,
