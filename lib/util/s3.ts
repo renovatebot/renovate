@@ -1,13 +1,13 @@
 // Singleton S3 instance initialized on-demand.
-import { S3 } from '@aws-sdk/client-s3';
+import { S3Client } from '@aws-sdk/client-s3';
 import { parseUrl } from './url';
 
-let s3Instance: S3 | undefined;
-export function getS3Client(): S3 {
+let s3Instance: S3Client | undefined;
+export function getS3Client(): S3Client {
   if (!s3Instance) {
     const endpoint = process.env.RENOVATE_X_S3_ENDPOINT;
     const forcePathStyle = process.env.RENOVATE_X_S3_PATH_STYLE;
-    s3Instance = new S3({
+    s3Instance = new S3Client({
       ...(endpoint && { endpoint }),
       ...(forcePathStyle && { forcePathStyle: true }),
     });

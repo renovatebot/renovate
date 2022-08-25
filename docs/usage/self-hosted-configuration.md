@@ -136,7 +136,7 @@ But you can tell Renovate to use "sidecar" containers for third-party tools by s
 For this to work, `docker` needs to be installed and the Docker socket available to Renovate.
 Now Renovate uses `docker run` to create containers like Node.js or Python to run tools in as-needed.
 
-Additionally, when Renovate is run inside a container built using [`containerbase/buildpack`](https://github.com/containerbase/buildpack), such as the official Renovate images on Docker Hub, then `binarySource=install` can be used.
+Additionally, when Renovate is run inside a container built using [`containerbase`](https://github.com/containerbase), such as the official Renovate images on Docker Hub, then `binarySource=install` can be used.
 This mode means that Renovate will dynamically install the version of tools available, if supported.
 
 Supported tools for dynamic install are:
@@ -446,6 +446,10 @@ modules.exports = {
 ```
 
 In the above example any reference to the `@company` preset will be replaced with `local>org/renovate-config`.
+
+<!-- prettier-ignore -->
+!!! tip
+    Combine `migratePresets` with `configMigration` if you'd like your config migrated by PR.
 
 ## onboarding
 
