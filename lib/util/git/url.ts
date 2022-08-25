@@ -1,12 +1,36 @@
-import GitUrlParse from 'git-url-parse';
+import gitUrlParse from 'git-url-parse';
 import { logger } from '../../logger';
+import { detectPlatform } from '../common';
 import * as hostRules from '../host-rules';
 import { regEx } from '../regex';
 
+export function parseGitUrl(url: string): gitUrlParse.GitUrl {
+  const parsed = gitUrlParse(url);
+
+  // Workaround for https://github.com/IonicaBizau/parse-path/issues/38
+  if (parsed.port && parsed.resource.endsWith(`:${parsed.port}`)) {
+    parsed.resource = parsed.resource.substring(
+      0,
+      parsed.resource.length - `:${parsed.port}`.length
+    );
+  }
+
+  return parsed;
+}
+
 export function getHttpUrl(url: string, token?: string): string {
-  const parsedUrl = GitUrlParse(url);
+  const parsedUrl = parseGitUrl(url);
 
   parsedUrl.token = token ?? '';
+
+  if (token) {
+    switch (detectPlatform(url)) {
+      case 'gitlab':
+        parsedUrl.token = token.includes(':')
+          ? token
+          : `gitlab-ci-token:${token}`;
+    }
+  }
 
   const protocol = regEx(/^https?$/).exec(parsedUrl.protocol)
     ? parsedUrl.protocol
