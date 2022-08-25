@@ -89,7 +89,7 @@ exports[`modules/manager/cargo/artifacts returns updated Cargo.lock with docker 
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
       "env": {
-        "BUILDPACK_CACHE_DIR": "/tmp/cache/buildpack",
+        "BUILDPACK_CACHE_DIR": "/tmp/cache/containerbase",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
         "HTTP_PROXY": "http://example.com",
