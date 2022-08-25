@@ -93,6 +93,18 @@ export const presets: Record<string, Preset> = {
       },
     ],
   },
+  'now-to-vercel': {
+    description: '`now` was renamed to `vercel`.',
+    packageRules: [
+      {
+        matchCurrentVersion: '>=21.0.0',
+        matchDatasources: ['npm'],
+        matchPackageNames: ['now'],
+        replacementName: 'vercel',
+        replacementVersion: '21.0.0',
+      },
+    ],
+  },
   'react-query-devtools-to-scoped': {
     description:
       '`react-query/devtools` became scoped under the `tanstack` organization.',

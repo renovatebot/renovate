@@ -11,7 +11,7 @@ import type { PackageDependency, PackageFile } from '../types';
 
 export const packagePattern =
   '[a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9._-]*[a-zA-Z0-9]';
-const extrasPattern = '(?:\\s*\\[[^\\]]+\\])?';
+export const extrasPattern = '(?:\\s*\\[[^\\]]+\\])?';
 const packageGitRegex = regEx(
   /(?<source>(?:git\+)(?<protocol>git|ssh|https):\/\/(?<gitUrl>(?:(?<user>[^@]+)@)?(?<hostname>[\w.-]+)(?<delimiter>\/)(?<scmPath>.*\/(?<depName>[\w/-]+))(\.git)?(?:@(?<version>.*))))/
 );

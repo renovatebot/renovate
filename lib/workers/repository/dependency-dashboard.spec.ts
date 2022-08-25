@@ -85,8 +85,10 @@ describe('workers/repository/dependency-dashboard', () => {
         title: '',
         number: 1,
         body:
-          Fixtures.get('master-issue_with_8_PR.txt').replace('- [ ]', '- [x]') +
-          '\n\n - [x] <!-- rebase-all-open-prs -->',
+          Fixtures.get('dependency-dashboard-with-8-PR.txt').replace(
+            '- [ ]',
+            '- [x]'
+          ) + '\n\n - [x] <!-- rebase-all-open-prs -->',
       });
       await dependencyDashboard.readDashboardBody(conf);
       expect(conf).toEqual({
@@ -302,7 +304,7 @@ describe('workers/repository/dependency-dashboard', () => {
         config.dependencyDashboardTitle
       );
       expect(platform.ensureIssue.mock.calls[0][0].body).toBe(
-        Fixtures.get('master-issue_with_8_PR.txt')
+        Fixtures.get('dependency-dashboard-with-8-PR.txt')
       );
 
       // same with dry run
@@ -339,7 +341,7 @@ describe('workers/repository/dependency-dashboard', () => {
         config.dependencyDashboardTitle
       );
       expect(platform.ensureIssue.mock.calls[0][0].body).toBe(
-        Fixtures.get('master-issue_with_2_PR_edited.txt')
+        Fixtures.get('dependency-dashboard-with-2-PR-edited.txt')
       );
 
       // same with dry run
@@ -384,7 +386,7 @@ describe('workers/repository/dependency-dashboard', () => {
         config.dependencyDashboardTitle
       );
       expect(platform.ensureIssue.mock.calls[0][0].body).toBe(
-        Fixtures.get('master-issue_with_3_PR_in_progress.txt')
+        Fixtures.get('dependency-dashboard-with-3-PR-in-progress.txt')
       );
 
       // same with dry run
@@ -419,7 +421,7 @@ describe('workers/repository/dependency-dashboard', () => {
         config.dependencyDashboardTitle
       );
       expect(platform.ensureIssue.mock.calls[0][0].body).toBe(
-        Fixtures.get('master-issue_with_2_PR_closed_ignored.txt')
+        Fixtures.get('dependency-dashboard-with-2-PR-closed-ignored.txt')
       );
 
       // same with dry run
@@ -469,7 +471,7 @@ describe('workers/repository/dependency-dashboard', () => {
         config.dependencyDashboardTitle
       );
       expect(platform.ensureIssue.mock.calls[0][0].body).toBe(
-        Fixtures.get('master-issue_with_3_PR_in_approval.txt')
+        Fixtures.get('dependency-dashboard-with-3-PR-in-approval.txt')
       );
 
       // same with dry run
