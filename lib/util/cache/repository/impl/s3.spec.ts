@@ -52,11 +52,13 @@ describe('util/cache/repository/impl/s3', () => {
   const err = new Error('error');
   let getObjectCommandInput: GetObjectCommandInput;
   let putObjectCommandInput: PutObjectCommandInput;
+  let s3Cache: RepoCacheS3;
 
   beforeEach(() => {
     GlobalConfig.set({ platform: 'github' });
     jest.clearAllMocks();
     s3Mock.reset();
+    s3Cache = new RepoCacheS3(repository, url);
     getObjectCommandInput = createGetObjectCommandInput(repository, url);
     putObjectCommandInput = createPutObjectCommandInput(
       repository,
@@ -70,7 +72,6 @@ describe('util/cache/repository/impl/s3', () => {
     s3Mock
       .on(GetObjectCommand, getObjectCommandInput)
       .resolvesOnce({ Body: Readable.from([json]) });
-    const s3Cache = new RepoCacheS3(repository, url);
     await expect(s3Cache.read()).resolves.toBe(json);
     expect(logger.warn).toHaveBeenCalledTimes(0);
     expect(logger.debug).toHaveBeenCalledWith('RepoCacheS3.read() - success');
@@ -78,7 +79,6 @@ describe('util/cache/repository/impl/s3', () => {
 
   it('gets an unexpected response from s3', async () => {
     s3Mock.on(GetObjectCommand, getObjectCommandInput).resolvesOnce({});
-    const s3Cache = new RepoCacheS3(repository, url);
     await expect(s3Cache.read()).resolves.toBeNull();
     expect(logger.warn).toHaveBeenCalledWith(
       "RepoCacheS3.read() - failure - expecting Readable return type got 'undefined' type instead"
@@ -91,7 +91,6 @@ describe('util/cache/repository/impl/s3', () => {
     s3Mock
       .on(GetObjectCommand, getObjectCommandInput)
       .rejectsOnce(NoSuchKeyErr);
-    const s3Cache = new RepoCacheS3(repository, url);
     await expect(s3Cache.read()).resolves.toBeNull();
     expect(logger.warn).toHaveBeenCalledTimes(0);
     expect(logger.debug).toHaveBeenCalledWith(
@@ -101,7 +100,6 @@ describe('util/cache/repository/impl/s3', () => {
 
   it('fails to read from s3', async () => {
     s3Mock.on(GetObjectCommand, getObjectCommandInput).rejectsOnce(err);
-    const s3Cache = new RepoCacheS3(repository, url);
     await expect(s3Cache.read()).resolves.toBeNull();
     expect(logger.warn).toHaveBeenCalledWith(
       { err },
@@ -116,14 +114,12 @@ describe('util/cache/repository/impl/s3', () => {
     s3Mock
       .on(PutObjectCommand, putObjectCommandInput)
       .resolvesOnce(putObjectCommandOutput);
-    const s3Cache = new RepoCacheS3(repository, url);
     await expect(s3Cache.write(repoCache)).toResolve();
     expect(logger.warn).toHaveBeenCalledTimes(0);
   });
 
   it('fails to write to s3', async () => {
     s3Mock.on(PutObjectCommand, putObjectCommandInput).rejectsOnce(err);
-    const s3Cache = new RepoCacheS3(repository, url);
     await expect(s3Cache.write(repoCache)).toResolve();
     expect(logger.warn).toHaveBeenCalledWith(
       { err },
