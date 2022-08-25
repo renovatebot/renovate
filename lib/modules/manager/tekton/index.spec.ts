@@ -24,6 +24,7 @@ describe('modules/manager/tekton/index', () => {
         )
       ).toBeNull();
     });
+
     it('ignores empty file', () => {
       expect(extractPackageFile('', 'test-file.yaml')).toBeNull();
     });
