@@ -108,6 +108,7 @@ If you need to use different credentials for a specific GitHub repo, then you ca
 ```
 
 Renovate will use those credentials for all requests to `org/repo`.
+
 #### Example for gomod
 
 Here's an example for `gomod` with private github.com repos.
