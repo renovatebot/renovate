@@ -76,11 +76,11 @@ describe('util/exec/index', () => {
 
   const buildpackEnv = {
     ...envMock.basic,
-    BUILDPACK_CACHE_DIR: `${cacheDir}buildpack`,
+    BUILDPACK_CACHE_DIR: `${cacheDir}containerbase`,
   };
   const buildpackEnvFiltered = {
     ...envMock.filtered,
-    BUILDPACK_CACHE_DIR: `${cacheDir}buildpack`,
+    BUILDPACK_CACHE_DIR: `${cacheDir}containerbase`,
   };
 
   const testInputs: [string, TestInput][] = [

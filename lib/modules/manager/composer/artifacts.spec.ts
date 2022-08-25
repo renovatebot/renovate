@@ -369,7 +369,7 @@ describe('modules/manager/composer/artifacts', () => {
         options: {
           cwd: '/tmp/github/some/repo',
           env: {
-            BUILDPACK_CACHE_DIR: '/tmp/renovate/cache/buildpack',
+            BUILDPACK_CACHE_DIR: '/tmp/renovate/cache/containerbase',
             COMPOSER_CACHE_DIR: '/tmp/renovate/cache/others/composer',
           },
         },
@@ -425,7 +425,7 @@ describe('modules/manager/composer/artifacts', () => {
         options: {
           cwd: '/tmp/github/some/repo',
           env: {
-            BUILDPACK_CACHE_DIR: '/tmp/renovate/cache/buildpack',
+            BUILDPACK_CACHE_DIR: '/tmp/renovate/cache/containerbase',
             COMPOSER_CACHE_DIR: '/tmp/renovate/cache/others/composer',
           },
         },

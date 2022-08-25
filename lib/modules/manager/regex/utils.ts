@@ -20,6 +20,27 @@ export const validMatchFields = [
 
 type ValidMatchFields = typeof validMatchFields[number];
 
+function updateDependency(
+  dependency: PackageDependency,
+  field: ValidMatchFields,
+  value: string
+): void {
+  switch (field) {
+    case 'registryUrl':
+      // check if URL is valid and pack inside an array
+      try {
+        const url = new URL(value).toString();
+        dependency.registryUrls = [url];
+      } catch (err) {
+        logger.warn({ value }, 'Invalid regex manager registryUrl');
+      }
+      break;
+    default:
+      dependency[field] = value;
+      break;
+  }
+}
+
 export function createDependency(
   extractionTemplate: ExtractionTemplate,
   config: CustomExtractConfig,
@@ -28,30 +49,13 @@ export function createDependency(
   const dependency = dep ?? {};
   const { groups, replaceString } = extractionTemplate;
 
-  function updateDependency(field: ValidMatchFields, value: string): void {
-    switch (field) {
-      case 'registryUrl':
-        // check if URL is valid and pack inside an array
-        try {
-          const url = new URL(value).toString();
-          dependency.registryUrls = [url];
-        } catch (err) {
-          logger.warn({ value }, 'Invalid regex manager registryUrl');
-        }
-        break;
-      default:
-        dependency[field] = value;
-        break;
-    }
-  }
-
   for (const field of validMatchFields) {
     const fieldTemplate = `${field}Template` as keyof RegexManagerTemplates;
     const tmpl = config[fieldTemplate];
     if (tmpl) {
       try {
         const compiled = template.compile(tmpl, groups, false);
-        updateDependency(field, compiled);
+        updateDependency(dependency, field, compiled);
       } catch (err) {
         logger.warn(
           { template: tmpl },
@@ -60,7 +64,7 @@ export function createDependency(
         return null;
       }
     } else if (groups[field]) {
-      updateDependency(field, groups[field]);
+      updateDependency(dependency, field, groups[field]);
     }
   }
   dependency.replaceString = replaceString;

@@ -136,7 +136,7 @@ describe('modules/platform/gitlab/index', () => {
       httpMock
         .scope(gitlabApiHost)
         .get(
-          '/api/v4/projects?membership=true&per_page=100&with_merge_requests_enabled=true&min_access_level=30'
+          '/api/v4/projects?membership=true&per_page=100&with_merge_requests_enabled=true&min_access_level=30&archived=false'
         )
         .replyWithError('getRepos error');
       await expect(gitlab.getRepos()).rejects.toThrow('getRepos error');
@@ -146,7 +146,7 @@ describe('modules/platform/gitlab/index', () => {
       httpMock
         .scope(gitlabApiHost)
         .get(
-          '/api/v4/projects?membership=true&per_page=100&with_merge_requests_enabled=true&min_access_level=30'
+          '/api/v4/projects?membership=true&per_page=100&with_merge_requests_enabled=true&min_access_level=30&archived=false'
         )
         .reply(200, [
           {
@@ -154,10 +154,6 @@ describe('modules/platform/gitlab/index', () => {
           },
           {
             path_with_namespace: 'c/d',
-          },
-          {
-            path_with_namespace: 'c/e',
-            archived: true,
           },
           {
             path_with_namespace: 'c/f',
