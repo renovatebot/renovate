@@ -90,7 +90,7 @@ With `hostRules` in place, private package lookups should all work.
 
 ### GitHub (and Enterprise) repo scoped credentials
 
-If you need to use seperate credentials for a single GitHub repo which is different from the default, then you can configure `hostRules` like this:
+If you need to use different credentials for a specific GitHub repo, then you can configure `hostRules` like one of the following:
 
 ```json
 {
@@ -100,7 +100,7 @@ If you need to use seperate credentials for a single GitHub repo which is differ
       "token": "abc123"
     },
     {
-      "matchHost": "https://gihub.domain.com/api/v3/repos/org/repo",
+      "matchHost": "https://github.domain.com/api/v3/repos/org/repo",
       "token": "abc123"
     }
   ]
@@ -108,6 +108,7 @@ If you need to use seperate credentials for a single GitHub repo which is differ
 ```
 
 Renovate will use those credentials for all requests to `org/repo`.
+#### Example for gomod
 
 Here's an example for `gomod` with private github.com repos.
 Assume this config is used on the `github.com/some-other-org` repo:
