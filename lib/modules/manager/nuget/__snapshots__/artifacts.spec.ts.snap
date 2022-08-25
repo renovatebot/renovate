@@ -154,7 +154,7 @@ exports[`modules/manager/nuget/artifacts supports docker mode 1`] = `
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
       "env": {
-        "BUILDPACK_CACHE_DIR": "/tmp/renovate/cache/buildpack",
+        "BUILDPACK_CACHE_DIR": "/tmp/renovate/cache/containerbase",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
         "HTTP_PROXY": "http://example.com",
