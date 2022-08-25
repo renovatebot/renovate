@@ -161,7 +161,7 @@ describe('modules/manager/npm/extract/monorepo', () => {
       ]);
     });
 
-    it('uses yarn workspaces package settings with contraints', async () => {
+    it('uses yarn workspaces package settings with constraints', async () => {
       const packageFiles: Partial<PackageFile>[] = [
         {
           packageFile: 'package.json',

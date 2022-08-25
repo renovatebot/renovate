@@ -30,7 +30,7 @@ export async function ensureConfigMigrationPr(
     migratedConfigData.filename
   );
 
-  const prTitle = commitMessageFactory.create().toString();
+  const prTitle = commitMessageFactory.getPrTitle();
   const existingPr = await platform.getBranchPr(branchName);
   const filename = migratedConfigData.filename;
   logger.debug('Filling in config migration PR template');
@@ -46,6 +46,8 @@ ${
       `JSON5 config file migrated! All comments & trailing commas were removed.`
     : ''
 }
+
+:no_bell: **Ignore**: Close this PR and you won't be reminded about config migration again, but one day your current config may no longer be valid.
 
 :question: Got questions? Does something look wrong to you? Please don't hesitate to [request help here](${
       // TODO: types (#7154)
@@ -68,7 +70,10 @@ ${
     logger.debug('Found open migration PR');
     // Check if existing PR needs updating
     const prBodyHash = hashBody(prBody);
-    if (existingPr.bodyStruct?.hash === prBodyHash) {
+    if (
+      existingPr.bodyStruct?.hash === prBodyHash &&
+      existingPr.title === prTitle
+    ) {
       logger.debug({ pr: existingPr.number }, `Does not need updating`);
       return;
     }
@@ -78,7 +83,7 @@ ${
     } else {
       await platform.updatePr({
         number: existingPr.number,
-        prTitle: existingPr.title,
+        prTitle,
         prBody,
       });
       logger.info({ pr: existingPr.number }, 'Migration PR updated');

@@ -1,241 +1,241 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`modules/manager/cargo/extract extractPackageFile() extracts multiple dependencies advanced 1`] = `
-Array [
-  Object {
+[
+  {
     "currentValue": "0.2.0",
     "datasource": "crate",
     "depName": "amethyst_animation",
     "depType": "dependencies",
-    "managerData": Object {
+    "managerData": {
       "nestedVersion": true,
     },
     "skipReason": "path-dependency",
   },
-  Object {
+  {
     "currentValue": "0.3.0",
     "datasource": "crate",
     "depName": "amethyst_assets",
     "depType": "dependencies",
-    "managerData": Object {
+    "managerData": {
       "nestedVersion": true,
     },
     "skipReason": "path-dependency",
   },
-  Object {
+  {
     "currentValue": "0.2.0",
     "datasource": "crate",
     "depName": "amethyst_audio",
     "depType": "dependencies",
-    "managerData": Object {
+    "managerData": {
       "nestedVersion": true,
     },
     "skipReason": "path-dependency",
   },
-  Object {
+  {
     "currentValue": "0.6.0",
     "datasource": "crate",
     "depName": "amethyst_config",
     "depType": "dependencies",
-    "managerData": Object {
+    "managerData": {
       "nestedVersion": true,
     },
     "skipReason": "path-dependency",
   },
-  Object {
+  {
     "currentValue": "0.2.0",
     "datasource": "crate",
     "depName": "amethyst_core",
     "depType": "dependencies",
-    "managerData": Object {
+    "managerData": {
       "nestedVersion": true,
     },
     "skipReason": "path-dependency",
   },
-  Object {
+  {
     "currentValue": "0.1.0",
     "datasource": "crate",
     "depName": "amethyst_controls",
     "depType": "dependencies",
-    "managerData": Object {
+    "managerData": {
       "nestedVersion": true,
     },
     "skipReason": "path-dependency",
   },
-  Object {
+  {
     "currentValue": "0.1.0",
     "datasource": "crate",
     "depName": "amethyst_locale",
     "depType": "dependencies",
-    "managerData": Object {
+    "managerData": {
       "nestedVersion": true,
     },
     "skipReason": "path-dependency",
   },
-  Object {
+  {
     "currentValue": "0.7",
     "datasource": "crate",
     "depName": "amethyst_renderer",
     "depType": "dependencies",
-    "managerData": Object {
+    "managerData": {
       "nestedVersion": true,
     },
     "skipReason": "path-dependency",
   },
-  Object {
+  {
     "currentValue": "0.3",
     "datasource": "crate",
     "depName": "amethyst_input",
     "depType": "dependencies",
-    "managerData": Object {
+    "managerData": {
       "nestedVersion": true,
     },
     "skipReason": "path-dependency",
   },
-  Object {
+  {
     "currentValue": "0.2",
     "datasource": "crate",
     "depName": "amethyst_ui",
     "depType": "dependencies",
-    "managerData": Object {
+    "managerData": {
       "nestedVersion": true,
     },
     "skipReason": "path-dependency",
   },
-  Object {
+  {
     "currentValue": "0.2",
     "datasource": "crate",
     "depName": "amethyst_utils",
     "depType": "dependencies",
-    "managerData": Object {
+    "managerData": {
       "nestedVersion": true,
     },
     "skipReason": "path-dependency",
   },
-  Object {
+  {
     "currentValue": "1.0",
     "datasource": "crate",
     "depName": "derivative",
     "depType": "dependencies",
-    "managerData": Object {
+    "managerData": {
       "nestedVersion": false,
     },
   },
-  Object {
+  {
     "currentValue": "0.5",
     "datasource": "crate",
     "depName": "fern",
     "depType": "dependencies",
-    "managerData": Object {
+    "managerData": {
       "nestedVersion": true,
     },
   },
-  Object {
+  {
     "currentValue": "0.4",
     "datasource": "crate",
     "depName": "log",
     "depType": "dependencies",
-    "managerData": Object {
+    "managerData": {
       "nestedVersion": false,
     },
   },
-  Object {
+  {
     "currentValue": "1.0.1",
     "datasource": "crate",
     "depName": "rayon",
     "depType": "dependencies",
-    "managerData": Object {
+    "managerData": {
       "nestedVersion": false,
     },
   },
-  Object {
+  {
     "currentValue": "0.1",
     "datasource": "crate",
     "depName": "rustc_version_runtime",
     "depType": "dependencies",
-    "managerData": Object {
+    "managerData": {
       "nestedVersion": false,
     },
   },
-  Object {
+  {
     "currentValue": "0.15",
     "datasource": "crate",
     "depName": "winit",
     "depType": "dependencies",
-    "managerData": Object {
+    "managerData": {
       "nestedVersion": false,
     },
   },
-  Object {
+  {
     "currentValue": "0.1",
     "datasource": "crate",
     "depName": "thread_profiler",
     "depType": "dependencies",
-    "managerData": Object {
+    "managerData": {
       "nestedVersion": true,
     },
   },
-  Object {
+  {
     "currentValue": "0.2",
     "datasource": "crate",
     "depName": "amethyst_gltf",
     "depType": "dev-dependencies",
-    "managerData": Object {
+    "managerData": {
       "nestedVersion": true,
     },
     "skipReason": "path-dependency",
   },
-  Object {
+  {
     "currentValue": "0.5.10",
     "datasource": "crate",
     "depName": "env_logger",
     "depType": "dev-dependencies",
-    "managerData": Object {
+    "managerData": {
       "nestedVersion": false,
     },
   },
-  Object {
+  {
     "currentValue": "0.6",
     "datasource": "crate",
     "depName": "genmesh",
     "depType": "dev-dependencies",
-    "managerData": Object {
+    "managerData": {
       "nestedVersion": false,
     },
   },
-  Object {
+  {
     "currentValue": "0.2",
     "datasource": "crate",
     "depName": "ron",
     "depType": "dev-dependencies",
-    "managerData": Object {
+    "managerData": {
       "nestedVersion": false,
     },
   },
-  Object {
+  {
     "currentValue": "1.0",
     "datasource": "crate",
     "depName": "serde",
     "depType": "dev-dependencies",
-    "managerData": Object {
+    "managerData": {
       "nestedVersion": false,
     },
   },
-  Object {
+  {
     "currentValue": "1.0",
     "datasource": "crate",
     "depName": "serde_derive",
     "depType": "dev-dependencies",
-    "managerData": Object {
+    "managerData": {
       "nestedVersion": false,
     },
   },
-  Object {
+  {
     "currentValue": "0.1",
     "datasource": "crate",
     "depName": "vergen",
     "depType": "build-dependencies",
-    "managerData": Object {
+    "managerData": {
       "nestedVersion": false,
     },
   },
@@ -243,162 +243,162 @@ Array [
 `;
 
 exports[`modules/manager/cargo/extract extractPackageFile() extracts multiple dependencies simple 1`] = `
-Array [
-  Object {
+[
+  {
     "currentValue": "=0.2.43",
     "datasource": "crate",
     "depName": "libc",
     "depType": "dependencies",
-    "managerData": Object {
+    "managerData": {
       "nestedVersion": false,
     },
   },
-  Object {
+  {
     "currentValue": "1.0.4",
     "datasource": "crate",
     "depName": "bitflags",
     "depType": "dependencies",
-    "managerData": Object {
+    "managerData": {
       "nestedVersion": false,
     },
   },
-  Object {
+  {
     "currentValue": "=0.1",
     "datasource": "crate",
     "depName": "pcap-sys",
     "depType": "dependencies",
-    "managerData": Object {
+    "managerData": {
       "nestedVersion": true,
     },
     "skipReason": "path-dependency",
   },
-  Object {
+  {
     "currentValue": "0.21.0",
     "datasource": "crate",
     "depName": "pnet",
     "depType": "dependencies",
-    "managerData": Object {
+    "managerData": {
       "nestedVersion": true,
     },
   },
-  Object {
+  {
     "currentValue": "0.1.0",
     "datasource": "crate",
     "depName": "git_dep_with_version",
     "depType": "dependencies",
-    "managerData": Object {
+    "managerData": {
       "nestedVersion": true,
     },
     "skipReason": "git-dependency",
   },
-  Object {
+  {
     "currentValue": "",
     "datasource": "crate",
     "depName": "git_dep",
     "depType": "dependencies",
-    "managerData": Object {
+    "managerData": {
       "nestedVersion": false,
     },
     "skipReason": "git-dependency",
   },
-  Object {
+  {
     "currentValue": "0.0.0",
     "datasource": "crate",
     "depName": "same_version_1__",
     "depType": "dependencies",
-    "managerData": Object {
+    "managerData": {
       "nestedVersion": false,
     },
   },
-  Object {
+  {
     "currentValue": "0.0.0",
     "datasource": "crate",
     "depName": "same_version_1_",
     "depType": "dependencies",
-    "managerData": Object {
+    "managerData": {
       "nestedVersion": false,
     },
   },
-  Object {
+  {
     "currentValue": "0.0.0",
     "datasource": "crate",
     "depName": "same_version_1",
     "depType": "dependencies",
-    "managerData": Object {
+    "managerData": {
       "nestedVersion": false,
     },
   },
-  Object {
+  {
     "currentValue": "0.4.2",
     "datasource": "crate",
     "depName": "dep1",
     "depType": "dependencies",
-    "managerData": Object {
+    "managerData": {
       "nestedVersion": true,
     },
   },
-  Object {
+  {
     "currentValue": "=0.3.6",
     "datasource": "crate",
     "depName": "winapi",
     "depType": "dependencies",
-    "managerData": Object {
+    "managerData": {
       "nestedVersion": true,
     },
     "target": "cfg(windows)",
   },
-  Object {
+  {
     "currentValue": "0.2.37",
     "datasource": "crate",
     "depName": "wasm-bindgen",
     "depType": "dependencies",
-    "managerData": Object {
+    "managerData": {
       "nestedVersion": false,
     },
-    "target": "cfg(target_arch = \\"wasm32\\")",
+    "target": "cfg(target_arch = "wasm32")",
   },
-  Object {
+  {
     "currentValue": "0.3.14",
     "datasource": "crate",
     "depName": "js-sys",
     "depType": "dependencies",
-    "managerData": Object {
+    "managerData": {
       "nestedVersion": false,
     },
-    "target": "cfg(target_arch = \\"wasm32\\")",
+    "target": "cfg(target_arch = "wasm32")",
   },
-  Object {
+  {
     "currentValue": "",
     "datasource": "crate",
     "depName": "js_relative_import",
     "depType": "dependencies",
-    "managerData": Object {
+    "managerData": {
       "nestedVersion": false,
     },
     "skipReason": "path-dependency",
-    "target": "cfg(target_arch = \\"wasm32\\")",
+    "target": "cfg(target_arch = "wasm32")",
   },
-  Object {
+  {
     "currentValue": "0.3.14",
     "datasource": "crate",
     "depName": "web-sys",
     "depType": "dependencies",
-    "managerData": Object {
+    "managerData": {
       "nestedVersion": true,
     },
-    "target": "cfg(target_arch = \\"wasm32\\")",
+    "target": "cfg(target_arch = "wasm32")",
   },
 ]
 `;
 
 exports[`modules/manager/cargo/extract extractPackageFile() extracts original package name of renamed dependencies 1`] = `
-Array [
-  Object {
+[
+  {
     "currentValue": "0.4.0",
     "datasource": "crate",
     "depName": "boolector-solver",
     "depType": "dependencies",
-    "managerData": Object {
+    "managerData": {
       "nestedVersion": true,
     },
     "packageName": "boolector",
@@ -407,83 +407,83 @@ Array [
 `;
 
 exports[`modules/manager/cargo/extract extractPackageFile() extracts platform specific dependencies 1`] = `
-Array [
-  Object {
+[
+  {
     "currentValue": "0.2.37",
     "datasource": "crate",
     "depName": "wasm-bindgen",
     "depType": "dependencies",
-    "managerData": Object {
+    "managerData": {
       "nestedVersion": false,
     },
-    "target": "cfg(target_arch = \\"wasm32\\")",
+    "target": "cfg(target_arch = "wasm32")",
   },
-  Object {
+  {
     "currentValue": "0.3.14",
     "datasource": "crate",
     "depName": "js-sys",
     "depType": "dependencies",
-    "managerData": Object {
+    "managerData": {
       "nestedVersion": false,
     },
-    "target": "cfg(target_arch = \\"wasm32\\")",
+    "target": "cfg(target_arch = "wasm32")",
   },
-  Object {
+  {
     "currentValue": "",
     "datasource": "crate",
     "depName": "js_relative_import",
     "depType": "dependencies",
-    "managerData": Object {
+    "managerData": {
       "nestedVersion": false,
     },
     "skipReason": "path-dependency",
-    "target": "cfg(target_arch = \\"wasm32\\")",
+    "target": "cfg(target_arch = "wasm32")",
   },
-  Object {
+  {
     "currentValue": "0.3.14",
     "datasource": "crate",
     "depName": "web-sys",
     "depType": "dependencies",
-    "managerData": Object {
+    "managerData": {
       "nestedVersion": true,
     },
-    "target": "cfg(target_arch = \\"wasm32\\")",
+    "target": "cfg(target_arch = "wasm32")",
   },
 ]
 `;
 
 exports[`modules/manager/cargo/extract extractPackageFile() extracts registry urls from .cargo/config (legacy path) 1`] = `
-Array [
-  Object {
+[
+  {
     "currentValue": "0.1.0",
     "datasource": "crate",
     "depName": "proprietary-crate",
     "depType": "dependencies",
-    "managerData": Object {
+    "managerData": {
       "nestedVersion": true,
     },
-    "registryUrls": Array [
+    "registryUrls": [
       "https://dl.cloudsmith.io/basic/my-org/my-repo/cargo/index.git",
     ],
   },
-  Object {
+  {
     "currentValue": "3.0.0",
     "datasource": "crate",
     "depName": "mcorbin-test",
     "depType": "dependencies",
-    "managerData": Object {
+    "managerData": {
       "nestedVersion": true,
     },
-    "registryUrls": Array [
+    "registryUrls": [
       "https://github.com/mcorbin/testregistry",
     ],
   },
-  Object {
+  {
     "currentValue": "0.2",
     "datasource": "crate",
     "depName": "tokio",
     "depType": "dependencies",
-    "managerData": Object {
+    "managerData": {
       "nestedVersion": false,
     },
   },
@@ -491,37 +491,37 @@ Array [
 `;
 
 exports[`modules/manager/cargo/extract extractPackageFile() extracts registry urls from .cargo/config.toml 1`] = `
-Array [
-  Object {
+[
+  {
     "currentValue": "0.1.0",
     "datasource": "crate",
     "depName": "proprietary-crate",
     "depType": "dependencies",
-    "managerData": Object {
+    "managerData": {
       "nestedVersion": true,
     },
-    "registryUrls": Array [
+    "registryUrls": [
       "https://dl.cloudsmith.io/basic/my-org/my-repo/cargo/index.git",
     ],
   },
-  Object {
+  {
     "currentValue": "3.0.0",
     "datasource": "crate",
     "depName": "mcorbin-test",
     "depType": "dependencies",
-    "managerData": Object {
+    "managerData": {
       "nestedVersion": true,
     },
-    "registryUrls": Array [
+    "registryUrls": [
       "https://github.com/mcorbin/testregistry",
     ],
   },
-  Object {
+  {
     "currentValue": "0.2",
     "datasource": "crate",
     "depName": "tokio",
     "depType": "dependencies",
-    "managerData": Object {
+    "managerData": {
       "nestedVersion": false,
     },
   },
@@ -529,33 +529,33 @@ Array [
 `;
 
 exports[`modules/manager/cargo/extract extractPackageFile() fails to parse cargo config with invalid TOML 1`] = `
-Array [
-  Object {
+[
+  {
     "currentValue": "0.1.0",
     "datasource": "crate",
     "depName": "proprietary-crate",
     "depType": "dependencies",
-    "managerData": Object {
+    "managerData": {
       "nestedVersion": true,
     },
     "skipReason": "unknown-registry",
   },
-  Object {
+  {
     "currentValue": "3.0.0",
     "datasource": "crate",
     "depName": "mcorbin-test",
     "depType": "dependencies",
-    "managerData": Object {
+    "managerData": {
       "nestedVersion": true,
     },
     "skipReason": "unknown-registry",
   },
-  Object {
+  {
     "currentValue": "0.2",
     "datasource": "crate",
     "depName": "tokio",
     "depType": "dependencies",
-    "managerData": Object {
+    "managerData": {
       "nestedVersion": false,
     },
   },
@@ -563,80 +563,80 @@ Array [
 `;
 
 exports[`modules/manager/cargo/extract extractPackageFile() handles inline tables 1`] = `
-Array [
-  Object {
+[
+  {
     "currentValue": "0.1",
     "datasource": "crate",
     "depName": "pcap-sys",
     "depType": "dependencies",
-    "managerData": Object {
+    "managerData": {
       "nestedVersion": true,
     },
     "skipReason": "path-dependency",
   },
-  Object {
+  {
     "currentValue": "0.21.0",
     "datasource": "crate",
     "depName": "pnet",
     "depType": "dependencies",
-    "managerData": Object {
+    "managerData": {
       "nestedVersion": true,
     },
   },
-  Object {
+  {
     "currentValue": "1.2",
     "datasource": "crate",
     "depName": "dep1",
     "depType": "dependencies",
-    "managerData": Object {
+    "managerData": {
       "nestedVersion": true,
     },
     "skipReason": "path-dependency",
   },
-  Object {
+  {
     "currentValue": "3.4",
     "datasource": "crate",
     "depName": "dep2",
     "depType": "dependencies",
-    "managerData": Object {
+    "managerData": {
       "nestedVersion": true,
     },
     "skipReason": "path-dependency",
   },
-  Object {
+  {
     "currentValue": "~12.3.1",
     "datasource": "crate",
     "depName": "dep3",
     "depType": "dependencies",
-    "managerData": Object {
+    "managerData": {
       "nestedVersion": true,
     },
     "skipReason": "path-dependency",
   },
-  Object {
+  {
     "currentValue": "INVALID 3.3.1 VERSION",
     "datasource": "crate",
     "depName": "dep4",
     "depType": "dependencies",
-    "managerData": Object {
+    "managerData": {
       "nestedVersion": true,
     },
   },
-  Object {
+  {
     "currentValue": "3.2.1",
     "datasource": "crate",
     "depName": "dep5",
     "depType": "dependencies",
-    "managerData": Object {
+    "managerData": {
       "nestedVersion": true,
     },
   },
-  Object {
+  {
     "currentValue": "",
     "datasource": "crate",
     "depName": "dep6",
     "depType": "dependencies",
-    "managerData": Object {
+    "managerData": {
       "nestedVersion": false,
     },
     "skipReason": "invalid-dependency-specification",
@@ -645,63 +645,63 @@ Array [
 `;
 
 exports[`modules/manager/cargo/extract extractPackageFile() handles standard tables 1`] = `
-Array [
-  Object {
+[
+  {
     "currentValue": "1.2",
     "datasource": "crate",
     "depName": "dep1",
     "depType": "dependencies",
-    "managerData": Object {
+    "managerData": {
       "nestedVersion": true,
     },
     "skipReason": "path-dependency",
   },
-  Object {
+  {
     "currentValue": "3.4",
     "datasource": "crate",
     "depName": "dep2",
     "depType": "dependencies",
-    "managerData": Object {
+    "managerData": {
       "nestedVersion": true,
     },
     "skipReason": "path-dependency",
   },
-  Object {
+  {
     "currentValue": "~12.3.1",
     "datasource": "crate",
     "depName": "dep3",
     "depType": "dependencies",
-    "managerData": Object {
+    "managerData": {
       "nestedVersion": true,
     },
     "skipReason": "path-dependency",
   },
-  Object {
+  {
     "currentValue": "INVALID 1.3.1 VERSION",
     "datasource": "crate",
     "depName": "dep4",
     "depType": "dependencies",
-    "managerData": Object {
+    "managerData": {
       "nestedVersion": true,
     },
     "skipReason": "path-dependency",
   },
-  Object {
+  {
     "currentValue": "",
     "datasource": "crate",
     "depName": "dep5",
     "depType": "dependencies",
-    "managerData": Object {
+    "managerData": {
       "nestedVersion": false,
     },
     "skipReason": "path-dependency",
   },
-  Object {
+  {
     "currentValue": "",
     "datasource": "crate",
     "depName": "dep7",
     "depType": "dependencies",
-    "managerData": Object {
+    "managerData": {
       "nestedVersion": false,
     },
     "skipReason": "invalid-dependency-specification",
@@ -710,33 +710,33 @@ Array [
 `;
 
 exports[`modules/manager/cargo/extract extractPackageFile() ignore cargo config registries with missing index 1`] = `
-Array [
-  Object {
+[
+  {
     "currentValue": "0.1.0",
     "datasource": "crate",
     "depName": "proprietary-crate",
     "depType": "dependencies",
-    "managerData": Object {
+    "managerData": {
       "nestedVersion": true,
     },
     "skipReason": "unknown-registry",
   },
-  Object {
+  {
     "currentValue": "3.0.0",
     "datasource": "crate",
     "depName": "mcorbin-test",
     "depType": "dependencies",
-    "managerData": Object {
+    "managerData": {
       "nestedVersion": true,
     },
     "skipReason": "unknown-registry",
   },
-  Object {
+  {
     "currentValue": "0.2",
     "datasource": "crate",
     "depName": "tokio",
     "depType": "dependencies",
-    "managerData": Object {
+    "managerData": {
       "nestedVersion": false,
     },
   },
@@ -744,13 +744,13 @@ Array [
 `;
 
 exports[`modules/manager/cargo/extract extractPackageFile() skips unknown registries 1`] = `
-Array [
-  Object {
+[
+  {
     "currentValue": "0.1.0",
     "datasource": "crate",
     "depName": "foobar",
     "depType": "dependencies",
-    "managerData": Object {
+    "managerData": {
       "nestedVersion": true,
     },
     "skipReason": "unknown-registry",

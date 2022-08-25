@@ -6,7 +6,7 @@ import { range } from '../../../util/range';
 import { datasource, defaultRegistryUrl, pageSize } from './common';
 
 function getPath(page: number, imageType = 'jdk'): string {
-  return `/v3/info/release_versions?page_size=${pageSize}&image_type=${imageType}&project=jdk&release_type=ga&sort_method=DATE&sort_order=DESC&vendor=adoptium&page=${page}`;
+  return `/v3/info/release_versions?page_size=${pageSize}&image_type=${imageType}&project=jdk&release_type=ga&sort_method=DATE&sort_order=DESC&page=${page}`;
 }
 
 const depName = 'java';

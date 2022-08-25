@@ -72,6 +72,7 @@ export async function checkOnboardingBranch(
     }
   }
   if (!GlobalConfig.get('dryRun')) {
+    logger.debug('Checkout onboarding branch.');
     // TODO #7154
     await checkoutBranch(onboardingBranch!);
   }

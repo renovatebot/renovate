@@ -19,6 +19,7 @@ const bunyanFields = [
 ];
 const metaFields = [
   'repository',
+  'baseBranch',
   'packageFile',
   'depType',
   'dependency',

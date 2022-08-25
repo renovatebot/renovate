@@ -192,8 +192,6 @@ Acceptable values are:
 Not all platforms support all pull request merge strategies.
 In cases where a merge strategy is not supported by the platform, Renovate will hold off on merging instead of silently merging in a way you didn't wish for.
 
-The only platform that supports `automergeStrategy` is Bitbucket Cloud.
-
 ## automergeType
 
 This setting is only applicable if you opt in to configure `automerge` to `true` for any of your dependencies.
@@ -288,6 +286,17 @@ If you truly need to configure this then it probably means either:
 
 - You are hopefully mistaken, and there's a better approach you should use, so open a new "config help" discussion at the [Renovate discussions tab](https://github.com/renovatebot/renovate/discussions) or
 - You have a use case we didn't expect and we should have a feature request from you to add it to the project
+
+## branchNameStrict
+
+By default, Renovate doesn't care about special characters when slugifying the branch name.
+This means that special characters like `.` may end up in the branch name.
+
+When you set `branchNameStrict` to `true`:
+
+- all special characters are removed
+- only alphabetic characters are allowed
+- hyphens `-` are used to separate sections
 
 ## branchPrefix
 
@@ -449,6 +458,10 @@ After we changed the [`baseBranches`](https://docs.renovatebot.com/configuration
 !!! info
     This feature writes plain JSON for `.json` files, and JSON5 for `.json5` files.
     JSON5 content can potentially be down leveled (`.json` files) and all comments will be removed.
+
+<!-- prettier-ignore -->
+!!! note
+    Closing the config migration PR will cause it to be ignored and not being reopend/recreated in the future.',
 
 ## configWarningReuseIssue
 
@@ -634,12 +647,12 @@ If you want the PRs created by Renovate to be considered as drafts rather than n
 }
 ```
 
-This option is evaluated at PR/MR creation time and is only supported on the following platforms: GitHub, GitLab, Azure.
+This option is evaluated at PR/MR creation time.
 
 <!-- prettier-ignore -->
 !!! note
-    GitLab implements draft status by checking whether the PR's title starts with certain strings.
-    This means that `draftPR` on GitLab is incompatible with the legacy method of triggering Renovate to rebase a PR by renaming the PR to start with `rebase!`.
+    GitLab and Gitea implement draft status by checking if the PR's title starts with certain strings.
+    This means that `draftPR` on GitLab and Gitea are incompatible with the legacy method of triggering Renovate to rebase a PR by renaming the PR to start with `rebase!`.
 
 ## enabled
 
@@ -1076,7 +1089,11 @@ When this field is enabled, Renovate will abort its run if it encounters either 
 
 ### authType
 
-This can be used with `token` to create a custom http `authorization` header.
+You may use the `authType` option to create a custom HTTP `authorization` header.
+For `authType` to work, you must also set your own `token`.
+
+Do not set `authType=Bearer`: it's the default setting for Renovate anyway.
+Do not set a username or password when you're using `authType`, as `authType` doesn't use usernames or passwords.
 
 An example for npm basic auth with token:
 
@@ -1314,8 +1331,8 @@ Use this configuration option for shared config across npm/Yarn/pnpm and meteor 
 
 ## labels
 
-By default, Renovate won't add any labels to its PRs.
-If you want Renovate to do so then define a `labels` array of one or more label strings.
+By default, Renovate won't add any labels to PRs.
+If you want Renovate to add labels to PRs it creates then define a `labels` array of one or more label strings.
 If you want the same label(s) for every PR then you can configure it at the top level of config.
 However you can also fully override them on a per-package basis.
 
@@ -1334,6 +1351,14 @@ Consider this example:
 ```
 
 With the above config, every PR raised by Renovate will have the label `dependencies` while PRs containing `eslint`-related packages will instead have the label `linting`.
+
+Renovate only adds labels when it creates the PR, which means:
+
+- If you remove labels which Renovate added, it won't re-apply them
+- If you change your config, the new/changed labels are not applied to any open PRs
+
+The `labels` array is non-mergeable, meaning if multiple `packageRules` match then Renovate uses the last value for `labels`.
+If you want to add/combine labels, use the `addLabels` config option, which is mergeable.
 
 ## lockFileMaintenance
 
@@ -1478,6 +1503,10 @@ For example you have multiple `package.json` and want to use `dependencyDashboar
 
 Important to know: Renovate will evaluate all `packageRules` and not stop once it gets a first match.
 You should order your `packageRules` in order of importance so that later rules can override settings from earlier rules if needed.
+
+<!-- prettier-ignore -->
+!!! warning
+    Avoid nesting any `object`-type configuration in a `packageRules` array, such as a `major` or `minor` block.
 
 ### allowedVersions
 
@@ -1847,6 +1876,30 @@ For example to apply a special label for Major updates:
 }
 ```
 
+### customChangelogUrl
+
+Use this field to set the source URL for a package, including overriding an existing one.
+Source URLs are necessary in order to look up release notes.
+
+Using this field we can specify the exact url to fetch release notes from.
+
+Example setting source URL for package "dummy":
+
+```json
+{
+  "packageRules": [
+    {
+      "matchPackageNames": ["dummy"],
+      "customChangelogUrl": "https://github.com/org/dummy"
+    }
+  ]
+}
+```
+
+<!-- prettier-ignore -->
+!!! note
+Renovate can fetch changelogs from GitHub and GitLab platforms only, and setting the URL to an unsupported host/platform type won't change that.
+
 ### replacementName
 
 This config option only works with the `npm` manager.
@@ -1898,6 +1951,15 @@ If enabled Renovate will pin Docker images by means of their SHA256 digest and n
 
 ## platformAutomerge
 
+<!-- prettier-ignore -->
+!!! warning
+    Before you enable `platformAutomerge` you should enable your Git hosting platform's capabilities to enforce test passing before PR merge.
+    If you don't do this, the platform might merge Renovate PRs even if the repository's tests haven't started, are in still in progress, or possibly even when they have failed.
+    On GitHub this is called "Require status checks before merging", which you can find in the "Branch protection rules" section of the settings for your repository.
+    [GitHub docs, about protected branches](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/defining-the-mergeability-of-pull-requests/about-protected-branches)
+    [GitHub docs, require status checks before merging](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/defining-the-mergeability-of-pull-requests/about-protected-branches#require-status-checks-before-merging)
+    If you're using another platform, search their documentation for a similar feature.
+
 If you have enabled `automerge` and set `automergeType=pr` in the Renovate config, then you can also set `platformAutomerge` to `true` to speed up merging via the platform's native automerge functionality.
 
 Renovate tries platform-native automerge only when it initially creates the PR.
@@ -1913,6 +1975,8 @@ Note that the outcome of `rebaseWhen=auto` can differ when `platformAutomerge=tr
 Normally when you set `rebaseWhen=auto` Renovate rebases any branch that's behind the base branch automatically, and some people rely on that.
 This behavior is no longer guaranteed when you enable `platformAutomerge` because the platform might automerge a branch which is not up-to-date.
 For example, GitHub might automerge a Renovate branch even if it's behind the base branch at the time.
+
+Please check platform specific docs for version requirements.
 
 ## platformCommit
 
@@ -2508,6 +2572,11 @@ This feature works with the following managers:
 - [`helmv3`](/modules/manager/helmv3/)
 - [`helmfile`](/modules/manager/helmfile/)
 - [`gitlabci`](/modules/manager/gitlabci/)
+- [`dockerfile`](/modules/manager/dockerfile)
+- [`docker-compose`](/modules/manager/docker-compose)
+- [`kubernetes`](/modules/manager/kubernetes)
+- [`ansible`](/modules/manager/ansible)
+- [`droneci`](/modules/manager/droneci)
 
 ## registryUrls
 

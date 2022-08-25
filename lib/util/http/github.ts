@@ -18,6 +18,7 @@ import { parseLinkHeader } from '../url';
 import type { GotLegacyError } from './legacy';
 import type {
   GraphqlOptions,
+  HttpOptions,
   HttpPostOptions,
   HttpResponse,
   InternalHttpOptions,
@@ -30,15 +31,10 @@ export const setBaseUrl = (url: string): void => {
   baseUrl = url;
 };
 
-interface GithubInternalOptions extends InternalHttpOptions {
-  body?: string;
-}
-
-export interface GithubHttpOptions extends InternalHttpOptions {
+export interface GithubHttpOptions extends HttpOptions {
   paginate?: boolean | string;
   paginationField?: string;
   pageLimit?: number;
-  token?: string;
 }
 
 interface GithubGraphqlRepoData<T = unknown> {
@@ -274,7 +270,7 @@ export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
 
   protected override async request<T>(
     url: string | URL,
-    options?: GithubInternalOptions & GithubHttpOptions,
+    options?: InternalHttpOptions & GithubHttpOptions,
     okToRetry = true
   ): Promise<HttpResponse<T>> {
     const opts = {

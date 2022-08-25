@@ -55,9 +55,7 @@ export async function extractPackageFile(
       };
       if (gemMatch.groups?.currentValue) {
         const currentValue = gemMatch.groups.currentValue;
-        dep.currentValue = regEx(/\s*,\s*/).test(currentValue)
-          ? currentValue
-          : currentValue.slice(1, -1);
+        dep.currentValue = currentValue;
       }
       dep.datasource = RubyGemsDatasource.id;
       res.deps.push(dep);
@@ -191,6 +189,8 @@ export async function extractPackageFile(
       res.lockFiles = [gemfileLock];
       const lockedEntries = extractLockFileEntries(lockContent);
       for (const dep of res.deps) {
+        // TODO: types (#7154)
+        // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
         const lockedDepValue = lockedEntries.get(`${dep.depName}`);
         if (lockedDepValue) {
           dep.lockedVersion = lockedDepValue;

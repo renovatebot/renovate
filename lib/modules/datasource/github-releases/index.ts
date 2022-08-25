@@ -1,3 +1,5 @@
+// TODO: types (#7154)
+/* eslint-disable @typescript-eslint/restrict-template-expressions */
 import hasha from 'hasha';
 import { logger } from '../../../logger';
 import { cache } from '../../../util/cache/package/decorator';

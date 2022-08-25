@@ -208,7 +208,8 @@ describe('util/git/index', () => {
     it('should exclude submodules', async () => {
       const repo = Git(base.path);
       await repo.submoduleAdd(base.path, 'submodule');
-      await repo.commit('Add submodule');
+      await repo.submoduleAdd(base.path, 'file');
+      await repo.commit('Add submodules');
       await git.initRepo({
         cloneSubmodules: true,
         url: base.path,
@@ -1033,6 +1034,12 @@ describe('util/git/index', () => {
       await expect(git.getRepoStatus('../../bin')).rejects.toThrow(
         INVALID_PATH
       );
+    });
+  });
+
+  describe('getSubmodules', () => {
+    it('should return empty array', async () => {
+      expect(await git.getSubmodules()).toHaveLength(0);
     });
   });
 });

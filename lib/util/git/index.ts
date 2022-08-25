@@ -529,7 +529,6 @@ export async function checkoutBranch(branchName: string): Promise<CommitSha> {
 export async function getFileList(): Promise<string[]> {
   await syncGit();
   const branch = config.currentBranch;
-  const submodules = await getSubmodules();
   let files: string;
   try {
     files = await git.raw(['ls-tree', '-r', branch]);
@@ -547,14 +546,12 @@ export async function getFileList(): Promise<string[]> {
   if (!files) {
     return [];
   }
+  // submodules are starting with `160000 commit`
   return files
     .split(newlineRegex)
     .filter(is.string)
     .filter((line) => line.startsWith('100'))
-    .map((line) => line.split(regEx(/\t/)).pop()!)
-    .filter((file) =>
-      submodules.every((submodule: string) => !file.startsWith(submodule))
-    );
+    .map((line) => line.split(regEx(/\t/)).pop()!);
 }
 
 export function getBranchList(): string[] {

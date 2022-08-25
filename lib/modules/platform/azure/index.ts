@@ -40,6 +40,7 @@ import type {
   RepoResult,
   UpdatePrConfig,
 } from '../types';
+import { repoFingerprint } from '../util';
 import { smartTruncate } from '../utils/pr-body';
 import * as azureApi from './azure-got-wrapper';
 import * as azureHelper from './azure-helper';
@@ -134,13 +135,17 @@ export async function getRawFile(
     repoId = config.repoId;
   }
 
+  if (!repoId) {
+    logger.debug('No repoId so cannot getRawFile');
+    return null;
+  }
+
   const versionDescriptor: GitVersionDescriptor = {
     version: branchOrTag,
   } as GitVersionDescriptor;
 
   const buf = await azureApiGit.getItemContent(
-    // TODO #7154
-    repoId!,
+    repoId,
     fileName,
     undefined,
     undefined,
@@ -161,8 +166,7 @@ export async function getJsonFile(
   branchOrTag?: string
 ): Promise<any | null> {
   const raw = await getRawFile(fileName, repoName, branchOrTag);
-  // TODO #7154
-  return JSON5.parse(raw!);
+  return raw ? JSON5.parse(raw) : null;
 }
 
 export async function initRepo({
@@ -227,6 +231,7 @@ export async function initRepo({
   const repoConfig: RepoResult = {
     defaultBranch,
     isFork: false,
+    repoFingerprint: repoFingerprint(repo.id!, defaults.endpoint),
   };
   return repoConfig;
 }
@@ -688,6 +693,7 @@ export async function mergePr({
     `Updating PR ${pullRequestId} to status ${PullRequestStatus.Completed} (${
       PullRequestStatus[PullRequestStatus.Completed]
     }) with lastMergeSourceCommit ${
+      // TODO: types (#7154)
       // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
       pr.lastMergeSourceCommit?.commitId
     } using mergeStrategy ${mergeMethod} (${
@@ -723,7 +729,7 @@ export async function mergePr({
         `Expected PR to have status ${
           PullRequestStatus[PullRequestStatus.Completed]
           // TODO #7154
-        }, however it is ${PullRequestStatus[pr.status!]}.`
+        }. However, it is ${PullRequestStatus[pr.status!]}.`
       );
     }
     return true;

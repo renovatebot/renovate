@@ -1,6 +1,6 @@
-import crypto from 'crypto';
 import merge from 'deepmerge';
 import got, { Options, RequestError, Response } from 'got';
+import hasha from 'hasha';
 import { HOST_DISABLED } from '../../constants/error-messages';
 import { pkg } from '../../expose.cjs';
 import { logger } from '../../logger';
@@ -133,18 +133,15 @@ export class Http<GetOptions = HttpOptions, PostOptions = HttpPostOptions> {
     }
     options = applyAuthorization(options);
 
-    const cacheKey = crypto
-      .createHash('md5')
-      .update(
-        'got-' +
-          JSON.stringify({
-            url,
-            headers: options.headers,
-            method: options.method,
-          })
-      )
-      .digest('hex');
-
+    // use sha512: https://www.npmjs.com/package/hasha#algorithm
+    const cacheKey = hasha([
+      'got-',
+      JSON.stringify({
+        url,
+        headers: options.headers,
+        method: options.method,
+      }),
+    ]);
     let resPromise;
 
     // Cache GET requests unless useCache=false

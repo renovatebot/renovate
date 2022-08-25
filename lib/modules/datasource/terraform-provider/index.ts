@@ -1,3 +1,5 @@
+// TODO: types (#7154)
+/* eslint-disable @typescript-eslint/restrict-template-expressions */
 import is from '@sindresorhus/is';
 import pMap from 'p-map';
 import { logger } from '../../../logger';

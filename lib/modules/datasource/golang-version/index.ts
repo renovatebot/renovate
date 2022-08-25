@@ -40,7 +40,9 @@ export class GolangVersionDatasource extends Datasource {
       sourceUrl: 'https://github.com/golang/go',
       releases: [],
     };
-    const golangVersionsUrl = `${registryUrl}master/internal/history/release.go`;
+    // TODO: types (#7154)
+    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+    const golangVersionsUrl = `${registryUrl}HEAD/internal/history/release.go`;
 
     const response = await this.http.get(golangVersionsUrl);
 

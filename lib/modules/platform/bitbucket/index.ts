@@ -8,6 +8,7 @@ import { BranchStatus, PrState, VulnerabilityAlert } from '../../../types';
 import * as git from '../../../util/git';
 import * as hostRules from '../../../util/host-rules';
 import { BitbucketHttp, setBaseUrl } from '../../../util/http/bitbucket';
+import type { HttpOptions } from '../../../util/http/types';
 import { regEx } from '../../../util/regex';
 import { sanitize } from '../../../util/sanitize';
 import type {
@@ -27,6 +28,7 @@ import type {
   RepoResult,
   UpdatePrConfig,
 } from '../types';
+import { repoFingerprint } from '../util';
 import { smartTruncate } from '../utils/pr-body';
 import { readOnlyIssueBody } from '../utils/read-only-issue-body';
 import * as comments from './comments';
@@ -54,10 +56,11 @@ export async function initPlatform({
   endpoint,
   username,
   password,
+  token,
 }: PlatformParams): Promise<PlatformResult> {
-  if (!(username && password)) {
+  if (!(username && password) && !token) {
     throw new Error(
-      'Init: You must configure a Bitbucket username and password'
+      'Init: You must configure either a Bitbucket token or username and password'
     );
   }
   if (endpoint && endpoint !== BITBUCKET_PROD_ENDPOINT) {
@@ -68,13 +71,18 @@ export async function initPlatform({
   }
   setBaseUrl(defaults.endpoint);
   renovateUserUuid = null;
+  const options: HttpOptions = {
+    useCache: false,
+  };
+  if (token) {
+    options.token = token;
+  } else {
+    options.username = username;
+    options.password = password;
+  }
   try {
     const { uuid } = (
-      await bitbucketHttp.getJson<Account>('/2.0/user', {
-        username,
-        password,
-        useCache: false,
-      })
+      await bitbucketHttp.getJson<Account>('/2.0/user', options)
     ).body;
     renovateUserUuid = uuid;
   } catch (err) {
@@ -192,9 +200,12 @@ export async function initRepo({
   // TODO #7154
   const hostnameWithoutApiPrefix = regEx(/api[.|-](.+)/).exec(hostname!)?.[1];
 
+  const auth = opts.token
+    ? `x-token-auth:${opts.token}`
+    : `${opts.username!}:${opts.password!}`;
   const url = git.getUrl({
     protocol: 'https',
-    auth: `${opts.username}:${opts.password}`,
+    auth,
     hostname: hostnameWithoutApiPrefix,
     repository,
   });
@@ -207,6 +218,7 @@ export async function initRepo({
   const repoConfig: RepoResult = {
     defaultBranch: info.mainbranch,
     isFork: info.isFork,
+    repoFingerprint: repoFingerprint(info.uuid, defaults.endpoint),
   };
   return repoConfig;
 }
@@ -249,6 +261,8 @@ export async function findPr({
   prTitle,
   state = PrState.All,
 }: FindPRConfig): Promise<Pr | null> {
+  // TODO: types (#7154)
+  // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
   logger.debug(`findPr(${branchName}, ${prTitle}, ${state})`);
   const prList = await getPrList();
   const pr = prList.find(
@@ -330,6 +344,8 @@ async function getStatus(
 ): Promise<utils.BitbucketStatus[]> {
   const sha = await getBranchCommit(branchName);
   return utils.accumulateValues<utils.BitbucketStatus>(
+    // TODO: types (#7154)
+    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
     `/2.0/repositories/${config.repository}/commit/${sha}/statuses`,
     'get',
     { useCache }
@@ -399,6 +415,8 @@ export async function setBranchStatus({
   };
 
   await bitbucketHttp.postJson(
+    // TODO: types (#7154)
+    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
     `/2.0/repositories/${config.repository}/commit/${sha}/statuses/build`,
     { body }
   );
@@ -847,6 +865,8 @@ export async function mergePr({
   id: prNo,
   strategy: mergeStrategy,
 }: MergePRConfig): Promise<boolean> {
+  // TODO: types (#7154)
+  // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
   logger.debug(`mergePr(${prNo}, ${branchName}, ${mergeStrategy})`);
 
   // Bitbucket Cloud does not support a rebase-alike; https://jira.atlassian.com/browse/BCLOUD-16610

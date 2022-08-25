@@ -1,11 +1,19 @@
 import { exec as cpExec, envMock } from '../../../test/exec-util';
+import { mockedFunction } from '../../../test/util';
 import { GlobalConfig } from '../../config/global';
 import type { RepoGlobalConfig } from '../../config/types';
 import { TEMPORARY_ERROR } from '../../constants/error-messages';
 import * as dockerModule from './docker';
+import { getHermitEnvs } from './hermit';
 import type { ExecOptions, RawExecOptions, VolumeOption } from './types';
 import { exec } from '.';
 
+const getHermitEnvsMock = mockedFunction(getHermitEnvs);
+
+jest.mock('./hermit', () => ({
+  ...jest.requireActual('./hermit'),
+  getHermitEnvs: jest.fn(),
+}));
 jest.mock('../../modules/datasource');
 
 interface TestInput {
@@ -15,19 +23,21 @@ interface TestInput {
   outCmd: string[];
   outOpts: RawExecOptions[];
   adminConfig?: Partial<RepoGlobalConfig>;
+  hermitEnvs?: Record<string, string>;
 }
 
 describe('util/exec/index', () => {
   let processEnvOrig: NodeJS.ProcessEnv;
 
   const cacheDir = '/tmp/renovate/cache/';
+  const containerbaseDir = '/tmp/renovate/cache/containerbase';
   const cwd = '/tmp/renovate/github/some/repo/';
 
   const defaultCwd = `-w "${cwd}"`;
   const defaultCacheVolume = `-v "${cacheDir}":"${cacheDir}"`;
   const defaultVolumes = `-v "${cwd}":"${cwd}" ${defaultCacheVolume}`;
 
-  const globalConfig: RepoGlobalConfig = { cacheDir };
+  const globalConfig: RepoGlobalConfig = { cacheDir, containerbaseDir };
 
   beforeEach(() => {
     dockerModule.resetPrefetchedImages();
@@ -67,11 +77,11 @@ describe('util/exec/index', () => {
 
   const buildpackEnv = {
     ...envMock.basic,
-    BUILDPACK_CACHE_DIR: `${cacheDir}buildpack`,
+    BUILDPACK_CACHE_DIR: `${cacheDir}containerbase`,
   };
   const buildpackEnvFiltered = {
     ...envMock.filtered,
-    BUILDPACK_CACHE_DIR: `${cacheDir}buildpack`,
+    BUILDPACK_CACHE_DIR: `${cacheDir}containerbase`,
   };
 
   const testInputs: [string, TestInput][] = [
@@ -710,6 +720,46 @@ describe('util/exec/index', () => {
         },
       },
     ],
+
+    [
+      'Hermit',
+      {
+        processEnv: {
+          ...envMock.basic,
+          CUSTOM_KEY: 'CUSTOM_VALUE',
+          PATH: '/home/user-a/bin;/usr/local/bin',
+        },
+        inCmd,
+        inOpts: {
+          cwd,
+        },
+        outCmd: [inCmd],
+        outOpts: [
+          {
+            cwd,
+            encoding,
+            env: {
+              ...envMock.basic,
+              CUSTOM_KEY: 'CUSTOM_OVERRIDEN_VALUE',
+              GOBIN: '/usr/src/app/repository-a/.hermit/go/bin',
+              PATH: '/usr/src/app/repository-a/bin/;/home/user-a/bin;/usr/local/bin;',
+            },
+            timeout: 900000,
+            maxBuffer: 10485760,
+          },
+        ],
+        hermitEnvs: {
+          GOBIN: '/usr/src/app/repository-a/.hermit/go/bin',
+          PATH: '/usr/src/app/repository-a/bin/;/home/user-a/bin;/usr/local/bin;',
+        },
+        adminConfig: {
+          customEnvVariables: {
+            CUSTOM_KEY: 'CUSTOM_OVERRIDEN_VALUE',
+          },
+          binarySource: 'hermit',
+        },
+      },
+    ],
   ];
 
   test.each(testInputs)('%s', async (_msg, testOpts) => {
@@ -720,6 +770,7 @@ describe('util/exec/index', () => {
       outCmd: outCommand,
       outOpts,
       adminConfig = {} as any,
+      hermitEnvs,
     } = testOpts;
 
     process.env = procEnv;
@@ -733,6 +784,10 @@ describe('util/exec/index', () => {
       return Promise.resolve({ stdout: '', stderr: '' });
     });
     GlobalConfig.set({ ...globalConfig, localDir: cwd, ...adminConfig });
+    if (hermitEnvs !== undefined) {
+      getHermitEnvsMock.mockResolvedValue(hermitEnvs);
+    }
+
     await exec(cmd as string, inOpts);
 
     expect(actualCmd).toEqual(outCommand);
@@ -790,6 +845,20 @@ describe('util/exec/index', () => {
     process.env.BUILDPACK = 'true';
     const promise = exec('foobar', { toolConstraints: [{ toolName: 'npm' }] });
     await expect(promise).rejects.toThrow('No tool releases found.');
+  });
+
+  it('Supports binarySource=install preCommands', async () => {
+    process.env = processEnv;
+    const actualCmd: string[] = [];
+    cpExec.mockImplementation((execCmd) => {
+      actualCmd.push(execCmd);
+      return Promise.resolve({ stdout: '', stderr: '' });
+    });
+
+    GlobalConfig.set({ ...globalConfig, binarySource: 'install' });
+    process.env.BUILDPACK = 'true';
+    await exec('foobar', { preCommands: ['install-pip foobar'] });
+    expect(actualCmd).toEqual([`install-pip foobar`, `foobar`]);
   });
 
   it('only calls removeDockerContainer in catch block is useDocker is set', async () => {

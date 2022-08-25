@@ -1,8 +1,9 @@
 import { envMock, mockExecAll } from '../../../../../test/exec-util';
 import { Fixtures } from '../../../../../test/fixtures';
-import { env, fs, partial } from '../../../../../test/util';
+import { env, fs, mockedFunction, partial } from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
 import type { PostUpdateConfig } from '../../types';
+import { getNodeToolConstraint } from './node-version';
 import * as pnpmHelper from './pnpm';
 
 jest.mock('../../../../util/exec/env');
@@ -10,6 +11,7 @@ jest.mock('../../../../util/fs');
 jest.mock('./node-version');
 
 delete process.env.NPM_CONFIG_CACHE;
+process.env.BUILDPACK = 'true';
 
 describe('modules/manager/npm/post-update/pnpm', () => {
   let config: PostUpdateConfig;
@@ -19,6 +21,10 @@ describe('modules/manager/npm/post-update/pnpm', () => {
     config = partial<PostUpdateConfig>({ constraints: { pnpm: '^2.0.0' } });
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
     GlobalConfig.set({ localDir: '' });
+    mockedFunction(getNodeToolConstraint).mockResolvedValueOnce({
+      toolName: 'node',
+      constraint: '16.16.0',
+    });
   });
 
   it('generates lock files', async () => {
@@ -177,5 +183,64 @@ describe('modules/manager/npm/post-update/pnpm', () => {
     );
     expect(fs.readLocalFile).toHaveBeenCalledTimes(3);
     expect(res.lockFile).toBe('lockfileVersion: 5.3\n');
+  });
+
+  it('works for docker mode', async () => {
+    GlobalConfig.set({
+      localDir: '',
+      cacheDir: '/tmp',
+      binarySource: 'docker',
+      allowScripts: true,
+    });
+    const execSnapshots = mockExecAll();
+    fs.readLocalFile.mockResolvedValue('package-lock-contents');
+    const res = await pnpmHelper.generateLockFile(
+      'some-dir',
+      {},
+      { ...config, constraints: { pnpm: '6.0.0' } }
+    );
+    expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
+    expect(res.lockFile).toBe('package-lock-contents');
+    expect(execSnapshots).toMatchObject([
+      { cmd: 'docker pull renovate/sidecar' },
+      { cmd: 'docker ps --filter name=renovate_sidecar -aq' },
+      {
+        cmd:
+          'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
+          '-v "/tmp":"/tmp" ' +
+          '-e BUILDPACK_CACHE_DIR ' +
+          '-w "some-dir" ' +
+          'renovate/sidecar ' +
+          'bash -l -c "' +
+          'install-tool node 16.16.0 ' +
+          '&& install-tool pnpm 6.0.0 ' +
+          '&& pnpm install --recursive --lockfile-only' +
+          '"',
+      },
+    ]);
+  });
+
+  it('works for install mode', async () => {
+    GlobalConfig.set({
+      localDir: '',
+      cacheDir: '/tmp',
+      binarySource: 'install',
+    });
+    const execSnapshots = mockExecAll();
+    fs.readLocalFile.mockResolvedValue('package-lock-contents');
+    const res = await pnpmHelper.generateLockFile(
+      'some-dir',
+      {},
+      { ...config, constraints: { pnpm: '6.0.0' } }
+    );
+    expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
+    expect(res.lockFile).toBe('package-lock-contents');
+    expect(execSnapshots).toMatchObject([
+      { cmd: 'install-tool node 16.16.0' },
+      { cmd: 'install-tool pnpm 6.0.0' },
+      {
+        cmd: 'pnpm install --recursive --lockfile-only --ignore-scripts --ignore-pnpmfile',
+      },
+    ]);
   });
 });

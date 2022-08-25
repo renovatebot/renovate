@@ -31,7 +31,8 @@ export function getGitlabDep(
   const match = depProxyRe.exec(imageName);
   if (match?.groups) {
     const dep = { ...getDep(match.groups.depName), replaceString: imageName };
-    // TODO: #7154
+    // TODO: types (#7154)
+    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
     dep.autoReplaceStringTemplate = `${match.groups.prefix}${dep.autoReplaceStringTemplate}`;
     return dep;
   }

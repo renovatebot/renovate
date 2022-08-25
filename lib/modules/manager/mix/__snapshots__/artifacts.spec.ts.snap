@@ -1,9 +1,9 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`modules/manager/mix/artifacts authenticates to private repositories 1`] = `
-Array [
-  Object {
-    "file": Object {
+[
+  {
+    "file": {
       "contents": "New mix.lock",
       "path": "mix.lock",
       "type": "addition",
@@ -13,20 +13,20 @@ Array [
 `;
 
 exports[`modules/manager/mix/artifacts authenticates to private repositories 2`] = `
-Array [
-  Object {
+[
+  {
     "cmd": "docker ps --filter name=renovate_sidecar -aq",
-    "options": Object {
+    "options": {
       "encoding": "utf-8",
     },
   },
-  Object {
-    "cmd": "docker run --rm --name=renovate_sidecar --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/cache\\":\\"/tmp/cache\\" -e BUILDPACK_CACHE_DIR -w \\"/tmp/github/some/repo\\" renovate/sidecar bash -l -c \\"install-tool erlang 24.3.4.2 && install-tool elixir v1.13.4 && mix hex.organization auth renovate_test --key valid_test_token && mix deps.update private_package other_package\\"",
-    "options": Object {
+  {
+    "cmd": "docker run --rm --name=renovate_sidecar --label=renovate_child -v "/tmp/github/some/repo":"/tmp/github/some/repo" -v "/tmp/cache":"/tmp/cache" -e BUILDPACK_CACHE_DIR -w "/tmp/github/some/repo" renovate/sidecar bash -l -c "install-tool erlang 24.3.4.2 && install-tool elixir v1.13.4 && mix hex.organization auth renovate_test --key valid_test_token && mix deps.update private_package other_package"",
+    "options": {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
-      "env": Object {
-        "BUILDPACK_CACHE_DIR": "/tmp/cache/buildpack",
+      "env": {
+        "BUILDPACK_CACHE_DIR": "/tmp/cache/containerbase",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
         "HTTP_PROXY": "http://example.com",
@@ -43,13 +43,13 @@ Array [
 `;
 
 exports[`modules/manager/mix/artifacts returns null if unchanged 1`] = `
-Array [
-  Object {
+[
+  {
     "cmd": "mix deps.update plug",
-    "options": Object {
+    "options": {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
-      "env": Object {
+      "env": {
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
         "HTTP_PROXY": "http://example.com",
@@ -66,26 +66,26 @@ Array [
 `;
 
 exports[`modules/manager/mix/artifacts returns updated mix.lock 1`] = `
-Array [
-  Object {
+[
+  {
     "cmd": "docker pull renovate/sidecar",
-    "options": Object {
+    "options": {
       "encoding": "utf-8",
     },
   },
-  Object {
+  {
     "cmd": "docker ps --filter name=renovate_sidecar -aq",
-    "options": Object {
+    "options": {
       "encoding": "utf-8",
     },
   },
-  Object {
-    "cmd": "docker run --rm --name=renovate_sidecar --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/cache\\":\\"/tmp/cache\\" -e BUILDPACK_CACHE_DIR -w \\"/tmp/github/some/repo\\" renovate/sidecar bash -l -c \\"install-tool erlang 24.3.4.2 && install-tool elixir 1.13.4 && mix deps.update plug\\"",
-    "options": Object {
+  {
+    "cmd": "docker run --rm --name=renovate_sidecar --label=renovate_child -v "/tmp/github/some/repo":"/tmp/github/some/repo" -v "/tmp/cache":"/tmp/cache" -e BUILDPACK_CACHE_DIR -w "/tmp/github/some/repo" renovate/sidecar bash -l -c "install-tool erlang 24.3.4.2 && install-tool elixir 1.13.4 && mix deps.update plug"",
+    "options": {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
-      "env": Object {
-        "BUILDPACK_CACHE_DIR": "/tmp/cache/buildpack",
+      "env": {
+        "BUILDPACK_CACHE_DIR": "/tmp/cache/containerbase",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
         "HTTP_PROXY": "http://example.com",
