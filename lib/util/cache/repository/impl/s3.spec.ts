@@ -20,10 +20,9 @@ function createGetObjectCommandInput(
   repository: string,
   url: string
 ): GetObjectCommandInput {
-  const platform = GlobalConfig.get('platform') ?? 'github';
   return {
     Bucket: parseS3Url(url)?.Bucket,
-    Key: `${platform}/${repository}/cache.json`,
+    Key: `github/${repository}/cache.json`,
   };
 }
 
