@@ -35,6 +35,7 @@ import {
   isBranchConflicted,
   isBranchModified,
 } from '../../../../util/git';
+import { setCachedConflictResult } from '../../../../util/git/conflicts-cache';
 import {
   getMergeConfidenceLevel,
   isActiveConfidenceLevel,
@@ -531,6 +532,13 @@ export async function processBranch(
     if (commitSha) {
       const action = branchExists ? 'updated' : 'created';
       logger.info({ commitSha }, `Branch ${action}`);
+      setCachedConflictResult(
+        config.defaultBranch!,
+        getBranchCommit(config.defaultBranch!)!,
+        config.branchName,
+        commitSha,
+        false
+      );
     }
     // Set branch statuses
     await setArtifactErrorStatus(config);
