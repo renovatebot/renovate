@@ -197,6 +197,19 @@ describe('modules/datasource/maven/s3', () => {
           'Unknown S3 download error'
         );
       });
+
+      it('returns null for unexpected response type', async () => {
+        s3mock
+          .on(GetObjectCommand, {
+            Bucket: 'repobucket',
+            Key: 'org/example/package/maven-metadata.xml',
+          })
+          .resolvesOnce({});
+        expect(await get('org.example:package', baseUrlS3)).toBeNull();
+        expect(logger.logger.debug).toHaveBeenCalledWith(
+          "Expecting Readable response type got 'undefined' type instead"
+        );
+      });
     });
   });
 });
