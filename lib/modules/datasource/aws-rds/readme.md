@@ -1,14 +1,18 @@
 This datasource returns the database engine versions available for use on [AWS RDS](https://aws.amazon.com/rds/) via the AWS API.
-These generally track publicly released database versions, though new versions may not be available on RDS for a few weeks or months after their release while AWS tests them, and existing versions may be pulled by AWS if serious problems arise during their use.
+Generally speaking, all publicly released database versions are available for use on RDS.
+However, new versions may not be available on RDS for a few weeks or months after their release while AWS tests them.
+In addition, AWS may pull existing versions if serious problems arise during their use.
 
-Because the datasource uses the AWS-SDK for JavaScript, you can configure it like other AWS Tools.
-You can use common AWS configuration options, for example (partial list):
+**AWS API configuration**
 
-- Setting the region via `AWS_REGION` (environment variable) or your `~/.aws/config` file
-- Provide credentials via `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` (environment variable) or your `~/.aws/credentials` file
+Since the datasource uses the AWS SDK for JavaScript, you can configure it like other AWS Tools.
+You can use common AWS configuration options, for example:
+
+- Set the region via the `AWS_REGION` environment variable or your `~/.aws/config` file
+- Provide credentials via the `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` environment variables or your `~/.aws/credentials` file
 - Select the profile to use via `AWS_PROFILE` environment variable
 
-Read the [Developer guide](https://docs.aws.amazon.com/sdk-for-javascript/v3/developer-guide/configuring-the-jssdk.html) for more information on configuration options.
+Read the [AWS Developer Guide - Configuring the SDK for JavaScript](https://docs.aws.amazon.com/sdk-for-javascript/v3/developer-guide/configuring-the-jssdk.html) for more information on these configuration options.
 
 The minimal IAM privileges required for this datasource are:
 
@@ -23,9 +27,12 @@ The minimal IAM privileges required for this datasource are:
 
 Read the [AWS RDS IAM reference](https://docs.aws.amazon.com/service-authorization/latest/reference/list_amazonrds.html) for more information.
 
-Because there is no general `packageName`, you have to pass a [filter](https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/clients/client-rds/interfaces/describedbengineversionscommandinput.html#filters) as minified JSON as the `packageName`.
+**Usage**
 
-Example:
+Because Renovate has no manager for the AWS RDS datasource, you need to help Renovate by configuring the regex manager to identify the RDS dependencies you want updated.
+
+When configuring the regex manager, you have to pass a [filter](https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/clients/client-rds/interfaces/describedbengineversionscommandinput.html#filters) as minified JSON as the `packageName`.
+For example:
 
 ```yaml
 # Getting the latest supported MySQL 5.7 version from RDS as a filter would look like:
@@ -46,11 +53,6 @@ Example:
 [{"Name":"engine","Values":["mysql"]},{"Name":"engine-version","Values":["5.7"]}]
 ```
 
-At the moment, this datasource has no "manager".
-You have to use the regex manager for this.
-
-**Usage Example**
-
 Here's an example of using the regex manager to configure this datasource:
 
 ```json
@@ -67,10 +69,10 @@ Here's an example of using the regex manager to configure this datasource:
 }
 ```
 
-This would match every YAML file, and would recognize the following lines:
+The configuration above matches every YAML file, and recognizes these lines:
 
 ```yaml
 spec:
-  # amiFilter=[{"Name":"engine","Values":["mysql"]}]
-  engineVersion: 8.0.24
+  # amiFilter=[{"Name":"engine","Values":["mysql"]},{"Name":"engine-version","Values":["5.7"]}]
+  engineVersion: 5.7.34
 ```
