@@ -125,7 +125,7 @@ export function isDynamicInstall(
   }
   if (!isBuildpack()) {
     logger.warn(
-      'binarySource=install is only compatible with images derived from containerbase/buildpack'
+      'binarySource=install is only compatible with images derived from github.com/containerbase'
     );
     return false;
   }
