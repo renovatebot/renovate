@@ -98,7 +98,7 @@ export const presets: Record<string, Preset> = {
       '`react-query/devtools` became scoped under the `tanstack` organization.',
     packageRules: [
       {
-        matchCurrentVersion: '>=2.6.3 <4.0.0',
+        matchCurrentVersion: '>=2.0.0 <4.0.0',
         matchDatasources: ['npm'],
         matchPackageNames: ['react-query/devtools'],
         replacementName: '@tanstack/react-query-devtools',
@@ -111,7 +111,7 @@ export const presets: Record<string, Preset> = {
       '`react-query` became scoped under the `tanstack` organization.',
     packageRules: [
       {
-        matchCurrentVersion: '>=3.39.2 <4.0.0',
+        matchCurrentVersion: '>=3.0.0 <4.0.0',
         matchDatasources: ['npm'],
         matchPackageNames: ['react-query'],
         replacementName: '@tanstack/react-query',
