@@ -24,7 +24,7 @@ describe('workers/global/initialize', () => {
       await expect(globalInitialize(config)).toResolve();
     });
 
-    it('supports buildpack', async () => {
+    it('supports containerbase', async () => {
       const config: AllConfig = { binarySource: 'docker' };
       git.validateGitVersion.mockResolvedValueOnce(true);
       await expect(globalInitialize(config)).toResolve();

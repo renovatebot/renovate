@@ -1,4 +1,3 @@
-import { Blob } from 'buffer';
 import { Readable } from 'stream';
 import { DateTime } from 'luxon';
 import { XmlDocument } from 'xmldoc';
@@ -114,15 +113,12 @@ export async function downloadS3Protocol(pkgUrl: URL): Promise<string | null> {
       return null;
     }
     const { Body: res } = await getS3Client().getObject(s3Url);
-
-    // istanbul ignore if
-    if (res instanceof Blob) {
-      return res.toString();
-    }
-
     if (res instanceof Readable) {
       return streamToString(res);
     }
+    logger.debug(
+      `Expecting Readable response type got '${typeof res}' type instead`
+    );
   } catch (err) {
     const failedUrl = pkgUrl.toString();
     if (err.name === 'CredentialsProviderError') {

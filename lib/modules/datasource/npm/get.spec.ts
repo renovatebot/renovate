@@ -265,9 +265,9 @@ describe('modules/datasource/npm/get', () => {
     expect(dep?.sourceDirectory).toBe('packages/react');
 
     expect(httpMock.getTrace()).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "headers": Object {
+      [
+        {
+          "headers": {
             "accept": "application/json",
             "accept-encoding": "gzip, deflate, br",
             "authorization": "Bearer XXX",
@@ -363,9 +363,9 @@ describe('modules/datasource/npm/get', () => {
     expect(dep?.sourceDirectory).toBe('packages/foo');
 
     expect(httpMock.getTrace()).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "headers": Object {
+      [
+        {
+          "headers": {
             "accept": "application/json",
             "accept-encoding": "gzip, deflate, br",
             "authorization": "Bearer XXX",
@@ -403,9 +403,9 @@ describe('modules/datasource/npm/get', () => {
     expect(dep?.sourceDirectory).toBeUndefined();
 
     expect(httpMock.getTrace()).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "headers": Object {
+      [
+        {
+          "headers": {
             "accept": "application/json",
             "accept-encoding": "gzip, deflate, br",
             "authorization": "Bearer XXX",

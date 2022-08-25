@@ -148,6 +148,23 @@ describe('modules/datasource/go/base', () => {
         });
       });
 
+      it('does not fail for names containing .git', async () => {
+        httpMock
+          .scope('https://gitlab.com')
+          .get('/group/subgroup/my.git.module?go-get=1')
+          .reply(200, Fixtures.get('go-get-gitlab.html'));
+
+        const res = await BaseGoDatasource.getDatasource(
+          'gitlab.com/group/subgroup/my.git.module'
+        );
+
+        expect(res).toEqual({
+          datasource: GitlabTagsDatasource.id,
+          packageName: 'group/subgroup/my.git.module',
+          registryUrl: 'https://gitlab.com',
+        });
+      });
+
       it('supports GitLab with URL mismatch', async () => {
         const mismatchingResponse = Fixtures.get('go-get-github.html').replace(
           'https://github.com/golang/text/',
@@ -229,6 +246,24 @@ describe('modules/datasource/go/base', () => {
 
         const res = await BaseGoDatasource.getDatasource(
           'my.custom.domain/golang/subgroup/myrepo/v2'
+        );
+
+        expect(res).toEqual({
+          datasource: GitlabTagsDatasource.id,
+          packageName: 'golang/subgroup/myrepo',
+          registryUrl: 'https://my.custom.domain',
+        });
+      });
+
+      it('supports GitLab EE deps in private subgroup with vcs indicator', async () => {
+        hostRules.find.mockReturnValue({ token: 'some-token' });
+        httpMock
+          .scope('https://my.custom.domain')
+          .get('/golang/subgroup/myrepo.git/v2?go-get=1')
+          .reply(200, Fixtures.get('go-get-gitlab-ee-private-subgroup.html'));
+
+        const res = await BaseGoDatasource.getDatasource(
+          'my.custom.domain/golang/subgroup/myrepo.git/v2'
         );
 
         expect(res).toEqual({

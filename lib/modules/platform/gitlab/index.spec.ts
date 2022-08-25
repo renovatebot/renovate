@@ -136,7 +136,7 @@ describe('modules/platform/gitlab/index', () => {
       httpMock
         .scope(gitlabApiHost)
         .get(
-          '/api/v4/projects?membership=true&per_page=100&with_merge_requests_enabled=true&min_access_level=30'
+          '/api/v4/projects?membership=true&per_page=100&with_merge_requests_enabled=true&min_access_level=30&archived=false'
         )
         .replyWithError('getRepos error');
       await expect(gitlab.getRepos()).rejects.toThrow('getRepos error');
@@ -146,7 +146,7 @@ describe('modules/platform/gitlab/index', () => {
       httpMock
         .scope(gitlabApiHost)
         .get(
-          '/api/v4/projects?membership=true&per_page=100&with_merge_requests_enabled=true&min_access_level=30'
+          '/api/v4/projects?membership=true&per_page=100&with_merge_requests_enabled=true&min_access_level=30&archived=false'
         )
         .reply(200, [
           {
@@ -154,10 +154,6 @@ describe('modules/platform/gitlab/index', () => {
           },
           {
             path_with_namespace: 'c/d',
-          },
-          {
-            path_with_namespace: 'c/e',
-            archived: true,
           },
           {
             path_with_namespace: 'c/f',
@@ -201,12 +197,11 @@ describe('modules/platform/gitlab/index', () => {
         await gitlab.initRepo({
           repository: 'some/repo/project',
         })
-      ).toMatchInlineSnapshot(`
-        Object {
-          "defaultBranch": "master",
-          "isFork": false,
-        }
-      `);
+      ).toEqual({
+        defaultBranch: 'master',
+        isFork: false,
+        repoFingerprint: expect.any(String),
+      });
     });
 
     it('should throw an error if receiving an error', async () => {
@@ -305,12 +300,11 @@ describe('modules/platform/gitlab/index', () => {
         await gitlab.initRepo({
           repository: 'some/repo/project',
         })
-      ).toMatchInlineSnapshot(`
-        Object {
-          "defaultBranch": "master",
-          "isFork": false,
-        }
-      `);
+      ).toEqual({
+        defaultBranch: 'master',
+        isFork: false,
+        repoFingerprint: expect.any(String),
+      });
     });
 
     it('should use ssh_url_to_repo if gitUrl is set to ssh', async () => {
@@ -1472,7 +1466,7 @@ describe('modules/platform/gitlab/index', () => {
           },
         })
       ).toMatchInlineSnapshot(`
-        Object {
+        {
           "displayNumber": "Merge Request #12345",
           "id": 1,
           "iid": 12345,
@@ -1588,7 +1582,7 @@ describe('modules/platform/gitlab/index', () => {
           },
         })
       ).toMatchInlineSnapshot(`
-        Object {
+        {
           "displayNumber": "Merge Request #12345",
           "id": 1,
           "iid": 12345,
@@ -1640,7 +1634,7 @@ describe('modules/platform/gitlab/index', () => {
           },
         })
       ).toMatchInlineSnapshot(`
-        Object {
+        {
           "displayNumber": "Merge Request #12345",
           "id": 1,
           "iid": 12345,
@@ -1692,7 +1686,7 @@ describe('modules/platform/gitlab/index', () => {
           },
         })
       ).toMatchInlineSnapshot(`
-        Object {
+        {
           "displayNumber": "Merge Request #12345",
           "id": 1,
           "iid": 12345,

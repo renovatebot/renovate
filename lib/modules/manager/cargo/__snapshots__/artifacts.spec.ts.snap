@@ -1,13 +1,13 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`modules/manager/cargo/artifacts returns null if unchanged 1`] = `
-Array [
-  Object {
+[
+  {
     "cmd": "cargo update --manifest-path Cargo.toml --workspace",
-    "options": Object {
+    "options": {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
-      "env": Object {
+      "env": {
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
         "HTTP_PROXY": "http://example.com",
@@ -24,13 +24,13 @@ Array [
 `;
 
 exports[`modules/manager/cargo/artifacts returns updated Cargo.lock 1`] = `
-Array [
-  Object {
+[
+  {
     "cmd": "cargo update --manifest-path Cargo.toml --workspace",
-    "options": Object {
+    "options": {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
-      "env": Object {
+      "env": {
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
         "HTTP_PROXY": "http://example.com",
@@ -47,13 +47,13 @@ Array [
 `;
 
 exports[`modules/manager/cargo/artifacts returns updated Cargo.lock for lockfile maintenance 1`] = `
-Array [
-  Object {
+[
+  {
     "cmd": "cargo update --manifest-path Cargo.toml",
-    "options": Object {
+    "options": {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
-      "env": Object {
+      "env": {
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
         "HTTP_PROXY": "http://example.com",
@@ -70,26 +70,26 @@ Array [
 `;
 
 exports[`modules/manager/cargo/artifacts returns updated Cargo.lock with docker 1`] = `
-Array [
-  Object {
+[
+  {
     "cmd": "docker pull renovate/rust",
-    "options": Object {
+    "options": {
       "encoding": "utf-8",
     },
   },
-  Object {
+  {
     "cmd": "docker ps --filter name=renovate_rust -aq",
-    "options": Object {
+    "options": {
       "encoding": "utf-8",
     },
   },
-  Object {
-    "cmd": "docker run --rm --name=renovate_rust --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/cache\\":\\"/tmp/cache\\" -e BUILDPACK_CACHE_DIR -w \\"/tmp/github/some/repo\\" renovate/rust bash -l -c \\"cargo update --manifest-path Cargo.toml --workspace\\"",
-    "options": Object {
+  {
+    "cmd": "docker run --rm --name=renovate_rust --label=renovate_child -v "/tmp/github/some/repo":"/tmp/github/some/repo" -v "/tmp/cache":"/tmp/cache" -e BUILDPACK_CACHE_DIR -w "/tmp/github/some/repo" renovate/rust bash -l -c "cargo update --manifest-path Cargo.toml --workspace"",
+    "options": {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
-      "env": Object {
-        "BUILDPACK_CACHE_DIR": "/tmp/cache/buildpack",
+      "env": {
+        "BUILDPACK_CACHE_DIR": "/tmp/cache/containerbase",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
         "HTTP_PROXY": "http://example.com",
@@ -106,13 +106,13 @@ Array [
 `;
 
 exports[`modules/manager/cargo/artifacts returns updated workspace Cargo.lock 1`] = `
-Array [
-  Object {
+[
+  {
     "cmd": "cargo update --manifest-path crates/one/Cargo.toml --workspace",
-    "options": Object {
+    "options": {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
-      "env": Object {
+      "env": {
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
         "HTTP_PROXY": "http://example.com",
@@ -129,13 +129,13 @@ Array [
 `;
 
 exports[`modules/manager/cargo/artifacts updates Cargo.lock based on the packageName, when given 1`] = `
-Array [
-  Object {
+[
+  {
     "cmd": "cargo update --manifest-path Cargo.toml --workspace",
-    "options": Object {
+    "options": {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
-      "env": Object {
+      "env": {
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
         "HTTP_PROXY": "http://example.com",

@@ -2,51 +2,51 @@
 
 exports[`modules/manager/homebrew/update returns unchanged content if both got requests fail 1`] = `
 "=begin
-  url \\"https://github.com/aide/aide/releases/download/v0.16.1/aide-0.16.1.tar.gz\\"
-  sha256 \\"0f2b7cecc70c1a27d35c06c98804fcdb9f326630de5d035afc447122186010b7\\"
+  url "https://github.com/aide/aide/releases/download/v0.16.1/aide-0.16.1.tar.gz"
+  sha256 "0f2b7cecc70c1a27d35c06c98804fcdb9f326630de5d035afc447122186010b7"
 =end
-# url \\"https://github.com/aide/aide/releases/download/v0.16.1/aide-0.16.1.tar.gz\\"
-# sha256 \\"0f2b7cecc70c1a27d35c06c98804fcdb9f326630de5d035afc447122186010b7\\"
+# url "https://github.com/aide/aide/releases/download/v0.16.1/aide-0.16.1.tar.gz"
+# sha256 "0f2b7cecc70c1a27d35c06c98804fcdb9f326630de5d035afc447122186010b7"
 
-$sha256 = \\"0f2b7cecc70c1a27d35c06c98804fcdb9f326630de5d035afc447122186010b7\\"
+$sha256 = "0f2b7cecc70c1a27d35c06c98804fcdb9f326630de5d035afc447122186010b7"
 class Aide < Formula
-  desc \\"File and directory integrity checker\\"
-  homepage \\"https://aide.github.io/\\"
-  url \\"https://github.com/aide/aide/releases/download/v0.16.1/aide-0.16.1.tar.gz\\"
-  sha256 \\"0f2b7cecc70c1a27d35c06c98804fcdb9f326630de5d035afc447122186010b7\\"
+  desc "File and directory integrity checker"
+  homepage "https://aide.github.io/"
+  url "https://github.com/aide/aide/releases/download/v0.16.1/aide-0.16.1.tar.gz"
+  sha256 "0f2b7cecc70c1a27d35c06c98804fcdb9f326630de5d035afc447122186010b7"
 
   bottle do
     cellar :any
-    sha256 \\"53b1dfabc76d6e54db56ec24f7f91b6cc9dcdd18210d17d2df92f86225fb9c9f\\" => :mojave
-    sha256 \\"79a2d4ce92526516891c844a4852161d39421f9dc31d2eba5ea0e48d79496053\\" => :high_sierra
-    sha256 \\"b626fcf7e52a0ea66fbed58bdc00cb08484f7bce8e84e61edf6740fbad7fabc5\\" => :sierra
+    sha256 "53b1dfabc76d6e54db56ec24f7f91b6cc9dcdd18210d17d2df92f86225fb9c9f" => :mojave
+    sha256 "79a2d4ce92526516891c844a4852161d39421f9dc31d2eba5ea0e48d79496053" => :high_sierra
+    sha256 "b626fcf7e52a0ea66fbed58bdc00cb08484f7bce8e84e61edf6740fbad7fabc5" => :sierra
   end
 
   head do
-    url \\"https://github.com/aide/aide.git\\"
-    depends_on \\"autoconf\\" => :build
-    depends_on \\"automake\\" => :build
+    url "https://github.com/aide/aide.git"
+    depends_on "autoconf" => :build
+    depends_on "automake" => :build
   end
 
-  depends_on \\"libgcrypt\\"
-  depends_on \\"libgpg-error\\"
-  depends_on \\"pcre\\"
+  depends_on "libgcrypt"
+  depends_on "libgpg-error"
+  depends_on "pcre"
 
   def install
-    system \\"sh\\", \\"./autogen.sh\\" if build.head?
+    system "sh", "./autogen.sh" if build.head?
 
-    system \\"./configure\\", \\"--disable-lfs\\",
-                          \\"--disable-static\\",
-                          \\"--with-curl\\",
-                          \\"--with-zlib\\",
-                          \\"--sysconfdir=#{etc}\\",
-                          \\"--prefix=#{prefix}\\"
+    system "./configure", "--disable-lfs",
+                          "--disable-static",
+                          "--with-curl",
+                          "--with-zlib",
+                          "--sysconfdir=#{etc}",
+                          "--prefix=#{prefix}"
 
-    system \\"make\\", \\"install\\"
+    system "make", "install"
   end
 
   test do
-    (testpath/\\"aide.conf\\").write <<~EOS
+    (testpath/"aide.conf").write <<~EOS
       database = file:/var/lib/aide/aide.db
       database_out = file:/var/lib/aide/aide.db.new
       database_new = file:/var/lib/aide/aide.db.new
@@ -57,7 +57,7 @@ class Aide < Formula
       database_attrs = sha256
       /etc p+i+u+g+sha256
     EOS
-    system \\"#{bin}/aide\\", \\"--config-check\\", \\"-c\\", \\"aide.conf\\"
+    system "#{bin}/aide", "--config-check", "-c", "aide.conf"
   end
 end
 "
@@ -66,30 +66,30 @@ end
 exports[`modules/manager/homebrew/update updates "archive" github dependency 1`] = `
 "# Copyright 2018 The Bazel Authors. All rights reserved.
 #
-# Licensed under the Apache License, Version 2.0 (the \\"License\\");
+# Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
 #    http://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an \\"AS IS\\" BASIS,
+# distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
 =begin
-  url \\"https://github.com/bazelbuild/bazel-watcher/archive/v0.8.2.tar.gz\\"
+  url "https://github.com/bazelbuild/bazel-watcher/archive/v0.8.2.tar.gz"
   sha256 '26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4'
 =end
-# url \\"https://github.com/bazelbuild/bazel-watcher/archive/v0.8.2.tar.gz\\"
+# url "https://github.com/bazelbuild/bazel-watcher/archive/v0.8.2.tar.gz"
 # sha256 '26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4'
 
 $sha256 = '26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4';
 class Ibazel < Formula
   desc 'IBazel is a tool for building Bazel targets when source files change.'
   homepage 'https://github.com/bazelbuild/bazel-watcher'
-  url \\"https://github.com/bazelbuild/bazel-watcher/releases/download/v0.9.3/bazel-watcher-0.9.3.tar.gz\\"
+  url "https://github.com/bazelbuild/bazel-watcher/releases/download/v0.9.3/bazel-watcher-0.9.3.tar.gz"
 
   # To generate run:
   # curl https://codeload.github.com/bazelbuild/bazel-watcher/tar.gz/v0.8.2 | sha256sum
@@ -97,7 +97,7 @@ class Ibazel < Formula
 
   bottle :unneeded
 
-  depends_on \\"bazelbuild/tap/bazel\\" => :build
+  depends_on "bazelbuild/tap/bazel" => :build
 
   def install
     system 'bazel', 'build', '--config=release', '--verbose_failures', '--experimental_platforms=@io_bazel_rules_go//go/toolchain:darwin_amd64', '//ibazel:ibazel'
@@ -116,51 +116,51 @@ end
 
 exports[`modules/manager/homebrew/update updates "releases" github dependency 1`] = `
 "=begin
-  url \\"https://github.com/aide/aide/releases/download/v0.16.1/aide-0.16.1.tar.gz\\"
-  sha256 \\"0f2b7cecc70c1a27d35c06c98804fcdb9f326630de5d035afc447122186010b7\\"
+  url "https://github.com/aide/aide/releases/download/v0.16.1/aide-0.16.1.tar.gz"
+  sha256 "0f2b7cecc70c1a27d35c06c98804fcdb9f326630de5d035afc447122186010b7"
 =end
-# url \\"https://github.com/aide/aide/releases/download/v0.16.1/aide-0.16.1.tar.gz\\"
-# sha256 \\"0f2b7cecc70c1a27d35c06c98804fcdb9f326630de5d035afc447122186010b7\\"
+# url "https://github.com/aide/aide/releases/download/v0.16.1/aide-0.16.1.tar.gz"
+# sha256 "0f2b7cecc70c1a27d35c06c98804fcdb9f326630de5d035afc447122186010b7"
 
-$sha256 = \\"0f2b7cecc70c1a27d35c06c98804fcdb9f326630de5d035afc447122186010b7\\"
+$sha256 = "0f2b7cecc70c1a27d35c06c98804fcdb9f326630de5d035afc447122186010b7"
 class Aide < Formula
-  desc \\"File and directory integrity checker\\"
-  homepage \\"https://aide.github.io/\\"
-  url \\"https://github.com/aide/aide/releases/download/v0.17.7/aide-0.17.7.tar.gz\\"
-  sha256 \\"2c26b46b68ffc68ff99b453c1d30413413422d706483bfa0f98a5e886266e7ae\\"
+  desc "File and directory integrity checker"
+  homepage "https://aide.github.io/"
+  url "https://github.com/aide/aide/releases/download/v0.17.7/aide-0.17.7.tar.gz"
+  sha256 "2c26b46b68ffc68ff99b453c1d30413413422d706483bfa0f98a5e886266e7ae"
 
   bottle do
     cellar :any
-    sha256 \\"53b1dfabc76d6e54db56ec24f7f91b6cc9dcdd18210d17d2df92f86225fb9c9f\\" => :mojave
-    sha256 \\"79a2d4ce92526516891c844a4852161d39421f9dc31d2eba5ea0e48d79496053\\" => :high_sierra
-    sha256 \\"b626fcf7e52a0ea66fbed58bdc00cb08484f7bce8e84e61edf6740fbad7fabc5\\" => :sierra
+    sha256 "53b1dfabc76d6e54db56ec24f7f91b6cc9dcdd18210d17d2df92f86225fb9c9f" => :mojave
+    sha256 "79a2d4ce92526516891c844a4852161d39421f9dc31d2eba5ea0e48d79496053" => :high_sierra
+    sha256 "b626fcf7e52a0ea66fbed58bdc00cb08484f7bce8e84e61edf6740fbad7fabc5" => :sierra
   end
 
   head do
-    url \\"https://github.com/aide/aide.git\\"
-    depends_on \\"autoconf\\" => :build
-    depends_on \\"automake\\" => :build
+    url "https://github.com/aide/aide.git"
+    depends_on "autoconf" => :build
+    depends_on "automake" => :build
   end
 
-  depends_on \\"libgcrypt\\"
-  depends_on \\"libgpg-error\\"
-  depends_on \\"pcre\\"
+  depends_on "libgcrypt"
+  depends_on "libgpg-error"
+  depends_on "pcre"
 
   def install
-    system \\"sh\\", \\"./autogen.sh\\" if build.head?
+    system "sh", "./autogen.sh" if build.head?
 
-    system \\"./configure\\", \\"--disable-lfs\\",
-                          \\"--disable-static\\",
-                          \\"--with-curl\\",
-                          \\"--with-zlib\\",
-                          \\"--sysconfdir=#{etc}\\",
-                          \\"--prefix=#{prefix}\\"
+    system "./configure", "--disable-lfs",
+                          "--disable-static",
+                          "--with-curl",
+                          "--with-zlib",
+                          "--sysconfdir=#{etc}",
+                          "--prefix=#{prefix}"
 
-    system \\"make\\", \\"install\\"
+    system "make", "install"
   end
 
   test do
-    (testpath/\\"aide.conf\\").write <<~EOS
+    (testpath/"aide.conf").write <<~EOS
       database = file:/var/lib/aide/aide.db
       database_out = file:/var/lib/aide/aide.db.new
       database_new = file:/var/lib/aide/aide.db.new
@@ -171,7 +171,7 @@ class Aide < Formula
       database_attrs = sha256
       /etc p+i+u+g+sha256
     EOS
-    system \\"#{bin}/aide\\", \\"--config-check\\", \\"-c\\", \\"aide.conf\\"
+    system "#{bin}/aide", "--config-check", "-c", "aide.conf"
   end
 end
 "

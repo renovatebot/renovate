@@ -1,10 +1,12 @@
 import { Readable } from 'stream';
 import is from '@sindresorhus/is';
+import type { IGitApi } from 'azure-devops-node-api/GitApi';
 import {
   GitPullRequestMergeStrategy,
   GitStatusState,
   PullRequestStatus,
 } from 'azure-devops-node-api/interfaces/GitInterfaces.js';
+import { partial } from '../../../../test/util';
 import {
   REPOSITORY_ARCHIVED,
   REPOSITORY_NOT_FOUND,
@@ -133,47 +135,46 @@ describe('modules/platform/azure/index', () => {
   });
 
   function initRepo(args?: Partial<RepoParams> | string) {
-    azureApi.gitApi.mockImplementationOnce(
-      () =>
-        ({
-          getRepositories: jest.fn(() => [
-            {
-              name: 'repo',
-              id: '1',
-              privateRepo: true,
-              isFork: false,
-              defaultBranch: 'defBr',
-              project: {
-                name: 'some',
-              },
+    azureApi.gitApi.mockResolvedValueOnce(
+      partial<IGitApi>({
+        getRepositories: jest.fn().mockResolvedValue([
+          {
+            name: 'repo',
+            id: '1',
+            privateRepo: true,
+            isFork: false,
+            defaultBranch: 'defBr',
+            project: {
+              name: 'some',
             },
-            {
-              name: 'repo2',
-              project: {
-                name: 'prj2',
-              },
+          },
+          {
+            name: 'repo2',
+            project: {
+              name: 'prj2',
             },
-            {
-              name: 'repo3',
-              project: {
-                name: 'some',
-              },
-              isDisabled: true,
+          },
+          {
+            name: 'repo3',
+            project: {
+              name: 'some',
             },
-          ]),
-        } as any)
+            isDisabled: true,
+          },
+        ]),
+      })
     );
 
     if (is.string(args)) {
       return azure.initRepo({
         repository: args,
-      } as any);
+      });
     }
 
     return azure.initRepo({
       repository: 'some/repo',
       ...args,
-    } as any);
+    });
   }
 
   describe('initRepo', () => {
@@ -315,6 +316,19 @@ describe('modules/platform/azure/index', () => {
       });
       expect(res).toMatchSnapshot();
     });
+
+    it('catches errors', async () => {
+      azureApi.gitApi.mockResolvedValueOnce(
+        partial<IGitApi>({
+          getPullRequests: jest.fn().mockRejectedValueOnce(new Error()),
+        })
+      );
+      const res = await azure.findPr({
+        branchName: 'branch-a',
+        prTitle: 'branch a pr',
+      });
+      expect(res).toBeNull();
+    });
   });
 
   describe('getPrList()', () => {
@@ -332,14 +346,10 @@ describe('modules/platform/azure/index', () => {
   describe('getBranchPr(branchName)', () => {
     it('should return null if no PR exists', async () => {
       await initRepo({ repository: 'some/repo' });
-      azureApi.gitApi.mockImplementationOnce(
-        () =>
-          ({
-            findPr: jest.fn(() => false),
-            getPr: jest.fn(() => {
-              'myPRName';
-            }),
-          } as any)
+      azureApi.gitApi.mockResolvedValue(
+        partial<IGitApi>({
+          getPullRequests: jest.fn().mockResolvedValueOnce([]),
+        })
       );
       const pr = await azure.getBranchPr('somebranch');
       expect(pr).toBeNull();
@@ -347,26 +357,40 @@ describe('modules/platform/azure/index', () => {
 
     it('should return the pr', async () => {
       await initRepo({ repository: 'some/repo' });
-      azureApi.gitApi.mockImplementation(
-        () =>
-          ({
-            getPullRequests: jest
-              .fn()
-              .mockReturnValue([])
-              .mockReturnValueOnce([
-                {
-                  pullRequestId: 1,
-                  sourceRefName: 'refs/heads/branch-a',
-                  title: 'branch a pr',
-                  status: 2,
-                },
-              ]),
-            getPullRequestCommits: jest.fn().mockReturnValue([]),
-          } as any)
+      azureApi.gitApi.mockResolvedValue(
+        partial<IGitApi>({
+          getPullRequests: jest
+            .fn()
+            .mockResolvedValueOnce([
+              {
+                pullRequestId: 1,
+                sourceRefName: 'refs/heads/branch-a',
+                title: 'branch a pr',
+                status: 1,
+              },
+            ])
+            .mockResolvedValueOnce([]),
+          getPullRequestLabels: jest.fn().mockResolvedValue([]),
+        })
       );
-      const pr = await azure.getBranchPr('somebranch');
-      // TODO: should this return a PR instead?
-      expect(pr).toBeNull();
+      const pr = await azure.getBranchPr('branch-a');
+      expect(pr).toEqual({
+        bodyStruct: {
+          hash: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
+        },
+        createdAt: undefined,
+        displayNumber: 'Pull Request #1',
+        hasReviewers: false,
+        labels: [],
+        number: 1,
+        pullRequestId: 1,
+        sourceBranch: 'branch-a',
+        sourceRefName: 'refs/heads/branch-a',
+        state: 'open',
+        status: 1,
+        targetBranch: undefined,
+        title: 'branch a pr',
+      });
     });
   });
 
@@ -489,6 +513,28 @@ describe('modules/platform/azure/index', () => {
               },
             ]),
           } as any)
+      );
+      const res = await azure.getBranchStatusCheck(
+        'somebranch',
+        'a-genre/a-name'
+      );
+      expect(res).toBe(BranchStatus.yellow);
+    });
+
+    it('should return yellow if status is unknown', async () => {
+      await initRepo({ repository: 'some/repo' });
+      azureApi.gitApi.mockResolvedValueOnce(
+        partial<IGitApi>({
+          getBranch: jest
+            .fn()
+            .mockResolvedValue({ commit: { commitId: 'abcd1234' } }),
+          getStatuses: jest.fn().mockResolvedValue([
+            {
+              state: -1,
+              context: { genre: 'a-genre', name: 'a-name' },
+            },
+          ]),
+        })
       );
       const res = await azure.getBranchStatusCheck(
         'somebranch',
@@ -1308,6 +1354,10 @@ describe('modules/platform/azure/index', () => {
   });
 
   describe('getJsonFile()', () => {
+    beforeEach(async () => {
+      await initRepo();
+    });
+
     it('returns file content', async () => {
       const data = { foo: 'bar' };
       azureApi.gitApi.mockImplementationOnce(
@@ -1395,6 +1445,16 @@ describe('modules/platform/azure/index', () => {
       const res = await azure.getJsonFile('file.json', 'foo/bar');
       expect(res).toEqual(data);
       expect(gitApiMock.getItemContent.mock.calls).toMatchSnapshot();
+    });
+
+    it('returns null', async () => {
+      azureApi.gitApi.mockResolvedValueOnce(
+        partial<IGitApi>({
+          getRepositories: jest.fn(() => Promise.resolve([])),
+        })
+      );
+      const res = await azure.getJsonFile('file.json', 'foo/bar');
+      expect(res).toBeNull();
     });
   });
 });

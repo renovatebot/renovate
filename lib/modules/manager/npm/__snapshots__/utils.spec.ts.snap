@@ -2,17 +2,17 @@
 
 exports[`modules/manager/npm/utils composeLockFile composes lockfile string out of an object 1`] = `
 "{
-  \\"lockfileVersion\\": 2,
-  \\"name\\": \\"lockfile-parsing\\",
-  \\"packages\\": {
-    \\"\\": {
-      \\"license\\": \\"ISC\\",
-      \\"name\\": \\"lockfile-parsing\\",
-      \\"version\\": \\"1.0.0\\"
+  "lockfileVersion": 2,
+  "name": "lockfile-parsing",
+  "packages": {
+    "": {
+      "license": "ISC",
+      "name": "lockfile-parsing",
+      "version": "1.0.0"
     }
   },
-  \\"requires\\": true,
-  \\"version\\": \\"1.0.0\\"
+  "requires": true,
+  "version": "1.0.0"
 }
 "
 `;

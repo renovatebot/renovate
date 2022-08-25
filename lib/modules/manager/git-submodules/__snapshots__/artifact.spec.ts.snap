@@ -1,9 +1,9 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`modules/manager/git-submodules/artifact updateArtifacts() returns empty content 1`] = `
-Array [
-  Object {
-    "file": Object {
+[
+  {
+    "file": {
       "contents": "",
       "path": "",
       "type": "addition",
@@ -13,16 +13,16 @@ Array [
 `;
 
 exports[`modules/manager/git-submodules/artifact updateArtifacts() returns two modules 1`] = `
-Array [
-  Object {
-    "file": Object {
+[
+  {
+    "file": {
       "contents": "",
       "path": "renovate",
       "type": "addition",
     },
   },
-  Object {
-    "file": Object {
+  {
+    "file": {
       "contents": "",
       "path": "renovate-pro",
       "type": "addition",

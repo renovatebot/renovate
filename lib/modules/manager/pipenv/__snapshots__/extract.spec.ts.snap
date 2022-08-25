@@ -1,60 +1,60 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`modules/manager/pipenv/extract extractPackageFile() extracts dependencies 1`] = `
-Object {
-  "constraints": Object {
+{
+  "constraints": {
     "python": "== 3.6.*",
   },
-  "deps": Array [
-    Object {
+  "deps": [
+    {
       "currentValue": "==0.3.1",
       "datasource": "pypi",
       "depName": "some-package",
       "depType": "packages",
-      "managerData": Object {},
+      "managerData": {},
     },
-    Object {
+    {
       "currentValue": "==1.0.0",
       "datasource": "pypi",
       "depName": "some-other-package",
       "depType": "packages",
-      "managerData": Object {},
+      "managerData": {},
     },
-    Object {
+    {
       "currentValue": "==1.0.0",
       "depName": "_invalid-package",
       "depType": "packages",
-      "managerData": Object {},
+      "managerData": {},
       "skipReason": "invalid-name",
     },
-    Object {
+    {
       "currentValue": "==0 0",
       "depName": "invalid-version",
       "depType": "packages",
-      "managerData": Object {},
+      "managerData": {},
       "skipReason": "invalid-version",
     },
-    Object {
+    {
       "currentValue": "==1.0.0",
       "datasource": "pypi",
       "depName": "pytest-benchmark",
       "depType": "packages",
-      "managerData": Object {
+      "managerData": {
         "nestedVersion": true,
       },
     },
-    Object {
+    {
       "currentValue": "==0.1.0",
       "datasource": "pypi",
       "depName": "dev-package",
       "depType": "dev-packages",
-      "managerData": Object {},
+      "managerData": {},
     },
   ],
-  "lockFiles": Array [
+  "lockFiles": [
     "Pipfile.lock",
   ],
-  "registryUrls": Array [
+  "registryUrls": [
     "https://pypi.org/simple",
     "http://example.com/private-pypi/",
   ],
@@ -62,152 +62,152 @@ Object {
 `;
 
 exports[`modules/manager/pipenv/extract extractPackageFile() extracts example pipfile 1`] = `
-Object {
-  "constraints": Object {
+{
+  "constraints": {
     "python": "== 2.7.*",
   },
-  "deps": Array [
-    Object {
+  "deps": [
+    {
       "depName": "requests",
       "depType": "packages",
-      "managerData": Object {},
+      "managerData": {},
       "skipReason": "any-version",
     },
-    Object {
+    {
       "currentValue": ">0.5.0",
       "datasource": "pypi",
       "depName": "records",
       "depType": "packages",
-      "managerData": Object {},
+      "managerData": {},
     },
-    Object {
+    {
       "depName": "django",
       "depType": "packages",
-      "managerData": Object {},
+      "managerData": {},
       "skipReason": "git-dependency",
     },
-    Object {
+    {
       "depName": "e682b37",
       "depType": "packages",
-      "managerData": Object {},
+      "managerData": {},
       "skipReason": "file-dependency",
     },
-    Object {
+    {
       "depName": "e1839a8",
       "depType": "packages",
-      "managerData": Object {},
+      "managerData": {},
       "skipReason": "local-dependency",
     },
-    Object {
+    {
       "currentValue": "*",
       "depName": "pywinusb",
       "depType": "packages",
-      "managerData": Object {
+      "managerData": {
         "nestedVersion": true,
       },
-      "registryUrls": Array [
+      "registryUrls": [
         "https://pypi.python.org/simple",
       ],
       "skipReason": "any-version",
     },
-    Object {
+    {
       "currentValue": "*",
       "depName": "nose",
       "depType": "dev-packages",
-      "managerData": Object {},
+      "managerData": {},
       "skipReason": "any-version",
     },
-    Object {
+    {
       "currentValue": ">=1.0,<3.0",
       "datasource": "pypi",
       "depName": "unittest2",
       "depType": "dev-packages",
-      "managerData": Object {
+      "managerData": {
         "nestedVersion": true,
       },
     },
   ],
-  "lockFiles": Array [
+  "lockFiles": [
     "Pipfile.lock",
   ],
-  "registryUrls": Array [
+  "registryUrls": [
     "https://pypi.python.org/simple",
   ],
 }
 `;
 
 exports[`modules/manager/pipenv/extract extractPackageFile() extracts multiple dependencies 1`] = `
-Object {
-  "constraints": Object {
+{
+  "constraints": {
     "python": "== 3.6.*",
   },
-  "deps": Array [
-    Object {
+  "deps": [
+    {
       "currentValue": "==1",
       "datasource": "pypi",
       "depName": "Django",
       "depType": "packages",
-      "managerData": Object {},
+      "managerData": {},
     },
-    Object {
+    {
       "currentValue": "==0.6.27",
       "datasource": "pypi",
       "depName": "distribute",
       "depType": "packages",
-      "managerData": Object {},
+      "managerData": {},
     },
-    Object {
+    {
       "currentValue": "==0.2",
       "datasource": "pypi",
       "depName": "dj-database-url",
       "depType": "packages",
-      "managerData": Object {},
+      "managerData": {},
     },
-    Object {
+    {
       "currentValue": "==2.4.5",
       "datasource": "pypi",
       "depName": "psycopg2",
       "depType": "packages",
-      "managerData": Object {},
+      "managerData": {},
     },
-    Object {
+    {
       "currentValue": "==0.1.2",
       "datasource": "pypi",
       "depName": "wsgiref",
       "depType": "packages",
-      "managerData": Object {},
+      "managerData": {},
     },
   ],
-  "lockFiles": Array [
+  "lockFiles": [
     "Pipfile.lock",
   ],
-  "registryUrls": Array [
+  "registryUrls": [
     "https://pypi.org/simple",
   ],
 }
 `;
 
 exports[`modules/manager/pipenv/extract extractPackageFile() supports custom index 1`] = `
-Object {
-  "constraints": Object {},
-  "deps": Array [
-    Object {
+{
+  "constraints": {},
+  "deps": [
+    {
       "currentValue": "==0.21.0",
       "datasource": "pypi",
       "depName": "requests",
       "depType": "packages",
-      "managerData": Object {
+      "managerData": {
         "nestedVersion": true,
       },
-      "registryUrls": Array [
+      "registryUrls": [
         "https://testpypi.python.org/pypi",
       ],
     },
   ],
-  "lockFiles": Array [
+  "lockFiles": [
     "Pipfile.lock",
   ],
-  "registryUrls": Array [
+  "registryUrls": [
     "https://pypi.python.org/simple",
     "https://testpypi.python.org/pypi",
   ],

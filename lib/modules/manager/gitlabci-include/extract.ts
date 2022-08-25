@@ -4,14 +4,22 @@ import { GlobalConfig } from '../../../config/global';
 import { logger } from '../../../logger';
 import { regEx } from '../../../util/regex';
 import { GitlabTagsDatasource } from '../../datasource/gitlab-tags';
+import type {
+  GitlabInclude,
+  GitlabIncludeProject,
+  GitlabPipeline,
+} from '../gitlabci/types';
 import { replaceReferenceTags } from '../gitlabci/utils';
 import type { PackageDependency, PackageFile } from '../types';
+import {
+  filterIncludeFromGitlabPipeline,
+  isGitlabIncludeProject,
+  isNonEmptyObject,
+} from './common';
 
-function extractDepFromIncludeFile(includeObj: {
-  file: any;
-  project: string;
-  ref: string;
-}): PackageDependency {
+function extractDepFromIncludeFile(
+  includeObj: GitlabIncludeProject
+): PackageDependency {
   const dep: PackageDependency = {
     datasource: GitlabTagsDatasource.id,
     depName: includeObj.project,
@@ -25,28 +33,50 @@ function extractDepFromIncludeFile(includeObj: {
   return dep;
 }
 
+function getIncludeProjectsFromInclude(
+  includeValue: GitlabInclude[] | GitlabInclude
+): GitlabIncludeProject[] {
+  const includes = is.array(includeValue) ? includeValue : [includeValue];
+
+  // Filter out includes that dont have a file & project.
+  return includes.filter(isGitlabIncludeProject);
+}
+
+function getAllIncludeProjects(data: GitlabPipeline): GitlabIncludeProject[] {
+  // If Array, search each element.
+  if (is.array(data)) {
+    return (data as GitlabPipeline[])
+      .filter(isNonEmptyObject)
+      .map(getAllIncludeProjects)
+      .flat();
+  }
+
+  const childrenData = Object.values(filterIncludeFromGitlabPipeline(data))
+    .filter(isNonEmptyObject)
+    .map(getAllIncludeProjects)
+    .flat();
+
+  // Process include key.
+  if (data.include) {
+    childrenData.push(...getIncludeProjectsFromInclude(data.include));
+  }
+  return childrenData;
+}
+
 export function extractPackageFile(content: string): PackageFile | null {
   const deps: PackageDependency[] = [];
   const { platform, endpoint } = GlobalConfig.get();
   try {
-    // TODO: fix me (#9610)
-    const doc: any = load(replaceReferenceTags(content), {
+    const doc = load(replaceReferenceTags(content), {
       json: true,
-    });
-    let includes;
-    if (doc?.include && is.array(doc.include)) {
-      includes = doc.include;
-    } else {
-      includes = [doc.include];
-    }
+    }) as GitlabPipeline;
+    const includes = getAllIncludeProjects(doc);
     for (const includeObj of includes) {
-      if (includeObj?.file && includeObj.project) {
-        const dep = extractDepFromIncludeFile(includeObj);
-        if (platform === 'gitlab' && endpoint) {
-          dep.registryUrls = [endpoint.replace(regEx(/\/api\/v4\/?/), '')];
-        }
-        deps.push(dep);
+      const dep = extractDepFromIncludeFile(includeObj);
+      if (platform === 'gitlab' && endpoint) {
+        dep.registryUrls = [endpoint.replace(regEx(/\/api\/v4\/?/), '')];
       }
+      deps.push(dep);
     }
   } catch (err) /* istanbul ignore next */ {
     if (err.stack?.startsWith('YAMLException:')) {

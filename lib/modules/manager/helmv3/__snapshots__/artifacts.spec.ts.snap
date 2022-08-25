@@ -1,9 +1,9 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`modules/manager/helmv3/artifacts alias name is picked, when repository is as alias and dependency defined 1`] = `
-Array [
-  Object {
-    "file": Object {
+[
+  {
+    "file": {
       "contents": "dependencies:
 - name: renovate-test
   repository: oci://registry.gitlab.com/user/oci-helm-test
@@ -12,7 +12,7 @@ Array [
   repository: https://gitlab.com/api/v4/projects/xxxxxxx/packages/helm/stable
   version: 0.5.0
 digest: sha256:886f204516ea48785fe615d22071d742f7fb0d6519ed3cd274f4ec0978d8b82b
-generated: \\"2022-01-20T17:48:47.610371241+01:00\\"
+generated: "2022-01-20T17:48:47.610371241+01:00"
 ",
       "path": "Chart.lock",
       "type": "addition",
@@ -22,13 +22,13 @@ generated: \\"2022-01-20T17:48:47.610371241+01:00\\"
 `;
 
 exports[`modules/manager/helmv3/artifacts alias name is picked, when repository is as alias and dependency defined 2`] = `
-Array [
-  Object {
+[
+  {
     "cmd": "helm repo add repo1 --registry-config /tmp/renovate/cache/__renovate-private-cache/registry.json --repository-config /tmp/renovate/cache/__renovate-private-cache/repositories.yaml --repository-cache /tmp/renovate/cache/__renovate-private-cache/repositories --username basicUser --password secret https://gitlab.com/api/v4/projects/xxxxxxx/packages/helm/stable",
-    "options": Object {
+    "options": {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
-      "env": Object {
+      "env": {
         "HELM_EXPERIMENTAL_OCI": "1",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -42,12 +42,12 @@ Array [
       "timeout": 900000,
     },
   },
-  Object {
+  {
     "cmd": "helm dependency update --registry-config /tmp/renovate/cache/__renovate-private-cache/registry.json --repository-config /tmp/renovate/cache/__renovate-private-cache/repositories.yaml --repository-cache /tmp/renovate/cache/__renovate-private-cache/repositories ''",
-    "options": Object {
+    "options": {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
-      "env": Object {
+      "env": {
         "HELM_EXPERIMENTAL_OCI": "1",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -65,9 +65,9 @@ Array [
 `;
 
 exports[`modules/manager/helmv3/artifacts catches errors 1`] = `
-Array [
-  Object {
-    "artifactError": Object {
+[
+  {
+    "artifactError": {
       "lockFile": "Chart.lock",
       "stderr": "not found",
     },
@@ -76,9 +76,9 @@ Array [
 `;
 
 exports[`modules/manager/helmv3/artifacts do not add registryAliases to repository list 1`] = `
-Array [
-  Object {
-    "file": Object {
+[
+  {
+    "file": {
       "contents": "dependencies:
 - name: cert-manager
   version: 1.7.0
@@ -87,7 +87,7 @@ Array [
   version: 4.0.16
   repository: https://kubernetes.github.io/ingress-nginx
 digest: sha256:886f204516ea48785fe615d22071d742f7fb0d6519ed3cd274f4ec0978d8b82b
-generated: \\"2022-01-20T17:48:47.610371241+01:00\\"
+generated: "2022-01-20T17:48:47.610371241+01:00"
 ",
       "path": "Chart.lock",
       "type": "addition",
@@ -97,13 +97,13 @@ generated: \\"2022-01-20T17:48:47.610371241+01:00\\"
 `;
 
 exports[`modules/manager/helmv3/artifacts do not add registryAliases to repository list 2`] = `
-Array [
-  Object {
+[
+  {
     "cmd": "helm repo add jetstack --registry-config /tmp/renovate/cache/__renovate-private-cache/registry.json --repository-config /tmp/renovate/cache/__renovate-private-cache/repositories.yaml --repository-cache /tmp/renovate/cache/__renovate-private-cache/repositories https://charts.jetstack.io",
-    "options": Object {
+    "options": {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
-      "env": Object {
+      "env": {
         "HELM_EXPERIMENTAL_OCI": "1",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -117,12 +117,12 @@ Array [
       "timeout": 900000,
     },
   },
-  Object {
+  {
     "cmd": "helm repo add nginx --registry-config /tmp/renovate/cache/__renovate-private-cache/registry.json --repository-config /tmp/renovate/cache/__renovate-private-cache/repositories.yaml --repository-cache /tmp/renovate/cache/__renovate-private-cache/repositories https://kubernetes.github.io/ingress-nginx",
-    "options": Object {
+    "options": {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
-      "env": Object {
+      "env": {
         "HELM_EXPERIMENTAL_OCI": "1",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -136,12 +136,12 @@ Array [
       "timeout": 900000,
     },
   },
-  Object {
+  {
     "cmd": "helm dependency update --registry-config /tmp/renovate/cache/__renovate-private-cache/registry.json --repository-config /tmp/renovate/cache/__renovate-private-cache/repositories.yaml --repository-cache /tmp/renovate/cache/__renovate-private-cache/repositories ''",
-    "options": Object {
+    "options": {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
-      "env": Object {
+      "env": {
         "HELM_EXPERIMENTAL_OCI": "1",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -159,9 +159,9 @@ Array [
 `;
 
 exports[`modules/manager/helmv3/artifacts log into private registries and repositories NOT defined in registryAliases 1`] = `
-Array [
-  Object {
-    "file": Object {
+[
+  {
+    "file": {
       "contents": "dependencies:
 - name: renovate-test
   repository: oci://registry.gitlab.com/user/oci-helm-test
@@ -170,7 +170,7 @@ Array [
   repository: https://gitlab.com/api/v4/projects/xxxxxxx/packages/helm/stable
   version: 0.5.0
 digest: sha256:886f204516ea48785fe615d22071d742f7fb0d6519ed3cd274f4ec0978d8b82b
-generated: \\"2022-01-20T17:48:47.610371241+01:00\\"
+generated: "2022-01-20T17:48:47.610371241+01:00"
 ",
       "path": "Chart.lock",
       "type": "addition",
@@ -180,13 +180,13 @@ generated: \\"2022-01-20T17:48:47.610371241+01:00\\"
 `;
 
 exports[`modules/manager/helmv3/artifacts log into private registries and repositories NOT defined in registryAliases 2`] = `
-Array [
-  Object {
+[
+  {
     "cmd": "helm registry login --registry-config /tmp/renovate/cache/__renovate-private-cache/registry.json --repository-config /tmp/renovate/cache/__renovate-private-cache/repositories.yaml --repository-cache /tmp/renovate/cache/__renovate-private-cache/repositories --username registryUser --password password registry.gitlab.com/user/oci-helm-test",
-    "options": Object {
+    "options": {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
-      "env": Object {
+      "env": {
         "HELM_EXPERIMENTAL_OCI": "1",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -200,12 +200,12 @@ Array [
       "timeout": 900000,
     },
   },
-  Object {
+  {
     "cmd": "helm repo add repo-test --registry-config /tmp/renovate/cache/__renovate-private-cache/registry.json --repository-config /tmp/renovate/cache/__renovate-private-cache/repositories.yaml --repository-cache /tmp/renovate/cache/__renovate-private-cache/repositories --username basicUser --password secret https://gitlab.com/api/v4/projects/xxxxxxx/packages/helm/stable",
-    "options": Object {
+    "options": {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
-      "env": Object {
+      "env": {
         "HELM_EXPERIMENTAL_OCI": "1",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -219,12 +219,12 @@ Array [
       "timeout": 900000,
     },
   },
-  Object {
+  {
     "cmd": "helm dependency update --registry-config /tmp/renovate/cache/__renovate-private-cache/registry.json --repository-config /tmp/renovate/cache/__renovate-private-cache/repositories.yaml --repository-cache /tmp/renovate/cache/__renovate-private-cache/repositories ''",
-    "options": Object {
+    "options": {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
-      "env": Object {
+      "env": {
         "HELM_EXPERIMENTAL_OCI": "1",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -242,9 +242,9 @@ Array [
 `;
 
 exports[`modules/manager/helmv3/artifacts log into private registries and repositories already defined in registryAliases 1`] = `
-Array [
-  Object {
-    "file": Object {
+[
+  {
+    "file": {
       "contents": "dependencies:
 - name: renovate-test
   repository: oci://registry.gitlab.com/user/oci-helm-test
@@ -253,7 +253,7 @@ Array [
   repository: https://gitlab.com/api/v4/projects/xxxxxxx/packages/helm/stable
   version: 0.5.0
 digest: sha256:886f204516ea48785fe615d22071d742f7fb0d6519ed3cd274f4ec0978d8b82b
-generated: \\"2022-01-20T17:48:47.610371241+01:00\\"
+generated: "2022-01-20T17:48:47.610371241+01:00"
 ",
       "path": "Chart.lock",
       "type": "addition",
@@ -263,13 +263,13 @@ generated: \\"2022-01-20T17:48:47.610371241+01:00\\"
 `;
 
 exports[`modules/manager/helmv3/artifacts log into private registries and repositories already defined in registryAliases 2`] = `
-Array [
-  Object {
+[
+  {
     "cmd": "helm registry login --registry-config /tmp/renovate/cache/__renovate-private-cache/registry.json --repository-config /tmp/renovate/cache/__renovate-private-cache/repositories.yaml --repository-cache /tmp/renovate/cache/__renovate-private-cache/repositories --username test --password aPassword registry.example.com/organization",
-    "options": Object {
+    "options": {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
-      "env": Object {
+      "env": {
         "HELM_EXPERIMENTAL_OCI": "1",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -283,12 +283,12 @@ Array [
       "timeout": 900000,
     },
   },
-  Object {
+  {
     "cmd": "helm repo add stable --registry-config /tmp/renovate/cache/__renovate-private-cache/registry.json --repository-config /tmp/renovate/cache/__renovate-private-cache/repositories.yaml --repository-cache /tmp/renovate/cache/__renovate-private-cache/repositories the_stable_url",
-    "options": Object {
+    "options": {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
-      "env": Object {
+      "env": {
         "HELM_EXPERIMENTAL_OCI": "1",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -302,12 +302,12 @@ Array [
       "timeout": 900000,
     },
   },
-  Object {
+  {
     "cmd": "helm repo add repo1 --registry-config /tmp/renovate/cache/__renovate-private-cache/registry.json --repository-config /tmp/renovate/cache/__renovate-private-cache/repositories.yaml --repository-cache /tmp/renovate/cache/__renovate-private-cache/repositories --username basicUser --password secret https://the_repo1_url",
-    "options": Object {
+    "options": {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
-      "env": Object {
+      "env": {
         "HELM_EXPERIMENTAL_OCI": "1",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -321,12 +321,12 @@ Array [
       "timeout": 900000,
     },
   },
-  Object {
+  {
     "cmd": "helm repo add repo-test --registry-config /tmp/renovate/cache/__renovate-private-cache/registry.json --repository-config /tmp/renovate/cache/__renovate-private-cache/repositories.yaml --repository-cache /tmp/renovate/cache/__renovate-private-cache/repositories https://gitlab.com/api/v4/projects/xxxxxxx/packages/helm/stable",
-    "options": Object {
+    "options": {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
-      "env": Object {
+      "env": {
         "HELM_EXPERIMENTAL_OCI": "1",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -340,12 +340,12 @@ Array [
       "timeout": 900000,
     },
   },
-  Object {
+  {
     "cmd": "helm dependency update --registry-config /tmp/renovate/cache/__renovate-private-cache/registry.json --repository-config /tmp/renovate/cache/__renovate-private-cache/repositories.yaml --repository-cache /tmp/renovate/cache/__renovate-private-cache/repositories ''",
-    "options": Object {
+    "options": {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
-      "env": Object {
+      "env": {
         "HELM_EXPERIMENTAL_OCI": "1",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -363,13 +363,13 @@ Array [
 `;
 
 exports[`modules/manager/helmv3/artifacts returns null if unchanged 1`] = `
-Array [
-  Object {
+[
+  {
     "cmd": "helm repo add repo-test --registry-config /tmp/renovate/cache/__renovate-private-cache/registry.json --repository-config /tmp/renovate/cache/__renovate-private-cache/repositories.yaml --repository-cache /tmp/renovate/cache/__renovate-private-cache/repositories https://gitlab.com/api/v4/projects/xxxxxxx/packages/helm/stable",
-    "options": Object {
+    "options": {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
-      "env": Object {
+      "env": {
         "HELM_EXPERIMENTAL_OCI": "1",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -383,12 +383,12 @@ Array [
       "timeout": 900000,
     },
   },
-  Object {
+  {
     "cmd": "helm dependency update --registry-config /tmp/renovate/cache/__renovate-private-cache/registry.json --repository-config /tmp/renovate/cache/__renovate-private-cache/repositories.yaml --repository-cache /tmp/renovate/cache/__renovate-private-cache/repositories ''",
-    "options": Object {
+    "options": {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
-      "env": Object {
+      "env": {
         "HELM_EXPERIMENTAL_OCI": "1",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -406,9 +406,9 @@ Array [
 `;
 
 exports[`modules/manager/helmv3/artifacts returns updated Chart.lock 1`] = `
-Array [
-  Object {
-    "file": Object {
+[
+  {
+    "file": {
       "contents": "dependencies:
 - name: renovate-test
   repository: oci://registry.gitlab.com/user/oci-helm-test
@@ -417,7 +417,7 @@ Array [
   repository: https://gitlab.com/api/v4/projects/xxxxxxx/packages/helm/stable
   version: 0.5.0
 digest: sha256:886f204516ea48785fe615d22071d742f7fb0d6519ed3cd274f4ec0978d8b82b
-generated: \\"2022-01-20T17:48:47.610371241+01:00\\"
+generated: "2022-01-20T17:48:47.610371241+01:00"
 ",
       "path": "Chart.lock",
       "type": "addition",
@@ -427,13 +427,13 @@ generated: \\"2022-01-20T17:48:47.610371241+01:00\\"
 `;
 
 exports[`modules/manager/helmv3/artifacts returns updated Chart.lock 2`] = `
-Array [
-  Object {
+[
+  {
     "cmd": "helm repo add repo-test --registry-config /tmp/renovate/cache/__renovate-private-cache/registry.json --repository-config /tmp/renovate/cache/__renovate-private-cache/repositories.yaml --repository-cache /tmp/renovate/cache/__renovate-private-cache/repositories https://gitlab.com/api/v4/projects/xxxxxxx/packages/helm/stable",
-    "options": Object {
+    "options": {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
-      "env": Object {
+      "env": {
         "HELM_EXPERIMENTAL_OCI": "1",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -447,12 +447,12 @@ Array [
       "timeout": 900000,
     },
   },
-  Object {
+  {
     "cmd": "helm dependency update --registry-config /tmp/renovate/cache/__renovate-private-cache/registry.json --repository-config /tmp/renovate/cache/__renovate-private-cache/repositories.yaml --repository-cache /tmp/renovate/cache/__renovate-private-cache/repositories ''",
-    "options": Object {
+    "options": {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
-      "env": Object {
+      "env": {
         "HELM_EXPERIMENTAL_OCI": "1",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -470,9 +470,9 @@ Array [
 `;
 
 exports[`modules/manager/helmv3/artifacts returns updated Chart.lock for lockfile maintenance 1`] = `
-Array [
-  Object {
-    "file": Object {
+[
+  {
+    "file": {
       "contents": "dependencies:
 - name: renovate-test
   repository: oci://registry.gitlab.com/user/oci-helm-test
@@ -481,7 +481,7 @@ Array [
   repository: https://gitlab.com/api/v4/projects/xxxxxxx/packages/helm/stable
   version: 0.5.0
 digest: sha256:886f204516ea48785fe615d22071d742f7fb0d6519ed3cd274f4ec0978d8b82b
-generated: \\"2022-01-20T17:48:47.610371241+01:00\\"
+generated: "2022-01-20T17:48:47.610371241+01:00"
 ",
       "path": "Chart.lock",
       "type": "addition",
@@ -491,13 +491,13 @@ generated: \\"2022-01-20T17:48:47.610371241+01:00\\"
 `;
 
 exports[`modules/manager/helmv3/artifacts returns updated Chart.lock for lockfile maintenance 2`] = `
-Array [
-  Object {
+[
+  {
     "cmd": "helm repo add repo-test --registry-config /tmp/renovate/cache/__renovate-private-cache/registry.json --repository-config /tmp/renovate/cache/__renovate-private-cache/repositories.yaml --repository-cache /tmp/renovate/cache/__renovate-private-cache/repositories https://gitlab.com/api/v4/projects/xxxxxxx/packages/helm/stable",
-    "options": Object {
+    "options": {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
-      "env": Object {
+      "env": {
         "HELM_EXPERIMENTAL_OCI": "1",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -511,12 +511,12 @@ Array [
       "timeout": 900000,
     },
   },
-  Object {
+  {
     "cmd": "helm dependency update --registry-config /tmp/renovate/cache/__renovate-private-cache/registry.json --repository-config /tmp/renovate/cache/__renovate-private-cache/repositories.yaml --repository-cache /tmp/renovate/cache/__renovate-private-cache/repositories ''",
-    "options": Object {
+    "options": {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
-      "env": Object {
+      "env": {
         "HELM_EXPERIMENTAL_OCI": "1",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -534,9 +534,9 @@ Array [
 `;
 
 exports[`modules/manager/helmv3/artifacts returns updated Chart.lock with docker 1`] = `
-Array [
-  Object {
-    "file": Object {
+[
+  {
+    "file": {
       "contents": "dependencies:
 - name: renovate-test
   repository: oci://registry.gitlab.com/user/oci-helm-test
@@ -545,7 +545,7 @@ Array [
   repository: https://gitlab.com/api/v4/projects/xxxxxxx/packages/helm/stable
   version: 0.5.0
 digest: sha256:886f204516ea48785fe615d22071d742f7fb0d6519ed3cd274f4ec0978d8b82b
-generated: \\"2022-01-20T17:48:47.610371241+01:00\\"
+generated: "2022-01-20T17:48:47.610371241+01:00"
 ",
       "path": "Chart.lock",
       "type": "addition",
@@ -555,26 +555,26 @@ generated: \\"2022-01-20T17:48:47.610371241+01:00\\"
 `;
 
 exports[`modules/manager/helmv3/artifacts returns updated Chart.lock with docker 2`] = `
-Array [
-  Object {
+[
+  {
     "cmd": "docker pull renovate/sidecar",
-    "options": Object {
+    "options": {
       "encoding": "utf-8",
     },
   },
-  Object {
+  {
     "cmd": "docker ps --filter name=renovate_sidecar -aq",
-    "options": Object {
+    "options": {
       "encoding": "utf-8",
     },
   },
-  Object {
-    "cmd": "docker run --rm --name=renovate_sidecar --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/renovate/cache\\":\\"/tmp/renovate/cache\\" -e HELM_EXPERIMENTAL_OCI -e BUILDPACK_CACHE_DIR -w \\"/tmp/github/some/repo\\" renovate/sidecar bash -l -c \\"install-tool helm v3.7.2 && helm repo add repo-test --registry-config /tmp/renovate/cache/__renovate-private-cache/registry.json --repository-config /tmp/renovate/cache/__renovate-private-cache/repositories.yaml --repository-cache /tmp/renovate/cache/__renovate-private-cache/repositories https://gitlab.com/api/v4/projects/xxxxxxx/packages/helm/stable && helm dependency update --registry-config /tmp/renovate/cache/__renovate-private-cache/registry.json --repository-config /tmp/renovate/cache/__renovate-private-cache/repositories.yaml --repository-cache /tmp/renovate/cache/__renovate-private-cache/repositories ''\\"",
-    "options": Object {
+  {
+    "cmd": "docker run --rm --name=renovate_sidecar --label=renovate_child -v "/tmp/github/some/repo":"/tmp/github/some/repo" -v "/tmp/renovate/cache":"/tmp/renovate/cache" -e HELM_EXPERIMENTAL_OCI -e BUILDPACK_CACHE_DIR -w "/tmp/github/some/repo" renovate/sidecar bash -l -c "install-tool helm v3.7.2 && helm repo add repo-test --registry-config /tmp/renovate/cache/__renovate-private-cache/registry.json --repository-config /tmp/renovate/cache/__renovate-private-cache/repositories.yaml --repository-cache /tmp/renovate/cache/__renovate-private-cache/repositories https://gitlab.com/api/v4/projects/xxxxxxx/packages/helm/stable && helm dependency update --registry-config /tmp/renovate/cache/__renovate-private-cache/registry.json --repository-config /tmp/renovate/cache/__renovate-private-cache/repositories.yaml --repository-cache /tmp/renovate/cache/__renovate-private-cache/repositories ''"",
+    "options": {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
-      "env": Object {
-        "BUILDPACK_CACHE_DIR": "/tmp/renovate/cache/buildpack",
+      "env": {
+        "BUILDPACK_CACHE_DIR": "/tmp/renovate/cache/containerbase",
         "HELM_EXPERIMENTAL_OCI": "1",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -592,9 +592,9 @@ Array [
 `;
 
 exports[`modules/manager/helmv3/artifacts sets repositories from registryAliases 1`] = `
-Array [
-  Object {
-    "file": Object {
+[
+  {
+    "file": {
       "contents": "dependencies:
 - name: renovate-test
   repository: oci://registry.gitlab.com/user/oci-helm-test
@@ -603,7 +603,7 @@ Array [
   repository: https://gitlab.com/api/v4/projects/xxxxxxx/packages/helm/stable
   version: 0.5.0
 digest: sha256:886f204516ea48785fe615d22071d742f7fb0d6519ed3cd274f4ec0978d8b82b
-generated: \\"2022-01-20T17:48:47.610371241+01:00\\"
+generated: "2022-01-20T17:48:47.610371241+01:00"
 ",
       "path": "Chart.lock",
       "type": "addition",
@@ -613,13 +613,13 @@ generated: \\"2022-01-20T17:48:47.610371241+01:00\\"
 `;
 
 exports[`modules/manager/helmv3/artifacts sets repositories from registryAliases 2`] = `
-Array [
-  Object {
+[
+  {
     "cmd": "helm repo add stable --registry-config /tmp/renovate/cache/__renovate-private-cache/registry.json --repository-config /tmp/renovate/cache/__renovate-private-cache/repositories.yaml --repository-cache /tmp/renovate/cache/__renovate-private-cache/repositories the_stable_url",
-    "options": Object {
+    "options": {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
-      "env": Object {
+      "env": {
         "HELM_EXPERIMENTAL_OCI": "1",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -633,12 +633,12 @@ Array [
       "timeout": 900000,
     },
   },
-  Object {
+  {
     "cmd": "helm repo add repo1 --registry-config /tmp/renovate/cache/__renovate-private-cache/registry.json --repository-config /tmp/renovate/cache/__renovate-private-cache/repositories.yaml --repository-cache /tmp/renovate/cache/__renovate-private-cache/repositories the_repo1_url",
-    "options": Object {
+    "options": {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
-      "env": Object {
+      "env": {
         "HELM_EXPERIMENTAL_OCI": "1",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -652,12 +652,12 @@ Array [
       "timeout": 900000,
     },
   },
-  Object {
+  {
     "cmd": "helm repo add repo-test --registry-config /tmp/renovate/cache/__renovate-private-cache/registry.json --repository-config /tmp/renovate/cache/__renovate-private-cache/repositories.yaml --repository-cache /tmp/renovate/cache/__renovate-private-cache/repositories https://gitlab.com/api/v4/projects/xxxxxxx/packages/helm/stable",
-    "options": Object {
+    "options": {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
-      "env": Object {
+      "env": {
         "HELM_EXPERIMENTAL_OCI": "1",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -671,12 +671,12 @@ Array [
       "timeout": 900000,
     },
   },
-  Object {
+  {
     "cmd": "helm dependency update --registry-config /tmp/renovate/cache/__renovate-private-cache/registry.json --repository-config /tmp/renovate/cache/__renovate-private-cache/repositories.yaml --repository-cache /tmp/renovate/cache/__renovate-private-cache/repositories ''",
-    "options": Object {
+    "options": {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
-      "env": Object {
+      "env": {
         "HELM_EXPERIMENTAL_OCI": "1",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -694,9 +694,9 @@ Array [
 `;
 
 exports[`modules/manager/helmv3/artifacts sets repositories from registryAliases with docker 1`] = `
-Array [
-  Object {
-    "file": Object {
+[
+  {
+    "file": {
       "contents": "dependencies:
 - name: renovate-test
   repository: oci://registry.gitlab.com/user/oci-helm-test
@@ -705,7 +705,7 @@ Array [
   repository: https://gitlab.com/api/v4/projects/xxxxxxx/packages/helm/stable
   version: 0.5.0
 digest: sha256:886f204516ea48785fe615d22071d742f7fb0d6519ed3cd274f4ec0978d8b82b
-generated: \\"2022-01-20T17:48:47.610371241+01:00\\"
+generated: "2022-01-20T17:48:47.610371241+01:00"
 ",
       "path": "Chart.lock",
       "type": "addition",
@@ -715,26 +715,26 @@ generated: \\"2022-01-20T17:48:47.610371241+01:00\\"
 `;
 
 exports[`modules/manager/helmv3/artifacts sets repositories from registryAliases with docker 2`] = `
-Array [
-  Object {
+[
+  {
     "cmd": "docker pull renovate/sidecar",
-    "options": Object {
+    "options": {
       "encoding": "utf-8",
     },
   },
-  Object {
+  {
     "cmd": "docker ps --filter name=renovate_sidecar -aq",
-    "options": Object {
+    "options": {
       "encoding": "utf-8",
     },
   },
-  Object {
-    "cmd": "docker run --rm --name=renovate_sidecar --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/renovate/cache\\":\\"/tmp/renovate/cache\\" -e HELM_EXPERIMENTAL_OCI -e BUILDPACK_CACHE_DIR -w \\"/tmp/github/some/repo\\" renovate/sidecar bash -l -c \\"install-tool helm v3.7.2 && helm repo add stable --registry-config /tmp/renovate/cache/__renovate-private-cache/registry.json --repository-config /tmp/renovate/cache/__renovate-private-cache/repositories.yaml --repository-cache /tmp/renovate/cache/__renovate-private-cache/repositories the_stable_url && helm repo add repo1 --registry-config /tmp/renovate/cache/__renovate-private-cache/registry.json --repository-config /tmp/renovate/cache/__renovate-private-cache/repositories.yaml --repository-cache /tmp/renovate/cache/__renovate-private-cache/repositories the_repo1_url && helm repo add repo-test --registry-config /tmp/renovate/cache/__renovate-private-cache/registry.json --repository-config /tmp/renovate/cache/__renovate-private-cache/repositories.yaml --repository-cache /tmp/renovate/cache/__renovate-private-cache/repositories https://gitlab.com/api/v4/projects/xxxxxxx/packages/helm/stable && helm dependency update --registry-config /tmp/renovate/cache/__renovate-private-cache/registry.json --repository-config /tmp/renovate/cache/__renovate-private-cache/repositories.yaml --repository-cache /tmp/renovate/cache/__renovate-private-cache/repositories ''\\"",
-    "options": Object {
+  {
+    "cmd": "docker run --rm --name=renovate_sidecar --label=renovate_child -v "/tmp/github/some/repo":"/tmp/github/some/repo" -v "/tmp/renovate/cache":"/tmp/renovate/cache" -e HELM_EXPERIMENTAL_OCI -e BUILDPACK_CACHE_DIR -w "/tmp/github/some/repo" renovate/sidecar bash -l -c "install-tool helm v3.7.2 && helm repo add stable --registry-config /tmp/renovate/cache/__renovate-private-cache/registry.json --repository-config /tmp/renovate/cache/__renovate-private-cache/repositories.yaml --repository-cache /tmp/renovate/cache/__renovate-private-cache/repositories the_stable_url && helm repo add repo1 --registry-config /tmp/renovate/cache/__renovate-private-cache/registry.json --repository-config /tmp/renovate/cache/__renovate-private-cache/repositories.yaml --repository-cache /tmp/renovate/cache/__renovate-private-cache/repositories the_repo1_url && helm repo add repo-test --registry-config /tmp/renovate/cache/__renovate-private-cache/registry.json --repository-config /tmp/renovate/cache/__renovate-private-cache/repositories.yaml --repository-cache /tmp/renovate/cache/__renovate-private-cache/repositories https://gitlab.com/api/v4/projects/xxxxxxx/packages/helm/stable && helm dependency update --registry-config /tmp/renovate/cache/__renovate-private-cache/registry.json --repository-config /tmp/renovate/cache/__renovate-private-cache/repositories.yaml --repository-cache /tmp/renovate/cache/__renovate-private-cache/repositories ''"",
+    "options": {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
-      "env": Object {
-        "BUILDPACK_CACHE_DIR": "/tmp/renovate/cache/buildpack",
+      "env": {
+        "BUILDPACK_CACHE_DIR": "/tmp/renovate/cache/containerbase",
         "HELM_EXPERIMENTAL_OCI": "1",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",

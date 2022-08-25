@@ -1,8 +1,8 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`modules/platform/github/index getBranchPr(branchName) should cache and return the PR object 1`] = `
-Object {
-  "bodyStruct": Object {
+{
+  "bodyStruct": {
     "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
   },
   "displayNumber": "Pull Request #91",
@@ -15,8 +15,8 @@ Object {
 `;
 
 exports[`modules/platform/github/index getBranchPr(branchName) should reopen and cache autoclosed PR 1`] = `
-Object {
-  "bodyStruct": Object {
+{
+  "bodyStruct": {
     "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
   },
   "displayNumber": "Pull Request #91",
@@ -29,8 +29,8 @@ Object {
 `;
 
 exports[`modules/platform/github/index getPr(prNo) should return PR 1`] = `
-Object {
-  "bodyStruct": Object {
+{
+  "bodyStruct": {
     "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
   },
   "displayNumber": "Pull Request #2500",
@@ -43,14 +43,14 @@ Object {
 `;
 
 exports[`modules/platform/github/index getPr(prNo) should return a PR object - 0 1`] = `
-Object {
-  "bodyStruct": Object {
+{
+  "bodyStruct": {
     "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
   },
   "createdAt": "01-01-2022",
   "displayNumber": "Pull Request #1234",
   "hasAssignees": true,
-  "labels": Array [
+  "labels": [
     "foo",
     "bar",
   ],
@@ -63,8 +63,8 @@ Object {
 `;
 
 exports[`modules/platform/github/index getPr(prNo) should return a PR object - 1 1`] = `
-Object {
-  "bodyStruct": Object {
+{
+  "bodyStruct": {
     "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
   },
   "displayNumber": "Pull Request #1234",
@@ -78,8 +78,8 @@ Object {
 `;
 
 exports[`modules/platform/github/index getPr(prNo) should return a PR object - 2 1`] = `
-Object {
-  "bodyStruct": Object {
+{
+  "bodyStruct": {
     "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
   },
   "displayNumber": "Pull Request #1234",
@@ -93,14 +93,14 @@ Object {
 exports[`modules/platform/github/index getRepoForceRebase should throw 401 1`] = `"Response code 401 (Unauthorized)"`;
 
 exports[`modules/platform/github/index getRepos should return an array of repos 1`] = `
-Array [
+[
   "a/b",
   "c/d",
 ]
 `;
 
 exports[`modules/platform/github/index initPlatform() should support custom endpoint 1`] = `
-Object {
+{
   "endpoint": "https://ghe.renovatebot.com/",
   "gitAuthor": "undefined <user@domain.com>",
   "renovateUsername": "renovate-bot",
@@ -109,7 +109,7 @@ Object {
 `;
 
 exports[`modules/platform/github/index initPlatform() should support custom endpoint without version 1`] = `
-Object {
+{
   "endpoint": "https://ghe.renovatebot.com/",
   "gitAuthor": "undefined <user@domain.com>",
   "renovateUsername": "renovate-bot",
@@ -118,7 +118,7 @@ Object {
 `;
 
 exports[`modules/platform/github/index initPlatform() should support default endpoint no email access 1`] = `
-Object {
+{
   "endpoint": "https://api.github.com/",
   "gitAuthor": undefined,
   "renovateUsername": "renovate-bot",
@@ -127,7 +127,7 @@ Object {
 `;
 
 exports[`modules/platform/github/index initPlatform() should support default endpoint no email result 1`] = `
-Object {
+{
   "endpoint": "https://api.github.com/",
   "gitAuthor": undefined,
   "renovateUsername": "renovate-bot",
@@ -136,7 +136,7 @@ Object {
 `;
 
 exports[`modules/platform/github/index initPlatform() should support default endpoint with email 1`] = `
-Object {
+{
   "endpoint": "https://api.github.com/",
   "gitAuthor": "undefined <user@domain.com>",
   "renovateUsername": "renovate-bot",
@@ -145,7 +145,7 @@ Object {
 `;
 
 exports[`modules/platform/github/index initPlatform() should support gitAuthor and username 1`] = `
-Object {
+{
   "endpoint": "https://api.github.com/",
   "gitAuthor": "renovate@whitesourcesoftware.com",
   "renovateUsername": "renovate-bot",
@@ -154,51 +154,58 @@ Object {
 `;
 
 exports[`modules/platform/github/index initRepo detects fork default branch mismatch 1`] = `
-Object {
+{
   "defaultBranch": "master",
   "isFork": false,
+  "repoFingerprint": "cd69e13f03c1f8d5399903d4d5e8973cb05218f8b392011be98dd52f0faf2b28541830a9a847716aab9b56be6f4c8e0e4b7cb6d726e7cc992f0b02168bc53f11",
 }
 `;
 
 exports[`modules/platform/github/index initRepo should fork when forkMode 1`] = `
-Object {
+{
   "defaultBranch": "master",
   "isFork": false,
+  "repoFingerprint": "cd69e13f03c1f8d5399903d4d5e8973cb05218f8b392011be98dd52f0faf2b28541830a9a847716aab9b56be6f4c8e0e4b7cb6d726e7cc992f0b02168bc53f11",
 }
 `;
 
 exports[`modules/platform/github/index initRepo should merge 1`] = `
-Object {
+{
   "defaultBranch": "master",
   "isFork": false,
+  "repoFingerprint": "cd69e13f03c1f8d5399903d4d5e8973cb05218f8b392011be98dd52f0faf2b28541830a9a847716aab9b56be6f4c8e0e4b7cb6d726e7cc992f0b02168bc53f11",
 }
 `;
 
 exports[`modules/platform/github/index initRepo should not guess at merge 1`] = `
-Object {
+{
   "defaultBranch": "master",
   "isFork": false,
+  "repoFingerprint": "cd69e13f03c1f8d5399903d4d5e8973cb05218f8b392011be98dd52f0faf2b28541830a9a847716aab9b56be6f4c8e0e4b7cb6d726e7cc992f0b02168bc53f11",
 }
 `;
 
 exports[`modules/platform/github/index initRepo should rebase 1`] = `
-Object {
+{
   "defaultBranch": "master",
   "isFork": false,
+  "repoFingerprint": "cd69e13f03c1f8d5399903d4d5e8973cb05218f8b392011be98dd52f0faf2b28541830a9a847716aab9b56be6f4c8e0e4b7cb6d726e7cc992f0b02168bc53f11",
 }
 `;
 
 exports[`modules/platform/github/index initRepo should squash 1`] = `
-Object {
+{
   "defaultBranch": "master",
   "isFork": false,
+  "repoFingerprint": "cd69e13f03c1f8d5399903d4d5e8973cb05218f8b392011be98dd52f0faf2b28541830a9a847716aab9b56be6f4c8e0e4b7cb6d726e7cc992f0b02168bc53f11",
 }
 `;
 
 exports[`modules/platform/github/index initRepo should update fork when forkMode 1`] = `
-Object {
+{
   "defaultBranch": "master",
   "isFork": false,
+  "repoFingerprint": "cd69e13f03c1f8d5399903d4d5e8973cb05218f8b392011be98dd52f0faf2b28541830a9a847716aab9b56be6f4c8e0e4b7cb6d726e7cc992f0b02168bc53f11",
 }
 `;
 
