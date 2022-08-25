@@ -9,9 +9,7 @@ export class CacheFactory {
     repository: string,
     cacheType: RepositoryCacheType = 'local'
   ): RepoCache {
-    // const type = parseUrl(cacheType)?.protocol ?? 'local';
     const type = cacheType.split('://')[0].trim().toLowerCase();
-
     switch (type) {
       case 'local':
         return new RepoCacheLocal(repository);

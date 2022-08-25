@@ -12,7 +12,6 @@ import { partial } from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
 import { logger } from '../../../../logger';
 import { parseS3Url } from '../../../s3';
-import * as s3Wrapper from '../../../s3';
 import type { RepoCacheRecord } from '../types';
 import { CacheFactory } from './cache-factory';
 import { RepoCacheS3 } from './s3';
@@ -46,7 +45,6 @@ function createPutObjectCommandInput(
  */
 
 describe('util/cache/repository/impl/s3', () => {
-  const s3WrapperSpy = jest.spyOn(s3Wrapper, 'getS3Client');
   const s3Mock = mockClient(S3Client);
   const repository = 'org/repo';
   const repoCache = partial<RepoCacheRecord>({ payload: 'payload' });
@@ -59,8 +57,6 @@ describe('util/cache/repository/impl/s3', () => {
     GlobalConfig.set({ platform: 'github' });
     jest.clearAllMocks();
     s3Mock.reset();
-    // every test function should have its own s3 instance for it to work
-    s3WrapperSpy.mockReturnValueOnce(new S3Client({}));
     getObjectCommandInput = createGetObjectCommandInput(repository, url);
     putObjectCommandInput = createPutObjectCommandInput(
       repository,
@@ -70,11 +66,12 @@ describe('util/cache/repository/impl/s3', () => {
   });
 
   it('successfully reads from s3', async () => {
+    const json = '{}';
     s3Mock
       .on(GetObjectCommand, getObjectCommandInput)
-      .resolvesOnce({ Body: Readable.from(['{}']) });
+      .resolvesOnce({ Body: Readable.from([json]) });
     const s3Cache = new RepoCacheS3(repository, url);
-    await expect(s3Cache.read()).toResolve();
+    await expect(s3Cache.read()).resolves.toBe(json);
     expect(logger.warn).toHaveBeenCalledTimes(0);
     expect(logger.debug).toHaveBeenCalledWith('RepoCacheS3.read() - success');
   });
@@ -82,7 +79,7 @@ describe('util/cache/repository/impl/s3', () => {
   it('gets an unexpected response from s3', async () => {
     s3Mock.on(GetObjectCommand, getObjectCommandInput).resolvesOnce({});
     const s3Cache = new RepoCacheS3(repository, url);
-    await expect(s3Cache.read()).toResolve();
+    await expect(s3Cache.read()).resolves.toBeNull();
     expect(logger.warn).toHaveBeenCalledWith(
       "RepoCacheS3.read() - failure - expecting Readable return type got 'undefined' type instead"
     );
@@ -95,7 +92,7 @@ describe('util/cache/repository/impl/s3', () => {
       .on(GetObjectCommand, getObjectCommandInput)
       .rejectsOnce(NoSuchKeyErr);
     const s3Cache = new RepoCacheS3(repository, url);
-    await expect(s3Cache.read()).toResolve();
+    await expect(s3Cache.read()).resolves.toBeNull();
     expect(logger.warn).toHaveBeenCalledTimes(0);
     expect(logger.debug).toHaveBeenCalledWith(
       `RepoCacheS3.read() - No cached file found`
@@ -105,7 +102,7 @@ describe('util/cache/repository/impl/s3', () => {
   it('fails to read from s3', async () => {
     s3Mock.on(GetObjectCommand, getObjectCommandInput).rejectsOnce(err);
     const s3Cache = new RepoCacheS3(repository, url);
-    await expect(s3Cache.read()).toResolve();
+    await expect(s3Cache.read()).resolves.toBeNull();
     expect(logger.warn).toHaveBeenCalledWith(
       { err },
       'RepoCacheS3.read() - failure'
