@@ -449,7 +449,7 @@ In the above example any reference to the `@company` preset will be replaced wit
 
 <!-- prettier-ignore -->
 !!! tip
-    For `migratePresets` to work, you must set `configMigration` to `true`.
+    Combine `migratePresets` with `configMigration` if you'd like your config migrated by PR.
 
 ## onboarding
 
