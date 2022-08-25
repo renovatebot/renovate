@@ -2,7 +2,9 @@ This datasource returns releases from the [Adoptium](https://adoptium.net/) API.
 
 It uses `image_type=<jre|jdk>&project=jdk&release_type=ga&sort_method=DATE&sort_order=DESC&vendor=adoptium` as filter parameters.
 
-It only uses the first 50 pages with 50 items per page.
+When Renovate contacts the Adoptium API, it fetches 50 pages.
+Each page has 50 items.
+So 2500 items are fetched from the API in total.
 
 If you want to get releases which come with the JDK, set the `packageName` to `java-jdk` or `java`.
 
