@@ -447,6 +447,10 @@ modules.exports = {
 
 In the above example any reference to the `@company` preset will be replaced with `local>org/renovate-config`.
 
+<!-- prettier-ignore -->
+!!! tip
+    Combine `migratePresets` with `configMigration` if you'd like your config migrated by PR.
+
 ## onboarding
 
 Only set this to `false` if all three statements are true:
