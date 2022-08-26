@@ -96,7 +96,7 @@ export function exec(cmd: string, opts: RawExecOptions): Promise<ExecResult> {
       }
       if (code !== 0) {
         reject(
-          new ExecError(`Command failed: ${cmd}\n${stringify(stderr)}`, {
+          new ExecError(`Command failed: ${cmd}\n${stringify(stdout)}\n${stringify(stderr)}`, {
             ...rejectInfo(),
             exitCode: code,
           })
