@@ -51,7 +51,7 @@ describe('modules/manager/composer/utils', () => {
           },
           {}
         )
-      ).toEqual({ composer: '1.*', php: '7.4.0' });
+      ).toEqual({ composer: '1.*', php: '<=7.4.0' });
     });
 
     it('returns platform lowest minor php version', () => {
@@ -63,7 +63,7 @@ describe('modules/manager/composer/utils', () => {
           },
           {}
         )
-      ).toEqual({ composer: '1.*', php: '7.0.0' });
+      ).toEqual({ composer: '1.*', php: '<=7.0.0' });
     });
 
     it('returns platform lowest patch php version', () => {
@@ -75,7 +75,7 @@ describe('modules/manager/composer/utils', () => {
           },
           {}
         )
-      ).toEqual({ composer: '1.*', php: '7.4.0' });
+      ).toEqual({ composer: '1.*', php: '<=7.4.0' });
     });
 
     it('returns from require-dev', () => {
