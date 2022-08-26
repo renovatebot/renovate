@@ -78,19 +78,7 @@ export function extractConstraints(
     const major = api.getMajor(composerJson.config.platform.php);
     const minor = api.getMinor(composerJson.config.platform.php) ?? 0;
     const patch = api.getPatch(composerJson.config.platform.php) ?? 0;
-
-    // handle where x is taken by composer to mean lowest patch of the lowest minor (x.0.0)
-    if (minor === 0) {
-      res.php = `${major}.0.${patch}`;
-    }
-    // handle where x.x is taken by composer to mean lowest patch (x.x.0)
-    else if (patch === 0) {
-      res.php = `${major}.${minor}.0`;
-    }
-    // handle non-existent patch numbers
-    else {
-      res.php = `<=${major}.${minor}.${patch}`;
-    }
+    res.php = `<=${major}.${minor}.${patch}`;
   } else if (composerJson.require?.php) {
     res.php = composerJson.require.php;
   }
