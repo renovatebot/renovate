@@ -30,13 +30,14 @@ describe('util/exec/index', () => {
   let processEnvOrig: NodeJS.ProcessEnv;
 
   const cacheDir = '/tmp/renovate/cache/';
+  const containerbaseDir = '/tmp/renovate/cache/containerbase';
   const cwd = '/tmp/renovate/github/some/repo/';
 
   const defaultCwd = `-w "${cwd}"`;
   const defaultCacheVolume = `-v "${cacheDir}":"${cacheDir}"`;
   const defaultVolumes = `-v "${cwd}":"${cwd}" ${defaultCacheVolume}`;
 
-  const globalConfig: RepoGlobalConfig = { cacheDir };
+  const globalConfig: RepoGlobalConfig = { cacheDir, containerbaseDir };
 
   beforeEach(() => {
     dockerModule.resetPrefetchedImages();
@@ -76,11 +77,11 @@ describe('util/exec/index', () => {
 
   const buildpackEnv = {
     ...envMock.basic,
-    BUILDPACK_CACHE_DIR: `${cacheDir}buildpack`,
+    BUILDPACK_CACHE_DIR: `${cacheDir}containerbase`,
   };
   const buildpackEnvFiltered = {
     ...envMock.filtered,
-    BUILDPACK_CACHE_DIR: `${cacheDir}buildpack`,
+    BUILDPACK_CACHE_DIR: `${cacheDir}containerbase`,
   };
 
   const testInputs: [string, TestInput][] = [

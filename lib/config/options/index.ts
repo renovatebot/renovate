@@ -315,6 +315,13 @@ const options: RenovateOptions[] = [
     type: 'string',
   },
   {
+    name: 'containerbaseDir',
+    description:
+      'The directory where Renovate stores its containerbase cache. If left empty, Renovate creates a subdirectory within the `cacheDir`.',
+    globalOnly: true,
+    type: 'string',
+  },
+  {
     name: 'customEnvVariables',
     description:
       'Custom environment variables for child processes and sidecar Docker containers.',
@@ -1182,6 +1189,16 @@ const options: RenovateOptions[] = [
     type: 'string',
     parent: 'packageRules',
     stage: 'package',
+    cli: false,
+    env: false,
+  },
+  {
+    name: 'customChangelogUrl',
+    description:
+      'If set, Renovate will use this url to fetch changelogs for a matched dependency. Valid only within a `packageRules` object.',
+    type: 'string',
+    stage: 'pr',
+    parent: 'packageRules',
     cli: false,
     env: false,
   },
