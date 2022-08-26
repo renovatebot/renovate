@@ -145,8 +145,7 @@ function kill(cp: ChildProcess, signal: NodeJS.Signals): boolean {
   }
 }
 
-// TODO: rename #16653
 export const rawExec: (
   cmd: string,
   opts: RawExecOptions
-) => Promise<ExecResult> = exec; // TODO: rename #16653
+) => Promise<ExecResult> = exec;
