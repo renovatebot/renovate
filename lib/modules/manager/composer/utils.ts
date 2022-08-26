@@ -81,7 +81,7 @@ export function extractConstraints(
 
     // handle where x is taken by composer to mean lowest patch of the lowest minor (x.0.0)
     if (minor === null || minor === 0) {
-      res.php = `${major}.0.0`;
+      res.php = `${major}.0.${patch}`;
     }
     // handle where x.x is taken by composer to mean lowest patch (x.x.0)
     else if (patch === null || patch === 0) {
