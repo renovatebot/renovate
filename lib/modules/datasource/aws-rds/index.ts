@@ -35,7 +35,7 @@ export class AwsRdsDataSource extends Datasource {
       releases: versions
         .filter((version) => version.EngineVersion)
         .map((version) => ({
-          version: version.EngineVersion as string,
+          version: version.EngineVersion!,
           isDeprecated: version.Status === 'deprecated',
         })),
     };
