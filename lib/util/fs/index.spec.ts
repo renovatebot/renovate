@@ -5,6 +5,7 @@ import { join, resolve } from 'upath';
 import { mockedFunction } from '../../../test/util';
 import { GlobalConfig } from '../../config/global';
 import {
+  cachePathExists,
   chmodLocalFile,
   createCacheWriteStream,
   deleteLocalFile,
@@ -423,6 +424,14 @@ describe('util/fs/index', () => {
       await rmCache(`foo/bar`);
       expect(await fs.pathExists(`${cacheDir}/foo/bar/file.txt`)).toBeFalse();
       expect(await fs.pathExists(`${cacheDir}/foo/bar`)).toBeFalse();
+    });
+  });
+
+  describe('cachePathExists', () => {
+    it('reads file', async () => {
+      await fs.outputFile(`${cacheDir}/foo/bar/file.txt`, 'foobar');
+      expect(await cachePathExists(`foo/bar/file.txt1`)).toBeFalse();
+      expect(await cachePathExists(`foo/bar/file.txt`)).toBeTrue();
     });
   });
 
