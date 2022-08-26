@@ -653,6 +653,37 @@ describe('workers/repository/update/branch/auto-replace', () => {
       );
     });
 
+    it('checks for replaceWithoutReplaceString double update', async () => {
+      const js =
+        'Package.describe({\n' +
+        "\t'name': 'test',\n" +
+        '});\n' +
+        '\n' +
+        'Npm.depends({\n' +
+        "\t'xml2js': '0.2.0',\n" +
+        "\t'xml2js': '0.2.0'\n" +
+        '});';
+      upgrade.manager = 'meteor';
+      upgrade.depName = 'xml2js';
+      upgrade.currentValue = '0.2.0';
+      upgrade.depIndex = 1;
+      upgrade.updateType = 'replacement';
+      upgrade.newName = 'connect';
+      upgrade.newValue = '2.7.10';
+      upgrade.packageFile = 'package.js';
+      const res = await doAutoReplace(upgrade, js, reuseExistingBranch);
+      expect(res).toBe(
+        'Package.describe({\n' +
+          "\t'name': 'test',\n" +
+          '});\n' +
+          '\n' +
+          'Npm.depends({\n' +
+          "\t'xml2js': '0.2.0',\n" +
+          "\t'connect': '2.7.10'\n" +
+          '});'
+      );
+    });
+
     it('updates with mix deps replacement', async () => {
       const exs =
         'defmodule MyProject.MixProject do\n' +
