@@ -10,7 +10,7 @@ import type {
 import { getFile } from '../../../../util/git';
 import type { FileAddition, FileChange } from '../../../../util/git/types';
 import type { BranchConfig } from '../../../types';
-import { doAutoReplace, doReplacementAutoReplace } from './auto-replace';
+import { doAutoReplace } from './auto-replace';
 
 export interface PackageFilesResult {
   artifactErrors: ArtifactError[];
@@ -155,13 +155,6 @@ export async function getUpdatedPackageFiles(
           packageFileContent!,
           reuseExistingBranch
         );
-        if (upgrade.updateType === 'replacement' && res) {
-          res = await doReplacementAutoReplace(
-            upgrade,
-            res,
-            reuseExistingBranch
-          );
-        }
         if (res) {
           if (bumpPackageVersion && upgrade.bumpVersion) {
             const { bumpedContent } = await bumpPackageVersion(

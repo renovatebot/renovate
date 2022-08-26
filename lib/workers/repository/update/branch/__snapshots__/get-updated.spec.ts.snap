@@ -191,12 +191,12 @@ exports[`workers/repository/update/branch/get-updated getUpdatedPackageFiles() h
 `;
 
 exports[`workers/repository/update/branch/get-updated getUpdatedPackageFiles() handles replacement 1`] = `
-Object {
-  "artifactErrors": Array [],
+{
+  "artifactErrors": [],
   "reuseExistingBranch": undefined,
-  "updatedArtifacts": Array [],
-  "updatedPackageFiles": Array [
-    Object {
+  "updatedArtifacts": [],
+  "updatedPackageFiles": [
+    {
       "contents": "my-new-dep:1.0.0",
       "path": "index.html",
       "type": "addition",

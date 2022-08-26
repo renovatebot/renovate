@@ -44,7 +44,10 @@ export async function confirmIfDepVersionUpdated(
     return false;
   }
 
-  if (upgrade.depName !== newUpgrade.depName) {
+  if (
+    upgrade.depName !== newUpgrade.depName &&
+    upgrade.newName !== newUpgrade.depName
+  ) {
     logger.debug(
       {
         manager,
@@ -56,7 +59,7 @@ export async function confirmIfDepVersionUpdated(
     );
     return false;
   }
-  if (newUpgrade.currentValue !== newValue) {
+  if (newValue && newUpgrade.currentValue !== newValue) {
     logger.debug(
       {
         manager,
@@ -79,44 +82,6 @@ export async function confirmIfDepVersionUpdated(
   }
   // istanbul ignore next
   return false;
-}
-
-async function confirmIfDepReplacementUpdated(
-  upgrade: BranchUpgradeConfig,
-  newContent: string
-): Promise<boolean> {
-  const { manager, packageFile, newName } = upgrade;
-  const extractPackageFile = get(manager, 'extractPackageFile');
-  let newUpgrade: PackageDependency;
-  try {
-    const newExtract = await extractPackageFile(
-      newContent,
-      packageFile,
-      upgrade
-    );
-    // istanbul ignore if
-    if (!newExtract) {
-      logger.debug({ manager, packageFile }, 'Could not extract package file');
-      return false;
-    }
-    newUpgrade = newExtract.deps.find((d) => d.depName === newName);
-  } catch (err) /* istanbul ignore next */ {
-    logger.debug({ manager, packageFile, err }, 'Failed to parse newContent');
-  }
-
-  if (upgrade.depName === newUpgrade.depName) {
-    logger.debug(
-      {
-        manager,
-        packageFile,
-        currentDepName: upgrade.depName,
-        newDepName: newUpgrade.depName,
-      },
-      'depName mismatch'
-    );
-    return false;
-  }
-  return true;
 }
 
 function getDepsSignature(deps: PackageDependency[]): string {
@@ -181,6 +146,7 @@ export async function doAutoReplace(
   const {
     packageFile,
     depName,
+    newName,
     currentValue,
     newValue,
     currentDigest,
@@ -190,6 +156,14 @@ export async function doAutoReplace(
   if (reuseExistingBranch) {
     return await checkExistingBranch(upgrade, existingContent);
   }
+
+  if (
+    upgrade.newName &&
+    (!upgrade.replaceString || upgrade.replaceString.indexOf(depName!) === -1)
+  ) {
+    return await doAutoReplaceNewNameNoReplaceString(upgrade, existingContent);
+  }
+
   const replaceString = upgrade.replaceString ?? currentValue;
   logger.trace({ depName, replaceString }, 'autoReplace replaceString');
   let searchIndex = existingContent.indexOf(replaceString!);
@@ -202,14 +176,20 @@ export async function doAutoReplace(
   }
   try {
     let newString: string;
-    if (autoReplaceStringTemplate) {
+    if (autoReplaceStringTemplate && !newName) {
       newString = compile(autoReplaceStringTemplate, upgrade, false);
     } else {
       newString = replaceString!;
-      if (currentValue) {
+      if (currentValue && newValue) {
         newString = newString.replace(
           regEx(escapeRegExp(currentValue), 'g'),
-          newValue!
+          newValue
+        );
+      }
+      if (depName && newName) {
+        newString = newString.replace(
+          regEx(escapeRegExp(depName), 'g'),
+          newName
         );
       }
       if (currentDigest && newDigest) {
@@ -240,7 +220,7 @@ export async function doAutoReplace(
         );
         await writeLocalFile(upgrade.packageFile!, testContent);
 
-        if (await confirmIfDepUpdated(upgrade, testContent)) {
+        if (await confirmIfDepVersionUpdated(upgrade, testContent)) {
           return testContent;
         }
         // istanbul ignore next
@@ -254,58 +234,54 @@ export async function doAutoReplace(
   throw new Error(WORKER_FILE_UPDATE_FAILED);
 }
 
-export async function doReplacementAutoReplace(
+export async function doAutoReplaceNewNameNoReplaceString(
   upgrade: BranchUpgradeConfig,
-  existingContent: string,
-  reuseExistingBranch: boolean
+  existingContent: string
 ): Promise<string | null> {
-  const { packageFile, depName, newName } = upgrade;
-  if (reuseExistingBranch) {
-    return await checkExistingBranch(upgrade, existingContent);
-  }
-  let searchIndex = existingContent.indexOf(depName);
-  if (searchIndex === -1) {
-    logger.info(
-      { packageFile, depName, existingContent },
-      'Cannot find depName in current file content. Was it already updated?'
-    );
-    return existingContent;
-  }
-  if (newName !== undefined) {
+  const { packageFile, depName, newName, currentValue, newValue } = upgrade;
+
+  const depIndex = existingContent.indexOf(depName!);
+  const valIndex = existingContent.indexOf(currentValue!);
+  let searchIndex = depIndex < valIndex ? depIndex : valIndex;
+
+  try {
     logger.debug(
       { packageFile, depName },
       `Starting search at index ${searchIndex}`
     );
-    try {
-      // Iterate through the rest of the file
-      for (; searchIndex < existingContent.length; searchIndex += 1) {
-        // First check if we have a hit for the old version
-        if (matchAt(existingContent, searchIndex, depName)) {
-          logger.debug(
-            { packageFile, depName },
-            `Found match at index ${searchIndex}`
-          );
-          // Now test if the result matches
-          const testContent = replaceAt(
-            existingContent,
-            searchIndex,
-            depName,
-            newName
-          );
-          await writeLocalFile(upgrade.packageFile, testContent);
-          if (await confirmIfDepReplacementUpdated(upgrade, testContent)) {
-            return testContent;
-          }
-          // istanbul ignore next
-          await writeLocalFile(upgrade.packageFile, existingContent);
-        }
+    // Iterate through the rest of the file
+    let testContent = existingContent;
+
+    for (; searchIndex < testContent.length; searchIndex += 1) {
+      // First check if we have a hit for the old version
+      if (matchAt(testContent, searchIndex, depName!)) {
+        logger.debug(
+          { packageFile, depName },
+          `Found match at index ${searchIndex}`
+        );
+        // Now test if the result matches
+        testContent = replaceAt(testContent, searchIndex, depName!, newName!);
+        await writeLocalFile(upgrade.packageFile!, testContent);
+      } else if (matchAt(testContent, searchIndex, currentValue!) && newValue) {
+        logger.debug(
+          { packageFile, currentValue },
+          `Found match at index ${searchIndex}`
+        );
+        // Now test if the result matches
+        testContent = replaceAt(
+          testContent,
+          searchIndex,
+          currentValue!,
+          newValue
+        );
+        await writeLocalFile(upgrade.packageFile!, testContent);
       }
-    } catch (err) /* istanbul ignore next */ {
-      logger.debug(
-        { packageFile, depName, err },
-        'doReplacementAutoReplace error'
-      );
     }
+    if (await confirmIfDepVersionUpdated(upgrade, testContent)) {
+      return testContent;
+    }
+  } catch (err) /* istanbul ignore next */ {
+    logger.debug({ packageFile, depName, err }, 'doAutoReplace error');
   }
   // istanbul ignore next
   throw new Error(WORKER_FILE_UPDATE_FAILED);
