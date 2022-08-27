@@ -101,12 +101,12 @@ async function prepareRawExec(
   opts: ExecOptions = {}
 ): Promise<RawExecArguments> {
   const { docker } = opts;
-  const { customEnvVariables, cacheDir, binarySource } = GlobalConfig.get();
+  const { customEnvVariables, containerbaseDir, binarySource } =
+    GlobalConfig.get();
 
   if (binarySource === 'docker' || binarySource === 'install') {
-    const buildPackCacheDir = upath.join(cacheDir, 'containerbase');
     opts.env ??= {};
-    opts.env.BUILDPACK_CACHE_DIR = buildPackCacheDir;
+    opts.env.BUILDPACK_CACHE_DIR = containerbaseDir;
   }
 
   const rawOptions = getRawExecOptions(opts);
