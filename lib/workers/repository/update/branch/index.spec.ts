@@ -287,6 +287,7 @@ describe('workers/repository/update/branch/index', () => {
         number: 13,
         state: PrState.Merged,
       } as Pr);
+      git.getBranchCommit.mockReturnValue('target_branch_sha');
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
         updatedPackageFiles: [{}],
       } as PackageFilesResult);
@@ -331,6 +332,7 @@ describe('workers/repository/update/branch/index', () => {
         artifactErrors: [{}],
         updatedArtifacts: [{}],
       } as WriteExistingFilesResult);
+      git.getBranchCommit.mockReturnValue('target_branch_sha');
       platform.getBranchPr.mockResolvedValueOnce(null);
       checkExisting.prAlreadyExisted.mockResolvedValueOnce({
         state: PrState.Merged,
