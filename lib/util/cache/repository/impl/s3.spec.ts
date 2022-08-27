@@ -57,7 +57,7 @@ describe('util/cache/repository/impl/s3', () => {
     GlobalConfig.set({ platform: 'github' });
     jest.clearAllMocks();
     s3Mock.reset();
-    s3Cache = new RepoCacheS3(repository, url);
+    s3Cache = new RepoCacheS3(repository, '0123456789abcdef', url);
     getObjectCommandInput = createGetObjectCommandInput(repository, url);
     putObjectCommandInput = createPutObjectCommandInput(
       repository,
@@ -127,7 +127,7 @@ describe('util/cache/repository/impl/s3', () => {
   });
 
   it('creates an S3 client using the cache factory', () => {
-    const cache = CacheFactory.get(repository, url);
+    const cache = CacheFactory.get(repository, '0123456789abcdef', url);
     expect(cache instanceof RepoCacheS3).toBeTrue();
   });
 });

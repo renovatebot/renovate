@@ -64,7 +64,11 @@ describe('util/cache/repository/impl/local', () => {
   });
 
   it('skip when not found', async () => {
-    const localRepoCache = CacheFactory.get('some/repo', 'local');
+    const localRepoCache = CacheFactory.get(
+      'some/repo',
+      '0123456789abcdef',
+      'local'
+    );
     await localRepoCache.load(); // readCacheFile is mocked but has no return value set - therefore returns undefined
     expect(logger.debug).not.toHaveBeenCalledWith();
   });
@@ -86,8 +90,9 @@ describe('util/cache/repository/impl/local', () => {
   });
 
   it('resets if fingerprint does not match', async () => {
+    fs.cachePathExists.mockResolvedValue(true);
     const data: RepoCacheData = { semanticCommits: 'enabled' };
-    const cacheRecord = {
+    const cacheRecord: RepoCacheRecord = {
       ...(await createCacheRecord(data)),
       fingerprint: '111',
     };
@@ -192,6 +197,7 @@ describe('util/cache/repository/impl/local', () => {
   });
 
   it('does not write cache that is not changed', async () => {
+    fs.cachePathExists.mockResolvedValueOnce(true);
     const oldCacheRecord = await createCacheRecord({
       semanticCommits: 'enabled',
     });
@@ -204,6 +210,8 @@ describe('util/cache/repository/impl/local', () => {
     );
 
     await localRepoCache.load();
+    expect(localRepoCache.getData()).toEqual({ semanticCommits: 'enabled' });
+
     await localRepoCache.save();
 
     expect(fs.outputCacheFile).not.toHaveBeenCalledWith();

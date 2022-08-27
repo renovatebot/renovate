@@ -15,8 +15,8 @@ export class RepoCacheS3 extends RepoCacheBase {
   private readonly s3Client;
   private readonly bucket;
 
-  constructor(repository: string, url: string) {
-    super(repository);
+  constructor(repository: string, fingerprint: string, url: string) {
+    super(repository, fingerprint);
     this.bucket = parseS3Url(url)?.Bucket;
     this.s3Client = getS3Client();
   }
