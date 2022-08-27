@@ -1,7 +1,7 @@
 import upath from 'upath';
 import { GlobalConfig } from '../../../../config/global';
 import { logger } from '../../../../logger';
-import { outputCacheFile, readCacheFile } from '../../../fs';
+import { cachePathExists, outputCacheFile, readCacheFile } from '../../../fs';
 import type { RepoCacheRecord } from '../types';
 import { RepoCacheBase } from './base';
 
@@ -13,6 +13,10 @@ export class RepoCacheLocal extends RepoCacheBase {
   protected async read(): Promise<string | null> {
     const cacheFileName = this.getCacheFileName();
     try {
+      // suppress debug logs with errros
+      if (!(await cachePathExists(cacheFileName))) {
+        return null;
+      }
       return await readCacheFile(cacheFileName, 'utf8');
     } catch (err) {
       logger.debug({ err, cacheFileName }, 'Repository local cache not found');

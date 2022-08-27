@@ -5,7 +5,12 @@ import { parseUrl } from './url';
 let s3Instance: S3Client | undefined;
 export function getS3Client(): S3Client {
   if (!s3Instance) {
-    s3Instance = new S3Client({});
+    const endpoint = process.env.RENOVATE_X_S3_ENDPOINT;
+    const forcePathStyle = process.env.RENOVATE_X_S3_PATH_STYLE;
+    s3Instance = new S3Client({
+      ...(endpoint && { endpoint }),
+      ...(forcePathStyle && { forcePathStyle: true }),
+    });
   }
   return s3Instance;
 }
