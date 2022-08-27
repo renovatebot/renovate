@@ -19,10 +19,10 @@ describe('util/git/parent-sha-cache', () => {
 
   describe('getCachedBranchParentShaResult', () => {
     it('returns null if cache is not populated', () => {
-      expect(getCachedBranchParentShaResult('foo', '111')).toBeNull();
+      expect(getCachedBranchParentShaResult('foo')).toBeNull();
     });
 
-    it('returns null if target key not found', () => {
+    it('returns null if branch not found', () => {
       repositoryCache.getCache.mockReturnValue({
         branches: [
           {
@@ -31,31 +31,19 @@ describe('util/git/parent-sha-cache', () => {
           } as BranchCache,
         ],
       });
-      expect(getCachedBranchParentShaResult('foo', '111')).toBeNull();
+      expect(getCachedBranchParentShaResult('foo')).toBeNull();
     });
 
-    it('returns null if target key is null', () => {
+    it('returns null if parentSha not stored', () => {
       repositoryCache.getCache.mockReturnValue({
         branches: [
           {
             branchName: 'not_foo',
-            sha: null,
+            sha: '111',
           } as BranchCache,
         ],
       });
-      expect(getCachedBranchParentShaResult('foo', '111')).toBeNull();
-    });
-
-    it('returns null if target SHA has changed', () => {
-      repositoryCache.getCache.mockReturnValue({
-        branches: [
-          {
-            branchName: 'foo',
-            sha: '222',
-          } as BranchCache,
-        ],
-      });
-      expect(getCachedBranchParentShaResult('foo', '111')).toBeNull();
+      expect(getCachedBranchParentShaResult('foo')).toBeNull();
     });
 
     it('returns cached value', () => {
@@ -63,12 +51,11 @@ describe('util/git/parent-sha-cache', () => {
         branches: [
           {
             branchName: 'foo',
-            sha: '111',
             parentSha: '000',
           } as BranchCache,
         ],
       });
-      expect(getCachedBranchParentShaResult('foo', '111')).toBe('000');
+      expect(getCachedBranchParentShaResult('foo')).toBe('000');
     });
   });
 

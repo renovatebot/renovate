@@ -533,19 +533,22 @@ export async function processBranch(
     if (commitSha) {
       const action = branchExists ? 'updated' : 'created';
       logger.info({ commitSha }, `Branch ${action}`);
-      // TODO #7154
-      setCachedBranchParentShaResult(
-        config.branchName,
-        getBranchCommit(config.defaultBranch!)!
-      );
-      // TODO #7154
-      setCachedConflictResult(
-        config.defaultBranch!,
-        getBranchCommit(config.defaultBranch!)!,
-        config.branchName,
-        commitSha,
-        false
-      );
+      // update cached parentSha when branch is rebased
+      if (!config.reuseExistingBranch) {
+        // TODO #7154
+        setCachedBranchParentShaResult(
+          config.branchName,
+          getBranchCommit(config.defaultBranch!)!
+        );
+        // TODO #7154
+        setCachedConflictResult(
+          config.defaultBranch!,
+          getBranchCommit(config.defaultBranch!)!,
+          config.branchName,
+          commitSha,
+          false
+        );
+      }
     }
     // Set branch statuses
     await setArtifactErrorStatus(config);
