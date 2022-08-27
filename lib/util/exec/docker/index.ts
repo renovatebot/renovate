@@ -217,6 +217,7 @@ export async function generateDockerCommand(
   const {
     localDir,
     cacheDir,
+    containerbaseDir,
     dockerUser,
     dockerChildPrefix,
     dockerImagePrefix,
@@ -230,7 +231,12 @@ export async function generateDockerCommand(
     result.push(`--user=${dockerUser}`);
   }
 
-  result.push(...prepareVolumes([localDir, cacheDir, ...volumes]));
+  const volumeDirs: VolumeOption[] = [localDir, cacheDir];
+  if (containerbaseDir && cacheDir && !containerbaseDir.startsWith(cacheDir)) {
+    volumeDirs.push(containerbaseDir);
+  }
+  volumeDirs.push(...volumes);
+  result.push(...prepareVolumes(volumeDirs));
 
   if (envVars) {
     result.push(
