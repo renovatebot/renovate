@@ -24,6 +24,7 @@ const config: UpdateArtifactsConfig = {};
 const adminConfig: RepoGlobalConfig = {
   localDir: join('/tmp/github/some/repo'),
   cacheDir: join('/tmp/cache'),
+  containerbaseDir: join('/tmp/cache/containerbase'),
 };
 
 describe('modules/manager/cocoapods/artifacts', () => {

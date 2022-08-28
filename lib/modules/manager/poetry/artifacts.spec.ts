@@ -26,6 +26,7 @@ const hostRules = mocked(_hostRules);
 const adminConfig: RepoGlobalConfig = {
   localDir: join('/tmp/github/some/repo'),
   cacheDir: join('/tmp/cache'),
+  containerbaseDir: join('/tmp/cache/containerbase'),
 };
 
 const config: UpdateArtifactsConfig = {};

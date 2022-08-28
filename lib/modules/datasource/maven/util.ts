@@ -1,4 +1,5 @@
 import { Readable } from 'stream';
+import { GetObjectCommand, HeadObjectCommand } from '@aws-sdk/client-s3';
 import { DateTime } from 'luxon';
 import { XmlDocument } from 'xmldoc';
 import { HOST_DISABLED } from '../../../constants/error-messages';
@@ -20,7 +21,7 @@ import type {
 } from './types';
 
 function getHost(url: string): string | null {
-  return parseUrl(url)?.host ?? null;
+  return parseUrl(url)?.host ?? /* istanbul ignore next: not possible */ null;
 }
 
 function isMavenCentral(pkgUrl: URL | string): boolean {
@@ -71,12 +72,10 @@ export async function downloadHttpProtocol(
   } catch (err) {
     const failedUrl = pkgUrl.toString();
     if (err.message === HOST_DISABLED) {
-      // istanbul ignore next
       logger.trace({ failedUrl }, 'Host disabled');
     } else if (isNotFoundError(err)) {
       logger.trace({ failedUrl }, `Url not found`);
     } else if (isHostError(err)) {
-      // istanbul ignore next
       logger.debug({ failedUrl }, `Cannot connect to host`);
     } else if (isPermissionsIssue(err)) {
       logger.debug(
@@ -89,10 +88,8 @@ export async function downloadHttpProtocol(
         throw new ExternalHostError(err);
       }
     } else if (isConnectionError(err)) {
-      // istanbul ignore next
       logger.debug({ failedUrl }, 'Connection refused to maven registry');
     } else if (isUnsupportedHostError(err)) {
-      // istanbul ignore next
       logger.debug({ failedUrl }, 'Unsupported host');
     } else {
       logger.info({ failedUrl, err }, 'Unknown HTTP download error');
@@ -112,7 +109,7 @@ export async function downloadS3Protocol(pkgUrl: URL): Promise<string | null> {
     if (s3Url === null) {
       return null;
     }
-    const { Body: res } = await getS3Client().getObject(s3Url);
+    const { Body: res } = await getS3Client().send(new GetObjectCommand(s3Url));
     if (res instanceof Readable) {
       return streamToString(res);
     }
@@ -182,7 +179,7 @@ export async function checkS3Resource(
     if (s3Url === null) {
       return 'error';
     }
-    const response = await getS3Client().headObject(s3Url);
+    const response = await getS3Client().send(new HeadObjectCommand(s3Url));
     if (response.DeleteMarker) {
       return 'not-found';
     }
