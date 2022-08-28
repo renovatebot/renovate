@@ -122,14 +122,14 @@ export function exec(cmd: string, opts: RawExecOptions): Promise<ExecResult> {
 
 function kill(cp: ChildProcess, signal: NodeJS.Signals): boolean {
   try {
-    if (process.env.RENOVATE_X_EXEC_GPID_HANDLE) {
+    if (cp.pid && process.env.RENOVATE_X_EXEC_GPID_HANDLE) {
       /**
        * If `pid` is negative, but not `-1`, signal shall be sent to all processes
        * (excluding an unspecified set of system processes),
        * whose process group ID (pgid) is equal to the absolute value of pid,
        * and for which the process has permission to send a signal.
        */
-      return process.kill(-(cp.pid as number), signal);
+      return process.kill(-cp.pid, signal);
     } else {
       // destroying stdio is needed for unref to work
       // https://nodejs.org/api/child_process.html#subprocessunref
