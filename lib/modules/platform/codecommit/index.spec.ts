@@ -296,6 +296,7 @@ describe('modules/platform/codecommit/index', () => {
 
   describe('findPr()', () => {
     it('finds pr', async () => {
+      prepareMocksForListPr();
       const res = await codeCommit.findPr({
         branchName: 'sourceBranch',
         prTitle: 'someTitle',
@@ -393,7 +394,7 @@ describe('modules/platform/codecommit/index', () => {
       });
     });
 
-    it('finds closed or merged pr', async () => {
+    it('finds any pr', async () => {
       //getPrList()
       jest
         .spyOn(codeCommitClient.prototype, 'send')
@@ -419,7 +420,6 @@ describe('modules/platform/codecommit/index', () => {
       const res = await codeCommit.findPr({
         branchName: 'sourceBranch',
         prTitle: 'someTitle',
-        state: PrState.Closed,
       });
       expect(res).toMatchObject({
         sourceBranch: 'refs/heads/sourceBranch',

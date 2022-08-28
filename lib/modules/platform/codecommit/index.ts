@@ -87,6 +87,7 @@ export async function initPlatform({
     secretAccessKey,
   };
   config.credentials = credentials;
+
   initIamClient(region, credentials);
   config.userArn = await getUserArn();
 
