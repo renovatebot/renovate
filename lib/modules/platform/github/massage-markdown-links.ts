@@ -19,12 +19,17 @@ function massageLink(input: string): string {
 }
 
 function collectLinkPosition(input: string, matches: UrlMatch[]): Plugin {
+  const newContent = input.replace(
+    /([\u200B]+|[\u200C]+|[\u200D]+|[\u200E]+|[\u200F]+|[\uFEFF]+)/g,
+    ''
+  );
+
   const transformer = (tree: Content): void => {
     const startOffset: number = tree.position?.start.offset ?? 0;
     const endOffset: number = tree.position?.end.offset ?? 0;
 
     if (tree.type === 'link') {
-      const substr = input.slice(startOffset, endOffset);
+      const substr = newContent.slice(startOffset, endOffset);
       const url: string = tree.url;
       const offset: number = startOffset + substr.lastIndexOf(url);
       if (urlRegex.test(url)) {
@@ -35,6 +40,10 @@ function collectLinkPosition(input: string, matches: UrlMatch[]): Plugin {
         });
       }
     } else if (tree.type === 'text') {
+      tree.value = tree.value.replace(
+        /([\u200B]+|[\u200C]+|[\u200D]+|[\u200E]+|[\u200F]+|[\uFEFF]+)/g,
+        ''
+      );
       const globalUrlReg = new RegExp(urlRegex, 'gi');
       const urlMatches = [...tree.value.matchAll(globalUrlReg)];
       for (const match of urlMatches) {
