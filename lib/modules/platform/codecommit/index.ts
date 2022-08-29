@@ -31,7 +31,7 @@ import type {
 } from '../types';
 import { repoFingerprint } from '../util';
 import { smartTruncate } from '../utils/pr-body';
-// eslint-disable-next-line import/named
+
 import * as client from './codecommit-client';
 import { getUserArn, initIamClient } from './iam-client';
 import { getCodeCommitUrl, getNewBranchName } from './util';
@@ -484,6 +484,24 @@ export async function mergePr({
   }
 }
 
+export async function addAssignees(
+  iid: number,
+  assignees: string[]
+): Promise<void> {
+  const numberOfApprovers = assignees.length;
+  const approvalRuleContents = `{"Version":"2018-11-08","Statements": [{"Type": "Approvers","NumberOfApprovalsNeeded":${numberOfApprovers},"ApprovalPoolMembers": ${JSON.stringify(
+    assignees
+  )}}]}`;
+  const res = await client.createPrAssignees(
+    `${iid}`,
+    approvalRuleContents.replace(/"/g, '"')
+  );
+  if (res) {
+    const approvalRule = res.approvalRule;
+    logger.debug({ approvalRule }, `Approval Rule Added to PR #${iid}:`);
+  }
+}
+
 /* istanbul ignore next */
 export function findIssue(title: string): Promise<Issue | null> {
   // CodeCommit does not have issues
@@ -507,11 +525,6 @@ export function getIssueList(): Promise<Issue[]> {
 /* istanbul ignore next */
 export function ensureIssueClosing(title: string): Promise<void> {
   // CodeCommit does not have issues
-  return Promise.resolve();
-}
-
-/* istanbul ignore next */
-export function addAssignees(iid: number, assignees: string[]): Promise<void> {
   return Promise.resolve();
 }
 

@@ -1,14 +1,17 @@
-import * as iam from './iam-client';
+import { PLATFORM_BAD_CREDENTIALS } from '../../../constants/error-messages';
 
 describe('modules/platform/codecommit/iam-client', () => {
   let iamClient: any;
+  let iam: any;
 
   beforeEach(() => {
     jest.resetModules();
     jest.mock('@aws-sdk/client-iam');
     const mod = require('@aws-sdk/client-iam');
     iamClient = mod['IAM'];
-    iam.initIamClient('eu-east-1', {
+
+    iam = require('./iam-client');
+    iam.initIamClient('eu-east', {
       accessKeyId: 'aaa',
       secretAccessKey: 'bbb',
     });
@@ -16,7 +19,7 @@ describe('modules/platform/codecommit/iam-client', () => {
 
   it('should throw in case of bad authentication', async () => {
     jest.spyOn(iamClient.prototype, 'send').mockImplementationOnce(() => {
-      throw new Error('bad credentials');
+      throw new Error(PLATFORM_BAD_CREDENTIALS);
     });
     let userArn;
     try {

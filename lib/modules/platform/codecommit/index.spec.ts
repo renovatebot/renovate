@@ -8,7 +8,6 @@ import type { logger as _logger } from '../../../logger';
 import { PrState } from '../../../types';
 import type * as _git from '../../../util/git';
 import type { Platform } from '../types';
-import { massageMarkdown } from './index';
 
 jest.mock('@aws-sdk/client-codecommit');
 jest.mock('@aws-sdk/client-iam');
@@ -43,7 +42,7 @@ describe('modules/platform/codecommit/index', () => {
   });
 
   it('validates massageMarkdown functionality', () => {
-    const newStr = massageMarkdown(
+    const newStr = codeCommit.massageMarkdown(
       '<details><summary>foo</summary>bar</details>text<details>\n<!--renovate-debug:hiddenmessage123-->'
     );
     expect(newStr).toBe(
@@ -1071,6 +1070,35 @@ describe('modules/platform/codecommit/index', () => {
       });
       expect(logger.debug).toHaveBeenCalledWith(
         'comment "my comment content" in PR #42 was removed'
+      );
+    });
+  });
+
+  describe('addAssignees', () => {
+    it('checks that the function resolves', async () => {
+      const res = {
+        approvalRule: {
+          approvalRuleName: 'Assignees By Renovate',
+          lastModifiedDate: 1570752871.932,
+          ruleContentSha256: '7c44e6ebEXAMPLE',
+          creationDate: 1570752871.932,
+          approvalRuleId: 'aac33506-EXAMPLE',
+          approvalRuleContent:
+            '{"Version": "2018-11-08","Statements": [{"Type": "Approvers","NumberOfApprovalsNeeded": 1,"ApprovalPoolMembers": ["arn:aws:iam::someUser:user/ReviewerUser"]}]}',
+          lastModifiedUser: 'arn:aws:iam::someUser:user/ReviewerUser',
+        },
+      };
+      jest
+        .spyOn(codeCommitClient.prototype, 'send')
+        .mockImplementationOnce(() => {
+          return Promise.resolve(res);
+        });
+      await expect(
+        codeCommit.addAssignees(13, ['arn:aws:iam::someUser:user/ReviewerUser'])
+      ).toResolve();
+      expect(logger.debug).toHaveBeenCalledWith(
+        res,
+        'Approval Rule Added to PR #13:'
       );
     });
   });

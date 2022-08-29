@@ -1,10 +1,7 @@
 import {
-  // eslint-disable-next-line import/named
   BatchGetBuildsCommand,
   CodeBuildClient,
-  // eslint-disable-next-line import/named
   ListBuildsCommand,
-  // eslint-disable-next-line import/named
   ListBuildsCommandOutput,
 } from '@aws-sdk/client-codebuild';
 import type { Credentials } from '@aws-sdk/types';

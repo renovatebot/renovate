@@ -1,5 +1,8 @@
 import {
   CodeCommitClient,
+  CreatePullRequestApprovalRuleCommand,
+  CreatePullRequestApprovalRuleInput,
+  CreatePullRequestApprovalRuleOutput,
   CreatePullRequestCommand,
   CreatePullRequestInput,
   CreatePullRequestOutput,
@@ -244,6 +247,7 @@ export async function listPullRequests(
   const input: ListPullRequestsInput = {
     repositoryName: repository,
     authorArn: userArn,
+    pullRequestStatus: PullRequestStatusEnum.OPEN,
   };
   const cmd = new ListPullRequestsCommand(input);
   return await codeCommitClient.send(cmd);
@@ -275,6 +279,18 @@ export async function getPr(
   return res;
 }
 
+export async function createPrAssignees(
+  prId: string,
+  approvalRuleContents: string
+): Promise<CreatePullRequestApprovalRuleOutput> {
+  const input: CreatePullRequestApprovalRuleInput = {
+    approvalRuleContent: approvalRuleContents,
+    approvalRuleName: 'Assignees By Renovate',
+    pullRequestId: prId,
+  };
+  const cmd = new CreatePullRequestApprovalRuleCommand(input);
+  return await codeCommitClient.send(cmd);
+}
 export async function listRepositories(): Promise<ListRepositoriesOutput> {
   const input: ListRepositoriesInput = {};
   const cmd = new ListRepositoriesCommand(input);
