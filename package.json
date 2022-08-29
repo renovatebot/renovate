@@ -310,7 +310,6 @@
     "unified": "9.2.2"
   },
   "resolutions": {
-    "**/json-schema": "^0.4.0",
     "@yarnpkg/core/clipanion": "3.2.0-rc.4"
   },
   "files": [
