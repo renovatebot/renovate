@@ -1117,7 +1117,6 @@ describe('workers/repository/update/branch/index', () => {
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
       const inconfig = {
         ...config,
-        dependencyDashboardChecks: { 'renovate/some-branch': 'true' },
         updatedArtifacts: [{ type: 'deletion', path: 'dummy' }],
       } as BranchConfig;
       expect(await branchWorker.processBranch(inconfig)).toEqual({
@@ -1183,6 +1182,42 @@ describe('workers/repository/update/branch/index', () => {
       const inconfig = {
         ...config,
         reuseExistingBranch: false,
+        updatedArtifacts: [{ type: 'deletion', path: 'dummy' }],
+      } as BranchConfig;
+      expect(await branchWorker.processBranch(inconfig)).toEqual({
+        branchExists: true,
+        prNo: undefined,
+        result: 'done',
+        commitSha: null,
+      });
+      expect(commit.commitFilesToBranch).toHaveBeenCalled();
+    });
+
+    it('updates branch if stopUpdatingLabel presents and dependency dashboard box checked', async () => {
+      getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce(
+        partial<PackageFilesResult>({
+          updatedPackageFiles: [partial<FileChange>({})],
+          artifactErrors: [],
+          updatedArtifacts: [],
+        })
+      );
+      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+        artifactErrors: [],
+        updatedArtifacts: [partial<FileChange>({})],
+      } as WriteExistingFilesResult);
+      git.branchExists.mockReturnValue(true);
+      platform.getBranchPr.mockResolvedValueOnce({
+        title: 'rebase!',
+        state: PrState.Open,
+        labels: ['stop-updating'],
+        bodyStruct: { hash: hashBody(`- [ ] <!-- rebase-check -->`) },
+      } as Pr);
+      git.isBranchModified.mockResolvedValueOnce(true);
+      schedule.isScheduledNow.mockReturnValueOnce(false);
+      commit.commitFilesToBranch.mockResolvedValueOnce(null);
+      const inconfig = {
+        ...config,
+        dependencyDashboardChecks: { 'renovate/some-branch': 'true' },
         updatedArtifacts: [{ type: 'deletion', path: 'dummy' }],
       } as BranchConfig;
       expect(await branchWorker.processBranch(inconfig)).toEqual({
