@@ -181,18 +181,6 @@ describe('workers/repository/update/branch/auto-replace', () => {
       const res = doAutoReplace(upgrade, yml, reuseExistingBranch);
       await expect(res).rejects.toThrow(WORKER_FILE_UPDATE_FAILED);
     });
-  });
-
-  describe('doReplacementAutoReplace', () => {
-    let reuseExistingBranch: boolean;
-    let upgrade: BranchUpgradeConfig;
-
-    beforeEach(() => {
-      upgrade = {
-        ...JSON.parse(JSON.stringify(defaultConfig)),
-      };
-      reuseExistingBranch = false;
-    });
 
     it('updates with docker replacement', async () => {
       const dockerfile = 'FROM bitnami/redis:6.0.8';
@@ -252,29 +240,6 @@ describe('workers/repository/update/branch/auto-replace', () => {
       ];
       const res = await doAutoReplace(upgrade, yml, reuseExistingBranch);
       expect(res).toBe(yml);
-    });
-
-    it('rebases if the deps list has changed', async () => {
-      upgrade.baseDeps = extractPackageFile(sampleHtml)?.deps;
-      reuseExistingBranch = true;
-      const res = await doAutoReplace(
-        upgrade,
-        'existing content',
-        reuseExistingBranch
-      );
-      expect(res).toBeNull();
-    });
-  });
-
-  describe('doReplacementAutoReplaceNewDepName', () => {
-    let reuseExistingBranch: boolean;
-    let upgrade: BranchUpgradeConfig;
-
-    beforeEach(() => {
-      upgrade = {
-        ...JSON.parse(JSON.stringify(defaultConfig)),
-      };
-      reuseExistingBranch = false;
     });
 
     it('updates with ansible replacement', async () => {

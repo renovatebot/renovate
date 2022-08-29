@@ -510,7 +510,7 @@ describe('workers/repository/update/branch/get-updated', () => {
       });
       autoReplace.doAutoReplace.mockResolvedValueOnce('my-new-dep:1.0.0');
       const res = await getUpdatedPackageFiles(config);
-      expect(res).toMatchSnapshot({
+      expect(res).toMatchObject({
         updatedPackageFiles: [
           { path: 'index.html', contents: 'my-new-dep:1.0.0' },
         ],

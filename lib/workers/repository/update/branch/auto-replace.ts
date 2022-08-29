@@ -107,28 +107,6 @@ export async function checkBranchDepsMatchBaseDeps(
     return false;
   }
 }
-async function checkExistingBranch(
-  upgrade: BranchUpgradeConfig,
-  existingContent: string
-): Promise<string | null> {
-  const { packageFile, depName } = upgrade;
-  if (!(await checkBranchDepsMatchBaseDeps(upgrade, existingContent))) {
-    logger.debug(
-      { packageFile, depName },
-      'Rebasing branch after deps list has changed'
-    );
-    return null;
-  }
-  if (!(await confirmIfDepVersionUpdated(upgrade, existingContent))) {
-    logger.debug(
-      { packageFile, depName },
-      'Rebasing after outdated branch dep found'
-    );
-    return null;
-  }
-  logger.debug({ packageFile, depName }, 'Branch dep is already updated');
-  return existingContent;
-}
 
 /**
  * Handles version upgrades for managers which do not already have custom logic
@@ -153,7 +131,22 @@ export async function doAutoReplace(
     autoReplaceStringTemplate,
   } = upgrade;
   if (reuseExistingBranch) {
-    return await checkExistingBranch(upgrade, existingContent);
+    if (!(await checkBranchDepsMatchBaseDeps(upgrade, existingContent))) {
+      logger.debug(
+        { packageFile, depName },
+        'Rebasing branch after deps list has changed'
+      );
+      return null;
+    }
+    if (!(await confirmIfDepVersionUpdated(upgrade, existingContent))) {
+      logger.debug(
+        { packageFile, depName },
+        'Rebasing after outdated branch dep found'
+      );
+      return null;
+    }
+    logger.debug({ packageFile, depName }, 'Branch dep is already updated');
+    return existingContent;
   }
   const replaceWithoutReplaceString = Boolean(
     newName &&
