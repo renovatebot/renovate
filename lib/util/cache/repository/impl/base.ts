@@ -91,11 +91,13 @@ export abstract class RepoCacheBase implements RepoCache {
     const repository = this.repository;
     const jsonStr = JSON.stringify(this.data);
     const hash = await hasha.async(jsonStr, { algorithm: 'sha256' });
-    if (hash !== this.oldHash) {
+    const modified = hash !== this.oldHash;
+    if (modified) {
       const compressed = await compress(jsonStr);
       const payload = compressed.toString('base64');
       await this.write({ revision, repository, payload, hash });
     }
+    this.data.modified = modified;
   }
 
   getData(): RepoCacheData {

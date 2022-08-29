@@ -51,6 +51,7 @@ export interface BaseBranchMetadata {
 }
 
 export interface BranchSummary {
+  cacheModified: boolean | undefined;
   baseBranches: BaseBranchMetadata[];
   branches: BranchMetadata[];
   inactiveBranches: string[];
@@ -75,7 +76,7 @@ export function unwrap({
 }
 
 export function runBranchSummery(): void {
-  const { scan, branches } = getCache();
+  const { scan, branches, modified: cacheModified } = getCache();
 
   const baseMetadata: BaseBranchMetadata[] = [];
   for (const [branchName, cached] of Object.entries(scan ?? {})) {
@@ -94,6 +95,7 @@ export function runBranchSummery(): void {
   }
 
   const res: BranchSummary = {
+    cacheModified,
     baseBranches: baseMetadata,
     branches: branchMetadata,
     inactiveBranches,

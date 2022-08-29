@@ -59,13 +59,16 @@ describe('workers/repository/finalise/repository-statistics', () => {
     it('processes cache with baseBranches only', () => {
       const sha = '793221454914cdc422e1a8f0ca27b96fe39ff9ad';
       const baseCache = partial<BaseBranchCache>({ sha });
+      const modified = false;
       const cache = partial<RepoCacheData>({
+        modified,
         scan: { main: baseCache, dev: baseCache },
       });
       cacheSpy.mockReturnValueOnce(cache);
       runBranchSummery();
       expect(logger.debug).toHaveBeenCalledWith(
         {
+          cacheModified: modified,
           baseBranches: [
             {
               branchName: 'main',
@@ -86,6 +89,7 @@ describe('workers/repository/finalise/repository-statistics', () => {
     it('processes cache with baseBranches and branches', () => {
       const sha = '793221454914cdc422e1a8f0ca27b96fe39ff9ad';
       const parentSha = '793221454914cdc422e1a8f0ca27b96fe39ff9ad';
+      const modified = false;
       const baseBranch = 'base-branch';
       const baseCache = partial<BaseBranchCache>({ sha });
       const branchCache = partial<BranchCache>({
@@ -104,6 +108,7 @@ describe('workers/repository/finalise/repository-statistics', () => {
         partial<BranchCache>({ branchName: 'b3' }),
       ];
       const cache = partial<RepoCacheData>({
+        modified,
         scan: { main: baseCache, dev: baseCache },
         branches,
       });
@@ -112,6 +117,7 @@ describe('workers/repository/finalise/repository-statistics', () => {
       runBranchSummery();
       expect(logger.debug).toHaveBeenCalledWith(
         {
+          cacheModified: modified,
           baseBranches: [
             {
               branchName: 'main',

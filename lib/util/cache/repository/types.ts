@@ -46,6 +46,7 @@ export interface RepoCacheData {
   };
   gitConflicts?: GitConflictsCache;
   prComments?: Record<number, Record<string, string>>;
+  modified?: boolean; // undefined until RepoCache.save() is called
 }
 
 export interface RepoCacheRecordV10 extends RepoCacheData {
