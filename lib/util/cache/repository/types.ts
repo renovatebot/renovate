@@ -28,7 +28,10 @@ export interface BranchCache {
   isModified: boolean;
   prNo: number | null;
   sha: string | null;
-  parentSha: string | null; // SHA of baseBranch
+  /**
+   * SHA of baseBranch
+   */
+  parentSha: string | null;
   upgrades: BranchUpgradeCache[];
   branchFingerprint?: string;
 }
