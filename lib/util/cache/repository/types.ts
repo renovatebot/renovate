@@ -31,6 +31,7 @@ export interface BranchCache {
   sha: string | null;
   parentSha: string | null;
   upgrades: BranchUpgradeCache[];
+  branchFingerprint?: string;
 }
 
 export interface RepoCacheData {
@@ -47,12 +48,25 @@ export interface RepoCacheData {
   prComments?: Record<number, Record<string, string>>;
 }
 
-export interface RepoCacheRecord {
+export interface RepoCacheRecordV10 extends RepoCacheData {
+  repository?: string;
+  revision?: number;
+}
+
+export interface RepoCacheRecordV11 {
+  repository: string;
+  revision: number;
+  data: RepoCacheData;
+}
+
+export interface RepoCacheRecordV12 {
   repository: string;
   revision: number;
   payload: string;
   hash: string;
 }
+
+export type RepoCacheRecord = RepoCacheRecordV12;
 
 export interface RepoCache {
   load(): Promise<void>;
