@@ -59,6 +59,7 @@ function getGitEnvironmentVariables(): NodeJS.ProcessEnv {
     PlatformId.Azure,
     PlatformId.Bitbucket,
     PlatformId.BitbucketServer,
+    PlatformId.CodeCommit,
     PlatformId.Gitea,
     PlatformId.Github,
     PlatformId.Gitlab,
