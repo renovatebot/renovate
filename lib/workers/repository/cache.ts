@@ -7,8 +7,11 @@ import type {
   BranchCache,
   BranchUpgradeCache,
 } from '../../util/cache/repository/types';
-import { getBranchCommit, isBranchModified } from '../../util/git';
-import { getCachedBranchParentShaResult } from '../../util/git/parent-sha-cache';
+import {
+  getBranchCommit,
+  getCachedBranchParentShaResult,
+  isBranchModified,
+} from '../../util/git';
 import type { BranchConfig, BranchUpgradeConfig } from '../types';
 
 function generateBranchUpgradeCache(

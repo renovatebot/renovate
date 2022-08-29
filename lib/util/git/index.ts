@@ -52,6 +52,17 @@ import type {
   TreeItem,
 } from './types';
 
+export {
+  getCachedConflictResult,
+  setCachedConflictResult,
+  getCachedModifiedResult,
+  setCachedModifiedResult,
+  getCachedBehindBaseResult,
+};
+export {
+  getCachedBranchParentShaResult,
+  setCachedBranchParentShaResult,
+} from './parent-sha-cache';
 export { setNoVerify } from './config';
 export { setPrivateKey } from './private-key';
 

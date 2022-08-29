@@ -34,9 +34,9 @@ import {
   branchExists as gitBranchExists,
   isBranchConflicted,
   isBranchModified,
+  setCachedBranchParentShaResult,
+  setCachedConflictResult,
 } from '../../../../util/git';
-import { setCachedConflictResult } from '../../../../util/git/conflicts-cache';
-import { setCachedBranchParentShaResult } from '../../../../util/git/parent-sha-cache';
 import {
   getMergeConfidenceLevel,
   isActiveConfidenceLevel,
