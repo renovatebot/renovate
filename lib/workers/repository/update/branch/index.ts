@@ -541,9 +541,10 @@ export async function processBranch(
           getBranchCommit(config.defaultBranch!)!
         );
         // TODO #7154
+        // TODO #7154
         setCachedConflictResult(
-          config.defaultBranch!,
-          getBranchCommit(config.defaultBranch!)!,
+          config.baseBranch!,
+          getBranchCommit(config.baseBranch!)!,
           config.branchName,
           commitSha,
           false
