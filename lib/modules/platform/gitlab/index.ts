@@ -49,6 +49,7 @@ import type {
   RepoResult,
   UpdatePrConfig,
 } from '../types';
+import { repoFingerprint } from '../util';
 import { smartTruncate } from '../utils/pr-body';
 import { getUserID, gitlabApi, isUserBusy } from './http';
 import { getMR, updateMR } from './merge-request';
@@ -142,13 +143,13 @@ export async function initPlatform({
 export async function getRepos(): Promise<string[]> {
   logger.debug('Autodiscovering GitLab repositories');
   try {
-    const url = `projects?membership=true&per_page=100&with_merge_requests_enabled=true&min_access_level=30`;
+    const url = `projects?membership=true&per_page=100&with_merge_requests_enabled=true&min_access_level=30&archived=false`;
     const res = await gitlabApi.getJson<RepoResponse[]>(url, {
       paginate: true,
     });
     logger.debug(`Discovered ${res.body.length} project(s)`);
     return res.body
-      .filter((repo) => !repo.mirror && !repo.archived)
+      .filter((repo) => !repo.mirror)
       .map((repo) => repo.path_with_namespace);
   } catch (err) {
     logger.error({ err }, `GitLab getRepos error`);
@@ -245,6 +246,7 @@ export async function initRepo({
   cloneSubmodules,
   ignorePrAuthor,
   gitUrl,
+  endpoint,
 }: RepoParams): Promise<RepoResult> {
   config = {} as any;
   config.repository = urlEscape(repository);
@@ -326,6 +328,7 @@ export async function initRepo({
   const repoConfig: RepoResult = {
     defaultBranch: config.defaultBranch,
     isFork: !!res.body.forked_from_project,
+    repoFingerprint: repoFingerprint(res.body.id, defaults.endpoint),
   };
   return repoConfig;
 }

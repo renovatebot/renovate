@@ -7,6 +7,7 @@ import * as memCache from '../../../../../util/cache/memory';
 import * as packageCache from '../../../../../util/cache/package';
 import { regEx } from '../../../../../util/regex';
 import type { BranchUpgradeConfig } from '../../../../types';
+import { slugifyUrl } from './common';
 import { getTags } from './gitlab';
 import { addReleaseNotes } from './release-notes';
 import { getInRangeReleases } from './releases';
@@ -38,7 +39,6 @@ export async function getChangeLogJSON(
   const newVersion = config.newVersion!;
   const sourceUrl = config.sourceUrl!;
   const depName = config.depName!;
-  const manager = config.manager;
   const sourceDirectory = config.sourceDirectory!;
 
   logger.trace('getChangeLogJSON for gitlab');
@@ -95,7 +95,7 @@ export async function getChangeLogJSON(
   }
 
   function getCacheKey(prev: string, next: string): string {
-    return `${manager}:${depName}:${prev}:${next}`;
+    return `${slugifyUrl(sourceUrl)}:${depName}:${prev}:${next}`;
   }
 
   const changelogReleases: ChangeLogRelease[] = [];

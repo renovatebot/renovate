@@ -32,6 +32,7 @@ const adminConfig: RepoGlobalConfig = {
   // `join` fixes Windows CI
   localDir: join('/tmp/github/some/repo'),
   cacheDir: join('/tmp/renovate/cache'),
+  containerbaseDir: join('/tmp/renovate/cache/containerbase'),
 };
 
 const repoStatus = partial<StatusResult>({
@@ -369,7 +370,7 @@ describe('modules/manager/composer/artifacts', () => {
         options: {
           cwd: '/tmp/github/some/repo',
           env: {
-            BUILDPACK_CACHE_DIR: '/tmp/renovate/cache/buildpack',
+            BUILDPACK_CACHE_DIR: '/tmp/renovate/cache/containerbase',
             COMPOSER_CACHE_DIR: '/tmp/renovate/cache/others/composer',
           },
         },
@@ -425,7 +426,7 @@ describe('modules/manager/composer/artifacts', () => {
         options: {
           cwd: '/tmp/github/some/repo',
           env: {
-            BUILDPACK_CACHE_DIR: '/tmp/renovate/cache/buildpack',
+            BUILDPACK_CACHE_DIR: '/tmp/renovate/cache/containerbase',
             COMPOSER_CACHE_DIR: '/tmp/renovate/cache/others/composer',
           },
         },
