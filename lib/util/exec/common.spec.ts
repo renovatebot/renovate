@@ -33,6 +33,7 @@ interface StubArgs {
   stdout?: string;
   stderr?: string;
   timeout?: number;
+  pid?: number;
 }
 
 function getReadable(
@@ -66,6 +67,7 @@ function getSpawnStub(args: StubArgs): ChildProcess {
     stderr,
     encoding,
     timeout,
+    pid = 31415,
   } = args;
   const listeners: Events = {};
 
@@ -140,6 +142,7 @@ function getSpawnStub(args: StubArgs): ChildProcess {
     emit,
     unref,
     kill,
+    pid,
   } as ChildProcess;
 }
 
@@ -279,6 +282,50 @@ describe('util/exec/common', () => {
         message: 'stderr maxBuffer exceeded',
         stderr: '',
         stdout: '',
+      });
+    });
+  });
+
+  describe('handle gpid', () => {
+    const killSpy = jest.spyOn(process, 'kill');
+
+    afterEach(() => {
+      delete process.env.RENOVATE_X_EXEC_GPID_HANDLE;
+      jest.restoreAllMocks();
+    });
+
+    it('calls process.kill on the gpid', async () => {
+      process.env.RENOVATE_X_EXEC_GPID_HANDLE = 'true';
+      const cmd = 'ls -l';
+      const exitSignal = 'SIGTERM';
+      const stub = getSpawnStub({ cmd, exitCode: null, exitSignal });
+      spawn.mockImplementationOnce((cmd, opts) => stub);
+      killSpy.mockImplementationOnce((pid, signal) => true);
+      await expect(
+        exec(cmd, partial<RawExecOptions>({ encoding: 'utf8' }))
+      ).rejects.toMatchObject({
+        cmd,
+        signal: exitSignal,
+        message: `Command failed: ${cmd}\nInterrupted by ${exitSignal}`,
+      });
+      expect(process.kill).toHaveBeenCalledWith(-stub.pid!, exitSignal);
+    });
+
+    it('handles process.kill call on non existent gpid', async () => {
+      process.env.RENOVATE_X_EXEC_GPID_HANDLE = 'true';
+      const cmd = 'ls -l';
+      const exitSignal = 'SIGTERM';
+      const stub = getSpawnStub({ cmd, exitCode: null, exitSignal });
+      spawn.mockImplementationOnce((cmd, opts) => stub);
+      killSpy.mockImplementationOnce((pid, signal) => {
+        throw new Error();
+      });
+      await expect(
+        exec(cmd, partial<RawExecOptions>({ encoding: 'utf8' }))
+      ).rejects.toMatchObject({
+        cmd,
+        signal: exitSignal,
+        message: `Command failed: ${cmd}\nInterrupted by ${exitSignal}`,
       });
     });
   });

@@ -196,7 +196,7 @@ module.exports = {
   hostRules: [
     {
       matchHost: 'your.host.io',
-      hostType: 'helm'
+      hostType: 'helm',
       username: '<your-username>',
       password: process.env.SELF_HOSTED_HELM_CHARTS_PASSWORD,
     },
