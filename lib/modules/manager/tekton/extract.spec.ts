@@ -1,7 +1,7 @@
 import { Fixtures } from '../../../../test/fixtures';
 import { extractPackageFile } from '.';
 
-describe('modules/manager/tekton/index', () => {
+describe('modules/manager/tekton/extract', () => {
   describe('extractPackageFile()', () => {
     it('extracts deps from a file', () => {
       expect(

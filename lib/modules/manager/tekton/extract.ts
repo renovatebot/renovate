@@ -55,10 +55,8 @@ function getDeps(doc: TektonResource): PackageDependency[] {
 
   // Handle list of TektonResources
   const items = doc.items ?? [];
-  if (items.length > 0) {
-    for (const item of items) {
-      deps.push(...getDeps(item));
-    }
+  for (const item of items) {
+    deps.push(...getDeps(item));
   }
 
   return deps;
