@@ -51,13 +51,29 @@ export interface RepoCacheData {
   prComments?: Record<number, Record<string, string>>;
 }
 
-export interface RepoCacheRecord {
-  revision: number;
+export interface RepoCacheRecordV10 extends RepoCacheData {
+  repository?: string;
+  revision?: number;
+}
+
+export interface RepoCacheRecordV11 {
   repository: string;
-  fingerprint: string;
+  revision: number;
+  data: RepoCacheData;
+}
+
+export interface RepoCacheRecordV12 {
+  repository: string;
+  revision: number;
   payload: string;
   hash: string;
 }
+
+export interface RepoCacheRecordV13 extends RepoCacheRecordV12 {
+  fingerprint: string;
+}
+
+export type RepoCacheRecord = RepoCacheRecordV13;
 
 export interface RepoCache {
   load(): Promise<void>;
