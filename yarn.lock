@@ -5571,7 +5571,12 @@ inherits@2, inherits@^2.0.1, inherits@^2.0.3, inherits@~2.0.3:
   resolved "https://registry.yarnpkg.com/inherits/-/inherits-2.0.4.tgz#0fa2c64f932917c3433a0ded55363aae37416b7c"
   integrity sha512-k/vGaX4/Yla3WzyMCvTQOXYeIHvqOKtnqBduzTHpzpQZzAskKMhZ2K+EnBiSM9zGSoIFeMpXKxa4dYeZIQqewQ==
 
-ini@3.0.0, ini@^3.0.0:
+ini@3.0.1:
+  version "3.0.1"
+  resolved "https://registry.yarnpkg.com/ini/-/ini-3.0.1.tgz#c76ec81007875bc44d544ff7a11a55d12294102d"
+  integrity sha512-it4HyVAUTKBc6m8e1iXWvXSTdndF7HbdN713+kvLrymxTaU4AUBWrJ4vEooP+V7fexnVD3LKcBshjGGPefSMUQ==
+
+ini@^3.0.0:
   version "3.0.0"
   resolved "https://registry.yarnpkg.com/ini/-/ini-3.0.0.tgz#2f6de95006923aa75feed8894f5686165adc08f1"
   integrity sha512-TxYQaeNW/N8ymDvwAxPyRbhMBtnEwuvaTYpOQkFx1nSeusgezHniEc/l35Vo4iCq/mMiTJbpD7oYxN98hFlfmw==
