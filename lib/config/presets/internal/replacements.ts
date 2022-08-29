@@ -16,6 +16,9 @@ export const presets: Record<string, Preset> = {
       'replacements:jade-to-pug',
       'replacements:joi-to-scoped',
       'replacements:joi-to-unscoped',
+      'replacements:now-to-vercel',
+      'replacements:react-query-devtools-to-scoped',
+      'replacements:react-query-to-scoped',
       'replacements:renovate-pep440-to-renovatebot-pep440',
       'replacements:rollup-node-resolve-to-scoped',
       'replacements:xmldom-to-scoped',
@@ -88,6 +91,44 @@ export const presets: Record<string, Preset> = {
         matchPackageNames: ['@hapi/joi'],
         replacementName: 'joi',
         replacementVersion: '17.1.1',
+      },
+    ],
+  },
+  'now-to-vercel': {
+    description: '`now` was renamed to `vercel`.',
+    packageRules: [
+      {
+        matchCurrentVersion: '>=21.0.0',
+        matchDatasources: ['npm'],
+        matchPackageNames: ['now'],
+        replacementName: 'vercel',
+        replacementVersion: '21.0.0',
+      },
+    ],
+  },
+  'react-query-devtools-to-scoped': {
+    description:
+      '`react-query/devtools` became scoped under the `tanstack` organization.',
+    packageRules: [
+      {
+        matchCurrentVersion: '>=2.0.0 <4.0.0',
+        matchDatasources: ['npm'],
+        matchPackageNames: ['react-query/devtools'],
+        replacementName: '@tanstack/react-query-devtools',
+        replacementVersion: '4.0.0',
+      },
+    ],
+  },
+  'react-query-to-scoped': {
+    description:
+      '`react-query` became scoped under the `tanstack` organization.',
+    packageRules: [
+      {
+        matchCurrentVersion: '>=3.0.0 <4.0.0',
+        matchDatasources: ['npm'],
+        matchPackageNames: ['react-query'],
+        replacementName: '@tanstack/react-query',
+        replacementVersion: '4.0.5',
       },
     ],
   },

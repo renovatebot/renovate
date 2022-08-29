@@ -1,12 +1,12 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`workers/repository/update/branch/get-updated getUpdatedPackageFiles() bumps versions in autoReplace managers 1`] = `
-Object {
-  "artifactErrors": Array [],
+{
+  "artifactErrors": [],
   "reuseExistingBranch": undefined,
-  "updatedArtifacts": Array [],
-  "updatedPackageFiles": Array [
-    Object {
+  "updatedArtifacts": [],
+  "updatedPackageFiles": [
+    {
       "contents": "version: 0.0.2",
       "path": "Chart.yaml",
       "type": "addition",
@@ -16,12 +16,12 @@ Object {
 `;
 
 exports[`workers/repository/update/branch/get-updated getUpdatedPackageFiles() bumps versions in updateDependency managers 1`] = `
-Object {
-  "artifactErrors": Array [],
+{
+  "artifactErrors": [],
   "reuseExistingBranch": undefined,
-  "updatedArtifacts": Array [],
-  "updatedPackageFiles": Array [
-    Object {
+  "updatedArtifacts": [],
+  "updatedPackageFiles": [
+    {
       "contents": "new version",
       "path": "package.json",
       "type": "addition",
@@ -31,12 +31,12 @@ Object {
 `;
 
 exports[`workers/repository/update/branch/get-updated getUpdatedPackageFiles() handles autoreplace base updated 1`] = `
-Object {
-  "artifactErrors": Array [],
+{
+  "artifactErrors": [],
   "reuseExistingBranch": undefined,
-  "updatedArtifacts": Array [],
-  "updatedPackageFiles": Array [
-    Object {
+  "updatedArtifacts": [],
+  "updatedPackageFiles": [
+    {
       "contents": "updated-file",
       "path": "index.html",
       "type": "addition",
@@ -46,12 +46,12 @@ Object {
 `;
 
 exports[`workers/repository/update/branch/get-updated getUpdatedPackageFiles() handles autoreplace branch needs update 1`] = `
-Object {
-  "artifactErrors": Array [],
+{
+  "artifactErrors": [],
   "reuseExistingBranch": false,
-  "updatedArtifacts": Array [],
-  "updatedPackageFiles": Array [
-    Object {
+  "updatedArtifacts": [],
+  "updatedPackageFiles": [
+    {
       "contents": "updated-file",
       "path": "index.html",
       "type": "addition",
@@ -61,12 +61,12 @@ Object {
 `;
 
 exports[`workers/repository/update/branch/get-updated getUpdatedPackageFiles() handles content change 1`] = `
-Object {
-  "artifactErrors": Array [],
+{
+  "artifactErrors": [],
   "reuseExistingBranch": false,
-  "updatedArtifacts": Array [],
-  "updatedPackageFiles": Array [
-    Object {
+  "updatedArtifacts": [],
+  "updatedPackageFiles": [
+    {
       "contents": "some new content",
       "path": "package.json",
       "type": "addition",
@@ -76,12 +76,12 @@ Object {
 `;
 
 exports[`workers/repository/update/branch/get-updated getUpdatedPackageFiles() handles git submodules 1`] = `
-Object {
-  "artifactErrors": Array [],
+{
+  "artifactErrors": [],
   "reuseExistingBranch": undefined,
-  "updatedArtifacts": Array [],
-  "updatedPackageFiles": Array [
-    Object {
+  "updatedArtifacts": [],
+  "updatedPackageFiles": [
+    {
       "contents": "existing content",
       "path": ".gitmodules",
       "type": "addition",
@@ -91,12 +91,12 @@ Object {
 `;
 
 exports[`workers/repository/update/branch/get-updated getUpdatedPackageFiles() handles isRemediation rebase 1`] = `
-Object {
-  "artifactErrors": Array [],
+{
+  "artifactErrors": [],
   "reuseExistingBranch": false,
-  "updatedArtifacts": Array [],
-  "updatedPackageFiles": Array [
-    Object {
+  "updatedArtifacts": [],
+  "updatedPackageFiles": [
+    {
       "contents": "new contents",
       "path": "package-lock.json",
       "type": "addition",
@@ -106,12 +106,12 @@ Object {
 `;
 
 exports[`workers/repository/update/branch/get-updated getUpdatedPackageFiles() handles isRemediation success 1`] = `
-Object {
-  "artifactErrors": Array [],
+{
+  "artifactErrors": [],
   "reuseExistingBranch": undefined,
-  "updatedArtifacts": Array [],
-  "updatedPackageFiles": Array [
-    Object {
+  "updatedArtifacts": [],
+  "updatedPackageFiles": [
+    {
       "contents": "new contents",
       "path": "package-lock.json",
       "type": "addition",
@@ -121,17 +121,17 @@ Object {
 `;
 
 exports[`workers/repository/update/branch/get-updated getUpdatedPackageFiles() handles lock file errors 1`] = `
-Object {
-  "artifactErrors": Array [
-    Object {
+{
+  "artifactErrors": [
+    {
       "lockFile": "composer.lock",
       "stderr": "some error",
     },
   ],
   "reuseExistingBranch": true,
-  "updatedArtifacts": Array [],
-  "updatedPackageFiles": Array [
-    Object {
+  "updatedArtifacts": [],
+  "updatedPackageFiles": [
+    {
       "contents": "some new content",
       "path": "undefined",
       "type": "addition",
@@ -141,18 +141,18 @@ Object {
 `;
 
 exports[`workers/repository/update/branch/get-updated getUpdatedPackageFiles() handles lock files 1`] = `
-Object {
-  "artifactErrors": Array [],
+{
+  "artifactErrors": [],
   "reuseExistingBranch": true,
-  "updatedArtifacts": Array [
-    Object {
+  "updatedArtifacts": [
+    {
       "contents": "some contents",
       "path": "composer.json",
       "type": "addition",
     },
   ],
-  "updatedPackageFiles": Array [
-    Object {
+  "updatedPackageFiles": [
+    {
       "contents": "some new content",
       "path": "composer.json",
       "type": "addition",
@@ -162,47 +162,47 @@ Object {
 `;
 
 exports[`workers/repository/update/branch/get-updated getUpdatedPackageFiles() handles lockFileMaintenance 1`] = `
-Object {
-  "artifactErrors": Array [],
+{
+  "artifactErrors": [],
   "reuseExistingBranch": undefined,
-  "updatedArtifacts": Array [
-    Object {
+  "updatedArtifacts": [
+    {
       "contents": "some contents",
       "path": "composer.json",
       "type": "addition",
     },
   ],
-  "updatedPackageFiles": Array [],
+  "updatedPackageFiles": [],
 }
 `;
 
 exports[`workers/repository/update/branch/get-updated getUpdatedPackageFiles() handles lockFileMaintenance error 1`] = `
-Object {
-  "artifactErrors": Array [
-    Object {
+{
+  "artifactErrors": [
+    {
       "lockFile": "composer.lock",
       "stderr": "some error",
     },
   ],
   "reuseExistingBranch": undefined,
-  "updatedArtifacts": Array [],
-  "updatedPackageFiles": Array [],
+  "updatedArtifacts": [],
+  "updatedPackageFiles": [],
 }
 `;
 
 exports[`workers/repository/update/branch/get-updated getUpdatedPackageFiles() update artifacts on update-lockfile strategy 1`] = `
-Object {
-  "artifactErrors": Array [],
+{
+  "artifactErrors": [],
   "reuseExistingBranch": undefined,
-  "updatedArtifacts": Array [
-    Object {
+  "updatedArtifacts": [
+    {
       "contents": "some contents",
       "path": "composer.lock",
       "type": "addition",
     },
   ],
-  "updatedPackageFiles": Array [
-    Object {
+  "updatedPackageFiles": [
+    {
       "contents": "existing content",
       "path": "composer.json",
       "type": "addition",
@@ -212,18 +212,18 @@ Object {
 `;
 
 exports[`workers/repository/update/branch/get-updated getUpdatedPackageFiles() update artifacts on update-lockfile strategy with no updateLockedDependency 1`] = `
-Object {
-  "artifactErrors": Array [],
+{
+  "artifactErrors": [],
   "reuseExistingBranch": undefined,
-  "updatedArtifacts": Array [
-    Object {
+  "updatedArtifacts": [
+    {
       "contents": "some contents",
       "path": "terraform.lock",
       "type": "addition",
     },
   ],
-  "updatedPackageFiles": Array [
-    Object {
+  "updatedPackageFiles": [
+    {
       "contents": "existing content",
       "path": "abc.tf",
       "type": "addition",

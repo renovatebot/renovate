@@ -34,6 +34,7 @@ import type {
   RepoResult,
   UpdatePrConfig,
 } from '../types';
+import { repoFingerprint } from '../util';
 import { smartTruncate } from '../utils/pr-body';
 import * as helper from './gitea-helper';
 import type {
@@ -334,6 +335,7 @@ const platform: Platform = {
     return {
       defaultBranch: config.defaultBranch,
       isFork: !!repo.fork,
+      repoFingerprint: repoFingerprint(repo.id, defaults.endpoint),
     };
   },
 
@@ -344,7 +346,7 @@ const platform: Platform = {
         uid: botUserID,
         archived: false,
       });
-      return repos.map((r) => r.full_name);
+      return repos.filter((r) => !r.mirror).map((r) => r.full_name);
     } catch (err) {
       logger.error({ err }, 'Gitea getRepos() error');
       throw err;

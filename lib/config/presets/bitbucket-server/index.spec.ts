@@ -88,7 +88,7 @@ describe('config/presets/bitbucket-server/index', () => {
       ).rejects.toThrow(PRESET_DEP_NOT_FOUND);
     });
 
-    it('throws to big', async () => {
+    it('throws too big', async () => {
       httpMock
         .scope(bitbucketApiHost)
         .get(`${basePath}/some-filename.json`)

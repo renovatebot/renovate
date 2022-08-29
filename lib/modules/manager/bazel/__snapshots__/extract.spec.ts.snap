@@ -1,25 +1,25 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`modules/manager/bazel/extract extractPackageFile() extracts dependencies for container_pull deptype 1`] = `
-Array [
-  Object {
+[
+  {
     "currentDigest": "sha256:a4e8d8c444ca04fe706649e82263c9f4c2a4229bc30d2a64561b5e1d20cc8548",
     "currentValue": "v1.0.0-alpha31.cli-migrations",
     "datasource": "docker",
     "depName": "hasura",
     "depType": "container_pull",
-    "managerData": Object {
+    "managerData": {
       "def": "container_pull(
-          name=\\"hasura\\",
-          registry=\\"index.docker.io\\",
-          repository=\\"hasura/graphql-engine\\",
+          name="hasura",
+          registry="index.docker.io",
+          repository="hasura/graphql-engine",
           # v1.0.0-alpha31.cli-migrations 11/28
-          digest=\\"sha256:a4e8d8c444ca04fe706649e82263c9f4c2a4229bc30d2a64561b5e1d20cc8548\\",
-          tag=\\"v1.0.0-alpha31.cli-migrations\\"
+          digest="sha256:a4e8d8c444ca04fe706649e82263c9f4c2a4229bc30d2a64561b5e1d20cc8548",
+          tag="v1.0.0-alpha31.cli-migrations"
         )",
     },
     "packageName": "hasura/graphql-engine",
-    "registryUrls": Array [
+    "registryUrls": [
       "index.docker.io",
     ],
     "versioning": "docker",
@@ -28,51 +28,51 @@ Array [
 `;
 
 exports[`modules/manager/bazel/extract extractPackageFile() extracts dependencies from *.bzl files 1`] = `
-Array [
-  Object {
+[
+  {
     "currentDigest": "0356bef3fbbabec5f0e196ecfacdeb6db62d48c0",
     "datasource": "github-tags",
     "depName": "subpar",
     "depType": "http_archive",
-    "managerData": Object {
+    "managerData": {
       "def": "http_archive(
-            name = \\"subpar\\",
-            sha256 = \\"7ab6ab37ede82255e00c0456846a1428b20e8813f77d83bcf54ddd59ba34377a\\",
+            name = "subpar",
+            sha256 = "7ab6ab37ede82255e00c0456846a1428b20e8813f77d83bcf54ddd59ba34377a",
             # Commit from 2019-03-07.
-            strip_prefix = \\"subpar-0356bef3fbbabec5f0e196ecfacdeb6db62d48c0\\",
-            urls = [\\"https://github.com/google/subpar/archive/0356bef3fbbabec5f0e196ecfacdeb6db62d48c0.tar.gz\\"],
+            strip_prefix = "subpar-0356bef3fbbabec5f0e196ecfacdeb6db62d48c0",
+            urls = ["https://github.com/google/subpar/archive/0356bef3fbbabec5f0e196ecfacdeb6db62d48c0.tar.gz"],
         )",
     },
     "packageName": "google/subpar",
   },
-  Object {
+  {
     "currentValue": "0.6.0",
     "datasource": "github-tags",
     "depName": "bazel_skylib",
     "depType": "http_archive",
-    "managerData": Object {
+    "managerData": {
       "def": "http_archive(
-            name = \\"bazel_skylib\\",
-            sha256 = \\"eb5c57e4c12e68c0c20bc774bfbc60a568e800d025557bc4ea022c6479acc867\\",
-            strip_prefix = \\"bazel-skylib-0.6.0\\",
-            urls = [\\"https://github.com/bazelbuild/bazel-skylib/archive/0.6.0.tar.gz\\"],
+            name = "bazel_skylib",
+            sha256 = "eb5c57e4c12e68c0c20bc774bfbc60a568e800d025557bc4ea022c6479acc867",
+            strip_prefix = "bazel-skylib-0.6.0",
+            urls = ["https://github.com/bazelbuild/bazel-skylib/archive/0.6.0.tar.gz"],
         )",
     },
     "packageName": "bazelbuild/bazel-skylib",
   },
-  Object {
+  {
     "currentValue": "0.5.0",
     "datasource": "github-releases",
     "depName": "io_bazel_stardoc",
     "depType": "http_archive",
-    "managerData": Object {
+    "managerData": {
       "def": "maybe(
         http_archive,
-        name = \\"io_bazel_stardoc\\",
-        sha256 = \\"c9794dcc8026a30ff67cf7cf91ebe245ca294b20b071845d12c192afe243ad72\\",
+        name = "io_bazel_stardoc",
+        sha256 = "c9794dcc8026a30ff67cf7cf91ebe245ca294b20b071845d12c192afe243ad72",
         urls = [
-            \\"https://mirror.bazel.build/github.com/bazelbuild/stardoc/releases/download/0.5.0/stardoc-0.5.0.tar.gz\\",
-            \\"https://github.com/bazelbuild/stardoc/releases/download/0.5.0/stardoc-0.5.0.tar.gz\\",
+            "https://mirror.bazel.build/github.com/bazelbuild/stardoc/releases/download/0.5.0/stardoc-0.5.0.tar.gz",
+            "https://github.com/bazelbuild/stardoc/releases/download/0.5.0/stardoc-0.5.0.tar.gz",
         ],
     )",
     },
@@ -82,78 +82,78 @@ Array [
 `;
 
 exports[`modules/manager/bazel/extract extractPackageFile() extracts github tags 1`] = `
-Array [
-  Object {
+[
+  {
     "currentValue": "6.3.0",
     "datasource": "github-tags",
     "depName": "GBDeviceInfo",
     "depType": "http_archive",
-    "managerData": Object {
+    "managerData": {
       "def": "http_archive(
-    name = \\"GBDeviceInfo\\",
-    url = \\"https://github.com/lmirosevic/GBDeviceInfo/archive/6.3.0.tar.gz\\",
-    sha256 = \\"d7666275dff039407ea467c3083b83e24934101777c8b55b6b1b3b7e9a9e220b\\",
-    strip_prefix = \\"GBDeviceInfo-6.3.0/GBDeviceInfo\\"
+    name = "GBDeviceInfo",
+    url = "https://github.com/lmirosevic/GBDeviceInfo/archive/6.3.0.tar.gz",
+    sha256 = "d7666275dff039407ea467c3083b83e24934101777c8b55b6b1b3b7e9a9e220b",
+    strip_prefix = "GBDeviceInfo-6.3.0/GBDeviceInfo"
 )",
     },
     "packageName": "lmirosevic/GBDeviceInfo",
   },
-  Object {
+  {
     "currentDigest": "135d46b4c9423ee7d494c78a21ff621bc73c12f3",
     "datasource": "github-tags",
     "depName": "com_github_nelhage_rules_boost",
     "depType": "http_archive",
-    "managerData": Object {
+    "managerData": {
       "def": "http_archive(
-    name = \\"com_github_nelhage_rules_boost\\",
-    url = \\"https://github.com/nelhage/rules_boost/archive/135d46b4c9423ee7d494c78a21ff621bc73c12f3.tar.gz\\",
-    sha256 = \\"3651f5dda0f7296e4cecafacc7f9d1f274be0fd64e30bebd74e28ffba28fe77f\\",
-    strip_prefix = \\"rules_boost-135d46b4c9423ee7d494c78a21ff621bc73c12f3\\",
+    name = "com_github_nelhage_rules_boost",
+    url = "https://github.com/nelhage/rules_boost/archive/135d46b4c9423ee7d494c78a21ff621bc73c12f3.tar.gz",
+    sha256 = "3651f5dda0f7296e4cecafacc7f9d1f274be0fd64e30bebd74e28ffba28fe77f",
+    strip_prefix = "rules_boost-135d46b4c9423ee7d494c78a21ff621bc73c12f3",
 )",
     },
     "packageName": "nelhage/rules_boost",
   },
-  Object {
+  {
     "currentValue": "6.3.0",
     "datasource": "github-tags",
     "depName": "GBDeviceInfo-zip",
     "depType": "http_archive",
-    "managerData": Object {
+    "managerData": {
       "def": "http_archive(
-    name = \\"GBDeviceInfo-zip\\",
-    url = \\"https://github.com/lmirosevic/GBDeviceInfo/archive/6.3.0.zip\\",
-    sha256 = \\"4ef4320c4880fd64cfb7f42132f4b02fa626bccf1ba3e1a71dfbfcb50735f141\\",
-    strip_prefix = \\"GBDeviceInfo-6.3.0/GBDeviceInfo\\"
+    name = "GBDeviceInfo-zip",
+    url = "https://github.com/lmirosevic/GBDeviceInfo/archive/6.3.0.zip",
+    sha256 = "4ef4320c4880fd64cfb7f42132f4b02fa626bccf1ba3e1a71dfbfcb50735f141",
+    strip_prefix = "GBDeviceInfo-6.3.0/GBDeviceInfo"
 )",
     },
     "packageName": "lmirosevic/GBDeviceInfo",
   },
-  Object {
+  {
     "currentDigest": "135d46b4c9423ee7d494c78a21ff621bc73c12f3",
     "datasource": "github-tags",
     "depName": "com_github_nelhage_rules_boost-zip",
     "depType": "http_archive",
-    "managerData": Object {
+    "managerData": {
       "def": "http_archive(
-    name = \\"com_github_nelhage_rules_boost-zip\\",
-    url = \\"https://github.com/nelhage/rules_boost/archive/135d46b4c9423ee7d494c78a21ff621bc73c12f3.zip\\",
-    sha256 = \\"de8aac034cabe4a9ba5f7a33b9523862bf76c245a6c554c0e737f591bb7c7aeb\\",
-    strip_prefix = \\"rules_boost-135d46b4c9423ee7d494c78a21ff621bc73c12f3\\",
+    name = "com_github_nelhage_rules_boost-zip",
+    url = "https://github.com/nelhage/rules_boost/archive/135d46b4c9423ee7d494c78a21ff621bc73c12f3.zip",
+    sha256 = "de8aac034cabe4a9ba5f7a33b9523862bf76c245a6c554c0e737f591bb7c7aeb",
+    strip_prefix = "rules_boost-135d46b4c9423ee7d494c78a21ff621bc73c12f3",
 )",
     },
     "packageName": "nelhage/rules_boost",
   },
-  Object {
+  {
     "currentValue": "v0.29.0",
     "datasource": "github-releases",
     "depName": "io_bazel_rules_go",
     "depType": "http_archive",
-    "managerData": Object {
+    "managerData": {
       "def": "maybe(
   http_archive,
-  name = \\"io_bazel_rules_go\\",
-  sha256 = \\"2b1641428dff9018f9e85c0384f03ec6c10660d935b750e3fa1492a281a53b0f\\",
-  url = \\"https://github.com/bazelbuild/rules_go/releases/download/v0.29.0/rules_go-v0.29.0.zip\\",
+  name = "io_bazel_rules_go",
+  sha256 = "2b1641428dff9018f9e85c0384f03ec6c10660d935b750e3fa1492a281a53b0f",
+  url = "https://github.com/bazelbuild/rules_go/releases/download/v0.29.0/rules_go-v0.29.0.zip",
 )",
     },
     "packageName": "bazelbuild/rules_go",
@@ -162,22 +162,22 @@ Array [
 `;
 
 exports[`modules/manager/bazel/extract extractPackageFile() extracts multiple types of dependencies 1`] = `
-Array [
-  Object {
+[
+  {
     "currentValue": "v1.0.5",
     "datasource": "go",
     "depName": "com_github_bitly_go-nsq",
     "depType": "go_repository",
-    "managerData": Object {
+    "managerData": {
       "def": "go_repository(
-    name = \\"com_github_bitly_go-nsq\\",
-    importpath = \\"github.com/bitly/go-nsq\\",
-    tag = \\"v1.0.5\\"
+    name = "com_github_bitly_go-nsq",
+    importpath = "github.com/bitly/go-nsq",
+    tag = "v1.0.5"
 )",
     },
     "packageName": "github.com/bitly/go-nsq",
   },
-  Object {
+  {
     "currentDigest": "dec09d789f3dba190787f8b4454c7d3c936fed9e",
     "currentDigestShort": "dec09d7",
     "currentValue": "v0.0.0",
@@ -185,200 +185,200 @@ Array [
     "depName": "com_github_google_uuid",
     "depType": "go_repository",
     "digestOneAndOnly": true,
-    "managerData": Object {
+    "managerData": {
       "def": "go_repository(
-   name = \\"com_github_google_uuid\\",
-   importpath = \\"github.com/google/uuid\\",
-   commit = \\"dec09d789f3dba190787f8b4454c7d3c936fed9e\\"
+   name = "com_github_google_uuid",
+   importpath = "github.com/google/uuid",
+   commit = "dec09d789f3dba190787f8b4454c7d3c936fed9e"
 )",
     },
     "packageName": "github.com/google/uuid",
   },
-  Object {
+  {
     "currentValue": "v2",
     "datasource": "go",
     "depName": "com_gopkgin_mgo_v2",
     "depType": "go_repository",
-    "managerData": Object {
+    "managerData": {
       "def": "go_repository(
-    name = \\"com_gopkgin_mgo_v2\\",
-    importpath = \\"gopkg.in/mgo.v2\\",
-    tag = \\"v2\\"
+    name = "com_gopkgin_mgo_v2",
+    importpath = "gopkg.in/mgo.v2",
+    tag = "v2"
 )",
     },
     "packageName": "gopkg.in/mgo.v2",
   },
-  Object {
+  {
     "currentValue": "0.3.1",
     "datasource": "github-releases",
     "depName": "build_bazel_rules_nodejs",
     "depType": "git_repository",
-    "managerData": Object {
+    "managerData": {
       "def": "git_repository(
-    name = \\"build_bazel_rules_nodejs\\",
-    remote = \\"https://github.com/bazelbuild/rules_nodejs.git\\",
-    tag = \\"0.3.1\\",
+    name = "build_bazel_rules_nodejs",
+    remote = "https://github.com/bazelbuild/rules_nodejs.git",
+    tag = "0.3.1",
 )",
     },
     "packageName": "bazelbuild/rules_nodejs",
   },
-  Object {
+  {
     "currentValue": "0.6.1",
     "datasource": "github-releases",
     "depName": "build_bazel_rules_typescript",
     "depType": "git_repository",
-    "managerData": Object {
+    "managerData": {
       "def": "git_repository(
-    name = \\"build_bazel_rules_typescript\\",
-    remote = \\"https://github.com/bazelbuild/rules_typescript.git\\",
-    tag = \\"0.6.1\\",
+    name = "build_bazel_rules_typescript",
+    remote = "https://github.com/bazelbuild/rules_typescript.git",
+    tag = "0.6.1",
 )",
     },
     "packageName": "bazelbuild/rules_typescript",
   },
-  Object {
+  {
     "currentDigest": "446923c3756ceeaa75888f52fcbdd48bb314fbf8",
     "datasource": "github-tags",
     "depName": "distroless",
     "depType": "http_archive",
-    "managerData": Object {
+    "managerData": {
       "def": "http_archive(
-    name=\\"distroless\\",
-    sha256=\\"f7a6ecfb8174a1dd4713ea3b21621072996ada7e8f1a69e6ae7581be137c6dd6\\",
-    strip_prefix=\\"distroless-446923c3756ceeaa75888f52fcbdd48bb314fbf8\\",
-    urls=[\\"https://github.com/GoogleContainerTools/distroless/archive/446923c3756ceeaa75888f52fcbdd48bb314fbf8.tar.gz\\"]
+    name="distroless",
+    sha256="f7a6ecfb8174a1dd4713ea3b21621072996ada7e8f1a69e6ae7581be137c6dd6",
+    strip_prefix="distroless-446923c3756ceeaa75888f52fcbdd48bb314fbf8",
+    urls=["https://github.com/GoogleContainerTools/distroless/archive/446923c3756ceeaa75888f52fcbdd48bb314fbf8.tar.gz"]
 )",
     },
     "packageName": "GoogleContainerTools/distroless",
   },
-  Object {
+  {
     "currentDigest": "d665ccfa3e9c90fa789671bf4ef5f7c19c5715c4",
     "datasource": "github-tags",
     "depName": "bazel_toolchains",
     "depType": "http_archive",
-    "managerData": Object {
+    "managerData": {
       "def": "http_archive(
-  name = \\"bazel_toolchains\\",
-    sha256 = \\"4b1468b254a572dbe134cc1fd7c6eab1618a72acd339749ea343bd8f55c3b7eb\\",
-    strip_prefix = \\"bazel-toolchains-d665ccfa3e9c90fa789671bf4ef5f7c19c5715c4\\",
+  name = "bazel_toolchains",
+    sha256 = "4b1468b254a572dbe134cc1fd7c6eab1618a72acd339749ea343bd8f55c3b7eb",
+    strip_prefix = "bazel-toolchains-d665ccfa3e9c90fa789671bf4ef5f7c19c5715c4",
     urls = [
-        \\"https://mirror.bazel.build/github.com/bazelbuild/bazel-toolchains/archive/d665ccfa3e9c90fa789671bf4ef5f7c19c5715c4.tar.gz\\",
-        \\"https://github.com/bazelbuild/bazel-toolchains/archive/d665ccfa3e9c90fa789671bf4ef5f7c19c5715c4.tar.gz\\",
+        "https://mirror.bazel.build/github.com/bazelbuild/bazel-toolchains/archive/d665ccfa3e9c90fa789671bf4ef5f7c19c5715c4.tar.gz",
+        "https://github.com/bazelbuild/bazel-toolchains/archive/d665ccfa3e9c90fa789671bf4ef5f7c19c5715c4.tar.gz",
     ],
 )",
     },
     "packageName": "bazelbuild/bazel-toolchains",
   },
-  Object {
+  {
     "currentValue": "0.0.3",
     "datasource": "github-releases",
     "depName": "io_bazel_rules_sass",
     "depType": "git_repository",
-    "managerData": Object {
+    "managerData": {
       "def": "git_repository(
-    name = \\"io_bazel_rules_sass\\",
-    remote = \\"https://github.com/bazelbuild/rules_sass.git\\",
-    tag = \\"0.0.3\\",
+    name = "io_bazel_rules_sass",
+    remote = "https://github.com/bazelbuild/rules_sass.git",
+    tag = "0.0.3",
 )",
     },
     "packageName": "bazelbuild/rules_sass",
   },
-  Object {
+  {
     "currentDigest": "b3b620e8bcff18ed3378cd3f35ebeb7016d71f71",
     "datasource": "github-releases",
     "depName": "com_github_bazelbuild_buildtools",
     "depType": "git_repository",
-    "managerData": Object {
+    "managerData": {
       "def": "git_repository(
-    name = \\"com_github_bazelbuild_buildtools\\",
-    remote = \\"https://github.com/bazelbuild/buildtools.git\\",
+    name = "com_github_bazelbuild_buildtools",
+    remote = "https://github.com/bazelbuild/buildtools.git",
     # Note, this commit matches the version of buildifier in angular/ngcontainer
-    commit = \\"b3b620e8bcff18ed3378cd3f35ebeb7016d71f71\\",
+    commit = "b3b620e8bcff18ed3378cd3f35ebeb7016d71f71",
 )",
     },
     "packageName": "bazelbuild/buildtools",
   },
-  Object {
+  {
     "currentValue": "0.7.1",
     "datasource": "github-releases",
     "depName": "io_bazel_rules_go",
     "depType": "http_archive",
-    "managerData": Object {
+    "managerData": {
       "def": "http_archive(
-    name = \\"io_bazel_rules_go\\",
-    url = \\"https://github.com/bazelbuild/rules_go/releases/download/0.7.1/rules_go-0.7.1.tar.gz\\",
-    sha256 = \\"341d5eacef704415386974bc82a1783a8b7ffbff2ab6ba02375e1ca20d9b031c\\",
+    name = "io_bazel_rules_go",
+    url = "https://github.com/bazelbuild/rules_go/releases/download/0.7.1/rules_go-0.7.1.tar.gz",
+    sha256 = "341d5eacef704415386974bc82a1783a8b7ffbff2ab6ba02375e1ca20d9b031c",
 )",
     },
     "packageName": "bazelbuild/rules_go",
   },
-  Object {
+  {
     "currentValue": "0.5.0",
     "datasource": "github-tags",
     "depName": "bazel_skylib",
     "depType": "http_archive",
-    "managerData": Object {
+    "managerData": {
       "def": "http_archive(
-    name = \\"bazel_skylib\\",
-    sha256 = \\"b5f6abe419da897b7901f90cbab08af958b97a8f3575b0d3dd062ac7ce78541f\\",
-    strip_prefix = \\"bazel-skylib-0.5.0\\",
+    name = "bazel_skylib",
+    sha256 = "b5f6abe419da897b7901f90cbab08af958b97a8f3575b0d3dd062ac7ce78541f",
+    strip_prefix = "bazel-skylib-0.5.0",
     urls = [
-        \\"https://mirror.bazel.build/github.com/bazelbuild/bazel-skylib/archive/0.5.0.tar.gz\\",
-        \\"https://github.com/bazelbuild/bazel-skylib/archive/0.5.0.tar.gz\\",
+        "https://mirror.bazel.build/github.com/bazelbuild/bazel-skylib/archive/0.5.0.tar.gz",
+        "https://github.com/bazelbuild/bazel-skylib/archive/0.5.0.tar.gz",
     ],
 )",
     },
     "packageName": "bazelbuild/bazel-skylib",
   },
-  Object {
+  {
     "currentDigest": "446923c3756ceeaa75888f52fcbdd48bb314fbf8",
     "datasource": "github-tags",
     "depName": "distroless",
     "depType": "http_archive",
-    "managerData": Object {
+    "managerData": {
       "def": "http_archive(
-    name=\\"distroless\\",
-    sha256=\\"f7a6ecfb8174a1dd4713ea3b21621072996ada7e8f1a69e6ae7581be137c6dd6\\",
-    strip_prefix=\\"distroless-446923c3756ceeaa75888f52fcbdd48bb314fbf8\\",
-    urls=[\\"https://github.com/GoogleContainerTools/distroless/archive/446923c3756ceeaa75888f52fcbdd48bb314fbf8.tar.gz\\"]
+    name="distroless",
+    sha256="f7a6ecfb8174a1dd4713ea3b21621072996ada7e8f1a69e6ae7581be137c6dd6",
+    strip_prefix="distroless-446923c3756ceeaa75888f52fcbdd48bb314fbf8",
+    urls=["https://github.com/GoogleContainerTools/distroless/archive/446923c3756ceeaa75888f52fcbdd48bb314fbf8.tar.gz"]
 )",
     },
     "packageName": "GoogleContainerTools/distroless",
   },
-  Object {
+  {
     "currentValue": "v0.29.0",
     "datasource": "github-releases",
     "depName": "io_bazel_rules_go",
     "depType": "http_archive",
-    "managerData": Object {
+    "managerData": {
       "def": "maybe(
   http_archive,
-  name = \\"io_bazel_rules_go\\",
-  sha256 = \\"2b1641428dff9018f9e85c0384f03ec6c10660d935b750e3fa1492a281a53b0f\\",
-  url = \\"https://github.com/bazelbuild/rules_go/releases/download/v0.29.0/rules_go-v0.29.0.zip\\",
+  name = "io_bazel_rules_go",
+  sha256 = "2b1641428dff9018f9e85c0384f03ec6c10660d935b750e3fa1492a281a53b0f",
+  url = "https://github.com/bazelbuild/rules_go/releases/download/v0.29.0/rules_go-v0.29.0.zip",
 )",
     },
     "packageName": "bazelbuild/rules_go",
   },
-  Object {
+  {
     "currentValue": "v0.24.0",
     "datasource": "github-releases",
     "depName": "bazel_gazelle",
     "depType": "http_archive",
-    "managerData": Object {
+    "managerData": {
       "def": "maybe(
     http_archive,
-    name = \\"bazel_gazelle\\",
-    sha256 = \\"de69a09dc70417580aabf20a28619bb3ef60d038470c7cf8442fafcf627c21cb\\",
+    name = "bazel_gazelle",
+    sha256 = "de69a09dc70417580aabf20a28619bb3ef60d038470c7cf8442fafcf627c21cb",
     urls = [
-        \\"https://mirror.bazel.build/github.com/bazelbuild/bazel-gazelle/releases/download/v0.24.0/bazel-gazelle-v0.24.0.tar.gz\\",
-        \\"https://github.com/bazelbuild/bazel-gazelle/releases/download/v0.24.0/bazel-gazelle-v0.24.0.tar.gz\\",
+        "https://mirror.bazel.build/github.com/bazelbuild/bazel-gazelle/releases/download/v0.24.0/bazel-gazelle-v0.24.0.tar.gz",
+        "https://github.com/bazelbuild/bazel-gazelle/releases/download/v0.24.0/bazel-gazelle-v0.24.0.tar.gz",
     ],
 )",
     },
     "packageName": "bazelbuild/bazel-gazelle",
   },
-  Object {
+  {
     "currentDigest": "816c9085562cd7ee03e7f8188a1cfd942858cded",
     "currentDigestShort": "816c908",
     "currentValue": "v0.0.0",
@@ -386,48 +386,48 @@ Array [
     "depName": "com_github_pkg_errors",
     "depType": "go_repository",
     "digestOneAndOnly": true,
-    "managerData": Object {
+    "managerData": {
       "def": "maybe(
     go_repository,
-    name = \\"com_github_pkg_errors\\",
-    commit = \\"816c9085562cd7ee03e7f8188a1cfd942858cded\\",
-    importpath = \\"github.com/pkg/errors\\",
+    name = "com_github_pkg_errors",
+    commit = "816c9085562cd7ee03e7f8188a1cfd942858cded",
+    importpath = "github.com/pkg/errors",
 )",
     },
     "packageName": "github.com/pkg/errors",
   },
-  Object {
+  {
     "currentDigest": "sha256:d5a717649fd93ea5b9c430d7f84e4c37ba219eb53bd73ed1d4a5a98e9edd84a7",
     "currentValue": "latest",
     "datasource": "docker",
     "depName": "py3_image_base",
     "depType": "container_pull",
-    "managerData": Object {
+    "managerData": {
       "def": "container_pull(
-    name = \\"py3_image_base\\",
-    digest = \\"sha256:d5a717649fd93ea5b9c430d7f84e4c37ba219eb53bd73ed1d4a5a98e9edd84a7\\",
-    registry = \\"gcr.io\\",
-    repository = \\"distroless/python3-debian10\\",
-    tag = \\"latest\\",
+    name = "py3_image_base",
+    digest = "sha256:d5a717649fd93ea5b9c430d7f84e4c37ba219eb53bd73ed1d4a5a98e9edd84a7",
+    registry = "gcr.io",
+    repository = "distroless/python3-debian10",
+    tag = "latest",
 )",
     },
     "packageName": "distroless/python3-debian10",
-    "registryUrls": Array [
+    "registryUrls": [
       "gcr.io",
     ],
     "versioning": "docker",
   },
-  Object {
+  {
     "currentDigest": "446923c3756ceeaa75888f52fcbdd48bb314fbf8",
     "datasource": "github-tags",
     "depName": "distroless",
     "depType": "http_file",
-    "managerData": Object {
+    "managerData": {
       "def": "http_file(
-    name=\\"distroless\\",
-    sha256=\\"f7a6ecfb8174a1dd4713ea3b21621072996ada7e8f1a69e6ae7581be137c6dd6\\",
-    strip_prefix=\\"distroless-446923c3756ceeaa75888f52fcbdd48bb314fbf8\\",
-    urls=[\\"https://github.com/GoogleContainerTools/distroless/archive/446923c3756ceeaa75888f52fcbdd48bb314fbf8.tar.gz\\"]
+    name="distroless",
+    sha256="f7a6ecfb8174a1dd4713ea3b21621072996ada7e8f1a69e6ae7581be137c6dd6",
+    strip_prefix="distroless-446923c3756ceeaa75888f52fcbdd48bb314fbf8",
+    urls=["https://github.com/GoogleContainerTools/distroless/archive/446923c3756ceeaa75888f52fcbdd48bb314fbf8.tar.gz"]
 )",
     },
     "packageName": "GoogleContainerTools/distroless",
@@ -436,18 +436,18 @@ Array [
 `;
 
 exports[`modules/manager/bazel/extract extractPackageFile() handle comments and strings 1`] = `
-Array [
-  Object {
+[
+  {
     "currentDigest": "98495a618246683c9058dd87c2c78a2c06087999",
     "datasource": "github-tags",
     "depName": "com_github_nelhage_rules_boost",
     "depType": "http_archive",
-    "managerData": Object {
+    "managerData": {
       "def": "http_archive(
-    name = \\"com_github_nelhage_rules_boost\\",
-    url = \\"https://github.com/nelhage/rules_boost/archive/98495a618246683c9058dd87c2c78a2c06087999.tar.gz\\",
-    sha256 = \\"f92cb7ed66a5b24f97a7fc3917407f808c70d2689273bdd68f93d70a379d22d3\\",
-    strip_prefix = \\"rules_boost-98495a618246683c9058dd87c2c78a2c06087999\\",
+    name = "com_github_nelhage_rules_boost",
+    url = "https://github.com/nelhage/rules_boost/archive/98495a618246683c9058dd87c2c78a2c06087999.tar.gz",
+    sha256 = "f92cb7ed66a5b24f97a7fc3917407f808c70d2689273bdd68f93d70a379d22d3",
+    strip_prefix = "rules_boost-98495a618246683c9058dd87c2c78a2c06087999",
 )",
     },
     "packageName": "nelhage/rules_boost",

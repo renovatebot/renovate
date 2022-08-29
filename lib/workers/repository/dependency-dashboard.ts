@@ -337,7 +337,6 @@ export async function ensureDependencyDashboard(
   // fit the detected dependencies section
   const footer = getFooter(config);
   issueBody += PackageFiles.getDashboardMarkdown(
-    config,
     GitHubMaxPrBodyLen - issueBody.length - footer.length
   );
 
