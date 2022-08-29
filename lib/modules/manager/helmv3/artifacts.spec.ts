@@ -20,6 +20,7 @@ const datasource = mocked(_datasource);
 const adminConfig: RepoGlobalConfig = {
   localDir: join('/tmp/github/some/repo'), // `join` fixes Windows CI
   cacheDir: join('/tmp/renovate/cache'),
+  containerbaseDir: join('/tmp/renovate/cache/containerbase'),
 };
 
 const config: UpdateArtifactsConfig = {};

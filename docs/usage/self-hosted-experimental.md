@@ -46,3 +46,19 @@ If set, Renovate will use this string as GitLab server version instead of checki
 This can be useful when you use the GitLab `CI_JOB_TOKEN` to authenticate Renovate.
 
 Read [platform details](modules/platform/gitlab/index.md) to learn why we need the server version on GitLab.
+
+## `RENOVATE_X_S3_ENDPOINT`
+
+If set, Renovate will use this string as the `endpoint` when instantiating the AWS s3 client.
+
+## `RENOVATE_X_S3_PATH_STYLE`
+
+If set, Renovate will enable `forcePathStyle` when instantiating the AWS s3 client.
+
+> Whether to force path style URLs for S3 objects (e.g., `https://s3.amazonaws.com//` instead of `https://.s3.amazonaws.com/`
+
+Source: [AWS s3 documentation - Interface BucketEndpointInputConfig](https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/clients/client-s3/interfaces/bucketendpointinputconfig.html)
+
+## `RENOVATE_X_EXEC_GPID_HANDLE`
+
+If set, Renovate will terminate the whole process group of a terminated child process spawned by Renovate.

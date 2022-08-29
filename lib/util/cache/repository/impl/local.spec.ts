@@ -35,9 +35,25 @@ describe('util/cache/repository/impl/local', () => {
     expect(localRepoCache.getData()).toBeEmpty();
   });
 
+  it('skip when receives non-string data', async () => {
+    const localRepoCache = CacheFactory.get('some/repo', 'local');
+    fs.cachePathExists.mockResolvedValueOnce(true);
+    await localRepoCache.load(); // readCacheFile is mocked but has no return value set - therefore returns undefined
+    expect(logger.debug).toHaveBeenCalledWith(
+      "RepoCacheBase.load() - expecting data of type 'string' received 'undefined' instead - skipping"
+    );
+  });
+
+  it('skip when not found', async () => {
+    const localRepoCache = CacheFactory.get('some/repo', 'local');
+    await localRepoCache.load(); // readCacheFile is mocked but has no return value set - therefore returns undefined
+    expect(logger.debug).not.toHaveBeenCalledWith();
+  });
+
   it('loads previously stored cache from disk', async () => {
     const data: RepoCacheData = { semanticCommits: 'enabled' };
     const cacheRecord = await createCacheRecord(data);
+    fs.cachePathExists.mockResolvedValueOnce(true);
     fs.readCacheFile.mockResolvedValue(JSON.stringify(cacheRecord));
     const localRepoCache = CacheFactory.get('some/repo', 'local');
 
@@ -47,6 +63,7 @@ describe('util/cache/repository/impl/local', () => {
   });
 
   it('migrates revision from 10 to 12', async () => {
+    fs.cachePathExists.mockResolvedValueOnce(true);
     fs.readCacheFile.mockResolvedValue(
       JSON.stringify({
         revision: 10,
@@ -67,6 +84,7 @@ describe('util/cache/repository/impl/local', () => {
   });
 
   it('migrates revision from 11 to 12', async () => {
+    fs.cachePathExists.mockResolvedValueOnce(true);
     fs.readCacheFile.mockResolvedValue(
       JSON.stringify({
         revision: 11,
@@ -87,6 +105,7 @@ describe('util/cache/repository/impl/local', () => {
   });
 
   it('does not migrate from older revisions to 11', async () => {
+    fs.cachePathExists.mockResolvedValueOnce(true);
     fs.readCacheFile.mockResolvedValueOnce(
       JSON.stringify({
         revision: 9,
@@ -102,6 +121,7 @@ describe('util/cache/repository/impl/local', () => {
   });
 
   it('handles invalid data', async () => {
+    fs.cachePathExists.mockResolvedValueOnce(true);
     fs.readCacheFile.mockResolvedValue(JSON.stringify({ foo: 'bar' }));
     const localRepoCache = CacheFactory.get('some/repo', 'local');
 
@@ -111,6 +131,7 @@ describe('util/cache/repository/impl/local', () => {
   });
 
   it('handles file read error', async () => {
+    fs.cachePathExists.mockResolvedValueOnce(true);
     fs.readCacheFile.mockRejectedValue(new Error('unknown error'));
     const localRepoCache = CacheFactory.get('some/repo', 'local');
 
@@ -120,19 +141,31 @@ describe('util/cache/repository/impl/local', () => {
     expect(data).toBeEmpty();
   });
 
+  it('handles invalid json', async () => {
+    fs.cachePathExists.mockResolvedValueOnce(true);
+    fs.readCacheFile.mockResolvedValue('{1');
+    const localRepoCache = CacheFactory.get('some/repo', 'local');
+
+    await localRepoCache.load();
+
+    expect(localRepoCache.getData()).toBeEmpty();
+  });
+
   it('resets if repository does not match', async () => {
     const cacheRecord = createCacheRecord({ semanticCommits: 'enabled' });
+    fs.cachePathExists.mockResolvedValueOnce(true);
     fs.readCacheFile.mockResolvedValueOnce(JSON.stringify(cacheRecord));
 
     const localRepoCache = CacheFactory.get('some/repo', 'local');
     await localRepoCache.load();
 
-    expect(localRepoCache.getData()).toEqual({});
+    expect(localRepoCache.getData()).toBeEmpty();
   });
 
   it('saves modified cache data to file', async () => {
     const oldCacheRecord = createCacheRecord({ semanticCommits: 'enabled' });
     const cacheType = 'protocol://domain/path';
+    fs.cachePathExists.mockResolvedValueOnce(true);
     fs.readCacheFile.mockResolvedValueOnce(JSON.stringify(oldCacheRecord));
     const localRepoCache = CacheFactory.get('some/repo', cacheType);
     await localRepoCache.load();
