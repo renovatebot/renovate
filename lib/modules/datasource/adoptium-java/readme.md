@@ -16,4 +16,5 @@ So 2500 items are fetched from the API in total.
 If you want to get releases which come with the JDK, set the `packageName` to `java-jdk` or `java`.
 
 If you want to get releases which come with the JRE, set the `packageName` to `java-jre`.
-Currently, only LTS releases of Java come with the JRE.
+LTS releases of Java will have a version that comes with the JRE.
+Non-LTS release may not always include the JRE.
