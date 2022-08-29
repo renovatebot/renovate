@@ -45,6 +45,8 @@ export async function writeUpdates(
       .join(', ')}`
   );
   const cache = getCache();
+  // eslint-disable-next-line no-console
+  console.log(cache.gitConflicts?.main.sourceBranches);
   const { branches: cachedBranches = [] } = cache;
   const prsRemaining = await getPrsRemaining(config, branches);
   logger.debug({ prsRemaining }, 'Calculated maximum PRs remaining this run');
