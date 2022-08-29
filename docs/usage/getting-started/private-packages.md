@@ -88,6 +88,62 @@ Here is an example of some host rules:
 Renovate applies theses `hostRules` to every HTTP(s) request which is sent, so they are largely independent of any platform or datasource logic.
 With `hostRules` in place, private package lookups should all work.
 
+### GitHub (and Enterprise) repo scoped credentials
+
+If you need to use different credentials for a specific GitHub repo, then you can configure `hostRules` like one of the following:
+
+```json
+{
+  "hostRules": [
+    {
+      "matchHost": "https://api.github.com/repos/org/repo",
+      "token": "abc123"
+    },
+    {
+      "matchHost": "https://github.domain.com/api/v3/repos/org/repo",
+      "token": "abc123"
+    }
+  ]
+}
+```
+
+Renovate will use those credentials for all requests to `org/repo`.
+
+#### Example for gomod
+
+Here's an example for `gomod` with private github.com repos.
+Assume this config is used on the `github.com/some-other-org` repo:
+
+```json
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "dependencyDashboard": true,
+  "hostRules": [
+    {
+      "matchHost": "https://gitlab.com",
+      "token": "glpat-token_for_different_git_platform",
+      "hostType": "gitlab"
+    },
+    {
+      "matchHost": "https://github.com/some-org",
+      "token": "ghp_token_for_different_org",
+      "hostType": "go"
+    },
+    {
+      "matchHost": "https://api.github.com/repos/some-org",
+      "token": "ghp_token_for_different_org",
+      "hostType": "github"
+    }
+  ],
+  "customEnvVariables": {
+    "GOPRIVATE": "github.com/some-org,github.com/some-other-org,gitlab.com/some-org",
+    "GONOSUMDB": "github.com/some-org,github.com/some-other-org,gitlab.com/some-org",
+    "GONOPROXY": "github.com/some-org,github.com/some-other-org,gitlab.com/some-org"
+  },
+  "postUpdateOptions": ["gomodTidy"]
+}
+```
+
 ## Looking up Release Notes
 
 When Renovate creates Pull Requests, its default behavior is to locate and embed release notes/changelogs of packages.
