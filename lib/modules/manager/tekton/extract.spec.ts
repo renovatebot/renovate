@@ -4,9 +4,12 @@ import { extractPackageFile } from '.';
 describe('modules/manager/tekton/extract', () => {
   describe('extractPackageFile()', () => {
     it('extracts deps from a file', () => {
-      expect(
-        extractPackageFile(Fixtures.get('multi-doc.yaml'), 'test-file.yaml')
-      ).toMatchSnapshot();
+      const result = extractPackageFile(
+        Fixtures.get('multi-doc.yaml'),
+        'test-file.yaml'
+      );
+      expect(result).toMatchSnapshot();
+      expect(result?.deps).toHaveLength(15);
     });
 
     it('ignores file without any deps', () => {
