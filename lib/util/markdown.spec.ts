@@ -12,6 +12,7 @@ describe('util/markdown', () => {
 *   Issue or PR (fork): foo#1
 *   Issue or PR (project): remarkjs/remark#1
 *   Mention: @wooorm
+*   </table>\n#### What's Changed
 `;
 
     const after = `Some references:
@@ -24,6 +25,7 @@ describe('util/markdown', () => {
 -   Issue or PR (fork): [foo#1](https://github.com/foo/repo/issues/1)
 -   Issue or PR (project): [remarkjs/remark#1](https://github.com/remarkjs/remark/issues/1)
 -   Mention: [@wooorm](https://github.com/wooorm)
+-   </table>\n\n#### What's Changed
 `;
 
     it('works', async () => {
