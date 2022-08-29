@@ -17,4 +17,4 @@ If you want to get releases which come with the JDK, set the `packageName` to `j
 
 If you want to get releases which come with the JRE, set the `packageName` to `java-jre`.
 LTS releases of Java will have a version that comes with the JRE.
-Non-LTS release may not always include the JRE.
+Non-LTS releases may not always include the JRE.
