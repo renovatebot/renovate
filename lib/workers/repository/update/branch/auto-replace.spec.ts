@@ -208,6 +208,17 @@ describe('workers/repository/update/branch/auto-replace', () => {
       expect(res).toBe(dockerfile.replace(upgrade.depName, upgrade.newName));
     });
 
+    it('handles already replaced', async () => {
+      const dockerfile = 'FROM library/ubuntu:20.04';
+      upgrade.manager = 'dockerfile';
+      upgrade.updateType = 'replacement';
+      upgrade.depName = 'library/alpine';
+      upgrade.newName = 'library/ubuntu';
+      upgrade.packageFile = 'Dockerfile';
+      const res = await doAutoReplace(upgrade, dockerfile, reuseExistingBranch);
+      expect(res).toBe(dockerfile);
+    });
+
     it('updates with terraform replacement', async () => {
       const hcl =
         'module "foo" {\nsource = "github.com/hashicorp/example?ref=v1.0.0"\n}';
@@ -220,6 +231,27 @@ describe('workers/repository/update/branch/auto-replace', () => {
       upgrade.packageFile = 'modules.tf';
       const res = await doAutoReplace(upgrade, hcl, reuseExistingBranch);
       expect(res).toBe(hcl.replace(upgrade.depName, upgrade.newName));
+    });
+
+    it('works with old name in depname', async () => {
+      const yml =
+        'image: "1111111111.dkr.ecr.us-east-1.amazonaws.com/my-repository:1"\n\n';
+      upgrade.manager = 'regex';
+      upgrade.updateType = 'replacement';
+      upgrade.depName =
+        '1111111111.dkr.ecr.us-east-1.amazonaws.com/my-repository';
+      upgrade.currentValue = '1';
+      upgrade.newName =
+        '1111111111.dkr.ecr.us-east-1.amazonaws.com/my-repository';
+      upgrade.depIndex = 0;
+      upgrade.replaceString =
+        'image: "1111111111.dkr.ecr.us-east-1.amazonaws.com/my-repository:1"\n\n';
+      upgrade.packageFile = 'k8s/base/defaults.yaml';
+      upgrade.matchStrings = [
+        'image:\\s*\\\'?\\"?(?<depName>[^:]+):(?<currentValue>[^\\s\\\'\\"]+)\\\'?\\"?\\s*',
+      ];
+      const res = await doAutoReplace(upgrade, yml, reuseExistingBranch);
+      expect(res).toBe(yml);
     });
 
     it('rebases if the deps list has changed', async () => {
