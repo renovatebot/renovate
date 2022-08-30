@@ -493,7 +493,7 @@ export async function addReviewers(
   )}}]}`;
   const res = await client.createPrApprovalRule(
     `${prNo}`,
-    approvalRuleContents.replace(/"/g, '"')
+    approvalRuleContents.replace(/"/g, '\\"')
   );
   if (res) {
     const approvalRule = res.approvalRule;
