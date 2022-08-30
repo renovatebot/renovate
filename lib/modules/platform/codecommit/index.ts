@@ -131,7 +131,7 @@ export async function initRepo({
   logger.debug({ repositoryDetails: repo }, 'Repository details');
   const metadata = repo.repositoryMetadata;
 
-  if (!metadata || !metadata.defaultBranch || !metadata.repositoryId) {
+  if (!metadata?.defaultBranch || !metadata?.repositoryId) {
     logger.debug('Repo is empty');
     throw new Error(REPOSITORY_EMPTY);
   }
@@ -167,7 +167,7 @@ export async function getPrList(): Promise<Pr[]> {
     const prRes = await client.getPr(prId);
 
     // istanbul ignore if
-    if (!prRes || !prRes.pullRequest) {
+    if (!prRes?.pullRequest) {
       continue;
     }
     const prInfo = prRes.pullRequest;
@@ -239,7 +239,7 @@ export async function getPr(pullRequestId: number): Promise<Pr | null> {
   logger.debug(`getPr(${pullRequestId})`);
   const prRes = await client.getPr(`${pullRequestId}`);
 
-  if (!prRes || !prRes.pullRequest) {
+  if (!prRes?.pullRequest) {
     return null;
   }
 
@@ -358,9 +358,8 @@ export async function createPr({
 
   // istanbul ignore if
   if (
-    !prCreateRes.pullRequest ||
     !prCreateRes.pullRequest?.title ||
-    !prCreateRes.pullRequest.pullRequestId
+    !prCreateRes.pullRequest?.pullRequestId
   ) {
     throw new Error('Could not create pr, missing PR info');
   }
@@ -599,13 +598,13 @@ export async function ensureComment({
   let commentNeedsUpdating = false;
 
   /* istanbul ignore if */
-  if (!prCommentsResponse || !prCommentsResponse.commentsForPullRequestData) {
+  if (!prCommentsResponse?.commentsForPullRequestData) {
     return false;
   }
 
   for (const commentObj of prCommentsResponse.commentsForPullRequestData) {
     /* istanbul ignore if */
-    if (!commentObj || !commentObj?.comments) {
+    if (!commentObj?.comments) {
       continue;
     }
     const firstCommentContent = commentObj.comments[0].content;
@@ -623,7 +622,7 @@ export async function ensureComment({
     const prEvent = await client.getPrEvents(`${number}`);
 
     // istanbul ignore if
-    if (!prEvent || !prEvent.pullRequestEvents) {
+    if (!prEvent?.pullRequestEvents) {
       return false;
     }
 
@@ -632,7 +631,7 @@ export async function ensureComment({
         .pullRequestSourceReferenceUpdatedEventMetadata;
 
     // istanbul ignore if
-    if (!event || !event.beforeCommitId || !event.afterCommitId) {
+    if (!event?.beforeCommitId || !event?.afterCommitId) {
       return false;
     }
 
@@ -686,14 +685,14 @@ export async function ensureCommentRemoval(
   }
 
   // istanbul ignore if
-  if (!prCommentsResponse || !prCommentsResponse.commentsForPullRequestData) {
+  if (!prCommentsResponse?.commentsForPullRequestData) {
     return;
   }
 
   let commentIdToRemove;
   for (const commentObj of prCommentsResponse.commentsForPullRequestData) {
     /* istanbul ignore if */
-    if (!commentObj || !commentObj?.comments) {
+    if (!commentObj?.comments) {
       continue;
     }
 
