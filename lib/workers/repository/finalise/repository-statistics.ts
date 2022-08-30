@@ -57,7 +57,7 @@ export interface BranchSummary {
   inactiveBranches: string[];
 }
 
-export function unwrap({
+export function branchCacheToMetadata({
   branchName,
   sha: branchSha,
   baseBranch,
@@ -75,7 +75,7 @@ export function unwrap({
   };
 }
 
-export function runBranchSummery(): void {
+export function runBranchSummary(): void {
   const { scan, branches, modified: cacheModified } = getCache();
 
   const baseMetadata: BaseBranchMetadata[] = [];
