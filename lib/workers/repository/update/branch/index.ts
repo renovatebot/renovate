@@ -140,7 +140,7 @@ export async function processBranch(
         if (config.recreateMergedPr) {
           logger.debug(
             { prTitle: config.prTitle },
-            'Merged PR already exists. Creating new PR'
+            'Merged PR already exists. Creating a fresh PR'
           );
         }
       } else {
