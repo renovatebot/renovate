@@ -23,7 +23,7 @@ Namespaces will not be inferred from the context (e.g. from the parent `Kustomiz
 
 ### Flux system manifests support
 
-Support updating flux system manifests generated during [flux installation](https://fluxcd.io/docs/installation/#customize-flux-manifests).
+Support updating Flux system manifests generated during [Flux installation](https://fluxcd.io/docs/installation/#customize-flux-manifests).
 
 Updating system manifests requires that either:
 
