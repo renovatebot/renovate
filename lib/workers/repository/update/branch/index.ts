@@ -544,13 +544,12 @@ export async function processBranch(
       logger.info({ commitSha }, `Branch ${action}`);
       // update cached parentSha when branch is rebased
       if (!config.reuseExistingBranch) {
-        // TODO #7154
+        // TODO: fix types (#7154)
         setCachedBranchParentShaResult(
           config.branchName,
           getBranchCommit(config.defaultBranch!)!
         );
-        // TODO #7154
-        // TODO #7154
+        // TODO: fix types (#7154)
         setCachedConflictResult(
           config.baseBranch!,
           getBranchCommit(config.baseBranch!)!,
