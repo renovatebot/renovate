@@ -19,7 +19,7 @@ export function sanitizeMarkdown(markdown: string): string {
   res = res.replace(backTickRe, '`$1`');
   res = res.replace(regEx(/`#&#8203;(\d+)`/g), '`#$1`');
   res = res.replace(
-    regEx(/(?<before>[^\n]\n)(?<title>####.*)/g),
+    regEx(/(?<before>[^\n]\n)(?<title>#.*)/g),
     '$<before>\n$<title>'
   );
   return res;
