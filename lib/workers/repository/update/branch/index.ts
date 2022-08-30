@@ -132,7 +132,7 @@ export async function processBranch(
       if (existingPr.state === 'merged') {
         if (config.automerge) {
           logger.debug(
-            'Merged pr with the same title already exists, disable automerge'
+            'Disable automerge to prevent re-created PRs from being merged automatically.'
           );
         }
 
@@ -140,7 +140,7 @@ export async function processBranch(
         if (config.recreateMergedPr) {
           logger.debug(
             { prTitle: config.prTitle },
-            'Merged PR already exists. Creating new PR with automerge disabled'
+            'Merged PR already exists. Creating new PR
           );
         }
       } else {
