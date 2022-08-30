@@ -9,7 +9,7 @@ import { matchAt, replaceAt } from '../../../../util/string';
 import { compile } from '../../../../util/template';
 import type { BranchUpgradeConfig } from '../../../types';
 
-export async function confirmIfDepVersionUpdated(
+export async function confirmIfDepUpdated(
   upgrade: BranchUpgradeConfig,
   newContent: string
 ): Promise<boolean> {
@@ -108,6 +108,29 @@ export async function checkBranchDepsMatchBaseDeps(
   }
 }
 
+async function checkExistingBranch(
+  upgrade: BranchUpgradeConfig,
+  existingContent: string
+): Promise<string | null> {
+  const { packageFile, depName } = upgrade;
+  if (!(await checkBranchDepsMatchBaseDeps(upgrade, existingContent))) {
+    logger.debug(
+      { packageFile, depName },
+      'Rebasing branch after deps list has changed'
+    );
+    return null;
+  }
+  if (!(await confirmIfDepUpdated(upgrade, existingContent))) {
+    logger.debug(
+      { packageFile, depName },
+      'Rebasing after outdated branch dep found'
+    );
+    return null;
+  }
+  logger.debug({ packageFile, depName }, 'Branch dep is already updated');
+  return existingContent;
+}
+
 /**
  * Handles version upgrades for managers which do not already have custom logic
  * @param upgrade
@@ -131,22 +154,7 @@ export async function doAutoReplace(
     autoReplaceStringTemplate,
   } = upgrade;
   if (reuseExistingBranch) {
-    if (!(await checkBranchDepsMatchBaseDeps(upgrade, existingContent))) {
-      logger.debug(
-        { packageFile, depName },
-        'Rebasing branch after deps list has changed'
-      );
-      return null;
-    }
-    if (!(await confirmIfDepVersionUpdated(upgrade, existingContent))) {
-      logger.debug(
-        { packageFile, depName },
-        'Rebasing after outdated branch dep found'
-      );
-      return null;
-    }
-    logger.debug({ packageFile, depName }, 'Branch dep is already updated');
-    return existingContent;
+    return await checkExistingBranch(upgrade, existingContent);
   }
   const replaceWithoutReplaceString = Boolean(
     newName &&
@@ -234,7 +242,7 @@ export async function doAutoReplace(
           await writeLocalFile(upgrade.packageFile!, newContent);
           valueReplaced = true;
         } else if (nameReplaced && valueReplaced) {
-          if (await confirmIfDepVersionUpdated(upgrade, newContent)) {
+          if (await confirmIfDepUpdated(upgrade, newContent)) {
             return newContent;
           }
           await writeLocalFile(upgrade.packageFile!, existingContent);
@@ -255,7 +263,7 @@ export async function doAutoReplace(
           newString
         );
         await writeLocalFile(upgrade.packageFile!, newContent);
-        if (await confirmIfDepVersionUpdated(upgrade, newContent)) {
+        if (await confirmIfDepUpdated(upgrade, newContent)) {
           return newContent;
         }
         await writeLocalFile(upgrade.packageFile!, existingContent);

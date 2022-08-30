@@ -1,6 +1,6 @@
 import {
   RenovateConfig,
-  defaultConfig,
+  getConfig,
   git,
   platform,
 } from '../../../../../test/util';
@@ -22,7 +22,7 @@ describe('workers/repository/onboarding/branch/rebase', () => {
     beforeEach(() => {
       jest.resetAllMocks();
       config = {
-        ...defaultConfig,
+        ...getConfig(),
         repository: 'some/repo',
       };
     });
@@ -35,7 +35,7 @@ describe('workers/repository/onboarding/branch/rebase', () => {
 
     it('does nothing if branch is up to date', async () => {
       const contents =
-        JSON.stringify(defaultConfig.onboardingConfig, null, 2) + '\n';
+        JSON.stringify(getConfig().onboardingConfig, null, 2) + '\n';
       git.getFile
         .mockResolvedValueOnce(contents) // package.json
         .mockResolvedValueOnce(contents); // renovate.json
