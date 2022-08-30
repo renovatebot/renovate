@@ -1898,7 +1898,7 @@ Example setting source URL for package "dummy":
 
 <!-- prettier-ignore -->
 !!! note
-Renovate can fetch changelogs from GitHub and GitLab platforms only, and setting the URL to an unsupported host/platform type won't change that.
+    Renovate can fetch changelogs from GitHub and GitLab platforms only, and setting the URL to an unsupported host/platform type won't change that.
 
 ### replacementName
 
