@@ -4,7 +4,7 @@ import type { PackageDependency, PackageFile } from '../types';
 export function extractPackageFile(content: string): PackageFile | null {
   const deps: PackageDependency[] = [];
 
-  content.split('\n').forEach((line) => {
+  content.split('\n').map(s => s.trim()).forEach((line) => {
     if (line === '') {
       return;
     }

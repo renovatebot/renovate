@@ -13,12 +13,12 @@ const includesCommentOutMintFileContent = `
 SwiftGen/SwiftGen@6.6.1
 yonaskolb/xcodegen
 #yonaskolb/xcodegen
-#realm/SwiftLint@0.48.0#commented out
+realm/SwiftLint@0.48.0 #commented out
 `;
 
 describe('modules/manager/mint/extract', () => {
   describe('extractPackageFile()', () => {
-    it('Makefile With Version Description', () => {
+    it('Mintfile With Version Description', () => {
       const res = extractPackageFile(simpleMintfile);
       expect(res).toEqual({
         deps: [
