@@ -159,7 +159,8 @@ export async function doAutoReplace(
   const replaceWithoutReplaceString = Boolean(
     newName &&
       newName !== depName &&
-      (!upgrade.replaceString || upgrade.replaceString.indexOf(depName!) === -1)
+      (!upgrade.replaceString ||
+        upgrade.replaceString?.indexOf(depName!) === -1)
   );
   const replaceString = upgrade.replaceString ?? currentValue;
   logger.trace({ depName, replaceString }, 'autoReplace replaceString');

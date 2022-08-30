@@ -1,5 +1,5 @@
 import { Fixtures } from '../../../../../test/fixtures';
-import { getConfig, partial } from '../../../../../test/util';
+import { getConfig } from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
 import { WORKER_FILE_UPDATE_FAILED } from '../../../../constants/error-messages';
 import { extractPackageFile } from '../../../../modules/manager/html';
@@ -14,23 +14,21 @@ const sampleHtml = Fixtures.get(
 jest.mock('fs-extra', () => Fixtures.fsExtra());
 
 describe('workers/repository/update/branch/auto-replace', () => {
-  beforeAll(() => {
-    GlobalConfig.set({
-      localDir: '/temp',
-    });
-  });
-
   describe('doAutoReplace', () => {
     let reuseExistingBranch: boolean;
     let upgrade: BranchUpgradeConfig;
 
-    beforeEach(() => {
-      upgrade = partial<BranchUpgradeConfig>({
-        // TODO: fix types (#7154)
-        ...(getConfig() as any),
-        manager: 'html',
-        packageFile: 'test',
+    beforeAll(() => {
+      GlobalConfig.set({
+        localDir: '/temp',
       });
+    });
+
+    beforeEach(() => {
+      // TODO: fix types (#7154)
+      upgrade = getConfig() as BranchUpgradeConfig;
+      upgrade.packageFile = 'test';
+      upgrade.manager = 'html';
       reuseExistingBranch = false;
     });
 
