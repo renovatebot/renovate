@@ -14,7 +14,8 @@ import { getCache } from '../cache/repository';
 import { maskToken } from '../mask';
 import { range } from '../range';
 import { regEx } from '../regex';
-import { parseLinkHeader } from '../url';
+import { joinUrlParts, parseLinkHeader, resolveBaseUrl } from '../url';
+import { findMatchingRules } from './host-rules';
 import type { GotLegacyError } from './legacy';
 import type {
   GraphqlOptions,
@@ -35,6 +36,7 @@ export interface GithubHttpOptions extends HttpOptions {
   paginate?: boolean | string;
   paginationField?: string;
   pageLimit?: number;
+  repository?: string;
 }
 
 interface GithubGraphqlRepoData<T = unknown> {
@@ -170,9 +172,12 @@ function constructAcceptString(input?: any): string {
   const defaultAccept = 'application/vnd.github.v3+json';
   const acceptStrings =
     typeof input === 'string' ? input.split(regEx(/\s*,\s*/)) : [];
+
+  // TODO: regression of #6736
   if (
-    !acceptStrings.some((x) => x.startsWith('application/vnd.github.')) ||
-    acceptStrings.length < 2
+    !acceptStrings.some((x) => x === defaultAccept) &&
+    (!acceptStrings.some((x) => x.startsWith('application/vnd.github.')) ||
+      acceptStrings.length < 2)
   ) {
     acceptStrings.push(defaultAccept);
   }
@@ -273,11 +278,32 @@ export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
     options?: InternalHttpOptions & GithubHttpOptions,
     okToRetry = true
   ): Promise<HttpResponse<T>> {
-    const opts = {
+    const opts: GithubHttpOptions = {
       baseUrl,
       ...options,
       throwHttpErrors: true,
     };
+
+    if (!opts.token) {
+      const authUrl = new URL(resolveBaseUrl(opts.baseUrl!, url));
+
+      if (opts.repository) {
+        // set authUrl to https://api.github.com/repos/org/repo or https://gihub.domain.com/api/v3/repos/org/repo
+        authUrl.hash = '';
+        authUrl.search = '';
+        authUrl.pathname = joinUrlParts(
+          authUrl.pathname.startsWith('/api/v3') ? '/api/v3' : '',
+          'repos',
+          `${opts.repository}`
+        );
+      }
+
+      const { token } = findMatchingRules(
+        { hostType: this.hostType },
+        authUrl.toString()
+      );
+      opts.token = token;
+    }
 
     const accept = constructAcceptString(opts.headers?.accept);
 
@@ -300,7 +326,7 @@ export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
           }
           const queue = [...range(2, lastPage)].map(
             (pageNumber) => (): Promise<HttpResponse<T>> => {
-              const nextUrl = new URL(linkHeader.next.url, baseUrl);
+              const nextUrl = new URL(linkHeader.next.url, opts.baseUrl);
               nextUrl.searchParams.set('page', String(pageNumber));
               return this.request<T>(
                 nextUrl,

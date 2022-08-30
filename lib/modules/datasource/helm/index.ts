@@ -21,9 +21,6 @@ export class HelmDatasource extends Datasource {
 
   override readonly defaultConfig = {
     commitMessageTopic: 'Helm release {{depName}}',
-    group: {
-      commitMessageTopic: '{{{groupName}}} Helm releases',
-    },
   };
 
   override readonly defaultVersioning = helmVersioning.id;

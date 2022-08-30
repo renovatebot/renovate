@@ -45,6 +45,7 @@ const adminConfig: RepoGlobalConfig = {
   // `join` fixes Windows CI
   localDir: join('/tmp/github/some/repo'),
   cacheDir: join('/tmp/renovate/cache'),
+  containerbaseDir: join('/tmp/renovate/cache/containerbase'),
 };
 
 const config: UpdateArtifactsConfig = {
@@ -306,7 +307,7 @@ describe('modules/manager/gomod/artifacts', () => {
         options: {
           cwd: '/tmp/github/some/repo',
           env: {
-            BUILDPACK_CACHE_DIR: '/tmp/renovate/cache/buildpack',
+            BUILDPACK_CACHE_DIR: '/tmp/renovate/cache/containerbase',
           },
         },
       },
@@ -345,7 +346,7 @@ describe('modules/manager/gomod/artifacts', () => {
         options: {
           cwd: '/tmp/github/some/repo',
           env: {
-            BUILDPACK_CACHE_DIR: '/tmp/renovate/cache/buildpack',
+            BUILDPACK_CACHE_DIR: '/tmp/renovate/cache/containerbase',
           },
         },
       },
@@ -460,7 +461,7 @@ describe('modules/manager/gomod/artifacts', () => {
         options: {
           cwd: '/tmp/github/some/repo',
           env: {
-            BUILDPACK_CACHE_DIR: '/tmp/renovate/cache/buildpack',
+            BUILDPACK_CACHE_DIR: '/tmp/renovate/cache/containerbase',
             GIT_CONFIG_COUNT: '6',
             GIT_CONFIG_KEY_0:
               'url.https://ssh:some-token@github.com/.insteadOf',
