@@ -117,6 +117,7 @@ All text inside the start and end `/` will be treated as a regular expression.
 ```
 
 You can negate the regex by putting a `!` in front.
+Only use a single negation and don't mix with other filters because all filters are combined with `or`.
 If using negations, all repositories except those who match the regex are added to the result:
 
 ```json
