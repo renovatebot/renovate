@@ -9,7 +9,6 @@ import * as httpMock from '../../../../test/http-mock';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages';
-// import { logger } from '../../../logger';
 import * as memCache from '../../../util/cache/memory';
 import { RegistryFlavor, RegistryInfo } from './types';
 import { CrateDatasource } from '.';
