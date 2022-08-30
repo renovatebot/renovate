@@ -77,7 +77,10 @@ export function extractConstraints(
 
   // extract php
   if (composerJson.config?.platform?.php) {
-    res.php = composerJson.config.platform.php;
+    const major = api.getMajor(composerJson.config.platform.php);
+    const minor = api.getMinor(composerJson.config.platform.php) ?? 0;
+    const patch = api.getPatch(composerJson.config.platform.php) ?? 0;
+    res.php = `<=${major}.${minor}.${patch}`;
   } else if (composerJson.require?.php) {
     res.php = composerJson.require.php;
   }

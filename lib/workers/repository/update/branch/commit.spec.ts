@@ -1,5 +1,5 @@
 import {
-  defaultConfig,
+  getConfig,
   git,
   mockedFunction,
   platform,
@@ -15,9 +15,9 @@ describe('workers/repository/update/branch/commit', () => {
     let config: BranchConfig;
 
     beforeEach(() => {
-      // TODO #7154 incompatible types
+      // TODO: incompatible types (#7154)
       config = {
-        ...defaultConfig,
+        ...getConfig(),
         branchName: 'renovate/some-branch',
         commitMessage: 'some commit message',
         semanticCommits: 'disabled',
