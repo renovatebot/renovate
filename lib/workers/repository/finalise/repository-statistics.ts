@@ -76,7 +76,7 @@ export function branchCacheToMetadata({
 }
 
 export function runBranchSummary(): void {
-  const { scan, branches, modified: cacheModified } = getCache();
+  const { scan, branches } = getCache();
 
   const baseMetadata: BaseBranchMetadata[] = [];
   for (const [branchName, cached] of Object.entries(scan ?? {})) {

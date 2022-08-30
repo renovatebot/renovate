@@ -38,6 +38,6 @@ describe('util/cache/repository/index', () => {
     await initRepoCache({ ...config, repositoryCache: 'reset' });
     expect(fs.readCacheFile).not.toHaveBeenCalled();
     expect(fs.outputCacheFile).toHaveBeenCalled();
-    expect(getCache()).toEqual({ modified: true });
+    expect(getCache()).toBeEmpty();
   });
 });
