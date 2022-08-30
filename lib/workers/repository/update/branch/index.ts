@@ -365,10 +365,19 @@ export async function processBranch(
       dependencyDashboardCheck === 'rebase' ||
       !!config.dependencyDashboardRebaseAllOpen ||
       !!config.rebaseRequested;
-
+    const userApproveAllPendingPR = !!config.dependencyDashboardAllPending;
+    const userOpenAllRateLimtedPR = !!config.dependencyDashboardAllRateLimited;
     if (userRebaseRequested) {
       logger.debug('Manual rebase requested via Dependency Dashboard');
       config.reuseExistingBranch = false;
+    } else if (userApproveAllPendingPR) {
+      logger.debug(
+        'A user manually approved all pending PRs via the Dependency Dashboard.'
+      );
+    } else if (userOpenAllRateLimtedPR) {
+      logger.debug(
+        'A user manually approved all rate-limited PRs via the Dependency Dashboard.'
+      );
     } else if (branchExists && config.rebaseWhen === 'never') {
       logger.debug('rebaseWhen=never so skipping branch update check');
       return {
@@ -532,9 +541,10 @@ export async function processBranch(
     if (commitSha) {
       const action = branchExists ? 'updated' : 'created';
       logger.info({ commitSha }, `Branch ${action}`);
+      // TODO #7154
       setCachedConflictResult(
-        config.defaultBranch!,
-        getBranchCommit(config.defaultBranch!)!,
+        config.baseBranch!,
+        getBranchCommit(config.baseBranch!)!,
         config.branchName,
         commitSha,
         false
@@ -590,7 +600,7 @@ export async function processBranch(
         ['conflicted', 'never'].includes(config.rebaseWhen!)
       ) {
         logger.warn(
-          'Branch cannot automerge because it is stale and rebaseWhen setting disallows rebasing - raising a PR instead'
+          'Branch cannot automerge because it is behind base branch and rebaseWhen setting disallows rebasing - raising a PR instead'
         );
         config.forcePr = true;
         config.branchAutomergeFailureMessage = mergeStatus;
