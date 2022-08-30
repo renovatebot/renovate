@@ -1,7 +1,7 @@
 import { Fixtures } from '../../../../../test/fixtures';
 import {
   RenovateConfig,
-  defaultConfig,
+  getConfig,
   git,
   platform,
 } from '../../../../../test/util';
@@ -32,7 +32,7 @@ describe('workers/repository/config-migration/branch/rebase', () => {
       GlobalConfig.reset();
       migratedConfigData = { content: renovateConfig, filename };
       config = {
-        ...defaultConfig,
+        ...getConfig(),
         repository: 'some/repo',
       };
     });

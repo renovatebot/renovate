@@ -16,27 +16,86 @@ import { PackageFiles } from './package-files';
 interface DependencyDashboard {
   dependencyDashboardChecks: Record<string, string>;
   dependencyDashboardRebaseAllOpen: boolean;
+  dependencyDashboardAllPending: boolean;
+  dependencyDashboardAllRateLimited: boolean;
+}
+
+const rateLimitedRe = regEx(
+  ' - \\[ \\] <!-- unlimit-branch=([^\\s]+) -->',
+  'g'
+);
+const pendingApprovalRe = regEx(
+  ' - \\[ \\] <!-- approve-branch=([^\\s]+) -->',
+  'g'
+);
+const generalBranchRe = regEx(' <!-- ([a-zA-Z]+)-branch=([^\\s]+) -->');
+const markedBranchesRe = regEx(
+  ' - \\[x\\] <!-- ([a-zA-Z]+)-branch=([^\\s]+) -->',
+  'g'
+);
+
+function checkOpenAllRateLimitedPR(issueBody: string): boolean {
+  return issueBody.includes(' - [x] <!-- create-all-rate-limited-prs -->');
+}
+
+function checkApproveAllPendingPR(issueBody: string): boolean {
+  return issueBody.includes(' - [x] <!-- approve-all-pending-prs -->');
 }
 
 function checkRebaseAll(issueBody: string): boolean {
   return issueBody.includes(' - [x] <!-- rebase-all-open-prs -->');
 }
 
-function getCheckedBranches(issueBody: string): Record<string, string> {
-  const checkMatch = /- \[x\] <!-- ([a-zA-Z]+)-branch=([^\s]+) -->/g;
-  const dependencyDashboardChecks: Record<string, string> = {};
-  for (const [, type, branchName] of issueBody.matchAll(regEx(checkMatch))) {
+function selectAllRelevantBranches(issueBody: string): string[] {
+  const checkedBranches = [];
+  if (checkOpenAllRateLimitedPR(issueBody)) {
+    for (const match of issueBody.matchAll(rateLimitedRe)) {
+      checkedBranches.push(match[0]);
+    }
+  }
+  if (checkApproveAllPendingPR(issueBody)) {
+    for (const match of issueBody.matchAll(pendingApprovalRe)) {
+      checkedBranches.push(match[0]);
+    }
+  }
+  return checkedBranches;
+}
+
+function getAllSelectedBranches(
+  issueBody: string,
+  dependencyDashboardChecks: Record<string, string>
+): Record<string, string> {
+  const allRelevantBranches = selectAllRelevantBranches(issueBody);
+  for (const branch of allRelevantBranches) {
+    const [, type, branchName] = generalBranchRe.exec(branch)!;
     dependencyDashboardChecks[branchName] = type;
   }
+  return dependencyDashboardChecks;
+}
+
+function getCheckedBranches(issueBody: string): Record<string, string> {
+  let dependencyDashboardChecks: Record<string, string> = {};
+  for (const [, type, branchName] of issueBody.matchAll(markedBranchesRe)) {
+    dependencyDashboardChecks[branchName] = type;
+  }
+  dependencyDashboardChecks = getAllSelectedBranches(
+    issueBody,
+    dependencyDashboardChecks
+  );
   return dependencyDashboardChecks;
 }
 
 function parseDashboardIssue(issueBody: string): DependencyDashboard {
   const dependencyDashboardChecks = getCheckedBranches(issueBody);
   const dependencyDashboardRebaseAllOpen = checkRebaseAll(issueBody);
+  const dependencyDashboardAllPending = checkApproveAllPendingPR(issueBody);
+  const dependencyDashboardAllRateLimited =
+    checkOpenAllRateLimitedPR(issueBody);
   return {
     dependencyDashboardChecks,
     dependencyDashboardRebaseAllOpen,
+    dependencyDashboardAllPending,
+    dependencyDashboardAllRateLimited,
   };
 }
 
@@ -175,6 +234,11 @@ export async function ensureDependencyDashboard(
     for (const branch of pendingApprovals) {
       issueBody += getListItem(branch, 'approve');
     }
+    if (pendingApprovals.length > 1) {
+      issueBody += ' - [ ] ';
+      issueBody += '<!-- approve-all-pending-prs -->';
+      issueBody += '🔐 **Create all pending approval PRs at once** 🔐\n';
+    }
     issueBody += '\n';
   }
   const awaitingSchedule = branches.filter(
@@ -196,11 +260,16 @@ export async function ensureDependencyDashboard(
       branch.result === BranchResult.CommitLimitReached
   );
   if (rateLimited.length) {
-    issueBody += '## Rate Limited\n\n';
+    issueBody += '## Rate-Limited\n\n';
     issueBody +=
-      'These updates are currently rate limited. Click on a checkbox below to force their creation now.\n\n';
+      'These updates are currently rate-limited. Click on a checkbox below to force their creation now.\n\n';
     for (const branch of rateLimited) {
       issueBody += getListItem(branch, 'unlimit');
+    }
+    if (rateLimited.length > 1) {
+      issueBody += ' - [ ] ';
+      issueBody += '<!-- create-all-rate-limited-prs -->';
+      issueBody += '🔐 **Create all rate-limited PRs at once** 🔐\n';
     }
     issueBody += '\n';
   }
