@@ -105,6 +105,7 @@ async function prepareRawExec(
     GlobalConfig.get();
 
   if (binarySource === 'docker' || binarySource === 'install') {
+    logger.debug(`Setting BUILDPACK_CACHE_DIR to ${containerbaseDir!}`);
     opts.env ??= {};
     opts.env.BUILDPACK_CACHE_DIR = containerbaseDir;
   }

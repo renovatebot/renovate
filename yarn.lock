@@ -140,10 +140,10 @@
   dependencies:
     tslib "^2.3.1"
 
-"@aws-sdk/client-ec2@3.154.0":
-  version "3.154.0"
-  resolved "https://registry.yarnpkg.com/@aws-sdk/client-ec2/-/client-ec2-3.154.0.tgz#7a1523d37311d4489f3eb737a3551e73dd335e2a"
-  integrity sha512-0/wZORnbVV1oMeZ10hUIQHW/ZR+Nej5Nvd9tW3GStafCvqpiprKE/5kTAfgBR+zoZhiVhgbJeiYp6zJbOUCv1w==
+"@aws-sdk/client-ec2@3.155.0":
+  version "3.155.0"
+  resolved "https://registry.yarnpkg.com/@aws-sdk/client-ec2/-/client-ec2-3.155.0.tgz#1b10868bb603dda2071c2baac0c5eb57d80af7c8"
+  integrity sha512-FfWWw6A7SmyD4tXX6bDZgvLshyBLhT4wJXVDX2pkZRg0hqngy3Knrp0cu4r9i9t50w4016RAwUzJjMrurEL2FA==
   dependencies:
     "@aws-crypto/sha256-browser" "2.0.0"
     "@aws-crypto/sha256-js" "2.0.0"
