@@ -29,7 +29,15 @@ async function setDirectories(input: AllConfig): Promise<AllConfig> {
   }
   await fs.ensureDir(config.cacheDir);
   if (config.binarySource === 'docker' || config.binarySource === 'install') {
-    await fs.ensureDir(upath.join(config.cacheDir, 'buildpack'));
+    if (config.containerbaseDir) {
+      logger.debug(
+        'Using configured containerbaseDir: ' + config.containerbaseDir
+      );
+    } else {
+      config.containerbaseDir = upath.join(config.cacheDir, 'containerbase');
+      logger.debug('Using containerbaseDir: ' + config.containerbaseDir);
+    }
+    await fs.ensureDir(config.containerbaseDir);
   }
   return config;
 }
