@@ -1,8 +1,8 @@
 import { mocked } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
-import type { RenovateConfig } from '../../../config/types';
 import * as _fs from '../../fs';
 import { initRepoCache } from './init';
+import type { RepoCacheConfig } from './types';
 import { getCache, resetCache, saveCache } from '.';
 
 jest.mock('../../fs');
@@ -16,10 +16,10 @@ describe('util/cache/repository/index', () => {
     GlobalConfig.set({ cacheDir: '/tmp/cache', platform: 'github' });
   });
 
-  const config: RenovateConfig = {
-    platform: 'github',
+  const config: RepoCacheConfig = {
     repository: 'some/repo',
     repositoryCache: 'enabled',
+    repoFingerprint: '0123456789abcdef',
   };
 
   it('returns if cache not enabled', async () => {
