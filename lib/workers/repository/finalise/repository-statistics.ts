@@ -88,7 +88,7 @@ export function runBranchSummary(): void {
 
   for (const branch of branches ?? []) {
     if (branch.sha) {
-      branchMetadata.push(unwrap(branch));
+      branchMetadata.push(branchCacheToMetadata(branch));
     } else {
       inactiveBranches.push(branch.branchName);
     }

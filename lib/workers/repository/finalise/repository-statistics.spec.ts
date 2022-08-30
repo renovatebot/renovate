@@ -14,9 +14,9 @@ import type {
   RepoCacheData,
 } from '../../../util/cache/repository/types';
 import {
-  runBranchSummery,
+  branchCacheToMetadata,
+  runBranchSummary,
   runRenovateRepoStats,
-  unwrap,
 } from './repository-statistics';
 
 jest.mock('../../../modules/platform/github/pr');
@@ -53,7 +53,7 @@ describe('workers/repository/finalise/repository-statistics', () => {
     });
   });
 
-  describe('runBranchSummery', () => {
+  describe('runBranchSummary', () => {
     const cacheSpy = jest.spyOn(cache, 'getCache');
 
     it('processes cache with baseBranches only', () => {
@@ -65,7 +65,7 @@ describe('workers/repository/finalise/repository-statistics', () => {
         scan: { main: baseCache, dev: baseCache },
       });
       cacheSpy.mockReturnValueOnce(cache);
-      runBranchSummery();
+      runBranchSummary();
       expect(logger.debug).toHaveBeenCalledWith(
         {
           cacheModified: modified,
@@ -114,7 +114,7 @@ describe('workers/repository/finalise/repository-statistics', () => {
       });
 
       cacheSpy.mockReturnValueOnce(cache);
-      runBranchSummery();
+      runBranchSummary();
       expect(logger.debug).toHaveBeenCalledWith(
         {
           cacheModified: modified,
@@ -129,8 +129,8 @@ describe('workers/repository/finalise/repository-statistics', () => {
             },
           ],
           branches: [
-            { ...unwrap(branchCache), branchName: 'b1' },
-            { ...unwrap(branchCache), branchName: 'b2' },
+            { ...branchCacheToMetadata(branchCache), branchName: 'b1' },
+            { ...branchCacheToMetadata(branchCache), branchName: 'b2' },
           ],
           inactiveBranches: ['b3'],
         },

@@ -7,7 +7,7 @@ import { configMigration } from '../config-migration';
 import { PackageFiles } from '../package-files';
 import { pruneStaleBranches } from './prune';
 import {
-  runBranchSummery,
+  runBranchSummary,
   runRenovateRepoStats,
 } from './repository-statistics';
 
@@ -36,6 +36,6 @@ export async function finaliseRepo(
     logger.debug('Repo is activated');
     config.repoIsActivated = true;
   }
-  runBranchSummery();
+  runBranchSummary();
   runRenovateRepoStats(config, prList);
 }
