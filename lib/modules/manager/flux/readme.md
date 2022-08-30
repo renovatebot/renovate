@@ -54,6 +54,6 @@ If instead you have all your Flux manifests inside a `flux/` directory, you woul
 }
 ```
 
-### Versionning
+### Versioning
 
 If you need to change the versioning format, read the [versioning](https://docs.renovatebot.com/modules/versioning/) documentation to learn more.
