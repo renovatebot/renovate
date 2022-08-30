@@ -490,7 +490,7 @@ export async function processBranch(
 
       const prRebaseChecked = !!branchPr?.bodyStruct?.rebaseRequested;
 
-      if (branchExists && dependencyDashboardCheck && config.stopUpdating) {
+      if (branchExists && !dependencyDashboardCheck && config.stopUpdating) {
         if (!prRebaseChecked) {
           logger.info(
             'Branch updating is skipped because stopUpdatingLabel is present in config'
