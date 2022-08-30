@@ -28,7 +28,7 @@ Support updating flux system manifests generated during [flux installation](http
 Updating system manifests requires that either:
 
 1. The `flux` tool is pre-installed, or
-2. You run a Docker image based on [containerbase](https://github.com/containerbase), such as the official Renovate images, and have `binarySource=install` configured
+1. You run a Docker image based on [containerbase](https://github.com/containerbase), such as the official Renovate images, and have `binarySource=install` configured
 
 ### Non-configured fileMatch
 
