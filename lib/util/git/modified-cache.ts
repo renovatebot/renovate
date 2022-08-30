@@ -35,6 +35,8 @@ export function setCachedModifiedResult(
 
   if (branch.sha !== branchSha) {
     branch.sha = branchSha;
+    // invalidate cached conflict result
+    branch.isConflicted = null;
   }
 
   branch.isModified = isModified;

@@ -259,10 +259,10 @@ describe('util/git/index', () => {
     });
 
     it('should return result even if non-default and not under branchPrefix', async () => {
-      const parentSha = 'SHA';
+      const baseBranchSha = 'SHA';
       const branchCache = partial<BranchCache>({
         branchName: 'develop',
-        parentSha: parentSha,
+        baseBranchSha: baseBranchSha,
       });
       repoCache.getCache.mockReturnValueOnce({}).mockReturnValueOnce({
         branches: [branchCache],

@@ -533,7 +533,7 @@ export async function processBranch(
       const action = branchExists ? 'updated' : 'created';
       logger.info({ commitSha }, `Branch ${action}`);
       // TODO #7154
-      setCachedConflictResult(
+      await setCachedConflictResult(
         config.baseBranch!,
         getBranchCommit(config.baseBranch!)!,
         config.branchName,

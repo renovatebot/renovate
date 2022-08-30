@@ -1,5 +1,6 @@
 import type { PackageFile } from '../../../modules/manager/types';
 import type { RepoInitConfig } from '../../../workers/repository/init/types';
+import type { GitConflictsCache } from '../../git/types';
 
 export interface BaseBranchCache {
   sha: string; // branch commit sha
@@ -24,8 +25,8 @@ export interface BranchUpgradeCache {
 export interface BranchCache {
   automerge: boolean;
   branchName: string;
-  isModified: boolean;
-  isConflicted: boolean;
+  isModified: boolean | null;
+  isConflicted: boolean | null;
   prNo: number | null;
   sha: string | null;
   baseBranchName: string;
@@ -44,6 +45,7 @@ export interface RepoCacheData {
   platform?: {
     github?: Record<string, unknown>;
   };
+  gitConflicts?: GitConflictsCache;
   prComments?: Record<number, Record<string, string>>;
 }
 

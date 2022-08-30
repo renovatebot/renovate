@@ -9,7 +9,7 @@ import type {
 } from '../../util/cache/repository/types';
 import {
   getBranchCommit,
-  getBranchParentSha,
+  isBranchConflicted,
   isBranchModified,
 } from '../../util/git';
 import type { BranchConfig, BranchUpgradeConfig } from '../types';
@@ -48,12 +48,14 @@ async function generateBranchCache(
   branch: BranchConfig
 ): Promise<BranchCache | null> {
   const { branchName } = branch;
+  const baseBranchName = branch.baseBranch ?? branch.defaultBranch;
   try {
     const sha = getBranchCommit(branchName) ?? null;
     let prNo = null;
-    let parentSha = null;
+    let baseBranchSha = null;
     if (sha) {
-      parentSha = await getBranchParentSha(branchName);
+      // TODO: (fix types) #7154
+      baseBranchSha = getBranchCommit(branch.baseBranch!);
       const branchPr = await platform.getBranchPr(branchName);
       if (branchPr) {
         prNo = branchPr.number;
@@ -68,6 +70,14 @@ async function generateBranchCache(
         // Do nothing
       }
     }
+    let isConflicted = false;
+    if (sha) {
+      try {
+        isConflicted = await isBranchConflicted(baseBranchName!, branchName);
+      } catch (err) /* istanbul ignore next */ {
+        // Do nothing
+      }
+    }
     const upgrades: BranchUpgradeCache[] = branch.upgrades
       ? branch.upgrades.map(generateBranchUpgradeCache)
       : [];
@@ -75,11 +85,14 @@ async function generateBranchCache(
     return {
       branchName,
       sha,
-      parentSha,
+      // TODO: (fix types) #7154
+      baseBranchName: baseBranchName!,
+      baseBranchSha,
       prNo,
       automerge,
       isModified,
       upgrades,
+      isConflicted,
       branchFingerprint,
     };
   } catch (error) {
