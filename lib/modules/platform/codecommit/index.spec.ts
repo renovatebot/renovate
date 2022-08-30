@@ -464,6 +464,7 @@ describe('modules/platform/codecommit/index', () => {
           ],
         },
       };
+
       jest.spyOn(codeCommitClient.prototype, 'send').mockImplementation(() => {
         return Promise.resolve(prRes);
       });
@@ -473,6 +474,65 @@ describe('modules/platform/codecommit/index', () => {
         sourceBranch: 'refs/heads/sourceBranch',
         targetBranch: 'refs/heads/targetBranch',
         state: 'open',
+        number: 1,
+        title: 'someTitle',
+      });
+    });
+
+    it('gets closed pr', async () => {
+      const prRes = {
+        pullRequest: {
+          title: 'someTitle',
+          pullRequestStatus: 'CLOSED',
+          pullRequestTargets: [
+            {
+              sourceReference: 'refs/heads/sourceBranch',
+              destinationReference: 'refs/heads/targetBranch',
+            },
+          ],
+        },
+      };
+
+      jest.spyOn(codeCommitClient.prototype, 'send').mockImplementation(() => {
+        return Promise.resolve(prRes);
+      });
+
+      const res = await codeCommit.getPr(1);
+      expect(res).toMatchObject({
+        sourceBranch: 'refs/heads/sourceBranch',
+        targetBranch: 'refs/heads/targetBranch',
+        state: 'closed',
+        number: 1,
+        title: 'someTitle',
+      });
+    });
+
+    it('gets merged pr', async () => {
+      const prRes = {
+        pullRequest: {
+          title: 'someTitle',
+          pullRequestStatus: 'OPEN',
+          pullRequestTargets: [
+            {
+              sourceReference: 'refs/heads/sourceBranch',
+              destinationReference: 'refs/heads/targetBranch',
+              mergeMetadata: {
+                isMerged: true,
+              },
+            },
+          ],
+        },
+      };
+
+      jest.spyOn(codeCommitClient.prototype, 'send').mockImplementation(() => {
+        return Promise.resolve(prRes);
+      });
+
+      const res = await codeCommit.getPr(1);
+      expect(res).toMatchObject({
+        sourceBranch: 'refs/heads/sourceBranch',
+        targetBranch: 'refs/heads/targetBranch',
+        state: 'merged',
         number: 1,
         title: 'someTitle',
       });
@@ -996,6 +1056,25 @@ describe('modules/platform/codecommit/index', () => {
         'Comment is already update-to-date'
       );
     });
+
+    it('throws an exception in case of api failed connection ', async () => {
+      const err = new Error('some error');
+      jest
+        .spyOn(codeCommitClient.prototype, 'send')
+        .mockImplementationOnce(() => {
+          throw err;
+        });
+      const res = await codeCommit.ensureComment({
+        number: 42,
+        topic: null,
+        content: 'my comment content',
+      });
+      expect(res).toBeFalse();
+      expect(logger.debug).toHaveBeenCalledWith(
+        { err },
+        'Unable to retrieve pr comments'
+      );
+    });
   });
 
   describe('ensureCommentRemoval', () => {
@@ -1072,9 +1151,27 @@ describe('modules/platform/codecommit/index', () => {
         'comment "my comment content" in PR #42 was removed'
       );
     });
+
+    it('throws exception in case failed api connection', async () => {
+      const err = new Error('some error');
+      jest
+        .spyOn(codeCommitClient.prototype, 'send')
+        .mockImplementationOnce(() => {
+          throw err;
+        });
+      await codeCommit.ensureCommentRemoval({
+        type: 'by-content',
+        number: 42,
+        content: 'my comment content',
+      });
+      expect(logger.debug).toHaveBeenCalledWith(
+        { err },
+        'Unable to retrieve pr comments'
+      );
+    });
   });
 
-  describe('addAssignees', () => {
+  describe('addReviewers', () => {
     it('checks that the function resolves', async () => {
       const res = {
         approvalRule: {
@@ -1094,7 +1191,7 @@ describe('modules/platform/codecommit/index', () => {
           return Promise.resolve(res);
         });
       await expect(
-        codeCommit.addAssignees(13, ['arn:aws:iam::someUser:user/ReviewerUser'])
+        codeCommit.addReviewers(13, ['arn:aws:iam::someUser:user/ReviewerUser'])
       ).toResolve();
       expect(logger.debug).toHaveBeenCalledWith(
         res,

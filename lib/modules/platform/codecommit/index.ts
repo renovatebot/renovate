@@ -31,7 +31,6 @@ import type {
 } from '../types';
 import { repoFingerprint } from '../util';
 import { smartTruncate } from '../utils/pr-body';
-
 import * as client from './codecommit-client';
 import { getUserArn, initIamClient } from './iam-client';
 import { getCodeCommitUrl, getNewBranchName } from './util';
@@ -157,6 +156,7 @@ export async function getPrList(): Promise<Pr[]> {
   );
   const fetchedPrs: Pr[] = [];
 
+  /* istanbul ignore if */
   if (listPrsResponse && !listPrsResponse.pullRequestIds) {
     return fetchedPrs;
   }
@@ -178,7 +178,7 @@ export async function getPrList(): Promise<Pr[]> {
         prInfo.pullRequestStatus === PullRequestStatusEnum.OPEN
           ? PrState.Open
           : PrState.Closed,
-      number: Number(prId),
+      number: Number.parseInt(prId),
       title: prInfo.title!,
     };
     fetchedPrs.push(pr);
@@ -257,7 +257,7 @@ export async function getPr(pullRequestId: number): Promise<Pr | null> {
   return {
     sourceBranch: prInfo.pullRequestTargets![0].sourceReference!,
     state: prState,
-    number: Number(pullRequestId),
+    number: pullRequestId,
     title: prInfo.title!,
     targetBranch: prInfo.pullRequestTargets![0].destinationReference!,
     sha: prInfo.revisionId,
@@ -359,18 +359,15 @@ export async function createPr({
   // istanbul ignore if
   if (
     !prCreateRes.pullRequest ||
-    !prCreateRes.pullRequest?.pullRequestStatus ||
-    !prCreateRes.pullRequest?.title
+    !prCreateRes.pullRequest?.title ||
+    !prCreateRes.pullRequest.pullRequestId
   ) {
     throw new Error('Could not create pr, missing PR info');
   }
 
   return {
-    number: Number(prCreateRes.pullRequest.pullRequestId),
-    state:
-      prCreateRes.pullRequest.pullRequestStatus === PullRequestStatusEnum.OPEN
-        ? PrState.Open
-        : PrState.Closed,
+    number: Number.parseInt(prCreateRes.pullRequest.pullRequestId),
+    state: PrState.Open,
     title: prCreateRes.pullRequest.title,
     sourceBranch: sourceBranch,
     targetBranch: targetBranch,
@@ -408,6 +405,8 @@ export async function updatePr({
   }
 }
 
+// Auto-Merge not supported currently.
+/* istanbul ignore next */
 export async function mergePr({
   branchName,
   id: prNo,
@@ -484,22 +483,28 @@ export async function mergePr({
   }
 }
 
-export async function addAssignees(
-  iid: number,
-  assignees: string[]
+export async function addReviewers(
+  prNo: number,
+  reviewers: string[]
 ): Promise<void> {
-  const numberOfApprovers = assignees.length;
+  const numberOfApprovers = reviewers.length;
   const approvalRuleContents = `{"Version":"2018-11-08","Statements": [{"Type": "Approvers","NumberOfApprovalsNeeded":${numberOfApprovers},"ApprovalPoolMembers": ${JSON.stringify(
-    assignees
+    reviewers
   )}}]}`;
-  const res = await client.createPrAssignees(
-    `${iid}`,
+  const res = await client.createPrApprovalRule(
+    `${prNo}`,
     approvalRuleContents.replace(/"/g, '"')
   );
   if (res) {
     const approvalRule = res.approvalRule;
-    logger.debug({ approvalRule }, `Approval Rule Added to PR #${iid}:`);
+    logger.debug({ approvalRule }, `Approval Rule Added to PR #${prNo}:`);
   }
+}
+
+/* istanbul ignore next */
+export function addAssignees(iid: number, assignees: string[]): Promise<void> {
+  // CodeCommit does not support adding reviewers
+  return Promise.resolve();
 }
 
 /* istanbul ignore next */
@@ -529,12 +534,6 @@ export function ensureIssueClosing(title: string): Promise<void> {
 }
 
 /* istanbul ignore next */
-export function addReviewers(prNo: number, reviewers: string[]): Promise<void> {
-  // CodeCommit does not support adding reviewers
-  return Promise.resolve();
-}
-
-/* istanbul ignore next */
 export function deleteLabel(prNumber: number, label: string): Promise<void> {
   return Promise.resolve();
 }
@@ -545,6 +544,7 @@ export function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
 }
 
 // Returns the combined status for a branch.
+/* istanbul ignore next */
 export function getBranchStatus(branchName: string): Promise<BranchStatus> {
   logger.debug(`getBranchStatus(${branchName})`);
   logger.debug(
@@ -553,6 +553,7 @@ export function getBranchStatus(branchName: string): Promise<BranchStatus> {
   return Promise.resolve(BranchStatus.yellow);
 }
 
+/* istanbul ignore next */
 export function getBranchStatusCheck(
   branchName: string,
   context: string
@@ -564,6 +565,7 @@ export function getBranchStatusCheck(
   return Promise.resolve(null);
 }
 
+/* istanbul ignore next */
 export function setBranchStatus({
   branchName,
   context,
@@ -590,16 +592,19 @@ export async function ensureComment({
     );
   } catch (err) {
     logger.debug({ err }, 'Unable to retrieve pr comments');
+    return false;
   }
 
   let commentId = undefined;
   let commentNeedsUpdating = false;
 
-  // istanbul ignore if
+  /* istanbul ignore if */
   if (!prCommentsResponse || !prCommentsResponse.commentsForPullRequestData) {
     return false;
   }
+
   for (const commentObj of prCommentsResponse.commentsForPullRequestData) {
+    /* istanbul ignore if */
     if (!commentObj || !commentObj?.comments) {
       continue;
     }
@@ -687,9 +692,11 @@ export async function ensureCommentRemoval(
 
   let commentIdToRemove;
   for (const commentObj of prCommentsResponse.commentsForPullRequestData) {
+    /* istanbul ignore if */
     if (!commentObj || !commentObj?.comments) {
       continue;
     }
+
     for (const comment of commentObj.comments) {
       if (
         (removeConfig.type === 'by-topic' &&

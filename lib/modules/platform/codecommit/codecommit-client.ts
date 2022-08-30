@@ -279,7 +279,13 @@ export async function getPr(
   return res;
 }
 
-export async function createPrAssignees(
+export async function listRepositories(): Promise<ListRepositoriesOutput> {
+  const input: ListRepositoriesInput = {};
+  const cmd = new ListRepositoriesCommand(input);
+  return await codeCommitClient.send(cmd);
+}
+
+export async function createPrApprovalRule(
   prId: string,
   approvalRuleContents: string
 ): Promise<CreatePullRequestApprovalRuleOutput> {
@@ -289,10 +295,5 @@ export async function createPrAssignees(
     pullRequestId: prId,
   };
   const cmd = new CreatePullRequestApprovalRuleCommand(input);
-  return await codeCommitClient.send(cmd);
-}
-export async function listRepositories(): Promise<ListRepositoriesOutput> {
-  const input: ListRepositoriesInput = {};
-  const cmd = new ListRepositoriesCommand(input);
   return await codeCommitClient.send(cmd);
 }

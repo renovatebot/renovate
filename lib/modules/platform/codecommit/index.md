@@ -9,13 +9,19 @@ first read SDK about how to get the [IAM Access Keys](https://docs.aws.amazon.co
 Requirements for authentication:
 
 can be set in renovate config file:
+
 `endpoint`: the url endpoint e.g `https://git-codecommit.us-east-1.amazonaws.com/`
+
 `username`: the AWS IAM access key id
+
 `password`: the AWS IAM secret access key
 
 or as environment variables:
+
 `AWS_REGION` : the region e.g `us-east-1`
+
 `AWS_ACCESS_KEY_ID` : your IAM Access key id
+
 `AWS_SECRET_ACCESS_KEY` : your IAM Secret access key id
 
 | Permission                                                                                                                                               | Scope                   |
@@ -26,6 +32,11 @@ or as environment variables:
 
 ## Unsupported platform features/concepts
 
-- Adding assignees is not supported
-- auto-merge doesn't work currently
+- adding assignees concept doesn't exist in CodeCommit
+- auto-merge doesn't work currently, there is no way to check CodeBuild status efficiently
 - rebaseLabel isn't supported
+- close PR to ignore is not supported, there is no way to get all pull requests efficiently
+
+## recommendations
+
+- it's always best to keep OPEN prs by renovate user to a maximum of 10, because every PR costs an extra AWS request

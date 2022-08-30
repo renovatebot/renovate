@@ -18,6 +18,8 @@ export function getCodeCommitUrl(
     credentials
   );
   const dateTime = signer.getDateTime();
+
+  /* istanbul ignore if */
   if (!is.string(dateTime)) {
     throw new Error(REPOSITORY_UNINITIATED);
   }
