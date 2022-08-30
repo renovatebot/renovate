@@ -21,7 +21,7 @@ In addition, for the `flux` manager to properly link `HelmRelease` and `HelmRepo
 
 Namespaces will not be inferred from the context (e.g. from the parent `Kustomization`).
 
-### Flux system support
+### Flux system manifests support
 
 Support updating flux system manifests generated during [flux installation](https://fluxcd.io/docs/installation/#customize-flux-manifests).
 
