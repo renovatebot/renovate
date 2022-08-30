@@ -1,9 +1,9 @@
-import type { PackageRuleInputConfig, UpdateType } from '../config/types';
-import { ProgrammingLanguage } from '../constants';
+import type { PackageRuleInputConfig, UpdateType } from '../../config/types';
+import { ProgrammingLanguage } from '../../constants';
 
-import { DockerDatasource } from '../modules/datasource/docker';
-import { OrbDatasource } from '../modules/datasource/orb';
-import { applyPackageRules } from './package-rules';
+import { DockerDatasource } from '../../modules/datasource/docker';
+import { OrbDatasource } from '../../modules/datasource/orb';
+import { applyPackageRules } from './index';
 
 type TestConfig = PackageRuleInputConfig & {
   x?: number;
@@ -11,7 +11,7 @@ type TestConfig = PackageRuleInputConfig & {
   groupName?: string;
 };
 
-describe('util/package-rules', () => {
+describe('util/package-rules/index', () => {
   const config1: TestConfig = {
     foo: 'bar',
 

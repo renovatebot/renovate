@@ -3,6 +3,7 @@ import { Fixtures } from '../../../../../test/fixtures';
 import { mockedFunction } from '../../../../../test/util';
 
 import { migrateConfig } from '../../../../config/migration';
+import { logger } from '../../../../logger';
 import { readLocalFile } from '../../../../util/fs';
 import { getFileList } from '../../../../util/git';
 import { detectRepoFileConfig } from '../../init/merge';
@@ -34,8 +35,8 @@ describe('workers/repository/config-migration/branch/migrated-data', () => {
       });
       mockedFunction(detectRepoFileConfig).mockResolvedValue({
         configFileName: 'renovate.json',
+        configFileRaw: rawNonMigrated,
       });
-      mockedFunction(readLocalFile).mockResolvedValue(rawNonMigrated);
       mockedFunction(migrateConfig).mockReturnValue({
         isMigrated: true,
         migratedConfig: migratedConfigObj,
@@ -100,28 +101,29 @@ describe('workers/repository/config-migration/branch/migrated-data', () => {
     it('Migrate a JSON5 config file', async () => {
       mockedFunction(detectRepoFileConfig).mockResolvedValueOnce({
         configFileName: 'renovate.json5',
+        configFileRaw: rawNonMigratedJson5,
       });
-      mockedFunction(readLocalFile).mockResolvedValueOnce(rawNonMigratedJson5);
       MigratedDataFactory.reset();
       await expect(MigratedDataFactory.getAsync()).resolves.toEqual(
         migratedDataJson5
       );
     });
 
-    it('Returns nothing due to fs error', async () => {
-      mockedFunction(detectRepoFileConfig).mockResolvedValueOnce({
-        configFileName: undefined,
-      });
-      mockedFunction(readLocalFile).mockRejectedValueOnce(null);
+    it('Returns nothing due to detectRepoFileConfig throwing', async () => {
+      const err = new Error('error-message');
+      mockedFunction(detectRepoFileConfig).mockRejectedValueOnce(err);
       MigratedDataFactory.reset();
       await expect(MigratedDataFactory.getAsync()).resolves.toBeNull();
+      expect(logger.debug).toHaveBeenCalledWith(
+        { err },
+        'MigratedDataFactory.getAsync() Error initializing renovate MigratedData'
+      );
     });
 
     it('format and migrate a JSON config file', async () => {
       mockedFunction(detectRepoFileConfig).mockResolvedValueOnce({
         configFileName: 'renovate.json',
       });
-      mockedFunction(readLocalFile).mockResolvedValueOnce(rawNonMigrated);
       mockedFunction(getFileList).mockResolvedValue(['.prettierrc']);
       MigratedDataFactory.reset();
       await expect(MigratedDataFactory.getAsync()).resolves.toEqual(
@@ -132,9 +134,21 @@ describe('workers/repository/config-migration/branch/migrated-data', () => {
     it('should not stop run for invalid package.json', async () => {
       mockedFunction(detectRepoFileConfig).mockResolvedValueOnce({
         configFileName: 'renovate.json',
+        configFileRaw: 'abci',
       });
       mockedFunction(readLocalFile).mockResolvedValueOnce(rawNonMigrated);
-      mockedFunction(readLocalFile).mockResolvedValue('abci');
+      MigratedDataFactory.reset();
+      await expect(MigratedDataFactory.getAsync()).resolves.toEqual(
+        migratedData
+      );
+    });
+
+    it('should not stop run for readLocalFile error', async () => {
+      mockedFunction(detectRepoFileConfig).mockResolvedValueOnce({
+        configFileName: 'renovate.json',
+        configFileRaw: 'abci',
+      });
+      mockedFunction(readLocalFile).mockRejectedValueOnce(null);
       MigratedDataFactory.reset();
       await expect(MigratedDataFactory.getAsync()).resolves.toEqual(
         migratedData
