@@ -232,8 +232,15 @@ export async function generateDockerCommand(
   }
 
   const volumeDirs: VolumeOption[] = [localDir, cacheDir];
-  if (containerbaseDir && cacheDir && !containerbaseDir.startsWith(cacheDir)) {
-    volumeDirs.push(containerbaseDir);
+  if (containerbaseDir) {
+    if (cacheDir && containerbaseDir.startsWith(cacheDir)) {
+      logger.debug('containerbaseDir is inside cacheDir');
+    } else {
+      logger.debug('containerbaseDir is separate from cacheDir');
+      volumeDirs.push(containerbaseDir);
+    }
+  } else {
+    logger.debug('containerbaseDir is missing');
   }
   volumeDirs.push(...volumes);
   result.push(...prepareVolumes(volumeDirs));
