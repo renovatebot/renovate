@@ -1,4 +1,5 @@
-import { linkify } from './markdown';
+import { Fixtures } from '../../test/fixtures';
+import { linkify, sanitizeMarkdown } from './markdown';
 
 describe('util/markdown', () => {
   describe('.linkify', () => {
@@ -12,7 +13,6 @@ describe('util/markdown', () => {
 *   Issue or PR (fork): foo#1
 *   Issue or PR (project): remarkjs/remark#1
 *   Mention: @wooorm
-*   </table>\n#### What's Changed
 `;
 
     const after = `Some references:
@@ -25,11 +25,30 @@ describe('util/markdown', () => {
 -   Issue or PR (fork): [foo#1](https://github.com/foo/repo/issues/1)
 -   Issue or PR (project): [remarkjs/remark#1](https://github.com/remarkjs/remark/issues/1)
 -   Mention: [@wooorm](https://github.com/wooorm)
--   </table>\n\n#### What's Changed
 `;
 
     it('works', async () => {
       expect(await linkify(before, { repository: 'some/repo' })).toEqual(after);
+    });
+
+    it('sanitizeMarkdown check massaged release notes', () => {
+      const input =
+        '#### Our Gold Sponsors\n' +
+        '\n' +
+        '<table>\n' +
+        '</table>\n' +
+        '#### Our Silver Sponsors\n' +
+        '\n' +
+        '<table>\n' +
+        '</table>\n' +
+        "#### What's Changed\n" +
+        '* pnpm rebuild accepts --store-dir by @user in https://github.com/foo/foo/pull/1\n' +
+        '\n' +
+        '#### New Contributors\n' +
+        '* @user made their first contribution in https://github.com/foo/foo/pull/2\n';
+
+      const expected = Fixtures.get('release-notes.txt');
+      expect(sanitizeMarkdown(input)).toEqual(expected);
     });
   });
 });
