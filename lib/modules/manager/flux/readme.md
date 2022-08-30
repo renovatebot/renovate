@@ -1,6 +1,8 @@
 This manager parses [Flux](https://fluxcd.io/) YAML manifests and supports:
+
 1. [`HelmRelease`](https://fluxcd.io/docs/components/helm/helmreleases/) resources
-2. Flux [system](https://fluxcd.io/docs/installation) manifests
+1. Flux [system](https://fluxcd.io/docs/installation) manifests
+
 
 ### HelmRelease support
 
