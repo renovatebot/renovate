@@ -8,7 +8,7 @@ import { setUserRepoConfig } from '../../../util/git';
 import { getAll } from '../../../util/host-rules';
 import { checkIfConfigured } from '../configured';
 import { PackageFiles } from '../package-files';
-import { initApis } from './apis';
+import { WorkerPlatformConfig, initApis } from './apis';
 import { initializeCaches, resetCaches } from './cache';
 import { getRepoConfig } from './config';
 import { detectVulnerabilityAlerts } from './vulnerability';
@@ -34,7 +34,7 @@ export async function initRepo(
   let config: RenovateConfig = initializeConfig(config_);
   await resetCaches();
   config = await initApis(config);
-  await initializeCaches(config);
+  await initializeCaches(config as WorkerPlatformConfig);
   config = await getRepoConfig(config);
   checkIfConfigured(config);
   warnOnUnsupportedOptions(config);
