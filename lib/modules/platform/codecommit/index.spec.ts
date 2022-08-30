@@ -716,6 +716,35 @@ describe('modules/platform/codecommit/index', () => {
         })
       ).toResolve();
     });
+
+    it('updates PR with status closed', async () => {
+      // updatePrDescription
+      jest
+        .spyOn(codeCommitClient.prototype, 'send')
+        .mockImplementationOnce(() => {
+          return Promise.resolve();
+        });
+      // updatePrTitle
+      jest
+        .spyOn(codeCommitClient.prototype, 'send')
+        .mockImplementationOnce(() => {
+          return Promise.resolve();
+        });
+      // updatePrStatus
+      jest
+        .spyOn(codeCommitClient.prototype, 'send')
+        .mockImplementationOnce(() => {
+          return Promise.resolve();
+        });
+      await expect(
+        codeCommit.updatePr({
+          number: 1,
+          prTitle: 'title',
+          prBody: 'body',
+          state: PrState.Closed,
+        })
+      ).toResolve();
+    });
   });
 
   describe('mergePr()', () => {

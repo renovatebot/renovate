@@ -28,10 +28,3 @@ export function getCodeCommitUrl(
   const token: string = dateTime + 'Z' + signer.signature();
   return `https://${accessKeyId}:${token}@git-codecommit.${region}.amazonaws.com/v1/repos/${repoName}`;
 }
-
-export function getNewBranchName(branchName?: string): string | undefined {
-  if (branchName && !branchName.startsWith('refs/heads/')) {
-    return `refs/heads/${branchName}`;
-  }
-  return branchName;
-}

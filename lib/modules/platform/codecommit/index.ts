@@ -29,11 +29,11 @@ import type {
   RepoResult,
   UpdatePrConfig,
 } from '../types';
-import { repoFingerprint } from '../util';
+import { getNewBranchName, repoFingerprint } from '../util';
 import { smartTruncate } from '../utils/pr-body';
 import * as client from './codecommit-client';
 import { getUserArn, initIamClient } from './iam-client';
-import { getCodeCommitUrl, getNewBranchName } from './util';
+import { getCodeCommitUrl } from './util';
 
 const decoder = new TextDecoder();
 
