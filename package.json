@@ -136,7 +136,7 @@
     "node": "^14.15.0 || >=16.13.0"
   },
   "dependencies": {
-    "@aws-sdk/client-ec2": "3.154.0",
+    "@aws-sdk/client-ec2": "3.155.0",
     "@aws-sdk/client-ecr": "3.154.0",
     "@aws-sdk/client-rds": "3.154.0",
     "@aws-sdk/client-s3": "3.154.0",
