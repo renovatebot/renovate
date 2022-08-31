@@ -57,7 +57,7 @@ async function generateBranchCache(
     const parentSha = getCachedBranchParentShaResult(branchName, sha);
     if (sha) {
       // TODO: (fix types) #7154
-      baseBranchSha = getBranchCommit(branch.baseBranch!);
+      baseBranchSha = getBranchCommit(baseBranchName);
       const branchPr = await platform.getBranchPr(branchName);
       if (branchPr) {
         prNo = branchPr.number;
