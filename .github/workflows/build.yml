@@ -76,6 +76,7 @@ jobs:
           git --version
           echo "Node $(node --version)"
           echo "Yarn $(yarn --version)"
+          node -e 'console.dir(v8.getHeapStatistics())'
 
       - name: Installing dependencies
         run: yarn install --frozen-lockfile
@@ -83,7 +84,7 @@ jobs:
       # build before tests to for static file check
       - name: Build
         run: yarn build
-        
+
       - name: jest config
         run: yarn jest --showConfig
 
