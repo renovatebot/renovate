@@ -1,8 +1,12 @@
 import { Fixtures } from '../../../../test/fixtures';
 import { extractPackageFile } from '.';
 
-const simpleMintfile = Fixtures.get('simple.Mintfile');
-const noVersionMintfile = Fixtures.get('noVersion.Mintfile');
+const simpleMintfile = Fixtures.get('Mintfile');
+
+const noVersionMintfileContent = `
+yonaskolb/xcodegen
+realm/SwiftLint
+`;
 
 const complexMintFileContent = `
 SwiftGen/SwiftGen@6.6.1
@@ -45,7 +49,7 @@ describe('modules/manager/mint/extract', () => {
     });
 
     it('Mintfile Without Version Description', () => {
-      const res = extractPackageFile(noVersionMintfile);
+      const res = extractPackageFile(noVersionMintfileContent);
       expect(res).toEqual({
         deps: [
           {
