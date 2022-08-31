@@ -30,6 +30,19 @@ describe('modules/platform/codecommit/iam-client', () => {
     expect(userArn).toBeUndefined();
   });
 
+  it('should return empty', async () => {
+    jest.spyOn(iamClient.prototype, 'send').mockImplementationOnce(() => {
+      return Promise.resolve(undefined);
+    });
+    let userArn;
+    try {
+      userArn = await iam.getUserArn();
+    } catch (err) {
+      //
+    }
+    expect(userArn).toBe('');
+  });
+
   it('should return the user arn, even though user has no permission', async () => {
     jest.spyOn(iamClient.prototype, 'send').mockImplementationOnce(() => {
       throw new Error('User: aws:arn:example:123456 has no permissions');

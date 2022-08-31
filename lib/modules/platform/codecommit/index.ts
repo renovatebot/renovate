@@ -93,7 +93,7 @@ export async function initPlatform({
   client.buildCodeCommitClient(region, credentials);
 
   const platformConfig: PlatformResult = {
-    endpoint: endpoint ?? `https://git-codecommit.${region}.amazonaws.com`,
+    endpoint: endpoint ?? `https://git-codecommit.${region}.amazonaws.com/`,
   };
   return Promise.resolve(platformConfig);
 }
@@ -161,6 +161,7 @@ export async function getPrList(): Promise<Pr[]> {
     return fetchedPrs;
   }
 
+  /* istanbul ignore next */
   const prIds = listPrsResponse.pullRequestIds ?? [];
 
   for (const prId of prIds) {
@@ -277,7 +278,11 @@ export async function getRepos(): Promise<string[]> {
   }
 
   const res: string[] = [];
-  for (const repo of reposRes.repositories ?? []) {
+
+  /* istanbul ignore next */
+  const repoNames = reposRes.repositories ?? [];
+
+  for (const repo of repoNames) {
     if (repo.repositoryName) {
       res.push(repo.repositoryName);
     }

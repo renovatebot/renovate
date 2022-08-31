@@ -61,11 +61,6 @@ describe('modules/platform/codecommit/index', () => {
       expect(error).toBe(
         'Init: You must configure a AWS user(accessKeyId), password(secretAccessKey) and endpoint/AWS_REGION'
       );
-
-      // this simplier syntax is not working for me,
-      // expect( () => codeCommit.initPlatform({})).toThrow(
-      //   'Init: You must configure a AWS user(accessKeyId), password(secretAccessKey) and endpoint/AWS_REGION'
-      // );
     });
 
     it('should show warning message if custom endpoint', async () => {
@@ -104,6 +99,32 @@ describe('modules/platform/codecommit/index', () => {
           password: '123',
         })
       ).toEqual({
+        endpoint: 'https://git-codecommit.REGION.amazonaws.com/',
+      });
+    });
+
+    it('should init with env vars', async () => {
+      jest.spyOn(iamClient.prototype, 'send').mockImplementationOnce(() => {
+        throw new Error('User: aws:arn:example:123456 has no permissions');
+      });
+      jest
+        .spyOn(codeCommitClient.prototype, 'send')
+        .mockImplementationOnce(() => {
+          return Promise.resolve();
+        });
+      process.env.AWS_REGION = 'REGION';
+      let res;
+      try {
+        res = await codeCommit.initPlatform({
+          username: 'abc',
+          password: '123',
+        });
+      } catch (err) {
+        res = err.message;
+      } finally {
+        delete process.env.AWS_REGION;
+      }
+      expect(res).toEqual({
         endpoint: 'https://git-codecommit.REGION.amazonaws.com/',
       });
     });

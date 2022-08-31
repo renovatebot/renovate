@@ -34,7 +34,7 @@ export async function getUserArn(): Promise<string> {
   let res;
   try {
     const userRes: GetUserCommandOutput = await iam.send(cmd);
-    res = userRes.User?.Arn;
+    res = userRes?.User?.Arn;
   } catch (err) {
     const match = userRe.exec(err.message);
     if (match) {
