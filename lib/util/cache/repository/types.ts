@@ -80,7 +80,6 @@ export interface RepoCache {
   load(): Promise<void>;
   save(): Promise<void>;
   getData(): RepoCacheData;
-  isModified(): Promise<boolean | undefined>;
 }
 
 export interface RepoCacheConfig {

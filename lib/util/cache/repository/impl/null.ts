@@ -16,8 +16,4 @@ export class RepoCacheNull implements RepoCache {
   getData(): RepoCacheData {
     return this.data;
   }
-
-  isModified(): Promise<boolean | undefined> {
-    return Promise.resolve(undefined);
-  }
 }

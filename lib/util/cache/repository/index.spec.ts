@@ -3,7 +3,7 @@ import { GlobalConfig } from '../../../config/global';
 import * as _fs from '../../fs';
 import { initRepoCache } from './init';
 import type { RepoCacheConfig } from './types';
-import { getCache, isCacheModified, resetCache, saveCache } from '.';
+import { getCache, resetCache, saveCache } from '.';
 
 jest.mock('../../fs');
 
@@ -26,14 +26,12 @@ describe('util/cache/repository/index', () => {
     await initRepoCache({ ...config, repositoryCache: 'disabled' });
     expect(fs.readCacheFile).not.toHaveBeenCalled();
     expect(getCache()).toBeEmpty();
-    expect(await isCacheModified()).toBeUndefined();
   });
 
   it('saves cache', async () => {
     await initRepoCache({ ...config, repositoryCache: 'enabled' });
     await saveCache();
     expect(fs.outputCacheFile).toHaveBeenCalled();
-    expect(await isCacheModified()).toBeUndefined();
   });
 
   it('resets cache', async () => {
@@ -41,6 +39,5 @@ describe('util/cache/repository/index', () => {
     expect(fs.readCacheFile).not.toHaveBeenCalled();
     expect(fs.outputCacheFile).toHaveBeenCalled();
     expect(getCache()).toBeEmpty();
-    expect(await isCacheModified()).toBeUndefined();
   });
 });
