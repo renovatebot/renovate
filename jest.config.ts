@@ -32,7 +32,7 @@ function jestGithubRunnerSpecs(): JestConfig {
   // }
 
   return {
-    maxWorkers: 2,
+    maxWorkers: cpus.length,
     workerIdleMemoryLimit: '1500MB', // '2GB',
   };
 }
