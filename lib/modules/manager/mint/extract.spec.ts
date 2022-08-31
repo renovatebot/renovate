@@ -106,6 +106,12 @@ describe('modules/manager/mint/extract', () => {
             packageName: 'https://github.com/yonaskolb/xcodegen.git',
             skipReason: 'no-version',
           },
+          {
+            depName: 'realm/SwiftLint',
+            currentValue: '0.48.0',
+            datasource: 'git-tags',
+            packageName: 'https://github.com/realm/SwiftLint.git',
+          },
         ],
       });
     });

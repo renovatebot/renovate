@@ -4,32 +4,25 @@ import type { PackageDependency, PackageFile } from '../types';
 export function extractPackageFile(content: string): PackageFile | null {
   const deps: PackageDependency[] = [];
 
-  content.split('\n').map(s => s.trim()).forEach((line) => {
+  for (const line of content.split('\n').map(s => s.trim())) {
     if (line === '') {
-      return;
+      continue;
     }
 
     // commented out line
     if (line.startsWith('#')) {
-      return;
-    }
-
-    // exclude blanks
-    const noBlanksLine = line.replace(/\s+/g, '');
-    if (noBlanksLine === '') {
-      return;
+      continue;
     }
 
     // commented out line after package name
-    if (noBlanksLine.includes('#')) {
+    if (line.includes('#')) {
       const [uncommentLine] = line.split('#');
       deps.push(handleDepInMintfile(uncommentLine));
-      return;
+      continue;
     }
 
-    deps.push(handleDepInMintfile(noBlanksLine));
-    return;
-  });
+    deps.push(handleDepInMintfile(line));
+  };
   return deps.length ? { deps } : null;
 }
 
@@ -42,7 +35,7 @@ function handleDepInMintfile(line: string): PackageDependency {
       packageName: `https://github.com/${line}.git`,
     };
   }
-  const [depName, currentVersion] = line.split('@');
+  const [depName, currentVersion] = line.split('@').map(s => s.trim());;
   return {
     depName: depName,
     currentValue: currentVersion,
