@@ -39,4 +39,4 @@ or as environment variables:
 
 ## recommendations
 
-- it's always best to keep OPEN prs by renovate user to a maximum of 10, because every PR costs an extra AWS request
+- it's always best to limit OPEN prs by renovate user to a maximum of 10, because every PR costs an extra AWS request

@@ -291,7 +291,7 @@ export async function createPrApprovalRule(
 ): Promise<CreatePullRequestApprovalRuleOutput> {
   const input: CreatePullRequestApprovalRuleInput = {
     approvalRuleContent: approvalRuleContents,
-    approvalRuleName: 'Assignees By Renovate',
+    approvalRuleName: 'Reviewers By Renovate',
     pullRequestId: prId,
   };
   const cmd = new CreatePullRequestApprovalRuleCommand(input);
