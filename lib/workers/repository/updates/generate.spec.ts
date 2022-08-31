@@ -1,11 +1,14 @@
-import { defaultConfig } from '../../../../test/util';
-import type { UpdateType } from '../../../config/types';
+import { getConfig } from '../../../../test/util';
+import type { RenovateConfig, UpdateType } from '../../../config/types';
 import { NpmDatasource } from '../../../modules/datasource/npm';
 import type { BranchUpgradeConfig } from '../../types';
 import { generateBranchConfig } from './generate';
 
+let defaultConfig: RenovateConfig;
+
 beforeEach(() => {
   jest.resetAllMocks();
+  defaultConfig = getConfig();
 });
 
 describe('workers/repository/updates/generate', () => {

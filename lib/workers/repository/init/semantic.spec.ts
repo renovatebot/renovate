@@ -16,7 +16,7 @@ beforeEach(() => {
 describe('workers/repository/init/semantic', () => {
   describe('detectSemanticCommits()', () => {
     beforeEach(async () => {
-      await initRepoCache({});
+      await initRepoCache({ repoFingerprint: '0123456789abcdef' });
     });
 
     it('detects false if unknown', async () => {

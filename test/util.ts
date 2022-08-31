@@ -45,8 +45,6 @@ export const logger = mocked(_logger);
 
 export type { RenovateConfig };
 
-export const defaultConfig = getConfig();
-
 export { getConfig };
 
 function getCallerFileName(): string | null {

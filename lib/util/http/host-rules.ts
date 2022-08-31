@@ -8,9 +8,10 @@ import { logger } from '../../logger';
 import { hasProxy } from '../../proxy';
 import type { HostRule } from '../../types';
 import * as hostRules from '../host-rules';
+import { dnsCache } from './dns';
 import type { GotOptions } from './types';
 
-function findMatchingRules(options: GotOptions, url: string): HostRule {
+export function findMatchingRules(options: GotOptions, url: string): HostRule {
   const { hostType } = options;
   let res = hostRules.find({ hostType, url });
 
@@ -102,6 +103,10 @@ export function applyHostRules(url: string, inOptions: GotOptions): GotOptions {
 
   if (foundRules.timeout) {
     options.timeout = foundRules.timeout;
+  }
+
+  if (foundRules.dnsCache) {
+    options.dnsCache = dnsCache;
   }
 
   if (!hasProxy() && foundRules.enableHttp2 === true) {
