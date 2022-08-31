@@ -370,5 +370,69 @@ describe('workers/repository/process/write', () => {
         ],
       });
     });
+
+    it('no invalidation if no branch', async () => {
+      const branches = partial<BranchConfig[]>([
+        {
+          branchName: 'new/some-branch',
+          manager: 'npm',
+          upgrades: [
+            {
+              manager: 'unknown-manager',
+            } as BranchUpgradeConfig,
+          ],
+        },
+      ]);
+      branchWorker.processBranch.mockResolvedValueOnce({
+        branchExists: true,
+        result: BranchResult.Done,
+        commitSha: 'some-value',
+      });
+      git.branchExists.mockReturnValue(false);
+      git.getBranchCommit.mockReturnValueOnce('101');
+      git.getBranchCommit.mockReturnValueOnce('303');
+      config.repositoryCache = 'enabled';
+      await writeUpdates(config, branches);
+      repoCache.getCache.mockReturnValueOnce({});
+      expect(repoCacheObj).toMatchObject({});
+    });
+
+    it('no invalidation if SHAs are same', async () => {
+      const branches = partial<BranchConfig[]>([
+        {
+          branchName: 'new/some-branch',
+          manager: 'npm',
+          upgrades: [
+            {
+              manager: 'unknown-manager',
+            } as BranchUpgradeConfig,
+          ],
+        },
+      ]);
+      branchWorker.processBranch.mockResolvedValueOnce({
+        branchExists: true,
+        result: BranchResult.Done,
+        commitSha: 'some-value',
+      });
+      git.branchExists.mockReturnValue(false);
+      git.getBranchCommit.mockReturnValueOnce('101');
+      git.getBranchCommit.mockReturnValueOnce('303');
+      config.repositoryCache = 'enabled';
+      await writeUpdates(config, branches);
+      repoCache.getCache.mockReturnValueOnce({});
+      expect(repoCacheObj).toMatchObject({
+        branches: [
+          {
+            branchName: 'new/some-branch',
+            sha: '111',
+            isModified: false,
+            isConflicted: false,
+            parentSha: '222',
+            baseBranchSha: '333',
+            baseBranchName: 'base_branch',
+          } as BranchCache,
+        ],
+      });
+    });
   });
 });

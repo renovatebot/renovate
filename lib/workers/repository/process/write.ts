@@ -124,7 +124,7 @@ function syncBranchCache(branchCache: BranchCache): void {
   const branchSha = getBranchCommit(branchCache.branchName);
   const baseBranchSha = getBranchCommit(branchCache.baseBranchName);
 
-  // compare branch cache to current branch state
+  // compare branch cache to fetched branch state
   if (branchSha !== branchCache.sha) {
     // invalidate isModified, isConflicted values
     branchCache.isConflicted = null;
