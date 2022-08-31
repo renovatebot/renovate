@@ -6051,7 +6051,7 @@ jest-config@^29.0.1:
     slash "^3.0.0"
     strip-json-comments "^3.1.1"
 
-jest-diff@^28.0.0, jest-diff@^28.1.0, jest-diff@^28.1.3:
+jest-diff@^28.1.0, jest-diff@^28.1.3:
   version "28.1.3"
   resolved "https://registry.yarnpkg.com/jest-diff/-/jest-diff-28.1.3.tgz#948a192d86f4e7a64c5264ad4da4877133d8792f"
   integrity sha512-8RqP1B/OXzjjTWkqMX67iqgwBVJRgCyKD3L9nq+6ZqJMdvjE8RgHktqZ6jNrkdMT+dJuYNI3rhQpxaz7drJHfw==
@@ -6061,7 +6061,7 @@ jest-diff@^28.0.0, jest-diff@^28.1.0, jest-diff@^28.1.3:
     jest-get-type "^28.0.2"
     pretty-format "^28.1.3"
 
-jest-diff@^29.0.1:
+jest-diff@^29.0.0, jest-diff@^29.0.1:
   version "29.0.1"
   resolved "https://registry.yarnpkg.com/jest-diff/-/jest-diff-29.0.1.tgz#d14e900a38ee4798d42feaaf0c61cb5b98e4c028"
   integrity sha512-l8PYeq2VhcdxG9tl5cU78ClAlg/N7RtVSp0v3MlXURR0Y99i6eFnegmasOandyTmO6uEdo20+FByAjBFEO9nuw==
@@ -6101,15 +6101,15 @@ jest-environment-node@^29.0.1:
     jest-mock "^29.0.1"
     jest-util "^29.0.1"
 
-jest-extended@3.0.2:
-  version "3.0.2"
-  resolved "https://registry.yarnpkg.com/jest-extended/-/jest-extended-3.0.2.tgz#f74ae82bdf280536552752b502f57f71e7d2fcf1"
-  integrity sha512-LnVZvwWLRV9AL8J7f4frKu0KHuTrbIFK15IqrvSwbFCYxalkuC5l7HfcofsksePrvlEJ2WAcfYNnu1+bEGvInA==
+jest-extended@3.1.0:
+  version "3.1.0"
+  resolved "https://registry.yarnpkg.com/jest-extended/-/jest-extended-3.1.0.tgz#7998699751f3b5d9207d212b39c1837f59c7fecc"
+  integrity sha512-BbuAVUb2dchgwm7euayVt/7hYlkKaknQItKyzie7Li8fmXCglgf21XJeRIdOITZ/cMOTTj5Oh5IjQOxQOe/hfQ==
   dependencies:
-    jest-diff "^28.0.0"
-    jest-get-type "^28.0.0"
+    jest-diff "^29.0.0"
+    jest-get-type "^29.0.0"
 
-jest-get-type@^28.0.0, jest-get-type@^28.0.2:
+jest-get-type@^28.0.2:
   version "28.0.2"
   resolved "https://registry.yarnpkg.com/jest-get-type/-/jest-get-type-28.0.2.tgz#34622e628e4fdcd793d46db8a242227901fcf203"
   integrity sha512-ioj2w9/DxSYHfOm5lJKCdcAmPJzQXmbM/Url3rhlghrPvT3tt+7a/+oXc9azkKmLvoiXjtV83bEWqi+vs5nlPA==
