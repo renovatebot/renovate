@@ -61,7 +61,7 @@ describe('util/git/parent-sha-cache', () => {
           {
             branchName: 'foo',
             sha: '111',
-            baseBranchSha: '000',
+            parentSha: '000',
           } as BranchCache,
         ],
       });

@@ -101,7 +101,6 @@ describe('util/git/conflicts-cache', () => {
             sha: '222',
             baseBranchSha: '111',
             isConflicted: true,
-            isModified: null,
           },
         ],
       });
@@ -119,7 +118,6 @@ describe('util/git/conflicts-cache', () => {
             sha: '444',
             baseBranchSha: '121',
             isConflicted: true,
-            isModified: null,
           },
         ],
       });
@@ -136,7 +134,6 @@ describe('util/git/conflicts-cache', () => {
             sha: '222',
             baseBranchSha: 'aaa',
             isConflicted: true,
-            isModified: null,
           },
         ],
       });
@@ -153,7 +150,6 @@ describe('util/git/conflicts-cache', () => {
             sha: 'bbb',
             baseBranchSha: 'aaa',
             isConflicted: false,
-            isModified: null,
           },
         ],
       });

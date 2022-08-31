@@ -30,7 +30,8 @@ export interface BranchCache {
   prNo: number | null;
   sha: string | null;
   baseBranchName: string;
-  baseBranchSha: string | null;
+  baseBranchSha: string | null; // recent baseBranch SHA
+  parentSha: string | null; // baseBranch SHA when branch-commit was made by bot
   upgrades: BranchUpgradeCache[];
   branchFingerprint?: string;
 }

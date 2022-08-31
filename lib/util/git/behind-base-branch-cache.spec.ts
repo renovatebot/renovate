@@ -36,14 +36,14 @@ describe('util/git/behind-base-branch-cache', () => {
 
     it('returns true if target SHA has changed', () => {
       repoCache.branches = [
-        { branchName: 'foo', sha: 'aaa', baseBranchSha: '222' } as BranchCache,
+        { branchName: 'foo', sha: 'aaa', parentSha: '222' } as BranchCache,
       ];
       expect(getCachedBehindBaseResult('foo', '111')).toBeTrue();
     });
 
     it('returns false if target SHA has not changed', () => {
       repoCache.branches = [
-        { branchName: 'foo', sha: 'aaa', baseBranchSha: '111' } as BranchCache,
+        { branchName: 'foo', sha: 'aaa', parentSha: '111' } as BranchCache,
       ];
       expect(getCachedBehindBaseResult('foo', '111')).toBeFalse();
     });

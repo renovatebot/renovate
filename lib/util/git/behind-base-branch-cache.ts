@@ -12,9 +12,10 @@ export function getCachedBehindBaseResult(
     (branch) => branch.branchName === branchName
   );
 
-  if (!cachedBranch?.baseBranchSha) {
+  if (!cachedBranch?.parentSha) {
     return null;
   }
 
-  return currentBaseBranchSha !== cachedBranch.baseBranchSha;
+  // compare current base branch SHA to the one stored Fin cache
+  return currentBaseBranchSha !== cachedBranch.parentSha;
 }

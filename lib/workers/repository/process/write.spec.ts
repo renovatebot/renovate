@@ -12,7 +12,10 @@ import { GlobalConfig } from '../../../config/global';
 import { addMeta } from '../../../logger';
 import { hashMap } from '../../../modules/manager';
 import * as _repoCache from '../../../util/cache/repository';
-import type { BranchCache } from '../../../util/cache/repository/types';
+import type {
+  BranchCache,
+  RepoCacheData,
+} from '../../../util/cache/repository/types';
 import { Limit, isLimitReached } from '../../global/limits';
 import { BranchConfig, BranchResult, BranchUpgradeConfig } from '../../types';
 import * as _branchWorker from '../update/branch';
@@ -234,6 +237,138 @@ describe('workers/repository/process/write', () => {
         branchFingerprint: '222',
       } as BranchCache;
       expect(canSkipBranchUpdateCheck(branchCache, '222')).toBe(true);
+    });
+  });
+
+  describe('invalidate cache', () => {
+    let repoCacheObj: RepoCacheData = {};
+
+    beforeEach(() => {
+      repoCacheObj = {
+        branches: [
+          {
+            branchName: 'new/some-branch',
+            sha: '111',
+            isModified: false,
+            isConflicted: false,
+            parentSha: '222',
+            baseBranchSha: '333',
+            baseBranchName: 'base_branch',
+          } as BranchCache,
+        ],
+      } as RepoCacheData;
+      repoCache.getCache.mockReturnValue(repoCacheObj);
+    });
+
+    it('invalidates cached values when branch sha changes', async () => {
+      const branches = partial<BranchConfig[]>([
+        {
+          branchName: 'new/some-branch',
+          manager: 'npm',
+          upgrades: [
+            {
+              manager: 'unknown-manager',
+            } as BranchUpgradeConfig,
+          ],
+        },
+      ]);
+      branchWorker.processBranch.mockResolvedValueOnce({
+        branchExists: true,
+        result: BranchResult.Done,
+        commitSha: 'some-value',
+      });
+      git.branchExists.mockReturnValue(true);
+      git.getBranchCommit.mockReturnValueOnce('101');
+      git.getBranchCommit.mockReturnValueOnce('333');
+      config.repositoryCache = 'enabled';
+      await writeUpdates(config, branches);
+      expect(repoCacheObj).toMatchObject({
+        branches: [
+          {
+            branchName: 'new/some-branch',
+            sha: '101',
+            isModified: null,
+            isConflicted: null,
+            parentSha: null,
+            baseBranchSha: '333',
+            baseBranchName: 'base_branch',
+          },
+        ],
+      });
+    });
+
+    it('invalidates cached values when base branch sha changes', async () => {
+      const branches = partial<BranchConfig[]>([
+        {
+          branchName: 'new/some-branch',
+          manager: 'npm',
+          upgrades: [
+            {
+              manager: 'unknown-manager',
+            } as BranchUpgradeConfig,
+          ],
+        },
+      ]);
+      branchWorker.processBranch.mockResolvedValueOnce({
+        branchExists: true,
+        result: BranchResult.Done,
+        commitSha: 'some-value',
+      });
+      git.branchExists.mockReturnValue(true);
+      git.getBranchCommit.mockReturnValueOnce('111');
+      git.getBranchCommit.mockReturnValueOnce('303');
+      config.repositoryCache = 'enabled';
+      await writeUpdates(config, branches);
+      expect(repoCacheObj).toMatchObject({
+        branches: [
+          {
+            branchName: 'new/some-branch',
+            sha: '111',
+            isModified: false,
+            isConflicted: null,
+            parentSha: '222',
+            baseBranchSha: '303',
+            baseBranchName: 'base_branch',
+          },
+        ],
+      });
+    });
+
+    it('invalidates cached values when both baseBranchSha and branchSha change', async () => {
+      const branches = partial<BranchConfig[]>([
+        {
+          branchName: 'new/some-branch',
+          manager: 'npm',
+          upgrades: [
+            {
+              manager: 'unknown-manager',
+            } as BranchUpgradeConfig,
+          ],
+        },
+      ]);
+      branchWorker.processBranch.mockResolvedValueOnce({
+        branchExists: true,
+        result: BranchResult.Done,
+        commitSha: 'some-value',
+      });
+      git.branchExists.mockReturnValue(true);
+      git.getBranchCommit.mockReturnValueOnce('101');
+      git.getBranchCommit.mockReturnValueOnce('303');
+      config.repositoryCache = 'enabled';
+      await writeUpdates(config, branches);
+      expect(repoCacheObj).toMatchObject({
+        branches: [
+          {
+            branchName: 'new/some-branch',
+            sha: '101',
+            isModified: null,
+            isConflicted: null,
+            parentSha: null,
+            baseBranchSha: '303',
+            baseBranchName: 'base_branch',
+          },
+        ],
+      });
     });
   });
 });

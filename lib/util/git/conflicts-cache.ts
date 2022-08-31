@@ -47,12 +47,12 @@ export function setCachedConflictResult(
   }
 
   if (!branch?.baseBranchSha || branch?.baseBranchSha !== targetBranchSha) {
+    // should never come in actual use now since we update this before processing branch
     branch.baseBranchSha = targetBranchSha;
   }
   if (!branch?.sha || branch?.sha !== sourceBranchSha) {
+    // should never be used now since we update this before processing branch result
     branch.sha = sourceBranchSha;
-    // invalidate cached branch-modified result
-    branch.isModified = null;
   }
 
   branch.isConflicted = isConflicted;

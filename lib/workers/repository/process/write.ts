@@ -6,7 +6,7 @@ import { addMeta, logger, removeMeta } from '../../../logger';
 import { hashMap } from '../../../modules/manager';
 import { getCache } from '../../../util/cache/repository';
 import type { BranchCache } from '../../../util/cache/repository/types';
-import { branchExists } from '../../../util/git';
+import { branchExists, getBranchCommit } from '../../../util/git';
 import { Limit, incLimitedValue, setMaxLimit } from '../../global/limits';
 import { BranchConfig, BranchResult } from '../../types';
 import { processBranch } from '../update/branch';
@@ -45,8 +45,6 @@ export async function writeUpdates(
       .join(', ')}`
   );
   const cache = getCache();
-  // eslint-disable-next-line no-console
-  console.log(cache.gitConflicts?.main.sourceBranches);
   const { branches: cachedBranches = [] } = cache;
   const prsRemaining = await getPrsRemaining(config, branches);
   logger.debug({ prsRemaining }, 'Calculated maximum PRs remaining this run');
@@ -94,6 +92,10 @@ export async function writeUpdates(
       branchCache,
       branchFingerprint
     );
+
+    if (branchExisted) {
+      syncBranchCache(branchCache);
+    }
     const res = await processBranch(branch);
     branch.prBlockedBy = res?.prBlockedBy;
     branch.prNo = res?.prNo;
@@ -116,4 +118,28 @@ export async function writeUpdates(
   }
   removeMeta(['branch', 'baseBranch']);
   return 'done';
+}
+
+function syncBranchCache(branchCache: BranchCache): void {
+  const branchSha = getBranchCommit(branchCache.branchName);
+  const baseBranchSha = getBranchCommit(branchCache.baseBranchName);
+
+  // compare branch cache to current branch state
+  if (branchSha !== branchCache.sha) {
+    // invalidate isModified, isConflicted values
+    branchCache.isConflicted = null;
+    branchCache.isModified = null;
+    branchCache.parentSha = null;
+
+    // update cached branchSha
+    branchCache.sha = branchSha;
+  }
+
+  if (baseBranchSha !== branchCache.baseBranchSha) {
+    // invalidate isModified, isConflicted values
+    branchCache.isConflicted = null;
+
+    // update cached branchSha
+    branchCache.baseBranchSha = baseBranchSha;
+  }
 }
