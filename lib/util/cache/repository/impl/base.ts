@@ -131,4 +131,12 @@ export abstract class RepoCacheBase implements RepoCache {
   getData(): RepoCacheData {
     return this.data;
   }
+
+  async isModified(): Promise<boolean | undefined> {
+    const jsonStr = JSON.stringify(this.data);
+    if (!this.oldHash) {
+      return undefined;
+    }
+    return (await hasha.async(jsonStr)) !== this.oldHash;
+  }
 }
