@@ -76,7 +76,6 @@ jobs:
           git --version
           echo "Node $(node --version)"
           echo "Yarn $(yarn --version)"
-          env
 
       - name: Installing dependencies
         run: yarn install --frozen-lockfile
@@ -84,6 +83,9 @@ jobs:
       # build before tests to for static file check
       - name: Build
         run: yarn build
+        
+      - name: jest config
+        run: yarn jest --showConfig
 
       - name: Unit tests
         run: yarn jest --ci --coverage ${{ env.coverage }}
