@@ -36,21 +36,14 @@ export function extractPackageFile(
     );
     return null;
   }
-  try {
-    // Image name/tags for services are only eligible for update if they don't
-    // use variables and if the image is not built locally
-    const deps = Object.values(config.pipeline ?? {})
-      .filter((step) => is.string(step?.image))
-      .map((step) => getDep(step.image, true, extractConfig.registryAliases))
-      .filter(is.truthy);
 
-    logger.trace({ deps }, 'Woodpecker Configuration image');
-    return deps.length ? { deps } : null;
-  } catch (err) {
-    logger.debug(
-      { fileName, content, err },
-      'Error extracting Woodpecker Configuration file'
-    );
-    return null;
-  }
+  // Image name/tags for services are only eligible for update if they don't
+  // use variables and if the image is not built locally
+  const deps = Object.values(config.pipeline ?? {})
+    .filter((step) => is.string(step?.image))
+    .map((step) => getDep(step.image, true, extractConfig.registryAliases))
+    .filter(is.truthy);
+
+  logger.trace({ deps }, 'Woodpecker Configuration image');
+  return deps.length ? { deps } : null;
 }
