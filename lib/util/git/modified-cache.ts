@@ -34,7 +34,6 @@ export function setCachedModifiedResult(
   }
 
   if (branch.sha !== branchSha) {
-    // should never come in actual use now since we update this before processing branch
     branch.sha = branchSha;
   }
 
