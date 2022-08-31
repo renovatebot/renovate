@@ -4,7 +4,7 @@ import type { PackageDependency, PackageFile } from '../types';
 export function extractPackageFile(content: string): PackageFile | null {
   const deps: PackageDependency[] = [];
 
-  for (const line of content.split('\n').map(s => s.trim())) {
+  for (const line of content.split('\n').map((s) => s.trim())) {
     if (line === '') {
       continue;
     }
@@ -22,7 +22,7 @@ export function extractPackageFile(content: string): PackageFile | null {
     }
 
     deps.push(handleDepInMintfile(line));
-  };
+  }
   return deps.length ? { deps } : null;
 }
 
@@ -32,10 +32,11 @@ function handleDepInMintfile(line: string): PackageDependency {
       depName: line,
       currentValue: null,
       skipReason: 'no-version',
+      datasource: 'git-tags',
       packageName: `https://github.com/${line}.git`,
     };
   }
-  const [depName, currentVersion] = line.split('@').map(s => s.trim());;
+  const [depName, currentVersion] = line.split('@').map((s) => s.trim());
   return {
     depName: depName,
     currentValue: currentVersion,

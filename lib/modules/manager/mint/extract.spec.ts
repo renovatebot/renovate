@@ -44,7 +44,7 @@ describe('modules/manager/mint/extract', () => {
       });
     });
 
-    it('Makefile Without Version Description', () => {
+    it('Mintfile Without Version Description', () => {
       const res = extractPackageFile(noVersionMintfile);
       expect(res).toEqual({
         deps: [
@@ -52,19 +52,21 @@ describe('modules/manager/mint/extract', () => {
             depName: 'yonaskolb/xcodegen',
             currentValue: null,
             skipReason: 'no-version',
+            datasource: 'git-tags',
             packageName: 'https://github.com/yonaskolb/xcodegen.git',
           },
           {
             depName: 'realm/SwiftLint',
             currentValue: null,
             skipReason: 'no-version',
+            datasource: 'git-tags',
             packageName: 'https://github.com/realm/SwiftLint.git',
           },
         ],
       });
     });
 
-    it('Complex Makefile', () => {
+    it('Complex Mintfile', () => {
       const res = extractPackageFile(complexMintFileContent);
       expect(res).toEqual({
         deps: [
@@ -78,6 +80,7 @@ describe('modules/manager/mint/extract', () => {
             depName: 'yonaskolb/xcodegen',
             currentValue: null,
             skipReason: 'no-version',
+            datasource: 'git-tags',
             packageName: 'https://github.com/yonaskolb/xcodegen.git',
           },
           {
@@ -101,10 +104,11 @@ describe('modules/manager/mint/extract', () => {
             packageName: 'https://github.com/SwiftGen/SwiftGen.git',
           },
           {
-            currentValue: null,
             depName: 'yonaskolb/xcodegen',
-            packageName: 'https://github.com/yonaskolb/xcodegen.git',
+            currentValue: null,
             skipReason: 'no-version',
+            datasource: 'git-tags',
+            packageName: 'https://github.com/yonaskolb/xcodegen.git',
           },
           {
             depName: 'realm/SwiftLint',
