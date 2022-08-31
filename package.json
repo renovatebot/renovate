@@ -306,7 +306,7 @@
     "ts-jest": "29.0.0-next.0",
     "ts-node": "10.9.1",
     "type-fest": "2.19.0",
-    "typescript": "4.7.4",
+    "typescript": "4.8.2",
     "unified": "9.2.2"
   },
   "resolutions": {
