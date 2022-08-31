@@ -541,11 +541,8 @@ export async function processBranch(
     if (commitSha) {
       const action = branchExists ? 'updated' : 'created';
       logger.info({ commitSha }, `Branch ${action}`);
-      // since a new commit is made we set all cached values ie. isModified, isConflicted to false and
-      // update getBranchParentSha, baseBranchSha and AcceptReservedInstancesExchangeQuoteCommand
+      // reset all cached values ie. isModified, isConflicted to false and update SHAs
       // TODO: (fix types) #7154
-      // eslint-disable-next-line no-console
-      console.log('HERE');
       setBranchShas(config.branchName, config.baseBranch!, commitSha);
     }
     // Set branch statuses
