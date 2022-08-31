@@ -1,4 +1,4 @@
-import os from 'os';
+// import os from 'os';
 import type { InitialOptionsTsJest } from 'ts-jest/dist/types';
 
 const ci = !!process.env.CI;
@@ -10,19 +10,19 @@ type JestConfig = InitialOptionsTsJest & {
 
 /**
  * https://docs.github.com/en/actions/using-github-hosted-runners/about-github-hosted-runners#supported-runners-and-hardware-resources
+ * Currently it seems the runner only have 4GB
  */
 function jestGithubRunnerSpecs(): JestConfig {
-  if (os.platform() === 'darwin') {
-    //
-    return {
-      maxWorkers: 2,
-      workerIdleMemoryLimit: '4GB',
-    };
-  }
+  // if (os.platform() === 'darwin') {
+  //   return {
+  //     maxWorkers: 2,
+  //     workerIdleMemoryLimit: '4GB',
+  //   };
+  // }
 
   return {
     maxWorkers: 2,
-    workerIdleMemoryLimit: '2GB',
+    workerIdleMemoryLimit: '1500MB', // '2GB',
   };
 }
 
