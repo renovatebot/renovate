@@ -76,7 +76,7 @@ jobs:
           git --version
           echo "Node $(node --version)"
           echo "Yarn $(yarn --version)"
-          node -e 'console.log((v8.getHeapStatistics().heap_size_limit / 1024 / 1024 / 1024).toFixed(2), 'GB')'
+          node -e 'console.log((v8.getHeapStatistics().heap_size_limit / 1024 / 1024 / 1024).toFixed(2), "GB")'
 
       - name: Installing dependencies
         run: yarn install --frozen-lockfile
