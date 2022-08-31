@@ -98,7 +98,7 @@ describe('modules/manager/mint/extract', () => {
     });
 
     it('Mintfile Includes Commented Out', () => {
-      const res = extractPackageFile(includesCommentOutMintFileContent);
+      const res = extractPackageFile(includesCommentedOutMintFileContent);
       expect(res).toEqual({
         deps: [
           {
