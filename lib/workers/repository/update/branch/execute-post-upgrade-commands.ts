@@ -187,8 +187,7 @@ export default async function executePostUpgradeCommands(
 
   const updateUpgradeCommands: BranchUpgradeConfig[] = config.upgrades.filter(
     ({ postUpgradeTasks }) =>
-      !postUpgradeTasks ||
-      !postUpgradeTasks.executionMode ||
+      !postUpgradeTasks?.executionMode ||
       postUpgradeTasks.executionMode === 'update'
   );
 
