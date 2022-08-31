@@ -1,6 +1,6 @@
 import {
-  defaultConfig,
   fs,
+  getConfig,
   git,
   mocked,
   mockedFunction,
@@ -100,8 +100,9 @@ describe('workers/repository/update/branch/index', () => {
       git.branchExists.mockReturnValue(false);
       prWorker.ensurePr = jest.fn();
       prAutomerge.checkAutoMerge = jest.fn();
+      // TODO: incompatible types (#7154)
       config = {
-        ...defaultConfig,
+        ...getConfig(),
         branchName: 'renovate/some-branch',
         errors: [],
         warnings: [],
@@ -1355,7 +1356,7 @@ describe('workers/repository/update/branch/index', () => {
         },
         upgrades: [
           {
-            ...defaultConfig,
+            ...getConfig(),
             depName: 'some-dep-name',
             postUpgradeTasks: {
               executionMode: 'update',
@@ -1445,7 +1446,7 @@ describe('workers/repository/update/branch/index', () => {
         ...config,
         upgrades: [
           {
-            ...defaultConfig,
+            ...getConfig(),
             depName: 'some-dep-name',
             postUpgradeTasks: {
               commands: ['exit 1'],
@@ -1529,7 +1530,7 @@ describe('workers/repository/update/branch/index', () => {
         },
         upgrades: [
           {
-            ...defaultConfig,
+            ...getConfig(),
             depName: 'some-dep-name',
             postUpgradeTasks: {
               executionMode: 'update',
@@ -1633,7 +1634,7 @@ describe('workers/repository/update/branch/index', () => {
         },
         upgrades: [
           {
-            ...defaultConfig,
+            ...getConfig(),
             depName: 'some-dep-name-1',
             postUpgradeTasks: {
               executionMode: 'update',
@@ -1647,7 +1648,7 @@ describe('workers/repository/update/branch/index', () => {
             },
           } as BranchUpgradeConfig,
           {
-            ...defaultConfig,
+            ...getConfig(),
             depName: 'some-dep-name-2',
             postUpgradeTasks: {
               executionMode: 'update',
@@ -1779,7 +1780,7 @@ describe('workers/repository/update/branch/index', () => {
         },
         upgrades: [
           {
-            ...defaultConfig,
+            ...getConfig(),
             depName: 'some-dep-name-1',
             postUpgradeTasks: {
               executionMode: 'branch',
@@ -1793,7 +1794,7 @@ describe('workers/repository/update/branch/index', () => {
             },
           } as BranchUpgradeConfig,
           {
-            ...defaultConfig,
+            ...getConfig(),
             depName: 'some-dep-name-2',
             postUpgradeTasks: {
               executionMode: 'branch',
