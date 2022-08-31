@@ -9,13 +9,15 @@ type JestConfig = InitialOptionsTsJest & {
   workerIdleMemoryLimit?: string;
 };
 
-const cpus = os.cpus()
+const cpus = os.cpus();
 const mem = os.totalmem();
 const stats = v8.getHeapStatistics();
 
-process.stderr.write(`Cpus:      ${cpus.length}\n`);
-process.stderr.write(`Memory:    ${(mem / 1024 / 1024 / 1024).toFixed(2)} GB\n`);
-process.stderr.write(`HeapLimit: ${(stats.heap_size_limit / 1024 / 1024 / 1024).toFixed(2)} GB\n`);
+process.stderr.write(`Host stats:
+  Cpus:      ${cpus.length}
+  Memory:    ${(mem / 1024 / 1024 / 1024).toFixed(2)} GB
+  HeapLimit: ${(stats.heap_size_limit / 1024 / 1024 / 1024).toFixed(2)} GB
+`);
 
 /**
  * https://docs.github.com/en/actions/using-github-hosted-runners/about-github-hosted-runners#supported-runners-and-hardware-resources
