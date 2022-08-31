@@ -259,10 +259,10 @@ describe('util/git/index', () => {
     });
 
     it('should return result even if non-default and not under branchPrefix', async () => {
-      const baseBranchSha = 'SHA';
+      const parentSha = 'SHA';
       const branchCache = partial<BranchCache>({
         branchName: 'develop',
-        baseBranchSha: baseBranchSha,
+        parentSha: parentSha,
       });
       repoCache.getCache.mockReturnValueOnce({}).mockReturnValueOnce({
         branches: [branchCache],
@@ -312,23 +312,6 @@ describe('util/git/index', () => {
 
     it('should return null', () => {
       expect(git.getBranchCommit('not_found')).toBeNull();
-    });
-  });
-
-  describe('getBranchParentSha(branchName)', () => {
-    it('should return sha if found', async () => {
-      const parentSha = await git.getBranchParentSha('renovate/future_branch');
-      expect(parentSha).toHaveLength(40);
-      expect(parentSha).toEqual(git.getBranchCommit(defaultBranch));
-    });
-
-    it('should return null if not found', async () => {
-      expect(await git.getBranchParentSha('not_found')).toBeNull();
-    });
-
-    it('should return cached value', async () => {
-      parentShaCache.getCachedBranchParentShaResult.mockReturnValueOnce('111');
-      expect(await git.getBranchParentSha('not_found')).toBe('111');
     });
   });
 

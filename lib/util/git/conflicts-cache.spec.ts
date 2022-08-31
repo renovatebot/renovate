@@ -106,7 +106,7 @@ describe('util/git/conflicts-cache', () => {
       });
     });
 
-    it('replaces value when source SHA has changed', () => {
+    it('replaces value when branch SHA has changed', () => {
       setCachedConflictResult('foo', '101', 'bar', '222', false);
       setCachedConflictResult('foo', '111', 'bar', '333', false);
       setCachedConflictResult('foo', '121', 'bar', '444', true);
@@ -123,7 +123,7 @@ describe('util/git/conflicts-cache', () => {
       });
     });
 
-    it('replaces value when target SHA has changed', () => {
+    it('replaces value when target branch SHA has changed', () => {
       setCachedConflictResult('foo', '111', 'bar', '222', false);
       setCachedConflictResult('foo', 'aaa', 'bar', '222', true);
       expect(repoCache).toEqual({
