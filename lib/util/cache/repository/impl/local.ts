@@ -6,8 +6,8 @@ import type { RepoCacheRecord } from '../types';
 import { RepoCacheBase } from './base';
 
 export class RepoCacheLocal extends RepoCacheBase {
-  constructor(repository: string) {
-    super(repository);
+  constructor(repository: string, fingerprint: string) {
+    super(repository, fingerprint);
   }
 
   protected async read(): Promise<string | null> {
