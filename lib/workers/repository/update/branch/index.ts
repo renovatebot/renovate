@@ -137,7 +137,7 @@ export async function processBranch(
         }
 
         config = { ...config, ...recreateMergedPrConfig(branchPr) };
-        if (config.recreateMergedPr) {
+        if (!branchPr) {
           logger.debug(
             { prTitle: config.prTitle },
             'Merged PR already exists. Creating a fresh PR'

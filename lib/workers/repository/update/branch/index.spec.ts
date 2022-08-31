@@ -280,7 +280,8 @@ describe('workers/repository/update/branch/index', () => {
       expect(reuse.shouldReuseExistingBranch).toHaveBeenCalledTimes(0);
     });
 
-    it('recreates pr using old branch when it exists for a merged pr', async () => {
+    // eslint-disable-next-line jest/no-focused-tests
+    it.only('recreates pr using old branch when it exists for a merged pr', async () => {
       schedule.isScheduledNow.mockReturnValueOnce(true);
       git.branchExists.mockReturnValue(true);
       checkExisting.prAlreadyExisted.mockResolvedValueOnce({
@@ -311,14 +312,15 @@ describe('workers/repository/update/branch/index', () => {
       });
       expect(logger.debug).not.toHaveBeenCalledWith(
         { prTitle: config.prTitle },
-        'Merged PR already exists. Creating new PR with automerge disabled'
+        'Merged PR already exists. Creating a fresh PR'
       );
       expect(logger.debug).toHaveBeenCalledWith(
-        'Merged pr with the same title already exists, disable automerge'
+        'Disable automerge to prevent re-created PRs from being merged automatically.'
       );
     });
 
-    it('recreates pr using new branch when merged pr exists but branch is deleted', async () => {
+    // eslint-disable-next-line jest/no-focused-tests
+    it.only('recreates pr using new branch when merged pr exists but branch is deleted', async () => {
       schedule.isScheduledNow.mockReturnValueOnce(true);
       git.branchExists.mockReturnValue(false);
       checkExisting.prAlreadyExisted.mockResolvedValueOnce({
@@ -346,7 +348,7 @@ describe('workers/repository/update/branch/index', () => {
       });
       expect(logger.debug).toHaveBeenCalledWith(
         { prTitle: config.prTitle },
-        'Merged PR already exists. Creating new PR with automerge disabled'
+        'Merged PR already exists. Creating a fresh PR'
       );
     });
 
