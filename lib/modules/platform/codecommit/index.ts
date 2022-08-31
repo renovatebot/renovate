@@ -334,6 +334,7 @@ export async function getRawFile(
   return decoder.decode(fileRes.fileContent);
 }
 
+/* istanbul ignore next */
 export function getRepoForceRebase(): Promise<boolean> {
   return Promise.resolve(false);
 }
