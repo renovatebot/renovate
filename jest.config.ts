@@ -1,4 +1,5 @@
-// import os from 'os';
+import os from 'os';
+import v8 from 'v8';
 import type { InitialOptionsTsJest } from 'ts-jest/dist/types';
 
 const ci = !!process.env.CI;
@@ -7,6 +8,14 @@ type JestConfig = InitialOptionsTsJest & {
   // https://github.com/renovatebot/renovate/issues/17034
   workerIdleMemoryLimit?: string;
 };
+
+const cpus = os.cpus()
+const mem = os.totalmem();
+const stats = v8.getHeapStatistics();
+
+process.stderr.write(`Cpus:      ${cpus.length}\n`);
+process.stderr.write(`Memory:    ${(mem / 1024 / 1024 / 1024).toFixed(2)} GB\n`);
+process.stderr.write(`HeapLimit: ${(stats.heap_size_limit / 1024 / 1024 / 1024).toFixed(2)} GB\n`);
 
 /**
  * https://docs.github.com/en/actions/using-github-hosted-runners/about-github-hosted-runners#supported-runners-and-hardware-resources
