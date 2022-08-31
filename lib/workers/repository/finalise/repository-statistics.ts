@@ -2,8 +2,13 @@ import type { RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
 import type { Pr } from '../../../modules/platform';
 import { PrState } from '../../../types';
-import { getCache, isCacheModified } from '../../../util/cache/repository';
+import { getCache } from '../../../util/cache/repository';
 import type { BranchCache } from '../../../util/cache/repository/types';
+import type {
+  BaseBranchMetadata,
+  BranchMetadata,
+  BranchSummary,
+} from '../../types';
 
 export function runRenovateRepoStats(
   config: RenovateConfig,
@@ -36,27 +41,6 @@ export function runRenovateRepoStats(
   logger.debug({ stats: prStats }, `Renovate repository PR statistics`);
 }
 
-export interface BranchMetadata {
-  branchName: string;
-  branchSha: string | null;
-  baseBranch: string | undefined;
-  baseBranchSha: string | null;
-  automerge: boolean;
-  isModified: boolean;
-}
-
-export interface BaseBranchMetadata {
-  branchName: string;
-  sha: string;
-}
-
-export interface BranchSummary {
-  cacheModified: boolean | undefined;
-  baseBranches: BaseBranchMetadata[];
-  branches: BranchMetadata[];
-  inactiveBranches: string[];
-}
-
 export function branchCacheToMetadata({
   branchName,
   sha: branchSha,
@@ -75,7 +59,7 @@ export function branchCacheToMetadata({
   };
 }
 
-export async function runBranchSummary(): Promise<void> {
+export function runBranchSummary(): void {
   const { scan, branches } = getCache();
 
   const baseMetadata: BaseBranchMetadata[] = [];
@@ -95,7 +79,7 @@ export async function runBranchSummary(): Promise<void> {
   }
 
   const res: BranchSummary = {
-    cacheModified: await isCacheModified(),
+    // cacheModified: await isCacheModified(),
     baseBranches: baseMetadata,
     branches: branchMetadata,
     inactiveBranches,
