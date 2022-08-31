@@ -289,7 +289,7 @@
     "graphql": "16.6.0",
     "husky": "8.0.1",
     "jest": "29.0.1",
-    "jest-extended": "3.0.2",
+    "jest-extended": "3.1.0",
     "jest-junit": "14.0.0",
     "jest-mock-extended": "2.0.6",
     "jest-silent-reporter": "0.5.0",
