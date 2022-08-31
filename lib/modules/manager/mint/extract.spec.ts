@@ -13,7 +13,7 @@ SwiftGen/SwiftGen@6.6.1
 yonaskolb/xcodegen
 realm/SwiftLint @ 0.48.0`;
 
-const includesCommentOutMintFileContent = `
+const includesCommentedOutMintFileContent = `
 SwiftGen/SwiftGen@6.6.1
 yonaskolb/xcodegen
 #yonaskolb/xcodegen
