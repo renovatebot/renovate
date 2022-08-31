@@ -15,7 +15,7 @@ import {
 import { getRepoStatus } from '../../../util/git';
 import { getGitAuthenticatedEnvironmentVariables } from '../../../util/git/auth';
 import { find, getAll } from '../../../util/host-rules';
-import { newlineRegex, regEx } from '../../../util/regex';
+import { regEx } from '../../../util/regex';
 import { createURLFromHostOrURL, validateUrl } from '../../../util/url';
 import { isValid } from '../../versioning/semver';
 import type {
@@ -240,7 +240,10 @@ export async function updateArtifacts({
     }
   }
   if (config.constraints) {
-    config.constraints.go ??= await getGoConstraints(goModFileName);
+    const goConstraints = await getGoConstraints(goModFileName);
+    if (goConstraints) {
+      config.constraints.go ??= goConstraints;
+    }
   }
   try {
     await writeLocalFile(goModFileName, massagedGoMod);
@@ -413,17 +416,16 @@ export async function updateArtifacts({
     ];
   }
 }
-async function getGoConstraints(goModFileName: string): Promise<string> {
+
+async function getGoConstraints(
+  goModFileName: string
+): Promise<string | undefined> {
   const content = (await readLocalFile(goModFileName, 'utf8')) ?? null;
-  if (content) {
-    const lines = content.split(newlineRegex);
-    for (let lineNumber = 0; lineNumber < lines.length; lineNumber += 1) {
-      const line = lines[lineNumber];
-      const goVer = line.startsWith('go ') ? line.replace('go ', '') : null;
-      if (goVer) {
-        return goVer;
-      }
-    }
+  if (!content) {
+    return undefined;
   }
-  return '';
+  const re = regEx(/(go\s*)(?<gover>\d+.\d+)/);
+  const match = re.exec(content);
+  const goVer = match?.groups?.gover;
+  return goVer ?? undefined;
 }
