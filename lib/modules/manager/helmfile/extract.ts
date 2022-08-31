@@ -13,7 +13,7 @@ const isValidChartName = (name: string | undefined): boolean =>
 function extractYaml(content: string): string {
   // regex remove go templated ({{ . }}) values
   return content
-    .replace(regEx(/{{`.+?`}}/g), '')
+    .replace(regEx(/{{`.+?`}}/gs), '')
     .replace(regEx(/{{.+?}}/g), '');
 }
 
