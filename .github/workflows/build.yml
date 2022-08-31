@@ -76,6 +76,7 @@ jobs:
           git --version
           echo "Node $(node --version)"
           echo "Yarn $(yarn --version)"
+          env
 
       - name: Installing dependencies
         run: yarn install --frozen-lockfile
