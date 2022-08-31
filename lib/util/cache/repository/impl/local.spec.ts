@@ -42,14 +42,14 @@ describe('util/cache/repository/impl/local', () => {
     fs.cachePathExists.mockResolvedValue(true);
   });
 
-  it('returns empty object before any data load', async () => {
+  it('returns empty object before any data load', () => {
     const localRepoCache = CacheFactory.get(
       'some/repo',
       '0123456789abcdef',
       'local'
     );
     expect(localRepoCache.getData()).toBeEmpty();
-    expect(await localRepoCache.isModified()).toBeUndefined();
+    expect(localRepoCache.isModified()).toBeUndefined();
   });
 
   it('skip when receives non-string data', async () => {
@@ -62,7 +62,7 @@ describe('util/cache/repository/impl/local', () => {
     expect(logger.debug).toHaveBeenCalledWith(
       "RepoCacheBase.load() - expecting data of type 'string' received 'undefined' instead - skipping"
     );
-    expect(await localRepoCache.isModified()).toBeUndefined();
+    expect(localRepoCache.isModified()).toBeUndefined();
   });
 
   it('skip when not found', async () => {
@@ -73,7 +73,7 @@ describe('util/cache/repository/impl/local', () => {
     );
     await localRepoCache.load(); // readCacheFile is mocked but has no return value set - therefore returns undefined
     expect(logger.debug).not.toHaveBeenCalledWith();
-    expect(await localRepoCache.isModified()).toBeUndefined();
+    expect(localRepoCache.isModified()).toBeUndefined();
   });
 
   it('loads previously stored cache from disk', async () => {
@@ -87,8 +87,9 @@ describe('util/cache/repository/impl/local', () => {
     );
 
     await localRepoCache.load();
+
     expect(localRepoCache.getData()).toEqual(data);
-    expect(await localRepoCache.isModified()).toBeFalse();
+    expect(localRepoCache.isModified()).toBeFalse();
   });
 
   it('resets if fingerprint does not match', async () => {
@@ -214,7 +215,7 @@ describe('util/cache/repository/impl/local', () => {
 
     await localRepoCache.load();
     expect(localRepoCache.getData()).toBeEmpty();
-    expect(await localRepoCache.isModified()).toBeUndefined();
+    expect(localRepoCache.isModified()).toBeUndefined();
   });
 
   it('handles file read error', async () => {
@@ -229,7 +230,7 @@ describe('util/cache/repository/impl/local', () => {
 
     const data = localRepoCache.getData();
     expect(data).toBeEmpty();
-    expect(await localRepoCache.isModified()).toBeUndefined();
+    expect(localRepoCache.isModified()).toBeUndefined();
   });
 
   it('handles invalid json', async () => {
@@ -243,7 +244,7 @@ describe('util/cache/repository/impl/local', () => {
     await localRepoCache.load();
 
     expect(localRepoCache.getData()).toBeEmpty();
-    expect(await localRepoCache.isModified()).toBeUndefined();
+    expect(localRepoCache.isModified()).toBeUndefined();
   });
 
   it('resets if repository does not match', async () => {
@@ -258,7 +259,7 @@ describe('util/cache/repository/impl/local', () => {
     await localRepoCache.load();
 
     expect(localRepoCache.getData()).toBeEmpty();
-    expect(await localRepoCache.isModified()).toBeUndefined();
+    expect(localRepoCache.isModified()).toBeUndefined();
   });
 
   it('saves modified cache data to file', async () => {
@@ -281,7 +282,7 @@ describe('util/cache/repository/impl/local', () => {
       semanticCommits: 'disabled',
     });
     expect(localRepoCache instanceof RepoCacheLocal).toBeTrue();
-    expect(await localRepoCache.isModified()).toBeTrue();
+    expect(localRepoCache.isModified()).toBeTrue();
     expect(logger.warn).toHaveBeenCalledWith(
       { cacheType },
       `Repository cache type not supported using type "local" instead`
@@ -306,7 +307,7 @@ describe('util/cache/repository/impl/local', () => {
 
     await localRepoCache.load();
     expect(localRepoCache.getData()).toEqual({ semanticCommits: 'enabled' });
-    expect(await localRepoCache.isModified()).toBeFalse();
+    expect(localRepoCache.isModified()).toBeFalse();
 
     await localRepoCache.save();
 

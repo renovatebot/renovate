@@ -21,6 +21,6 @@ export async function saveCache(): Promise<void> {
   await repoCache.save();
 }
 
-export function isCacheModified(): Promise<boolean | undefined> {
+export function isCacheModified(): boolean | undefined {
   return repoCache.isModified();
 }
