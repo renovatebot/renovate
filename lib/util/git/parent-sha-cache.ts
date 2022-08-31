@@ -1,22 +1,23 @@
+import { partial } from '../../../test/util';
 import { getCache } from '../cache/repository';
 import type { BranchCache } from '../cache/repository/types';
 
-export function getCachedBranchParentShaResult(
+export function getCachedBaseBranchShaResult(
   branchName: string
 ): string | null {
   const { branches } = getCache();
   const branch = branches?.find((branch) => branch.branchName === branchName);
 
-  if (branch?.parentSha) {
-    return branch.parentSha;
+  if (branch?.baseBranchSha) {
+    return branch.baseBranchSha;
   }
 
   return null;
 }
 
-export function setCachedBranchParentShaResult(
+export function setCachedBaseBranchShaResult(
   branchName: string,
-  parentSha: string
+  baseBranchSha: string
 ): void {
   const cache = getCache();
   cache.branches ??= [];
@@ -25,10 +26,10 @@ export function setCachedBranchParentShaResult(
     (branch) => branch.branchName === branchName
   );
   if (!branch) {
-    branch = {
+    branch = partial<BranchCache>({
       branchName: branchName,
-    } as BranchCache;
+    });
     cache.branches.push(branch);
   }
-  branch.parentSha = parentSha;
+  branch.baseBranchSha = baseBranchSha;
 }

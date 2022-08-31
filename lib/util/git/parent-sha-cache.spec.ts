@@ -2,8 +2,8 @@ import { mocked } from '../../../test/util';
 import * as _repositoryCache from '../cache/repository';
 import type { BranchCache, RepoCacheData } from '../cache/repository/types';
 import {
-  getCachedBranchParentShaResult,
-  setCachedBranchParentShaResult,
+  getCachedBaseBranchShaResult,
+  setCachedBaseBranchShaResult,
 } from './parent-sha-cache';
 
 jest.mock('../cache/repository');
@@ -17,9 +17,9 @@ describe('util/git/parent-sha-cache', () => {
     repositoryCache.getCache.mockReturnValue(repoCache);
   });
 
-  describe('getCachedBranchParentShaResult', () => {
+  describe('getCachedBaseBranchShaResult', () => {
     it('returns null if cache is not populated', () => {
-      expect(getCachedBranchParentShaResult('foo')).toBeNull();
+      expect(getCachedBaseBranchShaResult('foo')).toBeNull();
     });
 
     it('returns null if branch not found', () => {
@@ -31,7 +31,7 @@ describe('util/git/parent-sha-cache', () => {
           } as BranchCache,
         ],
       });
-      expect(getCachedBranchParentShaResult('foo')).toBeNull();
+      expect(getCachedBaseBranchShaResult('foo')).toBeNull();
     });
 
     it('returns null if parentSha not stored', () => {
@@ -43,7 +43,7 @@ describe('util/git/parent-sha-cache', () => {
           } as BranchCache,
         ],
       });
-      expect(getCachedBranchParentShaResult('foo')).toBeNull();
+      expect(getCachedBaseBranchShaResult('foo')).toBeNull();
     });
 
     it('returns cached value', () => {
@@ -51,18 +51,18 @@ describe('util/git/parent-sha-cache', () => {
         branches: [
           {
             branchName: 'foo',
-            parentSha: '000',
+            baseBranchSha: '000',
           } as BranchCache,
         ],
       });
-      expect(getCachedBranchParentShaResult('foo')).toBe('000');
+      expect(getCachedBaseBranchShaResult('foo')).toBe('000');
     });
   });
 
-  describe('setCachedBranchParentShaResult', () => {
+  describe('setCachedBaseBranchShaResult', () => {
     it('populates cache if it is empty', () => {
-      setCachedBranchParentShaResult('foo', '111');
-      expect(repoCache?.branches?.[0].parentSha).toBe('111');
+      setCachedBaseBranchShaResult('foo', '111');
+      expect(repoCache?.branches?.[0].baseBranchSha).toBe('111');
     });
 
     it('handles more than one branch', () => {
@@ -76,12 +76,12 @@ describe('util/git/parent-sha-cache', () => {
           sha: '112',
         } as BranchCache,
       ];
-      setCachedBranchParentShaResult('foo', '111');
+      setCachedBaseBranchShaResult('foo', '111');
       const branch = repoCache.branches?.find(
         (branch) => branch.branchName === 'foo'
       );
-      expect(repoCache?.branches?.[0].parentSha).toBeUndefined();
-      expect(branch?.parentSha).toBe('111');
+      expect(repoCache?.branches?.[0].baseBranchSha).toBeUndefined();
+      expect(branch?.baseBranchSha).toBe('111');
     });
   });
 });

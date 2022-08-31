@@ -116,7 +116,7 @@ describe('util/git/index', () => {
     // override some local git settings for better testing
     const local = Git(tmpDir.path);
     await local.addConfig('commit.gpgsign', 'false');
-    parentShaCache.getCachedBranchParentShaResult.mockReturnValue(null);
+    parentShaCache.getCachedBaseBranchShaResult.mockReturnValue(null);
   });
 
   afterEach(async () => {
@@ -259,10 +259,10 @@ describe('util/git/index', () => {
     });
 
     it('should return result even if non-default and not under branchPrefix', async () => {
-      const parentSha = 'SHA';
+      const baseBranchSha = 'SHA';
       const branchCache = partial<BranchCache>({
         branchName: 'develop',
-        parentSha: parentSha,
+        baseBranchSha: baseBranchSha,
       });
       repoCache.getCache.mockReturnValueOnce({}).mockReturnValueOnce({
         branches: [branchCache],

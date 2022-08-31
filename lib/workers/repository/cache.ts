@@ -9,7 +9,7 @@ import type {
 } from '../../util/cache/repository/types';
 import {
   getBranchCommit,
-  getCachedBranchParentShaResult,
+  getCachedBaseBranchShaResult,
   isBranchModified,
 } from '../../util/git';
 import type { BranchConfig, BranchUpgradeConfig } from '../types';
@@ -51,9 +51,9 @@ async function generateBranchCache(
   try {
     const sha = getBranchCommit(branchName) ?? null;
     let prNo = null;
-    let parentSha = null;
+    let baseBranchSha = null;
     if (sha) {
-      parentSha = getCachedBranchParentShaResult(branchName);
+      baseBranchSha = getCachedBaseBranchShaResult(branchName);
       const branchPr = await platform.getBranchPr(branchName);
       if (branchPr) {
         prNo = branchPr.number;
@@ -75,7 +75,7 @@ async function generateBranchCache(
     return {
       branchName,
       sha,
-      parentSha,
+      baseBranchSha,
       prNo,
       automerge,
       isModified,

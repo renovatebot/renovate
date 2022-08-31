@@ -60,8 +60,8 @@ export {
   getCachedBehindBaseResult,
 };
 export {
-  getCachedBranchParentShaResult,
-  setCachedBranchParentShaResult,
+  getCachedBaseBranchShaResult,
+  setCachedBaseBranchShaResult,
 } from './parent-sha-cache';
 export { setNoVerify } from './config';
 export { setPrivateKey } from './private-key';
