@@ -2,7 +2,7 @@ import type { RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
 import type { Pr } from '../../../modules/platform';
 import { PrState } from '../../../types';
-import { getCache } from '../../../util/cache/repository';
+import { getCache, isCacheModified } from '../../../util/cache/repository';
 import type { BranchCache } from '../../../util/cache/repository/types';
 
 export function runRenovateRepoStats(
@@ -75,7 +75,7 @@ export function branchCacheToMetadata({
   };
 }
 
-export function runBranchSummary(): void {
+export async function runBranchSummary(): Promise<void> {
   const { scan, branches } = getCache();
 
   const baseMetadata: BaseBranchMetadata[] = [];
@@ -95,7 +95,7 @@ export function runBranchSummary(): void {
   }
 
   const res: BranchSummary = {
-    cacheModified,
+    cacheModified: await isCacheModified(),
     baseBranches: baseMetadata,
     branches: branchMetadata,
     inactiveBranches,

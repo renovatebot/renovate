@@ -54,18 +54,21 @@ describe('workers/repository/finalise/repository-statistics', () => {
   });
 
   describe('runBranchSummary', () => {
-    const cacheSpy = jest.spyOn(cache, 'getCache');
+    const getCacheSpy = jest.spyOn(cache, 'getCache');
+    const isCacheModifiedSpy = jest.spyOn(cache, 'isCacheModified');
 
-    it('processes cache with baseBranches only', () => {
+    it('processes cache with baseBranches only', async () => {
       const sha = '793221454914cdc422e1a8f0ca27b96fe39ff9ad';
       const baseCache = partial<BaseBranchCache>({ sha });
       const cache = partial<RepoCacheData>({
         scan: { main: baseCache, dev: baseCache },
       });
-      cacheSpy.mockReturnValueOnce(cache);
-      runBranchSummary();
+      getCacheSpy.mockReturnValueOnce(cache);
+      isCacheModifiedSpy.mockResolvedValueOnce(true);
+      await runBranchSummary();
       expect(logger.debug).toHaveBeenCalledWith(
         {
+          cacheModified: true,
           baseBranches: [
             {
               branchName: 'main',
@@ -83,7 +86,7 @@ describe('workers/repository/finalise/repository-statistics', () => {
       );
     });
 
-    it('processes cache with baseBranches and branches', () => {
+    it('processes cache with baseBranches and branches', async () => {
       const sha = '793221454914cdc422e1a8f0ca27b96fe39ff9ad';
       const parentSha = '793221454914cdc422e1a8f0ca27b96fe39ff9ad';
       const baseBranch = 'base-branch';
@@ -108,10 +111,12 @@ describe('workers/repository/finalise/repository-statistics', () => {
         branches,
       });
 
-      cacheSpy.mockReturnValueOnce(cache);
-      runBranchSummary();
+      getCacheSpy.mockReturnValueOnce(cache);
+      isCacheModifiedSpy.mockResolvedValueOnce(false);
+      await runBranchSummary();
       expect(logger.debug).toHaveBeenCalledWith(
         {
+          cacheModified: false,
           baseBranches: [
             {
               branchName: 'main',
