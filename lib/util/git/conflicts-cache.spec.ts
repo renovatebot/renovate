@@ -88,6 +88,31 @@ describe('util/git/conflicts-cache', () => {
       ];
       expect(getCachedConflictResult('foo', '111', 'bar', '222')).toBeFalse();
     });
+
+    it('returns null and removes gitConflicts', () => {
+      repoCache.branches = [
+        partial<BranchCache>({
+          baseBranchName: 'foo',
+          branchName: 'bar',
+          sha: '222',
+          baseBranchSha: '111',
+          isConflicted: false,
+        }),
+      ];
+      repoCache.gitConflicts = {
+        targetBranchName: {
+          targetBranchSha: 'target_sha',
+          sourceBranches: {
+            sourceBranchName: {
+              sourceBranchSha: 'source_sha',
+              isConflicted: false,
+            },
+          },
+        },
+      };
+      expect(getCachedConflictResult('foo', '111', 'bar', '222')).toBeFalse();
+      expect(repoCache.gitConflicts).toBeUndefined();
+    });
   });
 
   describe('setCachedConflictResult', () => {
