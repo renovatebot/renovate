@@ -17,14 +17,14 @@ export function getCachedConflictResult(
   );
 
   if (
-    branch?.baseBranchName !== targetBranchName ||
-    branch?.baseBranchSha !== targetBranchSha ||
-    branch?.sha !== sourceBranchSha
+    branch?.baseBranchName === targetBranchName &&
+    branch?.baseBranchSha === targetBranchSha &&
+    branch?.sha === sourceBranchSha
   ) {
-    return null;
+    return branch.isConflicted;
   }
 
-  return branch.isConflicted;
+  return null;
 }
 
 export function setCachedConflictResult(
