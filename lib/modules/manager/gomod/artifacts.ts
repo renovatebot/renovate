@@ -239,12 +239,18 @@ export async function updateArtifacts({
       );
     }
   }
+  const goConstraints: Record<string, string> | undefined =
+    await getGoConstraints(goModFileName);
   if (config.constraints) {
-    const goConstraints = await getGoConstraints(goModFileName);
     if (goConstraints) {
-      config.constraints.go ??= goConstraints;
+      config.constraints.go ??= goConstraints['go'];
+    }
+  } else {
+    if (goConstraints) {
+      config.constraints = goConstraints;
     }
   }
+
   try {
     await writeLocalFile(goModFileName, massagedGoMod);
 
@@ -419,13 +425,16 @@ export async function updateArtifacts({
 
 async function getGoConstraints(
   goModFileName: string
-): Promise<string | undefined> {
+): Promise<Record<string, string> | undefined> {
+  const result: Record<string, string> = {};
   const content = (await readLocalFile(goModFileName, 'utf8')) ?? null;
   if (!content) {
     return undefined;
   }
-  const re = regEx(/(go\s*)(?<gover>\d+.\d+)/);
+  const re = regEx(/(?<goText>go\s*)(?<gover>\d+.\d+)/);
   const match = re.exec(content);
-  const goVer = match?.groups?.gover;
-  return goVer ?? undefined;
+  if (match?.groups) {
+    result[match.groups?.goText] = match?.groups?.gover.toString();
+  }
+  return result ?? undefined;
 }

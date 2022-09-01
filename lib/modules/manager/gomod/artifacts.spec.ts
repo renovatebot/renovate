@@ -1375,4 +1375,36 @@ describe('modules/manager/gomod/artifacts', () => {
       { file: { type: 'addition', path: 'go.mod', contents: 'New go.mod' } },
     ]);
   });
+
+  it('go.mod file contains go version config does not contain constraints', async () => {
+    const emptyConfig: UpdateArtifactsConfig = {};
+    const goMod = 'someText\n\ngo 1.19\n\n';
+    fs.readLocalFile.mockResolvedValueOnce('Current go.sum');
+    fs.readLocalFile.mockResolvedValueOnce(null); // vendor modules filename
+    fs.readLocalFile.mockResolvedValueOnce('someText\n\ngo 1.17\n\n');
+    mockExecAll();
+    git.getRepoStatus.mockResolvedValueOnce({
+      modified: ['go.sum', 'main.go'],
+    } as StatusResult);
+    fs.readLocalFile
+      .mockResolvedValueOnce('New go.sum')
+      .mockResolvedValueOnce('New main.go')
+      .mockResolvedValueOnce('New go.mod');
+    const res = await gomod.updateArtifacts({
+      packageFileName: 'go.mod',
+      updatedDeps: [{ depName: 'github.com/google/go-github/v24' }],
+      newPackageFileContent: goMod,
+      config: {
+        ...emptyConfig,
+        updateType: 'major',
+        newMajor: 28,
+        postUpdateOptions: ['gomodUpdateImportPaths'],
+      },
+    });
+    expect(res).toEqual([
+      { file: { type: 'addition', path: 'go.sum', contents: 'New go.sum' } },
+      { file: { type: 'addition', path: 'main.go', contents: 'New main.go' } },
+      { file: { type: 'addition', path: 'go.mod', contents: 'New go.mod' } },
+    ]);
+  });
 });
