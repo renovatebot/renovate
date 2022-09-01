@@ -21,6 +21,7 @@ process.env.BUILDPACK = 'true';
 const hostRules = mocked(_hostRules);
 
 const gomod1 = `module github.com/renovate-tests/gomod1
+
 require github.com/pkg/errors v0.7.0
 require github.com/aws/aws-sdk-go v1.15.21
 require github.com/davecgh/go-spew v1.0.0
@@ -28,12 +29,16 @@ require golang.org/x/foo v1.0.0
 require github.com/rarkins/foo abcdef1
 require gopkg.in/russross/blackfriday.v1 v1.0.0
 require go.uber.org/zap v1.20.0
+
 replace github.com/pkg/errors => ../errors
+
 replace (golang.org/x/foo => github.com/pravesht/gocql v0.0.0)
+
 replace (
   // TODO: this comment breaks renovatebot (>v0.11.1)
   go.uber.org/zap => go.uber.org/zap v1.21.0
 )
+
 `;
 
 const adminConfig: RepoGlobalConfig = {
@@ -124,7 +129,6 @@ describe('modules/manager/gomod/artifacts', () => {
   it('returns updated go.sum', async () => {
     fs.readLocalFile.mockResolvedValueOnce('Current go.sum');
     fs.readLocalFile.mockResolvedValueOnce(null); // vendor modules filename
-
     const execSnapshots = mockExecAll();
     git.getRepoStatus.mockResolvedValueOnce({
       modified: ['go.sum'],
@@ -173,7 +177,6 @@ describe('modules/manager/gomod/artifacts', () => {
 
     fs.readLocalFile.mockResolvedValueOnce('Current go.sum');
     fs.readLocalFile.mockResolvedValueOnce('modules.txt content'); // vendor modules filename
-
     const execSnapshots = mockExecAll();
     git.getRepoStatus.mockResolvedValueOnce({
       modified: ['go.sum', foo],
@@ -258,7 +261,6 @@ describe('modules/manager/gomod/artifacts', () => {
     GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
     fs.readLocalFile.mockResolvedValueOnce('Current go.sum');
     fs.readLocalFile.mockResolvedValueOnce(null); // vendor modules filename
-
     const execSnapshots = mockExecAll();
     git.getRepoStatus.mockResolvedValueOnce({
       modified: ['go.sum'],
