@@ -1,7 +1,7 @@
 import { TextEncoder } from 'web-encoding';
 import { Platform, setPlatformApi } from '../../../modules/platform';
-import * as codeCommit from '.';
 import { PRESET_DEP_NOT_FOUND } from '../util';
+import * as codeCommit from '.';
 
 jest.unmock('../../../modules/platform');
 jest.mock('@aws-sdk/client-codecommit');
