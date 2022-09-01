@@ -11,16 +11,16 @@ export function getCachedConflictResult(
   if (cache.gitConflicts) {
     delete cache.gitConflicts;
   }
-
-  const branch = cache.branches?.find(
+  cache.branches ??= [];
+  const branch = cache.branches.find(
     (br) => br.branchName === sourceBranchName
   );
 
-  if (branch?.baseBranchSha !== targetBranchSha) {
-    return null;
-  }
-
-  if (branch?.sha !== sourceBranchSha) {
+  if (
+    branch?.baseBranchName !== targetBranchName ||
+    branch?.baseBranchSha !== targetBranchSha ||
+    branch?.sha !== sourceBranchSha
+  ) {
     return null;
   }
 
@@ -36,7 +36,7 @@ export function setCachedConflictResult(
 ): void {
   const cache = getCache();
   cache.branches ??= [];
-  let branch = cache.branches?.find((br) => br.branchName === sourceBranchName);
+  let branch = cache.branches.find((br) => br.branchName === sourceBranchName);
 
   if (!branch) {
     branch = {
@@ -46,11 +46,11 @@ export function setCachedConflictResult(
     cache.branches?.push(branch);
   }
 
-  if (!branch?.baseBranchSha || branch?.baseBranchSha !== targetBranchSha) {
+  if (branch.baseBranchSha !== targetBranchSha) {
     branch.baseBranchSha = targetBranchSha;
   }
 
-  if (!branch?.sha || branch?.sha !== sourceBranchSha) {
+  if (branch.sha !== sourceBranchSha) {
     branch.sha = sourceBranchSha;
   }
 

@@ -22,8 +22,19 @@ describe('util/git/conflicts-cache', () => {
       expect(getCachedConflictResult('foo', '111', 'bar', '222')).toBeNull();
     });
 
-    it('returns null if target key not found', () => {
-      expect(getCachedConflictResult('foo', '111', 'bar', '222')).toBeNull();
+    it('returns null if target branch name mismatch', () => {
+      repoCache.branches = [
+        partial<BranchCache>({
+          baseBranchName: 'foo',
+          branchName: 'aaa',
+          sha: '444',
+          baseBranchSha: '121',
+          isConflicted: true,
+        }),
+      ];
+      expect(
+        getCachedConflictResult('not_foo', '111', 'bar', '222')
+      ).toBeNull();
     });
 
     it('returns null if target SHA has changed', () => {
@@ -36,10 +47,10 @@ describe('util/git/conflicts-cache', () => {
           isConflicted: true,
         }),
       ];
-      expect(getCachedConflictResult('foo', '111', 'bar', '222')).toBeNull();
+      expect(getCachedConflictResult('foo', '111', 'aaa', '444')).toBeNull();
     });
 
-    it('returns null if source key not found', () => {
+    it('returns null if source branch not found', () => {
       repoCache.branches = [
         partial<BranchCache>({
           baseBranchName: 'foo',
@@ -50,12 +61,12 @@ describe('util/git/conflicts-cache', () => {
       expect(getCachedConflictResult('foo', '111', 'bar', '222')).toBeNull();
     });
 
-    it('returns null if source key has changed', () => {
+    it('returns null if source branch sha has changed', () => {
       repoCache.branches = [
         partial<BranchCache>({
           baseBranchName: 'foo',
-          branchName: 'aaa',
-          sha: '221',
+          branchName: 'bar',
+          sha: '212',
           baseBranchSha: '111',
           isConflicted: true,
         }),
