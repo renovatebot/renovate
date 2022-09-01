@@ -72,17 +72,9 @@ export function getDepWarningsPR(
   );
 
   if (dependencyDashboard) {
-    if (warnings.length === 1) {
-      warningText += `A warning has been detected. Please check the Dependency Dashboard for further information\n\n`;
-    } else {
-      warningText += `Warnings have been detected. Please check the the Dependency Dashboard for further information\n\n`;
-    }
+    warningText += `Warnings were logged while processing this repo. Please check the Dependency Dashboard for further information\n\n`;
   } else {
-    if (warnings.length === 1) {
-      warningText += `A warning has been detected. Please check the logs for further information\n\n`;
-    } else {
-      warningText += `Warnings have been detected. Please check the logs for further information\n\n`;
-    }
+    warningText += `Warnings were logged while processing this repo. Please check logs for further information\n\n`;
   }
 
   return warningText;

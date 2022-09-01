@@ -90,44 +90,7 @@ describe('workers/repository/errors-warnings', () => {
 
         ### ⚠ Dependency Lookup Warnings ⚠
 
-        Warnings have been detected. Please check the the Dependency Dashboard for further information
-
-        "
-      `);
-    });
-
-    it('returns 1 pr warning text dependencyDashboard true', () => {
-      const dependencyDashboard = true;
-      const packageFiles: Record<string, PackageFile[]> = {
-        npm: [
-          {
-            packageFile: 'package.json',
-            deps: [
-              {
-                warnings: [{ message: 'Warning 1', topic: '' }],
-              },
-              {},
-            ],
-          },
-          {
-            packageFile: 'backend/package.json',
-            deps: [
-              {
-                warnings: [{ message: 'Warning 1', topic: '' }],
-              },
-            ],
-          },
-        ],
-      };
-
-      const res = getDepWarningsPR(packageFiles, dependencyDashboard);
-      expect(res).toMatchInlineSnapshot(`
-        "
-        ---
-
-        ### ⚠ Dependency Lookup Warnings ⚠
-
-        A warning has been detected. Please check the Dependency Dashboard for further information
+        Warnings were logged while processing this repo. Please check the Dependency Dashboard for further information
 
         "
       `);
@@ -174,44 +137,7 @@ describe('workers/repository/errors-warnings', () => {
 
         ### ⚠ Dependency Lookup Warnings ⚠
 
-        Warnings have been detected. Please check the logs for further information
-
-        "
-      `);
-    });
-
-    it('returns 1 pr warning text dependencyDashboard false', () => {
-      const dependencyDashboard = false;
-      const packageFiles: Record<string, PackageFile[]> = {
-        npm: [
-          {
-            packageFile: 'package.json',
-            deps: [
-              {
-                warnings: [{ message: 'Warning 1', topic: '' }],
-              },
-              {},
-            ],
-          },
-          {
-            packageFile: 'backend/package.json',
-            deps: [
-              {
-                warnings: [{ message: 'Warning 1', topic: '' }],
-              },
-            ],
-          },
-        ],
-      };
-
-      const res = getDepWarningsPR(packageFiles, dependencyDashboard);
-      expect(res).toMatchInlineSnapshot(`
-        "
-        ---
-
-        ### ⚠ Dependency Lookup Warnings ⚠
-
-        A warning has been detected. Please check the logs for further information
+        Warnings were logged while processing this repo. Please check logs for further information
 
         "
       `);
