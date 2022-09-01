@@ -90,7 +90,7 @@ describe('workers/repository/errors-warnings', () => {
 
         ### ⚠ Dependency Lookup Warnings ⚠
 
-        Warnings have been detected. Please check the dashboard for further information
+        Warnings have been detected. Please check the the Dependency Dashboard for further information
 
         "
       `);
@@ -127,7 +127,7 @@ describe('workers/repository/errors-warnings', () => {
 
         ### ⚠ Dependency Lookup Warnings ⚠
 
-        A warning has been detected. Please check the dashboard for further information
+        A warning has been detected. Please check the Dependency Dashboard for further information
 
         "
       `);
