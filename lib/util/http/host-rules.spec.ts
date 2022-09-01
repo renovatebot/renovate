@@ -1,7 +1,7 @@
 import { PlatformId } from '../../constants';
 import { bootstrap } from '../../proxy';
 import * as hostRules from '../host-rules';
-import { dnsCache } from './dns';
+import { dnsLookup } from './dns';
 import { applyHostRules } from './host-rules';
 
 const url = 'https://github.com';
@@ -114,7 +114,7 @@ describe('util/http/host-rules', () => {
     hostRules.add({ dnsCache: true });
     expect(applyHostRules(url, { ...options, token: 'xxx' })).toMatchObject({
       hostType: 'github',
-      dnsCache: dnsCache,
+      lookup: dnsLookup,
       token: 'xxx',
     });
   });
