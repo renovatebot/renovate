@@ -94,6 +94,7 @@ export function getNewValue({
   rangeStrategy,
   currentVersion,
   newVersion,
+  isReplacement,
 }: NewValueConfig): string | null {
   let ranges: Range[];
   let updatedRange: (string | null)[];
@@ -102,7 +103,7 @@ export function getNewValue({
   }
 
   // no symbol: accept only that specific version specified
-  if (currentValue === currentVersion) {
+  if (currentValue === currentVersion || isReplacement) {
     return newVersion;
   }
 

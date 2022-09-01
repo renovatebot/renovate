@@ -163,6 +163,7 @@ export async function lookupUpdates(
             currentValue: currentValue!,
             newVersion: config.replacementVersion,
             rangeStrategy: rangeStrategy!,
+            isReplacement: true,
           })!,
         });
       }
