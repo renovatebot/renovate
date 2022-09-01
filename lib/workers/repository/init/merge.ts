@@ -21,6 +21,7 @@ import { getCache } from '../../../util/cache/repository';
 import { readLocalFile } from '../../../util/fs';
 import { getFileList } from '../../../util/git';
 import * as hostRules from '../../../util/host-rules';
+import * as queue from '../../../util/http/queue';
 import type { RepoFileConfig } from './types';
 
 async function detectConfigFile(): Promise<string | null> {
@@ -255,6 +256,8 @@ export async function mergeRenovateConfig(
         );
       }
     }
+    // host rules can change concurrency
+    queue.clear();
     delete resolvedConfig.hostRules;
   }
   returnConfig = mergeChildConfig(returnConfig, resolvedConfig);
