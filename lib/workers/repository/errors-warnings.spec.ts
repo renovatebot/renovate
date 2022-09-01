@@ -49,7 +49,8 @@ describe('workers/repository/errors-warnings', () => {
       jest.resetAllMocks();
     });
 
-    it('returns pr warning text', () => {
+    it('returns 2 pr warnings text dependencyDashboard true', () => {
+      const dependencyDashboard = true;
       const packageFiles: Record<string, PackageFile[]> = {
         npm: [
           {
@@ -82,19 +83,135 @@ describe('workers/repository/errors-warnings', () => {
         ],
       };
 
-      const res = getDepWarningsPR(packageFiles);
+      const res = getDepWarningsPR(packageFiles, dependencyDashboard);
       expect(res).toMatchInlineSnapshot(`
         "
         ---
 
         ### ⚠ Dependency Lookup Warnings ⚠
 
-        Please correct - or verify that you can safely ignore - these lookup failures before you merge this PR.
+        Warnings have been detected. Please check the dashboard for further information
 
-        -   \`Warning 1\`
-        -   \`Warning 2\`
+        "
+      `);
+    });
 
-        Files affected: \`package.json\`, \`backend/package.json\`, \`Dockerfile\`
+    it('returns 1 pr warning text dependencyDashboard true', () => {
+      const dependencyDashboard = true;
+      const packageFiles: Record<string, PackageFile[]> = {
+        npm: [
+          {
+            packageFile: 'package.json',
+            deps: [
+              {
+                warnings: [{ message: 'Warning 1', topic: '' }],
+              },
+              {},
+            ],
+          },
+          {
+            packageFile: 'backend/package.json',
+            deps: [
+              {
+                warnings: [{ message: 'Warning 1', topic: '' }],
+              },
+            ],
+          },
+        ],
+      };
+
+      const res = getDepWarningsPR(packageFiles, dependencyDashboard);
+      expect(res).toMatchInlineSnapshot(`
+        "
+        ---
+
+        ### ⚠ Dependency Lookup Warnings ⚠
+
+        A warning has been detected. Please check the dashboard for further information
+
+        "
+      `);
+    });
+
+    it('returns 2 pr warnings text dependencyDashboard false', () => {
+      const dependencyDashboard = false;
+      const packageFiles: Record<string, PackageFile[]> = {
+        npm: [
+          {
+            packageFile: 'package.json',
+            deps: [
+              {
+                warnings: [{ message: 'Warning 1', topic: '' }],
+              },
+              {},
+            ],
+          },
+          {
+            packageFile: 'backend/package.json',
+            deps: [
+              {
+                warnings: [{ message: 'Warning 1', topic: '' }],
+              },
+            ],
+          },
+        ],
+        dockerfile: [
+          {
+            packageFile: 'Dockerfile',
+            deps: [
+              {
+                warnings: [{ message: 'Warning 2', topic: '' }],
+              },
+            ],
+          },
+        ],
+      };
+
+      const res = getDepWarningsPR(packageFiles, dependencyDashboard);
+      expect(res).toMatchInlineSnapshot(`
+        "
+        ---
+
+        ### ⚠ Dependency Lookup Warnings ⚠
+
+        Warnings have been detected. Please check the logs for further information
+
+        "
+      `);
+    });
+
+    it('returns 1 pr warning text dependencyDashboard false', () => {
+      const dependencyDashboard = false;
+      const packageFiles: Record<string, PackageFile[]> = {
+        npm: [
+          {
+            packageFile: 'package.json',
+            deps: [
+              {
+                warnings: [{ message: 'Warning 1', topic: '' }],
+              },
+              {},
+            ],
+          },
+          {
+            packageFile: 'backend/package.json',
+            deps: [
+              {
+                warnings: [{ message: 'Warning 1', topic: '' }],
+              },
+            ],
+          },
+        ],
+      };
+
+      const res = getDepWarningsPR(packageFiles, dependencyDashboard);
+      expect(res).toMatchInlineSnapshot(`
+        "
+        ---
+
+        ### ⚠ Dependency Lookup Warnings ⚠
+
+        A warning has been detected. Please check the logs for further information
 
         "
       `);

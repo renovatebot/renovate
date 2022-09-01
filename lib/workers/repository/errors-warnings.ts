@@ -58,7 +58,8 @@ function getDepWarnings(
 }
 
 export function getDepWarningsPR(
-  packageFiles: Record<string, PackageFile[]>
+  packageFiles: Record<string, PackageFile[]>,
+  dependencyDashboard?: boolean
 ): string {
   const { warnings, warningFiles } = getDepWarnings(packageFiles);
   let warningText = '';
@@ -69,14 +70,21 @@ export function getDepWarningsPR(
   warningText = emojify(
     `\n---\n\n### :warning: Dependency Lookup Warnings :warning:\n\n`
   );
-  warningText += `Please correct - or verify that you can safely ignore - these lookup failures before you merge this PR.\n\n`;
-  for (const w of warnings) {
-    warningText += `-   \`${w}\`\n`;
+
+  if (dependencyDashboard) {
+    if (warnings.length === 1) {
+      warningText += `A warning has been detected. Please check the dashboard for further information\n\n`;
+    } else {
+      warningText += `Warnings have been detected. Please check the dashboard for further information\n\n`;
+    }
+  } else {
+    if (warnings.length === 1) {
+      warningText += `A warning has been detected. Please check the logs for further information\n\n`;
+    } else {
+      warningText += `Warnings have been detected. Please check the logs for further information\n\n`;
+    }
   }
-  warningText +=
-    '\nFiles affected: ' +
-    warningFiles.map((f) => '`' + f + '`').join(', ') +
-    '\n\n';
+
   return warningText;
 }
 
