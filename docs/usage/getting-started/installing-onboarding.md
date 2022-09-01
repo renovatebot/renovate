@@ -17,11 +17,11 @@ Installing/enabling Mend's Renovate GitHub App is simple.
 
 First, navigate to [https://github.com/apps/renovate](https://github.com/apps/renovate) and click the Install button:
 
-![Github App Install button](../assets/images/github-app-install.png)
+![Github App Install button](../assets/images/github-app-install.png){ loading=lazy }
 
 The only choice you need to make is whether to run Renovate on all repositories or on selected repositories:
 
-![Github App repositories](../assets/images/github-app-choose-repos.png)
+![Github App repositories](../assets/images/github-app-choose-repos.png){ loading=lazy }
 
 Renovate will ignore any repositories that don't have known package files, as well as any forks, so you can enable Renovate for all your repositories with no problems.
 That said, most people run Renovate on selected repositories.
@@ -55,7 +55,7 @@ You can also set the line endings in your repository by adding `* text=auto eol=
 
 Once you have enabled Renovate on a repository, you will get a "Configure Renovate" Pull Request looking something like this:
 
-![Onboarding](../assets/images/onboarding.png)
+![Onboarding](../assets/images/onboarding.png){ loading=lazy }
 
 ### No risk onboarding
 
