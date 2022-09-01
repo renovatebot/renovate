@@ -1,6 +1,6 @@
 Extracts all Docker images from Woodpecker Pipeline YAML files.
 
-- [Homepage](https://woodpecker-ci.org/)
+- [Woodpecker homepage](https://woodpecker-ci.org/)
 - [Pipeline Syntax Documentation](https://woodpecker-ci.org/docs/usage/pipeline-syntax)
 - [Json Schema](https://raw.githubusercontent.com/woodpecker-ci/woodpecker/master/pipeline/schema/schema.json)
 
