@@ -281,8 +281,7 @@ describe('workers/repository/update/branch/index', () => {
       expect(reuse.shouldReuseExistingBranch).toHaveBeenCalledTimes(0);
     });
 
-    // eslint-disable-next-line jest/no-focused-tests
-    it.only('recreates pr using old branch when it exists for a merged pr', async () => {
+    it('recreates pr using old branch when it exists for a merged pr', async () => {
       schedule.isScheduledNow.mockReturnValueOnce(true);
       git.branchExists.mockReturnValue(true);
       checkExisting.prAlreadyExisted.mockResolvedValueOnce({
@@ -320,8 +319,7 @@ describe('workers/repository/update/branch/index', () => {
       );
     });
 
-    // eslint-disable-next-line jest/no-focused-tests
-    it.only('recreates pr using new branch when merged pr exists but branch is deleted', async () => {
+    it('recreates pr using new branch when merged pr exists but branch is deleted', async () => {
       schedule.isScheduledNow.mockReturnValueOnce(true);
       git.branchExists.mockReturnValue(false);
       checkExisting.prAlreadyExisted.mockResolvedValueOnce({
