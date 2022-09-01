@@ -59,7 +59,7 @@ export async function getChangeLogJSON(
   // istanbul ignore if
   if (!token) {
     if (host!.endsWith('.github.com') || host === 'github.com') {
-      if (!GlobalConfig.get().githubTokenWarn) {
+      if (!GlobalConfig.get('githubTokenWarn')) {
         logger.debug(
           { manager, depName, sourceUrl },
           'GitHub token warning has been suppressed. Skipping release notes retrieval'
