@@ -36,8 +36,13 @@ export class RubyGemsDatasource extends Datasource {
   })
   async getReleases({
     packageName,
-    registryUrl = 'https://rubygems.org',
+    registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
+    // istanbul ignore if
+    if (!registryUrl) {
+      return null;
+    }
+
     if (!this.versionsDatasources[registryUrl]) {
       this.versionsDatasources[registryUrl] = new VersionsDatasource(
         RubyGemsDatasource.id,
