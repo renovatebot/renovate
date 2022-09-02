@@ -115,6 +115,8 @@ export abstract class AbstractGithubDatasourceCache<
 
   private resetDeltaMinutes: number;
 
+  private cachedPromises: Record<string, Promise<StoredItem[]>> = {};
+
   constructor(private http: GithubHttp, opts: CacheOptions = {}) {
     const {
       updateAfterMinutes,
@@ -184,10 +186,25 @@ export abstract class AbstractGithubDatasourceCache<
     }
   }
 
+  private getBaseUrl(registryUrl: string | undefined): string {
+    const baseUrl = getApiBaseUrl(registryUrl).replace(/\/v3\/$/, '/'); // Replace for GHE
+    return baseUrl;
+  }
+
+  private getCacheKey(
+    registryUrl: string | undefined,
+    packageName: string
+  ): string {
+    const baseUrl = this.getBaseUrl(registryUrl);
+    const [owner, name] = packageName.split('/');
+    const cacheKey = `${baseUrl}:${owner}:${name}`;
+    return cacheKey;
+  }
+
   /**
    * Pre-fetch, update, or just return the package cache items.
    */
-  async getItems(
+  async getItemsImpl(
     releasesConfig: GetReleasesConfig,
     changelogRelease?: ChangelogRelease
   ): Promise<StoredItem[]> {
@@ -208,11 +225,10 @@ export abstract class AbstractGithubDatasourceCache<
     // so that soft update mechanics is immediately starting.
     let cacheUpdatedAt = now.minus(this.updateDuration).toISO();
 
-    const baseUrl = getApiBaseUrl(registryUrl).replace(/\/v3\/$/, '/'); // Replace for GHE
-
     const [owner, name] = packageName.split('/');
     if (owner && name) {
-      const cacheKey = `${baseUrl}:${owner}:${name}`;
+      const baseUrl = this.getBaseUrl(registryUrl);
+      const cacheKey = this.getCacheKey(registryUrl, packageName);
       const cache = await packageCache.get<GithubDatasourceCache<StoredItem>>(
         this.cacheNs,
         cacheKey
@@ -377,6 +393,20 @@ export abstract class AbstractGithubDatasourceCache<
 
     const items = Object.values(cacheItems);
     return items;
+  }
+
+  getItems(
+    releasesConfig: GetReleasesConfig,
+    changelogRelease?: ChangelogRelease
+  ): Promise<StoredItem[]> {
+    const { packageName, registryUrl } = releasesConfig;
+    const cacheKey = this.getCacheKey(registryUrl, packageName);
+    const promiseKey = `${this.cacheNs}:${cacheKey}`;
+    this.cachedPromises[promiseKey] ??= this.getItemsImpl(
+      releasesConfig,
+      changelogRelease
+    );
+    return this.cachedPromises[promiseKey];
   }
 
   getRandomDeltaMinutes(): number {
