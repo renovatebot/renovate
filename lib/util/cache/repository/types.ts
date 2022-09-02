@@ -34,10 +34,10 @@ export interface BranchCache {
   prNo: number | null;
   sha: string | null;
   baseBranchName: string;
-  baseBranchSha: string | null; // recent baseBranch SHA
-  parentSha: string | null; // baseBranch SHA when branch-commit was made by bot
+  baseBranchSha: string | null;
   upgrades: BranchUpgradeCache[];
   branchFingerprint?: string;
+  isBehindBaseBranch: boolean | null;
 }
 
 export interface RepoCacheData {

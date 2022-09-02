@@ -30,7 +30,10 @@ import type { GitProtocol } from '../../types/git';
 import { Limit, incLimitedValue } from '../../workers/global/limits';
 import { newlineRegex, regEx } from '../regex';
 import { parseGitAuthor } from './author';
-import { getCachedBehindBaseResult } from './behind-base-branch-cache';
+import {
+  getCachedBehindBaseResult,
+  setCachedBehindBaseResult,
+} from './behind-base-branch-cache';
 import { getNoVerify, simpleGitConfig } from './config';
 import {
   getCachedConflictResult,
@@ -538,9 +541,7 @@ export function getBranchList(): string[] {
 }
 
 export async function isBranchBehindBase(branchName: string): Promise<boolean> {
-  const { currentBranchSha } = config;
-
-  let isBehind = getCachedBehindBaseResult(branchName, currentBranchSha);
+  let isBehind = getCachedBehindBaseResult(branchName);
   if (isBehind !== null) {
     return isBehind;
   }
@@ -559,6 +560,7 @@ export async function isBranchBehindBase(branchName: string): Promise<boolean> {
       { isBehind, currentBranch, currentBranchSha },
       `isBranchBehindBase=${isBehind}`
     );
+    setCachedBehindBaseResult(branchName, isBehind);
     return isBehind;
   } catch (err) /* istanbul ignore next */ {
     const errChecked = checkForPlatformFailure(err);

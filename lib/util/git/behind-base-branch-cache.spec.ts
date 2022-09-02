@@ -1,7 +1,10 @@
 import { mocked, partial } from '../../../test/util';
 import * as _repositoryCache from '../cache/repository';
 import type { BranchCache, RepoCacheData } from '../cache/repository/types';
-import { getCachedBehindBaseResult } from './behind-base-branch-cache';
+import {
+  getCachedBehindBaseResult,
+  setCachedBehindBaseResult,
+} from './behind-base-branch-cache';
 
 jest.mock('../cache/repository');
 const repositoryCache = mocked(_repositoryCache);
@@ -16,36 +19,79 @@ describe('util/git/behind-base-branch-cache', () => {
 
   describe('getCachedBehindBaseResult', () => {
     it('returns null if cache is not populated', () => {
-      expect(getCachedBehindBaseResult('foo', '111')).toBeNull();
+      expect(getCachedBehindBaseResult('foo')).toBeNull();
     });
 
     it('returns null if branch not found', () => {
-      expect(getCachedBehindBaseResult('foo', '111')).toBeNull();
-    });
-
-    it('returns null if cache is partially defined', () => {
-      const branchName = 'branchName';
       const branchCache = partial<BranchCache>({
-        branchName,
+        branchName: 'not_foo',
         isModified: false,
       });
-      const repoCache: RepoCacheData = { branches: [branchCache] };
+      repoCache = { branches: [branchCache] };
+      expect(getCachedBehindBaseResult('foo')).toBeNull();
+    });
+
+    it('returns null if isBehindBaseBranch is undefined', () => {
+      const branchCache = partial<BranchCache>({
+        branchName: 'foo',
+        isModified: false,
+      });
+      repoCache = { branches: [branchCache] };
       repositoryCache.getCache.mockReturnValue(repoCache);
-      expect(getCachedBehindBaseResult(branchName, '111')).toBeNull();
+      expect(getCachedBehindBaseResult('foo')).toBeNull();
     });
 
-    it('returns true if target SHA has changed', () => {
-      repoCache.branches = [
-        { branchName: 'foo', sha: 'aaa', parentSha: '222' } as BranchCache,
-      ];
-      expect(getCachedBehindBaseResult('foo', '111')).toBeTrue();
+    it('returns value', () => {
+      const branchCache = partial<BranchCache>({
+        branchName: 'foo',
+        isBehindBaseBranch: false,
+      });
+      repoCache = { branches: [branchCache] };
+      repositoryCache.getCache.mockReturnValue(repoCache);
+      expect(getCachedBehindBaseResult('foo')).toBeFalse();
+    });
+  });
+
+  describe('setCachedBehindBaseResult', () => {
+    it('populates cache', () => {
+      setCachedBehindBaseResult('foo', false);
+      expect(repoCache).toMatchObject({
+        branches: [
+          {
+            branchName: 'foo',
+            isBehindBaseBranch: false,
+          },
+        ],
+      });
     });
 
-    it('returns false if target SHA has not changed', () => {
-      repoCache.branches = [
-        { branchName: 'foo', sha: 'aaa', parentSha: '111' } as BranchCache,
-      ];
-      expect(getCachedBehindBaseResult('foo', '111')).toBeFalse();
+    it('returns null if isBehindBaseBranch is undefined', () => {
+      repoCache = {
+        branches: [
+          partial<BranchCache>({
+            branchName: 'foo',
+            isBehindBaseBranch: true,
+          }),
+          partial<BranchCache>({
+            branchName: 'bar',
+            isBehindBaseBranch: false,
+          }),
+        ],
+      };
+      repositoryCache.getCache.mockReturnValue(repoCache);
+      setCachedBehindBaseResult('foo', false);
+      expect(repoCache).toMatchObject({
+        branches: [
+          {
+            branchName: 'foo',
+            isBehindBaseBranch: false,
+          },
+          {
+            branchName: 'bar',
+            isBehindBaseBranch: false,
+          },
+        ],
+      });
     });
   });
 });

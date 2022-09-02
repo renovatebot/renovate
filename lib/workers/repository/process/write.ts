@@ -127,9 +127,9 @@ function syncBranchCache(branchCache: BranchCache): void {
   // compare branch cache to fetched branch state
   if (branchSha !== branchCache.sha) {
     // invalidate isModified, isConflicted values
+    // not invalidating isBehindBase here cause thiss can only be caused due to modification by other usersand not renovate bot
     branchCache.isConflicted = null;
     branchCache.isModified = null;
-    branchCache.parentSha = null;
 
     // update cached branchSha
     branchCache.sha = branchSha;
@@ -138,6 +138,7 @@ function syncBranchCache(branchCache: BranchCache): void {
   if (baseBranchSha !== branchCache.baseBranchSha) {
     // invalidate isModified, isConflicted values
     branchCache.isConflicted = null;
+    branchCache.isBehindBaseBranch = null;
 
     // update cached branchSha
     branchCache.baseBranchSha = baseBranchSha;

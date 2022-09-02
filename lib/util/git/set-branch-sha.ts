@@ -21,7 +21,7 @@ export function setBranchShas(
   }
   branch.sha = commitSha;
   branch.baseBranchSha = baseBranchSha;
-  branch.parentSha = baseBranchSha;
+  branch.isBehindBaseBranch = false;
   branch.isConflicted = false;
   branch.isModified = false;
 }
