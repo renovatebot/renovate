@@ -240,7 +240,7 @@ export async function updateArtifacts({
     }
   }
   const goConstraints =
-    config.constraints?.go ?? await getGoConstraints(goModFileName);
+    config.constraints?.go ?? (await getGoConstraints(goModFileName));
 
   try {
     await writeLocalFile(goModFileName, massagedGoMod);
