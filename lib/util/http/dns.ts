@@ -68,7 +68,7 @@ function lookup(
 
     _dnsLookup(host, opts, (err, res) => {
       if (err) {
-        logger.error({ host, err }, 'dns lookup error');
+        logger.debug({ host, err }, 'dns lookup error');
         cb(err, null, null);
         return;
       }
@@ -85,7 +85,7 @@ function lookup(
 
     _dnsLookup(host, opts, (err, ...res) => {
       if (err) {
-        logger.error({ host, err }, 'dns lookup error');
+        logger.debug({ host, err }, 'dns lookup error');
         cb(err);
         return;
       }
