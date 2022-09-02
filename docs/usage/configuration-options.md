@@ -1146,6 +1146,11 @@ Example config:
 }
 ```
 
+### dnsCache
+
+Enable got [dnsCache](https://github.com/sindresorhus/got/blob/v11.5.2/readme.md#dnsCache) support.
+It uses `QuickLRU` with a `maxSize` of `1000`.
+
 ### enableHttp2
 
 Enable got [http2](https://github.com/sindresorhus/got/blob/v11.5.2/readme.md#http2) support.
