@@ -2,7 +2,7 @@ import { getPkgReleases } from '..';
 import { Fixtures } from '../../../../test/fixtures';
 import * as httpMock from '../../../../test/http-mock';
 import * as rubyVersioning from '../../versioning/ruby';
-import { resetCache, VersionsDatasource } from './versions-datasource';
+import { VersionsDatasource, resetCache } from './versions-datasource';
 import { RubyGemsDatasource } from '.';
 
 const rubygemsOrgVersions = Fixtures.get('rubygems-org.txt');
