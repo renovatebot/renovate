@@ -930,7 +930,7 @@ describe('workers/repository/update/branch/index', () => {
             sha: '123test',
             isModified: false,
             isConflicted: false,
-            parentSha: '123test_base',
+            isBehindBaseBranch: false,
             baseBranchSha: '123test_base',
             baseBranchName: 'base_branch',
           } as BranchCache,
