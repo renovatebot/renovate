@@ -26,6 +26,7 @@ const adminConfig: RepoGlobalConfig = {
   // `join` fixes Windows CI
   localDir: join('/tmp/github/some/repo'),
   cacheDir: join('/tmp/cache'),
+  containerbaseDir: join('/tmp/cache/containerbase'),
 };
 
 // auto-mock fs

@@ -43,7 +43,7 @@ export class GalaxyCollectionDatasource extends Datasource {
       this.handleGenericErrors(err);
     }
 
-    if (!baseUrlResponse || !baseUrlResponse.body) {
+    if (!baseUrlResponse?.body) {
       logger.warn(
         { dependency: packageName },
         `Received invalid data from ${baseUrl}`

@@ -1,6 +1,6 @@
 import {
-  defaultConfig,
   fs,
+  getConfig,
   git,
   mocked,
   mockedFunction,
@@ -100,8 +100,9 @@ describe('workers/repository/update/branch/index', () => {
       git.branchExists.mockReturnValue(false);
       prWorker.ensurePr = jest.fn();
       prAutomerge.checkAutoMerge = jest.fn();
+      // TODO: incompatible types (#7154)
       config = {
-        ...defaultConfig,
+        ...getConfig(),
         branchName: 'renovate/some-branch',
         errors: [],
         warnings: [],
@@ -430,6 +431,7 @@ describe('workers/repository/update/branch/index', () => {
         prBlockedBy: 'RateLimited',
       });
       limits.isLimitReached.mockReturnValue(false);
+      git.getBranchCommit.mockReturnValue('123test');
       expect(await branchWorker.processBranch(config)).toEqual({
         branchExists: true,
         prBlockedBy: 'RateLimited',
@@ -514,6 +516,7 @@ describe('workers/repository/update/branch/index', () => {
         updatedArtifacts: [partial<FileChange>({})],
       } as WriteExistingFilesResult);
       git.branchExists.mockReturnValue(false);
+      git.getBranchCommit.mockReturnValue('123test');
       automerge.tryBranchAutomerge.mockResolvedValueOnce('automerged');
       await branchWorker.processBranch({
         ...config,
@@ -677,6 +680,7 @@ describe('workers/repository/update/branch/index', () => {
         fetchReleaseNotes: true,
       } as BranchConfig;
       mockedFunction(needsChangelogs).mockReturnValueOnce(true);
+      git.getBranchCommit.mockReturnValue('123test');
       expect(await branchWorker.processBranch(inconfig)).toEqual({
         branchExists: true,
         prNo: undefined,
@@ -904,6 +908,7 @@ describe('workers/repository/update/branch/index', () => {
         artifactErrors: [{}],
         updatedArtifacts: [{}],
       } as WriteExistingFilesResult);
+      git.getBranchCommit.mockReturnValue('123test');
       const processBranchResult = await branchWorker.processBranch(config);
       expect(processBranchResult).toEqual({
         branchExists: true,
@@ -926,6 +931,7 @@ describe('workers/repository/update/branch/index', () => {
       prWorker.ensurePr.mockImplementationOnce(() => {
         throw new Error('some error');
       });
+      git.getBranchCommit.mockReturnValue('123test');
       const processBranchResult = await branchWorker.processBranch(config);
       expect(processBranchResult).toEqual({
         branchExists: true,
@@ -1112,7 +1118,6 @@ describe('workers/repository/update/branch/index', () => {
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
       const inconfig = {
         ...config,
-        dependencyDashboardChecks: { 'renovate/some-branch': 'true' },
         updatedArtifacts: [{ type: 'deletion', path: 'dummy' }],
       } as BranchConfig;
       expect(await branchWorker.processBranch(inconfig)).toEqual({
@@ -1189,6 +1194,42 @@ describe('workers/repository/update/branch/index', () => {
       expect(commit.commitFilesToBranch).toHaveBeenCalled();
     });
 
+    it('updates branch if stopUpdatingLabel presents and dependency dashboard box checked', async () => {
+      getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce(
+        partial<PackageFilesResult>({
+          updatedPackageFiles: [partial<FileChange>({})],
+          artifactErrors: [],
+          updatedArtifacts: [],
+        })
+      );
+      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+        artifactErrors: [],
+        updatedArtifacts: [partial<FileChange>({})],
+      } as WriteExistingFilesResult);
+      git.branchExists.mockReturnValue(true);
+      platform.getBranchPr.mockResolvedValueOnce({
+        title: 'rebase!',
+        state: PrState.Open,
+        labels: ['stop-updating'],
+        bodyStruct: { hash: hashBody(`- [ ] <!-- rebase-check -->`) },
+      } as Pr);
+      git.isBranchModified.mockResolvedValueOnce(true);
+      schedule.isScheduledNow.mockReturnValueOnce(false);
+      commit.commitFilesToBranch.mockResolvedValueOnce(null);
+      const inconfig = {
+        ...config,
+        dependencyDashboardChecks: { 'renovate/some-branch': 'true' },
+        updatedArtifacts: [{ type: 'deletion', path: 'dummy' }],
+      } as BranchConfig;
+      expect(await branchWorker.processBranch(inconfig)).toEqual({
+        branchExists: true,
+        prNo: undefined,
+        result: 'done',
+        commitSha: null,
+      });
+      expect(commit.commitFilesToBranch).toHaveBeenCalled();
+    });
+
     it('executes post-upgrade tasks if trust is high', async () => {
       const updatedPackageFile: FileChange = {
         type: 'addition',
@@ -1254,7 +1295,7 @@ describe('workers/repository/update/branch/index', () => {
         },
         upgrades: [
           {
-            ...defaultConfig,
+            ...getConfig(),
             depName: 'some-dep-name',
             postUpgradeTasks: {
               executionMode: 'update',
@@ -1344,7 +1385,7 @@ describe('workers/repository/update/branch/index', () => {
         ...config,
         upgrades: [
           {
-            ...defaultConfig,
+            ...getConfig(),
             depName: 'some-dep-name',
             postUpgradeTasks: {
               commands: ['exit 1'],
@@ -1428,7 +1469,7 @@ describe('workers/repository/update/branch/index', () => {
         },
         upgrades: [
           {
-            ...defaultConfig,
+            ...getConfig(),
             depName: 'some-dep-name',
             postUpgradeTasks: {
               executionMode: 'update',
@@ -1532,7 +1573,7 @@ describe('workers/repository/update/branch/index', () => {
         },
         upgrades: [
           {
-            ...defaultConfig,
+            ...getConfig(),
             depName: 'some-dep-name-1',
             postUpgradeTasks: {
               executionMode: 'update',
@@ -1546,7 +1587,7 @@ describe('workers/repository/update/branch/index', () => {
             },
           } as BranchUpgradeConfig,
           {
-            ...defaultConfig,
+            ...getConfig(),
             depName: 'some-dep-name-2',
             postUpgradeTasks: {
               executionMode: 'update',
@@ -1678,7 +1719,7 @@ describe('workers/repository/update/branch/index', () => {
         },
         upgrades: [
           {
-            ...defaultConfig,
+            ...getConfig(),
             depName: 'some-dep-name-1',
             postUpgradeTasks: {
               executionMode: 'branch',
@@ -1692,7 +1733,7 @@ describe('workers/repository/update/branch/index', () => {
             },
           } as BranchUpgradeConfig,
           {
-            ...defaultConfig,
+            ...getConfig(),
             depName: 'some-dep-name-2',
             postUpgradeTasks: {
               executionMode: 'branch',
@@ -1765,6 +1806,7 @@ describe('workers/repository/update/branch/index', () => {
         branchPrefix: 'new/',
         branchPrefixOld: 'old/',
       };
+      git.getBranchCommit.mockReturnValue('123test');
       expect(await branchWorker.processBranch(inconfig)).toEqual({
         branchExists: true,
         prNo: undefined,
@@ -1811,6 +1853,70 @@ describe('workers/repository/update/branch/index', () => {
       expect(logger.debug).not.toHaveBeenCalledWith(
         'No package files need updating'
       );
+    });
+
+    it('Dependency Dashboard All Pending approval', async () => {
+      jest.spyOn(getUpdated, 'getUpdatedPackageFiles').mockResolvedValueOnce({
+        updatedPackageFiles: [{}],
+        artifactErrors: [{}],
+      } as PackageFilesResult);
+      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+        artifactErrors: [],
+        updatedArtifacts: [partial<FileChange>({})],
+      } as WriteExistingFilesResult);
+      git.branchExists.mockReturnValue(true);
+      platform.getBranchPr.mockResolvedValueOnce({
+        title: 'pending!',
+        state: PrState.Open,
+        bodyStruct: {
+          hash: hashBody(`- [x] <!-- approve-all-pending-prs -->`),
+          rebaseRequested: false,
+        },
+      } as Pr);
+      git.getBranchCommit.mockReturnValue('123test');
+      expect(
+        await branchWorker.processBranch({
+          ...config,
+          dependencyDashboardAllPending: true,
+        })
+      ).toEqual({
+        branchExists: true,
+        commitSha: '123test',
+        prNo: undefined,
+        result: 'done',
+      });
+    });
+
+    it('Dependency Dashboard open all rate-limited', async () => {
+      jest.spyOn(getUpdated, 'getUpdatedPackageFiles').mockResolvedValueOnce({
+        updatedPackageFiles: [{}],
+        artifactErrors: [{}],
+      } as PackageFilesResult);
+      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+        artifactErrors: [],
+        updatedArtifacts: [partial<FileChange>({})],
+      } as WriteExistingFilesResult);
+      git.branchExists.mockReturnValue(true);
+      platform.getBranchPr.mockResolvedValueOnce({
+        title: 'unlimited!',
+        state: PrState.Open,
+        bodyStruct: {
+          hash: hashBody(`- [x] <!-- create-all-rate-limited-prs -->`),
+          rebaseRequested: false,
+        },
+      } as Pr);
+      git.getBranchCommit.mockReturnValue('123test');
+      expect(
+        await branchWorker.processBranch({
+          ...config,
+          dependencyDashboardAllRateLimited: true,
+        })
+      ).toEqual({
+        branchExists: true,
+        commitSha: '123test',
+        prNo: undefined,
+        result: 'done',
+      });
     });
   });
 });

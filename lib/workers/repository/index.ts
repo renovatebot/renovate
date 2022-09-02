@@ -7,6 +7,7 @@ import { instrument } from '../../instrumentation';
 import { logger, setMeta } from '../../logger';
 import { removeDanglingContainers } from '../../util/exec/docker';
 import { deleteLocalFile, privateCacheDir } from '../../util/fs';
+import { clearDnsCache, printDnsStats } from '../../util/http/dns';
 import * as queue from '../../util/http/queue';
 import { addSplit, getSplits, splitInit } from '../../util/split';
 import { setBranchCache } from './cache';
@@ -95,5 +96,7 @@ export async function renovateRepository(
   logger.debug(splits, 'Repository timing splits (milliseconds)');
   printRequestStats();
   logger.info({ durationMs: splits.total }, 'Repository finished');
+  printDnsStats();
+  clearDnsCache();
   return repoResult;
 }
