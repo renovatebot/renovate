@@ -18,8 +18,8 @@ export function getCachedConflictResult(
 
   if (
     branch?.baseBranchName === targetBranchName &&
-    branch?.baseBranchSha === targetBranchSha &&
-    branch?.sha === sourceBranchSha
+    branch.baseBranchSha === targetBranchSha &&
+    branch.sha === sourceBranchSha
   ) {
     return branch.isConflicted;
   }
