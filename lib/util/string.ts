@@ -46,7 +46,3 @@ export function uniqueStrings(
 ): boolean {
   return elements.indexOf(element) === index;
 }
-
-export function startsWithNumber(str: string): boolean {
-  return regEx(/^\d/).test(str);
-}
