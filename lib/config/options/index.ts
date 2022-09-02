@@ -2116,6 +2116,17 @@ const options: RenovateOptions[] = [
     experimental: true,
   },
   {
+    name: 'keepalive',
+    description: 'Enable http keepalives for hosts',
+    type: 'boolean',
+    stage: 'repository',
+    parent: 'hostRules',
+    default: false,
+    cli: false,
+    env: false,
+    experimental: true,
+  },
+  {
     name: 'prBodyDefinitions',
     description: 'Table column definitions for use in PR tables.',
     type: 'object',
