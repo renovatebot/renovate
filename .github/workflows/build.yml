@@ -26,7 +26,6 @@ env:
   DEFAULT_BRANCH: main
   NODE_VERSION: 14
   DRY_RUN: true
-  SKIP_JAVA_TESTS: true
 
 jobs:
   test:
