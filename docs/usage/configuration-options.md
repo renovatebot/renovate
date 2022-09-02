@@ -1183,6 +1183,10 @@ Example:
 }
 ```
 
+### keepalive
+
+If enabled, this allows a single TCP connection to remain open for multiple HTTP(S) requests/responses.
+
 ### matchHost
 
 This can be a base URL (e.g. `https://api.github.com`) or a hostname like `github.com` or `api.github.com`.

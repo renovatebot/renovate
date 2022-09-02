@@ -149,6 +149,7 @@
     "@types/tmp": "0.2.3",
     "@yarnpkg/core": "3.2.4",
     "@yarnpkg/parsers": "2.5.1",
+    "agentkeepalive": "4.2.1",
     "auth-header": "1.0.0",
     "azure-devops-node-api": "11.2.0",
     "bunyan": "1.8.15",
