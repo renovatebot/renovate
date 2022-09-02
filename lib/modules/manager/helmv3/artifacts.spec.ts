@@ -291,6 +291,7 @@ describe('modules/manager/helmv3/artifacts', () => {
     hostRules.add({
       username: 'basicUser',
       password: 'secret',
+      hostType: 'helm',
       matchHost: 'the_repo1_url',
     });
 
