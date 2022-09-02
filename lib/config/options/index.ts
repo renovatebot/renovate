@@ -2105,6 +2105,17 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
+    name: 'dnsCache',
+    description: 'Enable got dns cache',
+    type: 'boolean',
+    stage: 'repository',
+    parent: 'hostRules',
+    default: false,
+    cli: false,
+    env: false,
+    experimental: true,
+  },
+  {
     name: 'prBodyDefinitions',
     description: 'Table column definitions for use in PR tables.',
     type: 'object',
