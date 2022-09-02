@@ -1,5 +1,6 @@
 import { DateTime, DurationLikeObject } from 'luxon';
 import { logger } from '../../../../logger';
+import * as memCache from '../../../../util/cache/memory';
 import * as packageCache from '../../../../util/cache/package';
 import type {
   GithubGraphqlResponse,
@@ -7,7 +8,6 @@ import type {
   GithubHttpOptions,
 } from '../../../../util/http/github';
 import type { GetReleasesConfig } from '../../types';
-import * as memCache from '../../../../util/cache/memory';
 import { getApiBaseUrl } from '../common';
 import type {
   CacheOptions,
