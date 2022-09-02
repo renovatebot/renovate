@@ -544,6 +544,28 @@ describe('workers/repository/update/branch/auto-replace', () => {
       );
     });
 
+    it('updates with Dockerfile image replacement with digest', async () => {
+      const dockerfile = 'FROM ubuntu:16.04@q1w2e3r4t5z6u7i8o9p0\n';
+      upgrade.manager = 'dockerfile';
+      upgrade.depName = 'ubuntu';
+      upgrade.replaceString = 'ubuntu:16.04@q1w2e3r4t5z6u7i8o9p0';
+      upgrade.currentValue = '16.04';
+      upgrade.currentDigest = 'q1w2e3r4t5z6u7i8o9p0';
+      upgrade.depIndex = 0;
+      upgrade.updateType = 'replacement';
+      upgrade.newName = 'alpine';
+      upgrade.newValue = '3.16';
+      upgrade.newDigest = 'p0o9i8u7z6t5r4e3w2q1';
+      upgrade.packageFile = 'Dockerfile';
+      const res = await doAutoReplace(upgrade, dockerfile, reuseExistingBranch);
+      expect(res).toBe(
+        dockerfile
+          .replace(upgrade.depName, upgrade.newName)
+          .replace(upgrade.currentValue, upgrade.newValue)
+          .replace(upgrade.currentDigest, upgrade.newDigest)
+      );
+    });
+
     it('updates with droneci image replacement', async () => {
       const yml = 'steps:\n' + '- name: test\n' + '  image: ubuntu:16.04\n';
       upgrade.manager = 'droneci';
@@ -844,6 +866,61 @@ describe('workers/repository/update/branch/auto-replace', () => {
         tf
           .replace(upgrade.depName, upgrade.newName)
           .replace(upgrade.currentValue, upgrade.newValue)
+      );
+    });
+
+    it('updates with multiple same name replacement without replaceString', async () => {
+      const dockerfile =
+        'FROM ubuntu:16.04\n' + 'FROM ubuntu:20.04\n' + 'FROM ubuntu:18.04\n';
+      upgrade.manager = 'dockerfile';
+      upgrade.depName = 'ubuntu';
+      upgrade.currentValue = '18.04';
+      upgrade.depIndex = 2;
+      upgrade.updateType = 'replacement';
+      upgrade.newName = 'alpine';
+      upgrade.newValue = '3.16';
+      upgrade.packageFile = 'Dockerfile';
+      const res = await doAutoReplace(upgrade, dockerfile, reuseExistingBranch);
+      expect(res).toBe(
+        'FROM ubuntu:16.04\n' + 'FROM ubuntu:20.04\n' + 'FROM alpine:3.16\n'
+      );
+    });
+
+    it('updates with multiple same name replacement without replaceString 2', async () => {
+      const dockerfile =
+        'FROM ubuntu:16.04\n' + 'FROM ubuntu:20.04\n' + 'FROM ubuntu:18.04\n';
+      upgrade.manager = 'dockerfile';
+      upgrade.depName = 'ubuntu';
+      upgrade.currentValue = '20.04';
+      upgrade.depIndex = 1;
+      upgrade.updateType = 'replacement';
+      upgrade.newName = 'alpine';
+      upgrade.newValue = '3.16';
+      upgrade.packageFile = 'Dockerfile';
+      const res = await doAutoReplace(upgrade, dockerfile, reuseExistingBranch);
+      expect(res).toBe(
+        'FROM ubuntu:16.04\n' + 'FROM alpine:3.16\n' + 'FROM ubuntu:18.04\n'
+      );
+    });
+
+    it('updates with multiple same version replacement without replaceString', async () => {
+      const dockerfile =
+        'FROM notUbuntu:18.04\n' +
+        'FROM alsoNotUbuntu:18.04\n' +
+        'FROM ubuntu:18.04\n';
+      upgrade.manager = 'dockerfile';
+      upgrade.depName = 'ubuntu';
+      upgrade.currentValue = '18.04';
+      upgrade.depIndex = 2;
+      upgrade.updateType = 'replacement';
+      upgrade.newName = 'alpine';
+      upgrade.newValue = '3.16';
+      upgrade.packageFile = 'Dockerfile';
+      const res = await doAutoReplace(upgrade, dockerfile, reuseExistingBranch);
+      expect(res).toBe(
+        'FROM notUbuntu:18.04\n' +
+          'FROM alsoNotUbuntu:18.04\n' +
+          'FROM alpine:3.16\n'
       );
     });
   });

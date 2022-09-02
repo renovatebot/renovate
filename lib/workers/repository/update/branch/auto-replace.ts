@@ -211,6 +211,7 @@ export async function doAutoReplace(
     let newContent = existingContent;
     let nameReplaced = !newName;
     let valueReplaced = !newValue;
+    let startIndex = searchIndex;
     // Iterate through the rest of the file
     for (; searchIndex < newContent.length; searchIndex += 1) {
       // First check if we have a hit for the old version
@@ -221,6 +222,15 @@ export async function doAutoReplace(
             { packageFile, depName },
             `Found depName at index ${searchIndex}`
           );
+          if (nameReplaced) {
+            startIndex += 1;
+            searchIndex = startIndex;
+            await writeLocalFile(upgrade.packageFile!, existingContent);
+            newContent = existingContent;
+            nameReplaced = false;
+            valueReplaced = false;
+            continue;
+          }
           // replace with newName
           newContent = replaceAt(newContent, searchIndex, depName!, newName);
           await writeLocalFile(upgrade.packageFile!, newContent);
@@ -242,7 +252,8 @@ export async function doAutoReplace(
           );
           await writeLocalFile(upgrade.packageFile!, newContent);
           valueReplaced = true;
-        } else if (nameReplaced && valueReplaced) {
+        }
+        if (nameReplaced && valueReplaced) {
           if (await confirmIfDepUpdated(upgrade, newContent)) {
             return newContent;
           }
