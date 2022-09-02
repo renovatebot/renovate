@@ -9,6 +9,7 @@ import { hasProxy } from '../../proxy';
 import type { HostRule } from '../../types';
 import * as hostRules from '../host-rules';
 import { dnsLookup } from './dns';
+import { keepaliveAgents } from './keepalive';
 import type { GotOptions } from './types';
 
 export function findMatchingRules(options: GotOptions, url: string): HostRule {
@@ -107,6 +108,10 @@ export function applyHostRules(url: string, inOptions: GotOptions): GotOptions {
 
   if (foundRules.dnsCache) {
     options.lookup = dnsLookup;
+  }
+
+  if (foundRules.keepalive) {
+    options.agent = keepaliveAgents;
   }
 
   if (!hasProxy() && foundRules.enableHttp2 === true) {
