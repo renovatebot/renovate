@@ -37,7 +37,9 @@ function getLatestSuitableVersion(releases: Release[]): string | null {
   const stableVersions = allVersions.filter((x) => mavenVersion.isStable(x));
   const versions = stableVersions.length ? stableVersions : allVersions;
   return versions.reduce((latestVersion, version) =>
-    compare(version, latestVersion) === 1 ? version : latestVersion
+    compare(version, latestVersion) === 1
+      ? version
+      : /* istanbul ignore next: hard to test */ latestVersion
   );
 }
 
@@ -129,7 +131,7 @@ export class MavenDatasource extends Datasource {
             const match = line.trim().match(mavenCentralHtmlVersionRegex);
             if (match) {
               const { version, releaseTimestamp: timestamp } =
-                match?.groups ?? {};
+                match?.groups ?? /* istanbul ignore next: hard to test */ {};
               if (version && timestamp) {
                 const date = DateTime.fromFormat(
                   timestamp,
@@ -153,7 +155,9 @@ export class MavenDatasource extends Datasource {
           'Failed to get releases from index.html'
         );
       }
-      const cacheTTL = retryEarlier ? 60 : 24 * 60;
+      const cacheTTL = retryEarlier
+        ? /* istanbul ignore next: hard to test */ 60
+        : 24 * 60;
       await packageCache.set(cacheNs, cacheKey, workingReleaseMap, cacheTTL);
     }
 

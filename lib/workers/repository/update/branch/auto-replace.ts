@@ -105,6 +105,29 @@ export async function checkBranchDepsMatchBaseDeps(
   }
 }
 
+async function checkExistingBranch(
+  upgrade: BranchUpgradeConfig,
+  existingContent: string
+): Promise<string | null> {
+  const { packageFile, depName } = upgrade;
+  if (!(await checkBranchDepsMatchBaseDeps(upgrade, existingContent))) {
+    logger.debug(
+      { packageFile, depName },
+      'Rebasing branch after deps list has changed'
+    );
+    return null;
+  }
+  if (!(await confirmIfDepUpdated(upgrade, existingContent))) {
+    logger.debug(
+      { packageFile, depName },
+      'Rebasing after outdated branch dep found'
+    );
+    return null;
+  }
+  logger.debug({ packageFile, depName }, 'Branch dep is already updated');
+  return existingContent;
+}
+
 export async function doAutoReplace(
   upgrade: BranchUpgradeConfig,
   existingContent: string,
@@ -120,22 +143,7 @@ export async function doAutoReplace(
     autoReplaceStringTemplate,
   } = upgrade;
   if (reuseExistingBranch) {
-    if (!(await checkBranchDepsMatchBaseDeps(upgrade, existingContent))) {
-      logger.debug(
-        { packageFile, depName },
-        'Rebasing branch after deps list has changed'
-      );
-      return null;
-    }
-    if (!(await confirmIfDepUpdated(upgrade, existingContent))) {
-      logger.debug(
-        { packageFile, depName },
-        'Rebasing after outdated branch dep found'
-      );
-      return null;
-    }
-    logger.debug({ packageFile, depName }, 'Branch dep is already updated');
-    return existingContent;
+    return await checkExistingBranch(upgrade, existingContent);
   }
   const replaceString = upgrade.replaceString ?? currentValue;
   logger.trace({ depName, replaceString }, 'autoReplace replaceString');

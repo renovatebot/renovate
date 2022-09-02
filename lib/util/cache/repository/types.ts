@@ -1,3 +1,7 @@
+import type {
+  RepositoryCacheConfig,
+  RepositoryCacheType,
+} from '../../../config/types';
 import type { PackageFile } from '../../../modules/manager/types';
 import type { RepoInitConfig } from '../../../workers/repository/init/types';
 import type { GitConflictsCache } from '../../git/types';
@@ -30,6 +34,7 @@ export interface BranchCache {
   sha: string | null;
   parentSha: string | null;
   upgrades: BranchUpgradeCache[];
+  branchFingerprint?: string;
 }
 
 export interface RepoCacheData {
@@ -46,15 +51,39 @@ export interface RepoCacheData {
   prComments?: Record<number, Record<string, string>>;
 }
 
-export interface RepoCacheRecord {
+export interface RepoCacheRecordV10 extends RepoCacheData {
+  repository?: string;
+  revision?: number;
+}
+
+export interface RepoCacheRecordV11 {
+  repository: string;
+  revision: number;
+  data: RepoCacheData;
+}
+
+export interface RepoCacheRecordV12 {
   repository: string;
   revision: number;
   payload: string;
   hash: string;
 }
 
+export interface RepoCacheRecordV13 extends RepoCacheRecordV12 {
+  fingerprint: string;
+}
+
+export type RepoCacheRecord = RepoCacheRecordV13;
+
 export interface RepoCache {
   load(): Promise<void>;
   save(): Promise<void>;
   getData(): RepoCacheData;
+}
+
+export interface RepoCacheConfig {
+  repository?: string;
+  repositoryCache?: RepositoryCacheConfig;
+  repositoryCacheType?: RepositoryCacheType;
+  repoFingerprint: string;
 }

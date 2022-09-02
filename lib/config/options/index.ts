@@ -230,6 +230,16 @@ const options: RenovateOptions[] = [
     experimental: true,
   },
   {
+    name: 'repositoryCacheType',
+    description:
+      'Set the type of renovate repository cache if repositoryCache is not disabled.',
+    globalOnly: true,
+    type: 'string',
+    stage: 'repository',
+    default: 'local',
+    experimental: true,
+  },
+  {
     name: 'force',
     description:
       'Any configuration set in this object will force override existing settings.',
@@ -301,6 +311,13 @@ const options: RenovateOptions[] = [
     name: 'cacheDir',
     description:
       'The directory where Renovate stores its cache. If left empty, Renovate creates a subdirectory within the `baseDir`.',
+    globalOnly: true,
+    type: 'string',
+  },
+  {
+    name: 'containerbaseDir',
+    description:
+      'The directory where Renovate stores its containerbase cache. If left empty, Renovate creates a subdirectory within the `cacheDir`.',
     globalOnly: true,
     type: 'string',
   },
@@ -1173,6 +1190,16 @@ const options: RenovateOptions[] = [
     type: 'string',
     parent: 'packageRules',
     stage: 'package',
+    cli: false,
+    env: false,
+  },
+  {
+    name: 'customChangelogUrl',
+    description:
+      'If set, Renovate will use this url to fetch changelogs for a matched dependency. Valid only within a `packageRules` object.',
+    type: 'string',
+    stage: 'pr',
+    parent: 'packageRules',
     cli: false,
     env: false,
   },
@@ -2077,6 +2104,17 @@ const options: RenovateOptions[] = [
     default: 'Bearer',
     cli: false,
     env: false,
+  },
+  {
+    name: 'dnsCache',
+    description: 'Enable got dns cache',
+    type: 'boolean',
+    stage: 'repository',
+    parent: 'hostRules',
+    default: false,
+    cli: false,
+    env: false,
+    experimental: true,
   },
   {
     name: 'prBodyDefinitions',

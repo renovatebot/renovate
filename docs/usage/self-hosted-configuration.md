@@ -136,7 +136,7 @@ But you can tell Renovate to use "sidecar" containers for third-party tools by s
 For this to work, `docker` needs to be installed and the Docker socket available to Renovate.
 Now Renovate uses `docker run` to create containers like Node.js or Python to run tools in as-needed.
 
-Additionally, when Renovate is run inside a container built using [`containerbase/buildpack`](https://github.com/containerbase/buildpack), such as the official Renovate images on Docker Hub, then `binarySource=install` can be used.
+Additionally, when Renovate is run inside a container built using [`containerbase`](https://github.com/containerbase), such as the official Renovate images on Docker Hub, then `binarySource=install` can be used.
 This mode means that Renovate will dynamically install the version of tools available, if supported.
 
 Supported tools for dynamic install are:
@@ -180,6 +180,12 @@ For example:
   "cacheDir": "/my-own-different-cache-folder"
 }
 ```
+
+## containerbaseDir
+
+This directory is used to cache downloads when `binarySource=docker` or `binarySource=install`.
+
+Use this option if you need such downloads to be stored outside of Renovate's regular cache directory (`cacheDir`).
 
 ## customEnvVariables
 
@@ -447,6 +453,10 @@ modules.exports = {
 
 In the above example any reference to the `@company` preset will be replaced with `local>org/renovate-config`.
 
+<!-- prettier-ignore -->
+!!! tip
+    Combine `migratePresets` with `configMigration` if you'd like your config migrated by PR.
+
 ## onboarding
 
 Only set this to `false` if all three statements are true:
@@ -625,6 +635,28 @@ Elements in the `repositories` array can be an object if you wish to define addi
 Set this to `"enabled"` to have Renovate maintain a JSON file cache per-repository to speed up extractions.
 Set to `"reset"` if you ever need to bypass the cache and have it overwritten.
 JSON files will be stored inside the `cacheDir` beside the existing file-based package cache.
+
+## repositoryCacheType
+
+Set this to an S3 URI to enable S3 backed repository cache.
+
+```ts
+{
+  repositoryCacheType: 's3://bucket-name';
+}
+```
+
+<!-- prettier-ignore -->
+!!! note
+    [IAM is supported](https://docs.aws.amazon.com/sdk-for-javascript/v3/developer-guide/loading-node-credentials-iam.html) when running renovate within EC2 instance in an ECS cluster. In this case, no additional environment variables are requited.
+    Otherwise, The following environment variables should be set in order for the S3 client to work.
+
+```
+    AWS_ACCESS_KEY_ID
+    AWS_SECRET_ACCESS_KEY
+    AWS_SESSION_TOKEN
+    AWS_REGION
+```
 
 ## requireConfig
 
