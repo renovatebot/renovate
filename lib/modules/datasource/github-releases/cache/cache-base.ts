@@ -7,6 +7,7 @@ import type {
   GithubHttpOptions,
 } from '../../../../util/http/github';
 import type { GetReleasesConfig } from '../../types';
+import * as memCache from '../../../../util/cache/memory';
 import { getApiBaseUrl } from '../common';
 import type {
   CacheOptions,
@@ -114,8 +115,6 @@ export abstract class AbstractGithubDatasourceCache<
   private itemsPerUpdatePage: number;
 
   private resetDeltaMinutes: number;
-
-  private cachedPromises: Record<string, Promise<StoredItem[]>> = {};
 
   constructor(private http: GithubHttp, opts: CacheOptions = {}) {
     const {
@@ -401,12 +400,12 @@ export abstract class AbstractGithubDatasourceCache<
   ): Promise<StoredItem[]> {
     const { packageName, registryUrl } = releasesConfig;
     const cacheKey = this.getCacheKey(registryUrl, packageName);
-    const promiseKey = `${this.cacheNs}:${cacheKey}`;
-    this.cachedPromises[promiseKey] ??= this.getItemsImpl(
-      releasesConfig,
-      changelogRelease
-    );
-    return this.cachedPromises[promiseKey];
+    const promiseKey = `github-datasource-cache:${this.cacheNs}:${cacheKey}`;
+    const res =
+      memCache.get<Promise<StoredItem[]>>(promiseKey) ??
+      this.getItemsImpl(releasesConfig, changelogRelease);
+    memCache.set(promiseKey, res);
+    return res;
   }
 
   getRandomDeltaMinutes(): number {
