@@ -289,9 +289,14 @@ If you truly need to configure this then it probably means either:
 
 ## branchNameStrict
 
-By default, Renovate does not use strict-mode when slugifying the branch name. This means that certain special characters such as `.` may end up within the branch name.
+By default, Renovate doesn't care about special characters when slugifying the branch name.
+This means that special characters like `.` may end up in the branch name.
 
-By setting this configuration to `true`, all special characters will be removed from the branch name, resulting in a branch name consisting exclusively of alphabetic characters separated by `-`.
+When you set `branchNameStrict` to `true`:
+
+- all special characters are removed
+- only alphabetic characters are allowed
+- hyphens `-` are used to separate sections
 
 ## branchPrefix
 
@@ -1141,6 +1146,11 @@ Example config:
 }
 ```
 
+### dnsCache
+
+Enable got [dnsCache](https://github.com/sindresorhus/got/blob/v11.5.2/readme.md#dnsCache) support.
+It uses `QuickLRU` with a `maxSize` of `1000`.
+
 ### enableHttp2
 
 Enable got [http2](https://github.com/sindresorhus/got/blob/v11.5.2/readme.md#http2) support.
@@ -1172,6 +1182,10 @@ Example:
   ]
 }
 ```
+
+### keepalive
+
+If enabled, this allows a single TCP connection to remain open for multiple HTTP(S) requests/responses.
 
 ### matchHost
 
@@ -1870,6 +1884,30 @@ For example to apply a special label for Major updates:
   ]
 }
 ```
+
+### customChangelogUrl
+
+Use this field to set the source URL for a package, including overriding an existing one.
+Source URLs are necessary in order to look up release notes.
+
+Using this field we can specify the exact url to fetch release notes from.
+
+Example setting source URL for package "dummy":
+
+```json
+{
+  "packageRules": [
+    {
+      "matchPackageNames": ["dummy"],
+      "customChangelogUrl": "https://github.com/org/dummy"
+    }
+  ]
+}
+```
+
+<!-- prettier-ignore -->
+!!! note
+    Renovate can fetch changelogs from GitHub and GitLab platforms only, and setting the URL to an unsupported host/platform type won't change that.
 
 ### replacementName
 

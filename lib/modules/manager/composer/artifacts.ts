@@ -19,12 +19,14 @@ import {
 import { getRepoStatus } from '../../../util/git';
 import * as hostRules from '../../../util/host-rules';
 import { regEx } from '../../../util/regex';
+import { GitTagsDatasource } from '../../datasource/git-tags';
 import { PackagistDatasource } from '../../datasource/packagist';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
 import type { AuthJson, ComposerLock } from './types';
 import {
   composerVersioningId,
   extractConstraints,
+  findGithubPersonalAccessToken,
   getComposerArguments,
   getPhpConstraint,
   requireComposerDependencyInstallation,
@@ -33,13 +35,23 @@ import {
 function getAuthJson(): string | null {
   const authJson: AuthJson = {};
 
-  const githubCredentials = hostRules.find({
+  const githubToken = findGithubPersonalAccessToken({
     hostType: PlatformId.Github,
     url: 'https://api.github.com/',
   });
-  if (githubCredentials?.token) {
+  if (githubToken) {
     authJson['github-oauth'] = {
-      'github.com': githubCredentials.token.replace('x-access-token:', ''),
+      'github.com': githubToken,
+    };
+  }
+
+  const gitTagsGithubToken = findGithubPersonalAccessToken({
+    hostType: GitTagsDatasource.id,
+    url: 'https://github.com',
+  });
+  if (gitTagsGithubToken) {
+    authJson['github-oauth'] = {
+      'github.com': gitTagsGithubToken,
     };
   }
 

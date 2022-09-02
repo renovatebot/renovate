@@ -1,10 +1,20 @@
-This datasource returns releases from [Adoptium](https://adoptium.net/) API.
+This datasource returns releases from the [Adoptium](https://adoptium.net/) API.
 
-It uses `image_type=<jre|jdk>&project=jdk&release_type=ga&sort_method=DATE&sort_order=DESC&vendor=adoptium` as filter parameters.
+It uses `image_type=<jre|jdk>&project=jdk&release_type=ga&sort_method=DATE&sort_order=DESC` as filter parameters.
+This means that the datasource finds:
 
-It only uses the first 50 pages with 50 items per page.
+- JRE or JDK images
+- with a JDK project
+- which have the General Availability status
 
-Use `java-jdk` or `java` as `packageName` to get releases which come with the Java Development Kit.
+And finally, the results are sorted in descending order.
 
-Use `java-jre` as `packageName` if you only want releases which come with the Java Runtime Environment.
-Currently only the LTS releases of Java come with the JRE.
+When Renovate contacts the Adoptium API, it fetches 50 pages.
+Each page has 50 items.
+So 2500 items are fetched from the API in total.
+
+If you want to get releases which come with the JDK, set the `packageName` to `java-jdk` or `java`.
+
+If you want to get releases which come with the JRE, set the `packageName` to `java-jre`.
+LTS releases of Java will have a version that comes with the JRE.
+Non-LTS releases may not always include the JRE.

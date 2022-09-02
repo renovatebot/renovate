@@ -3,7 +3,7 @@ import type { logger as _logger } from '../../../logger';
 import { BranchStatus, PrState } from '../../../types';
 import type * as _git from '../../../util/git';
 import { setBaseUrl } from '../../../util/http/bitbucket';
-import type { Platform, RepoParams } from '../types';
+import type { Platform, PlatformResult, RepoParams } from '../types';
 
 const baseUrl = 'https://api.bitbucket.org';
 
@@ -69,7 +69,7 @@ describe('modules/platform/bitbucket/index', () => {
   }
 
   describe('initPlatform()', () => {
-    it('should throw if no username/password', async () => {
+    it('should throw if no token or username/password', async () => {
       expect.assertions(1);
       await expect(bitbucket.initPlatform({})).rejects.toThrow();
     });
@@ -85,14 +85,31 @@ describe('modules/platform/bitbucket/index', () => {
       );
     });
 
-    it('should init', async () => {
+    it('should init with username/password', async () => {
+      const expectedResult: PlatformResult = {
+        endpoint: baseUrl,
+      };
       httpMock.scope(baseUrl).get('/2.0/user').reply(200);
       expect(
         await bitbucket.initPlatform({
+          endpoint: baseUrl,
           username: 'abc',
           password: '123',
         })
-      ).toMatchSnapshot();
+      ).toEqual(expectedResult);
+    });
+
+    it('should init with only token', async () => {
+      const expectedResult: PlatformResult = {
+        endpoint: baseUrl,
+      };
+      httpMock.scope(baseUrl).get('/2.0/user').reply(200);
+      expect(
+        await bitbucket.initPlatform({
+          endpoint: baseUrl,
+          token: 'abc',
+        })
+      ).toEqual(expectedResult);
     });
 
     it('should warn for missing "profile" scope', async () => {
@@ -121,7 +138,7 @@ describe('modules/platform/bitbucket/index', () => {
   });
 
   describe('initRepo()', () => {
-    it('works', async () => {
+    it('works with username and password', async () => {
       httpMock
         .scope(baseUrl)
         .get('/2.0/repositories/some/repo')
@@ -131,6 +148,27 @@ describe('modules/platform/bitbucket/index', () => {
           repository: 'some/repo',
         })
       ).toMatchSnapshot();
+    });
+
+    it('works with only token', async () => {
+      hostRules.clear();
+      hostRules.find.mockReturnValue({
+        token: 'abc',
+      });
+      httpMock
+        .scope(baseUrl)
+        .get('/2.0/repositories/some/repo')
+        .reply(200, { owner: {}, mainbranch: { name: 'master' } });
+      expect(
+        await bitbucket.initRepo({
+          repository: 'some/repo',
+        })
+      ).toEqual({
+        defaultBranch: 'master',
+        isFork: false,
+        repoFingerprint:
+          '56653db0e9341ef4957c92bb78ee668b0a3f03c75b77db94d520230557385fca344cc1f593191e3594183b5b050909d29996c040045e8852f21774617b240642',
+      });
     });
   });
 

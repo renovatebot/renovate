@@ -43,6 +43,7 @@ export interface UpdateMergeRequest {
 export type MergeMethod = 'merge' | 'rebase_merge' | 'ff';
 
 export interface RepoResponse {
+  id: number;
   archived: boolean;
   mirror: boolean;
   default_branch: string;

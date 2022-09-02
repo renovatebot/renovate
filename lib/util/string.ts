@@ -1,4 +1,5 @@
 import { logger } from '../logger';
+import { regEx } from './regex';
 
 // Return true if the match string is found at index in content
 export function matchAt(
@@ -44,4 +45,8 @@ export function uniqueStrings(
   elements: string[]
 ): boolean {
   return elements.indexOf(element) === index;
+}
+
+export function startsWithNumber(str: string): boolean {
+  return regEx(/^\d/).test(str);
 }

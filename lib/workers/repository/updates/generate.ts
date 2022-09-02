@@ -8,6 +8,7 @@ import { CONFIG_SECRETS_EXPOSED } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { newlineRegex, regEx } from '../../../util/regex';
 import { sanitize } from '../../../util/sanitize';
+import { startsWithNumber } from '../../../util/string';
 import * as template from '../../../util/template';
 import type { BranchConfig, BranchUpgradeConfig } from '../../types';
 import { CommitMessage } from '../model/commit-message';
@@ -84,12 +85,14 @@ export function generateBranchConfig(
     toValues.add(upg.newValue!);
     // prettify newVersion and newMajor for printing
     if (upg.newVersion) {
-      upg.prettyNewVersion = semver.valid(upg.newVersion)
+      upg.prettyNewVersion = startsWithNumber(upg.newVersion)
         ? `v${upg.newVersion}`
         : upg.newVersion;
     }
     if (upg.newMajor) {
-      upg.prettyNewMajor = `v${upg.newMajor}`;
+      upg.prettyNewMajor = startsWithNumber(String(upg.newMajor))
+        ? `v${upg.newMajor}`
+        : String(upg.newMajor);
     }
     if (upg.commitMessageExtra) {
       const extra = template.compile(upg.commitMessageExtra, upg);

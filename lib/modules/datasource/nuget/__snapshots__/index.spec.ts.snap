@@ -396,7 +396,6 @@ exports[`modules/datasource/nuget/index getReleases processes real data (v3) fee
 
 exports[`modules/datasource/nuget/index getReleases processes real data (v3) feed is not a nuget.org 1`] = `
 {
-  "homepage": "https://nunit.org/",
   "registryUrl": "https://myprivatefeed/index.json",
   "releases": [
     {
