@@ -12,7 +12,7 @@ export function instrument<T>({
   kind,
 }: SpanParameters): Decorator<T> {
   return decorate(async ({ callback }) => {
-    return instrumentFunc(name, callback, {
+    return await instrumentFunc(name, callback, {
       attributes,
       root: ignoreParentSpan,
       kind,
