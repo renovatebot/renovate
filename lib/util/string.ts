@@ -1,5 +1,4 @@
 import { logger } from '../logger';
-import { regEx } from './regex';
 
 // Return true if the match string is found at index in content
 export function matchAt(
