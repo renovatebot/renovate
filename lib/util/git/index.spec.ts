@@ -242,8 +242,7 @@ describe('util/git/index', () => {
     });
   });
 
-  // eslint-disable-next-line jest/no-focused-tests
-  describe.only('isBranchBehindBase()', () => {
+  describe('isBranchBehindBase()', () => {
     it('should return false if same SHA as master', async () => {
       repoCache.getCache.mockReturnValue({});
       expect(
