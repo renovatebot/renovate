@@ -2,7 +2,7 @@ import { getPkgReleases } from '..';
 import { Fixtures } from '../../../../test/fixtures';
 import * as httpMock from '../../../../test/http-mock';
 import * as rubyVersioning from '../../versioning/ruby';
-import { resetCache } from './versions-datasource';
+import { resetCache, VersionsDatasource } from './versions-datasource';
 import { RubyGemsDatasource } from '.';
 
 const rubygemsOrgVersions = Fixtures.get('rubygems-org.txt');
@@ -66,6 +66,24 @@ describe('modules/datasource/rubygems/index', () => {
         .reply(200);
       const res = await getPkgReleases(newparams);
       expect(res).toBeNull();
+    });
+
+    it('returns null for an error without "not_supported" reason', async () => {
+      const newparams = {
+        ...params,
+        registryUrls: [],
+      };
+
+      const versionsdataSourceSpy = jest
+        .spyOn(VersionsDatasource.prototype, 'syncVersions')
+        .mockImplementationOnce(() => {
+          throw new Error();
+        });
+
+      const res = await getPkgReleases(newparams);
+      expect(res).toBeNull();
+
+      versionsdataSourceSpy.mockRestore();
     });
 
     it('returns a dep for rubygems.org package hit', async () => {
