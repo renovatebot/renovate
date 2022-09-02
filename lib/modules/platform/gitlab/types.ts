@@ -30,6 +30,9 @@ export interface GitLabMergeRequest {
   reviewers?: GitLabUser[];
   labels: string[];
   sha: string;
+  head_pipeline: {
+    status: string;
+  };
 }
 
 export interface UpdateMergeRequest {
