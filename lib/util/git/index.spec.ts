@@ -242,7 +242,8 @@ describe('util/git/index', () => {
     });
   });
 
-  describe('isBranchBehindBase()', () => {
+  // eslint-disable-next-line jest/no-focused-tests
+  describe.only('isBranchBehindBase()', () => {
     it('should return false if same SHA as master', async () => {
       repoCache.getCache.mockReturnValue({});
       expect(
@@ -258,6 +259,7 @@ describe('util/git/index', () => {
     it('should return result even if non-default and not under branchPrefix', async () => {
       const branchCache = partial<BranchCache>({
         branchName: 'develop',
+        isBehindBaseBranch: true,
       });
       repoCache.getCache
         .mockReturnValueOnce({})
