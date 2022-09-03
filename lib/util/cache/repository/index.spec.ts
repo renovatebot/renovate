@@ -26,14 +26,14 @@ describe('util/cache/repository/index', () => {
     await initRepoCache({ ...config, repositoryCache: 'disabled' });
     expect(fs.readCacheFile).not.toHaveBeenCalled();
     expect(getCache()).toBeEmpty();
-    expect(await isCacheModified()).toBeUndefined();
+    expect(isCacheModified()).toBeUndefined();
   });
 
   it('saves cache', async () => {
     await initRepoCache({ ...config, repositoryCache: 'enabled' });
     await saveCache();
     expect(fs.outputCacheFile).toHaveBeenCalled();
-    expect(await isCacheModified()).toBeUndefined();
+    expect(isCacheModified()).toBeUndefined();
   });
 
   it('resets cache', async () => {
@@ -41,6 +41,6 @@ describe('util/cache/repository/index', () => {
     expect(fs.readCacheFile).not.toHaveBeenCalled();
     expect(fs.outputCacheFile).toHaveBeenCalled();
     expect(getCache()).toBeEmpty();
-    expect(await isCacheModified()).toBeUndefined();
+    expect(isCacheModified()).toBeUndefined();
   });
 });
