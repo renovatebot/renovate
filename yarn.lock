@@ -3031,24 +3031,24 @@
     "@typescript-eslint/types" "5.36.1"
     eslint-visitor-keys "^3.3.0"
 
-"@yarnpkg/core@3.2.3":
-  version "3.2.3"
-  resolved "https://registry.yarnpkg.com/@yarnpkg/core/-/core-3.2.3.tgz#b0498f2a96a79ebcc61d0a6c9af6af5fb365148c"
-  integrity sha512-YFJCdMismKuHsNpNpAXbLil5NylUscL0cw32guPcle+VBcU3IWe7xtDWKZRt0hBmQRYVLOvd3t9GWEgj2j6p3Q==
+"@yarnpkg/core@3.2.4":
+  version "3.2.4"
+  resolved "https://registry.yarnpkg.com/@yarnpkg/core/-/core-3.2.4.tgz#ed4d22232a51fa689fdecfd6c0caa6135a54120f"
+  integrity sha512-wray5scy2jK5Kgpqf5kaMu2a6jSeCN+KZDPszzgiUWfbTkeZiuEv7LVTelaUdS2o9gHDQ4qrQeBgoJinaI5AqQ==
   dependencies:
     "@arcanis/slice-ansi" "^1.1.1"
     "@types/semver" "^7.1.0"
     "@types/treeify" "^1.0.0"
-    "@yarnpkg/fslib" "^2.7.0"
+    "@yarnpkg/fslib" "^2.7.1"
     "@yarnpkg/json-proxy" "^2.1.1"
     "@yarnpkg/libzip" "^2.2.4"
     "@yarnpkg/parsers" "^2.5.1"
-    "@yarnpkg/pnp" "^3.2.2"
-    "@yarnpkg/shell" "^3.2.3"
+    "@yarnpkg/pnp" "^3.2.3"
+    "@yarnpkg/shell" "^3.2.4"
     camelcase "^5.3.1"
     chalk "^3.0.0"
     ci-info "^3.2.0"
-    clipanion "^3.2.0-rc.4"
+    clipanion "3.2.0-rc.4"
     cross-spawn "7.0.3"
     diff "^5.1.0"
     globby "^11.0.1"
@@ -3069,10 +3069,18 @@
     tslib "^1.13.0"
     tunnel "^0.0.6"
 
-"@yarnpkg/fslib@^2.5.0", "@yarnpkg/fslib@^2.7.0":
+"@yarnpkg/fslib@^2.5.0":
   version "2.7.0"
   resolved "https://registry.yarnpkg.com/@yarnpkg/fslib/-/fslib-2.7.0.tgz#8693241e9049ca70796dddb3c3403f578b6b614a"
   integrity sha512-uLVuKd/i19v2c1OMg8H9sH8o5QAKlrLQYXdOk7ZFzUPDTmb8tHrSO1IKUijqItKAUi8RkrqsVgDHZmYFUEWMfQ==
+  dependencies:
+    "@yarnpkg/libzip" "^2.2.4"
+    tslib "^1.13.0"
+
+"@yarnpkg/fslib@^2.7.1":
+  version "2.7.1"
+  resolved "https://registry.yarnpkg.com/@yarnpkg/fslib/-/fslib-2.7.1.tgz#5b47f1b88e03fbcf19dd77ebab7bbc45703dbe0c"
+  integrity sha512-xUf0KTuTfVgWWW33sa7SopIPjpq1K7c8Ta/vYLI5FmEHTZ3uBc8FssEjXDXVkIv6HwO3DVI+5mhRfqlTrQSSNw==
   dependencies:
     "@yarnpkg/libzip" "^2.2.4"
     tslib "^1.13.0"
@@ -3101,23 +3109,23 @@
     js-yaml "^3.10.0"
     tslib "^1.13.0"
 
-"@yarnpkg/pnp@^3.2.2":
-  version "3.2.2"
-  resolved "https://registry.yarnpkg.com/@yarnpkg/pnp/-/pnp-3.2.2.tgz#1a1e7f13454d1328f2f21e1a5739a20aeac0d0ab"
-  integrity sha512-lFTAN/6bT3n2wNDbxtP8LxwEa1msB3TB6uglt1FDbGM89pRpzUXe/Z+8pBTkxQKjPh5R/JkGbsrnOpWUzbeBMA==
+"@yarnpkg/pnp@^3.2.3":
+  version "3.2.3"
+  resolved "https://registry.yarnpkg.com/@yarnpkg/pnp/-/pnp-3.2.3.tgz#45cb7cfa2451d372d408962642ae85c1daaa619a"
+  integrity sha512-GWgCeVN5xv8o5zms4NyBwULYlPlrGzjoRYkoEGVCC10EOMlGbgZmKgttsJe2B9ozAvet8gj0HEFyslJ/d2+gyA==
   dependencies:
     "@types/node" "^13.7.0"
-    "@yarnpkg/fslib" "^2.7.0"
+    "@yarnpkg/fslib" "^2.7.1"
 
-"@yarnpkg/shell@^3.2.3":
-  version "3.2.3"
-  resolved "https://registry.yarnpkg.com/@yarnpkg/shell/-/shell-3.2.3.tgz#a2ead577fce55e66f4573515e43b6ec63a309d15"
-  integrity sha512-Up10xmX2hn3UBzD17lqGtsnffHH5/quJgKE+8lcNZw4XjtJFlC6SePcvk15S7FNCCvJd0eSeS+mQ6nrSsWeQ5A==
+"@yarnpkg/shell@^3.2.4":
+  version "3.2.4"
+  resolved "https://registry.yarnpkg.com/@yarnpkg/shell/-/shell-3.2.4.tgz#98fbed82bdf31a9278e80e79783a6c6f183a7558"
+  integrity sha512-mCxB1N+onHynM2zcuvdb73y1njzqxKnpIu6hy+eFyxC6qyPDTT17w5gCdGDHWCs025I95jk2vPWbzhXJBiCEHw==
   dependencies:
-    "@yarnpkg/fslib" "^2.7.0"
+    "@yarnpkg/fslib" "^2.7.1"
     "@yarnpkg/parsers" "^2.5.1"
     chalk "^3.0.0"
-    clipanion "^3.2.0-rc.4"
+    clipanion "3.2.0-rc.4"
     cross-spawn "7.0.3"
     fast-glob "^3.2.2"
     micromatch "^4.0.2"
@@ -3164,7 +3172,7 @@ agent-base@6, agent-base@^6.0.2:
   dependencies:
     debug "4"
 
-agentkeepalive@^4.2.1:
+agentkeepalive@4.2.1, agentkeepalive@^4.2.1:
   version "4.2.1"
   resolved "https://registry.yarnpkg.com/agentkeepalive/-/agentkeepalive-4.2.1.tgz#a7975cbb9f83b367f06c90cc51ff28fe7d499717"
   integrity sha512-Zn4cw2NEqd+9fiSVWMscnjyQ1a8Yfoc5oBajLeo5w+YBHgDUcEBY2hS4YpTz6iN5f/2zQiktcuM6tS8x1p9dpA==
@@ -3799,7 +3807,7 @@ cli-table3@^0.6.1, cli-table3@^0.6.2:
   optionalDependencies:
     "@colors/colors" "1.5.0"
 
-clipanion@3.2.0-rc.4, clipanion@^3.2.0-rc.4:
+clipanion@3.2.0-rc.4:
   version "3.2.0-rc.4"
   resolved "https://registry.yarnpkg.com/clipanion/-/clipanion-3.2.0-rc.4.tgz#4df6e55e46c1287dd5d6d595eec3c785082e8e32"
   integrity sha512-wkW5IYIK63i2aSmFr8EoRjEpZmy3KFXezDn4K8dBct7pq0hWWDFUoqwXTMIXWyBIEJFekmZ9v5wX+JtRBMZbOA==
@@ -6119,10 +6127,10 @@ jest-haste-map@^29.0.1:
   optionalDependencies:
     fsevents "^2.3.2"
 
-jest-junit@14.0.0:
-  version "14.0.0"
-  resolved "https://registry.yarnpkg.com/jest-junit/-/jest-junit-14.0.0.tgz#f69fc31bab32224848f443480c2c808fccb2a802"
-  integrity sha512-kALvBDegstTROfDGXH71UGD7k5g7593Y1wuX1wpWT+QTYcBbmtuGOA8UlAt56zo/B2eMIOcaOVEON3j0VXVa4g==
+jest-junit@14.0.1:
+  version "14.0.1"
+  resolved "https://registry.yarnpkg.com/jest-junit/-/jest-junit-14.0.1.tgz#5b357d6f5d333459585d628a24cd48b5bbc92ba2"
+  integrity sha512-h7/wwzPbllgpQhhVcRzRC76/cc89GlazThoV1fDxcALkf26IIlRsu/AcTG64f4nR2WPE3Cbd+i/sVf+NCUHrWQ==
   dependencies:
     mkdirp "^1.0.4"
     strip-ansi "^6.0.1"

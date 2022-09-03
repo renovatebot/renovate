@@ -121,7 +121,7 @@
     "Markus Siebert <mail@markussiebert.com>",
     "Sergey Vedmak <serg.vedmak@gmail.com>"
   ],
-  "license": "AGPL-3.0",
+  "license": "AGPL-3.0-only",
   "bugs": {
     "url": "https://github.com/renovatebot/renovate/issues"
   },
@@ -147,8 +147,9 @@
     "@renovatebot/ruby-semver": "1.1.6",
     "@sindresorhus/is": "4.6.0",
     "@types/tmp": "0.2.3",
-    "@yarnpkg/core": "3.2.3",
+    "@yarnpkg/core": "3.2.4",
     "@yarnpkg/parsers": "2.5.1",
+    "agentkeepalive": "4.2.1",
     "auth-header": "1.0.0",
     "azure-devops-node-api": "11.2.0",
     "bunyan": "1.8.15",
@@ -289,7 +290,7 @@
     "husky": "8.0.1",
     "jest": "29.0.1",
     "jest-extended": "3.1.0",
-    "jest-junit": "14.0.0",
+    "jest-junit": "14.0.1",
     "jest-mock-extended": "2.0.6",
     "markdownlint-cli2": "0.5.1",
     "memfs": "3.4.7",
