@@ -65,7 +65,7 @@ function addDep(ref: TektonBundle, deps: PackageDependency[]): void {
   if (is.falsy(ref)) {
     return;
   }
-  let imageRef = '';
+  let imageRef: string | undefined;
   // Find a bundle reference from the Bundle resolver
   if (ref.resolver === 'bundles') {
     for (const field of ref.resource ?? []) {
@@ -76,10 +76,10 @@ function addDep(ref: TektonBundle, deps: PackageDependency[]): void {
     }
   }
 
-  if (is.emptyStringOrWhitespace(imageRef)) {
+  if (is.nullOrUndefined(imageRef)) {
     // Fallback to older style bundle reference
     imageRef = ref.bundle;
-    if (is.emptyStringOrWhitespace(imageRef)) {
+    if (is.nullOrUndefined(imageRef)) {
       return;
     }
   }
