@@ -41,8 +41,7 @@ export function extractPackageFile(
   // use variables and if the image is not built locally
   const deps = Object.values(config.pipeline ?? {})
     .filter((step) => is.string(step?.image))
-    .map((step) => getDep(step.image, true, extractConfig.registryAliases))
-    .filter(is.truthy);
+    .map((step) => getDep(step.image, true, extractConfig.registryAliases));
 
   logger.trace({ deps }, 'Woodpecker Configuration image');
   return deps.length ? { deps } : null;
