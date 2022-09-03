@@ -355,6 +355,10 @@ interface GitlabBranchStatus {
   allow_failure?: boolean;
 }
 
+interface GitlabPr extends Pr {
+  headPipelineStatus?: string;
+}
+
 async function getStatus(
   branchName: string,
   useCache = true
@@ -611,14 +615,12 @@ export async function createPr({
   return massagePr(pr);
 }
 
-export async function getPr(
-  iid: number
-): Promise<Pr & { headPipelineStatus?: string }> {
+export async function getPr(iid: number): Promise<GitlabPr> {
   logger.debug(`getPr(${iid})`);
   const mr = await getMR(config.repository, iid);
 
   // Harmonize fields with GitHub
-  const pr: Pr & { headPipelineStatus?: string } = {
+  const pr: GitlabPr = {
     sourceBranch: mr.source_branch,
     targetBranch: mr.target_branch,
     number: mr.iid,
@@ -744,7 +746,7 @@ export async function findPr({
 // Returns the Pull Request for a branch. Null if not exists.
 export async function getBranchPr(
   branchName: string
-): Promise<(Pr & { headPipelineStatus?: string }) | null> {
+): Promise<GitlabPr | null> {
   logger.debug(`getBranchPr(${branchName})`);
   const existingPr = await findPr({
     branchName,
