@@ -57,6 +57,7 @@ import type {
   GitLabMergeRequest,
   GitlabComment,
   GitlabIssue,
+  GitlabPr,
   MergeMethod,
   RepoResponse,
 } from './types';
@@ -353,10 +354,6 @@ interface GitlabBranchStatus {
   status: BranchState;
   name: string;
   allow_failure?: boolean;
-}
-
-interface GitlabPr extends Pr {
-  headPipelineStatus?: string;
 }
 
 async function getStatus(

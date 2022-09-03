@@ -1,3 +1,5 @@
+import type { Pr } from '../types';
+
 export interface GitlabIssue {
   iid: number;
 
@@ -33,6 +35,10 @@ export interface GitLabMergeRequest {
   head_pipeline?: {
     status: string;
   };
+}
+
+export interface GitlabPr extends Pr {
+  headPipelineStatus?: string;
 }
 
 export interface UpdateMergeRequest {
