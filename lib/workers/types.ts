@@ -145,7 +145,7 @@ export interface BaseBranchMetadata {
 }
 
 export interface BranchSummary {
-  // cacheModified: boolean | undefined;
+  cacheModified: boolean | undefined;
   baseBranches: BaseBranchMetadata[];
   branches: BranchMetadata[];
   inactiveBranches: string[];
