@@ -418,7 +418,10 @@ export async function getBranchStatus(
 
   const mrStatus = (await getBranchPr(branchName))?.headPipelineStatus;
   if (!is.undefined(mrStatus)) {
-    branchStatuses.push({ status: mrStatus as BranchState, name: '' });
+    branchStatuses.push({
+      status: mrStatus as BranchState,
+      name: 'head_pipeline',
+    });
   }
   // ignore all skipped jobs
   const res = branchStatuses.filter((check) => check.status !== 'skipped');
