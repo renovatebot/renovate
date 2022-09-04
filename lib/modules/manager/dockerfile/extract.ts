@@ -208,7 +208,10 @@ export function getDep(
     dep.versioning = ubuntuVersioning.id;
   }
 
-  if (dep.depName === 'debian') {
+  if (
+    dep.depName === 'debian' &&
+    debianVersioning.api.isVersion(dep.currentValue)
+  ) {
     dep.versioning = debianVersioning.id;
   }
 
