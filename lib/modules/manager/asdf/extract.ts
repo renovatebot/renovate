@@ -21,7 +21,7 @@ const upgradeableTooling: Record<
   },
 };
 
-export function extractPackageFile(content: string): PackageFile {
+export function extractPackageFile(content: string): PackageFile | null {
   logger.trace('asdf.extractPackageFile()');
 
   const regex = regEx(
@@ -47,5 +47,5 @@ export function extractPackageFile(content: string): PackageFile {
     }
   }
 
-  return { deps };
+  return deps.length ? { deps } : null;
 }
