@@ -70,13 +70,11 @@ export function getDepWarningsPR(
   warningText = emojify(
     `\n---\n\n### :warning: Dependency Lookup Warnings :warning:\n\n`
   );
-
   if (dependencyDashboard) {
     warningText += `Warnings were logged while processing this repo. Please check the Dependency Dashboard for further information\n\n`;
   } else {
     warningText += `Warnings were logged while processing this repo. Please check logs for further information\n\n`;
   }
-
   return warningText;
 }
 

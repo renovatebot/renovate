@@ -90,7 +90,6 @@ export async function getPrBody(
   };
 
   let prBody = '';
-
   if (branchConfig.prBodyTemplate) {
     const prBodyTemplate = branchConfig.prBodyTemplate;
     prBody = template.compile(prBodyTemplate, content, false);
