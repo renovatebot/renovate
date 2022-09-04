@@ -44,19 +44,43 @@ describe('modules/manager/asdf/extract', () => {
       });
     });
 
-    it('ignores supported tooling with ref: versioning', () => {
+    it('provides skipReason for supported tooling with ref: versioning', () => {
       const res = extractPackageFile('nodejs ref:234abc4\n');
-      expect(res).toBeNull();
+      expect(res).toEqual({
+        deps: [
+          {
+            currentValue: 'ref:234abc4',
+            depName: 'node',
+            skipReason: 'unsupported-version',
+          },
+        ],
+      });
     });
 
-    it('ignores supported tooling with path: versioning', () => {
+    it('provides skipReason for supported tooling with path: versioning', () => {
       const res = extractPackageFile('nodejs path:/path/to/tooling\n');
-      expect(res).toBeNull();
+      expect(res).toEqual({
+        deps: [
+          {
+            currentValue: 'path:/path/to/tooling',
+            depName: 'node',
+            skipReason: 'unsupported-version',
+          },
+        ],
+      });
     });
 
-    it('ignores supported tooling with system versioning', () => {
+    it('provides skipReason for supported tooling with system versioning', () => {
       const res = extractPackageFile('nodejs system\n');
-      expect(res).toBeNull();
+      expect(res).toEqual({
+        deps: [
+          {
+            currentValue: 'system',
+            depName: 'node',
+            skipReason: 'unsupported-version',
+          },
+        ],
+      });
     });
 
     describe('comment handling', () => {
