@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { logger } from '../../logger';
 import { getCache } from '../cache/repository';
 import type { BranchCache } from '../cache/repository/types';
 
@@ -9,7 +9,7 @@ export function getCachedModifiedResult(
   const { branches } = getCache();
   const branch = branches?.find((branch) => branch.branchName === branchName);
 
-  if (branch?.sha !== branchSha) {
+  if (branch?.sha !== branchSha || branch.isModified === undefined) {
     return null;
   }
 
@@ -24,17 +24,17 @@ export function setCachedModifiedResult(
   const cache = getCache();
   cache.branches ??= [];
   const { branches } = cache;
-  const branch =
-    branches?.find((branch) => branch.branchName === branchName) ??
-    ({ branchName: branchName } as BranchCache);
-
+  let branch = branches?.find((branch) => branch.branchName === branchName);
   // if branch not present add it to cache
-  if (is.undefined(branch.sha)) {
+  if (!branch) {
+    branch = { branchName: branchName, sha: branchSha } as BranchCache;
     branches.push(branch);
   }
 
   if (branch.sha !== branchSha) {
-    branch.sha = branchSha;
+    logger.warn(
+      'Invalid Cache.Cached branch SHA is different than current branch SHA'
+    );
   }
 
   branch.isModified = isModified;

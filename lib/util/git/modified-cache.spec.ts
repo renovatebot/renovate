@@ -1,4 +1,5 @@
 import { mocked } from '../../../test/util';
+import { logger } from '../../logger';
 import * as _repositoryCache from '../cache/repository';
 import type { BranchCache, RepoCacheData } from '../cache/repository/types';
 import {
@@ -59,16 +60,22 @@ describe('util/git/modified-cache', () => {
       setCachedModifiedResult('foo', '121', false);
       setCachedModifiedResult('foo', '131', false);
       expect(repoCache).toEqual({
-        branches: [{ branchName: 'foo', sha: '131', isModified: false }],
+        branches: [{ branchName: 'foo', sha: '111', isModified: false }],
       });
+      expect(logger.warn).toHaveBeenCalledWith(
+        'Invalid Cache.Cached branch SHA is different than current branch SHA'
+      );
     });
 
     it('replaces value when both value and SHA have changed', () => {
       setCachedModifiedResult('foo', '111', false);
       setCachedModifiedResult('foo', 'aaa', true);
       expect(repoCache).toEqual({
-        branches: [{ branchName: 'foo', sha: 'aaa', isModified: true }],
+        branches: [{ branchName: 'foo', sha: '111', isModified: true }],
       });
+      expect(logger.warn).toHaveBeenCalledWith(
+        'Invalid Cache.Cached branch SHA is different than current branch SHA'
+      );
     });
 
     it('handles multiple branches', () => {

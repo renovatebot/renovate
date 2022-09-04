@@ -1,4 +1,5 @@
 import { mocked, partial } from '../../../test/util';
+import { logger } from '../../logger';
 import * as _repositoryCache from '../cache/repository';
 import type { BranchCache, RepoCacheData } from '../cache/repository/types';
 import {
@@ -142,53 +143,64 @@ describe('util/git/conflicts-cache', () => {
       });
     });
 
-    it('replaces value when branch SHA has changed', () => {
+    it('warns when branch SHA has changed', () => {
       setCachedConflictResult('foo', '101', 'bar', '222', false);
-      setCachedConflictResult('foo', '111', 'bar', '333', false);
-      setCachedConflictResult('foo', '121', 'bar', '444', true);
-      expect(repoCache).toEqual({
-        branches: [
-          {
-            baseBranchName: 'foo',
-            branchName: 'bar',
-            sha: '444',
-            baseBranchSha: '121',
-            isConflicted: true,
-          },
-        ],
-      });
-    });
-
-    it('replaces value when target branch SHA has changed', () => {
-      setCachedConflictResult('foo', '111', 'bar', '222', false);
-      setCachedConflictResult('foo', 'aaa', 'bar', '222', true);
+      setCachedConflictResult('foo', '101', 'bar', '202', true);
       expect(repoCache).toEqual({
         branches: [
           {
             baseBranchName: 'foo',
             branchName: 'bar',
             sha: '222',
-            baseBranchSha: 'aaa',
+            baseBranchSha: '101',
             isConflicted: true,
           },
         ],
       });
+      expect(logger.warn).toHaveBeenCalledWith(
+        'Invalid Cache.Cached branch SHA is different than source branch SHA'
+      );
     });
 
-    it('replaces value when both target and source SHA have changed', () => {
-      setCachedConflictResult('foo', '111', 'bar', '222', true);
-      setCachedConflictResult('foo', 'aaa', 'bar', 'bbb', false);
+    it('warns when target branch SHA has changed', () => {
+      setCachedConflictResult('foo', '111', 'bar', '222', false);
+      setCachedConflictResult('foo', '101', 'bar', '222', true);
       expect(repoCache).toEqual({
         branches: [
           {
             baseBranchName: 'foo',
             branchName: 'bar',
-            sha: 'bbb',
-            baseBranchSha: 'aaa',
+            sha: '222',
+            baseBranchSha: '111',
+            isConflicted: true,
+          },
+        ],
+      });
+      expect(logger.warn).toHaveBeenCalledWith(
+        'Invalid Cache.Cached target branch SHA is different from fetched current branch state'
+      );
+    });
+
+    it('replaces value when both target and source SHA have changed', () => {
+      setCachedConflictResult('foo', '111', 'bar', '222', true);
+      setCachedConflictResult('foo', '101', 'bar', '202', false);
+      expect(repoCache).toEqual({
+        branches: [
+          {
+            baseBranchName: 'foo',
+            branchName: 'bar',
+            sha: '222',
+            baseBranchSha: '111',
             isConflicted: false,
           },
         ],
       });
+      expect(logger.warn).toHaveBeenCalledWith(
+        'Invalid Cache.Cached branch SHA is different than source branch SHA'
+      );
+      expect(logger.warn).toHaveBeenCalledWith(
+        'Invalid Cache.Cached target branch SHA is different from fetched current branch state'
+      );
     });
   });
 });

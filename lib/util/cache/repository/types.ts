@@ -28,16 +28,17 @@ export interface BranchUpgradeCache {
 
 export interface BranchCache {
   automerge: boolean;
-  branchName: string;
-  isModified: boolean | null;
-  isConflicted: boolean | null;
-  prNo: number | null;
-  sha: string | null;
   baseBranchName: string;
   baseBranchSha: string | null;
-  upgrades: BranchUpgradeCache[];
+  branchName: string;
   branchFingerprint?: string;
   isBehindBaseBranch: boolean | null;
+  isConflicted: boolean | null;
+  isModified: boolean | null;
+  parentSha: string | null;
+  prNo: number | null;
+  sha: string | null;
+  upgrades: BranchUpgradeCache[];
 }
 
 export interface RepoCacheData {

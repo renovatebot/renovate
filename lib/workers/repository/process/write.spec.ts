@@ -434,5 +434,54 @@ describe('workers/repository/process/write', () => {
         ],
       });
     });
+
+    it('adds cache when branch exists but cache not found', async () => {
+      const branches = partial<BranchConfig[]>([
+        {
+          branchName: 'new/diff-branch',
+          baseBranch: 'base_branch',
+          manager: 'npm',
+          upgrades: [
+            {
+              manager: 'unknown-manager',
+            } as BranchUpgradeConfig,
+          ],
+        },
+      ]);
+      branchWorker.processBranch.mockResolvedValueOnce({
+        branchExists: true,
+        result: BranchResult.Done,
+        commitSha: 'some-value',
+      });
+      git.branchExists.mockReturnValue(true);
+      git.getBranchCommit.mockReturnValueOnce('101');
+      git.getBranchCommit.mockReturnValueOnce('303');
+      config.repositoryCache = 'enabled';
+      await writeUpdates(config, branches);
+      repoCache.getCache.mockReturnValueOnce(repoCacheObj);
+      expect(repoCacheObj).toMatchObject({
+        branches: [
+          {
+            branchName: 'new/some-branch',
+            sha: '111',
+            isModified: false,
+            isConflicted: false,
+            isBehindBaseBranch: false,
+            baseBranchSha: '333',
+            baseBranchName: 'base_branch',
+          } as BranchCache,
+          {
+            branchName: 'new/diff-branch',
+            sha: '101',
+            isModified: null,
+            isConflicted: null,
+            isBehindBaseBranch: null,
+            baseBranchSha: '303',
+            baseBranchName: 'base_branch',
+            parentSha: null,
+          } as BranchCache,
+        ],
+      });
+    });
   });
 });

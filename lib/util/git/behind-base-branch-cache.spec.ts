@@ -19,7 +19,9 @@ describe('util/git/behind-base-branch-cache', () => {
 
   describe('getCachedBehindBaseResult', () => {
     it('returns null if cache is not populated', () => {
-      expect(getCachedBehindBaseResult('foo')).toBeNull();
+      expect(
+        getCachedBehindBaseResult('foo', 'SHA', 'base_foo', 'base_SHA')
+      ).toBeNull();
     });
 
     it('returns null if branch not found', () => {
@@ -28,49 +30,66 @@ describe('util/git/behind-base-branch-cache', () => {
         isModified: false,
       });
       repoCache = { branches: [branchCache] };
-      expect(getCachedBehindBaseResult('foo')).toBeNull();
+      expect(
+        getCachedBehindBaseResult('foo', 'SHA', 'base_foo', 'base_SHA')
+      ).toBeNull();
     });
 
     it('returns null if isBehindBaseBranch is undefined', () => {
       const branchCache = partial<BranchCache>({
         branchName: 'foo',
+        sha: 'SHA',
+        baseBranchName: 'base_foo',
         isModified: false,
       });
       repoCache = { branches: [branchCache] };
       repositoryCache.getCache.mockReturnValue(repoCache);
-      expect(getCachedBehindBaseResult('foo')).toBeNull();
+      expect(
+        getCachedBehindBaseResult('foo', 'SHA', 'base_foo', 'base_SHA')
+      ).toBeNull();
     });
 
     it('returns value', () => {
       const branchCache = partial<BranchCache>({
         branchName: 'foo',
+        sha: 'SHA',
+        baseBranchSha: 'base_SHA',
+        baseBranchName: 'base_foo',
         isBehindBaseBranch: false,
       });
       repoCache = { branches: [branchCache] };
       repositoryCache.getCache.mockReturnValue(repoCache);
-      expect(getCachedBehindBaseResult('foo')).toBeFalse();
+      expect(
+        getCachedBehindBaseResult('foo', 'SHA', 'base_foo', 'base_SHA')
+      ).toBeFalse();
     });
   });
 
   describe('setCachedBehindBaseResult', () => {
     it('populates cache', () => {
-      setCachedBehindBaseResult('foo', false);
+      setCachedBehindBaseResult('foo', 'SHA', 'base_foo', 'base_SHA', false);
       expect(repoCache).toMatchObject({
         branches: [
           {
             branchName: 'foo',
             isBehindBaseBranch: false,
+            baseBranchName: 'base_foo',
+            sha: 'SHA',
+            baseBranchSha: 'base_SHA',
           },
         ],
       });
     });
 
-    it('returns null if isBehindBaseBranch is undefined', () => {
+    it('handles multiple branches', () => {
       repoCache = {
         branches: [
           partial<BranchCache>({
             branchName: 'foo',
             isBehindBaseBranch: true,
+            baseBranchName: 'base_foo',
+            sha: 'SHA',
+            baseBranchSha: 'base_SHA',
           }),
           partial<BranchCache>({
             branchName: 'bar',
@@ -79,12 +98,15 @@ describe('util/git/behind-base-branch-cache', () => {
         ],
       };
       repositoryCache.getCache.mockReturnValue(repoCache);
-      setCachedBehindBaseResult('foo', false);
+      setCachedBehindBaseResult('foo', 'SHA', 'base_foo', 'base_SHA', false);
       expect(repoCache).toMatchObject({
         branches: [
           {
             branchName: 'foo',
             isBehindBaseBranch: false,
+            baseBranchName: 'base_foo',
+            sha: 'SHA',
+            baseBranchSha: 'base_SHA',
           },
           {
             branchName: 'bar',

@@ -94,6 +94,13 @@ export async function writeUpdates(
     );
 
     if (branchExisted) {
+      // if branch cache not found initialize it
+      if (Object.keys(branchCache).length === 0) {
+        cachedBranches.push(branchCache);
+        branchCache.branchName = branch.branchName;
+        branchCache.baseBranchName = branch.baseBranch!;
+      }
+
       syncBranchCache(branchCache);
     }
     const res = await processBranch(branch);
@@ -127,9 +134,10 @@ function syncBranchCache(branchCache: BranchCache): void {
   // compare branch cache to fetched branch state
   if (branchSha !== branchCache.sha) {
     // invalidate isModified, isConflicted values
-    // not invalidating isBehindBase here cause thiss can only be caused due to modification by other usersand not renovate bot
+    // not invalidating isBehindBase here cause this can only occurs when a user modifies the branch
     branchCache.isConflicted = null;
     branchCache.isModified = null;
+    branchCache.parentSha = null;
 
     // update cached branchSha
     branchCache.sha = branchSha;

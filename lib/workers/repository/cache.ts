@@ -9,6 +9,7 @@ import type {
 } from '../../util/cache/repository/types';
 import {
   getBranchCommit,
+  getBranchParentSha,
   isBranchBehindBase,
   isBranchConflicted,
   isBranchModified,
@@ -54,7 +55,9 @@ async function generateBranchCache(
     const sha = getBranchCommit(branchName) ?? null;
     let prNo = null;
     let baseBranchSha = null;
+    let parentSha = null;
     if (sha) {
+      parentSha = await getBranchParentSha(branchName);
       // TODO: (fix types) #7154
       baseBranchSha = getBranchCommit(baseBranchName!);
       const branchPr = await platform.getBranchPr(branchName);
@@ -97,6 +100,7 @@ async function generateBranchCache(
       // TODO: (fix types) #7154
       baseBranchName: baseBranchName!,
       baseBranchSha,
+      parentSha,
       prNo,
       automerge,
       isModified,
