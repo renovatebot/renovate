@@ -44,6 +44,13 @@ export function extractPackageFile(content: string): PackageFile | null {
       }
 
       deps.push(dep);
+    } else {
+      const dep: PackageDependency = {
+        depName: groups.toolname.trim(),
+        skipReason: 'unsupported-datasource',
+      };
+
+      deps.push(dep);
     }
   }
 

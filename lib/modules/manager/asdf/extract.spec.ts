@@ -15,9 +15,16 @@ describe('modules/manager/asdf/extract', () => {
       ]);
     });
 
-    it('ignores lines with unsupported tooling', () => {
-      const res = extractPackageFile('yarn 1.22.5\n');
-      expect(res).toBeNull();
+    it('provides skipReason for lines with unsupported tooling', () => {
+      const res = extractPackageFile('unsupported 1.22.5\n');
+      expect(res).toEqual({
+        deps: [
+          {
+            depName: 'unsupported',
+            skipReason: 'unsupported-datasource',
+          },
+        ],
+      });
     });
 
     it('only captures the first version', () => {
