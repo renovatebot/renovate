@@ -27,21 +27,7 @@ export class ApiCache<T extends ApiPageItem> {
     return lastModified ? DateTime.fromISO(lastModified).toHTTP() : null;
   }
 
-  getItems(): T[];
-  getItems<U = unknown>(mapFn: (_: T) => U): U[];
-  getItems<U = unknown>(mapFn?: (_: T) => U): T[] | U[] {
-    if (mapFn) {
-      const cachedResult = this.itemsMapCache.get(mapFn);
-      if (cachedResult) {
-        return cachedResult;
-      }
-
-      const items = Object.values(this.cache.items);
-      const mappedResult = items.map(mapFn);
-      this.itemsMapCache.set(mapFn, mappedResult);
-      return mappedResult;
-    }
-
+  getItems(): T[] {
     const items = Object.values(this.cache.items);
     return items;
   }
