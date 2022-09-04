@@ -158,7 +158,7 @@ describe('util/git/conflicts-cache', () => {
         ],
       });
       expect(logger.warn).toHaveBeenCalledWith(
-        'Invalid Cache.Cached branch SHA is different than source branch SHA'
+        'Invalid Cache. Branch sha mismatch'
       );
     });
 
@@ -177,13 +177,13 @@ describe('util/git/conflicts-cache', () => {
         ],
       });
       expect(logger.warn).toHaveBeenCalledWith(
-        'Invalid Cache.Cached target branch SHA is different from fetched current branch state'
+        'Invalid Cache. Base branch sha mismatch'
       );
     });
 
-    it('replaces value when both target and source SHA have changed', () => {
+    it('warns when targetBranchName is different from cached baseBranchName', () => {
       setCachedConflictResult('foo', '111', 'bar', '222', true);
-      setCachedConflictResult('foo', '101', 'bar', '202', false);
+      setCachedConflictResult('not_foo', '101', 'bar', '202', false);
       expect(repoCache).toEqual({
         branches: [
           {
@@ -196,10 +196,7 @@ describe('util/git/conflicts-cache', () => {
         ],
       });
       expect(logger.warn).toHaveBeenCalledWith(
-        'Invalid Cache.Cached branch SHA is different than source branch SHA'
-      );
-      expect(logger.warn).toHaveBeenCalledWith(
-        'Invalid Cache.Cached target branch SHA is different from fetched current branch state'
+        'Invalid Cache. Base branch name mismatch'
       );
     });
   });

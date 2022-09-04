@@ -32,9 +32,7 @@ export function setCachedModifiedResult(
   }
 
   if (branch.sha !== branchSha) {
-    logger.warn(
-      'Invalid Cache.Cached branch SHA is different than current branch SHA'
-    );
+    logger.warn('Invalid Cache. Branch sha mismatch');
   }
 
   branch.isModified = isModified;

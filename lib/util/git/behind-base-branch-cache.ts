@@ -48,21 +48,15 @@ export function setCachedBehindBaseResult(
   }
 
   if (branch.sha !== branchSha) {
-    logger.warn(
-      'Invalid Cache.Cached branch SHA is different than source branch SHA'
-    );
+    logger.warn('Invalid Cache. Branch sha mismatch');
   }
 
   if (branch.baseBranchSha !== baseBranchSha) {
-    logger.warn(
-      'Invalid Cache.Cached target branch SHA is different from fetched current branch state'
-    );
+    logger.warn('Invalid Cache. Base branch sha mismatch');
   }
 
   if (branch.baseBranchName !== baseBranchName) {
-    logger.warn(
-      'Invalid Cache. Cached base branch name different from target branch name'
-    );
+    logger.warn('Invalid Cache. Base branch name mismatch');
   }
 
   branch.isBehindBaseBranch = isBehind;

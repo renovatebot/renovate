@@ -55,26 +55,14 @@ describe('util/git/modified-cache', () => {
       });
     });
 
-    it('replaces value when SHA has changed', () => {
+    it('warns when branch sha mismmatch', () => {
       setCachedModifiedResult('foo', '111', false);
-      setCachedModifiedResult('foo', '121', false);
-      setCachedModifiedResult('foo', '131', false);
-      expect(repoCache).toEqual({
-        branches: [{ branchName: 'foo', sha: '111', isModified: false }],
-      });
-      expect(logger.warn).toHaveBeenCalledWith(
-        'Invalid Cache.Cached branch SHA is different than current branch SHA'
-      );
-    });
-
-    it('replaces value when both value and SHA have changed', () => {
-      setCachedModifiedResult('foo', '111', false);
-      setCachedModifiedResult('foo', 'aaa', true);
+      setCachedModifiedResult('foo', '121', true);
       expect(repoCache).toEqual({
         branches: [{ branchName: 'foo', sha: '111', isModified: true }],
       });
       expect(logger.warn).toHaveBeenCalledWith(
-        'Invalid Cache.Cached branch SHA is different than current branch SHA'
+        'Invalid Cache. Branch sha mismatch'
       );
     });
 
