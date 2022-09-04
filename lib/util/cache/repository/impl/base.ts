@@ -140,10 +140,10 @@ export abstract class RepoCacheBase implements RepoCache {
   }
 
   isModified(): boolean | undefined {
-    const jsonStr = this.stringify();
     if (!this.oldHash) {
       return undefined;
     }
+    const jsonStr = this.stringify();
     return hasha(jsonStr) !== this.oldHash;
   }
 }
