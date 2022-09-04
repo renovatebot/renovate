@@ -313,4 +313,31 @@ describe('util/cache/repository/impl/local', () => {
 
     expect(fs.outputCacheFile).not.toHaveBeenCalledWith();
   });
+
+  it('does not write cache when only key order has changed', async () => {
+    const oldCacheRecord = await createCacheRecord({
+      configFileName: 'renovate.json',
+      semanticCommits: 'enabled',
+    });
+    const cacheType = 'protocol://domain/path';
+    fs.readCacheFile.mockResolvedValueOnce(JSON.stringify(oldCacheRecord));
+    const localRepoCache = CacheFactory.get(
+      'some/repo',
+      '0123456789abcdef',
+      cacheType
+    );
+
+    await localRepoCache.load();
+    const data = localRepoCache.getData();
+    delete data.configFileName;
+    delete data.semanticCommits;
+    data.semanticCommits = 'enabled';
+    data.configFileName = 'renovate.json';
+
+    expect(localRepoCache.isModified()).toBeFalse();
+
+    await localRepoCache.save();
+
+    expect(fs.outputCacheFile).not.toHaveBeenCalledWith();
+  });
 });
