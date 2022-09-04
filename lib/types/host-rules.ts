@@ -12,6 +12,7 @@ export interface HostRuleSearchResult {
   concurrentRequestLimit?: number;
 
   dnsCache?: boolean;
+  keepalive?: boolean;
 }
 
 export interface HostRule extends HostRuleSearchResult {
