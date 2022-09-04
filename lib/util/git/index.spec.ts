@@ -258,6 +258,9 @@ describe('util/git/index', () => {
     it('should return result even if non-default and not under branchPrefix', async () => {
       const branchCache = partial<BranchCache>({
         branchName: 'develop',
+        sha: 'SHA',
+        baseBranchSha: 'base_SHA',
+        baseBranchName: 'base_foo',
         isBehindBaseBranch: true,
       });
       repoCache.getCache
