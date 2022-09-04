@@ -295,6 +295,7 @@ describe('util/cache/repository/impl/local', () => {
 
   it('does not write cache that is not changed', async () => {
     const oldCacheRecord = await createCacheRecord({
+      configFileName: 'renovate.json',
       semanticCommits: 'enabled',
     });
     const cacheType = 'protocol://domain/path';
@@ -306,7 +307,19 @@ describe('util/cache/repository/impl/local', () => {
     );
 
     await localRepoCache.load();
-    expect(localRepoCache.getData()).toEqual({ semanticCommits: 'enabled' });
+    expect(localRepoCache.getData()).toEqual({
+      configFileName: 'renovate.json',
+      semanticCommits: 'enabled',
+    });
+    expect(localRepoCache.isModified()).toBeFalse();
+
+    const data = localRepoCache.getData();
+
+    // Additionaly test for object keys order-independency
+    delete data.configFileName;
+    delete data.semanticCommits;
+    data.semanticCommits = 'enabled';
+    data.configFileName = 'renovate.json';
     expect(localRepoCache.isModified()).toBeFalse();
 
     await localRepoCache.save();

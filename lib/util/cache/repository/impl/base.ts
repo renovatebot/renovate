@@ -2,6 +2,7 @@ import { promisify } from 'util';
 import zlib from 'zlib';
 import is from '@sindresorhus/is';
 import hasha from 'hasha';
+import sortObject from 'sortobject';
 import { GlobalConfig } from '../../../../config/global';
 import { logger } from '../../../../logger';
 import {
@@ -105,8 +106,14 @@ export abstract class RepoCacheBase implements RepoCache {
     }
   }
 
+  private stringify(): string {
+    const sortedData = sortObject(this.data);
+    const stringifiedData = JSON.stringify(sortedData);
+    return stringifiedData;
+  }
+
   async save(): Promise<void> {
-    const jsonStr = JSON.stringify(this.data);
+    const jsonStr = this.stringify();
     const hash = await hasha.async(jsonStr);
     if (hash === this.oldHash) {
       return;
@@ -133,7 +140,7 @@ export abstract class RepoCacheBase implements RepoCache {
   }
 
   isModified(): boolean | undefined {
-    const jsonStr = JSON.stringify(this.data);
+    const jsonStr = this.stringify();
     if (!this.oldHash) {
       return undefined;
     }

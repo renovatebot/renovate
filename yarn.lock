@@ -8813,6 +8813,11 @@ sort-keys@^4.2.0:
   dependencies:
     is-plain-obj "^2.0.0"
 
+sortobject@4.16.0:
+  version "4.16.0"
+  resolved "https://registry.yarnpkg.com/sortobject/-/sortobject-4.16.0.tgz#9f1deca8da47f0d2da0a9100d9b0a407fd9d7b3f"
+  integrity sha512-jdcWhqJjxyYxRcXa30qImF3PZea1GpNwdKxUac28T28+GodptH4XihPuRlgCY0hITIEQVnw8DtQ81Fb6fomBaw==
+
 source-map-support@0.5.13:
   version "0.5.13"
   resolved "https://registry.yarnpkg.com/source-map-support/-/source-map-support-0.5.13.tgz#31b24a9c2e73c2de85066c0feb7d44767ed52932"
