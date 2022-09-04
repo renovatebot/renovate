@@ -83,6 +83,25 @@ describe('modules/manager/asdf/extract', () => {
       });
     });
 
+    it('can handle multiple tools in one file', () => {
+      const res = extractPackageFile('nodejs 16.16.0\nyarn 1.2.3');
+      expect(res).toEqual({
+        deps: [
+          {
+            currentValue: '16.16.0',
+            datasource: 'github-tags',
+            depName: 'node',
+            packageName: 'nodejs/node',
+            versioning: 'node',
+          },
+          {
+            depName: 'yarn',
+            skipReason: 'unsupported-datasource',
+          },
+        ],
+      });
+    });
+
     describe('comment handling', () => {
       it('ignores comments at the end of lines', () => {
         const res = extractPackageFile('nodejs 16.16.0 # this is a comment\n');
