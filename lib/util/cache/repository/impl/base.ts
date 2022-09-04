@@ -21,6 +21,7 @@ import type {
   RepoCacheRecordV12,
   RepoCacheRecordV13,
 } from '../types';
+import { safeStringify } from '../../../stringify';
 
 const compress = promisify(zlib.brotliCompress);
 const decompress = promisify(zlib.brotliDecompress);
@@ -106,14 +107,8 @@ export abstract class RepoCacheBase implements RepoCache {
     }
   }
 
-  private stringify(): string {
-    const sortedData = sortObject(this.data);
-    const stringifiedData = JSON.stringify(sortedData);
-    return stringifiedData;
-  }
-
   async save(): Promise<void> {
-    const jsonStr = this.stringify();
+    const jsonStr = safeStringify(this.data);
     const hash = await hasha.async(jsonStr);
     if (hash === this.oldHash) {
       return;
@@ -143,7 +138,7 @@ export abstract class RepoCacheBase implements RepoCache {
     if (!this.oldHash) {
       return undefined;
     }
-    const jsonStr = this.stringify();
+    const jsonStr = safeStringify(this.data);
     return hasha(jsonStr) !== this.oldHash;
   }
 }

@@ -213,7 +213,6 @@
     "shlex": "2.1.2",
     "simple-git": "3.13.0",
     "slugify": "1.6.5",
-    "sortobject": "4.16.0",
     "traverse": "0.6.6",
     "tslib": "2.4.0",
     "upath": "2.0.1",
