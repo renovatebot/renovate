@@ -84,7 +84,16 @@ describe('modules/manager/asdf/extract', () => {
 
       it('ignores supported tooling with a renovate:ignore comment', () => {
         const res = extractPackageFile('nodejs 16.16.0 # renovate:ignore\n');
-        expect(res.deps).toEqual([]);
+        expect(res.deps).toEqual([
+          {
+            currentValue: 'nodejs 16.16.0',
+            datasource: 'github-tags',
+            depName: 'node',
+            packageName: 'nodejs/node',
+            versioning: 'node',
+            skipReason: 'ignored',
+          },
+        ]);
       });
     });
   });

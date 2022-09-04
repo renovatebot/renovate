@@ -34,11 +34,15 @@ export function extractPackageFile(content: string): PackageFile {
     .map((m) => m.groups)
     .filter(is.truthy)) {
     const supportedTool = upgradeableTooling[groups.toolname];
-    if (supportedTool && !isSkipComment((groups.comment ?? '').trim())) {
+    if (supportedTool) {
       const dep: PackageDependency = {
         currentValue: groups.content.trim(),
         ...supportedTool,
       };
+      if (isSkipComment((groups.comment ?? '').trim())) {
+        dep.skipReason = 'ignored';
+      }
+
       deps.push(dep);
     }
   }
