@@ -3,8 +3,6 @@ import { DateTime } from 'luxon';
 import type { ApiPageCache, ApiPageItem } from './types';
 
 export class ApiCache<T extends ApiPageItem> {
-  private itemsMapCache = new WeakMap();
-
   constructor(private cache: ApiPageCache<T>) {}
 
   get etag(): string | null {
@@ -44,7 +42,6 @@ export class ApiCache<T extends ApiPageItem> {
    */
   updateItem(item: T): void {
     this.cache.items[item.number] = item;
-    this.itemsMapCache = new WeakMap();
   }
 
   /**
@@ -74,7 +71,6 @@ export class ApiCache<T extends ApiPageItem> {
 
       if (!dequal(oldItem, newItem)) {
         items[number] = newItem;
-        this.itemsMapCache = new WeakMap();
       }
 
       needNextPage = itemOldTime ? itemOldTime < itemNewTime : true;
