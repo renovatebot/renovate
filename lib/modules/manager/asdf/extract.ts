@@ -36,7 +36,7 @@ export function extractPackageFile(content: string): PackageFile | null {
     const supportedTool = upgradeableTooling[groups.toolname];
     if (supportedTool) {
       const dep: PackageDependency = {
-        currentValue: groups.content.trim(),
+        currentValue: groups.version.trim(),
         ...supportedTool,
       };
       if (isSkipComment((groups.comment ?? '').trim())) {

@@ -4,15 +4,17 @@ describe('modules/manager/asdf/extract', () => {
   describe('extractPackageFile()', () => {
     it('returns a result', () => {
       const res = extractPackageFile('nodejs 16.16.0\n');
-      expect(res.deps).toEqual([
-        {
-          currentValue: 'nodejs 16.16.0',
-          datasource: 'github-tags',
-          depName: 'node',
-          packageName: 'nodejs/node',
-          versioning: 'node',
-        },
-      ]);
+      expect(res).toEqual({
+        deps: [
+          {
+            currentValue: '16.16.0',
+            datasource: 'github-tags',
+            depName: 'node',
+            packageName: 'nodejs/node',
+            versioning: 'node',
+          },
+        ],
+      });
     });
 
     it('provides skipReason for lines with unsupported tooling', () => {
@@ -32,7 +34,7 @@ describe('modules/manager/asdf/extract', () => {
       expect(res).toEqual({
         deps: [
           {
-            currentValue: 'nodejs 16.16.0',
+            currentValue: '16.16.0',
             datasource: 'github-tags',
             depName: 'node',
             packageName: 'nodejs/node',
@@ -63,7 +65,7 @@ describe('modules/manager/asdf/extract', () => {
         expect(res).toEqual({
           deps: [
             {
-              currentValue: 'nodejs 16.16.0',
+              currentValue: '16.16.0',
               datasource: 'github-tags',
               depName: 'node',
               packageName: 'nodejs/node',
@@ -85,7 +87,7 @@ describe('modules/manager/asdf/extract', () => {
         expect(res).toEqual({
           deps: [
             {
-              currentValue: 'nodejs 16.16.0',
+              currentValue: '16.16.0',
               datasource: 'github-tags',
               depName: 'node',
               packageName: 'nodejs/node',
@@ -100,7 +102,7 @@ describe('modules/manager/asdf/extract', () => {
         expect(res).toEqual({
           deps: [
             {
-              currentValue: 'nodejs 16.16.0',
+              currentValue: '16.16.0',
               datasource: 'github-tags',
               depName: 'node',
               packageName: 'nodejs/node',
