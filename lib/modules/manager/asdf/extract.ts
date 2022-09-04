@@ -25,7 +25,7 @@ export function extractPackageFile(content: string): PackageFile | null {
   logger.trace('asdf.extractPackageFile()');
 
   const regex = regEx(
-    /^(?<content>(?<toolname>(\w+))\s+((?<version>(\d[\d.]+\d))|(?<altVersion>([^\s]+))))([^#]*(#(?<comment>(.*))))?/gm
+    /^(?<toolName>(\w+))\s+((?<version>(\d[\d.]+\d))|(?<altVersion>([^\s]+)))([^#]*(#(?<comment>(.*))))?/gm
   );
 
   const deps: PackageDependency[] = [];
@@ -33,7 +33,7 @@ export function extractPackageFile(content: string): PackageFile | null {
   for (const groups of [...content.matchAll(regex)]
     .map((m) => m.groups)
     .filter(is.truthy)) {
-    const supportedTool = upgradeableTooling[groups.toolname];
+    const supportedTool = upgradeableTooling[groups.toolName];
     if (supportedTool) {
       if (groups.version) {
         const dep: PackageDependency = {
@@ -56,7 +56,7 @@ export function extractPackageFile(content: string): PackageFile | null {
       }
     } else {
       const dep: PackageDependency = {
-        depName: groups.toolname.trim(),
+        depName: groups.toolName.trim(),
         skipReason: 'unsupported-datasource',
       };
 
