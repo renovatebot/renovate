@@ -2,9 +2,9 @@ import { promisify } from 'util';
 import zlib from 'zlib';
 import is from '@sindresorhus/is';
 import hasha from 'hasha';
-import sortObject from 'sortobject';
 import { GlobalConfig } from '../../../../config/global';
 import { logger } from '../../../../logger';
+import { safeStringify } from '../../../stringify';
 import {
   CACHE_REVISION,
   isValidRev10,
@@ -21,7 +21,6 @@ import type {
   RepoCacheRecordV12,
   RepoCacheRecordV13,
 } from '../types';
-import { safeStringify } from '../../../stringify';
 
 const compress = promisify(zlib.brotliCompress);
 const decompress = promisify(zlib.brotliDecompress);
