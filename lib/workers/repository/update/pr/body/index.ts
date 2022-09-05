@@ -70,10 +70,10 @@ export async function getPrBody(
   prBodyConfig: PrBodyConfig
 ): Promise<string> {
   massageUpdateMetadata(branchConfig);
-  let warn = '';
-  warn += getWarnings(branchConfig);
+  let warnings = '';
+  warnings += getWarnings(branchConfig);
   if (branchConfig.packageFiles) {
-    warn += getDepWarningsPR(
+    warnings += getDepWarningsPR(
       branchConfig.packageFiles,
       branchConfig.dependencyDashboard
     );
@@ -81,7 +81,7 @@ export async function getPrBody(
   const content = {
     header: getPrHeader(branchConfig),
     table: getPrUpdatesTable(branchConfig),
-    warnings: warn,
+    warnings,
     notes: getPrNotes(branchConfig) + getPrExtraNotes(branchConfig),
     changelogs: getChangelogs(branchConfig),
     configDescription: await getPrConfigDescription(branchConfig),
