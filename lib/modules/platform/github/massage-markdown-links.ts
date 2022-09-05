@@ -38,13 +38,6 @@ function collectLinkPosition(input: string, matches: UrlMatch[]): Plugin {
       const globalUrlReg = new RegExp(urlRegex, 'gi');
       const urlMatches = [...tree.value.matchAll(globalUrlReg)];
       for (const match of urlMatches) {
-        if (
-          regEx(
-            /([\u200B]+|[\u200C]+|[\u200D]+|[\u200E]+|[\u200F]+|[\uFEFF]+)/g
-          ).test(match.input ?? '')
-        ) {
-          match.index = (match.index ?? 0) + 6;
-        }
         const [url] = match;
         const start = startOffset + (match.index ?? 0);
         const end = start + url.length;
@@ -65,12 +58,15 @@ export function massageMarkdownLinks(content: string): string {
   try {
     const rightSpaces = content.replace(content.trimEnd(), '');
     const matches: UrlMatch[] = [];
-    remark().use(collectLinkPosition(content, matches)).processSync(content);
+    const newContent = content.replace(regEx(/@&#8203;/g), '@');
+    remark()
+      .use(collectLinkPosition(newContent, matches))
+      .processSync(newContent);
     const result = matches.reduceRight((acc, { start, end, replaceTo }) => {
       const leftPart = acc.slice(0, start);
       const rightPart = acc.slice(end);
       return leftPart + replaceTo + rightPart;
-    }, content);
+    }, newContent);
     return result.trimEnd() + rightSpaces;
   } catch (err) /* istanbul ignore next */ {
     logger.warn({ err }, `Unable to massage markdown text`);
