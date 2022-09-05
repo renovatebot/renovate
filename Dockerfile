@@ -45,13 +45,13 @@ RUN set -ex; \
 FROM base as final
 
 # renovate: datasource=docker lookupName=mcr.microsoft.com/dotnet/sdk
-RUN install-tool dotnet 6.0.302
+RUN install-tool dotnet 6.0.400
 
 # renovate: datasource=github-releases lookupName=helm/helm
-RUN install-tool helm v3.9.2
+RUN install-tool helm v3.9.4
 
 # renovate: datasource=docker versioning=docker
-RUN install-tool golang 1.18.4
+RUN install-tool golang 1.19.0
 
 COPY --from=tsbuild /usr/src/app/package.json package.json
 COPY --from=tsbuild /usr/src/app/dist dist
