@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import hasha from 'hasha';
 import { logger } from '../../logger';
 import { stripEmojis } from '../../util/emoji';
@@ -7,6 +8,14 @@ import type { PrBodyStruct } from './types';
 
 export const prDebugDataRe = regEx(
   /\n?<!--renovate-debug:(?<payload>.*?)-->\n?/
+);
+
+export const renovateConfigHashRe = regEx(
+  /\n?<!--renovate-config-hash:(?<payload>.*?)-->\n?/
+);
+
+export const prCheckboxRe = regEx(
+  /- (?<checkbox>\[[\sx]]) <!-- rebase-check -->/
 );
 
 function noWhitespaceOrHeadings(input: string): string {
@@ -28,12 +37,21 @@ export function hashBody(body: string | undefined): string {
   return result;
 }
 
-function isRebaseRequested(body: string | undefined): boolean {
-  return !!body?.includes(`- [x] <!-- rebase-check -->`);
+function isRebaseRequested(body: string | undefined): boolean | undefined {
+  const match = prCheckboxRe.exec(body ?? '');
+  if (!match) {
+    return undefined;
+  }
+  return match.groups?.checkbox === '[x]';
 }
 
 export function getRenovateDebugPayload(body: string): string | undefined {
   const match = prDebugDataRe.exec(body);
+  return match?.groups?.payload;
+}
+
+export function getRenovateConfigHashPayload(body: string): string | undefined {
+  const match = renovateConfigHashRe.exec(body);
   return match?.groups?.payload;
 }
 
@@ -45,8 +63,14 @@ export function getPrBodyStruct(
   const result: PrBodyStruct = { hash };
 
   const rebaseRequested = isRebaseRequested(body);
-  if (rebaseRequested) {
+
+  if (!is.undefined(rebaseRequested)) {
     result.rebaseRequested = rebaseRequested;
+  }
+
+  const rawConfigHash = getRenovateConfigHashPayload(body);
+  if (rawConfigHash) {
+    result.rawConfigHash = fromBase64(rawConfigHash);
   }
 
   const debugPayload = getRenovateDebugPayload(body);

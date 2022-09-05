@@ -11,6 +11,7 @@ import { logger } from '../../../../logger';
 import type { PackageFile } from '../../../../modules/manager/types';
 import type { Pr } from '../../../../modules/platform';
 import type { BranchConfig } from '../../../types';
+import { OnboardingState } from '../common';
 import { ensureOnboardingPr } from '.';
 
 jest.mock('../../../../util/git');
@@ -22,7 +23,7 @@ describe('workers/repository/onboarding/pr/index', () => {
     let branches: BranchConfig[];
 
     const bodyStruct = {
-      hash: '8d5d8373c3fc54803f573ea57ded60686a9df8eb0430ad25da281472eed9ce4e',
+      hash: 'eb5ddf49d8a928cd264116de75d46e1039ba2c1361036182aa43af8dd0609bd0',
     };
 
     beforeEach(() => {
@@ -38,6 +39,7 @@ describe('workers/repository/onboarding/pr/index', () => {
       platform.massageMarkdown = jest.fn((input) => input);
       platform.createPr.mockResolvedValueOnce(partial<Pr>({}));
       GlobalConfig.reset();
+      OnboardingState.prUpdateRequested = true;
     });
 
     it('returns if onboarded', async () => {

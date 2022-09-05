@@ -129,6 +129,6 @@ export const isOnboarded = async (config: RenovateConfig): Promise<boolean> => {
   throw new Error(REPOSITORY_CLOSED_ONBOARDING);
 };
 
-export const onboardingPrExists = async (
+export const getOnboardingPr = async (
   config: RenovateConfig
-): Promise<boolean> => !!(await platform.getBranchPr(config.onboardingBranch!));
+): Promise<Pr | null> => await platform.getBranchPr(config.onboardingBranch!); // TODO #7154

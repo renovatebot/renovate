@@ -52,6 +52,7 @@ export interface PrDebugData {
 
 export interface PrBodyStruct {
   hash: string;
+  rawConfigHash?: string;
   rebaseRequested?: boolean;
   debugData?: PrDebugData;
 }

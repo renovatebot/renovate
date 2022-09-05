@@ -1,4 +1,5 @@
-import { configFileNames } from '../../../../config/app-strings';
+import is from '@sindresorhus/is';
+import hasha from 'hasha';
 import { GlobalConfig } from '../../../../config/global';
 import type { RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
@@ -8,26 +9,35 @@ import {
   isBranchBehindBase,
   isBranchModified,
 } from '../../../../util/git';
+import { OnboardingState, defaultConfigFile } from '../common';
 import { OnboardingCommitMessageFactory } from './commit-message';
 import { getOnboardingConfigContents } from './config';
 
-const defaultConfigFile = (config: RenovateConfig): string =>
-  configFileNames.includes(config.onboardingConfigFileName!)
-    ? config.onboardingConfigFileName!
-    : configFileNames[0];
-
 export async function rebaseOnboardingBranch(
-  config: RenovateConfig
+  config: RenovateConfig,
+  previousConfigHash?: string
 ): Promise<string | null> {
   logger.debug('Checking if onboarding branch needs rebasing');
+  const configFile = defaultConfigFile(config);
+  const existingContents =
+    (await getFile(configFile, config.onboardingBranch)) ?? '';
+  const currentConfigHash = hasha(existingContents);
+  const contents = await getOnboardingConfigContents(config, configFile);
+
+  if (is.undefined(previousConfigHash)) {
+    logger.debug('Missing previousConfigHash bodyStruct prop in onboarding PR');
+    OnboardingState.prUpdateRequested = true;
+  } else if (previousConfigHash !== currentConfigHash) {
+    logger.debug('Onboarding config has been modified by the user');
+    OnboardingState.prUpdateRequested = true;
+  }
+
   // TODO #7154
   if (await isBranchModified(config.onboardingBranch!)) {
     logger.debug('Onboarding branch has been edited and cannot be rebased');
     return null;
   }
-  const configFile = defaultConfigFile(config);
-  const existingContents = await getFile(configFile, config.onboardingBranch);
-  const contents = await getOnboardingConfigContents(config, configFile);
+
   // TODO #7154
   if (
     contents === existingContents &&
@@ -36,7 +46,9 @@ export async function rebaseOnboardingBranch(
     logger.debug('Onboarding branch is up to date');
     return null;
   }
+
   logger.debug('Rebasing onboarding branch');
+  OnboardingState.prUpdateRequested = true;
   // istanbul ignore next
   const commitMessageFactory = new OnboardingCommitMessageFactory(
     config,
