@@ -43,6 +43,7 @@ HTTPS
 ignoreScripts
 ignoreTests
 JavaScript
+JFrog
 js
 lockfile
 mergeable
