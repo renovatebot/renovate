@@ -34,6 +34,7 @@ Gitea
 GitHub
 GitLab
 Gitpod
+Goetz
 Gradle
 Habjan
 hostname
@@ -69,6 +70,7 @@ Renovate bot
 repo
 SemVer
 signoff
+SSDs
 subpreset
 Swissquote
 TypeScript
