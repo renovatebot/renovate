@@ -32,17 +32,17 @@ export async function getReleaseNotesMd(
 
   const gitApi = await azureApi.gitApi();
   const repoInfo = repository.split('/');
-  const repoName = repoInfo.pop();
+  const repoName = repoInfo.pop()!;
   const projectName = repoInfo.pop();
 
   const { objectId: rootObjectId } = await gitApi.getItem(
-    repoName!,
+    repoName,
     sourceDirectory ? sourceDirectory : '/',
     projectName
   );
 
   const res = await gitApi.getTree(
-    repoName!,
+    repoName,
     rootObjectId!,
     projectName,
     undefined,
@@ -83,7 +83,7 @@ export async function getReleaseNotesMd(
 
   const gitRef = files.shift();
 
-  if (!gitRef || !gitRef.relativePath) {
+  if (!gitRef?.relativePath) {
     return null;
   }
 
@@ -98,7 +98,7 @@ export async function getReleaseNotesMd(
   }
 
   const contentRes = await gitApi.getBlobContent(
-    repoName!,
+    repoName,
     objectId!,
     projectName
   );

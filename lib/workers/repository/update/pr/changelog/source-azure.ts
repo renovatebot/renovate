@@ -3,6 +3,7 @@ import { logger } from '../../../../../logger';
 import * as allVersioning from '../../../../../modules/versioning';
 import * as packageCache from '../../../../../util/cache/package';
 import type { BranchUpgradeConfig } from '../../../../types';
+import { slugifyUrl } from './common';
 import { addReleaseNotes } from './release-notes';
 import { getInRangeReleases } from './releases';
 import type { ChangeLogRelease, ChangeLogResult } from './types';
@@ -12,13 +13,23 @@ const cacheNamespace = 'changelog-azure-release';
 export async function getChangeLogJSON(
   config: BranchUpgradeConfig
 ): Promise<ChangeLogResult | null> {
-  const { currentVersion, newVersion, sourceDirectory, depName, manager } =
-    config;
-  const version = allVersioning.get(config.versioning);
+  const currentVersion = config.currentVersion!;
+  const newVersion = config.newVersion!;
   const sourceUrl = config.sourceUrl!;
-  const { protocol, host, pathname } = URL.parse(sourceUrl);
+  const depName = config.depName!;
+  const sourceDirectory = config.sourceDirectory!;
+
+  logger.trace('getChangeLogJSON for azure');
+  const version = allVersioning.get(config.versioning);
+
+  const parsedUrl = URL.parse(sourceUrl);
+  const protocol = parsedUrl.protocol!;
+  const host = parsedUrl.host!;
+  const pathname = parsedUrl.pathname!;
+
+  logger.trace({ protocol, host, pathname }, 'Protocol, host, pathname');
   const baseUrl = `${protocol}//${host}/`;
-  const repository = pathname!.slice(1).replace('_git/', '');
+  const repository = pathname.slice(1).replace('_git/', '');
   const apiBaseUrl = `${baseUrl}_apis/git/`;
 
   const releases = config.releases ?? (await getInRangeReleases(config));
@@ -39,14 +50,14 @@ export async function getChangeLogJSON(
   }
 
   function getCacheKey(prev: string, next: string): string {
-    return `${manager}:${depName}:${prev}:${next}`;
+    return `${slugifyUrl(sourceUrl)}:${depName}:${prev}:${next}`;
   }
 
   const changelogReleases: ChangeLogRelease[] = [];
   // compare versions
   const include = (v: string): boolean =>
-    version.isGreaterThan(v, currentVersion!) &&
-    !version.isGreaterThan(v, newVersion!);
+    version.isGreaterThan(v, currentVersion) &&
+    !version.isGreaterThan(v, newVersion);
   for (let i = 1; i < validReleases.length; i += 1) {
     const prev = validReleases[i - 1];
     const next = validReleases[i];
@@ -57,7 +68,7 @@ export async function getChangeLogJSON(
       );
       if (!release) {
         release = {
-          tagPrefix: tagPrefix,
+          tagPrefix,
           version: next.version,
           date: next.releaseTimestamp,
           // put empty changes so that existing templates won't break
@@ -65,7 +76,11 @@ export async function getChangeLogJSON(
           compare: {},
         };
         if (prev.tagPrefix) {
-          release.compare.url = `${sourceUrl}/branchCompare?baseVersion=GT${prev.tagPrefix}%2F${prev.version}&targetVersion=GT${next.tagPrefix}%2F${next.version}`;
+          release.compare.url = `${sourceUrl}/branchCompare?baseVersion=GT${
+            prev.tagPrefix
+          }%2F${prev.version}&targetVersion=GT${next.tagPrefix!}%2F${
+            next.version
+          }`;
         } else {
           release.compare.url = `${sourceUrl}/branchCompare?baseVersion=GT${prev.version}&targetVersion=GT${next.version}`;
         }

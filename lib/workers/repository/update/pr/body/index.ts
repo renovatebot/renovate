@@ -78,12 +78,21 @@ export function getPrBody(
     changelogs = getChangelogs(branchConfig);
   }
 
+  let warnings = '';
+  warnings += getWarnings(branchConfig);
+  if (branchConfig.packageFiles) {
+    warnings += getDepWarningsPR(
+      branchConfig.packageFiles,
+      branchConfig.dependencyDashboard
+    );
+  }
+
   const content = {
     header: getPrHeader(branchConfig),
     table: getPrUpdatesTable(branchConfig),
     warnings,
     notes: getPrNotes(branchConfig) + getPrExtraNotes(branchConfig),
-    changelogs: changelogs,
+    changelogs,
     configDescription: getPrConfigDescription(branchConfig),
     controls: getControls(),
     footer: getPrFooter(branchConfig),

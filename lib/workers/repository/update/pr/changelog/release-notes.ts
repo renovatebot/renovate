@@ -298,9 +298,9 @@ export function getReleaseNotesMdFile(
   // TODO: types (#7154)
   const cacheKey = `getReleaseNotesMdFile@v2${project.repository}${
     project.tagPrefix ? `-${project.tagPrefix}` : ''
-  }${project.sourceDirectory ? `-${project.sourceDirectory}` : ''}-${
-    project.apiBaseUrl
-  }`;
+  }${
+    project.sourceDirectory ? `-${project.sourceDirectory}` : ''
+  }-${project.apiBaseUrl!}`;
   const cachedResult = memCache.get<Promise<ChangeLogFile | null>>(cacheKey);
   // istanbul ignore if
   if (cachedResult !== undefined) {
@@ -356,7 +356,7 @@ export async function getReleaseNotesMd(
               if (baseUrl.match('.*(dev.azure.com|visualstudio.com).*')) {
                 // https:/digitecgalaxus.visualstudio.com/devinite/_git/Chabis.Messaging?path=/CHANGELOG.md
                 const repoInfo = repository.split('/');
-                notesSourceUrl = `${baseUrl}${repoInfo.shift()}/_git/${repoInfo.shift()}?path=/${changelogFile}`;
+                notesSourceUrl = `${baseUrl}${repoInfo.shift()!}/_git/${repoInfo.shift()!}?path=/${changelogFile}`;
               } else {
                 notesSourceUrl = `${baseUrl}${repository}/blob/HEAD/${changelogFile}`;
               }
