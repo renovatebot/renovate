@@ -7,3 +7,4 @@
 # Docs: https://docs.errata.ai/vale/vocab
 
 renovatebot
+[?vscode] # It should be: VS Code

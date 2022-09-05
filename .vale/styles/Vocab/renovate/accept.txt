@@ -23,6 +23,7 @@ Bundler
 codecov
 cron
 Dependabot
+devDependencies
 Docker
 Dockerfile
 dotnet
@@ -37,6 +38,8 @@ Habjan
 hostname
 HTTP
 HTTPS
+ignoreScripts
+ignoreTests
 JavaScript
 js
 lockfile
@@ -54,16 +57,23 @@ npmrc
 NuGet
 Packagist
 PHP
+pinDigest
 Pipenv
 pnpm
+PR's
+prFooter
 rebase
 rebasing
 Renovate bot
 repo
 SemVer
+signoff
+subpreset
+Swissquote
 TypeScript
 URIs
 URL
 URLs
+userStrings
 Vue
 Webpack
