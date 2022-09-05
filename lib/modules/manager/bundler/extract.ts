@@ -55,9 +55,7 @@ export async function extractPackageFile(
       };
       if (gemMatch.groups?.currentValue) {
         const currentValue = gemMatch.groups.currentValue;
-        dep.currentValue = regEx(/\s*,\s*/).test(currentValue)
-          ? currentValue
-          : currentValue.slice(1, -1);
+        dep.currentValue = currentValue;
       }
       dep.datasource = RubyGemsDatasource.id;
       res.deps.push(dep);

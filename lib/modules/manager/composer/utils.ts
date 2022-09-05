@@ -4,6 +4,8 @@ import { quote } from 'shlex';
 import { GlobalConfig } from '../../../config/global';
 import { logger } from '../../../logger';
 import type { ToolConstraint } from '../../../util/exec/types';
+import { HostRuleSearch, find as findHostRule } from '../../../util/host-rules';
+import { regEx } from '../../../util/regex';
 import { api, id as composerVersioningId } from '../../versioning/composer';
 import type { UpdateArtifactsConfig } from '../types';
 import type { ComposerConfig, ComposerLock } from './types';
@@ -75,7 +77,10 @@ export function extractConstraints(
 
   // extract php
   if (composerJson.config?.platform?.php) {
-    res.php = composerJson.config.platform.php;
+    const major = api.getMajor(composerJson.config.platform.php);
+    const minor = api.getMinor(composerJson.config.platform.php) ?? 0;
+    const patch = api.getPatch(composerJson.config.platform.php) ?? 0;
+    res.php = `<=${major}.${minor}.${patch}`;
   } else if (composerJson.require?.php) {
     res.php = composerJson.require.php;
   }
@@ -105,4 +110,18 @@ export function extractConstraints(
     res.composer = `^${major}.${minor}`;
   }
   return res;
+}
+
+export function findGithubPersonalAccessToken(
+  search: HostRuleSearch
+): string | undefined {
+  const token = findHostRule(search)?.token;
+  if (token && isPersonalAccessToken(token)) {
+    return token;
+  }
+  return undefined;
+}
+
+export function isPersonalAccessToken(token: string): boolean {
+  return regEx(/^ghp_/).test(token);
 }

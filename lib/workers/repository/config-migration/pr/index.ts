@@ -47,6 +47,8 @@ ${
     : ''
 }
 
+:no_bell: **Ignore**: Close this PR and you won't be reminded about config migration again, but one day your current config may no longer be valid.
+
 :question: Got questions? Does something look wrong to you? Please don't hesitate to [request help here](${
       // TODO: types (#7154)
       // eslint-disable-next-line @typescript-eslint/restrict-template-expressions

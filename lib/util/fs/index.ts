@@ -246,6 +246,16 @@ export async function rmCache(path: string): Promise<void> {
   await fs.rm(fullPath, { recursive: true });
 }
 
+export async function cachePathExists(pathName: string): Promise<boolean> {
+  const path = ensureCachePath(pathName);
+  try {
+    const s = await fs.stat(path);
+    return !!s;
+  } catch (_) {
+    return false;
+  }
+}
+
 export async function readCacheFile(fileName: string): Promise<Buffer>;
 export async function readCacheFile(
   fileName: string,

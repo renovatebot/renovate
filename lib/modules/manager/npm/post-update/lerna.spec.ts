@@ -239,19 +239,19 @@ describe('modules/manager/npm/post-update/lerna', () => {
       const pkg = {
         deps: [{ depName: 'something-else', currentValue: '1.2.3' }],
       };
-      expect(lernaHelper.getLernaVersion(pkg)).toBe('latest');
+      expect(lernaHelper.getLernaVersion(pkg)).toBeNull();
     });
 
     it('returns latest if pkg has no deps at all', () => {
       const pkg = {};
-      expect(lernaHelper.getLernaVersion(pkg)).toBe('latest');
+      expect(lernaHelper.getLernaVersion(pkg)).toBeNull();
     });
 
     it('returns latest if specified lerna version is not a valid semVer range', () => {
       const pkg = {
         deps: [{ depName: 'lerna', currentValue: '[a.b.c;' }],
       };
-      expect(lernaHelper.getLernaVersion(pkg)).toBe('latest');
+      expect(lernaHelper.getLernaVersion(pkg)).toBeNull();
     });
   });
 });

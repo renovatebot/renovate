@@ -48,14 +48,16 @@ For this you use a custom `hostRules` array.
 {
   hostRules: [
     {
-      // global login
+      // global login for 'gitlab.com' if using Helm
       matchHost: 'gitlab.com',
+      hostType: 'helm', // this is optional, but else the credentials will be used for all request matching `matchHost`
       username: '<some-username>',
       password: '<some-password>',
     },
     {
       // specific repository
       matchHost: 'https://gitlab.com/api/v4/projects/xxxxxxx/packages/helm/stable',
+      hostType: 'helm', // this is optional
       username: '<some-username>',
       password: '<some-password>',
     },

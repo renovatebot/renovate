@@ -21,6 +21,7 @@ import { getCache } from '../../../util/cache/repository';
 import { readLocalFile } from '../../../util/fs';
 import { getFileList } from '../../../util/git';
 import * as hostRules from '../../../util/host-rules';
+import * as queue from '../../../util/http/queue';
 import type { RepoFileConfig } from './types';
 
 async function detectConfigFile(): Promise<string | null> {
@@ -49,14 +50,17 @@ export async function detectRepoFileConfig(): Promise<RepoFileConfig> {
   const cache = getCache();
   let { configFileName } = cache;
   if (configFileName) {
-    let configFileParsed = (await platform.getJsonFile(configFileName))!;
-    if (configFileParsed) {
-      if (configFileName === 'package.json') {
-        configFileParsed = configFileParsed.renovate;
+    const configFileRaw = await platform.getRawFile(configFileName);
+    if (configFileRaw) {
+      let configFileParsed = JSON5.parse(configFileRaw);
+      if (configFileName !== 'package.json') {
+        return { configFileName, configFileRaw, configFileParsed };
       }
-      return { configFileName, configFileParsed };
+      configFileParsed = configFileParsed.renovate;
+      return { configFileName, configFileParsed }; // don't return raw 'package.json'
+    } else {
+      logger.debug('Existing config file no longer exists');
     }
-    logger.debug('Existing config file no longer exists');
   }
   configFileName = (await detectConfigFile()) ?? undefined;
   if (!configFileName) {
@@ -67,6 +71,7 @@ export async function detectRepoFileConfig(): Promise<RepoFileConfig> {
   logger.debug(`Found ${configFileName} config file`);
   // TODO #7154
   let configFileParsed: any;
+  let configFileRaw: string | undefined | null;
   if (configFileName === 'package.json') {
     // We already know it parses
     configFileParsed = JSON.parse(
@@ -79,25 +84,25 @@ export async function detectRepoFileConfig(): Promise<RepoFileConfig> {
     }
     logger.debug({ config: configFileParsed }, 'package.json>renovate config');
   } else {
-    let rawFileContents = await readLocalFile(configFileName, 'utf8');
+    configFileRaw = await readLocalFile(configFileName, 'utf8');
     // istanbul ignore if
-    if (!is.string(rawFileContents)) {
+    if (!is.string(configFileRaw)) {
       logger.warn({ configFileName }, 'Null contents when reading config file');
       throw new Error(REPOSITORY_CHANGED);
     }
     // istanbul ignore if
-    if (!rawFileContents.length) {
-      rawFileContents = '{}';
+    if (!configFileRaw.length) {
+      configFileRaw = '{}';
     }
 
     const fileType = upath.extname(configFileName);
 
     if (fileType === '.json5') {
       try {
-        configFileParsed = JSON5.parse(rawFileContents);
+        configFileParsed = JSON5.parse(configFileRaw);
       } catch (err) /* istanbul ignore next */ {
         logger.debug(
-          { renovateConfig: rawFileContents },
+          { renovateConfig: configFileRaw },
           'Error parsing renovate config renovate.json5'
         );
         const validationError = 'Invalid JSON5 (parsing failed)';
@@ -110,7 +115,7 @@ export async function detectRepoFileConfig(): Promise<RepoFileConfig> {
     } else {
       let allowDuplicateKeys = true;
       let jsonValidationError = jsonValidator.validate(
-        rawFileContents,
+        configFileRaw,
         allowDuplicateKeys
       );
       if (jsonValidationError) {
@@ -123,7 +128,7 @@ export async function detectRepoFileConfig(): Promise<RepoFileConfig> {
       }
       allowDuplicateKeys = false;
       jsonValidationError = jsonValidator.validate(
-        rawFileContents,
+        configFileRaw,
         allowDuplicateKeys
       );
       if (jsonValidationError) {
@@ -135,10 +140,10 @@ export async function detectRepoFileConfig(): Promise<RepoFileConfig> {
         };
       }
       try {
-        configFileParsed = JSON5.parse(rawFileContents);
+        configFileParsed = JSON5.parse(configFileRaw);
       } catch (err) /* istanbul ignore next */ {
         logger.debug(
-          { renovateConfig: rawFileContents },
+          { renovateConfig: configFileRaw },
           'Error parsing renovate config'
         );
         const validationError = 'Invalid JSON (parsing failed)';
@@ -154,7 +159,7 @@ export async function detectRepoFileConfig(): Promise<RepoFileConfig> {
       'Repository config'
     );
   }
-  return { configFileName, configFileParsed };
+  return { configFileName, configFileRaw, configFileParsed };
 }
 
 export function checkForRepoConfigError(repoConfig: RepoFileConfig): void {
@@ -251,6 +256,8 @@ export async function mergeRenovateConfig(
         );
       }
     }
+    // host rules can change concurrency
+    queue.clear();
     delete resolvedConfig.hostRules;
   }
   returnConfig = mergeChildConfig(returnConfig, resolvedConfig);
