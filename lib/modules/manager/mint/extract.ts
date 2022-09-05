@@ -1,10 +1,11 @@
+import { newlineRegex } from '../../../util/regex';
 import { GitTagsDatasource } from '../../datasource/git-tags';
 import type { PackageDependency, PackageFile } from '../types';
 
 export function extractPackageFile(content: string): PackageFile | null {
   const deps: PackageDependency[] = [];
 
-  for (const line of content.split('\n').map((s) => s.trim())) {
+  for (const line of content.split(newlineRegex).map((s) => s.trim())) {
     if (line === '') {
       continue;
     }
