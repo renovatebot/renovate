@@ -39,4 +39,28 @@ or as environment variables:
 
 ## recommendations
 
-- it's always best to limit OPEN prs by renovate user to a maximum of 10, because every PR costs an extra AWS request
+- It's always best to limit OPEN prs by renovate user to a maximum of 10, because every PR costs an extra AWS request
+
+## Running Renovate
+
+First set up the global configuration for running renovate on CodeCommit
+
+inside set the repositories, or you can use [autodiscover](https://docs.renovatebot.com/self-hosted-configuration/#autodiscover)
+
+Here's an example [config.js](https://docs.renovatebot.com/getting-started/running/#using-configjs)
+fill in the fields
+
+```javascript
+module.exports = {
+  endpoint: 'https://git-codecommit.{your region}.amazonaws.com/',
+  platform: 'codecommit',
+  repositories: ['{your repository names separated by comma}'],
+  username: '{your access key id}',
+  password: '{your secret access key}',
+  gitAuthor: '{Self-hosted Renovate Bot <your_email@domain>}',
+  prConcurrentLimit: 10,
+};
+```
+
+Once you run renovate with this config, it will create an on-boarding pull request on the repositories that it finds(autodiscover)
+or that you set up in repositories array in the `config.js`.
