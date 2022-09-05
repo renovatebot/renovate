@@ -137,11 +137,7 @@ export class BaseGoDatasource {
       };
     }
 
-    const opts = hostRules.find({
-      hostType: PlatformId.Gitlab,
-      url: goSourceUrl,
-    });
-    if (opts.token) {
+    if (hostRules.hostType({ url: goSourceUrl }) === PlatformId.Gitlab) {
       // get server base url from import url
       const parsedUrl = URL.parse(goSourceUrl);
 

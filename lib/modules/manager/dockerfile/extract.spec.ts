@@ -649,6 +649,22 @@ describe('modules/manager/dockerfile/extract', () => {
       ]);
     });
 
+    it('handles debian with regular tag', () => {
+      const res = extractPackageFile('FROM debian:11.4-slim\n', '', {})?.deps;
+      expect(res).toEqual([
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentDigest: undefined,
+          currentValue: '11.4-slim',
+          datasource: 'docker',
+          depName: 'debian',
+          depType: 'final',
+          replaceString: 'debian:11.4-slim',
+        },
+      ]);
+    });
+
     it('handles debian with prefixes', () => {
       const res = extractPackageFile('FROM amd64/debian:10\n', '', {})?.deps;
       expect(res).toEqual([

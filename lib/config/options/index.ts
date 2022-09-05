@@ -2096,7 +2096,7 @@ const options: RenovateOptions[] = [
   {
     name: 'authType',
     description:
-      'Authentication type for http header. e.g. `"Bearer"` or `"Basic"`. Use `"Token-Only"` to use only the token without an authorization type.',
+      'Authentication type for HTTP header. e.g. `"Bearer"` or `"Basic"`. Use `"Token-Only"` to use only the token without an authorization type.',
     type: 'string',
     stage: 'repository',
     parent: 'hostRules',
@@ -2106,7 +2106,7 @@ const options: RenovateOptions[] = [
   },
   {
     name: 'dnsCache',
-    description: 'Enable got dns cache',
+    description: 'Enable got DNS cache.',
     type: 'boolean',
     stage: 'repository',
     parent: 'hostRules',
@@ -2117,7 +2117,7 @@ const options: RenovateOptions[] = [
   },
   {
     name: 'keepalive',
-    description: 'Enable http keepalives for hosts',
+    description: 'Enable HTTP keepalives for hosts.',
     type: 'boolean',
     stage: 'repository',
     parent: 'hostRules',
