@@ -2,7 +2,11 @@ import { GlobalConfig } from '../../../../config/global';
 import type { RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
 import { commitAndPush } from '../../../../modules/platform/commit';
-import { getFile, isBranchModified } from '../../../../util/git';
+import {
+  checkoutBranch,
+  getFile,
+  isBranchModified,
+} from '../../../../util/git';
 import { getMigrationBranchName } from '../common';
 import { ConfigMigrationCommitMessageFactory } from './commit-message';
 import type { MigratedData } from './migrated-data';
@@ -37,6 +41,7 @@ export async function rebaseMigrationBranch(
   );
   const commitMessage = commitMessageFactory.getCommitMessage();
 
+  await checkoutBranch(config.defaultBranch!);
   return commitAndPush({
     branchName,
     files: [
