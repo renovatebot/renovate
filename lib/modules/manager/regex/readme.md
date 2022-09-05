@@ -115,7 +115,7 @@ The above (obviously not a complete `Dockerfile`, but abbreviated for this examp
 
 In the above the `versioningTemplate` is not actually necessary because Renovate already defaults to `semver` versioning, but it has been included to help illustrate why we call these fields _templates_.
 They are named this way because they are compiled using Handlebars and so can be composed from values you collect in named capture groups.
-You will usually want to use the tripe brace `{{{ }}}` template (e.v. `{{{versioning}}}` to be safe because Handlebars escapes special characters by default with double braces.
+You will usually want to use the triple brace `{{{ }}}` template (e.g. `{{{versioning}}}`) to be safe because Handlebars escapes special characters by default with double braces.
 
 By adding the comments to the `Dockerfile`, you can see that instead of four separate `regexManagers` being required, there is now only one - and the `Dockerfile` itself is now somewhat better documented too.
 The syntax we used there is completely arbitrary and you may choose your own instead if you prefer - just be sure to update your `matchStrings` regex.

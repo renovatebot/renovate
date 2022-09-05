@@ -37,7 +37,7 @@ export class HelmDatasource extends Datasource {
       res = await this.http.get('index.yaml', {
         baseUrl: ensureTrailingSlash(helmRepository),
       });
-      if (!res || !res.body) {
+      if (!res?.body) {
         logger.warn(
           { helmRepository },
           `Received invalid response from helm repository`
