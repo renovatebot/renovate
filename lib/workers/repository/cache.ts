@@ -85,7 +85,10 @@ async function generateBranchCache(
     let isBehindBaseBranch = false;
     if (sha) {
       try {
-        isBehindBaseBranch = await isBranchBehindBase(branchName);
+        isBehindBaseBranch = await isBranchBehindBase(
+          branchName,
+          baseBranchName!
+        );
       } catch (err) /* istanbul ignore next */ {
         // Do nothing
       }
