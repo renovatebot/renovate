@@ -60,15 +60,11 @@ describe('modules/manager/mint/extract', () => {
             depName: 'yonaskolb/xcodegen',
             currentValue: null,
             skipReason: 'no-version',
-            datasource: 'git-tags',
-            packageName: 'https://github.com/yonaskolb/xcodegen.git',
           },
           {
             depName: 'realm/SwiftLint',
             currentValue: null,
             skipReason: 'no-version',
-            datasource: 'git-tags',
-            packageName: 'https://github.com/realm/SwiftLint.git',
           },
         ],
       });
@@ -88,8 +84,6 @@ describe('modules/manager/mint/extract', () => {
             depName: 'yonaskolb/xcodegen',
             currentValue: null,
             skipReason: 'no-version',
-            datasource: 'git-tags',
-            packageName: 'https://github.com/yonaskolb/xcodegen.git',
           },
           {
             depName: 'realm/SwiftLint',
@@ -115,8 +109,6 @@ describe('modules/manager/mint/extract', () => {
             depName: 'yonaskolb/xcodegen',
             currentValue: null,
             skipReason: 'no-version',
-            datasource: 'git-tags',
-            packageName: 'https://github.com/yonaskolb/xcodegen.git',
           },
           {
             depName: 'realm/SwiftLint',
