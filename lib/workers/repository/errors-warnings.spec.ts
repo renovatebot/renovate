@@ -90,7 +90,7 @@ describe('workers/repository/errors-warnings', () => {
 
         ### ⚠ Dependency Lookup Warnings ⚠
 
-        Warnings were logged while processing this repo. Please check the Dependency Dashboard for further information
+        Warnings were logged while processing this repo. Please check the Dependency Dashboard for more information.
 
         "
       `);
@@ -137,7 +137,7 @@ describe('workers/repository/errors-warnings', () => {
 
         ### ⚠ Dependency Lookup Warnings ⚠
 
-        Warnings were logged while processing this repo. Please check logs for further information
+        Warnings were logged while processing this repo. Please check logs for more information.
 
         "
       `);
