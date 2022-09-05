@@ -72,9 +72,9 @@ export function getDepWarningsPR(
   );
   warningText += 'Warnings were logged while processing this repo. ';
   if (dependencyDashboard) {
-    warningText += `Please check the Dependency Dashboard for further information\n\n`;
+    warningText += `Please check the Dependency Dashboard for more information\n\n`;
   } else {
-    warningText += `Please check logs for further information\n\n`;
+    warningText += `Please check logs for more information\n\n`;
   }
   return warningText;
 }
