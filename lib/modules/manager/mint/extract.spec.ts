@@ -1,7 +1,11 @@
-import { Fixtures } from '../../../../test/fixtures';
 import { extractPackageFile } from '.';
 
-const simpleMintfile = Fixtures.get('Mintfile');
+const simpleMintfile = `
+SwiftGen/SwiftGen@6.6.1
+yonaskolb/xcodegen@2.30.0
+realm/SwiftLint @ 0.48.0
+#realm/SwiftLint @ 0.48.0
+`;
 
 const noVersionMintfileContent = `
 yonaskolb/xcodegen
