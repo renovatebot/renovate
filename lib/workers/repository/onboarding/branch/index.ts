@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import { mergeChildConfig } from '../../../../config';
 import { GlobalConfig } from '../../../../config/global';
 import type { RenovateConfig } from '../../../../config/types';
@@ -10,7 +11,8 @@ import { platform } from '../../../../modules/platform';
 import { checkoutBranch, setGitAuthor } from '../../../../util/git';
 import { extractAllDependencies } from '../../extract';
 import { mergeRenovateConfig } from '../../init/merge';
-import { isOnboarded, onboardingPrExists } from './check';
+import { OnboardingState } from '../common';
+import { getOnboardingPr, isOnboarded } from './check';
 import { getOnboardingConfig } from './config';
 import { createOnboardingBranch } from './create';
 import { rebaseOnboardingBranch } from './rebase';
@@ -32,9 +34,19 @@ export async function checkOnboardingBranch(
   logger.debug('Repo is not onboarded');
   // global gitAuthor will need to be used
   setGitAuthor(config.gitAuthor);
-  if (await onboardingPrExists(config)) {
+  // TODO #7154
+  const onboardingPr = await getOnboardingPr(config);
+  if (onboardingPr) {
+    const { rebaseRequested, rawConfigHash } = onboardingPr.bodyStruct ?? {};
+    if (is.undefined(rebaseRequested)) {
+      logger.debug('No rebase checkbox was found in the onboarding PR');
+      OnboardingState.prUpdateRequested = true;
+    } else if (rebaseRequested) {
+      logger.debug('Manual onboarding PR update requested');
+      OnboardingState.prUpdateRequested = true;
+    }
     logger.debug('Onboarding PR already exists');
-    const commit = await rebaseOnboardingBranch(config);
+    const commit = await rebaseOnboardingBranch(config, rawConfigHash);
     if (commit) {
       logger.info(
         { branch: config.onboardingBranch, commit, onboarding: true },
@@ -43,9 +55,7 @@ export async function checkOnboardingBranch(
     }
     // istanbul ignore if
     if (platform.refreshPr) {
-      // TODO #7154
-      const onboardingPr = await platform.getBranchPr(config.onboardingBranch!);
-      await platform.refreshPr(onboardingPr!.number);
+      await platform.refreshPr(onboardingPr.number);
     }
   } else {
     logger.debug('Onboarding PR does not exist');
@@ -62,6 +72,7 @@ export async function checkOnboardingBranch(
       }
     }
     logger.debug('Need to create onboarding PR');
+    OnboardingState.prUpdateRequested = true;
     const commit = await createOnboardingBranch(mergedConfig);
     // istanbul ignore if
     if (commit) {

@@ -26,8 +26,14 @@ If you need any further assistance then you can also [request help here](https:/
 
 ---
 
+ - [ ] <!-- rebase-check -->If you want to rebase/retry this PR, click this checkbox.
 
-"
+
+---
+
+
+
+<!--renovate-config-hash:Y2Y4M2UxMzU3ZWVmYjhiZGYxNTQyODUwZDY2ZDgwMDdkNjIwZTQwNTBiNTcxNWRjODNmNGE5MjFkMzZjZTljZTQ3ZDBkMTNjNWQ4NWYyYjBmZjgzMThkMjg3N2VlYzJmNjNiOTMxYmQ0NzQxN2E4MWE1MzgzMjdhZjkyN2RhM2U=-->"
 `;
 
 exports[`workers/repository/onboarding/pr/index ensureOnboardingPr() creates PR with footer and header using templating 1`] = `
@@ -56,8 +62,14 @@ If you need any further assistance then you can also [request help here](https:/
 
 ---
 
+ - [ ] <!-- rebase-check -->If you want to rebase/retry this PR, click this checkbox.
+
+
+---
+
 And this is a footer for repository:test baseBranch:some-branch
-"
+
+<!--renovate-config-hash:Y2Y4M2UxMzU3ZWVmYjhiZGYxNTQyODUwZDY2ZDgwMDdkNjIwZTQwNTBiNTcxNWRjODNmNGE5MjFkMzZjZTljZTQ3ZDBkMTNjNWQ4NWYyYjBmZjgzMThkMjg3N2VlYzJmNjNiOTMxYmQ0NzQxN2E4MWE1MzgzMjdhZjkyN2RhM2U=-->"
 `;
 
 exports[`workers/repository/onboarding/pr/index ensureOnboardingPr() creates PR with footer and header with trailing and leading newlines 1`] = `
@@ -88,9 +100,15 @@ If you need any further assistance then you can also [request help here](https:/
 
 ---
 
+ - [ ] <!-- rebase-check -->If you want to rebase/retry this PR, click this checkbox.
+
+
+---
+
 There should be several empty lines at the end of the PR
 
 
 
-"
+
+<!--renovate-config-hash:Y2Y4M2UxMzU3ZWVmYjhiZGYxNTQyODUwZDY2ZDgwMDdkNjIwZTQwNTBiNTcxNWRjODNmNGE5MjFkMzZjZTljZTQ3ZDBkMTNjNWQ4NWYyYjBmZjgzMThkMjg3N2VlYzJmNjNiOTMxYmQ0NzQxN2E4MWE1MzgzMjdhZjkyN2RhM2U=-->"
 `;

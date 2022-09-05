@@ -14,8 +14,10 @@ import { ensureDependencyDashboard } from './dependency-dashboard';
 import handleError from './error';
 import { finaliseRepo } from './finalise';
 import { initRepo } from './init';
+import { OnboardingState } from './onboarding/common';
 import { ensureOnboardingPr } from './onboarding/pr';
 import { extractDependencies, updateRepo } from './process';
+import type { ExtractResult } from './process/extract-update';
 import { ProcessResult, processResult } from './result';
 import { printRequestStats } from './stats';
 
@@ -40,9 +42,11 @@ export async function renovateRepository(
     logger.debug('Using localDir: ' + localDir);
     config = await initRepo(config);
     addSplit('init');
-    const { branches, branchList, packageFiles } = await extractDependencies(
-      config
-    );
+    const preformExtract =
+      config.repoIsOnboarded! || OnboardingState.prUpdateRequested;
+    const { branches, branchList, packageFiles } = preformExtract
+      ? await extractDependencies(config)
+      : emptyExtract(config);
     if (
       GlobalConfig.get('dryRun') !== 'lookup' &&
       GlobalConfig.get('dryRun') !== 'extract'
@@ -52,7 +56,9 @@ export async function renovateRepository(
       const res = await updateRepo(config, branches);
       setMeta({ repository: config.repository });
       addSplit('update');
-      await setBranchCache(branches);
+      if (preformExtract) {
+        await setBranchCache(branches); // update branch cache if preformed extraction
+      }
       if (res === 'automerged') {
         if (canRetry) {
           logger.info('Renovating repository again after automerge result');
@@ -91,4 +97,12 @@ export async function renovateRepository(
   printDnsStats();
   clearDnsCache();
   return repoResult;
+}
+
+function emptyExtract(config: RenovateConfig): ExtractResult {
+  return {
+    branches: [],
+    branchList: [config.onboardingBranch!], // to prevent auto closing
+    packageFiles: {},
+  };
 }
