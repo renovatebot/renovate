@@ -32,7 +32,7 @@ export function extractPackageFile(
   } catch (err) {
     logger.debug(
       { fileName, err },
-      'Parsing Woodpecker Configuration config YAML'
+      'Error parsing Woodpecker Configuration config YAML'
     );
     return null;
   }
