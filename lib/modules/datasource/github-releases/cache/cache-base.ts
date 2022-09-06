@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import { DateTime, DurationLikeObject } from 'luxon';
 import { logger } from '../../../../logger';
 import * as memCache from '../../../../util/cache/memory';
