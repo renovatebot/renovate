@@ -10,7 +10,7 @@ export function all<T>(
   return pAll(tasks, {
     concurrency: 5,
     ...options,
-    stopOnError: false,
+    stopOnError: true,
   });
 }
 
@@ -22,6 +22,6 @@ export function map<Element, NewElement>(
   return pMap(input, mapper, {
     concurrency: 5,
     ...options,
-    stopOnError: false,
+    stopOnError: true,
   });
 }
