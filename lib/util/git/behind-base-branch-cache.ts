@@ -1,8 +1,8 @@
 import { getCache } from '../cache/repository';
 import { getBranchCommit } from '.';
 
-// Compare cached parent Sha of a branch to the fetched base-branch sha to determine whether the branch is behind the base
-// Since cache is updated after each run, this will be sufficient to determine whether a branch is behind its parent.
+// Compare cached baseBranchSha of a branch and fetched baseBranchSha to determine if the branch is behind base
+// since we update cache on each run, it is sufficient to determine whether a branch is behind its parent
 export function getCachedBehindBaseResult(
   branchName: string,
   baseBranchName: string

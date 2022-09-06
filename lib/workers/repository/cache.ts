@@ -50,6 +50,7 @@ async function generateBranchCache(
   const { branchName } = branch;
   try {
     const baseBranchName = branch.baseBranch ?? branch.defaultBranch;
+    // TODO: (fix types) #7154
     const baseBranchSha = getBranchCommit(baseBranchName!) ?? null;
     const sha = getBranchCommit(branchName) ?? null;
     let prNo = null;

@@ -32,6 +32,9 @@ export interface BranchCache {
   isModified: boolean;
   prNo: number | null;
   sha: string | null;
+  /**
+   * Parent commit branch sha
+   */
   parentSha: string | null;
   upgrades: BranchUpgradeCache[];
   branchFingerprint?: string;
