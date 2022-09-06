@@ -33,7 +33,7 @@ export interface BranchCache {
   prNo: number | null;
   sha: string | null;
   /**
-   * Parent commit branch sha
+   * Parent commit of branch sha(latest branch commit)
    */
   parentSha: string | null;
   upgrades: BranchUpgradeCache[];
