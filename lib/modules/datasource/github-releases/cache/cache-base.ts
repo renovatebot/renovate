@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import { DateTime, DurationLikeObject } from 'luxon';
 import { logger } from '../../../../logger';
 import * as memCache from '../../../../util/cache/memory';
@@ -164,11 +165,11 @@ export abstract class AbstractGithubDatasourceCache<
    */
   abstract coerceFetched(fetchedItem: FetchedItem): StoredItem | null;
 
-  private async query(
+  private async queryPayload(
     baseUrl: string,
     variables: GithubQueryParams,
     options: GithubHttpOptions
-  ): Promise<QueryResponse<FetchedItem> | Error> {
+  ): Promise<QueryResponse<FetchedItem>['repository']['payload'] | Error> {
     try {
       const graphqlRes = await this.http.postJson<
         GithubGraphqlResponse<QueryResponse<FetchedItem>>
@@ -179,7 +180,22 @@ export abstract class AbstractGithubDatasourceCache<
       });
       const { body } = graphqlRes;
       const { data, errors } = body;
-      return data ?? new Error(errors?.[0]?.message);
+
+      if (errors) {
+        let [errorMessage] = errors
+          .map(({ message }) => message)
+          .filter(is.string);
+        errorMessage ??= 'GitHub datasource cache: unknown GraphQL error';
+        return new Error(errorMessage);
+      }
+
+      if (!data?.repository?.payload) {
+        return new Error(
+          'GitHub datasource cache: failed to obtain payload data'
+        );
+      }
+
+      return data.repository.payload;
     } catch (err) {
       return err;
     }
@@ -282,12 +298,12 @@ export abstract class AbstractGithubDatasourceCache<
           : this.maxPrefetchPages;
         let stopIteration = false;
         while (pagesRemained > 0 && !stopIteration) {
-          const res = await this.query(baseUrl, variables, {
+          const queryResult = await this.queryPayload(baseUrl, variables, {
             repository: packageName,
           });
-          if (res instanceof Error) {
+          if (queryResult instanceof Error) {
             if (
-              res.message.startsWith(
+              queryResult.message.startsWith(
                 'Something went wrong while executing your query.' // #16343
               ) &&
               variables.count > 30
@@ -299,7 +315,7 @@ export abstract class AbstractGithubDatasourceCache<
               variables.count = Math.floor(variables.count / 2);
               continue;
             }
-            throw res;
+            throw queryResult;
           }
 
           pagesRemained -= 1;
@@ -307,7 +323,7 @@ export abstract class AbstractGithubDatasourceCache<
           const {
             nodes: fetchedItems,
             pageInfo: { hasNextPage, endCursor },
-          } = res.repository.payload;
+          } = queryResult;
 
           if (hasNextPage) {
             variables.cursor = endCursor;
