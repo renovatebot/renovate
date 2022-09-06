@@ -99,6 +99,7 @@ export async function renovateRepository(
   return repoResult;
 }
 
+// istanbul ignore next: renovateRepository is ignored
 function emptyExtract(config: RenovateConfig): ExtractResult {
   return {
     branches: [],

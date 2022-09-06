@@ -1,4 +1,3 @@
-import hasha from 'hasha';
 import {
   RenovateConfig,
   getConfig,
@@ -6,7 +5,7 @@ import {
   platform,
 } from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
-import { OnboardingState } from '../common';
+import { OnboardingState, toSha256 } from '../common';
 import { rebaseOnboardingBranch } from './rebase';
 
 jest.mock('../../../../util/git');
@@ -43,7 +42,7 @@ describe('workers/repository/onboarding/branch/rebase', () => {
       git.getFile
         .mockResolvedValueOnce(contents) // package.json
         .mockResolvedValueOnce(contents); // renovate.json
-      await rebaseOnboardingBranch(config, hasha(contents));
+      await rebaseOnboardingBranch(config, toSha256(contents));
       expect(git.commitFiles).toHaveBeenCalledTimes(0);
       expect(OnboardingState.prUpdateRequested).toBeFalse();
     });
@@ -113,7 +112,7 @@ describe('workers/repository/onboarding/branch/rebase', () => {
 
       it('does nothing if config hashes match', async () => {
         git.getFile.mockResolvedValueOnce(contents); // package.json
-        await rebaseOnboardingBranch(config, hasha(contents));
+        await rebaseOnboardingBranch(config, toSha256(contents));
         expect(git.commitFiles).toHaveBeenCalledTimes(0);
         expect(OnboardingState.prUpdateRequested).toBeFalse();
       });

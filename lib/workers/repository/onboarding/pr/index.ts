@@ -1,5 +1,4 @@
 import is from '@sindresorhus/is';
-import hasha from 'hasha';
 import { GlobalConfig } from '../../../../config/global';
 import type { RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
@@ -24,7 +23,7 @@ import {
 import { getPlatformPrOptions } from '../../update/pr';
 import { prepareLabels } from '../../update/pr/labels';
 import { addParticipants } from '../../update/pr/participants';
-import { OnboardingState, defaultConfigFile } from '../common';
+import { OnboardingState, defaultConfigFile, toSha256 } from '../common';
 import { getBaseBranchDesc } from './base-branch';
 import { getConfigDesc } from './config-description';
 import { getPrList } from './pr-list';
@@ -135,8 +134,7 @@ If you need any further assistance then you can also [request help here](${
   const configFile = defaultConfigFile(config);
   const existingContents =
     (await getFile(configFile, config.onboardingBranch)) ?? '';
-  // encoding algorithm must match in onboarding/branch/rebase
-  const hash = hasha(existingContents, { algorithm: 'sha256' });
+  const hash = toSha256(existingContents);
   prBody += `\n<!--renovate-config-hash:${toBase64(hash)}-->`;
 
   logger.trace('prBody:\n' + prBody);

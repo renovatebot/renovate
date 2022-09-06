@@ -52,7 +52,7 @@ describe('modules/platform/pr-body', () => {
     it('hashes an undefined body', () => {
       // nullish operator branch coverage
       const hash = hashBody(undefined);
-      expect(hash).toBe({ hash });
+      expect(hash).toBe(hash);
     });
 
     it('returns rebaseRequested=true flag', () => {

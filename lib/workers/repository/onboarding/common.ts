@@ -1,3 +1,4 @@
+import hasha from 'hasha';
 import { configFileNames } from '../../../config/app-strings';
 import type { RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
@@ -22,4 +23,8 @@ export class OnboardingState {
     logger.debug({ value }, 'Set OnboardingState.prUpdateRequested');
     this.updateRequested = value;
   }
+}
+
+export function toSha256(input: string): string {
+  return hasha(input, { algorithm: 'sha256' });
 }

@@ -1,5 +1,4 @@
 import is from '@sindresorhus/is';
-import hasha from 'hasha';
 import { GlobalConfig } from '../../../../config/global';
 import type { RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
@@ -9,7 +8,7 @@ import {
   isBranchBehindBase,
   isBranchModified,
 } from '../../../../util/git';
-import { OnboardingState, defaultConfigFile } from '../common';
+import { OnboardingState, defaultConfigFile, toSha256 } from '../common';
 import { OnboardingCommitMessageFactory } from './commit-message';
 import { getOnboardingConfigContents } from './config';
 
@@ -22,7 +21,7 @@ export async function rebaseOnboardingBranch(
   const existingContents =
     (await getFile(configFile, config.onboardingBranch)) ?? '';
   // encoding algorithm must match in pr/index
-  const currentConfigHash = hasha(existingContents, { algorithm: 'sha256' });
+  const currentConfigHash = toSha256(existingContents);
   const contents = await getOnboardingConfigContents(config, configFile);
 
   if (is.nullOrUndefined(previousConfigHash)) {
