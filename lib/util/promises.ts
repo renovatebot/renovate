@@ -1,28 +1,20 @@
-import is from '@sindresorhus/is';
+import AggregateError from 'aggregate-error';
 import pAll from 'p-all';
 import pMap from 'p-map';
 import { ExternalHostError } from '../types/errors/external-host-error';
 
 type PromiseFactory<T> = () => Promise<T>;
 
-interface AggregateError {
-  _errors: Error[];
-}
-
-function isAggregateError(err: any): err is AggregateError {
-  return is.array(err?._errors, is.error);
-}
-
 function isExternalHostError(err: any): err is ExternalHostError {
   return err instanceof ExternalHostError;
 }
 
 function handleError(err: any): never {
-  if (!isAggregateError(err)) {
+  if (!(err instanceof AggregateError)) {
     throw err;
   }
 
-  const errors = err._errors;
+  const errors = [...err];
 
   const hostError = errors.find(isExternalHostError);
   if (hostError) {
