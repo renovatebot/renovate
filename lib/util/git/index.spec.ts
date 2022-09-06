@@ -261,16 +261,17 @@ describe('util/git/index', () => {
     });
 
     it('should return result even if non-default and not under branchPrefix', async () => {
-      const parentSha = 'SHA';
       const branchCache = partial<BranchCache>({
         branchName: 'develop',
-        parentSha: parentSha,
+        baseBranchSha: git.getBranchCommit(defaultBranch),
       });
       repoCache.getCache.mockReturnValueOnce({}).mockReturnValueOnce({
         branches: [branchCache],
       });
       expect(await git.isBranchBehindBase('develop', defaultBranch)).toBeTrue();
-      expect(await git.isBranchBehindBase('develop', defaultBranch)).toBeTrue(); // cache
+      expect(
+        await git.isBranchBehindBase('develop', defaultBranch)
+      ).toBeFalse(); // cache
     });
   });
 
