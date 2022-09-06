@@ -104,7 +104,6 @@ describe('modules/manager/mint/extract', () => {
           },
           {
             depName: 'yonaskolb/xcodegen',
-            currentValue: null,
             skipReason: 'no-version',
           },
           {
