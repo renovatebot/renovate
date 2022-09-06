@@ -57,6 +57,29 @@ function getDepWarnings(
   return { warnings, warningFiles };
 }
 
+export function getDepWarningsOnboardingPR(
+  packageFiles: Record<string, PackageFile[]>
+): string {
+  const { warnings, warningFiles } = getDepWarnings(packageFiles);
+  let warningText = '';
+  if (!warnings.length) {
+    return '';
+  }
+  logger.debug({ warnings, warningFiles }, 'Found package lookup warnings');
+  warningText = emojify(
+    `\n---\n\n### :warning: Dependency Lookup Warnings :warning:\n\n`
+  );
+  warningText += `Please correct - or verify that you can safely ignore - these lookup failures before you merge this PR.\n\n`;
+  for (const w of warnings) {
+    warningText += `-   \`${w}\`\n`;
+  }
+  warningText +=
+    '\nFiles affected: ' +
+    warningFiles.map((f) => '`' + f + '`').join(', ') +
+    '\n\n';
+  return warningText;
+}
+
 export function getDepWarningsPR(
   packageFiles: Record<string, PackageFile[]>,
   dependencyDashboard?: boolean
