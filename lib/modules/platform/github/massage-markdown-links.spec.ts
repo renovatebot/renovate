@@ -88,7 +88,7 @@ describe('modules/platform/github/massage-markdown-links', () => {
     }
   );
 
-  it('replace url contains disappear text inline (colors)', () => {
+  it('replace url contains disappear text inline', () => {
     const input = [
       'pnpm rebuild accepts --store-dir by @&#8203;user in https://github.com/foo/bar/issues/1\n' +
         'pnpm rebuild accepts --store-dir by @&#8203;UsEr in https://github.com/foo/bar/issues/2\n' +
