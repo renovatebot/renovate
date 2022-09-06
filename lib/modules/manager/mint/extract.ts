@@ -31,7 +31,6 @@ function handleDepInMintfile(line: string): PackageDependency {
   if (!line.includes('@')) {
     return {
       depName: line,
-      currentValue: null,
       skipReason: 'no-version',
     };
   }
