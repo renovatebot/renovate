@@ -1,8 +1,8 @@
 import is from '@sindresorhus/is';
 import moo from 'moo';
-import pAll from 'p-all';
 import { logger } from '../../../logger';
 import { cache } from '../../../util/cache/package/decorator';
+import * as p from '../../../util/promises';
 import { regEx } from '../../../util/regex';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
@@ -60,7 +60,7 @@ export class GoProxyDatasource extends Datasource {
             return { version };
           }
         });
-        const releases = await pAll(queue, { concurrency: 5 });
+        const releases = await p.all(queue);
         if (releases.length) {
           const datasource = await BaseGoDatasource.getDatasource(packageName);
           const sourceUrl = getSourceUrl(datasource);
