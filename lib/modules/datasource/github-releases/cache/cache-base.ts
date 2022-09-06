@@ -194,7 +194,7 @@ export abstract class AbstractGithubDatasourceCache<
         );
       }
 
-      return data?.repository?.payload;
+      return data.repository.payload;
     } catch (err) {
       return err;
     }
