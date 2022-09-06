@@ -2,7 +2,6 @@ import URL from 'url';
 import is from '@sindresorhus/is';
 import delay from 'delay';
 import JSON5 from 'json5';
-import pAll from 'p-all';
 import semver from 'semver';
 import { PlatformId } from '../../../constants';
 import {
@@ -23,6 +22,7 @@ import * as git from '../../../util/git';
 import * as hostRules from '../../../util/host-rules';
 import { setBaseUrl } from '../../../util/http/gitlab';
 import type { HttpResponse } from '../../../util/http/types';
+import * as p from '../../../util/promises';
 import { regEx } from '../../../util/regex';
 import { sanitize } from '../../../util/sanitize';
 import {
@@ -1014,10 +1014,7 @@ export async function addReviewers(
   // Gather the IDs for all the reviewers we want to add
   let newReviewerIDs: number[];
   try {
-    newReviewerIDs = await pAll(
-      newReviewers.map((r) => () => getUserID(r)),
-      { concurrency: 5 }
-    );
+    newReviewerIDs = await p.all(newReviewers.map((r) => () => getUserID(r)));
   } catch (err) {
     logger.warn({ err }, 'Failed to get IDs of the new reviewers');
     return;
