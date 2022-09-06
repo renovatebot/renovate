@@ -90,12 +90,14 @@ describe('modules/platform/github/massage-markdown-links', () => {
 
   it('replace url contains disappear text inline (colors)', () => {
     const input = [
-      'pnpm rebuild accepts --store-dir by @&#8203;user in https://github.com/foo/bar/issues/1',
+      'pnpm rebuild accepts --store-dir by @&#8203;user in https://github.com/foo/bar/issues/1\n' +
+        'pnpm rebuild accepts --store-dir by @&#8203;UsEr in https://github.com/foo/bar/issues/2',
     ].join('\n');
     const res = massageMarkdownLinks(input);
     expect(res).toEqual(
       [
-        'pnpm rebuild accepts --store-dir by `@user` in [https://github.com/foo/bar/issues/1](https://togithub.com/foo/bar/issues/1)',
+        'pnpm rebuild accepts --store-dir by `@user` in [https://github.com/foo/bar/issues/1](https://togithub.com/foo/bar/issues/1)\n' +
+          'pnpm rebuild accepts --store-dir by `@UsEr` in [https://github.com/foo/bar/issues/2](https://togithub.com/foo/bar/issues/2)',
       ].join('\n')
     );
   });
