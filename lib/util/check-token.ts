@@ -1,3 +1,4 @@
+import { GlobalConfig } from '../config/global';
 import { PlatformId } from '../constants';
 import { logger } from '../logger';
 import { GithubReleasesDatasource } from '../modules/datasource/github-releases';
@@ -19,13 +20,19 @@ export function checkGithubToken(
     return;
   }
 
+  if (!GlobalConfig.get('githubTokenWarn')) {
+    logger.trace('GitHub token warning is disabled');
+    return;
+  }
+
   const githubDeps: string[] = [];
   for (const files of Object.values(packageFiles ?? {})) {
     for (const file of files ?? []) {
       for (const dep of file.deps ?? []) {
         if (
-          dep.datasource === GithubTagsDatasource.id ||
-          dep.datasource === GithubReleasesDatasource.id
+          !dep.skipReason &&
+          (dep.datasource === GithubTagsDatasource.id ||
+            dep.datasource === GithubReleasesDatasource.id)
         ) {
           dep.skipReason = 'github-token-required';
           if (dep.depName) {

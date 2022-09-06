@@ -17,6 +17,7 @@ import { CONFIG_PRESETS_INVALID } from '../../constants/error-messages';
 import { pkg } from '../../expose.cjs';
 import { getProblems, logger, setMeta } from '../../logger';
 import * as hostRules from '../../util/host-rules';
+import * as queue from '../../util/http/queue';
 import * as repositoryWorker from '../repository';
 import { autodiscoverRepositories } from './autodiscover';
 import { parseConfigs } from './config/parse';
@@ -152,6 +153,10 @@ export async function start(): Promise<number> {
         repoConfig.hostRules.forEach((rule) => hostRules.add(rule));
         repoConfig.hostRules = [];
       }
+
+      // host rules can change concurrency
+      queue.clear();
+
       await repositoryWorker.renovateRepository(repoConfig);
       setMeta({});
     }
