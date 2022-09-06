@@ -79,9 +79,6 @@ function addDep(ref: TektonBundle, deps: PackageDependency[]): void {
   if (is.nullOrUndefined(imageRef)) {
     // Fallback to older style bundle reference
     imageRef = ref.bundle;
-    if (is.nullOrUndefined(imageRef)) {
-      return;
-    }
   }
 
   const dep = getDep(imageRef);
