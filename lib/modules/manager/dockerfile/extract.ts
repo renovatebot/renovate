@@ -157,7 +157,7 @@ export function getDep(
   specifyReplaceString = true,
   registryAliases?: Record<string, string>
 ): PackageDependency {
-  if (!is.string(currentFrom)) {
+  if (!is.string(currentFrom) || is.emptyStringOrWhitespace(currentFrom)) {
     return {
       skipReason: 'invalid-value',
     };
