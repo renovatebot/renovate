@@ -8,6 +8,7 @@ import {
   platform,
 } from '../../../../../test/util';
 import { configFileNames } from '../../../../config/app-strings';
+import { GlobalConfig } from '../../../../config/global';
 import {
   REPOSITORY_FORKED,
   REPOSITORY_NO_PACKAGE_FILES,
@@ -17,6 +18,7 @@ import type { Pr } from '../../../../modules/platform';
 import { PrState } from '../../../../types';
 import * as _cache from '../../../../util/cache/repository';
 import type { FileAddition } from '../../../../util/git/types';
+import { OnboardingState } from '../common';
 import * as _config from './config';
 import * as _rebase from './rebase';
 import { checkOnboardingBranch } from '.';
@@ -244,6 +246,71 @@ describe('workers/repository/onboarding/branch/index', () => {
       expect(res.branchList).toEqual(['renovate/configure']);
       expect(git.checkoutBranch).toHaveBeenCalledTimes(1);
       expect(git.commitFiles).toHaveBeenCalledTimes(0);
+    });
+
+    describe('tests onboarding rebase/retry checkbox handling', () => {
+      beforeEach(() => {
+        GlobalConfig.set({ platform: 'github' });
+        OnboardingState.prUpdateRequested = false;
+        git.getFileList.mockResolvedValueOnce(['package.json']);
+        platform.findPr.mockResolvedValueOnce(null);
+        rebase.rebaseOnboardingBranch.mockResolvedValueOnce(null);
+      });
+
+      it('detects unsupported platfom', async () => {
+        const pl = 'bitbucket';
+        GlobalConfig.set({ platform: pl });
+        platform.getBranchPr.mockResolvedValueOnce(mock<Pr>({}));
+
+        await checkOnboardingBranch(config);
+
+        expect(logger.debug).toHaveBeenCalledWith(
+          `Platform '${pl}' does not support extended markdown`
+        );
+        expect(OnboardingState.prUpdateRequested).toBeTrue();
+        expect(git.checkoutBranch).toHaveBeenCalledTimes(1);
+        expect(git.commitFiles).toHaveBeenCalledTimes(0);
+      });
+
+      it('detects missing rebase checkbox', async () => {
+        const pr = { bodyStruct: { rebaseRequested: undefined } };
+        platform.getBranchPr.mockResolvedValueOnce(mock<Pr>(pr));
+
+        await checkOnboardingBranch(config);
+
+        expect(logger.debug).toHaveBeenCalledWith(
+          `No rebase checkbox was found in the onboarding PR`
+        );
+        expect(OnboardingState.prUpdateRequested).toBeTrue();
+        expect(git.checkoutBranch).toHaveBeenCalledTimes(1);
+        expect(git.commitFiles).toHaveBeenCalledTimes(0);
+      });
+
+      it('detects manual pr update requested', async () => {
+        const pr = { bodyStruct: { rebaseRequested: true } };
+        platform.getBranchPr.mockResolvedValueOnce(mock<Pr>(pr));
+
+        await checkOnboardingBranch(config);
+
+        expect(logger.debug).toHaveBeenCalledWith(
+          `Manual onboarding PR update requested`
+        );
+        expect(OnboardingState.prUpdateRequested).toBeTrue();
+        ``;
+        expect(git.checkoutBranch).toHaveBeenCalledTimes(1);
+        expect(git.commitFiles).toHaveBeenCalledTimes(0);
+      });
+
+      it('handles unchecked rebase checkbox', async () => {
+        const pr = { bodyStruct: { rebaseRequested: false } };
+        platform.getBranchPr.mockResolvedValueOnce(mock<Pr>(pr));
+
+        await checkOnboardingBranch(config);
+
+        expect(OnboardingState.prUpdateRequested).toBeFalse();
+        expect(git.checkoutBranch).toHaveBeenCalledTimes(1);
+        expect(git.commitFiles).toHaveBeenCalledTimes(0);
+      });
     });
   });
 });

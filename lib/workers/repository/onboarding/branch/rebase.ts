@@ -21,10 +21,11 @@ export async function rebaseOnboardingBranch(
   const configFile = defaultConfigFile(config);
   const existingContents =
     (await getFile(configFile, config.onboardingBranch)) ?? '';
-  const currentConfigHash = hasha(existingContents);
+  // encoding algorithm must match in pr/index
+  const currentConfigHash = hasha(existingContents, { algorithm: 'sha256' });
   const contents = await getOnboardingConfigContents(config, configFile);
 
-  if (is.undefined(previousConfigHash)) {
+  if (is.nullOrUndefined(previousConfigHash)) {
     logger.debug('Missing previousConfigHash bodyStruct prop in onboarding PR');
     OnboardingState.prUpdateRequested = true;
   } else if (previousConfigHash !== currentConfigHash) {

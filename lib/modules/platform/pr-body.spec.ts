@@ -1,3 +1,5 @@
+import hasha from 'hasha';
+import { toBase64 } from '../../util/string';
 import { getPrBodyStruct, hashBody } from './pr-body';
 
 describe('modules/platform/pr-body', () => {
@@ -47,23 +49,47 @@ describe('modules/platform/pr-body', () => {
       );
     });
 
+    it('hashes an undefined body', () => {
+      // nullish operator branch coverage
+      const hash = hashBody(undefined);
+      expect(hash).toBe({ hash });
+    });
+
     it('returns rebaseRequested=true flag', () => {
-      expect(getPrBodyStruct('- [x] <!-- rebase-check -->')).toEqual({
-        hash: '023952693e1e00a52a71b65d9b4804bca6ca9f215c20f6e029dbf420f322d541',
+      const input = '- [x] <!-- rebase-check -->';
+      const hash = hashBody(input);
+      expect(getPrBodyStruct(input)).toEqual({
+        hash,
         rebaseRequested: true,
       });
     });
 
     it('returns rebaseRequested=false flag', () => {
-      expect(getPrBodyStruct('- [ ] <!-- rebase-check -->')).toEqual({
-        hash: 'ed7c105ca9da8676d87f0c18f492070acab88592f9941c6c82dbf89f97874dae',
+      const input = '- [ ] <!-- rebase-check -->';
+      const hash = hashBody(input);
+      expect(getPrBodyStruct(input)).toEqual({
+        hash,
         rebaseRequested: false,
       });
     });
 
     it('returns rebaseRequested=undefined flag', () => {
-      expect(getPrBodyStruct('-  <!-- rebase-check -->')).toEqual({
-        hash: 'd4d81e14ce38612f0dab0758baaede3041697acc2966049c9e06c757aa53646e',
+      const input = '-  <!-- rebase-check -->';
+      const hash = hashBody(input);
+      expect(getPrBodyStruct(input)).toEqual({
+        hash,
+      });
+    });
+
+    it('returns raw config hash', () => {
+      const config = '{}';
+      const rawConfigHash = hasha(config, { algorithm: 'sha256' });
+      const encodedHash = toBase64(rawConfigHash);
+      const input = `<!--renovate-config-hash:${encodedHash})-->`;
+      const hash = hashBody(input);
+      expect(getPrBodyStruct(input)).toEqual({
+        hash,
+        rawConfigHash,
       });
     });
 

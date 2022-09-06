@@ -37,8 +37,8 @@ export function hashBody(body: string | undefined): string {
   return result;
 }
 
-function isRebaseRequested(body: string | undefined): boolean | undefined {
-  const match = prCheckboxRe.exec(body ?? '');
+function isRebaseRequested(body: string): boolean | undefined {
+  const match = prCheckboxRe.exec(body);
   if (!match) {
     return undefined;
   }

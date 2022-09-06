@@ -42,7 +42,7 @@ export async function checkOnboardingBranch(
     if (!['github', 'gitlab'].includes(pl)) {
       logger.debug(`Platform '${pl}' does not support extended markdown`);
       OnboardingState.prUpdateRequested = true;
-    } else if (is.undefined(rebaseRequested)) {
+    } else if (is.nullOrUndefined(rebaseRequested)) {
       logger.debug('No rebase checkbox was found in the onboarding PR');
       OnboardingState.prUpdateRequested = true;
     } else if (rebaseRequested) {

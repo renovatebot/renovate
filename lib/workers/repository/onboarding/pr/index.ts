@@ -135,7 +135,8 @@ If you need any further assistance then you can also [request help here](${
   const configFile = defaultConfigFile(config);
   const existingContents =
     (await getFile(configFile, config.onboardingBranch)) ?? '';
-  const hash = hasha(existingContents);
+  // encoding algorithm must match in onboarding/branch/rebase
+  const hash = hasha(existingContents, { algorithm: 'sha256' });
   prBody += `\n<!--renovate-config-hash:${toBase64(hash)}-->`;
 
   logger.trace('prBody:\n' + prBody);
