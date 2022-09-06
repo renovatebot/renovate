@@ -183,7 +183,7 @@ export abstract class AbstractGithubDatasourceCache<
       if (errors) {
         let [errorMessage] = errors
           .map(({ message }) => message)
-          .filter(Boolean);
+          .filter(is.string);
         errorMessage ??= 'GitHub datasource cache: unknown GraphQL error';
         return new Error(errorMessage);
       }
