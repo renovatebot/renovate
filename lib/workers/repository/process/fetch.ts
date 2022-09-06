@@ -96,7 +96,7 @@ async function fetchManagerPackagerFileUpdates(
     'fetchManagerPackagerFileUpdates starting with concurrency'
   );
 
-  pFile.deps = await pAll(queue, { concurrency: 5 });
+  pFile.deps = await pAll(queue, { concurrency: 5, stopOnError: false });
   logger.trace({ packageFile }, 'fetchManagerPackagerFileUpdates finished');
 }
 
@@ -114,7 +114,7 @@ async function fetchManagerUpdates(
     { manager, queueLength: queue.length },
     'fetchManagerUpdates starting'
   );
-  await pAll(queue, { concurrency: 5 });
+  await pAll(queue, { concurrency: 5, stopOnError: false });
   logger.trace({ manager }, 'fetchManagerUpdates finished');
 }
 

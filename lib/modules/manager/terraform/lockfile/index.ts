@@ -56,7 +56,7 @@ async function updateAllLocks(
       };
       return update;
     },
-    { concurrency: 4 } // allow to look up 4 lock in parallel
+    { concurrency: 4, stopOnError: false } // allow to look up 4 lock in parallel
   );
 
   return updates.filter(is.truthy);

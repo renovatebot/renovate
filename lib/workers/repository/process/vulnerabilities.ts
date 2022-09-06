@@ -73,7 +73,7 @@ export class Vulnerabilities {
       { manager, queueLength: queue.length },
       'fetchManagerUpdates starting'
     );
-    await pAll(queue, { concurrency: 5 });
+    await pAll(queue, { concurrency: 5, stopOnError: false });
     logger.trace({ manager }, 'fetchManagerUpdates finished');
   }
 
@@ -95,7 +95,7 @@ export class Vulnerabilities {
     );
 
     config.packageRules?.push(
-      ...(await pAll(queue, { concurrency: 5 })).flat()
+      ...(await pAll(queue, { concurrency: 5, stopOnError: false })).flat()
     );
     logger.trace({ packageFile }, 'fetchManagerPackagerFileUpdates finished');
   }

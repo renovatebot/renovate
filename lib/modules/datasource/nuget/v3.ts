@@ -122,7 +122,7 @@ export async function getReleases(
     (page) => (): Promise<CatalogEntry[]> => getCatalogEntry(http, page)
   );
   const catalogEntries = (
-    await pAll(catalogPagesQueue, { concurrency: 5 })
+    await pAll(catalogPagesQueue, { concurrency: 5, stopOnError: false })
   ).flat();
 
   let homepage: string | null = null;

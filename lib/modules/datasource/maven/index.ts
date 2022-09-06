@@ -268,7 +268,7 @@ export class MavenDatasource extends Datasource {
           res !== 'not-found' && res !== 'error' ? release : null;
       });
 
-      await pAll(queue, { concurrency: 5 });
+      await pAll(queue, { concurrency: 5, stopOnError: false });
 
       if (!isCacheValid) {
         // Store new TTL flag for 24 hours if the previous one is invalidated

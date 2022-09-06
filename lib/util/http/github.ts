@@ -335,7 +335,10 @@ export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
               );
             }
           );
-          const pages = await pAll(queue, { concurrency: 5 });
+          const pages = await pAll(queue, {
+            concurrency: 5,
+            stopOnError: false,
+          });
           if (opts.paginationField && is.plainObject(result.body)) {
             const paginatedResult = result.body[opts.paginationField];
             if (is.array<T>(paginatedResult)) {

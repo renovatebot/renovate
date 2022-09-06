@@ -126,7 +126,7 @@ async function getUpdateResult(
 
       return getAddResult(path, contents);
     },
-    { concurrency: 5 }
+    { concurrency: 5, stopOnError: false }
   );
 
   const deleted = hermitChanges.deleted.map(getDeleteResult);
@@ -140,7 +140,7 @@ async function getUpdateResult(
         getAddResult(path, contents), // add a new link
       ];
     },
-    { concurrency: 5 }
+    { concurrency: 5, stopOnError: false }
   );
 
   const renamed = await pMap(
@@ -152,7 +152,7 @@ async function getUpdateResult(
 
       return [getDeleteResult(from), getAddResult(to, toContents)];
     },
-    { concurrency: 5 }
+    { concurrency: 5, stopOnError: false }
   );
 
   return [

@@ -182,7 +182,10 @@ export class PackagistDatasource extends Datasource {
         (file) => (): Promise<PackagistFile> =>
           this.getPackagistFile(regUrl, file)
       );
-      const resolvedFiles = await pAll(queue, { concurrency: 5 });
+      const resolvedFiles = await pAll(queue, {
+        concurrency: 5,
+        stopOnError: false,
+      });
       for (const res of resolvedFiles) {
         for (const [name, val] of Object.entries(res.providers)) {
           providerPackages[name] = val.sha256;

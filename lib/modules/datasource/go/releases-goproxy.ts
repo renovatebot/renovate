@@ -60,7 +60,10 @@ export class GoProxyDatasource extends Datasource {
             return { version };
           }
         });
-        const releases = await pAll(queue, { concurrency: 5 });
+        const releases = await pAll(queue, {
+          concurrency: 5,
+          stopOnError: false,
+        });
         if (releases.length) {
           const datasource = await BaseGoDatasource.getDatasource(packageName);
           const sourceUrl = getSourceUrl(datasource);

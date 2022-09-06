@@ -1016,7 +1016,7 @@ export async function addReviewers(
   try {
     newReviewerIDs = await pAll(
       newReviewers.map((r) => () => getUserID(r)),
-      { concurrency: 5 }
+      { concurrency: 5, stopOnError: false }
     );
   } catch (err) {
     logger.warn({ err }, 'Failed to get IDs of the new reviewers');

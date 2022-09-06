@@ -109,7 +109,7 @@ export class GalaxyCollectionDatasource extends Datasource {
               return null;
             }
           }),
-      { concurrency: 5 } // allow 5 requests at maximum in parallel
+      { concurrency: 5, stopOnError: false } // allow 5 requests at maximum in parallel
     );
     // filter failed versions
     const filteredReleases = enrichedReleases.filter(is.truthy);

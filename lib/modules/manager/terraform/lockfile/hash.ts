@@ -97,7 +97,7 @@ export class TerraformProviderHash {
     return pMap(
       builds,
       (build) => this.calculateSingleHash(build, cacheDir),
-      { concurrency: 4 } // allow to look up 4 builds for this version in parallel
+      { concurrency: 4, stopOnError: false } // allow to look up 4 builds for this version in parallel
     );
   }
 

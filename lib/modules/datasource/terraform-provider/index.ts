@@ -254,7 +254,7 @@ export class TerraformProviderDatasource extends TerraformDatasource {
           return null;
         }
       },
-      { concurrency: 4 }
+      { concurrency: 4, stopOnError: false }
     );
 
     const filteredResult = result.filter(is.truthy);

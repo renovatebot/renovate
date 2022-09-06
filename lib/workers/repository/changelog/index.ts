@@ -19,7 +19,7 @@ export async function embedChangelog(
 export async function embedChangelogs(
   branches: BranchUpgradeConfig[]
 ): Promise<void> {
-  await pMap(branches, embedChangelog, { concurrency: 10 });
+  await pMap(branches, embedChangelog, { concurrency: 10, stopOnError: false });
 }
 
 export function needsChangelogs(
