@@ -2,12 +2,7 @@ import { logger } from '../../../logger';
 import { cache } from '../../../util/cache/package/decorator';
 import { GithubReleasesDatasource } from '../github-releases';
 import { getApiBaseUrl, getSourceUrl } from '../github-releases/common';
-import type {
-  DigestConfig,
-  GetReleasesConfig,
-  Release,
-  ReleaseResult,
-} from '../types';
+import type { DigestConfig, GetReleasesConfig, ReleaseResult } from '../types';
 import { CacheableGithubTags } from './cache';
 
 export class GithubTagsDatasource extends GithubReleasesDatasource {
