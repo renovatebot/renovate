@@ -88,28 +88,6 @@ export class GithubTagsDatasource extends GithubReleasesDatasource {
       releases: tagReleases.map((item) => ({ ...item, gitRef: item.version })),
     };
 
-    try {
-      // Fetch additional data from releases endpoint when possible
-      const releasesResult = await super.getReleases(config);
-      type PartialRelease = Omit<Release, 'version'>;
-
-      const releaseByVersion: Record<string, PartialRelease> = {};
-      releasesResult?.releases?.forEach((release) => {
-        const { version, ...value } = release;
-        releaseByVersion[version] = value;
-      });
-
-      const mergedReleases: Release[] = [];
-      tagsResult.releases.forEach((tag) => {
-        const release = releaseByVersion[tag.version];
-        mergedReleases.push({ ...release, ...tag });
-      });
-
-      tagsResult.releases = mergedReleases;
-    } catch (err) /* istanbul ignore next */ {
-      logger.debug({ err }, `Error fetching additional info for GitHub tags`);
-    }
-
     return tagsResult;
   }
 }
