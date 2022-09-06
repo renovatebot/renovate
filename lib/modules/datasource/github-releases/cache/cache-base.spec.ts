@@ -333,13 +333,57 @@ describe('modules/datasource/github-releases/cache/cache-base', () => {
       {
         statusCode: 200,
         headers: {},
-        body: { errors: [{ message: 'Ooops' }] },
+        body: { errors: [{} as never, { message: 'Ooops' }] },
       },
     ];
     const cache = new TestCache(http, { resetDeltaMinutes: 0 });
 
     await expect(cache.getItems({ packageName: 'foo/bar' })).rejects.toThrow(
       'Ooops'
+    );
+    expect(packageCache.get).toHaveBeenCalled();
+    expect(packageCache.set).not.toHaveBeenCalled();
+  });
+
+  it('throws for unknown graphql errors', async () => {
+    packageCache.get.mockResolvedValueOnce({
+      items: {},
+      createdAt: t3,
+      updatedAt: t3,
+    });
+    responses = [
+      {
+        statusCode: 200,
+        headers: {},
+        body: { errors: [] },
+      },
+    ];
+    const cache = new TestCache(http, { resetDeltaMinutes: 0 });
+
+    await expect(cache.getItems({ packageName: 'foo/bar' })).rejects.toThrow(
+      'GitHub datasource cache: unknown GraphQL error'
+    );
+    expect(packageCache.get).toHaveBeenCalled();
+    expect(packageCache.set).not.toHaveBeenCalled();
+  });
+
+  it('throws for empty payload', async () => {
+    packageCache.get.mockResolvedValueOnce({
+      items: {},
+      createdAt: t3,
+      updatedAt: t3,
+    });
+    responses = [
+      {
+        statusCode: 200,
+        headers: {},
+        body: { data: { repository: { payload: null as never } } },
+      },
+    ];
+    const cache = new TestCache(http, { resetDeltaMinutes: 0 });
+
+    await expect(cache.getItems({ packageName: 'foo/bar' })).rejects.toThrow(
+      'GitHub datasource cache: failed to obtain payload data'
     );
     expect(packageCache.get).toHaveBeenCalled();
     expect(packageCache.set).not.toHaveBeenCalled();
