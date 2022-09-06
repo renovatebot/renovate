@@ -35,6 +35,7 @@ export interface BranchCache {
   parentSha: string | null;
   upgrades: BranchUpgradeCache[];
   branchFingerprint?: string;
+  baseBranchSha: string | null;
 }
 
 export interface RepoCacheData {

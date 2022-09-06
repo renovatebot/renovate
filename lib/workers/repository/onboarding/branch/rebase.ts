@@ -31,7 +31,8 @@ export async function rebaseOnboardingBranch(
   // TODO #7154
   if (
     contents === existingContents &&
-    !(await isBranchBehindBase(config.onboardingBranch!))
+    // TODO: (fix types) #7154
+    !(await isBranchBehindBase(config.onboardingBranch!, config.defaultBranch!))
   ) {
     logger.debug('Onboarding branch is up to date');
     return null;

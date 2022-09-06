@@ -558,10 +558,11 @@ export function getBranchList(): string[] {
   return Object.keys(config.branchCommits);
 }
 
-export async function isBranchBehindBase(branchName: string): Promise<boolean> {
-  const { currentBranchSha } = config;
-
-  let isBehind = getCachedBehindBaseResult(branchName, currentBranchSha);
+export async function isBranchBehindBase(
+  branchName: string,
+  baseBranch: string
+): Promise<boolean> {
+  let isBehind = getCachedBehindBaseResult(branchName, baseBranch);
   if (isBehind !== null) {
     return isBehind;
   }
@@ -573,7 +574,7 @@ export async function isBranchBehindBase(branchName: string): Promise<boolean> {
       '--remotes',
       '--verbose',
       '--contains',
-      config.currentBranchSha,
+      currentBranchSha,
     ]);
     isBehind = !branches.all.map(localName).includes(branchName);
     logger.debug(

@@ -49,6 +49,8 @@ async function generateBranchCache(
 ): Promise<BranchCache | null> {
   const { branchName } = branch;
   try {
+    const baseBranchName = branch.baseBranch ?? branch.defaultBranch;
+    const baseBranchSha = getBranchCommit(baseBranchName!) ?? null;
     const sha = getBranchCommit(branchName) ?? null;
     let prNo = null;
     let parentSha = null;
@@ -81,6 +83,7 @@ async function generateBranchCache(
       isModified,
       upgrades,
       branchFingerprint,
+      baseBranchSha,
     };
   } catch (error) {
     const err = error.err || error; // external host error nests err

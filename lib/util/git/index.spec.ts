@@ -249,13 +249,15 @@ describe('util/git/index', () => {
     it('should return false if same SHA as master', async () => {
       repoCache.getCache.mockReturnValueOnce({});
       expect(
-        await git.isBranchBehindBase('renovate/future_branch')
+        await git.isBranchBehindBase('renovate/future_branch', defaultBranch)
       ).toBeFalse();
     });
 
     it('should return true if SHA different from master', async () => {
       repoCache.getCache.mockReturnValueOnce({});
-      expect(await git.isBranchBehindBase('renovate/past_branch')).toBeTrue();
+      expect(
+        await git.isBranchBehindBase('renovate/past_branch', defaultBranch)
+      ).toBeTrue();
     });
 
     it('should return result even if non-default and not under branchPrefix', async () => {
@@ -267,8 +269,8 @@ describe('util/git/index', () => {
       repoCache.getCache.mockReturnValueOnce({}).mockReturnValueOnce({
         branches: [branchCache],
       });
-      expect(await git.isBranchBehindBase('develop')).toBeTrue();
-      expect(await git.isBranchBehindBase('develop')).toBeTrue(); // cache
+      expect(await git.isBranchBehindBase('develop', defaultBranch)).toBeTrue();
+      expect(await git.isBranchBehindBase('develop', defaultBranch)).toBeTrue(); // cache
     });
   });
 
