@@ -37,8 +37,12 @@ export async function checkOnboardingBranch(
   // TODO #7154
   const onboardingPr = await getOnboardingPr(config);
   if (onboardingPr) {
+    const pl = GlobalConfig.get('platform')!;
     const { rebaseRequested, rawConfigHash } = onboardingPr.bodyStruct ?? {};
-    if (is.undefined(rebaseRequested)) {
+    if (!['github', 'gitlab'].includes(pl)) {
+      logger.debug(`Platform '${pl}' does not support extended markdown`);
+      OnboardingState.prUpdateRequested = true;
+    } else if (is.undefined(rebaseRequested)) {
       logger.debug('No rebase checkbox was found in the onboarding PR');
       OnboardingState.prUpdateRequested = true;
     } else if (rebaseRequested) {
