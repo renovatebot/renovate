@@ -1,6 +1,7 @@
 import AggregateError from 'aggregate-error';
 import pAll from 'p-all';
 import pMap from 'p-map';
+import { logger } from '../logger';
 import { ExternalHostError } from '../types/errors/external-host-error';
 
 type PromiseFactory<T> = () => Promise<T>;
@@ -13,6 +14,8 @@ function handleError(err: any): never {
   if (!(err instanceof AggregateError)) {
     throw err;
   }
+
+  logger.debug({ err }, 'Aggregate error is thrown');
 
   const errors = [...err];
 
