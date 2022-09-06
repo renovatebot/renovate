@@ -74,7 +74,7 @@ export function getDepWarningsPR(
   if (dependencyDashboard) {
     warningText += `Please check the Dependency Dashboard for more information.\n\n`;
   } else {
-    warningText += `Please check logs for more information.\n\n`;
+    warningText += `Please check the logs for more information.\n\n`;
   }
   return warningText;
 }

@@ -137,7 +137,7 @@ describe('workers/repository/errors-warnings', () => {
 
         ### ⚠ Dependency Lookup Warnings ⚠
 
-        Warnings were logged while processing this repo. Please check logs for more information.
+        Warnings were logged while processing this repo. Please check the logs for more information.
 
         "
       `);

@@ -205,12 +205,12 @@ describe('workers/repository/update/pr/body/index', () => {
       const massagedMarkDown =
         '---\n\n### ⚠ Dependency Lookup Warnings ⚠\n\n' +
         'Warnings were logged while processing this repo. ' +
-        'Please check the Dependency Dashboard for further information\n\n---';
+        'Please check the Dependency Dashboard for more information\n\n---';
 
       const compiledContent =
         '---\n\n\n\n### ⚠ Dependency Lookup Warnings ⚠' +
         '\n\n\n\nWarnings were logged while processing this repo. ' +
-        'Please check the Dependency Dashboard for further information\n\n\n\n---';
+        'Please check the Dependency Dashboard for more information\n\n\n\n---';
 
       platform.massageMarkdown.mockImplementation((x) => massagedMarkDown);
       template.compile.mockImplementation((x) => compiledContent);
@@ -246,7 +246,7 @@ describe('workers/repository/update/pr/body/index', () => {
       const expected =
         '---\n\n### ⚠ Dependency Lookup Warnings ⚠' +
         '\n\nWarnings were logged while processing this repo. ' +
-        'Please check the Dependency Dashboard for further information\n\n---';
+        'Please check the Dependency Dashboard for more information\n\n---';
       expect(res).toBe(expected);
     });
   });
