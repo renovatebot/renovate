@@ -57,6 +57,7 @@ import type {
   GitLabMergeRequest,
   GitlabComment,
   GitlabIssue,
+  GitlabPr,
   MergeMethod,
   RepoResponse,
 } from './types';
@@ -414,6 +415,14 @@ export async function getBranchStatus(
     return BranchStatus.yellow;
   }
   logger.debug(`Got res with ${branchStatuses.length} results`);
+
+  const mrStatus = (await getBranchPr(branchName))?.headPipelineStatus;
+  if (!is.undefined(mrStatus)) {
+    branchStatuses.push({
+      status: mrStatus as BranchState,
+      name: 'head_pipeline',
+    });
+  }
   // ignore all skipped jobs
   const res = branchStatuses.filter((check) => check.status !== 'skipped');
   if (res.length === 0) {
@@ -606,18 +615,19 @@ export async function createPr({
   return massagePr(pr);
 }
 
-export async function getPr(iid: number): Promise<Pr> {
+export async function getPr(iid: number): Promise<GitlabPr> {
   logger.debug(`getPr(${iid})`);
   const mr = await getMR(config.repository, iid);
 
   // Harmonize fields with GitHub
-  const pr: Pr = {
+  const pr: GitlabPr = {
     sourceBranch: mr.source_branch,
     targetBranch: mr.target_branch,
     number: mr.iid,
     displayNumber: `Merge Request #${mr.iid}`,
     bodyStruct: getPrBodyStruct(mr.description),
     state: mr.state === 'opened' ? PrState.Open : mr.state,
+    headPipelineStatus: mr.head_pipeline?.status,
     hasAssignees: !!(mr.assignee?.id ?? mr.assignees?.[0]?.id),
     hasReviewers: !!mr.reviewers?.length,
     title: mr.title,
@@ -734,7 +744,9 @@ export async function findPr({
 }
 
 // Returns the Pull Request for a branch. Null if not exists.
-export async function getBranchPr(branchName: string): Promise<Pr | null> {
+export async function getBranchPr(
+  branchName: string
+): Promise<GitlabPr | null> {
   logger.debug(`getBranchPr(${branchName})`);
   const existingPr = await findPr({
     branchName,
