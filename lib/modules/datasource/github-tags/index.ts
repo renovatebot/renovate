@@ -2,12 +2,7 @@ import { logger } from '../../../logger';
 import { cache } from '../../../util/cache/package/decorator';
 import { GithubReleasesDatasource } from '../github-releases';
 import { getApiBaseUrl, getSourceUrl } from '../github-releases/common';
-import type {
-  DigestConfig,
-  GetReleasesConfig,
-  Release,
-  ReleaseResult,
-} from '../types';
+import type { DigestConfig, GetReleasesConfig, ReleaseResult } from '../types';
 import { CacheableGithubTags } from './cache';
 
 export class GithubTagsDatasource extends GithubReleasesDatasource {
@@ -87,28 +82,6 @@ export class GithubTagsDatasource extends GithubReleasesDatasource {
       sourceUrl: getSourceUrl(config.packageName, config.registryUrl),
       releases: tagReleases.map((item) => ({ ...item, gitRef: item.version })),
     };
-
-    try {
-      // Fetch additional data from releases endpoint when possible
-      const releasesResult = await super.getReleases(config);
-      type PartialRelease = Omit<Release, 'version'>;
-
-      const releaseByVersion: Record<string, PartialRelease> = {};
-      releasesResult?.releases?.forEach((release) => {
-        const { version, ...value } = release;
-        releaseByVersion[version] = value;
-      });
-
-      const mergedReleases: Release[] = [];
-      tagsResult.releases.forEach((tag) => {
-        const release = releaseByVersion[tag.version];
-        mergedReleases.push({ ...release, ...tag });
-      });
-
-      tagsResult.releases = mergedReleases;
-    } catch (err) /* istanbul ignore next */ {
-      logger.debug({ err }, `Error fetching additional info for GitHub tags`);
-    }
 
     return tagsResult;
   }
