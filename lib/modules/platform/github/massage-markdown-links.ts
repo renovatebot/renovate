@@ -69,7 +69,7 @@ export function massageMarkdownLinks(content: string): string {
     const rightSpaces = content.replace(content.trimEnd(), '');
     const matches: UrlMatch[] = [];
     const newContent = content.replace(
-      regEx(/@&#8203;(?<name>[A-Za-z1-9]*)/gi),
+      regEx(/@&#8203;(?<name>[a-zA-Z1-9-!$%^&*()_+|~=`{}[\]:";'<>?,.]*)/gi),
       '`@$<name>`'
     );
     remark()
