@@ -5,14 +5,14 @@ import {
   generateInstallCommands,
   isDynamicInstall,
   resolveConstraint,
-} from './buildpack';
+} from './containerbase';
 import type { ToolConstraint } from './types';
 
 jest.mock('../../modules/datasource');
 
 const datasource = mocked(_datasource);
 
-describe('util/exec/buildpack', () => {
+describe('util/exec/containerbase', () => {
   describe('isDynamicInstall()', () => {
     beforeEach(() => {
       GlobalConfig.reset();
@@ -23,7 +23,7 @@ describe('util/exec/buildpack', () => {
       expect(isDynamicInstall()).toBeFalse();
     });
 
-    it('returns false if not buildpack', () => {
+    it('returns false if not containerbase', () => {
       GlobalConfig.set({ binarySource: 'install' });
       expect(isDynamicInstall()).toBeFalse();
     });

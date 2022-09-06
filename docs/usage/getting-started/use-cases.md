@@ -200,3 +200,8 @@ The typical workflow for a company is:
 - Set that repository as the default `extends` value when onboarding new repositories
 
 This means that repositories get the centralized config by default, and any changes made to the centralized config repository are propagated to other repositories immediately.
+
+## How others use Renovate
+
+You can learn a lot by seeing how others use Renovate.
+Check out the [Swissquote user story](../user-stories/swissquote.md).
