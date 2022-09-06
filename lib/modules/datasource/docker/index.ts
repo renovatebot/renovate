@@ -140,7 +140,6 @@ export async function getAuthHeaders(
     if (
       authenticateHeader.scheme.toUpperCase() !== 'BEARER' ||
       !is.string(authenticateHeader.params.realm) ||
-      !is.string(authenticateHeader.params.service) ||
       parseUrl(authenticateHeader.params.realm) === null
     ) {
       logger.trace(
@@ -159,7 +158,11 @@ export async function getAuthHeaders(
       scope = authenticateHeader.params.scope;
     }
 
-    const authUrl = `${authenticateHeader.params.realm}?service=${authenticateHeader.params.service}&scope=${scope}`;
+    let service = authenticateHeader.params.service;
+    if (!is.string(service)) {
+      service = '';
+    }
+    const authUrl = `${authenticateHeader.params.realm}?service=${service}&scope=${scope}`;
     logger.trace(
       { registryHost, dockerRepository, authUrl },
       `Obtaining docker registry token`
@@ -340,7 +343,7 @@ export function isECRMaxResultsError(err: HttpError): boolean {
 const defaultConfig = {
   commitMessageTopic: '{{{depName}}} Docker tag',
   commitMessageExtra:
-    'to {{#if isMajor}}{{{prettyNewMajor}}}{{else}}{{{prettyNewVersion}}}{{/if}}',
+    'to {{#if isPinDigest}}{{{newDigestShort}}}{{else}}{{#if isMajor}}{{{prettyNewMajor}}}{{else}}{{{prettyNewVersion}}}{{/if}}{{/if}}',
   digest: {
     branchTopic: '{{{depNameSanitized}}}-{{{currentValue}}}',
     commitMessageExtra: 'to {{newDigestShort}}',
@@ -358,9 +361,6 @@ const defaultConfig = {
       commitMessageTopic: '{{{groupName}}}',
       branchTopic: 'digests-pin',
     },
-  },
-  group: {
-    commitMessageTopic: '{{{groupName}}} Docker tags',
   },
 };
 

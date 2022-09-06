@@ -1,0 +1,15 @@
+#### Our Gold Sponsors
+
+<table>
+</table>
+
+#### Our Silver Sponsors
+
+<table>
+</table>
+
+#### What's Changed
+* pnpm rebuild accepts --store-dir by @&#8203;user in https://github.com/foo/foo/pull/1
+
+#### New Contributors
+* @&#8203;user made their first contribution in https://github.com/foo/foo/pull/2

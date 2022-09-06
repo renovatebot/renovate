@@ -1,3 +1,7 @@
+import type {
+  RepositoryCacheConfig,
+  RepositoryCacheType,
+} from '../../../config/types';
 import type { PackageFile } from '../../../modules/manager/types';
 import type { RepoInitConfig } from '../../../workers/repository/init/types';
 import type { ExtractResult } from '../../../workers/repository/process/extract-update';
@@ -31,6 +35,7 @@ export interface BranchCache {
   sha: string | null;
   parentSha: string | null;
   upgrades: BranchUpgradeCache[];
+  branchFingerprint?: string;
 }
 
 export interface OnboardingBranchCache {
@@ -55,15 +60,40 @@ export interface RepoCacheData {
   onboarding?: OnboardingBranchCache;
 }
 
-export interface RepoCacheRecord {
+export interface RepoCacheRecordV10 extends RepoCacheData {
+  repository?: string;
+  revision?: number;
+}
+
+export interface RepoCacheRecordV11 {
+  repository: string;
+  revision: number;
+  data: RepoCacheData;
+}
+
+export interface RepoCacheRecordV12 {
   repository: string;
   revision: number;
   payload: string;
   hash: string;
 }
 
+export interface RepoCacheRecordV13 extends RepoCacheRecordV12 {
+  fingerprint: string;
+}
+
+export type RepoCacheRecord = RepoCacheRecordV13;
+
 export interface RepoCache {
   load(): Promise<void>;
   save(): Promise<void>;
   getData(): RepoCacheData;
+  isModified(): boolean | undefined;
+}
+
+export interface RepoCacheConfig {
+  repository?: string;
+  repositoryCache?: RepositoryCacheConfig;
+  repositoryCacheType?: RepositoryCacheType;
+  repoFingerprint: string;
 }

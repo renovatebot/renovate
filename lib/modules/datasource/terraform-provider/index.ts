@@ -1,10 +1,10 @@
 // TODO: types (#7154)
 /* eslint-disable @typescript-eslint/restrict-template-expressions */
 import is from '@sindresorhus/is';
-import pMap from 'p-map';
 import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { cache } from '../../../util/cache/package/decorator';
+import * as p from '../../../util/promises';
 import { regEx } from '../../../util/regex';
 import * as hashicorpVersioning from '../../versioning/hashicorp';
 import { TerraformDatasource } from '../terraform-module/base';
@@ -230,7 +230,7 @@ export class TerraformProviderDatasource extends TerraformDatasource {
       );
       return null;
     }
-    const result = await pMap(
+    const result = await p.map(
       builds.platforms,
       async (platform) => {
         const buildURL = `${backendURL}/${version}/download/${platform.os}/${platform.arch}`;

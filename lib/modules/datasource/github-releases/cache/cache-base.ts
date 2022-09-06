@@ -1,9 +1,12 @@
+import is from '@sindresorhus/is';
 import { DateTime, DurationLikeObject } from 'luxon';
 import { logger } from '../../../../logger';
+import * as memCache from '../../../../util/cache/memory';
 import * as packageCache from '../../../../util/cache/package';
 import type {
   GithubGraphqlResponse,
   GithubHttp,
+  GithubHttpOptions,
 } from '../../../../util/http/github';
 import type { GetReleasesConfig } from '../../types';
 import { getApiBaseUrl } from '../common';
@@ -162,29 +165,61 @@ export abstract class AbstractGithubDatasourceCache<
    */
   abstract coerceFetched(fetchedItem: FetchedItem): StoredItem | null;
 
-  private async query(
+  private async queryPayload(
     baseUrl: string,
-    variables: GithubQueryParams
-  ): Promise<QueryResponse<FetchedItem> | Error> {
+    variables: GithubQueryParams,
+    options: GithubHttpOptions
+  ): Promise<QueryResponse<FetchedItem>['repository']['payload'] | Error> {
     try {
       const graphqlRes = await this.http.postJson<
         GithubGraphqlResponse<QueryResponse<FetchedItem>>
       >('/graphql', {
+        ...options,
         baseUrl,
         body: { query: this.graphqlQuery, variables },
       });
       const { body } = graphqlRes;
       const { data, errors } = body;
-      return data ?? new Error(errors?.[0]?.message);
+
+      if (errors) {
+        let [errorMessage] = errors
+          .map(({ message }) => message)
+          .filter(is.string);
+        errorMessage ??= 'GitHub datasource cache: unknown GraphQL error';
+        return new Error(errorMessage);
+      }
+
+      if (!data?.repository?.payload) {
+        return new Error(
+          'GitHub datasource cache: failed to obtain payload data'
+        );
+      }
+
+      return data.repository.payload;
     } catch (err) {
       return err;
     }
   }
 
+  private getBaseUrl(registryUrl: string | undefined): string {
+    const baseUrl = getApiBaseUrl(registryUrl).replace(/\/v3\/$/, '/'); // Replace for GHE
+    return baseUrl;
+  }
+
+  private getCacheKey(
+    registryUrl: string | undefined,
+    packageName: string
+  ): string {
+    const baseUrl = this.getBaseUrl(registryUrl);
+    const [owner, name] = packageName.split('/');
+    const cacheKey = `${baseUrl}:${owner}:${name}`;
+    return cacheKey;
+  }
+
   /**
    * Pre-fetch, update, or just return the package cache items.
    */
-  async getItems(
+  async getItemsImpl(
     releasesConfig: GetReleasesConfig,
     changelogRelease?: ChangelogRelease
   ): Promise<StoredItem[]> {
@@ -205,11 +240,10 @@ export abstract class AbstractGithubDatasourceCache<
     // so that soft update mechanics is immediately starting.
     let cacheUpdatedAt = now.minus(this.updateDuration).toISO();
 
-    const baseUrl = getApiBaseUrl(registryUrl).replace(/\/v3\/$/, '/'); // Replace for GHE
-
     const [owner, name] = packageName.split('/');
     if (owner && name) {
-      const cacheKey = `${baseUrl}:${owner}:${name}`;
+      const baseUrl = this.getBaseUrl(registryUrl);
+      const cacheKey = this.getCacheKey(registryUrl, packageName);
       const cache = await packageCache.get<GithubDatasourceCache<StoredItem>>(
         this.cacheNs,
         cacheKey
@@ -264,10 +298,12 @@ export abstract class AbstractGithubDatasourceCache<
           : this.maxPrefetchPages;
         let stopIteration = false;
         while (pagesRemained > 0 && !stopIteration) {
-          const res = await this.query(baseUrl, variables);
-          if (res instanceof Error) {
+          const queryResult = await this.queryPayload(baseUrl, variables, {
+            repository: packageName,
+          });
+          if (queryResult instanceof Error) {
             if (
-              res.message.startsWith(
+              queryResult.message.startsWith(
                 'Something went wrong while executing your query.' // #16343
               ) &&
               variables.count > 30
@@ -279,7 +315,7 @@ export abstract class AbstractGithubDatasourceCache<
               variables.count = Math.floor(variables.count / 2);
               continue;
             }
-            throw res;
+            throw queryResult;
           }
 
           pagesRemained -= 1;
@@ -287,7 +323,7 @@ export abstract class AbstractGithubDatasourceCache<
           const {
             nodes: fetchedItems,
             pageInfo: { hasNextPage, endCursor },
-          } = res.repository.payload;
+          } = queryResult;
 
           if (hasNextPage) {
             variables.cursor = endCursor;
@@ -372,6 +408,20 @@ export abstract class AbstractGithubDatasourceCache<
 
     const items = Object.values(cacheItems);
     return items;
+  }
+
+  getItems(
+    releasesConfig: GetReleasesConfig,
+    changelogRelease?: ChangelogRelease
+  ): Promise<StoredItem[]> {
+    const { packageName, registryUrl } = releasesConfig;
+    const cacheKey = this.getCacheKey(registryUrl, packageName);
+    const promiseKey = `github-datasource-cache:${this.cacheNs}:${cacheKey}`;
+    const res =
+      memCache.get<Promise<StoredItem[]>>(promiseKey) ??
+      this.getItemsImpl(releasesConfig, changelogRelease);
+    memCache.set(promiseKey, res);
+    return res;
   }
 
   getRandomDeltaMinutes(): number {
