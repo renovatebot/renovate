@@ -2504,7 +2504,7 @@ describe('modules/platform/github/index', () => {
         )
         .reply(200, [])
         .get('/repos/some/repo/pulls/1234')
-        .reply(200);
+        .reply(404);
       await github.initRepo({ repository: 'some/repo' });
       const pr = await github.getPr(1234);
       expect(pr).toBeNull();
