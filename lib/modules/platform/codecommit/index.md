@@ -26,7 +26,6 @@ Set up a global configuration file (config.js) for running Renovate on CodeCommi
 
 Run Renovate with the configuration file and it will create an onboarding Pull Request in your set repositories.
 
-
 ## Unsupported platform features/concepts
 
 - adding assignees to PRs not supported
@@ -38,8 +37,8 @@ Run Renovate with the configuration file and it will create an onboarding Pull R
 - We recommend limiting Open Renovate PRs using `prConcurrentLimit`
 - Due to current platform limitations, if you close a PR and don’t wish for Renovate to recreate if, use [package rules](https://docs.renovatebot.com/configuration-options/#packagerules) with the `"enabled": false` key.
 
-
 Here's an example config.js:
+
 ```module.exports = {
   endpoint: 'https://git-codecommit.{your region}.amazonaws.com/',
   platform: 'codecommit',
@@ -50,4 +49,3 @@ Here's an example config.js:
   prConcurrentLimit: 10,
 };
 ```
-
