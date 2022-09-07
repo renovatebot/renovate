@@ -35,25 +35,15 @@ export function extractPackageFile(content: string): PackageFile | null {
     .filter(is.truthy)) {
     const supportedTool = upgradeableTooling[groups.toolName];
     if (supportedTool) {
-      if (/^\d[\d.]+\d$/.test(groups.version)) {
-        const dep: PackageDependency = {
-          currentValue: groups.version.trim(),
-          ...supportedTool,
-        };
-        if (isSkipComment((groups.comment ?? '').trim())) {
-          dep.skipReason = 'ignored';
-        }
-
-        deps.push(dep);
-      } else {
-        const dep: PackageDependency = {
-          currentValue: groups.version.trim(),
-          depName: supportedTool.depName,
-          skipReason: 'unsupported-version',
-        };
-
-        deps.push(dep);
+      const dep: PackageDependency = {
+        currentValue: groups.version.trim(),
+        ...supportedTool,
+      };
+      if (isSkipComment((groups.comment ?? '').trim())) {
+        dep.skipReason = 'ignored';
       }
+
+      deps.push(dep);
     } else {
       const dep: PackageDependency = {
         depName: groups.toolName.trim(),
