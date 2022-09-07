@@ -582,12 +582,17 @@ function cachePr(pr?: Pr | null): void {
 
 // Fetch fresh Pull Request and cache it when possible
 async function fetchPr(prNo: number): Promise<Pr | null> {
-  const { body: ghRestPr } = await githubApi.getJson<GhRestPr>(
-    `repos/${config.parentRepo ?? config.repository}/pulls/${prNo}`
-  );
-  const result = coerceRestPr(ghRestPr);
-  cachePr(result);
-  return result;
+  try {
+    const { body: ghRestPr } = await githubApi.getJson<GhRestPr>(
+      `repos/${config.parentRepo ?? config.repository}/pulls/${prNo}`
+    );
+    const result = coerceRestPr(ghRestPr);
+    cachePr(result);
+    return result;
+  } catch (err) {
+    logger.warn({ err, prNo }, `GitHub fetchPr error`);
+    return null;
+  }
 }
 
 // Gets details for a PR
