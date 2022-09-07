@@ -249,10 +249,6 @@ describe('workers/repository/errors-warnings', () => {
   });
 
   describe('getDepWarningsOnboardingPR()', () => {
-    beforeEach(() => {
-      jest.resetAllMocks();
-    });
-
     it('returns onboarding warning text', () => {
       const packageFiles: Record<string, PackageFile[]> = {
         npm: [
