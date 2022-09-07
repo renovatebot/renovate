@@ -2,56 +2,45 @@
 
 ## Authentication
 
-We are using AWS CodeCommit SDK,
-if you do not have IAM access key id and Secret access key id
-first read SDK about how to get the [IAM Access Keys](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_access-keys.html)
+First, you need to obtain an AWS [IAM Access Key id and a Secret access key id](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_access-keys.html)
 
-Requirements for authentication:
+Let Renovate use AWS CodeCommit access keys by doing one of the following:
 
-can be set in renovate config file:
+- Set a Renovate configuration file - config.js and set:
+  - `endpoint:` the url endpoint e.g `https://git-codecommit.us-east-1.amazonaws.com/`
+  - `username:` AWS IAM access key id
+  - `password:` AWS Secret access key
+- Set environment variables:
+  - `AWS_REGION:` the region e.g `us-east-1`
+  - `AWS_ACCESS_KEY_ID:` your IAM Access key id
+  - `AWS_SECRET_ACCESS_KEY:` your IAM Secret access key id
 
-`endpoint`: the url endpoint e.g `https://git-codecommit.us-east-1.amazonaws.com/`
-
-`username`: the AWS IAM access key id
-
-`password`: the AWS IAM secret access key
-
-or as environment variables:
-
-`AWS_REGION` : the region e.g `us-east-1`
-
-`AWS_ACCESS_KEY_ID` : your IAM Access key id
-
-`AWS_SECRET_ACCESS_KEY` : your IAM Secret access key id
-
-| Permission                                                                                                                                               | Scope                   |
-| -------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------- |
-| AWS managed policy: [AWSCodeCommitFullAccess](https://docs.aws.amazon.com/codecommit/latest/userguide/security-iam-awsmanpol.html#managed-policies-full) | CodeCommit: Full Access |
-
-- Set `platform=codecommit` somewhere in your Renovate config file
-
-## Unsupported platform features/concepts
-
-- adding assignees concept doesn't exist in CodeCommit
-- auto-merge doesn't work currently, there is no way to check CodeBuild status efficiently
-- rebaseLabel isn't supported
-- close PR to ignore is not supported, there is no way to get all pull requests efficiently
-
-## recommendations
-
-- It's always best to limit OPEN prs by renovate user to a maximum of 10, because every PR costs an extra AWS request
+Make sure to attach the [AWSCodeCommitFullAccess policy](https://docs.aws.amazon.com/codecommit/latest/userguide/security-iam-awsmanpol.html#managed-policies-full) to your IAM identities.
 
 ## Running Renovate
 
-First set up the global configuration for running renovate on CodeCommit
+Set up a global configuration file (config.js) for running Renovate on CodeCommit:
 
-inside set the repositories, or you can use [autodiscover](https://docs.renovatebot.com/self-hosted-configuration/#autodiscover)
+- Set `platform: 'codecommit'`
+- Set `repositories: ['{repository names separated by comma}']`, or alternatively use Renovate’s [autodiscover](https://docs.renovatebot.com/self-hosted-configuration/#autodiscover)
 
-Here's an example [config.js](https://docs.renovatebot.com/getting-started/running/#using-configjs)
-fill in the fields
+Run Renovate with the configuration file and it will create an onboarding Pull Request in your set repositories.
 
-```javascript
-module.exports = {
+
+## Unsupported platform features/concepts
+
+- adding assignees to PRs not supported
+- auto-merge not supported
+- rebaseLabel isn't supported (request a rebase for Renovate)
+
+## recommendations
+
+- We recommend limiting Open Renovate PRs using `prConcurrentLimit`
+- Due to current platform limitations, if you close a PR and don’t wish for Renovate to recreate if, use [package rules](https://docs.renovatebot.com/configuration-options/#packagerules) with the `"enabled": false` key.
+
+
+Here's an example config.js:
+```module.exports = {
   endpoint: 'https://git-codecommit.{your region}.amazonaws.com/',
   platform: 'codecommit',
   repositories: ['{your repository names separated by comma}'],
@@ -62,5 +51,3 @@ module.exports = {
 };
 ```
 
-Once you run renovate with this config, it will create an on-boarding pull request on the repositories that it finds(autodiscover)
-or that you set up in repositories array in the `config.js`.
