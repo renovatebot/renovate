@@ -591,13 +591,7 @@ export async function isBranchBehindBase(
       { isBehind, currentBranch, currentBranchSha },
       `isBranchBehindBase=${isBehind}`
     );
-    setCachedBehindBaseResult(
-      branchName,
-      branchSha,
-      currentBranch,
-      currentBranchSha,
-      isBehind
-    );
+    setCachedBehindBaseResult(branchName, isBehind);
     return isBehind;
   } catch (err) /* istanbul ignore next */ {
     const errChecked = checkForPlatformFailure(err);
@@ -660,11 +654,7 @@ export async function isBranchModified(branchName: string): Promise<boolean> {
     // author matches - branch has not been modified
     logger.debug({ branchName }, 'Branch has not been modified');
     config.branchIsModified[branchName] = false;
-    setCachedModifiedResult(
-      branchName,
-      config.branchCommits[branchName],
-      false
-    );
+    setCachedModifiedResult(branchName, false);
     return false;
   }
   logger.debug(
@@ -672,7 +662,7 @@ export async function isBranchModified(branchName: string): Promise<boolean> {
     'Last commit author does not match git author email - branch has been modified'
   );
   config.branchIsModified[branchName] = true;
-  setCachedModifiedResult(branchName, config.branchCommits[branchName], true);
+  setCachedModifiedResult(branchName, true);
   return true;
 }
 
@@ -739,7 +729,7 @@ export async function isBranchConflicted(
     }
   }
 
-  setCachedConflictResult(baseBranch, baseBranchSha, branch, branchSha, result);
+  setCachedConflictResult(baseBranch, result);
   return result;
 }
 

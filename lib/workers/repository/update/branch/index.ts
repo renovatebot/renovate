@@ -35,7 +35,6 @@ import {
   isBranchConflicted,
   isBranchModified,
 } from '../../../../util/git';
-import { setBranchShas } from '../../../../util/git/set-branch-sha';
 import {
   getMergeConfidenceLevel,
   isActiveConfidenceLevel,
@@ -541,9 +540,6 @@ export async function processBranch(
     if (commitSha) {
       const action = branchExists ? 'updated' : 'created';
       logger.info({ commitSha }, `Branch ${action}`);
-      // reset all cached values ie. isModified, isConflicted to false and update SHAs
-      // TODO: (fix types) #7154
-      setBranchShas(config.branchName, config.baseBranch!, commitSha);
     }
     // Set branch statuses
     await setArtifactErrorStatus(config);

@@ -1,6 +1,6 @@
-import { logger } from '../../logger';
 import { getCache } from '../cache/repository';
 import type { BranchCache } from '../cache/repository/types';
+import { getBranchCommit } from '.';
 
 export function getCachedConflictResult(
   targetBranchName: string,
@@ -30,36 +30,19 @@ export function getCachedConflictResult(
 }
 
 export function setCachedConflictResult(
-  targetBranchName: string,
-  targetBranchSha: string,
-  sourceBranchName: string,
-  sourceBranchSha: string,
+  branchName: string,
   isConflicted: boolean
 ): void {
   const cache = getCache();
   cache.branches ??= [];
-  let branch = cache.branches.find((br) => br.branchName === sourceBranchName);
+  let branch = cache.branches.find((br) => br.branchName === branchName);
 
   if (!branch) {
     branch = {
-      branchName: sourceBranchName,
-      baseBranchName: targetBranchName,
-      sha: sourceBranchSha,
-      baseBranchSha: targetBranchSha,
+      branchName: branchName,
+      sha: getBranchCommit(branchName),
     } as BranchCache;
     cache.branches?.push(branch);
-  }
-
-  if (branch.sha !== sourceBranchSha) {
-    logger.warn('Invalid Cache. Branch sha mismatch');
-  }
-
-  if (branch.baseBranchSha !== targetBranchSha) {
-    logger.warn('Invalid Cache. Base branch sha mismatch');
-  }
-
-  if (branch.baseBranchName !== targetBranchName) {
-    logger.warn('Invalid Cache. Base branch name mismatch');
   }
 
   branch.isConflicted = isConflicted;

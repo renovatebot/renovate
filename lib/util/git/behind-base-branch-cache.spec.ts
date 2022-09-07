@@ -1,14 +1,16 @@
 import { mocked, partial } from '../../../test/util';
-import { logger } from '../../logger';
 import * as _repositoryCache from '../cache/repository';
 import type { BranchCache, RepoCacheData } from '../cache/repository/types';
 import {
   getCachedBehindBaseResult,
   setCachedBehindBaseResult,
 } from './behind-base-branch-cache';
+import * as _git from '.';
 
 jest.mock('../cache/repository');
+jest.mock('.');
 const repositoryCache = mocked(_repositoryCache);
+const git = mocked(_git);
 
 describe('util/git/behind-base-branch-cache', () => {
   let repoCache: RepoCacheData = {};
@@ -68,15 +70,14 @@ describe('util/git/behind-base-branch-cache', () => {
 
   describe('setCachedBehindBaseResult', () => {
     it('populates cache', () => {
-      setCachedBehindBaseResult('foo', 'SHA', 'base_foo', 'base_SHA', false);
+      git.getBranchCommit.mockReturnValueOnce('SHA');
+      setCachedBehindBaseResult('foo', false);
       expect(repoCache).toMatchObject({
         branches: [
           {
             branchName: 'foo',
             isBehindBaseBranch: false,
-            baseBranchName: 'base_foo',
             sha: 'SHA',
-            baseBranchSha: 'base_SHA',
           },
         ],
       });
@@ -99,7 +100,7 @@ describe('util/git/behind-base-branch-cache', () => {
         ],
       };
       repositoryCache.getCache.mockReturnValue(repoCache);
-      setCachedBehindBaseResult('foo', 'SHA', 'base_foo', 'base_SHA', false);
+      setCachedBehindBaseResult('foo', false);
       expect(repoCache).toMatchObject({
         branches: [
           {
@@ -115,63 +116,6 @@ describe('util/git/behind-base-branch-cache', () => {
           },
         ],
       });
-    });
-
-    it('warns when base branch name mismatches', () => {
-      setCachedBehindBaseResult('foo', 'SHA', 'base_foo', 'base_SHA', false);
-      setCachedBehindBaseResult('foo', 'SHA', 'not_base_foo', 'base_SHA', true);
-      expect(repoCache).toEqual({
-        branches: [
-          {
-            baseBranchName: 'base_foo',
-            branchName: 'foo',
-            sha: 'SHA',
-            baseBranchSha: 'base_SHA',
-            isBehindBaseBranch: true,
-          },
-        ],
-      });
-      expect(logger.warn).toHaveBeenCalledWith(
-        'Invalid Cache. Base branch name mismatch'
-      );
-    });
-
-    it('warns when base branch sha is mismatches', () => {
-      setCachedBehindBaseResult('foo', 'SHA', 'base_foo', 'base_SHA', false);
-      setCachedBehindBaseResult('foo', 'SHA', 'base_foo', 'not_base_SHA', true);
-      expect(repoCache).toEqual({
-        branches: [
-          {
-            baseBranchName: 'base_foo',
-            branchName: 'foo',
-            sha: 'SHA',
-            baseBranchSha: 'base_SHA',
-            isBehindBaseBranch: true,
-          },
-        ],
-      });
-      expect(logger.warn).toHaveBeenCalledWith(
-        'Invalid Cache. Base branch sha mismatch'
-      );
-    });
-
-    it('warns when branch sha is mismatches', () => {
-      setCachedBehindBaseResult('foo', 'SHA', 'base_foo', 'base_SHA', false);
-      setCachedBehindBaseResult('foo', 'not_SHA', 'base_foo', 'base_SHA', true);
-      expect(repoCache).toEqual({
-        branches: [
-          {
-            baseBranchName: 'base_foo',
-            branchName: 'foo',
-            sha: 'SHA',
-            baseBranchSha: 'base_SHA',
-            isBehindBaseBranch: true,
-          },
-        ],
-      });
-      expect(logger.warn).toHaveBeenCalledWith(
-        'Invalid Cache. Branch sha mismatch'
-      );
     });
   });
 });

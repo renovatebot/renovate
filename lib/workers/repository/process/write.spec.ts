@@ -152,7 +152,7 @@ describe('workers/repository/process/write', () => {
           ],
         },
       ]);
-      repoCache.getCache.mockReturnValueOnce({
+      repoCache.getCache.mockReturnValue({
         branches: [
           {
             branchName: 'new/some-branch',
@@ -205,7 +205,7 @@ describe('workers/repository/process/write', () => {
       config.repositoryCache = 'enabled';
       await writeUpdates(config, branches);
       expect(logger.logger.debug).toHaveBeenCalledWith(
-        'No branch cache found for new/some-branch'
+        'Creating branch cache becasue none found for new/some-branch'
       );
     });
   });
@@ -254,6 +254,7 @@ describe('workers/repository/process/write', () => {
             isBehindBaseBranch: false,
             baseBranchSha: '333',
             baseBranchName: 'base_branch',
+            parentSha: '222',
           } as BranchCache,
         ],
       } as RepoCacheData;
@@ -264,6 +265,7 @@ describe('workers/repository/process/write', () => {
       const branches = partial<BranchConfig[]>([
         {
           branchName: 'new/some-branch',
+          baseBranch: 'base_branch',
           manager: 'npm',
           upgrades: [
             {
@@ -286,12 +288,10 @@ describe('workers/repository/process/write', () => {
         branches: [
           {
             branchName: 'new/some-branch',
-            sha: '101',
-            isModified: null,
-            isConflicted: null,
-            isBehindBaseBranch: false,
+            sha: 'some-value',
             baseBranchSha: '333',
             baseBranchName: 'base_branch',
+            parentSha: '333',
           },
         ],
       });
@@ -301,6 +301,7 @@ describe('workers/repository/process/write', () => {
       const branches = partial<BranchConfig[]>([
         {
           branchName: 'new/some-branch',
+          baseBranch: 'base_branch',
           manager: 'npm',
           upgrades: [
             {
@@ -323,12 +324,10 @@ describe('workers/repository/process/write', () => {
         branches: [
           {
             branchName: 'new/some-branch',
-            sha: '111',
-            isModified: false,
-            isConflicted: null,
-            isBehindBaseBranch: null,
+            sha: 'some-value',
             baseBranchSha: '303',
             baseBranchName: 'base_branch',
+            parentSha: '303',
           },
         ],
       });
@@ -338,6 +337,7 @@ describe('workers/repository/process/write', () => {
       const branches = partial<BranchConfig[]>([
         {
           branchName: 'new/some-branch',
+          baseBranch: 'base_branch',
           manager: 'npm',
           upgrades: [
             {
@@ -360,12 +360,10 @@ describe('workers/repository/process/write', () => {
         branches: [
           {
             branchName: 'new/some-branch',
-            sha: '101',
-            isModified: null,
-            isConflicted: null,
-            isBehindBaseBranch: null,
+            sha: 'some-value',
             baseBranchSha: '303',
             baseBranchName: 'base_branch',
+            parentSha: '303',
           },
         ],
       });
@@ -424,12 +422,13 @@ describe('workers/repository/process/write', () => {
         branches: [
           {
             branchName: 'new/some-branch',
-            sha: '111',
+            sha: 'some-value',
             isModified: false,
             isConflicted: false,
             isBehindBaseBranch: false,
-            baseBranchSha: '333',
+            baseBranchSha: '303',
             baseBranchName: 'base_branch',
+            parentSha: '303',
           } as BranchCache,
         ],
       });
@@ -469,16 +468,13 @@ describe('workers/repository/process/write', () => {
             isBehindBaseBranch: false,
             baseBranchSha: '333',
             baseBranchName: 'base_branch',
+            parentSha: '222',
           } as BranchCache,
           {
             branchName: 'new/diff-branch',
-            sha: '101',
-            isModified: null,
-            isConflicted: null,
-            isBehindBaseBranch: null,
+            sha: 'some-value',
             baseBranchSha: '303',
             baseBranchName: 'base_branch',
-            parentSha: null,
           } as BranchCache,
         ],
       });

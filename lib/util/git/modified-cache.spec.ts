@@ -1,13 +1,15 @@
 import { mocked } from '../../../test/util';
-import { logger } from '../../logger';
 import * as _repositoryCache from '../cache/repository';
 import type { BranchCache, RepoCacheData } from '../cache/repository/types';
 import {
   getCachedModifiedResult,
   setCachedModifiedResult,
 } from './modified-cache';
+import * as _git from '.';
 
 jest.mock('../cache/repository');
+jest.mock('.');
+const git = mocked(_git);
 const repositoryCache = mocked(_repositoryCache);
 
 describe('util/git/modified-cache', () => {
@@ -49,32 +51,23 @@ describe('util/git/modified-cache', () => {
 
   describe('setCachedModifiedResult', () => {
     it('sets value for unpopulated cache', () => {
-      setCachedModifiedResult('foo', '111', false);
+      git.getBranchCommit.mockReturnValueOnce('SHA');
+      setCachedModifiedResult('foo', false);
       expect(repoCache).toEqual({
-        branches: [{ branchName: 'foo', sha: '111', isModified: false }],
+        branches: [{ branchName: 'foo', sha: 'SHA', isModified: false }],
       });
-    });
-
-    it('warns when branch sha mismmatch', () => {
-      setCachedModifiedResult('foo', '111', false);
-      setCachedModifiedResult('foo', '121', true);
-      expect(repoCache).toEqual({
-        branches: [{ branchName: 'foo', sha: '111', isModified: true }],
-      });
-      expect(logger.warn).toHaveBeenCalledWith(
-        'Invalid Cache. Branch sha mismatch'
-      );
     });
 
     it('handles multiple branches', () => {
-      setCachedModifiedResult('foo-1', '111', false);
-      setCachedModifiedResult('foo-2', 'aaa', true);
-      setCachedModifiedResult('foo-3', '222', false);
+      git.getBranchCommit.mockReturnValue('SHA');
+      setCachedModifiedResult('foo-1', false);
+      setCachedModifiedResult('foo-2', true);
+      setCachedModifiedResult('foo-3', false);
       expect(repoCache).toEqual({
         branches: [
-          { branchName: 'foo-1', sha: '111', isModified: false },
-          { branchName: 'foo-2', sha: 'aaa', isModified: true },
-          { branchName: 'foo-3', sha: '222', isModified: false },
+          { branchName: 'foo-1', sha: 'SHA', isModified: false },
+          { branchName: 'foo-2', sha: 'SHA', isModified: true },
+          { branchName: 'foo-3', sha: 'SHA', isModified: false },
         ],
       });
     });

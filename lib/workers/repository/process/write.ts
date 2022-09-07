@@ -7,6 +7,7 @@ import { hashMap } from '../../../modules/manager';
 import { getCache } from '../../../util/cache/repository';
 import type { BranchCache } from '../../../util/cache/repository/types';
 import { branchExists, getBranchCommit } from '../../../util/git';
+import { setBranchCommit } from '../../../util/git/set-branch-sha';
 import { Limit, incLimitedValue, setMaxLimit } from '../../global/limits';
 import { BranchConfig, BranchResult } from '../../types';
 import { processBranch } from '../update/branch';
@@ -29,6 +30,39 @@ export function canSkipBranchUpdateCheck(
 
   logger.debug('Branch fingerprint is unchanged, updates check can be skipped');
   return true;
+}
+
+function syncBranchCache(
+  branchName: string,
+  branchSha: string,
+  baseBranchName: string,
+  baseBranchSha: string,
+  branchCache: BranchCache
+): void {
+  if (baseBranchName !== branchCache.baseBranchName) {
+    branchCache.baseBranchName = baseBranchName;
+    delete branchCache.isModified;
+  }
+
+  if (branchSha !== branchCache.sha) {
+    // invalidate isModified, isConflicted values
+    delete branchCache.isConflicted;
+    delete branchCache.isModified;
+    delete branchCache.branchFingerprint;
+    delete branchCache.isBehindBaseBranch;
+
+    // update cached branchSha
+    branchCache.sha = branchSha;
+  }
+
+  if (baseBranchSha !== branchCache.baseBranchSha) {
+    // invalidate isModified, isConflicted values
+    delete branchCache.isConflicted;
+    delete branchCache.isBehindBaseBranch;
+
+    // update cached branchSha
+    branchCache.baseBranchSha = baseBranchSha;
+  }
 }
 
 export async function writeUpdates(
@@ -59,6 +93,8 @@ export async function writeUpdates(
 
   for (const branch of branches) {
     const { baseBranch, branchName } = branch;
+    const branchSha = getBranchCommit(branchName)!;
+    const baseBrachSha = getBranchCommit(baseBranch!)!;
     const meta: Record<string, string> = { branch: branchName };
     if (config.baseBranches?.length && baseBranch) {
       meta['baseBranch'] = baseBranch;
@@ -72,8 +108,24 @@ export async function writeUpdates(
         ({} as BranchCache);
 
       if (Object.keys(branchCache).length === 0) {
-        logger.debug(`No branch cache found for ${branch.branchName}`);
+        logger.debug(
+          `Creating branch cache becasue none found for ${branch.branchName}`
+        );
+        // if branch cache not found initialize it
+        cachedBranches.push(branchCache);
+        branchCache.branchName = branchName;
+        // TODO: fix types (#7154)
+        branchCache.baseBranchName = baseBranch!;
       }
+
+      // TODO: fix types (#7154)
+      syncBranchCache(
+        branchName,
+        branchSha,
+        branch.baseBranch!,
+        baseBrachSha,
+        branchCache
+      );
     }
     const branchManagersFingerprint = hasha(
       [
@@ -93,16 +145,6 @@ export async function writeUpdates(
       branchFingerprint
     );
 
-    if (branchExisted) {
-      // if branch cache not found initialize it
-      if (Object.keys(branchCache).length === 0) {
-        cachedBranches.push(branchCache);
-        branchCache.branchName = branch.branchName;
-        branchCache.baseBranchName = branch.baseBranch!;
-      }
-
-      syncBranchCache(branchCache);
-    }
     const res = await processBranch(branch);
     branch.prBlockedBy = res?.prBlockedBy;
     branch.prNo = res?.prNo;
@@ -112,6 +154,17 @@ export async function writeUpdates(
         ? branchFingerprint
         : branchCache.branchFingerprint;
 
+    if (res?.commitSha) {
+      // reset all cached values
+      // TODO: (fix types) #7154
+      setBranchCommit(
+        branchName,
+        res.commitSha,
+        baseBranch!,
+        baseBrachSha,
+        branch?.branchFingerprint
+      );
+    }
     if (
       branch.result === BranchResult.Automerged &&
       branch.automergeType !== 'pr-comment'
@@ -125,30 +178,4 @@ export async function writeUpdates(
   }
   removeMeta(['branch', 'baseBranch']);
   return 'done';
-}
-
-function syncBranchCache(branchCache: BranchCache): void {
-  const branchSha = getBranchCommit(branchCache.branchName);
-  const baseBranchSha = getBranchCommit(branchCache.baseBranchName);
-
-  // compare branch cache to fetched branch state
-  if (branchSha !== branchCache.sha) {
-    // invalidate isModified, isConflicted values
-    // not invalidating isBehindBase here cause this can only occurs when a user modifies the branch
-    branchCache.isConflicted = null;
-    branchCache.isModified = null;
-    branchCache.parentSha = null;
-
-    // update cached branchSha
-    branchCache.sha = branchSha;
-  }
-
-  if (baseBranchSha !== branchCache.baseBranchSha) {
-    // invalidate isModified, isConflicted values
-    branchCache.isConflicted = null;
-    branchCache.isBehindBaseBranch = null;
-
-    // update cached branchSha
-    branchCache.baseBranchSha = baseBranchSha;
-  }
 }

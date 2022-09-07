@@ -1,14 +1,14 @@
 import { getCache } from '../cache/repository';
 import type { BranchCache } from '../cache/repository/types';
-import { getBranchCommit } from '.';
 
-export function setBranchShas(
+export function setBranchCommit(
   branchName: string,
+  branchSha: string,
   baseBranchName: string,
-  commitSha: string
+  baseBranchSha: string,
+  branchFingerprint: string
 ): void {
   const cache = getCache();
-  const baseBranchSha = getBranchCommit(baseBranchName);
   cache.branches ??= [];
 
   let branch = cache.branches.find((br) => br.branchName === branchName);
@@ -19,9 +19,12 @@ export function setBranchShas(
     } as BranchCache;
     cache.branches.push(branch);
   }
-  branch.sha = commitSha;
+
+  branch.sha = branchSha;
   branch.baseBranchSha = baseBranchSha;
   branch.isBehindBaseBranch = false;
   branch.isConflicted = false;
   branch.isModified = false;
+  branch.branchFingerprint = branchFingerprint;
+  branch.parentSha = baseBranchSha;
 }

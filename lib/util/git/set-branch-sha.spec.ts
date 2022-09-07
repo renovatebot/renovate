@@ -1,16 +1,13 @@
 import { mocked, partial } from '../../../test/util';
 import * as _repositoryCache from '../cache/repository';
 import type { BranchCache, RepoCacheData } from '../cache/repository/types';
-import { setBranchShas } from './set-branch-sha';
-import * as _git from '.';
+import { setBranchCommit } from './set-branch-sha';
 
 jest.mock('../cache/repository');
-jest.mock('.');
 const repositoryCache = mocked(_repositoryCache);
-const git = mocked(_git);
 
 describe('util/git/set-branch-sha', () => {
-  describe('setBranchShas()', () => {
+  describe('setBranchCommit()', () => {
     let repoCache: RepoCacheData;
 
     beforeEach(() => {
@@ -19,8 +16,13 @@ describe('util/git/set-branch-sha', () => {
     });
 
     it('populates cache when branch is created', () => {
-      git.getBranchCommit.mockReturnValue('base_SHA');
-      setBranchShas('branch', 'base_branch', 'SHA');
+      setBranchCommit(
+        'branch',
+        'SHA',
+        'base_branch',
+        'base_SHA',
+        'fingerprint'
+      );
       expect(repoCache.branches).toMatchObject([
         {
           branchName: 'branch',
@@ -30,6 +32,7 @@ describe('util/git/set-branch-sha', () => {
           isBehindBaseBranch: false,
           isModified: false,
           isConflicted: false,
+          branchFingerprint: 'fingerprint',
         },
       ]);
     });
@@ -55,8 +58,13 @@ describe('util/git/set-branch-sha', () => {
           isConflicted: true,
         }),
       ];
-      git.getBranchCommit.mockReturnValue('base_SHA_new');
-      setBranchShas('branch', 'base_branch', 'SHA_new');
+      setBranchCommit(
+        'branch',
+        'SHA_new',
+        'base_branch',
+        'base_SHA_new',
+        'fingerprint'
+      );
       expect(repoCache.branches).toMatchObject([
         {
           branchName: 'branch',
@@ -66,6 +74,7 @@ describe('util/git/set-branch-sha', () => {
           isBehindBaseBranch: false,
           isModified: false,
           isConflicted: false,
+          branchFingerprint: 'fingerprint',
         },
         {
           branchName: 'branch-2',

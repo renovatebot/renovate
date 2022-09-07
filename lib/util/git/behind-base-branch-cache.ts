@@ -1,6 +1,6 @@
-import { logger } from '../../logger';
 import { getCache } from '../cache/repository';
 import type { BranchCache } from '../cache/repository/types';
+import { getBranchCommit } from '.';
 
 export function getCachedBehindBaseResult(
   branchName: string,
@@ -26,9 +26,6 @@ export function getCachedBehindBaseResult(
 
 export function setCachedBehindBaseResult(
   branchName: string,
-  branchSha: string,
-  baseBranchName: string,
-  baseBranchSha: string,
   isBehind: boolean
 ): void {
   const cache = getCache();
@@ -40,23 +37,9 @@ export function setCachedBehindBaseResult(
   if (!branch) {
     branch = {
       branchName: branchName,
-      baseBranchName: baseBranchName,
-      sha: branchSha,
-      baseBranchSha: baseBranchSha,
+      sha: getBranchCommit(branchName),
     } as BranchCache;
     cache.branches.push(branch);
-  }
-
-  if (branch.sha !== branchSha) {
-    logger.warn('Invalid Cache. Branch sha mismatch');
-  }
-
-  if (branch.baseBranchSha !== baseBranchSha) {
-    logger.warn('Invalid Cache. Base branch sha mismatch');
-  }
-
-  if (branch.baseBranchName !== baseBranchName) {
-    logger.warn('Invalid Cache. Base branch name mismatch');
   }
 
   branch.isBehindBaseBranch = isBehind;

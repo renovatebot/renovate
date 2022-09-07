@@ -1,6 +1,6 @@
-import { logger } from '../../logger';
 import { getCache } from '../cache/repository';
 import type { BranchCache } from '../cache/repository/types';
+import { getBranchCommit } from '.';
 
 export function getCachedModifiedResult(
   branchName: string,
@@ -18,7 +18,6 @@ export function getCachedModifiedResult(
 
 export function setCachedModifiedResult(
   branchName: string,
-  branchSha: string,
   isModified: boolean
 ): void {
   const cache = getCache();
@@ -27,12 +26,11 @@ export function setCachedModifiedResult(
   let branch = branches?.find((branch) => branch.branchName === branchName);
   // if branch not present add it to cache
   if (!branch) {
-    branch = { branchName: branchName, sha: branchSha } as BranchCache;
+    branch = {
+      branchName: branchName,
+      sha: getBranchCommit(branchName),
+    } as BranchCache;
     branches.push(branch);
-  }
-
-  if (branch.sha !== branchSha) {
-    logger.warn('Invalid Cache. Branch sha mismatch');
   }
 
   branch.isModified = isModified;

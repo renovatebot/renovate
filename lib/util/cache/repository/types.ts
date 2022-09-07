@@ -32,10 +32,10 @@ export interface BranchCache {
   baseBranchSha: string | null;
   branchName: string;
   branchFingerprint?: string;
-  isBehindBaseBranch: boolean | null;
-  isConflicted: boolean | null;
-  isModified: boolean | null;
-  parentSha: string | null;
+  isBehindBaseBranch?: boolean;
+  isConflicted?: boolean;
+  isModified?: boolean;
+  parentSha?: string | null;
   prNo: number | null;
   sha: string | null;
   upgrades: BranchUpgradeCache[];

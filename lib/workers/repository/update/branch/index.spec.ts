@@ -19,10 +19,7 @@ import type { WriteExistingFilesResult } from '../../../../modules/manager/npm/p
 import { hashBody } from '../../../../modules/platform/pr-body';
 import { PrState } from '../../../../types';
 import * as _repoCache from '../../../../util/cache/repository';
-import type {
-  BranchCache,
-  RepoCacheData,
-} from '../../../../util/cache/repository/types';
+import type { RepoCacheData } from '../../../../util/cache/repository/types';
 import * as _exec from '../../../../util/exec';
 import type { FileChange, StatusResult } from '../../../../util/git/types';
 import * as _mergeConfidence from '../../../../util/merge-confidence';
@@ -922,19 +919,6 @@ describe('workers/repository/update/branch/index', () => {
         prNo: undefined,
         result: 'pr-created',
         commitSha: '123test',
-      });
-      expect(repoCacheObj).toMatchObject({
-        branches: [
-          {
-            branchName: 'renovate/some-branch',
-            sha: '123test',
-            isModified: false,
-            isConflicted: false,
-            isBehindBaseBranch: false,
-            baseBranchSha: '123test_base',
-            baseBranchName: 'base_branch',
-          } as BranchCache,
-        ],
       });
     });
 
