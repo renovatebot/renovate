@@ -103,20 +103,32 @@ describe('modules/manager/asdf/extract', () => {
     });
 
     describe('comment handling', () => {
-      it('ignores comments at the end of lines', () => {
-        const res = extractPackageFile('nodejs 16.16.0 # this is a comment\n');
-        expect(res).toEqual({
-          deps: [
-            {
-              currentValue: '16.16.0',
-              datasource: 'github-tags',
-              depName: 'node',
-              packageName: 'nodejs/node',
-              versioning: 'node',
-            },
-          ],
-        });
-      });
+      const comments = [
+        ' # comment with spaces',
+        '# comment without leading space',
+        ' #comment without trailing space',
+        '#comment with no spaces',
+      ];
+
+      describe.each(comments)(
+        'ignores comments at the end of lines',
+        (comment) => {
+          it(`comment: '${comment}'`, () => {
+            const res = extractPackageFile(`nodejs 16.16.0${comment}\n`);
+            expect(res).toEqual({
+              deps: [
+                {
+                  currentValue: '16.16.0',
+                  datasource: 'github-tags',
+                  depName: 'node',
+                  packageName: 'nodejs/node',
+                  versioning: 'node',
+                },
+              ],
+            });
+          });
+        }
+      );
 
       it('ignores lines that are just comments', () => {
         const res = extractPackageFile('# this is a full line comment\n');
