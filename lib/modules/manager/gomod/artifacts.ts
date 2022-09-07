@@ -421,8 +421,7 @@ async function getGoConstraints(
   if (!content) {
     return undefined;
   }
-  const re = regEx(/(?<goText>go\s*)(?<gover>\d+.\d+)/);
+  const re = regEx(/go\s*(?<gover>\d+.\d+)/);
   const match = re.exec(content);
-  const goVer = match?.groups?.gover;
-  return goVer ?? undefined;
+  return match?.groups?.gover;
 }
