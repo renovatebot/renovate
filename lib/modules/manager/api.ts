@@ -75,6 +75,7 @@ import * as terragruntVersion from './terragrunt-version';
 import * as travis from './travis';
 import type { ManagerApi } from './types';
 import * as velaci from './velaci';
+import * as woodpecker from './woodpecker';
 
 const api = new Map<string, ManagerApi>();
 export default api;
@@ -155,3 +156,4 @@ api.set('terragrunt', terragrunt);
 api.set('terragrunt-version', terragruntVersion);
 api.set('travis', travis);
 api.set('velaci', velaci);
+api.set('woodpecker', woodpecker);
