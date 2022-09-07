@@ -1,27 +1,35 @@
-[Tekton](https://tekton.dev/) is an open-source cloud native CICD (Continuous Integration and Continuous Delivery/Deployment) solution.
+[Tekton](https://tekton.dev/) is an open-source cloud-native Continuous Integration and Continuous Delivery/Deployment solution.
 
-It uses Tasks to capture specifics commands to be executed, and Pipelines to combine different Tasks in order to achieve a goal, e.g. build a container image.
+Tekton uses Tasks to capture specific commands to be executed, and Pipelines to combine different Tasks, to achieve a goal, like building a container image.
 Tasks and Pipelines are defined as Kubernetes custom resources.
 
-Its [documentation](https://tekton.dev/docs/) is a great resource to learn more about the overall concepts and how to start using it.
+The [Tekton documentation](https://tekton.dev/docs/) is a great resource to learn more about the overall concepts and how to start using it.
+
+### Distributing Tasks and Pipeline definitions
 
 There are different ways to distribute Task and Pipeline definitions.
 They can be created directly as a Kubernetes resource with standard tools like `kubectl`.
-They can also reside outside the Kubernetes cluster and fetched by Tekton itself when needed.
-This second approach relies on Tekton resource references rather than the resource definition.
+Tasks and Pipeline definitions can also live outside the Kubernetes cluster and get fetched by Tekton when needed, this approach relies on Tekton resource references rather than the resource definition.
 The `tekton` manager focuses on providing updates to Tekton resource references.
 
-Currently, the manager only supports references that are [Bundles](https://tekton.dev/docs/pipelines/tekton-bundle-contracts/).
-See the [tektoncd/resolution](https://github.com/tektoncd/resolution) project for the different kinds of Tekton references.
+Right now, Renovate's Tekton manager only supports references that are [Bundles](https://tekton.dev/docs/pipelines/tekton-bundle-contracts/).
+See the [`tektoncd/resolution` project on GitHub](https://github.com/tektoncd/resolution) for the different kinds of Tekton references.
 
-There are two ways to use a Tekton Bundle reference.
-The first is via the previously mentioned [tektoncd/resolution](https://github.com/tektoncd/resolution) project, the second is via the `taskRun.spec.taskRef.bundle` and the `pipelineRun.spec.pipelineRef.bundle` attributes.
-This manager supports both.
+### Using a Tekton Bundle reference
+
+There are two ways to use a Tekton Bundle reference:
+
+1. Via the [`tektoncd/resolution` project](https://github.com/tektoncd/resolution)
+2. Via the `taskRun.spec.taskRef.bundle` and the `pipelineRun.spec.pipelineRef.bundle` attributes
+
+Renovate's Tekton manager supports both methods.
+
+### Set your own `fileMatch` pattern
 
 The `tekton` manager does not have a default `fileMatch` pattern.
-It won't match any files until it is configured with a pattern.
-This is to avoid unexpected issues with unrelated YAML files since there is no well-established file name pattern for [Tekton](https://tekton.dev/) resources.
-As an example, the following config will match all the YAML files in a repository:
+This means it won't match any files until you set a `fileMatch` pattern.
+This is to avoid problems with unrelated YAML files since there is no well-established file name pattern for [Tekton](https://tekton.dev/) resources.
+As an example, the following config matches all the YAML files in a repository:
 
 ```json
 {
@@ -31,4 +39,4 @@ As an example, the following config will match all the YAML files in a repositor
 }
 ```
 
-See the [versioning](https://docs.renovatebot.com/modules/versioning/) documentation for details on the existing versioning rules and possible alterations.
+See our [versioning](https://docs.renovatebot.com/modules/versioning/) documentation for details on the existing versioning rules and possible alterations.
