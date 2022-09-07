@@ -143,5 +143,26 @@ describe('util/git/conflicts-cache', () => {
         ],
       });
     });
+
+    it('updates value of existing cache', () => {
+      repoCache.branches = [
+        partial<BranchCache>({
+          branchName: 'foo',
+          sha: 'SHA',
+          isConflicted: false,
+        }),
+      ];
+      git.getBranchCommit.mockReturnValueOnce('SHA');
+      setCachedConflictResult('foo', true);
+      expect(repoCache).toEqual({
+        branches: [
+          {
+            branchName: 'foo',
+            isConflicted: true,
+            sha: 'SHA',
+          },
+        ],
+      });
+    });
   });
 });
