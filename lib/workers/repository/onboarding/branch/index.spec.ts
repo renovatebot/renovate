@@ -264,7 +264,7 @@ describe('workers/repository/onboarding/branch/index', () => {
 
         await checkOnboardingBranch(config);
 
-        expect(logger.debug).toHaveBeenCalledWith(
+        expect(logger.trace).toHaveBeenCalledWith(
           `Platform '${pl}' does not support extended markdown`
         );
         expect(OnboardingState.prUpdateRequested).toBeTrue();

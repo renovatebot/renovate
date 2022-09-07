@@ -1,5 +1,4 @@
 import hasha from 'hasha';
-import { toBase64 } from '../../util/string';
 import { getPrBodyStruct, hashBody } from './pr-body';
 
 describe('modules/platform/pr-body', () => {
@@ -84,8 +83,7 @@ describe('modules/platform/pr-body', () => {
     it('returns raw config hash', () => {
       const config = '{}';
       const rawConfigHash = hasha(config, { algorithm: 'sha256' });
-      const encodedHash = toBase64(rawConfigHash);
-      const input = `<!--renovate-config-hash:${encodedHash})-->`;
+      const input = `<!--renovate-config-hash:${rawConfigHash}-->`;
       const hash = hashBody(input);
       expect(getPrBodyStruct(input)).toEqual({
         hash,

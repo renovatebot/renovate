@@ -12,7 +12,7 @@ export class OnboardingState {
   private static updateRequested = false;
 
   static get prUpdateRequested(): boolean {
-    logger.debug(
+    logger.trace(
       { value: this.updateRequested },
       'Get OnboardingState.prUpdateRequested'
     );
@@ -20,7 +20,7 @@ export class OnboardingState {
   }
 
   static set prUpdateRequested(value: boolean) {
-    logger.debug({ value }, 'Set OnboardingState.prUpdateRequested');
+    logger.trace({ value }, 'Set OnboardingState.prUpdateRequested');
     this.updateRequested = value;
   }
 }

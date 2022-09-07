@@ -10,13 +10,11 @@ export const prDebugDataRe = regEx(
   /\n?<!--renovate-debug:(?<payload>.*?)-->\n?/
 );
 
-export const renovateConfigHashRe = regEx(
+const renovateConfigHashRe = regEx(
   /\n?<!--renovate-config-hash:(?<payload>.*?)-->\n?/
 );
 
-export const prCheckboxRe = regEx(
-  /- (?<checkbox>\[[\sx]]) <!-- rebase-check -->/
-);
+const prCheckboxRe = regEx(/- (?<checkbox>\[[\sx]]) <!-- rebase-check -->/);
 
 function noWhitespaceOrHeadings(input: string): string {
   return input.replace(regEx(/\r?\n|\r|\s|#/g), '');
@@ -70,7 +68,7 @@ export function getPrBodyStruct(
 
   const rawConfigHash = getRenovateConfigHashPayload(body);
   if (rawConfigHash) {
-    result.rawConfigHash = fromBase64(rawConfigHash);
+    result.rawConfigHash = rawConfigHash;
   }
 
   const debugPayload = getRenovateDebugPayload(body);

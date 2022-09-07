@@ -12,7 +12,6 @@ import {
   isBranchConflicted,
   isBranchModified,
 } from '../../../../util/git';
-import { toBase64 } from '../../../../util/string';
 import * as template from '../../../../util/template';
 import type { BranchConfig } from '../../../types';
 import {
@@ -135,7 +134,7 @@ If you need any further assistance then you can also [request help here](${
   const existingContents =
     (await getFile(configFile, config.onboardingBranch)) ?? '';
   const hash = toSha256(existingContents);
-  prBody += `\n<!--renovate-config-hash:${toBase64(hash)}-->`;
+  prBody += `\n<!--renovate-config-hash:${hash}-->`;
 
   logger.trace('prBody:\n' + prBody);
 

@@ -42,9 +42,9 @@ export async function renovateRepository(
     logger.debug('Using localDir: ' + localDir);
     config = await initRepo(config);
     addSplit('init');
-    const preformExtract =
+    const performExtract =
       config.repoIsOnboarded! || OnboardingState.prUpdateRequested;
-    const { branches, branchList, packageFiles } = preformExtract
+    const { branches, branchList, packageFiles } = performExtract
       ? await extractDependencies(config)
       : emptyExtract(config);
     if (
@@ -56,7 +56,7 @@ export async function renovateRepository(
       const res = await updateRepo(config, branches);
       setMeta({ repository: config.repository });
       addSplit('update');
-      if (preformExtract) {
+      if (performExtract) {
         await setBranchCache(branches); // update branch cache if preformed extraction
       }
       if (res === 'automerged') {

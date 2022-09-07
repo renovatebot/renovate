@@ -33,7 +33,7 @@ If you need any further assistance then you can also [request help here](https:/
 
 
 
-<!--renovate-config-hash:ZTNiMGM0NDI5OGZjMWMxNDlhZmJmNGM4OTk2ZmI5MjQyN2FlNDFlNDY0OWI5MzRjYTQ5NTk5MWI3ODUyYjg1NQ==-->"
+<!--renovate-config-hash:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855-->"
 `;
 
 exports[`workers/repository/onboarding/pr/index ensureOnboardingPr() creates PR with footer and header using templating 1`] = `
@@ -69,7 +69,7 @@ If you need any further assistance then you can also [request help here](https:/
 
 And this is a footer for repository:test baseBranch:some-branch
 
-<!--renovate-config-hash:ZTNiMGM0NDI5OGZjMWMxNDlhZmJmNGM4OTk2ZmI5MjQyN2FlNDFlNDY0OWI5MzRjYTQ5NTk5MWI3ODUyYjg1NQ==-->"
+<!--renovate-config-hash:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855-->"
 `;
 
 exports[`workers/repository/onboarding/pr/index ensureOnboardingPr() creates PR with footer and header with trailing and leading newlines 1`] = `
@@ -110,5 +110,5 @@ There should be several empty lines at the end of the PR
 
 
 
-<!--renovate-config-hash:ZTNiMGM0NDI5OGZjMWMxNDlhZmJmNGM4OTk2ZmI5MjQyN2FlNDFlNDY0OWI5MzRjYTQ5NTk5MWI3ODUyYjg1NQ==-->"
+<!--renovate-config-hash:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855-->"
 `;
