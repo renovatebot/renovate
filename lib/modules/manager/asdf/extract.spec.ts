@@ -84,7 +84,7 @@ describe('modules/manager/asdf/extract', () => {
     });
 
     it('can handle multiple tools in one file', () => {
-      const res = extractPackageFile('nodejs 16.16.0\nyarn 1.2.3');
+      const res = extractPackageFile('nodejs 16.16.0\ndummy 1.2.3');
       expect(res).toEqual({
         deps: [
           {
@@ -95,7 +95,7 @@ describe('modules/manager/asdf/extract', () => {
             versioning: 'node',
           },
           {
-            depName: 'yarn',
+            depName: 'dummy',
             skipReason: 'unsupported-datasource',
           },
         ],
