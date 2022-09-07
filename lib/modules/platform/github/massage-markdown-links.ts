@@ -70,7 +70,7 @@ export function massageMarkdownLinks(content: string): string {
     const matches: UrlMatch[] = [];
     const newContent = content.replace(
       regEx(/@&#8203;(?<name>[a-zA-Z1-9-!$%^&*()_+|~=`{}[\]:";'<>?,.]*)/gi),
-      '[`@$<name>`](https://togithub.com/$<name>)'
+      '[@$<name>](https://togithub.com/$<name>)'
     );
     remark()
       .use(collectLinkPosition(newContent, matches))

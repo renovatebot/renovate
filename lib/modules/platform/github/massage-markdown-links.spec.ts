@@ -97,9 +97,9 @@ describe('modules/platform/github/massage-markdown-links', () => {
     const res = massageMarkdownLinks(input);
     expect(res).toEqual(
       [
-        'pnpm rebuild accepts --store-dir by [`@user`](https://togithub.com/user) in [foo/bar#1](https://togithub.com/foo/bar/issues/1)\n' +
-          'pnpm rebuild accepts --store-dir by [`@UsEr`](https://togithub.com/UsEr) in [foo/bar#2](https://togithub.com/foo/bar/issues/2)\n' +
-          'pnpm rebuild accepts --store-dir by [`@user-name`](https://togithub.com/user-name) in [foo/bar#3](https://togithub.com/foo/bar/issues/3)',
+        'pnpm rebuild accepts --store-dir by [@user](https://togithub.com/user) in [foo/bar#1](https://togithub.com/foo/bar/issues/1)\n' +
+          'pnpm rebuild accepts --store-dir by [@UsEr](https://togithub.com/UsEr) in [foo/bar#2](https://togithub.com/foo/bar/issues/2)\n' +
+          'pnpm rebuild accepts --store-dir by [@user-name](https://togithub.com/user-name) in [foo/bar#3](https://togithub.com/foo/bar/issues/3)',
       ].join('\n')
     );
   });
