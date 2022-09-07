@@ -2408,6 +2408,12 @@ const options: RenovateOptions[] = [
     type: 'boolean',
     default: false,
   },
+  {
+    name: 'lang',
+    description: `User-facing text language`,
+    type: 'string',
+    default: 'en',
+  },
 ];
 
 export function getOptions(): RenovateOptions[] {
