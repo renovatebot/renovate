@@ -32,7 +32,7 @@ export function canSkipBranchUpdateCheck(
   return true;
 }
 
-function syncBranchCache(
+export function syncBranchCache(
   branchName: string,
   branchSha: string,
   baseBranchName: string,
@@ -162,7 +162,7 @@ export async function writeUpdates(
         res.commitSha,
         baseBranch!,
         baseBrachSha,
-        branch?.branchFingerprint
+        branch.branchFingerprint
       );
     }
     if (
