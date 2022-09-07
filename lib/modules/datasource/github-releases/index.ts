@@ -229,6 +229,14 @@ export class GithubReleasesDatasource extends Datasource {
     return newDigest;
   }
 
+  @cache({
+    namespace: 'datasource-github-releases-obsolete',
+    key: /*istanbul ignore next*/ ({
+      packageName: repo,
+      registryUrl,
+    }: GetReleasesConfig) => `${registryUrl}:${repo}:tags`,
+    cacheable: () => process.env.DISABLE_GITHUB_CACHE === 'true',
+  })
   /**
    * github.getReleases
    *
@@ -240,21 +248,44 @@ export class GithubReleasesDatasource extends Datasource {
    *  - Return a dependency object containing sourceUrl string and releases array
    */
   async getReleases(config: GetReleasesConfig): Promise<ReleaseResult> {
-    const releases = await this.releasesCache.getItems(config);
-    return {
-      sourceUrl: getSourceUrl(config.packageName, config.registryUrl),
-      releases: releases.map((item) => {
-        const { version, releaseTimestamp, isStable } = item;
-        const result: Release = {
-          version,
-          gitRef: version,
-          releaseTimestamp,
-        };
-        if (isStable !== undefined) {
-          result.isStable = isStable;
-        }
-        return result;
-      }),
-    };
+    // istanbul ignore if
+    if (process.env.DISABLE_GITHUB_CACHE === 'true') {
+      const { packageName: repo, registryUrl } = config;
+      const apiBaseUrl = getApiBaseUrl(registryUrl);
+      const url = `${apiBaseUrl}repos/${repo}/releases?per_page=100`;
+      const res = await this.http.getJson<GithubRelease[]>(url, {
+        paginate: true,
+      });
+      const githubReleases = res.body;
+      const dependency: ReleaseResult = {
+        sourceUrl: getSourceUrl(repo, registryUrl),
+        releases: githubReleases
+          .filter(({ draft }) => draft !== true)
+          .map(({ tag_name, published_at, prerelease }) => ({
+            version: tag_name,
+            gitRef: tag_name,
+            releaseTimestamp: published_at,
+            isStable: prerelease ? false : undefined,
+          })),
+      };
+      return dependency;
+    } else {
+      const releases = await this.releasesCache.getItems(config);
+      return {
+        sourceUrl: getSourceUrl(config.packageName, config.registryUrl),
+        releases: releases.map((item) => {
+          const { version, releaseTimestamp, isStable } = item;
+          const result: Release = {
+            version,
+            gitRef: version,
+            releaseTimestamp,
+          };
+          if (isStable !== undefined) {
+            result.isStable = isStable;
+          }
+          return result;
+        }),
+      };
+    }
   }
 }

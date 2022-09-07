@@ -73,16 +73,51 @@ export class GithubTagsDatasource extends GithubReleasesDatasource {
       : this.getCommit(registryUrl, repo!);
   }
 
+  @cache({
+    ttlMinutes: 10,
+    namespace: `datasource-${GithubTagsDatasource.id}`,
+    key: /*istanbul ignore next*/ ({
+      registryUrl,
+      packageName: repo,
+    }: GetReleasesConfig) => `${registryUrl!}:${repo}:tags`,
+    cacheable: () => process.env.DISABLE_GITHUB_CACHE === 'true',
+  })
   override async getReleases(
     config: GetReleasesConfig
   ): Promise<ReleaseResult> {
-    const tagReleases = await this.tagsCache.getItems(config);
+    // istanbul ignore if
+    if (process.env.DISABLE_GITHUB_CACHE === 'true') {
+      const { registryUrl, packageName: repo } = config;
+      const apiBaseUrl = getApiBaseUrl(registryUrl);
+      // tag
+      const url = `${apiBaseUrl}repos/${repo}/tags?per_page=100`;
 
-    const tagsResult: ReleaseResult = {
-      sourceUrl: getSourceUrl(config.packageName, config.registryUrl),
-      releases: tagReleases.map((item) => ({ ...item, gitRef: item.version })),
-    };
+      const versions = (
+        await this.http.getJson<{ name: string }[]>(url, {
+          paginate: true,
+        })
+      ).body.map((o) => o.name);
 
-    return tagsResult;
+      const dependency: ReleaseResult = {
+        sourceUrl: getSourceUrl(repo, registryUrl),
+        releases: versions.map((version) => ({
+          version,
+          gitRef: version,
+        })),
+      };
+      return dependency;
+    } else {
+      const tagReleases = await this.tagsCache.getItems(config);
+
+      const tagsResult: ReleaseResult = {
+        sourceUrl: getSourceUrl(config.packageName, config.registryUrl),
+        releases: tagReleases.map((item) => ({
+          ...item,
+          gitRef: item.version,
+        })),
+      };
+
+      return tagsResult;
+    }
   }
 }

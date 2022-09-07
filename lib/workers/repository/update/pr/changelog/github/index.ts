@@ -1,6 +1,7 @@
 import changelogFilenameRegex from 'changelog-filename-regex';
 import { logger } from '../../../../../../logger';
 import { CacheableGithubReleases } from '../../../../../../modules/datasource/github-releases/cache';
+import type { GithubRelease } from '../../../../../../modules/datasource/github-releases/types';
 import { CacheableGithubTags } from '../../../../../../modules/datasource/github-tags/cache';
 import type {
   GithubGitBlob,
@@ -28,17 +29,32 @@ export async function getTags(
 ): Promise<string[]> {
   logger.trace('github.getTags()');
   try {
-    const tags = await tagsCache.getItems({
-      registryUrl: endpoint,
-      packageName: repository,
-    });
-
     // istanbul ignore if
-    if (!tags.length) {
-      logger.debug({ repository }, 'repository has no Github tags');
-    }
+    if (process.env.DISABLE_GITHUB_CACHE === 'true') {
+      const url = `${endpoint}repos/${repository}/tags?per_page=100`;
+      const res = await http.getJson<{ name: string }[]>(url, {
+        paginate: true,
+      });
+      const tags = res.body;
 
-    return tags.map(({ version }) => version).filter(Boolean);
+      if (!tags.length) {
+        logger.debug({ repository }, 'repository has no Github tags');
+      }
+
+      return tags.map((tag) => tag.name).filter(Boolean);
+    } else {
+      const tags = await tagsCache.getItems({
+        registryUrl: endpoint,
+        packageName: repository,
+      });
+
+      // istanbul ignore if
+      if (!tags.length) {
+        logger.debug({ repository }, 'repository has no Github tags');
+      }
+
+      return tags.map(({ version }) => version).filter(Boolean);
+    }
   } catch (err) {
     logger.debug(
       { sourceRepo: repository, err },
@@ -116,26 +132,46 @@ export async function getReleaseList(
   release: ChangeLogRelease
 ): Promise<ChangeLogNotes[]> {
   logger.trace('github.getReleaseList()');
-  // TODO #7154
-  const apiBaseUrl = project.apiBaseUrl!;
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-  const repository = project.repository!;
-  const notesSourceUrl = `${ensureTrailingSlash(
-    apiBaseUrl
-  )}repos/${repository}/releases`;
-  const items = await releasesCache.getItems(
-    {
-      registryUrl: apiBaseUrl,
-      packageName: repository,
-    },
-    release
-  );
-  return items.map(({ url, id, version: tag, name, description: body }) => ({
-    url,
-    notesSourceUrl,
-    id,
-    tag,
-    name,
-    body,
-  }));
+  // istanbul ignore if
+  if (process.env.DISABLE_GITHUB_CACHE === 'true') {
+    const apiBaseUrl = project.apiBaseUrl!;
+    const repository = project.repository;
+    const url = `${ensureTrailingSlash(
+      apiBaseUrl
+    )}repos/${repository}/releases`;
+    const res = await http.getJson<GithubRelease[]>(`${url}?per_page=100`, {
+      paginate: true,
+    });
+    return res.body.map((release) => ({
+      url: release.html_url,
+      notesSourceUrl: url,
+      id: release.id,
+      tag: release.tag_name,
+      name: release.name,
+      body: release.body,
+    }));
+  } else {
+    // TODO #7154
+    const apiBaseUrl = project.apiBaseUrl!;
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+    const repository = project.repository!;
+    const notesSourceUrl = `${ensureTrailingSlash(
+      apiBaseUrl
+    )}repos/${repository}/releases`;
+    const items = await releasesCache.getItems(
+      {
+        registryUrl: apiBaseUrl,
+        packageName: repository,
+      },
+      release
+    );
+    return items.map(({ url, id, version: tag, name, description: body }) => ({
+      url,
+      notesSourceUrl,
+      id,
+      tag,
+      name,
+      body,
+    }));
+  }
 }
