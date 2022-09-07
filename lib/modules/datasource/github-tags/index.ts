@@ -80,13 +80,13 @@ export class GithubTagsDatasource extends GithubReleasesDatasource {
       registryUrl,
       packageName: repo,
     }: GetReleasesConfig) => `${registryUrl!}:${repo}:tags`,
-    cacheable: () => process.env.DISABLE_GITHUB_CACHE === 'true',
+    cacheable: () => process.env.RENOVATE_X_DISABLE_GITHUB_CACHE === 'true',
   })
   override async getReleases(
     config: GetReleasesConfig
   ): Promise<ReleaseResult> {
     // istanbul ignore if
-    if (process.env.DISABLE_GITHUB_CACHE === 'true') {
+    if (process.env.RENOVATE_X_DISABLE_GITHUB_CACHE === 'true') {
       const { registryUrl, packageName: repo } = config;
       const apiBaseUrl = getApiBaseUrl(registryUrl);
       // tag

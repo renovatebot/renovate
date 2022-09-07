@@ -30,7 +30,7 @@ export async function getTags(
   logger.trace('github.getTags()');
   try {
     // istanbul ignore if
-    if (process.env.DISABLE_GITHUB_CACHE === 'true') {
+    if (process.env.RENOVATE_X_DISABLE_GITHUB_CACHE === 'true') {
       const url = `${endpoint}repos/${repository}/tags?per_page=100`;
       const res = await http.getJson<{ name: string }[]>(url, {
         paginate: true,
@@ -133,7 +133,7 @@ export async function getReleaseList(
 ): Promise<ChangeLogNotes[]> {
   logger.trace('github.getReleaseList()');
   // istanbul ignore if
-  if (process.env.DISABLE_GITHUB_CACHE === 'true') {
+  if (process.env.RENOVATE_X_DISABLE_GITHUB_CACHE === 'true') {
     const apiBaseUrl = project.apiBaseUrl!;
     const repository = project.repository;
     const url = `${ensureTrailingSlash(

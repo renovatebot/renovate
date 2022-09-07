@@ -235,7 +235,7 @@ export class GithubReleasesDatasource extends Datasource {
       packageName: repo,
       registryUrl,
     }: GetReleasesConfig) => `${registryUrl}:${repo}:tags`,
-    cacheable: () => process.env.DISABLE_GITHUB_CACHE === 'true',
+    cacheable: () => process.env.RENOVATE_X_DISABLE_GITHUB_CACHE === 'true',
   })
   /**
    * github.getReleases
@@ -249,7 +249,7 @@ export class GithubReleasesDatasource extends Datasource {
    */
   async getReleases(config: GetReleasesConfig): Promise<ReleaseResult> {
     // istanbul ignore if
-    if (process.env.DISABLE_GITHUB_CACHE === 'true') {
+    if (process.env.RENOVATE_X_DISABLE_GITHUB_CACHE === 'true') {
       const { packageName: repo, registryUrl } = config;
       const apiBaseUrl = getApiBaseUrl(registryUrl);
       const url = `${apiBaseUrl}repos/${repo}/releases?per_page=100`;
