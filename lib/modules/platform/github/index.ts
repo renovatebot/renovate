@@ -590,7 +590,7 @@ async function fetchPr(prNo: number): Promise<Pr | null> {
     cachePr(result);
     return result;
   } catch (err) {
-    logger.debug({ err }, `fetchPr(${prNo}) error`);
+    logger.warn({ err, prNo }, `GitHub fetchPr error`);
     return null;
   }
 }
