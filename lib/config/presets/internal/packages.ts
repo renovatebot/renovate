@@ -12,7 +12,7 @@ export const presets: Record<string, Preset> = {
   },
   react: {
     description: 'All React packages.',
-    matchPackageNames: ['@types/react'],
+    matchPackageNames: ['@types/react', '@types/react-dom'],
     matchPackagePrefixes: ['react'],
   },
   apollographql: {
