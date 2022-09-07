@@ -1,9 +1,9 @@
 import is from '@sindresorhus/is';
 import { DateTime } from 'luxon';
-import pAll from 'p-all';
 import type { XmlDocument } from 'xmldoc';
 import { logger } from '../../../logger';
 import * as packageCache from '../../../util/cache/package';
+import * as p from '../../../util/promises';
 import { newlineRegex, regEx } from '../../../util/regex';
 import { ensureTrailingSlash } from '../../../util/url';
 import mavenVersion from '../../versioning/maven';
@@ -268,7 +268,7 @@ export class MavenDatasource extends Datasource {
           res !== 'not-found' && res !== 'error' ? release : null;
       });
 
-      await pAll(queue, { concurrency: 5 });
+      await p.all(queue);
 
       if (!isCacheValid) {
         // Store new TTL flag for 24 hours if the previous one is invalidated
