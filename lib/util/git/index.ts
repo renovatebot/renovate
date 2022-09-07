@@ -729,7 +729,7 @@ export async function isBranchConflicted(
     }
   }
 
-  setCachedConflictResult(baseBranch, result);
+  setCachedConflictResult(branch, result);
   return result;
 }
 
