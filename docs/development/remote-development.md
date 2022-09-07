@@ -23,7 +23,7 @@ You'll use the same code editor and have the same config as all other developers
 - Start work in a fresh environment every time
 - Reproducible development environment
 - Similar config for all developers
-- Use VSCode in the browser
+- Use VS Code in the browser
 
 ### Drawbacks
 

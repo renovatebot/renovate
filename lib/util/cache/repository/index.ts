@@ -20,3 +20,7 @@ export function getCache(): RepoCacheData {
 export async function saveCache(): Promise<void> {
   await repoCache.save();
 }
+
+export function isCacheModified(): boolean | undefined {
+  return repoCache.isModified();
+}
