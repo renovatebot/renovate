@@ -126,6 +126,7 @@ export interface BranchConfig
   prNo?: number;
   stopUpdating?: boolean;
   isConflicted?: boolean;
+  recreateMergedPr?: boolean;
   branchFingerprint?: string;
   skipBranchUpdate?: boolean;
 }
