@@ -1,12 +1,15 @@
 import { DateTime } from 'luxon';
 import { mocked } from '../../../../../test/util';
 import * as _packageCache from '../../../../util/cache/package';
+import type {
+  QueryResponse,
+  StoredItemBase,
+} from '../../../../util/github/types';
 import {
   GithubGraphqlResponse,
   GithubHttp,
 } from '../../../../util/http/github';
 import { AbstractGithubDatasourceCache } from './cache-base';
-import type { QueryResponse, StoredItemBase } from './types';
 
 jest.mock('../../../../util/cache/package');
 const packageCache = mocked(_packageCache);

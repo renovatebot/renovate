@@ -4,20 +4,20 @@ import { logger } from '../../../../logger';
 import * as memCache from '../../../../util/cache/memory';
 import * as packageCache from '../../../../util/cache/package';
 import type {
-  GithubGraphqlResponse,
-  GithubHttp,
-  GithubHttpOptions,
-} from '../../../../util/http/github';
-import type { GetReleasesConfig } from '../../types';
-import { getApiBaseUrl } from '../common';
-import type {
   CacheOptions,
   ChangelogRelease,
   GithubDatasourceCache,
   GithubQueryParams,
   QueryResponse,
   StoredItemBase,
-} from './types';
+} from '../../../../util/github/types';
+import { getApiBaseUrl } from '../../../../util/github/url';
+import type {
+  GithubGraphqlResponse,
+  GithubHttp,
+  GithubHttpOptions,
+} from '../../../../util/http/github';
+import type { GetReleasesConfig } from '../../types';
 
 /**
  * The options that are meant to be used in production.

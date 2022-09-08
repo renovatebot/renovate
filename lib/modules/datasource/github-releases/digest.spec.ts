@@ -1,7 +1,7 @@
 import hasha from 'hasha';
 import * as httpMock from '../../../../test/http-mock';
+import type { DigestAsset } from '../../../util/github/types';
 import { GitHubReleaseMocker } from './test';
-import type { DigestAsset } from './types';
 
 import { GithubReleasesDatasource } from '.';
 

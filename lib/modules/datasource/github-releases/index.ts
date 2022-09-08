@@ -1,12 +1,16 @@
 // TODO: types (#7154)
 import hasha from 'hasha';
 import { logger } from '../../../logger';
+import type {
+  DigestAsset,
+  GithubRelease,
+  GithubReleaseAsset,
+} from '../../../util/github/types';
+import { getApiBaseUrl, getSourceUrl } from '../../../util/github/url';
 import { GithubHttp } from '../../../util/http/github';
 import { newlineRegex, regEx } from '../../../util/regex';
 import { Datasource } from '../datasource';
 import type { DigestConfig, GetReleasesConfig, ReleaseResult } from '../types';
-import { getApiBaseUrl, getSourceUrl } from './common';
-import type { DigestAsset, GithubRelease, GithubReleaseAsset } from './types';
 
 export const cacheNamespace = 'datasource-github-releases';
 
@@ -21,15 +25,15 @@ function inferHashAlg(digest: string): string {
 }
 
 export class GithubReleasesDatasource extends Datasource {
-  static id = 'github-releases';
+  static readonly id = 'github-releases';
 
   override readonly defaultRegistryUrls = ['https://github.com'];
 
   override http: GithubHttp;
 
-  constructor(id = GithubReleasesDatasource.id) {
-    super(id);
-    this.http = new GithubHttp(id);
+  constructor() {
+    super(GithubReleasesDatasource.id);
+    this.http = new GithubHttp(GithubReleasesDatasource.id);
   }
 
   async findDigestFile(
