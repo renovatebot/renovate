@@ -1,4 +1,4 @@
-import { getSourceUrl as githubSourceUrl } from '../../../util/github';
+import { getSourceUrl as githubSourceUrl } from '../../../util/github/url';
 import { BitBucketTagsDatasource } from '../bitbucket-tags';
 import { GithubTagsDatasource } from '../github-tags';
 import { GitlabTagsDatasource } from '../gitlab-tags';

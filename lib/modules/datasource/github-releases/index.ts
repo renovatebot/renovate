@@ -1,7 +1,7 @@
 // TODO: types (#7154)
 import hasha from 'hasha';
 import { logger } from '../../../logger';
-import { getApiBaseUrl, getSourceUrl } from '../../../util/github';
+import { getApiBaseUrl, getSourceUrl } from '../../../util/github/url';
 import { GithubHttp } from '../../../util/http/github';
 import { newlineRegex, regEx } from '../../../util/regex';
 import { Datasource } from '../datasource';

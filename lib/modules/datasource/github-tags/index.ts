@@ -1,5 +1,5 @@
 import { logger } from '../../../logger';
-import { getApiBaseUrl, getSourceUrl } from '../../../util/github';
+import { getApiBaseUrl, getSourceUrl } from '../../../util/github/url';
 import { GithubHttp } from '../../../util/http/github';
 import { Datasource } from '../datasource';
 import type { DigestConfig, GetReleasesConfig, ReleaseResult } from '../types';

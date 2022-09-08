@@ -1,6 +1,6 @@
 import { logger } from '../../../logger';
 import { cache } from '../../../util/cache/package/decorator';
-import { getApiBaseUrl } from '../../../util/github';
+import { getApiBaseUrl } from '../../../util/github/url';
 import { GithubHttp } from '../../../util/http/github';
 import { regEx } from '../../../util/regex';
 import { streamToString } from '../../../util/streams';

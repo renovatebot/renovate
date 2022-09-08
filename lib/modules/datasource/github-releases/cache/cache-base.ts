@@ -3,7 +3,7 @@ import { DateTime, DurationLikeObject } from 'luxon';
 import { logger } from '../../../../logger';
 import * as memCache from '../../../../util/cache/memory';
 import * as packageCache from '../../../../util/cache/package';
-import { getApiBaseUrl } from '../../../../util/github';
+import { getApiBaseUrl } from '../../../../util/github/url';
 import type {
   GithubGraphqlResponse,
   GithubHttp,
