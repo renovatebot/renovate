@@ -4,20 +4,20 @@ import { logger } from '../../../../logger';
 import * as memCache from '../../../../util/cache/memory';
 import * as packageCache from '../../../../util/cache/package';
 import type {
+  CacheOptions,
+  ChangelogRelease,
+  GithubCachedItem,
+  GithubDatasourceCache,
+  GithubGraphqlRepoParams,
+  GithubGraphqlRepoResponse,
+} from '../../../../util/github/types';
+import { getApiBaseUrl } from '../../../../util/github/url';
+import type {
   GithubGraphqlResponse,
   GithubHttp,
   GithubHttpOptions,
 } from '../../../../util/http/github';
 import type { GetReleasesConfig } from '../../types';
-import { getApiBaseUrl } from '../common';
-import type {
-  CacheOptions,
-  ChangelogRelease,
-  GithubDatasourceCache,
-  GithubQueryParams,
-  QueryResponse,
-  StoredItemBase,
-} from './types';
 
 /**
  * The options that are meant to be used in production.
@@ -100,7 +100,7 @@ function isExpired(
 }
 
 export abstract class AbstractGithubDatasourceCache<
-  StoredItem extends StoredItemBase,
+  CachedItem extends GithubCachedItem,
   FetchedItem = unknown
 > {
   private updateDuration: DurationLikeObject;
@@ -163,16 +163,18 @@ export abstract class AbstractGithubDatasourceCache<
    * Transform `fetchedItem` for storing in the package cache.
    * @param fetchedItem Node obtained from GraphQL response
    */
-  abstract coerceFetched(fetchedItem: FetchedItem): StoredItem | null;
+  abstract coerceFetched(fetchedItem: FetchedItem): CachedItem | null;
 
   private async queryPayload(
     baseUrl: string,
-    variables: GithubQueryParams,
+    variables: GithubGraphqlRepoParams,
     options: GithubHttpOptions
-  ): Promise<QueryResponse<FetchedItem>['repository']['payload'] | Error> {
+  ): Promise<
+    GithubGraphqlRepoResponse<FetchedItem>['repository']['payload'] | Error
+  > {
     try {
       const graphqlRes = await this.http.postJson<
-        GithubGraphqlResponse<QueryResponse<FetchedItem>>
+        GithubGraphqlResponse<GithubGraphqlRepoResponse<FetchedItem>>
       >('/graphql', {
         ...options,
         baseUrl,
@@ -222,14 +224,14 @@ export abstract class AbstractGithubDatasourceCache<
   async getItemsImpl(
     releasesConfig: GetReleasesConfig,
     changelogRelease?: ChangelogRelease
-  ): Promise<StoredItem[]> {
+  ): Promise<CachedItem[]> {
     const { packageName, registryUrl } = releasesConfig;
 
     // The time meant to be used across the function
     const now = DateTime.now();
 
     // Initialize items and timestamps for the new cache
-    let cacheItems: Record<string, StoredItem> = {};
+    let cacheItems: Record<string, CachedItem> = {};
 
     // Add random minutes to the creation date in order to
     // provide back-off time during mass cache invalidation.
@@ -244,7 +246,7 @@ export abstract class AbstractGithubDatasourceCache<
     if (owner && name) {
       const baseUrl = this.getBaseUrl(registryUrl);
       const cacheKey = this.getCacheKey(registryUrl, packageName);
-      const cache = await packageCache.get<GithubDatasourceCache<StoredItem>>(
+      const cache = await packageCache.get<GithubDatasourceCache<CachedItem>>(
         this.cacheNs,
         cacheKey
       );
@@ -280,7 +282,7 @@ export abstract class AbstractGithubDatasourceCache<
           cacheItems
         )
       ) {
-        const variables: GithubQueryParams = {
+        const variables: GithubGraphqlRepoParams = {
           owner,
           name,
           cursor: null,
@@ -386,7 +388,7 @@ export abstract class AbstractGithubDatasourceCache<
           .diff(now, ['minutes'])
           .toObject();
         if (ttlMinutes && ttlMinutes > 0) {
-          const cacheValue: GithubDatasourceCache<StoredItem> = {
+          const cacheValue: GithubDatasourceCache<CachedItem> = {
             items: cacheItems,
             createdAt: cacheCreatedAt,
             updatedAt: now.toISO(),
@@ -413,12 +415,12 @@ export abstract class AbstractGithubDatasourceCache<
   getItems(
     releasesConfig: GetReleasesConfig,
     changelogRelease?: ChangelogRelease
-  ): Promise<StoredItem[]> {
+  ): Promise<CachedItem[]> {
     const { packageName, registryUrl } = releasesConfig;
     const cacheKey = this.getCacheKey(registryUrl, packageName);
     const promiseKey = `github-datasource-cache:${this.cacheNs}:${cacheKey}`;
     const res =
-      memCache.get<Promise<StoredItem[]>>(promiseKey) ??
+      memCache.get<Promise<CachedItem[]>>(promiseKey) ??
       this.getItemsImpl(releasesConfig, changelogRelease);
     memCache.set(promiseKey, res);
     return res;
@@ -430,7 +432,7 @@ export abstract class AbstractGithubDatasourceCache<
   }
 
   public getLastReleaseTimestamp(
-    items: Record<string, StoredItem>
+    items: Record<string, CachedItem>
   ): string | null {
     let result: string | null = null;
     let latest: DateTime | null = null;
@@ -454,7 +456,7 @@ export abstract class AbstractGithubDatasourceCache<
     changelogRelease: ChangelogRelease | undefined,
     now: DateTime,
     updateDuration: DurationLikeObject,
-    cacheItems: Record<string, StoredItem>
+    cacheItems: Record<string, CachedItem>
   ): boolean {
     if (!changelogRelease?.date) {
       return false;
