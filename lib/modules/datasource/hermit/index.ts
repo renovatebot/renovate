@@ -1,6 +1,6 @@
 import { logger } from '../../../logger';
 import { cache } from '../../../util/cache/package/decorator';
-import type { GithubRelease } from '../../../util/github/types';
+import type { GithubRestRelease } from '../../../util/github/types';
 import { getApiBaseUrl } from '../../../util/github/url';
 import { GithubHttp } from '../../../util/http/github';
 import { regEx } from '../../../util/regex';
@@ -118,7 +118,7 @@ export class HermitDatasource extends Datasource {
 
     const apiBaseUrl = getApiBaseUrl(`https://${host}`);
 
-    const indexRelease = await this.http.getJson<GithubRelease>(
+    const indexRelease = await this.http.getJson<GithubRestRelease>(
       `${apiBaseUrl}repos/${owner}/${repo}/releases/tags/index`
     );
 

@@ -1,5 +1,5 @@
 import { logger } from '../../../logger';
-import type { GitHubTag, TagResponse } from '../../../util/github/types';
+import type { GithubRestRef, GithubRestTag } from '../../../util/github/types';
 import { getApiBaseUrl, getSourceUrl } from '../../../util/github/url';
 import { GithubHttp } from '../../../util/http/github';
 import { Datasource } from '../datasource';
@@ -26,11 +26,11 @@ export class GithubTagsDatasource extends Datasource {
     let digest: string | null = null;
     try {
       const url = `${apiBaseUrl}repos/${githubRepo}/git/refs/tags/${tag}`;
-      const res = (await this.http.getJson<TagResponse>(url)).body.object;
+      const res = (await this.http.getJson<GithubRestRef>(url)).body.object;
       if (res.type === 'commit') {
         digest = res.sha;
       } else if (res.type === 'tag') {
-        digest = (await this.http.getJson<TagResponse>(res.url)).body.object
+        digest = (await this.http.getJson<GithubRestRef>(res.url)).body.object
           .sha;
       } else {
         logger.warn({ res }, 'Unknown git tag refs type');
@@ -88,7 +88,7 @@ export class GithubTagsDatasource extends Datasource {
     const url = `${apiBaseUrl}repos/${repo}/tags?per_page=100`;
 
     const versions = (
-      await this.http.getJson<GitHubTag[]>(url, {
+      await this.http.getJson<GithubRestTag[]>(url, {
         paginate: true,
       })
     ).body.map((o) => o.name);
