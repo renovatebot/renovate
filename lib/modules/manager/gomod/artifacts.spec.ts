@@ -1294,10 +1294,11 @@ describe('modules/manager/gomod/artifacts', () => {
   });
 
   it('GoConstraints when go.mod file content null', async () => {
+    GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
     fs.readLocalFile.mockResolvedValueOnce('Current go.sum');
     fs.readLocalFile.mockResolvedValueOnce(null); // vendor modules filename
     fs.readLocalFile.mockResolvedValueOnce(null);
-    mockExecAll();
+    const execSnapshots = mockExecAll();
     git.getRepoStatus.mockResolvedValueOnce({
       modified: ['go.sum', 'main.go'],
     } as StatusResult);
@@ -1323,14 +1324,37 @@ describe('modules/manager/gomod/artifacts', () => {
       { file: { type: 'addition', path: 'go.sum', contents: 'New go.sum' } },
       { file: { type: 'addition', path: 'main.go', contents: 'New main.go' } },
       { file: { type: 'addition', path: 'go.mod', contents: 'New go.mod' } },
+    ]);
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'go get -d -t ./...',
+        options: { cwd: '/tmp/github/some/repo' },
+      },
+      {
+        cmd: 'go install github.com/marwan-at-work/mod/cmd/mod@latest',
+        options: { cwd: '/tmp/github/some/repo' },
+      },
+      {
+        cmd: 'mod upgrade --mod-name=github.com/google/go-github/v24 -t=28',
+        options: { cwd: '/tmp/github/some/repo' },
+      },
+      {
+        cmd: 'go mod tidy',
+        options: { cwd: '/tmp/github/some/repo' },
+      },
+      {
+        cmd: 'go mod tidy',
+        options: { cwd: '/tmp/github/some/repo' },
+      },
     ]);
   });
 
   it('go.mod file contains go version', async () => {
+    GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
     fs.readLocalFile.mockResolvedValueOnce('Current go.sum');
     fs.readLocalFile.mockResolvedValueOnce(null); // vendor modules filename
     fs.readLocalFile.mockResolvedValueOnce('someText\n\ngo 1.17\n\n');
-    mockExecAll();
+    const execSnapshots = mockExecAll();
     git.getRepoStatus.mockResolvedValueOnce({
       modified: ['go.sum', 'main.go'],
     } as StatusResult);
@@ -1357,15 +1381,35 @@ describe('modules/manager/gomod/artifacts', () => {
       { file: { type: 'addition', path: 'main.go', contents: 'New main.go' } },
       { file: { type: 'addition', path: 'go.mod', contents: 'New go.mod' } },
     ]);
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'go get -d -t ./...',
+        options: { cwd: '/tmp/github/some/repo' },
+      },
+      {
+        cmd: 'go install github.com/marwan-at-work/mod/cmd/mod@latest',
+        options: { cwd: '/tmp/github/some/repo' },
+      },
+      {
+        cmd: 'mod upgrade --mod-name=github.com/google/go-github/v24 -t=28',
+        options: { cwd: '/tmp/github/some/repo' },
+      },
+      {
+        cmd: 'go mod tidy',
+        options: { cwd: '/tmp/github/some/repo' },
+      },
+      {
+        cmd: 'go mod tidy',
+        options: { cwd: '/tmp/github/some/repo' },
+      },
+    ]);
   });
 
-  it('go.mod file contains go version config does not contain constraints', async () => {
-    const emptyConfig: UpdateArtifactsConfig = {};
-    const goMod = 'someText\n\ngo 1.19\n\n';
+  it('config contains go version', async () => {
+    GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
     fs.readLocalFile.mockResolvedValueOnce('Current go.sum');
     fs.readLocalFile.mockResolvedValueOnce(null); // vendor modules filename
-    fs.readLocalFile.mockResolvedValueOnce('someText\n\ngo 1.17\n\n');
-    mockExecAll();
+    const execSnapshots = mockExecAll();
     git.getRepoStatus.mockResolvedValueOnce({
       modified: ['go.sum', 'main.go'],
     } as StatusResult);
@@ -1376,9 +1420,9 @@ describe('modules/manager/gomod/artifacts', () => {
     const res = await gomod.updateArtifacts({
       packageFileName: 'go.mod',
       updatedDeps: [{ depName: 'github.com/google/go-github/v24' }],
-      newPackageFileContent: goMod,
+      newPackageFileContent: gomod1,
       config: {
-        ...emptyConfig,
+        ...config,
         updateType: 'major',
         newMajor: 28,
         postUpdateOptions: ['gomodUpdateImportPaths'],
@@ -1388,6 +1432,28 @@ describe('modules/manager/gomod/artifacts', () => {
       { file: { type: 'addition', path: 'go.sum', contents: 'New go.sum' } },
       { file: { type: 'addition', path: 'main.go', contents: 'New main.go' } },
       { file: { type: 'addition', path: 'go.mod', contents: 'New go.mod' } },
+    ]);
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'go get -d -t ./...',
+        options: { cwd: '/tmp/github/some/repo' },
+      },
+      {
+        cmd: 'go install github.com/marwan-at-work/mod/cmd/mod@latest',
+        options: { cwd: '/tmp/github/some/repo' },
+      },
+      {
+        cmd: 'mod upgrade --mod-name=github.com/google/go-github/v24 -t=28',
+        options: { cwd: '/tmp/github/some/repo' },
+      },
+      {
+        cmd: 'go mod tidy',
+        options: { cwd: '/tmp/github/some/repo' },
+      },
+      {
+        cmd: 'go mod tidy',
+        options: { cwd: '/tmp/github/some/repo' },
+      },
     ]);
   });
 });
