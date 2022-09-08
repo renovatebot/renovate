@@ -41,5 +41,7 @@ export async function handlepr(config: BranchConfig, pr: Pr): Promise<void> {
         await deleteBranch(config.branchName);
       }
     }
+  } else if (pr.state === PrState.Merged) {
+    logger.debug({ pr: pr.number }, 'Merged PR is blocking this branch');
   }
 }
