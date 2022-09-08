@@ -417,15 +417,14 @@ export async function updateArtifacts({
 async function getGoConstraints(
   goModFileName: string
 ): Promise<string | undefined> {
-  let content = (await readLocalFile(goModFileName, 'utf8')) ?? null;
+  const content = (await readLocalFile(goModFileName, 'utf8')) ?? null;
   if (!content) {
     return undefined;
   }
-  content = content.replace(
-    regEx(/(?<goText>go\s*)(?<gover>\d+.\d+)/),
-    '$<goText>^$<gover>'
-  );
-  const re = regEx(/go\s*(?<gover>\^\d+.\d+)/);
+  const re = regEx(/go\s*(?<gover>\d+.\d+)/);
   const match = re.exec(content);
-  return match?.groups?.gover;
+  if (!match?.groups?.gover) {
+    return undefined;
+  }
+  return '^' + match?.groups?.gover;
 }
