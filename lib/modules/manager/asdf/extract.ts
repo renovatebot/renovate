@@ -25,7 +25,7 @@ export function extractPackageFile(content: string): PackageFile | null {
   logger.trace('asdf.extractPackageFile()');
 
   const regex = regEx(
-    /^(?<toolName>(\w+))\s+(?<version>[^\s#]+)(?:[^#]*(#(?<comment>.*)))?/gm
+    /^(?<toolName>(\w+)) (?<version>[^\s#]+)(?: [^\s#]+)* *(?: #(?<comment>.*))?$/gm
   );
 
   const deps: PackageDependency[] = [];

@@ -30,7 +30,7 @@ describe('modules/manager/asdf/extract', () => {
     });
 
     it('only captures the first version', () => {
-      const res = extractPackageFile('nodejs 16.16.0 16.15.1\n');
+      const res = extractPackageFile('nodejs 16.16.0 16.15.1');
       expect(res).toEqual({
         deps: [
           {
@@ -64,22 +64,26 @@ describe('modules/manager/asdf/extract', () => {
     });
 
     describe('comment handling', () => {
-      const comments = [
-        ' # comment with spaces',
-        '# comment without leading space',
-        ' #comment without trailing space',
-        '#comment with no spaces',
+      const validComments = [
+        {
+          entry: 'nodejs 16.16.0 # tidy comment',
+          expect: '16.16.0',
+        },
+        {
+          entry: 'nodejs 16.16.0 #sloppy-comment',
+          expect: '16.16.0',
+        },
       ];
 
-      describe.each(comments)(
-        'ignores comments at the end of lines',
-        (comment) => {
-          it(`comment: '${comment}'`, () => {
-            const res = extractPackageFile(`nodejs 16.16.0${comment}\n`);
+      describe.each(validComments)(
+        'ignores proper comments at the end of lines',
+        (data) => {
+          it(`entry: '${data.entry}'`, () => {
+            const res = extractPackageFile(data.entry);
             expect(res).toEqual({
               deps: [
                 {
-                  currentValue: '16.16.0',
+                  currentValue: data.expect,
                   datasource: 'github-tags',
                   depName: 'node',
                   packageName: 'nodejs/node',
@@ -90,6 +94,13 @@ describe('modules/manager/asdf/extract', () => {
           });
         }
       );
+
+      it('invalid comment placements fail to parse', () => {
+        const res = extractPackageFile(
+          'nodejs 16.16.0# invalid comment spacing'
+        );
+        expect(res).toBeNull();
+      });
 
       it('ignores lines that are just comments', () => {
         const res = extractPackageFile('# this is a full line comment\n');
