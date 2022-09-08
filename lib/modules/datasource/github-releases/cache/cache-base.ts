@@ -3,13 +3,6 @@ import { DateTime, DurationLikeObject } from 'luxon';
 import { logger } from '../../../../logger';
 import * as memCache from '../../../../util/cache/memory';
 import * as packageCache from '../../../../util/cache/package';
-import { getApiBaseUrl } from '../../../../util/github/url';
-import type {
-  GithubGraphqlResponse,
-  GithubHttp,
-  GithubHttpOptions,
-} from '../../../../util/http/github';
-import type { GetReleasesConfig } from '../../types';
 import type {
   CacheOptions,
   ChangelogRelease,
@@ -17,7 +10,14 @@ import type {
   GithubQueryParams,
   QueryResponse,
   StoredItemBase,
-} from './types';
+} from '../../../../util/github/types';
+import { getApiBaseUrl } from '../../../../util/github/url';
+import type {
+  GithubGraphqlResponse,
+  GithubHttp,
+  GithubHttpOptions,
+} from '../../../../util/http/github';
+import type { GetReleasesConfig } from '../../types';
 
 /**
  * The options that are meant to be used in production.

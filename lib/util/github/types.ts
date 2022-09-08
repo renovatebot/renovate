@@ -1,3 +1,42 @@
+export interface GithubRelease {
+  id: number;
+  tag_name: string;
+  published_at: string;
+  prerelease: boolean;
+  draft?: boolean;
+  assets: GithubReleaseAsset[];
+
+  html_url: string;
+  name: string;
+  body: string;
+}
+
+export interface GithubReleaseAsset {
+  name: string;
+  url: string;
+  browser_download_url: string;
+  size: number;
+}
+
+export interface DigestAsset {
+  assetName: string;
+  currentVersion: string;
+  currentDigest: string;
+  digestedFileName?: string;
+}
+
+export interface TagResponse {
+  object: {
+    type: string;
+    url: string;
+    sha: string;
+  };
+}
+
+export interface GitHubTag {
+  name: string;
+}
+
 /**
  * Every `AbstractGithubDatasourceCache` implementation
  * should have `graphqlQuery` that uses parameters

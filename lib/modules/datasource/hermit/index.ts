@@ -1,5 +1,6 @@
 import { logger } from '../../../logger';
 import { cache } from '../../../util/cache/package/decorator';
+import type { GithubRelease } from '../../../util/github/types';
 import { getApiBaseUrl } from '../../../util/github/url';
 import { GithubHttp } from '../../../util/http/github';
 import { regEx } from '../../../util/regex';
@@ -7,7 +8,6 @@ import { streamToString } from '../../../util/streams';
 import { parseUrl } from '../../../util/url';
 import { id } from '../../versioning/hermit';
 import { Datasource } from '../datasource';
-import type { GithubRelease } from '../github-releases/types';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 import type { HermitSearchResult } from './types';
 
