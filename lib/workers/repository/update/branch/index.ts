@@ -83,6 +83,18 @@ export interface ProcessBranchResult {
   commitSha?: string | null;
 }
 
+interface RecreateMergedPrConfig {
+  recreateMergedPr: boolean;
+  automerge: boolean;
+}
+
+function recreateMergedPrConfig(branchPr: Pr | null): RecreateMergedPrConfig {
+  return {
+    recreateMergedPr: !branchPr,
+    automerge: false,
+  };
+}
+
 export async function processBranch(
   branchConfig: BranchConfig
 ): Promise<ProcessBranchResult> {
@@ -114,19 +126,37 @@ export async function processBranch(
   const artifactErrorTopic = emojify(':warning: Artifact update problem');
   try {
     // Check if branch already existed
-    const existingPr = branchPr ? undefined : await prAlreadyExisted(config);
+    const existingPr = await prAlreadyExisted(config);
     if (existingPr && !dependencyDashboardCheck) {
-      logger.debug(
-        { prTitle: config.prTitle },
-        'Closed PR already exists. Skipping branch.'
-      );
-      await handlepr(config, existingPr);
-      return {
-        branchExists: false,
-        prNo: existingPr.number,
-        result: BranchResult.AlreadyExisted,
-      };
+      // Recreates pr if merged pr already exists
+      if (existingPr.state === 'merged') {
+        if (config.automerge) {
+          logger.debug(
+            'Disable automerge to prevent re-created PRs from being merged automatically.'
+          );
+        }
+
+        config = { ...config, ...recreateMergedPrConfig(branchPr) };
+        if (!branchPr) {
+          logger.debug(
+            { prTitle: config.prTitle },
+            'Merged PR already exists. Creating a fresh PR'
+          );
+        }
+      } else {
+        logger.debug(
+          { prTitle: config.prTitle },
+          'Closed PR already exists. Skipping branch.'
+        );
+        await handlepr(config, existingPr);
+        return {
+          branchExists: false,
+          prNo: existingPr.number,
+          result: BranchResult.AlreadyExisted,
+        };
+      }
     }
+
     // istanbul ignore if
     if (!branchExists && config.dependencyDashboardApproval) {
       if (dependencyDashboardCheck) {
@@ -385,6 +415,11 @@ export async function processBranch(
         prNo: branchPr?.number,
         result: BranchResult.NoWork,
       };
+    } else if (config.recreateMergedPr) {
+      logger.debug(
+        'Rebase branch cause the commits from old branch have already been merged.'
+      );
+      config.reuseExistingBranch = false;
     } else {
       config = { ...config, ...(await shouldReuseExistingBranch(config)) };
     }
