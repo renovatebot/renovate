@@ -21,15 +21,15 @@ function inferHashAlg(digest: string): string {
 }
 
 export class GithubReleasesDatasource extends Datasource {
-  static id = 'github-releases';
+  static readonly id = 'github-releases';
 
   override readonly defaultRegistryUrls = ['https://github.com'];
 
   override http: GithubHttp;
 
-  constructor(id = GithubReleasesDatasource.id) {
-    super(id);
-    this.http = new GithubHttp(id);
+  constructor() {
+    super(GithubReleasesDatasource.id);
+    this.http = new GithubHttp(GithubReleasesDatasource.id);
   }
 
   async findDigestFile(
