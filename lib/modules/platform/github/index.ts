@@ -79,6 +79,7 @@ import type {
   PlatformConfig,
 } from './types';
 import { getUserDetails, getUserEmail } from './user';
+import { gettext } from '../../../i18n';
 
 const githubApi = new githubHttp.GithubHttp();
 
@@ -124,11 +125,19 @@ export async function initPlatform({
   token: originalToken,
   username,
   gitAuthor,
+  locale,
 }: PlatformParams): Promise<PlatformResult> {
+  debugger;
+
+  gettext.setLocale(locale);
+  gettext.textdomain('github');
+
   let token = originalToken;
+
   if (!token) {
-    throw new Error('Init: You must configure a GitHub token');
+    throw new Error('Init: ' + gettext.__('You must configure a GitHub token'));
   }
+
   token = token.replace(/^ghs_/, 'x-access-token:ghs_');
   platformConfig.isGHApp = token.startsWith('x-access-token:');
 

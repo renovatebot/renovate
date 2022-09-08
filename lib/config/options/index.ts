@@ -2409,10 +2409,12 @@ const options: RenovateOptions[] = [
     default: false,
   },
   {
-    name: 'lang',
-    description: `User-facing text language`,
+    name: 'locale',
+    description: `Locale for user-facing text`,
     type: 'string',
     default: 'en',
+    globalOnly: true,
+    cli: true,
   },
 ];
 

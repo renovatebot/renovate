@@ -24,6 +24,9 @@ import { addParticipants } from '../../update/pr/participants';
 import { getBaseBranchDesc } from './base-branch';
 import { getConfigDesc } from './config-description';
 import { getPrList } from './pr-list';
+import { gettext } from '../../../../i18n';
+
+gettext.textdomain('onboarding');
 
 export async function ensureOnboardingPr(
   config: RenovateConfig,
@@ -38,9 +41,11 @@ export async function ensureOnboardingPr(
   // TODO #7154
   const existingPr = await platform.getBranchPr(config.onboardingBranch!);
   logger.debug('Filling in onboarding PR template');
-  let prTemplate = `Welcome to [Renovate](${
+  let prTemplate = gettext.__(
+    `Welcome to [Renovate](%1)! This is an onboarding PR to help you understand and configure settings before regular Pull Requests begin.\n\n`,
     config.productLinks!.homepage
-  })! This is an onboarding PR to help you understand and configure settings before regular Pull Requests begin.\n\n`;
+  );
+
   prTemplate +=
     config.requireConfig === 'required'
       ? emojify(

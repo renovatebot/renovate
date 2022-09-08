@@ -3904,6 +3904,11 @@ commander@^2.19.0:
   resolved "https://registry.yarnpkg.com/commander/-/commander-2.20.3.tgz#fd485e84c03eb4881c20722ba48035e8531aeb33"
   integrity sha512-GpVkmM8vF2vQUkj2LvZmD35JxeJOLCwJ9cUkugyk2nuhbv3+mJvpLYYt+0+USMxE+oj+ey/lJEnhZw75x/OMcQ==
 
+commander@^6.0.0:
+  version "6.2.1"
+  resolved "https://registry.yarnpkg.com/commander/-/commander-6.2.1.tgz#0792eb682dfbc325999bb2b84fddddba110ac73c"
+  integrity sha512-U7VdrJFnJgo4xjrHpTzu0yrHPGImdsmD95ZlgYSEajAn2JKzDhDTPG9kBTefmObL2w/ngeZnilk+OV9CG3d7UA==
+
 common-ancestor-path@^1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/common-ancestor-path/-/common-ancestor-path-1.0.1.tgz#4f7d2d1394d91b7abdf51871c62f71eadb0182a7"
@@ -4397,7 +4402,7 @@ emojibase@6.1.0:
   resolved "https://registry.yarnpkg.com/emojibase/-/emojibase-6.1.0.tgz#c3bc281e998a0e06398416090c23bac8c5ed3ee8"
   integrity sha512-1GkKJPXP6tVkYJHOBSJHoGOr/6uaDxZ9xJ6H7m6PfdGXTmQgbALHLWaVRY4Gi/qf5x/gT/NUXLPuSHYLqtLtrQ==
 
-encoding@^0.1.13:
+encoding@^0.1.12, encoding@^0.1.13:
   version "0.1.13"
   resolved "https://registry.yarnpkg.com/encoding/-/encoding-0.1.13.tgz#56574afdd791f54a8e9b2785c0582a2d26210fa9"
   integrity sha512-ETBauow1T35Y/WZMkio9jiM0Z5xjHHmJ4XmjZOq1l/dXz3lr2sRn87nJy20RupqSh1F2m3HHPSp8ShIPQJrJ3A==
@@ -5134,6 +5139,36 @@ get-tsconfig@^4.2.0:
   version "4.2.0"
   resolved "https://registry.yarnpkg.com/get-tsconfig/-/get-tsconfig-4.2.0.tgz#ff368dd7104dab47bf923404eb93838245c66543"
   integrity sha512-X8u8fREiYOE6S8hLbq99PeykTDoLVnxvF4DjWKJmz9xy2nNRdUcV8ZN9tniJFeKyTU3qnC9lL8n4Chd6LmVKHg==
+
+gettext-parser@2.0.0:
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/gettext-parser/-/gettext-parser-2.0.0.tgz#c28bb31e61f76f14665dfafbb5c0518cdc1270ed"
+  integrity sha512-FDs/7XjNw58ToQwJFO7avZZbPecSYgw8PBYhd0An+4JtZSrSzKhEvTsVV2uqdO7VziWTOGSgLGD5YRPdsCjF7Q==
+  dependencies:
+    encoding "^0.1.12"
+    safe-buffer "^5.1.2"
+
+gettext-parser@^1.4.0:
+  version "1.4.0"
+  resolved "https://registry.yarnpkg.com/gettext-parser/-/gettext-parser-1.4.0.tgz#f8baf34a292f03d5e42f02df099d301f167a7ace"
+  integrity sha512-sedZYLHlHeBop/gZ1jdg59hlUEcpcZJofLq2JFwJT1zTqAU3l2wFv6IsuwFHGqbiT9DWzMUW4/em2+hspnmMMA==
+  dependencies:
+    encoding "^0.1.12"
+    safe-buffer "^5.1.1"
+
+gettext-to-messageformat@0.3.1:
+  version "0.3.1"
+  resolved "https://registry.yarnpkg.com/gettext-to-messageformat/-/gettext-to-messageformat-0.3.1.tgz#c303ff9e31a5c781b14629b13bddb27b9ffca1f8"
+  integrity sha512-UyqIL3Ul4NryU95Wome/qtlcuVIqgEWVIFw0zi7Lv14ACLXfaVDCbrjZ7o+3BZ7u+4NS1mP/2O1eXZoHCoas8g==
+  dependencies:
+    gettext-parser "^1.4.0"
+
+gettext.js@1.2.0:
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/gettext.js/-/gettext.js-1.2.0.tgz#783e166c604bc60c4b70f4656391038aa9e950b2"
+  integrity sha512-qOafHtn/xsXKiBOFO8enhdx8k09ViBYSnckhn4pn/QLCpQMF8S87q9f4cE2pVgbqWD9/9SyGpWRO0nWJsEDmlg==
+  dependencies:
+    po2json "^1.0.0-beta-3"
 
 git-log-parser@^1.2.0:
   version "1.2.0"
@@ -8056,6 +8091,15 @@ pluralize@^7.0.0:
   resolved "https://registry.yarnpkg.com/pluralize/-/pluralize-7.0.0.tgz#298b89df8b93b0221dbf421ad2b1b1ea23fc6777"
   integrity sha512-ARhBOdzS3e41FbkW/XWrTEtukqqLoK5+Z/4UeDaLuSW+39JPeFgs4gCGqsrJHVZX0fUrx//4OF0K1CUGwlIFow==
 
+po2json@^1.0.0-beta-3:
+  version "1.0.0-beta-3"
+  resolved "https://registry.yarnpkg.com/po2json/-/po2json-1.0.0-beta-3.tgz#f087abeeccdc82c1e5315a749e5f3bcf7e1421e1"
+  integrity sha512-taS8y6ZEGzPAs0rygW9CuUPY8C3Zgx6cBy31QXxG2JlWS3fLxj/kuD3cbIfXBg30PuYN7J5oyBa/TIRjyqFFtg==
+  dependencies:
+    commander "^6.0.0"
+    gettext-parser "2.0.0"
+    gettext-to-messageformat "0.3.1"
+
 postcss-selector-parser@^6.0.10:
   version "6.0.10"
   resolved "https://registry.yarnpkg.com/postcss-selector-parser/-/postcss-selector-parser-6.0.10.tgz#79b61e2c0d1bfc2602d549e11d0876256f8df88d"
@@ -8555,7 +8599,7 @@ run-parallel@^1.1.9:
   dependencies:
     queue-microtask "^1.2.2"
 
-safe-buffer@^5.1.2, safe-buffer@~5.2.0:
+safe-buffer@^5.1.1, safe-buffer@^5.1.2, safe-buffer@~5.2.0:
   version "5.2.1"
   resolved "https://registry.yarnpkg.com/safe-buffer/-/safe-buffer-5.2.1.tgz#1eaf9fa9bdb1fdd4ec75f58f9cdb4e6b7827eec6"
   integrity sha512-rp3So07KcdmmKbGvgaNxQSJr7bGVSVk5S9Eq1F+ppbRo70+YeaDxkw5Dd8NPN+GD6bjnYm2VuPuCXmpuYvmCXQ==

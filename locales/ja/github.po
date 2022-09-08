@@ -1,0 +1,22 @@
+# Japanese translations for PACKAGE package.
+# Copyright (C) 2022 THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# xingxing <xingxing@zbmac-c02dt6ujq>, 2022.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2022-09-08 14:38+0800\n"
+"PO-Revision-Date: 2022-09-08 16:35+0800\n"
+"Last-Translator: xingxing <xingxing@zbmac-c02dt6ujq>\n"
+"Language-Team: Japanese <translation-team-ja@lists.sourceforge.net>\n"
+"Language: ja\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+
+#: lib/modules/platform/github/index.ts:133
+msgid "You must configure a GitHub token"
+msgstr "GitHub トークンを構成する必要があります"

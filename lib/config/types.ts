@@ -102,6 +102,7 @@ export interface GlobalOnlyConfig {
   repositories?: RenovateRepository[];
   platform?: string;
   endpoint?: string;
+  locale?: string;
 }
 
 // Config options used within the repository worker, but not user configurable
@@ -130,6 +131,7 @@ export interface RepoGlobalConfig {
   containerbaseDir?: string;
   platform?: string;
   endpoint?: string;
+  locale?: string;
 }
 
 export interface LegacyAdminConfig {
