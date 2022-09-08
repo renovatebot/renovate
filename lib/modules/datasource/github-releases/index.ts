@@ -2,9 +2,9 @@
 import hasha from 'hasha';
 import { logger } from '../../../logger';
 import type {
-  DigestAsset,
-  GithubRelease,
-  GithubReleaseAsset,
+  GithubDigestFile,
+  GithubRestAsset,
+  GithubRestRelease,
 } from '../../../util/github/types';
 import { getApiBaseUrl, getSourceUrl } from '../../../util/github/url';
 import { GithubHttp } from '../../../util/http/github';
@@ -37,20 +37,20 @@ export class GithubReleasesDatasource extends Datasource {
   }
 
   async findDigestFile(
-    release: GithubRelease,
+    release: GithubRestRelease,
     digest: string
-  ): Promise<DigestAsset | null> {
+  ): Promise<GithubDigestFile | null> {
     const smallAssets = release.assets.filter(
-      (a: GithubReleaseAsset) => a.size < 5 * 1024
+      (a: GithubRestAsset) => a.size < 5 * 1024
     );
     for (const asset of smallAssets) {
       const res = await this.http.get(asset.browser_download_url);
       for (const line of res.body.split(newlineRegex)) {
-        const [lineDigest, lineFn] = line.split(regEx(/\s+/), 2);
+        const [lineDigest, lineFilename] = line.split(regEx(/\s+/), 2);
         if (lineDigest === digest) {
           return {
             assetName: asset.name,
-            digestedFileName: lineFn,
+            digestedFileName: lineFilename,
             currentVersion: release.tag_name,
             currentDigest: lineDigest,
           };
@@ -61,7 +61,7 @@ export class GithubReleasesDatasource extends Datasource {
   }
 
   async downloadAndDigest(
-    asset: GithubReleaseAsset,
+    asset: GithubRestAsset,
     algorithm: string
   ): Promise<string> {
     const res = this.http.stream(asset.browser_download_url);
@@ -70,12 +70,12 @@ export class GithubReleasesDatasource extends Datasource {
   }
 
   async findAssetWithDigest(
-    release: GithubRelease,
+    release: GithubRestRelease,
     digest: string
-  ): Promise<DigestAsset | null> {
+  ): Promise<GithubDigestFile | null> {
     const algorithm = inferHashAlg(digest);
     const assetsBySize = release.assets.sort(
-      (a: GithubReleaseAsset, b: GithubReleaseAsset) => {
+      (a: GithubRestAsset, b: GithubRestAsset) => {
         if (a.size < b.size) {
           return -1;
         }
@@ -101,9 +101,9 @@ export class GithubReleasesDatasource extends Datasource {
 
   /** Identify the asset associated with a known digest. */
   async findDigestAsset(
-    release: GithubRelease,
+    release: GithubRestRelease,
     digest: string
-  ): Promise<DigestAsset | null> {
+  ): Promise<GithubDigestFile | null> {
     const digestFile = await this.findDigestFile(release, digest);
     if (digestFile) {
       return digestFile;
@@ -115,8 +115,8 @@ export class GithubReleasesDatasource extends Datasource {
 
   /** Given a digest asset, find the equivalent digest in a different release. */
   async mapDigestAssetToRelease(
-    digestAsset: DigestAsset,
-    release: GithubRelease
+    digestAsset: GithubDigestFile,
+    release: GithubRestRelease
   ): Promise<string | null> {
     const current = digestAsset.currentVersion.replace(regEx(/^v/), '');
     const next = release.tag_name.replace(regEx(/^v/), '');
@@ -125,7 +125,7 @@ export class GithubReleasesDatasource extends Datasource {
       next
     );
     const releaseAsset = release.assets.find(
-      (a: GithubReleaseAsset) => a.name === releaseChecksumAssetName
+      (a: GithubRestAsset) => a.name === releaseChecksumAssetName
     );
     if (!releaseAsset) {
       return null;
@@ -183,7 +183,7 @@ export class GithubReleasesDatasource extends Datasource {
     }
 
     const apiBaseUrl = getApiBaseUrl(registryUrl);
-    const { body: currentRelease } = await this.http.getJson<GithubRelease>(
+    const { body: currentRelease } = await this.http.getJson<GithubRestRelease>(
       `${apiBaseUrl}repos/${repo}/releases/tags/${currentValue}`
     );
     const digestAsset = await this.findDigestAsset(
@@ -194,7 +194,7 @@ export class GithubReleasesDatasource extends Datasource {
     if (!digestAsset || newValue === currentValue) {
       newDigest = currentDigest;
     } else {
-      const { body: newRelease } = await this.http.getJson<GithubRelease>(
+      const { body: newRelease } = await this.http.getJson<GithubRestRelease>(
         `${apiBaseUrl}repos/${repo}/releases/tags/${newValue}`
       );
       newDigest = await this.mapDigestAssetToRelease(digestAsset, newRelease);
@@ -216,7 +216,7 @@ export class GithubReleasesDatasource extends Datasource {
     const { packageName: repo, registryUrl } = config;
     const apiBaseUrl = getApiBaseUrl(registryUrl);
     const url = `${apiBaseUrl}repos/${repo}/releases?per_page=100`;
-    const res = await this.http.getJson<GithubRelease[]>(url, {
+    const res = await this.http.getJson<GithubRestRelease[]>(url, {
       paginate: true,
     });
     const githubReleases = res.body;

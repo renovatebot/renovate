@@ -1,6 +1,7 @@
 import type {
   CacheOptions,
-  StoredItemBase,
+  GithubCachedRelease,
+  GithubGraphqlRelease,
 } from '../../../../util/github/types';
 import type { GithubHttp } from '../../../../util/http/github';
 import { AbstractGithubDatasourceCache } from './cache-base';
@@ -32,28 +33,9 @@ query ($owner: String!, $name: String!, $cursor: String, $count: Int!) {
 }
 `;
 
-export interface FetchedRelease {
-  version: string;
-  releaseTimestamp: string;
-  isDraft: boolean;
-  isPrerelease: boolean;
-  url: string;
-  id: number;
-  name: string;
-  description: string;
-}
-
-export interface StoredRelease extends StoredItemBase {
-  isStable?: boolean;
-  url: string;
-  id: number;
-  name: string;
-  description: string;
-}
-
 export class CacheableGithubReleases extends AbstractGithubDatasourceCache<
-  StoredRelease,
-  FetchedRelease
+  GithubCachedRelease,
+  GithubGraphqlRelease
 > {
   cacheNs = 'github-datasource-graphql-releases';
   graphqlQuery = query;
@@ -62,7 +44,7 @@ export class CacheableGithubReleases extends AbstractGithubDatasourceCache<
     super(http, opts);
   }
 
-  coerceFetched(item: FetchedRelease): StoredRelease | null {
+  coerceFetched(item: GithubGraphqlRelease): GithubCachedRelease | null {
     const {
       version,
       releaseTimestamp,
@@ -78,7 +60,7 @@ export class CacheableGithubReleases extends AbstractGithubDatasourceCache<
       return null;
     }
 
-    const result: StoredRelease = {
+    const result: GithubCachedRelease = {
       version,
       releaseTimestamp,
       url,
