@@ -1,14 +1,20 @@
 import { logger } from '../../../logger';
-import { GithubReleasesDatasource } from '../github-releases';
+import { GithubHttp } from '../../../util/http/github';
+import { Datasource } from '../datasource';
 import { getApiBaseUrl, getSourceUrl } from '../github-releases/common';
 import type { DigestConfig, GetReleasesConfig, ReleaseResult } from '../types';
 import type { GitHubTag, TagResponse } from './types';
 
-export class GithubTagsDatasource extends GithubReleasesDatasource {
-  static override readonly id = 'github-tags';
+export class GithubTagsDatasource extends Datasource {
+  static readonly id = 'github-tags';
+
+  override readonly defaultRegistryUrls = ['https://github.com'];
+
+  override http: GithubHttp;
 
   constructor() {
     super(GithubTagsDatasource.id);
+    this.http = new GithubHttp(GithubTagsDatasource.id);
   }
 
   async getTagCommit(
