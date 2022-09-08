@@ -426,5 +426,5 @@ async function getGoConstraints(
   if (!match?.groups?.gover) {
     return undefined;
   }
-  return '^' + match?.groups?.gover;
+  return '^' + match.groups.gover;
 }
