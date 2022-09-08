@@ -73,7 +73,6 @@ export class GithubTagsDatasource extends GithubReleasesDatasource {
       : this.getCommit(registryUrl, repo!);
   }
 
-  // istanbul ignore next
   override async getReleases(
     config: GetReleasesConfig
   ): Promise<ReleaseResult> {

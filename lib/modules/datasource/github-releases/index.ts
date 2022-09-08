@@ -208,7 +208,6 @@ export class GithubReleasesDatasource extends Datasource {
    *  - Sanitize the versions if desired (e.g. strip out leading 'v')
    *  - Return a dependency object containing sourceUrl string and releases array
    */
-  // istanbul ignore next
   async getReleases(config: GetReleasesConfig): Promise<ReleaseResult> {
     const { packageName: repo, registryUrl } = config;
     const apiBaseUrl = getApiBaseUrl(registryUrl);
