@@ -115,6 +115,7 @@ export async function getReleaseList(
   release: ChangeLogRelease
 ): Promise<ChangeLogNotes[]> {
   logger.trace('github.getReleaseList()');
+  // TODO #7154
   const apiBaseUrl = project.apiBaseUrl!;
   const repository = project.repository;
   const url = `${ensureTrailingSlash(apiBaseUrl)}repos/${repository}/releases`;

@@ -84,7 +84,7 @@ describe('modules/datasource/github-tags/index', () => {
       expect(res).toBeNull();
     });
 
-    it('supports ghe', async () => {
+    it('supports GHE', async () => {
       httpMock
         .scope(githubEnterpriseApiHost)
         .get(`/api/v3/repos/${packageName}/git/refs/tags/${tag}`)
