@@ -2,8 +2,8 @@ import { DateTime } from 'luxon';
 import { mocked } from '../../../../../test/util';
 import * as _packageCache from '../../../../util/cache/package';
 import type {
-  QueryResponse,
-  StoredItemBase,
+  GithubCachedItem,
+  GithubGraphqlRepoResponse,
 } from '../../../../util/github/types';
 import {
   GithubGraphqlResponse,
@@ -20,14 +20,14 @@ interface FetchedItem {
   foo: string;
 }
 
-interface StoredItem extends StoredItemBase {
+interface StoredItem extends GithubCachedItem {
   bar: string;
 }
 
 type GraphqlDataResponse = {
   statusCode: 200;
   headers: Record<string, string>;
-  body: GithubGraphqlResponse<QueryResponse<FetchedItem>>;
+  body: GithubGraphqlResponse<GithubGraphqlRepoResponse<FetchedItem>>;
 };
 
 type GraphqlResponse = GraphqlDataResponse | Error;

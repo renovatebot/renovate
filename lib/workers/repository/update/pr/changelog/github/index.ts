@@ -6,8 +6,8 @@ import type {
   GithubGitTreeNode,
 } from '../../../../../../types/platform/github';
 import type {
-  GitHubTag,
-  GithubRelease,
+  GithubRestRelease,
+  GithubRestTag,
 } from '../../../../../../util/github/types';
 import { GithubHttp } from '../../../../../../util/http/github';
 import { fromBase64 } from '../../../../../../util/string';
@@ -29,7 +29,7 @@ export async function getTags(
   logger.trace('github.getTags()');
   try {
     const url = `${endpoint}repos/${repository}/tags?per_page=100`;
-    const res = await http.getJson<GitHubTag[]>(url, {
+    const res = await http.getJson<GithubRestTag[]>(url, {
       paginate: true,
     });
     const tags = res.body;
@@ -121,7 +121,7 @@ export async function getReleaseList(
   const apiBaseUrl = project.apiBaseUrl!;
   const repository = project.repository;
   const url = `${ensureTrailingSlash(apiBaseUrl)}repos/${repository}/releases`;
-  const res = await http.getJson<GithubRelease[]>(`${url}?per_page=100`, {
+  const res = await http.getJson<GithubRestRelease[]>(`${url}?per_page=100`, {
     paginate: true,
   });
 

@@ -1,31 +1,27 @@
-export interface GithubRelease {
+/**
+ * REST responses
+ */
+export interface GithubRestRelease {
   id: number;
   tag_name: string;
   published_at: string;
   prerelease: boolean;
   draft?: boolean;
-  assets: GithubReleaseAsset[];
+  assets: GithubRestAsset[];
 
   html_url: string;
   name: string;
   body: string;
 }
 
-export interface GithubReleaseAsset {
+export interface GithubRestAsset {
   name: string;
   url: string;
   browser_download_url: string;
   size: number;
 }
 
-export interface DigestAsset {
-  assetName: string;
-  currentVersion: string;
-  currentDigest: string;
-  digestedFileName?: string;
-}
-
-export interface TagResponse {
+export interface GithubRestRef {
   object: {
     type: string;
     url: string;
@@ -33,16 +29,24 @@ export interface TagResponse {
   };
 }
 
-export interface GitHubTag {
+export interface GithubRestTag {
   name: string;
 }
 
 /**
- * Every `AbstractGithubDatasourceCache` implementation
- * should have `graphqlQuery` that uses parameters
- * defined this interface.
+ * Release asset
  */
-export interface GithubQueryParams {
+export interface GithubDigestFile {
+  assetName: string;
+  currentVersion: string;
+  currentDigest: string;
+  digestedFileName?: string;
+}
+
+/**
+ * Parameters used for GraphQL queries with pagination
+ */
+export interface GithubGraphqlRepoParams {
   owner: string;
   name: string;
   cursor: string | null;
@@ -50,11 +54,9 @@ export interface GithubQueryParams {
 }
 
 /**
- * Every `AbstractGithubDatasourceCache` implementation
- * should have `graphqlQuery` that resembles the structure
- * of this interface.
+ * Common shape for GraphQL responses for repository items
  */
-export interface QueryResponse<T = unknown> {
+export interface GithubGraphqlRepoResponse<T = unknown> {
   repository: {
     payload: {
       nodes: T[];
@@ -67,35 +69,80 @@ export interface QueryResponse<T = unknown> {
 }
 
 /**
- * Base interface meant to be extended by all implementations.
- * Must have `version` and `releaseTimestamp` fields.
+ * GraphQL shape for releases
  */
-export interface StoredItemBase {
-  /** The values of `version` field meant to be unique. */
+export interface GithubGraphqlRelease {
   version: string;
+  releaseTimestamp: string;
+  isDraft: boolean;
+  isPrerelease: boolean;
+  url: string;
+  id: number;
+  name: string;
+  description: string;
+}
 
-  /** The `releaseTimestamp` field meant to be ISO-encoded date. */
+/**
+ * GraphQL shape for tags
+ */
+export interface GithubGraphqlTag {
+  version: string;
+  target:
+    | {
+        type: 'Commit';
+        hash: string;
+        releaseTimestamp: string;
+      }
+    | {
+        type: 'Tag';
+        target: {
+          hash: string;
+        };
+        tagger: {
+          releaseTimestamp: string;
+        };
+      };
+}
+
+/**
+ * The structures being stored with long-term caching
+ */
+export interface GithubCachedItem {
+  version: string;
+  releaseTimestamp: string;
+}
+
+export interface GithubCachedRelease extends GithubCachedItem {
+  isStable?: boolean;
+  url: string;
+  id: number;
+  name: string;
+  description: string;
+}
+
+export interface GithubCachedTag extends GithubCachedItem {
+  hash: string;
   releaseTimestamp: string;
 }
 
 /**
- * The data structure stored in the package cache.
+ * The common structure of datasource cache
  */
-export interface GithubDatasourceCache<StoredItem extends StoredItemBase> {
-  items: Record<string, StoredItem>;
+export interface GithubDatasourceCache<CachedItem extends GithubCachedItem> {
+  items: Record<string, CachedItem>;
 
-  /** Cache full reset decision is based on `createdAt` value. */
+  /** Used for determining hard reset time */
   createdAt: string;
 
-  /** Cache soft updates are performed depending on `updatedAt` value. */
+  /** Used for determining soft reset time */
   updatedAt: string;
 
-  /** Latest release timestamp (`releaseTimestamp`) of all releases. */
+  /** The most fresh `releaseTimestamp` of all items */
   lastReleasedAt?: string;
 }
 
 /**
- * The configuration for cache.
+ * The configuration for datasource cache
  */
 export interface CacheOptions {
   /**
@@ -160,6 +207,17 @@ export interface CacheOptions {
   maxUpdatePages?: number;
 }
 
+/**
+ * This type is used to handle the following edge-case:
+ *
+ *   1. Package is being released on both NPM and GitHub
+ *   2. Renovate know there is new release in NPM
+ *   3. Renovate didn't update it's cache for GitHub datasource
+ *   4. We can't obtain release notes from GitHub because of this
+ *
+ * By providing this additional structure, we can soft reset cache
+ * once we know it's released for NPM or any other package manager.
+ */
 export interface ChangelogRelease {
   date: string | Date;
   version: string;
