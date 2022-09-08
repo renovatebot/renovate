@@ -1,9 +1,9 @@
 import { logger } from '../../../logger';
+import type { GitHubTag, TagResponse } from '../../../util/github/types';
+import { getApiBaseUrl, getSourceUrl } from '../../../util/github/url';
 import { GithubHttp } from '../../../util/http/github';
 import { Datasource } from '../datasource';
-import { getApiBaseUrl, getSourceUrl } from '../github-releases/common';
 import type { DigestConfig, GetReleasesConfig, ReleaseResult } from '../types';
-import type { GitHubTag, TagResponse } from './types';
 
 export class GithubTagsDatasource extends Datasource {
   static readonly id = 'github-tags';

@@ -1,6 +1,6 @@
 import * as httpMock from '../../../../../test/http-mock';
 import { partial } from '../../../../../test/util';
-import type { GithubRelease } from '../types';
+import type { GithubRelease } from '../../../../util/github/types';
 
 export class GitHubReleaseMocker {
   constructor(

@@ -1,12 +1,16 @@
 // TODO: types (#7154)
 import hasha from 'hasha';
 import { logger } from '../../../logger';
+import type {
+  DigestAsset,
+  GithubRelease,
+  GithubReleaseAsset,
+} from '../../../util/github/types';
+import { getApiBaseUrl, getSourceUrl } from '../../../util/github/url';
 import { GithubHttp } from '../../../util/http/github';
 import { newlineRegex, regEx } from '../../../util/regex';
 import { Datasource } from '../datasource';
 import type { DigestConfig, GetReleasesConfig, ReleaseResult } from '../types';
-import { getApiBaseUrl, getSourceUrl } from './common';
-import type { DigestAsset, GithubRelease, GithubReleaseAsset } from './types';
 
 export const cacheNamespace = 'datasource-github-releases';
 

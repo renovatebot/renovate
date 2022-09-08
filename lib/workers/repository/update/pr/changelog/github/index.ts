@@ -1,12 +1,14 @@
 import changelogFilenameRegex from 'changelog-filename-regex';
 import { logger } from '../../../../../../logger';
-import type { GithubRelease } from '../../../../../../modules/datasource/github-releases/types';
-import type { GitHubTag } from '../../../../../../modules/datasource/github-tags/types';
 import type {
   GithubGitBlob,
   GithubGitTree,
   GithubGitTreeNode,
 } from '../../../../../../types/platform/github';
+import type {
+  GitHubTag,
+  GithubRelease,
+} from '../../../../../../util/github/types';
 import { GithubHttp } from '../../../../../../util/http/github';
 import { fromBase64 } from '../../../../../../util/string';
 import { ensureTrailingSlash } from '../../../../../../util/url';
