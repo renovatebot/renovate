@@ -1,12 +1,12 @@
 import { logger } from '../../../logger';
 import { cache } from '../../../util/cache/package/decorator';
+import { getApiBaseUrl } from '../../../util/github';
 import { GithubHttp } from '../../../util/http/github';
 import { regEx } from '../../../util/regex';
 import { streamToString } from '../../../util/streams';
 import { parseUrl } from '../../../util/url';
 import { id } from '../../versioning/hermit';
 import { Datasource } from '../datasource';
-import { getApiBaseUrl } from '../github-releases/common';
 import type { GithubRelease } from '../github-releases/types';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 import type { HermitSearchResult } from './types';

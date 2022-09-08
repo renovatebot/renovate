@@ -1,6 +1,6 @@
-import { getApiBaseUrl, getSourceUrlBase } from './common';
+import { getApiBaseUrl, getSourceUrlBase } from './github';
 
-describe('modules/datasource/github-releases/common', () => {
+describe('util/github', () => {
   describe('getSourceUrlBase', () => {
     it('ensures trailing slash', () => {
       const sourceUrl = getSourceUrlBase('https://gh.my-company.com');

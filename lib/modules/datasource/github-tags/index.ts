@@ -1,7 +1,7 @@
 import { logger } from '../../../logger';
+import { getApiBaseUrl, getSourceUrl } from '../../../util/github';
 import { GithubHttp } from '../../../util/http/github';
 import { Datasource } from '../datasource';
-import { getApiBaseUrl, getSourceUrl } from '../github-releases/common';
 import type { DigestConfig, GetReleasesConfig, ReleaseResult } from '../types';
 import type { GitHubTag, TagResponse } from './types';
 
