@@ -299,18 +299,6 @@ describe('modules/datasource/npm/index', () => {
     expect(res).toMatchSnapshot();
   });
 
-  it('should cache package info from npm', async () => {
-    httpMock
-      .scope('https://registry.npmjs.org')
-      .get('/foobar')
-      .reply(200, npmResponse);
-    const npmrc = '//registry.npmjs.org/:_authToken=abcdefghijklmnopqrstuvwxyz';
-    const res1 = await getPkgReleases({ datasource, depName: 'foobar', npmrc });
-    const res2 = await getPkgReleases({ datasource, depName: 'foobar', npmrc });
-    expect(res1).not.toBeNull();
-    expect(res1).toEqual(res2);
-  });
-
   it('should fetch package info from custom registry', async () => {
     httpMock
       .scope('https://npm.mycustomregistry.com', {})
