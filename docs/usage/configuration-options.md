@@ -1139,12 +1139,15 @@ Example config:
 {
   "hostRules": [
     {
-      "matchHost": "github.com",
+      "matchHost": "api.github.com",
       "concurrentRequestLimit": 2
     }
   ]
 }
 ```
+
+Use an exact host for `matchHost` and not a domain (e.g. `api.github.com` as shown above and not `github.com`).
+Do not combine with `hostType` in the same rule or it won't work.
 
 ### dnsCache
 
