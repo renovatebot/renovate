@@ -211,7 +211,7 @@ describe('workers/repository/process/write', () => {
       config.repositoryCache = 'enabled';
       await writeUpdates(config, branches);
       expect(logger.logger.debug).toHaveBeenCalledWith(
-        'Creating branch cache becasue none found for new/some-branch'
+        'Creating branch cache because it does not exist for new/some-branch'
       );
     });
   });
