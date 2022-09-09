@@ -60,7 +60,12 @@ export async function getConcurrentPrsRemaining(
             openPrs.push(pr);
           }
         } catch (err) {
-          // no-op
+          // istanbul ignore if
+          if (err instanceof ExternalHostError) {
+            throw err;
+          } else {
+            // no-op
+          }
         }
       }
       logger.debug(`${openPrs.length} PRs are currently open`);
