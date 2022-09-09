@@ -4,7 +4,7 @@ import * as httpMock from '../../../../test/http-mock';
 import { GlobalConfig } from '../../../config/global';
 import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages';
 import * as hostRules from '../../../util/host-rules';
-import { NpmDatasource, resetCache, setNpmrc } from '.';
+import { NpmDatasource, setNpmrc } from '.';
 
 const datasource = NpmDatasource.id;
 
@@ -17,7 +17,6 @@ describe('modules/datasource/npm/index', () => {
     jest.resetAllMocks();
     GlobalConfig.reset();
     hostRules.clear();
-    resetCache();
     setNpmrc();
     npmResponse = {
       name: 'foobar',
