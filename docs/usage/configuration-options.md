@@ -2170,9 +2170,12 @@ What may happen if you don't set a `prHourlyLimit`:
 1. You merge the onboarding PR to activate Renovate
 1. Renovate creates a "Pin Dependencies" PR (if needed)
 1. You merge the "Pin Dependencies" PR
-1. Renovate creates every single upgrade PR needed, which can be a lot. This may cause:
-   - Renovate bot's PRs to overwhelm your CI systems
-   - a lot of test runs, because branches are rebased each time you merge a PR
+1. Renovate creates every single upgrade PR needed, which can be a lot.
+ 
+The above may cause:
+
+- Renovate bot's PRs to overwhelm your CI systems
+- a lot of test runs, because branches are rebased each time you merge a PR
 
 To prevent these problems you can set `prHourlyLimit` to a value like `1` or `2`.
 Renovate will only create that many PRs within each hourly period (`:00` through `:59`).
