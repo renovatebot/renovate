@@ -19,8 +19,13 @@ function handleError(err: any): never {
 
   const errors = [...err];
 
-  const hostError = errors.find(isExternalHostError);
-  if (hostError) {
+  const hostErrors = errors.filter(isExternalHostError);
+  if (hostErrors.length) {
+    const [hostError, ...otherHostErrors] = hostErrors;
+    // istanbul ignore next
+    otherHostErrors.forEach((otherHostErrors) =>
+      otherHostErrors.resetTimeout()
+    );
     throw hostError;
   }
 
