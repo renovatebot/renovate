@@ -1,10 +1,11 @@
+import { _ } from '../../../i18n';
 import type { Preset } from '../types';
 
 /* eslint sort-keys: ["error", "asc", {caseSensitive: false, natural: true}] */
 
 export const presets: Record<string, Preset> = {
   angularJs: {
-    description: 'All AngularJS packages.',
+    description: _('All AngularJS packages.'),
     matchPackageNames: [
       'angular',
       'angular-animate',
@@ -13,24 +14,24 @@ export const presets: Record<string, Preset> = {
     ],
   },
   apollographql: {
-    description: 'All packages published by Apollo GraphQL.',
+    description: _('All packages published by Apollo GraphQL.'),
     matchSourceUrlPrefixes: ['https://github.com/apollographql/'],
   },
   emberTemplateLint: {
-    description: 'All ember-template-lint packages.',
+    description: _('All ember-template-lint packages.'),
     matchPackagePrefixes: ['ember-template-lint'],
   },
   eslint: {
-    description: 'All ESLint packages.',
+    description: _('All ESLint packages.'),
     matchPackageNames: ['@types/eslint', 'babel-eslint'],
     matchPackagePrefixes: ['@typescript-eslint/', 'eslint'],
   },
   gatsby: {
-    description: 'All packages published by Gatsby.',
+    description: _('All packages published by Gatsby.'),
     extends: ['monorepo:gatsby'],
   },
   googleapis: {
-    description: 'All `googleapis` packages.',
+    description: _('All `googleapis` packages.'),
     matchDatasources: ['npm'],
     matchPackageNames: ['google-auth-library'],
     matchPackagePrefixes: ['@google-cloud/'],
@@ -40,7 +41,7 @@ export const presets: Record<string, Preset> = {
     extends: ['packages:jsUnitTest'],
   },
   jsUnitTest: {
-    description: 'Unit test packages for JavaScript.',
+    description: _('Unit test packages for JavaScript.'),
     matchPackageNames: [
       '@types/chai',
       '@types/ember-mocha',
@@ -78,7 +79,7 @@ export const presets: Record<string, Preset> = {
     ],
   },
   linters: {
-    description: 'All lint-related packages.',
+    description: _('All lint-related packages.'),
     extends: [
       'packages:emberTemplateLint',
       'packages:eslint',
@@ -92,7 +93,7 @@ export const presets: Record<string, Preset> = {
     matchPackagePrefixes: ['leaflet', 'mapbox'],
   },
   postcss: {
-    description: 'All PostCSS packages.',
+    description: _('All PostCSS packages.'),
     matchPackageNames: ['postcss'],
     matchPackagePrefixes: ['postcss-'],
   },
@@ -106,16 +107,16 @@ export const presets: Record<string, Preset> = {
     matchPackagePrefixes: ['stylelint'],
   },
   test: {
-    description: 'Test packages.',
+    description: _('Test packages.'),
     extends: ['packages:unitTest'],
   },
   tslint: {
-    description: 'All TSLint packages.',
+    description: _('All TSLint packages.'),
     matchPackageNames: ['codelyzer'],
     matchPackagePatterns: ['\\btslint\\b'],
   },
   unitTest: {
-    description: 'All unit test packages.',
+    description: _('All unit test packages.'),
     extends: ['packages:jsUnitTest'],
   },
 };

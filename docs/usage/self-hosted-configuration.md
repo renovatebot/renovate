@@ -791,6 +791,11 @@ This is currently applicable to `npm` and `lerna`/`npm` only, and only used in c
 
 ## token
 
+## translationsFilePath
+
+Renovate supports internationalization with [GNU Gettext](https://www.gnu.org/software/gettext/), you can specific expected translations file (PO file) path.
+If you are interest in improving i18n of Renovate, please read i18n guide for more information.
+
 ## unicodeEmoji
 
 If enabled emoji shortcodes are replaced with their Unicode equivalents.

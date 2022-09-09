@@ -1,3 +1,4 @@
+import { _ } from '../../../i18n';
 import type { Preset } from '../types';
 
 /* eslint sort-keys: ["error", "asc", {caseSensitive: false, natural: true}] */
@@ -10,13 +11,13 @@ export const presets: Record<string, Preset> = {
     description: 'Enable Buildkite functionality.',
   },
   dockerCompose: {
-    description: 'Enable Docker Compose image updating.',
+    description: _('Enable Docker Compose image updating.'),
     'docker-compose': {
       enabled: true,
     },
   },
   dockerVersions: {
-    description: 'Upgrade Docker tags to newer versions.',
+    description: _('Upgrade Docker tags to newer versions.'),
     docker: {
       major: {
         enabled: true,

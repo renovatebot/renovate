@@ -1,3 +1,4 @@
+import { _ } from '../../../i18n';
 import type { Preset } from '../types';
 import * as monorepos from './monorepo';
 
@@ -7,7 +8,7 @@ const nonPinUpdateTypes = ['digest', 'patch', 'minor', 'major'];
 
 const staticGroups = {
   all: {
-    description: 'Group all updates together.',
+    description: _('Group all updates together.'),
     groupName: 'all dependencies',
     groupSlug: 'all',
     lockFileMaintenance: {
@@ -33,7 +34,7 @@ const staticGroups = {
     ],
   },
   allNonMajor: {
-    description: 'Group all `minor` and `patch` updates together.',
+    description: _('Group all `minor` and `patch` updates together.'),
     packageRules: [
       {
         groupName: 'all non-major dependencies',
@@ -296,8 +297,9 @@ const staticGroups = {
     ],
   },
   nodeJs: {
-    description:
-      "Group anything that looks like Node.js together so that it's updated together.",
+    description: _(
+      "Group anything that looks like Node.js together so that it's updated together."
+    ),
     packageRules: [
       {
         commitMessageTopic: 'Node.js',
@@ -346,8 +348,9 @@ const staticGroups = {
     ],
   },
   recommended: {
-    description:
-      'Use curated list of recommended non-monorepo package groupings.',
+    description: _(
+      'Use curated list of recommended non-monorepo package groupings.'
+    ),
     extends: [
       'group:nodeJs',
       'group:allApollographql',
@@ -410,7 +413,7 @@ const staticGroups = {
     ],
   },
   rubyOmniauth: {
-    description: 'Group OmniAuth packages together.',
+    description: _('Group OmniAuth packages together.'),
     packageRules: [
       {
         groupName: 'omniauth packages',
@@ -420,7 +423,7 @@ const staticGroups = {
     ],
   },
   rubyOnRails: {
-    description: 'Group Ruby on Rails packages together.',
+    description: _('Group Ruby on Rails packages together.'),
     packageRules: [
       {
         groupName: 'Ruby on Rails packages',
@@ -453,7 +456,7 @@ const staticGroups = {
     ],
   },
   springAmqp: {
-    description: 'Group Java Spring AMQP packages.',
+    description: _('Group Java Spring AMQP packages.'),
     packageRules: [
       {
         groupName: 'spring amqp',
@@ -462,7 +465,7 @@ const staticGroups = {
     ],
   },
   springAndroid: {
-    description: 'Group Java Spring Android packages.',
+    description: _('Group Java Spring Android packages.'),
     packageRules: [
       {
         groupName: 'spring android',
@@ -471,7 +474,7 @@ const staticGroups = {
     ],
   },
   springBatch: {
-    description: 'Group Java Spring Batch packages.',
+    description: _('Group Java Spring Batch packages.'),
     packageRules: [
       {
         groupName: 'spring batch',
@@ -480,7 +483,7 @@ const staticGroups = {
     ],
   },
   springBoot: {
-    description: 'Group Java Spring Boot packages.',
+    description: _('Group Java Spring Boot packages.'),
     packageRules: [
       {
         groupName: 'spring boot',
@@ -490,7 +493,7 @@ const staticGroups = {
     ],
   },
   springCloud: {
-    description: 'Group Java Spring Cloud packages.',
+    description: _('Group Java Spring Cloud packages.'),
     packageRules: [
       {
         groupName: 'spring cloud',
@@ -499,7 +502,7 @@ const staticGroups = {
     ],
   },
   springCore: {
-    description: 'Group Java Spring Core packages.',
+    description: _('Group Java Spring Core packages.'),
     packageRules: [
       {
         groupName: 'spring core',
@@ -508,7 +511,7 @@ const staticGroups = {
     ],
   },
   springData: {
-    description: 'Group Java Spring Data packages.',
+    description: _('Group Java Spring Data packages.'),
     packageRules: [
       {
         groupName: 'spring data',
@@ -517,7 +520,7 @@ const staticGroups = {
     ],
   },
   springHateoas: {
-    description: 'Group Java Spring HATEOAS packages.',
+    description: _('Group Java Spring HATEOAS packages.'),
     packageRules: [
       {
         groupName: 'spring hateoas',
@@ -526,7 +529,7 @@ const staticGroups = {
     ],
   },
   springIntegration: {
-    description: 'Group Java Spring Integration packages.',
+    description: _('Group Java Spring Integration packages.'),
     packageRules: [
       {
         groupName: 'spring integration',
@@ -535,7 +538,7 @@ const staticGroups = {
     ],
   },
   springKafka: {
-    description: 'Group Java Spring Kafka packages.',
+    description: _('Group Java Spring Kafka packages.'),
     packageRules: [
       {
         groupName: 'spring kafka',
@@ -544,7 +547,7 @@ const staticGroups = {
     ],
   },
   springLdap: {
-    description: 'Group Java Spring LDAP packages.',
+    description: _('Group Java Spring LDAP packages.'),
     packageRules: [
       {
         groupName: 'spring ldap',
@@ -553,7 +556,7 @@ const staticGroups = {
     ],
   },
   springMobile: {
-    description: 'Group Java Spring Mobile packages.',
+    description: _('Group Java Spring Mobile packages.'),
     packageRules: [
       {
         groupName: 'spring mobile',
@@ -562,7 +565,7 @@ const staticGroups = {
     ],
   },
   springOsgi: {
-    description: 'Group Java Spring OSGi packages.',
+    description: _('Group Java Spring OSGi packages.'),
     packageRules: [
       {
         groupName: 'spring osgi',
@@ -571,7 +574,7 @@ const staticGroups = {
     ],
   },
   springRestDocs: {
-    description: 'Group Java Spring REST Docs packages.',
+    description: _('Group Java Spring REST Docs packages.'),
     packageRules: [
       {
         groupName: 'spring restdocs',
@@ -580,7 +583,7 @@ const staticGroups = {
     ],
   },
   springRoo: {
-    description: 'Group Java Spring Roo packages.',
+    description: _('Group Java Spring Roo packages.'),
     packageRules: [
       {
         groupName: 'spring roo',
@@ -589,7 +592,7 @@ const staticGroups = {
     ],
   },
   springScala: {
-    description: 'Group Java Spring Scala packages.',
+    description: _('Group Java Spring Scala packages.'),
     packageRules: [
       {
         groupName: 'spring scala',
@@ -598,7 +601,7 @@ const staticGroups = {
     ],
   },
   springSecurity: {
-    description: 'Group Java Spring Security packages.',
+    description: _('Group Java Spring Security packages.'),
     packageRules: [
       {
         groupName: 'spring security',
@@ -607,7 +610,7 @@ const staticGroups = {
     ],
   },
   springSession: {
-    description: 'Group Java Spring Session packages.',
+    description: _('Group Java Spring Session packages.'),
     packageRules: [
       {
         groupName: 'spring session',
@@ -616,7 +619,7 @@ const staticGroups = {
     ],
   },
   springShell: {
-    description: 'Group Java Spring Shell packages.',
+    description: _('Group Java Spring Shell packages.'),
     packageRules: [
       {
         groupName: 'spring shell',
@@ -625,7 +628,7 @@ const staticGroups = {
     ],
   },
   springSocial: {
-    description: 'Group Java Spring Social packages.',
+    description: _('Group Java Spring Social packages.'),
     packageRules: [
       {
         groupName: 'spring social',
@@ -634,7 +637,7 @@ const staticGroups = {
     ],
   },
   springStatemachine: {
-    description: 'Group Java Spring Statemachine packages.',
+    description: _('Group Java Spring Statemachine packages.'),
     packageRules: [
       {
         groupName: 'spring statemachine',
@@ -643,7 +646,7 @@ const staticGroups = {
     ],
   },
   springWebflow: {
-    description: 'Group Java Spring WebFlow packages.',
+    description: _('Group Java Spring WebFlow packages.'),
     packageRules: [
       {
         groupName: 'spring webflow',
@@ -652,7 +655,7 @@ const staticGroups = {
     ],
   },
   springWs: {
-    description: 'Group Java Spring WS packages.',
+    description: _('Group Java Spring WS packages.'),
     packageRules: [
       {
         groupName: 'spring ws',
@@ -671,7 +674,7 @@ const staticGroups = {
     ],
   },
   test: {
-    description: 'Group all test packages together.',
+    description: _('Group all test packages together.'),
     packageRules: [
       {
         extends: 'packages:test',
@@ -680,7 +683,7 @@ const staticGroups = {
     ],
   },
   testNonMajor: {
-    description: 'Group all non-major test package updates together.',
+    description: _('Group all non-major test package updates together.'),
     packageRules: [
       {
         extends: 'packages:test',
@@ -690,7 +693,7 @@ const staticGroups = {
     ],
   },
   unitTest: {
-    description: 'Group all unit test packages together.',
+    description: _('Group all unit test packages together.'),
     packageRules: [
       {
         extends: 'packages:unitTest',
@@ -699,7 +702,9 @@ const staticGroups = {
     ],
   },
   unitTestNonMajor: {
-    description: 'Group all unit test packages together for non-major updates.',
+    description: _(
+      'Group all unit test packages together for non-major updates.'
+    ),
     packageRules: [
       {
         extends: 'packages:unitTest',
@@ -719,7 +724,7 @@ for (const monorepo of Object.keys(monorepos.presets)) {
   config[name] = {
     packageRules: [
       {
-        description: `Group packages from ${monorepo} monorepo together.`,
+        description: _(`Group packages from ${monorepo} monorepo together.`),
         extends: `monorepo:${monorepo}`,
         groupName: `${monorepo} monorepo`,
         matchUpdateTypes: nonPinUpdateTypes,
@@ -728,7 +733,7 @@ for (const monorepo of Object.keys(monorepos.presets)) {
   };
 }
 config.monorepos = {
-  description: 'Group known monorepo packages together.',
+  description: _('Group known monorepo packages together.'),
   extends: monorepoNames,
   ignoreDeps: [], // Hack to improve onboarding PR description
 };

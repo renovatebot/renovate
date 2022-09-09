@@ -3,6 +3,7 @@ import fs from 'fs-extra';
 import upath from 'upath';
 import { applySecretsToConfig } from '../../config/secrets';
 import type { AllConfig, RenovateConfig } from '../../config/types';
+import { initI18n } from '../../i18n';
 import { logger } from '../../logger';
 import { initPlatform } from '../../modules/platform';
 import * as packageCache from '../../util/cache/package';
@@ -11,6 +12,7 @@ import { validateGitVersion } from '../../util/git';
 import * as hostRules from '../../util/host-rules';
 import { initMergeConfidence } from '../../util/merge-confidence';
 import { setMaxLimit } from './limits';
+
 
 async function setDirectories(input: AllConfig): Promise<AllConfig> {
   const config: AllConfig = { ...input };
@@ -64,11 +66,18 @@ function setGlobalHostRules(config: RenovateConfig): void {
   }
 }
 
+async function setI18n(config: AllConfig): Promise<void> {
+  await initI18n(
+    config.translationsFilePath === undefined ? '' : config.translationsFilePath
+  );
+}
+
 export async function globalInitialize(
   config_: AllConfig
 ): Promise<RenovateConfig> {
   let config = config_;
   await checkVersions();
+  await setI18n(config);
   config = await initPlatform(config);
   config = await setDirectories(config);
   await packageCache.init(config);

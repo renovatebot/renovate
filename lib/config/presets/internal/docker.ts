@@ -1,3 +1,4 @@
+import { _ } from '../../../i18n';
 import type { Preset } from '../types';
 
 /* eslint sort-keys: ["error", "asc", {caseSensitive: false, natural: true}] */
@@ -7,7 +8,7 @@ export const presets: Record<string, Preset> = {
     circleci: {
       enabled: false,
     },
-    description: 'Disable Docker updates.',
+    description: _('Disable Docker updates.'),
     docker: {
       enabled: false,
     },
@@ -26,7 +27,7 @@ export const presets: Record<string, Preset> = {
     ],
   },
   enableMajor: {
-    description: 'Enable Docker `major` updates.',
+    description: _('Enable Docker `major` updates.'),
     packageRules: [
       {
         enabled: true,
@@ -36,7 +37,7 @@ export const presets: Record<string, Preset> = {
     ],
   },
   pinDigests: {
-    description: 'Pin Docker digests.',
+    description: _('Pin Docker digests.'),
     docker: {
       pinDigests: true,
     },

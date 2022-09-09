@@ -1,3 +1,4 @@
+import { _ } from '../../../i18n';
 import type { Preset } from '../types';
 
 /* eslint sort-keys: ["error", "asc", {caseSensitive: false, natural: true}] */
@@ -126,13 +127,13 @@ export const presets: Record<string, Preset> = {
     ],
   },
   disableDigestUpdates: {
-    description: 'Disable `digest` and Git hash updates.',
+    description: _('Disable `digest` and Git hash updates.'),
     digest: {
       enabled: false,
     },
   },
   disableDomain: {
-    description: 'Disable requests to a particular domain.',
+    description: _('Disable requests to a particular domain.'),
     hostRules: [
       {
         enabled: false,
@@ -141,7 +142,7 @@ export const presets: Record<string, Preset> = {
     ],
   },
   disableHost: {
-    description: 'Disable requests to a particular host.',
+    description: _('Disable requests to a particular host.'),
     hostRules: [
       {
         enabled: false,
@@ -204,7 +205,7 @@ export const presets: Record<string, Preset> = {
     ],
   },
   enablePreCommit: {
-    description: 'Enable the pre-commit manager.',
+    description: _('Enable the pre-commit manager.'),
     'pre-commit': {
       enabled: true,
     },
@@ -269,8 +270,9 @@ export const presets: Record<string, Preset> = {
     ],
   },
   ignoreModulesAndTests: {
-    description:
-      'Ignore `node_modules`, `bower_components`, `vendor` and various test/tests directories.',
+    description: _(
+      'Ignore `node_modules`, `bower_components`, `vendor` and various test/tests directories.'
+    ),
     ignorePaths: [
       '**/node_modules/**',
       '**/bower_components/**',
@@ -288,8 +290,9 @@ export const presets: Record<string, Preset> = {
     ignoreUnstable: true,
   },
   includeNodeModules: {
-    description:
-      'Include `package.json` files found within `node_modules` folders or `bower_components`.',
+    description: _(
+      'Include `package.json` files found within `node_modules` folders or `bower_components`.'
+    ),
     ignorePaths: [],
   },
   label: {
@@ -358,7 +361,7 @@ export const presets: Record<string, Preset> = {
     ],
   },
   pinAllExceptPeerDependencies: {
-    description: 'Pin all dependency versions except `peerDependencies`.',
+    description: _('Pin all dependency versions except `peerDependencies`.'),
     packageRules: [
       {
         matchPackagePatterns: ['*'],
@@ -371,8 +374,9 @@ export const presets: Record<string, Preset> = {
     ],
   },
   pinDependencies: {
-    description:
-      'Pin dependency versions where `depType=dependencies`. Usually applies only to non-dev dependencies in `package.json`.',
+    description: _(
+      'Pin dependency versions where `depType=dependencies`. Usually applies only to non-dev dependencies in `package.json`.'
+    ),
     packageRules: [
       {
         matchDepTypes: ['dependencies'],
@@ -381,7 +385,7 @@ export const presets: Record<string, Preset> = {
     ],
   },
   pinDevDependencies: {
-    description: 'Pin dependency versions for `devDependencies`.',
+    description: _('Pin dependency versions for `devDependencies`.'),
     packageRules: [
       {
         matchDepTypes: ['devDependencies'],
@@ -394,8 +398,9 @@ export const presets: Record<string, Preset> = {
     pinDigests: false,
   },
   pinOnlyDevDependencies: {
-    description:
-      'Pin dependency versions for `devDependencies` and retain SemVer ranges for others.',
+    description: _(
+      'Pin dependency versions for `devDependencies` and retain SemVer ranges for others.'
+    ),
     packageRules: [
       {
         matchPackagePatterns: ['*'],
@@ -418,12 +423,15 @@ export const presets: Record<string, Preset> = {
     },
   },
   pinVersions: {
-    description:
-      'Use version pinning (maintain a single version only and not SemVer ranges).',
+    description: _(
+      'Use version pinning (maintain a single version only and not SemVer ranges).'
+    ),
     rangeStrategy: 'pin',
   },
   prConcurrentLimit10: {
-    description: 'Limit to maximum 10 open PRs at any time.',
+    description: _(
+      'Limit to maximum 10 open PRs at any time.'
+    ),
     prConcurrentLimit: 10,
   },
   prConcurrentLimit20: {
@@ -465,13 +473,14 @@ export const presets: Record<string, Preset> = {
     prCreation: 'not-pending',
   },
   rebaseStalePrs: {
-    description:
-      'Rebase existing PRs any time the base branch has been updated.',
+    description: _(
+      'Rebase existing PRs any time the base branch has been updated.'
+    ),
     rebaseWhen: 'behind-base-branch',
   },
   renovatePrefix: {
     branchPrefix: 'renovate/',
-    description: 'Prefix `renovate/` to all branch names.',
+    description: _('Prefix `renovate/` to all branch names.'),
   },
   respectLatest: {
     description: 'Upgrade versions up to the "latest" tag in the npm registry.',
@@ -499,8 +508,9 @@ export const presets: Record<string, Preset> = {
     semanticCommits: 'disabled',
   },
   semanticCommitType: {
-    description:
-      'Use `{{arg0}}` as semantic commit type for commit messages and PR titles.',
+    description: _(
+      'Use `{{arg0}}` as semantic commit type for commit messages and PR titles.'
+    ),
     semanticCommitType: '{{arg0}}',
   },
   semanticCommitTypeAll: {
@@ -514,18 +524,21 @@ export const presets: Record<string, Preset> = {
     ],
   },
   semanticPrefixChore: {
-    description:
-      'Use `chore` as semantic commit type for commit messages and PR titles.',
+    description: _(
+      'Use `chore` as semantic commit type for commit messages and PR titles.'
+    ),
     extends: [':semanticCommitType(chore)'],
   },
   semanticPrefixFix: {
-    description:
-      'Use `fix` as semantic commit type for commit messages and PR titles.',
+    description: _(
+      'Use `fix` as semantic commit type for commit messages and PR titles.'
+    ),
     extends: [':semanticCommitType(fix)'],
   },
   semanticPrefixFixDepsChoreOthers: {
-    description:
-      'Use semantic commit type `fix` for dependencies and `chore` for all others if semantic commits are in use.',
+    description: _(
+      'Use semantic commit type `fix` for dependencies and `chore` for all others if semantic commits are in use.'
+    ),
     packageRules: [
       {
         matchPackagePatterns: ['*'],
@@ -555,8 +568,9 @@ export const presets: Record<string, Preset> = {
     separateMajorMinor: true,
   },
   separateMultipleMajorReleases: {
-    description:
-      'Separate each `major` version of dependencies into individual branches/PRs.',
+    description: _(
+      'Separate each `major` version of dependencies into individual branches/PRs.'
+    ),
     separateMajorMinor: true,
     separateMultipleMajor: true,
   },
@@ -566,7 +580,7 @@ export const presets: Record<string, Preset> = {
     separateMinorPatch: true,
   },
   skipStatusChecks: {
-    description: 'Skip status checks and automerge right away.',
+    description: _('Skip status checks and automerge right away.'),
     ignoreTests: true,
   },
   timezone: {
@@ -574,12 +588,13 @@ export const presets: Record<string, Preset> = {
     timezone: '{{arg0}}',
   },
   updateNotScheduled: {
-    description: 'Keep existing branches updated even when not scheduled.',
+    description: _('Keep existing branches updated even when not scheduled.'),
     updateNotScheduled: true,
   },
   widenPeerDependencies: {
-    description:
-      'Always widen `peerDependencies` SemVer ranges when updating, instead of replacing.',
+    description: _(
+      'Always widen `peerDependencies` SemVer ranges when updating, instead of replacing.'
+    ),
     packageRules: [
       {
         matchDepTypes: ['peerDependencies'],

@@ -1,3 +1,4 @@
+import { _ } from '../../../i18n';
 import type { Preset } from '../types';
 
 /* eslint sort-keys: ["error", "asc", {caseSensitive: false, natural: true}] */
@@ -5,7 +6,7 @@ import type { Preset } from '../types';
 export const presets: Record<string, Preset> = {
   all: {
     description: [
-      'Apply crowd-sourced workarounds for known problems with packages.',
+      _('Apply crowd-sourced workarounds for known problems with packages.'),
     ],
     extends: [
       'workarounds:mavenCommonsAncientVersion',
@@ -69,7 +70,7 @@ export const presets: Record<string, Preset> = {
     ],
   },
   ignoreSpringCloudNumeric: {
-    description: 'Ignore spring cloud `1.x` releases.',
+    description: _('Ignore spring cloud `1.x` releases.'),
     packageRules: [
       {
         allowedVersions: '/^[A-Z]/',
@@ -81,7 +82,7 @@ export const presets: Record<string, Preset> = {
     ],
   },
   ignoreWeb3jCoreWithOldReleaseTimestamp: {
-    description: 'Ignore `web3j` `5.0.0` release.',
+    description: _('Ignore `web3j` `5.0.0` release.'),
     packageRules: [
       {
         allowedVersions: '!/^5\\.0\\.0/',
@@ -91,7 +92,7 @@ export const presets: Record<string, Preset> = {
     ],
   },
   javaLTSVersions: {
-    description: 'Limit Java runtime versions to LTS releases.',
+    description: _('Limit Java runtime versions to LTS releases.'),
     packageRules: [
       {
         allowedVersions: '/^(?:8|11|17)(?:\\.|-|$)/',
@@ -113,7 +114,7 @@ export const presets: Record<string, Preset> = {
     ],
   },
   mavenCommonsAncientVersion: {
-    description: 'Fix some problems with very old Maven commons versions.',
+    description: _('Fix some problems with very old Maven commons versions.'),
     packageRules: [
       {
         allowedVersions: '!/^200\\d{5}(\\.\\d+)?/',
@@ -123,8 +124,9 @@ export const presets: Record<string, Preset> = {
     ],
   },
   reduceRepologyServerLoad: {
-    description:
-      'Limit concurrent requests to reduce load on Repology servers until we can fix this properly, see issue `#10133`.',
+    description: _(
+      'Limit concurrent requests to reduce load on Repology servers until we can fix this properly, see issue `#10133`.'
+    ),
     hostRules: [
       {
         concurrentRequestLimit: 1,
@@ -133,8 +135,9 @@ export const presets: Record<string, Preset> = {
     ],
   },
   supportRedHatImageVersion: {
-    description:
-      'Use specific versioning for Red Hat-maintained container images.',
+    description: _(
+      'Use specific versioning for Red Hat-maintained container images.'
+    ),
     packageRules: [
       {
         matchDatasources: ['docker'],

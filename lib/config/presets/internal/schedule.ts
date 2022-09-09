@@ -1,3 +1,4 @@
+import { _ } from '../../../i18n';
 import type { Preset } from '../types';
 
 /* eslint sort-keys: ["error", "asc", {caseSensitive: false, natural: true}] */
@@ -22,7 +23,7 @@ export const presets: Record<string, Preset> = {
   },
   automergeEarlyMondays: {
     automergeSchedule: earlyMondays,
-    description: 'Weekly automerge schedule on early Monday mornings.',
+    description: _('Weekly automerge schedule on early Monday mornings.'),
   },
   automergeMonthly: {
     automergeSchedule: monthly,
@@ -54,15 +55,15 @@ export const presets: Record<string, Preset> = {
     description: 'Schedule automerge once a year (not recommended).',
   },
   daily: {
-    description: 'Schedule daily.',
+    description: _('Schedule daily.'),
     schedule: daily,
   },
   earlyMondays: {
-    description: 'Weekly schedule on early Monday mornings.',
+    description: _('Weekly schedule on early Monday mornings.'),
     schedule: earlyMondays,
   },
   monthly: {
-    description: 'Schedule monthly.',
+    description: _('Schedule monthly.'),
     schedule: monthly,
   },
   nonOfficeHours: {
@@ -71,23 +72,25 @@ export const presets: Record<string, Preset> = {
     schedule: nonOfficeHours,
   },
   quarterly: {
-    description: 'Schedule quarterly.',
+    description: _('Schedule quarterly.'),
     schedule: quarterly,
   },
   weekdays: {
-    description: 'Schedule for weekdays.',
+    description: _('Schedule for weekdays.'),
     schedule: weekdays,
   },
   weekends: {
-    description: 'Schedule for weekends.',
+    description: _('Schedule for weekends.'),
     schedule: weekends,
   },
   weekly: {
-    description: 'Schedule weekly.',
+    description: _('Schedule weekly.'),
     extends: ['schedule:earlyMondays'],
   },
   yearly: {
-    description: 'Schedule once a year (not recommended).',
+    description: _(
+      'Schedule once a year (not recommended).'
+    ),
     schedule: yearly,
   },
 };

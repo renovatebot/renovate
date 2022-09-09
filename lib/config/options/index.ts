@@ -2607,6 +2607,13 @@ const options: RenovateOptions[] = [
     type: 'boolean',
     default: false,
   },
+  {
+    name: 'translationsFilePath',
+    description: `The file path where PO (Portal Object) files are located`,
+    type: 'string',
+    globalOnly: true,
+    default: '',
+  },
 ];
 
 export function getOptions(): RenovateOptions[] {

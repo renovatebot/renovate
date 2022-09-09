@@ -1,4 +1,6 @@
+import * as util from 'util';
 import type { RenovateConfig } from '../../../../config/types';
+import { _, ngettext, pgettext } from '../../../../i18n';
 import { logger } from '../../../../logger';
 import { emojify } from '../../../../util/emoji';
 import { regEx } from '../../../../util/regex';
@@ -10,12 +12,26 @@ export function getPrList(
 ): string {
   logger.debug('getPrList()');
   logger.trace({ config });
-  let prDesc = `\n### What to Expect\n\n`;
+  let prDesc = util.format('\n### %s\n\n', _('What to Expect'));
+
   if (!branches.length) {
-    return `${prDesc}It looks like your repository dependencies are already up-to-date and no Pull Requests will be necessary right away.\n`;
+    return util.format(
+      '%s%s\n',
+      prDesc,
+      _(
+        'It looks like your repository dependencies are already up-to-date and no Pull Requests will be necessary right away.'
+      )
+    );
   }
-  prDesc += `With your current configuration, Renovate will create ${branches.length} Pull Request`;
-  prDesc += branches.length > 1 ? `s:\n\n` : `:\n\n`;
+  prDesc +=
+    util.format(
+      ngettext(
+        'With your current configuration, Renovate will create %d Pull Request',
+        'With your current configuration, Renovate will create %d Pull Requests',
+        branches.length
+      ),
+      branches.length
+    ) + ':\n\n';
 
   for (const branch of branches) {
     const prTitleRe = regEx(/@([a-z]+\/[a-z]+)/);
@@ -25,22 +41,32 @@ export function getPrList(
       '@&#8203;$1'
     )}</summary>\n\n`;
     if (branch.schedule?.length) {
-      prDesc += `  - Schedule: ${JSON.stringify(branch.schedule)}\n`;
+      prDesc += `  - ${pgettext(
+        'onboarding/pr/pr-list',
+        'Schedule'
+      )}: ${JSON.stringify(branch.schedule)}\n`;
     }
-    prDesc += `  - Branch name: \`${branch.branchName}\`\n`;
+    prDesc += `  - ${pgettext('onboarding/pr/pr-list', 'Branch name')}: \`${
+      branch.branchName
+    }\`\n`;
     prDesc += branch.baseBranch
-      ? `  - Merge into: \`${branch.baseBranch}\`\n`
+      ? `  - ${pgettext('onboarding/pr/pr-list', 'Merge into')}: \`${
+          branch.baseBranch
+        }\`\n`
       : '';
     const seen: string[] = [];
     for (const upgrade of branch.upgrades) {
       let text = '';
       if (upgrade.updateType === 'lockFileMaintenance') {
-        text += '  - Regenerate lock files to use latest dependency versions';
+        text += util.format(
+          `  - %s`,
+          _('Regenerate lock files to use latest dependency versions')
+        );
       } else {
         if (upgrade.updateType === 'pin') {
-          text += '  - Pin ';
+          text += `  - ${pgettext('onboarding/pr/pr-list', 'Pin')} `;
         } else {
-          text += '  - Upgrade ';
+          text += `  - ${pgettext('onboarding/pr/pr-list', 'Upgrade')} `;
         }
         if (upgrade.sourceUrl) {
           // TODO: types (#7154)
@@ -50,8 +76,13 @@ export function getPrList(
         }
         // TODO: types (#7154)
         text += upgrade.isLockfileUpdate
-          ? ` to \`${upgrade.newVersion!}\``
-          : ` to \`${upgrade.newDigest ?? upgrade.newValue!}\``;
+          ? ` ${pgettext(
+              'onboarding/pr/pr-list',
+              'to'
+            )} \`${upgrade.newVersion!}\``
+          : ` ${pgettext('onboarding/pr/pr-list', 'to')} \`${
+              upgrade.newDigest ?? upgrade.newValue!
+            }\``;
         text += '\n';
       }
       if (!seen.includes(text)) {
@@ -70,7 +101,12 @@ export function getPrList(
     prHourlyLimit < branches.length
   ) {
     prDesc += emojify(
-      `<br />\n\n:children_crossing: Branch creation will be limited to maximum ${prHourlyLimit} per hour, so it doesn't swamp any CI resources or overwhelm the project. See docs for \`prhourlylimit\` for details.\n\n`
+      `<br />\n\n:children_crossing: ${util.format(
+        _(
+          "Branch creation will be limited to maximum %d per hour, so it doesn't swamp any CI resources or overwhelm the project. See docs for `prhourlylimit` for details."
+        ),
+        prHourlyLimit
+      )}\n\n`
     );
   }
   return prDesc;

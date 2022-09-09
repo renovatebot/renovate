@@ -1,6 +1,8 @@
+import * as util from 'util';
 import is from '@sindresorhus/is';
 import { GlobalConfig } from '../../../../config/global';
 import type { RenovateConfig } from '../../../../config/types';
+import { _ } from '../../../../i18n';
 import { logger } from '../../../../logger';
 import type { PackageFile } from '../../../../modules/manager/types';
 import { platform } from '../../../../modules/platform';
@@ -42,16 +44,30 @@ export async function ensureOnboardingPr(
   const { rebaseCheckBox, renovateConfigHashComment } =
     await getRebaseCheckboxComponents(config);
   logger.debug('Filling in onboarding PR template');
-  let prTemplate = `Welcome to [Renovate](${
+  let prTemplate = util.format(
+    _(
+      'Welcome to [Renovate](%s)! This is an onboarding PR to help you understand and configure settings before regular Pull Requests begin.\n\n'
+    ),
     config.productLinks!.homepage
-  })! This is an onboarding PR to help you understand and configure settings before regular Pull Requests begin.\n\n`;
+  );
+
   prTemplate +=
     config.requireConfig === 'required'
       ? emojify(
-          `:vertical_traffic_light: To activate Renovate, merge this Pull Request. To disable Renovate, simply close this Pull Request unmerged.\n\n`
+          util.format(
+            ':vertical_traffic_light: %s\n\n',
+            _(
+              'To activate Renovate, merge this Pull Request. To disable Renovate, simply close this Pull Request unmerged.'
+            )
+          )
         )
       : emojify(
-          `:vertical_traffic_light: Renovate will begin keeping your dependencies up-to-date only once you merge or close this Pull Request.\n\n`
+          util.format(
+            ':vertical_traffic_light: %s\n\n',
+            _(
+              'Renovate will begin keeping your dependencies up-to-date only once you merge or close this Pull'
+            )
+          )
         );
   // TODO #7154
   prTemplate += emojify(
@@ -67,12 +83,14 @@ export async function ensureOnboardingPr(
 
 ---
 
-:question: Got questions? Check out Renovate's [Docs](${
-      config.productLinks!.documentation
-    }), particularly the Getting Started section.
-If you need any further assistance then you can also [request help here](${
+:question: ${util.format(
+      _(
+        "Got questions? Check out Renovate's [Docs](%s), particularly the Getting Started section.\n" +
+          'If you need any further assistance then you can also [request help here](%s).'
+      ),
+      config.productLinks!.documentation,
       config.productLinks!.help
-    }).
+    )}
 `
   );
   prTemplate += rebaseCheckBox;
@@ -84,11 +102,15 @@ If you need any further assistance then you can also [request help here](${
         managerFiles.map((file) => ` * \`${file.packageFile}\` (${manager})`)
       );
     }
+
+    const detectedPackageFilesFragment = util.format(
+      '### %s\n\n%s',
+      _('Detected Package Files'),
+      files.join('\n')
+    );
+
     prBody =
-      prBody.replace(
-        '{{PACKAGE FILES}}',
-        '### Detected Package Files\n\n' + files.join('\n')
-      ) + '\n';
+      prBody.replace('{{PACKAGE FILES}}', detectedPackageFilesFragment) + '\n';
   } else {
     prBody = prBody.replace('{{PACKAGE FILES}}\n', '');
   }
@@ -98,9 +120,15 @@ If you need any further assistance then you can also [request help here](${
     logger.info(`DRY-RUN: Would check branch ${config.onboardingBranch!}`);
   } else if (await scm.isBranchModified(config.onboardingBranch!)) {
     configDesc = emojify(
-      `### Configuration\n\n:abcd: Renovate has detected a custom config for this PR. Feel free to ask for [help](${
+      util.format(
+        '### %s\n\n',
+        util.format(
+          _(
+            'Configuration\n\n:abcd: Renovate has detected a custom config for this PR. Feel free to ask for [help](%s) if you have any doubts and would like it reviewed.'
+          )
+        ),
         config.productLinks!.help
-      }) if you have any doubts and would like it reviewed.\n\n`
+      )
     );
     const isConflicted = await scm.isBranchConflicted(
       config.baseBranch!,
@@ -108,10 +136,18 @@ If you need any further assistance then you can also [request help here](${
     );
     if (isConflicted) {
       configDesc += emojify(
-        `:warning: This PR has a merge conflict. However, Renovate is unable to automatically fix that due to edits in this branch. Please resolve the merge conflict manually.\n\n`
+        util.format(
+          ':warning: %s\n\n',
+          _(
+            'This PR has a merge conflict. However, Renovate is unable to automatically fix that due to edits in this branch. Please resolve the merge conflict manually.'
+          )
+        )
       );
     } else {
-      configDesc += `Important: Now that this branch is edited, Renovate can't rebase it from the base branch any more. If you make changes to the base branch that could impact this onboarding PR, please merge them manually.\n\n`;
+      configDesc += _(
+        "Important: Now that this branch is edited, Renovate can't rebase it from the base branch any more. If you make changes to the base branch that could impact this onboarding PR, please merge them manually."
+      );
+      configDesc += '\n\n';
     }
   } else {
     configDesc = getConfigDesc(config, packageFiles!);

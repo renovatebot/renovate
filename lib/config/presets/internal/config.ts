@@ -1,10 +1,11 @@
+import { _ } from '../../../i18n';
 import type { Preset } from '../types';
 
 /* eslint sort-keys: ["error", "asc", {caseSensitive: false, natural: true}] */
 
 export const presets: Record<string, Preset> = {
   base: {
-    description: 'Default base configuration for all languages.',
+    description: _('Default base configuration for all languages.'),
     extends: [
       ':dependencyDashboard',
       ':semanticPrefixFixDepsChoreOthers',
@@ -16,16 +17,17 @@ export const presets: Record<string, Preset> = {
     ],
   },
   'js-app': {
-    description: 'Default configuration for webapps.',
+    description: _('Default configuration for webapps.'),
     extends: ['config:base', ':pinAllExceptPeerDependencies'],
   },
   'js-lib': {
-    description: 'Default configuration for libraries.',
+    description: _('Default configuration for libraries.'),
     extends: ['config:base', ':pinOnlyDevDependencies'],
   },
   semverAllMonthly: {
-    description:
-      'Preserve SemVer ranges and update everything together once a month.',
+    description: _(
+      'Preserve SemVer ranges and update everything together once a month.'
+    ),
     extends: [
       ':preserveSemverRanges',
       'group:all',
