@@ -125,6 +125,7 @@ export default async function handleError(
     return err.message;
   }
   if (err instanceof ExternalHostError) {
+    err.resetTimeout();
     logger.warn(
       { hostType: err.hostType, packageName: err.packageName, err: err.err },
       'Host error'
