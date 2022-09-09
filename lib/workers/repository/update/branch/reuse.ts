@@ -62,6 +62,7 @@ export async function shouldReuseExistingBranch(
     (config.rebaseWhen === 'auto' &&
       (config.automerge || (await platform.getRepoForceRebase())))
   ) {
+    // TODO: fix types (#7154)
     if (await isBranchBehindBase(branchName, baseBranch!)) {
       logger.debug(`Branch is behind base branch and needs rebasing`);
       // We can rebase the branch only if no PR or PR can be rebased

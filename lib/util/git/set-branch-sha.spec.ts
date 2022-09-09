@@ -15,7 +15,7 @@ describe('util/git/set-branch-sha', () => {
       repositoryCache.getCache.mockReturnValue(repoCache);
     });
 
-    it('populates cache when branch is created', () => {
+    it('populates empty cache', () => {
       setBranchCommit(
         'branch',
         'SHA',

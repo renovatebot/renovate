@@ -50,7 +50,8 @@ async function generateBranchCache(
   branch: BranchConfig
 ): Promise<BranchCache | null> {
   const { branchName } = branch;
-  const baseBranchName = branch.baseBranch ?? branch.defaultBranch;
+  // TODO: (fix types) #7154
+  const baseBranchName = (branch.baseBranch ?? branch.defaultBranch)!;
   try {
     const sha = getBranchCommit(branchName) ?? null;
     let prNo = null;
@@ -59,7 +60,7 @@ async function generateBranchCache(
     if (sha) {
       parentSha = await getBranchParentSha(branchName);
       // TODO: (fix types) #7154
-      baseBranchSha = getBranchCommit(baseBranchName!);
+      baseBranchSha = getBranchCommit(baseBranchName)!;
       const branchPr = await platform.getBranchPr(branchName);
       if (branchPr) {
         prNo = branchPr.number;
@@ -77,7 +78,7 @@ async function generateBranchCache(
     let isConflicted = false;
     if (sha) {
       try {
-        isConflicted = await isBranchConflicted(baseBranchName!, branchName);
+        isConflicted = await isBranchConflicted(baseBranchName, branchName);
       } catch (err) /* istanbul ignore next */ {
         // Do nothing
       }
@@ -87,7 +88,7 @@ async function generateBranchCache(
       try {
         isBehindBaseBranch = await isBranchBehindBase(
           branchName,
-          baseBranchName!
+          baseBranchName
         );
       } catch (err) /* istanbul ignore next */ {
         // Do nothing
@@ -100,8 +101,7 @@ async function generateBranchCache(
     return {
       branchName,
       sha,
-      // TODO: (fix types) #7154
-      baseBranchName: baseBranchName!,
+      baseBranchName,
       baseBranchSha,
       parentSha,
       prNo,
