@@ -69,18 +69,10 @@ describe('util/git/behind-base-branch-cache', () => {
   });
 
   describe('setCachedBehindBaseResult', () => {
-    it('populates cache', () => {
+    it('returns if branch not found', () => {
       git.getBranchCommit.mockReturnValueOnce('SHA');
       setCachedBehindBaseResult('foo', false);
-      expect(repoCache).toMatchObject({
-        branches: [
-          {
-            branchName: 'foo',
-            isBehindBaseBranch: false,
-            sha: 'SHA',
-          },
-        ],
-      });
+      expect(repoCache).toMatchObject({});
     });
 
     it('handles multiple branches', () => {

@@ -39,13 +39,14 @@ export function syncBranchCache(
   baseBranchSha: string,
   branchCache: BranchCache
 ): void {
+  // if base branch name has changed it means the PR has been modified
   if (baseBranchName !== branchCache.baseBranchName) {
     branchCache.baseBranchName = baseBranchName;
     delete branchCache.isModified;
   }
 
+  // if branch sha has changed  invalidate all cached values
   if (branchSha !== branchCache.sha) {
-    // invalidate isModified, isConflicted values
     delete branchCache.isConflicted;
     delete branchCache.isModified;
     delete branchCache.branchFingerprint;
@@ -55,8 +56,8 @@ export function syncBranchCache(
     branchCache.sha = branchSha;
   }
 
+  // if base branch sha has changed invalidate values that rely on base branch sha
   if (baseBranchSha !== branchCache.baseBranchSha) {
-    // invalidate isModified, isConflicted values
     delete branchCache.isConflicted;
     delete branchCache.isBehindBaseBranch;
 
@@ -93,7 +94,9 @@ export async function writeUpdates(
 
   for (const branch of branches) {
     const { baseBranch, branchName } = branch;
+    // TODO: fix types (#7154)
     const branchSha = getBranchCommit(branchName)!;
+    // TODO: fix types (#7154)
     const baseBrachSha = getBranchCommit(baseBranch!)!;
     const meta: Record<string, string> = { branch: branchName };
     if (config.baseBranches?.length && baseBranch) {
@@ -109,13 +112,12 @@ export async function writeUpdates(
 
       if (Object.keys(branchCache).length === 0) {
         logger.debug(
-          `Creating branch cache becasue none found for ${branch.branchName}`
+          `Creating branch cache because it does not exist for ${branch.branchName}`
         );
-        // if branch cache not found initialize it
-        cachedBranches.push(branchCache);
         branchCache.branchName = branchName;
         // TODO: fix types (#7154)
         branchCache.baseBranchName = baseBranch!;
+        cachedBranches.push(branchCache);
       }
 
       // TODO: fix types (#7154)
@@ -154,8 +156,8 @@ export async function writeUpdates(
         ? branchFingerprint
         : branchCache.branchFingerprint;
 
+    // reset all cached values if a new commit is made
     if (res?.commitSha) {
-      // reset all cached values
       // TODO: (fix types) #7154
       setBranchCommit(
         branchName,

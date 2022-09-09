@@ -1,6 +1,4 @@
 import { getCache } from '../cache/repository';
-import type { BranchCache } from '../cache/repository/types';
-import { getBranchCommit } from '.';
 
 export function getCachedConflictResult(
   targetBranchName: string,
@@ -9,11 +7,12 @@ export function getCachedConflictResult(
   sourceBranchSha: string
 ): boolean | null {
   const cache = getCache();
+  // temporary code to delete existing cache
   if (cache.gitConflicts) {
     delete cache.gitConflicts;
   }
-  cache.branches ??= [];
-  const branch = cache.branches.find(
+
+  const branch = cache.branches?.find(
     (br) => br.branchName === sourceBranchName
   );
 
@@ -34,15 +33,10 @@ export function setCachedConflictResult(
   isConflicted: boolean
 ): void {
   const cache = getCache();
-  cache.branches ??= [];
-  let branch = cache.branches.find((br) => br.branchName === branchName);
+  const branch = cache.branches?.find((br) => br.branchName === branchName);
 
   if (!branch) {
-    branch = {
-      branchName: branchName,
-      sha: getBranchCommit(branchName),
-    } as BranchCache;
-    cache.branches?.push(branch);
+    return;
   }
 
   branch.isConflicted = isConflicted;

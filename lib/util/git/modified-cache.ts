@@ -1,13 +1,13 @@
 import { getCache } from '../cache/repository';
-import type { BranchCache } from '../cache/repository/types';
-import { getBranchCommit } from '.';
 
 export function getCachedModifiedResult(
   branchName: string,
   branchSha: string
 ): boolean | null {
-  const { branches } = getCache();
-  const branch = branches?.find((branch) => branch.branchName === branchName);
+  const cache = getCache();
+  const branch = cache.branches?.find(
+    (branch) => branch.branchName === branchName
+  );
 
   if (branch?.sha !== branchSha || branch.isModified === undefined) {
     return null;
@@ -21,16 +21,11 @@ export function setCachedModifiedResult(
   isModified: boolean
 ): void {
   const cache = getCache();
-  cache.branches ??= [];
   const { branches } = cache;
-  let branch = branches?.find((branch) => branch.branchName === branchName);
-  // if branch not present add it to cache
+  const branch = branches?.find((branch) => branch.branchName === branchName);
+
   if (!branch) {
-    branch = {
-      branchName: branchName,
-      sha: getBranchCommit(branchName),
-    } as BranchCache;
-    branches.push(branch);
+    return;
   }
 
   branch.isModified = isModified;

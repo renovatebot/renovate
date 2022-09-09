@@ -25,7 +25,18 @@ describe('util/git/conflicts-cache', () => {
       expect(getCachedConflictResult('foo', '111', 'bar', '222')).toBeNull();
     });
 
-    it('returns null if target branch name mismatch', () => {
+    it('returns null if branch not found', () => {
+      repoCache.branches = [
+        partial<BranchCache>({
+          baseBranchName: 'foo',
+          baseBranchSha: '121',
+          isConflicted: true,
+        }),
+      ];
+      expect(getCachedConflictResult('foo', '111', 'bar', '222')).toBeNull();
+    });
+
+    it('returns null if base branch name does not match', () => {
       repoCache.branches = [
         partial<BranchCache>({
           baseBranchName: 'foo',
@@ -40,7 +51,7 @@ describe('util/git/conflicts-cache', () => {
       ).toBeNull();
     });
 
-    it('returns null if target SHA has changed', () => {
+    it('returns null if base branch SHA does not match', () => {
       repoCache.branches = [
         partial<BranchCache>({
           baseBranchName: 'foo',
@@ -53,18 +64,7 @@ describe('util/git/conflicts-cache', () => {
       expect(getCachedConflictResult('foo', '111', 'aaa', '444')).toBeNull();
     });
 
-    it('returns null if source branch not found', () => {
-      repoCache.branches = [
-        partial<BranchCache>({
-          baseBranchName: 'foo',
-          baseBranchSha: '121',
-          isConflicted: true,
-        }),
-      ];
-      expect(getCachedConflictResult('foo', '111', 'bar', '222')).toBeNull();
-    });
-
-    it('returns null if source branch sha has changed', () => {
+    it('returns null if brach sha does not match', () => {
       repoCache.branches = [
         partial<BranchCache>({
           baseBranchName: 'foo',
@@ -72,6 +72,18 @@ describe('util/git/conflicts-cache', () => {
           sha: '212',
           baseBranchSha: '111',
           isConflicted: true,
+        }),
+      ];
+      expect(getCachedConflictResult('foo', '111', 'bar', '222')).toBeNull();
+    });
+
+    it('returns null if isConflicted value does not exist', () => {
+      repoCache.branches = [
+        partial<BranchCache>({
+          baseBranchName: 'foo',
+          branchName: 'bar',
+          sha: '212',
+          baseBranchSha: '111',
         }),
       ];
       expect(getCachedConflictResult('foo', '111', 'bar', '222')).toBeNull();
@@ -103,7 +115,7 @@ describe('util/git/conflicts-cache', () => {
       expect(getCachedConflictResult('foo', '111', 'bar', '222')).toBeFalse();
     });
 
-    it('returns null and removes gitConflicts', () => {
+    it('removes gitConflcits if it exists', () => {
       repoCache.branches = [
         partial<BranchCache>({
           baseBranchName: 'foo',
@@ -130,18 +142,10 @@ describe('util/git/conflicts-cache', () => {
   });
 
   describe('setCachedConflictResult', () => {
-    it('sets value for unpopulated cache', () => {
+    it('returns for unpopulated cache', () => {
       git.getBranchCommit.mockReturnValueOnce('SHA');
       setCachedConflictResult('foo', true);
-      expect(repoCache).toEqual({
-        branches: [
-          {
-            branchName: 'foo',
-            isConflicted: true,
-            sha: 'SHA',
-          },
-        ],
-      });
+      expect(repoCache).toEqual({});
     });
 
     it('updates value of existing cache', () => {

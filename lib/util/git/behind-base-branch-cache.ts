@@ -1,6 +1,4 @@
 import { getCache } from '../cache/repository';
-import type { BranchCache } from '../cache/repository/types';
-import { getBranchCommit } from '.';
 
 export function getCachedBehindBaseResult(
   branchName: string,
@@ -9,8 +7,9 @@ export function getCachedBehindBaseResult(
   baseBranchSha: string
 ): boolean | null {
   const cache = getCache();
-  const { branches = [] } = cache;
-  const branch = branches?.find((branch) => branch.branchName === branchName);
+  const branch = cache.branches?.find(
+    (branch) => branch.branchName === branchName
+  );
 
   if (
     branch &&
@@ -29,17 +28,12 @@ export function setCachedBehindBaseResult(
   isBehind: boolean
 ): void {
   const cache = getCache();
-  cache.branches ??= [];
-  let branch = cache.branches.find(
+  const branch = cache.branches?.find(
     (branch) => branch.branchName === branchName
   );
 
   if (!branch) {
-    branch = {
-      branchName: branchName,
-      sha: getBranchCommit(branchName),
-    } as BranchCache;
-    cache.branches.push(branch);
+    return;
   }
 
   branch.isBehindBaseBranch = isBehind;

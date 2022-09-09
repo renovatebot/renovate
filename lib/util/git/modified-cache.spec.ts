@@ -1,4 +1,4 @@
-import { mocked } from '../../../test/util';
+import { mocked, partial } from '../../../test/util';
 import * as _repositoryCache from '../cache/repository';
 import type { BranchCache, RepoCacheData } from '../cache/repository/types';
 import {
@@ -25,12 +25,20 @@ describe('util/git/modified-cache', () => {
       expect(getCachedModifiedResult('foo', '111')).toBeNull();
     });
 
-    it('returns null if target key not found', () => {
+    it('returns null if branch not found', () => {
+      repoCache.branches = [
+        { branchName: 'not_foo', sha: 'aaa' } as BranchCache,
+      ];
       expect(getCachedModifiedResult('foo', '111')).toBeNull();
     });
 
-    it('returns null if target SHA has changed', () => {
-      repoCache.branches = [{ branchName: 'foo', sha: 'aaa' } as BranchCache];
+    it('returns null if branch sha does not match', () => {
+      repoCache.branches = [{ branchName: 'foo', sha: '111' } as BranchCache];
+      expect(getCachedModifiedResult('foo', '222')).toBeNull();
+    });
+
+    it('returns null if isModified doesn not exist', () => {
+      repoCache.branches = [{ branchName: 'foo', sha: '111' } as BranchCache];
       expect(getCachedModifiedResult('foo', '111')).toBeNull();
     });
 
@@ -50,24 +58,33 @@ describe('util/git/modified-cache', () => {
   });
 
   describe('setCachedModifiedResult', () => {
-    it('sets value for unpopulated cache', () => {
+    it('returns if branch not found', () => {
       git.getBranchCommit.mockReturnValueOnce('SHA');
       setCachedModifiedResult('foo', false);
-      expect(repoCache).toEqual({
-        branches: [{ branchName: 'foo', sha: 'SHA', isModified: false }],
-      });
+      expect(repoCache).toEqual({});
     });
 
     it('handles multiple branches', () => {
+      repoCache.branches = [
+        partial<BranchCache>({
+          branchName: 'foo-1',
+          sha: 'SHA',
+          isModified: true,
+        }),
+        partial<BranchCache>({
+          branchName: 'foo-2',
+          sha: 'SHA',
+          isModified: false,
+        }),
+      ];
+
       git.getBranchCommit.mockReturnValue('SHA');
       setCachedModifiedResult('foo-1', false);
       setCachedModifiedResult('foo-2', true);
-      setCachedModifiedResult('foo-3', false);
       expect(repoCache).toEqual({
         branches: [
           { branchName: 'foo-1', sha: 'SHA', isModified: false },
           { branchName: 'foo-2', sha: 'SHA', isModified: true },
-          { branchName: 'foo-3', sha: 'SHA', isModified: false },
         ],
       });
     });
