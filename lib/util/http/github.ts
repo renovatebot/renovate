@@ -397,6 +397,7 @@ export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
     } catch (err) {
       logger.debug({ err, query, options }, 'Unexpected GraphQL Error');
       if (err instanceof ExternalHostError && count && count > 10) {
+        err.resetTimeout();
         logger.info('Reducing pagination count to workaround graphql errors');
         return null;
       }
