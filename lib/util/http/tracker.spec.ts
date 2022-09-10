@@ -12,6 +12,7 @@ describe('util/http/tracker', () => {
     tracker.track('https://bar.com/bar');
     tracker.track('https://bar.com/bar');
     tracker.untrack('https://bar.com/bar');
+    tracker.reset();
     tracker.init();
     tracker.track('https://baz.com/baz');
     tracker.reset();
