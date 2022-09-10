@@ -35,9 +35,9 @@ export class ExternalHostError extends Error {
   static reportPending(): void {
     const messages = new Set<string>();
     for (const err of this.trackedInstances) {
-      if (!messages.has(err.message)) {
-        messages.add(err.message);
-        logger.debug({ err }, 'Uncaught ExternalHostError');
+      if (!messages.has(err.err.message)) {
+        messages.add(err.err.message);
+        logger.debug({ err, cause: err.err }, 'Uncaught ExternalHostError');
       }
     }
     this.resetTracking();
