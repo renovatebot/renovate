@@ -10,7 +10,7 @@ export class ExternalHostError extends Error {
 
   reason?: string;
 
-  timeoutId: NodeJS.Timeout | undefined;
+  private static trackedInstances: Set<ExternalHostError> = new Set();
 
   constructor(err: Error, hostType?: string) {
     super(EXTERNAL_HOST_ERROR);
@@ -18,26 +18,28 @@ export class ExternalHostError extends Error {
     Object.setPrototypeOf(this, ExternalHostError.prototype);
     this.hostType = hostType;
     this.err = err;
-
-    // istanbul ignore if
-    if (process.env.RENOVATE_X_EXTERNAL_HOST_ERROR_LOG_TIMEOUT_MINUTES) {
-      const timeoutMinutes = parseInt(
-        process.env.RENOVATE_X_EXTERNAL_HOST_ERROR_LOG_TIMEOUT_MINUTES,
-        10
-      );
-      this.timeoutId = setTimeout(() => /* istanbul ignore next*/ {
-        logger.debug(
-          { err: this, reasonErr: err },
-          'Uncaught ExternalHostError'
-        );
-      }, timeoutMinutes * 60 * 1000);
-    }
+    ExternalHostError.trackedInstances.add(this);
   }
 
-  resetTimeout(): void {
-    // istanbul ignore if
-    if (this.timeoutId) {
-      clearTimeout(this.timeoutId);
+  // istanbul ignore next
+  stopTracking(): void {
+    ExternalHostError.trackedInstances.delete(this);
+  }
+
+  // istanbul ignore next
+  static resetTracking(): void {
+    ExternalHostError.trackedInstances.clear();
+  }
+
+  // istanbul ignore next
+  static reportPending(): void {
+    const messages = new Set<string>();
+    for (const err of this.trackedInstances) {
+      if (!messages.has(err.message)) {
+        messages.add(err.message);
+        logger.debug({ err }, 'Uncaught ExternalHostError');
+      }
     }
+    this.resetTracking();
   }
 }

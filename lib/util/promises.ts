@@ -24,7 +24,7 @@ function handleError(err: any): never {
     const [hostError, ...otherHostErrors] = hostErrors;
     // istanbul ignore next
     otherHostErrors.forEach((otherHostErrors) =>
-      otherHostErrors.resetTimeout()
+      otherHostErrors.stopTracking()
     );
     throw hostError;
   }

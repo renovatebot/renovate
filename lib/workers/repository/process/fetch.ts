@@ -65,7 +65,7 @@ async function fetchDepUpdates(
           throw err;
         }
 
-        err.resetTimeout();
+        err.stopTracking();
         const cause = err.err;
         dep.warnings ??= [];
         dep.warnings.push({

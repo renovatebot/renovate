@@ -16,6 +16,7 @@ import type {
 import { CONFIG_PRESETS_INVALID } from '../../constants/error-messages';
 import { pkg } from '../../expose.cjs';
 import { getProblems, logger, setMeta } from '../../logger';
+import { ExternalHostError } from '../../types/errors/external-host-error';
 import * as hostRules from '../../util/host-rules';
 import * as queue from '../../util/http/queue';
 import * as repositoryWorker from '../repository';
@@ -143,6 +144,7 @@ export async function start(): Promise<number> {
 
     // Iterate through repositories sequentially
     for (const repository of config.repositories!) {
+      ExternalHostError.resetTracking();
       if (haveReachedLimits()) {
         break;
       }
@@ -159,6 +161,7 @@ export async function start(): Promise<number> {
 
       await repositoryWorker.renovateRepository(repoConfig);
       setMeta({});
+      ExternalHostError.reportPending();
     }
   } catch (err) /* istanbul ignore next */ {
     if (err.message.startsWith('Init: ')) {

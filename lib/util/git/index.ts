@@ -79,7 +79,7 @@ export async function gitRetry<T>(gitFunc: () => Promise<T>): Promise<T> {
     } catch (err) {
       // istanbul ignore if
       if (lastError instanceof ExternalHostError) {
-        lastError.resetTimeout();
+        lastError.stopTracking();
       }
       lastError = err;
       logger.debug({ err }, `Git function thrown`);
