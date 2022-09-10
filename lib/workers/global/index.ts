@@ -18,10 +18,7 @@ import { pkg } from '../../expose.cjs';
 import { getProblems, logger, setMeta } from '../../logger';
 import * as hostRules from '../../util/host-rules';
 import * as queue from '../../util/http/queue';
-import {
-  reportHangingRequests,
-  resetHangingRequestTracker,
-} from '../../util/http/request-tracker';
+import * as httpTracker from '../../util/http/request-tracker';
 import * as repositoryWorker from '../repository';
 import { autodiscoverRepositories } from './autodiscover';
 import { parseConfigs } from './config/parse';
@@ -148,7 +145,7 @@ export async function start(): Promise<number> {
     // Iterate through repositories sequentially
     for (const repository of config.repositories!) {
       try {
-        resetHangingRequestTracker();
+        httpTracker.init();
         if (haveReachedLimits()) {
           break;
         }
@@ -165,7 +162,7 @@ export async function start(): Promise<number> {
 
         await repositoryWorker.renovateRepository(repoConfig);
       } finally {
-        reportHangingRequests();
+        httpTracker.reset();
       }
       setMeta({});
     }
