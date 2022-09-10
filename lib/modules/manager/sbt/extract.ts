@@ -268,7 +268,7 @@ export function extractPackageFile(
   content: string,
   _packageFile: string
 ): PackageFile | null {
-  let parsedResult: Ctx | undefined;
+  let parsedResult: Ctx | null = null;
 
   try {
     parsedResult = scala.query(content, query, {
