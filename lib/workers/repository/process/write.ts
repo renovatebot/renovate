@@ -39,7 +39,7 @@ export function syncBranchCache(
   baseBranchSha: string,
   branchCache: BranchCache
 ): BranchCache {
-  // if base branch name has changed it means the PR has been modified
+  // if base branch name has changed it means the branch has been modified
   if (baseBranchName !== branchCache.baseBranchName) {
     branchCache.baseBranchName = baseBranchName;
     delete branchCache.isModified;
@@ -114,7 +114,7 @@ export async function writeUpdates(
 
       if (Object.keys(branchCache).length === 0) {
         logger.debug(
-          `Creating branch cache because it does not exist for ${branch.branchName}`
+          `Branch cache is being created because it does not exist for ${branch.branchName}`
         );
         branchCache.branchName = branchName;
         // TODO: fix types (#7154)

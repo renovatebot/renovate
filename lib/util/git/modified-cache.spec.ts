@@ -32,6 +32,11 @@ describe('util/git/modified-cache', () => {
       expect(getCachedModifiedResult('foo', '111')).toBeNull();
     });
 
+    it('returns null if branch is undefined', () => {
+      repoCache.branches = [{ branchName: 'foo' } as BranchCache];
+      expect(getCachedModifiedResult('foo', '222')).toBeNull();
+    });
+
     it('returns null if branch sha does not match', () => {
       repoCache.branches = [{ branchName: 'foo', sha: '111' } as BranchCache];
       expect(getCachedModifiedResult('foo', '222')).toBeNull();

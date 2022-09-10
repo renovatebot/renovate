@@ -9,11 +9,11 @@ export function getCachedModifiedResult(
     (branch) => branch.branchName === branchName
   );
 
-  if (branch?.sha !== branchSha || branch.isModified === undefined) {
-    return null;
+  if (branch && branch.sha === branchSha && branch.isModified !== undefined) {
+    return branch.isModified;
   }
 
-  return branch.isModified;
+  return null;
 }
 
 export function setCachedModifiedResult(
