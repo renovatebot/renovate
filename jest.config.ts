@@ -59,12 +59,15 @@ const config: JestConfig = {
       statements: 100,
     },
   },
-  globals: {
-    'ts-jest': {
-      tsconfig: '<rootDir>/tsconfig.spec.json',
-      diagnostics: false,
-      isolatedModules: true,
-    },
+  transform: {
+    '\\.ts$': [
+      'ts-jest',
+      {
+        tsconfig: '<rootDir>/tsconfig.spec.json',
+        diagnostics: false,
+        isolatedModules: true,
+      },
+    ],
   },
   modulePathIgnorePatterns: ['<rootDir>/dist/', '/__fixtures__/'],
   reporters: ci ? ['default', 'github-actions'] : ['default'],
