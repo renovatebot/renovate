@@ -2171,7 +2171,7 @@ What may happen if you don't set a `prHourlyLimit`:
 1. Renovate creates a "Pin Dependencies" PR (if needed)
 1. You merge the "Pin Dependencies" PR
 1. Renovate creates every single upgrade PR needed, which can be a lot
- 
+
 The above may cause:
 
 - Renovate bot's PRs to overwhelm your CI systems
