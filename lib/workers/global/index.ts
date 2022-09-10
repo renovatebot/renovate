@@ -144,23 +144,26 @@ export async function start(): Promise<number> {
 
     // Iterate through repositories sequentially
     for (const repository of config.repositories!) {
-      ExternalHostError.resetTracking();
-      if (haveReachedLimits()) {
-        break;
-      }
-      const repoConfig = await getRepositoryConfig(config, repository);
-      if (repoConfig.hostRules) {
-        logger.debug('Reinitializing hostRules for repo');
-        hostRules.clear();
-        repoConfig.hostRules.forEach((rule) => hostRules.add(rule));
-        repoConfig.hostRules = [];
-      }
+      try {
+        ExternalHostError.resetTracking();
+        if (haveReachedLimits()) {
+          break;
+        }
+        const repoConfig = await getRepositoryConfig(config, repository);
+        if (repoConfig.hostRules) {
+          logger.debug('Reinitializing hostRules for repo');
+          hostRules.clear();
+          repoConfig.hostRules.forEach((rule) => hostRules.add(rule));
+          repoConfig.hostRules = [];
+        }
 
-      // host rules can change concurrency
-      queue.clear();
+        // host rules can change concurrency
+        queue.clear();
 
-      await repositoryWorker.renovateRepository(repoConfig);
-      ExternalHostError.reportPending();
+        await repositoryWorker.renovateRepository(repoConfig);
+      } finally {
+        ExternalHostError.reportPending();
+      }
       setMeta({});
     }
   } catch (err) /* istanbul ignore next */ {
