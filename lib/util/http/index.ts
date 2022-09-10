@@ -12,7 +12,7 @@ import { applyAuthorization, removeAuthorization } from './auth';
 import { hooks } from './hooks';
 import { applyHostRules } from './host-rules';
 import { getQueue } from './queue';
-import { track, untrack } from './request-tracker';
+import { track, untrack } from './tracker';
 import type {
   GotJSONOptions,
   GotOptions,

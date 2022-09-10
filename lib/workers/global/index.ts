@@ -18,7 +18,7 @@ import { pkg } from '../../expose.cjs';
 import { getProblems, logger, setMeta } from '../../logger';
 import * as hostRules from '../../util/host-rules';
 import * as queue from '../../util/http/queue';
-import * as httpTracker from '../../util/http/request-tracker';
+import * as httpTracker from '../../util/http/tracker';
 import * as repositoryWorker from '../repository';
 import { autodiscoverRepositories } from './autodiscover';
 import { parseConfigs } from './config/parse';

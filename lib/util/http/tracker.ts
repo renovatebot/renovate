@@ -38,7 +38,7 @@ export function init(): void {
 }
 
 export function reset(): void {
-  if (!is.emptyObject(pendingRequests)) {
+  if (is.nonEmptyObject(pendingRequests)) {
     logger.warn({ pendingRequests }, 'Unfinished HTTP requests');
   }
   pendingRequests = null;
