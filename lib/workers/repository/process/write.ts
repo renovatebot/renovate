@@ -38,7 +38,7 @@ export function syncBranchCache(
   baseBranchName: string,
   baseBranchSha: string,
   branchCache: BranchCache
-): void {
+): BranchCache {
   // if base branch name has changed it means the PR has been modified
   if (baseBranchName !== branchCache.baseBranchName) {
     branchCache.baseBranchName = baseBranchName;
@@ -64,6 +64,8 @@ export function syncBranchCache(
     // update cached branchSha
     branchCache.baseBranchSha = baseBranchSha;
   }
+
+  return branchCache;
 }
 
 export async function writeUpdates(
@@ -119,9 +121,8 @@ export async function writeUpdates(
         branchCache.baseBranchName = baseBranch!;
         cachedBranches.push(branchCache);
       }
-
       // TODO: fix types (#7154)
-      syncBranchCache(
+      branchCache = syncBranchCache(
         branchName,
         branchSha,
         branch.baseBranch!,
@@ -159,13 +160,16 @@ export async function writeUpdates(
     // reset all cached values if a new commit is made
     if (res?.commitSha) {
       // TODO: (fix types) #7154
-      setBranchCommit(
-        branchName,
-        res.commitSha,
-        baseBranch!,
-        baseBrachSha,
-        branch.branchFingerprint
-      );
+      branchCache = {
+        ...branchCache,
+        ...setBranchCommit(
+          branchName,
+          res.commitSha,
+          baseBranch!,
+          baseBrachSha,
+          branch.branchFingerprint
+        ),
+      };
     }
     if (
       branch.result === BranchResult.Automerged &&

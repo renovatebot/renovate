@@ -7,7 +7,7 @@ export function setBranchCommit(
   baseBranchName: string,
   baseBranchSha: string,
   branchFingerprint: string
-): void {
+): BranchCache {
   const cache = getCache();
   cache.branches ??= [];
 
@@ -27,4 +27,6 @@ export function setBranchCommit(
   branch.isModified = false;
   branch.branchFingerprint = branchFingerprint;
   branch.parentSha = baseBranchSha;
+
+  return branch;
 }
