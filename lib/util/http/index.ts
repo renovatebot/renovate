@@ -12,6 +12,7 @@ import { applyAuthorization, removeAuthorization } from './auth';
 import { hooks } from './hooks';
 import { applyHostRules } from './host-rules';
 import { getQueue } from './queue';
+import { track, untrack } from './request-tracker';
 import type {
   GotJSONOptions,
   GotOptions,
@@ -66,6 +67,7 @@ async function gotRoutine<T>(
   let statusCode = 0;
 
   try {
+    track(url, options.method);
     // Cheat the TS compiler using `as` to pick a specific overload.
     // Otherwise it doesn't typecheck.
     const resp = await got<T>(url, { ...options, hooks } as GotJSONOptions);
@@ -86,6 +88,7 @@ async function gotRoutine<T>(
 
     throw error;
   } finally {
+    untrack(url, options.method);
     const httpRequests = memCache.get<RequestStats[]>('http-requests') || [];
     httpRequests.push({ ...requestStats, duration, statusCode });
     memCache.set('http-requests', httpRequests);

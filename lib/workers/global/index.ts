@@ -18,6 +18,10 @@ import { pkg } from '../../expose.cjs';
 import { getProblems, logger, setMeta } from '../../logger';
 import * as hostRules from '../../util/host-rules';
 import * as queue from '../../util/http/queue';
+import {
+  reportHangingRequests,
+  resetHangingRequestTracker,
+} from '../../util/http/request-tracker';
 import * as repositoryWorker from '../repository';
 import { autodiscoverRepositories } from './autodiscover';
 import { parseConfigs } from './config/parse';
@@ -143,21 +147,26 @@ export async function start(): Promise<number> {
 
     // Iterate through repositories sequentially
     for (const repository of config.repositories!) {
-      if (haveReachedLimits()) {
-        break;
-      }
-      const repoConfig = await getRepositoryConfig(config, repository);
-      if (repoConfig.hostRules) {
-        logger.debug('Reinitializing hostRules for repo');
-        hostRules.clear();
-        repoConfig.hostRules.forEach((rule) => hostRules.add(rule));
-        repoConfig.hostRules = [];
-      }
+      try {
+        resetHangingRequestTracker();
+        if (haveReachedLimits()) {
+          break;
+        }
+        const repoConfig = await getRepositoryConfig(config, repository);
+        if (repoConfig.hostRules) {
+          logger.debug('Reinitializing hostRules for repo');
+          hostRules.clear();
+          repoConfig.hostRules.forEach((rule) => hostRules.add(rule));
+          repoConfig.hostRules = [];
+        }
 
-      // host rules can change concurrency
-      queue.clear();
+        // host rules can change concurrency
+        queue.clear();
 
-      await repositoryWorker.renovateRepository(repoConfig);
+        await repositoryWorker.renovateRepository(repoConfig);
+      } finally {
+        reportHangingRequests();
+      }
       setMeta({});
     }
   } catch (err) /* istanbul ignore next */ {
