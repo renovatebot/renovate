@@ -160,8 +160,8 @@ export async function start(): Promise<number> {
       queue.clear();
 
       await repositoryWorker.renovateRepository(repoConfig);
-      setMeta({});
       ExternalHostError.reportPending();
+      setMeta({});
     }
   } catch (err) /* istanbul ignore next */ {
     if (err.message.startsWith('Init: ')) {
