@@ -12,12 +12,12 @@ import * as template from '../../../util/template';
 import type { BranchConfig, BranchUpgradeConfig } from '../../types';
 import { CommitMessage } from '../model/commit-message';
 
-function prettifyVersion(version: string | number): string {
-  if (regEx(/^\d/).test(String(version))) {
+function prettifyVersion(version: string): string {
+  if (regEx(/^\d/).test(version)) {
     return `v${version}`;
   }
 
-  return String(version);
+  return version;
 }
 
 function isTypesGroup(branchUpgrades: BranchUpgradeConfig[]): boolean {
@@ -95,7 +95,7 @@ export function generateBranchConfig(
       upg.prettyNewVersion = prettifyVersion(upg.newVersion);
     }
     if (upg.newMajor) {
-      upg.prettyNewMajor = prettifyVersion(upg.newMajor);
+      upg.prettyNewMajor = `v${upg.newMajor}`;
     }
     if (upg.commitMessageExtra) {
       const extra = template.compile(upg.commitMessageExtra, upg);
