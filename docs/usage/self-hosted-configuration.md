@@ -648,8 +648,8 @@ Set this to an S3 URI to enable S3 backed repository cache.
 
 <!-- prettier-ignore -->
 !!! note
-    [IAM is supported](https://docs.aws.amazon.com/sdk-for-javascript/v3/developer-guide/loading-node-credentials-iam.html) when running renovate within EC2 instance in an ECS cluster. In this case, no additional environment variables are requited.
-    Otherwise, The following environment variables should be set in order for the S3 client to work.
+    [IAM is supported](https://docs.aws.amazon.com/sdk-for-javascript/v3/developer-guide/loading-node-credentials-iam.html) when running renovate within an EC2 instance in an ECS cluster. In this case, no additional environment variables are required.
+    Otherwise, the following environment variables should be set for the S3 client to work.
 
 ```
     AWS_ACCESS_KEY_ID
