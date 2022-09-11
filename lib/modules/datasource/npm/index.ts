@@ -4,7 +4,6 @@ import type { GetReleasesConfig, ReleaseResult } from '../types';
 import { id } from './common';
 import { getDependency } from './get';
 
-export { resetMemCache, resetCache } from './get';
 export { setNpmrc } from './npmrc';
 
 export class NpmDatasource extends Datasource {

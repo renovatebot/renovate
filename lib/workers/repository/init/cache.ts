@@ -10,7 +10,6 @@ export async function resetCaches(): Promise<void> {
   memCache.reset();
   repositoryCache.resetCache();
   await fs.remove(privateCacheDir());
-  npmApi.resetMemCache();
 }
 
 export async function initializeCaches(
