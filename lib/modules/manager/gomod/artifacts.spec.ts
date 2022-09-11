@@ -1319,7 +1319,7 @@ describe('modules/manager/gomod/artifacts', () => {
         newMajor: 28,
         postUpdateOptions: ['gomodUpdateImportPaths'],
         constraints: {
-          gomodMod: 'a.b.c',
+          gomodMod: 'v1.2.3',
         },
       },
     });
@@ -1334,7 +1334,7 @@ describe('modules/manager/gomod/artifacts', () => {
         options: { cwd: '/tmp/github/some/repo' },
       },
       {
-        cmd: 'go install github.com/marwan-at-work/mod/cmd/mod@latest',
+        cmd: 'go install github.com/marwan-at-work/mod/cmd/mod@v1.2.3',
         options: { cwd: '/tmp/github/some/repo' },
       },
       {
@@ -1376,7 +1376,7 @@ describe('modules/manager/gomod/artifacts', () => {
         newMajor: 28,
         postUpdateOptions: ['gomodUpdateImportPaths'],
         constraints: {
-          gomodMod: 'a.b.c',
+          gomodMod: 'v1.2.3',
         },
       },
     });
@@ -1401,7 +1401,7 @@ describe('modules/manager/gomod/artifacts', () => {
           '/tmp/github/some/repo" -v "/tmp/renovate/cache":"/tmp/renovate/cache" -e GOPROXY -e GOPRIVATE -e ' +
           'GONOPROXY -e GONOSUMDB -e GOINSECURE -e GOFLAGS -e CGO_ENABLED -e BUILDPACK_CACHE_DIR -w ' +
           '"/tmp/github/some/repo" renovate/go:latest bash -l -c "go get -d -t ./... && ' +
-          'go install github.com/marwan-at-work/mod/cmd/mod@latest && mod upgrade ' +
+          'go install github.com/marwan-at-work/mod/cmd/mod@v1.2.3 && mod upgrade ' +
           '--mod-name=github.com/google/go-github/v24 -t=28 && go mod tidy && go mod tidy"',
         options: {
           cwd: '/tmp/github/some/repo',
@@ -1430,7 +1430,7 @@ describe('modules/manager/gomod/artifacts', () => {
     ]);
     const execCommands: string[] = [
       'go get -d -t ./...',
-      'go install github.com/marwan-at-work/mod/cmd/mod@latest',
+      'go install github.com/marwan-at-work/mod/cmd/mod@v1.2.3',
       'mod upgrade --mod-name=github.com/google/go-github/v24 -t=28',
       'go mod tidy',
       'go mod tidy',
