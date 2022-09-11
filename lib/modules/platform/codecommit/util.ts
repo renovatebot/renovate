@@ -30,9 +30,15 @@ export function getCodeCommitUrl(
   let username = `${accessKeyId}${
     credentials.sessionToken ? `%${credentials.sessionToken}` : ''
   }\n`;
+
+  // these modifications to username are only in case session token exists,
+  // and it's not supposed to work with renovate since it's a temporary token
+
+  // istanbul ignore if
   if (username.includes('\n')) {
     username = username.replace(/\n|\r/g, '');
   }
+  // istanbul ignore if
   if (username.includes('/')) {
     username = username.replace(/\//g, '%2F');
   }
