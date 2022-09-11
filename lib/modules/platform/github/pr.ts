@@ -6,10 +6,9 @@ import { getCache } from '../../../util/cache/repository';
 import type { GithubHttp, GithubHttpOptions } from '../../../util/http/github';
 import { parseLinkHeader } from '../../../util/url';
 import { getPrBodyStruct } from '../pr-body';
-import type { Pr } from '../types';
 import { ApiCache } from './api-cache';
 import { coerceRestPr } from './common';
-import type { ApiPageCache, GhRestPr } from './types';
+import type { ApiPageCache, GhPr, GhRestPr } from './types';
 
 function removeUrlFields(input: unknown): void {
   if (is.plainObject(input)) {
@@ -97,8 +96,8 @@ export async function getPrCache(
   http: GithubHttp,
   repo: string,
   username: string | null
-): Promise<Record<number, Pr>> {
-  const prCache: Record<number, Pr> = {};
+): Promise<Record<number, GhPr>> {
+  const prCache: Record<number, GhPr> = {};
   const prApiCache = getPrApiCache();
   const isInitial = is.emptyArray(prApiCache.getItems());
 

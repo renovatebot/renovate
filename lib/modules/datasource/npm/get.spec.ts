@@ -2,7 +2,7 @@ import * as httpMock from '../../../../test/http-mock';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import * as hostRules from '../../../util/host-rules';
 import { Http } from '../../../util/http';
-import { getDependency, resetMemCache } from './get';
+import { getDependency } from './get';
 import { resolveRegistryUrl, setNpmrc } from './npmrc';
 
 function getPath(s = ''): string {
@@ -16,7 +16,6 @@ const http = new Http('npm');
 describe('modules/datasource/npm/get', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    resetMemCache();
     hostRules.clear();
     setNpmrc();
   });
