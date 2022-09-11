@@ -26,5 +26,15 @@ export function getCodeCommitUrl(
 
   const accessKeyId = credentials.accessKeyId!;
   const token: string = dateTime + 'Z' + signer.signature();
-  return `https://${accessKeyId}:${token}@git-codecommit.${region}.amazonaws.com/v1/repos/${repoName}`;
+
+  let username = `${accessKeyId}${
+    credentials.sessionToken ? `%${credentials.sessionToken}` : ''
+  }\n`;
+  if (username.includes('\n')) {
+    username = username.replace(/\n|\r/g, '');
+  }
+  if (username.includes('/')) {
+    username = username.replace(/\//g, '%2F');
+  }
+  return `https://${username}:${token}@git-codecommit.${region}.amazonaws.com/v1/repos/${repoName}`;
 }

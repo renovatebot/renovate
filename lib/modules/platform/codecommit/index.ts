@@ -84,6 +84,7 @@ export async function initPlatform({
   const credentials = {
     accessKeyId,
     secretAccessKey,
+    sessionToken: process.env.AWS_SESSION_TOKEN,
   };
   config.credentials = credentials;
 
