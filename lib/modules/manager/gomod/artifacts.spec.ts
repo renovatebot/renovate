@@ -1353,7 +1353,7 @@ describe('modules/manager/gomod/artifacts', () => {
   });
 
   it('go.mod file contains go version', async () => {
-    GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
+    GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
     fs.readLocalFile.mockResolvedValueOnce('Current go.sum');
     fs.readLocalFile.mockResolvedValueOnce(null); // vendor modules filename
     fs.readLocalFile.mockResolvedValueOnce('someText\n\ngo 1.17\n\n');
@@ -1388,24 +1388,44 @@ describe('modules/manager/gomod/artifacts', () => {
     ]);
     expect(execSnapshots).toMatchObject([
       {
-        cmd: 'go get -d -t ./...',
-        options: { cwd: '/tmp/github/some/repo' },
+        cmd: 'docker pull renovate/go:latest',
+        options: { encoding: 'utf-8' },
       },
       {
-        cmd: 'go install github.com/marwan-at-work/mod/cmd/mod@latest',
-        options: { cwd: '/tmp/github/some/repo' },
+        cmd: 'docker ps --filter name=renovate_go -aq',
+        options: { encoding: 'utf-8' },
       },
       {
-        cmd: 'mod upgrade --mod-name=github.com/google/go-github/v24 -t=28',
-        options: { cwd: '/tmp/github/some/repo' },
-      },
-      {
-        cmd: 'go mod tidy',
-        options: { cwd: '/tmp/github/some/repo' },
-      },
-      {
-        cmd: 'go mod tidy',
-        options: { cwd: '/tmp/github/some/repo' },
+        cmd:
+          'docker run --rm --name=renovate_go --label=renovate_child -v "/tmp/github/some/repo":"' +
+          '/tmp/github/some/repo" -v "/tmp/renovate/cache":"/tmp/renovate/cache" -e GOPROXY -e GOPRIVATE -e ' +
+          'GONOPROXY -e GONOSUMDB -e GOINSECURE -e GOFLAGS -e CGO_ENABLED -e BUILDPACK_CACHE_DIR -w ' +
+          '"/tmp/github/some/repo" renovate/go:latest bash -l -c "go get -d -t ./... && ' +
+          'go install github.com/marwan-at-work/mod/cmd/mod@latest && mod upgrade ' +
+          '--mod-name=github.com/google/go-github/v24 -t=28 && go mod tidy && go mod tidy"',
+        options: {
+          cwd: '/tmp/github/some/repo',
+          encoding: 'utf-8',
+          env: {
+            GOPROXY: 'proxy.example.com',
+            GOPRIVATE: 'private.example.com/*',
+            GONOPROXY: 'noproxy.example.com/*',
+            GONOSUMDB: '1',
+            GOINSECURE: 'insecure.example.com/*',
+            GOFLAGS: '-modcacherw',
+            CGO_ENABLED: '1',
+            HTTP_PROXY: 'http://example.com',
+            HTTPS_PROXY: 'https://example.com',
+            NO_PROXY: 'localhost',
+            HOME: '/home/user',
+            PATH: '/tmp/path',
+            LANG: 'en_US.UTF-8',
+            LC_ALL: 'en_US',
+            BUILDPACK_CACHE_DIR: '/tmp/renovate/cache/containerbase',
+          },
+          maxBuffer: 10485760,
+          timeout: 900000,
+        },
       },
     ]);
     const execCommands: string[] = [
@@ -1426,7 +1446,7 @@ describe('modules/manager/gomod/artifacts', () => {
         BUILDPACK_CACHE_DIR: '/tmp/renovate/cache/containerbase',
       },
       extraEnv: {
-        CGO_ENABLED: null,
+        CGO_ENABLED: '0',
         GOFLAGS: '-modcacherw',
         GOINSECURE: undefined,
         GONOPROXY: undefined,
@@ -1441,7 +1461,7 @@ describe('modules/manager/gomod/artifacts', () => {
   });
 
   it('config contains go version', async () => {
-    GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
+    GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
     fs.readLocalFile.mockResolvedValueOnce('Current go.sum');
     fs.readLocalFile.mockResolvedValueOnce(null); // vendor modules filename
     const execSnapshots = mockExecAll();
@@ -1471,24 +1491,44 @@ describe('modules/manager/gomod/artifacts', () => {
     ]);
     expect(execSnapshots).toMatchObject([
       {
-        cmd: 'go get -d -t ./...',
-        options: { cwd: '/tmp/github/some/repo' },
+        cmd: 'docker pull renovate/go:latest',
+        options: { encoding: 'utf-8' },
       },
       {
-        cmd: 'go install github.com/marwan-at-work/mod/cmd/mod@latest',
-        options: { cwd: '/tmp/github/some/repo' },
+        cmd: 'docker ps --filter name=renovate_go -aq',
+        options: { encoding: 'utf-8' },
       },
       {
-        cmd: 'mod upgrade --mod-name=github.com/google/go-github/v24 -t=28',
-        options: { cwd: '/tmp/github/some/repo' },
-      },
-      {
-        cmd: 'go mod tidy',
-        options: { cwd: '/tmp/github/some/repo' },
-      },
-      {
-        cmd: 'go mod tidy',
-        options: { cwd: '/tmp/github/some/repo' },
+        cmd:
+          'docker run --rm --name=renovate_go --label=renovate_child -v "/tmp/github/some/repo":"' +
+          '/tmp/github/some/repo" -v "/tmp/renovate/cache":"/tmp/renovate/cache" -e GOPROXY -e GOPRIVATE -e ' +
+          'GONOPROXY -e GONOSUMDB -e GOINSECURE -e GOFLAGS -e CGO_ENABLED -e BUILDPACK_CACHE_DIR -w ' +
+          '"/tmp/github/some/repo" renovate/go:latest bash -l -c "go get -d -t ./... && ' +
+          'go install github.com/marwan-at-work/mod/cmd/mod@latest && mod upgrade ' +
+          '--mod-name=github.com/google/go-github/v24 -t=28 && go mod tidy && go mod tidy"',
+        options: {
+          cwd: '/tmp/github/some/repo',
+          encoding: 'utf-8',
+          env: {
+            GOPROXY: 'proxy.example.com',
+            GOPRIVATE: 'private.example.com/*',
+            GONOPROXY: 'noproxy.example.com/*',
+            GONOSUMDB: '1',
+            GOINSECURE: 'insecure.example.com/*',
+            GOFLAGS: '-modcacherw',
+            CGO_ENABLED: '1',
+            HTTP_PROXY: 'http://example.com',
+            HTTPS_PROXY: 'https://example.com',
+            NO_PROXY: 'localhost',
+            HOME: '/home/user',
+            PATH: '/tmp/path',
+            LANG: 'en_US.UTF-8',
+            LC_ALL: 'en_US',
+            BUILDPACK_CACHE_DIR: '/tmp/renovate/cache/containerbase',
+          },
+          maxBuffer: 10485760,
+          timeout: 900000,
+        },
       },
     ]);
     const execCommands: string[] = [
@@ -1509,7 +1549,7 @@ describe('modules/manager/gomod/artifacts', () => {
         BUILDPACK_CACHE_DIR: '/tmp/renovate/cache/containerbase',
       },
       extraEnv: {
-        CGO_ENABLED: null,
+        CGO_ENABLED: '0',
         GOFLAGS: '-modcacherw',
         GOINSECURE: undefined,
         GONOPROXY: undefined,
