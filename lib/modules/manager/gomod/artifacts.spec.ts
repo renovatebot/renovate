@@ -4,7 +4,9 @@ import { env, fs, git, mocked } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import { PlatformId } from '../../../constants/platforms';
+import * as execUtl from '../../../util/exec';
 import * as docker from '../../../util/exec/docker';
+import type { ExecOptions } from '../../../util/exec/types';
 import type { StatusResult } from '../../../util/git/types';
 import * as _hostRules from '../../../util/host-rules';
 import type { UpdateArtifactsConfig } from '../types';
@@ -66,6 +68,7 @@ describe('modules/manager/gomod/artifacts', () => {
   beforeEach(() => {
     jest.resetAllMocks();
     jest.resetModules();
+    jest.restoreAllMocks();
 
     delete process.env.GOPATH;
     env.getChildProcessEnv.mockReturnValue({ ...envMock.basic, ...goEnv });
@@ -1362,6 +1365,7 @@ describe('modules/manager/gomod/artifacts', () => {
       .mockResolvedValueOnce('New go.sum')
       .mockResolvedValueOnce('New main.go')
       .mockResolvedValueOnce('New go.mod');
+    const exec = jest.spyOn(execUtl, 'exec');
     const res = await gomod.updateArtifacts({
       packageFileName: 'go.mod',
       updatedDeps: [{ depName: 'github.com/google/go-github/v24' }],
@@ -1376,6 +1380,7 @@ describe('modules/manager/gomod/artifacts', () => {
         },
       },
     });
+
     expect(res).toEqual([
       { file: { type: 'addition', path: 'go.sum', contents: 'New go.sum' } },
       { file: { type: 'addition', path: 'main.go', contents: 'New main.go' } },
@@ -1403,6 +1408,36 @@ describe('modules/manager/gomod/artifacts', () => {
         options: { cwd: '/tmp/github/some/repo' },
       },
     ]);
+    const execCommands: string[] = [
+      'go get -d -t ./...',
+      'go install github.com/marwan-at-work/mod/cmd/mod@latest',
+      'mod upgrade --mod-name=github.com/google/go-github/v24 -t=28',
+      'go mod tidy',
+      'go mod tidy',
+    ];
+    const execOption: ExecOptions = {
+      cwdFile: 'go.mod',
+      docker: {
+        image: 'go',
+        tagConstraint: '^1.17',
+        tagScheme: 'npm',
+      },
+      env: {
+        BUILDPACK_CACHE_DIR: '/tmp/renovate/cache/containerbase',
+      },
+      extraEnv: {
+        CGO_ENABLED: null,
+        GOFLAGS: '-modcacherw',
+        GOINSECURE: undefined,
+        GONOPROXY: undefined,
+        GONOSUMDB: undefined,
+        GOPATH: undefined,
+        GOPRIVATE: undefined,
+        GOPROXY: undefined,
+        GOSUMDB: undefined,
+      },
+    };
+    expect(exec).toHaveBeenCalledWith(execCommands, execOption);
   });
 
   it('config contains go version', async () => {
@@ -1417,6 +1452,7 @@ describe('modules/manager/gomod/artifacts', () => {
       .mockResolvedValueOnce('New go.sum')
       .mockResolvedValueOnce('New main.go')
       .mockResolvedValueOnce('New go.mod');
+    const exec = jest.spyOn(execUtl, 'exec');
     const res = await gomod.updateArtifacts({
       packageFileName: 'go.mod',
       updatedDeps: [{ depName: 'github.com/google/go-github/v24' }],
@@ -1455,5 +1491,35 @@ describe('modules/manager/gomod/artifacts', () => {
         options: { cwd: '/tmp/github/some/repo' },
       },
     ]);
+    const execCommands: string[] = [
+      'go get -d -t ./...',
+      'go install github.com/marwan-at-work/mod/cmd/mod@latest',
+      'mod upgrade --mod-name=github.com/google/go-github/v24 -t=28',
+      'go mod tidy',
+      'go mod tidy',
+    ];
+    const execOption: ExecOptions = {
+      cwdFile: 'go.mod',
+      docker: {
+        image: 'go',
+        tagConstraint: '1.14',
+        tagScheme: 'npm',
+      },
+      env: {
+        BUILDPACK_CACHE_DIR: '/tmp/renovate/cache/containerbase',
+      },
+      extraEnv: {
+        CGO_ENABLED: null,
+        GOFLAGS: '-modcacherw',
+        GOINSECURE: undefined,
+        GONOPROXY: undefined,
+        GONOSUMDB: undefined,
+        GOPATH: undefined,
+        GOPRIVATE: undefined,
+        GOPROXY: undefined,
+        GOSUMDB: undefined,
+      },
+    };
+    expect(exec).toHaveBeenCalledWith(execCommands, execOption);
   });
 });
