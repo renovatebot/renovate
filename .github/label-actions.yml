@@ -34,7 +34,7 @@
 
     ### No logs at all
 
-    If there's no log posted yet, we need you to find and copy/paste the log into the issue template.
+    If you haven't posted any log yet, we need you to find and copy/paste the log into the issue template.
 
 
     #### Finding logs on hosted app
@@ -72,7 +72,7 @@
     <details><summary>Click me to read instructions</summary>
 
 
-    If you already provided logs, and the Renovate team said they are not enough, follow the instructions from the **No logs at all** section.
+    If you already gave us a log, and the Renovate team said it's not enough, then follow the instructions from the **No logs at all** section.
 
     </details>
 
@@ -88,7 +88,7 @@
         <details><summary>Click me to see logs</summary>
 
         ```
-        Copy/paste any log here, between the starting and ending backticks
+        Copy/paste your logs here, between the starting and ending backticks
         ```
 
         </details>
@@ -100,12 +100,12 @@
     Hi there,
 
 
-    You're requesting support for a new package manager.
+    You're asking us to support a new package manager.
     We need to know some basic information about this package manager first.
     Please copy/paste [the new package manager questionnaire](https://github.com/renovatebot/renovate/blob/main/docs/development/new-package-manager-template.md), and fill it out in full.
 
 
-    Once the questionnaire is filled out we will evaluate if adding support for this manager is something we want to do.
+    Once the questionnaire is filled out we'll decide if we want to support this new manager.
 
 
     Good luck,
@@ -118,7 +118,7 @@
     Hi there,
 
 
-    You're reporting a problem with an outdated version of Renovate.
+    You're reporting a problem with an old version of Renovate.
     Please try the latest version and tell us if that fixes your problem.
 
 
