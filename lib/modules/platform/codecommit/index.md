@@ -14,6 +14,8 @@ Let Renovate use AWS CodeCommit access keys by doing one of the following:
   - `AWS_REGION:` the region e.g `us-east-1`
   - `AWS_ACCESS_KEY_ID:` your IAM Access key id
   - `AWS_SECRET_ACCESS_KEY:` your IAM Secret access key id
+  - Only required if you have a session token
+    - `AWS_SESSION_TOKEN`: your AWS Session token
 
 Make sure to attach the [AWSCodeCommitFullAccess policy](https://docs.aws.amazon.com/codecommit/latest/userguide/security-iam-awsmanpol.html#managed-policies-full) to your IAM identities.
 

@@ -315,28 +315,19 @@ export async function getJsonFile(
   branchOrTag?: string
 ): Promise<any | null> {
   const raw = await getRawFile(fileName, repoName, branchOrTag);
-  if (!raw) {
-    return null;
-  }
-  return JSON5.parse(raw);
+  return raw ? JSON5.parse(raw) : null;
 }
-
 export async function getRawFile(
   fileName: string,
   repoName?: string,
   branchOrTag?: string
 ): Promise<string | null> {
-  let fileRes;
-  try {
-    fileRes = await client.getFile(
-      repoName ?? config.repository,
-      fileName,
-      branchOrTag
-    );
-  } catch (error) {
-    logger.error({ error }, 'Could not retrieve file');
-    return null;
-  }
+  const fileRes = await client.getFile(
+    repoName ?? config.repository,
+    fileName,
+    branchOrTag
+  );
+
   return decoder.decode(fileRes.fileContent);
 }
 
