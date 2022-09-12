@@ -1,4 +1,4 @@
-import { ensureTrailingSlash } from '../../../util/url';
+import { ensureTrailingSlash } from '../url';
 
 const defaultSourceUrlBase = 'https://github.com/';
 const defaultApiBaseUrl = 'https://api.github.com/';
