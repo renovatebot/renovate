@@ -1,7 +1,12 @@
-import * as _AWS from '@aws-sdk/client-ecr';
+import {
+  ECRClient,
+  GetAuthorizationTokenCommand,
+  GetAuthorizationTokenCommandOutput,
+} from '@aws-sdk/client-ecr';
+import { mockClient } from 'aws-sdk-client-mock';
 import { getDigest, getPkgReleases } from '..';
 import * as httpMock from '../../../../test/http-mock';
-import { logger, mocked, partial } from '../../../../test/util';
+import { logger, mocked } from '../../../../test/util';
 import {
   EXTERNAL_HOST_ERROR,
   PAGE_NOT_FOUND_ERROR,
@@ -15,13 +20,9 @@ const hostRules = mocked(_hostRules);
 
 const http = new Http(DockerDatasource.id);
 
-jest.mock('@aws-sdk/client-ecr');
 jest.mock('../../../util/host-rules');
 
-type ECR = _AWS.ECR;
-type GetAuthorizationTokenCommandOutput =
-  _AWS.GetAuthorizationTokenCommandOutput;
-const AWS = mocked(_AWS);
+const ecrMock = mockClient(ECRClient);
 
 const baseUrl = 'https://index.docker.io/v2';
 const authUrl = 'https://auth.docker.io';
@@ -30,26 +31,16 @@ const amazonUrl = 'https://123456789.dkr.ecr.us-east-1.amazonaws.com/v2';
 function mockEcrAuthResolve(
   res: Partial<GetAuthorizationTokenCommandOutput> = {}
 ) {
-  AWS.ECR.mockImplementationOnce(() =>
-    partial<ECR>({
-      getAuthorizationToken: () =>
-        Promise.resolve<GetAuthorizationTokenCommandOutput>(
-          partial<GetAuthorizationTokenCommandOutput>(res)
-        ),
-    })
-  );
+  ecrMock.on(GetAuthorizationTokenCommand).resolvesOnce(res);
 }
 
 function mockEcrAuthReject(msg: string) {
-  AWS.ECR.mockImplementationOnce(() =>
-    partial<ECR>({
-      getAuthorizationToken: jest.fn().mockRejectedValue(new Error(msg)),
-    })
-  );
+  ecrMock.on(GetAuthorizationTokenCommand).rejectsOnce(new Error(msg));
 }
 
 describe('modules/datasource/docker/index', () => {
   beforeEach(() => {
+    ecrMock.reset();
     hostRules.find.mockReturnValue({
       username: 'some-username',
       password: 'some-password',
@@ -415,20 +406,21 @@ describe('modules/datasource/docker/index', () => {
         authorizationData: [{ authorizationToken: 'test_token' }],
       });
 
-      await getDigest(
-        {
-          datasource: 'docker',
-          depName: '123456789.dkr.ecr.us-east-1.amazonaws.com/node',
-        },
-        'some-tag'
-      );
+      expect(
+        await getDigest(
+          {
+            datasource: 'docker',
+            depName: '123456789.dkr.ecr.us-east-1.amazonaws.com/node',
+          },
+          'some-tag'
+        )
+      ).toBe('some-digest');
 
-      expect(AWS.ECR).toHaveBeenCalledWith({
-        credentials: {
-          accessKeyId: 'some-username',
-          secretAccessKey: 'some-password',
-        },
-        region: 'us-east-1',
+      const ecr = ecrMock.call(0).thisValue as ECRClient;
+      expect(await ecr.config.region()).toBe('us-east-1');
+      expect(await ecr.config.credentials()).toEqual({
+        accessKeyId: 'some-username',
+        secretAccessKey: 'some-password',
       });
     });
 
@@ -453,21 +445,22 @@ describe('modules/datasource/docker/index', () => {
         authorizationData: [{ authorizationToken: 'test_token' }],
       });
 
-      await getDigest(
-        {
-          datasource: 'docker',
-          depName: '123456789.dkr.ecr.us-east-1.amazonaws.com/node',
-        },
-        'some-tag'
-      );
+      expect(
+        await getDigest(
+          {
+            datasource: 'docker',
+            depName: '123456789.dkr.ecr.us-east-1.amazonaws.com/node',
+          },
+          'some-tag'
+        )
+      ).toBe('some-digest');
 
-      expect(AWS.ECR).toHaveBeenCalledWith({
-        credentials: {
-          accessKeyId: 'some-username',
-          secretAccessKey: 'some-password',
-          sessionToken: 'some-session-token',
-        },
-        region: 'us-east-1',
+      const ecr = ecrMock.call(0).thisValue as ECRClient;
+      expect(await ecr.config.region()).toBe('us-east-1');
+      expect(await ecr.config.credentials()).toEqual({
+        accessKeyId: 'some-username',
+        secretAccessKey: 'some-password',
+        sessionToken: 'some-session-token',
       });
     });
 
