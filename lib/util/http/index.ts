@@ -175,6 +175,7 @@ export class Http<GetOptions = HttpOptions, PostOptions = HttpPostOptions> {
       res.authorization = !!options?.headers?.authorization;
       return cloneResponse(res);
     } catch (err) {
+      memCache.set(cacheKey, undefined);
       const { abortOnError, abortIgnoreStatusCodes } = options;
       if (abortOnError && !abortIgnoreStatusCodes?.includes(err.statusCode)) {
         throw new ExternalHostError(err);
