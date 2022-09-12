@@ -5,18 +5,6 @@ import type { ApiPageCache, ApiPageItem } from './types';
 export class ApiCache<T extends ApiPageItem> {
   constructor(private cache: ApiPageCache<T>) {}
 
-  get etag(): string | null {
-    return this.cache.etag ?? null;
-  }
-
-  set etag(value: string | null) {
-    if (value === null) {
-      delete this.cache.etag;
-    } else {
-      this.cache.etag = value;
-    }
-  }
-
   /**
    * @returns Date formatted to use in HTTP headers
    */

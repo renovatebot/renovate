@@ -51,7 +51,6 @@ import type {
   PlatformParams,
   PlatformPrOptions,
   PlatformResult,
-  Pr,
   RepoParams,
   RepoResult,
   UpdatePrConfig,
@@ -73,6 +72,7 @@ import type {
   Comment,
   GhAutomergeResponse,
   GhBranchStatus,
+  GhPr,
   GhRepo,
   GhRestPr,
   LocalRepoConfig,
@@ -566,7 +566,7 @@ export async function getRepoForceRebase(): Promise<boolean> {
   return !!config.repoForceRebase;
 }
 
-function cachePr(pr?: Pr | null): void {
+function cachePr(pr?: GhPr | null): void {
   config.prList ??= [];
   if (pr) {
     for (let idx = 0; idx < config.prList.length; idx += 1) {
@@ -581,17 +581,22 @@ function cachePr(pr?: Pr | null): void {
 }
 
 // Fetch fresh Pull Request and cache it when possible
-async function fetchPr(prNo: number): Promise<Pr | null> {
-  const { body: ghRestPr } = await githubApi.getJson<GhRestPr>(
-    `repos/${config.parentRepo ?? config.repository}/pulls/${prNo}`
-  );
-  const result = coerceRestPr(ghRestPr);
-  cachePr(result);
-  return result;
+async function fetchPr(prNo: number): Promise<GhPr | null> {
+  try {
+    const { body: ghRestPr } = await githubApi.getJson<GhRestPr>(
+      `repos/${config.parentRepo ?? config.repository}/pulls/${prNo}`
+    );
+    const result = coerceRestPr(ghRestPr);
+    cachePr(result);
+    return result;
+  } catch (err) {
+    logger.warn({ err, prNo }, `GitHub fetchPr error`);
+    return null;
+  }
 }
 
 // Gets details for a PR
-export async function getPr(prNo: number): Promise<Pr | null> {
+export async function getPr(prNo: number): Promise<GhPr | null> {
   if (!prNo) {
     return null;
   }
@@ -614,7 +619,7 @@ function matchesState(state: string, desiredState: string): boolean {
   return state === desiredState;
 }
 
-export async function getPrList(): Promise<Pr[]> {
+export async function getPrList(): Promise<GhPr[]> {
   if (!config.prList) {
     const repo = config.parentRepo ?? config.repository;
     const username =
@@ -635,7 +640,7 @@ export async function findPr({
   branchName,
   prTitle,
   state = PrState.All,
-}: FindPRConfig): Promise<Pr | null> {
+}: FindPRConfig): Promise<GhPr | null> {
   logger.debug(`findPr(${branchName}, ${prTitle}, ${state})`);
   const prList = await getPrList();
   const pr = prList.find((p) => {
@@ -666,7 +671,7 @@ export async function findPr({
 const REOPEN_THRESHOLD_MILLIS = 1000 * 60 * 60 * 24 * 7;
 
 // Returns the Pull Request for a branch. Null if not exists.
-export async function getBranchPr(branchName: string): Promise<Pr | null> {
+export async function getBranchPr(branchName: string): Promise<GhPr | null> {
   logger.debug(`getBranchPr(${branchName})`);
 
   const openPr = await findPr({
@@ -1406,7 +1411,7 @@ export async function createPr({
   labels,
   draftPR = false,
   platformOptions,
-}: CreatePRConfig): Promise<Pr | null> {
+}: CreatePRConfig): Promise<GhPr | null> {
   const body = sanitize(rawBody);
   const base = targetBranch;
   // Include the repository owner to handle forkMode and regular mode
