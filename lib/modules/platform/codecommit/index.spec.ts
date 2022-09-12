@@ -600,16 +600,6 @@ describe('modules/platform/codecommit/index', () => {
       const res = await codeCommit.getJsonFile('file.json');
       expect(res).toEqual({ foo: 'bar' });
     });
-
-    it('errors out', async () => {
-      jest
-        .spyOn(codeCommitClient.prototype, 'send')
-        .mockImplementationOnce(() => {
-          throw new Error('bad filename');
-        });
-      const res = await codeCommit.getJsonFile('file.json');
-      expect(res).toBeNull();
-    });
   });
 
   describe('getRawFile()', () => {
@@ -647,16 +637,6 @@ describe('modules/platform/codecommit/index', () => {
           foo: 'bar'
         }
       `);
-    });
-
-    it('errors out', async () => {
-      jest
-        .spyOn(codeCommitClient.prototype, 'send')
-        .mockImplementationOnce(() => {
-          throw new Error('bad filename');
-        });
-      const res = await codeCommit.getRawFile('file.json');
-      expect(res).toBeNull();
     });
   });
 
