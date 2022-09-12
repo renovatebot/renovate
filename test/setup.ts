@@ -23,61 +23,79 @@ jest.mock('../lib/modules/platform', () => ({
 }));
 jest.mock('../lib/logger');
 
-declare type Inverse<Matchers> = {
+//------------------------------------------------
+// Required global jest types
+//------------------------------------------------
+declare global {
+  // Extension point for jest matchers
+  type JestMatchers<R, T = any> = jest.Matchers<R> &
+    SnapshotMatchers<R extends void | Promise<void> ? R : void, T> &
+    Omit<
+      Matchers<R extends void | Promise<void> ? R : void>,
+      'toMatchObject'
+    > & {
+      // TODO: override, because type issues (#7154)
+      /**
+       * Used to check that a JavaScript object matches a subset of the properties of an object
+       *
+       * Optionally, you can provide an object to use as Generic type for the expected value.
+       * This ensures that the matching object matches the structure of the provided object-like type.
+       *
+       * @example
+       *
+       * type House = {
+       *   bath: boolean;
+       *   bedrooms: number;
+       *   kitchen: {
+       *     amenities: string[];
+       *     area: number;
+       *     wallColor: string;
+       *   }
+       * };
+       *
+       * expect(desiredHouse).toMatchObject<House>({...standardHouse, kitchen: {area: 20}}) // wherein standardHouse is some base object of type House
+       */
+      toMatchObject<E extends object | any[]>(
+        expected: E
+      ): R extends void | Promise<void> ? R : void;
+    };
+}
+
+type JestInverse<Matchers> = {
   /**
    * Inverse next matcher. If you know how to test something, `.not` lets you test its opposite.
    */
   not: Matchers;
 };
 
-type PromiseMatchers<T = unknown> = {
+type JestPromiseMatchers<T> = {
   /**
    * Unwraps the reason of a rejected promise so any other matcher can be chained.
    * If the promise is fulfilled the assertion fails.
    */
   rejects: JestMatchers<Promise<void>, T> &
-    Inverse<JestMatchers<Promise<void>, T>>;
+    JestInverse<JestMatchers<Promise<void>, T>>;
   /**
    * Unwraps the value of a fulfilled promise so any other matcher can be chained.
    * If the promise is rejected the assertion fails.
    */
   resolves: JestMatchers<Promise<void>, T> &
-    Inverse<JestMatchers<Promise<void>, T>>;
+    JestInverse<JestMatchers<Promise<void>, T>>;
 };
 
 type JestExpect = {
   <T = unknown>(actual: T): JestMatchers<void, T> &
-    Inverse<JestMatchers<void, T>> &
-    PromiseMatchers<T>;
+    JestInverse<JestMatchers<void, T>> &
+    JestPromiseMatchers<T>;
   addSnapshotSerializer: (arg: Plugin) => void;
 } & BaseExpect &
   AsymmetricMatchers &
-  Inverse<Omit<AsymmetricMatchers, 'any' | 'anything'>> &
+  JestInverse<Omit<AsymmetricMatchers, 'any' | 'anything'>> &
   jest.Expect;
 
-interface JestEach {
-  // Exclusively arrays.
-  <T extends any[] | [any]>(cases: ReadonlyArray<T>): (
-    name: string,
-    fn: (...args: T) => any,
-    timeout?: number
-  ) => void;
-  <T extends [any, ...any[]]>(cases: ReadonlyArray<T>): (
-    name: string,
-    fn: (...args: T) => ReturnType<Global.TestFn>,
-    timeout?: number
-  ) => void;
-  // Not arrays.
-  <T>(cases: ReadonlyArray<T>): (
-    name: string,
-    fn: (...args: T[]) => ReturnType<Global.TestFn>,
-    timeout?: number
-  ) => void;
-  (cases: ReadonlyArray<ReadonlyArray<any>>): (
-    name: string,
-    fn: (...args: any[]) => ReturnType<Global.TestFn>,
-    timeout?: number
-  ) => void;
+type JestItEach = Global.It['each'];
+
+interface JestEach extends JestItEach {
   (strings: TemplateStringsArray, ...placeholders: any[]): (
     name: string,
     fn: (arg: any) => ReturnType<Global.TestFn>,
@@ -85,17 +103,10 @@ interface JestEach {
   ) => void;
 }
 
-type JestIt = Omit<Global.It, 'each'> & {
-  /**
-   * Creates a test closure.
-   *
-   * @param name The name of your test
-   * @param fn The function for your test
-   * @param timeout The timeout for an async function test
-   */
-  (name: Global.TestNameLike, fn?: Global.TestFn, timeout?: number): void;
+interface JestIt extends Global.It {
+  // TODO: override, because type issues (#7154)
   each: JestEach;
-};
+}
 
 declare global {
   const afterAll: Global.HookBase;
@@ -103,14 +114,14 @@ declare global {
   const beforeAll: Global.HookBase;
   const beforeEach: Global.HookBase;
   const describe: Global.Describe;
-  const it: JestIt & Omit<Global.It, 'each'>;
+  const expect: JestExpect;
+  const it: JestIt;
   const jest: Omit<Jest, 'fn'> & {
+    // TODO: override, because type issues (#7154)
     fn(): jest.Mock;
     fn<T, Y extends any[]>(implementation?: (...args: Y) => T): jest.Mock<T, Y>;
   };
   const test: JestIt;
-
-  const expect: JestExpect;
 
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace jest {
@@ -147,18 +158,11 @@ declare global {
 
     type SpyInstance<T, Y extends any[]> = JestSpyInstance<(...args: Y) => T>;
 
+    // Extension point for jest matchers
     // eslint-disable-next-line @typescript-eslint/no-empty-interface
     interface Expect {}
+    // Extension point for jest matchers
+    // eslint-disable-next-line @typescript-eslint/no-empty-interface, @typescript-eslint/no-unused-vars
+    interface Matchers<R> {}
   }
-
-  type JestMatchers<R, T = any> = jest.Matchers<R> &
-    SnapshotMatchers<R extends void | Promise<void> ? R : void, T> &
-    Omit<
-      Matchers<R extends void | Promise<void> ? R : void>,
-      'toMatchObject'
-    > & {
-      toMatchObject<E extends object | any[]>(
-        expected: E
-      ): R extends void | Promise<void> ? R : void;
-    };
 }
