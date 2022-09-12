@@ -3,6 +3,7 @@ import {
   EXTERNAL_HOST_ERROR,
   HOST_DISABLED,
 } from '../../constants/error-messages';
+import * as memCache from '../cache/memory';
 import * as hostRules from '../host-rules';
 import * as queue from './queue';
 import { Http } from '.';
@@ -27,6 +28,45 @@ describe('util/http/index', () => {
       statusCode: 200,
     });
     expect(httpMock.allUsed()).toBeTrue();
+  });
+
+  it('caches get responses', async () => {
+    try {
+      memCache.init();
+      httpMock.scope(baseUrl).get('/test').reply(200);
+      expect(await http.get('http://renovate.com/test')).toEqual({
+        authorization: false,
+        body: '',
+        headers: {},
+        statusCode: 200,
+      });
+      expect(await http.get('http://renovate.com/test')).toEqual({
+        authorization: false,
+        body: '',
+        headers: {},
+        statusCode: 200,
+      });
+      expect(httpMock.allUsed()).toBeTrue();
+    } finally {
+      memCache.reset();
+    }
+  });
+
+  it('does not cache get exceptions', async () => {
+    try {
+      memCache.init();
+      httpMock.scope(baseUrl).get('/test').reply(500).get('/test').reply(200);
+      await expect(http.get('http://renovate.com/test')).rejects.toThrow('500');
+      expect(await http.get('http://renovate.com/test')).toEqual({
+        authorization: false,
+        body: '',
+        headers: {},
+        statusCode: 200,
+      });
+      expect(httpMock.allUsed()).toBeTrue();
+    } finally {
+      memCache.reset();
+    }
   });
 
   it('returns 429 error', async () => {
