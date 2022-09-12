@@ -168,7 +168,7 @@ export class CrateDatasource extends Datasource {
     if (info.flavor === RegistryFlavor.CratesIo) {
       const crateUrl =
         CrateDatasource.CRATES_IO_BASE_URL +
-        CrateDatasource.getIndexSuffix(packageName).join('/');
+        CrateDatasource.getIndexSuffix(packageName.toLowerCase()).join('/');
       try {
         return (await this.http.get(crateUrl)).body;
       } catch (err) {

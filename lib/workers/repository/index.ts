@@ -93,9 +93,9 @@ export async function renovateRepository(
   const splits = getSplits();
   logger.debug(splits, 'Repository timing splits (milliseconds)');
   printRequestStats();
-  logger.info({ durationMs: splits.total }, 'Repository finished');
   printDnsStats();
   clearDnsCache();
+  logger.info({ durationMs: splits.total }, 'Repository finished');
   return repoResult;
 }
 
