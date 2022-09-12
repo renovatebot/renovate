@@ -1,10 +1,11 @@
 import type fs from 'fs';
 import type { PathLike, Stats } from 'fs';
+import { jest } from '@jest/globals';
 import callsite from 'callsite';
 import { DirectoryJSON, fs as memfs, vol } from 'memfs';
 import upath from 'upath';
 
-const realFs = jest.requireActual<typeof fs>('fs');
+const realFs = jest.requireActual('fs') as typeof fs;
 
 /**
  * Class to work with in-memory file-system
@@ -89,12 +90,12 @@ export class Fixtures {
   static fsExtra(): any {
     return {
       ...memfs,
-      pathExists: jest.fn().mockImplementation(pathExists),
-      remove: jest.fn().mockImplementation(memfs.promises.rm),
-      readFile: jest.fn().mockImplementation(memfs.promises.readFile),
-      writeFile: jest.fn().mockImplementation(memfs.promises.writeFile),
-      outputFile: jest.fn().mockImplementation(outputFile),
-      stat: jest.fn().mockImplementation(stat),
+      pathExists: jest.fn(pathExists),
+      remove: jest.fn(memfs.promises.rm),
+      readFile: jest.fn(memfs.promises.readFile),
+      writeFile: jest.fn(memfs.promises.writeFile),
+      outputFile: jest.fn(outputFile),
+      stat: jest.fn(stat),
     };
   }
 
