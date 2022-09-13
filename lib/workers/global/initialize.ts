@@ -10,6 +10,8 @@ import { setEmojiConfig } from '../../util/emoji';
 import { validateGitVersion } from '../../util/git';
 import * as hostRules from '../../util/host-rules';
 import { setMaxLimit } from './limits';
+import { initI18n } from '../../i18n';
+
 
 async function setDirectories(input: AllConfig): Promise<AllConfig> {
   const config: AllConfig = { ...input };
@@ -63,11 +65,16 @@ function setGlobalHostRules(config: RenovateConfig): void {
   }
 }
 
+function setI18n(config: AllConfig): void {
+  initI18n(config.locale, config.translationsFilePath);
+}
+
 export async function globalInitialize(
   config_: AllConfig
 ): Promise<RenovateConfig> {
   let config = config_;
   await checkVersions();
+  setI18n(config);
   config = await initPlatform(config);
   config = await setDirectories(config);
   await packageCache.init(config);
