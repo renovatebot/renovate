@@ -165,13 +165,8 @@ export async function validateGitVersion(): Promise<boolean> {
   let version: string | undefined;
   const globalGit = simpleGit();
   try {
-    const raw = await globalGit.raw(['--version']);
-    for (const section of raw.split(/\s+/)) {
-      if (semverCoerced.isVersion(section)) {
-        version = section;
-        break;
-      }
-    }
+    const { major, minor, patch } = await globalGit.version();
+    version = `${String(major)}.${String(minor)}.${String(patch)}`;
   } catch (err) /* istanbul ignore next */ {
     logger.error({ err }, 'Error fetching git version');
     return false;
