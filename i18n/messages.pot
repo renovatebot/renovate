@@ -1,0 +1,57 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the renovate-platform package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: renovate-platform\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2022-09-14 17:52+0800\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=CHARSET\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: lib/config/presets/internal/default.ts:542
+msgid "Enable Renovate Dependency Dashboard creation."
+msgstr ""
+
+#: lib/workers/repository/onboarding/pr/config-description.ts:50
+msgid ""
+"Configuration Summary\n"
+"\n"
+"Based on the default config's presets, Renovate will:"
+msgstr ""
+
+#: lib/workers/repository/onboarding/pr/config-description.ts:53
+msgid "Start dependency updates only once this onboarding PR is merged"
+msgstr ""
+
+#: lib/workers/repository/onboarding/pr/index.ts:45
+#, javascript-format
+msgid ""
+"Welcome to [Renovate](%s)! This is an onboarding PR to help you understand "
+"and configure settings before regular Pull Requests begin.\n"
+"\n"
+msgstr ""
+
+#: lib/workers/repository/onboarding/pr/index.ts:54
+msgid ""
+"To activate Renovate, merge this Pull Request. To disable Renovate, simply "
+"close this Pull Request unmerged."
+msgstr ""
+
+#: lib/workers/repository/onboarding/pr/index.ts:59
+msgid ""
+"Renovate will begin keeping your dependencies up-to-date only once you merge "
+"or close this Pull Request."
+msgstr ""
+
+#: lib/modules/platform/github/index.ts:131
+msgid "You must configure a GitHub token"
+msgstr ""

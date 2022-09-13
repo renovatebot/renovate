@@ -65,8 +65,8 @@ function setGlobalHostRules(config: RenovateConfig): void {
   }
 }
 
-function setI18n(config: AllConfig): void {
-  initI18n(config.locale, config.translationsFilePath);
+async function setI18n(config: AllConfig): Promise<void> {
+  await initI18n(config.locale, config.translationsFilePath);
 }
 
 export async function globalInitialize(
@@ -74,7 +74,7 @@ export async function globalInitialize(
 ): Promise<RenovateConfig> {
   let config = config_;
   await checkVersions();
-  setI18n(config);
+  await setI18n(config);
   config = await initPlatform(config);
   config = await setDirectories(config);
   await packageCache.init(config);

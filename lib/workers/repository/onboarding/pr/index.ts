@@ -24,6 +24,8 @@ import { addParticipants } from '../../update/pr/participants';
 import { getBaseBranchDesc } from './base-branch';
 import { getConfigDesc } from './config-description';
 import { getPrList } from './pr-list';
+import { gt } from '../../../../i18n';
+import * as util from 'util';
 
 export async function ensureOnboardingPr(
   config: RenovateConfig,
@@ -38,16 +40,24 @@ export async function ensureOnboardingPr(
   // TODO #7154
   const existingPr = await platform.getBranchPr(config.onboardingBranch!);
   logger.debug('Filling in onboarding PR template');
-  let prTemplate = `Welcome to [Renovate](${
+  let prTemplate = util.format(
+    gt.gettext(
+      'Welcome to [Renovate](%s)! This is an onboarding PR to help you understand and configure settings before regular Pull Requests begin.\n\n'
+    ),
     config.productLinks!.homepage
-  })! This is an onboarding PR to help you understand and configure settings before regular Pull Requests begin.\n\n`;
+  );
+
   prTemplate +=
     config.requireConfig === 'required'
       ? emojify(
-          `:vertical_traffic_light: To activate Renovate, merge this Pull Request. To disable Renovate, simply close this Pull Request unmerged.\n\n`
+          `:vertical_traffic_light: ${gt.gettext(
+            'To activate Renovate, merge this Pull Request. To disable Renovate, simply close this Pull Request unmerged.'
+          )}\n\n`
         )
       : emojify(
-          `:vertical_traffic_light: Renovate will begin keeping your dependencies up-to-date only once you merge or close this Pull Request.\n\n`
+          `:vertical_traffic_light: ${gt.gettext(
+            'Renovate will begin keeping your dependencies up-to-date only once you merge or close this Pull Request.'
+          )}\n\n`
         );
   // TODO #7154
   prTemplate += emojify(

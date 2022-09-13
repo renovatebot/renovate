@@ -1,22 +1,34 @@
 import Gettext from 'node-gettext';
-import fs from 'fs';
+import { readSystemFile } from '../util/fs';
 import { po } from 'gettext-parser';
 import { logger } from '../logger';
 
 export const gt = new Gettext();
 
-export function initI18n(locale: string, translationsFilePath: string): void {
+export async function initI18n(
+  locale: string,
+  translationsFilePath: string
+): Promise<void> {
   logger.debug(
     `locale ${locale}, translationsFilePath ${translationsFilePath}`
   );
 
   // The en is the vanilla edition, do not need a PO file to translate
   if (locale === 'en') {
+    gt.setLocale('en');
     return;
   }
 
   try {
-    const translationsContent = fs.readFileSync(translationsFilePath);
+    const translationsContent = await readSystemFile(
+      translationsFilePath,
+      'utf8'
+    );
+
+    const parsedTranslations = po.parse(translationsContent);
+    const domain = 'messages';
+    gt.addTranslations(locale, domain, parsedTranslations);
+    gt.setLocale(locale);
   } catch (err) {
     logger.warn(
       `Occurred some error on reading the PO file ${err}, downgrade to English edition`
@@ -24,10 +36,4 @@ export function initI18n(locale: string, translationsFilePath: string): void {
     gt.setLocale('en');
     return;
   }
-
-  const parsedTranslations = po.parse(translationsContent);
-
-  const domain = 'messages';
-  gt.addTranslations(locale, domain, parseTranslations);
-  gt.setLocale(locale);
 }
