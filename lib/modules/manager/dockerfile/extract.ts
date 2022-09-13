@@ -157,7 +157,7 @@ export function getDep(
   specifyReplaceString = true,
   registryAliases?: Record<string, string>
 ): PackageDependency {
-  if (!is.string(currentFrom)) {
+  if (!is.string(currentFrom) || is.emptyStringOrWhitespace(currentFrom)) {
     return {
       skipReason: 'invalid-value',
     };
@@ -208,7 +208,10 @@ export function getDep(
     dep.versioning = ubuntuVersioning.id;
   }
 
-  if (dep.depName === 'debian') {
+  if (
+    dep.depName === 'debian' &&
+    debianVersioning.api.isVersion(dep.currentValue)
+  ) {
     dep.versioning = debianVersioning.id;
   }
 

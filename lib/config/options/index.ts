@@ -849,6 +849,7 @@ const options: RenovateOptions[] = [
       'kubernetes',
       'ansible',
       'droneci',
+      'woodpecker',
     ],
   },
   {
@@ -1691,7 +1692,7 @@ const options: RenovateOptions[] = [
       'Pull Request body template. Controls which sections are rendered in the body.',
     type: 'string',
     default:
-      '{{{header}}}{{{table}}}{{{notes}}}{{{changelogs}}}{{{configDescription}}}{{{controls}}}{{{footer}}}',
+      '{{{header}}}{{{table}}}{{{warnings}}}{{{notes}}}{{{changelogs}}}{{{configDescription}}}{{{controls}}}{{{footer}}}',
     cli: false,
   },
   {
@@ -2096,7 +2097,7 @@ const options: RenovateOptions[] = [
   {
     name: 'authType',
     description:
-      'Authentication type for http header. e.g. `"Bearer"` or `"Basic"`. Use `"Token-Only"` to use only the token without an authorization type.',
+      'Authentication type for HTTP header. e.g. `"Bearer"` or `"Basic"`. Use `"Token-Only"` to use only the token without an authorization type.',
     type: 'string',
     stage: 'repository',
     parent: 'hostRules',
@@ -2106,7 +2107,18 @@ const options: RenovateOptions[] = [
   },
   {
     name: 'dnsCache',
-    description: 'Enable got dns cache',
+    description: 'Enable got DNS cache.',
+    type: 'boolean',
+    stage: 'repository',
+    parent: 'hostRules',
+    default: false,
+    cli: false,
+    env: false,
+    experimental: true,
+  },
+  {
+    name: 'keepalive',
+    description: 'Enable HTTP keepalives for hosts.',
     type: 'boolean',
     stage: 'repository',
     parent: 'hostRules',

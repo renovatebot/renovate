@@ -527,9 +527,55 @@ describe('modules/platform/gitlab/index', () => {
         .get(
           '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses'
         )
+        .reply(200, [])
+        .get(
+          '/api/v4/projects/some%2Frepo/merge_requests?per_page=100&scope=created_by_me'
+        )
         .reply(200, []);
       const res = await gitlab.getBranchStatus('somebranch');
       expect(res).toEqual(BranchStatus.yellow);
+    });
+
+    it('returns success if no results but head pipeline success', async () => {
+      const scope = await initRepo();
+      scope
+        .get(
+          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses'
+        )
+        .reply(200, [])
+        .get(
+          '/api/v4/projects/some%2Frepo/merge_requests?per_page=100&scope=created_by_me'
+        )
+        .reply(200, [
+          {
+            iid: 91,
+            title: 'some change',
+            source_branch: 'some-branch',
+            target_branch: 'master',
+            state: 'opened',
+          },
+        ])
+        .get(
+          '/api/v4/projects/some%2Frepo/merge_requests/91?include_diverged_commits_count=1'
+        )
+        .reply(200, {
+          iid: 91,
+          title: 'some change',
+          state: 'opened',
+          additions: 1,
+          deletions: 1,
+          commits: 1,
+          source_branch: 'some-branch',
+          target_branch: 'master',
+          base: {
+            sha: '1234',
+          },
+          head_pipeline: {
+            status: 'success',
+          },
+        });
+      const res = await gitlab.getBranchStatus('some-branch');
+      expect(res).toEqual(BranchStatus.green);
     });
 
     it('returns success if all are success', async () => {
@@ -538,7 +584,11 @@ describe('modules/platform/gitlab/index', () => {
         .get(
           '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses'
         )
-        .reply(200, [{ status: 'success' }, { status: 'success' }]);
+        .reply(200, [{ status: 'success' }, { status: 'success' }])
+        .get(
+          '/api/v4/projects/some%2Frepo/merge_requests?per_page=100&scope=created_by_me'
+        )
+        .reply(200, []);
       const res = await gitlab.getBranchStatus('somebranch');
       expect(res).toEqual(BranchStatus.green);
     });
@@ -552,7 +602,11 @@ describe('modules/platform/gitlab/index', () => {
         .reply(200, [
           { status: 'success' },
           { status: 'failed', allow_failure: true },
-        ]);
+        ])
+        .get(
+          '/api/v4/projects/some%2Frepo/merge_requests?per_page=100&scope=created_by_me'
+        )
+        .reply(200, []);
       const res = await gitlab.getBranchStatus('somebranch');
       expect(res).toEqual(BranchStatus.green);
     });
@@ -563,7 +617,11 @@ describe('modules/platform/gitlab/index', () => {
         .get(
           '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses'
         )
-        .reply(200, [{ status: 'failed', allow_failure: true }]);
+        .reply(200, [{ status: 'failed', allow_failure: true }])
+        .get(
+          '/api/v4/projects/some%2Frepo/merge_requests?per_page=100&scope=created_by_me'
+        )
+        .reply(200, []);
       const res = await gitlab.getBranchStatus('somebranch');
       expect(res).toEqual(BranchStatus.green);
     });
@@ -574,7 +632,11 @@ describe('modules/platform/gitlab/index', () => {
         .get(
           '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses'
         )
-        .reply(200, [{ status: 'success' }, { status: 'skipped' }]);
+        .reply(200, [{ status: 'success' }, { status: 'skipped' }])
+        .get(
+          '/api/v4/projects/some%2Frepo/merge_requests?per_page=100&scope=created_by_me'
+        )
+        .reply(200, []);
       const res = await gitlab.getBranchStatus('somebranch');
       expect(res).toEqual(BranchStatus.green);
     });
@@ -585,7 +647,11 @@ describe('modules/platform/gitlab/index', () => {
         .get(
           '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses'
         )
-        .reply(200, [{ status: 'skipped' }]);
+        .reply(200, [{ status: 'skipped' }])
+        .get(
+          '/api/v4/projects/some%2Frepo/merge_requests?per_page=100&scope=created_by_me'
+        )
+        .reply(200, []);
       const res = await gitlab.getBranchStatus('somebranch');
       expect(res).toEqual(BranchStatus.yellow);
     });
@@ -596,7 +662,11 @@ describe('modules/platform/gitlab/index', () => {
         .get(
           '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses'
         )
-        .reply(200, [{ status: 'skipped' }, { status: 'failed' }]);
+        .reply(200, [{ status: 'skipped' }, { status: 'failed' }])
+        .get(
+          '/api/v4/projects/some%2Frepo/merge_requests?per_page=100&scope=created_by_me'
+        )
+        .reply(200, []);
       const res = await gitlab.getBranchStatus('somebranch');
       expect(res).toEqual(BranchStatus.red);
     });
@@ -611,7 +681,11 @@ describe('modules/platform/gitlab/index', () => {
           { status: 'success' },
           { status: 'failed', allow_failure: true },
           { status: 'failed' },
-        ]);
+        ])
+        .get(
+          '/api/v4/projects/some%2Frepo/merge_requests?per_page=100&scope=created_by_me'
+        )
+        .reply(200, []);
       const res = await gitlab.getBranchStatus('somebranch');
       expect(res).toEqual(BranchStatus.red);
     });
@@ -622,7 +696,11 @@ describe('modules/platform/gitlab/index', () => {
         .get(
           '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses'
         )
-        .reply(200, [{ status: 'success' }, { status: 'foo' }]);
+        .reply(200, [{ status: 'success' }, { status: 'foo' }])
+        .get(
+          '/api/v4/projects/some%2Frepo/merge_requests?per_page=100&scope=created_by_me'
+        )
+        .reply(200, []);
       const res = await gitlab.getBranchStatus('somebranch');
       expect(res).toEqual(BranchStatus.yellow);
     });
