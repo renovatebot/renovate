@@ -4,11 +4,10 @@ import { env, fs, git, mocked } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import { PlatformId } from '../../../constants/platforms';
-import * as execUtl from '../../../util/exec';
 import * as docker from '../../../util/exec/docker';
-import type { ExecOptions } from '../../../util/exec/types';
 import type { StatusResult } from '../../../util/git/types';
 import * as _hostRules from '../../../util/host-rules';
+import * as _datasource from '../../datasource';
 import type { UpdateArtifactsConfig } from '../types';
 import * as gomod from '.';
 
@@ -17,9 +16,11 @@ jest.mock('../../../util/git');
 jest.mock('../../../util/host-rules');
 jest.mock('../../../util/http');
 jest.mock('../../../util/fs');
+jest.mock('../../datasource');
 
 process.env.BUILDPACK = 'true';
 
+const datasource = mocked(_datasource);
 const hostRules = mocked(_hostRules);
 
 const gomod1 = `module github.com/renovate-tests/gomod1
@@ -1365,7 +1366,9 @@ describe('modules/manager/gomod/artifacts', () => {
       .mockResolvedValueOnce('New go.sum')
       .mockResolvedValueOnce('New main.go')
       .mockResolvedValueOnce('New go.mod');
-    const exec = jest.spyOn(execUtl, 'exec');
+    datasource.getPkgReleases.mockResolvedValueOnce({
+      releases: [{ version: '1.17.0' }, { version: '1.14.0' }],
+    });
     const res = await gomod.updateArtifacts({
       packageFileName: 'go.mod',
       updatedDeps: [{ depName: 'github.com/google/go-github/v24' }],
@@ -1388,7 +1391,7 @@ describe('modules/manager/gomod/artifacts', () => {
     ]);
     expect(execSnapshots).toMatchObject([
       {
-        cmd: 'docker pull renovate/go:latest',
+        cmd: 'docker pull renovate/go:1.17.0',
         options: { encoding: 'utf-8' },
       },
       {
@@ -1400,7 +1403,7 @@ describe('modules/manager/gomod/artifacts', () => {
           'docker run --rm --name=renovate_go --label=renovate_child -v "/tmp/github/some/repo":"' +
           '/tmp/github/some/repo" -v "/tmp/renovate/cache":"/tmp/renovate/cache" -e GOPROXY -e GOPRIVATE -e ' +
           'GONOPROXY -e GONOSUMDB -e GOINSECURE -e GOFLAGS -e CGO_ENABLED -e BUILDPACK_CACHE_DIR -w ' +
-          '"/tmp/github/some/repo" renovate/go:latest bash -l -c "go get -d -t ./... && ' +
+          '"/tmp/github/some/repo" renovate/go:1.17.0 bash -l -c "go get -d -t ./... && ' +
           'go install github.com/marwan-at-work/mod/cmd/mod@v1.2.3 && mod upgrade ' +
           '--mod-name=github.com/google/go-github/v24 -t=28 && go mod tidy && go mod tidy"',
         options: {
@@ -1428,36 +1431,6 @@ describe('modules/manager/gomod/artifacts', () => {
         },
       },
     ]);
-    const execCommands: string[] = [
-      'go get -d -t ./...',
-      'go install github.com/marwan-at-work/mod/cmd/mod@v1.2.3',
-      'mod upgrade --mod-name=github.com/google/go-github/v24 -t=28',
-      'go mod tidy',
-      'go mod tidy',
-    ];
-    const execOption: ExecOptions = {
-      cwdFile: 'go.mod',
-      docker: {
-        image: 'go',
-        tagConstraint: '^1.17',
-        tagScheme: 'npm',
-      },
-      env: {
-        BUILDPACK_CACHE_DIR: '/tmp/renovate/cache/containerbase',
-      },
-      extraEnv: {
-        CGO_ENABLED: '0',
-        GOFLAGS: '-modcacherw',
-        GOINSECURE: undefined,
-        GONOPROXY: undefined,
-        GONOSUMDB: undefined,
-        GOPATH: undefined,
-        GOPRIVATE: undefined,
-        GOPROXY: undefined,
-        GOSUMDB: undefined,
-      },
-    };
-    expect(exec).toHaveBeenCalledWith(execCommands, execOption);
   });
 
   it('config contains go version', async () => {
@@ -1472,7 +1445,9 @@ describe('modules/manager/gomod/artifacts', () => {
       .mockResolvedValueOnce('New go.sum')
       .mockResolvedValueOnce('New main.go')
       .mockResolvedValueOnce('New go.mod');
-    const exec = jest.spyOn(execUtl, 'exec');
+    datasource.getPkgReleases.mockResolvedValueOnce({
+      releases: [{ version: '1.17.0' }, { version: '1.14.0' }],
+    });
     const res = await gomod.updateArtifacts({
       packageFileName: 'go.mod',
       updatedDeps: [{ depName: 'github.com/google/go-github/v24' }],
@@ -1482,6 +1457,9 @@ describe('modules/manager/gomod/artifacts', () => {
         updateType: 'major',
         newMajor: 28,
         postUpdateOptions: ['gomodUpdateImportPaths'],
+        constraints: {
+          go: '1.14',
+        },
       },
     });
     expect(res).toEqual([
@@ -1491,7 +1469,7 @@ describe('modules/manager/gomod/artifacts', () => {
     ]);
     expect(execSnapshots).toMatchObject([
       {
-        cmd: 'docker pull renovate/go:latest',
+        cmd: 'docker pull renovate/go:1.14.0',
         options: { encoding: 'utf-8' },
       },
       {
@@ -1503,7 +1481,7 @@ describe('modules/manager/gomod/artifacts', () => {
           'docker run --rm --name=renovate_go --label=renovate_child -v "/tmp/github/some/repo":"' +
           '/tmp/github/some/repo" -v "/tmp/renovate/cache":"/tmp/renovate/cache" -e GOPROXY -e GOPRIVATE -e ' +
           'GONOPROXY -e GONOSUMDB -e GOINSECURE -e GOFLAGS -e CGO_ENABLED -e BUILDPACK_CACHE_DIR -w ' +
-          '"/tmp/github/some/repo" renovate/go:latest bash -l -c "go get -d -t ./... && ' +
+          '"/tmp/github/some/repo" renovate/go:1.14.0 bash -l -c "go get -d -t ./... && ' +
           'go install github.com/marwan-at-work/mod/cmd/mod@latest && mod upgrade ' +
           '--mod-name=github.com/google/go-github/v24 -t=28 && go mod tidy && go mod tidy"',
         options: {
@@ -1531,35 +1509,5 @@ describe('modules/manager/gomod/artifacts', () => {
         },
       },
     ]);
-    const execCommands: string[] = [
-      'go get -d -t ./...',
-      'go install github.com/marwan-at-work/mod/cmd/mod@latest',
-      'mod upgrade --mod-name=github.com/google/go-github/v24 -t=28',
-      'go mod tidy',
-      'go mod tidy',
-    ];
-    const execOption: ExecOptions = {
-      cwdFile: 'go.mod',
-      docker: {
-        image: 'go',
-        tagConstraint: '1.14',
-        tagScheme: 'npm',
-      },
-      env: {
-        BUILDPACK_CACHE_DIR: '/tmp/renovate/cache/containerbase',
-      },
-      extraEnv: {
-        CGO_ENABLED: '0',
-        GOFLAGS: '-modcacherw',
-        GOINSECURE: undefined,
-        GONOPROXY: undefined,
-        GONOSUMDB: undefined,
-        GOPATH: undefined,
-        GOPRIVATE: undefined,
-        GOPROXY: undefined,
-        GOSUMDB: undefined,
-      },
-    };
-    expect(exec).toHaveBeenCalledWith(execCommands, execOption);
   });
 });
