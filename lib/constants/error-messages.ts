@@ -45,6 +45,7 @@ export const FILE_ACCESS_VIOLATION_ERROR = 'file-access-violation-error';
 
 // Host error
 export const EXTERNAL_HOST_ERROR = 'external-host-error';
+export const ENDPOINT_NOT_SUPPORTED_ERROR = 'endpoint-not-supported-error';
 export const IGNORABLE_HOST_ERROR = 'ignorable-host-error';
 export const HOST_DISABLED = 'host-disabled';
 

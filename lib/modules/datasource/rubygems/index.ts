@@ -1,3 +1,4 @@
+import { EndpointNotSupportedError } from '../../../types/errors/endpoint-not-supported-error';
 import { cache } from '../../../util/cache/package/decorator';
 import * as rubyVersioning from '../../versioning/ruby';
 import { Datasource } from '../datasource';
@@ -56,13 +57,13 @@ export class RubyGemsDatasource extends Datasource {
         registryUrl,
       });
     } catch (error) {
-      if (error.reason === 'not_supported') {
+      if (error instanceof EndpointNotSupportedError) {
         return this.internalRubyGemsDatasource.getReleases({
           packageName,
           registryUrl,
         });
       }
-      return null;
+      throw error;
     }
   }
 }

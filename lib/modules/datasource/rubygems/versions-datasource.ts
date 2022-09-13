@@ -1,4 +1,5 @@
 import { logger } from '../../../logger';
+import { EndpointNotSupportedError } from '../../../types/errors/endpoint-not-supported-error';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { getElapsedMinutes } from '../../../util/date';
 import { HttpError } from '../../../util/http';
@@ -49,10 +50,9 @@ export class VersionsDatasource extends Datasource {
     logger.debug(`getRubygemsOrgDependency(${packageName})`);
     await this.syncVersions();
     if (!this.registryCache.isSupported) {
-      const err = new ExternalHostError(
+      const err = new EndpointNotSupportedError(
         new Error(`${this.registryUrl} is not supported`)
       );
-      err.reason = 'not_supported';
       throw err;
     }
     if (!this.registryCache.packageReleases[packageName]) {
