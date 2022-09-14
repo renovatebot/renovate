@@ -18,13 +18,15 @@ jest.mock('./util');
 const { getConfiguredRegistries, getDefaultRegistries } = mocked(util);
 const hostRules = mocked(_hostRules);
 
-const realFs: typeof import('../../../util/fs') =
-  jest.requireActual('../../../util/fs');
+const realFs = jest.requireActual(
+  '../../../util/fs'
+) as typeof import('../../../util/fs');
 
 const adminConfig: RepoGlobalConfig = {
   // `join` fixes Windows CI
   localDir: join('/tmp/github/some/repo'),
   cacheDir: join('/tmp/renovate/cache'),
+  containerbaseDir: join('/tmp/renovate/cache/containerbase'),
 };
 
 const config: UpdateArtifactsConfig = {};

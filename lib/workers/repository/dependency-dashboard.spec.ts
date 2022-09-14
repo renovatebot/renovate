@@ -19,13 +19,16 @@ import {
   GitHubMaxPrBodyLen,
   massageMarkdown,
 } from '../../modules/platform/github';
+import { regEx } from '../../util/regex';
 import { BranchConfig, BranchResult, BranchUpgradeConfig } from '../types';
 import * as dependencyDashboard from './dependency-dashboard';
 import { PackageFiles } from './package-files';
 
 type PrUpgrade = BranchUpgradeConfig;
 
-const massageMdSpy = jest.spyOn(platform, 'massageMarkdown');
+const massageMdSpy = platform.massageMarkdown;
+const getIssueSpy = platform.getIssue;
+
 let config: RenovateConfig;
 
 beforeEach(() => {
@@ -63,7 +66,7 @@ function genRandPackageFile(
 
 async function dryRun(
   branches: BranchConfig[],
-  platform: jest.Mocked<Platform>,
+  platform: jest.MockedObject<Platform>,
   ensureIssueClosingCalls = 0,
   ensureIssueCalls = 0
 ) {
@@ -92,6 +95,8 @@ describe('workers/repository/dependency-dashboard', () => {
       });
       await dependencyDashboard.readDashboardBody(conf);
       expect(conf).toEqual({
+        dependencyDashboardAllPending: false,
+        dependencyDashboardAllRateLimited: false,
         dependencyDashboardChecks: {
           branchName1: 'approve',
         },
@@ -99,6 +104,58 @@ describe('workers/repository/dependency-dashboard', () => {
         dependencyDashboardRebaseAllOpen: true,
         dependencyDashboardTitle: 'Dependency Dashboard',
         prCreation: 'approval',
+      });
+    });
+
+    it('reads dashboard body all pending approval', async () => {
+      const conf: RenovateConfig = {};
+      conf.prCreation = 'approval';
+      platform.findIssue.mockResolvedValueOnce({
+        title: '',
+        number: 1,
+        body: Fixtures.get('dependency-dashboard-with-8-PR.txt').replace(
+          '- [ ] <!-- approve-all-pending-prs -->',
+          '- [x] <!-- approve-all-pending-prs -->'
+        ),
+      });
+      await dependencyDashboard.readDashboardBody(conf);
+      expect(conf).toEqual({
+        dependencyDashboardChecks: {
+          branchName1: 'approve',
+          branchName2: 'approve',
+        },
+        dependencyDashboardIssue: 1,
+        dependencyDashboardRebaseAllOpen: false,
+        dependencyDashboardTitle: 'Dependency Dashboard',
+        prCreation: 'approval',
+        dependencyDashboardAllPending: true,
+        dependencyDashboardAllRateLimited: false,
+      });
+    });
+
+    it('reads dashboard body open all rate-limited', async () => {
+      const conf: RenovateConfig = {};
+      conf.prCreation = 'approval';
+      platform.findIssue.mockResolvedValueOnce({
+        title: '',
+        number: 1,
+        body: Fixtures.get('dependency-dashboard-with-8-PR.txt').replace(
+          '- [ ] <!-- create-all-rate-limited-prs -->',
+          '- [x] <!-- create-all-rate-limited-prs -->'
+        ),
+      });
+      await dependencyDashboard.readDashboardBody(conf);
+      expect(conf).toEqual({
+        dependencyDashboardChecks: {
+          branchName5: 'unlimit',
+          branchName6: 'unlimit',
+        },
+        dependencyDashboardIssue: 1,
+        dependencyDashboardRebaseAllOpen: false,
+        dependencyDashboardTitle: 'Dependency Dashboard',
+        prCreation: 'approval',
+        dependencyDashboardAllPending: false,
+        dependencyDashboardAllRateLimited: true,
       });
     });
   });
@@ -527,6 +584,123 @@ describe('workers/repository/dependency-dashboard', () => {
       expect(platform.ensureIssue.mock.calls[0][0].body).toMatchSnapshot();
     });
 
+    it('dependency Dashboard All Pending Approval', async () => {
+      const branches: BranchConfig[] = [
+        {
+          ...mock<BranchConfig>(),
+          prTitle: 'pr1',
+          upgrades: [{ ...mock<BranchUpgradeConfig>(), depName: 'dep1' }],
+          result: BranchResult.NeedsApproval,
+          branchName: 'branchName1',
+        },
+        {
+          ...mock<BranchConfig>(),
+          prTitle: 'pr2',
+          upgrades: [{ ...mock<BranchUpgradeConfig>(), depName: 'dep2' }],
+          result: BranchResult.NeedsApproval,
+          branchName: 'branchName2',
+        },
+      ];
+      config.dependencyDashboard = true;
+      config.dependencyDashboardChecks = {
+        branchName1: 'approve-branch',
+        branchName2: 'approve-branch',
+      };
+      config.dependencyDashboardIssue = 1;
+      getIssueSpy.mockResolvedValueOnce({
+        title: 'Dependency Dashboard',
+        body: `This issue contains a list of Renovate updates and their statuses.
+
+        ## Pending Approval
+
+        These branches will be created by Renovate only once you click their checkbox below.
+
+         - [ ] <!-- approve-branch=branchName1 -->pr1
+         - [ ] <!-- approve-branch=branchName2 -->pr2
+         - [x] <!-- approve-all-pending-prs -->🔐 **Create all pending approval PRs at once** 🔐`,
+      });
+      await dependencyDashboard.ensureDependencyDashboard(config, branches);
+      const checkApprovePendingSelectAll = regEx(
+        / - \[ ] <!-- approve-all-pending-prs -->/g
+      );
+      const checkApprovePendingBranch1 = regEx(
+        / - \[ ] <!-- approve-branch=branchName1 -->pr1/g
+      );
+      const checkApprovePendingBranch2 = regEx(
+        / - \[ ] <!-- approve-branch=branchName2 -->pr2/g
+      );
+      expect(
+        checkApprovePendingSelectAll.test(
+          platform.ensureIssue.mock.calls[0][0].body
+        )
+      ).toBeTrue();
+      expect(
+        checkApprovePendingBranch1.test(
+          platform.ensureIssue.mock.calls[0][0].body
+        )
+      ).toBeTrue();
+      expect(
+        checkApprovePendingBranch2.test(
+          platform.ensureIssue.mock.calls[0][0].body
+        )
+      ).toBeTrue();
+    });
+
+    it('dependency Dashboard Open All rate-limited', async () => {
+      const branches: BranchConfig[] = [
+        {
+          ...mock<BranchConfig>(),
+          prTitle: 'pr1',
+          upgrades: [{ ...mock<BranchUpgradeConfig>(), depName: 'dep1' }],
+          result: BranchResult.BranchLimitReached,
+          branchName: 'branchName1',
+        },
+        {
+          ...mock<BranchConfig>(),
+          prTitle: 'pr2',
+          upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep2' }],
+          result: BranchResult.PrLimitReached,
+          branchName: 'branchName2',
+        },
+      ];
+      config.dependencyDashboard = true;
+      config.dependencyDashboardChecks = {
+        branchName1: 'unlimit-branch',
+        branchName2: 'unlimit-branch',
+      };
+      config.dependencyDashboardIssue = 1;
+      getIssueSpy.mockResolvedValueOnce({
+        title: 'Dependency Dashboard',
+        body: `This issue contains a list of Renovate updates and their statuses.
+        ## Rate-limited
+        These updates are currently rate-limited. Click on a checkbox below to force their creation now.
+         - [x] <!-- create-all-rate-limited-prs -->**Open all rate-limited PRs**
+         - [ ] <!-- unlimit-branch=branchName1 -->pr1
+         - [ ] <!-- unlimit-branch=branchName2 -->pr2`,
+      });
+      await dependencyDashboard.ensureDependencyDashboard(config, branches);
+      const checkRateLimitedSelectAll = regEx(
+        / - \[ ] <!-- create-all-rate-limited-prs -->/g
+      );
+      const checkRateLimitedBranch1 = regEx(
+        / - \[ ] <!-- unlimit-branch=branchName1 -->pr1/g
+      );
+      const checkRateLimitedBranch2 = regEx(
+        / - \[ ] <!-- unlimit-branch=branchName2 -->pr2/g
+      );
+      expect(
+        checkRateLimitedSelectAll.test(
+          platform.ensureIssue.mock.calls[0][0].body
+        )
+      ).toBeTrue();
+      expect(
+        checkRateLimitedBranch1.test(platform.ensureIssue.mock.calls[0][0].body)
+      ).toBeTrue();
+      expect(
+        checkRateLimitedBranch2.test(platform.ensureIssue.mock.calls[0][0].body)
+      ).toBeTrue();
+    });
+
     it('rechecks branches', async () => {
       const branches: BranchConfig[] = [
         {
@@ -554,7 +728,7 @@ describe('workers/repository/dependency-dashboard', () => {
       config.dependencyDashboard = true;
       config.dependencyDashboardChecks = { branchName2: 'approve-branch' };
       config.dependencyDashboardIssue = 1;
-      mockedFunction(platform.getIssue!).mockResolvedValueOnce({
+      mockedFunction(platform.getIssue).mockResolvedValueOnce({
         title: 'Dependency Dashboard',
         body: `This issue contains a list of Renovate updates and their statuses.
 

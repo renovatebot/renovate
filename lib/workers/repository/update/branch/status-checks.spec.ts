@@ -1,4 +1,4 @@
-import { defaultConfig, platform } from '../../../../../test/util';
+import { getConfig, platform } from '../../../../../test/util';
 import { BranchStatus } from '../../../../types';
 import {
   ConfidenceConfig,
@@ -14,7 +14,7 @@ describe('workers/repository/update/branch/status-checks', () => {
 
     beforeEach(() => {
       config = {
-        ...defaultConfig,
+        ...getConfig(),
         branchName: 'renovate/some-branch',
       };
     });
@@ -56,7 +56,7 @@ describe('workers/repository/update/branch/status-checks', () => {
 
     beforeEach(() => {
       config = {
-        ...defaultConfig,
+        ...getConfig(),
         branchName: 'renovate/some-branch',
       };
     });

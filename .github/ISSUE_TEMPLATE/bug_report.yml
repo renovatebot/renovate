@@ -1,5 +1,5 @@
 name: Bug report
-description: You've found a bug with Renovate.
+description: Confirmed bugs only. If in doubt, create a Discussion instead.
 labels: ['type:bug', 'status:requirements', 'priority-5-triage']
 body:
   - type: markdown
@@ -29,7 +29,7 @@ body:
   - type: dropdown
     id: platform-select
     attributes:
-      label: Please select which platform you are using if self-hosting.
+      label: If you're self-hosting Renovate, select which platform you are using.
       options:
         - 'Azure DevOps (dev.azure.com)'
         - 'Azure DevOps Server'

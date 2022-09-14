@@ -272,7 +272,6 @@ If all your dependencies are on the Google Artifact Registry, you can base64 enc
         "hostRules": [
           {
             "matchHost": "europe-docker.pkg.dev",
-            "authType": "Basic",
             "username": "_json_key_base64",
             "password": "<base64 service account>"
           }
@@ -287,7 +286,6 @@ If all your dependencies are on the Google Artifact Registry, you can base64 enc
         "hostRules": [
           {
             "matchHost": "europe-docker.pkg.dev",
-            "authType": "Basic",
             "username": "_json_key_base64",
             "encrypted": {
               "password": "<encrypted base64 service account>"
@@ -371,7 +369,7 @@ To get access to the token a custom Renovate Docker image is needed that include
 The Dockerfile to create such an image can look like this:
 
 ```Dockerfile
-FROM renovate/renovate:32.169.1
+FROM renovate/renovate:32.194.5
 # Include the "Docker tip" which you can find here https://cloud.google.com/sdk/docs/install
 # under "Installation" for "Debian/Ubuntu"
 RUN ...

@@ -1,4 +1,5 @@
 import os from 'os';
+import v8 from 'v8';
 import type { InitialOptionsTsJest } from 'ts-jest/dist/types';
 
 const ci = !!process.env.CI;
@@ -8,26 +9,35 @@ type JestConfig = InitialOptionsTsJest & {
   workerIdleMemoryLimit?: string;
 };
 
+const cpus = os.cpus();
+const mem = os.totalmem();
+const stats = v8.getHeapStatistics();
+
+process.stderr.write(`Host stats:
+  Cpus:      ${cpus.length}
+  Memory:    ${(mem / 1024 / 1024 / 1024).toFixed(2)} GB
+  HeapLimit: ${(stats.heap_size_limit / 1024 / 1024 / 1024).toFixed(2)} GB
+`);
+
 /**
  * https://docs.github.com/en/actions/using-github-hosted-runners/about-github-hosted-runners#supported-runners-and-hardware-resources
+ * Currently it seems the runner only have 4GB
  */
 function jestGithubRunnerSpecs(): JestConfig {
-  if (os.platform() === 'darwin') {
-    //
-    return {
-      maxWorkers: 2,
-      workerIdleMemoryLimit: '4GB',
-    };
-  }
+  // if (os.platform() === 'darwin') {
+  //   return {
+  //     maxWorkers: 2,
+  //     workerIdleMemoryLimit: '4GB',
+  //   };
+  // }
 
   return {
-    maxWorkers: 2,
-    workerIdleMemoryLimit: '2GB',
+    maxWorkers: cpus.length,
+    workerIdleMemoryLimit: '1500MB', // '2GB',
   };
 }
 
 const config: JestConfig = {
-  preset: 'ts-jest',
   cacheDirectory: '.cache/jest',
   coverageDirectory: './coverage',
   collectCoverage: true,
@@ -48,12 +58,15 @@ const config: JestConfig = {
       statements: 100,
     },
   },
-  globals: {
-    'ts-jest': {
-      tsconfig: '<rootDir>/tsconfig.spec.json',
-      diagnostics: false,
-      isolatedModules: true,
-    },
+  transform: {
+    '\\.ts$': [
+      'ts-jest',
+      {
+        tsconfig: '<rootDir>/tsconfig.spec.json',
+        diagnostics: false,
+        isolatedModules: true,
+      },
+    ],
   },
   modulePathIgnorePatterns: ['<rootDir>/dist/', '/__fixtures__/'],
   reporters: ci ? ['default', 'github-actions'] : ['default'],

@@ -1,5 +1,5 @@
 import { Fixtures } from '../../../../../test/fixtures';
-import { defaultConfig } from '../../../../../test/util';
+import { getConfig, partial } from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
 import { WORKER_FILE_UPDATE_FAILED } from '../../../../constants/error-messages';
 import { extractPackageFile } from '../../../../modules/manager/html';
@@ -25,12 +25,12 @@ describe('workers/repository/update/branch/auto-replace', () => {
     });
 
     beforeEach(() => {
-      upgrade = {
-        // TODO: fix type #7154
-        ...JSON.parse(JSON.stringify(defaultConfig)),
+      upgrade = partial<BranchUpgradeConfig>({
+        // TODO: fix types (#7154)
+        ...(getConfig() as any),
         manager: 'html',
         packageFile: 'test',
-      };
+      });
       reuseExistingBranch = false;
     });
 
