@@ -1078,6 +1078,29 @@ describe('workers/repository/updates/generate', () => {
       );
     });
 
+    it('generates pretty version name properly', () => {
+      const branch: BranchUpgradeConfig[] = [
+        {
+          ...defaultConfig,
+          depName: 'some-dep',
+          isSingleVersion: true,
+          manager: 'some-manager',
+          newValue: 'foo-pkg-v3.2.1',
+          newVersion: 'foo-pkg-v3.2.1',
+          semanticCommits: 'enabled',
+          semanticCommitScope: 'package',
+          semanticCommitType: 'chore',
+        } as BranchUpgradeConfig,
+      ];
+      const res = generateBranchConfig(branch);
+      expect(res.prTitle).toBe(
+        'chore(package): update dependency some-dep to foo-pkg-v3.2.1'
+      );
+      expect(res.commitMessage).toBe(
+        'chore(package): update dependency some-dep to foo-pkg-v3.2.1'
+      );
+    });
+
     it('prevents issue with duplicating "v" character', () => {
       const branch: BranchUpgradeConfig[] = [
         {
