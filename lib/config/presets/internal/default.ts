@@ -1,4 +1,5 @@
 import type { Preset } from '../types';
+import { gt } from '../../../i18n';
 
 export const presets: Record<string, Preset> = {
   enableRenovate: {
@@ -538,7 +539,7 @@ export const presets: Record<string, Preset> = {
     ],
   },
   dependencyDashboard: {
-    description: 'Enable Renovate Dependency Dashboard creation.',
+    description: gt.gettext('Enable Renovate Dependency Dashboard creation.'),
     dependencyDashboard: true,
   },
   disableDependencyDashboard: {

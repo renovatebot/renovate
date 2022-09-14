@@ -4,6 +4,7 @@ import type { RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
 import type { PackageFile } from '../../../../modules/manager/types';
 import { emojify } from '../../../../util/emoji';
+import { gt } from '../../../../i18n';
 
 const defaultConfigFile = configFileNames[0];
 
@@ -45,10 +46,14 @@ export function getConfigDesc(
     return '';
   }
   logger.debug(`Found description array with length:${descriptionArr.length}`);
-  let desc = `\n### Configuration Summary\n\nBased on the default config's presets, Renovate will:\n\n`;
-  desc += `  - Start dependency updates only once this onboarding PR is merged\n`;
+  let desc = `\n### ${gt.gettext(
+    "Configuration Summary\n\nBased on the default config's presets, Renovate will:"
+  )}\n\n`;
+  desc += `  - ${gt.gettext(
+    'Start dependency updates only once this onboarding PR is merged'
+  )}\n`;
   descriptionArr.forEach((d) => {
-    desc += `  - ${d}\n`;
+    desc += `  - ${gt.gettext(d)}\n`;
   });
   desc += '\n';
   desc += emojify(
