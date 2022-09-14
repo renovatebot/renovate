@@ -9,7 +9,7 @@ await (async () => {
   try {
     const { major, minor, patch, installed } = await git.version();
     const gitVersion = `${major}.${minor}.${patch}`;
-    if (!installed || semver.lt(String(gitVersion), GIT_MINIMUM_VERSION)) {
+    if (!installed || semver.lt(gitVersion, GIT_MINIMUM_VERSION)) {
       if (process.env.CI) {
         shell.echo(
           `::error ::Minimum Git version ${GIT_MINIMUM_VERSION} is required, found version '${gitVersion}'.`
