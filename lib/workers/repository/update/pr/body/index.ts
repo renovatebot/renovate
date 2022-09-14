@@ -4,6 +4,7 @@ import { toBase64 } from '../../../../../util/string';
 import * as template from '../../../../../util/template';
 import { joinUrlParts } from '../../../../../util/url';
 import type { BranchConfig } from '../../../../types';
+import { getDepWarningsPR, getWarnings } from '../../../errors-warnings';
 import { getChangelogs } from './changelogs';
 import { getPrConfigDescription } from './config-description';
 import { getControls } from './controls';
@@ -69,9 +70,18 @@ export async function getPrBody(
   prBodyConfig: PrBodyConfig
 ): Promise<string> {
   massageUpdateMetadata(branchConfig);
+  let warnings = '';
+  warnings += getWarnings(branchConfig);
+  if (branchConfig.packageFiles) {
+    warnings += getDepWarningsPR(
+      branchConfig.packageFiles,
+      branchConfig.dependencyDashboard
+    );
+  }
   const content = {
     header: getPrHeader(branchConfig),
     table: getPrUpdatesTable(branchConfig),
+    warnings,
     notes: getPrNotes(branchConfig) + getPrExtraNotes(branchConfig),
     changelogs: getChangelogs(branchConfig),
     configDescription: await getPrConfigDescription(branchConfig),
