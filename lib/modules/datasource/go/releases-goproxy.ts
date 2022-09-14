@@ -212,7 +212,7 @@ export class GoProxyDatasource extends Datasource {
       .filter(is.nonEmptyStringAndNotWhitespace)
       .map((str) => {
         const [version, releaseTimestamp] = str.split(regEx(/\s+/));
-        return DateTime.fromISO(releaseTimestamp).toISO()
+        return DateTime.fromISO(releaseTimestamp).isValid
           ? { version, releaseTimestamp }
           : { version };
       });
