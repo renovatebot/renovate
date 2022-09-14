@@ -1,0 +1,79 @@
+// TODO #7154
+import { XmlDocument } from 'xmldoc';
+import { Fixtures } from '../../../../test/fixtures';
+import * as nugetUpdater from '.';
+
+const simpleContent = Fixtures.get(`for-bumpVersion/simple.csproj`);
+const minimumContent = Fixtures.get(`for-bumpVersion/minimum.csproj`);
+const prereleaseContent = Fixtures.get(`for-bumpVersion/prerelease.csproj`);
+
+describe('modules/manager/nuget/update', () => {
+  describe('bumpPackageVersion', () => {
+    it('bumps csproj version', () => {
+      const { bumpedContent } = nugetUpdater.bumpPackageVersion(
+        simpleContent,
+        '0.0.1',
+        'patch'
+      );
+
+      const project = new XmlDocument(bumpedContent!);
+      expect(project.valueWithPath('PropertyGroup.Version')).toBe('0.0.2');
+    });
+
+    it('does not bump version twice', () => {
+      const { bumpedContent } = nugetUpdater.bumpPackageVersion(
+        simpleContent,
+        '0.0.1',
+        'patch'
+      );
+      const { bumpedContent: bumpedContent2 } = nugetUpdater.bumpPackageVersion(
+        bumpedContent!,
+        '0.0.1',
+        'patch'
+      );
+
+      expect(bumpedContent).toEqual(bumpedContent2);
+    });
+
+    it('does not bump version if version is not a semantic version', () => {
+      const { bumpedContent } = nugetUpdater.bumpPackageVersion(
+        minimumContent,
+        '1',
+        'patch'
+      );
+
+      const project = new XmlDocument(bumpedContent!);
+      expect(project.valueWithPath('PropertyGroup.Version')).toBe('1');
+    });
+
+    it('does not bump version if csproj has no version', () => {
+      const { bumpedContent } = nugetUpdater.bumpPackageVersion(
+        minimumContent,
+        undefined,
+        'patch'
+      );
+
+      expect(bumpedContent).toEqual(minimumContent);
+    });
+
+    it('returns content if bumping errors', () => {
+      const { bumpedContent } = nugetUpdater.bumpPackageVersion(
+        simpleContent,
+        '0.0.1',
+        true as any
+      );
+      expect(bumpedContent).toEqual(simpleContent);
+    });
+
+    it('bumps csproj version with prerelease semver level', () => {
+      const { bumpedContent } = nugetUpdater.bumpPackageVersion(
+        prereleaseContent,
+        '1.0.0-1',
+        'prerelease'
+      );
+
+      const project = new XmlDocument(bumpedContent!);
+      expect(project.valueWithPath('PropertyGroup.Version')).toBe('1.0.0-2');
+    });
+  });
+});
