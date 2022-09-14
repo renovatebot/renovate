@@ -1,7 +1,7 @@
 import { mocked } from '../../test/util';
-import { gt, initI18n } from '.';
 import { logger } from '../logger';
 import * as _fs from '../util/fs';
+import { gt, initI18n } from '.';
 
 jest.mock('../util/fs');
 
@@ -16,7 +16,7 @@ describe('i18n/index', () => {
     it('do nothing and return when locale is en', async () => {
       await initI18n('en', '');
       expect(fs.readSystemFile).not.toHaveBeenCalled();
-      expect(gt.locale).toEqual('en');
+      expect(gt.locale).toBe('en');
     });
 
     it('load translations from the given PO file', async () => {
@@ -26,8 +26,8 @@ describe('i18n/index', () => {
         'utf8'
       );
 
-      expect(gt.locale).toEqual('zh_CN');
-      expect(gt.domain).toEqual('messages');
+      expect(gt.locale).toBe('zh_CN');
+      expect(gt.domain).toBe('messages');
     });
 
     it('should downgrade to English edition when loading PO file occurred any error', async () => {
@@ -37,10 +37,8 @@ describe('i18n/index', () => {
 
       await initI18n('zh_CN', './__fixtures__/message.po');
 
-      expect(logger.warn).toHaveBeenCalledWith(
-        'Occurred some error on reading the PO file Error: Can not read the file, downgrade to English edition'
-      );
-      expect(gt.locale).toEqual('en');
+      expect(logger.error).toHaveBeenCalled();
+      expect(gt.locale).toBe('en');
     });
   });
 });

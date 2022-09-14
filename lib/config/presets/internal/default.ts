@@ -1,5 +1,5 @@
-import type { Preset } from '../types';
 import { gt } from '../../../i18n';
+import type { Preset } from '../types';
 
 export const presets: Record<string, Preset> = {
   enableRenovate: {

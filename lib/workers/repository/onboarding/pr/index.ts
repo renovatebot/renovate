@@ -1,6 +1,8 @@
+import * as util from 'util';
 import is from '@sindresorhus/is';
 import { GlobalConfig } from '../../../../config/global';
 import type { RenovateConfig } from '../../../../config/types';
+import { gt } from '../../../../i18n';
 import { logger } from '../../../../logger';
 import type { PackageFile } from '../../../../modules/manager/types';
 import { platform } from '../../../../modules/platform';
@@ -24,8 +26,6 @@ import { addParticipants } from '../../update/pr/participants';
 import { getBaseBranchDesc } from './base-branch';
 import { getConfigDesc } from './config-description';
 import { getPrList } from './pr-list';
-import { gt } from '../../../../i18n';
-import * as util from 'util';
 
 export async function ensureOnboardingPr(
   config: RenovateConfig,

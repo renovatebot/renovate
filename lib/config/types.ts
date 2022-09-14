@@ -131,6 +131,8 @@ export interface RepoGlobalConfig {
   containerbaseDir?: string;
   platform?: PlatformId;
   endpoint?: string;
+  locale?: string;
+  translationsFilePath?: string;
 }
 
 export interface LegacyAdminConfig {

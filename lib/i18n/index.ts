@@ -1,7 +1,7 @@
-import Gettext from 'node-gettext';
-import { readSystemFile } from '../util/fs';
 import { po } from 'gettext-parser';
+import Gettext from 'node-gettext';
 import { logger } from '../logger';
+import { readSystemFile } from '../util/fs';
 
 export const gt = new Gettext();
 
@@ -30,9 +30,11 @@ export async function initI18n(
     gt.addTranslations(locale, domain, parsedTranslations);
     gt.setLocale(locale);
   } catch (err) {
-    logger.warn(
-      `Occurred some error on reading the PO file ${err}, downgrade to English edition`
+    logger.error(
+      { err },
+      'Occurred some error on reading the PO file, downgrade to English edition'
     );
+
     gt.setLocale('en');
     return;
   }

@@ -1,10 +1,10 @@
 import is from '@sindresorhus/is';
 import { configFileNames } from '../../../../config/app-strings';
 import type { RenovateConfig } from '../../../../config/types';
+import { gt } from '../../../../i18n';
 import { logger } from '../../../../logger';
 import type { PackageFile } from '../../../../modules/manager/types';
 import { emojify } from '../../../../util/emoji';
-import { gt } from '../../../../i18n';
 
 const defaultConfigFile = configFileNames[0];
 

@@ -3,6 +3,7 @@ import fs from 'fs-extra';
 import upath from 'upath';
 import { applySecretsToConfig } from '../../config/secrets';
 import type { AllConfig, RenovateConfig } from '../../config/types';
+import { initI18n } from '../../i18n';
 import { logger } from '../../logger';
 import { initPlatform } from '../../modules/platform';
 import * as packageCache from '../../util/cache/package';
@@ -10,7 +11,6 @@ import { setEmojiConfig } from '../../util/emoji';
 import { validateGitVersion } from '../../util/git';
 import * as hostRules from '../../util/host-rules';
 import { setMaxLimit } from './limits';
-import { initI18n } from '../../i18n';
 
 
 async function setDirectories(input: AllConfig): Promise<AllConfig> {
@@ -66,7 +66,10 @@ function setGlobalHostRules(config: RenovateConfig): void {
 }
 
 async function setI18n(config: AllConfig): Promise<void> {
-  await initI18n(config.locale, config.translationsFilePath);
+  await initI18n(
+    config.locale === undefined ? 'en' : config.locale,
+    config.translationsFilePath === undefined ? '' : config.translationsFilePath
+  );
 }
 
 export async function globalInitialize(

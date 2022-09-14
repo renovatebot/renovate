@@ -79,7 +79,6 @@ import type {
   PlatformConfig,
 } from './types';
 import { getUserDetails, getUserEmail } from './user';
-import { gt } from '../../../i18n';
 
 const githubApi = new githubHttp.GithubHttp();
 
@@ -128,7 +127,7 @@ export async function initPlatform({
 }: PlatformParams): Promise<PlatformResult> {
   let token = originalToken;
   if (!token) {
-    throw new Error('Init: ' + gt.gettext('You must configure a GitHub token'));
+    throw new Error('Init: You must configure a GitHub token');
   }
   token = token.replace(/^ghs_/, 'x-access-token:ghs_');
   platformConfig.isGHApp = token.startsWith('x-access-token:');
