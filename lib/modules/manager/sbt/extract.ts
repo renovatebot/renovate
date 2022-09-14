@@ -271,11 +271,12 @@ export function extractPackageFile(
   let parsedResult: Ctx | null = null;
 
   try {
-    parsedResult = scala.query(content, query, {
-      vars: {},
-      deps: [],
-      registryUrls: [MAVEN_REPO],
-    });
+    parsedResult =
+      scala.query(content, query, {
+        vars: {},
+        deps: [],
+        registryUrls: [MAVEN_REPO],
+      }) ?? null;
   } catch (err) /* istanbul ignore next */ {
     logger.warn({ err }, 'Sbt parsing error');
   }

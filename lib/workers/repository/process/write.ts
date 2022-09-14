@@ -106,30 +106,33 @@ export async function writeUpdates(
     }
     addMeta(meta);
     const branchExisted = branchExists(branchName);
-    let branchCache = {} as BranchCache;
-    if (branchExisted && config.repositoryCache === 'enabled') {
-      branchCache =
-        cachedBranches?.find((br) => br.branchName === branchName) ??
-        ({} as BranchCache);
+    let branchCache =
+      cachedBranches?.find((br) => br.branchName === branchName) ??
+      ({} as BranchCache);
 
-      if (Object.keys(branchCache).length === 0) {
+    if (Object.keys(branchCache).length === 0) {
+      if (config.repositoryCache === 'enabled') {
         logger.debug(
           `Branch cache is being created because it does not exist for ${branch.branchName}`
         );
-        branchCache.branchName = branchName;
-        // TODO: fix types (#7154)
-        branchCache.baseBranchName = baseBranch!;
-        cachedBranches.push(branchCache);
       }
+      // if branch cache doesn't exist create one
+      branchCache.branchName = branchName;
       // TODO: fix types (#7154)
-      branchCache = syncBranchCache(
-        branchName,
-        branchSha,
-        branch.baseBranch!,
-        baseBrachSha,
-        branchCache
-      );
+      branchCache.baseBranchName = baseBranch!;
+      cachedBranches.push(branchCache);
     }
+
+    // sync branch cache
+    // TODO: fix types (#7154)
+    branchCache = syncBranchCache(
+      branchName,
+      branchSha,
+      baseBranch!,
+      baseBrachSha,
+      branchCache
+    );
+
     const branchManagersFingerprint = hasha(
       [
         ...new Set(
@@ -157,7 +160,7 @@ export async function writeUpdates(
         ? branchFingerprint
         : branchCache.branchFingerprint;
 
-    // reset all cached values if a new commit is made
+    // reset all cached values when a new commit is made
     if (res?.commitSha) {
       // TODO: (fix types) #7154
       branchCache = {

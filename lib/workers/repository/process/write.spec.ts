@@ -302,7 +302,7 @@ describe('workers/repository/process/write', () => {
       });
     });
 
-    it('no invalidation if SHa are same', async () => {
+    it('no invalidation if branch and base branch sha match cached values', async () => {
       const branches = partial<BranchConfig[]>([
         {
           branchName: 'new/some-branch',
@@ -344,6 +344,7 @@ describe('workers/repository/process/write', () => {
       const branches = partial<BranchConfig[]>([
         {
           branchName: 'new/some-branch',
+          baseBranch: 'base_branch',
           manager: 'npm',
           upgrades: [
             {
