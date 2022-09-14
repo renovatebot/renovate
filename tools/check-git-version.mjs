@@ -7,10 +7,9 @@ const git = simpleGit();
 
 await (async () => {
   try {
-    const regex = /\d+\.\d+\.\d+/;
-    const stdout = await git.raw('--version');
-    const [gitVersion] = regex.exec(stdout) ?? [];
-    if (!gitVersion || semver.lt(gitVersion, GIT_MINIMUM_VERSION)) {
+    const { major, minor, patch, installed } = await git.version();
+    const gitVersion = `${major}.${minor}.${patch}`;
+    if (!installed || semver.lt(gitVersion, GIT_MINIMUM_VERSION)) {
       if (process.env.CI) {
         shell.echo(
           `::error ::Minimum Git version ${GIT_MINIMUM_VERSION} is required, found version '${gitVersion}'.`
