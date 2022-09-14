@@ -166,12 +166,12 @@ export async function validateGitVersion(): Promise<boolean> {
   const globalGit = simpleGit();
   try {
     const { major, minor, patch, installed } = await globalGit.version();
-    version = `${major}.${minor}.${patch}`;
     // istanbul ignore if
     if (!installed) {
       logger.error('Git not installed');
       return false;
     }
+    version = `${major}.${minor}.${patch}`;
   } catch (err) /* istanbul ignore next */ {
     logger.error({ err }, 'Error fetching git version');
     return false;
