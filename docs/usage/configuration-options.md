@@ -1406,6 +1406,14 @@ Renovate only adds labels when it creates the PR, which means:
 The `labels` array is non-mergeable, meaning if multiple `packageRules` match then Renovate uses the last value for `labels`.
 If you want to add/combine labels, use the `addLabels` config option, which is mergeable.
 
+## locale
+
+Renovate supports internationalization with [GUN Gettext](https://www.gnu.org/software/gettext/), you can specific expected locale with this option, and also assign translationsFilePath is required.
+
+```sh
+--locale fr
+```
+
 ## lockFileMaintenance
 
 This feature can be used to refresh lock files and keep them up-to-date.
@@ -2970,6 +2978,10 @@ Applicable only for GitHub platform (with vulnerability alerts enabled) and `npm
 When the `lockfileVersion` is higher than `1` in `package-lock.json`, remediations are only possible when changes are made to `package.json`.
 
 This is considered a feature flag with the aim to remove it and default to this behavior once it has been more widely tested.
+
+## translationsFilePath
+
+This option specific the PO(Portable Object) file's path. Renovate use the default single domain "messages" for i18n. You can translate your own edition by inovke `msginit` program, and then invoke `msgmerge` program to add more `msgid`.
 
 ## updateInternalDeps
 
