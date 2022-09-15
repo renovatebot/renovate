@@ -106,9 +106,9 @@ RUN apt-get update && \
 
 # Elixir
 
-ENV ELIXIR_VERSION=1.8.2
+ENV ELIXIR_VERSION=1.11.4
 
-RUN curl -L https://github.com/elixir-lang/elixir/releases/download/v${ELIXIR_VERSION}/Precompiled.zip -o Precompiled.zip && \
+RUN curl -L https://repo.hex.pm/builds/elixir/v${ELIXIR_VERSION}.zip -o Precompiled.zip && \
   mkdir -p /opt/elixir-${ELIXIR_VERSION}/ && \
   unzip Precompiled.zip -d /opt/elixir-${ELIXIR_VERSION}/ && \
   rm Precompiled.zip
