@@ -1,4 +1,6 @@
+import * as util from 'util';
 import type { RenovateConfig } from '../../../../config/types';
+import { gt } from '../../../../i18n';
 import { logger } from '../../../../logger';
 import { emojify } from '../../../../util/emoji';
 import { regEx } from '../../../../util/regex';
@@ -10,12 +12,21 @@ export function getPrList(
 ): string {
   logger.debug('getPrList()');
   logger.trace({ config });
-  let prDesc = `\n### What to Expect\n\n`;
+  let prDesc = `\n### ${gt.gettext('What to Expect')}\n\n`;
   if (!branches.length) {
-    return `${prDesc}It looks like your repository dependencies are already up-to-date and no Pull Requests will be necessary right away.\n`;
+    return `${prDesc}${gt.gettext(
+      'It looks like your repository dependencies are already up-to-date and no Pull Requests will be necessary right away.'
+    )}\n`;
   }
-  prDesc += `With your current configuration, Renovate will create ${branches.length} Pull Request`;
-  prDesc += branches.length > 1 ? `s:\n\n` : `:\n\n`;
+  prDesc +=
+    util.format(
+      gt.ngettext(
+        'With your current configuration, Renovate will create %d Pull Request',
+        'With your current configuration, Renovate will create %d Pull Requests',
+        branches.length
+      ),
+      branches.length
+    ) + ':\n\n';
 
   for (const branch of branches) {
     const prTitleRe = regEx(/@([a-z]+\/[a-z]+)/);
@@ -25,7 +36,10 @@ export function getPrList(
       '@&#8203;$1'
     )}</summary>\n\n`;
     if (branch.schedule?.length) {
-      prDesc += `  - Schedule: ${JSON.stringify(branch.schedule)}\n`;
+      prDesc += `  - ${gt.pgettext(
+        'onboarding/pr/pr-list',
+        'Schedule'
+      )}: ${JSON.stringify(branch.schedule)}\n`;
     }
     prDesc += `  - Branch name: \`${branch.branchName}\`\n`;
     prDesc += branch.baseBranch

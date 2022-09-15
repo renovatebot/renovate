@@ -1,7 +1,11 @@
 .PHONY: i18n/sources.txt i18n/messages.pot
 
 i18n/sources.txt:
-	@grep --files-with-match --recursive --extended-regexp "\.gettext\(" lib | sort > i18n/sources.txt
+	@grep \
+		--files-with-match \
+		--recursive \
+		--include \*.ts \
+		--extended-regexp "\.(gettext|dgettext|ngettext|dngettext|pgettext|dpgettext|npgettext|dnpgettext)\(" lib | sort > i18n/sources.txt
 
 i18n/messages.pot:
 	@xgettext \
