@@ -5,7 +5,6 @@ import * as codecommit from './codecommit';
 import * as gitea from './gitea';
 import * as github from './github';
 import * as gitlab from './gitlab';
-
 import type { Platform } from './types';
 
 const api = new Map<string, Platform>();

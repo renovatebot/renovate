@@ -151,6 +151,10 @@ export async function initRepo({
 export async function getPrList(): Promise<Pr[]> {
   logger.debug('getPrList()');
 
+  if (config.prList) {
+    return config.prList;
+  }
+
   const listPrsResponse = await client.listPullRequests(
     config.repository!,
     config.userArn!
@@ -366,8 +370,8 @@ export async function createPr({
     number: Number.parseInt(prCreateRes.pullRequest.pullRequestId),
     state: PrState.Open,
     title: prCreateRes.pullRequest.title,
-    sourceBranch: sourceBranch,
-    targetBranch: targetBranch,
+    sourceBranch,
+    targetBranch,
     sourceRepo: config.repository,
   };
 }

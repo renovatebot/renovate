@@ -1,6 +1,5 @@
 import { Readable } from 'stream';
 import { streamToString } from '../../../util/streams';
-
 import {
   getBranchNameWithoutRefsheadsPrefix,
   getGitStatusContextCombinedName,
