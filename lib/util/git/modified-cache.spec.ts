@@ -1,4 +1,5 @@
 import { mocked } from '../../../test/util';
+import * as _logger from '../../logger';
 import * as _repositoryCache from '../cache/repository';
 import type { BranchCache, RepoCacheData } from '../cache/repository/types';
 import {
@@ -7,6 +8,8 @@ import {
 } from './modified-cache';
 
 jest.mock('../cache/repository');
+jest.mock('../../logger');
+const logger = mocked(_logger);
 const repositoryCache = mocked(_repositoryCache);
 
 describe('util/git/modified-cache', () => {
@@ -52,6 +55,9 @@ describe('util/git/modified-cache', () => {
       expect(repoCache).toEqual({
         branches: [{ branchName: 'foo', sha: '111', isModified: false }],
       });
+      expect(logger.logger.warn).toHaveBeenCalledWith(
+        'Branch cache not present for foo'
+      );
     });
 
     it('replaces value when SHA has changed', () => {
@@ -61,14 +67,9 @@ describe('util/git/modified-cache', () => {
       expect(repoCache).toEqual({
         branches: [{ branchName: 'foo', sha: '131', isModified: false }],
       });
-    });
-
-    it('replaces value when both value and SHA have changed', () => {
-      setCachedModifiedResult('foo', '111', false);
-      setCachedModifiedResult('foo', 'aaa', true);
-      expect(repoCache).toEqual({
-        branches: [{ branchName: 'foo', sha: 'aaa', isModified: true }],
-      });
+      expect(logger.logger.warn).toHaveBeenCalledWith(
+        'Branch cache not present for foo'
+      );
     });
 
     it('handles multiple branches', () => {
@@ -82,6 +83,15 @@ describe('util/git/modified-cache', () => {
           { branchName: 'foo-3', sha: '222', isModified: false },
         ],
       });
+      expect(logger.logger.warn).toHaveBeenCalledWith(
+        'Branch cache not present for foo-1'
+      );
+      expect(logger.logger.warn).toHaveBeenCalledWith(
+        'Branch cache not present for foo-2'
+      );
+      expect(logger.logger.warn).toHaveBeenCalledWith(
+        'Branch cache not present for foo-3'
+      );
     });
   });
 });

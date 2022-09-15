@@ -28,13 +28,16 @@ export interface BranchUpgradeCache {
 
 export interface BranchCache {
   automerge: boolean;
+  branchFingerprint?: string;
   branchName: string;
   isModified: boolean;
+  /**
+   * Parent commit of branch sha (latest branch commit)
+   */
+  parentSha: string | null;
   prNo: number | null;
   sha: string | null;
-  parentSha: string | null;
   upgrades: BranchUpgradeCache[];
-  branchFingerprint?: string;
 }
 
 export interface RepoCacheData {
