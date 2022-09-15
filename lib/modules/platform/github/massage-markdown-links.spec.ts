@@ -9,8 +9,8 @@ describe('modules/platform/github/massage-markdown-links', () => {
     const res = massageMarkdownLinks(input);
     expect(res).toEqual(
       [
-        'Link [foo/bar#1](https://togithub.com/foo/bar/pull/1) points to [https://github.com/foo/bar/pull/1](https://togithub.com/foo/bar/pull/1).',
-        'URL [https://github.com/foo/bar/pull/1](https://togithub.com/foo/bar/pull/1) becomes [foo/bar#1](https://togithub.com/foo/bar/pull/1).',
+        'Link [foo/bar#1](https://togithub.com/foo/bar/pull/1) points to [foo/bar#1](https://togithub.com/foo/bar/pull/1).',
+        'URL [foo/bar#1](https://togithub.com/foo/bar/pull/1) becomes [foo/bar#1](https://togithub.com/foo/bar/pull/1).',
       ].join('\n')
     );
   });
@@ -59,19 +59,27 @@ describe('modules/platform/github/massage-markdown-links', () => {
 
   test.each`
     input                                                                                     | output
-    ${'github.com/foo/bar/discussions/1'}                                                     | ${'[github.com/foo/bar/discussions/1](togithub.com/foo/bar/discussions/1)'}
-    ${'github.com/foo/bar/issues/1'}                                                          | ${'[github.com/foo/bar/issues/1](togithub.com/foo/bar/issues/1)'}
-    ${'github.com/foo/bar/pull/1'}                                                            | ${'[github.com/foo/bar/pull/1](togithub.com/foo/bar/pull/1)'}
-    ${'github.com/Foo/bar/pull/1'}                                                            | ${'[github.com/Foo/bar/pull/1](togithub.com/Foo/bar/pull/1)'}
-    ${'www.github.com/foo/bar/discussions/1'}                                                 | ${'[www.github.com/foo/bar/discussions/1](www.togithub.com/foo/bar/discussions/1)'}
-    ${'www.github.com/foo/bar/issues/1'}                                                      | ${'[www.github.com/foo/bar/issues/1](www.togithub.com/foo/bar/issues/1)'}
-    ${'www.github.com/foo/bar/pull/1'}                                                        | ${'[www.github.com/foo/bar/pull/1](www.togithub.com/foo/bar/pull/1)'}
-    ${'https://github.com/foo/bar/discussions/1'}                                             | ${'[https://github.com/foo/bar/discussions/1](https://togithub.com/foo/bar/discussions/1)'}
-    ${'https://github.com/foo/bar/issues/1'}                                                  | ${'[https://github.com/foo/bar/issues/1](https://togithub.com/foo/bar/issues/1)'}
-    ${'https://github.com/foo/bar/pull/1'}                                                    | ${'[https://github.com/foo/bar/pull/1](https://togithub.com/foo/bar/pull/1)'}
-    ${'https://github.com/foo/bar/discussions/1#comment-123'}                                 | ${'[https://github.com/foo/bar/discussions/1#comment-123](https://togithub.com/foo/bar/discussions/1#comment-123)'}
-    ${'https://github.com/foo/bar/issues/1#comment-123'}                                      | ${'[https://github.com/foo/bar/issues/1#comment-123](https://togithub.com/foo/bar/issues/1#comment-123)'}
-    ${'https://github.com/foo/bar/pull/1#comment-123'}                                        | ${'[https://github.com/foo/bar/pull/1#comment-123](https://togithub.com/foo/bar/pull/1#comment-123)'}
+    ${'github.com/foo/bar/discussions/1'}                                                     | ${'[foo/bar#1](togithub.com/foo/bar/discussions/1)'}
+    ${'github.com/foo/bar/issues/1'}                                                          | ${'[foo/bar#1](togithub.com/foo/bar/issues/1)'}
+    ${'github.com/foo/bar/pull/1'}                                                            | ${'[foo/bar#1](togithub.com/foo/bar/pull/1)'}
+    ${'github.com/Foo/bar/pull/1'}                                                            | ${'[Foo/bar#1](togithub.com/Foo/bar/pull/1)'}
+    ${'github.com/Foo/bar.ab/pull/1'}                                                         | ${'[Foo/bar.ab#1](togithub.com/Foo/bar.ab/pull/1)'}
+    ${'github.com/Foo/bar-ab/pull/1'}                                                         | ${'[Foo/bar-ab#1](togithub.com/Foo/bar-ab/pull/1)'}
+    ${'www.github.com/foo/bar/discussions/1'}                                                 | ${'[foo/bar#1](www.togithub.com/foo/bar/discussions/1)'}
+    ${'www.github.com/foo/bar/issues/1'}                                                      | ${'[foo/bar#1](www.togithub.com/foo/bar/issues/1)'}
+    ${'www.github.com/foo/bar/pull/1'}                                                        | ${'[foo/bar#1](www.togithub.com/foo/bar/pull/1)'}
+    ${'www.github.com/foo/bar.ab/pull/1'}                                                     | ${'[foo/bar.ab#1](www.togithub.com/foo/bar.ab/pull/1)'}
+    ${'www.github.com/foo/bar-ab/pull/1'}                                                     | ${'[foo/bar-ab#1](www.togithub.com/foo/bar-ab/pull/1)'}
+    ${'https://github.com/foo/bar/discussions/1'}                                             | ${'[foo/bar#1](https://togithub.com/foo/bar/discussions/1)'}
+    ${'https://github.com/foo/bar/issues/1'}                                                  | ${'[foo/bar#1](https://togithub.com/foo/bar/issues/1)'}
+    ${'https://github.com/foo/bar/pull/1'}                                                    | ${'[foo/bar#1](https://togithub.com/foo/bar/pull/1)'}
+    ${'https://github.com/foo/bar.ab/pull/1'}                                                 | ${'[foo/bar.ab#1](https://togithub.com/foo/bar.ab/pull/1)'}
+    ${'https://github.com/foo/bar-ab/pull/1'}                                                 | ${'[foo/bar-ab#1](https://togithub.com/foo/bar-ab/pull/1)'}
+    ${'https://github.com/foo/bar/discussions/1#comment-123'}                                 | ${'[foo/bar#1#comment-123](https://togithub.com/foo/bar/discussions/1#comment-123)'}
+    ${'https://github.com/foo/bar/issues/1#comment-123'}                                      | ${'[foo/bar#1#comment-123](https://togithub.com/foo/bar/issues/1#comment-123)'}
+    ${'https://github.com/foo/bar/pull/1#comment-123'}                                        | ${'[foo/bar#1#comment-123](https://togithub.com/foo/bar/pull/1#comment-123)'}
+    ${'https://github.com/foo/bar.ab/pull/1#comment-123'}                                     | ${'[foo/bar.ab#1#comment-123](https://togithub.com/foo/bar.ab/pull/1#comment-123)'}
+    ${'https://github.com/foo/bar-ab/pull/1#comment-123'}                                     | ${'[foo/bar-ab#1#comment-123](https://togithub.com/foo/bar-ab/pull/1#comment-123)'}
     ${'[github.com/foo/bar/discussions/1](github.com/foo/bar/discussions/1)'}                 | ${'[github.com/foo/bar/discussions/1](togithub.com/foo/bar/discussions/1)'}
     ${'[github.com/foo/bar/issues/1](github.com/foo/bar/issues/1)'}                           | ${'[github.com/foo/bar/issues/1](togithub.com/foo/bar/issues/1)'}
     ${'[github.com/foo/bar/pull/1](github.com/foo/bar/pull/1)'}                               | ${'[github.com/foo/bar/pull/1](togithub.com/foo/bar/pull/1)'}
@@ -81,6 +89,8 @@ describe('modules/platform/github/massage-markdown-links', () => {
     ${'[https://github.com/foo/bar/discussions/1](https://github.com/foo/bar/discussions/1)'} | ${'[https://github.com/foo/bar/discussions/1](https://togithub.com/foo/bar/discussions/1)'}
     ${'[https://github.com/foo/bar/issues/1](https://github.com/foo/bar/issues/1)'}           | ${'[https://github.com/foo/bar/issues/1](https://togithub.com/foo/bar/issues/1)'}
     ${'[https://github.com/foo/bar/pull/1](https://github.com/foo/bar/pull/1)'}               | ${'[https://github.com/foo/bar/pull/1](https://togithub.com/foo/bar/pull/1)'}
+    ${'[https://github.com/ab-cd/ab.cd/pull/254](https://github.com/ab-cd/ab.cd/pull/254)'}   | ${'[https://github.com/ab-cd/ab.cd/pull/254](https://togithub.com/ab-cd/ab.cd/pull/254)'}
+    ${'[https://github.com/ab-cd/ab-cd/pull/254](https://github.com/ab-cd/ab-cd/pull/254)'}   | ${'[https://github.com/ab-cd/ab-cd/pull/254](https://togithub.com/ab-cd/ab-cd/pull/254)'}
   `(
     '$input -> $output',
     ({ input, output }: { input: string; output: string }) => {
