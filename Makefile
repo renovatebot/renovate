@@ -5,7 +5,7 @@ i18n/sources.txt:
 
 i18n/messages.pot:
 	xgettext --files-from=i18n/sources.txt \
-		     --output=i18n/messages.pot \
-			 --join-existing \
-			 --language=JavaScript \
-			 --package-name=renovate-platform
+		--output=i18n/messages.pot \
+		--join-existing \
+		--language=JavaScript \
+		--package-name=renovate-platform
