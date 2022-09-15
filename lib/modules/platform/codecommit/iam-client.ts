@@ -14,8 +14,8 @@ export function initIamClient(
 ): IAMClient {
   if (!iam) {
     iam = new IAMClient({
-      region: region,
-      credentials: credentials,
+      region,
+      credentials,
     });
   }
   return iam;

@@ -65,8 +65,8 @@ export function buildCodeCommitClient(
 ): CodeCommitClient {
   if (!codeCommitClient) {
     codeCommitClient = new CodeCommitClient({
-      region: region,
-      credentials: credentials,
+      region,
+      credentials,
     });
   }
   return codeCommitClient;
@@ -169,12 +169,12 @@ export async function squashMerge(
 }
 
 export async function updatePrStatus(
-  prNo: string,
-  prStatusInput: PullRequestStatusEnum.CLOSED | PullRequestStatusEnum.OPEN
+  pullRequestId: string,
+  pullRequestStatus: PullRequestStatusEnum.CLOSED | PullRequestStatusEnum.OPEN
 ): Promise<UpdatePullRequestStatusOutput> {
   const input: UpdatePullRequestStatusInput = {
-    pullRequestId: prNo,
-    pullRequestStatus: prStatusInput,
+    pullRequestId,
+    pullRequestStatus,
   };
   const cmd = new UpdatePullRequestStatusCommand(input);
   return await codeCommitClient.send(cmd);
@@ -193,12 +193,12 @@ export async function updatePrTitle(
 }
 
 export async function updatePrDescription(
-  prNo: string,
-  body: string
+  pullRequestId: string,
+  description: string
 ): Promise<UpdatePullRequestDescriptionOutput> {
   const input: UpdatePullRequestDescriptionInput = {
-    pullRequestId: prNo,
-    description: body,
+    pullRequestId,
+    description,
   };
   const cmd = new UpdatePullRequestDescriptionCommand(input);
   return await codeCommitClient.send(cmd);
@@ -207,18 +207,18 @@ export async function updatePrDescription(
 export async function createPr(
   title: string,
   description: string,
-  sourceRefName: string,
-  targetRefName: string,
-  repository: string | undefined
+  sourceReference: string,
+  destinationReference: string,
+  repositoryName: string | undefined
 ): Promise<CreatePullRequestOutput> {
   const input: CreatePullRequestInput = {
-    title: title,
-    description: description,
+    title,
+    description,
     targets: [
       {
-        sourceReference: sourceRefName,
-        destinationReference: targetRefName,
-        repositoryName: repository,
+        sourceReference,
+        destinationReference,
+        repositoryName,
       },
     ],
   };
@@ -241,12 +241,12 @@ export async function getFile(
 }
 
 export async function listPullRequests(
-  repository: string,
-  userArn: string
+  repositoryName: string,
+  authorArn: string
 ): Promise<ListPullRequestsOutput> {
   const input: ListPullRequestsInput = {
-    repositoryName: repository,
-    authorArn: userArn,
+    repositoryName,
+    authorArn,
     pullRequestStatus: PullRequestStatusEnum.OPEN,
   };
   const cmd = new ListPullRequestsCommand(input);
@@ -264,10 +264,10 @@ export async function getRepositoryInfo(
 }
 
 export async function getPr(
-  prId: string
+  pullRequestId: string
 ): Promise<GetPullRequestOutput | undefined> {
   const input: GetPullRequestInput = {
-    pullRequestId: prId,
+    pullRequestId,
   };
   const cmd = new GetPullRequestCommand(input);
   let res;
