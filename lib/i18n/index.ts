@@ -32,7 +32,7 @@ export async function initI18n(
   } catch (err) {
     logger.error(
       { err },
-      'Occurred some error on reading the PO file, downgrade to English edition'
+      'Occurred some error on reading the PO file, fallback to English edition'
     );
 
     gt.setLocale('en');

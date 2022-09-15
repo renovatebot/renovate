@@ -1408,7 +1408,7 @@ If you want to add/combine labels, use the `addLabels` config option, which is m
 
 ## locale
 
-Renovate supports internationalization with [GUN Gettext](https://www.gnu.org/software/gettext/), you can specific expected locale with this option, and also assign translationsFilePath is required.
+Renovate supports internationalization with [GNU Gettext](https://www.gnu.org/software/gettext/), you can specific expected locale with this option, and also assign translationsFilePath is required.
 
 ```sh
 --locale fr
@@ -2981,7 +2981,11 @@ This is considered a feature flag with the aim to remove it and default to this 
 
 ## translationsFilePath
 
-This option specific the PO(Portable Object) file's path. Renovate use the default single domain "messages" for i18n. You can translate your own edition by inovke `msginit` program, and then invoke `msgmerge` program to add more `msgid`.
+This option is specific the PO(Portable Object) file's path.
+
+Renovate uses the default single domain "messages" for i18n.
+
+You can translate your own edition by inovking `msginit` program, and then invoke `msgmerge` program to add more `msgid`.
 
 ## updateInternalDeps
 
