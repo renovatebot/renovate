@@ -84,7 +84,12 @@ export function getPrList(
     prHourlyLimit < branches.length
   ) {
     prDesc += emojify(
-      `<br />\n\n:children_crossing: Branch creation will be limited to maximum ${prHourlyLimit} per hour, so it doesn't swamp any CI resources or spam the project. See docs for \`prhourlylimit\` for details.\n\n`
+      `<br />\n\n:children_crossing: ${util.format(
+        gt.gettext(
+          "Branch creation will be limited to maximum %d per hour, so it doesn't swamp any CI resources or spam the project. See docs for `prhourlylimit` for details."
+        ),
+        prHourlyLimit
+      )}\n\n`
     );
   }
   return prDesc;

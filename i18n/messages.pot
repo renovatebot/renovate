@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: renovate-platform\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-09-15 20:28+0800\n"
+"POT-Creation-Date: 2022-09-16 17:00+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -27,6 +27,7 @@ msgid "You must configure a GitHub token"
 msgstr ""
 
 #: lib/workers/repository/onboarding/pr/config-description.ts:50
+#: lib/workers/repository/onboarding/pr/config-description.ts:51
 msgid ""
 "Configuration Summary\n"
 "\n"
@@ -34,7 +35,21 @@ msgid ""
 msgstr ""
 
 #: lib/workers/repository/onboarding/pr/config-description.ts:53
+#: lib/workers/repository/onboarding/pr/config-description.ts:54
 msgid "Start dependency updates only once this onboarding PR is merged"
+msgstr ""
+
+#: lib/workers/repository/onboarding/pr/config-description.ts:62
+msgid ""
+"Would you like to change the way Renovate is upgrading your dependencies?"
+msgstr ""
+
+#: lib/workers/repository/onboarding/pr/config-description.ts:67
+#, javascript-format
+msgid ""
+"Simply edit the `%s` in this branch with your custom config and the list of "
+"Pull Requests in the \"What to Expect\" section below will be updated the "
+"next time Renovate runs."
 msgstr ""
 
 #: lib/workers/repository/onboarding/pr/index.ts:45
@@ -116,4 +131,12 @@ msgstr[1] ""
 #: lib/workers/repository/onboarding/pr/pr-list.ts:41
 msgctxt "onboarding/pr/pr-list"
 msgid "Schedule"
+msgstr ""
+
+#: lib/workers/repository/onboarding/pr/pr-list.ts:89
+#, javascript-format
+msgid ""
+"Branch creation will be limited to maximum %d per hour, so it doesn't swamp "
+"any CI resources or spam the project. See docs for `prhourlylimit` for "
+"details."
 msgstr ""

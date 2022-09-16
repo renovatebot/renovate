@@ -1,3 +1,4 @@
+import * as util from 'util';
 import is from '@sindresorhus/is';
 import { configFileNames } from '../../../../config/app-strings';
 import type { RenovateConfig } from '../../../../config/types';
@@ -57,9 +58,16 @@ export function getConfigDesc(
   });
   desc += '\n';
   desc += emojify(
-    `:abcd: Would you like to change the way Renovate is upgrading your dependencies?`
+    `:abcd: ${gt.gettext(
+      'Would you like to change the way Renovate is upgrading your dependencies?'
+    )}`
   );
-  desc += ` Simply edit the \`${configFile}\` in this branch with your custom config and the list of Pull Requests in the "What to Expect" section below will be updated the next time Renovate runs.`;
+  desc += ` ${util.format(
+    gt.gettext(
+      'Simply edit the `%s` in this branch with your custom config and the list of Pull Requests in the "What to Expect" section below will be updated the next time Renovate runs.'
+    ),
+    configFile
+  )}`;
   desc += '\n\n---\n';
   return desc;
 }
