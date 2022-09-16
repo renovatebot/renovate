@@ -61,5 +61,33 @@ describe('modules/datasource/conda/index', () => {
       expect(res).toMatchSnapshot();
       expect(res?.releases).toHaveLength(94);
     });
+
+    it('supports multiple custom datasource urls', async () => {
+      const depName = 'pytest'
+      httpMock
+        .scope('https://api.anaconda.org/package/rapids')
+        .get(`/${depName}`)
+        .reply(404);
+        //.replyWithError('error');
+      httpMock
+        .scope('https://api.anaconda.org/package/conda-forge')
+        .get(`/${depName}`)
+        .reply(200, Fixtures.get('pytest.json'));
+      const config = {
+        registryUrls: [
+          'https://api.anaconda.org/package/rapids',
+          'https://api.anaconda.org/package/conda-forge',
+          'https://api.anaconda.org/package/nvidia',
+        ],
+      };
+      const res = await getPkgReleases({
+        ...config,
+        datasource,
+        depName: depName,
+      });
+      expect(res).toMatchSnapshot();
+      expect(res?.releases).toHaveLength(94);
+    });
+
   });
 });
