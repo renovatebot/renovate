@@ -72,7 +72,7 @@ export async function writeUpdates(
       ({} as BranchCache);
 
     if (Object.keys(branchState).length === 0) {
-      if (config.repositoryCache === 'enabled') {
+      if (branchExisted && config.repositoryCache === 'enabled') {
         logger.debug(`No branch cache found for ${branch.branchName}`);
       }
 
