@@ -1477,25 +1477,6 @@
   resolved "https://registry.yarnpkg.com/@istanbuljs/schema/-/schema-0.1.3.tgz#e45e384e4b8ec16bce2fd903af78450f6bf7ec98"
   integrity sha512-ZXRY4jNvVgSVQ8DL3LTcakaAtXwTVUxE81hslsyD2AtoXW/wVob10HkOJ1X/pAlcI7D+2YoZKg5do8G/w6RYgA==
 
-"@jamiemagee/osv-offline-db@1.1.4":
-  version "1.1.4"
-  resolved "https://registry.yarnpkg.com/@jamiemagee/osv-offline-db/-/osv-offline-db-1.1.4.tgz#b5f637fda46ed5cb9ae8575f3c8d0c6c9685da9d"
-  integrity sha512-xuXQ3PDwtxp1Tg++6SOeDUdrDNOfzO+ESOXkB756mv/v1Izm+Ss/4irO14SIAySU8YC8w2EJ6XXRmanZXLjunA==
-  dependencies:
-    "@seald-io/nedb" "3.0.0"
-
-"@jamiemagee/osv-offline@1.2.11":
-  version "1.2.11"
-  resolved "https://registry.yarnpkg.com/@jamiemagee/osv-offline/-/osv-offline-1.2.11.tgz#6f71d3e0248e2b2fa91e0a8b18939fff003ac11b"
-  integrity sha512-61UbXKZuhVsmHmjMIoCYdYRjdF5TUiASpWZrLjnPK+MrUFa4orizdgEfVumch87lN0jqfdIx/rsRuEl6KRf5xg==
-  dependencies:
-    "@jamiemagee/osv-offline-db" "1.1.4"
-    "@octokit/rest" "19.0.4"
-    adm-zip "^0.5.9"
-    fs-extra "10.0.0"
-    got "11.8.5"
-    luxon "3.0.1"
-
 "@jest/console@^29.0.2", "@jest/console@^29.0.3":
   version "29.0.3"
   resolved "https://registry.yarnpkg.com/@jest/console/-/console-29.0.3.tgz#a222ab87e399317a89db88a58eaec289519e807a"
@@ -2227,6 +2208,25 @@
   version "0.0.4"
   resolved "https://github.com/renovatebot/eslint-plugin#0c444386e79d6145901212507521b8a0a48af000"
 
+"@renovatebot/osv-offline-db@1.0.1":
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/@renovatebot/osv-offline-db/-/osv-offline-db-1.0.1.tgz#8fc465ce29811a8f6b2a9c452562e54a8d53f2e5"
+  integrity sha512-GZiFxckbNWW06fb8013LGPdNzp1lGONoUloHTjbC9/SP0AdrfgHZAHXy/o8uKB5nleodk7+siBojv21JPsrcqQ==
+  dependencies:
+    "@seald-io/nedb" "3.1.0"
+
+"@renovatebot/osv-offline@1.0.2":
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/@renovatebot/osv-offline/-/osv-offline-1.0.2.tgz#35e0c03ed823f281dccd82b66392553106c1936c"
+  integrity sha512-ID2+GSiOlhiuhLqKvZZN0kChKN4t8yUttXp6XnoTs+O4fiimGY2xrRnZVTlrHz8IB6iWkstJ3i8pojJsnZJ8nw==
+  dependencies:
+    "@octokit/rest" "19.0.4"
+    "@renovatebot/osv-offline-db" "1.0.1"
+    adm-zip "^0.5.9"
+    fs-extra "10.0.0"
+    got "11.8.5"
+    luxon "3.0.3"
+
 "@renovatebot/pep440@2.1.5":
   version "2.1.5"
   resolved "https://registry.yarnpkg.com/@renovatebot/pep440/-/pep440-2.1.5.tgz#6a9d09ade925f380f9ae4e2153f711a1db92162a"
@@ -2244,10 +2244,10 @@
   resolved "https://registry.yarnpkg.com/@seald-io/binary-search-tree/-/binary-search-tree-1.0.2.tgz#9f0e5cec5e0acf97f1b495f2f6d3476ddb6a94ed"
   integrity sha512-+pYGvPFAk7wUR+ONMOlc6A+LUN4kOCFwyPLjyaeS7wVibADPHWYJNYsNtyIAwjF1AXQkuaXElnIc4XjKt55QZA==
 
-"@seald-io/nedb@3.0.0":
-  version "3.0.0"
-  resolved "https://registry.yarnpkg.com/@seald-io/nedb/-/nedb-3.0.0.tgz#1bf681140d408c290cfdceb46cf8b224f373ae83"
-  integrity sha512-nJLQPbosz84BlJdE9qLRbIfQDYpB7PPMi6yGfQbN7YoWsnGef/sIFLDGWcV/rqsOfzJD5wtQYEcA42MIDerFvg==
+"@seald-io/nedb@3.1.0":
+  version "3.1.0"
+  resolved "https://registry.yarnpkg.com/@seald-io/nedb/-/nedb-3.1.0.tgz#6105345a18596f6f9d69f46d7f572efdae32af8e"
+  integrity sha512-5G0hCQGJjOelOutvW1l4VD581XMhTPxpj1BUaCWTEM2MPXR9TzIr0MKMnEjnTA5nEKfujPyvVW7iF3etm1/gKQ==
   dependencies:
     "@seald-io/binary-search-tree" "^1.0.2"
     localforage "^1.9.0"
@@ -6679,11 +6679,6 @@ lru-cache@^7.4.4, lru-cache@^7.5.1, lru-cache@^7.7.1:
   version "7.14.0"
   resolved "https://registry.yarnpkg.com/lru-cache/-/lru-cache-7.14.0.tgz#21be64954a4680e303a09e9468f880b98a0b3c7f"
   integrity sha512-EIRtP1GrSJny0dqb50QXRUNBxHJhcpxHC++M5tD7RYbvLLn5KVWKsbyswSSqDuU15UFi3bgTQIY8nhDMeF6aDQ==
-
-luxon@3.0.1:
-  version "3.0.1"
-  resolved "https://registry.yarnpkg.com/luxon/-/luxon-3.0.1.tgz#6901111d10ad06fd267ad4e4128a84bef8a77299"
-  integrity sha512-hF3kv0e5gwHQZKz4wtm4c+inDtyc7elkanAsBq+fundaCdUBNJB1dHEGUZIM6SfSBUlbVFduPwEtNjFK8wLtcw==
 
 luxon@3.0.3:
   version "3.0.3"
