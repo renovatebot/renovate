@@ -17,6 +17,7 @@ export const presets: Record<string, Preset> = {
       'replacements:joi-to-scoped',
       'replacements:joi-to-unscoped',
       'replacements:now-to-vercel',
+      'replacements:parcel-css-to-lightningcss',
       'replacements:react-query-devtools-to-scoped',
       'replacements:react-query-to-scoped',
       'replacements:renovate-pep440-to-renovatebot-pep440',
@@ -103,6 +104,17 @@ export const presets: Record<string, Preset> = {
         matchPackageNames: ['now'],
         replacementName: 'vercel',
         replacementVersion: '21.0.0',
+      },
+    ],
+  },
+  'parcel-css-to-lightningcss': {
+    description: '`@parcel/css` was renamed `lightningcss`.',
+    packageRules: [
+      {
+        matchDatasources: ['npm'],
+        matchPackageNames: ['@parcel/css'],
+        replacementName: 'lightningcss',
+        replacementVersion: '1.14.0',
       },
     ],
   },
