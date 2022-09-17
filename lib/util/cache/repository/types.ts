@@ -27,16 +27,37 @@ export interface BranchUpgradeCache {
 }
 
 export interface BranchCache {
+  /**
+   *Whether this branch has automerge enabled
+   */
   automerge: boolean;
+  /**
+   * Hash of the manager fingerprints and the update branch config
+   */
   branchFingerprint?: string;
+  /**
+   * Branch name
+   */
   branchName: string;
+  /**
+   * Whether a person not listed in gitIgnoredAuthors updated the branch.
+   */
   isModified: boolean;
   /**
-   * Parent commit of branch sha (latest branch commit)
+   * Parent commit of current branch sha
    */
   parentSha: string | null;
+  /**
+   * Pr nunber of PR created from this branch
+   */
   prNo: number | null;
+  /**
+   * The branch's most recent commit SHA
+   */
   sha: string | null;
+  /**
+   * Details on the dependency upgrades that have been applied in this branch
+   */
   upgrades: BranchUpgradeCache[];
 }
 

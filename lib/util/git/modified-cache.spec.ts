@@ -1,5 +1,4 @@
-import { mocked, partial } from '../../../test/util';
-import * as _logger from '../../logger';
+import { logger, mocked, partial } from '../../../test/util';
 import * as _repositoryCache from '../cache/repository';
 import type { BranchCache, RepoCacheData } from '../cache/repository/types';
 import {
@@ -8,8 +7,6 @@ import {
 } from './modified-cache';
 
 jest.mock('../cache/repository');
-jest.mock('../../logger');
-const logger = mocked(_logger);
 const repositoryCache = mocked(_repositoryCache);
 
 describe('util/git/modified-cache', () => {
