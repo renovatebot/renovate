@@ -26,7 +26,7 @@ export function setCachedModifiedResult(
   );
 
   if (!branch) {
-    logger.warn(`Branch cache not present for ${branchName}`);
+    logger.debug(`Branch cache not present for ${branchName}`);
     return;
   }
 
