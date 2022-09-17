@@ -44,7 +44,7 @@ export interface BranchCache {
    */
   isModified: boolean;
   /**
-   * Parent commit of current branch sha
+   * Parent commit of branch sha
    */
   parentSha: string | null;
   /**
