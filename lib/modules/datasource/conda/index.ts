@@ -6,6 +6,7 @@ import { Datasource } from '../datasource';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
 import { datasource, defaultRegistryUrl } from './common';
 import type { CondaPackage } from './types';
+import { joinUrlParts } from '../../../util/url';
 
 export class CondaDatasource extends Datasource {
   static readonly id = datasource;
@@ -37,7 +38,7 @@ export class CondaDatasource extends Datasource {
 
     // TODO: types (#7154)
     // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-    const url = `${registryUrl}/${packageName}`;
+    const url = joinUrlParts(registryUrl, packageName);
 
     const result: ReleaseResult = {
       releases: [],
