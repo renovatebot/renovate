@@ -57,7 +57,8 @@ function getReadable(
   return readable;
 }
 
-function getSpawnStub(args: StubArgs): ChildProcess {
+// TODO: fix types, jest is using wrong overload (#7154)
+function getSpawnStub(args: StubArgs): any {
   const {
     cmd,
     error,
