@@ -60,7 +60,7 @@ describe('util/git/modified-cache', () => {
     it('does not create new branch cache for when cache is empty', () => {
       setCachedModifiedResult('foo', '111', false);
       expect(repoCache).toEqual({});
-      expect(logger.logger.warn).toHaveBeenCalledWith(
+      expect(logger.logger.debug).toHaveBeenCalledWith(
         'Branch cache not present for foo'
       );
     });
