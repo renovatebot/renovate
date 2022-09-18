@@ -1,3 +1,23 @@
+import {
+  CodeCommitClient,
+  CreatePullRequestApprovalRuleCommand,
+  CreatePullRequestCommand,
+  DeleteCommentContentCommand,
+  DescribePullRequestEventsCommand,
+  GetCommentsForPullRequestCommand,
+  GetFileCommand,
+  GetPullRequestCommand,
+  GetRepositoryCommand,
+  ListPullRequestsCommand,
+  ListRepositoriesCommand,
+  MergeBranchesBySquashCommand,
+  PostCommentForPullRequestCommand,
+  UpdatePullRequestDescriptionCommand,
+  UpdatePullRequestStatusCommand,
+  UpdatePullRequestTitleCommand,
+} from '@aws-sdk/client-codecommit';
+import { GetUserCommand, IAMClient } from '@aws-sdk/client-iam';
+import { mockClient } from 'aws-sdk-client-mock';
 import { TextEncoder } from 'web-encoding';
 import {
   PLATFORM_BAD_CREDENTIALS,
@@ -6,39 +26,32 @@ import {
 } from '../../../constants/error-messages';
 import type { logger as _logger } from '../../../logger';
 import { PrState } from '../../../types';
-import type * as _git from '../../../util/git';
+import * as git from '../../../util/git';
 import type { Platform } from '../types';
-
-jest.mock('@aws-sdk/client-codecommit');
-jest.mock('@aws-sdk/client-iam');
+import { config } from './index';
 
 describe('modules/platform/codecommit/index', () => {
   let codeCommit: Platform;
   let logger: jest.Mocked<typeof _logger>;
-  let git: jest.Mocked<typeof _git>;
   let codeCommitClient: any;
   let iamClient: any;
 
   beforeEach(async () => {
-    jest.resetModules();
-    jest.mock('../../../util/git');
-    jest.mock('../../../util/host-rules');
     jest.mock('../../../logger');
-    git = require('../../../util/git');
-    const mod = require('@aws-sdk/client-codecommit');
-    codeCommitClient = mod['CodeCommit'];
-    codeCommit = await import('.');
     logger = (await import('../../../logger')).logger as any;
-    const modIam = require('@aws-sdk/client-iam');
-    iamClient = modIam['IAM'];
-    jest.spyOn(iamClient.prototype, 'send').mockImplementationOnce(() => {
-      throw new Error('User: aws:arn:example:123456 has no permissions');
-    });
+    iamClient = mockClient(IAMClient);
+    iamClient
+      .on(GetUserCommand)
+      .resolves({ User: { Arn: 'aws:arn:example:123456' } });
+    codeCommit = await import('.');
     await codeCommit.initPlatform({
       endpoint: 'https://git-codecommit.eu-central-1.amazonaws.com/',
       username: 'accessKeyId',
       password: 'SecretAccessKey',
     });
+    config.prList = undefined;
+    config.repository = undefined;
+    codeCommitClient = mockClient(CodeCommitClient);
   });
 
   it('validates massageMarkdown functionality', () => {
@@ -84,14 +97,6 @@ describe('modules/platform/codecommit/index', () => {
     });
 
     it('should init', async () => {
-      jest.spyOn(iamClient.prototype, 'send').mockImplementationOnce(() => {
-        throw new Error('User: aws:arn:example:123456 has no permissions');
-      });
-      jest
-        .spyOn(codeCommitClient.prototype, 'send')
-        .mockImplementationOnce(() => {
-          return Promise.resolve();
-        });
       expect(
         await codeCommit.initPlatform({
           endpoint: 'https://git-codecommit.REGION.amazonaws.com/',
@@ -104,14 +109,6 @@ describe('modules/platform/codecommit/index', () => {
     });
 
     it('should init with env vars', async () => {
-      jest.spyOn(iamClient.prototype, 'send').mockImplementationOnce(() => {
-        throw new Error('User: aws:arn:example:123456 has no permissions');
-      });
-      jest
-        .spyOn(codeCommitClient.prototype, 'send')
-        .mockImplementationOnce(() => {
-          return Promise.resolve();
-        });
       process.env.AWS_REGION = 'REGION';
       let res;
       try {
@@ -135,6 +132,7 @@ describe('modules/platform/codecommit/index', () => {
       jest.spyOn(git, 'initRepo').mockImplementationOnce(() => {
         throw new Error('any error');
       });
+      codeCommitClient.on(GetRepositoryCommand).resolvesOnce({});
       let error;
       try {
         await codeCommit.initRepo({
@@ -147,14 +145,10 @@ describe('modules/platform/codecommit/index', () => {
     });
 
     it('fails on getRepositoryInfo', async () => {
-      jest.spyOn(git, 'initRepo').mockImplementationOnce(() => {
-        return Promise.resolve();
-      });
-      jest
-        .spyOn(codeCommitClient.prototype, 'send')
-        .mockImplementationOnce(() => {
-          throw new Error('Could not find repository');
-        });
+      jest.spyOn(git, 'initRepo').mockReturnValueOnce(Promise.resolve());
+      codeCommitClient
+        .on(GetRepositoryCommand)
+        .rejectsOnce(new Error('Could not find repository'));
       let error;
       try {
         await codeCommit.initRepo({
@@ -167,14 +161,8 @@ describe('modules/platform/codecommit/index', () => {
     });
 
     it('getRepositoryInfo returns bad results', async () => {
-      jest.spyOn(git, 'initRepo').mockImplementationOnce(() => {
-        return Promise.resolve();
-      });
-      jest
-        .spyOn(codeCommitClient.prototype, 'send')
-        .mockImplementationOnce(() => {
-          return Promise.resolve();
-        });
+      jest.spyOn(git, 'initRepo').mockReturnValueOnce(Promise.resolve());
+      codeCommitClient.on(GetRepositoryCommand).resolvesOnce();
       let error;
       try {
         await codeCommit.initRepo({
@@ -187,14 +175,8 @@ describe('modules/platform/codecommit/index', () => {
     });
 
     it('getRepositoryInfo returns bad results 2', async () => {
-      jest.spyOn(git, 'initRepo').mockImplementationOnce(() => {
-        return Promise.resolve();
-      });
-      jest
-        .spyOn(codeCommitClient.prototype, 'send')
-        .mockImplementationOnce(() => {
-          return Promise.resolve({ repo: {} });
-        });
+      jest.spyOn(git, 'initRepo').mockReturnValueOnce(Promise.resolve());
+      codeCommitClient.on(GetRepositoryCommand).resolvesOnce({ repo: {} });
       let error;
       try {
         await codeCommit.initRepo({
@@ -207,19 +189,14 @@ describe('modules/platform/codecommit/index', () => {
     });
 
     it('initiates repo successfully', async () => {
-      jest.spyOn(git, 'initRepo').mockImplementationOnce(() => {
-        return Promise.resolve();
+      jest.spyOn(git, 'initRepo').mockReturnValueOnce(Promise.resolve());
+      codeCommitClient.on(GetRepositoryCommand).resolvesOnce({
+        repositoryMetadata: {
+          defaultBranch: 'main',
+          repositoryId: 'id',
+        },
       });
-      jest
-        .spyOn(codeCommitClient.prototype, 'send')
-        .mockImplementationOnce(() => {
-          return Promise.resolve({
-            repositoryMetadata: {
-              defaultBranch: 'main',
-              repositoryId: 'id',
-            },
-          });
-        });
+
       const repoResult = await codeCommit.initRepo({
         repository: 'repositoryName',
       });
@@ -243,24 +220,16 @@ describe('modules/platform/codecommit/index', () => {
           },
         ],
       };
-
-      jest
-        .spyOn(codeCommitClient.prototype, 'send')
-        .mockImplementationOnce(() => {
-          return Promise.resolve(result);
-        });
+      codeCommitClient.on(ListRepositoriesCommand).resolvesOnce(result);
 
       const res = await codeCommit.getRepos();
       expect(res).toEqual(['repoName']);
     });
 
     it('returns empty if error', async () => {
-      jest
-        .spyOn(codeCommitClient.prototype, 'send')
-        .mockImplementationOnce(() => {
-          throw new Error('something');
-        });
-
+      codeCommitClient
+        .on(ListRepositoriesCommand)
+        .rejectsOnce(new Error('something'));
       const res = await codeCommit.getRepos();
       expect(res).toEqual([]);
     });
@@ -273,34 +242,24 @@ describe('modules/platform/codecommit/index', () => {
     });
   });
 
-  function prepareMocksForListPr() {
-    //getPrList()
-    jest
-      .spyOn(codeCommitClient.prototype, 'send')
-      .mockImplementationOnce(() => {
-        return Promise.resolve({ pullRequestIds: ['1'] });
-      });
-    const prRes = {
-      pullRequest: {
-        title: 'someTitle',
-        pullRequestStatus: 'OPEN',
-        pullRequestTargets: [
-          {
-            sourceReference: 'refs/heads/sourceBranch',
-            destinationReference: 'refs/heads/targetBranch',
-          },
-        ],
-      },
-    };
-    //getPr()
-    jest.spyOn(codeCommitClient.prototype, 'send').mockImplementation(() => {
-      return Promise.resolve(prRes);
-    });
-  }
-
   describe('getPrList()', () => {
     it('gets PR list by author', async () => {
-      prepareMocksForListPr();
+      codeCommitClient
+        .on(ListPullRequestsCommand)
+        .resolvesOnce({ pullRequestIds: ['1'] });
+      const prRes = {
+        pullRequest: {
+          title: 'someTitle',
+          pullRequestStatus: 'OPEN',
+          pullRequestTargets: [
+            {
+              sourceReference: 'refs/heads/sourceBranch',
+              destinationReference: 'refs/heads/targetBranch',
+            },
+          ],
+        },
+      };
+      codeCommitClient.on(GetPullRequestCommand).resolvesOnce(prRes);
       const res = await codeCommit.getPrList();
       expect(res).toMatchObject([
         {
@@ -315,8 +274,35 @@ describe('modules/platform/codecommit/index', () => {
   });
 
   describe('findPr()', () => {
+    it('throws error on findPr', async () => {
+      const err = new Error('failed');
+      codeCommitClient.on(ListPullRequestsCommand).rejectsOnce(err);
+      const res = await codeCommit.findPr({
+        branchName: 'sourceBranch',
+        prTitle: 'someTitle',
+        state: PrState.Open,
+      });
+      expect(res).toBeNull();
+      expect(logger.error).toHaveBeenCalledWith({ err }, 'findPr error');
+    });
+
     it('finds pr', async () => {
-      prepareMocksForListPr();
+      codeCommitClient
+        .on(ListPullRequestsCommand)
+        .resolvesOnce({ pullRequestIds: ['1'] });
+      const prRes = {
+        pullRequest: {
+          title: 'someTitle',
+          pullRequestStatus: 'OPEN',
+          pullRequestTargets: [
+            {
+              sourceReference: 'refs/heads/sourceBranch',
+              destinationReference: 'refs/heads/targetBranch',
+            },
+          ],
+        },
+      };
+      codeCommitClient.on(GetPullRequestCommand).resolvesOnce(prRes);
       const res = await codeCommit.findPr({
         branchName: 'sourceBranch',
         prTitle: 'someTitle',
@@ -331,38 +317,23 @@ describe('modules/platform/codecommit/index', () => {
       });
     });
 
-    it('throws error on findPr', async () => {
-      const err = new Error('failed');
-      jest
-        .spyOn(codeCommitClient.prototype, 'send')
-        .mockImplementationOnce(() => {
-          throw err;
-        });
-      const res = await codeCommit.findPr({
-        branchName: 'sourceBranch',
-        prTitle: 'someTitle',
-        state: PrState.Open,
-      });
-      expect(res).toBeNull();
-      expect(logger.error).toHaveBeenCalledWith({ err }, 'findPr error');
-    });
-
-    it('returns empty list in case prs dont exist yet', async () => {
-      jest
-        .spyOn(codeCommitClient.prototype, 'send')
-        .mockImplementationOnce(() => {
-          return Promise.resolve({ pullRequestIds: [] });
-        });
-      const res = await codeCommit.findPr({
-        branchName: 'sourceBranch',
-        prTitle: 'someTitle',
-        state: PrState.Open,
-      });
-      expect(res).toBeNull();
-    });
-
     it('finds any pr with that title in regardless of state', async () => {
-      prepareMocksForListPr();
+      codeCommitClient
+        .on(ListPullRequestsCommand)
+        .resolvesOnce({ pullRequestIds: ['1'] });
+      const prRes = {
+        pullRequest: {
+          title: 'someTitle',
+          pullRequestStatus: 'OPEN',
+          pullRequestTargets: [
+            {
+              sourceReference: 'refs/heads/sourceBranch',
+              destinationReference: 'refs/heads/targetBranch',
+            },
+          ],
+        },
+      };
+      codeCommitClient.on(GetPullRequestCommand).resolvesOnce(prRes);
       const res = await codeCommit.findPr({
         branchName: 'sourceBranch',
         prTitle: 'someTitle',
@@ -378,12 +349,9 @@ describe('modules/platform/codecommit/index', () => {
     });
 
     it('finds closed/merged pr', async () => {
-      //getPrList()
-      jest
-        .spyOn(codeCommitClient.prototype, 'send')
-        .mockImplementationOnce(() => {
-          return Promise.resolve({ pullRequestIds: ['1'] });
-        });
+      codeCommitClient
+        .on(ListPullRequestsCommand)
+        .resolvesOnce({ pullRequestIds: ['1'] });
       const prRes = {
         pullRequest: {
           title: 'someTitle',
@@ -396,10 +364,7 @@ describe('modules/platform/codecommit/index', () => {
           ],
         },
       };
-      //getPr()
-      jest.spyOn(codeCommitClient.prototype, 'send').mockImplementation(() => {
-        return Promise.resolve(prRes);
-      });
+      codeCommitClient.on(GetPullRequestCommand).resolvesOnce(prRes);
       const res = await codeCommit.findPr({
         branchName: 'sourceBranch',
         prTitle: 'someTitle',
@@ -415,12 +380,9 @@ describe('modules/platform/codecommit/index', () => {
     });
 
     it('finds any pr', async () => {
-      //getPrList()
-      jest
-        .spyOn(codeCommitClient.prototype, 'send')
-        .mockImplementationOnce(() => {
-          return Promise.resolve({ pullRequestIds: ['1'] });
-        });
+      codeCommitClient
+        .on(ListPullRequestsCommand)
+        .resolvesOnce({ pullRequestIds: ['1'] });
       const prRes = {
         pullRequest: {
           title: 'someTitle',
@@ -433,10 +395,7 @@ describe('modules/platform/codecommit/index', () => {
           ],
         },
       };
-      //getPr()
-      jest.spyOn(codeCommitClient.prototype, 'send').mockImplementation(() => {
-        return Promise.resolve(prRes);
-      });
+      codeCommitClient.on(GetPullRequestCommand).resolvesOnce(prRes);
       const res = await codeCommit.findPr({
         branchName: 'sourceBranch',
         prTitle: 'someTitle',
@@ -449,11 +408,35 @@ describe('modules/platform/codecommit/index', () => {
         title: 'someTitle',
       });
     });
+
+    it('returns empty list in case prs dont exist yet', async () => {
+      const res = await codeCommit.findPr({
+        branchName: 'sourceBranch',
+        prTitle: 'someTitle',
+        state: PrState.Open,
+      });
+      expect(res).toBeNull();
+    });
   });
 
   describe('getBranchPr()', () => {
     it('codecommit find PR for branch', async () => {
-      prepareMocksForListPr();
+      codeCommitClient
+        .on(ListPullRequestsCommand)
+        .resolvesOnce({ pullRequestIds: ['1'] });
+      const prRes = {
+        pullRequest: {
+          title: 'someTitle',
+          pullRequestStatus: 'OPEN',
+          pullRequestTargets: [
+            {
+              sourceReference: 'refs/heads/sourceBranch',
+              destinationReference: 'refs/heads/targetBranch',
+            },
+          ],
+        },
+      };
+      codeCommitClient.on(GetPullRequestCommand).resolves(prRes);
       const res = await codeCommit.getBranchPr('sourceBranch');
       expect(res).toMatchObject({
         sourceBranch: 'refs/heads/sourceBranch',
@@ -465,7 +448,22 @@ describe('modules/platform/codecommit/index', () => {
     });
 
     it('returns null if no PR for branch', async () => {
-      prepareMocksForListPr();
+      codeCommitClient
+        .on(ListPullRequestsCommand)
+        .resolvesOnce({ pullRequestIds: ['1'] });
+      const prRes = {
+        pullRequest: {
+          title: 'someTitle',
+          pullRequestStatus: 'OPEN',
+          pullRequestTargets: [
+            {
+              sourceReference: 'refs/heads/sourceBranch',
+              destinationReference: 'refs/heads/targetBranch',
+            },
+          ],
+        },
+      };
+      codeCommitClient.on(GetPullRequestCommand).resolvesOnce(prRes);
       const res = await codeCommit.getBranchPr('branch_without_pr');
       expect(res).toBeNull();
     });
@@ -486,9 +484,7 @@ describe('modules/platform/codecommit/index', () => {
         },
       };
 
-      jest.spyOn(codeCommitClient.prototype, 'send').mockImplementation(() => {
-        return Promise.resolve(prRes);
-      });
+      codeCommitClient.on(GetPullRequestCommand).resolvesOnce(prRes);
 
       const res = await codeCommit.getPr(1);
       expect(res).toMatchObject({
@@ -514,9 +510,7 @@ describe('modules/platform/codecommit/index', () => {
         },
       };
 
-      jest.spyOn(codeCommitClient.prototype, 'send').mockImplementation(() => {
-        return Promise.resolve(prRes);
-      });
+      codeCommitClient.on(GetPullRequestCommand).resolvesOnce(prRes);
 
       const res = await codeCommit.getPr(1);
       expect(res).toMatchObject({
@@ -545,9 +539,7 @@ describe('modules/platform/codecommit/index', () => {
         },
       };
 
-      jest.spyOn(codeCommitClient.prototype, 'send').mockImplementation(() => {
-        return Promise.resolve(prRes);
-      });
+      codeCommitClient.on(GetPullRequestCommand).resolvesOnce(prRes);
 
       const res = await codeCommit.getPr(1);
       expect(res).toMatchObject({
@@ -560,10 +552,9 @@ describe('modules/platform/codecommit/index', () => {
     });
 
     it('returns null in case input is null', async () => {
-      jest.spyOn(codeCommitClient.prototype, 'send').mockImplementation(() => {
-        throw new Error('bad creds');
-      });
-
+      codeCommitClient
+        .on(GetPullRequestCommand)
+        .rejectsOnce(new Error('bad creds'));
       const res = await codeCommit.getPr(1);
       expect(res).toBeNull();
     });
@@ -574,11 +565,9 @@ describe('modules/platform/codecommit/index', () => {
       const data = { foo: 'bar' };
       const encoder = new TextEncoder();
       const int8arrData = encoder.encode(JSON.stringify(data));
-      jest
-        .spyOn(codeCommitClient.prototype, 'send')
-        .mockImplementationOnce(() => {
-          return { fileContent: int8arrData };
-        });
+      codeCommitClient
+        .on(GetFileCommand)
+        .resolvesOnce({ fileContent: int8arrData });
       const res = await codeCommit.getJsonFile('file.json');
       expect(res).toEqual(data);
     });
@@ -592,11 +581,9 @@ describe('modules/platform/codecommit/index', () => {
       `;
       const encoder = new TextEncoder();
       const int8arrData = encoder.encode(json5Data);
-      jest
-        .spyOn(codeCommitClient.prototype, 'send')
-        .mockImplementationOnce(() => {
-          return { fileContent: int8arrData };
-        });
+      codeCommitClient
+        .on(GetFileCommand)
+        .resolvesOnce({ fileContent: int8arrData });
       const res = await codeCommit.getJsonFile('file.json');
       expect(res).toEqual({ foo: 'bar' });
     });
@@ -607,11 +594,9 @@ describe('modules/platform/codecommit/index', () => {
       const data = { foo: 'bar' };
       const encoder = new TextEncoder();
       const int8arrData = encoder.encode(JSON.stringify(data));
-      jest
-        .spyOn(codeCommitClient.prototype, 'send')
-        .mockImplementationOnce(() => {
-          return { fileContent: int8arrData };
-        });
+      codeCommitClient
+        .on(GetFileCommand)
+        .resolvesOnce({ fileContent: int8arrData });
       const res = await codeCommit.getRawFile('file.json');
       expect(res).toBe('{"foo":"bar"}');
     });
@@ -625,11 +610,9 @@ describe('modules/platform/codecommit/index', () => {
       `;
       const encoder = new TextEncoder();
       const int8arrData = encoder.encode(json5Data);
-      jest
-        .spyOn(codeCommitClient.prototype, 'send')
-        .mockImplementationOnce(() => {
-          return { fileContent: int8arrData };
-        });
+      codeCommitClient
+        .on(GetFileCommand)
+        .resolvesOnce({ fileContent: int8arrData });
       const res = await codeCommit.getRawFile('file.json');
       expect(res).toBe(`
         {
@@ -649,12 +632,8 @@ describe('modules/platform/codecommit/index', () => {
           title: 'someTitle',
         },
       };
-      jest
-        .spyOn(codeCommitClient.prototype, 'send')
-        .mockImplementationOnce(() => {
-          return Promise.resolve(prRes);
-        });
 
+      codeCommitClient.on(CreatePullRequestCommand).resolvesOnce(prRes);
       const pr = await codeCommit.createPr({
         sourceBranch: 'sourceBranch',
         targetBranch: 'targetBranch',
@@ -675,10 +654,9 @@ describe('modules/platform/codecommit/index', () => {
 
   describe('updatePr()', () => {
     it('updates PR', async () => {
-      jest.spyOn(codeCommitClient.prototype, 'send').mockImplementation(() => {
-        return Promise.resolve();
-      });
-
+      codeCommitClient.on(UpdatePullRequestDescriptionCommand).resolvesOnce();
+      codeCommitClient.on(UpdatePullRequestTitleCommand).resolvesOnce();
+      codeCommitClient.on(UpdatePullRequestStatusCommand).resolvesOnce();
       await expect(
         codeCommit.updatePr({
           number: 1,
@@ -690,24 +668,11 @@ describe('modules/platform/codecommit/index', () => {
     });
 
     it('updates PR regardless of status failure', async () => {
-      // updatePrDescription
-      jest
-        .spyOn(codeCommitClient.prototype, 'send')
-        .mockImplementationOnce(() => {
-          return Promise.resolve();
-        });
-      // updatePrTitle
-      jest
-        .spyOn(codeCommitClient.prototype, 'send')
-        .mockImplementationOnce(() => {
-          return Promise.resolve();
-        });
-      // updatePrStatus
-      jest
-        .spyOn(codeCommitClient.prototype, 'send')
-        .mockImplementationOnce(() => {
-          throw new Error('update status failure');
-        });
+      codeCommitClient.on(UpdatePullRequestDescriptionCommand).resolvesOnce();
+      codeCommitClient.on(UpdatePullRequestTitleCommand).resolvesOnce();
+      codeCommitClient
+        .on(UpdatePullRequestStatusCommand)
+        .rejectsOnce(new Error('update status failure'));
       await expect(
         codeCommit.updatePr({
           number: 1,
@@ -719,24 +684,9 @@ describe('modules/platform/codecommit/index', () => {
     });
 
     it('updates PR with status closed', async () => {
-      // updatePrDescription
-      jest
-        .spyOn(codeCommitClient.prototype, 'send')
-        .mockImplementationOnce(() => {
-          return Promise.resolve();
-        });
-      // updatePrTitle
-      jest
-        .spyOn(codeCommitClient.prototype, 'send')
-        .mockImplementationOnce(() => {
-          return Promise.resolve();
-        });
-      // updatePrStatus
-      jest
-        .spyOn(codeCommitClient.prototype, 'send')
-        .mockImplementationOnce(() => {
-          return Promise.resolve();
-        });
+      codeCommitClient.on(UpdatePullRequestDescriptionCommand).resolvesOnce();
+      codeCommitClient.on(UpdatePullRequestTitleCommand).resolvesOnce();
+      codeCommitClient.on(UpdatePullRequestStatusCommand).resolvesOnce();
       await expect(
         codeCommit.updatePr({
           number: 1,
@@ -772,29 +722,17 @@ describe('modules/platform/codecommit/index', () => {
           ],
         },
       };
-      //getPr()
-      jest
-        .spyOn(codeCommitClient.prototype, 'send')
-        .mockImplementationOnce(() => {
-          return Promise.resolve(prRes);
-        });
-      //squash merge
-      jest
-        .spyOn(codeCommitClient.prototype, 'send')
-        .mockImplementationOnce(() => {
-          return Promise.resolve();
-        });
+      codeCommitClient.on(GetPullRequestCommand).resolvesOnce(prRes);
+      codeCommitClient.on(MergeBranchesBySquashCommand).resolvesOnce();
+
       const updateStatusRes = {
         pullRequest: {
           pullRequestStatus: 'OPEN',
         },
       };
-      //updateStatus
-      jest
-        .spyOn(codeCommitClient.prototype, 'send')
-        .mockImplementationOnce(() => {
-          return Promise.resolve(updateStatusRes);
-        });
+      codeCommitClient
+        .on(UpdatePullRequestStatusCommand)
+        .resolvesOnce(updateStatusRes);
       expect(
         await codeCommit.mergePr({
           branchName: 'branch',
@@ -817,29 +755,16 @@ describe('modules/platform/codecommit/index', () => {
           ],
         },
       };
-      //getPr()
-      jest
-        .spyOn(codeCommitClient.prototype, 'send')
-        .mockImplementationOnce(() => {
-          return Promise.resolve(prRes);
-        });
-      //squash merge
-      jest
-        .spyOn(codeCommitClient.prototype, 'send')
-        .mockImplementationOnce(() => {
-          return Promise.resolve();
-        });
+      codeCommitClient.on(GetPullRequestCommand).resolvesOnce(prRes);
+      codeCommitClient.on(MergeBranchesBySquashCommand).resolvesOnce();
       const updateStatusRes = {
         pullRequest: {
           pullRequestStatus: 'OPEN',
         },
       };
-      //updateStatus
-      jest
-        .spyOn(codeCommitClient.prototype, 'send')
-        .mockImplementationOnce(() => {
-          return Promise.resolve(updateStatusRes);
-        });
+      codeCommitClient
+        .on(UpdatePullRequestStatusCommand)
+        .resolvesOnce(updateStatusRes);
       expect(
         await codeCommit.mergePr({
           branchName: 'branch',
@@ -862,29 +787,16 @@ describe('modules/platform/codecommit/index', () => {
           ],
         },
       };
-      //getPr()
-      jest
-        .spyOn(codeCommitClient.prototype, 'send')
-        .mockImplementationOnce(() => {
-          return Promise.resolve(prRes);
-        });
-      //squash merge
-      jest
-        .spyOn(codeCommitClient.prototype, 'send')
-        .mockImplementationOnce(() => {
-          return Promise.resolve();
-        });
+      codeCommitClient.on(GetPullRequestCommand).resolvesOnce(prRes);
+      codeCommitClient.on(MergeBranchesBySquashCommand).resolvesOnce();
       const updateStatusRes = {
         pullRequest: {
           pullRequestStatus: 'OPEN',
         },
       };
-      //updateStatus
-      jest
-        .spyOn(codeCommitClient.prototype, 'send')
-        .mockImplementationOnce(() => {
-          return Promise.resolve(updateStatusRes);
-        });
+      codeCommitClient
+        .on(UpdatePullRequestStatusCommand)
+        .resolvesOnce(updateStatusRes);
       expect(
         await codeCommit.mergePr({
           branchName: 'branch',
@@ -907,12 +819,7 @@ describe('modules/platform/codecommit/index', () => {
           ],
         },
       };
-      //getPr()
-      jest
-        .spyOn(codeCommitClient.prototype, 'send')
-        .mockImplementationOnce(() => {
-          return Promise.resolve(prRes);
-        });
+      codeCommitClient.on(GetPullRequestCommand).resolvesOnce(prRes);
       expect(
         await codeCommit.mergePr({
           branchName: 'branch',
@@ -941,11 +848,10 @@ describe('modules/platform/codecommit/index', () => {
           },
         ],
       };
-      jest
-        .spyOn(codeCommitClient.prototype, 'send')
-        .mockImplementationOnce(() => {
-          return Promise.resolve(commentsRes);
-        });
+      codeCommitClient
+        .on(GetCommentsForPullRequestCommand)
+        .resolvesOnce(commentsRes);
+
       const eventsRes = {
         pullRequestEvents: [
           {
@@ -956,17 +862,10 @@ describe('modules/platform/codecommit/index', () => {
           },
         ],
       };
-      jest
-        .spyOn(codeCommitClient.prototype, 'send')
-        .mockImplementationOnce(() => {
-          return Promise.resolve(eventsRes);
-        });
-      //create comment
-      jest
-        .spyOn(codeCommitClient.prototype, 'send')
-        .mockImplementationOnce(() => {
-          return Promise.resolve();
-        });
+      codeCommitClient
+        .on(DescribePullRequestEventsCommand)
+        .resolvesOnce(eventsRes);
+      codeCommitClient.on(PostCommentForPullRequestCommand).resolvesOnce();
       const res = await codeCommit.ensureComment({
         number: 42,
         topic: 'some-subject',
@@ -996,17 +895,11 @@ describe('modules/platform/codecommit/index', () => {
           },
         ],
       };
-      jest
-        .spyOn(codeCommitClient.prototype, 'send')
-        .mockImplementationOnce(() => {
-          return Promise.resolve(commentsRes);
-        });
-      //create comment
-      jest
-        .spyOn(codeCommitClient.prototype, 'send')
-        .mockImplementationOnce(() => {
-          return Promise.resolve();
-        });
+      codeCommitClient
+        .on(GetCommentsForPullRequestCommand)
+        .resolvesOnce(commentsRes);
+      codeCommitClient.on(PostCommentForPullRequestCommand).resolvesOnce();
+
       const res = await codeCommit.ensureComment({
         number: 42,
         topic: 'some-subject',
@@ -1036,11 +929,9 @@ describe('modules/platform/codecommit/index', () => {
           },
         ],
       };
-      jest
-        .spyOn(codeCommitClient.prototype, 'send')
-        .mockImplementationOnce(() => {
-          return Promise.resolve(commentsRes);
-        });
+      codeCommitClient
+        .on(GetCommentsForPullRequestCommand)
+        .resolvesOnce(commentsRes);
       const res = await codeCommit.ensureComment({
         number: 42,
         topic: 'some-subject',
@@ -1070,11 +961,9 @@ describe('modules/platform/codecommit/index', () => {
           },
         ],
       };
-      jest
-        .spyOn(codeCommitClient.prototype, 'send')
-        .mockImplementationOnce(() => {
-          return Promise.resolve(commentsRes);
-        });
+      codeCommitClient
+        .on(GetCommentsForPullRequestCommand)
+        .resolvesOnce(commentsRes);
       const res = await codeCommit.ensureComment({
         number: 42,
         topic: null,
@@ -1089,11 +978,8 @@ describe('modules/platform/codecommit/index', () => {
 
     it('throws an exception in case of api failed connection ', async () => {
       const err = new Error('some error');
-      jest
-        .spyOn(codeCommitClient.prototype, 'send')
-        .mockImplementationOnce(() => {
-          throw err;
-        });
+      codeCommitClient.on(GetCommentsForPullRequestCommand).rejectsOnce(err);
+
       const res = await codeCommit.ensureComment({
         number: 42,
         topic: null,
@@ -1125,16 +1011,10 @@ describe('modules/platform/codecommit/index', () => {
           },
         ],
       };
-      jest
-        .spyOn(codeCommitClient.prototype, 'send')
-        .mockImplementationOnce(() => {
-          return Promise.resolve(commentsRes);
-        });
-      jest
-        .spyOn(codeCommitClient.prototype, 'send')
-        .mockImplementationOnce(() => {
-          return Promise.resolve();
-        });
+      codeCommitClient
+        .on(GetCommentsForPullRequestCommand)
+        .resolvesOnce(commentsRes);
+      codeCommitClient.on(DeleteCommentContentCommand).resolvesOnce();
       await codeCommit.ensureCommentRemoval({
         type: 'by-topic',
         number: 42,
@@ -1162,16 +1042,10 @@ describe('modules/platform/codecommit/index', () => {
           },
         ],
       };
-      jest
-        .spyOn(codeCommitClient.prototype, 'send')
-        .mockImplementationOnce(() => {
-          return Promise.resolve(commentsRes);
-        });
-      jest
-        .spyOn(codeCommitClient.prototype, 'send')
-        .mockImplementationOnce(() => {
-          return Promise.resolve();
-        });
+      codeCommitClient
+        .on(GetCommentsForPullRequestCommand)
+        .resolvesOnce(commentsRes);
+      codeCommitClient.on(DeleteCommentContentCommand).resolvesOnce();
       await codeCommit.ensureCommentRemoval({
         type: 'by-content',
         number: 42,
@@ -1184,11 +1058,7 @@ describe('modules/platform/codecommit/index', () => {
 
     it('throws exception in case failed api connection', async () => {
       const err = new Error('some error');
-      jest
-        .spyOn(codeCommitClient.prototype, 'send')
-        .mockImplementationOnce(() => {
-          throw err;
-        });
+      codeCommitClient.on(GetCommentsForPullRequestCommand).rejectsOnce(err);
       await codeCommit.ensureCommentRemoval({
         type: 'by-content',
         number: 42,
@@ -1215,11 +1085,9 @@ describe('modules/platform/codecommit/index', () => {
           lastModifiedUser: 'arn:aws:iam::someUser:user/ReviewerUser',
         },
       };
-      jest
-        .spyOn(codeCommitClient.prototype, 'send')
-        .mockImplementationOnce(() => {
-          return Promise.resolve(res);
-        });
+      codeCommitClient
+        .on(CreatePullRequestApprovalRuleCommand)
+        .resolvesOnce(res);
       await expect(
         codeCommit.addReviewers(13, ['arn:aws:iam::someUser:user/ReviewerUser'])
       ).toResolve();

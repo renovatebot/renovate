@@ -46,7 +46,7 @@ interface Config {
   userArn?: string;
 }
 
-const config: Config = {};
+export const config: Config = {};
 
 export async function initPlatform({
   endpoint,
@@ -348,15 +348,13 @@ export async function createPr({
   prTitle: title,
   prBody: body,
 }: CreatePRConfig): Promise<Pr> {
-  const sourceRefName = sourceBranch;
-  const targetRefName = targetBranch;
   const description = smartTruncate(sanitize(body), 10239);
 
   const prCreateRes = await client.createPr(
     title,
     sanitize(description),
-    sourceRefName,
-    targetRefName,
+    sourceBranch,
+    targetBranch,
     config.repository
   );
 
