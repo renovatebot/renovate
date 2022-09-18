@@ -106,6 +106,15 @@ export async function initRepo({
   logger.debug(`initRepo("${repository}")`);
 
   config.repository = repository;
+
+  let repo;
+  try {
+    repo = await client.getRepositoryInfo(repository);
+  } catch (err) {
+    logger.error({ err }, 'Could not find repository');
+    throw new Error(REPOSITORY_NOT_FOUND);
+  }
+
   const url = getCodeCommitUrl(config.region!, repository, config.credentials!);
   try {
     await git.initRepo({
@@ -114,14 +123,6 @@ export async function initRepo({
   } catch (err) {
     logger.debug({ err }, 'Failed to git init');
     throw new Error(PLATFORM_BAD_CREDENTIALS);
-  }
-
-  let repo;
-  try {
-    repo = await client.getRepositoryInfo(repository);
-  } catch (err) {
-    logger.error({ err }, 'Could not find repository');
-    throw new Error(REPOSITORY_NOT_FOUND);
   }
 
   if (!repo) {
