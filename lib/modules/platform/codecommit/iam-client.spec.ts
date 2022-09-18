@@ -1,14 +1,13 @@
+import { GetUserCommand, IAMClient } from '@aws-sdk/client-iam';
+import { mockClient } from 'aws-sdk-client-mock';
 import { PLATFORM_BAD_CREDENTIALS } from '../../../constants/error-messages';
 
 describe('modules/platform/codecommit/iam-client', () => {
-  let iamClient: any;
   let iam: any;
+  let iamClient: any;
 
   beforeEach(() => {
-    jest.resetModules();
-    jest.mock('@aws-sdk/client-iam');
-    const mod = require('@aws-sdk/client-iam');
-    iamClient = mod['IAM'];
+    iamClient = mockClient(IAMClient);
 
     iam = require('./iam-client');
     iam.initIamClient('eu-east', {
@@ -18,9 +17,7 @@ describe('modules/platform/codecommit/iam-client', () => {
   });
 
   it('should throw in case of bad authentication', async () => {
-    jest.spyOn(iamClient.prototype, 'send').mockImplementationOnce(() => {
-      throw new Error(PLATFORM_BAD_CREDENTIALS);
-    });
+    iamClient.on(GetUserCommand).rejects(new Error(PLATFORM_BAD_CREDENTIALS));
     let userArn;
     try {
       userArn = await iam.getUserArn();
@@ -31,9 +28,7 @@ describe('modules/platform/codecommit/iam-client', () => {
   });
 
   it('should return empty', async () => {
-    jest.spyOn(iamClient.prototype, 'send').mockImplementationOnce(() => {
-      return Promise.resolve(undefined);
-    });
+    iamClient.on(GetUserCommand).resolves(undefined);
     let userArn;
     try {
       userArn = await iam.getUserArn();
@@ -44,9 +39,9 @@ describe('modules/platform/codecommit/iam-client', () => {
   });
 
   it('should return the user arn, even though user has no permission', async () => {
-    jest.spyOn(iamClient.prototype, 'send').mockImplementationOnce(() => {
-      throw new Error('User: aws:arn:example:123456 has no permissions');
-    });
+    iamClient
+      .on(GetUserCommand)
+      .rejects(new Error('User: aws:arn:example:123456 has no permissions'));
     let userArn;
     try {
       userArn = await iam.getUserArn();
@@ -57,9 +52,9 @@ describe('modules/platform/codecommit/iam-client', () => {
   });
 
   it('should return the user normally', async () => {
-    jest.spyOn(iamClient.prototype, 'send').mockImplementationOnce(() => {
-      return Promise.resolve({ User: { Arn: 'aws:arn:example:123456' } });
-    });
+    iamClient
+      .on(GetUserCommand)
+      .resolves({ User: { Arn: 'aws:arn:example:123456' } });
     let userArn;
     try {
       userArn = await iam.getUserArn();
