@@ -50,8 +50,9 @@ describe('modules/platform/pr-body', () => {
 
     it('hashes an undefined body', () => {
       // nullish operator branch coverage
-      const hash = hashBody(undefined);
-      expect(hash).toBe(hash);
+      const hash =
+        'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855';
+      expect(hashBody(undefined)).toBe(hash);
     });
 
     it('returns rebaseRequested=true flag', () => {
