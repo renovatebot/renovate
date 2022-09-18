@@ -39,6 +39,7 @@ let config: RenovateConfig;
 beforeEach(() => {
   jest.resetAllMocks();
   config = getConfig();
+  repoCache.getCache.mockReturnValue({});
 });
 
 describe('workers/repository/process/write', () => {
@@ -57,7 +58,6 @@ describe('workers/repository/process/write', () => {
         { branchName: 'test_branch', manager: 'npm', upgrades: [] },
         { branchName: 'test_branch', manager: 'npm', upgrades: [] },
       ]);
-      repoCache.getCache.mockReturnValue({});
       git.branchExists.mockReturnValue(true);
       branchWorker.processBranch.mockResolvedValueOnce({
         branchExists: true,
@@ -92,8 +92,10 @@ describe('workers/repository/process/write', () => {
         branchExists: true,
         result: BranchResult.PrCreated,
       });
-      git.branchExists.mockReturnValueOnce(false);
-      git.branchExists.mockReturnValueOnce(true);
+      git.branchExists
+        .mockReturnValueOnce(false)
+        .mockReturnValueOnce(false)
+        .mockReturnValueOnce(true);
       limits.getBranchesRemaining.mockResolvedValueOnce(1);
       expect(isLimitReached(Limit.Branches)).toBeFalse();
       GlobalConfig.set({ dryRun: 'full' });
@@ -201,7 +203,7 @@ describe('workers/repository/process/write', () => {
         branchExists: true,
         result: BranchResult.NoWork,
       });
-      git.branchExists.mockReturnValueOnce(true);
+      git.branchExists.mockReturnValue(true);
       config.repositoryCache = 'enabled';
       await writeUpdates(config, branches);
       expect(logger.logger.debug).toHaveBeenCalledWith(
@@ -209,10 +211,11 @@ describe('workers/repository/process/write', () => {
       );
     });
 
-    it('adds branch to cache when cache is not enabled', async () => {
+    it('creates new branchCache when cache is not enabled', async () => {
       const branches = partial<BranchConfig[]>([
         {
           branchName: 'new/some-branch',
+          baseBranch: 'base_branch',
           manager: 'npm',
           upgrades: [
             {
@@ -227,7 +230,9 @@ describe('workers/repository/process/write', () => {
         branchExists: true,
         result: BranchResult.NoWork,
       });
-      git.getBranchCommit.mockReturnValue('101');
+      git.getBranchCommit
+        .mockReturnValueOnce('sha')
+        .mockReturnValueOnce('base_sha');
       git.branchExists.mockReturnValueOnce(true);
       await writeUpdates(config, branches);
       expect(logger.logger.debug).not.toHaveBeenCalledWith(
@@ -237,7 +242,9 @@ describe('workers/repository/process/write', () => {
         branches: [
           {
             branchName: 'new/some-branch',
-            sha: '101',
+            baseBranch: 'base_branch',
+            baseBranchSha: 'base_sha',
+            sha: 'sha',
           },
         ],
       });

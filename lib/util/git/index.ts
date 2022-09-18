@@ -603,10 +603,7 @@ export async function isBranchModified(branchName: string): Promise<boolean> {
     return config.branchIsModified[branchName];
   }
   // Second check repoCache
-  const isModified = getCachedModifiedResult(
-    branchName,
-    config.branchCommits[branchName]
-  );
+  const isModified = getCachedModifiedResult(branchName);
   if (isModified !== null) {
     logger.debug('Using cached result for isBranchModified');
     return (config.branchIsModified[branchName] = isModified);
@@ -643,11 +640,7 @@ export async function isBranchModified(branchName: string): Promise<boolean> {
     // author matches - branch has not been modified
     logger.debug({ branchName }, 'Branch has not been modified');
     config.branchIsModified[branchName] = false;
-    setCachedModifiedResult(
-      branchName,
-      config.branchCommits[branchName],
-      false
-    );
+    setCachedModifiedResult(branchName, false);
     return false;
   }
   logger.debug(
@@ -655,7 +648,7 @@ export async function isBranchModified(branchName: string): Promise<boolean> {
     'Last commit author does not match git author email - branch has been modified'
   );
   config.branchIsModified[branchName] = true;
-  setCachedModifiedResult(branchName, config.branchCommits[branchName], true);
+  setCachedModifiedResult(branchName, true);
   return true;
 }
 

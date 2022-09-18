@@ -6,9 +6,12 @@ import {
   getCachedModifiedResult,
   setCachedModifiedResult,
 } from './modified-cache';
+import * as _git from '.';
 
 jest.mock('../cache/repository');
 jest.mock('../../logger');
+jest.mock('.');
+const git = mocked(_git);
 const logger = mocked(_logger);
 const repositoryCache = mocked(_repositoryCache);
 
@@ -18,22 +21,35 @@ describe('util/git/modified-cache', () => {
   beforeEach(() => {
     repoCache = {};
     repositoryCache.getCache.mockReturnValue(repoCache);
+    git.getBranchCommit.mockReturnValue('111');
   });
 
   describe('getCachedModifiedResult', () => {
     it('returns null if cache is not populated', () => {
-      expect(getCachedModifiedResult('foo', '111')).toBeNull();
+      expect(getCachedModifiedResult('foo')).toBeNull();
     });
 
-    it('returns null if target key not found', () => {
-      expect(getCachedModifiedResult('foo', '111')).toBeNull();
+    it('returns null if branc not found', () => {
+      repoCache.branches = [
+        partial<BranchCache>({ branchName: 'not_foo', sha: 'aaa' }),
+      ];
+      expect(getCachedModifiedResult('foo')).toBeNull();
     });
 
-    it('returns null if target SHA has changed', () => {
+    it('returns null if branch SHA has changed', () => {
       repoCache.branches = [
         partial<BranchCache>({ branchName: 'foo', sha: 'aaa' }),
       ];
-      expect(getCachedModifiedResult('foo', '111')).toBeNull();
+      git.getBranchCommit.mockReturnValueOnce('not_aaa');
+      expect(getCachedModifiedResult('foo')).toBeNull();
+    });
+
+    it('returns null if cached value is undefined', () => {
+      repoCache.branches = [
+        partial<BranchCache>({ branchName: 'foo', sha: 'aaa' }),
+      ];
+      git.getBranchCommit.mockReturnValueOnce('aaa');
+      expect(getCachedModifiedResult('foo')).toBeNull();
     });
 
     it('returns true', () => {
@@ -44,7 +60,8 @@ describe('util/git/modified-cache', () => {
           isModified: true,
         }),
       ];
-      expect(getCachedModifiedResult('foo', '111')).toBeTrue();
+      git.getBranchCommit.mockReturnValue('111');
+      expect(getCachedModifiedResult('foo')).toBeTrue();
     });
 
     it('returns false', () => {
@@ -55,20 +72,28 @@ describe('util/git/modified-cache', () => {
           isModified: false,
         }),
       ];
-      expect(getCachedModifiedResult('foo', '111')).toBeFalse();
+      expect(getCachedModifiedResult('foo')).toBeFalse();
     });
   });
 
   describe('setCachedModifiedResult', () => {
-    it('does not create new branch cache for when cache is empty', () => {
-      setCachedModifiedResult('foo', '111', false);
+    it('returns without updating when cache not populated', () => {
+      setCachedModifiedResult('foo', false);
       expect(repoCache).toEqual({});
-      expect(logger.logger.warn).toHaveBeenCalledWith(
+      expect(logger.logger.debug).toHaveBeenCalledWith(
         'Branch cache not present for foo'
       );
     });
 
-    it('replaces value when SHA has changed', () => {
+    it('returns without updating when branch not found', () => {
+      setCachedModifiedResult('foo', false);
+      expect(repoCache).toEqual({});
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        'Branch cache not present for foo'
+      );
+    });
+
+    it('updates cached value', () => {
       repoCache = {
         branches: [
           partial<BranchCache>({
@@ -79,33 +104,12 @@ describe('util/git/modified-cache', () => {
         ],
       };
       repositoryCache.getCache.mockReturnValue(repoCache);
-      setCachedModifiedResult('foo', '131', false);
+      setCachedModifiedResult('foo', false);
       expect(repoCache).toEqual({
         branches: [
           {
             branchName: 'foo',
-            sha: '131',
-            isModified: false,
-          },
-        ],
-      });
-    });
-
-    it('adds SHA when it is not found', () => {
-      repoCache = {
-        branches: [
-          partial<BranchCache>({
-            branchName: 'foo',
-          }),
-        ],
-      };
-      repositoryCache.getCache.mockReturnValue(repoCache);
-      setCachedModifiedResult('foo', '131', false);
-      expect(repoCache).toEqual({
-        branches: [
-          {
-            branchName: 'foo',
-            sha: '131',
+            sha: '121',
             isModified: false,
           },
         ],
@@ -133,9 +137,9 @@ describe('util/git/modified-cache', () => {
         ],
       };
       repositoryCache.getCache.mockReturnValue(repoCache);
-      setCachedModifiedResult('foo-1', '111', false);
-      setCachedModifiedResult('foo-2', 'aaa', true);
-      setCachedModifiedResult('foo-3', '222', false);
+      setCachedModifiedResult('foo-1', false);
+      setCachedModifiedResult('foo-2', true);
+      setCachedModifiedResult('foo-3', false);
       expect(repoCache).toEqual({
         branches: [
           {

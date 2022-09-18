@@ -28,13 +28,22 @@ export interface BranchUpgradeCache {
 
 export interface BranchCache {
   automerge: boolean;
+  /**
+   * Name of base branch
+   */
+  baseBranch: string;
+  /**
+   * The base branch's most recent commit SHA
+   */
+  baseBranchSha: string | null;
   branchFingerprint?: string;
   branchName: string;
-  isModified: boolean;
+  isBehindBase?: boolean;
+  isModified?: boolean;
   /**
    * Parent commit of branch sha (latest branch commit)
    */
-  parentSha: string | null;
+  parentSha?: string | null;
   prNo: number | null;
   sha: string | null;
   upgrades: BranchUpgradeCache[];

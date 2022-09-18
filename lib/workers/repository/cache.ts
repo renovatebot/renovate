@@ -47,9 +47,10 @@ function generateBranchUpgradeCache(
 async function generateBranchCache(
   branch: BranchConfig
 ): Promise<BranchCache | null> {
-  const { branchName } = branch;
+  const { baseBranch, branchName } = branch;
   try {
     const sha = getBranchCommit(branchName) ?? null;
+    const baseBranchSha = getBranchCommit(baseBranch!)!;
     let prNo = null;
     let parentSha = null;
     if (sha) {
@@ -73,14 +74,16 @@ async function generateBranchCache(
       : [];
     const branchFingerprint = branch.branchFingerprint;
     return {
+      automerge,
+      baseBranchSha,
+      baseBranch: baseBranch!,
+      branchFingerprint,
       branchName,
-      sha,
+      isModified,
       parentSha,
       prNo,
-      automerge,
-      isModified,
+      sha,
       upgrades,
-      branchFingerprint,
     };
   } catch (error) {
     const err = error.err || error; // external host error nests err
