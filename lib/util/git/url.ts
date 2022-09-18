@@ -5,17 +5,7 @@ import * as hostRules from '../host-rules';
 import { regEx } from '../regex';
 
 export function parseGitUrl(url: string): gitUrlParse.GitUrl {
-  const parsed = gitUrlParse(url);
-
-  // Workaround for https://github.com/IonicaBizau/parse-path/issues/38
-  if (parsed.port && parsed.resource.endsWith(`:${parsed.port}`)) {
-    parsed.resource = parsed.resource.substring(
-      0,
-      parsed.resource.length - `:${parsed.port}`.length
-    );
-  }
-
-  return parsed;
+  return gitUrlParse(url);
 }
 
 export function getHttpUrl(url: string, token?: string): string {
