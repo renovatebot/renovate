@@ -67,13 +67,11 @@ export async function writeUpdates(
     }
     addMeta(meta);
     const branchExisted = branchExists(branchName);
-    let branchState =
-      cachedBranches.find((br) => br.branchName === branchName) ??
-      ({} as BranchCache);
+    let branchState = cachedBranches.find((br) => br.branchName === branchName);
 
-    if (Object.keys(branchState).length === 0) {
+    if (!branchState) {
       if (branchExisted && config.repositoryCache === 'enabled') {
-        logger.debug(`No branch cache found for ${branch.branchName}`);
+        logger.debug(`No branch cache found for ${branchName}`);
       }
 
       // create a minimal branch state

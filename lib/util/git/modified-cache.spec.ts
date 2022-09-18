@@ -33,18 +33,17 @@ describe('util/git/modified-cache', () => {
       expect(getCachedModifiedResult('foo', '111')).toBeNull();
     });
 
-    it('returns true', () => {
+    it('returns null if cache is partially defined', () => {
       repoCache.branches = [
         partial<BranchCache>({
           branchName: 'foo',
           sha: '111',
-          isModified: true,
         }),
       ];
-      expect(getCachedModifiedResult('foo', '111')).toBeTrue();
+      expect(getCachedModifiedResult('foo', '111')).toBeNull();
     });
 
-    it('returns false', () => {
+    it('returns cached value', () => {
       repoCache.branches = [
         partial<BranchCache>({
           branchName: 'foo',
