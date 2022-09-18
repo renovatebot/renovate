@@ -38,6 +38,7 @@ export function syncBranchState(
   repositoryCache?: string
 ): BranchCache {
   const branchExisted = branchExists(branchName);
+  // if branch doesn't exist
   const branchSha = getBranchCommit(branchName)!;
   const baseBranchSha = getBranchCommit(baseBranch)!;
 

@@ -20,7 +20,11 @@ import { Limit, isLimitReached } from '../../global/limits';
 import { BranchConfig, BranchResult, BranchUpgradeConfig } from '../../types';
 import * as _branchWorker from '../update/branch';
 import * as _limits from './limits';
-import { canSkipBranchUpdateCheck, writeUpdates } from './write';
+import {
+  canSkipBranchUpdateCheck,
+  syncBranchState,
+  writeUpdates,
+} from './write';
 
 jest.mock('../../../util/git');
 jest.mock('../../../util/cache/repository');
@@ -278,6 +282,91 @@ describe('workers/repository/process/write', () => {
         branchFingerprint: '222',
       } as BranchCache;
       expect(canSkipBranchUpdateCheck(branchCache, '222')).toBe(true);
+    });
+  });
+
+  describe('syncBranchState()', () => {
+    it('creates minimal branch state when cache is not populated', () => {
+      const repoCacheObj = {} as RepoCacheData;
+      repoCache.getCache.mockReturnValue(repoCacheObj);
+      git.getBranchCommit.mockReturnValueOnce('sha');
+      git.getBranchCommit.mockReturnValueOnce('base_sha');
+      expect(syncBranchState('branch_name', 'base_branch', 'enabled')).toEqual({
+        branchName: 'branch_name',
+        sha: 'sha',
+        baseBranch: 'base_branch',
+        baseBranchSha: 'base_sha',
+      });
+    });
+
+    it('when base branch name is dieffrent updates it and invalidates isModified value', () => {
+      const repoCacheObj = {
+        branchName: 'branch_name',
+        sha: 'sha',
+        baseBranch: 'base_branch',
+        baseBranchSha: 'base_sha',
+        isModified: true,
+      } as RepoCacheData;
+      repoCache.getCache.mockReturnValue(repoCacheObj);
+      git.getBranchCommit.mockReturnValueOnce('sha');
+      git.getBranchCommit.mockReturnValueOnce('base_sha');
+      expect(
+        syncBranchState('branch_name', 'new_base_branch', 'enabled')
+      ).toEqual({
+        branchName: 'branch_name',
+        sha: 'sha',
+        baseBranch: 'new_base_branch',
+        baseBranchSha: 'base_sha',
+      });
+    });
+
+    it('when base branch sha is dieffrent updates it and invalidates related values', () => {
+      const repoCacheObj = {
+        branchName: 'branch_name',
+        sha: 'sha',
+        baseBranch: 'base_branch',
+        baseBranchSha: 'base_sha',
+        isBehindBase: true,
+      } as RepoCacheData;
+      repoCache.getCache.mockReturnValue(repoCacheObj);
+      git.getBranchCommit.mockReturnValueOnce('sha');
+      git.getBranchCommit.mockReturnValueOnce('new_base_sha');
+      expect(syncBranchState('branch_name', 'base_branch', 'enabled')).toEqual({
+        branchName: 'branch_name',
+        sha: 'sha',
+        baseBranch: 'base_branch',
+        baseBranchSha: 'new_base_sha',
+      });
+    });
+
+    it('when branch sha is dieffrent updates it and invalidates related values', () => {
+      const repoCacheObj = {
+        branchName: 'branch_name',
+        sha: 'sha',
+        baseBranch: 'base_branch',
+        baseBranchSha: 'base_sha',
+        isBehindBase: true,
+        isModified: true,
+        branchFingerprint: '123',
+      } as RepoCacheData;
+      repoCache.getCache.mockReturnValue(repoCacheObj);
+      git.getBranchCommit.mockReturnValueOnce('new_sha');
+      git.getBranchCommit.mockReturnValueOnce('base_sha');
+      expect(syncBranchState('branch_name', 'base_branch', 'enabled')).toEqual({
+        branchName: 'branch_name',
+        sha: 'new_sha',
+        baseBranch: 'base_branch',
+        baseBranchSha: 'base_sha',
+      });
+    });
+
+    it('show debug log if cache is enabled but branch cache not found', () => {
+      repoCache.getCache.mockReturnValue({});
+      git.branchExists.mockReturnValueOnce(true);
+      syncBranchState('branch_name', 'base_branch', 'enabled');
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        'No branch cache found for branch_name'
+      );
     });
   });
 });

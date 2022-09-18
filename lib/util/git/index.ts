@@ -664,13 +664,6 @@ export async function isBranchConflicted(
   branch: string
 ): Promise<boolean> {
   logger.debug(`isBranchConflicted(${baseBranch}, ${branch})`);
-  if (!branchExists(branch)) {
-    logger.debug(
-      { branch },
-      'Branch does not exist - cannot check isBehindBase'
-    );
-    return false;
-  }
 
   const baseBranchSha = getBranchCommit(baseBranch);
   const branchSha = getBranchCommit(branch);
