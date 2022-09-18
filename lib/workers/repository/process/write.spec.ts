@@ -190,6 +190,51 @@ describe('workers/repository/process/write', () => {
       expect(branches[0].branchFingerprint).toBe(fingerprint);
     });
 
+    it('caches same fingerprint when no commit is made and branch cache existed', async () => {
+      const branches = partial<BranchConfig[]>([
+        {
+          branchName: 'new/some-branch',
+          baseBranch: 'base_branch',
+          manager: 'npm',
+          upgrades: [
+            {
+              manager: 'unknown-manager',
+            } as BranchUpgradeConfig,
+          ],
+        },
+      ]);
+      const branchManagersFingerprint = hasha(
+        [
+          ...new Set(
+            branches[0].upgrades
+              .map((upgrade) => hashMap.get(upgrade.manager) ?? upgrade.manager)
+              .filter(is.string)
+          ),
+        ].sort()
+      );
+      const fingerprint = hasha([
+        JSON.stringify(branches[0]),
+        branchManagersFingerprint,
+      ]);
+      repoCache.getCache.mockReturnValueOnce({
+        branches: [
+          {
+            branchName: 'new/some-branch',
+            baseBranch: 'base_branch',
+            branchFingerprint: fingerprint,
+          } as BranchCache,
+        ],
+      });
+      branchWorker.processBranch.mockResolvedValueOnce({
+        branchExists: true,
+        result: BranchResult.Done,
+      });
+      git.branchExists.mockReturnValue(true);
+      config.repositoryCache = 'enabled';
+      expect(await writeUpdates(config, branches)).toBe('done');
+      expect(branches[0].branchFingerprint).toBe(fingerprint);
+    });
+
     it('shows debug log when the cache is enabled, but branch cache not found', async () => {
       const branches = partial<BranchConfig[]>([
         {
@@ -339,7 +384,7 @@ describe('workers/repository/process/write', () => {
       });
     });
 
-    it('when branch sha is dieffrent updates it and invalidates related values', () => {
+    it('when branch sha is different updates it and invalidates related values', () => {
       const repoCacheObj = {
         branchName: 'branch_name',
         sha: 'sha',
@@ -358,15 +403,6 @@ describe('workers/repository/process/write', () => {
         baseBranch: 'base_branch',
         baseBranchSha: 'base_sha',
       });
-    });
-
-    it('show debug log if cache is enabled but branch cache not found', () => {
-      repoCache.getCache.mockReturnValue({});
-      git.branchExists.mockReturnValueOnce(true);
-      syncBranchState('branch_name', 'base_branch', 'enabled');
-      expect(logger.logger.debug).toHaveBeenCalledWith(
-        'No branch cache found for branch_name'
-      );
     });
   });
 });
