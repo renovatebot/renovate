@@ -12,6 +12,14 @@ import * as template from '../../../util/template';
 import type { BranchConfig, BranchUpgradeConfig } from '../../types';
 import { CommitMessage } from '../model/commit-message';
 
+function prettifyVersion(version: string): string {
+  if (regEx(/^\d/).test(version)) {
+    return `v${version}`;
+  }
+
+  return version;
+}
+
 function isTypesGroup(branchUpgrades: BranchUpgradeConfig[]): boolean {
   return (
     branchUpgrades.some(({ depName }) => depName?.startsWith('@types/')) &&
@@ -84,9 +92,7 @@ export function generateBranchConfig(
     toValues.add(upg.newValue!);
     // prettify newVersion and newMajor for printing
     if (upg.newVersion) {
-      upg.prettyNewVersion = upg.newVersion.startsWith('v')
-        ? upg.newVersion
-        : `v${upg.newVersion}`;
+      upg.prettyNewVersion = prettifyVersion(upg.newVersion);
     }
     if (upg.newMajor) {
       upg.prettyNewMajor = `v${upg.newMajor}`;

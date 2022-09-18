@@ -56,7 +56,8 @@ describe('workers/repository/stats', () => {
           statusCode: 401,
         },
       ];
-      memCache.get.mockImplementationOnce(() => stats);
+      // TODO: fix types, jest is using wrong overload (#7154)
+      memCache.get.mockImplementationOnce(() => stats as any);
       expect(printRequestStats()).toBeUndefined();
       expect(log.trace).toHaveBeenCalledOnce();
       expect(log.debug).toHaveBeenCalledTimes(2);

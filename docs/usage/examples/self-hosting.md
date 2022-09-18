@@ -9,7 +9,7 @@ npm install -g renovate
 ```
 
 Renovate does not embed `npm`, `pnpm` and `yarn` as its own dependencies.
-If you want to use these package managers to update your lockfiles, you must ensure that the correct versions are already installed globally.
+If you want to use these package managers to update your lockfiles, you must ensure that the correct versions are installed globally.
 
 ```sh
 npm install -g yarn pnpm
@@ -19,8 +19,8 @@ The same goes for any other third-party binary tool like `gradle` or `poetry` - 
 
 ### Docker
 
-Renovate is available for Docker via an automated build [renovate/renovate](https://hub.docker.com/r/renovate/renovate/).
-It builds `latest` based on the `main` branch and all semver tags are published too.
+Renovate is available for Docker via an automated build at [`renovate/renovate` on Docker Hub](https://hub.docker.com/r/renovate/renovate/).
+It builds `latest` based on the `main` branch and all SemVer tags are published too.
 For example, all the following are valid tags:
 
 ```sh
@@ -33,7 +33,7 @@ docker run --rm renovate/renovate:32.64.4
 <!-- prettier-ignore -->
 !!! warning
     Do not use the example tags listed above, as they will be out-of-date.
-    Go to [renovate/renovate tags](https://hub.docker.com/r/renovate/renovate/tags) to grab the latest tagged release from Renovate.
+    Go to [the `renovate/renovate` tags on DockerHub](https://hub.docker.com/r/renovate/renovate/tags) to grab the latest tagged release from Renovate.
 
 If you want to configure Renovate using a `config.js` file then map it to `/usr/src/app/config.js` using Docker volumes.
 For example:
@@ -161,7 +161,7 @@ By default, the orb looks for the self-hosted configuration file in the project 
 Secrets should be configured using environment variables (e.g. `RENOVATE_TOKEN`, `GITHUB_COM_TOKEN`).
 
 [Configure environment variables in CircleCI Project Settings](https://circleci.com/docs/2.0/env-vars/#setting-an-environment-variable-in-a-project).
-To share environment variables across projects, use CircleCI [Contexts](https://circleci.com/docs/2.0/contexts/).
+To share environment variables across projects, use [CircleCI Contexts](https://circleci.com/docs/2.0/contexts/).
 
 The following example runs Renovate hourly, and looks for the self-hosted configuration file at `renovate-config.js`:
 
@@ -200,11 +200,11 @@ workflows:
 
 ### GitLab CI/CD pipeline
 
-For GitLab pipelines we recommend you use the [renovate-runner project on GitLab](https://gitlab.com/renovate-bot/renovate-runner).
-We've prepared some pipeline templates to run Renovate on pipeline schedules in an easy way.
+For GitLab pipelines we recommend you use the [`renovate-runner` project on GitLab](https://gitlab.com/renovate-bot/renovate-runner).
+We prepared some pipeline templates so its easy to run Renovate on pipeline schedules.
 You can also find the configuration steps there.
 
-For self-hosted GitLab clone/import the [renovate-runner](https://gitlab.com/renovate-bot/renovate-runner) project to your instance.
+For self-hosted GitLab clone/import the [`renovate-runner` project on GitLab](https://gitlab.com/renovate-bot/renovate-runner) project to your instance.
 
 ## File/directory usage
 
@@ -212,25 +212,29 @@ By default, Renovate stores all files in the `renovate/` subdirectory of the ope
 
 Repository data is copied or cloned into unique subdirectories under `repos/`, e.g. `/tmp/renovate/repos/github/owner1/repo-a/`.
 
-Renovate's own cache, as well as the caches(s) for npm, Yarn, Composer etc, are stored in `/tmp/renovate/cache`.
+Renovate's cache, and the caches(s) for npm, Yarn, Composer, and so on, are stored in `/tmp/renovate/cache`.
 
-To use another directory as the base directory, instead of the default `tmp/renovate` you can:
+### Overriding the default directory
+
+If you don't want to use the default `tmp/renovate` directory you can:
 
 - Set a value for `baseDir` in `config.js`
 - Use an environment variable `RENOVATE_BASE_DIR`
 - Use the CLI to pass a base directory: `--base-dir=`
 
-If you want to override the cache location then set a value for `cacheDir` instead.
+### Overriding the default cache directory
+
+If you want to override the cache directory then set your own value for `cacheDir`.
 
 ## Usage
 
-The following example uses the Renovate CLI tool, which can be installed by running `npm i -g renovate`.
+The following example uses the Renovate CLI tool, which you can install by running `npm i -g renovate`.
 
 If running your own Renovate bot then you will need a user account that Renovate will run as.
-It's recommended to use a dedicated account for the bot, e.g. name it `renovate-bot` if on your own instance.
-Create and save a Personal Access Token for this account.
+We recommend you create and use a dedicated account for the bot, e.g. name it `renovate-bot` if on your own instance.
+Create and save a PAT for this account.
 
-Create a Renovate config file, e.g. here is an example:
+Create a Renovate config file, for example:
 
 ```js
 module.exports = {
@@ -247,12 +251,12 @@ module.exports = {
 Here change the `logFile` and `repositories` to something appropriate.
 Also replace `gitlab-token` value with the one created during the previous step.
 
-If running against GitHub Enterprise Server, change the above `gitlab` values to the equivalent GitHub ones.
+If you're running against GitHub Enterprise Server, then change the `gitlab` values in the example to the equivalent GitHub ones.
 
 You can save this file as anything you want and then use the `RENOVATE_CONFIG_FILE` environment variable to tell Renovate where to find it.
 
-Most people will run Renovate via cron, e.g. once per hour.
-Here is an example Bash script that you can point `cron` to:
+Most people use cron to schedule when Renovate runs, usually on an hourly schedule.
+Here's an example Bash script that you can point `cron` to:
 
 ```sh
 #!/bin/bash
@@ -266,16 +270,17 @@ export GITHUB_COM_TOKEN="**github-token**" # Delete this if using github.com
 renovate
 ```
 
+Save the script file, and run the script manually.
+Only add the script to cron after you checked it works.
+
 <!-- prettier-ignore -->
 !!! note
     The GitHub.com token as an environment variable is needed to fetch Release Notes that are usually hosted on github.com.
     You don't need to add it if you are already running the bot against github.com, but you do need to add it if you're using GitHub Enterprise Server, GitLab, Azure DevOps, or Bitbucket.
 
-You should save and test out this script manually first, and add it to cron once you've verified it.
-
 ## Kubernetes for GitLab, using Git over SSH
 
-This section describes how to use Git binary with SSH for GitLab, to avoid API shortcomings.
+This section describes how to use a Git binary with SSH for GitLab, to avoid API shortcomings.
 
 You need to first create a SSH key, then add the public part to GitLab (see this [guide](https://docs.gitlab.com/ee/ssh/)).
 
@@ -379,8 +384,8 @@ spec:
 
 ## Logging
 
-It's recommended to configure `LOG_LEVEL=debug` and `LOG_FORMAT=json` in environment if you are ingesting/parsing logs into another system.
-Debug logging is usually necessary for any debugging, while JSON format will mean that the output is parseable.
+If you're ingesting/parsing logs into another system then we recommend you set `LOG_LEVEL=debug` and `LOG_FORMAT=json` in your environment variables.
+Debug logging is usually needed for any debugging, while JSON format will mean that the output is parseable.
 
 ### About the log level numbers
 
@@ -399,15 +404,22 @@ The logging level output is controlled by the Bunyan logging library.
 
 ## Self-signed TLS/SSL certificates
 
-Renovate and invoked helper programs (e.g. Git, npm) use a secure TLS connection (e.g. HTTPS) to connect to remote source code and dependency hosts.
-If the remote hosts use any self-signed certificates or certificate authorities then Renovate needs to be configured to trust these additional certificates.
+Renovate and invoked helper programs (like Git, or npm) use a secure TLS connection (e.g. HTTPS) to connect to remote source code and dependency hosts.
+If the remote hosts use any self-signed certificates or certificate authorities then Renovate needs to be told to trust these additional certificates.
+
+### Renovate Node.js app
 
 For the main Renovate Node.js application set the environment variable [`NODE_EXTRA_CA_CERTS=/usr/local/share/ca-certificates/self-signed-certificate.crt`](https://nodejs.org/api/cli.html#node_extra_ca_certsfile).
-This ensures that the Renovate application itself trusts the `self-signed-certificate.crt` and can establish secure connections to systems using that certificate or certificates signed by this certificate authority.
+The Renovate application now trusts the `self-signed-certificate.crt` file.
+This means Renovate can safely connect to systems using that certificate or certificates signed by this certificate authority.
 
-The helper programs (e.g. Git, npm) use the system trust store.
-For them to trust a self-signed certificate you must add it to the systems trust store.
+### Helper programs like Git or npm
+
+Helper programs like Git and npm use the system trust store.
+For those programs to trust a self-signed certificate you must add it to the systems trust store.
 On Ubuntu/Debian and many Linux-based systems, this can be done by copying the self-signed certificate (e.g. `self-signed-certificate.crt`) to `/usr/local/share/ca-certificates/` and running [`update-ca-certificates`](https://manpages.ubuntu.com/manpages/xenial/man8/update-ca-certificates.8.html) to update the system trust store afterwards.
+
+### Renovate Docker image
 
 If you're using the official [Renovate Docker image](#docker) then we recommend you add the self-signed certificate and build your own modified Docker image.
 For example, the following `Dockerfile` is set up to use a self-signed certificate:

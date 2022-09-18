@@ -1,4 +1,5 @@
 import { mocked, platform } from '../../../../../../test/util';
+import type { PackageFile } from '../../../../../modules/manager/types';
 import { prDebugDataRe } from '../../../../../modules/platform/pr-body';
 import * as _template from '../../../../../util/template';
 import * as _changelogs from './changelogs';
@@ -198,6 +199,55 @@ describe('workers/repository/update/pr/body/index', () => {
 
       const match = prDebugDataRe.exec(res);
       expect(match?.groups?.payload).toBeString();
+    });
+
+    it('pr body warning', async () => {
+      const massagedMarkDown =
+        '---\n\n### ⚠ Dependency Lookup Warnings ⚠\n\n' +
+        'Warnings were logged while processing this repo. ' +
+        'Please check the Dependency Dashboard for more information\n\n---';
+
+      const compiledContent =
+        '---\n\n\n\n### ⚠ Dependency Lookup Warnings ⚠' +
+        '\n\n\n\nWarnings were logged while processing this repo. ' +
+        'Please check the Dependency Dashboard for more information\n\n\n\n---';
+
+      platform.massageMarkdown.mockImplementation((x) => massagedMarkDown);
+      template.compile.mockImplementation((x) => compiledContent);
+      const packageFiles: Record<string, PackageFile[]> = {
+        npm: [
+          {
+            packageFile: 'package.json',
+            deps: [
+              {
+                warnings: [{ message: 'Warning 1', topic: '' }],
+              },
+              {},
+            ],
+          },
+        ],
+      };
+
+      const res = await getPrBody(
+        {
+          manager: 'some-manager',
+          branchName: 'some-branch',
+          upgrades: [],
+          packageFiles: packageFiles,
+          prBodyTemplate: '{{{warnings}}}',
+        },
+        {
+          debugData: {
+            updatedInVer: '1.2.3',
+            createdInVer: '1.2.3',
+          },
+        }
+      );
+      const expected =
+        '---\n\n### ⚠ Dependency Lookup Warnings ⚠' +
+        '\n\nWarnings were logged while processing this repo. ' +
+        'Please check the Dependency Dashboard for more information\n\n---';
+      expect(res).toBe(expected);
     });
   });
 });

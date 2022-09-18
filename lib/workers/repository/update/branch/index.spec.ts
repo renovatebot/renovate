@@ -122,7 +122,8 @@ describe('workers/repository/update/branch/index', () => {
         }),
       });
       GlobalConfig.set(adminConfig);
-      sanitize.sanitize.mockImplementation((input) => input);
+      // TODO: fix types, jest is using wrong overload (#7154)
+      sanitize.sanitize.mockImplementation((input) => input!);
       repoCache.getCache.mockReturnValue({});
     });
 
