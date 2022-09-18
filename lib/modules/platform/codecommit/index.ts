@@ -31,9 +31,9 @@ import type {
 } from '../types';
 import { getNewBranchName, repoFingerprint } from '../util';
 import { smartTruncate } from '../utils/pr-body';
+import { getCodeCommitUrl } from './codecommit-client';
 import * as client from './codecommit-client';
 import { getUserArn, initIamClient } from './iam-client';
-import { getCodeCommitUrl } from './util';
 
 const decoder = new TextDecoder();
 
@@ -81,7 +81,7 @@ export async function initPlatform({
   }
 
   config.region = region;
-  const credentials = {
+  const credentials: Credentials = {
     accessKeyId,
     secretAccessKey,
     sessionToken: process.env.AWS_SESSION_TOKEN,
