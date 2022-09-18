@@ -69,7 +69,6 @@ describe('modules/manager/gomod/artifacts', () => {
   beforeEach(() => {
     jest.resetAllMocks();
     jest.resetModules();
-    jest.restoreAllMocks();
 
     delete process.env.GOPATH;
     env.getChildProcessEnv.mockReturnValue({ ...envMock.basic, ...goEnv });
@@ -1392,43 +1391,32 @@ describe('modules/manager/gomod/artifacts', () => {
     expect(execSnapshots).toMatchObject([
       {
         cmd: 'docker pull renovate/go:1.17.0',
-        options: { encoding: 'utf-8' },
       },
       {
         cmd: 'docker ps --filter name=renovate_go -aq',
-        options: { encoding: 'utf-8' },
       },
       {
         cmd:
-          'docker run --rm --name=renovate_go --label=renovate_child -v "/tmp/github/some/repo":"' +
-          '/tmp/github/some/repo" -v "/tmp/renovate/cache":"/tmp/renovate/cache" -e GOPROXY -e GOPRIVATE -e ' +
-          'GONOPROXY -e GONOSUMDB -e GOINSECURE -e GOFLAGS -e CGO_ENABLED -e BUILDPACK_CACHE_DIR -w ' +
-          '"/tmp/github/some/repo" renovate/go:1.17.0 bash -l -c "go get -d -t ./... && ' +
-          'go install github.com/marwan-at-work/mod/cmd/mod@v1.2.3 && mod upgrade ' +
-          '--mod-name=github.com/google/go-github/v24 -t=28 && go mod tidy && go mod tidy"',
-        options: {
-          cwd: '/tmp/github/some/repo',
-          encoding: 'utf-8',
-          env: {
-            GOPROXY: 'proxy.example.com',
-            GOPRIVATE: 'private.example.com/*',
-            GONOPROXY: 'noproxy.example.com/*',
-            GONOSUMDB: '1',
-            GOINSECURE: 'insecure.example.com/*',
-            GOFLAGS: '-modcacherw',
-            CGO_ENABLED: '1',
-            HTTP_PROXY: 'http://example.com',
-            HTTPS_PROXY: 'https://example.com',
-            NO_PROXY: 'localhost',
-            HOME: '/home/user',
-            PATH: '/tmp/path',
-            LANG: 'en_US.UTF-8',
-            LC_ALL: 'en_US',
-            BUILDPACK_CACHE_DIR: '/tmp/renovate/cache/containerbase',
-          },
-          maxBuffer: 10485760,
-          timeout: 900000,
-        },
+          'docker run --rm --name=renovate_go --label=renovate_child ' +
+          '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
+          '-v "/tmp/renovate/cache":"/tmp/renovate/cache" ' +
+          '-e GOPROXY ' +
+          '-e GOPRIVATE ' +
+          '-e GONOPROXY ' +
+          '-e GONOSUMDB ' +
+          '-e GOINSECURE ' +
+          '-e GOFLAGS ' +
+          '-e CGO_ENABLED ' +
+          '-e BUILDPACK_CACHE_DIR ' +
+          '-w "/tmp/github/some/repo" ' +
+          'renovate/go:1.17.0 ' +
+          'bash -l -c "go get -d -t ./... ' +
+          '&& ' +
+          'go install github.com/marwan-at-work/mod/cmd/mod@v1.2.3 ' +
+          '&& ' +
+          'mod upgrade --mod-name=github.com/google/go-github/v24 -t=28 ' +
+          '&& ' +
+          'go mod tidy && go mod tidy"',
       },
     ]);
   });
@@ -1470,43 +1458,33 @@ describe('modules/manager/gomod/artifacts', () => {
     expect(execSnapshots).toMatchObject([
       {
         cmd: 'docker pull renovate/go:1.14.0',
-        options: { encoding: 'utf-8' },
       },
       {
         cmd: 'docker ps --filter name=renovate_go -aq',
-        options: { encoding: 'utf-8' },
       },
       {
         cmd:
-          'docker run --rm --name=renovate_go --label=renovate_child -v "/tmp/github/some/repo":"' +
-          '/tmp/github/some/repo" -v "/tmp/renovate/cache":"/tmp/renovate/cache" -e GOPROXY -e GOPRIVATE -e ' +
-          'GONOPROXY -e GONOSUMDB -e GOINSECURE -e GOFLAGS -e CGO_ENABLED -e BUILDPACK_CACHE_DIR -w ' +
-          '"/tmp/github/some/repo" renovate/go:1.14.0 bash -l -c "go get -d -t ./... && ' +
-          'go install github.com/marwan-at-work/mod/cmd/mod@latest && mod upgrade ' +
-          '--mod-name=github.com/google/go-github/v24 -t=28 && go mod tidy && go mod tidy"',
-        options: {
-          cwd: '/tmp/github/some/repo',
-          encoding: 'utf-8',
-          env: {
-            GOPROXY: 'proxy.example.com',
-            GOPRIVATE: 'private.example.com/*',
-            GONOPROXY: 'noproxy.example.com/*',
-            GONOSUMDB: '1',
-            GOINSECURE: 'insecure.example.com/*',
-            GOFLAGS: '-modcacherw',
-            CGO_ENABLED: '1',
-            HTTP_PROXY: 'http://example.com',
-            HTTPS_PROXY: 'https://example.com',
-            NO_PROXY: 'localhost',
-            HOME: '/home/user',
-            PATH: '/tmp/path',
-            LANG: 'en_US.UTF-8',
-            LC_ALL: 'en_US',
-            BUILDPACK_CACHE_DIR: '/tmp/renovate/cache/containerbase',
-          },
-          maxBuffer: 10485760,
-          timeout: 900000,
-        },
+          'docker run --rm --name=renovate_go --label=renovate_child ' +
+          '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
+          '-v "/tmp/renovate/cache":"/tmp/renovate/cache" ' +
+          '-e GOPROXY ' +
+          '-e GOPRIVATE ' +
+          '-e GONOPROXY ' +
+          '-e GONOSUMDB ' +
+          '-e GOINSECURE ' +
+          '-e GOFLAGS ' +
+          '-e CGO_ENABLED ' +
+          '-e BUILDPACK_CACHE_DIR ' +
+          '-w "/tmp/github/some/repo" ' +
+          'renovate/go:1.14.0 ' +
+          'bash -l -c "go get -d -t ./... ' +
+          '&& ' +
+          'go install github.com/marwan-at-work/mod/cmd/mod@latest ' +
+          '&& ' +
+          'mod upgrade ' +
+          '--mod-name=github.com/google/go-github/v24 -t=28 ' +
+          '&& ' +
+          'go mod tidy && go mod tidy"',
       },
     ]);
   });
