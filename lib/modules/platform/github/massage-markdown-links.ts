@@ -14,14 +14,14 @@ interface UrlMatch {
 const urlRegex =
   /(?:https?:)?(?:\/\/)?(?:www\.)?(?<!api\.)(?:to)?github\.com\/[-_a-z0-9]+\/[-_a-z0-9]+\/(?:discussions|issues|pull)\/[0-9]+(?:#[-_a-z0-9]+)?/i; // TODO #12872 (?<!re) after text not matching
 const reduceUrlRegex =
-  /(?:https?:)?(?:\/\/)?(?:www\.)?github\.com\/(?<reg>[a-zA-Z1-9-!$%^&*()_+|~=`{}[\]:";'<>?,.]*)\/(?<repo>[a-zA-Z1-9-!$%^&*()_+|~=`{}[\]:";'<>?,.]*)\/([a-zA-Z1-9-!$%^&*()_+|~=`{}[\]:";'<>?,.]*)\/(?<number>[\d]+)/g;
+  /(?:https?:)?(?:\/\/)?(?:www\.)?github\.com\/(?<org>[a-zA-Z1-9\-_.]*)\/(?<repo>[a-zA-Z1-9\-_.]*)\/([a-zA-Z1-9\-_.]*)\/(?<number>[\d]+)/g;
 
 function massageLink(input: string): string {
   return input.replace(regEx(/(?:to)?github\.com/i), 'togithub.com');
 }
 
 function reduceLink(input: string): string {
-  return input.replace(regEx(reduceUrlRegex), '$<reg>/$<repo>#$<number>');
+  return input.replace(regEx(reduceUrlRegex), '$<org>/$<repo>#$<number>');
 }
 
 function collectLinkPosition(input: string, matches: UrlMatch[]): Plugin {
@@ -69,7 +69,7 @@ export function massageMarkdownLinks(content: string): string {
     const rightSpaces = content.replace(content.trimEnd(), '');
     const matches: UrlMatch[] = [];
     const newContent = content.replace(
-      regEx(/@&#8203;(?<name>[a-zA-Z1-9-!$%^&*()_+|~=`{}[\]:";'<>?,.]*)/gi),
+      regEx(/@&#8203;(?<name>[a-zA-Z1-9\-_.]*)/gi),
       '[@$<name>](https://togithub.com/$<name>)'
     );
     remark()
