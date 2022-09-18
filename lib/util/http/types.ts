@@ -77,6 +77,7 @@ export interface InternalHttpOptions extends HttpOptions {
 
 export interface HttpHeaders extends IncomingHttpHeaders {
   link?: string | undefined;
+  'x-artifactory-id'?: string | undefined;
 }
 
 export interface HttpResponse<T = string> {

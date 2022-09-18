@@ -340,6 +340,11 @@ export function isECRMaxResultsError(err: HttpError): boolean {
   );
 }
 
+export function isArtifactoryPaginationError(err: HttpError): boolean {
+  const resp = err.response as HttpResponse<any> | undefined;
+  return !!(resp?.statusCode === 404 && resp.headers?.['x-artifactory-id']);
+}
+
 const defaultConfig = {
   commitMessageTopic: '{{{depName}}} Docker tag',
   commitMessageExtra:
@@ -854,6 +859,14 @@ export class DockerDatasource extends Datasource {
           foundMaxResultsError = true;
           continue;
         }
+
+        if (err instanceof HttpError && isArtifactoryPaginationError(err)) {
+          url = `${registryHost}/${dockerRepository}/tags/list`;
+          url = ensurePathPrefix(url, '/v2');
+          tags = [];
+          continue;
+        }
+
         throw err;
       }
       tags = tags.concat(res.body.tags);
