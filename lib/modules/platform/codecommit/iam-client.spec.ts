@@ -6,7 +6,7 @@ describe('modules/platform/codecommit/iam-client', () => {
   let iam: any;
   let iamClient: any;
 
-  beforeEach(() => {
+  beforeAll(() => {
     iamClient = mockClient(IAMClient);
 
     iam = require('./iam-client');
