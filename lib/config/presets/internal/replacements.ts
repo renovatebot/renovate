@@ -12,56 +12,7 @@ export const presets: Record<string, Preset> = {
     extends: [
       'replacements:babel-eslint-to-eslint-parser',
       'replacements:cucumber-to-scoped',
-      'replacements:fastify-accepts-serializer-to-scoped',
-      'replacements:fastify-accepts-to-scoped',
-      'replacements:fastify-auth-to-scoped',
-      'replacements:fastify-autoload-to-scoped',
-      'replacements:fastify-awilix-to-scoped',
-      'replacements:fastify-basic-auth-to-scoped',
-      'replacements:fastify-bearer-auth-to-scoped',
-      'replacements:fastify-caching-to-scoped',
-      'replacements:fastify-circuit-breaker-to-scoped',
-      'replacements:fastify-compress-to-scoped',
-      'replacements:fastify-cookie-to-scoped',
-      'replacements:fastify-cors-to-scoped',
-      'replacements:fastify-diagnostics-channel-to-scoped',
-      'replacements:fastify-elasticsearch-to-scoped',
-      'replacements:fastify-env-to-scoped',
-      'replacements:fastify-error-to-scoped',
-      'replacements:fastify-etag-to-scoped',
-      'replacements:fastify-express-to-scoped',
-      'replacements:fastify-flash-to-scoped',
-      'replacements:fastify-formbody-to-scoped',
-      'replacements:fastify-funky-to-scoped',
-      'replacements:fastify-helmet-to-scoped',
-      'replacements:fastify-hotwire-to-scoped',
-      'replacements:fastify-http-proxy-to-scoped',
-      'replacements:fastify-jwt-to-scoped',
-      'replacements:fastify-kafka-to-scoped',
-      'replacements:fastify-leveldb-to-scoped',
-      'replacements:fastify-mongodb-to-scoped',
-      'replacements:fastify-multipart-to-scoped',
-      'replacements:fastify-mysql-to-scoped',
-      'replacements:fastify-nextjs-to-scoped',
-      'replacements:fastify-oauth2-to-scoped',
-      'replacements:fastify-passport-to-scoped',
-      'replacements:fastify-postgres-to-scoped',
-      'replacements:fastify-rate-limit-to-scoped',
-      'replacements:fastify-redis-to-scoped',
-      'replacements:fastify-reply-from-to-scoped',
-      'replacements:fastify-request-context-to-scoped',
-      'replacements:fastify-response-validation-to-scoped',
-      'replacements:fastify-routes-stats-to-scoped',
-      'replacements:fastify-routes-to-scoped',
-      'replacements:fastify-schedule-to-scoped',
-      'replacements:fastify-secure-session-to-scoped',
-      'replacements:fastify-sensible-to-scoped',
-      'replacements:fastify-soap-client-to-scoped',
-      'replacements:fastify-static-to-scoped',
-      'replacements:fastify-swagger-to-scoped',
-      'replacements:fastify-url-data-to-scoped',
-      'replacements:fastify-websocket-to-scoped',
-      'replacements:fastify-zipkin-to-scoped',
+      'replacements:fastify-to-scoped',
       'replacements:hapi-to-scoped',
       'replacements:jade-to-pug',
       'replacements:joi-to-scoped',
@@ -99,8 +50,8 @@ export const presets: Record<string, Preset> = {
       },
     ],
   },
-  'fastify-accepts-serializer-to-scoped': {
-    description: '`fastify-accepts-serializer` became scoped.',
+  'fastify-to-scoped': {
+    description: '`fastify` packages became scoped',
     packageRules: [
       {
         matchCurrentVersion: '>=3.3.0 <4.0.0',
@@ -109,11 +60,6 @@ export const presets: Record<string, Preset> = {
         replacementName: '@fastify/accepts-serializer',
         replacementVersion: '4.0.0',
       },
-    ],
-  },
-  'fastify-accepts-to-scoped': {
-    description: '`fastify-accepts` became scoped.',
-    packageRules: [
       {
         matchCurrentVersion: '>=2.3.0 <3.0.0',
         matchDatasources: ['npm'],
@@ -121,11 +67,6 @@ export const presets: Record<string, Preset> = {
         replacementName: '@fastify/accepts',
         replacementVersion: '3.0.0',
       },
-    ],
-  },
-  'fastify-auth-to-scoped': {
-    description: '`fastify-auth` became scoped.',
-    packageRules: [
       {
         matchCurrentVersion: '>=1.2.0 <2.0.0',
         matchDatasources: ['npm'],
@@ -133,11 +74,6 @@ export const presets: Record<string, Preset> = {
         replacementName: '@fastify/auth',
         replacementVersion: '2.0.0',
       },
-    ],
-  },
-  'fastify-autoload-to-scoped': {
-    description: '`fastify-autoload` became scoped.',
-    packageRules: [
       {
         matchCurrentVersion: '>=3.13.0 <4.0.0',
         matchDatasources: ['npm'],
@@ -145,11 +81,6 @@ export const presets: Record<string, Preset> = {
         replacementName: '@fastify/autoload',
         replacementVersion: '4.0.0',
       },
-    ],
-  },
-  'fastify-awilix-to-scoped': {
-    description: '`fastify-awilix` became scoped.',
-    packageRules: [
       {
         matchCurrentVersion: '>=1.3.0 <2.0.0',
         matchDatasources: ['npm'],
@@ -157,11 +88,6 @@ export const presets: Record<string, Preset> = {
         replacementName: '@fastify/awilix',
         replacementVersion: '2.0.0',
       },
-    ],
-  },
-  'fastify-basic-auth-to-scoped': {
-    description: '`fastify-basic-auth` became scoped.',
-    packageRules: [
       {
         matchCurrentVersion: '>=2.3.0 <3.0.0',
         matchDatasources: ['npm'],
@@ -169,11 +95,6 @@ export const presets: Record<string, Preset> = {
         replacementName: '@fastify/basic-auth',
         replacementVersion: '3.0.0',
       },
-    ],
-  },
-  'fastify-bearer-auth-to-scoped': {
-    description: '`fastify-bearer-auth` became scoped.',
-    packageRules: [
       {
         matchCurrentVersion: '>=6.3.0 <7.0.0',
         matchDatasources: ['npm'],
@@ -181,11 +102,6 @@ export const presets: Record<string, Preset> = {
         replacementName: '@fastify/bearer-auth',
         replacementVersion: '7.0.0',
       },
-    ],
-  },
-  'fastify-caching-to-scoped': {
-    description: '`fastify-caching` became scoped.',
-    packageRules: [
       {
         matchCurrentVersion: '>=6.3.0 <7.0.0',
         matchDatasources: ['npm'],
@@ -193,11 +109,6 @@ export const presets: Record<string, Preset> = {
         replacementName: '@fastify/caching',
         replacementVersion: '7.0.0',
       },
-    ],
-  },
-  'fastify-circuit-breaker-to-scoped': {
-    description: '`fastify-circuit-breaker` became scoped.',
-    packageRules: [
       {
         matchCurrentVersion: '>=1.2.0 <2.0.0',
         matchDatasources: ['npm'],
@@ -205,11 +116,6 @@ export const presets: Record<string, Preset> = {
         replacementName: '@fastify/circuit-breaker',
         replacementVersion: '2.0.0',
       },
-    ],
-  },
-  'fastify-compress-to-scoped': {
-    description: '`fastify-compress` became scoped.',
-    packageRules: [
       {
         matchCurrentVersion: '>=4.1.0 <5.0.0',
         matchDatasources: ['npm'],
@@ -217,11 +123,6 @@ export const presets: Record<string, Preset> = {
         replacementName: '@fastify/compress',
         replacementVersion: '5.0.0',
       },
-    ],
-  },
-  'fastify-cookie-to-scoped': {
-    description: '`fastify-cookie` became scoped.',
-    packageRules: [
       {
         matchCurrentVersion: '>=5.7.0 <6.0.0',
         matchDatasources: ['npm'],
@@ -229,11 +130,6 @@ export const presets: Record<string, Preset> = {
         replacementName: '@fastify/cookie',
         replacementVersion: '6.0.0',
       },
-    ],
-  },
-  'fastify-cors-to-scoped': {
-    description: '`fastify-cors` became scoped.',
-    packageRules: [
       {
         matchCurrentVersion: '>=6.1.0 <7.0.0',
         matchDatasources: ['npm'],
@@ -241,11 +137,6 @@ export const presets: Record<string, Preset> = {
         replacementName: '@fastify/cors',
         replacementVersion: '7.0.0',
       },
-    ],
-  },
-  'fastify-diagnostics-channel-to-scoped': {
-    description: '`fastify-diagnostics-channel` became scoped.',
-    packageRules: [
       {
         matchCurrentVersion: '>=1.1.0 <2.0.0',
         matchDatasources: ['npm'],
@@ -253,11 +144,6 @@ export const presets: Record<string, Preset> = {
         replacementName: '@fastify/diagnostics-channel',
         replacementVersion: '2.0.0',
       },
-    ],
-  },
-  'fastify-elasticsearch-to-scoped': {
-    description: '`fastify-elasticsearch` became scoped.',
-    packageRules: [
       {
         matchCurrentVersion: '>=1.2.0 <2.0.0',
         matchDatasources: ['npm'],
@@ -265,11 +151,6 @@ export const presets: Record<string, Preset> = {
         replacementName: '@fastify/elasticsearch',
         replacementVersion: '2.0.0',
       },
-    ],
-  },
-  'fastify-env-to-scoped': {
-    description: '`fastify-env` became scoped.',
-    packageRules: [
       {
         matchCurrentVersion: '>=2.2.0 <3.0.0',
         matchDatasources: ['npm'],
@@ -277,11 +158,6 @@ export const presets: Record<string, Preset> = {
         replacementName: '@fastify/env',
         replacementVersion: '3.0.0',
       },
-    ],
-  },
-  'fastify-error-to-scoped': {
-    description: '`fastify-error` became scoped.',
-    packageRules: [
       {
         matchCurrentVersion: '>=1.2.0 <2.0.0',
         matchDatasources: ['npm'],
@@ -289,11 +165,6 @@ export const presets: Record<string, Preset> = {
         replacementName: '@fastify/error',
         replacementVersion: '2.0.0',
       },
-    ],
-  },
-  'fastify-etag-to-scoped': {
-    description: '`fastify-etag` became scoped.',
-    packageRules: [
       {
         matchCurrentVersion: '>=2.2.0 <3.0.0',
         matchDatasources: ['npm'],
@@ -301,11 +172,6 @@ export const presets: Record<string, Preset> = {
         replacementName: '@fastify/etag',
         replacementVersion: '3.0.0',
       },
-    ],
-  },
-  'fastify-express-to-scoped': {
-    description: '`fastify-express` became scoped.',
-    packageRules: [
       {
         matchCurrentVersion: '>=0.4.0 <1.0.0',
         matchDatasources: ['npm'],
@@ -313,11 +179,6 @@ export const presets: Record<string, Preset> = {
         replacementName: '@fastify/express',
         replacementVersion: '1.0.0',
       },
-    ],
-  },
-  'fastify-flash-to-scoped': {
-    description: '`fastify-flash` became scoped.',
-    packageRules: [
       {
         matchCurrentVersion: '>=3.1.0 <4.0.0',
         matchDatasources: ['npm'],
@@ -325,11 +186,6 @@ export const presets: Record<string, Preset> = {
         replacementName: '@fastify/flash',
         replacementVersion: '4.0.0',
       },
-    ],
-  },
-  'fastify-formbody-to-scoped': {
-    description: '`fastify-formbody` became scoped.',
-    packageRules: [
       {
         matchCurrentVersion: '>=5.3.0 <6.0.0',
         matchDatasources: ['npm'],
@@ -337,11 +193,6 @@ export const presets: Record<string, Preset> = {
         replacementName: '@fastify/formbody',
         replacementVersion: '6.0.0',
       },
-    ],
-  },
-  'fastify-funky-to-scoped': {
-    description: '`fastify-funky` became scoped.',
-    packageRules: [
       {
         matchCurrentVersion: '>=1.1.0 <2.0.0',
         matchDatasources: ['npm'],
@@ -349,11 +200,6 @@ export const presets: Record<string, Preset> = {
         replacementName: '@fastify/funky',
         replacementVersion: '2.0.0',
       },
-    ],
-  },
-  'fastify-helmet-to-scoped': {
-    description: '`fastify-helmet` became scoped.',
-    packageRules: [
       {
         matchCurrentVersion: '>=7.1.0 <8.0.0',
         matchDatasources: ['npm'],
@@ -361,11 +207,6 @@ export const presets: Record<string, Preset> = {
         replacementName: '@fastify/helmet',
         replacementVersion: '8.0.0',
       },
-    ],
-  },
-  'fastify-hotwire-to-scoped': {
-    description: '`fastify-hotwire` became scoped.',
-    packageRules: [
       {
         matchCurrentVersion: '>=0.3.0 <1.0.0',
         matchDatasources: ['npm'],
@@ -373,11 +214,6 @@ export const presets: Record<string, Preset> = {
         replacementName: '@fastify/hotwire',
         replacementVersion: '1.0.0',
       },
-    ],
-  },
-  'fastify-http-proxy-to-scoped': {
-    description: '`fastify-http-proxy` became scoped.',
-    packageRules: [
       {
         matchCurrentVersion: '>=6.3.0 <7.0.0',
         matchDatasources: ['npm'],
@@ -385,11 +221,6 @@ export const presets: Record<string, Preset> = {
         replacementName: '@fastify/http-proxy',
         replacementVersion: '7.0.0',
       },
-    ],
-  },
-  'fastify-jwt-to-scoped': {
-    description: '`fastify-jwt` became scoped.',
-    packageRules: [
       {
         matchCurrentVersion: '>=4.2.0 <5.0.0',
         matchDatasources: ['npm'],
@@ -397,11 +228,6 @@ export const presets: Record<string, Preset> = {
         replacementName: '@fastify/jwt',
         replacementVersion: '5.0.0',
       },
-    ],
-  },
-  'fastify-kafka-to-scoped': {
-    description: '`fastify-kafka` became scoped.',
-    packageRules: [
       {
         matchCurrentVersion: '>=0.3.0 <1.0.0',
         matchDatasources: ['npm'],
@@ -409,11 +235,6 @@ export const presets: Record<string, Preset> = {
         replacementName: '@fastify/kafka',
         replacementVersion: '1.0.0',
       },
-    ],
-  },
-  'fastify-leveldb-to-scoped': {
-    description: '`fastify-leveldb` became scoped.',
-    packageRules: [
       {
         matchCurrentVersion: '>=3.2.0 <4.0.0',
         matchDatasources: ['npm'],
@@ -421,11 +242,6 @@ export const presets: Record<string, Preset> = {
         replacementName: '@fastify/leveldb',
         replacementVersion: '4.0.0',
       },
-    ],
-  },
-  'fastify-mongodb-to-scoped': {
-    description: '`fastify-mongodb` became scoped.',
-    packageRules: [
       {
         matchCurrentVersion: '>=4.2.0 <5.0.0',
         matchDatasources: ['npm'],
@@ -433,11 +249,6 @@ export const presets: Record<string, Preset> = {
         replacementName: '@fastify/mongodb',
         replacementVersion: '5.0.0',
       },
-    ],
-  },
-  'fastify-multipart-to-scoped': {
-    description: '`fastify-multipart` became scoped.',
-    packageRules: [
       {
         matchCurrentVersion: '>=5.4.0 <6.0.0',
         matchDatasources: ['npm'],
@@ -445,11 +256,6 @@ export const presets: Record<string, Preset> = {
         replacementName: '@fastify/multipart',
         replacementVersion: '6.0.0',
       },
-    ],
-  },
-  'fastify-mysql-to-scoped': {
-    description: '`fastify-mysql` became scoped.',
-    packageRules: [
       {
         matchCurrentVersion: '>=2.2.0 <3.0.0',
         matchDatasources: ['npm'],
@@ -457,11 +263,6 @@ export const presets: Record<string, Preset> = {
         replacementName: '@fastify/mysql',
         replacementVersion: '3.0.0',
       },
-    ],
-  },
-  'fastify-nextjs-to-scoped': {
-    description: '`fastify-nextjs` became scoped.',
-    packageRules: [
       {
         matchCurrentVersion: '>=7.3.0 <8.0.0',
         matchDatasources: ['npm'],
@@ -469,11 +270,6 @@ export const presets: Record<string, Preset> = {
         replacementName: '@fastify/nextjs',
         replacementVersion: '8.0.0',
       },
-    ],
-  },
-  'fastify-oauth2-to-scoped': {
-    description: '`fastify-oauth2` became scoped.',
-    packageRules: [
       {
         matchCurrentVersion: '>=4.6.0 <5.0.0',
         matchDatasources: ['npm'],
@@ -481,11 +277,6 @@ export const presets: Record<string, Preset> = {
         replacementName: '@fastify/oauth2',
         replacementVersion: '5.0.0',
       },
-    ],
-  },
-  'fastify-passport-to-scoped': {
-    description: '`fastify-passport` became scoped.',
-    packageRules: [
       {
         matchCurrentVersion: '>=0.5.0',
         matchDatasources: ['npm'],
@@ -493,11 +284,6 @@ export const presets: Record<string, Preset> = {
         replacementName: '@fastify/passport',
         replacementVersion: '1.0.0',
       },
-    ],
-  },
-  'fastify-postgres-to-scoped': {
-    description: '`fastify-postgres` became scoped.',
-    packageRules: [
       {
         matchCurrentVersion: '>=3.7.0 <4.0.0',
         matchDatasources: ['npm'],
@@ -505,11 +291,6 @@ export const presets: Record<string, Preset> = {
         replacementName: '@fastify/postgres',
         replacementVersion: '4.0.0',
       },
-    ],
-  },
-  'fastify-rate-limit-to-scoped': {
-    description: '`fastify-rate-limit` became scoped.',
-    packageRules: [
       {
         matchCurrentVersion: '>=5.9.0 <6.0.0',
         matchDatasources: ['npm'],
@@ -517,11 +298,6 @@ export const presets: Record<string, Preset> = {
         replacementName: '@fastify/rate-limit',
         replacementVersion: '6.0.0',
       },
-    ],
-  },
-  'fastify-redis-to-scoped': {
-    description: '`fastify-redis` became scoped.',
-    packageRules: [
       {
         matchCurrentVersion: '>=4.4.0 <5.0.0',
         matchDatasources: ['npm'],
@@ -529,11 +305,6 @@ export const presets: Record<string, Preset> = {
         replacementName: '@fastify/redis',
         replacementVersion: '5.0.0',
       },
-    ],
-  },
-  'fastify-reply-from-to-scoped': {
-    description: '`fastify-reply-from` became scoped.',
-    packageRules: [
       {
         matchCurrentVersion: '>=6.7.0 <7.0.0',
         matchDatasources: ['npm'],
@@ -541,11 +312,6 @@ export const presets: Record<string, Preset> = {
         replacementName: '@fastify/reply-from',
         replacementVersion: '7.0.0',
       },
-    ],
-  },
-  'fastify-request-context-to-scoped': {
-    description: '`fastify-request-context` became scoped.',
-    packageRules: [
       {
         matchCurrentVersion: '>=2.3.0 <3.0.0',
         matchDatasources: ['npm'],
@@ -553,11 +319,6 @@ export const presets: Record<string, Preset> = {
         replacementName: '@fastify/request-context',
         replacementVersion: '3.0.0',
       },
-    ],
-  },
-  'fastify-response-validation-to-scoped': {
-    description: '`fastify-response-validation` became scoped.',
-    packageRules: [
       {
         matchCurrentVersion: '>=0.3.0 <1.0.0',
         matchDatasources: ['npm'],
@@ -565,11 +326,6 @@ export const presets: Record<string, Preset> = {
         replacementName: '@fastify/response-validation',
         replacementVersion: '1.0.0',
       },
-    ],
-  },
-  'fastify-routes-stats-to-scoped': {
-    description: '`fastify-routes-stats` became scoped.',
-    packageRules: [
       {
         matchCurrentVersion: '>=2.1.0 <3.0.0',
         matchDatasources: ['npm'],
@@ -577,11 +333,6 @@ export const presets: Record<string, Preset> = {
         replacementName: '@fastify/routes-stats',
         replacementVersion: '3.0.0',
       },
-    ],
-  },
-  'fastify-routes-to-scoped': {
-    description: '`fastify-routes` became scoped.',
-    packageRules: [
       {
         matchCurrentVersion: '>=3.2.0 <4.0.0',
         matchDatasources: ['npm'],
@@ -589,11 +340,6 @@ export const presets: Record<string, Preset> = {
         replacementName: '@fastify/routes',
         replacementVersion: '4.0.0',
       },
-    ],
-  },
-  'fastify-schedule-to-scoped': {
-    description: '`fastify-schedule` became scoped.',
-    packageRules: [
       {
         matchCurrentVersion: '>=1.1.0 <2.0.0',
         matchDatasources: ['npm'],
@@ -601,11 +347,6 @@ export const presets: Record<string, Preset> = {
         replacementName: '@fastify/schedule',
         replacementVersion: '2.0.0',
       },
-    ],
-  },
-  'fastify-secure-session-to-scoped': {
-    description: '`fastify-secure-session` became scoped.',
-    packageRules: [
       {
         matchCurrentVersion: '>=3.2.0 <4.0.0',
         matchDatasources: ['npm'],
@@ -613,11 +354,6 @@ export const presets: Record<string, Preset> = {
         replacementName: '@fastify/secure-session',
         replacementVersion: '4.0.0',
       },
-    ],
-  },
-  'fastify-sensible-to-scoped': {
-    description: '`fastify-sensible` became scoped.',
-    packageRules: [
       {
         matchCurrentVersion: '>=3.2.0 <4.0.0',
         matchDatasources: ['npm'],
@@ -625,11 +361,6 @@ export const presets: Record<string, Preset> = {
         replacementName: '@fastify/sensible',
         replacementVersion: '4.0.0',
       },
-    ],
-  },
-  'fastify-soap-client-to-scoped': {
-    description: '`fastify-soap-client` became scoped.',
-    packageRules: [
       {
         matchCurrentVersion: '>=0.3.0 <1.0.0',
         matchDatasources: ['npm'],
@@ -637,11 +368,6 @@ export const presets: Record<string, Preset> = {
         replacementName: '@fastify/soap-client',
         replacementVersion: '1.0.0',
       },
-    ],
-  },
-  'fastify-static-to-scoped': {
-    description: '`fastify-static` became scoped.',
-    packageRules: [
       {
         matchCurrentVersion: '>=4.7.0 <5.0.0',
         matchDatasources: ['npm'],
@@ -649,11 +375,6 @@ export const presets: Record<string, Preset> = {
         replacementName: '@fastify/static',
         replacementVersion: '5.0.0',
       },
-    ],
-  },
-  'fastify-swagger-to-scoped': {
-    description: '`fastify-swagger` became scoped.',
-    packageRules: [
       {
         matchCurrentVersion: '>=5.2.0 <6.0.0',
         matchDatasources: ['npm'],
@@ -661,11 +382,6 @@ export const presets: Record<string, Preset> = {
         replacementName: '@fastify/swagger',
         replacementVersion: '6.0.0',
       },
-    ],
-  },
-  'fastify-url-data-to-scoped': {
-    description: '`fastify-url-data` became scoped.',
-    packageRules: [
       {
         matchCurrentVersion: '>=3.1.0 <4.0.0',
         matchDatasources: ['npm'],
@@ -673,11 +389,6 @@ export const presets: Record<string, Preset> = {
         replacementName: '@fastify/url-data',
         replacementVersion: '4.0.0',
       },
-    ],
-  },
-  'fastify-websocket-to-scoped': {
-    description: '`fastify-websocket` became scoped.',
-    packageRules: [
       {
         matchCurrentVersion: '>=4.3.0 <5.0.0',
         matchDatasources: ['npm'],
@@ -685,11 +396,6 @@ export const presets: Record<string, Preset> = {
         replacementName: '@fastify/websocket',
         replacementVersion: '5.0.0',
       },
-    ],
-  },
-  'fastify-zipkin-to-scoped': {
-    description: '`fastify-zipkin` became scoped.',
-    packageRules: [
       {
         matchCurrentVersion: '>=2.1.0 <3.0.0',
         matchDatasources: ['npm'],
