@@ -19,12 +19,12 @@ import {
 import { GetUserCommand, IAMClient } from '@aws-sdk/client-iam';
 import { mockClient } from 'aws-sdk-client-mock';
 import { TextEncoder } from 'web-encoding';
+import { logger } from '../../../../test/util';
 import {
   PLATFORM_BAD_CREDENTIALS,
   REPOSITORY_EMPTY,
   REPOSITORY_NOT_FOUND,
 } from '../../../constants/error-messages';
-import type { logger as _logger } from '../../../logger';
 import { PrState } from '../../../types';
 import * as git from '../../../util/git';
 import type { Platform } from '../types';
@@ -32,13 +32,10 @@ import { config } from './index';
 
 describe('modules/platform/codecommit/index', () => {
   let codeCommit: Platform;
-  let logger: jest.Mocked<typeof _logger>;
   let codeCommitClient: any;
   let iamClient: any;
 
   beforeEach(async () => {
-    jest.mock('../../../logger');
-    logger = (await import('../../../logger')).logger as any;
     iamClient = mockClient(IAMClient);
     iamClient
       .on(GetUserCommand)
@@ -91,7 +88,7 @@ describe('modules/platform/codecommit/index', () => {
         'Init: You must configure a AWS user(accessKeyId), password(secretAccessKey) and endpoint/AWS_REGION'
       );
 
-      expect(logger.warn).toHaveBeenCalledWith(
+      expect(logger.logger.warn).toHaveBeenCalledWith(
         "Can't parse region, make sure your endpoint is correct"
       );
     });
@@ -283,7 +280,7 @@ describe('modules/platform/codecommit/index', () => {
         state: PrState.Open,
       });
       expect(res).toBeNull();
-      expect(logger.error).toHaveBeenCalledWith({ err }, 'findPr error');
+      expect(logger.logger.error).toHaveBeenCalledWith({ err }, 'findPr error');
     });
 
     it('finds pr', async () => {
@@ -872,7 +869,7 @@ describe('modules/platform/codecommit/index', () => {
         content: 'some\ncontent',
       });
       expect(res).toBeTrue();
-      expect(logger.info).toHaveBeenCalledWith(
+      expect(logger.logger.info).toHaveBeenCalledWith(
         { repository: undefined, prNo: 42, topic: 'some-subject' },
         'Comment added'
       );
@@ -906,7 +903,7 @@ describe('modules/platform/codecommit/index', () => {
         content: 'some\ncontent',
       });
       expect(res).toBeTrue();
-      expect(logger.debug).toHaveBeenCalledWith(
+      expect(logger.logger.debug).toHaveBeenCalledWith(
         { repository: undefined, prNo: 42, topic: 'some-subject' },
         'Comment updated'
       );
@@ -938,7 +935,7 @@ describe('modules/platform/codecommit/index', () => {
         content: 'my comment content',
       });
       expect(res).toBeTrue();
-      expect(logger.debug).toHaveBeenCalledWith(
+      expect(logger.logger.debug).toHaveBeenCalledWith(
         { repository: undefined, prNo: 42, topic: 'some-subject' },
         'Comment is already update-to-date'
       );
@@ -970,7 +967,7 @@ describe('modules/platform/codecommit/index', () => {
         content: 'my comment content',
       });
       expect(res).toBeTrue();
-      expect(logger.debug).toHaveBeenCalledWith(
+      expect(logger.logger.debug).toHaveBeenCalledWith(
         { repository: undefined, prNo: 42, topic: null },
         'Comment is already update-to-date'
       );
@@ -986,7 +983,7 @@ describe('modules/platform/codecommit/index', () => {
         content: 'my comment content',
       });
       expect(res).toBeFalse();
-      expect(logger.debug).toHaveBeenCalledWith(
+      expect(logger.logger.debug).toHaveBeenCalledWith(
         { err },
         'Unable to retrieve pr comments'
       );
@@ -1020,7 +1017,7 @@ describe('modules/platform/codecommit/index', () => {
         number: 42,
         topic: 'some-subject',
       });
-      expect(logger.debug).toHaveBeenCalledWith(
+      expect(logger.logger.debug).toHaveBeenCalledWith(
         'comment "some-subject" in PR #42 was removed'
       );
     });
@@ -1051,7 +1048,7 @@ describe('modules/platform/codecommit/index', () => {
         number: 42,
         content: 'my comment content',
       });
-      expect(logger.debug).toHaveBeenCalledWith(
+      expect(logger.logger.debug).toHaveBeenCalledWith(
         'comment "my comment content" in PR #42 was removed'
       );
     });
@@ -1064,7 +1061,7 @@ describe('modules/platform/codecommit/index', () => {
         number: 42,
         content: 'my comment content',
       });
-      expect(logger.debug).toHaveBeenCalledWith(
+      expect(logger.logger.debug).toHaveBeenCalledWith(
         { err },
         'Unable to retrieve pr comments'
       );
@@ -1091,7 +1088,7 @@ describe('modules/platform/codecommit/index', () => {
       await expect(
         codeCommit.addReviewers(13, ['arn:aws:iam::someUser:user/ReviewerUser'])
       ).toResolve();
-      expect(logger.debug).toHaveBeenCalledWith(
+      expect(logger.logger.debug).toHaveBeenCalledWith(
         res,
         'Approval Rule Added to PR #13:'
       );
