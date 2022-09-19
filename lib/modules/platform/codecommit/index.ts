@@ -162,17 +162,15 @@ export async function getPrList(): Promise<Pr[]> {
   );
   const fetchedPrs: Pr[] = [];
 
-  /* istanbul ignore if */
   if (listPrsResponse && !listPrsResponse.pullRequestIds) {
     return fetchedPrs;
   }
 
-  const prIds = listPrsResponse?.pullRequestIds ?? [];
+  const prIds = listPrsResponse.pullRequestIds ?? [];
 
   for (const prId of prIds) {
     const prRes = await client.getPr(prId);
 
-    // istanbul ignore if
     if (!prRes?.pullRequest) {
       continue;
     }
@@ -355,7 +353,6 @@ export async function createPr({
     config.repository
   );
 
-  // istanbul ignore if
   if (
     !prCreateRes.pullRequest?.title ||
     !prCreateRes.pullRequest?.pullRequestId
@@ -596,13 +593,11 @@ export async function ensureComment({
   let commentId = undefined;
   let commentNeedsUpdating = false;
 
-  /* istanbul ignore if */
   if (!prCommentsResponse?.commentsForPullRequestData) {
     return false;
   }
 
   for (const commentObj of prCommentsResponse.commentsForPullRequestData) {
-    /* istanbul ignore if */
     if (!commentObj?.comments) {
       continue;
     }
@@ -620,7 +615,6 @@ export async function ensureComment({
   if (!commentId) {
     const prEvent = await client.getPrEvents(`${number}`);
 
-    // istanbul ignore if
     if (!prEvent?.pullRequestEvents) {
       return false;
     }
@@ -629,7 +623,6 @@ export async function ensureComment({
       prEvent.pullRequestEvents[0]
         .pullRequestSourceReferenceUpdatedEventMetadata;
 
-    // istanbul ignore if
     if (!event?.beforeCommitId || !event?.afterCommitId) {
       return false;
     }
@@ -683,15 +676,17 @@ export async function ensureCommentRemoval(
     return;
   }
 
-  // istanbul ignore if
   if (!prCommentsResponse?.commentsForPullRequestData) {
+    logger.debug('commentsForPullRequestData not found');
     return;
   }
 
   let commentIdToRemove;
   for (const commentObj of prCommentsResponse.commentsForPullRequestData) {
-    /* istanbul ignore if */
     if (!commentObj?.comments) {
+      logger.debug(
+        'comments object not found under commentsForPullRequestData'
+      );
       continue;
     }
 

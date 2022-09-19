@@ -254,7 +254,7 @@ describe('modules/platform/codecommit/index', () => {
     it('gets PR list by author', async () => {
       codeCommitClient
         .on(ListPullRequestsCommand)
-        .resolvesOnce({ pullRequestIds: ['1'] });
+        .resolvesOnce({ pullRequestIds: ['1', '2'] });
       const prRes = {
         pullRequest: {
           title: 'someTitle',
@@ -267,6 +267,7 @@ describe('modules/platform/codecommit/index', () => {
           ],
         },
       };
+      codeCommitClient.on(GetPullRequestCommand).resolvesOnce({});
       codeCommitClient.on(GetPullRequestCommand).resolvesOnce(prRes);
       const res = await codeCommit.getPrList();
       expect(res).toMatchObject([
@@ -292,6 +293,12 @@ describe('modules/platform/codecommit/index', () => {
           title: 'someTitle',
         },
       ]);
+    });
+
+    it('checks if nullcheck works for list prs', async () => {
+      codeCommitClient.on(ListPullRequestsCommand).resolvesOnce({});
+      const res = await codeCommit.getPrList();
+      expect(res).toEqual([]);
     });
   });
 
@@ -672,6 +679,29 @@ describe('modules/platform/codecommit/index', () => {
         sourceRepo: undefined,
       });
     });
+
+    it('doesnt return a title', async () => {
+      const prRes = {
+        pullRequest: {
+          pullRequestId: '1',
+          pullRequestStatus: 'OPEN',
+        },
+      };
+
+      codeCommitClient.on(CreatePullRequestCommand).resolvesOnce(prRes);
+      let res: string = '';
+      try {
+        await codeCommit.createPr({
+          sourceBranch: 'sourceBranch',
+          targetBranch: 'targetBranch',
+          prTitle: 'mytitle',
+          prBody: 'mybody',
+        });
+      } catch (err) {
+        res = err.message;
+      }
+      expect(res).toBe('Could not create pr, missing PR info');
+    });
   });
 
   describe('updatePr()', () => {
@@ -1013,6 +1043,97 @@ describe('modules/platform/codecommit/index', () => {
         'Unable to retrieve pr comments'
       );
     });
+
+    it('fails at null check for response', async () => {
+      codeCommitClient.on(GetCommentsForPullRequestCommand).resolvesOnce({});
+      const res = await codeCommit.ensureComment({
+        number: 42,
+        topic: null,
+        content: 'my comment content',
+      });
+      expect(res).toBeFalse();
+    });
+
+    it('doesnt find comments obj', async () => {
+      const commentsRes = {
+        commentsForPullRequestData: [
+          {
+            pullRequestId: '1',
+            repositoryName: 'someRepo',
+            beforeCommitId: 'beforeCommitId',
+            afterCommitId: 'afterCommitId',
+          },
+        ],
+      };
+      codeCommitClient
+        .on(GetCommentsForPullRequestCommand)
+        .resolvesOnce(commentsRes);
+      const res = await codeCommit.ensureComment({
+        number: 42,
+        topic: null,
+        content: 'my comment content',
+      });
+      expect(res).toBeFalse();
+    });
+
+    it('doesnt find events data', async () => {
+      const commentsRes = {
+        commentsForPullRequestData: [
+          {
+            pullRequestId: '1',
+            repositoryName: 'someRepo',
+            beforeCommitId: 'beforeCommitId',
+            afterCommitId: 'afterCommitId',
+          },
+        ],
+      };
+      codeCommitClient
+        .on(GetCommentsForPullRequestCommand)
+        .resolvesOnce(commentsRes);
+      codeCommitClient.on(DescribePullRequestEventsCommand).resolvesOnce({});
+      codeCommitClient.on(PostCommentForPullRequestCommand).resolvesOnce({});
+      const res = await codeCommit.ensureComment({
+        number: 42,
+        topic: null,
+        content: 'my comment content',
+      });
+
+      expect(res).toBeFalse();
+    });
+
+    it('doesnt find event before/after', async () => {
+      const commentsRes = {
+        commentsForPullRequestData: [
+          {
+            pullRequestId: '1',
+            repositoryName: 'someRepo',
+            beforeCommitId: 'beforeCommitId',
+            afterCommitId: 'afterCommitId',
+          },
+        ],
+      };
+      codeCommitClient
+        .on(GetCommentsForPullRequestCommand)
+        .resolvesOnce(commentsRes);
+      const eventsRes = {
+        pullRequestEvents: [
+          {
+            pullRequestSourceReferenceUpdatedEventMetadata: {},
+          },
+        ],
+      };
+      codeCommitClient
+        .on(DescribePullRequestEventsCommand)
+        .resolvesOnce(eventsRes);
+      codeCommitClient.on(PostCommentForPullRequestCommand).resolvesOnce({});
+      const res = await codeCommit.ensureComment({
+        number: 42,
+        topic: null,
+        content: 'my comment content',
+      });
+
+      expect(res).toBeFalse();
+    });
   });
 
   describe('ensureCommentRemoval', () => {
@@ -1044,6 +1165,44 @@ describe('modules/platform/codecommit/index', () => {
       });
       expect(logger.logger.debug).toHaveBeenCalledWith(
         'comment "some-subject" in PR #42 was removed'
+      );
+    });
+
+    it('doesnt find commentsForPullRequestData', async () => {
+      codeCommitClient.on(GetCommentsForPullRequestCommand).resolvesOnce({});
+      codeCommitClient.on(DeleteCommentContentCommand).resolvesOnce({});
+      await codeCommit.ensureCommentRemoval({
+        type: 'by-topic',
+        number: 42,
+        topic: 'some-subject',
+      });
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        'commentsForPullRequestData not found'
+      );
+    });
+
+    it('doesnt find comment obj', async () => {
+      const commentsRes = {
+        commentsForPullRequestData: [
+          {
+            pullRequestId: '1',
+            repositoryName: 'someRepo',
+            beforeCommitId: 'beforeCommitId',
+            afterCommitId: 'afterCommitId',
+          },
+        ],
+      };
+      codeCommitClient
+        .on(GetCommentsForPullRequestCommand)
+        .resolvesOnce(commentsRes);
+      codeCommitClient.on(DeleteCommentContentCommand).resolvesOnce({});
+      await codeCommit.ensureCommentRemoval({
+        type: 'by-topic',
+        number: 42,
+        topic: 'some-subject',
+      });
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        'comments object not found under commentsForPullRequestData'
       );
     });
 
