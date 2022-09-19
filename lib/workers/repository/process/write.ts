@@ -120,6 +120,7 @@ export async function writeUpdates(
     }
     addMeta(meta);
     const branchExisted = branchExists(branchName);
+    // TODO: base branch name cannot be undefined - fix optional types (#7154)
     let branchState = syncBranchState(
       branchName,
       baseBranch!,
