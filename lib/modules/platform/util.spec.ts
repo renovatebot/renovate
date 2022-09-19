@@ -1,5 +1,5 @@
 import * as hostRules from '../../util/host-rules';
-import { repoFingerprint } from './util';
+import { getNewBranchName, repoFingerprint } from './util';
 
 describe('modules/platform/util', () => {
   beforeEach(() => hostRules.clear());
@@ -15,5 +15,17 @@ describe('modules/platform/util', () => {
         expect(repoFingerprint(repoId, endpoint)).toBe(fingerprint);
       }
     );
+  });
+
+  describe('getNewBranchName', () => {
+    it('should add refs/heads', () => {
+      const res = getNewBranchName('testBB');
+      expect(res).toBe(`refs/heads/testBB`);
+    });
+
+    it('should be the same', () => {
+      const res = getNewBranchName('refs/heads/testBB');
+      expect(res).toBe(`refs/heads/testBB`);
+    });
   });
 });
