@@ -475,6 +475,7 @@ export async function getBranchParentSha(
   const branchSha = getBranchCommit(branchName);
   let parentSha = getCachedBranchParentShaResult(branchName, branchSha);
   if (parentSha !== null) {
+    logger.debug('Using cached result for getBranchParentSha');
     return parentSha;
   }
 
@@ -558,18 +559,15 @@ export function getBranchList(): string[] {
   return Object.keys(config.branchCommits);
 }
 
-export async function isBranchBehindBase(branchName: string): Promise<boolean> {
-  if (!branchExists(branchName)) {
-    logger.debug(
-      { branchName },
-      'Branch does not exist - cannot check isBehindBase'
-    );
-    return false;
-  }
-  const { currentBranchSha } = config;
-
-  let isBehind = getCachedBehindBaseResult(branchName, currentBranchSha);
+export async function isBranchBehindBase(
+  branchName: string,
+  baseBranch?: string
+): Promise<boolean> {
+  let isBehind = baseBranch
+    ? getCachedBehindBaseResult(branchName, baseBranch)
+    : null;
   if (isBehind !== null) {
+    logger.debug('Using cached result for isBranchBehindBase');
     return isBehind;
   }
 
@@ -607,6 +605,7 @@ export async function isBranchModified(branchName: string): Promise<boolean> {
   }
   // First check local config
   if (config.branchIsModified[branchName] !== undefined) {
+    logger.debug('Using local config for isBranchModified');
     return config.branchIsModified[branchName];
   }
   // Second check repoCache

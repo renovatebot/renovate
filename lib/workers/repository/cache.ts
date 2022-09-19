@@ -10,6 +10,7 @@ import type {
 import {
   getBranchCommit,
   getBranchParentSha,
+  isBranchBehindBase,
   isBranchModified,
 } from '../../util/git';
 import type { BranchConfig, BranchUpgradeConfig } from '../types';
@@ -69,6 +70,14 @@ async function generateBranchCache(
         // Do nothing
       }
     }
+    let isBehindBase = false;
+    if (sha) {
+      try {
+        isBehindBase = await isBranchBehindBase(branchName, baseBranch);
+      } catch (err) /* istanbul ignore next */ {
+        // Do nothing
+      }
+    }
     const upgrades: BranchUpgradeCache[] = branch.upgrades
       ? branch.upgrades.map(generateBranchUpgradeCache)
       : [];
@@ -79,6 +88,7 @@ async function generateBranchCache(
       baseBranch: baseBranch!,
       branchFingerprint,
       branchName,
+      isBehindBase,
       isModified,
       parentSha,
       prNo,
