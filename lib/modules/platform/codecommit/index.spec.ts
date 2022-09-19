@@ -278,6 +278,20 @@ describe('modules/platform/codecommit/index', () => {
           title: 'someTitle',
         },
       ]);
+      codeCommitClient
+        .on(GetPullRequestCommand)
+        .rejectsOnce(new Error('failed connection'));
+      // test cache
+      const res2 = await codeCommit.getPrList();
+      expect(res2).toMatchObject([
+        {
+          sourceBranch: 'refs/heads/sourceBranch',
+          targetBranch: 'refs/heads/targetBranch',
+          state: 'open',
+          number: 1,
+          title: 'someTitle',
+        },
+      ]);
     });
   });
 

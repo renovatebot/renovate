@@ -152,7 +152,6 @@ export async function initRepo({
 export async function getPrList(): Promise<Pr[]> {
   logger.debug('getPrList()');
 
-  /* istanbul ignore if */
   if (config.prList) {
     return config.prList;
   }
