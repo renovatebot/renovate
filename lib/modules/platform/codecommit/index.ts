@@ -125,7 +125,7 @@ export async function initRepo({
     throw new Error(PLATFORM_BAD_CREDENTIALS);
   }
 
-  if (!repo) {
+  if (!repo?.repositoryMetadata) {
     logger.error({ repository }, 'Could not find repository');
     throw new Error(REPOSITORY_NOT_FOUND);
   }
@@ -168,8 +168,7 @@ export async function getPrList(): Promise<Pr[]> {
     return fetchedPrs;
   }
 
-  /* istanbul ignore next */
-  const prIds = listPrsResponse.pullRequestIds ?? [];
+  const prIds = listPrsResponse?.pullRequestIds ?? [];
 
   for (const prId of prIds) {
     const prRes = await client.getPr(prId);
@@ -286,8 +285,7 @@ export async function getRepos(): Promise<string[]> {
 
   const res: string[] = [];
 
-  /* istanbul ignore next */
-  const repoNames = reposRes.repositories ?? [];
+  const repoNames = reposRes?.repositories ?? [];
 
   for (const repo of repoNames) {
     if (repo.repositoryName) {

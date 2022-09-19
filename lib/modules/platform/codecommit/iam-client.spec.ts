@@ -3,13 +3,10 @@ import { mockClient } from 'aws-sdk-client-mock';
 import { PLATFORM_BAD_CREDENTIALS } from '../../../constants/error-messages';
 
 describe('modules/platform/codecommit/iam-client', () => {
-  let iam: any;
-  let iamClient: any;
+  const iam = require('./iam-client');
+  const iamClient = mockClient(IAMClient);
 
   beforeAll(() => {
-    iamClient = mockClient(IAMClient);
-
-    iam = require('./iam-client');
     iam.initIamClient('eu-east', {
       accessKeyId: 'aaa',
       secretAccessKey: 'bbb',
@@ -28,7 +25,7 @@ describe('modules/platform/codecommit/iam-client', () => {
   });
 
   it('should return empty', async () => {
-    iamClient.on(GetUserCommand).resolves(undefined);
+    iamClient.on(GetUserCommand).rejectsOnce(undefined);
     let userArn;
     try {
       userArn = await iam.getUserArn();
@@ -52,9 +49,15 @@ describe('modules/platform/codecommit/iam-client', () => {
   });
 
   it('should return the user normally', async () => {
-    iamClient
-      .on(GetUserCommand)
-      .resolves({ User: { Arn: 'aws:arn:example:123456' } });
+    iamClient.on(GetUserCommand).resolves({
+      User: {
+        Arn: 'aws:arn:example:123456',
+        UserName: 'someone',
+        UserId: 'something',
+        Path: 'somewhere',
+        CreateDate: new Date(),
+      },
+    });
     let userArn;
     try {
       userArn = await iam.getUserArn();

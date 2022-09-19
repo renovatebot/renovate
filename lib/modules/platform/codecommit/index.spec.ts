@@ -30,25 +30,34 @@ import * as git from '../../../util/git';
 import type { Platform } from '../types';
 import { config } from './index';
 
+const codeCommitClient = mockClient(CodeCommitClient);
+const iamClient = mockClient(IAMClient);
+
 describe('modules/platform/codecommit/index', () => {
   let codeCommit: Platform;
-  let codeCommitClient: any;
-  let iamClient: any;
 
-  beforeEach(async () => {
-    iamClient = mockClient(IAMClient);
-    iamClient
-      .on(GetUserCommand)
-      .resolves({ User: { Arn: 'aws:arn:example:123456' } });
+  beforeAll(async () => {
     codeCommit = await import('.');
+    iamClient.on(GetUserCommand).resolves({
+      User: {
+        Arn: 'aws:arn:example:123456',
+        UserName: 'someone',
+        UserId: 'something',
+        Path: 'somewhere',
+        CreateDate: new Date(),
+      },
+    });
     await codeCommit.initPlatform({
       endpoint: 'https://git-codecommit.eu-central-1.amazonaws.com/',
       username: 'accessKeyId',
       password: 'SecretAccessKey',
     });
+  });
+
+  beforeEach(() => {
+    codeCommitClient.reset();
     config.prList = undefined;
     config.repository = undefined;
-    codeCommitClient = mockClient(CodeCommitClient);
   });
 
   it('validates massageMarkdown functionality', () => {
@@ -159,7 +168,7 @@ describe('modules/platform/codecommit/index', () => {
 
     it('getRepositoryInfo returns bad results', async () => {
       jest.spyOn(git, 'initRepo').mockReturnValueOnce(Promise.resolve());
-      codeCommitClient.on(GetRepositoryCommand).resolvesOnce();
+      codeCommitClient.on(GetRepositoryCommand).resolvesOnce({});
       let error;
       try {
         await codeCommit.initRepo({
@@ -173,7 +182,9 @@ describe('modules/platform/codecommit/index', () => {
 
     it('getRepositoryInfo returns bad results 2', async () => {
       jest.spyOn(git, 'initRepo').mockReturnValueOnce(Promise.resolve());
-      codeCommitClient.on(GetRepositoryCommand).resolvesOnce({ repo: {} });
+      codeCommitClient
+        .on(GetRepositoryCommand)
+        .resolvesOnce({ repositoryMetadata: {} });
       let error;
       try {
         await codeCommit.initRepo({
@@ -651,9 +662,9 @@ describe('modules/platform/codecommit/index', () => {
 
   describe('updatePr()', () => {
     it('updates PR', async () => {
-      codeCommitClient.on(UpdatePullRequestDescriptionCommand).resolvesOnce();
-      codeCommitClient.on(UpdatePullRequestTitleCommand).resolvesOnce();
-      codeCommitClient.on(UpdatePullRequestStatusCommand).resolvesOnce();
+      codeCommitClient.on(UpdatePullRequestDescriptionCommand).resolvesOnce({});
+      codeCommitClient.on(UpdatePullRequestTitleCommand).resolvesOnce({});
+      codeCommitClient.on(UpdatePullRequestStatusCommand).resolvesOnce({});
       await expect(
         codeCommit.updatePr({
           number: 1,
@@ -665,8 +676,8 @@ describe('modules/platform/codecommit/index', () => {
     });
 
     it('updates PR regardless of status failure', async () => {
-      codeCommitClient.on(UpdatePullRequestDescriptionCommand).resolvesOnce();
-      codeCommitClient.on(UpdatePullRequestTitleCommand).resolvesOnce();
+      codeCommitClient.on(UpdatePullRequestDescriptionCommand).resolvesOnce({});
+      codeCommitClient.on(UpdatePullRequestTitleCommand).resolvesOnce({});
       codeCommitClient
         .on(UpdatePullRequestStatusCommand)
         .rejectsOnce(new Error('update status failure'));
@@ -681,9 +692,9 @@ describe('modules/platform/codecommit/index', () => {
     });
 
     it('updates PR with status closed', async () => {
-      codeCommitClient.on(UpdatePullRequestDescriptionCommand).resolvesOnce();
-      codeCommitClient.on(UpdatePullRequestTitleCommand).resolvesOnce();
-      codeCommitClient.on(UpdatePullRequestStatusCommand).resolvesOnce();
+      codeCommitClient.on(UpdatePullRequestDescriptionCommand).resolvesOnce({});
+      codeCommitClient.on(UpdatePullRequestTitleCommand).resolvesOnce({});
+      codeCommitClient.on(UpdatePullRequestStatusCommand).resolvesOnce({});
       await expect(
         codeCommit.updatePr({
           number: 1,
@@ -720,7 +731,7 @@ describe('modules/platform/codecommit/index', () => {
         },
       };
       codeCommitClient.on(GetPullRequestCommand).resolvesOnce(prRes);
-      codeCommitClient.on(MergeBranchesBySquashCommand).resolvesOnce();
+      codeCommitClient.on(MergeBranchesBySquashCommand).resolvesOnce({});
 
       const updateStatusRes = {
         pullRequest: {
@@ -753,7 +764,7 @@ describe('modules/platform/codecommit/index', () => {
         },
       };
       codeCommitClient.on(GetPullRequestCommand).resolvesOnce(prRes);
-      codeCommitClient.on(MergeBranchesBySquashCommand).resolvesOnce();
+      codeCommitClient.on(MergeBranchesBySquashCommand).resolvesOnce({});
       const updateStatusRes = {
         pullRequest: {
           pullRequestStatus: 'OPEN',
@@ -785,7 +796,7 @@ describe('modules/platform/codecommit/index', () => {
         },
       };
       codeCommitClient.on(GetPullRequestCommand).resolvesOnce(prRes);
-      codeCommitClient.on(MergeBranchesBySquashCommand).resolvesOnce();
+      codeCommitClient.on(MergeBranchesBySquashCommand).resolvesOnce({});
       const updateStatusRes = {
         pullRequest: {
           pullRequestStatus: 'OPEN',
@@ -862,7 +873,7 @@ describe('modules/platform/codecommit/index', () => {
       codeCommitClient
         .on(DescribePullRequestEventsCommand)
         .resolvesOnce(eventsRes);
-      codeCommitClient.on(PostCommentForPullRequestCommand).resolvesOnce();
+      codeCommitClient.on(PostCommentForPullRequestCommand).resolvesOnce({});
       const res = await codeCommit.ensureComment({
         number: 42,
         topic: 'some-subject',
@@ -895,7 +906,7 @@ describe('modules/platform/codecommit/index', () => {
       codeCommitClient
         .on(GetCommentsForPullRequestCommand)
         .resolvesOnce(commentsRes);
-      codeCommitClient.on(PostCommentForPullRequestCommand).resolvesOnce();
+      codeCommitClient.on(PostCommentForPullRequestCommand).resolvesOnce({});
 
       const res = await codeCommit.ensureComment({
         number: 42,
@@ -1011,7 +1022,7 @@ describe('modules/platform/codecommit/index', () => {
       codeCommitClient
         .on(GetCommentsForPullRequestCommand)
         .resolvesOnce(commentsRes);
-      codeCommitClient.on(DeleteCommentContentCommand).resolvesOnce();
+      codeCommitClient.on(DeleteCommentContentCommand).resolvesOnce({});
       await codeCommit.ensureCommentRemoval({
         type: 'by-topic',
         number: 42,
@@ -1042,7 +1053,7 @@ describe('modules/platform/codecommit/index', () => {
       codeCommitClient
         .on(GetCommentsForPullRequestCommand)
         .resolvesOnce(commentsRes);
-      codeCommitClient.on(DeleteCommentContentCommand).resolvesOnce();
+      codeCommitClient.on(DeleteCommentContentCommand).resolvesOnce({});
       await codeCommit.ensureCommentRemoval({
         type: 'by-content',
         number: 42,
@@ -1073,9 +1084,9 @@ describe('modules/platform/codecommit/index', () => {
       const res = {
         approvalRule: {
           approvalRuleName: 'Assignees By Renovate',
-          lastModifiedDate: 1570752871.932,
+          lastModifiedDate: new Date(),
           ruleContentSha256: '7c44e6ebEXAMPLE',
-          creationDate: 1570752871.932,
+          creationDate: new Date(),
           approvalRuleId: 'aac33506-EXAMPLE',
           approvalRuleContent:
             '{"Version": "2018-11-08","Statements": [{"Type": "Approvers","NumberOfApprovalsNeeded": 1,"ApprovalPoolMembers": ["arn:aws:iam::someUser:user/ReviewerUser"]}]}',
