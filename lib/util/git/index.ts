@@ -565,11 +565,9 @@ export function getBranchList(): string[] {
 
 export async function isBranchBehindBase(
   branchName: string,
-  baseBranch?: string
+  baseBranch: string
 ): Promise<boolean> {
-  let isBehind = baseBranch
-    ? getCachedBehindBaseResult(branchName, baseBranch)
-    : null;
+  let isBehind = getCachedBehindBaseResult(branchName, baseBranch);
   if (isBehind !== null) {
     logger.debug('Using cached result for isBranchBehindBase');
     return isBehind;

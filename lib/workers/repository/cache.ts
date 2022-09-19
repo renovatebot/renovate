@@ -73,7 +73,8 @@ async function generateBranchCache(
     let isBehindBase = false;
     if (sha) {
       try {
-        isBehindBase = await isBranchBehindBase(branchName, baseBranch);
+        // TODO: fix types (#7154)
+        isBehindBase = await isBranchBehindBase(branchName, baseBranch!);
       } catch (err) /* istanbul ignore next */ {
         // Do nothing
       }
