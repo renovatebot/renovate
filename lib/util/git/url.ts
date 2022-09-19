@@ -34,8 +34,18 @@ export function getRemoteUrlWithToken(url: string, hostType?: string): string {
 
   if (hostRule?.token) {
     logger.debug(`Found hostRules token for url ${url}`);
-
-    return getHttpUrl(url, hostRule.token.split(":", 2).map(encodeURIComponent).join(":"));
+    const colonIndex = hostRule.token.indexOf(":")
+    let encodedToken
+    
+    if (colonIndex > -1) {
+      const encodedUsername = encodeURIComponent(hostRule.token.substring(0, colonIndex));
+      const encodedPassword = encodeURIComponent(hostRule.token.substring(colonIndex + 1));
+      encodedToken = `${encodedUsername}:${encodedPassword}`
+    } else {
+      encodedToken = encodeURIComponent(hostRule.token)
+    }
+    
+    return getHttpUrl(url, encodedToken);
   }
 
   if (hostRule?.username && hostRule?.password) {
