@@ -344,14 +344,18 @@ describe('workers/repository/process/write', () => {
       });
     });
 
-    it('when base branch name is dieffrent updates it and invalidates isModified value', () => {
+    it('when base branch name is different updates it and invalidates isModified value', () => {
       const repoCacheObj = {
-        branchName: 'branch_name',
-        sha: 'sha',
-        baseBranch: 'base_branch',
-        baseBranchSha: 'base_sha',
-        isModified: true,
-      } as RepoCacheData;
+        branches: [
+          partial<BranchCache>({
+            branchName: 'branch_name',
+            sha: 'sha',
+            baseBranch: 'base_branch',
+            baseBranchSha: 'base_sha',
+            isModified: true,
+          }),
+        ],
+      };
       repoCache.getCache.mockReturnValue(repoCacheObj);
       git.getBranchCommit.mockReturnValueOnce('sha');
       git.getBranchCommit.mockReturnValueOnce('base_sha');
@@ -365,14 +369,18 @@ describe('workers/repository/process/write', () => {
       });
     });
 
-    it('when base branch sha is dieffrent updates it and invalidates related values', () => {
+    it('when base branch sha is different updates it and invalidates related values', () => {
       const repoCacheObj = {
-        branchName: 'branch_name',
-        sha: 'sha',
-        baseBranch: 'base_branch',
-        baseBranchSha: 'base_sha',
-        isBehindBase: true,
-      } as RepoCacheData;
+        branches: [
+          partial<BranchCache>({
+            branchName: 'branch_name',
+            sha: 'sha',
+            baseBranch: 'base_branch',
+            baseBranchSha: 'base_sha',
+            isBehindBase: true,
+          }),
+        ],
+      };
       repoCache.getCache.mockReturnValue(repoCacheObj);
       git.getBranchCommit.mockReturnValueOnce('sha');
       git.getBranchCommit.mockReturnValueOnce('new_base_sha');
@@ -386,14 +394,18 @@ describe('workers/repository/process/write', () => {
 
     it('when branch sha is different updates it and invalidates related values', () => {
       const repoCacheObj = {
-        branchName: 'branch_name',
-        sha: 'sha',
-        baseBranch: 'base_branch',
-        baseBranchSha: 'base_sha',
-        isBehindBase: true,
-        isModified: true,
-        branchFingerprint: '123',
-      } as RepoCacheData;
+        branches: [
+          partial<BranchCache>({
+            branchName: 'branch_name',
+            sha: 'sha',
+            baseBranch: 'base_branch',
+            baseBranchSha: 'base_sha',
+            isBehindBase: true,
+            isModified: true,
+            branchFingerprint: '123',
+          }),
+        ],
+      };
       repoCache.getCache.mockReturnValue(repoCacheObj);
       git.getBranchCommit.mockReturnValueOnce('new_sha');
       git.getBranchCommit.mockReturnValueOnce('base_sha');
