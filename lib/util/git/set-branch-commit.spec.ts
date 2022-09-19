@@ -46,6 +46,7 @@ describe('util/git/set-branch-commit', () => {
         ],
       };
       git.getBranchCommit.mockReturnValueOnce('base_SHA');
+      repositoryCache.getCache.mockReturnValue(repoCache);
       expect(setBranchCommit('branch_name', 'base_branch', 'SHA')).toEqual({
         branchName: 'branch_name',
         baseBranch: 'base_branch',
