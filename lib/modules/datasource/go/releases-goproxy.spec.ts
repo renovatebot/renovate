@@ -316,9 +316,10 @@ describe('modules/datasource/go/releases-goproxy', () => {
       httpMock
         .scope(`${baseUrl}/github.com/google/btree`)
         .get('/@v/list')
-        .reply(200, 'v1.0.0\nv1.0.1\n')
-        .get('/@v/v1.0.0.info')
-        .reply(200, { Version: 'v1.0.0', Time: '2018-08-13T15:31:12Z' })
+        .reply(
+          200,
+          ['v1.0.0 2018-08-13T15:31:12Z', 'v1.0.1', '  \n'].join('\n')
+        )
         .get('/@v/v1.0.1.info')
         .reply(200, { Version: 'v1.0.1', Time: '2019-10-16T16:15:28Z' });
 

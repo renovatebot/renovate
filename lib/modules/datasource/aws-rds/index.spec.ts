@@ -94,7 +94,9 @@ function mockDescribeVersionsCommand(
 }
 
 describe('modules/datasource/aws-rds/index', () => {
-  beforeEach(() => rdsMock.reset());
+  beforeEach(() => {
+    rdsMock.reset();
+  });
 
   describe('getPkgReleases()', () => {
     it('without returned versions', async () => {

@@ -1,5 +1,5 @@
 // TODO #7154
-import { Ecosystem, Osv, OsvOffline } from '@jamiemagee/osv-offline';
+import { Ecosystem, Osv, OsvOffline } from '@renovatebot/osv-offline';
 import { getManagerConfig, mergeChildConfig } from '../../../config';
 import type { PackageRule, RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';

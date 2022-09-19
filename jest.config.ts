@@ -38,7 +38,6 @@ function jestGithubRunnerSpecs(): JestConfig {
 }
 
 const config: JestConfig = {
-  preset: 'ts-jest',
   cacheDirectory: '.cache/jest',
   coverageDirectory: './coverage',
   collectCoverage: true,
