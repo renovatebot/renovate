@@ -3727,6 +3727,13 @@ cli-table3@^0.6.1, cli-table3@^0.6.2:
   optionalDependencies:
     "@colors/colors" "1.5.0"
 
+clipanion@3.2.0-rc.12:
+  version "3.2.0-rc.12"
+  resolved "https://registry.yarnpkg.com/clipanion/-/clipanion-3.2.0-rc.12.tgz#4426199a1ca49d045f199613dd4e20387c815324"
+  integrity sha512-yhxjhyfuOtQW11CLgfqG3aWsVNu52CzQd18tgAn4P/AMaEvaLbB1x9qmKb5K5HPvjBzDG6JWSHdJOIfqQgOo7Q==
+  dependencies:
+    typanion "^3.8.0"
+
 clipanion@3.2.0-rc.4:
   version "3.2.0-rc.4"
   resolved "https://registry.yarnpkg.com/clipanion/-/clipanion-3.2.0-rc.4.tgz#4df6e55e46c1287dd5d6d595eec3c785082e8e32"
@@ -9188,7 +9195,7 @@ tunnel@0.0.6, tunnel@^0.0.6:
   resolved "https://registry.yarnpkg.com/tunnel/-/tunnel-0.0.6.tgz#72f1314b34a5b192db012324df2cc587ca47f92c"
   integrity sha512-1h/Lnq9yajKY2PEbBadPXj3VxsDDu844OnaAo52UVmIzIvwwtBPIuNvkjuzBlTWpfJyUbG3ez0KSBibQkj4ojg==
 
-typanion@^3.3.1:
+typanion@^3.3.1, typanion@^3.8.0:
   version "3.12.0"
   resolved "https://registry.yarnpkg.com/typanion/-/typanion-3.12.0.tgz#8352830e5cf26ebfc5832da265886c9fb3ebb323"
   integrity sha512-o59ZobUBsG+2dHnGVI2shscqqzHdzCOixCU0t8YXLxM2Su42J2ha7hY9V5+6SIBjVsw6aLqrlYznCgQGJN4Kag==
