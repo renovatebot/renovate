@@ -78,7 +78,7 @@ export async function gitRetry<T>(gitFunc: () => Promise<T>): Promise<T> {
       return res;
     } catch (err) {
       lastError = err;
-      logger.debug({ err }, `Git function thrown`);
+      logger.error({ err }, `Git function thrown`);
       // Try to transform the Error to ExternalHostError
       const errChecked = checkForPlatformFailure(err);
       if (errChecked instanceof ExternalHostError) {
@@ -216,7 +216,7 @@ async function fetchBranchCommits(): Promise<void> {
     if (errChecked) {
       throw errChecked;
     }
-    logger.debug({ err }, 'git error');
+    logger.error({ err }, 'git error');
     if (err.message?.includes('Please ask the owner to check their account')) {
       throw new Error(REPOSITORY_DISABLED);
     }
@@ -395,7 +395,7 @@ export async function syncGit(): Promise<void> {
       };
       await gitRetry(() => emptyDirAndClone());
     } catch (err) /* istanbul ignore next */ {
-      logger.debug({ err }, 'git clone error');
+      logger.error({ err }, 'git clone error');
       if (err.message?.includes('No space left on device')) {
         throw new Error(SYSTEM_INSUFFICIENT_DISK_SPACE);
       }
@@ -630,7 +630,7 @@ export async function isBranchModified(branchName: string): Promise<boolean> {
     ).trim();
   } catch (err) /* istanbul ignore next */ {
     if (err.message?.includes('fatal: bad revision')) {
-      logger.debug(
+      logger.error(
         { err },
         'Remote branch not found when checking last commit author - aborting run'
       );
@@ -776,7 +776,7 @@ export async function mergeBranch(branchName: string): Promise<void> {
     await gitRetry(() => git.push('origin', config.currentBranch));
     incLimitedValue(Limit.Commits);
   } catch (err) {
-    logger.debug(
+    logger.error(
       {
         baseBranch: config.currentBranch,
         baseSha: config.currentBranchSha,
