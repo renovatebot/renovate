@@ -8,20 +8,18 @@ Let Renovate use AWS CodeCommit access keys by doing one of the following:
 
 1. Set a Renovate configuration file - config.js and set:
 
-- `endpoint:` the url endpoint e.g `https://git-codecommit.us-east-1.amazonaws.com/`
-- `username:` AWS IAM access key id
-- `password:` AWS Secret access key
+   - `endpoint:` the url endpoint e.g `https://git-codecommit.us-east-1.amazonaws.com/`
+   - `username:` AWS IAM access key id
+   - `password:` AWS Secret access key
 
 2. Set environment variables:
-
-- `AWS_REGION:` the region e.g `us-east-1`
-- `AWS_ACCESS_KEY_ID:` your IAM Access key id
-- `AWS_SECRET_ACCESS_KEY:` your IAM Secret access key id
+   - `AWS_REGION:` the region e.g `us-east-1`
+   - `AWS_ACCESS_KEY_ID:` your IAM Access key id
+   - `AWS_SECRET_ACCESS_KEY:` your IAM Secret access key id
 
 ---
 
-- Only required if you have a session token
-  - `AWS_SESSION_TOKEN`: your AWS Session token
+- `AWS_SESSION_TOKEN`: your AWS Session token
 
 Make sure to attach the [AWSCodeCommitFullAccess policy](https://docs.aws.amazon.com/codecommit/latest/userguide/security-iam-awsmanpol.html#managed-policies-full) to your IAM User.
 

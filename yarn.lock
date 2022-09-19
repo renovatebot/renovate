@@ -2239,7 +2239,6 @@
 
 "@renovate/eslint-plugin@https://github.com/renovatebot/eslint-plugin#v0.0.4":
   version "0.0.4"
-  uid "0c444386e79d6145901212507521b8a0a48af000"
   resolved "https://github.com/renovatebot/eslint-plugin#0c444386e79d6145901212507521b8a0a48af000"
 
 "@renovatebot/osv-offline-db@1.0.1":
@@ -3828,19 +3827,12 @@ cli-table3@^0.6.1, cli-table3@^0.6.2:
   optionalDependencies:
     "@colors/colors" "1.5.0"
 
-clipanion@3.2.0-rc.12:
+clipanion@3.2.0-rc.12, clipanion@3.2.0-rc.4:
   version "3.2.0-rc.12"
   resolved "https://registry.yarnpkg.com/clipanion/-/clipanion-3.2.0-rc.12.tgz#4426199a1ca49d045f199613dd4e20387c815324"
   integrity sha512-yhxjhyfuOtQW11CLgfqG3aWsVNu52CzQd18tgAn4P/AMaEvaLbB1x9qmKb5K5HPvjBzDG6JWSHdJOIfqQgOo7Q==
   dependencies:
     typanion "^3.8.0"
-
-clipanion@3.2.0-rc.4:
-  version "3.2.0-rc.4"
-  resolved "https://registry.yarnpkg.com/clipanion/-/clipanion-3.2.0-rc.4.tgz#4df6e55e46c1287dd5d6d595eec3c785082e8e32"
-  integrity sha512-wkW5IYIK63i2aSmFr8EoRjEpZmy3KFXezDn4K8dBct7pq0hWWDFUoqwXTMIXWyBIEJFekmZ9v5wX+JtRBMZbOA==
-  dependencies:
-    typanion "^3.3.1"
 
 cliui@^7.0.2:
   version "7.0.4"
@@ -7547,7 +7539,6 @@ npm@^8.3.0:
     "@npmcli/fs" "^2.1.0"
     "@npmcli/map-workspaces" "^2.0.3"
     "@npmcli/package-json" "^2.0.0"
-    "@npmcli/promise-spawn" "^3.0.0"
     "@npmcli/run-script" "^4.2.1"
     abbrev "~1.1.1"
     archy "~1.0.0"
@@ -7558,7 +7549,6 @@ npm@^8.3.0:
     cli-table3 "^0.6.2"
     columnify "^1.6.0"
     fastest-levenshtein "^1.0.12"
-    fs-minipass "^2.1.0"
     glob "^8.0.1"
     graceful-fs "^4.2.10"
     hosted-git-info "^5.1.0"
@@ -7578,7 +7568,6 @@ npm@^8.3.0:
     libnpmteam "^4.0.4"
     libnpmversion "^3.0.7"
     make-fetch-happen "^10.2.0"
-    minimatch "^5.1.0"
     minipass "^3.1.6"
     minipass-pipeline "^1.2.4"
     mkdirp "^1.0.4"
