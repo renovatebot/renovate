@@ -1,5 +1,4 @@
 lib/config/presets/internal/default.ts
-lib/modules/platform/github/index.ts
 lib/workers/repository/onboarding/pr/config-description.ts
 lib/workers/repository/onboarding/pr/index.ts
 lib/workers/repository/onboarding/pr/pr-list.ts
