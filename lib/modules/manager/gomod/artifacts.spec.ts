@@ -1377,9 +1377,7 @@ describe('modules/manager/gomod/artifacts', () => {
         updateType: 'major',
         newMajor: 28,
         postUpdateOptions: ['gomodUpdateImportPaths'],
-        constraints: {
-          gomodMod: 'v1.2.3',
-        },
+        constraints: {},
       },
     });
 
@@ -1412,7 +1410,7 @@ describe('modules/manager/gomod/artifacts', () => {
           'renovate/go:1.17.0 ' +
           'bash -l -c "go get -d -t ./... ' +
           '&& ' +
-          'go install github.com/marwan-at-work/mod/cmd/mod@v1.2.3 ' +
+          'go install github.com/marwan-at-work/mod/cmd/mod@latest ' +
           '&& ' +
           'mod upgrade --mod-name=github.com/google/go-github/v24 -t=28 ' +
           '&& ' +
