@@ -58,9 +58,9 @@ import type {
   GitlabComment,
   GitlabIssue,
   GitlabPr,
+  GitlabProjectMembers,
   MergeMethod,
   RepoResponse,
-  GitlabProjectMembers,
 } from './types';
 
 let config: {
@@ -977,27 +977,31 @@ export async function addAssignees(
       'assignee_ids[]': assigneeIds,
     })}`;
     const mr = await gitlabApi.putJson<GitLabMergeRequest>(url);
-    
+
     // GitLab API returns empty array of assignees in case some of them are not project members
     if (mr.body.assignees?.length === 0) {
       if (assigneeIds.length === 1) {
-        logger.warn('Failed to add single assignee')
+        logger.warn('Failed to add single assignee');
         return;
       } else if (assigneeIds.length > 1) {
-        url = `projects/${
-          config.repository
-        }/members/all?${getQueryString({
+        url = `projects/${config.repository}/members/all?${getQueryString({
           'user_ids[]': assigneeIds,
         })}`;
 
-        logger.warn(`Not all assignees '${assignees.join(', ')}' are part of the project, checking project members`);
-        const projectMembers = await gitlabApi.getJson<GitlabProjectMembers>(url);
+        logger.warn(
+          `Not all assignees '${assignees.join(
+            ', '
+          )}' are part of the project, checking project members`
+        );
+        const projectMembers = await gitlabApi.getJson<GitlabProjectMembers>(
+          url
+        );
         // returns filtered out list of sent assigneeIds, with the ones who are members of the project
         const projectMemberIDs: number[] = [];
         const projectMemberUsernames: string[] = [];
         projectMembers.body.forEach((member) => {
-          projectMemberIDs.push(member.id); 
-          projectMemberUsernames.push(member.username)
+          projectMemberIDs.push(member.id);
+          projectMemberUsernames.push(member.username);
         });
 
         // update MR with new list of assignees which are project members
@@ -1005,7 +1009,11 @@ export async function addAssignees(
           logger.warn('None of the assignees are project members');
           return;
         }
-        logger.debug(`Adding members ${projectMemberUsernames.join(', ')} as MR assignees to #${iid}`);
+        logger.debug(
+          `Adding members ${projectMemberUsernames.join(
+            ', '
+          )} as MR assignees to #${iid}`
+        );
         url = `projects/${
           config.repository
         }/merge_requests/${iid}?${getQueryString({

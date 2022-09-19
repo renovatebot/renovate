@@ -1070,20 +1070,50 @@ describe('modules/platform/gitlab/index', () => {
         .get('/api/v4/users?username=someuser')
         .reply(200, [{ id: 123 }])
         .get('/api/v4/users?username=someotheruser')
-        .reply(200, [{ id: 124}])
+        .reply(200, [{ id: 124 }])
         .put(
           '/api/v4/projects/undefined/merge_requests/42?assignee_ids[]=123&assignee_ids[]=124'
         )
-        .reply(200, [{ assignees: [] }])
-        .get('/api/v4/projects/undefined/members/all/?user_ids[]=123&user_ids[]=124')
-        .reply(200, [{ id: 123 }])
-        .put(
-          '/api/v4/projects/undefined/merge_requests/42?assignee_ids[]=123'
+        .reply(200, { assignees: [] })
+        .get(
+          '/api/v4/projects/undefined/members/all?user_ids[]=123&user_ids[]=124'
         )
-        .reply(200)
+        .reply(200, [{ id: 123 }])
+        .put('/api/v4/projects/undefined/merge_requests/42?assignee_ids[]=123')
+        .reply(200);
       await expect(
         gitlab.addAssignees(42, ['someuser', 'someotheruser'])
-      ).toResolve()
+      ).toResolve();
+    });
+
+    it('should warn for failing to add assignee since none of them are project members', async () => {
+      httpMock
+        .scope(gitlabApiHost)
+        .get('/api/v4/users?username=someuser')
+        .reply(200, [{ id: 123 }])
+        .get('/api/v4/users?username=someotheruser')
+        .reply(200, [{ id: 124 }])
+        .put(
+          '/api/v4/projects/undefined/merge_requests/42?assignee_ids[]=123&assignee_ids[]=124'
+        )
+        .reply(200, { assignees: [] })
+        .get(
+          '/api/v4/projects/undefined/members/all?user_ids[]=123&user_ids[]=124'
+        )
+        .reply(200, []);
+      await expect(
+        gitlab.addAssignees(42, ['someuser', 'someotheruser'])
+      ).toResolve();
+    });
+
+    it('should warn for failing to add single assignee', async () => {
+      httpMock
+        .scope(gitlabApiHost)
+        .get('/api/v4/users?username=someuser')
+        .reply(200, [{ id: 123 }])
+        .put('/api/v4/projects/undefined/merge_requests/42?assignee_ids[]=123')
+        .reply(200, { assignees: [] });
+      await expect(gitlab.addAssignees(42, ['someuser'])).toResolve();
     });
 
     it('should swallow error', async () => {

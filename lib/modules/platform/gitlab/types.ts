@@ -18,7 +18,7 @@ export interface GitLabUser {
   username: string;
 }
 
-export interface GitlabProjectMembers extends Array<GitLabUser>{}
+export type GitlabProjectMembers = Array<GitLabUser>;
 
 export interface GitLabMergeRequest {
   iid: number;
