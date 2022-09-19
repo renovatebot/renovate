@@ -440,6 +440,14 @@ Use the `globalExtends` field if your preset has any global-only configuration o
 
 Use the `extends` field instead of this if, for example, you need the ability for a repository config (e.g. `renovate.json`) to be able to use `ignorePresets` for any preset defined in global config.
 
+## locale
+
+Renovate supports internationalization with [GNU Gettext](https://www.gnu.org/software/gettext/), you can specific expected locale with this option, and also assign translationsFilePath is required.
+
+```sh
+--locale fr
+```
+
 ## logContext
 
 `logContext` is included with each log entry only if `logFormat="json"` - it is not included in the pretty log output.
@@ -743,6 +751,14 @@ If this is set to false, then a full install of modules will be done.
 This is currently applicable to `npm` and `lerna`/`npm` only, and only used in cases where bugs in `npm` result in incorrect lock files being updated.
 
 ## token
+
+## translationsFilePath
+
+This option is specific the PO(Portable Object) file's path.
+
+Renovate uses the default single domain "messages" for i18n.
+
+You can translate your own edition by inovking `msginit` program, and then invoke `msgmerge` program to add more `msgid`.
 
 ## unicodeEmoji
 
