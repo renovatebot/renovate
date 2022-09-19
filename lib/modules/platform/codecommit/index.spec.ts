@@ -689,7 +689,7 @@ describe('modules/platform/codecommit/index', () => {
       };
 
       codeCommitClient.on(CreatePullRequestCommand).resolvesOnce(prRes);
-      let res: string = '';
+      let res = '';
       try {
         await codeCommit.createPr({
           sourceBranch: 'sourceBranch',
