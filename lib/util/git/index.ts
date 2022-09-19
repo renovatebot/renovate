@@ -230,7 +230,11 @@ export async function initRepo(args: StorageConfig): Promise<void> {
   config.additionalBranches = [];
   config.branchIsModified = {};
   const { localDir } = GlobalConfig.get();
-  git = simpleGit(localDir, simpleGitConfig());
+  git = simpleGit(localDir, simpleGitConfig()).env({
+    ...process.env,
+    LANG: 'C',
+    LC_ALL: 'C',
+  });
   gitInitialized = false;
   await fetchBranchCommits();
 }
