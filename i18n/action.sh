@@ -9,17 +9,11 @@ function install_gettext {
 }
 
 function commit {
-    local branchName
-    branchName="chore/i18n-$(date +%m-%d-%Y)"
-
-    git checkout -b "$branchName"
-
     git config --global user.name  'Renovate Bot'
     git config --global user.email 'renovate@whitesourcesoftware.com'
 
     git add i18n/sources.txt i18n/messages.pot
     git commit -m "chore(i18n): daily update the POT file"
-    git push origin "$branchName"
 }
 
 function make_pr {

@@ -543,7 +543,7 @@ export const presets: Record<string, Preset> = {
     dependencyDashboard: true,
   },
   disableDependencyDashboard: {
-    description: 'Disable Renovate Dependency Dashboard creation.',
+    description: gt.gettext('Disable Renovate Dependency Dashboard creation.'),
     dependencyDashboard: false,
   },
   dependencyDashboardApproval: {
