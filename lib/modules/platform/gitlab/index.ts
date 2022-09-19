@@ -988,7 +988,7 @@ export async function addAssignees(
           'user_ids[]': assigneeIds,
         })}`;
 
-        logger.warn(
+        logger.debug(
           `Not all assignees '${assignees.join(
             ', '
           )}' are part of the project, checking project members`
