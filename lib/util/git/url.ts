@@ -29,12 +29,13 @@ export function getHttpUrl(url: string, token?: string): string {
 }
 
 export function getRemoteUrlWithToken(url: string, hostType?: string): string {
-  const hostRule = hostRules.find({ url, hostType });
+  const httpUrl = getHttpUrl(url)
+  const hostRule = hostRules.find({ url: httpUrl, hostType });
 
   if (hostRule?.token) {
     logger.debug(`Found hostRules token for url ${url}`);
 
-    return getHttpUrl(url, encodeURIComponent(hostRule.token));
+    return getHttpUrl(url, hostRule.token.split(":", 2).map(encodeURIComponent).join(":"));
   }
 
   if (hostRule?.username && hostRule?.password) {
