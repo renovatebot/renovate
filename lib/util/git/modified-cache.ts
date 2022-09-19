@@ -9,8 +9,7 @@ export function getCachedModifiedResult(
   const branch = branches?.find((branch) => branch.branchName === branchName);
 
   if (
-    branch?.sha &&
-    branch.sha === branchSha &&
+    branch?.sha === branchSha &&
     branch.isModified !== undefined
   ) {
     return branch.isModified;
