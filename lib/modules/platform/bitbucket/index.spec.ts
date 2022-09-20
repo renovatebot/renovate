@@ -996,11 +996,10 @@ describe('modules/platform/bitbucket/index', () => {
 
   describe('massageMarkdown()', () => {
     it('returns diff files', () => {
-      expect(
-        bitbucket.massageMarkdown(
-          '<details><summary>foo</summary>bar</details>text<details>'
-        )
-      ).toMatchSnapshot();
+      const prBody =
+        '<details><summary>foo</summary>bar</details>text<details>' +
+        '\n---\n\n - [ ] <!-- rebase-check --> rebase\n<!--renovate-config-hash:-->';
+      expect(bitbucket.massageMarkdown(prBody)).toMatchSnapshot();
     });
   });
 
