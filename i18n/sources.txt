@@ -1,4 +1,6 @@
 lib/config/presets/internal/default.ts
+lib/config/presets/internal/group.ts
+lib/config/presets/internal/workarounds.ts
 lib/workers/repository/onboarding/pr/config-description.ts
 lib/workers/repository/onboarding/pr/index.ts
 lib/workers/repository/onboarding/pr/pr-list.ts

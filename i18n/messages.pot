@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: renovate-platform\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-09-19 14:33+0800\n"
+"POT-Creation-Date: 2022-09-20 06:57+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,8 +18,49 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
 
+#: lib/config/presets/internal/default.ts:45
+msgid ""
+"Ignore `node_modules`, `bower_components`, `vendor` and various test/tests "
+"directories."
+msgstr ""
+
+#: lib/config/presets/internal/default.ts:125
+msgid "Autodetect whether to pin dependencies or maintain ranges."
+msgstr ""
+
+#: lib/config/presets/internal/default.ts:195
+msgid ""
+"If Renovate detects semantic commits, it will use semantic commit type `fix` "
+"for dependencies and `chore` for all others."
+msgstr ""
+
+#: lib/config/presets/internal/default.ts:254
+msgid "Rate limit PR creation to a maximum of two per hour."
+msgstr ""
+
+#: lib/config/presets/internal/default.ts:267
+msgid "Limit to maximum 10 open PRs at any time."
+msgstr ""
+
 #: lib/config/presets/internal/default.ts:542
+#: lib/config/presets/internal/default.ts:548
 msgid "Enable Renovate Dependency Dashboard creation."
+msgstr ""
+
+#: lib/config/presets/internal/default.ts:552
+msgid "Disable Renovate Dependency Dashboard creation."
+msgstr ""
+
+#: lib/config/presets/internal/group.ts:50
+msgid "Use curated list of recommended non-monorepo package groupings."
+msgstr ""
+
+#: lib/config/presets/internal/group.ts:709
+msgid "Group known monorepo packages together."
+msgstr ""
+
+#: lib/config/presets/internal/workarounds.ts:8
+msgid "A collection of workarounds for known problems with packages."
 msgstr ""
 
 #: lib/modules/platform/github/index.ts:131
@@ -133,7 +174,38 @@ msgctxt "onboarding/pr/pr-list"
 msgid "Schedule"
 msgstr ""
 
+#: lib/workers/repository/onboarding/pr/pr-list.ts:44
+msgctxt "onboarding/pr/pr-list"
+msgid "Branch name"
+msgstr ""
+
+#: lib/workers/repository/onboarding/pr/pr-list.ts:48
+msgctxt "onboarding/pr/pr-list"
+msgid "Merge into"
+msgstr ""
+
+#: lib/workers/repository/onboarding/pr/pr-list.ts:57
+msgid "Regenerate lock files to use latest dependency versions"
+msgstr ""
+
+#: lib/workers/repository/onboarding/pr/pr-list.ts:61
+msgctxt "onboarding/pr/pr-list"
+msgid "Pin"
+msgstr ""
+
+#: lib/workers/repository/onboarding/pr/pr-list.ts:63
+msgctxt "onboarding/pr/pr-list"
+msgid "Upgrade"
+msgstr ""
+
+#: lib/workers/repository/onboarding/pr/pr-list.ts:75
+#: lib/workers/repository/onboarding/pr/pr-list.ts:77
+msgctxt "onboarding/pr/pr-list"
+msgid "to"
+msgstr ""
+
 #: lib/workers/repository/onboarding/pr/pr-list.ts:89
+#: lib/workers/repository/onboarding/pr/pr-list.ts:100
 #, javascript-format
 msgid ""
 "Branch creation will be limited to maximum %d per hour, so it doesn't swamp "
