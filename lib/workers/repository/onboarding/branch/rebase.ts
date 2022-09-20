@@ -20,7 +20,6 @@ export async function rebaseOnboardingBranch(
   const configFile = defaultConfigFile(config);
   const existingContents =
     (await getFile(configFile, config.onboardingBranch)) ?? '';
-  // encoding algorithm must match in pr/index
   const currentConfigHash = toSha256(existingContents);
   const contents = await getOnboardingConfigContents(config, configFile);
 

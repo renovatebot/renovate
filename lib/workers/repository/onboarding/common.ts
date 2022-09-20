@@ -3,10 +3,11 @@ import { configFileNames } from '../../../config/app-strings';
 import type { RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
 
-export const defaultConfigFile = (config: RenovateConfig): string =>
-  configFileNames.includes(config.onboardingConfigFileName!)
+export function defaultConfigFile(config: RenovateConfig): string {
+  return configFileNames.includes(config.onboardingConfigFileName!)
     ? config.onboardingConfigFileName!
     : configFileNames[0];
+}
 
 export class OnboardingState {
   private static updateRequested = false;

@@ -57,7 +57,7 @@ export async function renovateRepository(
       setMeta({ repository: config.repository });
       addSplit('update');
       if (performExtract) {
-        await setBranchCache(branches); // update branch cache if preformed extraction
+        await setBranchCache(branches); // update branch cache if performed extraction
       }
       if (res === 'automerged') {
         if (canRetry) {
