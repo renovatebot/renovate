@@ -1,10 +1,10 @@
+import { CodeCommitClient, GetFileCommand } from '@aws-sdk/client-codecommit';
+import { GetUserCommand, IAMClient } from '@aws-sdk/client-iam';
+import { mockClient } from 'aws-sdk-client-mock';
 import { TextEncoder } from 'web-encoding';
 import { Platform, setPlatformApi } from '../../../modules/platform';
 import { PRESET_DEP_NOT_FOUND } from '../util';
 import * as codeCommit from '.';
-import { mockClient } from 'aws-sdk-client-mock';
-import { CodeCommitClient, GetFileCommand } from '@aws-sdk/client-codecommit';
-import { GetUserCommand, IAMClient } from '@aws-sdk/client-iam';
 
 const codeCommitClient = mockClient(CodeCommitClient);
 const iamClient = mockClient(IAMClient);
