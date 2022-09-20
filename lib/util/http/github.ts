@@ -1,6 +1,5 @@
 import is from '@sindresorhus/is';
 import { DateTime } from 'luxon';
-import pAll from 'p-all';
 import { PlatformId } from '../../constants';
 import {
   PLATFORM_BAD_CREDENTIALS,
@@ -12,6 +11,7 @@ import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import { getCache } from '../cache/repository';
 import { maskToken } from '../mask';
+import * as p from '../promises';
 import { range } from '../range';
 import { regEx } from '../regex';
 import { joinUrlParts, parseLinkHeader, resolveBaseUrl } from '../url';
@@ -335,7 +335,7 @@ export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
               );
             }
           );
-          const pages = await pAll(queue, { concurrency: 5 });
+          const pages = await p.all(queue);
           if (opts.paginationField && is.plainObject(result.body)) {
             const paginatedResult = result.body[opts.paginationField];
             if (is.array<T>(paginatedResult)) {

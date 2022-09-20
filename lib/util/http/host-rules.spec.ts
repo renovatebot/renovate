@@ -119,6 +119,13 @@ describe('util/http/host-rules', () => {
     });
   });
 
+  it('uses http keepalives', () => {
+    hostRules.add({ keepalive: true });
+    expect(
+      applyHostRules(url, { ...options, token: 'xxx' }).agent
+    ).toBeDefined();
+  });
+
   it('disables http2', () => {
     process.env.HTTP_PROXY = 'http://proxy';
     bootstrap();

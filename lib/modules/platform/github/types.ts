@@ -53,22 +53,8 @@ export interface GhRestPr {
   _links?: unknown;
 }
 
-export interface GhGraphQlPr {
-  number: number;
-  title: string;
-  body?: string;
-  state?: string;
-  headRefName: string;
-  baseRefName?: string;
-  labels?: { nodes?: { name: string }[] };
-  assignees?: { totalCount: number };
-  reviewRequests?: { totalCount: number };
-  comments?: {
-    nodes?: {
-      databaseId: number;
-      body: string;
-    }[];
-  };
+export interface GhPr extends Pr {
+  updatedAt: string;
 }
 
 export interface UserDetails {
@@ -95,7 +81,7 @@ export interface LocalRepoConfig {
   parentRepo: string | null;
   forkMode?: boolean;
   forkToken?: string;
-  prList: Pr[] | null;
+  prList: GhPr[] | null;
   issueList: any[] | null;
   mergeMethod: 'rebase' | 'squash' | 'merge';
   defaultBranch: string;
@@ -145,5 +131,4 @@ export interface ApiPageItem {
 export interface ApiPageCache<T extends ApiPageItem = ApiPageItem> {
   items: Record<number, T>;
   lastModified?: string;
-  etag?: string;
 }

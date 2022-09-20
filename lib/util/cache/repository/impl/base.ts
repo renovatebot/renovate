@@ -4,6 +4,7 @@ import is from '@sindresorhus/is';
 import hasha from 'hasha';
 import { GlobalConfig } from '../../../../config/global';
 import { logger } from '../../../../logger';
+import { safeStringify } from '../../../stringify';
 import {
   CACHE_REVISION,
   isValidRev10,
@@ -106,7 +107,7 @@ export abstract class RepoCacheBase implements RepoCache {
   }
 
   async save(): Promise<void> {
-    const jsonStr = JSON.stringify(this.data);
+    const jsonStr = safeStringify(this.data);
     const hash = await hasha.async(jsonStr);
     if (hash === this.oldHash) {
       return;
@@ -130,5 +131,13 @@ export abstract class RepoCacheBase implements RepoCache {
 
   getData(): RepoCacheData {
     return this.data;
+  }
+
+  isModified(): boolean | undefined {
+    if (!this.oldHash) {
+      return undefined;
+    }
+    const jsonStr = safeStringify(this.data);
+    return hasha(jsonStr) !== this.oldHash;
   }
 }
