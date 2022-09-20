@@ -1091,7 +1091,7 @@ describe('modules/platform/azure/index', () => {
         '\n---\n\n - [ ] <!-- rebase-check --> rebase\n<!--renovate-config-hash:-->' +
         'plus also [a link](https://github.com/foo/bar/issues/5)';
       expect(azure.massageMarkdown(prBody)).toBe(
-       'plus also [a link](https://github.com/foo/bar/issues/5)'
+        'plus also [a link](https://github.com/foo/bar/issues/5)'
       );
     });
   });
