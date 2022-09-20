@@ -998,22 +998,14 @@ export async function addAssignees(
         );
         // returns filtered out list of sent assigneeIds, with the ones who are members of the project
         const projectMemberIDs: number[] = [];
-        const projectMemberUsernames: string[] = [];
-        projectMembers.body.forEach((member) => {
+        for (const member of projectMembers.body) {
           projectMemberIDs.push(member.id);
-          projectMemberUsernames.push(member.username);
-        });
-
+        }
         // update MR with new list of assignees which are project members
         if (!projectMemberIDs.length) {
           logger.warn('None of the assignees are project members');
           return;
         }
-        logger.debug(
-          `Adding members ${projectMemberUsernames.join(
-            ', '
-          )} as MR assignees to #${iid}`
-        );
         url = `projects/${
           config.repository
         }/merge_requests/${iid}?${getQueryString({
