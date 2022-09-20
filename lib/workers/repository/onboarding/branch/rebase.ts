@@ -23,12 +23,8 @@ export async function rebaseOnboardingBranch(
   const currentConfigHash = toSha256(existingContents);
   const contents = await getOnboardingConfigContents(config, configFile);
 
-  if (is.nullOrUndefined(previousConfigHash)) {
-    logger.debug('Missing previousConfigHash bodyStruct prop in onboarding PR');
-    OnboardingState.prUpdateRequested = true;
-  } else if (previousConfigHash !== currentConfigHash) {
-    logger.debug('Onboarding config has been modified by the user');
-    OnboardingState.prUpdateRequested = true;
+  if (config.onboardingRebaseCheckbox) {
+    handleOnboardingManualRebase(previousConfigHash, currentConfigHash);
   }
 
   // TODO #7154
@@ -47,7 +43,9 @@ export async function rebaseOnboardingBranch(
   }
 
   logger.debug('Rebasing onboarding branch');
-  OnboardingState.prUpdateRequested = true;
+  if (config.onboardingRebaseCheckbox) {
+    OnboardingState.prUpdateRequested = true;
+  }
   // istanbul ignore next
   const commitMessageFactory = new OnboardingCommitMessageFactory(
     config,
@@ -74,4 +72,17 @@ export async function rebaseOnboardingBranch(
     message: commitMessage.toString(),
     platformCommit: !!config.platformCommit,
   });
+}
+
+function handleOnboardingManualRebase(
+  previousConfigHash: string | undefined,
+  currentConfigHash: string
+): void {
+  if (is.nullOrUndefined(previousConfigHash)) {
+    logger.debug('Missing previousConfigHash bodyStruct prop in onboarding PR');
+    OnboardingState.prUpdateRequested = true;
+  } else if (previousConfigHash !== currentConfigHash) {
+    logger.debug('Onboarding config has been modified by the user');
+    OnboardingState.prUpdateRequested = true;
+  }
 }

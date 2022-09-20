@@ -43,7 +43,9 @@ export async function renovateRepository(
     config = await initRepo(config);
     addSplit('init');
     const performExtract =
-      config.repoIsOnboarded! || OnboardingState.prUpdateRequested;
+      config.repoIsOnboarded! ||
+      !config.onboardingRebaseCheckbox ||
+      OnboardingState.prUpdateRequested;
     const { branches, branchList, packageFiles } = performExtract
       ? await extractDependencies(config)
       : emptyExtract(config);

@@ -7,7 +7,7 @@ import {
   REPOSITORY_NO_PACKAGE_FILES,
 } from '../../../../constants/error-messages';
 import { logger } from '../../../../logger';
-import { platform } from '../../../../modules/platform';
+import { Pr, platform } from '../../../../modules/platform';
 import { checkoutBranch, setGitAuthor } from '../../../../util/git';
 import { extractAllDependencies } from '../../extract';
 import { mergeRenovateConfig } from '../../init/merge';
@@ -37,19 +37,11 @@ export async function checkOnboardingBranch(
   // TODO #7154
   const onboardingPr = await getOnboardingPr(config);
   if (onboardingPr) {
-    const pl = GlobalConfig.get('platform')!;
-    const { rebaseRequested, rawConfigHash } = onboardingPr.bodyStruct ?? {};
-    if (!['github', 'gitlab', 'gitea'].includes(pl)) {
-      logger.trace(`Platform '${pl}' does not support extended markdown`);
-      OnboardingState.prUpdateRequested = true;
-    } else if (is.nullOrUndefined(rebaseRequested)) {
-      logger.debug('No rebase checkbox was found in the onboarding PR');
-      OnboardingState.prUpdateRequested = true;
-    } else if (rebaseRequested) {
-      logger.debug('Manual onboarding PR update requested');
-      OnboardingState.prUpdateRequested = true;
+    if (config.onboardingRebaseCheckbox) {
+      handleOnboardingManualRebase(onboardingPr);
     }
     logger.debug('Onboarding PR already exists');
+    const { rawConfigHash } = onboardingPr.bodyStruct ?? {};
     const commit = await rebaseOnboardingBranch(config, rawConfigHash);
     if (commit) {
       logger.info(
@@ -94,4 +86,19 @@ export async function checkOnboardingBranch(
   // TODO #7154
   const branchList = [onboardingBranch!];
   return { ...config, repoIsOnboarded, onboardingBranch, branchList };
+}
+
+function handleOnboardingManualRebase(onboardingPr: Pr): void {
+  const pl = GlobalConfig.get('platform')!;
+  const { rebaseRequested } = onboardingPr.bodyStruct ?? {};
+  if (!['github', 'gitlab', 'gitea'].includes(pl)) {
+    logger.trace(`Platform '${pl}' does not support extended markdown`);
+    OnboardingState.prUpdateRequested = true;
+  } else if (is.nullOrUndefined(rebaseRequested)) {
+    logger.debug('No rebase checkbox was found in the onboarding PR');
+    OnboardingState.prUpdateRequested = true;
+  } else if (rebaseRequested) {
+    logger.debug('Manual onboarding PR update requested');
+    OnboardingState.prUpdateRequested = true;
+  }
 }

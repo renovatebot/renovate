@@ -401,6 +401,17 @@ const options: RenovateOptions[] = [
     mergeable: true,
   },
   {
+    name: 'onboardingRebaseCheckbox',
+    description:
+      'Set to enabled rebase/retry markdown checkbox for onboarding PRs.',
+    type: 'boolean',
+    default: false,
+    supportedPlatforms: ['github', 'gitlab', 'gitea'],
+    globalOnly: true,
+    experimental: true,
+    experimentalIssues: [17633],
+  },
+  {
     name: 'includeForks',
     description:
       'Whether to process forked repositories. By default, all forked repositories are skipped.',

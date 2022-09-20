@@ -32,13 +32,18 @@ export async function ensureOnboardingPr(
   packageFiles: Record<string, PackageFile[]> | null,
   branches: BranchConfig[]
 ): Promise<void> {
-  if (config.repoIsOnboarded || !OnboardingState.prUpdateRequested) {
+  if (
+    config.repoIsOnboarded ||
+    (config.onboardingRebaseCheckbox && !OnboardingState.prUpdateRequested)
+  ) {
     return;
   }
   logger.debug('ensureOnboardingPr()');
   logger.trace({ config });
   // TODO #7154
   const existingPr = await platform.getBranchPr(config.onboardingBranch!);
+  const { rebaseCheckBox, renovateConfigHashComment } =
+    await getRebaseCheckboxComponents(config);
   logger.debug('Filling in onboarding PR template');
   let prTemplate = `Welcome to [Renovate](${
     config.productLinks!.homepage
@@ -73,7 +78,7 @@ If you need any further assistance then you can also [request help here](${
     }).
 `
   );
-  prTemplate += `\n\n---\n\n - [ ] <!-- rebase-check -->If you want to rebase/retry this PR, click this checkbox.\n`;
+  prTemplate += rebaseCheckBox;
   let prBody = prTemplate;
   if (packageFiles && Object.entries(packageFiles).length) {
     let files: string[] = [];
@@ -130,11 +135,7 @@ If you need any further assistance then you can also [request help here](${
     prBody = `${prBody}\n---\n\n${template.compile(config.prFooter, config)}\n`;
   }
 
-  const configFile = defaultConfigFile(config);
-  const existingContents =
-    (await getFile(configFile, config.onboardingBranch)) ?? '';
-  const hash = toSha256(existingContents);
-  prBody += `\n<!--renovate-config-hash:${hash}-->`;
+  prBody += renovateConfigHashComment;
 
   logger.trace('prBody:\n' + prBody);
 
@@ -195,4 +196,31 @@ If you need any further assistance then you can also [request help here](${
     }
     throw err;
   }
+}
+
+interface RebaseCheckboxComponents {
+  rebaseCheckBox: string;
+  renovateConfigHashComment: string;
+}
+
+async function getRebaseCheckboxComponents(
+  config: RenovateConfig
+): Promise<RebaseCheckboxComponents> {
+  let rebaseCheckBox = '';
+  let renovateConfigHashComment = '';
+  if (!config.onboardingRebaseCheckbox) {
+    return { rebaseCheckBox, renovateConfigHashComment };
+  }
+
+  // Create markdown checkbox
+  rebaseCheckBox = `\n\n---\n\n - [ ] <!-- rebase-check -->If you want to rebase/retry this PR, click this checkbox.\n`;
+
+  // Create hashMeta
+  const configFile = defaultConfigFile(config);
+  const existingContents =
+    (await getFile(configFile, config.onboardingBranch)) ?? '';
+  const hash = toSha256(existingContents);
+  renovateConfigHashComment = `\n<!--renovate-config-hash:${hash}-->`;
+
+  return { rebaseCheckBox, renovateConfigHashComment };
 }
