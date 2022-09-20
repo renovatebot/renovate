@@ -41,8 +41,9 @@ export const presets: Record<string, Preset> = {
     },
   },
   ignoreModulesAndTests: {
-    description:
-      'Ignore `node_modules`, `bower_components`, `vendor` and various test/tests directories.',
+    description: gt.gettext(
+      'Ignore `node_modules`, `bower_components`, `vendor` and various test/tests directories.'
+    ),
     ignorePaths: [
       '**/node_modules/**',
       '**/bower_components/**',
@@ -120,7 +121,9 @@ export const presets: Record<string, Preset> = {
     ],
   },
   autodetectPinVersions: {
-    description: 'Autodetect whether to pin dependencies or maintain ranges.',
+    description: gt.gettext(
+      'Autodetect whether to pin dependencies or maintain ranges.'
+    ),
     rangeStrategy: 'auto',
   },
   separateMajorReleases: {
@@ -188,8 +191,9 @@ export const presets: Record<string, Preset> = {
     },
   },
   semanticPrefixFixDepsChoreOthers: {
-    description:
-      'If Renovate detects semantic commits, it will use semantic commit type `fix` for dependencies and `chore` for all others.',
+    description: gt.gettext(
+      'If Renovate detects semantic commits, it will use semantic commit type `fix` for dependencies and `chore` for all others.'
+    ),
     packageRules: [
       {
         matchPackagePatterns: ['*'],
@@ -246,7 +250,9 @@ export const presets: Record<string, Preset> = {
     prHourlyLimit: 1,
   },
   prHourlyLimit2: {
-    description: 'Rate limit PR creation to a maximum of two per hour.',
+    description: gt.gettext(
+      'Rate limit PR creation to a maximum of two per hour.'
+    ),
     prHourlyLimit: 2,
   },
   prHourlyLimit4: {
@@ -258,7 +264,7 @@ export const presets: Record<string, Preset> = {
     prConcurrentLimit: 0,
   },
   prConcurrentLimit10: {
-    description: 'Limit to maximum 10 open PRs at any time.',
+    description: gt.gettext('Limit to maximum 10 open PRs at any time.'),
     prConcurrentLimit: 10,
   },
   prConcurrentLimit20: {

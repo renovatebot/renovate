@@ -41,20 +41,26 @@ export function getPrList(
         'Schedule'
       )}: ${JSON.stringify(branch.schedule)}\n`;
     }
-    prDesc += `  - Branch name: \`${branch.branchName}\`\n`;
+    prDesc += `  - ${gt.pgettext('onboarding/pr/pr-list', 'Branch name')}: \`${
+      branch.branchName
+    }\`\n`;
     prDesc += branch.baseBranch
-      ? `  - Merge into: \`${branch.baseBranch}\`\n`
+      ? `  - ${gt.pgettext('onboarding/pr/pr-list', 'Merge into')}: \`${
+          branch.baseBranch
+        }\`\n`
       : '';
     const seen: string[] = [];
     for (const upgrade of branch.upgrades) {
       let text = '';
       if (upgrade.updateType === 'lockFileMaintenance') {
-        text += '  - Regenerate lock files to use latest dependency versions';
+        text += `  - ${gt.gettext(
+          'Regenerate lock files to use latest dependency versions'
+        )}`;
       } else {
         if (upgrade.updateType === 'pin') {
-          text += '  - Pin ';
+          text += `  - ${gt.pgettext('onboarding/pr/pr-list', 'Pin')} `;
         } else {
-          text += '  - Upgrade ';
+          text += `  - ${gt.pgettext('onboarding/pr/pr-list', 'Upgrade')} `;
         }
         if (upgrade.sourceUrl) {
           // TODO: types (#7154)
@@ -64,8 +70,13 @@ export function getPrList(
         }
         // TODO: types (#7154)
         text += upgrade.isLockfileUpdate
-          ? ` to \`${upgrade.newVersion!}\``
-          : ` to \`${upgrade.newDigest ?? upgrade.newValue!}\``;
+          ? ` ${gt.pgettext(
+              'onboarding/pr/pr-list',
+              'to'
+            )} \`${upgrade.newVersion!}\``
+          : ` ${gt.pgettext('onboarding/pr/pr-list', 'to')} \`${
+              upgrade.newDigest ?? upgrade.newValue!
+            }\``;
         text += '\n';
       }
       if (!seen.includes(text)) {
