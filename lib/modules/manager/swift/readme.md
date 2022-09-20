@@ -11,3 +11,5 @@ package(name: "<...>", "1.2.3"..<"1.3.0") // => "1.2.3"..<"2.0.0"
 package(name: "<...>", ..."1.2.3")        // => ..."2.0.0"
 package(name: "<...>", ..<"1.2.3")        // => ..<"2.0.0"
 ```
+
+Any `Package.resolved` companion files to `Package.swift` files are updated as well.

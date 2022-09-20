@@ -1385,6 +1385,7 @@ Supported lock files are:
 - `poetry.lock`
 - `Cargo.lock`
 - `jsonnetfile.lock.json`
+- `Package.resolved`
 
 Others may be added via feature request.
 
