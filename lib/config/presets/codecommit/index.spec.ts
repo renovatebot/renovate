@@ -15,9 +15,12 @@ describe('config/presets/codecommit/index', () => {
   let codeCommitPlatform: Platform;
   const data = { foo: 'bar' };
 
+  beforeAll(async () => {
+    codeCommitPlatform = await import('../../../modules/platform/codecommit');
+  });
+
   beforeEach(async () => {
     setPlatformApi('codecommit');
-    codeCommitPlatform = await import('../../../modules/platform/codecommit');
     iamClient.on(GetUserCommand).resolves({
       User: {
         Arn: 'aws:arn:example:123456',
