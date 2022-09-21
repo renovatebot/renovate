@@ -201,3 +201,9 @@ export interface Account {
   nickname?: string;
   account_status?: string;
 }
+
+export interface EffectiveReviewer {
+  type: string;
+  reviewer_type: string;
+  user: Account;
+}
