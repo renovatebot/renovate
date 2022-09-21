@@ -69,6 +69,7 @@ export function syncBranchState(
   // if base branch sha has changed invalidate cache isBehindBase state
   if (baseBranchSha !== branchState.baseBranchSha) {
     delete branchState.isBehindBase;
+    delete branchState.isConflicted;
 
     // update cached branchSha
     branchState.baseBranchSha = baseBranchSha;
@@ -77,6 +78,7 @@ export function syncBranchState(
   // if branch sha has changed invalidate all cached states
   if (branchSha !== branchState.sha) {
     delete branchState.isBehindBase;
+    delete branchState.isConflicted;
     delete branchState.isModified;
     delete branchState.branchFingerprint;
 

@@ -20,11 +20,12 @@ export function setBranchCommit(
 
   const baseBranchSha = getBranchCommit(baseBranch);
 
-  branch.sha = commitSha;
   branch.baseBranchSha = baseBranchSha;
   branch.isBehindBase = false;
+  branch.isConflicted = false;
   branch.isModified = false;
   branch.parentSha = baseBranchSha;
+  branch.sha = commitSha;
 
   return branch;
 }

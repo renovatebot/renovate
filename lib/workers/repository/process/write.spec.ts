@@ -402,6 +402,7 @@ describe('workers/repository/process/write', () => {
             baseBranchSha: 'base_sha',
             isBehindBase: true,
             isModified: true,
+            isConflicted: true,
             branchFingerprint: '123',
           }),
         ],
@@ -414,6 +415,36 @@ describe('workers/repository/process/write', () => {
         sha: 'new_sha',
         baseBranch: 'base_branch',
         baseBranchSha: 'base_sha',
+      });
+    });
+
+    it('no change if all parameters are same', () => {
+      const repoCacheObj = {
+        branches: [
+          partial<BranchCache>({
+            branchName: 'branch_name',
+            sha: 'sha',
+            baseBranch: 'base_branch',
+            baseBranchSha: 'base_sha',
+            isBehindBase: true,
+            isModified: true,
+            isConflicted: true,
+            branchFingerprint: '123',
+          }),
+        ],
+      };
+      repoCache.getCache.mockReturnValue(repoCacheObj);
+      git.getBranchCommit.mockReturnValueOnce('sha');
+      git.getBranchCommit.mockReturnValueOnce('base_sha');
+      expect(syncBranchState('branch_name', 'base_branch', 'enabled')).toEqual({
+        branchName: 'branch_name',
+        sha: 'sha',
+        baseBranch: 'base_branch',
+        baseBranchSha: 'base_sha',
+        isBehindBase: true,
+        isModified: true,
+        isConflicted: true,
+        branchFingerprint: '123',
       });
     });
   });

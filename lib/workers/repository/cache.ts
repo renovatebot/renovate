@@ -11,6 +11,7 @@ import {
   getBranchCommit,
   getBranchParentSha,
   isBranchBehindBase,
+  isBranchConflicted,
   isBranchModified,
 } from '../../util/git';
 import type { BranchConfig, BranchUpgradeConfig } from '../types';
@@ -50,31 +51,36 @@ async function generateBranchCache(
 ): Promise<BranchCache | null> {
   const { baseBranch, branchName } = branch;
   try {
-    const sha = getBranchCommit(branchName) ?? null;
+    const sha = getBranchCommit(branchName);
     const baseBranchSha = getBranchCommit(baseBranch!)!;
     let prNo = null;
     let parentSha = null;
+
+    const automerge = !!branch.automerge;
+    let isModified = false;
+    let isBehindBase = false;
+    let isConflicted = false;
     if (sha) {
       parentSha = await getBranchParentSha(branchName);
       const branchPr = await platform.getBranchPr(branchName);
       if (branchPr) {
         prNo = branchPr.number;
       }
-    }
-    const automerge = !!branch.automerge;
-    let isModified = false;
-    if (sha) {
       try {
         isModified = await isBranchModified(branchName);
       } catch (err) /* istanbul ignore next */ {
         // Do nothing
       }
-    }
-    let isBehindBase = false;
-    if (sha) {
       try {
         // TODO: fix types (#7154)
         isBehindBase = await isBranchBehindBase(branchName, baseBranch!);
+      } catch (err) /* istanbul ignore next */ {
+        // Do nothing
+      }
+
+      try {
+        // TODO: fix types (#7154)
+        isConflicted = await isBranchConflicted(baseBranch!, branchName);
       } catch (err) /* istanbul ignore next */ {
         // Do nothing
       }
@@ -85,11 +91,12 @@ async function generateBranchCache(
     const branchFingerprint = branch.branchFingerprint;
     return {
       automerge,
-      baseBranchSha,
       baseBranch: baseBranch!,
+      baseBranchSha,
       branchFingerprint,
       branchName,
       isBehindBase,
+      isConflicted,
       isModified,
       parentSha,
       prNo,

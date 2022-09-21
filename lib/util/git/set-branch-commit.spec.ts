@@ -21,13 +21,14 @@ describe('util/git/set-branch-commit', () => {
     it('sets new branch in cache if it doesn not exist', () => {
       git.getBranchCommit.mockReturnValueOnce('base_SHA');
       expect(setBranchCommit('branch_name', 'base_branch', 'SHA')).toEqual({
-        branchName: 'branch_name',
         baseBranch: 'base_branch',
-        sha: 'SHA',
         baseBranchSha: 'base_SHA',
+        branchName: 'branch_name',
         isBehindBase: false,
+        isConflicted: false,
         isModified: false,
         parentSha: 'base_SHA',
+        sha: 'SHA',
       });
     });
 
@@ -35,26 +36,28 @@ describe('util/git/set-branch-commit', () => {
       repoCache = {
         branches: [
           partial<BranchCache>({
-            branchName: 'branch_name',
             baseBranch: 'base_branch',
-            sha: 'SHA',
             baseBranchSha: 'base_SHA',
-            isBehindBase: false,
-            isModified: false,
+            branchName: 'branch_name',
+            isBehindBase: true,
+            isConflicted: true,
+            isModified: true,
             parentSha: 'base_SHA',
+            sha: 'SHA',
           }),
         ],
       };
       git.getBranchCommit.mockReturnValueOnce('base_SHA');
       repositoryCache.getCache.mockReturnValue(repoCache);
       expect(setBranchCommit('branch_name', 'base_branch', 'SHA')).toEqual({
-        branchName: 'branch_name',
         baseBranch: 'base_branch',
-        sha: 'SHA',
         baseBranchSha: 'base_SHA',
+        branchName: 'branch_name',
         isBehindBase: false,
+        isConflicted: false,
         isModified: false,
         parentSha: 'base_SHA',
+        sha: 'SHA',
       });
     });
   });
