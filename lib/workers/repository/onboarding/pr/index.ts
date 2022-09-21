@@ -220,7 +220,7 @@ async function getRebaseCheckboxComponents(
   const existingContents =
     (await getFile(configFile, config.onboardingBranch)) ?? '';
   const hash = toSha256(existingContents);
-  renovateConfigHashComment = `\n<!--renovate-config-hash:${hash}-->`;
+  renovateConfigHashComment = `\n<!--renovate-config-hash:${hash}-->\n`;
 
   return { rebaseCheckBox, renovateConfigHashComment };
 }

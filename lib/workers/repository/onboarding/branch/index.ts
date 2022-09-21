@@ -68,7 +68,9 @@ export async function checkOnboardingBranch(
       }
     }
     logger.debug('Need to create onboarding PR');
-    OnboardingState.prUpdateRequested = true;
+    if (config.onboardingRebaseCheckbox) {
+      OnboardingState.prUpdateRequested = true;
+    }
     const commit = await createOnboardingBranch(mergedConfig);
     // istanbul ignore if
     if (commit) {

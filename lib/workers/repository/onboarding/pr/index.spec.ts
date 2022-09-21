@@ -39,7 +39,6 @@ describe('workers/repository/onboarding/pr/index', () => {
       platform.massageMarkdown = jest.fn((input) => input);
       platform.createPr.mockResolvedValueOnce(partial<Pr>({}));
       GlobalConfig.reset();
-      OnboardingState.prUpdateRequested = true;
     });
 
     it('returns if onboarded', async () => {
@@ -47,7 +46,30 @@ describe('workers/repository/onboarding/pr/index', () => {
       await expect(
         ensureOnboardingPr(config, packageFiles, branches)
       ).resolves.not.toThrow();
+      expect(platform.createPr).toHaveBeenCalledTimes(0);
+      expect(platform.updatePr).toHaveBeenCalledTimes(0);
     });
+
+    it.each`
+      onboardingRebaseCheckbox | prUpdateRequested | expected
+      ${false}                 | ${false}          | ${1}
+      ${false}                 | ${true}           | ${1}
+      ${true}                  | ${false}          | ${0}
+      ${true}                  | ${true}           | ${1}
+    `(
+      'breaks early when onboarding ' +
+        '(onboardingRebaseCheckbox="$onboardingRebaseCheckbox", prUpdateRequeste="$prUpdateRequested" )',
+      async ({ onboardingRebaseCheckbox, prUpdateRequested, expected }) => {
+        config.repoIsOnboarded = false;
+        config.onboardingRebaseCheckbox = onboardingRebaseCheckbox;
+        OnboardingState.prUpdateRequested = prUpdateRequested;
+        await expect(
+          ensureOnboardingPr(config, packageFiles, branches)
+        ).resolves.not.toThrow();
+        expect(platform.updatePr).toHaveBeenCalledTimes(0);
+        expect(platform.createPr).toHaveBeenCalledTimes(expected);
+      }
+    );
 
     it('creates PR', async () => {
       await ensureOnboardingPr(config, packageFiles, branches);
@@ -71,69 +93,111 @@ describe('workers/repository/onboarding/pr/index', () => {
       ]);
     });
 
-    it('creates PR with empty footer and header', async () => {
-      await ensureOnboardingPr(
-        {
-          ...config,
-          prHeader: '',
-          prFooter: '',
-        },
-        packageFiles,
-        branches
-      );
-      expect(platform.createPr).toHaveBeenCalledTimes(1);
-      expect(platform.createPr.mock.calls[0][0].prBody).toMatchSnapshot();
-    });
+    it.each`
+      onboardingRebaseCheckbox
+      ${false}
+      ${true}
+    `(
+      'creates PR with empty footer and header' +
+        '(onboardingRebaseCheckbox="$onboardingRebaseCheckbox")',
+      async ({ onboardingRebaseCheckbox }) => {
+        config.onboardingRebaseCheckbox = onboardingRebaseCheckbox;
+        OnboardingState.prUpdateRequested = true; // case 'false' is tested in "breaks early when onboarding"
+        await ensureOnboardingPr(
+          {
+            ...config,
+            prHeader: '',
+            prFooter: '',
+          },
+          packageFiles,
+          branches
+        );
+        expect(platform.createPr).toHaveBeenCalledTimes(1);
+        expect(platform.createPr.mock.calls[0][0].prBody).toMatchSnapshot();
+      }
+    );
 
-    it('creates PR with footer and header with trailing and leading newlines', async () => {
-      await ensureOnboardingPr(
-        {
-          ...config,
-          prHeader: '\r\r\nThis should not be the first line of the PR',
-          prFooter:
-            'There should be several empty lines at the end of the PR\r\n\n\n',
-        },
-        packageFiles,
-        branches
-      );
-      expect(platform.createPr).toHaveBeenCalledTimes(1);
-      expect(platform.createPr.mock.calls[0][0].prBody).toMatchSnapshot();
-    });
+    it.each`
+      onboardingRebaseCheckbox
+      ${false}
+      ${true}
+    `(
+      'creates PR with footer and header with trailing and leading newlines' +
+        '(onboardingRebaseCheckbox="$onboardingRebaseCheckbox")',
+      async ({ onboardingRebaseCheckbox }) => {
+        config.onboardingRebaseCheckbox = onboardingRebaseCheckbox;
+        OnboardingState.prUpdateRequested = true; // case 'false' is tested in "breaks early when onboarding"
+        await ensureOnboardingPr(
+          {
+            ...config,
+            prHeader: '\r\r\nThis should not be the first line of the PR',
+            prFooter:
+              'There should be several empty lines at the end of the PR\r\n\n\n',
+          },
+          packageFiles,
+          branches
+        );
+        expect(platform.createPr).toHaveBeenCalledTimes(1);
+        expect(platform.createPr.mock.calls[0][0].prBody).toMatchSnapshot();
+      }
+    );
 
-    it('creates PR with footer and header using templating', async () => {
-      config.baseBranch = 'some-branch';
-      config.repository = 'test';
-      await ensureOnboardingPr(
-        {
-          ...config,
-          prHeader: 'This is a header for platform:{{platform}}',
-          prFooter:
-            'And this is a footer for repository:{{repository}} baseBranch:{{baseBranch}}',
-        },
-        packageFiles,
-        branches
-      );
-      expect(platform.createPr).toHaveBeenCalledTimes(1);
-      expect(platform.createPr.mock.calls[0][0].prBody).toMatch(
-        /platform:github/
-      );
-      expect(platform.createPr.mock.calls[0][0].prBody).toMatch(
-        /repository:test/
-      );
-      expect(platform.createPr.mock.calls[0][0].prBody).toMatchSnapshot();
-    });
+    it.each`
+      onboardingRebaseCheckbox
+      ${false}
+      ${true}
+    `(
+      'creates PR with footer and header using templating' +
+        '(onboardingRebaseCheckbox="$onboardingRebaseCheckbox")',
+      async ({ onboardingRebaseCheckbox }) => {
+        config.baseBranch = 'some-branch';
+        config.repository = 'test';
+        config.onboardingRebaseCheckbox = onboardingRebaseCheckbox;
+        OnboardingState.prUpdateRequested = true; // case 'false' is tested in "breaks early when onboarding"
+        await ensureOnboardingPr(
+          {
+            ...config,
+            prHeader: 'This is a header for platform:{{platform}}',
+            prFooter:
+              'And this is a footer for repository:{{repository}} baseBranch:{{baseBranch}}',
+          },
+          packageFiles,
+          branches
+        );
+        expect(platform.createPr).toHaveBeenCalledTimes(1);
+        expect(platform.createPr.mock.calls[0][0].prBody).toMatch(
+          /platform:github/
+        );
+        expect(platform.createPr.mock.calls[0][0].prBody).toMatch(
+          /repository:test/
+        );
+        expect(platform.createPr.mock.calls[0][0].prBody).toMatchSnapshot();
+      }
+    );
 
-    it('returns if PR does not need updating', async () => {
-      platform.getBranchPr.mockResolvedValue(
-        partial<Pr>({
-          title: 'Configure Renovate',
-          bodyStruct,
-        })
-      );
-      await ensureOnboardingPr(config, packageFiles, branches);
-      expect(platform.createPr).toHaveBeenCalledTimes(0);
-      expect(platform.updatePr).toHaveBeenCalledTimes(0);
-    });
+    it.each`
+      onboardingRebaseCheckbox
+      ${false}
+      ${true}
+    `(
+      'returns if PR does not need updating' +
+        '(onboardingRebaseCheckbox="$onboardingRebaseCheckbox")',
+      async ({ onboardingRebaseCheckbox }) => {
+        const hash =
+          '8d5d8373c3fc54803f573ea57ded60686a9df8eb0430ad25da281472eed9ce4e'; // no rebase checkbox PR hash
+        config.onboardingRebaseCheckbox = onboardingRebaseCheckbox;
+        OnboardingState.prUpdateRequested = true; // case 'false' is tested in "breaks early when onboarding"
+        platform.getBranchPr.mockResolvedValue(
+          partial<Pr>({
+            title: 'Configure Renovate',
+            bodyStruct: onboardingRebaseCheckbox ? bodyStruct : { hash },
+          })
+        );
+        await ensureOnboardingPr(config, packageFiles, branches);
+        expect(platform.createPr).toHaveBeenCalledTimes(0);
+        expect(platform.updatePr).toHaveBeenCalledTimes(0);
+      }
+    );
 
     it('updates PR when conflicted', async () => {
       config.baseBranch = 'some-branch';

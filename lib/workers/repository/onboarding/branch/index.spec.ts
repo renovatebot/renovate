@@ -42,6 +42,7 @@ describe('workers/repository/onboarding/branch/index', () => {
       jest.resetAllMocks();
       config = getConfig();
       config.repository = 'some/repo';
+      OnboardingState.prUpdateRequested = false;
       git.getFileList.mockResolvedValue([]);
       cache.getCache.mockReturnValue({});
     });
@@ -66,26 +67,36 @@ describe('workers/repository/onboarding/branch/index', () => {
       );
     });
 
-    it('has default onboarding config', async () => {
-      configModule.getOnboardingConfig.mockResolvedValue(
-        config.onboardingConfig
-      );
-      configModule.getOnboardingConfigContents.mockResolvedValue(
-        '{\n' +
-          '  "$schema": "https://docs.renovatebot.com/renovate-schema.json"\n' +
-          '}\n'
-      );
-      git.getFileList.mockResolvedValue(['package.json']);
-      fs.readLocalFile.mockResolvedValue('{}');
-      await checkOnboardingBranch(config);
-      const file = git.commitFiles.mock.calls[0][0].files[0] as FileAddition;
-      const contents = file.contents?.toString();
-      expect(contents).toBeJsonString();
-      // TODO #7154
-      expect(JSON.parse(contents!)).toEqual({
-        $schema: 'https://docs.renovatebot.com/renovate-schema.json',
-      });
-    });
+    it.each`
+      checkboxEnabled | expected
+      ${true}         | ${true}
+      ${false}        | ${false}
+    `(
+      'has default onboarding config' +
+        '(config.onboardingRebaseCheckbox="$checkboxEnabled")',
+      async ({ checkboxEnabled, expected }) => {
+        config.onboardingRebaseCheckbox = checkboxEnabled;
+        configModule.getOnboardingConfig.mockResolvedValue(
+          config.onboardingConfig
+        );
+        configModule.getOnboardingConfigContents.mockResolvedValue(
+          '{\n' +
+            '  "$schema": "https://docs.renovatebot.com/renovate-schema.json"\n' +
+            '}\n'
+        );
+        git.getFileList.mockResolvedValue(['package.json']);
+        fs.readLocalFile.mockResolvedValue('{}');
+        await checkOnboardingBranch(config);
+        const file = git.commitFiles.mock.calls[0][0].files[0] as FileAddition;
+        const contents = file.contents?.toString();
+        expect(contents).toBeJsonString();
+        // TODO #7154
+        expect(JSON.parse(contents!)).toEqual({
+          $schema: 'https://docs.renovatebot.com/renovate-schema.json',
+        });
+        expect(OnboardingState.prUpdateRequested).toBe(expected);
+      }
+    );
 
     it('uses discovered onboarding config', async () => {
       configModule.getOnboardingConfig.mockResolvedValue({
@@ -251,10 +262,15 @@ describe('workers/repository/onboarding/branch/index', () => {
     describe('tests onboarding rebase/retry checkbox handling', () => {
       beforeEach(() => {
         GlobalConfig.set({ platform: 'github' });
+        config.onboardingRebaseCheckbox = true;
         OnboardingState.prUpdateRequested = false;
         git.getFileList.mockResolvedValueOnce(['package.json']);
         platform.findPr.mockResolvedValueOnce(null);
         rebase.rebaseOnboardingBranch.mockResolvedValueOnce(null);
+      });
+
+      afterAll(() => {
+        delete config.onboardingRebaseCheckbox;
       });
 
       it('detects unsupported platfom', async () => {
