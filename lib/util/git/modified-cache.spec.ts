@@ -1,4 +1,3 @@
-import { mocked, partial } from '../../../test/util';
 import { logger, mocked, partial } from '../../../test/util';
 import * as _repositoryCache from '../cache/repository';
 import type { BranchCache, RepoCacheData } from '../cache/repository/types';
@@ -9,10 +8,8 @@ import {
 import * as _git from '.';
 
 jest.mock('../cache/repository');
-jest.mock('../../logger');
 jest.mock('.');
 const git = mocked(_git);
-const logger = mocked(_logger);
 const repositoryCache = mocked(_repositoryCache);
 
 describe('util/git/modified-cache', () => {
@@ -49,7 +46,7 @@ describe('util/git/modified-cache', () => {
         partial<BranchCache>({ branchName: 'foo', sha: 'aaa' }),
       ];
       git.getBranchCommit.mockReturnValueOnce('aaa');
-      expect(getCachedModifiedResult('foo')).toBeNull()
+      expect(getCachedModifiedResult('foo')).toBeNull();
     });
 
     it('returns cached value', () => {
@@ -79,52 +76,6 @@ describe('util/git/modified-cache', () => {
       expect(logger.logger.debug).toHaveBeenCalledWith(
         'Branch cache not present for foo'
       );
-    });
-
-    it('replaces value when SHA has changed', () => {
-      repoCache = {
-        branches: [
-          partial<BranchCache>({
-            branchName: 'foo',
-            sha: '121',
-            isModified: true,
-          }),
-        ],
-      };
-      repositoryCache.getCache.mockReturnValue(repoCache);
-      setCachedModifiedResult('foo', '131', false);
-      expect(repoCache).toEqual({
-        branches: [
-          {
-            branchName: 'foo',
-            sha: '131',
-            isModified: false,
-          },
-        ],
-      });
-    });
-
-    it('adds SHA when it is not found', () => {
-      repoCache = {
-        branches: [
-          partial<BranchCache>({
-            branchName: 'foo',
-            sha: '121',
-            isModified: true,
-          }),
-        ],
-      };
-      repositoryCache.getCache.mockReturnValue(repoCache);
-      setCachedModifiedResult('foo', false);
-      expect(repoCache).toEqual({
-        branches: [
-          {
-            branchName: 'foo',
-            sha: '121',
-            isModified: false,
-          },
-        ],
-      });
     });
 
     it('handles multiple branches', () => {

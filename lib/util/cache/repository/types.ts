@@ -48,9 +48,13 @@ export interface BranchCache {
    */
   branchName: string;
   /**
+   * Whether the update branch is behind base branh
+   */
+  isBehindBase?: boolean;
+  /**
    * Whether a person not listed in gitIgnoredAuthors updated the branch.
    */
-  isModified: boolean;
+  isModified?: boolean;
   /**
    * Parent commit of branch sha
    */
