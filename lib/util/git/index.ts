@@ -612,6 +612,7 @@ export async function isBranchModified(branchName: string): Promise<boolean> {
     config.branchCommits[branchName]
   );
   if (isModified !== null) {
+    logger.debug('Using cached result for isBranchModified');
     return (config.branchIsModified[branchName] = isModified);
   }
 
