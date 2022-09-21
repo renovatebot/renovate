@@ -27,4 +27,4 @@ jobs:
           branch: chore/update-pot
           branch-suffix: timestamp
           token: ${{ secrets.GH_TOKEN }}
-          title: 'chore(i18n): automtic update POT file'
+          title: 'chore(i18n): automatic update POT file'
