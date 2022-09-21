@@ -1,5 +1,16 @@
+lib/config/presets/internal/compatibility.ts
+lib/config/presets/internal/config.ts
 lib/config/presets/internal/default.ts
+lib/config/presets/internal/docker.ts
 lib/config/presets/internal/group.ts
+lib/config/presets/internal/helpers.ts
+lib/config/presets/internal/monorepo.ts
+lib/config/presets/internal/npm.ts
+lib/config/presets/internal/packages.ts
+lib/config/presets/internal/preview.ts
+lib/config/presets/internal/regex-managers.ts
+lib/config/presets/internal/replacements.ts
+lib/config/presets/internal/schedule.ts
 lib/config/presets/internal/workarounds.ts
 lib/workers/repository/onboarding/pr/config-description.ts
 lib/workers/repository/onboarding/pr/index.ts
