@@ -14,6 +14,7 @@ import {
   getDatasources,
   getDefaultVersioning,
   getDigest,
+  getDigestConfig,
   getPkgReleases,
   supportsDigests,
 } from '.';
@@ -227,6 +228,23 @@ describe('modules/datasource/index', () => {
 
       expect(supportsDigests(datasource)).toBeTrue();
       expect(await getDigest({ datasource, depName })).toBe('123');
+    });
+
+    it('returns replacementName if defined', () => {
+      expect(
+        getDigestConfig(new DummyDatasource(), {
+          datasource: datasource,
+          depName: depName,
+          replacementName: 'replacement',
+          currentDigest: '123',
+          currentValue: '1.2.3',
+        })
+      ).toMatchObject({
+        registryUrl: 'https://reg1.com',
+        packageName: 'replacement',
+        currentDigest: '123',
+        currentValue: '1.2.3',
+      });
     });
   });
 
