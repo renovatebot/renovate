@@ -1,0 +1,30 @@
+name: daily-i18n
+
+on:
+  schedule:
+    - cron: '0 5 * * *'
+
+  # allow manual trigger
+  workflow_dispatch:
+
+permissions:
+  pull-requests: write
+
+# Ensure only one i18n action can run at a time
+concurrency:
+  group: i18n
+
+jobs:
+  i18n:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 1
+      - run: i18n/action.sh
+      - uses: peter-evans/create-pull-request@v4
+        with:
+          branch: chore/update-pot
+          branch-suffix: timestamp
+          token: ${{ secrets.GH_TOKEN }}
+          title: 'chore(i18n): automatic update POT file'
