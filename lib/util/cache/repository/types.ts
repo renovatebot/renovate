@@ -27,6 +27,9 @@ export interface BranchUpgradeCache {
 }
 
 export interface BranchCache {
+  /**
+   *Whether this branch has automerge enabled
+   */
   automerge: boolean;
   /**
    * Name of base branch
@@ -36,16 +39,33 @@ export interface BranchCache {
    * The base branch's most recent commit SHA
    */
   baseBranchSha: string | null;
-  branchFingerprint?: string;
-  branchName: string;
-  isBehindBase?: boolean;
-  isModified?: boolean;
   /**
-   * Parent commit of branch sha (latest branch commit)
+   * Hash of the manager fingerprints and the update branch config
    */
-  parentSha?: string | null;
+  branchFingerprint?: string;
+  /**
+   * Branch name
+   */
+  branchName: string;
+  /**
+   * Whether a person not listed in gitIgnoredAuthors updated the branch.
+   */
+  isModified: boolean;
+  /**
+   * Parent commit of branch sha
+   */
+  parentSha: string | null;
+  /**
+   * Pr nunber of PR created from this branch
+   */
   prNo: number | null;
+  /**
+   * The branch's most recent commit SHA
+   */
   sha: string | null;
+  /**
+   * Details on the dependency upgrades that have been applied in this branch
+   */
   upgrades: BranchUpgradeCache[];
 }
 

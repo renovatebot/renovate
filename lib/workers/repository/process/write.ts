@@ -114,18 +114,21 @@ export async function writeUpdates(
 
   for (const branch of branches) {
     const { baseBranch, branchName } = branch;
+    const branchSha = getBranchCommit(branchName)!;
     const meta: Record<string, string> = { branch: branchName };
     if (config.baseBranches?.length && baseBranch) {
       meta['baseBranch'] = baseBranch;
     }
     addMeta(meta);
     const branchExisted = branchExists(branchName);
+    
     // TODO: base branch name cannot be undefined - fix optional types (#7154)
     let branchState = syncBranchState(
       branchName,
       baseBranch!,
       config.repositoryCache
     );
+
     const branchManagersFingerprint = hasha(
       [
         ...new Set(

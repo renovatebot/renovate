@@ -35,6 +35,7 @@ import * as comments from './comments';
 import * as utils from './utils';
 import {
   Account,
+  EffectiveReviewer,
   PrResponse,
   RepoInfoBody,
   mergeBodyTransformer,
@@ -487,7 +488,7 @@ export function massageMarkdown(input: string): string {
     .replace(regEx(/<\/?details>/g), '')
     .replace(regEx(`\n---\n\n.*?<!-- rebase-check -->.*?\n`), '')
     .replace(regEx(/\]\(\.\.\/pull\//g), '](../../pull-requests/')
-    .replace(regEx(/<!--renovate-debug:.*?-->/), '');
+    .replace(regEx(/<!--renovate-(?:debug|config-hash):.*?-->/g), '');
 }
 
 export async function ensureIssue({
@@ -738,12 +739,12 @@ export async function createPr({
 
   if (platformOptions?.bbUseDefaultReviewers) {
     const reviewersResponse = (
-      await bitbucketHttp.getJson<utils.PagedResult<Account>>(
-        `/2.0/repositories/${config.repository}/default-reviewers`
+      await bitbucketHttp.getJson<utils.PagedResult<EffectiveReviewer>>(
+        `/2.0/repositories/${config.repository}/effective-default-reviewers`
       )
     ).body;
-    reviewers = reviewersResponse.values.map((reviewer: Account) => ({
-      uuid: reviewer.uuid,
+    reviewers = reviewersResponse.values.map((reviewer: EffectiveReviewer) => ({
+      uuid: reviewer.user.uuid,
     }));
   }
 
