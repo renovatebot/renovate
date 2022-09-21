@@ -897,6 +897,26 @@ export class DockerDatasource extends Datasource {
         );
         return this.getTags(registryHost, 'library/' + dockerRepository);
       }
+      // Retry handling for JFrog Artifactory Docker Official Images
+      // These follow the format of {{registryHost}}{{jFrogRepository}}/library/{{dockerRepository}}
+      if (
+        (err.statusCode === 404 || err.message === PAGE_NOT_FOUND_ERROR) &&
+        dockerRepository.includes('/') &&
+        registryHost.includes('jfrog.io')
+      ) {
+        logger.debug(
+          `JFrog Artifactory: Retrying Tags for ${registryHost}/${dockerRepository} using library/ between JFrog virtual repository and image`
+        );
+
+        const dockerRepositoryParts = dockerRepository.split('/');
+        const jfrogRepository = dockerRepositoryParts[0];
+        const dockerImage = dockerRepositoryParts.splice(1).join('/');
+
+        return this.getTags(
+          registryHost,
+          jfrogRepository + '/library/' + dockerImage
+        );
+      }
       // prettier-ignore
       if (err.statusCode === 429 && isDockerHost(registryHost)) {
         logger.warn(
