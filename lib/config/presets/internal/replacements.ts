@@ -1,3 +1,4 @@
+import { gt } from '../../../i18n';
 import type { Preset } from '../types';
 import {
   PresetTemplate,
@@ -8,7 +9,7 @@ import {
 /* eslint sort-keys: ["error", "asc", {"caseSensitive": false, "natural": true}] */
 export const presets: Record<string, Preset> = {
   all: {
-    description: 'All replacements.',
+    description: gt.gettext('All replacements.'),
     extends: [
       'replacements:apollo-server-to-scoped',
       'replacements:babel-eslint-to-eslint-parser',
@@ -87,7 +88,9 @@ export const presets: Record<string, Preset> = {
     ],
   },
   'babel-eslint-to-eslint-parser': {
-    description: '`babel-eslint` was renamed under the `@babel` scope.',
+    description: gt.gettext(
+      '`babel-eslint` was renamed under the `@babel` scope.'
+    ),
     packageRules: [
       {
         matchCurrentVersion: '>=7.11.0',
@@ -99,7 +102,7 @@ export const presets: Record<string, Preset> = {
     ],
   },
   'cucumber-to-scoped': {
-    description: '`cucumber` became scoped.',
+    description: gt.gettext('`cucumber` became scoped.'),
     packageRules: [
       {
         matchDatasources: ['npm'],
@@ -110,7 +113,7 @@ export const presets: Record<string, Preset> = {
     ],
   },
   'fastify-to-scoped': {
-    description: '`fastify` packages became scoped',
+    description: gt.gettext('`fastify` packages became scoped'),
     packageRules: [
       {
         matchCurrentVersion: '>=3.3.0 <4.0.0',
@@ -208,7 +211,7 @@ export const presets: Record<string, Preset> = {
         matchDatasources: ['npm'],
         matchPackageNames: ['fastify-elasticsearch'],
         replacementName: '@fastify/elasticsearch',
-        replacementVersion: '2.0.0',
+        replacementVersion: '2.[]0.0',
       },
       {
         matchCurrentVersion: '>=2.2.0 <3.0.0',
@@ -465,7 +468,7 @@ export const presets: Record<string, Preset> = {
     ],
   },
   'hapi-to-scoped': {
-    description: '`hapi` became scoped.',
+    description: gt.gettext('`hapi` became scoped.'),
     packageRules: [
       {
         matchCurrentVersion: '>=18.0.0',
@@ -477,7 +480,7 @@ export const presets: Record<string, Preset> = {
     ],
   },
   'jade-to-pug': {
-    description: 'Jade was renamed to Pug.',
+    description: gt.gettext('Jade was renamed to Pug.'),
     packageRules: [
       {
         matchDatasources: ['npm'],
@@ -488,7 +491,9 @@ export const presets: Record<string, Preset> = {
     ],
   },
   'joi-to-scoped': {
-    description: '`joi` became scoped under the `hapi` organization.',
+    description: gt.gettext(
+      '`joi` became scoped under the `hapi` organization.'
+    ),
     packageRules: [
       {
         matchCurrentVersion: '>=14.0.0 <14.4.0',
@@ -500,7 +505,7 @@ export const presets: Record<string, Preset> = {
     ],
   },
   'joi-to-unscoped': {
-    description: '`joi` was moved out of the `hapi` organization.',
+    description: gt.gettext('`joi` was moved out of the `hapi` organization.'),
     packageRules: [
       {
         matchCurrentVersion: '>=17.0.0',
@@ -512,7 +517,7 @@ export const presets: Record<string, Preset> = {
     ],
   },
   'middie-to-scoped': {
-    description: '`middie` became scoped.',
+    description: gt.gettext('`middie` became scoped.'),
     packageRules: [
       {
         matchCurrentVersion: '>=7.1.0 <8.0.0',
@@ -524,7 +529,7 @@ export const presets: Record<string, Preset> = {
     ],
   },
   'now-to-vercel': {
-    description: '`now` was renamed to `vercel`.',
+    description: gt.gettext('`now` was renamed to `vercel`.'),
     packageRules: [
       {
         matchCurrentVersion: '>=21.0.0',
@@ -536,7 +541,7 @@ export const presets: Record<string, Preset> = {
     ],
   },
   'parcel-css-to-lightningcss': {
-    description: '`@parcel/css` was renamed `lightningcss`.',
+    description: gt.gettext('`@parcel/css` was renamed `lightningcss`.'),
     packageRules: [
       {
         matchDatasources: ['npm'],
@@ -547,8 +552,9 @@ export const presets: Record<string, Preset> = {
     ],
   },
   'react-query-devtools-to-scoped': {
-    description:
-      '`react-query/devtools` became scoped under the `tanstack` organization.',
+    description: gt.gettext(
+      '`react-query/devtools` became scoped under the `tanstack` organization.'
+    ),
     packageRules: [
       {
         matchCurrentVersion: '>=2.0.0 <4.0.0',
@@ -560,8 +566,9 @@ export const presets: Record<string, Preset> = {
     ],
   },
   'react-query-to-scoped': {
-    description:
-      '`react-query` became scoped under the `tanstack` organization.',
+    description: gt.gettext(
+      '`react-query` became scoped under the `tanstack` organization.'
+    ),
     packageRules: [
       {
         matchCurrentVersion: '>=3.0.0 <4.0.0',
@@ -573,8 +580,9 @@ export const presets: Record<string, Preset> = {
     ],
   },
   'redux-devtools-extension-to-scope': {
-    description:
-      'The `redux-devtools-extension` package was renamed to `@redux-devtools/extension`.',
+    description: gt.gettext(
+      'The `redux-devtools-extension` package was renamed to `@redux-devtools/extension`.'
+    ),
     packageRules: [
       {
         matchDatasources: ['npm'],
@@ -585,8 +593,9 @@ export const presets: Record<string, Preset> = {
     ],
   },
   'renovate-pep440-to-renovatebot-pep440': {
-    description:
-      'The `@renovate/pep440` package was renamed to `@renovatebot/pep440`.',
+    description: gt.gettext(
+      'The `@renovate/pep440` package was renamed to `@renovatebot/pep440`.'
+    ),
     packageRules: [
       {
         matchDatasources: ['npm'],
@@ -597,7 +606,9 @@ export const presets: Record<string, Preset> = {
     ],
   },
   'rollup-node-resolve-to-scoped': {
-    description: 'The node-resolve plugin for rollup became scoped.',
+    description: gt.gettext(
+      'The node-resolve plugin for rollup became scoped.'
+    ),
     packageRules: [
       {
         matchDatasources: ['npm'],
@@ -608,7 +619,9 @@ export const presets: Record<string, Preset> = {
     ],
   },
   'xmldom-to-scoped': {
-    description: 'The `xmldom` package is now published as `@xmldom/xmldom`.',
+    description: gt.gettext(
+      'The `xmldom` package is now published as `@xmldom/xmldom`.'
+    ),
     packageRules: [
       {
         matchDatasources: ['npm'],
@@ -635,8 +648,9 @@ const muiReplacement: Replacement[] = [
 ];
 
 const mui: PresetTemplate = {
-  description:
-    'The `material-ui` monorepo org was renamed from `@material-ui` to `@mui`.',
+  description: gt.gettext(
+    'The `material-ui` monorepo org was renamed from `@material-ui` to `@mui`.'
+  ),
   packageRules: [
     {
       matchCurrentVersion: '>=4.0.0 <5.0.0',

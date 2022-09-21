@@ -1,14 +1,15 @@
+import { gt } from '../../../i18n';
 import type { Preset } from '../types';
 
 export const presets: Record<string, Preset> = {
   dockerCompose: {
-    description: 'Enable Docker Compose image updating.',
+    description: gt.gettext('Enable Docker Compose image updating.'),
     'docker-compose': {
       enabled: true,
     },
   },
   dockerVersions: {
-    description: 'Upgrade Docker tags to newer versions.',
+    description: gt.gettext('Upgrade Docker tags to newer versions.'),
     docker: {
       major: {
         enabled: true,
@@ -19,7 +20,7 @@ export const presets: Record<string, Preset> = {
     },
   },
   buildkite: {
-    description: 'Enable Buildkite functionality.',
+    description: gt.gettext('Enable Buildkite functionality.'),
     buildkite: {
       enabled: true,
     },

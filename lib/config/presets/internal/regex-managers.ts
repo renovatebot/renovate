@@ -1,8 +1,9 @@
+import { gt } from '../../../i18n';
 import type { Preset } from '../types';
 
 export const presets: Record<string, Preset> = {
   dockerfileVersions: {
-    description: 'Update `_VERSION` variables in Dockerfiles.',
+    description: gt.gettext('Update `_VERSION` variables in Dockerfiles.'),
     regexManagers: [
       {
         fileMatch: ['(^|/|\\.)Dockerfile$', '(^|/)Dockerfile[^/]*$'],

@@ -1,8 +1,9 @@
+import { gt } from '../../../i18n';
 import type { Preset } from '../types';
 
 export const presets: Record<string, Preset> = {
   angularJs: {
-    description: 'All AngularJS packages.',
+    description: gt.gettext('All AngularJS packages.'),
     matchPackageNames: [
       'angular',
       'angular-animate',
@@ -11,38 +12,38 @@ export const presets: Record<string, Preset> = {
     ],
   },
   react: {
-    description: 'All React packages.',
+    description: gt.gettext('All React packages.'),
     matchPackageNames: ['@types/react'],
     matchPackagePrefixes: ['react'],
   },
   apollographql: {
-    description: 'All packages published by Apollo GraphQL.',
+    description: gt.gettext('All packages published by Apollo GraphQL.'),
     matchSourceUrlPrefixes: ['https://github.com/apollographql/'],
   },
   mapbox: {
-    description: 'All Mapbox-related packages.',
+    description: gt.gettext('All Mapbox-related packages.'),
     matchPackagePrefixes: ['leaflet', 'mapbox'],
   },
   emberTemplateLint: {
-    description: 'All ember-template-lint packages.',
+    description: gt.gettext('All ember-template-lint packages.'),
     matchPackagePrefixes: ['ember-template-lint'],
   },
   eslint: {
-    description: 'All ESLint packages.',
+    description: gt.gettext('All ESLint packages.'),
     matchPackageNames: ['@types/eslint', 'babel-eslint'],
     matchPackagePrefixes: ['@typescript-eslint/', 'eslint'],
   },
   stylelint: {
-    description: 'All Stylelint packages.',
+    description: gt.gettext('All Stylelint packages.'),
     matchPackagePrefixes: ['stylelint'],
   },
   tslint: {
-    description: 'All TSLint packages.',
+    description: gt.gettext('All TSLint packages.'),
     matchPackageNames: ['codelyzer'],
     matchPackagePatterns: ['\\btslint\\b'],
   },
   linters: {
-    description: 'All lint-related packages.',
+    description: gt.gettext('All lint-related packages.'),
     extends: [
       'packages:emberTemplateLint',
       'packages:eslint',
@@ -52,12 +53,12 @@ export const presets: Record<string, Preset> = {
     matchPackageNames: ['remark-lint'],
   },
   postcss: {
-    description: 'All PostCSS packages.',
+    description: gt.gettext('All PostCSS packages.'),
     matchPackageNames: ['postcss'],
     matchPackagePrefixes: ['postcss-'],
   },
   jsUnitTest: {
-    description: 'Unit test packages for JavaScript.',
+    description: gt.gettext('Unit test packages for JavaScript.'),
     matchPackageNames: [
       '@types/chai',
       '@types/ember-mocha',
@@ -95,24 +96,24 @@ export const presets: Record<string, Preset> = {
     ],
   },
   unitTest: {
-    description: 'All unit test packages.',
+    description: gt.gettext('All unit test packages.'),
     extends: ['packages:jsUnitTest'],
   },
   jsTest: {
-    description: 'JavaScript test packages.',
+    description: gt.gettext('JavaScript test packages.'),
     extends: ['packages:jsUnitTest'],
   },
   test: {
-    description: 'Test packages.',
+    description: gt.gettext('Test packages.'),
     extends: ['packages:unitTest'],
   },
   gatsby: {
-    description: 'All packages published by Gatsby.',
+    description: gt.gettext('All packages published by Gatsby.'),
     extends: ['monorepo:gatsby'],
   },
   googleapis: {
     matchDatasources: ['npm'],
-    description: 'All `googleapis` packages.',
+    description: gt.gettext('All `googleapis` packages.'),
     matchPackagePrefixes: ['@google-cloud/'],
   },
 };

@@ -3,21 +3,21 @@ import type { Preset } from '../types';
 
 export const presets: Record<string, Preset> = {
   enableRenovate: {
-    description: 'Enable Renovate.',
+    description: gt.gettext('Enable Renovate.'),
     enabled: true,
   },
   disableRenovate: {
-    description: 'Disable Renovate.',
+    description: gt.gettext('Disable Renovate.'),
     enabled: false,
   },
   disableMajorUpdates: {
-    description: 'Disable `major` updates.',
+    description: gt.gettext('Disable `major` updates.'),
     major: {
       enabled: false,
     },
   },
   disableDomain: {
-    description: 'Disable requests to a particular domain.',
+    description: gt.gettext('Disable requests to a particular domain.'),
     hostRules: [
       {
         matchHost: '{{arg0}}',
@@ -26,7 +26,7 @@ export const presets: Record<string, Preset> = {
     ],
   },
   disableHost: {
-    description: 'Disable requests to a particular host.',
+    description: gt.gettext('Disable requests to a particular host.'),
     hostRules: [
       {
         matchHost: 'https://{{arg0}}',
@@ -35,7 +35,7 @@ export const presets: Record<string, Preset> = {
     ],
   },
   enablePreCommit: {
-    description: 'Enable the pre-commit manager.',
+    description: gt.gettext('Enable the pre-commit manager.'),
     'pre-commit': {
       enabled: true,
     },
@@ -56,22 +56,27 @@ export const presets: Record<string, Preset> = {
     ],
   },
   includeNodeModules: {
-    description:
-      'Include `package.json` files found within `node_modules` folders or `bower_components`.',
+    description: gt.gettext(
+      'Include `package.json` files found within `node_modules` folders or `bower_components`.'
+    ),
     ignorePaths: [],
   },
   pinVersions: {
-    description:
-      'Use version pinning (maintain a single version only and not SemVer ranges).',
+    description: gt.gettext(
+      'Use version pinning (maintain a single version only and not SemVer ranges).'
+    ),
     rangeStrategy: 'pin',
   },
   preserveSemverRanges: {
-    description:
-      'Preserve (but continue to upgrade) any existing SemVer ranges.',
+    description: gt.gettext(
+      'Preserve (but continue to upgrade) any existing SemVer ranges.'
+    ),
     packageRules: [{ matchPackagePatterns: ['*'], rangeStrategy: 'replace' }],
   },
   pinAllExceptPeerDependencies: {
-    description: 'Pin all dependency versions except `peerDependencies`.',
+    description: gt.gettext(
+      'Pin all dependency versions except `peerDependencies`.'
+    ),
     packageRules: [
       {
         matchPackagePatterns: ['*'],
@@ -84,8 +89,9 @@ export const presets: Record<string, Preset> = {
     ],
   },
   pinDependencies: {
-    description:
-      'Pin dependency versions where `depType=dependencies`. Usually applies only to non-dev dependencies in `package.json`.',
+    description: gt.gettext(
+      'Pin dependency versions where `depType=dependencies`. Usually applies only to non-dev dependencies in `package.json`.'
+    ),
     packageRules: [
       {
         matchDepTypes: ['dependencies'],
@@ -94,7 +100,7 @@ export const presets: Record<string, Preset> = {
     ],
   },
   pinDevDependencies: {
-    description: 'Pin dependency versions for `devDependencies`.',
+    description: gt.gettext('Pin dependency versions for `devDependencies`.'),
     packageRules: [
       {
         matchDepTypes: ['devDependencies'],
@@ -103,8 +109,9 @@ export const presets: Record<string, Preset> = {
     ],
   },
   pinOnlyDevDependencies: {
-    description:
-      'Pin dependency versions for `devDependencies` and retain SemVer ranges for others.',
+    description: gt.gettext(
+      'Pin dependency versions for `devDependencies` and retain SemVer ranges for others.'
+    ),
     packageRules: [
       {
         matchPackagePatterns: ['*'],
@@ -127,47 +134,56 @@ export const presets: Record<string, Preset> = {
     rangeStrategy: 'auto',
   },
   separateMajorReleases: {
-    description:
-      'Separate `major` versions of dependencies into individual branches/PRs.',
+    description: gt.gettext(
+      'Separate `major` versions of dependencies into individual branches/PRs.'
+    ),
     separateMajorMinor: true,
   },
   separateMultipleMajorReleases: {
-    description:
-      'Separate each `major` version of dependencies into individual branches/PRs.',
+    description: gt.gettext(
+      'Separate each `major` version of dependencies into individual branches/PRs.'
+    ),
     separateMajorMinor: true,
     separateMultipleMajor: true,
   },
   separatePatchReleases: {
-    description:
-      'Separate `patch` and `minor` releases of dependencies into separate PRs.',
+    description: gt.gettext(
+      'Separate `patch` and `minor` releases of dependencies into separate PRs.'
+    ),
     separateMinorPatch: true,
   },
   combinePatchMinorReleases: {
-    description:
-      'Do not separate `patch` and `minor` upgrades into separate PRs for the same dependency.',
+    description: gt.gettext(
+      'Do not separate `patch` and `minor` upgrades into separate PRs for the same dependency.'
+    ),
     separateMinorPatch: false,
   },
   renovatePrefix: {
-    description: 'Prefix `renovate/` to all branch names.',
+    description: gt.gettext('Prefix `renovate/` to all branch names.'),
     branchPrefix: 'renovate/',
   },
   semanticCommitType: {
-    description:
-      'Use `{{arg0}}` as semantic commit type for commit messages and PR titles.',
+    description: gt.gettext(
+      'Use `{{arg0}}` as semantic commit type for commit messages and PR titles.'
+    ),
     semanticCommitType: '{{arg0}}',
   },
   semanticPrefixChore: {
-    description:
-      'Use `chore` as semantic commit type for commit messages and PR titles.',
+    description: gt.gettext(
+      'Use `chore` as semantic commit type for commit messages and PR titles.'
+    ),
     extends: [':semanticCommitType(chore)'],
   },
   semanticPrefixFix: {
-    description:
-      'Use `fix` as semantic commit type for commit messages and PR titles.',
+    description: gt.gettext(
+      'Use `fix` as semantic commit type for commit messages and PR titles.'
+    ),
     extends: [':semanticCommitType(fix)'],
   },
   disablePeerDependencies: {
-    description: 'Do not renovate `peerDependencies` versions/ranges.',
+    description: gt.gettext(
+      'Do not renovate `peerDependencies` versions/ranges.'
+    ),
     packageRules: [
       {
         matchDepTypes: ['peerDependencies'],
@@ -176,7 +192,9 @@ export const presets: Record<string, Preset> = {
     ],
   },
   disableDevDependencies: {
-    description: 'Do not renovate `devDependencies` versions/ranges.',
+    description: gt.gettext(
+      'Do not renovate `devDependencies` versions/ranges.'
+    ),
     packageRules: [
       {
         matchDepTypes: ['devDependencies'],
@@ -185,7 +203,7 @@ export const presets: Record<string, Preset> = {
     ],
   },
   disableDigestUpdates: {
-    description: 'Disable `digest` and Git hash updates.',
+    description: gt.gettext('Disable `digest` and Git hash updates.'),
     digest: {
       enabled: false,
     },
@@ -218,8 +236,9 @@ export const presets: Record<string, Preset> = {
     ],
   },
   semanticCommitTypeAll: {
-    description:
-      'If Renovate detects semantic commits, it will use semantic commit type `{{arg0}}` for all commits.',
+    description: gt.gettext(
+      'If Renovate detects semantic commits, it will use semantic commit type `{{arg0}}` for all commits.'
+    ),
     packageRules: [
       {
         matchPackagePatterns: ['*'],
@@ -228,25 +247,29 @@ export const presets: Record<string, Preset> = {
     ],
   },
   rebaseStalePrs: {
-    description:
-      'Rebase existing PRs any time the base branch has been updated.',
+    description: gt.gettext(
+      'Rebase existing PRs any time the base branch has been updated.'
+    ),
     rebaseWhen: 'behind-base-branch',
   },
   prImmediately: {
-    description: 'Raise PRs immediately (after branch is created).',
+    description: gt.gettext('Raise PRs immediately (after branch is created).'),
     prCreation: 'immediate',
   },
   prNotPending: {
-    description:
-      'Wait for branch tests to pass or fail before creating the PR.',
+    description: gt.gettext(
+      'Wait for branch tests to pass or fail before creating the PR.'
+    ),
     prCreation: 'not-pending',
   },
   prHourlyLimitNone: {
-    description: 'Removes rate limit for PR creation per hour.',
+    description: gt.gettext('Removes rate limit for PR creation per hour.'),
     prHourlyLimit: 0,
   },
   prHourlyLimit1: {
-    description: 'Rate limit PR creation to a maximum of one per hour.',
+    description: gt.gettext(
+      'Rate limit PR creation to a maximum of one per hour.'
+    ),
     prHourlyLimit: 1,
   },
   prHourlyLimit2: {
@@ -256,11 +279,13 @@ export const presets: Record<string, Preset> = {
     prHourlyLimit: 2,
   },
   prHourlyLimit4: {
-    description: 'Rate limit PR creation to a maximum of four per hour.',
+    description: gt.gettext(
+      'Rate limit PR creation to a maximum of four per hour.'
+    ),
     prHourlyLimit: 4,
   },
   prConcurrentLimitNone: {
-    description: 'Remove limit for open PRs at any time.',
+    description: gt.gettext('Remove limit for open PRs at any time.'),
     prConcurrentLimit: 0,
   },
   prConcurrentLimit10: {
@@ -268,27 +293,28 @@ export const presets: Record<string, Preset> = {
     prConcurrentLimit: 10,
   },
   prConcurrentLimit20: {
-    description: 'Limit to maximum 20 open PRs at any time.',
+    description: gt.gettext('Limit to maximum 20 open PRs at any time.'),
     prConcurrentLimit: 20,
   },
   disableRateLimiting: {
-    description: 'Remove hourly and concurrent rate limits.',
+    description: gt.gettext('Remove hourly and concurrent rate limits.'),
     prConcurrentLimit: 0,
     prHourlyLimit: 0,
   },
   automergeDisabled: {
-    description:
-      'Disable automerging feature - wait for humans to merge all PRs.',
+    description: gt.gettext(
+      'Disable automerging feature - wait for humans to merge all PRs.'
+    ),
     automerge: false,
   },
   automergeDigest: {
-    description: 'Automerge `digest` upgrades if they pass tests.',
+    description: gt.gettext('Automerge `digest` upgrades if they pass tests.'),
     digest: {
       automerge: true,
     },
   },
   automergePatch: {
-    description: 'Automerge `patch` upgrades if they pass tests.',
+    description: gt.gettext('Automerge `patch` upgrades if they pass tests.'),
     separateMinorPatch: true,
     patch: {
       automerge: true,
@@ -301,7 +327,9 @@ export const presets: Record<string, Preset> = {
     },
   },
   automergeMinor: {
-    description: 'Automerge `patch` and `minor` upgrades if they pass tests.',
+    description: gt.gettext(
+      'Automerge `patch` and `minor` upgrades if they pass tests.'
+    ),
     minor: {
       automerge: true,
     },
@@ -316,77 +344,93 @@ export const presets: Record<string, Preset> = {
     },
   },
   automergeMajor: {
-    description:
-      'Automerge all upgrades (including `major`) if they pass tests.',
+    description: gt.gettext(
+      'Automerge all upgrades (including `major`) if they pass tests.'
+    ),
     automerge: true,
   },
   automergeAll: {
-    description:
-      'Automerge all upgrades (including `major`) if they pass tests.',
+    description: gt.gettext(
+      'Automerge all upgrades (including `major`) if they pass tests.'
+    ),
     automerge: true,
   },
   automergeBranch: {
-    description:
-      'If automerging, push the new commit directly to the base branch (no PR).',
+    description: gt.gettext(
+      'If automerging, push the new commit directly to the base branch (no PR).'
+    ),
     automergeType: 'branch',
   },
   automergePr: {
-    description: 'Raise a PR first before any automerging.',
+    description: gt.gettext('Raise a PR first before any automerging.'),
     automergeType: 'pr',
   },
   automergeRequireAllStatusChecks: {
-    description: 'Require all status checks to pass before any automerging.',
+    description: gt.gettext(
+      'Require all status checks to pass before any automerging.'
+    ),
     ignoreTests: false,
   },
   skipStatusChecks: {
-    description: 'Skip status checks and automerge right away.',
+    description: gt.gettext('Skip status checks and automerge right away.'),
     ignoreTests: true,
   },
   maintainLockFilesDisabled: {
-    description:
-      'Update existing lock files only when `package.json` is modified.',
+    description: gt.gettext(
+      'Update existing lock files only when `package.json` is modified.'
+    ),
     lockFileMaintenance: {
       enabled: false,
     },
   },
   pinDigestsDisabled: {
-    description: 'Disable pinning of Docker dependency digests.',
+    description: gt.gettext('Disable pinning of Docker dependency digests.'),
     pinDigests: false,
   },
   maintainLockFilesWeekly: {
-    description: 'Run lock file maintenance (updates) early Monday mornings.',
+    description: gt.gettext(
+      'Run lock file maintenance (updates) early Monday mornings.'
+    ),
     lockFileMaintenance: {
       enabled: true,
       extends: ['schedule:weekly'],
     },
   },
   maintainLockFilesMonthly: {
-    description:
-      'Run lock file maintenance (updates) on the first day of each month.',
+    description: gt.gettext(
+      'Run lock file maintenance (updates) on the first day of each month.'
+    ),
     lockFileMaintenance: {
       enabled: true,
       extends: ['schedule:monthly'],
     },
   },
   ignoreUnstable: {
-    description:
-      'Upgrade to unstable versions only if the existing version is unstable.',
+    description: gt.gettext(
+      'Upgrade to unstable versions only if the existing version is unstable.'
+    ),
     ignoreUnstable: true,
   },
   respectLatest: {
-    description: 'Upgrade versions up to the "latest" tag in the npm registry.',
+    description: gt.gettext(
+      'Upgrade versions up to the "latest" tag in the npm registry.'
+    ),
     respectLatest: true,
   },
   updateNotScheduled: {
-    description: 'Keep existing branches updated even when not scheduled.',
+    description: gt.gettext(
+      'Keep existing branches updated even when not scheduled.'
+    ),
     updateNotScheduled: true,
   },
   noUnscheduledUpdates: {
-    description: 'Only update branches when scheduled.',
+    description: gt.gettext('Only update branches when scheduled.'),
     updateNotScheduled: false,
   },
   automergeLinters: {
-    description: 'Update lint packages automatically if tests pass.',
+    description: gt.gettext(
+      'Update lint packages automatically if tests pass.'
+    ),
     packageRules: [
       {
         extends: ['packages:linters'],
@@ -395,7 +439,9 @@ export const presets: Record<string, Preset> = {
     ],
   },
   automergeTesters: {
-    description: 'Update testing packages automatically if tests pass.',
+    description: gt.gettext(
+      'Update testing packages automatically if tests pass.'
+    ),
     packageRules: [
       {
         extends: ['packages:test'],
@@ -404,7 +450,9 @@ export const presets: Record<string, Preset> = {
     ],
   },
   automergeTypes: {
-    description: 'Update `@types/*` packages automatically if tests pass.',
+    description: gt.gettext(
+      'Update `@types/*` packages automatically if tests pass.'
+    ),
     packageRules: [
       {
         matchPackagePrefixes: ['@types/'],
@@ -413,7 +461,7 @@ export const presets: Record<string, Preset> = {
     ],
   },
   doNotPinPackage: {
-    description: 'Disable version pinning for `{{arg0}}`.',
+    description: gt.gettext('Disable version pinning for `{{arg0}}`.'),
     packageRules: [
       {
         matchPackageNames: ['{{arg0}}'],
@@ -422,29 +470,31 @@ export const presets: Record<string, Preset> = {
     ],
   },
   pinSkipCi: {
-    description: 'Add `[skip ci]` to commit message body whenever pinning.',
+    description: gt.gettext(
+      'Add `[skip ci]` to commit message body whenever pinning.'
+    ),
     pin: {
       commitBody: '[skip ci]',
     },
   },
   gitSignOff: {
-    description: 'Append `Signed-off-by:` to signoff Git commits.',
+    description: gt.gettext('Append `Signed-off-by:` to signoff Git commits.'),
     commitBody: 'Signed-off-by: {{{gitAuthor}}}',
   },
   npm: {
-    description: 'Keep `package.json` npm dependencies updated.',
+    description: gt.gettext('Keep `package.json` npm dependencies updated.'),
     npm: {
       enabled: true,
     },
   },
   gomod: {
-    description: 'Enable Go modules support.',
+    description: gt.gettext('Enable Go modules support.'),
     gomod: {
       enabled: true,
     },
   },
   onlyNpm: {
-    description: 'Renovate only npm dependencies.',
+    description: gt.gettext('Renovate only npm dependencies.'),
     docker: {
       enabled: false,
     },
@@ -453,19 +503,19 @@ export const presets: Record<string, Preset> = {
     },
   },
   docker: {
-    description: 'Keep Dockerfile `FROM` sources updated.',
+    description: gt.gettext('Keep Dockerfile `FROM` sources updated.'),
     docker: {
       enabled: true,
     },
   },
   meteor: {
-    description: 'Keep Meteor Npm.depends packages updated.',
+    description: gt.gettext('Keep Meteor Npm.depends packages updated.'),
     meteor: {
       enabled: true,
     },
   },
   group: {
-    description: 'Group `{{arg1}}` packages into same branch/PR.',
+    description: gt.gettext('Group `{{arg1}}` packages into same branch/PR.'),
     packageRules: [
       {
         extends: ['{{arg0}}'],
@@ -474,69 +524,78 @@ export const presets: Record<string, Preset> = {
     ],
   },
   label: {
-    description: 'Apply label `{{arg0}}` to PRs.',
+    description: gt.gettext('Apply label `{{arg0}}` to PRs.'),
     labels: ['{{arg0}}'],
   },
   labels: {
-    description: 'Apply labels `{{arg0}}` and `{{arg1}}` to PRs.',
+    description: gt.gettext('Apply labels `{{arg0}}` and `{{arg1}}` to PRs.'),
     labels: ['{{arg0}}', '{{arg1}}'],
   },
   assignee: {
-    description: 'Assign PRs to `{{arg0}}`.',
+    description: gt.gettext('Assign PRs to `{{arg0}}`.'),
     assignees: ['{{arg0}}'],
   },
   reviewer: {
-    description: 'Add `{{arg0}}` as reviewer for PRs.',
+    description: gt.gettext('Add `{{arg0}}` as reviewer for PRs.'),
     reviewers: ['{{arg0}}'],
   },
   assignAndReview: {
-    description: 'Set `{{arg0}}` as assignee and reviewer of PRs.',
+    description: gt.gettext('Set `{{arg0}}` as assignee and reviewer of PRs.'),
     extends: [':assignee({{arg0}})', ':reviewer({{arg0}})'],
   },
   enableVulnerabilityAlerts: {
-    description: 'Raise PR when vulnerability alerts are detected.',
+    description: gt.gettext('Raise PR when vulnerability alerts are detected.'),
     vulnerabilityAlerts: {
       enabled: true,
     },
   },
   enableVulnerabilityAlertsWithLabel: {
-    description:
-      'Raise PR when vulnerability alerts are detected with label `{{arg0}}`.',
+    description: gt.gettext(
+      'Raise PR when vulnerability alerts are detected with label `{{arg0}}`.'
+    ),
     vulnerabilityAlerts: {
       enabled: true,
       labels: ['{{arg0}}'],
     },
   },
   disableVulnerabilityAlerts: {
-    description: 'Disable vulnerability alerts completely.',
+    description: gt.gettext('Disable vulnerability alerts completely.'),
     vulnerabilityAlerts: {
       enabled: false,
     },
   },
   semanticCommits: {
-    description: 'Use semantic prefixes for commit messages and PR titles.',
+    description: gt.gettext(
+      'Use semantic prefixes for commit messages and PR titles.'
+    ),
     semanticCommits: 'enabled',
   },
   semanticCommitsDisabled: {
-    description: 'Disable semantic prefixes for commit messages and PR titles.',
+    description: gt.gettext(
+      'Disable semantic prefixes for commit messages and PR titles.'
+    ),
     semanticCommits: 'disabled',
   },
   disableLockFiles: {
-    description: 'Disable lock file updates.',
+    description: gt.gettext('Disable lock file updates.'),
     updateLockFiles: false,
   },
   semanticCommitScope: {
-    description:
-      'Use semantic commit scope `{{arg0}}` for all commits and PR titles.',
+    description: gt.gettext(
+      'Use semantic commit scope `{{arg0}}` for all commits and PR titles.'
+    ),
     semanticCommitScope: '{{arg0}}',
   },
   semanticCommitScopeDisabled: {
-    description: 'Disable semantic commit scope for all commits and PR titles.',
+    description: gt.gettext(
+      'Disable semantic commit scope for all commits and PR titles.'
+    ),
     semanticCommitScope: null,
   },
   widenPeerDependencies: {
-    description:
-      'Always widen `peerDependencies` SemVer ranges when updating, instead of replacing.',
+    description: gt.gettext(
+      'Always widen `peerDependencies` SemVer ranges when updating, instead of replacing.'
+    ),
     packageRules: [
       {
         matchDepTypes: ['peerDependencies'],
@@ -553,16 +612,21 @@ export const presets: Record<string, Preset> = {
     dependencyDashboard: false,
   },
   dependencyDashboardApproval: {
-    description: 'Enable Renovate Dependency Dashboard approval workflow.',
+    description: gt.gettext(
+      'Enable Renovate Dependency Dashboard approval workflow.'
+    ),
     dependencyDashboardApproval: true,
   },
   timezone: {
-    description: 'Evaluate schedules according to timezone `{{arg0}}`.',
+    description: gt.gettext(
+      'Evaluate schedules according to timezone `{{arg0}}`.'
+    ),
     timezone: '{{arg0}}',
   },
   pathSemanticCommitType: {
-    description:
-      'Use semanticCommitType `{{arg0}}` for all package files matching path `{{arg1}}`.',
+    description: gt.gettext(
+      'Use semanticCommitType `{{arg0}}` for all package files matching path `{{arg1}}`.'
+    ),
     packageRules: [
       {
         matchPaths: ['{{arg0}}'],
@@ -571,8 +635,9 @@ export const presets: Record<string, Preset> = {
     ],
   },
   followTag: {
-    description:
-      'For package `{{arg0}}`, strictly follow release tag `{{arg1}}`.',
+    description: gt.gettext(
+      'For package `{{arg0}}`, strictly follow release tag `{{arg1}}`.'
+    ),
     packageRules: [
       {
         matchPackageNames: ['{{arg0}}'],
@@ -581,8 +646,9 @@ export const presets: Record<string, Preset> = {
     ],
   },
   githubComToken: {
-    description:
-      'Use provided token for `github.com` lookups. Do not configure this if you are already running on `github.com`.',
+    description: gt.gettext(
+      'Use provided token for `github.com` lookups. Do not configure this if you are already running on `github.com`.'
+    ),
     hostRules: [
       {
         matchHost: 'github.com',
@@ -593,7 +659,7 @@ export const presets: Record<string, Preset> = {
     ],
   },
   disablePrControls: {
-    description: 'Remove the checkbox controls from PRs.',
+    description: gt.gettext('Remove the checkbox controls from PRs.'),
     prBodyTemplate:
       '{{{header}}}{{{table}}}{{{notes}}}{{{changelogs}}}{{{configDescription}}}{{{footer}}}',
   },

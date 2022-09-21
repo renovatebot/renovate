@@ -23,7 +23,9 @@ export const presets: Record<string, Preset> = {
     ignoreDeps: [],
   },
   mavenCommonsAncientVersion: {
-    description: 'Fix some problems with very old Maven commons versions.',
+    description: gt.gettext(
+      'Fix some problems with very old Maven commons versions.'
+    ),
     packageRules: [
       {
         matchDatasources: ['maven', 'sbt-package'],
@@ -33,7 +35,7 @@ export const presets: Record<string, Preset> = {
     ],
   },
   ignoreSpringCloudNumeric: {
-    description: 'Ignore spring cloud `1.x` releases.',
+    description: gt.gettext('Ignore spring cloud `1.x` releases.'),
     packageRules: [
       {
         matchDatasources: ['maven'],
@@ -45,7 +47,7 @@ export const presets: Record<string, Preset> = {
     ],
   },
   ignoreWeb3jCoreWithOldReleaseTimestamp: {
-    description: 'Ignore `web3j` `5.0.0` release.',
+    description: gt.gettext('Ignore `web3j` `5.0.0` release.'),
     packageRules: [
       {
         matchDatasources: ['maven'],
@@ -55,7 +57,7 @@ export const presets: Record<string, Preset> = {
     ],
   },
   ignoreHttp4sDigestMilestones: {
-    description: 'Ignore `http4s` digest-based `1.x` milestones.',
+    description: gt.gettext('Ignore `http4s` digest-based `1.x` milestones.'),
     packageRules: [
       {
         matchManagers: ['sbt'],
@@ -65,7 +67,7 @@ export const presets: Record<string, Preset> = {
     ],
   },
   typesNodeVersioning: {
-    description: 'Use node versioning for `@types/node`.',
+    description: gt.gettext('Use node versioning for `@types/node`.'),
     packageRules: [
       {
         matchManagers: ['npm'],
@@ -75,8 +77,9 @@ export const presets: Record<string, Preset> = {
     ],
   },
   reduceRepologyServerLoad: {
-    description:
-      'Limit concurrent requests to reduce load on Repology servers until we can fix this properly, see issue `#10133`.',
+    description: gt.gettext(
+      'Limit concurrent requests to reduce load on Repology servers until we can fix this properly, see issue `#10133`.'
+    ),
     hostRules: [
       {
         matchHost: 'repology.org',
@@ -85,7 +88,7 @@ export const presets: Record<string, Preset> = {
     ],
   },
   doNotUpgradeFromAlpineStableToEdge: {
-    description: 'Do not upgrade from Alpine stable to edge.',
+    description: gt.gettext('Do not upgrade from Alpine stable to edge.'),
     packageRules: [
       {
         matchDatasources: ['docker'],
@@ -96,8 +99,9 @@ export const presets: Record<string, Preset> = {
     ],
   },
   supportRedHatImageVersion: {
-    description:
-      'Use specific versioning for Red Hat-maintained container images',
+    description: gt.gettext(
+      'Use specific versioning for Red Hat-maintained container images'
+    ),
     packageRules: [
       {
         matchDatasources: ['docker'],
