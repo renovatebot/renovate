@@ -1,0 +1,48 @@
+name: 'Upstream Sync'
+
+on:
+  schedule:
+    - cron: '0 4 * * *'
+
+  workflow_dispatch: # click the button on GitHub repo
+
+permissions:
+  contents: write
+
+jobs:
+  sync_latest_from_upstream:
+    runs-on: ubuntu-latest
+    name: Sync latest commits from upstream repo
+
+    steps:
+      # REQUIRED step
+      # Step 1: run a standard checkout action, provided by github
+      - name: Checkout xingxing/renovate:i18n
+        uses: actions/checkout@v3
+        with:
+          repository: 'xingxing/renovate'
+          ref: i18n
+
+      - name: Get the latest tag of the upstream repo
+        env:
+          ACTIONS_ALLOW_UNSECURE_COMMANDS: true
+        run: |
+          export LATEST_TAG=$(curl "https://api.github.com/repos/renovatebot/renovate/releases/latest" --silent -H "Authorization: token ${{secrets.GITHUB_TOKEN}}" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
+          echo "::set-env name=LATEST_TAG::$LATEST_TAG"
+
+      - name: Print out the latest tag
+        run: echo "$LATEST_TAG"
+
+      - name: Sync upstream changes
+        id: sync
+        uses: aormsby/Fork-Sync-With-Upstream-action@v3.2
+        with:
+          target_sync_branch: i18n
+          target_repo_token: ${{ secrets.GH_TOKEN }}
+          upstream_sync_branch: ${{ env.LATEST_TAG }}
+          upstream_sync_repo: 'renovatebot/renovate'
+          git_config_user: 'Xing Xing'
+          git_config_email: 'wadexing@gmail.com'
+          git_config_pull_rebase: 'true'
+          target_branch_push_args: '--force-with-lease'
+          test_mode: true
