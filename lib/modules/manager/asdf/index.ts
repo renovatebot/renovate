@@ -5,7 +5,7 @@ export { extractPackageFile } from './extract';
 export const displayName = 'asdf';
 
 export const defaultConfig = {
-  fileMatch: ['(^|/)\\.tools-versions$'],
+  fileMatch: ['(^|/)\\.tool-versions$'],
 };
 
 export const supportedDatasources = [GithubTagsDatasource.id];
