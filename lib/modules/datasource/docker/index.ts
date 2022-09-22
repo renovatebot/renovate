@@ -897,11 +897,11 @@ export class DockerDatasource extends Datasource {
         );
         return this.getTags(registryHost, 'library/' + dockerRepository);
       }
-      // Retry handling for JFrog Artifactory when resolving Docker Official Images
+      // JFrog Artifactory - Retry handling when resolving Docker Official Images
       // These follow the format of {{registryHost}}{{jFrogRepository}}/library/{{dockerRepository}}
       if (
         (err.statusCode === 404 || err.message === PAGE_NOT_FOUND_ERROR) &&
-        dockerRepository.split('/').length === 2 &&
+        err.headers['x-jfrog-version'] !== null &&
         registryHost.includes('jfrog.io')
       ) {
         logger.debug(
