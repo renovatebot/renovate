@@ -902,7 +902,7 @@ export class DockerDatasource extends Datasource {
       if (
         (err.statusCode === 404 || err.message === PAGE_NOT_FOUND_ERROR) &&
         err.headers['x-jfrog-version'] !== null &&
-        registryHost.includes('jfrog.io')
+        dockerRepository.split('/').length === 2
       ) {
         logger.debug(
           `JFrog Artifactory: Retrying Tags for ${registryHost}/${dockerRepository} using library/ path between JFrog virtual repository and image`
