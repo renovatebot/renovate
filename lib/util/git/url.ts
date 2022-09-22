@@ -19,6 +19,12 @@ export function getHttpUrl(url: string, token?: string): string {
         parsedUrl.token = token.includes(':')
           ? token
           : `gitlab-ci-token:${token}`;
+        break;
+      case 'github':
+        parsedUrl.token = token.includes(':')
+          ? token
+          : `x-access-token:${token}`;
+        break;
     }
   }
 
@@ -34,18 +40,8 @@ export function getRemoteUrlWithToken(url: string, hostType?: string): string {
 
   if (hostRule?.token) {
     logger.debug(`Found hostRules token for url ${url}`);
-    const colonIndex = hostRule.token.indexOf(":")
-    let encodedToken
-    
-    if (colonIndex > -1) {
-      const encodedUsername = encodeURIComponent(hostRule.token.substring(0, colonIndex));
-      const encodedPassword = encodeURIComponent(hostRule.token.substring(colonIndex + 1));
-      encodedToken = `${encodedUsername}:${encodedPassword}`
-    } else {
-      encodedToken = encodeURIComponent(hostRule.token)
-    }
-    
-    return getHttpUrl(url, encodedToken);
+
+    return getHttpUrl(url, encodeURIComponent(hostRule.token));
   }
 
   if (hostRule?.username && hostRule?.password) {
