@@ -905,7 +905,7 @@ export class DockerDatasource extends Datasource {
         registryHost.includes('jfrog.io')
       ) {
         logger.debug(
-          `JFrog Artifactory: Retrying Tags for ${registryHost}/${dockerRepository} using library/ between JFrog virtual repository and image`
+          `JFrog Artifactory: Retrying Tags for ${registryHost}/${dockerRepository} using library/ path between JFrog virtual repository and image`
         );
 
         const dockerRepositoryParts = dockerRepository.split('/');
