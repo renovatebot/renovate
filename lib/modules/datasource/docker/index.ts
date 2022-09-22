@@ -897,11 +897,11 @@ export class DockerDatasource extends Datasource {
         );
         return this.getTags(registryHost, 'library/' + dockerRepository);
       }
-      // Retry handling for JFrog Artifactory Docker Official Images
+      // Retry handling for JFrog Artifactory when resolving Docker Official Images
       // These follow the format of {{registryHost}}{{jFrogRepository}}/library/{{dockerRepository}}
       if (
         (err.statusCode === 404 || err.message === PAGE_NOT_FOUND_ERROR) &&
-        dockerRepository.includes('/') &&
+        dockerRepository.split('/').length === 2 &&
         registryHost.includes('jfrog.io')
       ) {
         logger.debug(
@@ -910,7 +910,7 @@ export class DockerDatasource extends Datasource {
 
         const dockerRepositoryParts = dockerRepository.split('/');
         const jfrogRepository = dockerRepositoryParts[0];
-        const dockerImage = dockerRepositoryParts.splice(1).join('/');
+        const dockerImage = dockerRepositoryParts[1];
 
         return this.getTags(
           registryHost,
