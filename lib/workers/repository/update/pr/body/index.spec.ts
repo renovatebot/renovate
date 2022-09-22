@@ -1,8 +1,7 @@
-import { mocked, partial, platform } from '../../../../../../test/util';
+import { mocked, platform } from '../../../../../../test/util';
 import type { PackageFile } from '../../../../../modules/manager/types';
 import { prDebugDataRe } from '../../../../../modules/platform/pr-body';
 import * as _template from '../../../../../util/template';
-import type { BranchConfig } from '../../../../types';
 import * as _changelogs from './changelogs';
 import * as _configDescription from './config-description';
 import * as _controls from './controls';
@@ -53,11 +52,11 @@ describe('workers/repository/update/pr/body/index', () => {
 
     it('handles empty template', async () => {
       const res = await getPrBody(
-        partial<BranchConfig>({
+        {
           manager: 'some-manager',
           branchName: 'some-branch',
           upgrades: [],
-        }),
+        },
         {
           debugData: {
             updatedInVer: '1.2.3',
@@ -81,11 +80,11 @@ describe('workers/repository/update/pr/body/index', () => {
       };
 
       await getPrBody(
-        partial<BranchConfig>({
+        {
           manager: 'some-manager',
           branchName: 'some-branch',
           upgrades: [upgrade],
-        }),
+        },
         {
           debugData: {
             updatedInVer: '1.2.3',
@@ -117,11 +116,11 @@ describe('workers/repository/update/pr/body/index', () => {
       };
 
       await getPrBody(
-        partial<BranchConfig>({
+        {
           manager: 'some-manager',
           branchName: 'some-branch',
           upgrades: [upgrade],
-        }),
+        },
         {
           debugData: {
             updatedInVer: '1.2.3',
@@ -142,12 +141,12 @@ describe('workers/repository/update/pr/body/index', () => {
       platform.massageMarkdown.mockImplementation((x) => x);
       template.compile.mockImplementation((x) => x);
       const res = await getPrBody(
-        partial<BranchConfig>({
+        {
           manager: 'some-manager',
           branchName: 'some-branch',
           upgrades: [],
           prBodyTemplate: 'PR BODY',
-        }),
+        },
         {
           debugData: {
             updatedInVer: '1.2.3',
@@ -163,12 +162,12 @@ describe('workers/repository/update/pr/body/index', () => {
       platform.massageMarkdown.mockImplementation((x) => x);
       template.compile.mockImplementation((x) => x);
       const res = await getPrBody(
-        partial<BranchConfig>({
+        {
           manager: 'some-manager',
           branchName: 'some-branch',
           upgrades: [],
           prBodyTemplate: ['aaa', '**Rebasing**: FOO', 'bbb'].join('\n'),
-        }),
+        },
         {
           rebasingNotice: 'BAR',
           debugData: {
@@ -184,12 +183,12 @@ describe('workers/repository/update/pr/body/index', () => {
       platform.massageMarkdown.mockImplementation((x) => x);
       template.compile.mockImplementation((x) => x);
       const res = await getPrBody(
-        partial<BranchConfig>({
+        {
           manager: 'some-manager',
           branchName: 'some-branch',
           upgrades: [],
           prBodyTemplate: 'PR BODY',
-        }),
+        },
         {
           debugData: {
             updatedInVer: '1.2.3',
@@ -230,13 +229,13 @@ describe('workers/repository/update/pr/body/index', () => {
       };
 
       const res = await getPrBody(
-        partial<BranchConfig>({
+        {
           manager: 'some-manager',
           branchName: 'some-branch',
           upgrades: [],
           packageFiles: packageFiles,
           prBodyTemplate: '{{{warnings}}}',
-        }),
+        },
         {
           debugData: {
             updatedInVer: '1.2.3',

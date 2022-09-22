@@ -20,7 +20,7 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
           },
         },
       ];
-      const config = partial<BranchConfig>({
+      const config: BranchConfig = {
         manager: 'some-manager',
         updatedPackageFiles: [],
         updatedArtifacts: [
@@ -30,7 +30,7 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
         artifactErrors: [],
         upgrades: [],
         branchName: 'main',
-      });
+      };
       git.getRepoStatus.mockResolvedValueOnce(
         partial<StatusResult>({
           modified: [],

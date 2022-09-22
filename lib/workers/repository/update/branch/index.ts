@@ -391,7 +391,7 @@ export async function processBranch(
     // TODO: types (#7154)
     logger.debug(`Using reuseExistingBranch: ${config.reuseExistingBranch!}`);
     if (!(config.reuseExistingBranch && config.skipBranchUpdate)) {
-      await checkoutBranch(config.baseBranch);
+      await checkoutBranch(config.baseBranch!);
       const res = await getUpdatedPackageFiles(config);
       // istanbul ignore if
       if (res.artifactErrors && config.artifactErrors) {
@@ -480,7 +480,7 @@ export async function processBranch(
 
       config.isConflicted ??=
         branchExists &&
-        (await isBranchConflicted(config.baseBranch, config.branchName));
+        (await isBranchConflicted(config.baseBranch!, config.branchName));
       config.forceCommit = forcedManually || config.isConflicted;
 
       config.stopUpdating = branchPr?.labels?.includes(
@@ -543,8 +543,8 @@ export async function processBranch(
       logger.info({ commitSha }, `Branch ${action}`);
       // TODO #7154
       setCachedConflictResult(
-        config.baseBranch,
-        getBranchCommit(config.baseBranch)!,
+        config.baseBranch!,
+        getBranchCommit(config.baseBranch!)!,
         config.branchName,
         commitSha,
         false

@@ -7,7 +7,6 @@ import {
   logger,
   mocked,
   partial,
-  partialArr,
 } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import { addMeta } from '../../../logger';
@@ -45,17 +44,9 @@ beforeEach(() => {
 describe('workers/repository/process/write', () => {
   describe('writeUpdates()', () => {
     it('stops after automerge', async () => {
-      const branches = partialArr<BranchConfig>([
-        {
-          branchName: 'test_branch',
-          manager: 'npm',
-          upgrades: [],
-        },
-        {
-          branchName: 'test_branch',
-          manager: 'npm',
-          upgrades: [],
-        },
+      const branches = partial<BranchConfig[]>([
+        { branchName: 'test_branch', manager: 'npm', upgrades: [] },
+        { branchName: 'test_branch', manager: 'npm', upgrades: [] },
         {
           branchName: 'test_branch',
           manager: 'npm',
@@ -63,16 +54,8 @@ describe('workers/repository/process/write', () => {
           ignoreTests: true,
           upgrades: [],
         },
-        {
-          branchName: 'test_branch',
-          manager: 'npm',
-          upgrades: [],
-        },
-        {
-          branchName: 'test_branch',
-          manager: 'npm',
-          upgrades: [],
-        },
+        { branchName: 'test_branch', manager: 'npm', upgrades: [] },
+        { branchName: 'test_branch', manager: 'npm', upgrades: [] },
       ]);
       repoCache.getCache.mockReturnValue({});
       git.branchExists.mockReturnValue(true);
@@ -128,8 +111,8 @@ describe('workers/repository/process/write', () => {
     });
 
     it('return no-work if branch fingerprint is not different', async () => {
-      const branches = [
-        partial<BranchConfig>({
+      const branches = partial<BranchConfig[]>([
+        {
           branchName: 'new/some-branch',
           manager: 'npm',
           upgrades: [
@@ -137,8 +120,8 @@ describe('workers/repository/process/write', () => {
               manager: 'npm',
             } as BranchUpgradeConfig,
           ],
-        }),
-      ];
+        },
+      ]);
       repoCache.getCache.mockReturnValueOnce({
         branches: [
           {
@@ -158,8 +141,8 @@ describe('workers/repository/process/write', () => {
     });
 
     it('updates branch fingerprint when new commit is made', async () => {
-      const branches = [
-        partial<BranchConfig>({
+      const branches = partial<BranchConfig[]>([
+        {
           branchName: 'new/some-branch',
           manager: 'npm',
           upgrades: [
@@ -167,8 +150,8 @@ describe('workers/repository/process/write', () => {
               manager: 'unknown-manager',
             } as BranchUpgradeConfig,
           ],
-        }),
-      ];
+        },
+      ]);
       repoCache.getCache.mockReturnValueOnce({
         branches: [
           {
@@ -202,8 +185,8 @@ describe('workers/repository/process/write', () => {
     });
 
     it('shows debug log when the cache is enabled, but branch cache not found', async () => {
-      const branches = [
-        partial<BranchConfig>({
+      const branches = partial<BranchConfig[]>([
+        {
           branchName: 'new/some-branch',
           manager: 'npm',
           upgrades: [
@@ -211,8 +194,8 @@ describe('workers/repository/process/write', () => {
               manager: 'npm',
             } as BranchUpgradeConfig,
           ],
-        }),
-      ];
+        },
+      ]);
       repoCache.getCache.mockReturnValueOnce({});
       branchWorker.processBranch.mockResolvedValueOnce({
         branchExists: true,
@@ -227,8 +210,8 @@ describe('workers/repository/process/write', () => {
     });
 
     it('adds branch to cache when cache is not enabled', async () => {
-      const branches = [
-        partial<BranchConfig>({
+      const branches = partial<BranchConfig[]>([
+        {
           branchName: 'new/some-branch',
           manager: 'npm',
           upgrades: [
@@ -236,8 +219,8 @@ describe('workers/repository/process/write', () => {
               manager: 'npm',
             } as BranchUpgradeConfig,
           ],
-        }),
-      ];
+        },
+      ]);
       const repoCacheObj = {} as RepoCacheData;
       repoCache.getCache.mockReturnValueOnce(repoCacheObj);
       branchWorker.processBranch.mockResolvedValueOnce({

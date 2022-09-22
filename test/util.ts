@@ -37,14 +37,6 @@ export function partial<T>(obj: Partial<T>): T {
   return obj as T;
 }
 
-/**
- * Simply wrapper to create partial mocks.
- * @param obj Object to cast to final type
- */
-export function partialArr<T>(obj: Partial<T>[]): T[] {
-  return obj as T[];
-}
-
 export const fs = mocked(_fs);
 export const git = mocked(_git);
 

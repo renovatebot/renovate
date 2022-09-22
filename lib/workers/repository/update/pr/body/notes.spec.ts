@@ -1,6 +1,5 @@
-import { mocked, partial } from '../../../../../../test/util';
+import { mocked } from '../../../../../../test/util';
 import * as _template from '../../../../../util/template';
-import type { BranchConfig } from '../../../../types';
 import { getPrExtraNotes, getPrNotes } from './notes';
 
 jest.mock('../../../../../util/template');
@@ -13,19 +12,17 @@ describe('workers/repository/update/pr/body/notes', () => {
 
   it('renders notes', () => {
     template.compile.mockImplementation((x) => x);
-    const res = getPrNotes(
-      partial<BranchConfig>({
-        manager: 'some-manager',
-        branchName: 'branch',
-        upgrades: [
-          {
-            manager: 'some-manager',
-            branchName: 'branch',
-            prBodyNotes: ['NOTE'],
-          },
-        ],
-      })
-    );
+    const res = getPrNotes({
+      manager: 'some-manager',
+      branchName: 'branch',
+      upgrades: [
+        {
+          manager: 'some-manager',
+          branchName: 'branch',
+          prBodyNotes: ['NOTE'],
+        },
+      ],
+    });
     expect(res).toContain('NOTE');
   });
 
@@ -33,34 +30,30 @@ describe('workers/repository/update/pr/body/notes', () => {
     template.compile.mockImplementationOnce(() => {
       throw new Error('unknown');
     });
-    const res = getPrNotes(
-      partial<BranchConfig>({
-        manager: 'some-manager',
-        branchName: 'branch',
-        upgrades: [
-          {
-            manager: 'some-manager',
-            branchName: 'branch',
-            prBodyNotes: ['NOTE'],
-          },
-        ],
-      })
-    );
+    const res = getPrNotes({
+      manager: 'some-manager',
+      branchName: 'branch',
+      upgrades: [
+        {
+          manager: 'some-manager',
+          branchName: 'branch',
+          prBodyNotes: ['NOTE'],
+        },
+      ],
+    });
     expect(res).not.toContain('NOTE');
   });
 
   it('handles extra notes', () => {
-    const res = getPrExtraNotes(
-      partial<BranchConfig>({
-        manager: 'some-manager',
-        branchName: 'branch',
-        upgrades: [
-          { manager: 'some-manager', branchName: 'branch', gitRef: true },
-        ],
-        updateType: 'lockFileMaintenance',
-        isPin: true,
-      })
-    );
+    const res = getPrExtraNotes({
+      manager: 'some-manager',
+      branchName: 'branch',
+      upgrades: [
+        { manager: 'some-manager', branchName: 'branch', gitRef: true },
+      ],
+      updateType: 'lockFileMaintenance',
+      isPin: true,
+    });
     expect(res).toContain(
       'If you wish to disable git hash updates, add `":disableDigestUpdates"` to the extends array in your config.'
     );

@@ -1,6 +1,5 @@
-import { mocked, partial } from '../../../../../../test/util';
+import { mocked } from '../../../../../../test/util';
 import * as _template from '../../../../../util/template';
-import type { BranchConfig } from '../../../../types';
 import { getPrHeader } from './header';
 
 jest.mock('../../../../../util/template');
@@ -13,27 +12,23 @@ describe('workers/repository/update/pr/body/header', () => {
 
   it('renders empty header', () => {
     expect(
-      getPrHeader(
-        partial<BranchConfig>({
-          manager: 'some-manager',
-          branchName: 'branch',
-          upgrades: [],
-        })
-      )
+      getPrHeader({
+        manager: 'some-manager',
+        branchName: 'branch',
+        upgrades: [],
+      })
     ).toBe('');
   });
 
   it('renders prHeader', () => {
     template.compile.mockImplementation((x) => x);
     expect(
-      getPrHeader(
-        partial<BranchConfig>({
-          manager: 'some-manager',
-          branchName: 'branch',
-          upgrades: [],
-          prHeader: 'HEADER',
-        })
-      )
+      getPrHeader({
+        manager: 'some-manager',
+        branchName: 'branch',
+        upgrades: [],
+        prHeader: 'HEADER',
+      })
     ).toMatchInlineSnapshot(`
       "HEADER
 
