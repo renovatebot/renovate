@@ -33,7 +33,7 @@ jobs:
         run: yarn prettier-fix
 
       - name: Create pull request
-        uses: peter-evans/create-pull-request@18f90432bedd2afd6a825469ffd38aa24712a91d # tag=v4.1.1
+        uses: peter-evans/create-pull-request@171dd555b9ab6b18fa02519fdfacbb8bf671e1b4 # tag=v4.1.2
         with:
           author: 'Renovate Bot <renovate@whitesourcesoftware.com>'
           branch: 'chore/update-static-data'

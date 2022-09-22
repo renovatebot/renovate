@@ -849,6 +849,7 @@ const options: RenovateOptions[] = [
       'kubernetes',
       'ansible',
       'droneci',
+      'woodpecker',
     ],
   },
   {
@@ -1691,7 +1692,7 @@ const options: RenovateOptions[] = [
       'Pull Request body template. Controls which sections are rendered in the body.',
     type: 'string',
     default:
-      '{{{header}}}{{{table}}}{{{notes}}}{{{changelogs}}}{{{configDescription}}}{{{controls}}}{{{footer}}}',
+      '{{{header}}}{{{table}}}{{{warnings}}}{{{notes}}}{{{changelogs}}}{{{configDescription}}}{{{controls}}}{{{footer}}}',
     cli: false,
   },
   {

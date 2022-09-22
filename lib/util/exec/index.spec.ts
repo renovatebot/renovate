@@ -11,7 +11,7 @@ import { exec } from '.';
 const getHermitEnvsMock = mockedFunction(getHermitEnvs);
 
 jest.mock('./hermit', () => ({
-  ...jest.requireActual('./hermit'),
+  ...(jest.requireActual('./hermit') as any),
   getHermitEnvs: jest.fn(),
 }));
 jest.mock('../../modules/datasource');
