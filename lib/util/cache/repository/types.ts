@@ -43,6 +43,9 @@ export interface BranchCache {
    * Whether a person not listed in gitIgnoredAuthors updated the branch.
    */
   isModified: boolean;
+  /**
+   * Name of the branch current branch was checked out from
+   */
   baseBranch: string | undefined;
   /**
    * Parent commit of branch sha
