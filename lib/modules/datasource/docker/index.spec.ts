@@ -1170,7 +1170,7 @@ describe('modules/datasource/docker/index', () => {
       await expect(getPkgReleases(config)).rejects.toThrow(EXTERNAL_HOST_ERROR);
     });
 
-    it('jfrog artifactory mirror - `/library` retry handling for docker official images', async () => {
+    it('jfrog artifactory - retry tags for official images by injecting `/library` after repository and before image', async () => {
       const tags = ['18.0.0'];
       httpMock
         .scope('https://org.jfrog.io/v2')
