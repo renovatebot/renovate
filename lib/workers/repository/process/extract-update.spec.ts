@@ -1,7 +1,8 @@
 import hasha from 'hasha';
-import { git, mocked } from '../../../../test/util';
+import { git, mocked, partial } from '../../../../test/util';
 import type { PackageFile } from '../../../modules/manager/types';
 import * as _repositoryCache from '../../../util/cache/repository';
+import type { BranchConfig } from '../../types';
 import * as _branchify from '../updates/branchify';
 import { extract, lookup, update } from './extract-update';
 
@@ -17,9 +18,9 @@ const branchify = mocked(_branchify);
 const repositoryCache = mocked(_repositoryCache);
 
 branchify.branchifyUpgrades.mockResolvedValueOnce({
-  branches: [
+  branches: partial<BranchConfig>([
     { manager: 'some-manager', branchName: 'some-branch', upgrades: [] },
-  ],
+  ]),
   branchList: ['branchName'],
 });
 

@@ -1,4 +1,4 @@
-import { mocked } from '../../../../../../test/util';
+import { mocked, partial } from '../../../../../../test/util';
 import { BranchStatus } from '../../../../../types';
 import type { BranchConfig } from '../../../../types';
 import * as _checks from '../../branch/status-checks';
@@ -9,11 +9,11 @@ const checks = mocked(_checks);
 
 describe('workers/repository/update/pr/body/config-description', () => {
   describe('getPrConfigDescription', () => {
-    const config: BranchConfig = {
+    const config = partial<BranchConfig>({
       manager: 'some-manager',
       branchName: 'some-branch',
       upgrades: [],
-    };
+    });
 
     beforeEach(() => {
       jest.resetAllMocks();

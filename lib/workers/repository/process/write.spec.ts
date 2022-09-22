@@ -44,7 +44,7 @@ beforeEach(() => {
 describe('workers/repository/process/write', () => {
   describe('writeUpdates()', () => {
     it('stops after automerge', async () => {
-      const branches = partial<BranchConfig[]>([
+      const branches = partial<BranchConfig>([
         { branchName: 'test_branch', manager: 'npm', upgrades: [] },
         { branchName: 'test_branch', manager: 'npm', upgrades: [] },
         {
@@ -111,7 +111,7 @@ describe('workers/repository/process/write', () => {
     });
 
     it('return no-work if branch fingerprint is not different', async () => {
-      const branches = partial<BranchConfig[]>([
+      const branches = partial<BranchConfig>([
         {
           branchName: 'new/some-branch',
           manager: 'npm',
@@ -141,7 +141,7 @@ describe('workers/repository/process/write', () => {
     });
 
     it('updates branch fingerprint when new commit is made', async () => {
-      const branches = partial<BranchConfig[]>([
+      const branches = partial<BranchConfig>([
         {
           branchName: 'new/some-branch',
           manager: 'npm',
@@ -185,7 +185,7 @@ describe('workers/repository/process/write', () => {
     });
 
     it('shows debug log when the cache is enabled, but branch cache not found', async () => {
-      const branches = partial<BranchConfig[]>([
+      const branches = partial<BranchConfig>([
         {
           branchName: 'new/some-branch',
           manager: 'npm',
@@ -210,7 +210,7 @@ describe('workers/repository/process/write', () => {
     });
 
     it('adds branch to cache when cache is not enabled', async () => {
-      const branches = partial<BranchConfig[]>([
+      const branches = partial<BranchConfig>([
         {
           branchName: 'new/some-branch',
           manager: 'npm',
