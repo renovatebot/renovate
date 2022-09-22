@@ -403,6 +403,55 @@ describe('modules/manager/npm/post-update/yarn', () => {
     expect(res.lockFile).toBe('package-lock-contents');
   });
 
+  it('supports corepack on grouping', async () => {
+    process.env.BUILDPACK = 'true';
+    GlobalConfig.set({
+      localDir: '.',
+      binarySource: 'install',
+      cacheDir: '/tmp/cache',
+    });
+    Fixtures.mock(
+      {
+        'package.json': '{ "packageManager": "yarn@3.0.0" }',
+        'yarn.lock': 'package-lock-contents',
+      },
+      'some-dir'
+    );
+    mockedFunction(getPkgReleases).mockResolvedValueOnce({
+      releases: [{ version: '0.10.0' }],
+    });
+    const execSnapshots = mockExecAll({
+      stdout: '2.1.0',
+      stderr: '',
+    });
+    const config = partial<PostUpdateConfig<NpmManagerData>>({
+      constraints: {
+        yarn: '^3.0.0',
+      },
+    });
+    const res = await yarnHelper.generateLockFile('some-dir', {}, config, [
+      {
+        managerData: { hasPackageManager: true },
+      },
+    ]);
+    expect(execSnapshots).toMatchObject([
+      { cmd: 'install-tool node 16.16.0', options: { cwd: 'some-dir' } },
+      { cmd: 'install-tool corepack 0.10.0', options: { cwd: 'some-dir' } },
+      {
+        cmd: 'yarn install --mode=update-lockfile',
+        options: {
+          cwd: 'some-dir',
+          env: {
+            YARN_ENABLE_GLOBAL_CACHE: '1',
+            YARN_ENABLE_IMMUTABLE_INSTALLS: 'false',
+            YARN_HTTP_TIMEOUT: '100000',
+          },
+        },
+      },
+    ]);
+    expect(res.lockFile).toBe('package-lock-contents');
+  });
+
   it('uses slim yarn instead of corepack', async () => {
     // sanity check for later refactorings
     expect(plocktest1YarnLockV1).toBeTruthy();
