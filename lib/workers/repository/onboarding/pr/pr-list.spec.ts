@@ -1,4 +1,4 @@
-import { RenovateConfig, getConfig } from '../../../../../test/util';
+import { RenovateConfig, getConfig, partial } from '../../../../../test/util';
 import type { BranchConfig } from '../../../types';
 import { getPrList } from './pr-list';
 
@@ -25,7 +25,7 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
 
     it('has special lock file maintenance description', () => {
       const branches = [
-        {
+        partial<BranchConfig>({
           prTitle: 'Lock file maintenance',
           schedule: ['before 5am'],
           branchName: 'renovate/lock-file-maintenance',
@@ -36,7 +36,7 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
               updateType: 'lockFileMaintenance',
             } as never,
           ],
-        },
+        }),
       ];
       const res = getPrList(config, branches);
       expect(res).toMatchInlineSnapshot(`
@@ -60,7 +60,7 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
 
     it('handles multiple', () => {
       const branches = [
-        {
+        partial<BranchConfig>({
           prTitle: 'Pin dependencies',
           baseBranch: 'some-other',
           branchName: 'renovate/pin-dependencies',
@@ -81,8 +81,8 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
               newValue: '1.5.3',
             },
           ] as never,
-        },
-        {
+        }),
+        partial<BranchConfig>({
           prTitle: 'Update a to v2',
           branchName: 'renovate/a-2.x',
           manager: 'some-manager',
@@ -97,7 +97,7 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
               isLockfileUpdate: true,
             } as never,
           ],
-        },
+        }),
       ];
       config.prHourlyLimit = 1;
       const res = getPrList(config, branches);

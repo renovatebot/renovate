@@ -1,5 +1,6 @@
-import { mocked } from '../../../../../../test/util';
+import { mocked, partial } from '../../../../../../test/util';
 import * as _template from '../../../../../util/template';
+import type { BranchConfig } from '../../../../types';
 import { getChangelogs } from './changelogs';
 
 jest.mock('../../../../../util/template');
@@ -11,12 +12,14 @@ describe('workers/repository/update/pr/body/changelogs', () => {
   });
 
   it('returns empty string when there is no release notes', () => {
-    const res = getChangelogs({
-      manager: 'some-manager',
-      branchName: 'some-branch',
-      upgrades: [],
-      hasReleaseNotes: false,
-    });
+    const res = getChangelogs(
+      partial<BranchConfig>({
+        manager: 'some-manager',
+        branchName: 'some-branch',
+        upgrades: [],
+        hasReleaseNotes: false,
+      })
+    );
 
     expect(res).toBe('');
     expect(template.compile).not.toHaveBeenCalled();
@@ -32,41 +35,43 @@ describe('workers/repository/update/pr/body/changelogs', () => {
         .trim();
     });
 
-    const res = getChangelogs({
-      branchName: 'some-branch',
-      manager: 'some-manager',
-      upgrades: [
-        {
-          manager: 'some-manager',
-          depName: 'dep-1',
-          repoName: 'some/repo',
-          branchName: 'some-branch',
-          hasReleaseNotes: true,
-        },
-        {
-          manager: 'some-manager',
-          depName: 'dep-2',
-          repoName: 'some/repo',
-          branchName: 'some-branch',
-          hasReleaseNotes: true,
-        },
-        {
-          manager: 'some-manager',
-          depName: 'dep-3',
-          repoName: 'some/repo',
-          branchName: 'some-branch',
-          hasReleaseNotes: true,
-        },
-        {
-          manager: 'some-manager',
-          depName: 'dep-4',
-          repoName: 'other/repo',
-          branchName: 'some-branch',
-          hasReleaseNotes: true,
-        },
-      ],
-      hasReleaseNotes: true,
-    });
+    const res = getChangelogs(
+      partial<BranchConfig>({
+        branchName: 'some-branch',
+        manager: 'some-manager',
+        upgrades: [
+          {
+            manager: 'some-manager',
+            depName: 'dep-1',
+            repoName: 'some/repo',
+            branchName: 'some-branch',
+            hasReleaseNotes: true,
+          },
+          {
+            manager: 'some-manager',
+            depName: 'dep-2',
+            repoName: 'some/repo',
+            branchName: 'some-branch',
+            hasReleaseNotes: true,
+          },
+          {
+            manager: 'some-manager',
+            depName: 'dep-3',
+            repoName: 'some/repo',
+            branchName: 'some-branch',
+            hasReleaseNotes: true,
+          },
+          {
+            manager: 'some-manager',
+            depName: 'dep-4',
+            repoName: 'other/repo',
+            branchName: 'some-branch',
+            hasReleaseNotes: true,
+          },
+        ],
+        hasReleaseNotes: true,
+      })
+    );
 
     expect(res).toMatchInlineSnapshot(`
       "

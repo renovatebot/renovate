@@ -1,5 +1,6 @@
-import { mocked } from '../../../../../../test/util';
+import { mocked, partial } from '../../../../../../test/util';
 import * as _template from '../../../../../util/template';
+import type { BranchConfig } from '../../../../types';
 import { getPrFooter } from './footer';
 
 jest.mock('../../../../../util/template');
@@ -12,23 +13,27 @@ describe('workers/repository/update/pr/body/footer', () => {
 
   it('renders empty footer', () => {
     expect(
-      getPrFooter({
-        manager: 'some-manager',
-        branchName: 'branch',
-        upgrades: [],
-      })
+      getPrFooter(
+        partial<BranchConfig>({
+          manager: 'some-manager',
+          branchName: 'branch',
+          upgrades: [],
+        })
+      )
     ).toBe('');
   });
 
   it('renders prFooter', () => {
     template.compile.mockImplementation((x) => x);
     expect(
-      getPrFooter({
-        manager: 'some-manager',
-        branchName: 'branch',
-        upgrades: [],
-        prFooter: 'FOOTER',
-      })
+      getPrFooter(
+        partial<BranchConfig>({
+          manager: 'some-manager',
+          branchName: 'branch',
+          upgrades: [],
+          prFooter: 'FOOTER',
+        })
+      )
     ).toMatchInlineSnapshot(`
       "
       ---
