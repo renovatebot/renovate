@@ -36,6 +36,7 @@ export class GolangVersionDatasource extends Datasource {
   async getReleases({
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
+    // istanbul ignore if
     if (!registryUrl) {
       return null;
     }
