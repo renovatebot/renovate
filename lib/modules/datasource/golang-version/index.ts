@@ -25,7 +25,7 @@ export class GolangVersionDatasource extends Datasource {
   }
 
   override readonly defaultRegistryUrls = [
-    'https://raw.githubusercontent.com/golang/website/',
+    'https://raw.githubusercontent.com/golang/website',
   ];
 
   override readonly customRegistrySupport = true;
