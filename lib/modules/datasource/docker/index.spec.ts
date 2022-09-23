@@ -1194,6 +1194,29 @@ describe('modules/datasource/docker/index', () => {
       });
     });
 
+    it('uses no pagination for Artifactory deps', async () => {
+      const artifactoryHeaders = {
+        'X-Artifactory-Id': '123',
+      };
+      const tags = ['1.0.0'];
+      httpMock
+        .scope(baseUrl)
+        .get('/node/node/tags/list?n=10000')
+        .twice()
+        .reply(200, '', artifactoryHeaders)
+        .get('/node/node/tags/list')
+        .reply(200, { tags }, artifactoryHeaders)
+        .get('/')
+        .reply(200, '', artifactoryHeaders)
+        .get('/node/node/manifests/1.0.0')
+        .reply(200, '', artifactoryHeaders);
+      const res = await getPkgReleases({
+        datasource: DockerDatasource.id,
+        depName: 'node/node',
+      });
+      expect(res?.releases).toHaveLength(1);
+    });
+
     describe('when making requests that interact with an ECR proxy', () => {
       it('resolves requests to ECR proxy', async () => {
         httpMock
