@@ -696,11 +696,29 @@ describe('modules/platform/bitbucket/index', () => {
 
   describe('createPr()', () => {
     it('posts PR', async () => {
+      const projectReviewer = {
+        type: 'default_reviewer',
+        reviewer_type: 'project',
+        user: {
+          display_name: 'Bob Smith',
+          uuid: '{d2238482-2e9f-48b3-8630-de22ccb9e42f}',
+          account_id: '123',
+        },
+      };
+      const repoReviewer = {
+        type: 'default_reviewer',
+        reviewer_type: 'repository',
+        user: {
+          display_name: 'Jane Smith',
+          uuid: '{90b6646d-1724-4a64-9fd9-539515fe94e9}',
+          account_id: '456',
+        },
+      };
       const scope = await initRepoMock();
       scope
-        .get('/2.0/repositories/some/repo/default-reviewers')
+        .get('/2.0/repositories/some/repo/effective-default-reviewers')
         .reply(200, {
-          values: [{ uuid: '{1234-5678}' }],
+          values: [projectReviewer, repoReviewer],
         })
         .post('/2.0/repositories/some/repo/pullrequests')
         .reply(200, { id: 5 });
@@ -718,18 +736,22 @@ describe('modules/platform/bitbucket/index', () => {
 
     it('removes inactive reviewers when updating pr', async () => {
       const inactiveReviewer = {
-        display_name: 'Bob Smith',
-        uuid: '{d2238482-2e9f-48b3-8630-de22ccb9e42f}',
-        account_id: '123',
+        user: {
+          display_name: 'Bob Smith',
+          uuid: '{d2238482-2e9f-48b3-8630-de22ccb9e42f}',
+          account_id: '123',
+        },
       };
       const activeReviewer = {
-        display_name: 'Jane Smith',
-        uuid: '{90b6646d-1724-4a64-9fd9-539515fe94e9}',
-        account_id: '456',
+        user: {
+          display_name: 'Jane Smith',
+          uuid: '{90b6646d-1724-4a64-9fd9-539515fe94e9}',
+          account_id: '456',
+        },
       };
       const scope = await initRepoMock();
       scope
-        .get('/2.0/repositories/some/repo/default-reviewers')
+        .get('/2.0/repositories/some/repo/effective-default-reviewers')
         .reply(200, {
           values: [activeReviewer, inactiveReviewer],
         })
@@ -767,18 +789,22 @@ describe('modules/platform/bitbucket/index', () => {
 
     it('removes default reviewers no longer member of the workspace when creating pr', async () => {
       const notMemberReviewer = {
-        display_name: 'Bob Smith',
-        uuid: '{d2238482-2e9f-48b3-8630-de22ccb9e42f}',
-        account_id: '123',
+        user: {
+          display_name: 'Bob Smith',
+          uuid: '{d2238482-2e9f-48b3-8630-de22ccb9e42f}',
+          account_id: '123',
+        },
       };
       const memberReviewer = {
-        display_name: 'Jane Smith',
-        uuid: '{90b6646d-1724-4a64-9fd9-539515fe94e9}',
-        account_id: '456',
+        user: {
+          display_name: 'Jane Smith',
+          uuid: '{90b6646d-1724-4a64-9fd9-539515fe94e9}',
+          account_id: '456',
+        },
       };
       const scope = await initRepoMock();
       scope
-        .get('/2.0/repositories/some/repo/default-reviewers')
+        .get('/2.0/repositories/some/repo/effective-default-reviewers')
         .reply(200, {
           values: [memberReviewer, notMemberReviewer],
         })
@@ -819,13 +845,15 @@ describe('modules/platform/bitbucket/index', () => {
 
     it('throws exception when unable to check default reviewers workspace membership', async () => {
       const reviewer = {
-        display_name: 'Bob Smith',
-        uuid: '{d2238482-2e9f-48b3-8630-de22ccb9e42f}',
-        account_id: '123',
+        user: {
+          display_name: 'Bob Smith',
+          uuid: '{d2238482-2e9f-48b3-8630-de22ccb9e42f}',
+          account_id: '123',
+        },
       };
       const scope = await initRepoMock();
       scope
-        .get('/2.0/repositories/some/repo/default-reviewers')
+        .get('/2.0/repositories/some/repo/effective-default-reviewers')
         .reply(200, {
           values: [reviewer],
         })
@@ -861,13 +889,15 @@ describe('modules/platform/bitbucket/index', () => {
 
     it('rethrows exception when PR create error due to unknown reviewers error', async () => {
       const reviewer = {
-        display_name: 'Jane Smith',
-        uuid: '{90b6646d-1724-4a64-9fd9-539515fe94e9}',
+        user: {
+          display_name: 'Jane Smith',
+          uuid: '{90b6646d-1724-4a64-9fd9-539515fe94e9}',
+        },
       };
 
       const scope = await initRepoMock();
       scope
-        .get('/2.0/repositories/some/repo/default-reviewers')
+        .get('/2.0/repositories/some/repo/effective-default-reviewers')
         .reply(200, {
           values: [reviewer],
         })
@@ -896,13 +926,15 @@ describe('modules/platform/bitbucket/index', () => {
 
     it('rethrows exception when PR create error not due to reviewers field', async () => {
       const reviewer = {
-        display_name: 'Jane Smith',
-        uuid: '{90b6646d-1724-4a64-9fd9-539515fe94e9}',
+        user: {
+          display_name: 'Jane Smith',
+          uuid: '{90b6646d-1724-4a64-9fd9-539515fe94e9}',
+        },
       };
 
       const scope = await initRepoMock();
       scope
-        .get('/2.0/repositories/some/repo/default-reviewers')
+        .get('/2.0/repositories/some/repo/effective-default-reviewers')
         .reply(200, {
           values: [reviewer],
         })
@@ -964,11 +996,10 @@ describe('modules/platform/bitbucket/index', () => {
 
   describe('massageMarkdown()', () => {
     it('returns diff files', () => {
-      expect(
-        bitbucket.massageMarkdown(
-          '<details><summary>foo</summary>bar</details>text<details>'
-        )
-      ).toMatchSnapshot();
+      const prBody =
+        '<details><summary>foo</summary>bar</details>text<details>' +
+        '\n---\n\n - [ ] <!-- rebase-check --> rebase\n<!--renovate-config-hash:-->';
+      expect(bitbucket.massageMarkdown(prBody)).toMatchSnapshot();
     });
   });
 
