@@ -61,4 +61,53 @@ describe('modules/manager/bazel/parser', () => {
       ],
     });
   });
+
+  it('parses multiple archives', () => {
+    const input = `
+      http_archive(
+          name = "aspect_rules_js",
+          sha256 = "db9f446752fe4100320cf8487e8fd476b9af0adf6b99b601bcfd70b289bb0598",
+          strip_prefix = "rules_js-1.1.2",
+          url = "https://github.com/aspect-build/rules_js/archive/refs/tags/v1.1.2.tar.gz",
+      )
+      http_archive(
+        name = "rules_nodejs",
+        sha256 = "5aef09ed3279aa01d5c928e3beb248f9ad32dde6aafe6373a8c994c3ce643064",
+        urls = ["https://github.com/bazelbuild/rules_nodejs/releases/download/5.5.3/rules_nodejs-core-5.5.3.tar.gz"],
+      )`;
+
+    const res = parse(input);
+    expect(res).toEqual({
+      meta: [
+        { data: { length: 15, offset: 39 }, path: [0, 'name'] },
+        { data: { length: 64, offset: 77 }, path: [0, 'sha256'] },
+        { data: { length: 14, offset: 170 }, path: [0, 'strip_prefix'] },
+        { data: { length: 72, offset: 204 }, path: [0, 'url'] },
+        { data: { length: 279, offset: 7 }, path: [0] },
+        { data: { length: 12, offset: 323 }, path: [0, 1, 'name'] },
+        { data: { length: 64, offset: 356 }, path: [0, 1, 'sha256'] },
+        { data: { length: 97, offset: 440 }, path: [0, 1, 'urls', 0] },
+        { data: { length: 255, offset: 293 }, path: [1] },
+      ],
+      targets: [
+        {
+          rule: 'http_archive',
+          name: 'aspect_rules_js',
+          sha256:
+            'db9f446752fe4100320cf8487e8fd476b9af0adf6b99b601bcfd70b289bb0598',
+          strip_prefix: 'rules_js-1.1.2',
+          url: 'https://github.com/aspect-build/rules_js/archive/refs/tags/v1.1.2.tar.gz',
+        },
+        {
+          rule: 'http_archive',
+          name: 'rules_nodejs',
+          sha256:
+            '5aef09ed3279aa01d5c928e3beb248f9ad32dde6aafe6373a8c994c3ce643064',
+          urls: [
+            'https://github.com/bazelbuild/rules_nodejs/releases/download/5.5.3/rules_nodejs-core-5.5.3.tar.gz',
+          ],
+        },
+      ],
+    });
+  });
 });
