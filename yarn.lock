@@ -5028,10 +5028,10 @@ git-up@^7.0.0:
     is-ssh "^1.4.0"
     parse-url "^8.1.0"
 
-git-url-parse@13.0.0:
-  version "13.0.0"
-  resolved "https://registry.yarnpkg.com/git-url-parse/-/git-url-parse-13.0.0.tgz#9a18d0eaec579fb6379c368aecb09f00b544669c"
-  integrity sha512-X1kozCqKL82dMrCLi4vie9SHDC+QugKskAMs4VUbIkhURKg5yDwxDmf6Ixg73J+/xVgK5TXKhzn8a94nHJHpnA==
+git-url-parse@13.1.0:
+  version "13.1.0"
+  resolved "https://registry.yarnpkg.com/git-url-parse/-/git-url-parse-13.1.0.tgz#07e136b5baa08d59fabdf0e33170de425adf07b4"
+  integrity sha512-5FvPJP/70WkIprlUZ33bm4UAaFdjcLkJLpWft1BeZKqwR0uhhNGoKwlUaPtVb4LxCSQ++erHapRak9kWGj+FCA==
   dependencies:
     git-up "^7.0.0"
 
