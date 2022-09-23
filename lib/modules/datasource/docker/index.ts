@@ -858,7 +858,7 @@ export class DockerDatasource extends Datasource {
         throw err;
       }
 
-      if (res.headers['x-artifactory-id'] && url.includes('limit')) {
+      if (res.headers['x-artifactory-id'] && url.includes('n=')) {
         url = joinUrlParts(registryHost, dockerRepository, 'tags/list');
         url = ensurePathPrefix(url, '/v2');
         continue;
