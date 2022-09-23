@@ -110,4 +110,69 @@ describe('modules/manager/bazel/parser', () => {
       ],
     });
   });
+
+  it('parses http_archive', () => {
+    const input = `http_archive(
+          name = "rules_nodejs",
+          sha256 = "5aef09ed3279aa01d5c928e3beb248f9ad32dde6aafe6373a8c994c3ce643064",
+          url = "https://github.com/bazelbuild/rules_nodejs/releases/download/5.5.3/rules_nodejs-core-5.5.3.tar.gz",
+    )`;
+
+    const res = parse(input);
+    expect(res).toEqual({
+      meta: [
+        { data: { length: 12, offset: 32 }, path: [0, 'name'] },
+        { data: { length: 64, offset: 67 }, path: [0, 'sha256'] },
+        { data: { length: 97, offset: 151 }, path: [0, 'url'] },
+        { data: { length: 256, offset: 0 }, path: [0] },
+      ],
+      targets: [
+        {
+          sha256:
+            '5aef09ed3279aa01d5c928e3beb248f9ad32dde6aafe6373a8c994c3ce643064',
+          url: 'https://github.com/bazelbuild/rules_nodejs/releases/download/5.5.3/rules_nodejs-core-5.5.3.tar.gz',
+          name: 'rules_nodejs',
+          rule: 'http_archive',
+        },
+      ],
+    });
+  });
+
+  it('parses http_archive with prefixes and multiple urls', () => {
+    const input = `http_archive(
+        name = "bazel_toolchains",
+        sha256 = "4b1468b254a572dbe134cc1fd7c6eab1618a72acd339749ea343bd8f55c3b7eb",
+        strip_prefix = "bazel-toolchains-d665ccfa3e9c90fa789671bf4ef5f7c19c5715c4",
+        urls = [
+            "https://mirror.bazel.build/github.com/bazelbuild/bazel-toolchains/archive/d665ccfa3e9c90fa789671bf4ef5f7c19c5715c4.tar.gz",
+            "https://github.com/bazelbuild/bazel-toolchains/archive/d665ccfa3e9c90fa789671bf4ef5f7c19c5715c4.tar.gz",
+        ],
+    )`;
+
+    const res = parse(input);
+    expect(res).toEqual({
+      meta: [
+        { data: { length: 16, offset: 30 }, path: [0, 'name'] },
+        { data: { length: 64, offset: 67 }, path: [0, 'sha256'] },
+        { data: { length: 57, offset: 158 }, path: [0, 'strip_prefix'] },
+        { data: { length: 121, offset: 248 }, path: [0, 'urls', 0] },
+        { data: { length: 102, offset: 385 }, path: [0, 'urls', 1] },
+        { data: { length: 506, offset: 0 }, path: [0] },
+      ],
+      targets: [
+        {
+          sha256:
+            '4b1468b254a572dbe134cc1fd7c6eab1618a72acd339749ea343bd8f55c3b7eb',
+          urls: [
+            'https://mirror.bazel.build/github.com/bazelbuild/bazel-toolchains/archive/d665ccfa3e9c90fa789671bf4ef5f7c19c5715c4.tar.gz',
+            'https://github.com/bazelbuild/bazel-toolchains/archive/d665ccfa3e9c90fa789671bf4ef5f7c19c5715c4.tar.gz',
+          ],
+          strip_prefix:
+            'bazel-toolchains-d665ccfa3e9c90fa789671bf4ef5f7c19c5715c4',
+          name: 'bazel_toolchains',
+          rule: 'http_archive',
+        },
+      ],
+    });
+  });
 });
