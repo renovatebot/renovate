@@ -456,4 +456,122 @@ describe('modules/manager/bazel/update', () => {
       expect(res).toEqual(output);
     });
   });
+
+  it('updates one http_archive alongside others', async () => {
+    const inputHash1 =
+      '5aef09ed3279aa01d5c928e3beb248f9ad32dde6aafe6373a8c994c3ce643064';
+    const other_http_archive = `
+      http_archive(
+          name = "aspect_rules_js",
+          sha256 = "db9f446752fe4100320cf8487e8fd476b9af0adf6b99b601bcfd70b289bb0598",
+          strip_prefix = "rules_js-1.1.2",
+          url = "https://github.com/aspect-build/rules_js/archive/refs/tags/v1.1.2.tar.gz",
+      )
+    `.trim();
+    const upgraded_http_archive = `
+      http_archive(
+          name = "rules_nodejs",
+          sha256 = "${inputHash1}",
+          urls = ["https://github.com/bazelbuild/rules_nodejs/releases/download/5.5.3/rules_nodejs-core-5.5.3.tar.gz"],
+      )
+    `.trim();
+
+    const input = `${other_http_archive}\n${upgraded_http_archive}`;
+
+    const currentValue1 = '5.5.3';
+    const newValue1 = '5.5.4';
+    const upgrade1 = {
+      depName: 'rules_nodejs',
+      depType: 'http_archive',
+      repo: 'bazelbuild/rules_nodejs',
+      managerData: { def: upgraded_http_archive },
+      currentValue: currentValue1,
+      newValue: newValue1,
+    };
+
+    const tarContent1 = Buffer.from('foo');
+    const outputHash1 = crypto
+      .createHash('sha256')
+      .update(tarContent1)
+      .digest('hex');
+
+    httpMock
+      .scope('https://github.com')
+      .get(
+        '/bazelbuild/rules_nodejs/releases/download/5.5.4/rules_nodejs-core-5.5.4.tar.gz'
+      )
+      .reply(200, tarContent1);
+
+    const output1 = input
+      .replace(currentValue1, newValue1)
+      .replace(currentValue1, newValue1)
+      .replace(currentValue1, newValue1)
+      .replace(inputHash1, outputHash1);
+
+    const res = await updateDependency({
+      fileContent: input,
+      upgrade: upgrade1,
+    });
+    expect(res).toEqual(output1);
+  });
+
+  it('updates one http_archive alongside others with matching versions', async () => {
+    const inputHash1 =
+      '5aef09ed3279aa01d5c928e3beb248f9ad32dde6aafe6373a8c994c3ce643064';
+
+    const other_http_archive = `
+      http_archive(
+          name = "aspect_rules_js",
+          sha256 = "db9f446752fe4100320cf8487e8fd476b9af0adf6b99b601bcfd70b289bb0598",
+          strip_prefix = "rules_js-1.1.2",
+          url = "https://github.com/aspect-build/rules_js/archive/refs/tags/v1.1.2.tar.gz",
+      )`.trim();
+
+    const upgraded_http_archive = `
+      http_archive(
+          name = "rules_nodejs",
+          sha256 = "${inputHash1}",
+          urls = ["https://github.com/bazelbuild/rules_nodejs/releases/download/1.1.2/rules_nodejs-core-1.1.2.tar.gz"],
+      )
+    `.trim();
+
+    const input = `${other_http_archive}\n${upgraded_http_archive}`;
+
+    const currentValue1 = '1.1.2';
+    const newValue1 = '1.2.3';
+    const upgrade1 = {
+      depName: 'rules_nodejs',
+      depType: 'http_archive',
+      repo: 'bazelbuild/rules_nodejs',
+      managerData: { def: upgraded_http_archive },
+      currentValue: currentValue1,
+      newValue: newValue1,
+    };
+
+    const tarContent1 = Buffer.from('foo');
+    const outputHash1 = crypto
+      .createHash('sha256')
+      .update(tarContent1)
+      .digest('hex');
+
+    httpMock
+      .scope('https://github.com')
+      .get(
+        '/bazelbuild/rules_nodejs/releases/download/1.2.3/rules_nodejs-core-1.2.3.tar.gz'
+      )
+      .reply(200, tarContent1);
+
+    const output1 = input
+      .replace(
+        `${currentValue1}/rules_nodejs-core-${currentValue1}`,
+        `${newValue1}/rules_nodejs-core-${newValue1}`
+      )
+      .replace(inputHash1, outputHash1);
+
+    const res = await updateDependency({
+      fileContent: input,
+      upgrade: upgrade1,
+    });
+    expect(res).toEqual(output1);
+  });
 });
