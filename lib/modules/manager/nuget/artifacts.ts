@@ -96,7 +96,7 @@ async function runDotnetRestore(
   await exec(cmds, execOptions);
 }
 
-async function getLockFileContentMap(
+export async function getLockFileContentMap(
   lockFileNames: string[],
   local = false
 ): Promise<Record<string, string | null>> {
