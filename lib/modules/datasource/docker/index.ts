@@ -901,7 +901,7 @@ export class DockerDatasource extends Datasource {
       // These follow the format of {{registryHost}}{{jFrogRepository}}/library/{{dockerRepository}}
       if (
         (err.statusCode === 404 || err.message === PAGE_NOT_FOUND_ERROR) &&
-        err.headers['x-jfrog-version'] !== null &&
+        is.string(err.headers['x-jfrog-version']) &&
         dockerRepository.split('/').length === 2
       ) {
         logger.debug(
