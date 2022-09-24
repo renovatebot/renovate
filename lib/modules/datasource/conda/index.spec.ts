@@ -63,12 +63,12 @@ describe('modules/datasource/conda/index', () => {
     });
 
     it('supports multiple custom datasource urls', async () => {
-      const depName = 'pytest'
+      const depName = 'pytest';
       httpMock
         .scope('https://api.anaconda.org/package/rapids')
         .get(`/${depName}`)
         .reply(404);
-        //.replyWithError('error');
+      //.replyWithError('error');
       httpMock
         .scope('https://api.anaconda.org/package/conda-forge')
         .get(`/${depName}`)
@@ -88,6 +88,5 @@ describe('modules/datasource/conda/index', () => {
       expect(res).toMatchSnapshot();
       expect(res?.releases).toHaveLength(94);
     });
-
   });
 });
