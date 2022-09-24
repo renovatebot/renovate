@@ -1,9 +1,9 @@
-import { gt } from '../../../i18n';
+import { gettext } from '../../../i18n';
 import type { Preset } from '../types';
 
 export const presets: Record<string, Preset> = {
   additionalBranchPrefix: {
-    description: gt.gettext(
+    description: gettext(
       'Backwards-compatibility preset to restore `additionalBranchPrefix` settings for multiple managers which were removed in Renovate `v25`.'
     ),
     buildkite: {

@@ -1,4 +1,4 @@
-import { gt } from '../../../i18n';
+import { gettext } from '../../../i18n';
 import type { Preset } from '../types';
 import * as monorepos from './monorepo';
 
@@ -6,7 +6,7 @@ const nonPinUpdateTypes = ['digest', 'patch', 'minor', 'major'];
 
 const staticGroups = {
   all: {
-    description: gt.gettext('Group all updates together.'),
+    description: gettext('Group all updates together.'),
     groupName: 'all dependencies',
     separateMajorMinor: false,
     groupSlug: 'all',
@@ -22,7 +22,7 @@ const staticGroups = {
     },
   },
   allNonMajor: {
-    description: gt.gettext('Group all `minor` and `patch` updates together.'),
+    description: gettext('Group all `minor` and `patch` updates together.'),
     packageRules: [
       {
         matchPackagePatterns: ['*'],
@@ -33,7 +33,7 @@ const staticGroups = {
     ],
   },
   nodeJs: {
-    description: gt.gettext(
+    description: gettext(
       "Group anything that looks like Node.js together so that it's updated together."
     ),
     packageRules: [
@@ -47,7 +47,7 @@ const staticGroups = {
     ],
   },
   recommended: {
-    description: gt.gettext(
+    description: gettext(
       'Use curated list of recommended non-monorepo package groupings.'
     ),
     extends: [
@@ -102,7 +102,7 @@ const staticGroups = {
     ignoreDeps: [],
   },
   allApollographql: {
-    description: gt.gettext(
+    description: gettext(
       'Group all packages published by Apollo GraphQL together.'
     ),
     packageRules: [
@@ -113,7 +113,7 @@ const staticGroups = {
     ],
   },
   codemirror: {
-    description: gt.gettext('Group CodeMirror packages together.'),
+    description: gettext('Group CodeMirror packages together.'),
     packageRules: [
       {
         groupName: 'CodeMirror',
@@ -122,7 +122,7 @@ const staticGroups = {
     ],
   },
   definitelyTyped: {
-    description: gt.gettext('Group all `@types` packages together.'),
+    description: gettext('Group all `@types` packages together.'),
     packageRules: [
       {
         groupName: 'definitelyTyped',
@@ -131,7 +131,7 @@ const staticGroups = {
     ],
   },
   dotNetCore: {
-    description: gt.gettext('.NET Core Docker containers.'),
+    description: gettext('.NET Core Docker containers.'),
     packageRules: [
       {
         matchDatasources: ['docker'],
@@ -141,7 +141,7 @@ const staticGroups = {
     ],
   },
   fortawesome: {
-    description: gt.gettext('Group all packages by Font Awesome together.'),
+    description: gettext('Group all packages by Font Awesome together.'),
     packageRules: [
       {
         groupName: 'Font Awesome',
@@ -150,7 +150,7 @@ const staticGroups = {
     ],
   },
   fusionjs: {
-    description: gt.gettext('Group Fusion.js packages together.'),
+    description: gettext('Group Fusion.js packages together.'),
     matchPackageNames: [
       'fusion-cli',
       'fusion-core',
@@ -160,7 +160,7 @@ const staticGroups = {
     matchPackagePrefixes: ['fusion-plugin-', 'fusion-react', '^usion-apollo'],
   },
   glimmer: {
-    description: gt.gettext('Group Glimmer.js packages together.'),
+    description: gettext('Group Glimmer.js packages together.'),
     packageRules: [
       {
         groupName: 'Glimmer.js packages',
@@ -170,7 +170,7 @@ const staticGroups = {
     ],
   },
   illuminate: {
-    description: gt.gettext('Group PHP Illuminate packages together.'),
+    description: gettext('Group PHP Illuminate packages together.'),
     packageRules: [
       {
         matchPackagePrefixes: ['illuminate/'],
@@ -180,7 +180,7 @@ const staticGroups = {
     ],
   },
   symfony: {
-    description: gt.gettext('Group PHP Symfony packages together.'),
+    description: gettext('Group PHP Symfony packages together.'),
     packageRules: [
       {
         matchPackagePrefixes: ['symfony/'],
@@ -190,7 +190,7 @@ const staticGroups = {
     ],
   },
   phpstan: {
-    description: gt.gettext('Group PHPStan packages together.'),
+    description: gettext('Group PHPStan packages together.'),
     packageRules: [
       {
         matchDatasources: ['packagist'],
@@ -200,7 +200,7 @@ const staticGroups = {
     ],
   },
   polymer: {
-    description: gt.gettext('Group all `@polymer` packages together.'),
+    description: gettext('Group all `@polymer` packages together.'),
     packageRules: [
       {
         groupName: 'polymer packages',
@@ -209,7 +209,7 @@ const staticGroups = {
     ],
   },
   hibernateCore: {
-    description: gt.gettext('Group Java Hibernate Core packages.'),
+    description: gettext('Group Java Hibernate Core packages.'),
     packageRules: [
       {
         matchPackagePrefixes: ['org.hibernate:'],
@@ -218,7 +218,7 @@ const staticGroups = {
     ],
   },
   hibernateValidator: {
-    description: gt.gettext('Group Java Hibernate Validator packages.'),
+    description: gettext('Group Java Hibernate Validator packages.'),
     packageRules: [
       {
         matchPackagePrefixes: ['org.hibernate.validator:'],
@@ -227,7 +227,7 @@ const staticGroups = {
     ],
   },
   hibernateOgm: {
-    description: gt.gettext('Group Java Hibernate OGM packages.'),
+    description: gettext('Group Java Hibernate OGM packages.'),
     packageRules: [
       {
         matchPackagePrefixes: ['org.hibernate.ogm:'],
@@ -236,7 +236,7 @@ const staticGroups = {
     ],
   },
   hibernateCommons: {
-    description: gt.gettext('Group Java Hibernate Commons packages.'),
+    description: gettext('Group Java Hibernate Commons packages.'),
     packageRules: [
       {
         matchPackagePrefixes: ['org.hibernate.common:'],
@@ -245,7 +245,7 @@ const staticGroups = {
     ],
   },
   resilience4j: {
-    description: gt.gettext('Group Java Resilience4j packages.'),
+    description: gettext('Group Java Resilience4j packages.'),
     packageRules: [
       {
         matchPackagePrefixes: ['io.github.resilience4j:'],
@@ -254,7 +254,7 @@ const staticGroups = {
     ],
   },
   springAmqp: {
-    description: gt.gettext('Group Java Spring AMQP packages.'),
+    description: gettext('Group Java Spring AMQP packages.'),
     packageRules: [
       {
         groupName: 'spring amqp',
@@ -263,7 +263,7 @@ const staticGroups = {
     ],
   },
   springAndroid: {
-    description: gt.gettext('Group Java Spring Android packages.'),
+    description: gettext('Group Java Spring Android packages.'),
     packageRules: [
       {
         groupName: 'spring android',
@@ -272,7 +272,7 @@ const staticGroups = {
     ],
   },
   springBatch: {
-    description: gt.gettext('Group Java Spring Batch packages.'),
+    description: gettext('Group Java Spring Batch packages.'),
     packageRules: [
       {
         groupName: 'spring batch',
@@ -281,7 +281,7 @@ const staticGroups = {
     ],
   },
   springBoot: {
-    description: gt.gettext('Group Java Spring Boot packages.'),
+    description: gettext('Group Java Spring Boot packages.'),
     packageRules: [
       {
         groupName: 'spring boot',
@@ -291,7 +291,7 @@ const staticGroups = {
     ],
   },
   springCloud: {
-    description: gt.gettext('Group Java Spring Cloud packages.'),
+    description: gettext('Group Java Spring Cloud packages.'),
     packageRules: [
       {
         groupName: 'spring cloud',
@@ -300,7 +300,7 @@ const staticGroups = {
     ],
   },
   springCore: {
-    description: gt.gettext('Group Java Spring Core packages.'),
+    description: gettext('Group Java Spring Core packages.'),
     packageRules: [
       {
         groupName: 'spring core',
@@ -309,7 +309,7 @@ const staticGroups = {
     ],
   },
   springData: {
-    description: gt.gettext('Group Java Spring Data packages.'),
+    description: gettext('Group Java Spring Data packages.'),
     packageRules: [
       {
         groupName: 'spring data',
@@ -318,7 +318,7 @@ const staticGroups = {
     ],
   },
   springHateoas: {
-    description: gt.gettext('Group Java Spring HATEOAS packages.'),
+    description: gettext('Group Java Spring HATEOAS packages.'),
     packageRules: [
       {
         groupName: 'spring hateoas',
@@ -327,7 +327,7 @@ const staticGroups = {
     ],
   },
   springIntegration: {
-    description: gt.gettext('Group Java Spring Integration packages.'),
+    description: gettext('Group Java Spring Integration packages.'),
     packageRules: [
       {
         groupName: 'spring integration',
@@ -336,7 +336,7 @@ const staticGroups = {
     ],
   },
   springKafka: {
-    description: gt.gettext('Group Java Spring Kafka packages.'),
+    description: gettext('Group Java Spring Kafka packages.'),
     packageRules: [
       {
         groupName: 'spring kafka',
@@ -345,7 +345,7 @@ const staticGroups = {
     ],
   },
   springLdap: {
-    description: gt.gettext('Group Java Spring LDAP packages.'),
+    description: gettext('Group Java Spring LDAP packages.'),
     packageRules: [
       {
         groupName: 'spring ldap',
@@ -354,7 +354,7 @@ const staticGroups = {
     ],
   },
   springMobile: {
-    description: gt.gettext('Group Java Spring Mobile packages.'),
+    description: gettext('Group Java Spring Mobile packages.'),
     packageRules: [
       {
         groupName: 'spring mobile',
@@ -363,7 +363,7 @@ const staticGroups = {
     ],
   },
   springOsgi: {
-    description: gt.gettext('Group Java Spring OSGi packages.'),
+    description: gettext('Group Java Spring OSGi packages.'),
     packageRules: [
       {
         groupName: 'spring osgi',
@@ -372,7 +372,7 @@ const staticGroups = {
     ],
   },
   springRestDocs: {
-    description: gt.gettext('Group Java Spring REST Docs packages.'),
+    description: gettext('Group Java Spring REST Docs packages.'),
     packageRules: [
       {
         groupName: 'spring restdocs',
@@ -381,7 +381,7 @@ const staticGroups = {
     ],
   },
   springRoo: {
-    description: gt.gettext('Group Java Spring Roo packages.'),
+    description: gettext('Group Java Spring Roo packages.'),
     packageRules: [
       {
         groupName: 'spring roo',
@@ -390,7 +390,7 @@ const staticGroups = {
     ],
   },
   springScala: {
-    description: gt.gettext('Group Java Spring Scala packages.'),
+    description: gettext('Group Java Spring Scala packages.'),
     packageRules: [
       {
         groupName: 'spring scala',
@@ -399,7 +399,7 @@ const staticGroups = {
     ],
   },
   springSecurity: {
-    description: gt.gettext('Group Java Spring Security packages.'),
+    description: gettext('Group Java Spring Security packages.'),
     packageRules: [
       {
         groupName: 'spring security',
@@ -408,7 +408,7 @@ const staticGroups = {
     ],
   },
   springSession: {
-    description: gt.gettext('Group Java Spring Session packages.'),
+    description: gettext('Group Java Spring Session packages.'),
     packageRules: [
       {
         groupName: 'spring session',
@@ -417,7 +417,7 @@ const staticGroups = {
     ],
   },
   springShell: {
-    description: gt.gettext('Group Java Spring Shell packages.'),
+    description: gettext('Group Java Spring Shell packages.'),
     packageRules: [
       {
         groupName: 'spring shell',
@@ -426,7 +426,7 @@ const staticGroups = {
     ],
   },
   springSocial: {
-    description: gt.gettext('Group Java Spring Social packages.'),
+    description: gettext('Group Java Spring Social packages.'),
     packageRules: [
       {
         groupName: 'spring social',
@@ -435,7 +435,7 @@ const staticGroups = {
     ],
   },
   springStatemachine: {
-    description: gt.gettext('Group Java Spring Statemachine packages.'),
+    description: gettext('Group Java Spring Statemachine packages.'),
     packageRules: [
       {
         groupName: 'spring statemachine',
@@ -444,7 +444,7 @@ const staticGroups = {
     ],
   },
   springWebflow: {
-    description: gt.gettext('Group Java Spring WebFlow packages.'),
+    description: gettext('Group Java Spring WebFlow packages.'),
     packageRules: [
       {
         groupName: 'spring webflow',
@@ -453,7 +453,7 @@ const staticGroups = {
     ],
   },
   springWs: {
-    description: gt.gettext('Group Java Spring WS packages.'),
+    description: gettext('Group Java Spring WS packages.'),
     packageRules: [
       {
         groupName: 'spring ws',
@@ -462,7 +462,7 @@ const staticGroups = {
     ],
   },
   socketio: {
-    description: gt.gettext('Group socket.io packages.'),
+    description: gettext('Group socket.io packages.'),
     packageRules: [
       {
         groupName: 'socket.io packages',
@@ -471,7 +471,7 @@ const staticGroups = {
     ],
   },
   postcss: {
-    description: gt.gettext('Group PostCSS packages together.'),
+    description: gettext('Group PostCSS packages together.'),
     packageRules: [
       {
         extends: 'packages:postcss',
@@ -480,7 +480,7 @@ const staticGroups = {
     ],
   },
   jekyllEcosystem: {
-    description: gt.gettext('Group Jekyll and related Ruby packages together.'),
+    description: gettext('Group Jekyll and related Ruby packages together.'),
     packageRules: [
       {
         matchSourceUrlPrefixes: [
@@ -492,7 +492,7 @@ const staticGroups = {
     ],
   },
   rubyOnRails: {
-    description: gt.gettext('Group Ruby on Rails packages together.'),
+    description: gettext('Group Ruby on Rails packages together.'),
     packageRules: [
       {
         matchDatasources: ['rubygems'],
@@ -516,7 +516,7 @@ const staticGroups = {
     ],
   },
   rubyOmniauth: {
-    description: gt.gettext('Group OmniAuth packages together.'),
+    description: gettext('Group OmniAuth packages together.'),
     packageRules: [
       {
         matchDatasources: ['rubygems'],
@@ -526,7 +526,7 @@ const staticGroups = {
     ],
   },
   goOpenapi: {
-    description: gt.gettext('Group `go-openapi` packages together.'),
+    description: gettext('Group `go-openapi` packages together.'),
     packageRules: [
       {
         matchDatasources: ['go'],
@@ -537,7 +537,7 @@ const staticGroups = {
     ],
   },
   kubernetes: {
-    description: gt.gettext('Group Kubernetes packages together.'),
+    description: gettext('Group Kubernetes packages together.'),
     packageRules: [
       {
         matchDatasources: ['go'],
@@ -576,7 +576,7 @@ const staticGroups = {
     ],
   },
   googleapis: {
-    description: gt.gettext('Group `googleapis` packages together.'),
+    description: gettext('Group `googleapis` packages together.'),
     packageRules: [
       {
         extends: 'packages:googleapis',
@@ -585,7 +585,7 @@ const staticGroups = {
     ],
   },
   linters: {
-    description: gt.gettext('Group various lint packages together.'),
+    description: gettext('Group various lint packages together.'),
     packageRules: [
       {
         extends: 'packages:linters',
@@ -594,7 +594,7 @@ const staticGroups = {
     ],
   },
   jsUnitTest: {
-    description: gt.gettext('Group JavaScript unit test packages together.'),
+    description: gettext('Group JavaScript unit test packages together.'),
     packageRules: [
       {
         extends: 'packages:jsUnitTest',
@@ -603,7 +603,7 @@ const staticGroups = {
     ],
   },
   jsUnitTestNonMajor: {
-    description: gt.gettext(
+    description: gettext(
       'Group JavaScipt unit test packages together for non-major updates.'
     ),
     packageRules: [
@@ -615,7 +615,7 @@ const staticGroups = {
     ],
   },
   unitTest: {
-    description: gt.gettext('Group all unit test packages together.'),
+    description: gettext('Group all unit test packages together.'),
     packageRules: [
       {
         extends: 'packages:unitTest',
@@ -624,7 +624,7 @@ const staticGroups = {
     ],
   },
   unitTestNonMajor: {
-    description: gt.gettext(
+    description: gettext(
       'Group all unit test packages together for non-major updates.'
     ),
     packageRules: [
@@ -636,7 +636,7 @@ const staticGroups = {
     ],
   },
   jsTest: {
-    description: gt.gettext('Group JS test packages together.'),
+    description: gettext('Group JS test packages together.'),
     packageRules: [
       {
         extends: 'packages:jsTest',
@@ -645,9 +645,7 @@ const staticGroups = {
     ],
   },
   jsTestMonMajor: {
-    description: gt.gettext(
-      'Group non-major JS test package updates together.'
-    ),
+    description: gettext('Group non-major JS test package updates together.'),
     packageRules: [
       {
         extends: 'packages:jsTest',
@@ -657,7 +655,7 @@ const staticGroups = {
     ],
   },
   test: {
-    description: gt.gettext('Group all test packages together.'),
+    description: gettext('Group all test packages together.'),
     packageRules: [
       {
         extends: 'packages:test',
@@ -666,9 +664,7 @@ const staticGroups = {
     ],
   },
   testNonMajor: {
-    description: gt.gettext(
-      'Group all non-major test package updates together.'
-    ),
+    description: gettext('Group all non-major test package updates together.'),
     packageRules: [
       {
         extends: 'packages:test',
@@ -678,7 +674,7 @@ const staticGroups = {
     ],
   },
   jestPlusTSJest: {
-    description: gt.gettext('Add `ts-jest` `major` update to Jest monorepo.'),
+    description: gettext('Add `ts-jest` `major` update to Jest monorepo.'),
     packageRules: [
       {
         matchSourceUrlPrefixes: ['https://github.com/kulshekhar/ts-jest'],
@@ -688,7 +684,7 @@ const staticGroups = {
     ],
   },
   jestPlusTypes: {
-    description: gt.gettext('Add `@types/jest` update to Jest monorepo.'),
+    description: gettext('Add `@types/jest` update to Jest monorepo.'),
     packageRules: [
       {
         matchPackageNames: ['@types/jest'],
@@ -718,7 +714,7 @@ for (const monorepo of Object.keys(monorepos.presets)) {
   config[name] = {
     packageRules: [
       {
-        description: gt.gettext(
+        description: gettext(
           `Group packages from ${monorepo} monorepo together.`
         ),
         extends: `monorepo:${monorepo}`,
@@ -729,7 +725,7 @@ for (const monorepo of Object.keys(monorepos.presets)) {
   };
 }
 config.monorepos = {
-  description: gt.gettext('Group known monorepo packages together.'),
+  description: gettext('Group known monorepo packages together.'),
   ignoreDeps: [],
   extends: monorepoNames,
 };

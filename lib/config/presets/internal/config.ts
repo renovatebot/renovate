@@ -1,9 +1,9 @@
-import { gt } from '../../../i18n';
+import { gettext } from '../../../i18n';
 import type { Preset } from '../types';
 
 export const presets: Record<string, Preset> = {
   base: {
-    description: gt.gettext('Default base configuration for all languages.'),
+    description: gettext('Default base configuration for all languages.'),
     extends: [
       ':dependencyDashboard',
       ':semanticPrefixFixDepsChoreOthers',
@@ -17,15 +17,15 @@ export const presets: Record<string, Preset> = {
     ],
   },
   'js-app': {
-    description: gt.gettext('Default configuration for webapps.'),
+    description: gettext('Default configuration for webapps.'),
     extends: ['config:base', ':pinAllExceptPeerDependencies'],
   },
   'js-lib': {
-    description: gt.gettext('Default configuration for libraries.'),
+    description: gettext('Default configuration for libraries.'),
     extends: ['config:base', ':pinOnlyDevDependencies'],
   },
   semverAllMonthly: {
-    description: gt.gettext(
+    description: gettext(
       'Preserve SemVer ranges and update everything together once a month.'
     ),
     separateMajorMinor: false,

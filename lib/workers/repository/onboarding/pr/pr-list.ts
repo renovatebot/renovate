@@ -1,6 +1,6 @@
 import * as util from 'util';
 import type { RenovateConfig } from '../../../../config/types';
-import { gt } from '../../../../i18n';
+import { gettext, ngettext, pgettext } from '../../../../i18n';
 import { logger } from '../../../../logger';
 import { emojify } from '../../../../util/emoji';
 import { regEx } from '../../../../util/regex';
@@ -12,15 +12,15 @@ export function getPrList(
 ): string {
   logger.debug('getPrList()');
   logger.trace({ config });
-  let prDesc = `\n### ${gt.gettext('What to Expect')}\n\n`;
+  let prDesc = `\n### ${gettext('What to Expect')}\n\n`;
   if (!branches.length) {
-    return `${prDesc}${gt.gettext(
+    return `${prDesc}${gettext(
       'It looks like your repository dependencies are already up-to-date and no Pull Requests will be necessary right away.'
     )}\n`;
   }
   prDesc +=
     util.format(
-      gt.ngettext(
+      ngettext(
         'With your current configuration, Renovate will create %d Pull Request',
         'With your current configuration, Renovate will create %d Pull Requests',
         branches.length
@@ -36,16 +36,16 @@ export function getPrList(
       '@&#8203;$1'
     )}</summary>\n\n`;
     if (branch.schedule?.length) {
-      prDesc += `  - ${gt.pgettext(
+      prDesc += `  - ${pgettext(
         'onboarding/pr/pr-list',
         'Schedule'
       )}: ${JSON.stringify(branch.schedule)}\n`;
     }
-    prDesc += `  - ${gt.pgettext('onboarding/pr/pr-list', 'Branch name')}: \`${
+    prDesc += `  - ${pgettext('onboarding/pr/pr-list', 'Branch name')}: \`${
       branch.branchName
     }\`\n`;
     prDesc += branch.baseBranch
-      ? `  - ${gt.pgettext('onboarding/pr/pr-list', 'Merge into')}: \`${
+      ? `  - ${pgettext('onboarding/pr/pr-list', 'Merge into')}: \`${
           branch.baseBranch
         }\`\n`
       : '';
@@ -53,14 +53,14 @@ export function getPrList(
     for (const upgrade of branch.upgrades) {
       let text = '';
       if (upgrade.updateType === 'lockFileMaintenance') {
-        text += `  - ${gt.gettext(
+        text += `  - ${gettext(
           'Regenerate lock files to use latest dependency versions'
         )}`;
       } else {
         if (upgrade.updateType === 'pin') {
-          text += `  - ${gt.pgettext('onboarding/pr/pr-list', 'Pin')} `;
+          text += `  - ${pgettext('onboarding/pr/pr-list', 'Pin')} `;
         } else {
-          text += `  - ${gt.pgettext('onboarding/pr/pr-list', 'Upgrade')} `;
+          text += `  - ${pgettext('onboarding/pr/pr-list', 'Upgrade')} `;
         }
         if (upgrade.sourceUrl) {
           // TODO: types (#7154)
@@ -70,11 +70,11 @@ export function getPrList(
         }
         // TODO: types (#7154)
         text += upgrade.isLockfileUpdate
-          ? ` ${gt.pgettext(
+          ? ` ${pgettext(
               'onboarding/pr/pr-list',
               'to'
             )} \`${upgrade.newVersion!}\``
-          : ` ${gt.pgettext('onboarding/pr/pr-list', 'to')} \`${
+          : ` ${pgettext('onboarding/pr/pr-list', 'to')} \`${
               upgrade.newDigest ?? upgrade.newValue!
             }\``;
         text += '\n';
@@ -96,7 +96,7 @@ export function getPrList(
   ) {
     prDesc += emojify(
       `<br />\n\n:children_crossing: ${util.format(
-        gt.gettext(
+        gettext(
           "Branch creation will be limited to maximum %d per hour, so it doesn't swamp any CI resources or spam the project. See docs for `prhourlylimit` for details."
         ),
         prHourlyLimit

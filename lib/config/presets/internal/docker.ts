@@ -1,9 +1,9 @@
-import { gt } from '../../../i18n';
+import { gettext } from '../../../i18n';
 import type { Preset } from '../types';
 
 export const presets: Record<string, Preset> = {
   disable: {
-    description: gt.gettext('Disable Docker updates.'),
+    description: gettext('Disable Docker updates.'),
     docker: {
       enabled: false,
     },
@@ -15,7 +15,7 @@ export const presets: Record<string, Preset> = {
     },
   },
   enableMajor: {
-    description: gt.gettext('Enable Docker `major` updates.'),
+    description: gettext('Enable Docker `major` updates.'),
     packageRules: [
       {
         matchDatasources: ['docker'],
@@ -25,7 +25,7 @@ export const presets: Record<string, Preset> = {
     ],
   },
   disableMajor: {
-    description: gt.gettext('Disable Docker `major` updates.'),
+    description: gettext('Disable Docker `major` updates.'),
     packageRules: [
       {
         matchDatasources: ['docker'],
@@ -35,7 +35,7 @@ export const presets: Record<string, Preset> = {
     ],
   },
   pinDigests: {
-    description: gt.gettext('Pin Docker digests.'),
+    description: gettext('Pin Docker digests.'),
     docker: {
       pinDigests: true,
     },

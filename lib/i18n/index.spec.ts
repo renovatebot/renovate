@@ -1,7 +1,7 @@
 import { mocked } from '../../test/util';
 import { logger } from '../logger';
 import * as _fs from '../util/fs';
-import { gt, initI18n } from '.';
+import { getDomain, getLocale, initI18n } from '.';
 
 jest.mock('../util/fs');
 
@@ -16,18 +16,19 @@ describe('i18n/index', () => {
     it('do nothing and return when locale is en', async () => {
       await initI18n('en', '');
       expect(fs.readSystemFile).not.toHaveBeenCalled();
-      expect(gt.locale).toBe('en');
+      expect(getLocale()).toBe('en');
     });
 
     it('load translations from the given PO file', async () => {
-      await initI18n('zh_CN', './__fixtures__/message.po');
+      await initI18n('zh_CN', './__fixtures__/messages.po');
+
       expect(fs.readSystemFile).toHaveBeenCalledWith(
-        './__fixtures__/message.po',
+        './__fixtures__/messages.po',
         'utf8'
       );
 
-      expect(gt.locale).toBe('zh_CN');
-      expect(gt.domain).toBe('messages');
+      expect(getLocale()).toBe('zh_CN');
+      expect(getDomain()).toBe('messages');
     });
 
     it('should downgrade to English edition when loading PO file occurred any error', async () => {
@@ -35,10 +36,10 @@ describe('i18n/index', () => {
         throw new Error('Can not read the file');
       });
 
-      await initI18n('zh_CN', './__fixtures__/message.po');
+      await initI18n('zh_CN', './__fixtures__/messages.po');
 
       expect(logger.error).toHaveBeenCalled();
-      expect(gt.locale).toBe('en');
+      expect(getLocale()).toBe('en');
     });
   });
 });

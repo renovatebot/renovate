@@ -3,7 +3,34 @@ import Gettext from 'node-gettext';
 import { logger } from '../logger';
 import { readSystemFile } from '../util/fs';
 
-export const gt = new Gettext();
+const gt = new Gettext();
+
+export function gettext(msgid: string): string {
+  return gt.gettext(msgid);
+}
+
+export function ngettext(
+  msgid: string,
+  msgidPlural: string,
+  count: number
+): string {
+  return gt.ngettext(msgid, msgidPlural, count);
+}
+
+export function pgettext(msgctxt: string, msgid: string): string {
+  return gt.pgettext(msgctxt, msgid);
+}
+
+export function getLocale(): string {
+  return gt.locale;
+}
+
+export function getDomain(): string {
+  return gt.domain;
+}
+
+// Renovate use single domain to reduce the complexity of 1i8n
+const domain = 'messages';
 
 export async function initI18n(
   locale: string,
@@ -26,7 +53,6 @@ export async function initI18n(
     );
 
     const parsedTranslations = po.parse(translationsContent);
-    const domain = 'messages';
     gt.addTranslations(locale, domain, parsedTranslations);
     gt.setLocale(locale);
   } catch (err) {
