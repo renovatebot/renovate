@@ -304,6 +304,7 @@ export interface PackageRule
   excludePackageNames?: string[];
   excludePackagePatterns?: string[];
   excludePackagePrefixes?: string[];
+  matchCurrentValue?: string | Range;
   matchCurrentVersion?: string | Range;
   matchSourceUrlPrefixes?: string[];
   matchSourceUrls?: string[];
