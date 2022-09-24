@@ -1,5 +1,4 @@
 import { GithubReleasesDatasource } from '../../datasource/github-releases';
-import * as semver from '../../versioning/semver';
 
 export { extractPackageFile } from './extract';
 
@@ -8,7 +7,6 @@ export const supportedDatasources = [GithubReleasesDatasource.id];
 
 export const defaultConfig = {
   commitMessageTopic: 'TFLint plugin {{depName}}',
-  fileMatch: ['^\\.tflint\\.hcl$'],
-  versioning: semver.id,
+  fileMatch: ['\\.tflint\\.hcl$'],
   extractVersion: '^v(?<version>.*)$',
 };
