@@ -1,6 +1,4 @@
-// TODO #7154
 import { XmlDocument } from 'xmldoc';
-import { Fixtures } from '../../../../test/fixtures';
 import { bumpPackageVersion } from '.';
 
 const simpleContent = '<Project Sdk="Microsoft.NET.Sdk"><PropertyGroup><Version>0.0.1</Version></PropertyGroup></Project>';
