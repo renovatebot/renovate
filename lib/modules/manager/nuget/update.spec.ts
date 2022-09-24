@@ -3,11 +3,11 @@ import { XmlDocument } from 'xmldoc';
 import { Fixtures } from '../../../../test/fixtures';
 import { bumpPackageVersion } from '.';
 
-const simpleContent = Fixtures.get(`for-bumpVersion/simple.csproj`);
-const minimumContent = Fixtures.get(`for-bumpVersion/minimum.csproj`);
-const prereleaseContent = Fixtures.get(`for-bumpVersion/prerelease.csproj`);
-
 describe('modules/manager/nuget/update', () => {
+  const simpleContent = Fixtures.get(`for-bumpVersion/simple.csproj`);
+  const minimumContent = Fixtures.get(`for-bumpVersion/minimum.csproj`);
+  const prereleaseContent = Fixtures.get(`for-bumpVersion/prerelease.csproj`);
+
   describe('bumpPackageVersion', () => {
     it('bumps csproj version', () => {
       const { bumpedContent } = bumpPackageVersion(
