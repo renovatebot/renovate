@@ -53,7 +53,7 @@ describe('modules/manager/gradle/artifacts', () => {
     resetPrefetchedImages();
 
     // java
-    mockedFunction(getPkgReleases).mockResolvedValueOnce({
+    mockedFunction(getPkgReleases).mockResolvedValue({
       releases: [
         { version: '8.0.1' },
         { version: '11.0.1' },
@@ -223,6 +223,95 @@ describe('modules/manager/gradle/artifacts', () => {
         options: {
           cwd: '/tmp/github/some/repo',
         },
+      },
+    ]);
+  });
+
+  it('performs lock file maintenance (docker)', async () => {
+    const execSnapshots = mockExecAll();
+    git.getRepoStatus.mockResolvedValue(
+      partial<StatusResult>({
+        modified: ['gradle.lockfile'],
+      })
+    );
+    GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
+
+    expect(
+      await updateArtifacts({
+        packageFileName: 'build.gradle',
+        updatedDeps: [],
+        newPackageFileContent: '',
+        config: { isLockFileMaintenance: true },
+      })
+    ).not.toBeNull();
+
+    expect(execSnapshots).toMatchObject([
+      { cmd: 'docker pull renovate/sidecar' },
+      { cmd: 'docker ps --filter name=renovate_sidecar -aq' },
+      {
+        cmd:
+          'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
+          '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
+          '-v "/tmp/cache":"/tmp/cache" ' +
+          '-e GRADLE_OPTS ' +
+          '-e BUILDPACK_CACHE_DIR ' +
+          '-w "/tmp/github/some/repo" ' +
+          'renovate/sidecar' +
+          ' bash -l -c "' +
+          'install-tool java 11.0.1' +
+          ' && ' +
+          './gradlew --console=plain -q properties' +
+          '"',
+        options: { cwd: '/tmp/github/some/repo' },
+      },
+      { cmd: 'docker ps --filter name=renovate_sidecar -aq' },
+      {
+        cmd:
+          'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
+          '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
+          '-v "/tmp/cache":"/tmp/cache" ' +
+          '-e GRADLE_OPTS ' +
+          '-e BUILDPACK_CACHE_DIR ' +
+          '-w "/tmp/github/some/repo" ' +
+          'renovate/sidecar' +
+          ' bash -l -c "' +
+          'install-tool java 11.0.1' +
+          ' && ' +
+          './gradlew --console=plain -q :dependencies --write-locks' +
+          '"',
+        options: { cwd: '/tmp/github/some/repo' },
+      },
+    ]);
+  });
+
+  it('performs lock file maintenance (install)', async () => {
+    const execSnapshots = mockExecAll();
+    git.getRepoStatus.mockResolvedValue(
+      partial<StatusResult>({
+        modified: ['gradle.lockfile'],
+      })
+    );
+    GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
+
+    expect(
+      await updateArtifacts({
+        packageFileName: 'build.gradle',
+        updatedDeps: [],
+        newPackageFileContent: '',
+        config: { isLockFileMaintenance: true },
+      })
+    ).not.toBeNull();
+
+    expect(execSnapshots).toMatchObject([
+      { cmd: 'install-tool java 11.0.1' },
+      {
+        cmd: './gradlew --console=plain -q properties',
+        options: { cwd: '/tmp/github/some/repo' },
+      },
+      { cmd: 'install-tool java 11.0.1' },
+      {
+        cmd: './gradlew --console=plain -q :dependencies --write-locks',
+        options: { cwd: '/tmp/github/some/repo' },
       },
     ]);
   });
