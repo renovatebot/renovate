@@ -22,7 +22,6 @@ import type { StatusResult } from '../../../util/git/types';
 import { getPkgReleases } from '../../datasource';
 import { updateArtifacts } from '.';
 
-const platform = jest.spyOn(os, 'platform');
 jest.mock('../../../util/fs');
 jest.mock('../../../util/git');
 jest.mock('../../../util/exec/env');
@@ -62,7 +61,6 @@ describe('modules/manager/gradle/artifacts', () => {
       ],
     });
 
-    platform.mockReturnValueOnce('linux');
     fs.findUpLocal.mockResolvedValue('gradlew');
 
     git.getFileList.mockResolvedValue([
