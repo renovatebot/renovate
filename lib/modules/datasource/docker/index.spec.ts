@@ -1177,7 +1177,7 @@ describe('modules/datasource/docker/index', () => {
         .get('/virtual-mirror/node/tags/list?n=10000')
         .reply(200, '', {})
         .get('/virtual-mirror/node/tags/list?n=10000')
-        .reply(404, '', {})
+        .reply(404, '', { 'x-jfrog-version': 'Artifactory/7.42.2 74202900' })
         .get('/virtual-mirror/library/node/tags/list?n=10000')
         .reply(200, '', {})
         .get('/virtual-mirror/library/node/tags/list?n=10000')
