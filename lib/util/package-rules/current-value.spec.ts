@@ -3,10 +3,6 @@ import { CurrentValueMatcher } from './current-value';
 describe('util/package-rules/current-value', () => {
   const matcher = new CurrentValueMatcher();
 
-  afterEach(() => {
-    jest.clearAllMocks();
-  });
-
   describe('match', () => {
     it('return null if non-regex', () => {
       const result = matcher.matches(

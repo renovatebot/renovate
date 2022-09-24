@@ -12,12 +12,11 @@ export class CurrentValueMatcher extends Matcher {
     if (is.undefined(matchCurrentValue)) {
       return null;
     }
-    const matchCurrentValueStr = matchCurrentValue.toString();
-    const matchCurrentValuePred = configRegexPredicate(matchCurrentValueStr);
+    const matchCurrentValuePred = configRegexPredicate(matchCurrentValue);
 
     if (!matchCurrentValuePred) {
       logger.warn(
-        { matchCurrentValueStr },
+        { matchCurrentValue },
         'matchCurrentValue should be a regex, starting and ending with `/`'
       );
       return null;
