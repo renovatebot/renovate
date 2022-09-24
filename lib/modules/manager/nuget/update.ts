@@ -11,19 +11,19 @@ export function bumpPackageVersion(
 ): BumpPackageVersionResult {
   logger.debug(
     { bumpVersion, currentValue },
-    'Checking if we should bump csproj version'
+    'Checking if we should bump project version'
   );
   let bumpedContent = content;
 
   if (!currentValue) {
-    logger.warn('Unable to bump csproj version, csproj has no version');
+    logger.warn('Unable to bump project version, project has no version');
     return { bumpedContent };
   }
 
   if (!semver.valid(currentValue)) {
     logger.warn(
       { currentValue },
-      'Unable to bump csproj version, not a valid semver'
+      'Unable to bump project version, not a valid semver'
     );
     return { bumpedContent };
   }
@@ -34,26 +34,26 @@ export function bumpPackageVersion(
     const startTagPosition = versionNode.startTagPosition;
     const versionPosition = content.indexOf(versionNode.val, startTagPosition);
 
-    const newCsprojVersion = semver.inc(
+    const newProjVersion = semver.inc(
       currentValue,
       bumpVersion as ReleaseType
     );
-    if (!newCsprojVersion) {
+    if (!newProjVersion) {
       throw new Error('semver inc failed');
     }
 
-    logger.debug({ newCsprojVersion });
+    logger.debug({ newProjVersion });
     bumpedContent = replaceAt(
       content,
       versionPosition,
       currentValue,
-      newCsprojVersion
+      newProjVersion
     );
 
     if (bumpedContent === content) {
       logger.debug('Version was already bumped');
     } else {
-      logger.debug('csproj version bumped');
+      logger.debug('project version bumped');
     }
   } catch (err) {
     logger.warn(
