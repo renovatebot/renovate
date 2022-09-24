@@ -36,6 +36,14 @@ export class CondaDatasource extends Datasource {
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     logger.trace({ registryUrl, packageName }, 'fetching conda package');
 
+    if (!registryUrl) {
+      logger.warn(
+        { packageName },
+        'conda datasource requires custom registryUrl. Skipping datasource'
+      );
+      return null;
+    }
+
     const url = joinUrlParts(registryUrl, packageName);
 
     const result: ReleaseResult = {
