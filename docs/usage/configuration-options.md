@@ -1514,7 +1514,7 @@ For example you have multiple `package.json` and want to use `dependencyDashboar
 ```
 
 Important to know: Renovate will evaluate all `packageRules` and not stop once it gets a first match.
-You should order your `packageRules` in order of importance so that later rules can override settings from earlier rules if needed.
+You should order your `packageRules` in ascending order of importance so that more important rules come later and can override settings from earlier rules if needed.
 
 <!-- prettier-ignore -->
 !!! warning

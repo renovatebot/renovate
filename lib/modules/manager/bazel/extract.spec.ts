@@ -17,7 +17,7 @@ describe('modules/manager/bazel/extract', () => {
 
     it('extracts multiple types of dependencies', () => {
       const res = extractPackageFile(Fixtures.get('WORKSPACE1'));
-      expect(res?.deps).toHaveLength(17);
+      expect(res?.deps).toHaveLength(18);
       expect(res?.deps).toMatchSnapshot();
     });
 
@@ -132,6 +132,30 @@ go_repository(
         `
       );
       expect(gitlabRemote?.deps[0].skipReason).toBe('unsupported-remote');
+    });
+
+    it('sequential http_archive', () => {
+      // Sequential http_archive
+      // See https://github.com/aspect-build/rules_swc/commit/d4989f9dfed781dc0226421fb9373b45052e7bc8
+      const res = extractPackageFile(
+        `
+          http_archive(
+            name = "aspect_rules_js",
+            sha256 = "db9f446752fe4100320cf8487e8fd476b9af0adf6b99b601bcfd70b289bb0598",
+            strip_prefix = "rules_js-1.1.2",
+            url = "https://github.com/aspect-build/rules_js/archive/refs/tags/v1.1.2.tar.gz",
+          )
+
+          http_archive(
+              name = "rules_nodejs",
+              sha256 = "5aef09ed3279aa01d5c928e3beb248f9ad32dde6aafe6373a8c994c3ce643064",
+              urls = ["https://github.com/bazelbuild/rules_nodejs/releases/download/5.5.3/rules_nodejs-core-5.5.3.tar.gz"],
+          )
+        `
+      );
+
+      expect(res?.deps).toHaveLength(2);
+      expect(res?.deps).toMatchSnapshot();
     });
   });
 });
