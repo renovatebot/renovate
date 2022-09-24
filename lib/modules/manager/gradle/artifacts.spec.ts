@@ -62,13 +62,17 @@ describe('modules/manager/gradle/artifacts', () => {
     });
 
     fs.findUpLocal.mockResolvedValue('gradlew');
-
     git.getFileList.mockResolvedValue([
       'gradlew',
       'build.gradle',
       'gradle.lockfile',
     ]);
     git.getFile.mockResolvedValue('Current gradle.lockfile');
+    git.getRepoStatus.mockResolvedValue(
+      partial<StatusResult>({
+        modified: ['build.gradle', 'gradle.lockfile'],
+      })
+    );
     fs.readLocalFile.mockResolvedValue('New gradle.lockfile');
   });
 
@@ -112,11 +116,6 @@ describe('modules/manager/gradle/artifacts', () => {
 
   it('updates lock file', async () => {
     const execSnapshots = mockExecAll();
-    git.getRepoStatus.mockResolvedValue(
-      partial<StatusResult>({
-        modified: ['build.gradle', 'gradle.lockfile'],
-      })
-    );
 
     const res = await updateArtifacts({
       packageFileName: 'build.gradle',
@@ -155,11 +154,6 @@ describe('modules/manager/gradle/artifacts', () => {
 
   it('prefers packageName over depName if provided', async () => {
     const execSnapshots = mockExecAll();
-    git.getRepoStatus.mockResolvedValue(
-      partial<StatusResult>({
-        modified: ['build.gradle', 'gradle.lockfile'],
-      })
-    );
 
     expect(
       await updateArtifacts({
@@ -195,11 +189,7 @@ describe('modules/manager/gradle/artifacts', () => {
 
   it('performs lock file maintenance', async () => {
     const execSnapshots = mockExecAll();
-    git.getRepoStatus.mockResolvedValue(
-      partial<StatusResult>({
-        modified: ['gradle.lockfile'],
-      })
-    );
+
     expect(
       await updateArtifacts({
         packageFileName: 'build.gradle',
@@ -227,11 +217,6 @@ describe('modules/manager/gradle/artifacts', () => {
 
   it('performs lock file maintenance (docker)', async () => {
     const execSnapshots = mockExecAll();
-    git.getRepoStatus.mockResolvedValue(
-      partial<StatusResult>({
-        modified: ['gradle.lockfile'],
-      })
-    );
     GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
 
     expect(
@@ -284,11 +269,6 @@ describe('modules/manager/gradle/artifacts', () => {
 
   it('performs lock file maintenance (install)', async () => {
     const execSnapshots = mockExecAll();
-    git.getRepoStatus.mockResolvedValue(
-      partial<StatusResult>({
-        modified: ['gradle.lockfile'],
-      })
-    );
     GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
 
     expect(
@@ -319,11 +299,6 @@ describe('modules/manager/gradle/artifacts', () => {
       { stdout: "subprojects: [project ':sub1', project ':sub2']", stderr: '' },
       { stdout: '', stderr: '' },
     ]);
-    git.getRepoStatus.mockResolvedValue(
-      partial<StatusResult>({
-        modified: ['gradle.lockfile'],
-      })
-    );
 
     expect(
       await updateArtifacts({
@@ -353,11 +328,6 @@ describe('modules/manager/gradle/artifacts', () => {
   it('does not update lockfile if content is unchanged', async () => {
     mockExecAll();
     fs.readLocalFile.mockResolvedValue('Current gradle.lockfile');
-    git.getRepoStatus.mockResolvedValue(
-      partial<StatusResult>({
-        modified: ['gradle.lockfile'],
-      })
-    );
 
     expect(
       await updateArtifacts({
