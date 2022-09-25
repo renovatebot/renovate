@@ -2101,12 +2101,12 @@ Followed by some information.
         });
 
         it('returns file content in json5 format', async () => {
-          const json5Data = `
-          {
-            // json5 comment
-            foo: 'bar'
-          }
-        `;
+          const lines = [
+            { text: '{' },
+            { text: '  // json5 comment' },
+            { text: '  foo: "bar"' },
+            { text: '}' },
+          ];
           const scope = await initRepo();
           scope
             .get(
@@ -2114,7 +2114,7 @@ Followed by some information.
             )
             .reply(200, {
               isLastPage: true,
-              lines: [{ text: json5Data }],
+              lines: lines,
             });
           const res = await bitbucket.getJsonFile('file.json5');
           expect(res).toEqual({ foo: 'bar' });
