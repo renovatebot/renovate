@@ -1,27 +1,25 @@
 import { logger } from '../../logger';
 import { getCache } from '../cache/repository';
-import { getBranchCommit } from '.';
 
 export function getCachedBehindBaseResult(
   branchName: string,
-  baseBranch: string
+  branchSha: string | null,
+  baseBranch: string,
+  baseBranchSha: string | null
 ): boolean | null {
   const cache = getCache();
   const branch = cache.branches?.find(
     (branch) => branch.branchName === branchName
   );
 
-  if (branch) {
-    const branchSha = getBranchCommit(branchName);
-    const baseBranchSha = getBranchCommit(baseBranch);
-
-    if (
-      branch.sha === branchSha &&
-      branch.baseBranchSha === baseBranchSha &&
-      branch.isBehindBase !== undefined
-    ) {
-      return branch.isBehindBase;
-    }
+  if (
+    branch &&
+    branch.sha === branchSha &&
+    branch.baseBranch === baseBranch &&
+    branch.baseBranchSha === baseBranchSha &&
+    branch.isBehindBase !== undefined
+  ) {
+    return branch.isBehindBase;
   }
 
   return null;

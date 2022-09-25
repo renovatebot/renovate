@@ -567,7 +567,12 @@ export async function isBranchBehindBase(
   branchName: string,
   baseBranch: string
 ): Promise<boolean> {
-  let isBehind = getCachedBehindBaseResult(branchName, baseBranch);
+  let isBehind = getCachedBehindBaseResult(
+    branchName,
+    getBranchCommit(branchName), // branch sha
+    baseBranch,
+    getBranchCommit(baseBranch) // base branch sha
+  );
   if (isBehind !== null) {
     logger.debug('Using cached result for isBranchBehindBase');
     return isBehind;
@@ -610,8 +615,11 @@ export async function isBranchModified(branchName: string): Promise<boolean> {
     logger.debug('Using local config for isBranchModified');
     return config.branchIsModified[branchName];
   }
-  // Second check repoCache
-  const isModified = getCachedModifiedResult(branchName);
+  // Second check repository cache
+  const isModified = getCachedModifiedResult(
+    branchName,
+    getBranchCommit(branchName) // branch sha
+  );
   if (isModified !== null) {
     logger.debug('Using cached result for isBranchModified');
     return (config.branchIsModified[branchName] = isModified);
