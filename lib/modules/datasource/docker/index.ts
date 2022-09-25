@@ -35,7 +35,7 @@ import {
 } from '../../versioning/docker';
 import { Datasource } from '../datasource';
 import type { DigestConfig, GetReleasesConfig, ReleaseResult } from '../types';
-import { gitRefLabel, sourceLabels } from './common';
+import { gitRefLabel, isArtifactoryServer, sourceLabels } from './common';
 import {
   Image,
   ImageConfig,
@@ -901,7 +901,7 @@ export class DockerDatasource extends Datasource {
       // These follow the format of {{registryHost}}{{jFrogRepository}}/library/{{dockerRepository}}
       if (
         (err.statusCode === 404 || err.message === PAGE_NOT_FOUND_ERROR) &&
-        is.string(err.headers['x-jfrog-version']) &&
+        isArtifactoryServer(err) &&
         dockerRepository.split('/').length === 2
       ) {
         logger.debug(
