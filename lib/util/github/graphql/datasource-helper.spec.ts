@@ -3,7 +3,7 @@ import { parse as graphqlParse } from 'graphql';
 import * as httpMock from '../../../../test/http-mock';
 import { GithubGraphqlResponse, GithubHttp } from '../../http/github';
 import { range } from '../../range';
-import { GithubGraphqlDatasource as Datasource } from './datasource';
+import { GithubGraphqlDatasourceHelper as Datasource } from './datasource-helper';
 import type {
   GithubDatasourceItem,
   GithubGraphqlDatasourceAdapter,
@@ -88,7 +88,7 @@ async function catchError<T>(cb: () => Promise<T>): Promise<Error> {
   }
 }
 
-describe('util/github/graphql/datasource', () => {
+describe('util/github/graphql/datasource-helper', () => {
   describe('prepareQuery', () => {
     it('returns valid query for valid payload query', () => {
       const payloadQuery = adapter.query;

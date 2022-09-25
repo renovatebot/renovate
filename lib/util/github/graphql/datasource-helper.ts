@@ -33,7 +33,7 @@ function isErrorFromIssue16343(err: Error): boolean {
   return isSomethingWentWrongMessage(err.message);
 }
 
-export class GithubGraphqlDatasource<
+export class GithubGraphqlDatasourceHelper<
   GraphqlItem,
   ResultItem extends GithubDatasourceItem
 > {
@@ -53,7 +53,11 @@ export class GithubGraphqlDatasource<
     http: GithubHttp,
     adapter: GithubGraphqlDatasourceAdapter<T, U>
   ): Promise<U[]> {
-    const instance = new GithubGraphqlDatasource<T, U>(config, http, adapter);
+    const instance = new GithubGraphqlDatasourceHelper<T, U>(
+      config,
+      http,
+      adapter
+    );
     const items = await instance.getItems();
     return items;
   }
