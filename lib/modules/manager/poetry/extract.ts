@@ -14,13 +14,27 @@ import type { PackageDependency, PackageFile } from '../types';
 import { extractLockFileEntries } from './locked-version';
 import type { PoetryFile, PoetrySection } from './types';
 
+class PoetryGroup {
+  constructor(public name: string) {}
+}
+
 function extractFromSection(
   parsedFile: PoetryFile,
-  section: keyof Omit<PoetrySection, 'source'>,
+  section: keyof Omit<PoetrySection, 'source' | 'group'> | PoetryGroup,
   poetryLockfile: Record<string, string>
 ): PackageDependency[] {
   const deps: PackageDependency[] = [];
-  const sectionContent = parsedFile.tool?.poetry?.[section];
+  let sectionContent;
+  let depType;
+
+  if (section instanceof PoetryGroup) {
+    sectionContent = parsedFile.tool?.poetry?.group[section.name].dependencies;
+    depType = 'dev-dependencies';
+  } else {
+    sectionContent = parsedFile.tool?.poetry?.[section];
+    depType = section;
+  }
+
   if (!sectionContent) {
     return [];
   }
@@ -56,7 +70,7 @@ function extractFromSection(
     }
     const dep: PackageDependency = {
       depName,
-      depType: section,
+      depType: depType,
       currentValue: currentValue,
       managerData: { nestedVersion },
       datasource: PypiDatasource.id,
@@ -124,7 +138,11 @@ export async function extractPackageFile(
     ...extractFromSection(pyprojectfile, 'dependencies', lockfileMapping),
     ...extractFromSection(pyprojectfile, 'dev-dependencies', lockfileMapping),
     ...extractFromSection(pyprojectfile, 'extras', lockfileMapping),
+    ...Object.keys(pyprojectfile.tool?.poetry?.group ?? []).flatMap((group) =>
+      extractFromSection(pyprojectfile, new PoetryGroup(group), lockfileMapping)
+    ),
   ];
+
   if (!deps.length) {
     return null;
   }

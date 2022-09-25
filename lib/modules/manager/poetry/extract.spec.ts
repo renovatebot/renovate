@@ -17,6 +17,7 @@ const pyproject9toml = Fixtures.get('pyproject.9.toml');
 // pyproject.10.toml use by artifacts
 const pyproject11toml = Fixtures.get('pyproject.11.toml');
 const pyproject11tomlLock = Fixtures.get('pyproject.11.toml.lock');
+const pyproject12toml = Fixtures.get('pyproject.12.toml');
 
 describe('modules/manager/poetry/extract', () => {
   describe('extractPackageFile()', () => {
@@ -130,6 +131,11 @@ describe('modules/manager/poetry/extract', () => {
           { depName: 'dep34', currentValue: '<2.0' },
         ],
       });
+    });
+
+    it('extracts dependencies from dependency groups', async () => {
+      const res = await extractPackageFile(pyproject12toml, filename);
+      expect(res).toMatchSnapshot();
     });
 
     it('resolves lockedVersions from the lockfile', async () => {

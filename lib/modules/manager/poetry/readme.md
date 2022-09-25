@@ -7,3 +7,4 @@ The following `depTypes` are supported by the Poetry manager:
 - `dependencies`
 - `dev-dependencies`
 - `extras`
+- `group.<group-name>.dependencies`
