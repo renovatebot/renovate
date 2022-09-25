@@ -67,7 +67,9 @@ describe('modules/manager/gradle/artifacts', () => {
       'build.gradle',
       'gradle.lockfile',
     ]);
-    git.getFile.mockResolvedValue('Current gradle.lockfile');
+    fs.getFileContentMap.mockResolvedValue({
+      'gradle.lockfile': 'Current gradle.lockfile',
+    });
     git.getRepoStatus.mockResolvedValue(
       partial<StatusResult>({
         modified: ['build.gradle', 'gradle.lockfile'],

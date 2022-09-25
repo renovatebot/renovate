@@ -5,7 +5,12 @@ import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { exec } from '../../../util/exec';
 import type { ExecOptions } from '../../../util/exec/types';
-import { findUpLocal, readLocalFile, writeLocalFile } from '../../../util/fs';
+import {
+  findUpLocal,
+  getFileContentMap,
+  readLocalFile,
+  writeLocalFile,
+} from '../../../util/fs';
 import { getFileList, getRepoStatus } from '../../../util/git';
 import { regEx } from '../../../util/regex';
 import {
@@ -13,7 +18,6 @@ import {
   getJavaConstraint,
   gradleWrapperFileName,
 } from '../gradle-wrapper/utils';
-import { getLockFileContentMap } from '../nuget/artifacts';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
 
 async function getUpdatedLockfiles(
@@ -90,7 +94,7 @@ export async function updateArtifacts({
   logger.debug('Updating found Gradle dependency lockfiles');
 
   try {
-    const oldLockFileContentMap = await getLockFileContentMap(lockFiles);
+    const oldLockFileContentMap = await getFileContentMap(lockFiles);
 
     await writeLocalFile(packageFileName, newPackageFileContent);
 
