@@ -1705,7 +1705,47 @@ Use this field to restrict rules to a particular datasource. e.g.
 }
 ```
 
+### matchCurrentValue
+
+This option is matched against the `currentValue` field of a dependency.
+
+`matchCurrentValue` supports Regular Expressions which must begin and end with `/`.
+For example, the following enforces that only `1.*` versions will be used:
+
+```json
+{
+  "packageRules": [
+    {
+      "matchPackagePatterns": ["io.github.resilience4j"],
+      "matchCurrentValue": "/^1\\./"
+    }
+  ]
+}
+```
+
+This field also supports a special negated regex syntax to ignore certain versions.
+Use the syntax `!/ /` like this:
+
+```json
+{
+  "packageRules": [
+    {
+      "matchPackagePatterns": ["io.github.resilience4j"],
+      "matchCurrentValue": "!/^0\\./"
+    }
+  ]
+}
+```
+
 ### matchCurrentVersion
+
+The `currentVersion` field will be one of the following (in order of preference):
+
+- locked version if a lock file exists
+- resolved version
+- current value
+
+Consider using instead `matchCurrentValue` if you wish to match against the raw string value of a dependency.
 
 `matchCurrentVersion` can be an exact SemVer version or a SemVer range:
 
