@@ -13,7 +13,7 @@ describe('util/package-rules/current-value', () => {
           matchCurrentValue: '^v',
         }
       );
-      expect(result).toBeNull();
+      expect(result).toBeFalse();
     });
 
     it('return false for regex version non match', () => {

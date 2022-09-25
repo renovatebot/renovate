@@ -15,11 +15,11 @@ export class CurrentValueMatcher extends Matcher {
     const matchCurrentValuePred = configRegexPredicate(matchCurrentValue);
 
     if (!matchCurrentValuePred) {
-      logger.warn(
+      logger.debug(
         { matchCurrentValue },
         'matchCurrentValue should be a regex, starting and ending with `/`'
       );
-      return null;
+      return false;
     }
 
     if (!currentValue) {
