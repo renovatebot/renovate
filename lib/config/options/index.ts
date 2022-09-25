@@ -403,7 +403,7 @@ const options: RenovateOptions[] = [
   {
     name: 'onboardingRebaseCheckbox',
     description:
-      'Set to enabled rebase/retry markdown checkbox for onboarding PRs.',
+      'Set to enable rebase/retry markdown checkbox for onboarding PRs.',
     type: 'boolean',
     default: false,
     supportedPlatforms: ['github', 'gitlab', 'gitea'],
