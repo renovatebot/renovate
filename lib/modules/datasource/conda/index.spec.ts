@@ -2,7 +2,9 @@ import { getPkgReleases } from '..';
 import { Fixtures } from '../../../../test/fixtures';
 import * as httpMock from '../../../../test/http-mock';
 import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages';
+import { logger } from '../../../logger';
 import { datasource, defaultRegistryUrl } from './common';
+import { CondaDatasource } from './index';
 
 const depName = 'main/pytest';
 const depUrl = `/${depName}`;
@@ -37,6 +39,20 @@ describe('modules/datasource/conda/index', () => {
           depName,
         })
       ).toBeNull();
+    });
+
+    it('returns null without registryUrl + warning', async () => {
+      const condaDatasource = new CondaDatasource();
+      const res = await condaDatasource.getReleases({
+        registryUrl: '',
+        packageName: depName,
+      });
+      expect(logger.warn).toHaveBeenCalledTimes(2);
+      expect(logger.warn).toHaveBeenCalledWith(
+        { packageName: depName },
+        'conda datasource requires custom registryUrl. Skipping datasource'
+      );
+      expect(res).toBeNull();
     });
 
     it('throws for 5xx', async () => {
