@@ -98,7 +98,7 @@ Credentials for authenticated/private feeds can be given via host rules in the c
 }
 ```
 
-When using Azure DevOps, you can use `pkgs.dev.azure.com` as host name.
+When using Azure DevOps, you can use `pkgs.dev.azure.com` as `matchHost` value.
 
 <!-- prettier-ignore -->
 !!! note
