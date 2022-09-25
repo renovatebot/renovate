@@ -1,4 +1,3 @@
-// istanbul ignore file
 import type { GithubHttp } from '../../http/github';
 import { GithubGraphqlDatasource } from './datasource';
 import { adapter as releasesAdapter } from './releases-adapter';
