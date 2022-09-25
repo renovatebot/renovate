@@ -1,6 +1,5 @@
 import _findUp from 'find-up';
 import fs from 'fs-extra';
-import Git from 'simple-git';
 import tmp, { DirectoryResult } from 'tmp-promise';
 import { join, resolve } from 'upath';
 import { git, mockedFunction } from '../../../test/util';
@@ -37,6 +36,7 @@ import {
 
 jest.mock('../exec/env');
 jest.mock('find-up');
+jest.mock('../git');
 
 const findUp = mockedFunction(_findUp);
 
@@ -482,15 +482,7 @@ describe('util/fs/index', () => {
         file1: 'foobar',
       };
 
-      const repo = Git(tmpDir);
-      await repo.init();
-      await fs.outputFile(`${tmpDir}/file1`, fileContentMap.file1);
-      await repo.add(Object.keys(fileContentMap));
-      await repo.commit('some message');
-      await git.initRepo({
-        url: tmpDir,
-      });
-
+      git.getFile.mockResolvedValueOnce('foobar');
       const res = await getFileContentMap(Object.keys(fileContentMap));
       expect(res).toStrictEqual(fileContentMap);
     });
