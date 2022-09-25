@@ -34,10 +34,7 @@ export function bumpPackageVersion(
     const startTagPosition = versionNode.startTagPosition;
     const versionPosition = content.indexOf(versionNode.val, startTagPosition);
 
-    const newProjVersion = semver.inc(
-      currentValue,
-      bumpVersion as ReleaseType
-    );
+    const newProjVersion = semver.inc(currentValue, bumpVersion as ReleaseType);
     if (!newProjVersion) {
       throw new Error('semver inc failed');
     }

@@ -1,9 +1,12 @@
 import { XmlDocument } from 'xmldoc';
 import { bumpPackageVersion } from '.';
 
-const simpleContent = '<Project Sdk="Microsoft.NET.Sdk"><PropertyGroup><Version>0.0.1</Version></PropertyGroup></Project>';
-const minimumContent = '<Project Sdk="Microsoft.NET.Sdk"><PropertyGroup><Version>1</Version></PropertyGroup></Project>';
-const prereleaseContent = '<Project Sdk="Microsoft.NET.Sdk"><PropertyGroup><Version>1.0.0-1</Version></PropertyGroup></Project>';
+const simpleContent =
+  '<Project Sdk="Microsoft.NET.Sdk"><PropertyGroup><Version>0.0.1</Version></PropertyGroup></Project>';
+const minimumContent =
+  '<Project Sdk="Microsoft.NET.Sdk"><PropertyGroup><Version>1</Version></PropertyGroup></Project>';
+const prereleaseContent =
+  '<Project Sdk="Microsoft.NET.Sdk"><PropertyGroup><Version>1.0.0-1</Version></PropertyGroup></Project>';
 
 describe('modules/manager/nuget/update', () => {
   describe('bumpPackageVersion', () => {
