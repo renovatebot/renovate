@@ -29,7 +29,7 @@ function extractFromSection(
 
   if (section instanceof PoetryGroup) {
     sectionContent = parsedFile.tool?.poetry?.group[section.name].dependencies;
-    depType = 'dev-dependencies';
+    depType = section.name;
   } else {
     sectionContent = parsedFile.tool?.poetry?.[section];
     depType = section;
@@ -70,7 +70,7 @@ function extractFromSection(
     }
     const dep: PackageDependency = {
       depName,
-      depType: depType,
+      depType,
       currentValue: currentValue,
       managerData: { nestedVersion },
       datasource: PypiDatasource.id,
@@ -139,7 +139,11 @@ export async function extractPackageFile(
     ...extractFromSection(pyprojectfile, 'dev-dependencies', lockfileMapping),
     ...extractFromSection(pyprojectfile, 'extras', lockfileMapping),
     ...Object.keys(pyprojectfile.tool?.poetry?.group ?? []).flatMap((group) =>
-      extractFromSection(pyprojectfile, new PoetryGroup(group), lockfileMapping)
+      extractFromSection(
+        pyprojectfile,
+        new PoetryGroupSection(group),
+        lockfileMapping
+      )
     ),
   ];
 
