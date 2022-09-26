@@ -269,10 +269,6 @@ describe('workers/repository/onboarding/branch/index', () => {
         rebase.rebaseOnboardingBranch.mockResolvedValueOnce(null);
       });
 
-      afterAll(() => {
-        delete config.onboardingRebaseCheckbox;
-      });
-
       it('detects unsupported platfom', async () => {
         const pl = 'bitbucket';
         GlobalConfig.set({ platform: pl });
