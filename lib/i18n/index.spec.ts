@@ -20,7 +20,7 @@ describe('i18n/index', () => {
     });
 
     it('load translations from the given PO file', async () => {
-      await initI18n('zh_CN', './__fixtures__/messages.po');
+      await initI18n('zh_CN', './messages.po');
 
       expect(fs.readSystemFile).toHaveBeenCalledWith(
         './__fixtures__/messages.po',
@@ -36,7 +36,7 @@ describe('i18n/index', () => {
         throw new Error('Can not read the file');
       });
 
-      await initI18n('zh_CN', './__fixtures__/messages.po');
+      await initI18n('zh_CN', './messages.po');
 
       expect(logger.error).toHaveBeenCalled();
       expect(getLocale()).toBe('en');
