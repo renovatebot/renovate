@@ -127,7 +127,6 @@ export class Vulnerabilities {
   ): PackageRule[] {
     const rules: PackageRule[] = [];
     vulnerabilities.forEach((vulnerability) => {
-      logger.info({ vulnerability }, 'Vulnerabilities found');
       vulnerability.affected?.forEach((affected) => {
         if (
           affected.package?.ecosystem === ecosystem &&
