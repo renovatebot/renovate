@@ -1443,10 +1443,13 @@ export async function createPr({
     { branch: sourceBranch, pr: ghPr.number, draft: draftPR },
     'PR created'
   );
-  const { number, node_id } = ghPr;
+
+  const result = coerceRestPr(ghPr);
+  const { number, node_id } = result;
+
   await addLabels(number, labels);
   await tryPrAutomerge(number, node_id, platformOptions);
-  const result = coerceRestPr(ghPr);
+
   cachePr(result);
   return result;
 }
