@@ -1,5 +1,4 @@
 import is from '@sindresorhus/is';
-import { gettext } from '../../../i18n';
 import type { Preset } from '../types';
 
 /* eslint sort-keys: ["error", "asc", {caseSensitive: false, natural: true}] */
@@ -258,13 +257,13 @@ export const presets: Record<string, Preset> = {};
 
 for (const [name, value] of Object.entries(repoGroups)) {
   presets[name] = {
-    description: gettext(`${name} monorepo`),
+    description: `${name} monorepo`,
     matchSourceUrlPrefixes: is.array(value) ? value : [value],
   };
 }
 for (const [name, value] of Object.entries(patternGroups)) {
   presets[name] = {
-    description: gettext(`${name} monorepo`),
+    description: `${name} monorepo`,
     matchPackagePatterns: is.array(value) ? value : [value],
   };
 }
