@@ -14,20 +14,20 @@ import type { PackageDependency, PackageFile } from '../types';
 import { extractLockFileEntries } from './locked-version';
 import type { PoetryFile, PoetrySection } from './types';
 
-class PoetryGroup {
+class PoetryGroupSection {
   constructor(public name: string) {}
 }
 
 function extractFromSection(
   parsedFile: PoetryFile,
-  section: keyof Omit<PoetrySection, 'source' | 'group'> | PoetryGroup,
+  section: keyof Omit<PoetrySection, 'source' | 'group'> | PoetryGroupSection,
   poetryLockfile: Record<string, string>
 ): PackageDependency[] {
   const deps: PackageDependency[] = [];
   let sectionContent;
   let depType;
 
-  if (section instanceof PoetryGroup) {
+  if (section instanceof PoetryGroupSection) {
     sectionContent = parsedFile.tool?.poetry?.group[section.name].dependencies;
     depType = section.name;
   } else {
