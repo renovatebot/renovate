@@ -1,33 +1,80 @@
-Currently, Terraform supports renovating the following dependencies, where sub-points represent hosting options of the dependencies:
+### Supported dependencies
 
-- modules
-  - GitTags
-  - GithubTags
-  - TerraformRegistry ( Public and Private )
-- providers ( deprecated in Terraform 0.13.0 )
-  - TerraformRegistry ( Public and Private )
-- required_providers block ( Terraform >= 0.13.0)
-  - TerraformRegistry ( Public and Private )
-- required_version
-- helm_release
-  - chart repository ( Public and Private )
-- docker\_\*
-  - Docker registry ( Public and Private )
-- kubernetes\_\*
-  - Docker registry ( Public and Private )
-- [tfe_workspace](https://registry.terraform.io/providers/hashicorp/tfe/latest/docs/resources/workspace) ( `terraform_version` argument )
+Renovate supports updating the Terraform dependencies listed below.
+Check the tables to see where some dependencies can be hosted.
 
-Terraform range constraints are supported:
+#### Modules
 
-- `>= 1.2.0`: version 1.2.0 or newer
-- `<= 1.2.0`: version 1.2.0 or older
-- `~> 1.2.0`: any non-beta version >= 1.2.0 and < 1.3.0, e.g. 1.2.X
-- `~> 1.2`: any non-beta version >= 1.2.0 and < 2.0.0, e.g. 1.X.Y
-- `>= 1.0.0, <= 2.0.0`: any version between 1.0.0 and 2.0.0 inclusive
+| Name              | Public hosting | Private hosting |
+| ----------------- | :------------: | :-------------: |
+| GitTags           |                |                 |
+| GithubTags        |                |                 |
+| TerraformRegistry |      yes       |       yes       |
 
-For fine-grained control, e.g., to turn off only parts of this manager, you can use the following `depTypes`:
+#### Providers
 
-| resource                             |                depType                 |                                   Notes                                    |
+Providers are deprecated in Terraform `0.13.0`.
+
+| Name              | Public hosting | Private hosting |
+| ----------------- | :------------: | :-------------: |
+| TerraformRegistry |      yes       |       yes       |
+
+#### required_providers block
+
+Needs Terraform `>= 0.13.0`.
+
+| Name              | Public hosting | Private hosting |
+| ----------------- | :------------: | :-------------: |
+| TerraformRegistry |      yes       |       yes       |
+
+#### required_version
+
+Renovate can update `required_version` dependencies.
+
+#### helm_release
+
+| Name             | Public hosting | Private hosting |
+| ---------------- | :------------: | :-------------: |
+| chart repository |      yes       |       yes       |
+
+#### Docker
+
+Renovate can update `docker\_\*` files.
+
+| Name            | Public hosting | Private hosting |
+| --------------- | :------------: | :-------------: |
+| Docker registry |      yes       |       yes       |
+
+#### Kubernetes
+
+Renovate can update `kubernetes\_\*` files.
+
+| Name            | Public hosting | Private hosting |
+| --------------- | :------------: | :-------------: |
+| Docker registry |      yes       |       yes       |
+
+#### tfe_workspaces
+
+Renovate can update [tfe_workspaces](https://registry.terraform.io/providers/hashicorp/tfe/latest/docs/resources/workspace).
+Renovate searches for the `terraform_version` argument.
+
+### Range constraints
+
+Renovate understands these Terraform range constraints:
+
+| Terraform range      | Notes                                                 |
+| -------------------- | ----------------------------------------------------- |
+| `>= 1.2.0`           | version 1.2.0 or newer                                |
+| `<= 1.2.0`           | version 1.2.0 or older                                |
+| `~> 1.2.0`           | any non-beta version >= 1.2.0 and < 1.3.0, e.g. 1.2.X |
+| `~> 1.2`             | any non-beta version >= 1.2.0 and < 2.0.0, e.g. 1.X.Y |
+| `>= 1.0.0, <= 2.0.0` | any version between 1.0.0 and 2.0.0 inclusive         |
+
+### Disabling parts of the manager
+
+You can use these `depTypes` for fine-grained control, for example to disable parts of the Terraform manager.
+
+| resource                             |               `depType`                |                                   Notes                                    |
 | ------------------------------------ | :------------------------------------: | :------------------------------------------------------------------------: |
 | Terraform provider                   |               `provider`               |                                                                            |
 | required Terraform provider          |          `required_provider`           |                                                                            |
