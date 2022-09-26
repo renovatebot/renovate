@@ -444,10 +444,6 @@ Use the `extends` field instead of this if, for example, you need the ability fo
 
 Renovate supports internationalization with [GNU Gettext](https://www.gnu.org/software/gettext/), you can specific expected locale with this option, and also assign translationsFilePath is required.
 
-```sh
---locale fr
-```
-
 ## logContext
 
 `logContext` is included with each log entry only if `logFormat="json"` - it is not included in the pretty log output.
@@ -756,9 +752,23 @@ This is currently applicable to `npm` and `lerna`/`npm` only, and only used in c
 
 This option is specific the PO(Portable Object) file's path.
 
-Renovate uses the default single domain "messages" for i18n.
+Renovate uses the default single domain "messages" for i18n to decline the complexity of usage of it.
 
-You can translate your own edition by inovking `msginit` program, and then invoke `msgmerge` program to add more `msgid`.
+How to contribute for i18n of Renovate ? Here is the workflow looks like:
+
+Firt, you have to invok/mark string literals that you want to translate, and then invoke `gettext` function (or its siblings, e.g. `ngettext`, `pgettext` etc.) on them, for instance:
+
+```typescript
+{
+  description: gt.gettext(
+    'Ignore `node_modules`, `bower_components`, `vendor` and various test/tests directories.'
+  );
+}
+```
+
+Now you can clone [renovatebot/renovate-i18n](xingxing/renovate-i18n-zh-cn) repository, manually update the `messages.pot`, or wait for the daily action to update that file, please read documents about i18n in that project for more details.
+
+And then you can translate your own edition by inovking `msginit` program, and then invoke `msgmerge` program to add more `msgid`, refer the repository [xingxing/renovate-i18n-zh-cn](xingxing/renovate-i18n-zh-cn).
 
 ## unicodeEmoji
 

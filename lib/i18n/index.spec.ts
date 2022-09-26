@@ -31,7 +31,7 @@ describe('i18n/index', () => {
       expect(getDomain()).toBe('messages');
     });
 
-    it('should downgrade to English edition when loading PO file occurred any error', async () => {
+    it('should fallback to English edition when loading PO file occurred any error', async () => {
       fs.readSystemFile.mockImplementationOnce(() => {
         throw new Error('Can not read the file');
       });
