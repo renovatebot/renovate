@@ -6,12 +6,7 @@ import type { GhPr, GhRestPr } from './types';
 /**
  * @see https://docs.github.com/en/rest/reference/pulls#list-pull-requests
  */
-export function coerceRestPr(pr: GhRestPr | null | undefined): GhPr | null {
-  // istanbul ignore if
-  if (!pr) {
-    return null;
-  }
-
+export function coerceRestPr(pr: GhRestPr): GhPr {
   const bodyStruct = pr.bodyStruct ?? getPrBodyStruct(pr.body);
   const result: GhPr = {
     displayNumber: `Pull Request #${pr.number}`,
@@ -23,7 +18,8 @@ export function coerceRestPr(pr: GhRestPr | null | undefined): GhPr | null {
         ? PrState.Merged
         : pr.state,
     bodyStruct,
-    updatedAt: pr.updated_at,
+    updated_at: pr.updated_at,
+    node_id: pr.node_id,
   };
 
   if (pr.head?.sha) {

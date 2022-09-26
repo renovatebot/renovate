@@ -34,7 +34,6 @@ export async function checkOnboardingBranch(
   logger.debug('Repo is not onboarded');
   // global gitAuthor will need to be used
   setGitAuthor(config.gitAuthor);
-  // TODO #7154
   const onboardingPr = await getOnboardingPr(config);
   if (onboardingPr) {
     if (config.onboardingRebaseCheckbox) {
