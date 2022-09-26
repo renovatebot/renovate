@@ -16,7 +16,11 @@ function isOldCache(prCache: unknown): prCache is ApiPageCache<GhRestPr> {
     !is.emptyObject(prCache.items)
   ) {
     const [item] = Object.values(prCache.items);
-    if (is.plainObject(item) && is.string(item.node_id)) {
+    if (
+      is.plainObject(item) &&
+      is.plainObject(item.head) &&
+      is.plainObject(item.base)
+    ) {
       return true;
     }
   }
