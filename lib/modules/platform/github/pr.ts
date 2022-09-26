@@ -17,11 +17,7 @@ function isOldCache(prCache: unknown): prCache is ApiPageCache<GhRestPr> {
   ) {
     const [item] = Object.values(prCache.items);
     // istanbul ignore if
-    if (
-      is.plainObject(item) &&
-      is.plainObject(item.head) &&
-      is.plainObject(item.base)
-    ) {
+    if (is.plainObject(item) && is.plainObject(item.head)) {
       return true;
     }
   }
