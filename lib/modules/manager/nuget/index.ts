@@ -3,6 +3,7 @@ import { NugetDatasource } from '../../datasource/nuget';
 
 export { extractPackageFile } from './extract';
 export { updateArtifacts } from './artifacts';
+export { bumpPackageVersion } from './update';
 
 export const language = ProgrammingLanguage.NET;
 
