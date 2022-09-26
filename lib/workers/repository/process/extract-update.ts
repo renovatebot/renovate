@@ -138,8 +138,8 @@ export async function lookup(
   config: RenovateConfig,
   packageFiles: Record<string, PackageFile[]>
 ): Promise<ExtractResult> {
-  await fetchUpdates(config, packageFiles);
   await fetchVulnerabilities(config, packageFiles);
+  await fetchUpdates(config, packageFiles);
   await raiseDeprecationWarnings(config, packageFiles);
   const { branches, branchList } = await branchifyUpgrades(
     config,

@@ -125,24 +125,45 @@ export class Vulnerabilities {
     dependencyName: string,
     ecosystem: Ecosystem
   ): PackageRule[] {
-    return vulnerabilities
-      .flatMap((vulnerability) => vulnerability.affected)
-      .filter(
-        (vulnerability) =>
-          vulnerability?.package?.name === dependencyName &&
-          vulnerability?.package?.ecosystem === ecosystem
-      )
-      .map(
-        (affected): PackageRule => ({
-          matchPackageNames: [dependencyName],
-          allowedVersions: affected?.ranges?.[0].events.find(
-            (event) => event.fixed !== undefined
-          )!.fixed,
-          isVulnerabilityAlert: true,
-          force: {
-            ...packageFileConfig.vulnerabilityAlerts,
-          },
-        })
-      );
+    const rules: PackageRule[] = [];
+    vulnerabilities.forEach((vulnerability) => {
+      logger.info({ vulnerability }, 'Vulnerabilities found');
+      vulnerability.affected?.forEach((affected) => {
+        if (
+          affected.package?.ecosystem === ecosystem &&
+          affected.package.name === dependencyName
+        ) {
+          const prBodyNotes: string[] = [
+            `## ${affected.package.name} - ${vulnerability.id}`,
+            `${vulnerability.summary ?? ''}`,
+            `<details><summary>More infos</summary>
+
+## Details\n${vulnerability.details ?? 'No details'}
+
+## Severity\n${vulnerability.severity?.[0].score ?? 'No severity'}
+
+## References\n${
+              vulnerability.references
+                ?.map((ref) => {
+                  return ref.url;
+                })
+                .join('\n') ?? 'No references'
+            }</details>`,
+          ];
+          rules.push({
+            matchPackageNames: [dependencyName],
+            allowedVersions: affected?.ranges?.[0].events.find(
+              (event) => event.fixed !== undefined
+            )!.fixed,
+            isVulnerabilityAlert: true,
+            prBodyNotes: prBodyNotes,
+            force: {
+              ...packageFileConfig.vulnerabilityAlerts,
+            },
+          });
+        }
+      });
+    });
+    return rules;
   }
 }
