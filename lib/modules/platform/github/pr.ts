@@ -140,3 +140,8 @@ export async function getPrCache(
 
   return prApiCache.getItems();
 }
+
+export function updatePrCache(pr: GhPr): void {
+  const cache = getPrApiCache();
+  cache.updateItem(pr);
+}
