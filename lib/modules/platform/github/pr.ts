@@ -31,6 +31,7 @@ function isOldCache(prCache: unknown): prCache is ApiPageCache<GhRestPr> {
 
 function migrateCache(cache: unknown): void {
   const items: ApiPageCache<GhPr>['items'] = {};
+  // istanbul ignore if
   if (isOldCache(cache)) {
     for (const item of Object.values(cache.items)) {
       items[item.number] = coerceRestPr(item);
