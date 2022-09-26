@@ -56,6 +56,10 @@ export async function initI18n(
       'utf8'
     );
 
+    if (translationsContent === null) {
+      logger.warn('ReadSystemFile for translations content returns null');
+    }
+
     const parsedTranslations = po.parse(translationsContent);
     gt.addTranslations(locale, domain, parsedTranslations);
     gt.setLocale(locale);

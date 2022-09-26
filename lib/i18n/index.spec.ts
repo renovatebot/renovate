@@ -22,13 +22,23 @@ describe('i18n/index', () => {
     it('load translations from the given PO file', async () => {
       await initI18n('zh_CN', './messages.po');
 
-      expect(fs.readSystemFile).toHaveBeenCalledWith(
-        './__fixtures__/messages.po',
-        'utf8'
-      );
+      expect(fs.readSystemFile).toHaveBeenCalledWith('./messages.po', 'utf8');
 
       expect(getLocale()).toBe('zh_CN');
       expect(getDomain()).toBe('messages');
+    });
+
+    it('load translations from the given PO file2', async () => {
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+
+      fs.readSystemFile.mockReturnValueOnce(null);
+
+      await initI18n('zh_CN', './messages.po');
+
+      expect(logger.warn).toHaveBeenCalledWith(
+        'ReadSystemFile for translations content returns null'
+      );
     });
 
     it('should fallback to English edition when loading PO file occurred any error', async () => {
