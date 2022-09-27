@@ -28,7 +28,7 @@ function extractFromSection(
   let depType;
 
   if (section instanceof PoetryGroupSection) {
-    sectionContent = parsedFile.tool?.poetry?.group[section.name].dependencies;
+    sectionContent = parsedFile.tool?.poetry?.group[section.name]?.dependencies;
     depType = section.name;
   } else {
     sectionContent = parsedFile.tool?.poetry?.[section];
