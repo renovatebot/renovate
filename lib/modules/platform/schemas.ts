@@ -2,7 +2,7 @@ import { z } from 'zod';
 
 export const Pr = z.object(
   {
-    sourceBranch: z.number().min(1),
+    sourceBranch: z.string().min(1),
     number: z.number(),
     state: z.string().min(1),
     title: z.string().min(1),
