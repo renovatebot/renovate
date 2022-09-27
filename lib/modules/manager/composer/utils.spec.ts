@@ -336,6 +336,22 @@ describe('modules/manager/composer/utils', () => {
         })
       ).toBeUndefined();
     });
+
+    it('remove x-access-token token prefix', () => {
+      const TOKEN_STRING_WITH_PREFIX = 'x-access-token:ghp_TOKEN';
+      const TOKEN_STRING = 'ghp_TOKEN';
+      hostRules.add({
+        hostType: GitTagsDatasource.id,
+        matchHost: 'github.com',
+        token: TOKEN_STRING_WITH_PREFIX,
+      });
+      expect(
+        findGithubPersonalAccessToken({
+          hostType: GitTagsDatasource.id,
+          url: 'https://github.com',
+        })
+      ).toEqual(TOKEN_STRING);
+    });
   });
 
   describe('isPersonalAccessToken', () => {
