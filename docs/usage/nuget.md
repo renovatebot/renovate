@@ -98,9 +98,12 @@ Credentials for authenticated/private feeds can be given via host rules in the c
 }
 ```
 
+When using Azure DevOps, you can use `pkgs.dev.azure.com` as `matchHost` value.
+
 <!-- prettier-ignore -->
 !!! note
     Only Basic HTTP authentication (via username and password) is supported.
+    For Azure DevOps, you can use a Personal Access Token (PAT) with read permissions on `Packaging` along with an empty username.
 
 ## Future work
 
