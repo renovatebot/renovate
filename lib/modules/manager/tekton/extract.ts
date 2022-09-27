@@ -1,6 +1,7 @@
 import is from '@sindresorhus/is';
 import { loadAll } from 'js-yaml';
 import { logger } from '../../../logger';
+import { coerceArray } from '../../../util/array';
 import { getDep } from '../dockerfile/extract';
 import type { PackageDependency, PackageFile } from '../types';
 import type { TektonBundle, TektonResource } from './types';
@@ -43,18 +44,18 @@ function getDeps(doc: TektonResource): PackageDependency[] {
   addDep(doc.spec?.pipelineRef, deps);
 
   // Handle Pipeline resource
-  for (const task of doc.spec?.tasks ?? []) {
+  for (const task of coerceArray(doc.spec?.tasks)) {
     addDep(task.taskRef, deps);
   }
 
   // Handle TriggerTemplate resource
-  for (const resource of doc.spec?.resourcetemplates ?? []) {
+  for (const resource of coerceArray(doc.spec?.resourcetemplates)) {
     addDep(resource?.spec?.taskRef, deps);
     addDep(resource?.spec?.pipelineRef, deps);
   }
 
   // Handle list of TektonResources
-  for (const item of doc.items ?? []) {
+  for (const item of coerceArray(doc.items)) {
     deps.push(...getDeps(item));
   }
 
@@ -68,7 +69,7 @@ function addDep(ref: TektonBundle, deps: PackageDependency[]): void {
   let imageRef: string | undefined;
   // Find a bundle reference from the Bundle resolver
   if (ref.resolver === 'bundles') {
-    for (const field of ref.resource ?? []) {
+    for (const field of coerceArray(ref.resource)) {
       if (field.name === 'bundle') {
         imageRef = field.value;
         break;
