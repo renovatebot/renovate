@@ -14,6 +14,7 @@ export const presets: Record<string, Preset> = {
       'workarounds:reduceRepologyServerLoad',
       'workarounds:doNotUpgradeFromAlpineStableToEdge',
       'workarounds:supportRedHatImageVersion',
+      'workarounds:javaLTSImageVersion',
     ],
     ignoreDeps: [],
   },
@@ -115,6 +116,23 @@ export const presets: Record<string, Preset> = {
           'registry.access.redhat.com/rhel-minimal',
         ],
         versioning: 'redhat',
+      },
+    ],
+  },
+  javaLTSImageVersion: {
+    description: 'Limit Java runtime versions to LTS releases',
+    packageRules: [
+      {
+        matchDatasources: ['docker'],
+        matchPackageNames: ['openjdk', 'amazoncorretto'],
+        allowedVersions: '/^(11|17|21)(\\.[0-9]+){0,2}/',
+      },
+      {
+        matchDatasources: ['docker'],
+        matchPackageNames: ['eclipse-temurin', 'adoptopenjdk'],
+        versioning:
+          'regex:^(?<major>\\d+)(\\.(?<minor>\\d+))?(\\.(?<patch>\\d+))?(_(?<build>\\d+))?(-(?<compatibility>.*))?$',
+        allowedVersions: '/^(11|17|21)(\\.[0-9]+){0,2}/',
       },
     ],
   },
