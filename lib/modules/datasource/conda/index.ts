@@ -37,11 +37,7 @@ export class CondaDatasource extends Datasource {
     logger.trace({ registryUrl, packageName }, 'fetching conda package');
 
     if (!registryUrl) {
-      logger.warn(
-        { packageName },
-        'conda datasource requires custom registryUrl. Skipping datasource'
-      );
-      return null;
+      registryUrl = defaultRegistryUrl;
     }
 
     const url = joinUrlParts(registryUrl, packageName);

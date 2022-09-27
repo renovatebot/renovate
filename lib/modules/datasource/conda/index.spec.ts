@@ -41,20 +41,6 @@ describe('modules/datasource/conda/index', () => {
       ).toBeNull();
     });
 
-    it('returns null without registryUrl + warning', async () => {
-      const condaDatasource = new CondaDatasource();
-      const res = await condaDatasource.getReleases({
-        registryUrl: '',
-        packageName: depName,
-      });
-      expect(logger.warn).toHaveBeenCalledTimes(2);
-      expect(logger.warn).toHaveBeenCalledWith(
-        { packageName: depName },
-        'conda datasource requires custom registryUrl. Skipping datasource'
-      );
-      expect(res).toBeNull();
-    });
-
     it('throws for 5xx', async () => {
       httpMock.scope(defaultRegistryUrl).get(depUrl).reply(502);
       await expect(
@@ -73,6 +59,20 @@ describe('modules/datasource/conda/index', () => {
       const res = await getPkgReleases({
         datasource,
         depName,
+      });
+      expect(res).toMatchSnapshot();
+      expect(res?.releases).toHaveLength(94);
+    });
+
+    it('process real data without registryUrl + warning', async () => {
+      httpMock
+        .scope(defaultRegistryUrl)
+        .get(depUrl)
+        .reply(200, Fixtures.get('pytest.json'));
+      const condaDatasource = new CondaDatasource();
+      const res = await condaDatasource.getReleases({
+        registryUrl: '',
+        packageName: depName,
       });
       expect(res).toMatchSnapshot();
       expect(res?.releases).toHaveLength(94);
