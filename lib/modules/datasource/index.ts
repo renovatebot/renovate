@@ -428,7 +428,7 @@ export function supportsDigests(datasource: string | undefined): boolean {
   return !!ds && 'getDigest' in ds;
 }
 
-export function getDigestConfig(
+function getDigestConfig(
   datasource: DatasourceApi,
   config: GetDigestInputConfig
 ): DigestConfig {

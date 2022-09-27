@@ -8,13 +8,17 @@ import { ExternalHostError } from '../../types/errors/external-host-error';
 import { loadModules } from '../../util/modules';
 import datasources from './api';
 import { Datasource } from './datasource';
-import type { DatasourceApi, GetReleasesConfig, ReleaseResult } from './types';
+import type {
+  DatasourceApi,
+  DigestConfig,
+  GetReleasesConfig,
+  ReleaseResult,
+} from './types';
 import {
   getDatasourceList,
   getDatasources,
   getDefaultVersioning,
   getDigest,
-  getDigestConfig,
   getPkgReleases,
   supportsDigests,
 } from '.';
@@ -230,21 +234,25 @@ describe('modules/datasource/index', () => {
       expect(await getDigest({ datasource, depName })).toBe('123');
     });
 
-    it('returns replacementName if defined', () => {
+    it('returns replacementName if defined', async () => {
+      class TestDatasource extends DummyDatasource {
+        override getDigest(
+          config: DigestConfig,
+          newValue?: string
+        ): Promise<string> {
+          return Promise.resolve(config.packageName);
+        }
+      }
+      datasources.set(datasource, new TestDatasource());
+
       expect(
-        getDigestConfig(new DummyDatasource(), {
+        await getDigest({
           datasource: datasource,
+          packageName: 'pkgName',
           depName: depName,
           replacementName: 'replacement',
-          currentDigest: '123',
-          currentValue: '1.2.3',
         })
-      ).toMatchObject({
-        registryUrl: 'https://reg1.com',
-        packageName: 'replacement',
-        currentDigest: '123',
-        currentValue: '1.2.3',
-      });
+      ).toBe('replacement');
     });
   });
 
