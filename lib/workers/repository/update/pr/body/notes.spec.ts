@@ -37,11 +37,11 @@ describe('workers/repository/update/pr/body/notes', () => {
         {
           manager: 'some-manager',
           branchName: 'branch',
-          prBodyNotes: ['NOTE'],
+          prBodyNotes: ['{{NOTE}}'],
         },
       ],
     });
-    expect(res).not.toContain('NOTE');
+    expect(res).toContain('{{NOTE}}');
   });
 
   it('handles extra notes', () => {
