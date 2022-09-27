@@ -1,11 +1,14 @@
-import { defaultConfig } from '../../../../test/util';
-import type { UpdateType } from '../../../config/types';
+import { getConfig } from '../../../../test/util';
+import type { RenovateConfig, UpdateType } from '../../../config/types';
 import { NpmDatasource } from '../../../modules/datasource/npm';
 import type { BranchUpgradeConfig } from '../../types';
 import { generateBranchConfig } from './generate';
 
+let defaultConfig: RenovateConfig;
+
 beforeEach(() => {
   jest.resetAllMocks();
+  defaultConfig = getConfig();
 });
 
 describe('workers/repository/updates/generate', () => {
@@ -1072,6 +1075,29 @@ describe('workers/repository/updates/generate', () => {
       const excludeCommitPaths = res.excludeCommitPaths ?? [];
       expect(excludeCommitPaths.sort()).toStrictEqual(
         ['some/path', 'some/other/path', 'some/other-manager/path'].sort()
+      );
+    });
+
+    it('generates pretty version name properly', () => {
+      const branch: BranchUpgradeConfig[] = [
+        {
+          ...defaultConfig,
+          depName: 'some-dep',
+          isSingleVersion: true,
+          manager: 'some-manager',
+          newValue: 'foo-pkg-v3.2.1',
+          newVersion: 'foo-pkg-v3.2.1',
+          semanticCommits: 'enabled',
+          semanticCommitScope: 'package',
+          semanticCommitType: 'chore',
+        } as BranchUpgradeConfig,
+      ];
+      const res = generateBranchConfig(branch);
+      expect(res.prTitle).toBe(
+        'chore(package): update dependency some-dep to foo-pkg-v3.2.1'
+      );
+      expect(res.commitMessage).toBe(
+        'chore(package): update dependency some-dep to foo-pkg-v3.2.1'
       );
     });
 

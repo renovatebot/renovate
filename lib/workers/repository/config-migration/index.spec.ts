@@ -1,5 +1,5 @@
 import { Fixtures } from '../../../../test/fixtures';
-import { defaultConfig, mockedFunction } from '../../../../test/util';
+import { getConfig, mockedFunction } from '../../../../test/util';
 import { checkConfigMigrationBranch } from './branch';
 import { MigratedDataFactory } from './branch/migrated-data';
 import { ensureConfigMigrationPr } from './pr';
@@ -13,7 +13,7 @@ const content = Fixtures.getJson('./migrated-data.json', './branch');
 const filename = 'renovate.json';
 const branchName = 'renovate/config-migration';
 const config = {
-  ...defaultConfig,
+  ...getConfig(),
   configMigration: true,
 };
 

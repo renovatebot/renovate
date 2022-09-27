@@ -1,7 +1,6 @@
 import * as httpMock from '../../../../../../test/http-mock';
 import { GlobalConfig } from '../../../../../config/global';
 import { PlatformId } from '../../../../../constants';
-import { CacheableGithubTags } from '../../../../../modules/datasource/github-tags/cache';
 import * as semverVersioning from '../../../../../modules/versioning/semver';
 import * as hostRules from '../../../../../util/host-rules';
 import type { BranchUpgradeConfig } from '../../../../types';
@@ -358,17 +357,15 @@ describe('workers/repository/update/pr/changelog/github', () => {
     });
 
     it('works with same version releases but different prefix', async () => {
-      const githubTagsMock = jest.spyOn(
-        CacheableGithubTags.prototype,
-        'getItems'
-      );
-
-      githubTagsMock.mockResolvedValue([
-        { version: 'v1.0.1' },
-        { version: '1.0.1' },
-        { version: 'correctPrefix/target@1.0.1' },
-        { version: 'wrongPrefix/target-1.0.1' },
-      ] as never);
+      httpMock
+        .scope('https://api.github.com/')
+        .get('/repos/chalk/chalk/tags?per_page=100')
+        .reply(200, [
+          { name: 'v1.0.1' },
+          { name: '1.0.1' },
+          { name: 'correctPrefix/target@1.0.1' },
+          { name: 'wrongPrefix/target-1.0.1' },
+        ]);
 
       const upgradeData: BranchUpgradeConfig = {
         manager: 'some-manager',

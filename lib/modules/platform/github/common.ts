@@ -1,19 +1,14 @@
 import is from '@sindresorhus/is';
 import { PrState } from '../../../types';
 import { getPrBodyStruct } from '../pr-body';
-import type { Pr } from '../types';
-import type { GhRestPr } from './types';
+import type { GhPr, GhRestPr } from './types';
 
 /**
  * @see https://docs.github.com/en/rest/reference/pulls#list-pull-requests
  */
-export function coerceRestPr(pr: GhRestPr | null | undefined): Pr | null {
-  if (!pr) {
-    return null;
-  }
-
+export function coerceRestPr(pr: GhRestPr): GhPr {
   const bodyStruct = pr.bodyStruct ?? getPrBodyStruct(pr.body);
-  const result: Pr = {
+  const result: GhPr = {
     displayNumber: `Pull Request #${pr.number}`,
     number: pr.number,
     sourceBranch: pr.head?.ref,
@@ -23,6 +18,8 @@ export function coerceRestPr(pr: GhRestPr | null | undefined): Pr | null {
         ? PrState.Merged
         : pr.state,
     bodyStruct,
+    updated_at: pr.updated_at,
+    node_id: pr.node_id,
   };
 
   if (pr.head?.sha) {
