@@ -16,7 +16,8 @@ function isOldCache(prCache: unknown): prCache is ApiPageCache<GhRestPr> {
     !is.emptyObject(prCache.items)
   ) {
     const [item] = Object.values(prCache.items);
-    if (is.plainObject(item) && is.string(item.node_id)) {
+    // istanbul ignore if
+    if (is.plainObject(item) && is.plainObject(item.head)) {
       return true;
     }
   }
@@ -26,6 +27,7 @@ function isOldCache(prCache: unknown): prCache is ApiPageCache<GhRestPr> {
 
 function migrateCache(cache: unknown): void {
   const items: ApiPageCache<GhPr>['items'] = {};
+  // istanbul ignore if
   if (isOldCache(cache)) {
     for (const item of Object.values(cache.items)) {
       items[item.number] = coerceRestPr(item);
