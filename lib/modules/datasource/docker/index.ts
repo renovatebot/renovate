@@ -49,6 +49,7 @@ import {
 export const DOCKER_HUB = 'https://index.docker.io';
 
 export const ecrRegex = regEx(/\d+\.dkr\.ecr\.([-a-z0-9]+)\.amazonaws\.com/);
+export const ecrPublicRegex = regEx(/public\.ecr\.aws/);
 
 function isDockerHost(host: string): boolean {
   const regex = regEx(/(?:^|\.)docker\.io$/);
@@ -818,7 +819,11 @@ export class DockerDatasource extends Datasource {
     let tags: string[] = [];
     // AWS ECR limits the maximum number of results to 1000
     // See https://docs.aws.amazon.com/AmazonECR/latest/APIReference/API_DescribeRepositories.html#ECR-DescribeRepositories-request-maxResults
-    const limit = ecrRegex.test(registryHost) ? 1000 : 10000;
+    // See https://docs.aws.amazon.com/AmazonECRPublic/latest/APIReference/API_DescribeRepositories.html#ecrpublic-DescribeRepositories-request-maxResults
+    const limit =
+      ecrRegex.test(registryHost) || ecrPublicRegex.test(registryHost)
+        ? 1000
+        : 10000;
     let url:
       | string
       | null = `${registryHost}/${dockerRepository}/tags/list?n=${limit}`;
