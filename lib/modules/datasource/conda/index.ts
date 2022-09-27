@@ -36,11 +36,13 @@ export class CondaDatasource extends Datasource {
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     logger.trace({ registryUrl, packageName }, 'fetching conda package');
 
-    if (!registryUrl) {
-      registryUrl = defaultRegistryUrl;
+    let regUrl = registryUrl;
+
+    if (!regUrl) {
+      regUrl = defaultRegistryUrl;
     }
 
-    const url = joinUrlParts(registryUrl, packageName);
+    const url = joinUrlParts(regUrl, packageName);
 
     const result: ReleaseResult = {
       releases: [],
