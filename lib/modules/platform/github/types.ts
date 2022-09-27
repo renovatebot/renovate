@@ -54,7 +54,8 @@ export interface GhRestPr {
 }
 
 export interface GhPr extends Pr {
-  updatedAt: string;
+  updated_at: string;
+  node_id: string;
 }
 
 export interface UserDetails {
