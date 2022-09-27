@@ -1,6 +1,8 @@
 import is from '@sindresorhus/is';
 import { PrState } from '../../../types';
+import { checkSchema } from '../../../util/schema';
 import { getPrBodyStruct } from '../pr-body';
+import * as platformSchemas from '../schemas';
 import type { GhPr, GhRestPr } from './types';
 
 /**
@@ -50,5 +52,6 @@ export function coerceRestPr(pr: GhRestPr): GhPr {
     result.closedAt = pr.closed_at;
   }
 
+  checkSchema(platformSchemas.Pr, result);
   return result;
 }
