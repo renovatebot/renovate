@@ -27,12 +27,8 @@ describe('util/schema', () => {
 
   it('reports same warning once', () => {
     const schema = z.object(
-      {
-        foo: z.string(),
-      },
-      {
-        description: 'Some test schema',
-      }
+      { foo: z.string() },
+      { description: 'Some test schema' }
     );
     const invalidData = { foo: 42 };
 
@@ -50,9 +46,7 @@ describe('util/schema', () => {
   });
 
   it('reports unspecified schema', () => {
-    const schema = z.object({
-      foo: z.string(),
-    });
+    const schema = z.object({ foo: z.string() });
     const invalidData = { foo: 42 };
 
     checkSchema(schema, invalidData);
