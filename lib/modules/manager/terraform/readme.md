@@ -7,8 +7,8 @@ Check the tables to see where some dependencies can be hosted.
 
 | Name              | Public hosting | Private hosting |
 | ----------------- | :------------: | :-------------: |
-| GitTags           |        yes        |       yes          |
-| GithubTags        |      yes          |       yes          |
+| GitTags           |      yes       |       yes       |
+| GithubTags        |      yes       |       yes       |
 | TerraformRegistry |      yes       |       yes       |
 
 #### Providers
@@ -33,7 +33,7 @@ Renovate can update the `required_version` attribute of the Terraform block.
 
 #### helm_release
 
-Renovate can update the version attribute of  `helm_release` resources.
+Renovate can update the version attribute of `helm_release` resources.
 
 | Name             | Public hosting | Private hosting |
 | ---------------- | :------------: | :-------------: |
@@ -41,7 +41,7 @@ Renovate can update the version attribute of  `helm_release` resources.
 
 #### Docker
 
-Renovate can update image references of the docker provider resources (`docker\_\*`).
+Renovate can update image references of the Docker provider resources (`docker\_\*`).
 
 | Name            | Public hosting | Private hosting |
 | --------------- | :------------: | :-------------: |
