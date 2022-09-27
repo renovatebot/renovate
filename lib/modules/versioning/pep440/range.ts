@@ -98,7 +98,7 @@ export function getNewValue({
 }: NewValueConfig): string | null {
   let ranges: Range[];
   let updatedRange: (string | null)[];
-  if (rangeStrategy === 'pin') {
+  if (rangeStrategy === 'pin' && !isReplacement) {
     return '==' + newVersion;
   }
 
