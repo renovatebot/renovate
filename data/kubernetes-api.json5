@@ -1,4 +1,4 @@
-export const KubernetesApiVersions: Record<string, string[]> = {
+{
   // https://kubernetes.io/docs/reference/using-api/deprecation-guide/#v1-16
   // https://kubernetes.io/docs/reference/using-api/deprecation-guide/#networkpolicy-v116
   NetworkPolicy: ['extensions/v1beta1', 'networking.k8s.io/v1'],
@@ -12,7 +12,6 @@ export const KubernetesApiVersions: Record<string, string[]> = {
   ReplicaSet: ['extensions/v1beta1', 'apps/v1beta1', 'apps/v1beta2', 'apps/v1'],
   // https://kubernetes.io/docs/reference/using-api/deprecation-guide/#psp-v116
   PodSecurityPolicy: ['extensions/v1beta1', 'policy/v1beta1'],
-
   // https://kubernetes.io/docs/reference/using-api/deprecation-guide/#v1-22
   // https://kubernetes.io/docs/reference/using-api/deprecation-guide/#webhook-resources-v122
   MutatingWebhookConfiguration: [
@@ -54,7 +53,6 @@ export const KubernetesApiVersions: Record<string, string[]> = {
     'certificates.k8s.io/v1beta1',
     'certificates.k8s.io/v1',
   ],
-
   // https://kubernetes.io/docs/reference/using-api/deprecation-guide/#lease-v122
   Lease: ['coordination.k8s.io/v1beta1', 'coordination.k8s.io/v1'],
   // https://kubernetes.io/docs/reference/using-api/deprecation-guide/#ingress-v122
@@ -86,7 +84,6 @@ export const KubernetesApiVersions: Record<string, string[]> = {
   CSINode: ['storage.k8s.io/v1beta1', 'storage.k8s.io/v1'],
   StorageClass: ['storage.k8s.io/v1beta1', 'storage.k8s.io/v1'],
   VolumeAttachment: ['storage.k8s.io/v1beta1', 'storage.k8s.io/v1'],
-
   // https://kubernetes.io/docs/reference/using-api/deprecation-guide/#v1-25
   // https://kubernetes.io/docs/reference/using-api/deprecation-guide/#cronjob-v125
   CronJob: ['batch/v1beta1', 'batch/v1'],
@@ -100,7 +97,6 @@ export const KubernetesApiVersions: Record<string, string[]> = {
   PodDisruptionBudget: ['policy/v1beta1', 'policy/v1'],
   // https://kubernetes.io/docs/reference/using-api/deprecation-guide/#runtimeclass-v125
   RuntimeClass: ['node.k8s.io/v1beta1', 'node.k8s.io/v1'],
-
   // https://kubernetes.io/docs/reference/using-api/deprecation-guide/#v1-26
   // https://kubernetes.io/docs/reference/using-api/deprecation-guide/#flowcontrol-resources-v126
   FlowSchema: [
@@ -111,8 +107,7 @@ export const KubernetesApiVersions: Record<string, string[]> = {
     'flowcontrol.apiserver.k8s.io/v1beta1',
     'flowcontrol.apiserver.k8s.io/v1beta2',
   ],
-
   // https://kubernetes.io/docs/reference/using-api/deprecation-guide/#v1-27
   // https://kubernetes.io/docs/reference/using-api/deprecation-guide/#csistoragecapacity-v127
   CSIStorageCapacity: ['storage.k8s.io/v1beta1', 'storage.k8s.io/v1'],
-};
+}
