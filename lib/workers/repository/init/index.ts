@@ -4,10 +4,11 @@ import type { RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
 import { platform } from '../../../modules/platform';
 import { clone } from '../../../util/clone';
-import { setUserRepoConfig } from '../../../util/git';
+import { cloneSubmodules, setUserRepoConfig } from '../../../util/git';
+import { getAll } from '../../../util/host-rules';
 import { checkIfConfigured } from '../configured';
 import { PackageFiles } from '../package-files';
-import { initApis } from './apis';
+import { WorkerPlatformConfig, initApis } from './apis';
 import { initializeCaches, resetCaches } from './cache';
 import { getRepoConfig } from './config';
 import { detectVulnerabilityAlerts } from './vulnerability';
@@ -18,7 +19,8 @@ function initializeConfig(config: RenovateConfig): RenovateConfig {
 
 function warnOnUnsupportedOptions(config: RenovateConfig): void {
   if (config.filterUnavailableUsers && !platform.filterUnavailableUsers) {
-    const platform = GlobalConfig.get('platform');
+    // TODO: types (#7154)
+    const platform = GlobalConfig.get('platform')!;
     logger.warn(
       `Configuration option 'filterUnavailableUsers' is not supported on the current platform '${platform}'.`
     );
@@ -32,7 +34,7 @@ export async function initRepo(
   let config: RenovateConfig = initializeConfig(config_);
   await resetCaches();
   config = await initApis(config);
-  await initializeCaches(config);
+  await initializeCaches(config as WorkerPlatformConfig);
   config = await getRepoConfig(config);
   checkIfConfigured(config);
   warnOnUnsupportedOptions(config);
@@ -41,7 +43,11 @@ export async function initRepo(
   config = await detectVulnerabilityAlerts(config);
   // istanbul ignore if
   if (config.printConfig) {
-    logger.info({ config }, 'Full resolved config including presets');
+    logger.info(
+      { config, hostRules: getAll() },
+      'Full resolved config and hostRules including presets'
+    );
   }
+  await cloneSubmodules(!!config.cloneSubmodules);
   return config;
 }

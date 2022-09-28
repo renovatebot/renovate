@@ -1,11 +1,11 @@
 import URL from 'url';
-import pAll from 'p-all';
 import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import * as packageCache from '../../../util/cache/package';
 import { cache } from '../../../util/cache/package/decorator';
 import * as hostRules from '../../../util/host-rules';
 import type { HttpOptions } from '../../../util/http/types';
+import * as p from '../../../util/promises';
 import { regEx } from '../../../util/regex';
 import { ensureTrailingSlash, joinUrlParts } from '../../../util/url';
 import * as composerVersioning from '../../versioning/composer';
@@ -182,7 +182,7 @@ export class PackagistDatasource extends Datasource {
         (file) => (): Promise<PackagistFile> =>
           this.getPackagistFile(regUrl, file)
       );
-      const resolvedFiles = await pAll(queue, { concurrency: 5 });
+      const resolvedFiles = await p.all(queue);
       for (const res of resolvedFiles) {
         for (const [name, val] of Object.entries(res.providers)) {
           providerPackages[name] = val.sha256;

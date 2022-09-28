@@ -1,7 +1,7 @@
 import { DateTime } from 'luxon';
+import { Fixtures } from '../../../../../../test/fixtures';
 import * as httpMock from '../../../../../../test/http-mock';
-import { loadFixture, mocked } from '../../../../../../test/util';
-import { CacheableGithubReleases } from '../../../../../modules/datasource/github-releases/cache';
+import { mocked } from '../../../../../../test/util';
 import { clone } from '../../../../../util/clone';
 import * as _hostRules from '../../../../../util/host-rules';
 import { toBase64 } from '../../../../../util/string';
@@ -24,12 +24,12 @@ jest.mock('../../../../../util/host-rules');
 
 const hostRules = mocked(_hostRules);
 
-const angularJsChangelogMd = loadFixture('angular-js.md', '..');
-const jestChangelogMd = loadFixture('jest.md', '..');
-const jsYamlChangelogMd = loadFixture('js-yaml.md', '..');
-const yargsChangelogMd = loadFixture('yargs.md', '..');
-const adapterutilsChangelogMd = loadFixture('adapter-utils.md', '..');
-const gitterWebappChangelogMd = loadFixture('gitter-webapp.md', '..');
+const angularJsChangelogMd = Fixtures.get('angular-js.md', '..');
+const jestChangelogMd = Fixtures.get('jest.md', '..');
+const jsYamlChangelogMd = Fixtures.get('js-yaml.md', '..');
+const yargsChangelogMd = Fixtures.get('yargs.md', '..');
+const adapterutilsChangelogMd = Fixtures.get('adapter-utils.md', '..');
+const gitterWebappChangelogMd = Fixtures.get('gitter-webapp.md', '..');
 
 const githubTreeResponse = {
   tree: [
@@ -58,11 +58,6 @@ const gitlabProject = {
 } as ChangeLogProject;
 
 describe('workers/repository/update/pr/changelog/release-notes', () => {
-  const githubReleasesMock = jest.spyOn(
-    CacheableGithubReleases.prototype,
-    'getItems'
-  );
-
   beforeEach(() => {
     hostRules.find.mockReturnValue({});
     hostRules.hosts.mockReturnValue([]);
@@ -183,14 +178,16 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
     });
 
     it('should return release list for github repo', async () => {
-      githubReleasesMock.mockResolvedValueOnce([
-        { version: `v1.0.0` },
-        {
-          version: `v1.0.1`,
-          description:
-            'some body #123, [#124](https://github.com/some/yet-other-repository/issues/124)',
-        },
-      ] as never);
+      httpMock
+        .scope('https://api.github.com/')
+        .get('/repos/some/yet-other-repository/releases?per_page=100')
+        .reply(200, [
+          { tag_name: `v1.0.0` },
+          {
+            tag_name: `v1.0.1`,
+            body: 'some body #123, [#124](https://github.com/some/yet-other-repository/issues/124)',
+          },
+        ]);
 
       const res = await getReleaseList(
         {
@@ -292,10 +289,10 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
 
   describe('getReleaseNotes()', () => {
     it('should return null for release notes without body', async () => {
-      githubReleasesMock.mockResolvedValueOnce([
-        { version: 'v1.0.0' },
-        { version: 'v1.0.1' },
-      ] as never);
+      httpMock
+        .scope('https://api.github.com/')
+        .get('/repos/some/repository/releases?per_page=100')
+        .reply(200, [{ tag_name: 'v1.0.0' }, { tag_name: 'v1.0.1' }]);
       const res = await getReleaseNotes(
         {
           ...githubProject,
@@ -312,14 +309,17 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
     });
 
     it('gets release notes with body ""', async () => {
-      githubReleasesMock.mockResolvedValueOnce([
-        { version: '1.0.0' },
-        {
-          version: '1.0.1',
-          description:
-            'some body #123, [#124](https://github.com/some/yet-other-repository/issues/124)',
-        },
-      ] as never);
+      const prefix = '';
+      httpMock
+        .scope('https://api.github.com/')
+        .get('/repos/some/other-repository/releases?per_page=100')
+        .reply(200, [
+          { tag_name: `${prefix}1.0.0` },
+          {
+            tag_name: `${prefix}1.0.1`,
+            body: 'some body #123, [#124](https://github.com/some/yet-other-repository/issues/124)',
+          },
+        ]);
       const res = await getReleaseNotes(
         {
           ...githubProject,
@@ -344,14 +344,17 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
     });
 
     it('gets release notes with body "v"', async () => {
-      githubReleasesMock.mockResolvedValueOnce([
-        { version: 'v1.0.0' },
-        {
-          version: 'v1.0.1',
-          description:
-            'some body #123, [#124](https://github.com/some/yet-other-repository/issues/124)',
-        },
-      ] as never);
+      const prefix = 'v';
+      httpMock
+        .scope('https://api.github.com/')
+        .get('/repos/some/other-repository/releases?per_page=100')
+        .reply(200, [
+          { tag_name: `${prefix}1.0.0` },
+          {
+            tag_name: `${prefix}1.0.1`,
+            body: 'some body #123, [#124](https://github.com/some/yet-other-repository/issues/124)',
+          },
+        ]);
       const res = await getReleaseNotes(
         {
           ...githubProject,
@@ -376,14 +379,17 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
     });
 
     it('gets release notes with body "other-"', async () => {
-      githubReleasesMock.mockResolvedValueOnce([
-        { version: 'other-1.0.0' },
-        {
-          version: 'other-1.0.1',
-          description:
-            'some body #123, [#124](https://github.com/some/yet-other-repository/issues/124)',
-        },
-      ] as never);
+      const prefix = 'other-';
+      httpMock
+        .scope('https://api.github.com/')
+        .get('/repos/some/other-repository/releases?per_page=100')
+        .reply(200, [
+          { tag_name: `${prefix}1.0.0` },
+          {
+            tag_name: `${prefix}1.0.1`,
+            body: 'some body #123, [#124](https://github.com/some/yet-other-repository/issues/124)',
+          },
+        ]);
 
       const res = await getReleaseNotes(
         {
@@ -409,14 +415,17 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
     });
 
     it('gets release notes with body "other_v"', async () => {
-      githubReleasesMock.mockResolvedValueOnce([
-        { version: 'other_v1.0.0' },
-        {
-          version: 'other_v1.0.1',
-          description:
-            'some body #123, [#124](https://github.com/some/yet-other-repository/issues/124)',
-        },
-      ] as never);
+      const prefix = 'other_v';
+      httpMock
+        .scope('https://api.github.com/')
+        .get('/repos/some/other-repository/releases?per_page=100')
+        .reply(200, [
+          { tag_name: `${prefix}1.0.0` },
+          {
+            tag_name: `${prefix}1.0.1`,
+            body: 'some body #123, [#124](https://github.com/some/yet-other-repository/issues/124)',
+          },
+        ]);
 
       const res = await getReleaseNotes(
         {
@@ -442,14 +451,17 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
     });
 
     it('gets release notes with body "other@"', async () => {
-      githubReleasesMock.mockResolvedValueOnce([
-        { version: 'other@1.0.0' },
-        {
-          version: 'other@1.0.1',
-          description:
-            'some body #123, [#124](https://github.com/some/yet-other-repository/issues/124)',
-        },
-      ] as never);
+      const prefix = 'other@';
+      httpMock
+        .scope('https://api.github.com/')
+        .get('/repos/some/other-repository/releases?per_page=100')
+        .reply(200, [
+          { tag_name: `${prefix}1.0.0` },
+          {
+            tag_name: `${prefix}1.0.1`,
+            body: 'some body #123, [#124](https://github.com/some/yet-other-repository/issues/124)',
+          },
+        ]);
       const res = await getReleaseNotes(
         {
           ...githubProject,
@@ -603,17 +615,20 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
 
     it('handles same version but different repo releases', async () => {
       const depName = 'correctTagPrefix/exampleDep';
-      githubReleasesMock.mockResolvedValueOnce([
-        {
-          version: `${depName}@1.0.0`,
-          url: 'correct/url/tag.com',
-          description: 'some body',
-        },
-        { version: `someOtherRelease1/exampleDep_1.0.0` },
-        {
-          version: `someOtherRelease2/exampleDep-1.0.0`,
-        },
-      ] as never);
+      httpMock
+        .scope('https://api.github.com/')
+        .get('/repos/some/other-repository/releases?per_page=100')
+        .reply(200, [
+          {
+            tag_name: `${depName}@1.0.0`,
+            html_url: 'correct/url/tag.com',
+            body: 'some body',
+          },
+          { tag_name: `someOtherRelease1/exampleDep_1.0.0` },
+          {
+            tag_name: `someOtherRelease2/exampleDep-1.0.0`,
+          },
+        ]);
       const res = await getReleaseNotes(
         {
           ...githubProject,
@@ -638,13 +653,16 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
     });
 
     it('fallback to extractVersion', async () => {
-      githubReleasesMock.mockResolvedValueOnce([
-        {
-          version: `app-1.0.0`,
-          url: 'correct/url/tag.com',
-          description: 'some body',
-        },
-      ] as never);
+      httpMock
+        .scope('https://api.github.com/')
+        .get('/repos/some/other-repository/releases?per_page=100')
+        .reply(200, [
+          {
+            tag_name: `app-1.0.0`,
+            html_url: 'correct/url/tag.com',
+            body: 'some body',
+          },
+        ]);
       const res = await getReleaseNotes(
         {
           ...githubProject,

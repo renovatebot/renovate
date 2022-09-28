@@ -1,6 +1,6 @@
 import is from '@sindresorhus/is';
 import { logger } from '../../../../logger';
-import { getSiblingFileName, getSubDirectory } from '../../../../util/fs';
+import { getParentDir, getSiblingFileName } from '../../../../util/fs';
 import type { PackageFile } from '../../types';
 import { detectPnpmWorkspaces } from './pnpm';
 import { matchesAnyPattern } from './utils';
@@ -31,7 +31,7 @@ export async function detectMonorepos(
       ).map((pattern) => getSiblingFileName(packageFile!, pattern));
       const internalPackageFiles = packageFiles.filter((sp) =>
         matchesAnyPattern(
-          getSubDirectory(sp.packageFile!),
+          getParentDir(sp.packageFile!),
           internalPackagePatterns
         )
       );

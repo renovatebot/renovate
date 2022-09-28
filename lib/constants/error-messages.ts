@@ -41,6 +41,7 @@ export const NO_VULNERABILITY_ALERTS = 'no-vulnerability-alerts';
 
 // Manager Error
 export const MANAGER_LOCKFILE_ERROR = 'lockfile-error';
+export const FILE_ACCESS_VIOLATION_ERROR = 'file-access-violation-error';
 
 // Host error
 export const EXTERNAL_HOST_ERROR = 'external-host-error';
@@ -55,3 +56,9 @@ export const BUNDLER_INVALID_CREDENTIALS = 'bundler-credentials';
 
 // Unknown Error
 export const UNKNOWN_ERROR = 'unknown-error';
+
+// PATH Error
+export const INVALID_PATH = 'invalid-path';
+
+// PAGE NOT FOUND
+export const PAGE_NOT_FOUND_ERROR = 'page-not-found';

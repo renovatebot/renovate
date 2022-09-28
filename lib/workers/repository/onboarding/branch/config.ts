@@ -26,8 +26,9 @@ async function getOnboardingConfig(
   // Check for org/renovate-config
   try {
     const repo = `${orgName}/renovate-config`;
-    await getPreset({ repo });
-    orgPreset = `local>${repo}`;
+    if (await getPreset({ repo })) {
+      orgPreset = `local>${repo}`;
+    }
   } catch (err) {
     if (
       err.message !== PRESET_DEP_NOT_FOUND &&
@@ -39,15 +40,19 @@ async function getOnboardingConfig(
 
   if (!orgPreset) {
     // Check for org/.{{platform}}
-    const platform = GlobalConfig.get('platform');
+    // TODO: types (#7154)
+    const platform = GlobalConfig.get('platform')!;
     try {
       const repo = `${orgName}/.${platform}`;
       const presetName = 'renovate-config';
-      await getPreset({
-        repo,
-        presetName,
-      });
-      orgPreset = `local>${repo}:${presetName}`;
+      if (
+        await getPreset({
+          repo,
+          presetName,
+        })
+      ) {
+        orgPreset = `local>${repo}:${presetName}`;
+      }
     } catch (err) {
       if (
         err.message !== PRESET_DEP_NOT_FOUND &&
@@ -59,6 +64,9 @@ async function getOnboardingConfig(
   }
 
   if (orgPreset) {
+    logger.debug(
+      `Found org preset ${orgPreset} - using it in onboarding config`
+    );
     onboardingConfig = {
       $schema: 'https://docs.renovatebot.com/renovate-schema.json',
       extends: [orgPreset],

@@ -1,16 +1,20 @@
 // TODO #7154
 import is from '@sindresorhus/is';
-import pAll from 'p-all';
 import { getManagerConfig, mergeChildConfig } from '../../../config';
 import type { RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
-import { getDefaultConfig } from '../../../modules/datasource';
+import {
+  getDefaultConfig,
+  getDefaultVersioning,
+} from '../../../modules/datasource';
 import type {
   PackageDependency,
   PackageFile,
 } from '../../../modules/manager/types';
+import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { clone } from '../../../util/clone';
 import { applyPackageRules } from '../../../util/package-rules';
+import * as p from '../../../util/promises';
 import { PackageFiles } from '../package-files';
 import { lookupUpdates } from './lookup';
 import type { LookupUpdateConfig } from './lookup/types';
@@ -38,6 +42,7 @@ async function fetchDepUpdates(
   let depConfig = mergeChildConfig(packageFileConfig, dep);
   const datasourceDefaultConfig = await getDefaultConfig(depConfig.datasource!);
   depConfig = mergeChildConfig(depConfig, datasourceDefaultConfig);
+  depConfig.versioning ??= getDefaultVersioning(depConfig.datasource);
   depConfig = applyPackageRules(depConfig);
   if (depConfig.ignoreDeps!.includes(depName!)) {
     logger.debug({ dependency: depName }, 'Dependency is ignored');
@@ -47,10 +52,27 @@ async function fetchDepUpdates(
     dep.skipReason = 'disabled';
   } else {
     if (depConfig.datasource) {
-      dep = {
-        ...dep,
-        ...(await lookupUpdates(depConfig as LookupUpdateConfig)),
-      };
+      try {
+        dep = {
+          ...dep,
+          ...(await lookupUpdates(depConfig as LookupUpdateConfig)),
+        };
+      } catch (err) {
+        if (
+          packageFileConfig.repoIsOnboarded ||
+          !(err instanceof ExternalHostError)
+        ) {
+          throw err;
+        }
+
+        const cause = err.err;
+        dep.warnings ??= [];
+        dep.warnings.push({
+          topic: 'Lookup Error',
+          // TODO: types (#7154)
+          message: `${depName!}: ${cause.message}`,
+        });
+      }
     }
     dep.updates = dep.updates ?? [];
   }
@@ -74,7 +96,7 @@ async function fetchManagerPackagerFileUpdates(
     'fetchManagerPackagerFileUpdates starting with concurrency'
   );
 
-  pFile.deps = await pAll(queue, { concurrency: 5 });
+  pFile.deps = await p.all(queue);
   logger.trace({ packageFile }, 'fetchManagerPackagerFileUpdates finished');
 }
 
@@ -92,7 +114,7 @@ async function fetchManagerUpdates(
     { manager, queueLength: queue.length },
     'fetchManagerUpdates starting'
   );
-  await pAll(queue, { concurrency: 5 });
+  await p.all(queue);
   logger.trace({ manager }, 'fetchManagerUpdates finished');
 }
 

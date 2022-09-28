@@ -48,10 +48,11 @@ export interface BbsRestPr {
 }
 
 export interface BbsRestRepo {
+  id: number;
   project: { key: string };
   origin: { name: string; slug: string };
   links: {
-    clone: { href: string; name: string }[];
+    clone?: { href: string; name: string }[];
   };
 }
 

@@ -8,17 +8,6 @@ import { joinUrlParts } from '../../../util/url';
 import { id } from './common';
 import type { NpmDependency, NpmRelease, NpmResponse } from './types';
 
-let memcache: Record<string, string> = {};
-
-export function resetMemCache(): void {
-  logger.debug('resetMemCache()');
-  memcache = {};
-}
-
-export function resetCache(): void {
-  resetMemCache();
-}
-
 interface PackageSource {
   sourceUrl?: string;
   sourceDirectory?: string;
@@ -35,6 +24,8 @@ function getPackageSource(repository: any): PackageSource {
     if (is.nonEmptyString(repository.directory)) {
       res.sourceDirectory = repository.directory;
     }
+    // TODO: types (#7154)
+    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
     const sourceUrlCopy = `${res.sourceUrl}`;
     const sourceUrlSplit: string[] = sourceUrlCopy.split('/');
     if (sourceUrlSplit.length > 7 && sourceUrlSplit[2] === 'github.com') {
@@ -56,12 +47,6 @@ export async function getDependency(
   packageName: string
 ): Promise<NpmDependency | null> {
   logger.trace(`npm.getDependency(${packageName})`);
-
-  // This is our datastore cache and is cleared at the end of each repo, i.e. we never requery/revalidate during a "run"
-  if (memcache[packageName]) {
-    logger.trace('Returning cached result');
-    return JSON.parse(memcache[packageName]) as NpmDependency;
-  }
 
   const packageUrl = joinUrlParts(registryUrl, packageName.replace('/', '%2F'));
 
@@ -136,7 +121,6 @@ export async function getDependency(
     });
     logger.trace({ dep }, 'dep');
     // serialize first before saving
-    memcache[packageName] = JSON.stringify(dep);
     const cacheMinutes = process.env.RENOVATE_CACHE_NPM_MINUTES
       ? parseInt(process.env.RENOVATE_CACHE_NPM_MINUTES, 10)
       : 15;
@@ -194,6 +178,7 @@ export async function getDependency(
       }
       throw new ExternalHostError(err);
     }
+    logger.debug({ err }, 'Unknown npm lookup error');
     return null;
   }
 }

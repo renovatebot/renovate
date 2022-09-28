@@ -1,8 +1,10 @@
-import { platform } from '../../../../../modules/platform';
+import { PrDebugData, platform } from '../../../../../modules/platform';
 import { regEx } from '../../../../../util/regex';
+import { toBase64 } from '../../../../../util/string';
 import * as template from '../../../../../util/template';
-import { ensureTrailingSlash } from '../../../../../util/url';
+import { joinUrlParts } from '../../../../../util/url';
 import type { BranchConfig } from '../../../../types';
+import { getDepWarningsPR, getWarnings } from '../../../errors-warnings';
 import { getChangelogs } from './changelogs';
 import { getPrConfigDescription } from './config-description';
 import { getControls } from './controls';
@@ -20,7 +22,8 @@ function massageUpdateMetadata(config: BranchConfig): void {
       changelogUrl,
       dependencyUrl,
     } = upgrade;
-    let depNameLinked = upgrade.depName;
+    // TODO: types (#7154)
+    let depNameLinked = upgrade.depName!;
     const primaryLink = homepage ?? sourceUrl ?? dependencyUrl;
     if (primaryLink) {
       depNameLinked = `[${depNameLinked}](${primaryLink})`;
@@ -43,10 +46,7 @@ function massageUpdateMetadata(config: BranchConfig): void {
     if (sourceUrl) {
       let fullUrl = sourceUrl;
       if (sourceDirectory) {
-        fullUrl =
-          ensureTrailingSlash(sourceUrl) +
-          'tree/HEAD/' +
-          sourceDirectory.replace('^/?/', '');
+        fullUrl = joinUrlParts(sourceUrl, 'tree/HEAD/', sourceDirectory);
       }
       references.push(`[source](${fullUrl})`);
     }
@@ -60,18 +60,28 @@ function massageUpdateMetadata(config: BranchConfig): void {
 interface PrBodyConfig {
   appendExtra?: string | null | undefined;
   rebasingNotice?: string;
+  debugData: PrDebugData;
 }
 
 const rebasingRegex = regEx(/\*\*Rebasing\*\*: .*/);
 
 export async function getPrBody(
   branchConfig: BranchConfig,
-  prBodyConfig?: PrBodyConfig
+  prBodyConfig: PrBodyConfig
 ): Promise<string> {
   massageUpdateMetadata(branchConfig);
+  let warnings = '';
+  warnings += getWarnings(branchConfig);
+  if (branchConfig.packageFiles) {
+    warnings += getDepWarningsPR(
+      branchConfig.packageFiles,
+      branchConfig.dependencyDashboard
+    );
+  }
   const content = {
     header: getPrHeader(branchConfig),
     table: getPrUpdatesTable(branchConfig),
+    warnings,
     notes: getPrNotes(branchConfig) + getPrExtraNotes(branchConfig),
     changelogs: getChangelogs(branchConfig),
     configDescription: await getPrConfigDescription(branchConfig),
@@ -85,6 +95,8 @@ export async function getPrBody(
     prBody = template.compile(prBodyTemplate, content, false);
     prBody = prBody.trim();
     prBody = prBody.replace(regEx(/\n\n\n+/g), '\n\n');
+    const prDebugData64 = toBase64(JSON.stringify(prBodyConfig.debugData));
+    prBody += `\n<!--renovate-debug:${prDebugData64}-->\n`;
     prBody = platform.massageMarkdown(prBody);
 
     if (prBodyConfig?.rebasingNotice) {

@@ -8,10 +8,16 @@ import { ExternalHostError } from '../../types/errors/external-host-error';
 import { loadModules } from '../../util/modules';
 import datasources from './api';
 import { Datasource } from './datasource';
-import type { DatasourceApi, GetReleasesConfig, ReleaseResult } from './types';
+import type {
+  DatasourceApi,
+  DigestConfig,
+  GetReleasesConfig,
+  ReleaseResult,
+} from './types';
 import {
   getDatasourceList,
   getDatasources,
+  getDefaultVersioning,
   getDigest,
   getPkgReleases,
   supportsDigests,
@@ -107,6 +113,12 @@ describe('modules/datasource/index', () => {
 
   afterEach(() => {
     datasources.delete(datasource);
+  });
+
+  describe('getDefaultVersioning()', () => {
+    it('returns semver if undefined', () => {
+      expect(getDefaultVersioning(undefined)).toBe('semver');
+    });
   });
 
   describe('Validations', () => {
@@ -220,6 +232,27 @@ describe('modules/datasource/index', () => {
 
       expect(supportsDigests(datasource)).toBeTrue();
       expect(await getDigest({ datasource, depName })).toBe('123');
+    });
+
+    it('returns replacementName if defined', async () => {
+      class TestDatasource extends DummyDatasource {
+        override getDigest(
+          config: DigestConfig,
+          newValue?: string
+        ): Promise<string> {
+          return Promise.resolve(config.packageName);
+        }
+      }
+      datasources.set(datasource, new TestDatasource());
+
+      expect(
+        await getDigest({
+          datasource: datasource,
+          packageName: 'pkgName',
+          depName: depName,
+          replacementName: 'replacement',
+        })
+      ).toBe('replacement');
     });
   });
 

@@ -1,4 +1,5 @@
 import { lt } from '@renovatebot/ruby-semver';
+import is from '@sindresorhus/is';
 import { quote } from 'shlex';
 import {
   BUNDLER_INVALID_CREDENTIALS,
@@ -15,7 +16,7 @@ import {
   writeLocalFile,
 } from '../../../util/fs';
 import { getRepoStatus } from '../../../util/git';
-import { regEx } from '../../../util/regex';
+import { newlineRegex, regEx } from '../../../util/regex';
 import { addSecretForSanitizing } from '../../../util/sanitize';
 import { isValid } from '../../versioning/ruby';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
@@ -42,8 +43,27 @@ function buildBundleHostVariable(hostRule: HostRule): Record<string, string> {
   };
 }
 
+const resolvedPkgRegex = regEx(
+  /(?<pkg>\S+)(?:\s*\([^)]+\)\s*)? was resolved to/
+);
+
+function getResolvedPackages(input: string): string[] {
+  const lines = input.split(newlineRegex);
+  const result: string[] = [];
+  for (const line of lines) {
+    const resolveMatchGroups = line.match(resolvedPkgRegex)?.groups;
+    if (resolveMatchGroups) {
+      const { pkg } = resolveMatchGroups;
+      result.push(pkg);
+    }
+  }
+
+  return [...new Set(result)];
+}
+
 export async function updateArtifacts(
-  updateArtifact: UpdateArtifact
+  updateArtifact: UpdateArtifact,
+  recursionLimit = 10
 ): Promise<UpdateArtifactsResult[] | null> {
   const { packageFileName, updatedDeps, newPackageFileContent, config } =
     updateArtifact;
@@ -61,6 +81,16 @@ export async function updateArtifacts(
     return null;
   }
 
+  const args = [
+    config.postUpdateOptions?.includes('bundlerConservative') &&
+      '--conservative',
+    '--update',
+  ].filter(is.nonEmptyString);
+
+  const updatedDepNames = updatedDeps
+    .map(({ depName }) => depName)
+    .filter(is.nonEmptyStringAndNotWhitespace);
+
   try {
     await writeLocalFile(packageFileName, newPackageFileContent);
 
@@ -69,8 +99,7 @@ export async function updateArtifacts(
     if (config.isLockFileMaintenance) {
       cmd = 'bundler lock --update';
     } else {
-      cmd = `bundler lock --update ${updatedDeps
-        .map((dep) => `${dep.depName}`)
+      cmd = `bundler lock ${args.join(' ')} ${updatedDepNames
         .filter((dep) => dep !== 'ruby')
         .map(quote)
         .join(' ')}`;
@@ -167,7 +196,7 @@ export async function updateArtifacts(
         },
       },
     ];
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) {
     if (err.message === TEMPORARY_ERROR) {
       throw err;
     }
@@ -200,44 +229,36 @@ export async function updateArtifacts(
       memCache.set('bundlerArtifactsError', BUNDLER_INVALID_CREDENTIALS);
       throw new Error(BUNDLER_INVALID_CREDENTIALS);
     }
-    const resolveMatchRe = regEx('\\s+(.*) was resolved to', 'g');
-    if (output.match(resolveMatchRe) && !config.isLockFileMaintenance) {
-      logger.debug({ err }, 'Bundler has a resolve error');
-      // TODO: see below
-      const resolveMatches: any[] = [];
-      let resolveMatch: RegExpExecArray | null;
-      do {
-        resolveMatch = resolveMatchRe.exec(output);
-        if (resolveMatch) {
-          resolveMatches.push(resolveMatch[1].split(' ').shift());
-        }
-      } while (resolveMatch);
-      // TODO: fixme `updatedDeps.includes(match)` is never true, as updatedDeps is `PackageDependency[]`
-      if (resolveMatches.some((match) => !updatedDeps.includes(match))) {
-        logger.debug(
-          { resolveMatches, updatedDeps },
-          'Found new resolve matches - reattempting recursively'
-        );
-        const newUpdatedDeps = [
-          ...new Set([...updatedDeps, ...resolveMatches]),
-        ];
-        return updateArtifacts({
+    const resolveMatches: string[] = getResolvedPackages(output).filter(
+      (depName) => !updatedDepNames.includes(depName)
+    );
+    if (
+      recursionLimit > 0 &&
+      resolveMatches.length &&
+      !config.isLockFileMaintenance
+    ) {
+      logger.debug(
+        { resolveMatches, updatedDeps },
+        'Found new resolve matches - reattempting recursively'
+      );
+      const newUpdatedDeps = [
+        ...new Set([
+          ...updatedDeps,
+          ...resolveMatches.map((match) => ({ depName: match })),
+        ]),
+      ];
+      return updateArtifacts(
+        {
           packageFileName,
           updatedDeps: newUpdatedDeps,
           newPackageFileContent,
           config,
-        });
-      }
-      logger.debug(
-        { err },
-        'Gemfile.lock update failed due to incompatible packages'
-      );
-    } else {
-      logger.info(
-        { err },
-        'Gemfile.lock update failed due to an unknown reason'
+        },
+        recursionLimit - 1
       );
     }
+
+    logger.info({ err }, 'Gemfile.lock update failed due to an unknown reason');
     return [
       {
         artifactError: {

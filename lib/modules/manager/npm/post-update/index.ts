@@ -1,3 +1,5 @@
+// TODO: types (#7154)
+/* eslint-disable @typescript-eslint/restrict-template-expressions */
 import is from '@sindresorhus/is';
 import deepmerge from 'deepmerge';
 import detectIndent from 'detect-indent';
@@ -10,8 +12,8 @@ import { getChildProcessEnv } from '../../../../util/exec/env';
 import {
   deleteLocalFile,
   ensureCacheDir,
+  getParentDir,
   getSiblingFileName,
-  getSubDirectory,
   readLocalFile,
   writeLocalFile,
 } from '../../../../util/fs';
@@ -34,6 +36,7 @@ import type {
   ArtifactError,
   DetermineLockFileDirsResult,
   WriteExistingFilesResult,
+  YarnRcYmlFile,
 } from './types';
 import * as yarn from './yarn';
 
@@ -177,6 +180,9 @@ export async function writeExistingFiles(
           const widens: string[] = [];
           let lockFileChanged = false;
           for (const upgrade of config.upgrades) {
+            if (upgrade.lockFiles && !upgrade.lockFiles.includes(npmLock)) {
+              continue;
+            }
             if (
               upgrade.rangeStrategy === 'widen' &&
               upgrade.npmLock === npmLock
@@ -406,6 +412,7 @@ async function updateYarnOffline(
   }
 }
 
+// TODO: move to ./yarn.ts
 // exported for testing
 export async function updateYarnBinary(
   lockFileDir: string,
@@ -421,8 +428,15 @@ export async function updateYarnBinary(
       return existingYarnrcYmlContent;
     }
 
-    const oldYarnPath = (load(yarnrcYml) as Record<string, string>).yarnPath;
-    const newYarnPath = (load(newYarnrcYml) as Record<string, string>).yarnPath;
+    const oldYarnPath = (load(yarnrcYml) as YarnRcYmlFile)?.yarnPath;
+    const newYarnPath = (load(newYarnrcYml) as YarnRcYmlFile)?.yarnPath;
+    if (
+      !is.nonEmptyStringAndNotWhitespace(oldYarnPath) ||
+      !is.nonEmptyStringAndNotWhitespace(newYarnPath)
+    ) {
+      return existingYarnrcYmlContent;
+    }
+
     const oldYarnFullPath = upath.join(lockFileDir, oldYarnPath);
     const newYarnFullPath = upath.join(lockFileDir, newYarnPath);
     logger.debug({ oldYarnPath, newYarnPath }, 'Found updated Yarn binary');
@@ -738,7 +752,7 @@ export async function getAdditionalFiles(
     logger.debug(`Finding package.json for lerna location "${lernaJsonFile}"`);
     const lernaPackageFile = packageFiles.npm.find(
       // TODO #7154
-      (p) => getSubDirectory(p.packageFile!) === getSubDirectory(lernaJsonFile)
+      (p) => getParentDir(p.packageFile!) === getParentDir(lernaJsonFile)
     );
     // istanbul ignore if: not sure how to test
     if (!lernaPackageFile) {
@@ -752,7 +766,7 @@ export async function getAdditionalFiles(
     }
     const skipInstalls =
       lockFile === 'npm-shrinkwrap.json' ? false : config.skipInstalls;
-    const learnaFileDir = getSubDirectory(lernaJsonFile);
+    const learnaFileDir = getParentDir(lernaJsonFile);
     const npmrcContent = await getNpmrcContent(learnaFileDir);
     await updateNpmrcContent(
       learnaFileDir,
@@ -761,7 +775,7 @@ export async function getAdditionalFiles(
     );
     const res = await lerna.generateLockFiles(
       lernaPackageFile,
-      getSubDirectory(lernaJsonFile),
+      getParentDir(lernaJsonFile),
       config,
       env,
       skipInstalls

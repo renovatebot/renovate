@@ -2,7 +2,7 @@ import type { Preset } from '../types';
 
 export const presets: Record<string, Preset> = {
   base: {
-    description: 'Default base configuration for all languages',
+    description: 'Default base configuration for all languages.',
     extends: [
       ':dependencyDashboard',
       ':semanticPrefixFixDepsChoreOthers',
@@ -16,16 +16,16 @@ export const presets: Record<string, Preset> = {
     ],
   },
   'js-app': {
-    description: 'Default configuration for webapps',
+    description: 'Default configuration for webapps.',
     extends: ['config:base', ':pinAllExceptPeerDependencies'],
   },
   'js-lib': {
-    description: 'Default configuration for libraries',
+    description: 'Default configuration for libraries.',
     extends: ['config:base', ':pinOnlyDevDependencies'],
   },
   semverAllMonthly: {
     description:
-      'Preserve SemVer ranges and update everything together once a month',
+      'Preserve SemVer ranges and update everything together once a month.',
     separateMajorMinor: false,
     extends: [
       ':preserveSemverRanges',

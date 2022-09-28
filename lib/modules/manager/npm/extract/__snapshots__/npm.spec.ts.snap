@@ -1,8 +1,8 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`modules/manager/npm/extract/npm .getNpmLock() extracts 1`] = `
-Object {
-  "lockedVersions": Object {
+{
+  "lockedVersions": {
     "ansi-styles": "3.2.1",
     "chalk": "2.4.1",
     "color-convert": "1.9.1",
@@ -16,8 +16,8 @@ Object {
 `;
 
 exports[`modules/manager/npm/extract/npm .getNpmLock() extracts npm 7 lockfile 1`] = `
-Object {
-  "lockedVersions": Object {
+{
+  "lockedVersions": {
     "ansi-styles": "3.2.1",
     "chalk": "2.4.1",
     "color-convert": "1.9.1",

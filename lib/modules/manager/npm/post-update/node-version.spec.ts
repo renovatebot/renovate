@@ -1,5 +1,9 @@
 import { fs } from '../../../../../test/util';
-import { getNodeConstraint, getNodeUpdate } from './node-version';
+import {
+  getNodeConstraint,
+  getNodeToolConstraint,
+  getNodeUpdate,
+} from './node-version';
 
 jest.mock('../../../../util/fs');
 
@@ -54,6 +58,26 @@ describe('modules/manager/npm/post-update/node-version', () => {
 
     it('returns undefined', () => {
       expect(getNodeUpdate([])).toBeUndefined();
+    });
+  });
+
+  describe('getNodeToolConstraint()', () => {
+    it('returns getNodeUpdate', async () => {
+      expect(
+        await getNodeToolConstraint(config, [
+          { depName: 'node', newValue: '16.15.0' },
+        ])
+      ).toEqual({
+        toolName: 'node',
+        constraint: '16.15.0',
+      });
+    });
+
+    it('returns getNodeConstraint', async () => {
+      expect(await getNodeToolConstraint(config, [])).toEqual({
+        toolName: 'node',
+        constraint: '^12.16.0',
+      });
     });
   });
 });

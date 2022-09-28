@@ -1,3 +1,5 @@
+// TODO: types (#7154)
+/* eslint-disable @typescript-eslint/restrict-template-expressions */
 import hasha from 'hasha';
 import { logger } from '../../../logger';
 import * as packageCache from '../../../util/cache/package';
@@ -13,6 +15,10 @@ function updateWithNewVersion(
   currentValue: string,
   newValue: string
 ): string {
+  // istanbul ignore if
+  if (currentValue === newValue) {
+    return content;
+  }
   const replaceFrom = currentValue.replace(regEx(/^v/), '');
   const replaceTo = newValue.replace(regEx(/^v/), '');
   let newContent = content;
@@ -156,7 +162,7 @@ export async function updateDependency({
       return null;
     }
 
-    let existingRegExStr = `${upgrade.depType}\\([^\\)]+name\\s*=\\s*"${upgrade.depName}"(.*\\n)+?\\s*\\)`;
+    let existingRegExStr = `(?:maybe\\s*\\(\\s*)?${upgrade.depType}(?:\\(|,)[^\\)]+name\\s*=\\s*"${upgrade.depName}"(.*\\n)+?\\s*\\)`;
     if (newDef.endsWith('\n')) {
       existingRegExStr += '\n';
     }

@@ -5,7 +5,7 @@ const nonPinUpdateTypes = ['digest', 'patch', 'minor', 'major'];
 
 const staticGroups = {
   all: {
-    description: 'Group all updates together',
+    description: 'Group all updates together.',
     groupName: 'all dependencies',
     separateMajorMinor: false,
     groupSlug: 'all',
@@ -21,7 +21,7 @@ const staticGroups = {
     },
   },
   allNonMajor: {
-    description: 'Group all minor and patch updates together',
+    description: 'Group all `minor` and `patch` updates together.',
     packageRules: [
       {
         matchPackagePatterns: ['*'],
@@ -33,7 +33,7 @@ const staticGroups = {
   },
   nodeJs: {
     description:
-      "Group anything that looks like Node.js together so that it's updated together",
+      "Group anything that looks like Node.js together so that it's updated together.",
     packageRules: [
       {
         matchDatasources: ['docker'],
@@ -46,7 +46,7 @@ const staticGroups = {
   },
   recommended: {
     description:
-      'Use curated list of recommended non-monorepo package groupings',
+      'Use curated list of recommended non-monorepo package groupings.',
     extends: [
       'group:nodeJs',
       'group:allApollographql',
@@ -67,6 +67,7 @@ const staticGroups = {
       'group:phpstan',
       'group:polymer',
       'group:resilience4j',
+      'group:rubyOnRails',
       'group:rubyOmniauth',
       'group:socketio',
       'group:springAmqp',
@@ -97,7 +98,7 @@ const staticGroups = {
     ignoreDeps: [],
   },
   allApollographql: {
-    description: 'Group all packages published by Apollo GraphQL together',
+    description: 'Group all packages published by Apollo GraphQL together.',
     packageRules: [
       {
         extends: 'packages:apollographql',
@@ -106,7 +107,7 @@ const staticGroups = {
     ],
   },
   codemirror: {
-    description: 'Group CodeMirror packages together',
+    description: 'Group CodeMirror packages together.',
     packageRules: [
       {
         groupName: 'CodeMirror',
@@ -115,7 +116,7 @@ const staticGroups = {
     ],
   },
   definitelyTyped: {
-    description: 'Group all @types packages together',
+    description: 'Group all `@types` packages together.',
     packageRules: [
       {
         groupName: 'definitelyTyped',
@@ -124,7 +125,7 @@ const staticGroups = {
     ],
   },
   dotNetCore: {
-    description: '.NET Core Docker containers',
+    description: '.NET Core Docker containers.',
     packageRules: [
       {
         matchDatasources: ['docker'],
@@ -134,7 +135,7 @@ const staticGroups = {
     ],
   },
   fortawesome: {
-    description: 'Group all packages by Font Awesome together',
+    description: 'Group all packages by Font Awesome together.',
     packageRules: [
       {
         groupName: 'Font Awesome',
@@ -143,7 +144,7 @@ const staticGroups = {
     ],
   },
   fusionjs: {
-    description: 'Group Fusion.js packages together',
+    description: 'Group Fusion.js packages together.',
     matchPackageNames: [
       'fusion-cli',
       'fusion-core',
@@ -153,7 +154,7 @@ const staticGroups = {
     matchPackagePrefixes: ['fusion-plugin-', 'fusion-react', '^usion-apollo'],
   },
   glimmer: {
-    description: 'Group Glimmer.js packages together',
+    description: 'Group Glimmer.js packages together.',
     packageRules: [
       {
         groupName: 'Glimmer.js packages',
@@ -163,7 +164,7 @@ const staticGroups = {
     ],
   },
   illuminate: {
-    description: 'Group PHP Illuminate packages together',
+    description: 'Group PHP Illuminate packages together.',
     packageRules: [
       {
         matchPackagePrefixes: ['illuminate/'],
@@ -173,7 +174,7 @@ const staticGroups = {
     ],
   },
   symfony: {
-    description: 'Group PHP Symfony packages together',
+    description: 'Group PHP Symfony packages together.',
     packageRules: [
       {
         matchPackagePrefixes: ['symfony/'],
@@ -183,7 +184,7 @@ const staticGroups = {
     ],
   },
   phpstan: {
-    description: 'Group PHPStan packages together',
+    description: 'Group PHPStan packages together.',
     packageRules: [
       {
         matchDatasources: ['packagist'],
@@ -193,7 +194,7 @@ const staticGroups = {
     ],
   },
   polymer: {
-    description: 'Group all @polymer packages together',
+    description: 'Group all `@polymer` packages together.',
     packageRules: [
       {
         groupName: 'polymer packages',
@@ -202,7 +203,7 @@ const staticGroups = {
     ],
   },
   hibernateCore: {
-    description: 'Group Java Hibernate Core packages',
+    description: 'Group Java Hibernate Core packages.',
     packageRules: [
       {
         matchPackagePrefixes: ['org.hibernate:'],
@@ -211,7 +212,7 @@ const staticGroups = {
     ],
   },
   hibernateValidator: {
-    description: 'Group Java Hibernate Validator packages',
+    description: 'Group Java Hibernate Validator packages.',
     packageRules: [
       {
         matchPackagePrefixes: ['org.hibernate.validator:'],
@@ -220,7 +221,7 @@ const staticGroups = {
     ],
   },
   hibernateOgm: {
-    description: 'Group Java Hibernate OGM packages',
+    description: 'Group Java Hibernate OGM packages.',
     packageRules: [
       {
         matchPackagePrefixes: ['org.hibernate.ogm:'],
@@ -229,7 +230,7 @@ const staticGroups = {
     ],
   },
   hibernateCommons: {
-    description: 'Group Java Hibernate Commons packages',
+    description: 'Group Java Hibernate Commons packages.',
     packageRules: [
       {
         matchPackagePrefixes: ['org.hibernate.common:'],
@@ -238,7 +239,7 @@ const staticGroups = {
     ],
   },
   resilience4j: {
-    description: 'Group Java Resilience4j packages',
+    description: 'Group Java Resilience4j packages.',
     packageRules: [
       {
         matchPackagePrefixes: ['io.github.resilience4j:'],
@@ -247,7 +248,7 @@ const staticGroups = {
     ],
   },
   springAmqp: {
-    description: 'Group Java Spring AMQP packages',
+    description: 'Group Java Spring AMQP packages.',
     packageRules: [
       {
         groupName: 'spring amqp',
@@ -256,7 +257,7 @@ const staticGroups = {
     ],
   },
   springAndroid: {
-    description: 'Group Java Spring Android packages',
+    description: 'Group Java Spring Android packages.',
     packageRules: [
       {
         groupName: 'spring android',
@@ -265,7 +266,7 @@ const staticGroups = {
     ],
   },
   springBatch: {
-    description: 'Group Java Spring Batch packages',
+    description: 'Group Java Spring Batch packages.',
     packageRules: [
       {
         groupName: 'spring batch',
@@ -274,7 +275,7 @@ const staticGroups = {
     ],
   },
   springBoot: {
-    description: 'Group Java Spring Boot packages',
+    description: 'Group Java Spring Boot packages.',
     packageRules: [
       {
         groupName: 'spring boot',
@@ -284,7 +285,7 @@ const staticGroups = {
     ],
   },
   springCloud: {
-    description: 'Group Java Spring Cloud packages',
+    description: 'Group Java Spring Cloud packages.',
     packageRules: [
       {
         groupName: 'spring cloud',
@@ -293,7 +294,7 @@ const staticGroups = {
     ],
   },
   springCore: {
-    description: 'Group Java Spring Core packages',
+    description: 'Group Java Spring Core packages.',
     packageRules: [
       {
         groupName: 'spring core',
@@ -302,7 +303,7 @@ const staticGroups = {
     ],
   },
   springData: {
-    description: 'Group Java Spring Data packages',
+    description: 'Group Java Spring Data packages.',
     packageRules: [
       {
         groupName: 'spring data',
@@ -311,7 +312,7 @@ const staticGroups = {
     ],
   },
   springHateoas: {
-    description: 'Group Java Spring HATEOAS packages',
+    description: 'Group Java Spring HATEOAS packages.',
     packageRules: [
       {
         groupName: 'spring hateoas',
@@ -320,7 +321,7 @@ const staticGroups = {
     ],
   },
   springIntegration: {
-    description: 'Group Java Spring Integration packages',
+    description: 'Group Java Spring Integration packages.',
     packageRules: [
       {
         groupName: 'spring integration',
@@ -329,7 +330,7 @@ const staticGroups = {
     ],
   },
   springKafka: {
-    description: 'Group Java Spring Kafka packages',
+    description: 'Group Java Spring Kafka packages.',
     packageRules: [
       {
         groupName: 'spring kafka',
@@ -338,7 +339,7 @@ const staticGroups = {
     ],
   },
   springLdap: {
-    description: 'Group Java Spring LDAP packages',
+    description: 'Group Java Spring LDAP packages.',
     packageRules: [
       {
         groupName: 'spring ldap',
@@ -347,7 +348,7 @@ const staticGroups = {
     ],
   },
   springMobile: {
-    description: 'Group Java Spring Mobile packages',
+    description: 'Group Java Spring Mobile packages.',
     packageRules: [
       {
         groupName: 'spring mobile',
@@ -356,7 +357,7 @@ const staticGroups = {
     ],
   },
   springOsgi: {
-    description: 'Group Java Spring OSGi packages',
+    description: 'Group Java Spring OSGi packages.',
     packageRules: [
       {
         groupName: 'spring osgi',
@@ -365,7 +366,7 @@ const staticGroups = {
     ],
   },
   springRestDocs: {
-    description: 'Group Java Spring REST Docs packages',
+    description: 'Group Java Spring REST Docs packages.',
     packageRules: [
       {
         groupName: 'spring restdocs',
@@ -374,7 +375,7 @@ const staticGroups = {
     ],
   },
   springRoo: {
-    description: 'Group Java Spring Roo packages',
+    description: 'Group Java Spring Roo packages.',
     packageRules: [
       {
         groupName: 'spring roo',
@@ -383,7 +384,7 @@ const staticGroups = {
     ],
   },
   springScala: {
-    description: 'Group Java Spring Scala packages',
+    description: 'Group Java Spring Scala packages.',
     packageRules: [
       {
         groupName: 'spring scala',
@@ -392,7 +393,7 @@ const staticGroups = {
     ],
   },
   springSecurity: {
-    description: 'Group Java Spring Security packages',
+    description: 'Group Java Spring Security packages.',
     packageRules: [
       {
         groupName: 'spring security',
@@ -401,7 +402,7 @@ const staticGroups = {
     ],
   },
   springSession: {
-    description: 'Group Java Spring Session packages',
+    description: 'Group Java Spring Session packages.',
     packageRules: [
       {
         groupName: 'spring session',
@@ -410,7 +411,7 @@ const staticGroups = {
     ],
   },
   springShell: {
-    description: 'Group Java Spring Shell packages',
+    description: 'Group Java Spring Shell packages.',
     packageRules: [
       {
         groupName: 'spring shell',
@@ -419,7 +420,7 @@ const staticGroups = {
     ],
   },
   springSocial: {
-    description: 'Group Java Spring Social packages',
+    description: 'Group Java Spring Social packages.',
     packageRules: [
       {
         groupName: 'spring social',
@@ -428,7 +429,7 @@ const staticGroups = {
     ],
   },
   springStatemachine: {
-    description: 'Group Java Spring Statemachine packages',
+    description: 'Group Java Spring Statemachine packages.',
     packageRules: [
       {
         groupName: 'spring statemachine',
@@ -437,7 +438,7 @@ const staticGroups = {
     ],
   },
   springWebflow: {
-    description: 'Group Java Spring WebFlow packages',
+    description: 'Group Java Spring WebFlow packages.',
     packageRules: [
       {
         groupName: 'spring webflow',
@@ -446,7 +447,7 @@ const staticGroups = {
     ],
   },
   springWs: {
-    description: 'Group Java Spring WS packages',
+    description: 'Group Java Spring WS packages.',
     packageRules: [
       {
         groupName: 'spring ws',
@@ -455,7 +456,7 @@ const staticGroups = {
     ],
   },
   socketio: {
-    description: 'Group socket.io packages',
+    description: 'Group socket.io packages.',
     packageRules: [
       {
         groupName: 'socket.io packages',
@@ -464,7 +465,7 @@ const staticGroups = {
     ],
   },
   postcss: {
-    description: 'Group PostCSS packages together',
+    description: 'Group PostCSS packages together.',
     packageRules: [
       {
         extends: 'packages:postcss',
@@ -473,7 +474,7 @@ const staticGroups = {
     ],
   },
   jekyllEcosystem: {
-    description: 'Group Jekyll and related Ruby packages together',
+    description: 'Group Jekyll and related Ruby packages together.',
     packageRules: [
       {
         matchSourceUrlPrefixes: [
@@ -484,8 +485,32 @@ const staticGroups = {
       },
     ],
   },
+  rubyOnRails: {
+    description: 'Group Ruby on Rails packages together.',
+    packageRules: [
+      {
+        matchDatasources: ['rubygems'],
+        matchPackageNames: [
+          'actioncable',
+          'actionmailbox',
+          'actionmailer',
+          'actionpack',
+          'actiontext',
+          'actionview',
+          'activejob',
+          'activemodel',
+          'activerecord',
+          'activestorage',
+          'activesupport',
+          'railties',
+          'rails',
+        ],
+        groupName: 'Ruby on Rails packages',
+      },
+    ],
+  },
   rubyOmniauth: {
-    description: 'Group OmniAuth packages together',
+    description: 'Group OmniAuth packages together.',
     packageRules: [
       {
         matchDatasources: ['rubygems'],
@@ -495,7 +520,7 @@ const staticGroups = {
     ],
   },
   goOpenapi: {
-    description: 'Group go-openapi packages together',
+    description: 'Group `go-openapi` packages together.',
     packageRules: [
       {
         matchDatasources: ['go'],
@@ -506,7 +531,7 @@ const staticGroups = {
     ],
   },
   kubernetes: {
-    description: 'Group kubernetes packages together',
+    description: 'Group Kubernetes packages together.',
     packageRules: [
       {
         matchDatasources: ['go'],
@@ -545,7 +570,7 @@ const staticGroups = {
     ],
   },
   googleapis: {
-    description: 'Group googleapis packages together',
+    description: 'Group `googleapis` packages together.',
     packageRules: [
       {
         extends: 'packages:googleapis',
@@ -554,7 +579,7 @@ const staticGroups = {
     ],
   },
   linters: {
-    description: 'Group various lint packages together',
+    description: 'Group various lint packages together.',
     packageRules: [
       {
         extends: 'packages:linters',
@@ -563,7 +588,7 @@ const staticGroups = {
     ],
   },
   jsUnitTest: {
-    description: 'Group JS unit test packages together',
+    description: 'Group JavaScript unit test packages together.',
     packageRules: [
       {
         extends: 'packages:jsUnitTest',
@@ -572,7 +597,8 @@ const staticGroups = {
     ],
   },
   jsUnitTestNonMajor: {
-    description: 'Group JS unit test packages together',
+    description:
+      'Group JavaScipt unit test packages together for non-major updates.',
     packageRules: [
       {
         extends: 'packages:jsUnitTest',
@@ -582,7 +608,7 @@ const staticGroups = {
     ],
   },
   unitTest: {
-    description: 'Group all unit test packages together',
+    description: 'Group all unit test packages together.',
     packageRules: [
       {
         extends: 'packages:unitTest',
@@ -591,7 +617,7 @@ const staticGroups = {
     ],
   },
   unitTestNonMajor: {
-    description: 'Group all unit test packages together',
+    description: 'Group all unit test packages together for non-major updates.',
     packageRules: [
       {
         extends: 'packages:unitTest',
@@ -601,7 +627,7 @@ const staticGroups = {
     ],
   },
   jsTest: {
-    description: 'Group JS test packages together',
+    description: 'Group JS test packages together.',
     packageRules: [
       {
         extends: 'packages:jsTest',
@@ -610,7 +636,7 @@ const staticGroups = {
     ],
   },
   jsTestMonMajor: {
-    description: 'Group non-major JS test package updates together',
+    description: 'Group non-major JS test package updates together.',
     packageRules: [
       {
         extends: 'packages:jsTest',
@@ -620,7 +646,7 @@ const staticGroups = {
     ],
   },
   test: {
-    description: 'Group all test packages together',
+    description: 'Group all test packages together.',
     packageRules: [
       {
         extends: 'packages:test',
@@ -629,7 +655,7 @@ const staticGroups = {
     ],
   },
   testNonMajor: {
-    description: 'Group all non-major test package updates together',
+    description: 'Group all non-major test package updates together.',
     packageRules: [
       {
         extends: 'packages:test',
@@ -639,7 +665,7 @@ const staticGroups = {
     ],
   },
   jestPlusTSJest: {
-    description: 'Add ts-jest major update to Jest monorepo',
+    description: 'Add `ts-jest` `major` update to Jest monorepo.',
     packageRules: [
       {
         matchSourceUrlPrefixes: ['https://github.com/kulshekhar/ts-jest'],
@@ -649,7 +675,7 @@ const staticGroups = {
     ],
   },
   jestPlusTypes: {
-    description: 'Add @types/jest update to Jest monorepo',
+    description: 'Add `@types/jest` update to Jest monorepo.',
     packageRules: [
       {
         matchPackageNames: ['@types/jest'],
@@ -669,7 +695,7 @@ for (const monorepo of Object.keys(monorepos.presets)) {
   config[name] = {
     packageRules: [
       {
-        description: `Group packages from ${monorepo} monorepo together`,
+        description: `Group packages from ${monorepo} monorepo together.`,
         extends: `monorepo:${monorepo}`,
         matchUpdateTypes: nonPinUpdateTypes,
         groupName: `${monorepo} monorepo`,
@@ -678,7 +704,7 @@ for (const monorepo of Object.keys(monorepos.presets)) {
   };
 }
 config.monorepos = {
-  description: 'Group known monorepo packages together',
+  description: 'Group known monorepo packages together.',
   ignoreDeps: [],
   extends: monorepoNames,
 };

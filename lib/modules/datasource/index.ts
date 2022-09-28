@@ -219,18 +219,23 @@ function resolveRegistryUrls(
     resolvedUrls = [...customUrls];
   } else if (is.nonEmptyArray(defaultRegistryUrls)) {
     resolvedUrls = [...defaultRegistryUrls];
-    resolvedUrls.concat(additionalRegistryUrls ?? []);
+    resolvedUrls = resolvedUrls.concat(additionalRegistryUrls ?? []);
   } else if (is.function_(datasource.defaultRegistryUrls)) {
     resolvedUrls = [...datasource.defaultRegistryUrls()];
-    resolvedUrls.concat(additionalRegistryUrls ?? []);
+    resolvedUrls = resolvedUrls.concat(additionalRegistryUrls ?? []);
   } else if (is.nonEmptyArray(datasource.defaultRegistryUrls)) {
     resolvedUrls = [...datasource.defaultRegistryUrls];
-    resolvedUrls.concat(additionalRegistryUrls ?? []);
+    resolvedUrls = resolvedUrls.concat(additionalRegistryUrls ?? []);
   }
   return massageRegistryUrls(resolvedUrls);
 }
 
-export function getDefaultVersioning(datasourceName: string): string {
+export function getDefaultVersioning(
+  datasourceName: string | undefined
+): string {
+  if (!datasourceName) {
+    return 'semver';
+  }
   const datasource = getDatasourceFor(datasourceName);
   // istanbul ignore if: wrong regex manager config?
   if (!datasource) {
@@ -428,7 +433,8 @@ function getDigestConfig(
   config: GetDigestInputConfig
 ): DigestConfig {
   const { currentValue, currentDigest } = config;
-  const packageName = config.packageName ?? config.depName;
+  const packageName =
+    config.replacementName ?? config.packageName ?? config.depName;
   const [registryUrl] = resolveRegistryUrls(
     datasource,
     config.defaultRegistryUrls,

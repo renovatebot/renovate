@@ -5,9 +5,9 @@ import { platform } from '../../../../modules/platform';
 import type { RangeStrategy } from '../../../../types';
 import {
   branchExists,
+  isBranchBehindBase,
   isBranchConflicted,
   isBranchModified,
-  isBranchStale,
 } from '../../../../util/git';
 import type { BranchConfig } from '../../../types';
 
@@ -62,8 +62,8 @@ export async function shouldReuseExistingBranch(
     (config.rebaseWhen === 'auto' &&
       (config.automerge || (await platform.getRepoForceRebase())))
   ) {
-    if (await isBranchStale(branchName)) {
-      logger.debug(`Branch is stale and needs rebasing`);
+    if (await isBranchBehindBase(branchName)) {
+      logger.debug(`Branch is behind base branch and needs rebasing`);
       // We can rebase the branch only if no PR or PR can be rebased
       if (await isBranchModified(branchName)) {
         logger.debug('Cannot rebase branch as it has been modified');
@@ -77,7 +77,7 @@ export async function shouldReuseExistingBranch(
     logger.debug('Branch is up-to-date');
   } else {
     logger.debug(
-      `Skipping stale branch check due to rebaseWhen=${config.rebaseWhen!}`
+      `Skipping behind base branch check due to rebaseWhen=${config.rebaseWhen!}`
     );
   }
 

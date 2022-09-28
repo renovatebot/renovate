@@ -1,10 +1,10 @@
-import { loadFixture } from '../../../../test/util';
+import { Fixtures } from '../../../../test/fixtures';
 import type { UpdateLockedConfig } from '../types';
 import { updateLockedDependency } from '.';
 
 const lockFile = 'compose.lock';
 
-const lockFileContent = loadFixture('composer5.lock');
+const lockFileContent = Fixtures.get('composer5.lock');
 
 describe('modules/manager/composer/update-locked', () => {
   it('detects already updated', () => {

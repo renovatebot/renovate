@@ -56,7 +56,10 @@ export function getCachedReleaseList(
   project: ChangeLogProject,
   release: ChangeLogRelease
 ): Promise<ChangeLogNotes[]> {
-  const cacheKey = `getReleaseList-${project.apiBaseUrl}-${project.repository}`;
+  // TODO: types (#7154)
+  const cacheKey = `getReleaseList-${project.apiBaseUrl!}-${
+    project.repository
+  }`;
   const cachedResult = memCache.get<Promise<ChangeLogNotes[]>>(cacheKey);
   // istanbul ignore if
   if (cachedResult !== undefined) {
@@ -105,7 +108,8 @@ export async function getReleaseNotes(
 ): Promise<ChangeLogNotes | null> {
   const { depName, repository } = project;
   const { version, gitRef } = release;
-  logger.trace(`getReleaseNotes(${repository}, ${version}, ${depName})`);
+  // TODO: types (#7154)
+  logger.trace(`getReleaseNotes(${repository}, ${version}, ${depName!})`);
   const releases = await getCachedReleaseList(project, release);
   logger.trace({ releases }, 'Release list from getReleaseList');
   let releaseNotes: ChangeLogNotes | null = null;
@@ -160,9 +164,10 @@ async function releaseNotesResult(
     // there is a ready link
     releaseNotes.url = releaseMatch.url;
   } else {
+    // TODO: types (#7154)
     releaseNotes.url = baseUrl.includes('gitlab')
-      ? `${baseUrl}${repository}/tags/${releaseMatch.tag}`
-      : `${baseUrl}${repository}/releases/${releaseMatch.tag}`;
+      ? `${baseUrl}${repository}/tags/${releaseMatch.tag!}`
+      : `${baseUrl}${repository}/releases/${releaseMatch.tag!}`;
   }
   // set body for release notes
   releaseNotes.body = massageBody(releaseNotes.body, baseUrl);
@@ -189,7 +194,7 @@ function sectionize(text: string, level: number): string[] {
   const tokens = markdown.parse(text, undefined);
   tokens.forEach((token) => {
     if (token.type === 'heading_open') {
-      const lev = +token.tag.substr(1);
+      const lev = +token.tag.substring(1);
       if (lev <= level) {
         sections.push([lev, token.map![0]]);
       }
@@ -262,9 +267,10 @@ export async function getReleaseNotesMdFileInner(
 export function getReleaseNotesMdFile(
   project: ChangeLogProject
 ): Promise<ChangeLogFile | null> {
+  // TODO: types (#7154)
   const cacheKey = `getReleaseNotesMdFile@v2-${project.repository}${
     project.sourceDirectory ? `-${project.sourceDirectory}` : ''
-  }-${project.apiBaseUrl}`;
+  }-${project.apiBaseUrl!}`;
   const cachedResult = memCache.get<Promise<ChangeLogFile | null>>(cacheKey);
   // istanbul ignore if
   if (cachedResult !== undefined) {

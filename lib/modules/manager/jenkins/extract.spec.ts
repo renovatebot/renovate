@@ -1,13 +1,13 @@
-import { loadFixture } from '../../../../test/util';
+import { Fixtures } from '../../../../test/fixtures';
 import { extractPackageFile } from '.';
 
-const invalidYamlFile = loadFixture('invalid.yaml');
+const invalidYamlFile = Fixtures.get('invalid.yaml');
 
-const pluginsTextFile = loadFixture('plugins.txt');
-const pluginsYamlFile = loadFixture('plugins.yaml');
+const pluginsTextFile = Fixtures.get('plugins.txt');
+const pluginsYamlFile = Fixtures.get('plugins.yaml');
 
-const pluginsEmptyTextFile = loadFixture('empty.txt');
-const pluginsEmptyYamlFile = loadFixture('empty.yaml');
+const pluginsEmptyTextFile = Fixtures.get('empty.txt');
+const pluginsEmptyYamlFile = Fixtures.get('empty.yaml');
 
 describe('modules/manager/jenkins/extract', () => {
   describe('extractPackageFile()', () => {

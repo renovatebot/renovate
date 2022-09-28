@@ -1,8 +1,8 @@
-import { loadFixture } from '../../../../test/util';
+import { Fixtures } from '../../../../test/fixtures';
 import { extractPackageFile } from '.';
 
-const multiDepFile = loadFixture('validHelmsfile.yaml');
-const otherYamlFile = loadFixture('empty.yaml');
+const multiDepFile = Fixtures.get('validHelmsfile.yaml');
+const otherYamlFile = Fixtures.get('empty.yaml');
 
 describe('modules/manager/helmsman/extract', () => {
   describe('extractPackageFile()', () => {

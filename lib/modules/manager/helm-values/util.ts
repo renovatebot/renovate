@@ -15,6 +15,9 @@ const parentKeyRe = regEx(/image$/i);
  * image:
  *   repository: 'something'
  *   tag: v1.0.0
+ * image:
+ *   repository: 'something'
+ *   version: v1.0.0
  * renovateImage:
  *   repository: 'something'
  *   tag: v1.0.0
@@ -28,7 +31,7 @@ export function matchesHelmValuesDockerHeuristic(
     data &&
     typeof data === 'object' &&
     hasKey('repository', data) &&
-    hasKey('tag', data)
+    (hasKey('tag', data) || hasKey('version', data))
   );
 }
 

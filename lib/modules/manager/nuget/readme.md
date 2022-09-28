@@ -1,5 +1,21 @@
-The `nuget` configuration object is used to control settings for the NuGet package manager.
-The NuGet package manager supports a SDK-style `.csproj`/`.fsproj`/`.vbproj`/`.props`/`.targets` format, as described [here](https://natemcmaster.com/blog/2017/03/09/vs2015-to-vs2017-upgrade/).
-This means that .NET Core projects are all supported but any .NET Framework projects need to be updated to the new `.csproj`/`.fsproj`/`.vbproj`/`.props`/`.targets` format in order to be detected and supported by Renovate.
+Use [`packageRules`](https://docs.renovatebot.com/configuration-options/#packagerules) to control the behavior of the NuGet package manager.
 
-The NuGet manager also supports `global.json` and `dotnet-tools.json` SDK files.
+The NuGet package manager supports these SDK-style files and formats:
+
+- `.csproj`
+- `.fsproj`
+- `.vbproj`
+- `.props`
+- `.targets`
+- `global.json`
+- `dotnet-tools.json`
+
+.NET Core projects are supported by default.
+
+For Renovate to work with .NET Framework projects, you need to update these files so they match the new SDK-style format:
+
+- `.csproj`
+- `.fsproj`
+- `.vbproj`
+- `.props`
+- `.targets`

@@ -136,15 +136,31 @@ But you can tell Renovate to use "sidecar" containers for third-party tools by s
 For this to work, `docker` needs to be installed and the Docker socket available to Renovate.
 Now Renovate uses `docker run` to create containers like Node.js or Python to run tools in as-needed.
 
-Additionally, when Renovate is run inside a container built using [`containerbase/buildpack`](https://github.com/containerbase/buildpack), such as the official Renovate images on Docker Hub, then `binarySource=install` can be used.
+Additionally, when Renovate is run inside a container built using [`containerbase`](https://github.com/containerbase), such as the official Renovate images on Docker Hub, then `binarySource=install` can be used.
 This mode means that Renovate will dynamically install the version of tools available, if supported.
 
 Supported tools for dynamic install are:
 
+- `bundler`
+- `cargo`
 - `composer`
 - `flux`
+- `gradle-wrapper`
 - `jb`
+- `jsonnet-bundler`
+- `lerna`
+- `mix`
+- `node`
 - `npm`
+- `pip_requirements`
+- `pip-compile`
+- `pipenv`
+- `pnpm`
+- `poetry`
+- `python`
+- `yarn`
+
+If all projects are managed by Hermit, you can tell Renovate to use the tooling versions specified in each project via Hermit by setting `binarySource=hermit`.
 
 Tools not on this list fall back to `binarySource=global`.
 
@@ -164,6 +180,12 @@ For example:
   "cacheDir": "/my-own-different-cache-folder"
 }
 ```
+
+## containerbaseDir
+
+This directory is used to cache downloads when `binarySource=docker` or `binarySource=install`.
+
+Use this option if you need such downloads to be stored outside of Renovate's regular cache directory (`cacheDir`).
 
 ## customEnvVariables
 
@@ -383,7 +405,7 @@ To handle the case where the underlying Git processes appear to hang, configure 
 ## gitUrl
 
 Override the default resolution for Git remote, e.g. to switch GitLab from HTTPS to SSH-based.
-Currently works for GitLab only.
+Currently works for Bitbucket Server and GitLab only.
 
 Possible values:
 
@@ -430,6 +452,10 @@ modules.exports = {
 ```
 
 In the above example any reference to the `@company` preset will be replaced with `local>org/renovate-config`.
+
+<!-- prettier-ignore -->
+!!! tip
+    Combine `migratePresets` with `configMigration` if you'd like your config migrated by PR.
 
 ## onboarding
 
@@ -486,11 +512,6 @@ Parameter to reduce CI load.
 CI jobs are usually triggered by these events: pull-request creation, pull-request update, automerge events.
 Set as an integer.
 Default is no limit.
-
-## printConfig
-
-This option is useful for troubleshooting, particularly if using presets.
-e.g. run `renovate foo/bar --print-config > config.log` and the fully-resolved config will be included in the log file.
 
 ## privateKey
 
@@ -602,10 +623,7 @@ Elements in the `repositories` array can be an object if you wish to define addi
 
 ```js
 {
-  repositories: [
-    { repository: 'g/r1', bumpVersion: true },
-    'g/r2'
-  ],
+  repositories: [{ repository: 'g/r1', bumpVersion: true }, 'g/r2'];
 }
 ```
 
@@ -615,9 +633,27 @@ Set this to `"enabled"` to have Renovate maintain a JSON file cache per-reposito
 Set to `"reset"` if you ever need to bypass the cache and have it overwritten.
 JSON files will be stored inside the `cacheDir` beside the existing file-based package cache.
 
+## repositoryCacheType
+
+Set this to an S3 URI to enable S3 backed repository cache.
+
+```ts
+{
+  repositoryCacheType: 's3://bucket-name';
+}
+```
+
 <!-- prettier-ignore -->
-!!! warning
-    This is an experimental feature and may be modified or removed in a future non-major release.
+!!! note
+    [IAM is supported](https://docs.aws.amazon.com/sdk-for-javascript/v3/developer-guide/loading-node-credentials-iam.html) when running renovate within an EC2 instance in an ECS cluster. In this case, no additional environment variables are required.
+    Otherwise, the following environment variables should be set for the S3 client to work.
+
+```
+    AWS_ACCESS_KEY_ID
+    AWS_SECRET_ACCESS_KEY
+    AWS_SESSION_TOKEN
+    AWS_REGION
+```
 
 ## requireConfig
 
@@ -691,7 +727,8 @@ This is currently applicable to `npm` and `lerna`/`npm` only, and only used in c
 
 ## unicodeEmoji
 
-If enabled emoji shortcodes (`:warning:`) are replaced with their Unicode equivalents (`⚠️`).
+If enabled emoji shortcodes are replaced with their Unicode equivalents.
+For example: `:warning:` will be replaced with `⚠️`.
 
 ## username
 

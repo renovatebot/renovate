@@ -7,7 +7,7 @@ import { extractPackageFile } from './extract';
 import { getRangeStrategy } from './range';
 import { updateLockedDependency } from './update-locked';
 
-const language = ProgrammingLanguage.Ruby;
+export const language = ProgrammingLanguage.Ruby;
 export const supportsLockFileMaintenance = true;
 
 /*
@@ -19,7 +19,6 @@ export {
   extractPackageFile, // Mandatory unless extractAllPackageFiles is used instead
   updateArtifacts, // Optional
   getRangeStrategy, // Optional
-  language, // Optional
   updateLockedDependency,
 };
 

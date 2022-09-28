@@ -1,8 +1,8 @@
+import { Fixtures } from '../../../../../../../test/fixtures';
 import * as httpMock from '../../../../../../../test/http-mock';
-import { loadJsonFixture } from '../../../../../../../test/util';
 import { findFirstParentVersion } from './parent-version';
 
-const expressJson = loadJsonFixture('express.json');
+const expressJson = Fixtures.getJson('express.json');
 
 describe('modules/manager/npm/update/locked-dependency/common/parent-version', () => {
   describe('getLockedDependencies()', () => {

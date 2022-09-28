@@ -7,6 +7,7 @@ import {
 } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import { CONFIG_VALIDATION } from '../../../constants/error-messages';
+import { addMeta } from '../../../logger';
 import { getCache } from '../../../util/cache/repository';
 import * as _extractUpdate from './extract-update';
 import { lookup } from './extract-update';
@@ -83,6 +84,8 @@ describe('workers/repository/process/index', () => {
         undefined,
         'dev'
       );
+      expect(addMeta).toHaveBeenNthCalledWith(1, { baseBranch: 'master' });
+      expect(addMeta).toHaveBeenNthCalledWith(2, { baseBranch: 'dev' });
     });
 
     it('handles config name mismatch between baseBranches if useBaseBranchConfig specified', async () => {
@@ -101,6 +104,8 @@ describe('workers/repository/process/index', () => {
       await expect(extractDependencies(config)).rejects.toThrow(
         CONFIG_VALIDATION
       );
+      expect(addMeta).toHaveBeenNthCalledWith(1, { baseBranch: 'master' });
+      expect(addMeta).toHaveBeenNthCalledWith(2, { baseBranch: 'dev' });
     });
 
     it('processes baseBranches dryRun extract', async () => {

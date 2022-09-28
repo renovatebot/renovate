@@ -5,6 +5,7 @@ import {
 } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
+import * as memCache from '../../util/cache/memory';
 import { clone } from '../../util/clone';
 import { regEx } from '../../util/regex';
 import * as massage from '../massage';
@@ -18,7 +19,7 @@ import * as gitlab from './gitlab';
 import * as internal from './internal';
 import * as local from './local';
 import * as npm from './npm';
-import type { ParsedPreset, PresetApi } from './types';
+import type { ParsedPreset, Preset, PresetApi } from './types';
 import {
   PRESET_DEP_NOT_FOUND,
   PRESET_INVALID,
@@ -218,12 +219,17 @@ export async function getPreset(
   }
   const { presetSource, repo, presetPath, presetName, tag, params } =
     parsePreset(preset);
-  let presetConfig = await presetSources[presetSource].getPreset({
-    repo,
-    presetPath,
-    presetName,
-    tag,
-  });
+  const cacheKey = `preset:${preset}`;
+  let presetConfig = memCache.get<Preset | null | undefined>(cacheKey);
+  if (is.nullOrUndefined(presetConfig)) {
+    presetConfig = await presetSources[presetSource].getPreset({
+      repo,
+      presetPath,
+      presetName,
+      tag,
+    });
+    memCache.set(cacheKey, presetConfig);
+  }
   if (!presetConfig) {
     throw new Error(PRESET_DEP_NOT_FOUND);
   }
@@ -280,58 +286,14 @@ export async function resolveConfigPresets(
   // First, merge all the preset configs from left to right
   if (inputConfig.extends?.length) {
     for (const preset of inputConfig.extends) {
-      // istanbul ignore if
-      if (existingPresets.includes(preset)) {
-        logger.debug(
-          `Already seen preset ${preset} in [${existingPresets.join(', ')}]`
-        );
-      } else if (ignorePresets.includes(preset)) {
-        // istanbul ignore next
-        logger.debug(
-          `Ignoring preset ${preset} in [${existingPresets.join(', ')}]`
-        );
-      } else {
+      if (shouldResolvePreset(preset, existingPresets, ignorePresets)) {
         logger.trace(`Resolving preset "${preset}"`);
-        let fetchedPreset: RenovateConfig;
-        try {
-          fetchedPreset = await getPreset(preset, baseConfig ?? inputConfig);
-        } catch (err) {
-          logger.debug({ preset, err }, 'Preset fetch error');
-          // istanbul ignore if
-          if (err instanceof ExternalHostError) {
-            throw err;
-          }
-          // istanbul ignore if
-          if (err.message === PLATFORM_RATE_LIMIT_EXCEEDED) {
-            throw err;
-          }
-          const error = new Error(CONFIG_VALIDATION);
-          if (err.message === PRESET_DEP_NOT_FOUND) {
-            error.validationError = `Cannot find preset's package (${preset})`;
-          } else if (err.message === PRESET_RENOVATE_CONFIG_NOT_FOUND) {
-            error.validationError = `Preset package is missing a renovate-config entry (${preset})`;
-          } else if (err.message === PRESET_NOT_FOUND) {
-            error.validationError = `Preset name not found within published preset config (${preset})`;
-          } else if (err.message === PRESET_INVALID) {
-            error.validationError = `Preset is invalid (${preset})`;
-          } else if (err.message === PRESET_PROHIBITED_SUBPRESET) {
-            error.validationError = `Sub-presets cannot be combined with a custom path (${preset})`;
-          } else if (err.message === PRESET_INVALID_JSON) {
-            error.validationError = `Preset is invalid JSON (${preset})`;
-          } else {
-            error.validationError = `Preset caused unexpected error (${preset})`;
-          }
-          // istanbul ignore if
-          if (existingPresets.length) {
-            error.validationError +=
-              '. Note: this is a *nested* preset so please contact the preset author if you are unable to fix it yourself.';
-          }
-          logger.info(
-            { validationError: error.validationError },
-            'Throwing preset error'
-          );
-          throw error;
-        }
+        const fetchedPreset = await fetchPreset(
+          preset,
+          baseConfig,
+          inputConfig,
+          existingPresets
+        );
         const presetConfig = await resolveConfigPresets(
           fetchedPreset,
           baseConfig ?? inputConfig,
@@ -385,4 +347,73 @@ export async function resolveConfigPresets(
   logger.trace({ config: inputConfig }, 'Input config');
   logger.trace({ config }, 'Resolved config');
   return config;
+}
+
+async function fetchPreset(
+  preset: string,
+  baseConfig: RenovateConfig | undefined,
+  inputConfig: AllConfig,
+  existingPresets: string[]
+): Promise<AllConfig> {
+  try {
+    return await getPreset(preset, baseConfig ?? inputConfig);
+  } catch (err) {
+    logger.debug({ preset, err }, 'Preset fetch error');
+    // istanbul ignore if
+    if (err instanceof ExternalHostError) {
+      throw err;
+    }
+    // istanbul ignore if
+    if (err.message === PLATFORM_RATE_LIMIT_EXCEEDED) {
+      throw err;
+    }
+    const error = new Error(CONFIG_VALIDATION);
+    if (err.message === PRESET_DEP_NOT_FOUND) {
+      error.validationError = `Cannot find preset's package (${preset})`;
+    } else if (err.message === PRESET_RENOVATE_CONFIG_NOT_FOUND) {
+      error.validationError = `Preset package is missing a renovate-config entry (${preset})`;
+    } else if (err.message === PRESET_NOT_FOUND) {
+      error.validationError = `Preset name not found within published preset config (${preset})`;
+    } else if (err.message === PRESET_INVALID) {
+      error.validationError = `Preset is invalid (${preset})`;
+    } else if (err.message === PRESET_PROHIBITED_SUBPRESET) {
+      error.validationError = `Sub-presets cannot be combined with a custom path (${preset})`;
+    } else if (err.message === PRESET_INVALID_JSON) {
+      error.validationError = `Preset is invalid JSON (${preset})`;
+    } else {
+      error.validationError = `Preset caused unexpected error (${preset})`;
+    }
+    // istanbul ignore if
+    if (existingPresets.length) {
+      error.validationError +=
+        '. Note: this is a *nested* preset so please contact the preset author if you are unable to fix it yourself.';
+    }
+    logger.info(
+      { validationError: error.validationError },
+      'Throwing preset error'
+    );
+    throw error;
+  }
+}
+
+function shouldResolvePreset(
+  preset: string,
+  existingPresets: string[],
+  ignorePresets: string[]
+): boolean {
+  // istanbul ignore if
+  if (existingPresets.includes(preset)) {
+    logger.debug(
+      `Already seen preset ${preset} in [${existingPresets.join(', ')}]`
+    );
+    return false;
+  }
+  if (ignorePresets.includes(preset)) {
+    // istanbul ignore next
+    logger.debug(
+      `Ignoring preset ${preset} in [${existingPresets.join(', ')}]`
+    );
+    return false;
+  }
+  return true;
 }

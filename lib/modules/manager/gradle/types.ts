@@ -47,6 +47,7 @@ export type SyntaxHandlerOutput = {
   deps?: PackageDependency<GradleManagerData>[];
   vars?: PackageVariables;
   urls?: string[];
+  scriptFile?: string | null;
 } | null;
 
 export interface SyntaxMatchConfig {
