@@ -65,7 +65,7 @@ import {
   vulnerabilityAlertsQuery,
 } from './graphql';
 import { massageMarkdownLinks } from './massage-markdown-links';
-import { getPrCache } from './pr';
+import { getPrCache, updatePrCache } from './pr';
 import type {
   BranchProtection,
   CombinedBranchStatus,
@@ -569,6 +569,7 @@ export async function getRepoForceRebase(): Promise<boolean> {
 function cachePr(pr?: GhPr | null): void {
   config.prList ??= [];
   if (pr) {
+    updatePrCache(pr);
     for (let idx = 0; idx < config.prList.length; idx += 1) {
       const cachedPr = config.prList[idx];
       if (cachedPr.number === pr.number) {
