@@ -1,34 +1,49 @@
+import { _, ngettext, pgettext } from '../../../../../i18n';
 import { emojify } from '../../../../../util/emoji';
 import type { BranchConfig } from '../../../../types';
+import * as util from 'util';
+
 
 export function getPrConfigDescription(config: BranchConfig): string {
   let prBody = `\n\n---\n\n### Configuration\n\n`;
   prBody += emojify(`:date: **Schedule**: `);
   prBody +=
-    'Branch creation - ' + scheduleToString(config.schedule, config.timezone);
+    `${pgettext('worker/repository/update/pr/body', 'Branch creation')} - ` +
+    scheduleToString(config.schedule, config.timezone);
   prBody +=
-    ', Automerge - ' +
+    `, ${pgettext('worker/repository/update/pr/body', 'Automerge')} - ` +
     scheduleToString(config.automergeSchedule, config.timezone) +
     '.';
 
   prBody += '\n\n';
-  prBody += emojify(':vertical_traffic_light: **Automerge**: ');
+  prBody += emojify(
+    `:vertical_traffic_light: **${pgettext(
+      'worker/repository/update/pr/body',
+      'Automerge'
+    )}**: `
+  );
   if (config.automerge) {
     prBody += 'Enabled.';
   } else {
-    prBody +=
-      'Disabled by config. Please merge this manually once you are satisfied.';
+    prBody += _(
+      'Disabled by config. Please merge this manually once you are satisfied.'
+    );
   }
   prBody += '\n\n';
-  prBody += emojify(':recycle: **Rebasing**: ');
+  prBody += emojify(
+    `:recycle: **${pgettext(
+      'worker/repository/update/pr/body',
+      'Rebasing'
+    )}**: `
+  );
   if (config.rebaseWhen === 'behind-base-branch') {
-    prBody += 'Whenever PR is behind base branch';
+    prBody += _('Whenever PR is behind base branch');
   } else if (config.rebaseWhen === 'never' || config.stopUpdating) {
-    prBody += 'Never';
+    prBody += pgettext('worker/repository/update/pr/body', 'Never');
   } else {
-    prBody += 'Whenever PR becomes conflicted';
+    prBody += _('Whenever PR becomes conflicted');
   }
-  prBody += `, or you tick the rebase/retry checkbox.\n\n`;
+  prBody += `, ${_('or you tick the rebase/retry checkbox.')}\n\n`;
   if (config.recreateClosed) {
     prBody += emojify(
       // TODO: types (#7154)
@@ -37,9 +52,13 @@ export function getPrConfigDescription(config: BranchConfig): string {
     );
   } else {
     prBody += emojify(
-      `:no_bell: **Ignore**: Close this PR and you won't be reminded about ${
-        config.upgrades.length === 1 ? 'this update' : 'these updates'
-      } again.\n\n`
+      util.format(
+        `:no_bell: **Ignore**: ${ngettext(
+          "Close this PR and you won't be reminded about this update again.",
+          "Close this PR and you won't be reminded about these updates again.",
+          config.upgrades.length
+        )}\n\n`
+      )
     );
   }
   return prBody;
@@ -53,12 +72,12 @@ function scheduleToString(
   if (schedule && schedule[0] !== 'at any time') {
     scheduleString += `"${String(schedule)}"`;
     if (timezone) {
-      scheduleString += ` in timezone ${timezone}`;
+      scheduleString += util.format(_(' in timezone %s'), timezone);
     } else {
       scheduleString += ` (UTC)`;
     }
   } else {
-    scheduleString += 'At any time (no schedule defined)';
+    scheduleString += _('At any time (no schedule defined)');
   }
   return scheduleString;
 }

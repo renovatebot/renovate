@@ -1,3 +1,4 @@
+import { _ } from '../../../../../i18n';
 import { logger } from '../../../../../logger';
 import { regEx } from '../../../../../util/regex';
 import * as template from '../../../../../util/template';
@@ -70,7 +71,7 @@ export function getPrUpdatesTable(config: BranchConfig): string {
       return res;
     });
   const tableColumns = getNonEmptyColumns(config.prBodyColumns, tableValues);
-  let res = '\n\nThis PR contains the following updates:\n\n';
+  let res = `\n\n${_('This PR contains the following updates:')}\n\n`;
   res += '| ' + tableColumns.join(' | ') + ' |\n';
   res += '|' + tableColumns.map(() => '---|').join('') + '\n';
   const rows = [];
