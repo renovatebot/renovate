@@ -11,7 +11,7 @@ export function setBranchCommit(
   branchName: string,
   baseBranch: string,
   commitSha: string
-): BranchCache {
+): void {
   const cache = getCache();
   cache.branches ??= [];
   let branch = cache.branches.find((br) => br.branchName === branchName);
@@ -30,6 +30,4 @@ export function setBranchCommit(
   branch.isBehindBase = false;
   branch.isModified = false;
   branch.parentSha = baseBranchSha;
-
-  return branch;
 }

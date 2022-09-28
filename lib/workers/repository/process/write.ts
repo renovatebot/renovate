@@ -34,10 +34,8 @@ export function canSkipBranchUpdateCheck(
 
 export function syncBranchState(
   branchName: string,
-  baseBranch: string,
-  repositoryCache?: string
+  baseBranch: string
 ): BranchCache {
-  const branchExisted = branchExists(branchName);
   const branchSha = getBranchCommit(branchName)!;
   const baseBranchSha = getBranchCommit(baseBranch)!;
 
@@ -46,10 +44,6 @@ export function syncBranchState(
   const { branches: cachedBranches } = cache;
   let branchState = cachedBranches.find((br) => br.branchName === branchName);
   if (!branchState) {
-    if (branchExisted && repositoryCache === 'enabled') {
-      logger.debug(`No branch cache found for ${branchName}`);
-    }
-
     // create a minimal branch state
     branchState = {
       branchName,
@@ -120,11 +114,7 @@ export async function writeUpdates(
     addMeta(meta);
     const branchExisted = branchExists(branchName);
     // TODO: base branch name cannot be undefined - fix optional types (#7154)
-    let branchState = syncBranchState(
-      branchName,
-      baseBranch!,
-      config.repositoryCache
-    );
+    const branchState = syncBranchState(branchName, baseBranch!);
 
     const branchManagersFingerprint = hasha(
       [
@@ -153,7 +143,8 @@ export async function writeUpdates(
         : branchState.branchFingerprint;
 
     if (res?.commitSha) {
-      branchState = setBranchCommit(branchName, baseBranch!, res.commitSha);
+      // TODO: base branch name cannot be undefined - fix optional types (#7154)
+      setBranchCommit(branchName, baseBranch!, res.commitSha);
     }
     if (
       branch.result === BranchResult.Automerged &&

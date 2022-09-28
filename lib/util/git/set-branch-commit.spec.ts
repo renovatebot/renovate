@@ -20,15 +20,18 @@ describe('util/git/set-branch-commit', () => {
   describe('setBranchCommit', () => {
     it('sets new branch in cache if it doesn not exist', () => {
       git.getBranchCommit.mockReturnValueOnce('base_SHA');
-      expect(setBranchCommit('branch_name', 'base_branch', 'SHA')).toEqual({
-        branchName: 'branch_name',
-        baseBranch: 'base_branch',
-        sha: 'SHA',
-        baseBranchSha: 'base_SHA',
-        isBehindBase: false,
-        isModified: false,
-        parentSha: 'base_SHA',
-      });
+      setBranchCommit('branch_name', 'base_branch', 'SHA');
+      expect(repoCache.branches).toEqual([
+        {
+          branchName: 'branch_name',
+          baseBranch: 'base_branch',
+          sha: 'SHA',
+          baseBranchSha: 'base_SHA',
+          isBehindBase: false,
+          isModified: false,
+          parentSha: 'base_SHA',
+        },
+      ]);
     });
 
     it('sets new values in branch when old state exists', () => {
@@ -47,15 +50,18 @@ describe('util/git/set-branch-commit', () => {
       };
       git.getBranchCommit.mockReturnValueOnce('base_SHA');
       repositoryCache.getCache.mockReturnValue(repoCache);
-      expect(setBranchCommit('branch_name', 'base_branch', 'SHA')).toEqual({
-        branchName: 'branch_name',
-        baseBranch: 'base_branch',
-        sha: 'SHA',
-        baseBranchSha: 'base_SHA',
-        isBehindBase: false,
-        isModified: false,
-        parentSha: 'base_SHA',
-      });
+      setBranchCommit('branch_name', 'base_branch', 'SHA');
+      expect(repoCache.branches).toEqual([
+        {
+          branchName: 'branch_name',
+          baseBranch: 'base_branch',
+          sha: 'SHA',
+          baseBranchSha: 'base_SHA',
+          isBehindBase: false,
+          isModified: false,
+          parentSha: 'base_SHA',
+        },
+      ]);
     });
   });
 });
