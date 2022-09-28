@@ -1,4 +1,3 @@
-import { logger } from '../../../../test/util';
 import {
   dockerDependency,
   extractDepFromTarget,
