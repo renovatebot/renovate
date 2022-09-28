@@ -4,7 +4,7 @@ import is from '@sindresorhus/is';
 import hasha from 'hasha';
 import { GlobalConfig } from '../../../../config/global';
 import { logger } from '../../../../logger';
-import { match } from '../../../schema';
+import * as schema from '../../../schema';
 import { safeStringify } from '../../../stringify';
 import { CACHE_REVISION } from '../common';
 import { RepoCacheRecord, RepoCacheV13 } from '../schemas';
@@ -50,7 +50,7 @@ export abstract class RepoCacheBase implements RepoCache {
       }
       const oldCache = JSON.parse(rawOldCache) as unknown;
 
-      if (match(RepoCacheV13, oldCache, false)) {
+      if (schema.match(RepoCacheV13, oldCache)) {
         await this.restore(oldCache);
         logger.debug('Repository cache is restored from revision 13');
         return;
