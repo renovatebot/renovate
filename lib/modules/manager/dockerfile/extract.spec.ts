@@ -1158,6 +1158,15 @@ describe('modules/manager/dockerfile/extract', () => {
     });
   });
 
+  it('filters dependency duplicates', () => {
+    const res = extractPackageFile(
+      'ARG PYTHON_VERS=3.10-slim\nFROM python:${PYTHON_VERS} AS builder\nFROM python:${PYTHON_VERS}\n',
+      '',
+      {}
+    )?.deps;
+    expect(res).toHaveLength(1);
+  });
+
   describe('getDep()', () => {
     it('rejects null', () => {
       expect(getDep(null)).toEqual({ skipReason: 'invalid-value' });

@@ -389,9 +389,15 @@ export function extractPackageFile(
   if (!deps.length) {
     return null;
   }
-  for (const d of deps) {
+
+  const deduplicatedDeps = [
+    ...new Map(deps.map((v) => [JSON.stringify(v), v])).values(),
+  ];
+
+  for (const d of deduplicatedDeps) {
     d.depType = 'stage';
   }
-  deps[deps.length - 1].depType = 'final';
-  return { deps };
+  deduplicatedDeps[deduplicatedDeps.length - 1].depType = 'final';
+
+  return { deps: deduplicatedDeps };
 }
