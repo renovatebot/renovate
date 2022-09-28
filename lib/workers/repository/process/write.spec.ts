@@ -96,10 +96,7 @@ describe('workers/repository/process/write', () => {
         branchExists: true,
         result: BranchResult.PrCreated,
       });
-      git.branchExists
-        .mockReturnValueOnce(false)
-        .mockReturnValueOnce(false)
-        .mockReturnValueOnce(true);
+      git.branchExists.mockReturnValueOnce(false).mockReturnValueOnce(true);
       limits.getBranchesRemaining.mockResolvedValueOnce(1);
       expect(isLimitReached(Limit.Branches)).toBeFalse();
       GlobalConfig.set({ dryRun: 'full' });
