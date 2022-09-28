@@ -36,10 +36,10 @@ export class CondaDatasource extends Datasource {
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     logger.trace({ registryUrl, packageName }, 'fetching conda package');
 
-    let regUrl = registryUrl;
 
-    if (!regUrl) {
-      regUrl = defaultRegistryUrl;
+    // istanbul ignore if
+    if (!registryUrl) {
+      return null;
     }
 
     const url = joinUrlParts(regUrl, packageName);
