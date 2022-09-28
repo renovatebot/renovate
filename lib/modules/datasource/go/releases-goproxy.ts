@@ -68,9 +68,17 @@ export class GoProxyDatasource extends Datasource {
           }
         });
         if (releases.length) {
-          const datasource = await BaseGoDatasource.getDatasource(packageName);
-          const sourceUrl = getSourceUrl(datasource);
-          result = { releases, sourceUrl };
+          try {
+            const datasource = await BaseGoDatasource.getDatasource(
+              packageName
+            );
+            const sourceUrl = getSourceUrl(datasource);
+            result = { releases, sourceUrl };
+          } catch (err) {
+            logger.trace({ err }, `Can't get datasource for ${packageName}`);
+            result = { releases };
+          }
+
           break;
         }
       } catch (err) {
