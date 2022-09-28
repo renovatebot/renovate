@@ -567,6 +567,7 @@ export async function isBranchBehindBase(
   branchName: string,
   baseBranch: string
 ): Promise<boolean> {
+  logger.debug('branch.isBranchBehindBase(): calculating result');
   let isBehind = getCachedBehindBaseResult(
     branchName,
     getBranchCommit(branchName), // branch sha
@@ -574,7 +575,7 @@ export async function isBranchBehindBase(
     getBranchCommit(baseBranch) // base branch sha
   );
   if (isBehind !== null) {
-    logger.debug('Using cached result for isBranchBehindBase');
+    logger.debug('branch.isBranchBehindBase(): using cached result');
     return isBehind;
   }
 
@@ -603,6 +604,7 @@ export async function isBranchBehindBase(
 }
 
 export async function isBranchModified(branchName: string): Promise<boolean> {
+  logger.debug('branch.isModified(): calculating result');
   if (!branchExists(branchName)) {
     logger.debug(
       { branchName },
@@ -612,7 +614,6 @@ export async function isBranchModified(branchName: string): Promise<boolean> {
   }
   // First check local config
   if (config.branchIsModified[branchName] !== undefined) {
-    logger.debug('Using local config for isBranchModified');
     return config.branchIsModified[branchName];
   }
   // Second check repository cache
@@ -621,7 +622,7 @@ export async function isBranchModified(branchName: string): Promise<boolean> {
     getBranchCommit(branchName) // branch sha
   );
   if (isModified !== null) {
-    logger.debug('Using cached result for isBranchModified');
+    logger.debug('branch.isModified(): using cached result');
     return (config.branchIsModified[branchName] = isModified);
   }
 

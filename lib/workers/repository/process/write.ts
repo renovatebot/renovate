@@ -153,10 +153,7 @@ export async function writeUpdates(
         : branchState.branchFingerprint;
 
     if (res?.commitSha) {
-      branchState = {
-        ...branchState,
-        ...setBranchCommit(branchName, baseBranch!, res.commitSha),
-      };
+      branchState = setBranchCommit(branchName, baseBranch!, res.commitSha);
     }
     if (
       branch.result === BranchResult.Automerged &&

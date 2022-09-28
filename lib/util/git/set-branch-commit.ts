@@ -2,6 +2,11 @@ import { getCache } from '../cache/repository';
 import type { BranchCache } from '../cache/repository/types';
 import { getBranchCommit } from '.';
 
+/**
+ * Called when a new commit is added to branch
+ *
+ * ie. when branch is created/updated
+ */
 export function setBranchCommit(
   branchName: string,
   baseBranch: string,
@@ -12,8 +17,8 @@ export function setBranchCommit(
   let branch = cache.branches.find((br) => br.branchName === branchName);
   if (!branch) {
     branch = {
-      branchName: branchName,
-      baseBranch: baseBranch,
+      branchName,
+      baseBranch,
     } as BranchCache;
     cache.branches.push(branch);
   }
