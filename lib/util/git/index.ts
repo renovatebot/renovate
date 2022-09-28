@@ -156,6 +156,7 @@ let config: LocalConfig = {} as any;
 // TODO: can be undefined
 let git: SimpleGit;
 let gitInitialized: boolean;
+let submodulesInitizialized: boolean;
 
 let privateKeySet = false;
 
@@ -236,6 +237,7 @@ export async function initRepo(args: StorageConfig): Promise<void> {
     LC_ALL: 'C',
   });
   gitInitialized = false;
+  submodulesInitizialized = false;
   await fetchBranchCommits();
 }
 
@@ -341,6 +343,26 @@ export async function getSubmodules(): Promise<string[]> {
   }
 }
 
+export async function cloneSubmodules(shouldClone: boolean): Promise<void> {
+  if (!shouldClone || submodulesInitizialized) {
+    return;
+  }
+  submodulesInitizialized = true;
+  await syncGit();
+  const submodules = await getSubmodules();
+  for (const submodule of submodules) {
+    try {
+      logger.debug(`Cloning git submodule at ${submodule}`);
+      await gitRetry(() => git.submoduleUpdate(['--init', submodule]));
+    } catch (err) {
+      logger.warn(
+        { err },
+        `Unable to initialise git submodule at ${submodule}`
+      );
+    }
+  }
+}
+
 export async function syncGit(): Promise<void> {
   if (gitInitialized) {
     return;
@@ -415,20 +437,8 @@ export async function syncGit(): Promise<void> {
     }
     throw err;
   }
-  if (config.cloneSubmodules) {
-    const submodules = await getSubmodules();
-    for (const submodule of submodules) {
-      try {
-        logger.debug(`Cloning git submodule at ${submodule}`);
-        await gitRetry(() => git.submoduleUpdate(['--init', submodule]));
-      } catch (err) {
-        logger.warn(
-          { err },
-          `Unable to initialise git submodule at ${submodule}`
-        );
-      }
-    }
-  }
+  // This will only happen now if set in global config
+  await cloneSubmodules(!!config.cloneSubmodules);
   try {
     const latestCommit = (await git.log({ n: 1 })).latest;
     logger.debug({ latestCommit }, 'latest repository commit');
@@ -612,6 +622,7 @@ export async function isBranchModified(branchName: string): Promise<boolean> {
     config.branchCommits[branchName]
   );
   if (isModified !== null) {
+    logger.debug('Using cached result for isBranchModified');
     return (config.branchIsModified[branchName] = isModified);
   }
 
