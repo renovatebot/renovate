@@ -9,42 +9,16 @@ import { ApiCache } from './api-cache';
 import { coerceRestPr } from './common';
 import type { ApiPageCache, GhPr, GhRestPr } from './types';
 
-function isOldCache(prCache: unknown): prCache is ApiPageCache<GhRestPr> {
-  if (
-    is.plainObject(prCache) &&
-    is.plainObject(prCache.items) &&
-    !is.emptyObject(prCache.items)
-  ) {
-    const [item] = Object.values(prCache.items);
-    // istanbul ignore if
-    if (is.plainObject(item) && is.plainObject(item.head)) {
-      return true;
-    }
-  }
-
-  return false;
-}
-
-function migrateCache(cache: unknown): void {
-  const items: ApiPageCache<GhPr>['items'] = {};
-  // istanbul ignore if
-  if (isOldCache(cache)) {
-    for (const item of Object.values(cache.items)) {
-      items[item.number] = coerceRestPr(item);
-    }
-    cache.items = items as never;
-  }
-}
-
 function getPrApiCache(): ApiCache<GhPr> {
   const repoCache = getCache();
   repoCache.platform ??= {};
   repoCache.platform.github ??= {};
-  repoCache.platform.github.prCache ??= { items: {} };
-  const cache = repoCache.platform.github.prCache;
-  migrateCache(cache);
-  const prCache = new ApiCache<GhPr>(cache as ApiPageCache<GhPr>);
-  return prCache;
+  delete repoCache.platform.github.prCache;
+  repoCache.platform.github.pullRequestsCache ??= { items: {} };
+  const prApiCache = new ApiCache<GhPr>(
+    repoCache.platform.github.pullRequestsCache as ApiPageCache<GhPr>
+  );
+  return prApiCache;
 }
 
 /**
