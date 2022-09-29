@@ -3,21 +3,7 @@ import { DateTime } from 'luxon';
 import type { ApiPageCache, ApiPageItem } from './types';
 
 export class ApiCache<T extends ApiPageItem> {
-  private itemsMapCache = new WeakMap();
-
   constructor(private cache: ApiPageCache<T>) {}
-
-  get etag(): string | null {
-    return this.cache.etag ?? null;
-  }
-
-  set etag(value: string | null) {
-    if (value === null) {
-      delete this.cache.etag;
-    } else {
-      this.cache.etag = value;
-    }
-  }
 
   /**
    * @returns Date formatted to use in HTTP headers
@@ -27,21 +13,7 @@ export class ApiCache<T extends ApiPageItem> {
     return lastModified ? DateTime.fromISO(lastModified).toHTTP() : null;
   }
 
-  getItems(): T[];
-  getItems<U = unknown>(mapFn: (_: T) => U): U[];
-  getItems<U = unknown>(mapFn?: (_: T) => U): T[] | U[] {
-    if (mapFn) {
-      const cachedResult = this.itemsMapCache.get(mapFn);
-      if (cachedResult) {
-        return cachedResult;
-      }
-
-      const items = Object.values(this.cache.items);
-      const mappedResult = items.map(mapFn);
-      this.itemsMapCache.set(mapFn, mappedResult);
-      return mappedResult;
-    }
-
+  getItems(): T[] {
     const items = Object.values(this.cache.items);
     return items;
   }
@@ -58,7 +30,6 @@ export class ApiCache<T extends ApiPageItem> {
    */
   updateItem(item: T): void {
     this.cache.items[item.number] = item;
-    this.itemsMapCache = new WeakMap();
   }
 
   /**
@@ -88,7 +59,6 @@ export class ApiCache<T extends ApiPageItem> {
 
       if (!dequal(oldItem, newItem)) {
         items[number] = newItem;
-        this.itemsMapCache = new WeakMap();
       }
 
       needNextPage = itemOldTime ? itemOldTime < itemNewTime : true;

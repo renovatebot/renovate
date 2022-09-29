@@ -84,12 +84,13 @@ exports[`modules/manager/cargo/artifacts returns updated Cargo.lock with docker 
     },
   },
   {
-    "cmd": "docker run --rm --name=renovate_rust --label=renovate_child -v "/tmp/github/some/repo":"/tmp/github/some/repo" -v "/tmp/cache":"/tmp/cache" -e BUILDPACK_CACHE_DIR -w "/tmp/github/some/repo" renovate/rust bash -l -c "cargo update --manifest-path Cargo.toml --workspace"",
+    "cmd": "docker run --rm --name=renovate_rust --label=renovate_child -v "/tmp/github/some/repo":"/tmp/github/some/repo" -v "/tmp/cache":"/tmp/cache" -e BUILDPACK_CACHE_DIR -e CONTAINERBASE_CACHE_DIR -w "/tmp/github/some/repo" renovate/rust bash -l -c "cargo update --manifest-path Cargo.toml --workspace"",
     "options": {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
       "env": {
         "BUILDPACK_CACHE_DIR": "/tmp/cache/containerbase",
+        "CONTAINERBASE_CACHE_DIR": "/tmp/cache/containerbase",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
         "HTTP_PROXY": "http://example.com",

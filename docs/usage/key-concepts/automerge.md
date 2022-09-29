@@ -27,7 +27,7 @@ For example, if you have Jest or Mocha as a development dependency, and it has a
 If you have a linter like ESLint or TSLint and its update passes... automerge them!
 If you have an API with 100% test coverage and Express is updated... automerge it!
 
-![Automerged PR](/assets/images/automerged-pr.png)
+![Automerged PR](/assets/images/automerged-pr.png){ loading=lazy }
 
 ## Configuration examples
 

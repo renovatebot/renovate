@@ -679,64 +679,6 @@ describe('modules/platform/github/index', () => {
       ]);
     });
 
-    describe('Url cleanup', () => {
-      type GhRestPrWithUrls = GhRestPr & {
-        url: string;
-        example_url: string;
-        repo: {
-          example_url: string;
-        };
-      };
-
-      type PrCache = ApiPageCache<GhRestPrWithUrls>;
-
-      const prWithUrls = (): GhRestPrWithUrls => ({
-        ...pr1,
-        url: 'https://example.com',
-        example_url: 'https://example.com',
-        _links: { foo: { href: 'https://example.com' } },
-        repo: { example_url: 'https://example.com' },
-      });
-
-      it('removes url data from response', async () => {
-        const scope = httpMock.scope(githubApiHost);
-        initRepoMock(scope, 'some/repo');
-        scope.get(pagePath(1)).reply(200, [prWithUrls()]);
-        await github.initRepo({ repository: 'some/repo' });
-
-        await github.getPrList();
-
-        const repoCache = repository.getCache();
-        const prCache = repoCache.platform?.github?.prCache as PrCache;
-        expect(prCache).toMatchObject({ items: {} });
-
-        const item = prCache.items[1];
-        expect(item).toBeDefined();
-        expect(item._links).toBeUndefined();
-        expect(item.url).toBeUndefined();
-        expect(item.example_url).toBeUndefined();
-        expect(item.repo.example_url).toBeUndefined();
-      });
-
-      it('removes url data from existing cache', async () => {
-        const scope = httpMock.scope(githubApiHost);
-        initRepoMock(scope, 'some/repo');
-        scope.get(pagePath(1, 20)).reply(200, []);
-        await github.initRepo({ repository: 'some/repo' });
-        const repoCache = repository.getCache();
-        const prCache: PrCache = { items: { 1: prWithUrls() } };
-        repoCache.platform = { github: { prCache } };
-
-        await github.getPrList();
-
-        const item = prCache.items[1];
-        expect(item._links).toBeUndefined();
-        expect(item.url).toBeUndefined();
-        expect(item.example_url).toBeUndefined();
-        expect(item.repo.example_url).toBeUndefined();
-      });
-    });
-
     describe('Body compaction', () => {
       type PrCache = ApiPageCache<GhRestPr>;
 
@@ -754,31 +696,11 @@ describe('modules/platform/github/index', () => {
         await github.getPrList();
 
         const repoCache = repository.getCache();
-        const prCache = repoCache.platform?.github?.prCache as PrCache;
-        expect(prCache).toMatchObject({ items: {} });
+        const pullRequestsCache = repoCache.platform?.github
+          ?.pullRequestsCache as PrCache;
+        expect(pullRequestsCache).toMatchObject({ items: {} });
 
-        const item = prCache.items[1];
-        expect(item).toBeDefined();
-        expect(item.body).toBeUndefined();
-        expect(item.bodyStruct).toEqual({ hash: hashBody('foo') });
-      });
-
-      it('removes url data from existing cache', async () => {
-        const scope = httpMock.scope(githubApiHost);
-        initRepoMock(scope, 'some/repo');
-        scope.get(pagePath(1)).reply(200, [prWithBody('foo')]);
-        await github.initRepo({ repository: 'some/repo' });
-        const repoCache = repository.getCache();
-        const prCache: PrCache = {
-          items: { 1: prWithBody('bar'), 2: prWithBody('baz') },
-        };
-        repoCache.platform = { github: { prCache } };
-
-        await github.getPrList();
-
-        expect(prCache.items[2]).toBeUndefined();
-
-        const item = prCache.items[1];
+        const item = pullRequestsCache.items[1];
         expect(item).toBeDefined();
         expect(item.body).toBeUndefined();
         expect(item.bodyStruct).toEqual({ hash: hashBody('foo') });
@@ -818,6 +740,7 @@ describe('modules/platform/github/index', () => {
             head: { ref: 'somebranch', repo: { full_name: 'other/repo' } },
             state: PrState.Open,
             title: 'PR from another repo',
+            updated_at: '01-09-2022',
           },
           {
             number: 91,
@@ -825,6 +748,7 @@ describe('modules/platform/github/index', () => {
             head: { ref: 'somebranch', repo: { full_name: 'some/repo' } },
             state: PrState.Open,
             title: 'Some title',
+            updated_at: '01-09-2022',
           },
         ]);
       await github.initRepo({ repository: 'some/repo' });
@@ -832,7 +756,7 @@ describe('modules/platform/github/index', () => {
       const pr = await github.getBranchPr('somebranch');
       const pr2 = await github.getBranchPr('somebranch');
 
-      expect(pr).toMatchSnapshot();
+      expect(pr).toMatchObject({ number: 91, sourceBranch: 'somebranch' });
       expect(pr2).toEqual(pr);
     });
 
@@ -848,6 +772,7 @@ describe('modules/platform/github/index', () => {
             number: 90,
             head: { ref: 'somebranch', repo: { full_name: 'other/repo' } },
             state: PrState.Open,
+            updated_at: '01-09-2022',
           },
           {
             number: 91,
@@ -855,6 +780,7 @@ describe('modules/platform/github/index', () => {
             title: 'old title - autoclosed',
             state: PrState.Closed,
             closed_at: DateTime.now().minus({ days: 6 }).toISO(),
+            updated_at: '01-09-2022',
           },
         ])
         .post('/repos/some/repo/git/refs')
@@ -866,13 +792,14 @@ describe('modules/platform/github/index', () => {
           head: { ref: 'somebranch', repo: { full_name: 'some/repo' } },
           state: PrState.Open,
           title: 'old title',
+          updated_at: '01-09-2022',
         });
       await github.initRepo({ repository: 'some/repo' });
 
       const pr = await github.getBranchPr('somebranch');
       const pr2 = await github.getBranchPr('somebranch');
 
-      expect(pr).toMatchSnapshot({ number: 91 });
+      expect(pr).toMatchObject({ number: 91, sourceBranch: 'somebranch' });
       expect(pr2).toEqual(pr);
     });
 
@@ -2427,6 +2354,7 @@ describe('modules/platform/github/index', () => {
             },
             title: 'build(deps): update dependency delay to v4.0.1',
             state: PrState.Closed,
+            updated_at: '01-09-2022',
           },
           {
             number: 2500,
@@ -2436,12 +2364,22 @@ describe('modules/platform/github/index', () => {
             },
             state: PrState.Open,
             title: 'chore(deps): update dependency jest to v23.6.0',
+            updated_at: '01-09-2022',
           },
         ]);
       await github.initRepo({ repository: 'some/repo' });
       const pr = await github.getPr(2500);
       expect(pr).toBeDefined();
-      expect(pr).toMatchSnapshot();
+      expect(pr).toMatchObject({
+        number: 2500,
+        bodyStruct: { hash: expect.any(String) },
+        displayNumber: 'Pull Request #2500',
+        sourceBranch: 'renovate/jest-monorepo',
+        sourceRepo: 'some/repo',
+        state: 'open',
+        title: 'chore(deps): update dependency jest to v23.6.0',
+        updated_at: '01-09-2022',
+      });
     });
 
     it('should return closed PR', async () => {
@@ -2504,7 +2442,7 @@ describe('modules/platform/github/index', () => {
         )
         .reply(200, [])
         .get('/repos/some/repo/pulls/1234')
-        .reply(200);
+        .reply(404);
       await github.initRepo({ repository: 'some/repo' });
       const pr = await github.getPr(1234);
       expect(pr).toBeNull();
@@ -2529,10 +2467,11 @@ describe('modules/platform/github/index', () => {
           labels: [{ name: 'foo' }, { name: 'bar' }],
           assignee: { login: 'foobar' },
           created_at: '01-01-2022',
+          updated_at: '01-09-2022',
         });
       await github.initRepo({ repository: 'some/repo' });
       const pr = await github.getPr(1234);
-      expect(pr).toMatchSnapshot({ state: 'merged' });
+      expect(pr).toMatchObject({ number: 1234, state: 'merged' });
     });
 
     it(`should return a PR object - 1`, async () => {
@@ -2554,10 +2493,23 @@ describe('modules/platform/github/index', () => {
           title: 'Some title',
           assignees: [{ login: 'foo' }],
           requested_reviewers: [{ login: 'bar' }],
+          updated_at: '01-09-2022',
         });
       await github.initRepo({ repository: 'some/repo' });
       const pr = await github.getPr(1234);
-      expect(pr).toMatchSnapshot();
+      expect(pr).toMatchObject({
+        bodyStruct: {
+          hash: expect.any(String),
+        },
+        displayNumber: 'Pull Request #1234',
+        hasAssignees: true,
+        hasReviewers: true,
+        number: 1234,
+        sourceBranch: 'some/branch',
+        state: 'open',
+        title: 'Some title',
+        updated_at: '01-09-2022',
+      });
     });
 
     it(`should return a PR object - 2`, async () => {
@@ -2576,10 +2528,21 @@ describe('modules/platform/github/index', () => {
           head: { ref: 'some/branch' },
           commits: 1,
           title: 'Some title',
+          updated_at: '01-09-2022',
         });
       await github.initRepo({ repository: 'some/repo' });
       const pr = await github.getPr(1234);
-      expect(pr).toMatchSnapshot();
+      expect(pr).toMatchObject({
+        bodyStruct: {
+          hash: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
+        },
+        displayNumber: 'Pull Request #1234',
+        number: 1234,
+        sourceBranch: 'some/branch',
+        state: 'open',
+        title: 'Some title',
+        updated_at: '01-09-2022',
+      });
     });
   });
 

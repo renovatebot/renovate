@@ -12,13 +12,6 @@ import { toBase64 } from '../../../util/string';
 import { getPrBodyStruct } from '../pr-body';
 import type { AzurePr } from './types';
 
-export function getNewBranchName(branchName?: string): string | undefined {
-  if (branchName && !branchName.startsWith('refs/heads/')) {
-    return `refs/heads/${branchName}`;
-  }
-  return branchName;
-}
-
 export function getGitStatusContextCombinedName(
   context: GitStatusContext | null | undefined
 ): string | undefined {

@@ -6,7 +6,7 @@ import { addMeta, logger, removeMeta } from '../../../logger';
 import { hashMap } from '../../../modules/manager';
 import { getCache } from '../../../util/cache/repository';
 import type { BranchCache } from '../../../util/cache/repository/types';
-import { branchExists } from '../../../util/git';
+import { branchExists, getBranchCommit } from '../../../util/git';
 import { Limit, incLimitedValue, setMaxLimit } from '../../global/limits';
 import { BranchConfig, BranchResult } from '../../types';
 import { processBranch } from '../update/branch';
@@ -45,7 +45,8 @@ export async function writeUpdates(
       .join(', ')}`
   );
   const cache = getCache();
-  const { branches: cachedBranches = [] } = cache;
+  cache.branches ??= [];
+  const { branches: cachedBranches } = cache;
   const prsRemaining = await getPrsRemaining(config, branches);
   logger.debug({ prsRemaining }, 'Calculated maximum PRs remaining this run');
   setMaxLimit(Limit.PullRequests, prsRemaining);
@@ -59,22 +60,28 @@ export async function writeUpdates(
 
   for (const branch of branches) {
     const { baseBranch, branchName } = branch;
+    const branchSha = getBranchCommit(branchName)!;
     const meta: Record<string, string> = { branch: branchName };
     if (config.baseBranches?.length && baseBranch) {
       meta['baseBranch'] = baseBranch;
     }
     addMeta(meta);
     const branchExisted = branchExists(branchName);
-    let branchCache = {} as BranchCache;
-    if (branchExisted && config.repositoryCache === 'enabled') {
-      branchCache =
-        cachedBranches?.find((br) => br.branchName === branchName) ??
-        ({} as BranchCache);
+    let branchState = cachedBranches.find((br) => br.branchName === branchName);
 
-      if (Object.keys(branchCache).length === 0) {
-        logger.debug(`No branch cache found for ${branch.branchName}`);
+    if (!branchState) {
+      if (branchExisted && config.repositoryCache === 'enabled') {
+        logger.debug(`No branch cache found for ${branchName}`);
       }
+
+      // create a minimal branch state
+      branchState = {
+        branchName,
+        sha: branchSha,
+      } as BranchCache;
+      cachedBranches.push(branchState);
     }
+
     const branchManagersFingerprint = hasha(
       [
         ...new Set(
@@ -89,7 +96,7 @@ export async function writeUpdates(
       branchManagersFingerprint,
     ]);
     branch.skipBranchUpdate = canSkipBranchUpdateCheck(
-      branchCache,
+      branchState,
       branchFingerprint
     );
     const res = await processBranch(branch);
@@ -97,9 +104,9 @@ export async function writeUpdates(
     branch.prNo = res?.prNo;
     branch.result = res?.result;
     branch.branchFingerprint =
-      res?.commitSha || !branchCache.branchFingerprint
+      res?.commitSha || !branchState.branchFingerprint
         ? branchFingerprint
-        : branchCache.branchFingerprint;
+        : branchState.branchFingerprint;
 
     if (
       branch.result === BranchResult.Automerged &&
