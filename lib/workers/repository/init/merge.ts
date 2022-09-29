@@ -220,13 +220,15 @@ export async function mergeRenovateConfig(
     logger.debug('Found npmrc in decrypted config - setting');
     npmApi.setNpmrc(decryptedConfig.npmrc);
   }
-  const resolvedConfigTemp = await presets.resolveConfigPresets(
-    decryptedConfig,
-    config,
-    config.ignorePresets
-  );
   // Decrypt after resolving in case the preset contains npm authentication instead
-  let resolvedConfig = await decryptConfig(resolvedConfigTemp, repository);
+  let resolvedConfig = await decryptConfig(
+    await presets.resolveConfigPresets(
+      decryptedConfig,
+      config,
+      config.ignorePresets
+    ),
+    repository
+  );
   logger.trace({ config: resolvedConfig }, 'resolved config');
   const migrationResult = migrateConfig(resolvedConfig);
   if (migrationResult.isMigrated) {
