@@ -246,7 +246,7 @@ export const supportedRulesRegex = regEx(`^${supportedRules.join('|')}$`);
 export function extractDepFromTarget(target: Target): PackageDependency | null {
   const dependencyExtractor = dependencyExtractorRegistry[target.rule];
   if (!dependencyExtractor) {
-    logger.warn(
+    logger.debug(
       `Bazel dependency extractor function not found for ${target.rule}`
     );
     return null;

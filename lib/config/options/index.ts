@@ -1305,7 +1305,7 @@ const options: RenovateOptions[] = [
     description: 'Bump the version in the package file being updated.',
     type: 'string',
     allowedValues: ['major', 'minor', 'patch', 'prerelease'],
-    supportedManagers: ['helmv3', 'npm', 'maven', 'sbt'],
+    supportedManagers: ['helmv3', 'npm', 'nuget', 'maven', 'sbt'],
   },
   // Major/Minor/Patch
   {
