@@ -696,10 +696,11 @@ describe('modules/platform/github/index', () => {
         await github.getPrList();
 
         const repoCache = repository.getCache();
-        const prCache = repoCache.platform?.github?.prCache as PrCache;
-        expect(prCache).toMatchObject({ items: {} });
+        const pullRequestsCache = repoCache.platform?.github
+          ?.pullRequestsCache as PrCache;
+        expect(pullRequestsCache).toMatchObject({ items: {} });
 
-        const item = prCache.items[1];
+        const item = pullRequestsCache.items[1];
         expect(item).toBeDefined();
         expect(item.body).toBeUndefined();
         expect(item.bodyStruct).toEqual({ hash: hashBody('foo') });
