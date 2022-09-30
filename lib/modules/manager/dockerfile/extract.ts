@@ -88,6 +88,7 @@ function processDepForAutoReplace(
   dep.replaceString = unfoldedLineNumbers
     .map((lineNumber) => lines[lineNumber])
     .join(linefeed);
+  dep.replaceString += linefeed;
 
   dep.autoReplaceStringTemplate = getAutoReplaceTemplate(dep);
 }
