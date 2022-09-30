@@ -41,7 +41,7 @@ export class CondaDatasource extends Datasource {
       return null;
     }
 
-    const url = joinUrlParts(regUrl, packageName);
+    const url = joinUrlParts(registryUrl, packageName);
 
     const result: ReleaseResult = {
       releases: [],
