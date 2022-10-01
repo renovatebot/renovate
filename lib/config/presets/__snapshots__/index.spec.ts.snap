@@ -10,6 +10,8 @@ exports[`config/presets/index getPreset gets linters 1`] = `
     "packages:eslint",
     "packages:stylelint",
     "packages:tslint",
+    "packages:prettier",
+    "packages:standard",
   ],
   "matchPackageNames": [
     "remark-lint",
@@ -143,6 +145,8 @@ exports[`config/presets/index resolvePreset resolves linters 1`] = `
     "@typescript-eslint/",
     "eslint",
     "stylelint",
+    "prettier",
+    "standard",
   ],
 }
 `;
@@ -172,6 +176,8 @@ exports[`config/presets/index resolvePreset resolves nested groups 1`] = `
         "@typescript-eslint/",
         "eslint",
         "stylelint",
+        "prettier",
+        "standard",
       ],
     },
   ],

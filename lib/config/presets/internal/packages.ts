@@ -36,10 +36,18 @@ export const presets: Record<string, Preset> = {
     description: 'All Stylelint packages.',
     matchPackagePrefixes: ['stylelint'],
   },
+  standard: {
+    description: 'JavaScript Standard Style',
+    matchPackagePrefixes: ['standard'],
+  },
   tslint: {
     description: 'All TSLint packages.',
     matchPackageNames: ['codelyzer'],
     matchPackagePatterns: ['\\btslint\\b'],
+  },
+  prettier: {
+    description: 'Prettier code formatter',
+    matchPackagePrefixes: ['prettier'],
   },
   linters: {
     description: 'All lint-related packages.',
@@ -48,6 +56,8 @@ export const presets: Record<string, Preset> = {
       'packages:eslint',
       'packages:stylelint',
       'packages:tslint',
+      'packages:prettier',
+      'packages:standard',
     ],
     matchPackageNames: ['remark-lint'],
   },
