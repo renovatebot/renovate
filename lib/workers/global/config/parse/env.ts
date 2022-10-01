@@ -80,7 +80,7 @@ export function getConfig(inputEnv: NodeJS.ProcessEnv): AllConfig {
       val
         .split(',')
         .map((el) => el.trim())
-        .filter((el) => el !== ''),
+        .filter(is.nonEmptyString),
     string: (val: string): string => val.replace(/\\n/g, '\n'),
     object: (val: string): any => JSON5.parse(val),
     integer: parseInt,
