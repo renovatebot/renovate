@@ -1001,6 +1001,25 @@ describe('util/git/index', () => {
       await git.clearRenovateRefs();
       expect(await lsRenovateRefs()).toEqual(['refs/renovate/foo/bar']);
     });
+
+    it('falls back to sequential ref deletion if bulk changes are disallowed', async () => {
+      const commit = git.getBranchCommit('develop')!;
+      await git.pushCommitToRenovateRef(commit, 'foo');
+      await git.pushCommitToRenovateRef(commit, 'bar');
+      await git.pushCommitToRenovateRef(commit, 'baz');
+
+      const pushSpy = jest.spyOn(SimpleGit.prototype, 'push');
+      pushSpy.mockImplementationOnce(() => {
+        throw new Error(
+          'remote: Repository policies do not allow pushes that update more than 2 branches or tags.'
+        );
+      });
+
+      expect(await lsRenovateRefs()).not.toBeEmpty();
+      await git.clearRenovateRefs();
+      expect(await lsRenovateRefs()).toBeEmpty();
+      expect(pushSpy).toHaveBeenCalledTimes(4);
+    });
   });
 
   describe('listCommitTree', () => {
