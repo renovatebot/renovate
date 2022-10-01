@@ -5,7 +5,7 @@ description: How to use OpenTelemetry with Renovate
 
 # OpenTelemetry and Renovate
 
-**THIS FEATURE IS EXPERIMENTAL** and is subject to change in minor version.
+**THIS FEATURE IS EXPERIMENTAL** and is subject to change in minor versions.
 
 Renovate supports OpenTelemetry which is an emerging monitoring standard.
 
@@ -20,7 +20,8 @@ Renovate can only send traces and only via the OpenTelemetryProtocol (OTLP), oth
 ## Usage
 
 To activate the instrumentation, the environment variable `OTEL_EXPORTER_OTLP_ENDPOINT` has to be set.
-This sets the endpoint where to send the telemetry data. If this endpoint is set, all other environment variables defined by the [OpenTelemetry specification](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/sdk-environment-variables.md) are supported.
+This sets the endpoint where to send the telemetry data.
+If this endpoint is set, all other environment variables defined by the [OpenTelemetry specification](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/sdk-environment-variables.md) are supported.
 
 For debugging purposes the telemetry can also be printed to the console if the environment variable `RENOVATE_TRACING_CONSOLE_EXPORTER` is set.
 
