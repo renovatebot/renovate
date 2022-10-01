@@ -984,8 +984,13 @@ describe('util/git/index', () => {
 
       await git.pushCommitToRenovateRef(commit, 'bbb');
       await git.pushCommitToRenovateRef(commit, 'ccc', 'branches');
+
+      const pushSpy = jest.spyOn(SimpleGit.prototype, 'push');
+
+      expect(await lsRenovateRefs()).not.toBeEmpty();
       await git.clearRenovateRefs();
       expect(await lsRenovateRefs()).toBeEmpty();
+      expect(pushSpy).toHaveBeenCalledOnce();
     });
 
     it('preserves unknown sections by default', async () => {
