@@ -14,30 +14,40 @@ import type { PackageDependency, PackageFile } from '../types';
 import { extractLockFileEntries } from './locked-version';
 import type { PoetryDependency, PoetryFile, PoetrySection } from './types';
 
-class PoetryGroupSection {
-  constructor(public name: string) {}
+function extractFromDependenciesSection(
+  parsedFile: PoetryFile,
+  section: keyof Omit<PoetrySection, 'source' | 'group'>,
+  poetryLockfile: Record<string, string>
+): PackageDependency[] {
+  return extractFromSection(
+    parsedFile.tool?.poetry?.[section],
+    section,
+    poetryLockfile
+  );
+}
+
+function extractFromDependenciesGroupSection(
+  parsedFile: PoetryFile,
+  group: string,
+  poetryLockfile: Record<string, string>
+): PackageDependency[] {
+  return extractFromSection(
+    parsedFile.tool?.poetry?.group[group]?.dependencies,
+    group,
+    poetryLockfile
+  );
 }
 
 function extractFromSection(
-  parsedFile: PoetryFile,
-  section: keyof Omit<PoetrySection, 'source' | 'group'> | PoetryGroupSection,
+  sectionContent: Record<string, PoetryDependency | string> | undefined,
+  depType: string,
   poetryLockfile: Record<string, string>
 ): PackageDependency[] {
-  const deps: PackageDependency[] = [];
-  let sectionContent: Record<string, PoetryDependency | string> | undefined;
-  let depType: string;
-
-  if (section instanceof PoetryGroupSection) {
-    sectionContent = parsedFile.tool?.poetry?.group[section.name]?.dependencies;
-    depType = section.name;
-  } else {
-    sectionContent = parsedFile.tool?.poetry?.[section];
-    depType = section;
-  }
-
   if (!sectionContent) {
     return [];
   }
+
+  const deps: PackageDependency[] = [];
 
   for (const depName of Object.keys(sectionContent)) {
     if (depName === 'python' || depName === 'source') {
@@ -135,15 +145,19 @@ export async function extractPackageFile(
   const lockfileMapping = extractLockFileEntries(lockContents);
 
   const deps = [
-    ...extractFromSection(pyprojectfile, 'dependencies', lockfileMapping),
-    ...extractFromSection(pyprojectfile, 'dev-dependencies', lockfileMapping),
-    ...extractFromSection(pyprojectfile, 'extras', lockfileMapping),
+    ...extractFromDependenciesSection(
+      pyprojectfile,
+      'dependencies',
+      lockfileMapping
+    ),
+    ...extractFromDependenciesSection(
+      pyprojectfile,
+      'dev-dependencies',
+      lockfileMapping
+    ),
+    ...extractFromDependenciesSection(pyprojectfile, 'extras', lockfileMapping),
     ...Object.keys(pyprojectfile.tool?.poetry?.group ?? []).flatMap((group) =>
-      extractFromSection(
-        pyprojectfile,
-        new PoetryGroupSection(group),
-        lockfileMapping
-      )
+      extractFromDependenciesGroupSection(pyprojectfile, group, lockfileMapping)
     ),
   ];
 
