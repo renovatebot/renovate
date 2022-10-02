@@ -46,9 +46,15 @@ export function updateDependency({
       updateLineExp = regEx(/(?<depPart>go)(?<divider>\s+)[^\s]+/);
     }
     if (depType === 'replace') {
-      updateLineExp = regEx(
-        /^(?<depPart>replace\s+[^\s]+[\s]+[=][>]+\s+)(?<divider>[^\s]+\s+)[^\s]+/
-      );
+      if (upgrade.managerData.multiLine) {
+        updateLineExp = regEx(
+          /^(?<depPart>\s+[^\s]+[\s]+[=][>]+\s+)(?<divider>[^\s]+\s+)[^\s]+/
+        );
+      } else {
+        updateLineExp = regEx(
+          /^(?<depPart>replace\s+[^\s]+[\s]+[=][>]+\s+)(?<divider>[^\s]+\s+)[^\s]+/
+        );
+      }
     } else if (depType === 'require') {
       if (upgrade.managerData.multiLine) {
         updateLineExp = regEx(/^(?<depPart>\s+[^\s]+)(?<divider>\s+)[^\s]+/);
@@ -114,7 +120,10 @@ export function updateDependency({
         }
       }
     }
-    if (lineToChange.endsWith('+incompatible')) {
+    if (
+      lineToChange.endsWith('+incompatible') &&
+      !upgrade.newValue?.endsWith('+incompatible')
+    ) {
       let toAdd = '+incompatible';
 
       if (upgrade.updateType === 'major' && upgrade.newMajor! >= 2) {

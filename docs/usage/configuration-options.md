@@ -287,6 +287,17 @@ If you truly need to configure this then it probably means either:
 - You are hopefully mistaken, and there's a better approach you should use, so open a new "config help" discussion at the [Renovate discussions tab](https://github.com/renovatebot/renovate/discussions) or
 - You have a use case we didn't expect and we should have a feature request from you to add it to the project
 
+## branchNameStrict
+
+By default, Renovate doesn't care about special characters when slugifying the branch name.
+This means that special characters like `.` may end up in the branch name.
+
+When you set `branchNameStrict` to `true`:
+
+- all special characters are removed
+- only alphabetic characters are allowed
+- hyphens `-` are used to separate sections
+
 ## branchPrefix
 
 You can modify this field if you want to change the prefix used.
@@ -314,7 +325,7 @@ This is an advance field and it's recommend you seek a config review before appl
 
 ## bumpVersion
 
-Currently this setting supports `helmv3`, `npm`, `maven` and `sbt` only, so raise a feature request if you have a use for it with other package managers.
+Currently this setting supports `helmv3`, `npm`, 'nuget', `maven` and `sbt` only, so raise a feature request if you have a use for it with other package managers.
 Its purpose is if you want Renovate to update the `version` field within your package file any time it updates dependencies within.
 Usually this is for automatic release purposes, so that you don't need to add another step after Renovate before you can release a new version.
 
@@ -447,6 +458,10 @@ After we changed the [`baseBranches`](https://docs.renovatebot.com/configuration
 !!! info
     This feature writes plain JSON for `.json` files, and JSON5 for `.json5` files.
     JSON5 content can potentially be down leveled (`.json` files) and all comments will be removed.
+
+<!-- prettier-ignore -->
+!!! note
+    Closing the config migration PR will cause it to be ignored and not being reopend/recreated in the future.',
 
 ## configWarningReuseIssue
 
@@ -1124,12 +1139,20 @@ Example config:
 {
   "hostRules": [
     {
-      "matchHost": "github.com",
+      "matchHost": "api.github.com",
       "concurrentRequestLimit": 2
     }
   ]
 }
 ```
+
+Use an exact host for `matchHost` and not a domain (e.g. `api.github.com` as shown above and not `github.com`).
+Do not combine with `hostType` in the same rule or it won't work.
+
+### dnsCache
+
+Enable got [dnsCache](https://github.com/sindresorhus/got/blob/v11.5.2/readme.md#dnsCache) support.
+It uses `QuickLRU` with a `maxSize` of `1000`.
 
 ### enableHttp2
 
@@ -1162,6 +1185,10 @@ Example:
   ]
 }
 ```
+
+### keepalive
+
+If enabled, this allows a single TCP connection to remain open for multiple HTTP(S) requests/responses.
 
 ### matchHost
 
@@ -1316,8 +1343,8 @@ Use this configuration option for shared config across npm/Yarn/pnpm and meteor 
 
 ## labels
 
-By default, Renovate won't add any labels to its PRs.
-If you want Renovate to do so then define a `labels` array of one or more label strings.
+By default, Renovate won't add any labels to PRs.
+If you want Renovate to add labels to PRs it creates then define a `labels` array of one or more label strings.
 If you want the same label(s) for every PR then you can configure it at the top level of config.
 However you can also fully override them on a per-package basis.
 
@@ -1336,6 +1363,14 @@ Consider this example:
 ```
 
 With the above config, every PR raised by Renovate will have the label `dependencies` while PRs containing `eslint`-related packages will instead have the label `linting`.
+
+Renovate only adds labels when it creates the PR, which means:
+
+- If you remove labels which Renovate added, it won't re-apply them
+- If you change your config, the new/changed labels are not applied to any open PRs
+
+The `labels` array is non-mergeable, meaning if multiple `packageRules` match then Renovate uses the last value for `labels`.
+If you want to add/combine labels, use the `addLabels` config option, which is mergeable.
 
 ## lockFileMaintenance
 
@@ -1479,7 +1514,7 @@ For example you have multiple `package.json` and want to use `dependencyDashboar
 ```
 
 Important to know: Renovate will evaluate all `packageRules` and not stop once it gets a first match.
-You should order your `packageRules` in order of importance so that later rules can override settings from earlier rules if needed.
+You should order your `packageRules` in ascending order of importance so that more important rules come later and can override settings from earlier rules if needed.
 
 <!-- prettier-ignore -->
 !!! warning
@@ -1670,7 +1705,47 @@ Use this field to restrict rules to a particular datasource. e.g.
 }
 ```
 
+### matchCurrentValue
+
+This option is matched against the `currentValue` field of a dependency.
+
+`matchCurrentValue` supports Regular Expressions which must begin and end with `/`.
+For example, the following enforces that only `1.*` versions will be used:
+
+```json
+{
+  "packageRules": [
+    {
+      "matchPackagePatterns": ["io.github.resilience4j"],
+      "matchCurrentValue": "/^1\\./"
+    }
+  ]
+}
+```
+
+This field also supports a special negated regex syntax to ignore certain versions.
+Use the syntax `!/ /` like this:
+
+```json
+{
+  "packageRules": [
+    {
+      "matchPackagePatterns": ["io.github.resilience4j"],
+      "matchCurrentValue": "!/^0\\./"
+    }
+  ]
+}
+```
+
 ### matchCurrentVersion
+
+The `currentVersion` field will be one of the following (in order of preference):
+
+- locked version if a lock file exists
+- resolved version
+- current value
+
+Consider using instead `matchCurrentValue` if you wish to match against the raw string value of a dependency.
 
 `matchCurrentVersion` can be an exact SemVer version or a SemVer range:
 
@@ -1853,6 +1928,30 @@ For example to apply a special label for Major updates:
 }
 ```
 
+### customChangelogUrl
+
+Use this field to set the source URL for a package, including overriding an existing one.
+Source URLs are necessary in order to look up release notes.
+
+Using this field we can specify the exact url to fetch release notes from.
+
+Example setting source URL for package "dummy":
+
+```json
+{
+  "packageRules": [
+    {
+      "matchPackageNames": ["dummy"],
+      "customChangelogUrl": "https://github.com/org/dummy"
+    }
+  ]
+}
+```
+
+<!-- prettier-ignore -->
+!!! note
+    Renovate can fetch changelogs from GitHub and GitLab platforms only, and setting the URL to an unsupported host/platform type won't change that.
+
 ### replacementName
 
 This config option only works with the `npm` manager.
@@ -1903,6 +2002,15 @@ Add to this object if you wish to define rules that apply only to PRs that pin d
 If enabled Renovate will pin Docker images by means of their SHA256 digest and not only by tag so that they are immutable.
 
 ## platformAutomerge
+
+<!-- prettier-ignore -->
+!!! warning
+    Before you enable `platformAutomerge` you should enable your Git hosting platform's capabilities to enforce test passing before PR merge.
+    If you don't do this, the platform might merge Renovate PRs even if the repository's tests haven't started, are in still in progress, or possibly even when they have failed.
+    On GitHub this is called "Require status checks before merging", which you can find in the "Branch protection rules" section of the settings for your repository.
+    [GitHub docs, about protected branches](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/defining-the-mergeability-of-pull-requests/about-protected-branches)
+    [GitHub docs, require status checks before merging](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/defining-the-mergeability-of-pull-requests/about-protected-branches#require-status-checks-before-merging)
+    If you're using another platform, search their documentation for a similar feature.
 
 If you have enabled `automerge` and set `automergeType=pr` in the Renovate config, then you can also set `platformAutomerge` to `true` to speed up merging via the platform's native automerge functionality.
 
@@ -2093,20 +2201,31 @@ When you set prCreation to `not-pending` you're reducing the "noise" but get not
 
 ## prHourlyLimit
 
-This setting - if enabled - helps slow down Renovate, particularly during the onboarding phase. What may happen without this setting is:
+This config option slows down the _rate_ at which Renovate creates PRs.
 
-1. Onboarding PR is created
-2. User merges onboarding PR to activate Renovate
-3. Renovate creates a "Pin Dependencies" PR (if necessary)
-4. User merges Pin PR
-5. Renovate then creates every single upgrade PR necessary - potentially dozens
+Slowing Renovate down can be handy when you're onboarding a repository with a lot of dependencies.
+What may happen if you don't set a `prHourlyLimit`:
 
-The above can result in swamping CI systems, as well as a lot of retesting if branches need to be rebased every time one is merged.
-Instead, if `prHourlyLimit` is configure to a value like 1 or 2, it will mean that Renovate creates at most that many new PRs within each hourly period (:00-:59).
-So the project should still result in all PRs created perhaps within the first 24 hours maximum, but at a rate that may allow users to merge them once they pass tests.
-It does not place a limit on the number of _concurrently open_ PRs - only on the rate they are created.
+1. Renovate creates a Onboarding PR
+1. You merge the onboarding PR to activate Renovate
+1. Renovate creates a "Pin Dependencies" PR (if needed)
+1. You merge the "Pin Dependencies" PR
+1. Renovate creates every single upgrade PR needed, which can be a lot
 
-This limit is enforced on a per-repository basis.
+The above may cause:
+
+- Renovate bot's PRs to overwhelm your CI systems
+- a lot of test runs, because branches are rebased each time you merge a PR
+
+To prevent these problems you can set `prHourlyLimit` to a value like `1` or `2`.
+Renovate will only create that many PRs within each hourly period (`:00` through `:59`).
+You still get all the PRs in a reasonable time, perhaps over a day or so.
+Now you can merge the PRs at a do-able rate, once the tests pass.
+
+<!-- prettier-ignore -->
+!!! tip
+    The `prHourlyLimit` setting does _not_ limit the number of _concurrently open PRs_, only the _rate_ at which PRs are created.
+    The `prHourlyLimit` setting is enforced on a per-repository basis.
 
 ## prNotPendingHours
 
@@ -2516,6 +2635,11 @@ This feature works with the following managers:
 - [`helmv3`](/modules/manager/helmv3/)
 - [`helmfile`](/modules/manager/helmfile/)
 - [`gitlabci`](/modules/manager/gitlabci/)
+- [`dockerfile`](/modules/manager/dockerfile)
+- [`docker-compose`](/modules/manager/docker-compose)
+- [`kubernetes`](/modules/manager/kubernetes)
+- [`ansible`](/modules/manager/ansible)
+- [`droneci`](/modules/manager/droneci)
 
 ## registryUrls
 

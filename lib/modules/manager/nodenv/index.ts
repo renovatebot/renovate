@@ -10,7 +10,7 @@ export const url = 'https://github.com/nodenv/nodenv';
 export const language = ProgrammingLanguage.NodeJS;
 
 export const defaultConfig = {
-  fileMatch: ['(^|/).node-version$'],
+  fileMatch: ['(^|/)\\.node-version$'],
   versioning: nodeVersioning.id,
 };
 

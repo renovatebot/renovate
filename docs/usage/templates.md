@@ -5,13 +5,15 @@ description: Explain Renovate template fields
 
 # Template fields
 
-In order to provide flexible configuration, Renovate supports using "templates" for certain fields like `branchName`.
+In order to provide flexible configuration, Renovate supports using "templates" for certain fields like `addLabels`, `branchName`, `extractVersionTemplate`, `labels`.
 
 Renovate's templates use [handlebars](https://handlebarsjs.com/) under the hood.
 You can recognize templates when you see strings like `{{depName}}` in configuration fields.
 
 Below you can find lists of fields/values that you can use in templates.
 Some are configuration options passed through, while others are generated as part of Renovate's run.
+
+`logJSON` and `releases` are only allowed in `commitBody` template.
 
 ## Exposed config options
 

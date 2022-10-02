@@ -129,7 +129,10 @@ export async function lookup(
     config,
     packageFiles
   );
-  logger.debug({ config: packageFiles }, 'packageFiles with updates');
+  logger.debug(
+    { baseBranch: config.baseBranch, config: packageFiles },
+    'packageFiles with updates'
+  );
   sortBranches(branches);
   return { branches, branchList, packageFiles };
 }

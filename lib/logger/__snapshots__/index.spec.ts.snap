@@ -1,15 +1,15 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`logger/index saves problems 1`] = `
-Array [
-  Object {
+[
+  {
     "any": "test",
     "level": 50,
     "logContext": "123test",
     "msg": "some meta",
     "name": "renovate",
   },
-  Object {
+  {
     "any": "test",
     "level": 50,
     "logContext": "123test",
@@ -18,7 +18,7 @@ Array [
     "password": "***********",
     "some": "meta",
   },
-  Object {
+  {
     "any": "test",
     "level": 50,
     "logContext": "123test",
@@ -26,7 +26,7 @@ Array [
     "name": "renovate",
     "some": "meta",
   },
-  Object {
+  {
     "any": "test",
     "level": 40,
     "logContext": "123test",

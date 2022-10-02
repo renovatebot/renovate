@@ -1,7 +1,6 @@
 import * as httpMock from '../../../../../../test/http-mock';
 import { GlobalConfig } from '../../../../../config/global';
 import { PlatformId } from '../../../../../constants';
-import { CacheableGithubTags } from '../../../../../modules/datasource/github-tags/cache';
 import * as semverVersioning from '../../../../../modules/versioning/semver';
 import * as hostRules from '../../../../../util/host-rules';
 import type { BranchUpgradeConfig } from '../../../../types';
@@ -265,6 +264,34 @@ describe('workers/repository/update/pr/changelog/github', () => {
       });
     });
 
+    it('supports overwriting sourceUrl for supports github enterprise and github.com changelog', async () => {
+      const sourceUrl = upgrade.sourceUrl;
+      const replacementSourceUrl = 'https://github.com/sindresorhus/got';
+      const config = {
+        ...upgrade,
+        endpoint: 'https://github-enterprise.example.com/',
+        customChangelogUrl: replacementSourceUrl,
+      };
+      hostRules.add({
+        hostType: PlatformId.Github,
+        token: 'super_secret',
+        matchHost: 'https://github-enterprise.example.com/',
+      });
+      expect(await getChangeLogJSON(config)).toMatchObject({
+        hasReleaseNotes: true,
+        project: {
+          apiBaseUrl: 'https://api.github.com/',
+          baseUrl: 'https://github.com/',
+          depName: 'renovate',
+          repository: 'sindresorhus/got',
+          sourceDirectory: undefined,
+          sourceUrl: 'https://github.com/sindresorhus/got',
+          type: 'github',
+        },
+      });
+      expect(upgrade.sourceUrl).toBe(sourceUrl); // ensure unmodified function argument
+    });
+
     it('supports github enterprise and github enterprise changelog', async () => {
       hostRules.add({
         hostType: PlatformId.Github,
@@ -298,18 +325,47 @@ describe('workers/repository/update/pr/changelog/github', () => {
       });
     });
 
-    it('works with same version releases but different prefix', async () => {
-      const githubTagsMock = jest.spyOn(
-        CacheableGithubTags.prototype,
-        'getItems'
-      );
+    it('supports overwriting sourceUrl for github enterprise and github enterprise changelog', async () => {
+      const sourceUrl = 'https://github-enterprise.example.com/chalk/chalk';
+      const replacementSourceUrl =
+        'https://github-enterprise.example.com/sindresorhus/got';
+      const config = {
+        ...upgrade,
+        sourceUrl,
+        endpoint: 'https://github-enterprise.example.com/',
+        customChangelogUrl: replacementSourceUrl,
+      };
+      hostRules.add({
+        hostType: PlatformId.Github,
+        matchHost: 'https://github-enterprise.example.com/',
+        token: 'abc',
+      });
+      process.env.GITHUB_ENDPOINT = '';
+      expect(await getChangeLogJSON(config)).toMatchObject({
+        hasReleaseNotes: true,
+        project: {
+          apiBaseUrl: 'https://github-enterprise.example.com/api/v3/',
+          baseUrl: 'https://github-enterprise.example.com/',
+          depName: 'renovate',
+          repository: 'sindresorhus/got',
+          sourceDirectory: undefined,
+          sourceUrl: 'https://github-enterprise.example.com/sindresorhus/got',
+          type: 'github',
+        },
+      });
+      expect(config.sourceUrl).toBe(sourceUrl); // ensure unmodified function argument
+    });
 
-      githubTagsMock.mockResolvedValue([
-        { version: 'v1.0.1' },
-        { version: '1.0.1' },
-        { version: 'correctPrefix/target@1.0.1' },
-        { version: 'wrongPrefix/target-1.0.1' },
-      ] as never);
+    it('works with same version releases but different prefix', async () => {
+      httpMock
+        .scope('https://api.github.com/')
+        .get('/repos/chalk/chalk/tags?per_page=100')
+        .reply(200, [
+          { name: 'v1.0.1' },
+          { name: '1.0.1' },
+          { name: 'correctPrefix/target@1.0.1' },
+          { name: 'wrongPrefix/target-1.0.1' },
+        ]);
 
       const upgradeData: BranchUpgradeConfig = {
         manager: 'some-manager',
