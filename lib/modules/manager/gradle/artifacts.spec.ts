@@ -157,22 +157,29 @@ describe('modules/manager/gradle/artifacts', () => {
   it('prefers packageName over depName if provided', async () => {
     const execSnapshots = mockExecAll();
 
-    expect(
-      await updateArtifacts({
-        packageFileName: 'build.gradle',
-        updatedDeps: [
-          {
-            depType: 'plugin',
-            depName: 'org.springframework.boot',
-            packageName:
-              'org.springframework.boot:org.springframework.boot.gradle.plugin',
-          },
-        ],
-        newPackageFileContent: '',
-        config: {},
-      })
-    ).not.toBeNull();
+    const res = await updateArtifacts({
+      packageFileName: 'build.gradle',
+      updatedDeps: [
+        {
+          depType: 'plugin',
+          depName: 'org.springframework.boot',
+          packageName:
+            'org.springframework.boot:org.springframework.boot.gradle.plugin',
+        },
+      ],
+      newPackageFileContent: '',
+      config: {},
+    });
 
+    expect(res).toEqual([
+      {
+        file: {
+          type: 'addition',
+          path: 'gradle.lockfile',
+          contents: 'New gradle.lockfile',
+        },
+      },
+    ]);
     expect(execSnapshots).toMatchObject([
       {
         cmd: './gradlew --console=plain -q properties',
@@ -192,15 +199,22 @@ describe('modules/manager/gradle/artifacts', () => {
   it('performs lock file maintenance', async () => {
     const execSnapshots = mockExecAll();
 
-    expect(
-      await updateArtifacts({
-        packageFileName: 'build.gradle',
-        updatedDeps: [],
-        newPackageFileContent: '',
-        config: { isLockFileMaintenance: true },
-      })
-    ).not.toBeNull();
+    const res = await updateArtifacts({
+      packageFileName: 'build.gradle',
+      updatedDeps: [],
+      newPackageFileContent: '',
+      config: { isLockFileMaintenance: true },
+    });
 
+    expect(res).toEqual([
+      {
+        file: {
+          type: 'addition',
+          path: 'gradle.lockfile',
+          contents: 'New gradle.lockfile',
+        },
+      },
+    ]);
     expect(execSnapshots).toMatchObject([
       {
         cmd: './gradlew --console=plain -q properties',
@@ -221,15 +235,22 @@ describe('modules/manager/gradle/artifacts', () => {
     const execSnapshots = mockExecAll();
     GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
 
-    expect(
-      await updateArtifacts({
-        packageFileName: 'build.gradle',
-        updatedDeps: [],
-        newPackageFileContent: '',
-        config: { isLockFileMaintenance: true },
-      })
-    ).not.toBeNull();
+    const res = await updateArtifacts({
+      packageFileName: 'build.gradle',
+      updatedDeps: [],
+      newPackageFileContent: '',
+      config: { isLockFileMaintenance: true },
+    });
 
+    expect(res).toEqual([
+      {
+        file: {
+          type: 'addition',
+          path: 'gradle.lockfile',
+          contents: 'New gradle.lockfile',
+        },
+      },
+    ]);
     expect(execSnapshots).toMatchObject([
       { cmd: 'docker pull renovate/sidecar' },
       { cmd: 'docker ps --filter name=renovate_sidecar -aq' },
@@ -275,15 +296,22 @@ describe('modules/manager/gradle/artifacts', () => {
     const execSnapshots = mockExecAll();
     GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
 
-    expect(
-      await updateArtifacts({
-        packageFileName: 'build.gradle',
-        updatedDeps: [],
-        newPackageFileContent: '',
-        config: { isLockFileMaintenance: true },
-      })
-    ).not.toBeNull();
+    const res = await updateArtifacts({
+      packageFileName: 'build.gradle',
+      updatedDeps: [],
+      newPackageFileContent: '',
+      config: { isLockFileMaintenance: true },
+    });
 
+    expect(res).toEqual([
+      {
+        file: {
+          type: 'addition',
+          path: 'gradle.lockfile',
+          contents: 'New gradle.lockfile',
+        },
+      },
+    ]);
     expect(execSnapshots).toMatchObject([
       { cmd: 'install-tool java 11.0.1' },
       {
@@ -304,15 +332,22 @@ describe('modules/manager/gradle/artifacts', () => {
       { stdout: '', stderr: '' },
     ]);
 
-    expect(
-      await updateArtifacts({
-        packageFileName: 'build.gradle',
-        updatedDeps: [],
-        newPackageFileContent: '',
-        config: { isLockFileMaintenance: true },
-      })
-    ).not.toBeNull();
+    const res = await updateArtifacts({
+      packageFileName: 'build.gradle',
+      updatedDeps: [],
+      newPackageFileContent: '',
+      config: { isLockFileMaintenance: true },
+    });
 
+    expect(res).toEqual([
+      {
+        file: {
+          type: 'addition',
+          path: 'gradle.lockfile',
+          contents: 'New gradle.lockfile',
+        },
+      },
+    ]);
     expect(execSnapshots).toMatchObject([
       {
         cmd: './gradlew --console=plain -q properties',
@@ -362,7 +397,6 @@ describe('modules/manager/gradle/artifacts', () => {
       },
     ]);
 
-    expect(execSnapshots).toHaveLength(1);
     expect(execSnapshots).toMatchObject([
       {
         cmd: './gradlew --console=plain -q properties',
