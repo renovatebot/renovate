@@ -50,9 +50,5 @@ export function extractPackageFile(
     logger.warn({ err }, 'Error extracting TFLint plugins');
   }
 
-  deps.forEach((dep) => {
-    analyseTFLintPlugin(dep);
-    delete dep.managerData;
-  });
   return { deps };
 }

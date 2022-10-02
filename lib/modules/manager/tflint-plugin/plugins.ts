@@ -13,11 +13,9 @@ export function extractTFLintPlugin(
 ): ExtractionResult {
   let lineNumber = startingLine;
   const deps: PackageDependency<TFLintManagerData>[] = [];
-  const dep: PackageDependency<TFLintManagerData> = {
-    managerData: {
-      pluginName: pluginName,
-    },
-  };
+
+  let pluginSource: string = null;
+  let currentVersion: string = null;
 
   let braceCounter = 0;
   do {
@@ -41,11 +39,9 @@ export function extractTFLintPlugin(
         const kvMatch = keyValueExtractionRegex.exec(line);
         if (kvMatch?.groups) {
           if (kvMatch.groups.key === 'version') {
-            dep.currentValue = kvMatch.groups.value;
+            currentVersion = kvMatch.groups.value;
           } else if (kvMatch.groups.key === 'source') {
-            // TODO #7154
-            dep.managerData!.source = kvMatch.groups.value;
-            dep.managerData!.sourceLine = lineNumber;
+            pluginSource = kvMatch.groups.value;
           }
         }
       }
@@ -55,6 +51,8 @@ export function extractTFLintPlugin(
     }
     lineNumber += 1;
   } while (braceCounter !== 0);
+
+  const dep = analyseTFLintPlugin(pluginSource, currentVersion);
   deps.push(dep);
 
   // remove last lineNumber addition to not skip a line after the last bracket
@@ -62,14 +60,15 @@ export function extractTFLintPlugin(
   return { lineNumber, dependencies: deps };
 }
 
-export function analyseTFLintPlugin(dep: PackageDependency): void {
-  // TODO #7154
-  const source = dep.managerData!.source as string;
+export function analyseTFLintPlugin(source: string, version: string): PackageDependency{
+  const dep: PackageDependency<TFLintManagerData> = {};
+
   if (source) {
     dep.depType = 'plugin';
 
     const sourceParts = source.split('/');
     if (sourceParts[0] === 'github.com') {
+      dep.currentValue = version;
       dep.datasource = GithubReleasesDatasource.id;
       dep.depName = sourceParts.slice(1).join('/');
     } else {
@@ -80,4 +79,6 @@ export function analyseTFLintPlugin(dep: PackageDependency): void {
     logger.debug({ dep }, 'tflint plugin has no source');
     dep.skipReason = 'no-source';
   }
+
+  return dep;
 }
