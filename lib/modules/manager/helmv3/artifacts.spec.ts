@@ -1,5 +1,5 @@
 import { join } from 'upath';
-import { envMock, exec, mockExecAll } from '../../../../test/exec-util';
+import { envMock, mockExecAll } from '../../../../test/exec-util';
 import { Fixtures } from '../../../../test/fixtures';
 import { env, fs, mocked } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
@@ -10,7 +10,6 @@ import * as _datasource from '../../datasource';
 import type { UpdateArtifactsConfig } from '../types';
 import * as helmv3 from '.';
 
-jest.mock('child_process');
 jest.mock('../../datasource');
 jest.mock('../../../util/exec/env');
 jest.mock('../../../util/http');
@@ -21,6 +20,7 @@ const datasource = mocked(_datasource);
 const adminConfig: RepoGlobalConfig = {
   localDir: join('/tmp/github/some/repo'), // `join` fixes Windows CI
   cacheDir: join('/tmp/renovate/cache'),
+  containerbaseDir: join('/tmp/renovate/cache/containerbase'),
 };
 
 const config: UpdateArtifactsConfig = {};
@@ -73,12 +73,12 @@ describe('modules/manager/helmv3/artifacts', () => {
   it('returns null if unchanged', async () => {
     fs.readLocalFile.mockResolvedValueOnce(ociLockFile1 as any);
     fs.getSiblingFileName.mockReturnValueOnce('Chart.lock');
-    const execSnapshots = mockExecAll(exec);
+    const execSnapshots = mockExecAll();
     fs.readLocalFile.mockResolvedValueOnce(ociLockFile1 as any);
     fs.privateCacheDir.mockReturnValue(
       '/tmp/renovate/cache/__renovate-private-cache'
     );
-    fs.getSubDirectory.mockReturnValue('');
+    fs.getParentDir.mockReturnValue('');
     const updatedDeps = [{ depName: 'dep1' }];
     expect(
       await helmv3.updateArtifacts({
@@ -94,12 +94,12 @@ describe('modules/manager/helmv3/artifacts', () => {
   it('returns updated Chart.lock', async () => {
     fs.readLocalFile.mockResolvedValueOnce(ociLockFile1 as never);
     fs.getSiblingFileName.mockReturnValueOnce('Chart.lock');
-    const execSnapshots = mockExecAll(exec);
+    const execSnapshots = mockExecAll();
     fs.readLocalFile.mockResolvedValueOnce(ociLockFile2 as never);
     fs.privateCacheDir.mockReturnValue(
       '/tmp/renovate/cache/__renovate-private-cache'
     );
-    fs.getSubDirectory.mockReturnValue('');
+    fs.getParentDir.mockReturnValue('');
     const updatedDeps = [{ depName: 'dep1' }];
     expect(
       await helmv3.updateArtifacts({
@@ -124,12 +124,12 @@ describe('modules/manager/helmv3/artifacts', () => {
   it('returns updated Chart.lock for lockfile maintenance', async () => {
     fs.readLocalFile.mockResolvedValueOnce(ociLockFile1 as never);
     fs.getSiblingFileName.mockReturnValueOnce('Chart.lock');
-    const execSnapshots = mockExecAll(exec);
+    const execSnapshots = mockExecAll();
     fs.readLocalFile.mockResolvedValueOnce(ociLockFile2 as never);
     fs.privateCacheDir.mockReturnValue(
       '/tmp/renovate/cache/__renovate-private-cache'
     );
-    fs.getSubDirectory.mockReturnValue('');
+    fs.getParentDir.mockReturnValue('');
     expect(
       await helmv3.updateArtifacts({
         packageFileName: 'Chart.yaml',
@@ -154,12 +154,12 @@ describe('modules/manager/helmv3/artifacts', () => {
     GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
     fs.getSiblingFileName.mockReturnValueOnce('Chart.lock');
     fs.readLocalFile.mockResolvedValueOnce(ociLockFile1 as never);
-    const execSnapshots = mockExecAll(exec);
+    const execSnapshots = mockExecAll();
     fs.readLocalFile.mockResolvedValueOnce(ociLockFile2 as never);
     fs.privateCacheDir.mockReturnValue(
       '/tmp/renovate/cache/__renovate-private-cache'
     );
-    fs.getSubDirectory.mockReturnValue('');
+    fs.getParentDir.mockReturnValue('');
     datasource.getPkgReleases.mockResolvedValueOnce({
       releases: [{ version: 'v3.7.2' }],
     });
@@ -217,9 +217,9 @@ describe('modules/manager/helmv3/artifacts', () => {
     );
     fs.getSiblingFileName.mockReturnValueOnce('Chart.lock');
     fs.readLocalFile.mockResolvedValueOnce(ociLockFile1 as never);
-    const execSnapshots = mockExecAll(exec);
+    const execSnapshots = mockExecAll();
     fs.readLocalFile.mockResolvedValueOnce(ociLockFile2 as never);
-    fs.getSubDirectory.mockReturnValue('');
+    fs.getParentDir.mockReturnValue('');
     expect(
       await helmv3.updateArtifacts({
         packageFileName: 'Chart.yaml',
@@ -248,12 +248,12 @@ describe('modules/manager/helmv3/artifacts', () => {
     GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
     fs.getSiblingFileName.mockReturnValueOnce('Chart.lock');
     fs.readLocalFile.mockResolvedValueOnce(ociLockFile1 as never);
-    const execSnapshots = mockExecAll(exec);
+    const execSnapshots = mockExecAll();
     fs.readLocalFile.mockResolvedValueOnce(ociLockFile2 as never);
     fs.privateCacheDir.mockReturnValue(
       '/tmp/renovate/cache/__renovate-private-cache'
     );
-    fs.getSubDirectory.mockReturnValue('');
+    fs.getParentDir.mockReturnValue('');
     datasource.getPkgReleases.mockResolvedValueOnce({
       releases: [{ version: 'v3.7.2' }],
     });
@@ -291,17 +291,18 @@ describe('modules/manager/helmv3/artifacts', () => {
     hostRules.add({
       username: 'basicUser',
       password: 'secret',
+      hostType: 'helm',
       matchHost: 'the_repo1_url',
     });
 
     fs.getSiblingFileName.mockReturnValueOnce('Chart.lock');
     fs.readLocalFile.mockResolvedValueOnce(ociLockFile1 as never);
-    const execSnapshots = mockExecAll(exec);
+    const execSnapshots = mockExecAll();
     fs.readLocalFile.mockResolvedValueOnce(ociLockFile2 as never);
     fs.privateCacheDir.mockReturnValue(
       '/tmp/renovate/cache/__renovate-private-cache'
     );
-    fs.getSubDirectory.mockReturnValue('');
+    fs.getParentDir.mockReturnValue('');
     expect(
       await helmv3.updateArtifacts({
         packageFileName: 'Chart.yaml',
@@ -346,12 +347,12 @@ describe('modules/manager/helmv3/artifacts', () => {
 
     fs.getSiblingFileName.mockReturnValueOnce('Chart.lock');
     fs.readLocalFile.mockResolvedValueOnce(ociLockFile1 as never);
-    const execSnapshots = mockExecAll(exec);
+    const execSnapshots = mockExecAll();
     fs.readLocalFile.mockResolvedValueOnce(ociLockFile2 as never);
     fs.privateCacheDir.mockReturnValue(
       '/tmp/renovate/cache/__renovate-private-cache'
     );
-    fs.getSubDirectory.mockReturnValue('');
+    fs.getParentDir.mockReturnValue('');
     expect(
       await helmv3.updateArtifacts({
         packageFileName: 'Chart.yaml',
@@ -386,12 +387,12 @@ describe('modules/manager/helmv3/artifacts', () => {
 
     fs.getSiblingFileName.mockReturnValueOnce('Chart.lock');
     fs.readLocalFile.mockResolvedValueOnce(ociLockFile1 as never);
-    const execSnapshots = mockExecAll(exec);
+    const execSnapshots = mockExecAll();
     fs.readLocalFile.mockResolvedValueOnce(ociLockFile2 as never);
     fs.privateCacheDir.mockReturnValue(
       '/tmp/renovate/cache/__renovate-private-cache'
     );
-    fs.getSubDirectory.mockReturnValue('');
+    fs.getParentDir.mockReturnValue('');
     expect(
       await helmv3.updateArtifacts({
         packageFileName: 'Chart.yaml',
@@ -434,12 +435,12 @@ describe('modules/manager/helmv3/artifacts', () => {
   it('do not add registryAliases to repository list', async () => {
     fs.getSiblingFileName.mockReturnValueOnce('Chart.lock');
     fs.readLocalFile.mockResolvedValueOnce(ociLockFile1Alias as never);
-    const execSnapshots = mockExecAll(exec);
+    const execSnapshots = mockExecAll();
     fs.readLocalFile.mockResolvedValueOnce(ociLockFile2Alias as never);
     fs.privateCacheDir.mockReturnValue(
       '/tmp/renovate/cache/__renovate-private-cache'
     );
-    fs.getSubDirectory.mockReturnValue('');
+    fs.getParentDir.mockReturnValue('');
     expect(
       await helmv3.updateArtifacts({
         packageFileName: 'Chart.yaml',

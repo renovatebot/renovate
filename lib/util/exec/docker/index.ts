@@ -18,7 +18,7 @@ export async function prefetchDockerImage(taggedImage: string): Promise<void> {
     logger.debug(
       `Docker image is already prefetched: ${taggedImage}@${prefetchedImages.get(
         taggedImage
-      )}`
+      )!}`
     );
   } else {
     logger.debug(`Fetching Docker image: ${taggedImage}`);
@@ -217,6 +217,7 @@ export async function generateDockerCommand(
   const {
     localDir,
     cacheDir,
+    containerbaseDir,
     dockerUser,
     dockerChildPrefix,
     dockerImagePrefix,
@@ -230,7 +231,19 @@ export async function generateDockerCommand(
     result.push(`--user=${dockerUser}`);
   }
 
-  result.push(...prepareVolumes([localDir, cacheDir, ...volumes]));
+  const volumeDirs: VolumeOption[] = [localDir, cacheDir];
+  if (containerbaseDir) {
+    if (cacheDir && containerbaseDir.startsWith(cacheDir)) {
+      logger.debug('containerbaseDir is inside cacheDir');
+    } else {
+      logger.debug('containerbaseDir is separate from cacheDir');
+      volumeDirs.push(containerbaseDir);
+    }
+  } else {
+    logger.debug('containerbaseDir is missing');
+  }
+  volumeDirs.push(...volumes);
+  result.push(...prepareVolumes(volumeDirs));
 
   if (envVars) {
     result.push(

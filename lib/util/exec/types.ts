@@ -1,4 +1,4 @@
-import type { ExecOptions as ChildProcessExecOptions } from 'child_process';
+import type { SpawnOptions as ChildProcessSpawnOptions } from 'child_process';
 
 export interface ToolConstraint {
   toolName: string;
@@ -27,8 +27,14 @@ export interface DockerOptions {
   cwd?: Opt<string>;
 }
 
-export interface RawExecOptions extends ChildProcessExecOptions {
+export interface RawExecOptions extends ChildProcessSpawnOptions {
+  // TODO: to be removed in #16655
+  /**
+   * @deprecated renovate uses utf8, encoding property is ignored.
+   */
   encoding: string;
+  maxBuffer?: number | undefined;
+  cwd?: string;
 }
 
 export interface ExecResult {

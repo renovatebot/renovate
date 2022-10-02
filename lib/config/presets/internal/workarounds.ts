@@ -13,6 +13,7 @@ export const presets: Record<string, Preset> = {
       'workarounds:typesNodeVersioning',
       'workarounds:reduceRepologyServerLoad',
       'workarounds:doNotUpgradeFromAlpineStableToEdge',
+      'workarounds:supportRedHatImageVersion',
     ],
     ignoreDeps: [],
   },
@@ -86,6 +87,34 @@ export const presets: Record<string, Preset> = {
         matchPackageNames: ['alpine'],
         matchCurrentVersion: '<20000000',
         allowedVersions: '<20000000',
+      },
+    ],
+  },
+  supportRedHatImageVersion: {
+    description:
+      'Use specific versioning for Red Hat-maintained container images',
+    packageRules: [
+      {
+        matchDatasources: ['docker'],
+        matchPackagePrefixes: [
+          'registry.access.redhat.com/rhceph/',
+          'registry.access.redhat.com/rhgs3/',
+          'registry.access.redhat.com/rhel7',
+          'registry.access.redhat.com/rhel8/',
+          'registry.access.redhat.com/rhel9/',
+          'registry.access.redhat.com/rhscl/',
+          'registry.access.redhat.com/ubi7',
+          'registry.access.redhat.com/ubi8',
+          'registry.access.redhat.com/ubi9',
+          'redhat/',
+        ],
+        matchPackageNames: [
+          'registry.access.redhat.com/rhel',
+          'registry.access.redhat.com/rhel-atomic',
+          'registry.access.redhat.com/rhel-init',
+          'registry.access.redhat.com/rhel-minimal',
+        ],
+        versioning: 'redhat',
       },
     ],
   },

@@ -1,6 +1,6 @@
 import {
   RenovateConfig,
-  defaultConfig,
+  getConfig,
   git,
   platform,
 } from '../../../../../test/util';
@@ -22,7 +22,7 @@ describe('workers/repository/onboarding/branch/rebase', () => {
     beforeEach(() => {
       jest.resetAllMocks();
       config = {
-        ...defaultConfig,
+        ...getConfig(),
         repository: 'some/repo',
       };
     });
@@ -35,7 +35,7 @@ describe('workers/repository/onboarding/branch/rebase', () => {
 
     it('does nothing if branch is up to date', async () => {
       const contents =
-        JSON.stringify(defaultConfig.onboardingConfig, null, 2) + '\n';
+        JSON.stringify(getConfig().onboardingConfig, null, 2) + '\n';
       git.getFile
         .mockResolvedValueOnce(contents) // package.json
         .mockResolvedValueOnce(contents); // renovate.json
@@ -44,7 +44,7 @@ describe('workers/repository/onboarding/branch/rebase', () => {
     });
 
     it('rebases onboarding branch', async () => {
-      git.isBranchStale.mockResolvedValueOnce(true);
+      git.isBranchBehindBase.mockResolvedValueOnce(true);
       await rebaseOnboardingBranch(config);
       expect(git.commitFiles).toHaveBeenCalledTimes(1);
     });
@@ -52,13 +52,13 @@ describe('workers/repository/onboarding/branch/rebase', () => {
     it('rebases via platform', async () => {
       platform.commitFiles = jest.fn();
       config.platformCommit = true;
-      git.isBranchStale.mockResolvedValueOnce(true);
+      git.isBranchBehindBase.mockResolvedValueOnce(true);
       await rebaseOnboardingBranch(config);
       expect(platform.commitFiles).toHaveBeenCalledTimes(1);
     });
 
     it('uses the onboardingConfigFileName if set', async () => {
-      git.isBranchStale.mockResolvedValueOnce(true);
+      git.isBranchBehindBase.mockResolvedValueOnce(true);
       await rebaseOnboardingBranch({
         ...config,
         onboardingConfigFileName: '.github/renovate.json',
@@ -73,7 +73,7 @@ describe('workers/repository/onboarding/branch/rebase', () => {
     });
 
     it('falls back to "renovate.json" if onboardingConfigFileName is not set', async () => {
-      git.isBranchStale.mockResolvedValueOnce(true);
+      git.isBranchBehindBase.mockResolvedValueOnce(true);
       await rebaseOnboardingBranch({
         ...config,
         onboardingConfigFileName: undefined,

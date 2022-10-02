@@ -114,7 +114,7 @@ module.exports = {
     '@typescript-eslint/no-unsafe-argument': 0, // thousands of errors :-/
 
     '@typescript-eslint/restrict-template-expressions': [
-      1,
+      2,
       { allowNumber: true, allowBoolean: true },
     ],
     '@typescript-eslint/restrict-plus-operands': 2,

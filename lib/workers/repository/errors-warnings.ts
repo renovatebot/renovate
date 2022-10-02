@@ -57,7 +57,7 @@ function getDepWarnings(
   return { warnings, warningFiles };
 }
 
-export function getDepWarningsPR(
+export function getDepWarningsOnboardingPR(
   packageFiles: Record<string, PackageFile[]>
 ): string {
   const { warnings, warningFiles } = getDepWarnings(packageFiles);
@@ -65,10 +65,7 @@ export function getDepWarningsPR(
   if (!warnings.length) {
     return '';
   }
-  logger.debug(
-    { warnings, warningFiles },
-    'Found package lookup warnings in onboarding'
-  );
+  logger.debug({ warnings, warningFiles }, 'Found package lookup warnings');
   warningText = emojify(
     `\n---\n\n### :warning: Dependency Lookup Warnings :warning:\n\n`
   );
@@ -80,5 +77,52 @@ export function getDepWarningsPR(
     '\nFiles affected: ' +
     warningFiles.map((f) => '`' + f + '`').join(', ') +
     '\n\n';
+  return warningText;
+}
+
+export function getDepWarningsPR(
+  packageFiles: Record<string, PackageFile[]>,
+  dependencyDashboard?: boolean
+): string {
+  const { warnings, warningFiles } = getDepWarnings(packageFiles);
+  let warningText = '';
+  if (!warnings.length) {
+    return '';
+  }
+  logger.debug({ warnings, warningFiles }, 'Found package lookup warnings');
+  warningText = emojify(
+    `\n---\n\n### :warning: Dependency Lookup Warnings :warning:\n\n`
+  );
+  warningText += 'Warnings were logged while processing this repo. ';
+  if (dependencyDashboard) {
+    warningText += `Please check the Dependency Dashboard for more information.\n\n`;
+  } else {
+    warningText += `Please check the logs for more information.\n\n`;
+  }
+  return warningText;
+}
+
+export function getDepWarningsDashboard(
+  packageFiles: Record<string, PackageFile[]>
+): string {
+  const { warnings, warningFiles } = getDepWarnings(packageFiles);
+  if (!warnings.length) {
+    return '';
+  }
+
+  const depWarnings = warnings
+    .map((w) => w.replace('Failed to look up dependency ', ''))
+    .map((dep) => '`' + dep + '`')
+    .join(', ');
+
+  logger.debug({ warnings, warningFiles }, 'Found package lookup warnings');
+  let warningText = emojify(
+    `\n---\n\n### :warning: Dependency Lookup Warnings :warning:\n\n`
+  );
+  warningText += `-   Renovate failed to look up the following dependencies: `;
+  warningText += depWarnings;
+  warningText += '.\n\nFiles affected: ';
+  warningText += warningFiles.map((f) => '`' + f + '`').join(', ');
+  warningText += '\n\n---\n\n';
   return warningText;
 }

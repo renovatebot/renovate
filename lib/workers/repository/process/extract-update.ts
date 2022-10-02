@@ -5,6 +5,7 @@ import type { RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
 import type { PackageFile } from '../../../modules/manager/types';
 import { getCache } from '../../../util/cache/repository';
+import { checkGithubToken as ensureGithubToken } from '../../../util/check-token';
 import { checkoutBranch, getBranchCommit } from '../../../util/git';
 import type { BranchConfig } from '../../types';
 import { extractAllDependencies } from '../extract';
@@ -14,11 +15,11 @@ import { fetchUpdates } from './fetch';
 import { sortBranches } from './sort';
 import { WriteUpdateResult, writeUpdates } from './write';
 
-export type ExtractResult = {
+export interface ExtractResult {
   branches: BranchConfig[];
   branchList: string[];
   packageFiles: Record<string, PackageFile[]>;
-};
+}
 
 export interface StatsResult {
   fileCount: number;
@@ -114,6 +115,7 @@ export async function extract(
     `Dependency extraction complete`
   );
   logger.trace({ config: packageFiles }, 'packageFiles');
+  ensureGithubToken(packageFiles);
   return packageFiles;
 }
 
@@ -127,7 +129,10 @@ export async function lookup(
     config,
     packageFiles
   );
-  logger.debug({ config: packageFiles }, 'packageFiles with updates');
+  logger.debug(
+    { baseBranch: config.baseBranch, config: packageFiles },
+    'packageFiles with updates'
+  );
   sortBranches(branches);
   return { branches, branchList, packageFiles };
 }

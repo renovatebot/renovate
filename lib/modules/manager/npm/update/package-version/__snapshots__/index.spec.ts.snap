@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`modules/manager/npm/update/package-version/index .bumpPackageVersion() increments 1`] = `"{\\"name\\":\\"some-package\\",\\"version\\":\\"0.0.3\\",\\"dependencies\\":{\\"chalk\\":\\"2.4.2\\"}}"`;
+exports[`modules/manager/npm/update/package-version/index .bumpPackageVersion() increments 1`] = `"{"name":"some-package","version":"0.0.3","dependencies":{"chalk":"2.4.2"}}"`;
 
-exports[`modules/manager/npm/update/package-version/index .bumpPackageVersion() mirrors 1`] = `"{\\"name\\":\\"some-package\\",\\"version\\":\\"2.4.2\\",\\"dependencies\\":{\\"chalk\\":\\"2.4.2\\"}}"`;
+exports[`modules/manager/npm/update/package-version/index .bumpPackageVersion() mirrors 1`] = `"{"name":"some-package","version":"2.4.2","dependencies":{"chalk":"2.4.2"}}"`;
 
-exports[`modules/manager/npm/update/package-version/index .bumpPackageVersion() updates 1`] = `"{\\"name\\":\\"some-package\\",\\"version\\":\\"0.1.0\\",\\"dependencies\\":{\\"chalk\\":\\"2.4.2\\"}}"`;
+exports[`modules/manager/npm/update/package-version/index .bumpPackageVersion() updates 1`] = `"{"name":"some-package","version":"0.1.0","dependencies":{"chalk":"2.4.2"}}"`;

@@ -7,7 +7,8 @@ import { extractAllPackageFiles } from '.';
 jest.mock('../../../util/fs');
 
 function mockFs(files: Record<string, string>): void {
-  fs.readLocalFile.mockImplementation((fileName: string): Promise<string> => {
+  // TODO: fix types, jest is using wrong overload (#7154)
+  fs.readLocalFile.mockImplementation((fileName: string): Promise<any> => {
     const content = files?.[fileName];
     return Promise.resolve(content ?? '');
   });
@@ -49,7 +50,7 @@ describe('modules/manager/gradle/extract', () => {
 
     expect(logger.logger.warn).toHaveBeenCalledWith(
       { err, config: {}, packageFile: filename },
-      `Failed to process Gradle file: ${filename}`
+      `Failed to process Gradle file`
     );
   });
 
@@ -90,7 +91,7 @@ describe('modules/manager/gradle/extract', () => {
           {
             depName: 'foo:bar',
             currentValue: '1.2.3',
-            registryUrls: ['https://repo.maven.apache.org/maven2'],
+            registryUrls: [],
             skipReason: 'contains-variable',
             managerData: {
               packageFile: 'build.gradle',
@@ -121,10 +122,7 @@ describe('modules/manager/gradle/extract', () => {
           {
             depName: 'foo:bar',
             currentValue: '1.2.3',
-            registryUrls: [
-              'https://repo.maven.apache.org/maven2',
-              'https://example.com',
-            ],
+            registryUrls: ['https://example.com'],
           },
         ],
       },
@@ -197,8 +195,8 @@ describe('modules/manager/gradle/extract', () => {
             depType: 'plugin',
             registryUrls: [
               'https://repo.maven.apache.org/maven2',
-              'https://plugins.gradle.org/m2/',
               'https://example.com',
+              'https://plugins.gradle.org/m2/',
             ],
           },
           {
@@ -352,10 +350,7 @@ describe('modules/manager/gradle/extract', () => {
               fileReplacePosition: 21,
               packageFile: 'gradle/libs.versions.toml',
             },
-            registryUrls: [
-              'https://repo.maven.apache.org/maven2',
-              'https://plugins.gradle.org/m2/',
-            ],
+            registryUrls: ['https://plugins.gradle.org/m2/'],
           },
           {
             depName: 'org.danilopianini.publish-on-central',
@@ -367,10 +362,7 @@ describe('modules/manager/gradle/extract', () => {
               fileReplacePosition: 82,
               packageFile: 'gradle/libs.versions.toml',
             },
-            registryUrls: [
-              'https://repo.maven.apache.org/maven2',
-              'https://plugins.gradle.org/m2/',
-            ],
+            registryUrls: ['https://plugins.gradle.org/m2/'],
           },
           {
             depName: 'org.ajoberstar.grgit',
@@ -381,10 +373,7 @@ describe('modules/manager/gradle/extract', () => {
             managerData: {
               packageFile: 'gradle/libs.versions.toml',
             },
-            registryUrls: [
-              'https://repo.maven.apache.org/maven2',
-              'https://plugins.gradle.org/m2/',
-            ],
+            registryUrls: ['https://plugins.gradle.org/m2/'],
             skipReason: 'unknown-version',
           },
         ],
@@ -474,10 +463,7 @@ describe('modules/manager/gradle/extract', () => {
               fileReplacePosition: 661,
               packageFile: 'gradle/libs.versions.toml',
             },
-            registryUrls: [
-              'https://repo.maven.apache.org/maven2',
-              'https://plugins.gradle.org/m2/',
-            ],
+            registryUrls: ['https://plugins.gradle.org/m2/'],
           },
           {
             depName: 'org.jetbrains.kotlin.plugin.serialization',
@@ -489,10 +475,7 @@ describe('modules/manager/gradle/extract', () => {
               fileReplacePosition: 21,
               packageFile: 'gradle/libs.versions.toml',
             },
-            registryUrls: [
-              'https://repo.maven.apache.org/maven2',
-              'https://plugins.gradle.org/m2/',
-            ],
+            registryUrls: ['https://plugins.gradle.org/m2/'],
           },
           {
             depName: 'org.danilopianini.multi-jvm-test-plugin',
@@ -505,10 +488,7 @@ describe('modules/manager/gradle/extract', () => {
               fileReplacePosition: 822,
               packageFile: 'gradle/libs.versions.toml',
             },
-            registryUrls: [
-              'https://repo.maven.apache.org/maven2',
-              'https://plugins.gradle.org/m2/',
-            ],
+            registryUrls: ['https://plugins.gradle.org/m2/'],
           },
         ],
       },
@@ -560,17 +540,14 @@ describe('modules/manager/gradle/extract', () => {
               packageFile: 'gradle/libs.versions.toml',
             },
             fileReplacePosition: 30,
-            registryUrls: ['https://repo.maven.apache.org/maven2'],
+            registryUrls: [],
           },
           {
             depType: 'plugin',
             depName: 'io.gitlab.arturbosch.detekt',
             packageName:
               'io.gitlab.arturbosch.detekt:io.gitlab.arturbosch.detekt.gradle.plugin',
-            registryUrls: [
-              'https://repo.maven.apache.org/maven2',
-              'https://plugins.gradle.org/m2/',
-            ],
+            registryUrls: ['https://plugins.gradle.org/m2/'],
             currentValue: '1.18.1',
             managerData: {
               fileReplacePosition: 30,
@@ -608,7 +585,7 @@ describe('modules/manager/gradle/extract', () => {
               packageFile: 'gradle/libs.versions.toml',
             },
             fileReplacePosition: 124,
-            registryUrls: ['https://repo.maven.apache.org/maven2'],
+            registryUrls: [],
           },
           {
             depName: 'mocha-junit:mocha-junit',
@@ -619,7 +596,7 @@ describe('modules/manager/gradle/extract', () => {
               packageFile: 'gradle/libs.versions.toml',
             },
             fileReplacePosition: 82,
-            registryUrls: ['https://repo.maven.apache.org/maven2'],
+            registryUrls: [],
           },
         ],
       },
@@ -636,6 +613,7 @@ describe('modules/manager/gradle/extract', () => {
           apply from: "\${someDir}/libs1.gradle"
           apply from: file("gradle/libs2.gradle")
           apply from: "gradle/libs3.gradle"
+          apply from: new File(someDir, "\${someDir}/libs4.gradle")
           apply from: file("gradle/non-existing.gradle")
 
           dependencies {
@@ -645,6 +623,7 @@ describe('modules/manager/gradle/extract', () => {
 
               classpath "org.junit.jupiter:junit-jupiter-api:\${junitVersion}"
               classpath "org.junit.jupiter:junit-jupiter-engine:\${junitVersion}"
+              classpath "org.slf4j:slf4j-api:\${slf4jVersion}"
           }
       }
     `;
@@ -653,6 +632,7 @@ describe('modules/manager/gradle/extract', () => {
       'gradleX/libs1.gradle': "ext.junitVersion = '5.5.2'",
       'gradle/libs2.gradle': "ext.protoBufVersion = '3.18.2'",
       'gradle/libs3.gradle': "ext.guavaVersion = '30.1-jre'",
+      'gradleX/gradleX/libs4.gradle': "ext.slf4jVersion = '1.7.30'",
       'build.gradle': buildFile,
       'gradle.properties': 'someDir=gradleX',
     });
@@ -661,6 +641,7 @@ describe('modules/manager/gradle/extract', () => {
       'gradleX/libs1.gradle',
       'gradle/libs2.gradle',
       // 'gradle/libs3.gradle', is intentionally not listed here
+      'gradleX/gradleX/libs4.gradle',
       'build.gradle',
       'gradle.properties',
     ]);
@@ -693,6 +674,16 @@ describe('modules/manager/gradle/extract', () => {
             depName: 'org.junit.jupiter:junit-jupiter-engine',
             currentValue: '5.5.2',
             managerData: { packageFile: 'gradleX/libs1.gradle' },
+          },
+        ],
+      },
+      {
+        packageFile: 'gradleX/gradleX/libs4.gradle',
+        deps: [
+          {
+            depName: 'org.slf4j:slf4j-api',
+            currentValue: '1.7.30',
+            managerData: { packageFile: 'gradleX/gradleX/libs4.gradle' },
           },
         ],
       },
@@ -810,6 +801,35 @@ describe('modules/manager/gradle/extract', () => {
         ],
       },
       { packageFile: 'build.gradle' },
+    ]);
+  });
+
+  it('ensures depType is assigned', async () => {
+    const fsMock = {
+      'build.gradle':
+        "id 'org.sonarqube' version '3.1.1'\n\"io.jsonwebtoken:jjwt-api:0.11.2\"",
+      'buildSrc/build.gradle': '"com.google.protobuf:protobuf-java:3.18.2"',
+    };
+
+    mockFs(fsMock);
+
+    const res = await extractAllPackageFiles(
+      {} as ExtractConfig,
+      Object.keys(fsMock)
+    );
+
+    expect(res).toMatchObject([
+      {
+        packageFile: 'build.gradle',
+        deps: [
+          { depName: 'org.sonarqube', depType: 'plugin' },
+          { depName: 'io.jsonwebtoken:jjwt-api', depType: 'dependencies' },
+        ],
+      },
+      {
+        packageFile: 'buildSrc/build.gradle',
+        deps: [{ depType: 'devDependencies' }],
+      },
     ]);
   });
 });

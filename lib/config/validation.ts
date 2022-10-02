@@ -196,6 +196,8 @@ export async function validateConfig(
         optionParents[key] &&
         optionParents[key] !== parentName
       ) {
+        // TODO: types (#7154)
+        // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
         const message = `${key} should only be configured within a "${optionParents[key]}" object. Was found in ${parentName}`;
         warnings.push({
           topic: `${parentPath ? `${parentPath}.` : ''}${key}`,
@@ -225,6 +227,15 @@ export async function validateConfig(
             message: `Invalid regExp for ${currentPath}: \`${val}\``,
           });
         }
+      } else if (
+        key === 'matchCurrentValue' &&
+        is.string(val) &&
+        !configRegexPredicate(val)
+      ) {
+        errors.push({
+          topic: 'Configuration Error',
+          message: `Invalid regExp for ${currentPath}: \`${val}\``,
+        });
       } else if (key === 'timezone' && val !== null) {
         const [validTimezone, errorMessage] = hasValidTimezone(val as string);
         if (!validTimezone) {
@@ -312,6 +323,7 @@ export async function validateConfig(
               'excludePackageNames',
               'excludePackagePatterns',
               'excludePackagePrefixes',
+              'matchCurrentValue',
               'matchCurrentVersion',
               'matchSourceUrlPrefixes',
               'matchSourceUrls',
@@ -502,7 +514,9 @@ export async function validateConfig(
               }
             }
             if (
-              (selectors.includes(key) || key === 'matchCurrentVersion') &&
+              (selectors.includes(key) ||
+                key === 'matchCurrentVersion' ||
+                key === 'matchCurrentValue') &&
               // TODO: can be undefined ? #7154
               !rulesRe.test(parentPath!) && // Inside a packageRule
               (parentPath || !isPreset) // top level in a preset

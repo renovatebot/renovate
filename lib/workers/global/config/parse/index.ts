@@ -3,11 +3,7 @@ import type { AllConfig } from '../../../../config/types';
 import { mergeChildConfig } from '../../../../config/utils';
 import { addStream, logger, setContext } from '../../../../logger';
 import { detectAllGlobalConfig } from '../../../../modules/manager';
-import {
-  ensureDir,
-  getSubDirectory,
-  readSystemFile,
-} from '../../../../util/fs';
+import { ensureDir, getParentDir, readSystemFile } from '../../../../util/fs';
 import { ensureTrailingSlash } from '../../../../util/url';
 import * as cliParser from './cli';
 import * as envParser from './env';
@@ -63,9 +59,10 @@ export async function parseConfigs(
   // istanbul ignore if
   if (config.logFile) {
     logger.debug(
-      `Enabling ${config.logFileLevel} logging to ${config.logFile}`
+      // TODO: types (#7154)
+      `Enabling ${config.logFileLevel!} logging to ${config.logFile}`
     );
-    await ensureDir(getSubDirectory(config.logFile));
+    await ensureDir(getParentDir(config.logFile));
     addStream({
       name: 'logfile',
       path: config.logFile,

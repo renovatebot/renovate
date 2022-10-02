@@ -4,8 +4,8 @@ import * as httpMock from '../../../../test/http-mock';
 import * as versioning from '../../versioning/docker';
 import { JenkinsPluginsDatasource } from '.';
 
-const jenkinsPluginsVersions = Fixtures?.getJson('plugin-versions.json');
-const jenkinsPluginsInfo = Fixtures?.getJson('update-center.actual.json');
+const jenkinsPluginsVersions = Fixtures.getJson('plugin-versions.json');
+const jenkinsPluginsInfo = Fixtures.getJson('update-center.actual.json');
 
 describe('modules/datasource/jenkins-plugins/index', () => {
   describe('getReleases', () => {

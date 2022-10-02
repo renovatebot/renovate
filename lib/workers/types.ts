@@ -10,7 +10,6 @@ import type {
 import type { Release } from '../modules/datasource/types';
 import type {
   ArtifactError,
-  CustomExtractConfig,
   ExtractConfig,
   LookupUpdate,
   PackageDependency,
@@ -57,6 +56,8 @@ export interface BranchUpgradeConfig
   prBodyTemplate?: string;
   prPriority?: number;
   prTitle?: string;
+  prettyNewMajor?: string;
+  prettyNewVersion?: string;
   releases?: ReleaseWithNotes[];
   releaseTimestamp?: string;
   repoName?: string;
@@ -125,11 +126,11 @@ export interface BranchConfig
   prNo?: number;
   stopUpdating?: boolean;
   isConflicted?: boolean;
+  branchFingerprint?: string;
+  skipBranchUpdate?: boolean;
 }
 
-export interface WorkerExtractConfig
-  extends ExtractConfig,
-    Partial<CustomExtractConfig> {
+export interface WorkerExtractConfig extends ExtractConfig {
   manager: string;
   fileList: string[];
   fileMatch?: string[];
@@ -144,4 +145,10 @@ export interface WorkerExtractConfig
 export interface DepWarnings {
   warnings: string[];
   warningFiles: string[];
+}
+
+export interface SelectAllConfig extends RenovateConfig {
+  dependencyDashboardRebaseAllOpen?: boolean;
+  dependencyDashboardAllPending?: boolean;
+  dependencyDashboardAllRateLimited?: boolean;
 }

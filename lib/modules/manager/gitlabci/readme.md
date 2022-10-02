@@ -6,3 +6,13 @@ If you use Gitlab Dependency Proxy then you can use these predefined variables a
 
 - `CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX`
 - `CI_DEPENDENCY_PROXY_DIRECT_GROUP_IMAGE_PREFIX`
+
+If you use the predefined `CI_REGISTRY` variable make sure to configure its value via `registryAliases`:
+
+```json
+{
+  "registryAliases": {
+    "$CI_REGISTRY": "registry.example.com"
+  }
+}
+```

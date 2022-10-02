@@ -1,5 +1,5 @@
+import { Fixtures } from '../../../../test/fixtures';
 import * as httpMock from '../../../../test/http-mock';
-import { loadFixture } from '../../../../test/util';
 import { GithubReleasesDatasource } from '../github-releases';
 import { GithubTagsDatasource } from '../github-tags';
 import { GoProxyDatasource } from './releases-goproxy';
@@ -31,7 +31,7 @@ describe('modules/datasource/go/releases-goproxy', () => {
       httpMock
         .scope(baseUrl)
         .get('/github.com/go-kit/kit/@v/list')
-        .reply(200, loadFixture('go-kit.list.txt'));
+        .reply(200, Fixtures.get('go-kit.list.txt'));
 
       const versions = await datasource.listVersions(baseUrl, packageName);
 
@@ -316,9 +316,10 @@ describe('modules/datasource/go/releases-goproxy', () => {
       httpMock
         .scope(`${baseUrl}/github.com/google/btree`)
         .get('/@v/list')
-        .reply(200, 'v1.0.0\nv1.0.1\n')
-        .get('/@v/v1.0.0.info')
-        .reply(200, { Version: 'v1.0.0', Time: '2018-08-13T15:31:12Z' })
+        .reply(
+          200,
+          ['v1.0.0 2018-08-13T15:31:12Z', 'v1.0.1', '  \n'].join('\n')
+        )
         .get('/@v/v1.0.1.info')
         .reply(200, { Version: 'v1.0.1', Time: '2019-10-16T16:15:28Z' });
 
@@ -513,6 +514,32 @@ describe('modules/datasource/go/releases-goproxy', () => {
       });
 
       expect(res).toBeNull();
+    });
+
+    it('handles soureUrl fetch errors', async () => {
+      process.env.GOPROXY = baseUrl;
+
+      httpMock
+        .scope(`${baseUrl}/custom.com/lib/btree`)
+        .get('/@v/list')
+        .reply(200, ['v1.0.0 2018-08-13T15:31:12Z', 'v1.0.1'].join('\n'))
+        .get('/@v/v1.0.1.info')
+        .reply(200, { Version: 'v1.0.1', Time: '2019-10-16T16:15:28Z' });
+      httpMock
+        .scope('https://custom.com/lib/btree')
+        .get('?go-get=1')
+        .reply(500);
+
+      const res = await datasource.getReleases({
+        packageName: 'custom.com/lib/btree',
+      });
+
+      expect(res).toEqual({
+        releases: [
+          { releaseTimestamp: '2018-08-13T15:31:12Z', version: 'v1.0.0' },
+          { releaseTimestamp: '2019-10-16T16:15:28Z', version: 'v1.0.1' },
+        ],
+      });
     });
   });
 });

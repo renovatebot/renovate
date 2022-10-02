@@ -51,6 +51,9 @@ If you're looking for an online regex testing tool that supports capture groups,
 Be aware that backslashes (`'\'`) of the resulting regex have to still be escaped e.g. `\n\s` --> `\\n\\s`.
 You can use the Code Generator in the sidebar and copy the regex in the generated "Alternative syntax" comment into JSON.
 
+The `regex` manager uses [RE2](https://github.com/google/re2/wiki/WhyRE2) which does not support [backreferences and lookahead assertions](https://github.com/uhop/node-re2#limitations-things-re2-does-not-support).
+The `regex` manager matches are done per-file and not per-line, you should be aware when using the `^` and/or `$` regex assertions.
+
 ### Configuration templates
 
 In many cases, named capture groups alone won't be enough and you'll need to configure Renovate with additional information about how to look up a dependency.
@@ -112,7 +115,7 @@ The above (obviously not a complete `Dockerfile`, but abbreviated for this examp
 
 In the above the `versioningTemplate` is not actually necessary because Renovate already defaults to `semver` versioning, but it has been included to help illustrate why we call these fields _templates_.
 They are named this way because they are compiled using Handlebars and so can be composed from values you collect in named capture groups.
-You will usually want to use the tripe brace `{{{ }}}` template (e.v. `{{{versioning}}}` to be safe because Handlebars escapes special characters by default with double braces.
+You will usually want to use the triple brace `{{{ }}}` template (e.g. `{{{versioning}}}`) to be safe because Handlebars escapes special characters by default with double braces.
 
 By adding the comments to the `Dockerfile`, you can see that instead of four separate `regexManagers` being required, there is now only one - and the `Dockerfile` itself is now somewhat better documented too.
 The syntax we used there is completely arbitrary and you may choose your own instead if you prefer - just be sure to update your `matchStrings` regex.

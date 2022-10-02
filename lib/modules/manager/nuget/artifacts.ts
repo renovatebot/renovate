@@ -6,13 +6,12 @@ import { exec } from '../../../util/exec';
 import type { ExecOptions } from '../../../util/exec/types';
 import {
   ensureDir,
+  getFileContentMap,
   getSiblingFileName,
   outputCacheFile,
   privateCacheDir,
-  readLocalFile,
   writeLocalFile,
 } from '../../../util/fs';
-import { getFile } from '../../../util/git';
 import * as hostRules from '../../../util/host-rules';
 import { regEx } from '../../../util/regex';
 import { NugetDatasource } from '../../datasource/nuget';
@@ -96,21 +95,6 @@ async function runDotnetRestore(
   await exec(cmds, execOptions);
 }
 
-async function getLockFileContentMap(
-  lockFileNames: string[],
-  local = false
-): Promise<Record<string, string | null>> {
-  const lockFileContentMap: Record<string, string | null> = {};
-
-  for (const lockFileName of lockFileNames) {
-    lockFileContentMap[lockFileName] = local
-      ? await readLocalFile(lockFileName, 'utf8')
-      : await getFile(lockFileName);
-  }
-
-  return lockFileContentMap;
-}
-
 export async function updateArtifacts({
   packageFileName,
   newPackageFileContent,
@@ -159,7 +143,7 @@ export async function updateArtifacts({
     getSiblingFileName(f, 'packages.lock.json')
   );
 
-  const existingLockFileContentMap = await getLockFileContentMap(lockFileNames);
+  const existingLockFileContentMap = await getFileContentMap(lockFileNames);
 
   const hasLockFileContent = Object.values(existingLockFileContentMap).some(
     (val) => !!val
@@ -184,10 +168,7 @@ export async function updateArtifacts({
 
     await runDotnetRestore(packageFileName, packageFiles, config);
 
-    const newLockFileContentMap = await getLockFileContentMap(
-      lockFileNames,
-      true
-    );
+    const newLockFileContentMap = await getFileContentMap(lockFileNames, true);
 
     const retArray: UpdateArtifactsResult[] = [];
     for (const lockFileName of lockFileNames) {

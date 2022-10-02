@@ -1,5 +1,6 @@
+import { Fixtures } from '../../../../test/fixtures';
 import * as httpMock from '../../../../test/http-mock';
-import { loadFixture, mocked } from '../../../../test/util';
+import { mocked } from '../../../../test/util';
 import * as _hostRules from '../../../util/host-rules';
 import { GoDatasource } from '.';
 
@@ -107,7 +108,7 @@ describe('modules/datasource/go/index', () => {
       httpMock
         .scope('https://golang.org/')
         .get('/y/text?go-get=1')
-        .reply(200, loadFixture('go-get-github.html'));
+        .reply(200, Fixtures.get('go-get-github.html'));
       const res = await datasource.getDigest(
         { packageName: 'golang.org/y/text' },
         null
@@ -119,7 +120,7 @@ describe('modules/datasource/go/index', () => {
       httpMock
         .scope('https://gitlab.com/')
         .get('/group/subgroup?go-get=1')
-        .reply(200, loadFixture('go-get-gitlab.html'));
+        .reply(200, Fixtures.get('go-get-gitlab.html'));
       getDigestGitlabMock.mockResolvedValue('abcdefabcdefabcdefabcdef');
       const res = await datasource.getDigest(
         { packageName: 'gitlab.com/group/subgroup' },
@@ -133,7 +134,7 @@ describe('modules/datasource/go/index', () => {
       httpMock
         .scope('https://gitlab.com/')
         .get('/group/subgroup?go-get=1')
-        .reply(200, loadFixture('go-get-gitlab.html'));
+        .reply(200, Fixtures.get('go-get-gitlab.html'));
       getDigestGitlabMock.mockResolvedValue('abcdefabcdefabcdefabcdef');
       const res = await datasource.getDigest(
         { packageName: 'gitlab.com/group/subgroup' },
@@ -146,7 +147,7 @@ describe('modules/datasource/go/index', () => {
       httpMock
         .scope('https://golang.org/')
         .get('/x/text?go-get=1')
-        .reply(200, loadFixture('go-get-github.html'));
+        .reply(200, Fixtures.get('go-get-github.html'));
       getDigestGithubMock.mockResolvedValueOnce('abcdefabcdefabcdefabcdef');
       const res = await datasource.getDigest(
         { packageName: 'golang.org/x/text' },

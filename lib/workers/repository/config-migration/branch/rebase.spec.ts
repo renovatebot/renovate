@@ -1,11 +1,12 @@
 import { Fixtures } from '../../../../../test/fixtures';
 import {
   RenovateConfig,
-  defaultConfig,
+  getConfig,
   git,
   platform,
 } from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
+import { checkoutBranch } from '../../../../util/git';
 import type { MigratedData } from './migrated-data';
 import { rebaseMigrationBranch } from './rebase';
 
@@ -32,14 +33,17 @@ describe('workers/repository/config-migration/branch/rebase', () => {
       GlobalConfig.reset();
       migratedConfigData = { content: renovateConfig, filename };
       config = {
-        ...defaultConfig,
+        ...getConfig(),
         repository: 'some/repo',
+        baseBranch: 'dev',
+        defaultBranch: 'master',
       };
     });
 
     it('does not rebase modified branch', async () => {
       git.isBranchModified.mockResolvedValueOnce(true);
       await rebaseMigrationBranch(config, migratedConfigData);
+      expect(checkoutBranch).toHaveBeenCalledTimes(0);
       expect(git.commitFiles).toHaveBeenCalledTimes(0);
     });
 
@@ -48,12 +52,14 @@ describe('workers/repository/config-migration/branch/rebase', () => {
         .mockResolvedValueOnce(renovateConfig)
         .mockResolvedValueOnce(renovateConfig);
       await rebaseMigrationBranch(config, migratedConfigData);
+      expect(checkoutBranch).toHaveBeenCalledTimes(0);
       expect(git.commitFiles).toHaveBeenCalledTimes(0);
     });
 
     it('rebases migration branch', async () => {
-      git.isBranchStale.mockResolvedValueOnce(true);
+      git.isBranchBehindBase.mockResolvedValueOnce(true);
       await rebaseMigrationBranch(config, migratedConfigData);
+      expect(checkoutBranch).toHaveBeenCalledWith(config.defaultBranch);
       expect(git.commitFiles).toHaveBeenCalledTimes(1);
     });
 
@@ -61,15 +67,17 @@ describe('workers/repository/config-migration/branch/rebase', () => {
       GlobalConfig.set({
         dryRun: 'full',
       });
-      git.isBranchStale.mockResolvedValueOnce(true);
+      git.isBranchBehindBase.mockResolvedValueOnce(true);
       await rebaseMigrationBranch(config, migratedConfigData);
+      expect(checkoutBranch).toHaveBeenCalledTimes(0);
       expect(git.commitFiles).toHaveBeenCalledTimes(0);
     });
 
     it('rebases via platform', async () => {
       config.platformCommit = true;
-      git.isBranchStale.mockResolvedValueOnce(true);
+      git.isBranchBehindBase.mockResolvedValueOnce(true);
       await rebaseMigrationBranch(config, migratedConfigData);
+      expect(checkoutBranch).toHaveBeenCalledWith(config.defaultBranch);
       expect(platform.commitFiles).toHaveBeenCalledTimes(1);
     });
   });

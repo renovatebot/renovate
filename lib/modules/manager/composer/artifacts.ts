@@ -24,7 +24,7 @@ import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
 import type { AuthJson, ComposerLock } from './types';
 import {
   composerVersioningId,
-  extractContraints,
+  extractConstraints,
   getComposerArguments,
   getPhpConstraint,
   requireComposerDependencyInstallation,
@@ -97,7 +97,10 @@ export async function updateArtifacts({
 
     const existingLockFile: ComposerLock = JSON.parse(existingLockFileContent);
     const constraints = {
-      ...extractContraints(JSON.parse(newPackageFileContent), existingLockFile),
+      ...extractConstraints(
+        JSON.parse(newPackageFileContent),
+        existingLockFile
+      ),
       ...config.constraints,
     };
 

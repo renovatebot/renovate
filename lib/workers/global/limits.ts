@@ -21,7 +21,7 @@ export function resetAllLimits(): void {
 export function setMaxLimit(key: Limit, val: unknown): void {
   const max = typeof val === 'number' ? Math.max(0, val) : null;
   limits.set(key, { current: 0, max });
-  logger.debug(`${key} limit = ${max}`);
+  logger.debug(`${key} limit = ${max!}`);
 }
 
 export function incLimitedValue(key: Limit, incBy = 1): void {

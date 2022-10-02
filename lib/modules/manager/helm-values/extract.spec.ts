@@ -1,11 +1,11 @@
-import { loadFixture } from '../../../../test/util';
+import { Fixtures } from '../../../../test/fixtures';
 import { extractPackageFile } from '.';
 
-const helmDefaultChartInitValues = loadFixture(
+const helmDefaultChartInitValues = Fixtures.get(
   'default_chart_init_values.yaml'
 );
 
-const helmMultiAndNestedImageValues = loadFixture(
+const helmMultiAndNestedImageValues = Fixtures.get(
   'multi_and_nested_image_values.yaml'
 );
 

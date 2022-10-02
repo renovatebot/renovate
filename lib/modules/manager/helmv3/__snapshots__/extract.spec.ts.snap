@@ -1,19 +1,19 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`modules/manager/helmv3/extract extractPackageFile() extract correctly oci references 1`] = `
-Object {
+{
   "datasource": "helm",
-  "deps": Array [
-    Object {
+  "deps": [
+    {
       "currentValue": "0.1.0",
       "datasource": "docker",
       "depName": "library",
       "packageName": "ghcr.io/ankitabhopatkar13/library",
     },
-    Object {
+    {
       "currentValue": "0.8.1",
       "depName": "postgresql",
-      "registryUrls": Array [
+      "registryUrls": [
         "https://charts.helm.sh/stable",
       ],
     },
@@ -23,20 +23,20 @@ Object {
 `;
 
 exports[`modules/manager/helmv3/extract extractPackageFile() parses simple Chart.yaml correctly 1`] = `
-Object {
+{
   "datasource": "helm",
-  "deps": Array [
-    Object {
+  "deps": [
+    {
       "currentValue": "0.9.0",
       "depName": "redis",
-      "registryUrls": Array [
+      "registryUrls": [
         "https://charts.helm.sh/stable",
       ],
     },
-    Object {
+    {
       "currentValue": "0.8.1",
       "depName": "postgresql",
-      "registryUrls": Array [
+      "registryUrls": [
         "https://charts.helm.sh/stable",
       ],
     },
@@ -46,24 +46,24 @@ Object {
 `;
 
 exports[`modules/manager/helmv3/extract extractPackageFile() resolves aliased registry urls 1`] = `
-Object {
+{
   "datasource": "helm",
-  "deps": Array [
-    Object {
+  "deps": [
+    {
       "currentValue": "0.9.0",
       "depName": "redis",
-      "registryUrls": Array [
+      "registryUrls": [
         "https://my-registry.gcr.io/",
       ],
     },
-    Object {
+    {
       "currentValue": "1.0.0",
       "depName": "example",
-      "registryUrls": Array [
+      "registryUrls": [
         "https://registry.example.com/",
       ],
     },
-    Object {
+    {
       "currentValue": "2.2.0",
       "datasource": "docker",
       "depName": "oci-example",
@@ -75,20 +75,20 @@ Object {
 `;
 
 exports[`modules/manager/helmv3/extract extractPackageFile() skips invalid registry urls 1`] = `
-Object {
+{
   "datasource": "helm",
-  "deps": Array [
-    Object {
+  "deps": [
+    {
       "currentValue": "0.9.0",
       "depName": "redis",
       "skipReason": "placeholder-url",
     },
-    Object {
+    {
       "currentValue": "0.8.1",
       "depName": "postgresql",
       "skipReason": "invalid-url",
     },
-    Object {
+    {
       "currentValue": "0.8.1",
       "depName": "broken",
       "skipReason": "no-repository",
@@ -99,17 +99,17 @@ Object {
 `;
 
 exports[`modules/manager/helmv3/extract extractPackageFile() skips local dependencies 1`] = `
-Object {
+{
   "datasource": "helm",
-  "deps": Array [
-    Object {
+  "deps": [
+    {
       "currentValue": "0.9.0",
       "depName": "redis",
-      "registryUrls": Array [
+      "registryUrls": [
         "https://charts.helm.sh/stable",
       ],
     },
-    Object {
+    {
       "currentValue": "0.8.1",
       "depName": "postgresql",
       "skipReason": "local-dependency",

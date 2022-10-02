@@ -1,20 +1,20 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`modules/manager/jsonnet-bundler/extract extractPackageFile() extracts dependency 1`] = `
-Object {
-  "deps": Array [
-    Object {
+{
+  "deps": [
+    {
       "currentValue": "v0.50.0",
       "depName": "prometheus-operator",
-      "managerData": Object {
+      "managerData": {
         "subdir": "jsonnet/prometheus-operator",
       },
       "packageName": "https://github.com/prometheus-operator/prometheus-operator.git",
     },
-    Object {
+    {
       "currentValue": "v0.9.0",
       "depName": "kube-prometheus",
-      "managerData": Object {
+      "managerData": {
         "subdir": "jsonnet/kube-prometheus",
       },
       "packageName": "ssh://git@github.com/prometheus-operator/kube-prometheus.git",
@@ -24,12 +24,12 @@ Object {
 `;
 
 exports[`modules/manager/jsonnet-bundler/extract extractPackageFile() extracts dependency with custom name 1`] = `
-Object {
-  "deps": Array [
-    Object {
+{
+  "deps": [
+    {
       "currentValue": "v0.50.0",
       "depName": "prometheus-operator-mixin",
-      "managerData": Object {
+      "managerData": {
         "subdir": "jsonnet/mixin",
       },
       "packageName": "https://github.com/prometheus-operator/prometheus-operator",

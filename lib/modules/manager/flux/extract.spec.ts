@@ -1,4 +1,4 @@
-import { loadFixture } from '../../../../test/util';
+import { Fixtures } from '../../../../test/fixtures';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import type { ExtractConfig } from '../types';
@@ -15,7 +15,7 @@ describe('modules/manager/flux/extract', () => {
   describe('extractPackageFile()', () => {
     it('extracts multiple resources', () => {
       const result = extractPackageFile(
-        loadFixture('multidoc.yaml'),
+        Fixtures.get('multidoc.yaml'),
         'multidoc.yaml'
       );
       expect(result).toEqual({
@@ -32,7 +32,7 @@ describe('modules/manager/flux/extract', () => {
 
     it('extracts version and components from system manifests', () => {
       const result = extractPackageFile(
-        loadFixture('system.yaml'),
+        Fixtures.get('system.yaml'),
         'clusters/my-cluster/flux-system/gotk-components.yaml'
       );
       expect(result).toEqual({
@@ -68,7 +68,7 @@ describe('modules/manager/flux/extract', () => {
 
     it('extracts releases without repositories', () => {
       const result = extractPackageFile(
-        loadFixture('release.yaml'),
+        Fixtures.get('release.yaml'),
         'release.yaml'
       );
       expect(result?.deps[0].skipReason).toBe('unknown-registry');
@@ -86,7 +86,7 @@ describe('modules/manager/flux/extract', () => {
 
     it('ignores HelmRepository resources without metadata', () => {
       const result = extractPackageFile(
-        `${loadFixture('release.yaml')}
+        `${Fixtures.get('release.yaml')}
 ---
 apiVersion: source.toolkit.fluxcd.io/v1beta1
 kind: HelmRepository
@@ -143,7 +143,7 @@ spec:
 
     it('does not match HelmRelease resources without a sourceRef', () => {
       const result = extractPackageFile(
-        `${loadFixture('source.yaml')}
+        `${Fixtures.get('source.yaml')}
 ---
 apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
@@ -162,7 +162,7 @@ spec:
 
     it('does not match HelmRelease resources without a namespace', () => {
       const result = extractPackageFile(
-        `${loadFixture('source.yaml')}
+        `${Fixtures.get('source.yaml')}
 ---
 apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
@@ -182,7 +182,7 @@ spec:
 
     it('ignores HelmRepository resources without a namespace', () => {
       const result = extractPackageFile(
-        `${loadFixture('release.yaml')}
+        `${Fixtures.get('release.yaml')}
 ---
 apiVersion: source.toolkit.fluxcd.io/v1beta1
 kind: HelmRepository
@@ -196,7 +196,7 @@ metadata:
 
     it('ignores HelmRepository resources without a URL', () => {
       const result = extractPackageFile(
-        `${loadFixture('release.yaml')}
+        `${Fixtures.get('release.yaml')}
 ---
 apiVersion: source.toolkit.fluxcd.io/v1beta1
 kind: HelmRepository

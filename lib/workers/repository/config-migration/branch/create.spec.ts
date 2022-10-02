@@ -1,6 +1,6 @@
 import { Fixtures } from '../../../../../test/fixtures';
 import { RenovateConfig, getConfig, platform } from '../../../../../test/util';
-import { commitFiles } from '../../../../util/git';
+import { checkoutBranch, commitFiles } from '../../../../util/git';
 import { createConfigMigrationBranch } from './create';
 import type { MigratedData } from './migrated-data';
 
@@ -18,12 +18,15 @@ describe('workers/repository/config-migration/branch/create', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     config = getConfig();
+    config.baseBranch = 'dev';
+    config.defaultBranch = 'master';
     migratedConfigData = { content: renovateConfig, filename };
   });
 
   describe('createConfigMigrationBranch', () => {
     it('applies the default commit message', async () => {
       await createConfigMigrationBranch(config, migratedConfigData);
+      expect(checkoutBranch).toHaveBeenCalledWith(config.defaultBranch);
       expect(commitFiles).toHaveBeenCalledWith({
         branchName: 'renovate/migrate-config',
         files: [
@@ -43,6 +46,7 @@ describe('workers/repository/config-migration/branch/create', () => {
 
       await createConfigMigrationBranch(config, migratedConfigData);
 
+      expect(checkoutBranch).toHaveBeenCalledWith(config.defaultBranch);
       expect(platform.commitFiles).toHaveBeenCalledWith({
         branchName: 'renovate/migrate-config',
         files: [
@@ -64,6 +68,7 @@ describe('workers/repository/config-migration/branch/create', () => {
 
       await createConfigMigrationBranch(config, migratedConfigData);
 
+      expect(checkoutBranch).toHaveBeenCalledWith(config.defaultBranch);
       expect(commitFiles).toHaveBeenCalledWith({
         branchName: 'renovate/migrate-config',
         files: [
@@ -86,6 +91,7 @@ describe('workers/repository/config-migration/branch/create', () => {
         const message = `PREFIX: migrate config renovate.json`;
         await createConfigMigrationBranch(config, migratedConfigData);
 
+        expect(checkoutBranch).toHaveBeenCalledWith(config.defaultBranch);
         expect(commitFiles).toHaveBeenCalledWith({
           branchName: 'renovate/migrate-config',
           files: [
@@ -99,20 +105,17 @@ describe('workers/repository/config-migration/branch/create', () => {
           platformCommit: false,
         });
       });
+    });
 
-      it('to the supplied commit message prefix, topic & action', async () => {
-        const prefix = 'PREFIX:';
-        const topic = 'thats a topic';
-        const action = 'action';
+    describe('applies the commitMessageSuffix value', () => {
+      it('to the default commit message', async () => {
+        const suffix = 'SUFFIX';
+        config.commitMessageSuffix = suffix;
 
-        const message = `${prefix} ${action} ${topic}`;
-
-        config.commitMessagePrefix = prefix;
-        config.commitMessageTopic = topic;
-        config.commitMessageAction = action;
-
+        const message = `Migrate config renovate.json ${suffix}`;
         await createConfigMigrationBranch(config, migratedConfigData);
 
+        expect(checkoutBranch).toHaveBeenCalledWith(config.defaultBranch);
         expect(commitFiles).toHaveBeenCalledWith({
           branchName: 'renovate/migrate-config',
           files: [
@@ -137,6 +140,7 @@ describe('workers/repository/config-migration/branch/create', () => {
 
         await createConfigMigrationBranch(config, migratedConfigData);
 
+        expect(checkoutBranch).toHaveBeenCalledWith(config.defaultBranch);
         expect(commitFiles).toHaveBeenCalledWith({
           branchName: 'renovate/migrate-config',
           files: [
@@ -151,16 +155,16 @@ describe('workers/repository/config-migration/branch/create', () => {
         });
       });
 
-      it('to the supplied commit message topic', async () => {
-        const prefix = 'chore(config)';
-        const topic = 'supplied topic';
-        const message = `${prefix}: ${topic}`;
+      it('uses user defined semantic commit type', async () => {
+        const prefix = 'type(config)';
+        const message = `${prefix}: migrate config renovate.json`;
 
         config.semanticCommits = 'enabled';
-        config.commitMessageTopic = topic;
+        config.semanticCommitType = 'type';
 
         await createConfigMigrationBranch(config, migratedConfigData);
 
+        expect(checkoutBranch).toHaveBeenCalledWith(config.defaultBranch);
         expect(commitFiles).toHaveBeenCalledWith({
           branchName: 'renovate/migrate-config',
           files: [

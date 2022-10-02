@@ -34,6 +34,7 @@
     <PackageReference Include="NotUpdatable3" Version="(1.2.3, 3.2.1)" />
     <PackageReference Include="NotUpdatable3" Version="[1.2.3, 3.2.1]" />
     <PackageReference Include="NotUpdatable3" Version="[1.2.3, 3.2.1)" />
+    <PackageReference Include="NotUpdatable3" />
   </ItemGroup>
   <ItemGroup>
     <DotNetCliToolReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Tools" Version="1.0.0" />

@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import JSON5 from 'json5';
 
 export const coersions: Record<string, (arg: string) => unknown> = {
@@ -19,7 +20,10 @@ export const coersions: Record<string, (arg: string) => unknown> = {
     try {
       return JSON5.parse(val);
     } catch (err) {
-      return val.split(',').map((el) => el.trim());
+      return val
+        .split(',')
+        .map((el) => el.trim())
+        .filter(is.nonEmptyString);
     }
   },
   object: (val: string): any => {

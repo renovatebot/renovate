@@ -1,10 +1,10 @@
 import is from '@sindresorhus/is';
 import { logger } from '../../../logger';
-import { newlineRegex, regEx } from '../../../util/regex';
+import { escapeRegExp, newlineRegex, regEx } from '../../../util/regex';
 import { DockerDatasource } from '../../datasource/docker';
 import * as debianVersioning from '../../versioning/debian';
 import * as ubuntuVersioning from '../../versioning/ubuntu';
-import type { PackageDependency, PackageFile } from '../types';
+import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
 
 const variableMarker = '$';
 
@@ -154,13 +154,31 @@ const quayRegex = regEx(/^quay\.io(?::[1-9][0-9]{0,4})?/i);
 
 export function getDep(
   currentFrom: string | null | undefined,
-  specifyReplaceString = true
+  specifyReplaceString = true,
+  registryAliases?: Record<string, string>
 ): PackageDependency {
-  if (!is.string(currentFrom)) {
+  if (!is.string(currentFrom) || is.emptyStringOrWhitespace(currentFrom)) {
     return {
       skipReason: 'invalid-value',
     };
   }
+
+  // Resolve registry aliases first so that we don't need special casing later on:
+  for (const [name, value] of Object.entries(registryAliases ?? {})) {
+    const escapedName = escapeRegExp(name);
+    const groups = regEx(`(?<prefix>${escapedName})/(?<depName>.+)`).exec(
+      currentFrom
+    )?.groups;
+    if (groups) {
+      const dep = {
+        ...getDep(`${value}/${groups.depName}`),
+        replaceString: currentFrom,
+      };
+      dep.autoReplaceStringTemplate = getAutoReplaceTemplate(dep)!;
+      return dep;
+    }
+  }
+
   const dep = splitImageParts(currentFrom);
   if (specifyReplaceString) {
     if (!dep.replaceString) {
@@ -190,7 +208,10 @@ export function getDep(
     dep.versioning = ubuntuVersioning.id;
   }
 
-  if (dep.depName === 'debian') {
+  if (
+    dep.depName === 'debian' &&
+    debianVersioning.api.isVersion(dep.currentValue)
+  ) {
     dep.versioning = debianVersioning.id;
   }
 
@@ -208,7 +229,11 @@ export function getDep(
   return dep;
 }
 
-export function extractPackageFile(content: string): PackageFile | null {
+export function extractPackageFile(
+  content: string,
+  _filename: string,
+  config: ExtractConfig
+): PackageFile | null {
   const deps: PackageDependency[] = [];
   const stageNames: string[] = [];
   const args: Record<string, string> = {};
@@ -304,7 +329,7 @@ export function extractPackageFile(content: string): PackageFile | null {
       } else if (fromImage && stageNames.includes(fromImage)) {
         logger.debug({ image: fromImage }, 'Skipping alias FROM');
       } else {
-        const dep = getDep(fromImage);
+        const dep = getDep(fromImage, true, config.registryAliases);
         processDepForAutoReplace(dep, lineNumberRanges, lines, lineFeed);
         logger.trace(
           {
@@ -332,7 +357,11 @@ export function extractPackageFile(content: string): PackageFile | null {
           'Skipping alias COPY --from'
         );
       } else if (Number.isNaN(Number(copyFromMatch.groups.image))) {
-        const dep = getDep(copyFromMatch.groups.image);
+        const dep = getDep(
+          copyFromMatch.groups.image,
+          true,
+          config.registryAliases
+        );
         const lineNumberRanges: number[][] = [
           [lineNumberInstrStart, lineNumber],
         ];
