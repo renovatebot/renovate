@@ -2164,17 +2164,17 @@
   dependencies:
     "@seald-io/nedb" "3.1.0"
 
-"@renovatebot/osv-offline@1.0.2":
-  version "1.0.2"
-  resolved "https://registry.yarnpkg.com/@renovatebot/osv-offline/-/osv-offline-1.0.2.tgz#35e0c03ed823f281dccd82b66392553106c1936c"
-  integrity sha512-ID2+GSiOlhiuhLqKvZZN0kChKN4t8yUttXp6XnoTs+O4fiimGY2xrRnZVTlrHz8IB6iWkstJ3i8pojJsnZJ8nw==
+"@renovatebot/osv-offline@1.0.3":
+  version "1.0.3"
+  resolved "https://registry.yarnpkg.com/@renovatebot/osv-offline/-/osv-offline-1.0.3.tgz#079230ce89992f4e03bfbfecce83b71762e1bbb8"
+  integrity sha512-A2sHlb3ZoNP5JzD3t64Mre90K6AhzsvdEpW9Avw4alnmODJ0NOBlxwHT5IOYkqxpC1BbEVvAmqfJiJplsly3Wg==
   dependencies:
     "@octokit/rest" "19.0.4"
     "@renovatebot/osv-offline-db" "1.0.1"
     adm-zip "^0.5.9"
     fs-extra "10.0.0"
     got "11.8.5"
-    luxon "3.0.3"
+    luxon "3.0.4"
 
 "@renovatebot/pep440@2.1.5":
   version "2.1.5"
@@ -6690,6 +6690,11 @@ luxon@3.0.3:
   version "3.0.3"
   resolved "https://registry.yarnpkg.com/luxon/-/luxon-3.0.3.tgz#573e65531efd3d92265feb640f02ba7a192e2388"
   integrity sha512-+EfHWnF+UT7GgTnq5zXg3ldnTKL2zdv7QJgsU5bjjpbH17E3qi/puMhQyJVYuCq+FRkogvB5WB6iVvUr+E4a7w==
+
+luxon@3.0.4:
+  version "3.0.4"
+  resolved "https://registry.yarnpkg.com/luxon/-/luxon-3.0.4.tgz#d179e4e9f05e092241e7044f64aaa54796b03929"
+  integrity sha512-aV48rGUwP/Vydn8HT+5cdr26YYQiUZ42NM6ToMoaGKwYfWbfLeRkEu1wXWMHBZT6+KyLfcbbtVcoQFCbbPjKlw==
 
 make-dir@^3.0.0:
   version "3.1.0"
