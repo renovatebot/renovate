@@ -16,6 +16,7 @@ import {
 import { logger } from '../../../../logger';
 import * as _npmPostExtract from '../../../../modules/manager/npm/post-update';
 import type { WriteExistingFilesResult } from '../../../../modules/manager/npm/post-update/types';
+import type { Pr } from '../../../../modules/platform';
 import { hashBody } from '../../../../modules/platform/pr-body';
 import { PrState } from '../../../../types';
 import * as _repoCache from '../../../../util/cache/repository';
@@ -27,7 +28,6 @@ import * as _limits from '../../../global/limits';
 import type { BranchConfig, BranchUpgradeConfig } from '../../../types';
 import { BranchResult } from '../../../types';
 import { needsChangelogs } from '../../changelog';
-import type { Pr } from '../../onboarding/branch/check';
 import * as _prWorker from '../pr';
 import type { ResultWithPr } from '../pr';
 import * as _prAutomerge from '../pr/automerge';
@@ -115,10 +115,10 @@ describe('workers/repository/update/branch/index', () => {
       prWorker.ensurePr.mockResolvedValue({
         type: 'with-pr',
         pr: partial<Pr>({
+          bodyStruct: { hash: '' },
           title: '',
           sourceBranch: '',
           state: '',
-          body: '',
         }),
       });
       GlobalConfig.set(adminConfig);
@@ -331,7 +331,7 @@ describe('workers/repository/update/branch/index', () => {
       git.branchExists.mockReturnValue(true);
       platform.getBranchPr.mockResolvedValueOnce({
         state: PrState.Open,
-        body: '**Rebasing**: something',
+        bodyStruct: { hash: '' },
       } as Pr);
       git.isBranchModified.mockResolvedValueOnce(true);
       const res = await branchWorker.processBranch(config);

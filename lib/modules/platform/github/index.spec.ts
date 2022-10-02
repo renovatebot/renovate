@@ -679,64 +679,6 @@ describe('modules/platform/github/index', () => {
       ]);
     });
 
-    describe('Url cleanup', () => {
-      type GhRestPrWithUrls = GhRestPr & {
-        url: string;
-        example_url: string;
-        repo: {
-          example_url: string;
-        };
-      };
-
-      type PrCache = ApiPageCache<GhRestPrWithUrls>;
-
-      const prWithUrls = (): GhRestPrWithUrls => ({
-        ...pr1,
-        url: 'https://example.com',
-        example_url: 'https://example.com',
-        _links: { foo: { href: 'https://example.com' } },
-        repo: { example_url: 'https://example.com' },
-      });
-
-      it('removes url data from response', async () => {
-        const scope = httpMock.scope(githubApiHost);
-        initRepoMock(scope, 'some/repo');
-        scope.get(pagePath(1)).reply(200, [prWithUrls()]);
-        await github.initRepo({ repository: 'some/repo' });
-
-        await github.getPrList();
-
-        const repoCache = repository.getCache();
-        const prCache = repoCache.platform?.github?.prCache as PrCache;
-        expect(prCache).toMatchObject({ items: {} });
-
-        const item = prCache.items[1];
-        expect(item).toBeDefined();
-        expect(item._links).toBeUndefined();
-        expect(item.url).toBeUndefined();
-        expect(item.example_url).toBeUndefined();
-        expect(item.repo.example_url).toBeUndefined();
-      });
-
-      it('removes url data from existing cache', async () => {
-        const scope = httpMock.scope(githubApiHost);
-        initRepoMock(scope, 'some/repo');
-        scope.get(pagePath(1, 20)).reply(200, []);
-        await github.initRepo({ repository: 'some/repo' });
-        const repoCache = repository.getCache();
-        const prCache: PrCache = { items: { 1: prWithUrls() } };
-        repoCache.platform = { github: { prCache } };
-
-        await github.getPrList();
-
-        const item = prCache.items[1];
-        expect(item._links).toBeUndefined();
-        expect(item.url).toBeUndefined();
-        expect(item.example_url).toBeUndefined();
-        expect(item.repo.example_url).toBeUndefined();
-      });
-    });
-
     describe('Body compaction', () => {
       type PrCache = ApiPageCache<GhRestPr>;
 
@@ -754,31 +696,11 @@ describe('modules/platform/github/index', () => {
         await github.getPrList();
 
         const repoCache = repository.getCache();
-        const prCache = repoCache.platform?.github?.prCache as PrCache;
-        expect(prCache).toMatchObject({ items: {} });
+        const pullRequestsCache = repoCache.platform?.github
+          ?.pullRequestsCache as PrCache;
+        expect(pullRequestsCache).toMatchObject({ items: {} });
 
-        const item = prCache.items[1];
-        expect(item).toBeDefined();
-        expect(item.body).toBeUndefined();
-        expect(item.bodyStruct).toEqual({ hash: hashBody('foo') });
-      });
-
-      it('removes url data from existing cache', async () => {
-        const scope = httpMock.scope(githubApiHost);
-        initRepoMock(scope, 'some/repo');
-        scope.get(pagePath(1)).reply(200, [prWithBody('foo')]);
-        await github.initRepo({ repository: 'some/repo' });
-        const repoCache = repository.getCache();
-        const prCache: PrCache = {
-          items: { 1: prWithBody('bar'), 2: prWithBody('baz') },
-        };
-        repoCache.platform = { github: { prCache } };
-
-        await github.getPrList();
-
-        expect(prCache.items[2]).toBeUndefined();
-
-        const item = prCache.items[1];
+        const item = pullRequestsCache.items[1];
         expect(item).toBeDefined();
         expect(item.body).toBeUndefined();
         expect(item.bodyStruct).toEqual({ hash: hashBody('foo') });
@@ -2456,7 +2378,7 @@ describe('modules/platform/github/index', () => {
         sourceRepo: 'some/repo',
         state: 'open',
         title: 'chore(deps): update dependency jest to v23.6.0',
-        updatedAt: '01-09-2022',
+        updated_at: '01-09-2022',
       });
     });
 
@@ -2586,7 +2508,7 @@ describe('modules/platform/github/index', () => {
         sourceBranch: 'some/branch',
         state: 'open',
         title: 'Some title',
-        updatedAt: '01-09-2022',
+        updated_at: '01-09-2022',
       });
     });
 
@@ -2619,7 +2541,7 @@ describe('modules/platform/github/index', () => {
         sourceBranch: 'some/branch',
         state: 'open',
         title: 'Some title',
-        updatedAt: '01-09-2022',
+        updated_at: '01-09-2022',
       });
     });
   });
