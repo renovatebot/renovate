@@ -12,7 +12,7 @@ import * as pep440Versioning from '../../versioning/pep440';
 import * as poetryVersioning from '../../versioning/poetry';
 import type { PackageDependency, PackageFile } from '../types';
 import { extractLockFileEntries } from './locked-version';
-import type { PoetryFile, PoetrySection } from './types';
+import type { PoetryDependency, PoetryFile, PoetrySection } from './types';
 
 class PoetryGroupSection {
   constructor(public name: string) {}
@@ -24,8 +24,8 @@ function extractFromSection(
   poetryLockfile: Record<string, string>
 ): PackageDependency[] {
   const deps: PackageDependency[] = [];
-  let sectionContent;
-  let depType;
+  let sectionContent: Record<string, PoetryDependency | string> | undefined;
+  let depType: string;
 
   if (section instanceof PoetryGroupSection) {
     sectionContent = parsedFile.tool?.poetry?.group[section.name]?.dependencies;
