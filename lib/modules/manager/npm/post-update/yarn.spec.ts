@@ -559,7 +559,7 @@ describe('modules/manager/npm/post-update/yarn', () => {
       { cmd: 'docker pull renovate/sidecar', options },
       {
         cmd:
-          `docker run --rm --name=renovate_sidecar --label=renovate_child -v ".":"." -v "/tmp/cache":"/tmp/cache" -e CI -e BUILDPACK_CACHE_DIR -w "some-dir" renovate/sidecar ` +
+          `docker run --rm --name=renovate_sidecar --label=renovate_child -v ".":"." -v "/tmp/cache":"/tmp/cache" -e CI -e BUILDPACK_CACHE_DIR -e CONTAINERBASE_CACHE_DIR -w "some-dir" renovate/sidecar ` +
           `bash -l -c "` +
           `install-tool node 16.16.0` +
           ` && ` +
