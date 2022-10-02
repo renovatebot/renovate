@@ -1,4 +1,5 @@
 import { Fixtures } from '../../../../test/fixtures';
+import { AzurePipelinesTasksDatasource } from '../../datasource/azure-pipelines-tasks';
 import {
   extractAzurePipelinesTasks,
   extractContainer,
@@ -96,6 +97,7 @@ describe('modules/manager/azure-pipelines/extract', () => {
       expect(extractAzurePipelinesTasks('Bash@3')).toEqual({
         depName: 'Bash',
         currentValue: '3',
+        datasource: AzurePipelinesTasksDatasource.id,
       });
     });
 
@@ -142,7 +144,13 @@ describe('modules/manager/azure-pipelines/extract', () => {
         azurePipelinesStages,
         azurePipelinesFilename
       );
-      expect(res?.deps).toEqual([{ depName: 'Bash', currentValue: '3' }]);
+      expect(res?.deps).toEqual([
+        {
+          depName: 'Bash',
+          currentValue: '3',
+          datasource: AzurePipelinesTasksDatasource.id,
+        },
+      ]);
     });
 
     it('should extract jobs', () => {
@@ -150,7 +158,13 @@ describe('modules/manager/azure-pipelines/extract', () => {
         azurePipelinesJobs,
         azurePipelinesFilename
       );
-      expect(res?.deps).toEqual([{ depName: 'Bash', currentValue: '3' }]);
+      expect(res?.deps).toEqual([
+        {
+          depName: 'Bash',
+          currentValue: '3',
+          datasource: AzurePipelinesTasksDatasource.id,
+        },
+      ]);
     });
 
     it('should extract steps', () => {
@@ -158,7 +172,13 @@ describe('modules/manager/azure-pipelines/extract', () => {
         azurePipelinesSteps,
         azurePipelinesFilename
       );
-      expect(res?.deps).toEqual([{ depName: 'Bash', currentValue: '3' }]);
+      expect(res?.deps).toEqual([
+        {
+          depName: 'Bash',
+          currentValue: '3',
+          datasource: AzurePipelinesTasksDatasource.id,
+        },
+      ]);
     });
 
     it('should return null when task alias used', () => {

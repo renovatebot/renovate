@@ -27,7 +27,7 @@ export function trimTrailingSlash(url: string): string {
 }
 
 export function trimLeadingSlash(path: string): string {
-  return path.replace(/^\//, '');
+  return path.replace(/^\/+/, '');
 }
 
 export function resolveBaseUrl(baseUrl: string, input: string | URL): string {

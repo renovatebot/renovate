@@ -1,158 +1,158 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`modules/datasource/adoptium-java/index getReleases pages 1`] = `
-Object {
+{
   "homepage": "https://adoptium.net",
   "registryUrl": "https://api.adoptium.net/",
-  "releases": Array [
-    Object {
+  "releases": [
+    {
       "version": "1.1.0",
     },
-    Object {
+    {
       "version": "1.2.0",
     },
-    Object {
+    {
       "version": "1.3.0",
     },
-    Object {
+    {
       "version": "1.4.0",
     },
-    Object {
+    {
       "version": "1.5.0",
     },
-    Object {
+    {
       "version": "1.6.0",
     },
-    Object {
+    {
       "version": "1.7.0",
     },
-    Object {
+    {
       "version": "1.8.0",
     },
-    Object {
+    {
       "version": "1.9.0",
     },
-    Object {
+    {
       "version": "1.10.0",
     },
-    Object {
+    {
       "version": "1.11.0",
     },
-    Object {
+    {
       "version": "1.12.0",
     },
-    Object {
+    {
       "version": "1.13.0",
     },
-    Object {
+    {
       "version": "1.14.0",
     },
-    Object {
+    {
       "version": "1.15.0",
     },
-    Object {
+    {
       "version": "1.16.0",
     },
-    Object {
+    {
       "version": "1.17.0",
     },
-    Object {
+    {
       "version": "1.18.0",
     },
-    Object {
+    {
       "version": "1.19.0",
     },
-    Object {
+    {
       "version": "1.20.0",
     },
-    Object {
+    {
       "version": "1.21.0",
     },
-    Object {
+    {
       "version": "1.22.0",
     },
-    Object {
+    {
       "version": "1.23.0",
     },
-    Object {
+    {
       "version": "1.24.0",
     },
-    Object {
+    {
       "version": "1.25.0",
     },
-    Object {
+    {
       "version": "1.26.0",
     },
-    Object {
+    {
       "version": "1.27.0",
     },
-    Object {
+    {
       "version": "1.28.0",
     },
-    Object {
+    {
       "version": "1.29.0",
     },
-    Object {
+    {
       "version": "1.30.0",
     },
-    Object {
+    {
       "version": "1.31.0",
     },
-    Object {
+    {
       "version": "1.32.0",
     },
-    Object {
+    {
       "version": "1.33.0",
     },
-    Object {
+    {
       "version": "1.34.0",
     },
-    Object {
+    {
       "version": "1.35.0",
     },
-    Object {
+    {
       "version": "1.36.0",
     },
-    Object {
+    {
       "version": "1.37.0",
     },
-    Object {
+    {
       "version": "1.38.0",
     },
-    Object {
+    {
       "version": "1.39.0",
     },
-    Object {
+    {
       "version": "1.40.0",
     },
-    Object {
+    {
       "version": "1.41.0",
     },
-    Object {
+    {
       "version": "1.42.0",
     },
-    Object {
+    {
       "version": "1.43.0",
     },
-    Object {
+    {
       "version": "1.44.0",
     },
-    Object {
+    {
       "version": "1.45.0",
     },
-    Object {
+    {
       "version": "1.46.0",
     },
-    Object {
+    {
       "version": "1.47.0",
     },
-    Object {
+    {
       "version": "1.48.0",
     },
-    Object {
+    {
       "version": "1.49.0",
     },
-    Object {
+    {
       "version": "1.50.0",
     },
   ],
@@ -160,14 +160,14 @@ Object {
 `;
 
 exports[`modules/datasource/adoptium-java/index getReleases processes real data (jre) 1`] = `
-Object {
+{
   "homepage": "https://adoptium.net",
   "registryUrl": "https://api.adoptium.net/",
-  "releases": Array [
-    Object {
+  "releases": [
+    {
       "version": "8.0.302+8",
     },
-    Object {
+    {
       "version": "11.0.12+7",
     },
   ],
@@ -175,17 +175,17 @@ Object {
 `;
 
 exports[`modules/datasource/adoptium-java/index getReleases processes real data 1`] = `
-Object {
+{
   "homepage": "https://adoptium.net",
   "registryUrl": "https://api.adoptium.net/",
-  "releases": Array [
-    Object {
+  "releases": [
+    {
       "version": "8.0.302+8",
     },
-    Object {
+    {
       "version": "11.0.12+7",
     },
-    Object {
+    {
       "version": "16.0.2+7",
     },
   ],

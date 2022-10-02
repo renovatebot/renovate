@@ -24,6 +24,7 @@ const config: UpdateArtifactsConfig = {};
 const adminConfig: RepoGlobalConfig = {
   localDir: join('/tmp/github/some/repo'),
   cacheDir: join('/tmp/cache'),
+  containerbaseDir: join('/tmp/cache/containerbase'),
 };
 
 describe('modules/manager/cocoapods/artifacts', () => {
@@ -248,6 +249,7 @@ describe('modules/manager/cocoapods/artifacts', () => {
           '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
           '-v "/tmp/cache":"/tmp/cache" ' +
           '-e BUILDPACK_CACHE_DIR ' +
+          '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
           'renovate/ruby:2.7.4' +
           ' bash -l -c "' +
@@ -291,6 +293,7 @@ describe('modules/manager/cocoapods/artifacts', () => {
           '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
           '-v "/tmp/cache":"/tmp/cache" ' +
           '-e BUILDPACK_CACHE_DIR ' +
+          '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
           'renovate/ruby:latest' +
           ' bash -l -c "' +

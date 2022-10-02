@@ -18,13 +18,15 @@ jest.mock('./util');
 const { getConfiguredRegistries, getDefaultRegistries } = mocked(util);
 const hostRules = mocked(_hostRules);
 
-const realFs: typeof import('../../../util/fs') =
-  jest.requireActual('../../../util/fs');
+const realFs = jest.requireActual(
+  '../../../util/fs'
+) as typeof import('../../../util/fs');
 
 const adminConfig: RepoGlobalConfig = {
   // `join` fixes Windows CI
   localDir: join('/tmp/github/some/repo'),
   cacheDir: join('/tmp/renovate/cache'),
+  containerbaseDir: join('/tmp/renovate/cache/containerbase'),
 };
 
 const config: UpdateArtifactsConfig = {};
@@ -48,6 +50,7 @@ describe('modules/manager/nuget/artifacts', () => {
   it('aborts if no lock file found', async () => {
     const execSnapshots = mockExecAll();
     fs.getSiblingFileName.mockReturnValueOnce('packages.lock.json');
+    fs.getFileContentMap.mockResolvedValueOnce({ 'packages.lock.json': null });
     expect(
       await nuget.updateArtifacts({
         packageFileName: 'project.csproj',
@@ -64,8 +67,13 @@ describe('modules/manager/nuget/artifacts', () => {
     fs.getSiblingFileName.mockReturnValueOnce(
       'path/with space/packages.lock.json'
     );
-    git.getFile.mockResolvedValueOnce('Current packages.lock.json');
-    fs.readLocalFile.mockResolvedValueOnce('Current packages.lock.json');
+    fs.getFileContentMap
+      .mockResolvedValueOnce({
+        'path/with space/packages.lock.json': 'Current packages.lock.json',
+      })
+      .mockResolvedValueOnce({
+        'path/with space/packages.lock.json': 'Current packages.lock.json',
+      });
     expect(
       await nuget.updateArtifacts({
         packageFileName: 'path/with space/project.csproj',
@@ -80,8 +88,13 @@ describe('modules/manager/nuget/artifacts', () => {
   it('updates lock file', async () => {
     const execSnapshots = mockExecAll();
     fs.getSiblingFileName.mockReturnValueOnce('packages.lock.json');
-    git.getFile.mockResolvedValueOnce('Current packages.lock.json');
-    fs.readLocalFile.mockResolvedValueOnce('New packages.lock.json');
+    fs.getFileContentMap
+      .mockResolvedValueOnce({
+        'packages.lock.json': 'Current packages.lock.json',
+      })
+      .mockResolvedValueOnce({
+        'packages.lock.json': 'New packages.lock.json',
+      });
     expect(
       await nuget.updateArtifacts({
         packageFileName: 'project.csproj',
@@ -96,8 +109,13 @@ describe('modules/manager/nuget/artifacts', () => {
   it('does not update lock file when non-proj file is changed', async () => {
     const execSnapshots = mockExecAll();
     fs.getSiblingFileName.mockReturnValueOnce('packages.lock.json');
-    git.getFile.mockResolvedValueOnce('Current packages.lock.json');
-    fs.readLocalFile.mockResolvedValueOnce('New packages.lock.json');
+    fs.getFileContentMap
+      .mockResolvedValueOnce({
+        'packages.lock.json': 'Current packages.lock.json',
+      })
+      .mockResolvedValueOnce({
+        'packages.lock.json': 'New packages.lock.json',
+      });
     expect(
       await nuget.updateArtifacts({
         packageFileName: 'otherfile.props',
@@ -112,8 +130,13 @@ describe('modules/manager/nuget/artifacts', () => {
   it('does not update lock file when no deps changed', async () => {
     const execSnapshots = mockExecAll();
     fs.getSiblingFileName.mockReturnValueOnce('packages.lock.json');
-    git.getFile.mockResolvedValueOnce('Current packages.lock.json');
-    fs.readLocalFile.mockResolvedValueOnce('New packages.lock.json');
+    fs.getFileContentMap
+      .mockResolvedValueOnce({
+        'packages.lock.json': 'Current packages.lock.json',
+      })
+      .mockResolvedValueOnce({
+        'packages.lock.json': 'New packages.lock.json',
+      });
     expect(
       await nuget.updateArtifacts({
         packageFileName: 'project.csproj',
@@ -128,8 +151,13 @@ describe('modules/manager/nuget/artifacts', () => {
   it('performs lock file maintenance', async () => {
     const execSnapshots = mockExecAll();
     fs.getSiblingFileName.mockReturnValueOnce('packages.lock.json');
-    git.getFile.mockResolvedValueOnce('Current packages.lock.json');
-    fs.readLocalFile.mockResolvedValueOnce('New packages.lock.json');
+    fs.getFileContentMap
+      .mockResolvedValueOnce({
+        'packages.lock.json': 'Current packages.lock.json',
+      })
+      .mockResolvedValueOnce({
+        'packages.lock.json': 'New packages.lock.json',
+      });
     expect(
       await nuget.updateArtifacts({
         packageFileName: 'project.csproj',
@@ -148,8 +176,13 @@ describe('modules/manager/nuget/artifacts', () => {
     GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
     const execSnapshots = mockExecAll();
     fs.getSiblingFileName.mockReturnValueOnce('packages.lock.json');
-    git.getFile.mockResolvedValueOnce('Current packages.lock.json');
-    fs.readLocalFile.mockResolvedValueOnce('New packages.lock.json');
+    fs.getFileContentMap
+      .mockResolvedValueOnce({
+        'packages.lock.json': 'Current packages.lock.json',
+      })
+      .mockResolvedValueOnce({
+        'packages.lock.json': 'New packages.lock.json',
+      });
     expect(
       await nuget.updateArtifacts({
         packageFileName: 'project.csproj',
@@ -165,8 +198,13 @@ describe('modules/manager/nuget/artifacts', () => {
     GlobalConfig.set({ ...adminConfig, binarySource: 'global' });
     const execSnapshots = mockExecAll();
     fs.getSiblingFileName.mockReturnValueOnce('packages.lock.json');
-    git.getFile.mockResolvedValueOnce('Current packages.lock.json');
-    fs.readLocalFile.mockResolvedValueOnce('New packages.lock.json');
+    fs.getFileContentMap
+      .mockResolvedValueOnce({
+        'packages.lock.json': 'Current packages.lock.json',
+      })
+      .mockResolvedValueOnce({
+        'packages.lock.json': 'New packages.lock.json',
+      });
     expect(
       await nuget.updateArtifacts({
         packageFileName: 'project.csproj',
@@ -180,7 +218,9 @@ describe('modules/manager/nuget/artifacts', () => {
 
   it('catches errors', async () => {
     fs.getSiblingFileName.mockReturnValueOnce('packages.lock.json');
-    git.getFile.mockResolvedValueOnce('Current packages.lock.json');
+    fs.getFileContentMap.mockResolvedValueOnce({
+      'packages.lock.json': 'Current packages.lock.json',
+    });
     fs.writeLocalFile.mockImplementationOnce(() => {
       throw new Error('not found');
     });
@@ -204,8 +244,13 @@ describe('modules/manager/nuget/artifacts', () => {
   it('authenticates at registries', async () => {
     const execSnapshots = mockExecAll();
     fs.getSiblingFileName.mockReturnValueOnce('packages.lock.json');
-    git.getFile.mockResolvedValueOnce('Current packages.lock.json');
-    fs.readLocalFile.mockResolvedValueOnce('New packages.lock.json');
+    fs.getFileContentMap
+      .mockResolvedValueOnce({
+        'packages.lock.json': 'Current packages.lock.json',
+      })
+      .mockResolvedValueOnce({
+        'packages.lock.json': 'New packages.lock.json',
+      });
     getConfiguredRegistries.mockResolvedValueOnce([
       {
         name: 'myRegistry',
@@ -238,8 +283,13 @@ describe('modules/manager/nuget/artifacts', () => {
   it('strips protocol version from feed url', async () => {
     const execSnapshots = mockExecAll();
     fs.getSiblingFileName.mockReturnValueOnce('packages.lock.json');
-    git.getFile.mockResolvedValueOnce('Current packages.lock.json');
-    fs.readLocalFile.mockResolvedValueOnce('New packages.lock.json');
+    fs.getFileContentMap
+      .mockResolvedValueOnce({
+        'packages.lock.json': 'Current packages.lock.json',
+      })
+      .mockResolvedValueOnce({
+        'packages.lock.json': 'New packages.lock.json',
+      });
     getConfiguredRegistries.mockResolvedValueOnce([
       {
         name: 'myRegistry',

@@ -1,10 +1,10 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`modules/manager/terraform/lockfile/util extractLocks() extracts 1`] = `
-Array [
-  Object {
+[
+  {
     "constraints": "3.0.0",
-    "hashes": Array [
+    "hashes": [
       "h1:ULKfwySvQ4pDhy027ryRhLxDhg640wsojYc+7NHMFBU=",
       "zh:25294510ae9c250502f2e37ac32b01017439735f098f82a1728772427626a2fd",
       "zh:3b723e7772d47bd8cc11bea6e5d3e0b5e1df8398c0e7aaf510e3a8a54e0f1874",
@@ -17,13 +17,13 @@ Array [
       "zh:df568a69087831c1780fac4395630a2cfb3cdf67b7dffbfe16bd78c64770bb75",
       "zh:fce1b69dd673aace19508640b0b9b7eb1ef7e746d76cb846b49e7d52e0f5fb7e",
     ],
-    "lineNumbers": Object {
-      "block": Object {
+    "lineNumbers": {
+      "block": {
         "end": 21,
         "start": 3,
       },
       "constraint": 2,
-      "hashes": Object {
+      "hashes": {
         "end": 14,
         "start": 4,
       },
@@ -33,9 +33,9 @@ Array [
     "registryUrl": "https://registry.terraform.io",
     "version": "3.0.0",
   },
-  Object {
+  {
     "constraints": "~> 2.50",
-    "hashes": Array [
+    "hashes": [
       "h1:Vr6WUm88s9hXGkyVjHtHsP2Jmc2ypQXn6ww7dXtvk1M=",
       "zh:0c0688d5a743248f8646d39eb3645a4ac19fd7523ba1b47072fa3fb03b92b1b0",
       "zh:2beb3a55ee970f87a9292ae96d57134be8a03d0566117e7be0fe0d9c1267e4ea",
@@ -49,13 +49,13 @@ Array [
       "zh:e98f1d178d1e111b3f3449e27d305ce263071226fad3d86272e1bd161c26fd43",
       "zh:eb76ec000c9c49a0bf730370c8880f671597bc01f7b7401ab301df7124c049ec",
     ],
-    "lineNumbers": Object {
-      "block": Object {
+    "lineNumbers": {
+      "block": {
         "end": 40,
         "start": 21,
       },
       "constraint": 2,
-      "hashes": Object {
+      "hashes": {
         "end": 15,
         "start": 4,
       },
@@ -65,9 +65,9 @@ Array [
     "registryUrl": "https://registry.terraform.io",
     "version": "2.50.0",
   },
-  Object {
+  {
     "constraints": "~> 2.2",
-    "hashes": Array [
+    "hashes": [
       "h1:Zg1Bpi6vr7b0H6no8kVDfEucn5pvNALivdrVKVHarGs=",
       "zh:072ce92b0138ee65df2e4e2e6e5f6632fa12a7e6453b91399bad89291855d426",
       "zh:5731987fe61051515f449033e456ee55207caf17ef41096eb82247810585f53b",
@@ -82,13 +82,13 @@ Array [
       "zh:d040220c09b8d9d6bd937572bd5b14bc069af2b883185a873460530d8a1de6e6",
       "zh:f254c1f943eb016ae07ebe91b23f813dc79f2064616c65f98c8f64ce23be90c4",
     ],
-    "lineNumbers": Object {
-      "block": Object {
+    "lineNumbers": {
+      "block": {
         "end": 59,
         "start": 40,
       },
       "constraint": 2,
-      "hashes": Object {
+      "hashes": {
         "end": 16,
         "start": 4,
       },

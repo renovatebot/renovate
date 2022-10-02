@@ -1,4 +1,4 @@
-import { defaultConfig, git, platform } from '../../../../../test/util';
+import { getConfig, git, platform } from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
 import type { RenovateConfig } from '../../../../config/types';
 import { BranchStatus } from '../../../../types';
@@ -13,9 +13,7 @@ describe('workers/repository/update/branch/automerge', () => {
     let config: RenovateConfig;
 
     beforeEach(() => {
-      config = {
-        ...defaultConfig,
-      };
+      config = getConfig();
       GlobalConfig.reset();
     });
 

@@ -43,10 +43,10 @@ export async function fetchJSONFile(
     throw new Error(PRESET_DEP_NOT_FOUND);
   }
   if (!res.body.isLastPage) {
-    logger.warn({ size: res.body.size }, 'Renovate config to big');
+    logger.warn({ size: res.body.size }, 'Renovate config too big');
     throw new Error(PRESET_INVALID_JSON);
   }
-  return parsePreset(res.body.lines.map((l) => l.text).join(''));
+  return parsePreset(res.body.lines.map((l) => l.text).join('\n'));
 }
 
 export function getPresetFromEndpoint(

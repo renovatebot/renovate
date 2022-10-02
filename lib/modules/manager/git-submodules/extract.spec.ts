@@ -1,6 +1,11 @@
 import is from '@sindresorhus/is';
 import { mock } from 'jest-mock-extended';
-import _simpleGit, { Response, SimpleGit, TaskOptions } from 'simple-git';
+import _simpleGit, {
+  Response,
+  SimpleGit,
+  SimpleGitFactory,
+  TaskOptions,
+} from 'simple-git';
 import { GlobalConfig } from '../../../config/global';
 import * as hostRules from '../../../util/host-rules';
 import type { PackageFile } from '../types';
@@ -8,7 +13,7 @@ import { extractPackageFile } from '.';
 
 jest.mock('simple-git');
 const simpleGit: jest.Mock<Partial<SimpleGit>> = _simpleGit as never;
-const Git: typeof _simpleGit = jest.requireActual('simple-git');
+const Git = jest.requireActual('simple-git') as SimpleGitFactory;
 
 describe('modules/manager/git-submodules/extract', () => {
   // flaky ci tests

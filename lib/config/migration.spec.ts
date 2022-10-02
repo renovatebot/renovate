@@ -678,7 +678,7 @@ describe('config/migration', () => {
     const { isMigrated, migratedConfig } =
       configMigration.migrateConfig(config);
     expect(isMigrated).toBe(true);
-    expect(migratedConfig).toMatchInlineSnapshot(`Object {}`);
+    expect(migratedConfig).toMatchInlineSnapshot(`{}`);
   });
 
   it('migrates azureAutoComplete', () => {

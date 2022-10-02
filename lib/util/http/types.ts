@@ -60,6 +60,8 @@ export interface HttpOptions {
   noAuth?: boolean;
 
   throwHttpErrors?: boolean;
+
+  token?: string;
   useCache?: boolean;
 }
 

@@ -368,7 +368,7 @@ function parseRange(rangeStr: string): Range[] | null {
   if (interval.leftType) {
     return null;
   } // something like '[1,2],[3'
-  if (!ranges || !ranges.length) {
+  if (!ranges?.length) {
     return null;
   }
 

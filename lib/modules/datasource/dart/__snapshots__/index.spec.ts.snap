@@ -1,186 +1,187 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`modules/datasource/dart/index getReleases processes real data 1`] = `
-Object {
+{
+  "homepage": "https://github.com/flutter/plugins/tree/master/packages/shared_preferences/shared_preferences",
   "registryUrl": "https://pub.dartlang.org/",
-  "releases": Array [
-    Object {
+  "releases": [
+    {
       "releaseTimestamp": "2017-05-09T18:25:24.268Z",
       "version": "0.1.1",
     },
-    Object {
+    {
       "releaseTimestamp": "2017-05-11T10:45:03.041Z",
       "version": "0.2.0",
     },
-    Object {
+    {
       "releaseTimestamp": "2017-05-17T07:37:42.515Z",
       "version": "0.2.0+1",
     },
-    Object {
+    {
       "releaseTimestamp": "2017-06-03T14:12:51.183Z",
       "version": "0.2.3",
     },
-    Object {
+    {
       "releaseTimestamp": "2017-06-05T19:33:50.975Z",
       "version": "0.2.4",
     },
-    Object {
+    {
       "releaseTimestamp": "2017-06-05T19:59:16.090Z",
       "version": "0.2.4+1",
     },
-    Object {
+    {
       "releaseTimestamp": "2017-08-30T17:09:33.914Z",
       "version": "0.2.5",
     },
-    Object {
+    {
       "releaseTimestamp": "2017-12-20T15:38:21.917Z",
       "version": "0.3.0",
     },
-    Object {
+    {
       "releaseTimestamp": "2018-01-12T15:09:05.976Z",
       "version": "0.3.1",
     },
-    Object {
+    {
       "releaseTimestamp": "2018-02-05T20:57:27.104Z",
       "version": "0.3.2",
     },
-    Object {
+    {
       "releaseTimestamp": "2018-02-28T15:41:47.772Z",
       "version": "0.3.3",
     },
-    Object {
+    {
       "releaseTimestamp": "2018-03-09T16:12:39.663Z",
       "version": "0.4.0",
     },
-    Object {
+    {
       "releaseTimestamp": "2018-04-09T08:43:11.818Z",
       "version": "0.4.1",
     },
-    Object {
+    {
       "releaseTimestamp": "2018-06-01T19:14:21.586Z",
       "version": "0.4.2",
     },
-    Object {
+    {
       "releaseTimestamp": "2018-10-01T19:17:45.554Z",
       "version": "0.4.3",
     },
-    Object {
+    {
       "releaseTimestamp": "2019-01-24T23:22:56.870Z",
       "version": "0.5.0",
     },
-    Object {
+    {
       "releaseTimestamp": "2019-02-08T02:03:10.911Z",
       "version": "0.5.1+1",
     },
-    Object {
+    {
       "releaseTimestamp": "2019-03-15T15:44:55.382Z",
       "version": "0.5.1+2",
     },
-    Object {
+    {
       "releaseTimestamp": "2019-04-09T15:32:00.113Z",
       "version": "0.5.2",
     },
-    Object {
+    {
       "releaseTimestamp": "2019-05-22T16:11:30.917Z",
       "version": "0.5.2+1",
     },
-    Object {
+    {
       "releaseTimestamp": "2019-05-30T00:37:40.912Z",
       "version": "0.5.2+2",
     },
-    Object {
+    {
       "releaseTimestamp": "2019-05-31T22:52:25.471Z",
       "version": "0.5.3",
     },
-    Object {
+    {
       "releaseTimestamp": "2019-06-04T00:34:04.927Z",
       "version": "0.5.3+1",
     },
-    Object {
+    {
       "releaseTimestamp": "2019-07-08T01:27:57.932Z",
       "version": "0.5.3+2",
     },
-    Object {
+    {
       "releaseTimestamp": "2019-07-16T01:25:26.525Z",
       "version": "0.5.3+3",
     },
-    Object {
+    {
       "releaseTimestamp": "2019-07-16T12:32:40.229Z",
       "version": "0.5.3+4",
     },
-    Object {
+    {
       "releaseTimestamp": "2019-10-16T22:49:22.744Z",
       "version": "0.5.3+5",
     },
-    Object {
+    {
       "releaseTimestamp": "2019-10-22T00:00:44.785Z",
       "version": "0.5.4",
     },
-    Object {
+    {
       "releaseTimestamp": "2019-10-25T22:47:57.255Z",
       "version": "0.5.4+1",
     },
-    Object {
+    {
       "releaseTimestamp": "2019-10-28T22:44:38.107Z",
       "version": "0.5.4+3",
     },
-    Object {
+    {
       "releaseTimestamp": "2019-11-13T01:12:51.650Z",
       "version": "0.5.4+5",
     },
-    Object {
+    {
       "releaseTimestamp": "2019-11-25T22:46:39.167Z",
       "version": "0.5.4+6",
     },
-    Object {
+    {
       "releaseTimestamp": "2019-12-03T22:28:49.437Z",
       "version": "0.5.4+8",
     },
-    Object {
+    {
       "releaseTimestamp": "2019-12-10T04:45:58.964Z",
       "version": "0.5.4+9",
     },
-    Object {
+    {
       "releaseTimestamp": "2019-12-10T21:43:54.946Z",
       "version": "0.5.5",
     },
-    Object {
+    {
       "releaseTimestamp": "2019-12-11T00:12:47.456Z",
       "version": "0.5.6",
     },
-    Object {
+    {
       "releaseTimestamp": "2020-01-23T21:53:34.756Z",
       "version": "0.5.6+1",
     },
-    Object {
+    {
       "releaseTimestamp": "2020-02-20T23:57:05.213Z",
       "version": "0.5.6+2",
     },
-    Object {
+    {
       "releaseTimestamp": "2020-03-10T17:55:26.669Z",
       "version": "0.5.6+3",
     },
-    Object {
+    {
       "releaseTimestamp": "2020-04-21T04:36:13.482Z",
       "version": "0.5.7",
     },
-    Object {
+    {
       "releaseTimestamp": "2020-05-06T02:25:58.787Z",
       "version": "0.5.7+1",
     },
-    Object {
+    {
       "releaseTimestamp": "2020-05-12T03:51:13.065Z",
       "version": "0.5.7+2",
     },
-    Object {
+    {
       "releaseTimestamp": "2020-05-21T19:52:19.756Z",
       "version": "0.5.7+3",
     },
-    Object {
+    {
       "releaseTimestamp": "2020-07-08T04:36:43.412Z",
       "version": "0.5.8",
     },
   ],
-  "sourceUrl": "http://example.com",
+  "sourceUrl": "https://github.com/flutter/plugins",
 }
 `;

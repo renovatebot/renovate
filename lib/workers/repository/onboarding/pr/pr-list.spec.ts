@@ -48,7 +48,7 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
         <details>
         <summary>Lock file maintenance</summary>
 
-          - Schedule: [\\"before 5am\\"]
+          - Schedule: ["before 5am"]
           - Branch name: \`renovate/lock-file-maintenance\`
           - Regenerate lock files to use latest dependency versions
 

@@ -1,6 +1,7 @@
 import { Fixtures } from '../../../../test/fixtures';
 import * as httpMock from '../../../../test/http-mock';
 import { mocked } from '../../../../test/util';
+import { PlatformId } from '../../../constants';
 import * as _hostRules from '../../../util/host-rules';
 import { GithubTagsDatasource } from '../github-tags';
 import { GitlabTagsDatasource } from '../gitlab-tags';
@@ -148,6 +149,23 @@ describe('modules/datasource/go/base', () => {
         });
       });
 
+      it('does not fail for names containing .git', async () => {
+        httpMock
+          .scope('https://gitlab.com')
+          .get('/group/subgroup/my.git.module?go-get=1')
+          .reply(200, Fixtures.get('go-get-gitlab.html'));
+
+        const res = await BaseGoDatasource.getDatasource(
+          'gitlab.com/group/subgroup/my.git.module'
+        );
+
+        expect(res).toEqual({
+          datasource: GitlabTagsDatasource.id,
+          packageName: 'group/subgroup/my.git.module',
+          registryUrl: 'https://gitlab.com',
+        });
+      });
+
       it('supports GitLab with URL mismatch', async () => {
         const mismatchingResponse = Fixtures.get('go-get-github.html').replace(
           'https://github.com/golang/text/',
@@ -185,7 +203,7 @@ describe('modules/datasource/go/base', () => {
       });
 
       it('supports GitLab EE deps', async () => {
-        hostRules.find.mockReturnValue({ token: 'some-token' });
+        hostRules.hostType.mockReturnValue(PlatformId.Gitlab);
         httpMock
           .scope('https://my.custom.domain')
           .get('/golang/myrepo?go-get=1')
@@ -203,7 +221,7 @@ describe('modules/datasource/go/base', () => {
       });
 
       it('supports GitLab EE deps in subgroup', async () => {
-        hostRules.find.mockReturnValue({ token: 'some-token' });
+        hostRules.hostType.mockReturnValue(PlatformId.Gitlab);
         httpMock
           .scope('https://my.custom.domain')
           .get('/golang/subgroup/myrepo?go-get=1')
@@ -221,7 +239,7 @@ describe('modules/datasource/go/base', () => {
       });
 
       it('supports GitLab EE deps in subgroup with version', async () => {
-        hostRules.find.mockReturnValue({ token: 'some-token' });
+        hostRules.hostType.mockReturnValue(PlatformId.Gitlab);
         httpMock
           .scope('https://my.custom.domain')
           .get('/golang/subgroup/myrepo/v2?go-get=1')
@@ -238,8 +256,26 @@ describe('modules/datasource/go/base', () => {
         });
       });
 
+      it('supports GitLab EE deps in private subgroup with vcs indicator', async () => {
+        hostRules.hostType.mockReturnValue(PlatformId.Gitlab);
+        httpMock
+          .scope('https://my.custom.domain')
+          .get('/golang/subgroup/myrepo.git/v2?go-get=1')
+          .reply(200, Fixtures.get('go-get-gitlab-ee-private-subgroup.html'));
+
+        const res = await BaseGoDatasource.getDatasource(
+          'my.custom.domain/golang/subgroup/myrepo.git/v2'
+        );
+
+        expect(res).toEqual({
+          datasource: GitlabTagsDatasource.id,
+          packageName: 'golang/subgroup/myrepo',
+          registryUrl: 'https://my.custom.domain',
+        });
+      });
+
       it('supports GitLab EE monorepo deps in subgroup', async () => {
-        hostRules.find.mockReturnValue({ token: 'some-token' });
+        hostRules.hostType.mockReturnValue(PlatformId.Gitlab);
         httpMock
           .scope('https://my.custom.domain')
           .get('/golang/subgroup/myrepo/monorepo?go-get=1')

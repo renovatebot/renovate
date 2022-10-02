@@ -1,6 +1,5 @@
 import { DateTime } from 'luxon';
 import { ApiCache } from './api-cache';
-import type { ApiPageItem } from './types';
 
 describe('modules/platform/github/api-cache', () => {
   const now = DateTime.fromISO('2000-01-01T00:00:00.000+00:00');
@@ -49,47 +48,9 @@ describe('modules/platform/github/api-cache', () => {
         },
       });
 
-      const res = apiCache.getItems(({ number }) => number);
+      const res = apiCache.getItems();
 
-      expect(res).toEqual([1, 2, 3]);
-    });
-
-    it('caches mapping results', () => {
-      const item1 = { number: 1, updated_at: t1 };
-      const item2 = { number: 2, updated_at: t2 };
-      const item3 = { number: 3, updated_at: t3 };
-      const apiCache = new ApiCache({
-        items: {
-          1: item1,
-          2: item2,
-          3: item3,
-        },
-      });
-
-      let numbersMapCalls = 0;
-      const mapNumbers = ({ number }: ApiPageItem) => {
-        numbersMapCalls += 1;
-        return number;
-      };
-
-      let datesMapCalls = 0;
-      const mapDates = ({ updated_at }: ApiPageItem) => {
-        datesMapCalls += 1;
-        return updated_at;
-      };
-
-      const numbers1 = apiCache.getItems(mapNumbers);
-      const numbers2 = apiCache.getItems(mapNumbers);
-      const dates1 = apiCache.getItems(mapDates);
-      const dates2 = apiCache.getItems(mapDates);
-
-      expect(numbers1).toEqual([1, 2, 3]);
-      expect(numbers1).toBe(numbers2);
-      expect(numbersMapCalls).toBe(3);
-
-      expect(dates1).toEqual([t1, t2, t3]);
-      expect(dates1).toBe(dates2);
-      expect(datesMapCalls).toBe(3);
+      expect(res).toMatchObject([{ number: 1 }, { number: 2 }, { number: 3 }]);
     });
 
     it('resets cache on item update', () => {
@@ -103,18 +64,16 @@ describe('modules/platform/github/api-cache', () => {
         },
       });
 
-      let numbersMapCalls = 0;
-      const mapNumbers = ({ number }: ApiPageItem) => {
-        numbersMapCalls += 1;
-        return number;
-      };
-      const numbers1 = apiCache.getItems(mapNumbers);
+      const numbers1 = apiCache.getItems();
       apiCache.updateItem(item3);
-      const numbers2 = apiCache.getItems(mapNumbers);
+      const numbers2 = apiCache.getItems();
 
-      expect(numbers1).toEqual([1, 2]);
-      expect(numbers2).toEqual([1, 2, 3]);
-      expect(numbersMapCalls).toBe(5);
+      expect(numbers1).toMatchObject([{ number: 1 }, { number: 2 }]);
+      expect(numbers2).toMatchObject([
+        { number: 1 },
+        { number: 2 },
+        { number: 3 },
+      ]);
     });
 
     it('resets cache on page reconcile', () => {
@@ -128,18 +87,16 @@ describe('modules/platform/github/api-cache', () => {
         },
       });
 
-      let numbersMapCalls = 0;
-      const mapNumbers = ({ number }: ApiPageItem) => {
-        numbersMapCalls += 1;
-        return number;
-      };
-      const numbers1 = apiCache.getItems(mapNumbers);
+      const numbers1 = apiCache.getItems();
       apiCache.reconcile([item3]);
-      const numbers2 = apiCache.getItems(mapNumbers);
+      const numbers2 = apiCache.getItems();
 
-      expect(numbers1).toEqual([1, 2]);
-      expect(numbers2).toEqual([1, 2, 3]);
-      expect(numbersMapCalls).toBe(5);
+      expect(numbers1).toMatchObject([{ number: 1 }, { number: 2 }]);
+      expect(numbers2).toMatchObject([
+        { number: 1 },
+        { number: 2 },
+        { number: 3 },
+      ]);
     });
   });
 
@@ -246,25 +203,6 @@ describe('modules/platform/github/api-cache', () => {
       ]);
       expect(apiCache.lastModified).toBe(t3_http);
       expect(needNextPage).toBeFalse();
-    });
-  });
-
-  describe('etag', () => {
-    it('returns null', () => {
-      const apiCache = new ApiCache({ items: {} });
-      expect(apiCache.etag).toBeNull();
-    });
-
-    it('sets and retrieves non-null value', () => {
-      const apiCache = new ApiCache({ items: {} });
-      apiCache.etag = 'foobar';
-      expect(apiCache.etag).toBe('foobar');
-    });
-
-    it('deletes value for null parameter', () => {
-      const apiCache = new ApiCache({ items: {} });
-      apiCache.etag = null;
-      expect(apiCache.etag).toBeNull();
     });
   });
 });

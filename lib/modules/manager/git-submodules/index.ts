@@ -8,7 +8,7 @@ export { default as updateArtifacts } from './artifacts';
 export const defaultConfig = {
   enabled: false,
   versioning: gitVersioning.id,
-  fileMatch: ['(^|/).gitmodules$'],
+  fileMatch: ['(^|/)\\.gitmodules$'],
 };
 
 export const supportedDatasources = [GitRefsDatasource.id];

@@ -1,6 +1,7 @@
 import { load } from 'js-yaml';
 import { logger } from '../../../logger';
 import { regEx } from '../../../util/regex';
+import { AzurePipelinesTasksDatasource } from '../../datasource/azure-pipelines-tasks';
 import { GitTagsDatasource } from '../../datasource/git-tags';
 import { getDep } from '../dockerfile/extract';
 import type { PackageDependency, PackageFile } from '../types';
@@ -59,6 +60,7 @@ export function extractAzurePipelinesTasks(
     return {
       depName: match.groups.name,
       currentValue: match.groups.version,
+      datasource: AzurePipelinesTasksDatasource.id,
     };
   }
   return null;

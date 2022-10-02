@@ -191,6 +191,26 @@ describe('util/git/auth', () => {
       });
     });
 
+    it('returns url with token containing username for GitLab token without hostType', () => {
+      expect(
+        getGitAuthenticatedEnvironmentVariables('https://gitlab.com/', {
+          token: 'token1234',
+          matchHost: 'gitlab.com',
+        })
+      ).toStrictEqual({
+        GIT_CONFIG_COUNT: '3',
+        GIT_CONFIG_KEY_0:
+          'url.https://gitlab-ci-token:token1234@gitlab.com/.insteadOf',
+        GIT_CONFIG_KEY_1:
+          'url.https://gitlab-ci-token:token1234@gitlab.com/.insteadOf',
+        GIT_CONFIG_KEY_2:
+          'url.https://gitlab-ci-token:token1234@gitlab.com/.insteadOf',
+        GIT_CONFIG_VALUE_0: 'ssh://git@gitlab.com/',
+        GIT_CONFIG_VALUE_1: 'git@gitlab.com:',
+        GIT_CONFIG_VALUE_2: 'https://gitlab.com/',
+      });
+    });
+
     it('returns original environment variables when no token is set', () => {
       expect(
         getGitAuthenticatedEnvironmentVariables(
