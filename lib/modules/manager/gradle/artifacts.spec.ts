@@ -27,7 +27,7 @@ jest.mock('../../../util/git');
 jest.mock('../../../util/exec/env');
 jest.mock('../../datasource');
 
-process.env.BUILDPACK = 'true';
+process.env.CONTAINERBASE = 'true';
 
 const adminConfig: RepoGlobalConfig = {
   // `join` fixes Windows CI
@@ -240,6 +240,7 @@ describe('modules/manager/gradle/artifacts', () => {
           '-v "/tmp/cache":"/tmp/cache" ' +
           '-e GRADLE_OPTS ' +
           '-e BUILDPACK_CACHE_DIR ' +
+          '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
           'renovate/sidecar' +
           ' bash -l -c "' +
@@ -257,6 +258,7 @@ describe('modules/manager/gradle/artifacts', () => {
           '-v "/tmp/cache":"/tmp/cache" ' +
           '-e GRADLE_OPTS ' +
           '-e BUILDPACK_CACHE_DIR ' +
+          '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
           'renovate/sidecar' +
           ' bash -l -c "' +
