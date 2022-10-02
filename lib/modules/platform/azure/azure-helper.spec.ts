@@ -82,7 +82,7 @@ describe('modules/platform/azure/azure-helper', () => {
       const mockEventStream = new Readable({
         objectMode: true,
 
-        read: function () {
+        read() {
           if (eventCount < 1) {
             eventCount += 1;
             return this.push('{"typeKey": "GitItemNotFoundException"}');
@@ -111,7 +111,7 @@ describe('modules/platform/azure/azure-helper', () => {
       const mockEventStream = new Readable({
         objectMode: true,
 
-        read: function () {
+        read() {
           if (eventCount < 1) {
             eventCount += 1;
             return this.push('{"typeKey": "GitUnresolvableToCommitException"}');
@@ -140,7 +140,7 @@ describe('modules/platform/azure/azure-helper', () => {
       const mockEventStream = new Readable({
         objectMode: true,
 
-        read: function () {
+        read() {
           if (eventCount < 1) {
             eventCount += 1;
             return this.push('{"hello"= "test"}');
