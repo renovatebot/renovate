@@ -1,7 +1,7 @@
 import { logger } from '../../../logger';
 import { newlineRegex, regEx } from '../../../util/regex';
 import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
-import { analyseTFLintPlugin, extractTFLintPlugin } from './plugins';
+import { extractTFLintPlugin } from './plugins';
 import type { ExtractionResult, TFLintManagerData } from './types';
 import { checkFileContainsPlugins } from './util';
 

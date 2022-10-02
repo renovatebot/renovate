@@ -14,8 +14,8 @@ export function extractTFLintPlugin(
   let lineNumber = startingLine;
   const deps: PackageDependency<TFLintManagerData>[] = [];
 
-  let pluginSource: string = null;
-  let currentVersion: string = null;
+  let pluginSource: string | null = null;
+  let currentVersion: string | null = null;
 
   let braceCounter = 0;
   do {
@@ -60,7 +60,10 @@ export function extractTFLintPlugin(
   return { lineNumber, dependencies: deps };
 }
 
-export function analyseTFLintPlugin(source: string, version: string): PackageDependency{
+function analyseTFLintPlugin(
+  source: string | null,
+  version: string | null
+): PackageDependency {
   const dep: PackageDependency<TFLintManagerData> = {};
 
   if (source) {
