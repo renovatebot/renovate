@@ -339,6 +339,46 @@ describe('modules/datasource/npm/get', () => {
     );
   });
 
+  it('handles short sourceUrls in releases', async () => {
+    setNpmrc('registry=https://test.org\n_authToken=XXX');
+
+    httpMock
+      .scope('https://test.org')
+      .get('/vue')
+      .reply(200, {
+        name: 'vue',
+        repository: {
+          type: 'git',
+          url: 'https://github.com/vuejs/vue',
+        },
+        versions: {
+          '2.0.0': {
+            repository: 'vuejs/vue',
+          },
+          '3.0.0': {
+            repository: 'github:vuejs/vue-next',
+          },
+          '4.0.0': {
+            repository: 'gitlab:vuejs/vue',
+          },
+          '5.0.0': {
+            repository: 'bitbucket:vuejs/vue',
+          },
+        },
+        'dist-tags': { latest: '2.0.0' },
+      });
+    const registryUrl = resolveRegistryUrl('vue');
+    const dep = await getDependency(http, registryUrl, 'vue');
+
+    expect(dep?.sourceUrl).toBe('https://github.com/vuejs/vue');
+    expect(dep?.releases[0].sourceUrl).toBeUndefined();
+    expect(dep?.releases[1].sourceUrl).toBe(
+      'https://github.com/vuejs/vue-next'
+    );
+    expect(dep?.releases[2].sourceUrl).toBe('https://gitlab.com/vuejs/vue');
+    expect(dep?.releases[3].sourceUrl).toBe('https://bitbucket.org/vuejs/vue');
+  });
+
   it('does not override sourceDirectory', async () => {
     setNpmrc('registry=https://test.org\n_authToken=XXX');
 

@@ -4,6 +4,7 @@ import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import * as packageCache from '../../../util/cache/package';
 import type { Http } from '../../../util/http';
+import { regEx } from '../../../util/regex';
 import { joinUrlParts } from '../../../util/url';
 import { id } from './common';
 import type { NpmDependency, NpmRelease, NpmResponse } from './types';
@@ -13,11 +14,31 @@ interface PackageSource {
   sourceDirectory?: string;
 }
 
+const SHORT_REPO_REGEX = regEx(/^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/);
+
 function getPackageSource(repository: any): PackageSource {
   const res: PackageSource = {};
   if (repository) {
     if (is.nonEmptyString(repository)) {
-      res.sourceUrl = repository;
+      // Put github first because then it matches abc/def too
+      if (SHORT_REPO_REGEX.test(repository.replace(/^github:/, ''))) {
+        res.sourceUrl = `https://github.com/${repository.replace(
+          /^github:/,
+          ''
+        )}`;
+      } else if (SHORT_REPO_REGEX.test(repository.replace(/^gitlab:/, ''))) {
+        res.sourceUrl = `https://gitlab.com/${repository.replace(
+          /^gitlab:/,
+          ''
+        )}`;
+      } else if (SHORT_REPO_REGEX.test(repository.replace(/^bitbucket:/, ''))) {
+        res.sourceUrl = `https://bitbucket.org/${repository.replace(
+          /^bitbucket:/,
+          ''
+        )}`;
+      } else {
+        res.sourceUrl = repository;
+      }
     } else if (is.nonEmptyString(repository.url)) {
       res.sourceUrl = repository.url;
     }
