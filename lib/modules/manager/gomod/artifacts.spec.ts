@@ -299,6 +299,7 @@ describe('modules/manager/gomod/artifacts', () => {
           '-e GOFLAGS ' +
           '-e CGO_ENABLED ' +
           '-e BUILDPACK_CACHE_DIR ' +
+          '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
           'renovate/go:latest' +
           ' bash -l -c "' +
@@ -453,6 +454,7 @@ describe('modules/manager/gomod/artifacts', () => {
           '-e GIT_CONFIG_KEY_5 ' +
           '-e GIT_CONFIG_VALUE_5 ' +
           '-e BUILDPACK_CACHE_DIR ' +
+          '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
           'renovate/go:latest' +
           ' bash -l -c "' +
@@ -915,7 +917,7 @@ describe('modules/manager/gomod/artifacts', () => {
       { cmd: 'docker pull renovate/go:latest' },
       { cmd: 'docker ps --filter name=renovate_go -aq' },
       {
-        cmd: 'docker run --rm --name=renovate_go --label=renovate_child -v "/tmp/github/some/repo":"/tmp/github/some/repo" -v "/tmp/renovate/cache":"/tmp/renovate/cache" -e GOPROXY -e GOPRIVATE -e GONOPROXY -e GONOSUMDB -e GOINSECURE -e GOFLAGS -e CGO_ENABLED -e BUILDPACK_CACHE_DIR -w "/tmp/github/some/repo" renovate/go:latest bash -l -c "go get -d -t ./... && go mod tidy && go mod tidy"',
+        cmd: 'docker run --rm --name=renovate_go --label=renovate_child -v "/tmp/github/some/repo":"/tmp/github/some/repo" -v "/tmp/renovate/cache":"/tmp/renovate/cache" -e GOPROXY -e GOPRIVATE -e GONOPROXY -e GONOSUMDB -e GOINSECURE -e GOFLAGS -e CGO_ENABLED -e BUILDPACK_CACHE_DIR -e CONTAINERBASE_CACHE_DIR -w "/tmp/github/some/repo" renovate/go:latest bash -l -c "go get -d -t ./... && go mod tidy && go mod tidy"',
         options: { cwd: '/tmp/github/some/repo' },
       },
     ]);
@@ -952,7 +954,7 @@ describe('modules/manager/gomod/artifacts', () => {
       { cmd: 'docker pull renovate/go:latest' },
       { cmd: 'docker ps --filter name=renovate_go -aq' },
       {
-        cmd: 'docker run --rm --name=renovate_go --label=renovate_child -v "/tmp/github/some/repo":"/tmp/github/some/repo" -v "/tmp/renovate/cache":"/tmp/renovate/cache" -e GOPROXY -e GOPRIVATE -e GONOPROXY -e GONOSUMDB -e GOINSECURE -e GOFLAGS -e CGO_ENABLED -e BUILDPACK_CACHE_DIR -w "/tmp/github/some/repo" renovate/go:latest bash -l -c "go get -d -t ./... && go mod tidy -compat=1.17 && go mod tidy -compat=1.17"',
+        cmd: 'docker run --rm --name=renovate_go --label=renovate_child -v "/tmp/github/some/repo":"/tmp/github/some/repo" -v "/tmp/renovate/cache":"/tmp/renovate/cache" -e GOPROXY -e GOPRIVATE -e GONOPROXY -e GONOSUMDB -e GOINSECURE -e GOFLAGS -e CGO_ENABLED -e BUILDPACK_CACHE_DIR -e CONTAINERBASE_CACHE_DIR -w "/tmp/github/some/repo" renovate/go:latest bash -l -c "go get -d -t ./... && go mod tidy -compat=1.17 && go mod tidy -compat=1.17"',
         options: { cwd: '/tmp/github/some/repo' },
       },
     ]);
