@@ -51,7 +51,7 @@ export class CondaDatasource extends Datasource {
 
       response.body.versions.forEach((version: string) => {
         const thisRelease: Release = {
-          version: version,
+          version,
         };
         result.releases.push(thisRelease);
       });
