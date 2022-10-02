@@ -1170,6 +1170,29 @@ describe('modules/datasource/docker/index', () => {
       await expect(getPkgReleases(config)).rejects.toThrow(EXTERNAL_HOST_ERROR);
     });
 
+    it('jfrog artifactory - retry tags for official images by injecting `/library` after repository and before image', async () => {
+      const tags = ['18.0.0'];
+      httpMock
+        .scope('https://org.jfrog.io/v2')
+        .get('/virtual-mirror/node/tags/list?n=10000')
+        .reply(200, '', {})
+        .get('/virtual-mirror/node/tags/list?n=10000')
+        .reply(404, '', { 'x-jfrog-version': 'Artifactory/7.42.2 74202900' })
+        .get('/virtual-mirror/library/node/tags/list?n=10000')
+        .reply(200, '', {})
+        .get('/virtual-mirror/library/node/tags/list?n=10000')
+        .reply(200, { tags }, {})
+        .get('/')
+        .reply(200, '', {})
+        .get('/virtual-mirror/node/manifests/18.0.0')
+        .reply(200, '', {});
+      const res = await getPkgReleases({
+        datasource: DockerDatasource.id,
+        depName: 'org.jfrog.io/virtual-mirror/node',
+      });
+      expect(res?.releases).toHaveLength(1);
+    });
+
     it('uses lower tag limit for ECR deps', async () => {
       httpMock
         .scope(amazonUrl)
