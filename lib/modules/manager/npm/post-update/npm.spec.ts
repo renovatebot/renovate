@@ -265,6 +265,7 @@ describe('modules/manager/npm/post-update/npm', () => {
           'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
           '-v "/tmp":"/tmp" ' +
           '-e BUILDPACK_CACHE_DIR ' +
+          '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "some-dir" ' +
           'renovate/sidecar ' +
           'bash -l -c "' +
