@@ -1193,7 +1193,8 @@ export async function clearRenovateRefs(): Promise<void> {
     try {
       const pushOpts = ['--delete', 'origin', ...obsoleteRefs];
       await git.push(pushOpts);
-    } catch (err) /* istanbul ignore next */ {
+    } catch (err) {
+      /* istanbul ignore else */
       if (bulkChangesDisallowed(err)) {
         for (const ref of obsoleteRefs) {
           const pushOpts = ['--delete', 'origin', ref];
