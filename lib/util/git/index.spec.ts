@@ -262,7 +262,7 @@ describe('util/git/index', () => {
       const parentSha = 'SHA';
       const branchCache = partial<BranchCache>({
         branchName: 'develop',
-        parentSha: parentSha,
+        parentSha,
       });
       repoCache.getCache.mockReturnValueOnce({}).mockReturnValueOnce({
         branches: [branchCache],
