@@ -35,6 +35,8 @@ export async function getLockedVersions(
       for (const dep of packageFile.deps) {
         dep.lockedVersion =
           lockFileCache[yarnLock].lockedVersions[
+            // TODO: types (#7154)
+            // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
             `${dep.depName}@${dep.currentValue}`
           ];
         if (
@@ -46,6 +48,8 @@ export async function getLockedVersions(
         }
       }
     } else if (npmLock) {
+      // TODO: types (#7154)
+      // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
       logger.debug(`Found ${npmLock} for ${packageFile.packageFile}`);
       lockFiles.push(npmLock);
       if (!lockFileCache[npmLock]) {

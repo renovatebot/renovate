@@ -230,6 +230,16 @@ const options: RenovateOptions[] = [
     experimental: true,
   },
   {
+    name: 'repositoryCacheType',
+    description:
+      'Set the type of renovate repository cache if repositoryCache is not disabled.',
+    globalOnly: true,
+    type: 'string',
+    stage: 'repository',
+    default: 'local',
+    experimental: true,
+  },
+  {
     name: 'force',
     description:
       'Any configuration set in this object will force override existing settings.',
@@ -254,7 +264,7 @@ const options: RenovateOptions[] = [
       'If set to `true` then Renovate creates draft PRs, instead of normal status PRs.',
     type: 'boolean',
     default: false,
-    supportedPlatforms: ['github', 'gitlab', 'azure'],
+    supportedPlatforms: ['azure', 'gitea', 'github', 'gitlab'],
   },
   {
     name: 'dryRun',
@@ -278,7 +288,7 @@ const options: RenovateOptions[] = [
       'Controls how third-party tools like npm or Gradle are called: directly, via Docker sidecar containers, or via dynamic install.',
     globalOnly: true,
     type: 'string',
-    allowedValues: ['global', 'docker', 'install'],
+    allowedValues: ['global', 'docker', 'install', 'hermit'],
     default: 'global',
   },
   {
@@ -301,6 +311,13 @@ const options: RenovateOptions[] = [
     name: 'cacheDir',
     description:
       'The directory where Renovate stores its cache. If left empty, Renovate creates a subdirectory within the `baseDir`.',
+    globalOnly: true,
+    type: 'string',
+  },
+  {
+    name: 'containerbaseDir',
+    description:
+      'The directory where Renovate stores its containerbase cache. If left empty, Renovate creates a subdirectory within the `cacheDir`.',
     globalOnly: true,
     type: 'string',
   },
@@ -399,7 +416,7 @@ const options: RenovateOptions[] = [
     type: 'string',
     globalOnly: true,
     supportedPlatforms: ['github'],
-    experimental: true, 
+    experimental: true,
   },
   {
     name: 'githubTokenWarn',
@@ -814,7 +831,18 @@ const options: RenovateOptions[] = [
       type: 'string',
       format: 'uri',
     },
-    supportedManagers: ['helm-requirements', 'helmv3', 'helmfile', 'gitlabci'],
+    supportedManagers: [
+      'helm-requirements',
+      'helmv3',
+      'helmfile',
+      'gitlabci',
+      'dockerfile',
+      'docker-compose',
+      'kubernetes',
+      'ansible',
+      'droneci',
+      'woodpecker',
+    ],
   },
   {
     name: 'defaultRegistryUrls',
@@ -1043,6 +1071,17 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
+    name: 'matchCurrentValue',
+    description:
+      'A regex to match against the raw currentValue string of a dependency. Valid only within a `packageRules` object.',
+    type: 'string',
+    stage: 'package',
+    parent: 'packageRules',
+    mergeable: true,
+    cli: false,
+    env: false,
+  },
+  {
     name: 'matchCurrentVersion',
     description:
       'A version or range of versions to match against the current version of a package. Valid only within a `packageRules` object.',
@@ -1158,6 +1197,16 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
+    name: 'customChangelogUrl',
+    description:
+      'If set, Renovate will use this url to fetch changelogs for a matched dependency. Valid only within a `packageRules` object.',
+    type: 'string',
+    stage: 'pr',
+    parent: 'packageRules',
+    cli: false,
+    env: false,
+  },
+  {
     name: 'pinDigests',
     description: 'Whether to add digests to Dockerfile source images.',
     type: 'boolean',
@@ -1248,7 +1297,7 @@ const options: RenovateOptions[] = [
     description: 'Bump the version in the package file being updated.',
     type: 'string',
     allowedValues: ['major', 'minor', 'patch', 'prerelease'],
-    supportedManagers: ['helmv3', 'npm', 'maven', 'sbt'],
+    supportedManagers: ['helmv3', 'npm', 'nuget', 'maven', 'sbt'],
   },
   // Major/Minor/Patch
   {
@@ -1350,7 +1399,7 @@ const options: RenovateOptions[] = [
       branchTopic: '{{{depNameSanitized}}}-replacement',
       commitMessageAction: 'Replace',
       commitMessageExtra:
-        'with {{newName}} {{#if isMajor}}v{{{newMajor}}}{{else}}{{#if isSingleVersion}}v{{{newVersion}}}{{else}}{{{newValue}}}{{/if}}{{/if}}',
+        'with {{newName}} {{#if isMajor}}{{{prettyNewMajor}}}{{else}}{{#if isSingleVersion}}{{{prettyNewVersion}}}{{else}}{{{newValue}}}{{/if}}{{/if}}',
       prBodyNotes: [
         'This is a special PR that replaces `{{{depNameSanitized}}}` with the community suggested minimal stable replacement version.',
       ],
@@ -1509,7 +1558,7 @@ const options: RenovateOptions[] = [
     type: 'string',
     allowedValues: ['auto', 'fast-forward', 'merge-commit', 'rebase', 'squash'],
     default: 'auto',
-    supportedPlatforms: ['bitbucket'],
+    supportedPlatforms: ['bitbucket', 'gitea'],
   },
   {
     name: 'automergeComment',
@@ -1631,7 +1680,7 @@ const options: RenovateOptions[] = [
       'Extra description used after the commit message topic - typically the version.',
     type: 'string',
     default:
-      'to {{#if isPinDigest}}{{{newDigestShort}}}{{else}}{{#if isMajor}}v{{{newMajor}}}{{else}}{{#if isSingleVersion}}v{{{newVersion}}}{{else}}{{#if newValue}}{{{newValue}}}{{else}}{{{newDigestShort}}}{{/if}}{{/if}}{{/if}}{{/if}}',
+      'to {{#if isPinDigest}}{{{newDigestShort}}}{{else}}{{#if isMajor}}{{prettyNewMajor}}{{else}}{{#if isSingleVersion}}{{prettyNewVersion}}{{else}}{{#if newValue}}{{{newValue}}}{{else}}{{{newDigestShort}}}{{/if}}{{/if}}{{/if}}{{/if}}',
     cli: false,
   },
   {
@@ -1646,7 +1695,7 @@ const options: RenovateOptions[] = [
       'Pull Request body template. Controls which sections are rendered in the body.',
     type: 'string',
     default:
-      '{{{header}}}{{{table}}}{{{notes}}}{{{changelogs}}}{{{configDescription}}}{{{controls}}}{{{footer}}}',
+      '{{{header}}}{{{table}}}{{{warnings}}}{{{notes}}}{{{changelogs}}}{{{configDescription}}}{{{controls}}}{{{footer}}}',
     cli: false,
   },
   {
@@ -2051,13 +2100,35 @@ const options: RenovateOptions[] = [
   {
     name: 'authType',
     description:
-      'Authentication type for http header. e.g. `"Bearer"` or `"Basic"`. Use `"Token-Only"` to use only the token without an authorization type.',
+      'Authentication type for HTTP header. e.g. `"Bearer"` or `"Basic"`. Use `"Token-Only"` to use only the token without an authorization type.',
     type: 'string',
     stage: 'repository',
     parent: 'hostRules',
     default: 'Bearer',
     cli: false,
     env: false,
+  },
+  {
+    name: 'dnsCache',
+    description: 'Enable got DNS cache.',
+    type: 'boolean',
+    stage: 'repository',
+    parent: 'hostRules',
+    default: false,
+    cli: false,
+    env: false,
+    experimental: true,
+  },
+  {
+    name: 'keepalive',
+    description: 'Enable HTTP keepalives for hosts.',
+    type: 'boolean',
+    stage: 'repository',
+    parent: 'hostRules',
+    default: false,
+    cli: false,
+    env: false,
+    experimental: true,
   },
   {
     name: 'prBodyDefinitions',
@@ -2308,6 +2379,7 @@ const options: RenovateOptions[] = [
     name: 'platformAutomerge',
     description: `Controls if platform-native auto-merge is used.`,
     type: 'boolean',
+    supportedPlatforms: ['azure', 'gitea', 'github', 'gitlab'],
     default: false,
   },
   {
@@ -2332,6 +2404,12 @@ const options: RenovateOptions[] = [
     type: 'boolean',
     default: false,
     supportedPlatforms: ['github'],
+  },
+  {
+    name: 'branchNameStrict',
+    description: `Whether to be strict about the use of special characters within the branch name.`,
+    type: 'boolean',
+    default: false,
   },
 ];
 

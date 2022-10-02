@@ -12,13 +12,6 @@ import { toBase64 } from '../../../util/string';
 import { getPrBodyStruct } from '../pr-body';
 import type { AzurePr } from './types';
 
-export function getNewBranchName(branchName?: string): string | undefined {
-  if (branchName && !branchName.startsWith('refs/heads/')) {
-    return `refs/heads/${branchName}`;
-  }
-  return branchName;
-}
-
 export function getGitStatusContextCombinedName(
   context: GitStatusContext | null | undefined
 ): string | undefined {
@@ -26,7 +19,8 @@ export function getGitStatusContextCombinedName(
     return undefined;
   }
   const combinedName = `${context.genre ? `${context.genre}/` : ''}${
-    context.name
+    // TODO: types (#7154)
+    context.name!
   }`;
   logger.trace(`Got combined context name of ${combinedName}`);
   return combinedName;
@@ -55,7 +49,7 @@ export function getBranchNameWithoutRefsheadsPrefix(
   branchPath: string | undefined
 ): string | undefined {
   if (!branchPath) {
-    logger.error(`getBranchNameWithoutRefsheadsPrefix(${branchPath})`);
+    logger.error(`getBranchNameWithoutRefsheadsPrefix(undefined)`);
     return undefined;
   }
   if (!branchPath.startsWith('refs/heads/')) {
@@ -71,7 +65,7 @@ export function getBranchNameWithoutRefsPrefix(
   branchPath?: string
 ): string | undefined {
   if (!branchPath) {
-    logger.error(`getBranchNameWithoutRefsPrefix(${branchPath})`);
+    logger.error(`getBranchNameWithoutRefsPrefix(undefined)`);
     return undefined;
   }
   if (!branchPath.startsWith('refs/')) {
@@ -90,7 +84,8 @@ const stateMap = {
 
 export function getRenovatePRFormat(azurePr: GitPullRequest): AzurePr {
   const number = azurePr.pullRequestId;
-  const displayNumber = `Pull Request #${number}`;
+  // TODO: types (#7154)
+  const displayNumber = `Pull Request #${number!}`;
 
   const sourceBranch = getBranchNameWithoutRefsheadsPrefix(
     azurePr.sourceRefName
@@ -179,11 +174,13 @@ export function getRepoByName(
   project = project.toLowerCase();
   repo = repo.toLowerCase();
 
-  return (
-    repos?.find(
-      (r) =>
-        project === r?.project?.name?.toLowerCase() &&
-        repo === r?.name?.toLowerCase()
-    ) ?? null
+  const foundRepo = repos?.find(
+    (r) =>
+      project === r?.project?.name?.toLowerCase() &&
+      repo === r?.name?.toLowerCase()
   );
+  if (!foundRepo) {
+    logger.debug(`Repo not found: ${name}`);
+  }
+  return foundRepo ?? null;
 }

@@ -1,48 +1,49 @@
 import { logger } from '../../../logger';
-import { cache } from '../../../util/cache/package/decorator';
-import { GithubReleasesDatasource } from '../github-releases';
-import { getApiBaseUrl, getSourceUrl } from '../github-releases/common';
-import type {
-  DigestConfig,
-  GetReleasesConfig,
-  Release,
-  ReleaseResult,
-} from '../types';
-import { CacheableGithubTags } from './cache';
+import type { GithubRestRef, GithubRestTag } from '../../../util/github/types';
+import { getApiBaseUrl, getSourceUrl } from '../../../util/github/url';
+import { GithubHttp } from '../../../util/http/github';
+import { Datasource } from '../datasource';
+import type { DigestConfig, GetReleasesConfig, ReleaseResult } from '../types';
 
-export class GithubTagsDatasource extends GithubReleasesDatasource {
-  static override readonly id = 'github-tags';
+export class GithubTagsDatasource extends Datasource {
+  static readonly id = 'github-tags';
 
-  private tagsCache: CacheableGithubTags;
+  override readonly defaultRegistryUrls = ['https://github.com'];
+
+  override http: GithubHttp;
 
   constructor() {
     super(GithubTagsDatasource.id);
-    this.tagsCache = new CacheableGithubTags(this.http);
+    this.http = new GithubHttp(GithubTagsDatasource.id);
   }
 
   async getTagCommit(
     registryUrl: string | undefined,
-    packageName: string,
+    githubRepo: string,
     tag: string
   ): Promise<string | null> {
-    let result: string | null = null;
-    const tagReleases = await this.tagsCache.getItems({
-      packageName,
-      registryUrl,
-    });
-    const tagRelease = tagReleases.find(({ version }) => version === tag);
-    if (tagRelease) {
-      result = tagRelease.hash;
+    const apiBaseUrl = getApiBaseUrl(registryUrl);
+    let digest: string | null = null;
+    try {
+      const url = `${apiBaseUrl}repos/${githubRepo}/git/refs/tags/${tag}`;
+      const res = (await this.http.getJson<GithubRestRef>(url)).body.object;
+      if (res.type === 'commit') {
+        digest = res.sha;
+      } else if (res.type === 'tag') {
+        digest = (await this.http.getJson<GithubRestRef>(res.url)).body.object
+          .sha;
+      } else {
+        logger.warn({ res }, 'Unknown git tag refs type');
+      }
+    } catch (err) {
+      logger.debug(
+        { githubRepo, err },
+        'Error getting tag commit from GitHub repo'
+      );
     }
-    return result;
+    return digest;
   }
 
-  @cache({
-    ttlMinutes: 10,
-    namespace: `datasource-${GithubTagsDatasource.id}`,
-    key: (registryUrl: string, githubRepo: string) =>
-      `${registryUrl}:${githubRepo}:commit`,
-  })
   async getCommit(
     registryUrl: string | undefined,
     githubRepo: string
@@ -81,35 +82,24 @@ export class GithubTagsDatasource extends GithubReleasesDatasource {
   override async getReleases(
     config: GetReleasesConfig
   ): Promise<ReleaseResult> {
-    const tagReleases = await this.tagsCache.getItems(config);
+    const { registryUrl, packageName: repo } = config;
+    const apiBaseUrl = getApiBaseUrl(registryUrl);
+    // tag
+    const url = `${apiBaseUrl}repos/${repo}/tags?per_page=100`;
 
-    const tagsResult: ReleaseResult = {
-      sourceUrl: getSourceUrl(config.packageName, config.registryUrl),
-      releases: tagReleases.map((item) => ({ ...item, gitRef: item.version })),
+    const versions = (
+      await this.http.getJson<GithubRestTag[]>(url, {
+        paginate: true,
+      })
+    ).body.map((o) => o.name);
+
+    const dependency: ReleaseResult = {
+      sourceUrl: getSourceUrl(repo, registryUrl),
+      releases: versions.map((version) => ({
+        version,
+        gitRef: version,
+      })),
     };
-
-    try {
-      // Fetch additional data from releases endpoint when possible
-      const releasesResult = await super.getReleases(config);
-      type PartialRelease = Omit<Release, 'version'>;
-
-      const releaseByVersion: Record<string, PartialRelease> = {};
-      releasesResult?.releases?.forEach((release) => {
-        const { version, ...value } = release;
-        releaseByVersion[version] = value;
-      });
-
-      const mergedReleases: Release[] = [];
-      tagsResult.releases.forEach((tag) => {
-        const release = releaseByVersion[tag.version];
-        mergedReleases.push({ ...release, ...tag });
-      });
-
-      tagsResult.releases = mergedReleases;
-    } catch (err) /* istanbul ignore next */ {
-      logger.debug({ err }, `Error fetching additional info for GitHub tags`);
-    }
-
-    return tagsResult;
+    return dependency;
   }
 }

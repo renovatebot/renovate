@@ -5,11 +5,11 @@ import {
 } from 'azure-devops-node-api/interfaces/GitInterfaces.js';
 import { logger } from '../../../logger';
 import { streamToString } from '../../../util/streams';
+import { getNewBranchName } from '../util';
 import * as azureApi from './azure-got-wrapper';
 import {
   getBranchNameWithoutRefsPrefix,
   getBranchNameWithoutRefsheadsPrefix,
-  getNewBranchName,
 } from './util';
 
 const mergePolicyGuid = 'fa4e907d-c16b-4a4c-9dfa-4916e5d171ab'; // Magic GUID for merge strategy policy configurations
@@ -18,7 +18,7 @@ export async function getRefs(
   repoId: string,
   branchName?: string
 ): Promise<GitRef[]> {
-  logger.debug(`getRefs(${repoId}, ${branchName})`);
+  logger.debug(`getRefs(${repoId}, ${branchName!})`);
   const azureApiGit = await azureApi.gitApi();
   const refs = await azureApiGit.getRefs(
     repoId,
@@ -123,7 +123,8 @@ export async function getMergeMethod(
   const isRelevantScope = (scope: Scope): boolean => {
     if (
       scope.matchKind === 'DefaultBranch' &&
-      (!branchRef || branchRef === `refs/heads/${defaultBranch}`)
+      // TODO: types (#7154)
+      (!branchRef || branchRef === `refs/heads/${defaultBranch!}`)
     ) {
       return true;
     }
@@ -149,7 +150,8 @@ export async function getMergeMethod(
     .map((p) => p.settings)[0];
 
   logger.trace(
-    `getMergeMethod(${repoId}, ${project}, ${branchRef}) determining mergeMethod from matched policy:\n${JSON.stringify(
+    // TODO: types (#7154)
+    `getMergeMethod(${repoId}, ${project}, ${branchRef!}) determining mergeMethod from matched policy:\n${JSON.stringify(
       policyConfigurations,
       null,
       4

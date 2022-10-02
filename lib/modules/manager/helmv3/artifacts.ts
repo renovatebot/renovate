@@ -14,6 +14,7 @@ import {
 } from '../../../util/fs';
 import * as hostRules from '../../../util/host-rules';
 import { DockerDatasource } from '../../datasource/docker';
+import { HelmDatasource } from '../../datasource/helm';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
 import type { ChartDefinition, Repository, RepositoryRule } from './types';
 import {
@@ -71,6 +72,7 @@ async function helmCommands(
         ...value,
         hostRule: hostRules.find({
           url: value.repository,
+          hostType: HelmDatasource.id,
         }),
       };
     });

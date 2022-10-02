@@ -2,7 +2,7 @@
 
 Renovate was created by [Mend](https://www.mend.io/) staff and they continue to work on Renovate.
 
-More than 600 outside contributors helped improve Renovate.
+More than 650 outside contributors helped improve Renovate.
 
 ## Special thanks
 
@@ -21,7 +21,6 @@ Renovate is maintained by:
 
 Next up, we have these people who help maintain parts of Renovate:
 
-- [@HonkingGoose](https://github.com/HonkingGoose) master of the docs and community manager
 - [@zharinov](https://github.com/zharinov) focused on parsing, Gradle and Maven
 - [@secustor](https://github.com/secustor) worked on Terraform and Helm
 - [@fgreinacher](https://github.com/fgreinacher) worked on NuGet
@@ -32,6 +31,7 @@ Next up, we have these people who help maintain parts of Renovate:
 We want to highlight these valuable contributions, even if they are one-offs.
 Some features made a lot of people happy, and efficient!
 
+- [@HonkingGoose](https://github.com/HonkingGoose) worked on the docs and was community manager
 - [@ikesyo](https://github.com/ikesyo) regularly helpful
 - [@astellingwerf](https://github.com/astellingwerf) reviews PRs
 - [@danports](https://github.com/danports) worked on the Flux manager, and other managers. Feel free to ping `@danports` for any Flux-related issue or PR

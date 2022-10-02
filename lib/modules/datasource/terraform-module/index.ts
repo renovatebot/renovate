@@ -10,6 +10,7 @@ import type {
   TerraformModuleVersions,
   TerraformRelease,
 } from './types';
+import { createSDBackendURL } from './utils';
 
 export class TerraformModuleDatasource extends TerraformDatasource {
   static override readonly id = 'terraform-module';
@@ -80,7 +81,14 @@ export class TerraformModuleDatasource extends TerraformDatasource {
     let pkgUrl: string;
 
     try {
-      pkgUrl = `${registryUrl}${serviceDiscovery['modules.v1']}${repository}`;
+      // TODO: types (#7154)
+
+      pkgUrl = createSDBackendURL(
+        registryUrl,
+        'modules.v1',
+        serviceDiscovery,
+        repository
+      );
       res = (await this.http.getJson<TerraformRelease>(pkgUrl)).body;
       const returnedName = res.namespace + '/' + res.name + '/' + res.provider;
       if (returnedName !== repository) {
@@ -123,7 +131,13 @@ export class TerraformModuleDatasource extends TerraformDatasource {
     let res: TerraformModuleVersions;
     let pkgUrl: string;
     try {
-      pkgUrl = `${registryUrl}${serviceDiscovery['modules.v1']}${repository}/versions`;
+      // TODO: types (#7154)
+      pkgUrl = createSDBackendURL(
+        registryUrl,
+        'modules.v1',
+        serviceDiscovery,
+        `${repository}/versions`
+      );
       res = (await this.http.getJson<TerraformModuleVersions>(pkgUrl)).body;
       if (res.modules.length < 1) {
         logger.warn({ pkgUrl }, 'Terraform registry result mismatch');

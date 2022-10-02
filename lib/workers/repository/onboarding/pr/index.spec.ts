@@ -1,7 +1,7 @@
 import type { RequestError, Response } from 'got';
 import {
   RenovateConfig,
-  defaultConfig,
+  getConfig,
   git,
   partial,
   platform,
@@ -28,7 +28,7 @@ describe('workers/repository/onboarding/pr/index', () => {
     beforeEach(() => {
       jest.resetAllMocks();
       config = {
-        ...defaultConfig,
+        ...getConfig(),
         errors: [],
         warnings: [],
         description: [],

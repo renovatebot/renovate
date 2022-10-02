@@ -1,9 +1,40 @@
 import { hostRules } from '../../../test/util';
-import { getHttpUrl, getRemoteUrlWithToken } from './url';
+import { getHttpUrl, getRemoteUrlWithToken, parseGitUrl } from './url';
 
 jest.mock('../host-rules');
 
 describe('util/git/url', () => {
+  describe('parseGitUrl', () => {
+    it('supports ports', () => {
+      expect(parseGitUrl('https://gitlab.com:8443/')).toEqual({
+        filepath: '',
+        filepathtype: '',
+        full_name: '',
+        git_suffix: false,
+        hash: '',
+        host: 'gitlab.com:8443',
+        href: 'https://gitlab.com:8443',
+        name: '',
+        organization: '',
+        owner: '',
+        parse_failed: false,
+        password: '',
+        pathname: '/',
+        port: '8443',
+        protocol: 'https',
+        protocols: ['https'],
+        query: {},
+        ref: '',
+        resource: 'gitlab.com',
+        search: '',
+        source: 'gitlab.com',
+        toString: expect.toBeFunction(),
+        token: '',
+        user: '',
+      });
+    });
+  });
+
   describe('getHttpUrl()', () => {
     it('returns https url for git url', () => {
       expect(getHttpUrl('git://foo.bar/')).toBe('https://foo.bar/');
@@ -15,6 +46,18 @@ describe('util/git/url', () => {
 
     it('returns http url for http url', () => {
       expect(getHttpUrl('http://foo.bar/')).toBe('http://foo.bar/');
+    });
+
+    it('returns gitlab url with token', () => {
+      expect(getHttpUrl('http://gitlab.com/', 'token')).toBe(
+        'http://gitlab-ci-token:token@gitlab.com/'
+      );
+      expect(getHttpUrl('http://gitlab.com/', 'gitlab-ci-token:token')).toBe(
+        'http://gitlab-ci-token:token@gitlab.com/'
+      );
+      expect(
+        getHttpUrl('http://gitlab.com:8443/', 'gitlab-ci-token:token')
+      ).toBe('http://gitlab-ci-token:token@gitlab.com:8443/');
     });
   });
 
@@ -90,6 +133,15 @@ describe('util/git/url', () => {
       });
       expect(getRemoteUrlWithToken('https://foo.bar/')).toBe(
         'https://u%24er:p%40ss@foo.bar/'
+      );
+    });
+
+    it('returns https url with encoded gitlab token', () => {
+      hostRules.find.mockReturnValueOnce({
+        token: 'token',
+      });
+      expect(getRemoteUrlWithToken('ssh://gitlab.com/some/repo.git')).toBe(
+        'https://gitlab-ci-token:token@gitlab.com/some/repo.git'
       );
     });
   });

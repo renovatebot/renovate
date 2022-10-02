@@ -1,3 +1,5 @@
+// TODO: types (#7154)
+/* eslint-disable @typescript-eslint/restrict-template-expressions */
 import is from '@sindresorhus/is';
 import deepmerge from 'deepmerge';
 import detectIndent from 'detect-indent';
@@ -34,6 +36,7 @@ import type {
   ArtifactError,
   DetermineLockFileDirsResult,
   WriteExistingFilesResult,
+  YarnRcYmlFile,
 } from './types';
 import * as yarn from './yarn';
 
@@ -177,6 +180,9 @@ export async function writeExistingFiles(
           const widens: string[] = [];
           let lockFileChanged = false;
           for (const upgrade of config.upgrades) {
+            if (upgrade.lockFiles && !upgrade.lockFiles.includes(npmLock)) {
+              continue;
+            }
             if (
               upgrade.rangeStrategy === 'widen' &&
               upgrade.npmLock === npmLock
@@ -406,6 +412,7 @@ async function updateYarnOffline(
   }
 }
 
+// TODO: move to ./yarn.ts
 // exported for testing
 export async function updateYarnBinary(
   lockFileDir: string,
@@ -421,8 +428,15 @@ export async function updateYarnBinary(
       return existingYarnrcYmlContent;
     }
 
-    const oldYarnPath = (load(yarnrcYml) as Record<string, string>).yarnPath;
-    const newYarnPath = (load(newYarnrcYml) as Record<string, string>).yarnPath;
+    const oldYarnPath = (load(yarnrcYml) as YarnRcYmlFile)?.yarnPath;
+    const newYarnPath = (load(newYarnrcYml) as YarnRcYmlFile)?.yarnPath;
+    if (
+      !is.nonEmptyStringAndNotWhitespace(oldYarnPath) ||
+      !is.nonEmptyStringAndNotWhitespace(newYarnPath)
+    ) {
+      return existingYarnrcYmlContent;
+    }
+
     const oldYarnFullPath = upath.join(lockFileDir, oldYarnPath);
     const newYarnFullPath = upath.join(lockFileDir, newYarnPath);
     logger.debug({ oldYarnPath, newYarnPath }, 'Found updated Yarn binary');

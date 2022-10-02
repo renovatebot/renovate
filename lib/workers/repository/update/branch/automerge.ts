@@ -40,7 +40,8 @@ export async function tryBranchAutomerge(
     logger.debug(`Automerging branch`);
     try {
       if (GlobalConfig.get('dryRun')) {
-        logger.info(`DRY-RUN: Would automerge branch ${config.branchName}`);
+        // TODO: types (#7154)
+        logger.info(`DRY-RUN: Would automerge branch ${config.branchName!}`);
       } else {
         await mergeBranch(config.branchName!);
       }

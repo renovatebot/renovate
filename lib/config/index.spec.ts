@@ -95,7 +95,7 @@ describe('config/index', () => {
       const configParser = await import('./index');
       const config = configParser.getManagerConfig(parentConfig, 'npm');
       expect(config).toContainEntries([
-        ['fileMatch', ['(^|/)package.json$']],
+        ['fileMatch', ['(^|/)package\\.json$']],
         ['rollbackPrs', true],
       ]);
       expect(

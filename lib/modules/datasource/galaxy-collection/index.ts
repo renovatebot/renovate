@@ -1,8 +1,8 @@
 import is from '@sindresorhus/is';
-import pMap from 'p-map';
 import { logger } from '../../../logger';
 import { cache } from '../../../util/cache/package/decorator';
 import type { HttpResponse } from '../../../util/http/types';
+import * as p from '../../../util/promises';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
 import type {
@@ -32,6 +32,8 @@ export class GalaxyCollectionDatasource extends Datasource {
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     const [namespace, projectName] = packageName.split('.');
 
+    // TODO: types (#7154)
+    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
     const baseUrl = `${registryUrl}api/v2/collections/${namespace}/${projectName}/`;
 
     let baseUrlResponse: HttpResponse<BaseProjectResult>;
@@ -41,7 +43,7 @@ export class GalaxyCollectionDatasource extends Datasource {
       this.handleGenericErrors(err);
     }
 
-    if (!baseUrlResponse || !baseUrlResponse.body) {
+    if (!baseUrlResponse?.body) {
       logger.warn(
         { dependency: packageName },
         `Received invalid data from ${baseUrl}`
@@ -74,7 +76,7 @@ export class GalaxyCollectionDatasource extends Datasource {
 
     let newestVersionDetails: VersionsDetailResult | undefined;
     // asynchronously get release details
-    const enrichedReleases: (Release | null)[] = await pMap(
+    const enrichedReleases: (Release | null)[] = await p.map(
       releases,
       (basicRelease) =>
         this.http
@@ -106,8 +108,7 @@ export class GalaxyCollectionDatasource extends Datasource {
               );
               return null;
             }
-          }),
-      { concurrency: 5 } // allow 5 requests at maximum in parallel
+          })
     );
     // filter failed versions
     const filteredReleases = enrichedReleases.filter(is.truthy);

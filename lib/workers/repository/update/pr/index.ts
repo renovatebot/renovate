@@ -27,6 +27,8 @@ import type {
   BranchUpgradeConfig,
   PrBlockedBy,
 } from '../../../types';
+import { embedChangelogs } from '../../changelog';
+// import { embedChangelogs } from '../../changelog';
 import { resolveBranchStatus } from '../branch/status-checks';
 import { getPrBody } from './body';
 import { ChangeLogError } from './changelog/types';
@@ -51,15 +53,15 @@ export function getPlatformPrOptions(
   };
 }
 
-export type ResultWithPr = {
+export interface ResultWithPr {
   type: 'with-pr';
   pr: Pr;
-};
+}
 
-export type ResultWithoutPr = {
+export interface ResultWithoutPr {
   type: 'without-pr';
   prBlockedBy: PrBlockedBy;
-};
+}
 
 export type EnsurePrResult = ResultWithPr | ResultWithoutPr;
 
@@ -188,16 +190,25 @@ export async function ensurePr(
   function getRepoNameWithSourceDirectory(
     upgrade: BranchUpgradeConfig
   ): string {
-    return `${upgrade.repoName}${
+    // TODO: types (#7154)
+    return `${upgrade.repoName!}${
       upgrade.sourceDirectory ? `:${upgrade.sourceDirectory}` : ''
     }`;
   }
 
+  if (config.fetchReleaseNotes) {
+    // fetch changelogs when not already done;
+    await embedChangelogs(upgrades);
+  }
+
   // Get changelog and then generate template strings
   for (const upgrade of upgrades) {
-    const upgradeKey = `${upgrade.depType}-${upgrade.depName}-${
+    // TODO: types (#7154)
+    const upgradeKey = `${upgrade.depType!}-${upgrade.depName!}-${
       upgrade.manager
-    }-${upgrade.currentVersion ?? upgrade.currentValue}-${upgrade.newVersion}`;
+    }-${
+      upgrade.currentVersion ?? upgrade.currentValue!
+    }-${upgrade.newVersion!}`;
     if (processedUpgrades.includes(upgradeKey)) {
       continue;
     }
@@ -248,7 +259,8 @@ export async function ensurePr(
   for (const upgrade of config.upgrades) {
     let notesSourceUrl = upgrade.releases?.[0]?.releaseNotes?.notesSourceUrl;
     if (!notesSourceUrl) {
-      notesSourceUrl = `${upgrade.sourceUrl}${
+      // TODO: types (#7154)
+      notesSourceUrl = `${upgrade.sourceUrl!}${
         upgrade.sourceDirectory ? `:${upgrade.sourceDirectory}` : ''
       }`;
     }
@@ -292,7 +304,8 @@ export async function ensurePr(
         existingPrTitle === newPrTitle &&
         existingPrBodyHash === newPrBodyHash
       ) {
-        logger.debug(`${existingPr.displayNumber} does not need updating`);
+        // TODO: types (#7154)
+        logger.debug(`${existingPr.displayNumber!} does not need updating`);
         return { type: 'with-pr', pr: existingPr };
       }
       // PR must need updating
@@ -385,7 +398,7 @@ export async function ensurePr(
     ) {
       const topic = 'Branch automerge failure';
       let content =
-        'This PR was configured for branch automerge, however this is not possible so it has been raised as a PR instead.';
+        'This PR was configured for branch automerge. However, this is not possible, so it has been raised as a PR instead.';
       if (config.branchAutomergeFailureMessage === 'branch status error') {
         content += '\n___\n * Branch has one or more failed status checks';
       }
@@ -414,7 +427,8 @@ export async function ensurePr(
       } else {
         await addParticipants(config, pr);
       }
-      logger.debug(`Created ${pr.displayNumber}`);
+      // TODO: types (#7154)
+      logger.debug(`Created ${pr.displayNumber!}`);
       return { type: 'with-pr', pr };
     }
   } catch (err) {

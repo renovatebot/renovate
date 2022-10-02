@@ -2,7 +2,6 @@ import URL from 'url';
 import is from '@sindresorhus/is';
 import delay from 'delay';
 import JSON5 from 'json5';
-import pAll from 'p-all';
 import semver from 'semver';
 import { PlatformId } from '../../../constants';
 import {
@@ -23,6 +22,7 @@ import * as git from '../../../util/git';
 import * as hostRules from '../../../util/host-rules';
 import { setBaseUrl } from '../../../util/http/gitlab';
 import type { HttpResponse } from '../../../util/http/types';
+import * as p from '../../../util/promises';
 import { regEx } from '../../../util/regex';
 import { sanitize } from '../../../util/sanitize';
 import {
@@ -49,6 +49,7 @@ import type {
   RepoResult,
   UpdatePrConfig,
 } from '../types';
+import { repoFingerprint } from '../util';
 import { smartTruncate } from '../utils/pr-body';
 import { getUserID, gitlabApi, isUserBusy } from './http';
 import { getMR, updateMR } from './merge-request';
@@ -56,6 +57,7 @@ import type {
   GitLabMergeRequest,
   GitlabComment,
   GitlabIssue,
+  GitlabPr,
   MergeMethod,
   RepoResponse,
 } from './types';
@@ -142,13 +144,13 @@ export async function initPlatform({
 export async function getRepos(): Promise<string[]> {
   logger.debug('Autodiscovering GitLab repositories');
   try {
-    const url = `projects?membership=true&per_page=100&with_merge_requests_enabled=true&min_access_level=30`;
+    const url = `projects?membership=true&per_page=100&with_merge_requests_enabled=true&min_access_level=30&archived=false`;
     const res = await gitlabApi.getJson<RepoResponse[]>(url, {
       paginate: true,
     });
     logger.debug(`Discovered ${res.body.length} project(s)`);
     return res.body
-      .filter((repo) => !repo.mirror && !repo.archived)
+      .filter((repo) => !repo.mirror)
       .map((repo) => repo.path_with_namespace);
   } catch (err) {
     logger.error({ err }, `GitLab getRepos error`);
@@ -223,7 +225,8 @@ function getRepoUrl(
     const newPathname = pathname.slice(0, pathname.indexOf('/api'));
     const url = URL.format({
       protocol: protocol.slice(0, -1) || 'https',
-      auth: `oauth2:${opts.token}`,
+      // TODO: types (#7154)
+      auth: `oauth2:${opts.token!}`,
       host,
       pathname: newPathname + '/' + repository + '.git',
     });
@@ -233,7 +236,8 @@ function getRepoUrl(
 
   logger.debug({ url: res.body.http_url_to_repo }, `using http URL`);
   const repoUrl = URL.parse(`${res.body.http_url_to_repo}`);
-  repoUrl.auth = `oauth2:${opts.token}`;
+  // TODO: types (#7154)
+  repoUrl.auth = `oauth2:${opts.token!}`;
   return URL.format(repoUrl);
 }
 
@@ -243,6 +247,7 @@ export async function initRepo({
   cloneSubmodules,
   ignorePrAuthor,
   gitUrl,
+  endpoint,
 }: RepoParams): Promise<RepoResult> {
   config = {} as any;
   config.repository = urlEscape(repository);
@@ -324,6 +329,7 @@ export async function initRepo({
   const repoConfig: RepoResult = {
     defaultBranch: config.defaultBranch,
     isFork: !!res.body.forked_from_project,
+    repoFingerprint: repoFingerprint(res.body.id, defaults.endpoint),
   };
   return repoConfig;
 }
@@ -356,7 +362,10 @@ async function getStatus(
 ): Promise<GitlabBranchStatus[]> {
   const branchSha = git.getBranchCommit(branchName);
   try {
-    const url = `projects/${config.repository}/repository/commits/${branchSha}/statuses`;
+    // TODO: types (#7154)
+    const url = `projects/${
+      config.repository
+    }/repository/commits/${branchSha!}/statuses`;
 
     return (
       await gitlabApi.getJson<GitlabBranchStatus[]>(url, {
@@ -406,6 +415,14 @@ export async function getBranchStatus(
     return BranchStatus.yellow;
   }
   logger.debug(`Got res with ${branchStatuses.length} results`);
+
+  const mrStatus = (await getBranchPr(branchName))?.headPipelineStatus;
+  if (!is.undefined(mrStatus)) {
+    branchStatuses.push({
+      status: mrStatus as BranchState,
+      name: 'head_pipeline',
+    });
+  }
   // ignore all skipped jobs
   const res = branchStatuses.filter((check) => check.status !== 'skipped');
   if (res.length === 0) {
@@ -598,18 +615,19 @@ export async function createPr({
   return massagePr(pr);
 }
 
-export async function getPr(iid: number): Promise<Pr> {
+export async function getPr(iid: number): Promise<GitlabPr> {
   logger.debug(`getPr(${iid})`);
   const mr = await getMR(config.repository, iid);
 
   // Harmonize fields with GitHub
-  const pr: Pr = {
+  const pr: GitlabPr = {
     sourceBranch: mr.source_branch,
     targetBranch: mr.target_branch,
     number: mr.iid,
     displayNumber: `Merge Request #${mr.iid}`,
     bodyStruct: getPrBodyStruct(mr.description),
     state: mr.state === 'opened' ? PrState.Open : mr.state,
+    headPipelineStatus: mr.head_pipeline?.status,
     hasAssignees: !!(mr.assignee?.id ?? mr.assignees?.[0]?.id),
     hasReviewers: !!mr.reviewers?.length,
     title: mr.title,
@@ -713,7 +731,7 @@ export async function findPr({
   prTitle,
   state = PrState.All,
 }: FindPRConfig): Promise<Pr | null> {
-  logger.debug(`findPr(${branchName}, ${prTitle}, ${state})`);
+  logger.debug(`findPr(${branchName}, ${prTitle!}, ${state})`);
   const prList = await getPrList();
   return (
     prList.find(
@@ -726,7 +744,9 @@ export async function findPr({
 }
 
 // Returns the Pull Request for a branch. Null if not exists.
-export async function getBranchPr(branchName: string): Promise<Pr | null> {
+export async function getBranchPr(
+  branchName: string
+): Promise<GitlabPr | null> {
   logger.debug(`getBranchPr(${branchName})`);
   const existingPr = await findPr({
     branchName,
@@ -760,7 +780,8 @@ export async function setBranchStatus({
   // First, get the branch commit SHA
   const branchSha = git.getBranchCommit(branchName);
   // Now, check the statuses for that commit
-  const url = `projects/${config.repository}/statuses/${branchSha}`;
+  // TODO: types (#7154)
+  const url = `projects/${config.repository}/statuses/${branchSha!}`;
   let state = 'success';
   if (renovateState === BranchStatus.yellow) {
     state = 'pending';
@@ -993,10 +1014,7 @@ export async function addReviewers(
   // Gather the IDs for all the reviewers we want to add
   let newReviewerIDs: number[];
   try {
-    newReviewerIDs = await pAll(
-      newReviewers.map((r) => () => getUserID(r)),
-      { concurrency: 5 }
-    );
+    newReviewerIDs = await p.all(newReviewers.map((r) => () => getUserID(r)));
   } catch (err) {
     logger.warn({ err }, 'Failed to get IDs of the new reviewers');
     return;
@@ -1092,14 +1110,15 @@ export async function ensureComment({
   let body: string;
   let commentId: number | undefined;
   let commentNeedsUpdating: boolean | undefined;
+  // TODO: types (#7154)
   if (topic) {
-    logger.debug(`Ensuring comment "${massagedTopic}" in #${number}`);
+    logger.debug(`Ensuring comment "${massagedTopic!}" in #${number}`);
     body = `### ${topic}\n\n${sanitizedContent}`;
     body = body
       .replace(regEx(/Pull Request/g), 'Merge Request')
       .replace(regEx(/PR/g), 'MR');
     comments.forEach((comment: { body: string; id: number }) => {
-      if (comment.body.startsWith(`### ${massagedTopic}\n\n`)) {
+      if (comment.body.startsWith(`### ${massagedTopic!}\n\n`)) {
         commentId = comment.id;
         commentNeedsUpdating = comment.body !== body;
       }

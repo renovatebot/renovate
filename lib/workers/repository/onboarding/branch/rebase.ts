@@ -3,14 +3,19 @@ import { GlobalConfig } from '../../../../config/global';
 import type { RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
 import { commitAndPush } from '../../../../modules/platform/commit';
-import { getFile, isBranchModified, isBranchStale } from '../../../../util/git';
+import {
+  getFile,
+  isBranchBehindBase,
+  isBranchModified,
+} from '../../../../util/git';
 import { OnboardingCommitMessageFactory } from './commit-message';
 import { getOnboardingConfigContents } from './config';
 
-const defaultConfigFile = (config: RenovateConfig): string =>
-  configFileNames.includes(config.onboardingConfigFileName!)
+function defaultConfigFile(config: RenovateConfig): string {
+  return configFileNames.includes(config.onboardingConfigFileName!)
     ? config.onboardingConfigFileName!
     : configFileNames[0];
+}
 
 export async function rebaseOnboardingBranch(
   config: RenovateConfig
@@ -27,7 +32,7 @@ export async function rebaseOnboardingBranch(
   // TODO #7154
   if (
     contents === existingContents &&
-    !(await isBranchStale(config.onboardingBranch!))
+    !(await isBranchBehindBase(config.onboardingBranch!))
   ) {
     logger.debug('Onboarding branch is up to date');
     return null;

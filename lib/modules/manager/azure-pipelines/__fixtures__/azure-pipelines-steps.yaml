@@ -1,0 +1,4 @@
+steps:
+  - task: Bash@3
+    inputs:
+      script: 'echo Hello World'

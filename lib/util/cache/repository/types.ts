@@ -1,3 +1,7 @@
+import type {
+  RepositoryCacheConfig,
+  RepositoryCacheType,
+} from '../../../config/types';
 import type { PackageFile } from '../../../modules/manager/types';
 import type { RepoInitConfig } from '../../../workers/repository/init/types';
 import type { GitConflictsCache } from '../../git/types';
@@ -23,12 +27,37 @@ export interface BranchUpgradeCache {
 }
 
 export interface BranchCache {
+  /**
+   *Whether this branch has automerge enabled
+   */
   automerge: boolean;
+  /**
+   * Hash of the manager fingerprints and the update branch config
+   */
+  branchFingerprint?: string;
+  /**
+   * Branch name
+   */
   branchName: string;
+  /**
+   * Whether a person not listed in gitIgnoredAuthors updated the branch.
+   */
   isModified: boolean;
-  prNo: number | null;
-  sha: string | null;
+  /**
+   * Parent commit of branch sha
+   */
   parentSha: string | null;
+  /**
+   * Pr nunber of PR created from this branch
+   */
+  prNo: number | null;
+  /**
+   * The branch's most recent commit SHA
+   */
+  sha: string | null;
+  /**
+   * Details on the dependency upgrades that have been applied in this branch
+   */
   upgrades: BranchUpgradeCache[];
 }
 
@@ -46,15 +75,16 @@ export interface RepoCacheData {
   prComments?: Record<number, Record<string, string>>;
 }
 
-export interface RepoCacheRecord {
-  repository: string;
-  revision: number;
-  payload: string;
-  hash: string;
-}
-
 export interface RepoCache {
   load(): Promise<void>;
   save(): Promise<void>;
   getData(): RepoCacheData;
+  isModified(): boolean | undefined;
+}
+
+export interface RepoCacheConfig {
+  repository?: string;
+  repositoryCache?: RepositoryCacheConfig;
+  repositoryCacheType?: RepositoryCacheType;
+  repoFingerprint: string;
 }
