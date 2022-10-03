@@ -65,12 +65,8 @@ export interface HttpOptions {
   useCache?: boolean;
 }
 
-export interface HttpPostOptions extends HttpOptions {
-  body: unknown;
-}
-
 export interface InternalHttpOptions extends HttpOptions {
-  json?: Record<string, unknown>;
+  json?: HttpOptions['body'];
   responseType?: 'json' | 'buffer';
   method?: 'get' | 'post' | 'put' | 'patch' | 'delete' | 'head';
 }
