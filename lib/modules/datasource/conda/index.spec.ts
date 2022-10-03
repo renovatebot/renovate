@@ -63,18 +63,13 @@ describe('modules/datasource/conda/index', () => {
       expect(res?.releases).toHaveLength(94);
     });
 
-    it('process real data without registryUrl + warning', async () => {
-      httpMock
-        .scope(defaultRegistryUrl)
-        .get(depUrl)
-        .reply(200, Fixtures.get('pytest.json'));
+    it('returns null without registryUrl', async () => {
       const condaDatasource = new CondaDatasource();
       const res = await condaDatasource.getReleases({
         registryUrl: '',
         packageName: depName,
       });
-      expect(res).toMatchSnapshot();
-      expect(res?.releases).toHaveLength(94);
+      expect(res).toBeNull();
     });
 
     it('supports multiple custom datasource urls', async () => {
