@@ -38,7 +38,7 @@ export const presets: Record<string, Preset> = {
   },
   standard: {
     description: 'JavaScript Standard Style',
-    matchPackagePrefixes: ['standard'],
+    matchPackageNames: ['standard'],
   },
   tslint: {
     description: 'All TSLint packages.',
@@ -47,7 +47,7 @@ export const presets: Record<string, Preset> = {
   },
   prettier: {
     description: 'Prettier code formatter',
-    matchPackagePrefixes: ['prettier'],
+    matchPackageNames: ['prettier'],
   },
   linters: {
     description: 'All lint-related packages.',
