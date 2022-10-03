@@ -1298,7 +1298,7 @@ describe('modules/manager/gomod/artifacts', () => {
     ]);
   });
 
-  it('GoConstraints when go.mod file content null', async () => {
+  it('gomod file and config do not contain GoConstraints', async () => {
     GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
     fs.readLocalFile.mockResolvedValueOnce('Current go.sum');
     fs.readLocalFile.mockResolvedValueOnce(null); // vendor modules filename
@@ -1382,38 +1382,10 @@ describe('modules/manager/gomod/artifacts', () => {
       { file: { type: 'addition', path: 'main.go', contents: 'New main.go' } },
       { file: { type: 'addition', path: 'go.mod', contents: 'New go.mod' } },
     ]);
-    expect(execSnapshots).toMatchObject([
-      {
-        cmd: 'docker pull renovate/go:1.17.0',
-      },
-      {
-        cmd: 'docker ps --filter name=renovate_go -aq',
-      },
-      {
-        cmd:
-          'docker run --rm --name=renovate_go --label=renovate_child ' +
-          '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
-          '-v "/tmp/renovate/cache":"/tmp/renovate/cache" ' +
-          '-e GOPROXY ' +
-          '-e GOPRIVATE ' +
-          '-e GONOPROXY ' +
-          '-e GONOSUMDB ' +
-          '-e GOINSECURE ' +
-          '-e GOFLAGS ' +
-          '-e CGO_ENABLED ' +
-          '-e BUILDPACK_CACHE_DIR ' +
-          '-e CONTAINERBASE_CACHE_DIR ' +
-          '-w "/tmp/github/some/repo" ' +
-          'renovate/go:1.17.0 ' +
-          'bash -l -c "go get -d -t ./... ' +
-          '&& ' +
-          'go install github.com/marwan-at-work/mod/cmd/mod@latest ' +
-          '&& ' +
-          'mod upgrade --mod-name=github.com/google/go-github/v24 -t=28 ' +
-          '&& ' +
-          'go mod tidy && go mod tidy"',
-      },
-    ]);
+    const expectedResult = {
+      cmd: 'docker pull renovate/go:1.17.0',
+    };
+    expect(execSnapshots[0]).toMatchObject(expectedResult);
   });
 
   it('config contains go version', async () => {
@@ -1449,38 +1421,9 @@ describe('modules/manager/gomod/artifacts', () => {
       { file: { type: 'addition', path: 'main.go', contents: 'New main.go' } },
       { file: { type: 'addition', path: 'go.mod', contents: 'New go.mod' } },
     ]);
-    expect(execSnapshots).toMatchObject([
-      {
-        cmd: 'docker pull renovate/go:1.14.0',
-      },
-      {
-        cmd: 'docker ps --filter name=renovate_go -aq',
-      },
-      {
-        cmd:
-          'docker run --rm --name=renovate_go --label=renovate_child ' +
-          '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
-          '-v "/tmp/renovate/cache":"/tmp/renovate/cache" ' +
-          '-e GOPROXY ' +
-          '-e GOPRIVATE ' +
-          '-e GONOPROXY ' +
-          '-e GONOSUMDB ' +
-          '-e GOINSECURE ' +
-          '-e GOFLAGS ' +
-          '-e CGO_ENABLED ' +
-          '-e BUILDPACK_CACHE_DIR ' +
-          '-e CONTAINERBASE_CACHE_DIR ' +
-          '-w "/tmp/github/some/repo" ' +
-          'renovate/go:1.14.0 ' +
-          'bash -l -c "go get -d -t ./... ' +
-          '&& ' +
-          'go install github.com/marwan-at-work/mod/cmd/mod@latest ' +
-          '&& ' +
-          'mod upgrade ' +
-          '--mod-name=github.com/google/go-github/v24 -t=28 ' +
-          '&& ' +
-          'go mod tidy && go mod tidy"',
-      },
-    ]);
+    const expectedResult = {
+      cmd: 'docker pull renovate/go:1.14.0',
+    };
+    expect(execSnapshots[0]).toMatchObject(expectedResult);
   });
 });
