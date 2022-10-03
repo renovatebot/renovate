@@ -1,4 +1,5 @@
 import { cache } from '../../../util/cache/package/decorator';
+import { getHttpUrl } from '../../../util/git/url';
 import { regEx } from '../../../util/regex';
 import { GitDatasource } from '../git-refs/base';
 import type { DigestConfig, GetReleasesConfig, ReleaseResult } from '../types';
@@ -32,9 +33,7 @@ export class GitTagsDatasource extends GitDatasource {
         newDigest: ref.hash,
       }));
 
-    const sourceUrl = packageName
-      .replace(regEx(/\.git$/), '')
-      .replace(regEx(/\/$/), '');
+    const sourceUrl = getHttpUrl(packageName).replace(regEx(/\.git$/), '');
 
     const result: ReleaseResult = {
       sourceUrl,
