@@ -29,10 +29,19 @@ export function parseArchiveUrl(
   if (path[2] === 'releases' && path[3] === 'download') {
     datasource = GithubReleasesDatasource.id;
     currentValue = path[4];
-  }
-  if (path[2] === 'archive') {
+  } else if (
+    path[2] === 'archive' &&
+    path[3] === 'refs' &&
+    path[4] === 'tags'
+  ) {
+    datasource = GithubTagsDatasource.id;
+    currentValue = path[5];
+  } else if (path[2] === 'archive') {
     datasource = GithubTagsDatasource.id;
     currentValue = path[3];
+  }
+
+  if (currentValue) {
     // Strip archive extension to get hash or tag.
     // Tolerates formats produced by Git(Hub|Lab) and allowed by http_archive
     // Note: Order matters in suffix list to strip, e.g. .tar.gz.
@@ -41,8 +50,7 @@ export function parseArchiveUrl(
         currentValue = currentValue.slice(0, -extension.length);
       }
     }
-  }
-  if (currentValue) {
+
     return { datasource, repo, currentValue };
   }
   return null;
@@ -238,7 +246,7 @@ export const supportedRulesRegex = regEx(`^${supportedRules.join('|')}$`);
 export function extractDepFromTarget(target: Target): PackageDependency | null {
   const dependencyExtractor = dependencyExtractorRegistry[target.rule];
   if (!dependencyExtractor) {
-    logger.warn(
+    logger.debug(
       `Bazel dependency extractor function not found for ${target.rule}`
     );
     return null;
