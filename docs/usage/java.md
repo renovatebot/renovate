@@ -10,14 +10,14 @@ This includes libraries and plugins as well as the Gradle Wrapper.
 
 ## LTS Releases
 
-The `config:base` preset limits Renovate update to Java runtimes to those which are LTS versions. This is handled by the workaround `workarounds:javaLTSImageVersion`.
+The `config:base` preset limits Renovate update to Java runtimes to those which are LTS versions. This is handled by the workaround `workarounds:javaLTSVersions`.
 
 If you wish to have all major updates suggested then you can add the following `ignorePreset` rule:
 
 ```
 {
   "extends": ["config:base"],
-  "ignorePresets": ["workarounds:javaLTSImageVersion"]
+  "ignorePresets": ["workarounds:javaLTSVersions"]
 }
 ```
 

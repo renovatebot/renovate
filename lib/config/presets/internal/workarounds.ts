@@ -14,7 +14,7 @@ export const presets: Record<string, Preset> = {
       'workarounds:reduceRepologyServerLoad',
       'workarounds:doNotUpgradeFromAlpineStableToEdge',
       'workarounds:supportRedHatImageVersion',
-      'workarounds:javaLTSImageVersion',
+      'workarounds:javaLTSVersions',
     ],
     ignoreDeps: [],
   },
@@ -119,12 +119,12 @@ export const presets: Record<string, Preset> = {
       },
     ],
   },
-  javaLTSImageVersion: {
+  javaLTSVersions: {
     description: 'Limit Java runtime versions to LTS releases',
     packageRules: [
       {
         description:
-          'Limit Java runtime versions to LTS releases. To receive all major releases add `javaLTSImageVersion` to the `ignorePresets` array.',
+          'Limit Java runtime versions to LTS releases. To receive all major releases add `javaLTSVersions` to the `ignorePresets` array.',
         matchDatasources: ['docker', 'adoptium-java'],
         matchPackageNames: [
           'eclipse-temurin',
