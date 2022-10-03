@@ -1316,13 +1316,9 @@ describe('modules/manager/gomod/artifacts', () => {
       updatedDeps: [{ depName: 'github.com/google/go-github/v24' }],
       newPackageFileContent: gomod1,
       config: {
-        ...config,
         updateType: 'major',
         newMajor: 28,
         postUpdateOptions: ['gomodUpdateImportPaths'],
-        constraints: {
-          gomodMod: 'v1.2.3',
-        },
       },
     });
     expect(res).toEqual([
@@ -1336,7 +1332,7 @@ describe('modules/manager/gomod/artifacts', () => {
         options: { cwd: '/tmp/github/some/repo' },
       },
       {
-        cmd: 'go install github.com/marwan-at-work/mod/cmd/mod@v1.2.3',
+        cmd: 'go install github.com/marwan-at-work/mod/cmd/mod@latest',
         options: { cwd: '/tmp/github/some/repo' },
       },
       {
@@ -1375,11 +1371,9 @@ describe('modules/manager/gomod/artifacts', () => {
       updatedDeps: [{ depName: 'github.com/google/go-github/v24' }],
       newPackageFileContent: gomod1,
       config: {
-        ...config,
         updateType: 'major',
         newMajor: 28,
         postUpdateOptions: ['gomodUpdateImportPaths'],
-        constraints: {},
       },
     });
 
@@ -1408,6 +1402,7 @@ describe('modules/manager/gomod/artifacts', () => {
           '-e GOFLAGS ' +
           '-e CGO_ENABLED ' +
           '-e BUILDPACK_CACHE_DIR ' +
+          '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
           'renovate/go:1.17.0 ' +
           'bash -l -c "go get -d -t ./... ' +
@@ -1441,7 +1436,6 @@ describe('modules/manager/gomod/artifacts', () => {
       updatedDeps: [{ depName: 'github.com/google/go-github/v24' }],
       newPackageFileContent: gomod1,
       config: {
-        ...config,
         updateType: 'major',
         newMajor: 28,
         postUpdateOptions: ['gomodUpdateImportPaths'],
@@ -1475,6 +1469,7 @@ describe('modules/manager/gomod/artifacts', () => {
           '-e GOFLAGS ' +
           '-e CGO_ENABLED ' +
           '-e BUILDPACK_CACHE_DIR ' +
+          '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
           'renovate/go:1.14.0 ' +
           'bash -l -c "go get -d -t ./... ' +
