@@ -16,7 +16,6 @@ import type {
   GotJSONOptions,
   GotOptions,
   HttpOptions,
-  HttpPostOptions,
   HttpResponse,
   InternalHttpOptions,
   RequestStats,
@@ -92,7 +91,7 @@ async function gotRoutine<T>(
   }
 }
 
-export class Http<GetOptions = HttpOptions, PostOptions = HttpPostOptions> {
+export class Http<Opts extends HttpOptions = HttpOptions> {
   private options?: GotOptions;
 
   constructor(protected hostType: string, options: HttpOptions = {}) {
@@ -210,59 +209,50 @@ export class Http<GetOptions = HttpOptions, PostOptions = HttpPostOptions> {
 
   private async requestJson<T = unknown>(
     url: string,
-    options: InternalHttpOptions
+    requestOptions?: Opts,
+    internalOptions?: InternalHttpOptions
   ): Promise<HttpResponse<T>> {
-    const { body, ...jsonOptions } = options;
-    if (body) {
-      jsonOptions.json = body;
-    }
-    const res = await this.request<T>(url, {
-      ...jsonOptions,
+    const { body, ...httpOptions } = { ...requestOptions };
+    const opts: InternalHttpOptions = {
+      ...httpOptions,
+      ...internalOptions,
       responseType: 'json',
-    });
+    };
+    if (body) {
+      opts.json = body;
+    }
+    const res = await this.request<T>(url, opts);
     return { ...res, body: res.body };
   }
 
-  getJson<T = unknown>(
-    url: string,
-    options?: GetOptions
-  ): Promise<HttpResponse<T>> {
-    return this.requestJson<T>(url, { ...options });
+  getJson<T = unknown>(url: string, options?: Opts): Promise<HttpResponse<T>> {
+    return this.requestJson<T>(url, options);
   }
 
-  headJson<T = unknown>(
-    url: string,
-    options?: GetOptions
-  ): Promise<HttpResponse<T>> {
-    return this.requestJson<T>(url, { ...options, method: 'head' });
+  headJson<T = unknown>(url: string, options?: Opts): Promise<HttpResponse<T>> {
+    return this.requestJson<T>(url, options, { method: 'head' });
   }
 
-  postJson<T = unknown>(
-    url: string,
-    options?: PostOptions
-  ): Promise<HttpResponse<T>> {
-    return this.requestJson<T>(url, { ...options, method: 'post' });
+  postJson<T = unknown>(url: string, options?: Opts): Promise<HttpResponse<T>> {
+    return this.requestJson<T>(url, options, { method: 'post' });
   }
 
-  putJson<T = unknown>(
-    url: string,
-    options?: PostOptions
-  ): Promise<HttpResponse<T>> {
-    return this.requestJson<T>(url, { ...options, method: 'put' });
+  putJson<T = unknown>(url: string, options?: Opts): Promise<HttpResponse<T>> {
+    return this.requestJson<T>(url, options, { method: 'put' });
   }
 
   patchJson<T = unknown>(
     url: string,
-    options?: PostOptions
+    options?: Opts
   ): Promise<HttpResponse<T>> {
-    return this.requestJson<T>(url, { ...options, method: 'patch' });
+    return this.requestJson<T>(url, options, { method: 'patch' });
   }
 
   deleteJson<T = unknown>(
     url: string,
-    options?: PostOptions
+    options?: Opts
   ): Promise<HttpResponse<T>> {
-    return this.requestJson<T>(url, { ...options, method: 'delete' });
+    return this.requestJson<T>(url, options, { method: 'delete' });
   }
 
   stream(url: string, options?: HttpOptions): NodeJS.ReadableStream {

@@ -2,11 +2,7 @@ import url from 'url';
 import type { MergeStrategy } from '../../../config/types';
 import { BranchStatus, PrState } from '../../../types';
 import { BitbucketHttp } from '../../../util/http/bitbucket';
-import type {
-  HttpOptions,
-  HttpPostOptions,
-  HttpResponse,
-} from '../../../util/http/types';
+import type { HttpOptions, HttpResponse } from '../../../util/http/types';
 import { getPrBodyStruct } from '../pr-body';
 import type { Pr } from '../types';
 import type { BitbucketMergeStrategy, MergeRequestBody } from './types';
@@ -114,20 +110,20 @@ const addMaxLength = (inputUrl: string, pagelen = 100): string => {
 function callApi<T>(
   apiUrl: string,
   method: string,
-  options?: HttpOptions | HttpPostOptions
+  options?: HttpOptions
 ): Promise<HttpResponse<T>> {
   /* istanbul ignore next */
   switch (method.toLowerCase()) {
     case 'post':
-      return bitbucketHttp.postJson<T>(apiUrl, options as HttpPostOptions);
+      return bitbucketHttp.postJson<T>(apiUrl, options);
     case 'put':
-      return bitbucketHttp.putJson<T>(apiUrl, options as HttpPostOptions);
+      return bitbucketHttp.putJson<T>(apiUrl, options);
     case 'patch':
-      return bitbucketHttp.patchJson<T>(apiUrl, options as HttpPostOptions);
+      return bitbucketHttp.patchJson<T>(apiUrl, options);
     case 'head':
       return bitbucketHttp.headJson<T>(apiUrl, options);
     case 'delete':
-      return bitbucketHttp.deleteJson<T>(apiUrl, options as HttpPostOptions);
+      return bitbucketHttp.deleteJson<T>(apiUrl, options);
     case 'get':
     default:
       return bitbucketHttp.getJson<T>(apiUrl, options);
@@ -137,7 +133,7 @@ function callApi<T>(
 export async function accumulateValues<T = any>(
   reqUrl: string,
   method = 'get',
-  options?: HttpOptions | HttpPostOptions,
+  options?: HttpOptions,
   pagelen?: number
 ): Promise<T[]> {
   let accumulator: T[] = [];
