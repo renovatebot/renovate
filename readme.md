@@ -27,10 +27,6 @@ Multi-platform and multi-language.
 - Get replacement PRs to migrate from a deprecated dependency to the community suggested replacement (npm packages only)
 - Open source (installable via npm/Yarn or Docker Hub) so can be self-hosted or used via GitHub App
 
-## Star History
-
-[![Star History Chart](https://api.star-history.com/svg?repos=renovatebot/renovate&type=Date)](https://star-history.com/#renovatebot/renovate&Date)
-
 ## Supported Platforms
 
 Renovate works on the following platforms:
@@ -47,6 +43,10 @@ Renovate works on the following platforms:
 Renovate is widely used in the developer community:
 
 ![Renovate Matrix](https://app.renovatebot.com/images/matrix.png)
+
+## Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=renovatebot/renovate&type=Date)](https://star-history.com/#renovatebot/renovate&Date)
 
 ## The Renovate Approach
 
