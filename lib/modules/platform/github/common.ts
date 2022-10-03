@@ -52,6 +52,6 @@ export function coerceRestPr(pr: GhRestPr): GhPr {
     result.closedAt = pr.closed_at;
   }
 
-  schema.match(platformSchemas.Pr, result, true);
+  schema.match(platformSchemas.Pr, result, 'warn');
   return result;
 }

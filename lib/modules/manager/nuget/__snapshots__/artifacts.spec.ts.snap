@@ -149,12 +149,13 @@ exports[`modules/manager/nuget/artifacts supports docker mode 1`] = `
     },
   },
   {
-    "cmd": "docker run --rm --name=renovate_dotnet --label=renovate_child -v "/tmp/github/some/repo":"/tmp/github/some/repo" -v "/tmp/renovate/cache":"/tmp/renovate/cache" -e NUGET_PACKAGES -e BUILDPACK_CACHE_DIR -w "/tmp/github/some/repo" renovate/dotnet bash -l -c "dotnet restore project.csproj --force-evaluate --configfile /tmp/renovate/cache/__renovate-private-cache/nuget/nuget.config"",
+    "cmd": "docker run --rm --name=renovate_dotnet --label=renovate_child -v "/tmp/github/some/repo":"/tmp/github/some/repo" -v "/tmp/renovate/cache":"/tmp/renovate/cache" -e NUGET_PACKAGES -e BUILDPACK_CACHE_DIR -e CONTAINERBASE_CACHE_DIR -w "/tmp/github/some/repo" renovate/dotnet bash -l -c "dotnet restore project.csproj --force-evaluate --configfile /tmp/renovate/cache/__renovate-private-cache/nuget/nuget.config"",
     "options": {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
       "env": {
         "BUILDPACK_CACHE_DIR": "/tmp/renovate/cache/containerbase",
+        "CONTAINERBASE_CACHE_DIR": "/tmp/renovate/cache/containerbase",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
         "HTTP_PROXY": "http://example.com",
