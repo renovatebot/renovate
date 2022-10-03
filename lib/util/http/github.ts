@@ -431,9 +431,8 @@ export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
       });
       const repositoryData = res?.data?.repository;
       if (
-        repositoryData &&
-        is.plainObject(repositoryData) &&
-        repositoryData[fieldName]
+        is.nonEmptyObject(repositoryData) &&
+        !is.nullOrUndefined(repositoryData[fieldName])
       ) {
         optimalCount = count;
 
