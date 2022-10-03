@@ -20,7 +20,6 @@ import type { GotLegacyError } from './legacy';
 import type {
   GraphqlOptions,
   HttpOptions,
-  HttpPostOptions,
   HttpResponse,
   InternalHttpOptions,
 } from './types';
@@ -265,7 +264,7 @@ function setGraphqlPageSize(fieldName: string, newPageSize: number): void {
   }
 }
 
-export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
+export class GithubHttp extends Http<GithubHttpOptions> {
   constructor(
     hostType: string = PlatformId.Github,
     options?: GithubHttpOptions
@@ -380,7 +379,7 @@ export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
     }
     const body = variables ? { query, variables } : { query };
 
-    const opts: HttpPostOptions = {
+    const opts: GithubHttpOptions = {
       baseUrl: baseUrl.replace('/v3/', '/'), // GHE uses unversioned graphql path
       body,
       headers: { accept: options?.acceptHeader },
