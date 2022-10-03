@@ -369,14 +369,15 @@ describe('modules/datasource/npm/get', () => {
       });
     const registryUrl = resolveRegistryUrl('vue');
     const dep = await getDependency(http, registryUrl, 'vue');
-
-    expect(dep?.sourceUrl).toBe('https://github.com/vuejs/vue');
-    expect(dep?.releases[0].sourceUrl).toBeUndefined();
-    expect(dep?.releases[1].sourceUrl).toBe(
-      'https://github.com/vuejs/vue-next'
-    );
-    expect(dep?.releases[2].sourceUrl).toBe('https://gitlab.com/vuejs/vue');
-    expect(dep?.releases[3].sourceUrl).toBe('https://bitbucket.org/vuejs/vue');
+    expect(dep).toMatchObject({
+      sourceUrl: 'https://github.com/vuejs/vue',
+      releases: [
+        {},
+        { sourceUrl: 'https://github.com/vuejs/vue-next' },
+        { sourceUrl: 'https://gitlab.com/vuejs/vue' },
+        { sourceUrl: 'https://bitbucket.org/vuejs/vue' },
+      ],
+    });
   });
 
   it('does not override sourceDirectory', async () => {
