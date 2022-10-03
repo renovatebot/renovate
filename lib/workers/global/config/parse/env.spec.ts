@@ -37,6 +37,11 @@ describe('workers/global/config/parse/env', () => {
       expect(env.getConfig(envParam).labels).toEqual(['a', 'b', 'c']);
     });
 
+    it('supports list multiple without blank items', () => {
+      const envParam: NodeJS.ProcessEnv = { RENOVATE_LABELS: 'a,b,c,' };
+      expect(env.getConfig(envParam).labels).toEqual(['a', 'b', 'c']);
+    });
+
     it('supports string', () => {
       const envParam: NodeJS.ProcessEnv = { RENOVATE_TOKEN: 'a' };
       expect(env.getConfig(envParam).token).toBe('a');

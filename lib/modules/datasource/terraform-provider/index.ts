@@ -9,6 +9,7 @@ import { regEx } from '../../../util/regex';
 import * as hashicorpVersioning from '../../versioning/hashicorp';
 import { TerraformDatasource } from '../terraform-module/base';
 import type { ServiceDiscoveryResult } from '../terraform-module/types';
+import { createSDBackendURL } from '../terraform-module/utils';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 import type {
   TerraformBuild,
@@ -97,7 +98,12 @@ export class TerraformProviderDatasource extends TerraformDatasource {
     registryUrl: string,
     repository: string
   ): Promise<ReleaseResult> {
-    const backendURL = `${registryUrl}${serviceDiscovery['providers.v1']}${repository}`;
+    const backendURL = createSDBackendURL(
+      registryUrl,
+      'providers.v1',
+      serviceDiscovery,
+      repository
+    );
     const res = (await this.http.getJson<TerraformProvider>(backendURL)).body;
     const dep: ReleaseResult = {
       releases: res.versions.map((version) => ({
@@ -128,7 +134,12 @@ export class TerraformProviderDatasource extends TerraformDatasource {
     registryUrl: string,
     repository: string
   ): Promise<ReleaseResult> {
-    const backendURL = `${registryUrl}${serviceDiscovery['providers.v1']}${repository}/versions`;
+    const backendURL = createSDBackendURL(
+      registryUrl,
+      'providers.v1',
+      serviceDiscovery,
+      `${repository}/versions`
+    );
     const res = (await this.http.getJson<TerraformProviderVersions>(backendURL))
       .body;
     const dep: ReleaseResult = {
@@ -211,7 +222,12 @@ export class TerraformProviderDatasource extends TerraformDatasource {
       logger.trace(`Failed to retrieve service discovery from ${registryURL}`);
       return null;
     }
-    const backendURL = `${registryURL}${serviceDiscovery['providers.v1']}${repository}`;
+    const backendURL = createSDBackendURL(
+      registryURL,
+      'providers.v1',
+      serviceDiscovery,
+      repository
+    );
     const versionsResponse = (
       await this.http.getJson<TerraformRegistryVersions>(
         `${backendURL}/versions`
