@@ -137,12 +137,5 @@ export const presets: Record<string, Preset> = {
         allowedVersions: '/^(8|11|17|21|25|29)/',
       },
     ],
-    // {
-    //   matchDatasources: ['adoptium-java'],
-    //   matchPackageNames: ['java'],
-    //   versioning:
-    //     'regex:^(?<major>\\d+)?(\\.(?<minor>\\d+))?(\\.(?<patch>\\d+))?([+_](?<build>\\d+))?(-(?<compatibility>.*))?$',
-    //   allowedVersions: '/^(11|17|18|19|21)/',
-    // },
   },
 };
