@@ -138,3 +138,9 @@ export function handleCommitError(
   // We don't know why this happened, so this will cause bubble up to a branch error
   throw err;
 }
+
+export function bulkChangesDisallowed(err: Error): boolean {
+  return err.message.includes(
+    'remote: Repository policies do not allow pushes that update more than'
+  );
+}

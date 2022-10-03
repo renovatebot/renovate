@@ -1,6 +1,7 @@
 import * as ansible from './ansible';
 import * as ansibleGalaxy from './ansible-galaxy';
 import * as argoCD from './argocd';
+import * as asdf from './asdf';
 import * as azurePipelines from './azure-pipelines';
 import * as batect from './batect';
 import * as batectWrapper from './batect-wrapper';
@@ -83,6 +84,7 @@ export default api;
 api.set('ansible', ansible);
 api.set('ansible-galaxy', ansibleGalaxy);
 api.set('argocd', argoCD);
+api.set('asdf', asdf);
 api.set('azure-pipelines', azurePipelines);
 api.set('batect', batect);
 api.set('batect-wrapper', batectWrapper);

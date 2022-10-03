@@ -27,14 +27,38 @@ export interface BranchUpgradeCache {
 }
 
 export interface BranchCache {
+  /**
+   *Whether this branch has automerge enabled
+   */
   automerge: boolean;
-  branchName: string;
-  isModified: boolean;
-  prNo: number | null;
-  sha: string | null;
-  parentSha: string | null;
-  upgrades: BranchUpgradeCache[];
+  /**
+   * Hash of the manager fingerprints and the update branch config
+   */
   branchFingerprint?: string;
+  /**
+   * Branch name
+   */
+  branchName: string;
+  /**
+   * Whether a person not listed in gitIgnoredAuthors updated the branch.
+   */
+  isModified: boolean;
+  /**
+   * Parent commit of branch sha
+   */
+  parentSha: string | null;
+  /**
+   * Pr nunber of PR created from this branch
+   */
+  prNo: number | null;
+  /**
+   * The branch's most recent commit SHA
+   */
+  sha: string | null;
+  /**
+   * Details on the dependency upgrades that have been applied in this branch
+   */
+  upgrades: BranchUpgradeCache[];
 }
 
 export interface RepoCacheData {
@@ -50,30 +74,6 @@ export interface RepoCacheData {
   gitConflicts?: GitConflictsCache;
   prComments?: Record<number, Record<string, string>>;
 }
-
-export interface RepoCacheRecordV10 extends RepoCacheData {
-  repository?: string;
-  revision?: number;
-}
-
-export interface RepoCacheRecordV11 {
-  repository: string;
-  revision: number;
-  data: RepoCacheData;
-}
-
-export interface RepoCacheRecordV12 {
-  repository: string;
-  revision: number;
-  payload: string;
-  hash: string;
-}
-
-export interface RepoCacheRecordV13 extends RepoCacheRecordV12 {
-  fingerprint: string;
-}
-
-export type RepoCacheRecord = RepoCacheRecordV13;
 
 export interface RepoCache {
   load(): Promise<void>;

@@ -12,7 +12,10 @@ import { GlobalConfig } from '../../../config/global';
 import { addMeta } from '../../../logger';
 import { hashMap } from '../../../modules/manager';
 import * as _repoCache from '../../../util/cache/repository';
-import type { BranchCache } from '../../../util/cache/repository/types';
+import type {
+  BranchCache,
+  RepoCacheData,
+} from '../../../util/cache/repository/types';
 import { Limit, isLimitReached } from '../../global/limits';
 import { BranchConfig, BranchResult, BranchUpgradeConfig } from '../../types';
 import * as _branchWorker from '../update/branch';
@@ -107,7 +110,7 @@ describe('workers/repository/process/write', () => {
       });
     });
 
-    it('return nowork if same updates', async () => {
+    it('return no-work if branch fingerprint is not different', async () => {
       const branches = partial<BranchConfig[]>([
         {
           branchName: 'new/some-branch',
@@ -137,7 +140,7 @@ describe('workers/repository/process/write', () => {
       expect(await writeUpdates(config, branches)).toBe('done');
     });
 
-    it('updates branch fingerprint when commit is made', async () => {
+    it('updates branch fingerprint when new commit is made', async () => {
       const branches = partial<BranchConfig[]>([
         {
           branchName: 'new/some-branch',
@@ -204,6 +207,40 @@ describe('workers/repository/process/write', () => {
       expect(logger.logger.debug).toHaveBeenCalledWith(
         'No branch cache found for new/some-branch'
       );
+    });
+
+    it('adds branch to cache when cache is not enabled', async () => {
+      const branches = partial<BranchConfig[]>([
+        {
+          branchName: 'new/some-branch',
+          manager: 'npm',
+          upgrades: [
+            {
+              manager: 'npm',
+            } as BranchUpgradeConfig,
+          ],
+        },
+      ]);
+      const repoCacheObj = {} as RepoCacheData;
+      repoCache.getCache.mockReturnValueOnce(repoCacheObj);
+      branchWorker.processBranch.mockResolvedValueOnce({
+        branchExists: true,
+        result: BranchResult.NoWork,
+      });
+      git.getBranchCommit.mockReturnValue('101');
+      git.branchExists.mockReturnValueOnce(true);
+      await writeUpdates(config, branches);
+      expect(logger.logger.debug).not.toHaveBeenCalledWith(
+        'No branch cache found for new/some-branch'
+      );
+      expect(repoCacheObj).toEqual({
+        branches: [
+          {
+            branchName: 'new/some-branch',
+            sha: '101',
+          },
+        ],
+      });
     });
   });
 
