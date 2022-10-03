@@ -69,7 +69,6 @@ describe('modules/manager/tflint-plugin/extract', () => {
       expect(res).toEqual({
         deps: [
           {
-            currentValue: '0.4.0',
             skipReason: 'no-source',
           },
           {
@@ -84,7 +83,6 @@ describe('modules/manager/tflint-plugin/extract', () => {
       expect(res).toEqual({
         deps: [
           {
-            currentValue: '0.4.0',
             depName: 'gitlab.com/terraform-linters/tflint-ruleset-aws',
             depType: 'plugin',
             skipReason: 'unsupported-datasource',
