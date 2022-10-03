@@ -623,10 +623,7 @@ Elements in the `repositories` array can be an object if you wish to define addi
 
 ```js
 {
-  repositories: [
-    { repository: 'g/r1', bumpVersion: true },
-    'g/r2'
-  ],
+  repositories: [{ repository: 'g/r1', bumpVersion: true }, 'g/r2'];
 }
 ```
 

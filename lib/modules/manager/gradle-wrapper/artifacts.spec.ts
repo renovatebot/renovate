@@ -208,6 +208,7 @@ describe('modules/manager/gradle-wrapper/artifacts', () => {
             '-v "/tmp/cache":"/tmp/cache" ' +
             '-e GRADLE_OPTS ' +
             '-e BUILDPACK_CACHE_DIR ' +
+            '-e CONTAINERBASE_CACHE_DIR ' +
             '-w "/tmp/github/some/repo" ' +
             'renovate/sidecar' +
             ' bash -l -c "' +
