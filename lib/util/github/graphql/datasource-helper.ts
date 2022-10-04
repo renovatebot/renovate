@@ -187,7 +187,9 @@ export class GithubGraphqlDatasourceHelper<
     return this.queryCount >= 100;
   }
 
-  private async doQuery(): Promise<GithubGraphqlPayload<GraphqlItem>> {
+  private async doShrinkableQuery(): Promise<
+    GithubGraphqlPayload<GraphqlItem>
+  > {
     let res: GithubGraphqlPayload<GraphqlItem> | null = null;
     let err: Error | null = null;
 
@@ -214,7 +216,7 @@ export class GithubGraphqlDatasourceHelper<
     let hasNextPage: boolean | undefined = true;
     let cursor: string | undefined;
     while (hasNextPage && !this.hasReachedQueryLimit()) {
-      const queryResult = await this.doQuery();
+      const queryResult = await this.doShrinkableQuery();
 
       const pageResultItems = queryResult.nodes
         .map((item) => this.datasourceAdapter.transform(item))
