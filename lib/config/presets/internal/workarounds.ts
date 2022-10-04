@@ -135,7 +135,7 @@ export const presets: Record<string, Preset> = {
         ],
         versioning:
           'regex:^(?<major>\\d+)?(\\.(?<minor>\\d+))?(\\.(?<patch>\\d+))?([\\._+](?<build>\\d+))?(-(?<compatibility>.*))?$',
-        allowedVersions: '/^(8|11|17|21|25|29)/',
+        allowedVersions: '/^(?:8|11|17|21|25|29)(?:\.|$)/',
       },
     ],
   },
