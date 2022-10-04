@@ -1,12 +1,14 @@
 import merge from 'deepmerge';
 import got, { Options, RequestError, Response } from 'got';
 import hasha from 'hasha';
+import { infer as Infer, ZodSchema } from 'zod';
 import { HOST_DISABLED } from '../../constants/error-messages';
 import { pkg } from '../../expose.cjs';
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import * as memCache from '../cache/memory';
 import { clone } from '../clone';
+import { match } from '../schema';
 import { resolveBaseUrl } from '../url';
 import { applyAuthorization, removeAuthorization } from './auth';
 import { hooks } from './hooks';
@@ -24,6 +26,12 @@ import type {
 import './legacy';
 
 export { RequestError as HttpError };
+
+type JsonArgs<T extends HttpOptions> = {
+  url: string;
+  httpOptions?: T;
+  schema?: ZodSchema | undefined;
+};
 
 function cloneResponse<T extends Buffer | string | any>(
   response: HttpResponse<T>
@@ -208,51 +216,159 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
   }
 
   private async requestJson<T = unknown>(
-    url: string,
-    requestOptions?: Opts,
-    internalOptions?: InternalHttpOptions
+    method: InternalHttpOptions['method'],
+    { url, httpOptions: requestOptions, schema }: JsonArgs<Opts>
   ): Promise<HttpResponse<T>> {
-    const { body, ...httpOptions } = { ...requestOptions };
+    const { body, onSchemaError, ...httpOptions } = { ...requestOptions };
     const opts: InternalHttpOptions = {
       ...httpOptions,
-      ...internalOptions,
+      method,
       responseType: 'json',
     };
     if (body) {
       opts.json = body;
     }
     const res = await this.request<T>(url, opts);
+
+    if (schema) {
+      match(schema, res.body, onSchemaError);
+    }
+
     return { ...res, body: res.body };
   }
 
-  getJson<T = unknown>(url: string, options?: Opts): Promise<HttpResponse<T>> {
-    return this.requestJson<T>(url, options);
+  private resolveArgs(
+    arg1: string,
+    arg2: Opts | ZodSchema | undefined,
+    arg3: ZodSchema | undefined
+  ): JsonArgs<Opts> {
+    const res: JsonArgs<Opts> = { url: arg1 };
+
+    if (arg2 instanceof ZodSchema) {
+      res.schema = arg2;
+    } else if (arg2) {
+      res.httpOptions = arg2;
+    }
+
+    if (arg3) {
+      res.schema = arg3;
+    }
+
+    return res;
   }
 
-  headJson<T = unknown>(url: string, options?: Opts): Promise<HttpResponse<T>> {
-    return this.requestJson<T>(url, options, { method: 'head' });
+  getJson<T>(url: string, options?: Opts): Promise<HttpResponse<T>>;
+  getJson<T>(
+    url: string,
+    schema: ZodSchema<T>
+  ): Promise<HttpResponse<Infer<typeof schema>>>;
+  getJson<T>(
+    url: string,
+    options: Opts,
+    schema: ZodSchema<T>
+  ): Promise<HttpResponse<Infer<typeof schema>>>;
+  getJson<T = unknown>(
+    arg1: string,
+    arg2?: Opts | ZodSchema,
+    arg3?: ZodSchema
+  ): Promise<HttpResponse<T>> {
+    const args = this.resolveArgs(arg1, arg2, arg3);
+    return this.requestJson<T>('get', args);
   }
 
-  postJson<T = unknown>(url: string, options?: Opts): Promise<HttpResponse<T>> {
-    return this.requestJson<T>(url, options, { method: 'post' });
+  headJson<T>(url: string, options?: Opts): Promise<HttpResponse<T>>;
+  headJson<T>(
+    url: string,
+    schema: ZodSchema<T>
+  ): Promise<HttpResponse<Infer<typeof schema>>>;
+  headJson<T>(
+    url: string,
+    options: Opts,
+    schema: ZodSchema<T>
+  ): Promise<HttpResponse<Infer<typeof schema>>>;
+  headJson<T = unknown>(
+    arg1: string,
+    arg2?: Opts | ZodSchema,
+    arg3?: ZodSchema
+  ): Promise<HttpResponse<T>> {
+    const args = this.resolveArgs(arg1, arg2, arg3);
+    return this.requestJson<T>('head', args);
   }
 
-  putJson<T = unknown>(url: string, options?: Opts): Promise<HttpResponse<T>> {
-    return this.requestJson<T>(url, options, { method: 'put' });
+  postJson<T>(url: string, options?: Opts): Promise<HttpResponse<T>>;
+  postJson<T>(
+    url: string,
+    schema: ZodSchema<T>
+  ): Promise<HttpResponse<Infer<typeof schema>>>;
+  postJson<T>(
+    url: string,
+    options: Opts,
+    schema: ZodSchema<T>
+  ): Promise<HttpResponse<Infer<typeof schema>>>;
+  postJson<T = unknown>(
+    arg1: string,
+    arg2?: Opts | ZodSchema,
+    arg3?: ZodSchema
+  ): Promise<HttpResponse<T>> {
+    const args = this.resolveArgs(arg1, arg2, arg3);
+    return this.requestJson<T>('post', args);
   }
 
+  putJson<T>(url: string, options?: Opts): Promise<HttpResponse<T>>;
+  putJson<T>(
+    url: string,
+    schema: ZodSchema<T>
+  ): Promise<HttpResponse<Infer<typeof schema>>>;
+  putJson<T>(
+    url: string,
+    options: Opts,
+    schema: ZodSchema<T>
+  ): Promise<HttpResponse<Infer<typeof schema>>>;
+  putJson<T = unknown>(
+    arg1: string,
+    arg2?: Opts | ZodSchema,
+    arg3?: ZodSchema
+  ): Promise<HttpResponse<T>> {
+    const args = this.resolveArgs(arg1, arg2, arg3);
+    return this.requestJson<T>('put', args);
+  }
+
+  patchJson<T>(url: string, options?: Opts): Promise<HttpResponse<T>>;
+  patchJson<T>(
+    url: string,
+    schema: ZodSchema<T>
+  ): Promise<HttpResponse<Infer<typeof schema>>>;
+  patchJson<T>(
+    url: string,
+    options: Opts,
+    schema: ZodSchema<T>
+  ): Promise<HttpResponse<Infer<typeof schema>>>;
   patchJson<T = unknown>(
-    url: string,
-    options?: Opts
+    arg1: string,
+    arg2?: Opts | ZodSchema,
+    arg3?: ZodSchema
   ): Promise<HttpResponse<T>> {
-    return this.requestJson<T>(url, options, { method: 'patch' });
+    const args = this.resolveArgs(arg1, arg2, arg3);
+    return this.requestJson<T>('patch', args);
   }
 
-  deleteJson<T = unknown>(
+  deleteJson<T>(url: string, options?: Opts): Promise<HttpResponse<T>>;
+  deleteJson<T>(
     url: string,
-    options?: Opts
+    schema: ZodSchema<T>
+  ): Promise<HttpResponse<Infer<typeof schema>>>;
+  deleteJson<T>(
+    url: string,
+    options: Opts,
+    schema: ZodSchema<T>
+  ): Promise<HttpResponse<Infer<typeof schema>>>;
+  deleteJson<T = unknown>(
+    arg1: string,
+    arg2?: Opts | ZodSchema,
+    arg3?: ZodSchema
   ): Promise<HttpResponse<T>> {
-    return this.requestJson<T>(url, options, { method: 'delete' });
+    const args = this.resolveArgs(arg1, arg2, arg3);
+    return this.requestJson<T>('delete', args);
   }
 
   stream(url: string, options?: HttpOptions): NodeJS.ReadableStream {

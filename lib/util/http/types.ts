@@ -63,6 +63,8 @@ export interface HttpOptions {
 
   token?: string;
   useCache?: boolean;
+
+  onSchemaError?: 'warn' | 'throw';
 }
 
 export interface InternalHttpOptions extends HttpOptions {
