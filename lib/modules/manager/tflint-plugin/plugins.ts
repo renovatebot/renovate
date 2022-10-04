@@ -3,7 +3,7 @@ import { logger } from '../../../logger';
 import { regEx } from '../../../util/regex';
 import { GithubReleasesDatasource } from '../../datasource/github-releases';
 import type { PackageDependency } from '../types';
-import type { ExtractionResult, TFLintManagerData } from './types';
+import type { ExtractionResult } from './types';
 import { keyValueExtractionRegex } from './util';
 
 export function extractTFLintPlugin(
@@ -12,7 +12,7 @@ export function extractTFLintPlugin(
   pluginName: string
 ): ExtractionResult {
   let lineNumber = startingLine;
-  const deps: PackageDependency<TFLintManagerData>[] = [];
+  const deps: PackageDependency[] = [];
 
   let pluginSource: string | null = null;
   let currentVersion: string | null = null;
@@ -64,7 +64,7 @@ function analyseTFLintPlugin(
   source: string | null,
   version: string | null
 ): PackageDependency {
-  const dep: PackageDependency<TFLintManagerData> = {};
+  const dep: PackageDependency = {};
 
   if (source) {
     dep.depType = 'plugin';

@@ -2,7 +2,7 @@ import { logger } from '../../../logger';
 import { newlineRegex, regEx } from '../../../util/regex';
 import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
 import { extractTFLintPlugin } from './plugins';
-import type { ExtractionResult, TFLintManagerData } from './types';
+import type { ExtractionResult } from './types';
 import { checkFileContainsPlugins } from './util';
 
 const dependencyBlockExtractionRegex = regEx(
@@ -23,7 +23,7 @@ export function extractPackageFile(
     return null;
   }
 
-  let deps: PackageDependency<TFLintManagerData>[] = [];
+  let deps: PackageDependency[] = [];
 
   try {
     const lines = content.split(newlineRegex);
