@@ -51,34 +51,23 @@ async function generateBranchCache(
   const { baseBranch, branchName } = branch;
   try {
     const sha = getBranchCommit(branchName) ?? null;
+    // TODO: fix types (#7154)
     const baseBranchSha = getBranchCommit(baseBranch!)!;
     let prNo = null;
     let parentSha = null;
+    let isModified = false;
+    let isBehindBase = false;
     if (sha) {
       parentSha = await getBranchParentSha(branchName);
       const branchPr = await platform.getBranchPr(branchName);
       if (branchPr) {
         prNo = branchPr.number;
       }
+      isModified = await isBranchModified(branchName);
+      // TODO: fix types (#7154)
+      isBehindBase = await isBranchBehindBase(branchName, baseBranch!);
     }
     const automerge = !!branch.automerge;
-    let isModified = false;
-    if (sha) {
-      try {
-        isModified = await isBranchModified(branchName);
-      } catch (err) /* istanbul ignore next */ {
-        // Do nothing
-      }
-    }
-    let isBehindBase = false;
-    if (sha) {
-      try {
-        // TODO: fix types (#7154)
-        isBehindBase = await isBranchBehindBase(branchName, baseBranch!);
-      } catch (err) /* istanbul ignore next */ {
-        // Do nothing
-      }
-    }
     const upgrades: BranchUpgradeCache[] = branch.upgrades
       ? branch.upgrades.map(generateBranchUpgradeCache)
       : [];
@@ -86,6 +75,7 @@ async function generateBranchCache(
     return {
       automerge,
       baseBranchSha,
+      // TODO: fix types (#7154)
       baseBranch: baseBranch!,
       branchFingerprint,
       branchName,

@@ -7,7 +7,7 @@ import { getBranchCommit } from '.';
  *
  * ie. when branch is created/updated
  */
-export function setBranchCommit(
+export function setBranchNewCommit(
   branchName: string,
   baseBranch: string,
   commitSha: string

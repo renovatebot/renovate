@@ -7,7 +7,7 @@ import { hashMap } from '../../../modules/manager';
 import { getCache } from '../../../util/cache/repository';
 import type { BranchCache } from '../../../util/cache/repository/types';
 import { branchExists, getBranchCommit } from '../../../util/git';
-import { setBranchCommit } from '../../../util/git/set-branch-commit';
+import { setBranchNewCommit } from '../../../util/git/set-branch-commit';
 import { Limit, incLimitedValue, setMaxLimit } from '../../global/limits';
 import { BranchConfig, BranchResult } from '../../types';
 import { processBranch } from '../update/branch';
@@ -144,7 +144,7 @@ export async function writeUpdates(
 
     if (res?.commitSha) {
       // TODO: base branch name cannot be undefined - fix optional types (#7154)
-      setBranchCommit(branchName, baseBranch!, res.commitSha);
+      setBranchNewCommit(branchName, baseBranch!, res.commitSha);
     }
     if (
       branch.result === BranchResult.Automerged &&

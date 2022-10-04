@@ -1,7 +1,7 @@
 import { mocked, partial } from '../../../test/util';
 import * as _repositoryCache from '../cache/repository';
 import type { BranchCache, RepoCacheData } from '../cache/repository/types';
-import { setBranchCommit } from './set-branch-commit';
+import { setBranchNewCommit } from './set-branch-commit';
 import * as _git from '.';
 
 jest.mock('.');
@@ -20,7 +20,7 @@ describe('util/git/set-branch-commit', () => {
   describe('setBranchCommit', () => {
     it('sets new branch in cache if it doesn not exist', () => {
       git.getBranchCommit.mockReturnValueOnce('base_SHA');
-      setBranchCommit('branch_name', 'base_branch', 'SHA');
+      setBranchNewCommit('branch_name', 'base_branch', 'SHA');
       expect(repoCache.branches).toEqual([
         {
           branchName: 'branch_name',
@@ -50,7 +50,7 @@ describe('util/git/set-branch-commit', () => {
       };
       git.getBranchCommit.mockReturnValueOnce('base_SHA');
       repositoryCache.getCache.mockReturnValue(repoCache);
-      setBranchCommit('branch_name', 'base_branch', 'SHA');
+      setBranchNewCommit('branch_name', 'base_branch', 'SHA');
       expect(repoCache.branches).toEqual([
         {
           branchName: 'branch_name',
