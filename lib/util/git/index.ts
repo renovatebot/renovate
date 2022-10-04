@@ -36,7 +36,11 @@ import {
   getCachedConflictResult,
   setCachedConflictResult,
 } from './conflicts-cache';
-import { checkForPlatformFailure, handleCommitError } from './error';
+import {
+  bulkChangesDisallowed,
+  checkForPlatformFailure,
+  handleCommitError,
+} from './error';
 import {
   getCachedModifiedResult,
   setCachedModifiedResult,
@@ -1149,6 +1153,11 @@ export async function pushCommitToRenovateRef(
  *
  *   $ git push --delete origin refs/renovate/foo refs/renovate/bar refs/renovate/baz
  *
+ * If Step 2 fails because the repo doesn't allow bulk changes, we'll remove them one by one instead:
+ *
+ *   $ git push --delete origin refs/renovate/foo
+ *   $ git push --delete origin refs/renovate/bar
+ *   $ git push --delete origin refs/renovate/baz
  */
 export async function clearRenovateRefs(): Promise<void> {
   if (!gitInitialized || !remoteRefsExist) {
@@ -1181,8 +1190,20 @@ export async function clearRenovateRefs(): Promise<void> {
   obsoleteRefs.push(...renovateBranchRefs);
 
   if (obsoleteRefs.length) {
-    const pushOpts = ['--delete', 'origin', ...obsoleteRefs];
-    await git.push(pushOpts);
+    try {
+      const pushOpts = ['--delete', 'origin', ...obsoleteRefs];
+      await git.push(pushOpts);
+    } catch (err) {
+      /* istanbul ignore else */
+      if (bulkChangesDisallowed(err)) {
+        for (const ref of obsoleteRefs) {
+          const pushOpts = ['--delete', 'origin', ref];
+          await git.push(pushOpts);
+        }
+      } else {
+        throw err;
+      }
+    }
   }
 
   remoteRefsExist = false;

@@ -127,7 +127,7 @@ export async function updateLockedDependency(
         files[packageFile!] = packageFileContent!;
         // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
         files[lockFile!] = lockFileContent!;
-        return { status, files: files };
+        return { status, files };
       }
       return { status };
     }

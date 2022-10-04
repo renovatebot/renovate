@@ -215,7 +215,7 @@ describe('modules/datasource/maven/index', () => {
       snapshots: [
         {
           version: '1.0.3-SNAPSHOT',
-          meta: meta,
+          meta,
           jarStatus: 200,
         },
       ],
