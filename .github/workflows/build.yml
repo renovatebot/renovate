@@ -143,7 +143,7 @@ jobs:
 
   release:
     needs: [lint, test]
-    if: github.event_name != 'pull_request'
+    if: github.repository == 'renovatebot/renovate' && github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     # release shouldn't need more than 5 min
     timeout-minutes: 15
