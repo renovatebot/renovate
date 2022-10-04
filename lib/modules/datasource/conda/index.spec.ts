@@ -81,7 +81,11 @@ describe('modules/datasource/conda/index', () => {
       httpMock
         .scope('https://api.anaconda.org/package/conda-forge')
         .get(`/${depName}`)
-        .reply(200, Fixtures.get('pytest.json'));
+        .reply(200, {
+          html_url: 'http://anaconda.org/anaconda/pytest',
+          dev_url: 'https://github.com/pytest-dev/pytest/',
+          versions: ['2.7.0', '2.5.1', '2.6.0'],
+        });
       const config = {
         registryUrls: [
           'https://api.anaconda.org/package/rapids',
@@ -97,7 +101,7 @@ describe('modules/datasource/conda/index', () => {
       expect(res.registryUrl).toBe(
         'https://api.anaconda.org/package/conda-forge'
       );
-      expect(res?.releases).toHaveLength(94);
+      expect(res?.releases).toHaveLength(3);
     });
   });
 });
