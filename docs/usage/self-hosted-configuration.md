@@ -768,7 +768,7 @@ Firt, you have to invok/mark string literals that you want to translate, and the
 
 Now you can clone [renovatebot/renovate-i18n](xingxing/renovate-i18n-zh-cn) repository, manually update the `messages.pot`, or wait for the daily action to update that file, please read documents about i18n in that project for more details.
 
-And then you can translate your own edition by inovking `msginit` program, and then invoke `msgmerge` program to add more `msgid`, refer the repository [xingxing/renovate-i18n-zh-cn](xingxing/renovate-i18n-zh-cn).
+And then you can translate your own edition by invoking `msginit` program, and then invoke `msgmerge` program to add more `msgid`, refer the repository [xingxing/renovate-i18n-zh-cn](xingxing/renovate-i18n-zh-cn).
 
 ## unicodeEmoji
 
