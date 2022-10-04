@@ -12,7 +12,7 @@ This includes libraries and plugins as well as the Gradle Wrapper.
 
 The `config:base` preset limits Renovate update to Java runtimes to those which are LTS versions. This is handled by the workaround `workarounds:javaLTSVersions`.
 
-If you wish to have all major updates suggested then you can add the following `ignorePreset` rule:
+If you want Renovate to offer all `major` Java updates then add `workarounds:javaLTSVersions` to the `ignorePreset` array:
 
 ```
 {
