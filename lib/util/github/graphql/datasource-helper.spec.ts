@@ -52,11 +52,11 @@ const adapter: GithubGraphqlDatasourceAdapter<
 function resp(
   nodes: TestAdapterInput[],
   cursor: string | undefined = undefined,
-  isPrivate = false
+  isRepoPrivate = false
 ): GithubGraphqlResponse<GithubGraphqlRepoResponse<TestAdapterInput>> {
   const data: GithubGraphqlRepoResponse<TestAdapterInput> = {
     repository: {
-      isPrivate,
+      isRepoPrivate,
       payload: { nodes },
     },
   };

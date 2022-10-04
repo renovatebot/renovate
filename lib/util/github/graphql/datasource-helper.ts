@@ -41,7 +41,7 @@ export class GithubGraphqlDatasourceHelper<
     return `
       query($owner: String!, $name: String!, $cursor: String, $count: Int!) {
         repository(owner: $owner, name: $name) {
-          isPrivate
+          isRepoPrivate: isPrivate
           payload: ${payloadQuery}
         }
       }
@@ -163,7 +163,7 @@ export class GithubGraphqlDatasourceHelper<
 
     this.queryCount += 1;
 
-    const isRepoPrivate = data.repository.isPrivate;
+    const isRepoPrivate = data.repository.isRepoPrivate;
     const res = { ...data.repository.payload, isRepoPrivate };
     return [res, null];
   }

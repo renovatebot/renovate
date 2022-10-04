@@ -3,12 +3,29 @@ export interface GithubDatasourceItem {
   releaseTimestamp: string;
 }
 
+/**
+ * Datasource-specific structure
+ */
 export interface GithubGraphqlDatasourceAdapter<
   Input,
   Output extends GithubDatasourceItem
 > {
+  /**
+   * Used for creating datasource-unique cache key
+   */
   key: string;
+
+  /**
+   * Used to define datasource-unique GraphQL query
+   */
   query: string;
+
+  /**
+   * Used for transforming GraphQL nodes to objects
+   * that have `version` and `releaseTimestamp` fields.
+   *
+   * @param input GraphQL node data
+   */
   transform(input: Input): Output | null;
 }
 
@@ -24,18 +41,28 @@ export interface GithubGraphqlRepoResponsePayload<T> {
 
 export interface GithubGraphqlRepoResponse<T> {
   repository: {
-    isPrivate?: boolean;
+    isRepoPrivate?: boolean;
     payload: GithubGraphqlRepoResponsePayload<T>;
   };
 }
 
+/**
+ * Payload data unified with `isRepoPrivate` flag moved from upper level
+ */
 export type GithubGraphqlPayload<T> =
   GithubGraphqlRepoResponse<T>['repository']['payload'] & {
-    isRepoPrivate: GithubGraphqlRepoResponse<T>['repository']['isPrivate'];
+    isRepoPrivate: GithubGraphqlRepoResponse<T>['repository']['isRepoPrivate'];
   };
 
 export interface GithubPackageConfig {
+  /**
+   * Example: renovatebot/renovate
+   */
   packageName: string;
+
+  /**
+   * Default: https://api.github.com
+   */
   registryUrl?: string;
 }
 
@@ -53,6 +80,9 @@ export interface GithubGraphqlRelease {
   description: string;
 }
 
+/**
+ * Result of GraphQL response transformation for releases (via adapter)
+ */
 export interface GithubReleaseItem extends GithubDatasourceItem {
   isStable?: boolean;
   url: string;
@@ -83,11 +113,17 @@ export interface GithubGraphqlTag {
       };
 }
 
+/**
+ * Result of GraphQL response transformation for tags (via tags)
+ */
 export interface GithubTagItem extends GithubDatasourceItem {
   newDigest: string;
   gitRef: string;
 }
 
+/**
+ * Parameters being passed as GraphQL variables
+ */
 export interface GithubGraphqlRepoParams {
   owner: string;
   name: string;
