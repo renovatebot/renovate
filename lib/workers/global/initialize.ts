@@ -67,7 +67,6 @@ function setGlobalHostRules(config: RenovateConfig): void {
 
 async function setI18n(config: AllConfig): Promise<void> {
   await initI18n(
-    config.locale === undefined ? 'en' : config.locale,
     config.translationsFilePath === undefined ? '' : config.translationsFilePath
   );
 }

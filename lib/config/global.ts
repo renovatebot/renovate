@@ -26,7 +26,6 @@ export class GlobalConfig {
     'gitTimeout',
     'platform',
     'endpoint',
-    'locale',
     'translationsFilePath',
   ];
 

@@ -36,21 +36,14 @@ export function getDomain(): string {
 // Renovate use single domain to reduce the complexity of 1i8n
 const domain = 'messages';
 
-export async function initI18n(
-  locale: string,
-  translationsFilePath: string
-): Promise<void> {
-  logger.debug(
-    `locale ${locale}, translationsFilePath ${translationsFilePath}`
-  );
-
-  // The en is the vanilla edition, do not need a PO file to translate
-  if (locale === 'en') {
-    gt.setLocale('en');
-    return;
-  }
-
+export async function initI18n(translationsFilePath: string): Promise<void> {
   try {
+    if (translationsFilePath === '') {
+      gt.setLocale('en');
+      logger.warn('Passed empty string to --translations-file-path');
+      return;
+    }
+
     const translationsContent = await readSystemFile(
       translationsFilePath,
       'utf8'
@@ -61,8 +54,10 @@ export async function initI18n(
     }
 
     const parsedTranslations = po.parse(translationsContent);
-    gt.addTranslations(locale, domain, parsedTranslations);
+    const locale: string = parsedTranslations.headers['Language'];
+
     gt.setLocale(locale);
+    gt.addTranslations(locale, domain, parsedTranslations);
   } catch (err) {
     logger.error(
       { err },
