@@ -1,5 +1,4 @@
 import { join } from 'upath';
-import { Fixtures } from '../../../../test/fixtures';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import { extractPackageFile } from '.';
@@ -33,7 +32,6 @@ config {
   }
 
   varfile = ["example1.tfvars", "example2.tfvars"]
-  variables = ["foo=bar", "bar=[\"baz\"]"]
 }
 
 plugin "aws" {
