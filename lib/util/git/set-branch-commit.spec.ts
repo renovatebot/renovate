@@ -1,4 +1,4 @@
-import { mocked, partial } from '../../../test/util';
+import { logger, mocked, partial } from '../../../test/util';
 import * as _repositoryCache from '../cache/repository';
 import type { BranchCache, RepoCacheData } from '../cache/repository/types';
 import { setBranchNewCommit } from './set-branch-commit';
@@ -21,6 +21,9 @@ describe('util/git/set-branch-commit', () => {
     it('sets new branch in cache if it doesn not exist', () => {
       git.getBranchCommit.mockReturnValueOnce('base_SHA');
       setBranchNewCommit('branch_name', 'base_branch', 'SHA');
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        'setBranchCommit(): Branch cache not present for branch_name'
+      );
       expect(repoCache.branches).toEqual([
         {
           branchName: 'branch_name',
