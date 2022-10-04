@@ -758,7 +758,7 @@ Firt, you have to invok/mark string literals that you want to translate, and the
 
 ```typescript
 {
-  description: gt.gettext(
+  description: gt._(
     'Ignore `node_modules`, `bower_components`, `vendor` and various test/tests directories.'
   );
 }

@@ -1,41 +1,41 @@
-import { gettext } from '../../../i18n';
+import { _ } from '../../../i18n';
 import type { Preset } from '../types';
 
 export const presets: Record<string, Preset> = {
   earlyMondays: {
-    description: gettext('Weekly schedule on early Monday mornings.'),
+    description: _('Weekly schedule on early Monday mornings.'),
     schedule: ['before 3am on Monday'],
   },
   daily: {
-    description: gettext('Schedule daily.'),
+    description: _('Schedule daily.'),
     schedule: ['before 2am'],
   },
   weekly: {
-    description: gettext('Schedule weekly.'),
+    description: _('Schedule weekly.'),
     extends: ['schedule:earlyMondays'],
   },
   monthly: {
-    description: gettext('Schedule monthly.'),
+    description: _('Schedule monthly.'),
     schedule: ['before 3am on the first day of the month'],
   },
   quarterly: {
-    description: gettext('Schedule quarterly.'),
+    description: _('Schedule quarterly.'),
     schedule: ['every 3 months on the first day of the month'],
   },
   yearly: {
-    description: gettext('Schedule once a year (not recommended).'),
+    description: _('Schedule once a year (not recommended).'),
     schedule: ['every 12 months on the first day of the month'],
   },
   weekends: {
-    description: gettext('Schedule for weekends.'),
+    description: _('Schedule for weekends.'),
     schedule: ['every weekend'],
   },
   weekdays: {
-    description: gettext('Schedule for weekdays.'),
+    description: _('Schedule for weekdays.'),
     schedule: ['every weekday'],
   },
   nonOfficeHours: {
-    description: gettext(
+    description: _(
       'Schedule for typical non-office hours (night time and weekends).'
     ),
     schedule: [

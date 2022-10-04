@@ -1,15 +1,15 @@
-import { gettext } from '../../../i18n';
+import { _ } from '../../../i18n';
 import type { Preset } from '../types';
 
 export const presets: Record<string, Preset> = {
   dockerCompose: {
-    description: gettext('Enable Docker Compose image updating.'),
+    description: _('Enable Docker Compose image updating.'),
     'docker-compose': {
       enabled: true,
     },
   },
   dockerVersions: {
-    description: gettext('Upgrade Docker tags to newer versions.'),
+    description: _('Upgrade Docker tags to newer versions.'),
     docker: {
       major: {
         enabled: true,
@@ -20,7 +20,7 @@ export const presets: Record<string, Preset> = {
     },
   },
   buildkite: {
-    description: gettext('Enable Buildkite functionality.'),
+    description: _('Enable Buildkite functionality.'),
     buildkite: {
       enabled: true,
     },

@@ -5,12 +5,8 @@ import { readSystemFile } from '../util/fs';
 
 const gt = new Gettext();
 
-export function gettext(msgid: string): string {
-  return gt.gettext(msgid);
-}
-
 export function _(msgid: string): string {
-  return gettext(msgid);
+  return gt.gettext(msgid);
 }
 
 export function ngettext(

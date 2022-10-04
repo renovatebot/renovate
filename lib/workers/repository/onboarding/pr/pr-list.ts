@@ -1,6 +1,6 @@
 import * as util from 'util';
 import type { RenovateConfig } from '../../../../config/types';
-import { gettext, ngettext, pgettext } from '../../../../i18n';
+import { _, ngettext, pgettext } from '../../../../i18n';
 import { logger } from '../../../../logger';
 import { emojify } from '../../../../util/emoji';
 import { regEx } from '../../../../util/regex';
@@ -12,9 +12,9 @@ export function getPrList(
 ): string {
   logger.debug('getPrList()');
   logger.trace({ config });
-  let prDesc = `\n### ${gettext('What to Expect')}\n\n`;
+  let prDesc = `\n### ${_('What to Expect')}\n\n`;
   if (!branches.length) {
-    return `${prDesc}${gettext(
+    return `${prDesc}${_(
       'It looks like your repository dependencies are already up-to-date and no Pull Requests will be necessary right away.'
     )}\n`;
   }
@@ -53,7 +53,7 @@ export function getPrList(
     for (const upgrade of branch.upgrades) {
       let text = '';
       if (upgrade.updateType === 'lockFileMaintenance') {
-        text += `  - ${gettext(
+        text += `  - ${_(
           'Regenerate lock files to use latest dependency versions'
         )}`;
       } else {
@@ -96,7 +96,7 @@ export function getPrList(
   ) {
     prDesc += emojify(
       `<br />\n\n:children_crossing: ${util.format(
-        gettext(
+        _(
           "Branch creation will be limited to maximum %d per hour, so it doesn't swamp any CI resources or spam the project. See docs for `prhourlylimit` for details."
         ),
         prHourlyLimit

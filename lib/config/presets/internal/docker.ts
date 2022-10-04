@@ -1,9 +1,9 @@
-import { gettext } from '../../../i18n';
+import { _ } from '../../../i18n';
 import type { Preset } from '../types';
 
 export const presets: Record<string, Preset> = {
   disable: {
-    description: gettext('Disable Docker updates.'),
+    description: _('Disable Docker updates.'),
     docker: {
       enabled: false,
     },
@@ -15,7 +15,7 @@ export const presets: Record<string, Preset> = {
     },
   },
   enableMajor: {
-    description: gettext('Enable Docker `major` updates.'),
+    description: _('Enable Docker `major` updates.'),
     packageRules: [
       {
         matchDatasources: ['docker'],
@@ -25,7 +25,7 @@ export const presets: Record<string, Preset> = {
     ],
   },
   disableMajor: {
-    description: gettext('Disable Docker `major` updates.'),
+    description: _('Disable Docker `major` updates.'),
     packageRules: [
       {
         matchDatasources: ['docker'],
@@ -35,7 +35,7 @@ export const presets: Record<string, Preset> = {
     ],
   },
   pinDigests: {
-    description: gettext('Pin Docker digests.'),
+    description: _('Pin Docker digests.'),
     docker: {
       pinDigests: true,
     },

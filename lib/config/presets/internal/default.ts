@@ -1,23 +1,23 @@
-import { gettext } from '../../../i18n';
+import { _ } from '../../../i18n';
 import type { Preset } from '../types';
 
 export const presets: Record<string, Preset> = {
   enableRenovate: {
-    description: gettext('Enable Renovate.'),
+    description: _('Enable Renovate.'),
     enabled: true,
   },
   disableRenovate: {
-    description: gettext('Disable Renovate.'),
+    description: _('Disable Renovate.'),
     enabled: false,
   },
   disableMajorUpdates: {
-    description: gettext('Disable `major` updates.'),
+    description: _('Disable `major` updates.'),
     major: {
       enabled: false,
     },
   },
   disableDomain: {
-    description: gettext('Disable requests to a particular domain.'),
+    description: _('Disable requests to a particular domain.'),
     hostRules: [
       {
         matchHost: '{{arg0}}',
@@ -26,7 +26,7 @@ export const presets: Record<string, Preset> = {
     ],
   },
   disableHost: {
-    description: gettext('Disable requests to a particular host.'),
+    description: _('Disable requests to a particular host.'),
     hostRules: [
       {
         matchHost: 'https://{{arg0}}',
@@ -35,13 +35,13 @@ export const presets: Record<string, Preset> = {
     ],
   },
   enablePreCommit: {
-    description: gettext('Enable the pre-commit manager.'),
+    description: _('Enable the pre-commit manager.'),
     'pre-commit': {
       enabled: true,
     },
   },
   ignoreModulesAndTests: {
-    description: gettext(
+    description: _(
       'Ignore `node_modules`, `bower_components`, `vendor` and various test/tests directories.'
     ),
     ignorePaths: [
@@ -56,27 +56,25 @@ export const presets: Record<string, Preset> = {
     ],
   },
   includeNodeModules: {
-    description: gettext(
+    description: _(
       'Include `package.json` files found within `node_modules` folders or `bower_components`.'
     ),
     ignorePaths: [],
   },
   pinVersions: {
-    description: gettext(
+    description: _(
       'Use version pinning (maintain a single version only and not SemVer ranges).'
     ),
     rangeStrategy: 'pin',
   },
   preserveSemverRanges: {
-    description: gettext(
+    description: _(
       'Preserve (but continue to upgrade) any existing SemVer ranges.'
     ),
     packageRules: [{ matchPackagePatterns: ['*'], rangeStrategy: 'replace' }],
   },
   pinAllExceptPeerDependencies: {
-    description: gettext(
-      'Pin all dependency versions except `peerDependencies`.'
-    ),
+    description: _('Pin all dependency versions except `peerDependencies`.'),
     packageRules: [
       {
         matchPackagePatterns: ['*'],
@@ -89,7 +87,7 @@ export const presets: Record<string, Preset> = {
     ],
   },
   pinDependencies: {
-    description: gettext(
+    description: _(
       'Pin dependency versions where `depType=dependencies`. Usually applies only to non-dev dependencies in `package.json`.'
     ),
     packageRules: [
@@ -100,7 +98,7 @@ export const presets: Record<string, Preset> = {
     ],
   },
   pinDevDependencies: {
-    description: gettext('Pin dependency versions for `devDependencies`.'),
+    description: _('Pin dependency versions for `devDependencies`.'),
     packageRules: [
       {
         matchDepTypes: ['devDependencies'],
@@ -109,7 +107,7 @@ export const presets: Record<string, Preset> = {
     ],
   },
   pinOnlyDevDependencies: {
-    description: gettext(
+    description: _(
       'Pin dependency versions for `devDependencies` and retain SemVer ranges for others.'
     ),
     packageRules: [
@@ -128,60 +126,60 @@ export const presets: Record<string, Preset> = {
     ],
   },
   autodetectPinVersions: {
-    description: gettext(
+    description: _(
       'Autodetect whether to pin dependencies or maintain ranges.'
     ),
     rangeStrategy: 'auto',
   },
   separateMajorReleases: {
-    description: gettext(
+    description: _(
       'Separate `major` versions of dependencies into individual branches/PRs.'
     ),
     separateMajorMinor: true,
   },
   separateMultipleMajorReleases: {
-    description: gettext(
+    description: _(
       'Separate each `major` version of dependencies into individual branches/PRs.'
     ),
     separateMajorMinor: true,
     separateMultipleMajor: true,
   },
   separatePatchReleases: {
-    description: gettext(
+    description: _(
       'Separate `patch` and `minor` releases of dependencies into separate PRs.'
     ),
     separateMinorPatch: true,
   },
   combinePatchMinorReleases: {
-    description: gettext(
+    description: _(
       'Do not separate `patch` and `minor` upgrades into separate PRs for the same dependency.'
     ),
     separateMinorPatch: false,
   },
   renovatePrefix: {
-    description: gettext('Prefix `renovate/` to all branch names.'),
+    description: _('Prefix `renovate/` to all branch names.'),
     branchPrefix: 'renovate/',
   },
   semanticCommitType: {
-    description: gettext(
+    description: _(
       'Use `{{arg0}}` as semantic commit type for commit messages and PR titles.'
     ),
     semanticCommitType: '{{arg0}}',
   },
   semanticPrefixChore: {
-    description: gettext(
+    description: _(
       'Use `chore` as semantic commit type for commit messages and PR titles.'
     ),
     extends: [':semanticCommitType(chore)'],
   },
   semanticPrefixFix: {
-    description: gettext(
+    description: _(
       'Use `fix` as semantic commit type for commit messages and PR titles.'
     ),
     extends: [':semanticCommitType(fix)'],
   },
   disablePeerDependencies: {
-    description: gettext('Do not renovate `peerDependencies` versions/ranges.'),
+    description: _('Do not renovate `peerDependencies` versions/ranges.'),
     packageRules: [
       {
         matchDepTypes: ['peerDependencies'],
@@ -190,7 +188,7 @@ export const presets: Record<string, Preset> = {
     ],
   },
   disableDevDependencies: {
-    description: gettext('Do not renovate `devDependencies` versions/ranges.'),
+    description: _('Do not renovate `devDependencies` versions/ranges.'),
     packageRules: [
       {
         matchDepTypes: ['devDependencies'],
@@ -199,13 +197,13 @@ export const presets: Record<string, Preset> = {
     ],
   },
   disableDigestUpdates: {
-    description: gettext('Disable `digest` and Git hash updates.'),
+    description: _('Disable `digest` and Git hash updates.'),
     digest: {
       enabled: false,
     },
   },
   semanticPrefixFixDepsChoreOthers: {
-    description: gettext(
+    description: _(
       'If Renovate detects semantic commits, it will use semantic commit type `fix` for dependencies and `chore` for all others.'
     ),
     packageRules: [
@@ -232,7 +230,7 @@ export const presets: Record<string, Preset> = {
     ],
   },
   semanticCommitTypeAll: {
-    description: gettext(
+    description: _(
       'If Renovate detects semantic commits, it will use semantic commit type `{{arg0}}` for all commits.'
     ),
     packageRules: [
@@ -243,74 +241,68 @@ export const presets: Record<string, Preset> = {
     ],
   },
   rebaseStalePrs: {
-    description: gettext(
+    description: _(
       'Rebase existing PRs any time the base branch has been updated.'
     ),
     rebaseWhen: 'behind-base-branch',
   },
   prImmediately: {
-    description: gettext('Raise PRs immediately (after branch is created).'),
+    description: _('Raise PRs immediately (after branch is created).'),
     prCreation: 'immediate',
   },
   prNotPending: {
-    description: gettext(
+    description: _(
       'Wait for branch tests to pass or fail before creating the PR.'
     ),
     prCreation: 'not-pending',
   },
   prHourlyLimitNone: {
-    description: gettext('Removes rate limit for PR creation per hour.'),
+    description: _('Removes rate limit for PR creation per hour.'),
     prHourlyLimit: 0,
   },
   prHourlyLimit1: {
-    description: gettext(
-      'Rate limit PR creation to a maximum of one per hour.'
-    ),
+    description: _('Rate limit PR creation to a maximum of one per hour.'),
     prHourlyLimit: 1,
   },
   prHourlyLimit2: {
-    description: gettext(
-      'Rate limit PR creation to a maximum of two per hour.'
-    ),
+    description: _('Rate limit PR creation to a maximum of two per hour.'),
     prHourlyLimit: 2,
   },
   prHourlyLimit4: {
-    description: gettext(
-      'Rate limit PR creation to a maximum of four per hour.'
-    ),
+    description: _('Rate limit PR creation to a maximum of four per hour.'),
     prHourlyLimit: 4,
   },
   prConcurrentLimitNone: {
-    description: gettext('Remove limit for open PRs at any time.'),
+    description: _('Remove limit for open PRs at any time.'),
     prConcurrentLimit: 0,
   },
   prConcurrentLimit10: {
-    description: gettext('Limit to maximum 10 open PRs at any time.'),
+    description: _('Limit to maximum 10 open PRs at any time.'),
     prConcurrentLimit: 10,
   },
   prConcurrentLimit20: {
-    description: gettext('Limit to maximum 20 open PRs at any time.'),
+    description: _('Limit to maximum 20 open PRs at any time.'),
     prConcurrentLimit: 20,
   },
   disableRateLimiting: {
-    description: gettext('Remove hourly and concurrent rate limits.'),
+    description: _('Remove hourly and concurrent rate limits.'),
     prConcurrentLimit: 0,
     prHourlyLimit: 0,
   },
   automergeDisabled: {
-    description: gettext(
+    description: _(
       'Disable automerging feature - wait for humans to merge all PRs.'
     ),
     automerge: false,
   },
   automergeDigest: {
-    description: gettext('Automerge `digest` upgrades if they pass tests.'),
+    description: _('Automerge `digest` upgrades if they pass tests.'),
     digest: {
       automerge: true,
     },
   },
   automergePatch: {
-    description: gettext('Automerge `patch` upgrades if they pass tests.'),
+    description: _('Automerge `patch` upgrades if they pass tests.'),
     separateMinorPatch: true,
     patch: {
       automerge: true,
@@ -323,7 +315,7 @@ export const presets: Record<string, Preset> = {
     },
   },
   automergeMinor: {
-    description: gettext(
+    description: _(
       'Automerge `patch` and `minor` upgrades if they pass tests.'
     ),
     minor: {
@@ -340,39 +332,37 @@ export const presets: Record<string, Preset> = {
     },
   },
   automergeMajor: {
-    description: gettext(
+    description: _(
       'Automerge all upgrades (including `major`) if they pass tests.'
     ),
     automerge: true,
   },
   automergeAll: {
-    description: gettext(
+    description: _(
       'Automerge all upgrades (including `major`) if they pass tests.'
     ),
     automerge: true,
   },
   automergeBranch: {
-    description: gettext(
+    description: _(
       'If automerging, push the new commit directly to the base branch (no PR).'
     ),
     automergeType: 'branch',
   },
   automergePr: {
-    description: gettext('Raise a PR first before any automerging.'),
+    description: _('Raise a PR first before any automerging.'),
     automergeType: 'pr',
   },
   automergeRequireAllStatusChecks: {
-    description: gettext(
-      'Require all status checks to pass before any automerging.'
-    ),
+    description: _('Require all status checks to pass before any automerging.'),
     ignoreTests: false,
   },
   skipStatusChecks: {
-    description: gettext('Skip status checks and automerge right away.'),
+    description: _('Skip status checks and automerge right away.'),
     ignoreTests: true,
   },
   maintainLockFilesDisabled: {
-    description: gettext(
+    description: _(
       'Update existing lock files only when `package.json` is modified.'
     ),
     lockFileMaintenance: {
@@ -380,11 +370,11 @@ export const presets: Record<string, Preset> = {
     },
   },
   pinDigestsDisabled: {
-    description: gettext('Disable pinning of Docker dependency digests.'),
+    description: _('Disable pinning of Docker dependency digests.'),
     pinDigests: false,
   },
   maintainLockFilesWeekly: {
-    description: gettext(
+    description: _(
       'Run lock file maintenance (updates) early Monday mornings.'
     ),
     lockFileMaintenance: {
@@ -393,7 +383,7 @@ export const presets: Record<string, Preset> = {
     },
   },
   maintainLockFilesMonthly: {
-    description: gettext(
+    description: _(
       'Run lock file maintenance (updates) on the first day of each month.'
     ),
     lockFileMaintenance: {
@@ -402,29 +392,27 @@ export const presets: Record<string, Preset> = {
     },
   },
   ignoreUnstable: {
-    description: gettext(
+    description: _(
       'Upgrade to unstable versions only if the existing version is unstable.'
     ),
     ignoreUnstable: true,
   },
   respectLatest: {
-    description: gettext(
+    description: _(
       'Upgrade versions up to the "latest" tag in the npm registry.'
     ),
     respectLatest: true,
   },
   updateNotScheduled: {
-    description: gettext(
-      'Keep existing branches updated even when not scheduled.'
-    ),
+    description: _('Keep existing branches updated even when not scheduled.'),
     updateNotScheduled: true,
   },
   noUnscheduledUpdates: {
-    description: gettext('Only update branches when scheduled.'),
+    description: _('Only update branches when scheduled.'),
     updateNotScheduled: false,
   },
   automergeLinters: {
-    description: gettext('Update lint packages automatically if tests pass.'),
+    description: _('Update lint packages automatically if tests pass.'),
     packageRules: [
       {
         extends: ['packages:linters'],
@@ -433,9 +421,7 @@ export const presets: Record<string, Preset> = {
     ],
   },
   automergeTesters: {
-    description: gettext(
-      'Update testing packages automatically if tests pass.'
-    ),
+    description: _('Update testing packages automatically if tests pass.'),
     packageRules: [
       {
         extends: ['packages:test'],
@@ -444,9 +430,7 @@ export const presets: Record<string, Preset> = {
     ],
   },
   automergeTypes: {
-    description: gettext(
-      'Update `@types/*` packages automatically if tests pass.'
-    ),
+    description: _('Update `@types/*` packages automatically if tests pass.'),
     packageRules: [
       {
         matchPackagePrefixes: ['@types/'],
@@ -455,7 +439,7 @@ export const presets: Record<string, Preset> = {
     ],
   },
   doNotPinPackage: {
-    description: gettext('Disable version pinning for `{{arg0}}`.'),
+    description: _('Disable version pinning for `{{arg0}}`.'),
     packageRules: [
       {
         matchPackageNames: ['{{arg0}}'],
@@ -464,31 +448,29 @@ export const presets: Record<string, Preset> = {
     ],
   },
   pinSkipCi: {
-    description: gettext(
-      'Add `[skip ci]` to commit message body whenever pinning.'
-    ),
+    description: _('Add `[skip ci]` to commit message body whenever pinning.'),
     pin: {
       commitBody: '[skip ci]',
     },
   },
   gitSignOff: {
-    description: gettext('Append `Signed-off-by:` to signoff Git commits.'),
+    description: _('Append `Signed-off-by:` to signoff Git commits.'),
     commitBody: 'Signed-off-by: {{{gitAuthor}}}',
   },
   npm: {
-    description: gettext('Keep `package.json` npm dependencies updated.'),
+    description: _('Keep `package.json` npm dependencies updated.'),
     npm: {
       enabled: true,
     },
   },
   gomod: {
-    description: gettext('Enable Go modules support.'),
+    description: _('Enable Go modules support.'),
     gomod: {
       enabled: true,
     },
   },
   onlyNpm: {
-    description: gettext('Renovate only npm dependencies.'),
+    description: _('Renovate only npm dependencies.'),
     docker: {
       enabled: false,
     },
@@ -497,19 +479,19 @@ export const presets: Record<string, Preset> = {
     },
   },
   docker: {
-    description: gettext('Keep Dockerfile `FROM` sources updated.'),
+    description: _('Keep Dockerfile `FROM` sources updated.'),
     docker: {
       enabled: true,
     },
   },
   meteor: {
-    description: gettext('Keep Meteor Npm.depends packages updated.'),
+    description: _('Keep Meteor Npm.depends packages updated.'),
     meteor: {
       enabled: true,
     },
   },
   group: {
-    description: gettext('Group `{{arg1}}` packages into same branch/PR.'),
+    description: _('Group `{{arg1}}` packages into same branch/PR.'),
     packageRules: [
       {
         extends: ['{{arg0}}'],
@@ -518,33 +500,33 @@ export const presets: Record<string, Preset> = {
     ],
   },
   label: {
-    description: gettext('Apply label `{{arg0}}` to PRs.'),
+    description: _('Apply label `{{arg0}}` to PRs.'),
     labels: ['{{arg0}}'],
   },
   labels: {
-    description: gettext('Apply labels `{{arg0}}` and `{{arg1}}` to PRs.'),
+    description: _('Apply labels `{{arg0}}` and `{{arg1}}` to PRs.'),
     labels: ['{{arg0}}', '{{arg1}}'],
   },
   assignee: {
-    description: gettext('Assign PRs to `{{arg0}}`.'),
+    description: _('Assign PRs to `{{arg0}}`.'),
     assignees: ['{{arg0}}'],
   },
   reviewer: {
-    description: gettext('Add `{{arg0}}` as reviewer for PRs.'),
+    description: _('Add `{{arg0}}` as reviewer for PRs.'),
     reviewers: ['{{arg0}}'],
   },
   assignAndReview: {
-    description: gettext('Set `{{arg0}}` as assignee and reviewer of PRs.'),
+    description: _('Set `{{arg0}}` as assignee and reviewer of PRs.'),
     extends: [':assignee({{arg0}})', ':reviewer({{arg0}})'],
   },
   enableVulnerabilityAlerts: {
-    description: gettext('Raise PR when vulnerability alerts are detected.'),
+    description: _('Raise PR when vulnerability alerts are detected.'),
     vulnerabilityAlerts: {
       enabled: true,
     },
   },
   enableVulnerabilityAlertsWithLabel: {
-    description: gettext(
+    description: _(
       'Raise PR when vulnerability alerts are detected with label `{{arg0}}`.'
     ),
     vulnerabilityAlerts: {
@@ -553,41 +535,39 @@ export const presets: Record<string, Preset> = {
     },
   },
   disableVulnerabilityAlerts: {
-    description: gettext('Disable vulnerability alerts completely.'),
+    description: _('Disable vulnerability alerts completely.'),
     vulnerabilityAlerts: {
       enabled: false,
     },
   },
   semanticCommits: {
-    description: gettext(
-      'Use semantic prefixes for commit messages and PR titles.'
-    ),
+    description: _('Use semantic prefixes for commit messages and PR titles.'),
     semanticCommits: 'enabled',
   },
   semanticCommitsDisabled: {
-    description: gettext(
+    description: _(
       'Disable semantic prefixes for commit messages and PR titles.'
     ),
     semanticCommits: 'disabled',
   },
   disableLockFiles: {
-    description: gettext('Disable lock file updates.'),
+    description: _('Disable lock file updates.'),
     updateLockFiles: false,
   },
   semanticCommitScope: {
-    description: gettext(
+    description: _(
       'Use semantic commit scope `{{arg0}}` for all commits and PR titles.'
     ),
     semanticCommitScope: '{{arg0}}',
   },
   semanticCommitScopeDisabled: {
-    description: gettext(
+    description: _(
       'Disable semantic commit scope for all commits and PR titles.'
     ),
     semanticCommitScope: null,
   },
   widenPeerDependencies: {
-    description: gettext(
+    description: _(
       'Always widen `peerDependencies` SemVer ranges when updating, instead of replacing.'
     ),
     packageRules: [
@@ -598,27 +578,23 @@ export const presets: Record<string, Preset> = {
     ],
   },
   dependencyDashboard: {
-    description: gettext('Enable Renovate Dependency Dashboard creation.'),
+    description: _('Enable Renovate Dependency Dashboard creation.'),
     dependencyDashboard: true,
   },
   disableDependencyDashboard: {
-    description: gettext('Disable Renovate Dependency Dashboard creation.'),
+    description: _('Disable Renovate Dependency Dashboard creation.'),
     dependencyDashboard: false,
   },
   dependencyDashboardApproval: {
-    description: gettext(
-      'Enable Renovate Dependency Dashboard approval workflow.'
-    ),
+    description: _('Enable Renovate Dependency Dashboard approval workflow.'),
     dependencyDashboardApproval: true,
   },
   timezone: {
-    description: gettext(
-      'Evaluate schedules according to timezone `{{arg0}}`.'
-    ),
+    description: _('Evaluate schedules according to timezone `{{arg0}}`.'),
     timezone: '{{arg0}}',
   },
   pathSemanticCommitType: {
-    description: gettext(
+    description: _(
       'Use semanticCommitType `{{arg0}}` for all package files matching path `{{arg1}}`.'
     ),
     packageRules: [
@@ -629,7 +605,7 @@ export const presets: Record<string, Preset> = {
     ],
   },
   followTag: {
-    description: gettext(
+    description: _(
       'For package `{{arg0}}`, strictly follow release tag `{{arg1}}`.'
     ),
     packageRules: [
@@ -640,7 +616,7 @@ export const presets: Record<string, Preset> = {
     ],
   },
   githubComToken: {
-    description: gettext(
+    description: _(
       'Use provided token for `github.com` lookups. Do not configure this if you are already running on `github.com`.'
     ),
     hostRules: [
@@ -653,7 +629,7 @@ export const presets: Record<string, Preset> = {
     ],
   },
   disablePrControls: {
-    description: gettext('Remove the checkbox controls from PRs.'),
+    description: _('Remove the checkbox controls from PRs.'),
     prBodyTemplate:
       '{{{header}}}{{{table}}}{{{notes}}}{{{changelogs}}}{{{configDescription}}}{{{footer}}}',
   },

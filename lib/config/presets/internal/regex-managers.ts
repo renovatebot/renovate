@@ -1,9 +1,9 @@
-import { gettext } from '../../../i18n';
+import { _ } from '../../../i18n';
 import type { Preset } from '../types';
 
 export const presets: Record<string, Preset> = {
   dockerfileVersions: {
-    description: gettext('Update `_VERSION` variables in Dockerfiles.'),
+    description: _('Update `_VERSION` variables in Dockerfiles.'),
     regexManagers: [
       {
         fileMatch: ['(^|/|\\.)Dockerfile$', '(^|/)Dockerfile[^/]*$'],

@@ -1,9 +1,9 @@
-import { gettext } from '../../../i18n';
+import { _ } from '../../../i18n';
 import type { Preset } from '../types';
 
 export const presets: Record<string, Preset> = {
   base: {
-    description: gettext('Default base configuration for all languages.'),
+    description: _('Default base configuration for all languages.'),
     extends: [
       ':dependencyDashboard',
       ':semanticPrefixFixDepsChoreOthers',
@@ -17,15 +17,15 @@ export const presets: Record<string, Preset> = {
     ],
   },
   'js-app': {
-    description: gettext('Default configuration for webapps.'),
+    description: _('Default configuration for webapps.'),
     extends: ['config:base', ':pinAllExceptPeerDependencies'],
   },
   'js-lib': {
-    description: gettext('Default configuration for libraries.'),
+    description: _('Default configuration for libraries.'),
     extends: ['config:base', ':pinOnlyDevDependencies'],
   },
   semverAllMonthly: {
-    description: gettext(
+    description: _(
       'Preserve SemVer ranges and update everything together once a month.'
     ),
     separateMajorMinor: false,

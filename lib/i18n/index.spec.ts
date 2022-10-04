@@ -20,7 +20,8 @@ describe('i18n/index', () => {
     });
 
     it('load translations from the given PO file', async () => {
-      fs.readSystemFile.mockReturnValueOnce(`
+      fs.readSystemFile.mockReturnValueOnce(
+        Promise.resolve(`
         # Language zh-CN translations for renovate-platform package.
         # Copyright (C) 2022 THE renovate-platform'S COPYRIGHT HOLDER
         # This file is distributed under the same license as the renovate-platform package.
@@ -39,7 +40,8 @@ describe('i18n/index', () => {
         "Content-Type: text/plain; charset=UTF-8\n"
         "Content-Transfer-Encoding: 8bit\n"
         "Plural-Forms: nplurals=2; plural=(n!=1)\n"
-      `);
+      `)
+      );
 
       await initI18n('./messages.po');
 

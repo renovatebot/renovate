@@ -2,7 +2,7 @@ import * as util from 'util';
 import is from '@sindresorhus/is';
 import { GlobalConfig } from '../../../../config/global';
 import type { RenovateConfig } from '../../../../config/types';
-import { gettext } from '../../../../i18n';
+import { _ } from '../../../../i18n';
 import { logger } from '../../../../logger';
 import type { PackageFile } from '../../../../modules/manager/types';
 import { platform } from '../../../../modules/platform';
@@ -41,7 +41,7 @@ export async function ensureOnboardingPr(
   const existingPr = await platform.getBranchPr(config.onboardingBranch!);
   logger.debug('Filling in onboarding PR template');
   let prTemplate = util.format(
-    gettext(
+    _(
       'Welcome to [Renovate](%s)! This is an onboarding PR to help you understand and configure settings before regular Pull Requests begin.\n\n'
     ),
     config.productLinks!.homepage
@@ -50,12 +50,12 @@ export async function ensureOnboardingPr(
   prTemplate +=
     config.requireConfig === 'required'
       ? emojify(
-          `:vertical_traffic_light: ${gettext(
+          `:vertical_traffic_light: ${_(
             'To activate Renovate, merge this Pull Request. To disable Renovate, simply close this Pull Request unmerged.'
           )}\n\n`
         )
       : emojify(
-          `:vertical_traffic_light: ${gettext(
+          `:vertical_traffic_light: ${_(
             'Renovate will begin keeping your dependencies up-to-date only once you merge or close this Pull Request.'
           )}\n\n`
         );
@@ -74,7 +74,7 @@ export async function ensureOnboardingPr(
 ---
 
 :question: ${util.format(
-      gettext(
+      _(
         "Got questions? Check out Renovate's [Docs](%s), particularly the Getting Started section.\n" +
           'If you need any further assistance then you can also [request help here](%s).'
       ),
@@ -95,7 +95,7 @@ export async function ensureOnboardingPr(
     prBody =
       prBody.replace(
         '{{PACKAGE FILES}}',
-        `### ${gettext('Detected Package Files')}\n\n` + files.join('\n')
+        `### ${_('Detected Package Files')}\n\n` + files.join('\n')
       ) + '\n';
   } else {
     prBody = prBody.replace('{{PACKAGE FILES}}\n', '');
@@ -108,7 +108,7 @@ export async function ensureOnboardingPr(
     configDesc = emojify(
       `### ${
         (util.format(
-          gettext(
+          _(
             'Configuration\n\n:abcd: Renovate has detected a custom config for this PR. Feel free to ask for [help](%s) if you have any doubts and would like it reviewed.'
           )
         ),
@@ -121,12 +121,12 @@ export async function ensureOnboardingPr(
     );
     if (isConflicted) {
       configDesc += emojify(
-        `:warning: ${gettext(
+        `:warning: ${_(
           'This PR has a merge conflict. However, Renovate is unable to automatically fix that due to edits in this branch. Please resolve the merge conflict manually.'
         )}\n\n`
       );
     } else {
-      configDesc += `${gettext(
+      configDesc += `${_(
         "Important: Now that this branch is edited, Renovate can't rebase it from the base branch any more. If you make changes to the base branch that could impact this onboarding PR, please merge them manually."
       )}\n\n`;
     }
