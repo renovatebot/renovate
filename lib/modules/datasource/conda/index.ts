@@ -36,7 +36,6 @@ export class CondaDatasource extends Datasource {
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     logger.trace({ registryUrl, packageName }, 'fetching conda package');
 
-    // istanbul ignore if
     if (!registryUrl) {
       return null;
     }

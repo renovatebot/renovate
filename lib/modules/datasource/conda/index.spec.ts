@@ -78,7 +78,6 @@ describe('modules/datasource/conda/index', () => {
         .scope('https://api.anaconda.org/package/rapids')
         .get(`/${depName}`)
         .reply(404);
-      //.replyWithError('error');
       httpMock
         .scope('https://api.anaconda.org/package/conda-forge')
         .get(`/${depName}`)
@@ -95,7 +94,9 @@ describe('modules/datasource/conda/index', () => {
         datasource,
         depName,
       });
-      expect(res).toMatchSnapshot();
+      expect(res.registryUrl).toBe(
+        'https://api.anaconda.org/package/conda-forge'
+      );
       expect(res?.releases).toHaveLength(94);
     });
   });
