@@ -2681,6 +2681,15 @@ Say the full team name on GitHub is `@organization/foo`, then you'd set the conf
 }
 ```
 
+To mark a reviewer as required in Azure DevOps, you must use the prefix `required:`.
+If the name of the reviewer is `bar` for example, this could also be the name of a team, then you would set the config option like this:
+```json
+{
+  "reviewers": ["required:bar"]
+}
+```
+
+
 ## reviewersFromCodeOwners
 
 If enabled Renovate tries to determine PR reviewers by matching rules defined in a CODEOWNERS file against the changes in the PR.
