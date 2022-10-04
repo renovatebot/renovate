@@ -8,7 +8,7 @@ description: Java versions support in Renovate
 Renovate can update Gradle and Maven dependencies.
 This includes libraries and plugins as well as the Gradle Wrapper.
 
-## LTS Releases
+## LTS releases
 
 The `config:base` preset limits Renovate update to Java runtimes to those which are LTS versions. This is handled by the workaround `workarounds:javaLTSVersions`.
 
