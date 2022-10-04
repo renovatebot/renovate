@@ -93,7 +93,7 @@ describe('modules/datasource/conda/index', () => {
       const res = await getPkgReleases({
         ...config,
         datasource,
-        depName: depName,
+        depName,
       });
       expect(res).toMatchSnapshot();
       expect(res?.releases).toHaveLength(94);
