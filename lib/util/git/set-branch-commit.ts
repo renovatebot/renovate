@@ -1,3 +1,4 @@
+import { logger } from '../../logger';
 import { getCache } from '../cache/repository';
 import type { BranchCache } from '../cache/repository/types';
 import { getBranchCommit } from '.';
@@ -12,10 +13,12 @@ export function setBranchNewCommit(
   baseBranch: string,
   commitSha: string
 ): void {
+  logger.debug('setBranchCommit()');
   const cache = getCache();
   cache.branches ??= [];
   let branch = cache.branches.find((br) => br.branchName === branchName);
   if (!branch) {
+    logger.debug('setBranchCommit(): create branch cache'); // should never be called
     branch = {
       branchName,
       baseBranch,

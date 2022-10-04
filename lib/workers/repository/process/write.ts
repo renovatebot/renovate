@@ -36,6 +36,7 @@ export function syncBranchState(
   branchName: string,
   baseBranch: string
 ): BranchCache {
+  logger.debug('syncBranchState()');
   const branchSha = getBranchCommit(branchName)!;
   const baseBranchSha = getBranchCommit(baseBranch)!;
 
@@ -44,6 +45,9 @@ export function syncBranchState(
   const { branches: cachedBranches } = cache;
   let branchState = cachedBranches.find((br) => br.branchName === branchName);
   if (!branchState) {
+    logger.debug(
+      'syncBranchState(): Branch cache not found, creating minimal branchState'
+    );
     // create a minimal branch state
     branchState = {
       branchName,
@@ -56,12 +60,14 @@ export function syncBranchState(
 
   // if base branch name has changed invalidate cached isModified state
   if (baseBranch !== branchState.baseBranch) {
+    logger.debug('syncBranchState(): update baseBranch name');
     branchState.baseBranch = baseBranch!;
     delete branchState.isModified;
   }
 
   // if base branch sha has changed invalidate cache isBehindBase state
   if (baseBranchSha !== branchState.baseBranchSha) {
+    logger.debug('syncBranchState(): update baseBranchSha');
     delete branchState.isBehindBase;
 
     // update cached branchSha
@@ -70,6 +76,7 @@ export function syncBranchState(
 
   // if branch sha has changed invalidate all cached states
   if (branchSha !== branchState.sha) {
+    logger.debug('syncBranchState(): update branchSha');
     delete branchState.isBehindBase;
     delete branchState.isModified;
     delete branchState.branchFingerprint;
