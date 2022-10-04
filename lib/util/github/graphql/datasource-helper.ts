@@ -17,13 +17,14 @@ import type {
   RawQueryResponse,
 } from './types';
 
+function isSomethingWentWrongMessage(msg: string): boolean {
+  return msg.startsWith('Something went wrong while executing your query.');
+}
+
 /**
  * See: #16343
  */
 function isErrorFromIssue16343(err: Error): boolean {
-  const isSomethingWentWrongMessage = (msg: string): boolean =>
-    msg.startsWith('Something went wrong while executing your query.');
-
   if (err instanceof AggregateError) {
     const errors = [...(err as AggregateError<Error>)];
     const messages = errors.map(({ message }) => message);
