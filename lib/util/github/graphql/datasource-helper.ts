@@ -17,21 +17,24 @@ import type {
   RawQueryResponse,
 } from './types';
 
-function isSomethingWentWrongMessage(msg: string): boolean {
+function isShrinkableMessage(msg: string): boolean {
   return msg.startsWith('Something went wrong while executing your query.');
 }
 
 /**
- * See: #16343
+ * We know empirically that certain type of GraphQL errors
+ * can be fixed by shrinking page size.
+ *
+ * @see https://github.com/renovatebot/renovate/issues/16343
  */
-function isErrorFromIssue16343(err: Error): boolean {
+function canBeSolvedByShrinking(err: Error): boolean {
   if (err instanceof AggregateError) {
-    const errors = [...(err as AggregateError<Error>)];
+    const errors = [...err];
     const messages = errors.map(({ message }) => message);
-    return messages.some(isSomethingWentWrongMessage);
+    return messages.some(isShrinkableMessage);
   }
 
-  return isSomethingWentWrongMessage(err.message);
+  return isShrinkableMessage(err.message);
 }
 
 export class GithubGraphqlDatasourceHelper<
@@ -118,9 +121,8 @@ export class GithubGraphqlDatasourceHelper<
   > {
     const requestOptions = this.getRawQueryOptions();
 
-    type HttpBody = GithubGraphqlResponse<
-      GithubGraphqlRepoResponse<GraphqlItem>
-    >;
+    type GraphqlData = GithubGraphqlRepoResponse<GraphqlItem>;
+    type HttpBody = GithubGraphqlResponse<GraphqlData>;
     let httpRes: HttpResponse<HttpBody>;
     try {
       httpRes = await this.http.postJson<HttpBody>('/graphql', requestOptions);
@@ -196,7 +198,7 @@ export class GithubGraphqlDatasourceHelper<
     while (!res) {
       [res, err] = await this.doRawQuery();
       if (err) {
-        if (!isErrorFromIssue16343(err)) {
+        if (!canBeSolvedByShrinking(err)) {
           throw err;
         }
 
