@@ -65,7 +65,7 @@ export function syncBranchState(
     delete branchState.isModified;
   }
 
-  // if base branch sha has changed invalidate cache isBehindBase state
+  // if base branch sha has changed invalidate cached isBehindBase state
   if (baseBranchSha !== branchState.baseBranchSha) {
     logger.debug('syncBranchState(): update baseBranchSha');
     delete branchState.isBehindBase;
