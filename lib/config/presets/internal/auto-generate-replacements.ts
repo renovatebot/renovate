@@ -38,14 +38,16 @@ function generatePackageRules({
 
 export function addPresets(
   presets: Record<string, Preset>,
-  template: PresetTemplate
+  templates: PresetTemplate[]
 ): void {
-  const { title, description, packageRules } = template;
-  presets[title] = {
-    description,
-    packageRules: generatePackageRules(packageRules),
-  };
   const ext = presets.all?.extends ?? [];
-  ext.push(`replacements:${title}`);
+  for (const template of templates) {
+    const { title, description, packageRules } = template;
+    presets[title] = {
+      description,
+      packageRules: generatePackageRules(packageRules),
+    };
+    ext.push(`replacements:${title}`);
+  }
   ext.sort();
 }
