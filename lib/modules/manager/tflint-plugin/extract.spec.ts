@@ -4,10 +4,68 @@ import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import { extractPackageFile } from '.';
 
-const plugin1 = Fixtures?.get('tflint-1.hcl');
-const configFull = Fixtures?.get('tflint-full.hcl');
-const noSource = Fixtures?.get('tflint-no-source.hcl');
-const notGithub = Fixtures?.get('tflint-not-github.hcl');
+const plugin1 = `
+plugin "foo" {
+  enabled = true
+  version = "0.1.0"
+  source  = "github.com/org/tflint-ruleset-foo"
+}
+
+plugin "bar" {
+  enabled = true
+  version = "1.42.0"
+  source  = "github.com/org2/tflint-ruleset-bar"
+}
+`;
+
+const configFull = `
+config {
+  format = "compact"
+  plugin_dir = "~/.tflint.d/plugins"
+
+  module = true
+  force = false
+  disabled_by_default = false
+
+  ignore_module = {
+    "terraform-aws-modules/vpc/aws"            = true
+    "terraform-aws-modules/security-group/aws" = true
+  }
+
+  varfile = ["example1.tfvars", "example2.tfvars"]
+  variables = ["foo=bar", "bar=[\"baz\"]"]
+}
+
+plugin "aws" {
+  enabled = true
+  version = "0.4.0"
+  source  = "github.com/terraform-linters/tflint-ruleset-aws"
+}
+
+rule "aws_instance_invalid_type" {
+  enabled = false
+}
+`;
+
+const noSource = `
+plugin "aws" {
+  enabled = true
+  version = "0.4.0"
+}
+
+plugin "bundled" {
+  # A bundled plugin, probably.
+  enabled = true
+}
+`;
+
+const notGithub = `
+plugin "aws" {
+  enabled = true
+  version = "0.4.0"
+  source  = "gitlab.com/terraform-linters/tflint-ruleset-aws"
+}
+`;
 
 const adminConfig: RepoGlobalConfig = {
   localDir: join('/tmp/github/some/repo'),
