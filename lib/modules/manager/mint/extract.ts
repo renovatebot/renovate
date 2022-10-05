@@ -36,7 +36,7 @@ function handleDepInMintfile(line: string): PackageDependency {
   }
   const [depName, currentVersion] = line.split('@').map((s) => s.trim());
   return {
-    depName: depName,
+    depName,
     currentValue: currentVersion,
     datasource: GitTagsDatasource.id,
     packageName: `https://github.com/${depName}.git`,
