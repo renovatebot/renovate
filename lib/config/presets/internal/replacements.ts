@@ -578,20 +578,22 @@ const muiReplacement: Replacement[] = [
 const mui: PresetTemplate = {
   description:
     'The `material-ui` monorepo org was renamed from `@material-ui` to `@mui`.',
-  packageRules: {
-    matchCurrentVersion: '>=4.0.0 <5.0.0',
-    matchDatasources: ['npm'],
-    replacements: muiReplacement,
-    replacementVersion: '5.0.0',
-  },
+  packageRules: [
+    {
+      matchCurrentVersion: '>=4.0.0 <5.0.0',
+      matchDatasources: ['npm'],
+      replacements: muiReplacement,
+      replacementVersion: '5.0.0',
+    },
+  ],
   title: 'material-ui-to-mui',
 };
 
-const messageFormat: PresetTemplate[] = [
-  {
-    description:
-      'The `messageformat` monorepo package naming scheme changed from `MessageFormat-{{package}}`-to-`@messageformat/{{package}}`.',
-    packageRules: {
+const messageFormat: PresetTemplate = {
+  description:
+    'The `messageformat` monorepo package naming scheme changed from `messageFormat-{{package}}`-to-`@messageformat/{{package}}`.',
+  packageRules: [
+    {
       matchCurrentVersion: '>=2.0.0 <3.0.0',
       matchDatasources: ['npm'],
       replacements: [
@@ -600,13 +602,7 @@ const messageFormat: PresetTemplate[] = [
       ],
       replacementVersion: '3.0.0',
     },
-    title:
-      'messageformat-and-messageformat[cli|runtime]-to-@messageformat/[cli|runtime|core]',
-  },
-  {
-    description:
-      'The `messageformat` monorepo package naming scheme changed from `MessageFormat-{{package}}`-to-`@messageformat/{{package}}`.',
-    packageRules: {
+    {
       matchCurrentVersion: '>=0.4.0 <1.0.0',
       matchDatasources: ['npm'],
       replacements: [
@@ -615,20 +611,14 @@ const messageFormat: PresetTemplate[] = [
       ],
       replacementVersion: '1.0.0',
     },
-    title:
-      'messageformat-convert-and-react-message-context-to-@messageformat/[convert|react]',
-  },
-  {
-    description:
-      'The `messageformat` monorepo package naming scheme changed from `MessageFormat-{{package}}`-to-`@messageformat/{{package}}`.',
-    packageRules: {
+    {
       matchCurrentVersion: '>=4.0.0 <5.0.0',
       matchDatasources: ['npm'],
       replacements: [[['messageformat-parser'], '@messageformat/parser']],
       replacementVersion: '5.0.0',
     },
-    title: 'messageformat-parser-to-@messageformat/parser',
-  },
-];
+  ],
+  title: 'messageFormat-{{package}}-to-@messageformat/{{package}}',
+};
 
-addPresets(presets, ...messageFormat, mui);
+addPresets(presets, messageFormat, mui);
