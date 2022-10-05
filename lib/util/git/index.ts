@@ -590,13 +590,11 @@ export async function isBranchBehindBase(
     getBranchCommit(baseBranch) // base branch sha
   );
   if (isBehind !== null) {
-    logger.debug(
-      `branch.isBranchBehindBase(): using cached result "${isBehind}"`
-    );
+    logger.debug(`branch.isBehindBase(): using cached result "${isBehind}"`);
     return isBehind;
   }
 
-  logger.debug('branch.isBranchBehindBase(): using git to calculate');
+  logger.debug('branch.isBehindBase(): using git to calculate');
 
   await syncGit();
   try {
@@ -715,6 +713,8 @@ export async function isBranchConflicted(
     );
     return isConflicted;
   }
+
+  logger.debug('branch.isConflicted(): using git to calculate');
 
   let result = false;
   await syncGit();
