@@ -35,7 +35,7 @@ import {
 } from '../../versioning/docker';
 import { Datasource } from '../datasource';
 import type { DigestConfig, GetReleasesConfig, ReleaseResult } from '../types';
-import { gitRefLabel, sourceLabels } from './common';
+import { gitRefLabel, isArtifactoryServer, sourceLabels } from './common';
 import {
   Image,
   ImageConfig,
@@ -49,6 +49,7 @@ import {
 export const DOCKER_HUB = 'https://index.docker.io';
 
 export const ecrRegex = regEx(/\d+\.dkr\.ecr\.([-a-z0-9]+)\.amazonaws\.com/);
+export const ecrPublicRegex = regEx(/public\.ecr\.aws/);
 
 function isDockerHost(host: string): boolean {
   const regex = regEx(/(?:^|\.)docker\.io$/);
@@ -818,7 +819,11 @@ export class DockerDatasource extends Datasource {
     let tags: string[] = [];
     // AWS ECR limits the maximum number of results to 1000
     // See https://docs.aws.amazon.com/AmazonECR/latest/APIReference/API_DescribeRepositories.html#ECR-DescribeRepositories-request-maxResults
-    const limit = ecrRegex.test(registryHost) ? 1000 : 10000;
+    // See https://docs.aws.amazon.com/AmazonECRPublic/latest/APIReference/API_DescribeRepositories.html#ecrpublic-DescribeRepositories-request-maxResults
+    const limit =
+      ecrRegex.test(registryHost) || ecrPublicRegex.test(registryHost)
+        ? 1000
+        : 10000;
     let url:
       | string
       | null = `${registryHost}/${dockerRepository}/tags/list?n=${limit}`;
@@ -896,6 +901,26 @@ export class DockerDatasource extends Datasource {
           `Retrying Tags for ${registryHost}/${dockerRepository} using library/ prefix`
         );
         return this.getTags(registryHost, 'library/' + dockerRepository);
+      }
+      // JFrog Artifactory - Retry handling when resolving Docker Official Images
+      // These follow the format of {{registryHost}}{{jFrogRepository}}/library/{{dockerRepository}}
+      if (
+        (err.statusCode === 404 || err.message === PAGE_NOT_FOUND_ERROR) &&
+        isArtifactoryServer(err.response) &&
+        dockerRepository.split('/').length === 2
+      ) {
+        logger.debug(
+          `JFrog Artifactory: Retrying Tags for ${registryHost}/${dockerRepository} using library/ path between JFrog virtual repository and image`
+        );
+
+        const dockerRepositoryParts = dockerRepository.split('/');
+        const jfrogRepository = dockerRepositoryParts[0];
+        const dockerImage = dockerRepositoryParts[1];
+
+        return this.getTags(
+          registryHost,
+          jfrogRepository + '/library/' + dockerImage
+        );
       }
       // prettier-ignore
       if (err.statusCode === 429 && isDockerHost(registryHost)) {
