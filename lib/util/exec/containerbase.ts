@@ -124,9 +124,7 @@ export function isDynamicInstall(
     return false;
   }
   if (!isContainerbase()) {
-    logger.warn(
-      'binarySource=install is only compatible with images derived from github.com/containerbase'
-    );
+    logger.debug('Falling back to binarySource=global');
     return false;
   }
   return (
