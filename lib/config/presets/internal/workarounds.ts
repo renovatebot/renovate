@@ -133,6 +133,7 @@ export const presets: Record<string, Preset> = {
           'openjdk',
           'java',
           'java-jre',
+          'sapmachine',
         ],
         versioning:
           'regex:^(?<major>\\d+)?(\\.(?<minor>\\d+))?(\\.(?<patch>\\d+))?([\\._+](?<build>\\d+))?(-(?<compatibility>.*))?$',
