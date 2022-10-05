@@ -592,6 +592,8 @@ export async function isBranchBehindBase(
     logger.debug('branch.isBranchBehindBase(): using cached result');
     return isBehind;
   }
+  
+  logger.debug('branch.isBranchBehindBase(): using git to calculate');
 
   await syncGit();
   try {
@@ -639,6 +641,8 @@ export async function isBranchModified(branchName: string): Promise<boolean> {
     logger.debug('branch.isModified(): using cached result');
     return (config.branchIsModified[branchName] = isModified);
   }
+  
+  logger.debug('branch.isModified(): using git to calculate');
 
   await syncGit();
   // Retrieve the author of the most recent commit
