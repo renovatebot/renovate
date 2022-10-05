@@ -25,11 +25,11 @@ export function canSkipBranchUpdateCheck(
   }
 
   if (branchFingerprint !== branchState.branchFingerprint) {
-    logger.debug('branch.isUpdateToDate(): needs recalculation');
+    logger.debug('branch.isUpToDate(): needs recalculation');
     return false;
   }
 
-  logger.debug('branch.isUpdateToDate(): using cached result "true"');
+  logger.debug('branch.isUpToDate(): using cached result "true"');
   return true;
 }
 
