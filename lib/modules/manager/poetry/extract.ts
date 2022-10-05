@@ -57,7 +57,7 @@ function extractFromSection(
     const dep: PackageDependency = {
       depName,
       depType: section,
-      currentValue: currentValue,
+      currentValue,
       managerData: { nestedVersion },
       datasource: PypiDatasource.id,
     };

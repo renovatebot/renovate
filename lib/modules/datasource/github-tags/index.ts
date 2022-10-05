@@ -56,7 +56,7 @@ export class GithubTagsDatasource extends Datasource {
       digest = res.body[0].sha;
     } catch (err) {
       logger.debug(
-        { githubRepo: githubRepo, err, registryUrl },
+        { githubRepo, err, registryUrl },
         'Error getting latest commit from GitHub repo'
       );
     }
