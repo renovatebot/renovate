@@ -24,11 +24,11 @@ export function canSkipBranchUpdateCheck(
   }
 
   if (branchFingerprint !== branchState.branchFingerprint) {
-    logger.debug('Branch fingerprint has changed, full check required');
+    logger.debug('branch.isUpdateToDate(): needs recalculation');
     return false;
   }
 
-  logger.debug('Branch fingerprint is unchanged, updates check can be skipped');
+  logger.debug('branch.isUpdateToDate(): using cached result "true"');
   return true;
 }
 
