@@ -20,6 +20,7 @@ export function canSkipBranchUpdateCheck(
   branchFingerprint: string
 ): boolean {
   if (!branchState.branchFingerprint) {
+    logger.trace('branch.isUpToDate(): no fingerprint');
     return false;
   }
 
