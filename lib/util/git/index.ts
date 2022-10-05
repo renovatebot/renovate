@@ -622,7 +622,7 @@ export async function isBranchBehindBase(
 
 export async function isBranchModified(branchName: string): Promise<boolean> {
   if (!branchExists(branchName)) {
-    logger.debug({ branchName }, 'branch.isModified(): no cache');
+    logger.debug('branch.isModified(): no cache');
     return false;
   }
   // First check local config
