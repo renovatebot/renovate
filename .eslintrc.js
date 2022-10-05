@@ -133,6 +133,13 @@ module.exports = {
 
     'typescript-enum/no-const-enum': 2,
     'typescript-enum/no-enum': 2,
+    'object-shorthand': [
+      'error',
+      'always',
+      {
+        avoidQuotes: true,
+      },
+    ],
   },
   settings: {
     'import/parsers': {

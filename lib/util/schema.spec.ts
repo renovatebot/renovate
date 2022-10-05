@@ -28,42 +28,57 @@ describe('util/schema', () => {
     expect(logger.logger.warn).not.toHaveBeenCalled();
   });
 
-  it('reports nothing if there are no any reports', () => {
-    schema.reportErrors();
-    expect(logger.logger.warn).not.toHaveBeenCalled();
+  describe('warn', () => {
+    it('reports nothing if there are no any reports', () => {
+      schema.reportErrors();
+      expect(logger.logger.warn).not.toHaveBeenCalled();
+    });
+
+    it('reports same warning one time', () => {
+      const testSchema = z.object(
+        { foo: z.string() },
+        { description: 'Some test schema' }
+      );
+      const invalidData = { foo: 42 };
+
+      schema.match(testSchema, invalidData, 'warn');
+      schema.match(testSchema, invalidData, 'warn');
+      schema.match(testSchema, invalidData, 'warn');
+      schema.match(testSchema, invalidData, 'warn');
+      schema.reportErrors();
+
+      expect(logger.logger.warn).toHaveBeenCalledOnce();
+      expect(logger.logger.warn.mock.calls[0]).toMatchObject([
+        { description: 'Some test schema' },
+        'Schema validation error',
+      ]);
+    });
+
+    it('reports unspecified schema', () => {
+      const testSchema = z.object({ foo: z.string() });
+      const invalidData = { foo: 42 };
+
+      schema.match(testSchema, invalidData, 'warn');
+      schema.reportErrors();
+
+      expect(logger.logger.warn).toHaveBeenCalledOnce();
+      expect(logger.logger.warn.mock.calls[0]).toMatchObject([
+        { description: 'Unspecified schema' },
+        'Schema validation error',
+      ]);
+    });
   });
 
-  it('reports same warning one time', () => {
-    const testSchema = z.object(
-      { foo: z.string() },
-      { description: 'Some test schema' }
-    );
-    const invalidData = { foo: 42 };
+  describe('throw', () => {
+    it('throws for invalid data', () => {
+      const testSchema = z.object({
+        foo: z.string({ invalid_type_error: 'foobar' }),
+      });
+      const invalidData = { foo: 123 };
 
-    schema.match(testSchema, invalidData, true);
-    schema.match(testSchema, invalidData, true);
-    schema.match(testSchema, invalidData, true);
-    schema.match(testSchema, invalidData, true);
-    schema.reportErrors();
-
-    expect(logger.logger.warn).toHaveBeenCalledOnce();
-    expect(logger.logger.warn.mock.calls[0]).toMatchObject([
-      { description: 'Some test schema' },
-      'Schema validation error',
-    ]);
-  });
-
-  it('reports unspecified schema', () => {
-    const testSchema = z.object({ foo: z.string() });
-    const invalidData = { foo: 42 };
-
-    schema.match(testSchema, invalidData, true);
-    schema.reportErrors();
-
-    expect(logger.logger.warn).toHaveBeenCalledOnce();
-    expect(logger.logger.warn.mock.calls[0]).toMatchObject([
-      { description: 'Unspecified schema' },
-      'Schema validation error',
-    ]);
+      expect(() => schema.match(testSchema, invalidData, 'throw')).toThrow(
+        'foobar'
+      );
+    });
   });
 });
