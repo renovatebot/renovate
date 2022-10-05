@@ -703,17 +703,17 @@ export async function isBranchConflicted(
     return true;
   }
 
-  const cachedResult = getCachedConflictResult(
+  const isConflicted = getCachedConflictResult(
     baseBranch,
     baseBranchSha,
     branch,
     branchSha
   );
-  if (is.boolean(cachedResult)) {
+  if (is.boolean(isConflicted)) {
     logger.debug(
-      `branch.isConflicted(): using cached result "${cachedResult}"`
+      `branch.isConflicted(): using cached result "${isConflicted}"`
     );
-    return cachedResult;
+    return isConflicted;
   }
 
   let result = false;
