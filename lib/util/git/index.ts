@@ -493,7 +493,9 @@ export async function getBranchParentSha(
   const branchSha = getBranchCommit(branchName);
   let parentSha = getCachedBranchParentShaResult(branchName, branchSha);
   if (parentSha !== null) {
-    logger.debug('Using cached result for getBranchParentSha');
+    logger.debug(
+      `branch.getBranchParentSha(): using cached result "${parentSha}"`
+    );
     return parentSha;
   }
 
@@ -581,7 +583,6 @@ export async function isBranchBehindBase(
   branchName: string,
   baseBranch: string
 ): Promise<boolean> {
-  logger.debug('branch.isBranchBehindBase(): calculating result');
   let isBehind = getCachedBehindBaseResult(
     branchName,
     getBranchCommit(branchName), // branch sha
@@ -589,10 +590,12 @@ export async function isBranchBehindBase(
     getBranchCommit(baseBranch) // base branch sha
   );
   if (isBehind !== null) {
-    logger.debug('branch.isBranchBehindBase(): using cached result');
+    logger.debug(
+      `branch.isBranchBehindBase(): using cached result "${isBehind}"`
+    );
     return isBehind;
   }
-  
+
   logger.debug('branch.isBranchBehindBase(): using git to calculate');
 
   await syncGit();
@@ -620,12 +623,8 @@ export async function isBranchBehindBase(
 }
 
 export async function isBranchModified(branchName: string): Promise<boolean> {
-  logger.debug('branch.isModified(): calculating result');
   if (!branchExists(branchName)) {
-    logger.debug(
-      { branchName },
-      'Branch does not exist - cannot check isModified'
-    );
+    logger.debug({ branchName }, 'branch.isModified(): no cache');
     return false;
   }
   // First check local config
@@ -638,10 +637,11 @@ export async function isBranchModified(branchName: string): Promise<boolean> {
     getBranchCommit(branchName) // branch sha
   );
   if (isModified !== null) {
-    logger.debug('branch.isModified(): using cached result');
-    return (config.branchIsModified[branchName] = isModified);
+    logger.debug(`branch.isModified(): using cached result "${isModified}"`);
+    config.branchIsModified[branchName] = isModified;
+    return isModified;
   }
-  
+
   logger.debug('branch.isModified(): using git to calculate');
 
   await syncGit();
@@ -711,7 +711,7 @@ export async function isBranchConflicted(
   );
   if (is.boolean(cachedResult)) {
     logger.debug(
-      `Using cached result ${cachedResult} for isBranchConflicted(${baseBranch}, ${branch})`
+      `branch.isConflicted(): using cached result "${cachedResult}"`
     );
     return cachedResult;
   }
