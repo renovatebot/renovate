@@ -29,7 +29,9 @@ import {
   findGithubToken,
   getComposerArguments,
   getPhpConstraint,
+  isGithubPersonalAccessToken,
   requireComposerDependencyInstallation,
+  takePersonalAccessTokenIfPossible,
 } from './utils';
 
 function getAuthJson(): string | null {
@@ -39,19 +41,22 @@ function getAuthJson(): string | null {
     hostType: PlatformId.Github,
     url: 'https://api.github.com/',
   });
-  if (githubToken) {
-    authJson['github-oauth'] = {
-      'github.com': githubToken,
-    };
-  }
 
   const gitTagsGithubToken = findGithubToken({
     hostType: GitTagsDatasource.id,
     url: 'https://github.com',
   });
-  if (gitTagsGithubToken) {
+
+  const selectedGithubToken = takePersonalAccessTokenIfPossible(
+    githubToken,
+    gitTagsGithubToken
+  );
+  if (selectedGithubToken) {
+    if (!isGithubPersonalAccessToken(selectedGithubToken)) {
+      logger.debug(`Selected github token is not a Personal Access Token`);
+    }
     authJson['github-oauth'] = {
-      'github.com': gitTagsGithubToken,
+      'github.com': selectedGithubToken,
     };
   }
 

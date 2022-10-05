@@ -5,7 +5,9 @@ import {
   extractConstraints,
   findGithubToken,
   getComposerArguments,
+  isGithubPersonalAccessToken,
   requireComposerDependencyInstallation,
+  takePersonalAccessTokenIfPossible,
 } from './utils';
 
 jest.mock('../../datasource');
@@ -335,6 +337,70 @@ describe('modules/manager/composer/utils', () => {
           url: 'https://github.com',
         })
       ).toEqual(TOKEN_STRING);
+    });
+  });
+
+  describe('isGithubPersonalAccessToken', () => {
+    it('returns true when string is a github personnal access token', () => {
+      expect(isGithubPersonalAccessToken('ghp_XXXXXX')).toBeTrue();
+    });
+
+    it('returns false when string is a github application token', () => {
+      expect(isGithubPersonalAccessToken('ghs_XXXXXX')).toBeFalse();
+    });
+
+    it('returns false when string is not a token at all', () => {
+      expect(isGithubPersonalAccessToken('XXXXXX')).toBeFalse();
+    });
+  });
+
+  describe('takePersonalAccessTokenIfPossible', () => {
+    it('returns undefined when both token are undefined', () => {
+      const githubToken = undefined;
+      const gitTagsGithubToken = undefined;
+      expect(
+        takePersonalAccessTokenIfPossible(githubToken, gitTagsGithubToken)
+      ).toBeUndefined();
+    });
+
+    it('returns gitTagsToken when both token are PAT', () => {
+      const githubToken = 'ghp_github';
+      const gitTagsGithubToken = 'ghp_gitTags';
+      expect(
+        takePersonalAccessTokenIfPossible(githubToken, gitTagsGithubToken)
+      ).toEqual(gitTagsGithubToken);
+    });
+
+    it('returns githubToken is PAT and gitTagsGithubToken is not a PAT', () => {
+      const githubToken = 'ghp_github';
+      const gitTagsGithubToken = 'ghs_gitTags';
+      expect(
+        takePersonalAccessTokenIfPossible(githubToken, gitTagsGithubToken)
+      ).toEqual(githubToken);
+    });
+
+    it('returns gitTagsToken when both token are set but not PAT', () => {
+      const githubToken = 'ghs_github';
+      const gitTagsGithubToken = 'ghs_gitTags';
+      expect(
+        takePersonalAccessTokenIfPossible(githubToken, gitTagsGithubToken)
+      ).toEqual(gitTagsGithubToken);
+    });
+
+    it('returns gitTagsToken when gitTagsToken not PAT and gitTagsGithubToken is not set', () => {
+      const githubToken = undefined;
+      const gitTagsGithubToken = 'ghs_gitTags';
+      expect(
+        takePersonalAccessTokenIfPossible(githubToken, gitTagsGithubToken)
+      ).toEqual(gitTagsGithubToken);
+    });
+
+    it('returns githubToken when githubToken not PAT and gitTagsGithubToken is not set', () => {
+      const githubToken = 'ghs_gitTags';
+      const gitTagsGithubToken = undefined;
+      expect(
+        takePersonalAccessTokenIfPossible(githubToken, gitTagsGithubToken)
+      ).toEqual(githubToken);
     });
   });
 });

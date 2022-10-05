@@ -5,6 +5,7 @@ import { GlobalConfig } from '../../../config/global';
 import { logger } from '../../../logger';
 import type { ToolConstraint } from '../../../util/exec/types';
 import { HostRuleSearch, find as findHostRule } from '../../../util/host-rules';
+import { regEx } from '../../../util/regex';
 import { api, id as composerVersioningId } from '../../versioning/composer';
 import type { UpdateArtifactsConfig } from '../types';
 import type { ComposerConfig, ComposerLock } from './types';
@@ -113,4 +114,27 @@ export function extractConstraints(
 
 export function findGithubToken(search: HostRuleSearch): string | undefined {
   return findHostRule(search)?.token?.replace('x-access-token:', '');
+}
+
+export function isGithubPersonalAccessToken(token: string): boolean {
+  return regEx(/^ghp_/).test(token);
+}
+
+export function takePersonalAccessTokenIfPossible(
+  githubToken: string | undefined,
+  gitTagsGithubToken: string | undefined
+): string | undefined {
+  if (gitTagsGithubToken && isGithubPersonalAccessToken(gitTagsGithubToken)) {
+    return gitTagsGithubToken;
+  }
+
+  if (githubToken && isGithubPersonalAccessToken(githubToken)) {
+    return githubToken;
+  }
+
+  if (gitTagsGithubToken) {
+    return gitTagsGithubToken;
+  }
+
+  return githubToken;
 }
