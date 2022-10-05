@@ -15,7 +15,7 @@ The workaround limits Renovate to upgrade to LTS versions of the Java runtime on
 
 If you want Renovate to offer all `major` Java updates then add `workarounds:javaLTSVersions` to the `ignorePreset` array:
 
-```
+```json
 {
   "extends": ["config:base"],
   "ignorePresets": ["workarounds:javaLTSVersions"]
