@@ -98,9 +98,16 @@ describe('modules/datasource/conda/index', () => {
         datasource,
         depName,
       });
-      expect(res?.registryUrl).toBe(
-        'https://api.anaconda.org/package/conda-forge'
-      );
+      expect(res).toMatchObject({
+        homepage: 'http://anaconda.org/anaconda/pytest',
+        registryUrl: 'https://api.anaconda.org/package/conda-forge',
+        releases: [
+          { version: '2.5.1' },
+          { version: '2.6.0' },
+          { version: '2.7.0' },
+        ],
+        sourceUrl: 'https://github.com/pytest-dev/pytest',
+      });
       expect(res?.releases).toHaveLength(3);
     });
   });
