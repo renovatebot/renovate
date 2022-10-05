@@ -108,7 +108,6 @@ describe('modules/datasource/conda/index', () => {
         ],
         sourceUrl: 'https://github.com/pytest-dev/pytest',
       });
-      expect(res?.releases).toHaveLength(3);
     });
   });
 });
