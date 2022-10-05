@@ -411,7 +411,7 @@ const options: RenovateOptions[] = [
   {
     name: 'forkToken',
     description:
-      'Configure a personal access token here to enable "fork mode".',
+      'Set a personal access token here to enable "fork mode".',
     stage: 'repository',
     type: 'string',
     globalOnly: true,
