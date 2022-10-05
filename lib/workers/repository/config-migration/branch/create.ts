@@ -5,6 +5,7 @@ import { commitAndPush } from '../../../../modules/platform/commit';
 import { checkoutBranch } from '../../../../util/git';
 import { getMigrationBranchName } from '../common';
 import { ConfigMigrationCommitMessageFactory } from './commit-message';
+import { MigratedDataFactory } from './migrated-data';
 import type { MigratedData } from './migrated-data';
 
 export async function createConfigMigrationBranch(
@@ -12,7 +13,6 @@ export async function createConfigMigrationBranch(
   migratedConfigData: MigratedData
 ): Promise<string | null> {
   logger.debug('createConfigMigrationBranch()');
-  const contents = migratedConfigData.content;
   const configFileName = migratedConfigData.filename;
   logger.debug('Creating config migration branch');
 
@@ -30,6 +30,11 @@ export async function createConfigMigrationBranch(
   }
 
   await checkoutBranch(config.defaultBranch!);
+  let contents = migratedConfigData.content;
+  const prettified = await MigratedDataFactory.applyPrettierFormatting();
+  if (prettified) {
+    contents = prettified;
+  }
   return commitAndPush({
     branchName: getMigrationBranchName(config),
     files: [

@@ -3,8 +3,13 @@ import { RenovateConfig, getConfig, platform } from '../../../../../test/util';
 import { checkoutBranch, commitFiles } from '../../../../util/git';
 import { createConfigMigrationBranch } from './create';
 import type { MigratedData } from './migrated-data';
+import { MigratedDataFactory } from './migrated-data';
 
 jest.mock('../../../../util/git');
+
+const formattedMigratedData = Fixtures.getJson(
+  './migrated-data-formatted.json'
+);
 
 describe('workers/repository/config-migration/branch/create', () => {
   const raw = Fixtures.getJson('./renovate.json');
@@ -24,6 +29,11 @@ describe('workers/repository/config-migration/branch/create', () => {
   });
 
   describe('createConfigMigrationBranch', () => {
+    const prettierSpy = jest.spyOn(
+      MigratedDataFactory,
+      'applyPrettierFormatting'
+    );
+
     it('applies the default commit message', async () => {
       await createConfigMigrationBranch(config, migratedConfigData);
       expect(checkoutBranch).toHaveBeenCalledWith(config.defaultBranch);
@@ -175,6 +185,25 @@ describe('workers/repository/config-migration/branch/create', () => {
             },
           ],
           message,
+          platformCommit: false,
+        });
+      });
+
+      it('applies prettier formatting to the committed content', async () => {
+        const formatted = formattedMigratedData.content;
+        prettierSpy.mockResolvedValueOnce(formattedMigratedData.content);
+        await createConfigMigrationBranch(config, migratedConfigData);
+        expect(checkoutBranch).toHaveBeenCalledWith(config.defaultBranch);
+        expect(commitFiles).toHaveBeenCalledWith({
+          branchName: 'renovate/migrate-config',
+          files: [
+            {
+              type: 'addition',
+              path: 'renovate.json',
+              contents: formatted,
+            },
+          ],
+          message: 'Migrate config renovate.json',
           platformCommit: false,
         });
       });

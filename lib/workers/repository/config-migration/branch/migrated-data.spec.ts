@@ -7,7 +7,7 @@ import { logger } from '../../../../logger';
 import { readLocalFile } from '../../../../util/fs';
 import { getFileList } from '../../../../util/git';
 import { detectRepoFileConfig } from '../../init/merge';
-import { MigratedDataFactory, applyPrettierFormatting } from './migrated-data';
+import { MigratedDataFactory } from './migrated-data';
 
 jest.mock('../../../../config/migration');
 jest.mock('../../../../util/git');
@@ -41,7 +41,6 @@ describe('workers/repository/config-migration/branch/migrated-data', () => {
         isMigrated: true,
         migratedConfig: migratedConfigObj,
       });
-      mockedFunction(getFileList).mockResolvedValue([]);
     });
 
     it('Calls getAsync a first when migration not needed', async () => {
@@ -119,49 +118,82 @@ describe('workers/repository/config-migration/branch/migrated-data', () => {
         'MigratedDataFactory.getAsync() Error initializing renovate MigratedData'
       );
     });
+  });
 
-    it('format and migrate a JSON config file', async () => {
+  describe(' MigratedDataFactory.applyPrettierFormatting', () => {
+    beforeAll(() => {
+      mockedFunction(detectIndent).mockReturnValueOnce({
+        type: 'space',
+        amount: 2,
+        indent: '  ',
+      });
       mockedFunction(detectRepoFileConfig).mockResolvedValueOnce({
         configFileName: 'renovate.json',
+        configFileRaw: rawNonMigrated,
       });
-      mockedFunction(getFileList).mockResolvedValue(['.prettierrc']);
+      mockedFunction(migrateConfig).mockReturnValueOnce({
+        isMigrated: true,
+        migratedConfig: migratedConfigObj,
+      });
       MigratedDataFactory.reset();
-      await expect(MigratedDataFactory.getAsync()).resolves.toEqual(
-        formattedMigratedData
-      );
     });
 
-    it('should not stop run for invalid package.json', async () => {
-      mockedFunction(detectRepoFileConfig).mockResolvedValueOnce({
-        configFileName: 'renovate.json',
-        configFileRaw: 'abci',
-      });
-      mockedFunction(readLocalFile).mockResolvedValueOnce(rawNonMigrated);
-      MigratedDataFactory.reset();
-      await expect(MigratedDataFactory.getAsync()).resolves.toEqual(
-        migratedData
-      );
+    beforeEach(() => {
+      mockedFunction(getFileList).mockResolvedValue([]);
     });
 
-    it('should not stop run for readLocalFile error', async () => {
-      mockedFunction(detectRepoFileConfig).mockResolvedValueOnce({
-        configFileName: 'renovate.json',
-        configFileRaw: 'abci',
-      });
-      mockedFunction(readLocalFile).mockRejectedValueOnce(null);
-      MigratedDataFactory.reset();
-      await expect(MigratedDataFactory.getAsync()).resolves.toEqual(
-        migratedData
-      );
-    });
-
-    it('return original content if its invalid', async () => {
+    it('returns null if invoked before factory is initialized', async () => {
       await expect(
-        applyPrettierFormatting(`{"name":"Rahul"`, 'json', {
-          indent: '  ',
-          amount: 2,
-        })
-      ).resolves.toBe(`{"name":"Rahul"`);
+        MigratedDataFactory.applyPrettierFormatting()
+      ).resolves.toBeNull();
+    });
+
+    it('does not format when no prettier config is present', async () => {
+      const unformatted = migratedData.content;
+      mockedFunction(readLocalFile).mockResolvedValueOnce(null);
+      await MigratedDataFactory.getAsync();
+      await expect(
+        MigratedDataFactory.applyPrettierFormatting()
+      ).resolves.toEqual(unformatted);
+    });
+
+    it('does not format when failing to fetch package.json file', async () => {
+      const unformatted = migratedData.content;
+      mockedFunction(readLocalFile).mockRejectedValueOnce(null);
+      await MigratedDataFactory.getAsync();
+      await expect(
+        MigratedDataFactory.applyPrettierFormatting()
+      ).resolves.toEqual(unformatted);
+    });
+
+    it('does not format when there is an invalid package.json file', async () => {
+      const unformatted = migratedData.content;
+      mockedFunction(readLocalFile).mockResolvedValueOnce('invalid json');
+      await MigratedDataFactory.getAsync();
+      await expect(
+        MigratedDataFactory.applyPrettierFormatting()
+      ).resolves.toEqual(unformatted);
+    });
+
+    it('formats when prettier config file is found', async () => {
+      const formatted = formattedMigratedData.content;
+      mockedFunction(getFileList).mockResolvedValue(['.prettierrc']);
+      await MigratedDataFactory.getAsync();
+      await expect(
+        MigratedDataFactory.applyPrettierFormatting()
+      ).resolves.toEqual(formatted);
+    });
+
+    it('formats when finds prettier config inside the package.json file', async () => {
+      const formatted = formattedMigratedData.content;
+      mockedFunction(detectRepoFileConfig).mockResolvedValueOnce({
+        configFileName: 'renovate.json',
+      });
+      mockedFunction(readLocalFile).mockResolvedValueOnce('{"prettier":{}}');
+      await MigratedDataFactory.getAsync();
+      await expect(
+        MigratedDataFactory.applyPrettierFormatting()
+      ).resolves.toEqual(formatted);
     });
   });
 });

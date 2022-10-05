@@ -1,3 +1,4 @@
+import hasha from 'hasha';
 import { GlobalConfig } from '../../../../config/global';
 import type { RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
@@ -7,8 +8,10 @@ import {
   getFile,
   isBranchModified,
 } from '../../../../util/git';
+import { regEx } from '../../../../util/regex';
 import { getMigrationBranchName } from '../common';
 import { ConfigMigrationCommitMessageFactory } from './commit-message';
+import { MigratedDataFactory } from './migrated-data';
 import type { MigratedData } from './migrated-data';
 
 export async function rebaseMigrationBranch(
@@ -22,9 +25,9 @@ export async function rebaseMigrationBranch(
     return null;
   }
   const configFileName = migratedConfigData.filename;
-  const contents = migratedConfigData.content;
+  let contents = migratedConfigData.content;
   const existingContents = await getFile(configFileName, branchName);
-  if (contents === existingContents) {
+  if (hash(contents) === hash(existingContents)) {
     logger.debug('Migration branch is up to date');
     return null;
   }
@@ -42,6 +45,10 @@ export async function rebaseMigrationBranch(
   const commitMessage = commitMessageFactory.getCommitMessage();
 
   await checkoutBranch(config.defaultBranch!);
+  const prettified = await MigratedDataFactory.applyPrettierFormatting();
+  if (prettified) {
+    contents = prettified;
+  }
   return commitAndPush({
     branchName,
     files: [
@@ -54,4 +61,17 @@ export async function rebaseMigrationBranch(
     message: commitMessage.toString(),
     platformCommit: !!config.platformCommit,
   });
+}
+
+function stripWhitespaces(str: string): string {
+  const whitespacesRe = regEx(/\s/g);
+  return str.replace(whitespacesRe, '');
+}
+
+function hash(str: string | null): string | null {
+  if (!str) {
+    return null;
+  }
+  const stripped = stripWhitespaces(str);
+  return hasha(stripped, { algorithm: 'sha256' });
 }

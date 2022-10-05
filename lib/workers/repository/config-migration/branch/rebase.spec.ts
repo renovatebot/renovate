@@ -6,13 +6,23 @@ import {
   platform,
 } from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
-import { checkoutBranch } from '../../../../util/git';
+import { checkoutBranch, commitFiles } from '../../../../util/git';
+import { MigratedDataFactory } from './migrated-data';
 import type { MigratedData } from './migrated-data';
 import { rebaseMigrationBranch } from './rebase';
 
 jest.mock('../../../../util/git');
 
+const formattedMigratedData = Fixtures.getJson(
+  './migrated-data-formatted.json'
+);
+
 describe('workers/repository/config-migration/branch/rebase', () => {
+  const prettierSpy = jest.spyOn(
+    MigratedDataFactory,
+    'applyPrettierFormatting'
+  );
+
   beforeAll(() => {
     GlobalConfig.set({
       localDir: '',
@@ -61,6 +71,27 @@ describe('workers/repository/config-migration/branch/rebase', () => {
       await rebaseMigrationBranch(config, migratedConfigData);
       expect(checkoutBranch).toHaveBeenCalledWith(config.defaultBranch);
       expect(git.commitFiles).toHaveBeenCalledTimes(1);
+    });
+
+    it('applies prettier formatting when rebasing the migration branch ', async () => {
+      const formatted = formattedMigratedData.content;
+      prettierSpy.mockResolvedValueOnce(formattedMigratedData.content);
+      git.isBranchBehindBase.mockResolvedValueOnce(true);
+      await rebaseMigrationBranch(config, migratedConfigData);
+      expect(checkoutBranch).toHaveBeenCalledWith(config.defaultBranch);
+      expect(git.commitFiles).toHaveBeenCalledTimes(1);
+      expect(commitFiles).toHaveBeenCalledWith({
+        branchName: 'renovate/migrate-config',
+        files: [
+          {
+            type: 'addition',
+            path: 'renovate.json',
+            contents: formatted,
+          },
+        ],
+        message: 'Migrate config renovate.json',
+        platformCommit: false,
+      });
     });
 
     it('does not rebases migration branch when in dryRun is on', async () => {
