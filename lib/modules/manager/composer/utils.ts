@@ -5,7 +5,6 @@ import { GlobalConfig } from '../../../config/global';
 import { logger } from '../../../logger';
 import type { ToolConstraint } from '../../../util/exec/types';
 import { HostRuleSearch, find as findHostRule } from '../../../util/host-rules';
-import { regEx } from '../../../util/regex';
 import { api, id as composerVersioningId } from '../../versioning/composer';
 import type { UpdateArtifactsConfig } from '../types';
 import type { ComposerConfig, ComposerLock } from './types';
