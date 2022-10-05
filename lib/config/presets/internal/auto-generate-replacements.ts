@@ -38,7 +38,7 @@ function generatePackageRules({
 
 export function addPresets(
   presets: Record<string, Preset>,
-  templates: PresetTemplate[]
+  ...templates: PresetTemplate[]
 ): void {
   const ext = presets.all?.extends ?? [];
   for (const template of templates) {

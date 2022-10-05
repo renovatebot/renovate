@@ -587,53 +587,48 @@ const mui: PresetTemplate = {
   title: 'material-ui-to-mui',
 };
 
-const messageFormatCoreCli: PresetTemplate = {
-  description:
-    'The `messageformat` monorepo package naming scheme changed from `MessageFormat-{{package}}`-to-`@messageformat/{{package}}`.',
-  packageRules: {
-    matchCurrentVersion: '>=2.0.0 <3.0.0',
-    matchDatasources: ['npm'],
-    replacements: [
-      [['messageformat-cli'], '@messageformat/cli'],
-      [['messageformat'], '@messageformat/core'],
-    ],
-    replacementVersion: '3.0.0',
+const messageFormat: PresetTemplate[] = [
+  {
+    description:
+      'The `messageformat` monorepo package naming scheme changed from `MessageFormat-{{package}}`-to-`@messageformat/{{package}}`.',
+    packageRules: {
+      matchCurrentVersion: '>=2.0.0 <3.0.0',
+      matchDatasources: ['npm'],
+      replacements: [
+        [['messageformat-cli'], '@messageformat/cli'],
+        [['messageformat'], '@messageformat/core'],
+      ],
+      replacementVersion: '3.0.0',
+    },
+    title:
+      'messageformat-and-messageformat[cli|runtime]-to-@messageformat/[cli|runtime|core]',
   },
-  title:
-    'messageformat-and-messageformat[cli|runtime]-to-@messageformat/[cli|runtime|core]',
-};
-
-const messageFormatConvertReact: PresetTemplate = {
-  description:
-    'The `messageformat` monorepo package naming scheme changed from `MessageFormat-{{package}}`-to-`@messageformat/{{package}}`.',
-  packageRules: {
-    matchCurrentVersion: '>=0.4.0 <1.0.0',
-    matchDatasources: ['npm'],
-    replacements: [
-      [['messageformat-convert'], '@messageformat/convert'],
-      [['react-message-context'], '@messageformat/react'],
-    ],
-    replacementVersion: '1.0.0',
+  {
+    description:
+      'The `messageformat` monorepo package naming scheme changed from `MessageFormat-{{package}}`-to-`@messageformat/{{package}}`.',
+    packageRules: {
+      matchCurrentVersion: '>=0.4.0 <1.0.0',
+      matchDatasources: ['npm'],
+      replacements: [
+        [['messageformat-convert'], '@messageformat/convert'],
+        [['react-message-context'], '@messageformat/react'],
+      ],
+      replacementVersion: '1.0.0',
+    },
+    title:
+      'messageformat-convert-and-react-message-context-to-@messageformat/[convert|react]',
   },
-  title:
-    'messageformat-convert-and-react-message-context-to-@messageformat/[convert|react]',
-};
-
-const messageFormatParser: PresetTemplate = {
-  description:
-    'The `messageformat` monorepo package naming scheme changed from `MessageFormat-{{package}}`-to-`@messageformat/{{package}}`.',
-  packageRules: {
-    matchCurrentVersion: '>=4.0.0 <5.0.0',
-    matchDatasources: ['npm'],
-    replacements: [[['messageformat-parser'], '@messageformat/parser']],
-    replacementVersion: '5.0.0',
+  {
+    description:
+      'The `messageformat` monorepo package naming scheme changed from `MessageFormat-{{package}}`-to-`@messageformat/{{package}}`.',
+    packageRules: {
+      matchCurrentVersion: '>=4.0.0 <5.0.0',
+      matchDatasources: ['npm'],
+      replacements: [[['messageformat-parser'], '@messageformat/parser']],
+      replacementVersion: '5.0.0',
+    },
+    title: 'messageformat-parser-to-@messageformat/parser',
   },
-  title: 'messageformat-parser-to-@messageformat/parser',
-};
+];
 
-addPresets(presets, [
-  messageFormatConvertReact,
-  messageFormatCoreCli,
-  messageFormatParser,
-  mui,
-]);
+addPresets(presets, ...messageFormat, mui);
