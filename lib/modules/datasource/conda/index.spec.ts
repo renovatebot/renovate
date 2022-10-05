@@ -98,7 +98,7 @@ describe('modules/datasource/conda/index', () => {
         datasource,
         depName,
       });
-      expect(res.registryUrl).toBe(
+      expect(res?.registryUrl).toBe(
         'https://api.anaconda.org/package/conda-forge'
       );
       expect(res?.releases).toHaveLength(3);
