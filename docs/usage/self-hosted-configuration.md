@@ -363,9 +363,12 @@ It will also override any settings in `packageRules`.
 
 ## forkToken
 
-You probably have no need for this option - it is an experimental setting developed for the Forking Renovate hosted GitHub App.
+You probably don't need this option - it is an experimental setting developed for the Forking Renovate hosted GitHub App.
 
-If this option is non-null then Renovate will fork the target repository into the account owning the Personal Access Token, and keep its default branch up-to-date with the target.
+If this value is configured then Renovate:
+
+- forks the target repository into the account that owns the PAT
+- keep this fork's default branch up-to-date with the target
 Renovate will then create branches on the fork and opens Pull Requests on the parent repository.
 
 ## gitNoVerify
