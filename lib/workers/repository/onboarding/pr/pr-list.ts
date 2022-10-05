@@ -12,11 +12,16 @@ export function getPrList(
 ): string {
   logger.debug('getPrList()');
   logger.trace({ config });
-  let prDesc = `\n### ${_('What to Expect')}\n\n`;
+  let prDesc = util.format('\n### %s\n\n', _('What to Expect'));
+
   if (!branches.length) {
-    return `${prDesc}${_(
-      'It looks like your repository dependencies are already up-to-date and no Pull Requests will be necessary right away.'
-    )}\n`;
+    return util.format(
+      '%s%s\n',
+      prDesc,
+      _(
+        'It looks like your repository dependencies are already up-to-date and no Pull Requests will be necessary right away.'
+      )
+    );
   }
   prDesc +=
     util.format(
@@ -53,9 +58,10 @@ export function getPrList(
     for (const upgrade of branch.upgrades) {
       let text = '';
       if (upgrade.updateType === 'lockFileMaintenance') {
-        text += `  - ${_(
-          'Regenerate lock files to use latest dependency versions'
-        )}`;
+        text += util.format(
+          `  - %s`,
+          _('Regenerate lock files to use latest dependency versions')
+        );
       } else {
         if (upgrade.updateType === 'pin') {
           text += `  - ${pgettext('onboarding/pr/pr-list', 'Pin')} `;

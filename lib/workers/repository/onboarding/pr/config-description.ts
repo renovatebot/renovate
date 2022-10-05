@@ -47,27 +47,29 @@ export function getConfigDesc(
     return '';
   }
   logger.debug(`Found description array with length:${descriptionArr.length}`);
-  let desc = `\n### ${_(
-     "Configuration Summary\n\nBased on the default config's presets, Renovate will:"
-  )}\n\n`;
-  desc += `  - ${_(
-    'Start dependency updates only once this onboarding PR is merged'
-  )}\n`;
+  let desc = '\n### ';
+  desc += _(
+    "Configuration Summary\n\nBased on the default config's presets, Renovate will:"
+  );
+  desc += '\n\n';
+  desc += '  - ';
+  desc += _('Start dependency updates only once this onboarding PR is merged');
+  desc += '\n';
   descriptionArr.forEach((d) => {
-    desc += `  - ${_(d)}\n`;
+    desc += util.format('  - %s\n', _(d));
   });
   desc += '\n';
-  desc += emojify(
-    `:abcd: ${_(
-      'Would you like to change the way Renovate is upgrading your dependencies?'
-    )}`
+  desc += emojify(':abcd: ');
+  desc += _(
+    'Would you like to change the way Renovate is upgrading your dependencies?'
   );
-  desc += ` ${util.format(
+
+  desc += util.format(
     _(
-      'Simply edit the `%s` in this branch with your custom config and the list of Pull Requests in the "What to Expect" section below will be updated the next time Renovate runs.'
+      ' Simply edit the `%s` in this branch with your custom config and the list of Pull Requests in the "What to Expect" section below will be updated the next time Renovate runs.'
     ),
     configFile
-  )}`;
+  );
   desc += '\n\n---\n';
   return desc;
 }
