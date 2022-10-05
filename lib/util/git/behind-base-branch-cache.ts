@@ -35,9 +35,7 @@ export function setCachedBehindBaseResult(
   );
 
   if (!branch) {
-    logger.debug(
-      `setCachedBehindBaseResult(): Branch cache not present for ${branchName}`
-    );
+    logger.debug(`setCachedBehindBaseResult(): Branch cache not present`);
     return;
   }
 

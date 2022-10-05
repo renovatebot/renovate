@@ -18,9 +18,7 @@ export function setBranchNewCommit(
   cache.branches ??= [];
   let branch = cache.branches.find((br) => br.branchName === branchName);
   if (!branch) {
-    logger.debug(
-      `setBranchCommit(): Branch cache not present for ${branchName}`
-    ); // should never be called
+    logger.debug(`setBranchCommit(): Branch cache not present`); // should never be called
     branch = {
       branchName,
       baseBranch,

@@ -10,7 +10,7 @@ export function getCachedModifiedResult(
     (branch) => branch.branchName === branchName
   );
 
-  if (branch && branch.sha === branchSha && branch.isModified !== undefined) {
+  if (branch?.sha === branchSha && branch.isModified !== undefined) {
     return branch.isModified;
   }
 
@@ -27,9 +27,7 @@ export function setCachedModifiedResult(
   );
 
   if (!branch) {
-    logger.debug(
-      `setCachedModifiedResult(): Branch cache not present for ${branchName}`
-    );
+    logger.debug(`setCachedModifiedResult(): Branch cache not present`);
     return;
   }
 

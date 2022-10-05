@@ -195,7 +195,7 @@ describe('util/git/behind-base-branch-cache', () => {
       setCachedBehindBaseResult('foo', false);
       expect(repoCache).toEqual({});
       expect(logger.logger.debug).toHaveBeenCalledWith(
-        'setCachedBehindBaseResult(): Branch cache not present for foo'
+        'setCachedBehindBaseResult(): Branch cache not present'
       );
     });
 
@@ -203,7 +203,7 @@ describe('util/git/behind-base-branch-cache', () => {
       setCachedBehindBaseResult('foo', false);
       expect(repoCache).toEqual({});
       expect(logger.logger.debug).toHaveBeenCalledWith(
-        'setCachedBehindBaseResult(): Branch cache not present for foo'
+        'setCachedBehindBaseResult(): Branch cache not present'
       );
     });
 
