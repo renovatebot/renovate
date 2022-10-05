@@ -1,4 +1,5 @@
 import { logger } from '../../../logger';
+import { coerceArray } from '../../../util/array';
 import { regEx } from '../../../util/regex';
 import type { PackageDependency, PackageFile } from '../types';
 import type { Dependency, JsonnetFile } from './types';
@@ -26,7 +27,7 @@ export function extractPackageFile(
     return null;
   }
 
-  for (const dependency of jsonnetFile.dependencies ?? []) {
+  for (const dependency of coerceArray(jsonnetFile.dependencies)) {
     const dep = extractDependency(dependency);
     if (dep) {
       deps.push(dep);
