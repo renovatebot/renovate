@@ -369,6 +369,7 @@ If this value is configured then Renovate:
 
 - forks the target repository into the account that owns the PAT
 - keep this fork's default branch up-to-date with the target
+
 Renovate will then create branches on the fork and opens Pull Requests on the parent repository.
 
 ## gitNoVerify
