@@ -112,16 +112,6 @@ export function extractConstraints(
   return res;
 }
 
-export function findGithubPersonalAccessToken(
-  search: HostRuleSearch
-): string | undefined {
-  const token = findHostRule(search)?.token?.replace('x-access-token:', '');
-  if (token && isPersonalAccessToken(token)) {
-    return token;
-  }
-  return undefined;
-}
-
-export function isPersonalAccessToken(token: string): boolean {
-  return regEx(/^ghp_/).test(token);
+export function findGithubToken(search: HostRuleSearch): string | undefined {
+  return findHostRule(search)?.token?.replace('x-access-token:', '');
 }

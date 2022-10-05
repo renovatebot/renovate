@@ -26,7 +26,7 @@ import type { AuthJson, ComposerLock } from './types';
 import {
   composerVersioningId,
   extractConstraints,
-  findGithubPersonalAccessToken,
+  findGithubToken,
   getComposerArguments,
   getPhpConstraint,
   requireComposerDependencyInstallation,
@@ -35,7 +35,7 @@ import {
 function getAuthJson(): string | null {
   const authJson: AuthJson = {};
 
-  const githubToken = findGithubPersonalAccessToken({
+  const githubToken = findGithubToken({
     hostType: PlatformId.Github,
     url: 'https://api.github.com/',
   });
@@ -45,7 +45,7 @@ function getAuthJson(): string | null {
     };
   }
 
-  const gitTagsGithubToken = findGithubPersonalAccessToken({
+  const gitTagsGithubToken = findGithubToken({
     hostType: GitTagsDatasource.id,
     url: 'https://github.com',
   });
