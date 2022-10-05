@@ -132,6 +132,7 @@ export const presets: Record<string, Preset> = {
           'adoptopenjdk',
           'openjdk',
           'java',
+          'sapmachine'
         ],
         versioning:
           'regex:^(?<major>\\d+)?(\\.(?<minor>\\d+))?(\\.(?<patch>\\d+))?([\\._+](?<build>\\d+))?(-(?<compatibility>.*))?$',
