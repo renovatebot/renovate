@@ -31,6 +31,10 @@ const repoGroups = {
   'aspnet aspnetwebstack': 'https://github.com/aspnet/AspNetWebStack',
   'aspnet extensions': 'https://github.com/aspnet/Extensions',
   'aspnet-api-versioning': 'https://github.com/Microsoft/aspnet-api-versioning',
+  'automapper-dotnet': [
+    'https://github.com/AutoMapper/AutoMapper',
+    'https://github.com/AutoMapper/AutoMapper.Extensions.Microsoft.DependencyInjection',
+  ],
   'aws-cdk': 'https://github.com/aws/aws-cdk',
   'aws-sdk-js-v3': 'https://github.com/aws/aws-sdk-js-v3',
   'aws-sdk-net': 'https://github.com/aws/aws-sdk-net',
@@ -212,6 +216,7 @@ const repoGroups = {
   'telus-tds-core': 'https://github.com/telus/tds-core',
   'theme-ui': 'https://github.com/system-ui/theme-ui',
   treat: 'https://github.com/seek-oss/treat',
+  trpc: 'https://github.com/trpc/trpc',
   tsoa: 'https://github.com/lukeautry/tsoa',
   typefaces: 'https://github.com/KyleAMathews/typefaces',
   'typescript-eslint': 'https://github.com/typescript-eslint/typescript-eslint',
