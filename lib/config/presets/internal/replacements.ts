@@ -578,12 +578,14 @@ const muiReplacement: Replacement[] = [
 const mui: PresetTemplate = {
   description:
     'The `material-ui` monorepo org was renamed from `@material-ui` to `@mui`.',
-  packageRules: {
-    matchCurrentVersion: '>=4.0.0 <5.0.0',
-    matchDatasources: ['npm'],
-    replacements: muiReplacement,
-    replacementVersion: '5.0.0',
-  },
+  packageRules: [
+    {
+      matchCurrentVersion: '>=4.0.0 <5.0.0',
+      matchDatasources: ['npm'],
+      replacements: muiReplacement,
+      replacementVersion: '5.0.0',
+    },
+  ],
   title: 'material-ui-to-mui',
 };
 

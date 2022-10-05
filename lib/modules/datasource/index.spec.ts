@@ -184,7 +184,7 @@ describe('modules/datasource/index', () => {
       datasources.set(datasource, new DummyDatasource());
       expect(
         await getPkgReleases({
-          datasource: datasource,
+          datasource,
           depName: null as never, // #7154
         })
       ).toBeNull();
@@ -247,9 +247,9 @@ describe('modules/datasource/index', () => {
 
       expect(
         await getDigest({
-          datasource: datasource,
+          datasource,
           packageName: 'pkgName',
-          depName: depName,
+          depName,
           replacementName: 'replacement',
         })
       ).toBe('replacement');
