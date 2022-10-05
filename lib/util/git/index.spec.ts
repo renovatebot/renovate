@@ -267,7 +267,7 @@ describe('util/git/index', () => {
       behindBaseCache.getCachedBehindBaseResult.mockReturnValue(true);
       expect(await git.isBranchBehindBase('develop', defaultBranch)).toBeTrue();
       expect(logger.logger.debug).toHaveBeenCalledWith(
-        'branch.isBranchBehindBase(): using cached result'
+        'branch.isBehindBase(): using cached result "true"'
       );
     });
   });
