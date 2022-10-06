@@ -1,5 +1,4 @@
 import is from '@sindresorhus/is';
-import hasha from 'hasha';
 import {
   RenovateConfig,
   getConfig,
@@ -16,6 +15,7 @@ import type {
   BranchCache,
   RepoCacheData,
 } from '../../../util/cache/repository/types';
+import { fingerprint } from '../../../util/fingerprint';
 import { Limit, isLimitReached } from '../../global/limits';
 import { BranchConfig, BranchResult, BranchUpgradeConfig } from '../../types';
 import * as _branchWorker from '../update/branch';
@@ -166,7 +166,7 @@ describe('workers/repository/process/write', () => {
         result: BranchResult.Done,
         commitSha: 'some-value',
       });
-      const branchManagersFingerprint = hasha(
+      const branchManagersFingerprint = fingerprint(
         [
           ...new Set(
             branches[0].upgrades
@@ -175,12 +175,12 @@ describe('workers/repository/process/write', () => {
           ),
         ].sort()
       );
-      const fingerprint = hasha([
-        JSON.stringify(branches[0]),
+      const branchFingerprint = fingerprint({
+        branches: JSON.stringify(branches[0]),
         branchManagersFingerprint,
-      ]);
+      });
       expect(await writeUpdates(config, branches)).toBe('done');
-      expect(branches[0].branchFingerprint).toBe(fingerprint);
+      expect(branches[0].branchFingerprint).toBe(branchFingerprint);
     });
 
     it('caches same fingerprint when no commit is made', async () => {
@@ -196,7 +196,7 @@ describe('workers/repository/process/write', () => {
           ],
         },
       ]);
-      const branchManagersFingerprint = hasha(
+      const branchManagersFingerprint = fingerprint(
         [
           ...new Set(
             branches[0].upgrades
@@ -205,16 +205,16 @@ describe('workers/repository/process/write', () => {
           ),
         ].sort()
       );
-      const fingerprint = hasha([
-        JSON.stringify(branches[0]),
+      const branchFingerprint = fingerprint({
+        branches: JSON.stringify(branches[0]),
         branchManagersFingerprint,
-      ]);
+      });
       repoCache.getCache.mockReturnValueOnce({
         branches: [
           {
             branchName: 'new/some-branch',
             baseBranch: 'base_branch',
-            branchFingerprint: fingerprint,
+            branchFingerprint,
           } as BranchCache,
         ],
       });
@@ -223,7 +223,7 @@ describe('workers/repository/process/write', () => {
         result: BranchResult.Done,
       });
       expect(await writeUpdates(config, branches)).toBe('done');
-      expect(branches[0].branchFingerprint).toBe(fingerprint);
+      expect(branches[0].branchFingerprint).toBe(branchFingerprint);
     });
 
     it('creates new branchCache when cache is not enabled', async () => {

@@ -1,11 +1,10 @@
 import is from '@sindresorhus/is';
-import hasha from 'hasha';
-import stringify from 'safe-stable-stringify';
 import type { RenovateConfig } from '../../../config/types';
 import { addMeta, logger, removeMeta } from '../../../logger';
 import { hashMap } from '../../../modules/manager';
 import { getCache } from '../../../util/cache/repository';
 import type { BranchCache } from '../../../util/cache/repository/types';
+import { fingerprint } from '../../../util/fingerprint';
 import { branchExists, getBranchCommit } from '../../../util/git';
 import { setBranchNewCommit } from '../../../util/git/set-branch-commit';
 import { Limit, incLimitedValue, setMaxLimit } from '../../global/limits';
@@ -124,7 +123,7 @@ export async function writeUpdates(
     // TODO: base branch name cannot be undefined - fix optional types (#7154)
     const branchState = syncBranchState(branchName, baseBranch!);
 
-    const branchManagersFingerprint = hasha(
+    const branchManagersFingerprint = fingerprint(
       [
         ...new Set(
           branch.upgrades
@@ -133,10 +132,10 @@ export async function writeUpdates(
         ),
       ].sort()
     );
-    const branchFingerprint = hasha([
-      stringify(branch),
+    const branchFingerprint = fingerprint({
+      branch,
       branchManagersFingerprint,
-    ]);
+    });
     branch.skipBranchUpdate = canSkipBranchUpdateCheck(
       branchState,
       branchFingerprint
