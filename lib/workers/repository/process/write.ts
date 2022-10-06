@@ -123,18 +123,16 @@ export async function writeUpdates(
     // TODO: base branch name cannot be undefined - fix optional types (#7154)
     const branchState = syncBranchState(branchName, baseBranch!);
 
-    const branchManagersFingerprint = fingerprint(
-      [
-        ...new Set(
-          branch.upgrades
-            .map((upgrade) => hashMap.get(upgrade.manager) ?? upgrade.manager)
-            .filter(is.string)
-        ),
-      ].sort()
-    );
+    const managers = [
+      ...new Set(
+        branch.upgrades
+          .map((upgrade) => hashMap.get(upgrade.manager) ?? upgrade.manager)
+          .filter(is.string)
+      ),
+    ].sort();
     const branchFingerprint = fingerprint({
       branch,
-      branchManagersFingerprint,
+      managers,
     });
     branch.skipBranchUpdate = canSkipBranchUpdateCheck(
       branchState,
