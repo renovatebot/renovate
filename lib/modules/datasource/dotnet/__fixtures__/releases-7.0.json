@@ -1,0 +1,122 @@
+{
+  "channel-version": "7.0",
+  "latest-release": "7.0.0-rc.1",
+  "latest-release-date": "2022-09-14",
+  "latest-runtime": "7.0.0-rc.1.22426.10",
+  "latest-sdk": "7.0.100-rc.1.22431.12",
+  "support-phase": "rc",
+  "releases": [
+    {
+      "release-date": "2022-09-14",
+      "release-version": "7.0.0-rc.1",
+      "security": true,
+      "release-notes": "https://github.com/dotnet/core/blob/main/release-notes/7.0/preview/7.0.0-rc.1.md",
+      "runtime": {
+        "version": "7.0.0-rc.1.22426.10",
+        "version-display": "7.0.0-rc.1"
+      },
+      "sdk": {
+        "version": "7.0.100-rc.1.22431.12",
+        "version-display": "7.0.100-rc.1"
+      }
+    },
+    {
+      "release-date": "2022-08-09",
+      "release-version": "7.0.0-preview.7",
+      "security": false,
+      "release-notes": "https://github.com/dotnet/core/blob/main/release-notes/7.0/preview/7.0.0-preview.7.md",
+      "runtime": {
+        "version": "7.0.0-preview.7.22375.6",
+        "version-display": "7.0.0-preview.7"
+      },
+      "sdk": {
+        "version": "7.0.100-preview.7.22377.5",
+        "version-display": "7.0.100-preview.7"
+      }
+    },
+    {
+      "release-date": "2022-07-12",
+      "release-version": "7.0.0-preview.6",
+      "security": false,
+      "release-notes": "https://github.com/dotnet/core/blob/main/release-notes/7.0/preview/7.0.0-preview.6.md",
+      "runtime": {
+        "version": "7.0.0-preview.6.22324.4",
+        "version-display": "7.0.0-preview.6"
+      },
+      "sdk": {
+        "version": "7.0.100-preview.6.22352.1",
+        "version-display": "7.0.100-preview.6"
+      }
+    },
+    {
+      "release-date": "2022-06-14",
+      "release-version": "7.0.0-preview.5",
+      "security": false,
+      "release-notes": "https://github.com/dotnet/core/blob/main/release-notes/7.0/preview/7.0.0-preview.5.md",
+      "runtime": {
+        "version": "7.0.0-preview.5.22301.12",
+        "version-display": "7.0.0-preview.5"
+      },
+      "sdk": {
+        "version": "7.0.100-preview.5.22307.18",
+        "version-display": "7.0.100-preview.5"
+      }
+    },
+    {
+      "release-date": "2022-05-10",
+      "release-version": "7.0.0-preview.4",
+      "security": false,
+      "release-notes": "https://github.com/dotnet/core/blob/main/release-notes/7.0/preview/7.0.0-preview.4.md",
+      "runtime": {
+        "version": "7.0.0-preview.4.22229.4",
+        "version-display": "7.0.0-preview.4"
+      },
+      "sdk": {
+        "version": "7.0.100-preview.4.22252.9",
+        "version-display": "7.0.100-preview.4"
+      }
+    },
+    {
+      "release-date": "2022-04-13",
+      "release-version": "7.0.0-preview.3",
+      "security": false,
+      "release-notes": "https://github.com/dotnet/core/blob/main/release-notes/7.0/preview/7.0.0-preview.3.md",
+      "runtime": {
+        "version": "7.0.0-preview.3.22175.4",
+        "version-display": "7.0.0-preview.3"
+      },
+      "sdk": {
+        "version": "7.0.100-preview.3.22179.4",
+        "version-display": "7.0.100-preview.3"
+      }
+    },
+    {
+      "release-date": "2022-03-15",
+      "release-version": "7.0.0-preview.2",
+      "security": false,
+      "release-notes": "https://github.com/dotnet/core/blob/main/release-notes/7.0/preview/7.0.0-preview.2.md",
+      "runtime": {
+        "version": "7.0.0-preview.2.22152.2",
+        "version-display": "7.0.0-preview.2"
+      },
+      "sdk": {
+        "version": "7.0.100-preview.2.22153.17",
+        "version-display": "7.0.100-preview.2"
+      }
+    },
+    {
+      "release-date": "2022-02-17",
+      "release-version": "7.0.0-preview.1",
+      "security": false,
+      "release-notes": "https://github.com/dotnet/core/blob/main/release-notes/7.0/preview/7.0.0-preview.1.md",
+      "runtime": {
+        "version": "7.0.0-preview.1.22076.8",
+        "version-display": "7.0.0-preview.1"
+      },
+      "sdk": {
+        "version": "7.0.100-preview.1.22110.4",
+        "version-display": "7.0.100-preview.1"
+      }
+    }
+  ]
+}
