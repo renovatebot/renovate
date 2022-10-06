@@ -132,6 +132,7 @@ export const presets: Record<string, Preset> = {
           'adoptopenjdk',
           'openjdk',
           'java',
+          'java-jre',
           'sapmachine',
         ],
         versioning:
