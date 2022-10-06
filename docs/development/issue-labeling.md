@@ -81,10 +81,10 @@ Add the `breaking` label for Issues or PRs which have changes that are not backw
 </details>
 
 Use these to assign a priority level to an issue.
-Incoming issues are labeled `priority-5-triage` by default, this label should be replaced with a proper priority (low/normal/important/critical).
+Incoming issues are labeled `priority-5-triage` by default, this label should be replaced with a proper priority (low/medium/high/critical).
 Try to select the proper priority.
 Nothing bad will happen if you select a "wrong" priority.
-At a high level: critical = needs immediate fix, important = to be prioritized ahead of others, normal = default priority, low = trivial issue, or impacts a very small % of the user base.
+At a high level: critical = needs immediate fix, high = to be prioritized ahead of others, medium = default priority, low = trivial issue, or impacts a very small percentage of the user base.
 
 Use [this search](https://github.com/renovatebot/renovate/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+-label%3Apriority-1-critical+-label%3Apriority-2-high+-label%3Apriority-3-medium+-label%3Apriority-4-low++-label%3Apriority-5-triage) to find any issues which are missing a priority label.
 
