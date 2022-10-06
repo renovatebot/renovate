@@ -82,4 +82,4 @@ To ignore a PR you just close it unmerged.
 !!! note
     Renovate will re-create any PRs that is marked "immortal".
     What this means is that any immortal PR you close, will pop up again the next time Renovate runs.
-    To ignore immortal PRs, follow the advice in [INSERT PROPER LINK HERE](#).
+    To ignore immortal PRs, follow the advice in the [How to fix immortal PRs](#how-to-fix-immortal-prs) section.
