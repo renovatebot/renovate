@@ -4,9 +4,9 @@ import { Datasource } from '../datasource';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
 import {
   DotnetReleases,
+  DotnetReleasesIndex,
   DotnetReleasesIndexType,
   DotnetReleasesType,
-  DotnetSdkReleasesIndex,
 } from './schema';
 
 export class DotnetDatasource extends Datasource {
@@ -42,7 +42,7 @@ export class DotnetDatasource extends Datasource {
     try {
       raw = await this.http.getJson(
         this.defaultRegistryUrls[0],
-        DotnetSdkReleasesIndex
+        DotnetReleasesIndex
       );
     } catch (err) {
       this.handleGenericErrors(err);

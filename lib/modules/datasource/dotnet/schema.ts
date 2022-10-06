@@ -21,7 +21,7 @@ const ReleaseIndex = z.object({
   'eol-date': z.date().nullable(),
   'releases.json': z.string(),
 });
-export const DotnetSdkReleasesIndex = z.object({
+export const DotnetReleasesIndex = z.object({
   'releases-index': z.array(ReleaseIndex),
 });
 
@@ -47,5 +47,5 @@ export const DotnetReleases = z.object({
   releases: z.array(Release),
 });
 
-export type DotnetReleasesIndexType = z.infer<typeof DotnetSdkReleasesIndex>;
+export type DotnetReleasesIndexType = z.infer<typeof DotnetReleasesIndex>;
 export type DotnetReleasesType = z.infer<typeof DotnetReleases>;
