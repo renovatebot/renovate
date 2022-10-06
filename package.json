@@ -168,7 +168,7 @@
     "detect-indent": "6.1.0",
     "editorconfig": "0.15.3",
     "email-addresses": "5.0.0",
-    "emoji-regex": "10.1.0",
+    "emoji-regex": "10.2.0",
     "emojibase": "6.1.0",
     "emojibase-regex": "6.0.1",
     "extract-zip": "2.0.1",
@@ -226,7 +226,6 @@
     "re2": "1.17.7"
   },
   "devDependencies": {
-    "@actions/core": "1.9.1",
     "@jest/globals": "29.0.3",
     "@jest/reporters": "29.0.3",
     "@jest/test-result": "29.0.3",
@@ -305,7 +304,7 @@
     "shelljs": "0.8.5",
     "strip-ansi": "6.0.1",
     "tmp-promise": "3.0.3",
-    "ts-jest": "29.0.2",
+    "ts-jest": "29.0.3",
     "ts-node": "10.9.1",
     "type-fest": "2.19.0",
     "typescript": "4.7.4",
