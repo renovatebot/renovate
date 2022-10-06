@@ -2433,7 +2433,7 @@ const options: RenovateOptions[] = [
   },
   {
     name: 'translationsFilePath',
-    description: `PO (Portable Object) file's path`,
+    description: `The file path where PO (Portal Object) files are located`,
     type: 'string',
     globalOnly: true,
   },
