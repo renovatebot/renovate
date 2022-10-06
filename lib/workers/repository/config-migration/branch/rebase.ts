@@ -8,7 +8,7 @@ import {
   getFile,
   isBranchModified,
 } from '../../../../util/git';
-import { regEx } from '../../../../util/regex';
+import { quickStringify } from '../../../../util/stringify';
 import { getMigrationBranchName } from '../common';
 import { ConfigMigrationCommitMessageFactory } from './commit-message';
 import { MigratedDataFactory } from './migrated-data';
@@ -64,8 +64,7 @@ export async function rebaseMigrationBranch(
 }
 
 function stripWhitespaces(str: string): string {
-  const whitespacesRe = regEx(/\s/g);
-  return str.replace(whitespacesRe, '');
+  return quickStringify(JSON.parse(str));
 }
 
 function hash(str: string | null): string | null {
@@ -73,5 +72,5 @@ function hash(str: string | null): string | null {
     return null;
   }
   const stripped = stripWhitespaces(str);
-  return hasha(stripped, { algorithm: 'sha256' });
+  return hasha(stripped);
 }

@@ -51,41 +51,47 @@ export class MigratedDataFactory {
   }
 
   public static async applyPrettierFormatting(): Promise<string | null> {
-    logger.trace('applyPrettierFormatting() - START');
-    if (!this.data) {
-      return null;
-    }
-
-    const { content, filename } = this.data;
-    const indent = this.indent;
-    const fileList = await getFileList();
-    let prettierExists = fileList.some((file) =>
-      prettierConfigFilenames.has(file)
-    );
-
-    if (!prettierExists) {
-      try {
-        const packageJsonContent = await readLocalFile('package.json', 'utf8');
-        prettierExists =
-          packageJsonContent && JSON.parse(packageJsonContent).prettier;
-      } catch {
-        logger.warn(
-          'applyPrettierFormatting() - Error processing package.json file'
-        );
+    try {
+      logger.trace('applyPrettierFormatting() - START');
+      if (!this.data) {
+        return null;
       }
-    }
 
-    if (!prettierExists) {
-      return content;
-    }
-    const options = {
-      parser: filename.endsWith('.json5') ? 'json5' : 'json',
-      tabWidth: indent.amount === 0 ? 2 : indent.amount,
-      useTabs: indent.type === 'tab',
-    };
+      const { content, filename } = this.data;
+      const indent = this.indent;
+      const fileList = await getFileList();
+      let prettierExists = fileList.some((file) =>
+        prettierConfigFilenames.has(file)
+      );
 
-    logger.trace('applyPrettierFormatting() - END');
-    return prettier.format(content, options);
+      if (!prettierExists) {
+        try {
+          const packageJsonContent = await readLocalFile(
+            'package.json',
+            'utf8'
+          );
+          prettierExists =
+            packageJsonContent && JSON.parse(packageJsonContent).prettier;
+        } catch {
+          logger.warn(
+            'applyPrettierFormatting() - Error processing package.json file'
+          );
+        }
+      }
+
+      if (!prettierExists) {
+        return content;
+      }
+      const options = {
+        parser: filename.endsWith('.json5') ? 'json5' : 'json',
+        tabWidth: indent.amount === 0 ? 2 : indent.amount,
+        useTabs: indent.type === 'tab',
+      };
+
+      return prettier.format(content, options);
+    } finally {
+      logger.trace('applyPrettierFormatting() - END');
+    }
   }
 
   public static reset(): void {
