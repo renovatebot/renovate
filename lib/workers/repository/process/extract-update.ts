@@ -1,12 +1,11 @@
 // TODO #7154
 import is from '@sindresorhus/is';
-import hasha from 'hasha';
-import stringify from 'safe-stable-stringify';
 import type { RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
 import type { PackageFile } from '../../../modules/manager/types';
 import { getCache } from '../../../util/cache/repository';
 import { checkGithubToken as ensureGithubToken } from '../../../util/check-token';
+import { fingerprint } from '../../../util/fingerprint';
 import { checkoutBranch, getBranchCommit } from '../../../util/git';
 import type { BranchConfig } from '../../types';
 import { extractAllDependencies } from '../extract';
@@ -75,7 +74,7 @@ export async function extract(
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { packageRules, ...remainingConfig } = config;
   // Calculate hash excluding packageRules, because they're not applied during extract
-  const configHash = hasha(stringify(remainingConfig));
+  const configHash = fingerprint(remainingConfig);
   // istanbul ignore if
   if (
     cachedExtract?.sha === baseBranchSha &&
