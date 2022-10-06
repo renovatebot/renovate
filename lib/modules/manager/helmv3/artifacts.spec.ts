@@ -1,10 +1,11 @@
 import { join } from 'upath';
 import { envMock, mockExecAll } from '../../../../test/exec-util';
 import { Fixtures } from '../../../../test/fixtures';
-import { env, fs, mocked } from '../../../../test/util';
+import { env, fs, git, mocked } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import * as docker from '../../../util/exec/docker';
+import type { StatusResult } from '../../../util/git/types';
 import * as hostRules from '../../../util/host-rules';
 import * as _datasource from '../../datasource';
 import type { UpdateArtifactsConfig } from '../types';
@@ -13,7 +14,23 @@ import * as helmv3 from '.';
 jest.mock('../../datasource');
 jest.mock('../../../util/exec/env');
 jest.mock('../../../util/http');
-jest.mock('../../../util/fs');
+jest.mock('../../../util/fs', () => {
+  // mock everything except isFileInDir
+  const original =
+    jest.requireActual<typeof import('../../../util/fs')>('../../../util/fs');
+  const partialMocked = Object.keys(original).reduce(
+    (pre: Record<string, jest.Mock>, methodName) => {
+      pre[methodName] = jest.fn();
+      return pre;
+    },
+    {}
+  );
+  return {
+    ...partialMocked,
+    isFileInDir: original.isFileInDir, // mock all methods except isFileInDir
+  };
+});
+jest.mock('../../../util/git');
 
 const datasource = mocked(_datasource);
 
@@ -209,6 +226,126 @@ describe('modules/manager/helmv3/artifacts', () => {
         },
       },
     ]);
+  });
+
+  it('add sub chart artifacts to file list if Chart.lock exists', async () => {
+    fs.readLocalFile.mockResolvedValueOnce(ociLockFile1 as never);
+    fs.getSiblingFileName.mockReturnValueOnce('Chart.lock');
+    const execSnapshots = mockExecAll();
+    fs.readLocalFile.mockResolvedValueOnce(ociLockFile2 as never);
+    fs.privateCacheDir.mockReturnValue(
+      '/tmp/renovate/cache/__renovate-private-cache'
+    );
+    fs.getParentDir.mockReturnValue('');
+
+    // sub chart artifacts
+    fs.getSiblingFileName.mockReturnValueOnce('charts');
+    git.getRepoStatus.mockResolvedValueOnce({
+      not_added: ['charts/example-1.9.2.tgz'],
+      deleted: ['charts/example-1.6.2.tgz'],
+    } as StatusResult);
+    const updatedDeps = [{ depName: 'dep1' }];
+    const test = await helmv3.updateArtifacts({
+      packageFileName: 'Chart.yaml',
+      updatedDeps,
+      newPackageFileContent: chartFile,
+      config: {
+        postUpdateOptions: ['helmUpdateSubChartArchives'],
+        ...config,
+      },
+    });
+    expect(test).toMatchSnapshot([
+      {
+        file: {
+          type: 'addition',
+          path: 'Chart.lock',
+          contents: ociLockFile2,
+        },
+      },
+      {
+        file: {
+          type: 'addition',
+          path: 'charts/example-1.9.2.tgz',
+          contents: undefined,
+        },
+      },
+      {
+        file: {
+          type: 'deletion',
+          path: 'charts/example-1.6.2.tgz',
+        },
+      },
+    ]);
+    expect(execSnapshots).toBeArrayOfSize(2);
+    expect(execSnapshots).toMatchSnapshot();
+  });
+
+  it('add sub chart artifacts to file list if Chart.lock is missing', async () => {
+    fs.readLocalFile.mockResolvedValueOnce(null);
+    fs.getSiblingFileName.mockReturnValueOnce('Chart.lock');
+    const execSnapshots = mockExecAll();
+    fs.privateCacheDir.mockReturnValue(
+      '/tmp/renovate/cache/__renovate-private-cache'
+    );
+    fs.getParentDir.mockReturnValue('');
+
+    // sub chart artifacts
+    fs.getSiblingFileName.mockReturnValueOnce('charts');
+    git.getRepoStatus.mockResolvedValueOnce({
+      modified: ['charts/example.tgz'],
+    } as StatusResult);
+    const updatedDeps = [{ depName: 'dep1' }];
+    expect(
+      await helmv3.updateArtifacts({
+        packageFileName: 'Chart.yaml',
+        updatedDeps,
+        newPackageFileContent: chartFile,
+        config: {
+          postUpdateOptions: ['helmUpdateSubChartArchives'],
+          ...config,
+        },
+      })
+    ).toMatchSnapshot([
+      {
+        file: {
+          type: 'addition',
+          path: 'charts/example.tgz',
+          contents: undefined,
+        },
+      },
+    ]);
+    expect(execSnapshots).toBeArrayOfSize(2);
+    expect(execSnapshots).toMatchSnapshot();
+  });
+
+  it('skip artifacts which are not lock files or in the chart folder', async () => {
+    fs.readLocalFile.mockResolvedValueOnce(null);
+    fs.getSiblingFileName.mockReturnValueOnce('Chart.lock');
+    const execSnapshots = mockExecAll();
+    fs.privateCacheDir.mockReturnValue(
+      '/tmp/renovate/cache/__renovate-private-cache'
+    );
+    fs.getParentDir.mockReturnValue('');
+
+    // sub chart artifacts
+    fs.getSiblingFileName.mockReturnValueOnce('charts');
+    git.getRepoStatus.mockResolvedValueOnce({
+      modified: ['example/example.tgz'],
+    } as StatusResult);
+    const updatedDeps = [{ depName: 'dep1' }];
+    expect(
+      await helmv3.updateArtifacts({
+        packageFileName: 'Chart.yaml',
+        updatedDeps,
+        newPackageFileContent: chartFile,
+        config: {
+          postUpdateOptions: ['helmUpdateSubChartArchives'],
+          ...config,
+        },
+      })
+    ).toBeNull();
+    expect(execSnapshots).toBeArrayOfSize(2);
+    expect(execSnapshots).toMatchSnapshot();
   });
 
   it('sets repositories from registryAliases', async () => {

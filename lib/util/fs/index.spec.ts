@@ -17,6 +17,7 @@ import {
   getFileContentMap,
   getParentDir,
   getSiblingFileName,
+  isFileInDir,
   listCacheDir,
   localPathExists,
   localPathIsFile,
@@ -493,5 +494,18 @@ describe('util/fs/index', () => {
         invalidfile: null,
       });
     });
+  });
+
+  test.each`
+    dir        | file                     | result
+    ${'chart'} | ${'chart'}               | ${false}
+    ${'chart'} | ${'chart/example'}       | ${true}
+    ${'chart'} | ${'chart/example.ext'}   | ${true}
+    ${'chart'} | ${'chart/other/example'} | ${true}
+    ${'chart'} | ${'other_chart/example'} | ${false}
+    ${''}      | ${'chart/example'}       | ${false}
+    ${'chart'} | ${''}                    | ${false}
+  `('isFileInDir', ({ dir, file, result }) => {
+    expect(isFileInDir(dir, file)).toBe(result);
   });
 });
