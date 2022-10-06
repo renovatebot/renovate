@@ -17,6 +17,15 @@ describe('modules/datasource/dotnet/index', () => {
   describe('getReleases', () => {
     afterEach(() => httpMock.clear(false));
 
+    it('returns null for non-dotnet package', async () => {
+      expect(
+        await getPkgReleases({
+          datasource: DotnetDatasource.id,
+          depName: 'non-dotnet',
+        })
+      ).toBeNull();
+    });
+
     it('returns null for 404 for index', async () => {
       httpMock.scope(baseUrl).get('/releases-index.json').reply(404);
 
