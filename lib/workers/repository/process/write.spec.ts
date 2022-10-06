@@ -166,21 +166,20 @@ describe('workers/repository/process/write', () => {
         result: BranchResult.Done,
         commitSha: 'some-value',
       });
-      const branchManagersFingerprint = fingerprint(
-        [
-          ...new Set(
-            branches[0].upgrades
-              .map((upgrade) => hashMap.get(upgrade.manager) ?? upgrade.manager)
-              .filter(is.string)
-          ),
-        ].sort()
-      );
+      const branch = branches[0];
+      const managers = [
+        ...new Set(
+          branch.upgrades
+            .map((upgrade) => hashMap.get(upgrade.manager) ?? upgrade.manager)
+            .filter(is.string)
+        ),
+      ].sort();
       const branchFingerprint = fingerprint({
-        branches: JSON.stringify(branches[0]),
-        branchManagersFingerprint,
+        branch,
+        managers,
       });
       expect(await writeUpdates(config, branches)).toBe('done');
-      expect(branches[0].branchFingerprint).toBe(branchFingerprint);
+      expect(branch.branchFingerprint).toBe(branchFingerprint);
     });
 
     it('caches same fingerprint when no commit is made', async () => {
@@ -196,18 +195,16 @@ describe('workers/repository/process/write', () => {
           ],
         },
       ]);
-      const branchManagersFingerprint = fingerprint(
-        [
-          ...new Set(
-            branches[0].upgrades
-              .map((upgrade) => hashMap.get(upgrade.manager) ?? upgrade.manager)
-              .filter(is.string)
-          ),
-        ].sort()
-      );
+      const managers = [
+        ...new Set(
+          branches[0].upgrades
+            .map((upgrade) => hashMap.get(upgrade.manager) ?? upgrade.manager)
+            .filter(is.string)
+        ),
+      ].sort();
       const branchFingerprint = fingerprint({
         branches: JSON.stringify(branches[0]),
-        branchManagersFingerprint,
+        managers,
       });
       repoCache.getCache.mockReturnValueOnce({
         branches: [
