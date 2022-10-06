@@ -89,7 +89,7 @@ jobs:
           path: .cache/jest
           key: ${{ runner.os }}-${{ matrix.node-version }}-jest-${{ hashFiles('yarn.lock') }}
           restore-keys: |
-            ${{ runner.os }}-node-${{ matrix.node-version }}-jest-
+            ${{ runner.os }}-${{ matrix.node-version }}-jest
 
       - name: Unit tests
         run: yarn jest --ci --coverage ${{ env.coverage }}
