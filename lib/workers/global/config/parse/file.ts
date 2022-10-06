@@ -53,7 +53,7 @@ export async function getConfig(env: NodeJS.ProcessEnv): Promise<AllConfig> {
   } catch (err) {
     // istanbul ignore if
     if (err instanceof SyntaxError || err instanceof TypeError) {
-      logger.fatal(`Could not parse config file \n ${err.stack}`);
+      logger.fatal(`Could not parse config file \n ${err.stack!}`);
       process.exit(1);
     } else if (err instanceof ReferenceError) {
       logger.fatal(

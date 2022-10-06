@@ -1,126 +1,126 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`modules/manager/pip_setup/extract extractPackageFile() returns found deps 1`] = `
-Object {
-  "deps": Array [
-    Object {
+{
+  "deps": [
+    {
       "currentValue": ">=3.1.13.0,<5.0",
       "datasource": "pypi",
       "depName": "celery",
-      "managerData": Object {
+      "managerData": {
         "lineNumber": 49,
       },
     },
-    Object {
+    {
       "currentValue": ">=1.7",
       "datasource": "pypi",
       "depName": "logging_tree",
-      "managerData": Object {
+      "managerData": {
         "lineNumber": 52,
       },
     },
-    Object {
+    {
       "currentValue": ">=2.2",
       "datasource": "pypi",
       "depName": "pygments",
-      "managerData": Object {
+      "managerData": {
         "lineNumber": 53,
       },
     },
-    Object {
+    {
       "currentValue": ">=5.0",
       "datasource": "pypi",
       "depName": "psutil",
-      "managerData": Object {
+      "managerData": {
         "lineNumber": 54,
       },
     },
-    Object {
+    {
       "currentValue": ">=3.0",
       "datasource": "pypi",
       "depName": "objgraph",
-      "managerData": Object {
+      "managerData": {
         "lineNumber": 55,
       },
     },
-    Object {
+    {
       "currentValue": ">=1.11.23,<2.0",
       "datasource": "pypi",
       "depName": "django",
-      "managerData": Object {
+      "managerData": {
         "lineNumber": 58,
       },
     },
-    Object {
+    {
       "currentValue": ">=0.11,<2.0",
       "datasource": "pypi",
       "depName": "flask",
-      "managerData": Object {
+      "managerData": {
         "lineNumber": 61,
       },
     },
-    Object {
+    {
       "currentValue": ">=1.4,<2.0",
       "datasource": "pypi",
       "depName": "blinker",
-      "managerData": Object {
+      "managerData": {
         "lineNumber": 62,
       },
     },
-    Object {
+    {
       "currentValue": ">=19.7.0,<20.0",
       "datasource": "pypi",
       "depName": "gunicorn",
-      "managerData": Object {
+      "managerData": {
         "lineNumber": 74,
       },
     },
-    Object {
+    {
       "currentValue": ">=0.15.3,<0.16",
       "datasource": "pypi",
       "depName": "Werkzeug",
-      "managerData": Object {
+      "managerData": {
         "lineNumber": 75,
       },
     },
-    Object {
+    {
       "currentValue": ">=3.2.1,<4.0",
       "datasource": "pypi",
       "depName": "statsd",
-      "managerData": Object {
+      "managerData": {
         "lineNumber": 75,
       },
     },
-    Object {
+    {
       "currentValue": ">=2.10.0,<3.0",
       "datasource": "pypi",
       "depName": "requests",
-      "managerData": Object {
+      "managerData": {
         "lineNumber": 76,
       },
       "skipReason": "ignored",
     },
-    Object {
+    {
       "currentValue": ">=5.27.1,<7.0",
       "datasource": "pypi",
       "depName": "raven",
-      "managerData": Object {
+      "managerData": {
         "lineNumber": 77,
       },
     },
-    Object {
+    {
       "currentValue": ">=0.15.2,<0.17",
       "datasource": "pypi",
       "depName": "future",
-      "managerData": Object {
+      "managerData": {
         "lineNumber": 78,
       },
     },
-    Object {
+    {
       "currentValue": ">=1.0.16,<2.0",
       "datasource": "pypi",
       "depName": "ipaddress",
-      "managerData": Object {
+      "managerData": {
         "lineNumber": 79,
       },
     },

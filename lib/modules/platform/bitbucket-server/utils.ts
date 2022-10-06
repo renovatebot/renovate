@@ -7,11 +7,7 @@ import { HostRule, PrState } from '../../../types';
 import type { GitProtocol } from '../../../types/git';
 import * as git from '../../../util/git';
 import { BitbucketServerHttp } from '../../../util/http/bitbucket-server';
-import type {
-  HttpOptions,
-  HttpPostOptions,
-  HttpResponse,
-} from '../../../util/http/types';
+import type { HttpOptions, HttpResponse } from '../../../util/http/types';
 import { parseUrl } from '../../../util/url';
 import { getPrBodyStruct } from '../pr-body';
 import type { GitUrlOption } from '../types';
@@ -54,29 +50,20 @@ const addMaxLength = (inputUrl: string, limit = 100): string => {
 function callApi<T>(
   apiUrl: string,
   method: string,
-  options?: HttpOptions | HttpPostOptions
+  options?: HttpOptions
 ): Promise<HttpResponse<T>> {
   /* istanbul ignore next */
   switch (method.toLowerCase()) {
     case 'post':
-      return bitbucketServerHttp.postJson<T>(
-        apiUrl,
-        options as HttpPostOptions
-      );
+      return bitbucketServerHttp.postJson<T>(apiUrl, options);
     case 'put':
-      return bitbucketServerHttp.putJson<T>(apiUrl, options as HttpPostOptions);
+      return bitbucketServerHttp.putJson<T>(apiUrl, options);
     case 'patch':
-      return bitbucketServerHttp.patchJson<T>(
-        apiUrl,
-        options as HttpPostOptions
-      );
+      return bitbucketServerHttp.patchJson<T>(apiUrl, options);
     case 'head':
       return bitbucketServerHttp.headJson<T>(apiUrl, options);
     case 'delete':
-      return bitbucketServerHttp.deleteJson<T>(
-        apiUrl,
-        options as HttpPostOptions
-      );
+      return bitbucketServerHttp.deleteJson<T>(apiUrl, options);
     case 'get':
     default:
       return bitbucketServerHttp.getJson<T>(apiUrl, options);
@@ -86,7 +73,7 @@ function callApi<T>(
 export async function accumulateValues<T = any>(
   reqUrl: string,
   method = 'get',
-  options?: HttpOptions | HttpPostOptions,
+  options?: HttpOptions,
   limit?: number
 ): Promise<T[]> {
   let accumulator: T[] = [];
@@ -168,6 +155,8 @@ function generateUrlFromEndpoint(
   const url = new URL(defaultEndpoint);
   const generatedUrl = git.getUrl({
     protocol: url.protocol as GitProtocol,
+    // TODO: types (#7154)
+    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
     auth: `${opts.username}:${opts.password}`,
     host: `${url.host}${url.pathname}${
       // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion

@@ -10,6 +10,7 @@ import * as packageCache from '../../../../../util/cache/package';
 import * as hostRules from '../../../../../util/host-rules';
 import { regEx } from '../../../../../util/regex';
 import type { BranchUpgradeConfig } from '../../../../types';
+import { slugifyUrl } from './common';
 import { getTags } from './github';
 import { addReleaseNotes } from './release-notes';
 import { getInRangeReleases } from './releases';
@@ -46,7 +47,8 @@ export async function getChangeLogJSON(
   }
   const version = allVersioning.get(versioning);
   const { protocol, host, pathname } = URL.parse(sourceUrl);
-  const baseUrl = `${protocol}//${host}/`;
+  // TODO: types (#7154)
+  const baseUrl = `${protocol!}//${host!}/`;
   const url = sourceUrl.startsWith('https://github.com/')
     ? 'https://api.github.com/'
     : sourceUrl;
@@ -57,7 +59,7 @@ export async function getChangeLogJSON(
   // istanbul ignore if
   if (!token) {
     if (host!.endsWith('.github.com') || host === 'github.com') {
-      if (!GlobalConfig.get().githubTokenWarn) {
+      if (!GlobalConfig.get('githubTokenWarn')) {
         logger.debug(
           { manager, depName, sourceUrl },
           'GitHub token warning has been suppressed. Skipping release notes retrieval'
@@ -119,8 +121,9 @@ export async function getChangeLogJSON(
   }
 
   const cacheNamespace = 'changelog-github-release';
+
   function getCacheKey(prev: string, next: string): string {
-    return `${manager}:${depName}:${prev}:${next}`;
+    return `${slugifyUrl(sourceUrl)}:${depName}:${prev}:${next}`;
   }
 
   const changelogReleases: ChangeLogRelease[] = [];

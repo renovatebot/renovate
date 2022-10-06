@@ -60,6 +60,7 @@ function infoMock(
       });
     }
     return {
+      id: 123,
       project: { key: projectKey },
       origin: { name: repositorySlug, slug: repositorySlug },
       links,
@@ -68,6 +69,7 @@ function infoMock(
     // This mimics the behavior of bb-server which does not include the clone property at all
     // if ssh and https are both turned off
     return {
+      id: 1,
       project: { key: projectKey },
       origin: { name: repositorySlug, slug: repositorySlug },
       links: { clone: undefined },
@@ -118,8 +120,8 @@ describe('modules/platform/bitbucket-server/utils', () => {
         const username = 'abc';
         const password = '123';
         const opts = {
-          username: username,
-          password: password,
+          username,
+          password,
         };
 
         it('works gitUrl:undefined generate endpoint', () => {

@@ -6,7 +6,7 @@ import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { id as versioning } from '../../versioning/gradle';
 import { GradleVersionDatasource } from '.';
 
-const allResponse = Fixtures?.get('all.json');
+const allResponse = Fixtures.get('all.json');
 
 let config: GetPkgReleasesConfig;
 

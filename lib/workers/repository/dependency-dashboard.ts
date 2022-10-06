@@ -4,39 +4,104 @@ import { nameFromLevel } from 'bunyan';
 import { GlobalConfig } from '../../config/global';
 import type { RenovateConfig } from '../../config/types';
 import { getProblems, logger } from '../../logger';
+import type { PackageFile } from '../../modules/manager/types';
 import { platform } from '../../modules/platform';
+import { GitHubMaxPrBodyLen } from '../../modules/platform/github';
 import { regEx } from '../../util/regex';
 import * as template from '../../util/template';
-import { BranchConfig, BranchResult } from '../types';
+import { BranchConfig, BranchResult, SelectAllConfig } from '../types';
+import { getDepWarningsDashboard } from './errors-warnings';
 import { PackageFiles } from './package-files';
 
 interface DependencyDashboard {
   dependencyDashboardChecks: Record<string, string>;
   dependencyDashboardRebaseAllOpen: boolean;
+  dependencyDashboardAllPending: boolean;
+  dependencyDashboardAllRateLimited: boolean;
+}
+
+const rateLimitedRe = regEx(
+  ' - \\[ \\] <!-- unlimit-branch=([^\\s]+) -->',
+  'g'
+);
+const pendingApprovalRe = regEx(
+  ' - \\[ \\] <!-- approve-branch=([^\\s]+) -->',
+  'g'
+);
+const generalBranchRe = regEx(' <!-- ([a-zA-Z]+)-branch=([^\\s]+) -->');
+const markedBranchesRe = regEx(
+  ' - \\[x\\] <!-- ([a-zA-Z]+)-branch=([^\\s]+) -->',
+  'g'
+);
+
+function checkOpenAllRateLimitedPR(issueBody: string): boolean {
+  return issueBody.includes(' - [x] <!-- create-all-rate-limited-prs -->');
+}
+
+function checkApproveAllPendingPR(issueBody: string): boolean {
+  return issueBody.includes(' - [x] <!-- approve-all-pending-prs -->');
+}
+
+function checkRebaseAll(issueBody: string): boolean {
+  return issueBody.includes(' - [x] <!-- rebase-all-open-prs -->');
+}
+
+function selectAllRelevantBranches(issueBody: string): string[] {
+  const checkedBranches = [];
+  if (checkOpenAllRateLimitedPR(issueBody)) {
+    for (const match of issueBody.matchAll(rateLimitedRe)) {
+      checkedBranches.push(match[0]);
+    }
+  }
+  if (checkApproveAllPendingPR(issueBody)) {
+    for (const match of issueBody.matchAll(pendingApprovalRe)) {
+      checkedBranches.push(match[0]);
+    }
+  }
+  return checkedBranches;
+}
+
+function getAllSelectedBranches(
+  issueBody: string,
+  dependencyDashboardChecks: Record<string, string>
+): Record<string, string> {
+  const allRelevantBranches = selectAllRelevantBranches(issueBody);
+  for (const branch of allRelevantBranches) {
+    const [, type, branchName] = generalBranchRe.exec(branch)!;
+    dependencyDashboardChecks[branchName] = type;
+  }
+  return dependencyDashboardChecks;
+}
+
+function getCheckedBranches(issueBody: string): Record<string, string> {
+  let dependencyDashboardChecks: Record<string, string> = {};
+  for (const [, type, branchName] of issueBody.matchAll(markedBranchesRe)) {
+    dependencyDashboardChecks[branchName] = type;
+  }
+  dependencyDashboardChecks = getAllSelectedBranches(
+    issueBody,
+    dependencyDashboardChecks
+  );
+  return dependencyDashboardChecks;
 }
 
 function parseDashboardIssue(issueBody: string): DependencyDashboard {
-  const checkMatch = ' - \\[x\\] <!-- ([a-zA-Z]+)-branch=([^\\s]+) -->';
-  const checked = issueBody.match(regEx(checkMatch, 'g'));
-  const dependencyDashboardChecks: Record<string, string> = {};
-  if (checked?.length) {
-    const re = regEx(checkMatch);
-    checked.forEach((check) => {
-      const [, type, branchName] = re.exec(check)!;
-      dependencyDashboardChecks[branchName] = type;
-    });
-  }
-  const checkedRebaseAll = issueBody.includes(
-    ' - [x] <!-- rebase-all-open-prs -->'
-  );
-  let dependencyDashboardRebaseAllOpen = false;
-  if (checkedRebaseAll) {
-    dependencyDashboardRebaseAllOpen = true;
-  }
-  return { dependencyDashboardChecks, dependencyDashboardRebaseAllOpen };
+  const dependencyDashboardChecks = getCheckedBranches(issueBody);
+  const dependencyDashboardRebaseAllOpen = checkRebaseAll(issueBody);
+  const dependencyDashboardAllPending = checkApproveAllPendingPR(issueBody);
+  const dependencyDashboardAllRateLimited =
+    checkOpenAllRateLimitedPR(issueBody);
+  return {
+    dependencyDashboardChecks,
+    dependencyDashboardRebaseAllOpen,
+    dependencyDashboardAllPending,
+    dependencyDashboardAllRateLimited,
+  };
 }
 
-export async function readDashboardBody(config: RenovateConfig): Promise<void> {
+export async function readDashboardBody(
+  config: SelectAllConfig
+): Promise<void> {
   config.dependencyDashboardChecks = {};
   const stringifiedConfig = JSON.stringify(config);
   if (
@@ -58,12 +123,14 @@ function getListItem(branch: BranchConfig, type: string): string {
   let item = ' - [ ] ';
   item += `<!-- ${type}-branch=${branch.branchName} -->`;
   if (branch.prNo) {
-    item += `[${branch.prTitle}](../pull/${branch.prNo})`;
+    // TODO: types (#7154)
+    item += `[${branch.prTitle!}](../pull/${branch.prNo})`;
   } else {
     item += branch.prTitle;
   }
   const uniquePackages = [
-    ...new Set(branch.upgrades.map((upgrade) => `\`${upgrade.depName}\``)),
+    // TODO: types (#7154)
+    ...new Set(branch.upgrades.map((upgrade) => `\`${upgrade.depName!}\``)),
   ];
   if (uniquePackages.length < 2) {
     return item + '\n';
@@ -97,8 +164,9 @@ function appendRepoProblems(config: RenovateConfig, issueBody: string): string {
 }
 
 export async function ensureDependencyDashboard(
-  config: RenovateConfig,
-  allBranches: BranchConfig[]
+  config: SelectAllConfig,
+  allBranches: BranchConfig[],
+  packageFiles: Record<string, PackageFile[]> = {}
 ): Promise<void> {
   // legacy/migrated issue
   const reuseTitle = 'Update Dependencies (Renovate Bot)';
@@ -166,6 +234,11 @@ export async function ensureDependencyDashboard(
     for (const branch of pendingApprovals) {
       issueBody += getListItem(branch, 'approve');
     }
+    if (pendingApprovals.length > 1) {
+      issueBody += ' - [ ] ';
+      issueBody += '<!-- approve-all-pending-prs -->';
+      issueBody += '🔐 **Create all pending approval PRs at once** 🔐\n';
+    }
     issueBody += '\n';
   }
   const awaitingSchedule = branches.filter(
@@ -187,11 +260,16 @@ export async function ensureDependencyDashboard(
       branch.result === BranchResult.CommitLimitReached
   );
   if (rateLimited.length) {
-    issueBody += '## Rate Limited\n\n';
+    issueBody += '## Rate-Limited\n\n';
     issueBody +=
-      'These updates are currently rate limited. Click on a checkbox below to force their creation now.\n\n';
+      'These updates are currently rate-limited. Click on a checkbox below to force their creation now.\n\n';
     for (const branch of rateLimited) {
       issueBody += getListItem(branch, 'unlimit');
+    }
+    if (rateLimited.length > 1) {
+      issueBody += ' - [ ] ';
+      issueBody += '<!-- create-all-rate-limited-prs -->';
+      issueBody += '🔐 **Create all rate-limited PRs at once** 🔐\n';
     }
     issueBody += '\n';
   }
@@ -252,6 +330,13 @@ export async function ensureDependencyDashboard(
     }
     issueBody += '\n';
   }
+
+  const warn = getDepWarningsDashboard(packageFiles);
+  if (warn) {
+    issueBody += warn;
+    issueBody += '\n';
+  }
+
   const otherRes = [
     BranchResult.Pending,
     BranchResult.NeedsApproval,
@@ -318,14 +403,13 @@ export async function ensureDependencyDashboard(
       'This repository currently has no open or pending branches.\n\n';
   }
 
-  issueBody += PackageFiles.getDashboardMarkdown(config);
+  // fit the detected dependencies section
+  const footer = getFooter(config);
+  issueBody += PackageFiles.getDashboardMarkdown(
+    GitHubMaxPrBodyLen - issueBody.length - footer.length
+  );
 
-  if (config.dependencyDashboardFooter?.length) {
-    issueBody +=
-      '---\n' +
-      template.compile(config.dependencyDashboardFooter, config) +
-      '\n';
-  }
+  issueBody += footer;
 
   if (config.dependencyDashboardIssue) {
     const updatedIssue = await platform.getIssue?.(
@@ -363,4 +447,16 @@ export async function ensureDependencyDashboard(
       confidential: config.confidential,
     });
   }
+}
+
+function getFooter(config: RenovateConfig): string {
+  let footer = '';
+  if (config.dependencyDashboardFooter?.length) {
+    footer +=
+      '---\n' +
+      template.compile(config.dependencyDashboardFooter, config) +
+      '\n';
+  }
+
+  return footer;
 }

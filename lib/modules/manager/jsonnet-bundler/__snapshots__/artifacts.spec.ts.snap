@@ -1,9 +1,9 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`modules/manager/jsonnet-bundler/artifacts performs lock file maintenance 1`] = `
-Array [
-  Object {
-    "file": Object {
+[
+  {
+    "file": {
       "contents": "Updated jsonnetfile.lock.json",
       "path": "jsonnetfile.lock.json",
       "type": "addition",
@@ -13,13 +13,13 @@ Array [
 `;
 
 exports[`modules/manager/jsonnet-bundler/artifacts performs lock file maintenance 2`] = `
-Array [
-  Object {
+[
+  {
     "cmd": "jb update",
-    "options": Object {
+    "options": {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
-      "env": Object {
+      "env": {
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
         "HTTP_PROXY": "http://example.com",
@@ -36,9 +36,9 @@ Array [
 `;
 
 exports[`modules/manager/jsonnet-bundler/artifacts returns error when jb update fails 1`] = `
-Array [
-  Object {
-    "artifactError": Object {
+[
+  {
+    "artifactError": {
       "lockFile": "jsonnetfile.lock.json",
       "stderr": "jb released the magic smoke",
     },
@@ -47,13 +47,13 @@ Array [
 `;
 
 exports[`modules/manager/jsonnet-bundler/artifacts returns error when jb update fails 2`] = `
-Array [
-  Object {
+[
+  {
     "cmd": "jb update",
-    "options": Object {
+    "options": {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
-      "env": Object {
+      "env": {
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
         "HTTP_PROXY": "http://example.com",
@@ -69,40 +69,40 @@ Array [
 ]
 `;
 
-exports[`modules/manager/jsonnet-bundler/artifacts returns null if there are no changes 1`] = `Array []`;
+exports[`modules/manager/jsonnet-bundler/artifacts returns null if there are no changes 1`] = `[]`;
 
 exports[`modules/manager/jsonnet-bundler/artifacts updates the vendor dir when dependencies change 1`] = `
-Array [
-  Object {
-    "file": Object {
+[
+  {
+    "file": {
       "contents": "Updated jsonnetfile.json",
       "path": "jsonnetfile.json",
       "type": "addition",
     },
   },
-  Object {
-    "file": Object {
+  {
+    "file": {
       "contents": "Updated jsonnetfile.lock.json",
       "path": "jsonnetfile.lock.json",
       "type": "addition",
     },
   },
-  Object {
-    "file": Object {
+  {
+    "file": {
       "contents": "New foo/main.jsonnet",
       "path": "vendor/foo/main.jsonnet",
       "type": "addition",
     },
   },
-  Object {
-    "file": Object {
+  {
+    "file": {
       "contents": "New bar/main.jsonnet",
       "path": "vendor/bar/main.jsonnet",
       "type": "addition",
     },
   },
-  Object {
-    "file": Object {
+  {
+    "file": {
       "path": "vendor/baz/deleted.jsonnet",
       "type": "deletion",
     },
@@ -111,13 +111,13 @@ Array [
 `;
 
 exports[`modules/manager/jsonnet-bundler/artifacts updates the vendor dir when dependencies change 2`] = `
-Array [
-  Object {
+[
+  {
     "cmd": "jb update https://github.com/foo/foo.git ssh://git@github.com/foo/foo.git/bar",
-    "options": Object {
+    "options": {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
-      "env": Object {
+      "env": {
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
         "HTTP_PROXY": "http://example.com",
