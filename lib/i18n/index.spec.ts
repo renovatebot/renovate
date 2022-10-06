@@ -62,6 +62,8 @@ describe('i18n/index', () => {
       expect(logger.warn).toHaveBeenCalledWith(
         'ReadSystemFile for translations content returns null'
       );
+
+      expect(getLocale()).toBe('en');
     });
 
     it('should fallback to English edition when loading PO file occurred any error', async () => {

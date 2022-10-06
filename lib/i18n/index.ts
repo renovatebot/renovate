@@ -47,6 +47,9 @@ export async function initI18n(translationsFilePath: string): Promise<void> {
 
     if (translationsContent === null) {
       logger.warn('ReadSystemFile for translations content returns null');
+      gt.setLocale('en');
+
+      return;
     }
 
     const parsedTranslations = po.parse(translationsContent);
