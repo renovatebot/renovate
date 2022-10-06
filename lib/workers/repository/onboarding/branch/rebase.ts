@@ -29,10 +29,10 @@ export async function rebaseOnboardingBranch(
   const configFile = defaultConfigFile(config);
   const existingContents = await getFile(configFile, config.onboardingBranch);
   const contents = await getOnboardingConfigContents(config, configFile);
-  // TODO #7154
+  // TODO: fix types (#7154)
   if (
     contents === existingContents &&
-    !(await isBranchBehindBase(config.onboardingBranch!))
+    !(await isBranchBehindBase(config.onboardingBranch!, config.defaultBranch!))
   ) {
     logger.debug('Onboarding branch is up to date');
     return null;
