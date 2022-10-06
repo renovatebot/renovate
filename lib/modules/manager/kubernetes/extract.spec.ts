@@ -18,7 +18,9 @@ describe('modules/manager/kubernetes/extract', () => {
       expect(res?.deps).toStrictEqual([
         {
           currentValue: 'v1',
+          datasource: 'kubernetes-api',
           depName: 'ConfigMap',
+          versioning: 'kubernetes-api',
         },
       ]);
     });
@@ -46,11 +48,15 @@ describe('modules/manager/kubernetes/extract', () => {
         },
         {
           currentValue: 'apps/v1',
+          datasource: 'kubernetes-api',
           depName: 'Deployment',
+          versioning: 'kubernetes-api',
         },
         {
           currentValue: 'extensions/v1beta1',
+          datasource: 'kubernetes-api',
           depName: 'DaemonSet',
+          versioning: 'kubernetes-api',
         },
       ]);
     });
@@ -74,7 +80,9 @@ describe('modules/manager/kubernetes/extract', () => {
         },
         {
           currentValue: 'apps/v1',
+          datasource: 'kubernetes-api',
           depName: 'DaemonSet',
+          versioning: 'kubernetes-api',
         },
       ]);
     });
