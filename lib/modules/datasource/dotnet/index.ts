@@ -3,10 +3,10 @@ import type { HttpResponse } from '../../../util/http/types';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
 import {
-  DotnetReleasesSchema,
-  DotnetReleasesIndexSchema,
-  DotnetReleasesIndex,
   DotnetReleases,
+  DotnetReleasesIndex,
+  DotnetReleasesIndexSchema,
+  DotnetReleasesSchema,
 } from './schema';
 
 export class DotnetDatasource extends Datasource {
