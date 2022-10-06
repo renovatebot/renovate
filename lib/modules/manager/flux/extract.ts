@@ -18,7 +18,7 @@ function readManifest(content: string, file: string): FluxManifest | null {
     }
     return {
       kind: 'system',
-      file: file,
+      file,
       version: versionMatch[1],
       components: versionMatch[2],
     };
@@ -26,7 +26,7 @@ function readManifest(content: string, file: string): FluxManifest | null {
 
   const manifest: FluxManifest = {
     kind: 'resource',
-    file: file,
+    file,
     releases: [],
     repositories: [],
   };
@@ -128,7 +128,7 @@ export function extractPackageFile(
     return null;
   }
   const deps = resolveManifest(manifest, [manifest]);
-  return deps?.length ? { deps: deps } : null;
+  return deps?.length ? { deps } : null;
 }
 
 export async function extractAllPackageFiles(
@@ -152,7 +152,7 @@ export async function extractAllPackageFiles(
     if (deps?.length) {
       results.push({
         packageFile: manifest.file,
-        deps: deps,
+        deps,
       });
     }
   }
