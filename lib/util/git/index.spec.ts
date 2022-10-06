@@ -1,15 +1,14 @@
 import fs from 'fs-extra';
 import Git from 'simple-git';
 import tmp from 'tmp-promise';
-import { mocked, partial } from '../../../test/util';
+import { logger, mocked } from '../../../test/util';
 import { GlobalConfig } from '../../config/global';
 import {
   CONFIG_VALIDATION,
   INVALID_PATH,
 } from '../../constants/error-messages';
-import * as _repoCache from '../cache/repository';
-import type { BranchCache } from '../cache/repository/types';
 import { newlineRegex, regEx } from '../regex';
+import * as _behindBaseCache from './behind-base-branch-cache';
 import * as _conflictsCache from './conflicts-cache';
 import * as _modifiedCache from './modified-cache';
 import * as _parentShaCache from './parent-sha-cache';
@@ -18,11 +17,12 @@ import * as git from '.';
 import { setNoVerify } from '.';
 
 jest.mock('./conflicts-cache');
+jest.mock('./behind-base-branch-cache');
 jest.mock('./modified-cache');
 jest.mock('./parent-sha-cache');
 jest.mock('delay');
 jest.mock('../cache/repository');
-const repoCache = mocked(_repoCache);
+const behindBaseCache = mocked(_behindBaseCache);
 const conflictsCache = mocked(_conflictsCache);
 const modifiedCache = mocked(_modifiedCache);
 const parentShaCache = mocked(_parentShaCache);
@@ -117,6 +117,7 @@ describe('util/git/index', () => {
     const local = Git(tmpDir.path);
     await local.addConfig('commit.gpgsign', 'false');
     parentShaCache.getCachedBranchParentShaResult.mockReturnValue(null);
+    behindBaseCache.getCachedBehindBaseResult.mockReturnValue(null);
   });
 
   afterEach(async () => {
@@ -247,28 +248,27 @@ describe('util/git/index', () => {
 
   describe('isBranchBehindBase()', () => {
     it('should return false if same SHA as master', async () => {
-      repoCache.getCache.mockReturnValueOnce({});
       expect(
-        await git.isBranchBehindBase('renovate/future_branch')
+        await git.isBranchBehindBase('renovate/future_branch', defaultBranch)
       ).toBeFalse();
     });
 
     it('should return true if SHA different from master', async () => {
-      repoCache.getCache.mockReturnValueOnce({});
-      expect(await git.isBranchBehindBase('renovate/past_branch')).toBeTrue();
+      expect(
+        await git.isBranchBehindBase('renovate/past_branch', defaultBranch)
+      ).toBeTrue();
     });
 
     it('should return result even if non-default and not under branchPrefix', async () => {
-      const parentSha = 'SHA';
-      const branchCache = partial<BranchCache>({
-        branchName: 'develop',
-        parentSha: parentSha,
-      });
-      repoCache.getCache.mockReturnValueOnce({}).mockReturnValueOnce({
-        branches: [branchCache],
-      });
-      expect(await git.isBranchBehindBase('develop')).toBeTrue();
-      expect(await git.isBranchBehindBase('develop')).toBeTrue(); // cache
+      expect(await git.isBranchBehindBase('develop', defaultBranch)).toBeTrue();
+    });
+
+    it('returns cached value', async () => {
+      behindBaseCache.getCachedBehindBaseResult.mockReturnValue(true);
+      expect(await git.isBranchBehindBase('develop', defaultBranch)).toBeTrue();
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        'branch.isBehindBase(): using cached result "true"'
+      );
     });
   });
 
@@ -984,8 +984,13 @@ describe('util/git/index', () => {
 
       await git.pushCommitToRenovateRef(commit, 'bbb');
       await git.pushCommitToRenovateRef(commit, 'ccc', 'branches');
+
+      const pushSpy = jest.spyOn(SimpleGit.prototype, 'push');
+
+      expect(await lsRenovateRefs()).not.toBeEmpty();
       await git.clearRenovateRefs();
       expect(await lsRenovateRefs()).toBeEmpty();
+      expect(pushSpy).toHaveBeenCalledOnce();
     });
 
     it('preserves unknown sections by default', async () => {
@@ -995,6 +1000,25 @@ describe('util/git/index', () => {
       await tmpGit.raw(['push', '--force', 'origin', 'refs/renovate/foo/bar']);
       await git.clearRenovateRefs();
       expect(await lsRenovateRefs()).toEqual(['refs/renovate/foo/bar']);
+    });
+
+    it('falls back to sequential ref deletion if bulk changes are disallowed', async () => {
+      const commit = git.getBranchCommit('develop')!;
+      await git.pushCommitToRenovateRef(commit, 'foo');
+      await git.pushCommitToRenovateRef(commit, 'bar');
+      await git.pushCommitToRenovateRef(commit, 'baz');
+
+      const pushSpy = jest.spyOn(SimpleGit.prototype, 'push');
+      pushSpy.mockImplementationOnce(() => {
+        throw new Error(
+          'remote: Repository policies do not allow pushes that update more than 2 branches or tags.'
+        );
+      });
+
+      expect(await lsRenovateRefs()).not.toBeEmpty();
+      await git.clearRenovateRefs();
+      expect(await lsRenovateRefs()).toBeEmpty();
+      expect(pushSpy).toHaveBeenCalledTimes(4);
     });
   });
 

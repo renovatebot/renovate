@@ -382,6 +382,7 @@ const options: RenovateOptions[] = [
     globalOnly: true,
     type: 'string',
     default: null,
+    stage: 'global',
   },
   // Onboarding
   {

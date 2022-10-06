@@ -68,7 +68,7 @@ const kwParams = q
       ctx.currentTarget[ctx.currentAttrKey!] = value;
       ctx.result.meta.push({
         path: [...ctx.currentMetaPath],
-        data: { offset: offset, length: value.length },
+        data: { offset, length: value.length },
       });
       return ctx;
     }),
@@ -83,7 +83,7 @@ const kwParams = q
       search: q.str<Ctx>((ctx, { value, offset }) => {
         ctx.result.meta.push({
           path: [...ctx.currentMetaPath, ctx.currentArray!.length],
-          data: { offset: offset, length: value.length },
+          data: { offset, length: value.length },
         });
         ctx.currentArray?.push(value);
         return ctx;
