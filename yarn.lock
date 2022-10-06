@@ -4297,10 +4297,10 @@ emittery@^0.10.2:
   resolved "https://registry.yarnpkg.com/emittery/-/emittery-0.10.2.tgz#902eec8aedb8c41938c46e9385e9db7e03182933"
   integrity sha512-aITqOwnLanpHLNXZJENbOgjUBeHocD+xsSJmNrjovKBW5HbSpW3d1pEls7GFQPUWXiwG9+0P4GtHfEqC/4M0Iw==
 
-emoji-regex@10.1.0:
-  version "10.1.0"
-  resolved "https://registry.yarnpkg.com/emoji-regex/-/emoji-regex-10.1.0.tgz#d50e383743c0f7a5945c47087295afc112e3cf66"
-  integrity sha512-xAEnNCT3w2Tg6MA7ly6QqYJvEoY1tm9iIjJ3yMKK9JPlWuRHAMoe5iETwQnx3M9TVbFMfsrBgWKR+IsmswwNjg==
+emoji-regex@10.2.0:
+  version "10.2.0"
+  resolved "https://registry.yarnpkg.com/emoji-regex/-/emoji-regex-10.2.0.tgz#a027bae7f5624a726f41c219783a4401e6a73f4b"
+  integrity sha512-vum/WOT0ZbG61R3bmfZ+Yw+MsOC7maogn5mjBiY9m4Ga9d/jEEr2hB+DXM+/T/jEpWQAgkB+cfYOrcbRRxltVQ==
 
 emoji-regex@^8.0.0:
   version "8.0.0"
