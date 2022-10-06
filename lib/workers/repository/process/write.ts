@@ -1,11 +1,10 @@
 import is from '@sindresorhus/is';
-import hasha from 'hasha';
-import stringify from 'safe-stable-stringify';
 import type { RenovateConfig } from '../../../config/types';
 import { addMeta, logger, removeMeta } from '../../../logger';
 import { hashMap } from '../../../modules/manager';
 import { getCache } from '../../../util/cache/repository';
 import type { BranchCache } from '../../../util/cache/repository/types';
+import { fingerprint } from '../../../util/fingerprint';
 import { branchExists, getBranchCommit } from '../../../util/git';
 import { setBranchNewCommit } from '../../../util/git/set-branch-commit';
 import { Limit, incLimitedValue, setMaxLimit } from '../../global/limits';
@@ -124,19 +123,17 @@ export async function writeUpdates(
     // TODO: base branch name cannot be undefined - fix optional types (#7154)
     const branchState = syncBranchState(branchName, baseBranch!);
 
-    const branchManagersFingerprint = hasha(
-      [
-        ...new Set(
-          branch.upgrades
-            .map((upgrade) => hashMap.get(upgrade.manager) ?? upgrade.manager)
-            .filter(is.string)
-        ),
-      ].sort()
-    );
-    const branchFingerprint = hasha([
-      stringify(branch),
-      branchManagersFingerprint,
-    ]);
+    const managers = [
+      ...new Set(
+        branch.upgrades
+          .map((upgrade) => hashMap.get(upgrade.manager) ?? upgrade.manager)
+          .filter(is.string)
+      ),
+    ].sort();
+    const branchFingerprint = fingerprint({
+      branch,
+      managers,
+    });
     branch.skipBranchUpdate = canSkipBranchUpdateCheck(
       branchState,
       branchFingerprint
