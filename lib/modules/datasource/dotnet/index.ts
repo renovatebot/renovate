@@ -3,10 +3,10 @@ import type { HttpResponse } from '../../../util/http/types';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
 import {
-  DotnetReleases,
+  DotnetReleasesSchema,
+  DotnetReleasesIndexSchema,
   DotnetReleasesIndex,
-  DotnetReleasesIndexType,
-  DotnetReleasesType,
+  DotnetReleases,
 } from './schema';
 
 export class DotnetDatasource extends Datasource {
@@ -38,11 +38,11 @@ export class DotnetDatasource extends Datasource {
 
     let result: ReleaseResult | null = null;
 
-    let raw: HttpResponse<DotnetReleasesIndexType> | null = null;
+    let raw: HttpResponse<DotnetReleasesIndex> | null = null;
     try {
       raw = await this.http.getJson(
         this.defaultRegistryUrls[0],
-        DotnetReleasesIndex
+        DotnetReleasesIndexSchema
       );
     } catch (err) {
       this.handleGenericErrors(err);
@@ -80,9 +80,9 @@ export class DotnetDatasource extends Datasource {
   ): Promise<Release[] | null> {
     let result: Release[] = [];
 
-    let raw: HttpResponse<DotnetReleasesType> | null = null;
+    let raw: HttpResponse<DotnetReleases> | null = null;
     try {
-      raw = await this.http.getJson(releaseUrl, DotnetReleases);
+      raw = await this.http.getJson(releaseUrl, DotnetReleasesSchema);
     } catch (err) {
       this.handleGenericErrors(err);
     }

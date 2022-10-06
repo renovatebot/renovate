@@ -21,7 +21,7 @@ const ReleaseIndex = z.object({
   'eol-date': z.date().nullable(),
   'releases.json': z.string(),
 });
-export const DotnetReleasesIndex = z.object({
+export const DotnetReleasesIndexSchema = z.object({
   'releases-index': z.array(ReleaseIndex),
 });
 
@@ -37,7 +37,7 @@ const Release = z.object({
   runtime: ReleaseDetails,
   sdk: ReleaseDetails,
 });
-export const DotnetReleases = z.object({
+export const DotnetReleasesSchema = z.object({
   'channel-version': z.string(),
   'latest-release': z.string(),
   'latest-release-date': z.date(),
@@ -47,5 +47,5 @@ export const DotnetReleases = z.object({
   releases: z.array(Release),
 });
 
-export type DotnetReleasesIndexType = z.infer<typeof DotnetReleasesIndex>;
-export type DotnetReleasesType = z.infer<typeof DotnetReleases>;
+export type DotnetReleasesIndex = z.infer<typeof DotnetReleasesIndexSchema>;
+export type DotnetReleases = z.infer<typeof DotnetReleasesSchema>;

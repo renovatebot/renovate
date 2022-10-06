@@ -15,8 +15,6 @@ const baseUrl =
 
 describe('modules/datasource/dotnet/index', () => {
   describe('getReleases', () => {
-    afterEach(() => httpMock.clear(false));
-
     it('returns null for non-dotnet package', async () => {
       expect(
         await getPkgReleases({
@@ -43,12 +41,6 @@ describe('modules/datasource/dotnet/index', () => {
         .get('/releases-index.json')
         .reply(200, releasesIndex)
         .get('/7.0/releases.json')
-        .reply(404)
-        .get('/6.0/releases.json')
-        .reply(404)
-        .get('/5.0/releases.json')
-        .reply(404)
-        .get('/3.1/releases.json')
         .reply(404);
 
       expect(
@@ -76,12 +68,6 @@ describe('modules/datasource/dotnet/index', () => {
         .get('/releases-index.json')
         .reply(200, releasesIndex)
         .get('/7.0/releases.json')
-        .reply(502)
-        .get('/6.0/releases.json')
-        .reply(502)
-        .get('/5.0/releases.json')
-        .reply(502)
-        .get('/3.1/releases.json')
         .reply(502);
 
       await expect(
@@ -109,12 +95,6 @@ describe('modules/datasource/dotnet/index', () => {
         .get('/releases-index.json')
         .reply(200, releasesIndex)
         .get('/7.0/releases.json')
-        .replyWithError('')
-        .get('/6.0/releases.json')
-        .replyWithError('')
-        .get('/5.0/releases.json')
-        .replyWithError('')
-        .get('/3.1/releases.json')
         .replyWithError('');
 
       expect(
@@ -145,7 +125,7 @@ describe('modules/datasource/dotnet/index', () => {
       });
 
       expect(res).toBeDefined();
-      expect(res?.releases).toHaveLength(88);
+      expect(res?.releases).toHaveLength(17);
       expect(res?.releases).toIncludeAllPartialMembers([
         { version: '3.1.100-preview1-014459' },
         { version: '3.1.423' },
@@ -178,7 +158,7 @@ describe('modules/datasource/dotnet/index', () => {
       });
 
       expect(res).toBeDefined();
-      expect(res?.releases).toHaveLength(88);
+      expect(res?.releases).toHaveLength(17);
       expect(res?.releases).toIncludeAllPartialMembers([
         { version: '3.1.0-preview1.19506.1' },
         { version: '3.1.29' },
