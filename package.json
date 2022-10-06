@@ -168,7 +168,7 @@
     "detect-indent": "6.1.0",
     "editorconfig": "0.15.3",
     "email-addresses": "5.0.0",
-    "emoji-regex": "10.1.0",
+    "emoji-regex": "10.2.0",
     "emojibase": "6.1.0",
     "emojibase-regex": "6.0.1",
     "extract-zip": "2.0.1",
@@ -226,7 +226,7 @@
     "re2": "1.17.7"
   },
   "devDependencies": {
-    "@actions/core": "1.9.1",
+    "@actions/core": "1.10.0",
     "@jest/globals": "29.0.3",
     "@jest/reporters": "29.0.3",
     "@jest/test-result": "29.0.3",
