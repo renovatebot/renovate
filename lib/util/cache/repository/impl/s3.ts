@@ -8,7 +8,7 @@ import {
 import { logger } from '../../../../logger';
 import { getS3Client, parseS3Url } from '../../../s3';
 import { streamToString } from '../../../streams';
-import type { RepoCacheRecord } from '../types';
+import type { RepoCacheRecord } from '../schemas';
 import { RepoCacheBase } from './base';
 
 export class RepoCacheS3 extends RepoCacheBase {

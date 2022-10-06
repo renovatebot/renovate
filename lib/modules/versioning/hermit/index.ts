@@ -52,8 +52,8 @@ export class HermitVersioning extends RegExpVersioningApi {
 
     return {
       release,
-      prerelease: prerelease,
-      compatibility: compatibility,
+      prerelease,
+      compatibility,
     };
   }
 

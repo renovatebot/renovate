@@ -4,7 +4,7 @@ import type { RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
 import { platform } from '../../../modules/platform';
 import { clone } from '../../../util/clone';
-import { setUserRepoConfig } from '../../../util/git';
+import { cloneSubmodules, setUserRepoConfig } from '../../../util/git';
 import { getAll } from '../../../util/host-rules';
 import { checkIfConfigured } from '../configured';
 import { PackageFiles } from '../package-files';
@@ -48,5 +48,6 @@ export async function initRepo(
       'Full resolved config and hostRules including presets'
     );
   }
+  await cloneSubmodules(!!config.cloneSubmodules);
   return config;
 }
