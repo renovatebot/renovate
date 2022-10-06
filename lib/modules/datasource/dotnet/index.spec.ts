@@ -34,6 +34,12 @@ describe('modules/datasource/dotnet/index', () => {
         .get('/releases-index.json')
         .reply(200, releasesIndex)
         .get('/7.0/releases.json')
+        .reply(404)
+        .get('/6.0/releases.json')
+        .reply(404)
+        .get('/5.0/releases.json')
+        .reply(404)
+        .get('/3.1/releases.json')
         .reply(404);
 
       expect(
@@ -55,7 +61,7 @@ describe('modules/datasource/dotnet/index', () => {
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
     });
 
-    it('throws for 5xx for for version', async () => {
+    it('throws for 5xx for version', async () => {
       httpMock
         .scope(baseUrl)
         .get('/releases-index.json')
@@ -94,6 +100,12 @@ describe('modules/datasource/dotnet/index', () => {
         .get('/releases-index.json')
         .reply(200, releasesIndex)
         .get('/7.0/releases.json')
+        .replyWithError('')
+        .get('/6.0/releases.json')
+        .replyWithError('')
+        .get('/5.0/releases.json')
+        .replyWithError('')
+        .get('/3.1/releases.json')
         .replyWithError('');
 
       expect(
