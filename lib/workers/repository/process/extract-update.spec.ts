@@ -1,4 +1,5 @@
 import hasha from 'hasha';
+import stringify from 'safe-stable-stringify';
 import { git, mocked } from '../../../../test/util';
 import type { PackageFile } from '../../../modules/manager/types';
 import * as _repositoryCache from '../../../util/cache/repository';
@@ -71,7 +72,7 @@ describe('workers/repository/process/extract-update', () => {
         scan: {
           master: {
             sha: '123test',
-            configHash: hasha(JSON.stringify(config)),
+            configHash: hasha(stringify(config)),
             packageFiles,
           },
         },

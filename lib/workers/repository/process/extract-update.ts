@@ -1,6 +1,7 @@
 // TODO #7154
 import is from '@sindresorhus/is';
 import hasha from 'hasha';
+import stringify from 'safe-stable-stringify';
 import type { RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
 import type { PackageFile } from '../../../modules/manager/types';
@@ -71,7 +72,10 @@ export async function extract(
   const cache = getCache();
   cache.scan ||= {};
   const cachedExtract = cache.scan[baseBranch!];
-  const configHash = hasha(JSON.stringify(config));
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { packageRules, ...remainingConfig } = config;
+  // Calculate hash excluding packageRules, because they're not applied during extract
+  const configHash = hasha(stringify(remainingConfig));
   // istanbul ignore if
   if (
     cachedExtract?.sha === baseBranchSha &&
