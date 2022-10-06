@@ -1,5 +1,66 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`modules/manager/helmv3/artifacts add sub chart artifacts and ignore files outside of the chart folder 1`] = `
+[
+  {
+    "file": {
+      "contents": undefined,
+      "path": "charts/example-1.9.2.tgz",
+      "type": "addition",
+    },
+  },
+  {
+    "file": {
+      "path": "charts/example-1.6.2.tgz",
+      "type": "deletion",
+    },
+  },
+]
+`;
+
+exports[`modules/manager/helmv3/artifacts add sub chart artifacts and ignore files outside of the chart folder 2`] = `
+[
+  {
+    "cmd": "helm repo add repo-test --registry-config /tmp/renovate/cache/__renovate-private-cache/registry.json --repository-config /tmp/renovate/cache/__renovate-private-cache/repositories.yaml --repository-cache /tmp/renovate/cache/__renovate-private-cache/repositories https://gitlab.com/api/v4/projects/xxxxxxx/packages/helm/stable",
+    "options": {
+      "cwd": "/tmp/github/some/repo",
+      "encoding": "utf-8",
+      "env": {
+        "HELM_EXPERIMENTAL_OCI": "1",
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
+      "maxBuffer": 10485760,
+      "timeout": 900000,
+    },
+  },
+  {
+    "cmd": "helm dependency update --registry-config /tmp/renovate/cache/__renovate-private-cache/registry.json --repository-config /tmp/renovate/cache/__renovate-private-cache/repositories.yaml --repository-cache /tmp/renovate/cache/__renovate-private-cache/repositories ''",
+    "options": {
+      "cwd": "/tmp/github/some/repo",
+      "encoding": "utf-8",
+      "env": {
+        "HELM_EXPERIMENTAL_OCI": "1",
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
+      "maxBuffer": 10485760,
+      "timeout": 900000,
+    },
+  },
+]
+`;
+
 exports[`modules/manager/helmv3/artifacts add sub chart artifacts to file list if Chart.lock exists 1`] = `
 [
   {
@@ -21,8 +82,14 @@ generated: "2022-01-20T17:48:47.610371241+01:00"
   {
     "file": {
       "contents": undefined,
-      "path": "charts/example.tgz",
+      "path": "charts/example-1.9.2.tgz",
       "type": "addition",
+    },
+  },
+  {
+    "file": {
+      "path": "charts/example-1.6.2.tgz",
+      "type": "deletion",
     },
   },
 ]
@@ -76,14 +143,75 @@ exports[`modules/manager/helmv3/artifacts add sub chart artifacts to file list i
   {
     "file": {
       "contents": undefined,
-      "path": "charts/example.tgz",
+      "path": "charts/example-1.9.2.tgz",
       "type": "addition",
+    },
+  },
+  {
+    "file": {
+      "path": "charts/example-1.6.2.tgz",
+      "type": "deletion",
     },
   },
 ]
 `;
 
 exports[`modules/manager/helmv3/artifacts add sub chart artifacts to file list if Chart.lock is missing 2`] = `
+[
+  {
+    "cmd": "helm repo add repo-test --registry-config /tmp/renovate/cache/__renovate-private-cache/registry.json --repository-config /tmp/renovate/cache/__renovate-private-cache/repositories.yaml --repository-cache /tmp/renovate/cache/__renovate-private-cache/repositories https://gitlab.com/api/v4/projects/xxxxxxx/packages/helm/stable",
+    "options": {
+      "cwd": "/tmp/github/some/repo",
+      "encoding": "utf-8",
+      "env": {
+        "HELM_EXPERIMENTAL_OCI": "1",
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
+      "maxBuffer": 10485760,
+      "timeout": 900000,
+    },
+  },
+  {
+    "cmd": "helm dependency update --registry-config /tmp/renovate/cache/__renovate-private-cache/registry.json --repository-config /tmp/renovate/cache/__renovate-private-cache/repositories.yaml --repository-cache /tmp/renovate/cache/__renovate-private-cache/repositories ''",
+    "options": {
+      "cwd": "/tmp/github/some/repo",
+      "encoding": "utf-8",
+      "env": {
+        "HELM_EXPERIMENTAL_OCI": "1",
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
+      "maxBuffer": 10485760,
+      "timeout": 900000,
+    },
+  },
+]
+`;
+
+exports[`modules/manager/helmv3/artifacts add sub chart artifacts without old archives 1`] = `
+[
+  {
+    "file": {
+      "contents": undefined,
+      "path": "charts/example-1.9.2.tgz",
+      "type": "addition",
+    },
+  },
+]
+`;
+
+exports[`modules/manager/helmv3/artifacts add sub chart artifacts without old archives 2`] = `
 [
   {
     "cmd": "helm repo add repo-test --registry-config /tmp/renovate/cache/__renovate-private-cache/registry.json --repository-config /tmp/renovate/cache/__renovate-private-cache/repositories.yaml --repository-cache /tmp/renovate/cache/__renovate-private-cache/repositories https://gitlab.com/api/v4/projects/xxxxxxx/packages/helm/stable",

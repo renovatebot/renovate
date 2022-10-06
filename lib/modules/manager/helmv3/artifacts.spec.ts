@@ -14,22 +14,7 @@ import * as helmv3 from '.';
 jest.mock('../../datasource');
 jest.mock('../../../util/exec/env');
 jest.mock('../../../util/http');
-jest.mock('../../../util/fs', () => {
-  // mock everything except isFileInDir
-  const original =
-    jest.requireActual<typeof import('../../../util/fs')>('../../../util/fs');
-  const partialMocked = Object.keys(original).reduce(
-    (pre: Record<string, jest.Mock>, methodName) => {
-      pre[methodName] = jest.fn();
-      return pre;
-    },
-    {}
-  );
-  return {
-    ...partialMocked,
-    isFileInDir: original.isFileInDir, // mock all methods except isFileInDir
-  };
-});
+jest.mock('../../../util/fs');
 jest.mock('../../../util/git');
 
 const datasource = mocked(_datasource);
@@ -292,7 +277,8 @@ describe('modules/manager/helmv3/artifacts', () => {
     // sub chart artifacts
     fs.getSiblingFileName.mockReturnValueOnce('charts');
     git.getRepoStatus.mockResolvedValueOnce({
-      modified: ['charts/example.tgz'],
+      not_added: ['charts/example-1.9.2.tgz'],
+      deleted: ['charts/example-1.6.2.tgz'],
     } as StatusResult);
     const updatedDeps = [{ depName: 'dep1' }];
     expect(
@@ -309,8 +295,97 @@ describe('modules/manager/helmv3/artifacts', () => {
       {
         file: {
           type: 'addition',
-          path: 'charts/example.tgz',
+          path: 'charts/example-1.9.2.tgz',
           contents: undefined,
+        },
+      },
+      {
+        file: {
+          type: 'deletion',
+          path: 'charts/example-1.6.2.tgz',
+        },
+      },
+    ]);
+    expect(execSnapshots).toBeArrayOfSize(2);
+    expect(execSnapshots).toMatchSnapshot();
+  });
+
+  it('add sub chart artifacts without old archives', async () => {
+    fs.readLocalFile.mockResolvedValueOnce(null);
+    fs.getSiblingFileName.mockReturnValueOnce('Chart.lock');
+    const execSnapshots = mockExecAll();
+    fs.privateCacheDir.mockReturnValue(
+      '/tmp/renovate/cache/__renovate-private-cache'
+    );
+    fs.getParentDir.mockReturnValue('');
+
+    // sub chart artifacts
+    fs.getSiblingFileName.mockReturnValueOnce('charts');
+    git.getRepoStatus.mockResolvedValueOnce({
+      not_added: ['charts/example-1.9.2.tgz'],
+    } as StatusResult);
+    const updatedDeps = [{ depName: 'dep1' }];
+    expect(
+      await helmv3.updateArtifacts({
+        packageFileName: 'Chart.yaml',
+        updatedDeps,
+        newPackageFileContent: chartFile,
+        config: {
+          postUpdateOptions: ['helmUpdateSubChartArchives'],
+          ...config,
+        },
+      })
+    ).toMatchSnapshot([
+      {
+        file: {
+          type: 'addition',
+          path: 'charts/example-1.9.2.tgz',
+          contents: undefined,
+        },
+      },
+    ]);
+    expect(execSnapshots).toBeArrayOfSize(2);
+    expect(execSnapshots).toMatchSnapshot();
+  });
+
+  it('add sub chart artifacts and ignore files outside of the chart folder', async () => {
+    fs.readLocalFile.mockResolvedValueOnce(null);
+    fs.getSiblingFileName.mockReturnValueOnce('Chart.lock');
+    const execSnapshots = mockExecAll();
+    fs.privateCacheDir.mockReturnValue(
+      '/tmp/renovate/cache/__renovate-private-cache'
+    );
+    fs.getParentDir.mockReturnValue('');
+
+    // sub chart artifacts
+    fs.getSiblingFileName.mockReturnValueOnce('charts');
+    git.getRepoStatus.mockResolvedValueOnce({
+      not_added: ['charts/example-1.9.2.tgz', 'exampleFile'],
+      deleted: ['charts/example-1.6.2.tgz', 'aFolder/otherFile'],
+    } as StatusResult);
+    const updatedDeps = [{ depName: 'dep1' }];
+    expect(
+      await helmv3.updateArtifacts({
+        packageFileName: 'Chart.yaml',
+        updatedDeps,
+        newPackageFileContent: chartFile,
+        config: {
+          postUpdateOptions: ['helmUpdateSubChartArchives'],
+          ...config,
+        },
+      })
+    ).toMatchSnapshot([
+      {
+        file: {
+          type: 'addition',
+          path: 'charts/example-1.9.2.tgz',
+          contents: undefined,
+        },
+      },
+      {
+        file: {
+          type: 'deletion',
+          path: 'charts/example-1.6.2.tgz',
         },
       },
     ]);

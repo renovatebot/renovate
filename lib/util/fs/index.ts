@@ -15,10 +15,6 @@ export function getParentDir(fileName: string): string {
   return upath.parse(fileName).dir;
 }
 
-export function isFileInDir(dir: string, file: string): boolean {
-  return upath.dirname(file) === dir;
-}
-
 export function getSiblingFileName(
   fileName: string,
   siblingName: string

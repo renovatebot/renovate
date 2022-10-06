@@ -9,7 +9,6 @@ import type { ExecOptions, ToolConstraint } from '../../../util/exec/types';
 import {
   getParentDir,
   getSiblingFileName,
-  isFileInDir,
   privateCacheDir,
   readLocalFile,
   writeLocalFile,
@@ -23,6 +22,7 @@ import type { ChartDefinition, Repository, RepositoryRule } from './types';
 import {
   aliasRecordToRepositories,
   getRepositories,
+  isFileInDir,
   isOCIRegistry,
 } from './utils';
 
