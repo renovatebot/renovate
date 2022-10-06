@@ -83,6 +83,14 @@ jobs:
       - name: Build
         run: yarn build
 
+      - name: Cache jest cache
+        uses: actions/cache@56461b9eb0f8438fd15c7a9968e3c9ebb18ceff1 # tag=v3.0.10
+        with:
+          path: .cache/jest
+          key: ${{ runner.os }}-${{ matrix.node-version }}-jest-${{ hashFiles('yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-node-${{ matrix.node-version }}-jest-
+
       - name: Unit tests
         run: yarn jest --ci --coverage ${{ env.coverage }}
 
