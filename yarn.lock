@@ -1749,11 +1749,6 @@
   resolved "https://registry.yarnpkg.com/@ls-lint/ls-lint/-/ls-lint-1.11.2.tgz#fa7e8c404b7c2f9f7fe3e92b7d69fe37a15c0e1c"
   integrity sha512-kX+CCjgNz+NHCaOcFyJLSBLRgAoyOxN18QFLpgucz5ILvbr60BGjwKaoPYTv/rBV/77L+Oz82lpP24mzJ2wGsQ==
 
-"@mattiasbuelens/web-streams-adapter@~0.1.0":
-  version "0.1.0"
-  resolved "https://registry.yarnpkg.com/@mattiasbuelens/web-streams-adapter/-/web-streams-adapter-0.1.0.tgz#607b5a25682f4ae2741da7ba6df39302505336b3"
-  integrity sha512-oV4PyZfwJNtmFWhvlJLqYIX1Nn22ML8FZpS16ZUKv0hg7414xV1fjsGqxQzLT2dyK92TKxsJSwMOd7VNHAtPmA==
-
 "@nodelib/fs.scandir@2.1.5":
   version "2.1.5"
   resolved "https://registry.yarnpkg.com/@nodelib/fs.scandir/-/fs.scandir-2.1.5.tgz#7619c2eb21b25483f6d167548b4cfd5a7488c3d5"
@@ -2047,13 +2042,10 @@
   dependencies:
     "@octokit/openapi-types" "^13.11.0"
 
-"@openpgp/web-stream-tools@0.0.11":
-  version "0.0.11"
-  resolved "https://registry.yarnpkg.com/@openpgp/web-stream-tools/-/web-stream-tools-0.0.11.tgz#71bc9c493024506b1e5b0a587b85984435bbff8e"
-  integrity sha512-52NMPRmlXIVajd5dhpDNsG7WJRCdlcS1wXY03OGH1rxm7p6i3QzJvTVyKEAcW0T9KojvLKakV2uTICceELqSMw==
-  dependencies:
-    "@mattiasbuelens/web-streams-adapter" "~0.1.0"
-    web-streams-polyfill "~3.0.3"
+"@openpgp/web-stream-tools@0.0.12":
+  version "0.0.12"
+  resolved "https://registry.yarnpkg.com/@openpgp/web-stream-tools/-/web-stream-tools-0.0.12.tgz#8a80170c7590ecee2af4220c5cb1efe1a02946eb"
+  integrity sha512-OGQ7a7UlALBOPxTWqLjPoa6YjHtLYF5ETb3zwx2A2Qq3YsstJX4q/OvYx60v2MavmBBJELsBQNugdJu0uMBhSw==
 
 "@pkgr/utils@^2.3.1":
   version "2.3.1"
@@ -3819,10 +3811,10 @@ columnify@^1.6.0:
     strip-ansi "^6.0.1"
     wcwidth "^1.0.0"
 
-commander@9.4.0:
-  version "9.4.0"
-  resolved "https://registry.yarnpkg.com/commander/-/commander-9.4.0.tgz#bc4a40918fefe52e22450c111ecd6b7acce6f11c"
-  integrity sha512-sRPT+umqkz90UA8M1yqYfnHlZA7fF6nSphDtxeywPZ49ysjxDQybzk13CL+mXekDRG92skbcqCLVovuCusNmFw==
+commander@9.4.1:
+  version "9.4.1"
+  resolved "https://registry.yarnpkg.com/commander/-/commander-9.4.1.tgz#d1dd8f2ce6faf93147295c0df13c7c21141cfbdd"
+  integrity sha512-5EEkTNyHNGFPD2H+c/dXXfQZYa/scCKasxWcXJaWnNJ99pnQN9Vnmqow+p+PlFPE63Q6mThaZws1T+HxfpgtPw==
 
 commander@^2.19.0:
   version "2.20.3"
@@ -9473,11 +9465,6 @@ wcwidth@^1.0.0:
   integrity sha512-XHPEwS0q6TaxcvG85+8EYkbiCux2XtWG2mkc47Ng2A77BQu9+DqIOJldST4HgPkuea7dvKSj5VgX3P1d4rW8Tg==
   dependencies:
     defaults "^1.0.3"
-
-web-streams-polyfill@~3.0.3:
-  version "3.0.3"
-  resolved "https://registry.yarnpkg.com/web-streams-polyfill/-/web-streams-polyfill-3.0.3.tgz#f49e487eedeca47a207c1aee41ee5578f884b42f"
-  integrity sha512-d2H/t0eqRNM4w2WvmTdoeIvzAUSpK7JmATB8Nr2lb7nQ9BTIJVjbQ/TRFVEh2gUH1HwclPdoPtfMoFfetXaZnA==
 
 webidl-conversions@^3.0.0:
   version "3.0.1"
