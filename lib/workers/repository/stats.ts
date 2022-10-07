@@ -3,22 +3,38 @@ import { logger } from '../../logger';
 import * as memCache from '../../util/cache/memory';
 import type { RequestStats } from '../../util/http/types';
 
+interface CacheStats {
+  count: number;
+  avgMs?: number;
+  maxMs?: number;
+}
+
 export function printRequestStats(): void {
-  const packageCacheRequests = (
-    memCache.get<number[]>('package-cache-requests') ?? []
+  const packageCacheGets = (
+    memCache.get<number[]>('package-cache-gets') ?? []
   ).sort();
-  const packageCacheStats = {
-    requestCount: packageCacheRequests.length,
-    responseAvgMs: 0,
-    responseMaxMs: 0,
+  const packageCacheSets = (
+    memCache.get<number[]>('package-cache-sets') ?? []
+  ).sort();
+  const packageCacheStats: Record<string, CacheStats> = {
+    get: {
+      count: packageCacheGets.length,
+    },
+    set: {
+      count: packageCacheSets.length,
+    },
   };
-  if (packageCacheStats.requestCount) {
-    packageCacheStats.responseAvgMs = Math.round(
-      packageCacheRequests.reduce((a, b) => a + b, 0) /
-        packageCacheRequests.length
+  if (packageCacheGets.length) {
+    packageCacheStats.get.avgMs = Math.round(
+      packageCacheGets.reduce((a, b) => a + b, 0) / packageCacheGets.length
     );
-    packageCacheStats.responseMaxMs =
-      packageCacheRequests[packageCacheRequests.length - 1];
+    packageCacheStats.get.maxMs = packageCacheGets[packageCacheGets.length - 1];
+  }
+  if (packageCacheSets.length) {
+    packageCacheStats.set.avgMs = Math.round(
+      packageCacheSets.reduce((a, b) => a + b, 0) / packageCacheSets.length
+    );
+    packageCacheStats.set.maxMs = packageCacheSets[packageCacheSets.length - 1];
   }
   logger.debug(packageCacheStats, 'Package cache statistics');
   const httpRequests = memCache.get<RequestStats[]>('http-requests');

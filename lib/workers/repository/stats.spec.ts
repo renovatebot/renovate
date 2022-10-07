@@ -12,9 +12,12 @@ const log = logger.logger as jest.Mocked<Logger>;
 describe('workers/repository/stats', () => {
   describe('printRequestStats()', () => {
     it('runs', () => {
-      const cacheStats: number[] = [10, 20, 30];
+      const getStats: number[] = [10, 20, 30];
       // TODO: fix types, jest is using wrong overload (#7154)
-      memCache.get.mockImplementationOnce(() => cacheStats as any);
+      memCache.get.mockImplementationOnce(() => getStats as any);
+      const setStats: number[] = [20, 80];
+      // TODO: fix types, jest is using wrong overload (#7154)
+      memCache.get.mockImplementationOnce(() => setStats as any);
       const httpStats: RequestStats[] = [
         {
           method: 'get',
@@ -126,9 +129,16 @@ describe('workers/repository/stats', () => {
       `);
       expect(log.debug.mock.calls[1][0]).toMatchInlineSnapshot(`
         {
-          "requestCount": 3,
-          "responseAvgMs": 20,
-          "responseMaxMs": 30,
+          "get": {
+            "avgMs": 20,
+            "count": 3,
+            "maxMs": 30,
+          },
+          "set": {
+            "avgMs": 50,
+            "count": 2,
+            "maxMs": 80,
+          },
         }
       `);
       expect(log.debug.mock.calls[2][0]).toMatchInlineSnapshot(`
