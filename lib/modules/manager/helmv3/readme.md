@@ -65,12 +65,12 @@ For this you use a custom `hostRules` array.
 }
 ```
 
-### SubChart archives
+### Subchart archives
 
-If updates to sub chart archives are desired, a `postUpdateOption` named `helmUpdateSubChartArchives` can be used.
-After enabling this option archives located in the `/chart` folder are managed by Renovate.
+To get updates for subchart archives put `helmUpdateSubChartArchives` in your `postUpdateOption` configuration.
+Renovate now updates archives in the `/chart` folder.
 
-```json5
+```json
 {
   postUpdateOptions: ['helmUpdateSubChartArchives'],
 }
