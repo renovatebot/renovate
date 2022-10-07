@@ -72,6 +72,7 @@ interface Config {
 interface User {
   id: string;
   name: string;
+  isRequired: boolean;
 }
 
 let config: Config = {} as any;
