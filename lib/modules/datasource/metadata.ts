@@ -13,14 +13,25 @@ const githubPages = regEx('^https://([^.]+).github.com/([^/]+)$');
 const gitPrefix = regEx('^git:/?/?');
 
 export function massageUrl(sourceUrl: string): string {
-  const parsedUrl = URL.parse(sourceUrl);
-  if (!parsedUrl?.hostname) {
+  const hostname = getHostname(sourceUrl);
+  if (!hostname) {
     return '';
   }
-  if (parsedUrl.hostname.includes('gitlab')) {
+  if (hostname.includes('gitlab')) {
     return massageGitlabUrl(sourceUrl);
   }
   return massageGithubUrl(sourceUrl);
+}
+
+function getHostname(sourceUrl: string): string | null {
+  let massagedUrl = sourceUrl;
+  // Replace git@ sourceUrl with https so hostname can be parsed
+  if (sourceUrl.startsWith('git@')) {
+    massagedUrl = sourceUrl.replace(':', '/').replace('git@', 'https://');
+  }
+
+  const parsedUrl = URL.parse(massagedUrl);
+  return parsedUrl?.hostname;
 }
 
 export function massageGithubUrl(url: string): string {
