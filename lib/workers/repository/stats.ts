@@ -1,5 +1,6 @@
 import URL from 'url';
 import { logger } from '../../logger';
+import { sortNumeric } from '../../util/array';
 import * as memCache from '../../util/cache/memory';
 import type { RequestStats } from '../../util/http/types';
 
@@ -12,10 +13,10 @@ interface CacheStats {
 export function printRequestStats(): void {
   const packageCacheGets = (
     memCache.get<number[]>('package-cache-gets') ?? []
-  ).sort();
+  ).sort(sortNumeric);
   const packageCacheSets = (
     memCache.get<number[]>('package-cache-sets') ?? []
-  ).sort();
+  ).sort(sortNumeric);
   const packageCacheStats: Record<string, CacheStats> = {
     get: {
       count: packageCacheGets.length,
