@@ -30,6 +30,7 @@ function createDependency(
     return null;
   }
 
+  // a chart variable is defined this is helm declaration
   if (source.chart) {
     // assume OCI helm chart if repoURL doesn't contain explicit protocol
     if (
