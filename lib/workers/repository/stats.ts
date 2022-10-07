@@ -5,7 +5,7 @@ import type { RequestStats } from '../../util/http/types';
 
 export function printRequestStats(): void {
   const packageCacheRequests = (
-    memCache.get<number[]>('package-cache-requests') || []
+    memCache.get<number[]>('package-cache-requests') ?? []
   ).sort();
   const packageCacheStats = {
     requestCount: packageCacheRequests.length,
