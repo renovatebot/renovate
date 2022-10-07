@@ -78,7 +78,8 @@ const repoGroups = {
   'ember-decorators': 'https://github.com/ember-decorators/ember-decorators',
   emojibase: 'https://github.com/milesj/emojibase',
   emotion: 'https://github.com/emotion-js/emotion',
-  'eslint-config-globex': 'https://github.com/GlobexDesignsInc/eslint-config-globex',
+  'eslint-config-globex':
+    'https://github.com/GlobexDesignsInc/eslint-config-globex',
   expo: 'https://github.com/expo/expo',
   feathers: 'https://github.com/feathersjs/feathers',
   feign: 'https://github.com/OpenFeign/feign',
