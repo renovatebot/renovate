@@ -54,6 +54,16 @@ describe('modules/manager/argocd/extract', () => {
             datasource: 'git-tags',
             depName: 'https://git.example.com/foo/bar.git',
           },
+          {
+            currentValue: '1.2.0',
+            datasource: 'docker',
+            depName: 'somecontainer.registry.io/some/image',
+          },
+          {
+            currentValue: '1.3.0',
+            datasource: 'docker',
+            depName: 'somecontainer.registry.io/some/image2',
+          },
         ],
       });
     });
