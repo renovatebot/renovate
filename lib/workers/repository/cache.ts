@@ -58,7 +58,7 @@ async function generateBranchCache(
     let parentSha = null;
     let isModified = false;
     let isBehindBase = false;
-     let isConflicted = false;
+    let isConflicted = false;
     if (sha) {
       parentSha = await getBranchParentSha(branchName);
       const branchPr = await platform.getBranchPr(branchName);
@@ -69,7 +69,7 @@ async function generateBranchCache(
       // TODO: fix types (#7154)
       isBehindBase = await isBranchBehindBase(branchName, baseBranch!);
       // TODO: fix types (#7154)
-        isConflicted = await isBranchConflicted(baseBranch!, branchName);
+      isConflicted = await isBranchConflicted(baseBranch!, branchName);
     }
     const automerge = !!branch.automerge;
     const upgrades: BranchUpgradeCache[] = branch.upgrades
