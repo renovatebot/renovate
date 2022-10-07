@@ -124,13 +124,8 @@ describe('workers/repository/stats', () => {
           },
         }
       `);
-      expect(log.debug.mock.calls[1][0]).toMatchInlineSnapshot(`
+      expect(log.debug.mock.calls[2][0]).toMatchInlineSnapshot(`
         {
-          "cacheStats": {
-            "cacheAverageMs": 20,
-            "cacheCount": 3,
-            "cacheMaximumMs": 30,
-          },
           "hostStats": {
             "api.github.com": {
               "queueAvgMs": 2,
