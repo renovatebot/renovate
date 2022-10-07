@@ -813,7 +813,7 @@ async function getUserIds(users: string[]): Promise<User[]> {
             ids.push({
               id: m.identity.id!,
               name: reviewer,
-              isRequired: isRequired,
+              isRequired,
             });
           }
         }
@@ -832,7 +832,7 @@ async function getUserIds(users: string[]): Promise<User[]> {
       if (reviewer.toLowerCase() === t.name?.toLowerCase()) {
         if (ids.filter((c) => c.id === t.id).length === 0) {
           // TODO #7154
-          ids.push({ id: t.id!, name: reviewer, isRequired: isRequired });
+          ids.push({ id: t.id!, name: reviewer, isRequired });
         }
       }
     });
