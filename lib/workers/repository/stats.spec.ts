@@ -12,7 +12,10 @@ const log = logger.logger as jest.Mocked<Logger>;
 describe('workers/repository/stats', () => {
   describe('printRequestStats()', () => {
     it('runs', () => {
-      const stats: RequestStats[] = [
+      const cacheStats: number[] = [10, 20, 30];
+      // TODO: fix types, jest is using wrong overload (#7154)
+      memCache.get.mockImplementationOnce(() => cacheStats as any);
+      const httpStats: RequestStats[] = [
         {
           method: 'get',
           url: 'https://api.github.com/api/v3/user',
@@ -57,7 +60,7 @@ describe('workers/repository/stats', () => {
         },
       ];
       // TODO: fix types, jest is using wrong overload (#7154)
-      memCache.get.mockImplementationOnce(() => stats as any);
+      memCache.get.mockImplementationOnce(() => httpStats as any);
       expect(printRequestStats()).toBeUndefined();
       expect(log.trace).toHaveBeenCalledOnce();
       expect(log.debug).toHaveBeenCalledTimes(2);
@@ -123,6 +126,11 @@ describe('workers/repository/stats', () => {
       `);
       expect(log.debug.mock.calls[1][0]).toMatchInlineSnapshot(`
         {
+          "cacheStats": {
+            "cacheAverageMs": 20,
+            "cacheCount": 3,
+            "cacheMaximumMs": 30,
+          },
           "hostStats": {
             "api.github.com": {
               "queueAvgMs": 2,

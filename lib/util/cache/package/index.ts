@@ -21,7 +21,12 @@ export async function get<T = any>(
   if (memCache.get(globalKey) === undefined) {
     memCache.set(globalKey, cacheProxy.get(namespace, key));
   }
+  const start = Date.now();
   const result = await memCache.get(globalKey);
+  const durationMs = Math.round(Date.now() - start);
+  const cacheRequests = memCache.get<number[]>('package-cache-requests') || [];
+  cacheRequests.push(durationMs);
+  memCache.set('package-cache-requests', cacheRequests);
   return result;
 }
 

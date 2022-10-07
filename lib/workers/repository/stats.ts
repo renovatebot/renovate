@@ -4,6 +4,22 @@ import * as memCache from '../../util/cache/memory';
 import type { RequestStats } from '../../util/http/types';
 
 export function printRequestStats(): void {
+  const packageCacheRequests = (
+    memCache.get<number[]>('package-cache-requests') || []
+  ).sort();
+  const packageCacheStats = {
+    cacheCount: packageCacheRequests.length,
+    cacheAverageMs: 0,
+    cacheMaximumMs: 0,
+  };
+  if (packageCacheStats.cacheCount) {
+    packageCacheStats.cacheAverageMs = Math.round(
+      packageCacheRequests.reduce((a, b) => a + b, 0) /
+        packageCacheRequests.length
+    );
+    packageCacheStats.cacheMaximumMs =
+      packageCacheRequests[packageCacheRequests.length - 1];
+  }
   const httpRequests = memCache.get<RequestStats[]>('http-requests');
   // istanbul ignore next
   if (!httpRequests) {
@@ -70,5 +86,8 @@ export function printRequestStats(): void {
     const queueAvgMs = Math.round(queueSum / requestCount);
     hostStats[hostname] = { requestCount, requestAvgMs, queueAvgMs };
   }
-  logger.debug({ urls, hostStats, totalRequests }, 'http statistics');
+  logger.debug(
+    { urls, packageCacheStats, hostStats, totalRequests },
+    'http statistics'
+  );
 }
