@@ -1,10 +1,14 @@
 import { getPkgReleases } from '..';
 import * as httpMock from '../../../../test/http-mock';
+import * as _githubGraphql from '../../../util/github/graphql';
 import * as _hostRules from '../../../util/host-rules';
 import { GithubTagsDatasource } from '.';
 
 jest.mock('../../../util/host-rules');
 const hostRules: any = _hostRules;
+
+jest.mock('../../../util/github/graphql');
+const githubGraphql: any = _githubGraphql;
 
 const githubApiHost = 'https://api.github.com';
 const githubEnterpriseApiHost = 'https://git.enterprise.com';
@@ -118,18 +122,37 @@ describe('modules/datasource/github-tags/index', () => {
     const depName = 'some/dep2';
 
     it('returns tags', async () => {
-      const tags = [{ name: 'v1.0.0' }, { name: 'v1.1.0' }];
-      httpMock
-        .scope(githubApiHost)
-        .get(`/repos/${depName}/tags?per_page=100`)
-        .reply(200, tags);
+      const queryTags = jest.spyOn(githubGraphql, 'queryTags');
+      queryTags.mockResolvedValueOnce([
+        {
+          version: 'v1.0.0',
+          gitRef: 'v1.0.0',
+          releaseTimestamp: '2021-01-01',
+          newDigest: '123',
+        },
+        {
+          version: 'v2.0.0',
+          gitRef: 'v2.0.0',
+          releaseTimestamp: '2022-01-01',
+          newDigest: 'abc',
+        },
+      ]);
+
       const res = await getPkgReleases({ datasource: github.id, depName });
 
       expect(res).toEqual({
         registryUrl: 'https://github.com',
         releases: [
-          { gitRef: 'v1.0.0', version: 'v1.0.0' },
-          { gitRef: 'v1.1.0', version: 'v1.1.0' },
+          {
+            gitRef: 'v1.0.0',
+            version: 'v1.0.0',
+            releaseTimestamp: '2021-01-01T00:00:00.000Z',
+          },
+          {
+            gitRef: 'v2.0.0',
+            version: 'v2.0.0',
+            releaseTimestamp: '2022-01-01T00:00:00.000Z',
+          },
         ],
 
         sourceUrl: 'https://github.com/some/dep2',
