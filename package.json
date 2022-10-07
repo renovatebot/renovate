@@ -267,8 +267,8 @@
     "@types/url-join": "4.0.1",
     "@types/validate-npm-package-name": "4.0.0",
     "@types/xmldoc": "1.1.6",
-    "@typescript-eslint/eslint-plugin": "5.38.1",
-    "@typescript-eslint/parser": "5.38.1",
+    "@typescript-eslint/eslint-plugin": "5.39.0",
+    "@typescript-eslint/parser": "5.39.0",
     "aws-sdk-client-mock": "2.0.0",
     "callsite": "1.0.0",
     "conventional-changelog-conventionalcommits": "5.0.0",
@@ -280,7 +280,7 @@
     "eslint-formatter-gha": "1.4.1",
     "eslint-import-resolver-typescript": "3.5.1",
     "eslint-plugin-import": "2.26.0",
-    "eslint-plugin-jest": "27.0.4",
+    "eslint-plugin-jest": "27.1.1",
     "eslint-plugin-jest-formatting": "3.1.0",
     "eslint-plugin-promise": "6.0.1",
     "eslint-plugin-typescript-enum": "2.1.0",
@@ -307,7 +307,7 @@
     "ts-jest": "29.0.3",
     "ts-node": "10.9.1",
     "type-fest": "2.19.0",
-    "typescript": "4.7.4",
+    "typescript": "4.8.4",
     "unified": "9.2.2"
   },
   "resolutions": {
