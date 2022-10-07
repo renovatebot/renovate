@@ -33,6 +33,7 @@ describe('modules/manager/npm/post-update/lerna', () => {
   const globalConfig: RepoGlobalConfig = {
     localDir: '',
     cacheDir: '/tmp/cache',
+    allowScripts: false,
   };
 
   describe('generateLockFiles()', () => {
@@ -134,7 +135,11 @@ describe('modules/manager/npm/post-update/lerna', () => {
 
     it('suppports docker', async () => {
       const execSnapshots = mockExecAll();
-      GlobalConfig.set({ ...globalConfig, binarySource: 'docker' });
+      GlobalConfig.set({
+        ...globalConfig,
+        allowScripts: false,
+        binarySource: 'docker',
+      });
 
       const res = await lernaHelper.generateLockFiles(
         lernaPkgFile('npm'),
