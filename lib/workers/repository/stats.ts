@@ -8,16 +8,16 @@ export function printRequestStats(): void {
     memCache.get<number[]>('package-cache-requests') || []
   ).sort();
   const packageCacheStats = {
-    cacheCount: packageCacheRequests.length,
-    cacheAverageMs: 0,
-    cacheMaximumMs: 0,
+    requestCount: packageCacheRequests.length,
+    responseAvgMs: 0,
+    responseMaxMs: 0,
   };
-  if (packageCacheStats.cacheCount) {
-    packageCacheStats.cacheAverageMs = Math.round(
+  if (packageCacheStats.requestCount) {
+    packageCacheStats.responseAvgMs = Math.round(
       packageCacheRequests.reduce((a, b) => a + b, 0) /
         packageCacheRequests.length
     );
-    packageCacheStats.cacheMaximumMs =
+    packageCacheStats.responseMaxMs =
       packageCacheRequests[packageCacheRequests.length - 1];
   }
   logger.debug(packageCacheStats, 'Package cache statistics');
