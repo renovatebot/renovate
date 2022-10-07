@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "dependencies": [
+    {
+      "source": {
+        "git": {}
+      },
+      "version": "v0.50.0"
+    }
+  ]
+}

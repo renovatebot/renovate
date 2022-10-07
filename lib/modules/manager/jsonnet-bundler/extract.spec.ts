@@ -9,6 +9,9 @@ const jsonnetfileNoDependencies = Fixtures.get(
 const jsonnetfileLocalDependencies = Fixtures.get(
   'jsonnetfile-local-dependencies.json'
 );
+const jsonnetfileEmptyGitSource = Fixtures.get(
+  'jsonnetfile-empty-git-source.json'
+);
 
 describe('modules/manager/jsonnet-bundler/extract', () => {
   describe('extractPackageFile()', () => {
@@ -33,6 +36,15 @@ describe('modules/manager/jsonnet-bundler/extract', () => {
     it('returns null for vendored dependencies', () => {
       expect(
         extractPackageFile(jsonnetfile, 'vendor/jsonnetfile.json')
+      ).toBeNull();
+    });
+
+    it('returns null for dependencies with empty Git source', () => {
+      expect(
+        extractPackageFile(
+          jsonnetfileEmptyGitSource,
+          'jsonnetfile-empty-git-source.json'
+        )
       ).toBeNull();
     });
 

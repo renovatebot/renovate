@@ -1,8 +1,8 @@
-import { URL } from 'url';
 import { join } from 'upath';
 
 import { logger } from '../../../logger';
 import { coerceArray } from '../../../util/array';
+import { parseUrl } from '../../../util/url';
 import type { PackageDependency, PackageFile } from '../types';
 import type { Dependency, JsonnetFile } from './types';
 
@@ -44,7 +44,10 @@ function extractDependency(dependency: Dependency): PackageDependency | null {
     return null;
   }
 
-  const gitRemote = new URL(dependency.source.git.remote);
+  const gitRemote = parseUrl(dependency.source.git.remote);
+  if (gitRemote === null) {
+    return null;
+  }
 
   const depName = join(
     gitRemote.host,
