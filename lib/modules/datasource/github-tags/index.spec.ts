@@ -108,8 +108,7 @@ describe('modules/datasource/github-tags/index', () => {
     const depName = 'some/dep2';
 
     it('returns tags', async () => {
-      const queryTags = jest.spyOn(githubGraphql, 'queryTags');
-      queryTags.mockResolvedValueOnce([
+      jest.spyOn(githubGraphql, 'queryTags').mockResolvedValueOnce([
         {
           version: 'v1.0.0',
           gitRef: 'v1.0.0',
