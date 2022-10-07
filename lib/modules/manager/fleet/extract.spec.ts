@@ -2,6 +2,9 @@ import { Fixtures } from '../../../../test/fixtures';
 import { extractPackageFile } from '.';
 
 const validFleetYaml = Fixtures.get('valid_fleet.yaml');
+const validFleetYamlWithCustom = Fixtures.get(
+  'valid_fleet_helm_target_customization.yaml'
+);
 const inValidFleetYaml = Fixtures.get('invalid_fleet.yaml');
 
 const validGitRepoYaml = Fixtures.get('valid_gitrepo.yaml');
@@ -56,6 +59,49 @@ kind: Fleet
             datasource: 'helm',
             depName: 'logging-operator',
             registryUrls: ['https://kubernetes-charts.banzaicloud.com'],
+            depType: 'fleet',
+          },
+        ]);
+      });
+
+      it('should parse valid configuration with target customization', () => {
+        const result = extractPackageFile(
+          validFleetYamlWithCustom,
+          'fleet.yaml'
+        );
+
+        expect(result).not.toBeNull();
+        expect(result?.deps).toMatchObject([
+          {
+            currentValue: 'v1.8.0',
+            datasource: 'helm',
+            depName: 'cert-manager',
+            packageName: 'cert-manager',
+            registryUrls: ['https://charts.jetstack.io'],
+            depType: 'fleet',
+          },
+          {
+            currentValue: 'v1.9.2',
+            datasource: 'helm',
+            depName: 'rke2',
+            packageName: 'cert-manager',
+            registryUrls: ['https://charts.jetstack.io'],
+            depType: 'fleet',
+          },
+          {
+            currentValue: 'v1.8.0',
+            datasource: 'helm',
+            depName: 'cert-manager',
+            packageName: 'cert-manager',
+            registryUrls: ['https://charts.jetstack.io'],
+            depType: 'fleet',
+          },
+          {
+            currentValue: 'v1.8.2',
+            datasource: 'helm',
+            depName: 'cluster1',
+            packageName: 'cert-manager',
+            registryUrls: ['https://charts.example.com'],
             depType: 'fleet',
           },
         ]);
