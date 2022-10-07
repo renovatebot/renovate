@@ -124,6 +124,13 @@ describe('workers/repository/stats', () => {
           },
         }
       `);
+      expect(log.debug.mock.calls[1][0]).toMatchInlineSnapshot(`
+        {
+          "requestCount": 3,
+          "responseAvgMs": 20,
+          "responseMaxMs": 30,
+        }
+      `);
       expect(log.debug.mock.calls[2][0]).toMatchInlineSnapshot(`
         {
           "hostStats": {
