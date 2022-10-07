@@ -239,7 +239,7 @@ describe('modules/manager/helmv3/artifacts', () => {
         ...config,
       },
     });
-    expect(test).toMatchSnapshot([
+    expect(test).toEqual([
       {
         file: {
           type: 'addition',
@@ -262,7 +262,14 @@ describe('modules/manager/helmv3/artifacts', () => {
       },
     ]);
     expect(execSnapshots).toBeArrayOfSize(2);
-    expect(execSnapshots).toMatchSnapshot();
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'helm repo add repo-test --registry-config /tmp/renovate/cache/__renovate-private-cache/registry.json --repository-config /tmp/renovate/cache/__renovate-private-cache/repositories.yaml --repository-cache /tmp/renovate/cache/__renovate-private-cache/repositories https://gitlab.com/api/v4/projects/xxxxxxx/packages/helm/stable',
+      },
+      {
+        cmd: "helm dependency update --registry-config /tmp/renovate/cache/__renovate-private-cache/registry.json --repository-config /tmp/renovate/cache/__renovate-private-cache/repositories.yaml --repository-cache /tmp/renovate/cache/__renovate-private-cache/repositories ''",
+      },
+    ]);
   });
 
   it('add sub chart artifacts to file list if Chart.lock is missing', async () => {
@@ -291,7 +298,7 @@ describe('modules/manager/helmv3/artifacts', () => {
           ...config,
         },
       })
-    ).toMatchSnapshot([
+    ).toEqual([
       {
         file: {
           type: 'addition',
@@ -307,7 +314,14 @@ describe('modules/manager/helmv3/artifacts', () => {
       },
     ]);
     expect(execSnapshots).toBeArrayOfSize(2);
-    expect(execSnapshots).toMatchSnapshot();
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'helm repo add repo-test --registry-config /tmp/renovate/cache/__renovate-private-cache/registry.json --repository-config /tmp/renovate/cache/__renovate-private-cache/repositories.yaml --repository-cache /tmp/renovate/cache/__renovate-private-cache/repositories https://gitlab.com/api/v4/projects/xxxxxxx/packages/helm/stable',
+      },
+      {
+        cmd: "helm dependency update --registry-config /tmp/renovate/cache/__renovate-private-cache/registry.json --repository-config /tmp/renovate/cache/__renovate-private-cache/repositories.yaml --repository-cache /tmp/renovate/cache/__renovate-private-cache/repositories ''",
+      },
+    ]);
   });
 
   it('add sub chart artifacts without old archives', async () => {
@@ -335,7 +349,7 @@ describe('modules/manager/helmv3/artifacts', () => {
           ...config,
         },
       })
-    ).toMatchSnapshot([
+    ).toEqual([
       {
         file: {
           type: 'addition',
@@ -345,7 +359,14 @@ describe('modules/manager/helmv3/artifacts', () => {
       },
     ]);
     expect(execSnapshots).toBeArrayOfSize(2);
-    expect(execSnapshots).toMatchSnapshot();
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'helm repo add repo-test --registry-config /tmp/renovate/cache/__renovate-private-cache/registry.json --repository-config /tmp/renovate/cache/__renovate-private-cache/repositories.yaml --repository-cache /tmp/renovate/cache/__renovate-private-cache/repositories https://gitlab.com/api/v4/projects/xxxxxxx/packages/helm/stable',
+      },
+      {
+        cmd: "helm dependency update --registry-config /tmp/renovate/cache/__renovate-private-cache/registry.json --repository-config /tmp/renovate/cache/__renovate-private-cache/repositories.yaml --repository-cache /tmp/renovate/cache/__renovate-private-cache/repositories ''",
+      },
+    ]);
   });
 
   it('add sub chart artifacts and ignore files outside of the chart folder', async () => {
@@ -374,7 +395,7 @@ describe('modules/manager/helmv3/artifacts', () => {
           ...config,
         },
       })
-    ).toMatchSnapshot([
+    ).toEqual([
       {
         file: {
           type: 'addition',
@@ -390,7 +411,14 @@ describe('modules/manager/helmv3/artifacts', () => {
       },
     ]);
     expect(execSnapshots).toBeArrayOfSize(2);
-    expect(execSnapshots).toMatchSnapshot();
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'helm repo add repo-test --registry-config /tmp/renovate/cache/__renovate-private-cache/registry.json --repository-config /tmp/renovate/cache/__renovate-private-cache/repositories.yaml --repository-cache /tmp/renovate/cache/__renovate-private-cache/repositories https://gitlab.com/api/v4/projects/xxxxxxx/packages/helm/stable',
+      },
+      {
+        cmd: "helm dependency update --registry-config /tmp/renovate/cache/__renovate-private-cache/registry.json --repository-config /tmp/renovate/cache/__renovate-private-cache/repositories.yaml --repository-cache /tmp/renovate/cache/__renovate-private-cache/repositories ''",
+      },
+    ]);
   });
 
   it('skip artifacts which are not lock files or in the chart folder', async () => {
@@ -420,7 +448,14 @@ describe('modules/manager/helmv3/artifacts', () => {
       })
     ).toBeNull();
     expect(execSnapshots).toBeArrayOfSize(2);
-    expect(execSnapshots).toMatchSnapshot();
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'helm repo add repo-test --registry-config /tmp/renovate/cache/__renovate-private-cache/registry.json --repository-config /tmp/renovate/cache/__renovate-private-cache/repositories.yaml --repository-cache /tmp/renovate/cache/__renovate-private-cache/repositories https://gitlab.com/api/v4/projects/xxxxxxx/packages/helm/stable',
+      },
+      {
+        cmd: "helm dependency update --registry-config /tmp/renovate/cache/__renovate-private-cache/registry.json --repository-config /tmp/renovate/cache/__renovate-private-cache/repositories.yaml --repository-cache /tmp/renovate/cache/__renovate-private-cache/repositories ''",
+      },
+    ]);
   });
 
   it('sets repositories from registryAliases', async () => {

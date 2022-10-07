@@ -72,6 +72,6 @@ Renovate now updates archives in the `/chart` folder.
 
 ```json
 {
-  postUpdateOptions: ['helmUpdateSubChartArchives'],
+  "postUpdateOptions": ["helmUpdateSubChartArchives"]
 }
 ```
