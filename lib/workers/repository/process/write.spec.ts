@@ -1,4 +1,5 @@
 import is from '@sindresorhus/is';
+import hasha from 'hasha';
 import {
   RenovateConfig,
   getConfig,
@@ -442,7 +443,7 @@ describe('workers/repository/process/write', () => {
       repoCache.getCache.mockReturnValue(repoCacheObj);
       git.getBranchCommit.mockReturnValueOnce('sha');
       git.getBranchCommit.mockReturnValueOnce('base_sha');
-      expect(syncBranchState('branch_name', 'base_branch', 'enabled')).toEqual({
+      expect(syncBranchState('branch_name', 'base_branch')).toEqual({
         branchName: 'branch_name',
         sha: 'sha',
         baseBranch: 'base_branch',

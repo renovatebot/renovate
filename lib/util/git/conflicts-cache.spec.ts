@@ -5,11 +5,8 @@ import {
   getCachedConflictResult,
   setCachedConflictResult,
 } from './conflicts-cache';
-import * as _git from '.';
 
-jest.mock('.');
 jest.mock('../cache/repository');
-const git = mocked(_git);
 const repositoryCache = mocked(_repositoryCache);
 
 describe('util/git/conflicts-cache', () => {
@@ -22,20 +19,24 @@ describe('util/git/conflicts-cache', () => {
 
   describe('getCachedConflictResult', () => {
     it('returns null if cache is not populated', () => {
-      expect(getCachedConflictResult('foo', 'bar')).toBeNull();
+      expect(
+        getCachedConflictResult('foo', 'sha', 'bar', 'base_sha')
+      ).toBeNull();
     });
 
     it('returns null if branch cache not found', () => {
       repoCache.branches = [
         partial<BranchCache>({
-          branchName: 'not_foo',
+          branchName: 'foo',
           sha: 'sha',
           baseBranch: 'bar',
           baseBranchSha: 'base_sha',
           isConflicted: true,
         }),
       ];
-      expect(getCachedConflictResult('foo', 'bar')).toBeNull();
+      expect(
+        getCachedConflictResult('not_foo', 'sha', 'bar', 'base_sha')
+      ).toBeNull();
     });
 
     it('returns null if base branch SHA has changed', () => {
@@ -48,10 +49,9 @@ describe('util/git/conflicts-cache', () => {
           isConflicted: true,
         }),
       ];
-      git.getBranchCommit
-        .mockReturnValueOnce('sha')
-        .mockReturnValueOnce('not_base_sha');
-      expect(getCachedConflictResult('foo', 'bar')).toBeNull();
+      expect(
+        getCachedConflictResult('foo', 'sha', 'bar', 'not_base_sha')
+      ).toBeNull();
     });
 
     it('returns null if branch SHA has changed', () => {
@@ -64,10 +64,9 @@ describe('util/git/conflicts-cache', () => {
           isConflicted: true,
         }),
       ];
-      git.getBranchCommit
-        .mockReturnValueOnce('not_sha')
-        .mockReturnValueOnce('base_sha');
-      expect(getCachedConflictResult('foo', 'bar')).toBeNull();
+      expect(
+        getCachedConflictResult('foo', 'not_sha', 'bar', 'base_sha')
+      ).toBeNull();
     });
 
     it('returns null if isConfliced is undefined', () => {
@@ -79,10 +78,9 @@ describe('util/git/conflicts-cache', () => {
           baseBranchSha: 'base_sha',
         }),
       ];
-      git.getBranchCommit
-        .mockReturnValueOnce('sha')
-        .mockReturnValueOnce('base_sha');
-      expect(getCachedConflictResult('foo', 'bar')).toBeNull();
+      expect(
+        getCachedConflictResult('foo', 'sha', 'bar', 'base_sha')
+      ).toBeNull();
     });
 
     it('returns true', () => {
@@ -95,10 +93,9 @@ describe('util/git/conflicts-cache', () => {
           isConflicted: true,
         }),
       ];
-      git.getBranchCommit
-        .mockReturnValueOnce('sha')
-        .mockReturnValueOnce('base_sha');
-      expect(getCachedConflictResult('foo', 'bar')).toBeTrue();
+      expect(
+        getCachedConflictResult('foo', 'sha', 'bar', 'base_sha')
+      ).toBeTrue();
     });
   });
 

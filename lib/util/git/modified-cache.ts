@@ -1,6 +1,5 @@
 import { logger } from '../../logger';
 import { getCache } from '../cache/repository';
-import { getBranchCommit } from '.';
 
 export function getCachedModifiedResult(
   branchName: string,
@@ -11,11 +10,8 @@ export function getCachedModifiedResult(
     (branch) => branch.branchName === branchName
   );
 
-  if (branch) {
-    const branchSha = getBranchCommit(branchName);
-    if (branch.sha === branchSha && branch.isModified !== undefined) {
-      return branch.isModified;
-    }
+  if (branch?.sha === branchSha && branch.isModified !== undefined) {
+    return branch.isModified;
   }
 
   return null;

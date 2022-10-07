@@ -5,11 +5,8 @@ import {
   getCachedModifiedResult,
   setCachedModifiedResult,
 } from './modified-cache';
-import * as _git from '.';
 
 jest.mock('../cache/repository');
-jest.mock('.');
-const git = mocked(_git);
 const repositoryCache = mocked(_repositoryCache);
 
 describe('util/git/modified-cache', () => {
@@ -18,7 +15,6 @@ describe('util/git/modified-cache', () => {
   beforeEach(() => {
     repoCache = {};
     repositoryCache.getCache.mockReturnValue(repoCache);
-    git.getBranchCommit.mockReturnValue('111');
   });
 
   describe('getCachedModifiedResult', () => {

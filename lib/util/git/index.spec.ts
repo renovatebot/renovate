@@ -888,7 +888,12 @@ describe('util/git/index', () => {
 
         expect(res).toBeTrue();
         expect(conflictsCache.getCachedConflictResult.mock.calls).toEqual([
-          ['renovate/conflicted_branch', defaultBranch],
+          [
+            'renovate/conflicted_branch',
+            git.getBranchCommit('renovate/conflicted_branch'),
+            defaultBranch,
+            git.getBranchCommit(defaultBranch),
+          ],
         ]);
         expect(conflictsCache.setCachedConflictResult).not.toHaveBeenCalled();
       });

@@ -1,6 +1,5 @@
 import { logger } from '../../logger';
 import { getCache } from '../cache/repository';
-import { getBranchCommit } from '.';
 
 export function getCachedBehindBaseResult(
   branchName: string,

@@ -1,10 +1,11 @@
 import { logger } from '../../logger';
 import { getCache } from '../cache/repository';
-import { getBranchCommit } from '.';
 
 export function getCachedConflictResult(
   branchName: string,
-  baseBranch: string
+  branchSha: string | null,
+  baseBranch: string,
+  baseBranchSha: string | null
 ): boolean | null {
   const cache = getCache();
   if (!cache.gitConflicts) {
@@ -12,16 +13,14 @@ export function getCachedConflictResult(
   }
 
   const branch = cache?.branches?.find((br) => br.branchName === branchName);
-  if (branch) {
-    const branchSha = getBranchCommit(branchName);
-    const baseBranchSha = getBranchCommit(baseBranch);
-    if (
-      branch.baseBranchSha === baseBranchSha &&
-      branch.sha === branchSha &&
-      branch.isConflicted
-    ) {
-      return branch.isConflicted;
-    }
+  if (
+    branch &&
+    branch.baseBranch === baseBranch &&
+    branch.baseBranchSha === baseBranchSha &&
+    branch.sha === branchSha &&
+    branch.isConflicted !== undefined
+  ) {
+    return branch.isConflicted;
   }
 
   return null;
@@ -35,7 +34,7 @@ export function setCachedConflictResult(
   const branch = cache?.branches?.find((br) => br.branchName === branchName);
 
   if (!branch) {
-    logger.debug(`Branch cache not present for ${branchName}`);
+    logger.debug(`setCachedBehindBaseResult(): Branch cache not present`);
     return;
   }
 

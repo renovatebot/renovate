@@ -1,4 +1,4 @@
-import { git, logger, mocked, partial } from '../../../test/util';
+import { logger, mocked, partial } from '../../../test/util';
 import * as _repositoryCache from '../cache/repository';
 import type { BranchCache, RepoCacheData } from '../cache/repository/types';
 import {
@@ -7,7 +7,6 @@ import {
 } from './behind-base-branch-cache';
 
 jest.mock('../cache/repository');
-jest.mock('.');
 const repositoryCache = mocked(_repositoryCache);
 
 describe('util/git/behind-base-branch-cache', () => {
