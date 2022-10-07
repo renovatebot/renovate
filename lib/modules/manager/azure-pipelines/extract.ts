@@ -1,5 +1,6 @@
 import { load } from 'js-yaml';
 import { logger } from '../../../logger';
+import { coerceArray } from '../../../util/array';
 import { regEx } from '../../../util/regex';
 import { AzurePipelinesTasksDatasource } from '../../datasource/azure-pipelines-tasks';
 import { GitTagsDatasource } from '../../datasource/git-tags';
@@ -93,23 +94,23 @@ export function extractPackageFile(
     return null;
   }
 
-  for (const repository of pkg.resources?.repositories ?? []) {
+  for (const repository of coerceArray(pkg.resources?.repositories)) {
     const dep = extractRepository(repository);
     if (dep) {
       deps.push(dep);
     }
   }
 
-  for (const container of pkg.resources?.containers ?? []) {
+  for (const container of coerceArray(pkg.resources?.containers)) {
     const dep = extractContainer(container);
     if (dep) {
       deps.push(dep);
     }
   }
 
-  for (const { jobs } of pkg.stages ?? []) {
-    for (const { steps } of jobs ?? []) {
-      for (const step of steps ?? []) {
+  for (const { jobs } of coerceArray(pkg.stages)) {
+    for (const { steps } of coerceArray(jobs)) {
+      for (const step of coerceArray(steps)) {
         const task = extractAzurePipelinesTasks(step.task);
         if (task) {
           deps.push(task);
@@ -118,8 +119,8 @@ export function extractPackageFile(
     }
   }
 
-  for (const { steps } of pkg.jobs ?? []) {
-    for (const step of steps ?? []) {
+  for (const { steps } of coerceArray(pkg.jobs)) {
+    for (const step of coerceArray(steps)) {
       const task = extractAzurePipelinesTasks(step.task);
       if (task) {
         deps.push(task);
@@ -127,7 +128,7 @@ export function extractPackageFile(
     }
   }
 
-  for (const step of pkg.steps ?? []) {
+  for (const step of coerceArray(pkg.steps)) {
     const task = extractAzurePipelinesTasks(step.task);
     if (task) {
       deps.push(task);

@@ -32,8 +32,12 @@ describe('modules/platform/azure/azure-got-wrapper', () => {
       delete res.rest.client.userAgent;
       delete res.vsoClient.restClient.client.userAgent;
 
-      // We will track if the lib azure-devops-node-api change
-      expect(res).toMatchSnapshot();
+      expect(res).toMatchObject({
+        serverUrl: 'https://dev.azure.com/renovate1',
+        authHandler: {
+          token: '123test',
+        },
+      });
     });
 
     it('should set bearer token and endpoint', () => {
@@ -49,8 +53,12 @@ describe('modules/platform/azure/azure-got-wrapper', () => {
       delete res.rest.client.userAgent;
       delete res.vsoClient.restClient.client.userAgent;
 
-      // We will track if the lib azure-devops-node-api change
-      expect(res).toMatchSnapshot();
+      expect(res).toMatchObject({
+        serverUrl: 'https://dev.azure.com/renovate2',
+        authHandler: {
+          token: 'testtoken',
+        },
+      });
     });
 
     it('should set password and endpoint', () => {
@@ -67,8 +75,13 @@ describe('modules/platform/azure/azure-got-wrapper', () => {
       delete res.rest.client.userAgent;
       delete res.vsoClient.restClient.client.userAgent;
 
-      // We will track if the lib azure-devops-node-api change
-      expect(res).toMatchSnapshot();
+      expect(res).toMatchObject({
+        serverUrl: 'https://dev.azure.com/renovate3',
+        authHandler: {
+          username: 'user',
+          password: 'pass',
+        },
+      });
     });
   });
 });
