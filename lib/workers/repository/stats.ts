@@ -20,6 +20,7 @@ export function printRequestStats(): void {
     packageCacheStats.cacheMaximumMs =
       packageCacheRequests[packageCacheRequests.length - 1];
   }
+  logger.debug(packageCacheStats, 'Package cache statistics');
   const httpRequests = memCache.get<RequestStats[]>('http-requests');
   // istanbul ignore next
   if (!httpRequests) {
@@ -86,8 +87,5 @@ export function printRequestStats(): void {
     const queueAvgMs = Math.round(queueSum / requestCount);
     hostStats[hostname] = { requestCount, requestAvgMs, queueAvgMs };
   }
-  logger.debug(
-    { urls, packageCacheStats, hostStats, totalRequests },
-    'http statistics'
-  );
+  logger.debug({ urls, hostStats, totalRequests }, 'http statistics');
 }
