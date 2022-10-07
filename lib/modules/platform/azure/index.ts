@@ -779,7 +779,7 @@ async function getUserIds(users: string[]): Promise<User[]> {
   const azureApiCore = await azureApi.coreApi();
   const repos = await azureApiGit.getRepositories();
   const repo = repos.filter((c) => c.id === config.repoId)[0];
-  const reqReviewerIndicator = 'required:';
+  const requiredReviewerPrefix = 'required:';
 
   // TODO #7154
   const teams = await azureApiCore.getTeams(repo.project!.id!);
@@ -800,8 +800,8 @@ async function getUserIds(users: string[]): Promise<User[]> {
       users.forEach((r) => {
         let reviewer = r;
         let isRequired = false;
-        if (reviewer.startsWith(reqReviewerIndicator)) {
-          reviewer = reviewer.replace(reqReviewerIndicator, '');
+        if (reviewer.startsWith(requiredReviewerPrefix)) {
+          reviewer = reviewer.replace(requiredReviewerPrefix, '');
           isRequired = true;
         }
         if (
@@ -825,8 +825,8 @@ async function getUserIds(users: string[]): Promise<User[]> {
     users.forEach((r) => {
       let reviewer = r;
       let isRequired = false;
-      if (reviewer.startsWith(reqReviewerIndicator)) {
-        reviewer = reviewer.replace(reqReviewerIndicator, '');
+      if (reviewer.startsWith(requiredReviewerPrefix)) {
+        reviewer = reviewer.replace(requiredReviewerPrefix, '');
         isRequired = true;
       }
       if (reviewer.toLowerCase() === t.name?.toLowerCase()) {
