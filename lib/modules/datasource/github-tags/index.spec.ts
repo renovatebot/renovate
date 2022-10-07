@@ -1,14 +1,8 @@
 import { getPkgReleases } from '..';
 import * as httpMock from '../../../../test/http-mock';
-import * as _githubGraphql from '../../../util/github/graphql';
-import * as _hostRules from '../../../util/host-rules';
+import * as githubGraphql from '../../../util/github/graphql';
+import * as hostRules from '../../../util/host-rules';
 import { GithubTagsDatasource } from '.';
-
-jest.mock('../../../util/host-rules');
-const hostRules: any = _hostRules;
-
-jest.mock('../../../util/github/graphql');
-const githubGraphql: any = _githubGraphql;
 
 const githubApiHost = 'https://api.github.com';
 const githubEnterpriseApiHost = 'https://git.enterprise.com';
@@ -18,8 +12,8 @@ describe('modules/datasource/github-tags/index', () => {
 
   beforeEach(() => {
     jest.resetAllMocks();
-    hostRules.hosts = jest.fn(() => []);
-    hostRules.find.mockReturnValue({
+    jest.spyOn(hostRules, 'hosts').mockReturnValue([]);
+    jest.spyOn(hostRules, 'find').mockReturnValue({
       token: 'some-token',
     });
   });
@@ -111,14 +105,6 @@ describe('modules/datasource/github-tags/index', () => {
   });
 
   describe('getReleases', () => {
-    beforeEach(() => {
-      jest.resetAllMocks();
-      hostRules.hosts = jest.fn(() => []);
-      hostRules.find.mockReturnValue({
-        token: 'some-token',
-      });
-    });
-
     const depName = 'some/dep2';
 
     it('returns tags', async () => {
