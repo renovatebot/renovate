@@ -241,6 +241,25 @@ export async function writeExistingFiles(
     if (packageFile.pnpmShrinkwrap && config.reuseLockFiles === false) {
       await deleteLocalFile(packageFile.pnpmShrinkwrap);
     }
+
+    const yarnrcFilename = upath.join(basedir, '.yarnrc');
+    let yarnrcContent: string | null = null;
+    try {
+      yarnrcContent = await getFile(yarnrcFilename);
+    } catch (err) /* istanbul ignore next */ {
+      // .yarnrc doesn't exist
+    }
+    if (yarnrcContent) {
+      logger.debug(`Writing .yarnrc to ${basedir}`);
+      try {
+        const yarnrcContentNew = yarnrcContent
+          .replace('--install.pure-lockfile true', '')
+          .replace('--install.frozen-lockfile true', '');
+        await writeLocalFile(yarnrcFilename, yarnrcContentNew);
+      } catch (err) /* istanbul ignore next */ {
+        logger.warn({ yarnrcFilename, err }, 'Error writing .yarnrc');
+      }
+    }
   }
 }
 

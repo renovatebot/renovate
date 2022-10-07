@@ -199,7 +199,9 @@ describe('modules/manager/npm/post-update/index', () => {
 
       expect(fs.writeLocalFile).toHaveBeenCalledTimes(2);
       expect(fs.deleteLocalFile).not.toHaveBeenCalled();
-      expect(git.getFile).toHaveBeenCalledOnce();
+      const expectedNumberOfGetFileCalls =
+        (additionalFiles.npm?.length ?? 0) + 1;
+      expect(git.getFile).toHaveBeenCalledTimes(expectedNumberOfGetFileCalls);
     });
 
     it('works no reuse lockfiles', async () => {
@@ -229,11 +231,29 @@ describe('modules/manager/npm/post-update/index', () => {
 
       expect(fs.writeLocalFile).toHaveBeenCalledTimes(2);
       expect(fs.deleteLocalFile).not.toHaveBeenCalled();
-      expect(git.getFile).toHaveBeenCalledOnce();
+      const expectedNumberOfGetFileCalls =
+        (additionalFiles.npm?.length ?? 0) + 1;
+      expect(git.getFile).toHaveBeenCalledTimes(expectedNumberOfGetFileCalls);
     });
 
     it('has no npm files', async () => {
       await expect(writeExistingFiles(baseConfig, {})).toResolve();
+    });
+
+    it('massages .yarnrc files', async () => {
+      git.getFile.mockResolvedValueOnce(
+        Fixtures.get('yarnrc-massage-1/.yarnrc')
+      );
+      await expect(
+        writeExistingFiles(updateConfig, additionalFiles)
+      ).resolves.toBeUndefined();
+
+      const expectOnlyWhitespace = expect.stringMatching(/^\s*$/g);
+      expect(fs.writeLocalFile).toHaveBeenNthCalledWith(
+        1,
+        '.yarnrc',
+        expectOnlyWhitespace
+      );
     });
   });
 
