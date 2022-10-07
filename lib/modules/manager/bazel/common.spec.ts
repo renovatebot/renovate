@@ -1,4 +1,3 @@
-import { logger } from '../../../../test/util';
 import {
   dockerDependency,
   extractDepFromTarget,
@@ -16,6 +15,7 @@ describe('modules/manager/bazel/common', () => {
     expect(parseArchiveUrl('https://example.com/')).toBeNull();
     expect(parseArchiveUrl('https://github.com/foo/bar')).toBeNull();
 
+    // Archive of a commit.
     expect(
       parseArchiveUrl(
         'https://github.com/foo/bar/archive/abcdef0123abcdef0123abcdef0123abcdef0123.tar.gz'
@@ -26,6 +26,7 @@ describe('modules/manager/bazel/common', () => {
       currentValue: 'abcdef0123abcdef0123abcdef0123abcdef0123',
     });
 
+    // Archive of a release
     expect(
       parseArchiveUrl(
         'https://github.com/foo/bar/releases/download/1.2.3/foobar-1.2.3.tar.gz'
@@ -34,6 +35,17 @@ describe('modules/manager/bazel/common', () => {
       datasource: 'github-releases',
       repo: 'foo/bar',
       currentValue: '1.2.3',
+    });
+
+    // Archive of a tag.
+    expect(
+      parseArchiveUrl(
+        'https://github.com/aspect-build/rules_js/archive/refs/tags/v1.1.2.tar.gz'
+      )
+    ).toEqual({
+      datasource: 'github-tags',
+      repo: 'aspect-build/rules_js',
+      currentValue: 'v1.1.2',
     });
   });
 
@@ -235,6 +247,24 @@ describe('modules/manager/bazel/common', () => {
       depType: 'http_archive',
       packageName: 'foo/bar',
     });
+
+    expect(
+      httpDependency({
+        rule: 'http_archive',
+        name: 'aspect_rules_js',
+        sha256:
+          'db9f446752fe4100320cf8487e8fd476b9af0adf6b99b601bcfd70b289bb0598',
+        urls: [
+          'https://github.com/aspect-build/rules_js/archive/refs/tags/v1.1.2.tar.gz',
+        ],
+      })
+    ).toEqual({
+      currentValue: 'v1.1.2',
+      datasource: 'github-tags',
+      depName: 'aspect_rules_js',
+      depType: 'http_archive',
+      packageName: 'aspect-build/rules_js',
+    });
   });
 
   test('dockerDependency', () => {
@@ -261,26 +291,46 @@ describe('modules/manager/bazel/common', () => {
     });
   });
 
-  test('extractDepFromTarget', () => {
-    expect(extractDepFromTarget({ rule: 'foo', name: 'bar' })).toBeNull();
-
-    expect(
-      extractDepFromTarget({
-        rule: 'git_repository',
-        name: 'foo_bar',
-        tag: '1.2.3',
-        remote: 'https://github.com/foo/bar',
-      })
-    ).toEqual({
-      datasource: 'github-releases',
-      depType: 'git_repository',
-      depName: 'foo_bar',
-      packageName: 'foo/bar',
-      currentValue: '1.2.3',
+  describe('extractDepFromTarget', () => {
+    it('returns null for unknown rule type', () => {
+      expect(extractDepFromTarget({ rule: 'foo', name: 'bar' })).toBeNull();
     });
 
-    expect(logger.logger.warn).toHaveBeenCalledWith(
-      'Bazel dependency extractor function not found for foo'
-    );
+    it('extracts from git_repository', () => {
+      expect(
+        extractDepFromTarget({
+          rule: 'git_repository',
+          name: 'foo_bar',
+          tag: '1.2.3',
+          remote: 'https://github.com/foo/bar',
+        })
+      ).toEqual({
+        datasource: 'github-releases',
+        depType: 'git_repository',
+        depName: 'foo_bar',
+        packageName: 'foo/bar',
+        currentValue: '1.2.3',
+      });
+    });
+
+    it('extracts from http_archive', () => {
+      expect(
+        extractDepFromTarget({
+          rule: 'http_archive',
+          name: 'rules_nodejs',
+          sha256:
+            '5aef09ed3279aa01d5c928e3beb248f9ad32dde6aafe6373a8c994c3ce643064',
+          urls: [
+            'https://github.com/bazelbuild/rules_nodejs/releases/download/5.5.3/rules_nodejs-core-5.5.3.tar.gz',
+          ],
+        })
+      ).toEqual({
+        datasource: 'github-releases',
+        depType: 'http_archive',
+        depName: 'rules_nodejs',
+        packageName: 'bazelbuild/rules_nodejs',
+        currentValue: '5.5.3',
+      });
+    });
   });
 });

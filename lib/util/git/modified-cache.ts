@@ -2,7 +2,10 @@ import { logger } from '../../logger';
 import { getCache } from '../cache/repository';
 import { getBranchCommit } from '.';
 
-export function getCachedModifiedResult(branchName: string): boolean | null {
+export function getCachedModifiedResult(
+  branchName: string,
+  branchSha: string | null
+): boolean | null {
   const cache = getCache();
   const branch = cache.branches?.find(
     (branch) => branch.branchName === branchName
@@ -28,7 +31,7 @@ export function setCachedModifiedResult(
   );
 
   if (!branch) {
-    logger.debug(`Branch cache not present for ${branchName}`);
+    logger.debug(`setCachedModifiedResult(): Branch cache not present`);
     return;
   }
 

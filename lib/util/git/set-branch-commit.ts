@@ -1,19 +1,27 @@
+import { logger } from '../../logger';
 import { getCache } from '../cache/repository';
 import type { BranchCache } from '../cache/repository/types';
 import { getBranchCommit } from '.';
 
-export function setBranchCommit(
+/**
+ * Called when a new commit is added to branch
+ *
+ * ie. when branch is created/updated
+ */
+export function setBranchNewCommit(
   branchName: string,
   baseBranch: string,
   commitSha: string
-): BranchCache {
+): void {
+  logger.debug('setBranchCommit()');
   const cache = getCache();
   cache.branches ??= [];
   let branch = cache.branches.find((br) => br.branchName === branchName);
   if (!branch) {
+    logger.debug(`setBranchCommit(): Branch cache not present`); // should never be called
     branch = {
-      branchName: branchName,
-      baseBranch: baseBranch,
+      branchName,
+      baseBranch,
     } as BranchCache;
     cache.branches.push(branch);
   }
@@ -26,6 +34,4 @@ export function setBranchCommit(
   branch.isModified = false;
   branch.parentSha = baseBranchSha;
   branch.sha = commitSha;
-
-  return branch;
 }

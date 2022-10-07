@@ -51,48 +51,36 @@ async function generateBranchCache(
 ): Promise<BranchCache | null> {
   const { baseBranch, branchName } = branch;
   try {
-    const sha = getBranchCommit(branchName);
+    const sha = getBranchCommit(branchName) ?? null;
+    // TODO: fix types (#7154)
     const baseBranchSha = getBranchCommit(baseBranch!)!;
     let prNo = null;
     let parentSha = null;
-
-    const automerge = !!branch.automerge;
     let isModified = false;
     let isBehindBase = false;
-    let isConflicted = false;
+     let isConflicted = false;
     if (sha) {
       parentSha = await getBranchParentSha(branchName);
       const branchPr = await platform.getBranchPr(branchName);
       if (branchPr) {
         prNo = branchPr.number;
       }
-      try {
-        isModified = await isBranchModified(branchName);
-      } catch (err) /* istanbul ignore next */ {
-        // Do nothing
-      }
-      try {
-        // TODO: fix types (#7154)
-        isBehindBase = await isBranchBehindBase(branchName, baseBranch!);
-      } catch (err) /* istanbul ignore next */ {
-        // Do nothing
-      }
-
-      try {
-        // TODO: fix types (#7154)
+      isModified = await isBranchModified(branchName);
+      // TODO: fix types (#7154)
+      isBehindBase = await isBranchBehindBase(branchName, baseBranch!);
+      // TODO: fix types (#7154)
         isConflicted = await isBranchConflicted(baseBranch!, branchName);
-      } catch (err) /* istanbul ignore next */ {
-        // Do nothing
-      }
     }
+    const automerge = !!branch.automerge;
     const upgrades: BranchUpgradeCache[] = branch.upgrades
       ? branch.upgrades.map(generateBranchUpgradeCache)
       : [];
     const branchFingerprint = branch.branchFingerprint;
     return {
       automerge,
-      baseBranch: baseBranch!,
       baseBranchSha,
+      // TODO: fix types (#7154)
+      baseBranch: baseBranch!,
       branchFingerprint,
       branchName,
       isBehindBase,
