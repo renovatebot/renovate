@@ -627,7 +627,6 @@ export async function isBranchModified(branchName: string): Promise<boolean> {
   }
   // First check local config
   if (config.branchIsModified[branchName] !== undefined) {
-    logger.debug('Using local config for isBranchModified');
     return config.branchIsModified[branchName];
   }
   // Second check repository cache
