@@ -32,6 +32,14 @@ export interface BranchCache {
    */
   automerge: boolean;
   /**
+   * Name of base branch
+   */
+  baseBranch: string;
+  /**
+   * The base branch's most recent commit SHA
+   */
+  baseBranchSha: string | null;
+  /**
    * Hash of the manager fingerprints and the update branch config
    */
   branchFingerprint?: string;
@@ -40,9 +48,13 @@ export interface BranchCache {
    */
   branchName: string;
   /**
+   * Whether the update branch is behind base branh
+   */
+  isBehindBase?: boolean;
+  /**
    * Whether a person not listed in gitIgnoredAuthors updated the branch.
    */
-  isModified: boolean;
+  isModified?: boolean;
   /**
    * Parent commit of branch sha
    */
