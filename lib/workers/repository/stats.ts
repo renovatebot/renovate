@@ -7,6 +7,7 @@ import type { RequestStats } from '../../util/http/types';
 interface CacheStats {
   count: number;
   avgMs?: number;
+  medianMs?: number;
   maxMs?: number;
 }
 
@@ -29,13 +30,23 @@ export function printRequestStats(): void {
     packageCacheStats.get.avgMs = Math.round(
       packageCacheGets.reduce((a, b) => a + b, 0) / packageCacheGets.length
     );
-    packageCacheStats.get.maxMs = packageCacheGets[packageCacheGets.length - 1];
+    if (packageCacheGets.length > 1) {
+      packageCacheStats.get.medianMs =
+        packageCacheGets[Math.round(packageCacheGets.length / 2) - 1];
+      packageCacheStats.get.maxMs =
+        packageCacheGets[packageCacheGets.length - 1];
+    }
   }
   if (packageCacheSets.length) {
     packageCacheStats.set.avgMs = Math.round(
       packageCacheSets.reduce((a, b) => a + b, 0) / packageCacheSets.length
     );
-    packageCacheStats.set.maxMs = packageCacheSets[packageCacheSets.length - 1];
+    if (packageCacheSets.length > 1) {
+      packageCacheStats.set.medianMs =
+        packageCacheSets[Math.round(packageCacheSets.length / 2) - 1];
+      packageCacheStats.set.maxMs =
+        packageCacheSets[packageCacheSets.length - 1];
+    }
   }
   logger.debug(packageCacheStats, 'Package cache statistics');
   const httpRequests = memCache.get<RequestStats[]>('http-requests');
