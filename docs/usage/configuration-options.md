@@ -1690,7 +1690,7 @@ Use this field to restrict rules to a particular package manager. e.g.
 }
 ```
 
-See https://docs.renovatebot.com/modules/manager for a full list of supported managers.
+For the full list of available managers, see the [Supported Managers](https://docs.renovatebot.com/modules/manager/#supported-managers) documentation.
 
 ### matchDatasources
 
