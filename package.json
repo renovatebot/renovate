@@ -230,7 +230,7 @@
     "@jest/reporters": "29.0.3",
     "@jest/test-result": "29.0.3",
     "@ls-lint/ls-lint": "1.11.2",
-    "@openpgp/web-stream-tools": "0.0.11",
+    "@openpgp/web-stream-tools": "0.0.12",
     "@renovate/eslint-plugin": "https://github.com/renovatebot/eslint-plugin#v0.0.4",
     "@semantic-release/exec": "6.0.3",
     "@types/auth-header": "1.0.2",
