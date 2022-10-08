@@ -3,7 +3,7 @@ import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import { extractPackageFile } from '.';
 
-const plugin1 = `
+const configNormal = `
 plugin "foo" {
   enabled = true
   version = "0.1.0"
@@ -15,6 +15,10 @@ plugin "bar" {
   version = "1.42.0"
   source  = "github.com/org2/tflint-ruleset-bar"
 }
+`;
+
+const configNoVersion = `
+plugin "bundled" {}
 `;
 
 const configFull = `
@@ -86,8 +90,14 @@ describe('modules/manager/tflint-plugin/extract', () => {
       ).toBeNull();
     });
 
+    it('returns null when there are no version', () => {
+      expect(
+        extractPackageFile(configNoVersion, 'doesnt-exist.hcl', {})
+      ).toBeNull();
+    });
+
     it('extracts plugins', () => {
-      const res = extractPackageFile(plugin1, 'tflint-1.hcl', {});
+      const res = extractPackageFile(configNormal, 'tflint-1.hcl', {});
       expect(res).toEqual({
         deps: [
           {

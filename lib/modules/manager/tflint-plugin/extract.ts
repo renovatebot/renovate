@@ -50,5 +50,5 @@ export function extractPackageFile(
     logger.warn({ err }, 'Error extracting TFLint plugins');
   }
 
-  return { deps };
+  return deps.length ? { deps } : null;
 }
