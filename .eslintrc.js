@@ -97,7 +97,7 @@ module.exports = {
       {
         vars: 'all',
         args: 'none',
-        ignoreRestSiblings: false,
+        ignoreRestSiblings: true,
       },
     ],
     '@typescript-eslint/prefer-optional-chain': 2,
