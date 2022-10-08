@@ -240,10 +240,11 @@ describe('modules/manager/npm/post-update/index', () => {
       await expect(writeExistingFiles(baseConfig, {})).toResolve();
     });
 
-    it('massages .yarnrc files', async () => {
-      git.getFile.mockResolvedValueOnce(
-        Fixtures.get('yarnrc-massage-1/.yarnrc')
-      );
+    it('massages .yarnrc files if needed', async () => {
+      git.getFile.mockResolvedValueOnce(`
+        --install.pure-lockfile true
+        --install.frozen-lockfile true
+      `);
       await expect(
         writeExistingFiles(updateConfig, additionalFiles)
       ).resolves.toBeUndefined();
@@ -253,6 +254,19 @@ describe('modules/manager/npm/post-update/index', () => {
         1,
         '.yarnrc',
         expectOnlyWhitespace
+      );
+    });
+
+    it("doesn't massage .yarnrc file if not needed", async () => {
+      git.getFile.mockResolvedValueOnce('some-other-yarnrc-content');
+      await expect(
+        writeExistingFiles(updateConfig, additionalFiles)
+      ).resolves.toBeUndefined();
+
+      expect(fs.writeLocalFile).toHaveBeenNthCalledWith(
+        1,
+        'packages/core/.npmrc',
+        expect.anything()
       );
     });
   });

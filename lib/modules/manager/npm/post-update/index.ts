@@ -250,14 +250,16 @@ export async function writeExistingFiles(
       // .yarnrc doesn't exist
     }
     if (yarnrcContent) {
-      logger.debug(`Writing .yarnrc to ${basedir}`);
-      try {
-        const yarnrcContentNew = yarnrcContent
-          .replace('--install.pure-lockfile true', '')
-          .replace('--install.frozen-lockfile true', '');
-        await writeLocalFile(yarnrcFilename, yarnrcContentNew);
-      } catch (err) /* istanbul ignore next */ {
-        logger.warn({ yarnrcFilename, err }, 'Error writing .yarnrc');
+      const yarnrcContentNew = yarnrcContent
+        .replace('--install.pure-lockfile true', '')
+        .replace('--install.frozen-lockfile true', '');
+      if (yarnrcContent !== yarnrcContentNew) {
+        try {
+          logger.debug(`Writing .yarnrc to ${basedir}`);
+          await writeLocalFile(yarnrcFilename, yarnrcContentNew);
+        } catch (err) /* istanbul ignore next */ {
+          logger.warn({ yarnrcFilename, err }, 'Error writing .yarnrc');
+        }
       }
     }
   }
