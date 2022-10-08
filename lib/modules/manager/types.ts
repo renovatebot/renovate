@@ -198,9 +198,9 @@ export interface UpdateArtifactsResult {
   file?: FileChange;
 }
 
-export interface UpdateArtifact {
+export interface UpdateArtifact<T = Record<string, any>> {
   packageFileName: string;
-  updatedDeps: PackageDependency[];
+  updatedDeps: PackageDependency<T>[];
   newPackageFileContent: string;
   config: UpdateArtifactsConfig;
 }
