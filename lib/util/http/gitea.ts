@@ -30,7 +30,7 @@ function resolveUrl(path: string, base: string): URL {
   return new URL(resolvedUrlString);
 }
 
-export class GiteaHttp extends Http<GiteaHttpOptions, GiteaHttpOptions> {
+export class GiteaHttp extends Http<GiteaHttpOptions> {
   constructor(options?: HttpOptions) {
     super(PlatformId.Gitea, options);
   }

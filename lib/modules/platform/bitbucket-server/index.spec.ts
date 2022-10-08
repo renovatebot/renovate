@@ -2114,7 +2114,7 @@ Followed by some information.
             )
             .reply(200, {
               isLastPage: true,
-              lines: lines,
+              lines,
             });
           const res = await bitbucket.getJsonFile('file.json5');
           expect(res).toEqual({ foo: 'bar' });
