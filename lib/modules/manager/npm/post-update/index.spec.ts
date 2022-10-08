@@ -190,9 +190,15 @@ describe('modules/manager/npm/post-update/index', () => {
 
   describe('writeExistingFiles()', () => {
     it('works', async () => {
-      git.getFile.mockResolvedValueOnce(
-        Fixtures.get('update-lockfile-massage-1/package-lock.json')
-      );
+      git.getFile.mockImplementation((path) => {
+        if (path === 'package-lock.json') {
+          return Promise.resolve(
+            Fixtures.get('update-lockfile-massage-1/package-lock.json')
+          );
+        }
+        return Promise.resolve(null);
+      });
+
       await expect(
         writeExistingFiles(updateConfig, additionalFiles)
       ).resolves.toBeUndefined();
@@ -222,9 +228,14 @@ describe('modules/manager/npm/post-update/index', () => {
     });
 
     it('works only on relevant folders', async () => {
-      git.getFile.mockResolvedValueOnce(
-        Fixtures.get('update-lockfile-massage-1/package-lock.json')
-      );
+      git.getFile.mockImplementation((path) => {
+        if (path === 'package-lock.json') {
+          return Promise.resolve(
+            Fixtures.get('update-lockfile-massage-1/package-lock.json')
+          );
+        }
+        return Promise.resolve(null);
+      });
       await expect(
         writeExistingFiles(updateConfig, additionalFiles)
       ).resolves.toBeUndefined();
