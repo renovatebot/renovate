@@ -71,7 +71,6 @@ export async function extract(
   const cache = getCache();
   cache.scan ||= {};
   const cachedExtract = cache.scan[baseBranch!];
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { packageRules, ...remainingConfig } = config;
   // Calculate hash excluding packageRules, because they're not applied during extract
   const configHash = fingerprint(remainingConfig);
