@@ -1,3 +1,7 @@
+export type FluxManagerData = {
+  components: string;
+};
+
 export interface KubernetesResource {
   apiVersion: string;
   metadata: {
