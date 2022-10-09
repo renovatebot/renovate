@@ -1432,6 +1432,20 @@ A use case for the latter is if you are a Renovate bot admin and wish to provide
 If `false` (default), it means that defining `config.npmrc` will result in any `.npmrc` file in the repo being overridden and its values ignored.
 If configured to `true`, it means that any `.npmrc` file in the repo will have `config.npmrc` prepended to it before running `npm`.
 
+## osvVulnerabilityAlerts
+
+Set this to `true` to enable [OSV](https://osv.dev/) vulnerability alerts.
+OSV vulnerabilities are only supported for top-level dependencies.
+OSV vulnerabilities are supported for the following datasources:
+
+- [`crate`](https://docs.renovatebot.com/modules/datasource/#crate-datasource)
+- [`go`](https://docs.renovatebot.com/modules/datasource/#go-datasource)
+- [`maven`](https://docs.renovatebot.com/modules/datasource/#maven-datasource)
+- [`npm`](https://docs.renovatebot.com/modules/datasource/#npm-datasource)
+- [`nuget`](https://docs.renovatebot.com/modules/datasource/#nuget-datasource)
+- [`pypi`](https://docs.renovatebot.com/modules/datasource/#pypi-datasource)
+- [`rubygems`](https://docs.renovatebot.com/modules/datasource/#rubygems-datasource)
+
 ## packageRules
 
 `packageRules` is a powerful feature that lets you apply rules to individual packages or to groups of packages using regex pattern matching.

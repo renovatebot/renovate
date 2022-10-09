@@ -5,9 +5,21 @@ import { fingerprint } from '../../../util/fingerprint';
 import * as _branchify from '../updates/branchify';
 import { extract, lookup, update } from './extract-update';
 
+const createVulnerabilitiesMock = jest.fn();
+
 jest.mock('./write');
 jest.mock('./sort');
 jest.mock('./fetch');
+jest.mock('./vulnerabilities', () => {
+  return {
+    __esModule: true,
+    Vulnerabilities: class {
+      static create() {
+        return createVulnerabilitiesMock();
+      }
+    },
+  };
+});
 jest.mock('../updates/branchify');
 jest.mock('../extract');
 jest.mock('../../../util/cache/repository');
@@ -16,7 +28,7 @@ jest.mock('../../../util/git');
 const branchify = mocked(_branchify);
 const repositoryCache = mocked(_repositoryCache);
 
-branchify.branchifyUpgrades.mockResolvedValueOnce({
+branchify.branchifyUpgrades.mockResolvedValue({
   branches: [
     { manager: 'some-manager', branchName: 'some-branch', upgrades: [] },
   ],
@@ -25,6 +37,10 @@ branchify.branchifyUpgrades.mockResolvedValueOnce({
 
 describe('workers/repository/process/extract-update', () => {
   describe('extract()', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
     it('runs with no baseBranches', async () => {
       const config = {
         repoIsOnboarded: true,
@@ -80,6 +96,42 @@ describe('workers/repository/process/extract-update', () => {
       git.checkoutBranch.mockResolvedValueOnce('123test');
       const res = await extract(config);
       expect(res).toEqual(packageFiles);
+    });
+
+    it('fetches vulnerabilities', async () => {
+      const config = {
+        repoIsOnboarded: true,
+        suppressNotifications: ['deprecationWarningIssues'],
+        osvVulnerabilityAlerts: true,
+      };
+      const fetchVulnerabilitiesMock = jest.fn();
+      createVulnerabilitiesMock.mockResolvedValueOnce({
+        fetchVulnerabilities: fetchVulnerabilitiesMock,
+      });
+      repositoryCache.getCache.mockReturnValueOnce({ scan: {} });
+      git.checkoutBranch.mockResolvedValueOnce('123test');
+
+      const packageFiles = await extract(config);
+      await lookup(config, packageFiles);
+
+      expect(createVulnerabilitiesMock).toHaveBeenCalledOnce();
+      expect(fetchVulnerabilitiesMock).toHaveBeenCalledOnce();
+    });
+
+    it('handles exception when fetching vulnerabilities', async () => {
+      const config = {
+        repoIsOnboarded: true,
+        suppressNotifications: ['deprecationWarningIssues'],
+        osvVulnerabilityAlerts: true,
+      };
+      createVulnerabilitiesMock.mockRejectedValueOnce(new Error());
+      repositoryCache.getCache.mockReturnValueOnce({ scan: {} });
+      git.checkoutBranch.mockResolvedValueOnce('123test');
+
+      const packageFiles = await extract(config);
+      await expect(lookup(config, packageFiles)).resolves.not.toThrow();
+
+      expect(createVulnerabilitiesMock).toHaveBeenCalledOnce();
     });
   });
 });
