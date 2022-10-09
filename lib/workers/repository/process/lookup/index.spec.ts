@@ -1720,5 +1720,48 @@ describe('workers/repository/process/lookup/index', () => {
         },
       ]);
     });
+
+    it.each([
+      [0, 0, ['8.2.2', '9.1.0']],
+      [1, 0, ['8.2.2']],
+      [2, 0, []],
+      [0, 1, ['8.2.2', '9.0.1']],
+      [0, 2, ['8.2.2']],
+      [0, 100, ['8.2.2']],
+      [1, 1, ['8.1.1']],
+    ])(
+      'ignores the last %i major and last %i minor versions',
+      async (ignoreLastXMajor, ignoreLastXMinor, expectedVersions) => {
+        config.currentValue = '8.0.0';
+        config.depName = 'node';
+        config.versioning = dockerVersioningId;
+        config.datasource = DockerDatasource.id;
+        config.ignoreLastXMajor = ignoreLastXMajor;
+        config.ignoreLastXMinor = ignoreLastXMinor;
+        docker.getReleases.mockResolvedValueOnce({
+          releases: [
+            { version: '8.0.0' },
+            { version: '8.0.1' },
+            { version: '8.0.2' },
+            { version: '8.1.0' },
+            { version: '8.1.1' },
+            { version: '8.2.0' },
+            { version: '8.2.1' },
+            { version: '8.2.2' },
+            { version: '9.0.0' },
+            { version: '9.0.1' },
+            { version: '9.1.0' },
+          ],
+        });
+        const res = (await lookup.lookupUpdates(config)).updates;
+
+        expect(res).toHaveLength(expectedVersions.length);
+
+        for (const [index, expectedVersion] of expectedVersions.entries()) {
+          expect(res[index].newValue).toEqual(expectedVersion);
+          expect(res[index].newVersion).toEqual(expectedVersion);
+        }
+      }
+    );
   });
 });

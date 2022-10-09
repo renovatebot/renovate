@@ -18,6 +18,8 @@ export interface FilterConfig {
   respectLatest?: boolean;
   updatePinnedDependencies?: boolean;
   versioning: string;
+  ignoreLastXMinor?: number;
+  ignoreLastXMajor?: number;
 }
 
 export interface RollbackConfig {

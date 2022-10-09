@@ -41,6 +41,42 @@ export function filterVersions(
       versioning.isGreaterThan(v.version, currentVersion)
   );
 
+  // If configuration uses ignoreLastX..., exclude versions that are too recent
+  const { ignoreLastXMajor, ignoreLastXMinor } = config;
+
+  if (ignoreLastXMajor) {
+    const lastMajor = Math.max(
+      ...filteredVersions.map(
+        (release) => versioning.getMajor(release.version)!
+      )
+    );
+    if (lastMajor !== null) {
+      filteredVersions = filteredVersions.filter(
+        (release) =>
+          versioning.getMajor(release.version)! <= lastMajor - ignoreLastXMajor
+      );
+    }
+  }
+  if (ignoreLastXMinor) {
+    const lastMajor = Math.max(
+      ...filteredVersions.map(
+        (release) => versioning.getMajor(release.version)!
+      )
+    );
+    const lastMinor = Math.max(
+      ...filteredVersions
+        .filter((release) => versioning.getMajor(release.version) === lastMajor)
+        .map((release) => versioning.getMinor(release.version)!)
+    );
+    if (lastMinor !== null) {
+      filteredVersions = filteredVersions.filter(
+        (release) =>
+          versioning.getMajor(release.version) !== lastMajor ||
+          versioning.getMinor(release.version)! <= lastMinor - ignoreLastXMinor
+      );
+    }
+  }
+
   // Don't upgrade from non-deprecated to deprecated
   const fromRelease = releases.find(
     (release) => release.version === currentVersion
