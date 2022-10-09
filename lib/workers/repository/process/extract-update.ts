@@ -9,6 +9,7 @@ import { fingerprint } from '../../../util/fingerprint';
 import { checkoutBranch, getBranchCommit } from '../../../util/git';
 import type { BranchConfig } from '../../types';
 import { extractAllDependencies } from '../extract';
+import { extractFingerprintConfig } from '../extract/extract-fingerprint-config';
 import { branchifyUpgrades } from '../updates/branchify';
 import { raiseDeprecationWarnings } from './deprecated';
 import { fetchUpdates } from './fetch';
@@ -71,10 +72,7 @@ export async function extract(
   const cache = getCache();
   cache.scan ||= {};
   const cachedExtract = cache.scan[baseBranch!];
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { packageRules, ...remainingConfig } = config;
-  // Calculate hash excluding packageRules, because they're not applied during extract
-  const configHash = fingerprint(remainingConfig);
+  const configHash = fingerprint(extractFingerprintConfig(config));
   // istanbul ignore if
   if (
     cachedExtract?.sha === baseBranchSha &&
@@ -97,6 +95,7 @@ export async function extract(
   } else {
     await checkoutBranch(baseBranch!);
     packageFiles = await extractAllDependencies(config);
+    // TODO: fix types (#7154)
     cache.scan[baseBranch!] = {
       sha: baseBranchSha!,
       configHash,
