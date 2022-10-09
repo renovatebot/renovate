@@ -234,7 +234,7 @@ describe('workers/repository/update/pr/body/index', () => {
           manager: 'some-manager',
           branchName: 'some-branch',
           upgrades: [],
-          packageFiles: packageFiles,
+          packageFiles,
           prBodyTemplate: '{{{warnings}}}',
         }),
         {

@@ -9,6 +9,7 @@ export interface GetDigestInputConfig {
   additionalRegistryUrls?: string[];
   currentValue?: string;
   currentDigest?: string;
+  replacementName?: string;
 }
 
 export interface DigestConfig {

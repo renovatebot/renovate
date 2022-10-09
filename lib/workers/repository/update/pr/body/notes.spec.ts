@@ -33,20 +33,18 @@ describe('workers/repository/update/pr/body/notes', () => {
     template.compile.mockImplementationOnce(() => {
       throw new Error('unknown');
     });
-    const res = getPrNotes(
-      partial<BranchConfig>({
-        manager: 'some-manager',
-        branchName: 'branch',
-        upgrades: [
-          {
-            manager: 'some-manager',
-            branchName: 'branch',
-            prBodyNotes: ['NOTE'],
-          },
-        ],
-      })
-    );
-    expect(res).not.toContain('NOTE');
+    const res = getPrNotes({
+      manager: 'some-manager',
+      branchName: 'branch',
+      upgrades: [
+        {
+          manager: 'some-manager',
+          branchName: 'branch',
+          prBodyNotes: ['{{NOTE}}'],
+        },
+      ],
+    });
+    expect(res).toContain('{{NOTE}}');
   });
 
   it('handles extra notes', () => {

@@ -325,7 +325,7 @@ This is an advance field and it's recommend you seek a config review before appl
 
 ## bumpVersion
 
-Currently this setting supports `helmv3`, `npm`, `maven` and `sbt` only, so raise a feature request if you have a use for it with other package managers.
+Currently this setting supports `helmv3`, `npm`, 'nuget', `maven` and `sbt` only, so raise a feature request if you have a use for it with other package managers.
 Its purpose is if you want Renovate to update the `version` field within your package file any time it updates dependencies within.
 Usually this is for automatic release purposes, so that you don't need to add another step after Renovate before you can release a new version.
 
@@ -1690,6 +1690,8 @@ Use this field to restrict rules to a particular package manager. e.g.
 }
 ```
 
+For the full list of available managers, see the [Supported Managers](https://docs.renovatebot.com/modules/manager/#supported-managers) documentation.
+
 ### matchDatasources
 
 Use this field to restrict rules to a particular datasource. e.g.
@@ -1705,7 +1707,47 @@ Use this field to restrict rules to a particular datasource. e.g.
 }
 ```
 
+### matchCurrentValue
+
+This option is matched against the `currentValue` field of a dependency.
+
+`matchCurrentValue` supports Regular Expressions which must begin and end with `/`.
+For example, the following enforces that only `1.*` versions will be used:
+
+```json
+{
+  "packageRules": [
+    {
+      "matchPackagePatterns": ["io.github.resilience4j"],
+      "matchCurrentValue": "/^1\\./"
+    }
+  ]
+}
+```
+
+This field also supports a special negated regex syntax to ignore certain versions.
+Use the syntax `!/ /` like this:
+
+```json
+{
+  "packageRules": [
+    {
+      "matchPackagePatterns": ["io.github.resilience4j"],
+      "matchCurrentValue": "!/^0\\./"
+    }
+  ]
+}
+```
+
 ### matchCurrentVersion
+
+The `currentVersion` field will be one of the following (in order of preference):
+
+- locked version if a lock file exists
+- resolved version
+- current value
+
+Consider using instead `matchCurrentValue` if you wish to match against the raw string value of a dependency.
 
 `matchCurrentVersion` can be an exact SemVer version or a SemVer range:
 

@@ -84,8 +84,8 @@ export class RegExpVersioningApi extends GenericVersioningApi<RegExpVersion> {
 
     return {
       release,
-      prerelease: prerelease,
-      compatibility: compatibility,
+      prerelease,
+      compatibility,
     };
   }
 

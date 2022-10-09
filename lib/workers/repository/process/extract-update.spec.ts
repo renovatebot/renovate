@@ -1,8 +1,7 @@
-import hasha from 'hasha';
-import { git, mocked, partial } from '../../../../test/util';
+import { git, mocked } from '../../../../test/util';
 import type { PackageFile } from '../../../modules/manager/types';
 import * as _repositoryCache from '../../../util/cache/repository';
-import type { BranchConfig } from '../../types';
+import { fingerprint } from '../../../util/fingerprint';
 import * as _branchify from '../updates/branchify';
 import { extract, lookup, update } from './extract-update';
 
@@ -72,7 +71,7 @@ describe('workers/repository/process/extract-update', () => {
         scan: {
           master: {
             sha: '123test',
-            configHash: hasha(JSON.stringify(config)),
+            configHash: fingerprint(config),
             packageFiles,
           },
         },

@@ -1,4 +1,3 @@
-import { logger } from '../../../../test/util';
 import {
   dockerDependency,
   extractDepFromTarget,
@@ -293,12 +292,8 @@ describe('modules/manager/bazel/common', () => {
   });
 
   describe('extractDepFromTarget', () => {
-    it('returns null and warns for unknown rule type', () => {
+    it('returns null for unknown rule type', () => {
       expect(extractDepFromTarget({ rule: 'foo', name: 'bar' })).toBeNull();
-
-      expect(logger.logger.warn).toHaveBeenCalledWith(
-        'Bazel dependency extractor function not found for foo'
-      );
     });
 
     it('extracts from git_repository', () => {

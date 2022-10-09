@@ -78,7 +78,7 @@ describe('workers/repository/config-migration/branch/create', () => {
             contents: renovateConfig,
           },
         ],
-        message: message,
+        message,
         platformCommit: false,
       });
     });
@@ -101,7 +101,7 @@ describe('workers/repository/config-migration/branch/create', () => {
               contents: renovateConfig,
             },
           ],
-          message: message,
+          message,
           platformCommit: false,
         });
       });
@@ -125,7 +125,7 @@ describe('workers/repository/config-migration/branch/create', () => {
               contents: renovateConfig,
             },
           ],
-          message: message,
+          message,
           platformCommit: false,
         });
       });
@@ -150,7 +150,7 @@ describe('workers/repository/config-migration/branch/create', () => {
               contents: renovateConfig,
             },
           ],
-          message: message,
+          message,
           platformCommit: false,
         });
       });
@@ -174,7 +174,7 @@ describe('workers/repository/config-migration/branch/create', () => {
               contents: renovateConfig,
             },
           ],
-          message: message,
+          message,
           platformCommit: false,
         });
       });

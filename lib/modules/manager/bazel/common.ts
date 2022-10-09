@@ -1,5 +1,4 @@
 import is from '@sindresorhus/is';
-import { dequal } from 'dequal';
 import parseGithubUrl from 'github-url-from-git';
 import { logger } from '../../../logger';
 import { regEx } from '../../../util/regex';
@@ -10,7 +9,40 @@ import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { GoDatasource } from '../../datasource/go';
 import { id as dockerVersioning } from '../../versioning/docker';
 import type { PackageDependency } from '../types';
-import type { RuleMeta, Target, UrlParsedResult } from './types';
+import type {
+  Fragment,
+  StringFragment,
+  Target,
+  TargetAttribute,
+  UrlParsedResult,
+} from './types';
+
+function isTarget(x: Record<string, TargetAttribute>): x is Target {
+  return is.string(x.name) && is.string(x.rule);
+}
+
+export function coerceFragmentToTarget(fragment: Fragment): Target | null {
+  if (fragment.type === 'record') {
+    const { children } = fragment;
+    const target: Record<string, TargetAttribute> = {};
+    for (const [key, value] of Object.entries(children)) {
+      if (value.type === 'array') {
+        const values = value.children
+          .filter((x): x is StringFragment => x.type === 'string')
+          .map((x) => x.value);
+        target[key] = values;
+      } else if (value.type === 'string') {
+        target[key] = value.value;
+      }
+    }
+
+    if (isTarget(target)) {
+      return target;
+    }
+  }
+
+  return null;
+}
 
 export function parseArchiveUrl(
   urlString: string | undefined | null
@@ -246,32 +278,10 @@ export const supportedRulesRegex = regEx(`^${supportedRules.join('|')}$`);
 export function extractDepFromTarget(target: Target): PackageDependency | null {
   const dependencyExtractor = dependencyExtractorRegistry[target.rule];
   if (!dependencyExtractor) {
-    logger.warn(
+    logger.debug(
       `Bazel dependency extractor function not found for ${target.rule}`
     );
     return null;
   }
   return dependencyExtractor(target);
-}
-
-// TODO: remove it (#9667)
-export function getRuleDefinition(
-  content: string,
-  meta: RuleMeta[],
-  ruleIndex: number
-): string | null {
-  let result: string | null = null;
-
-  const rulePath = [ruleIndex];
-  const ruleMeta = meta.find(({ path }) => dequal(path, rulePath));
-  if (ruleMeta) {
-    const {
-      data: { offset, length },
-    } = ruleMeta;
-    const begin = offset;
-    const end = offset + length;
-    result = content.slice(begin, end);
-  }
-
-  return result;
 }
