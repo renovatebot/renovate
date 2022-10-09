@@ -15,6 +15,11 @@ describe('modules/manager/bazel/extract', () => {
       expect(res).toBeNull();
     });
 
+    it('returns empty for incomplete dependency', () => {
+      const res = extractPackageFile('git_repository(\n foo = "bar" \n)');
+      expect(res).toBeNull();
+    });
+
     it('extracts multiple types of dependencies', () => {
       const res = extractPackageFile(Fixtures.get('WORKSPACE1'));
       expect(res?.deps).toHaveLength(18);
