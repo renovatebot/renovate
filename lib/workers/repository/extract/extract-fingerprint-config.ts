@@ -2,7 +2,7 @@ import type { RenovateConfig } from '../../../config/types';
 import { get, getManagerList, hashMap } from '../../../modules/manager';
 
 export function extractFingerprintConfig(config: RenovateConfig): unknown {
-  // collect manage configs
+  // collect manager configs
   let managerList = getManagerList();
   const { enabledManagers } = config;
   if (enabledManagers?.length) {
