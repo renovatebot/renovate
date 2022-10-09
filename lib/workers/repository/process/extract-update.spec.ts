@@ -54,6 +54,13 @@ describe('workers/repository/process/extract-update', () => {
         baseBranches: ['master', 'dev'],
         repoIsOnboarded: true,
         suppressNotifications: ['deprecationWarningIssues'],
+        enabledManagers: ['npm'],
+        javascript: {
+          labels: ['js'],
+        },
+        npm: {
+          addLabels: 'npm',
+        },
       };
       git.checkoutBranch.mockResolvedValueOnce('123test');
       repositoryCache.getCache.mockReturnValueOnce({ scan: {} });
