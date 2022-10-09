@@ -36,7 +36,7 @@ export async function initI18n(translationsFilePath: string): Promise<void> {
   try {
     if (translationsFilePath === '') {
       gt.setLocale('en');
-      logger.warn('Passed empty string to --translations-file-path');
+      logger.info('Have not specified --translations-file-path');
       return;
     }
 
