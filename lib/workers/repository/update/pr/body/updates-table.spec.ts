@@ -1,15 +1,15 @@
-import { partial } from '../../../../../../test/util';
 import type { BranchConfig, BranchUpgradeConfig } from '../../../../types';
 import { getPrUpdatesTable } from './updates-table';
 
 describe('workers/repository/update/pr/body/updates-table', () => {
   it('checks a case where prBodyColumns are undefined', () => {
-    const configObj = partial<BranchConfig>({
+    const configObj: BranchConfig = {
       manager: 'some-manager',
       branchName: 'some-branch',
+      baseBranch: 'base',
       upgrades: [],
       prBodyColumns: undefined,
-    });
+    };
     const result = getPrUpdatesTable(configObj);
     expect(result).toBe('');
   });
@@ -88,9 +88,10 @@ describe('workers/repository/update/pr/body/updates-table', () => {
     };
     // TODO #7154 allow or filter undefined
     const upgrade3 = undefined as never;
-    const configObj = partial<BranchConfig>({
+    const configObj: BranchConfig = {
       manager: 'some-manager',
       branchName: 'some-branch',
+      baseBranch: 'base',
       upgrades: [upgrade0, upgrade1, upgrade2, upgrade3],
       prBodyColumns: ['Package', 'Type', 'Update', 'Change', 'Pending'],
       prBodyDefinitions: {
@@ -104,7 +105,7 @@ describe('workers/repository/update/pr/body/updates-table', () => {
         References: '{{{references}}}',
         'Package file': '{{{packageFile}}}',
       },
-    });
+    };
     const result = getPrUpdatesTable(configObj);
     expect(result).toMatch(
       '\n' +

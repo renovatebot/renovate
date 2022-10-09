@@ -1,4 +1,4 @@
-import { git, partial, platform } from '../../../../../test/util';
+import { git, platform } from '../../../../../test/util';
 import type { Pr } from '../../../../modules/platform';
 import { PrState } from '../../../../types';
 import type { BranchConfig } from '../../../types';
@@ -17,13 +17,14 @@ describe('workers/repository/update/branch/reuse', () => {
     let config: BranchConfig;
 
     beforeEach(() => {
-      config = partial<BranchConfig>({
+      config = {
         manager: 'some-manager',
         branchName: 'renovate/some-branch',
+        baseBranch: 'base',
         rebaseLabel: 'rebase',
         rebaseWhen: 'behind-base-branch',
         upgrades: [],
-      });
+      };
       jest.resetAllMocks();
     });
 

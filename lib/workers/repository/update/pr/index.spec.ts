@@ -1,11 +1,5 @@
 import { DateTime } from 'luxon';
-import {
-  git,
-  logger,
-  mocked,
-  partial,
-  platform,
-} from '../../../../../test/util';
+import { git, logger, mocked, platform } from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
 import {
   PLATFORM_INTEGRATION_UNAUTHORIZED,
@@ -63,12 +57,13 @@ describe('workers/repository/update/pr/index', () => {
       state: PrState.Open,
     };
 
-    const config = partial<BranchConfig>({
+    const config: BranchConfig = {
       manager: 'some-manager',
       branchName: sourceBranch,
+      baseBranch: 'base',
       upgrades: [],
       prTitle,
-    });
+    };
 
     beforeEach(() => {
       jest.resetAllMocks();
