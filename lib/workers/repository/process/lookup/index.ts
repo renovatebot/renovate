@@ -451,7 +451,7 @@ function isNpmXRangeAll(
   if (is.nullOrUndefined(currentValue)) {
     return false;
   }
-  if (versioning !== 'npm' || manager !== 'npm') {
+  if (manager !== 'npm' || versioning !== 'npm') {
     return false;
   }
   return isSemVerXRange(currentValue);

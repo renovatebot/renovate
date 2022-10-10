@@ -334,26 +334,35 @@ describe('workers/repository/process/lookup/index', () => {
       ]);
     });
 
-    it('supports minor, major and pinning for x-range "all versions" value (with lockfile)', async () => {
-      config.currentValue = '*';
-      config.rangeStrategy = 'pin';
-      config.lockedVersion = '0.4.0';
-      config.depName = 'q';
-      config.datasource = NpmDatasource.id;
-      httpMock.scope('https://registry.npmjs.org').get('/q').reply(200, qJson);
-      expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot([
-        { newValue: '0.4.0', updateType: 'pin' },
-      ]);
-    });
+    it.each`
+      strategy             | expected
+      ${'update-lockfile'} | ${[{ newValue: '*', newVersion: '0.9.7', updateType: 'minor' }, { newValue: '*', newVersion: '1.4.1', updateType: 'major' }]}
+      ${'pin'}             | ${[{ newValue: '0.4.0', updateType: 'pin' }]}
+    `(
+      'supports for x-range-all for replaceStrategy = $strategy (with lockfile)',
+      async ({ strategy, expected }) => {
+        config.currentValue = '*';
+        config.rangeStrategy = strategy;
+        config.lockedVersion = '0.4.0';
+        config.depName = 'q';
+        config.datasource = NpmDatasource.id;
+        httpMock
+          .scope('https://registry.npmjs.org')
+          .get('/q')
+          .reply(200, qJson);
+        expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot(
+          expected
+        );
+      }
+    );
 
     it.each`
       strategy
       ${'widen'}
-      ${'update-lockfile'}
       ${'bump'}
       ${'replace'}
     `(
-      'doesnt offer updates for x-range "all versions" value (with lockfile) when replaceStrategy = $strategy',
+      'doesnt offer updates for x-range-all (with lockfile) when replaceStrategy = $strategy',
       async ({ strategy }) => {
         config.currentValue = 'x';
         config.rangeStrategy = strategy;
@@ -370,7 +379,7 @@ describe('workers/repository/process/lookup/index', () => {
       }
     );
 
-    it('supports pinning for x-range "all versions" value (no lockfile)', async () => {
+    it('supports pinning for x-range-all (no lockfile)', async () => {
       config.currentValue = '*';
       config.rangeStrategy = 'pin';
       config.depName = 'q';
@@ -385,9 +394,10 @@ describe('workers/repository/process/lookup/index', () => {
       strategy
       ${'widen'}
       ${'bump'}
+      ${'update-lockfile'}
       ${'replace'}
     `(
-      'doesnt offer updates for x-range "all versions" value (no lockfile) when replaceStrategy = $strategy',
+      'doesnt offer updates for x-range-all (no lockfile) when replaceStrategy = $strategy',
       async ({ strategy }) => {
         config.currentValue = 'X';
         config.rangeStrategy = strategy;

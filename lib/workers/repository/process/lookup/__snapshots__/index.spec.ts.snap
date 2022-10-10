@@ -35,19 +35,19 @@ exports[`workers/repository/process/lookup/index .lookupUpdates() disables major
 ]
 `;
 
-exports[`workers/repository/process/lookup/index .lookupUpdates() doesnt offer updates for x-range "all versions" value (no lockfile) when replaceStrategy = bump 1`] = `[]`;
+exports[`workers/repository/process/lookup/index .lookupUpdates() doesnt offer updates for x-range-all (no lockfile) when replaceStrategy = bump 1`] = `[]`;
 
-exports[`workers/repository/process/lookup/index .lookupUpdates() doesnt offer updates for x-range "all versions" value (no lockfile) when replaceStrategy = replace 1`] = `[]`;
+exports[`workers/repository/process/lookup/index .lookupUpdates() doesnt offer updates for x-range-all (no lockfile) when replaceStrategy = replace 1`] = `[]`;
 
-exports[`workers/repository/process/lookup/index .lookupUpdates() doesnt offer updates for x-range "all versions" value (no lockfile) when replaceStrategy = widen 1`] = `[]`;
+exports[`workers/repository/process/lookup/index .lookupUpdates() doesnt offer updates for x-range-all (no lockfile) when replaceStrategy = update-lockfile 1`] = `[]`;
 
-exports[`workers/repository/process/lookup/index .lookupUpdates() doesnt offer updates for x-range "all versions" value (with lockfile) when replaceStrategy = bump 1`] = `[]`;
+exports[`workers/repository/process/lookup/index .lookupUpdates() doesnt offer updates for x-range-all (no lockfile) when replaceStrategy = widen 1`] = `[]`;
 
-exports[`workers/repository/process/lookup/index .lookupUpdates() doesnt offer updates for x-range "all versions" value (with lockfile) when replaceStrategy = replace 1`] = `[]`;
+exports[`workers/repository/process/lookup/index .lookupUpdates() doesnt offer updates for x-range-all (with lockfile) when replaceStrategy = bump 1`] = `[]`;
 
-exports[`workers/repository/process/lookup/index .lookupUpdates() doesnt offer updates for x-range "all versions" value (with lockfile) when replaceStrategy = update-lockfile 1`] = `[]`;
+exports[`workers/repository/process/lookup/index .lookupUpdates() doesnt offer updates for x-range-all (with lockfile) when replaceStrategy = replace 1`] = `[]`;
 
-exports[`workers/repository/process/lookup/index .lookupUpdates() doesnt offer updates for x-range "all versions" value (with lockfile) when replaceStrategy = widen 1`] = `[]`;
+exports[`workers/repository/process/lookup/index .lookupUpdates() doesnt offer updates for x-range-all (with lockfile) when replaceStrategy = widen 1`] = `[]`;
 
 exports[`workers/repository/process/lookup/index .lookupUpdates() handles PEP440 1`] = `
 [
@@ -996,6 +996,45 @@ exports[`workers/repository/process/lookup/index .lookupUpdates() supports compl
 ]
 `;
 
+exports[`workers/repository/process/lookup/index .lookupUpdates() supports for x-range-all for replaceStrategy = pin (with lockfile) 1`] = `
+[
+  {
+    "isPin": true,
+    "newMajor": 0,
+    "newValue": "0.4.0",
+    "newVersion": "0.4.0",
+    "updateType": "pin",
+  },
+]
+`;
+
+exports[`workers/repository/process/lookup/index .lookupUpdates() supports for x-range-all for replaceStrategy = update-lockfile (with lockfile) 1`] = `
+[
+  {
+    "bucket": "non-major",
+    "isLockfileUpdate": true,
+    "isRange": true,
+    "newMajor": 0,
+    "newMinor": 9,
+    "newValue": "*",
+    "newVersion": "0.9.7",
+    "releaseTimestamp": "2013-09-04T17:07:22.948Z",
+    "updateType": "minor",
+  },
+  {
+    "bucket": "major",
+    "isLockfileUpdate": true,
+    "isRange": true,
+    "newMajor": 1,
+    "newMinor": 4,
+    "newValue": "*",
+    "newVersion": "1.4.1",
+    "releaseTimestamp": "2015-05-17T04:25:07.299Z",
+    "updateType": "major",
+  },
+]
+`;
+
 exports[`workers/repository/process/lookup/index .lookupUpdates() supports in-range caret updates 1`] = `
 [
   {
@@ -1192,19 +1231,7 @@ exports[`workers/repository/process/lookup/index .lookupUpdates() supports minor
 ]
 `;
 
-exports[`workers/repository/process/lookup/index .lookupUpdates() supports minor, major and pinning for x-range "all versions" value (with lockfile) 1`] = `
-[
-  {
-    "isPin": true,
-    "newMajor": 0,
-    "newValue": "0.4.0",
-    "newVersion": "0.4.0",
-    "updateType": "pin",
-  },
-]
-`;
-
-exports[`workers/repository/process/lookup/index .lookupUpdates() supports pinning for x-range "all versions" value (no lockfile) 1`] = `
+exports[`workers/repository/process/lookup/index .lookupUpdates() supports pinning for x-range-all (no lockfile) 1`] = `
 [
   {
     "isPin": true,
