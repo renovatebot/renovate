@@ -34,7 +34,7 @@ export function setCachedConflictResult(
   const branch = cache?.branches?.find((br) => br.branchName === branchName);
 
   if (!branch) {
-    logger.debug(`setCachedBehindBaseResult(): Branch cache not present`);
+    logger.debug(`setCachedConflictResult(): Branch cache not present`);
     return;
   }
 
