@@ -226,7 +226,10 @@ export async function lookupUpdates(
         });
       }
 
-      if (isNpmXRangeAll(currentValue, config)) {
+      if (
+        rangeStrategy !== 'update-lockfile' &&
+        isNpmXRangeAll(currentValue, config)
+      ) {
         return res;
       }
 
