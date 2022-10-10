@@ -261,7 +261,6 @@ describe('modules/manager/helmv3/artifacts', () => {
         },
       },
     ]);
-    expect(execSnapshots).toBeArrayOfSize(2);
     expect(execSnapshots).toMatchObject([
       {
         cmd: 'helm repo add repo-test --registry-config /tmp/renovate/cache/__renovate-private-cache/registry.json --repository-config /tmp/renovate/cache/__renovate-private-cache/repositories.yaml --repository-cache /tmp/renovate/cache/__renovate-private-cache/repositories https://gitlab.com/api/v4/projects/xxxxxxx/packages/helm/stable',
@@ -313,7 +312,6 @@ describe('modules/manager/helmv3/artifacts', () => {
         },
       },
     ]);
-    expect(execSnapshots).toBeArrayOfSize(2);
     expect(execSnapshots).toMatchObject([
       {
         cmd: 'helm repo add repo-test --registry-config /tmp/renovate/cache/__renovate-private-cache/registry.json --repository-config /tmp/renovate/cache/__renovate-private-cache/repositories.yaml --repository-cache /tmp/renovate/cache/__renovate-private-cache/repositories https://gitlab.com/api/v4/projects/xxxxxxx/packages/helm/stable',
@@ -358,7 +356,6 @@ describe('modules/manager/helmv3/artifacts', () => {
         },
       },
     ]);
-    expect(execSnapshots).toBeArrayOfSize(2);
     expect(execSnapshots).toMatchObject([
       {
         cmd: 'helm repo add repo-test --registry-config /tmp/renovate/cache/__renovate-private-cache/registry.json --repository-config /tmp/renovate/cache/__renovate-private-cache/repositories.yaml --repository-cache /tmp/renovate/cache/__renovate-private-cache/repositories https://gitlab.com/api/v4/projects/xxxxxxx/packages/helm/stable',
@@ -410,7 +407,6 @@ describe('modules/manager/helmv3/artifacts', () => {
         },
       },
     ]);
-    expect(execSnapshots).toBeArrayOfSize(2);
     expect(execSnapshots).toMatchObject([
       {
         cmd: 'helm repo add repo-test --registry-config /tmp/renovate/cache/__renovate-private-cache/registry.json --repository-config /tmp/renovate/cache/__renovate-private-cache/repositories.yaml --repository-cache /tmp/renovate/cache/__renovate-private-cache/repositories https://gitlab.com/api/v4/projects/xxxxxxx/packages/helm/stable',
@@ -447,7 +443,6 @@ describe('modules/manager/helmv3/artifacts', () => {
         },
       })
     ).toBeNull();
-    expect(execSnapshots).toBeArrayOfSize(2);
     expect(execSnapshots).toMatchObject([
       {
         cmd: 'helm repo add repo-test --registry-config /tmp/renovate/cache/__renovate-private-cache/registry.json --repository-config /tmp/renovate/cache/__renovate-private-cache/repositories.yaml --repository-cache /tmp/renovate/cache/__renovate-private-cache/repositories https://gitlab.com/api/v4/projects/xxxxxxx/packages/helm/stable',
