@@ -334,6 +334,75 @@ describe('workers/repository/process/lookup/index', () => {
       ]);
     });
 
+    it('supports minor, major and pinning for x-range "all versions" value (with lockfile)', async () => {
+      config.currentValue = '';
+      config.rangeStrategy = 'pin';
+      config.lockedVersion = '0.4.0';
+      config.depName = 'q';
+      config.datasource = NpmDatasource.id;
+      httpMock.scope('https://registry.npmjs.org').get('/q').reply(200, qJson);
+      expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot([
+        { newValue: '0.4.0', updateType: 'pin' },
+      ]);
+    });
+
+    it.each`
+      strategy
+      ${'widen'}
+      ${'update-lockfile'}
+      ${'bump'}
+      ${'replace'}
+    `(
+      'doesnt offer updates for x-range "all versions" value (with lockfile) when replaceStrategy = $strategy',
+      async ({ strategy }) => {
+        config.currentValue = 'x';
+        config.rangeStrategy = strategy;
+        config.lockedVersion = '0.4.0';
+        config.depName = 'q';
+        config.datasource = NpmDatasource.id;
+        httpMock
+          .scope('https://registry.npmjs.org')
+          .get('/q')
+          .reply(200, qJson);
+        expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot(
+          []
+        );
+      }
+    );
+
+    it('supports pinning for x-range "all versions" value (no lockfile)', async () => {
+      config.currentValue = '*';
+      config.rangeStrategy = 'pin';
+      config.depName = 'q';
+      config.datasource = NpmDatasource.id;
+      httpMock.scope('https://registry.npmjs.org').get('/q').reply(200, qJson);
+      expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot([
+        { newValue: '1.4.1', updateType: 'pin' },
+      ]);
+    });
+
+    it.each`
+      strategy
+      ${'widen'}
+      ${'bump'}
+      ${'replace'}
+    `(
+      'doesnt offer updates for x-range "all versions" value (no lockfile) when replaceStrategy = $strategy',
+      async ({ strategy }) => {
+        config.currentValue = 'X';
+        config.rangeStrategy = strategy;
+        config.depName = 'q';
+        config.datasource = NpmDatasource.id;
+        httpMock
+          .scope('https://registry.npmjs.org')
+          .get('/q')
+          .reply(200, qJson);
+        expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot(
+          []
+        );
+      }
+    );
+
     it('ignores pinning for ranges when other upgrade exists', async () => {
       config.currentValue = '~0.9.0';
       config.rangeStrategy = 'pin';

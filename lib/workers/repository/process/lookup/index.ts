@@ -14,6 +14,7 @@ import {
 } from '../../../../modules/datasource';
 import { getRangeStrategy } from '../../../../modules/manager';
 import * as allVersioning from '../../../../modules/versioning';
+import { isSemVerXRange } from '../../../../modules/versioning/semver/types';
 import { ExternalHostError } from '../../../../types/errors/external-host-error';
 import { clone } from '../../../../util/clone';
 import { applyPackageRules } from '../../../../util/package-rules';
@@ -205,7 +206,7 @@ export async function lookupUpdates(
       }
       res.currentVersion = currentVersion!;
       if (
-        currentValue &&
+        is.string(currentValue) &&
         currentVersion &&
         rangeStrategy === 'pin' &&
         !versioning.isSingleVersion(currentValue)
@@ -224,6 +225,11 @@ export async function lookupUpdates(
           newMajor: versioning.getMajor(currentVersion)!,
         });
       }
+
+      if (isNpmXRangeAll(currentValue, config)) {
+        return res;
+      }
+
       // istanbul ignore if
       if (!versioning.isVersion(currentVersion!)) {
         res.skipReason = 'invalid-version';
@@ -428,4 +434,21 @@ export async function lookupUpdates(
     res.skipReason = 'internal-error';
   }
   return res;
+}
+
+/**
+ * https://docs.npmjs.com/cli/v6/using-npm/semver#x-ranges-12x-1x-12-
+ * x-range-all := "" (empty string) := * := x := X := >=0.0.0
+ */
+function isNpmXRangeAll(
+  currentValue: string | undefined,
+  config: LookupUpdateConfig
+): boolean {
+  if (is.nullOrUndefined(currentValue)) {
+    return false;
+  }
+  if (config.versioning !== 'npm') {
+    return false;
+  }
+  return isSemVerXRange(currentValue);
 }

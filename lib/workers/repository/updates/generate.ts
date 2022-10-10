@@ -63,6 +63,19 @@ function getTableValues(upgrade: BranchUpgradeConfig): string[] | null {
   return null;
 }
 
+export function getDisplayFrom(
+  currentValue: string | undefined
+): string | undefined {
+  const emptyString = '""';
+  if (is.nullOrUndefined(currentValue)) {
+    return undefined;
+  }
+  if (is.emptyString(currentValue)) {
+    return emptyString;
+  }
+  return currentValue;
+}
+
 export function generateBranchConfig(
   upgrades: BranchUpgradeConfig[]
 ): BranchConfig {
@@ -134,13 +147,13 @@ export function generateBranchConfig(
         upgrade.newDigest.replace('sha256:', '').substring(0, 7);
     }
     if (upgrade.isDigest || upgrade.isPinDigest) {
-      upgrade.displayFrom = upgrade.currentDigestShort;
+      upgrade.displayFrom = getDisplayFrom(upgrade.currentDigestShort);
       upgrade.displayTo = upgrade.newDigestShort;
     } else if (upgrade.isLockfileUpdate) {
-      upgrade.displayFrom = upgrade.currentVersion;
+      upgrade.displayFrom = getDisplayFrom(upgrade.currentVersion);
       upgrade.displayTo = upgrade.newVersion;
     } else if (!upgrade.isLockFileMaintenance) {
-      upgrade.displayFrom = upgrade.currentValue;
+      upgrade.displayFrom = getDisplayFrom(upgrade.currentValue);
       upgrade.displayTo = upgrade.newValue;
     }
     upgrade.displayFrom ??= '';

@@ -35,6 +35,20 @@ exports[`workers/repository/process/lookup/index .lookupUpdates() disables major
 ]
 `;
 
+exports[`workers/repository/process/lookup/index .lookupUpdates() doesnt offer updates for x-range "all versions" value (no lockfile) when replaceStrategy = bump 1`] = `[]`;
+
+exports[`workers/repository/process/lookup/index .lookupUpdates() doesnt offer updates for x-range "all versions" value (no lockfile) when replaceStrategy = replace 1`] = `[]`;
+
+exports[`workers/repository/process/lookup/index .lookupUpdates() doesnt offer updates for x-range "all versions" value (no lockfile) when replaceStrategy = widen 1`] = `[]`;
+
+exports[`workers/repository/process/lookup/index .lookupUpdates() doesnt offer updates for x-range "all versions" value (with lockfile) when replaceStrategy = bump 1`] = `[]`;
+
+exports[`workers/repository/process/lookup/index .lookupUpdates() doesnt offer updates for x-range "all versions" value (with lockfile) when replaceStrategy = replace 1`] = `[]`;
+
+exports[`workers/repository/process/lookup/index .lookupUpdates() doesnt offer updates for x-range "all versions" value (with lockfile) when replaceStrategy = update-lockfile 1`] = `[]`;
+
+exports[`workers/repository/process/lookup/index .lookupUpdates() doesnt offer updates for x-range "all versions" value (with lockfile) when replaceStrategy = widen 1`] = `[]`;
+
 exports[`workers/repository/process/lookup/index .lookupUpdates() handles PEP440 1`] = `
 [
   {
@@ -1174,6 +1188,30 @@ exports[`workers/repository/process/lookup/index .lookupUpdates() supports minor
     "newVersion": "1.4.1",
     "releaseTimestamp": "2015-05-17T04:25:07.299Z",
     "updateType": "major",
+  },
+]
+`;
+
+exports[`workers/repository/process/lookup/index .lookupUpdates() supports minor, major and pinning for x-range "all versions" value (with lockfile) 1`] = `
+[
+  {
+    "isPin": true,
+    "newMajor": 0,
+    "newValue": "0.4.0",
+    "newVersion": "0.4.0",
+    "updateType": "pin",
+  },
+]
+`;
+
+exports[`workers/repository/process/lookup/index .lookupUpdates() supports pinning for x-range "all versions" value (no lockfile) 1`] = `
+[
+  {
+    "isPin": true,
+    "newMajor": 1,
+    "newValue": "1.4.1",
+    "newVersion": "1.4.1",
+    "updateType": "pin",
   },
 ]
 `;

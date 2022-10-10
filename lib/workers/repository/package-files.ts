@@ -1,6 +1,9 @@
 import is from '@sindresorhus/is';
 import { logger } from '../../logger';
-import type { PackageFile } from '../../modules/manager/types';
+import type {
+  PackageDependency,
+  PackageFile,
+} from '../../modules/manager/types';
 import { clone } from '../../util/clone';
 
 export class PackageFiles {
@@ -111,7 +114,7 @@ export class PackageFiles {
           // TODO: types (#7154)
           deps += `<details><summary>${packageFile.packageFile!}</summary>\n\n`;
           for (const dep of packageFile.deps) {
-            const ver = dep.currentValue;
+            const ver = this.getCurrentValue(dep);
             const digest = dep.currentDigest;
             const version =
               ver && digest ? `${ver}@${digest}` : `${digest ?? ver!}`;
@@ -165,5 +168,16 @@ export class PackageFiles {
 
     // remove the last listed dependency
     return !!packageFiles[len].deps.pop();
+  }
+
+  private static getCurrentValue({
+    currentValue,
+  }: PackageDependency): string | null | undefined {
+    const emptyStringDisplayForm = '"" (="*")';
+    if (is.emptyString(currentValue)) {
+      return emptyStringDisplayForm;
+    } else {
+      return currentValue;
+    }
   }
 }
