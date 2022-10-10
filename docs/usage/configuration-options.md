@@ -1690,6 +1690,8 @@ Use this field to restrict rules to a particular package manager. e.g.
 }
 ```
 
+For the full list of available managers, see the [Supported Managers](https://docs.renovatebot.com/modules/manager/#supported-managers) documentation.
+
 ### matchDatasources
 
 Use this field to restrict rules to a particular datasource. e.g.
@@ -2678,6 +2680,15 @@ Say the full team name on GitHub is `@organization/foo`, then you'd set the conf
 ```json
 {
   "reviewers": ["team:foo"]
+}
+```
+
+To mark a reviewer as required in Azure DevOps, you must use the prefix `required:`.
+If the name of the reviewer is `bar` for example, this could also be the name of a team, then you would set the config option like this:
+
+```json
+{
+  "reviewers": ["required:bar"]
 }
 ```
 
