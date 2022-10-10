@@ -35,8 +35,17 @@ export function getHttpUrl(url: string, token?: string): string {
 }
 
 export function getRemoteUrlWithToken(url: string, hostType?: string): string {
-  const httpUrl = getHttpUrl(url)
-  const hostRule = hostRules.find({ url: httpUrl, hostType });
+  let coercedUrl: string;
+
+  try {
+    coercedUrl = getHttpUrl(url);
+  } catch {
+    logger.warn(`Attempting to use non-git url '${url}' for git operations`);
+
+    coercedUrl = url;
+  }
+
+  const hostRule = hostRules.find({ url: coercedUrl, hostType });
 
   if (hostRule?.token) {
     logger.debug(`Found hostRules token for url ${url}`);
