@@ -39,7 +39,7 @@ export function prInfo(pr: BbsRestPr): BbsPr {
 }
 
 const addMaxLength = (inputUrl: string, limit = 100): string => {
-  const { search, ...parsedUrl } = url.parse(inputUrl, true); // eslint-disable-line @typescript-eslint/no-unused-vars
+  const { search, ...parsedUrl } = url.parse(inputUrl, true);
   const maxedUrl = url.format({
     ...parsedUrl,
     query: { ...parsedUrl.query, limit },
@@ -91,7 +91,7 @@ export async function accumulateValues<T = any>(
       break;
     }
 
-    const { search, ...parsedUrl } = url.parse(nextUrl, true); // eslint-disable-line @typescript-eslint/no-unused-vars
+    const { search, ...parsedUrl } = url.parse(nextUrl, true);
     nextUrl = url.format({
       ...parsedUrl,
       query: {

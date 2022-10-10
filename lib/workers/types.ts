@@ -112,7 +112,7 @@ export interface BranchConfig
     PlatformPrOptions {
   automergeComment?: string;
   automergeType?: string;
-  baseBranch?: string;
+  baseBranch: string;
   errors?: ValidationMessage[];
   hasTypes?: boolean;
   dependencyDashboardChecks?: Record<string, string>;

@@ -1,4 +1,3 @@
-// TODO #7154
 import is from '@sindresorhus/is';
 import { DateTime } from 'luxon';
 import { GlobalConfig } from '../../../../config/global';
@@ -390,7 +389,7 @@ export async function processBranch(
     // TODO: types (#7154)
     logger.debug(`Using reuseExistingBranch: ${config.reuseExistingBranch!}`);
     if (!(config.reuseExistingBranch && config.skipBranchUpdate)) {
-      await checkoutBranch(config.baseBranch!);
+      await checkoutBranch(config.baseBranch);
       const res = await getUpdatedPackageFiles(config);
       // istanbul ignore if
       if (res.artifactErrors && config.artifactErrors) {
@@ -479,7 +478,7 @@ export async function processBranch(
 
       config.isConflicted ??=
         branchExists &&
-        (await isBranchConflicted(config.baseBranch!, config.branchName));
+        (await isBranchConflicted(config.baseBranch, config.branchName));
       config.forceCommit = forcedManually || config.isConflicted;
 
       config.stopUpdating = branchPr?.labels?.includes(

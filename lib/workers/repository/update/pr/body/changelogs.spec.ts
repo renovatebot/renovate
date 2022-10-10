@@ -14,6 +14,7 @@ describe('workers/repository/update/pr/body/changelogs', () => {
     const res = getChangelogs({
       manager: 'some-manager',
       branchName: 'some-branch',
+      baseBranch: 'base',
       upgrades: [],
       hasReleaseNotes: false,
     });
@@ -34,6 +35,7 @@ describe('workers/repository/update/pr/body/changelogs', () => {
 
     const res = getChangelogs({
       branchName: 'some-branch',
+      baseBranch: 'base',
       manager: 'some-manager',
       upgrades: [
         {

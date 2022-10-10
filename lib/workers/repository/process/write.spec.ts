@@ -6,7 +6,6 @@ import {
   git,
   logger,
   mocked,
-  partial,
 } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import { addMeta } from '../../../logger';
@@ -50,19 +49,40 @@ beforeEach(() => {
 describe('workers/repository/process/write', () => {
   describe('writeUpdates()', () => {
     it('stops after automerge', async () => {
-      const branches = partial<BranchConfig[]>([
-        { branchName: 'test_branch', manager: 'npm', upgrades: [] },
-        { branchName: 'test_branch', manager: 'npm', upgrades: [] },
+      const branches: BranchConfig[] = [
         {
           branchName: 'test_branch',
+          baseBranch: 'base',
+          manager: 'npm',
+          upgrades: [],
+        },
+        {
+          branchName: 'test_branch',
+          baseBranch: 'base',
+          manager: 'npm',
+          upgrades: [],
+        },
+        {
+          branchName: 'test_branch',
+          baseBranch: 'base',
           manager: 'npm',
           automergeType: 'pr-comment',
           ignoreTests: true,
           upgrades: [],
         },
-        { branchName: 'test_branch', manager: 'npm', upgrades: [] },
-        { branchName: 'test_branch', manager: 'npm', upgrades: [] },
-      ]);
+        {
+          branchName: 'test_branch',
+          baseBranch: 'base',
+          manager: 'npm',
+          upgrades: [],
+        },
+        {
+          branchName: 'test_branch',
+          baseBranch: 'base',
+          manager: 'npm',
+          upgrades: [],
+        },
+      ];
       git.branchExists.mockReturnValue(true);
       branchWorker.processBranch.mockResolvedValueOnce({
         branchExists: true,
@@ -89,9 +109,9 @@ describe('workers/repository/process/write', () => {
     it('increments branch counter', async () => {
       const branchName = 'branchName';
       const branches: BranchConfig[] = [
-        partial<BranchConfig>({ baseBranch: 'main', branchName, upgrades: [] }),
-        partial<BranchConfig>({ baseBranch: 'dev', branchName, upgrades: [] }),
-      ] as never;
+        { baseBranch: 'main', branchName, upgrades: [], manager: 'npm' },
+        { baseBranch: 'dev', branchName, upgrades: [], manager: 'npm' },
+      ];
       repoCache.getCache.mockReturnValueOnce({});
       branchWorker.processBranch.mockResolvedValueOnce({
         branchExists: true,
@@ -115,9 +135,10 @@ describe('workers/repository/process/write', () => {
     });
 
     it('return no-work if branch fingerprint is not different', async () => {
-      const branches = partial<BranchConfig[]>([
+      const branches: BranchConfig[] = [
         {
           branchName: 'new/some-branch',
+          baseBranch: 'base',
           manager: 'npm',
           upgrades: [
             {
@@ -125,7 +146,7 @@ describe('workers/repository/process/write', () => {
             } as BranchUpgradeConfig,
           ],
         },
-      ]);
+      ];
       repoCache.getCache.mockReturnValueOnce({
         branches: [
           {
@@ -143,9 +164,10 @@ describe('workers/repository/process/write', () => {
     });
 
     it('updates branch fingerprint when new commit is made', async () => {
-      const branches = partial<BranchConfig[]>([
+      const branches: BranchConfig[] = [
         {
           branchName: 'new/some-branch',
+          baseBranch: 'base',
           manager: 'npm',
           upgrades: [
             {
@@ -153,7 +175,7 @@ describe('workers/repository/process/write', () => {
             } as BranchUpgradeConfig,
           ],
         },
-      ]);
+      ];
       repoCache.getCache.mockReturnValueOnce({
         branches: [
           {
@@ -229,7 +251,7 @@ describe('workers/repository/process/write', () => {
     });
 
     it('caches same fingerprint when no commit is made', async () => {
-      const branches = partial<BranchConfig[]>([
+      const branches: BranchConfig[] = [
         {
           branchName: 'new/some-branch',
           baseBranch: 'base_branch',
@@ -240,7 +262,7 @@ describe('workers/repository/process/write', () => {
             } as BranchUpgradeConfig,
           ],
         },
-      ]);
+      ];
       const managers = [
         ...new Set(
           branches[0].upgrades
@@ -270,7 +292,7 @@ describe('workers/repository/process/write', () => {
     });
 
     it('creates new branchCache when cache is not enabled', async () => {
-      const branches = partial<BranchConfig[]>([
+      const branches: BranchConfig[] = [
         {
           branchName: 'new/some-branch',
           baseBranch: 'base_branch',
@@ -281,7 +303,7 @@ describe('workers/repository/process/write', () => {
             } as BranchUpgradeConfig,
           ],
         },
-      ]);
+      ];
       const repoCacheObj = {} as RepoCacheData;
       repoCache.getCache.mockReturnValueOnce(repoCacheObj);
       branchWorker.processBranch.mockResolvedValueOnce({
@@ -310,31 +332,43 @@ describe('workers/repository/process/write', () => {
   });
 
   describe('canSkipBranchUpdateCheck()', () => {
-    let branchCache = {} as BranchCache;
+    let branchCache: BranchCache = {
+      branchName: 'branch',
+      baseBranch: 'base',
+      baseBranchSha: 'base_sha',
+      sha: 'sha',
+      upgrades: [],
+      automerge: false,
+      prNo: null,
+      parentSha: null,
+    };
 
     it('returns false if no cache', () => {
       branchCache = {
+        ...branchCache,
         branchName: 'new/some-branch',
         sha: '111',
-      } as BranchCache;
+      };
       expect(canSkipBranchUpdateCheck(branchCache, '222')).toBe(false);
     });
 
     it('returns false when fingerprints are not same', () => {
       branchCache = {
+        ...branchCache,
         branchName: 'new/some-branch',
         sha: '111',
         branchFingerprint: '211',
-      } as BranchCache;
+      };
       expect(canSkipBranchUpdateCheck(branchCache, '222')).toBe(false);
     });
 
     it('returns true', () => {
       branchCache = {
+        ...branchCache,
         branchName: 'new/some-branch',
         sha: '111',
         branchFingerprint: '222',
-      } as BranchCache;
+      };
       expect(canSkipBranchUpdateCheck(branchCache, '222')).toBe(true);
     });
   });
@@ -354,15 +388,19 @@ describe('workers/repository/process/write', () => {
     });
 
     it('when base branch name is different updates it and invalidates isModified value', () => {
-      const repoCacheObj = {
+      const repoCacheObj: RepoCacheData = {
         branches: [
-          partial<BranchCache>({
+          {
             branchName: 'branch_name',
-            sha: 'sha',
             baseBranch: 'base_branch',
+            sha: 'sha',
             baseBranchSha: 'base_sha',
             isModified: true,
-          }),
+            upgrades: [],
+            automerge: false,
+            prNo: null,
+            parentSha: null,
+          },
         ],
       };
       repoCache.getCache.mockReturnValue(repoCacheObj);
@@ -373,19 +411,27 @@ describe('workers/repository/process/write', () => {
         sha: 'sha',
         baseBranch: 'new_base_branch',
         baseBranchSha: 'base_sha',
+        upgrades: [],
+        automerge: false,
+        prNo: null,
+        parentSha: null,
       });
     });
 
     it('when base branch sha is different updates it and invalidates related values', () => {
-      const repoCacheObj = {
+      const repoCacheObj: RepoCacheData = {
         branches: [
-          partial<BranchCache>({
+          {
             branchName: 'branch_name',
             sha: 'sha',
             baseBranch: 'base_branch',
             baseBranchSha: 'base_sha',
             isBehindBase: true,
-          }),
+            upgrades: [],
+            automerge: false,
+            prNo: null,
+            parentSha: null,
+          },
         ],
       };
       repoCache.getCache.mockReturnValue(repoCacheObj);
@@ -396,13 +442,17 @@ describe('workers/repository/process/write', () => {
         sha: 'sha',
         baseBranch: 'base_branch',
         baseBranchSha: 'new_base_sha',
+        upgrades: [],
+        automerge: false,
+        prNo: null,
+        parentSha: null,
       });
     });
 
     it('when branch sha is different updates it and invalidates related values', () => {
-      const repoCacheObj = {
+      const repoCacheObj: RepoCacheData = {
         branches: [
-          partial<BranchCache>({
+          {
             branchName: 'branch_name',
             sha: 'sha',
             baseBranch: 'base_branch',
@@ -411,7 +461,11 @@ describe('workers/repository/process/write', () => {
             isModified: true,
             isConflicted: true,
             branchFingerprint: '123',
-          }),
+            upgrades: [],
+            automerge: false,
+            prNo: null,
+            parentSha: null,
+          },
         ],
       };
       repoCache.getCache.mockReturnValue(repoCacheObj);
@@ -422,6 +476,10 @@ describe('workers/repository/process/write', () => {
         sha: 'new_sha',
         baseBranch: 'base_branch',
         baseBranchSha: 'base_sha',
+        upgrades: [],
+        automerge: false,
+        prNo: null,
+        parentSha: null,
       });
     });
 
