@@ -43,10 +43,9 @@ export function getPrConfigDescription(config: BranchConfig): string {
   } else {
     prBody += _('Whenever PR becomes conflicted');
   }
-  prBody += util.format(
-    ', %s\n\n',
-    _('or you tick the rebase/retry checkbox.')
-  );
+
+  prBody += ', ' + _('or you tick the rebase/retry checkbox.') + '\n\n';
+
   if (config.recreateClosed) {
     prBody += emojify(
       // TODO: types (#7154)
@@ -55,13 +54,11 @@ export function getPrConfigDescription(config: BranchConfig): string {
     );
   } else {
     prBody += emojify(
-      util.format(
-        `:no_bell: **Ignore**: ${ngettext(
-          "Close this PR and you won't be reminded about this update again.",
-          "Close this PR and you won't be reminded about these updates again.",
-          config.upgrades.length
-        )}\n\n`
-      )
+      `:no_bell: **Ignore**: ${ngettext(
+        "Close this PR and you won't be reminded about this update again.",
+        "Close this PR and you won't be reminded about these updates again.",
+        config.upgrades.length
+      )}\n\n`
     );
   }
   return prBody;
