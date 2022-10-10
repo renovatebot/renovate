@@ -1,0 +1,80 @@
+{
+  "channel-version": "6.0",
+  "latest-release": "6.0.9",
+  "latest-release-date": "2022-09-13",
+  "latest-runtime": "6.0.9",
+  "latest-sdk": "6.0.401",
+  "support-phase": "lts",
+  "releases": [
+    {
+      "release-date": "2022-09-13",
+      "release-version": "6.0.9",
+      "security": true,
+      "release-notes": "https://github.com/dotnet/core/blob/main/release-notes/6.0/6.0.9/6.0.9.md",
+      "runtime": {
+        "version": "6.0.9",
+        "version-display": "6.0.9"
+      },
+      "sdk": {
+        "version": "6.0.401",
+        "version-display": "6.0.401"
+      }
+    },
+    {
+      "release-date": "2021-12-14",
+      "release-version": "6.0.1",
+      "security": true,
+      "release-notes": "https://github.com/dotnet/core/blob/main/release-notes/6.0/6.0.1/6.0.1.md",
+      "runtime": {
+        "version": "6.0.1",
+        "version-display": "6.0.1"
+      },
+      "sdk": {
+        "version": "6.0.101",
+        "version-display": "6.0.101"
+      }
+    },
+    {
+      "release-date": "2021-11-08",
+      "release-version": "6.0.0",
+      "security": false,
+      "release-notes": "https://github.com/dotnet/core/blob/main/release-notes/6.0/6.0.0/6.0.0.md",
+      "runtime": {
+        "version": "6.0.0",
+        "version-display": "6.0.0"
+      },
+      "sdk": {
+        "version": "6.0.100",
+        "version-display": "6.0.100"
+      }
+    },
+    {
+      "release-date": "2021-09-14",
+      "release-version": "6.0.0-rc.1",
+      "security": false,
+      "release-notes": "https://github.com/dotnet/core/blob/main/release-notes/6.0/preview/6.0.0-rc.1.md",
+      "runtime": {
+        "version": "6.0.0-rc.1.21451.13",
+        "version-display": "6.0.0-rc.1"
+      },
+      "sdk": {
+        "version": "6.0.100-rc.1.21463.6",
+        "version-display": "6.0.100-rc.1"
+      }
+    },
+    {
+      "release-date": "2021-02-17",
+      "release-version": "6.0.0-preview.1",
+      "security": false,
+      "release-notes": "https://github.com/dotnet/core/blob/main/release-notes/6.0/preview/6.0.0-preview.1.md",
+      "runtime": {
+        "version": "6.0.0-preview.1.21102.12",
+        "version-display": "6.0.0-preview.1"
+      },
+      "sdk": {
+        "version": "6.0.100-preview.1.21103.13",
+        "version-display": "6.0.100-preview.1"
+      }
+    }
+  ]
+}

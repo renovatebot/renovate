@@ -6,7 +6,12 @@ import { GithubReleasesDatasource } from '../../datasource/github-releases';
 import { HelmDatasource } from '../../datasource/helm';
 import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
 import { isSystemManifest } from './common';
-import type { FluxManifest, FluxResource, ResourceFluxManifest } from './types';
+import type {
+  FluxManagerData,
+  FluxManifest,
+  FluxResource,
+  ResourceFluxManifest,
+} from './types';
 
 function readManifest(content: string, file: string): FluxManifest | null {
   if (isSystemManifest(file)) {
@@ -68,14 +73,14 @@ function readManifest(content: string, file: string): FluxManifest | null {
 function resolveManifest(
   manifest: FluxManifest,
   context: FluxManifest[]
-): PackageDependency[] | null {
+): PackageDependency<FluxManagerData>[] | null {
   const resourceManifests = context.filter(
     (manifest) => manifest.kind === 'resource'
   ) as ResourceFluxManifest[];
   const repositories = resourceManifests.flatMap(
     (manifest) => manifest.repositories
   );
-  let res: PackageDependency[] | null = null;
+  let res: PackageDependency<FluxManagerData>[] | null = null;
   switch (manifest.kind) {
     case 'system':
       res = [
@@ -91,7 +96,7 @@ function resolveManifest(
       break;
     case 'resource':
       res = manifest.releases.map((release) => {
-        const dep: PackageDependency = {
+        const dep: PackageDependency<FluxManagerData> = {
           depName: release.spec.chart.spec.chart,
           currentValue: release.spec.chart.spec.version,
           datasource: HelmDatasource.id,
@@ -122,7 +127,7 @@ function resolveManifest(
 export function extractPackageFile(
   content: string,
   packageFile: string
-): PackageFile | null {
+): PackageFile<FluxManagerData> | null {
   const manifest = readManifest(content, packageFile);
   if (!manifest) {
     return null;
@@ -134,9 +139,9 @@ export function extractPackageFile(
 export async function extractAllPackageFiles(
   _config: ExtractConfig,
   packageFiles: string[]
-): Promise<PackageFile[] | null> {
+): Promise<PackageFile<FluxManagerData>[] | null> {
   const manifests: FluxManifest[] = [];
-  const results: PackageFile[] = [];
+  const results: PackageFile<FluxManagerData>[] = [];
 
   for (const file of packageFiles) {
     const content = await readLocalFile(file, 'utf8');
