@@ -23,7 +23,7 @@ flowchart TB
     subgraph initializeRepository
     X[initRepo]
     X--> P[InitializeConfig]
-    X--> Q[InititalizeCaches]
+    X--> Q[InitializeCaches]
     X--> R[initApis]
     X--> S[getRepoConfig]
     X--> T[checkIfConfigured]

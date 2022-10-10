@@ -33,8 +33,10 @@ export function mockedFunction<T extends (...args: any[]) => any>(
  * Simply wrapper to create partial mocks.
  * @param obj Object to cast to final type
  */
-export function partial<T>(obj: Partial<T>): T {
-  return obj as T;
+export function partial<T>(obj: Partial<T>): T;
+export function partial<T>(obj: Partial<T>[]): T[];
+export function partial(obj: unknown): unknown {
+  return obj;
 }
 
 export const fs = mocked(_fs);

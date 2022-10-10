@@ -4,6 +4,7 @@ import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import * as packageCache from '../../../util/cache/package';
 import type { Http } from '../../../util/http';
+import { regEx } from '../../../util/regex';
 import { joinUrlParts } from '../../../util/url';
 import { id } from './common';
 import type { NpmDependency, NpmRelease, NpmResponse } from './types';
@@ -13,11 +14,27 @@ interface PackageSource {
   sourceDirectory?: string;
 }
 
+const SHORT_REPO_REGEX = regEx(
+  /^((?<platform>bitbucket|github|gitlab):)?(?<shortRepo>[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+)$/
+);
+
+const platformMapping: Record<string, string> = {
+  bitbucket: 'https://bitbucket.org/',
+  github: 'https://github.com/',
+  gitlab: 'https://gitlab.com/',
+};
+
 function getPackageSource(repository: any): PackageSource {
   const res: PackageSource = {};
   if (repository) {
     if (is.nonEmptyString(repository)) {
-      res.sourceUrl = repository;
+      const shortMatch = repository.match(SHORT_REPO_REGEX);
+      if (shortMatch?.groups) {
+        const { platform = 'github', shortRepo } = shortMatch.groups;
+        res.sourceUrl = platformMapping[platform] + shortRepo;
+      } else {
+        res.sourceUrl = repository;
+      }
     } else if (is.nonEmptyString(repository.url)) {
       res.sourceUrl = repository.url;
     }

@@ -20,6 +20,7 @@ describe('workers/repository/update/branch/reuse', () => {
       config = {
         manager: 'some-manager',
         branchName: 'renovate/some-branch',
+        baseBranch: 'base',
         rebaseLabel: 'rebase',
         rebaseWhen: 'behind-base-branch',
         upgrades: [],
