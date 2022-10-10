@@ -288,7 +288,7 @@ describe('modules/manager/bazel/rules/index', () => {
     });
   });
 
-  describe('extractDepFromTarget', () => {
+  describe('extractDepFromFragment', () => {
     it('returns null for unknown rule type', () => {
       expect(
         extractDepFromFragment({

@@ -1,8 +1,8 @@
 import { logger } from '../../../logger';
 import type { PackageDependency, PackageFile } from '../types';
 import { parse } from './parser';
-import type { ArrayFragment } from './types';
 import { extractDepFromFragment } from './rules';
+import type { ArrayFragment } from './types';
 
 export function extractPackageFile(
   content: string,
