@@ -8,7 +8,7 @@ export function getCachedConflictResult(
   baseBranchSha: string | null
 ): boolean | null {
   const cache = getCache();
-  if (!cache.gitConflicts) {
+  if (cache.gitConflicts) {
     delete cache.gitConflicts;
   }
 
