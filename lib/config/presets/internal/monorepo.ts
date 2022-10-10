@@ -31,6 +31,10 @@ const repoGroups = {
   'aspnet aspnetwebstack': 'https://github.com/aspnet/AspNetWebStack',
   'aspnet extensions': 'https://github.com/aspnet/Extensions',
   'aspnet-api-versioning': 'https://github.com/Microsoft/aspnet-api-versioning',
+  'automapper-dotnet': [
+    'https://github.com/AutoMapper/AutoMapper',
+    'https://github.com/AutoMapper/AutoMapper.Extensions.Microsoft.DependencyInjection',
+  ],
   'aws-cdk': 'https://github.com/aws/aws-cdk',
   'aws-sdk-js-v3': 'https://github.com/aws/aws-sdk-js-v3',
   'aws-sdk-net': 'https://github.com/aws/aws-sdk-net',
@@ -74,6 +78,8 @@ const repoGroups = {
   'ember-decorators': 'https://github.com/ember-decorators/ember-decorators',
   emojibase: 'https://github.com/milesj/emojibase',
   emotion: 'https://github.com/emotion-js/emotion',
+  'eslint-config-globex':
+    'https://github.com/GlobexDesignsInc/eslint-config-globex',
   expo: 'https://github.com/expo/expo',
   feathers: 'https://github.com/feathersjs/feathers',
   feign: 'https://github.com/OpenFeign/feign',

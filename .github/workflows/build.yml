@@ -54,7 +54,7 @@ jobs:
       NODE_VERSION: ${{ matrix.node-version }}
 
     steps:
-      - uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b # tag=v3.0.2
+      - uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8 # tag=v3.1.0
         with:
           fetch-depth: 2
 
@@ -83,6 +83,12 @@ jobs:
       - name: Build
         run: yarn build
 
+      - name: Cache jest cache
+        uses: actions/cache@56461b9eb0f8438fd15c7a9968e3c9ebb18ceff1 # tag=v3.0.10
+        with:
+          path: .cache/jest
+          key: ${{ runner.os }}-${{ matrix.node-version }}-jest-${{ hashFiles('yarn.lock') }}
+
       - name: Unit tests
         run: yarn jest --ci --coverage ${{ env.coverage }}
 
@@ -100,7 +106,7 @@ jobs:
     timeout-minutes: 15
 
     steps:
-      - uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b # tag=v3.0.2
+      - uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8 # tag=v3.1.0
         with:
           fetch-depth: 2
 
@@ -154,7 +160,7 @@ jobs:
 
     steps:
       # full checkout for semantic-release
-      - uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b # tag=v3.0.2
+      - uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8 # tag=v3.1.0
         with:
           fetch-depth: 0
 
