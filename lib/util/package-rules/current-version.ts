@@ -18,12 +18,8 @@ export class CurrentVersionMatcher extends Matcher {
     if (is.undefined(matchCurrentVersion)) {
       return null;
     }
-
-    if (is.nullOrUndefined(currentValue)) {
-      return false;
-    }
-
-    const isUnconstrainedValue = !!lockedVersion;
+    const isUnconstrainedValue =
+      !!lockedVersion && is.nullOrUndefined(currentValue);
     const version = allVersioning.get(versioning);
     const matchCurrentVersionStr = matchCurrentVersion.toString();
     const matchCurrentVersionPred = configRegexPredicate(
@@ -31,13 +27,20 @@ export class CurrentVersionMatcher extends Matcher {
     );
 
     if (matchCurrentVersionPred) {
-      return !(!isUnconstrainedValue && !matchCurrentVersionPred(currentValue));
+      const compareVersion = lockedVersion ?? currentVersion ?? currentValue;
+      return (
+        !is.nullOrUndefined(compareVersion) &&
+        matchCurrentVersionPred(compareVersion)
+      );
     }
     if (version.isVersion(matchCurrentVersionStr)) {
       try {
         return (
           isUnconstrainedValue ||
-          version.matches(matchCurrentVersionStr, currentValue)
+          !!(
+            currentValue &&
+            version.matches(matchCurrentVersionStr, currentValue)
+          )
         );
       } catch (err) {
         return false;
@@ -47,7 +50,7 @@ export class CurrentVersionMatcher extends Matcher {
     const compareVersion = version.isVersion(currentValue)
       ? currentValue // it's a version so we can match against it
       : lockedVersion ?? currentVersion; // need to match against this currentVersion, if available
-    if (is.undefined(compareVersion)) {
+    if (is.nullOrUndefined(compareVersion)) {
       return false;
     }
     if (version.isVersion(compareVersion)) {

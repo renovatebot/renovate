@@ -1,9 +1,10 @@
 import is from '@sindresorhus/is';
+import { DateTime } from 'luxon';
 import moo from 'moo';
 import { logger } from '../../../logger';
 import { cache } from '../../../util/cache/package/decorator';
 import * as p from '../../../util/promises';
-import { regEx } from '../../../util/regex';
+import { newlineRegex, regEx } from '../../../util/regex';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
 import { BaseGoDatasource } from './base';
@@ -51,8 +52,14 @@ export class GoProxyDatasource extends Datasource {
           break;
         }
 
-        const versions = await this.listVersions(url, packageName);
-        const queue = versions.map((version) => async (): Promise<Release> => {
+        const releasesIndex = await this.listVersions(url, packageName);
+        const releases = await p.map(releasesIndex, async (versionInfo) => {
+          const { version, releaseTimestamp } = versionInfo;
+
+          if (releaseTimestamp) {
+            return { version, releaseTimestamp };
+          }
+
           try {
             return await this.versionInfo(url, packageName, version);
           } catch (err) {
@@ -60,11 +67,18 @@ export class GoProxyDatasource extends Datasource {
             return { version };
           }
         });
-        const releases = await p.all(queue);
         if (releases.length) {
-          const datasource = await BaseGoDatasource.getDatasource(packageName);
-          const sourceUrl = getSourceUrl(datasource);
-          result = { releases, sourceUrl };
+          try {
+            const datasource = await BaseGoDatasource.getDatasource(
+              packageName
+            );
+            const sourceUrl = getSourceUrl(datasource);
+            result = { releases, sourceUrl };
+          } catch (err) {
+            logger.trace({ err }, `Can't get datasource for ${packageName}`);
+            result = { releases };
+          }
+
           break;
         }
       } catch (err) {
@@ -198,13 +212,18 @@ export class GoProxyDatasource extends Datasource {
     return input.replace(regEx(/([A-Z])/g), (x) => `!${x.toLowerCase()}`);
   }
 
-  async listVersions(baseUrl: string, packageName: string): Promise<string[]> {
+  async listVersions(baseUrl: string, packageName: string): Promise<Release[]> {
     const url = `${baseUrl}/${this.encodeCase(packageName)}/@v/list`;
     const { body } = await this.http.get(url);
     return body
-      .split(regEx(/\s+/))
-      .filter(Boolean)
-      .filter((x) => x.indexOf('+') === -1);
+      .split(newlineRegex)
+      .filter(is.nonEmptyStringAndNotWhitespace)
+      .map((str) => {
+        const [version, releaseTimestamp] = str.split(regEx(/\s+/));
+        return DateTime.fromISO(releaseTimestamp).isValid
+          ? { version, releaseTimestamp }
+          : { version };
+      });
   }
 
   async versionInfo(

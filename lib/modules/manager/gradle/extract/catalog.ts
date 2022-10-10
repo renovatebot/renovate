@@ -88,7 +88,7 @@ function extractVersion({
     });
   } else {
     return extractLiteralVersion({
-      version: version,
+      version,
       depStartIndex,
       depSubContent,
       sectionKey: depName,
