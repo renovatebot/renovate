@@ -206,7 +206,7 @@ describe('workers/repository/process/write', () => {
     });
 
     it('caches same fingerprint when no commit is made and branch cache existed', async () => {
-      const branches = partial<BranchConfig[]>([
+      const branches: BranchConfig[] = [
         {
           branchName: 'new/some-branch',
           baseBranch: 'base_branch',
@@ -217,7 +217,7 @@ describe('workers/repository/process/write', () => {
             } as BranchUpgradeConfig,
           ],
         },
-      ]);
+      ];
       const branchManagersFingerprint = hasha(
         [
           ...new Set(
@@ -484,9 +484,9 @@ describe('workers/repository/process/write', () => {
     });
 
     it('no change if all parameters are same', () => {
-      const repoCacheObj = {
+      const repoCacheObj: RepoCacheData = {
         branches: [
-          partial<BranchCache>({
+          {
             branchName: 'branch_name',
             sha: 'sha',
             baseBranch: 'base_branch',
@@ -495,7 +495,11 @@ describe('workers/repository/process/write', () => {
             isModified: true,
             isConflicted: true,
             branchFingerprint: '123',
-          }),
+            upgrades: [],
+            automerge: false,
+            prNo: null,
+            parentSha: null,
+          },
         ],
       };
       repoCache.getCache.mockReturnValue(repoCacheObj);
@@ -510,6 +514,10 @@ describe('workers/repository/process/write', () => {
         isModified: true,
         isConflicted: true,
         branchFingerprint: '123',
+        upgrades: [],
+        automerge: false,
+        prNo: null,
+        parentSha: null,
       });
     });
   });
