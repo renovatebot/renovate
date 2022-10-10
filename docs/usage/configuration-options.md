@@ -83,7 +83,7 @@ By default, the value for this config option is an empty string.
 Normally you don't need to set this config option.
 
 Here's an example where `additionalBranchPrefix` can help you.
-Say you're using a monorepo and want to split pull requests based on the location of the package definition.
+Say you're using a monorepo and want to split pull requests based on the location of the package definition, so that individual teams can manage their own Renovate Pull Requests.
 This can be done with this configuration:
 
 ```json
