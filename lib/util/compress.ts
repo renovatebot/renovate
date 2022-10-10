@@ -11,6 +11,6 @@ export async function compress(input: string): Promise<string> {
 
 export async function decompress(input: string): Promise<string> {
   const buf = Buffer.from(input, 'base64');
-  const res = await brotliDecompress(buf);
-  return res.toString('utf8');
+  const str = await brotliDecompress(buf);
+  return str.toString('utf8');
 }
