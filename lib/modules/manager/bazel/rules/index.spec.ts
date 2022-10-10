@@ -1,13 +1,10 @@
-import {
-  dockerDependency,
-  extractDepFromTarget,
-  gitDependency,
-  goDependency,
-  httpDependency,
-  parseArchiveUrl,
-} from './common';
+import { dockerDependency } from './docker';
+import { gitDependency } from './git';
+import { goDependency } from './go';
+import { httpDependency, parseArchiveUrl } from './http';
+import { extractDepFromFragment } from '.';
 
-describe('modules/manager/bazel/common', () => {
+describe('modules/manager/bazel/rules/index', () => {
   test('parseUrl', () => {
     expect(parseArchiveUrl('')).toBeNull();
     expect(parseArchiveUrl(null)).toBeNull();
@@ -293,16 +290,35 @@ describe('modules/manager/bazel/common', () => {
 
   describe('extractDepFromTarget', () => {
     it('returns null for unknown rule type', () => {
-      expect(extractDepFromTarget({ rule: 'foo', name: 'bar' })).toBeNull();
+      expect(
+        extractDepFromFragment({
+          type: 'record',
+          value: '',
+          offset: 0,
+          children: {
+            rule: { type: 'string', value: 'foo', offset: 0 },
+            name: { type: 'string', value: 'bar', offset: 0 },
+          },
+        })
+      ).toBeNull();
     });
 
     it('extracts from git_repository', () => {
       expect(
-        extractDepFromTarget({
-          rule: 'git_repository',
-          name: 'foo_bar',
-          tag: '1.2.3',
-          remote: 'https://github.com/foo/bar',
+        extractDepFromFragment({
+          type: 'record',
+          value: '',
+          offset: 0,
+          children: {
+            rule: { type: 'string', value: 'git_repository', offset: 0 },
+            name: { type: 'string', value: 'foo_bar', offset: 0 },
+            tag: { type: 'string', value: '1.2.3', offset: 0 },
+            remote: {
+              type: 'string',
+              value: 'https://github.com/foo/bar',
+              offset: 0,
+            },
+          },
         })
       ).toEqual({
         datasource: 'github-releases',
@@ -315,14 +331,33 @@ describe('modules/manager/bazel/common', () => {
 
     it('extracts from http_archive', () => {
       expect(
-        extractDepFromTarget({
-          rule: 'http_archive',
-          name: 'rules_nodejs',
-          sha256:
-            '5aef09ed3279aa01d5c928e3beb248f9ad32dde6aafe6373a8c994c3ce643064',
-          urls: [
-            'https://github.com/bazelbuild/rules_nodejs/releases/download/5.5.3/rules_nodejs-core-5.5.3.tar.gz',
-          ],
+        extractDepFromFragment({
+          type: 'record',
+          value: '',
+          offset: 0,
+          children: {
+            rule: { type: 'string', value: 'http_archive', offset: 0 },
+            name: { type: 'string', value: 'rules_nodejs', offset: 0 },
+            sha256: {
+              type: 'string',
+              value:
+                '5aef09ed3279aa01d5c928e3beb248f9ad32dde6aafe6373a8c994c3ce643064',
+              offset: 0,
+            },
+            urls: {
+              type: 'array',
+              value: '',
+              offset: 0,
+              children: [
+                {
+                  type: 'string',
+                  offset: 0,
+                  value:
+                    'https://github.com/bazelbuild/rules_nodejs/releases/download/5.5.3/rules_nodejs-core-5.5.3.tar.gz',
+                },
+              ],
+            },
+          },
         })
       ).toEqual({
         datasource: 'github-releases',

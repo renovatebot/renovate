@@ -1,7 +1,7 @@
 import { lang, lexer, parser, query as q } from 'good-enough-parser';
 import hasha from 'hasha';
 import * as memCache from '../../../util/cache/memory';
-import { supportedRulesRegex } from './common';
+import { supportedRulesRegex } from './rules/index';
 import type { ArrayFragment, NestedFragment, RecordFragment } from './types';
 
 interface Ctx {

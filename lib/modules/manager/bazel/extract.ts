@@ -1,8 +1,8 @@
 import { logger } from '../../../logger';
 import type { PackageDependency, PackageFile } from '../types';
-import { coerceFragmentToTarget, extractDepFromTarget } from './common';
 import { parse } from './parser';
 import type { ArrayFragment } from './types';
+import { extractDepFromFragment } from './rules';
 
 export function extractPackageFile(
   content: string,
@@ -23,12 +23,8 @@ export function extractPackageFile(
 
   for (let idx = 0; idx < parsed.children.length; idx += 1) {
     const fragment = parsed.children[idx];
-    const target = coerceFragmentToTarget(fragment);
-    if (!target) {
-      continue;
-    }
 
-    const dep = extractDepFromTarget(target);
+    const dep = extractDepFromFragment(fragment);
     if (!dep) {
       continue;
     }
