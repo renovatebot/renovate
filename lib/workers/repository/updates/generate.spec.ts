@@ -2,7 +2,7 @@ import { getConfig } from '../../../../test/util';
 import type { RenovateConfig, UpdateType } from '../../../config/types';
 import { NpmDatasource } from '../../../modules/datasource/npm';
 import type { BranchUpgradeConfig } from '../../types';
-import { generateBranchConfig, getDisplayFrom } from './generate';
+import { generateBranchConfig } from './generate';
 
 let defaultConfig: RenovateConfig;
 
@@ -1134,17 +1134,4 @@ describe('workers/repository/updates/generate', () => {
       );
     });
   });
-
-  it.each`
-    currentValue | returnValue
-    ${'1.0.0'}   | ${'1.0.0'}
-    ${''}        | ${'""'}
-    ${undefined} | ${undefined}
-    ${null}      | ${undefined}
-  `(
-    'getFromDisplay($currentValue)=$returnValue',
-    ({ currentValue, returnValue }) => {
-      expect(getDisplayFrom(currentValue)).toBe(returnValue);
-    }
-  );
 });

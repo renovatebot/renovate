@@ -38,7 +38,7 @@
         {
           "depType": "dependencies",
           "depName": "cookie-parser",
-          "currentValue": "",
+          "currentValue": "^1.4.5",
           "datasource": "npm",
           "prettyDepType": "dependency",
           "depIndex": 0,
@@ -46,7 +46,7 @@
           "warnings": [],
           "versioning": "npm",
           "sourceUrl": "https://github.com/expressjs/cookie-parser",
-          "currentVersion": ""
+          "currentVersion": "1.4.6"
         },
         {
           "depType": "dependencies",

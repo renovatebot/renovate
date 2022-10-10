@@ -335,7 +335,7 @@ describe('workers/repository/process/lookup/index', () => {
     });
 
     it('supports minor, major and pinning for x-range "all versions" value (with lockfile)', async () => {
-      config.currentValue = '';
+      config.currentValue = '*';
       config.rangeStrategy = 'pin';
       config.lockedVersion = '0.4.0';
       config.depName = 'q';

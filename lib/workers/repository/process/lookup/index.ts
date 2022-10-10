@@ -206,7 +206,7 @@ export async function lookupUpdates(
       }
       res.currentVersion = currentVersion!;
       if (
-        is.string(currentValue) &&
+        currentValue &&
         currentVersion &&
         rangeStrategy === 'pin' &&
         !versioning.isSingleVersion(currentValue)
@@ -444,10 +444,11 @@ function isNpmXRangeAll(
   currentValue: string | undefined,
   config: LookupUpdateConfig
 ): boolean {
+  const { versioning, manager } = config;
   if (is.nullOrUndefined(currentValue)) {
     return false;
   }
-  if (config.versioning !== 'npm') {
+  if (versioning !== 'npm' || manager !== 'npm') {
     return false;
   }
   return isSemVerXRange(currentValue);

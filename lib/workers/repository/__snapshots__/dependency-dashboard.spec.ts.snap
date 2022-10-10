@@ -56,7 +56,7 @@ This repository currently has no open or pending branches.
 
 <details><summary>package.json</summary>
 
- - \`cookie-parser "" (="*")\`
+ - \`cookie-parser ^1.4.5\`
  - \`express ~4.17.1\`
  - \`express-handlebars >=5.3.4\`
  - \`geoip-lite 1.4.*\`
@@ -115,7 +115,7 @@ This repository currently has no open or pending branches.
 
 <details><summary>package.json</summary>
 
- - \`cookie-parser "" (="*")\`
+ - \`cookie-parser ^1.4.5\`
  - \`express ~4.17.1\`
  - \`express-handlebars >=5.3.4\`
  - \`geoip-lite 1.4.*\`
@@ -164,7 +164,7 @@ This repository currently has no open or pending branches.
 
 <details><summary>package.json</summary>
 
- - \`cookie-parser "" (="*")\`
+ - \`cookie-parser ^1.4.5\`
  - \`express ~4.17.1\`
  - \`express-handlebars >=5.3.4\`
  - \`geoip-lite 1.4.*\`
@@ -231,7 +231,7 @@ None detected
 
 <details><summary>package.json</summary>
 
- - \`cookie-parser "" (="*")\`
+ - \`cookie-parser ^1.4.5\`
  - \`express ~4.17.1\`
  - \`express-handlebars >=5.3.4\`
  - \`geoip-lite 1.4.*\`
@@ -298,7 +298,7 @@ None detected
 
 <details><summary>package.json</summary>
 
- - \`cookie-parser "" (="*")\`
+ - \`cookie-parser ^1.4.5\`
  - \`express ~4.17.1\`
  - \`express-handlebars >=5.3.4\`
  - \`geoip-lite 1.4.*\`
@@ -354,7 +354,7 @@ This repository currently has no open or pending branches.
 
 <details><summary>package.json</summary>
 
- - \`cookie-parser "" (="*")\`
+ - \`cookie-parser ^1.4.5\`
  - \`express ~4.17.1\`
  - \`express-handlebars >=5.3.4\`
  - \`geoip-lite 1.4.*\`

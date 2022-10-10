@@ -1,4 +1,3 @@
-import is from '@sindresorhus/is';
 import { logger } from '../../../../logger';
 import type { Release } from '../../../../modules/datasource';
 import type { LookupUpdate } from '../../../../modules/manager/types';
@@ -40,7 +39,7 @@ export function generateUpdate(
   }
 
   const { currentValue } = config;
-  if (is.string(currentValue)) {
+  if (currentValue) {
     try {
       update.newValue = versioning.getNewValue({
         currentValue,
