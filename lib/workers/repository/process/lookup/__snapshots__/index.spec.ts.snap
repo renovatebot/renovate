@@ -1,5 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`workers/repository/process/lookup/index .lookupUpdates() covers pinning an unsupported x-range-all value 1`] = `[]`;
+
 exports[`workers/repository/process/lookup/index .lookupUpdates() disables major release separation (major) 1`] = `
 [
   {

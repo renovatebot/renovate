@@ -448,7 +448,7 @@ function isNpmXRangeAll(
   config: LookupUpdateConfig
 ): boolean {
   const { versioning, manager } = config;
-  if (is.nullOrUndefined(currentValue)) {
+  if (!currentValue) {
     return false;
   }
   if (manager !== 'npm' || versioning !== 'npm') {

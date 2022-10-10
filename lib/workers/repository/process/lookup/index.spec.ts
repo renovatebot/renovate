@@ -390,6 +390,15 @@ describe('workers/repository/process/lookup/index', () => {
       ]);
     });
 
+    it('covers pinning an unsupported x-range-all value', async () => {
+      config.currentValue = '';
+      config.rangeStrategy = 'pin';
+      config.depName = 'q';
+      config.datasource = NpmDatasource.id;
+      httpMock.scope('https://registry.npmjs.org').get('/q').reply(200, qJson);
+      expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot([]);
+    });
+
     it.each`
       strategy
       ${'widen'}
