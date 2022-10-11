@@ -1,4 +1,4 @@
-import { ZodEffects, ZodObject, z } from 'zod';
+import { ZodObject, z } from 'zod';
 import { regEx } from '../../../../util/regex';
 import type { PackageDependency } from '../../types';
 import { extract } from '../parser';

@@ -44,7 +44,7 @@ describe('modules/manager/bazel/parser', () => {
         },
       ],
     });
-    expect(extract(res)).toMatchObject([
+    expect(extract(res!)).toMatchObject([
       { rule: 'go_repository', name: 'foo' },
       { rule: 'go_repository', name: 'bar', deps: ['baz', 'qux'] },
     ]);
@@ -104,7 +104,7 @@ describe('modules/manager/bazel/parser', () => {
         },
       ],
     });
-    expect(extract(res)).toMatchObject([
+    expect(extract(res!)).toMatchObject([
       {
         rule: 'http_archive',
         name: 'aspect_rules_js',
@@ -152,7 +152,7 @@ describe('modules/manager/bazel/parser', () => {
         },
       ],
     });
-    expect(extract(res)).toMatchObject([
+    expect(extract(res!)).toMatchObject([
       {
         rule: 'http_archive',
         name: 'rules_nodejs',
@@ -206,7 +206,7 @@ describe('modules/manager/bazel/parser', () => {
         },
       ],
     });
-    expect(extract(res)).toMatchObject([
+    expect(extract(res!)).toMatchObject([
       {
         name: 'bazel_toolchains',
         rule: 'http_archive',
@@ -220,9 +220,5 @@ describe('modules/manager/bazel/parser', () => {
         ],
       },
     ]);
-  });
-
-  it('extracts null from null', () => {
-    expect(extract(null)).toBeNull();
   });
 });
