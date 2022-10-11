@@ -1,3 +1,4 @@
+import upath from 'upath';
 import { logger } from '../../../logger';
 import { DockerDatasource } from '../../datasource/docker';
 import type { PackageDependency } from '../types';
@@ -94,4 +95,8 @@ export function aliasRecordToRepositories(
       repository: url,
     };
   });
+}
+
+export function isFileInDir(dir: string, file: string): boolean {
+  return upath.dirname(file) === dir;
 }
