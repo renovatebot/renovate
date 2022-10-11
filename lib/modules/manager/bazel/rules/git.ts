@@ -12,9 +12,11 @@ function githubPackageName(input: string): string | undefined {
   return parseGithubUrl(input)?.match(githubUrlRegex)?.groups?.packageName;
 }
 
+export const gitRules = ['git_repository'] as const;
+
 export const GitTarget = z
   .object({
-    rule: z.enum(['git_repository']),
+    rule: z.enum(gitRules),
     name: z.string(),
     tag: z.string().optional(),
     commit: z.string().optional(),

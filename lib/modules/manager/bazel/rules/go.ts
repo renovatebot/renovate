@@ -3,9 +3,11 @@ import { regEx } from '../../../../util/regex';
 import { GoDatasource } from '../../../datasource/go';
 import type { PackageDependency } from '../../types';
 
+export const goRules = ['go_repository'] as const;
+
 export const GoTarget = z
   .object({
-    rule: z.enum(['go_repository']),
+    rule: z.enum(goRules),
     name: z.string(),
     tag: z.string().optional(),
     commit: z.string().optional(),

@@ -51,9 +51,11 @@ export function parseArchiveUrl(
   return null;
 }
 
+export const httpRules = ['http_archive', 'http_file'] as const;
+
 export const HttpTarget = z
   .object({
-    rule: z.enum(['http_archive', 'http_file']),
+    rule: z.enum(httpRules),
     name: z.string(),
     url: z.string().optional(),
     urls: z.array(z.string()).optional(),
