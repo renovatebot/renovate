@@ -232,7 +232,7 @@ const repoGroups = {
   workbox: 'https://github.com/googlechrome/workbox',
   xterm: 'https://github.com/xtermjs/xterm.js',
   'xunit-dotnet': 'https://github.com/xunit/xunit',
-  'yarn': 'https://github.com/yarnpkg/berry',
+  yarn: 'https://github.com/yarnpkg/berry',
   'zxing-net': 'https://github.com/micjahn/ZXing.Net',
 };
 
