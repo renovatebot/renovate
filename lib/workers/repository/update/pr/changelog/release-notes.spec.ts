@@ -196,7 +196,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
         },
         {} as ChangeLogRelease
       );
-      expect(res).toMatchSnapshot([
+      expect(res).toMatchObject([
         {
           notesSourceUrl:
             'https://api.github.com/repos/some/yet-other-repository/releases',
@@ -231,7 +231,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
         },
         {} as ChangeLogRelease
       );
-      expect(res).toMatchSnapshot([
+      expect(res).toMatchObject([
         {
           notesSourceUrl:
             'https://gitlab.com/api/v4/projects/some%2Fyet-other-repository/releases',
@@ -270,7 +270,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
         },
         {} as ChangeLogRelease
       );
-      expect(res).toMatchSnapshot([
+      expect(res).toMatchObject([
         {
           notesSourceUrl:
             'https://my.custom.domain/api/v4/projects/some%2Fyet-other-repository/releases',

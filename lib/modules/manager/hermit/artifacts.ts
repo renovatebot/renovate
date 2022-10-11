@@ -220,7 +220,7 @@ async function updateHermitPackage(update: UpdateArtifact): Promise<void> {
   logger.debug(
     {
       packageFile: update.packageFileName,
-      packagesToInstall: packagesToInstall,
+      packagesToInstall,
     },
     `performing updates`
   );

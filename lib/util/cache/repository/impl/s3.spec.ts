@@ -12,7 +12,7 @@ import { partial } from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
 import { logger } from '../../../../logger';
 import { parseS3Url } from '../../../s3';
-import type { RepoCacheRecord } from '../types';
+import type { RepoCacheRecord } from '../schemas';
 import { CacheFactory } from './cache-factory';
 import { RepoCacheS3 } from './s3';
 
