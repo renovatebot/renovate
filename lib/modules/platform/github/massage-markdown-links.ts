@@ -2,7 +2,6 @@ import type { Content } from 'mdast';
 import remark from 'remark';
 import type { Plugin, Transformer } from 'unified';
 import { logger } from '../../../logger';
-import { hasKey } from '../../../util/object';
 import { regEx } from '../../../util/regex';
 
 interface UrlMatch {
@@ -44,7 +43,7 @@ function collectLinkPosition(input: string, matches: UrlMatch[]): Plugin {
         const newUrl = massageLink(url);
         matches.push({ start, end, replaceTo: `[${url}](${newUrl})` });
       }
-    } else if (hasKey('children', tree)) {
+    } else if ('children' in tree) {
       tree.children.forEach((child: Content) => {
         transformer(child);
       });

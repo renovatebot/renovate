@@ -38,8 +38,8 @@ process.on('unhandledRejection', (err) => {
     logger.info('* platforms');
     await generatePlatforms(dist);
 
-    // versionigs
-    logger.info('* versionigs');
+    // versionings
+    logger.info('* versionings');
     await generateVersioning(dist);
 
     // datasources

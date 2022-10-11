@@ -7,6 +7,7 @@ import { PlatformId } from '../../../constants/platforms';
 import * as docker from '../../../util/exec/docker';
 import type { StatusResult } from '../../../util/git/types';
 import * as _hostRules from '../../../util/host-rules';
+import * as _datasource from '../../datasource';
 import type { UpdateArtifactsConfig } from '../types';
 import * as gomod from '.';
 
@@ -15,9 +16,11 @@ jest.mock('../../../util/git');
 jest.mock('../../../util/host-rules');
 jest.mock('../../../util/http');
 jest.mock('../../../util/fs');
+jest.mock('../../datasource');
 
 process.env.BUILDPACK = 'true';
 
+const datasource = mocked(_datasource);
 const hostRules = mocked(_hostRules);
 
 const gomod1 = `module github.com/renovate-tests/gomod1
@@ -964,6 +967,7 @@ describe('modules/manager/gomod/artifacts', () => {
     const execSnapshots = mockExecAll();
     fs.readLocalFile.mockResolvedValueOnce('Current go.sum');
     fs.readLocalFile.mockResolvedValueOnce(null); // vendor modules filename
+    fs.readLocalFile.mockResolvedValueOnce('go.mod file');
     fs.writeLocalFile.mockImplementationOnce(() => {
       throw new Error('This update totally doesnt work');
     });
@@ -1143,6 +1147,7 @@ describe('modules/manager/gomod/artifacts', () => {
   it('updates import paths with specific tool version from constraint', async () => {
     fs.readLocalFile.mockResolvedValueOnce('Current go.sum');
     fs.readLocalFile.mockResolvedValueOnce(null); // vendor modules filename
+    fs.readLocalFile.mockResolvedValueOnce('go.mod file');
     const execSnapshots = mockExecAll();
     git.getRepoStatus.mockResolvedValueOnce({
       modified: ['go.sum', 'main.go'],
@@ -1198,6 +1203,7 @@ describe('modules/manager/gomod/artifacts', () => {
   it('updates import paths with latest tool version on invalid version constraint', async () => {
     fs.readLocalFile.mockResolvedValueOnce('Current go.sum');
     fs.readLocalFile.mockResolvedValueOnce(null); // vendor modules filename
+    fs.readLocalFile.mockResolvedValueOnce('go.mod file');
     const execSnapshots = mockExecAll();
     git.getRepoStatus.mockResolvedValueOnce({
       modified: ['go.sum', 'main.go'],
@@ -1290,5 +1296,134 @@ describe('modules/manager/gomod/artifacts', () => {
         options: { cwd: '/tmp/github/some/repo' },
       },
     ]);
+  });
+
+  it('gomod file and config do not contain GoConstraints', async () => {
+    GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
+    fs.readLocalFile.mockResolvedValueOnce('Current go.sum');
+    fs.readLocalFile.mockResolvedValueOnce(null); // vendor modules filename
+    fs.readLocalFile.mockResolvedValueOnce(null);
+    const execSnapshots = mockExecAll();
+    git.getRepoStatus.mockResolvedValueOnce({
+      modified: ['go.sum', 'main.go'],
+    } as StatusResult);
+    fs.readLocalFile
+      .mockResolvedValueOnce('New go.sum')
+      .mockResolvedValueOnce('New main.go')
+      .mockResolvedValueOnce('New go.mod');
+    const res = await gomod.updateArtifacts({
+      packageFileName: 'go.mod',
+      updatedDeps: [{ depName: 'github.com/google/go-github/v24' }],
+      newPackageFileContent: gomod1,
+      config: {
+        updateType: 'major',
+        newMajor: 28,
+        postUpdateOptions: ['gomodUpdateImportPaths'],
+      },
+    });
+    expect(res).toEqual([
+      { file: { type: 'addition', path: 'go.sum', contents: 'New go.sum' } },
+      { file: { type: 'addition', path: 'main.go', contents: 'New main.go' } },
+      { file: { type: 'addition', path: 'go.mod', contents: 'New go.mod' } },
+    ]);
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'go get -d -t ./...',
+        options: { cwd: '/tmp/github/some/repo' },
+      },
+      {
+        cmd: 'go install github.com/marwan-at-work/mod/cmd/mod@latest',
+        options: { cwd: '/tmp/github/some/repo' },
+      },
+      {
+        cmd: 'mod upgrade --mod-name=github.com/google/go-github/v24 -t=28',
+        options: { cwd: '/tmp/github/some/repo' },
+      },
+      {
+        cmd: 'go mod tidy',
+        options: { cwd: '/tmp/github/some/repo' },
+      },
+      {
+        cmd: 'go mod tidy',
+        options: { cwd: '/tmp/github/some/repo' },
+      },
+    ]);
+  });
+
+  it('go.mod file contains go version', async () => {
+    GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
+    fs.readLocalFile.mockResolvedValueOnce('Current go.sum');
+    fs.readLocalFile.mockResolvedValueOnce(null); // vendor modules filename
+    fs.readLocalFile.mockResolvedValueOnce('someText\n\ngo 1.17\n\n');
+    const execSnapshots = mockExecAll();
+    git.getRepoStatus.mockResolvedValueOnce({
+      modified: ['go.sum', 'main.go'],
+    } as StatusResult);
+    fs.readLocalFile
+      .mockResolvedValueOnce('New go.sum')
+      .mockResolvedValueOnce('New main.go')
+      .mockResolvedValueOnce('New go.mod');
+    datasource.getPkgReleases.mockResolvedValueOnce({
+      releases: [{ version: '1.17.0' }, { version: '1.14.0' }],
+    });
+    const res = await gomod.updateArtifacts({
+      packageFileName: 'go.mod',
+      updatedDeps: [{ depName: 'github.com/google/go-github/v24' }],
+      newPackageFileContent: gomod1,
+      config: {
+        updateType: 'major',
+        newMajor: 28,
+        postUpdateOptions: ['gomodUpdateImportPaths'],
+      },
+    });
+
+    expect(res).toEqual([
+      { file: { type: 'addition', path: 'go.sum', contents: 'New go.sum' } },
+      { file: { type: 'addition', path: 'main.go', contents: 'New main.go' } },
+      { file: { type: 'addition', path: 'go.mod', contents: 'New go.mod' } },
+    ]);
+    const expectedResult = {
+      cmd: 'docker pull renovate/go:1.17.0',
+    };
+    expect(execSnapshots[0]).toMatchObject(expectedResult);
+  });
+
+  it('config contains go version', async () => {
+    GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
+    fs.readLocalFile.mockResolvedValueOnce('Current go.sum');
+    fs.readLocalFile.mockResolvedValueOnce(null); // vendor modules filename
+    const execSnapshots = mockExecAll();
+    git.getRepoStatus.mockResolvedValueOnce({
+      modified: ['go.sum', 'main.go'],
+    } as StatusResult);
+    fs.readLocalFile
+      .mockResolvedValueOnce('New go.sum')
+      .mockResolvedValueOnce('New main.go')
+      .mockResolvedValueOnce('New go.mod');
+    datasource.getPkgReleases.mockResolvedValueOnce({
+      releases: [{ version: '1.17.0' }, { version: '1.14.0' }],
+    });
+    const res = await gomod.updateArtifacts({
+      packageFileName: 'go.mod',
+      updatedDeps: [{ depName: 'github.com/google/go-github/v24' }],
+      newPackageFileContent: gomod1,
+      config: {
+        updateType: 'major',
+        newMajor: 28,
+        postUpdateOptions: ['gomodUpdateImportPaths'],
+        constraints: {
+          go: '1.14',
+        },
+      },
+    });
+    expect(res).toEqual([
+      { file: { type: 'addition', path: 'go.sum', contents: 'New go.sum' } },
+      { file: { type: 'addition', path: 'main.go', contents: 'New main.go' } },
+      { file: { type: 'addition', path: 'go.mod', contents: 'New go.mod' } },
+    ]);
+    const expectedResult = {
+      cmd: 'docker pull renovate/go:1.14.0',
+    };
+    expect(execSnapshots[0]).toMatchObject(expectedResult);
   });
 });

@@ -42,7 +42,7 @@ describe('modules/manager/github-actions/extract', () => {
         Fixtures.get('workflow_3.yml'),
         'workflow_3.yml'
       );
-      expect(res?.deps).toMatchSnapshot([
+      expect(res?.deps).toMatchObject([
         {
           currentValue: 'v0.13.1',
           datasource: 'github-tags',

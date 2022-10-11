@@ -11,6 +11,7 @@ describe('workers/repository/update/pr/body/config-description', () => {
   describe('getPrConfigDescription', () => {
     const config: BranchConfig = {
       manager: 'some-manager',
+      baseBranch: 'base',
       branchName: 'some-branch',
       upgrades: [],
     };
