@@ -1,6 +1,5 @@
 import is from '@sindresorhus/is';
 import { loadAll } from 'js-yaml';
-import urlJoin from 'url-join';
 import { logger } from '../../../logger';
 import { DockerDatasource } from '../../datasource/docker';
 import { GitTagsDatasource } from '../../datasource/git-tags';
