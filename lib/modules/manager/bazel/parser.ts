@@ -239,8 +239,6 @@ export function parse(input: string): ArrayFragment | null {
   return result;
 }
 
-export function extract(fragment: null): null;
-export function extract(fragment: Fragment): FragmentData;
 export function extract(fragment: Fragment | null): FragmentData | null {
   if (!fragment) {
     return null;
