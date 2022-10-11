@@ -447,11 +447,11 @@ function isNpmXRangeAll(
   currentValue: string | undefined,
   config: LookupUpdateConfig
 ): boolean {
-  const { versioning, manager } = config;
+  const { manager } = config;
   if (!currentValue) {
     return false;
   }
-  if (manager !== 'npm' || versioning !== 'npm') {
+  if (manager !== 'npm') {
     return false;
   }
   return isSemVerXRange(currentValue);
