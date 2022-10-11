@@ -1,74 +1,48 @@
-import is from '@sindresorhus/is';
-import { logger } from '../../../../logger';
+import { ZodEffects, ZodObject, z } from 'zod';
 import { regEx } from '../../../../util/regex';
 import type { PackageDependency } from '../../types';
-import type {
-  Fragment,
-  StringFragment,
-  Target,
-  TargetAttribute,
-} from '../types';
-import { dockerDependency } from './docker';
-import { gitDependency } from './git';
-import { goDependency } from './go';
-import { httpDependency } from './http';
+import { extract } from '../parser';
+import type { Fragment, FragmentData, Target } from '../types';
+import { DockerTarget } from './docker';
+import { GitTarget } from './git';
+import { GoTarget } from './go';
+import { HttpTarget } from './http';
 
-type DependencyExtractor = (_: Target) => PackageDependency | null;
-type DependencyExtractorRegistry = Record<string, DependencyExtractor>;
+const Target = z.union([DockerTarget, GitTarget, GoTarget, HttpTarget]);
 
-const dependencyExtractorRegistry: DependencyExtractorRegistry = {
-  git_repository: gitDependency,
-  go_repository: goDependency,
-  http_archive: httpDependency,
-  http_file: httpDependency,
-  container_pull: dockerDependency,
-};
+/**
+ * Infer all rule names supported by Renovate in order to speed up parsing
+ * by filtering out other syntactically correct rules we don't support yet.
+ */
+const supportedRules = Target.options.reduce<string[]>((res, targetSchema) => {
+  const schema = targetSchema._def.schema;
+  if (schema instanceof ZodObject) {
+    return [...res, ...schema.shape.rule.options];
+  }
+  if (schema instanceof ZodEffects) {
+    return [...res, ...schema._def.schema.shape.rule.options];
+  }
+  return res;
+}, []);
 
-const supportedRules = Object.keys(dependencyExtractorRegistry);
+/**
+ * Used by parser
+ */
 export const supportedRulesRegex = regEx(`^${supportedRules.join('|')}$`);
 
-function isTarget(x: Record<string, TargetAttribute>): x is Target {
-  return is.string(x.name) && is.string(x.rule);
-}
-
-export function coerceFragmentToTarget(fragment: Fragment): Target | null {
-  if (fragment.type === 'record') {
-    const { children } = fragment;
-    const target: Record<string, TargetAttribute> = {};
-    for (const [key, value] of Object.entries(children)) {
-      if (value.type === 'array') {
-        const values = value.children
-          .filter((x): x is StringFragment => x.type === 'string')
-          .map((x) => x.value);
-        target[key] = values;
-      } else if (value.type === 'string') {
-        target[key] = value.value;
-      }
-    }
-
-    if (isTarget(target)) {
-      return target;
-    }
+export function extractDepFromFragmentData(
+  fragmentData: FragmentData
+): PackageDependency | null {
+  const res = Target.safeParse(fragmentData);
+  if (!res.success) {
+    return null;
   }
-
-  return null;
+  return res.data;
 }
 
 export function extractDepFromFragment(
   fragment: Fragment
 ): PackageDependency | null {
-  const target = coerceFragmentToTarget(fragment);
-  if (!target) {
-    return null;
-  }
-
-  const dependencyExtractor = dependencyExtractorRegistry[target.rule];
-  if (!dependencyExtractor) {
-    logger.debug(
-      `Bazel dependency extractor function not found for ${target.rule}`
-    );
-    return null;
-  }
-
-  return dependencyExtractor(target);
+  const fragmentData = extract(fragment);
+  return extractDepFromFragmentData(fragmentData);
 }

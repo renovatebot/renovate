@@ -1,11 +1,8 @@
-import { dockerDependency } from './docker';
-import { gitDependency } from './git';
-import { goDependency } from './go';
-import { httpDependency, parseArchiveUrl } from './http';
-import { extractDepFromFragment } from '.';
+import { parseArchiveUrl } from './http';
+import { extractDepFromFragmentData } from '.';
 
 describe('modules/manager/bazel/rules/index', () => {
-  test('parseUrl', () => {
+  it('parses archiveUrl', () => {
     expect(parseArchiveUrl('')).toBeNull();
     expect(parseArchiveUrl(null)).toBeNull();
     expect(parseArchiveUrl(null)).toBeNull();
@@ -46,279 +43,30 @@ describe('modules/manager/bazel/rules/index', () => {
     });
   });
 
-  test('gitDependency', () => {
-    expect(gitDependency({ rule: 'foo_bar', name: 'foo_bar' })).toBeNull();
-
-    expect(
-      gitDependency({ rule: 'git_repository', name: 'foo_bar' })
-    ).toBeNull();
-
-    expect(
-      gitDependency({ rule: 'git_repository', name: 'foo_bar', tag: '1.2.3' })
-    ).toBeNull();
-
-    expect(
-      gitDependency({
-        rule: 'git_repository',
-        name: 'foo_bar',
-        tag: '1.2.3',
-        remote: 'https://github.com/foo/bar',
-      })
-    ).toEqual({
-      datasource: 'github-releases',
-      depType: 'git_repository',
-      depName: 'foo_bar',
-      packageName: 'foo/bar',
-      currentValue: '1.2.3',
-    });
-
-    expect(
-      gitDependency({
-        rule: 'git_repository',
-        name: 'foo_bar',
-        commit: 'abcdef0123abcdef0123abcdef0123abcdef0123',
-        remote: 'https://github.com/foo/bar',
-      })
-    ).toEqual({
-      datasource: 'github-releases',
-      depType: 'git_repository',
-      depName: 'foo_bar',
-      packageName: 'foo/bar',
-      currentDigest: 'abcdef0123abcdef0123abcdef0123abcdef0123',
-    });
-  });
-
-  test('goDependency', () => {
-    expect(goDependency({ rule: 'foo_bar', name: 'foo_bar' })).toBeNull();
-
-    expect(goDependency({ rule: 'go_repository', name: 'foo_bar' })).toBeNull();
-
-    expect(
-      goDependency({ rule: 'go_repository', name: 'foo_bar', tag: '1.2.3' })
-    ).toBeNull();
-
-    expect(
-      goDependency({
-        rule: 'go_repository',
-        name: 'foo_bar',
-        tag: '1.2.3',
-        importpath: 'foo/bar/baz',
-      })
-    ).toEqual({
-      datasource: 'go',
-      depType: 'go_repository',
-      depName: 'foo_bar',
-      packageName: 'foo/bar/baz',
-      currentValue: '1.2.3',
-    });
-
-    expect(
-      goDependency({
-        rule: 'go_repository',
-        name: 'foo_bar',
-        commit: 'abcdef0123abcdef0123abcdef0123abcdef0123',
-        importpath: 'foo/bar/baz',
-      })
-    ).toEqual({
-      datasource: 'go',
-      depType: 'go_repository',
-      depName: 'foo_bar',
-      packageName: 'foo/bar/baz',
-      currentValue: 'v0.0.0',
-      currentDigest: 'abcdef0123abcdef0123abcdef0123abcdef0123',
-      currentDigestShort: 'abcdef0',
-      digestOneAndOnly: true,
-    });
-
-    expect(
-      goDependency({
-        rule: 'go_repository',
-        name: 'foo_bar',
-        tag: '1.2.3',
-        importpath: 'foo/bar/baz',
-        remote: 'https://github.com/foo/bar',
-      })
-    ).toEqual({
-      datasource: 'go',
-      depType: 'go_repository',
-      depName: 'foo_bar',
-      packageName: 'github.com/foo/bar',
-      currentValue: '1.2.3',
-    });
-
-    expect(
-      goDependency({
-        rule: 'go_repository',
-        name: 'foo_bar',
-        tag: '1.2.3',
-        importpath: 'foo/bar/baz',
-        remote: 'https://example.com/foo/bar',
-      })
-    ).toEqual({
-      datasource: 'go',
-      depType: 'go_repository',
-      depName: 'foo_bar',
-      packageName: 'foo/bar/baz',
-      currentValue: '1.2.3',
-      skipReason: 'unsupported-remote',
-    });
-  });
-
-  test('httpDependency', () => {
-    expect(httpDependency({ rule: 'foo_bar', name: 'foo_bar' })).toBeNull();
-
-    expect(
-      httpDependency({ rule: 'http_archive', name: 'foo_bar' })
-    ).toBeNull();
-
-    expect(
-      httpDependency({
-        rule: 'http_archive',
-        name: 'foo_bar',
-        sha256: 'abcdef0123abcdef0123abcdef0123abcdef0123',
-      })
-    ).toBeNull();
-
-    expect(
-      httpDependency({
-        rule: 'http_archive',
-        name: 'foo_bar',
-        sha256: 'abcdef0123abcdef0123abcdef0123abcdef0123',
-        url: 'https://github.com/foo/bar/archive/abcdef0123abcdef0123abcdef0123abcdef0123.tar.gz',
-      })
-    ).toEqual({
-      currentDigest: 'abcdef0123abcdef0123abcdef0123abcdef0123',
-      datasource: 'github-tags',
-      depName: 'foo_bar',
-      depType: 'http_archive',
-      packageName: 'foo/bar',
-    });
-
-    expect(
-      httpDependency({
-        rule: 'http_archive',
-        name: 'foo_bar',
-        sha256: 'abcdef0123abcdef0123abcdef0123abcdef0123',
-        urls: [
-          'https://example.com/foo/bar',
-          'https://github.com/foo/bar/archive/abcdef0123abcdef0123abcdef0123abcdef0123.tar.gz',
-        ],
-      })
-    ).toEqual({
-      currentDigest: 'abcdef0123abcdef0123abcdef0123abcdef0123',
-      datasource: 'github-tags',
-      depName: 'foo_bar',
-      depType: 'http_archive',
-      packageName: 'foo/bar',
-    });
-
-    expect(
-      httpDependency({
-        rule: 'http_archive',
-        name: 'foo_bar',
-        sha256: 'abcdef0123abcdef0123abcdef0123abcdef0123',
-        url: 'https://github.com/foo/bar/releases/download/1.2.3/foobar-1.2.3.tar.gz',
-      })
-    ).toEqual({
-      currentValue: '1.2.3',
-      datasource: 'github-releases',
-      depName: 'foo_bar',
-      depType: 'http_archive',
-      packageName: 'foo/bar',
-    });
-
-    expect(
-      httpDependency({
-        rule: 'http_archive',
-        name: 'foo_bar',
-        sha256: 'abcdef0123abcdef0123abcdef0123abcdef0123',
-        urls: [
-          'https://example.com/foo/bar',
-          'https://github.com/foo/bar/releases/download/1.2.3/foobar-1.2.3.tar.gz',
-        ],
-      })
-    ).toEqual({
-      currentValue: '1.2.3',
-      datasource: 'github-releases',
-      depName: 'foo_bar',
-      depType: 'http_archive',
-      packageName: 'foo/bar',
-    });
-
-    expect(
-      httpDependency({
-        rule: 'http_archive',
-        name: 'aspect_rules_js',
-        sha256:
-          'db9f446752fe4100320cf8487e8fd476b9af0adf6b99b601bcfd70b289bb0598',
-        urls: [
-          'https://github.com/aspect-build/rules_js/archive/refs/tags/v1.1.2.tar.gz',
-        ],
-      })
-    ).toEqual({
-      currentValue: 'v1.1.2',
-      datasource: 'github-tags',
-      depName: 'aspect_rules_js',
-      depType: 'http_archive',
-      packageName: 'aspect-build/rules_js',
-    });
-  });
-
-  test('dockerDependency', () => {
-    expect(dockerDependency({ rule: 'foo_bar', name: 'foo_bar' })).toBeNull();
-
-    expect(
-      dockerDependency({
-        rule: 'container_pull',
-        name: 'foo_bar',
-        tag: '1.2.3',
-        digest: 'abcdef0123abcdef0123abcdef0123abcdef0123',
-        repository: 'example.com/foo/bar',
-        registry: 'https://example.com',
-      })
-    ).toEqual({
-      currentDigest: 'abcdef0123abcdef0123abcdef0123abcdef0123',
-      currentValue: '1.2.3',
-      datasource: 'docker',
-      depName: 'foo_bar',
-      depType: 'container_pull',
-      packageName: 'example.com/foo/bar',
-      registryUrls: ['https://example.com'],
-      versioning: 'docker',
-    });
-  });
-
-  describe('extractDepFromFragment', () => {
-    it('returns null for unknown rule type', () => {
+  describe('git', () => {
+    it('extracts git dependencies', () => {
       expect(
-        extractDepFromFragment({
-          type: 'record',
-          value: '',
-          offset: 0,
-          children: {
-            rule: { type: 'string', value: 'foo', offset: 0 },
-            name: { type: 'string', value: 'bar', offset: 0 },
-          },
+        extractDepFromFragmentData({ rule: 'foo_bar', name: 'foo_bar' })
+      ).toBeNull();
+
+      expect(
+        extractDepFromFragmentData({ rule: 'git_repository', name: 'foo_bar' })
+      ).toBeNull();
+
+      expect(
+        extractDepFromFragmentData({
+          rule: 'git_repository',
+          name: 'foo_bar',
+          tag: '1.2.3',
         })
       ).toBeNull();
-    });
 
-    it('extracts from git_repository', () => {
       expect(
-        extractDepFromFragment({
-          type: 'record',
-          value: '',
-          offset: 0,
-          children: {
-            rule: { type: 'string', value: 'git_repository', offset: 0 },
-            name: { type: 'string', value: 'foo_bar', offset: 0 },
-            tag: { type: 'string', value: '1.2.3', offset: 0 },
-            remote: {
-              type: 'string',
-              value: 'https://github.com/foo/bar',
-              offset: 0,
-            },
-          },
+        extractDepFromFragmentData({
+          rule: 'git_repository',
+          name: 'foo_bar',
+          tag: '1.2.3',
+          remote: 'https://github.com/foo/bar',
         })
       ).toEqual({
         datasource: 'github-releases',
@@ -327,44 +75,238 @@ describe('modules/manager/bazel/rules/index', () => {
         packageName: 'foo/bar',
         currentValue: '1.2.3',
       });
-    });
 
-    it('extracts from http_archive', () => {
       expect(
-        extractDepFromFragment({
-          type: 'record',
-          value: '',
-          offset: 0,
-          children: {
-            rule: { type: 'string', value: 'http_archive', offset: 0 },
-            name: { type: 'string', value: 'rules_nodejs', offset: 0 },
-            sha256: {
-              type: 'string',
-              value:
-                '5aef09ed3279aa01d5c928e3beb248f9ad32dde6aafe6373a8c994c3ce643064',
-              offset: 0,
-            },
-            urls: {
-              type: 'array',
-              value: '',
-              offset: 0,
-              children: [
-                {
-                  type: 'string',
-                  offset: 0,
-                  value:
-                    'https://github.com/bazelbuild/rules_nodejs/releases/download/5.5.3/rules_nodejs-core-5.5.3.tar.gz',
-                },
-              ],
-            },
-          },
+        extractDepFromFragmentData({
+          rule: 'git_repository',
+          name: 'foo_bar',
+          commit: 'abcdef0123abcdef0123abcdef0123abcdef0123',
+          remote: 'https://github.com/foo/bar',
         })
       ).toEqual({
         datasource: 'github-releases',
+        depType: 'git_repository',
+        depName: 'foo_bar',
+        packageName: 'foo/bar',
+        currentDigest: 'abcdef0123abcdef0123abcdef0123abcdef0123',
+      });
+    });
+  });
+
+  describe('go', () => {
+    it('extracts go dependencies', () => {
+      expect(
+        extractDepFromFragmentData({ rule: 'foo_bar', name: 'foo_bar' })
+      ).toBeNull();
+
+      expect(
+        extractDepFromFragmentData({ rule: 'go_repository', name: 'foo_bar' })
+      ).toBeNull();
+
+      expect(
+        extractDepFromFragmentData({
+          rule: 'go_repository',
+          name: 'foo_bar',
+          tag: '1.2.3',
+        })
+      ).toBeNull();
+
+      expect(
+        extractDepFromFragmentData({
+          rule: 'go_repository',
+          name: 'foo_bar',
+          tag: '1.2.3',
+          importpath: 'foo/bar/baz',
+        })
+      ).toEqual({
+        datasource: 'go',
+        depType: 'go_repository',
+        depName: 'foo_bar',
+        packageName: 'foo/bar/baz',
+        currentValue: '1.2.3',
+      });
+
+      expect(
+        extractDepFromFragmentData({
+          rule: 'go_repository',
+          name: 'foo_bar',
+          commit: 'abcdef0123abcdef0123abcdef0123abcdef0123',
+          importpath: 'foo/bar/baz',
+        })
+      ).toEqual({
+        datasource: 'go',
+        depType: 'go_repository',
+        depName: 'foo_bar',
+        packageName: 'foo/bar/baz',
+        currentValue: 'v0.0.0',
+        currentDigest: 'abcdef0123abcdef0123abcdef0123abcdef0123',
+        currentDigestShort: 'abcdef0',
+        digestOneAndOnly: true,
+      });
+
+      expect(
+        extractDepFromFragmentData({
+          rule: 'go_repository',
+          name: 'foo_bar',
+          tag: '1.2.3',
+          importpath: 'foo/bar/baz',
+          remote: 'https://github.com/foo/bar',
+        })
+      ).toEqual({
+        datasource: 'go',
+        depType: 'go_repository',
+        depName: 'foo_bar',
+        packageName: 'github.com/foo/bar',
+        currentValue: '1.2.3',
+      });
+
+      expect(
+        extractDepFromFragmentData({
+          rule: 'go_repository',
+          name: 'foo_bar',
+          tag: '1.2.3',
+          importpath: 'foo/bar/baz',
+          remote: 'https://example.com/foo/bar',
+        })
+      ).toEqual({
+        datasource: 'go',
+        depType: 'go_repository',
+        depName: 'foo_bar',
+        packageName: 'foo/bar/baz',
+        currentValue: '1.2.3',
+        skipReason: 'unsupported-remote',
+      });
+    });
+  });
+
+  describe('http', () => {
+    it('extracts http dependencies', () => {
+      expect(
+        extractDepFromFragmentData({ rule: 'foo_bar', name: 'foo_bar' })
+      ).toBeNull();
+
+      expect(
+        extractDepFromFragmentData({ rule: 'http_archive', name: 'foo_bar' })
+      ).toBeNull();
+
+      expect(
+        extractDepFromFragmentData({
+          rule: 'http_archive',
+          name: 'foo_bar',
+          sha256: 'abcdef0123abcdef0123abcdef0123abcdef0123',
+        })
+      ).toBeNull();
+
+      expect(
+        extractDepFromFragmentData({
+          rule: 'http_archive',
+          name: 'foo_bar',
+          sha256: 'abcdef0123abcdef0123abcdef0123abcdef0123',
+          url: 'https://github.com/foo/bar/archive/abcdef0123abcdef0123abcdef0123abcdef0123.tar.gz',
+        })
+      ).toEqual({
+        currentDigest: 'abcdef0123abcdef0123abcdef0123abcdef0123',
+        datasource: 'github-tags',
+        depName: 'foo_bar',
         depType: 'http_archive',
-        depName: 'rules_nodejs',
-        packageName: 'bazelbuild/rules_nodejs',
-        currentValue: '5.5.3',
+        packageName: 'foo/bar',
+      });
+
+      expect(
+        extractDepFromFragmentData({
+          rule: 'http_archive',
+          name: 'foo_bar',
+          sha256: 'abcdef0123abcdef0123abcdef0123abcdef0123',
+          urls: [
+            'https://example.com/foo/bar',
+            'https://github.com/foo/bar/archive/abcdef0123abcdef0123abcdef0123abcdef0123.tar.gz',
+          ],
+        })
+      ).toEqual({
+        currentDigest: 'abcdef0123abcdef0123abcdef0123abcdef0123',
+        datasource: 'github-tags',
+        depName: 'foo_bar',
+        depType: 'http_archive',
+        packageName: 'foo/bar',
+      });
+
+      expect(
+        extractDepFromFragmentData({
+          rule: 'http_archive',
+          name: 'foo_bar',
+          sha256: 'abcdef0123abcdef0123abcdef0123abcdef0123',
+          url: 'https://github.com/foo/bar/releases/download/1.2.3/foobar-1.2.3.tar.gz',
+        })
+      ).toEqual({
+        currentValue: '1.2.3',
+        datasource: 'github-releases',
+        depName: 'foo_bar',
+        depType: 'http_archive',
+        packageName: 'foo/bar',
+      });
+
+      expect(
+        extractDepFromFragmentData({
+          rule: 'http_archive',
+          name: 'foo_bar',
+          sha256: 'abcdef0123abcdef0123abcdef0123abcdef0123',
+          urls: [
+            'https://example.com/foo/bar',
+            'https://github.com/foo/bar/releases/download/1.2.3/foobar-1.2.3.tar.gz',
+          ],
+        })
+      ).toEqual({
+        currentValue: '1.2.3',
+        datasource: 'github-releases',
+        depName: 'foo_bar',
+        depType: 'http_archive',
+        packageName: 'foo/bar',
+      });
+
+      expect(
+        extractDepFromFragmentData({
+          rule: 'http_archive',
+          name: 'aspect_rules_js',
+          sha256:
+            'db9f446752fe4100320cf8487e8fd476b9af0adf6b99b601bcfd70b289bb0598',
+          urls: [
+            'https://github.com/aspect-build/rules_js/archive/refs/tags/v1.1.2.tar.gz',
+          ],
+        })
+      ).toEqual({
+        currentValue: 'v1.1.2',
+        datasource: 'github-tags',
+        depName: 'aspect_rules_js',
+        depType: 'http_archive',
+        packageName: 'aspect-build/rules_js',
+      });
+    });
+  });
+
+  describe('docker', () => {
+    it('extracts docker dependencies', () => {
+      expect(
+        extractDepFromFragmentData({ rule: 'foo_bar', name: 'foo_bar' })
+      ).toBeNull();
+
+      expect(
+        extractDepFromFragmentData({
+          rule: 'container_pull',
+          name: 'foo_bar',
+          tag: '1.2.3',
+          digest: 'abcdef0123abcdef0123abcdef0123abcdef0123',
+          repository: 'example.com/foo/bar',
+          registry: 'https://example.com',
+        })
+      ).toEqual({
+        currentDigest: 'abcdef0123abcdef0123abcdef0123abcdef0123',
+        currentValue: '1.2.3',
+        datasource: 'docker',
+        depName: 'foo_bar',
+        depType: 'container_pull',
+        packageName: 'example.com/foo/bar',
+        registryUrls: ['https://example.com'],
+        versioning: 'docker',
       });
     });
   });

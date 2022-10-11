@@ -1,38 +1,26 @@
-import is from '@sindresorhus/is';
+import { z } from 'zod';
 import { DockerDatasource } from '../../../datasource/docker';
 import { id as dockerVersioning } from '../../../versioning/docker';
 import type { PackageDependency } from '../../types';
-import type { Target } from '../types';
 
-export function dockerDependency({
-  rule: depType,
-  name: depName,
-  tag: currentValue,
-  digest: currentDigest,
-  repository: packageName,
-  registry,
-}: Target): PackageDependency | null {
-  let dep: PackageDependency | null = null;
-
-  if (
-    depType === 'container_pull' &&
-    is.string(depName) &&
-    is.string(currentValue) &&
-    is.string(currentDigest) &&
-    is.string(packageName) &&
-    is.string(registry)
-  ) {
-    dep = {
+export const DockerTarget = z
+  .object({
+    rule: z.enum(['container_pull']),
+    name: z.string(),
+    tag: z.string(),
+    digest: z.string(),
+    repository: z.string(),
+    registry: z.string(),
+  })
+  .transform(
+    ({ rule, name, repository, tag, digest, registry }): PackageDependency => ({
       datasource: DockerDatasource.id,
       versioning: dockerVersioning,
-      depType,
-      depName,
-      packageName,
-      currentValue,
-      currentDigest,
+      depType: rule,
+      depName: name,
+      packageName: repository,
+      currentValue: tag,
+      currentDigest: digest,
       registryUrls: [registry],
-    };
-  }
-
-  return dep;
-}
+    })
+  );
