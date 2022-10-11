@@ -33,19 +33,19 @@ export function extractFingerprintConfig(
 
     // npmrc and npmrcMerge
     if (manager === 'npm') {
-      filteredConfig.npmrc = config.npmrc;
-      filteredConfig.npmrcMerge = config.npmrcMerge;
+      filteredConfig.npmrc = config?.npmrc;
+      filteredConfig.npmrcMerge = config?.npmrcMerge;
     }
 
     // non-mergeable config options
-    filteredConfig.enabled = managerConfig.enabled;
-    filteredConfig.ignorePaths = managerConfig.ignorePaths;
-    filteredConfig.includePaths = config.includePaths;
-    filteredConfig.registryAliases = managerConfig.registryAliases;
-    filteredConfig.skipInstalls = managerConfig.skipInstalls;
+    filteredConfig.enabled = managerConfig?.enabled;
+    filteredConfig.ignorePaths = managerConfig?.ignorePaths;
+    filteredConfig.includePaths = config?.includePaths;
+    filteredConfig.registryAliases = managerConfig?.registryAliases;
+    filteredConfig.skipInstalls = managerConfig?.skipInstalls;
 
     // mergeable config options
-    filteredConfig.fileMatch = [...(managerConfig.fileMatch ?? [])].concat(
+    filteredConfig.fileMatch = [...(managerConfig?.fileMatch ?? [])].concat(
       ...(languageConfig?.fileMatch ?? [])
     );
 
