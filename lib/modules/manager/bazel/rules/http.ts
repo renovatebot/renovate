@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import { z } from 'zod';
 import { regEx } from '../../../../util/regex';
 import { parseUrl } from '../../../../util/url';
@@ -60,7 +61,7 @@ export const HttpTarget = z
   })
   .refine(({ url, urls }) => !!url || !!urls)
   .transform(({ rule, name, url, urls = [] }): PackageDependency | null => {
-    const parsedUrl = [url, ...urls].map(parseArchiveUrl).find(Boolean);
+    const parsedUrl = [url, ...urls].map(parseArchiveUrl).find(is.truthy);
     if (!parsedUrl) {
       return null;
     }
