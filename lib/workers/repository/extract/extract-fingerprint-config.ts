@@ -1,20 +1,26 @@
-import type { RenovateConfig } from '../../../config/types';
+import type { RegExManager, RenovateConfig } from '../../../config/types';
 import { get, getManagerList } from '../../../modules/manager';
 import type { WorkerExtractConfig } from '../../types';
 
-export interface FingerprintExtractConfig
-  extends Omit<WorkerExtractConfig, 'manager' | 'fileList'> {
-  manager?: string;
-  fileList?: string[];
+export interface FingerprintExtractConfig {
+  enabledManagers?: string[];
+  managerList: string[];
+  managers: WorkerExtractConfig[];
+  regexManagers?: RegExManager[];
 }
 
 export function extractFingerprintConfig(
   config: RenovateConfig
-): FingerprintExtractConfig[] {
-  const managerExtractConfigs: FingerprintExtractConfig[] = [
-    ...((config.regexManagers ?? []) as FingerprintExtractConfig[]),
-  ];
+): FingerprintExtractConfig {
+  const finalConfig = {} as FingerprintExtractConfig;
+  if (config.enabledManagers) {
+    finalConfig.enabledManagers = config.enabledManagers;
+  }
+  if (config.regexManagers) {
+    finalConfig.regexManagers = config.regexManagers;
+  }
 
+  const managerExtractConfigs: WorkerExtractConfig[] = [];
   let managerList = getManagerList();
   const { enabledManagers } = config;
   if (enabledManagers?.length) {
@@ -22,20 +28,21 @@ export function extractFingerprintConfig(
       enabledManagers.includes(manager)
     );
   }
+  finalConfig.managerList = managerList;
 
   for (const manager of managerList) {
+    // the type here is not completely correct because there isn't any defined type only for managers
     const managerConfig: WorkerExtractConfig = config[manager] as any;
     const language = get(manager, 'language');
+    // the type here is not completely correct because there isn't any defined type only for languages
     const languageConfig = (
       language ? (config[language] ? config[language] : {}) : {}
-    ) as FingerprintExtractConfig;
-    const filteredConfig = {} as FingerprintExtractConfig;
+    ) as WorkerExtractConfig;
+    const filteredConfig = {} as WorkerExtractConfig;
 
-    // npmrc and npmrcMerge
-    if (manager === 'npm') {
-      filteredConfig.npmrc = config?.npmrc;
-      filteredConfig.npmrcMerge = config?.npmrcMerge;
-    }
+    filteredConfig.manager = manager;
+    filteredConfig.npmrc = config?.npmrc;
+    filteredConfig.npmrcMerge = config?.npmrcMerge;
 
     // non-mergeable config options
     filteredConfig.enabled = managerConfig?.enabled;
@@ -52,5 +59,6 @@ export function extractFingerprintConfig(
     managerExtractConfigs.push(filteredConfig);
   }
 
-  return managerExtractConfigs;
+  finalConfig.managers = managerExtractConfigs;
+  return finalConfig;
 }

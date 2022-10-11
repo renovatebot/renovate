@@ -9,6 +9,7 @@ import { logger } from '../../../../logger';
 import { platform } from '../../../../modules/platform';
 import { checkoutBranch, setGitAuthor } from '../../../../util/git';
 import { extractAllDependencies } from '../../extract';
+import { extractFingerprintConfig } from '../../extract/extract-fingerprint-config';
 import { mergeRenovateConfig } from '../../init/merge';
 import { getOnboardingPr, isOnboarded } from './check';
 import { getOnboardingConfig } from './config';
@@ -55,7 +56,9 @@ export async function checkOnboardingBranch(
     onboardingBranch = mergedConfig.onboardingBranch;
 
     if (
-      Object.entries(await extractAllDependencies(mergedConfig)).length === 0
+      Object.entries(
+        await extractAllDependencies(extractFingerprintConfig(mergedConfig))
+      ).length === 0
     ) {
       if (!config?.onboardingNoDeps) {
         throw new Error(REPOSITORY_NO_PACKAGE_FILES);
