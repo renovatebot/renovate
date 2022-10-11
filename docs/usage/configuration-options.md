@@ -79,9 +79,12 @@ With the above config:
 
 ## additionalBranchPrefix
 
-This value defaults to an empty string, and is typically not necessary.
-Some managers previously populated this field, but they no longer do so by default.
-You normally don't need to configure this, but one example where it can be useful is combining with `parentDir` in monorepos to split PRs based on where the package definition is located, e.g.
+By default, the value for this config option is an empty string.
+Normally you don't need to set this config option.
+
+Here's an example where `additionalBranchPrefix` can help you.
+Say you're using a monorepo and want to split pull requests based on the location of the package definition, so that individual teams can manage their own Renovate pull requests.
+This can be done with this configuration:
 
 ```json
 {
@@ -177,20 +180,24 @@ To configure this option refer to [`schedule`](#schedule) as the syntax is the s
 
 ## automergeStrategy
 
-This setting is only applicable if you opt-in by configuring `automerge` to `true` and `automergeType` to `pr` for any of your dependencies.
+The automerge strategy defaults to `auto`, so Renovate decides how to merge pull requests as best it can.
+If possible, Renovate follows the merge strategy set on the platform itself for the repository.
 
-The automerge strategy defaults to `auto`, in which Renovate will make its best guess as to how to merge pull requests.
-This generally results in Renovate respecting the strategy configured in the platform itself for the repository if possible.
-Acceptable values are:
+If you've set `automerge=true` and `automergeType=pr` for any of your dependencies, then you may choose what automerge strategy Renovate uses by setting the `automergeStrategy` config option.
+If you're happy with the default behavior, you don't need to do anything.
 
-- `auto`, in which the choice is left to Renovate
-- `fast-forward`, which generally involves no new commits in the resultant tree, but "fast-forwarding" the main branch reference
-- `merge-commit`, which generally involves synthesizing a new merge commit
-- `rebase`, which generally involves rewriting history as part of the merge — but usually retaining the individual commits
-- `squash`, which generally involves flattening the commits that are being merged into a single new commit
+You may choose from these values:
 
-Not all platforms support all pull request merge strategies.
-In cases where a merge strategy is not supported by the platform, Renovate will hold off on merging instead of silently merging in a way you didn't wish for.
+- `auto`, Renovate decides how to merge
+- `fast-forward`, "fast-forwarding" the main branch reference, no new commits in the resultant tree
+- `merge-commit`, create a new merge commit
+- `rebase`, rewrite history as part of the merge, but usually keep the individual commits
+- `squash`, flatten the commits that are being merged into a single new commit
+
+Platforms may only support _some_ of these merge strategies.
+
+If the chosen automerge strategy is not supported on your platform then Renovate stops automerging.
+In that case just set a supported automerge strategy.
 
 ## automergeType
 
@@ -2680,6 +2687,15 @@ Say the full team name on GitHub is `@organization/foo`, then you'd set the conf
 ```json
 {
   "reviewers": ["team:foo"]
+}
+```
+
+To mark a reviewer as required in Azure DevOps, you must use the prefix `required:`.
+If the name of the reviewer is `bar` for example, this could also be the name of a team, then you would set the config option like this:
+
+```json
+{
+  "reviewers": ["required:bar"]
 }
 ```
 
