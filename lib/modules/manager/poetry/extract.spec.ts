@@ -132,6 +132,32 @@ describe('modules/manager/poetry/extract', () => {
       });
     });
 
+    it('extracts dependencies from dependency groups', async () => {
+      const content =
+        '[tool.poetry.dependencies]\ndep = "^2.0"\n\n[tool.poetry.group.dev.dependencies]\ndev_dep = "^3.0"\n\n[tool.poetry.group.typing.dependencies]\ntyping_dep = "^4.0"';
+      const res = await extractPackageFile(content, filename);
+      expect(res?.deps).toMatchObject([
+        {
+          currentValue: '^2.0',
+          datasource: 'pypi',
+          depName: 'dep',
+          depType: 'dependencies',
+        },
+        {
+          currentValue: '^3.0',
+          datasource: 'pypi',
+          depName: 'dev_dep',
+          depType: 'dev',
+        },
+        {
+          currentValue: '^4.0',
+          datasource: 'pypi',
+          depName: 'typing_dep',
+          depType: 'typing',
+        },
+      ]);
+    });
+
     it('resolves lockedVersions from the lockfile', async () => {
       fs.readLocalFile.mockResolvedValue(pyproject11tomlLock);
       const res = await extractPackageFile(pyproject11toml, filename);

@@ -44,6 +44,10 @@ Renovate is widely used in the developer community:
 
 ![Renovate Matrix](https://app.renovatebot.com/images/matrix.png)
 
+## Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=renovatebot/renovate&type=Date)](https://star-history.com/#renovatebot/renovate&Date)
+
 ## The Renovate Approach
 
 We believe everyone benefits from automation, whether it's a little or a lot.
