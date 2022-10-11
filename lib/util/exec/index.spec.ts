@@ -11,6 +11,7 @@ import { exec } from '.';
 const getHermitEnvsMock = mockedFunction(getHermitEnvs);
 
 jest.mock('./hermit', () => ({
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
   ...(jest.requireActual('./hermit') as any),
   getHermitEnvs: jest.fn(),
 }));
