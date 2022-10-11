@@ -335,12 +335,12 @@ describe('workers/repository/process/lookup/index', () => {
     });
 
     it.each`
-      strategy             | expected
-      ${'update-lockfile'} | ${[{ newValue: '*', newVersion: '0.9.7', updateType: 'minor' }, { newValue: '*', newVersion: '1.4.1', updateType: 'major' }]}
+      strategy             | updates
+      ${'update-lockfile'} | ${[{ isLockfileUpdate: true, newValue: '*', newVersion: '0.9.7', updateType: 'minor' }, { isLockfileUpdate: true, newValue: '*', newVersion: '1.4.1', updateType: 'major' }]}
       ${'pin'}             | ${[{ newValue: '0.4.0', updateType: 'pin' }]}
     `(
       'supports for x-range-all for replaceStrategy = $strategy (with lockfile)',
-      async ({ strategy, expected }) => {
+      async ({ strategy, updates }) => {
         config.currentValue = '*';
         config.rangeStrategy = strategy;
         config.lockedVersion = '0.4.0';
@@ -350,9 +350,7 @@ describe('workers/repository/process/lookup/index', () => {
           .scope('https://registry.npmjs.org')
           .get('/q')
           .reply(200, qJson);
-        expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot(
-          expected
-        );
+        expect(await lookup.lookupUpdates(config)).toMatchSnapshot({ updates });
       }
     );
 
@@ -373,9 +371,7 @@ describe('workers/repository/process/lookup/index', () => {
           .scope('https://registry.npmjs.org')
           .get('/q')
           .reply(200, qJson);
-        expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot(
-          []
-        );
+        expect((await lookup.lookupUpdates(config)).updates).toEqual([]);
       }
     );
 
@@ -385,9 +381,9 @@ describe('workers/repository/process/lookup/index', () => {
       config.depName = 'q';
       config.datasource = NpmDatasource.id;
       httpMock.scope('https://registry.npmjs.org').get('/q').reply(200, qJson);
-      expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot([
-        { newValue: '1.4.1', updateType: 'pin' },
-      ]);
+      expect(await lookup.lookupUpdates(config)).toMatchSnapshot({
+        updates: [{ newValue: '1.4.1', updateType: 'pin' }],
+      });
     });
 
     it('covers pinning an unsupported x-range-all value', async () => {
@@ -396,7 +392,7 @@ describe('workers/repository/process/lookup/index', () => {
       config.depName = 'q';
       config.datasource = NpmDatasource.id;
       httpMock.scope('https://registry.npmjs.org').get('/q').reply(200, qJson);
-      expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot([]);
+      expect((await lookup.lookupUpdates(config)).updates).toEqual([]);
     });
 
     it.each`
@@ -416,9 +412,7 @@ describe('workers/repository/process/lookup/index', () => {
           .scope('https://registry.npmjs.org')
           .get('/q')
           .reply(200, qJson);
-        expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot(
-          []
-        );
+        expect((await lookup.lookupUpdates(config)).updates).toEqual([]);
       }
     );
 

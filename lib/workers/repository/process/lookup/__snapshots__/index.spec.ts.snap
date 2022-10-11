@@ -1,88 +1,5 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`workers/repository/process/lookup/index .lookupUpdates() covers pinning an unsupported x-range-all value 1`] = `[]`;
-
-exports[`workers/repository/process/lookup/index .lookupUpdates() disables major release separation (major) 1`] = `
-[
-  {
-    "isPin": true,
-    "newMajor": 0,
-    "newValue": "0.4.4",
-    "newVersion": "0.4.4",
-    "updateType": "pin",
-  },
-  {
-    "bucket": "latest",
-    "newMajor": 1,
-    "newMinor": 4,
-    "newValue": "1.4.1",
-    "newVersion": "1.4.1",
-    "releaseTimestamp": "2015-05-17T04:25:07.299Z",
-    "updateType": "major",
-  },
-]
-`;
-
-exports[`workers/repository/process/lookup/index .lookupUpdates() disables major release separation (minor) 1`] = `
-[
-  {
-    "bucket": "latest",
-    "newMajor": 1,
-    "newMinor": 4,
-    "newValue": "1.4.1",
-    "newVersion": "1.4.1",
-    "releaseTimestamp": "2015-05-17T04:25:07.299Z",
-    "updateType": "minor",
-  },
-]
-`;
-
-exports[`workers/repository/process/lookup/index .lookupUpdates() doesnt offer updates for x-range-all (no lockfile) when replaceStrategy = bump 1`] = `[]`;
-
-exports[`workers/repository/process/lookup/index .lookupUpdates() doesnt offer updates for x-range-all (no lockfile) when replaceStrategy = replace 1`] = `[]`;
-
-exports[`workers/repository/process/lookup/index .lookupUpdates() doesnt offer updates for x-range-all (no lockfile) when replaceStrategy = update-lockfile 1`] = `[]`;
-
-exports[`workers/repository/process/lookup/index .lookupUpdates() doesnt offer updates for x-range-all (no lockfile) when replaceStrategy = widen 1`] = `[]`;
-
-exports[`workers/repository/process/lookup/index .lookupUpdates() doesnt offer updates for x-range-all (with lockfile) when replaceStrategy = bump 1`] = `[]`;
-
-exports[`workers/repository/process/lookup/index .lookupUpdates() doesnt offer updates for x-range-all (with lockfile) when replaceStrategy = replace 1`] = `[]`;
-
-exports[`workers/repository/process/lookup/index .lookupUpdates() doesnt offer updates for x-range-all (with lockfile) when replaceStrategy = widen 1`] = `[]`;
-
-exports[`workers/repository/process/lookup/index .lookupUpdates() handles PEP440 1`] = `
-[
-  {
-    "isPin": true,
-    "newMajor": 0,
-    "newValue": "==0.9.4",
-    "newVersion": "0.9.4",
-    "updateType": "pin",
-  },
-  {
-    "bucket": "non-major",
-    "isRange": true,
-    "newMajor": 0,
-    "newMinor": 9,
-    "newValue": "==0.9.7",
-    "newVersion": "0.9.7",
-    "releaseTimestamp": "2013-09-04T17:07:22.948Z",
-    "updateType": "patch",
-  },
-  {
-    "bucket": "major",
-    "isRange": true,
-    "newMajor": 1,
-    "newMinor": 4,
-    "newValue": "==1.4.1",
-    "newVersion": "1.4.1",
-    "releaseTimestamp": "2015-05-17T04:25:07.299Z",
-    "updateType": "major",
-  },
-]
-`;
-
 exports[`workers/repository/process/lookup/index .lookupUpdates() handles digest pin 1`] = `
 {
   "changelogUrl": undefined,
@@ -733,429 +650,83 @@ exports[`workers/repository/process/lookup/index .lookupUpdates() supports compl
 `;
 
 exports[`workers/repository/process/lookup/index .lookupUpdates() supports for x-range-all for replaceStrategy = pin (with lockfile) 1`] = `
-[
-  {
-    "isPin": true,
-    "newMajor": 0,
-    "newValue": "0.4.0",
-    "newVersion": "0.4.0",
-    "updateType": "pin",
-  },
-]
+{
+  "changelogUrl": undefined,
+  "currentVersion": "0.4.0",
+  "dependencyUrl": undefined,
+  "homepage": undefined,
+  "sourceUrl": "https://github.com/kriskowal/q",
+  "updates": [
+    {
+      "isPin": true,
+      "newMajor": 0,
+      "newValue": "0.4.0",
+      "newVersion": "0.4.0",
+      "updateType": "pin",
+    },
+  ],
+  "versioning": "npm",
+  "warnings": [],
+}
 `;
 
 exports[`workers/repository/process/lookup/index .lookupUpdates() supports for x-range-all for replaceStrategy = update-lockfile (with lockfile) 1`] = `
-[
-  {
-    "bucket": "non-major",
-    "isLockfileUpdate": true,
-    "isRange": true,
-    "newMajor": 0,
-    "newMinor": 9,
-    "newValue": "*",
-    "newVersion": "0.9.7",
-    "releaseTimestamp": "2013-09-04T17:07:22.948Z",
-    "updateType": "minor",
-  },
-  {
-    "bucket": "major",
-    "isLockfileUpdate": true,
-    "isRange": true,
-    "newMajor": 1,
-    "newMinor": 4,
-    "newValue": "*",
-    "newVersion": "1.4.1",
-    "releaseTimestamp": "2015-05-17T04:25:07.299Z",
-    "updateType": "major",
-  },
-]
+{
+  "changelogUrl": undefined,
+  "currentVersion": "0.4.0",
+  "dependencyUrl": undefined,
+  "fixedVersion": "0.4.0",
+  "homepage": undefined,
+  "isSingleVersion": true,
+  "sourceUrl": "https://github.com/kriskowal/q",
+  "updates": [
+    {
+      "bucket": "non-major",
+      "isLockfileUpdate": true,
+      "isRange": true,
+      "newMajor": 0,
+      "newMinor": 9,
+      "newValue": "*",
+      "newVersion": "0.9.7",
+      "releaseTimestamp": "2013-09-04T17:07:22.948Z",
+      "updateType": "minor",
+    },
+    {
+      "bucket": "major",
+      "isLockfileUpdate": true,
+      "isRange": true,
+      "newMajor": 1,
+      "newMinor": 4,
+      "newValue": "*",
+      "newVersion": "1.4.1",
+      "releaseTimestamp": "2015-05-17T04:25:07.299Z",
+      "updateType": "major",
+    },
+  ],
+  "versioning": "npm",
+  "warnings": [],
+}
 `;
 
-exports[`workers/repository/process/lookup/index .lookupUpdates() supports complex tilde ranges 1`] = `
-[
-  {
-    "bucket": "non-major",
-    "isRange": true,
-    "newMajor": 1,
-    "newMinor": 4,
-    "newValue": "~1.2.0 || ~1.3.0 || ~1.4.0",
-    "newVersion": "1.4.1",
-    "releaseTimestamp": "2015-05-17T04:25:07.299Z",
-    "updateType": "minor",
-  },
-]
-`;
-
-exports[`workers/repository/process/lookup/index .lookupUpdates() supports in-range caret updates 1`] = `
-[
-  {
-    "bucket": "non-major",
-    "isBump": true,
-    "isRange": true,
-    "newMajor": 1,
-    "newMinor": 4,
-    "newValue": "^1.4.1",
-    "newVersion": "1.4.1",
-    "releaseTimestamp": "2015-05-17T04:25:07.299Z",
-    "updateType": "minor",
-  },
-]
-`;
-
-exports[`workers/repository/process/lookup/index .lookupUpdates() supports in-range gte updates 1`] = `
-[
-  {
-    "bucket": "non-major",
-    "isBump": true,
-    "isRange": true,
-    "newMajor": 1,
-    "newMinor": 4,
-    "newValue": ">=1.4.1",
-    "newVersion": "1.4.1",
-    "releaseTimestamp": "2015-05-17T04:25:07.299Z",
-    "updateType": "minor",
-  },
-]
-`;
-
-exports[`workers/repository/process/lookup/index .lookupUpdates() supports in-range tilde patch updates 1`] = `
-[
-  {
-    "bucket": "patch",
-    "isBump": true,
-    "isRange": true,
-    "newMajor": 1,
-    "newMinor": 0,
-    "newValue": "~1.0.1",
-    "newVersion": "1.0.1",
-    "releaseTimestamp": "2014-03-11T18:47:17.560Z",
-    "updateType": "patch",
-  },
-  {
-    "bucket": "minor",
-    "isRange": true,
-    "newMajor": 1,
-    "newMinor": 4,
-    "newValue": "~1.4.1",
-    "newVersion": "1.4.1",
-    "releaseTimestamp": "2015-05-17T04:25:07.299Z",
-    "updateType": "minor",
-  },
-]
-`;
-
-exports[`workers/repository/process/lookup/index .lookupUpdates() supports in-range tilde updates 1`] = `
-[
-  {
-    "bucket": "patch",
-    "isBump": true,
-    "isRange": true,
-    "newMajor": 1,
-    "newMinor": 0,
-    "newValue": "~1.0.1",
-    "newVersion": "1.0.1",
-    "releaseTimestamp": "2014-03-11T18:47:17.560Z",
-    "updateType": "patch",
-  },
-  {
-    "bucket": "minor",
-    "isRange": true,
-    "newMajor": 1,
-    "newMinor": 4,
-    "newValue": "~1.4.1",
-    "newVersion": "1.4.1",
-    "releaseTimestamp": "2015-05-17T04:25:07.299Z",
-    "updateType": "minor",
-  },
-]
-`;
-
-exports[`workers/repository/process/lookup/index .lookupUpdates() supports lock file updates mixed with regular updates 1`] = `
-[
-  {
-    "bucket": "patch",
-    "isLockfileUpdate": true,
-    "isRange": true,
-    "newMajor": 0,
-    "newMinor": 4,
-    "newValue": "^0.4.0",
-    "newVersion": "0.4.4",
-    "releaseTimestamp": "2011-06-10T17:20:04.719Z",
-    "updateType": "patch",
-  },
-  {
-    "bucket": "minor",
-    "isRange": true,
-    "newMajor": 0,
-    "newMinor": 9,
-    "newValue": "^0.9.0",
-    "newVersion": "0.9.7",
-    "releaseTimestamp": "2013-09-04T17:07:22.948Z",
-    "updateType": "minor",
-  },
-  {
-    "bucket": "major",
-    "isRange": true,
-    "newMajor": 1,
-    "newMinor": 4,
-    "newValue": "^1.0.0",
-    "newVersion": "1.4.1",
-    "releaseTimestamp": "2015-05-17T04:25:07.299Z",
-    "updateType": "major",
-  },
-]
-`;
-
-exports[`workers/repository/process/lookup/index .lookupUpdates() supports majorgte updates 1`] = `
-[
-  {
-    "bucket": "latest",
-    "isBump": true,
-    "isRange": true,
-    "newMajor": 1,
-    "newMinor": 4,
-    "newValue": ">=1.4.1",
-    "newVersion": "1.4.1",
-    "releaseTimestamp": "2015-05-17T04:25:07.299Z",
-    "updateType": "major",
-  },
-]
-`;
-
-exports[`workers/repository/process/lookup/index .lookupUpdates() supports minor and major upgrades for ranged versions 1`] = `
-[
-  {
-    "isPin": true,
-    "newMajor": 0,
-    "newValue": "0.4.4",
-    "newVersion": "0.4.4",
-    "updateType": "pin",
-  },
-  {
-    "bucket": "non-major",
-    "newMajor": 0,
-    "newMinor": 9,
-    "newValue": "0.9.7",
-    "newVersion": "0.9.7",
-    "releaseTimestamp": "2013-09-04T17:07:22.948Z",
-    "updateType": "minor",
-  },
-  {
-    "bucket": "major",
-    "newMajor": 1,
-    "newMinor": 4,
-    "newValue": "1.4.1",
-    "newVersion": "1.4.1",
-    "releaseTimestamp": "2015-05-17T04:25:07.299Z",
-    "updateType": "major",
-  },
-]
-`;
-
-exports[`workers/repository/process/lookup/index .lookupUpdates() supports minor and major upgrades for tilde ranges 1`] = `
-[
-  {
-    "isPin": true,
-    "newMajor": 0,
-    "newValue": "0.4.4",
-    "newVersion": "0.4.4",
-    "updateType": "pin",
-  },
-  {
-    "bucket": "non-major",
-    "newMajor": 0,
-    "newMinor": 9,
-    "newValue": "0.9.7",
-    "newVersion": "0.9.7",
-    "releaseTimestamp": "2013-09-04T17:07:22.948Z",
-    "updateType": "minor",
-  },
-  {
-    "bucket": "major",
-    "newMajor": 1,
-    "newMinor": 4,
-    "newValue": "1.4.1",
-    "newVersion": "1.4.1",
-    "releaseTimestamp": "2015-05-17T04:25:07.299Z",
-    "updateType": "major",
-  },
-]
-`;
-
-exports[`workers/repository/process/lookup/index .lookupUpdates() upgrades .x complex minor ranges without pinning 1`] = `
-[
-  {
-    "bucket": "non-major",
-    "isRange": true,
-    "newMajor": 1,
-    "newMinor": 4,
-    "newValue": "1.2.x - 1.4.x",
-    "newVersion": "1.4.1",
-    "releaseTimestamp": "2015-05-17T04:25:07.299Z",
-    "updateType": "minor",
-  },
-]
-`;
-
-exports[`workers/repository/process/lookup/index .lookupUpdates() upgrades .x major ranges without pinning 1`] = `
-[
-  {
-    "bucket": "major",
-    "isRange": true,
-    "newMajor": 1,
-    "newMinor": 4,
-    "newValue": "1.x",
-    "newVersion": "1.4.1",
-    "releaseTimestamp": "2015-05-17T04:25:07.299Z",
-    "updateType": "major",
-  },
-]
-`;
-
-exports[`workers/repository/process/lookup/index .lookupUpdates() upgrades .x minor ranges 1`] = `
-[
-  {
-    "isPin": true,
-    "newMajor": 1,
-    "newValue": "1.3.0",
-    "newVersion": "1.3.0",
-    "updateType": "pin",
-  },
-  {
-    "bucket": "non-major",
-    "newMajor": 1,
-    "newMinor": 4,
-    "newValue": "1.4.1",
-    "newVersion": "1.4.1",
-    "releaseTimestamp": "2015-05-17T04:25:07.299Z",
-    "updateType": "minor",
-  },
-]
-`;
-
-exports[`workers/repository/process/lookup/index .lookupUpdates() upgrades .x minor ranges without pinning 1`] = `
-[
-  {
-    "bucket": "non-major",
-    "isRange": true,
-    "newMajor": 1,
-    "newMinor": 4,
-    "newValue": "1.4.x",
-    "newVersion": "1.4.1",
-    "releaseTimestamp": "2015-05-17T04:25:07.299Z",
-    "updateType": "minor",
-  },
-]
-`;
-
-exports[`workers/repository/process/lookup/index .lookupUpdates() upgrades equal minor ranges 1`] = `
-[
-  {
-    "bucket": "non-major",
-    "isRange": true,
-    "newMajor": 1,
-    "newMinor": 4,
-    "newValue": "=1.4.1",
-    "newVersion": "1.4.1",
-    "releaseTimestamp": "2015-05-17T04:25:07.299Z",
-    "updateType": "minor",
-  },
-]
-`;
-
-exports[`workers/repository/process/lookup/index .lookupUpdates() upgrades less than equal major ranges 1`] = `
-[
-  {
-    "bucket": "major",
-    "isRange": true,
-    "newMajor": 2,
-    "newMinor": 0,
-    "newValue": "<= 2",
-    "newVersion": "2.0.3",
-    "releaseTimestamp": "2015-01-31T08:11:47.852Z",
-    "updateType": "major",
-  },
-]
-`;
-
-exports[`workers/repository/process/lookup/index .lookupUpdates() upgrades less than equal minor ranges 1`] = `
-[
-  {
-    "bucket": "non-major",
-    "isRange": true,
-    "newMajor": 1,
-    "newMinor": 4,
-    "newValue": "<= 1.4",
-    "newVersion": "1.4.1",
-    "releaseTimestamp": "2015-05-17T04:25:07.299Z",
-    "updateType": "minor",
-  },
-]
-`;
-
-exports[`workers/repository/process/lookup/index .lookupUpdates() upgrades less than equal ranges without pinning 1`] = `
-[
-  {
-    "bucket": "non-major",
-    "isRange": true,
-    "newMajor": 0,
-    "newMinor": 9,
-    "newValue": "<= 0.9.7",
-    "newVersion": "0.9.7",
-    "releaseTimestamp": "2013-09-04T17:07:22.948Z",
-    "updateType": "minor",
-  },
-  {
-    "bucket": "major",
-    "isRange": true,
-    "newMajor": 1,
-    "newMinor": 4,
-    "newValue": "<= 1.4.1",
-    "newVersion": "1.4.1",
-    "releaseTimestamp": "2015-05-17T04:25:07.299Z",
-    "updateType": "major",
-  },
-]
-`;
-
-exports[`workers/repository/process/lookup/index .lookupUpdates() upgrades less than major ranges 1`] = `
-[
-  {
-    "bucket": "major",
-    "isRange": true,
-    "newMajor": 1,
-    "newMinor": 4,
-    "newValue": "< 2",
-    "newVersion": "1.4.1",
-    "releaseTimestamp": "2015-05-17T04:25:07.299Z",
-    "updateType": "major",
-  },
-]
-`;
-
-exports[`workers/repository/process/lookup/index .lookupUpdates() upgrades less than ranges without pinning 1`] = `
-[
-  {
-    "bucket": "non-major",
-    "isRange": true,
-    "newMajor": 0,
-    "newMinor": 9,
-    "newValue": "< 0.9.8",
-    "newVersion": "0.9.7",
-    "releaseTimestamp": "2013-09-04T17:07:22.948Z",
-    "updateType": "minor",
-  },
-  {
-    "bucket": "major",
-    "isRange": true,
-    "newMajor": 1,
-    "newMinor": 4,
-    "newValue": "< 1.4.2",
-    "newVersion": "1.4.1",
-    "releaseTimestamp": "2015-05-17T04:25:07.299Z",
-    "updateType": "major",
-  },
-]
+exports[`workers/repository/process/lookup/index .lookupUpdates() supports pinning for x-range-all (no lockfile) 1`] = `
+{
+  "changelogUrl": undefined,
+  "currentVersion": "1.4.1",
+  "dependencyUrl": undefined,
+  "homepage": undefined,
+  "sourceUrl": "https://github.com/kriskowal/q",
+  "updates": [
+    {
+      "isPin": true,
+      "newMajor": 1,
+      "newValue": "1.4.1",
+      "newVersion": "1.4.1",
+      "updateType": "pin",
+    },
+  ],
+  "versioning": "npm",
+  "warnings": [],
+}
 `;
 
 exports[`workers/repository/process/lookup/index .lookupUpdates() upgrades major greater than less than ranges without pinning 1`] = `
