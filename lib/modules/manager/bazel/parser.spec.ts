@@ -1,4 +1,4 @@
-import { parse } from './parser';
+import { extract, parse } from './parser';
 
 describe('modules/manager/bazel/parser', () => {
   it('parses rules input', () => {
@@ -44,6 +44,10 @@ describe('modules/manager/bazel/parser', () => {
         },
       ],
     });
+    expect(extract(res!)).toMatchObject([
+      { rule: 'go_repository', name: 'foo' },
+      { rule: 'go_repository', name: 'bar', deps: ['baz', 'qux'] },
+    ]);
   });
 
   it('parses multiple archives', () => {
@@ -100,6 +104,25 @@ describe('modules/manager/bazel/parser', () => {
         },
       ],
     });
+    expect(extract(res!)).toMatchObject([
+      {
+        rule: 'http_archive',
+        name: 'aspect_rules_js',
+        sha256:
+          'db9f446752fe4100320cf8487e8fd476b9af0adf6b99b601bcfd70b289bb0598',
+        strip_prefix: 'rules_js-1.1.2',
+        url: 'https://github.com/aspect-build/rules_js/archive/refs/tags/v1.1.2.tar.gz',
+      },
+      {
+        rule: 'http_archive',
+        name: 'rules_nodejs',
+        sha256:
+          '5aef09ed3279aa01d5c928e3beb248f9ad32dde6aafe6373a8c994c3ce643064',
+        urls: [
+          'https://github.com/bazelbuild/rules_nodejs/releases/download/5.5.3/rules_nodejs-core-5.5.3.tar.gz',
+        ],
+      },
+    ]);
   });
 
   it('parses http_archive', () => {
@@ -129,6 +152,15 @@ describe('modules/manager/bazel/parser', () => {
         },
       ],
     });
+    expect(extract(res!)).toMatchObject([
+      {
+        rule: 'http_archive',
+        name: 'rules_nodejs',
+        sha256:
+          '5aef09ed3279aa01d5c928e3beb248f9ad32dde6aafe6373a8c994c3ce643064',
+        url: 'https://github.com/bazelbuild/rules_nodejs/releases/download/5.5.3/rules_nodejs-core-5.5.3.tar.gz',
+      },
+    ]);
   });
 
   it('parses http_archive with prefixes and multiple urls', () => {
@@ -174,5 +206,19 @@ describe('modules/manager/bazel/parser', () => {
         },
       ],
     });
+    expect(extract(res!)).toMatchObject([
+      {
+        name: 'bazel_toolchains',
+        rule: 'http_archive',
+        sha256:
+          '4b1468b254a572dbe134cc1fd7c6eab1618a72acd339749ea343bd8f55c3b7eb',
+        strip_prefix:
+          'bazel-toolchains-d665ccfa3e9c90fa789671bf4ef5f7c19c5715c4',
+        urls: [
+          'https://mirror.bazel.build/github.com/bazelbuild/bazel-toolchains/archive/d665ccfa3e9c90fa789671bf4ef5f7c19c5715c4.tar.gz',
+          'https://github.com/bazelbuild/bazel-toolchains/archive/d665ccfa3e9c90fa789671bf4ef5f7c19c5715c4.tar.gz',
+        ],
+      },
+    ]);
   });
 });

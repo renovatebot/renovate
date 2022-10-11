@@ -2,7 +2,13 @@ import { lang, lexer, parser, query as q } from 'good-enough-parser';
 import hasha from 'hasha';
 import * as memCache from '../../../util/cache/memory';
 import { supportedRulesRegex } from './rules/index';
-import type { ArrayFragment, NestedFragment, RecordFragment } from './types';
+import type {
+  ArrayFragment,
+  Fragment,
+  FragmentData,
+  NestedFragment,
+  RecordFragment,
+} from './types';
 
 interface Ctx {
   readonly source: string;
@@ -231,4 +237,21 @@ export function parse(input: string): ArrayFragment | null {
 
   memCache.set(cacheKey, result);
   return result;
+}
+
+export function extract(fragment: Fragment): FragmentData {
+  if (fragment.type === 'string') {
+    return fragment.value;
+  }
+
+  if (fragment.type === 'record') {
+    const { children } = fragment;
+    const result: Record<string, FragmentData> = {};
+    for (const [key, value] of Object.entries(children)) {
+      result[key] = extract(value);
+    }
+    return result;
+  }
+
+  return fragment.children.map(extract);
 }
