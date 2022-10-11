@@ -1,8 +1,20 @@
 import type { RenovateConfig } from '../../../config/types';
-import { get, getManagerList, hashMap } from '../../../modules/manager';
+import { get, getManagerList } from '../../../modules/manager';
+import type { WorkerExtractConfig } from '../../types';
 
-export function extractFingerprintConfig(config: RenovateConfig): unknown {
-  // collect manager configs
+export interface FingerprintExtractConfig
+  extends Omit<WorkerExtractConfig, 'manager' | 'fileList'> {
+  manager?: string;
+  fileList?: string[];
+}
+
+export function extractFingerprintConfig(
+  config: RenovateConfig
+): FingerprintExtractConfig[] {
+  const managerExtractConfigs: FingerprintExtractConfig[] = [
+    ...((config.regexManagers ?? []) as FingerprintExtractConfig[]),
+  ];
+
   let managerList = getManagerList();
   const { enabledManagers } = config;
   if (enabledManagers?.length) {
@@ -11,27 +23,34 @@ export function extractFingerprintConfig(config: RenovateConfig): unknown {
     );
   }
 
-  // collect language configs
-  const languageConfigArray = managerList
-    .map((manager) => {
-      const language = get(manager, 'language');
-      if (language) {
-        return config[language];
-      }
-      return undefined;
-    })
-    .filter(Boolean);
+  for (const manager of managerList) {
+    const managerConfig: WorkerExtractConfig = config[manager] as any;
+    const language = get(manager, 'language');
+    const languageConfig = (
+      language ? (config[language] ? config[language] : {}) : {}
+    ) as FingerprintExtractConfig;
+    const filteredConfig = {} as FingerprintExtractConfig;
 
-  return {
-    npmrc: config.npmrc,
-    npmrcMerge: config.npmrcMerge,
-    regexManagers: config.regexManagers,
-    managerConfigList: managerList
-      .map((manager) => config[manager])
-      .filter(Boolean),
-    languageConfigArray,
-    managerFingerprints: managerList.map(
-      (manager) => hashMap.get(manager) ?? manager
-    ),
-  };
+    // npmrc and npmrcMerge
+    if (manager === 'npm') {
+      filteredConfig.npmrc = config.npmrc;
+      filteredConfig.npmrcMerge = config.npmrcMerge;
+    }
+
+    // non-mergeable config options
+    filteredConfig.enabled = managerConfig.enabled;
+    filteredConfig.ignorePaths = managerConfig.ignorePaths;
+    filteredConfig.includePaths = config.includePaths;
+    filteredConfig.registryAliases = managerConfig.registryAliases;
+    filteredConfig.skipInstalls = managerConfig.skipInstalls;
+
+    // mergeable config options
+    filteredConfig.fileMatch = [...(managerConfig.fileMatch ?? [])].concat(
+      ...(languageConfig?.fileMatch ?? [])
+    );
+
+    managerExtractConfigs.push(filteredConfig);
+  }
+
+  return managerExtractConfigs;
 }
