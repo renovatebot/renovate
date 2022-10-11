@@ -16,13 +16,9 @@ const Target = z.union([DockerTarget, GitTarget, GoTarget, HttpTarget]);
  */
 const supportedRules = Target.options.reduce<string[]>((res, targetSchema) => {
   const schema = targetSchema._def.schema;
-  if (schema instanceof ZodObject) {
-    return [...res, ...schema.shape.rule.options];
-  }
-  if (schema instanceof ZodEffects) {
-    return [...res, ...schema._def.schema.shape.rule.options];
-  }
-  return res;
+  return schema instanceof ZodObject
+    ? [...res, ...schema.shape.rule.options]
+    : [...res, ...schema._def.schema.shape.rule.options];
 }, []);
 
 /**

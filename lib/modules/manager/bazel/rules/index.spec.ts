@@ -90,6 +90,20 @@ describe('modules/manager/bazel/rules/index', () => {
         packageName: 'foo/bar',
         currentDigest: 'abcdef0123abcdef0123abcdef0123abcdef0123',
       });
+
+      expect(
+        extractDepFromFragmentData({
+          rule: 'git_repository',
+          name: 'foo_bar',
+          tag: '1.2.3',
+          remote: 'https://gitlab.com/foo/bar',
+        })
+      ).toMatchObject({
+        currentValue: '1.2.3',
+        depName: 'foo_bar',
+        depType: 'git_repository',
+        skipReason: 'unsupported-datasource',
+      });
     });
   });
 
