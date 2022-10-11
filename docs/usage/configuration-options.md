@@ -2786,6 +2786,12 @@ To parse Cron syntax, Renovate uses [@cheap-glitch/mi-cron](https://github.com/c
 Renovate does not support scheduled minutes or "at an exact time" granularity.
 
 <!-- prettier-ignore -->
+!!! tip
+    If you want to _disable_ Renovate, then avoid setting `schedule` to `"never"`.
+    Instead, use the `enabled` config option to disable Renovate.
+    Read the [`enabled` config option docs](https://docs.renovatebot.com/configuration-options/#enabled) to learn more.
+
+<!-- prettier-ignore -->
 !!! note
     Actions triggered via the [Dependency Dashboard](https://docs.renovatebot.com/configuration-options/#dependencydashboard) are not restricted by a configured schedule.
 
