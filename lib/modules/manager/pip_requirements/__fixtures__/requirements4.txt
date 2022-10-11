@@ -2,3 +2,4 @@
 Django[argon2]==2.0.12
 celery [redis]==4.1.1
 foo [bar] == 3.2.1 # handles extra white space
+celery>=5.2.2 # not directly required, pinned by Snyk to avoid a vulnerability
