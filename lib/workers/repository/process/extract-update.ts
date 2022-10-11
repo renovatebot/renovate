@@ -1,4 +1,3 @@
-// TODO #7154
 import is from '@sindresorhus/is';
 import type { RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
@@ -94,7 +93,9 @@ export async function extract(
     }
   } else {
     await checkoutBranch(baseBranch!);
-    packageFiles = await extractAllDependencies(config);
+    packageFiles = await extractAllDependencies(
+      extractFingerprintConfig(config)
+    );
     // TODO: fix types (#7154)
     cache.scan[baseBranch!] = {
       sha: baseBranchSha!,

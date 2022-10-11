@@ -180,7 +180,7 @@ export interface RegexManagerTemplates {
 export interface RegExManager extends RegexManagerTemplates {
   fileMatch: string[];
   matchStrings: string[];
-  matchStringsStrategy?: string;
+  matchStringsStrategy?: MatchStringsStrategy;
   autoReplaceStringTemplate?: string;
 }
 

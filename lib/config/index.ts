@@ -1,9 +1,38 @@
 import { logger } from '../logger';
+import { get, getLanguageList, getManagerList } from '../modules/manager';
 import * as options from './options';
-import type { AllConfig, RenovateConfig, RenovateConfigStage } from './types';
+import type {
+  AllConfig,
+  ManagerConfig,
+  RenovateConfig,
+  RenovateConfigStage,
+} from './types';
 import { mergeChildConfig } from './utils';
 
 export { mergeChildConfig };
+
+export function getManagerConfig(
+  config: RenovateConfig,
+  manager: string
+): ManagerConfig {
+  let managerConfig: ManagerConfig = {
+    ...config,
+    language: null,
+    manager,
+  };
+  const language = get(manager, 'language');
+  if (language) {
+    // TODO: fix types #7154
+    managerConfig = mergeChildConfig(managerConfig, config[language] as any);
+    managerConfig.language = language;
+  }
+  // TODO: fix types #7154
+  managerConfig = mergeChildConfig(managerConfig, config[manager] as any);
+  for (const i of getLanguageList().concat(getManagerList())) {
+    delete managerConfig[i];
+  }
+  return managerConfig;
+}
 
 export function filterConfig(
   inputConfig: AllConfig,

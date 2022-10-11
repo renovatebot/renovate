@@ -1,4 +1,4 @@
-import type { RegExManager, RenovateConfig } from '../../../config/types';
+import type { RenovateConfig } from '../../../config/types';
 import { get, getManagerList } from '../../../modules/manager';
 import type { WorkerExtractConfig } from '../../types';
 
@@ -6,7 +6,7 @@ export interface FingerprintExtractConfig {
   enabledManagers?: string[];
   managerList: string[];
   managers: WorkerExtractConfig[];
-  regexManagers?: RegExManager[];
+  regexManagers?: WorkerExtractConfig[];
 }
 
 export function extractFingerprintConfig(
@@ -15,9 +15,6 @@ export function extractFingerprintConfig(
   const finalConfig = {} as FingerprintExtractConfig;
   if (config.enabledManagers) {
     finalConfig.enabledManagers = config.enabledManagers;
-  }
-  if (config.regexManagers) {
-    finalConfig.regexManagers = config.regexManagers;
   }
 
   const managerExtractConfigs: WorkerExtractConfig[] = [];
@@ -59,6 +56,17 @@ export function extractFingerprintConfig(
     managerExtractConfigs.push(filteredConfig);
   }
 
+  if (config.regexManagers) {
+    for (const manager of config.regexManagers) {
+      managerExtractConfigs.push({
+        manager: 'regex',
+        fileList: [],
+        ...manager,
+      });
+    }
+  }
+
+  // need to handle this different so as to get all necessary properties of RegExManager
   finalConfig.managers = managerExtractConfigs;
   return finalConfig;
 }
