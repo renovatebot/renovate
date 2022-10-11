@@ -18,6 +18,7 @@ jest.mock('./util');
 const { getConfiguredRegistries, getDefaultRegistries } = mocked(util);
 const hostRules = mocked(_hostRules);
 
+// eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
 const realFs = jest.requireActual(
   '../../../util/fs'
 ) as typeof import('../../../util/fs');

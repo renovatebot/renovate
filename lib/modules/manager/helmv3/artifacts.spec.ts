@@ -108,7 +108,7 @@ describe('modules/manager/helmv3/artifacts', () => {
         newPackageFileContent: chartFile,
         config,
       })
-    ).toMatchSnapshot([
+    ).toMatchObject([
       {
         file: {
           type: 'addition',
@@ -137,7 +137,7 @@ describe('modules/manager/helmv3/artifacts', () => {
         newPackageFileContent: chartFile,
         config: { ...config, updateType: 'lockFileMaintenance' },
       })
-    ).toMatchSnapshot([
+    ).toMatchObject([
       {
         file: {
           type: 'addition',
@@ -171,7 +171,7 @@ describe('modules/manager/helmv3/artifacts', () => {
         newPackageFileContent: chartFile,
         config,
       })
-    ).toMatchSnapshot([
+    ).toMatchObject([
       {
         file: {
           type: 'addition',
@@ -201,7 +201,7 @@ describe('modules/manager/helmv3/artifacts', () => {
         newPackageFileContent: chartFile,
         config,
       })
-    ).toMatchSnapshot([
+    ).toMatchObject([
       {
         artifactError: {
           lockFile: 'Chart.lock',
@@ -231,7 +231,7 @@ describe('modules/manager/helmv3/artifacts', () => {
           registryAliases: { stable: 'the_stable_url', repo1: 'the_repo1_url' },
         },
       })
-    ).toMatchSnapshot([
+    ).toMatchObject([
       {
         file: {
           type: 'addition',
@@ -268,7 +268,7 @@ describe('modules/manager/helmv3/artifacts', () => {
           registryAliases: { stable: 'the_stable_url', repo1: 'the_repo1_url' },
         },
       })
-    ).toMatchSnapshot([
+    ).toMatchObject([
       {
         file: {
           type: 'addition',
@@ -318,7 +318,7 @@ describe('modules/manager/helmv3/artifacts', () => {
           },
         },
       })
-    ).toMatchSnapshot([
+    ).toMatchObject([
       {
         file: {
           type: 'addition',
@@ -364,7 +364,7 @@ describe('modules/manager/helmv3/artifacts', () => {
           registryAliases: {},
         },
       })
-    ).toMatchSnapshot([
+    ).toMatchObject([
       {
         file: {
           type: 'addition',
@@ -407,7 +407,7 @@ describe('modules/manager/helmv3/artifacts', () => {
           },
         },
       })
-    ).toMatchSnapshot([
+    ).toMatchObject([
       {
         file: {
           type: 'addition',
@@ -454,7 +454,7 @@ describe('modules/manager/helmv3/artifacts', () => {
           },
         },
       })
-    ).toMatchSnapshot([
+    ).toMatchObject([
       {
         file: {
           type: 'addition',
