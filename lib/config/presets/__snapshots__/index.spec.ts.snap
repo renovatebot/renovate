@@ -135,6 +135,8 @@ exports[`config/presets/index resolvePreset resolves linters 1`] = `
     "@types/eslint",
     "babel-eslint",
     "codelyzer",
+    "prettier",
+    "standard",
     "remark-lint",
   ],
   "matchPackagePatterns": [
@@ -145,8 +147,6 @@ exports[`config/presets/index resolvePreset resolves linters 1`] = `
     "@typescript-eslint/",
     "eslint",
     "stylelint",
-    "prettier",
-    "standard",
   ],
 }
 `;
@@ -166,6 +166,8 @@ exports[`config/presets/index resolvePreset resolves nested groups 1`] = `
         "@types/eslint",
         "babel-eslint",
         "codelyzer",
+        "prettier",
+        "standard",
         "remark-lint",
       ],
       "matchPackagePatterns": [
@@ -176,8 +178,6 @@ exports[`config/presets/index resolvePreset resolves nested groups 1`] = `
         "@typescript-eslint/",
         "eslint",
         "stylelint",
-        "prettier",
-        "standard",
       ],
     },
   ],

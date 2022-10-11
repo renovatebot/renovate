@@ -247,9 +247,9 @@ describe('config/presets/index', () => {
       config.extends = ['packages:linters'];
       const res = await presets.resolveConfigPresets(config);
       expect(res).toMatchSnapshot();
-      expect(res.matchPackageNames).toHaveLength(4);
+      expect(res.matchPackageNames).toHaveLength(6);
       expect(res.matchPackagePatterns).toHaveLength(1);
-      expect(res.matchPackagePrefixes).toHaveLength(6);
+      expect(res.matchPackagePrefixes).toHaveLength(4);
     });
 
     it('resolves nested groups', async () => {
@@ -258,9 +258,9 @@ describe('config/presets/index', () => {
       expect(res).toMatchSnapshot();
       const rule = res.packageRules![0];
       expect(rule.automerge).toBeTrue();
-      expect(rule.matchPackageNames).toHaveLength(4);
+      expect(rule.matchPackageNames).toHaveLength(6);
       expect(rule.matchPackagePatterns).toHaveLength(1);
-      expect(rule.matchPackagePrefixes).toHaveLength(6);
+      expect(rule.matchPackagePrefixes).toHaveLength(4);
     });
 
     it('migrates automerge in presets', async () => {
