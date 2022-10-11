@@ -10,7 +10,7 @@ describe('modules/manager/deps-edn/extract', () => {
     it('extractPackageFile', () => {
       const res = extractPackageFile(Fixtures.get('deps.edn'));
       const deps = res?.deps;
-      expect(deps).toMatchSnapshot([
+      expect(deps).toMatchObject([
         {
           depName: 'persistent-sorted-set',
           currentValue: '0.1.2',

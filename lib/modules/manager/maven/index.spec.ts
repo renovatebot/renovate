@@ -61,7 +61,7 @@ describe('modules/manager/maven/index', () => {
           p.parent = p.parent.replace(/\\/g, '/');
         }
       }
-      expect(packages).toMatchSnapshot([
+      expect(packages).toMatchObject([
         {
           deps: [
             { depName: 'org.example:parent', currentValue: '42' },

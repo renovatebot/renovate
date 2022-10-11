@@ -51,8 +51,7 @@ async function generateBranchCache(
   const { baseBranch, branchName } = branch;
   try {
     const sha = getBranchCommit(branchName) ?? null;
-    // TODO: fix types (#7154)
-    const baseBranchSha = getBranchCommit(baseBranch!)!;
+    const baseBranchSha = getBranchCommit(baseBranch);
     let prNo = null;
     let parentSha = null;
     let isModified = false;
@@ -64,8 +63,7 @@ async function generateBranchCache(
         prNo = branchPr.number;
       }
       isModified = await isBranchModified(branchName);
-      // TODO: fix types (#7154)
-      isBehindBase = await isBranchBehindBase(branchName, baseBranch!);
+      isBehindBase = await isBranchBehindBase(branchName, baseBranch);
     }
     const automerge = !!branch.automerge;
     const upgrades: BranchUpgradeCache[] = branch.upgrades
@@ -75,8 +73,7 @@ async function generateBranchCache(
     return {
       automerge,
       baseBranchSha,
-      // TODO: fix types (#7154)
-      baseBranch: baseBranch!,
+      baseBranch,
       branchFingerprint,
       branchName,
       isBehindBase,
