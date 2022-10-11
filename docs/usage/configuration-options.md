@@ -79,9 +79,12 @@ With the above config:
 
 ## additionalBranchPrefix
 
-This value defaults to an empty string, and is typically not necessary.
-Some managers previously populated this field, but they no longer do so by default.
-You normally don't need to configure this, but one example where it can be useful is combining with `parentDir` in monorepos to split PRs based on where the package definition is located, e.g.
+By default, the value for this config option is an empty string.
+Normally you don't need to set this config option.
+
+Here's an example where `additionalBranchPrefix` can help you.
+Say you're using a monorepo and want to split pull requests based on the location of the package definition, so that individual teams can manage their own Renovate pull requests.
+This can be done with this configuration:
 
 ```json
 {
@@ -2781,6 +2784,12 @@ Technical details: We mostly rely on the text parsing of the library [@breejs/la
 Read the parser documentation at [breejs.github.io/later/parsers.html#text](https://breejs.github.io/later/parsers.html#text).
 To parse Cron syntax, Renovate uses [@cheap-glitch/mi-cron](https://github.com/cheap-glitch/mi-cron).
 Renovate does not support scheduled minutes or "at an exact time" granularity.
+
+<!-- prettier-ignore -->
+!!! tip
+    If you want to _disable_ Renovate, then avoid setting `schedule` to `"never"`.
+    Instead, use the `enabled` config option to disable Renovate.
+    Read the [`enabled` config option docs](https://docs.renovatebot.com/configuration-options/#enabled) to learn more.
 
 <!-- prettier-ignore -->
 !!! note

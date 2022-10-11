@@ -36,3 +36,8 @@ export interface StringFragment extends FragmentBase {
 
 export type NestedFragment = ArrayFragment | RecordFragment;
 export type Fragment = NestedFragment | StringFragment;
+
+export type FragmentData =
+  | string
+  | FragmentData[]
+  | { [k: string]: FragmentData };
