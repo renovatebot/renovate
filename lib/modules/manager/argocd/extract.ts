@@ -1,6 +1,7 @@
 import is from '@sindresorhus/is';
 import { loadAll } from 'js-yaml';
 import { logger } from '../../../logger';
+import { trimTrailingSlash } from '../../../util/url';
 import { DockerDatasource } from '../../datasource/docker';
 import { GitTagsDatasource } from '../../datasource/git-tags';
 import { HelmDatasource } from '../../datasource/helm';
@@ -37,9 +38,7 @@ function createDependency(
       !source.repoURL.includes('://')
     ) {
       let registryURL = source.repoURL.replace('oci://', '');
-      if (registryURL.endsWith('/')) {
-        registryURL = registryURL.slice(0, -1);
-      }
+      registryURL = trimTrailingSlash(registryURL);
 
       return {
         depName: `${registryURL}/${source.chart}`,
