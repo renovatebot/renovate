@@ -37,9 +37,13 @@ function createDependency(
       source.repoURL.startsWith('oci://') ||
       !source.repoURL.includes('://')
     ) {
-      const registryURL = source.repoURL.replace('oci://', '');
+      let registryURL = source.repoURL.replace('oci://', '');
+      if (registryURL.endsWith('/')) {
+        registryURL = registryURL.slice(0, -1);
+      }
+
       return {
-        depName: urlJoin(registryURL, source.chart),
+        depName: `${registryURL}/${source.chart}`,
         currentValue: source.targetRevision,
         datasource: DockerDatasource.id,
       };
