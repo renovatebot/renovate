@@ -1,10 +1,11 @@
 import is from '@sindresorhus/is';
+import { z } from 'zod';
 import { regEx } from '../../../../util/regex';
 import { parseUrl } from '../../../../util/url';
 import { GithubReleasesDatasource } from '../../../datasource/github-releases';
 import { GithubTagsDatasource } from '../../../datasource/github-tags';
 import type { PackageDependency } from '../../types';
-import type { Target, UrlParsedResult } from '../types';
+import type { UrlParsedResult } from '../types';
 
 export function parseArchiveUrl(
   urlString: string | undefined | null
@@ -50,47 +51,35 @@ export function parseArchiveUrl(
   return null;
 }
 
-export function httpDependency({
-  rule: depType,
-  name: depName,
-  url,
-  urls,
-  sha256,
-}: Target): PackageDependency | null {
-  let dep: PackageDependency | null = null;
+export const httpRules = ['http_archive', 'http_file'] as const;
 
-  if (
-    (depType === 'http_archive' || depType === 'http_file') &&
-    is.string(depName) &&
-    is.string(sha256)
-  ) {
-    let parsedUrl: UrlParsedResult | null = null;
-    if (is.string(url)) {
-      parsedUrl = parseArchiveUrl(url);
-    } else if (is.array(urls, is.string)) {
-      for (const u of urls) {
-        parsedUrl = parseArchiveUrl(u);
-        if (parsedUrl) {
-          break;
-        }
-      }
+export const HttpTarget = z
+  .object({
+    rule: z.enum(httpRules),
+    name: z.string(),
+    url: z.string().optional(),
+    urls: z.array(z.string()).optional(),
+    sha256: z.string(),
+  })
+  .refine(({ url, urls }) => !!url || !!urls)
+  .transform(({ rule, name, url, urls = [] }): PackageDependency | null => {
+    const parsedUrl = [url, ...urls].map(parseArchiveUrl).find(is.truthy);
+    if (!parsedUrl) {
+      return null;
     }
 
-    if (parsedUrl) {
-      dep = {
-        datasource: parsedUrl.datasource,
-        depType,
-        depName,
-        packageName: parsedUrl.repo,
-      };
+    const dep: PackageDependency = {
+      datasource: parsedUrl.datasource,
+      depType: rule,
+      depName: name,
+      packageName: parsedUrl.repo,
+    };
 
-      if (regEx(/^[a-f0-9]{40}$/i).test(parsedUrl.currentValue)) {
-        dep.currentDigest = parsedUrl.currentValue;
-      } else {
-        dep.currentValue = parsedUrl.currentValue;
-      }
+    if (regEx(/^[a-f0-9]{40}$/i).test(parsedUrl.currentValue)) {
+      dep.currentDigest = parsedUrl.currentValue;
+    } else {
+      dep.currentValue = parsedUrl.currentValue;
     }
-  }
 
-  return dep;
-}
+    return dep;
+  });
