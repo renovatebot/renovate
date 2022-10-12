@@ -145,8 +145,9 @@ export async function updateDependency({
       return result;
     }
 
-    if (upgrade.depType === 'http_archive' || upgrade.depType === 'http_file') {
+    if (upgrade.depType === 'http_file' || upgrade.depType === 'http_archive') {
       const rule = findCodeFragment(fileContent, [idx]);
+      // istanbul ignore if
       if (rule?.type !== 'record') {
         return null;
       }
@@ -180,5 +181,6 @@ export async function updateDependency({
     logger.debug({ err }, 'Error setting new bazel WORKSPACE version');
   }
 
+  // istanbul ignore next
   return null;
 }

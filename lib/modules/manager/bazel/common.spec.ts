@@ -20,7 +20,13 @@ describe('modules/manager/bazel/common', () => {
       expect(output).toBe(`git_repository(name = "bar")`);
     });
 
-    it('returns input on key miss', () => {
+    it('returns input on wrong index', () => {
+      const input = `git_repository(name = "foo")`;
+      const output = updateCode(input, [1, 'name'], 'bar');
+      expect(output).toBe(input);
+    });
+
+    it('returns input on wrong key', () => {
       const input = `git_repository(name = "foo")`;
       const output = updateCode(input, [0, 'foobar'], 'bar');
       expect(output).toBe(input);

@@ -11,14 +11,14 @@ export function findCodeFragment(
     return null;
   }
 
-  const [idx, ...restPath] = path;
-  let fragment: Fragment | undefined = parsed[idx];
-  for (let idx = 0; idx < restPath.length; idx += 1) {
+  const [ruleIndex, ...restPath] = path;
+  let fragment: Fragment | undefined = parsed[ruleIndex];
+  for (let pathIndex = 0; pathIndex < restPath.length; pathIndex += 1) {
     if (!fragment) {
       break;
     }
 
-    const key = restPath[idx];
+    const key = restPath[pathIndex];
 
     if (fragment.type === 'array' && is.number(key)) {
       fragment = fragment.children[key];
