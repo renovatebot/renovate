@@ -132,6 +132,24 @@ const answer = 'two';
 let result: string = util.format(_('one plus one should be equal %s'), answer);
 ```
 
+### Prevent multiple-lines function call for Gettext functions
+
+We prefer
+
+```typescript
+pgettext('context', 'the text you wanna translate');
+```
+
+than
+
+```typescript
+pgettext('context', 'the text you wanna translate');
+```
+
+Sometimes, the `xgettext` program, which extracts translatable strings from the code base, can not determine the function call of the latter style.
+
+That might be a bug of Gettext utilities.
+
 ### Preparing Translatable Strings
 
 Please read [the manual](https://www.gnu.org/software/gettext/manual/html_node/Preparing-Strings.html#Preparing-Strings) of GNU gettext.
