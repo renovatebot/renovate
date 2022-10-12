@@ -55,6 +55,7 @@ describe('workers/repository/update/pr/body/index', () => {
         {
           manager: 'some-manager',
           branchName: 'some-branch',
+          baseBranch: 'base',
           upgrades: [],
         },
         {
@@ -82,6 +83,7 @@ describe('workers/repository/update/pr/body/index', () => {
       await getPrBody(
         {
           manager: 'some-manager',
+          baseBranch: 'base',
           branchName: 'some-branch',
           upgrades: [upgrade],
         },
@@ -118,6 +120,7 @@ describe('workers/repository/update/pr/body/index', () => {
       await getPrBody(
         {
           manager: 'some-manager',
+          baseBranch: 'base',
           branchName: 'some-branch',
           upgrades: [upgrade],
         },
@@ -144,6 +147,7 @@ describe('workers/repository/update/pr/body/index', () => {
         {
           manager: 'some-manager',
           branchName: 'some-branch',
+          baseBranch: 'base',
           upgrades: [],
           prBodyTemplate: 'PR BODY',
         },
@@ -164,6 +168,7 @@ describe('workers/repository/update/pr/body/index', () => {
       const res = await getPrBody(
         {
           manager: 'some-manager',
+          baseBranch: 'base',
           branchName: 'some-branch',
           upgrades: [],
           prBodyTemplate: ['aaa', '**Rebasing**: FOO', 'bbb'].join('\n'),
@@ -187,6 +192,7 @@ describe('workers/repository/update/pr/body/index', () => {
           manager: 'some-manager',
           branchName: 'some-branch',
           upgrades: [],
+          baseBranch: 'base',
           prBodyTemplate: 'PR BODY',
         },
         {
@@ -235,6 +241,7 @@ describe('workers/repository/update/pr/body/index', () => {
           upgrades: [],
           packageFiles,
           prBodyTemplate: '{{{warnings}}}',
+          baseBranch: 'base',
         },
         {
           debugData: {

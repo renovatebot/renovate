@@ -30,6 +30,7 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
         artifactErrors: [],
         upgrades: [],
         branchName: 'main',
+        baseBranch: 'base',
       };
       git.getRepoStatus.mockResolvedValueOnce(
         partial<StatusResult>({
