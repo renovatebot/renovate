@@ -34,7 +34,7 @@ Set up a global configuration file (config.js) for running Renovate on CodeCommi
 - Set `platform: 'codecommit'`
 - Set `repositories: ['{repository names separated by comma}']`, or alternatively use Renovate’s [autodiscover](https://docs.renovatebot.com/self-hosted-configuration/#autodiscover)
 
-Run Renovate with the configuration file and it will create an onboarding Pull Request in your set repositories.
+Run Renovate with the configuration file, and it will create an onboarding Pull Request in your set repositories.
 
 ## Unsupported platform features/concepts
 
