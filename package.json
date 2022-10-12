@@ -226,9 +226,9 @@
     "re2": "1.17.7"
   },
   "devDependencies": {
-    "@jest/globals": "29.0.3",
-    "@jest/reporters": "29.0.3",
-    "@jest/test-result": "29.0.3",
+    "@jest/globals": "29.1.2",
+    "@jest/reporters": "29.1.2",
+    "@jest/test-result": "29.1.2",
     "@ls-lint/ls-lint": "1.11.2",
     "@openpgp/web-stream-tools": "0.0.12",
     "@renovate/eslint-plugin": "https://github.com/renovatebot/eslint-plugin#v0.0.4",
@@ -288,7 +288,7 @@
     "glob": "8.0.3",
     "graphql": "16.6.0",
     "husky": "8.0.1",
-    "jest": "29.0.3",
+    "jest": "29.1.2",
     "jest-extended": "3.1.0",
     "jest-junit": "14.0.1",
     "jest-mock-extended": "3.0.1",
