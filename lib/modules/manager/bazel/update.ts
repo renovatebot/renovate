@@ -1,5 +1,3 @@
-// TODO: types (#7154)
-/* eslint-disable @typescript-eslint/restrict-template-expressions */
 import is from '@sindresorhus/is';
 import hasha from 'hasha';
 import { logger } from '../../../logger';
