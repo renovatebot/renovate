@@ -255,7 +255,7 @@ export async function writeExistingFiles(
         .replace('--install.frozen-lockfile true', '');
       if (yarnrcContent !== yarnrcContentNew) {
         try {
-          logger.debug(`Writing .yarnrc to ${basedir}`);
+          logger.debug(`Writing massaged .yarnrc to ${basedir}`);
           await writeLocalFile(yarnrcFilename, yarnrcContentNew);
         } catch (err) /* istanbul ignore next */ {
           logger.warn({ yarnrcFilename, err }, 'Error writing .yarnrc');
