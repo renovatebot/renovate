@@ -56,10 +56,6 @@ export interface BranchCache {
    */
   isModified?: boolean;
   /**
-   * Name of the branch current branch was checked out from
-   */
-  baseBranch: string | undefined;
-  /**
    * Parent commit of branch sha
    */
   parentSha: string | null;
