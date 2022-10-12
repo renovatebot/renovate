@@ -2059,10 +2059,10 @@
   resolved "https://registry.yarnpkg.com/@pnpm/constants/-/constants-6.1.0.tgz#2db43ae0e029095df7959bc640081beae38a631b"
   integrity sha512-L6AiU3OXv9kjKGTJN9j8n1TeJGDcLX9atQlZvAkthlvbXjvKc5SKNWESc/eXhr5nEfuMWhQhiKHDJCpYejmeCQ==
 
-"@pnpm/error@3.0.1":
-  version "3.0.1"
-  resolved "https://registry.yarnpkg.com/@pnpm/error/-/error-3.0.1.tgz#dc232f1717eba895eb842624755c753599b10c9b"
-  integrity sha512-hMlbWbFcfcfolNfSjKjpeaZFow71kNg438LZ8rAd01swiVIYRUf/sRv8gGySru6AijYfz5UqslpIJRDbYBkgQA==
+"@pnpm/error@3.1.0":
+  version "3.1.0"
+  resolved "https://registry.yarnpkg.com/@pnpm/error/-/error-3.1.0.tgz#f701ff46c5170a2dff1c198db85f8b4eade5d80a"
+  integrity sha512-bmXBD/kzlgHqlIZPP8QJUDAxGqug2qhPdnqNnuXyWQSyIEgeaXyPiUh91MLj9GwLoHA9Zdrx5+dfEougzxf4mA==
   dependencies:
     "@pnpm/constants" "6.1.0"
 
@@ -2073,12 +2073,12 @@
   dependencies:
     graceful-fs "^4.2.6"
 
-"@pnpm/read-project-manifest@3.0.11":
-  version "3.0.11"
-  resolved "https://registry.yarnpkg.com/@pnpm/read-project-manifest/-/read-project-manifest-3.0.11.tgz#00fbef95f50db1e1cd63abad6ac284e76c10f5f9"
-  integrity sha512-xbgcnXVUipTZCNeg55pFjeJmq6VzHHP//ZicEKm+aWnY992+axxo7KoIadgtS96U1otsydopmCJ1tdZI74OezA==
+"@pnpm/read-project-manifest@3.0.12":
+  version "3.0.12"
+  resolved "https://registry.yarnpkg.com/@pnpm/read-project-manifest/-/read-project-manifest-3.0.12.tgz#b29c568f9f92f4ce68c09b4c743a66d3fff2defb"
+  integrity sha512-PsG5q2AqxiBC0joFBS1lbMxiPjcL53+GxxEg7ntVeLNw813k25TITlPmfIpNJzg2qtfn/UuMrZ04B8ov+/4hFw==
   dependencies:
-    "@pnpm/error" "3.0.1"
+    "@pnpm/error" "3.1.0"
     "@pnpm/graceful-fs" "2.0.0"
     "@pnpm/types" "8.7.0"
     "@pnpm/write-project-manifest" "3.0.9"
@@ -4789,12 +4789,12 @@ fill-range@^7.0.1:
   dependencies:
     to-regex-range "^5.0.1"
 
-find-packages@9.0.11:
-  version "9.0.11"
-  resolved "https://registry.yarnpkg.com/find-packages/-/find-packages-9.0.11.tgz#7cd61ea8a0cfd65e14638851ef069eefd2259e3e"
-  integrity sha512-9+GEXCdKq/lkNXjTUSlBLIa1Yx3GXxfK3G1VtyETWdoZ86ocwgScfWbj0E841OlTxSEHW1fzE+K0iqVwNTK/FA==
+find-packages@9.0.12:
+  version "9.0.12"
+  resolved "https://registry.yarnpkg.com/find-packages/-/find-packages-9.0.12.tgz#8d1078d83ff2164f54c19748deada1013824c250"
+  integrity sha512-qdY0X9bqwE6HCyhWSKfPJ7MOxvfo/lMAY0odWPBNv6EwFzDZ+X/Nc7qzDk6vcM8Yd63/+rlZ4H9/qxE2xyJ0qQ==
   dependencies:
-    "@pnpm/read-project-manifest" "3.0.11"
+    "@pnpm/read-project-manifest" "3.0.12"
     "@pnpm/types" "8.7.0"
     fast-glob "^3.2.12"
     p-filter "^2.1.0"
