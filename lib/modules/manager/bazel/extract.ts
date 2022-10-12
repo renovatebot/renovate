@@ -1,8 +1,7 @@
-import { logger } from '../../../logger';
 import type { PackageDependency, PackageFile } from '../types';
-import { coerceFragmentToTarget, extractDepFromTarget } from './common';
 import { parse } from './parser';
-import type { ArrayFragment } from './types';
+import { extractDepFromFragment } from './rules';
+import type { RecordFragment } from './types';
 
 export function extractPackageFile(
   content: string,
@@ -10,25 +9,15 @@ export function extractPackageFile(
 ): PackageFile | null {
   const deps: PackageDependency[] = [];
 
-  let parsed: ArrayFragment | null = null;
-  try {
-    parsed = parse(content);
-  } catch (err) /* istanbul ignore next */ {
-    logger.debug({ err, packageFile }, 'Bazel parsing error');
-  }
-
-  if (!parsed) {
+  const fragments: RecordFragment[] | null = parse(content, packageFile);
+  if (!fragments) {
     return null;
   }
 
-  for (let idx = 0; idx < parsed.children.length; idx += 1) {
-    const fragment = parsed.children[idx];
-    const target = coerceFragmentToTarget(fragment);
-    if (!target) {
-      continue;
-    }
+  for (let idx = 0; idx < fragments.length; idx += 1) {
+    const fragment = fragments[idx];
 
-    const dep = extractDepFromTarget(target);
+    const dep = extractDepFromFragment(fragment);
     if (!dep) {
       continue;
     }
