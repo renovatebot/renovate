@@ -34,8 +34,8 @@ const Release = z.object({
   'release-version': z.string(),
   security: z.boolean(),
   'release-notes': z.string(),
-  runtime: ReleaseDetails,
-  sdk: ReleaseDetails,
+  runtime: z.nullable(ReleaseDetails),
+  sdk: z.nullable(ReleaseDetails),
 });
 export const DotnetReleasesSchema = z.object({
   'channel-version': z.string(),
