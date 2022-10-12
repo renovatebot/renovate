@@ -3,9 +3,9 @@ import { getCache } from '../cache/repository';
 
 export function getCachedConflictResult(
   branchName: string,
-  branchSha: string | null,
+  branchSha: string,
   baseBranch: string,
-  baseBranchSha: string | null
+  baseBranchSha: string
 ): boolean | null {
   const cache = getCache();
   if (cache.gitConflicts) {
