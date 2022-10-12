@@ -10,8 +10,8 @@ import { getDep } from '../dockerfile/extract';
 import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
 import type { KubernetesConfiguration } from './types';
 
-const kubernetesApiVersions: Record<string, string[]> = JSON5.parse(
-  dataFiles.get('data/kubernetes-api.json5')!
+const kubernetesApiVersions = new Set(
+  Object.keys(JSON5.parse(dataFiles.get('data/kubernetes-api.json5')!))
 );
 
 export function extractPackageFile(
@@ -79,7 +79,7 @@ function extractApis(content: string, fileName: string): PackageDependency[] {
         is.nonEmptyStringAndNotWhitespace(m.kind) &&
         is.nonEmptyStringAndNotWhitespace(m.apiVersion)
     )
-    .filter((m) => Object.keys(kubernetesApiVersions).includes(m.kind))
+    .filter((m) => kubernetesApiVersions.has(m.kind))
     .map((configuration) => ({
       depName: configuration.kind,
       currentValue: configuration.apiVersion,
