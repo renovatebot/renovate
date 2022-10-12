@@ -32,6 +32,14 @@ export interface BranchCache {
    */
   automerge: boolean;
   /**
+   * Name of base branch
+   */
+  baseBranch: string;
+  /**
+   * The base branch's most recent commit SHA
+   */
+  baseBranchSha: string | null;
+  /**
    * Hash of the manager fingerprints and the update branch config
    */
   branchFingerprint?: string;
@@ -40,9 +48,13 @@ export interface BranchCache {
    */
   branchName: string;
   /**
+   * Whether the update branch is behind base branh
+   */
+  isBehindBase?: boolean;
+  /**
    * Whether a person not listed in gitIgnoredAuthors updated the branch.
    */
-  isModified: boolean;
+  isModified?: boolean;
   /**
    * Name of the branch current branch was checked out from
    */
@@ -78,30 +90,6 @@ export interface RepoCacheData {
   gitConflicts?: GitConflictsCache;
   prComments?: Record<number, Record<string, string>>;
 }
-
-export interface RepoCacheRecordV10 extends RepoCacheData {
-  repository?: string;
-  revision?: number;
-}
-
-export interface RepoCacheRecordV11 {
-  repository: string;
-  revision: number;
-  data: RepoCacheData;
-}
-
-export interface RepoCacheRecordV12 {
-  repository: string;
-  revision: number;
-  payload: string;
-  hash: string;
-}
-
-export interface RepoCacheRecordV13 extends RepoCacheRecordV12 {
-  fingerprint: string;
-}
-
-export type RepoCacheRecord = RepoCacheRecordV13;
 
 export interface RepoCache {
   load(): Promise<void>;

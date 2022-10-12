@@ -10,6 +10,7 @@ import type {
 import {
   getBranchCommit,
   getBranchParentSha,
+  isBranchBehindBase,
   isBranchModified,
 } from '../../util/git';
 import type { BranchConfig, BranchUpgradeConfig } from '../types';
@@ -47,41 +48,40 @@ function generateBranchUpgradeCache(
 async function generateBranchCache(
   branch: BranchConfig
 ): Promise<BranchCache | null> {
-  const { branchName, baseBranch } = branch;
+  const { baseBranch, branchName } = branch;
   try {
     const sha = getBranchCommit(branchName) ?? null;
+    const baseBranchSha = getBranchCommit(baseBranch);
     let prNo = null;
     let parentSha = null;
+    let isModified = false;
+    let isBehindBase = false;
     if (sha) {
       parentSha = await getBranchParentSha(branchName);
       const branchPr = await platform.getBranchPr(branchName);
       if (branchPr) {
         prNo = branchPr.number;
       }
+      isModified = await isBranchModified(branchName);
+      isBehindBase = await isBranchBehindBase(branchName, baseBranch);
     }
     const automerge = !!branch.automerge;
-    let isModified = false;
-    if (sha) {
-      try {
-        isModified = await isBranchModified(branchName);
-      } catch (err) /* istanbul ignore next */ {
-        // Do nothing
-      }
-    }
     const upgrades: BranchUpgradeCache[] = branch.upgrades
       ? branch.upgrades.map(generateBranchUpgradeCache)
       : [];
     const branchFingerprint = branch.branchFingerprint;
     return {
-      branchName,
+      automerge,
+      baseBranchSha,
       baseBranch,
-      sha,
+      branchFingerprint,
+      branchName,
+      isBehindBase,
+      isModified,
       parentSha,
       prNo,
-      automerge,
-      isModified,
+      sha,
       upgrades,
-      branchFingerprint,
     };
   } catch (error) {
     const err = error.err || error; // external host error nests err
