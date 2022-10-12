@@ -2683,7 +2683,9 @@ By default, `renovate` will update to a version greater than `latest` only if th
 
 Must be valid usernames.
 
-If on GitHub and assigning a team to review, you must use the prefix `team:` and add the _last part_ of the team name.
+**Required reviewers on GitHub**
+
+If you're assigning a team to review on GitHub, you must use the prefix `team:` and add the _last part_ of the team name.
 Say the full team name on GitHub is `@organization/foo`, then you'd set the config option like this:
 
 ```json
@@ -2692,8 +2694,11 @@ Say the full team name on GitHub is `@organization/foo`, then you'd set the conf
 }
 ```
 
-To mark a reviewer as required in Azure DevOps, you must use the prefix `required:`.
-If the name of the reviewer is `bar` for example, this could also be the name of a team, then you would set the config option like this:
+**Required reviewers on Azure DevOps**
+
+To mark a reviewer as required on Azure DevOps, you must use the prefix `required:`.
+
+For example: if the username or team name is `bar` then you would set the config option like this:
 
 ```json
 {
