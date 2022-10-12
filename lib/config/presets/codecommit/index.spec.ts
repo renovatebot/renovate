@@ -1,12 +1,12 @@
 import { CodeCommitClient, GetFileCommand } from '@aws-sdk/client-codecommit';
 import { GetUserCommand, IAMClient } from '@aws-sdk/client-iam';
+import type { Credentials } from '@aws-sdk/types';
 import { mockClient } from 'aws-sdk-client-mock';
 import { TextEncoder } from 'web-encoding';
 import { setPlatformApi } from '../../../modules/platform';
-import { PRESET_DEP_NOT_FOUND } from '../util';
 import { buildCodeCommitClient } from '../../../modules/platform/codecommit/codecommit-client';
+import { PRESET_DEP_NOT_FOUND } from '../util';
 import * as codeCommit from '.';
-import type { Credentials } from '@aws-sdk/types';
 
 const codeCommitClient = mockClient(CodeCommitClient);
 const iamClient = mockClient(IAMClient);
@@ -21,7 +21,7 @@ describe('config/presets/codecommit/index', () => {
   };
   buildCodeCommitClient('us-east-1', credentials);
 
-  beforeEach(async () => {
+  beforeEach(() => {
     setPlatformApi('codecommit');
     iamClient.on(GetUserCommand).resolves({
       User: {
