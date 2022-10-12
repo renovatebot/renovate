@@ -65,14 +65,17 @@ let codeCommitClient: CodeCommitClient;
 export function buildCodeCommitClient(
   region: string,
   credentials: Credentials
-): CodeCommitClient {
+) {
   if (!codeCommitClient) {
     codeCommitClient = new CodeCommitClient({
       region,
       credentials,
     });
   }
-  return codeCommitClient;
+
+  if (!codeCommitClient) {
+    throw new Error('Failed to initialize codecommit client');
+  }
 }
 
 export async function deleteComment(
@@ -323,15 +326,13 @@ export function getCodeCommitUrl(
   }
 
   const accessKeyId = credentials.accessKeyId;
-  const token: string = dateTime + 'Z' + signer.signature();
+  const token: string = `${dateTime}Z${signer.signature()}`;
 
   let username = `${accessKeyId}${
     credentials.sessionToken ? `%${credentials.sessionToken}` : ''
   }\n`;
 
-  // these modifications to username are only in case session token exists,
-  // and it's not supposed to work with renovate since it's a temporary token
-
+  // massaging username with the session token
   // istanbul ignore if
   if (username.includes('\n')) {
     username = username.replace(/\n|\r/g, '');

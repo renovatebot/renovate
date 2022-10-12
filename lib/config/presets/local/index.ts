@@ -3,7 +3,7 @@ import { GlobalConfig } from '../../global';
 import * as azure from '../azure';
 import * as bitbucket from '../bitbucket';
 import * as bitbucketServer from '../bitbucket-server';
-import * as codecommit from '../codecommit';
+import * as local from './common';
 import * as gitea from '../gitea';
 import * as github from '../github';
 import * as gitlab from '../gitlab';
@@ -13,7 +13,7 @@ const resolvers = {
   [PlatformId.Azure]: azure,
   [PlatformId.Bitbucket]: bitbucket,
   [PlatformId.BitbucketServer]: bitbucketServer,
-  [PlatformId.CodeCommit]: codecommit,
+  [PlatformId.CodeCommit]: local,
   [PlatformId.Gitea]: gitea,
   [PlatformId.Github]: github,
   [PlatformId.Gitlab]: gitlab,
