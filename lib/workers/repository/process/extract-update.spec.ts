@@ -2,7 +2,7 @@ import { git, mocked } from '../../../../test/util';
 import type { PackageFile } from '../../../modules/manager/types';
 import * as _repositoryCache from '../../../util/cache/repository';
 import { fingerprint } from '../../../util/fingerprint';
-import { extractFingerprintConfig } from '../extract/extract-fingerprint-config';
+import { generateExtractConfig } from '../extract/extract-fingerprint-config';
 import * as _branchify from '../updates/branchify';
 import { extract, lookup, update } from './extract-update';
 
@@ -85,7 +85,7 @@ describe('workers/repository/process/extract-update', () => {
         scan: {
           master: {
             sha: '123test',
-            configHash: fingerprint(extractFingerprintConfig(config)),
+            configHash: fingerprint(generateExtractConfig(config)),
             packageFiles,
           },
         },

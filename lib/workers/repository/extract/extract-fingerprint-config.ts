@@ -9,7 +9,7 @@ export interface FingerprintExtractConfig {
   regexManagers?: WorkerExtractConfig[];
 }
 
-export function extractFingerprintConfig(
+export function generateExtractConfig(
   config: RenovateConfig
 ): FingerprintExtractConfig {
   const finalConfig = {} as FingerprintExtractConfig;
