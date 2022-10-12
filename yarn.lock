@@ -2923,19 +2923,19 @@
     "@typescript-eslint/types" "5.40.0"
     eslint-visitor-keys "^3.3.0"
 
-"@yarnpkg/core@3.2.4":
-  version "3.2.4"
-  resolved "https://registry.yarnpkg.com/@yarnpkg/core/-/core-3.2.4.tgz#ed4d22232a51fa689fdecfd6c0caa6135a54120f"
-  integrity sha512-wray5scy2jK5Kgpqf5kaMu2a6jSeCN+KZDPszzgiUWfbTkeZiuEv7LVTelaUdS2o9gHDQ4qrQeBgoJinaI5AqQ==
+"@yarnpkg/core@3.2.5":
+  version "3.2.5"
+  resolved "https://registry.yarnpkg.com/@yarnpkg/core/-/core-3.2.5.tgz#aef54ced8024d8fd4b49745bd72e5e83995ef92d"
+  integrity sha512-8Z4xRhLKHwq37+TmEwVNYmgJIU6uPa1rUYWOc/luFHS+6KTJyW1OkZU9Sfe6SkcTKIH3gYP9EAqxyczf4TBOKA==
   dependencies:
     "@arcanis/slice-ansi" "^1.1.1"
     "@types/semver" "^7.1.0"
     "@types/treeify" "^1.0.0"
-    "@yarnpkg/fslib" "^2.7.1"
+    "@yarnpkg/fslib" "^2.8.0"
     "@yarnpkg/json-proxy" "^2.1.1"
     "@yarnpkg/libzip" "^2.2.4"
     "@yarnpkg/parsers" "^2.5.1"
-    "@yarnpkg/pnp" "^3.2.3"
+    "@yarnpkg/pnp" "^3.2.4"
     "@yarnpkg/shell" "^3.2.4"
     camelcase "^5.3.1"
     chalk "^3.0.0"
@@ -2993,7 +2993,7 @@
     js-yaml "^3.10.0"
     tslib "^1.13.0"
 
-"@yarnpkg/pnp@^3.2.3":
+"@yarnpkg/pnp@^3.2.4":
   version "3.2.4"
   resolved "https://registry.yarnpkg.com/@yarnpkg/pnp/-/pnp-3.2.4.tgz#cfbf43ae2dcb8fb31172baed4f3f28e495e8f9a2"
   integrity sha512-ucQb6W/wm5civ9fPWWB06DWcd3Qqw/fm48dyMMO4YVF87dIbJpKP2uI2IqNWQbul2GaM63efIb2sk3kf7MAHtg==
