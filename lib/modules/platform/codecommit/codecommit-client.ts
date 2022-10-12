@@ -73,6 +73,7 @@ export function buildCodeCommitClient(
     });
   }
 
+  // istanbul ignore if
   if (!codeCommitClient) {
     throw new Error('Failed to initialize codecommit client');
   }
