@@ -1,5 +1,9 @@
 # AWS CodeCommit
 
+<!-- prettier-ignore -->
+!!! warning "This feature is flagged as experimental"
+    Experimental features might be changed or even removed at any time, To track this feature visit the following GitHub issue https://github.com/renovatebot/renovate/issues/2868
+
 ## Authentication
 
 First, you need to obtain an AWS [IAM Access Key id and a Secret access key id](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_access-keys.html)
