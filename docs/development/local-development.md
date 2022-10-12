@@ -91,6 +91,14 @@ To ensure everything is working properly on your end, you must:
 1. Make a build with `yarn build`, which should pass with no errors
 1. Verify all tests pass and have 100% test coverage, by running `yarn test`
 1. Verify the installation by running `yarn start`. You must see this error: `You must configure a GitHub personal access token`
+  To solve this problem, you must create a file called config.js and place:
+  
+  ```
+     module.exports = {
+     token: 'xxxxxxxx',
+     };
+  ```
+  Your personal GitHub token must be placed.
 
 You only need to do these steps once.
 
