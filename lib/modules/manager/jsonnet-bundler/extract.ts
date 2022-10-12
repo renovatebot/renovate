@@ -1,5 +1,4 @@
 import { join } from 'upath';
-
 import { logger } from '../../../logger';
 import { coerceArray } from '../../../util/array';
 import { parseUrl } from '../../../util/url';
@@ -46,6 +45,7 @@ function extractDependency(dependency: Dependency): PackageDependency | null {
 
   const gitRemote = parseUrl(dependency.source.git.remote);
   if (gitRemote === null) {
+    logger.debug({ dependency }, 'Invalid Git remote URL');
     return null;
   }
 
