@@ -350,7 +350,7 @@ describe('workers/repository/process/lookup/index', () => {
           .scope('https://registry.npmjs.org')
           .get('/q')
           .reply(200, qJson);
-        expect(await lookup.lookupUpdates(config)).toMatchSnapshot({ updates });
+        expect(await lookup.lookupUpdates(config)).toMatchObject({ updates });
       }
     );
 
@@ -381,7 +381,7 @@ describe('workers/repository/process/lookup/index', () => {
       config.depName = 'q';
       config.datasource = NpmDatasource.id;
       httpMock.scope('https://registry.npmjs.org').get('/q').reply(200, qJson);
-      expect(await lookup.lookupUpdates(config)).toMatchSnapshot({
+      expect(await lookup.lookupUpdates(config)).toMatchObject({
         updates: [{ newValue: '1.4.1', updateType: 'pin' }],
       });
     });

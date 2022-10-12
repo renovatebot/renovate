@@ -1,6 +1,6 @@
 const SEMVER_X_RANGE = ['*', 'x', 'X', ''] as const;
-type SemVerXRangeType = typeof SEMVER_X_RANGE;
-export type SemVerXRange = SemVerXRangeType[number];
+type SemVerXRangeArray = typeof SEMVER_X_RANGE;
+export type SemVerXRange = SemVerXRangeArray[number];
 
 /**
  * https://docs.npmjs.com/cli/v6/using-npm/semver#x-ranges-12x-1x-12-

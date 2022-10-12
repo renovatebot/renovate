@@ -14,7 +14,7 @@ import {
 } from '../../../../modules/datasource';
 import { getRangeStrategy } from '../../../../modules/manager';
 import * as allVersioning from '../../../../modules/versioning';
-import { isSemVerXRange } from '../../../../modules/versioning/semver/types';
+import { isSemVerXRange } from '../../../../modules/versioning/semver/common';
 import { ExternalHostError } from '../../../../types/errors/external-host-error';
 import { clone } from '../../../../util/clone';
 import { applyPackageRules } from '../../../../util/package-rules';
