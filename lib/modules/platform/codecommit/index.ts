@@ -57,12 +57,6 @@ export async function initPlatform({
   let secretAccessKey = password;
   let region;
 
-  logger.warn(
-    'AWS CodeCommit feature is flagged as experimental\n' +
-      'Experimental features might be changed or even removed at any time.\n' +
-      'To track this feature visit the following GitHub issue https://github.com/renovatebot/renovate/issues/2868 \n'
-  );
-
   if (!accessKeyId) {
     accessKeyId = process.env.AWS_ACCESS_KEY_ID;
   }
