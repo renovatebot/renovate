@@ -65,7 +65,7 @@ let codeCommitClient: CodeCommitClient;
 export function buildCodeCommitClient(
   region: string,
   credentials: Credentials
-) {
+): void {
   if (!codeCommitClient) {
     codeCommitClient = new CodeCommitClient({
       region,
@@ -326,7 +326,7 @@ export function getCodeCommitUrl(
   }
 
   const accessKeyId = credentials.accessKeyId;
-  const token: string = `${dateTime}Z${signer.signature()}`;
+  const token = `${dateTime}Z${signer.signature()}`;
 
   let username = `${accessKeyId}${
     credentials.sessionToken ? `%${credentials.sessionToken}` : ''
