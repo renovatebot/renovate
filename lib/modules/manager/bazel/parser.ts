@@ -1,49 +1,49 @@
-import is from '@sindresorhus/is';
-import { lang, query as q } from 'good-enough-parser';
+import { lang, lexer, parser, query as q } from 'good-enough-parser';
 import hasha from 'hasha';
+import { logger } from '../../../logger';
 import * as memCache from '../../../util/cache/memory';
-import { supportedRulesRegex } from './common';
-import type { MetaPath, ParsedResult, Target, TargetAttribute } from './types';
-
-function isTarget(target: Partial<Target>): target is Target {
-  return !!target.rule && !!target.name;
-}
+import { supportedRulesRegex } from './rules/index';
+import type {
+  Fragment,
+  FragmentData,
+  NestedFragment,
+  RecordFragment,
+} from './types';
 
 interface Ctx {
-  result: ParsedResult;
-  currentTarget: Partial<Target>;
-  currentAttrKey?: string;
-  currentAttrVal?: TargetAttribute;
-  currentArray?: string[];
-  currentMetaPath: MetaPath;
-  ruleIndex: number;
-  ruleStartOffset?: number; // deprecated
+  readonly source: string;
+  results: RecordFragment[];
+  stack: NestedFragment[];
+  recordKey?: string;
 }
 
-const emptyCtx: Ctx = {
-  result: { targets: [], meta: [] },
-  currentTarget: {},
-  currentMetaPath: [],
-  ruleIndex: 0,
-};
+function emptyCtx(source: string): Ctx {
+  return {
+    source,
+    results: [],
+    stack: [],
+  };
+}
 
-const starlark = lang.createLang('starlark');
+function currentFragment(ctx: Ctx): NestedFragment {
+  const deepestFragment = ctx.stack[ctx.stack.length - 1];
+  return deepestFragment;
+}
 
-/**
- * Matches rule type:
- * - `git_repository`
- * - `go_repository`
- **/
-const ruleSym = q.sym<Ctx>(supportedRulesRegex, (ctx, { value, offset }) => {
-  ctx.currentTarget.rule = value;
-
-  // TODO: remove it (#9667)
-  if (!is.number(ctx.ruleStartOffset)) {
-    ctx.ruleStartOffset = offset;
+function extractTreeValue(
+  source: string,
+  tree: parser.Tree,
+  offset: number
+): string {
+  if (tree.type === 'wrapped-tree') {
+    const { endsWith } = tree;
+    const to = endsWith.offset + endsWith.value.length;
+    return source.slice(offset, to);
   }
 
-  return ctx;
-});
+  // istanbul ignore next
+  return '';
+}
 
 /**
  * Matches key-value pairs:
@@ -52,52 +52,76 @@ const ruleSym = q.sym<Ctx>(supportedRulesRegex, (ctx, { value, offset }) => {
  * - `deps = ["foo", "bar"]`
  **/
 const kwParams = q
-  .sym<Ctx>((ctx, { value }) => {
-    ctx.currentAttrKey = value;
-    const leaf = ctx.currentMetaPath.pop();
-    if (is.number(leaf)) {
-      ctx.currentMetaPath.push(leaf);
-    }
-    ctx.currentMetaPath.push(value);
-    return ctx;
-  })
+  .sym<Ctx>((ctx, { value: recordKey }) => ({ ...ctx, recordKey }))
   .op('=')
   .alt(
-    // string case
+    // string
     q.str((ctx, { offset, value }) => {
-      ctx.currentTarget[ctx.currentAttrKey!] = value;
-      ctx.result.meta.push({
-        path: [...ctx.currentMetaPath],
-        data: { offset: offset, length: value.length },
-      });
+      const frag = currentFragment(ctx);
+      if (frag.type === 'record' && ctx.recordKey) {
+        const key = ctx.recordKey;
+        frag.children[key] = { type: 'string', value, offset };
+      }
       return ctx;
     }),
-    // array of strings case
+    // array of strings
     q.tree({
       type: 'wrapped-tree',
       maxDepth: 1,
-      preHandler: (ctx) => {
-        ctx.currentArray = [];
+      preHandler: (ctx, tree) => {
+        const parentRecord = currentFragment(ctx) as RecordFragment;
+        if (
+          parentRecord.type === 'record' &&
+          ctx.recordKey &&
+          tree.type === 'wrapped-tree'
+        ) {
+          const key = ctx.recordKey;
+          parentRecord.children[key] = {
+            type: 'array',
+            value: '',
+            offset: tree.startsWith.offset,
+            children: [],
+          };
+        }
         return ctx;
       },
       search: q.str<Ctx>((ctx, { value, offset }) => {
-        ctx.result.meta.push({
-          path: [...ctx.currentMetaPath, ctx.currentArray!.length],
-          data: { offset: offset, length: value.length },
-        });
-        ctx.currentArray?.push(value);
+        const parentRecord = currentFragment(ctx);
+        if (parentRecord.type === 'record' && ctx.recordKey) {
+          const key = ctx.recordKey;
+          const array = parentRecord.children[key];
+          if (array.type === 'array') {
+            array.children.push({ type: 'string', value, offset });
+          }
+        }
         return ctx;
       }),
-      postHandler: (ctx) => {
-        ctx.currentTarget[ctx.currentAttrKey!] = ctx.currentArray;
-        ctx.currentArray = [];
+      postHandler: (ctx, tree) => {
+        const parentRecord = currentFragment(ctx);
+        if (
+          parentRecord.type === 'record' &&
+          ctx.recordKey &&
+          tree.type === 'wrapped-tree'
+        ) {
+          const key = ctx.recordKey;
+          const array = parentRecord.children[key];
+          if (array.type === 'array') {
+            array.value = extractTreeValue(ctx.source, tree, array.offset);
+          }
+        }
         return ctx;
       },
     })
-  );
+  )
+  .handler((ctx) => {
+    delete ctx.recordKey;
+    return ctx;
+  });
 
 /**
- * Matches rule signature, i.e. content of `git_repository(...)`
+ * Matches rule signature:
+ *   `git_repository(......)`
+ *                  ^^^^^^^^
  *
  * @param search something to match inside parens
  */
@@ -105,38 +129,37 @@ function ruleCall(search: q.QueryBuilder<Ctx>): q.QueryBuilder<Ctx> {
   return q.tree({
     type: 'wrapped-tree',
     maxDepth: 1,
-    preHandler: (ctx) => {
-      ctx.currentMetaPath.push(ctx.ruleIndex);
-      return ctx;
-    },
     search,
     postHandler: (ctx, tree) => {
-      // TODO: remove it (#9667)
-      if (is.number(ctx.ruleStartOffset) && tree.type === 'wrapped-tree') {
-        const { children, endsWith } = tree;
-        const lastElem = children[children.length - 1];
-        if (lastElem.type === '_end') {
-          const ruleEndOffset = lastElem.offset + endsWith.value.length;
-          const offset = ctx.ruleStartOffset;
-          const length = ruleEndOffset - ctx.ruleStartOffset;
-          ctx.result.meta.push({
-            path: [ctx.ruleIndex],
-            data: { offset, length },
-          });
-          delete ctx.ruleStartOffset;
-        }
+      const frag = currentFragment(ctx);
+      if (frag.type === 'record' && tree.type === 'wrapped-tree') {
+        frag.value = extractTreeValue(ctx.source, tree, frag.offset);
+        ctx.stack.pop();
+        ctx.results.push(frag);
       }
-
-      if (isTarget(ctx.currentTarget)) {
-        ctx.result.targets.push(ctx.currentTarget);
-      }
-      ctx.currentTarget = {};
-      ctx.ruleIndex += 1;
-      ctx.currentMetaPath.pop();
 
       return ctx;
     },
   });
+}
+
+function ruleStartHandler(ctx: Ctx, { offset }: lexer.Token): Ctx {
+  ctx.stack.push({
+    type: 'record',
+    value: '',
+    offset,
+    children: {},
+  });
+  return ctx;
+}
+
+function ruleNameHandler(ctx: Ctx, { value, offset }: lexer.Token): Ctx {
+  const ruleFragment = currentFragment(ctx);
+  if (ruleFragment.type === 'record') {
+    ruleFragment.children['rule'] = { type: 'string', value, offset };
+  }
+
+  return ctx;
 }
 
 /**
@@ -144,9 +167,11 @@ function ruleCall(search: q.QueryBuilder<Ctx>): q.QueryBuilder<Ctx> {
  * - `git_repository(...)`
  * - `go_repository(...)`
  */
-const regularRule = ruleSym.join(ruleCall(kwParams));
-
-const maybeFirstArg = q.begin<Ctx>().join(ruleSym).op(',');
+const regularRule = q
+  .sym<Ctx>(supportedRulesRegex, (ctx, token) =>
+    ruleNameHandler(ruleStartHandler(ctx, token), token)
+  )
+  .join(ruleCall(kwParams));
 
 /**
  * Matches "maybe"-form rules:
@@ -154,17 +179,15 @@ const maybeFirstArg = q.begin<Ctx>().join(ruleSym).op(',');
  * - `maybe(go_repository, ...)`
  */
 const maybeRule = q
-  .sym<Ctx>(
-    'maybe',
-    // TODO: remove it (#9667)
-    (ctx, { offset }) => {
-      if (!is.number(ctx.ruleStartOffset)) {
-        ctx.ruleStartOffset = offset;
-      }
-      return ctx;
-    }
-  )
-  .join(ruleCall(q.alt(maybeFirstArg, kwParams)));
+  .sym<Ctx>('maybe', ruleStartHandler)
+  .join(
+    ruleCall(
+      q.alt(
+        q.begin<Ctx>().sym(supportedRulesRegex, ruleNameHandler).op(','),
+        kwParams
+      )
+    )
+  );
 
 const rule = q.alt<Ctx>(maybeRule, regularRule);
 
@@ -179,23 +202,47 @@ function getCacheKey(input: string): string {
   return `bazel-parser-${hash}`;
 }
 
-export function parse(input: string, ctx = emptyCtx): ParsedResult | null {
+const starlark = lang.createLang('starlark');
+
+export function parse(
+  input: string,
+  packageFile?: string
+): RecordFragment[] | null {
   const cacheKey = getCacheKey(input);
 
-  const cachedResult = memCache.get<ParsedResult | null>(cacheKey);
+  const cachedResult = memCache.get<RecordFragment[] | null>(cacheKey);
   // istanbul ignore if
   if (cachedResult === null || cachedResult) {
     return cachedResult;
   }
 
-  const parsedResult = starlark.query(input, query, ctx);
-
-  let result: ParsedResult | null = null;
-
-  if (parsedResult) {
-    result = parsedResult.result;
+  let result: RecordFragment[] | null = null;
+  try {
+    const parsedResult = starlark.query(input, query, emptyCtx(input));
+    if (parsedResult) {
+      result = parsedResult.results;
+    }
+  } catch (err) /* istanbul ignore next */ {
+    logger.debug({ err, packageFile }, 'Bazel parsing error');
   }
 
   memCache.set(cacheKey, result);
   return result;
+}
+
+export function extract(fragment: Fragment): FragmentData {
+  if (fragment.type === 'string') {
+    return fragment.value;
+  }
+
+  if (fragment.type === 'record') {
+    const { children } = fragment;
+    const result: Record<string, FragmentData> = {};
+    for (const [key, value] of Object.entries(children)) {
+      result[key] = extract(value);
+    }
+    return result;
+  }
+
+  return fragment.children.map(extract);
 }
