@@ -98,6 +98,7 @@ describe('modules/manager/gradle/parser', () => {
         ${'baz = "1.2.3"'}                    | ${'library("foo.bar", "foo", "bar").versionRef("baz")'} | ${{ depName: 'foo:bar', currentValue: '1.2.3', groupName: 'baz' }}
         ${''}                                 | ${'library("foo.bar", "foo", "bar").version("1.2.3")'}  | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
         ${'library("foo.bar", "foo", "bar")'} | ${'"${foo.bar}:1.2.3"'}                                 | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
+        ${'foo = "${bar}"; baz = "1.2.3"'}    | ${'"foo:bar:${baz}"'}                                   | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
       `('$def | $str', async ({ def, str, output }) => {
         const input = [def, str].join('\n');
         const { deps } = await parseGradle(input);

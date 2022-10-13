@@ -200,7 +200,7 @@ function processDepInterpolation({
       return { deps: [dep] };
     }
   }
-  return null;
+  return {};
 }
 
 function processPlugin({
