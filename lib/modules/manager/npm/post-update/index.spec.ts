@@ -190,24 +190,16 @@ describe('modules/manager/npm/post-update/index', () => {
 
   describe('writeExistingFiles()', () => {
     it('works', async () => {
-      git.getFile.mockImplementation((path) => {
-        if (path === 'package-lock.json') {
-          return Promise.resolve(
-            Fixtures.get('update-lockfile-massage-1/package-lock.json')
-          );
-        }
-        return Promise.resolve(null);
-      });
-
+      git.getFile.mockResolvedValueOnce(
+        Fixtures.get('update-lockfile-massage-1/package-lock.json')
+      );
       await expect(
         writeExistingFiles(updateConfig, additionalFiles)
       ).resolves.toBeUndefined();
 
       expect(fs.writeLocalFile).toHaveBeenCalledTimes(2);
       expect(fs.deleteLocalFile).not.toHaveBeenCalled();
-      const expectedNumberOfGetFileCalls =
-        (additionalFiles.npm?.length ?? 0) + 1;
-      expect(git.getFile).toHaveBeenCalledTimes(expectedNumberOfGetFileCalls);
+      expect(git.getFile).toHaveBeenCalledOnce();
     });
 
     it('works no reuse lockfiles', async () => {
@@ -228,57 +220,20 @@ describe('modules/manager/npm/post-update/index', () => {
     });
 
     it('works only on relevant folders', async () => {
-      git.getFile.mockImplementation((path) => {
-        if (path === 'package-lock.json') {
-          return Promise.resolve(
-            Fixtures.get('update-lockfile-massage-1/package-lock.json')
-          );
-        }
-        return Promise.resolve(null);
-      });
+      git.getFile.mockResolvedValueOnce(
+        Fixtures.get('update-lockfile-massage-1/package-lock.json')
+      );
       await expect(
         writeExistingFiles(updateConfig, additionalFiles)
       ).resolves.toBeUndefined();
 
       expect(fs.writeLocalFile).toHaveBeenCalledTimes(2);
       expect(fs.deleteLocalFile).not.toHaveBeenCalled();
-      const expectedNumberOfGetFileCalls =
-        (additionalFiles.npm?.length ?? 0) + 1;
-      expect(git.getFile).toHaveBeenCalledTimes(expectedNumberOfGetFileCalls);
+      expect(git.getFile).toHaveBeenCalledOnce();
     });
 
     it('has no npm files', async () => {
       await expect(writeExistingFiles(baseConfig, {})).toResolve();
-    });
-
-    it('massages .yarnrc files if needed', async () => {
-      git.getFile.mockResolvedValueOnce(`
-        --install.pure-lockfile true
-        --install.frozen-lockfile true
-      `);
-      await expect(
-        writeExistingFiles(updateConfig, additionalFiles)
-      ).resolves.toBeUndefined();
-
-      const expectOnlyWhitespace = expect.stringMatching(/^\s*$/g);
-      expect(fs.writeLocalFile).toHaveBeenNthCalledWith(
-        1,
-        '.yarnrc',
-        expectOnlyWhitespace
-      );
-    });
-
-    it("doesn't massage .yarnrc file if not needed", async () => {
-      git.getFile.mockResolvedValueOnce('some-other-yarnrc-content');
-      await expect(
-        writeExistingFiles(updateConfig, additionalFiles)
-      ).resolves.toBeUndefined();
-
-      expect(fs.writeLocalFile).toHaveBeenNthCalledWith(
-        1,
-        'packages/core/.npmrc',
-        expect.anything()
-      );
     });
   });
 
