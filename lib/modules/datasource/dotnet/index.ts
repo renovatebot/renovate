@@ -4,6 +4,7 @@ import type { HttpResponse } from '../../../util/http/types';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
 import {
+  DotnetRelease,
   DotnetReleases,
   DotnetReleasesIndex,
   DotnetReleasesIndexSchema,
@@ -94,14 +95,22 @@ export class DotnetDatasource extends Datasource {
       const type = DotnetDatasource.getType(packageName);
       const { releases: releases } = body;
       result = releases
+        .filter(
+          (
+            release
+          ): release is {
+            [P in keyof DotnetRelease]: NonNullable<DotnetRelease[P]>;
+          } => {
+            return is.nullOrUndefined(release[type]);
+          }
+        )
         .map((release) => {
           return {
-            version: release[type]?.version,
+            version: release[type].version,
             releaseTimestamp: release['release-date'],
             changelogUrl: release['release-notes'],
           };
-        })
-        .filter((release) => is.nonEmptyString(release.version)) as Release[];
+        });
     }
 
     return result;
