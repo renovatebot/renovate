@@ -1,5 +1,6 @@
 import AggregateError from 'aggregate-error';
 import { TimeoutError } from 'got';
+import { logger } from '../../../logger';
 import * as memCache from '../../cache/memory';
 import type {
   GithubGraphqlResponse,
@@ -204,7 +205,12 @@ export class GithubGraphqlDatasourceHelper<
         }
 
         const shrinkingResult = this.shrinkPageSize();
-        if (!shrinkingResult) {
+        if (shrinkingResult) {
+          logger.debug(
+            { err, size: this.itemsPerQuery },
+            'Shrinking page size'
+          );
+        } else {
           throw err;
         }
       }
