@@ -1,9 +1,8 @@
-import { promisify } from 'util';
-import zlib from 'zlib';
 import hasha from 'hasha';
 import { fs } from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
 import { logger } from '../../../../logger';
+import { compress } from '../../../compress';
 import { CACHE_REVISION } from '../common';
 import type { RepoCacheRecord } from '../schemas';
 import type { RepoCacheData } from '../types';
@@ -11,8 +10,6 @@ import { CacheFactory } from './cache-factory';
 import { RepoCacheLocal } from './local';
 
 jest.mock('../../../fs');
-
-const compress = promisify(zlib.brotliCompress);
 
 async function createCacheRecord(
   data: RepoCacheData,
@@ -24,8 +21,7 @@ async function createCacheRecord(
 
   const jsonStr = JSON.stringify(data);
   const hash = hasha(jsonStr);
-  const compressedPayload = await compress(jsonStr);
-  const payload = compressedPayload.toString('base64');
+  const payload = await compress(jsonStr);
 
   return {
     revision,
