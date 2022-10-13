@@ -1,51 +1,18 @@
 import { GetUserCommand, IAMClient } from '@aws-sdk/client-iam';
 import { mockClient } from 'aws-sdk-client-mock';
 import { PLATFORM_BAD_CREDENTIALS } from '../../../constants/error-messages';
+import * as iam from './iam-client';
 
 describe('modules/platform/codecommit/iam-client', () => {
-  const iam = require('./iam-client');
   const iamClient = mockClient(IAMClient);
-
-  beforeAll(() => {
-    iam.initIamClient('eu-east', {
-      accessKeyId: 'aaa',
-      secretAccessKey: 'bbb',
-    });
-  });
-
-  it('should throw in case of bad authentication', async () => {
-    iamClient.on(GetUserCommand).rejects(new Error(PLATFORM_BAD_CREDENTIALS));
-    let userArn;
-    try {
-      userArn = await iam.getUserArn();
-    } catch (err) {
-      //
-    }
-    expect(userArn).toBeUndefined();
+  iam.initIamClient('eu-east', {
+    accessKeyId: 'aaa',
+    secretAccessKey: 'bbb',
   });
 
   it('should return empty', async () => {
-    iamClient.on(GetUserCommand).rejectsOnce(undefined);
-    let userArn;
-    try {
-      userArn = await iam.getUserArn();
-    } catch (err) {
-      //
-    }
-    expect(userArn).toBe('');
-  });
-
-  it('should return the user arn, even though user has no permission', async () => {
-    iamClient
-      .on(GetUserCommand)
-      .rejects(new Error('User: aws:arn:example:123456 has no permissions'));
-    let userArn;
-    try {
-      userArn = await iam.getUserArn();
-    } catch (err) {
-      //
-    }
-    expect(userArn).toBe('aws:arn:example:123456');
+    iamClient.on(GetUserCommand).resolves({});
+    await expect(iam.getUserArn()).resolves.toMatch('');
   });
 
   it('should return the user normally', async () => {
@@ -58,12 +25,19 @@ describe('modules/platform/codecommit/iam-client', () => {
         CreateDate: new Date(),
       },
     });
-    let userArn;
-    try {
-      userArn = await iam.getUserArn();
-    } catch (err) {
-      //
-    }
-    expect(userArn).toBe('aws:arn:example:123456');
+    await expect(iam.getUserArn()).resolves.toMatch('aws:arn:example:123456');
+  });
+
+  it('should throw in case of bad authentication', async () => {
+    const err = new Error(PLATFORM_BAD_CREDENTIALS);
+    iamClient.on(GetUserCommand).rejects(err);
+    await expect(iam.getUserArn()).rejects.toThrow(err);
+  });
+
+  it('should return the user arn, even though user has no permission', async () => {
+    iamClient
+      .on(GetUserCommand)
+      .rejects(new Error('User: aws:arn:example:123456 has no permissions'));
+    await expect(iam.getUserArn()).resolves.toMatch('aws:arn:example:123456');
   });
 });

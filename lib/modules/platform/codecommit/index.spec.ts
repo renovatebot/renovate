@@ -71,31 +71,23 @@ describe('modules/platform/codecommit/index', () => {
 
   describe('initPlatform()', () => {
     it('should throw if no username/password', async () => {
-      let error;
-      try {
-        await codeCommit.initPlatform({});
-      } catch (e) {
-        error = e.message;
-      }
-      expect(error).toBe(
+      const err = new Error(
         'Init: You must configure a AWS user(accessKeyId), password(secretAccessKey) and endpoint/AWS_REGION'
       );
+      await expect(codeCommit.initPlatform({})).rejects.toThrow(err);
     });
 
     it('should show warning message if custom endpoint', async () => {
-      let error;
-      try {
-        await codeCommit.initPlatform({
+      const err = new Error(
+        'Init: You must configure a AWS user(accessKeyId), password(secretAccessKey) and endpoint/AWS_REGION'
+      );
+      await expect(
+        codeCommit.initPlatform({
           endpoint: 'endpoint',
           username: 'abc',
           password: '123',
-        });
-      } catch (e) {
-        error = e.message;
-      }
-      expect(error).toBe(
-        'Init: You must configure a AWS user(accessKeyId), password(secretAccessKey) and endpoint/AWS_REGION'
-      );
+        })
+      ).rejects.toThrow(err);
 
       expect(logger.logger.warn).toHaveBeenCalledWith(
         "Can't parse region, make sure your endpoint is correct"
@@ -115,21 +107,17 @@ describe('modules/platform/codecommit/index', () => {
     });
 
     it('should init with env vars', async () => {
+      const temp = process.env.AWS_REGION;
       process.env.AWS_REGION = 'REGION';
-      let res;
-      try {
-        res = await codeCommit.initPlatform({
+      await expect(
+        codeCommit.initPlatform({
           username: 'abc',
           password: '123',
-        });
-      } catch (err) {
-        res = err.message;
-      } finally {
-        delete process.env.AWS_REGION;
-      }
-      expect(res).toEqual({
+        })
+      ).resolves.toEqual({
         endpoint: 'https://git-codecommit.REGION.amazonaws.com/',
       });
+      process.env.AWS_REGION = temp;
     });
   });
 
@@ -139,15 +127,10 @@ describe('modules/platform/codecommit/index', () => {
         throw new Error('any error');
       });
       codeCommitClient.on(GetRepositoryCommand).resolvesOnce({});
-      let error;
-      try {
-        await codeCommit.initRepo({
-          repository: 'repositoryName',
-        });
-      } catch (e) {
-        error = e.message;
-      }
-      expect(error).toBe(PLATFORM_BAD_CREDENTIALS);
+
+      await expect(
+        codeCommit.initRepo({ repository: 'repositoryName' })
+      ).rejects.toThrow(new Error(PLATFORM_BAD_CREDENTIALS));
     });
 
     it('fails on getRepositoryInfo', async () => {
@@ -155,29 +138,17 @@ describe('modules/platform/codecommit/index', () => {
       codeCommitClient
         .on(GetRepositoryCommand)
         .rejectsOnce(new Error('Could not find repository'));
-      let error;
-      try {
-        await codeCommit.initRepo({
-          repository: 'repositoryName',
-        });
-      } catch (e) {
-        error = e.message;
-      }
-      expect(error).toBe(REPOSITORY_NOT_FOUND);
+      await expect(
+        codeCommit.initRepo({ repository: 'repositoryName' })
+      ).rejects.toThrow(new Error(REPOSITORY_NOT_FOUND));
     });
 
     it('getRepositoryInfo returns bad results', async () => {
       jest.spyOn(git, 'initRepo').mockReturnValueOnce(Promise.resolve());
       codeCommitClient.on(GetRepositoryCommand).resolvesOnce({});
-      let error;
-      try {
-        await codeCommit.initRepo({
-          repository: 'repositoryName',
-        });
-      } catch (e) {
-        error = e.message;
-      }
-      expect(error).toBe(REPOSITORY_NOT_FOUND);
+      await expect(
+        codeCommit.initRepo({ repository: 'repositoryName' })
+      ).rejects.toThrow(new Error(REPOSITORY_NOT_FOUND));
     });
 
     it('getRepositoryInfo returns bad results 2', async () => {
@@ -185,15 +156,9 @@ describe('modules/platform/codecommit/index', () => {
       codeCommitClient
         .on(GetRepositoryCommand)
         .resolvesOnce({ repositoryMetadata: {} });
-      let error;
-      try {
-        await codeCommit.initRepo({
-          repository: 'repositoryName',
-        });
-      } catch (e) {
-        error = e.message;
-      }
-      expect(error).toBe(REPOSITORY_EMPTY);
+      await expect(
+        codeCommit.initRepo({ repository: 'repositoryName' })
+      ).rejects.toThrow(new Error(REPOSITORY_EMPTY));
     });
 
     it('initiates repo successfully', async () => {
@@ -204,12 +169,9 @@ describe('modules/platform/codecommit/index', () => {
           repositoryId: 'id',
         },
       });
-
-      const repoResult = await codeCommit.initRepo({
-        repository: 'repositoryName',
-      });
-
-      expect(repoResult).toEqual({
+      await expect(
+        codeCommit.initRepo({ repository: 'repositoryName' })
+      ).resolves.toEqual({
         repoFingerprint:
           'f0bcfd81abefcdf9ae5e5de58d1a868317503ea76422309bc212d1ef25a1e67789d0bfa752a7e2abd4510f4f3e4f60cdaf6202a42883fb97bb7110ab3600785e',
         defaultBranch: 'main',
@@ -689,18 +651,15 @@ describe('modules/platform/codecommit/index', () => {
       };
 
       codeCommitClient.on(CreatePullRequestCommand).resolvesOnce(prRes);
-      let res = '';
-      try {
-        await codeCommit.createPr({
+
+      await expect(
+        codeCommit.createPr({
           sourceBranch: 'sourceBranch',
           targetBranch: 'targetBranch',
           prTitle: 'mytitle',
           prBody: 'mybody',
-        });
-      } catch (err) {
-        res = err.message;
-      }
-      expect(res).toBe('Could not create pr, missing PR info');
+        })
+      ).rejects.toThrow(new Error('Could not create pr, missing PR info'));
     });
   });
 
