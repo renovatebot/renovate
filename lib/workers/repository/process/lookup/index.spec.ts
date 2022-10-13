@@ -390,7 +390,7 @@ describe('workers/repository/process/lookup/index', () => {
       config.datasource = NpmDatasource.id;
       httpMock.scope('https://registry.npmjs.org').get('/q').reply(200, qJson);
       const res = await lookup.lookupUpdates(config);
-      expect(res.updates).toMatchSnapshot([
+      expect(res.updates).toEqual([
         {
           bucket: 'non-major',
           isLockfileUpdate: true,
