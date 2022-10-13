@@ -8,17 +8,13 @@ import { regEx } from '../../../util/regex';
 
 let iam: IAMClient;
 
-export function initIamClient(
-  region: string,
-  credentials: Credentials
-): IAMClient {
+export function initIamClient(region: string, credentials: Credentials): void {
   if (!iam) {
     iam = new IAMClient({
       region,
       credentials,
     });
   }
-  return iam;
 }
 
 const userRe = regEx(/User:\s*(?<arn>[^ ]+).*/);
