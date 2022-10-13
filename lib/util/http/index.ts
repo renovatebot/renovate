@@ -14,6 +14,7 @@ import { applyAuthorization, removeAuthorization } from './auth';
 import { hooks } from './hooks';
 import { applyHostRules } from './host-rules';
 import { getQueue } from './queue';
+import { getThrottle } from './throttle';
 import type {
   GotJSONOptions,
   GotOptions,
@@ -62,7 +63,7 @@ function applyDefaultHeaders(options: Options): void {
 // `Buffer` in the latter case.
 // We don't declare overload signatures because it's immediately wrapped by
 // `request`.
-async function gotRoutine<T>(
+async function gotTask<T>(
   url: string,
   options: GotOptions,
   requestStats: Omit<RequestStats, 'duration' | 'statusCode'>
@@ -149,7 +150,7 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
         method: options.method,
       }),
     ]);
-    let resPromise;
+    let resPromise: Promise<Response<T>> | undefined = undefined;
 
     // Cache GET requests unless useCache=false
     if (
@@ -162,16 +163,24 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
     // istanbul ignore else: no cache tests
     if (!resPromise) {
       const startTime = Date.now();
-      const queueTask = (): Promise<Response<T>> => {
+      const httpTask = (): Promise<Response<T>> => {
         const queueDuration = Date.now() - startTime;
-        return gotRoutine(url, options, {
+        return gotTask(url, options, {
           method: options.method ?? 'get',
           url,
           queueDuration,
         });
       };
+
+      const throttle = getThrottle(url);
+      const throttledTask = (): Promise<Response<T>> =>
+        throttle?.add<Response<T>>(httpTask) ?? httpTask();
+
       const queue = getQueue(url);
-      resPromise = queue?.add(queueTask) ?? queueTask();
+      const queuedTask = (): Promise<Response<T>> =>
+        queue?.add<Response<T>>(throttledTask) ?? throttledTask();
+
+      resPromise = queuedTask();
       if (options.method === 'get' || options.method === 'head') {
         memCache.set(cacheKey, resPromise); // always set if it's a get or a head
       }
@@ -179,7 +188,7 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
 
     try {
       const res = await resPromise;
-      res.authorization = !!options?.headers?.authorization;
+      (res as any).authorization = !!options?.headers?.authorization;
       return cloneResponse(res);
     } catch (err) {
       const { abortOnError, abortIgnoreStatusCodes } = options;

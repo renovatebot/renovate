@@ -18,6 +18,7 @@ import { pkg } from '../../expose.cjs';
 import { getProblems, logger, setMeta } from '../../logger';
 import * as hostRules from '../../util/host-rules';
 import * as queue from '../../util/http/queue';
+import * as throttle from '../../util/http/throttle';
 import * as repositoryWorker from '../repository';
 import { autodiscoverRepositories } from './autodiscover';
 import { parseConfigs } from './config/parse';
@@ -156,6 +157,7 @@ export async function start(): Promise<number> {
 
       // host rules can change concurrency
       queue.clear();
+      throttle.clear();
 
       await repositoryWorker.renovateRepository(repoConfig);
       setMeta({});

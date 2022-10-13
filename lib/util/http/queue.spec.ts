@@ -8,7 +8,7 @@ const hostRules = mocked(_hostRules);
 
 describe('util/http/queue', () => {
   beforeEach(() => {
-    hostRules.getRequestLimit.mockReturnValue(143);
+    hostRules.getConcurrentLimit.mockReturnValue(143);
     clear();
   });
 

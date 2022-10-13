@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import {
   BITBUCKET_API_USING_HOST_TYPES,
   GITHUB_API_USING_HOST_TYPES,
@@ -120,10 +121,24 @@ export function applyHostRules(url: string, inOptions: GotOptions): GotOptions {
   return options;
 }
 
-export function getRequestLimit(url: string): number | null {
-  const hostRule = hostRules.find({
-    url,
-  });
-  const limit = hostRule.concurrentRequestLimit;
-  return typeof limit === 'number' && limit > 0 ? limit : null;
+export function getConcurrentLimit(url: string): number | null {
+  const hostRule = hostRules.find({ url });
+  const concurrentLimit = hostRule.concurrentRequestLimit;
+  return typeof concurrentLimit === 'number' && concurrentLimit > 0
+    ? concurrentLimit
+    : null;
+}
+
+export function getThrottleLimit(url: string): number | null {
+  const hostRule = hostRules.find({ url });
+  const throttleLimit = hostRule.throttleRequestLimit;
+  return is.number(throttleLimit) && throttleLimit > 0 ? throttleLimit : null;
+}
+
+export function getThrottleInterval(url: string): number {
+  const hostRule = hostRules.find({ url });
+  const throttleInterval = hostRule.throttleRequestInterval;
+  return is.number(throttleInterval) && throttleInterval > 0
+    ? throttleInterval
+    : 1000;
 }

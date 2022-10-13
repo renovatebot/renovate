@@ -9,6 +9,7 @@ import { deleteLocalFile, privateCacheDir } from '../../util/fs';
 import { isCloned } from '../../util/git';
 import { clearDnsCache, printDnsStats } from '../../util/http/dns';
 import * as queue from '../../util/http/queue';
+import * as throttle from '../../util/http/throttle';
 import * as schemaUtil from '../../util/schema';
 import { addSplit, getSplits, splitInit } from '../../util/split';
 import { setBranchCache } from './cache';
@@ -36,6 +37,7 @@ export async function renovateRepository(
   logger.trace({ config });
   let repoResult: ProcessResult | undefined;
   queue.clear();
+  throttle.clear();
   const localDir = GlobalConfig.get('localDir')!;
   try {
     await fs.ensureDir(localDir);

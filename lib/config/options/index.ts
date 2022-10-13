@@ -2108,6 +2108,26 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
+    name: 'throttleRequestLimit',
+    description: 'Limit requests rate per host.',
+    type: 'integer',
+    stage: 'repository',
+    parent: 'hostRules',
+    default: null,
+    cli: false,
+    env: false,
+  },
+  {
+    name: 'throttleRequestInterval',
+    description: 'Throttling interval in milliseconds.',
+    type: 'integer',
+    stage: 'repository',
+    parent: 'hostRules',
+    default: 1000,
+    cli: false,
+    env: false,
+  },
+  {
     name: 'authType',
     description:
       'Authentication type for HTTP header. e.g. `"Bearer"` or `"Basic"`. Use `"Token-Only"` to use only the token without an authorization type.',
