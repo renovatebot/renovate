@@ -47,13 +47,17 @@ export function reportErrors(): void {
 export function match<T extends z.ZodSchema>(
   schema: T,
   input: unknown,
-  report = false
+  onError?: 'warn' | 'throw'
 ): input is z.infer<T> {
   const res = schema.safeParse(input);
   const { success } = res;
   if (!success) {
-    if (report) {
+    if (onError === 'warn') {
       collectError(schema, res.error);
+    }
+
+    if (onError === 'throw') {
+      throw res.error;
     }
 
     return false;
