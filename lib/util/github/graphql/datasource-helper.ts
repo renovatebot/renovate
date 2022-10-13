@@ -1,4 +1,5 @@
 import AggregateError from 'aggregate-error';
+import { TimeoutError } from 'got';
 import * as memCache from '../../cache/memory';
 import type {
   GithubGraphqlResponse,
@@ -17,24 +18,24 @@ import type {
   RawQueryResponse,
 } from './types';
 
-function isShrinkableMessage(msg: string): boolean {
-  return msg.startsWith('Something went wrong while executing your query.');
-}
-
 /**
  * We know empirically that certain type of GraphQL errors
  * can be fixed by shrinking page size.
  *
  * @see https://github.com/renovatebot/renovate/issues/16343
  */
-function canBeSolvedByShrinking(err: Error): boolean {
-  if (err instanceof AggregateError) {
-    const errors = [...err];
-    const messages = errors.map(({ message }) => message);
-    return messages.some(isShrinkableMessage);
-  }
+function isUnknownGraphqlError(err: Error): boolean {
+  const { message } = err;
+  return message.startsWith('Something went wrong while executing your query.');
+}
 
-  return isShrinkableMessage(err.message);
+function isTimeoutError(err: Error): err is TimeoutError {
+  return err instanceof TimeoutError;
+}
+
+function canBeSolvedByShrinking(err: Error): boolean {
+  const errors: Error[] = err instanceof AggregateError ? [...err] : [err];
+  return errors.some((e) => isTimeoutError(e) || isUnknownGraphqlError(e));
 }
 
 export class GithubGraphqlDatasourceHelper<
