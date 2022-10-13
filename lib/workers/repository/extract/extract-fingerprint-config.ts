@@ -42,9 +42,10 @@ export function generateExtractConfig(
     filteredConfig.npmrcMerge = config?.npmrcMerge;
 
     // non-mergeable config options
-    filteredConfig.enabled = managerConfig?.enabled;
+    filteredConfig.enabled = managerConfig?.enabled ?? config.enabled;
     filteredConfig.ignorePaths = managerConfig?.ignorePaths;
-    filteredConfig.includePaths = config?.includePaths;
+    filteredConfig.includePaths =
+      managerConfig?.includePaths ?? config?.includePaths;
     filteredConfig.registryAliases = managerConfig?.registryAliases;
     filteredConfig.skipInstalls = managerConfig?.skipInstalls;
 
