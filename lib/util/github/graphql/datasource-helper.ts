@@ -204,15 +204,11 @@ export class GithubGraphqlDatasourceHelper<
           throw err;
         }
 
-        const shrinkingResult = this.shrinkPageSize();
-        if (shrinkingResult) {
-          logger.debug(
-            { err, size: this.itemsPerQuery },
-            'Shrinking page size'
-          );
-        } else {
+        const shrinkResult = this.shrinkPageSize();
+        if (!shrinkResult) {
           throw err;
         }
+        logger.debug({ err, size: this.itemsPerQuery }, 'Shrinking page size');
       }
     }
 
