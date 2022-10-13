@@ -390,7 +390,19 @@ describe('workers/repository/process/lookup/index', () => {
       config.datasource = NpmDatasource.id;
       httpMock.scope('https://registry.npmjs.org').get('/q').reply(200, qJson);
       const res = await lookup.lookupUpdates(config);
-      expect(res.updates).toBeEmptyArray();
+      expect(res.updates).toEqual([
+        {
+          bucket: 'non-major',
+          isLockfileUpdate: true,
+          isRange: true,
+          newMajor: 1,
+          newMinor: 2,
+          newValue: '~1.2.0',
+          newVersion: '1.2.1',
+          releaseTimestamp: '2015-04-25T22:25:48.180Z',
+          updateType: 'patch',
+        },
+      ]);
     });
 
     it('handles unconstrainedValue values', async () => {
