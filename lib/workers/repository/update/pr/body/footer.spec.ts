@@ -14,6 +14,7 @@ describe('workers/repository/update/pr/body/footer', () => {
     expect(
       getPrFooter({
         manager: 'some-manager',
+        baseBranch: 'base',
         branchName: 'branch',
         upgrades: [],
       })
@@ -25,6 +26,7 @@ describe('workers/repository/update/pr/body/footer', () => {
     expect(
       getPrFooter({
         manager: 'some-manager',
+        baseBranch: 'base',
         branchName: 'branch',
         upgrades: [],
         prFooter: 'FOOTER',

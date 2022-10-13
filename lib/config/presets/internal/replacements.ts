@@ -589,4 +589,36 @@ const mui: PresetTemplate = {
   title: 'material-ui-to-mui',
 };
 
-addPresets(presets, mui);
+const messageFormat: PresetTemplate = {
+  description:
+    'The `messageformat` monorepo package naming scheme changed from `messageFormat-{{package}}`-to-`@messageformat/{{package}}`.',
+  packageRules: [
+    {
+      matchCurrentVersion: '>=2.0.0 <3.0.0',
+      matchDatasources: ['npm'],
+      replacements: [
+        [['messageformat-cli'], '@messageformat/cli'],
+        [['messageformat'], '@messageformat/core'],
+      ],
+      replacementVersion: '3.0.0',
+    },
+    {
+      matchCurrentVersion: '>=0.4.0 <1.0.0',
+      matchDatasources: ['npm'],
+      replacements: [
+        [['messageformat-convert'], '@messageformat/convert'],
+        [['react-message-context'], '@messageformat/react'],
+      ],
+      replacementVersion: '1.0.0',
+    },
+    {
+      matchCurrentVersion: '>=4.0.0 <5.0.0',
+      matchDatasources: ['npm'],
+      replacements: [[['messageformat-parser'], '@messageformat/parser']],
+      replacementVersion: '5.0.0',
+    },
+  ],
+  title: 'messageFormat-{{package}}-to-@messageformat/{{package}}',
+};
+
+addPresets(presets, messageFormat, mui);
