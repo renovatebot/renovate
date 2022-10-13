@@ -9,18 +9,14 @@ describe('modules/versioning/npm/index', () => {
     ${'x'}                                           | ${true}
     ${'X'}                                           | ${true}
     ${'1'}                                           | ${true}
-    ${'1.2'}                                         | ${true}
-    ${'1.2.3'}                                       | ${true}
     ${'1.2.3-foo'}                                   | ${true}
     ${'1.2.3foo'}                                    | ${false}
     ${'~1.2.3'}                                      | ${true}
     ${'1.2'}                                         | ${true}
     ${'1.2.x'}                                       | ${true}
     ${'1.2.X'}                                       | ${true}
+    ${'1.2.*'}                                       | ${true}
     ${'~1.2.3'}                                      | ${true}
-    ${'1.2'}                                         | ${true}
-    ${'1.x'}                                         | ${true}
-    ${'1.X'}                                         | ${true}
     ${'^1.2.3'}                                      | ${true}
     ${'>1.2.3'}                                      | ${true}
     ${'renovatebot/renovate'}                        | ${false}

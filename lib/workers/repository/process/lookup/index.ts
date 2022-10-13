@@ -224,7 +224,6 @@ export async function lookupUpdates(
           newMajor: versioning.getMajor(currentVersion)!,
         });
       }
-
       // istanbul ignore if
       if (!versioning.isVersion(currentVersion!)) {
         res.skipReason = 'invalid-version';
