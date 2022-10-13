@@ -337,7 +337,7 @@ describe('workers/repository/process/lookup/index', () => {
     it.each`
       strategy             | updates
       ${'update-lockfile'} | ${[{ isLockfileUpdate: true, newValue: '*', newVersion: '0.9.7', updateType: 'minor' }, { isLockfileUpdate: true, newValue: '*', newVersion: '1.4.1', updateType: 'major' }]}
-      ${'pin'}             | ${[{ newValue: '0.4.0', updateType: 'pin' }]}
+      ${'pin'}             | ${[{ newValue: '0.4.0', updateType: 'pin' }, { newValue: '0.9.7', updateType: 'minor' }, { newValue: '1.4.1', updateType: 'major' }]}
     `(
       'supports for x-range-all for replaceStrategy = $strategy (with lockfile)',
       async ({ strategy, updates }) => {

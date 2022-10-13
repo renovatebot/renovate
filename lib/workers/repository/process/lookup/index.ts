@@ -14,7 +14,6 @@ import {
 } from '../../../../modules/datasource';
 import { getRangeStrategy } from '../../../../modules/manager';
 import * as allVersioning from '../../../../modules/versioning';
-import { isSemVerXRange } from '../../../../modules/versioning/semver/common';
 import { ExternalHostError } from '../../../../types/errors/external-host-error';
 import { clone } from '../../../../util/clone';
 import { applyPackageRules } from '../../../../util/package-rules';
@@ -226,13 +225,6 @@ export async function lookupUpdates(
         });
       }
 
-      if (
-        rangeStrategy !== 'update-lockfile' &&
-        isNpmXRangeAll(currentValue, config)
-      ) {
-        return res;
-      }
-
       // istanbul ignore if
       if (!versioning.isVersion(currentVersion!)) {
         res.skipReason = 'invalid-version';
@@ -437,22 +429,4 @@ export async function lookupUpdates(
     res.skipReason = 'internal-error';
   }
   return res;
-}
-
-/**
- * https://docs.npmjs.com/cli/v6/using-npm/semver#x-ranges-12x-1x-12-
- * x-range-all := "" (empty string) := * := x := X := >=0.0.0
- */
-function isNpmXRangeAll(
-  currentValue: string | undefined,
-  config: LookupUpdateConfig
-): boolean {
-  const { manager } = config;
-  if (!currentValue) {
-    return false;
-  }
-  if (manager !== 'npm') {
-    return false;
-  }
-  return isSemVerXRange(currentValue);
 }
