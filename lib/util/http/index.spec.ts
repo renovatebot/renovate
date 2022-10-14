@@ -435,4 +435,12 @@ describe('util/http/index', () => {
       });
     });
   });
+
+  it('limits request rate by host', async () => {
+    hostRules.add({ matchHost: 'renovate.com', maxRequestsPerSecond: 1 });
+    httpMock.scope(baseUrl).get('/foo').reply(200, 'bar');
+    await expect(http.get('http://renovate.com/foo')).resolves.toMatchObject({
+      body: 'bar',
+    });
+  });
 });

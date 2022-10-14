@@ -132,12 +132,15 @@ export function getConcurrentRequestsLimit(url: string): number | null {
 export function getThrottleOptions(
   url: string
 ): { limit: number; interval: number } | null {
-  const hostRule = hostRules.find({ url });
-  const throttleLimit = hostRule.maxRequestsPerSecond;
-  if (!is.number(throttleLimit)) {
+  const { maxRequestsPerSecond } = hostRules.find({ url });
+  if (!is.number(maxRequestsPerSecond)) {
     return null;
   }
-  const limit = Math.floor(throttleLimit * 1000);
-  const interval = 1000 * 1000;
-  return { limit, interval };
+
+  // istanbul ignore if
+  if (maxRequestsPerSecond < 1) {
+    return { limit: 1, interval: 1000 / maxRequestsPerSecond };
+  }
+
+  return { limit: maxRequestsPerSecond, interval: 1000 };
 }
