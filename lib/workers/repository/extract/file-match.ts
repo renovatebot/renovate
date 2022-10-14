@@ -41,6 +41,7 @@ export function getFilteredFileList(
 ): string[] {
   const { includePaths, ignorePaths } = config;
   // TODO #7154
+
   let filteredList = getIncludedFiles(fileList, includePaths!);
   filteredList = filterIgnoredFiles(filteredList, ignorePaths!);
   return filteredList;

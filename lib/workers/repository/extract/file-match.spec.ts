@@ -1,4 +1,4 @@
-import type { RenovateConfig } from '../../../config/types';
+import type { RenovateConfig } from '../../../../test/util';
 import * as fileMatch from './file-match';
 
 jest.mock('../../../util/git');
