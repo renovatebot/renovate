@@ -1,27 +1,45 @@
 import is from '@sindresorhus/is';
+import { getManagerConfig, mergeChildConfig } from '../../../config';
+import type { ManagerConfig, RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
+import { getManagerList } from '../../../modules/manager';
 import type { PackageFile } from '../../../modules/manager/types';
 import { getFileList } from '../../../util/git';
 import type { WorkerExtractConfig } from '../../types';
-import type { FingerprintExtractConfig } from './extract-fingerprint-config';
 import { getMatchingFiles } from './file-match';
 import { getManagerPackageFiles } from './manager-files';
 
 export async function extractAllDependencies(
-  config: FingerprintExtractConfig
+  config: RenovateConfig
 ): Promise<Record<string, PackageFile[]>> {
+  let managerList = getManagerList();
+  const { enabledManagers } = config;
+  if (is.nonEmptyArray(enabledManagers)) {
+    logger.debug('Applying enabledManagers filtering');
+    managerList = managerList.filter((manager) =>
+      enabledManagers.includes(manager)
+    );
+  }
   const extractList: WorkerExtractConfig[] = [];
   const fileList = await getFileList();
 
-  const tryConfig = (managerConfig: WorkerExtractConfig): void => {
+  const tryConfig = (managerConfig: ManagerConfig): void => {
     const matchingFileList = getMatchingFiles(managerConfig, fileList);
     if (matchingFileList.length) {
       extractList.push({ ...managerConfig, fileList: matchingFileList });
     }
   };
 
-  for (const managerConfig of config.managers) {
-    tryConfig(managerConfig);
+  for (const manager of managerList) {
+    const managerConfig = getManagerConfig(config, manager);
+    managerConfig.manager = manager;
+    if (manager === 'regex') {
+      for (const regexManager of config.regexManagers ?? []) {
+        tryConfig(mergeChildConfig(managerConfig, regexManager));
+      }
+    } else {
+      tryConfig(managerConfig);
+    }
   }
 
   const extractResults = await Promise.all(

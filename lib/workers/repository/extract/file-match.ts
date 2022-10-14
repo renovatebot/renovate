@@ -1,7 +1,7 @@
 import minimatch from 'minimatch';
+import type { RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
 import { regEx } from '../../../util/regex';
-import type { WorkerExtractConfig } from '../../types';
 
 export function getIncludedFiles(
   fileList: string[],
@@ -36,7 +36,7 @@ export function filterIgnoredFiles(
 }
 
 export function getFilteredFileList(
-  config: WorkerExtractConfig,
+  config: RenovateConfig,
   fileList: string[]
 ): string[] {
   const { includePaths, ignorePaths } = config;
@@ -47,14 +47,15 @@ export function getFilteredFileList(
 }
 
 export function getMatchingFiles(
-  config: WorkerExtractConfig,
+  config: RenovateConfig,
   allFiles: string[]
 ): string[] {
   const fileList = getFilteredFileList(config, allFiles);
   const { fileMatch, manager } = config;
   let matchedFiles: string[] = [];
-  for (const match of fileMatch ?? []) {
-    logger.debug(`Using file match: ${match} for manager ${manager}`);
+  // TODO: types (#7154)
+  for (const match of fileMatch!) {
+    logger.debug(`Using file match: ${match} for manager ${manager!}`);
     const re = regEx(match);
     matchedFiles = matchedFiles.concat(
       fileList.filter((file) => re.test(file))

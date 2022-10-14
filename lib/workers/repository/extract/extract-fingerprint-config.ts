@@ -1,17 +1,15 @@
 import type { RenovateConfig } from '../../../config/types';
 import { get, getManagerList } from '../../../modules/manager';
+import { safeStringify } from '../../../util/stringify';
 import type { WorkerExtractConfig } from '../../types';
 
 export interface FingerprintExtractConfig {
   enabledManagers?: string[];
   managerList: string[];
   managers: WorkerExtractConfig[];
-  regexManagers?: WorkerExtractConfig[];
 }
 
-export function generateExtractConfig(
-  config: RenovateConfig
-): FingerprintExtractConfig {
+export function generateFingerprint(config: RenovateConfig): string {
   const finalConfig = {} as FingerprintExtractConfig;
   if (config.enabledManagers) {
     finalConfig.enabledManagers = config.enabledManagers;
@@ -43,9 +41,9 @@ export function generateExtractConfig(
 
     // non-mergeable config options
     filteredConfig.enabled = managerConfig?.enabled ?? config.enabled;
-    filteredConfig.ignorePaths = managerConfig?.ignorePaths;
+    filteredConfig.ignorePaths = managerConfig?.ignorePaths ?? [];
     filteredConfig.includePaths =
-      managerConfig?.includePaths ?? config?.includePaths;
+      managerConfig?.includePaths ?? config?.includePaths ?? [];
     filteredConfig.registryAliases = managerConfig?.registryAliases;
     filteredConfig.skipInstalls = managerConfig?.skipInstalls;
 
@@ -69,5 +67,5 @@ export function generateExtractConfig(
 
   // need to handle this different so as to get all necessary properties of RegExManager
   finalConfig.managers = managerExtractConfigs;
-  return finalConfig;
+  return safeStringify(finalConfig);
 }

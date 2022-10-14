@@ -1,4 +1,4 @@
-import type { WorkerExtractConfig } from '../../types';
+import type { RenovateConfig } from '../../../config/types';
 import * as fileMatch from './file-match';
 
 jest.mock('../../../util/git');
@@ -49,12 +49,11 @@ describe('workers/repository/extract/file-match', () => {
   });
 
   describe('getMatchingFiles()', () => {
-    const config: WorkerExtractConfig = {
+    const config: RenovateConfig = {
       includePaths: [],
       ignorePaths: [],
       manager: 'npm',
       fileMatch: ['(^|/)package\\.json$'],
-      fileList: [],
     };
 
     it('returns npm files', () => {

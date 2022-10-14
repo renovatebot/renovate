@@ -1,7 +1,6 @@
 import { getConfig, git, mocked } from '../../../../test/util';
 import type { RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
-import { generateExtractConfig } from './extract-fingerprint-config';
 import * as _managerFiles from './manager-files';
 import { extractAllDependencies } from '.';
 
@@ -23,38 +22,34 @@ describe('workers/repository/extract/index', () => {
 
     it('runs', async () => {
       managerFiles.getManagerPackageFiles.mockResolvedValue([{} as never]);
-      const res = await extractAllDependencies(generateExtractConfig(config));
+      const res = await extractAllDependencies(config);
       expect(Object.keys(res)).toContain('ansible');
     });
 
     it('skips non-enabled managers', async () => {
       config.enabledManagers = ['npm'];
       managerFiles.getManagerPackageFiles.mockResolvedValue([{} as never]);
-      const res = await extractAllDependencies(generateExtractConfig(config));
+      const res = await extractAllDependencies(config);
       expect(res).toEqual({ npm: [{}] });
     });
 
     it('warns if no packages found for a enabled manager', async () => {
       config.enabledManagers = ['npm'];
       managerFiles.getManagerPackageFiles.mockResolvedValue([]);
-      expect(
-        await extractAllDependencies(generateExtractConfig(config))
-      ).toEqual({});
+      expect(await extractAllDependencies(config)).toEqual({});
       expect(logger.debug).toHaveBeenCalled();
     });
 
     it('warns if packageFiles is null', async () => {
       config.enabledManagers = ['npm'];
       managerFiles.getManagerPackageFiles.mockResolvedValue(null);
-      expect(
-        await extractAllDependencies(generateExtractConfig(config))
-      ).toEqual({});
+      expect(await extractAllDependencies(config)).toEqual({});
     });
 
     it('checks custom managers', async () => {
       managerFiles.getManagerPackageFiles.mockResolvedValue([{} as never]);
       config.regexManagers = [{ fileMatch: ['README'], matchStrings: [''] }];
-      const res = await extractAllDependencies(generateExtractConfig(config));
+      const res = await extractAllDependencies(config);
       expect(Object.keys(res)).toContain('regex');
     });
   });
