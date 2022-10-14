@@ -4,10 +4,11 @@ import { logger } from '../../../logger';
 import type { PackageFile } from '../../../modules/manager/types';
 import { getCache } from '../../../util/cache/repository';
 import { checkGithubToken as ensureGithubToken } from '../../../util/check-token';
+import { fingerprint } from '../../../util/fingerprint';
 import { checkoutBranch, getBranchCommit } from '../../../util/git';
 import type { BranchConfig } from '../../types';
 import { extractAllDependencies } from '../extract';
-import { generateFingerprint } from '../extract/extract-fingerprint-config';
+import { generateFingerprintConfig } from '../extract/extract-fingerprint-config';
 import { branchifyUpgrades } from '../updates/branchify';
 import { raiseDeprecationWarnings } from './deprecated';
 import { fetchUpdates } from './fetch';
@@ -70,7 +71,7 @@ export async function extract(
   const cache = getCache();
   cache.scan ||= {};
   const cachedExtract = cache.scan[baseBranch!];
-  const configHash = generateFingerprint(config);
+  const configHash = fingerprint(generateFingerprintConfig(config));
   // istanbul ignore if
   if (
     cachedExtract?.sha === baseBranchSha &&

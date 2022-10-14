@@ -230,6 +230,7 @@ export interface RenovateConfig
 
   defaultRegistryUrls?: string[];
   registryUrls?: string[];
+  registryAliases?: Record<string, string>;
 
   repoIsOnboarded?: boolean;
   repoIsActivated?: boolean;
@@ -245,6 +246,7 @@ export interface RenovateConfig
   secrets?: Record<string, string>;
 
   constraints?: Record<string, string>;
+  skipInstalls?: boolean;
 }
 
 export interface AllConfig
