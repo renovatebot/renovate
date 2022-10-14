@@ -134,7 +134,7 @@ export function getThrottleOptions(
 ): { limit: number; interval: number } | null {
   const hostRule = hostRules.find({ url });
   const throttleLimit = hostRule.maxRequestsPerSecond;
-  if (!is.number(throttleLimit) || throttleLimit <= 0) {
+  if (!is.number(throttleLimit)) {
     return null;
   }
   const limit = Math.floor(throttleLimit * 1000);
