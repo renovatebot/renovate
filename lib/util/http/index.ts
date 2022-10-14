@@ -150,7 +150,7 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
         method: options.method,
       }),
     ]);
-    let resPromise: Promise<Response<T>> | undefined = undefined;
+    let resPromise: Promise<HttpResponse<T>> | undefined = undefined;
 
     // Cache GET requests unless useCache=false
     if (
@@ -191,7 +191,7 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
 
     try {
       const res = await resPromise;
-      (res as any).authorization = !!options?.headers?.authorization;
+      res.authorization = !!options?.headers?.authorization;
       return cloneResponse(res);
     } catch (err) {
       const { abortOnError, abortIgnoreStatusCodes } = options;
