@@ -83,5 +83,3 @@ export interface HttpResponse<T = string> {
   headers: HttpHeaders;
   authorization?: boolean;
 }
-
-export type HttpTask<T> = () => Promise<HttpResponse<T>>;

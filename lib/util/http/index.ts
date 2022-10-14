@@ -20,7 +20,6 @@ import type {
   GotOptions,
   HttpOptions,
   HttpResponse,
-  HttpTask,
   InternalHttpOptions,
   RequestStats,
 } from './types';
@@ -34,6 +33,8 @@ type JsonArgs<T extends HttpOptions> = {
   httpOptions?: T;
   schema?: ZodSchema | undefined;
 };
+
+type Task<T> = () => Promise<HttpResponse<T>>;
 
 function cloneResponse<T extends Buffer | string | any>(
   response: HttpResponse<T>
@@ -151,7 +152,7 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
         method: options.method,
       }),
     ]);
-    let resPromise: Promise<HttpResponse<T>> | undefined = undefined;
+    let resPromise: Promise<HttpResponse<T>> | null = null;
 
     // Cache GET requests unless useCache=false
     if (
@@ -164,7 +165,7 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
     // istanbul ignore else: no cache tests
     if (!resPromise) {
       const startTime = Date.now();
-      const httpTask: HttpTask<T> = () => {
+      const httpTask: Task<T> = () => {
         const queueDuration = Date.now() - startTime;
         return gotTask(url, options, {
           method: options.method ?? 'get',
@@ -174,12 +175,12 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
       };
 
       const throttle = getThrottle(url);
-      const throttledTask: HttpTask<T> = throttle
-        ? () => throttle.add<T>(httpTask)
+      const throttledTask: Task<T> = throttle
+        ? () => throttle.add<HttpResponse<T>>(httpTask)
         : httpTask;
 
       const queue = getQueue(url);
-      const queuedTask: HttpTask<T> = queue
+      const queuedTask: Task<T> = queue
         ? () => queue.add<HttpResponse<T>>(throttledTask)
         : throttledTask;
 

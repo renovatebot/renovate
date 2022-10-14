@@ -3,7 +3,6 @@ import pThrottle from 'p-throttle';
 import { logger } from '../../logger';
 import { parseUrl } from '../url';
 import { getThrottleInterval, getThrottleLimit } from './host-rules';
-import type { HttpResponse, HttpTask } from './types';
 
 const hostThrottles = new Map<string, Throttle | null>();
 
@@ -20,7 +19,7 @@ class Throttle {
     });
   }
 
-  add<T>(task: HttpTask<T>): Promise<HttpResponse<T>> {
+  add<T>(task: () => Promise<T>): Promise<T> {
     const throttledTask = this.throttle(task);
     return throttledTask();
   }
