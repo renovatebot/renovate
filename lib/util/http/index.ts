@@ -173,14 +173,15 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
       };
 
       const throttle = getThrottle(url);
-      const throttledTask = (): Promise<Response<T>> =>
-        throttle?.add<Response<T>>(httpTask) ?? httpTask();
+      const throttledTask = throttle
+        ? () => throttle.add<Response<T>>(httpTask)
+        : httpTask;
 
       const queue = getQueue(url);
-      const queuedTask = (): Promise<Response<T>> =>
-        queue?.add<Response<T>>(throttledTask) ?? throttledTask();
+      const queuedTask = queue
+        ? () => queue.add<Response<T>>(throttledTask)
+        : throttledTask;
 
-      resPromise = queuedTask();
       if (options.method === 'get' || options.method === 'head') {
         memCache.set(cacheKey, resPromise); // always set if it's a get or a head
       }
