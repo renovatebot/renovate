@@ -121,7 +121,7 @@ export function applyHostRules(url: string, inOptions: GotOptions): GotOptions {
   return options;
 }
 
-export function getConcurrentLimit(url: string): number | null {
+export function getConcurrentRequestsLimit(url: string): number | null {
   const hostRule = hostRules.find({ url });
   const concurrentLimit = hostRule.concurrentRequestLimit;
   return typeof concurrentLimit === 'number' && concurrentLimit > 0
