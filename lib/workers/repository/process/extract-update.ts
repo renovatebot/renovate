@@ -71,7 +71,8 @@ export async function extract(
   const cache = getCache();
   cache.scan ||= {};
   const cachedExtract = cache.scan[baseBranch!];
-  const configHash = fingerprint(generateExtractConfig(config));
+  const extractConfig = generateExtractConfig(config);
+  const configHash = fingerprint(extractConfig);
   // istanbul ignore if
   if (
     cachedExtract?.sha === baseBranchSha &&
@@ -93,7 +94,7 @@ export async function extract(
     }
   } else {
     await checkoutBranch(baseBranch!);
-    packageFiles = await extractAllDependencies(generateExtractConfig(config));
+    packageFiles = await extractAllDependencies(extractConfig);
     // TODO: fix types (#7154)
     cache.scan[baseBranch!] = {
       sha: baseBranchSha!,
