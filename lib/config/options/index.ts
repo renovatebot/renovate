@@ -2109,7 +2109,7 @@ const options: RenovateOptions[] = [
   },
   {
     name: 'maxRequestsPerSecond',
-    description: 'Limit requests rate per second per host.',
+    description: 'Limit requests rate per host.',
     type: 'integer',
     stage: 'repository',
     parent: 'hostRules',
