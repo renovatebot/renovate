@@ -122,6 +122,7 @@ const repoGroups = {
     'https://github.com/loopbackio/loopback-next',
   ],
   lrnwebcomponents: 'https://github.com/elmsln/lrnwebcomponents',
+  mailing: 'https://github.com/sofn-xyz/mailing',
   mapstruct: 'https://github.com/mapstruct/mapstruct',
   masstransit: 'https://github.com/MassTransit/MassTransit',
   'material-components-web':
