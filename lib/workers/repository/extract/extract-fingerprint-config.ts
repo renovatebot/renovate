@@ -29,7 +29,10 @@ function getFilteredManagerConfig(
   filteredConfig.ignorePaths = managerConfig?.ignorePaths ?? [];
   filteredConfig.includePaths =
     managerConfig?.includePaths ?? config?.includePaths ?? [];
-  filteredConfig.registryAliases = config?.registryAliases;
+  filteredConfig.registryAliases = {
+    ...config?.registryAliases,
+    ...(managerConfig?.registryAliases ?? {}),
+  };
   filteredConfig.skipInstalls =
     managerConfig?.skipInstalls ?? config.skipInstalls;
 
