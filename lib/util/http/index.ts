@@ -182,6 +182,8 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
         ? () => queue.add<Response<T>>(throttledTask)
         : throttledTask;
 
+      resPromise = queuedTask();
+
       if (options.method === 'get' || options.method === 'head') {
         memCache.set(cacheKey, resPromise); // always set if it's a get or a head
       }
