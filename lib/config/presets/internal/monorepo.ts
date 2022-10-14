@@ -122,6 +122,7 @@ const repoGroups = {
     'https://github.com/loopbackio/loopback-next',
   ],
   lrnwebcomponents: 'https://github.com/elmsln/lrnwebcomponents',
+  mailing: 'https://github.com/sofn-xyz/mailing',
   mapstruct: 'https://github.com/mapstruct/mapstruct',
   masstransit: 'https://github.com/MassTransit/MassTransit',
   'material-components-web':
@@ -232,6 +233,7 @@ const repoGroups = {
   workbox: 'https://github.com/googlechrome/workbox',
   xterm: 'https://github.com/xtermjs/xterm.js',
   'xunit-dotnet': 'https://github.com/xunit/xunit',
+  yarn: 'https://github.com/yarnpkg/berry',
   'zxing-net': 'https://github.com/micjahn/ZXing.Net',
 };
 

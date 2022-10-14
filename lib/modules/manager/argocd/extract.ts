@@ -1,7 +1,7 @@
 import is from '@sindresorhus/is';
 import { loadAll } from 'js-yaml';
-import urlJoin from 'url-join';
 import { logger } from '../../../logger';
+import { trimTrailingSlash } from '../../../util/url';
 import { DockerDatasource } from '../../datasource/docker';
 import { GitTagsDatasource } from '../../datasource/git-tags';
 import { HelmDatasource } from '../../datasource/helm';
@@ -37,9 +37,11 @@ function createDependency(
       source.repoURL.startsWith('oci://') ||
       !source.repoURL.includes('://')
     ) {
-      const registryURL = source.repoURL.replace('oci://', '');
+      let registryURL = source.repoURL.replace('oci://', '');
+      registryURL = trimTrailingSlash(registryURL);
+
       return {
-        depName: urlJoin(registryURL, source.chart),
+        depName: `${registryURL}/${source.chart}`,
         currentValue: source.targetRevision,
         datasource: DockerDatasource.id,
       };

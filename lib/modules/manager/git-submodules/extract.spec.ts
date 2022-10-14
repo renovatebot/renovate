@@ -13,6 +13,7 @@ import { extractPackageFile } from '.';
 
 jest.mock('simple-git');
 const simpleGit: jest.Mock<Partial<SimpleGit>> = _simpleGit as never;
+// eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
 const Git = jest.requireActual('simple-git') as SimpleGitFactory;
 
 describe('modules/manager/git-submodules/extract', () => {
