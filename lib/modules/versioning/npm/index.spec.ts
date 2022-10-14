@@ -5,8 +5,17 @@ describe('modules/versioning/npm/index', () => {
     version                                          | isValid
     ${'17.04.0'}                                     | ${false}
     ${'1.2.3'}                                       | ${true}
+    ${'*'}                                           | ${true}
+    ${'x'}                                           | ${true}
+    ${'X'}                                           | ${true}
+    ${'1'}                                           | ${true}
     ${'1.2.3-foo'}                                   | ${true}
     ${'1.2.3foo'}                                    | ${false}
+    ${'~1.2.3'}                                      | ${true}
+    ${'1.2'}                                         | ${true}
+    ${'1.2.x'}                                       | ${true}
+    ${'1.2.X'}                                       | ${true}
+    ${'1.2.*'}                                       | ${true}
     ${'~1.2.3'}                                      | ${true}
     ${'^1.2.3'}                                      | ${true}
     ${'>1.2.3'}                                      | ${true}
@@ -14,9 +23,25 @@ describe('modules/versioning/npm/index', () => {
     ${'renovatebot/renovate#main'}                   | ${false}
     ${'https://github.com/renovatebot/renovate.git'} | ${false}
   `('isValid("$version") === $isValid', ({ version, isValid }) => {
-    const res = !!semver.isValid(version);
+    const res = semver.isValid(version);
     expect(res).toBe(isValid);
   });
+
+  test.each`
+    versions                                          | range      | maxSatisfying
+    ${['2.3.3.', '2.3.4', '2.4.5', '2.5.1', '3.0.0']} | ${'*'}     | ${'3.0.0'}
+    ${['2.3.3.', '2.3.4', '2.4.5', '2.5.1', '3.0.0']} | ${'x'}     | ${'3.0.0'}
+    ${['2.3.3.', '2.3.4', '2.4.5', '2.5.1', '3.0.0']} | ${'X'}     | ${'3.0.0'}
+    ${['2.3.3.', '2.3.4', '2.4.5', '2.5.1', '3.0.0']} | ${'2'}     | ${'2.5.1'}
+    ${['2.3.3.', '2.3.4', '2.4.5', '2.5.1', '3.0.0']} | ${'2.*'}   | ${'2.5.1'}
+    ${['2.3.3.', '2.3.4', '2.4.5', '2.5.1', '3.0.0']} | ${'2.3'}   | ${'2.3.4'}
+    ${['2.3.3.', '2.3.4', '2.4.5', '2.5.1', '3.0.0']} | ${'2.3.*'} | ${'2.3.4'}
+  `(
+    'getSatisfyingVersion("$versions","$range") === $maxSatisfying',
+    ({ versions, range, maxSatisfying }) => {
+      expect(semver.getSatisfyingVersion(versions, range)).toBe(maxSatisfying);
+    }
+  );
 
   test.each`
     version            | isSingle
@@ -59,6 +84,7 @@ describe('modules/versioning/npm/index', () => {
     ${'>= 0.0.1 < 0.0.4'}   | ${'bump'}     | ${'0.0.4'}     | ${'0.0.5'}              | ${'>= 0.0.5 < 0.0.6'}
     ${'>= 0.0.1 < 1'}       | ${'bump'}     | ${'1.0.0'}     | ${'1.0.1'}              | ${'>= 1.0.1 < 2'}
     ${'>= 0.0.1 < 1'}       | ${'bump'}     | ${'1.0.0'}     | ${'1.0.1'}              | ${'>= 1.0.1 < 2'}
+    ${'*'}                  | ${'bump'}     | ${'1.0.0'}     | ${'1.0.1'}              | ${null}
     ${'<=1.2.3'}            | ${'widen'}    | ${'1.0.0'}     | ${'1.2.3'}              | ${'<=1.2.3'}
     ${'<=1.2.3'}            | ${'widen'}    | ${'1.0.0'}     | ${'1.2.4'}              | ${'<=1.2.4'}
     ${'>=1.2.3'}            | ${'widen'}    | ${'1.0.0'}     | ${'1.2.3'}              | ${'>=1.2.3'}
