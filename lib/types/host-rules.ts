@@ -10,8 +10,7 @@ export interface HostRuleSearchResult {
   enabled?: boolean;
   enableHttp2?: boolean;
   concurrentRequestLimit?: number;
-  throttleRequestLimit?: number;
-  throttleRequestInterval?: number;
+  maxRequestsPerSecond?: number;
 
   dnsCache?: boolean;
   keepalive?: boolean;

@@ -1,8 +1,7 @@
-import is from '@sindresorhus/is';
 import pThrottle from 'p-throttle';
 import { logger } from '../../logger';
 import { parseUrl } from '../url';
-import { getThrottleInterval, getThrottleLimit } from './host-rules';
+import { getThrottleOptions } from './host-rules';
 
 const hostThrottles = new Map<string, Throttle | null>();
 
@@ -12,11 +11,7 @@ class Throttle {
   ) => pThrottle.ThrottledFunction<Argument, ReturnValue>;
 
   constructor(limit: number, interval: number) {
-    this.throttle = pThrottle({
-      limit,
-      interval,
-      strict: true,
-    });
+    this.throttle = pThrottle({ limit, interval, strict: true });
   }
 
   add<T>(task: () => Promise<T>): Promise<T> {
@@ -36,9 +31,9 @@ export function getThrottle(url: string): Throttle | null {
   let throttle = hostThrottles.get(host);
   if (throttle === undefined) {
     throttle = null; // null represents "no throttle", as opposed to undefined
-    const limit = getThrottleLimit(url);
-    const interval = getThrottleInterval(url);
-    if (is.number(limit)) {
+    const throttleOptions = getThrottleOptions(url);
+    if (throttleOptions) {
+      const { limit, interval } = throttleOptions;
       logger.debug({ limit, interval, host }, 'Using throttle');
       throttle = new Throttle(limit, interval);
     } else {

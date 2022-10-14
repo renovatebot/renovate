@@ -129,16 +129,15 @@ export function getConcurrentLimit(url: string): number | null {
     : null;
 }
 
-export function getThrottleLimit(url: string): number | null {
+export function getThrottleOptions(
+  url: string
+): { limit: number; interval: number } | null {
   const hostRule = hostRules.find({ url });
-  const throttleLimit = hostRule.throttleRequestLimit;
-  return is.number(throttleLimit) && throttleLimit > 0 ? throttleLimit : null;
-}
-
-export function getThrottleInterval(url: string): number {
-  const hostRule = hostRules.find({ url });
-  const throttleInterval = hostRule.throttleRequestInterval;
-  return is.number(throttleInterval) && throttleInterval > 0
-    ? throttleInterval
-    : 1000;
+  const throttleLimit = hostRule.maxRequestsPerSecond;
+  if (!is.number(throttleLimit) || throttleLimit <= 0) {
+    return null;
+  }
+  const limit = Math.floor(throttleLimit * 1000);
+  const interval = 1000 * 1000;
+  return { limit, interval };
 }

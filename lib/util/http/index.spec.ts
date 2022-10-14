@@ -9,6 +9,7 @@ import * as memCache from '../cache/memory';
 import * as hostRules from '../host-rules';
 import { reportErrors } from '../schema';
 import * as queue from './queue';
+import * as throttle from './throttle';
 import type { HttpResponse } from './types';
 import { Http } from '.';
 
@@ -21,6 +22,7 @@ describe('util/http/index', () => {
     http = new Http('dummy');
     hostRules.clear();
     queue.clear();
+    throttle.clear();
   });
 
   it('get', async () => {
