@@ -96,7 +96,7 @@ describe('modules/manager/jsonnet-bundler/artifacts', () => {
         newPackageFileContent: 'Updated jsonnetfile.json',
         config,
       })
-    ).toMatchSnapshot([
+    ).toMatchObject([
       {
         file: {
           type: 'addition',
@@ -155,7 +155,7 @@ describe('modules/manager/jsonnet-bundler/artifacts', () => {
           isLockFileMaintenance: true,
         },
       })
-    ).toMatchSnapshot([
+    ).toMatchObject([
       {
         file: {
           type: 'addition',
@@ -190,7 +190,7 @@ describe('modules/manager/jsonnet-bundler/artifacts', () => {
           isLockFileMaintenance: true,
         },
       })
-    ).toMatchSnapshot([
+    ).toMatchObject([
       {
         artifactError: {
           lockFile: 'jsonnetfile.lock.json',

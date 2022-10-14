@@ -4,8 +4,10 @@ import * as gradleVersioning from '../../versioning/gradle';
 
 export { extractAllPackageFiles } from './extract';
 export { updateDependency } from './update';
+export { updateArtifacts } from './artifacts';
 
 export const language = ProgrammingLanguage.Java;
+export const supportsLockFileMaintenance = true;
 
 export const defaultConfig = {
   fileMatch: [

@@ -6,8 +6,10 @@ import { pkg } from '../../expose.cjs';
 import { logger, setMeta } from '../../logger';
 import { removeDanglingContainers } from '../../util/exec/docker';
 import { deleteLocalFile, privateCacheDir } from '../../util/fs';
+import { isCloned } from '../../util/git';
 import { clearDnsCache, printDnsStats } from '../../util/http/dns';
 import * as queue from '../../util/http/queue';
+import * as schemaUtil from '../../util/schema';
 import { addSplit, getSplits, splitInit } from '../../util/split';
 import { setBranchCache } from './cache';
 import { ensureDependencyDashboard } from './dependency-dashboard';
@@ -89,6 +91,8 @@ export async function renovateRepository(
   printRequestStats();
   printDnsStats();
   clearDnsCache();
-  logger.info({ durationMs: splits.total }, 'Repository finished');
+  schemaUtil.reportErrors();
+  const cloned = isCloned();
+  logger.info({ cloned, durationMs: splits.total }, 'Repository finished');
   return repoResult;
 }

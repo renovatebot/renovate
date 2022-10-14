@@ -119,16 +119,18 @@ export async function extractPackageFile(
   }
 
   let deps: PackageDependency[] = [];
+  let packageFileVersion = undefined;
   try {
     const parsedXml = new XmlDocument(content);
     deps = extractDepsFromXml(parsedXml).map((dep) => ({
       ...dep,
       ...(registryUrls && { registryUrls }),
     }));
+    packageFileVersion = parsedXml.valueWithPath('PropertyGroup.Version');
   } catch (err) {
     logger.debug({ err }, `Failed to parse ${packageFile}`);
   }
-  const res: PackageFile = { deps };
+  const res: PackageFile = { deps, packageFileVersion };
   const lockFileName = getSiblingFileName(packageFile, 'packages.lock.json');
   // istanbul ignore if
   if (await localPathExists(lockFileName)) {
