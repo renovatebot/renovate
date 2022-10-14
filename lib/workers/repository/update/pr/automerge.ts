@@ -57,7 +57,7 @@ export async function checkAutoMerge(
   }
   const isConflicted =
     config.isConflicted ??
-    (await isBranchConflicted(config.baseBranch!, config.branchName));
+    (await isBranchConflicted(config.baseBranch, config.branchName));
   if (isConflicted) {
     logger.debug('PR is conflicted');
     return {

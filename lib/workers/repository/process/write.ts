@@ -61,7 +61,7 @@ export function syncBranchState(
   // if base branch name has changed invalidate cached isModified state
   if (baseBranch !== branchState.baseBranch) {
     logger.debug('syncBranchState(): update baseBranch name');
-    branchState.baseBranch = baseBranch!;
+    branchState.baseBranch = baseBranch;
     delete branchState.isModified;
   }
 
@@ -120,8 +120,7 @@ export async function writeUpdates(
     }
     addMeta(meta);
     const branchExisted = branchExists(branchName);
-    // TODO: base branch name cannot be undefined - fix optional types (#7154)
-    const branchState = syncBranchState(branchName, baseBranch!);
+    const branchState = syncBranchState(branchName, baseBranch);
 
     const managers = [
       ...new Set(
@@ -148,8 +147,7 @@ export async function writeUpdates(
         : branchState.branchFingerprint;
 
     if (res?.commitSha) {
-      // TODO: base branch name cannot be undefined - fix optional types (#7154)
-      setBranchNewCommit(branchName, baseBranch!, res.commitSha);
+      setBranchNewCommit(branchName, baseBranch, res.commitSha);
     }
     if (
       branch.result === BranchResult.Automerged &&

@@ -99,7 +99,7 @@ export const buildStates: Record<BranchStatus, BitbucketBranchState> = {
 };
 
 const addMaxLength = (inputUrl: string, pagelen = 100): string => {
-  const { search, ...parsedUrl } = url.parse(inputUrl, true); // eslint-disable-line @typescript-eslint/no-unused-vars
+  const { search, ...parsedUrl } = url.parse(inputUrl, true);
   const maxedUrl = url.format({
     ...parsedUrl,
     query: { ...parsedUrl.query, pagelen },
