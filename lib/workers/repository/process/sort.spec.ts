@@ -100,5 +100,43 @@ describe('workers/repository/process/sort', () => {
         { prPriority: -1, prTitle: 'some pin', updateType: 'pin' },
       ]);
     });
+
+    it('sorts based on isVulnerabilityAlert symmetric', () => {
+      const branches = [
+        {
+          updateType: 'minor' as UpdateType,
+          prTitle: 'a minor update',
+          prPriority: -1,
+          isVulnerabilityAlert: true,
+        },
+        {
+          updateType: 'major' as UpdateType,
+          prTitle: 'some major update',
+          prPriority: 1,
+        },
+        {
+          updateType: 'pin' as UpdateType,
+          prTitle: 'some pin',
+          prPriority: -1,
+        },
+        {
+          updateType: 'pin' as UpdateType,
+          prTitle: 'some other pin',
+          prPriority: 0,
+        },
+      ];
+      sortBranches(branches);
+      expect(branches).toEqual([
+        {
+          isVulnerabilityAlert: true,
+          prPriority: -1,
+          prTitle: 'a minor update',
+          updateType: 'minor',
+        },
+        { prPriority: 1, prTitle: 'some major update', updateType: 'major' },
+        { prPriority: 0, prTitle: 'some other pin', updateType: 'pin' },
+        { prPriority: -1, prTitle: 'some pin', updateType: 'pin' },
+      ]);
+    });
   });
 });
