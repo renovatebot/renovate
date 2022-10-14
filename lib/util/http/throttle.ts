@@ -13,6 +13,7 @@ class Throttle {
     private throttle = pThrottle({
       limit,
       interval,
+      strict: true,
     })
   ) {}
 
