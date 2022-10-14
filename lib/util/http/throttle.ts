@@ -3,21 +3,24 @@ import pThrottle from 'p-throttle';
 import { logger } from '../../logger';
 import { parseUrl } from '../url';
 import { getThrottleInterval, getThrottleLimit } from './host-rules';
+import type { HttpResponse, HttpTask } from './types';
 
 const hostThrottles = new Map<string, Throttle | null>();
 
 class Throttle {
-  constructor(
-    limit: number,
-    interval: number,
-    private throttle = pThrottle({
+  private throttle: <Argument extends readonly unknown[], ReturnValue>(
+    function_: (...args: Argument) => ReturnValue
+  ) => pThrottle.ThrottledFunction<Argument, ReturnValue>;
+
+  constructor(limit: number, interval: number) {
+    this.throttle = pThrottle({
       limit,
       interval,
       strict: true,
-    })
-  ) {}
+    });
+  }
 
-  add<T>(task: () => Promise<T>): Promise<T> {
+  add<T>(task: HttpTask<T>): Promise<HttpResponse<T>> {
     const throttledTask = this.throttle(task);
     return throttledTask();
   }

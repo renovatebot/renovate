@@ -1,5 +1,5 @@
 import merge from 'deepmerge';
-import got, { Options, RequestError, Response } from 'got';
+import got, { Options, RequestError } from 'got';
 import hasha from 'hasha';
 import { infer as Infer, ZodSchema } from 'zod';
 import { HOST_DISABLED } from '../../constants/error-messages';
@@ -20,6 +20,7 @@ import type {
   GotOptions,
   HttpOptions,
   HttpResponse,
+  HttpTask,
   InternalHttpOptions,
   RequestStats,
 } from './types';
@@ -67,7 +68,7 @@ async function gotTask<T>(
   url: string,
   options: GotOptions,
   requestStats: Omit<RequestStats, 'duration' | 'statusCode'>
-): Promise<Response<T>> {
+): Promise<HttpResponse<T>> {
   logger.trace({ url, options }, 'got request');
 
   let duration = 0;
@@ -163,7 +164,7 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
     // istanbul ignore else: no cache tests
     if (!resPromise) {
       const startTime = Date.now();
-      const httpTask = (): Promise<Response<T>> => {
+      const httpTask: HttpTask<T> = () => {
         const queueDuration = Date.now() - startTime;
         return gotTask(url, options, {
           method: options.method ?? 'get',
@@ -173,13 +174,13 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
       };
 
       const throttle = getThrottle(url);
-      const throttledTask = throttle
-        ? () => throttle.add<Response<T>>(httpTask)
+      const throttledTask: HttpTask<T> = throttle
+        ? () => throttle.add<T>(httpTask)
         : httpTask;
 
       const queue = getQueue(url);
-      const queuedTask = queue
-        ? () => queue.add<Response<T>>(throttledTask)
+      const queuedTask: HttpTask<T> = queue
+        ? () => queue.add<HttpResponse<T>>(throttledTask)
         : throttledTask;
 
       resPromise = queuedTask();
