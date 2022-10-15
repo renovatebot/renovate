@@ -209,6 +209,21 @@ describe('modules/manager/gradle/artifacts', () => {
     ]);
   });
 
+  it('aborts lock file maintenance if packageFileName is not build.gradle(.kts) in root project', async () => {
+    expect(
+      await updateArtifacts({
+        packageFileName: 'somedir/settings.gradle',
+        updatedDeps: [],
+        newPackageFileContent: '',
+        config: { isLockFileMaintenance: true },
+      })
+    ).toBeNull();
+
+    expect(logger.logger.trace).toHaveBeenCalledWith(
+      'No build.gradle(.kts) file or not in root project - skipping lock file maintenance'
+    );
+  });
+
   it('performs lock file maintenance', async () => {
     const execSnapshots = mockExecAll();
 
