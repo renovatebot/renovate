@@ -68,9 +68,7 @@ async function getSubProjectList(
   return subprojects;
 }
 
-export async function getGradleVersion(
-  gradlewFile: string
-): Promise<string | null> {
+async function getGradleVersion(gradlewFile: string): Promise<string | null> {
   const propertiesFile = join(
     dirname(gradlewFile),
     'gradle/wrapper/gradle-wrapper.properties'
