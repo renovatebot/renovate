@@ -2235,7 +2235,7 @@ describe('modules/platform/github/index', () => {
         await github.createPr(prConfig);
 
         expect(logger.logger.debug).toHaveBeenNthCalledWith(
-          10,
+          11,
           { prNumber: 123 },
           'GitHub-native automerge: not supported on this version of GHE. Use 3.3.0 or newer.'
         );
