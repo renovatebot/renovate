@@ -137,10 +137,5 @@ export function getThrottleOptions(
     return null;
   }
 
-  // istanbul ignore if
-  if (maxRequestsPerSecond < 1) {
-    return { limit: 1, interval: 1000 / maxRequestsPerSecond };
-  }
-
-  return { limit: maxRequestsPerSecond, interval: 1000 };
+  return { limit: 1, interval: Math.ceil(1000 / maxRequestsPerSecond) };
 }
