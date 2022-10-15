@@ -66,6 +66,7 @@ describe('modules/manager/gradle/artifacts', () => {
       'gradlew',
       'build.gradle',
       'gradle.lockfile',
+      'gradle/wrapper/gradle-wrapper.properties',
     ]);
     fs.getFileContentMap.mockResolvedValue({
       'gradle.lockfile': 'Current gradle.lockfile',
@@ -75,7 +76,19 @@ describe('modules/manager/gradle/artifacts', () => {
         modified: ['build.gradle', 'gradle.lockfile'],
       })
     );
-    fs.readLocalFile.mockResolvedValue('New gradle.lockfile');
+
+    // TODO: fix types, jest is using wrong overload (#7154)
+    fs.readLocalFile.mockImplementation((fileName: string): Promise<any> => {
+      let content = '';
+      if (fileName === 'gradle.lockfile') {
+        content = 'New gradle.lockfile';
+      } else if (fileName === 'gradle/wrapper/gradle-wrapper.properties') {
+        content =
+          'distributionUrl=https\\://services.gradle.org/distributions/gradle-7.4-bin.zip';
+      }
+
+      return Promise.resolve(content);
+    });
   });
 
   it('aborts if no lockfile is found', async () => {
@@ -265,7 +278,7 @@ describe('modules/manager/gradle/artifacts', () => {
           '-w "/tmp/github/some/repo" ' +
           'renovate/sidecar' +
           ' bash -l -c "' +
-          'install-tool java 11.0.1' +
+          'install-tool java 16.0.1' +
           ' && ' +
           './gradlew --console=plain -q properties' +
           '"',
@@ -283,7 +296,7 @@ describe('modules/manager/gradle/artifacts', () => {
           '-w "/tmp/github/some/repo" ' +
           'renovate/sidecar' +
           ' bash -l -c "' +
-          'install-tool java 11.0.1' +
+          'install-tool java 16.0.1' +
           ' && ' +
           './gradlew --console=plain -q :dependencies --write-locks' +
           '"',
@@ -313,12 +326,12 @@ describe('modules/manager/gradle/artifacts', () => {
       },
     ]);
     expect(execSnapshots).toMatchObject([
-      { cmd: 'install-tool java 11.0.1' },
+      { cmd: 'install-tool java 16.0.1' },
       {
         cmd: './gradlew --console=plain -q properties',
         options: { cwd: '/tmp/github/some/repo' },
       },
-      { cmd: 'install-tool java 11.0.1' },
+      { cmd: 'install-tool java 16.0.1' },
       {
         cmd: './gradlew --console=plain -q :dependencies --write-locks',
         options: { cwd: '/tmp/github/some/repo' },
@@ -424,5 +437,42 @@ describe('modules/manager/gradle/artifacts', () => {
         config: {},
       })
     ).rejects.toThrow(TEMPORARY_ERROR);
+  });
+
+  it('fallback to default Java version if Gradle version not extractable', async () => {
+    const execSnapshots = mockExecAll();
+    GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
+    fs.readLocalFile
+      .mockResolvedValueOnce(null)
+      .mockResolvedValueOnce('New gradle.lockfile');
+
+    const res = await updateArtifacts({
+      packageFileName: 'build.gradle',
+      updatedDeps: [],
+      newPackageFileContent: '',
+      config: { isLockFileMaintenance: true },
+    });
+
+    expect(res).toEqual([
+      {
+        file: {
+          type: 'addition',
+          path: 'gradle.lockfile',
+          contents: 'New gradle.lockfile',
+        },
+      },
+    ]);
+    expect(execSnapshots).toMatchObject([
+      { cmd: 'install-tool java 11.0.1' },
+      {
+        cmd: './gradlew --console=plain -q properties',
+        options: { cwd: '/tmp/github/some/repo' },
+      },
+      { cmd: 'install-tool java 11.0.1' },
+      {
+        cmd: './gradlew --console=plain -q :dependencies --write-locks',
+        options: { cwd: '/tmp/github/some/repo' },
+      },
+    ]);
   });
 });

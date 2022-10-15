@@ -1,6 +1,6 @@
 import is from '@sindresorhus/is';
 import { quote } from 'shlex';
-import { dirname } from 'upath';
+import { dirname, join } from 'upath';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { exec } from '../../../util/exec';
@@ -15,6 +15,7 @@ import { getFileList, getRepoStatus } from '../../../util/git';
 import { regEx } from '../../../util/regex';
 import {
   extraEnv,
+  extractGradleVersion,
   getJavaConstraint,
   gradleWrapperFileName,
 } from '../gradle-wrapper/utils';
@@ -67,6 +68,19 @@ async function getSubProjectList(
   return subprojects;
 }
 
+export async function getGradleVersion(
+  gradlewFile: string
+): Promise<string | null> {
+  const propertiesFile = join(
+    dirname(gradlewFile),
+    'gradle/wrapper/gradle-wrapper.properties'
+  );
+  const properties = await readLocalFile(propertiesFile, 'utf8');
+  const extractResult = extractGradleVersion(properties ?? '');
+
+  return extractResult ? extractResult.version : null;
+}
+
 export async function updateArtifacts({
   packageFileName,
   updatedDeps,
@@ -108,7 +122,8 @@ export async function updateArtifacts({
         {
           toolName: 'java',
           constraint:
-            config.constraints?.java ?? getJavaConstraint(config.currentValue),
+            config.constraints?.java ??
+            getJavaConstraint(await getGradleVersion(gradlewFile)),
         },
       ],
     };
