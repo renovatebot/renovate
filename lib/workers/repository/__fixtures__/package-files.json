@@ -226,7 +226,6 @@
           "fixedVersion": "2.0.14"
         }
       ],
-      "packageJsonType": "app",
       "managerData": {
         "yarnZeroInstall": false
       },
