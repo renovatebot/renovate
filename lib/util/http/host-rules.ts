@@ -128,7 +128,7 @@ export function getConcurrentRequestsLimit(url: string): number | null {
 
 export function getThrottleIntervalMs(url: string): number | null {
   const { maxRequestsPerSecond } = hostRules.find({ url });
-  return is.number(maxRequestsPerSecond)
+  return is.number(maxRequestsPerSecond) && maxRequestsPerSecond > 0
     ? Math.ceil(1000 / maxRequestsPerSecond)
     : null;
 }
