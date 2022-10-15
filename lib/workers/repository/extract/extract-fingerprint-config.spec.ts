@@ -40,14 +40,7 @@ describe('workers/repository/extract/extract-fingerprint-config', () => {
     });
     expect(
       fingerprintConfig.managers.find((manager) => manager.manager === 'regex')
-    ).toEqual({
-      manager: 'regex',
-      fileMatch: ['js', '***$}{]]['],
-      matchStrings: ['^(?<depName>foo)(?<currentValue>bar)$'],
-      datasourceTemplate: 'maven',
-      versioningTemplate: 'gradle',
-      fileList: [],
-    });
+    ).toBeUndefined();
   });
 
   it('filter with all managers enabled', () => {

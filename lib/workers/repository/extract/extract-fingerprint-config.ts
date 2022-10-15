@@ -21,24 +21,24 @@ function getFilteredManagerConfig(
   const filteredConfig = {} as WorkerExtractConfig;
 
   filteredConfig.manager = manager;
-  filteredConfig.npmrc = config?.npmrc;
-  filteredConfig.npmrcMerge = config?.npmrcMerge;
+  filteredConfig.npmrc = config.npmrc;
+  filteredConfig.npmrcMerge = config.npmrcMerge;
 
   // non-mergeable config options
   filteredConfig.enabled = managerConfig?.enabled ?? config.enabled;
-  filteredConfig.ignorePaths = managerConfig?.ignorePaths ?? [];
+  filteredConfig.ignorePaths = managerConfig.ignorePaths ?? [];
   filteredConfig.includePaths =
-    managerConfig?.includePaths ?? config?.includePaths ?? [];
+    managerConfig.includePaths ?? config.includePaths ?? [];
   filteredConfig.registryAliases = {
-    ...config?.registryAliases,
-    ...(managerConfig?.registryAliases ?? {}),
+    ...config.registryAliases,
+    ...(managerConfig.registryAliases ?? {}),
   };
   filteredConfig.skipInstalls =
-    managerConfig?.skipInstalls ?? config.skipInstalls;
+    managerConfig.skipInstalls ?? config.skipInstalls;
 
   // mergeable config options
-  filteredConfig.fileMatch = [...(managerConfig?.fileMatch ?? [])].concat(
-    ...(languageConfig?.fileMatch ?? [])
+  filteredConfig.fileMatch = [...(managerConfig.fileMatch ?? [])].concat(
+    ...(languageConfig.fileMatch ?? [])
   );
 
   return filteredConfig;
@@ -56,21 +56,21 @@ export function generateFingerprintConfig(
     managerList = managerList.filter((manager) =>
       enabledManagers.includes(manager)
     );
+
+    if (enabledManagers.includes('regex') && config.regexManagers?.length) {
+      for (const manager of config.regexManagers) {
+        managerExtractConfigs.push({
+          manager: 'regex',
+          fileList: [],
+          ...manager,
+        });
+      }
+    }
   }
   finalConfig.managerList = managerList;
 
   for (const manager of managerList) {
     managerExtractConfigs.push(getFilteredManagerConfig(config, manager));
-  }
-
-  if (config.regexManagers?.length) {
-    for (const manager of config.regexManagers) {
-      managerExtractConfigs.push({
-        manager: 'regex',
-        fileList: [],
-        ...manager,
-      });
-    }
   }
 
   // need to handle this different so as to get all necessary properties of RegExManager
