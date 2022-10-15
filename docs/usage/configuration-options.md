@@ -1158,6 +1158,25 @@ Example config:
 Use an exact host for `matchHost` and not a domain (e.g. `api.github.com` as shown above and not `github.com`).
 Do not combine with `hostType` in the same rule or it won't work.
 
+### maxRequestsPerSecond
+
+In addition to `concurrentRequestLimit`, you can limit the maximum number of requests that can be made per one second.
+It can be used to set minimal delay between two requests to the same host.
+Fractional values are allowed, e.g. `0.25` means 1 request per 4 seconds.
+
+Example config:
+
+```json
+{
+  "hostRules": [
+    {
+      "matchHost": "api.github.com",
+      "maxRequestsPerSecond": 2
+    }
+  ]
+}
+```
+
 ### dnsCache
 
 Enable got [dnsCache](https://github.com/sindresorhus/got/blob/v11.5.2/readme.md#dnsCache) support.
