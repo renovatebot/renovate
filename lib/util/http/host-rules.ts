@@ -122,20 +122,13 @@ export function applyHostRules(url: string, inOptions: GotOptions): GotOptions {
 }
 
 export function getConcurrentRequestsLimit(url: string): number | null {
-  const hostRule = hostRules.find({ url });
-  const concurrentLimit = hostRule.concurrentRequestLimit;
-  return typeof concurrentLimit === 'number' && concurrentLimit > 0
-    ? concurrentLimit
-    : null;
+  const { concurrentRequestLimit: limit } = hostRules.find({ url });
+  return typeof limit === 'number' && limit > 0 ? limit : null;
 }
 
-export function getThrottleOptions(
-  url: string
-): { limit: number; interval: number } | null {
+export function getThrottleIntervalMs(url: string): number | null {
   const { maxRequestsPerSecond } = hostRules.find({ url });
-  if (!is.number(maxRequestsPerSecond)) {
-    return null;
-  }
-
-  return { limit: 1, interval: Math.ceil(1000 / maxRequestsPerSecond) };
+  return is.number(maxRequestsPerSecond)
+    ? Math.ceil(1000 / maxRequestsPerSecond)
+    : null;
 }
