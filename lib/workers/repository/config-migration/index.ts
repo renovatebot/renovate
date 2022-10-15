@@ -8,7 +8,7 @@ export async function configMigration(
   branchList: string[]
 ): Promise<void> {
   if (config.configMigration) {
-    const migratedConfigData = await MigratedDataFactory.getAsync();
+    const migratedConfigData = await MigratedDataFactory.get();
     const migrationBranch = await checkConfigMigrationBranch(
       config,
       migratedConfigData

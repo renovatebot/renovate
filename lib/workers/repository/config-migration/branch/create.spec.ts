@@ -1,21 +1,24 @@
+import type { Indent } from 'detect-indent';
 import { Fixtures } from '../../../../../test/fixtures';
-import { RenovateConfig, getConfig, platform } from '../../../../../test/util';
+import {
+  RenovateConfig,
+  getConfig,
+  partial,
+  platform,
+} from '../../../../../test/util';
 import { checkoutBranch, commitFiles } from '../../../../util/git';
 import { createConfigMigrationBranch } from './create';
 import type { MigratedData } from './migrated-data';
-import { MigratedDataFactory } from './migrated-data';
+import * as MigratedDataModule from './migrated-data';
 
 jest.mock('../../../../util/git');
-
-const formattedMigratedData = Fixtures.getJson(
-  './migrated-data-formatted.json'
-);
 
 describe('workers/repository/config-migration/branch/create', () => {
   const raw = Fixtures.getJson('./renovate.json');
   const indent = '  ';
   const renovateConfig = JSON.stringify(raw, undefined, indent) + '\n';
   const filename = 'renovate.json';
+  const prettierSpy = jest.spyOn(MigratedDataModule, 'applyPrettierFormatting');
 
   let config: RenovateConfig;
   let migratedConfigData: MigratedData;
@@ -25,15 +28,15 @@ describe('workers/repository/config-migration/branch/create', () => {
     config = getConfig();
     config.baseBranch = 'dev';
     config.defaultBranch = 'master';
-    migratedConfigData = { content: renovateConfig, filename };
+    migratedConfigData = {
+      content: renovateConfig,
+      filename,
+      indent: partial<Indent>({}),
+    };
+    prettierSpy.mockResolvedValueOnce(migratedConfigData.content);
   });
 
   describe('createConfigMigrationBranch', () => {
-    const prettierSpy = jest.spyOn(
-      MigratedDataFactory,
-      'applyPrettierFormatting'
-    );
-
     it('applies the default commit message', async () => {
       await createConfigMigrationBranch(config, migratedConfigData);
       expect(checkoutBranch).toHaveBeenCalledWith(config.defaultBranch);
@@ -185,25 +188,6 @@ describe('workers/repository/config-migration/branch/create', () => {
             },
           ],
           message,
-          platformCommit: false,
-        });
-      });
-
-      it('applies prettier formatting to the committed content', async () => {
-        const formatted = formattedMigratedData.content;
-        prettierSpy.mockResolvedValueOnce(formattedMigratedData.content);
-        await createConfigMigrationBranch(config, migratedConfigData);
-        expect(checkoutBranch).toHaveBeenCalledWith(config.defaultBranch);
-        expect(commitFiles).toHaveBeenCalledWith({
-          branchName: 'renovate/migrate-config',
-          files: [
-            {
-              type: 'addition',
-              path: 'renovate.json',
-              contents: formatted,
-            },
-          ],
-          message: 'Migrate config renovate.json',
           platformCommit: false,
         });
       });

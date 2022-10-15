@@ -1,5 +1,6 @@
+import type { Indent } from 'detect-indent';
 import { Fixtures } from '../../../../test/fixtures';
-import { getConfig, mockedFunction } from '../../../../test/util';
+import { getConfig, mockedFunction, partial } from '../../../../test/util';
 import { checkConfigMigrationBranch } from './branch';
 import { MigratedDataFactory } from './branch/migrated-data';
 import { ensureConfigMigrationPr } from './pr';
@@ -20,15 +21,16 @@ const config = {
 describe('workers/repository/config-migration/index', () => {
   beforeEach(() => {
     jest.resetAllMocks();
-    mockedFunction(MigratedDataFactory.getAsync).mockResolvedValue({
+    mockedFunction(MigratedDataFactory.get).mockResolvedValue({
       filename,
       content,
+      indent: partial<Indent>({}),
     });
   });
 
   it('does nothing when config migration is disabled', async () => {
     await configMigration({ ...config, configMigration: false }, []);
-    expect(MigratedDataFactory.getAsync).toHaveBeenCalledTimes(0);
+    expect(MigratedDataFactory.get).toHaveBeenCalledTimes(0);
     expect(checkConfigMigrationBranch).toHaveBeenCalledTimes(0);
     expect(ensureConfigMigrationPr).toHaveBeenCalledTimes(0);
   });

@@ -1,4 +1,5 @@
 import hasha from 'hasha';
+import upath from 'upath';
 import { GlobalConfig } from '../../../../config/global';
 import type { RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
@@ -11,7 +12,7 @@ import {
 import { quickStringify } from '../../../../util/stringify';
 import { getMigrationBranchName } from '../common';
 import { ConfigMigrationCommitMessageFactory } from './commit-message';
-import { MigratedDataFactory } from './migrated-data';
+import { PrettierParser, applyPrettierFormatting } from './migrated-data';
 import type { MigratedData } from './migrated-data';
 
 export async function rebaseMigrationBranch(
@@ -45,10 +46,10 @@ export async function rebaseMigrationBranch(
   const commitMessage = commitMessageFactory.getCommitMessage();
 
   await checkoutBranch(config.defaultBranch!);
-  const prettified = await MigratedDataFactory.applyPrettierFormatting();
-  if (prettified) {
-    contents = prettified;
-  }
+
+  const { content, filename, indent } = migratedConfigData;
+  const parser = upath.extname(filename).replace('.', '') as PrettierParser;
+  contents = await applyPrettierFormatting(content, parser, indent);
   return commitAndPush({
     branchName,
     files: [

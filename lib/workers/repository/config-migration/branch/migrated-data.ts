@@ -1,6 +1,6 @@
 import detectIndent from 'detect-indent';
 import JSON5 from 'json5';
-import prettier from 'prettier';
+import prettier, { BuiltInParserName } from 'prettier';
 import { migrateConfig } from '../../../../config/migration';
 import { logger } from '../../../../logger';
 import { readLocalFile } from '../../../../util/fs';
@@ -10,6 +10,7 @@ import { detectRepoFileConfig } from '../../init/merge';
 export interface MigratedData {
   content: string;
   filename: string;
+  indent: Indent;
 }
 
 interface Indent {
@@ -31,12 +32,51 @@ const prettierConfigFilenames = new Set([
   '.prettierrc.toml',
 ]);
 
+export type PrettierParser = BuiltInParserName;
+export async function applyPrettierFormatting(
+  content: string,
+  parser: PrettierParser,
+  indent?: Indent
+): Promise<string> {
+  try {
+    logger.trace('applyPrettierFormatting - START');
+    const fileList = await getFileList();
+    let prettierExists = fileList.some((file) =>
+      prettierConfigFilenames.has(file)
+    );
+
+    if (!prettierExists) {
+      try {
+        const packageJsonContent = await readLocalFile('package.json', 'utf8');
+        prettierExists =
+          packageJsonContent && JSON.parse(packageJsonContent).prettier;
+      } catch {
+        logger.warn(
+          'applyPrettierFormatting - Error processing package.json file'
+        );
+      }
+    }
+
+    if (!prettierExists) {
+      return content;
+    }
+    const options = {
+      parser,
+      tabWidth: indent?.amount === 0 ? 2 : indent?.amount,
+      useTabs: indent?.type === 'tab',
+    };
+
+    return prettier.format(content, options);
+  } finally {
+    logger.trace('applyPrettierFormatting - END');
+  }
+}
+
 export class MigratedDataFactory {
   // singleton
   private static data: MigratedData | null;
-  private static indent: Indent;
 
-  public static async getAsync(): Promise<MigratedData | null> {
+  static async get(): Promise<MigratedData | null> {
     if (this.data) {
       return this.data;
     }
@@ -50,51 +90,7 @@ export class MigratedDataFactory {
     return this.data;
   }
 
-  public static async applyPrettierFormatting(): Promise<string | null> {
-    try {
-      logger.trace('applyPrettierFormatting() - START');
-      if (!this.data) {
-        return null;
-      }
-
-      const { content, filename } = this.data;
-      const indent = this.indent;
-      const fileList = await getFileList();
-      let prettierExists = fileList.some((file) =>
-        prettierConfigFilenames.has(file)
-      );
-
-      if (!prettierExists) {
-        try {
-          const packageJsonContent = await readLocalFile(
-            'package.json',
-            'utf8'
-          );
-          prettierExists =
-            packageJsonContent && JSON.parse(packageJsonContent).prettier;
-        } catch {
-          logger.warn(
-            'applyPrettierFormatting() - Error processing package.json file'
-          );
-        }
-      }
-
-      if (!prettierExists) {
-        return content;
-      }
-      const options = {
-        parser: filename.endsWith('.json5') ? 'json5' : 'json',
-        tabWidth: indent.amount === 0 ? 2 : indent.amount,
-        useTabs: indent.type === 'tab',
-      };
-
-      return prettier.format(content, options);
-    } finally {
-      logger.trace('applyPrettierFormatting() - END');
-    }
-  }
-
-  public static reset(): void {
+  static reset(): void {
     this.data = null;
   }
 
@@ -118,8 +114,8 @@ export class MigratedDataFactory {
 
       // indent defaults to 2 spaces
       // TODO #7154
-      this.indent = detectIndent(raw!);
-      const indentSpace = this.indent.indent ?? '  ';
+      const indent = detectIndent(raw!);
+      const indentSpace = indent.indent ?? '  ';
       const filename = configFileName!;
       let content: string;
 
@@ -133,7 +129,7 @@ export class MigratedDataFactory {
         content += '\n';
       }
 
-      res = { content, filename };
+      res = { content, filename, indent };
     } catch (err) {
       logger.debug(
         { err },

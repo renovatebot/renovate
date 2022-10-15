@@ -1,13 +1,15 @@
+import type { Indent } from 'detect-indent';
 import { Fixtures } from '../../../../../test/fixtures';
 import {
   RenovateConfig,
   getConfig,
   git,
+  partial,
   platform,
 } from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
 import { checkoutBranch, commitFiles } from '../../../../util/git';
-import { MigratedDataFactory } from './migrated-data';
+import * as MigratedDataModule from './migrated-data';
 import type { MigratedData } from './migrated-data';
 import { rebaseMigrationBranch } from './rebase';
 
@@ -18,10 +20,7 @@ const formattedMigratedData = Fixtures.getJson(
 );
 
 describe('workers/repository/config-migration/branch/rebase', () => {
-  const prettierSpy = jest.spyOn(
-    MigratedDataFactory,
-    'applyPrettierFormatting'
-  );
+  const prettierSpy = jest.spyOn(MigratedDataModule, 'applyPrettierFormatting');
 
   beforeAll(() => {
     GlobalConfig.set({
@@ -41,7 +40,11 @@ describe('workers/repository/config-migration/branch/rebase', () => {
     beforeEach(() => {
       jest.resetAllMocks();
       GlobalConfig.reset();
-      migratedConfigData = { content: renovateConfig, filename };
+      migratedConfigData = {
+        content: renovateConfig,
+        filename,
+        indent: partial<Indent>({}),
+      };
       config = {
         ...getConfig(),
         repository: 'some/repo',
