@@ -388,9 +388,15 @@ export function generateBranchConfig(
     .map(getTableValues)
     .filter((x): x is string[] => is.array(x, is.string));
   if (tableRows.length) {
-    let table: string[][] = [];
+    const table: string[][] = [];
     table.push(['datasource', 'package', 'from', 'to']);
-    table = table.concat(tableRows!);
+    const seenRows: Set<string> = new Set();
+    tableRows.forEach((row) => {
+      if (!seenRows.has(row.join())) {
+        seenRows.add(row.join());
+        table.push(row);
+      }
+    });
     config.commitMessage += '\n\n' + mdTable(table) + '\n';
   }
   return config;
