@@ -3,7 +3,7 @@ import hasha from 'hasha';
 import { logger } from '../../../logger';
 import * as packageCache from '../../../util/cache/package';
 import { Http } from '../../../util/http';
-import * as p from '../../../util/promises';
+import { map as pMap } from '../../../util/promises';
 import { regEx } from '../../../util/regex';
 import type { UpdateDependencyConfig } from '../types';
 import { findCodeFragment, patchCodeAtFragments, updateCode } from './common';
@@ -89,7 +89,7 @@ async function getHashFromUrl(url: string): Promise<string | null> {
 
 async function getHashFromUrls(urls: string[]): Promise<string | null> {
   const hashes = (
-    await p.map(urls, (url) => getHashFromUrl(massageUrl(url)))
+    await pMap(urls, (url) => getHashFromUrl(massageUrl(url)))
   ).filter(is.truthy);
   if (!hashes.length) {
     logger.debug({ urls }, 'Could not calculate hash for URLs');

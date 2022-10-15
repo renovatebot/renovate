@@ -1,7 +1,7 @@
 import { updateCode } from './common';
 
 describe('modules/manager/bazel/common', () => {
-  describe('updateFragment', () => {
+  describe('updateCode', () => {
     it('returns input for invalid', () => {
       const input = `!@#`;
       const output = updateCode(input, [0], 'foobar');
