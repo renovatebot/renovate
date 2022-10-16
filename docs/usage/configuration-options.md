@@ -1163,6 +1163,7 @@ Do not combine with `hostType` in the same rule or it won't work.
 In addition to `concurrentRequestLimit`, you can limit the maximum number of requests that can be made per one second.
 It can be used to set minimal delay between two requests to the same host.
 Fractional values are allowed, e.g. `0.25` means 1 request per 4 seconds.
+Default value `0` means no limit.
 
 Example config:
 

@@ -2113,7 +2113,7 @@ const options: RenovateOptions[] = [
     type: 'integer',
     stage: 'repository',
     parent: 'hostRules',
-    default: null,
+    default: 0,
     cli: false,
     env: false,
   },
