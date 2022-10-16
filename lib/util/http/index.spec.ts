@@ -436,11 +436,28 @@ describe('util/http/index', () => {
     });
   });
 
-  it('limits request rate by host', async () => {
-    hostRules.add({ matchHost: 'renovate.com', maxRequestsPerSecond: 1 });
-    httpMock.scope(baseUrl).get('/foo').reply(200, 'bar');
-    await expect(http.get('http://renovate.com/foo')).resolves.toMatchObject({
-      body: 'bar',
+  describe('Throttling', () => {
+    it('works without throttling', async () => {
+      httpMock.scope(baseUrl).get('/foo').twice().reply(200, 'bar');
+
+      const t1 = Date.now();
+      await http.get('http://renovate.com/foo');
+      await http.get('http://renovate.com/foo');
+      const t2 = Date.now();
+
+      expect(t2 - t1).toBeLessThan(125);
+    });
+
+    it('limits request rate by host', async () => {
+      httpMock.scope(baseUrl).get('/foo').twice().reply(200, 'bar');
+      hostRules.add({ matchHost: 'renovate.com', maxRequestsPerSecond: 8 });
+
+      const t1 = Date.now();
+      await http.get('http://renovate.com/foo');
+      await http.get('http://renovate.com/foo');
+      const t2 = Date.now();
+
+      expect(t2 - t1).toBeGreaterThanOrEqual(125);
     });
   });
 });
