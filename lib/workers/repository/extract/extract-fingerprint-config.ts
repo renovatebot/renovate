@@ -56,21 +56,22 @@ export function generateFingerprintConfig(
     managerList = managerList.filter((manager) =>
       enabledManagers.includes(manager)
     );
-
-    if (enabledManagers.includes('regex') && config.regexManagers?.length) {
-      for (const manager of config.regexManagers) {
-        managerExtractConfigs.push({
-          manager: 'regex',
-          fileList: [],
-          ...manager,
-        });
-      }
-    }
   }
   finalConfig.managerList = managerList;
 
   for (const manager of managerList) {
-    managerExtractConfigs.push(getFilteredManagerConfig(config, manager));
+    if (manager === 'regex') {
+      for (const managerConfig of config.regexManagers ?? []) {
+        managerExtractConfigs.push({
+          manager,
+          fileList: [],
+          enabled: true,
+          ...managerConfig,
+        });
+      }
+    } else {
+      managerExtractConfigs.push(getFilteredManagerConfig(config, manager));
+    }
   }
 
   // need to handle this different so as to get all necessary properties of RegExManager

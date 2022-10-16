@@ -9,8 +9,9 @@ describe('workers/repository/extract/extract-fingerprint-config', () => {
       registryAliases: {
         stable: 'http://some.link',
       },
+      includePaths: ['some-path'],
       npm: { fileMatch: ['hero.json'] },
-      enabledManagers: ['npm'],
+      enabledManagers: ['npm', 'regex'],
     });
     config.regexManagers = [
       {
@@ -22,14 +23,14 @@ describe('workers/repository/extract/extract-fingerprint-config', () => {
     ];
     const fingerprintConfig = generateFingerprintConfig(config);
 
-    expect(fingerprintConfig.managerList).toEqual(['npm']);
+    expect(fingerprintConfig.managerList).toEqual(['npm', 'regex']);
     expect(
       fingerprintConfig.managers.find((manager) => manager.manager === 'npm')
     ).toEqual({
       enabled: true,
       fileMatch: ['(^|/)package\\.json$', 'hero.json'],
       ignorePaths: [],
-      includePaths: [],
+      includePaths: ['some-path'],
       manager: 'npm',
       npmrc: null,
       npmrcMerge: false,
@@ -40,7 +41,15 @@ describe('workers/repository/extract/extract-fingerprint-config', () => {
     });
     expect(
       fingerprintConfig.managers.find((manager) => manager.manager === 'regex')
-    ).toBeUndefined();
+    ).toEqual({
+      fileMatch: ['js', '***$}{]]['],
+      fileList: [],
+      matchStrings: ['^(?<depName>foo)(?<currentValue>bar)$'],
+      datasourceTemplate: 'maven',
+      versioningTemplate: 'gradle',
+      enabled: true,
+      manager: 'regex',
+    });
   });
 
   it('filter with all managers enabled', () => {
@@ -81,16 +90,6 @@ describe('workers/repository/extract/extract-fingerprint-config', () => {
     });
     expect(
       fingerprintConfig.managers.find((manager) => manager.manager === 'regex')
-    ).toEqual({
-      enabled: true,
-      fileMatch: [],
-      ignorePaths: [],
-      includePaths: [],
-      manager: 'regex',
-      npmrc: 'some-string',
-      npmrcMerge: true,
-      registryAliases: {},
-      skipInstalls: null,
-    });
+    ).toBeUndefined();
   });
 });
