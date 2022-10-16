@@ -437,7 +437,12 @@ describe('util/http/index', () => {
   });
 
   describe('Throttling', () => {
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
     it('works without throttling', async () => {
+      jest.useFakeTimers({ advanceTimers: 1 });
       httpMock.scope(baseUrl).get('/foo').twice().reply(200, 'bar');
 
       const t1 = Date.now();
@@ -445,19 +450,21 @@ describe('util/http/index', () => {
       await http.get('http://renovate.com/foo');
       const t2 = Date.now();
 
-      expect(t2 - t1).toBeLessThan(125);
+      expect(t2 - t1).toBeLessThan(100);
     });
 
     it('limits request rate by host', async () => {
+      jest.useFakeTimers({ advanceTimers: true });
       httpMock.scope(baseUrl).get('/foo').twice().reply(200, 'bar');
-      hostRules.add({ matchHost: 'renovate.com', maxRequestsPerSecond: 8 });
+      hostRules.add({ matchHost: 'renovate.com', maxRequestsPerSecond: 0.25 });
 
       const t1 = Date.now();
       await http.get('http://renovate.com/foo');
+      jest.advanceTimersByTime(4000);
       await http.get('http://renovate.com/foo');
       const t2 = Date.now();
 
-      expect(t2 - t1).toBeGreaterThanOrEqual(125);
+      expect(t2 - t1).toBeGreaterThanOrEqual(4000);
     });
   });
 });
