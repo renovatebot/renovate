@@ -26,19 +26,19 @@ function getFilteredManagerConfig(
 
   // non-mergeable config options
   filteredConfig.enabled = managerConfig?.enabled ?? config.enabled;
-  filteredConfig.ignorePaths = managerConfig.ignorePaths ?? [];
+  filteredConfig.ignorePaths = managerConfig?.ignorePaths ?? [];
   filteredConfig.includePaths =
-    managerConfig.includePaths ?? config.includePaths ?? [];
+    managerConfig?.includePaths ?? config.includePaths ?? [];
   filteredConfig.registryAliases = {
     ...config.registryAliases,
-    ...(managerConfig.registryAliases ?? {}),
+    ...(managerConfig?.registryAliases ?? {}),
   };
   filteredConfig.skipInstalls =
-    managerConfig.skipInstalls ?? config.skipInstalls;
+    managerConfig?.skipInstalls ?? config.skipInstalls;
 
   // mergeable config options
-  filteredConfig.fileMatch = [...(managerConfig.fileMatch ?? [])].concat(
-    ...(languageConfig.fileMatch ?? [])
+  filteredConfig.fileMatch = [...(managerConfig?.fileMatch ?? [])].concat(
+    ...(languageConfig?.fileMatch ?? [])
   );
 
   return filteredConfig;
