@@ -9,8 +9,16 @@ describe('workers/repository/extract/extract-fingerprint-config', () => {
       registryAliases: {
         stable: 'http://some.link',
       },
-      includePaths: ['some-path'],
-      npm: { fileMatch: ['hero.json'] },
+      ignorePaths: ['ignore-path-1'],
+      includePaths: ['include-path-1'],
+      npm: {
+        fileMatch: ['hero.json'],
+        ignorePaths: ['ignore-path-2'],
+        includePaths: ['include-path-2'],
+        registryAliases: {
+          notStable: 'http://some.link.2',
+        },
+      },
       enabledManagers: ['npm', 'regex'],
     });
     config.regexManagers = [
@@ -29,13 +37,14 @@ describe('workers/repository/extract/extract-fingerprint-config', () => {
     ).toEqual({
       enabled: true,
       fileMatch: ['(^|/)package\\.json$', 'hero.json'],
-      ignorePaths: [],
-      includePaths: ['some-path'],
+      ignorePaths: ['ignore-path-2'],
+      includePaths: ['include-path-2'],
       manager: 'npm',
       npmrc: null,
       npmrcMerge: false,
       registryAliases: {
         stable: 'http://some.link',
+        notStable: 'http://some.link.2',
       },
       skipInstalls: null,
     });

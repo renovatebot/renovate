@@ -24,19 +24,19 @@ function getFilteredManagerConfig(
   filteredConfig.npmrc = config.npmrc;
   filteredConfig.npmrcMerge = config.npmrcMerge;
 
-  // non-mergeable config options
+  //  non-mergeable so manager level config is given preference
   filteredConfig.enabled = managerConfig?.enabled ?? config.enabled;
   filteredConfig.ignorePaths = managerConfig?.ignorePaths ?? [];
   filteredConfig.includePaths =
     managerConfig?.includePaths ?? config.includePaths ?? [];
+  filteredConfig.skipInstalls =
+    managerConfig?.skipInstalls ?? config.skipInstalls;
+
+  // mergeable so manager level config is given preference
   filteredConfig.registryAliases = {
     ...config.registryAliases,
     ...(managerConfig?.registryAliases ?? {}),
   };
-  filteredConfig.skipInstalls =
-    managerConfig?.skipInstalls ?? config.skipInstalls;
-
-  // mergeable config options
   filteredConfig.fileMatch = [...(managerConfig?.fileMatch ?? [])].concat(
     ...(languageConfig?.fileMatch ?? [])
   );
