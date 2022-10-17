@@ -53,7 +53,7 @@ Here's an example config.js:
   endpoint: 'https://git-codecommit.{your region}.amazonaws.com/',
   platform: 'codecommit',
   repositories: ['{your repository names separated by comma}'],
-  username: '{your access key id}',
+  username: 'ACCESS_KEY_ID_GOES_HERE',
   password: 'SECRET_ACCESS_KEY_GOES_HERE',
   gitAuthor: 'your_email@domain',
   prConcurrentLimit: 10,
