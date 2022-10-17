@@ -15,20 +15,29 @@ export interface Target extends Record<string, TargetAttribute> {
   name: string;
 }
 
-export type PathElement = string | number;
-export type MetaPath = PathElement[];
-
-export interface MetaData {
+interface FragmentBase {
+  value: string;
   offset: number;
-  length: number;
 }
 
-export interface RuleMeta {
-  path: MetaPath;
-  data: MetaData;
+export interface ArrayFragment extends FragmentBase {
+  type: 'array';
+  children: Fragment[];
 }
 
-export interface ParsedResult {
-  targets: Target[];
-  meta: RuleMeta[];
+export interface RecordFragment extends FragmentBase {
+  type: 'record';
+  children: Record<string, Fragment>;
 }
+
+export interface StringFragment extends FragmentBase {
+  type: 'string';
+}
+
+export type NestedFragment = ArrayFragment | RecordFragment;
+export type Fragment = NestedFragment | StringFragment;
+
+export type FragmentData =
+  | string
+  | FragmentData[]
+  | { [k: string]: FragmentData };

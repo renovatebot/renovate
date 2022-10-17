@@ -382,6 +382,7 @@ const options: RenovateOptions[] = [
     globalOnly: true,
     type: 'string',
     default: null,
+    stage: 'global',
   },
   // Onboarding
   {
@@ -1900,6 +1901,7 @@ const options: RenovateOptions[] = [
     default: [],
     allowedValues: [
       'bundlerConservative',
+      'helmUpdateSubChartArchives',
       'gomodMassage',
       'gomodUpdateImportPaths',
       'gomodTidy',
