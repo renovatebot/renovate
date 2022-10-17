@@ -44,6 +44,13 @@ function parseRepositories(
 
         switch (repo.type) {
           case 'vcs':
+          case 'bitbucket':
+          case 'github':
+          case 'gitlab':
+          case 'perforce':
+          case 'fossil':
+          case 'svn':
+          case 'hg':
           case 'git':
             repositories[name!] = repo;
             break;
