@@ -32,7 +32,7 @@ export function extractPackageFile(content: string): PackageFile | null {
           const gitDepName = gitPluginName.replace(regEx('\\.git$'), '');
           const dep: PackageDependency = {
             depName: gitDepName,
-            currentValue: currentValue,
+            currentValue,
             registryUrls: ['https://' + registry],
             datasource: GithubTagsDatasource.id,
           };

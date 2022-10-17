@@ -236,7 +236,9 @@ export async function lookupUpdates(
         config,
         currentVersion!,
         latestVersion!,
-        allVersions,
+        config.rangeStrategy === 'in-range-only'
+          ? allSatisfyingVersions
+          : allVersions,
         versioning
       ).filter(
         (v) =>

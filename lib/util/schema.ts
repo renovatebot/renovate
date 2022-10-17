@@ -44,14 +44,22 @@ export function reportErrors(): void {
   memCache.set('schema-errors', null);
 }
 
-export function checkSchema<T extends z.ZodSchema>(
+export function match<T extends z.ZodSchema>(
   schema: T,
-  input: unknown
+  input: unknown,
+  onError?: 'warn' | 'throw'
 ): input is z.infer<T> {
   const res = schema.safeParse(input);
   const { success } = res;
   if (!success) {
-    collectError(schema, res.error);
+    if (onError === 'warn') {
+      collectError(schema, res.error);
+    }
+
+    if (onError === 'throw') {
+      throw res.error;
+    }
+
     return false;
   }
 
