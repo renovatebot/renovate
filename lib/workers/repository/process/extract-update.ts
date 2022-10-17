@@ -1,3 +1,4 @@
+// TODO #7154
 import is from '@sindresorhus/is';
 import type { RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';

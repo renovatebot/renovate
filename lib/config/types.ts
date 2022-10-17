@@ -180,7 +180,7 @@ export interface RegexManagerTemplates {
 export interface RegExManager extends RegexManagerTemplates {
   fileMatch: string[];
   matchStrings: string[];
-  matchStringsStrategy?: MatchStringsStrategy;
+  matchStringsStrategy?: string;
   autoReplaceStringTemplate?: string;
 }
 
@@ -245,7 +245,6 @@ export interface RenovateConfig
   secrets?: Record<string, string>;
 
   constraints?: Record<string, string>;
-  skipInstalls?: boolean;
 }
 
 export interface AllConfig
