@@ -49,7 +49,8 @@ Run Renovate with the configuration file, and it will create an onboarding Pull 
 
 Here's an example config.js:
 
-```module.exports = {
+```js
+module.exports = {
   endpoint: 'https://git-codecommit.us-east-1.amazonaws.com/',
   platform: 'codecommit',
   repositories: ['abc/def', 'abc/ghi'],
