@@ -55,7 +55,7 @@ Here's an example config.js:
   repositories: ['{your repository names separated by comma}'],
   username: '{your access key id}',
   password: '{your secret access key}',
-  gitAuthor: '{Self-hosted Renovate Bot <your_email@domain>}',
+  gitAuthor: 'your_email@domain',
   prConcurrentLimit: 10,
 };
 ```
