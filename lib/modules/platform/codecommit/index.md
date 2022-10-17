@@ -52,7 +52,7 @@ Here's an example config.js:
 ```module.exports = {
   endpoint: 'https://git-codecommit.{your region}.amazonaws.com/',
   platform: 'codecommit',
-  repositories: ['{your repository names separated by comma}'],
+  repositories: ['abc/def', 'abc/ghi'],
   username: 'ACCESS_KEY_ID_GOES_HERE',
   password: 'SECRET_ACCESS_KEY_GOES_HERE',
   gitAuthor: 'your_email@domain',
