@@ -42,6 +42,7 @@ export function add(params: HostRule): void {
 
   const confidentialFields: (keyof HostRule)[] = ['password', 'token'];
   if (rule.matchHost) {
+    rule.matchHost = massageUrl(rule.matchHost);
     const parsedUrl = parseUrl(rule.matchHost);
     rule.resolvedHost = parsedUrl?.hostname ?? rule.matchHost;
     confidentialFields.forEach((field) => {
@@ -194,4 +195,13 @@ export function clear(): void {
   logger.debug('Clearing hostRules');
   hostRules = [];
   sanitize.clearSanitizedSecretsList();
+}
+
+function massageUrl(url: string): string {
+  if (!url.includes('://') && url.includes('/')) {
+    logger.debug(`URL:"${url}" is missing a scheme prepending "https://"`);
+    return 'https://' + url;
+  } else {
+    return url;
+  }
 }

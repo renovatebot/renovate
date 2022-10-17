@@ -58,6 +58,18 @@ describe('util/host-rules', () => {
         username: 'user1',
       });
     });
+
+    it('handles missing url scheme when path exists', () => {
+      add({
+        matchHost: 'some.endpoint/',
+        username: 'user1',
+        password: 'pass1',
+      });
+      expect(find({ url: 'https://some.endpoint/v3/' })).toEqual({
+        password: 'pass1',
+        username: 'user1',
+      });
+    });
   });
 
   describe('find()', () => {
