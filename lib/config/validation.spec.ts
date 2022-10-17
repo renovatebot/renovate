@@ -550,7 +550,7 @@ describe('config/validation', () => {
         registryAliases: {
           sample: {
             example1: 'http://www.example.com',
-          } as unknown as string, // this is an intentional wrong config to check error message
+          },
         },
       };
       const { warnings, errors } = await configValidation.validateConfig(

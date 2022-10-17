@@ -230,7 +230,6 @@ export interface RenovateConfig
 
   defaultRegistryUrls?: string[];
   registryUrls?: string[];
-  registryAliases?: Record<string, string>;
 
   repoIsOnboarded?: boolean;
   repoIsActivated?: boolean;

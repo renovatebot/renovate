@@ -2,7 +2,6 @@ import { git, mocked } from '../../../../test/util';
 import type { PackageFile } from '../../../modules/manager/types';
 import * as _repositoryCache from '../../../util/cache/repository';
 import { fingerprint } from '../../../util/fingerprint';
-import { generateFingerprintConfig } from '../extract/extract-fingerprint-config';
 import * as _branchify from '../updates/branchify';
 import { extract, lookup, update } from './extract-update';
 
@@ -60,13 +59,6 @@ describe('workers/repository/process/extract-update', () => {
         baseBranches: ['master', 'dev'],
         repoIsOnboarded: true,
         suppressNotifications: ['deprecationWarningIssues'],
-        enabledManagers: ['npm'],
-        javascript: {
-          labels: ['js'],
-        },
-        npm: {
-          addLabels: 'npm',
-        },
       };
       git.checkoutBranch.mockResolvedValueOnce('123test');
       repositoryCache.getCache.mockReturnValueOnce({ scan: {} });
@@ -85,7 +77,7 @@ describe('workers/repository/process/extract-update', () => {
         scan: {
           master: {
             sha: '123test',
-            configHash: fingerprint(generateFingerprintConfig(config)),
+            configHash: fingerprint(config),
             packageFiles,
           },
         },
