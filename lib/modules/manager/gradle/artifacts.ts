@@ -18,8 +18,10 @@ import {
   extractGradleVersion,
   getJavaConstraint,
   gradleWrapperFileName,
+  prepareGradleCommand,
 } from '../gradle-wrapper/utils';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
+import { isGradleBuildFile } from './utils';
 
 async function getUpdatedLockfiles(
   oldLockFileContentMap: Record<string, string | null>
@@ -102,12 +104,25 @@ export async function updateArtifacts({
     );
     return null;
   }
+
+  if (
+    config.isLockFileMaintenance &&
+    (!isGradleBuildFile(packageFileName) ||
+      dirname(packageFileName) !== dirname(gradlewFile))
+  ) {
+    logger.trace(
+      'No build.gradle(.kts) file or not in root project - skipping lock file maintenance'
+    );
+    return null;
+  }
+
   logger.debug('Updating found Gradle dependency lockfiles');
 
   try {
     const oldLockFileContentMap = await getFileContentMap(lockFiles);
 
     await writeLocalFile(packageFileName, newPackageFileContent);
+    await prepareGradleCommand(gradlewFile);
 
     let cmd = `${gradlewName} --console=plain -q`;
     const execOptions: ExecOptions = {
