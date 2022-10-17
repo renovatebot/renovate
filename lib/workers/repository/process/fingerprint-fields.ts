@@ -65,7 +65,6 @@ export const actualBranchConfigFields = [
   'body',
 
   // used in compiling commit message
-  // these won't be necessary as we want diffferent commit message in new PRs rather than older ones
   'isLockfileUpdate',
   'isMajor',
   'isPatch',
@@ -107,21 +106,13 @@ export const actualBranchConfigFields = [
   'versioning',
   'versions',
 
-  // -- pr and platform related
-  'productLinks',
-  'ignoreTests',
-  'branchAutomergeFailureMessage',
-  'pruneBranchAfterAutomerge',
-  'automergeComment',
-  'automergeStrategy',
-
   // ensure Pr
   'dependencyDashboardChecks',
   'prNotPendingHours',
   'prBlockedBy',
   'hasReleaseNotes',
   'assignAutomerge',
-  'committedFiles', // only found once in code not sure if it is necessary
+  'committedFiles', // only happened to find once in the code not sure if it is required.
   'updateType',
   'draftPR',
   'assignees',
@@ -138,6 +129,13 @@ export const actualBranchConfigFields = [
   'stopUpdating',
   'prFooter',
   'prBodyTemplate',
+
+  'productLinks',
+  'ignoreTests',
+  'branchAutomergeFailureMessage',
+  'pruneBranchAfterAutomerge',
+  'automergeComment',
+  'automergeStrategy',
 ];
 
 export const actualFingerprintConfigFields = [
@@ -145,5 +143,4 @@ export const actualFingerprintConfigFields = [
   'branchName',
   'upgrades',
   'packageFiles',
-  'excludeCommitPaths',
 ];
