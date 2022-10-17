@@ -331,13 +331,9 @@ export function getCodeCommitUrl(
 
   let username = `${accessKeyId}${
     credentials.sessionToken ? `%${credentials.sessionToken}` : ''
-  }\n`;
+  }`;
 
-  // massaging username with the session token
-  // istanbul ignore if
-  if (username.includes('\n')) {
-    username = username.replace(/\n|\r/g, '');
-  }
+  // massaging username with the session token,
   // istanbul ignore if
   if (username.includes('/')) {
     username = username.replace(/\//g, '%2F');

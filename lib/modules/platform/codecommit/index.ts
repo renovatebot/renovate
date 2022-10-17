@@ -88,10 +88,13 @@ export async function initPlatform({
   };
   config.credentials = credentials;
 
+  // If any of the below fails, it will throw an exception stopping the program.
+  client.buildCodeCommitClient(region, credentials);
+  // To check if we have permission to codecommit
+  await client.listRepositories();
+
   initIamClient(region, credentials);
   config.userArn = await getUserArn();
-
-  client.buildCodeCommitClient(region, credentials);
 
   const platformConfig: PlatformResult = {
     endpoint: endpoint ?? `https://git-codecommit.${region}.amazonaws.com/`,
@@ -318,6 +321,7 @@ export async function getJsonFile(
   const raw = await getRawFile(fileName, repoName, branchOrTag);
   return raw ? JSON5.parse(raw) : null;
 }
+
 export async function getRawFile(
   fileName: string,
   repoName?: string,

@@ -4,6 +4,7 @@ import {
   IAMClient,
 } from '@aws-sdk/client-iam';
 import type { Credentials } from '@aws-sdk/types';
+import { logger } from '../../../logger';
 import { regEx } from '../../../util/regex';
 
 let iam: IAMClient;
@@ -34,9 +35,15 @@ export async function getUserArn(): Promise<string> {
   } catch (err) {
     const match = userRe.exec(err.message);
     if (match) {
+      logger.warn(
+        'It is recommended to add "IAMReadOnlyAccess" policy to this IAM user'
+      );
       res = match.groups?.arn;
     }
     if (!res) {
+      logger.warn(
+        'Failed to get IAM user info, Make sure your user has "IAMReadOnlyAccess" policy'
+      );
       throw err;
     }
   }

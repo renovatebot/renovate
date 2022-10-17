@@ -25,7 +25,10 @@ Let Renovate use AWS CodeCommit access keys by doing one of the following:
 
 - `AWS_SESSION_TOKEN`: your AWS Session token if you have one
 
-Make sure to attach the [AWSCodeCommitFullAccess policy](https://docs.aws.amazon.com/codecommit/latest/userguide/security-iam-awsmanpol.html#managed-policies-full) to your IAM User.
+## AWS IAM security policies
+
+- Make sure to attach the [AWSCodeCommitFullAccess](https://docs.aws.amazon.com/codecommit/latest/userguide/security-iam-awsmanpol.html#managed-policies-full) policy to your IAM User.
+- It is recommended to also attach the [IAMReadOnlyAccess](https://docs.aws.amazon.com/IAM/latest/UserGuide/security-iam-awsmanpol.html) policy to your IAM User
 
 ## Running Renovate
 
