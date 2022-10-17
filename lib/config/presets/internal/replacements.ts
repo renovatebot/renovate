@@ -10,6 +10,7 @@ export const presets: Record<string, Preset> = {
   all: {
     description: 'All replacements.',
     extends: [
+      'replacements:apollo-server-to-scoped',
       'replacements:babel-eslint-to-eslint-parser',
       'replacements:cucumber-to-scoped',
       'replacements:fastify-to-scoped',
@@ -25,6 +26,64 @@ export const presets: Record<string, Preset> = {
       'replacements:renovate-pep440-to-renovatebot-pep440',
       'replacements:rollup-node-resolve-to-scoped',
       'replacements:xmldom-to-scoped',
+    ],
+  },
+  'apollo-server-to-scoped': {
+    description: '`apollo-server` packages became scoped',
+    packageRules: [
+      {
+        matchCurrentVersion: '>=3.10.3',
+        matchDatasources: ['npm'],
+        matchPackageNames: [
+          'apollo-server',
+          'apollo-server-core',
+          'apollo-server-express',
+        ],
+        replacementName: '@apollo/server',
+        replacementVersion: '4.0.0',
+      },
+      {
+        matchCurrentVersion: '>=3.3.1',
+        matchDatasources: ['npm'],
+        matchPackageNames: ['apollo-server-errors'],
+        replacementName: '@apollo/server',
+        replacementVersion: '4.0.0',
+      },
+      {
+        matchCurrentVersion: '>=3.6.3',
+        matchDatasources: ['npm'],
+        matchPackageNames: ['apollo-server-types', 'apollo-server-plugin-base'],
+        replacementName: '@apollo/server',
+        replacementVersion: '4.0.0',
+      },
+      {
+        matchCurrentVersion: '>=3.7.0',
+        matchDatasources: ['npm'],
+        matchPackageNames: ['apollo-datasource-rest'],
+        replacementName: '@apollo/datasource-rest',
+        replacementVersion: '4.0.0',
+      },
+      {
+        matchCurrentVersion: '>=3.7.1',
+        matchDatasources: ['npm'],
+        matchPackageNames: ['apollo-server-plugin-response-cache'],
+        replacementName: '@apollo/server-plugin-response-cache',
+        replacementVersion: '4.0.0',
+      },
+      {
+        matchCurrentVersion: '>=3.5.1',
+        matchDatasources: ['npm'],
+        matchPackageNames: ['apollo-server-plugin-operation-registry'],
+        replacementName: '@apollo/server-plugin-operation-registry',
+        replacementVersion: '3.5.6',
+      },
+      {
+        matchCurrentVersion: '>=3.3.3',
+        matchDatasources: ['npm'],
+        matchPackageNames: ['apollo-reporting-protobuf'],
+        replacementName: '@apollo/usage-reporting-protobuf',
+        replacementVersion: '4.0.0',
+      },
     ],
   },
   'babel-eslint-to-eslint-parser': {
@@ -578,13 +637,47 @@ const muiReplacement: Replacement[] = [
 const mui: PresetTemplate = {
   description:
     'The `material-ui` monorepo org was renamed from `@material-ui` to `@mui`.',
-  packageRules: {
-    matchCurrentVersion: '>=4.0.0 <5.0.0',
-    matchDatasources: ['npm'],
-    replacements: muiReplacement,
-    replacementVersion: '5.0.0',
-  },
+  packageRules: [
+    {
+      matchCurrentVersion: '>=4.0.0 <5.0.0',
+      matchDatasources: ['npm'],
+      replacements: muiReplacement,
+      replacementVersion: '5.0.0',
+    },
+  ],
   title: 'material-ui-to-mui',
 };
 
-addPresets(presets, mui);
+const messageFormat: PresetTemplate = {
+  description:
+    'The `messageformat` monorepo package naming scheme changed from `messageFormat-{{package}}`-to-`@messageformat/{{package}}`.',
+  packageRules: [
+    {
+      matchCurrentVersion: '>=2.0.0 <3.0.0',
+      matchDatasources: ['npm'],
+      replacements: [
+        [['messageformat-cli'], '@messageformat/cli'],
+        [['messageformat'], '@messageformat/core'],
+      ],
+      replacementVersion: '3.0.0',
+    },
+    {
+      matchCurrentVersion: '>=0.4.0 <1.0.0',
+      matchDatasources: ['npm'],
+      replacements: [
+        [['messageformat-convert'], '@messageformat/convert'],
+        [['react-message-context'], '@messageformat/react'],
+      ],
+      replacementVersion: '1.0.0',
+    },
+    {
+      matchCurrentVersion: '>=4.0.0 <5.0.0',
+      matchDatasources: ['npm'],
+      replacements: [[['messageformat-parser'], '@messageformat/parser']],
+      replacementVersion: '5.0.0',
+    },
+  ],
+  title: 'messageFormat-{{package}}-to-@messageformat/{{package}}',
+};
+
+addPresets(presets, messageFormat, mui);

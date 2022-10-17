@@ -120,7 +120,10 @@ export function updateDependency({
         }
       }
     }
-    if (lineToChange.endsWith('+incompatible')) {
+    if (
+      lineToChange.endsWith('+incompatible') &&
+      !upgrade.newValue?.endsWith('+incompatible')
+    ) {
       let toAdd = '+incompatible';
 
       if (upgrade.updateType === 'major' && upgrade.newMajor! >= 2) {
