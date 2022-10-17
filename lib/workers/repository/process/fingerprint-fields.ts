@@ -30,10 +30,6 @@ export const actualBranchConfigFields = [
   'automerge',
   'packageFiles',
   'allowedPostUpgradeCommands',
-  'fileFilters',
-  'manager',
-  'postUpgradeTasks',
-  'releaseTimestamp',
   'commitBody',
   'fetchReleaseNotes',
   'commitMessage',
@@ -136,6 +132,27 @@ export const actualBranchConfigFields = [
   'pruneBranchAfterAutomerge',
   'automergeComment',
   'automergeStrategy',
+
+  'constraints',
+  'composerIgnorePlatformReqs',
+  'ignoreScripts',
+  'ignorePlugins',
+  'isLockFileMaintenance',
+  'updateLockFiles',
+  'transitiveRemediation',
+  'npmrc',
+  'reuselockFiles',
+  'npmLock',
+  'yarnLock',
+  'skipInstalls',
+  'managerData',
+  'postUpdateOptions',
+
+  // post upgrade tasks
+  'manager',
+  'postUpgradeTasks',
+  'releaseTimestamp',
+  'fileFilters',
 ];
 
 export const actualFingerprintConfigFields = [
