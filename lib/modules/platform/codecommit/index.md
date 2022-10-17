@@ -54,7 +54,7 @@ Here's an example config.js:
   platform: 'codecommit',
   repositories: ['{your repository names separated by comma}'],
   username: '{your access key id}',
-  password: '{your secret access key}',
+  password: 'SECRET_ACCESS_KEY_GOES_HERE',
   gitAuthor: 'your_email@domain',
   prConcurrentLimit: 10,
 };
