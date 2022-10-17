@@ -2,7 +2,6 @@ import is from '@sindresorhus/is';
 import type { RenovateConfig } from '../../../config/types';
 import { addMeta, logger, removeMeta } from '../../../logger';
 import { hashMap } from '../../../modules/manager';
-import { actualBranchConfigFields } from '../../../modules/platform';
 import { getCache } from '../../../util/cache/repository';
 import type { BranchCache } from '../../../util/cache/repository/types';
 import { fingerprint } from '../../../util/fingerprint';
@@ -11,13 +10,14 @@ import { setBranchNewCommit } from '../../../util/git/set-branch-commit';
 import { Limit, incLimitedValue, setMaxLimit } from '../../global/limits';
 import { BranchConfig, BranchResult } from '../../types';
 import { processBranch } from '../update/branch';
+import { actualFingerprintConfigFields } from './fingerprint-fields';
 import { getBranchesRemaining, getPrsRemaining } from './limits';
 
 export type WriteUpdateResult = 'done' | 'automerged';
 
-function generateBranchFingerprintConfig(branch: BranchConfig): any {
+export function generateBranchFingerprintConfig(branch: BranchConfig): any {
   const res = {} as any;
-  for (const field of actualBranchConfigFields) {
+  for (const field of actualFingerprintConfigFields) {
     if (branch[field] !== undefined) {
       res[field] = branch[field];
     }
