@@ -143,4 +143,28 @@ export const actualFingerprintConfigFields = [
   'branchName',
   'upgrades',
   'packageFiles',
+  'excludeCommitPaths',
+
+  // lockfile related
+  'constraints',
+  'composerIgnorePlatformReqs',
+  'ignoreScripts',
+  'ignorePlugins',
+  'isLockFileMaintenance',
+  'updateType',
+  'updateLockFiles',
+  'transitiveRemediation',
+  'npmrc',
+  'reuselockFiles',
+  'npmLock',
+  'yarnLock',
+  'skipInstalls',
+  'managerData',
+  'postUpdateOptions',
+
+  // post upgrade tasks
+  'manager',
+  'postUpgradeTasks',
+  'releaseTimestamp',
+  'fileFilters',
 ];
