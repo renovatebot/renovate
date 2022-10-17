@@ -1,6 +1,6 @@
 # Renovate i18n Guide
 
-This document briefs how to provide translatable to user-facing text, how to contribute code for i18n, and what is your recommended way/style to do that.
+This document aims the developers who want to improve i18n or create his/her own translations.
 
 ## Context
 
@@ -26,69 +26,13 @@ Renovate introduced [GNU Gettext](https://www.gnu.org/software/gettext/) to supp
 
 The GNU _gettext_ utilties are a set of tools that provides i18n to other software systems. Please check its offical website for more infomations.
 
-### What is the `pgettext` function for?
-
-The `pgetext` function introduced the `context` concept to provide additional info to translators for solving ambiguities.
-
-Especially when the text need to be translated is very short, e.g. a word `'sin'`, they may appear in more than one situation in the program but have different translations.
-
-The first argument of the `pgettext` function is a string, which contain the 'context', so you can distinct those text now:
-
-```typescript
-pgettext('mathletics', 'sin');
-
-pgettext('religion', 'sin');
-```
-
-Please read [this document](https://www.gnu.org/software/gettext/manual/html_node/Contexts.html) for more details.
-
-#### Naming of context
-
-We used the package path from 'lib' directory to name a context, for example, when a translatable string is containd in file `lib/workers/repository/update/pr/body/config-description.ts`, we will use `'workers/repository/update/pr/body'` as the context:
-
-```typescript
-pgettext('worker/repository/update/pr/body', 'Never');
-```
-
-TBD
-
-### What is the `ngettext` function for?
-
-The `ngettext` is for plural forms. It is similar to the `gettext` function, but it takes two extract arguments:
-
-```typescript
-export function ngettext(
-  msgid: string,
-  msgidPlural: string,
-  count: number
-): string {
-   ...
-}
-```
-
-The 1st argument `msgid` contain the sigular form of the string to be translated.
-
-The 2nd argument `msgidPlural` is the plural form.
-
-The 3ird argument `count` is a number, which is used to determine the plural form.
-
-If `count` === 1 `msgid` will be used to index the translation from the PO file, otherwise `msgidPlural`. For example:
-
-```typescript
-let log = util.format(ngettext('%d file deleted', '%d files deleted', n), n);
-```
-
-when n === 1, log will be '1 file deleted', otherwise 'x files deleted'.
-
-The plural form is a complex topic for i18n, some factors can differ between languages, please check [the document](https://www.gnu.org/software/gettext/manual/html_node/Plural-forms.html#Plural-forms) for more details.
-
 ## Best pratice
 
 ### What's the translatble text?
 
 Or in other word what's the text we do **not** consider to translate:
 
-- Text in logs: To `i18n`, we aim users is not the administrator of self-hosting instance, the text in logs should be easy to search in correspond code base, which easyer for problem diagnosis.
+- Text in log: To `i18n`, we aim users is not the administrator of self-hosting instance, the text in logs should be easy to search in correspond code base, which easyer for problem diagnosis.
 - Console output: The reason is same with text in logs.
 - Technical term: Renovate have a lot of technical terms in its user-facing text .e.g. `monorepo`, `maven`, `Pull Request`, `PR`, English
   is common language at technical area, we should respect that tradition.
@@ -104,7 +48,7 @@ We put the POT(Portable Object Template) file to a separted repository renovateb
 
 We only provide POT file and everyone can translate a own edition by it. For example, a [zh_CN](https://github.com/xingxing/renovate-i18n-zh-cn) edition.
 
-### Use "\_"(single underline) instead of "gettext" function
+### Use '\_'(single underline) instead of 'gettext' function
 
 The `_` function is [formal keyword](https://www.gnu.org/software/gettext/manual/html_node/Mark-Keywords.html) , it is equivalent to the function `gettext`, and it is shorter than `gettext` obviously.
 
@@ -153,3 +97,11 @@ That might be a bug of Gettext utilities.
 ### Preparing Translatable Strings
 
 Please read [the manual](https://www.gnu.org/software/gettext/manual/html_node/Preparing-Strings.html#Preparing-Strings) of GNU gettext.
+
+### Create your own translate edition
+
+We put the POT file and relevant scripts to a separate repository.
+
+You can clone [renovatebot/renovate-i18n](renovatebot/renovate-i18n), manually update the `messages.pot`, or wait for the daily action to update that file, please read documents about i18n in that project for more details.
+
+And then you can translate your own edition by invoking `msginit` program, and then invoke `msgmerge` program to add more `msgid`, refer the repository [xingxing/renovate-i18n-zh-cn](xingxing/renovate-i18n-zh-cn).
