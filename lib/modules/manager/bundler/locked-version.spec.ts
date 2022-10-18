@@ -1,6 +1,5 @@
 import { Fixtures } from '../../../../test/fixtures';
 import { logger } from '../../../../test/util';
-import * as rubyVersioning from '../../versioning/ruby';
 import { extractLockFileEntries } from './locked-version';
 
 const railsGemfileLock = Fixtures.get('Gemfile.rails.lock');
@@ -10,48 +9,44 @@ const rubyCIGemfileLock = Fixtures.get('Gemfile.rubyci.lock');
 const gitlabFossGemfileLock = Fixtures.get('Gemfile.gitlab-foss.lock');
 
 describe('modules/manager/bundler/locked-version', () => {
-  it('Parse Rails Gem Lock File', () => {
+  it('parses Rails Gem Lock File', () => {
     const parsedLockEntries = extractLockFileEntries(railsGemfileLock);
     expect(parsedLockEntries.size).toBe(185);
     expect(parsedLockEntries).toMatchSnapshot();
   });
 
-  it('Parse WebPacker Gem Lock File', () => {
+  it('parses WebPacker Gem Lock File', () => {
     const parsedLockEntries = extractLockFileEntries(webPackerGemfileLock);
     expect(parsedLockEntries.size).toBe(53);
     expect(parsedLockEntries).toMatchSnapshot();
   });
 
-  it('Parse Mastodon Gem Lock File', () => {
+  it('parses Mastodon Gem Lock File', () => {
     const parsedLockEntries = extractLockFileEntries(mastodonGemfileLock);
     expect(parsedLockEntries.size).toBe(266);
     expect(parsedLockEntries).toMatchSnapshot();
   });
 
-  it('Parse Ruby CI Gem Lock File', () => {
+  it('parses Ruby CI Gem Lock File', () => {
     const parsedLockEntries = extractLockFileEntries(rubyCIGemfileLock);
     expect(parsedLockEntries.size).toBe(64);
     expect(parsedLockEntries).toMatchSnapshot();
   });
 
-  it('Parse Gitlab Foss Gem Lock File', () => {
+  it('parses Gitlab Foss Gem Lock File', () => {
     const parsedLockEntries = extractLockFileEntries(gitlabFossGemfileLock);
     expect(parsedLockEntries.size).toBe(478);
     expect(parsedLockEntries).toMatchSnapshot();
   });
 
-  it('handles empty string', () => {
+  it('returns empty map for empty string', () => {
     const parsedLockEntries = extractLockFileEntries('');
     expect(parsedLockEntries.size).toBe(0);
   });
 
-  it('logs message for errors', () => {
-    extractLockFileEntries('');
-    jest
-      .spyOn(rubyVersioning, 'isVersion')
-      .mockReturnValueOnce(new Error() as never);
-    expect(logger.logger.warn).toHaveBeenCalledWith(
-      `Failed to parse Bundler lockfile`
-    );
+  it('returns empty map when errors occur', () => {
+    const parsedLockEntries = extractLockFileEntries(undefined as never);
+    expect(parsedLockEntries.size).toBe(0);
+    expect(logger.logger.warn).toHaveBeenCalledTimes(1);
   });
 });
