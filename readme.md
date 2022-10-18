@@ -46,7 +46,7 @@ Renovate is widely used in the developer community:
 
 ## Who contributes to Renovate?
 
-Renovate is build on a big community and actively invites contributions.
+Renovate is built on a big community and actively invites and supports contributions.
 Information about our contributors and community can be found on [OSS Insight](https://ossinsight.io/analyze/renovatebot/renovate).
 
 ## Star History
