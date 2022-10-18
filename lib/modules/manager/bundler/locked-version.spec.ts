@@ -9,31 +9,31 @@ const rubyCIGemfileLock = Fixtures.get('Gemfile.rubyci.lock');
 const gitlabFossGemfileLock = Fixtures.get('Gemfile.gitlab-foss.lock');
 
 describe('modules/manager/bundler/locked-version', () => {
-  it('parses Rails Gem Lock File', () => {
+  test('Parse Rails Gem Lock File', () => {
     const parsedLockEntries = extractLockFileEntries(railsGemfileLock);
     expect(parsedLockEntries.size).toBe(185);
     expect(parsedLockEntries).toMatchSnapshot();
   });
 
-  it('parses WebPacker Gem Lock File', () => {
+  test('Parse WebPacker Gem Lock File', () => {
     const parsedLockEntries = extractLockFileEntries(webPackerGemfileLock);
     expect(parsedLockEntries.size).toBe(53);
     expect(parsedLockEntries).toMatchSnapshot();
   });
 
-  it('parses Mastodon Gem Lock File', () => {
+  test('Parse Mastodon Gem Lock File', () => {
     const parsedLockEntries = extractLockFileEntries(mastodonGemfileLock);
     expect(parsedLockEntries.size).toBe(266);
     expect(parsedLockEntries).toMatchSnapshot();
   });
 
-  it('parses Ruby CI Gem Lock File', () => {
+  test('Parse Ruby CI Gem Lock File', () => {
     const parsedLockEntries = extractLockFileEntries(rubyCIGemfileLock);
     expect(parsedLockEntries.size).toBe(64);
     expect(parsedLockEntries).toMatchSnapshot();
   });
 
-  it('parses Gitlab Foss Gem Lock File', () => {
+  test('Parse Gitlab Foss Gem Lock File', () => {
     const parsedLockEntries = extractLockFileEntries(gitlabFossGemfileLock);
     expect(parsedLockEntries.size).toBe(478);
     expect(parsedLockEntries).toMatchSnapshot();
