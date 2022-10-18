@@ -101,7 +101,7 @@ export class DotnetDatasource extends Datasource {
           ): release is {
             [P in keyof DotnetRelease]: NonNullable<DotnetRelease[P]>;
           } => {
-            return is.nullOrUndefined(release[type]);
+            return !is.nullOrUndefined(release[type]);
           }
         )
         .map((release) => {
