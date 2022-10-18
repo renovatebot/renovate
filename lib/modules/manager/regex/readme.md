@@ -1,4 +1,4 @@
-With the `regex` manager you can configure Renovate so it finds dependencies that are not detected by its built-in package managers.
+With the `regex` manager you can configure Renovate so it finds dependencies that are not detected by its other built-in package managers.
 
 The `regex` manager is unique in Renovate because:
 
