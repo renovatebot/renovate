@@ -1,8 +1,10 @@
+import is from '@sindresorhus/is';
 import { cache } from '../../../util/cache/package/decorator';
 import type { HttpResponse } from '../../../util/http/types';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
 import {
+  DotnetRelease,
   DotnetReleases,
   DotnetReleasesIndex,
   DotnetReleasesIndexSchema,
@@ -71,7 +73,8 @@ export class DotnetDatasource extends Datasource {
 
   @cache({
     namespace: `datasource-${DotnetDatasource.id}`,
-    key: (releaseUrl: string) => releaseUrl,
+    key: (releaseUrl: string, packageName: string) =>
+      `${releaseUrl}:${packageName}`,
     ttlMinutes: 1440,
   })
   async getChannelReleases(
@@ -91,13 +94,23 @@ export class DotnetDatasource extends Datasource {
     if (body) {
       const type = DotnetDatasource.getType(packageName);
       const { releases: releases } = body;
-      result = releases.map((release) => {
-        return {
-          version: release[type].version,
-          releaseTimestamp: release['release-date'],
-          changelogUrl: release['release-notes'],
-        };
-      });
+      result = releases
+        .filter(
+          (
+            release
+          ): release is {
+            [P in keyof DotnetRelease]: NonNullable<DotnetRelease[P]>;
+          } => {
+            return !is.nullOrUndefined(release[type]);
+          }
+        )
+        .map((release) => {
+          return {
+            version: release[type].version,
+            releaseTimestamp: release['release-date'],
+            changelogUrl: release['release-notes'],
+          };
+        });
     }
 
     return result;
