@@ -308,7 +308,7 @@ export function massageMarkdown(input: string): string {
     .replace(regEx(`\n---\n\n.*?<!-- rebase-check -->.*?\n`), '')
     .replace(regEx(/\]\(\.\.\/pull\//g), '](../../pull-requests/')
     .replace(
-      regEx(/(?<hiddenComment><!--renovate-debug:.*?-->)/),
+      regEx(/(?<hiddenComment><!--renovate-(?:debug|config-hash):.*?-->)/g),
       '[//]: # ($<hiddenComment>)'
     );
 }
