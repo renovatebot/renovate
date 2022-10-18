@@ -19,8 +19,8 @@ The first two required fields are `fileMatch` and `matchStrings`:
 Before Renovate can look up a dependency and decide about updates, it needs this information about each dependency:
 
 - The dependency's name
-- Which `datasource` to use: npm, Docker, GitHub tags, and so on
-- Which version scheme to use: defaults to `semver`, but you may set another value like `pep440`
+- Which `datasource` to use: npm, Docker, GitHub tags, and so on. For how to format this references see [datasource overview](https://docs.renovatebot.com/modules/datasource/#supported-datasources)
+- Which version scheme to use: defaults to `semver`, but you may set another value like `pep440`. Supported versioning schemes can be found in the [versioning overview](https://docs.renovatebot.com/modules/versioning/#supported-versioning)
 
 Configuration-wise, it works like this:
 
