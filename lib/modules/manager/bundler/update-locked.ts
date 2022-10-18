@@ -9,8 +9,7 @@ export function updateLockedDependency(
     config;
   logger.debug(
     // TODO: types (#7154)
-    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-    `bundler.updateLockedDependency: ${depName}@${currentVersion} -> ${newVersion} [${lockFile}]`
+    `bundler.updateLockedDependency: ${depName}@${currentVersion!} -> ${newVersion} [${lockFile}]`
   );
   try {
     const locked = extractLockFileEntries(lockFileContent ?? '');
