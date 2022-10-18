@@ -24,22 +24,15 @@ export function massageUrl(sourceUrl: string): string {
 }
 
 function getHostname(sourceUrl: string): string | null {
-  let massagedUrl = sourceUrl;
   // Replace git@ sourceUrl with https so hostname can be parsed
-  if (sourceUrl.startsWith('git@')) {
-    massagedUrl = sourceUrl.replace(':', '/').replace('git@', 'https://');
-  }
+  const massagedUrl = massageGitAtUrl(sourceUrl);
 
   const parsedUrl = URL.parse(massagedUrl);
   return parsedUrl?.hostname;
 }
 
 export function massageGithubUrl(url: string): string {
-  let massagedUrl = url;
-
-  if (url.startsWith('git@')) {
-    massagedUrl = url.replace(':', '/').replace('git@', 'https://');
-  }
+  const massagedUrl = massageGitAtUrl(url);
 
   return massagedUrl
     .replace('http:', 'https:')
@@ -55,12 +48,23 @@ export function massageGithubUrl(url: string): string {
 }
 
 function massageGitlabUrl(url: string): string {
-  return url
+  const massagedUrl = massageGitAtUrl(url);
+
+  return massagedUrl
     .replace('http:', 'https:')
     .replace(gitPrefix, 'https://')
     .replace(regEx(/\/tree\/.*$/i), '')
     .replace(regEx(/\/$/i), '')
     .replace('.git', '');
+}
+
+function massageGitAtUrl(url: string): string {
+  let massagedUrl = url;
+
+  if (url.startsWith('git@')) {
+    massagedUrl = url.replace(':', '/').replace('git@', 'https://');
+  }
+  return massagedUrl;
 }
 
 export function normalizeDate(input: any): string | null {

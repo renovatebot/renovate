@@ -258,6 +258,7 @@ describe('modules/datasource/metadata', () => {
       ${'https://gitlab.com/user/repo/tree/master'}
       ${'http://gitlab.com/user/repo/'}
       ${'http://gitlab.com/user/repo.git'}
+      ${'git@gitlab.com:user/repo.git'}
     `('Should massage GitLab url $sourceUrl', ({ sourceUrl }) => {
       expect(massageUrl(sourceUrl)).toBe('https://gitlab.com/user/repo');
     });
