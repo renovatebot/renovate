@@ -125,6 +125,7 @@ describe('modules/datasource/dotnet/index', () => {
       });
 
       expect(res).toBeDefined();
+      expect(res?.sourceUrl).toBe('https://github.com/dotnet/sdk');
       expect(res?.releases).toHaveLength(17);
       expect(res?.releases).toIncludeAllPartialMembers([
         { version: '3.1.100-preview1-014459' },
@@ -158,6 +159,7 @@ describe('modules/datasource/dotnet/index', () => {
       });
 
       expect(res).toBeDefined();
+      expect(res?.sourceUrl).toBe('https://github.com/dotnet/runtime');
       expect(res?.releases).toHaveLength(17);
       expect(res?.releases).toIncludeAllPartialMembers([
         { version: '3.1.0-preview1.19506.1' },
