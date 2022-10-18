@@ -1,187 +1,26 @@
-export const actualBranchConfigFields = [
-  'baseBranch',
-  'branchName',
-  'branchPrefix',
-  'branchPrefixOld',
-  'rebaseRequested',
-  'rebaseLabel',
-  'recreateClosed',
-  'userStrings',
-  'suppressNotifications',
-  'dependencyDashboardApproval',
-  'isVulnerabilityAlert',
-  'pendingChecks',
-  'automergeType',
-  'platformAutomerge',
-  'azureAutoApprove',
-  'azureWorkItemId',
-  'bbUseDefaultReviewers',
-  'gitLabIgnoreApprovals',
-  'schedule',
-  'timezone',
-  'automergeSchedule',
-  'updateNotScheduled',
-  'upgrades',
-  'prCreation',
-  'dependencyDashboardRebaseAllOpen',
-  'dependencyDashboardAllPending',
-  'dependencyDashboardAllRateLimited',
-  'rebaseWhen',
-  'automerge',
-  'packageFiles',
-  'allowedPostUpgradeCommands',
-  'commitBody',
-  'fetchReleaseNotes',
-  'commitMessage',
-  'excludeCommitPaths',
-  'platformCommit',
+import type { UpdateType } from '../../../config/types';
+import type { BranchUpgradeConfig } from '../../types';
 
-  // changelogs related
-  'additionalBranchPrefix',
-  'branchTopic',
-  'commitMessageAction',
-  'commitMessageExtra',
-  'commitMessagePrefix',
-  'commitMessageSuffix',
-  'commitMessageTopic',
-  'gitAuthor',
-  'group',
-  'groupName',
-  'groupSlug',
-  'prBodyColumns',
-  'prBodyDefinitions',
-  'prBodyNotes',
-  'prTitle',
-  'semanticCommitScope',
-  'semanticCommitType',
-  'separateMajorMinor',
-  'separateMinorPatch',
-  'errors',
-  'warnings',
-  'body',
-
-  // used in compiling commit message
-  'isLockfileUpdate',
-  'isMajor',
-  'isPatch',
-  'isPin',
-  'isPinDigest',
-  'isRollback',
-  'isReplacement',
-  'isRange',
-  'isSingleVersion',
-  'logJSON',
-  'newDigest',
-  'newDigestShort',
-  'newMajor',
-  'newMinor',
-  'newName',
-  'newValue',
-  'newVersion',
-  'packageFile',
-  'packageFileDir',
-  'packageName',
-  'parentDir',
-  'platform',
-  'prettyDepType',
-  'prettyNewMajor',
-  'prettyNewVersion',
-  'project',
-  'references',
-  'releases',
-  'releaseNotes',
-  'repository',
-  'semanticPrefix',
-  'sourceRepo',
-  'sourceRepoName',
-  'sourceRepoOrg',
-  'sourceRepoSlug',
-  'sourceUrl',
-  'url',
-  'version',
-  'versioning',
-  'versions',
-
-  // ensure Pr
-  'dependencyDashboardChecks',
-  'prNotPendingHours',
-  'prBlockedBy',
-  'hasReleaseNotes',
-  'assignAutomerge',
-  'committedFiles', // only happened to find once in the code not sure if it is required.
-  'updateType',
-  'draftPR',
-  'assignees',
-  'assigneesFromCodeOwners',
-  'assigneesSampleSize',
-  'reviewers',
-  'reviewersFromCodeOwners',
-  'additionalReviewers',
-  'reviewersSampleSize',
-  'labels',
-  'addLabels',
-  'dependencyDashboard',
-  'prHeader',
-  'stopUpdating',
-  'prFooter',
-  'prBodyTemplate',
-
-  'productLinks',
-  'ignoreTests',
-  'branchAutomergeFailureMessage',
-  'pruneBranchAfterAutomerge',
-  'automergeComment',
-  'automergeStrategy',
-
-  'constraints',
-  'composerIgnorePlatformReqs',
-  'ignoreScripts',
-  'ignorePlugins',
-  'isLockFileMaintenance',
-  'updateLockFiles',
-  'transitiveRemediation',
-  'npmrc',
-  'reuselockFiles',
-  'npmLock',
-  'yarnLock',
-  'skipInstalls',
-  'managerData',
-  'postUpdateOptions',
-
-  // post upgrade tasks
-  'manager',
-  'postUpgradeTasks',
-  'releaseTimestamp',
-  'fileFilters',
-];
-
-export const actualFingerprintConfigFields = [
-  'baseBranch',
-  'branchName',
-  'upgrades',
-  'packageFiles',
-  'excludeCommitPaths',
+export interface actualFingerprintConfigFields {
+  branchName: string;
+  baseBranch: string;
+  upgrades: BranchUpgradeConfig[];
+  packageFiles: string[];
+  excludeCommitPaths: string[];
 
   // lockfile related
-  'constraints',
-  'composerIgnorePlatformReqs',
-  'ignoreScripts',
-  'ignorePlugins',
-  'isLockFileMaintenance',
-  'updateType',
-  'updateLockFiles',
-  'transitiveRemediation',
-  'npmrc',
-  'reuselockFiles',
-  'npmLock',
-  'yarnLock',
-  'skipInstalls',
-  'managerData',
-  'postUpdateOptions',
-
-  // post upgrade tasks
-  'manager',
-  'postUpgradeTasks',
-  'releaseTimestamp',
-  'fileFilters',
-];
+  constraints?: Record<string, string>;
+  composerIgnorePlatformReqs?: string[];
+  ignoreScripts?: boolean;
+  ignorePlugins?: boolean;
+  isLockFileMaintenance?: boolean;
+  updateType?: UpdateType;
+  updateLockFiles?: boolean;
+  transitiveRemediation?: boolean;
+  npmrc?: string;
+  reuselockFiles?: boolean;
+  npmLock?: string;
+  yarnLock?: string;
+  skipInstalls?: boolean;
+  postUpdateOptions?: string[];
+}
