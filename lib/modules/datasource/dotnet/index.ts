@@ -63,7 +63,12 @@ export class DotnetDatasource extends Datasource {
         }
       }
 
-      result = { releases };
+      const sourceUrl =
+        packageName === 'dotnet-sdk'
+          ? 'https://github.com/dotnet/sdk'
+          : 'https://github.com/dotnet/runtime';
+
+      result = { releases, sourceUrl };
     }
 
     return result;
