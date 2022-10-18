@@ -2152,15 +2152,15 @@
   dependencies:
     graceful-fs "^4.2.6"
 
-"@pnpm/read-project-manifest@3.0.12":
-  version "3.0.12"
-  resolved "https://registry.yarnpkg.com/@pnpm/read-project-manifest/-/read-project-manifest-3.0.12.tgz#b29c568f9f92f4ce68c09b4c743a66d3fff2defb"
-  integrity sha512-PsG5q2AqxiBC0joFBS1lbMxiPjcL53+GxxEg7ntVeLNw813k25TITlPmfIpNJzg2qtfn/UuMrZ04B8ov+/4hFw==
+"@pnpm/read-project-manifest@3.0.13":
+  version "3.0.13"
+  resolved "https://registry.yarnpkg.com/@pnpm/read-project-manifest/-/read-project-manifest-3.0.13.tgz#bcf558e81a7e6dab0d4dd1c57c6901d7f6f09e46"
+  integrity sha512-DEpAO64fA6VhcAudrjTAM4RIWCvw0Pmr4L0gaZqV0yta5zIkOTfFXT07lo80Zch4bvqmcOxlbM6Bazd4W+6Cww==
   dependencies:
     "@pnpm/error" "3.1.0"
     "@pnpm/graceful-fs" "2.0.0"
     "@pnpm/types" "8.7.0"
-    "@pnpm/write-project-manifest" "3.0.9"
+    "@pnpm/write-project-manifest" "3.0.10"
     detect-indent "^6.1.0"
     fast-deep-equal "^3.1.3"
     is-windows "^1.0.2"
@@ -2175,14 +2175,14 @@
   resolved "https://registry.yarnpkg.com/@pnpm/types/-/types-8.7.0.tgz#472dbe4e74b85985f43265750e6c861a28a9cce7"
   integrity sha512-2j4ldzfOQNa3EZfJEmJrBQefE+OWBMgAoWWnVeXi5B7itVHRcg27Np+q0FxzuZE//O0N44WKH4WJG53sBsUqCQ==
 
-"@pnpm/write-project-manifest@3.0.9":
-  version "3.0.9"
-  resolved "https://registry.yarnpkg.com/@pnpm/write-project-manifest/-/write-project-manifest-3.0.9.tgz#25860e043fef79477953f7308548e85add1c976a"
-  integrity sha512-2mkVR9NQNOyHyjPGMcrx7q6ZDLAO4eSnpXIYD4m6JQ02iPwk4O1oN6KaNau5r6gtjVFq2wX99Jixk91yhTIwjQ==
+"@pnpm/write-project-manifest@3.0.10":
+  version "3.0.10"
+  resolved "https://registry.yarnpkg.com/@pnpm/write-project-manifest/-/write-project-manifest-3.0.10.tgz#19927bc453050267ad45d0a3fcbfd66733dc40de"
+  integrity sha512-sw5AXR+KplipHL3GiPq8xNib8XUsi8ieh4XFVgjrAGkLIhfOrslonULY7d0QpVMotFMS7ha74s0s059T/5cnmQ==
   dependencies:
     "@pnpm/types" "8.7.0"
     json5 "^2.2.1"
-    write-file-atomic "^3.0.3"
+    write-file-atomic "^4.0.2"
     write-yaml-file "^4.2.0"
 
 "@redis/bloom@1.0.2":
@@ -2778,10 +2778,10 @@
   resolved "https://registry.yarnpkg.com/@types/node/-/node-18.11.0.tgz#f38c7139247a1d619f6cc6f27b072606af7c289d"
   integrity sha512-IOXCvVRToe7e0ny7HpT/X9Rb2RYtElG1a+VshjwT00HxrM2dWBApHQoqsI6WiY7Q03vdf2bCrIGzVrkF/5t10w==
 
-"@types/node@16.11.64":
-  version "16.11.64"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-16.11.64.tgz#9171f327298b619e2c52238b120c19056415d820"
-  integrity sha512-z5hPTlVFzNwtJ2LNozTpJcD1Cu44c4LNuzaq1mwxmiHWQh2ULdR6Vjwo1UGldzRpzL0yUEdZddnfqGW2G70z6Q==
+"@types/node@16.11.65":
+  version "16.11.65"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-16.11.65.tgz#59500b86af757d6fcabd3dec32fecb6e357d7a45"
+  integrity sha512-Vfz7wGMOr4jbQGiQHVJm8VjeQwM9Ya7mHe9LtQ264/Epf5n1KiZShOFqk++nBzw6a/ubgYdB9Od7P+MH/LjoWw==
 
 "@types/node@^13.7.0":
   version "13.13.52"
@@ -4868,12 +4868,12 @@ fill-range@^7.0.1:
   dependencies:
     to-regex-range "^5.0.1"
 
-find-packages@9.0.12:
-  version "9.0.12"
-  resolved "https://registry.yarnpkg.com/find-packages/-/find-packages-9.0.12.tgz#8d1078d83ff2164f54c19748deada1013824c250"
-  integrity sha512-qdY0X9bqwE6HCyhWSKfPJ7MOxvfo/lMAY0odWPBNv6EwFzDZ+X/Nc7qzDk6vcM8Yd63/+rlZ4H9/qxE2xyJ0qQ==
+find-packages@9.0.13:
+  version "9.0.13"
+  resolved "https://registry.yarnpkg.com/find-packages/-/find-packages-9.0.13.tgz#8912486b825d70eae6875450d0b135e085b28ee9"
+  integrity sha512-5DDQPKf6B1HCTO1jiBxmRfvvyVeOhNpFI2qW8inx1H7hOZV6gKJHHUqLcUTP34SsbswNTH2hj8vGi+JYxFCNxw==
   dependencies:
-    "@pnpm/read-project-manifest" "3.0.12"
+    "@pnpm/read-project-manifest" "3.0.13"
     "@pnpm/types" "8.7.0"
     fast-glob "^3.2.12"
     p-filter "^2.1.0"
@@ -9606,7 +9606,7 @@ write-file-atomic@^3.0.3:
     signal-exit "^3.0.2"
     typedarray-to-buffer "^3.1.5"
 
-write-file-atomic@^4.0.0, write-file-atomic@^4.0.1:
+write-file-atomic@^4.0.0, write-file-atomic@^4.0.1, write-file-atomic@^4.0.2:
   version "4.0.2"
   resolved "https://registry.yarnpkg.com/write-file-atomic/-/write-file-atomic-4.0.2.tgz#a9df01ae5b77858a027fd2e80768ee433555fcfd"
   integrity sha512-7KxauUdBmSdWnmpaGFg+ppNjKF8uNLry8LyzjauQDOVONfFLNKrKvQOxZ/VuTIcS/gge/YNahf5RIIQWTSarlg==
