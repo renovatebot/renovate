@@ -1,6 +1,5 @@
 // TODO #7154
-import { Ecosystem, Osv, OsvOffline } from '@jamiemagee/osv-offline';
-import pAll from 'p-all';
+import { Ecosystem, Osv, OsvOffline } from '@renovatebot/osv-offline';
 import { getManagerConfig, mergeChildConfig } from '../../../config';
 import type { PackageRule, RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
@@ -8,6 +7,7 @@ import type {
   PackageDependency,
   PackageFile,
 } from '../../../modules/manager/types';
+import * as p from '../../../util/promises';
 
 export class Vulnerabilities {
   private osvOffline: OsvOffline | undefined;
@@ -73,7 +73,7 @@ export class Vulnerabilities {
       { manager, queueLength: queue.length },
       'fetchManagerUpdates starting'
     );
-    await pAll(queue, { concurrency: 5 });
+    await p.all(queue);
     logger.trace({ manager }, 'fetchManagerUpdates finished');
   }
 
@@ -94,9 +94,7 @@ export class Vulnerabilities {
       'fetchManagerPackagerFileUpdates starting with concurrency'
     );
 
-    config.packageRules?.push(
-      ...(await pAll(queue, { concurrency: 5 })).flat()
-    );
+    config.packageRules?.push(...(await p.all(queue)).flat());
     logger.trace({ packageFile }, 'fetchManagerPackagerFileUpdates finished');
   }
 

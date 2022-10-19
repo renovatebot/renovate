@@ -1,0 +1,19 @@
+forge "https://forgeapi.puppetlabs.com"
+
+#########################
+## Puppetforge Modules ##
+#########################
+
+mod 'puppetlabs/stdlib', '8.0.0'
+mod 'puppetlabs/apache', '6.5.1'
+mod 'puppetlabs/puppetdb', '7.9.0'
+
+forge "https://some-other-puppet-forge.com"
+
+###########################
+## Some Other Mock Forge ##
+###########################
+
+mod 'mock/mockstdlib', '10.0.0'
+mod 'mock/mockapache', '2.5.1'
+mod 'mock/mockpuppetdb', '1.9.0'

@@ -38,6 +38,8 @@ export class CrateDatasource extends Datasource {
   @cache({
     namespace: `datasource-${CrateDatasource.id}`,
     key: ({ registryUrl, packageName }: GetReleasesConfig) =>
+      // TODO: types (#7154)
+      // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
       `${registryUrl}/${packageName}`,
     cacheable: ({ registryUrl }: GetReleasesConfig) =>
       CrateDatasource.areReleasesCacheable(registryUrl),
@@ -166,7 +168,7 @@ export class CrateDatasource extends Datasource {
     if (info.flavor === RegistryFlavor.CratesIo) {
       const crateUrl =
         CrateDatasource.CRATES_IO_BASE_URL +
-        CrateDatasource.getIndexSuffix(packageName).join('/');
+        CrateDatasource.getIndexSuffix(packageName.toLowerCase()).join('/');
       try {
         return (await this.http.get(crateUrl)).body;
       } catch (err) {
@@ -208,7 +210,7 @@ export class CrateDatasource extends Datasource {
     const host = url.hostname;
     const hash = hasha(url.pathname, {
       algorithm: 'sha256',
-    }).substr(0, 7);
+    }).substring(0, 7);
 
     return `crate-registry-${proto}-${host}-${hash}`;
   }

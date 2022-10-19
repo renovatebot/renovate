@@ -167,7 +167,7 @@ If you're only working on the documentation files, you can use the `yarn doc-fix
 
 First of all, never commit to the `main` branch of your fork - always use a "feature" branch like `feat/1234-add-yarn-parsing`.
 
-Make sure your fork is up to date with the Renovate `main` branch, check this each time before you create a new branch.
+Make sure your fork is up-to-date with the Renovate `main` branch, check this each time before you create a new branch.
 To do this, see these GitHub guides:
 
 [Configuring a remote for a fork](https://help.github.com/articles/configuring-a-remote-for-a-fork/)
@@ -206,7 +206,7 @@ We want stay backwards-compatible as much as possible, as well as make the code 
 So most new functionality should be controllable via configuration options.
 
 Create your new configuration option in the `lib/config/options/index.ts` file.
-Also create documentation for the option in the `website/docs/configuration-options.md` file.
+Also create documentation for the option in the `docs/usage/configuration-options.md` file.
 
 ## Debugging
 

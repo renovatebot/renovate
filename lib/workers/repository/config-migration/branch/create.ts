@@ -2,11 +2,12 @@ import { GlobalConfig } from '../../../../config/global';
 import type { RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
 import { commitAndPush } from '../../../../modules/platform/commit';
+import { checkoutBranch } from '../../../../util/git';
 import { getMigrationBranchName } from '../common';
 import { ConfigMigrationCommitMessageFactory } from './commit-message';
 import type { MigratedData } from './migrated-data';
 
-export function createConfigMigrationBranch(
+export async function createConfigMigrationBranch(
   config: Partial<RenovateConfig>,
   migratedConfigData: MigratedData
 ): Promise<string | null> {
@@ -20,7 +21,7 @@ export function createConfigMigrationBranch(
     configFileName
   );
 
-  const commitMessage = commitMessageFactory.create();
+  const commitMessage = commitMessageFactory.getCommitMessage();
 
   // istanbul ignore if
   if (GlobalConfig.get('dryRun')) {
@@ -28,6 +29,7 @@ export function createConfigMigrationBranch(
     return Promise.resolve(null);
   }
 
+  await checkoutBranch(config.defaultBranch!);
   return commitAndPush({
     branchName: getMigrationBranchName(config),
     files: [

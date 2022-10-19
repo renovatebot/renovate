@@ -31,7 +31,7 @@ describe('modules/platform/comment', () => {
       expect(repoCache).toEqual({
         prComments: {
           '1': {
-            foo: '62cdb7020ff920e5aa642c3d4066950dd1f01f4d',
+            foo: 'd82c4eb5261cb9c8aa9855edd67d1bd10482f41529858d925094d173fa662aa91ff39bc5b188615273484021dfb16fd8284cf684ccf0fc795be3aa2fc1e6c181',
           },
         },
       });
@@ -50,7 +50,7 @@ describe('modules/platform/comment', () => {
       expect(repoCache).toEqual({
         prComments: {
           '1': {
-            '': '62cdb7020ff920e5aa642c3d4066950dd1f01f4d',
+            '': 'd82c4eb5261cb9c8aa9855edd67d1bd10482f41529858d925094d173fa662aa91ff39bc5b188615273484021dfb16fd8284cf684ccf0fc795be3aa2fc1e6c181',
           },
         },
       });
@@ -88,7 +88,7 @@ describe('modules/platform/comment', () => {
       expect(repoCache).toEqual({
         prComments: {
           '1': {
-            aaa: '1c6637a8f2e1f75e06ff9984894d6bd16a3a36a9',
+            aaa: '5f28f24f5520230fd1e66ea6ac649e9f9637515f516b2ef74fc90622b60f165eafca8f34db8471b85b9b4a2cdf72f75099ae0eb8860c4f339252261778d406eb',
           },
         },
       });
@@ -107,8 +107,8 @@ describe('modules/platform/comment', () => {
       expect(repoCache).toEqual({
         prComments: {
           '1': {
-            aaa: '6216f8a75fd5bb3d5f22b6f9958cdede3fc086c2',
-            bbb: '6216f8a75fd5bb3d5f22b6f9958cdede3fc086c2',
+            aaa: 'fb131bc57a477c8c9d068f1ee5622ac304195a77164ccc2d75d82dfe1a727ba8d674ed87f96143b2b416aacefb555e3045c356faa23e6d21de72b85822e39fdd',
+            bbb: 'fb131bc57a477c8c9d068f1ee5622ac304195a77164ccc2d75d82dfe1a727ba8d674ed87f96143b2b416aacefb555e3045c356faa23e6d21de72b85822e39fdd',
           },
         },
       });
@@ -152,7 +152,7 @@ describe('modules/platform/comment', () => {
       expect(repoCache).toEqual({
         prComments: {
           '1': {
-            bbb: '6216f8a75fd5bb3d5f22b6f9958cdede3fc086c2',
+            bbb: 'fb131bc57a477c8c9d068f1ee5622ac304195a77164ccc2d75d82dfe1a727ba8d674ed87f96143b2b416aacefb555e3045c356faa23e6d21de72b85822e39fdd',
           },
         },
       });
@@ -170,7 +170,7 @@ describe('modules/platform/comment', () => {
         prComments: {
           '1': {},
           '2': {
-            aaa: '6216f8a75fd5bb3d5f22b6f9958cdede3fc086c2',
+            aaa: 'fb131bc57a477c8c9d068f1ee5622ac304195a77164ccc2d75d82dfe1a727ba8d674ed87f96143b2b416aacefb555e3045c356faa23e6d21de72b85822e39fdd',
           },
         },
       });

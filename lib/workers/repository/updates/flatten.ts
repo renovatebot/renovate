@@ -13,7 +13,7 @@ import type { BranchUpgradeConfig } from '../../types';
 import { generateBranchName } from './branch-name';
 
 const upper = (str: string): string =>
-  str.charAt(0).toUpperCase() + str.substr(1);
+  str.charAt(0).toUpperCase() + str.substring(1);
 
 function sanitizeDepName(depName: string): string {
   return depName

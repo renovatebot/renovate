@@ -4,6 +4,7 @@ import { GlobalConfig } from '../../../config/global';
 import { PlatformId } from '../../../constants';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
+import type { HostRule } from '../../../types';
 import { exec } from '../../../util/exec';
 import type { ExecOptions } from '../../../util/exec/types';
 import {
@@ -24,6 +25,13 @@ import type {
   UpdateArtifactsResult,
 } from '../types';
 
+const githubApiUrls = new Set([
+  'github.com',
+  'api.github.com',
+  'https://api.github.com',
+  'https://api.github.com/',
+]);
+
 function getGitEnvironmentVariables(): NodeJS.ProcessEnv {
   let environmentVariables: NodeJS.ProcessEnv = {};
 
@@ -41,9 +49,12 @@ function getGitEnvironmentVariables(): NodeJS.ProcessEnv {
   }
 
   // get extra host rules for other git-based Go Module hosts
-  const hostRules = getAll() || [];
+  // filter rules without `matchHost` and `token` and github api github rules
+  const hostRules = getAll()
+    .filter((r) => r.matchHost && r.token)
+    .filter((r) => !githubToken || !githubApiUrls.has(r.matchHost!));
 
-  const goGitAllowedHostType: (string | undefined)[] = [
+  const goGitAllowedHostType = new Set<string>([
     // All known git platforms
     PlatformId.Azure,
     PlatformId.Bitbucket,
@@ -51,34 +62,51 @@ function getGitEnvironmentVariables(): NodeJS.ProcessEnv {
     PlatformId.Gitea,
     PlatformId.Github,
     PlatformId.Gitlab,
-    // plus all without a host type (=== undefined)
-    undefined,
-  ];
+  ]);
 
-  // for each hostRule we add additional authentication variables to the environmentVariables
+  // for each hostRule without hostType we add additional authentication variables to the environmentVariables
   for (const hostRule of hostRules) {
-    if (
-      hostRule?.token &&
-      hostRule.matchHost &&
-      goGitAllowedHostType.includes(hostRule.hostType)
-    ) {
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-      const httpUrl = createURLFromHostOrURL(hostRule.matchHost!)?.toString();
-      if (validateUrl(httpUrl)) {
-        logger.debug(
-          `Adding Git authentication for Go Module retrieval for ${httpUrl} using token auth.`
-        );
-        environmentVariables = getGitAuthenticatedEnvironmentVariables(
-          httpUrl!,
-          hostRule,
-          environmentVariables
-        );
-      } else {
-        logger.warn(
-          `Could not parse registryUrl ${hostRule.matchHost} or not using http(s). Ignoring`
-        );
-      }
+    if (!hostRule.hostType) {
+      environmentVariables = addAuthFromHostRule(
+        hostRule,
+        environmentVariables
+      );
     }
+  }
+
+  // for each hostRule with hostType we add additional authentication variables to the environmentVariables
+  for (const hostRule of hostRules) {
+    if (hostRule.hostType && goGitAllowedHostType.has(hostRule.hostType)) {
+      environmentVariables = addAuthFromHostRule(
+        hostRule,
+        environmentVariables
+      );
+    }
+  }
+  return environmentVariables;
+}
+
+function addAuthFromHostRule(
+  hostRule: HostRule,
+  env: NodeJS.ProcessEnv
+): NodeJS.ProcessEnv {
+  let environmentVariables = env;
+  const httpUrl = createURLFromHostOrURL(hostRule.matchHost!)?.toString();
+  if (validateUrl(httpUrl)) {
+    logger.debug(
+      // TODO: types (#7154)
+      // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+      `Adding Git authentication for Go Module retrieval for ${httpUrl} using token auth.`
+    );
+    environmentVariables = getGitAuthenticatedEnvironmentVariables(
+      httpUrl!,
+      hostRule,
+      environmentVariables
+    );
+  } else {
+    logger.warn(
+      `Could not parse registryUrl ${hostRule.matchHost!} or not using http(s). Ignoring`
+    );
   }
   return environmentVariables;
 }
@@ -90,6 +118,8 @@ function getUpdateImportPathCmds(
   const updateImportCommands = updatedDeps
     .map((dep) => dep.depName!)
     .filter((x) => !x.startsWith('gopkg.in'))
+    // TODO: types (#7154)
+    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
     .map((depName) => `mod upgrade --mod-name=${depName} -t=${newMajor}`);
 
   if (updateImportCommands.length > 0) {
@@ -209,6 +239,9 @@ export async function updateArtifacts({
       );
     }
   }
+  const goConstraints =
+    config.constraints?.go ?? (await getGoConstraints(goModFileName));
+
   try {
     await writeLocalFile(goModFileName, massagedGoMod);
 
@@ -223,13 +256,13 @@ export async function updateArtifacts({
         GONOSUMDB: process.env.GONOSUMDB,
         GOSUMDB: process.env.GOSUMDB,
         GOINSECURE: process.env.GOINSECURE,
-        GOFLAGS: useModcacherw(config.constraints?.go) ? '-modcacherw' : null,
+        GOFLAGS: useModcacherw(goConstraints) ? '-modcacherw' : null,
         CGO_ENABLED: GlobalConfig.get('binarySource') === 'docker' ? '0' : null,
         ...getGitEnvironmentVariables(),
       },
       docker: {
         image: 'go',
-        tagConstraint: config.constraints?.go,
+        tagConstraint: goConstraints,
         tagScheme: 'npm',
       },
     };
@@ -349,7 +382,7 @@ export async function updateArtifacts({
       }
     }
 
-    // TODO #7154
+    // TODO: throws in tests (#7154)
     const finalGoModContent = (await readLocalFile(goModFileName, 'utf8'))!
       .replace(regEx(/\/\/ renovate-replace /g), '')
       .replace(regEx(/renovate-replace-bracket/g), ')');
@@ -379,4 +412,19 @@ export async function updateArtifacts({
       },
     ];
   }
+}
+
+async function getGoConstraints(
+  goModFileName: string
+): Promise<string | undefined> {
+  const content = (await readLocalFile(goModFileName, 'utf8')) ?? null;
+  if (!content) {
+    return undefined;
+  }
+  const re = regEx(/^go\s*(?<gover>\d+\.\d+)$/m);
+  const match = re.exec(content);
+  if (!match?.groups?.gover) {
+    return undefined;
+  }
+  return '^' + match.groups.gover;
 }

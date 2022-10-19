@@ -6,7 +6,10 @@ import { pkg } from '../../expose.cjs';
 import { logger, setMeta } from '../../logger';
 import { removeDanglingContainers } from '../../util/exec/docker';
 import { deleteLocalFile, privateCacheDir } from '../../util/fs';
+import { isCloned } from '../../util/git';
+import { clearDnsCache, printDnsStats } from '../../util/http/dns';
 import * as queue from '../../util/http/queue';
+import * as schemaUtil from '../../util/schema';
 import { addSplit, getSplits, splitInit } from '../../util/split';
 import { setBranchCache } from './cache';
 import { ensureDependencyDashboard } from './dependency-dashboard';
@@ -47,6 +50,7 @@ export async function renovateRepository(
       GlobalConfig.get('dryRun') !== 'extract'
     ) {
       await ensureOnboardingPr(config, packageFiles, branches);
+      addSplit('onboarding');
       const res = await updateRepo(config, branches);
       setMeta({ repository: config.repository });
       addSplit('update');
@@ -59,7 +63,7 @@ export async function renovateRepository(
         }
         logger.debug(`Automerged but already retried once`);
       } else {
-        await ensureDependencyDashboard(config, branches);
+        await ensureDependencyDashboard(config, branches, packageFiles);
       }
       await finaliseRepo(config, branchList);
       // TODO #7154
@@ -85,6 +89,10 @@ export async function renovateRepository(
   const splits = getSplits();
   logger.debug(splits, 'Repository timing splits (milliseconds)');
   printRequestStats();
-  logger.info({ durationMs: splits.total }, 'Repository finished');
+  printDnsStats();
+  clearDnsCache();
+  schemaUtil.reportErrors();
+  const cloned = isCloned();
+  logger.info({ cloned, durationMs: splits.total }, 'Repository finished');
   return repoResult;
 }

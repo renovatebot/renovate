@@ -63,7 +63,7 @@ function extractFromSection(
         const specifierMatches = specifierRegex.exec(currentValue!);
         if (!specifierMatches) {
           logger.debug(
-            `Skipping dependency with malformed version specifier "${currentValue}".`
+            `Skipping dependency with malformed version specifier "${currentValue!}".`
           );
           skipReason = 'invalid-version';
         }

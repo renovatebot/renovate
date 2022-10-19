@@ -1,12 +1,12 @@
-export type BitbucketTag = {
+export interface BitbucketTag {
   name: string;
   target?: {
     date?: string;
     hash: string;
   };
-};
+}
 
-export type BitbucketCommit = {
+export interface BitbucketCommit {
   hash: string;
   date?: string;
-};
+}

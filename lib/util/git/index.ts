@@ -2,6 +2,8 @@ import URL from 'url';
 import is from '@sindresorhus/is';
 import delay from 'delay';
 import fs from 'fs-extra';
+// TODO: check if bug is fixed (#7154)
+// eslint-disable-next-line import/no-named-as-default
 import simpleGit, {
   Options,
   ResetMode,
@@ -28,12 +30,22 @@ import type { GitProtocol } from '../../types/git';
 import { Limit, incLimitedValue } from '../../workers/global/limits';
 import { newlineRegex, regEx } from '../regex';
 import { parseGitAuthor } from './author';
+import { getCachedBehindBaseResult } from './behind-base-branch-cache';
 import { getNoVerify, simpleGitConfig } from './config';
 import {
   getCachedConflictResult,
   setCachedConflictResult,
 } from './conflicts-cache';
-import { checkForPlatformFailure, handleCommitError } from './error';
+import {
+  bulkChangesDisallowed,
+  checkForPlatformFailure,
+  handleCommitError,
+} from './error';
+import {
+  getCachedModifiedResult,
+  setCachedModifiedResult,
+} from './modified-cache';
+import { getCachedBranchParentShaResult } from './parent-sha-cache';
 import { configSigningKey, writePrivateKey } from './private-key';
 import type {
   CommitFilesConfig,
@@ -148,6 +160,7 @@ let config: LocalConfig = {} as any;
 // TODO: can be undefined
 let git: SimpleGit;
 let gitInitialized: boolean;
+let submodulesInitizialized: boolean;
 
 let privateKeySet = false;
 
@@ -157,13 +170,13 @@ export async function validateGitVersion(): Promise<boolean> {
   let version: string | undefined;
   const globalGit = simpleGit();
   try {
-    const raw = await globalGit.raw(['--version']);
-    for (const section of raw.split(/\s+/)) {
-      if (semverCoerced.isVersion(section)) {
-        version = section;
-        break;
-      }
+    const { major, minor, patch, installed } = await globalGit.version();
+    // istanbul ignore if
+    if (!installed) {
+      logger.error('Git not installed');
+      return false;
     }
+    version = `${major}.${minor}.${patch}`;
   } catch (err) /* istanbul ignore next */ {
     logger.error({ err }, 'Error fetching git version');
     return false;
@@ -191,7 +204,8 @@ async function fetchBranchCommits(): Promise<void> {
   const opts = ['ls-remote', '--heads', config.url];
   if (config.extraCloneOpts) {
     Object.entries(config.extraCloneOpts).forEach((e) =>
-      opts.unshift(e[0], `${e[1]}`)
+      // TODO: types (#7154)
+      opts.unshift(e[0], `${e[1]!}`)
     );
   }
   try {
@@ -221,8 +235,13 @@ export async function initRepo(args: StorageConfig): Promise<void> {
   config.additionalBranches = [];
   config.branchIsModified = {};
   const { localDir } = GlobalConfig.get();
-  git = simpleGit(localDir, simpleGitConfig());
+  git = simpleGit(localDir, simpleGitConfig()).env({
+    ...process.env,
+    LANG: 'C',
+    LC_ALL: 'C',
+  });
   gitInitialized = false;
+  submodulesInitizialized = false;
   await fetchBranchCommits();
 }
 
@@ -264,7 +283,7 @@ export function setGitAuthor(gitAuthor: string | undefined): void {
     const error = new Error(CONFIG_VALIDATION);
     error.validationSource = 'None';
     error.validationError = 'Invalid gitAuthor';
-    error.validationMessage = `gitAuthor is not parsed as valid RFC5322 format: ${gitAuthor}`;
+    error.validationMessage = `gitAuthor is not parsed as valid RFC5322 format: ${gitAuthor!}`;
     throw error;
   }
   config.gitAuthorName = gitAuthorParsed.name;
@@ -328,6 +347,30 @@ export async function getSubmodules(): Promise<string[]> {
   }
 }
 
+export async function cloneSubmodules(shouldClone: boolean): Promise<void> {
+  if (!shouldClone || submodulesInitizialized) {
+    return;
+  }
+  submodulesInitizialized = true;
+  await syncGit();
+  const submodules = await getSubmodules();
+  for (const submodule of submodules) {
+    try {
+      logger.debug(`Cloning git submodule at ${submodule}`);
+      await gitRetry(() => git.submoduleUpdate(['--init', submodule]));
+    } catch (err) {
+      logger.warn(
+        { err },
+        `Unable to initialise git submodule at ${submodule}`
+      );
+    }
+  }
+}
+
+export function isCloned(): boolean {
+  return gitInitialized;
+}
+
 export async function syncGit(): Promise<void> {
   if (gitInitialized) {
     return;
@@ -372,7 +415,8 @@ export async function syncGit(): Promise<void> {
       }
       if (config.extraCloneOpts) {
         Object.entries(config.extraCloneOpts).forEach((e) =>
-          opts.push(e[0], `${e[1]}`)
+          // TODO: types (#7154)
+          opts.push(e[0], `${e[1]!}`)
         );
       }
       const emptyDirAndClone = async (): Promise<void> => {
@@ -393,21 +437,16 @@ export async function syncGit(): Promise<void> {
     const durationMs = Math.round(Date.now() - cloneStart);
     logger.debug({ durationMs }, 'git clone completed');
   }
-  config.currentBranchSha = (await git.raw(['rev-parse', 'HEAD'])).trim();
-  if (config.cloneSubmodules) {
-    const submodules = await getSubmodules();
-    for (const submodule of submodules) {
-      try {
-        logger.debug(`Cloning git submodule at ${submodule}`);
-        await gitRetry(() => git.submoduleUpdate(['--init', submodule]));
-      } catch (err) {
-        logger.warn(
-          { err },
-          `Unable to initialise git submodule at ${submodule}`
-        );
-      }
+  try {
+    config.currentBranchSha = (await git.raw(['rev-parse', 'HEAD'])).trim();
+  } catch (err) /* istanbul ignore next */ {
+    if (err.message?.includes('fatal: not a git repository')) {
+      throw new Error(REPOSITORY_CHANGED);
     }
+    throw err;
   }
+  // This will only happen now if set in global config
+  await cloneSubmodules(!!config.cloneSubmodules);
   try {
     const latestCommit = (await git.log({ n: 1 })).latest;
     logger.debug({ latestCommit }, 'latest repository commit');
@@ -455,9 +494,18 @@ export function getBranchCommit(branchName: string): CommitSha | null {
 export async function getBranchParentSha(
   branchName: string
 ): Promise<CommitSha | null> {
+  const branchSha = getBranchCommit(branchName);
+  let parentSha = getCachedBranchParentShaResult(branchName, branchSha);
+  if (parentSha !== null) {
+    logger.debug(
+      `branch.getBranchParentSha(): using cached result "${parentSha}"`
+    );
+    return parentSha;
+  }
+
   try {
-    const branchSha = getBranchCommit(branchName);
-    const parentSha = await git.revparse([`${branchSha}^`]);
+    // TODO: branchSha can be null (#7154)
+    parentSha = await git.revparse([`${branchSha!}^`]);
     return parentSha;
   } catch (err) {
     logger.debug({ err }, 'Error getting branch parent sha');
@@ -506,7 +554,6 @@ export async function checkoutBranch(branchName: string): Promise<CommitSha> {
 export async function getFileList(): Promise<string[]> {
   await syncGit();
   const branch = config.currentBranch;
-  const submodules = await getSubmodules();
   let files: string;
   try {
     files = await git.raw(['ls-tree', '-r', branch]);
@@ -524,21 +571,35 @@ export async function getFileList(): Promise<string[]> {
   if (!files) {
     return [];
   }
+  // submodules are starting with `160000 commit`
   return files
     .split(newlineRegex)
     .filter(is.string)
     .filter((line) => line.startsWith('100'))
-    .map((line) => line.split(regEx(/\t/)).pop()!)
-    .filter((file) =>
-      submodules.every((submodule: string) => !file.startsWith(submodule))
-    );
+    .map((line) => line.split(regEx(/\t/)).pop()!);
 }
 
 export function getBranchList(): string[] {
   return Object.keys(config.branchCommits);
 }
 
-export async function isBranchStale(branchName: string): Promise<boolean> {
+export async function isBranchBehindBase(
+  branchName: string,
+  baseBranch: string
+): Promise<boolean> {
+  let isBehind = getCachedBehindBaseResult(
+    branchName,
+    getBranchCommit(branchName), // branch sha
+    baseBranch,
+    getBranchCommit(baseBranch) // base branch sha
+  );
+  if (isBehind !== null) {
+    logger.debug(`branch.isBehindBase(): using cached result "${isBehind}"`);
+    return isBehind;
+  }
+
+  logger.debug('branch.isBehindBase(): using git to calculate');
+
   await syncGit();
   try {
     const { currentBranchSha, currentBranch } = config;
@@ -548,12 +609,12 @@ export async function isBranchStale(branchName: string): Promise<boolean> {
       '--contains',
       config.currentBranchSha,
     ]);
-    const isStale = !branches.all.map(localName).includes(branchName);
+    isBehind = !branches.all.map(localName).includes(branchName);
     logger.debug(
-      { isStale, currentBranch, currentBranchSha },
-      `isBranchStale=${isStale}`
+      { currentBranch, currentBranchSha },
+      `branch.isBehindBase(): ${isBehind}`
     );
-    return isStale;
+    return isBehind;
   } catch (err) /* istanbul ignore next */ {
     const errChecked = checkForPlatformFailure(err);
     if (errChecked) {
@@ -564,18 +625,28 @@ export async function isBranchStale(branchName: string): Promise<boolean> {
 }
 
 export async function isBranchModified(branchName: string): Promise<boolean> {
-  await syncGit();
-  // First check cache
+  if (!branchExists(branchName)) {
+    logger.debug('branch.isModified(): no cache');
+    return false;
+  }
+  // First check local config
   if (config.branchIsModified[branchName] !== undefined) {
     return config.branchIsModified[branchName];
   }
-  if (!branchExists(branchName)) {
-    logger.debug(
-      { branchName },
-      'Branch does not exist - cannot check isModified'
-    );
-    return false;
+  // Second check repository cache
+  const isModified = getCachedModifiedResult(
+    branchName,
+    getBranchCommit(branchName) // branch sha
+  );
+  if (isModified !== null) {
+    logger.debug(`branch.isModified(): using cached result "${isModified}"`);
+    config.branchIsModified[branchName] = isModified;
+    return isModified;
   }
+
+  logger.debug('branch.isModified(): using git to calculate');
+
+  await syncGit();
   // Retrieve the author of the most recent commit
   let lastAuthor: string | undefined;
   try {
@@ -604,15 +675,17 @@ export async function isBranchModified(branchName: string): Promise<boolean> {
     config.ignoredAuthors.some((ignoredAuthor) => lastAuthor === ignoredAuthor)
   ) {
     // author matches - branch has not been modified
-    logger.debug({ branchName }, 'Branch has not been modified');
+    logger.debug('branch.isModified() = false');
     config.branchIsModified[branchName] = false;
+    setCachedModifiedResult(branchName, false);
     return false;
   }
   logger.debug(
     { branchName, lastAuthor, gitAuthorEmail },
-    'Last commit author does not match git author email - branch has been modified'
+    'branch.isModified() = true'
   );
   config.branchIsModified[branchName] = true;
+  setCachedModifiedResult(branchName, true);
   return true;
 }
 
@@ -621,8 +694,6 @@ export async function isBranchConflicted(
   branch: string
 ): Promise<boolean> {
   logger.debug(`isBranchConflicted(${baseBranch}, ${branch})`);
-  await syncGit();
-  await writeGitAuthor();
 
   const baseBranchSha = getBranchCommit(baseBranch);
   const branchSha = getBranchCommit(branch);
@@ -634,20 +705,24 @@ export async function isBranchConflicted(
     return true;
   }
 
-  const cachedResult = getCachedConflictResult(
+  const isConflicted = getCachedConflictResult(
     baseBranch,
     baseBranchSha,
     branch,
     branchSha
   );
-  if (is.boolean(cachedResult)) {
+  if (is.boolean(isConflicted)) {
     logger.debug(
-      `Using cached result ${cachedResult} for isBranchConflicted(${baseBranch}, ${branch})`
+      `branch.isConflicted(): using cached result "${isConflicted}"`
     );
-    return cachedResult;
+    return isConflicted;
   }
 
+  logger.debug('branch.isConflicted(): using git to calculate');
+
   let result = false;
+  await syncGit();
+  await writeGitAuthor();
 
   const origBranch = config.currentBranch;
   try {
@@ -680,6 +755,7 @@ export async function isBranchConflicted(
   }
 
   setCachedConflictResult(baseBranch, baseBranchSha, branch, branchSha, result);
+  logger.debug(`branch.isConflicted(): ${result}`);
   return result;
 }
 
@@ -1042,7 +1118,8 @@ export function getUrl({
   repository: string;
 }): string {
   if (protocol === 'ssh') {
-    return `git@${hostname}:${repository}.git`;
+    // TODO: types (#7154)
+    return `git@${hostname!}:${repository}.git`;
   }
   return URL.format({
     protocol: protocol ?? 'https',
@@ -1091,6 +1168,11 @@ export async function pushCommitToRenovateRef(
  *
  *   $ git push --delete origin refs/renovate/foo refs/renovate/bar refs/renovate/baz
  *
+ * If Step 2 fails because the repo doesn't allow bulk changes, we'll remove them one by one instead:
+ *
+ *   $ git push --delete origin refs/renovate/foo
+ *   $ git push --delete origin refs/renovate/bar
+ *   $ git push --delete origin refs/renovate/baz
  */
 export async function clearRenovateRefs(): Promise<void> {
   if (!gitInitialized || !remoteRefsExist) {
@@ -1123,8 +1205,20 @@ export async function clearRenovateRefs(): Promise<void> {
   obsoleteRefs.push(...renovateBranchRefs);
 
   if (obsoleteRefs.length) {
-    const pushOpts = ['--delete', 'origin', ...obsoleteRefs];
-    await git.push(pushOpts);
+    try {
+      const pushOpts = ['--delete', 'origin', ...obsoleteRefs];
+      await git.push(pushOpts);
+    } catch (err) {
+      /* istanbul ignore else */
+      if (bulkChangesDisallowed(err)) {
+        for (const ref of obsoleteRefs) {
+          const pushOpts = ['--delete', 'origin', ref];
+          await git.push(pushOpts);
+        }
+      } else {
+        throw err;
+      }
+    }
   }
 
   remoteRefsExist = false;

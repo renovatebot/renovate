@@ -3,8 +3,9 @@ import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import type { GitLabBranch } from '../../../types/platform/gitlab';
 import { GitlabHttp } from '../../../util/http/gitlab';
+import type { HttpResponse } from '../../../util/http/types';
 import type { Preset, PresetConfig } from '../types';
-import { PRESET_DEP_NOT_FOUND, fetchPreset } from '../util';
+import { PRESET_DEP_NOT_FOUND, fetchPreset, parsePreset } from '../util';
 
 const gitlabApi = new GitlabHttp();
 export const Endpoint = 'https://gitlab.com/api/v4/';
@@ -36,6 +37,7 @@ export async function fetchJSONFile(
 ): Promise<Preset> {
   let url = endpoint;
   let ref = '';
+  let res: HttpResponse;
   try {
     const urlEncodedRepo = encodeURIComponent(repo);
     const urlEncodedPkgName = encodeURIComponent(fileName);
@@ -50,7 +52,7 @@ export async function fetchJSONFile(
     }
     url += `projects/${urlEncodedRepo}/repository/files/${urlEncodedPkgName}/raw${ref}`;
     logger.trace({ url }, `Preset URL`);
-    return (await gitlabApi.getJson<Preset>(url)).body;
+    res = await gitlabApi.get(url);
   } catch (err) {
     if (err instanceof ExternalHostError) {
       throw err;
@@ -61,6 +63,8 @@ export async function fetchJSONFile(
     );
     throw new Error(PRESET_DEP_NOT_FOUND);
   }
+
+  return parsePreset(res.body);
 }
 
 export function getPresetFromEndpoint(

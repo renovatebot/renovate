@@ -3,6 +3,7 @@ import semver from 'semver';
 import semverUtils from 'semver-utils';
 import { logger } from '../../../logger';
 import { regEx } from '../../../util/regex';
+import { isSemVerXRange } from '../semver/common';
 import type { NewValueConfig } from '../types';
 
 const {
@@ -63,6 +64,12 @@ export function getNewValue({
   currentVersion,
   newVersion,
 }: NewValueConfig): string | null {
+  if (
+    !['pin', 'update-lockfile'].includes(rangeStrategy) &&
+    isSemVerXRange(currentValue)
+  ) {
+    return null;
+  }
   if (rangeStrategy === 'pin' || isVersion(currentValue)) {
     return newVersion;
   }
@@ -93,21 +100,24 @@ export function getNewValue({
       // TODO fix this
       const splitCurrent = currentValue.split(element.operator);
       splitCurrent.pop();
-      return `${splitCurrent.join(element.operator)}${newValue}`;
+      // TODO: types (#7154)
+      return `${splitCurrent.join(element.operator)}${newValue!}`;
     }
     if (parsedRange.length > 1) {
       const previousElement = parsedRange[parsedRange.length - 2];
       if (previousElement.operator === '-') {
         const splitCurrent = currentValue.split('-');
         splitCurrent.pop();
-        return `${splitCurrent.join('-')}- ${newValue}`;
+        // TODO: types (#7154)
+        return `${splitCurrent.join('-')}- ${newValue!}`;
       }
       if (element.operator?.startsWith('>')) {
         logger.warn(`Complex ranges ending in greater than are not supported`);
         return null;
       }
     }
-    return `${currentValue} || ${newValue}`;
+    // TODO: types (#7154)
+    return `${currentValue} || ${newValue!}`;
   }
   const toVersionMajor = major(newVersion);
   const toVersionMinor = minor(newVersion);
@@ -235,7 +245,8 @@ export function getNewValue({
       const newMajor = toVersionMajor + 1;
       res = `<${newMajor}.0.0`;
     } else if (element.patch) {
-      res = `<${increment(newVersion, 'patch')}`;
+      // TODO: types (#7154)
+      res = `<${increment(newVersion, 'patch')!}`;
     } else if (element.minor) {
       res = `<${toVersionMajor}.${toVersionMinor + 1}`;
     } else {

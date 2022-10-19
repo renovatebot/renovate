@@ -271,9 +271,6 @@ export async function extractPackageFile(
     }
     if (isValid(dep.currentValue)) {
       dep.datasource = NpmDatasource.id;
-      if (dep.currentValue === '*') {
-        dep.skipReason = 'any-version';
-      }
       if (dep.currentValue === '') {
         dep.skipReason = 'empty';
       }
@@ -406,9 +403,16 @@ export async function extractPackageFile(
             dep.managerData = { key };
           }
           if (depType === 'overrides' && !is.string(val)) {
-            deps.push(...extractOverrideDepsRec([depName], val));
+            // TODO: fix type #7154
+            deps.push(
+              ...extractOverrideDepsRec(
+                [depName],
+                val as unknown as NpmManagerData
+              )
+            );
           } else {
-            dep = { ...dep, ...extractDependency(depType, depName, val) };
+            // TODO: fix type #7154
+            dep = { ...dep, ...extractDependency(depType, depName, val!) };
             setNodeCommitTopic(dep);
             dep.prettyDepType = depTypes[depType];
             deps.push(dep);

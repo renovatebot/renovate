@@ -154,14 +154,14 @@ describe('modules/manager/npm/extract/monorepo', () => {
         },
       ];
       await detectMonorepos(packageFiles);
-      expect(packageFiles).toMatchSnapshot([
+      expect(packageFiles).toMatchObject([
         {},
         { npmrc: '@org:registry=//registry.some.org\n' },
         {},
       ]);
     });
 
-    it('uses yarn workspaces package settings with contraints', async () => {
+    it('uses yarn workspaces package settings with constraints', async () => {
       const packageFiles: Partial<PackageFile>[] = [
         {
           packageFile: 'package.json',
@@ -229,7 +229,7 @@ describe('modules/manager/npm/extract/monorepo', () => {
         },
       ];
       await detectMonorepos(packageFiles);
-      expect(packageFiles).toMatchSnapshot([
+      expect(packageFiles).toMatchObject([
         {},
         { managerData: { yarnZeroInstall: true }, skipInstalls: false },
         { managerData: { yarnZeroInstall: true }, skipInstalls: false },

@@ -1,6 +1,5 @@
 // TODO #7154
 import is from '@sindresorhus/is';
-import pAll from 'p-all';
 import { getManagerConfig, mergeChildConfig } from '../../../config';
 import type { RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
@@ -15,6 +14,7 @@ import type {
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { clone } from '../../../util/clone';
 import { applyPackageRules } from '../../../util/package-rules';
+import * as p from '../../../util/promises';
 import { PackageFiles } from '../package-files';
 import { lookupUpdates } from './lookup';
 import type { LookupUpdateConfig } from './lookup/types';
@@ -69,7 +69,8 @@ async function fetchDepUpdates(
         dep.warnings ??= [];
         dep.warnings.push({
           topic: 'Lookup Error',
-          message: `${depName}: ${cause.message}`,
+          // TODO: types (#7154)
+          message: `${depName!}: ${cause.message}`,
         });
       }
     }
@@ -95,7 +96,7 @@ async function fetchManagerPackagerFileUpdates(
     'fetchManagerPackagerFileUpdates starting with concurrency'
   );
 
-  pFile.deps = await pAll(queue, { concurrency: 5 });
+  pFile.deps = await p.all(queue);
   logger.trace({ packageFile }, 'fetchManagerPackagerFileUpdates finished');
 }
 
@@ -113,7 +114,7 @@ async function fetchManagerUpdates(
     { manager, queueLength: queue.length },
     'fetchManagerUpdates starting'
   );
-  await pAll(queue, { concurrency: 5 });
+  await p.all(queue);
   logger.trace({ manager }, 'fetchManagerUpdates finished');
 }
 

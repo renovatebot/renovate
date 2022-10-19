@@ -30,7 +30,7 @@ We intend to make the mapping configurable in future iterations.
 ### Configuration of Python version
 
 By default Renovate uses the latest version of Python.
-To get Renovate to use another version of Python, add a contraints` rule to the Renovate config:
+To get Renovate to use another version of Python, add a constraints` rule to the Renovate config:
 
 ```json
 {

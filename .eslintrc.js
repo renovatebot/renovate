@@ -97,7 +97,7 @@ module.exports = {
       {
         vars: 'all',
         args: 'none',
-        ignoreRestSiblings: false,
+        ignoreRestSiblings: true,
       },
     ],
     '@typescript-eslint/prefer-optional-chain': 2,
@@ -114,7 +114,7 @@ module.exports = {
     '@typescript-eslint/no-unsafe-argument': 0, // thousands of errors :-/
 
     '@typescript-eslint/restrict-template-expressions': [
-      1,
+      2,
       { allowNumber: true, allowBoolean: true },
     ],
     '@typescript-eslint/restrict-plus-operands': 2,
@@ -133,6 +133,13 @@ module.exports = {
 
     'typescript-enum/no-const-enum': 2,
     'typescript-enum/no-enum': 2,
+    'object-shorthand': [
+      'error',
+      'always',
+      {
+        avoidQuotes: true,
+      },
+    ],
   },
   settings: {
     'import/parsers': {

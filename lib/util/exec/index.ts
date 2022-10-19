@@ -3,10 +3,11 @@ import upath from 'upath';
 import { GlobalConfig } from '../../config/global';
 import { TEMPORARY_ERROR } from '../../constants/error-messages';
 import { logger } from '../../logger';
-import { generateInstallCommands, isDynamicInstall } from './buildpack';
 import { rawExec } from './common';
+import { generateInstallCommands, isDynamicInstall } from './containerbase';
 import { generateDockerCommand, removeDockerContainer } from './docker';
 import { getChildProcessEnv } from './env';
+import { getHermitEnvs, isHermit } from './hermit';
 import type {
   DockerOptions,
   ExecOptions,
@@ -100,7 +101,15 @@ async function prepareRawExec(
   opts: ExecOptions = {}
 ): Promise<RawExecArguments> {
   const { docker } = opts;
-  const { customEnvVariables } = GlobalConfig.get();
+  const { customEnvVariables, containerbaseDir, binarySource } =
+    GlobalConfig.get();
+
+  if (binarySource === 'docker' || binarySource === 'install') {
+    logger.debug(`Setting CONTAINERBASE_CACHE_DIR to ${containerbaseDir!}`);
+    opts.env ??= {};
+    opts.env.BUILDPACK_CACHE_DIR = containerbaseDir;
+    opts.env.CONTAINERBASE_CACHE_DIR = containerbaseDir;
+  }
 
   const rawOptions = getRawExecOptions(opts);
 
@@ -108,9 +117,16 @@ async function prepareRawExec(
 
   if (isDocker(docker)) {
     logger.debug({ image: docker.image }, 'Using docker to execute');
-    const extraEnv = { ...opts.extraEnv, ...customEnvVariables };
+    const extraEnv = {
+      ...opts.extraEnv,
+      ...customEnvVariables,
+    };
     const childEnv = getChildEnv(opts);
-    const envVars = dockerEnvVars(extraEnv, childEnv);
+    const envVars = [
+      ...dockerEnvVars(extraEnv, childEnv),
+      'BUILDPACK_CACHE_DIR',
+      'CONTAINERBASE_CACHE_DIR',
+    ];
     const cwd = getCwd(opts);
     const dockerOptions: DockerOptions = { ...docker, cwd, envVars };
     const preCommands = [
@@ -124,11 +140,22 @@ async function prepareRawExec(
     );
     rawCommands = [dockerCommand];
   } else if (isDynamicInstall(opts.toolConstraints)) {
-    logger.debug('Using buildpack dynamic installs');
+    logger.debug('Using containerbase dynamic installs');
     rawCommands = [
       ...(await generateInstallCommands(opts.toolConstraints)),
+      ...(opts.preCommands ?? []),
       ...rawCommands,
     ];
+  } else if (isHermit()) {
+    const hermitEnvVars = await getHermitEnvs(rawOptions);
+    logger.debug(
+      { hermitEnvVars },
+      'merging hermit environment variables into the execution options'
+    );
+    rawOptions.env = {
+      ...rawOptions.env,
+      ...hermitEnvVars,
+    };
   }
 
   return { rawCommands, rawOptions };

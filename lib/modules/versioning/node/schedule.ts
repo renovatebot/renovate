@@ -22,7 +22,7 @@ for (const version of Object.keys(nodeSchedule)) {
   const schedule = nodeSchedule[version];
   if (schedule.codename) {
     nodeCodenames.set(schedule.codename.toUpperCase(), {
-      version: version,
+      version,
       ...schedule,
     });
   }
@@ -36,6 +36,7 @@ export function findScheduleForCodename(
 
 export function findScheduleForVersion(version: string): NodeJsSchedule | null {
   const major = semver.getMajor(version);
-  const schedule = nodeSchedule[`v${major}`];
+  // TODO: types (#7154)
+  const schedule = nodeSchedule[`v${major!}`];
   return schedule;
 }

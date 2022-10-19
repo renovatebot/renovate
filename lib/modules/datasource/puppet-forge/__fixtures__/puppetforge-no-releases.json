@@ -1,0 +1,26 @@
+{
+  "uri": "/v3/modules/puppetlabs-apache",
+  "slug": "puppetlabs-apache",
+  "name": "apache",
+  "downloads": 11063567,
+  "created_at": "2010-05-20 22:43:19 -0700",
+  "updated_at": "2021-10-11 07:47:24 -0700",
+  "deprecated_at": null,
+  "deprecated_for": null,
+  "superseded_by": null,
+  "supported": true,
+  "endorsement": "supported",
+  "module_group": "base",
+  "owner": {
+    "uri": "/v3/users/puppetlabs",
+    "slug": "puppetlabs",
+    "username": "puppetlabs",
+    "gravatar_id": "fdd009b7c1ec96e088b389f773e87aec"
+  },
+  "premium": false,
+  "releases": [
+  ],
+  "feedback_score": 83,
+  "homepage_url": "https://github.com/puppetlabs/puppetlabs-apache",
+  "issues_url": "https://tickets.puppetlabs.com/browse/MODULES"
+}

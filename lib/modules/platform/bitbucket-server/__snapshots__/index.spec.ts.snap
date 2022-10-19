@@ -11,8 +11,8 @@ exports[`modules/platform/bitbucket-server/index endpoint with no path addReview
 exports[`modules/platform/bitbucket-server/index endpoint with no path deleteLAbel() does not throw 1`] = `undefined`;
 
 exports[`modules/platform/bitbucket-server/index endpoint with no path findPr() has pr 1`] = `
-Object {
-  "bodyStruct": Object {
+{
+  "bodyStruct": {
     "hash": "7980dafc4eb6f0c79278fd929d3e8e5954b32b68ae118a22565c7c369fc2f591",
   },
   "createdAt": 1547853840016,
@@ -26,15 +26,15 @@ Object {
 `;
 
 exports[`modules/platform/bitbucket-server/index endpoint with no path getBranchPr() has pr 1`] = `
-Object {
-  "bodyStruct": Object {
+{
+  "bodyStruct": {
     "hash": "7980dafc4eb6f0c79278fd929d3e8e5954b32b68ae118a22565c7c369fc2f591",
   },
   "createdAt": 1547853840016,
   "displayNumber": "Pull Request #5",
   "hasReviewers": true,
   "number": 5,
-  "reviewers": Array [
+  "reviewers": [
     "userName2",
   ],
   "sourceBranch": "userName1/pullRequest5",
@@ -46,15 +46,15 @@ Object {
 `;
 
 exports[`modules/platform/bitbucket-server/index endpoint with no path getPr() canRebase 1`] = `
-Object {
-  "bodyStruct": Object {
+{
+  "bodyStruct": {
     "hash": "7980dafc4eb6f0c79278fd929d3e8e5954b32b68ae118a22565c7c369fc2f591",
   },
   "createdAt": 1547853840016,
   "displayNumber": "Pull Request #5",
   "hasReviewers": true,
   "number": 5,
-  "reviewers": Array [
+  "reviewers": [
     "userName2",
   ],
   "sourceBranch": "userName1/pullRequest5",
@@ -66,15 +66,15 @@ Object {
 `;
 
 exports[`modules/platform/bitbucket-server/index endpoint with no path getPr() canRebase 2`] = `
-Object {
-  "bodyStruct": Object {
+{
+  "bodyStruct": {
     "hash": "7980dafc4eb6f0c79278fd929d3e8e5954b32b68ae118a22565c7c369fc2f591",
   },
   "createdAt": 1547853840016,
   "displayNumber": "Pull Request #5",
   "hasReviewers": true,
   "number": 5,
-  "reviewers": Array [
+  "reviewers": [
     "userName2",
   ],
   "sourceBranch": "userName1/pullRequest5",
@@ -86,15 +86,15 @@ Object {
 `;
 
 exports[`modules/platform/bitbucket-server/index endpoint with no path getPr() canRebase 3`] = `
-Object {
-  "bodyStruct": Object {
+{
+  "bodyStruct": {
     "hash": "7980dafc4eb6f0c79278fd929d3e8e5954b32b68ae118a22565c7c369fc2f591",
   },
   "createdAt": 1547853840016,
   "displayNumber": "Pull Request #5",
   "hasReviewers": true,
   "number": 5,
-  "reviewers": Array [
+  "reviewers": [
     "userName2",
   ],
   "sourceBranch": "userName1/pullRequest5",
@@ -106,15 +106,15 @@ Object {
 `;
 
 exports[`modules/platform/bitbucket-server/index endpoint with no path getPr() gets a PR 1`] = `
-Object {
-  "bodyStruct": Object {
+{
+  "bodyStruct": {
     "hash": "7980dafc4eb6f0c79278fd929d3e8e5954b32b68ae118a22565c7c369fc2f591",
   },
   "createdAt": 1547853840016,
   "displayNumber": "Pull Request #5",
   "hasReviewers": true,
   "number": 5,
-  "reviewers": Array [
+  "reviewers": [
     "userName2",
   ],
   "sourceBranch": "userName1/pullRequest5",
@@ -126,15 +126,15 @@ Object {
 `;
 
 exports[`modules/platform/bitbucket-server/index endpoint with no path getPr() gets a closed PR 1`] = `
-Object {
-  "bodyStruct": Object {
+{
+  "bodyStruct": {
     "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
   },
   "createdAt": undefined,
   "displayNumber": "Pull Request #undefined",
   "hasReviewers": false,
   "number": undefined,
-  "reviewers": Array [],
+  "reviewers": [],
   "sourceBranch": undefined,
   "state": "merged",
   "targetBranch": undefined,
@@ -144,9 +144,9 @@ Object {
 `;
 
 exports[`modules/platform/bitbucket-server/index endpoint with no path getPrList() has pr 1`] = `
-Array [
-  Object {
-    "bodyStruct": Object {
+[
+  {
+    "bodyStruct": {
       "hash": "7980dafc4eb6f0c79278fd929d3e8e5954b32b68ae118a22565c7c369fc2f591",
     },
     "createdAt": 1547853840016,
@@ -161,36 +161,40 @@ Array [
 `;
 
 exports[`modules/platform/bitbucket-server/index endpoint with no path initPlatform() should init 1`] = `
-Object {
+{
   "endpoint": "https://stash.renovatebot.com/",
 }
 `;
 
 exports[`modules/platform/bitbucket-server/index endpoint with no path initRepo() generates URL if API does not contain clone links 1`] = `
-Object {
+{
   "defaultBranch": "master",
   "isFork": false,
+  "repoFingerprint": "a37c027c633002a25e0c86a9d82fba2350ee8028133b94fe4df032f052f6f331a0d6d1c189d25c4cf9f436816fbe35d7086556ef2bdd2b2b54c82fde035c2bb6",
 }
 `;
 
 exports[`modules/platform/bitbucket-server/index endpoint with no path initRepo() uses http url from API with injected auth if http url in API response 1`] = `
-Object {
+{
   "defaultBranch": "master",
   "isFork": false,
+  "repoFingerprint": "a37c027c633002a25e0c86a9d82fba2350ee8028133b94fe4df032f052f6f331a0d6d1c189d25c4cf9f436816fbe35d7086556ef2bdd2b2b54c82fde035c2bb6",
 }
 `;
 
 exports[`modules/platform/bitbucket-server/index endpoint with no path initRepo() uses ssh url from API if http not in API response 1`] = `
-Object {
+{
   "defaultBranch": "master",
   "isFork": false,
+  "repoFingerprint": "a37c027c633002a25e0c86a9d82fba2350ee8028133b94fe4df032f052f6f331a0d6d1c189d25c4cf9f436816fbe35d7086556ef2bdd2b2b54c82fde035c2bb6",
 }
 `;
 
 exports[`modules/platform/bitbucket-server/index endpoint with no path initRepo() works 1`] = `
-Object {
+{
   "defaultBranch": "master",
   "isFork": false,
+  "repoFingerprint": "a37c027c633002a25e0c86a9d82fba2350ee8028133b94fe4df032f052f6f331a0d6d1c189d25c4cf9f436816fbe35d7086556ef2bdd2b2b54c82fde035c2bb6",
 }
 `;
 
@@ -200,7 +204,7 @@ exports[`modules/platform/bitbucket-server/index endpoint with no path massageMa
 "---
 
 - [ ] If you want to rebase/retry this PR, click this checkbox
-- [ ] <a href=\\"/some/link\\">Update renovate/renovate to 16.1.2</a>
+- [ ] <a href="/some/link">Update renovate/renovate to 16.1.2</a>
 
 ---
 
@@ -223,8 +227,8 @@ exports[`modules/platform/bitbucket-server/index endpoint with path addReviewers
 exports[`modules/platform/bitbucket-server/index endpoint with path deleteLAbel() does not throw 1`] = `undefined`;
 
 exports[`modules/platform/bitbucket-server/index endpoint with path findPr() has pr 1`] = `
-Object {
-  "bodyStruct": Object {
+{
+  "bodyStruct": {
     "hash": "7980dafc4eb6f0c79278fd929d3e8e5954b32b68ae118a22565c7c369fc2f591",
   },
   "createdAt": 1547853840016,
@@ -238,15 +242,15 @@ Object {
 `;
 
 exports[`modules/platform/bitbucket-server/index endpoint with path getBranchPr() has pr 1`] = `
-Object {
-  "bodyStruct": Object {
+{
+  "bodyStruct": {
     "hash": "7980dafc4eb6f0c79278fd929d3e8e5954b32b68ae118a22565c7c369fc2f591",
   },
   "createdAt": 1547853840016,
   "displayNumber": "Pull Request #5",
   "hasReviewers": true,
   "number": 5,
-  "reviewers": Array [
+  "reviewers": [
     "userName2",
   ],
   "sourceBranch": "userName1/pullRequest5",
@@ -258,15 +262,15 @@ Object {
 `;
 
 exports[`modules/platform/bitbucket-server/index endpoint with path getPr() canRebase 1`] = `
-Object {
-  "bodyStruct": Object {
+{
+  "bodyStruct": {
     "hash": "7980dafc4eb6f0c79278fd929d3e8e5954b32b68ae118a22565c7c369fc2f591",
   },
   "createdAt": 1547853840016,
   "displayNumber": "Pull Request #5",
   "hasReviewers": true,
   "number": 5,
-  "reviewers": Array [
+  "reviewers": [
     "userName2",
   ],
   "sourceBranch": "userName1/pullRequest5",
@@ -278,15 +282,15 @@ Object {
 `;
 
 exports[`modules/platform/bitbucket-server/index endpoint with path getPr() canRebase 2`] = `
-Object {
-  "bodyStruct": Object {
+{
+  "bodyStruct": {
     "hash": "7980dafc4eb6f0c79278fd929d3e8e5954b32b68ae118a22565c7c369fc2f591",
   },
   "createdAt": 1547853840016,
   "displayNumber": "Pull Request #5",
   "hasReviewers": true,
   "number": 5,
-  "reviewers": Array [
+  "reviewers": [
     "userName2",
   ],
   "sourceBranch": "userName1/pullRequest5",
@@ -298,15 +302,15 @@ Object {
 `;
 
 exports[`modules/platform/bitbucket-server/index endpoint with path getPr() canRebase 3`] = `
-Object {
-  "bodyStruct": Object {
+{
+  "bodyStruct": {
     "hash": "7980dafc4eb6f0c79278fd929d3e8e5954b32b68ae118a22565c7c369fc2f591",
   },
   "createdAt": 1547853840016,
   "displayNumber": "Pull Request #5",
   "hasReviewers": true,
   "number": 5,
-  "reviewers": Array [
+  "reviewers": [
     "userName2",
   ],
   "sourceBranch": "userName1/pullRequest5",
@@ -318,15 +322,15 @@ Object {
 `;
 
 exports[`modules/platform/bitbucket-server/index endpoint with path getPr() gets a PR 1`] = `
-Object {
-  "bodyStruct": Object {
+{
+  "bodyStruct": {
     "hash": "7980dafc4eb6f0c79278fd929d3e8e5954b32b68ae118a22565c7c369fc2f591",
   },
   "createdAt": 1547853840016,
   "displayNumber": "Pull Request #5",
   "hasReviewers": true,
   "number": 5,
-  "reviewers": Array [
+  "reviewers": [
     "userName2",
   ],
   "sourceBranch": "userName1/pullRequest5",
@@ -338,15 +342,15 @@ Object {
 `;
 
 exports[`modules/platform/bitbucket-server/index endpoint with path getPr() gets a closed PR 1`] = `
-Object {
-  "bodyStruct": Object {
+{
+  "bodyStruct": {
     "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
   },
   "createdAt": undefined,
   "displayNumber": "Pull Request #undefined",
   "hasReviewers": false,
   "number": undefined,
-  "reviewers": Array [],
+  "reviewers": [],
   "sourceBranch": undefined,
   "state": "merged",
   "targetBranch": undefined,
@@ -356,9 +360,9 @@ Object {
 `;
 
 exports[`modules/platform/bitbucket-server/index endpoint with path getPrList() has pr 1`] = `
-Array [
-  Object {
-    "bodyStruct": Object {
+[
+  {
+    "bodyStruct": {
       "hash": "7980dafc4eb6f0c79278fd929d3e8e5954b32b68ae118a22565c7c369fc2f591",
     },
     "createdAt": 1547853840016,
@@ -373,36 +377,40 @@ Array [
 `;
 
 exports[`modules/platform/bitbucket-server/index endpoint with path initPlatform() should init 1`] = `
-Object {
+{
   "endpoint": "https://stash.renovatebot.com/",
 }
 `;
 
 exports[`modules/platform/bitbucket-server/index endpoint with path initRepo() generates URL if API does not contain clone links 1`] = `
-Object {
+{
   "defaultBranch": "master",
   "isFork": false,
+  "repoFingerprint": "5cf9fcad2424fb392c571e8c68ae75132e5db7a1f74d89235bda8dbac1c6c40c45997bace756898176a8b898aa1580b0345dc6272284ecf18a055536402ffcf7",
 }
 `;
 
 exports[`modules/platform/bitbucket-server/index endpoint with path initRepo() uses http url from API with injected auth if http url in API response 1`] = `
-Object {
+{
   "defaultBranch": "master",
   "isFork": false,
+  "repoFingerprint": "5cf9fcad2424fb392c571e8c68ae75132e5db7a1f74d89235bda8dbac1c6c40c45997bace756898176a8b898aa1580b0345dc6272284ecf18a055536402ffcf7",
 }
 `;
 
 exports[`modules/platform/bitbucket-server/index endpoint with path initRepo() uses ssh url from API if http not in API response 1`] = `
-Object {
+{
   "defaultBranch": "master",
   "isFork": false,
+  "repoFingerprint": "5cf9fcad2424fb392c571e8c68ae75132e5db7a1f74d89235bda8dbac1c6c40c45997bace756898176a8b898aa1580b0345dc6272284ecf18a055536402ffcf7",
 }
 `;
 
 exports[`modules/platform/bitbucket-server/index endpoint with path initRepo() works 1`] = `
-Object {
+{
   "defaultBranch": "master",
   "isFork": false,
+  "repoFingerprint": "5cf9fcad2424fb392c571e8c68ae75132e5db7a1f74d89235bda8dbac1c6c40c45997bace756898176a8b898aa1580b0345dc6272284ecf18a055536402ffcf7",
 }
 `;
 
@@ -412,7 +420,7 @@ exports[`modules/platform/bitbucket-server/index endpoint with path massageMarkd
 "---
 
 - [ ] If you want to rebase/retry this PR, click this checkbox
-- [ ] <a href=\\"/some/link\\">Update renovate/renovate to 16.1.2</a>
+- [ ] <a href="/some/link">Update renovate/renovate to 16.1.2</a>
 
 ---
 
