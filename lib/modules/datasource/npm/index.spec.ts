@@ -4,7 +4,7 @@ import * as httpMock from '../../../../test/http-mock';
 import { GlobalConfig } from '../../../config/global';
 import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages';
 import * as hostRules from '../../../util/host-rules';
-import { NpmDatasource, resetCache, setNpmrc } from '.';
+import { NpmDatasource, setNpmrc } from '.';
 
 const datasource = NpmDatasource.id;
 
@@ -17,7 +17,6 @@ describe('modules/datasource/npm/index', () => {
     jest.resetAllMocks();
     GlobalConfig.reset();
     hostRules.clear();
-    resetCache();
     setNpmrc();
     npmResponse = {
       name: 'foobar',
@@ -92,7 +91,7 @@ describe('modules/datasource/npm/index', () => {
     httpMock.scope('https://registry.npmjs.org').get('/foobar').reply(200, pkg);
     const res = await getPkgReleases({ datasource, depName: 'foobar' });
     expect(res).toMatchSnapshot();
-    expect(res.sourceUrl).toBeDefined();
+    expect(res?.sourceUrl).toBeDefined();
   });
 
   it('should parse repo url (string)', async () => {
@@ -113,7 +112,7 @@ describe('modules/datasource/npm/index', () => {
     httpMock.scope('https://registry.npmjs.org').get('/foobar').reply(200, pkg);
     const res = await getPkgReleases({ datasource, depName: 'foobar' });
     expect(res).toMatchSnapshot();
-    expect(res.sourceUrl).toBeDefined();
+    expect(res?.sourceUrl).toBeDefined();
   });
 
   it('should return deprecated', async () => {
@@ -146,7 +145,7 @@ describe('modules/datasource/npm/index', () => {
       .reply(200, deprecatedPackage);
     const res = await getPkgReleases({ datasource, depName: 'foobar' });
     expect(res).toMatchSnapshot();
-    expect(res.deprecationMessage).toMatchSnapshot();
+    expect(res?.deprecationMessage).toMatchSnapshot();
   });
 
   it('should handle foobar', async () => {
@@ -298,18 +297,6 @@ describe('modules/datasource/npm/index', () => {
     const npmrc = 'foo=bar';
     const res = await getPkgReleases({ datasource, depName: 'foobar', npmrc });
     expect(res).toMatchSnapshot();
-  });
-
-  it('should cache package info from npm', async () => {
-    httpMock
-      .scope('https://registry.npmjs.org')
-      .get('/foobar')
-      .reply(200, npmResponse);
-    const npmrc = '//registry.npmjs.org/:_authToken=abcdefghijklmnopqrstuvwxyz';
-    const res1 = await getPkgReleases({ datasource, depName: 'foobar', npmrc });
-    const res2 = await getPkgReleases({ datasource, depName: 'foobar', npmrc });
-    expect(res1).not.toBeNull();
-    expect(res1).toEqual(res2);
   });
 
   it('should fetch package info from custom registry', async () => {

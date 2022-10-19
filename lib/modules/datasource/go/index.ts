@@ -25,6 +25,8 @@ export class GoDatasource extends Datasource {
 
   @cache({
     namespace: `datasource-${GoDatasource.id}`,
+    // TODO: types (#7154)
+    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
     key: ({ packageName }: Partial<DigestConfig>) => `${packageName}-digest`,
   })
   getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
@@ -45,11 +47,11 @@ export class GoDatasource extends Datasource {
    */
   @cache({
     namespace: GoDatasource.id,
-    key: ({ packageName }: Partial<DigestConfig>) => `${packageName}-digest`,
+    key: ({ packageName }: DigestConfig) => `${packageName}-digest`,
   })
   override async getDigest(
-    { packageName }: Partial<DigestConfig>,
-    value?: string
+    { packageName }: DigestConfig,
+    value?: string | null
   ): Promise<string | null> {
     const source = await BaseGoDatasource.getDatasource(packageName);
     if (!source) {
@@ -64,10 +66,10 @@ export class GoDatasource extends Datasource {
         return this.direct.github.getDigest(source, tag);
       }
       case BitBucketTagsDatasource.id: {
-        return this.direct.bitbucket.getDigest(source, tag);
+        return this.direct.bitbucket.getDigest?.(source, tag) ?? null;
       }
       case GitlabTagsDatasource.id: {
-        return this.direct.gitlab.getDigest(source, tag);
+        return this.direct.gitlab.getDigest?.(source, tag) ?? null;
       }
       /* istanbul ignore next: can never happen, makes lint happy */
       default: {

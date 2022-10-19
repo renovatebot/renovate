@@ -1,15 +1,15 @@
-import { join } from 'path';
 import { quote } from 'shlex';
+import { join } from 'upath';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { exec } from '../../../util/exec';
 import type { ExecOptions } from '../../../util/exec/types';
 import {
-  ensureCacheDir,
+  ensureDir,
+  getFileContentMap,
   getSiblingFileName,
-  outputFile,
-  readLocalFile,
-  remove,
+  outputCacheFile,
+  privateCacheDir,
   writeLocalFile,
 } from '../../../util/fs';
 import * as hostRules from '../../../util/host-rules';
@@ -21,35 +21,39 @@ import type {
   UpdateArtifactsConfig,
   UpdateArtifactsResult,
 } from '../types';
-import { getDependentPackageFiles } from './package-tree';
 import {
-  getConfiguredRegistries,
-  getDefaultRegistries,
-  getRandomString,
-} from './util';
+  MSBUILD_CENTRAL_FILE,
+  NUGET_CENTRAL_FILE,
+  getDependentPackageFiles,
+} from './package-tree';
+import { getConfiguredRegistries, getDefaultRegistries } from './util';
 
 async function addSourceCmds(
   packageFileName: string,
-  config: UpdateArtifactsConfig,
+  _config: UpdateArtifactsConfig,
   nugetConfigFile: string
 ): Promise<string[]> {
   const registries =
-    (await getConfiguredRegistries(packageFileName)) || getDefaultRegistries();
-  const result = [];
+    (await getConfiguredRegistries(packageFileName)) ?? getDefaultRegistries();
+  const result: string[] = [];
   for (const registry of registries) {
     const { username, password } = hostRules.find({
       hostType: NugetDatasource.id,
       url: registry.url,
     });
     const registryInfo = parseRegistryUrl(registry.url);
-    let addSourceCmd = `dotnet nuget add source ${registryInfo.feedUrl} --configfile ${nugetConfigFile}`;
+    let addSourceCmd = `dotnet nuget add source ${quote(
+      registryInfo.feedUrl
+    )} --configfile ${quote(nugetConfigFile)}`;
     if (registry.name) {
       // Add name for registry, if known.
       addSourceCmd += ` --name ${quote(registry.name)}`;
     }
     if (username && password) {
       // Add registry credentials from host rules, if configured.
-      addSourceCmd += ` --username ${username} --password ${password} --store-password-in-clear-text`;
+      addSourceCmd += ` --username ${quote(username)} --password ${quote(
+        password
+      )} --store-password-in-clear-text`;
     }
     result.push(addSourceCmd);
   }
@@ -61,16 +65,20 @@ async function runDotnetRestore(
   dependentPackageFileNames: string[],
   config: UpdateArtifactsConfig
 ): Promise<void> {
+  const nugetCacheDir = join(privateCacheDir(), 'nuget');
+
   const execOptions: ExecOptions = {
     docker: {
       image: 'dotnet',
     },
+    extraEnv: { NUGET_PACKAGES: join(nugetCacheDir, 'packages') },
   };
 
-  const nugetCacheDir = await ensureCacheDir('nuget');
-  const nugetConfigDir = join(nugetCacheDir, `${getRandomString()}`);
-  const nugetConfigFile = join(nugetConfigDir, `nuget.config`);
-  await outputFile(
+  const nugetConfigFile = join(nugetCacheDir, `nuget.config`);
+
+  await ensureDir(nugetCacheDir);
+
+  await outputCacheFile(
     nugetConfigFile,
     `<?xml version="1.0" encoding="utf-8"?>\n<configuration>\n</configuration>\n`
   );
@@ -78,27 +86,13 @@ async function runDotnetRestore(
   const cmds = [
     ...(await addSourceCmds(packageFileName, config, nugetConfigFile)),
     ...dependentPackageFileNames.map(
-      (f) =>
-        `dotnet restore ${f} --force-evaluate --configfile ${nugetConfigFile}`
+      (fileName) =>
+        `dotnet restore ${quote(
+          fileName
+        )} --force-evaluate --configfile ${quote(nugetConfigFile)}`
     ),
   ];
   await exec(cmds, execOptions);
-  await remove(nugetConfigDir);
-}
-
-async function getLockFileContentMap(
-  lockFileNames: string[]
-): Promise<Record<string, string>> {
-  const lockFileContentMap: Record<string, string> = {};
-
-  for (const lockFileName of lockFileNames) {
-    lockFileContentMap[lockFileName] = await readLocalFile(
-      lockFileName,
-      'utf8'
-    );
-  }
-
-  return lockFileContentMap;
 }
 
 export async function updateArtifacts({
@@ -109,7 +103,18 @@ export async function updateArtifacts({
 }: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
   logger.debug(`nuget.updateArtifacts(${packageFileName})`);
 
-  if (!regEx(/(?:cs|vb|fs)proj$/i).test(packageFileName)) {
+  // https://github.com/NuGet/Home/wiki/Centrally-managing-NuGet-package-versions
+  // https://github.com/microsoft/MSBuildSdks/tree/main/src/CentralPackageVersions
+  const isCentralManament =
+    packageFileName === NUGET_CENTRAL_FILE ||
+    packageFileName === MSBUILD_CENTRAL_FILE ||
+    packageFileName.endsWith(`/${NUGET_CENTRAL_FILE}`) ||
+    packageFileName.endsWith(`/${MSBUILD_CENTRAL_FILE}`);
+
+  if (
+    !isCentralManament &&
+    !regEx(/(?:cs|vb|fs)proj$/i).test(packageFileName)
+  ) {
     // This could be implemented in the future if necessary.
     // It's not that easy though because the questions which
     // project file to restore how to determine which lock files
@@ -122,9 +127,12 @@ export async function updateArtifacts({
   }
 
   const packageFiles = [
-    ...(await getDependentPackageFiles(packageFileName)),
-    packageFileName,
+    ...(await getDependentPackageFiles(packageFileName, isCentralManament)),
   ];
+
+  if (!isCentralManament) {
+    packageFiles.push(packageFileName);
+  }
 
   logger.trace(
     { packageFiles },
@@ -135,7 +143,7 @@ export async function updateArtifacts({
     getSiblingFileName(f, 'packages.lock.json')
   );
 
-  const existingLockFileContentMap = await getLockFileContentMap(lockFileNames);
+  const existingLockFileContentMap = await getFileContentMap(lockFileNames);
 
   const hasLockFileContent = Object.values(existingLockFileContentMap).some(
     (val) => !!val
@@ -160,24 +168,25 @@ export async function updateArtifacts({
 
     await runDotnetRestore(packageFileName, packageFiles, config);
 
-    const newLockFileContentMap = await getLockFileContentMap(lockFileNames);
+    const newLockFileContentMap = await getFileContentMap(lockFileNames, true);
 
-    const retArray = [];
+    const retArray: UpdateArtifactsResult[] = [];
     for (const lockFileName of lockFileNames) {
       if (
         existingLockFileContentMap[lockFileName] ===
         newLockFileContentMap[lockFileName]
       ) {
         logger.trace(`Lock file ${lockFileName} is unchanged`);
-      } else {
+      } else if (newLockFileContentMap[lockFileName]) {
         retArray.push({
           file: {
             type: 'addition',
             path: lockFileName,
-            contents: newLockFileContentMap[lockFileName],
+            contents: newLockFileContentMap[lockFileName]!,
           },
         });
       }
+      // TODO: else should we return an artifact error if new content is missing?
     }
 
     return retArray.length > 0 ? retArray : null;
@@ -191,7 +200,8 @@ export async function updateArtifacts({
       {
         artifactError: {
           lockFile: lockFileNames.join(', '),
-          stderr: err.message,
+          // error is written to stdout
+          stderr: err.stdout || err.message,
         },
       },
     ];

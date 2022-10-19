@@ -28,12 +28,15 @@ export class RubyVersionDatasource extends Datasource {
       sourceUrl: 'https://github.com/ruby/ruby',
       releases: [],
     };
+    // TODO: types (#7154)
+    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
     const rubyVersionsUrl = `${registryUrl}en/downloads/releases/`;
     try {
       const response = await this.http.get(rubyVersionsUrl);
 
       const root = parse(response.body);
-      const rows = root.querySelector('.release-list').querySelectorAll('tr');
+      const rows =
+        root.querySelector('.release-list')?.querySelectorAll('tr') ?? [];
       rows.forEach((row) => {
         const tds = row.querySelectorAll('td');
         const columns: string[] = [];
@@ -49,6 +52,9 @@ export class RubyVersionDatasource extends Datasource {
           }
         }
       });
+      if (!res.releases.length) {
+        throw new Error('Missing ruby releases');
+      }
     } catch (err) {
       this.handleGenericErrors(err);
     }

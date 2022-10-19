@@ -1,24 +1,24 @@
-import { getConfig, git, mocked, partial } from '../../../../../test/util';
+import { getConfig, git, partial, platform } from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
-import { Pr, platform as _platform } from '../../../../modules/platform';
+import type { Pr } from '../../../../modules/platform';
 import { BranchStatus } from '../../../../types';
 import type { BranchConfig } from '../../../types';
+import * as schedule from '../branch/schedule';
 import * as prAutomerge from './automerge';
 
 jest.mock('../../../../util/git');
 
-const platform = mocked(_platform);
-const defaultConfig = getConfig();
-
 describe('workers/repository/update/pr/automerge', () => {
   describe('checkAutoMerge(pr, config)', () => {
+    const spy = jest.spyOn(schedule, 'isScheduledNow');
     let config: BranchConfig;
     let pr: Pr;
 
     beforeEach(() => {
-      config = partial<BranchConfig>({
-        ...defaultConfig,
-      });
+      // TODO #7154 incompatible types
+      config = {
+        ...getConfig(),
+      } as BranchConfig;
       pr = partial<Pr>({});
     });
 
@@ -26,8 +26,20 @@ describe('workers/repository/update/pr/automerge', () => {
       jest.clearAllMocks();
     });
 
+    it('should not automerge if not configured', async () => {
+      await prAutomerge.checkAutoMerge(pr, config);
+      expect(platform.mergePr).toHaveBeenCalledTimes(0);
+    });
+
+    it('should not automerge if off schedule', async () => {
+      spy.mockReturnValueOnce(false);
+      await prAutomerge.checkAutoMerge(pr, config);
+      expect(platform.mergePr).toHaveBeenCalledTimes(0);
+    });
+
     it('should automerge if enabled and pr is mergeable', async () => {
       config.automerge = true;
+      config.pruneBranchAfterAutomerge = true;
       platform.getBranchStatus.mockResolvedValueOnce(BranchStatus.green);
       platform.mergePr.mockResolvedValueOnce(true);
       const res = await prAutomerge.checkAutoMerge(pr, config);
@@ -70,6 +82,16 @@ describe('workers/repository/update/pr/automerge', () => {
       expect(res).toEqual({ automerged: true, branchRemoved: false });
       expect(platform.ensureCommentRemoval).toHaveBeenCalledTimes(1);
       expect(platform.ensureComment).toHaveBeenCalledTimes(1);
+    });
+
+    it('should skip branch deletion after automerge if prune is disabled', async () => {
+      config.automerge = true;
+      config.pruneBranchAfterAutomerge = false;
+      platform.getBranchStatus.mockResolvedValueOnce(BranchStatus.green);
+      platform.mergePr.mockResolvedValueOnce(true);
+      const res = await prAutomerge.checkAutoMerge(pr, config);
+      expect(res).toEqual({ automerged: true, branchRemoved: false });
+      expect(platform.mergePr).toHaveBeenCalledTimes(1);
     });
 
     it('should not automerge if enabled and pr is mergeable but cannot rebase', async () => {

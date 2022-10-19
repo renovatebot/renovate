@@ -1,12 +1,16 @@
-import { loadFixture } from '../../../../test/util';
+import { Fixtures } from '../../../../test/fixtures';
 import type { UpdateLockedConfig } from '../types';
 import { updateLockedDependency } from '.';
 
-const lockFileContent = loadFixture('composer5.lock');
+const lockFile = 'compose.lock';
+
+const lockFileContent = Fixtures.get('composer5.lock');
 
 describe('modules/manager/composer/update-locked', () => {
   it('detects already updated', () => {
     const config: UpdateLockedConfig = {
+      packageFile: 'composer.json',
+      lockFile,
       lockFileContent,
       depName: 'awesome/git',
       newVersion: '1.2.0',
@@ -16,6 +20,8 @@ describe('modules/manager/composer/update-locked', () => {
 
   it('returns unsupported', () => {
     const config: UpdateLockedConfig = {
+      packageFile: 'composer.json',
+      lockFile,
       lockFileContent,
       depName: 'awesome/git',
       newVersion: '1.0.0',

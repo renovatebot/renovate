@@ -8,7 +8,7 @@ import * as allVersioning from '.';
 
 const supportedSchemes = getOptions().find(
   (option) => option.name === 'versioning'
-).allowedValues;
+)?.allowedValues;
 
 describe('modules/versioning/index', () => {
   it('has api', () => {
@@ -52,7 +52,7 @@ describe('modules/versioning/index', () => {
     expect(Array.from(vers.keys())).toEqual(Object.keys(loadedVers));
 
     for (const name of vers.keys()) {
-      const ver = vers.get(name);
+      const ver = vers.get(name)!;
       expect(validate(ver, name)).toBeTrue();
     }
   });
@@ -88,7 +88,7 @@ describe('modules/versioning/index', () => {
       .sort();
 
     function getAllPropertyNames(obj: any): string[] {
-      const props = [];
+      const props: string[] = [];
       let o = obj;
 
       do {
@@ -102,7 +102,7 @@ describe('modules/versioning/index', () => {
       return props;
     }
 
-    for (const supportedScheme of supportedSchemes) {
+    for (const supportedScheme of supportedSchemes ?? []) {
       it(supportedScheme, () => {
         const schemeKeys = getAllPropertyNames(
           allVersioning.get(supportedScheme)

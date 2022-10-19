@@ -55,6 +55,14 @@ http_archive(
     ],
 )
 
+http_archive(
+    name = "rules_nodejs",
+    sha256 = "5aef09ed3279aa01d5c928e3beb248f9ad32dde6aafe6373a8c994c3ce643064",
+    urls = [
+      "https://github.com/bazelbuild/rules_nodejs/releases/download/5.5.3/rules_nodejs-core-5.5.3.tar.gz"
+    ],
+)
+
 local_repository(
     name = "angular",
     path = "node_modules/@angular/bazel",
@@ -103,6 +111,29 @@ http_archive(
     sha256="f7a6ecfb8174a1dd4713ea3b21621072996ada7e8f1a69e6ae7581be137c6dd6",
     strip_prefix="distroless-446923c3756ceeaa75888f52fcbdd48bb314fbf8",
     urls=["https://github.com/GoogleContainerTools/distroless/archive/446923c3756ceeaa75888f52fcbdd48bb314fbf8.tar.gz"]
+)
+
+load("@bazel_tools//tools/build_defs/repo:utils.bzl", "maybe")
+maybe(
+  http_archive,
+  name = "io_bazel_rules_go",
+  sha256 = "2b1641428dff9018f9e85c0384f03ec6c10660d935b750e3fa1492a281a53b0f",
+  url = "https://github.com/bazelbuild/rules_go/releases/download/v0.29.0/rules_go-v0.29.0.zip",
+)
+maybe(
+    http_archive,
+    name = "bazel_gazelle",
+    sha256 = "de69a09dc70417580aabf20a28619bb3ef60d038470c7cf8442fafcf627c21cb",
+    urls = [
+        "https://mirror.bazel.build/github.com/bazelbuild/bazel-gazelle/releases/download/v0.24.0/bazel-gazelle-v0.24.0.tar.gz",
+        "https://github.com/bazelbuild/bazel-gazelle/releases/download/v0.24.0/bazel-gazelle-v0.24.0.tar.gz",
+    ],
+)
+maybe(
+    go_repository,
+    name = "com_github_pkg_errors",
+    commit = "816c9085562cd7ee03e7f8188a1cfd942858cded",
+    importpath = "github.com/pkg/errors",
 )
 
 load("@io_bazel_rules_go//go:def.bzl", "go_rules_dependencies", "go_register_toolchains")

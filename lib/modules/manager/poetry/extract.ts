@@ -12,38 +12,60 @@ import * as pep440Versioning from '../../versioning/pep440';
 import * as poetryVersioning from '../../versioning/poetry';
 import type { PackageDependency, PackageFile } from '../types';
 import { extractLockFileEntries } from './locked-version';
-import type { PoetryFile, PoetrySection } from './types';
+import type { PoetryDependency, PoetryFile, PoetrySection } from './types';
 
-function extractFromSection(
+function extractFromDependenciesSection(
   parsedFile: PoetryFile,
-  section: keyof PoetrySection,
+  section: keyof Omit<PoetrySection, 'source' | 'group'>,
   poetryLockfile: Record<string, string>
 ): PackageDependency[] {
-  const deps = [];
-  const sectionContent = parsedFile.tool.poetry[section];
+  return extractFromSection(
+    parsedFile.tool?.poetry?.[section],
+    section,
+    poetryLockfile
+  );
+}
+
+function extractFromDependenciesGroupSection(
+  parsedFile: PoetryFile,
+  group: string,
+  poetryLockfile: Record<string, string>
+): PackageDependency[] {
+  return extractFromSection(
+    parsedFile.tool?.poetry?.group[group]?.dependencies,
+    group,
+    poetryLockfile
+  );
+}
+
+function extractFromSection(
+  sectionContent: Record<string, PoetryDependency | string> | undefined,
+  depType: string,
+  poetryLockfile: Record<string, string>
+): PackageDependency[] {
   if (!sectionContent) {
     return [];
   }
 
-  Object.keys(sectionContent).forEach((depName) => {
-    if (depName === 'python') {
-      return;
+  const deps: PackageDependency[] = [];
+
+  for (const depName of Object.keys(sectionContent)) {
+    if (depName === 'python' || depName === 'source') {
+      continue;
     }
-    let skipReason: SkipReason;
+
+    let skipReason: SkipReason | null = null;
     let currentValue = sectionContent[depName];
     let nestedVersion = false;
-    if (typeof currentValue !== 'string') {
+    if (!is.string(currentValue)) {
       const version = currentValue.version;
       const path = currentValue.path;
       const git = currentValue.git;
       if (version) {
         currentValue = version;
         nestedVersion = true;
-        if (path) {
-          skipReason = 'path-dependency';
-        }
-        if (git) {
-          skipReason = 'git-dependency';
+        if (path || git) {
+          skipReason = path ? 'path-dependency' : 'git-dependency';
         }
       } else if (path) {
         currentValue = '';
@@ -58,33 +80,33 @@ function extractFromSection(
     }
     const dep: PackageDependency = {
       depName,
-      depType: section,
-      currentValue: currentValue as string,
+      depType,
+      currentValue,
       managerData: { nestedVersion },
       datasource: PypiDatasource.id,
     };
-    if (dep.depName in poetryLockfile) {
-      dep.lockedVersion = poetryLockfile[dep.depName];
+    if (depName in poetryLockfile) {
+      dep.lockedVersion = poetryLockfile[depName];
     }
     if (skipReason) {
       dep.skipReason = skipReason;
-    } else if (pep440Versioning.isValid(dep.currentValue)) {
+    } else if (pep440Versioning.isValid(currentValue)) {
       dep.versioning = pep440Versioning.id;
-    } else if (poetryVersioning.isValid(dep.currentValue)) {
+    } else if (poetryVersioning.isValid(currentValue)) {
       dep.versioning = poetryVersioning.id;
     } else {
       dep.skipReason = 'unknown-version';
     }
     deps.push(dep);
-  });
+  }
   return deps;
 }
 
-function extractRegistries(pyprojectfile: PoetryFile): string[] {
+function extractRegistries(pyprojectfile: PoetryFile): string[] | undefined {
   const sources = pyprojectfile.tool?.poetry?.source;
 
   if (!Array.isArray(sources) || sources.length === 0) {
-    return null;
+    return undefined;
   }
 
   const registryUrls = new Set<string>();
@@ -93,7 +115,7 @@ function extractRegistries(pyprojectfile: PoetryFile): string[] {
       registryUrls.add(source.url);
     }
   }
-  registryUrls.add(process.env.PIP_INDEX_URL || 'https://pypi.org/pypi/');
+  registryUrls.add(process.env.PIP_INDEX_URL ?? 'https://pypi.org/pypi/');
 
   return Array.from(registryUrls);
 }
@@ -117,29 +139,43 @@ export async function extractPackageFile(
 
   // handle the lockfile
   const lockfileName = getSiblingFileName(fileName, 'poetry.lock');
-  const lockContents = await readLocalFile(lockfileName, 'utf8');
+  // TODO #7154
+  const lockContents = (await readLocalFile(lockfileName, 'utf8'))!;
 
   const lockfileMapping = extractLockFileEntries(lockContents);
 
   const deps = [
-    ...extractFromSection(pyprojectfile, 'dependencies', lockfileMapping),
-    ...extractFromSection(pyprojectfile, 'dev-dependencies', lockfileMapping),
-    ...extractFromSection(pyprojectfile, 'extras', lockfileMapping),
+    ...extractFromDependenciesSection(
+      pyprojectfile,
+      'dependencies',
+      lockfileMapping
+    ),
+    ...extractFromDependenciesSection(
+      pyprojectfile,
+      'dev-dependencies',
+      lockfileMapping
+    ),
+    ...extractFromDependenciesSection(pyprojectfile, 'extras', lockfileMapping),
+    ...Object.keys(pyprojectfile.tool?.poetry?.group ?? []).flatMap((group) =>
+      extractFromDependenciesGroupSection(pyprojectfile, group, lockfileMapping)
+    ),
   ];
+
   if (!deps.length) {
     return null;
   }
 
-  const constraints: Record<string, any> = {};
+  const extractedConstraints: Record<string, any> = {};
 
   if (is.nonEmptyString(pyprojectfile.tool?.poetry?.dependencies?.python)) {
-    constraints.python = pyprojectfile.tool?.poetry?.dependencies?.python;
+    extractedConstraints.python =
+      pyprojectfile.tool?.poetry?.dependencies?.python;
   }
 
   const res: PackageFile = {
     deps,
     registryUrls: extractRegistries(pyprojectfile),
-    constraints,
+    extractedConstraints,
   };
   // Try poetry.lock first
   let lockFile = getSiblingFileName(fileName, 'poetry.lock');

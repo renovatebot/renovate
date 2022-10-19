@@ -1,13 +1,15 @@
 import type { ModuleApi } from '../../types';
 
 export interface GetDigestInputConfig {
-  datasource?: string;
+  datasource: string;
   packageName?: string;
   depName: string;
   defaultRegistryUrls?: string[];
   registryUrls?: string[];
+  additionalRegistryUrls?: string[];
   currentValue?: string;
   currentDigest?: string;
+  replacementName?: string;
 }
 
 export interface DigestConfig {
@@ -26,6 +28,7 @@ export interface GetPkgReleasesConfig {
   npmrc?: string;
   defaultRegistryUrls?: string[];
   registryUrls?: string[];
+  additionalRegistryUrls?: string[];
   datasource: string;
   depName: string;
   packageName?: string;
@@ -63,18 +66,21 @@ export interface ReleaseResult {
   changelogUrl?: string;
   dependencyUrl?: string;
   homepage?: string;
-  sourceUrl?: string;
+  gitRef?: string;
+  sourceUrl?: string | null;
   sourceDirectory?: string;
   registryUrl?: string;
   replacementName?: string;
   replacementVersion?: string;
 }
 
+export type RegistryStrategy = 'first' | 'hunt' | 'merge';
+
 export interface DatasourceApi extends ModuleApi {
   id: string;
   getDigest?(config: DigestConfig, newValue?: string): Promise<string | null>;
   getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null>;
-  defaultRegistryUrls?: string[];
+  defaultRegistryUrls?: string[] | (() => string[]);
   defaultVersioning?: string;
   defaultConfig?: Record<string, unknown>;
 
@@ -84,7 +90,7 @@ export interface DatasourceApi extends ModuleApi {
    * hunt: registryUrls will be tried in order until one returns a result
    * merge: all registryUrls will be tried and the results merged if more than one returns a result
    */
-  registryStrategy?: 'first' | 'hunt' | 'merge';
+  registryStrategy?: RegistryStrategy;
 
   /**
    * Whether custom registryUrls are allowed.

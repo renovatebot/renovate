@@ -3,6 +3,7 @@ import { logger } from '../../../logger';
 import { newlineRegex, regEx } from '../../../util/regex';
 import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
 import { TerraformDependencyTypes } from './common';
+import type { ProviderLock } from './lockfile/types';
 import { extractLocks, findLockFile, readLockFile } from './lockfile/util';
 import { analyseTerraformModule, extractTerraformModule } from './modules';
 import {
@@ -21,7 +22,7 @@ import {
   analyseTerraformResource,
   extractTerraformResource,
 } from './resources';
-import type { TerraformManagerData } from './types';
+import type { ExtractionResult, TerraformManagerData } from './types';
 import {
   checkFileContainsDependency,
   getTerraformDependencyType,
@@ -33,11 +34,13 @@ const dependencyBlockExtractionRegex = regEx(
 const contentCheckList = [
   'module "',
   'provider "',
+  '"docker_',
+  '"kubernetes_',
   'required_providers ',
   ' "helm_release" ',
   ' "docker_image" ',
   'required_version',
-  'terraform_version', // part of  tfe_workspace
+  'terraform_version', // part of tfe_workspace
 ];
 
 export async function extractPackageFile(
@@ -59,14 +62,14 @@ export async function extractPackageFile(
     for (let lineNumber = 0; lineNumber < lines.length; lineNumber += 1) {
       const line = lines[lineNumber];
       const terraformDependency = dependencyBlockExtractionRegex.exec(line);
-      if (terraformDependency) {
+      if (terraformDependency?.groups) {
         logger.trace(
           `Matched ${terraformDependency.groups.type} on line ${lineNumber}`
         );
         const tfDepType = getTerraformDependencyType(
           terraformDependency.groups.type
         );
-        let result = null;
+        let result: ExtractionResult | null = null;
         switch (tfDepType) {
           case TerraformDependencyTypes.required_providers: {
             result = extractTerraformRequiredProviders(lineNumber, lines);
@@ -114,7 +117,7 @@ export async function extractPackageFile(
     logger.warn({ err }, 'Error extracting terraform plugins');
   }
 
-  const locks = [];
+  const locks: ProviderLock[] = [];
   const lockFilePath = findLockFile(fileName);
   if (lockFilePath) {
     const lockFileContent = await readLockFile(lockFilePath);
@@ -127,7 +130,7 @@ export async function extractPackageFile(
   }
 
   deps.forEach((dep) => {
-    switch (dep.managerData.terraformDependencyType) {
+    switch (dep.managerData?.terraformDependencyType) {
       case TerraformDependencyTypes.required_providers:
         analyzeTerraformRequiredProvider(dep, locks);
         break;

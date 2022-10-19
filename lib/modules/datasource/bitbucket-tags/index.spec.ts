@@ -35,7 +35,7 @@ describe('modules/datasource/bitbucket-tags/index', () => {
         depName: 'some/dep2',
       });
       expect(res).toMatchSnapshot();
-      expect(res.releases).toHaveLength(3);
+      expect(res?.releases).toHaveLength(3);
     });
   });
 

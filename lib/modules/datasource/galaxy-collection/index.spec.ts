@@ -108,7 +108,7 @@ describe('modules/datasource/galaxy-collection/index', () => {
       expect(res).toMatchSnapshot();
       expect(res).not.toBeNull();
       expect(res).toBeDefined();
-      expect(res.releases).toHaveLength(2);
+      expect(res?.releases).toHaveLength(2);
     });
 
     it('returns null for empty lookup', async () => {
@@ -124,7 +124,7 @@ describe('modules/datasource/galaxy-collection/index', () => {
       expect(
         await getPkgReleases({
           datasource,
-          depName: null,
+          depName: '',
         })
       ).toBeNull();
     });
@@ -162,7 +162,7 @@ describe('modules/datasource/galaxy-collection/index', () => {
       expect(res).toMatchSnapshot();
       expect(res).not.toBeNull();
       expect(res).toBeDefined();
-      expect(res.releases).toHaveLength(3);
+      expect(res?.releases).toHaveLength(3);
     });
   });
 });

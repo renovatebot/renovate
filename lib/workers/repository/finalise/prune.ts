@@ -39,7 +39,7 @@ async function cleanUpBranches(
               number: pr.number,
               topic: 'Autoclosing Skipped',
               content:
-                'This PR has been flagged for autoclosing, however it is being skipped due to the branch being already modified. Please close/delete it manually or report a bug if you think this is in error.',
+                'This PR has been flagged for autoclosing. However, it is being skipped due to the branch being already modified. Please close/delete it manually or report a bug if you think this is in error.',
             });
           }
         } else if (GlobalConfig.get('dryRun')) {
@@ -63,6 +63,8 @@ async function cleanUpBranches(
           });
           await deleteBranch(branchName);
         }
+      } else if (branchIsModified) {
+        logger.debug('Orphan Branch is modified - skipping branch deletion');
       } else if (GlobalConfig.get('dryRun')) {
         logger.info(`DRY-RUN: Would delete orphan branch ${branchName}`);
       } else {
@@ -88,17 +90,19 @@ async function cleanUpBranches(
 
 export async function pruneStaleBranches(
   config: RenovateConfig,
-  branchList: string[]
+  branchList: string[] | null | undefined
 ): Promise<void> {
   logger.debug('Removing any stale branches');
   logger.trace({ config }, `pruneStaleBranches`);
-  logger.debug(`config.repoIsOnboarded=${config.repoIsOnboarded}`);
+  // TODO: types (#7154)
+  logger.debug(`config.repoIsOnboarded=${config.repoIsOnboarded!}`);
   if (!branchList) {
     logger.debug('No branchList');
     return;
   }
+  // TODO: types (#7154)
   let renovateBranches = getBranchList().filter((branchName) =>
-    branchName.startsWith(config.branchPrefix)
+    branchName.startsWith(config.branchPrefix!)
   );
   if (!renovateBranches?.length) {
     logger.debug('No renovate branches found');
@@ -111,7 +115,8 @@ export async function pruneStaleBranches(
     },
     'Branch lists'
   );
-  const lockFileBranch = `${config.branchPrefix}lock-file-maintenance`;
+  // TODO: types (#7154)
+  const lockFileBranch = `${config.branchPrefix!}lock-file-maintenance`;
   renovateBranches = renovateBranches.filter(
     (branch) => branch !== lockFileBranch
   );

@@ -1,20 +1,26 @@
 import is from '@sindresorhus/is';
 import { DateTime } from 'luxon';
-import pAll from 'p-all';
 import type { XmlDocument } from 'xmldoc';
 import { logger } from '../../../logger';
 import * as packageCache from '../../../util/cache/package';
+import * as p from '../../../util/promises';
 import { newlineRegex, regEx } from '../../../util/regex';
 import { ensureTrailingSlash } from '../../../util/url';
 import mavenVersion from '../../versioning/maven';
 import * as mavenVersioning from '../../versioning/maven';
 import { compare } from '../../versioning/maven/compare';
 import { Datasource } from '../datasource';
-import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
+import type {
+  GetReleasesConfig,
+  RegistryStrategy,
+  Release,
+  ReleaseResult,
+} from '../types';
 import { MAVEN_REPO } from './common';
 import type { MavenDependency, ReleaseMap } from './types';
 import {
-  checkHttpResource,
+  checkResource,
+  createUrlForDependencyPom,
   downloadHttpProtocol,
   downloadMavenXml,
   getDependencyInfo,
@@ -31,7 +37,9 @@ function getLatestSuitableVersion(releases: Release[]): string | null {
   const stableVersions = allVersions.filter((x) => mavenVersion.isStable(x));
   const versions = stableVersions.length ? stableVersions : allVersions;
   return versions.reduce((latestVersion, version) =>
-    compare(version, latestVersion) === 1 ? version : latestVersion
+    compare(version, latestVersion) === 1
+      ? version
+      : /* istanbul ignore next: hard to test */ latestVersion
   );
 }
 
@@ -49,37 +57,6 @@ const mavenCentralHtmlVersionRegex = regEx(
   'i'
 );
 
-function isSnapshotVersion(version: string): boolean {
-  if (version.endsWith('-SNAPSHOT')) {
-    return true;
-  }
-  return false;
-}
-
-function extractSnapshotVersion(metadata: XmlDocument): string | null {
-  // Parse the maven-metadata.xml for the snapshot version and determine
-  // the fixed version of the latest deployed snapshot.
-  // The metadata descriptor can be found at
-  // https://maven.apache.org/ref/3.3.3/maven-repository-metadata/repository-metadata.html
-  //
-  // Basically, we need to replace -SNAPSHOT with the artifact timestanp & build number,
-  // so for example 1.0.0-SNAPSHOT will become 1.0.0-<timestamp>-<buildNumber>
-  const version = metadata
-    .descendantWithPath('version')
-    ?.val?.replace('-SNAPSHOT', '');
-
-  const snapshot = metadata.descendantWithPath('versioning.snapshot');
-  const timestamp = snapshot?.childNamed('timestamp')?.val;
-  const build = snapshot?.childNamed('buildNumber')?.val;
-
-  // If we weren't able to parse out the required 3 version elements,
-  // return null because we can't determine the fixed version of the latest snapshot.
-  if (!version || !timestamp || !build) {
-    return null;
-  }
-  return `${version}-${timestamp}-${build}`;
-}
-
 export const defaultRegistryUrls = [MAVEN_REPO];
 
 export class MavenDatasource extends Datasource {
@@ -87,9 +64,9 @@ export class MavenDatasource extends Datasource {
 
   override readonly defaultRegistryUrls = defaultRegistryUrls;
 
-  override readonly defaultVersioning = mavenVersioning.id;
+  override readonly defaultVersioning: string = mavenVersioning.id;
 
-  override readonly registryStrategy = 'merge';
+  override readonly registryStrategy: RegistryStrategy = 'merge';
 
   constructor(id = MavenDatasource.id) {
     super(id);
@@ -154,7 +131,7 @@ export class MavenDatasource extends Datasource {
             const match = line.trim().match(mavenCentralHtmlVersionRegex);
             if (match) {
               const { version, releaseTimestamp: timestamp } =
-                match?.groups ?? {};
+                match?.groups ?? /* istanbul ignore next: hard to test */ {};
               if (version && timestamp) {
                 const date = DateTime.fromFormat(
                   timestamp,
@@ -178,7 +155,9 @@ export class MavenDatasource extends Datasource {
           'Failed to get releases from index.html'
         );
       }
-      const cacheTTL = retryEarlier ? 60 : 24 * 60;
+      const cacheTTL = retryEarlier
+        ? /* istanbul ignore next: hard to test */ 60
+        : 24 * 60;
       await packageCache.set(cacheNs, cacheKey, workingReleaseMap, cacheTTL);
     }
 
@@ -188,53 +167,6 @@ export class MavenDatasource extends Datasource {
     }
 
     return releaseMap;
-  }
-
-  async getSnapshotFullVersion(
-    version: string,
-    dependency: MavenDependency,
-    repoUrl: string
-  ): Promise<string | null> {
-    // To determine what actual files are available for the snapshot, first we have to fetch and parse
-    // the metadata located at http://<repo>/<group>/<artifact>/<version-SNAPSHOT>/maven-metadata.xml
-    const metadataUrl = getMavenUrl(
-      dependency,
-      repoUrl,
-      `${version}/maven-metadata.xml`
-    );
-
-    const { xml: mavenMetadata } = await downloadMavenXml(
-      this.http,
-      metadataUrl
-    );
-    if (!mavenMetadata) {
-      return null;
-    }
-
-    return extractSnapshotVersion(mavenMetadata);
-  }
-
-  async createUrlForDependencyPom(
-    version: string,
-    dependency: MavenDependency,
-    repoUrl: string
-  ): Promise<string> {
-    if (isSnapshotVersion(version)) {
-      // By default, Maven snapshots are deployed to the repository with fixed file names.
-      // Resolve the full, actual pom file name for the version.
-      const fullVersion = await this.getSnapshotFullVersion(
-        version,
-        dependency,
-        repoUrl
-      );
-
-      // If we were able to resolve the version, use that, otherwise fall back to using -SNAPSHOT
-      if (fullVersion !== null) {
-        return `${version}/${dependency.name}-${fullVersion}.pom`;
-      }
-    }
-
-    return `${version}/${dependency.name}-${version}.pom`;
   }
 
   /**
@@ -317,7 +249,8 @@ export class MavenDatasource extends Datasource {
     // Update cached data with freshly discovered versions
     if (freshVersions.length) {
       const queue = freshVersions.map((version) => async (): Promise<void> => {
-        const pomUrl = await this.createUrlForDependencyPom(
+        const pomUrl = await createUrlForDependencyPom(
+          this.http,
           version,
           dependency,
           repoUrl
@@ -325,7 +258,7 @@ export class MavenDatasource extends Datasource {
         const artifactUrl = getMavenUrl(dependency, repoUrl, pomUrl);
         const release: Release = { version };
 
-        const res = await checkHttpResource(this.http, artifactUrl);
+        const res = await checkResource(this.http, artifactUrl);
 
         if (is.date(res)) {
           release.releaseTimestamp = res.toISOString();
@@ -335,7 +268,7 @@ export class MavenDatasource extends Datasource {
           res !== 'not-found' && res !== 'error' ? release : null;
       });
 
-      await pAll(queue, { concurrency: 5 });
+      await p.all(queue);
 
       if (!isCacheValid) {
         // Store new TTL flag for 24 hours if the previous one is invalidated

@@ -1,35 +1,54 @@
+import is from '@sindresorhus/is';
 import Graph from 'graph-data-structure';
 import minimatch from 'minimatch';
 import upath from 'upath';
-import xmldoc from 'xmldoc';
 import { logger } from '../../../logger';
-import { readLocalFile } from '../../../util/fs';
 import { getFileList } from '../../../util/git';
+import { readFileAsXmlDocument } from './util';
+
+export const NUGET_CENTRAL_FILE = 'Directory.Packages.props';
+export const MSBUILD_CENTRAL_FILE = 'Packages.props';
 
 /**
  * Get all package files at any level of ancestry that depend on packageFileName
  */
 export async function getDependentPackageFiles(
-  packageFileName: string
+  packageFileName: string,
+  isCentralManament = false
 ): Promise<string[]> {
   const packageFiles = await getAllPackageFiles();
   const graph: ReturnType<typeof Graph> = Graph();
 
+  if (isCentralManament) {
+    graph.addNode(packageFileName);
+  }
+
+  const parentDir =
+    packageFileName === NUGET_CENTRAL_FILE ||
+    packageFileName === MSBUILD_CENTRAL_FILE
+      ? ''
+      : upath.dirname(packageFileName);
+
   for (const f of packageFiles) {
     graph.addNode(f);
+
+    if (isCentralManament && upath.dirname(f).startsWith(parentDir)) {
+      graph.addEdge(packageFileName, f);
+    }
   }
 
   for (const f of packageFiles) {
-    const packageFileContent = (await readLocalFile(f, 'utf8')).toString();
+    const doc = await readFileAsXmlDocument(f);
+    if (!doc) {
+      continue;
+    }
 
-    const doc = new xmldoc.XmlDocument(packageFileContent);
-    const projectReferenceAttributes = (
-      doc
-        .childrenNamed('ItemGroup')
-        .map((ig) => ig.childrenNamed('ProjectReference')) ?? []
-    )
+    const projectReferenceAttributes = doc
+      .childrenNamed('ItemGroup')
+      .map((ig) => ig.childrenNamed('ProjectReference'))
       .flat()
-      .map((pf) => pf.attr['Include']);
+      .map((pf) => pf.attr['Include'])
+      .filter(is.nonEmptyString);
 
     const projectReferences = projectReferenceAttributes.map((a) =>
       upath.normalize(a)
@@ -47,7 +66,13 @@ export async function getDependentPackageFiles(
     }
   }
 
-  return recursivelyGetDependentPackageFiles(packageFileName, graph);
+  const dependents = recursivelyGetDependentPackageFiles(
+    packageFileName,
+    graph
+  );
+
+  // deduplicate
+  return Array.from(new Set(dependents.reverse())).reverse();
 }
 
 /**
@@ -57,7 +82,7 @@ function recursivelyGetDependentPackageFiles(
   packageFileName: string,
   graph: ReturnType<typeof Graph>
 ): string[] {
-  const dependents: string[] = graph.adjacent(packageFileName);
+  const dependents = graph.adjacent(packageFileName);
 
   if (dependents.length === 0) {
     return [];

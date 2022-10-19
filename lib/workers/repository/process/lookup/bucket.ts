@@ -11,7 +11,7 @@ export function getBucket(
   currentVersion: string,
   newVersion: string,
   versioning: VersioningApi
-): string {
+): string | null {
   const { separateMajorMinor, separateMultipleMajor, separateMinorPatch } =
     config;
   if (!separateMajorMinor) {

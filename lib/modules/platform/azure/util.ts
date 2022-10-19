@@ -9,40 +9,35 @@ import { HostRule, PrState } from '../../../types';
 import type { GitOptions } from '../../../types/git';
 import { addSecretForSanitizing } from '../../../util/sanitize';
 import { toBase64 } from '../../../util/string';
+import { getPrBodyStruct } from '../pr-body';
 import type { AzurePr } from './types';
 
-export function getNewBranchName(branchName?: string): string {
-  if (branchName && !branchName.startsWith('refs/heads/')) {
-    return `refs/heads/${branchName}`;
-  }
-  return branchName;
-}
-
 export function getGitStatusContextCombinedName(
-  context: GitStatusContext
+  context: GitStatusContext | null | undefined
 ): string | undefined {
   if (!context) {
     return undefined;
   }
   const combinedName = `${context.genre ? `${context.genre}/` : ''}${
-    context.name
+    // TODO: types (#7154)
+    context.name!
   }`;
   logger.trace(`Got combined context name of ${combinedName}`);
   return combinedName;
 }
 
 export function getGitStatusContextFromCombinedName(
-  context: string
+  context: string | undefined | null
 ): GitStatusContext | undefined {
   if (!context) {
     return undefined;
   }
   let name = context;
-  let genre;
+  let genre: string | undefined;
   const lastSlash = context.lastIndexOf('/');
   if (lastSlash > 0) {
-    name = context.substr(lastSlash + 1);
-    genre = context.substr(0, lastSlash);
+    name = context.substring(lastSlash + 1);
+    genre = context.substring(0, lastSlash);
   }
   return {
     genre,
@@ -51,10 +46,10 @@ export function getGitStatusContextFromCombinedName(
 }
 
 export function getBranchNameWithoutRefsheadsPrefix(
-  branchPath: string
+  branchPath: string | undefined
 ): string | undefined {
   if (!branchPath) {
-    logger.error(`getBranchNameWithoutRefsheadsPrefix(${branchPath})`);
+    logger.error(`getBranchNameWithoutRefsheadsPrefix(undefined)`);
     return undefined;
   }
   if (!branchPath.startsWith('refs/heads/')) {
@@ -70,7 +65,7 @@ export function getBranchNameWithoutRefsPrefix(
   branchPath?: string
 ): string | undefined {
   if (!branchPath) {
-    logger.error(`getBranchNameWithoutRefsPrefix(${branchPath})`);
+    logger.error(`getBranchNameWithoutRefsPrefix(undefined)`);
     return undefined;
   }
   if (!branchPath.startsWith('refs/')) {
@@ -82,9 +77,15 @@ export function getBranchNameWithoutRefsPrefix(
   return branchPath.substring(5, branchPath.length);
 }
 
+const stateMap = {
+  [PullRequestStatus.Abandoned]: PrState.Closed,
+  [PullRequestStatus.Completed]: PrState.Merged,
+} as Record<PullRequestStatus, PrState | undefined>;
+
 export function getRenovatePRFormat(azurePr: GitPullRequest): AzurePr {
   const number = azurePr.pullRequestId;
-  const displayNumber = `Pull Request #${number}`;
+  // TODO: types (#7154)
+  const displayNumber = `Pull Request #${number!}`;
 
   const sourceBranch = getBranchNameWithoutRefsheadsPrefix(
     azurePr.sourceRefName
@@ -92,14 +93,12 @@ export function getRenovatePRFormat(azurePr: GitPullRequest): AzurePr {
   const targetBranch = getBranchNameWithoutRefsheadsPrefix(
     azurePr.targetRefName
   );
-  const body = azurePr.description;
+  const bodyStruct = getPrBodyStruct(azurePr.description);
 
   const createdAt = azurePr.creationDate?.toISOString();
-  const state =
-    {
-      [PullRequestStatus.Abandoned]: PrState.Closed,
-      [PullRequestStatus.Completed]: PrState.Merged,
-    }[azurePr.status] || PrState.Open;
+
+  // TODO #7154
+  const state = stateMap[azurePr.status!] ?? PrState.Open;
 
   const sourceRefName = azurePr.sourceRefName;
 
@@ -109,24 +108,11 @@ export function getRenovatePRFormat(azurePr: GitPullRequest): AzurePr {
     state,
     number,
     displayNumber,
-    body,
+    bodyStruct,
     sourceRefName,
     targetBranch,
     createdAt,
   } as AzurePr;
-}
-
-export async function streamToString(
-  stream: NodeJS.ReadableStream
-): Promise<string> {
-  const chunks: Uint8Array[] = [];
-
-  const p = await new Promise<string>((resolve, reject) => {
-    stream.on('data', (chunk) => chunks.push(Buffer.from(chunk)));
-    stream.on('end', () => resolve(Buffer.concat(chunks).toString('utf8')));
-    stream.on('error', (err) => reject(err));
-  });
-  return p;
 }
 
 export function getStorageExtraCloneOpts(config: HostRule): GitOptions {
@@ -135,12 +121,12 @@ export function getStorageExtraCloneOpts(config: HostRule): GitOptions {
   if (!config.token && config.username && config.password) {
     authType = 'basic';
     authValue = toBase64(`${config.username}:${config.password}`);
-  } else if (config.token.length === 52) {
+  } else if (config.token?.length === 52) {
     authType = 'basic';
     authValue = toBase64(`:${config.token}`);
   } else {
     authType = 'bearer';
-    authValue = config.token;
+    authValue = config.token!;
   }
   addSecretForSanitizing(authValue, 'global');
   return {
@@ -180,7 +166,7 @@ export function getProjectAndRepo(str: string): {
 
 export function getRepoByName(
   name: string,
-  repos: GitRepository[]
+  repos: (GitRepository | null | undefined)[] | undefined | null
 ): GitRepository | null {
   logger.trace(`getRepoByName(${name})`);
 
@@ -188,11 +174,13 @@ export function getRepoByName(
   project = project.toLowerCase();
   repo = repo.toLowerCase();
 
-  return (
-    repos?.find(
-      (r) =>
-        project === r?.project?.name?.toLowerCase() &&
-        repo === r?.name?.toLowerCase()
-    ) || null
+  const foundRepo = repos?.find(
+    (r) =>
+      project === r?.project?.name?.toLowerCase() &&
+      repo === r?.name?.toLowerCase()
   );
+  if (!foundRepo) {
+    logger.debug(`Repo not found: ${name}`);
+  }
+  return foundRepo ?? null;
 }

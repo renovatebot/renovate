@@ -13,6 +13,7 @@ package.json
 **/__mocks__/
 bin/yarn*
 .clinic/
+.eslintcache
 
 # generated code
 **/*.generated.ts

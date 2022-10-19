@@ -15,9 +15,10 @@ import type { PnpmWorkspaceFile } from './types';
 
 export async function extractPnpmFilters(
   fileName: string
-): Promise<string[] | null> {
+): Promise<string[] | undefined> {
   try {
-    const contents = load(await readLocalFile(fileName, 'utf8'), {
+    // TODO #7154
+    const contents = load((await readLocalFile(fileName, 'utf8'))!, {
       json: true,
     }) as PnpmWorkspaceFile;
     if (
@@ -28,12 +29,12 @@ export async function extractPnpmFilters(
         { fileName },
         'Failed to find required "packages" array in pnpm-workspace.yaml'
       );
-      return null;
+      return undefined;
     }
     return contents.packages;
   } catch (err) {
     logger.trace({ fileName, err }, 'Failed to parse pnpm-workspace.yaml');
-    return null;
+    return undefined;
   }
 }
 
@@ -91,7 +92,8 @@ export async function detectPnpmWorkspaces(
     }
 
     // search for corresponding pnpm workspace
-    const pnpmWorkspace = await findPnpmWorkspace(packageFile);
+    // TODO #7154
+    const pnpmWorkspace = await findPnpmWorkspace(packageFile!);
     if (pnpmWorkspace === null) {
       continue;
     }
@@ -113,7 +115,7 @@ export async function detectPnpmWorkspaces(
     const packagePaths = packagePathCache.get(workspaceYamlPath);
 
     const isPackageInWorkspace = packagePaths?.some((p) =>
-      p.endsWith(packageFile)
+      p.endsWith(packageFile!)
     );
 
     if (isPackageInWorkspace) {

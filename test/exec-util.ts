@@ -1,25 +1,25 @@
-import { exec as _exec } from 'child_process';
 import is from '@sindresorhus/is';
 import traverse from 'traverse';
 import upath from 'upath';
-import type { ExecOptions } from '../lib/util/exec/types';
+import { rawExec as _exec } from '../lib/util/exec/common';
+import type { RawExecOptions } from '../lib/util/exec/types';
 import { regEx } from '../lib/util/regex';
+import { mockedFunction } from './util';
 
-type CallOptions = ExecOptions | null | undefined;
+jest.mock('../lib/util/exec/common');
 
 export type ExecResult = { stdout: string; stderr: string } | Error;
 
-export type ExecMock = jest.Mock<typeof _exec>;
-export const exec: ExecMock = _exec as any;
+export const exec = mockedFunction(_exec);
 
-interface ExecSnapshot {
+export interface ExecSnapshot {
   cmd: string;
-  options?: ExecOptions | null | undefined;
+  options?: RawExecOptions | null | undefined;
 }
 
 export type ExecSnapshots = ExecSnapshot[];
 
-export function execSnapshot(cmd: string, options?: CallOptions): ExecSnapshot {
+function execSnapshot(cmd: string, options?: RawExecOptions): ExecSnapshot {
   const snapshot = {
     cmd,
     options,
@@ -40,34 +40,28 @@ export function execSnapshot(cmd: string, options?: CallOptions): ExecSnapshot {
 const defaultExecResult = { stdout: '', stderr: '' };
 
 export function mockExecAll(
-  execFn: ExecMock,
   execResult: ExecResult = defaultExecResult
 ): ExecSnapshots {
   const snapshots: ExecSnapshots = [];
-  execFn.mockImplementation((cmd, options, callback) => {
+  exec.mockImplementation((cmd, options) => {
     snapshots.push(execSnapshot(cmd, options));
     if (execResult instanceof Error) {
       throw execResult;
     }
-    callback(null, execResult);
-    return undefined as never;
+    return execResult as never;
   });
   return snapshots;
 }
 
-export function mockExecSequence(
-  execFn: ExecMock,
-  execResults: ExecResult[]
-): ExecSnapshots {
+export function mockExecSequence(execResults: ExecResult[]): ExecSnapshots {
   const snapshots: ExecSnapshots = [];
   execResults.forEach((execResult) => {
-    execFn.mockImplementationOnce((cmd, options, callback) => {
+    exec.mockImplementationOnce((cmd, options) => {
       snapshots.push(execSnapshot(cmd, options));
       if (execResult instanceof Error) {
         throw execResult;
       }
-      callback(null, execResult);
-      return undefined as never;
+      return execResult as never;
     });
   });
   return snapshots;
@@ -99,3 +93,9 @@ export const envMock = {
   full: fullEnvMock,
   filtered: filteredEnvMock,
 };
+
+// reset exec mock, otherwise there can be some left over from previous test
+beforeEach(() => {
+  // maybe not mocked
+  exec.mockReset?.();
+});

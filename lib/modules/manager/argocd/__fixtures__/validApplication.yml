@@ -43,3 +43,35 @@ kind: Application
 spec:
   target:
     namespace: testing
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+spec:
+  source:
+    chart: some/image
+    repoURL: somecontainer.registry.io
+    targetRevision: 1.2.0
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+spec:
+  source:
+    chart: some/image2
+    repoURL: oci://somecontainer.registry.io
+    targetRevision: 1.3.0
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+spec:
+  source:
+    chart: some/image2
+    repoURL: somecontainer.registry.io:443
+    targetRevision: 1.3.0
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+spec:
+  source:
+    chart: some/image3
+    repoURL: somecontainer.registry.io:443/
+    targetRevision: 1.0.0

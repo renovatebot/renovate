@@ -8,7 +8,6 @@ jest.mock('../../../util/host-rules');
 const hostRules: any = _hostRules;
 
 const githubApiHost = 'https://api.github.com';
-const githubEnterpriseApiHost = 'https://git.enterprise.com';
 
 const responseBody = [
   { tag_name: 'a', published_at: '2020-03-09T13:00:00Z' },
@@ -24,9 +23,8 @@ const responseBody = [
 ];
 
 describe('modules/datasource/github-releases/index', () => {
-  const githubReleases = new GithubReleasesDatasource();
-
   beforeEach(() => {
+    jest.resetAllMocks();
     hostRules.hosts.mockReturnValue([]);
     hostRules.find.mockReturnValue({
       token: 'some-token',
@@ -44,30 +42,20 @@ describe('modules/datasource/github-releases/index', () => {
         datasource: GithubReleasesDatasource.id,
         depName: 'some/dep',
       });
-      expect(res).toMatchSnapshot();
-      expect(res.releases).toHaveLength(3);
-      expect(
-        res.releases.find((release) => release.version === 'v1.1.0')
-      ).toBeDefined();
-      expect(
-        res.releases.find((release) => release.version === '1.2.0')
-      ).toBeUndefined();
-      expect(
-        res.releases.find((release) => release.version === '2.0.0').isStable
-      ).toBeFalse();
-    });
 
-    it('supports ghe', async () => {
-      const packageName = 'some/dep';
-      httpMock
-        .scope(githubEnterpriseApiHost)
-        .get(`/api/v3/repos/${packageName}/releases?per_page=100`)
-        .reply(200, responseBody);
-      const res = await githubReleases.getReleases({
-        registryUrl: 'https://git.enterprise.com',
-        packageName,
+      expect(res).toMatchObject({
+        registryUrl: 'https://github.com',
+        releases: [
+          { releaseTimestamp: '2020-03-09T11:00:00.000Z', version: '1.0.0' },
+          { version: 'v1.1.0', releaseTimestamp: '2020-03-09T10:00:00.000Z' },
+          {
+            version: '2.0.0',
+            releaseTimestamp: '2020-04-09T10:00:00.000Z',
+            isStable: false,
+          },
+        ],
+        sourceUrl: 'https://github.com/some/dep',
       });
-      expect(res).toMatchSnapshot();
     });
   });
 

@@ -1,16 +1,17 @@
-import { loadFixture } from '../../../../../../../test/util';
+import { Fixtures } from '../../../../../../../test/fixtures';
+import { partial } from '../../../../../../../test/util';
 import type { UpdateLockedConfig } from '../../../../types';
 import { updateLockedDependency } from '.';
 
-const yarnLock1 = loadFixture('express.yarn.lock');
-const yarn2Lock = loadFixture('yarn2.lock');
+const yarnLock1 = Fixtures.get('express.yarn.lock');
+const yarn2Lock = Fixtures.get('yarn2.lock');
 
 describe('modules/manager/npm/update/locked-dependency/yarn-lock/index', () => {
   describe('updateLockedDependency()', () => {
     let config: UpdateLockedConfig;
 
     beforeEach(() => {
-      config = {};
+      config = partial<UpdateLockedConfig>({ packageFile: 'package.json' });
     });
 
     it('returns if cannot parse lock file', () => {

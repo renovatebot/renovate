@@ -15,6 +15,7 @@ const adminConfig: RepoGlobalConfig = {
   // `join` fixes Windows CI
   localDir: join('/tmp/github/some/repo'),
   cacheDir: join('/tmp/cache'),
+  containerbaseDir: join('/tmp/cache/containerbase'),
 };
 
 describe('modules/manager/bundler/common', () => {
@@ -23,7 +24,7 @@ describe('modules/manager/bundler/common', () => {
   });
 
   describe('getBundlerConstraint', () => {
-    it('uses existing contraint', () => {
+    it('uses existing constraint', () => {
       const config: Pick<UpdateArtifact, 'config'> = {
         config: {
           constraints: { bundler: '2.1.0' },
@@ -51,7 +52,7 @@ describe('modules/manager/bundler/common', () => {
   });
 
   describe('getRubyConstraint', () => {
-    it('uses existing contraint', async () => {
+    it('uses existing constraint', async () => {
       const config = partial<UpdateArtifact>({
         packageFileName: 'Gemfile',
         newPackageFileContent: gemfile,

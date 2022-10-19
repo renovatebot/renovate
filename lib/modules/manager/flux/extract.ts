@@ -6,7 +6,12 @@ import { GithubReleasesDatasource } from '../../datasource/github-releases';
 import { HelmDatasource } from '../../datasource/helm';
 import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
 import { isSystemManifest } from './common';
-import type { FluxManifest, FluxResource, ResourceFluxManifest } from './types';
+import type {
+  FluxManagerData,
+  FluxManifest,
+  FluxResource,
+  ResourceFluxManifest,
+} from './types';
 
 function readManifest(content: string, file: string): FluxManifest | null {
   if (isSystemManifest(file)) {
@@ -18,7 +23,7 @@ function readManifest(content: string, file: string): FluxManifest | null {
     }
     return {
       kind: 'system',
-      file: file,
+      file,
       version: versionMatch[1],
       components: versionMatch[2],
     };
@@ -26,7 +31,7 @@ function readManifest(content: string, file: string): FluxManifest | null {
 
   const manifest: FluxManifest = {
     kind: 'resource',
-    file: file,
+    file,
     releases: [],
     repositories: [],
   };
@@ -68,16 +73,17 @@ function readManifest(content: string, file: string): FluxManifest | null {
 function resolveManifest(
   manifest: FluxManifest,
   context: FluxManifest[]
-): PackageDependency[] {
+): PackageDependency<FluxManagerData>[] | null {
   const resourceManifests = context.filter(
     (manifest) => manifest.kind === 'resource'
   ) as ResourceFluxManifest[];
   const repositories = resourceManifests.flatMap(
     (manifest) => manifest.repositories
   );
+  let res: PackageDependency<FluxManagerData>[] | null = null;
   switch (manifest.kind) {
     case 'system':
-      return [
+      res = [
         {
           depName: 'fluxcd/flux2',
           datasource: GithubReleasesDatasource.id,
@@ -87,9 +93,10 @@ function resolveManifest(
           },
         },
       ];
+      break;
     case 'resource':
-      return manifest.releases.map((release) => {
-        const res: PackageDependency = {
+      res = manifest.releases.map((release) => {
+        const dep: PackageDependency<FluxManagerData> = {
           depName: release.spec.chart.spec.chart,
           currentValue: release.spec.chart.spec.version,
           datasource: HelmDatasource.id,
@@ -100,44 +107,46 @@ function resolveManifest(
             rep.kind === release.spec.chart.spec.sourceRef?.kind &&
             rep.metadata.name === release.spec.chart.spec.sourceRef.name &&
             rep.metadata.namespace ===
-              (release.spec.chart.spec.sourceRef.namespace ||
+              (release.spec.chart.spec.sourceRef.namespace ??
                 release.metadata?.namespace)
         );
         if (matchingRepositories.length) {
-          res.registryUrls = matchingRepositories.map((repo) => repo.spec.url);
+          dep.registryUrls = matchingRepositories.map((repo) => repo.spec.url);
         } else {
-          res.skipReason = 'unknown-registry';
+          dep.skipReason = 'unknown-registry';
         }
 
-        return res;
+        return dep;
       });
+      break;
   }
-  // istanbul ignore next: unreachable code
-  return null;
+
+  return res;
 }
 
 export function extractPackageFile(
   content: string,
   packageFile: string
-): PackageFile | null {
+): PackageFile<FluxManagerData> | null {
   const manifest = readManifest(content, packageFile);
   if (!manifest) {
     return null;
   }
   const deps = resolveManifest(manifest, [manifest]);
-  return deps.length ? { deps: deps } : null;
+  return deps?.length ? { deps } : null;
 }
 
 export async function extractAllPackageFiles(
   _config: ExtractConfig,
   packageFiles: string[]
-): Promise<PackageFile[] | null> {
+): Promise<PackageFile<FluxManagerData>[] | null> {
   const manifests: FluxManifest[] = [];
-  const results: PackageFile[] = [];
+  const results: PackageFile<FluxManagerData>[] = [];
 
   for (const file of packageFiles) {
     const content = await readLocalFile(file, 'utf8');
-    const manifest = readManifest(content, file);
+    // TODO #7154
+    const manifest = readManifest(content!, file);
     if (manifest) {
       manifests.push(manifest);
     }
@@ -145,10 +154,10 @@ export async function extractAllPackageFiles(
 
   for (const manifest of manifests) {
     const deps = resolveManifest(manifest, manifests);
-    if (deps.length) {
+    if (deps?.length) {
       results.push({
         packageFile: manifest.file,
-        deps: deps,
+        deps,
       });
     }
   }

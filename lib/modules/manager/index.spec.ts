@@ -18,7 +18,7 @@ describe('modules/manager/index', () => {
 
       it(`has valid supportedDatasources for ${m}`, () => {
         expect(supportedDatasources).toBeNonEmptyArray();
-        supportedDatasources.every((d) => {
+        supportedDatasources!.every((d) => {
           expect(datasources.includes(d)).toBeTrue();
         });
       });
@@ -62,7 +62,7 @@ describe('modules/manager/index', () => {
     expect(Array.from(mgrs.keys())).toEqual(Object.keys(loadedMgr));
 
     for (const name of mgrs.keys()) {
-      const mgr = mgrs.get(name);
+      const mgr = mgrs.get(name)!;
       expect(validate(mgr)).toBeTrue();
     }
   });
@@ -109,8 +109,12 @@ describe('modules/manager/index', () => {
         defaultConfig: {},
         supportedDatasources: [],
       });
-      expect(manager.extractPackageFile('unknown', null)).toBeNull();
-      expect(manager.extractPackageFile('dummy', null)).toBeNull();
+      expect(
+        manager.extractPackageFile('unknown', '', 'filename', {})
+      ).toBeNull();
+      expect(
+        manager.extractPackageFile('dummy', '', 'filename', {})
+      ).toBeNull();
     });
 
     it('returns non-null', () => {
@@ -120,7 +124,9 @@ describe('modules/manager/index', () => {
         extractPackageFile: () => Promise.resolve({ deps: [] }),
       });
 
-      expect(manager.extractPackageFile('dummy', null)).not.toBeNull();
+      expect(
+        manager.extractPackageFile('dummy', '', 'filename', {})
+      ).not.toBeNull();
     });
 
     afterEach(() => {

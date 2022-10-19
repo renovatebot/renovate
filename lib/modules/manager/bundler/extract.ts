@@ -1,9 +1,10 @@
 import { logger } from '../../../logger';
 import { readLocalFile } from '../../../util/fs';
 import { newlineRegex, regEx } from '../../../util/regex';
+import { RubyVersionDatasource } from '../../datasource/ruby-version';
 import { RubyGemsDatasource } from '../../datasource/rubygems';
 import type { PackageDependency, PackageFile } from '../types';
-import { delimiters } from './common';
+import { delimiters, extractRubyVersion } from './common';
 import { extractLockFileEntries } from './locked-version';
 
 function formatContent(input: string): string {
@@ -24,7 +25,7 @@ export async function extractPackageFile(
     let sourceMatch: RegExpMatchArray | null = null;
     for (const delimiter of delimiters) {
       sourceMatch =
-        sourceMatch ||
+        sourceMatch ??
         regEx(`^source ${delimiter}([^${delimiter}]+)${delimiter}\\s*$`).exec(
           line
         );
@@ -32,16 +33,17 @@ export async function extractPackageFile(
     if (sourceMatch) {
       res.registryUrls?.push(sourceMatch[1]);
     }
-    // TODO: will be used in next PR for #15114
-    // let rubyMatch: RegExpMatchArray | null = null;
-    // for (const delimiter of delimiters) {
-    //   rubyMatch =
-    //     rubyMatch ??
-    //     regEx(`^ruby ${delimiter}([^${delimiter}]+)${delimiter}`).exec(line);
-    // }
-    // if (rubyMatch) {
-    //   res.constraints = { ruby: rubyMatch[1] };
-    // }
+
+    const rubyMatch = extractRubyVersion(line);
+    if (rubyMatch) {
+      res.deps.push({
+        depName: 'ruby',
+        currentValue: rubyMatch,
+        datasource: RubyVersionDatasource.id,
+        registryUrls: null,
+      });
+    }
+
     const gemMatchRegex = regEx(
       `^\\s*gem\\s+(['"])(?<depName>[^'"]+)(['"])(\\s*,\\s*(?<currentValue>(['"])[^'"]+['"](\\s*,\\s*['"][^'"]+['"])?))?`
     );
@@ -53,9 +55,7 @@ export async function extractPackageFile(
       };
       if (gemMatch.groups?.currentValue) {
         const currentValue = gemMatch.groups.currentValue;
-        dep.currentValue = regEx(/\s*,\s*/).test(currentValue)
-          ? currentValue
-          : currentValue.slice(1, -1);
+        dep.currentValue = currentValue;
       }
       dep.datasource = RubyGemsDatasource.id;
       res.deps.push(dep);
@@ -189,6 +189,8 @@ export async function extractPackageFile(
       res.lockFiles = [gemfileLock];
       const lockedEntries = extractLockFileEntries(lockContent);
       for (const dep of res.deps) {
+        // TODO: types (#7154)
+        // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
         const lockedDepValue = lockedEntries.get(`${dep.depName}`);
         if (lockedDepValue) {
           dep.lockedVersion = lockedDepValue;

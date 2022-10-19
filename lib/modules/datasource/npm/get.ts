@@ -4,37 +4,45 @@ import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import * as packageCache from '../../../util/cache/package';
 import type { Http } from '../../../util/http';
+import { regEx } from '../../../util/regex';
 import { joinUrlParts } from '../../../util/url';
 import { id } from './common';
 import type { NpmDependency, NpmRelease, NpmResponse } from './types';
-
-let memcache: Record<string, string> = {};
-
-export function resetMemCache(): void {
-  logger.debug('resetMemCache()');
-  memcache = {};
-}
-
-export function resetCache(): void {
-  resetMemCache();
-}
 
 interface PackageSource {
   sourceUrl?: string;
   sourceDirectory?: string;
 }
 
+const SHORT_REPO_REGEX = regEx(
+  /^((?<platform>bitbucket|github|gitlab):)?(?<shortRepo>[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+)$/
+);
+
+const platformMapping: Record<string, string> = {
+  bitbucket: 'https://bitbucket.org/',
+  github: 'https://github.com/',
+  gitlab: 'https://gitlab.com/',
+};
+
 function getPackageSource(repository: any): PackageSource {
   const res: PackageSource = {};
   if (repository) {
     if (is.nonEmptyString(repository)) {
-      res.sourceUrl = repository;
+      const shortMatch = repository.match(SHORT_REPO_REGEX);
+      if (shortMatch?.groups) {
+        const { platform = 'github', shortRepo } = shortMatch.groups;
+        res.sourceUrl = platformMapping[platform] + shortRepo;
+      } else {
+        res.sourceUrl = repository;
+      }
     } else if (is.nonEmptyString(repository.url)) {
       res.sourceUrl = repository.url;
     }
     if (is.nonEmptyString(repository.directory)) {
       res.sourceDirectory = repository.directory;
     }
+    // TODO: types (#7154)
+    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
     const sourceUrlCopy = `${res.sourceUrl}`;
     const sourceUrlSplit: string[] = sourceUrlCopy.split('/');
     if (sourceUrlSplit.length > 7 && sourceUrlSplit[2] === 'github.com') {
@@ -56,12 +64,6 @@ export async function getDependency(
   packageName: string
 ): Promise<NpmDependency | null> {
   logger.trace(`npm.getDependency(${packageName})`);
-
-  // This is our datastore cache and is cleared at the end of each repo, i.e. we never requery/revalidate during a "run"
-  if (memcache[packageName]) {
-    logger.trace('Returning cached result');
-    return JSON.parse(memcache[packageName]) as NpmDependency;
-  }
 
   const packageUrl = joinUrlParts(registryUrl, packageName.replace('/', '%2F'));
 
@@ -87,9 +89,9 @@ export async function getDependency(
       return null;
     }
 
-    const latestVersion = res.versions[res['dist-tags']?.latest];
-    res.repository = res.repository || latestVersion?.repository;
-    res.homepage = res.homepage || latestVersion?.homepage;
+    const latestVersion = res.versions[res['dist-tags']?.latest ?? ''];
+    res.repository ??= latestVersion?.repository;
+    res.homepage ??= latestVersion?.homepage;
 
     const { sourceUrl, sourceDirectory } = getPackageSource(res.repository);
 
@@ -100,7 +102,7 @@ export async function getDependency(
       sourceUrl,
       sourceDirectory,
       versions: {},
-      releases: null,
+      releases: [],
       'dist-tags': res['dist-tags'],
       registryUrl,
     };
@@ -112,17 +114,17 @@ export async function getDependency(
     dep.releases = Object.keys(res.versions).map((version) => {
       const release: NpmRelease = {
         version,
-        gitRef: res.versions[version].gitHead,
-        dependencies: res.versions[version].dependencies,
-        devDependencies: res.versions[version].devDependencies,
+        gitRef: res.versions?.[version].gitHead,
+        dependencies: res.versions?.[version].dependencies,
+        devDependencies: res.versions?.[version].devDependencies,
       };
       if (res.time?.[version]) {
         release.releaseTimestamp = res.time[version];
       }
-      if (res.versions[version].deprecated) {
+      if (res.versions?.[version].deprecated) {
         release.isDeprecated = true;
       }
-      const source = getPackageSource(res.versions[version].repository);
+      const source = getPackageSource(res.versions?.[version].repository);
       if (source.sourceUrl && source.sourceUrl !== dep.sourceUrl) {
         release.sourceUrl = source.sourceUrl;
       }
@@ -136,7 +138,6 @@ export async function getDependency(
     });
     logger.trace({ dep }, 'dep');
     // serialize first before saving
-    memcache[packageName] = JSON.stringify(dep);
     const cacheMinutes = process.env.RENOVATE_CACHE_NPM_MINUTES
       ? parseInt(process.env.RENOVATE_CACHE_NPM_MINUTES, 10)
       : 15;
@@ -194,6 +195,7 @@ export async function getDependency(
       }
       throw new ExternalHostError(err);
     }
+    logger.debug({ err }, 'Unknown npm lookup error');
     return null;
   }
 }

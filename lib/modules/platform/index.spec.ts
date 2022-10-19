@@ -13,9 +13,9 @@ describe('modules/platform/index', () => {
   });
 
   it('validates', () => {
-    function validate(module: Platform, name: string): boolean {
+    function validate(module: Platform | undefined, name: string): boolean {
       // TODO: test required api (#9650)
-      if (!module.initPlatform) {
+      if (!module?.initPlatform) {
         throw Error(`Missing api on ${name}`);
       }
       return true;
@@ -24,7 +24,7 @@ describe('modules/platform/index', () => {
 
     const loadedMgr = loadModules(
       __dirname,
-      null,
+      undefined,
       (m) => !['utils', 'git'].includes(m)
     );
     expect(Array.from(platforms.keys())).toEqual(Object.keys(loadedMgr));

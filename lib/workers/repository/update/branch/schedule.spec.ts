@@ -40,6 +40,14 @@ describe('workers/repository/update/branch/schedule', () => {
       ).toBeFalse();
     });
 
+    it('returns false for wildcard minutes', () => {
+      const res = schedule.hasValidSchedule(['1 * * * *']);
+      expect(res).toEqual([
+        false,
+        `Invalid schedule: "1 * * * *" has cron syntax, but doesn't have * as minutes`,
+      ]);
+    });
+
     it('returns false if schedules have no days or time range', () => {
       expect(schedule.hasValidSchedule(['at 5:00pm'])[0]).toBeFalse();
     });

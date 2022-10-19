@@ -1,9 +1,4 @@
-import {
-  defaultConfig,
-  git,
-  partial,
-  platform,
-} from '../../../../../test/util';
+import { getConfig, git, platform } from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
 import type { BranchConfig } from '../../../types';
 import { commitFilesToBranch } from './commit';
@@ -15,8 +10,9 @@ describe('workers/repository/update/branch/commit', () => {
     let config: BranchConfig;
 
     beforeEach(() => {
-      config = partial<BranchConfig>({
-        ...defaultConfig,
+      // TODO: incompatible types (#7154)
+      config = {
+        ...getConfig(),
         branchName: 'renovate/some-branch',
         commitMessage: 'some commit message',
         semanticCommits: 'disabled',
@@ -24,10 +20,10 @@ describe('workers/repository/update/branch/commit', () => {
         semanticCommitScope: 'b',
         updatedPackageFiles: [],
         updatedArtifacts: [],
-      });
+        upgrades: [],
+      } as BranchConfig;
       jest.resetAllMocks();
       git.commitFiles.mockResolvedValueOnce('123test');
-      platform.commitFiles = jest.fn();
       GlobalConfig.reset();
     });
 
@@ -37,7 +33,7 @@ describe('workers/repository/update/branch/commit', () => {
     });
 
     it('commits files', async () => {
-      config.updatedPackageFiles.push({
+      config.updatedPackageFiles?.push({
         type: 'addition',
         path: 'package.json',
         contents: 'some contents',
@@ -48,7 +44,7 @@ describe('workers/repository/update/branch/commit', () => {
     });
 
     it('commits via platform', async () => {
-      config.updatedPackageFiles.push({
+      config.updatedPackageFiles?.push({
         type: 'addition',
         path: 'package.json',
         contents: 'some contents',
@@ -61,7 +57,7 @@ describe('workers/repository/update/branch/commit', () => {
 
     it('dry runs', async () => {
       GlobalConfig.set({ dryRun: 'full' });
-      config.updatedPackageFiles.push({
+      config.updatedPackageFiles?.push({
         type: 'addition',
         path: 'package.json',
         contents: 'some contents',

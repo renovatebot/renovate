@@ -184,5 +184,20 @@ describe('workers/global/config/parse/cli', () => {
       argv.push('--dry-run=null');
       expect(cli.getConfig(argv)).toEqual({ dryRun: null });
     });
+
+    it('requireConfig boolean true', () => {
+      argv.push('--require-config=true');
+      expect(cli.getConfig(argv)).toEqual({ requireConfig: 'required' });
+    });
+
+    it('requireConfig no value', () => {
+      argv.push('--require-config');
+      expect(cli.getConfig(argv)).toEqual({ requireConfig: 'required' });
+    });
+
+    it('requireConfig boolean false', () => {
+      argv.push('--require-config=false');
+      expect(cli.getConfig(argv)).toEqual({ requireConfig: 'optional' });
+    });
   });
 });

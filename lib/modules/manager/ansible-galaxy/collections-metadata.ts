@@ -16,7 +16,7 @@ export function extractCollectionsMetaDataFile(
     } else if (foundDependencyBlock) {
       // expects a line like this `  ansible.windows: "1.4.0"`
       const galaxyRegExResult = galaxyRegEx.exec(line);
-      if (galaxyRegExResult) {
+      if (galaxyRegExResult?.groups) {
         const dep: PackageDependency = {
           depType: 'galaxy-collection',
           datasource: GalaxyCollectionDatasource.id,

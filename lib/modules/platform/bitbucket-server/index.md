@@ -13,7 +13,7 @@ Remember to set `platform=bitbucket-server` somewhere in your Renovate config fi
 
 If you're not using `@renovate-bot` as username then set your custom `username` for the bot account.
 
-If you use MySQL or MariaDB you must set `unicodeEmoji` to `false` in the bot config (`RENOVATE_CONFIG_FILE`) to prevent issues with emojis.
+If you use MySQL or MariaDB you must set `unicodeEmoji` to `false` in the global bot config (`RENOVATE_CONFIG_FILE`) to prevent issues with emojis.
 
 ## Unsupported platform features/concepts
 
@@ -67,4 +67,4 @@ You should then get a "Configure Renovate" onboarding PR in any projects that `@
 ## Supported versions
 
 We support all Bitbucket Server versions which are not EOL.
-See [Atlassian Support End of Life Policy](https://confluence.atlassian.com/support/atlassian-support-end-of-life-policy-201851003.html#AtlassianSupportEndofLifePolicy-BitbucketServer) for uptodate versions.
+See [Atlassian Support End of Life Policy](https://confluence.atlassian.com/support/atlassian-support-end-of-life-policy-201851003.html#AtlassianSupportEndofLifePolicy-BitbucketServer) for up-to-date versions.

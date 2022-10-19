@@ -43,12 +43,19 @@ export class GitlabPackagesDatasource extends Datasource {
   @cache({
     namespace: `datasource-${datasource}`,
     key: ({ registryUrl, packageName }: GetReleasesConfig) =>
+      // TODO: types (#7154)
+      // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
       `${registryUrl}-${packageName}`,
   })
   async getReleases({
     registryUrl,
     packageName,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
+    // istanbul ignore if
+    if (!registryUrl) {
+      return null;
+    }
+
     const [projectPart, packagePart] = packageName.split(':', 2);
 
     const apiUrl = GitlabPackagesDatasource.getGitlabPackageApiUrl(
@@ -58,7 +65,7 @@ export class GitlabPackagesDatasource extends Datasource {
     );
 
     const result: ReleaseResult = {
-      releases: null,
+      releases: [],
     };
 
     let response: GitlabPackage[];

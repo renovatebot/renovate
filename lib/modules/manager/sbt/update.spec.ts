@@ -1,4 +1,4 @@
-import * as sbtUpdater from './update';
+import * as sbtUpdater from '.';
 
 describe('modules/manager/sbt/update', () => {
   describe('.bumpPackageVersion()', () => {

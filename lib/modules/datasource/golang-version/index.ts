@@ -1,6 +1,7 @@
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { cache } from '../../../util/cache/package/decorator';
 import { regEx } from '../../../util/regex';
+import { joinUrlParts } from '../../../util/url';
 import { isVersion, id as semverVersioningId } from '../../versioning/semver';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
@@ -24,10 +25,10 @@ export class GolangVersionDatasource extends Datasource {
   }
 
   override readonly defaultRegistryUrls = [
-    'https://raw.githubusercontent.com/golang/website/',
+    'https://raw.githubusercontent.com/golang/website',
   ];
 
-  override readonly customRegistrySupport = false;
+  override readonly customRegistrySupport = true;
 
   override readonly defaultVersioning = semverVersioningId;
 
@@ -35,12 +36,21 @@ export class GolangVersionDatasource extends Datasource {
   async getReleases({
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
+    // istanbul ignore if
+    if (!registryUrl) {
+      return null;
+    }
+
     const res: ReleaseResult = {
       homepage: 'https://go.dev/',
       sourceUrl: 'https://github.com/golang/go',
       releases: [],
     };
-    const golangVersionsUrl = `${registryUrl}master/internal/history/release.go`;
+
+    const golangVersionsUrl = joinUrlParts(
+      registryUrl,
+      '/HEAD/internal/history/release.go'
+    );
 
     const response = await this.http.get(golangVersionsUrl);
 
@@ -57,10 +67,12 @@ export class GolangVersionDatasource extends Datasource {
     lines.splice(0, startOfReleases + 1);
 
     // Parse the release list
-    let release: Release = { version: undefined };
+    let release: Omit<Release, 'version'> & { version?: string } = {
+      version: undefined,
+    };
     let skipFutureRelease = false;
     while (lines.length !== 0) {
-      const line = lines.shift();
+      const line = lines.shift()!;
       if (line === releaseBeginningChar) {
         if (release.version !== undefined) {
           throw new ExternalHostError(
@@ -76,7 +88,7 @@ export class GolangVersionDatasource extends Datasource {
               new Error('Invalid file - release has empty version')
             );
           }
-          res.releases.push(release);
+          res.releases.push(release as Release);
         }
         release = { version: undefined };
       } else {
@@ -85,7 +97,7 @@ export class GolangVersionDatasource extends Datasource {
           skipFutureRelease = true;
         }
         const releaseDateMatch = releaseDateRegex.exec(line);
-        if (releaseDateMatch) {
+        if (releaseDateMatch?.groups) {
           // Make a valid UTC timestamp
           const year = releaseDateMatch.groups.year.padStart(4, '0');
           const month = releaseDateMatch.groups.month.padStart(2, '0');
@@ -93,7 +105,7 @@ export class GolangVersionDatasource extends Datasource {
           release.releaseTimestamp = `${year}-${month}-${day}T00:00:00.000Z`;
         }
         const releaseVersionMatch = releaseVersionRegex.exec(line);
-        if (releaseVersionMatch) {
+        if (releaseVersionMatch?.groups) {
           release.version = `${releaseVersionMatch.groups.versionMajor}.${releaseVersionMatch.groups.versionMinor}.${releaseVersionMatch.groups.patch}`;
           if (!isVersion(release.version)) {
             throw new ExternalHostError(

@@ -31,7 +31,7 @@ async function setStatusCheck(
   context: string,
   description: string,
   state: BranchStatus,
-  url: string
+  url?: string
 ): Promise<void> {
   const existingState = await platform.getBranchStatusCheck(
     branchName,
@@ -51,10 +51,10 @@ async function setStatusCheck(
   }
 }
 
-export type StabilityConfig = RenovateConfig & {
+export interface StabilityConfig extends RenovateConfig {
   stabilityStatus?: BranchStatus;
   branchName: string;
-};
+}
 
 export async function setStability(config: StabilityConfig): Promise<void> {
   if (!config.stabilityStatus) {
@@ -70,17 +70,22 @@ export async function setStability(config: StabilityConfig): Promise<void> {
     context,
     description,
     config.stabilityStatus,
-    config.productLinks.documentation
+    config.productLinks?.documentation
   );
 }
 
-export type ConfidenceConfig = RenovateConfig & {
+export interface ConfidenceConfig extends RenovateConfig {
   confidenceStatus?: BranchStatus;
   minimumConfidence?: MergeConfidence;
-};
+}
 
 export async function setConfidence(config: ConfidenceConfig): Promise<void> {
-  if (!isActiveConfidenceLevel(config.minimumConfidence)) {
+  if (
+    !config.branchName ||
+    !config.confidenceStatus ||
+    (config.minimumConfidence &&
+      !isActiveConfidenceLevel(config.minimumConfidence))
+  ) {
     return;
   }
   const context = `renovate/merge-confidence`;
@@ -93,6 +98,6 @@ export async function setConfidence(config: ConfidenceConfig): Promise<void> {
     context,
     description,
     config.confidenceStatus,
-    config.productLinks.documentation
+    config.productLinks?.documentation
   );
 }

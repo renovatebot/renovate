@@ -1,41 +1,59 @@
-import { loadFixture } from '../../../../test/util';
-import { extractPackageFile } from './extract';
+import { Fixtures } from '../../../../test/fixtures';
+import { GlobalConfig } from '../../../config/global';
+import { extractPackageFile } from '.';
 
-const yamlFileMultiConfig = loadFixture('gitlab-ci.1.yaml');
-const yamlFileSingleConfig = loadFixture('gitlab-ci.2.yaml');
-const yamlWithEmptyIncludeConfig = loadFixture('gitlab-ci.3.yaml');
+const yamlFileMultiConfig = Fixtures.get('gitlab-ci.1.yaml');
+const yamlFileSingleConfig = Fixtures.get('gitlab-ci.2.yaml');
+const yamlWithEmptyIncludeConfig = Fixtures.get('gitlab-ci.3.yaml');
+const yamlWithTriggerRef = Fixtures.get('gitlab-ci.4.yaml');
 
 describe('modules/manager/gitlabci-include/extract', () => {
   describe('extractPackageFile()', () => {
     it('returns null for empty', () => {
-      expect(
-        extractPackageFile('nothing here', '.gitlab-ci.yml', {})
-      ).toBeNull();
+      expect(extractPackageFile('nothing here')).toBeNull();
     });
 
     it('returns null for include block without any actual includes', () => {
-      const res = extractPackageFile(
-        yamlWithEmptyIncludeConfig,
-        '.gitlab-ci.yml',
-        {}
-      );
+      const res = extractPackageFile(yamlWithEmptyIncludeConfig);
       expect(res).toBeNull();
     });
 
     it('extracts single include block', () => {
-      const res = extractPackageFile(
-        yamlFileSingleConfig,
-        '.gitlab-ci.yml',
-        {}
-      );
-      expect(res.deps).toMatchSnapshot();
-      expect(res.deps).toHaveLength(1);
+      const res = extractPackageFile(yamlFileSingleConfig);
+      expect(res?.deps).toMatchSnapshot();
+      expect(res?.deps).toHaveLength(1);
     });
 
     it('extracts multiple include blocks', () => {
-      const res = extractPackageFile(yamlFileMultiConfig, '.gitlab-ci.yml', {});
-      expect(res.deps).toMatchSnapshot();
-      expect(res.deps).toHaveLength(3);
+      const res = extractPackageFile(yamlFileMultiConfig);
+      expect(res?.deps).toMatchSnapshot();
+      expect(res?.deps).toHaveLength(3);
+    });
+
+    it('extracts multiple embedded include blocks', () => {
+      const res = extractPackageFile(yamlWithTriggerRef);
+      expect(res?.deps).toHaveLength(2);
+      expect(res?.deps).toMatchObject([
+        {
+          currentValue: 'master',
+          datasource: 'gitlab-tags',
+          depName: 'mikebryant/include-source-example',
+        },
+        {
+          currentValue: '1.0.0',
+          datasource: 'gitlab-tags',
+          depName: 'mikebryant/include-source-example',
+        },
+      ]);
+    });
+
+    it('ignores includes without project and file keys', () => {
+      const includeWithoutProjectRef = `include:
+      - 'https://gitlab.com/mikebryant/include-source-example.yml'
+      - remote: 'https://gitlab.com/mikebryant/include-source-example.yml'
+      - local: mikebryant/include-source-example`;
+      const res = extractPackageFile(includeWithoutProjectRef);
+      expect(res).toBeNull();
     });
 
     it('normalizes configured endpoints', () => {
@@ -45,10 +63,9 @@ describe('modules/manager/gitlabci-include/extract', () => {
       ];
 
       for (const endpoint of endpoints) {
-        const res = extractPackageFile(yamlFileMultiConfig, '.gitlab-ci.yml', {
-          endpoint,
-        });
-        expect(res.deps[0].registryUrls[0]).toBe('http://gitlab.test');
+        GlobalConfig.set({ platform: 'gitlab', endpoint });
+        const res = extractPackageFile(yamlFileMultiConfig);
+        expect(res?.deps[0].registryUrls).toEqual(['http://gitlab.test']);
       }
     });
   });

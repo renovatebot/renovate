@@ -1,4 +1,4 @@
-import { defaultConfig, git, mocked } from '../../../../test/util';
+import { getConfig, git, mocked } from '../../../../test/util';
 import type { RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
 import * as _managerFiles from './manager-files';
@@ -17,7 +17,7 @@ describe('workers/repository/extract/index', () => {
     beforeEach(() => {
       jest.resetAllMocks();
       git.getFileList.mockResolvedValue(fileList);
-      config = { ...defaultConfig };
+      config = getConfig();
     });
 
     it('runs', async () => {
@@ -38,6 +38,12 @@ describe('workers/repository/extract/index', () => {
       managerFiles.getManagerPackageFiles.mockResolvedValue([]);
       expect(await extractAllDependencies(config)).toEqual({});
       expect(logger.debug).toHaveBeenCalled();
+    });
+
+    it('warns if packageFiles is null', async () => {
+      config.enabledManagers = ['npm'];
+      managerFiles.getManagerPackageFiles.mockResolvedValue(null);
+      expect(await extractAllDependencies(config)).toEqual({});
     });
 
     it('checks custom managers', async () => {

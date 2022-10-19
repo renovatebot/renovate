@@ -10,9 +10,10 @@ import {
 } from '../../constants/error-messages';
 import { GithubReleasesDatasource } from '../../modules/datasource/github-releases';
 import * as _repositoryCache from '../cache/repository';
-import type { Cache } from '../cache/repository/types';
+import type { RepoCacheData } from '../cache/repository/types';
 import * as hostRules from '../host-rules';
 import { GithubHttp, setBaseUrl } from './github';
+import type { GraphqlPageCache } from './github';
 
 jest.mock('../cache/repository');
 const repositoryCache = mocked(_repositoryCache);
@@ -47,7 +48,7 @@ query(
 
 describe('util/http/github', () => {
   let githubApi: GithubHttp;
-  let repoCache: Cache = {};
+  let repoCache: RepoCacheData = {};
 
   beforeEach(() => {
     githubApi = new GithubHttp();
@@ -135,6 +136,83 @@ describe('util/http/github', () => {
         paginationField: 'the_field',
       });
       expect(res.body.the_field).toEqual(['a', 'b', 'c', 'd']);
+    });
+
+    it('paginates with auth and repo', async () => {
+      const url = '/some-url?per_page=2';
+      hostRules.add({
+        hostType: 'github',
+        token: 'test',
+        matchHost: 'github.com',
+      });
+      hostRules.add({
+        hostType: 'github',
+        token: 'abc',
+        matchHost: 'https://api.github.com/repos/some/repo',
+      });
+      httpMock
+        .scope(githubApiHost, {
+          reqheaders: {
+            authorization: 'token abc',
+            accept: 'application/vnd.github.v3+json',
+          },
+        })
+        .get(url)
+        .reply(200, ['a', 'b'], {
+          link: `<${url}&page=2>; rel="next", <${url}&page=3>; rel="last"`,
+        })
+        .get(`${url}&page=2`)
+        .reply(200, ['c', 'd'], {
+          link: `<${url}&page=3>; rel="next", <${url}&page=3>; rel="last"`,
+        })
+        .get(`${url}&page=3`)
+        .reply(200, ['e']);
+      const res = await githubApi.getJson(url, {
+        paginate: true,
+        repository: 'some/repo',
+      });
+      expect(res.body).toEqual(['a', 'b', 'c', 'd', 'e']);
+    });
+
+    it('paginates with auth and repo on GHE', async () => {
+      const url = '/api/v3/some-url?per_page=2';
+      hostRules.add({
+        hostType: 'github',
+        token: 'test',
+        matchHost: 'github.domain.com',
+      });
+      hostRules.add({
+        hostType: 'github',
+        token: 'abc',
+        matchHost: 'https://github.domain.com/api/v3/repos/some/repo',
+      });
+      httpMock
+        .scope('https://github.domain.com', {
+          reqheaders: {
+            authorization: 'token abc',
+            accept:
+              'application/vnd.github.antiope-preview+json, application/vnd.github.v3+json',
+          },
+        })
+        .get(url)
+        .reply(200, ['a', 'b'], {
+          link: `<${url}&page=2>; rel="next", <${url}&page=3>; rel="last"`,
+        })
+        .get(`${url}&page=2`)
+        .reply(200, ['c', 'd'], {
+          link: `<${url}&page=3>; rel="next", <${url}&page=3>; rel="last"`,
+        })
+        .get(`${url}&page=3`)
+        .reply(200, ['e']);
+      const res = await githubApi.getJson(url, {
+        paginate: true,
+        repository: 'some/repo',
+        baseUrl: 'https://github.domain.com',
+        headers: {
+          accept: 'application/vnd.github.antiope-preview+json',
+        },
+      });
+      expect(res.body).toEqual(['a', 'b', 'c', 'd', 'e']);
     });
 
     it('attempts to paginate', async () => {
@@ -458,7 +536,7 @@ describe('util/http/github', () => {
         });
       expect(
         await githubApi.queryRepoField(graphqlQuery, 'testItem')
-      ).toMatchInlineSnapshot(`Array []`);
+      ).toMatchInlineSnapshot(`[]`);
     });
 
     it('queryRepo', async () => {
@@ -527,9 +605,10 @@ describe('util/http/github', () => {
       const items = await githubApi.queryRepoField(graphqlQuery, 'testItem');
       expect(items).toHaveLength(3);
 
-      expect(
-        repoCache?.platform?.github?.graphqlPageCache?.['testItem']?.pageSize
-      ).toBe(25);
+      const graphqlPageCache = repoCache?.platform?.github?.[
+        'graphqlPageCache'
+      ] as GraphqlPageCache;
+      expect(graphqlPageCache?.['testItem']?.pageSize).toBe(25);
     });
 
     it('expands items count on timeout', async () => {
@@ -555,9 +634,10 @@ describe('util/http/github', () => {
 
       const items = await githubApi.queryRepoField(graphqlQuery, 'testItem');
       expect(items).toHaveLength(3);
-      expect(
-        repoCache?.platform?.github?.graphqlPageCache?.['testItem']?.pageSize
-      ).toBe(84);
+      const graphqlPageCache = repoCache?.platform?.github?.[
+        'graphqlPageCache'
+      ] as GraphqlPageCache;
+      expect(graphqlPageCache?.['testItem']?.pageSize).toBe(84);
     });
 
     it('continues to iterate with a lower page size on error 502', async () => {
@@ -599,10 +679,10 @@ describe('util/http/github', () => {
 
       const items = await githubApi.queryRepoField(graphqlQuery, 'testItem');
       expect(items).toHaveLength(3);
-
-      expect(
-        repoCache?.platform?.github?.graphqlPageCache?.['testItem']
-      ).toBeUndefined();
+      const graphqlPageCache = repoCache?.platform?.github?.[
+        'graphqlPageCache'
+      ] as GraphqlPageCache;
+      expect(graphqlPageCache?.['testItem']).toBeUndefined();
     });
 
     it('throws on 50x if count < 10', async () => {

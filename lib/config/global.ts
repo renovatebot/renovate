@@ -10,6 +10,7 @@ export class GlobalConfig {
     'allowScripts',
     'binarySource',
     'cacheDir',
+    'containerbaseDir',
     'customEnvVariables',
     'dockerChildPrefix',
     'dockerImagePrefix',
@@ -22,6 +23,9 @@ export class GlobalConfig {
     'migratePresets',
     'privateKey',
     'privateKeyOld',
+    'gitTimeout',
+    'platform',
+    'endpoint',
   ];
 
   private static config: RepoGlobalConfig = {};

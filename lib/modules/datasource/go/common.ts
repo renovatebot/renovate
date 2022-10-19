@@ -1,5 +1,5 @@
+import { getSourceUrl as githubSourceUrl } from '../../../util/github/url';
 import { BitBucketTagsDatasource } from '../bitbucket-tags';
-import { getSourceUrl as githubSourceUrl } from '../github-releases/common';
 import { GithubTagsDatasource } from '../github-tags';
 import { GitlabTagsDatasource } from '../gitlab-tags';
 import { getSourceUrl as gitlabSourceUrl } from '../gitlab-tags/util';
@@ -12,7 +12,9 @@ export enum GoproxyFallback {
   Always = '|',
 }
 
-export function getSourceUrl(dataSource?: DataSource): string | undefined {
+export function getSourceUrl(
+  dataSource?: DataSource | null
+): string | undefined {
   if (dataSource) {
     const { datasource, registryUrl, packageName } = dataSource;
 

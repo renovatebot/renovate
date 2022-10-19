@@ -12,6 +12,10 @@ class Pkg(ConanFile):
    requires = (("req_c/1.0@user/stable", "private"), )
    requires = ("req_f/1.0@user/stable", ("req_h/3.0@other/beta", "override"))
    requires = "req_g/[>1.0 <1.8]@user/stable"
+#  requires = "commentedout/[>1.0 <1.8]@user/stable"
+   #  requires = "commentedout2/[>1.0 <1.8]@user/stable"
+   requires = (("req_l/1.0@user/stable#bc592346b33fd19c1fbffce25d1e4236", "private"), )
+
 
 
 def requirements(self):

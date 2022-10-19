@@ -1,24 +1,36 @@
 import fs from 'fs-extra';
 import Git from 'simple-git';
 import tmp from 'tmp-promise';
-import { mocked } from '../../../test/util';
+import { logger, mocked } from '../../../test/util';
 import { GlobalConfig } from '../../config/global';
-import { CONFIG_VALIDATION } from '../../constants/error-messages';
+import {
+  CONFIG_VALIDATION,
+  INVALID_PATH,
+} from '../../constants/error-messages';
 import { newlineRegex, regEx } from '../regex';
+import * as _behindBaseCache from './behind-base-branch-cache';
 import * as _conflictsCache from './conflicts-cache';
+import * as _modifiedCache from './modified-cache';
+import * as _parentShaCache from './parent-sha-cache';
 import type { FileChange } from './types';
 import * as git from '.';
 import { setNoVerify } from '.';
 
 jest.mock('./conflicts-cache');
+jest.mock('./behind-base-branch-cache');
+jest.mock('./modified-cache');
+jest.mock('./parent-sha-cache');
 jest.mock('delay');
+jest.mock('../cache/repository');
+const behindBaseCache = mocked(_behindBaseCache);
 const conflictsCache = mocked(_conflictsCache);
-
+const modifiedCache = mocked(_modifiedCache);
+const parentShaCache = mocked(_parentShaCache);
 // Class is no longer exported
 const SimpleGit = Git().constructor as { prototype: ReturnType<typeof Git> };
 
 describe('util/git/index', () => {
-  jest.setTimeout(15000);
+  jest.setTimeout(60000);
 
   const masterCommitDate = new Date();
   masterCommitDate.setMilliseconds(0);
@@ -68,6 +80,14 @@ describe('util/git/index', () => {
     await repo.addConfig('user.email', 'custom@example.com');
     await repo.commit('custom message');
 
+    await repo.checkoutBranch('renovate/nested_files', defaultBranch);
+    await fs.mkdirp(base.path + '/bin/');
+    await fs.writeFile(base.path + '/bin/nested', 'nested');
+    await fs.writeFile(base.path + '/root', 'root');
+    await repo.add(['root', 'bin/nested']);
+    await repo.addConfig('user.email', 'custom@example.com');
+    await repo.commit('nested message');
+
     await repo.checkoutBranch('renovate/equal_branch', defaultBranch);
 
     await repo.checkout(defaultBranch);
@@ -96,17 +116,19 @@ describe('util/git/index', () => {
     // override some local git settings for better testing
     const local = Git(tmpDir.path);
     await local.addConfig('commit.gpgsign', 'false');
+    parentShaCache.getCachedBranchParentShaResult.mockReturnValue(null);
+    behindBaseCache.getCachedBehindBaseResult.mockReturnValue(null);
   });
 
   afterEach(async () => {
-    await tmpDir.cleanup();
-    await origin.cleanup();
+    await tmpDir?.cleanup();
+    await origin?.cleanup();
     jest.restoreAllMocks();
   });
 
   afterAll(async () => {
     process.env = OLD_ENV;
-    await base.cleanup();
+    await base?.cleanup();
   });
 
   describe('gitRetry', () => {
@@ -187,7 +209,8 @@ describe('util/git/index', () => {
     it('should exclude submodules', async () => {
       const repo = Git(base.path);
       await repo.submoduleAdd(base.path, 'submodule');
-      await repo.commit('Add submodule');
+      await repo.submoduleAdd(base.path, 'file');
+      await repo.commit('Add submodules');
       await git.initRepo({
         cloneSubmodules: true,
         url: base.path,
@@ -223,22 +246,37 @@ describe('util/git/index', () => {
     });
   });
 
-  describe('isBranchStale()', () => {
+  describe('isBranchBehindBase()', () => {
     it('should return false if same SHA as master', async () => {
-      expect(await git.isBranchStale('renovate/future_branch')).toBeFalse();
+      expect(
+        await git.isBranchBehindBase('renovate/future_branch', defaultBranch)
+      ).toBeFalse();
     });
 
     it('should return true if SHA different from master', async () => {
-      expect(await git.isBranchStale('renovate/past_branch')).toBeTrue();
+      expect(
+        await git.isBranchBehindBase('renovate/past_branch', defaultBranch)
+      ).toBeTrue();
     });
 
     it('should return result even if non-default and not under branchPrefix', async () => {
-      expect(await git.isBranchStale('develop')).toBeTrue();
-      expect(await git.isBranchStale('develop')).toBeTrue(); // cache
+      expect(await git.isBranchBehindBase('develop', defaultBranch)).toBeTrue();
+    });
+
+    it('returns cached value', async () => {
+      behindBaseCache.getCachedBehindBaseResult.mockReturnValue(true);
+      expect(await git.isBranchBehindBase('develop', defaultBranch)).toBeTrue();
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        'branch.isBehindBase(): using cached result "true"'
+      );
     });
   });
 
   describe('isBranchModified()', () => {
+    beforeEach(() => {
+      modifiedCache.getCachedModifiedResult.mockReturnValue(null);
+    });
+
     it('should return false when branch is not found', async () => {
       expect(await git.isBranchModified('renovate/not_found')).toBeFalse();
     });
@@ -257,6 +295,11 @@ describe('util/git/index', () => {
 
     it('should return true when custom author is unknown', async () => {
       expect(await git.isBranchModified('renovate/custom_author')).toBeTrue();
+    });
+
+    it('should return value stored in modifiedCacheResult', async () => {
+      modifiedCache.getCachedModifiedResult.mockReturnValue(true);
+      expect(await git.isBranchModified('renovate/future_branch')).toBeTrue();
     });
   });
 
@@ -279,8 +322,13 @@ describe('util/git/index', () => {
       expect(parentSha).toEqual(git.getBranchCommit(defaultBranch));
     });
 
-    it('should return false if not found', async () => {
+    it('should return null if not found', async () => {
       expect(await git.getBranchParentSha('not_found')).toBeNull();
+    });
+
+    it('should return cached value', async () => {
+      parentShaCache.getCachedBranchParentShaResult.mockReturnValueOnce('111');
+      expect(await git.getBranchParentSha('not_found')).toBe('111');
     });
   });
 
@@ -293,7 +341,10 @@ describe('util/git/index', () => {
       };
       await git.commitFiles({
         branchName: 'renovate/branch_with_changes',
-        files: [file],
+        files: [
+          file,
+          { type: 'addition', path: 'dummy', contents: null as never },
+        ],
         message: 'Create something',
       });
       const branchFiles = await git.getBranchFiles(
@@ -368,6 +419,30 @@ describe('util/git/index', () => {
         message: 'Create something',
       });
       expect(commit).not.toBeNull();
+    });
+
+    it('link file', async () => {
+      const file: FileChange = {
+        type: 'addition',
+        path: 'future_link',
+        contents: 'past_file',
+        isSymlink: true,
+      };
+      const commit = await git.commitFiles({
+        branchName: 'renovate/future_branch',
+        files: [file],
+        message: 'Create a link',
+      });
+      expect(commit).toBeString();
+      const tmpGit = Git(tmpDir.path);
+      const lsTree = await tmpGit.raw(['ls-tree', commit!]);
+      const files = lsTree
+        .trim()
+        .split(newlineRegex)
+        .map((x) => x.split(/\s/))
+        .map(([mode, type, _hash, name]) => [mode, type, name]);
+      expect(files).toContainEqual(['100644', 'blob', 'past_file']);
+      expect(files).toContainEqual(['120000', 'blob', 'future_link']);
     });
 
     it('deletes file', async () => {
@@ -872,17 +947,26 @@ describe('util/git/index', () => {
         .map((line) => line.replace(regEx(/[0-9a-f]+\s+/i), ''))
         .filter(Boolean);
 
-    it('creates renovate ref', async () => {
-      const commit = git.getBranchCommit('develop');
+    it('creates renovate ref in default section', async () => {
+      const commit = git.getBranchCommit('develop')!;
 
       await git.pushCommitToRenovateRef(commit, 'foo/bar');
 
-      const funnyRefs = await lsRenovateRefs();
-      expect(funnyRefs).toContain('refs/renovate/foo/bar');
+      const renovateRefs = await lsRenovateRefs();
+      expect(renovateRefs).toContain('refs/renovate/branches/foo/bar');
+    });
+
+    it('creates custom section for renovate ref', async () => {
+      const commit = git.getBranchCommit('develop')!;
+
+      await git.pushCommitToRenovateRef(commit, 'bar/baz', 'foo');
+
+      const renovateRefs = await lsRenovateRefs();
+      expect(renovateRefs).toContain('refs/renovate/foo/bar/baz');
     });
 
     it('clears pushed Renovate refs', async () => {
-      const commit = git.getBranchCommit('develop');
+      const commit = git.getBranchCommit('develop')!;
       await git.pushCommitToRenovateRef(commit, 'foo');
       await git.pushCommitToRenovateRef(commit, 'bar');
       await git.pushCommitToRenovateRef(commit, 'baz');
@@ -893,20 +977,54 @@ describe('util/git/index', () => {
     });
 
     it('clears remote Renovate refs', async () => {
-      const commit = git.getBranchCommit('develop');
+      const commit = git.getBranchCommit('develop')!;
       const tmpGit = Git(tmpDir.path);
       await tmpGit.raw(['update-ref', 'refs/renovate/aaa', commit]);
       await tmpGit.raw(['push', '--force', 'origin', 'refs/renovate/aaa']);
 
       await git.pushCommitToRenovateRef(commit, 'bbb');
+      await git.pushCommitToRenovateRef(commit, 'ccc', 'branches');
+
+      const pushSpy = jest.spyOn(SimpleGit.prototype, 'push');
+
+      expect(await lsRenovateRefs()).not.toBeEmpty();
       await git.clearRenovateRefs();
       expect(await lsRenovateRefs()).toBeEmpty();
+      expect(pushSpy).toHaveBeenCalledOnce();
+    });
+
+    it('preserves unknown sections by default', async () => {
+      const commit = git.getBranchCommit('develop')!;
+      const tmpGit = Git(tmpDir.path);
+      await tmpGit.raw(['update-ref', 'refs/renovate/foo/bar', commit]);
+      await tmpGit.raw(['push', '--force', 'origin', 'refs/renovate/foo/bar']);
+      await git.clearRenovateRefs();
+      expect(await lsRenovateRefs()).toEqual(['refs/renovate/foo/bar']);
+    });
+
+    it('falls back to sequential ref deletion if bulk changes are disallowed', async () => {
+      const commit = git.getBranchCommit('develop')!;
+      await git.pushCommitToRenovateRef(commit, 'foo');
+      await git.pushCommitToRenovateRef(commit, 'bar');
+      await git.pushCommitToRenovateRef(commit, 'baz');
+
+      const pushSpy = jest.spyOn(SimpleGit.prototype, 'push');
+      pushSpy.mockImplementationOnce(() => {
+        throw new Error(
+          'remote: Repository policies do not allow pushes that update more than 2 branches or tags.'
+        );
+      });
+
+      expect(await lsRenovateRefs()).not.toBeEmpty();
+      await git.clearRenovateRefs();
+      expect(await lsRenovateRefs()).toBeEmpty();
+      expect(pushSpy).toHaveBeenCalledTimes(4);
     });
   });
 
   describe('listCommitTree', () => {
     it('creates non-branch ref', async () => {
-      const commit = git.getBranchCommit('develop');
+      const commit = git.getBranchCommit('develop')!;
       const res = await git.listCommitTree(commit);
       expect(res).toEqual([
         {
@@ -916,6 +1034,36 @@ describe('util/git/index', () => {
           type: 'blob',
         },
       ]);
+    });
+  });
+
+  describe('getRepoStatus', () => {
+    it('should pass options into git status', async () => {
+      await git.checkoutBranch('renovate/nested_files');
+
+      await fs.writeFile(tmpDir.path + '/bin/nested', 'new nested');
+      await fs.writeFile(tmpDir.path + '/root', 'new root');
+      const resp = await git.getRepoStatus('bin');
+
+      expect(resp.modified).toStrictEqual(['bin/nested']);
+    });
+
+    it('should reject when trying to access directory out of localDir', async () => {
+      GlobalConfig.set({ localDir: tmpDir.path });
+      await git.checkoutBranch('renovate/nested_files');
+
+      await fs.writeFile(tmpDir.path + '/bin/nested', 'new nested');
+      await fs.writeFile(tmpDir.path + '/root', 'new root');
+
+      await expect(git.getRepoStatus('../../bin')).rejects.toThrow(
+        INVALID_PATH
+      );
+    });
+  });
+
+  describe('getSubmodules', () => {
+    it('should return empty array', async () => {
+      expect(await git.getSubmodules()).toHaveLength(0);
     });
   });
 });

@@ -57,7 +57,7 @@ export async function updateArtifacts({
   const existingLockFileContent = lockFileName
     ? await readLocalFile(lockFileName)
     : null;
-  if (!existingLockFileContent) {
+  if (!existingLockFileContent || !lockFileName) {
     logger.debug('No Cargo.lock found');
     return null;
   }

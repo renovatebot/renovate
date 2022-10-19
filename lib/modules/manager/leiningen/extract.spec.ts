@@ -1,11 +1,7 @@
 import { Fixtures } from '../../../../test/fixtures';
 import { ClojureDatasource } from '../../datasource/clojure';
-import {
-  extractFromVectors,
-  extractPackageFile,
-  extractVariables,
-  trimAtKey,
-} from './extract';
+import { extractFromVectors, extractVariables, trimAtKey } from './extract';
+import { extractPackageFile } from '.';
 
 const leinProjectClj = Fixtures.get(`project.clj`);
 
@@ -20,6 +16,7 @@ describe('modules/manager/leiningen/extract', () => {
     expect(extractFromVectors('')).toBeEmptyArray();
     expect(extractFromVectors('[]')).toBeEmptyArray();
     expect(extractFromVectors('[[]]')).toBeEmptyArray();
+    expect(extractFromVectors('[#_[foo/bar "1.2.3"]]')).toBeEmptyArray();
     expect(extractFromVectors('[[foo/bar "1.2.3"]]')).toEqual([
       {
         datasource: ClojureDatasource.id,

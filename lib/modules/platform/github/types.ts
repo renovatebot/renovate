@@ -1,4 +1,4 @@
-import type { Pr } from '../types';
+import type { Pr, PrBodyStruct } from '../types';
 
 // https://developer.github.com/v3/repos/statuses
 // https://developer.github.com/v3/checks/runs/
@@ -24,16 +24,25 @@ export interface GhRestPr {
   head: {
     ref: string;
     sha: string;
-    repo: { full_name: string };
+    repo: {
+      full_name: string;
+      pushed_at?: string;
+    };
+  };
+  base: {
+    repo: {
+      pushed_at?: string;
+    };
   };
   mergeable_state: string;
   number: number;
   title: string;
-  body: string;
+  body?: string;
+  bodyStruct?: PrBodyStruct;
   state: string;
-  merged_at: string;
+  merged_at?: string;
   created_at: string;
-  closed_at: string;
+  closed_at?: string;
   updated_at: string;
   user?: { login?: string };
   node_id: string;
@@ -41,24 +50,12 @@ export interface GhRestPr {
   assignees?: { login?: string }[];
   requested_reviewers?: { login?: string }[];
   labels?: { name: string }[];
+  _links?: unknown;
 }
 
-export interface GhGraphQlPr {
-  number: number;
-  title: string;
-  body?: string;
-  state?: string;
-  headRefName: string;
-  baseRefName?: string;
-  labels?: { nodes?: { name: string }[] };
-  assignees?: { totalCount: number };
-  reviewRequests?: { totalCount: number };
-  comments?: {
-    nodes?: {
-      databaseId: number;
-      body: string;
-    }[];
-  };
+export interface GhPr extends Pr {
+  updated_at: string;
+  node_id: string;
 }
 
 export interface UserDetails {
@@ -82,16 +79,16 @@ export interface LocalRepoConfig {
   pushProtection: boolean;
   prReviewsRequired: boolean;
   repoForceRebase?: boolean;
-  parentRepo: string;
+  parentRepo: string | null;
   forkMode?: boolean;
   forkToken?: string;
-  prList?: Pr[];
+  prList: GhPr[] | null;
   issueList: any[] | null;
   mergeMethod: 'rebase' | 'squash' | 'merge';
   defaultBranch: string;
   repositoryOwner: string;
   repository: string | null;
-  renovateUsername: string;
+  renovateUsername: string | undefined;
   productLinks: any;
   ignorePrAuthor: boolean;
   autoMergeAllowed: boolean;
@@ -101,6 +98,7 @@ export interface LocalRepoConfig {
 export type BranchProtection = any;
 
 export interface GhRepo {
+  id: string;
   isFork: boolean;
   isArchived: boolean;
   nameWithOwner: string;
@@ -134,5 +132,4 @@ export interface ApiPageItem {
 export interface ApiPageCache<T extends ApiPageItem = ApiPageItem> {
   items: Record<number, T>;
   lastModified?: string;
-  etag?: string;
 }

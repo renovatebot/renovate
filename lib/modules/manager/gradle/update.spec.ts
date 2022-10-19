@@ -4,7 +4,7 @@ describe('modules/manager/gradle/update', () => {
   it('replaces', () => {
     expect(
       updateDependency({
-        fileContent: '___1.2.3___',
+        fileContent: '###1.2.3###',
         upgrade: {
           currentValue: '1.2.3',
           newValue: '1.2.4',
@@ -13,13 +13,13 @@ describe('modules/manager/gradle/update', () => {
           },
         },
       })
-    ).toBe('___1.2.4___');
+    ).toBe('###1.2.4###');
   });
 
   it('groups', () => {
     expect(
       updateDependency({
-        fileContent: '___1.2.4___',
+        fileContent: '###1.2.4###',
         upgrade: {
           currentValue: '1.2.3',
           newValue: '1.2.5',
@@ -29,11 +29,11 @@ describe('modules/manager/gradle/update', () => {
           },
         },
       })
-    ).toBe('___1.2.5___');
+    ).toBe('###1.2.5###');
   });
 
   it('returns same content', () => {
-    const fileContent = '___1.2.4___';
+    const fileContent = '###1.2.4###';
     expect(
       updateDependency({
         fileContent,
@@ -51,7 +51,7 @@ describe('modules/manager/gradle/update', () => {
   it('returns null', () => {
     expect(
       updateDependency({
-        fileContent: '___1.3.0___',
+        fileContent: '###1.3.0###',
         upgrade: {
           currentValue: '1.2.3',
           newValue: '1.2.4',
@@ -78,7 +78,7 @@ describe('modules/manager/gradle/update', () => {
 
   it('should return null for replacement', () => {
     const res = updateDependency({
-      fileContent: undefined,
+      fileContent: '',
       upgrade: { updateType: 'replacement' },
     });
     expect(res).toBeNull();

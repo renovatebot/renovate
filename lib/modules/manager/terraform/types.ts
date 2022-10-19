@@ -1,20 +1,20 @@
 import type { PackageDependency } from '../types';
-import type {
-  TerraformDependencyTypes,
-  TerraformResourceTypes,
-} from './common';
+import type { TerraformDependencyTypes } from './common';
 
 export interface ExtractionResult {
   lineNumber: number;
-  dependencies: PackageDependency[];
+  dependencies: PackageDependency<TerraformManagerData>[];
 }
 
 export interface TerraformManagerData {
+  moduleName?: string;
+  source?: string;
+  sourceLine?: number;
   terraformDependencyType: TerraformDependencyTypes;
 }
 
 export interface ResourceManagerData extends TerraformManagerData {
-  resourceType?: TerraformResourceTypes;
+  resourceType?: string;
   chart?: string;
   image?: string;
   name?: string;

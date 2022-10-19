@@ -1,5 +1,5 @@
 import { Fixtures } from '../../../../test/fixtures';
-import { extractPackageFile } from './extract';
+import { extractPackageFile } from '.';
 
 describe('modules/manager/cloudbuild/extract', () => {
   describe('extractPackageFile()', () => {
@@ -9,8 +9,8 @@ describe('modules/manager/cloudbuild/extract', () => {
 
     it('extracts multiple image lines', () => {
       const res = extractPackageFile(Fixtures.get('cloudbuild.yml'));
-      expect(res.deps).toMatchSnapshot();
-      expect(res.deps).toHaveLength(3);
+      expect(res?.deps).toMatchSnapshot();
+      expect(res?.deps).toHaveLength(3);
     });
   });
 });

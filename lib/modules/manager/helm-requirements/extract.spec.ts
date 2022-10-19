@@ -1,5 +1,5 @@
 import { fs } from '../../../../test/util';
-import { extractPackageFile } from './extract';
+import { extractPackageFile } from '.';
 
 jest.mock('../../../util/fs');
 
@@ -26,14 +26,14 @@ describe('modules/manager/helm-requirements/extract', () => {
       `;
       const fileName = 'requirements.yaml';
       const result = extractPackageFile(content, fileName, {
-        aliases: {
+        registryAliases: {
           stable: 'https://charts.helm.sh/stable/',
         },
       });
       expect(result).not.toBeNull();
-      expect(typeof result.deps[0]?.currentValue).toBe('string');
+      expect(result?.deps[0]?.currentValue).toBeString();
       expect(result).toMatchSnapshot();
-      expect(result.deps.every((dep) => dep.skipReason)).toBe(true);
+      expect(result?.deps.every((dep) => dep.skipReason)).toBe(true);
     });
 
     it('skips invalid registry urls', () => {
@@ -57,13 +57,13 @@ describe('modules/manager/helm-requirements/extract', () => {
       `;
       const fileName = 'requirements.yaml';
       const result = extractPackageFile(content, fileName, {
-        aliases: {
+        registryAliases: {
           stable: 'https://charts.helm.sh/stable/',
         },
       });
       expect(result).not.toBeNull();
       expect(result).toMatchSnapshot();
-      expect(result.deps.every((dep) => dep.skipReason)).toBe(true);
+      expect(result?.deps.every((dep) => dep.skipReason)).toBe(true);
     });
 
     it('parses simple requirements.yaml correctly', () => {
@@ -85,7 +85,7 @@ describe('modules/manager/helm-requirements/extract', () => {
       `;
       const fileName = 'requirements.yaml';
       const result = extractPackageFile(content, fileName, {
-        aliases: {
+        registryAliases: {
           stable: 'https://charts.helm.sh/stable/',
         },
       });
@@ -107,7 +107,7 @@ describe('modules/manager/helm-requirements/extract', () => {
       `);
       const fileName = 'requirements.yaml';
       const result = extractPackageFile('', fileName, {
-        aliases: {
+        registryAliases: {
           stable: 'https://charts.helm.sh/stable/',
         },
       });
@@ -133,14 +133,14 @@ describe('modules/manager/helm-requirements/extract', () => {
       `;
       const fileName = 'requirements.yaml';
       const result = extractPackageFile(content, fileName, {
-        aliases: {
+        registryAliases: {
           placeholder: 'https://my-registry.gcr.io/',
           longalias: 'https://registry.example.com/',
         },
       });
       expect(result).not.toBeNull();
       expect(result).toMatchSnapshot();
-      expect(result.deps.every((dep) => dep.skipReason)).toBe(false);
+      expect(result?.deps.every((dep) => dep.skipReason)).toBe(false);
     });
 
     it('skips local dependencies', () => {
@@ -162,7 +162,7 @@ describe('modules/manager/helm-requirements/extract', () => {
       `;
       const fileName = 'requirements.yaml';
       const result = extractPackageFile(content, fileName, {
-        aliases: {
+        registryAliases: {
           stable: 'https://charts.helm.sh/stable/',
         },
       });
@@ -187,7 +187,7 @@ describe('modules/manager/helm-requirements/extract', () => {
       `;
       const fileName = 'requirements.yaml';
       const result = extractPackageFile(content, fileName, {
-        aliases: {
+        registryAliases: {
           stable: 'https://charts.helm.sh/stable/',
         },
       });
@@ -209,7 +209,7 @@ describe('modules/manager/helm-requirements/extract', () => {
       `;
       const fileName = 'requirements.yaml';
       const result = extractPackageFile(content, fileName, {
-        aliases: {
+        registryAliases: {
           stable: 'https://charts.helm.sh/stable/',
         },
       });
@@ -220,7 +220,7 @@ describe('modules/manager/helm-requirements/extract', () => {
       const content = '';
       const fileName = 'requirements.yaml';
       const result = extractPackageFile(content, fileName, {
-        aliases: {
+        registryAliases: {
           stable: 'https://charts.helm.sh/stable/',
         },
       });

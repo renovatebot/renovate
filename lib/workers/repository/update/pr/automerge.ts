@@ -1,3 +1,4 @@
+// TODO #7154
 import { GlobalConfig } from '../../../../config/global';
 import { logger } from '../../../../logger';
 import { Pr, platform } from '../../../../modules/platform';
@@ -12,6 +13,7 @@ import {
   isBranchModified,
 } from '../../../../util/git';
 import type { BranchConfig } from '../../../types';
+import { isScheduledNow } from '../branch/schedule';
 import { resolveBranchStatus } from '../branch/status-checks';
 
 // eslint-disable-next-line typescript-enum/no-enum
@@ -22,13 +24,14 @@ export enum PrAutomergeBlockReason {
   DryRun = 'DryRun',
   PlatformNotReady = 'PlatformNotReady',
   PlatformRejection = 'PlatformRejection',
+  OffSchedule = 'off schedule',
 }
 
-export type AutomergePrResult = {
+export interface AutomergePrResult {
   automerged: boolean;
   branchRemoved?: boolean;
   prAutomergeBlockReason?: PrAutomergeBlockReason;
-};
+}
 
 export async function checkAutoMerge(
   pr: Pr,
@@ -39,11 +42,19 @@ export async function checkAutoMerge(
     branchName,
     automergeType,
     automergeStrategy,
+    pruneBranchAfterAutomerge,
     automergeComment,
     ignoreTests,
     rebaseRequested,
   } = config;
   // Return if PR not ready for automerge
+  if (!isScheduledNow(config, 'automergeSchedule')) {
+    logger.debug(`PR automerge is off schedule`);
+    return {
+      automerged: false,
+      prAutomergeBlockReason: PrAutomergeBlockReason.OffSchedule,
+    };
+  }
   const isConflicted =
     config.isConflicted ??
     (await isBranchConflicted(config.baseBranch, config.branchName));
@@ -85,7 +96,8 @@ export async function checkAutoMerge(
     };
   }
   if (automergeType === 'pr-comment') {
-    logger.debug(`Applying automerge comment: ${automergeComment}`);
+    // TODO: types (#7154)
+    logger.debug(`Applying automerge comment: ${automergeComment!}`);
     // istanbul ignore if
     if (GlobalConfig.get('dryRun')) {
       logger.info(
@@ -100,28 +112,32 @@ export async function checkAutoMerge(
       await ensureCommentRemoval({
         type: 'by-content',
         number: pr.number,
-        content: automergeComment,
+        content: automergeComment!,
       });
     }
     await ensureComment({
       number: pr.number,
       topic: null,
-      content: automergeComment,
+      content: automergeComment!,
     });
     return { automerged: true, branchRemoved: false };
   }
   // Let's merge this
   // istanbul ignore if
   if (GlobalConfig.get('dryRun')) {
+    // TODO: types (#7154)
     logger.info(
-      `DRY-RUN: Would merge PR #${pr.number} with strategy "${automergeStrategy}"`
+      `DRY-RUN: Would merge PR #${
+        pr.number
+      } with strategy "${automergeStrategy!}"`
     );
     return {
       automerged: false,
       prAutomergeBlockReason: PrAutomergeBlockReason.DryRun,
     };
   }
-  logger.debug(`Automerging #${pr.number} with strategy ${automergeStrategy}`);
+  // TODO: types (#7154)
+  logger.debug(`Automerging #${pr.number} with strategy ${automergeStrategy!}`);
   const res = await platform.mergePr({
     branchName,
     id: pr.number,
@@ -129,6 +145,10 @@ export async function checkAutoMerge(
   });
   if (res) {
     logger.info({ pr: pr.number, prTitle: pr.title }, 'PR automerged');
+    if (!pruneBranchAfterAutomerge) {
+      logger.info('Skipping pruning of merged branch');
+      return { automerged: true, branchRemoved: false };
+    }
     let branchRemoved = false;
     try {
       await deleteBranch(branchName);

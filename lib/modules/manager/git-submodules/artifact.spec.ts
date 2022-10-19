@@ -1,4 +1,4 @@
-import updateArtifacts from './artifacts';
+import { updateArtifacts } from '.';
 
 describe('modules/manager/git-submodules/artifact', () => {
   describe('updateArtifacts()', () => {
@@ -10,9 +10,7 @@ describe('modules/manager/git-submodules/artifact', () => {
           newPackageFileContent: '',
           config: {},
         })
-      ).toMatchSnapshot([
-        { file: { type: 'addition', path: '', contents: '' } },
-      ]);
+      ).toMatchObject([{ file: { type: 'addition', path: '', contents: '' } }]);
     });
 
     it('returns two modules', () => {
@@ -23,7 +21,7 @@ describe('modules/manager/git-submodules/artifact', () => {
           newPackageFileContent: '',
           config: {},
         })
-      ).toMatchSnapshot([
+      ).toMatchObject([
         { file: { type: 'addition', path: 'renovate', contents: '' } },
         { file: { type: 'addition', path: 'renovate-pro', contents: '' } },
       ]);

@@ -1,21 +1,22 @@
-import { loadFixture, mocked } from '../../../../test/util';
+import { Fixtures } from '../../../../test/fixtures';
+import { mocked } from '../../../../test/util';
 import * as _hostRules from '../../../util/host-rules';
-import { extractPackageFile } from './extract';
+import { extractPackageFile } from '.';
 
 jest.mock('../../../util/host-rules');
 const hostRules = mocked(_hostRules);
 const filename = '.pre-commit.yaml';
 
-const complexPrecommitConfig = loadFixture('complex.pre-commit-config.yaml');
-const examplePrecommitConfig = loadFixture('.pre-commit-config.yaml');
-const emptyReposPrecommitConfig = loadFixture(
+const complexPrecommitConfig = Fixtures.get('complex.pre-commit-config.yaml');
+const examplePrecommitConfig = Fixtures.get('.pre-commit-config.yaml');
+const emptyReposPrecommitConfig = Fixtures.get(
   'empty_repos.pre-commit-config.yaml'
 );
-const noReposPrecommitConfig = loadFixture('no_repos.pre-commit-config.yaml');
-const invalidRepoPrecommitConfig = loadFixture(
+const noReposPrecommitConfig = Fixtures.get('no_repos.pre-commit-config.yaml');
+const invalidRepoPrecommitConfig = Fixtures.get(
   'invalid_repo.pre-commit-config.yaml'
 );
-const enterpriseGitPrecommitConfig = loadFixture(
+const enterpriseGitPrecommitConfig = Fixtures.get(
   'enterprise.pre-commit-config.yaml'
 );
 
@@ -36,7 +37,8 @@ describe('modules/manager/pre-commit/extract', () => {
     });
 
     it('returns null for no file content', () => {
-      const result = extractPackageFile(null, filename);
+      // TODO #7154
+      const result = extractPackageFile(null as never, filename);
       expect(result).toBeNull();
     });
 

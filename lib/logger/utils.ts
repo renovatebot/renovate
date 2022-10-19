@@ -39,7 +39,7 @@ export class ProblemStream extends Stream {
     this._problems = [];
   }
 }
-const templateFields = ['prBody'];
+
 const contentFields = [
   'content',
   'contents',
@@ -85,6 +85,7 @@ export default function prepareError(err: Error): Record<string, unknown> {
           err.name === 'TimeoutError' ? undefined : clone(err.response.body),
         headers: clone(err.response.headers),
         httpVersion: err.response.httpVersion,
+        retryCount: err.response.retryCount,
       };
     }
   }
@@ -148,8 +149,6 @@ export function sanitizeValue(
         curValue = '***********';
       } else if (contentFields.includes(key)) {
         curValue = '[content]';
-      } else if (templateFields.includes(key)) {
-        curValue = '[Template]';
       } else if (key === 'secrets') {
         curValue = {};
         Object.keys(val).forEach((secretKey) => {

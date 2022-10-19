@@ -1,5 +1,5 @@
 import { Fixtures } from '../../../../../test/fixtures';
-import { defaultConfig } from '../../../../../test/util';
+import { getConfig, partial } from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
 import { WORKER_FILE_UPDATE_FAILED } from '../../../../constants/error-messages';
 import { extractPackageFile } from '../../../../modules/manager/html';
@@ -25,16 +25,17 @@ describe('workers/repository/update/branch/auto-replace', () => {
     });
 
     beforeEach(() => {
-      upgrade = {
-        ...JSON.parse(JSON.stringify(defaultConfig)),
+      upgrade = partial<BranchUpgradeConfig>({
+        // TODO: fix types (#7154)
+        ...(getConfig() as any),
         manager: 'html',
         packageFile: 'test',
-      };
+      });
       reuseExistingBranch = false;
     });
 
     it('rebases if the deps list has changed', async () => {
-      upgrade.baseDeps = extractPackageFile(sampleHtml).deps;
+      upgrade.baseDeps = extractPackageFile(sampleHtml)?.deps;
       reuseExistingBranch = true;
       const res = await doAutoReplace(
         upgrade,
@@ -45,8 +46,8 @@ describe('workers/repository/update/branch/auto-replace', () => {
     });
 
     it('rebases if the deps to update has changed', async () => {
-      upgrade.baseDeps = extractPackageFile(sampleHtml).deps;
-      upgrade.baseDeps[0].currentValue = '1.0.0';
+      upgrade.baseDeps = extractPackageFile(sampleHtml)?.deps;
+      upgrade.baseDeps![0].currentValue = '1.0.0';
       reuseExistingBranch = true;
       const res = await doAutoReplace(upgrade, sampleHtml, reuseExistingBranch);
       expect(res).toBeNull();
@@ -56,7 +57,7 @@ describe('workers/repository/update/branch/auto-replace', () => {
       const script =
         '<script src="https://cdnjs.cloudflare.com/ajax/libs/reactstrap/7.1.0/reactstrap.min.js">';
       const src = `     ${script}   `;
-      upgrade.baseDeps = extractPackageFile(src).deps;
+      upgrade.baseDeps = extractPackageFile(src)?.deps;
       upgrade.depName = 'reactstrap';
       upgrade.packageName = 'reactstrap/7.1.0/reactstrap.min.js';
       upgrade.currentValue = '7.1.0';
@@ -71,7 +72,7 @@ describe('workers/repository/update/branch/auto-replace', () => {
       const script =
         '<script src="https://cdnjs.cloudflare.com/ajax/libs/reactstrap/7.1.0/reactstrap.min.js">';
       const src = `     ${script}  ${script} `;
-      upgrade.baseDeps = extractPackageFile(src).deps;
+      upgrade.baseDeps = extractPackageFile(src)?.deps;
       upgrade.depName = 'reactstrap';
       upgrade.packageName = 'reactstrap/7.1.0/reactstrap.min.js';
       upgrade.currentValue = '7.1.0';
@@ -85,7 +86,7 @@ describe('workers/repository/update/branch/auto-replace', () => {
       const script =
         '<script src="https://cdnjs.cloudflare.com/ajax/libs/reactstrap/7.1.0/reactstrap.min.js">';
       const src = `     ${script}   `;
-      upgrade.baseDeps = extractPackageFile(src).deps;
+      upgrade.baseDeps = extractPackageFile(src)?.deps;
       upgrade.depName = 'reactstrap';
       upgrade.packageName = 'reactstrap/7.1.0/reactstrap.min.js';
       upgrade.currentValue = '7.1.0';
@@ -106,7 +107,7 @@ describe('workers/repository/update/branch/auto-replace', () => {
       const script =
         '<script src="https://cdnjs.cloudflare.com/ajax/libs/reactstrap/7.1.0/reactstrap.min.js">';
       const src = `     ${script}   `;
-      upgrade.baseDeps = extractPackageFile(src).deps;
+      upgrade.baseDeps = extractPackageFile(src)?.deps;
       upgrade.depName = 'reactstrap';
       upgrade.packageName = 'reactstrap/7.1.0/reactstrap.min.js';
       upgrade.currentValue = '7.1.0';
@@ -124,7 +125,7 @@ describe('workers/repository/update/branch/auto-replace', () => {
     it('updates version and integrity', async () => {
       const script =
         '<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.js" integrity="sha384-K3vbOmF2BtaVai+Qk37uypf7VrgBubhQreNQe9aGsz9lB63dIFiQVlJbr92dw2Lx" crossorigin="anonymous">';
-      upgrade.baseDeps = extractPackageFile(script).deps;
+      upgrade.baseDeps = extractPackageFile(script)?.deps;
       upgrade.depName = 'KaTeX';
       upgrade.packageName = 'KaTeX/0.10.0/katex.min.js';
       upgrade.currentValue = '0.10.0';

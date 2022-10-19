@@ -1,8 +1,7 @@
 import { logger } from '../../../../../logger';
-import { detectPlatform } from '../../../../../modules/platform/util';
 import * as allVersioning from '../../../../../modules/versioning';
+import { detectPlatform } from '../../../../../util/common';
 import type { BranchUpgradeConfig } from '../../../../types';
-import { getInRangeReleases } from './releases';
 import * as sourceGithub from './source-github';
 import * as sourceGitlab from './source-gitlab';
 import type { ChangeLogResult } from './types';
@@ -10,9 +9,11 @@ import type { ChangeLogResult } from './types';
 export * from './types';
 
 export async function getChangeLogJSON(
-  args: BranchUpgradeConfig
+  _config: BranchUpgradeConfig
 ): Promise<ChangeLogResult | null> {
-  const { sourceUrl, versioning, currentVersion, newVersion } = args;
+  const sourceUrl = _config.customChangelogUrl ?? _config.sourceUrl!;
+  const config: BranchUpgradeConfig = { ..._config, sourceUrl };
+  const { versioning, currentVersion, newVersion } = config;
   try {
     if (!(sourceUrl && currentVersion && newVersion)) {
       return null;
@@ -24,7 +25,6 @@ export async function getChangeLogJSON(
     logger.debug(
       `Fetching changelog: ${sourceUrl} (${currentVersion} -> ${newVersion})`
     );
-    const releases = args.releases || (await getInRangeReleases(args));
 
     let res: ChangeLogResult | null = null;
 
@@ -32,10 +32,10 @@ export async function getChangeLogJSON(
 
     switch (platform) {
       case 'gitlab':
-        res = await sourceGitlab.getChangeLogJSON({ ...args, releases });
+        res = await sourceGitlab.getChangeLogJSON(config);
         break;
       case 'github':
-        res = await sourceGithub.getChangeLogJSON({ ...args, releases });
+        res = await sourceGithub.getChangeLogJSON(config);
         break;
 
       default:
@@ -48,7 +48,7 @@ export async function getChangeLogJSON(
 
     return res;
   } catch (err) /* istanbul ignore next */ {
-    logger.error({ config: args, err }, 'getChangeLogJSON error');
+    logger.error({ config, err }, 'getChangeLogJSON error');
     return null;
   }
 }

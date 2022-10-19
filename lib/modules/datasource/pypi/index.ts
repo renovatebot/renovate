@@ -7,9 +7,8 @@ import { ensureTrailingSlash } from '../../../util/url';
 import * as pep440 from '../../versioning/pep440';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
+import { isGitHubRepo } from './common';
 import type { PypiJSON, PypiJSONRelease, Releases } from './types';
-
-const githubRepoPattern = regEx(/^https?:\/\/github\.com\/[^\\/]+\/[^\\/]+$/);
 
 export class PypiDatasource extends Datasource {
   static readonly id = 'pypi';
@@ -23,7 +22,7 @@ export class PypiDatasource extends Datasource {
   override readonly customRegistrySupport = true;
 
   override readonly defaultRegistryUrls = [
-    process.env.PIP_INDEX_URL || 'https://pypi.org/pypi/',
+    process.env.PIP_INDEX_URL ?? 'https://pypi.org/pypi/',
   ];
 
   override readonly defaultVersioning = pep440.id;
@@ -34,8 +33,11 @@ export class PypiDatasource extends Datasource {
     packageName,
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    let dependency: ReleaseResult = null;
-    const hostUrl = ensureTrailingSlash(registryUrl);
+    let dependency: ReleaseResult | null = null;
+    // TODO: null check (#7154)
+    const hostUrl = ensureTrailingSlash(
+      registryUrl!.replace('https://pypi.org/simple', 'https://pypi.org/pypi')
+    );
     const normalizedLookupName = PypiDatasource.normalizeName(packageName);
 
     // not all simple indexes use this identifier, but most do
@@ -88,7 +90,7 @@ export class PypiDatasource extends Datasource {
       hostUrl,
       `${PypiDatasource.normalizeNameForUrlLookup(packageName)}/json`
     );
-    const dependency: ReleaseResult = { releases: null };
+    const dependency: ReleaseResult = { releases: [] };
     logger.trace({ lookupUrl }, 'Pypi api got lookup');
     const rep = await this.http.getJson<PypiJSON>(lookupUrl);
     const dep = rep?.body;
@@ -103,7 +105,7 @@ export class PypiDatasource extends Datasource {
 
     if (dep.info?.home_page) {
       dependency.homepage = dep.info.home_page;
-      if (githubRepoPattern.exec(dep.info.home_page)) {
+      if (isGitHubRepo(dep.info.home_page)) {
         dependency.sourceUrl = dep.info.home_page.replace(
           'http://',
           'https://'
@@ -120,7 +122,7 @@ export class PypiDatasource extends Datasource {
           (lower.startsWith('repo') ||
             lower === 'code' ||
             lower === 'source' ||
-            githubRepoPattern.exec(projectUrl))
+            isGitHubRepo(projectUrl))
         ) {
           dependency.sourceUrl = projectUrl;
         }
@@ -143,11 +145,10 @@ export class PypiDatasource extends Datasource {
       }
     }
 
-    dependency.releases = [];
     if (dep.releases) {
       const versions = Object.keys(dep.releases);
       dependency.releases = versions.map((version) => {
-        const releases = dep.releases[version] || [];
+        const releases = dep.releases?.[version] ?? [];
         const { upload_time: releaseTimestamp } = releases[0] || {};
         const isDeprecated = releases.some(({ yanked }) => yanked);
         const result: Release = {
@@ -159,7 +160,8 @@ export class PypiDatasource extends Datasource {
         }
         // There may be multiple releases with different requires_python, so we return all in an array
         result.constraints = {
-          python: releases.map(({ requires_python }) => requires_python),
+          // TODO: string[] isn't allowed here
+          python: releases.map(({ requires_python }) => requires_python) as any,
         };
         return result;
       });
@@ -181,11 +183,18 @@ export class PypiDatasource extends Datasource {
 
     // pep-0427 wheel packages
     //  {distribution}-{version}(-{build tag})?-{python tag}-{abi tag}-{platform tag}.whl.
+    // Also match the current wheel spec
+    // https://packaging.python.org/en/latest/specifications/binary-distribution-format/#escaping-and-unicode
+    // where any of -_. characters in {distribution} are replaced with _
     const wheelText = text.toLowerCase();
-    const wheelPrefix = packageName.replace(regEx(/[^\w\d.]+/g), '_') + '-';
+    const wheelPrefixWithPeriod =
+      packageName.replace(regEx(/[^\w\d.]+/g), '_') + '-';
+    const wheelPrefixWithoutPeriod =
+      packageName.replace(regEx(/[^\w\d]+/g), '_') + '-';
     const wheelSuffix = '.whl';
     if (
-      wheelText.startsWith(wheelPrefix) &&
+      (wheelText.startsWith(wheelPrefixWithPeriod) ||
+        wheelText.startsWith(wheelPrefixWithoutPeriod)) &&
       wheelText.endsWith(wheelSuffix) &&
       wheelText.split('-').length > 2
     ) {
@@ -219,7 +228,7 @@ export class PypiDatasource extends Datasource {
       hostUrl,
       ensureTrailingSlash(PypiDatasource.normalizeNameForUrlLookup(packageName))
     );
-    const dependency: ReleaseResult = { releases: null };
+    const dependency: ReleaseResult = { releases: [] };
     const response = await this.http.get(lookupUrl);
     const dep = response?.body;
     if (!dep) {
@@ -253,7 +262,7 @@ export class PypiDatasource extends Datasource {
     }
     const versions = Object.keys(releases);
     dependency.releases = versions.map((version) => {
-      const versionReleases = releases[version] || [];
+      const versionReleases = releases[version] ?? [];
       const isDeprecated = versionReleases.some(({ yanked }) => yanked);
       const result: Release = { version };
       if (isDeprecated) {
@@ -261,7 +270,10 @@ export class PypiDatasource extends Datasource {
       }
       // There may be multiple releases with different requires_python, so we return all in an array
       result.constraints = {
-        python: versionReleases.map(({ requires_python }) => requires_python),
+        // TODO: string[] isn't allowed here
+        python: versionReleases.map(
+          ({ requires_python }) => requires_python
+        ) as any,
       };
       return result;
     });

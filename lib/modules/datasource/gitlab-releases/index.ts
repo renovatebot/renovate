@@ -19,12 +19,19 @@ export class GitlabReleasesDatasource extends Datasource {
   @cache({
     namespace: `datasource-${GitlabReleasesDatasource.id}`,
     key: ({ registryUrl, packageName }: GetReleasesConfig) =>
+      // TODO: types (#7154)
+      // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
       `${registryUrl}/${packageName}`,
   })
   async getReleases({
     registryUrl,
     packageName,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
+    // istanbul ignore if
+    if (!registryUrl) {
+      return null;
+    }
+
     const urlEncodedRepo = encodeURIComponent(packageName);
     const apiUrl = `${registryUrl}/api/v4/projects/${urlEncodedRepo}/releases`;
 

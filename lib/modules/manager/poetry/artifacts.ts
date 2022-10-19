@@ -5,9 +5,10 @@ import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import type { HostRule } from '../../../types';
 import { exec } from '../../../util/exec';
-import type { ExecOptions, ToolConstraint } from '../../../util/exec/types';
+import type { ExecOptions } from '../../../util/exec/types';
 import {
   deleteLocalFile,
+  ensureCacheDir,
   getSiblingFileName,
   readLocalFile,
   writeLocalFile,
@@ -21,7 +22,7 @@ import type {
   UpdateArtifactsConfig,
   UpdateArtifactsResult,
 } from '../types';
-import type { PoetryFile, PoetrySource } from './types';
+import type { PoetryFile, PoetryLock, PoetrySource } from './types';
 
 function getPythonConstraint(
   existingLockFileContent: string,
@@ -35,8 +36,8 @@ function getPythonConstraint(
     return python;
   }
   try {
-    const data = parse(existingLockFileContent);
-    if (data?.metadata?.['python-versions']) {
+    const data = parse(existingLockFileContent) as PoetryLock;
+    if (is.string(data?.metadata?.['python-versions'])) {
       return data?.metadata?.['python-versions'];
     }
   } catch (err) {
@@ -57,7 +58,7 @@ function getPoetryRequirement(pyProjectContent: string): string | null {
         buildBackend === 'poetry.core.masonry.api') &&
       is.nonEmptyArray(pyproject['build-system']?.requires)
     ) {
-      for (const requirement of pyproject['build-system'].requires) {
+      for (const requirement of pyproject['build-system']!.requires) {
         if (is.nonEmptyString(requirement)) {
           const pkgValMatch = pkgValRegex.exec(requirement);
           if (pkgValMatch) {
@@ -91,7 +92,7 @@ function getPoetrySources(content: string, fileName: string): PoetrySource[] {
     return [];
   }
 
-  const sources = pyprojectFile.tool?.poetry?.source || [];
+  const sources = pyprojectFile.tool?.poetry?.source ?? [];
   const sourceArray: PoetrySource[] = [];
   for (const source of sources) {
     if (source.name && source.url) {
@@ -166,31 +167,30 @@ export async function updateArtifacts({
     } else {
       cmd.push(
         `poetry update --lock --no-interaction ${updatedDeps
-          .map((dep) => quote(dep.depName))
+          .map((dep) => dep.depName)
+          .filter(is.string)
+          .map((dep) => quote(dep))
           .join(' ')}`
       );
     }
-    const tagConstraint = getPythonConstraint(existingLockFileContent, config);
-    const constraint =
-      config.constraints?.poetry || getPoetryRequirement(newPackageFileContent);
-    const extraEnv = getSourceCredentialVars(
-      newPackageFileContent,
-      packageFileName
-    );
-    const toolConstraint: ToolConstraint = {
-      toolName: 'poetry',
-      constraint,
+    const constraint = getPythonConstraint(existingLockFileContent, config);
+    const poetryVersion =
+      config.constraints?.poetry ?? getPoetryRequirement(newPackageFileContent);
+    const extraEnv = {
+      ...getSourceCredentialVars(newPackageFileContent, packageFileName),
+      PIP_CACHE_DIR: await ensureCacheDir('pip'),
     };
 
     const execOptions: ExecOptions = {
       cwdFile: packageFileName,
       extraEnv,
       docker: {
-        image: 'python',
-        tagConstraint,
-        tagScheme: 'poetry',
+        image: 'sidecar',
       },
-      toolConstraints: [toolConstraint],
+      toolConstraints: [{ toolName: 'python', constraint }],
+      preCommands: [
+        `pip install --user ${quote(`poetry${poetryVersion ?? ''}`)}`,
+      ],
     };
     await exec(cmd, execOptions);
     const newPoetryLockContent = await readLocalFile(lockFileName, 'utf8');

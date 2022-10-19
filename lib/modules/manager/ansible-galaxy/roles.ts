@@ -2,6 +2,7 @@ import { regEx } from '../../../util/regex';
 import { GalaxyDatasource } from '../../datasource/galaxy';
 import { GitTagsDatasource } from '../../datasource/git-tags';
 import type { PackageDependency } from '../types';
+import type { AnsibleGalaxyPackageDependency } from './types';
 import {
   blockLineRegEx,
   galaxyDepRegex,
@@ -12,9 +13,9 @@ import {
 function interpretLine(
   lineMatch: RegExpMatchArray,
   lineNumber: number,
-  dependency: PackageDependency
-): PackageDependency {
-  const localDependency: PackageDependency = dependency;
+  dependency: AnsibleGalaxyPackageDependency
+): AnsibleGalaxyPackageDependency | null {
+  const localDependency = dependency;
   const key = lineMatch[2];
   const value = lineMatch[3].replace(regEx(/["']/g), '');
   switch (key) {
@@ -43,28 +44,27 @@ function interpretLine(
   return localDependency;
 }
 
-function finalize(dependency: PackageDependency): boolean {
+function finalize(dependency: AnsibleGalaxyPackageDependency): boolean {
   const dep = dependency;
   if (dependency.managerData.version === null) {
     dep.skipReason = 'no-version';
     return false;
   }
-
-  const source: string = dep.managerData.src;
+  const source = dep.managerData.src ?? '';
   const sourceMatch = nameMatchRegex.exec(source);
-  if (sourceMatch) {
+  if (sourceMatch?.groups) {
     dep.datasource = GitTagsDatasource.id;
     dep.depName = sourceMatch.groups.depName.replace(regEx(/.git$/), '');
     // remove leading `git+` from URLs like `git+https://...`
     dep.packageName = source.replace(regEx(/git\+/), '');
   } else if (galaxyDepRegex.exec(source)) {
     dep.datasource = GalaxyDatasource.id;
-    dep.depName = dep.managerData.src;
-    dep.packageName = dep.managerData.src;
-  } else if (galaxyDepRegex.exec(dep.managerData.name)) {
+    dep.depName = source;
+    dep.packageName = source;
+  } else if (galaxyDepRegex.exec(dep.managerData.name ?? '')) {
     dep.datasource = GalaxyDatasource.id;
-    dep.depName = dep.managerData.name;
-    dep.packageName = dep.managerData.name;
+    dep.depName = dep.managerData.name!;
+    dep.packageName = dep.managerData.name!;
   } else {
     dep.skipReason = 'no-source-match';
     return false;
@@ -82,7 +82,7 @@ export function extractRoles(lines: string[]): PackageDependency[] {
   for (let lineNumber = 0; lineNumber < lines.length; lineNumber += 1) {
     let lineMatch = newBlockRegEx.exec(lines[lineNumber]);
     if (lineMatch) {
-      const dep: PackageDependency = {
+      const dep: AnsibleGalaxyPackageDependency = {
         depType: 'role',
         managerData: {
           name: null,
@@ -107,7 +107,7 @@ export function extractRoles(lines: string[]): PackageDependency[] {
         }
       } while (lineMatch);
       if (finalize(dep)) {
-        delete dep.managerData;
+        delete (dep as PackageDependency).managerData;
         deps.push(dep);
       }
     }

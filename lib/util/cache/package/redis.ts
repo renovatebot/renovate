@@ -2,6 +2,7 @@
 import { DateTime } from 'luxon';
 import { createClient } from 'redis';
 import { logger } from '../../../logger';
+import { compress, decompress } from '../../compress';
 
 let client: ReturnType<typeof createClient> | undefined;
 
@@ -37,7 +38,12 @@ export async function get<T = never>(
     if (cachedValue) {
       if (DateTime.local() < DateTime.fromISO(cachedValue.expiry)) {
         logger.trace({ namespace, key }, 'Returning cached value');
-        return cachedValue.value;
+        // istanbul ignore if
+        if (!cachedValue.compress) {
+          return cachedValue.value;
+        }
+        const res = await decompress(cachedValue.value);
+        return JSON.parse(res);
       }
       // istanbul ignore next
       await rm(namespace, key);
@@ -55,13 +61,18 @@ export async function set(
   ttlMinutes = 5
 ): Promise<void> {
   logger.trace({ namespace, key, ttlMinutes }, 'Saving cached value');
+
+  // Redis requires TTL to be integer, not float
+  const redisTTL = Math.floor(ttlMinutes * 60);
+
   await client?.set(
     getKey(namespace, key),
     JSON.stringify({
-      value,
+      compress: true,
+      value: await compress(JSON.stringify(value)),
       expiry: DateTime.local().plus({ minutes: ttlMinutes }),
     }),
-    { EX: ttlMinutes * 60 }
+    { EX: redisTTL }
   );
 }
 

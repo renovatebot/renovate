@@ -1,16 +1,23 @@
 import changelogFilenameRegex from 'changelog-filename-regex';
 import { logger } from '../../../../../../logger';
-import type { GithubRelease } from '../../../../../../modules/datasource/github-releases/types';
-import type { GitHubTag } from '../../../../../../modules/datasource/github-tags/types';
 import type {
   GithubGitBlob,
   GithubGitTree,
   GithubGitTreeNode,
 } from '../../../../../../types/platform/github';
+import type {
+  GithubRestRelease,
+  GithubRestTag,
+} from '../../../../../../util/github/types';
 import { GithubHttp } from '../../../../../../util/http/github';
 import { fromBase64 } from '../../../../../../util/string';
 import { ensureTrailingSlash } from '../../../../../../util/url';
-import type { ChangeLogFile, ChangeLogNotes } from '../types';
+import type {
+  ChangeLogFile,
+  ChangeLogNotes,
+  ChangeLogProject,
+  ChangeLogRelease,
+} from '../types';
 
 export const id = 'github-changelog';
 const http = new GithubHttp(id);
@@ -20,14 +27,14 @@ export async function getTags(
   repository: string
 ): Promise<string[]> {
   logger.trace('github.getTags()');
-  const url = `${endpoint}repos/${repository}/tags?per_page=100`;
   try {
-    const res = await http.getJson<GitHubTag[]>(url, {
+    const url = `${endpoint}repos/${repository}/tags?per_page=100`;
+    const res = await http.getJson<GithubRestTag[]>(url, {
       paginate: true,
     });
-
     const tags = res.body;
 
+    // istanbul ignore if
     if (!tags.length) {
       logger.debug({ repository }, 'repository has no Github tags');
     }
@@ -51,7 +58,7 @@ export async function getReleaseNotesMd(
   repository: string,
   apiBaseUrl: string,
   sourceDirectory: string
-): Promise<ChangeLogFile> | null {
+): Promise<ChangeLogFile | null> {
   logger.trace('github.getReleaseNotesMd()');
   const apiPrefix = `${ensureTrailingSlash(apiBaseUrl)}repos/${repository}`;
   const { default_branch: defaultBranch = 'HEAD' } = (
@@ -88,7 +95,7 @@ export async function getReleaseNotesMd(
     logger.trace('no changelog file found');
     return null;
   }
-  const { path: changelogFile, sha } = files.shift();
+  const { path: changelogFile, sha } = files.shift()!;
   /* istanbul ignore if */
   if (files.length !== 0) {
     logger.debug(
@@ -106,14 +113,18 @@ export async function getReleaseNotesMd(
 }
 
 export async function getReleaseList(
-  apiBaseUrl: string,
-  repository: string
+  project: ChangeLogProject,
+  release: ChangeLogRelease
 ): Promise<ChangeLogNotes[]> {
   logger.trace('github.getReleaseList()');
+  // TODO #7154
+  const apiBaseUrl = project.apiBaseUrl!;
+  const repository = project.repository;
   const url = `${ensureTrailingSlash(apiBaseUrl)}repos/${repository}/releases`;
-  const res = await http.getJson<GithubRelease[]>(`${url}?per_page=100`, {
+  const res = await http.getJson<GithubRestRelease[]>(`${url}?per_page=100`, {
     paginate: true,
   });
+
   return res.body.map((release) => ({
     url: release.html_url,
     notesSourceUrl: url,

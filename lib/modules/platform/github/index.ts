@@ -1,9 +1,12 @@
+// TODO: types (#7154)
+/* eslint-disable @typescript-eslint/restrict-template-expressions */
 import URL from 'url';
 import is from '@sindresorhus/is';
 import delay from 'delay';
 import JSON5 from 'json5';
 import { DateTime } from 'luxon';
 import semver from 'semver';
+import { GlobalConfig } from '../../../config/global';
 import { PlatformId } from '../../../constants';
 import {
   PLATFORM_INTEGRATION_UNAUTHORIZED,
@@ -48,11 +51,11 @@ import type {
   PlatformParams,
   PlatformPrOptions,
   PlatformResult,
-  Pr,
   RepoParams,
   RepoResult,
   UpdatePrConfig,
 } from '../types';
+import { repoFingerprint } from '../util';
 import { smartTruncate } from '../utils/pr-body';
 import { coerceRestPr } from './common';
 import {
@@ -62,13 +65,14 @@ import {
   vulnerabilityAlertsQuery,
 } from './graphql';
 import { massageMarkdownLinks } from './massage-markdown-links';
-import { getPrCache } from './pr';
+import { getPrCache, updatePrCache } from './pr';
 import type {
   BranchProtection,
   CombinedBranchStatus,
   Comment,
   GhAutomergeResponse,
   GhBranchStatus,
+  GhPr,
   GhRepo,
   GhRestPr,
   LocalRepoConfig,
@@ -80,6 +84,8 @@ const githubApi = new githubHttp.GithubHttp();
 
 let config: LocalRepoConfig;
 let platformConfig: PlatformConfig;
+
+export const GitHubMaxPrBodyLen = 60000;
 
 export function resetConfigs(): void {
   config = {} as never;
@@ -101,26 +107,29 @@ export async function detectGhe(token: string): Promise<void> {
   if (platformConfig.isGhe) {
     const gheHeaderKey = 'x-github-enterprise-version';
     const gheQueryRes = await githubApi.headJson('/', { token });
-    const gheHeaders: Record<string, string | string[]> =
-      gheQueryRes?.headers || {};
+    const gheHeaders = gheQueryRes?.headers || {};
     const [, gheVersion] =
       Object.entries(gheHeaders).find(
         ([k]) => k.toLowerCase() === gheHeaderKey
       ) ?? [];
     platformConfig.gheVersion = semver.valid(gheVersion as string) ?? null;
+    logger.debug(
+      `Detected GitHub Enterprise Server, version: ${platformConfig.gheVersion}`
+    );
   }
 }
 
 export async function initPlatform({
   endpoint,
-  token,
+  token: originalToken,
   username,
   gitAuthor,
 }: PlatformParams): Promise<PlatformResult> {
+  let token = originalToken;
   if (!token) {
-    throw new Error('Init: You must configure a GitHub personal access token');
+    throw new Error('Init: You must configure a GitHub token');
   }
-
+  token = token.replace(/^ghs_/, 'x-access-token:ghs_');
   platformConfig.isGHApp = token.startsWith('x-access-token:');
 
   if (endpoint) {
@@ -142,7 +151,7 @@ export async function initPlatform({
     );
     renovateUsername = platformConfig.userDetails.username;
   }
-  let discoveredGitAuthor: string;
+  let discoveredGitAuthor: string | undefined;
   if (!gitAuthor) {
     platformConfig.userDetails ??= await getUserDetails(
       platformConfig.endpoint,
@@ -159,8 +168,9 @@ export async function initPlatform({
   logger.debug({ platformConfig, renovateUsername }, 'Platform config');
   const platformResult: PlatformResult = {
     endpoint: platformConfig.endpoint,
-    gitAuthor: gitAuthor || discoveredGitAuthor,
+    gitAuthor: gitAuthor ?? discoveredGitAuthor,
     renovateUsername,
+    token,
   };
 
   return platformResult;
@@ -227,11 +237,9 @@ export async function getJsonFile(
   repoName?: string,
   branchOrTag?: string
 ): Promise<any | null> {
-  const raw = await getRawFile(fileName, repoName, branchOrTag);
-  if (fileName.endsWith('.json5')) {
-    return JSON5.parse(raw);
-  }
-  return JSON.parse(raw);
+  // TODO #7154
+  const raw = (await getRawFile(fileName, repoName, branchOrTag)) as string;
+  return JSON5.parse(raw);
 }
 
 // Initialize GitHub by getting base branch and SHA
@@ -264,11 +272,17 @@ export async function initRepo({
   });
   config.renovateUsername = renovateUsername;
   [config.repositoryOwner, config.repositoryName] = repository.split('/');
-  let repo: GhRepo;
+  let repo: GhRepo | undefined;
   try {
     let infoQuery = repoInfoQuery;
 
-    if (platformConfig.isGhe) {
+    // GitHub Enterprise Server <3.3.0 doesn't support autoMergeAllowed and hasIssuesEnabled objects
+    // TODO #7154
+    if (
+      platformConfig.isGhe &&
+      // semver not null safe, accepts null and undefined
+      semver.satisfies(platformConfig.gheVersion!, '<3.3.0')
+    ) {
       infoQuery = infoQuery.replace(/\n\s*autoMergeAllowed\s*\n/, '\n');
       infoQuery = infoQuery.replace(/\n\s*hasIssuesEnabled\s*\n/, '\n');
     }
@@ -369,7 +383,7 @@ export async function initRepo({
       await githubApi.getJson<{ full_name: string }[]>(
         'user/repos?per_page=100',
         {
-          token: forkToken || opts.token,
+          token: forkToken ?? opts.token,
           paginate: true,
           pageLimit: 100,
         }
@@ -380,7 +394,7 @@ export async function initRepo({
         full_name: string;
         default_branch: string;
       }>(`repos/${repository}/forks`, {
-        token: forkToken || opts.token,
+        token: forkToken ?? opts.token,
       });
       config.repository = forkedRepo.body.full_name;
       const forkDefaultBranch = forkedRepo.body.default_branch;
@@ -453,7 +467,7 @@ export async function initRepo({
             sha,
             force: true,
           },
-          token: forkToken || opts.token,
+          token: forkToken ?? opts.token,
         });
       } catch (err) /* istanbul ignore next */ {
         logger.warn(
@@ -477,19 +491,20 @@ export async function initRepo({
   // istanbul ignore else
   if (forkMode) {
     logger.debug('Using forkToken for git init');
-    parsedEndpoint.auth = config.forkToken;
+    parsedEndpoint.auth = config.forkToken ?? null;
   } else {
     const tokenType = opts.token?.startsWith('x-access-token:')
       ? 'app'
       : 'personal access';
     logger.debug(`Using ${tokenType} token for git init`);
-    parsedEndpoint.auth = opts.token;
+    parsedEndpoint.auth = opts.token ?? null;
   }
-  parsedEndpoint.host = parsedEndpoint.host.replace(
+  // TODO: null checks (#7154)
+  parsedEndpoint.host = parsedEndpoint.host!.replace(
     'api.github.com',
     'github.com'
   );
-  parsedEndpoint.pathname = config.repository + '.git';
+  parsedEndpoint.pathname = `${config.repository}.git`;
   const url = URL.format(parsedEndpoint);
   await git.initRepo({
     ...config,
@@ -498,6 +513,7 @@ export async function initRepo({
   const repoConfig: RepoResult = {
     defaultBranch: config.defaultBranch,
     isFork: repo.isFork === true,
+    repoFingerprint: repoFingerprint(repo.id, platformConfig.endpoint),
   };
   return repoConfig;
 }
@@ -547,12 +563,13 @@ export async function getRepoForceRebase(): Promise<boolean> {
       }
     }
   }
-  return config.repoForceRebase;
+  return !!config.repoForceRebase;
 }
 
-function cachePr(pr?: Pr): void {
+function cachePr(pr?: GhPr | null): void {
   config.prList ??= [];
   if (pr) {
+    updatePrCache(pr);
     for (let idx = 0; idx < config.prList.length; idx += 1) {
       const cachedPr = config.prList[idx];
       if (cachedPr.number === pr.number) {
@@ -565,22 +582,27 @@ function cachePr(pr?: Pr): void {
 }
 
 // Fetch fresh Pull Request and cache it when possible
-async function fetchPr(prNo: number): Promise<Pr | null> {
-  const { body: ghRestPr } = await githubApi.getJson<GhRestPr>(
-    `repos/${config.parentRepo || config.repository}/pulls/${prNo}`
-  );
-  const result = coerceRestPr(ghRestPr);
-  cachePr(result);
-  return result;
+async function fetchPr(prNo: number): Promise<GhPr | null> {
+  try {
+    const { body: ghRestPr } = await githubApi.getJson<GhRestPr>(
+      `repos/${config.parentRepo ?? config.repository}/pulls/${prNo}`
+    );
+    const result = coerceRestPr(ghRestPr);
+    cachePr(result);
+    return result;
+  } catch (err) {
+    logger.warn({ err, prNo }, `GitHub fetchPr error`);
+    return null;
+  }
 }
 
 // Gets details for a PR
-export async function getPr(prNo: number): Promise<Pr | null> {
+export async function getPr(prNo: number): Promise<GhPr | null> {
   if (!prNo) {
     return null;
   }
   const prList = await getPrList();
-  let pr = prList.find(({ number }) => number === prNo);
+  let pr = prList.find(({ number }) => number === prNo) ?? null;
   if (pr) {
     logger.debug('Returning PR from cache');
   }
@@ -598,15 +620,18 @@ function matchesState(state: string, desiredState: string): boolean {
   return state === desiredState;
 }
 
-export async function getPrList(): Promise<Pr[]> {
+export async function getPrList(): Promise<GhPr[]> {
   if (!config.prList) {
     const repo = config.parentRepo ?? config.repository;
     const username =
       !config.forkMode && !config.ignorePrAuthor && config.renovateUsername
         ? config.renovateUsername
         : null;
-    const prCache = await getPrCache(githubApi, repo, username);
-    config.prList = Object.values(prCache);
+    // TODO: check null `repo` (#7154)
+    const prCache = await getPrCache(githubApi, repo!, username);
+    config.prList = Object.values(prCache).sort(
+      ({ number: a }, { number: b }) => (a > b ? -1 : 1)
+    );
   }
 
   return config.prList;
@@ -616,26 +641,38 @@ export async function findPr({
   branchName,
   prTitle,
   state = PrState.All,
-}: FindPRConfig): Promise<Pr | null> {
+}: FindPRConfig): Promise<GhPr | null> {
   logger.debug(`findPr(${branchName}, ${prTitle}, ${state})`);
   const prList = await getPrList();
-  const pr = prList.find(
-    (p) =>
-      p.sourceBranch === branchName &&
-      (!prTitle || p.title === prTitle) &&
-      matchesState(p.state, state) &&
-      (config.forkMode || config.repository === p.sourceRepo) // #5188
-  );
+  const pr = prList.find((p) => {
+    if (p.sourceBranch !== branchName) {
+      return false;
+    }
+
+    if (prTitle && prTitle !== p.title) {
+      return false;
+    }
+
+    if (!matchesState(p.state, state)) {
+      return false;
+    }
+
+    if (!config.forkMode && config.repository !== p.sourceRepo) {
+      return false;
+    }
+
+    return true;
+  });
   if (pr) {
     logger.debug(`Found PR #${pr.number}`);
   }
-  return pr;
+  return pr ?? null;
 }
 
 const REOPEN_THRESHOLD_MILLIS = 1000 * 60 * 60 * 24 * 7;
 
 // Returns the Pull Request for a branch. Null if not exists.
-export async function getBranchPr(branchName: string): Promise<Pr | null> {
+export async function getBranchPr(branchName: string): Promise<GhPr | null> {
   logger.debug(`getBranchPr(${branchName})`);
 
   const openPr = await findPr({
@@ -662,6 +699,10 @@ export async function getBranchPr(branchName: string): Promise<Pr | null> {
       return null;
     }
     logger.debug({ autoclosedPr }, 'Found autoclosed PR for branch');
+    if (GlobalConfig.get('dryRun')) {
+      logger.info('DRY-RUN: Would try to reopen autoclosed PR');
+      return null;
+    }
     const { sha, number } = autoclosedPr;
     try {
       await githubApi.postJson(`repos/${config.repository}/git/refs`, {
@@ -859,7 +900,7 @@ export async function setBranchStatus({
     return;
   }
   logger.debug({ branch: branchName, context, state }, 'Setting branch status');
-  let url: string;
+  let url: string | undefined;
   try {
     const branchCommit = git.getBranchCommit(branchName);
     url = `repos/${config.repository}/statuses/${branchCommit}`;
@@ -906,7 +947,7 @@ async function getIssues(): Promise<Issue[]> {
   logger.debug(`Retrieved ${result.length} issues`);
   return result.map((issue) => ({
     ...issue,
-    state: issue.state.toLowerCase(),
+    state: issue.state?.toLowerCase(),
   }));
 }
 
@@ -933,7 +974,7 @@ export async function getIssue(
   try {
     const issueBody = (
       await githubApi.getJson<{ body: string }>(
-        `repos/${config.parentRepo || config.repository}/issues/${number}`,
+        `repos/${config.parentRepo ?? config.repository}/issues/${number}`,
         { useCache }
       )
     ).body.body;
@@ -956,13 +997,14 @@ export async function findIssue(title: string): Promise<Issue | null> {
     return null;
   }
   logger.debug(`Found issue ${issue.number}`);
-  return getIssue(issue.number);
+  // TODO: can number be required? (#7154)
+  return getIssue(issue.number!);
 }
 
 async function closeIssue(issueNumber: number): Promise<void> {
   logger.debug(`closeIssue(${issueNumber})`);
   await githubApi.patchJson(
-    `repos/${config.parentRepo || config.repository}/issues/${issueNumber}`,
+    `repos/${config.parentRepo ?? config.repository}/issues/${issueNumber}`,
     {
       body: { state: 'closed' },
     }
@@ -1010,12 +1052,13 @@ export async function ensureIssue({
       for (const i of issues) {
         if (i.state === 'open' && i.number !== issue.number) {
           logger.warn(`Closing duplicate issue ${i.number}`);
-          await closeIssue(i.number);
+          // TODO #7154
+          await closeIssue(i.number!);
         }
       }
       const issueBody = (
         await githubApi.getJson<{ body: string }>(
-          `repos/${config.parentRepo || config.repository}/issues/${
+          `repos/${config.parentRepo ?? config.repository}/issues/${
             issue.number
           }`
         )
@@ -1035,7 +1078,7 @@ export async function ensureIssue({
           data.labels = labels;
         }
         await githubApi.patchJson(
-          `repos/${config.parentRepo || config.repository}/issues/${
+          `repos/${config.parentRepo ?? config.repository}/issues/${
             issue.number
           }`,
           {
@@ -1047,18 +1090,18 @@ export async function ensureIssue({
       }
     }
     await githubApi.postJson(
-      `repos/${config.parentRepo || config.repository}/issues`,
+      `repos/${config.parentRepo ?? config.repository}/issues`,
       {
         body: {
           title,
           body,
-          labels: labels || [],
+          labels: labels ?? [],
         },
       }
     );
     logger.info('Issue created');
     // reset issueList so that it will be fetched again as-needed
-    delete config.issueList;
+    config.issueList = null;
     return 'created';
   } catch (err) /* istanbul ignore next */ {
     if (err.body?.message?.startsWith('Issues are disabled for this repo')) {
@@ -1082,7 +1125,8 @@ export async function ensureIssueClosing(title: string): Promise<void> {
   const issueList = await getIssueList();
   for (const issue of issueList) {
     if (issue.state === 'open' && issue.title === title) {
-      await closeIssue(issue.number);
+      // TODO #7154
+      await closeIssue(issue.number!);
       logger.debug({ number: issue.number }, 'Issue closed');
     }
   }
@@ -1093,7 +1137,7 @@ export async function addAssignees(
   assignees: string[]
 ): Promise<void> {
   logger.debug(`Adding assignees '${assignees.join(', ')}' to #${issueNo}`);
-  const repository = config.parentRepo || config.repository;
+  const repository = config.parentRepo ?? config.repository;
   await githubApi.postJson(`repos/${repository}/issues/${issueNo}/assignees`, {
     body: {
       assignees,
@@ -1114,7 +1158,7 @@ export async function addReviewers(
   try {
     await githubApi.postJson(
       `repos/${
-        config.parentRepo || config.repository
+        config.parentRepo ?? config.repository
       }/pulls/${prNo}/requested_reviewers`,
       {
         body: {
@@ -1130,10 +1174,10 @@ export async function addReviewers(
 
 async function addLabels(
   issueNo: number,
-  labels: string[] | null
+  labels: string[] | null | undefined
 ): Promise<void> {
   logger.debug(`Adding labels '${labels?.join(', ')}' to #${issueNo}`);
-  const repository = config.parentRepo || config.repository;
+  const repository = config.parentRepo ?? config.repository;
   if (is.array(labels) && labels.length) {
     await githubApi.postJson(`repos/${repository}/issues/${issueNo}/labels`, {
       body: labels,
@@ -1146,7 +1190,7 @@ export async function deleteLabel(
   label: string
 ): Promise<void> {
   logger.debug(`Deleting label ${label} from #${issueNo}`);
-  const repository = config.parentRepo || config.repository;
+  const repository = config.parentRepo ?? config.repository;
   try {
     await githubApi.deleteJson(
       `repos/${repository}/issues/${issueNo}/labels/${label}`
@@ -1160,7 +1204,7 @@ async function addComment(issueNo: number, body: string): Promise<void> {
   // POST /repos/:owner/:repo/issues/:number/comments
   await githubApi.postJson(
     `repos/${
-      config.parentRepo || config.repository
+      config.parentRepo ?? config.repository
     }/issues/${issueNo}/comments`,
     {
       body: { body },
@@ -1172,7 +1216,7 @@ async function editComment(commentId: number, body: string): Promise<void> {
   // PATCH /repos/:owner/:repo/issues/comments/:id
   await githubApi.patchJson(
     `repos/${
-      config.parentRepo || config.repository
+      config.parentRepo ?? config.repository
     }/issues/comments/${commentId}`,
     {
       body: { body },
@@ -1184,7 +1228,7 @@ async function deleteComment(commentId: number): Promise<void> {
   // DELETE /repos/:owner/:repo/issues/comments/:id
   await githubApi.deleteJson(
     `repos/${
-      config.parentRepo || config.repository
+      config.parentRepo ?? config.repository
     }/issues/comments/${commentId}`
   );
 }
@@ -1193,7 +1237,7 @@ async function getComments(issueNo: number): Promise<Comment[]> {
   // GET /repos/:owner/:repo/issues/:number/comments
   logger.debug(`Getting comments for #${issueNo}`);
   const url = `repos/${
-    config.parentRepo || config.repository
+    config.parentRepo ?? config.repository
   }/issues/${issueNo}/comments?per_page=100`;
   try {
     const comments = (
@@ -1308,10 +1352,23 @@ export async function ensureCommentRemoval(
 async function tryPrAutomerge(
   prNumber: number,
   prNodeId: string,
-  platformOptions: PlatformPrOptions
+  platformOptions: PlatformPrOptions | undefined
 ): Promise<void> {
-  if (platformConfig.isGhe || !platformOptions?.usePlatformAutomerge) {
+  if (!platformOptions?.usePlatformAutomerge) {
     return;
+  }
+
+  // If GitHub Enterprise Server <3.3.0 it doesn't support automerge
+  // TODO #7154
+  if (platformConfig.isGhe) {
+    // semver not null safe, accepts null and undefined
+    if (semver.satisfies(platformConfig.gheVersion!, '<3.3.0')) {
+      logger.debug(
+        { prNumber },
+        'GitHub-native automerge: not supported on this version of GHE. Use 3.3.0 or newer.'
+      );
+      return;
+    }
   }
 
   if (!config.autoMergeAllowed) {
@@ -1327,18 +1384,21 @@ async function tryPrAutomerge(
     const variables = { pullRequestId: prNodeId, mergeMethod };
     const queryOptions = { variables };
 
-    const { errors } = await githubApi.requestGraphql<GhAutomergeResponse>(
+    const res = await githubApi.requestGraphql<GhAutomergeResponse>(
       enableAutoMergeMutation,
       queryOptions
     );
 
-    if (errors) {
-      logger.debug({ prNumber, errors }, 'GitHub-native automerge: fail');
+    if (res?.errors) {
+      logger.debug(
+        { prNumber, errors: res.errors },
+        'GitHub-native automerge: fail'
+      );
       return;
     }
 
     logger.debug({ prNumber }, 'GitHub-native automerge: success');
-  } catch (err) {
+  } catch (err) /* istanbul ignore next: missing test #7154 */ {
     logger.warn({ prNumber, err }, 'GitHub-native automerge: REST API error');
   }
 }
@@ -1352,11 +1412,13 @@ export async function createPr({
   labels,
   draftPR = false,
   platformOptions,
-}: CreatePRConfig): Promise<Pr> {
+}: CreatePRConfig): Promise<GhPr | null> {
   const body = sanitize(rawBody);
   const base = targetBranch;
   // Include the repository owner to handle forkMode and regular mode
-  const head = `${config.repository.split('/')[0]}:${sourceBranch}`;
+  // TODO: can `repository` be null? (#7154)
+
+  const head = `${config.repository!.split('/')[0]}:${sourceBranch}`;
   const options: any = {
     body: {
       title,
@@ -1374,7 +1436,7 @@ export async function createPr({
   logger.debug({ title, head, base, draft: draftPR }, 'Creating PR');
   const ghPr = (
     await githubApi.postJson<GhRestPr>(
-      `repos/${config.parentRepo || config.repository}/pulls`,
+      `repos/${config.parentRepo ?? config.repository}/pulls`,
       options
     )
   ).body;
@@ -1382,10 +1444,13 @@ export async function createPr({
     { branch: sourceBranch, pr: ghPr.number, draft: draftPR },
     'PR created'
   );
-  const { number, node_id } = ghPr;
+
+  const result = coerceRestPr(ghPr);
+  const { number, node_id } = result;
+
   await addLabels(number, labels);
   await tryPrAutomerge(number, node_id, platformOptions);
-  const result = coerceRestPr(ghPr);
+
   cachePr(result);
   return result;
 }
@@ -1414,7 +1479,7 @@ export async function updatePr({
   }
   try {
     const { body: ghPr } = await githubApi.patchJson<GhRestPr>(
-      `repos/${config.parentRepo || config.repository}/pulls/${prNo}`,
+      `repos/${config.parentRepo ?? config.repository}/pulls/${prNo}`,
       options
     );
     const result = coerceRestPr(ghPr);
@@ -1439,7 +1504,7 @@ export async function mergePr({
       { branch: branchName, prNo },
       'Branch protection: Attempting to merge PR when PR reviews are enabled'
     );
-    const repository = config.parentRepo || config.repository;
+    const repository = config.parentRepo ?? config.repository;
     const reviews = await githubApi.getJson<{ state: string }[]>(
       `repos/${repository}/pulls/${prNo}/reviews`
     );
@@ -1456,7 +1521,7 @@ export async function mergePr({
     logger.debug('Found approving reviews');
   }
   const url = `repos/${
-    config.parentRepo || config.repository
+    config.parentRepo ?? config.repository
   }/pulls/${prNo}/merge`;
   const options: any = {
     body: {} as { merge_method?: string },
@@ -1526,7 +1591,7 @@ export async function mergePr({
 
 export function massageMarkdown(input: string): string {
   if (platformConfig.isGhe) {
-    return smartTruncate(input, 60000);
+    return smartTruncate(input, GitHubMaxPrBodyLen);
   }
   const massagedInput = massageMarkdownLinks(input)
     // to be safe, replace all github.com links with renovatebot redirector
@@ -1536,15 +1601,18 @@ export function massageMarkdown(input: string): string {
     )
     .replace(regEx(/]\(https:\/\/github\.com\//g), '](https://togithub.com/')
     .replace(regEx(/]: https:\/\/github\.com\//g), ']: https://togithub.com/');
-  return smartTruncate(massagedInput, 60000);
+  return smartTruncate(massagedInput, GitHubMaxPrBodyLen);
 }
 
 export async function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
-  let vulnerabilityAlerts: { node: VulnerabilityAlert }[];
+  let vulnerabilityAlerts: { node: VulnerabilityAlert }[] | undefined;
 
+  // TODO #7154
   const gheSupportsStateFilter = semver.satisfies(
-    platformConfig.gheVersion,
-    '~3.0.25 || ~3.1.17 || ~3.2.9 || >=3.3.4'
+    // semver not null safe, accepts null and undefined
+
+    platformConfig.gheVersion!,
+    '>=3.5'
   );
   const filterByState = !platformConfig.isGhe || gheSupportsStateFilter;
   const query = vulnerabilityAlertsQuery(filterByState);
@@ -1590,7 +1658,7 @@ export async function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
           const key = `${ecosystem.toLowerCase()}/${name}`;
           const range = vulnerableVersionRange;
           const elem = shortAlerts[key] || {};
-          elem[range] = patch || null;
+          elem[range] = patch ?? null;
           shortAlerts[key] = elem;
         }
         logger.debug({ alerts: shortAlerts }, 'GitHub vulnerability details');
@@ -1656,8 +1724,8 @@ export async function commitFiles(
   config: CommitFilesConfig
 ): Promise<CommitSha | null> {
   const commitResult = await git.prepareCommit(config); // Commit locally and don't push
+  const { branchName, files } = config;
   if (!commitResult) {
-    const { branchName, files } = config;
     logger.debug(
       { branchName, files: files.map(({ path }) => path) },
       `Platform-native commit: unable to prepare for commit`
@@ -1669,7 +1737,9 @@ export async function commitFiles(
   if (!pushResult) {
     return null;
   }
-  // Because the branch commit was done remotely via REST API, now we git fetch it locally.
-  // We also do this step when committing/pushing using local git tooling.
-  return git.fetchCommit(config);
+  // Replace locally created branch with the remotely created one
+  // and return the remote commit SHA
+  await git.resetToCommit(commitResult.parentCommitSha);
+  const commitSha = await git.fetchCommit(config);
+  return commitSha;
 }

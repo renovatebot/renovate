@@ -21,7 +21,7 @@ function getPluginCommands(content: string): string[] {
   const lines: string[] = content.split(newlineRegex);
   lines.forEach((line) => {
     const match = pluginRegex.exec(line);
-    if (match) {
+    if (match?.groups) {
       const { plugin } = match.groups;
       result.add(`gem install ${quote(plugin)}`);
     }
@@ -67,7 +67,7 @@ export async function updateArtifacts({
   const match = regEx(/^COCOAPODS: (?<cocoapodsVersion>.*)$/m).exec(
     existingLockFileContent
   );
-  const tagConstraint = match?.groups?.cocoapodsVersion ?? null;
+  const cocoapods = match?.groups?.cocoapodsVersion ?? null;
 
   const cmd = [...getPluginCommands(newPackageFileContent), 'pod install'];
   const execOptions: ExecOptions = {
@@ -76,10 +76,16 @@ export async function updateArtifacts({
       CP_HOME_DIR: await ensureCacheDir('cocoapods'),
     },
     docker: {
-      image: 'cocoapods',
+      image: 'ruby',
       tagScheme: 'ruby',
-      tagConstraint,
+      tagConstraint: '< 3.0', // currently using v2 on docker image
     },
+    toolConstraints: [
+      {
+        toolName: 'cocoapods',
+        constraint: cocoapods,
+      },
+    ],
   };
 
   try {

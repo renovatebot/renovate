@@ -155,5 +155,18 @@ describe('workers/repository/finalise/prune', () => {
       expect(git.deleteBranch).toHaveBeenCalledTimes(1);
       expect(platform.updatePr).toHaveBeenCalledTimes(0);
     });
+
+    it('does not delete modified orphan branch', async () => {
+      config.branchList = ['renovate/a', 'renovate/b'];
+      git.getBranchList.mockReturnValueOnce(
+        config.branchList.concat(['renovate/c'])
+      );
+      git.isBranchModified.mockResolvedValueOnce(true);
+      platform.findPr.mockResolvedValueOnce(null as never);
+      await cleanup.pruneStaleBranches(config, config.branchList);
+      expect(git.getBranchList).toHaveBeenCalledTimes(1);
+      expect(git.deleteBranch).toHaveBeenCalledTimes(0);
+      expect(platform.updatePr).toHaveBeenCalledTimes(0);
+    });
   });
 });

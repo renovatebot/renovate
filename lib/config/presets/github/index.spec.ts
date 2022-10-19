@@ -48,11 +48,11 @@ describe('config/presets/github/index', () => {
       await expect(github.getPreset({ repo: 'some/repo' })).rejects.toThrow();
     });
 
-    it('throws if no content', async () => {
+    it('throws if invalid content', async () => {
       httpMock
         .scope(githubApiHost)
         .get(`${basePath}/default.json`)
-        .reply(200, {});
+        .reply(200, { content: toBase64('invalid') });
 
       await expect(github.getPreset({ repo: 'some/repo' })).rejects.toThrow(
         PRESET_INVALID_JSON
@@ -94,6 +94,34 @@ describe('config/presets/github/index', () => {
       const content = await github.getPreset({
         repo: 'some/repo',
         presetName: 'somefile/somename',
+      });
+      expect(content).toEqual({ foo: 'bar' });
+    });
+
+    it('should query preset within the file when .json extension provided', async () => {
+      httpMock
+        .scope(githubApiHost)
+        .get(`${basePath}/somefile.json`)
+        .reply(200, {
+          content: toBase64('{"foo":"bar"}'),
+        });
+      const content = await github.getPreset({
+        repo: 'some/repo',
+        presetName: 'somefile.json',
+      });
+      expect(content).toEqual({ foo: 'bar' });
+    });
+
+    it('should query preset within the file when .json5 extension provided', async () => {
+      httpMock
+        .scope(githubApiHost)
+        .get(`${basePath}/somefile.json5`)
+        .reply(200, {
+          content: toBase64('{foo:"bar"}'),
+        });
+      const content = await github.getPreset({
+        repo: 'some/repo',
+        presetName: 'somefile.json5',
       });
       expect(content).toEqual({ foo: 'bar' });
     });

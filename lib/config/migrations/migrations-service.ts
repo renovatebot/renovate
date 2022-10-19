@@ -15,6 +15,7 @@ import { BranchNameMigration } from './custom/branch-name-migration';
 import { BranchPrefixMigration } from './custom/branch-prefix-migration';
 import { CompatibilityMigration } from './custom/compatibility-migration';
 import { ComposerIgnorePlatformReqsMigration } from './custom/composer-ignore-platform-reqs-migration';
+import { DepTypesMigration } from './custom/dep-types-migration';
 import { DryRunMigration } from './custom/dry-run-migration';
 import { EnabledManagersMigration } from './custom/enabled-managers-migration';
 import { ExtendsMigration } from './custom/extends-migration';
@@ -22,18 +23,25 @@ import { GoModTidyMigration } from './custom/go-mod-tidy-migration';
 import { HostRulesMigration } from './custom/host-rules-migration';
 import { IgnoreNodeModulesMigration } from './custom/ignore-node-modules-migration';
 import { IgnoreNpmrcFileMigration } from './custom/ignore-npmrc-file-migration';
+import { MatchStringsMigration } from './custom/match-strings-migration';
+import { NodeMigration } from './custom/node-migration';
+import { PackageFilesMigration } from './custom/package-files-migration';
 import { PackageNameMigration } from './custom/package-name-migration';
 import { PackagePatternMigration } from './custom/package-pattern-migration';
+import { PackageRulesMigration } from './custom/package-rules-migration';
 import { PackagesMigration } from './custom/packages-migration';
 import { PathRulesMigration } from './custom/path-rules-migration';
 import { PinVersionsMigration } from './custom/pin-versions-migration';
+import { PostUpdateOptionsMigration } from './custom/post-update-options-migration';
 import { RaiseDeprecationWarningsMigration } from './custom/raise-deprecation-warnings-migration';
 import { RebaseConflictedPrs } from './custom/rebase-conflicted-prs-migration';
 import { RebaseStalePrsMigration } from './custom/rebase-stale-prs-migration';
 import { RenovateForkMigration } from './custom/renovate-fork-migration';
+import { RequireConfigMigration } from './custom/require-config-migration';
 import { RequiredStatusChecksMigration } from './custom/required-status-checks-migration';
 import { ScheduleMigration } from './custom/schedule-migration';
 import { SemanticCommitsMigration } from './custom/semantic-commits-migration';
+import { SemanticPrefixMigration } from './custom/semantic-prefix-migration';
 import { SeparateMajorReleasesMigration } from './custom/separate-major-release-migration';
 import { SeparateMultipleMajorMigration } from './custom/separate-multiple-major-migration';
 import { SuppressNotificationsMigration } from './custom/suppress-notifications-migration';
@@ -71,6 +79,14 @@ export class MigrationsService {
     ['separatePatchReleases', 'separateMinorPatch'],
     ['versionScheme', 'versioning'],
     ['lookupNameTemplate', 'packageNameTemplate'],
+    ['aliases', 'registryAliases'],
+    ['masterIssue', 'dependencyDashboard'],
+    ['masterIssueApproval', 'dependencyDashboardApproval'],
+    ['masterIssueAutoclose', 'dependencyDashboardAutoclose'],
+    ['masterIssueHeader', 'dependencyDashboardHeader'],
+    ['masterIssueFooter', 'dependencyDashboardFooter'],
+    ['masterIssueTitle', 'dependencyDashboardTitle'],
+    ['masterIssueLabels', 'dependencyDashboardLabels'],
   ]);
 
   static readonly customMigrations: ReadonlyArray<MigrationConstructor> = [
@@ -92,11 +108,13 @@ export class MigrationsService {
     HostRulesMigration,
     IgnoreNodeModulesMigration,
     IgnoreNpmrcFileMigration,
+    MatchStringsMigration,
     PackageNameMigration,
     PackagePatternMigration,
     PackagesMigration,
     PathRulesMigration,
     PinVersionsMigration,
+    PostUpdateOptionsMigration,
     RaiseDeprecationWarningsMigration,
     RebaseConflictedPrs,
     RebaseStalePrsMigration,
@@ -112,6 +130,12 @@ export class MigrationsService {
     UpgradeInRangeMigration,
     VersionStrategyMigration,
     DryRunMigration,
+    RequireConfigMigration,
+    PackageFilesMigration,
+    DepTypesMigration,
+    PackageRulesMigration,
+    NodeMigration,
+    SemanticPrefixMigration,
   ];
 
   static run(originalConfig: RenovateConfig): RenovateConfig {

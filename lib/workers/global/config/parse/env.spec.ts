@@ -1,3 +1,4 @@
+import type { RequiredConfig } from '../../../../config/types';
 import { PlatformId } from '../../../../constants';
 import { logger } from '../../../../logger';
 import * as env from './env';
@@ -33,6 +34,11 @@ describe('workers/global/config/parse/env', () => {
 
     it('supports list multiple', () => {
       const envParam: NodeJS.ProcessEnv = { RENOVATE_LABELS: 'a,b,c' };
+      expect(env.getConfig(envParam).labels).toEqual(['a', 'b', 'c']);
+    });
+
+    it('supports list multiple without blank items', () => {
+      const envParam: NodeJS.ProcessEnv = { RENOVATE_LABELS: 'a,b,c,' };
       expect(env.getConfig(envParam).labels).toEqual(['a', 'b', 'c']);
     });
 
@@ -288,7 +294,7 @@ describe('workers/global/config/parse/env', () => {
         RENOVATE_DRY_RUN: 'false',
       };
       const config = env.getConfig(envParam);
-      expect(config.dryRun).toBeNull();
+      expect(config.dryRun).toBeUndefined();
     });
 
     it('dryRun null', () => {
@@ -296,7 +302,23 @@ describe('workers/global/config/parse/env', () => {
         RENOVATE_DRY_RUN: 'null',
       };
       const config = env.getConfig(envParam);
-      expect(config.dryRun).toBeNull();
+      expect(config.dryRun).toBeUndefined();
+    });
+
+    it('requireConfig boolean true', () => {
+      const envParam: NodeJS.ProcessEnv = {
+        RENOVATE_REQUIRE_CONFIG: 'true' as RequiredConfig,
+      };
+      const config = env.getConfig(envParam);
+      expect(config.requireConfig).toBe('required');
+    });
+
+    it('requireConfig boolean false', () => {
+      const envParam: NodeJS.ProcessEnv = {
+        RENOVATE_REQUIRE_CONFIG: 'false' as RequiredConfig,
+      };
+      const config = env.getConfig(envParam);
+      expect(config.requireConfig).toBe('optional');
     });
   });
 });

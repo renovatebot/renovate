@@ -1,3 +1,7 @@
+import type {
+  RepositoryCacheConfig,
+  RepositoryCacheType,
+} from '../../../config/types';
 import type { PackageFile } from '../../../modules/manager/types';
 import type { RepoInitConfig } from '../../../workers/repository/init/types';
 import type { GitConflictsCache } from '../../git/types';
@@ -23,21 +27,56 @@ export interface BranchUpgradeCache {
 }
 
 export interface BranchCache {
+  /**
+   *Whether this branch has automerge enabled
+   */
   automerge: boolean;
+  /**
+   * Name of base branch
+   */
+  baseBranch: string;
+  /**
+   * The base branch's most recent commit SHA
+   */
+  baseBranchSha: string | null;
+  /**
+   * Hash of the manager fingerprints and the update branch config
+   */
+  branchFingerprint?: string;
+  /**
+   * Branch name
+   */
   branchName: string;
-  isModified: boolean;
-  prNo: number | null;
-  sha: string | null;
+  /**
+   * Whether the update branch is behind base branh
+   */
+  isBehindBase?: boolean;
+  /**
+   * Whether a person not listed in gitIgnoredAuthors updated the branch.
+   */
+  isModified?: boolean;
+  /**
+   * Parent commit of branch sha
+   */
   parentSha: string | null;
+  /**
+   * Pr nunber of PR created from this branch
+   */
+  prNo: number | null;
+  /**
+   * The branch's most recent commit SHA
+   */
+  sha: string | null;
+  /**
+   * Details on the dependency upgrades that have been applied in this branch
+   */
   upgrades: BranchUpgradeCache[];
 }
 
-export interface Cache {
+export interface RepoCacheData {
   configFileName?: string;
   semanticCommits?: 'enabled' | 'disabled';
   branches?: BranchCache[];
-  repository?: string;
-  revision?: number;
   init?: RepoInitConfig;
   scan?: Record<string, BaseBranchCache>;
   lastPlatformAutomergeFailure?: string;
@@ -46,4 +85,18 @@ export interface Cache {
   };
   gitConflicts?: GitConflictsCache;
   prComments?: Record<number, Record<string, string>>;
+}
+
+export interface RepoCache {
+  load(): Promise<void>;
+  save(): Promise<void>;
+  getData(): RepoCacheData;
+  isModified(): boolean | undefined;
+}
+
+export interface RepoCacheConfig {
+  repository?: string;
+  repositoryCache?: RepositoryCacheConfig;
+  repositoryCacheType?: RepositoryCacheType;
+  repoFingerprint: string;
 }

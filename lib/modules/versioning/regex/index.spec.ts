@@ -237,7 +237,7 @@ describe('modules/versioning/regex/index', () => {
     `(
       'isLessThanRange($version, $range) === $expected',
       ({ version, range, expected }) => {
-        expect(regex.isLessThanRange(version, range)).toBe(expected);
+        expect(regex.isLessThanRange?.(version, range)).toBe(expected);
       }
     );
 
@@ -273,9 +273,9 @@ describe('modules/versioning/regex/index', () => {
       it('returns newVersion', () => {
         expect(
           regex.getNewValue({
-            currentValue: null,
-            rangeStrategy: null,
-            currentVersion: null,
+            currentValue: null as never,
+            rangeStrategy: null as never,
+            currentVersion: null as never,
             newVersion: '1.2.3',
           })
         ).toBe('1.2.3');

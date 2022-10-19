@@ -80,8 +80,13 @@ Bot services are better if they are provisioned with a "bot identity" so that us
 Until the hosted app can be reactivated, we recommend users migrate to use self-hosted pipelines to run Renovate.
 Please see the [renovate-bot/renovate-runner README on GitLab](https://gitlab.com/renovate-bot/renovate-runner/-/blob/HEAD/README.md) for instructions on how to set this up as easily as possible.
 
+## Status of the Renovate app for GitLab
+
 We're trying to find a workable design for the GitLab app, so we can enable it safely again.
 If you have any ideas, open a [discussion](https://github.com/renovatebot/renovate/discussions) and let us know!
+
+GitLab introduced Group Access Tokens & API for paid & self-hosted instances, but a good permission setup/flow is still not possible.
+Check out [GitLab issue #346298](https://gitlab.com/gitlab-org/gitlab/-/issues/346298).
 
 ## Acknowledgments
 

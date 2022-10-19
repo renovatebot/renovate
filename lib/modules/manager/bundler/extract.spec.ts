@@ -1,35 +1,31 @@
-import { fs, loadFixture } from '../../../../test/util';
+import is from '@sindresorhus/is';
+import { Fixtures } from '../../../../test/fixtures';
+import { fs } from '../../../../test/util';
 import { isValid } from '../../versioning/ruby';
-import { extractPackageFile } from './extract';
+import { extractPackageFile } from '.';
 
 jest.mock('../../../util/fs');
 
-const railsGemfile = loadFixture('Gemfile.rails');
-const railsGemfileLock = loadFixture('Gemfile.rails.lock');
+const railsGemfile = Fixtures.get('Gemfile.rails');
+const railsGemfileLock = Fixtures.get('Gemfile.rails.lock');
 
-const sourceGroupGemfile = loadFixture('Gemfile.sourceGroup');
-const webPackerGemfile = loadFixture('Gemfile.webpacker');
-const webPackerGemfileLock = loadFixture('Gemfile.webpacker.lock');
-const mastodonGemfile = loadFixture('Gemfile.mastodon');
-const mastodonGemfileLock = loadFixture('Gemfile.mastodon.lock');
-const rubyCIGemfileLock = loadFixture('Gemfile.rubyci.lock');
+const sourceGroupGemfile = Fixtures.get('Gemfile.sourceGroup');
+const webPackerGemfile = Fixtures.get('Gemfile.webpacker');
+const webPackerGemfileLock = Fixtures.get('Gemfile.webpacker.lock');
+const mastodonGemfile = Fixtures.get('Gemfile.mastodon');
+const mastodonGemfileLock = Fixtures.get('Gemfile.mastodon.lock');
+const rubyCIGemfileLock = Fixtures.get('Gemfile.rubyci.lock');
 
-const rubyCIGemfile = loadFixture('Gemfile.rubyci');
-const gitlabFossGemfileLock = loadFixture('Gemfile.gitlab-foss.lock');
-const gitlabFossGemfile = loadFixture('Gemfile.gitlab-foss');
-const sourceBlockGemfile = loadFixture('Gemfile.sourceBlock');
-const sourceBlockWithNewLinesGemfileLock = loadFixture(
+const rubyCIGemfile = Fixtures.get('Gemfile.rubyci');
+const gitlabFossGemfileLock = Fixtures.get('Gemfile.gitlab-foss.lock');
+const gitlabFossGemfile = Fixtures.get('Gemfile.gitlab-foss');
+const sourceBlockGemfile = Fixtures.get('Gemfile.sourceBlock');
+const sourceBlockWithNewLinesGemfileLock = Fixtures.get(
   'Gemfile.sourceBlockWithNewLines.lock'
 );
-const sourceBlockWithNewLinesGemfile = loadFixture(
+const sourceBlockWithNewLinesGemfile = Fixtures.get(
   'Gemfile.sourceBlockWithNewLines'
 );
-
-function validateGems(raw, parsed) {
-  const gemfileGemCount = raw.match(/\n\s*gem\s+/g).length;
-  const parsedGemCount = parsed.deps.length;
-  expect(gemfileGemCount).toEqual(parsedGemCount);
-}
 
 describe('modules/manager/bundler/extract', () => {
   describe('extractPackageFile()', () => {
@@ -43,23 +39,21 @@ describe('modules/manager/bundler/extract', () => {
       expect(res).toMatchSnapshot();
       // couple of dependency of ruby rails are not present in the lock file. Filter out those before processing
       expect(
-        res.deps
+        res?.deps
           .filter((dep) =>
             Object.prototype.hasOwnProperty.call(dep, 'lockedVersion')
           )
           .every(
-            (dep) =>
-              Object.prototype.hasOwnProperty.call(dep, 'lockedVersion') &&
-              isValid(dep.lockedVersion)
+            (dep) => is.string(dep.lockedVersion) && isValid(dep.lockedVersion)
           )
       ).toBeTrue();
-      validateGems(railsGemfile, res);
+      expect(res?.deps).toHaveLength(68);
     });
 
     it('parses sourceGroups', async () => {
       const res = await extractPackageFile(sourceGroupGemfile, 'Gemfile');
       expect(res).toMatchSnapshot();
-      validateGems(sourceGroupGemfile, res);
+      expect(res?.deps).toHaveLength(7);
     });
 
     it('parse webpacker Gemfile', async () => {
@@ -67,13 +61,11 @@ describe('modules/manager/bundler/extract', () => {
       const res = await extractPackageFile(webPackerGemfile, 'Gemfile');
       expect(res).toMatchSnapshot();
       expect(
-        res.deps.every(
-          (dep) =>
-            Object.prototype.hasOwnProperty.call(dep, 'lockedVersion') &&
-            isValid(dep.lockedVersion)
+        res?.deps.every(
+          (dep) => is.string(dep.lockedVersion) && isValid(dep.lockedVersion)
         )
       ).toBeTrue();
-      validateGems(webPackerGemfile, res);
+      expect(res?.deps).toHaveLength(5);
     });
 
     it('parse mastodon Gemfile', async () => {
@@ -81,17 +73,15 @@ describe('modules/manager/bundler/extract', () => {
       const res = await extractPackageFile(mastodonGemfile, 'Gemfile');
       expect(res).toMatchSnapshot();
       expect(
-        res.deps
+        res?.deps
           .filter((dep) =>
             Object.prototype.hasOwnProperty.call(dep, 'lockedVersion')
           )
           .every(
-            (dep) =>
-              Object.prototype.hasOwnProperty.call(dep, 'lockedVersion') &&
-              isValid(dep.lockedVersion)
+            (dep) => is.string(dep.lockedVersion) && isValid(dep.lockedVersion)
           )
       ).toBeTrue();
-      validateGems(mastodonGemfile, res);
+      expect(res?.deps).toHaveLength(125);
     });
 
     it('parse Ruby CI Gemfile', async () => {
@@ -99,13 +89,11 @@ describe('modules/manager/bundler/extract', () => {
       const res = await extractPackageFile(rubyCIGemfile, 'Gemfile');
       expect(res).toMatchSnapshot();
       expect(
-        res.deps.every(
-          (dep) =>
-            Object.prototype.hasOwnProperty.call(dep, 'lockedVersion') &&
-            isValid(dep.lockedVersion)
+        res?.deps.every(
+          (dep) => is.string(dep.lockedVersion) && isValid(dep.lockedVersion)
         )
       ).toBeTrue();
-      validateGems(rubyCIGemfile, res);
+      expect(res?.deps).toHaveLength(14);
     });
   });
 
@@ -114,13 +102,11 @@ describe('modules/manager/bundler/extract', () => {
     const res = await extractPackageFile(gitlabFossGemfile, 'Gemfile');
     expect(res).toMatchSnapshot();
     expect(
-      res.deps.every(
-        (dep) =>
-          Object.prototype.hasOwnProperty.call(dep, 'lockedVersion') &&
-          isValid(dep.lockedVersion)
+      res?.deps.every(
+        (dep) => is.string(dep.lockedVersion) && isValid(dep.lockedVersion)
       )
     ).toBeTrue();
-    validateGems(gitlabFossGemfile, res);
+    expect(res?.deps).toHaveLength(252);
   });
 
   it('parse source blocks in Gemfile', async () => {
@@ -136,6 +122,6 @@ describe('modules/manager/bundler/extract', () => {
       'Gemfile'
     );
     expect(res).toMatchSnapshot();
-    validateGems(sourceBlockWithNewLinesGemfile, res);
+    expect(res?.deps).toHaveLength(2);
   });
 });

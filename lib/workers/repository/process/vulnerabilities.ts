@@ -1,5 +1,5 @@
-import { Ecosystem, Osv, OsvOffline } from '@jamiemagee/osv-offline';
-import pAll from 'p-all';
+// TODO #7154
+import { Ecosystem, Osv, OsvOffline } from '@renovatebot/osv-offline';
 import { getManagerConfig, mergeChildConfig } from '../../../config';
 import type { PackageRule, RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
@@ -7,6 +7,7 @@ import type {
   PackageDependency,
   PackageFile,
 } from '../../../modules/manager/types';
+import * as p from '../../../util/promises';
 
 export class Vulnerabilities {
   private osvOffline: OsvOffline | undefined;
@@ -72,7 +73,7 @@ export class Vulnerabilities {
       { manager, queueLength: queue.length },
       'fetchManagerUpdates starting'
     );
-    await pAll(queue, { concurrency: 5 });
+    await p.all(queue);
     logger.trace({ manager }, 'fetchManagerUpdates finished');
   }
 
@@ -93,9 +94,7 @@ export class Vulnerabilities {
       'fetchManagerPackagerFileUpdates starting with concurrency'
     );
 
-    config.packageRules?.push(
-      ...(await pAll(queue, { concurrency: 5 })).flat()
-    );
+    config.packageRules?.push(...(await p.all(queue)).flat());
     logger.trace({ packageFile }, 'fetchManagerPackagerFileUpdates finished');
   }
 
@@ -104,16 +103,16 @@ export class Vulnerabilities {
     packageDependency: PackageDependency
   ): Promise<PackageRule[]> {
     const ecosystem =
-      Vulnerabilities.managerEcosystemMap[packageFileConfig.manager];
+      Vulnerabilities.managerEcosystemMap[packageFileConfig.manager!];
 
     const vulnerabilities = await this.osvOffline?.getVulnerabilities(
-      ecosystem,
-      packageDependency.depName
+      ecosystem!,
+      packageDependency.depName!
     );
     return this.convertToPackageRule(
       vulnerabilities ?? [],
-      packageDependency.depName,
-      ecosystem
+      packageDependency.depName!,
+      ecosystem!
     );
   }
 
@@ -134,7 +133,7 @@ export class Vulnerabilities {
           matchPackageNames: [dependencyName],
           allowedVersions: affected?.ranges?.[0].events.find(
             (event) => event.fixed !== undefined
-          ).fixed,
+          )!.fixed,
           isVulnerabilityAlert: true,
         })
       );

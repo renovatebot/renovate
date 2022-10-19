@@ -1,11 +1,11 @@
 import URL from 'url';
-import pAll from 'p-all';
 import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import * as packageCache from '../../../util/cache/package';
 import { cache } from '../../../util/cache/package/decorator';
 import * as hostRules from '../../../util/host-rules';
 import type { HttpOptions } from '../../../util/http/types';
+import * as p from '../../../util/promises';
 import { regEx } from '../../../util/regex';
 import { ensureTrailingSlash, joinUrlParts } from '../../../util/url';
 import * as composerVersioning from '../../versioning/composer';
@@ -35,8 +35,12 @@ export class PackagistDatasource extends Datasource {
   public override getReleases({
     packageName,
     registryUrl,
-  }: GetReleasesConfig): Promise<ReleaseResult> {
+  }: GetReleasesConfig): Promise<ReleaseResult | null> {
     logger.trace(`getReleases(${packageName})`);
+    // istanbul ignore if
+    if (!registryUrl) {
+      return Promise.resolve(null);
+    }
     return this.packageLookup(registryUrl, packageName);
   }
 
@@ -59,8 +63,8 @@ export class PackagistDatasource extends Datasource {
     const res = (await this.http.getJson<PackageMeta>(url, opts)).body;
     const meta: RegistryMeta = {
       providerPackages: {},
+      packages: res.packages,
     };
-    meta.packages = res.packages;
     if (res.includes) {
       meta.includesFiles = [];
       for (const [name, val] of Object.entries(res.includes)) {
@@ -132,14 +136,14 @@ export class PackagistDatasource extends Datasource {
   }
 
   private static extractDepReleases(versions: RegistryFile): ReleaseResult {
-    const dep: ReleaseResult = { releases: null };
+    const dep: ReleaseResult = { releases: [] };
     // istanbul ignore if
     if (!versions) {
-      dep.releases = [];
       return dep;
     }
     dep.releases = Object.keys(versions).map((version) => {
-      const release = versions[version];
+      // TODO: fix function parameter type: `versions`
+      const release = (versions as any)[version];
       const parsedVersion = release.version ?? version;
       dep.homepage = release.homepage || dep.homepage;
       if (release.source?.url) {
@@ -160,6 +164,11 @@ export class PackagistDatasource extends Datasource {
   })
   async getAllPackages(regUrl: string): Promise<AllPackages | null> {
     const registryMeta = await this.getRegistryMeta(regUrl);
+    // istanbul ignore if: needs test
+    if (!registryMeta) {
+      return null;
+    }
+
     const {
       packages,
       providersUrl,
@@ -173,7 +182,7 @@ export class PackagistDatasource extends Datasource {
         (file) => (): Promise<PackagistFile> =>
           this.getPackagistFile(regUrl, file)
       );
-      const resolvedFiles = await pAll(queue, { concurrency: 5 });
+      const resolvedFiles = await p.all(queue);
       for (const res of resolvedFiles) {
         for (const [name, val] of Object.entries(res.providers)) {
           providerPackages[name] = val.sha256;
@@ -202,7 +211,7 @@ export class PackagistDatasource extends Datasource {
     return allPackages;
   }
 
-  async packagistOrgLookup(name: string): Promise<ReleaseResult> {
+  async packagistOrgLookup(name: string): Promise<ReleaseResult | null> {
     const cacheNamespace = 'datasource-packagist-org';
     const cachedResult = await packageCache.get<ReleaseResult>(
       cacheNamespace,
@@ -212,7 +221,7 @@ export class PackagistDatasource extends Datasource {
     if (cachedResult) {
       return cachedResult;
     }
-    let dep: ReleaseResult = null;
+    let dep: ReleaseResult | null = null;
     const regUrl = 'https://packagist.org';
     const pkgUrl = [
       joinUrlParts(regUrl, `/p2/${name}.json`),
@@ -243,6 +252,10 @@ export class PackagistDatasource extends Datasource {
         return packagistResult;
       }
       const allPackages = await this.getAllPackages(regUrl);
+      // istanbul ignore if: needs test
+      if (!allPackages) {
+        return null;
+      }
       const {
         packages,
         providersUrl,
@@ -261,7 +274,7 @@ export class PackagistDatasource extends Datasource {
       if (name in providerPackages) {
         pkgUrl = URL.resolve(
           regUrl,
-          providersUrl
+          providersUrl!
             .replace('%package%', name)
             .replace('%hash%', providerPackages[name])
         );

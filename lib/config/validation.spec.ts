@@ -63,6 +63,30 @@ describe('config/validation', () => {
       expect(errors).toMatchSnapshot();
     });
 
+    it('catches invalid matchCurrentValue', async () => {
+      const config = {
+        packageRules: [
+          {
+            matchPackageNames: ['foo'],
+            matchCurrentValue: '/^2/',
+            enabled: true,
+          },
+          {
+            matchPackageNames: ['bar'],
+            matchCurrentValue: '^1',
+            enabled: true,
+          },
+          {
+            matchPackageNames: ['quack'],
+            matchCurrentValue: '<1.0.0',
+            enabled: true,
+          },
+        ],
+      };
+      const { errors } = await configValidation.validateConfig(config);
+      expect(errors).toHaveLength(2);
+    });
+
     it('catches invalid matchCurrentVersion regex', async () => {
       const config = {
         packageRules: [
@@ -195,6 +219,7 @@ describe('config/validation', () => {
         schedule: ['every 15 mins every weekday'],
         timezone: 'Asia',
         labels: 5 as any,
+        prCommitsPerRunLimit: false as any,
         semanticCommitType: 7 as any,
         lockFileMaintenance: false as any,
         extends: [':timezone(Europe/Brussel)'],
@@ -220,7 +245,7 @@ describe('config/validation', () => {
       );
       expect(warnings).toHaveLength(1);
       expect(errors).toMatchSnapshot();
-      expect(errors).toHaveLength(12);
+      expect(errors).toHaveLength(13);
     });
 
     it('selectors outside packageRules array trigger errors', async () => {
@@ -319,8 +344,8 @@ describe('config/validation', () => {
       expect(warnings).toHaveLength(0);
       expect(errors).toHaveLength(1);
       expect(errors).toMatchInlineSnapshot(`
-        Array [
-          Object {
+        [
+          {
             "message": "Each Regex Manager must contain a non-empty fileMatch array",
             "topic": "Configuration Error",
           },
@@ -347,12 +372,12 @@ describe('config/validation', () => {
       expect(warnings).toHaveLength(0);
       expect(errors).toHaveLength(2);
       expect(errors).toMatchInlineSnapshot(`
-        Array [
-          Object {
+        [
+          {
             "message": "Each Regex Manager must contain a non-empty matchStrings array",
             "topic": "Configuration Error",
           },
-          Object {
+          {
             "message": "Each Regex Manager must contain a non-empty matchStrings array",
             "topic": "Configuration Error",
           },
@@ -487,7 +512,7 @@ describe('config/validation', () => {
         constraints: { packageRules: [{}] },
       };
       const { warnings, errors } = await configValidation.validateConfig(
-        config,
+        config as never, // TODO: #15963
         true
       );
       expect(warnings).toHaveLength(0);
@@ -506,9 +531,9 @@ describe('config/validation', () => {
       expect(errors).toHaveLength(0);
     });
 
-    it('validates valid alias objects', async () => {
+    it('validates valid registryAlias objects', async () => {
       const config = {
-        aliases: {
+        registryAliases: {
           example1: 'http://www.example.com',
           example2: 'https://www.example2.com/example',
         },
@@ -520,9 +545,9 @@ describe('config/validation', () => {
       expect(errors).toHaveLength(0);
     });
 
-    it('errors if aliases depth is more than 1', async () => {
+    it('errors if registryAliases depth is more than 1', async () => {
       const config = {
-        aliases: {
+        registryAliases: {
           sample: {
             example1: 'http://www.example.com',
           },
@@ -535,15 +560,15 @@ describe('config/validation', () => {
       expect(errors).toMatchObject([
         {
           message:
-            'Invalid `aliases.aliases.sample` configuration: value is not a url',
+            'Invalid `registryAliases.registryAliases.sample` configuration: value is not a url',
           topic: 'Configuration Error',
         },
       ]);
     });
 
-    it('errors if aliases have invalid url', async () => {
+    it('errors if registryAliases have invalid url', async () => {
       const config = {
-        aliases: {
+        registryAliases: {
           example1: 'noturl',
           example2: 'http://www.example.com',
         },
@@ -555,7 +580,7 @@ describe('config/validation', () => {
       expect(errors).toMatchObject([
         {
           message:
-            'Invalid `aliases.aliases.example1` configuration: value is not a url',
+            'Invalid `registryAliases.registryAliases.example1` configuration: value is not a url',
           topic: 'Configuration Error',
         },
       ]);

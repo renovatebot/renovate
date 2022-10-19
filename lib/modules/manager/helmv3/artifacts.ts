@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import yaml from 'js-yaml';
 import { quote } from 'shlex';
 import upath from 'upath';
@@ -6,19 +7,22 @@ import { logger } from '../../../logger';
 import { exec } from '../../../util/exec';
 import type { ExecOptions, ToolConstraint } from '../../../util/exec/types';
 import {
+  getParentDir,
   getSiblingFileName,
-  getSubDirectory,
   privateCacheDir,
   readLocalFile,
   writeLocalFile,
 } from '../../../util/fs';
+import { getRepoStatus } from '../../../util/git';
 import * as hostRules from '../../../util/host-rules';
 import { DockerDatasource } from '../../datasource/docker';
+import { HelmDatasource } from '../../datasource/helm';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
 import type { ChartDefinition, Repository, RepositoryRule } from './types';
 import {
   aliasRecordToRepositories,
   getRepositories,
+  isFileInDir,
   isOCIRegistry,
 } from './utils';
 
@@ -27,7 +31,7 @@ async function helmCommands(
   manifestPath: string,
   repositories: Repository[]
 ): Promise<void> {
-  const cmd = [];
+  const cmd: string[] = [];
   // set cache and config files to a path in privateCacheDir to prevent file and credential leakage
   const helmConfigParameters = [
     `--registry-config ${upath.join(privateCacheDir(), 'registry.json')}`,
@@ -71,6 +75,7 @@ async function helmCommands(
         ...value,
         hostRule: hostRules.find({
           url: value.repository,
+          hostType: HelmDatasource.id,
         }),
       };
     });
@@ -92,7 +97,7 @@ async function helmCommands(
 
   cmd.push(
     `helm dependency update ${helmConfigParameters.join(' ')} ${quote(
-      getSubDirectory(manifestPath)
+      getParentDir(manifestPath)
     )}`
   );
 
@@ -108,6 +113,9 @@ export async function updateArtifacts({
   logger.debug(`helmv3.updateArtifacts(${packageFileName})`);
 
   const isLockFileMaintenance = config.updateType === 'lockFileMaintenance';
+  const isUpdateOptionAddChartArchives = config.postUpdateOptions?.includes(
+    'helmUpdateSubChartArchives'
+  );
 
   if (
     !isLockFileMaintenance &&
@@ -119,20 +127,22 @@ export async function updateArtifacts({
 
   const lockFileName = getSiblingFileName(packageFileName, 'Chart.lock');
   const existingLockFileContent = await readLocalFile(lockFileName, 'utf8');
-  if (!existingLockFileContent) {
+  if (!existingLockFileContent && !isUpdateOptionAddChartArchives) {
     logger.debug('No Chart.lock found');
     return null;
   }
   try {
     // get repositories and registries defined in the package file
     const packages = yaml.load(newPackageFileContent) as ChartDefinition; //TODO #9610
-    const locks = yaml.load(existingLockFileContent) as ChartDefinition; //TODO #9610
+    const locks = existingLockFileContent
+      ? (yaml.load(existingLockFileContent) as ChartDefinition)
+      : { dependencies: [] }; //TODO #9610
 
-    const chartDefinitions = [];
-    // prioritize alias naming for Helm repositories
-    if (config.aliases) {
+    const chartDefinitions: ChartDefinition[] = [];
+    // prioritize registryAlias naming for Helm repositories
+    if (config.registryAliases) {
       chartDefinitions.push({
-        dependencies: aliasRecordToRepositories(config.aliases),
+        dependencies: aliasRecordToRepositories(config.registryAliases),
       });
     }
     chartDefinitions.push(packages, locks);
@@ -140,7 +150,7 @@ export async function updateArtifacts({
     const repositories = getRepositories(chartDefinitions);
 
     await writeLocalFile(packageFileName, newPackageFileContent);
-    logger.debug('Updating ' + lockFileName);
+    logger.debug('Updating Helm artifacts');
     const helmToolConstraint: ToolConstraint = {
       toolName: 'helm',
       constraint: config.constraints?.helm,
@@ -156,21 +166,62 @@ export async function updateArtifacts({
       toolConstraints: [helmToolConstraint],
     };
     await helmCommands(execOptions, packageFileName, repositories);
-    logger.debug('Returning updated Chart.lock');
-    const newHelmLockContent = await readLocalFile(lockFileName, 'utf8');
-    if (existingLockFileContent === newHelmLockContent) {
-      logger.debug('Chart.lock is unchanged');
-      return null;
+    logger.debug('Returning updated Helm artifacts');
+
+    const fileChanges: UpdateArtifactsResult[] = [];
+
+    if (is.truthy(existingLockFileContent)) {
+      const newHelmLockContent = await readLocalFile(lockFileName, 'utf8');
+      const isLockFileChanged = existingLockFileContent !== newHelmLockContent;
+      if (isLockFileChanged) {
+        fileChanges.push({
+          file: {
+            type: 'addition',
+            path: lockFileName,
+            contents: newHelmLockContent,
+          },
+        });
+      } else {
+        logger.debug('Chart.lock is unchanged');
+      }
     }
-    return [
-      {
-        file: {
-          type: 'addition',
-          path: lockFileName,
-          contents: newHelmLockContent,
-        },
-      },
-    ];
+
+    // add modified helm chart archives to artifacts
+    if (is.truthy(isUpdateOptionAddChartArchives)) {
+      const chartsPath = getSiblingFileName(packageFileName, 'charts');
+      const status = await getRepoStatus();
+      const chartsAddition = status.not_added ?? [];
+      const chartsDeletion = status.deleted ?? [];
+
+      for (const file of chartsAddition) {
+        // only add artifacts in the chart sub path
+        if (!isFileInDir(chartsPath, file)) {
+          continue;
+        }
+        fileChanges.push({
+          file: {
+            type: 'addition',
+            path: file,
+            contents: await readLocalFile(file),
+          },
+        });
+      }
+
+      for (const file of chartsDeletion) {
+        // only add artifacts in the chart sub path
+        if (!isFileInDir(chartsPath, file)) {
+          continue;
+        }
+        fileChanges.push({
+          file: {
+            type: 'deletion',
+            path: file,
+          },
+        });
+      }
+    }
+
+    return fileChanges.length > 0 ? fileChanges : null;
   } catch (err) {
     // istanbul ignore if
     if (err.message === TEMPORARY_ERROR) {

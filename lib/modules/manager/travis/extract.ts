@@ -6,11 +6,11 @@ import type { PackageDependency, PackageFile } from '../types';
 import type { TravisMatrixItem, TravisYaml } from './types';
 
 export function extractPackageFile(content: string): PackageFile | null {
-  let doc: TravisYaml | null;
+  let doc: TravisYaml;
   try {
     doc = load(content, {
       json: true,
-    });
+    }) as TravisYaml;
   } catch (err) {
     logger.warn({ err, content }, 'Failed to parse .travis.yml file.');
     return null;

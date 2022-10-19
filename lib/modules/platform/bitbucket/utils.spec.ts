@@ -29,7 +29,7 @@ describe('modules/platform/bitbucket/utils', () => {
         values: range(5),
       });
 
-    const res = await utils.accumulateValues('some-url', 'get', null, 10);
+    const res = await utils.accumulateValues('some-url', 'get', undefined, 10);
     expect(res).toHaveLength(25);
   });
 });

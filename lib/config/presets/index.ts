@@ -5,6 +5,7 @@ import {
 } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
+import * as memCache from '../../util/cache/memory';
 import { clone } from '../../util/clone';
 import { regEx } from '../../util/regex';
 import * as massage from '../massage';
@@ -18,7 +19,7 @@ import * as gitlab from './gitlab';
 import * as internal from './internal';
 import * as local from './local';
 import * as npm from './npm';
-import type { ParsedPreset, PresetApi } from './types';
+import type { ParsedPreset, Preset, PresetApi } from './types';
 import {
   PRESET_DEP_NOT_FOUND,
   PRESET_INVALID,
@@ -45,6 +46,29 @@ const gitPresetRegex = regEx(
 );
 
 export function replaceArgs(
+  obj: string,
+  argMapping: Record<string, any>
+): string;
+export function replaceArgs(
+  obj: string[],
+  argMapping: Record<string, any>
+): string[];
+export function replaceArgs(
+  obj: Record<string, any>,
+  argMapping: Record<string, any>
+): Record<string, any>;
+export function replaceArgs(
+  obj: Record<string, any>[],
+  argMapping: Record<string, any>
+): Record<string, any>[];
+
+/**
+ * TODO: fix me #7154
+ * @param obj
+ * @param argMapping
+ */
+export function replaceArgs(obj: any, argMapping: Record<string, any>): any;
+export function replaceArgs(
   obj: string | string[] | Record<string, any> | Record<string, any>[],
   argMapping: Record<string, any>
 ): any {
@@ -64,7 +88,7 @@ export function replaceArgs(
     return returnArray;
   }
   if (is.object(obj)) {
-    const returnObj = {};
+    const returnObj: Record<string, any> = {};
     for (const [key, val] of Object.entries(obj)) {
       returnObj[key] = replaceArgs(val, argMapping);
     }
@@ -75,12 +99,12 @@ export function replaceArgs(
 
 export function parsePreset(input: string): ParsedPreset {
   let str = input;
-  let presetSource: string;
+  let presetSource: string | undefined;
   let presetPath: string | undefined;
   let repo: string;
   let presetName: string;
   let tag: string | undefined;
-  let params: string[];
+  let params: string[] | undefined;
   if (str.startsWith('github>')) {
     presetSource = 'github';
     str = str.substring('github>'.length);
@@ -101,7 +125,7 @@ export function parsePreset(input: string): ParsedPreset {
     presetSource = 'local';
   }
   str = str.replace(regEx(/^npm>/), '');
-  presetSource = presetSource || 'npm';
+  presetSource = presetSource ?? 'npm';
   if (str.includes('(')) {
     params = str
       .slice(str.indexOf('(') + 1, -1)
@@ -137,7 +161,7 @@ export function parsePreset(input: string): ParsedPreset {
     presetName = str.slice(1);
   } else if (str.startsWith('@')) {
     // scoped namespace
-    [, repo] = regEx(/(@.*?)(:|$)/).exec(str);
+    [, repo] = regEx(/(@.*?)(:|$)/).exec(str)!;
     str = str.slice(repo.length);
     if (!repo.includes('/')) {
       repo += '/renovate-config';
@@ -158,9 +182,9 @@ export function parsePreset(input: string): ParsedPreset {
       throw new Error(PRESET_INVALID);
     }
     ({ repo, presetPath, presetName, tag } =
-      nonScopedPresetWithSubdirRegex.exec(str)?.groups || {});
+      nonScopedPresetWithSubdirRegex.exec(str)?.groups ?? {});
   } else {
-    ({ repo, presetName, tag } = gitPresetRegex.exec(str)?.groups || {});
+    ({ repo, presetName, tag } = gitPresetRegex.exec(str)?.groups ?? {});
 
     if (presetSource === 'npm' && !repo.startsWith('renovate-config-')) {
       repo = `renovate-config-${repo}`;
@@ -195,19 +219,23 @@ export async function getPreset(
   }
   const { presetSource, repo, presetPath, presetName, tag, params } =
     parsePreset(preset);
-  let presetConfig = await presetSources[presetSource].getPreset({
-    repo,
-    presetPath,
-    presetName,
-    baseConfig,
-    tag,
-  });
+  const cacheKey = `preset:${preset}`;
+  let presetConfig = memCache.get<Preset | null | undefined>(cacheKey);
+  if (is.nullOrUndefined(presetConfig)) {
+    presetConfig = await presetSources[presetSource].getPreset({
+      repo,
+      presetPath,
+      presetName,
+      tag,
+    });
+    memCache.set(cacheKey, presetConfig);
+  }
   if (!presetConfig) {
     throw new Error(PRESET_DEP_NOT_FOUND);
   }
   logger.trace({ presetConfig }, `Found preset ${preset}`);
   if (params) {
-    const argMapping = {};
+    const argMapping: Record<string, string> = {};
     for (const [index, value] of params.entries()) {
       argMapping[`arg${index}`] = value;
     }
@@ -248,7 +276,7 @@ export async function resolveConfigPresets(
 ): Promise<AllConfig> {
   let ignorePresets = clone(_ignorePresets);
   if (!ignorePresets || ignorePresets.length === 0) {
-    ignorePresets = inputConfig.ignorePresets || [];
+    ignorePresets = inputConfig.ignorePresets ?? [];
   }
   logger.trace(
     { config: inputConfig, existingPresets },
@@ -258,61 +286,17 @@ export async function resolveConfigPresets(
   // First, merge all the preset configs from left to right
   if (inputConfig.extends?.length) {
     for (const preset of inputConfig.extends) {
-      // istanbul ignore if
-      if (existingPresets.includes(preset)) {
-        logger.debug(
-          `Already seen preset ${preset} in [${existingPresets.join(', ')}]`
-        );
-      } else if (ignorePresets.includes(preset)) {
-        // istanbul ignore next
-        logger.debug(
-          `Ignoring preset ${preset} in [${existingPresets.join(', ')}]`
-        );
-      } else {
+      if (shouldResolvePreset(preset, existingPresets, ignorePresets)) {
         logger.trace(`Resolving preset "${preset}"`);
-        let fetchedPreset: RenovateConfig;
-        try {
-          fetchedPreset = await getPreset(preset, baseConfig ?? inputConfig);
-        } catch (err) {
-          logger.debug({ preset, err }, 'Preset fetch error');
-          // istanbul ignore if
-          if (err instanceof ExternalHostError) {
-            throw err;
-          }
-          // istanbul ignore if
-          if (err.message === PLATFORM_RATE_LIMIT_EXCEEDED) {
-            throw err;
-          }
-          const error = new Error(CONFIG_VALIDATION);
-          if (err.message === PRESET_DEP_NOT_FOUND) {
-            error.validationError = `Cannot find preset's package (${preset})`;
-          } else if (err.message === PRESET_RENOVATE_CONFIG_NOT_FOUND) {
-            error.validationError = `Preset package is missing a renovate-config entry (${preset})`;
-          } else if (err.message === PRESET_NOT_FOUND) {
-            error.validationError = `Preset name not found within published preset config (${preset})`;
-          } else if (err.message === PRESET_INVALID) {
-            error.validationError = `Preset is invalid (${preset})`;
-          } else if (err.message === PRESET_PROHIBITED_SUBPRESET) {
-            error.validationError = `Sub-presets cannot be combined with a custom path (${preset})`;
-          } else if (err.message === PRESET_INVALID_JSON) {
-            error.validationError = `Preset is invalid JSON (${preset})`;
-          } else {
-            error.validationError = `Preset caused unexpected error (${preset})`;
-          }
-          // istanbul ignore if
-          if (existingPresets.length) {
-            error.validationError +=
-              '. Note: this is a *nested* preset so please contact the preset author if you are unable to fix it yourself.';
-          }
-          logger.info(
-            { validationError: error.validationError },
-            'Throwing preset error'
-          );
-          throw error;
-        }
+        const fetchedPreset = await fetchPreset(
+          preset,
+          baseConfig,
+          inputConfig,
+          existingPresets
+        );
         const presetConfig = await resolveConfigPresets(
           fetchedPreset,
-          baseConfig,
+          baseConfig ?? inputConfig,
           ignorePresets,
           existingPresets.concat([preset])
         );
@@ -363,4 +347,73 @@ export async function resolveConfigPresets(
   logger.trace({ config: inputConfig }, 'Input config');
   logger.trace({ config }, 'Resolved config');
   return config;
+}
+
+async function fetchPreset(
+  preset: string,
+  baseConfig: RenovateConfig | undefined,
+  inputConfig: AllConfig,
+  existingPresets: string[]
+): Promise<AllConfig> {
+  try {
+    return await getPreset(preset, baseConfig ?? inputConfig);
+  } catch (err) {
+    logger.debug({ preset, err }, 'Preset fetch error');
+    // istanbul ignore if
+    if (err instanceof ExternalHostError) {
+      throw err;
+    }
+    // istanbul ignore if
+    if (err.message === PLATFORM_RATE_LIMIT_EXCEEDED) {
+      throw err;
+    }
+    const error = new Error(CONFIG_VALIDATION);
+    if (err.message === PRESET_DEP_NOT_FOUND) {
+      error.validationError = `Cannot find preset's package (${preset})`;
+    } else if (err.message === PRESET_RENOVATE_CONFIG_NOT_FOUND) {
+      error.validationError = `Preset package is missing a renovate-config entry (${preset})`;
+    } else if (err.message === PRESET_NOT_FOUND) {
+      error.validationError = `Preset name not found within published preset config (${preset})`;
+    } else if (err.message === PRESET_INVALID) {
+      error.validationError = `Preset is invalid (${preset})`;
+    } else if (err.message === PRESET_PROHIBITED_SUBPRESET) {
+      error.validationError = `Sub-presets cannot be combined with a custom path (${preset})`;
+    } else if (err.message === PRESET_INVALID_JSON) {
+      error.validationError = `Preset is invalid JSON (${preset})`;
+    } else {
+      error.validationError = `Preset caused unexpected error (${preset})`;
+    }
+    // istanbul ignore if
+    if (existingPresets.length) {
+      error.validationError +=
+        '. Note: this is a *nested* preset so please contact the preset author if you are unable to fix it yourself.';
+    }
+    logger.info(
+      { validationError: error.validationError },
+      'Throwing preset error'
+    );
+    throw error;
+  }
+}
+
+function shouldResolvePreset(
+  preset: string,
+  existingPresets: string[],
+  ignorePresets: string[]
+): boolean {
+  // istanbul ignore if
+  if (existingPresets.includes(preset)) {
+    logger.debug(
+      `Already seen preset ${preset} in [${existingPresets.join(', ')}]`
+    );
+    return false;
+  }
+  if (ignorePresets.includes(preset)) {
+    // istanbul ignore next
+    logger.debug(
+      `Ignoring preset ${preset} in [${existingPresets.join(', ')}]`
+    );
+    return false;
+  }
+  return true;
 }

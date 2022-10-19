@@ -9,16 +9,27 @@ import { ensureTrailingSlash } from '../../url';
 import { rawExec } from '../common';
 import type { DockerOptions, Opt, VolumeOption, VolumesPair } from '../types';
 
-const prefetchedImages = new Set<string>();
+const prefetchedImages = new Map<string, string>();
+
+const digestRegex = regEx('Digest: (.*?)\n');
 
 export async function prefetchDockerImage(taggedImage: string): Promise<void> {
   if (prefetchedImages.has(taggedImage)) {
-    logger.debug(`Docker image is already prefetched: ${taggedImage}`);
+    logger.debug(
+      `Docker image is already prefetched: ${taggedImage}@${prefetchedImages.get(
+        taggedImage
+      )!}`
+    );
   } else {
     logger.debug(`Fetching Docker image: ${taggedImage}`);
-    prefetchedImages.add(taggedImage);
-    await rawExec(`docker pull ${taggedImage}`, { encoding: 'utf-8' });
-    logger.debug(`Finished fetching Docker image`);
+    const res = await rawExec(`docker pull ${taggedImage}`, {
+      encoding: 'utf-8',
+    });
+    const imageDigest = digestRegex.exec(res?.stdout)?.[1] ?? 'unknown';
+    logger.debug(
+      `Finished fetching Docker image ${taggedImage}@${imageDigest}`
+    );
+    prefetchedImages.set(taggedImage, imageDigest);
   }
 }
 
@@ -206,6 +217,7 @@ export async function generateDockerCommand(
   const {
     localDir,
     cacheDir,
+    containerbaseDir,
     dockerUser,
     dockerChildPrefix,
     dockerImagePrefix,
@@ -219,7 +231,19 @@ export async function generateDockerCommand(
     result.push(`--user=${dockerUser}`);
   }
 
-  result.push(...prepareVolumes([localDir, cacheDir, ...volumes]));
+  const volumeDirs: VolumeOption[] = [localDir, cacheDir];
+  if (containerbaseDir) {
+    if (cacheDir && containerbaseDir.startsWith(cacheDir)) {
+      logger.debug('containerbaseDir is inside cacheDir');
+    } else {
+      logger.debug('containerbaseDir is separate from cacheDir');
+      volumeDirs.push(containerbaseDir);
+    }
+  } else {
+    logger.debug('containerbaseDir is missing');
+  }
+  volumeDirs.push(...volumes);
+  result.push(...prepareVolumes(volumeDirs));
 
   if (envVars) {
     result.push(

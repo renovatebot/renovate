@@ -1,3 +1,5 @@
+// TODO: types (#7154)
+/* eslint-disable @typescript-eslint/restrict-template-expressions */
 import { quote } from 'shlex';
 import { GlobalConfig } from '../../../config/global';
 import { logger } from '../../../logger';
@@ -18,8 +20,9 @@ export function getComposerArguments(
 
   if (config.composerIgnorePlatformReqs) {
     if (config.composerIgnorePlatformReqs.length === 0) {
-      const major = api.getMajor(toolConstraint.constraint);
-      const minor = api.getMinor(toolConstraint.constraint);
+      // TODO: toolConstraint.constraint can be null or undefined? (#7154)
+      const major = api.getMajor(toolConstraint.constraint!);
+      const minor = api.getMinor(toolConstraint.constraint!);
       args += api.matches(`${major}.${minor}`, '^2.2')
         ? " --ignore-platform-req='ext-*' --ignore-platform-req='lib-*'"
         : ' --ignore-platform-reqs';
@@ -42,7 +45,9 @@ export function getComposerArguments(
   return args;
 }
 
-export function getPhpConstraint(constraints: Record<string, string>): string {
+export function getPhpConstraint(
+  constraints: Record<string, string>
+): string | null {
   const { php } = constraints;
 
   if (php) {
@@ -62,7 +67,7 @@ export function requireComposerDependencyInstallation(
   );
 }
 
-export function extractContraints(
+export function extractConstraints(
   composerJson: ComposerConfig,
   lockParsed: ComposerLock
 ): Record<string, string> {
@@ -70,7 +75,10 @@ export function extractContraints(
 
   // extract php
   if (composerJson.config?.platform?.php) {
-    res.php = composerJson.config.platform.php;
+    const major = api.getMajor(composerJson.config.platform.php);
+    const minor = api.getMinor(composerJson.config.platform.php) ?? 0;
+    const patch = api.getPatch(composerJson.config.platform.php) ?? 0;
+    res.php = `<=${major}.${minor}.${patch}`;
   } else if (composerJson.require?.php) {
     res.php = composerJson.require.php;
   }

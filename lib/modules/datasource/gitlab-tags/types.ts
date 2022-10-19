@@ -1,10 +1,10 @@
-export type GitlabTag = {
+export interface GitlabTag {
   name: string;
   commit?: {
     created_at?: string;
   };
-};
+}
 
-export type GitlabCommit = {
+export interface GitlabCommit {
   id: string;
-};
+}

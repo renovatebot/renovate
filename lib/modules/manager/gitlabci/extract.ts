@@ -2,31 +2,33 @@ import is from '@sindresorhus/is';
 import { load } from 'js-yaml';
 import { logger } from '../../../logger';
 import { readLocalFile } from '../../../util/fs';
-import { regEx } from '../../../util/regex';
-import { getDep } from '../dockerfile/extract';
+import { trimLeadingSlash } from '../../../util/url';
 import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
+import { isGitlabIncludeLocal } from './common';
 import type { GitlabPipeline, Image, Job, Services } from './types';
-import { replaceReferenceTags } from './utils';
+import { getGitlabDep, replaceReferenceTags } from './utils';
 
 export function extractFromImage(
-  image: Image | undefined
+  image: Image | undefined,
+  registryAliases?: Record<string, string>
 ): PackageDependency | null {
   if (is.undefined(image)) {
     return null;
   }
-  let dep: PackageDependency = null;
+  let dep: PackageDependency | null = null;
   if (is.string(image)) {
-    dep = getDep(image);
+    dep = getGitlabDep(image, registryAliases);
     dep.depType = 'image';
   } else if (is.string(image?.name)) {
-    dep = getDep(image.name);
+    dep = getGitlabDep(image.name, registryAliases);
     dep.depType = 'image-name';
   }
   return dep;
 }
 
 export function extractFromServices(
-  services: Services | undefined
+  services: Services | undefined,
+  registryAliases?: Record<string, string>
 ): PackageDependency[] {
   if (is.undefined(services)) {
     return [];
@@ -34,11 +36,11 @@ export function extractFromServices(
   const deps: PackageDependency[] = [];
   for (const service of services) {
     if (is.string(service)) {
-      const dep = getDep(service);
+      const dep = getGitlabDep(service, registryAliases);
       dep.depType = 'service-image';
       deps.push(dep);
     } else if (is.string(service?.name)) {
-      const dep = getDep(service.name);
+      const dep = getGitlabDep(service.name, registryAliases);
       dep.depType = 'service-image';
       deps.push(dep);
     }
@@ -46,7 +48,10 @@ export function extractFromServices(
   return deps;
 }
 
-export function extractFromJob(job: Job | undefined): PackageDependency[] {
+export function extractFromJob(
+  job: Job | undefined,
+  registryAliases?: Record<string, string>
+): PackageDependency[] {
   if (is.undefined(job)) {
     return [];
   }
@@ -54,16 +59,23 @@ export function extractFromJob(job: Job | undefined): PackageDependency[] {
   if (is.object(job)) {
     const { image, services } = { ...job };
     if (is.object(image) || is.string(image)) {
-      deps.push(extractFromImage(image));
+      const dep = extractFromImage(image, registryAliases);
+      if (dep) {
+        deps.push(dep);
+      }
     }
     if (is.array(services)) {
-      deps.push(...extractFromServices(services));
+      deps.push(...extractFromServices(services, registryAliases));
     }
   }
   return deps;
 }
 
-export function extractPackageFile(content: string): PackageFile | null {
+export function extractPackageFile(
+  content: string,
+  _fileName: string,
+  config: ExtractConfig
+): PackageFile | null {
   let deps: PackageDependency[] = [];
   try {
     const doc = load(replaceReferenceTags(content), {
@@ -73,15 +85,25 @@ export function extractPackageFile(content: string): PackageFile | null {
       for (const [property, value] of Object.entries(doc)) {
         switch (property) {
           case 'image':
-            deps.push(extractFromImage(value as Image));
+            {
+              const dep = extractFromImage(
+                value as Image,
+                config.registryAliases
+              );
+              if (dep) {
+                deps.push(dep);
+              }
+            }
             break;
 
           case 'services':
-            deps.push(...extractFromServices(value as Services));
+            deps.push(
+              ...extractFromServices(value as Services, config.registryAliases)
+            );
             break;
 
           default:
-            deps.push(...extractFromJob(value as Job));
+            deps.push(...extractFromJob(value as Job, config.registryAliases));
             break;
         }
       }
@@ -90,14 +112,12 @@ export function extractPackageFile(content: string): PackageFile | null {
   } catch (err) /* istanbul ignore next */ {
     logger.warn({ err }, 'Error extracting GitLab CI dependencies');
   }
-  if (!deps.length) {
-    return null;
-  }
-  return { deps };
+
+  return deps.length ? { deps } : null;
 }
 
 export async function extractAllPackageFiles(
-  _config: ExtractConfig,
+  config: ExtractConfig,
   packageFiles: string[]
 ): Promise<PackageFile[] | null> {
   const filesToExamine = [...packageFiles];
@@ -106,7 +126,7 @@ export async function extractAllPackageFiles(
 
   // extract all includes from the files
   while (filesToExamine.length > 0) {
-    const file = filesToExamine.pop();
+    const file = filesToExamine.pop()!;
 
     const content = await readLocalFile(file, 'utf8');
     if (!content) {
@@ -121,27 +141,26 @@ export async function extractAllPackageFiles(
       }) as GitlabPipeline;
     } catch (err) {
       logger.warn({ err, file }, 'Error extracting GitLab CI dependencies');
+      continue;
     }
 
     if (is.array(doc?.include)) {
-      for (const includeObj of doc.include) {
-        if (is.string(includeObj.local)) {
-          const fileObj = includeObj.local.replace(regEx(/^\//), '');
-          if (!seen.has(fileObj)) {
-            seen.add(fileObj);
-            filesToExamine.push(fileObj);
-          }
+      for (const includeObj of doc.include.filter(isGitlabIncludeLocal)) {
+        const fileObj = trimLeadingSlash(includeObj.local);
+        if (!seen.has(fileObj)) {
+          seen.add(fileObj);
+          filesToExamine.push(fileObj);
         }
       }
     } else if (is.string(doc?.include)) {
-      const fileObj = doc.include.replace(regEx(/^\//), '');
+      const fileObj = trimLeadingSlash(doc.include);
       if (!seen.has(fileObj)) {
         seen.add(fileObj);
         filesToExamine.push(fileObj);
       }
     }
 
-    const result = extractPackageFile(content);
+    const result = extractPackageFile(content, file, config);
     if (result !== null) {
       results.push({
         packageFile: file,

@@ -15,7 +15,7 @@ function findPackageInResponse(
   repoName: string,
   pkgName: string,
   types: RepologyPackageType[]
-): RepologyPackage[] | undefined {
+): RepologyPackage[] | null {
   const repoPackages = response.filter((pkg) => pkg.repo === repoName);
 
   if (repoPackages.length === 0) {
@@ -189,6 +189,10 @@ export class RepologyDatasource extends Datasource {
     packageName,
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
+    // istanbul ignore if
+    if (!registryUrl) {
+      return null;
+    }
     // Ensure lookup name contains both repository and package
     const [repoName, pkgName] = packageName.split('/', 2);
     if (!repoName || !pkgName) {

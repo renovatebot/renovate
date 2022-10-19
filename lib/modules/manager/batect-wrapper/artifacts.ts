@@ -34,7 +34,7 @@ export async function updateArtifacts({
   packageFileName,
   config,
 }: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
-  const version = config.newVersion;
+  const version = config.newVersion!;
 
   logger.debug({ version, packageFileName }, 'Updating Batect wrapper scripts');
 

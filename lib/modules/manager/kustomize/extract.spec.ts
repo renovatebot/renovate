@@ -1,4 +1,4 @@
-import { loadFixture } from '../../../../test/util';
+import { Fixtures } from '../../../../test/fixtures';
 import { DockerDatasource } from '../../datasource/docker';
 import { GitTagsDatasource } from '../../datasource/git-tags';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
@@ -11,19 +11,19 @@ import {
   parseKustomize,
 } from './extract';
 
-const kustomizeGitSSHBase = loadFixture('gitSshBase.yaml');
-const kustomizeEmpty = loadFixture('kustomizeEmpty.yaml');
-const kustomizeGitSSHSubdir = loadFixture('gitSubdir.yaml');
-const kustomizeHTTP = loadFixture('kustomizeHttp.yaml');
-const kustomizeWithLocal = loadFixture('kustomizeWithLocal.yaml');
-const nonKustomize = loadFixture('service.yaml');
-const gitImages = loadFixture('gitImages.yaml');
-const kustomizeDepsInResources = loadFixture('depsInResources.yaml');
-const kustomizeComponent = loadFixture('component.yaml');
-const newTag = loadFixture('newTag.yaml');
-const newName = loadFixture('newName.yaml');
-const digest = loadFixture('digest.yaml');
-const kustomizeHelmChart = loadFixture('kustomizeHelmChart.yaml');
+const kustomizeGitSSHBase = Fixtures.get('gitSshBase.yaml');
+const kustomizeEmpty = Fixtures.get('kustomizeEmpty.yaml');
+const kustomizeGitSSHSubdir = Fixtures.get('gitSubdir.yaml');
+const kustomizeHTTP = Fixtures.get('kustomizeHttp.yaml');
+const kustomizeWithLocal = Fixtures.get('kustomizeWithLocal.yaml');
+const nonKustomize = Fixtures.get('service.yaml');
+const gitImages = Fixtures.get('gitImages.yaml');
+const kustomizeDepsInResources = Fixtures.get('depsInResources.yaml');
+const kustomizeComponent = Fixtures.get('component.yaml');
+const newTag = Fixtures.get('newTag.yaml');
+const newName = Fixtures.get('newName.yaml');
+const digest = Fixtures.get('digest.yaml');
+const kustomizeHelmChart = Fixtures.get('kustomizeHelmChart.yaml');
 
 describe('modules/manager/kustomize/extract', () => {
   it('should successfully parse a valid kustomize file', () => {
@@ -51,7 +51,7 @@ describe('modules/manager/kustomize/extract', () => {
       - github.com/fluxcd/flux/deploy?ref=1.19.0
     `);
     expect(file).not.toBeNull();
-    expect(file.kind).toBe('Kustomization');
+    expect(file?.kind).toBe('Kustomization');
   });
 
   describe('extractBase', () => {
@@ -152,9 +152,9 @@ describe('modules/manager/kustomize/extract', () => {
   describe('extractHelmChart', () => {
     it('should return null on a null input', () => {
       const pkg = extractHelmChart({
-        name: null,
-        repo: null,
-        version: null,
+        name: '',
+        repo: '',
+        version: '',
       });
       expect(pkg).toBeNull();
     });
@@ -179,8 +179,8 @@ describe('modules/manager/kustomize/extract', () => {
   describe('image extraction', () => {
     it('should return null on a null input', () => {
       const pkg = extractImage({
-        name: null,
-        newTag: null,
+        name: '',
+        newTag: '',
       });
       expect(pkg).toBeNull();
     });
@@ -268,38 +268,38 @@ describe('modules/manager/kustomize/extract', () => {
 
     it('extracts multiple image lines', () => {
       const res = extractPackageFile(kustomizeWithLocal);
-      expect(res.deps).toMatchSnapshot();
-      expect(res.deps).toHaveLength(2);
+      expect(res?.deps).toMatchSnapshot();
+      expect(res?.deps).toHaveLength(2);
     });
 
     it('extracts ssh dependency', () => {
       const res = extractPackageFile(kustomizeGitSSHBase);
-      expect(res.deps).toMatchSnapshot();
-      expect(res.deps).toHaveLength(1);
+      expect(res?.deps).toMatchSnapshot();
+      expect(res?.deps).toHaveLength(1);
     });
 
     it('extracts ssh dependency with a subdir', () => {
       const res = extractPackageFile(kustomizeGitSSHSubdir);
-      expect(res.deps).toMatchSnapshot();
-      expect(res.deps).toHaveLength(1);
+      expect(res?.deps).toMatchSnapshot();
+      expect(res?.deps).toHaveLength(1);
     });
 
     it('extracts http dependency', () => {
       const res = extractPackageFile(kustomizeHTTP);
-      expect(res.deps).toMatchSnapshot();
-      expect(res.deps).toHaveLength(2);
-      expect(res.deps[0].currentValue).toBe('v0.0.1');
-      expect(res.deps[1].currentValue).toBe('1.19.0');
-      expect(res.deps[1].depName).toBe('fluxcd/flux');
+      expect(res?.deps).toMatchSnapshot();
+      expect(res?.deps).toHaveLength(2);
+      expect(res?.deps[0].currentValue).toBe('v0.0.1');
+      expect(res?.deps[1].currentValue).toBe('1.19.0');
+      expect(res?.deps[1].depName).toBe('fluxcd/flux');
     });
 
     it('should extract out image versions', () => {
       const res = extractPackageFile(gitImages);
-      expect(res.deps).toMatchSnapshot();
-      expect(res.deps).toHaveLength(6);
-      expect(res.deps[0].currentValue).toBe('v0.1.0');
-      expect(res.deps[1].currentValue).toBe('v0.0.1');
-      expect(res.deps[5].skipReason).toBe('invalid-value');
+      expect(res?.deps).toMatchSnapshot();
+      expect(res?.deps).toHaveLength(6);
+      expect(res?.deps[0].currentValue).toBe('v0.1.0');
+      expect(res?.deps[1].currentValue).toBe('v0.0.1');
+      expect(res?.deps[5].skipReason).toBe('invalid-value');
     });
 
     it('ignores non-Kubernetes empty files', () => {
@@ -313,33 +313,33 @@ describe('modules/manager/kustomize/extract', () => {
     it('should extract bases resources and components from their respective blocks', () => {
       const res = extractPackageFile(kustomizeDepsInResources);
       expect(res).not.toBeNull();
-      expect(res.deps).toMatchSnapshot();
-      expect(res.deps).toHaveLength(3);
-      expect(res.deps[0].currentValue).toBe('v0.0.1');
-      expect(res.deps[1].currentValue).toBe('1.19.0');
-      expect(res.deps[2].currentValue).toBe('1.18.0');
-      expect(res.deps[0].depName).toBe('moredhel/remote-kustomize');
-      expect(res.deps[1].depName).toBe('fluxcd/flux');
-      expect(res.deps[2].depName).toBe('fluxcd/flux');
-      expect(res.deps[0].depType).toBe('Kustomization');
-      expect(res.deps[1].depType).toBe('Kustomization');
-      expect(res.deps[2].depType).toBe('Kustomization');
+      expect(res?.deps).toMatchSnapshot();
+      expect(res?.deps).toHaveLength(3);
+      expect(res?.deps[0].currentValue).toBe('v0.0.1');
+      expect(res?.deps[1].currentValue).toBe('1.19.0');
+      expect(res?.deps[2].currentValue).toBe('1.18.0');
+      expect(res?.deps[0].depName).toBe('moredhel/remote-kustomize');
+      expect(res?.deps[1].depName).toBe('fluxcd/flux');
+      expect(res?.deps[2].depName).toBe('fluxcd/flux');
+      expect(res?.deps[0].depType).toBe('Kustomization');
+      expect(res?.deps[1].depType).toBe('Kustomization');
+      expect(res?.deps[2].depType).toBe('Kustomization');
     });
 
     it('should extract dependencies when kind is Component', () => {
       const res = extractPackageFile(kustomizeComponent);
       expect(res).not.toBeNull();
-      expect(res.deps).toMatchSnapshot();
-      expect(res.deps).toHaveLength(3);
-      expect(res.deps[0].currentValue).toBe('1.19.0');
-      expect(res.deps[1].currentValue).toBe('1.18.0');
-      expect(res.deps[2].currentValue).toBe('v0.1.0');
-      expect(res.deps[0].depName).toBe('fluxcd/flux');
-      expect(res.deps[1].depName).toBe('fluxcd/flux');
-      expect(res.deps[2].depName).toBe('node');
-      expect(res.deps[0].depType).toBe('Component');
-      expect(res.deps[1].depType).toBe('Component');
-      expect(res.deps[2].depType).toBe('Component');
+      expect(res?.deps).toMatchSnapshot();
+      expect(res?.deps).toHaveLength(3);
+      expect(res?.deps[0].currentValue).toBe('1.19.0');
+      expect(res?.deps[1].currentValue).toBe('1.18.0');
+      expect(res?.deps[2].currentValue).toBe('v0.1.0');
+      expect(res?.deps[0].depName).toBe('fluxcd/flux');
+      expect(res?.deps[1].depName).toBe('fluxcd/flux');
+      expect(res?.deps[2].depName).toBe('node');
+      expect(res?.deps[0].depType).toBe('Component');
+      expect(res?.deps[1].depType).toBe('Component');
+      expect(res?.deps[2].depType).toBe('Component');
     });
 
     const postgresDigest =

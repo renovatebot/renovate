@@ -92,11 +92,6 @@
   "tagFormat": "${version}",
   "branches": [
     {
-      "name": "v25",
-      "range": "25.x",
-      "channel": "version25"
-    },
-    {
       "name": "main"
     }
   ]

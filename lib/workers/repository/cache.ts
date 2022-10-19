@@ -10,6 +10,7 @@ import type {
 import {
   getBranchCommit,
   getBranchParentSha,
+  isBranchBehindBase,
   isBranchModified,
 } from '../../util/git';
 import type { BranchConfig, BranchUpgradeConfig } from '../types';
@@ -28,10 +29,9 @@ function generateBranchUpgradeCache(
     newDigest,
     sourceUrl,
   } = upgrade;
-  return {
+  const result: BranchUpgradeCache = {
     datasource,
     depName,
-    packageName,
     fixedVersion,
     currentVersion,
     newVersion,
@@ -39,40 +39,48 @@ function generateBranchUpgradeCache(
     newDigest,
     sourceUrl,
   };
+  if (packageName) {
+    result.packageName = packageName;
+  }
+  return result;
 }
 
-async function generateBranchCache(branch: BranchConfig): Promise<BranchCache> {
-  const { branchName } = branch;
+async function generateBranchCache(
+  branch: BranchConfig
+): Promise<BranchCache | null> {
+  const { baseBranch, branchName } = branch;
   try {
-    const sha = getBranchCommit(branchName) || null;
+    const sha = getBranchCommit(branchName) ?? null;
+    const baseBranchSha = getBranchCommit(baseBranch);
     let prNo = null;
     let parentSha = null;
+    let isModified = false;
+    let isBehindBase = false;
     if (sha) {
       parentSha = await getBranchParentSha(branchName);
       const branchPr = await platform.getBranchPr(branchName);
       if (branchPr) {
         prNo = branchPr.number;
       }
+      isModified = await isBranchModified(branchName);
+      isBehindBase = await isBranchBehindBase(branchName, baseBranch);
     }
     const automerge = !!branch.automerge;
-    let isModified = false;
-    if (sha) {
-      try {
-        isModified = await isBranchModified(branchName);
-      } catch (err) /* istanbul ignore next */ {
-        // Do nothing
-      }
-    }
     const upgrades: BranchUpgradeCache[] = branch.upgrades
       ? branch.upgrades.map(generateBranchUpgradeCache)
       : [];
+    const branchFingerprint = branch.branchFingerprint;
     return {
+      automerge,
+      baseBranchSha,
+      baseBranch,
+      branchFingerprint,
       branchName,
-      sha,
+      isBehindBase,
+      isModified,
       parentSha,
       prNo,
-      automerge,
-      isModified,
+      sha,
       upgrades,
     };
   } catch (error) {
@@ -89,9 +97,12 @@ async function generateBranchCache(branch: BranchConfig): Promise<BranchCache> {
 }
 
 export async function setBranchCache(branches: BranchConfig[]): Promise<void> {
-  const branchCache: BranchCache[] = [];
+  const branchCaches: BranchCache[] = [];
   for (const branch of branches) {
-    branchCache.push(await generateBranchCache(branch));
+    const branchCache = await generateBranchCache(branch);
+    if (branchCache) {
+      branchCaches.push(branchCache);
+    }
   }
-  getCache().branches = branchCache.filter(Boolean);
+  getCache().branches = branchCaches;
 }

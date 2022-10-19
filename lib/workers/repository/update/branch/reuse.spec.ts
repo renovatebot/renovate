@@ -18,7 +18,9 @@ describe('workers/repository/update/branch/reuse', () => {
 
     beforeEach(() => {
       config = {
+        manager: 'some-manager',
         branchName: 'renovate/some-branch',
+        baseBranch: 'base',
         rebaseLabel: 'rebase',
         rebaseWhen: 'behind-base-branch',
         upgrades: [],
@@ -34,7 +36,7 @@ describe('workers/repository/update/branch/reuse', () => {
 
     it('returns true if no PR', async () => {
       git.branchExists.mockReturnValueOnce(true);
-      platform.getBranchPr.mockReturnValue(null);
+      platform.getBranchPr.mockResolvedValue(null);
       const res = await shouldReuseExistingBranch(config);
       expect(res.reuseExistingBranch).toBeTrue();
     });
@@ -50,16 +52,19 @@ describe('workers/repository/update/branch/reuse', () => {
     it('returns false if does not need rebasing but has upgrades that need lockfile maintenance along with upgrades that do not', async () => {
       config.upgrades = [
         {
+          manager: 'some-manager',
           packageFile: 'package.json',
           rangeStrategy: 'replace',
           branchName: 'current',
         },
         {
+          manager: 'some-manager',
           packageFile: 'package.json',
           rangeStrategy: 'update-lockfile',
           branchName: 'current',
         },
         {
+          manager: 'some-manager',
           packageFile: 'package.json',
           rangeStrategy: 'in-range-only',
           branchName: 'current',
@@ -75,11 +80,13 @@ describe('workers/repository/update/branch/reuse', () => {
     it('returns true if does not need rebasing and lockfile update is on different packages', async () => {
       config.upgrades = [
         {
+          manager: 'some-manager',
           packageFile: 'package.json',
           rangeStrategy: 'replace',
           branchName: 'current',
         },
         {
+          manager: 'some-manager',
           packageFile: 'subpackage/package.json',
           rangeStrategy: 'update-lockfile',
           branchName: 'current',
@@ -126,7 +133,10 @@ describe('workers/repository/update/branch/reuse', () => {
       platform.getBranchPr.mockResolvedValueOnce({
         ...pr,
         title: 'Update foo to v4',
-        body: 'blah\nblah\n- [x] <!-- rebase-check -->foo\n',
+        bodyStruct: {
+          hash: '123',
+          rebaseRequested: true,
+        },
       });
       const res = await shouldReuseExistingBranch(config);
       expect(res.reuseExistingBranch).toBeFalse();
@@ -164,7 +174,7 @@ describe('workers/repository/update/branch/reuse', () => {
       config.automerge = true;
       config.automergeType = 'branch';
       git.branchExists.mockReturnValueOnce(true);
-      git.isBranchStale.mockResolvedValueOnce(true);
+      git.isBranchBehindBase.mockResolvedValueOnce(true);
       const res = await shouldReuseExistingBranch(config);
       expect(res.reuseExistingBranch).toBeFalse();
     });
@@ -172,7 +182,7 @@ describe('workers/repository/update/branch/reuse', () => {
     it('returns true if rebaseWhen=behind-base-branch but cannot rebase', async () => {
       config.rebaseWhen = 'behind-base-branch';
       git.branchExists.mockReturnValueOnce(true);
-      git.isBranchStale.mockResolvedValueOnce(true);
+      git.isBranchBehindBase.mockResolvedValueOnce(true);
       git.isBranchConflicted.mockResolvedValueOnce(true);
       platform.getBranchPr.mockResolvedValueOnce(pr);
       git.isBranchModified.mockResolvedValueOnce(true);
@@ -185,7 +195,7 @@ describe('workers/repository/update/branch/reuse', () => {
       config.automerge = true;
       config.automergeType = 'pr';
       git.branchExists.mockReturnValueOnce(true);
-      git.isBranchStale.mockResolvedValueOnce(true);
+      git.isBranchBehindBase.mockResolvedValueOnce(true);
       const res = await shouldReuseExistingBranch(config);
       expect(res.reuseExistingBranch).toBeFalse();
     });
@@ -194,7 +204,7 @@ describe('workers/repository/update/branch/reuse', () => {
       config.rebaseWhen = 'auto';
       platform.getRepoForceRebase.mockResolvedValueOnce(true);
       git.branchExists.mockReturnValueOnce(true);
-      git.isBranchStale.mockResolvedValueOnce(true);
+      git.isBranchBehindBase.mockResolvedValueOnce(true);
       const res = await shouldReuseExistingBranch(config);
       expect(res.reuseExistingBranch).toBeFalse();
     });
@@ -205,7 +215,7 @@ describe('workers/repository/update/branch/reuse', () => {
       git.branchExists.mockReturnValueOnce(true);
       const res = await shouldReuseExistingBranch(config);
       expect(res.reuseExistingBranch).toBeTrue();
-      expect(git.isBranchStale).not.toHaveBeenCalled();
+      expect(git.isBranchBehindBase).not.toHaveBeenCalled();
       expect(git.isBranchModified).not.toHaveBeenCalled();
     });
 
@@ -213,7 +223,7 @@ describe('workers/repository/update/branch/reuse', () => {
       config.rebaseWhen = 'conflicted';
       config.automerge = true;
       git.branchExists.mockReturnValueOnce(true);
-      git.isBranchStale.mockResolvedValueOnce(true);
+      git.isBranchBehindBase.mockResolvedValueOnce(true);
       const res = await shouldReuseExistingBranch(config);
       expect(res.reuseExistingBranch).toBeTrue();
     });

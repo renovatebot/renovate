@@ -1,671 +1,671 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`modules/datasource/ruby-version/index getReleases parses real data 1`] = `
-Object {
+{
   "homepage": "https://www.ruby-lang.org",
   "registryUrl": "https://www.ruby-lang.org/",
-  "releases": Array [
-    Object {
+  "releases": [
+    {
       "changelogUrl": "https://www.ruby-lang.org/en/news/2002/03/01/167-is-released/",
       "releaseTimestamp": "2002-03-01T00:00:00.000Z",
       "version": "1.6.7",
     },
-    Object {
+    {
       "changelogUrl": "https://www.ruby-lang.org/en/news/2003/08/04/ruby-180-released/",
       "releaseTimestamp": "2003-08-04T00:00:00.000Z",
       "version": "1.8.0",
     },
-    Object {
+    {
       "changelogUrl": "https://www.ruby-lang.org/en/news/2004/07/21/ruby-182-preview1-released/",
       "releaseTimestamp": "2004-07-21T00:00:00.000Z",
       "version": "1.8.2-preview1",
     },
-    Object {
+    {
       "changelogUrl": "https://www.ruby-lang.org/en/news/2004/07/30/ruby-182-preview2-released/",
       "releaseTimestamp": "2004-07-30T00:00:00.000Z",
       "version": "1.8.2-preview2",
     },
-    Object {
+    {
       "changelogUrl": "https://www.ruby-lang.org/en/news/2004/11/08/182-preview3-released/",
       "releaseTimestamp": "2004-11-08T00:00:00.000Z",
       "version": "1.8.2-preview3",
     },
-    Object {
+    {
       "changelogUrl": "https://www.ruby-lang.org/en/news/2004/12/22/182-preview4-released/",
       "releaseTimestamp": "2004-12-22T00:00:00.000Z",
       "version": "1.8.2-preview4",
     },
-    Object {
+    {
       "changelogUrl": "https://www.ruby-lang.org/en/news/2004/12/26/ruby-182-released/",
       "releaseTimestamp": "2004-12-26T00:00:00.000Z",
       "version": "1.8.2",
     },
-    Object {
+    {
       "changelogUrl": "https://www.ruby-lang.org/en/news/2005/09/21/ruby-183-released/",
       "releaseTimestamp": "2005-09-21T00:00:00.000Z",
       "version": "1.8.3",
     },
-    Object {
+    {
       "changelogUrl": "https://www.ruby-lang.org/en/news/2005/12/14/ruby-184-preview-2-released/",
       "releaseTimestamp": "2005-12-14T00:00:00.000Z",
       "version": "1.8.4-preview2",
     },
-    Object {
+    {
       "changelogUrl": "https://www.ruby-lang.org/en/news/2005/12/24/ruby-184-released/",
       "releaseTimestamp": "2005-12-24T00:00:00.000Z",
       "version": "1.8.4",
     },
-    Object {
+    {
       "changelogUrl": "https://www.ruby-lang.org/en/news/2006/08/29/ruby-1-8-5-released/",
       "releaseTimestamp": "2006-08-29T00:00:00.000Z",
       "version": "1.8.5",
     },
-    Object {
+    {
       "changelogUrl": "https://www.ruby-lang.org/en/news/2008/08/11/ruby-1-8-7-p72-and-1-8-6-p287-released/",
       "releaseTimestamp": "2008-08-11T00:00:00.000Z",
       "version": "1.8.6-p287",
     },
-    Object {
+    {
       "changelogUrl": "https://www.ruby-lang.org/en/news/2009/04/18/ruby-1-8-7-p160-and-1-8-6-p368-released/",
       "releaseTimestamp": "2009-04-18T00:00:00.000Z",
       "version": "1.8.6-p368",
     },
-    Object {
+    {
       "changelogUrl": "https://www.ruby-lang.org/en/news/2007/03/12/ruby-1-8-6-released/",
       "releaseTimestamp": "2007-03-12T00:00:00.000Z",
       "version": "1.8.6",
     },
-    Object {
+    {
       "changelogUrl": "https://www.ruby-lang.org/en/news/2008/08/11/ruby-1-8-7-p72-and-1-8-6-p287-released/",
       "releaseTimestamp": "2008-08-11T00:00:00.000Z",
       "version": "1.8.7-p72",
     },
-    Object {
+    {
       "changelogUrl": "https://www.ruby-lang.org/en/news/2009/04/18/ruby-1-8-7-p160-and-1-8-6-p368-released/",
       "releaseTimestamp": "2009-04-18T00:00:00.000Z",
       "version": "1.8.7-p160",
     },
-    Object {
+    {
       "changelogUrl": "https://www.ruby-lang.org/en/news/2009/12/25/ruby-1-8-7-p248-released/",
       "releaseTimestamp": "2009-12-25T00:00:00.000Z",
       "version": "1.8.7-p248",
     },
-    Object {
+    {
       "changelogUrl": "https://www.ruby-lang.org/en/news/2010/06/23/ruby-1-8-7-p299-released/",
       "releaseTimestamp": "2010-06-23T00:00:00.000Z",
       "version": "1.8.7-p299",
     },
-    Object {
+    {
       "changelogUrl": "https://www.ruby-lang.org/en/news/2010/08/16/ruby-1-8-7-p302-is-released/",
       "releaseTimestamp": "2010-08-16T00:00:00.000Z",
       "version": "1.8.7-p302",
     },
-    Object {
+    {
       "changelogUrl": "https://www.ruby-lang.org/en/news/2010/12/25/ruby-1-8-7-p330-released/",
       "releaseTimestamp": "2010-12-25T00:00:00.000Z",
       "version": "1.8.7-p330",
     },
-    Object {
+    {
       "changelogUrl": "https://www.ruby-lang.org/en/news/2011/07/02/ruby-1-8-7-p352-released/",
       "releaseTimestamp": "2011-07-02T00:00:00.000Z",
       "version": "1.8.7-p352",
     },
-    Object {
+    {
       "changelogUrl": "https://www.ruby-lang.org/en/news/2012/06/29/ruby-1-8-7-p370-released/",
       "releaseTimestamp": "2012-06-29T00:00:00.000Z",
       "version": "1.8.7-p370",
     },
-    Object {
+    {
       "changelogUrl": "https://www.ruby-lang.org/en/news/2013/06/27/ruby-1-8-7-p374-is-released/",
       "releaseTimestamp": "2013-06-27T00:00:00.000Z",
       "version": "1.8.7-p374",
     },
-    Object {
+    {
       "changelogUrl": "https://www.ruby-lang.org/en/news/2008/05/31/ruby-1-8-7-has-been-released/",
       "releaseTimestamp": "2008-05-31T00:00:00.000Z",
       "version": "1.8.7",
     },
-    Object {
+    {
       "changelogUrl": "https://www.ruby-lang.org/en/news/2007/12/25/ruby-1-9-0-released/",
       "releaseTimestamp": "2007-12-25T00:00:00.000Z",
       "version": "1.9.0",
     },
-    Object {
+    {
       "changelogUrl": "https://www.ruby-lang.org/en/news/2009/05/12/ruby-1-9-1-p129-released/",
       "releaseTimestamp": "2009-05-12T00:00:00.000Z",
       "version": "1.9.1-p129",
     },
-    Object {
+    {
       "changelogUrl": "https://www.ruby-lang.org/en/news/2009/07/20/ruby-1-9-1-p243-released/",
       "releaseTimestamp": "2009-07-20T00:00:00.000Z",
       "version": "1.9.1-p243",
     },
-    Object {
+    {
       "changelogUrl": "https://www.ruby-lang.org/en/news/2009/12/07/ruby-1-9-1-p376-is-released/",
       "releaseTimestamp": "2009-12-07T00:00:00.000Z",
       "version": "1.9.1-p376",
     },
-    Object {
+    {
       "changelogUrl": "https://www.ruby-lang.org/en/news/2010/07/02/ruby-1-9-1-p429-is-released/",
       "releaseTimestamp": "2010-07-02T00:00:00.000Z",
       "version": "1.9.1-p429",
     },
-    Object {
+    {
       "changelogUrl": "https://www.ruby-lang.org/en/news/2010/08/16/ruby-1-9-1-p430-is-released/",
       "releaseTimestamp": "2010-08-16T00:00:00.000Z",
       "version": "1.9.1-p430",
     },
-    Object {
+    {
       "changelogUrl": "https://www.ruby-lang.org/en/news/2008/10/28/ruby-1-9-1-preview-1-released/",
       "releaseTimestamp": "2008-10-28T00:00:00.000Z",
       "version": "1.9.1-preview1",
     },
-    Object {
+    {
       "changelogUrl": "https://www.ruby-lang.org/en/news/2009/01/30/ruby-1-9-1-released/",
       "releaseTimestamp": "2009-01-30T00:00:00.000Z",
       "version": "1.9.1",
     },
-    Object {
+    {
       "changelogUrl": "https://www.ruby-lang.org/en/news/2010/12/25/ruby-1-9-2-p136-is-released/",
       "releaseTimestamp": "2010-12-25T00:00:00.000Z",
       "version": "1.9.2-p136",
     },
-    Object {
+    {
       "changelogUrl": "https://www.ruby-lang.org/en/news/2011/07/15/ruby-1-9-2-p290-is-released/",
       "releaseTimestamp": "2011-07-15T00:00:00.000Z",
       "version": "1.9.2-p290",
     },
-    Object {
+    {
       "changelogUrl": "https://www.ruby-lang.org/en/news/2012/04/21/ruby-1-9-2-p320-is-released/",
       "releaseTimestamp": "2012-04-21T00:00:00.000Z",
       "version": "1.9.2-p320",
     },
-    Object {
+    {
       "changelogUrl": "https://www.ruby-lang.org/en/news/2014/08/19/ruby-1-9-2-p330-released/",
       "releaseTimestamp": "2014-08-19T00:00:00.000Z",
       "version": "1.9.2-p330",
     },
-    Object {
+    {
       "changelogUrl": "https://www.ruby-lang.org/en/news/2009/07/20/ruby-1-9-2-preview-1-released/",
       "releaseTimestamp": "2009-07-20T00:00:00.000Z",
       "version": "1.9.2-preview1",
     },
-    Object {
+    {
       "changelogUrl": "https://www.ruby-lang.org/en/news/2010/07/02/ruby-1-9-2-rc1-is-released/",
       "releaseTimestamp": "2010-07-02T00:00:00.000Z",
       "version": "1.9.2-rc1",
     },
-    Object {
+    {
       "changelogUrl": "https://www.ruby-lang.org/en/news/2010/07/11/ruby-1-9-2-rc2-is-released/",
       "releaseTimestamp": "2010-07-11T00:00:00.000Z",
       "version": "1.9.2-rc2",
     },
-    Object {
+    {
       "changelogUrl": "https://www.ruby-lang.org/en/news/2010/08/18/ruby-1-9-2-released/",
       "releaseTimestamp": "2010-08-18T00:00:00.000Z",
       "version": "1.9.2",
     },
-    Object {
+    {
       "changelogUrl": "https://www.ruby-lang.org/en/news/2012/02/16/ruby-1-9-3-p125-is-released/",
       "releaseTimestamp": "2012-02-16T00:00:00.000Z",
       "version": "1.9.3-p125",
     },
-    Object {
+    {
       "changelogUrl": "https://www.ruby-lang.org/en/news/2012/04/20/ruby-1-9-3-p194-is-released/",
       "releaseTimestamp": "2012-04-20T00:00:00.000Z",
       "version": "1.9.3-p194",
     },
-    Object {
+    {
       "changelogUrl": "https://www.ruby-lang.org/en/news/2012/10/12/ruby-1-9-3-p286-is-released/",
       "releaseTimestamp": "2012-10-12T00:00:00.000Z",
       "version": "1.9.3-p286",
     },
-    Object {
+    {
       "changelogUrl": "https://www.ruby-lang.org/en/news/2012/11/09/ruby-1-9-3-p327-is-released/",
       "releaseTimestamp": "2012-11-09T00:00:00.000Z",
       "version": "1.9.3-p327",
     },
-    Object {
+    {
       "changelogUrl": "https://www.ruby-lang.org/en/news/2012/12/25/ruby-1-9-3-p362-is-released/",
       "releaseTimestamp": "2012-12-25T00:00:00.000Z",
       "version": "1.9.3-p362",
     },
-    Object {
+    {
       "changelogUrl": "https://www.ruby-lang.org/en/news/2013/01/17/ruby-1-9-3-p374-is-released/",
       "releaseTimestamp": "2013-01-17T00:00:00.000Z",
       "version": "1.9.3-p374",
     },
-    Object {
+    {
       "changelogUrl": "https://www.ruby-lang.org/en/news/2013/02/06/ruby-1-9-3-p385-is-released/",
       "releaseTimestamp": "2013-02-06T00:00:00.000Z",
       "version": "1.9.3-p385",
     },
-    Object {
+    {
       "changelogUrl": "https://www.ruby-lang.org/en/news/2013/02/22/ruby-1-9-3-p392-is-released/",
       "releaseTimestamp": "2013-02-22T00:00:00.000Z",
       "version": "1.9.3-p392",
     },
-    Object {
+    {
       "changelogUrl": "https://www.ruby-lang.org/en/news/2013/05/14/ruby-1-9-3-p429-is-released/",
       "releaseTimestamp": "2013-05-14T00:00:00.000Z",
       "version": "1.9.3-p429",
     },
-    Object {
+    {
       "changelogUrl": "https://www.ruby-lang.org/en/news/2013/06/27/ruby-1-9-3-p448-is-released/",
       "releaseTimestamp": "2013-06-27T00:00:00.000Z",
       "version": "1.9.3-p448",
     },
-    Object {
+    {
       "changelogUrl": "https://www.ruby-lang.org/en/news/2013/11/22/ruby-1-9-3-p484-is-released/",
       "releaseTimestamp": "2013-11-22T00:00:00.000Z",
       "version": "1.9.3-p484",
     },
-    Object {
+    {
       "changelogUrl": "https://www.ruby-lang.org/en/news/2014/02/24/ruby-1-9-3-p545-is-released/",
       "releaseTimestamp": "2014-02-24T00:00:00.000Z",
       "version": "1.9.3-p545",
     },
-    Object {
+    {
       "changelogUrl": "https://www.ruby-lang.org/en/news/2014/05/16/ruby-1-9-3-p547-released/",
       "releaseTimestamp": "2014-05-16T00:00:00.000Z",
       "version": "1.9.3-p547",
     },
-    Object {
+    {
       "changelogUrl": "https://www.ruby-lang.org/en/news/2014/10/27/ruby-1-9-3-p550-is-released/",
       "releaseTimestamp": "2014-10-27T00:00:00.000Z",
       "version": "1.9.3-p550",
     },
-    Object {
+    {
       "changelogUrl": "https://www.ruby-lang.org/en/news/2014/11/13/ruby-1-9-3-p551-is-released/",
       "releaseTimestamp": "2014-11-13T00:00:00.000Z",
       "version": "1.9.3-p551",
     },
-    Object {
+    {
       "changelogUrl": "https://www.ruby-lang.org/en/news/2011/08/01/ruby-1-9-3-preview1-has-been-released/",
       "releaseTimestamp": "2011-08-01T00:00:00.000Z",
       "version": "1.9.3-preview1",
     },
-    Object {
+    {
       "changelogUrl": "https://www.ruby-lang.org/en/news/2011/09/24/ruby-1-9-3-rc1-has-been-released/",
       "releaseTimestamp": "2011-09-24T00:00:00.000Z",
       "version": "1.9.3-rc1",
     },
-    Object {
+    {
       "changelogUrl": "https://www.ruby-lang.org/en/news/2011/10/31/ruby-1-9-3-p0-is-released/",
       "releaseTimestamp": "2011-10-31T00:00:00.000Z",
       "version": "1.9.3",
     },
-    Object {
+    {
       "changelogUrl": "https://www.ruby-lang.org/en/news/2013/05/14/ruby-2-0-0-p195-is-released/",
       "releaseTimestamp": "2013-05-14T00:00:00.000Z",
       "version": "2.0.0-p195",
     },
-    Object {
+    {
       "changelogUrl": "https://www.ruby-lang.org/en/news/2013/06/27/ruby-2-0-0-p247-is-released/",
       "releaseTimestamp": "2013-06-27T00:00:00.000Z",
       "version": "2.0.0-p247",
     },
-    Object {
+    {
       "changelogUrl": "https://www.ruby-lang.org/en/news/2013/11/22/ruby-2-0-0-p353-is-released/",
       "releaseTimestamp": "2013-11-22T00:00:00.000Z",
       "version": "2.0.0-p353",
     },
-    Object {
+    {
       "changelogUrl": "https://www.ruby-lang.org/en/news/2014/02/24/ruby-2-0-0-p451-is-released/",
       "releaseTimestamp": "2014-02-24T00:00:00.000Z",
       "version": "2.0.0-p451",
     },
-    Object {
+    {
       "changelogUrl": "https://www.ruby-lang.org/en/news/2014/05/09/ruby-2-0-0-p481-is-released/",
       "releaseTimestamp": "2014-05-09T00:00:00.000Z",
       "version": "2.0.0-p481",
     },
-    Object {
+    {
       "changelogUrl": "https://www.ruby-lang.org/en/news/2014/09/19/ruby-2-0-0-p576-is-released/",
       "releaseTimestamp": "2014-09-19T00:00:00.000Z",
       "version": "2.0.0-p576",
     },
-    Object {
+    {
       "changelogUrl": "https://www.ruby-lang.org/en/news/2014/10/27/ruby-2-0-0-p594-is-released/",
       "releaseTimestamp": "2014-10-27T00:00:00.000Z",
       "version": "2.0.0-p594",
     },
-    Object {
+    {
       "changelogUrl": "https://www.ruby-lang.org/en/news/2014/11/13/ruby-2-0-0-p598-is-released/",
       "releaseTimestamp": "2014-11-13T00:00:00.000Z",
       "version": "2.0.0-p598",
     },
-    Object {
+    {
       "changelogUrl": "https://www.ruby-lang.org/en/news/2015/02/25/ruby-2-0-0-p643-is-released/",
       "releaseTimestamp": "2015-02-25T00:00:00.000Z",
       "version": "2.0.0-p643",
     },
-    Object {
+    {
       "changelogUrl": "https://www.ruby-lang.org/en/news/2015/04/13/ruby-2-0-0-p645-released/",
       "releaseTimestamp": "2015-04-13T00:00:00.000Z",
       "version": "2.0.0-p645",
     },
-    Object {
+    {
       "changelogUrl": "https://www.ruby-lang.org/en/news/2015/08/18/ruby-2-0-0-p647-released/",
       "releaseTimestamp": "2015-08-18T00:00:00.000Z",
       "version": "2.0.0-p647",
     },
-    Object {
+    {
       "changelogUrl": "https://www.ruby-lang.org/en/news/2015/12/16/ruby-2-0-0-p648-released/",
       "releaseTimestamp": "2015-12-16T00:00:00.000Z",
       "version": "2.0.0-p648",
     },
-    Object {
+    {
       "changelogUrl": "https://www.ruby-lang.org/en/news/2013/02/08/ruby-2-0-0-rc2-is-released/",
       "releaseTimestamp": "2013-02-08T00:00:00.000Z",
       "version": "2.0.0-rc2",
     },
-    Object {
+    {
       "changelogUrl": "https://www.ruby-lang.org/en/news/2013/02/24/ruby-2-0-0-p0-is-released/",
       "releaseTimestamp": "2013-02-24T00:00:00.000Z",
       "version": "2.0.0",
     },
-    Object {
+    {
       "changelogUrl": "https://www.ruby-lang.org/en/news/2013/09/23/ruby-2-1-0-preview1-is-released/",
       "releaseTimestamp": "2013-09-23T00:00:00.000Z",
       "version": "2.1.0-preview1",
     },
-    Object {
+    {
       "changelogUrl": "https://www.ruby-lang.org/en/news/2013/11/22/ruby-2-1-0-preview2-is-released/",
       "releaseTimestamp": "2013-11-22T00:00:00.000Z",
       "version": "2.1.0-preview2",
     },
-    Object {
+    {
       "changelogUrl": "https://www.ruby-lang.org/en/news/2013/12/20/ruby-2-1-0-rc1-is-released/",
       "releaseTimestamp": "2013-12-20T00:00:00.000Z",
       "version": "2.1.0-rc1",
     },
-    Object {
+    {
       "changelogUrl": "https://www.ruby-lang.org/en/news/2013/12/25/ruby-2-1-0-is-released/",
       "releaseTimestamp": "2013-12-25T00:00:00.000Z",
       "version": "2.1.0",
     },
-    Object {
+    {
       "changelogUrl": "https://www.ruby-lang.org/en/news/2014/02/24/ruby-2-1-1-is-released/",
       "releaseTimestamp": "2014-02-24T00:00:00.000Z",
       "version": "2.1.1",
     },
-    Object {
+    {
       "changelogUrl": "https://www.ruby-lang.org/en/news/2014/05/09/ruby-2-1-2-is-released/",
       "releaseTimestamp": "2014-05-09T00:00:00.000Z",
       "version": "2.1.2",
     },
-    Object {
+    {
       "changelogUrl": "https://www.ruby-lang.org/en/news/2014/09/19/ruby-2-1-3-is-released/",
       "releaseTimestamp": "2014-09-19T00:00:00.000Z",
       "version": "2.1.3",
     },
-    Object {
+    {
       "changelogUrl": "https://www.ruby-lang.org/en/news/2014/10/27/ruby-2-1-4-released/",
       "releaseTimestamp": "2014-10-27T00:00:00.000Z",
       "version": "2.1.4",
     },
-    Object {
+    {
       "changelogUrl": "https://www.ruby-lang.org/en/news/2014/11/13/ruby-2-1-5-is-released/",
       "releaseTimestamp": "2014-11-13T00:00:00.000Z",
       "version": "2.1.5",
     },
-    Object {
+    {
       "changelogUrl": "https://www.ruby-lang.org/en/news/2015/04/13/ruby-2-1-6-released/",
       "releaseTimestamp": "2015-04-13T00:00:00.000Z",
       "version": "2.1.6",
     },
-    Object {
+    {
       "changelogUrl": "https://www.ruby-lang.org/en/news/2015/08/18/ruby-2-1-7-released/",
       "releaseTimestamp": "2015-08-18T00:00:00.000Z",
       "version": "2.1.7",
     },
-    Object {
+    {
       "changelogUrl": "https://www.ruby-lang.org/en/news/2015/12/16/ruby-2-1-8-released/",
       "releaseTimestamp": "2015-12-16T00:00:00.000Z",
       "version": "2.1.8",
     },
-    Object {
+    {
       "changelogUrl": "https://www.ruby-lang.org/en/news/2016/03/30/ruby-2-1-9-released/",
       "releaseTimestamp": "2016-03-30T00:00:00.000Z",
       "version": "2.1.9",
     },
-    Object {
+    {
       "changelogUrl": "https://www.ruby-lang.org/en/news/2016/04/01/ruby-2-1-10-released/",
       "releaseTimestamp": "2016-04-01T00:00:00.000Z",
       "version": "2.1.10",
     },
-    Object {
+    {
       "changelogUrl": "https://www.ruby-lang.org/en/news/2014/09/18/ruby-2-2-0-preview1-released/",
       "releaseTimestamp": "2014-09-18T00:00:00.000Z",
       "version": "2.2.0-preview1",
     },
-    Object {
+    {
       "changelogUrl": "https://www.ruby-lang.org/en/news/2014/11/28/ruby-2-2-0-preview2-released/",
       "releaseTimestamp": "2014-11-28T00:00:00.000Z",
       "version": "2.2.0-preview2",
     },
-    Object {
+    {
       "changelogUrl": "https://www.ruby-lang.org/en/news/2014/12/18/ruby-2-2-0-rc1-released/",
       "releaseTimestamp": "2014-12-18T00:00:00.000Z",
       "version": "2.2.0-rc1",
     },
-    Object {
+    {
       "changelogUrl": "https://www.ruby-lang.org/en/news/2014/12/25/ruby-2-2-0-released/",
       "releaseTimestamp": "2014-12-25T00:00:00.000Z",
       "version": "2.2.0",
     },
-    Object {
+    {
       "changelogUrl": "https://www.ruby-lang.org/en/news/2015/03/03/ruby-2-2-1-released/",
       "releaseTimestamp": "2015-03-03T00:00:00.000Z",
       "version": "2.2.1",
     },
-    Object {
+    {
       "changelogUrl": "https://www.ruby-lang.org/en/news/2015/04/13/ruby-2-2-2-released/",
       "releaseTimestamp": "2015-04-13T00:00:00.000Z",
       "version": "2.2.2",
     },
-    Object {
+    {
       "changelogUrl": "https://www.ruby-lang.org/en/news/2015/08/18/ruby-2-2-3-released/",
       "releaseTimestamp": "2015-08-18T00:00:00.000Z",
       "version": "2.2.3",
     },
-    Object {
+    {
       "changelogUrl": "https://www.ruby-lang.org/en/news/2015/12/16/ruby-2-2-4-released/",
       "releaseTimestamp": "2015-12-16T00:00:00.000Z",
       "version": "2.2.4",
     },
-    Object {
+    {
       "changelogUrl": "https://www.ruby-lang.org/en/news/2016/04/26/ruby-2-2-5-released/",
       "releaseTimestamp": "2016-04-26T00:00:00.000Z",
       "version": "2.2.5",
     },
-    Object {
+    {
       "changelogUrl": "https://www.ruby-lang.org/en/news/2016/11/15/ruby-2-2-6-released/",
       "releaseTimestamp": "2016-11-15T00:00:00.000Z",
       "version": "2.2.6",
     },
-    Object {
+    {
       "changelogUrl": "https://www.ruby-lang.org/en/news/2017/03/28/ruby-2-2-7-released/",
       "releaseTimestamp": "2017-03-28T00:00:00.000Z",
       "version": "2.2.7",
     },
-    Object {
+    {
       "changelogUrl": "https://www.ruby-lang.org/en/news/2017/09/14/ruby-2-2-8-released/",
       "releaseTimestamp": "2017-09-14T00:00:00.000Z",
       "version": "2.2.8",
     },
-    Object {
+    {
       "changelogUrl": "https://www.ruby-lang.org/en/news/2017/12/14/ruby-2-2-9-released/",
       "releaseTimestamp": "2017-12-14T00:00:00.000Z",
       "version": "2.2.9",
     },
-    Object {
+    {
       "changelogUrl": "https://www.ruby-lang.org/en/news/2018/03/28/ruby-2-2-10-released/",
       "releaseTimestamp": "2018-03-28T00:00:00.000Z",
       "version": "2.2.10",
     },
-    Object {
+    {
       "changelogUrl": "https://www.ruby-lang.org/en/news/2015/11/11/ruby-2-3-0-preview1-released/",
       "releaseTimestamp": "2015-11-11T00:00:00.000Z",
       "version": "2.3.0-preview1",
     },
-    Object {
+    {
       "changelogUrl": "https://www.ruby-lang.org/en/news/2015/12/11/ruby-2-3-0-preview2-released/",
       "releaseTimestamp": "2015-12-11T00:00:00.000Z",
       "version": "2.3.0-preview2",
     },
-    Object {
+    {
       "changelogUrl": "https://www.ruby-lang.org/en/news/2015/12/25/ruby-2-3-0-released/",
       "releaseTimestamp": "2015-12-25T00:00:00.000Z",
       "version": "2.3.0",
     },
-    Object {
+    {
       "changelogUrl": "https://www.ruby-lang.org/en/news/2016/04/26/ruby-2-3-1-released/",
       "releaseTimestamp": "2016-04-26T00:00:00.000Z",
       "version": "2.3.1",
     },
-    Object {
+    {
       "changelogUrl": "https://www.ruby-lang.org/en/news/2016/11/15/ruby-2-3-2-released/",
       "releaseTimestamp": "2016-11-15T00:00:00.000Z",
       "version": "2.3.2",
     },
-    Object {
+    {
       "changelogUrl": "https://www.ruby-lang.org/en/news/2016/11/21/ruby-2-3-3-released/",
       "releaseTimestamp": "2016-11-21T00:00:00.000Z",
       "version": "2.3.3",
     },
-    Object {
+    {
       "changelogUrl": "https://www.ruby-lang.org/en/news/2017/03/30/ruby-2-3-4-released/",
       "releaseTimestamp": "2017-03-30T00:00:00.000Z",
       "version": "2.3.4",
     },
-    Object {
+    {
       "changelogUrl": "https://www.ruby-lang.org/en/news/2017/09/14/ruby-2-3-5-released/",
       "releaseTimestamp": "2017-09-14T00:00:00.000Z",
       "version": "2.3.5",
     },
-    Object {
+    {
       "changelogUrl": "https://www.ruby-lang.org/en/news/2017/12/14/ruby-2-3-6-released/",
       "releaseTimestamp": "2017-12-14T00:00:00.000Z",
       "version": "2.3.6",
     },
-    Object {
+    {
       "changelogUrl": "https://www.ruby-lang.org/en/news/2018/03/28/ruby-2-3-7-released/",
       "releaseTimestamp": "2018-03-28T00:00:00.000Z",
       "version": "2.3.7",
     },
-    Object {
+    {
       "changelogUrl": "https://www.ruby-lang.org/en/news/2018/10/17/ruby-2-3-8-released/",
       "releaseTimestamp": "2018-10-17T00:00:00.000Z",
       "version": "2.3.8",
     },
-    Object {
+    {
       "changelogUrl": "https://www.ruby-lang.org/en/news/2016/06/20/ruby-2-4-0-preview1-released/",
       "releaseTimestamp": "2016-06-20T00:00:00.000Z",
       "version": "2.4.0-preview1",
     },
-    Object {
+    {
       "changelogUrl": "https://www.ruby-lang.org/en/news/2016/09/08/ruby-2-4-0-preview2-released/",
       "releaseTimestamp": "2016-09-08T00:00:00.000Z",
       "version": "2.4.0-preview2",
     },
-    Object {
+    {
       "changelogUrl": "https://www.ruby-lang.org/en/news/2016/11/09/ruby-2-4-0-preview3-released/",
       "releaseTimestamp": "2016-11-09T00:00:00.000Z",
       "version": "2.4.0-preview3",
     },
-    Object {
+    {
       "changelogUrl": "https://www.ruby-lang.org/en/news/2016/12/12/ruby-2-4-0-rc1-released/",
       "releaseTimestamp": "2016-12-12T00:00:00.000Z",
       "version": "2.4.0-rc1",
     },
-    Object {
+    {
       "changelogUrl": "https://www.ruby-lang.org/en/news/2016/12/25/ruby-2-4-0-released/",
       "releaseTimestamp": "2016-12-25T00:00:00.000Z",
       "version": "2.4.0",
     },
-    Object {
+    {
       "changelogUrl": "https://www.ruby-lang.org/en/news/2017/03/22/ruby-2-4-1-released/",
       "releaseTimestamp": "2017-03-22T00:00:00.000Z",
       "version": "2.4.1",
     },
-    Object {
+    {
       "changelogUrl": "https://www.ruby-lang.org/en/news/2017/09/14/ruby-2-4-2-released/",
       "releaseTimestamp": "2017-09-14T00:00:00.000Z",
       "version": "2.4.2",
     },
-    Object {
+    {
       "changelogUrl": "https://www.ruby-lang.org/en/news/2017/12/14/ruby-2-4-3-released/",
       "releaseTimestamp": "2017-12-14T00:00:00.000Z",
       "version": "2.4.3",
     },
-    Object {
+    {
       "changelogUrl": "https://www.ruby-lang.org/en/news/2018/03/28/ruby-2-4-4-released/",
       "releaseTimestamp": "2018-03-28T00:00:00.000Z",
       "version": "2.4.4",
     },
-    Object {
+    {
       "changelogUrl": "https://www.ruby-lang.org/en/news/2018/10/17/ruby-2-4-5-released/",
       "releaseTimestamp": "2018-10-17T00:00:00.000Z",
       "version": "2.4.5",
     },
-    Object {
+    {
       "changelogUrl": "https://www.ruby-lang.org/en/news/2017/10/10/ruby-2-5-0-preview1-released/",
       "releaseTimestamp": "2017-10-10T00:00:00.000Z",
       "version": "2.5.0-preview1",
     },
-    Object {
+    {
       "changelogUrl": "https://www.ruby-lang.org/en/news/2017/12/14/ruby-2-5-0-rc1-released/",
       "releaseTimestamp": "2017-12-14T00:00:00.000Z",
       "version": "2.5.0-rc1",
     },
-    Object {
+    {
       "changelogUrl": "https://www.ruby-lang.org/en/news/2017/12/25/ruby-2-5-0-released/",
       "releaseTimestamp": "2017-12-25T00:00:00.000Z",
       "version": "2.5.0",
     },
-    Object {
+    {
       "changelogUrl": "https://www.ruby-lang.org/en/news/2018/03/28/ruby-2-5-1-released/",
       "releaseTimestamp": "2018-03-28T00:00:00.000Z",
       "version": "2.5.1",
     },
-    Object {
+    {
       "changelogUrl": "https://www.ruby-lang.org/en/news/2018/10/17/ruby-2-5-2-released/",
       "releaseTimestamp": "2018-10-17T00:00:00.000Z",
       "version": "2.5.2",
     },
-    Object {
+    {
       "changelogUrl": "https://www.ruby-lang.org/en/news/2018/10/18/ruby-2-5-3-released/",
       "releaseTimestamp": "2018-10-18T00:00:00.000Z",
       "version": "2.5.3",
     },
-    Object {
+    {
       "changelogUrl": "https://www.ruby-lang.org/en/news/2018/02/24/ruby-2-6-0-preview1-released/",
       "releaseTimestamp": "2018-02-24T00:00:00.000Z",
       "version": "2.6.0-preview1",
     },
-    Object {
+    {
       "changelogUrl": "https://www.ruby-lang.org/en/news/2018/05/31/ruby-2-6-0-preview2-released/",
       "releaseTimestamp": "2018-05-31T00:00:00.000Z",
       "version": "2.6.0-preview2",
     },
-    Object {
+    {
       "changelogUrl": "https://www.ruby-lang.org/en/news/2018/11/06/ruby-2-6-0-preview3-released/",
       "releaseTimestamp": "2018-11-06T00:00:00.000Z",
       "version": "2.6.0-preview3",
     },
-    Object {
+    {
       "changelogUrl": "https://www.ruby-lang.org/en/news/2018/12/06/ruby-2-6-0-rc1-released/",
       "releaseTimestamp": "2018-12-06T00:00:00.000Z",
       "version": "2.6.0-rc1",
     },
-    Object {
+    {
       "changelogUrl": "https://www.ruby-lang.org/en/news/2018/12/15/ruby-2-6-0-rc2-released/",
       "releaseTimestamp": "2018-12-15T00:00:00.000Z",
       "version": "2.6.0-rc2",
     },
-    Object {
+    {
       "changelogUrl": "https://www.ruby-lang.org/en/news/2018/12/25/ruby-2-6-0-released/",
       "releaseTimestamp": "2018-12-25T00:00:00.000Z",
       "version": "2.6.0",

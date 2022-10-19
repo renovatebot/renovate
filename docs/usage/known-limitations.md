@@ -21,14 +21,18 @@ For scheduled action to take place, both these need to happen:
 - The bot needs to run against your repository
 - The current time needs to fall within your repository's configured schedule
 
-For the GitHub hosted app, all active repositories will be enqueued hourly by default, but it's often the case that not every repository gets processed every hour.
-For this reason, it's best to allow for a minimum 2-3 hours schedule window per run, if you want a high chance that the bot will have run on your repo at least once while the schedule is active.
+### GitHub hosted app scheduled jobs
+
+On the GitHub hosted app Mend checks each active repository roughly every three hours, if no activity has been seen before then (merged PRs, etc).
+
+For this reason, you should set your schedule window to at least three or four hours.
+This makes it likely that Renovate bot checks your repository at least once during the schedule.
 
 ## Automerge limitations
 
-Renovate automerges at most one branch per run.
-Renovate will only automerge a branch when it is up-to-date with the target branch.
-Therefore, Renovate may not be able to automerge as many branches as you expect, especially if your base branch is receiving regular commits at the same time.
+- Renovate automerges at most one branch per run
+- Renovate will only automerge a branch when it is up-to-date with the target branch
+- Renovate may not be able to automerge as many branches as you expect, especially if your base branch is receiving regular commits at the same time
 
 The limitation to only merge one branch per run is because Renovate's dependency and branch state is based on what was present in the base branch at the start of the run.
 If a branch is merged into the base branch during Renovate's run - including by other users - it means that remaining Renovate branches may have Git conflicts.

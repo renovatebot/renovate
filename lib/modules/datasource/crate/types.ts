@@ -27,3 +27,10 @@ export interface CrateRecord {
   vers: string;
   yanked: boolean;
 }
+
+export interface CrateMetadata {
+  description: string | null;
+  documentation: string | null;
+  homepage: string | null;
+  repository: string | null;
+}

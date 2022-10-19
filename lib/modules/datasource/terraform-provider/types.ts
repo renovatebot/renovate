@@ -23,6 +23,17 @@ export interface TerraformProvider {
   published_at: string;
 }
 
+/**
+ * API Docs https://www.terraform.io/internals/provider-registry-protocol
+ */
+export interface TerraformProviderVersions {
+  versions: TerraformProviderVersionsVersion[];
+}
+
+export interface TerraformProviderVersionsVersion {
+  version: string;
+}
+
 export type TerraformProviderReleaseBackend = Record<
   string,
   {

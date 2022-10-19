@@ -1,3 +1,4 @@
+// TODO #7154
 import { GlobalConfig } from '../../../config/global';
 import type { RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
@@ -23,12 +24,14 @@ export async function raiseDeprecationWarnings(
       for (const dep of packageFile.deps) {
         const { deprecationMessage } = dep;
         if (deprecationMessage) {
-          deprecatedPackages[dep.depName] = deprecatedPackages[dep.depName] || {
+          deprecatedPackages[dep.depName!] = deprecatedPackages[
+            dep.depName!
+          ] || {
             deprecationMessage,
             depPackageFiles: [],
           };
-          deprecatedPackages[dep.depName].depPackageFiles.push(
-            packageFile.packageFile
+          deprecatedPackages[dep.depName!].depPackageFiles.push(
+            packageFile.packageFile!
           );
         }
       }
@@ -61,7 +64,7 @@ export async function raiseDeprecationWarnings(
         const ensureOnce = true;
         await platform.ensureIssue({
           title: issueTitle,
-          body: issueBody,
+          body: issueBody!,
           once: ensureOnce,
           confidential: config.confidential,
         });
@@ -73,11 +76,11 @@ export async function raiseDeprecationWarnings(
     const issueList = await platform.getIssueList();
     if (issueList?.length) {
       const deprecatedIssues = issueList.filter(
-        (i) => i.title.startsWith(issueTitlePrefix) && i.state === 'open'
+        (i) => i.title!.startsWith(issueTitlePrefix) && i.state === 'open'
       );
       for (const i of deprecatedIssues) {
-        if (!issueTitleList.includes(i.title)) {
-          await platform.ensureIssueClosing(i.title);
+        if (!issueTitleList.includes(i.title!)) {
+          await platform.ensureIssueClosing(i.title!);
         }
       }
     }

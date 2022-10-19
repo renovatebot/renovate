@@ -1,4 +1,6 @@
-const re = new RegExp(
+import { regEx } from '../../../util/regex';
+
+const re = regEx(
   `(?<preNotes>.*### Release Notes)(?<releaseNotes>.*)### Configuration(?<postNotes>.*)`,
   's'
 );

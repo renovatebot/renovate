@@ -1,3 +1,4 @@
+// TODO #7154
 import { logger } from '../../../../../logger';
 import {
   Release,
@@ -26,14 +27,17 @@ function matchesUnstable(
 export async function getInRangeReleases(
   config: BranchUpgradeConfig
 ): Promise<Release[] | null> {
-  const { versioning, currentVersion, newVersion, depName, datasource } =
-    config;
+  const versioning = config.versioning!;
+  const currentVersion = config.currentVersion!;
+  const newVersion = config.newVersion!;
+  const depName = config.depName!;
+  const datasource = config.datasource!;
   // istanbul ignore if
   if (!isGetPkgReleasesConfig(config)) {
     return null;
   }
   try {
-    const pkgReleases = (await getPkgReleases(config)).releases;
+    const pkgReleases = (await getPkgReleases(config))!.releases;
     const version = get(versioning);
 
     const releases = pkgReleases

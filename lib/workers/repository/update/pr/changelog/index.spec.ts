@@ -35,6 +35,7 @@ const upgrade: BranchConfig = partial<BranchConfig>({
 describe('workers/repository/update/pr/changelog/index', () => {
   describe('getChangeLogJSON', () => {
     beforeEach(() => {
+      jest.resetAllMocks();
       hostRules.clear();
       hostRules.add({
         hostType: PlatformId.Github,
@@ -47,7 +48,7 @@ describe('workers/repository/update/pr/changelog/index', () => {
       expect(
         await getChangeLogJSON({
           ...upgrade,
-          currentVersion: null,
+          currentVersion: undefined,
         })
       ).toBeNull();
     });
@@ -155,11 +156,7 @@ describe('workers/repository/update/pr/changelog/index', () => {
     });
 
     it('filters unnecessary warns', async () => {
-      httpMock
-        .scope(githubApiHost)
-        .persist()
-        .get(/.*/)
-        .replyWithError('Unknown Github Repo');
+      httpMock.scope(githubApiHost).get(/.*/).reply(200, []).persist();
       const res = await getChangeLogJSON({
         ...upgrade,
         depName: '@renovate/no',
