@@ -126,3 +126,42 @@
 
 
     The Renovate team
+
+'pr:no-coverage-ignore':
+  comment: >
+    Hi there,
+
+
+    You're skipping code tests with `istanbul ignore`.
+    Please only skip tests if:
+      - you cannot test the code, or
+      - the code is very difficult to test, or
+      - the edge case won't usually happen at runtime
+    If you skip a test then always comment why:
+    ```ts
+    // istanbul ignore next: typescript strict null check
+    if (!url) {
+      return null;
+    }
+    ```
+
+
+    Good luck,
+
+
+    The Renovate team
+
+'pr:no-done-comments':
+  comment: >
+    Hi there,
+
+
+    You are using simple `done` comments which cause a lot of noise.
+    Instead, please use GitHub's web interface to request another review.
+    Please read our [contribution guide](https://github.com/renovatebot/renovate/blob/main/.github/contributing.md#resolve-review-comments-instead-of-commenting) to reduce noise.
+
+
+    Good luck,
+
+
+    The Renovate team
