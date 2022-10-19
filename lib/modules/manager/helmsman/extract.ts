@@ -8,7 +8,10 @@ import type { HelmsmanDocument } from './types';
 
 const chartRegex = regEx('^(?<registryRef>[^/]*)/(?<packageName>[^/]*)$');
 
-function createDep(key: string, doc: HelmsmanDocument): PackageDependency {
+function createDep(
+  key: string,
+  doc: HelmsmanDocument
+): PackageDependency | null {
   const dep: PackageDependency = {
     depName: key,
     datasource: HelmDatasource.id,
@@ -24,8 +27,8 @@ function createDep(key: string, doc: HelmsmanDocument): PackageDependency {
   }
   dep.currentValue = anApp.version;
 
-  const regexResult = chartRegex.exec(anApp.chart);
-  if (!regexResult) {
+  const regexResult = anApp.chart ? chartRegex.exec(anApp.chart) : null;
+  if (!regexResult?.groups) {
     dep.skipReason = 'invalid-url';
     return dep;
   }
@@ -63,7 +66,7 @@ export function extractPackageFile(
 
     const deps = Object.keys(doc.apps)
       .map((key) => createDep(key, doc))
-      .filter(Boolean); // filter null values
+      .filter(is.truthy); // filter null values
 
     if (deps.length === 0) {
       return null;

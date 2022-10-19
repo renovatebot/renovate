@@ -17,3 +17,11 @@ job1:
               - -something2
               - -something3
               - -something4
+job2:
+    services:
+      - "mariadb:10.4.11"
+      - postgres:11.7
+      - redis:latest
+      - name: "registry.example.com/myimage:latest"
+      - myimage@sha256:0ecb2ad60
+      - tomcat:7-jre8

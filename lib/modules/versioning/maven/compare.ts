@@ -313,7 +313,7 @@ function parseRange(rangeStr: string): Range[] | null {
     };
   }
 
-  const commaSplit = rangeStr.split(',');
+  const commaSplit = rangeStr.split(/\s*,\s*/);
   let ranges: Range[] | null = [];
   let interval = emptyInterval();
 
@@ -368,7 +368,7 @@ function parseRange(rangeStr: string): Range[] | null {
   if (interval.leftType) {
     return null;
   } // something like '[1,2],[3'
-  if (!ranges || !ranges.length) {
+  if (!ranges?.length) {
     return null;
   }
 

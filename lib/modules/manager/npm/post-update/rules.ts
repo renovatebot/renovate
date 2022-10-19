@@ -23,7 +23,9 @@ export function processHostRules(): HostRulesResult {
       uri =
         is.string(uri) && validateUrl(uri)
           ? uri.replace(regEx(/^https?:/), '')
-          : `//${uri}/`;
+          : // TODO: types (#7154)
+            // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+            `//${uri}/`;
       if (hostRule.token) {
         const key = hostRule.authType === 'Basic' ? '_auth' : '_authToken';
         additionalNpmrcContent.push(`${uri}:${key}=${hostRule.token}`);

@@ -32,6 +32,8 @@ export class RubyGemsDatasource extends Datasource {
   @cache({
     namespace: `datasource-${RubyGemsDatasource.id}`,
     key: ({ registryUrl, packageName }: GetReleasesConfig) =>
+      // TODO: types (#7154)
+      /* eslint-disable @typescript-eslint/restrict-template-expressions */
       `${registryUrl}/${packageName}`,
   })
   getReleases({

@@ -1,0 +1,13 @@
+This issue lists Renovate updates and detected dependencies. Read the [Dependency Dashboard](https://docs.renovatebot.com/key-concepts/dashboard/) docs to learn more.
+
+## Edited/Blocked
+
+These updates have been manually edited so Renovate will no longer make changes. To discard all commits and start over, click on a checkbox.
+
+ - [ ] <!-- rebase-branch=branchName1 -->[pr1](../pull/1)
+ - [ ] <!-- rebase-branch=branchName2 -->[pr2](../pull/2) (`dep2`, `dep3`)
+
+## Detected dependencies
+
+None detected
+

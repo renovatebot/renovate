@@ -4,7 +4,6 @@ import type { GetReleasesConfig, ReleaseResult } from '../types';
 import { id } from './common';
 import { getDependency } from './get';
 
-export { resetMemCache, resetCache } from './get';
 export { setNpmrc } from './npmrc';
 
 export class NpmDatasource extends Datasource {
@@ -24,9 +23,14 @@ export class NpmDatasource extends Datasource {
     packageName,
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
+    // istanbul ignore if
+    if (!registryUrl) {
+      return null;
+    }
+
     const res = await getDependency(this.http, registryUrl, packageName);
     if (res) {
-      res.tags = res['dist-tags'];
+      res.tags ||= res['dist-tags'];
       delete res['dist-tags'];
     }
     return res;

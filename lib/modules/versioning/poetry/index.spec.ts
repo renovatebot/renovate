@@ -145,7 +145,7 @@ describe('modules/versioning/poetry/index', () => {
   `(
     'isLessThanRange("$version", "$range") === "$expected"',
     ({ version, range, expected }) => {
-      expect(versioning.isLessThanRange(version, range)).toBe(expected);
+      expect(versioning.isLessThanRange?.(version, range)).toBe(expected);
     }
   );
 
@@ -177,6 +177,7 @@ describe('modules/versioning/poetry/index', () => {
       expect(versioning.getSatisfyingVersion(versions, range)).toBe(expected);
     }
   );
+
   test.each`
     currentValue        | rangeStrategy | currentVersion     | newVersion         | expected
     ${'1.0.0'}          | ${'bump'}     | ${'1.0.0'}         | ${'1.1.0'}         | ${'1.1.0'}

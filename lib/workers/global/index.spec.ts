@@ -1,6 +1,7 @@
 import { expect } from '@jest/globals';
 import { ERROR, WARN } from 'bunyan';
-import { fs, logger, mocked } from '../../../test/util';
+import * as _fs from 'fs-extra';
+import { logger, mocked } from '../../../test/util';
 import * as _presets from '../../config/presets';
 import { PlatformId } from '../../constants';
 import { CONFIG_PRESETS_INVALID } from '../../constants/error-messages';
@@ -14,6 +15,9 @@ import * as globalWorker from '.';
 jest.mock('../repository');
 jest.mock('../../util/fs');
 jest.mock('../../config/presets');
+
+jest.mock('fs-extra');
+const fs = mocked(_fs);
 
 // imports are readonly
 const repositoryWorker = _repositoryWorker;
@@ -111,6 +115,7 @@ describe('workers/global/index', () => {
     expect(configParser.parseConfigs).toHaveBeenCalledTimes(1);
     expect(repositoryWorker.renovateRepository).toHaveBeenCalledTimes(0);
   });
+
   it('exits with non-zero when errors are logged', async () => {
     configParser.parseConfigs.mockResolvedValueOnce({
       baseDir: '/tmp/base',
@@ -126,6 +131,7 @@ describe('workers/global/index', () => {
     ]);
     await expect(globalWorker.start()).resolves.not.toBe(0);
   });
+
   it('exits with zero when warnings are logged', async () => {
     configParser.parseConfigs.mockResolvedValueOnce({
       baseDir: '/tmp/base',
@@ -141,6 +147,7 @@ describe('workers/global/index', () => {
     ]);
     await expect(globalWorker.start()).resolves.toBe(0);
   });
+
   describe('processes platforms', () => {
     it('github', async () => {
       configParser.parseConfigs.mockResolvedValueOnce({
@@ -152,6 +159,7 @@ describe('workers/global/index', () => {
       expect(configParser.parseConfigs).toHaveBeenCalledTimes(1);
       expect(repositoryWorker.renovateRepository).toHaveBeenCalledTimes(1);
     });
+
     it('gitlab', async () => {
       configParser.parseConfigs.mockResolvedValueOnce({
         repositories: [{ repository: 'a' }],
@@ -172,7 +180,6 @@ describe('workers/global/index', () => {
         endpoint: 'https://github.com/',
         writeDiscoveredRepos: '/tmp/renovate-output.json',
       });
-      fs.writeFile.mockReturnValueOnce(null);
 
       expect(await globalWorker.start()).toBe(0);
       expect(fs.writeFile).toHaveBeenCalledTimes(1);

@@ -1,12 +1,20 @@
 import type { PackageJson } from 'type-fest';
 
 export type NpmPackageDependency = PackageJson.Dependency;
+export type DependenciesMeta = Record<
+  string,
+  { optional: boolean; built: boolean; unplugged: boolean }
+>;
 
 export interface NpmPackage extends PackageJson {
   renovate?: unknown;
   _from?: any;
   _args?: any;
   _id?: any;
+  dependenciesMeta?: DependenciesMeta;
+  packageManager?: string;
+  overrides?: OverrideDependency;
+  volta?: PackageJson.Dependency;
 }
 
 export type LockFileEntry = Record<
@@ -23,3 +31,7 @@ export interface LockFile {
 export interface PnpmWorkspaceFile {
   packages: string[];
 }
+
+export type OverrideDependency = Record<string, RecursiveOverride>;
+
+export type RecursiveOverride = string | { [_: string]: RecursiveOverride };

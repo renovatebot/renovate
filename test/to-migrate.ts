@@ -24,7 +24,9 @@ expect.extend({
     CustomMigration: MigrationConstructor,
     originalConfig: RenovateConfig,
     expectedConfig: RenovateConfig,
-    isMigrated = true
+    // not inferrable type https://github.com/typescript-eslint/typescript-eslint/issues/5199
+    // eslint-disable-next-line @typescript-eslint/no-inferrable-types
+    isMigrated: boolean = true
   ) {
     class CustomMigrationsService extends MigrationsService {
       protected static override getMigrations(
@@ -49,7 +51,10 @@ expect.extend({
 
     if (!this.equals(migratedConfig, expectedConfig)) {
       return {
-        message: (): string => 'Migration failed',
+        message: (): string =>
+          `Migration failed\n\nReceived config:\n${JSON.stringify(
+            migratedConfig
+          )}\n\nExpected config:\n${JSON.stringify(expectedConfig)}`,
         pass: false,
       };
     }

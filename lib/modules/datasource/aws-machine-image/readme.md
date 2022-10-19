@@ -1,6 +1,31 @@
-> :warning: **This datasource is _experimental_**: Be aware that its syntax and behavior may change at any time!
+<!-- prettier-ignore -->
+!!! warning
+    This datasource is experimental.
+    Its syntax and behavior may change at any time!
 
-This datasource returns the latest [Amazon Machine Image](https://docs.aws.amazon.com/en_en/AWSEC2/latest/UserGuide/AMIs.html) via the AWS API (valid credentials required).
+This datasource returns the latest [Amazon Machine Image](https://docs.aws.amazon.com/en_en/AWSEC2/latest/UserGuide/AMIs.html) via the AWS API.
+
+Because the datasource uses the AWS-SDK for JavaScript, you can configure it like other AWS Tools.
+You can use common AWS configuration options, for example (partial list):
+
+- Setting the region via `AWS_REGION` (environment variable) or your `~/.aws/config` file
+- Provide credentials via `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` (environment variable) or your `~/.aws/credentials` file
+- Select the profile to use via `AWS_PROFILE` environment variable
+
+Read the [Developer guide](https://docs.aws.amazon.com/sdk-for-javascript/v3/developer-guide/configuring-the-jssdk.html) for more information on configuration options.
+
+The least IAM privileges required for this datasource are:
+
+```json
+{
+  "Sid": "AllowEc2ImageLookup",
+  "Effect": "Allow",
+  "Action": ["ec2:DescribeImages"],
+  "Resource": "*"
+}
+```
+
+Read the [AWS IAM Reference](https://docs.aws.amazon.com/service-authorization/latest/reference/list_amazonec2.html) for more information.
 
 Because there is no general `packageName`, you have to use the [describe images filter](https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/clients/client-ec2/interfaces/describeimagescommandinput.html#filters) as minified JSON as a `packageName`.
 
@@ -38,7 +63,7 @@ module.exports = {
     {
       fileMatch: ['.*'],
       matchStrings: [
-        '.*amiFilter=(?<packageName>.*?)\\n(.*currentImageName=(?<currentDigest>.*?)\\n)?(.*\\n)?.*?(?<depName>[a-zA-Z0-9-_:]*)[ ]*?[:|=][ ]*?["|\']?(?<currentValue>ami-[a-z0-9]{17})["|\']?.*',
+        '.*amiFilter=(?<packageName>.*?)\n(.*currentImageName=(?<currentDigest>.*?)\n)?(.*\n)?.*?(?<depName>[a-zA-Z0-9-_:]*)[ ]*?[:|=][ ]*?["|\']?(?<currentValue>ami-[a-z0-9]{17})["|\']?.*',
       ],
       datasourceTemplate: 'aws-machine-image',
       versioningTemplate: 'aws-machine-image',
@@ -57,7 +82,7 @@ Or as JSON:
         'fileMatch': ['.*'],
         'matchStrings':
           [
-            ".*amiFilter=(?<packageName>.*?)\\n(.*currentImageName=(?<currentDigest>.*?)\\n)?(.*\\n)?.*?(?<depName>[a-zA-Z0-9-_:]*)[ ]*?[:|=][ ]*?[\"|']?(?<currentValue>ami-[a-z0-9]{17})[\"|']?.*",
+            ".*amiFilter=(?<packageName>.*?)\n(.*currentImageName=(?<currentDigest>.*?)\n)?(.*\n)?.*?(?<depName>[a-zA-Z0-9-_:]*)[ ]*?[:|=][ ]*?[\"|']?(?<currentValue>ami-[a-z0-9]{17})[\"|']?.*",
           ],
         'datasourceTemplate': 'aws-machine-image',
         'versioningTemplate': 'aws-machine-image',

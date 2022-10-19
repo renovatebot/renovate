@@ -5,14 +5,19 @@ import { GlobalConfig } from '../../../config/global';
 import { logger } from '../../../logger';
 import * as memCache from '../../../util/cache/memory';
 import { cache } from '../../../util/cache/package/decorator';
-import { privateCacheDir, readFile } from '../../../util/fs';
+import { privateCacheDir, readCacheFile } from '../../../util/fs';
 import { simpleGitConfig } from '../../../util/git/config';
 import { newlineRegex, regEx } from '../../../util/regex';
 import { parseUrl } from '../../../util/url';
 import * as cargoVersioning from '../../versioning/cargo';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
-import { CrateRecord, RegistryFlavor, RegistryInfo } from './types';
+import {
+  CrateMetadata,
+  CrateRecord,
+  RegistryFlavor,
+  RegistryInfo,
+} from './types';
 
 export class CrateDatasource extends Datasource {
   static readonly id = 'crate';
@@ -28,9 +33,13 @@ export class CrateDatasource extends Datasource {
   static readonly CRATES_IO_BASE_URL =
     'https://raw.githubusercontent.com/rust-lang/crates.io-index/master/';
 
+  static readonly CRATES_IO_API_BASE_URL = 'https://crates.io/api/v1/';
+
   @cache({
     namespace: `datasource-${CrateDatasource.id}`,
     key: ({ registryUrl, packageName }: GetReleasesConfig) =>
+      // TODO: types (#7154)
+      // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
       `${registryUrl}/${packageName}`,
     cacheable: ({ registryUrl }: GetReleasesConfig) =>
       CrateDatasource.areReleasesCacheable(registryUrl),
@@ -70,10 +79,22 @@ export class CrateDatasource extends Datasource {
       .map((line) => line.trim()) // remove whitespace
       .filter((line) => line.length !== 0) // remove empty lines
       .map((line) => JSON.parse(line) as CrateRecord); // parse
+
+    const metadata = await this.getCrateMetadata(registryInfo, packageName);
+
     const result: ReleaseResult = {
       dependencyUrl,
       releases: [],
     };
+
+    if (metadata?.homepage) {
+      result.homepage = metadata.homepage;
+    }
+
+    if (metadata?.repository) {
+      result.sourceUrl = metadata.repository;
+    }
+
     result.releases = lines
       .map((version) => {
         const release: Release = {
@@ -92,6 +113,46 @@ export class CrateDatasource extends Datasource {
     return result;
   }
 
+  @cache({
+    namespace: `datasource-${CrateDatasource.id}-metadata`,
+    key: (info: RegistryInfo, packageName: string) =>
+      `${info.rawUrl}/${packageName}`,
+    cacheable: (info: RegistryInfo) =>
+      CrateDatasource.areReleasesCacheable(info.rawUrl),
+    ttlMinutes: 24 * 60, // 24 hours
+  })
+  public async getCrateMetadata(
+    info: RegistryInfo,
+    packageName: string
+  ): Promise<CrateMetadata | null> {
+    if (info.flavor !== RegistryFlavor.CratesIo) {
+      return null;
+    }
+
+    // The `?include=` suffix is required to avoid unnecessary database queries
+    // on the crates.io server. This lets us work around the regular request
+    // throttling of one request per second.
+    const crateUrl = `${CrateDatasource.CRATES_IO_API_BASE_URL}crates/${packageName}?include=`;
+
+    logger.debug(
+      { crateUrl, packageName, registryUrl: info.rawUrl },
+      'downloading crate metadata'
+    );
+
+    try {
+      type Response = { crate: CrateMetadata };
+      const response = await this.http.getJson<Response>(crateUrl);
+      return response.body.crate;
+    } catch (err) {
+      logger.warn(
+        { err, packageName, registryUrl: info.rawUrl },
+        'failed to download crate metadata'
+      );
+    }
+
+    return null;
+  }
+
   public async fetchCrateRecordsPayload(
     info: RegistryInfo,
     packageName: string
@@ -101,13 +162,13 @@ export class CrateDatasource extends Datasource {
         info.clonePath,
         ...CrateDatasource.getIndexSuffix(packageName)
       );
-      return readFile(path, 'utf8');
+      return readCacheFile(path, 'utf8');
     }
 
     if (info.flavor === RegistryFlavor.CratesIo) {
       const crateUrl =
         CrateDatasource.CRATES_IO_BASE_URL +
-        CrateDatasource.getIndexSuffix(packageName).join('/');
+        CrateDatasource.getIndexSuffix(packageName.toLowerCase()).join('/');
       try {
         return (await this.http.get(crateUrl)).body;
       } catch (err) {
@@ -149,7 +210,7 @@ export class CrateDatasource extends Datasource {
     const host = url.hostname;
     const hash = hasha(url.pathname, {
       algorithm: 'sha256',
-    }).substr(0, 7);
+    }).substring(0, 7);
 
     return `crate-registry-${proto}-${host}-${hash}`;
   }
@@ -208,7 +269,6 @@ export class CrateDatasource extends Datasource {
       const clonePathPromise: Promise<string> | null = memCache.get(cacheKey);
       let clonePath: string;
 
-      // eslint-disable-next-line @typescript-eslint/no-misused-promises
       if (clonePathPromise) {
         clonePath = await clonePathPromise;
       } else {

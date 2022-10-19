@@ -4,15 +4,19 @@ import { getPrUpdatesTable } from './updates-table';
 describe('workers/repository/update/pr/body/updates-table', () => {
   it('checks a case where prBodyColumns are undefined', () => {
     const configObj: BranchConfig = {
+      manager: 'some-manager',
       branchName: 'some-branch',
+      baseBranch: 'base',
       upgrades: [],
       prBodyColumns: undefined,
     };
     const result = getPrUpdatesTable(configObj);
     expect(result).toBe('');
   });
+
   it('checks results for getPrUpdatesTable', () => {
     const upgrade0: BranchUpgradeConfig = {
+      manager: 'some-manager',
       branchName: 'some-branch',
       prBodyDefinitions: {
         Package: '{{{depNameLinked}}}',
@@ -29,6 +33,7 @@ describe('workers/repository/update/pr/body/updates-table', () => {
     };
 
     const upgrade1: BranchUpgradeConfig = {
+      manager: 'some-manager',
       branchName: 'some-branch',
       prBodyDefinitions: {
         Package: '{{{depNameLinked}}}',
@@ -55,6 +60,7 @@ describe('workers/repository/update/pr/body/updates-table', () => {
     };
 
     const upgrade2: BranchUpgradeConfig = {
+      manager: 'some-manager',
       branchName: 'some-branch',
       prBodyDefinitions: {
         Package: '{{{depNameLinked}}}',
@@ -80,9 +86,12 @@ describe('workers/repository/update/pr/body/updates-table', () => {
       displayFrom: '^6.2.3',
       displayTo: '6.2.3',
     };
-    const upgrade3: BranchUpgradeConfig = undefined;
+    // TODO #7154 allow or filter undefined
+    const upgrade3 = undefined as never;
     const configObj: BranchConfig = {
+      manager: 'some-manager',
       branchName: 'some-branch',
+      baseBranch: 'base',
       upgrades: [upgrade0, upgrade1, upgrade2, upgrade3],
       prBodyColumns: ['Package', 'Type', 'Update', 'Change', 'Pending'],
       prBodyDefinitions: {

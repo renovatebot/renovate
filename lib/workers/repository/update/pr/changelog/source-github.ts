@@ -1,4 +1,6 @@
+// TODO #7154
 import URL from 'url';
+import { GlobalConfig } from '../../../../../config/global';
 import { PlatformId } from '../../../../../constants';
 import { logger } from '../../../../../logger';
 import type { Release } from '../../../../../modules/datasource/types';
@@ -8,8 +10,10 @@ import * as packageCache from '../../../../../util/cache/package';
 import * as hostRules from '../../../../../util/host-rules';
 import { regEx } from '../../../../../util/regex';
 import type { BranchUpgradeConfig } from '../../../../types';
+import { slugifyUrl } from './common';
 import { getTags } from './github';
 import { addReleaseNotes } from './release-notes';
+import { getInRangeReleases } from './releases';
 import { ChangeLogError, ChangeLogRelease, ChangeLogResult } from './types';
 
 function getCachedTags(
@@ -27,33 +31,41 @@ function getCachedTags(
   return promisedRes;
 }
 
-export async function getChangeLogJSON({
-  versioning,
-  currentVersion,
-  newVersion,
-  sourceUrl,
-  sourceDirectory,
-  releases,
-  depName,
-  manager,
-}: BranchUpgradeConfig): Promise<ChangeLogResult | null> {
+export async function getChangeLogJSON(
+  config: BranchUpgradeConfig
+): Promise<ChangeLogResult | null> {
+  const versioning = config.versioning!;
+  const currentVersion = config.currentVersion!;
+  const newVersion = config.newVersion!;
+  const sourceUrl = config.sourceUrl!;
+  const sourceDirectory = config.sourceDirectory!;
+  const depName = config.depName!;
+  const manager = config.manager;
   if (sourceUrl === 'https://github.com/DefinitelyTyped/DefinitelyTyped') {
     logger.trace('No release notes for @types');
     return null;
   }
   const version = allVersioning.get(versioning);
   const { protocol, host, pathname } = URL.parse(sourceUrl);
-  const baseUrl = `${protocol}//${host}/`;
+  // TODO: types (#7154)
+  const baseUrl = `${protocol!}//${host!}/`;
   const url = sourceUrl.startsWith('https://github.com/')
     ? 'https://api.github.com/'
     : sourceUrl;
-  const config = hostRules.find({
+  const { token } = hostRules.find({
     hostType: PlatformId.Github,
     url,
   });
   // istanbul ignore if
-  if (!config.token) {
-    if (host.endsWith('github.com')) {
+  if (!token) {
+    if (host!.endsWith('.github.com') || host === 'github.com') {
+      if (!GlobalConfig.get('githubTokenWarn')) {
+        logger.debug(
+          { manager, depName, sourceUrl },
+          'GitHub token warning has been suppressed. Skipping release notes retrieval'
+        );
+        return null;
+      }
       logger.warn(
         { manager, depName, sourceUrl },
         'No github.com token has been configured. Skipping release notes retrieval'
@@ -69,7 +81,7 @@ export async function getChangeLogJSON({
   const apiBaseUrl = sourceUrl.startsWith('https://github.com/')
     ? 'https://api.github.com/'
     : baseUrl + 'api/v3/';
-  const repository = pathname
+  const repository = pathname!
     .slice(1)
     .replace(regEx(/\/$/), '')
     .replace(regEx(/\.git$/), '');
@@ -77,6 +89,7 @@ export async function getChangeLogJSON({
     logger.debug({ sourceUrl }, 'Invalid github URL found');
     return null;
   }
+  const releases = config.releases ?? (await getInRangeReleases(config));
   if (!releases?.length) {
     logger.debug('No releases');
     return null;
@@ -97,10 +110,7 @@ export async function getChangeLogJSON({
     if (!tags) {
       tags = await getCachedTags(apiBaseUrl, repository);
     }
-    const regex = regEx(`(?:${depName}|release)[@-]`, undefined, false);
-    const tagName = tags
-      .filter((tag) => version.isVersion(tag.replace(regex, '')))
-      .find((tag) => version.equals(tag.replace(regex, ''), release.version));
+    const tagName = findTagOfRelease(version, depName, release.version, tags);
     if (tagName) {
       return tagName;
     }
@@ -111,8 +121,9 @@ export async function getChangeLogJSON({
   }
 
   const cacheNamespace = 'changelog-github-release';
+
   function getCacheKey(prev: string, next: string): string {
-    return `${manager}:${depName}:${prev}:${next}`;
+    return `${slugifyUrl(sourceUrl)}:${depName}:${prev}:${next}`;
   }
 
   const changelogReleases: ChangeLogRelease[] = [];
@@ -132,6 +143,7 @@ export async function getChangeLogJSON({
       if (!release) {
         release = {
           version: next.version,
+          gitRef: next.gitRef,
           date: next.releaseTimestamp,
           // put empty changes so that existing templates won't break
           changes: [],
@@ -167,7 +179,31 @@ export async function getChangeLogJSON({
     versions: changelogReleases,
   };
 
-  res = await addReleaseNotes(res);
+  res = await addReleaseNotes(res, config);
 
   return res;
+}
+
+function findTagOfRelease(
+  version: allVersioning.VersioningApi,
+  depName: string,
+  depNewVersion: string,
+  tags: string[]
+): string | undefined {
+  const regex = regEx(`(?:${depName}|release)[@-]`, undefined, false);
+  const excactReleaseRegex = regEx(`${depName}[@-_]v?${depNewVersion}`);
+  const exactTagsList = tags.filter((tag) => {
+    return excactReleaseRegex.test(tag);
+  });
+  let tagName: string | undefined;
+  if (exactTagsList.length) {
+    tagName = exactTagsList
+      .filter((tag) => version.isVersion(tag.replace(regex, '')))
+      .find((tag) => version.equals(tag.replace(regex, ''), depNewVersion));
+  } else {
+    tagName = tags
+      .filter((tag) => version.isVersion(tag.replace(regex, '')))
+      .find((tag) => version.equals(tag.replace(regex, ''), depNewVersion));
+  }
+  return tagName;
 }

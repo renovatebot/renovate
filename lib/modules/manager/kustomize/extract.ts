@@ -1,6 +1,7 @@
 import is from '@sindresorhus/is';
 import { load } from 'js-yaml';
 import { logger } from '../../../logger';
+import { coerceArray } from '../../../util/array';
 import { regEx } from '../../../util/regex';
 import { DockerDatasource } from '../../datasource/docker';
 import { GitTagsDatasource } from '../../datasource/git-tags';
@@ -19,7 +20,7 @@ const gitUrl = regEx(
 export function extractResource(base: string): PackageDependency | null {
   const match = gitUrl.exec(base);
 
-  if (!match) {
+  if (!match?.groups) {
     return null;
   }
 
@@ -87,6 +88,8 @@ export function extractImage(image: Image): PackageDependency | null {
       };
     }
 
+    // TODO: types (#7154)
+    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
     const dep = splitImageParts(`${depName}:${newTag}`);
     return {
       ...dep,
@@ -152,7 +155,7 @@ export function extractPackageFile(content: string): PackageFile | null {
   }
 
   // grab the remote bases
-  for (const base of pkg.bases ?? []) {
+  for (const base of coerceArray(pkg.bases)) {
     const dep = extractResource(base);
     if (dep) {
       deps.push({
@@ -163,7 +166,7 @@ export function extractPackageFile(content: string): PackageFile | null {
   }
 
   // grab the remote resources
-  for (const resource of pkg.resources ?? []) {
+  for (const resource of coerceArray(pkg.resources)) {
     const dep = extractResource(resource);
     if (dep) {
       deps.push({
@@ -174,7 +177,7 @@ export function extractPackageFile(content: string): PackageFile | null {
   }
 
   // grab the remote components
-  for (const component of pkg.components ?? []) {
+  for (const component of coerceArray(pkg.components)) {
     const dep = extractResource(component);
     if (dep) {
       deps.push({
@@ -185,7 +188,7 @@ export function extractPackageFile(content: string): PackageFile | null {
   }
 
   // grab the image tags
-  for (const image of pkg.images ?? []) {
+  for (const image of coerceArray(pkg.images)) {
     const dep = extractImage(image);
     if (dep) {
       deps.push({
@@ -196,7 +199,7 @@ export function extractPackageFile(content: string): PackageFile | null {
   }
 
   // grab the helm charts
-  for (const helmChart of pkg.helmCharts ?? []) {
+  for (const helmChart of coerceArray(pkg.helmCharts)) {
     const dep = extractHelmChart(helmChart);
     if (dep) {
       deps.push({

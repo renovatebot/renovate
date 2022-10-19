@@ -8,6 +8,7 @@ describe('util/cache/package/index', () => {
     expect(await get('test', 'missing-key')).toBeUndefined();
     expect(await set('test', 'some-key', 'some-value', 5)).toBeUndefined();
   });
+
   it('sets and gets file', async () => {
     await init({ cacheDir: 'some-dir' });
     expect(
@@ -15,6 +16,7 @@ describe('util/cache/package/index', () => {
     ).toBeUndefined();
     expect(await get('some-namespace', 'unknown-key')).toBeUndefined();
   });
+
   it('sets and gets redis', async () => {
     await init({ redisUrl: 'some-url' });
     expect(

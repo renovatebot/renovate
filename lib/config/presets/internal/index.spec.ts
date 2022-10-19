@@ -1,16 +1,14 @@
-import { mocked } from '../../../../test/util';
+import { resolveConfigPresets } from '../';
 import { CONFIG_VALIDATION } from '../../../constants/error-messages';
 import { massageConfig } from '../../massage';
 import { validateConfig } from '../../validation';
-import { resolveConfigPresets } from '../index';
-import * as _npm from '../npm';
+import * as npm from '../npm';
 import * as internal from '.';
 
 jest.mock('./npm');
 jest.mock('../../../modules/datasource/npm');
 
-const npm = mocked(_npm);
-npm.getPreset = jest.fn((_) => null);
+jest.spyOn(npm, 'getPreset').mockResolvedValue(undefined);
 
 const ignoredPresets = ['default:group', 'default:timezone'];
 

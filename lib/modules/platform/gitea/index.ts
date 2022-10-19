@@ -1,4 +1,3 @@
-import URL from 'url';
 import is from '@sindresorhus/is';
 import JSON5 from 'json5';
 import semver from 'semver';
@@ -14,10 +13,10 @@ import {
 import { logger } from '../../../logger';
 import { BranchStatus, PrState, VulnerabilityAlert } from '../../../types';
 import * as git from '../../../util/git';
-import * as hostRules from '../../../util/host-rules';
 import { setBaseUrl } from '../../../util/http/gitea';
 import { sanitize } from '../../../util/sanitize';
 import { ensureTrailingSlash } from '../../../util/url';
+import { getPrBodyStruct, hashBody } from '../pr-body';
 import type {
   BranchStatusConfig,
   CreatePRConfig,
@@ -35,24 +34,41 @@ import type {
   RepoResult,
   UpdatePrConfig,
 } from '../types';
+import { repoFingerprint } from '../util';
 import { smartTruncate } from '../utils/pr-body';
 import * as helper from './gitea-helper';
-import { smartLinks } from './utils';
+import type {
+  CombinedCommitStatus,
+  Comment,
+  IssueState,
+  Label,
+  PR,
+  PRMergeMethod,
+  Repo,
+} from './types';
+import {
+  getMergeMethod,
+  getRepoUrl,
+  smartLinks,
+  trimTrailingApiPath,
+} from './utils';
 
 interface GiteaRepoConfig {
   repository: string;
-  mergeMethod: helper.PRMergeMethod;
+  mergeMethod: PRMergeMethod;
 
   prList: Promise<Pr[]> | null;
   issueList: Promise<Issue[]> | null;
-  labelList: Promise<helper.Label[]> | null;
+  labelList: Promise<Label[]> | null;
   defaultBranch: string;
   cloneSubmodules: boolean;
 }
 
+const DRAFT_PREFIX = 'WIP: ';
+
 const defaults = {
   hostType: PlatformId.Gitea,
-  endpoint: 'https://gitea.com/api/v1/',
+  endpoint: 'https://gitea.com/',
   version: '0.0.0',
 };
 
@@ -60,7 +76,7 @@ let config: GiteaRepoConfig = {} as any;
 let botUserID: number;
 let botUserName: string;
 
-function toRenovateIssue(data: helper.Issue): Issue {
+function toRenovateIssue(data: Issue): Issue {
   return {
     number: data.number,
     state: data.state,
@@ -69,7 +85,8 @@ function toRenovateIssue(data: helper.Issue): Issue {
   };
 }
 
-function toRenovatePR(data: helper.PR): Pr | null {
+// TODO #7154
+function toRenovatePR(data: PR): Pr | null {
   if (!data) {
     return null;
   }
@@ -91,12 +108,20 @@ function toRenovatePR(data: helper.PR): Pr | null {
     return null;
   }
 
+  let title = data.title;
+  let isDraft = false;
+  if (title.startsWith(DRAFT_PREFIX)) {
+    title = title.substring(DRAFT_PREFIX.length);
+    isDraft = true;
+  }
+
   return {
     number: data.number,
     displayNumber: `Pull Request #${data.number}`,
     state: data.state,
-    title: data.title,
-    body: data.body,
+    title,
+    isDraft,
+    bodyStruct: getPrBodyStruct(data.body),
     sha: data.head.sha,
     sourceBranch: data.head.label,
     targetBranch: data.base.ref,
@@ -105,7 +130,7 @@ function toRenovatePR(data: helper.PR): Pr | null {
     cannotMergeReason: data.mergeable
       ? undefined
       : `pr.mergeable="${data.mergeable}"`,
-    hasAssignees: !!(data.assignee?.login || is.nonEmptyArray(data.assignees)),
+    hasAssignees: !!(data.assignee?.login ?? is.nonEmptyArray(data.assignees)),
   };
 }
 
@@ -121,20 +146,20 @@ function matchesState(actual: string, expected: string): boolean {
 }
 
 function findCommentByTopic(
-  comments: helper.Comment[],
+  comments: Comment[],
   topic: string
-): helper.Comment | null {
-  return comments.find((c) => c.body.startsWith(`### ${topic}\n\n`));
+): Comment | null {
+  return comments.find((c) => c.body.startsWith(`### ${topic}\n\n`)) ?? null;
 }
 
 function findCommentByContent(
-  comments: helper.Comment[],
+  comments: Comment[],
   content: string
-): helper.Comment | null {
-  return comments.find((c) => c.body.trim() === content);
+): Comment | null {
+  return comments.find((c) => c.body.trim() === content) ?? null;
 }
 
-function getLabelList(): Promise<helper.Label[]> {
+function getLabelList(): Promise<Label[]> {
   if (config.labelList === null) {
     const repoLabels = helper
       .getRepoLabels(config.repository, {
@@ -156,11 +181,11 @@ function getLabelList(): Promise<helper.Label[]> {
       .catch((err) => {
         // Will fail if owner of repo is not org or Gitea version < 1.12
         logger.debug(`Unable to fetch organization labels`);
-        return [];
+        return [] as Label[];
       });
 
     config.labelList = Promise.all([repoLabels, orgLabels]).then((labels) =>
-      [].concat(...labels)
+      ([] as Label[]).concat(...labels)
     );
   }
 
@@ -170,7 +195,7 @@ function getLabelList(): Promise<helper.Label[]> {
 async function lookupLabelByName(name: string): Promise<number | null> {
   logger.debug(`lookupLabelByName(${name})`);
   const labelList = await getLabelList();
-  return labelList.find((l) => l.name === name)?.id;
+  return labelList.find((l) => l.name === name)?.id ?? null;
 }
 
 const platform: Platform = {
@@ -183,7 +208,9 @@ const platform: Platform = {
     }
 
     if (endpoint) {
-      defaults.endpoint = ensureTrailingSlash(endpoint);
+      let baseEndpoint = trimTrailingApiPath(endpoint);
+      baseEndpoint = ensureTrailingSlash(baseEndpoint);
+      defaults.endpoint = baseEndpoint;
     } else {
       logger.debug('Using default Gitea endpoint: ' + defaults.endpoint);
     }
@@ -192,7 +219,7 @@ const platform: Platform = {
     let gitAuthor: string;
     try {
       const user = await helper.getCurrentUser({ token });
-      gitAuthor = `${user.full_name || user.username} <${user.email}>`;
+      gitAuthor = `${user.full_name ?? user.username} <${user.email}>`;
       botUserID = user.id;
       botUserName = user.username;
       defaults.version = await helper.getVersion({ token });
@@ -217,7 +244,7 @@ const platform: Platform = {
   ): Promise<string | null> {
     const repo = repoName ?? config.repository;
     const contents = await helper.getRepoContents(repo, fileName, branchOrTag);
-    return contents.contentString;
+    return contents.contentString ?? null;
   },
 
   async getJsonFile(
@@ -225,22 +252,21 @@ const platform: Platform = {
     repoName?: string,
     branchOrTag?: string
   ): Promise<any | null> {
-    const raw = await platform.getRawFile(fileName, repoName, branchOrTag);
-    if (fileName.endsWith('.json5')) {
-      return JSON5.parse(raw);
-    }
-    return JSON.parse(raw);
+    // TODO #7154
+    const raw = (await platform.getRawFile(fileName, repoName, branchOrTag))!;
+    return JSON5.parse(raw);
   },
 
   async initRepo({
     repository,
     cloneSubmodules,
+    gitUrl,
   }: RepoParams): Promise<RepoResult> {
-    let repo: helper.Repo;
+    let repo: Repo;
 
     config = {} as any;
     config.repository = repository;
-    config.cloneSubmodules = cloneSubmodules;
+    config.cloneSubmodules = !!cloneSubmodules;
 
     // Attempt to fetch information about repository
     try {
@@ -293,18 +319,12 @@ const platform: Platform = {
     config.defaultBranch = repo.default_branch;
     logger.debug(`${repository} default branch = ${config.defaultBranch}`);
 
-    // Find options for current host and determine Git endpoint
-    const opts = hostRules.find({
-      hostType: PlatformId.Gitea,
-      url: defaults.endpoint,
-    });
-    const gitEndpoint = URL.parse(repo.clone_url);
-    gitEndpoint.auth = opts.token;
+    const url = getRepoUrl(repo, gitUrl, defaults.endpoint);
 
     // Initialize Git storage
     await git.initRepo({
       ...config,
-      url: URL.format(gitEndpoint),
+      url,
     });
 
     // Reset cached resources
@@ -315,6 +335,7 @@ const platform: Platform = {
     return {
       defaultBranch: config.defaultBranch,
       isFork: !!repo.fork,
+      repoFingerprint: repoFingerprint(repo.id, defaults.endpoint),
     };
   },
 
@@ -325,7 +346,7 @@ const platform: Platform = {
         uid: botUserID,
         archived: false,
       });
-      return repos.map((r) => r.full_name);
+      return repos.filter((r) => !r.mirror).map((r) => r.full_name);
     } catch (err) {
       logger.error({ err }, 'Gitea getRepos() error');
       throw err;
@@ -342,7 +363,9 @@ const platform: Platform = {
     try {
       // Create new status for branch commit
       const branchCommit = git.getBranchCommit(branchName);
-      await helper.createCommitStatus(config.repository, branchCommit, {
+      // TODO: check branchCommit
+
+      await helper.createCommitStatus(config.repository, branchCommit!, {
         state: helper.renovateToGiteaStatusMapping[state] || 'pending',
         context,
         description,
@@ -359,7 +382,7 @@ const platform: Platform = {
   },
 
   async getBranchStatus(branchName: string): Promise<BranchStatus> {
-    let ccs: helper.CombinedCommitStatus;
+    let ccs: CombinedCommitStatus;
     try {
       ccs = await helper.getCombinedCommitStatus(config.repository, branchName);
     } catch (err) {
@@ -376,7 +399,7 @@ const platform: Platform = {
 
     logger.debug({ ccs }, 'Branch status check result');
     return (
-      helper.giteaToRenovateStatusMapping[ccs.worstStatus] ||
+      helper.giteaToRenovateStatusMapping[ccs.worstStatus] ??
       BranchStatus.yellow
     );
   },
@@ -413,7 +436,7 @@ const platform: Platform = {
           { useCache: false }
         )
         .then((prs) => {
-          const prList = prs.map(toRenovatePR).filter(Boolean);
+          const prList = prs.map(toRenovatePR).filter(is.truthy);
           logger.debug(`Retrieved ${prList.length} Pull Requests`);
           return prList;
         });
@@ -425,7 +448,7 @@ const platform: Platform = {
   async getPr(number: number): Promise<Pr | null> {
     // Search for pull request in cached list or attempt to query directly
     const prList = await platform.getPrList();
-    let pr = prList.find((p) => p.number === number);
+    let pr = prList.find((p) => p.number === number) ?? null;
     if (pr) {
       logger.debug('Returning from cached PRs');
     } else {
@@ -435,7 +458,8 @@ const platform: Platform = {
 
       // Add pull request to cache for further lookups / queries
       if (config.prList !== null) {
-        (await config.prList).push(pr);
+        // TODO #7154
+        (await config.prList).push(pr!);
       }
     }
 
@@ -451,8 +475,8 @@ const platform: Platform = {
     branchName,
     prTitle: title,
     state = PrState.All,
-  }: FindPRConfig): Promise<Pr> {
-    logger.debug(`findPr(${branchName}, ${title}, ${state})`);
+  }: FindPRConfig): Promise<Pr | null> {
+    logger.debug(`findPr(${branchName}, ${title!}, ${state})`);
     const prList = await platform.getPrList();
     const pr = prList.find(
       (p) =>
@@ -471,13 +495,19 @@ const platform: Platform = {
   async createPr({
     sourceBranch,
     targetBranch,
-    prTitle: title,
+    prTitle,
     prBody: rawBody,
     labels: labelNames,
+    platformOptions,
+    draftPR,
   }: CreatePRConfig): Promise<Pr> {
+    let title = prTitle;
     const base = targetBranch;
     const head = sourceBranch;
     const body = sanitize(rawBody);
+    if (draftPR) {
+      title = DRAFT_PREFIX + title;
+    }
 
     logger.debug(`Creating pull request: ${title} (${head} => ${base})`);
     try {
@@ -489,8 +519,35 @@ const platform: Platform = {
         head,
         title,
         body,
-        labels: labels.filter(Boolean),
+        labels: labels.filter(is.number),
       });
+
+      if (platformOptions?.usePlatformAutomerge) {
+        if (semver.gte(defaults.version, '1.17.0')) {
+          try {
+            await helper.mergePR(config.repository, gpr.number, {
+              // TODO: pass strategy (#16884)
+              Do: config.mergeMethod,
+              merge_when_checks_succeed: true,
+            });
+
+            logger.debug(
+              { prNumber: gpr.number },
+              'Gitea-native automerge: success'
+            );
+          } catch (err) {
+            logger.warn(
+              { err, prNumber: gpr.number },
+              'Gitea-native automerge: fail'
+            );
+          }
+        } else {
+          logger.debug(
+            { prNumber: gpr.number },
+            'Gitea-native automerge: not supported on this version of Gitea. Use 1.17.0 or newer.'
+          );
+        }
+      }
 
       const pr = toRenovatePR(gpr);
       if (!pr) {
@@ -519,8 +576,8 @@ const platform: Platform = {
         });
 
         // If a valid PR was found, return and gracefully recover from the error. Otherwise, abort and throw error.
-        if (pr) {
-          if (pr.title !== title || pr.body !== body) {
+        if (pr?.bodyStruct) {
+          if (pr.title !== title || pr.bodyStruct.hash !== hashBody(body)) {
             logger.debug(
               `Recovered from 409 Conflict, but PR for ${sourceBranch} is outdated. Updating...`
             );
@@ -530,7 +587,7 @@ const platform: Platform = {
               prBody: body,
             });
             pr.title = title;
-            pr.body = body;
+            pr.bodyStruct = getPrBodyStruct(body);
           } else {
             logger.debug(
               `Recovered from 409 Conflict and PR for ${sourceBranch} is up-to-date`
@@ -547,10 +604,15 @@ const platform: Platform = {
 
   async updatePr({
     number,
-    prTitle: title,
+    prTitle,
     prBody: body,
     state,
   }: UpdatePrConfig): Promise<void> {
+    let title = prTitle;
+    if ((await getPrList()).find((pr) => pr.number === number)?.isDraft) {
+      title = DRAFT_PREFIX + title;
+    }
+
     await helper.updatePR(config.repository, number, {
       title,
       ...(body && { body }),
@@ -558,9 +620,11 @@ const platform: Platform = {
     });
   },
 
-  async mergePr({ id }: MergePRConfig): Promise<boolean> {
+  async mergePr({ id, strategy }: MergePRConfig): Promise<boolean> {
     try {
-      await helper.mergePR(config.repository, id, config.mergeMethod);
+      await helper.mergePR(config.repository, id, {
+        Do: getMergeMethod(strategy) ?? config.mergeMethod,
+      });
       return true;
     } catch (err) {
       logger.warn({ err, id }, 'Merging of PR failed');
@@ -582,7 +646,7 @@ const platform: Platform = {
     return config.issueList;
   },
 
-  async getIssue(number: number, useCache = true): Promise<Issue> {
+  async getIssue(number: number, useCache = true): Promise<Issue | null> {
     try {
       const body = (
         await helper.getIssue(config.repository, number, {
@@ -599,7 +663,7 @@ const platform: Platform = {
     }
   },
 
-  async findIssue(title: string): Promise<Issue> {
+  async findIssue(title: string): Promise<Issue | null> {
     const issueList = await platform.getIssueList();
     const issue = issueList.find(
       (i) => i.state === 'open' && i.title === title
@@ -608,8 +672,10 @@ const platform: Platform = {
     if (!issue) {
       return null;
     }
-    logger.debug(`Found Issue #${issue.number}`);
-    return platform.getIssue(issue.number);
+    // TODO: types (#7154)
+    logger.debug(`Found Issue #${issue.number!}`);
+    // TODO #7154
+    return getIssue!(issue.number!);
   },
 
   async ensureIssue({
@@ -631,7 +697,9 @@ const platform: Platform = {
       }
 
       const labels = Array.isArray(labelNames)
-        ? await Promise.all(labelNames.map(lookupLabelByName))
+        ? (await Promise.all(labelNames.map(lookupLabelByName))).filter(
+            is.number
+          )
         : undefined;
 
       // Update any matching issues which currently exist
@@ -655,8 +723,10 @@ const platform: Platform = {
         // Close any duplicate issues
         for (const issue of issues) {
           if (issue.state === 'open' && issue.number !== activeIssue.number) {
-            logger.warn(`Closing duplicate Issue #${issue.number}`);
-            await helper.closeIssue(config.repository, issue.number);
+            // TODO: types (#7154)
+            logger.warn(`Closing duplicate Issue #${issue.number!}`);
+            // TODO #7154
+            await helper.closeIssue(config.repository, issue.number!);
           }
         }
 
@@ -667,22 +737,23 @@ const platform: Platform = {
           activeIssue.state === 'open'
         ) {
           logger.debug(
-            `Issue #${activeIssue.number} is open and up to date - nothing to do`
+            // TODO: types (#7154)
+            `Issue #${activeIssue.number!} is open and up to date - nothing to do`
           );
           return null;
         }
 
         // Update issue body and re-open if enabled
-        logger.debug(`Updating Issue #${activeIssue.number}`);
+        // TODO: types (#7154)
+        logger.debug(`Updating Issue #${activeIssue.number!}`);
         const existingIssue = await helper.updateIssue(
           config.repository,
-          activeIssue.number,
+          // TODO #7154
+          activeIssue.number!,
           {
             body,
             title,
-            state: shouldReOpen
-              ? 'open'
-              : (activeIssue.state as helper.IssueState),
+            state: shouldReOpen ? 'open' : (activeIssue.state as IssueState),
           }
         );
 
@@ -698,7 +769,8 @@ const platform: Platform = {
         ) {
           await helper.updateIssueLabels(
             config.repository,
-            activeIssue.number,
+            // TODO #7154
+            activeIssue.number!,
             {
               labels,
             }
@@ -731,7 +803,8 @@ const platform: Platform = {
     for (const issue of issueList) {
       if (issue.state === 'open' && issue.title === title) {
         logger.debug({ number: issue.number }, 'Closing issue');
-        await helper.closeIssue(config.repository, issue.number);
+        // TODO #7154
+        await helper.closeIssue(config.repository, issue.number!);
       }
     }
   },
@@ -744,8 +817,6 @@ const platform: Platform = {
     } else {
       logger.warn({ issue, labelName }, 'Failed to lookup label for deletion');
     }
-
-    return null;
   },
 
   getRepoForceRebase(): Promise<boolean> {
@@ -762,7 +833,7 @@ const platform: Platform = {
       const commentList = await helper.getComments(config.repository, issue);
 
       // Search comment by either topic or exact body
-      let comment: helper.Comment | null = null;
+      let comment: Comment | null = null;
       if (topic) {
         comment = findCommentByTopic(commentList, topic);
         body = `### ${topic}\n\n${body}`;
@@ -805,7 +876,7 @@ const platform: Platform = {
     logger.debug(`Ensuring comment "${key}" in #${issue} is removed`);
     const commentList = await helper.getComments(config.repository, issue);
 
-    let comment: helper.Comment | null = null;
+    let comment: Comment | null = null;
     if (deleteConfig.type === 'by-topic') {
       comment = findCommentByTopic(commentList, deleteConfig.topic);
     } else if (deleteConfig.type === 'by-content') {

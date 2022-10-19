@@ -1,10 +1,10 @@
-import { loadJsonFixture } from '../../../../../../../test/util';
+import { Fixtures } from '../../../../../../../test/fixtures';
 import { getLockedDependencies } from './get-locked';
 
 jest.mock('../../../../../../util/fs');
 
-const packageLockJson = loadJsonFixture('package-lock.json');
-const bundledPackageLockJson = loadJsonFixture('bundled.package-lock.json');
+const packageLockJson = Fixtures.getJson('package-lock.json');
+const bundledPackageLockJson = Fixtures.getJson('bundled.package-lock.json');
 
 describe('modules/manager/npm/update/locked-dependency/package-lock/get-locked', () => {
   describe('getLockedDependencies()', () => {
@@ -13,38 +13,43 @@ describe('modules/manager/npm/update/locked-dependency/package-lock/get-locked',
         []
       );
     });
+
     it('returns empty if failed to parse', () => {
       expect(getLockedDependencies({}, 'some-dep', '1.0.0')).toEqual([]);
     });
+
     it('finds direct dependency', () => {
       expect(
         getLockedDependencies(packageLockJson, 'express', '4.0.0')
-      ).toMatchSnapshot([
+      ).toMatchObject([
         {
           resolved: 'https://registry.npmjs.org/express/-/express-4.0.0.tgz',
           version: '4.0.0',
         },
       ]);
     });
+
     it('finds indirect dependency', () => {
       expect(
         getLockedDependencies(packageLockJson, 'send', '0.2.0')
-      ).toMatchSnapshot([
+      ).toMatchObject([
         {
           resolved: 'https://registry.npmjs.org/send/-/send-0.2.0.tgz',
           version: '0.2.0',
         },
       ]);
     });
+
     it('finds any version', () => {
       expect(getLockedDependencies(packageLockJson, 'send', null)).toHaveLength(
         2
       );
     });
+
     it('finds bundled dependency', () => {
       expect(
         getLockedDependencies(bundledPackageLockJson, 'ansi-regex', '3.0.0')
-      ).toMatchSnapshot([
+      ).toMatchObject([
         {
           bundled: true,
           dev: true,

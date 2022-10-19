@@ -77,8 +77,8 @@ function getUnsupportedEnabledManagers(enabledManagers: string[]): string[] {
   );
 }
 
-function getDeprecationMessage(option: string): string {
-  const deprecatedOptions = {
+function getDeprecationMessage(option: string): string | undefined {
+  const deprecatedOptions: Record<string, string | undefined> = {
     branchName: `Direct editing of branchName is now deprecated. Please edit branchPrefix, additionalBranchPrefix, or branchTopic instead`,
     commitMessage: `Direct editing of commitMessage is now deprecated. Please edit commitMessage's subcomponents instead.`,
     prTitle: `Direct editing of prTitle is now deprecated. Please edit commitMessage subcomponents instead as they will be passed through to prTitle.`,
@@ -86,13 +86,13 @@ function getDeprecationMessage(option: string): string {
   return deprecatedOptions[option];
 }
 
-export function getParentName(parentPath: string): string {
+export function getParentName(parentPath: string | undefined): string {
   return parentPath
     ? parentPath
         .replace(regEx(/\.?encrypted$/), '')
         .replace(regEx(/\[\d+\]$/), '')
         .split('.')
-        .pop()
+        .pop()!
     : '.';
 }
 
@@ -167,7 +167,7 @@ export async function validateConfig(
       if (getDeprecationMessage(key)) {
         warnings.push({
           topic: 'Deprecation Warning',
-          message: getDeprecationMessage(key),
+          message: getDeprecationMessage(key)!,
         });
       }
       const templateKeys = [
@@ -179,7 +179,8 @@ export async function validateConfig(
       ];
       if ((key.endsWith('Template') || templateKeys.includes(key)) && val) {
         try {
-          let res = template.compile(val.toString(), config, false);
+          // TODO: validate string #7154
+          let res = template.compile((val as string).toString(), config, false);
           res = template.compile(res, config, false);
           template.compile(res, config, false);
         } catch (err) {
@@ -195,6 +196,8 @@ export async function validateConfig(
         optionParents[key] &&
         optionParents[key] !== parentName
       ) {
+        // TODO: types (#7154)
+        // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
         const message = `${key} should only be configured within a "${optionParents[key]}" object. Was found in ${parentName}`;
         warnings.push({
           topic: `${parentPath ? `${parentPath}.` : ''}${key}`,
@@ -224,6 +227,15 @@ export async function validateConfig(
             message: `Invalid regExp for ${currentPath}: \`${val}\``,
           });
         }
+      } else if (
+        key === 'matchCurrentValue' &&
+        is.string(val) &&
+        !configRegexPredicate(val)
+      ) {
+        errors.push({
+          topic: 'Configuration Error',
+          message: `Invalid regExp for ${currentPath}: \`${val}\``,
+        });
       } else if (key === 'timezone' && val !== null) {
         const [validTimezone, errorMessage] = hasValidTimezone(val as string);
         if (!validTimezone) {
@@ -239,6 +251,15 @@ export async function validateConfig(
             errors.push({
               topic: 'Configuration Error',
               message: `Configuration option \`${currentPath}\` should be boolean. Found: ${JSON.stringify(
+                val
+              )} (${typeof val})`,
+            });
+          }
+        } else if (type === 'integer') {
+          if (!is.number(val)) {
+            errors.push({
+              topic: 'Configuration Error',
+              message: `Configuration option \`${currentPath}\` should be an integer. Found: ${JSON.stringify(
                 val
               )} (${typeof val})`,
             });
@@ -269,7 +290,7 @@ export async function validateConfig(
                     });
                   }
                   if (tzRe.test(subval)) {
-                    const [, timezone] = tzRe.exec(subval);
+                    const [, timezone] = tzRe.exec(subval)!;
                     const [validTimezone, errorMessage] =
                       hasValidTimezone(timezone);
                     if (!validTimezone) {
@@ -302,8 +323,10 @@ export async function validateConfig(
               'excludePackageNames',
               'excludePackagePatterns',
               'excludePackagePrefixes',
+              'matchCurrentValue',
               'matchCurrentVersion',
               'matchSourceUrlPrefixes',
+              'matchSourceUrls',
               'matchUpdateTypes',
             ];
             if (key === 'packageRules') {
@@ -316,7 +339,7 @@ export async function validateConfig(
                         config
                       ),
                     ],
-                  }).migratedConfig.packageRules[0];
+                  }).migratedConfig.packageRules![0];
                   errors.push(
                     ...managerValidator.check({ resolvedRule, currentPath })
                   );
@@ -394,7 +417,7 @@ export async function validateConfig(
                 'autoReplaceStringTemplate',
                 'depTypeTemplate',
               ];
-              // TODO: fix types
+              // TODO: fix types #7154
               for (const regexManager of val as any[]) {
                 if (
                   Object.keys(regexManager).some(
@@ -435,8 +458,9 @@ export async function validateConfig(
                       for (const field of mandatoryFields) {
                         if (
                           !regexManager[`${field}Template`] &&
-                          !regexManager.matchStrings.some((matchString) =>
-                            matchString.includes(`(?<${field}>`)
+                          !regexManager.matchStrings.some(
+                            (matchString: string) =>
+                              matchString.includes(`(?<${field}>`)
                           )
                         ) {
                           errors.push({
@@ -490,8 +514,11 @@ export async function validateConfig(
               }
             }
             if (
-              (selectors.includes(key) || key === 'matchCurrentVersion') &&
-              !rulesRe.test(parentPath) && // Inside a packageRule
+              (selectors.includes(key) ||
+                key === 'matchCurrentVersion' ||
+                key === 'matchCurrentValue') &&
+              // TODO: can be undefined ? #7154
+              !rulesRe.test(parentPath!) && // Inside a packageRule
               (parentPath || !isPreset) // top level in a preset
             ) {
               errors.push({
@@ -519,7 +546,7 @@ export async function validateConfig(
           currentPath !== 'force.constraints'
         ) {
           if (is.plainObject(val)) {
-            if (key === 'aliases') {
+            if (key === 'registryAliases') {
               const res = validateAliasObject(val);
               if (res !== true) {
                 errors.push({

@@ -1,5 +1,20 @@
 # Bitbucket Server Support
 
+## Authentication
+
+First, create a [HTTP access token](https://confluence.atlassian.com/bitbucketserver/personal-access-tokens-939515499.html) for the bot account.
+Let Renovate use your HTTP access token by doing _one_ of the following:
+
+- Set your HTTP access token as a `password` in your `config.js` file
+- Set your HTTP access token as an environment variable `RENOVATE_PASSWORD`
+- Set your HTTP access token when you run Renovate in the CLI with `--password=`
+
+Remember to set `platform=bitbucket-server` somewhere in your Renovate config file.
+
+If you're not using `@renovate-bot` as username then set your custom `username` for the bot account.
+
+If you use MySQL or MariaDB you must set `unicodeEmoji` to `false` in the global bot config (`RENOVATE_CONFIG_FILE`) to prevent issues with emojis.
+
 ## Unsupported platform features/concepts
 
 - Adding assignees to PRs not supported (does not seem to be a Bitbucket concept)
@@ -52,4 +67,4 @@ You should then get a "Configure Renovate" onboarding PR in any projects that `@
 ## Supported versions
 
 We support all Bitbucket Server versions which are not EOL.
-See [Atlassian Support End of Life Policy](https://confluence.atlassian.com/support/atlassian-support-end-of-life-policy-201851003.html#AtlassianSupportEndofLifePolicy-BitbucketServer) for uptodate versions.
+See [Atlassian Support End of Life Policy](https://confluence.atlassian.com/support/atlassian-support-end-of-life-policy-201851003.html#AtlassianSupportEndofLifePolicy-BitbucketServer) for up-to-date versions.

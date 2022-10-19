@@ -8,6 +8,7 @@ import { BranchStatus, PrState, VulnerabilityAlert } from '../../../types';
 import * as git from '../../../util/git';
 import * as hostRules from '../../../util/host-rules';
 import { BitbucketHttp, setBaseUrl } from '../../../util/http/bitbucket';
+import type { HttpOptions } from '../../../util/http/types';
 import { regEx } from '../../../util/regex';
 import { sanitize } from '../../../util/sanitize';
 import type {
@@ -27,12 +28,14 @@ import type {
   RepoResult,
   UpdatePrConfig,
 } from '../types';
+import { repoFingerprint } from '../util';
 import { smartTruncate } from '../utils/pr-body';
 import { readOnlyIssueBody } from '../utils/read-only-issue-body';
 import * as comments from './comments';
 import * as utils from './utils';
 import {
   Account,
+  EffectiveReviewer,
   PrResponse,
   RepoInfoBody,
   mergeBodyTransformer,
@@ -48,16 +51,17 @@ const defaults = { endpoint: BITBUCKET_PROD_ENDPOINT };
 
 const pathSeparator = '/';
 
-let renovateUserUuid: string;
+let renovateUserUuid: string | null = null;
 
 export async function initPlatform({
   endpoint,
   username,
   password,
+  token,
 }: PlatformParams): Promise<PlatformResult> {
-  if (!(username && password)) {
+  if (!(username && password) && !token) {
     throw new Error(
-      'Init: You must configure a Bitbucket username and password'
+      'Init: You must configure either a Bitbucket token or username and password'
     );
   }
   if (endpoint && endpoint !== BITBUCKET_PROD_ENDPOINT) {
@@ -68,13 +72,18 @@ export async function initPlatform({
   }
   setBaseUrl(defaults.endpoint);
   renovateUserUuid = null;
+  const options: HttpOptions = {
+    useCache: false,
+  };
+  if (token) {
+    options.token = token;
+  } else {
+    options.username = username;
+    options.password = password;
+  }
   try {
     const { uuid } = (
-      await bitbucketHttp.getJson<Account>('/2.0/user', {
-        username,
-        password,
-        useCache: false,
-      })
+      await bitbucketHttp.getJson<Account>('/2.0/user', options)
     ).body;
     renovateUserUuid = uuid;
   } catch (err) {
@@ -89,7 +98,7 @@ export async function initPlatform({
   }
   // TODO: Add a connection check that endpoint/username/password combination are valid (#9594)
   const platformConfig: PlatformResult = {
-    endpoint: endpoint || BITBUCKET_PROD_ENDPOINT,
+    endpoint: endpoint ?? BITBUCKET_PROD_ENDPOINT,
   };
   return Promise.resolve(platformConfig);
 }
@@ -125,7 +134,7 @@ export async function getRawFile(
 
   const url =
     `/2.0/repositories/${repo}/src/` +
-    (finalBranchOrTag || `HEAD`) +
+    (finalBranchOrTag ?? `HEAD`) +
     `/${path}`;
   const res = await bitbucketHttp.get(url);
   return res.body;
@@ -136,11 +145,9 @@ export async function getJsonFile(
   repoName?: string,
   branchOrTag?: string
 ): Promise<any | null> {
-  const raw = await getRawFile(fileName, repoName, branchOrTag);
-  if (fileName.endsWith('.json5')) {
-    return JSON5.parse(raw);
-  }
-  return JSON.parse(raw);
+  // TODO #7154
+  const raw = (await getRawFile(fileName, repoName, branchOrTag)) as string;
+  return JSON5.parse(raw);
 }
 
 // Initialize bitbucket by getting base branch and SHA
@@ -191,11 +198,15 @@ export async function initRepo({
   // Converts API hostnames to their respective HTTP git hosts:
   // `api.bitbucket.org`  to `bitbucket.org`
   // `api-staging.<host>` to `staging.<host>`
-  const hostnameWithoutApiPrefix = regEx(/api[.|-](.+)/).exec(hostname)[1];
+  // TODO #7154
+  const hostnameWithoutApiPrefix = regEx(/api[.|-](.+)/).exec(hostname!)?.[1];
 
+  const auth = opts.token
+    ? `x-token-auth:${opts.token}`
+    : `${opts.username!}:${opts.password!}`;
   const url = git.getUrl({
     protocol: 'https',
-    auth: `${opts.username}:${opts.password}`,
+    auth,
     hostname: hostnameWithoutApiPrefix,
     repository,
   });
@@ -208,6 +219,7 @@ export async function initRepo({
   const repoConfig: RepoResult = {
     defaultBranch: info.mainbranch,
     isFork: info.isFork,
+    repoFingerprint: repoFingerprint(info.uuid, defaults.endpoint),
   };
   return repoConfig;
 }
@@ -250,6 +262,8 @@ export async function findPr({
   prTitle,
   state = PrState.All,
 }: FindPRConfig): Promise<Pr | null> {
+  // TODO: types (#7154)
+  // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
   logger.debug(`findPr(${branchName}, ${prTitle}, ${state})`);
   const prList = await getPrList();
   const pr = prList.find(
@@ -261,7 +275,7 @@ export async function findPr({
   if (pr) {
     logger.debug(`Found PR #${pr.number}`);
   }
-  return pr;
+  return pr ?? null;
 }
 
 // Gets details for a PR
@@ -297,7 +311,9 @@ interface BranchResponse {
 }
 
 // Return the commit SHA for a branch
-async function getBranchCommit(branchName: string): Promise<string | null> {
+async function getBranchCommit(
+  branchName: string
+): Promise<string | undefined> {
   try {
     const branch = (
       await bitbucketHttp.getJson<BranchResponse>(
@@ -309,7 +325,7 @@ async function getBranchCommit(branchName: string): Promise<string | null> {
     return branch.target.hash;
   } catch (err) /* istanbul ignore next */ {
     logger.debug({ err }, `getBranchCommit('${branchName}') failed'`);
-    return null;
+    return undefined;
   }
 }
 
@@ -329,6 +345,8 @@ async function getStatus(
 ): Promise<utils.BitbucketStatus[]> {
   const sha = await getBranchCommit(branchName);
   return utils.accumulateValues<utils.BitbucketStatus>(
+    // TODO: types (#7154)
+    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
     `/2.0/repositories/${config.repository}/commit/${sha}/statuses`,
     'get',
     { useCache }
@@ -372,9 +390,9 @@ export async function getBranchStatusCheck(
   context: string
 ): Promise<BranchStatus | null> {
   const statuses = await getStatus(branchName);
-  const bbState = (statuses.find((status) => status.key === context) || {})
-    .state;
-  return bbToRenovateStatusMapping[bbState] || null;
+  const bbState = statuses.find((status) => status.key === context)?.state;
+  // TODO #7154
+  return bbToRenovateStatusMapping[bbState!] || null;
 }
 
 export async function setBranchStatus({
@@ -387,7 +405,7 @@ export async function setBranchStatus({
   const sha = await getBranchCommit(branchName);
 
   // TargetUrl can not be empty so default to bitbucket
-  const url = targetUrl || /* istanbul ignore next */ 'https://bitbucket.org';
+  const url = targetUrl ?? /* istanbul ignore next */ 'https://bitbucket.org';
 
   const body = {
     name: context,
@@ -398,6 +416,8 @@ export async function setBranchStatus({
   };
 
   await bitbucketHttp.postJson(
+    // TODO: types (#7154)
+    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
     `/2.0/repositories/${config.repository}/commit/${sha}/statuses/build`,
     { body }
   );
@@ -429,7 +449,7 @@ async function findOpenIssues(title: string): Promise<BbIssue[]> {
   }
 }
 
-export async function findIssue(title: string): Promise<Issue> {
+export async function findIssue(title: string): Promise<Issue | null> {
   logger.debug(`findIssue(${title})`);
 
   /* istanbul ignore if */
@@ -467,7 +487,8 @@ export function massageMarkdown(input: string): string {
     .replace(regEx(/<\/?summary>/g), '**')
     .replace(regEx(/<\/?details>/g), '')
     .replace(regEx(`\n---\n\n.*?<!-- rebase-check -->.*?\n`), '')
-    .replace(regEx(/\]\(\.\.\/pull\//g), '](../../pull-requests/');
+    .replace(regEx(/\]\(\.\.\/pull\//g), '](../../pull-requests/')
+    .replace(regEx(/<!--renovate-(?:debug|config-hash):.*?-->/g), '');
 }
 
 export async function ensureIssue({
@@ -486,7 +507,7 @@ export async function ensureIssue({
   }
   try {
     let issues = await findOpenIssues(title);
-    if (!issues.length) {
+    if (!issues.length && reuseTitle) {
       issues = await findOpenIssues(reuseTitle);
     }
     if (issues.length) {
@@ -497,7 +518,7 @@ export async function ensureIssue({
       const [issue] = issues;
       if (
         issue.title !== title ||
-        String(issue.content.raw).trim() !== description.trim()
+        String(issue.content?.raw).trim() !== description.trim()
       ) {
         logger.debug('Issue updated');
         await bitbucketHttp.putJson(
@@ -594,7 +615,8 @@ export async function addReviewers(
 ): Promise<void> {
   logger.debug(`Adding reviewers '${reviewers.join(', ')}' to #${prId}`);
 
-  const { title } = await getPr(prId);
+  // TODO #7154
+  const { title } = (await getPr(prId))!;
 
   const body = {
     title,
@@ -637,7 +659,7 @@ export function ensureCommentRemoval(
 async function sanitizeReviewers(
   reviewers: Account[],
   err: any
-): Promise<Account[]> {
+): Promise<Account[] | undefined> {
   if (err.statusCode === 400 && err.body?.error?.fields?.reviewers) {
     const sanitizedReviewers: Account[] = [];
 
@@ -717,12 +739,12 @@ export async function createPr({
 
   if (platformOptions?.bbUseDefaultReviewers) {
     const reviewersResponse = (
-      await bitbucketHttp.getJson<utils.PagedResult<Account>>(
-        `/2.0/repositories/${config.repository}/default-reviewers`
+      await bitbucketHttp.getJson<utils.PagedResult<EffectiveReviewer>>(
+        `/2.0/repositories/${config.repository}/effective-default-reviewers`
       )
     ).body;
-    reviewers = reviewersResponse.values.map((reviewer: Account) => ({
-      uuid: reviewer.uuid,
+    reviewers = reviewersResponse.values.map((reviewer: EffectiveReviewer) => ({
+      uuid: reviewer.user.uuid,
     }));
   }
 
@@ -844,6 +866,8 @@ export async function mergePr({
   id: prNo,
   strategy: mergeStrategy,
 }: MergePRConfig): Promise<boolean> {
+  // TODO: types (#7154)
+  // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
   logger.debug(`mergePr(${prNo}, ${branchName}, ${mergeStrategy})`);
 
   // Bitbucket Cloud does not support a rebase-alike; https://jira.atlassian.com/browse/BCLOUD-16610

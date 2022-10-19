@@ -1,6 +1,7 @@
 import { PlatformId } from '../../constants';
 import { bootstrap } from '../../proxy';
 import * as hostRules from '../host-rules';
+import { dnsLookup } from './dns';
 import { applyHostRules } from './host-rules';
 
 const url = 'https://github.com';
@@ -11,6 +12,7 @@ describe('util/http/host-rules', () => {
   const options = {
     hostType: PlatformId.Github,
   };
+
   beforeEach(() => {
     // reset module
     jest.resetAllMocks();
@@ -32,6 +34,7 @@ describe('util/http/host-rules', () => {
       hostType: 'npm',
       authType: 'Basic',
       token: 'XXX',
+      timeout: 5000,
     });
 
     hostRules.add({
@@ -51,8 +54,8 @@ describe('util/http/host-rules', () => {
 
   it('adds token', () => {
     expect(applyHostRules(url, { ...options })).toMatchInlineSnapshot(`
-      Object {
-        "context": Object {
+      {
+        "context": {
           "authType": undefined,
         },
         "hostType": "github",
@@ -64,7 +67,7 @@ describe('util/http/host-rules', () => {
   it('adds auth', () => {
     expect(applyHostRules(url, { hostType: PlatformId.Gitea }))
       .toMatchInlineSnapshot(`
-      Object {
+      {
         "hostType": "gitea",
         "password": "password",
         "username": undefined,
@@ -74,11 +77,12 @@ describe('util/http/host-rules', () => {
 
   it('adds custom auth', () => {
     expect(applyHostRules(url, { hostType: 'npm' })).toMatchInlineSnapshot(`
-      Object {
-        "context": Object {
+      {
+        "context": {
           "authType": "Basic",
         },
         "hostType": "npm",
+        "timeout": 5000,
         "token": "XXX",
       }
     `);
@@ -87,7 +91,7 @@ describe('util/http/host-rules', () => {
   it('skips', () => {
     expect(applyHostRules(url, { ...options, token: 'xxx' }))
       .toMatchInlineSnapshot(`
-      Object {
+      {
         "hostType": "github",
         "token": "xxx",
       }
@@ -98,12 +102,28 @@ describe('util/http/host-rules', () => {
     hostRules.add({ enableHttp2: true });
     expect(applyHostRules(url, { ...options, token: 'xxx' }))
       .toMatchInlineSnapshot(`
-      Object {
+      {
         "hostType": "github",
         "http2": true,
         "token": "xxx",
       }
     `);
+  });
+
+  it('uses dnsCache', () => {
+    hostRules.add({ dnsCache: true });
+    expect(applyHostRules(url, { ...options, token: 'xxx' })).toMatchObject({
+      hostType: 'github',
+      lookup: dnsLookup,
+      token: 'xxx',
+    });
+  });
+
+  it('uses http keepalives', () => {
+    hostRules.add({ keepalive: true });
+    expect(
+      applyHostRules(url, { ...options, token: 'xxx' }).agent
+    ).toBeDefined();
   });
 
   it('disables http2', () => {
@@ -112,7 +132,7 @@ describe('util/http/host-rules', () => {
     hostRules.add({ enableHttp2: true });
     expect(applyHostRules(url, { ...options, token: 'xxx' }))
       .toMatchInlineSnapshot(`
-      Object {
+      {
         "hostType": "github",
         "token": "xxx",
       }
@@ -122,7 +142,7 @@ describe('util/http/host-rules', () => {
   it('noAuth', () => {
     expect(applyHostRules(url, { ...options, noAuth: true }))
       .toMatchInlineSnapshot(`
-      Object {
+      {
         "hostType": "github",
         "noAuth": true,
       }

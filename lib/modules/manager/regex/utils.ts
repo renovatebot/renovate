@@ -1,4 +1,6 @@
 import { URL } from 'url';
+import is from '@sindresorhus/is';
+import type { RegexManagerTemplates } from '../../../config/types';
 import { logger } from '../../../logger';
 import * as template from '../../../util/template';
 import type { CustomExtractConfig, PackageDependency } from '../types';
@@ -14,48 +16,55 @@ export const validMatchFields = [
   'extractVersion',
   'registryUrl',
   'depType',
-];
+] as const;
+
+type ValidMatchFields = typeof validMatchFields[number];
+
+function updateDependency(
+  dependency: PackageDependency,
+  field: ValidMatchFields,
+  value: string
+): void {
+  switch (field) {
+    case 'registryUrl':
+      // check if URL is valid and pack inside an array
+      try {
+        const url = new URL(value).toString();
+        dependency.registryUrls = [url];
+      } catch (err) {
+        logger.warn({ value }, 'Invalid regex manager registryUrl');
+      }
+      break;
+    default:
+      dependency[field] = value;
+      break;
+  }
+}
 
 export function createDependency(
   extractionTemplate: ExtractionTemplate,
   config: CustomExtractConfig,
   dep?: PackageDependency
-): PackageDependency {
-  const dependency = dep || {};
+): PackageDependency | null {
+  const dependency = dep ?? {};
   const { groups, replaceString } = extractionTemplate;
 
-  function updateDependency(field: string, value: string): void {
-    switch (field) {
-      case 'registryUrl':
-        // check if URL is valid and pack inside an array
-        try {
-          const url = new URL(value).toString();
-          dependency.registryUrls = [url];
-        } catch (err) {
-          logger.warn({ value }, 'Invalid regex manager registryUrl');
-        }
-        break;
-      default:
-        dependency[field] = value;
-        break;
-    }
-  }
-
   for (const field of validMatchFields) {
-    const fieldTemplate = `${field}Template`;
-    if (config[fieldTemplate]) {
+    const fieldTemplate = `${field}Template` as keyof RegexManagerTemplates;
+    const tmpl = config[fieldTemplate];
+    if (tmpl) {
       try {
-        const compiled = template.compile(config[fieldTemplate], groups, false);
-        updateDependency(field, compiled);
+        const compiled = template.compile(tmpl, groups, false);
+        updateDependency(dependency, field, compiled);
       } catch (err) {
         logger.warn(
-          { template: config[fieldTemplate] },
+          { template: tmpl },
           'Error compiling template for custom manager'
         );
         return null;
       }
     } else if (groups[field]) {
-      updateDependency(field, groups[field]);
+      updateDependency(dependency, field, groups[field]);
     }
   }
   dependency.replaceString = replaceString;
@@ -67,7 +76,7 @@ export function regexMatchAll(
   content: string
 ): RegExpMatchArray[] {
   const matches: RegExpMatchArray[] = [];
-  let matchResult;
+  let matchResult: RegExpMatchArray | null;
   do {
     matchResult = regex.exec(content);
     if (matchResult) {
@@ -92,4 +101,17 @@ export function mergeExtractionTemplate(
     groups: mergeGroups(base.groups, addition.groups),
     replaceString: addition.replaceString ?? base.replaceString,
   };
+}
+
+export function isValidDependency({
+  depName,
+  currentValue,
+  currentDigest,
+}: PackageDependency): boolean {
+  // check if all the fields are set
+  return (
+    is.nonEmptyStringAndNotWhitespace(depName) &&
+    (is.nonEmptyStringAndNotWhitespace(currentDigest) ||
+      is.nonEmptyStringAndNotWhitespace(currentValue))
+  );
 }

@@ -1,4 +1,4 @@
-import { extractPackageFile } from './extract';
+import { extractPackageFile } from '.';
 
 describe('modules/manager/pyenv/extract', () => {
   describe('extractPackageFile()', () => {
@@ -8,12 +8,14 @@ describe('modules/manager/pyenv/extract', () => {
         { depName: 'python', currentValue: '3.7.1', datasource: 'docker' },
       ]);
     });
+
     it('supports ranges', () => {
       const res = extractPackageFile('3.8\n');
       expect(res.deps).toEqual([
         { depName: 'python', currentValue: '3.8', datasource: 'docker' },
       ]);
     });
+
     it('skips non ranges', () => {
       const res = extractPackageFile('latestn');
       expect(res.deps).toEqual([

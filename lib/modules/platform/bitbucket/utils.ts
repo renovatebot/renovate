@@ -2,11 +2,8 @@ import url from 'url';
 import type { MergeStrategy } from '../../../config/types';
 import { BranchStatus, PrState } from '../../../types';
 import { BitbucketHttp } from '../../../util/http/bitbucket';
-import type {
-  HttpOptions,
-  HttpPostOptions,
-  HttpResponse,
-} from '../../../util/http/types';
+import type { HttpOptions, HttpResponse } from '../../../util/http/types';
+import { getPrBodyStruct } from '../pr-body';
 import type { Pr } from '../types';
 import type { BitbucketMergeStrategy, MergeRequestBody } from './types';
 
@@ -37,6 +34,7 @@ export interface RepoInfo {
   mainbranch: string;
   mergeMethod: string;
   has_issues: boolean;
+  uuid: string;
 }
 
 export type BitbucketBranchState = 'SUCCESSFUL' | 'FAILED' | 'INPROGRESS';
@@ -50,6 +48,7 @@ export interface RepoInfoBody {
   owner: { username: string };
   mainbranch: { name: string };
   has_issues: boolean;
+  uuid: string;
 }
 
 export function repoInfoTransformer(repoInfoBody: RepoInfoBody): RepoInfo {
@@ -59,6 +58,7 @@ export function repoInfoTransformer(repoInfoBody: RepoInfoBody): RepoInfo {
     mainbranch: repoInfoBody.mainbranch.name,
     mergeMethod: 'merge',
     has_issues: repoInfoBody.has_issues,
+    uuid: repoInfoBody.uuid,
   };
 }
 
@@ -70,14 +70,14 @@ const bitbucketMergeStrategies: Map<MergeStrategy, BitbucketMergeStrategy> =
   ]);
 
 export function mergeBodyTransformer(
-  mergeStrategy: MergeStrategy
+  mergeStrategy: MergeStrategy | undefined
 ): MergeRequestBody {
   const body: MergeRequestBody = {
     close_source_branch: true,
   };
 
   // The `auto` strategy will use the strategy configured inside Bitbucket.
-  if (mergeStrategy !== 'auto') {
+  if (mergeStrategy && mergeStrategy !== 'auto') {
     body.merge_strategy = bitbucketMergeStrategies.get(mergeStrategy);
   }
 
@@ -99,7 +99,7 @@ export const buildStates: Record<BranchStatus, BitbucketBranchState> = {
 };
 
 const addMaxLength = (inputUrl: string, pagelen = 100): string => {
-  const { search, ...parsedUrl } = url.parse(inputUrl, true); // eslint-disable-line @typescript-eslint/no-unused-vars
+  const { search, ...parsedUrl } = url.parse(inputUrl, true);
   const maxedUrl = url.format({
     ...parsedUrl,
     query: { ...parsedUrl.query, pagelen },
@@ -110,20 +110,20 @@ const addMaxLength = (inputUrl: string, pagelen = 100): string => {
 function callApi<T>(
   apiUrl: string,
   method: string,
-  options?: HttpOptions | HttpPostOptions
+  options?: HttpOptions
 ): Promise<HttpResponse<T>> {
   /* istanbul ignore next */
   switch (method.toLowerCase()) {
     case 'post':
-      return bitbucketHttp.postJson<T>(apiUrl, options as HttpPostOptions);
+      return bitbucketHttp.postJson<T>(apiUrl, options);
     case 'put':
-      return bitbucketHttp.putJson<T>(apiUrl, options as HttpPostOptions);
+      return bitbucketHttp.putJson<T>(apiUrl, options);
     case 'patch':
-      return bitbucketHttp.patchJson<T>(apiUrl, options as HttpPostOptions);
+      return bitbucketHttp.patchJson<T>(apiUrl, options);
     case 'head':
       return bitbucketHttp.headJson<T>(apiUrl, options);
     case 'delete':
-      return bitbucketHttp.deleteJson<T>(apiUrl, options as HttpPostOptions);
+      return bitbucketHttp.deleteJson<T>(apiUrl, options);
     case 'get':
     default:
       return bitbucketHttp.getJson<T>(apiUrl, options);
@@ -133,7 +133,7 @@ function callApi<T>(
 export async function accumulateValues<T = any>(
   reqUrl: string,
   method = 'get',
-  options?: HttpOptions | HttpPostOptions,
+  options?: HttpOptions,
   pagelen?: number
 ): Promise<T[]> {
   let accumulator: T[] = [];
@@ -180,7 +180,7 @@ export function prInfo(pr: PrResponse): Pr {
   return {
     number: pr.id,
     displayNumber: `Pull Request #${pr.id}`,
-    body: pr.summary?.raw,
+    bodyStruct: getPrBodyStruct(pr.summary?.raw),
     sourceBranch: pr.source?.branch?.name,
     targetBranch: pr.destination?.branch?.name,
     title: pr.title,
@@ -196,4 +196,10 @@ export interface Account {
   uuid: string;
   nickname?: string;
   account_status?: string;
+}
+
+export interface EffectiveReviewer {
+  type: string;
+  reviewer_type: string;
+  user: Account;
 }

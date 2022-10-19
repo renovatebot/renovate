@@ -1,4 +1,4 @@
-import { extractPackageFile } from './extract';
+import { extractPackageFile } from '.';
 
 describe('modules/manager/nvm/extract', () => {
   describe('extractPackageFile()', () => {
@@ -13,6 +13,7 @@ describe('modules/manager/nvm/extract', () => {
         },
       ]);
     });
+
     it('supports ranges', () => {
       const res = extractPackageFile('8.4\n');
       expect(res.deps).toEqual([
@@ -24,6 +25,7 @@ describe('modules/manager/nvm/extract', () => {
         },
       ]);
     });
+
     it('skips non ranges', () => {
       const res = extractPackageFile('latestn');
       expect(res.deps).toEqual([

@@ -10,6 +10,7 @@ describe('modules/manager/bundler/host-rules', () => {
   beforeEach(() => {
     clear();
   });
+
   describe('getAuthenticationHeaderValue()', () => {
     it('returns the authentication header with the password', () => {
       expect(
@@ -19,6 +20,7 @@ describe('modules/manager/bundler/host-rules', () => {
         })
       ).toBe('test:password');
     });
+
     it('returns the authentication header with the token', () => {
       expect(
         getAuthenticationHeaderValue({
@@ -27,6 +29,7 @@ describe('modules/manager/bundler/host-rules', () => {
       ).toBe('token');
     });
   });
+
   describe('findAllAuthenticatable()', () => {
     let hostRule: HostRule;
 
@@ -39,6 +42,7 @@ describe('modules/manager/bundler/host-rules', () => {
         token: 'token',
       };
     });
+
     it('returns an empty array if matchHost is missing', () => {
       delete hostRule.matchHost;
       add(hostRule);
@@ -46,6 +50,7 @@ describe('modules/manager/bundler/host-rules', () => {
         findAllAuthenticatable({ hostType: 'nuget' } as any)
       ).toBeEmptyArray();
     });
+
     it('returns an empty array if username is missing and password is present', () => {
       delete hostRule.username;
       delete hostRule.token;
@@ -55,6 +60,7 @@ describe('modules/manager/bundler/host-rules', () => {
         findAllAuthenticatable({ hostType: 'nuget' } as any)
       ).toBeEmptyArray();
     });
+
     it('returns an empty array if password and token are missing', () => {
       delete hostRule.password;
       delete hostRule.token;
@@ -64,6 +70,7 @@ describe('modules/manager/bundler/host-rules', () => {
         findAllAuthenticatable({ hostType: 'nuget' } as any)
       ).toBeEmptyArray();
     });
+
     it('returns the hostRule if using matchHost and password', () => {
       delete hostRule.token;
 
@@ -72,6 +79,7 @@ describe('modules/manager/bundler/host-rules', () => {
         findAllAuthenticatable({ hostType: 'nuget' } as any)
       ).toMatchObject([hostRule]);
     });
+
     it('returns the hostRule if using matchHost and token', () => {
       delete hostRule.password;
 
@@ -80,6 +88,7 @@ describe('modules/manager/bundler/host-rules', () => {
         findAllAuthenticatable({ hostType: 'nuget' } as any)
       ).toMatchObject([hostRule]);
     });
+
     it('returns the hostRule if using baseUrl and password', () => {
       hostRule.matchHost = 'https://nuget.com';
 
@@ -88,6 +97,7 @@ describe('modules/manager/bundler/host-rules', () => {
         findAllAuthenticatable({ hostType: 'nuget' } as any)
       ).toMatchObject([hostRule]);
     });
+
     it('returns the hostRule if using baseUrl and token', () => {
       hostRule.matchHost = 'https://nuget.com';
 

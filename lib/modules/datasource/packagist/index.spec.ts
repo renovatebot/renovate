@@ -1,6 +1,7 @@
 import { getPkgReleases } from '..';
+import { Fixtures } from '../../../../test/fixtures';
 import * as httpMock from '../../../../test/http-mock';
-import { loadJsonFixture } from '../../../../test/util';
+import type { HostRule } from '../../../types';
 import * as _hostRules from '../../../util/host-rules';
 import * as composerVersioning from '../../versioning/composer';
 import { id as versioning } from '../../versioning/loose';
@@ -10,10 +11,10 @@ jest.mock('../../../util/host-rules');
 
 const hostRules = _hostRules;
 
-const includesJson: any = loadJsonFixture('includes.json');
-const beytJson: any = loadJsonFixture('1beyt.json');
-const mailchimpJson: any = loadJsonFixture('mailchimp-api.json');
-const mailchimpDevJson: any = loadJsonFixture('mailchimp-api~dev.json');
+const includesJson = Fixtures.getJson('includes.json');
+const beytJson = Fixtures.getJson('1beyt.json');
+const mailchimpJson = Fixtures.getJson('mailchimp-api.json');
+const mailchimpDevJson = Fixtures.getJson('mailchimp-api~dev.json');
 
 const baseUrl = 'https://packagist.org';
 const datasource = PackagistDatasource.id;
@@ -21,9 +22,10 @@ const datasource = PackagistDatasource.id;
 describe('modules/datasource/packagist/index', () => {
   describe('getReleases', () => {
     let config: any;
+
     beforeEach(() => {
       jest.resetAllMocks();
-      hostRules.find = jest.fn((input) => input);
+      hostRules.find = jest.fn((input: HostRule) => input);
       hostRules.hosts = jest.fn(() => []);
       config = {
         versioning: composerVersioning.id,
@@ -73,8 +75,8 @@ describe('modules/datasource/packagist/index', () => {
         depName: 'vendor/package-name',
       });
       expect(res).toMatchSnapshot();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
+
     it('handles timeouts', async () => {
       httpMock
         .scope('https://composer.renovatebot.com')
@@ -88,8 +90,8 @@ describe('modules/datasource/packagist/index', () => {
         depName: 'vendor/package-name2',
       });
       expect(res).toBeNull();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
+
     it('handles auth rejections', async () => {
       httpMock
         .scope('https://composer.renovatebot.com')
@@ -103,8 +105,8 @@ describe('modules/datasource/packagist/index', () => {
         depName: 'vendor/package-name',
       });
       expect(res).toBeNull();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
+
     it('handles not found registries', async () => {
       httpMock
         .scope('https://composer.renovatebot.com')
@@ -118,8 +120,8 @@ describe('modules/datasource/packagist/index', () => {
         depName: 'drewm/mailchimp-api',
       });
       expect(res).toBeNull();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
+
     it('supports includes packages', async () => {
       hostRules.find = jest.fn(() => ({
         username: 'some-username',
@@ -147,8 +149,8 @@ describe('modules/datasource/packagist/index', () => {
       });
       expect(res).toMatchSnapshot();
       expect(res).not.toBeNull();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
+
     it('supports lazy repositories', async () => {
       const packagesJson = {
         packages: [],
@@ -186,8 +188,8 @@ describe('modules/datasource/packagist/index', () => {
       });
       expect(res).toMatchSnapshot();
       expect(res).not.toBeNull();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
+
     it('supports provider-includes', async () => {
       const packagesJson = {
         packages: [],
@@ -231,8 +233,8 @@ describe('modules/datasource/packagist/index', () => {
       });
       expect(res).toMatchSnapshot();
       expect(res).not.toBeNull();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
+
     it('handles provider-includes miss', async () => {
       const packagesJson = {
         packages: [],
@@ -272,8 +274,8 @@ describe('modules/datasource/packagist/index', () => {
         depName: 'some/other',
       });
       expect(res).toBeNull();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
+
     it('supports providers', async () => {
       const packagesJson = {
         packages: [],
@@ -305,8 +307,8 @@ describe('modules/datasource/packagist/index', () => {
       });
       expect(res).toMatchSnapshot();
       expect(res).not.toBeNull();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
+
     it('supports providers without a hash', async () => {
       const packagesJson = {
         packages: [],
@@ -335,6 +337,7 @@ describe('modules/datasource/packagist/index', () => {
       expect(res).toMatchSnapshot();
       expect(res).not.toBeNull();
     });
+
     it('handles providers miss', async () => {
       const packagesJson = {
         packages: [],
@@ -362,8 +365,8 @@ describe('modules/datasource/packagist/index', () => {
         depName: 'some/other',
       });
       expect(res).toBeNull();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
+
     it('processes real versioned data', async () => {
       httpMock
         .scope(baseUrl)
@@ -382,8 +385,8 @@ describe('modules/datasource/packagist/index', () => {
           depName: 'drewm/mailchimp-api',
         })
       ).toMatchSnapshot();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
+
     it('adds packagist source implicitly', async () => {
       httpMock
         .scope(baseUrl)
@@ -402,7 +405,6 @@ describe('modules/datasource/packagist/index', () => {
           depName: 'drewm/mailchimp-api',
         })
       ).toMatchSnapshot();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
 });

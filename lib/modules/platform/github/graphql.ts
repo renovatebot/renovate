@@ -1,6 +1,7 @@
 export const repoInfoQuery = `
 query($owner: String!, $name: String!) {
   repository(owner: $owner, name: $name) {
+    id
     isFork
     isArchived
     nameWithOwner
@@ -73,7 +74,6 @@ query($owner: String!, $name: String!, $count: Int, $cursor: String) {
         headRefName
         baseRefName
         title
-        mergeStateStatus
         labels(last: 100) {
           nodes {
             name
@@ -86,11 +86,6 @@ query($owner: String!, $name: String!, $count: Int, $cursor: String) {
           totalCount
         }
         body
-        reviews(first: 1, states: [CHANGES_REQUESTED]){
-          nodes{
-            state
-          }
-        }
       }
     }
   }
@@ -127,10 +122,10 @@ query(
 }
 `;
 
-export const vulnerabilityAlertsQuery = `
+export const vulnerabilityAlertsQuery = (filterByState: boolean): string => `
 query($owner: String!, $name: String!) {
   repository(owner: $owner, name: $name) {
-    vulnerabilityAlerts(last: 100) {
+    vulnerabilityAlerts(last: 100, ${filterByState ? 'states: [OPEN]' : ''}) {
       edges {
         node {
           dismissReason

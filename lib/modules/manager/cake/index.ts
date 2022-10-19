@@ -33,8 +33,8 @@ function parseDependencyLine(line: string): PackageDependency | null {
 
     const { origin: registryUrl, protocol, searchParams } = new URL(url);
 
-    const depName = searchParams.get('package');
-    const currentValue = searchParams.get('version');
+    const depName = searchParams.get('package')!;
+    const currentValue = searchParams.get('version') ?? undefined;
 
     const result: PackageDependency = {
       datasource: NugetDatasource.id,
@@ -57,7 +57,7 @@ function parseDependencyLine(line: string): PackageDependency | null {
 }
 
 export function extractPackageFile(content: string): PackageFile {
-  const deps = [];
+  const deps: PackageDependency[] = [];
   lexer.reset(content);
   let token = lexer.next();
   while (token) {

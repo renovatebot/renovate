@@ -5,10 +5,12 @@ import { getPrList } from './pr-list';
 describe('workers/repository/onboarding/pr/pr-list', () => {
   describe('getPrList()', () => {
     let config: RenovateConfig;
+
     beforeEach(() => {
       jest.resetAllMocks();
       config = getConfig();
     });
+
     it('handles empty', () => {
       const branches: BranchConfig[] = [];
       const res = getPrList(config, branches);
@@ -20,14 +22,18 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
         "
       `);
     });
+
     it('has special lock file maintenance description', () => {
-      const branches = [
+      const branches: BranchConfig[] = [
         {
           prTitle: 'Lock file maintenance',
           schedule: ['before 5am'],
           branchName: 'renovate/lock-file-maintenance',
+          baseBranch: 'base',
+          manager: 'some-manager',
           upgrades: [
             {
+              manager: 'some-manager',
               updateType: 'lockFileMaintenance',
             } as never,
           ],
@@ -43,8 +49,9 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
         <details>
         <summary>Lock file maintenance</summary>
 
-          - Schedule: [\\"before 5am\\"]
+          - Schedule: ["before 5am"]
           - Branch name: \`renovate/lock-file-maintenance\`
+          - Merge into: \`base\`
           - Regenerate lock files to use latest dependency versions
 
         </details>
@@ -52,14 +59,17 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
         "
       `);
     });
+
     it('handles multiple', () => {
-      const branches = [
+      const branches: BranchConfig[] = [
         {
           prTitle: 'Pin dependencies',
-          baseBranch: 'some-other',
+          baseBranch: 'base',
           branchName: 'renovate/pin-dependencies',
+          manager: 'some-manager',
           upgrades: [
             {
+              manager: 'some-manager',
               updateType: 'pin',
               sourceUrl: 'https://a',
               depName: 'a',
@@ -67,6 +77,7 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
               newValue: '1.1.0',
             },
             {
+              manager: 'some-manager',
               updateType: 'pin',
               depName: 'b',
               newValue: '1.5.3',
@@ -76,8 +87,11 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
         {
           prTitle: 'Update a to v2',
           branchName: 'renovate/a-2.x',
+          baseBranch: '', // handles case where baseBranch name is falsy
+          manager: 'some-manager',
           upgrades: [
             {
+              manager: 'some-manager',
               sourceUrl: 'https://a',
               depName: 'a',
               currentValue: '^1.0.0',
@@ -100,7 +114,7 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
         <summary>Pin dependencies</summary>
 
           - Branch name: \`renovate/pin-dependencies\`
-          - Merge into: \`some-other\`
+          - Merge into: \`base\`
           - Pin [a](https://a) to \`1.1.0\`
           - Pin b to \`1.5.3\`
 

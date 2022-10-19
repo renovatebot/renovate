@@ -2,7 +2,7 @@ import type { Preset } from '../types';
 
 export const presets: Record<string, Preset> = {
   disableTypesNodeMajor: {
-    description: 'Disable major updates to <code>@types/node</code>',
+    description: 'Disable `major` updates to `@types/node`.',
     packageRules: [
       {
         matchPackageNames: ['@types/node'],
@@ -12,17 +12,15 @@ export const presets: Record<string, Preset> = {
     ],
   },
   followTypescriptNext: {
-    description:
-      'Keep <code>typescript</code> version in sync with the <code>next</code> tag',
+    description: 'Keep `typescript` version in sync with the `next` tag.',
     extends: [':followTag(typescript, next)'],
   },
   followTypescriptRc: {
-    description:
-      'Keep <code>typescript</code> version in sync with the <code>rc</code> tag',
+    description: 'Keep `typescript` version in sync with the `rc` tag.',
     extends: [':followTag(typescript, rc)'],
   },
   pinGitHubActionDigests: {
-    description: 'Pin <code>github-action</code> digests',
+    description: 'Pin `github-action` digests.',
     packageRules: [
       {
         matchDepTypes: ['action'],

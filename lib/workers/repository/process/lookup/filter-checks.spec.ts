@@ -38,6 +38,7 @@ const releases: Release[] = [
 
 describe('workers/repository/process/lookup/filter-checks', () => {
   let sortedReleases: Release[];
+
   beforeEach(() => {
     config = getConfig();
     config.currentVersion = '1.0.0';

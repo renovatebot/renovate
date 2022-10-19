@@ -9,15 +9,18 @@ describe('config/presets/npm/index', () => {
     jest.resetAllMocks();
     GlobalConfig.reset();
   });
+
   afterEach(() => {
     delete process.env.RENOVATE_CACHE_NPM_MINUTES;
   });
+
   it('should throw if no package', async () => {
     httpMock.scope('https://registry.npmjs.org').get('/nopackage').reply(404);
     await expect(
       npm.getPreset({ repo: 'nopackage', presetName: 'default' })
     ).rejects.toThrow(/dep not found/);
   });
+
   it('should throw if no renovate-config', async () => {
     const presetPackage = {
       name: 'norenovateconfig',
@@ -50,6 +53,7 @@ describe('config/presets/npm/index', () => {
       npm.getPreset({ repo: 'norenovateconfig', presetName: 'default' })
     ).rejects.toThrow(/preset renovate-config not found/);
   });
+
   it('should throw if preset name not found', async () => {
     const presetPackage = {
       name: 'presetnamenotfound',
@@ -86,6 +90,7 @@ describe('config/presets/npm/index', () => {
       })
     ).rejects.toThrow(/preset not found/);
   });
+
   it('should return preset', async () => {
     const presetPackage = {
       name: 'workingpreset',

@@ -6,7 +6,7 @@ description: The pros and cons of dependency pinning for JavaScript/npm
 # Should you Pin your JavaScript Dependencies?
 
 Once you start using a tool/service like Renovate, probably the biggest decision you need to make is whether to "pin" your dependencies instead of using SemVer ranges.
-The answer is "It's your choice", however we can certainly make some generalisations/recommendations to help you.
+The answer is "It's your choice", but we can certainly make some generalisations/recommendations to help you.
 
 If you do not want to read the in-depth discussion, and just want our recommendations, skip ahead to the ["So what's best?" section](#so-whats-best).
 
@@ -17,7 +17,7 @@ To ensure we're all talking about the same thing, it's important to define exact
 Historically, projects use SemVer ranges in their `package.json`.
 For instance, if you run `npm install foobar` you will see an entry like `"foobar": "^1.1.0"` added to your `package.json`.
 Verbosely, this means "any foobar version greater than or equal to 1.1.0 but less than 2".
-Therefore the project will automatically use 1.1.1 if it's released, or 1.2.0, or 1.2.1, etc - meaning you will get not only patch updates but also feature (minor) releases too.
+The project will automatically use `1.1.1` if it's released, or `1.2.0`, or `1.2.1`, etc - meaning you will get not only patch updates but also feature (minor) releases too.
 
 Another alternative is ranges like `"foobar": "~1.1.0"` which means "any foobar version greater than or equal to 1.1.0 but less than 1.2".
 This narrows the range to only patch updates to the 1.1 range.
@@ -67,7 +67,7 @@ You would need to manually check and work out which dependency caused the failur
 Consider the same situation if instead you were _pinning_ dependency versions.
 Your `main` branch would not be broken because it's pinned to `foobar@1.1.0` - instead you'd just have a Pull Request for upgrading to `foobar@1.2.0` which would fail.
 You'd know not to merge it and can wait for `foobar@1.2.1` or later when it's fixed.
-Therefore you know exactly what you're running and you know exactly what failed - you have great "visibility".
+By pinning dependencies you know exactly what you're running and you know exactly what failed.
 
 Now consider a similar theoretical scenario where `foobar@1.2.0` is faulty but it is _not_ caught by any of your automated tests.
 This is more common and more dangerous.
@@ -94,14 +94,15 @@ Depending on how many repositories you maintain, and how many dependencies are i
 ## Reducing the "noise" of dependency updates
 
 The increased volume of Pull Requests for upgrading dependencies may be considered by some to be undesirable "noise" in their day.
-To some extent this is simply a trade-off for having your dependencies pinned and predictable, however there are also ways you can reduce this noise while still gaining the majority of the benefits:
+To some extent this is simply a trade-off for having your dependencies pinned and predictable, but there are also ways you can reduce this noise while still gaining the majority of the benefits:
 
 ### Pull Request automerging
 
 There are some dependencies that either (a) don't have the potential to break something in production, or (b) are fully tested by your tests.
 
-For example, it's very hard for `eslint` to break anything in production. If your build/tests pass, then you are fine.
-Therefore you should consider enabling automerge for all lint packages to save yourself the pointless click when you manually approve them each time.
+For example, it's very hard for `eslint` to break anything in production.
+If your build/tests pass, then you are fine.
+Consider enabling automerge for all lint packages to save yourself the pointless click when you manually approve them each time.
 In this case you might wake up to 5/10 of your overnight Pull Requests having already merged themselves.
 
 Another example of a good candidate for automerging might be a database driver like `node-postgres` (`pg` on npm), if you have 100% test coverage of your API.
@@ -141,7 +142,7 @@ You can add a package rule in our Renovate configuration to group these together
 Since both `yarn` and `npm@5` both support lock files, it's a common question to ask "Why should I pin dependencies if I'm already using a lock file?".
 It's a good question!
 
-![broken-lockfile](assets/images/broken-lockfile.jpg)
+![broken-lockfile](assets/images/broken-lockfile.jpg){ loading=lazy }
 
 Lock files are a great companion to SemVer ranges _or_ pinning dependencies, because these files lock (pin) deeper into your dependency tree than you see in `package.json`.
 
@@ -157,7 +158,7 @@ If a lock file gets out of sync with its `package.json`, it can no longer be gua
 
 The lock file has only delayed the inevitable problem, and provides much less visibility than `package.json`, because it's not designed to be human readable and is quite dense.
 
-![all-dead](assets/images/all-dead.jpg)
+![all-dead](assets/images/all-dead.jpg){ loading=lazy }
 
 If the `package.json` has a range, and a new in-range version is released that would break the build, then essentially your `package.json` is in a state of "broken", even if the lock file is still holding things together.
 
@@ -182,7 +183,7 @@ The (broken) upgrade to `1.2.0` would have been explicitly proposed to you via a
 Meanwhile you could be upgrading all the other essential fixes of other dependencies without worrying about `foobar`.
 You could even be running `yarn upgrade` regularly to be getting _indirect_ package updates in the lockfile and seeing if everything still passes.
 
-Therefore, the lock file does not solve the same SemVer problems that pinning solves - but it compliments it.
+So the lock file does not solve the same SemVer problems that pinning solves - but it compliments it.
 For this reason our usual recommendation using a lock file regardless of whether you pin dependencies or not, and pinning even if you have a lock file.
 
 Don't forget though that our motto is "Flexible, so you don't need to be", so go ahead and configure however you want.
@@ -209,7 +210,7 @@ Don't forget that there is some form of transitive trust too.
 You need to pick your direct dependencies carefully, and which versions of them you use.
 Hopefully in doing that you pick dependencies partly for how well _they_ look after their own dependencies and versions (e.g. do they have good enough test coverage, do they use something like Renovate to keep updated, etc?).
 So the reality is that even if 90% of the entries in your lock file are indirect dependencies, those are ones you have somewhat "delegated" responsibility for to your dependencies.
-e.g. I'd hope that Express are even better at watching their deps for breaks than I am, to use the example above.
+e.g. I'd hope that Express are even better at watching their dependencies for breaks than I am, to use the example above.
 
 But certainly "does it give a false sense of security" is not a question we can really answer quantifiably.
 
@@ -228,6 +229,5 @@ If/when this starts bothering you, add Renovate rules to reduce the volume, such
 ## References
 
 This is a "living" document and we plan to update it whenever we think of something new or someone makes a valid point we've missed or misunderstood.
-[GitHub Location](https://github.com/renovatebot/renovate/blob/main/docs/usage/dependency-pinning.md)
 
 Updated 2018-01-19 after [excellent feedback on lockfiles](https://github.com/commitizen/cz-conventional-changelog-default-export/pull/4#issuecomment-358038966) by [@LinusU](https://github.com/LinusU)

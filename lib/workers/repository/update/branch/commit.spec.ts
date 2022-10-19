@@ -1,9 +1,4 @@
-import {
-  defaultConfig,
-  git,
-  partial,
-  platform,
-} from '../../../../../test/util';
+import { getConfig, git, platform } from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
 import type { BranchConfig } from '../../../types';
 import { commitFilesToBranch } from './commit';
@@ -13,9 +8,11 @@ jest.mock('../../../../util/git');
 describe('workers/repository/update/branch/commit', () => {
   describe('commitFilesToBranch', () => {
     let config: BranchConfig;
+
     beforeEach(() => {
-      config = partial<BranchConfig>({
-        ...defaultConfig,
+      // TODO: incompatible types (#7154)
+      config = {
+        ...getConfig(),
         branchName: 'renovate/some-branch',
         commitMessage: 'some commit message',
         semanticCommits: 'disabled',
@@ -23,18 +20,20 @@ describe('workers/repository/update/branch/commit', () => {
         semanticCommitScope: 'b',
         updatedPackageFiles: [],
         updatedArtifacts: [],
-      });
+        upgrades: [],
+      } as BranchConfig;
       jest.resetAllMocks();
       git.commitFiles.mockResolvedValueOnce('123test');
-      platform.commitFiles = jest.fn();
       GlobalConfig.reset();
     });
+
     it('handles empty files', async () => {
       await commitFilesToBranch(config);
       expect(git.commitFiles).toHaveBeenCalledTimes(0);
     });
+
     it('commits files', async () => {
-      config.updatedPackageFiles.push({
+      config.updatedPackageFiles?.push({
         type: 'addition',
         path: 'package.json',
         contents: 'some contents',
@@ -43,8 +42,9 @@ describe('workers/repository/update/branch/commit', () => {
       expect(git.commitFiles).toHaveBeenCalledTimes(1);
       expect(git.commitFiles.mock.calls).toMatchSnapshot();
     });
+
     it('commits via platform', async () => {
-      config.updatedPackageFiles.push({
+      config.updatedPackageFiles?.push({
         type: 'addition',
         path: 'package.json',
         contents: 'some contents',
@@ -54,9 +54,10 @@ describe('workers/repository/update/branch/commit', () => {
       expect(platform.commitFiles).toHaveBeenCalledTimes(1);
       expect(platform.commitFiles.mock.calls).toMatchSnapshot();
     });
+
     it('dry runs', async () => {
-      GlobalConfig.set({ dryRun: true });
-      config.updatedPackageFiles.push({
+      GlobalConfig.set({ dryRun: 'full' });
+      config.updatedPackageFiles?.push({
         type: 'addition',
         path: 'package.json',
         contents: 'some contents',

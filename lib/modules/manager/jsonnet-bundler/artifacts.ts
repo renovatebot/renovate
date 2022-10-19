@@ -13,7 +13,7 @@ import type {
 } from '../types';
 
 function dependencyUrl(dep: PackageDependency): string {
-  const url = dep.packageName;
+  const url = dep.packageName!;
   if (dep.managerData?.subdir) {
     return url.concat('/', dep.managerData.subdir);
   }
@@ -70,12 +70,20 @@ export async function updateArtifacts(
 
     for (const f of status.modified ?? []) {
       res.push({
-        file: { type: 'addition', path: f, contents: await readLocalFile(f) },
+        file: {
+          type: 'addition',
+          path: f,
+          contents: await readLocalFile(f),
+        },
       });
     }
     for (const f of status.not_added ?? []) {
       res.push({
-        file: { type: 'addition', path: f, contents: await readLocalFile(f) },
+        file: {
+          type: 'addition',
+          path: f,
+          contents: await readLocalFile(f),
+        },
       });
     }
     for (const f of status.deleted ?? []) {

@@ -1,0 +1,20 @@
+This issue lists Renovate updates and detected dependencies. Read the [Dependency Dashboard](https://docs.renovatebot.com/key-concepts/dashboard/) docs to learn more.
+
+## PR Creation Approval Required
+
+These branches exist but PRs won't be created until you approve them by clicking on a checkbox.
+
+ - [ ] <!-- approvePr-branch=branchName1 -->pr1
+ - [ ] <!-- approvePr-branch=branchName2 -->pr2 (`dep2`, `dep3`)
+ - [ ] <!-- approvePr-branch=branchName3 -->pr3
+
+## Pending Status Checks
+
+These updates await pending status checks. To force their creation now, click the checkbox below.
+
+ - [ ] <!-- approvePr-branch=branchName4 -->pr4
+
+## Detected dependencies
+
+None detected
+

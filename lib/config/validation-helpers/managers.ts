@@ -9,7 +9,7 @@ export function check({
   resolvedRule,
   currentPath,
 }: CheckManagerArgs): ValidationMessage[] {
-  let managersErrMessage: string;
+  let managersErrMessage: string | undefined;
   if (Array.isArray(resolvedRule.matchManagers)) {
     if (
       resolvedRule.matchManagers.find(

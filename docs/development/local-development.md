@@ -65,6 +65,21 @@ If you are using [VS Code](https://code.visualstudio.com/) you can skip installi
 
 The VS Code [integrated terminal](https://code.visualstudio.com/docs/editor/integrated-terminal) is now running in the container and can be used to run additional commands.
 
+#### Local Docker
+
+If, for some reason, you can't run the relevant versions on your local machine, you can run everything from a Docker image.
+To build the correct docker image:
+
+```
+docker build -f .devcontainer/Dockerfile -t renovatebot_local .
+```
+
+Then you can run Yarn directly from Docker, for instance:
+
+```
+docker run -it --rm -v "$PWD":/usr/src/app -w /usr/src/app renovatebot_local yarn install
+```
+
 ## Fork and Clone
 
 If you want to contribute to the project, you should first "fork" the main project using the GitHub website and then clone your fork locally.
@@ -152,7 +167,7 @@ If you're only working on the documentation files, you can use the `yarn doc-fix
 
 First of all, never commit to the `main` branch of your fork - always use a "feature" branch like `feat/1234-add-yarn-parsing`.
 
-Make sure your fork is up to date with the Renovate `main` branch, check this each time before you create a new branch.
+Make sure your fork is up-to-date with the Renovate `main` branch, check this each time before you create a new branch.
 To do this, see these GitHub guides:
 
 [Configuring a remote for a fork](https://help.github.com/articles/configuring-a-remote-for-a-fork/)
@@ -164,7 +179,7 @@ To do this, see these GitHub guides:
 ### Running Renovate against forked repositories
 
 Quite often, the quickest way for you to test or fix something is to fork an existing repository.
-However, by default Renovate skips over repositories that are forked.
+But by default Renovate skips over repositories that are forked.
 To override this default, you need to specify the setting `includeForks` as `true`.
 
 Tell Renovate to run on your forked repository by doing one of the following:
@@ -191,7 +206,7 @@ We want stay backwards-compatible as much as possible, as well as make the code 
 So most new functionality should be controllable via configuration options.
 
 Create your new configuration option in the `lib/config/options/index.ts` file.
-Also create documentation for the option in the `website/docs/configuration-options.md` file.
+Also create documentation for the option in the `docs/usage/configuration-options.md` file.
 
 ## Debugging
 

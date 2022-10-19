@@ -1,9 +1,8 @@
-import { exec, mockExecAll } from '../../../../test/exec-util';
+import { mockExecAll } from '../../../../test/exec-util';
 import { fs } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import { updateArtifacts } from '.';
 
-jest.mock('child_process');
 jest.mock('../../../util/fs');
 
 describe('modules/manager/flux/artifacts', () => {
@@ -14,7 +13,7 @@ describe('modules/manager/flux/artifacts', () => {
   });
 
   it('replaces existing value', async () => {
-    const snapshots = mockExecAll(exec, { stdout: '', stderr: '' });
+    const snapshots = mockExecAll({ stdout: '', stderr: '' });
     fs.readLocalFile.mockResolvedValueOnce('old');
     fs.readLocalFile.mockResolvedValueOnce('test');
 
@@ -29,7 +28,7 @@ describe('modules/manager/flux/artifacts', () => {
           },
         },
       ],
-      newPackageFileContent: undefined,
+      newPackageFileContent: '',
       config: {},
     });
 
@@ -42,16 +41,18 @@ describe('modules/manager/flux/artifacts', () => {
         },
       },
     ]);
-    expect(snapshots[0].cmd).toBe(
-      'flux install --export --components source-controller,kustomize-controller,helm-controller,notification-controller > clusters/my-cluster/flux-system/gotk-components.yaml'
-    );
+    expect(snapshots).toMatchObject([
+      {
+        cmd: 'flux install --export --components source-controller,kustomize-controller,helm-controller,notification-controller > clusters/my-cluster/flux-system/gotk-components.yaml',
+      },
+    ]);
   });
 
   it('ignores non-system manifests', async () => {
     const res = await updateArtifacts({
       packageFileName: 'not-a-system-manifest.yaml',
       updatedDeps: [{ newVersion: '1.0.1' }],
-      newPackageFileContent: undefined,
+      newPackageFileContent: '',
       config: {},
     });
 
@@ -59,23 +60,29 @@ describe('modules/manager/flux/artifacts', () => {
   });
 
   it('ignores unchanged system manifests', async () => {
+    const execSnapshots = mockExecAll({ stdout: '', stderr: '' });
     fs.readLocalFile.mockResolvedValueOnce('old');
     fs.readLocalFile.mockResolvedValueOnce('old');
     const res = await updateArtifacts({
       packageFileName: 'clusters/my-cluster/flux-system/gotk-components.yaml',
       updatedDeps: [{ newVersion: '1.0.1' }],
-      newPackageFileContent: undefined,
+      newPackageFileContent: '',
       config: {},
     });
 
     expect(res).toBeNull();
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'flux install --export > clusters/my-cluster/flux-system/gotk-components.yaml',
+      },
+    ]);
   });
 
   it('ignores system manifests without a new version', async () => {
     const res = await updateArtifacts({
       packageFileName: 'clusters/my-cluster/flux-system/gotk-components.yaml',
       updatedDeps: [{ newVersion: undefined }],
-      newPackageFileContent: undefined,
+      newPackageFileContent: '',
       config: {},
     });
 
@@ -83,11 +90,11 @@ describe('modules/manager/flux/artifacts', () => {
   });
 
   it('failed to generate system manifest', async () => {
-    mockExecAll(exec, new Error('failed'));
+    mockExecAll(new Error('failed'));
     const res = await updateArtifacts({
       packageFileName: 'clusters/my-cluster/flux-system/gotk-components.yaml',
       updatedDeps: [{ newVersion: '1.0.1' }],
-      newPackageFileContent: undefined,
+      newPackageFileContent: '',
       config: {},
     });
 
@@ -102,13 +109,13 @@ describe('modules/manager/flux/artifacts', () => {
   });
 
   it('failed to read system manifest', async () => {
-    mockExecAll(exec, { stdout: '', stderr: 'Error' });
+    mockExecAll({ stdout: '', stderr: 'Error' });
     fs.readLocalFile.mockResolvedValueOnce('old');
     fs.readLocalFile.mockResolvedValueOnce('');
     const res = await updateArtifacts({
       packageFileName: 'clusters/my-cluster/flux-system/gotk-components.yaml',
       updatedDeps: [{ newVersion: '1.0.1' }],
-      newPackageFileContent: undefined,
+      newPackageFileContent: '',
       config: {},
     });
 

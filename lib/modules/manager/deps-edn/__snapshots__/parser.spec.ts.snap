@@ -1,0 +1,146 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`modules/manager/deps-edn/parser parseEdnFile extracts file 1`] = `
+{
+  "aliases": {
+    "1.10": {
+      "override-deps": {
+        "org.clojure/clojure": {
+          "mvn/version": "1.10.0",
+        },
+      },
+    },
+    "1.9": {
+      "override-deps": {
+        "org.clojure/clojure": {
+          "mvn/version": "1.9.0",
+        },
+      },
+    },
+    "datomic": {
+      "extra-deps": {
+        "com.datomic/datomic-free": {
+          "mvn/version": "0.9.5703",
+        },
+      },
+    },
+    "dev": {
+      "extra-deps": {
+        "org.clojure/clojurescript": {
+          "mvn/version": "1.10.520",
+        },
+        "org.clojure/tools.namespace": {
+          "mvn/version": "0.2.11",
+        },
+      },
+      "extra-paths": [
+        "dev",
+        "target/classes",
+      ],
+    },
+    "repl": {
+      "extra-deps": {
+        "cider/cider-nrepl": {
+          "mvn/version": "0.21.1",
+        },
+        "nrepl/nrepl": {
+          "mvn/version": "0.6.0",
+        },
+        "org.clojure/tools.namespace": {
+          "mvn/version": "0.2.11",
+        },
+      },
+      "main-opts": [
+        "-m",
+        "nrepl.cmdline",
+        "--middleware",
+        "[cider.nrepl/cider-middleware]",
+      ],
+    },
+    "test": {
+      "extra-deps": {
+        "io.github.lambdaisland/kaocha-cljs": {
+          "git/tag": "0.0-21",
+        },
+        "lambdaisland/kaocha": {
+          "git/tag": "0.0-389",
+          "git/url": "https://github.com/lambdaisland/kaocha.git",
+        },
+        "org.clojure/clojurescript": {
+          "mvn/version": "1.10.520",
+        },
+      },
+      "extra-paths": [
+        "test",
+      ],
+    },
+    "test-bitbucket": {
+      "extra-deps": {
+        "lambdaisland/kaocha": {
+          "git/tag": "0.0-389",
+          "git/url": "https://bitbucket.org/lambdaisland/kaocha.git",
+        },
+        "org.bitbucket.lambdaisland/kaocha-cljs": {
+          "git/tag": "0.0-21",
+        },
+      },
+      "extra-paths": [
+        "test",
+      ],
+    },
+    "test-git": {
+      "extra-deps": {
+        "bar/bar": {
+          "git/url": "https://example.com/bar.git",
+        },
+        "baz/baz": {},
+        "foo/foo": {
+          "git/sha": "123",
+          "git/url": "git@example.com/foo.git",
+        },
+      },
+      "extra-paths": [
+        "test",
+      ],
+    },
+    "test-gitlab": {
+      "extra-deps": {
+        "com.gitlab.lambdaisland/kaocha-cljs": {
+          "git/tag": "0.0-21",
+        },
+        "lambdaisland/kaocha": {
+          "git/tag": "0.0-389",
+          "git/url": "https://gitlab.com/lambdaisland/kaocha.git",
+        },
+      },
+      "extra-paths": [
+        "test",
+      ],
+    },
+  },
+  "deps": {
+    "invalid/package!": {
+      "mvn/version": "1.2.3",
+    },
+    "invalid/version": "nil",
+    "io.github.nextjournal/clerk": {
+      "mvn/version": "0.7.418",
+    },
+    "persistent-sorted-set": {
+      "mvn/version": "0.1.2",
+    },
+  },
+  "mvn/repos": {
+    "central": "nil",
+    "clojars": {
+      "url": "https://deps.com/foo/bar",
+    },
+    "my-auth-repo": {
+      "url": "https://my.auth.com/repo",
+    },
+    "my-private-repo": {
+      "url": "s3://my-bucket/maven/releases",
+    },
+  },
+}
+`;

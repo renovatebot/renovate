@@ -1,4 +1,4 @@
-Composer uses Semver-like versioning, however some package authors may use versions that are not completely valid, e.g. `1.2` instead of `1.2.0`.
+Composer uses Semver-like versioning, but some package authors may use versions that are not completely valid, e.g. `1.2` instead of `1.2.0`.
 
 Composer supports ranges in a similar manner to npm, but not identical. The main difference is with tilde ranges.
 

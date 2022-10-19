@@ -181,6 +181,7 @@ describe('modules/versioning/gradle/index', () => {
     ${'Hoxton.SR'}                          | ${true}
     ${'Hoxton.SR1'}                         | ${true}
     ${'1.3.5-native-mt-1.3.71-release-429'} | ${false}
+    ${'1.0-dev'}                            | ${false}
   `('isStable("$input") === $expected', ({ input, expected }) => {
     expect(api.isStable(input)).toBe(expected);
   });

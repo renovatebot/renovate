@@ -37,6 +37,7 @@ describe('workers/repository/update/pr/changelog/releases', () => {
         ],
       });
     });
+
     it('should contain only stable', async () => {
       const config = partial<BranchUpgradeConfig>({
         datasource: 'some-datasource',
@@ -49,6 +50,7 @@ describe('workers/repository/update/pr/changelog/releases', () => {
       expect(res).toMatchSnapshot();
       expect(res).toHaveLength(3);
     });
+
     it('should contain currentVersion unstable', async () => {
       const config = partial<BranchUpgradeConfig>({
         datasource: 'some-datasource',
@@ -61,6 +63,7 @@ describe('workers/repository/update/pr/changelog/releases', () => {
       expect(res).toMatchSnapshot();
       expect(res).toHaveLength(4);
     });
+
     it('should contain newVersion unstable', async () => {
       const config = partial<BranchUpgradeConfig>({
         datasource: 'some-datasource',
@@ -73,6 +76,7 @@ describe('workers/repository/update/pr/changelog/releases', () => {
       expect(res).toMatchSnapshot();
       expect(res).toHaveLength(4);
     });
+
     it('should contain both currentVersion newVersion unstable', async () => {
       const config = partial<BranchUpgradeConfig>({
         datasource: 'some-datasource',
@@ -85,6 +89,7 @@ describe('workers/repository/update/pr/changelog/releases', () => {
       expect(res).toMatchSnapshot();
       expect(res).toHaveLength(6);
     });
+
     it('should valueToVersion', async () => {
       const config = partial<BranchUpgradeConfig>({
         datasource: 'some-datasource',

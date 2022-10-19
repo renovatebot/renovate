@@ -48,7 +48,6 @@ describe('modules/manager/terraform/lockfile/hash', () => {
       '2.59.0'
     );
     expect(result).toBeNull();
-    expect(httpMock.getTrace()).toMatchSnapshot();
   });
 
   it('backend index throws error', async () => {
@@ -63,7 +62,6 @@ describe('modules/manager/terraform/lockfile/hash', () => {
       '2.56.0'
     );
     expect(result).toBeNull();
-    expect(httpMock.getTrace()).toMatchSnapshot();
   });
 
   it('fail to create hashes', async () => {
@@ -93,7 +91,6 @@ describe('modules/manager/terraform/lockfile/hash', () => {
         '2.56.0'
       )
     ).rejects.toThrow();
-    expect(httpMock.getTrace()).toMatchSnapshot();
   });
 
   it('full walkthrough', async () => {
@@ -125,6 +122,5 @@ describe('modules/manager/terraform/lockfile/hash', () => {
     expect(result).not.toBeNull();
     expect(result).toBeArrayOfSize(2);
     expect(result).toMatchSnapshot();
-    expect(httpMock.getTrace()).toMatchSnapshot();
   });
 });

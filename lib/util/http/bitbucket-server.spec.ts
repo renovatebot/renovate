@@ -7,6 +7,7 @@ const baseUrl = 'https://git.example.com';
 
 describe('util/http/bitbucket-server', () => {
   let api: BitbucketServerHttp;
+
   beforeEach(() => {
     api = new BitbucketServerHttp();
 
@@ -29,6 +30,5 @@ describe('util/http/bitbucket-server', () => {
     httpMock.scope(baseUrl).post('/some-url').reply(200, body);
     const res = await api.postJson('some-url');
     expect(res.body).toEqual(body);
-    expect(httpMock.getTrace()).toMatchSnapshot();
   });
 });

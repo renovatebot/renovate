@@ -11,6 +11,7 @@ describe('modules/versioning/hashicorp/index', () => {
       expect(semver.matches(version, range)).toBe(expected);
     }
   );
+
   test.each`
     versions                                         | range         | expected
     ${['0.4.0', '0.5.0', '4.0.0', '4.2.0', '5.0.0']} | ${'~> 4.0'}   | ${'4.2.0'}
@@ -37,7 +38,7 @@ describe('modules/versioning/hashicorp/index', () => {
   `(
     'isLessThanRange($version, $range) === $expected',
     ({ version, range, expected }) => {
-      expect(semver.isLessThanRange(version, range)).toBe(expected);
+      expect(semver.isLessThanRange?.(version, range)).toBe(expected);
     }
   );
 
@@ -66,6 +67,22 @@ describe('modules/versioning/hashicorp/index', () => {
     ${'~> 0.14'}            | ${'update-lockfile'} | ${'0.14.2'}    | ${'0.15.0'} | ${'~> 0.15'}
     ${'~> 2.62.0'}          | ${'update-lockfile'} | ${'2.62.0'}    | ${'2.62.1'} | ${'~> 2.62.0'}
     ${'~> 2.62.0'}          | ${'update-lockfile'} | ${'2.62.0'}    | ${'2.67.0'} | ${'~> 2.67.0'}
+  `(
+    'getNewValue("$currentValue", "$rangeStrategy", "$currentVersion", "$newVersion") === "$expected"',
+    ({ currentValue, rangeStrategy, currentVersion, newVersion, expected }) => {
+      const res = semver.getNewValue({
+        currentValue,
+        rangeStrategy,
+        currentVersion,
+        newVersion,
+      });
+      expect(res).toEqual(expected);
+    }
+  );
+
+  test.each`
+    currentValue | rangeStrategy | currentVersion | newVersion   | expected
+    ${'v0.14'}   | ${'replace'}  | ${'v0.14.2'}   | ${'v0.15.0'} | ${'v0.15'}
   `(
     'getNewValue("$currentValue", "$rangeStrategy", "$currentVersion", "$newVersion") === "$expected"',
     ({ currentValue, rangeStrategy, currentVersion, newVersion, expected }) => {

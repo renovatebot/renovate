@@ -3,9 +3,11 @@ import { api as nodever } from '.';
 
 describe('modules/versioning/node/index', () => {
   let dtLocal: any;
+
   beforeEach(() => {
     dtLocal = DateTime.local;
   });
+
   afterEach(() => {
     DateTime.local = dtLocal;
   });

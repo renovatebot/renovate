@@ -4,9 +4,9 @@ import { platform } from '../../../../modules/platform';
 import type { RangeStrategy } from '../../../../types';
 import {
   branchExists,
+  isBranchBehindBase,
   isBranchConflicted,
   isBranchModified,
-  isBranchStale,
 } from '../../../../util/git';
 import type { BranchConfig } from '../../../types';
 
@@ -36,19 +36,21 @@ export async function shouldReuseExistingBranch(
       logger.debug(`Manual rebase requested via PR title for #${pr.number}`);
       return result;
     }
-    if (pr.body?.includes(`- [x] <!-- rebase-check -->`)) {
+    if (pr.bodyStruct?.rebaseRequested) {
       logger.debug(`Manual rebase requested via PR checkbox for #${pr.number}`);
       return result;
     }
-    if (pr.labels?.includes(config.rebaseLabel)) {
+    if (pr.labels?.includes(config.rebaseLabel!)) {
       logger.debug(`Manual rebase requested via PR labels for #${pr.number}`);
       // istanbul ignore if
       if (GlobalConfig.get('dryRun')) {
         logger.info(
-          `DRY-RUN: Would delete label ${config.rebaseLabel} from #${pr.number}`
+          `DRY-RUN: Would delete label ${config.rebaseLabel!} from #${
+            pr.number
+          }`
         );
       } else {
-        await platform.deleteLabel(pr.number, config.rebaseLabel);
+        await platform.deleteLabel(pr.number, config.rebaseLabel!);
       }
       return result;
     }
@@ -59,8 +61,8 @@ export async function shouldReuseExistingBranch(
     (config.rebaseWhen === 'auto' &&
       (config.automerge || (await platform.getRepoForceRebase())))
   ) {
-    if (await isBranchStale(branchName)) {
-      logger.debug(`Branch is stale and needs rebasing`);
+    if (await isBranchBehindBase(branchName, baseBranch)) {
+      logger.debug(`Branch is behind base branch and needs rebasing`);
       // We can rebase the branch only if no PR or PR can be rebased
       if (await isBranchModified(branchName)) {
         logger.debug('Cannot rebase branch as it has been modified');
@@ -74,7 +76,7 @@ export async function shouldReuseExistingBranch(
     logger.debug('Branch is up-to-date');
   } else {
     logger.debug(
-      `Skipping stale branch check due to rebaseWhen=${config.rebaseWhen}`
+      `Skipping behind base branch check due to rebaseWhen=${config.rebaseWhen!}`
     );
   }
 
@@ -106,13 +108,13 @@ export async function shouldReuseExistingBranch(
   // This is why we are skipping branch reuse in this case (#10050)
   const groupedByPackageFile: Record<string, Set<RangeStrategy>> = {};
   for (const upgrade of config.upgrades) {
-    groupedByPackageFile[upgrade.packageFile] =
-      groupedByPackageFile[upgrade.packageFile] || new Set();
-    groupedByPackageFile[upgrade.packageFile].add(upgrade.rangeStrategy);
+    const packageFile = upgrade.packageFile!;
+    groupedByPackageFile[packageFile] ??= new Set();
+    groupedByPackageFile[packageFile].add(upgrade.rangeStrategy!);
 
     if (
-      groupedByPackageFile[upgrade.packageFile].size > 1 &&
-      groupedByPackageFile[upgrade.packageFile].has('update-lockfile')
+      groupedByPackageFile[packageFile].size > 1 &&
+      groupedByPackageFile[packageFile].has('update-lockfile')
     ) {
       logger.debug(
         `Detected multiple rangeStrategies along with update-lockfile`

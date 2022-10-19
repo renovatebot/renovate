@@ -106,4 +106,4 @@ You can use the `enabledManagers` array, to list the managers you want to use (`
 }
 ```
 
-Using the `enabledManager` array disables all other managers, this includes Bundler, Composer, Docker Compose, etc.
+Using the `enabledManagers` array disables all other managers, this includes Bundler, Composer, Docker Compose, etc.

@@ -1,6 +1,6 @@
 import * as httpMock from '../../../../test/http-mock';
 import type { UpdateArtifact } from '../types';
-import { updateArtifacts } from './artifacts';
+import { updateArtifacts } from '.';
 
 const defaultTo = '1.2.3';
 const newUnixWrapperContent = `Unix wrapper script for ${defaultTo}`;

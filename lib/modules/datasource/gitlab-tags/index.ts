@@ -48,7 +48,7 @@ export class GitlabTagsDatasource extends Datasource {
 
     const dependency: ReleaseResult = {
       sourceUrl: getSourceUrl(repo, registryUrl),
-      releases: null,
+      releases: [],
     };
     dependency.releases = gitlabTags.map(({ name, commit }) => ({
       version: name,
@@ -75,8 +75,8 @@ export class GitlabTagsDatasource extends Datasource {
   ): Promise<string | null> {
     const depHost = getDepHost(registryUrl);
 
-    const urlEncodedRepo = encodeURIComponent(repo);
-    let digest: string;
+    const urlEncodedRepo = encodeURIComponent(repo!);
+    let digest: string | null = null;
 
     try {
       if (newValue) {

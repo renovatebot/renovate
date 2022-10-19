@@ -10,6 +10,7 @@ describe('modules/manager/conan/extract', () => {
     it('returns null for empty', () => {
       expect(extractPackageFile('nothing here')).toBeNull();
     });
+
     it('extracts multiple image lines from conanfile.txt', () => {
       const res = extractPackageFile(conanfile1);
       expect(res?.deps).toEqual([
@@ -33,6 +34,16 @@ describe('modules/manager/conan/extract', () => {
           depType: 'requires',
           packageName: 'fake/8.62.134@test/dev',
           replaceString: 'fake/8.62.134@test/dev',
+        },
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}/{{newValue}}@_/_{{#if newDigest}}#{{newDigest}}{{/if}}',
+          currentDigest: 'aff2d03608351db075ec1348a3afc9ff',
+          currentValue: '1.17.2',
+          depName: 'cairo',
+          depType: 'requires',
+          packageName: 'cairo/1.17.2@_/_',
+          replaceString: 'cairo/1.17.2@_/_#aff2d03608351db075ec1348a3afc9ff',
         },
         {
           currentValue: '[>1.1 <2.1, include_prerelease=True]',
@@ -85,12 +96,24 @@ describe('modules/manager/conan/extract', () => {
           packageName: 'cryptopp/[1.2.7 || >=1.2.9 <2.0.0]@test/local',
           replaceString: 'cryptopp/[1.2.7 || >=1.2.9 <2.0.0]@test/local',
         },
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}/{{newValue}}@_/_{{#if newDigest}}#{{newDigest}}{{/if}}',
+          currentDigest: 'bc592346b33fd19c1fbffce25d1e4236',
+          currentValue: '0.63.0',
+          depName: 'meson',
+          depType: 'build_requires',
+          packageName: 'meson/0.63.0@_/_',
+          replaceString: 'meson/0.63.0@_/_#bc592346b33fd19c1fbffce25d1e4236',
+        },
       ]);
     });
+
     it('extracts multiple 0 lines from conanfile.txt', () => {
       const res = extractPackageFile(conanfile2);
       expect(res).toBeNull();
     });
+
     it('extracts multiple image lines from conanfile.py', () => {
       const res = extractPackageFile(conanfile3);
       expect(res?.deps).toEqual([
@@ -177,6 +200,17 @@ describe('modules/manager/conan/extract', () => {
           depType: 'requires',
           packageName: 'req_g/[>1.0 <1.8]@user/stable',
           replaceString: 'req_g/[>1.0 <1.8]@user/stable',
+        },
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}/{{newValue}}@user/stable{{#if newDigest}}#{{newDigest}}{{/if}}',
+          currentDigest: 'bc592346b33fd19c1fbffce25d1e4236',
+          currentValue: '1.0',
+          depName: 'req_l',
+          depType: 'requires',
+          packageName: 'req_l/1.0@user/stable',
+          replaceString:
+            'req_l/1.0@user/stable#bc592346b33fd19c1fbffce25d1e4236',
         },
         {
           currentValue: '1.2',

@@ -5,6 +5,7 @@ export interface PackageMeta {
   packages: Record<string, RegistryFile>;
   'provider-includes': Record<string, { sha256: string }>;
   providers: Record<string, { sha256: string }>;
+  'providers-lazy-url'?: string;
   'providers-url'?: string;
 }
 export interface RegistryFile {
@@ -17,7 +18,7 @@ export interface RegistryMeta {
   providersUrl?: string;
   providersLazyUrl?: string;
   includesFiles?: RegistryFile[];
-  packages?: Record<string, RegistryFile>;
+  packages: Record<string, RegistryFile>;
 }
 
 export interface PackagistFile {
@@ -27,8 +28,8 @@ export interface PackagistFile {
 
 export interface AllPackages {
   packages: Record<string, RegistryFile>;
-  providersUrl: string;
-  providersLazyUrl: string;
+  providersUrl?: string;
+  providersLazyUrl?: string;
   providerPackages: Record<string, string>;
 
   includesPackages: Record<string, ReleaseResult>;

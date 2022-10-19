@@ -1,17 +1,23 @@
-export interface HostRule {
+export interface HostRuleSearchResult {
   authType?: string;
-  hostType?: string;
-  matchHost?: string;
   token?: string;
   username?: string;
   password?: string;
   insecureRegistry?: boolean;
   timeout?: number;
-  encrypted?: HostRule;
   abortOnError?: boolean;
   abortIgnoreStatusCodes?: number[];
   enabled?: boolean;
   enableHttp2?: boolean;
   concurrentRequestLimit?: number;
+
+  dnsCache?: boolean;
+  keepalive?: boolean;
+}
+
+export interface HostRule extends HostRuleSearchResult {
+  encrypted?: HostRule;
+  hostType?: string;
+  matchHost?: string;
   resolvedHost?: string;
 }

@@ -32,8 +32,8 @@ export function parsePom(raw: string): XmlDocument | null {
   return null;
 }
 
-function containsPlaceholder(str: string): boolean {
-  return regEx(/\${.*?}/g).test(str);
+function containsPlaceholder(str: string | null | undefined): boolean {
+  return !!str && regEx(/\${.*?}/g).test(str);
 }
 
 function depFromNode(
@@ -46,7 +46,7 @@ function depFromNode(
   let groupId = node.valueWithPath('groupId')?.trim();
   const artifactId = node.valueWithPath('artifactId')?.trim();
   const currentValue = node.valueWithPath('version')?.trim();
-  let depType: string;
+  let depType: string | undefined;
 
   if (!groupId && node.name === 'plugin') {
     groupId = 'org.apache.maven.plugins';
@@ -54,7 +54,7 @@ function depFromNode(
 
   if (groupId && artifactId && currentValue) {
     const depName = `${groupId}:${artifactId}`;
-    const versionNode = node.descendantWithPath('version');
+    const versionNode = node.descendantWithPath('version')!;
     const fileReplacePosition = versionNode.position;
     const datasource = MavenDatasource.id;
     const registryUrls = [MAVEN_REPO];
@@ -77,6 +77,8 @@ function depFromNode(
       case 'dependency':
         if (underBuildSettingsElement) {
           depType = 'build';
+        } else if (node.valueWithPath('optional')?.trim() === 'true') {
+          depType = 'optional';
         } else {
           depType = node.valueWithPath('scope')?.trim() ?? 'compile'; // maven default scope is compile
         }
@@ -162,7 +164,8 @@ function applyPropsInternal(
   const replaceAll = (str: string): string =>
     str.replace(regEx(/\${.*?}/g), (substr) => {
       const propKey = substr.slice(2, -1).trim();
-      const propValue = props[propKey];
+      // TODO: wrong types here, props is already `MavenProp`
+      const propValue = (props as any)[propKey] as MavenProp;
       if (propValue) {
         anyChange = true;
         if (alreadySeenProps.find((it) => it === propKey)) {
@@ -175,23 +178,24 @@ function applyPropsInternal(
       return substr;
     });
 
-  const depName = replaceAll(dep.depName);
-  const registryUrls = dep.registryUrls.map((url) => replaceAll(url));
+  const depName = replaceAll(dep.depName!);
+  const registryUrls = dep.registryUrls!.map((url) => replaceAll(url));
 
   let fileReplacePosition = dep.fileReplacePosition;
   let propSource = dep.propSource;
-  let groupName = null;
-  const currentValue = dep.currentValue.replace(
+  let groupName: string | null = null;
+  const currentValue = dep.currentValue!.replace(
     regEx(/^\${.*?}$/),
     (substr) => {
       const propKey = substr.slice(2, -1).trim();
-      const propValue = props[propKey];
+      // TODO: wrong types here, props is already `MavenProp`
+      const propValue = (props as any)[propKey] as MavenProp;
       if (propValue) {
         if (!groupName) {
           groupName = propKey;
         }
         fileReplacePosition = propValue.fileReplacePosition;
-        propSource = propValue.packageFile;
+        propSource = propValue.packageFile ?? undefined;
         anyChange = true;
         if (alreadySeenProps.find((it) => it === propKey)) {
           fatal = true;
@@ -273,7 +277,7 @@ export function extractPackage(
 
   const repositories = project.childNamed('repositories');
   if (repositories?.children) {
-    const repoUrls = [];
+    const repoUrls: string[] = [];
     for (const repo of repositories.childrenNamed('repository')) {
       const repoUrl = repo.valueWithPath('url')?.trim();
       if (repoUrl) {
@@ -281,20 +285,20 @@ export function extractPackage(
       }
     }
     result.deps.forEach((dep) => {
-      if (dep.registryUrls) {
-        repoUrls.forEach((url) => dep.registryUrls.push(url));
+      if (is.array(dep.registryUrls)) {
+        repoUrls.forEach((url) => dep.registryUrls!.push(url));
       }
     });
   }
 
   if (packageFile && project.childNamed('parent')) {
     const parentPath =
-      project.valueWithPath('parent.relativePath')?.trim() || '../pom.xml';
+      project.valueWithPath('parent.relativePath')?.trim() ?? '../pom.xml';
     result.parent = resolveParentFile(packageFile, parentPath);
   }
 
   if (project.childNamed('version')) {
-    result.packageFileVersion = project.valueWithPath('version').trim();
+    result.packageFileVersion = project.valueWithPath('version')!.trim();
   }
 
   return result;
@@ -310,7 +314,7 @@ export function extractRegistries(rawContent: string): string[] {
     return [];
   }
 
-  const urls = [];
+  const urls: string[] = [];
 
   const mirrorUrls = parseUrls(settings, 'mirrors');
   urls.push(...mirrorUrls);
@@ -326,7 +330,7 @@ export function extractRegistries(rawContent: string): string[] {
 
 function parseUrls(xmlNode: XmlElement, path: string): string[] {
   const children = xmlNode.descendantWithPath(path);
-  const urls = [];
+  const urls: string[] = [];
   if (children?.children) {
     children.eachChild((child) => {
       const url = child.valueWithPath('url');
@@ -362,7 +366,7 @@ export function resolveParents(packages: PackageFile[]): PackageFile[] {
   const extractedProps: Record<string, MavenProp> = {};
   const registryUrls: Record<string, Set<string>> = {};
   packages.forEach((pkg) => {
-    const name = pkg.packageFile;
+    const name = pkg.packageFile!;
     packageFileNames.push(name);
     extractedPackages[name] = pkg;
     extractedDeps[name] = [];
@@ -375,9 +379,9 @@ export function resolveParents(packages: PackageFile[]): PackageFile[] {
     registryUrls[name] = new Set();
     const propsHierarchy: Record<string, MavenProp>[] = [];
     const visitedPackages: Set<string> = new Set();
-    let pkg = extractedPackages[name];
+    let pkg: PackageFile | null = extractedPackages[name];
     while (pkg) {
-      propsHierarchy.unshift(pkg.mavenProps);
+      propsHierarchy.unshift(pkg.mavenProps!);
 
       if (pkg.deps) {
         pkg.deps.forEach((dep) => {
@@ -404,7 +408,7 @@ export function resolveParents(packages: PackageFile[]): PackageFile[] {
   packageFileNames.forEach((name) => {
     const pkg = extractedPackages[name];
     pkg.deps.forEach((rawDep) => {
-      const urlsSet = new Set([...rawDep.registryUrls, ...registryUrls[name]]);
+      const urlsSet = new Set([...rawDep.registryUrls!, ...registryUrls[name]]);
       rawDep.registryUrls = [...urlsSet];
     });
   });
@@ -414,7 +418,7 @@ export function resolveParents(packages: PackageFile[]): PackageFile[] {
     const pkg = extractedPackages[name];
     pkg.deps.forEach((rawDep) => {
       const dep = applyProps(rawDep, name, extractedProps[name]);
-      const sourceName = dep.propSource || name;
+      const sourceName = dep.propSource ?? name;
       extractedDeps[sourceName].push(dep);
     });
   });
@@ -442,7 +446,7 @@ export async function extractAllPackageFiles(
   packageFiles: string[]
 ): Promise<PackageFile[]> {
   const packages: PackageFile[] = [];
-  const additionalRegistryUrls = [];
+  const additionalRegistryUrls: string[] = [];
 
   for (const packageFile of packageFiles) {
     const content = await readLocalFile(packageFile, 'utf8');

@@ -9,7 +9,7 @@ export interface MavenDependency {
 }
 
 export interface MavenXml {
-  authorization?: boolean;
+  isCacheable?: boolean;
   xml?: XmlDocument;
 }
 

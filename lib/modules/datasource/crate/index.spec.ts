@@ -8,12 +8,15 @@ import { Fixtures } from '../../../../test/fixtures';
 import * as httpMock from '../../../../test/http-mock';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
+import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages';
 import * as memCache from '../../../util/cache/memory';
 import { RegistryFlavor, RegistryInfo } from './types';
 import { CrateDatasource } from '.';
 
 jest.mock('simple-git');
 const simpleGit: jest.Mock<Partial<SimpleGit>> = _simpleGit as never;
+
+const API_BASE_URL = CrateDatasource.CRATES_IO_API_BASE_URL;
 
 const baseUrl =
   'https://raw.githubusercontent.com/rust-lang/crates.io-index/master/';
@@ -26,7 +29,7 @@ function setupGitMocks(delayMs?: number): { mockClone: jest.Mock<any, any> } {
     .mockName('clone')
     .mockImplementation(
       async (_registryUrl: string, clonePath: string, _opts) => {
-        if (delayMs > 0) {
+        if (delayMs && delayMs > 0) {
           await delay(delayMs);
         }
 
@@ -56,6 +59,13 @@ function setupErrorGitMock(): { mockClone: jest.Mock<any, any> } {
   });
 
   return { mockClone };
+}
+
+function mockCratesApiCallFor(crateName: string, response?: httpMock.Body) {
+  httpMock
+    .scope(API_BASE_URL)
+    .get(`/crates/${crateName}?include=`)
+    .reply(response ? 200 : 404, response);
 }
 
 describe('modules/datasource/crate/index', () => {
@@ -105,7 +115,7 @@ describe('modules/datasource/crate/index', () => {
     });
 
     afterEach(async () => {
-      await tmpDir.cleanup();
+      await tmpDir?.cleanup();
       tmpDir = null;
       GlobalConfig.reset();
     });
@@ -121,6 +131,7 @@ describe('modules/datasource/crate/index', () => {
         })
       ).toBeNull();
     });
+
     it('returns null for invalid registry url', async () => {
       expect(
         await getPkgReleases({
@@ -130,7 +141,9 @@ describe('modules/datasource/crate/index', () => {
         })
       ).toBeNull();
     });
+
     it('returns null for empty result', async () => {
+      mockCratesApiCallFor('non_existent_crate');
       httpMock.scope(baseUrl).get('/no/n_/non_existent_crate').reply(200, {});
       expect(
         await getPkgReleases({
@@ -139,9 +152,10 @@ describe('modules/datasource/crate/index', () => {
           registryUrls: ['https://crates.io'],
         })
       ).toBeNull();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
+
     it('returns null for missing fields', async () => {
+      mockCratesApiCallFor('non_existent_crate');
       httpMock
         .scope(baseUrl)
         .get('/no/n_/non_existent_crate')
@@ -153,9 +167,10 @@ describe('modules/datasource/crate/index', () => {
           registryUrls: ['https://crates.io'],
         })
       ).toBeNull();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
+
     it('returns null for empty list', async () => {
+      mockCratesApiCallFor('non_existent_crate');
       httpMock.scope(baseUrl).get('/no/n_/non_existent_crate').reply(200, '\n');
       expect(
         await getPkgReleases({
@@ -164,8 +179,8 @@ describe('modules/datasource/crate/index', () => {
           registryUrls: ['https://crates.io'],
         })
       ).toBeNull();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
+
     it('returns null for 404', async () => {
       httpMock.scope(baseUrl).get('/so/me/some_crate').reply(404);
       expect(
@@ -175,24 +190,19 @@ describe('modules/datasource/crate/index', () => {
           registryUrls: ['https://crates.io'],
         })
       ).toBeNull();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
+
     it('throws for 5xx', async () => {
       httpMock.scope(baseUrl).get('/so/me/some_crate').reply(502);
-      let e;
-      try {
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource,
           depName: 'some_crate',
           registryUrls: ['https://crates.io'],
-        });
-      } catch (err) {
-        e = err;
-      }
-      expect(e).toBeDefined();
-      expect(e).toMatchSnapshot();
-      expect(httpMock.getTrace()).toMatchSnapshot();
+        })
+      ).rejects.toThrow(EXTERNAL_HOST_ERROR);
     });
+
     it('returns null for unknown error', async () => {
       httpMock.scope(baseUrl).get('/so/me/some_crate').replyWithError('');
       expect(
@@ -202,9 +212,11 @@ describe('modules/datasource/crate/index', () => {
           registryUrls: ['https://crates.io'],
         })
       ).toBeNull();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
+
     it('processes real data: libc', async () => {
+      mockCratesApiCallFor('libc', Fixtures.get('libc.json'));
+
       httpMock
         .scope(baseUrl)
         .get('/li/bc/libc')
@@ -217,9 +229,11 @@ describe('modules/datasource/crate/index', () => {
       expect(res).toMatchSnapshot();
       expect(res).not.toBeNull();
       expect(res).toBeDefined();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
+
     it('processes real data: amethyst', async () => {
+      mockCratesApiCallFor('amethyst', Fixtures.get('amethyst.json'));
+
       httpMock
         .scope(baseUrl)
         .get('/am/et/amethyst')
@@ -232,8 +246,8 @@ describe('modules/datasource/crate/index', () => {
       expect(res).toMatchSnapshot();
       expect(res).not.toBeNull();
       expect(res).toBeDefined();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
+
     it('refuses to clone if allowCustomCrateRegistries is not true', async () => {
       const { mockClone } = setupGitMocks();
 
@@ -244,9 +258,9 @@ describe('modules/datasource/crate/index', () => {
         registryUrls: [url],
       });
       expect(mockClone).toHaveBeenCalledTimes(0);
-      expect(res).toMatchSnapshot();
       expect(res).toBeNull();
     });
+
     it('clones cloudsmith private registry', async () => {
       const { mockClone } = setupGitMocks();
       GlobalConfig.set({ ...adminConfig, allowCustomCrateRegistries: true });
@@ -261,6 +275,7 @@ describe('modules/datasource/crate/index', () => {
       expect(res).not.toBeNull();
       expect(res).toBeDefined();
     });
+
     it('clones other private registry', async () => {
       const { mockClone } = setupGitMocks();
       GlobalConfig.set({ ...adminConfig, allowCustomCrateRegistries: true });
@@ -275,6 +290,7 @@ describe('modules/datasource/crate/index', () => {
       expect(res).not.toBeNull();
       expect(res).toBeDefined();
     });
+
     it('clones once then reuses the cache', async () => {
       const { mockClone } = setupGitMocks();
       GlobalConfig.set({ ...adminConfig, allowCustomCrateRegistries: true });
@@ -291,6 +307,7 @@ describe('modules/datasource/crate/index', () => {
       });
       expect(mockClone).toHaveBeenCalledTimes(1);
     });
+
     it('guards against race conditions while cloning', async () => {
       const { mockClone } = setupGitMocks(250);
       GlobalConfig.set({ ...adminConfig, allowCustomCrateRegistries: true });
@@ -317,6 +334,7 @@ describe('modules/datasource/crate/index', () => {
 
       expect(mockClone).toHaveBeenCalledTimes(1);
     });
+
     it('returns null when git clone fails', async () => {
       setupErrorGitMock();
       GlobalConfig.set({ ...adminConfig, allowCustomCrateRegistries: true });

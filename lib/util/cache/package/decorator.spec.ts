@@ -116,8 +116,12 @@ describe('util/cache/package/decorator', () => {
       }
     }
     const decorator = cache({ namespace: 'namespace', key: 'key' });
-    const getNumber = decorator(MyClass.prototype, 'getNumber', undefined);
+    const getNumber = decorator(
+      MyClass.prototype,
+      'getNumber',
+      undefined as never
+    );
 
-    expect(await getNumber.value()).toBeNumber();
+    expect(await getNumber.value?.()).toBeNumber();
   });
 });

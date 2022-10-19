@@ -1,4 +1,5 @@
 import { lt } from '@renovatebot/ruby-semver';
+import is from '@sindresorhus/is';
 import { quote } from 'shlex';
 import {
   BUNDLER_INVALID_CREDENTIALS,
@@ -11,15 +12,15 @@ import { exec } from '../../../util/exec';
 import type { ExecOptions } from '../../../util/exec/types';
 import {
   ensureCacheDir,
-  getSiblingFileName,
   readLocalFile,
   writeLocalFile,
 } from '../../../util/fs';
 import { getRepoStatus } from '../../../util/git';
-import { regEx } from '../../../util/regex';
+import { newlineRegex, regEx } from '../../../util/regex';
 import { addSecretForSanitizing } from '../../../util/sanitize';
 import { isValid } from '../../versioning/ruby';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
+import { getBundlerConstraint, getRubyConstraint } from './common';
 import {
   findAllAuthenticatable,
   getAuthenticationHeaderValue,
@@ -27,36 +28,8 @@ import {
 
 const hostConfigVariablePrefix = 'BUNDLE_';
 
-async function getRubyConstraint(
-  updateArtifact: UpdateArtifact
-): Promise<string> {
-  const { packageFileName, config } = updateArtifact;
-  const { constraints = {} } = config;
-  const { ruby } = constraints;
-
-  let rubyConstraint: string;
-  if (ruby) {
-    logger.debug('Using rubyConstraint from config');
-    rubyConstraint = ruby;
-  } else {
-    const rubyVersionFile = getSiblingFileName(
-      packageFileName,
-      '.ruby-version'
-    );
-    const rubyVersionFileContent = await readLocalFile(rubyVersionFile, 'utf8');
-    if (rubyVersionFileContent) {
-      logger.debug('Using ruby version specified in .ruby-version');
-      rubyConstraint = rubyVersionFileContent
-        .replace(regEx(/^ruby-/), '')
-        .replace(regEx(/\n/g), '')
-        .trim();
-    }
-  }
-  return rubyConstraint;
-}
-
 function buildBundleHostVariable(hostRule: HostRule): Record<string, string> {
-  if (hostRule.resolvedHost.includes('-')) {
+  if (!hostRule.resolvedHost || hostRule.resolvedHost.includes('-')) {
     return {};
   }
   const varName = hostConfigVariablePrefix.concat(
@@ -70,12 +43,30 @@ function buildBundleHostVariable(hostRule: HostRule): Record<string, string> {
   };
 }
 
+const resolvedPkgRegex = regEx(
+  /(?<pkg>\S+)(?:\s*\([^)]+\)\s*)? was resolved to/
+);
+
+function getResolvedPackages(input: string): string[] {
+  const lines = input.split(newlineRegex);
+  const result: string[] = [];
+  for (const line of lines) {
+    const resolveMatchGroups = line.match(resolvedPkgRegex)?.groups;
+    if (resolveMatchGroups) {
+      const { pkg } = resolveMatchGroups;
+      result.push(pkg);
+    }
+  }
+
+  return [...new Set(result)];
+}
+
 export async function updateArtifacts(
-  updateArtifact: UpdateArtifact
+  updateArtifact: UpdateArtifact,
+  recursionLimit = 10
 ): Promise<UpdateArtifactsResult[] | null> {
   const { packageFileName, updatedDeps, newPackageFileContent, config } =
     updateArtifact;
-  const { constraints = {} } = config;
   logger.debug(`bundler.updateArtifacts(${packageFileName})`);
   const existingError = memCache.get<string>('bundlerArtifactsError');
   // istanbul ignore if
@@ -90,16 +81,26 @@ export async function updateArtifacts(
     return null;
   }
 
+  const args = [
+    config.postUpdateOptions?.includes('bundlerConservative') &&
+      '--conservative',
+    '--update',
+  ].filter(is.nonEmptyString);
+
+  const updatedDepNames = updatedDeps
+    .map(({ depName }) => depName)
+    .filter(is.nonEmptyStringAndNotWhitespace);
+
   try {
     await writeLocalFile(packageFileName, newPackageFileContent);
 
-    let cmd;
+    let cmd: string;
 
     if (config.isLockFileMaintenance) {
       cmd = 'bundler lock --update';
     } else {
-      cmd = `bundler lock --update ${updatedDeps
-        .map((dep) => dep.depName)
+      cmd = `bundler lock ${args.join(' ')} ${updatedDepNames
+        .filter((dep) => dep !== 'ruby')
         .map(quote)
         .join(' ')}`;
     }
@@ -121,7 +122,8 @@ export async function updateArtifacts(
     // with the bundler config
     const bundlerHostRulesAuthCommands: string[] = bundlerHostRules.reduce(
       (authCommands: string[], hostRule) => {
-        if (hostRule.resolvedHost.includes('-')) {
+        if (hostRule.resolvedHost?.includes('-')) {
+          // TODO: fix me, hostrules can missing all auth
           const creds = getAuthenticationHeaderValue(hostRule);
           authCommands.push(`${hostRule.resolvedHost} ${creds}`);
           // sanitize the authentication
@@ -132,7 +134,10 @@ export async function updateArtifacts(
       []
     );
 
-    const { bundler } = constraints || {};
+    const bundler = getBundlerConstraint(
+      updateArtifact,
+      existingLockFileContent
+    );
     const preCommands = ['ruby --version'];
 
     // Bundler < 2 has a different config option syntax than >= 2
@@ -191,7 +196,7 @@ export async function updateArtifacts(
         },
       },
     ];
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) {
     if (err.message === TEMPORARY_ERROR) {
       throw err;
     }
@@ -224,42 +229,36 @@ export async function updateArtifacts(
       memCache.set('bundlerArtifactsError', BUNDLER_INVALID_CREDENTIALS);
       throw new Error(BUNDLER_INVALID_CREDENTIALS);
     }
-    const resolveMatchRe = regEx('\\s+(.*) was resolved to', 'g');
-    if (output.match(resolveMatchRe) && !config.isLockFileMaintenance) {
-      logger.debug({ err }, 'Bundler has a resolve error');
-      const resolveMatches = [];
-      let resolveMatch;
-      do {
-        resolveMatch = resolveMatchRe.exec(output);
-        if (resolveMatch) {
-          resolveMatches.push(resolveMatch[1].split(' ').shift());
-        }
-      } while (resolveMatch);
-      if (resolveMatches.some((match) => !updatedDeps.includes(match))) {
-        logger.debug(
-          { resolveMatches, updatedDeps },
-          'Found new resolve matches - reattempting recursively'
-        );
-        const newUpdatedDeps = [
-          ...new Set([...updatedDeps, ...resolveMatches]),
-        ];
-        return updateArtifacts({
+    const resolveMatches: string[] = getResolvedPackages(output).filter(
+      (depName) => !updatedDepNames.includes(depName)
+    );
+    if (
+      recursionLimit > 0 &&
+      resolveMatches.length &&
+      !config.isLockFileMaintenance
+    ) {
+      logger.debug(
+        { resolveMatches, updatedDeps },
+        'Found new resolve matches - reattempting recursively'
+      );
+      const newUpdatedDeps = [
+        ...new Set([
+          ...updatedDeps,
+          ...resolveMatches.map((match) => ({ depName: match })),
+        ]),
+      ];
+      return updateArtifacts(
+        {
           packageFileName,
           updatedDeps: newUpdatedDeps,
           newPackageFileContent,
           config,
-        });
-      }
-      logger.debug(
-        { err },
-        'Gemfile.lock update failed due to incompatible packages'
-      );
-    } else {
-      logger.info(
-        { err },
-        'Gemfile.lock update failed due to an unknown reason'
+        },
+        recursionLimit - 1
       );
     }
+
+    logger.info({ err }, 'Gemfile.lock update failed due to an unknown reason');
     return [
       {
         artifactError: {

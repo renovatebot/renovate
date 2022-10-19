@@ -1,25 +1,25 @@
 import { logger } from '../../../logger';
-import { cache } from '../../../util/cache/package/decorator';
-import { GithubReleasesDatasource } from '../github-releases';
-import { getApiBaseUrl, getSourceUrl } from '../github-releases/common';
+import { queryTags } from '../../../util/github/graphql';
+import type { GithubRestRef } from '../../../util/github/types';
+import { getApiBaseUrl, getSourceUrl } from '../../../util/github/url';
+import { GithubHttp } from '../../../util/http/github';
+import { Datasource } from '../datasource';
 import type { DigestConfig, GetReleasesConfig, ReleaseResult } from '../types';
-import type { GitHubTag, TagResponse } from './types';
 
-export class GithubTagsDatasource extends GithubReleasesDatasource {
-  static override readonly id = 'github-tags';
+export class GithubTagsDatasource extends Datasource {
+  static readonly id = 'github-tags';
+
+  override readonly defaultRegistryUrls = ['https://github.com'];
+
+  override http: GithubHttp;
 
   constructor() {
     super(GithubTagsDatasource.id);
+    this.http = new GithubHttp(GithubTagsDatasource.id);
   }
 
-  @cache({
-    ttlMinutes: 120,
-    namespace: `datasource-${GithubTagsDatasource.id}`,
-    key: (registryUrl: string, githubRepo: string, tag: string) =>
-      `${registryUrl}:${githubRepo}:tag-${tag}`,
-  })
   async getTagCommit(
-    registryUrl: string,
+    registryUrl: string | undefined,
     githubRepo: string,
     tag: string
   ): Promise<string | null> {
@@ -27,11 +27,11 @@ export class GithubTagsDatasource extends GithubReleasesDatasource {
     let digest: string | null = null;
     try {
       const url = `${apiBaseUrl}repos/${githubRepo}/git/refs/tags/${tag}`;
-      const res = (await this.http.getJson<TagResponse>(url)).body.object;
+      const res = (await this.http.getJson<GithubRestRef>(url)).body.object;
       if (res.type === 'commit') {
         digest = res.sha;
       } else if (res.type === 'tag') {
-        digest = (await this.http.getJson<TagResponse>(res.url)).body.object
+        digest = (await this.http.getJson<GithubRestRef>(res.url)).body.object
           .sha;
       } else {
         logger.warn({ res }, 'Unknown git tag refs type');
@@ -45,14 +45,8 @@ export class GithubTagsDatasource extends GithubReleasesDatasource {
     return digest;
   }
 
-  @cache({
-    ttlMinutes: 10,
-    namespace: `datasource-${GithubTagsDatasource.id}`,
-    key: (registryUrl: string, githubRepo: string) =>
-      `${registryUrl}:${githubRepo}:commit`,
-  })
   async getCommit(
-    registryUrl: string,
+    registryUrl: string | undefined,
     githubRepo: string
   ): Promise<string | null> {
     const apiBaseUrl = getApiBaseUrl(registryUrl);
@@ -63,7 +57,7 @@ export class GithubTagsDatasource extends GithubReleasesDatasource {
       digest = res.body[0].sha;
     } catch (err) {
       logger.debug(
-        { githubRepo: githubRepo, err, registryUrl },
+        { githubRepo, err, registryUrl },
         'Error getting latest commit from GitHub repo'
       );
     }
@@ -82,66 +76,22 @@ export class GithubTagsDatasource extends GithubReleasesDatasource {
     newValue?: string
   ): Promise<string | null> {
     return newValue
-      ? this.getTagCommit(registryUrl, repo, newValue)
-      : this.getCommit(registryUrl, repo);
-  }
-
-  @cache({
-    ttlMinutes: 10,
-    namespace: `datasource-${GithubTagsDatasource.id}`,
-    key: ({ registryUrl, packageName: repo }: GetReleasesConfig) =>
-      `${registryUrl}:${repo}:tags`,
-  })
-  async getTags({
-    registryUrl,
-    packageName: repo,
-  }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    const apiBaseUrl = getApiBaseUrl(registryUrl);
-    // tag
-    const url = `${apiBaseUrl}repos/${repo}/tags?per_page=100`;
-
-    const versions = (
-      await this.http.getJson<GitHubTag[]>(url, {
-        paginate: true,
-      })
-    ).body.map((o) => o.name);
-    const dependency: ReleaseResult = {
-      sourceUrl: getSourceUrl(repo, registryUrl),
-      releases: versions.map((version) => ({
-        version,
-        gitRef: version,
-      })),
-    };
-    return dependency;
+      ? this.getTagCommit(registryUrl, repo!, newValue)
+      : this.getCommit(registryUrl, repo!);
   }
 
   override async getReleases(
     config: GetReleasesConfig
-  ): Promise<ReleaseResult | null> {
-    const tagsResult = await this.getTags(config);
-
-    try {
-      // Fetch additional data from releases endpoint when possible
-      const releasesResult = await super.getReleases(config);
-      const releaseByVersion = {};
-      releasesResult?.releases?.forEach((release) => {
-        const key = release.version;
-        const value = { ...release };
-        delete value.version;
-        releaseByVersion[key] = value;
-      });
-
-      const mergedReleases = [];
-      tagsResult.releases.forEach((tag) => {
-        const release = releaseByVersion[tag.version];
-        mergedReleases.push({ ...release, ...tag });
-      });
-
-      tagsResult.releases = mergedReleases;
-    } catch (e) {
-      // no-op
-    }
-
-    return tagsResult;
+  ): Promise<ReleaseResult> {
+    const { registryUrl, packageName: repo } = config;
+    const sourceUrl = getSourceUrl(repo, registryUrl);
+    const tags = await queryTags(config, this.http);
+    const releases = tags.map(({ version, releaseTimestamp, gitRef }) => ({
+      version,
+      releaseTimestamp,
+      gitRef,
+    }));
+    const dependency: ReleaseResult = { sourceUrl, releases };
+    return dependency;
   }
 }

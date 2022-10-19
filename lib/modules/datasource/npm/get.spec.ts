@@ -2,7 +2,7 @@ import * as httpMock from '../../../../test/http-mock';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import * as hostRules from '../../../util/host-rules';
 import { Http } from '../../../util/http';
-import { getDependency, resetMemCache } from './get';
+import { getDependency } from './get';
 import { resolveRegistryUrl, setNpmrc } from './npmrc';
 
 function getPath(s = ''): string {
@@ -16,7 +16,6 @@ const http = new Http('npm');
 describe('modules/datasource/npm/get', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    resetMemCache();
     hostRules.clear();
     setNpmrc();
   });
@@ -45,11 +44,10 @@ describe('modules/datasource/npm/get', () => {
 
       setNpmrc(npmrc);
       const registryUrl = resolveRegistryUrl('@myco/test');
-      await getDependency(http, registryUrl, '@myco/test');
+      expect(await getDependency(http, registryUrl, '@myco/test')).toBeNull();
 
       const trace = httpMock.getTrace();
       expect(trace[0].headers.authorization).toBe('Bearer XXX');
-      expect(trace).toMatchSnapshot();
     });
   });
 
@@ -78,11 +76,10 @@ describe('modules/datasource/npm/get', () => {
         .reply(200, { name: '@myco/test' });
       setNpmrc(npmrc);
       const registryUrl = resolveRegistryUrl('@myco/test');
-      await getDependency(http, registryUrl, '@myco/test');
+      expect(await getDependency(http, registryUrl, '@myco/test')).toBeNull();
 
       const trace = httpMock.getTrace();
       expect(trace[0].headers.authorization).toBe('Basic dGVzdDp0ZXN0');
-      expect(trace).toMatchSnapshot();
     });
   });
 
@@ -102,11 +99,10 @@ describe('modules/datasource/npm/get', () => {
         .reply(200, { name: '@myco/test' });
       setNpmrc(npmrc);
       const registryUrl = resolveRegistryUrl('@myco/test');
-      await getDependency(http, registryUrl, '@myco/test');
+      expect(await getDependency(http, registryUrl, '@myco/test')).toBeNull();
 
       const trace = httpMock.getTrace();
       expect(trace[0].headers.authorization).toBeUndefined();
-      expect(trace).toMatchSnapshot();
     });
   });
 
@@ -129,8 +125,7 @@ describe('modules/datasource/npm/get', () => {
       .reply(200, { name: '@myco/test' });
     setNpmrc(npmrc);
     const registryUrl = resolveRegistryUrl('@myco/test');
-    await getDependency(http, registryUrl, '@myco/test');
-    expect(httpMock.getTrace()).toMatchSnapshot();
+    expect(await getDependency(http, registryUrl, '@myco/test')).toBeNull();
   });
 
   it('uses hostRules token auth', async () => {
@@ -151,8 +146,7 @@ describe('modules/datasource/npm/get', () => {
       .reply(200, { name: 'renovate' });
     setNpmrc(npmrc);
     const registryUrl = resolveRegistryUrl('renovate');
-    await getDependency(http, registryUrl, 'renovate');
-    expect(httpMock.getTrace()).toMatchSnapshot();
+    expect(await getDependency(http, registryUrl, 'renovate')).toBeNull();
   });
 
   it('uses hostRules basic token auth', async () => {
@@ -174,12 +168,11 @@ describe('modules/datasource/npm/get', () => {
       .reply(200, { name: 'renovate' });
     setNpmrc(npmrc);
     const registryUrl = resolveRegistryUrl('renovate');
-    await getDependency(http, registryUrl, 'renovate');
-    expect(httpMock.getTrace()).toMatchSnapshot();
+    expect(await getDependency(http, registryUrl, 'renovate')).toBeNull();
   });
 
   it('cover all paths', async () => {
-    expect.assertions(10);
+    expect.assertions(9);
 
     setNpmrc('registry=https://test.org\n_authToken=XXX');
 
@@ -225,7 +218,8 @@ describe('modules/datasource/npm/get', () => {
     registryUrl = resolveRegistryUrl('error-404');
     expect(await getDependency(http, registryUrl, 'error-404')).toBeNull();
 
-    httpMock.scope('https://test.org').get('/error4').reply(200, null);
+    // return invalid json to get coverage
+    httpMock.scope('https://test.org').get('/error4').reply(200, '{');
     registryUrl = resolveRegistryUrl('error4');
     expect(await getDependency(http, registryUrl, 'error4')).toBeNull();
 
@@ -244,15 +238,15 @@ describe('modules/datasource/npm/get', () => {
       .get('/npm-error-402')
       .reply(402);
     expect(await getDependency(http, registryUrl, 'npm-error-402')).toBeNull();
-
-    expect(httpMock.getTrace()).toMatchSnapshot();
   });
 
   it('massages non-compliant repository urls', async () => {
     setNpmrc('registry=https://test.org\n_authToken=XXX');
 
     httpMock
-      .scope('https://test.org')
+      .scope('https://test.org', {
+        reqheaders: { authorization: 'Bearer XXX' },
+      })
       .get('/@neutrinojs%2Freact')
       .reply(200, {
         name: '@neutrinojs/react',
@@ -266,13 +260,13 @@ describe('modules/datasource/npm/get', () => {
     const registryUrl = resolveRegistryUrl('@neutrinojs/react');
     const dep = await getDependency(http, registryUrl, '@neutrinojs/react');
 
-    expect(dep.sourceUrl).toBe('https://github.com/neutrinojs/neutrino');
-    expect(dep.sourceDirectory).toBe('packages/react');
+    expect(dep?.sourceUrl).toBe('https://github.com/neutrinojs/neutrino');
+    expect(dep?.sourceDirectory).toBe('packages/react');
 
     expect(httpMock.getTrace()).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "headers": Object {
+      [
+        {
+          "headers": {
             "accept": "application/json",
             "accept-encoding": "gzip, deflate, br",
             "authorization": "Bearer XXX",
@@ -284,6 +278,27 @@ describe('modules/datasource/npm/get', () => {
         },
       ]
     `);
+  });
+
+  it('handles missing dist-tags latest', async () => {
+    setNpmrc('registry=https://test.org\n_authToken=XXX');
+
+    httpMock
+      .scope('https://test.org')
+      .get('/@neutrinojs%2Freact')
+      .reply(200, {
+        name: '@neutrinojs/react',
+        repository: {
+          type: 'git',
+          url: 'https://github.com/neutrinojs/neutrino/tree/master/packages/react',
+        },
+        versions: { '1.0.0': {} },
+      });
+    const registryUrl = resolveRegistryUrl('@neutrinojs/react');
+    const dep = await getDependency(http, registryUrl, '@neutrinojs/react');
+
+    expect(dep?.sourceUrl).toBe('https://github.com/neutrinojs/neutrino');
+    expect(dep?.sourceDirectory).toBe('packages/react');
   });
 
   it('handles mixed sourceUrls in releases', async () => {
@@ -317,11 +332,52 @@ describe('modules/datasource/npm/get', () => {
     const registryUrl = resolveRegistryUrl('vue');
     const dep = await getDependency(http, registryUrl, 'vue');
 
-    expect(dep.sourceUrl).toBe('https://github.com/vuejs/vue.git');
-    expect(dep.releases[0].sourceUrl).toBeUndefined();
-    expect(dep.releases[1].sourceUrl).toBe(
+    expect(dep?.sourceUrl).toBe('https://github.com/vuejs/vue.git');
+    expect(dep?.releases[0].sourceUrl).toBeUndefined();
+    expect(dep?.releases[1].sourceUrl).toBe(
       'https://github.com/vuejs/vue-next.git'
     );
+  });
+
+  it('handles short sourceUrls in releases', async () => {
+    setNpmrc('registry=https://test.org\n_authToken=XXX');
+
+    httpMock
+      .scope('https://test.org')
+      .get('/vue')
+      .reply(200, {
+        name: 'vue',
+        repository: {
+          type: 'git',
+          url: 'https://github.com/vuejs/vue',
+        },
+        versions: {
+          '2.0.0': {
+            repository: 'vuejs/vue',
+          },
+          '3.0.0': {
+            repository: 'github:vuejs/vue-next',
+          },
+          '4.0.0': {
+            repository: 'gitlab:vuejs/vue',
+          },
+          '5.0.0': {
+            repository: 'bitbucket:vuejs/vue',
+          },
+        },
+        'dist-tags': { latest: '2.0.0' },
+      });
+    const registryUrl = resolveRegistryUrl('vue');
+    const dep = await getDependency(http, registryUrl, 'vue');
+    expect(dep).toMatchObject({
+      sourceUrl: 'https://github.com/vuejs/vue',
+      releases: [
+        {},
+        { sourceUrl: 'https://github.com/vuejs/vue-next' },
+        { sourceUrl: 'https://gitlab.com/vuejs/vue' },
+        { sourceUrl: 'https://bitbucket.org/vuejs/vue' },
+      ],
+    });
   });
 
   it('does not override sourceDirectory', async () => {
@@ -343,13 +399,13 @@ describe('modules/datasource/npm/get', () => {
     const registryUrl = resolveRegistryUrl('@neutrinojs/react');
     const dep = await getDependency(http, registryUrl, '@neutrinojs/react');
 
-    expect(dep.sourceUrl).toBe('https://github.com/neutrinojs/neutrino');
-    expect(dep.sourceDirectory).toBe('packages/foo');
+    expect(dep?.sourceUrl).toBe('https://github.com/neutrinojs/neutrino');
+    expect(dep?.sourceDirectory).toBe('packages/foo');
 
     expect(httpMock.getTrace()).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "headers": Object {
+      [
+        {
+          "headers": {
             "accept": "application/json",
             "accept-encoding": "gzip, deflate, br",
             "authorization": "Bearer XXX",
@@ -381,15 +437,15 @@ describe('modules/datasource/npm/get', () => {
     const registryUrl = resolveRegistryUrl('@neutrinojs/react');
     const dep = await getDependency(http, registryUrl, '@neutrinojs/react');
 
-    expect(dep.sourceUrl).toBe(
+    expect(dep?.sourceUrl).toBe(
       'https://bitbucket.org/neutrinojs/neutrino/tree/master/packages/react'
     );
-    expect(dep.sourceDirectory).toBeUndefined();
+    expect(dep?.sourceDirectory).toBeUndefined();
 
     expect(httpMock.getTrace()).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "headers": Object {
+      [
+        {
+          "headers": {
             "accept": "application/json",
             "accept-encoding": "gzip, deflate, br",
             "authorization": "Bearer XXX",

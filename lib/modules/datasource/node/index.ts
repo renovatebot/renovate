@@ -23,6 +23,8 @@ export class NodeDatasource extends Datasource {
 
   @cache({
     namespace: `datasource-${datasource}`,
+    // TODO: types (#7154)
+    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
     key: ({ registryUrl }: GetReleasesConfig) => `${registryUrl}`,
   })
   async getReleases({

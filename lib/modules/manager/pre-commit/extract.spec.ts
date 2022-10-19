@@ -1,21 +1,22 @@
-import { loadFixture, mocked } from '../../../../test/util';
+import { Fixtures } from '../../../../test/fixtures';
+import { mocked } from '../../../../test/util';
 import * as _hostRules from '../../../util/host-rules';
-import { extractPackageFile } from './extract';
+import { extractPackageFile } from '.';
 
 jest.mock('../../../util/host-rules');
 const hostRules = mocked(_hostRules);
 const filename = '.pre-commit.yaml';
 
-const complexPrecommitConfig = loadFixture('complex.pre-commit-config.yaml');
-const examplePrecommitConfig = loadFixture('.pre-commit-config.yaml');
-const emptyReposPrecommitConfig = loadFixture(
+const complexPrecommitConfig = Fixtures.get('complex.pre-commit-config.yaml');
+const examplePrecommitConfig = Fixtures.get('.pre-commit-config.yaml');
+const emptyReposPrecommitConfig = Fixtures.get(
   'empty_repos.pre-commit-config.yaml'
 );
-const noReposPrecommitConfig = loadFixture('no_repos.pre-commit-config.yaml');
-const invalidRepoPrecommitConfig = loadFixture(
+const noReposPrecommitConfig = Fixtures.get('no_repos.pre-commit-config.yaml');
+const invalidRepoPrecommitConfig = Fixtures.get(
   'invalid_repo.pre-commit-config.yaml'
 );
-const enterpriseGitPrecommitConfig = loadFixture(
+const enterpriseGitPrecommitConfig = Fixtures.get(
   'enterprise.pre-commit-config.yaml'
 );
 
@@ -24,30 +25,38 @@ describe('modules/manager/pre-commit/extract', () => {
     beforeEach(() => {
       jest.resetAllMocks();
     });
+
     it('returns null for invalid yaml file content', () => {
       const result = extractPackageFile('nothing here: [', filename);
       expect(result).toBeNull();
     });
+
     it('returns null for empty yaml file content', () => {
       const result = extractPackageFile('', filename);
       expect(result).toBeNull();
     });
+
     it('returns null for no file content', () => {
-      const result = extractPackageFile(null, filename);
+      // TODO #7154
+      const result = extractPackageFile(null as never, filename);
       expect(result).toBeNull();
     });
+
     it('returns null for no repos', () => {
       const result = extractPackageFile(noReposPrecommitConfig, filename);
       expect(result).toBeNull();
     });
+
     it('returns null for empty repos', () => {
       const result = extractPackageFile(emptyReposPrecommitConfig, filename);
       expect(result).toBeNull();
     });
+
     it('returns null for invalid repo', () => {
       const result = extractPackageFile(invalidRepoPrecommitConfig, filename);
       expect(result).toBeNull();
     });
+
     it('extracts from values.yaml correctly with same structure as "pre-commit sample-config"', () => {
       const result = extractPackageFile(examplePrecommitConfig, filename);
       expect(result).toEqual({
@@ -69,6 +78,7 @@ describe('modules/manager/pre-commit/extract', () => {
         ],
       });
     });
+
     it('extracts from complex config file correctly', () => {
       const result = extractPackageFile(complexPrecommitConfig, filename);
       expect(result).toMatchSnapshot({
@@ -83,6 +93,7 @@ describe('modules/manager/pre-commit/extract', () => {
         ],
       });
     });
+
     it('can handle private git repos', () => {
       hostRules.find.mockReturnValue({ token: 'value' });
       const result = extractPackageFile(enterpriseGitPrecommitConfig, filename);
@@ -99,6 +110,7 @@ describe('modules/manager/pre-commit/extract', () => {
         ],
       });
     });
+
     it('can handle invalid private git repos', () => {
       hostRules.find.mockReturnValue({});
       const result = extractPackageFile(enterpriseGitPrecommitConfig, filename);
@@ -115,6 +127,7 @@ describe('modules/manager/pre-commit/extract', () => {
         ],
       });
     });
+
     it('can handle unknown private git repos', () => {
       // First attemp returns a result
       hostRules.find.mockReturnValueOnce({ token: 'value' });

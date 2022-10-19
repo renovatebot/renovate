@@ -4,6 +4,7 @@ import type * as _hostRules from '../../../util/host-rules';
 describe('modules/platform/azure/azure-got-wrapper', () => {
   let azure: typeof import('./azure-got-wrapper');
   let hostRules: typeof _hostRules;
+
   beforeEach(() => {
     // reset module
     jest.resetModules();
@@ -17,6 +18,7 @@ describe('modules/platform/azure/azure-got-wrapper', () => {
       expect(azure.coreApi).toThrow('No config found for azure');
       expect(azure.policyApi).toThrow('No config found for azure');
     });
+
     it('should set personal access token and endpoint', () => {
       hostRules.add({
         hostType: PlatformId.Azure,
@@ -30,9 +32,14 @@ describe('modules/platform/azure/azure-got-wrapper', () => {
       delete res.rest.client.userAgent;
       delete res.vsoClient.restClient.client.userAgent;
 
-      // We will track if the lib azure-devops-node-api change
-      expect(res).toMatchSnapshot();
+      expect(res).toMatchObject({
+        serverUrl: 'https://dev.azure.com/renovate1',
+        authHandler: {
+          token: '123test',
+        },
+      });
     });
+
     it('should set bearer token and endpoint', () => {
       hostRules.add({
         hostType: PlatformId.Azure,
@@ -46,8 +53,12 @@ describe('modules/platform/azure/azure-got-wrapper', () => {
       delete res.rest.client.userAgent;
       delete res.vsoClient.restClient.client.userAgent;
 
-      // We will track if the lib azure-devops-node-api change
-      expect(res).toMatchSnapshot();
+      expect(res).toMatchObject({
+        serverUrl: 'https://dev.azure.com/renovate2',
+        authHandler: {
+          token: 'testtoken',
+        },
+      });
     });
 
     it('should set password and endpoint', () => {
@@ -64,8 +75,13 @@ describe('modules/platform/azure/azure-got-wrapper', () => {
       delete res.rest.client.userAgent;
       delete res.vsoClient.restClient.client.userAgent;
 
-      // We will track if the lib azure-devops-node-api change
-      expect(res).toMatchSnapshot();
+      expect(res).toMatchObject({
+        serverUrl: 'https://dev.azure.com/renovate3',
+        authHandler: {
+          username: 'user',
+          password: 'pass',
+        },
+      });
     });
   });
 });

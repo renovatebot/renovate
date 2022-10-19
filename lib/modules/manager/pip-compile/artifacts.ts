@@ -7,6 +7,7 @@ import { exec } from '../../../util/exec';
 import type { ExecOptions } from '../../../util/exec/types';
 import {
   deleteLocalFile,
+  ensureCacheDir,
   readLocalFile,
   writeLocalFile,
 } from '../../../util/fs';
@@ -47,6 +48,11 @@ function getPipToolsConstraint(config: UpdateArtifactsConfig): string {
 const constraintLineRegex = regEx(
   /^(#.*?\r?\n)+# {4}pip-compile(?<arguments>.*?)\r?\n/
 );
+const allowedPipArguments = [
+  '--allow-unsafe',
+  '--generate-hashes',
+  '--no-emit-index-url',
+];
 
 export function constructPipCompileCmd(
   content: string,
@@ -55,10 +61,10 @@ export function constructPipCompileCmd(
 ): string {
   const headers = constraintLineRegex.exec(content);
   const args = ['pip-compile'];
-  if (headers) {
+  if (headers?.groups) {
     logger.debug({ header: headers[0] }, 'Found pip-compile header');
     for (const argument of split(headers.groups.arguments)) {
-      if (['--allow-unsafe', '--generate-hashes'].includes(argument)) {
+      if (allowedPipArguments.includes(argument)) {
         args.push(argument);
       } else if (argument.startsWith('--output-file=')) {
         const file = upath.parse(outputFileName).base;
@@ -109,18 +115,25 @@ export async function updateArtifacts({
       inputFileName,
       outputFileName
     );
-    const tagConstraint = getPythonConstraint(config);
+    const constraint = getPythonConstraint(config);
     const pipToolsConstraint = getPipToolsConstraint(config);
     const execOptions: ExecOptions = {
       cwdFile: inputFileName,
       docker: {
-        image: 'python',
-        tagConstraint,
-        tagScheme: 'pep440',
+        image: 'sidecar',
       },
       preCommands: [
         `pip install --user ${quote(`pip-tools${pipToolsConstraint}`)}`,
       ],
+      toolConstraints: [
+        {
+          toolName: 'python',
+          constraint,
+        },
+      ],
+      extraEnv: {
+        PIP_CACHE_DIR: await ensureCacheDir('pip'),
+      },
     };
     logger.debug({ cmd }, 'pip-compile command');
     await exec(cmd, execOptions);

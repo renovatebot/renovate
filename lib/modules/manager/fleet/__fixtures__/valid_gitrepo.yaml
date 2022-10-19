@@ -1,0 +1,21 @@
+kind: GitRepo
+apiVersion: fleet.cattle.io/v1alpha1
+metadata:
+  name: my-repo
+  namespace: fleet-local
+spec:
+  repo: https://github.com/rancher/fleet-examples
+  revision: v0.3.0
+  paths:
+    - simple
+---
+kind: GitRepo
+apiVersion: fleet.cattle.io/v1alpha1
+metadata:
+  name: renovate
+  namespace: fleet-local
+spec:
+  repo: https://github.com/renovatebot/renovate
+  revision: 32.89.2
+  paths:
+    - simple

@@ -15,7 +15,8 @@ export function getPrNotes(config: BranchConfig): string {
             notes.push(res);
           }
         } catch (err) {
-          logger.warn({ note }, 'Error compiling upgrade note');
+          logger.debug({ err }, 'Error compiling upgrade note');
+          notes.push(note);
         }
       }
     }
@@ -40,7 +41,7 @@ export function getPrExtraNotes(config: BranchConfig): string {
 
   if (config.isPin) {
     res += emojify(
-      `:pushpin: **Important**: Renovate will wait until you have merged this Pin PR before creating any *upgrade* PRs for the affected packages. Add the preset \`:preserveSemverRanges\` to your config if you instead don't wish to pin dependencies.\n\n`
+      `Add the preset \`:preserveSemverRanges\` to your config if you don't want to pin your dependencies.\n\n`
     );
   }
 

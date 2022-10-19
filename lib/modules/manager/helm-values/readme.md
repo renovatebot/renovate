@@ -7,6 +7,10 @@ image:
   tag: v1.0.0
   registry: registry.example.com # optional key, will default to "docker.io"
 
+image:
+  repository: 'some-docker/dependency'
+  version: v1.0.0
+
 coreImage:
   registry: docker.io
   repository: bitnami/harbor-core

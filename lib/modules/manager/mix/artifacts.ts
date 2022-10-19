@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import { quote } from 'shlex';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
@@ -26,7 +27,7 @@ export async function updateArtifacts({
   }
 
   const lockFileName =
-    (await findLocalSiblingOrParent(packageFileName, 'mix.lock')) || 'mix.lock';
+    (await findLocalSiblingOrParent(packageFileName, 'mix.lock')) ?? 'mix.lock';
   try {
     await writeLocalFile(packageFileName, newPackageFileContent);
   } catch (err) {
@@ -70,19 +71,32 @@ export async function updateArtifacts({
     }
 
     return acc;
-  }, []);
+  }, [] as string[]);
 
   const execOptions: ExecOptions = {
     cwdFile: packageFileName,
     docker: {
-      image: 'elixir',
+      image: 'sidecar',
     },
+    toolConstraints: [
+      {
+        toolName: 'erlang',
+        // https://hexdocs.pm/elixir/1.13.4/compatibility-and-deprecations.html#compatibility-between-elixir-and-erlang-otp
+        constraint: '^24',
+      },
+      {
+        toolName: 'elixir',
+      },
+    ],
     preCommands,
   };
   const command = [
     'mix',
     'deps.update',
-    ...updatedDeps.map((dep) => quote(dep.depName)),
+    ...updatedDeps
+      .map((dep) => dep.depName)
+      .filter(is.string)
+      .map((dep) => quote(dep)),
   ].join(' ');
 
   try {

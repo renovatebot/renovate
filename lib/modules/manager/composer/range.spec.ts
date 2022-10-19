@@ -6,6 +6,7 @@ describe('modules/manager/composer/range', () => {
     const config: RangeConfig = { rangeStrategy: 'widen' };
     expect(getRangeStrategy(config)).toBe('widen');
   });
+
   it('pins require-dev', () => {
     const config: RangeConfig = {
       rangeStrategy: 'auto',
@@ -13,6 +14,7 @@ describe('modules/manager/composer/range', () => {
     };
     expect(getRangeStrategy(config)).toBe('pin');
   });
+
   it('pins project require', () => {
     const config: RangeConfig = {
       rangeStrategy: 'auto',
@@ -21,6 +23,7 @@ describe('modules/manager/composer/range', () => {
     };
     expect(getRangeStrategy(config)).toBe('pin');
   });
+
   it('widens complex ranges', () => {
     const config: RangeConfig = {
       rangeStrategy: 'auto',
@@ -29,6 +32,7 @@ describe('modules/manager/composer/range', () => {
     };
     expect(getRangeStrategy(config)).toBe('widen');
   });
+
   it('widens complex bump', () => {
     const config: RangeConfig = {
       rangeStrategy: 'bump',
@@ -37,10 +41,12 @@ describe('modules/manager/composer/range', () => {
     };
     expect(getRangeStrategy(config)).toBe('widen');
   });
+
   it('defaults to replace', () => {
     const config: RangeConfig = { rangeStrategy: 'auto', depType: 'require' };
     expect(getRangeStrategy(config)).toBe('replace');
   });
+
   it('defaults to widen for TYPO3 extensions', () => {
     const config: RangeConfig = {
       managerData: {

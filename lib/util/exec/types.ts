@@ -1,8 +1,8 @@
-import type { ExecOptions as ChildProcessExecOptions } from 'child_process';
+import type { SpawnOptions as ChildProcessSpawnOptions } from 'child_process';
 
 export interface ToolConstraint {
   toolName: string;
-  constraint?: string;
+  constraint?: string | null;
 }
 
 export interface ToolConfig {
@@ -17,9 +17,6 @@ export type Opt<T> = T | null | undefined;
 export type VolumesPair = [string, string];
 export type VolumeOption = Opt<string | VolumesPair>;
 
-export type DockerExtraCommand = Opt<string>;
-export type DockerExtraCommands = Opt<DockerExtraCommand[]>;
-
 export interface DockerOptions {
   image: string;
   tag?: Opt<string>;
@@ -30,8 +27,14 @@ export interface DockerOptions {
   cwd?: Opt<string>;
 }
 
-export interface RawExecOptions extends ChildProcessExecOptions {
+export interface RawExecOptions extends ChildProcessSpawnOptions {
+  // TODO: to be removed in #16655
+  /**
+   * @deprecated renovate uses utf8, encoding property is ignored.
+   */
   encoding: string;
+  maxBuffer?: number | undefined;
+  cwd?: string;
 }
 
 export interface ExecResult {
@@ -48,7 +51,7 @@ export interface ExecOptions {
   extraEnv?: Opt<ExtraEnv>;
   docker?: Opt<DockerOptions>;
   toolConstraints?: Opt<ToolConstraint[]>;
-  preCommands?: DockerExtraCommands;
+  preCommands?: Opt<string[]>;
   // Following are pass-through to child process
   maxBuffer?: number | undefined;
   timeout?: number | undefined;

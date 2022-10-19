@@ -13,6 +13,7 @@ describe('modules/manager/nodenv/extract', () => {
         },
       ]);
     });
+
     it('supports ranges', () => {
       const res = extractPackageFile('8.4\n');
       expect(res.deps).toEqual([
@@ -24,6 +25,7 @@ describe('modules/manager/nodenv/extract', () => {
         },
       ]);
     });
+
     it('skips non ranges', () => {
       const res = extractPackageFile('latestn');
       expect(res.deps).toEqual([

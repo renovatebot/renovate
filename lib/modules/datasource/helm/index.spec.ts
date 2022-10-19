@@ -1,6 +1,7 @@
 import { getPkgReleases } from '..';
 import { Fixtures } from '../../../../test/fixtures';
 import * as httpMock from '../../../../test/http-mock';
+import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages';
 import { HelmDatasource } from '.';
 
 // Truncated index.yaml file
@@ -16,11 +17,12 @@ describe('modules/datasource/helm/index', () => {
       expect(
         await getPkgReleases({
           datasource: HelmDatasource.id,
-          depName: undefined,
+          depName: undefined as never, // #7154
           registryUrls: ['https://example-repository.com'],
         })
       ).toBeNull();
     });
+
     it('returns null if repository was not provided', async () => {
       // FIXME: should it call default rtegisty?
       httpMock
@@ -35,11 +37,12 @@ describe('modules/datasource/helm/index', () => {
         })
       ).toBeNull();
     });
+
     it('returns null for empty response', async () => {
       httpMock
         .scope('https://example-repository.com')
         .get('/index.yaml')
-        .reply(200, null);
+        .reply(200);
       expect(
         await getPkgReleases({
           datasource: HelmDatasource.id,
@@ -47,8 +50,8 @@ describe('modules/datasource/helm/index', () => {
           registryUrls: ['https://example-repository.com'],
         })
       ).toBeNull();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
+
     it('returns null for missing response body', async () => {
       httpMock
         .scope('https://example-repository.com')
@@ -61,8 +64,8 @@ describe('modules/datasource/helm/index', () => {
           registryUrls: ['https://example-repository.com'],
         })
       ).toBeNull();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
+
     it('returns null for 404', async () => {
       httpMock
         .scope('https://example-repository.com')
@@ -75,27 +78,22 @@ describe('modules/datasource/helm/index', () => {
           registryUrls: ['https://example-repository.com'],
         })
       ).toBeNull();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
+
     it('throws for 5xx', async () => {
       httpMock
         .scope('https://example-repository.com')
         .get('/index.yaml')
         .reply(502);
-      let e;
-      try {
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource: HelmDatasource.id,
           depName: 'some_chart',
           registryUrls: ['https://example-repository.com'],
-        });
-      } catch (err) {
-        e = err;
-      }
-      expect(e).toBeDefined();
-      expect(e).toMatchSnapshot();
-      expect(httpMock.getTrace()).toMatchSnapshot();
+        })
+      ).rejects.toThrow(EXTERNAL_HOST_ERROR);
     });
+
     it('returns null for unknown error', async () => {
       httpMock
         .scope('https://example-repository.com')
@@ -108,8 +106,8 @@ describe('modules/datasource/helm/index', () => {
           registryUrls: ['https://example-repository.com'],
         })
       ).toBeNull();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
+
     it('returns null if index.yaml in response is empty', async () => {
       httpMock
         .scope('https://example-repository.com')
@@ -121,8 +119,8 @@ describe('modules/datasource/helm/index', () => {
         registryUrls: ['https://example-repository.com'],
       });
       expect(releases).toBeNull();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
+
     it('returns null if index.yaml in response is invalid', async () => {
       const res = {
         body: `some
@@ -140,8 +138,8 @@ describe('modules/datasource/helm/index', () => {
         registryUrls: ['https://example-repository.com'],
       });
       expect(releases).toBeNull();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
+
     it('returns null if packageName is not in index.yaml', async () => {
       httpMock
         .scope('https://example-repository.com')
@@ -153,8 +151,8 @@ describe('modules/datasource/helm/index', () => {
         registryUrls: ['https://example-repository.com'],
       });
       expect(releases).toBeNull();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
+
     it('returns list of versions for normal response', async () => {
       httpMock
         .scope('https://example-repository.com')
@@ -167,23 +165,25 @@ describe('modules/datasource/helm/index', () => {
       });
       expect(releases).not.toBeNull();
       expect(releases).toMatchSnapshot();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
+
     it('adds trailing slash to subdirectories', async () => {
       httpMock
         .scope('https://example-repository.com')
         .get('/subdir/index.yaml')
         .reply(200, indexYaml);
-      await getPkgReleases({
+      const res = await getPkgReleases({
         datasource: HelmDatasource.id,
         depName: 'ambassador',
         registryUrls: ['https://example-repository.com/subdir'],
       });
-      const trace = httpMock.getTrace();
-      expect(trace[0].url).toBe(
-        'https://example-repository.com/subdir/index.yaml'
-      );
-      expect(trace).toMatchSnapshot();
+
+      expect(res).toMatchObject({
+        homepage: 'https://www.getambassador.io/',
+        registryUrl: 'https://example-repository.com/subdir',
+        sourceUrl: 'https://github.com/datawire/ambassador',
+        releases: expect.toBeArrayOfSize(27),
+      });
     });
   });
 });

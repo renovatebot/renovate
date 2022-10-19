@@ -1,11 +1,11 @@
 import is from '@sindresorhus/is';
-import pAll from 'p-all';
 import semver from 'semver';
 import { XmlDocument } from 'xmldoc';
 import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import * as packageCache from '../../../util/cache/package';
 import { Http, HttpError } from '../../../util/http';
+import * as p from '../../../util/promises';
 import { regEx } from '../../../util/regex';
 import { ensureTrailingSlash } from '../../../util/url';
 import type { Release, ReleaseResult } from '../types';
@@ -62,13 +62,16 @@ export async function getResourceUrl(
       .filter(
         ({ type, version }) => type === resourceType && semver.valid(version)
       )
-      .sort((x, y) => semver.compare(x.version, y.version));
-    const { serviceId, version } = services.pop();
+      .sort((x, y) =>
+        x.version && y.version ? semver.compare(x.version, y.version) : 0
+      );
+    const { serviceId, version } = services.pop()!;
 
     // istanbul ignore if
     if (
       resourceType === 'RegistrationsBaseUrl' &&
-      !version?.startsWith('3.0.0-') &&
+      version &&
+      !version.startsWith('3.0.0-') &&
       !semver.satisfies(version, '^3.0.0')
     ) {
       logger.warn(
@@ -118,12 +121,10 @@ export async function getReleases(
   const catalogPagesQueue = catalogPages.map(
     (page) => (): Promise<CatalogEntry[]> => getCatalogEntry(http, page)
   );
-  const catalogEntries = (
-    await pAll(catalogPagesQueue, { concurrency: 5 })
-  ).flat();
+  const catalogEntries = (await p.all(catalogPagesQueue)).flat();
 
-  let homepage = null;
-  let latestStable: string = null;
+  let homepage: string | null = null;
+  let latestStable: string | null = null;
   const releases = catalogEntries.map(
     ({ version, published: releaseTimestamp, projectUrl, listed }) => {
       const release: Release = { version: removeBuildMeta(version) };
@@ -132,7 +133,7 @@ export async function getReleases(
       }
       if (semver.valid(version) && !semver.prerelease(version)) {
         latestStable = removeBuildMeta(version);
-        homepage = massageUrl(projectUrl || homepage);
+        homepage = projectUrl ? massageUrl(projectUrl) : homepage;
       }
       if (listed === false) {
         release.isDeprecated = true;
@@ -146,10 +147,10 @@ export async function getReleases(
   }
 
   // istanbul ignore if: only happens when no stable version exists
-  if (latestStable === null) {
-    const last = catalogEntries.pop();
+  if (latestStable === null && catalogPages.length) {
+    const last = catalogEntries.pop()!;
     latestStable = removeBuildMeta(last.version);
-    homepage ??= last.projectUrl;
+    homepage ??= last.projectUrl ?? null;
   }
 
   const dep: ReleaseResult = {
@@ -166,7 +167,11 @@ export async function getReleases(
     if (is.nonEmptyString(packageBaseAddress)) {
       const nuspecUrl = `${ensureTrailingSlash(
         packageBaseAddress
-      )}${pkgName.toLowerCase()}/${latestStable}/${pkgName.toLowerCase()}.nuspec`;
+      )}${pkgName.toLowerCase()}/${
+        // TODO: types (#7154)
+        // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+        latestStable
+      }/${pkgName.toLowerCase()}.nuspec`;
       const metaresult = await http.get(nuspecUrl);
       const nuspec = new XmlDocument(metaresult.body);
       const sourceUrl = nuspec.valueWithPath('metadata.repository@url');

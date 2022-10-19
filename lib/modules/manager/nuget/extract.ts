@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import { XmlDocument, XmlElement, XmlNode } from 'xmldoc';
 import { logger } from '../../../logger';
 import { getSiblingFileName, localPathExists } from '../../../util/fs';
@@ -38,19 +39,19 @@ function extractDepsFromXml(xmlNode: XmlDocument): PackageDependency[] {
   const results: PackageDependency[] = [];
   const todo: XmlElement[] = [xmlNode];
   while (todo.length) {
-    const child = todo.pop();
+    const child = todo.pop()!;
     const { name, attr } = child;
 
     if (elemNames.has(name)) {
       const depName = attr?.Include || attr?.Update;
       const version =
-        attr?.Version ||
-        child.valueWithPath('Version') ||
-        attr?.VersionOverride ||
+        attr?.Version ??
+        child.valueWithPath('Version') ??
+        attr?.VersionOverride ??
         child.valueWithPath('VersionOverride');
-      const currentValue = checkVersion
-        ?.exec(version)
-        ?.groups?.currentValue?.trim();
+      const currentValue = is.nonEmptyStringAndNotWhitespace(version)
+        ? checkVersion.exec(version)?.groups?.currentValue?.trim()
+        : undefined;
       if (depName && currentValue) {
         results.push({
           datasource: NugetDatasource.id,
@@ -118,16 +119,18 @@ export async function extractPackageFile(
   }
 
   let deps: PackageDependency[] = [];
+  let packageFileVersion = undefined;
   try {
     const parsedXml = new XmlDocument(content);
     deps = extractDepsFromXml(parsedXml).map((dep) => ({
       ...dep,
       ...(registryUrls && { registryUrls }),
     }));
+    packageFileVersion = parsedXml.valueWithPath('PropertyGroup.Version');
   } catch (err) {
     logger.debug({ err }, `Failed to parse ${packageFile}`);
   }
-  const res: PackageFile = { deps };
+  const res: PackageFile = { deps, packageFileVersion };
   const lockFileName = getSiblingFileName(packageFile, 'packages.lock.json');
   // istanbul ignore if
   if (await localPathExists(lockFileName)) {

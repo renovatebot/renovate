@@ -1,7 +1,7 @@
 import upath from 'upath';
 import { logger } from '../../../logger';
 import { readLocalFile } from '../../../util/fs';
-import { MavenDatasource, defaultRegistryUrls } from '../../datasource/maven';
+import { MavenDatasource } from '../../datasource/maven';
 import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
 import { parseCatalog } from './extract/catalog';
 import { parseGradle, parseProps } from './parser';
@@ -12,7 +12,6 @@ import type {
 } from './types';
 import {
   getVars,
-  isGradleFile,
   isPropsFile,
   isTOMLFile,
   reorderFiles,
@@ -43,7 +42,7 @@ export async function extractAllPackageFiles(
   const extractedDeps: PackageDependency<GradleManagerData>[] = [];
   const registry: VariableRegistry = {};
   const packageFilesByName: Record<string, PackageFile> = {};
-  const registryUrls = [];
+  const registryUrls: string[] = [];
   const reorderedFiles = reorderFiles(packageFiles);
   for (const packageFile of reorderedFiles) {
     packageFilesByName[packageFile] = {
@@ -53,7 +52,8 @@ export async function extractAllPackageFiles(
     };
 
     try {
-      const content = await readLocalFile(packageFile, 'utf8');
+      // TODO #7154
+      const content = (await readLocalFile(packageFile, 'utf8'))!;
       const dir = upath.dirname(toAbsolutePath(packageFile));
 
       const updateVars = (newVars: PackageVariables): void => {
@@ -68,13 +68,13 @@ export async function extractAllPackageFiles(
       } else if (isTOMLFile(packageFile)) {
         const updatesFromCatalog = parseCatalog(packageFile, content);
         extractedDeps.push(...updatesFromCatalog);
-      } else if (isGradleFile(packageFile)) {
+      } else {
         const vars = getVars(registry, dir);
         const {
           deps,
           urls,
           vars: gradleVars,
-        } = parseGradle(content, vars, packageFile);
+        } = await parseGradle(content, vars, packageFile);
         urls.forEach((url) => {
           if (!registryUrls.includes(url)) {
             registryUrls.push(url);
@@ -87,7 +87,7 @@ export async function extractAllPackageFiles(
     } catch (err) {
       logger.warn(
         { err, config, packageFile },
-        `Failed to process Gradle file: ${packageFile}`
+        `Failed to process Gradle file`
       );
     }
   }
@@ -100,23 +100,41 @@ export async function extractAllPackageFiles(
     const key = dep.managerData?.packageFile;
     // istanbul ignore else
     if (key) {
-      const pkgFile: PackageFile = packageFilesByName[key];
-      const { deps } = pkgFile;
-      deps.push({
-        ...dep,
-        registryUrls: [
-          ...new Set([
-            ...defaultRegistryUrls,
-            ...(dep.registryUrls || []),
-            ...registryUrls,
-          ]),
-        ],
-      });
+      let pkgFile = packageFilesByName[key];
+      if (!pkgFile) {
+        pkgFile = {
+          packageFile: key,
+          datasource,
+          deps: [],
+        } as PackageFile;
+      }
+
+      dep.registryUrls = [
+        ...new Set([...registryUrls, ...(dep.registryUrls ?? [])]),
+      ];
+
+      if (!dep.depType) {
+        dep.depType = key.startsWith('buildSrc')
+          ? 'devDependencies'
+          : 'dependencies';
+      }
+
+      const depAlreadyInPkgFile = pkgFile.deps.some(
+        (item) =>
+          item.depName === dep.depName &&
+          item.managerData?.fileReplacePosition ===
+            dep.managerData?.fileReplacePosition
+      );
+      if (!depAlreadyInPkgFile) {
+        pkgFile.deps.push(dep);
+      }
+
       packageFilesByName[key] = pkgFile;
     } else {
       logger.warn({ dep }, `Failed to process Gradle dependency`);
     }
   });
 
-  return Object.values(packageFilesByName);
+  const result = Object.values(packageFilesByName);
+  return result;
 }

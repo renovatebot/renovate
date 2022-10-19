@@ -1,10 +1,15 @@
+import * as z from 'zod';
 import * as httpMock from '../../../test/http-mock';
+import { logger } from '../../../test/util';
 import {
   EXTERNAL_HOST_ERROR,
   HOST_DISABLED,
 } from '../../constants/error-messages';
+import * as memCache from '../cache/memory';
 import * as hostRules from '../host-rules';
+import { reportErrors } from '../schema';
 import * as queue from './queue';
+import type { HttpResponse } from './types';
 import { Http } from '.';
 
 const baseUrl = 'http://renovate.com';
@@ -17,6 +22,7 @@ describe('util/http/index', () => {
     hostRules.clear();
     queue.clear();
   });
+
   it('get', async () => {
     httpMock.scope(baseUrl).get('/test').reply(200);
     expect(await http.get('http://renovate.com/test')).toEqual({
@@ -27,6 +33,7 @@ describe('util/http/index', () => {
     });
     expect(httpMock.allUsed()).toBeTrue();
   });
+
   it('returns 429 error', async () => {
     httpMock.scope(baseUrl).get('/test').reply(429);
     await expect(http.get('http://renovate.com/test')).rejects.toThrow(
@@ -34,6 +41,7 @@ describe('util/http/index', () => {
     );
     expect(httpMock.allUsed()).toBeTrue();
   });
+
   it('converts 404 error to ExternalHostError', async () => {
     httpMock.scope(baseUrl).get('/test').reply(404);
     hostRules.add({ abortOnError: true });
@@ -42,12 +50,14 @@ describe('util/http/index', () => {
     );
     expect(httpMock.allUsed()).toBeTrue();
   });
+
   it('disables hosts', async () => {
     hostRules.add({ matchHost: 'renovate.com', enabled: false });
     await expect(http.get('http://renovate.com/test')).rejects.toThrow(
       HOST_DISABLED
     );
   });
+
   it('ignores 404 error and does not throw ExternalHostError', async () => {
     httpMock.scope(baseUrl).get('/test').reply(404);
     hostRules.add({ abortOnError: true, abortIgnoreStatusCodes: [404] });
@@ -56,6 +66,7 @@ describe('util/http/index', () => {
     );
     expect(httpMock.allUsed()).toBeTrue();
   });
+
   it('getJson', async () => {
     httpMock.scope(baseUrl).get('/').reply(200, '{ "test": true }');
     expect(await http.getJson('http://renovate.com')).toEqual({
@@ -67,6 +78,7 @@ describe('util/http/index', () => {
       statusCode: 200,
     });
   });
+
   it('postJson', async () => {
     httpMock.scope(baseUrl).post('/').reply(200, {});
     expect(
@@ -81,6 +93,7 @@ describe('util/http/index', () => {
     });
     expect(httpMock.allUsed()).toBeTrue();
   });
+
   it('putJson', async () => {
     httpMock.scope(baseUrl).put('/').reply(200, {});
     expect(
@@ -95,6 +108,7 @@ describe('util/http/index', () => {
     });
     expect(httpMock.allUsed()).toBeTrue();
   });
+
   it('patchJson', async () => {
     httpMock.scope(baseUrl).patch('/').reply(200, {});
     expect(
@@ -109,6 +123,7 @@ describe('util/http/index', () => {
     });
     expect(httpMock.allUsed()).toBeTrue();
   });
+
   it('deleteJson', async () => {
     httpMock.scope(baseUrl).delete('/').reply(200, {});
     expect(
@@ -123,6 +138,7 @@ describe('util/http/index', () => {
     });
     expect(httpMock.allUsed()).toBeTrue();
   });
+
   it('headJson', async () => {
     httpMock.scope(baseUrl).head('/').reply(200, {});
     expect(await http.headJson('http://renovate.com', { baseUrl })).toEqual({
@@ -159,6 +175,14 @@ describe('util/http/index', () => {
 
     expect(data).toBe('{}');
     expect(httpMock.allUsed()).toBeTrue();
+  });
+
+  it('disables hosts for stream', () => {
+    hostRules.add({ matchHost: 'renovate.com', enabled: false });
+
+    expect(() => http.stream('http://renovate.com/test')).toThrow(
+      HOST_DISABLED
+    );
   });
 
   it('retries', async () => {
@@ -280,5 +304,133 @@ describe('util/http/index', () => {
     const res = await http.getBuffer('http://renovate.com');
     expect(res?.body).toBeInstanceOf(Buffer);
     expect(res?.body.toString('utf-8')).toBe('test');
+  });
+
+  describe('Schema support', () => {
+    const testSchema = z.object({ test: z.boolean() });
+    type TestType = z.infer<typeof testSchema>;
+
+    beforeEach(() => {
+      jest.resetAllMocks();
+      memCache.init();
+    });
+
+    afterEach(() => {
+      memCache.reset();
+    });
+
+    describe('getJson', () => {
+      it('infers body type', async () => {
+        httpMock
+          .scope(baseUrl)
+          .get('/')
+          .reply(200, JSON.stringify({ test: true }));
+
+        const { body }: HttpResponse<TestType> = await http.getJson(
+          'http://renovate.com',
+          testSchema
+        );
+
+        expect(body).toEqual({ test: true });
+
+        reportErrors();
+        expect(logger.logger.warn).not.toHaveBeenCalled();
+      });
+
+      it('reports warnings', async () => {
+        memCache.init();
+        httpMock
+          .scope(baseUrl)
+          .get('/')
+          .reply(200, JSON.stringify({ test: 'foobar' }));
+
+        const res = await http.getJson(
+          'http://renovate.com',
+          { onSchemaError: 'warn' },
+          testSchema
+        );
+
+        expect(res.body).toEqual({ test: 'foobar' });
+
+        expect(logger.logger.warn).not.toHaveBeenCalled();
+        reportErrors();
+        expect(logger.logger.warn).toHaveBeenCalled();
+      });
+
+      it('throws', async () => {
+        httpMock
+          .scope(baseUrl)
+          .get('/')
+          .reply(200, JSON.stringify({ test: 'foobar' }));
+
+        await expect(
+          http.getJson(
+            'http://renovate.com',
+            { onSchemaError: 'throw' },
+            testSchema
+          )
+        ).rejects.toThrow();
+
+        reportErrors();
+        expect(logger.logger.warn).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('postJson', () => {
+      it('infers body type', async () => {
+        httpMock
+          .scope(baseUrl)
+          .post('/')
+          .reply(200, JSON.stringify({ test: true }));
+
+        const { body }: HttpResponse<TestType> = await http.postJson(
+          'http://renovate.com',
+          testSchema
+        );
+
+        expect(body).toEqual({ test: true });
+
+        reportErrors();
+        expect(logger.logger.warn).not.toHaveBeenCalled();
+      });
+
+      it('reports warnings', async () => {
+        memCache.init();
+        httpMock
+          .scope(baseUrl)
+          .post('/')
+          .reply(200, JSON.stringify({ test: 'foobar' }));
+
+        const res = await http.postJson(
+          'http://renovate.com',
+          { onSchemaError: 'warn' },
+          testSchema
+        );
+
+        expect(res.body).toEqual({ test: 'foobar' });
+
+        expect(logger.logger.warn).not.toHaveBeenCalled();
+        reportErrors();
+        expect(logger.logger.warn).toHaveBeenCalled();
+      });
+
+      it('throws', async () => {
+        httpMock
+          .scope(baseUrl)
+          .post('/')
+          .reply(200, JSON.stringify({ test: 'foobar' }));
+
+        await expect(
+          http.postJson(
+            'http://renovate.com',
+            { onSchemaError: 'throw' },
+            testSchema
+          )
+        ).rejects.toThrow();
+
+        reportErrors();
+        expect(logger.logger.warn).not.toHaveBeenCalled();
+      });
+    });
   });
 });

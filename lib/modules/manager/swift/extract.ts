@@ -49,7 +49,7 @@ const searchLabels = {
   exactVersion: EXACT_VERSION,
 };
 
-function searchKeysForState(state): (keyof typeof regExps)[] {
+function searchKeysForState(state: string | null): (keyof typeof regExps)[] {
   switch (state) {
     case 'dependencies':
       return [SPACE, COLON, WILDCARD];
@@ -89,9 +89,9 @@ function searchKeysForState(state): (keyof typeof regExps)[] {
       return [DEPS];
   }
 }
-function getMatch(str: string, state: string): MatchResult | null {
+function getMatch(str: string, state: string | null): MatchResult | null {
   const keys = searchKeysForState(state);
-  let result = null;
+  let result: MatchResult | null = null;
   for (let i = 0; i < keys.length; i += 1) {
     const key = keys[i];
     const regex = regExps[key];
@@ -112,7 +112,10 @@ function getMatch(str: string, state: string): MatchResult | null {
   return result;
 }
 
-function getDepName(url: string): string | null {
+function getDepName(url: string | null): string | null {
+  if (!url) {
+    return null;
+  }
   try {
     const { host, pathname } = new URL(url);
     if (host === 'github.com' || host === 'gitlab.com') {
@@ -129,24 +132,24 @@ function getDepName(url: string): string | null {
 
 export function extractPackageFile(
   content: string,
-  packageFile: string = null
+  packageFile: string | null = null
 ): PackageFile | null {
   if (!content) {
     return null;
   }
 
+  const deps: PackageDependency[] = [];
   const result: PackageFile = {
     packageFile,
-    deps: null,
+    deps,
   };
-  const deps: PackageDependency[] = [];
 
   let restStr = content;
-  let state: string = null;
+  let state: string | null = null;
   let match = getMatch(restStr, state);
 
-  let packageName: string = null;
-  let currentValue: string = null;
+  let packageName: string | null = null;
+  let currentValue: string | null = null;
 
   function yieldDep(): void {
     const depName = getDepName(packageName);
@@ -338,5 +341,5 @@ export function extractPackageFile(
     restStr = restStr.slice(idx + len);
     match = getMatch(restStr, state);
   }
-  return deps.length ? { ...result, deps } : null;
+  return deps.length ? result : null;
 }

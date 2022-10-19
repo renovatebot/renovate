@@ -35,14 +35,16 @@ export function extractFromVectors(
   let vecPos = 0;
   let artifactId = '';
   let version = '';
+  let commentLevel = 0;
 
-  const isSpace = (ch: string): boolean => ch && regEx(/[\s,]/).test(ch);
+  const isSpace = (ch: string | null): boolean =>
+    !!ch && regEx(/[\s,]/).test(ch);
 
   const cleanStrLiteral = (s: string): string =>
     s.replace(regEx(/^"/), '').replace(regEx(/"$/), '');
 
   const yieldDep = (): void => {
-    if (artifactId && version) {
+    if (!commentLevel && artifactId && version) {
       const depName = expandDepName(cleanStrLiteral(artifactId));
       if (version.startsWith('~')) {
         const varName = version.replace(regEx(/^~\s*/), '');
@@ -69,9 +71,14 @@ export function extractFromVectors(
     version = '';
   };
 
-  let prevChar = null;
+  let prevChar: string | null = null;
   while (idx < str.length) {
     const char = str.charAt(idx);
+
+    if (str.substring(idx).startsWith('#_[')) {
+      commentLevel = balance;
+    }
+
     if (char === '[') {
       balance += 1;
       if (balance === 2) {
@@ -79,6 +86,13 @@ export function extractFromVectors(
       }
     } else if (char === ']') {
       balance -= 1;
+
+      if (commentLevel === balance) {
+        artifactId = '';
+        version = '';
+        commentLevel = 0;
+      }
+
       if (balance === 1) {
         yieldDep();
       } else if (balance === 0) {
@@ -102,7 +116,7 @@ export function extractFromVectors(
 }
 
 function extractLeinRepos(content: string): string[] {
-  const result = [];
+  const result: string[] = [];
 
   const repoContent = trimAtKey(
     content.replace(/;;.*(?=[\r\n])/g, ''), // get rid of comments // TODO #12872 lookahead
@@ -126,7 +140,7 @@ function extractLeinRepos(content: string): string[] {
     }
     const repoSectionContent = repoContent.slice(0, endIdx);
     const matches =
-      repoSectionContent.match(regEx(/"https?:\/\/[^"]*"/g)) || [];
+      repoSectionContent.match(regEx(/"https?:\/\/[^"]*"/g)) ?? [];
     const urls = matches.map((x) =>
       x.replace(regEx(/^"/), '').replace(regEx(/"$/), '')
     );
@@ -146,7 +160,7 @@ export function extractVariables(content: string): ExtractedVariables {
   for (let idx = 0; idx < lines.length; idx += 1) {
     const line = lines[idx];
     const match = defRegex.exec(line);
-    if (match) {
+    if (match?.groups) {
       const { varName: key, stringValue: val } = match.groups;
       result[key] = val;
     }

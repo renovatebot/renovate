@@ -1,10 +1,8 @@
 import { getPkgReleases } from '..';
 import * as httpMock from '../../../../test/http-mock';
-import * as _hostRules from '../../../util/host-rules';
+import * as githubGraphql from '../../../util/github/graphql';
+import * as hostRules from '../../../util/host-rules';
 import { GithubTagsDatasource } from '.';
-
-jest.mock('../../../util/host-rules');
-const hostRules: any = _hostRules;
 
 const githubApiHost = 'https://api.github.com';
 const githubEnterpriseApiHost = 'https://git.enterprise.com';
@@ -14,8 +12,8 @@ describe('modules/datasource/github-tags/index', () => {
 
   beforeEach(() => {
     jest.resetAllMocks();
-    hostRules.hosts = jest.fn(() => []);
-    hostRules.find.mockReturnValue({
+    jest.spyOn(hostRules, 'hosts').mockReturnValue([]);
+    jest.spyOn(hostRules, 'find').mockReturnValue({
       token: 'some-token',
     });
   });
@@ -24,33 +22,35 @@ describe('modules/datasource/github-tags/index', () => {
     const packageName = 'some/dep';
     const tag = 'v1.2.0';
 
-    it('returns null if no token', async () => {
+    it('returns commit digest', async () => {
+      httpMock
+        .scope(githubApiHost)
+        .get(`/repos/${packageName}/commits?per_page=1`)
+        .reply(200, [{ sha: 'abcdef' }]);
+
+      const res = await github.getDigest({ packageName }, undefined);
+
+      expect(res).toBe('abcdef');
+    });
+
+    it('returns null for missing commit', async () => {
       httpMock
         .scope(githubApiHost)
         .get(`/repos/${packageName}/commits?per_page=1`)
         .reply(200, []);
-      const res = await github.getDigest({ packageName }, null);
+      const res = await github.getDigest({ packageName }, undefined);
       expect(res).toBeNull();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
+
     it('returns digest', async () => {
       httpMock
         .scope(githubApiHost)
         .get(`/repos/${packageName}/commits?per_page=1`)
         .reply(200, [{ sha: 'abcdef' }]);
-      const res = await github.getDigest({ packageName }, null);
+      const res = await github.getDigest({ packageName }, undefined);
       expect(res).toBe('abcdef');
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
-    it('returns commit digest', async () => {
-      httpMock
-        .scope(githubApiHost)
-        .get(`/repos/${packageName}/git/refs/tags/${tag}`)
-        .reply(200, { object: { type: 'commit', sha: 'ddd111' } });
-      const res = await github.getDigest({ packageName }, tag);
-      expect(res).toBe('ddd111');
-      expect(httpMock.getTrace()).toMatchSnapshot();
-    });
+
     it('returns tagged commit digest', async () => {
       httpMock
         .scope(githubApiHost)
@@ -62,8 +62,8 @@ describe('modules/datasource/github-tags/index', () => {
         .reply(200, { object: { type: 'commit', sha: 'ddd111' } });
       const res = await github.getDigest({ packageName }, tag);
       expect(res).toBe('ddd111');
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
+
     it('warns if unknown ref', async () => {
       httpMock
         .scope(githubApiHost)
@@ -71,8 +71,8 @@ describe('modules/datasource/github-tags/index', () => {
         .reply(200, { object: { sha: 'ddd111' } });
       const res = await github.getDigest({ packageName }, tag);
       expect(res).toBeNull();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
+
     it('returns null for missed tagged digest', async () => {
       httpMock
         .scope(githubApiHost)
@@ -80,10 +80,9 @@ describe('modules/datasource/github-tags/index', () => {
         .reply(200, {});
       const res = await github.getDigest({ packageName: 'some/dep' }, 'v1.2.0');
       expect(res).toBeNull();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
-    it('supports ghe', async () => {
+    it('supports GHE', async () => {
       httpMock
         .scope(githubEnterpriseApiHost)
         .get(`/api/v3/repos/${packageName}/git/refs/tags/${tag}`)
@@ -93,62 +92,56 @@ describe('modules/datasource/github-tags/index', () => {
 
       const sha1 = await github.getDigest(
         { packageName, registryUrl: githubEnterpriseApiHost },
-        null
+        undefined
       );
       const sha2 = await github.getDigest(
         { packageName: 'some/dep', registryUrl: githubEnterpriseApiHost },
         'v1.2.0'
       );
-      expect(httpMock.getTrace()).toMatchSnapshot();
+
       expect(sha1).toBe('abcdef');
       expect(sha2).toBe('ddd111');
     });
   });
-  describe('getReleases', () => {
-    beforeEach(() => {
-      jest.resetAllMocks();
-      hostRules.hosts = jest.fn(() => []);
-      hostRules.find.mockReturnValue({
-        token: 'some-token',
-      });
-    });
 
+  describe('getReleases', () => {
     const depName = 'some/dep2';
 
     it('returns tags', async () => {
-      const tags = [{ name: 'v1.0.0' }, { name: 'v1.1.0' }];
-      const releases = tags.map((item, idx) => ({
-        tag_name: item.name,
-        published_at: new Date(idx),
-        prerelease: !!idx,
-      }));
-      httpMock
-        .scope(githubApiHost)
-        .get(`/repos/${depName}/tags?per_page=100`)
-        .reply(200, tags)
-        .get(`/repos/${depName}/releases?per_page=100`)
-        .reply(200, releases);
+      jest.spyOn(githubGraphql, 'queryTags').mockResolvedValueOnce([
+        {
+          version: 'v1.0.0',
+          gitRef: 'v1.0.0',
+          releaseTimestamp: '2021-01-01',
+          newDigest: '123',
+        },
+        {
+          version: 'v2.0.0',
+          gitRef: 'v2.0.0',
+          releaseTimestamp: '2022-01-01',
+          newDigest: 'abc',
+        },
+      ]);
+
       const res = await getPkgReleases({ datasource: github.id, depName });
-      expect(res).toMatchSnapshot();
-      expect(res.releases).toHaveLength(2);
-      expect(httpMock.getTrace()).toMatchSnapshot();
-    });
 
-    it('supports ghe', async () => {
-      const body = [{ name: 'v1.0.0' }, { name: 'v1.1.0' }];
-      httpMock
-        .scope(githubEnterpriseApiHost)
-        .get(`/api/v3/repos/${depName}/tags?per_page=100`)
-        .reply(200, body)
-        .get(`/api/v3/repos/${depName}/releases?per_page=100`)
-        .reply(404);
+      expect(res).toEqual({
+        registryUrl: 'https://github.com',
+        releases: [
+          {
+            gitRef: 'v1.0.0',
+            version: 'v1.0.0',
+            releaseTimestamp: '2021-01-01T00:00:00.000Z',
+          },
+          {
+            gitRef: 'v2.0.0',
+            version: 'v2.0.0',
+            releaseTimestamp: '2022-01-01T00:00:00.000Z',
+          },
+        ],
 
-      const res = await github.getReleases({
-        registryUrl: 'https://git.enterprise.com',
-        packageName: depName,
+        sourceUrl: 'https://github.com/some/dep2',
       });
-      expect(res).toMatchSnapshot();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
 });

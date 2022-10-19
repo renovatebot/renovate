@@ -24,7 +24,6 @@ describe('util/http/gitea', () => {
       paginate: true,
     });
     expect(res.body).toEqual({ hello: 'world' });
-    expect(httpMock.getTrace()).toMatchSnapshot();
   });
 
   it('supports root-level pagination', async () => {
@@ -43,7 +42,6 @@ describe('util/http/gitea', () => {
 
     expect(res.body).toHaveLength(6);
     expect(res.body).toEqual(['abc', 'def', 'ghi', 'jkl', 'mno', 'pqr']);
-    expect(httpMock.getTrace()).toMatchSnapshot();
   });
 
   it('supports pagination on data property', async () => {
@@ -64,8 +62,8 @@ describe('util/http/gitea', () => {
     );
     expect(res.body.data).toHaveLength(6);
     expect(res.body.data).toEqual(['abc', 'def', 'ghi', 'jkl', 'mno', 'pqr']);
-    expect(httpMock.getTrace()).toMatchSnapshot();
   });
+
   it('handles pagination with empty response', async () => {
     httpMock
       .scope(baseUrl)
@@ -82,6 +80,5 @@ describe('util/http/gitea', () => {
     );
     expect(res.body.data).toHaveLength(3);
     expect(res.body.data).toEqual(['abc', 'def', 'ghi']);
-    expect(httpMock.getTrace()).toMatchSnapshot();
   });
 });

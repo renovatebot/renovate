@@ -18,23 +18,27 @@ describe('modules/datasource/npm/npmrc', () => {
     GlobalConfig.reset();
     jest.resetAllMocks();
   });
+
   describe('getMatchHostFromNpmrcHost()', () => {
     it('parses //host', () => {
       expect(getMatchHostFromNpmrcHost('//registry.npmjs.org')).toBe(
         'registry.npmjs.org'
       );
     });
+
     it('parses //host/path', () => {
       expect(
         getMatchHostFromNpmrcHost('//registry.company.com/some/path')
       ).toBe('https://registry.company.com/some/path');
     });
+
     it('parses https://host', () => {
       expect(getMatchHostFromNpmrcHost('https://registry.npmjs.org')).toBe(
         'https://registry.npmjs.org'
       );
     });
   });
+
   describe('convertNpmrcToRules()', () => {
     it('rejects invalid registries', () => {
       const res = convertNpmrcToRules(
@@ -43,70 +47,75 @@ describe('modules/datasource/npm/npmrc', () => {
       expect(res.hostRules).toHaveLength(0);
       expect(res.packageRules).toHaveLength(0);
     });
+
     it('handles naked auth', () => {
       expect(convertNpmrcToRules(ini.parse('_auth=abc123\n')))
         .toMatchInlineSnapshot(`
-        Object {
-          "hostRules": Array [
-            Object {
+        {
+          "hostRules": [
+            {
               "authType": "Basic",
               "hostType": "npm",
               "token": "abc123",
             },
           ],
-          "packageRules": Array [],
+          "packageRules": [],
         }
       `);
     });
+
     it('handles host, path and auth', () => {
       expect(
         convertNpmrcToRules(ini.parse('//some.test/with/path:_auth=abc123'))
       ).toMatchInlineSnapshot(`
-        Object {
-          "hostRules": Array [
-            Object {
+        {
+          "hostRules": [
+            {
               "authType": "Basic",
               "hostType": "npm",
               "matchHost": "https://some.test/with/path",
               "token": "abc123",
             },
           ],
-          "packageRules": Array [],
+          "packageRules": [],
         }
       `);
     });
+
     it('handles host, path, port and auth', () => {
       expect(
         convertNpmrcToRules(
           ini.parse('//some.test:8080/with/path:_authToken=abc123')
         )
       ).toMatchInlineSnapshot(`
-        Object {
-          "hostRules": Array [
-            Object {
+        {
+          "hostRules": [
+            {
               "hostType": "npm",
               "matchHost": "https://some.test:8080/with/path",
               "token": "abc123",
             },
           ],
-          "packageRules": Array [],
+          "packageRules": [],
         }
       `);
     });
+
     it('handles naked authToken', () => {
       expect(convertNpmrcToRules(ini.parse('_authToken=abc123\n')))
         .toMatchInlineSnapshot(`
-        Object {
-          "hostRules": Array [
-            Object {
+        {
+          "hostRules": [
+            {
               "hostType": "npm",
               "token": "abc123",
             },
           ],
-          "packageRules": Array [],
+          "packageRules": [],
         }
       `);
     });
+
     it('handles host authToken', () => {
       expect(
         convertNpmrcToRules(
@@ -115,23 +124,23 @@ describe('modules/datasource/npm/npmrc', () => {
           )
         )
       ).toMatchInlineSnapshot(`
-        Object {
-          "hostRules": Array [
-            Object {
+        {
+          "hostRules": [
+            {
               "hostType": "npm",
               "matchHost": "https://npm.fontawesome.com/",
               "token": "abc123",
             },
           ],
-          "packageRules": Array [
-            Object {
-              "matchDataSources": Array [
+          "packageRules": [
+            {
+              "matchDatasources": [
                 "npm",
               ],
-              "matchPackagePrefixes": Array [
+              "matchPackagePrefixes": [
                 "@fontawesome/",
               ],
-              "registryUrls": Array [
+              "registryUrls": [
                 "https://npm.fontawesome.com/",
               ],
             },
@@ -139,6 +148,7 @@ describe('modules/datasource/npm/npmrc', () => {
         }
       `);
     });
+
     it('handles username and _password', () => {
       expect(
         convertNpmrcToRules(
@@ -147,20 +157,21 @@ describe('modules/datasource/npm/npmrc', () => {
           )
         )
       ).toMatchInlineSnapshot(`
-        Object {
-          "hostRules": Array [
-            Object {
+        {
+          "hostRules": [
+            {
               "hostType": "npm",
               "matchHost": "https://my-registry.example.com/npm-private/",
               "password": "test",
               "username": "bot",
             },
           ],
-          "packageRules": Array [],
+          "packageRules": [],
         }
       `);
     });
   });
+
   it('sanitize _auth', () => {
     setNpmrc('_auth=test');
     expect(sanitize.addSecretForSanitizing).toHaveBeenCalledWith('test');

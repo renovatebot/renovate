@@ -1,44 +1,49 @@
-import { loadFixture } from '../../../../test/util';
-import { extractPackageFile } from './extract';
+import { Fixtures } from '../../../../test/fixtures';
+import { extractPackageFile } from '.';
 
-const aalib = loadFixture('aalib.rb');
-const aap = loadFixture('aap.rb');
-const acmetool = loadFixture('acmetool.rb');
-const aide = loadFixture('aide.rb');
-const ibazel = loadFixture('ibazel.rb');
+const aalib = Fixtures.get('aalib.rb');
+const aap = Fixtures.get('aap.rb');
+const acmetool = Fixtures.get('acmetool.rb');
+const aide = Fixtures.get('aide.rb');
+const ibazel = Fixtures.get('ibazel.rb');
 
 describe('modules/manager/homebrew/extract', () => {
   describe('extractPackageFile()', () => {
     it('skips sourceforge dependency 1', () => {
       const res = extractPackageFile(aalib);
       expect(res).not.toBeNull();
-      expect(res.deps[0].skipReason).toBe('unsupported-url');
+      expect(res?.deps[0].skipReason).toBe('unsupported-url');
       expect(res).toMatchSnapshot();
     });
+
     it('skips sourceforge dependency 2', () => {
       const res = extractPackageFile(aap);
       expect(res).not.toBeNull();
-      expect(res.deps[0].skipReason).toBe('unsupported-url');
+      expect(res?.deps[0].skipReason).toBe('unsupported-url');
       expect(res).toMatchSnapshot();
     });
+
     it('skips github dependency with wrong format', () => {
       const res = extractPackageFile(acmetool);
       expect(res).not.toBeNull();
-      expect(res.deps[0].skipReason).toBe('unsupported-url');
+      expect(res?.deps[0].skipReason).toBe('unsupported-url');
       expect(res).toMatchSnapshot();
     });
+
     it('extracts "releases" github dependency', () => {
       const res = extractPackageFile(aide);
       expect(res).not.toBeNull();
-      expect(res.deps[0].skipReason).toBeUndefined();
+      expect(res?.deps[0].skipReason).toBeUndefined();
       expect(res).toMatchSnapshot();
     });
+
     it('extracts "archive" github dependency', () => {
       const res = extractPackageFile(ibazel);
       expect(res).not.toBeNull();
-      expect(res.deps[0].skipReason).toBeUndefined();
+      expect(res?.deps[0].skipReason).toBeUndefined();
       expect(res).toMatchSnapshot();
     });
+
     it('handles no space before class header', () => {
       const content = `class Ibazel < Formula
           desc 'IBazel is a tool for building Bazel targets when source files change.'
@@ -49,9 +54,10 @@ describe('modules/manager/homebrew/extract', () => {
       `;
       const res = extractPackageFile(content);
       expect(res).not.toBeNull();
-      expect(res.deps[0].skipReason).toBeUndefined();
+      expect(res?.deps[0].skipReason).toBeUndefined();
       expect(res).toMatchSnapshot();
     });
+
     it('returns null for invalid class header 1', () => {
       const content = `
           class Ibazel !?# Formula
@@ -63,6 +69,7 @@ describe('modules/manager/homebrew/extract', () => {
       `;
       expect(extractPackageFile(content)).toBeNull();
     });
+
     it('returns null for invalid class header 2', () => {
       const content = `
           class Ibazel < NotFormula
@@ -74,6 +81,7 @@ describe('modules/manager/homebrew/extract', () => {
       `;
       expect(extractPackageFile(content)).toBeNull();
     });
+
     it('skips if there is no url field', () => {
       const content = `
           class Ibazel < Formula
@@ -85,9 +93,10 @@ describe('modules/manager/homebrew/extract', () => {
       `;
       const res = extractPackageFile(content);
       expect(res).not.toBeNull();
-      expect(res.deps[0].skipReason).toBe('unsupported-url');
+      expect(res?.deps[0].skipReason).toBe('unsupported-url');
       expect(res).toMatchSnapshot();
     });
+
     it('skips if invalid url protocol', () => {
       const content = `
           class Ibazel < Formula
@@ -102,6 +111,7 @@ describe('modules/manager/homebrew/extract', () => {
         deps: [{ depName: 'Ibazel', skipReason: 'unsupported-url' }],
       });
     });
+
     it('skips if invalid url', () => {
       const content = `
           class Ibazel < Formula
@@ -116,6 +126,7 @@ describe('modules/manager/homebrew/extract', () => {
         deps: [{ depName: 'Ibazel', skipReason: 'unsupported-url' }],
       });
     });
+
     it('skips if there is no sha256 field', () => {
       const content = `
           class Ibazel < Formula
@@ -127,9 +138,10 @@ describe('modules/manager/homebrew/extract', () => {
       `;
       const res = extractPackageFile(content);
       expect(res).not.toBeNull();
-      expect(res.deps[0].skipReason).toBe('invalid-sha256');
+      expect(res?.deps[0].skipReason).toBe('invalid-sha256');
       expect(res).toMatchSnapshot();
     });
+
     it('skips if sha256 field is invalid', () => {
       const content = `
           class Ibazel < Formula
@@ -141,7 +153,7 @@ describe('modules/manager/homebrew/extract', () => {
       `;
       const res = extractPackageFile(content);
       expect(res).not.toBeNull();
-      expect(res.deps[0].skipReason).toBe('invalid-sha256');
+      expect(res?.deps[0].skipReason).toBe('invalid-sha256');
       expect(res).toMatchSnapshot();
     });
   });

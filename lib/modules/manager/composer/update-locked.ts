@@ -9,15 +9,18 @@ export function updateLockedDependency(
   const { depName, currentVersion, newVersion, lockFile, lockFileContent } =
     config;
   logger.debug(
+    // TODO: types (#7154)
+    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
     `composer.updateLockedDependency: ${depName}@${currentVersion} -> ${newVersion} [${lockFile}]`
   );
   try {
-    const locked = JSON.parse(lockFileContent) as ComposerLock;
+    const locked = JSON.parse(lockFileContent!) as ComposerLock;
     if (
       locked.packages?.find(
         (entry) =>
           entry.name === depName &&
-          composer.equals(entry.version || '', newVersion)
+          // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+          composer.equals(entry.version || '', newVersion!)
       )
     ) {
       return { status: 'already-updated' };

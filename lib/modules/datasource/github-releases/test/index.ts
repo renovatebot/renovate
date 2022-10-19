@@ -1,5 +1,6 @@
 import * as httpMock from '../../../../../test/http-mock';
-import type { GithubRelease } from '../types';
+import { partial } from '../../../../../test/util';
+import type { GithubRestRelease } from '../../../../util/github/types';
 
 export class GitHubReleaseMocker {
   constructor(
@@ -7,26 +8,28 @@ export class GitHubReleaseMocker {
     private readonly packageName: string
   ) {}
 
-  release(version: string): GithubRelease {
+  release(version: string): GithubRestRelease {
     return this.withAssets(version, {});
   }
 
   withAssets(
     version: string,
     assets: { [key: string]: string }
-  ): GithubRelease {
-    const releaseData = {
+  ): GithubRestRelease {
+    const releaseData = partial<GithubRestRelease>({
       tag_name: version,
       published_at: '2020-03-09T11:00:00Z',
       prerelease: false,
       assets: [],
-    } as GithubRelease;
+    });
     for (const assetFn of Object.keys(assets)) {
       const assetPath = `/repos/${this.packageName}/releases/download/${version}/${assetFn}`;
+      const urlPath = `/repos/${this.packageName}/releases/assets/${version}-${assetFn}`;
       const assetData = assets[assetFn];
       releaseData.assets.push({
         name: assetFn,
         size: assetData.length,
+        url: `${this.githubApiHost}${urlPath}`,
         browser_download_url: `${this.githubApiHost}${assetPath}`,
       });
       httpMock
@@ -43,7 +46,10 @@ export class GitHubReleaseMocker {
     return releaseData;
   }
 
-  withDigestFileAsset(version: string, ...digests: string[]): GithubRelease {
+  withDigestFileAsset(
+    version: string,
+    ...digests: string[]
+  ): GithubRestRelease {
     return this.withAssets(version, { 'SHASUMS.txt': digests.join('\n') });
   }
 }

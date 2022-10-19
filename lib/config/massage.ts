@@ -40,7 +40,7 @@ export function massageConfig(config: RenovateConfig): RenovateConfig {
     }
   }
   if (is.nonEmptyArray(massagedConfig.packageRules)) {
-    const newRules: PackageRule[] = [];
+    let newRules: PackageRule[] = [];
     const updateTypes: UpdateType[] = [
       'major',
       'minor',
@@ -62,7 +62,7 @@ export function massageConfig(config: RenovateConfig): RenovateConfig {
               delete newRule[newKey];
             }
           });
-          newRule.matchUpdateTypes = rule.matchUpdateTypes || [];
+          newRule.matchUpdateTypes = rule.matchUpdateTypes ?? [];
           newRule.matchUpdateTypes.push(key);
           newRule = { ...newRule, ...val };
           newRules.push(newRule);
@@ -74,6 +74,17 @@ export function massageConfig(config: RenovateConfig): RenovateConfig {
         delete rule[updateType];
       });
     }
+    newRules = newRules.filter((rule) => {
+      if (
+        Object.keys(rule).every(
+          (key) => key.startsWith('match') || key.startsWith('exclude')
+        )
+      ) {
+        // Exclude rules which contain only match or exclude options
+        return false;
+      }
+      return true;
+    });
     massagedConfig.packageRules = newRules;
   }
   return massagedConfig;

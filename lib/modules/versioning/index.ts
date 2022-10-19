@@ -14,7 +14,7 @@ export const getVersionings = (): Map<
   VersioningApi | VersioningApiConstructor
 > => versionings;
 
-export function get(versioning: string): VersioningApi {
+export function get(versioning: string | undefined): VersioningApi {
   if (!versioning) {
     logger.trace('Missing versioning, using semver as fallback.');
     return versionings.get('semver') as VersioningApi;

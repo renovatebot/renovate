@@ -3,7 +3,7 @@ module.exports = {
   env: {
     node: true,
   },
-  plugins: ['@renovate', 'typescript-enum'],
+  plugins: ['@renovate', 'typescript-enum', 'jest-formatting'],
   extends: [
     'eslint:recommended',
     'plugin:import/errors',
@@ -15,6 +15,7 @@ module.exports = {
     'plugin:@typescript-eslint/recommended',
     'plugin:@typescript-eslint/recommended-requiring-type-checking',
     'plugin:promise/recommended',
+    'plugin:jest-formatting/recommended',
     'prettier',
   ],
   parserOptions: {
@@ -70,7 +71,16 @@ module.exports = {
 
     // disallow direct `nock` module usage as it causes memory issues.
     // disallow `parse-link-header` to allow override ENV https://github.com/thlorenz/parse-link-header#environmental-variables
-    'no-restricted-imports': [2, { paths: ['nock', 'parse-link-header'] }],
+    // disallow `path` in favor of `upath`
+    'no-restricted-imports': [
+      2,
+      { paths: ['nock', 'parse-link-header', 'path'] },
+    ],
+
+    '@typescript-eslint/consistent-type-assertions': [
+      'error',
+      { assertionStyle: 'as', objectLiteralTypeAssertions: 'allow' },
+    ],
 
     // Makes no sense to allow type inference for expression parameters, but require typing the response
     '@typescript-eslint/explicit-function-return-type': [
@@ -80,13 +90,14 @@ module.exports = {
 
     // TODO: fix lint
     '@typescript-eslint/no-explicit-any': 0,
-    '@typescript-eslint/no-non-null-assertion': 2,
+    // TODO: https://github.com/renovatebot/renovate/issues/7154
+    '@typescript-eslint/no-non-null-assertion': 0,
     '@typescript-eslint/no-unused-vars': [
       2,
       {
         vars: 'all',
         args: 'none',
-        ignoreRestSiblings: false,
+        ignoreRestSiblings: true,
       },
     ],
     '@typescript-eslint/prefer-optional-chain': 2,
@@ -103,7 +114,7 @@ module.exports = {
     '@typescript-eslint/no-unsafe-argument': 0, // thousands of errors :-/
 
     '@typescript-eslint/restrict-template-expressions': [
-      1,
+      2,
       { allowNumber: true, allowBoolean: true },
     ],
     '@typescript-eslint/restrict-plus-operands': 2,
@@ -122,6 +133,13 @@ module.exports = {
 
     'typescript-enum/no-const-enum': 2,
     'typescript-enum/no-enum': 2,
+    'object-shorthand': [
+      'error',
+      'always',
+      {
+        avoidQuotes: true,
+      },
+    ],
   },
   settings: {
     'import/parsers': {

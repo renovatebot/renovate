@@ -9,9 +9,11 @@ describe('modules/manager/fvm/extract', () => {
         extractPackageFile('clearly invalid json', packageFile)
       ).toBeNull();
     });
+
     it('returns null for empty flutter sdk version', () => {
       expect(extractPackageFile('{}', packageFile)).toBeNull();
     });
+
     it('returns null for non string flutter sdk version', () => {
       expect(
         extractPackageFile(
@@ -20,29 +22,31 @@ describe('modules/manager/fvm/extract', () => {
         )
       ).toBeNull();
     });
+
     it('returns a result', () => {
       const res = extractPackageFile(
         '{"flutterSdkVersion": "2.10.1", "flavors": {}}',
         packageFile
       );
-      expect(res.deps).toEqual([
+      expect(res?.deps).toEqual([
         {
           currentValue: '2.10.1',
-          datasource: 'github-tags',
+          datasource: 'flutter-version',
           depName: 'flutter',
           packageName: 'flutter/flutter',
         },
       ]);
     });
+
     it('supports non range', () => {
       const res = extractPackageFile(
         '{"flutterSdkVersion": "stable", "flavors": {}}',
         packageFile
       );
-      expect(res.deps).toEqual([
+      expect(res?.deps).toEqual([
         {
           currentValue: 'stable',
-          datasource: 'github-tags',
+          datasource: 'flutter-version',
           depName: 'flutter',
           packageName: 'flutter/flutter',
         },
