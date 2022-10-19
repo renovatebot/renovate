@@ -156,6 +156,7 @@
 
 
     You are using simple `done` comments which cause a lot of noise.
+    Instead, please use GitHub's web interface to request another review.
     Please read our [contribution guide](https://github.com/renovatebot/renovate/blob/main/.github/contributing.md#resolve-review-comments-instead-of-commenting) to reduce noise.
 
 
