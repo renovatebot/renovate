@@ -19,8 +19,7 @@ export function updateLockedDependency(
       locked.packages?.find(
         (entry) =>
           entry.name === depName &&
-          // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-          composer.equals(entry.version || '', newVersion!)
+          composer.equals(entry.version || '', newVersion)
       )
     ) {
       return { status: 'already-updated' };
