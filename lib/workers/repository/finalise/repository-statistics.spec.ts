@@ -14,7 +14,6 @@ import type {
   RepoCacheData,
 } from '../../../util/cache/repository/types';
 import {
-  branchCacheToMetadata,
   runBranchSummary,
   runRenovateRepoStats,
 } from './repository-statistics';
@@ -98,6 +97,13 @@ describe('workers/repository/finalise/repository-statistics', () => {
         isModified: false,
         automerge: false,
       });
+      const expectedMeta = {
+        automerge: branchCache.automerge,
+        isModified: branchCache.isModified,
+        baseBranch,
+        baseBranchSha: parentSha,
+        branchSha: sha,
+      };
       const branches: BranchCache[] = [
         { ...branchCache, branchName: 'b1' },
         {
@@ -128,8 +134,8 @@ describe('workers/repository/finalise/repository-statistics', () => {
             },
           ],
           branches: [
-            { ...branchCacheToMetadata(branchCache), branchName: 'b1' },
-            { ...branchCacheToMetadata(branchCache), branchName: 'b2' },
+            { ...expectedMeta, branchName: 'b1' },
+            { ...expectedMeta, branchName: 'b2' },
           ],
           inactiveBranches: ['b3'],
         },

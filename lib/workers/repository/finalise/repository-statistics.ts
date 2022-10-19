@@ -41,7 +41,7 @@ export function runRenovateRepoStats(
   logger.debug({ stats: prStats }, `Renovate repository PR statistics`);
 }
 
-export function branchCacheToMetadata({
+function branchCacheToMetadata({
   branchName,
   sha: branchSha,
   baseBranch,
