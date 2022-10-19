@@ -1,7 +1,7 @@
 import crypto from 'crypto';
 import * as httpMock from '../../../../test/http-mock';
 import type { UpdateType } from '../../../config/types';
-import { updateDependency } from './update';
+import { updateDependency } from '.';
 
 describe('modules/manager/bazel/update', () => {
   describe('updateDependency', () => {
