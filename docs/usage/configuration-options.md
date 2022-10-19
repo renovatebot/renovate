@@ -1172,11 +1172,11 @@ The `matchHost` URL must be the same as the `registryUrl` set in `.npmrc`, or yo
 {
   "hostRules": [
     {
-      "matchHost": "https://gitlab.myorg.com/api/v4/packages/npm/"
+      "matchHost": "https://gitlab.myorg.com/api/v4/packages/npm/",
+      "token": "abc123"
     }
   ]
 }
-```
 
 ### timeout
 
