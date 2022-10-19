@@ -59,7 +59,6 @@ exports[`modules/manager/npm/extract/index .extractPackageFile() extracts engine
       "depName": "foo",
       "depType": "devDependencies",
       "prettyDepType": "devDependency",
-      "skipReason": "any-version",
     },
     {
       "currentValue": "file:../foo/bar",

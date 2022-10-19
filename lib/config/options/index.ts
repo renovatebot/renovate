@@ -1908,6 +1908,7 @@ const options: RenovateOptions[] = [
     default: [],
     allowedValues: [
       'bundlerConservative',
+      'helmUpdateSubChartArchives',
       'gomodMassage',
       'gomodUpdateImportPaths',
       'gomodTidy',

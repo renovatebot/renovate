@@ -94,8 +94,10 @@ This can be done with this configuration:
 
 ## additionalReviewers
 
-In contrast to `reviewers`, this option adds to the existing reviewer list, rather than replacing it.
-This makes it suitable for augmenting a preset or base list without displacing the original, for example when adding focused reviewers for a specific package group.
+This option _adds_ to the existing reviewer list, rather than _replacing_ it like `reviewers`.
+
+Use `additionalReviewers` when you want to add to a preset or base list, without replacing the original.
+For example, when adding focused reviewers for a specific package group.
 
 ## assignAutomerge
 
@@ -1203,6 +1205,29 @@ This can be a base URL (e.g. `https://api.github.com`) or a hostname like `githu
 If the value starts with `http(s)` then it will only match against URLs which start with the full base URL.
 Otherwise, it will be matched by checking if the URL's hostname matches the `matchHost` directly or ends with it.
 When checking the end of the hostname, a single dot is prefixed to the value of `matchHost`, if one is not already present, to ensure it can only match against whole domain segments.
+
+The `matchHost` URL must be the same as the `registryUrl` set in `.npmrc`, or you'll get authentication issues when the artifacts are updated when yarn or npm runs.
+
+```json
+{
+  "hostRules": [
+    {
+      "matchHost": "https://gitlab.myorg.com/api/v4/packages/npm/",
+      "token": "abc123"
+    }
+  ]
+}
+```
+
+The above corresponds with an `.npmrc` like the following:
+
+```
+registry=https://gitlab.myorg.com/api/v4/packages/npm/
+```
+
+<!-- prettier-ignore -->
+!!! note
+    Values containing a URL path but missing a scheme will be prepended with 'https://' (e.g. `domain.com/path` -> `https://domain.com/path`)
 
 ### timeout
 
@@ -2353,7 +2378,7 @@ Avoid setting `rebaseWhen=never` and then also setting `prCreation=not-pending` 
 
 By default, Renovate will detect if it has proposed an update to a project before and not propose the same one again.
 For example the Webpack 3.x case described above.
-This field lets you customise this behavior down to a per-package level.
+This field lets you customize this behavior down to a per-package level.
 For example we override it to `true` in the following cases where branch names and PR titles need to be reused:
 
 - Package groups
@@ -2681,7 +2706,9 @@ By default, `renovate` will update to a version greater than `latest` only if th
 
 Must be valid usernames.
 
-If on GitHub and assigning a team to review, you must use the prefix `team:` and add the _last part_ of the team name.
+**Required reviewers on GitHub**
+
+If you're assigning a team to review on GitHub, you must use the prefix `team:` and add the _last part_ of the team name.
 Say the full team name on GitHub is `@organization/foo`, then you'd set the config option like this:
 
 ```json
@@ -2690,8 +2717,11 @@ Say the full team name on GitHub is `@organization/foo`, then you'd set the conf
 }
 ```
 
-To mark a reviewer as required in Azure DevOps, you must use the prefix `required:`.
-If the name of the reviewer is `bar` for example, this could also be the name of a team, then you would set the config option like this:
+**Required reviewers on Azure DevOps**
+
+To mark a reviewer as required on Azure DevOps, you must use the prefix `required:`.
+
+For example: if the username or team name is `bar` then you would set the config option like this:
 
 ```json
 {
@@ -2784,6 +2814,12 @@ Technical details: We mostly rely on the text parsing of the library [@breejs/la
 Read the parser documentation at [breejs.github.io/later/parsers.html#text](https://breejs.github.io/later/parsers.html#text).
 To parse Cron syntax, Renovate uses [@cheap-glitch/mi-cron](https://github.com/cheap-glitch/mi-cron).
 Renovate does not support scheduled minutes or "at an exact time" granularity.
+
+<!-- prettier-ignore -->
+!!! tip
+    If you want to _disable_ Renovate, then avoid setting `schedule` to `"never"`.
+    Instead, use the `enabled` config option to disable Renovate.
+    Read the [`enabled` config option docs](https://docs.renovatebot.com/configuration-options/#enabled) to learn more.
 
 <!-- prettier-ignore -->
 !!! note
