@@ -1207,6 +1207,10 @@ If the value starts with `http(s)` then it will only match against URLs which st
 Otherwise, it will be matched by checking if the URL's hostname matches the `matchHost` directly or ends with it.
 When checking the end of the hostname, a single dot is prefixed to the value of `matchHost`, if one is not already present, to ensure it can only match against whole domain segments.
 
+<!-- prettier-ignore -->
+!!! note
+    Values containing a URL path but missing a scheme will be prepended with 'https://' (e.g. `domain.com/path` -> `https://domain.com/path`)
+
 ### timeout
 
 Use this figure to adjust the timeout for queries.
@@ -2354,7 +2358,7 @@ Avoid setting `rebaseWhen=never` and then also setting `prCreation=not-pending` 
 
 By default, Renovate will detect if it has proposed an update to a project before and not propose the same one again.
 For example the Webpack 3.x case described above.
-This field lets you customise this behavior down to a per-package level.
+This field lets you customize this behavior down to a per-package level.
 For example we override it to `true` in the following cases where branch names and PR titles need to be reused:
 
 - Package groups
