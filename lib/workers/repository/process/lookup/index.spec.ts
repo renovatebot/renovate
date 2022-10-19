@@ -334,6 +334,88 @@ describe('workers/repository/process/lookup/index', () => {
       ]);
     });
 
+    it.each`
+      strategy             | updates
+      ${'update-lockfile'} | ${[{ isLockfileUpdate: true, newValue: '*', newVersion: '0.9.7', updateType: 'minor' }, { isLockfileUpdate: true, newValue: '*', newVersion: '1.4.1', updateType: 'major' }]}
+      ${'pin'}             | ${[{ newValue: '0.4.0', updateType: 'pin' }, { newValue: '0.9.7', updateType: 'minor' }, { newValue: '1.4.1', updateType: 'major' }]}
+    `(
+      'supports for x-range-all for replaceStrategy = $strategy (with lockfile)',
+      async ({ strategy, updates }) => {
+        config.currentValue = '*';
+        config.rangeStrategy = strategy;
+        config.lockedVersion = '0.4.0';
+        config.depName = 'q';
+        config.datasource = NpmDatasource.id;
+        httpMock
+          .scope('https://registry.npmjs.org')
+          .get('/q')
+          .reply(200, qJson);
+        expect(await lookup.lookupUpdates(config)).toMatchObject({ updates });
+      }
+    );
+
+    it.each`
+      strategy
+      ${'widen'}
+      ${'bump'}
+      ${'replace'}
+    `(
+      'doesnt offer updates for x-range-all (with lockfile) when replaceStrategy = $strategy',
+      async ({ strategy }) => {
+        config.currentValue = 'x';
+        config.rangeStrategy = strategy;
+        config.lockedVersion = '0.4.0';
+        config.depName = 'q';
+        config.datasource = NpmDatasource.id;
+        httpMock
+          .scope('https://registry.npmjs.org')
+          .get('/q')
+          .reply(200, qJson);
+        expect((await lookup.lookupUpdates(config)).updates).toEqual([]);
+      }
+    );
+
+    it('supports pinning for x-range-all (no lockfile)', async () => {
+      config.currentValue = '*';
+      config.rangeStrategy = 'pin';
+      config.depName = 'q';
+      config.datasource = NpmDatasource.id;
+      httpMock.scope('https://registry.npmjs.org').get('/q').reply(200, qJson);
+      expect(await lookup.lookupUpdates(config)).toMatchObject({
+        updates: [{ newValue: '1.4.1', updateType: 'pin' }],
+      });
+    });
+
+    it('covers pinning an unsupported x-range-all value', async () => {
+      config.currentValue = '';
+      config.rangeStrategy = 'pin';
+      config.depName = 'q';
+      config.datasource = NpmDatasource.id;
+      httpMock.scope('https://registry.npmjs.org').get('/q').reply(200, qJson);
+      expect((await lookup.lookupUpdates(config)).updates).toEqual([]);
+    });
+
+    it.each`
+      strategy
+      ${'widen'}
+      ${'bump'}
+      ${'update-lockfile'}
+      ${'replace'}
+    `(
+      'doesnt offer updates for x-range-all (no lockfile) when replaceStrategy = $strategy',
+      async ({ strategy }) => {
+        config.currentValue = 'X';
+        config.rangeStrategy = strategy;
+        config.depName = 'q';
+        config.datasource = NpmDatasource.id;
+        httpMock
+          .scope('https://registry.npmjs.org')
+          .get('/q')
+          .reply(200, qJson);
+        expect((await lookup.lookupUpdates(config)).updates).toEqual([]);
+      }
+    );
+
     it('ignores pinning for ranges when other upgrade exists', async () => {
       config.currentValue = '~0.9.0';
       config.rangeStrategy = 'pin';

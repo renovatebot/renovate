@@ -353,7 +353,7 @@ describe('modules/manager/npm/extract/index', () => {
         deps: [
           { depName: 'angular', currentValue: '1.6.0' },
           { depName: '@angular/cli', currentValue: '1.6.0' },
-          { depName: 'foo', currentValue: '*', skipReason: 'any-version' },
+          { depName: 'foo', currentValue: '*' },
           {
             depName: 'bar',
             currentValue: 'file:../foo/bar',
