@@ -6,9 +6,7 @@ import { getThrottleIntervalMs } from './host-rules';
 const hostThrottles = new Map<string, Throttle | null>();
 
 class Throttle {
-  private throttle: <Argument extends readonly unknown[], ReturnValue>(
-    function_: (...args: Argument) => ReturnValue
-  ) => pThrottle.ThrottledFunction<Argument, ReturnValue>;
+  private throttle: ReturnType<typeof pThrottle>;
 
   constructor(interval: number) {
     this.throttle = pThrottle({
