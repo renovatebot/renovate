@@ -18,7 +18,6 @@ import {
 } from '@aws-sdk/client-codecommit';
 import { GetUserCommand, IAMClient } from '@aws-sdk/client-iam';
 import { mockClient } from 'aws-sdk-client-mock';
-import { TextEncoder } from 'web-encoding';
 import { logger } from '../../../../test/util';
 import {
   PLATFORM_BAD_CREDENTIALS,
@@ -554,11 +553,10 @@ describe('modules/platform/codecommit/index', () => {
   describe('getJsonFile()', () => {
     it('returns file content', async () => {
       const data = { foo: 'bar' };
-      const encoder = new TextEncoder();
-      const int8arrData = encoder.encode(JSON.stringify(data));
+      const uint8arrData = new Uint8Array(Buffer.from(JSON.stringify(data)));
       codeCommitClient
         .on(GetFileCommand)
-        .resolvesOnce({ fileContent: int8arrData });
+        .resolvesOnce({ fileContent: uint8arrData });
       const res = await codeCommit.getJsonFile('file.json');
       expect(res).toEqual(data);
     });
@@ -570,11 +568,10 @@ describe('modules/platform/codecommit/index', () => {
           foo: 'bar'
         }
       `;
-      const encoder = new TextEncoder();
-      const int8arrData = encoder.encode(json5Data);
+      const uint8arrData = new Uint8Array(Buffer.from(json5Data));
       codeCommitClient
         .on(GetFileCommand)
-        .resolvesOnce({ fileContent: int8arrData });
+        .resolvesOnce({ fileContent: uint8arrData });
       const res = await codeCommit.getJsonFile('file.json');
       expect(res).toEqual({ foo: 'bar' });
     });
@@ -583,11 +580,10 @@ describe('modules/platform/codecommit/index', () => {
   describe('getRawFile()', () => {
     it('returns file content', async () => {
       const data = { foo: 'bar' };
-      const encoder = new TextEncoder();
-      const int8arrData = encoder.encode(JSON.stringify(data));
+      const uint8arrData = new Uint8Array(Buffer.from(JSON.stringify(data)));
       codeCommitClient
         .on(GetFileCommand)
-        .resolvesOnce({ fileContent: int8arrData });
+        .resolvesOnce({ fileContent: uint8arrData });
       const res = await codeCommit.getRawFile('file.json');
       expect(res).toBe('{"foo":"bar"}');
     });
@@ -599,11 +595,10 @@ describe('modules/platform/codecommit/index', () => {
           foo: 'bar'
         }
       `;
-      const encoder = new TextEncoder();
-      const int8arrData = encoder.encode(json5Data);
+      const uint8arrData = new Uint8Array(Buffer.from(json5Data));
       codeCommitClient
         .on(GetFileCommand)
-        .resolvesOnce({ fileContent: int8arrData });
+        .resolvesOnce({ fileContent: uint8arrData });
       const res = await codeCommit.getRawFile('file.json');
       expect(res).toBe(`
         {

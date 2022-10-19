@@ -1,7 +1,8 @@
+import { Buffer } from 'buffer';
 import { PullRequestStatusEnum } from '@aws-sdk/client-codecommit';
 import type { Credentials } from '@aws-sdk/types';
 import JSON5 from 'json5';
-import { TextDecoder } from 'web-encoding';
+
 import {
   PLATFORM_BAD_CREDENTIALS,
   REPOSITORY_EMPTY,
@@ -34,8 +35,6 @@ import { smartTruncate } from '../utils/pr-body';
 import { getCodeCommitUrl } from './codecommit-client';
 import * as client from './codecommit-client';
 import { getUserArn, initIamClient } from './iam-client';
-
-const decoder = new TextDecoder();
 
 interface Config {
   repository?: string;
@@ -332,8 +331,11 @@ export async function getRawFile(
     fileName,
     branchOrTag
   );
-
-  return decoder.decode(fileRes.fileContent);
+  if (!fileRes.fileContent) {
+    return null;
+  }
+  const buf = Buffer.from(fileRes.fileContent);
+  return buf.toString('utf-8');
 }
 
 /* istanbul ignore next */
