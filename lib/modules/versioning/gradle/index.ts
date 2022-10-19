@@ -75,6 +75,7 @@ const getPatch = (version: string): number | null => {
 const isGreaterThan = (a: string, b: string): boolean => compare(a, b) === 1;
 
 const unstable = new Set([
+  'dev',
   'a',
   'alpha',
   'b',

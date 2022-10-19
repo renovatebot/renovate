@@ -3,7 +3,7 @@
 exports[`modules/datasource/conda/index getReleases processes real data 1`] = `
 {
   "homepage": "http://anaconda.org/anaconda/pytest",
-  "registryUrl": "https://api.anaconda.org/package/",
+  "registryUrl": "https://api.anaconda.org/package",
   "releases": [
     {
       "version": "2.3.3",

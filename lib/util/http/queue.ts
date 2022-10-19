@@ -21,7 +21,7 @@ export function getQueue(url: string): PQueue | null {
       logger.debug({ concurrency, host }, 'Using queue');
       queue = new PQueue({ concurrency });
     } else {
-      logger.debug({ host }, 'No concurency limits');
+      logger.debug({ host }, 'No concurrency limits');
     }
   }
   hostQueues.set(host, queue);

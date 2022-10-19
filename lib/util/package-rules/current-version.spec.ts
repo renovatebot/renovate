@@ -39,5 +39,46 @@ describe('util/package-rules/current-version', () => {
       );
       expect(result).toBeFalse();
     });
+
+    it('return false for regex version non match', () => {
+      const result = matcher.matches(
+        {
+          versioning: 'ruby',
+          currentValue: '"~> 1.1.0"',
+          lockedVersion: '1.1.4',
+        },
+        {
+          matchCurrentVersion: '/^v?[~ -]?0/',
+        }
+      );
+      expect(result).toBeFalse();
+    });
+
+    it('return true for regex version match', () => {
+      const result = matcher.matches(
+        {
+          versioning: 'ruby',
+          currentValue: '"~> 0.1.0"',
+          lockedVersion: '0.1.0',
+        },
+        {
+          matchCurrentVersion: '/^v?[~ -]?0/',
+        }
+      );
+      expect(result).toBeTrue();
+    });
+
+    it('return false for regex value match', () => {
+      const result = matcher.matches(
+        {
+          versioning: 'ruby',
+          currentValue: '"~> 0.1.0"',
+        },
+        {
+          matchCurrentVersion: '/^v?[~ -]?0/',
+        }
+      );
+      expect(result).toBeFalse();
+    });
   });
 });

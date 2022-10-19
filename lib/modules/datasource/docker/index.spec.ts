@@ -1,7 +1,12 @@
-import * as _AWS from '@aws-sdk/client-ecr';
+import {
+  ECRClient,
+  GetAuthorizationTokenCommand,
+  GetAuthorizationTokenCommandOutput,
+} from '@aws-sdk/client-ecr';
+import { mockClient } from 'aws-sdk-client-mock';
 import { getDigest, getPkgReleases } from '..';
 import * as httpMock from '../../../../test/http-mock';
-import { logger, mocked, partial } from '../../../../test/util';
+import { logger, mocked } from '../../../../test/util';
 import {
   EXTERNAL_HOST_ERROR,
   PAGE_NOT_FOUND_ERROR,
@@ -15,13 +20,9 @@ const hostRules = mocked(_hostRules);
 
 const http = new Http(DockerDatasource.id);
 
-jest.mock('@aws-sdk/client-ecr');
 jest.mock('../../../util/host-rules');
 
-type ECR = _AWS.ECR;
-type GetAuthorizationTokenCommandOutput =
-  _AWS.GetAuthorizationTokenCommandOutput;
-const AWS = mocked(_AWS);
+const ecrMock = mockClient(ECRClient);
 
 const baseUrl = 'https://index.docker.io/v2';
 const authUrl = 'https://auth.docker.io';
@@ -30,26 +31,16 @@ const amazonUrl = 'https://123456789.dkr.ecr.us-east-1.amazonaws.com/v2';
 function mockEcrAuthResolve(
   res: Partial<GetAuthorizationTokenCommandOutput> = {}
 ) {
-  AWS.ECR.mockImplementationOnce(() =>
-    partial<ECR>({
-      getAuthorizationToken: () =>
-        Promise.resolve<GetAuthorizationTokenCommandOutput>(
-          partial<GetAuthorizationTokenCommandOutput>(res)
-        ),
-    })
-  );
+  ecrMock.on(GetAuthorizationTokenCommand).resolvesOnce(res);
 }
 
 function mockEcrAuthReject(msg: string) {
-  AWS.ECR.mockImplementationOnce(() =>
-    partial<ECR>({
-      getAuthorizationToken: jest.fn().mockRejectedValue(new Error(msg)),
-    })
-  );
+  ecrMock.on(GetAuthorizationTokenCommand).rejectsOnce(new Error(msg));
 }
 
 describe('modules/datasource/docker/index', () => {
   beforeEach(() => {
+    ecrMock.reset();
     hostRules.find.mockReturnValue({
       username: 'some-username',
       password: 'some-password',
@@ -415,20 +406,21 @@ describe('modules/datasource/docker/index', () => {
         authorizationData: [{ authorizationToken: 'test_token' }],
       });
 
-      await getDigest(
-        {
-          datasource: 'docker',
-          depName: '123456789.dkr.ecr.us-east-1.amazonaws.com/node',
-        },
-        'some-tag'
-      );
+      expect(
+        await getDigest(
+          {
+            datasource: 'docker',
+            depName: '123456789.dkr.ecr.us-east-1.amazonaws.com/node',
+          },
+          'some-tag'
+        )
+      ).toBe('some-digest');
 
-      expect(AWS.ECR).toHaveBeenCalledWith({
-        credentials: {
-          accessKeyId: 'some-username',
-          secretAccessKey: 'some-password',
-        },
-        region: 'us-east-1',
+      const ecr = ecrMock.call(0).thisValue as ECRClient;
+      expect(await ecr.config.region()).toBe('us-east-1');
+      expect(await ecr.config.credentials()).toEqual({
+        accessKeyId: 'some-username',
+        secretAccessKey: 'some-password',
       });
     });
 
@@ -453,21 +445,22 @@ describe('modules/datasource/docker/index', () => {
         authorizationData: [{ authorizationToken: 'test_token' }],
       });
 
-      await getDigest(
-        {
-          datasource: 'docker',
-          depName: '123456789.dkr.ecr.us-east-1.amazonaws.com/node',
-        },
-        'some-tag'
-      );
+      expect(
+        await getDigest(
+          {
+            datasource: 'docker',
+            depName: '123456789.dkr.ecr.us-east-1.amazonaws.com/node',
+          },
+          'some-tag'
+        )
+      ).toBe('some-digest');
 
-      expect(AWS.ECR).toHaveBeenCalledWith({
-        credentials: {
-          accessKeyId: 'some-username',
-          secretAccessKey: 'some-password',
-          sessionToken: 'some-session-token',
-        },
-        region: 'us-east-1',
+      const ecr = ecrMock.call(0).thisValue as ECRClient;
+      expect(await ecr.config.region()).toBe('us-east-1');
+      expect(await ecr.config.credentials()).toEqual({
+        accessKeyId: 'some-username',
+        secretAccessKey: 'some-password',
+        sessionToken: 'some-session-token',
       });
     });
 
@@ -1177,6 +1170,29 @@ describe('modules/datasource/docker/index', () => {
       await expect(getPkgReleases(config)).rejects.toThrow(EXTERNAL_HOST_ERROR);
     });
 
+    it('jfrog artifactory - retry tags for official images by injecting `/library` after repository and before image', async () => {
+      const tags = ['18.0.0'];
+      httpMock
+        .scope('https://org.jfrog.io/v2')
+        .get('/virtual-mirror/node/tags/list?n=10000')
+        .reply(200, '', {})
+        .get('/virtual-mirror/node/tags/list?n=10000')
+        .reply(404, '', { 'x-jfrog-version': 'Artifactory/7.42.2 74202900' })
+        .get('/virtual-mirror/library/node/tags/list?n=10000')
+        .reply(200, '', {})
+        .get('/virtual-mirror/library/node/tags/list?n=10000')
+        .reply(200, { tags }, {})
+        .get('/')
+        .reply(200, '', {})
+        .get('/virtual-mirror/node/manifests/18.0.0')
+        .reply(200, '', {});
+      const res = await getPkgReleases({
+        datasource: DockerDatasource.id,
+        depName: 'org.jfrog.io/virtual-mirror/node',
+      });
+      expect(res?.releases).toHaveLength(1);
+    });
+
     it('uses lower tag limit for ECR deps', async () => {
       httpMock
         .scope(amazonUrl)
@@ -1197,6 +1213,58 @@ describe('modules/datasource/docker/index', () => {
         })
       ).toEqual({
         registryUrl: 'https://123456789.dkr.ecr.us-east-1.amazonaws.com',
+        releases: [],
+      });
+    });
+
+    it('uses lower tag limit for ECR Public deps', async () => {
+      httpMock
+        .scope('https://public.ecr.aws')
+        .get('/v2/amazonlinux/amazonlinux/tags/list?n=1000')
+        .reply(401, '', {
+          'www-authenticate':
+            'Bearer realm="https://public.ecr.aws/token",service="public.ecr.aws",scope="aws"',
+        })
+        .get('/token?service=public.ecr.aws&scope=aws')
+        .reply(200, { token: 'test' });
+      httpMock
+        .scope('https://public.ecr.aws', {
+          reqheaders: {
+            authorization: 'Bearer test',
+          },
+        })
+        // The  tag limit parameter `n` needs to be limited to 1000 for ECR Public
+        // See https://docs.aws.amazon.com/AmazonECRPublic/latest/APIReference/API_DescribeRepositories.html#ecrpublic-DescribeRepositories-request-maxResults
+        .get('/v2/amazonlinux/amazonlinux/tags/list?n=1000')
+        .reply(200, { tags: ['some'] }, {});
+
+      httpMock
+        .scope('https://public.ecr.aws')
+        .get('/v2/')
+        .reply(401, '', {
+          'www-authenticate':
+            'Bearer realm="https://public.ecr.aws/token",service="public.ecr.aws",scope="aws"',
+        })
+        .get(
+          '/token?service=public.ecr.aws&scope=repository:amazonlinux/amazonlinux:pull'
+        )
+        .reply(200, { token: 'test' });
+      httpMock
+        .scope('https://public.ecr.aws', {
+          reqheaders: {
+            authorization: 'Bearer test',
+          },
+        })
+        .get('/v2/amazonlinux/amazonlinux/manifests/some')
+        .reply(200);
+
+      expect(
+        await getPkgReleases({
+          datasource: DockerDatasource.id,
+          depName: 'public.ecr.aws/amazonlinux/amazonlinux',
+        })
+      ).toEqual({
+        registryUrl: 'https://public.ecr.aws',
         releases: [],
       });
     });
