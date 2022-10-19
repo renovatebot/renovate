@@ -267,9 +267,6 @@ export async function extractPackageFile(
     }
     if (isValid(dep.currentValue)) {
       dep.datasource = NpmDatasource.id;
-      if (dep.currentValue === '*') {
-        dep.skipReason = 'any-version';
-      }
       if (dep.currentValue === '') {
         dep.skipReason = 'empty';
       }
