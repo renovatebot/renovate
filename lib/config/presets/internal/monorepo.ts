@@ -78,6 +78,8 @@ const repoGroups = {
   'ember-decorators': 'https://github.com/ember-decorators/ember-decorators',
   emojibase: 'https://github.com/milesj/emojibase',
   emotion: 'https://github.com/emotion-js/emotion',
+  'eslint-config-globex':
+    'https://github.com/GlobexDesignsInc/eslint-config-globex',
   expo: 'https://github.com/expo/expo',
   feathers: 'https://github.com/feathersjs/feathers',
   feign: 'https://github.com/OpenFeign/feign',
@@ -120,6 +122,7 @@ const repoGroups = {
     'https://github.com/loopbackio/loopback-next',
   ],
   lrnwebcomponents: 'https://github.com/elmsln/lrnwebcomponents',
+  mailing: 'https://github.com/sofn-xyz/mailing',
   mapstruct: 'https://github.com/mapstruct/mapstruct',
   masstransit: 'https://github.com/MassTransit/MassTransit',
   'material-components-web':
@@ -230,6 +233,7 @@ const repoGroups = {
   workbox: 'https://github.com/googlechrome/workbox',
   xterm: 'https://github.com/xtermjs/xterm.js',
   'xunit-dotnet': 'https://github.com/xunit/xunit',
+  yarn: 'https://github.com/yarnpkg/berry',
   'zxing-net': 'https://github.com/micjahn/ZXing.Net',
 };
 
@@ -242,6 +246,7 @@ const patternGroups = {
   clarity: ['^@cds/', '^@clr/'],
   embroider: '^@embroider/',
   fullcalendar: '^@fullcalendar/',
+  spfx: ['^@microsoft\\/sp-', '^@microsoft\\/eslint-.+-spfx$'],
   wordpress: '^@wordpress/',
 };
 

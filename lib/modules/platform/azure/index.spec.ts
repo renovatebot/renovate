@@ -1080,7 +1080,7 @@ describe('modules/platform/azure/index', () => {
             ]),
           } as any)
       );
-      await azure.addReviewers(123, ['test@bonjour.fr', 'jyc', 'def']);
+      await azure.addReviewers(123, ['test@bonjour.fr', 'jyc', 'required:def']);
       expect(azureApi.gitApi).toHaveBeenCalledTimes(3);
     });
   });

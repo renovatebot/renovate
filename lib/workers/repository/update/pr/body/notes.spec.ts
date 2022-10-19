@@ -15,6 +15,7 @@ describe('workers/repository/update/pr/body/notes', () => {
     const res = getPrNotes({
       manager: 'some-manager',
       branchName: 'branch',
+      baseBranch: 'base',
       upgrades: [
         {
           manager: 'some-manager',
@@ -33,6 +34,7 @@ describe('workers/repository/update/pr/body/notes', () => {
     const res = getPrNotes({
       manager: 'some-manager',
       branchName: 'branch',
+      baseBranch: 'base',
       upgrades: [
         {
           manager: 'some-manager',
@@ -48,6 +50,7 @@ describe('workers/repository/update/pr/body/notes', () => {
     const res = getPrExtraNotes({
       manager: 'some-manager',
       branchName: 'branch',
+      baseBranch: 'base',
       upgrades: [
         { manager: 'some-manager', branchName: 'branch', gitRef: true },
       ],
