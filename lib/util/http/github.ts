@@ -67,6 +67,7 @@ function handleGotError(
     message = String(body.message);
   }
   if (
+    err.code === 'ERR_HTTP2_STREAM_ERROR' ||
     err.code === 'ENOTFOUND' ||
     err.code === 'ETIMEDOUT' ||
     err.code === 'EAI_AGAIN' ||
