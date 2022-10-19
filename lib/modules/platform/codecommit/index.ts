@@ -331,7 +331,7 @@ export async function getRawFile(
     fileName,
     branchOrTag
   );
-  if (!fileRes.fileContent) {
+  if (!fileRes || !fileRes.fileContent) {
     return null;
   }
   const buf = Buffer.from(fileRes.fileContent);

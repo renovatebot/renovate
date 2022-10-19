@@ -588,6 +588,14 @@ describe('modules/platform/codecommit/index', () => {
       expect(res).toBe('{"foo":"bar"}');
     });
 
+    it('returns null', async () => {
+      codeCommitClient
+        .on(GetFileCommand)
+        .resolvesOnce({ fileContent: undefined });
+      const res = await codeCommit.getRawFile('file.json');
+      expect(res).toBeNull();
+    });
+
     it('returns file content in json5 format', async () => {
       const json5Data = `
         {
