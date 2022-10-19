@@ -13,7 +13,7 @@ export const url = 'https://go.dev/ref/mod';
 export const language = ProgrammingLanguage.Golang;
 
 export const defaultConfig = {
-  fileMatch: ['(^|/)go.mod$'],
+  fileMatch: ['(^|/)go\\.mod$'],
 };
 
 export const supportedDatasources = [

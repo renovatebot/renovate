@@ -24,6 +24,7 @@ import * as _participants from './participants';
 import { ensurePr } from '.';
 
 jest.mock('../../../../util/git');
+jest.mock('../../changelog');
 
 jest.mock('../../../global/limits');
 const limits = mocked(_limits);
@@ -59,6 +60,7 @@ describe('workers/repository/update/pr/index', () => {
     const config: BranchConfig = {
       manager: 'some-manager',
       branchName: sourceBranch,
+      baseBranch: 'base',
       upgrades: [],
       prTitle,
     };
@@ -89,6 +91,8 @@ describe('workers/repository/update/pr/index', () => {
       it('aborts PR creation once limit is exceeded', async () => {
         platform.createPr.mockResolvedValueOnce(pr);
         limits.isLimitReached.mockReturnValueOnce(true);
+
+        config.fetchReleaseNotes = true;
 
         const res = await ensurePr(config);
 

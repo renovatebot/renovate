@@ -99,6 +99,7 @@ export async function updateArtifacts({
       cwdFile: pipfileName,
       extraEnv: {
         PIPENV_CACHE_DIR: await ensureCacheDir('pipenv'),
+        PIP_CACHE_DIR: await ensureCacheDir('pip'),
       },
       docker: {
         image: 'sidecar',

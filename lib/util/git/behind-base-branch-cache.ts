@@ -1,20 +1,43 @@
+import { logger } from '../../logger';
 import { getCache } from '../cache/repository';
 
-// Compare cached parent Sha of a branch to the fetched base-branch sha to determine whether the branch is behind the base
-// Since cache is updated after each run, this will be sufficient to determine whether a branch is behind its parent.
 export function getCachedBehindBaseResult(
   branchName: string,
-  currentBaseBranchSha: string
+  branchSha: string | null,
+  baseBranch: string,
+  baseBranchSha: string | null
 ): boolean | null {
   const cache = getCache();
-  const { branches = [] } = cache;
-  const cachedBranch = branches?.find(
+  const branch = cache.branches?.find(
     (branch) => branch.branchName === branchName
   );
 
-  if (!cachedBranch?.parentSha) {
-    return null;
+  if (
+    branch &&
+    branch.sha === branchSha &&
+    branch.baseBranch === baseBranch &&
+    branch.baseBranchSha === baseBranchSha &&
+    branch.isBehindBase !== undefined
+  ) {
+    return branch.isBehindBase;
   }
 
-  return currentBaseBranchSha !== cachedBranch.parentSha;
+  return null;
+}
+
+export function setCachedBehindBaseResult(
+  branchName: string,
+  isBehindBase: boolean
+): void {
+  const cache = getCache();
+  const branch = cache.branches?.find(
+    (branch) => branch.branchName === branchName
+  );
+
+  if (!branch) {
+    logger.debug(`setCachedBehindBaseResult(): Branch cache not present`);
+    return;
+  }
+
+  branch.isBehindBase = isBehindBase;
 }

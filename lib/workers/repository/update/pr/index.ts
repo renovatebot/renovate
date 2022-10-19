@@ -27,6 +27,8 @@ import type {
   BranchUpgradeConfig,
   PrBlockedBy,
 } from '../../../types';
+import { embedChangelogs } from '../../changelog';
+// import { embedChangelogs } from '../../changelog';
 import { resolveBranchStatus } from '../branch/status-checks';
 import { getPrBody } from './body';
 import { ChangeLogError } from './changelog/types';
@@ -192,6 +194,11 @@ export async function ensurePr(
     return `${upgrade.repoName!}${
       upgrade.sourceDirectory ? `:${upgrade.sourceDirectory}` : ''
     }`;
+  }
+
+  if (config.fetchReleaseNotes) {
+    // fetch changelogs when not already done;
+    await embedChangelogs(upgrades);
   }
 
   // Get changelog and then generate template strings
@@ -391,7 +398,7 @@ export async function ensurePr(
     ) {
       const topic = 'Branch automerge failure';
       let content =
-        'This PR was configured for branch automerge, however this is not possible so it has been raised as a PR instead.';
+        'This PR was configured for branch automerge. However, this is not possible, so it has been raised as a PR instead.';
       if (config.branchAutomergeFailureMessage === 'branch status error') {
         content += '\n___\n * Branch has one or more failed status checks';
       }

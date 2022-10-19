@@ -34,8 +34,18 @@ import type {
   RepoResult,
   UpdatePrConfig,
 } from '../types';
+import { repoFingerprint } from '../util';
 import { smartTruncate } from '../utils/pr-body';
 import * as helper from './gitea-helper';
+import type {
+  CombinedCommitStatus,
+  Comment,
+  IssueState,
+  Label,
+  PR,
+  PRMergeMethod,
+  Repo,
+} from './types';
 import {
   getMergeMethod,
   getRepoUrl,
@@ -45,11 +55,11 @@ import {
 
 interface GiteaRepoConfig {
   repository: string;
-  mergeMethod: helper.PRMergeMethod;
+  mergeMethod: PRMergeMethod;
 
   prList: Promise<Pr[]> | null;
   issueList: Promise<Issue[]> | null;
-  labelList: Promise<helper.Label[]> | null;
+  labelList: Promise<Label[]> | null;
   defaultBranch: string;
   cloneSubmodules: boolean;
 }
@@ -66,7 +76,7 @@ let config: GiteaRepoConfig = {} as any;
 let botUserID: number;
 let botUserName: string;
 
-function toRenovateIssue(data: helper.Issue): Issue {
+function toRenovateIssue(data: Issue): Issue {
   return {
     number: data.number,
     state: data.state,
@@ -76,7 +86,7 @@ function toRenovateIssue(data: helper.Issue): Issue {
 }
 
 // TODO #7154
-function toRenovatePR(data: helper.PR): Pr | null {
+function toRenovatePR(data: PR): Pr | null {
   if (!data) {
     return null;
   }
@@ -136,20 +146,20 @@ function matchesState(actual: string, expected: string): boolean {
 }
 
 function findCommentByTopic(
-  comments: helper.Comment[],
+  comments: Comment[],
   topic: string
-): helper.Comment | null {
+): Comment | null {
   return comments.find((c) => c.body.startsWith(`### ${topic}\n\n`)) ?? null;
 }
 
 function findCommentByContent(
-  comments: helper.Comment[],
+  comments: Comment[],
   content: string
-): helper.Comment | null {
+): Comment | null {
   return comments.find((c) => c.body.trim() === content) ?? null;
 }
 
-function getLabelList(): Promise<helper.Label[]> {
+function getLabelList(): Promise<Label[]> {
   if (config.labelList === null) {
     const repoLabels = helper
       .getRepoLabels(config.repository, {
@@ -171,11 +181,11 @@ function getLabelList(): Promise<helper.Label[]> {
       .catch((err) => {
         // Will fail if owner of repo is not org or Gitea version < 1.12
         logger.debug(`Unable to fetch organization labels`);
-        return [] as helper.Label[];
+        return [] as Label[];
       });
 
     config.labelList = Promise.all([repoLabels, orgLabels]).then((labels) =>
-      ([] as helper.Label[]).concat(...labels)
+      ([] as Label[]).concat(...labels)
     );
   }
 
@@ -252,7 +262,7 @@ const platform: Platform = {
     cloneSubmodules,
     gitUrl,
   }: RepoParams): Promise<RepoResult> {
-    let repo: helper.Repo;
+    let repo: Repo;
 
     config = {} as any;
     config.repository = repository;
@@ -325,6 +335,7 @@ const platform: Platform = {
     return {
       defaultBranch: config.defaultBranch,
       isFork: !!repo.fork,
+      repoFingerprint: repoFingerprint(repo.id, defaults.endpoint),
     };
   },
 
@@ -335,7 +346,7 @@ const platform: Platform = {
         uid: botUserID,
         archived: false,
       });
-      return repos.map((r) => r.full_name);
+      return repos.filter((r) => !r.mirror).map((r) => r.full_name);
     } catch (err) {
       logger.error({ err }, 'Gitea getRepos() error');
       throw err;
@@ -371,7 +382,7 @@ const platform: Platform = {
   },
 
   async getBranchStatus(branchName: string): Promise<BranchStatus> {
-    let ccs: helper.CombinedCommitStatus;
+    let ccs: CombinedCommitStatus;
     try {
       ccs = await helper.getCombinedCommitStatus(config.repository, branchName);
     } catch (err) {
@@ -742,9 +753,7 @@ const platform: Platform = {
           {
             body,
             title,
-            state: shouldReOpen
-              ? 'open'
-              : (activeIssue.state as helper.IssueState),
+            state: shouldReOpen ? 'open' : (activeIssue.state as IssueState),
           }
         );
 
@@ -824,7 +833,7 @@ const platform: Platform = {
       const commentList = await helper.getComments(config.repository, issue);
 
       // Search comment by either topic or exact body
-      let comment: helper.Comment | null = null;
+      let comment: Comment | null = null;
       if (topic) {
         comment = findCommentByTopic(commentList, topic);
         body = `### ${topic}\n\n${body}`;
@@ -867,7 +876,7 @@ const platform: Platform = {
     logger.debug(`Ensuring comment "${key}" in #${issue} is removed`);
     const commentList = await helper.getComments(config.repository, issue);
 
-    let comment: helper.Comment | null = null;
+    let comment: Comment | null = null;
     if (deleteConfig.type === 'by-topic') {
       comment = findCommentByTopic(commentList, deleteConfig.topic);
     } else if (deleteConfig.type === 'by-content') {

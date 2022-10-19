@@ -5,20 +5,20 @@ import {
   REPOSITORY_NO_CONFIG,
 } from '../../../../constants/error-messages';
 import { logger } from '../../../../logger';
-import { platform } from '../../../../modules/platform';
+import { Pr, platform } from '../../../../modules/platform';
 import { ensureComment } from '../../../../modules/platform/comment';
 import { PrState } from '../../../../types';
 import { getCache } from '../../../../util/cache/repository';
 import { readLocalFile } from '../../../../util/fs';
 import { getFileList } from '../../../../util/git';
 
-const findFile = async (fileName: string): Promise<boolean> => {
+async function findFile(fileName: string): Promise<boolean> {
   logger.debug(`findFile(${fileName})`);
   const fileList = await getFileList();
   return fileList.includes(fileName);
-};
+}
 
-const configFileExists = async (): Promise<boolean> => {
+async function configFileExists(): Promise<boolean> {
   for (const fileName of configFileNames) {
     if (fileName !== 'package.json' && (await findFile(fileName))) {
       logger.debug({ fileName }, 'Config file exists');
@@ -26,9 +26,9 @@ const configFileExists = async (): Promise<boolean> => {
     }
   }
   return false;
-};
+}
 
-const packageJsonConfigExists = async (): Promise<boolean> => {
+async function packageJsonConfigExists(): Promise<boolean> {
   try {
     // TODO #7154
     const pJson = JSON.parse((await readLocalFile('package.json', 'utf8'))!);
@@ -39,19 +39,17 @@ const packageJsonConfigExists = async (): Promise<boolean> => {
     // Do nothing
   }
   return false;
-};
+}
 
-// TODO: types (#7154)
-export type Pr = any;
-
-const closedPrExists = (config: RenovateConfig): Promise<Pr> =>
-  platform.findPr({
+function closedPrExists(config: RenovateConfig): Promise<Pr | null> {
+  return platform.findPr({
     branchName: config.onboardingBranch!,
     prTitle: config.onboardingPrTitle,
     state: PrState.NotOpen,
   });
+}
 
-export const isOnboarded = async (config: RenovateConfig): Promise<boolean> => {
+export async function isOnboarded(config: RenovateConfig): Promise<boolean> {
   logger.debug('isOnboarded()');
   const title = `Action required: Add a Renovate config`;
   // Repo is onboarded if global config is bypassing onboarding and does not require a
@@ -127,8 +125,10 @@ export const isOnboarded = async (config: RenovateConfig): Promise<boolean> => {
     });
   }
   throw new Error(REPOSITORY_CLOSED_ONBOARDING);
-};
+}
 
-export const onboardingPrExists = async (
+export async function getOnboardingPr(
   config: RenovateConfig
-): Promise<boolean> => !!(await platform.getBranchPr(config.onboardingBranch!));
+): Promise<Pr | null> {
+  return await platform.getBranchPr(config.onboardingBranch!);
+}
