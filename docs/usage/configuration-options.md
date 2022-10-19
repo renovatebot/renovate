@@ -1177,6 +1177,13 @@ The `matchHost` URL must be the same as the `registryUrl` set in `.npmrc`, or yo
     }
   ]
 }
+```
+
+The above corresponds with an `.npmrc` like the following:
+
+```
+registry=https://gitlab.myorg.com/api/v4/packages/npm/
+```
 
 ### timeout
 
