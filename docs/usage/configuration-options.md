@@ -390,25 +390,45 @@ This is used to alter `commitMessage` and `prTitle` without needing to copy/past
 Actions may be like `Update`, `Pin`, `Roll back`, `Refresh`, etc.
 Check out the default value for `commitMessage` to understand how this field is used.
 
+<!-- prettier-ignore -->
+!!! warning
+    Warning, for advanced use only! Use at your own risk!
+
 ## commitMessageExtra
 
 This is used to alter `commitMessage` and `prTitle` without needing to copy/paste the whole string.
 The "extra" is usually an identifier of the new version, e.g. "to v1.3.2" or "to tag 9.2".
+
+<!-- prettier-ignore -->
+!!! warning
+    Warning, for advanced use only! Use at your own risk!
 
 ## commitMessagePrefix
 
 This is used to alter `commitMessage` and `prTitle` without needing to copy/paste the whole string.
 The "prefix" is usually an automatically applied semantic commit prefix, but it can also be statically configured.
 
+<!-- prettier-ignore -->
+!!! warning
+    Warning, for advanced use only! Use at your own risk!
+
 ## commitMessageSuffix
 
 This is used to add a suffix to commit messages.
 Usually left empty except for internal use (multiple base branches, and vulnerability alerts).
 
+<!-- prettier-ignore -->
+!!! warning
+    Warning, for advanced use only! Use at your own risk!
+
 ## commitMessageTopic
 
 This is used to alter `commitMessage` and `prTitle` without needing to copy/paste the whole string.
 The "topic" is usually refers to the dependency being updated, e.g. `"dependency react"`.
+
+<!-- prettier-ignore -->
+!!! warning
+    Warning, for advanced use only! Use at your own risk!
 
 ## composerIgnorePlatformReqs
 
