@@ -12,6 +12,7 @@ describe('modules/manager/bundler/update-locked', () => {
       lockFileContent,
       depName: 'activejob',
       newVersion: '5.2.3',
+      currentVersion: '5.1.0',
     };
     expect(updateLockedDependency(config).status).toBe('already-updated');
   });
@@ -23,6 +24,7 @@ describe('modules/manager/bundler/update-locked', () => {
       lockFileContent,
       depName: 'activejob',
       newVersion: '5.2.0',
+      currentVersion: '5.1.0',
     };
     expect(updateLockedDependency(config).status).toBe('unsupported');
   });

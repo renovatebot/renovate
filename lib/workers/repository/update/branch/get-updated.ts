@@ -37,6 +37,7 @@ export async function getUpdatedPackageFiles(
     const packageFile = upgrade.packageFile!;
     const depName = upgrade.depName!;
     const newVersion = upgrade.newVersion!;
+    const currentVersion = upgrade.currentVersion!;
     const updateLockedDependency = get(manager, 'updateLockedDependency')!;
     packageFileManagers[packageFile] = manager;
     packageFileUpdatedDeps[packageFile] =
@@ -81,6 +82,7 @@ export async function getUpdatedPackageFiles(
         ...upgrade,
         depName,
         newVersion,
+        currentVersion,
         packageFile,
         packageFileContent: packageFileContent!,
         lockFile,
@@ -110,6 +112,7 @@ export async function getUpdatedPackageFiles(
           ...upgrade,
           depName,
           newVersion,
+          currentVersion,
           packageFile,
           packageFileContent: packageFileContent!,
           lockFile,

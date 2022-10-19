@@ -8,8 +8,7 @@ export function updateLockedDependency(
   const { depName, currentVersion, newVersion, lockFile, lockFileContent } =
     config;
   logger.debug(
-    // TODO: types (#7154)
-    `poetry.updateLockedDependency: ${depName}@${currentVersion!} -> ${newVersion} [${lockFile}]`
+    `poetry.updateLockedDependency: ${depName}@${currentVersion} -> ${newVersion} [${lockFile}]`
   );
   const locked = extractLockFileEntries(lockFileContent ?? '');
   if (depName && locked[depName] === newVersion) {

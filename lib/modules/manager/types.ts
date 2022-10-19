@@ -220,7 +220,7 @@ export interface UpdateLockedConfig {
   lockFile: string;
   lockFileContent?: string;
   depName: string;
-  currentVersion?: string;
+  currentVersion: string;
   newVersion: string;
   allowParentUpdates?: boolean;
   allowHigherOrRemoved?: boolean;
