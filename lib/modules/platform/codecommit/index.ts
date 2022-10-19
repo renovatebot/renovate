@@ -1,5 +1,9 @@
 import { Buffer } from 'buffer';
-import { PullRequestStatusEnum } from '@aws-sdk/client-codecommit';
+import {
+  GetCommentsForPullRequestOutput,
+  ListRepositoriesOutput,
+  PullRequestStatusEnum,
+} from '@aws-sdk/client-codecommit';
 import type { Credentials } from '@aws-sdk/types';
 import JSON5 from 'json5';
 
@@ -135,7 +139,7 @@ export async function initRepo({
   logger.debug({ repositoryDetails: repo }, 'Repository details');
   const metadata = repo.repositoryMetadata;
 
-  if (!metadata?.defaultBranch || !metadata?.repositoryId) {
+  if (!metadata.defaultBranch || !metadata.repositoryId) {
     logger.debug('Repo is empty');
     throw new Error(REPOSITORY_EMPTY);
   }
@@ -273,7 +277,7 @@ export async function getPr(pullRequestId: number): Promise<Pr | null> {
 export async function getRepos(): Promise<string[]> {
   logger.debug('Autodiscovering AWS CodeCommit repositories');
 
-  let reposRes;
+  let reposRes: ListRepositoriesOutput;
   try {
     reposRes = await client.listRepositories();
     //todo do we need pagination? maximum number of repos is 1000 without pagination, also the same for free account
@@ -343,13 +347,15 @@ export function getRepoForceRebase(): Promise<boolean> {
   return Promise.resolve(false);
 }
 
+const AMAZON_MAX_BODY_LENGTH = 10239;
+
 export async function createPr({
   sourceBranch,
   targetBranch,
   prTitle: title,
   prBody: body,
 }: CreatePRConfig): Promise<Pr> {
-  const description = smartTruncate(sanitize(body), 10239);
+  const description = smartTruncate(sanitize(body), AMAZON_MAX_BODY_LENGTH);
 
   const prCreateRes = await client.createPr(
     title,
@@ -387,7 +393,7 @@ export async function updatePr({
   if (body) {
     await client.updatePrDescription(
       `${prNo}`,
-      smartTruncate(sanitize(body), 10239)
+      smartTruncate(sanitize(body), AMAZON_MAX_BODY_LENGTH)
     );
   }
 
@@ -585,7 +591,7 @@ export async function ensureComment({
   logger.debug(`ensureComment(${number}, ${topic!}, content)`);
   const header = topic ? `### ${topic}\n\n` : '';
   const body = `${header}${sanitize(content)}`;
-  let prCommentsResponse;
+  let prCommentsResponse: GetCommentsForPullRequestOutput;
   try {
     prCommentsResponse = await client.getPrComments(
       config.repository!,
@@ -596,7 +602,7 @@ export async function ensureComment({
     return false;
   }
 
-  let commentId = undefined;
+  let commentId: string | undefined = undefined;
   let commentNeedsUpdating = false;
 
   if (!prCommentsResponse?.commentsForPullRequestData) {
@@ -671,7 +677,7 @@ export async function ensureCommentRemoval(
       : removeConfig.content;
   logger.debug(`Ensuring comment "${key}" in #${prNo} is removed`);
 
-  let prCommentsResponse;
+  let prCommentsResponse: GetCommentsForPullRequestOutput;
   try {
     prCommentsResponse = await client.getPrComments(
       config.repository!,
@@ -687,7 +693,7 @@ export async function ensureCommentRemoval(
     return;
   }
 
-  let commentIdToRemove;
+  let commentIdToRemove: string | undefined;
   for (const commentObj of prCommentsResponse.commentsForPullRequestData) {
     if (!commentObj?.comments) {
       logger.debug(
