@@ -335,7 +335,7 @@ export async function getRawFile(
     return null;
   }
   const buf = Buffer.from(fileRes.fileContent);
-  return buf.toString('utf-8');
+  return buf.toString();
 }
 
 /* istanbul ignore next */
