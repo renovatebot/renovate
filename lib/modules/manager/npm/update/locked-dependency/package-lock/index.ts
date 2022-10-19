@@ -25,6 +25,8 @@ export async function updateLockedDependency(
     allowHigherOrRemoved = false,
   } = config;
   logger.debug(
+    // TODO: types (#7154)
+    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
     `npm.updateLockedDependency: ${depName}@${currentVersion} -> ${newVersion} [${lockFile}]`
   );
   try {
@@ -45,10 +47,13 @@ export async function updateLockedDependency(
     const lockedDeps = getLockedDependencies(
       packageLockJson,
       depName,
-      currentVersion
+      // TODO #7154
+      currentVersion!
     );
     if (lockedDeps.some((dep) => dep.bundled)) {
       logger.info(
+        // TODO: types (#7154)
+        // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
         `Package ${depName}@${currentVersion} is bundled and cannot be updated`
       );
       return { status: 'update-failed' };
@@ -62,6 +67,8 @@ export async function updateLockedDependency(
       let status: 'update-failed' | 'already-updated';
       if (newLockedDeps.length) {
         logger.debug(
+          // TODO: types (#7154)
+          // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
           `${depName}@${currentVersion} not found in ${lockFile} but ${depName}@${newVersion} was - looks like it's already updated`
         );
         status = 'already-updated';
@@ -105,6 +112,8 @@ export async function updateLockedDependency(
           }
         } else {
           logger.debug(
+            // TODO: types (#7154)
+            // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
             `${depName}@${currentVersion} not found in ${lockFile} - cannot update`
           );
           status = 'update-failed';
@@ -129,7 +138,8 @@ export async function updateLockedDependency(
       packageJson,
       packageLockJson,
       depName,
-      currentVersion,
+      // TODO #7154
+      currentVersion!,
       newVersion
     );
     logger.trace({ deps: lockedDeps, constraints }, 'Matching details');
