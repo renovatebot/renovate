@@ -272,6 +272,7 @@ describe('modules/manager/poetry/artifacts', () => {
           '-v "/tmp/cache":"/tmp/cache" ' +
           '-e PIP_CACHE_DIR ' +
           '-e BUILDPACK_CACHE_DIR ' +
+          '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
           'renovate/sidecar ' +
           'bash -l -c "' +
@@ -330,6 +331,7 @@ describe('modules/manager/poetry/artifacts', () => {
           '-v "/tmp/cache":"/tmp/cache" ' +
           '-e PIP_CACHE_DIR ' +
           '-e BUILDPACK_CACHE_DIR ' +
+          '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
           'renovate/sidecar ' +
           'bash -l -c "' +

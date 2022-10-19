@@ -1,17 +1,15 @@
-import { promisify } from 'util';
-import zlib from 'zlib';
 import hasha from 'hasha';
 import { fs } from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
 import { logger } from '../../../../logger';
+import { compress } from '../../../compress';
 import { CACHE_REVISION } from '../common';
-import type { RepoCacheData, RepoCacheRecord } from '../types';
+import type { RepoCacheRecord } from '../schemas';
+import type { RepoCacheData } from '../types';
 import { CacheFactory } from './cache-factory';
 import { RepoCacheLocal } from './local';
 
 jest.mock('../../../fs');
-
-const compress = promisify(zlib.brotliCompress);
 
 async function createCacheRecord(
   data: RepoCacheData,
@@ -23,8 +21,7 @@ async function createCacheRecord(
 
   const jsonStr = JSON.stringify(data);
   const hash = hasha(jsonStr);
-  const compressedPayload = await compress(jsonStr);
-  const payload = compressedPayload.toString('base64');
+  const payload = await compress(jsonStr);
 
   return {
     revision,
@@ -107,102 +104,6 @@ describe('util/cache/repository/impl/local', () => {
     const cache2 = CacheFactory.get('some/repo', '222', 'local');
     await cache2.load();
     expect(cache2.getData()).toBeEmpty();
-  });
-
-  it('migrates revision from 10 to 13', async () => {
-    fs.readCacheFile.mockResolvedValue(
-      JSON.stringify({
-        revision: 10,
-        repository: 'some/repo',
-        semanticCommits: 'enabled',
-      })
-    );
-    const localRepoCache = CacheFactory.get(
-      'some/repo',
-      '0123456789abcdef',
-      'local'
-    );
-
-    await localRepoCache.load();
-    await localRepoCache.save();
-
-    const cacheRecord = await createCacheRecord({ semanticCommits: 'enabled' });
-    expect(fs.outputCacheFile).toHaveBeenCalledWith(
-      '/tmp/cache/renovate/repository/github/some/repo.json',
-      JSON.stringify(cacheRecord)
-    );
-  });
-
-  it('migrates revision from 11 to 13', async () => {
-    fs.readCacheFile.mockResolvedValue(
-      JSON.stringify({
-        revision: 11,
-        repository: 'some/repo',
-        data: { semanticCommits: 'enabled' },
-      })
-    );
-    const localRepoCache = CacheFactory.get(
-      'some/repo',
-      '0123456789abcdef',
-      'local'
-    );
-
-    await localRepoCache.load();
-    await localRepoCache.save();
-
-    const cacheRecord = await createCacheRecord({ semanticCommits: 'enabled' });
-    expect(fs.outputCacheFile).toHaveBeenCalledWith(
-      '/tmp/cache/renovate/repository/github/some/repo.json',
-      JSON.stringify(cacheRecord)
-    );
-  });
-
-  it('migrates revision from 12 to 13', async () => {
-    const { repository, payload, hash } = await createCacheRecord({
-      semanticCommits: 'enabled',
-    });
-
-    fs.readCacheFile.mockResolvedValue(
-      JSON.stringify({ revision: 12, repository, payload, hash })
-    );
-    const localRepoCache = CacheFactory.get(
-      'some/repo',
-      '0123456789abcdef',
-      'local'
-    );
-
-    await localRepoCache.load();
-    const data = localRepoCache.getData();
-    data.semanticCommits = 'disabled';
-    await localRepoCache.save();
-
-    expect(fs.outputCacheFile).toHaveBeenCalledWith(
-      '/tmp/cache/renovate/repository/github/some/repo.json',
-      JSON.stringify(
-        await createCacheRecord({
-          semanticCommits: 'disabled',
-        })
-      )
-    );
-  });
-
-  it('does not migrate from older revisions to 11', async () => {
-    fs.readCacheFile.mockResolvedValueOnce(
-      JSON.stringify({
-        revision: 9,
-        repository: 'some/repo',
-        semanticCommits: 'enabled',
-      })
-    );
-
-    const localRepoCache = CacheFactory.get(
-      'some/repo',
-      '0123456789abcdef',
-      'local'
-    );
-    await localRepoCache.load();
-
-    expect(localRepoCache.getData()).toBeEmpty();
   });
 
   it('handles invalid data', async () => {

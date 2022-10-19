@@ -65,7 +65,7 @@ describe('modules/manager/gradle/extract', () => {
       'gradle.properties',
     ]);
 
-    expect(res).toMatchSnapshot([
+    expect(res).toMatchObject([
       {
         packageFile: 'gradle.properties',
         deps: [{ depName: 'foo:bar', currentValue: '1.2.3' }],

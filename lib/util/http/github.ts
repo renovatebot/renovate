@@ -20,7 +20,6 @@ import type { GotLegacyError } from './legacy';
 import type {
   GraphqlOptions,
   HttpOptions,
-  HttpPostOptions,
   HttpResponse,
   InternalHttpOptions,
 } from './types';
@@ -68,6 +67,7 @@ function handleGotError(
     message = String(body.message);
   }
   if (
+    err.code === 'ERR_HTTP2_STREAM_ERROR' ||
     err.code === 'ENOTFOUND' ||
     err.code === 'ETIMEDOUT' ||
     err.code === 'EAI_AGAIN' ||
@@ -265,7 +265,7 @@ function setGraphqlPageSize(fieldName: string, newPageSize: number): void {
   }
 }
 
-export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
+export class GithubHttp extends Http<GithubHttpOptions> {
   constructor(
     hostType: string = PlatformId.Github,
     options?: GithubHttpOptions
@@ -380,7 +380,7 @@ export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
     }
     const body = variables ? { query, variables } : { query };
 
-    const opts: HttpPostOptions = {
+    const opts: GithubHttpOptions = {
       baseUrl: baseUrl.replace('/v3/', '/'), // GHE uses unversioned graphql path
       body,
       headers: { accept: options?.acceptHeader },
@@ -431,9 +431,8 @@ export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
       });
       const repositoryData = res?.data?.repository;
       if (
-        repositoryData &&
-        is.plainObject(repositoryData) &&
-        repositoryData[fieldName]
+        is.nonEmptyObject(repositoryData) &&
+        !is.nullOrUndefined(repositoryData[fieldName])
       ) {
         optimalCount = count;
 

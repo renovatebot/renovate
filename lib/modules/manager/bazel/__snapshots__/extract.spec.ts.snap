@@ -1,166 +1,5 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`modules/manager/bazel/extract extractPackageFile() extracts dependencies for container_pull deptype 1`] = `
-[
-  {
-    "currentDigest": "sha256:a4e8d8c444ca04fe706649e82263c9f4c2a4229bc30d2a64561b5e1d20cc8548",
-    "currentValue": "v1.0.0-alpha31.cli-migrations",
-    "datasource": "docker",
-    "depName": "hasura",
-    "depType": "container_pull",
-    "managerData": {
-      "def": "container_pull(
-          name="hasura",
-          registry="index.docker.io",
-          repository="hasura/graphql-engine",
-          # v1.0.0-alpha31.cli-migrations 11/28
-          digest="sha256:a4e8d8c444ca04fe706649e82263c9f4c2a4229bc30d2a64561b5e1d20cc8548",
-          tag="v1.0.0-alpha31.cli-migrations"
-        )",
-    },
-    "packageName": "hasura/graphql-engine",
-    "registryUrls": [
-      "index.docker.io",
-    ],
-    "versioning": "docker",
-  },
-]
-`;
-
-exports[`modules/manager/bazel/extract extractPackageFile() extracts dependencies from *.bzl files 1`] = `
-[
-  {
-    "currentDigest": "0356bef3fbbabec5f0e196ecfacdeb6db62d48c0",
-    "datasource": "github-tags",
-    "depName": "subpar",
-    "depType": "http_archive",
-    "managerData": {
-      "def": "http_archive(
-            name = "subpar",
-            sha256 = "7ab6ab37ede82255e00c0456846a1428b20e8813f77d83bcf54ddd59ba34377a",
-            # Commit from 2019-03-07.
-            strip_prefix = "subpar-0356bef3fbbabec5f0e196ecfacdeb6db62d48c0",
-            urls = ["https://github.com/google/subpar/archive/0356bef3fbbabec5f0e196ecfacdeb6db62d48c0.tar.gz"],
-        )",
-    },
-    "packageName": "google/subpar",
-  },
-  {
-    "currentValue": "0.6.0",
-    "datasource": "github-tags",
-    "depName": "bazel_skylib",
-    "depType": "http_archive",
-    "managerData": {
-      "def": "http_archive(
-            name = "bazel_skylib",
-            sha256 = "eb5c57e4c12e68c0c20bc774bfbc60a568e800d025557bc4ea022c6479acc867",
-            strip_prefix = "bazel-skylib-0.6.0",
-            urls = ["https://github.com/bazelbuild/bazel-skylib/archive/0.6.0.tar.gz"],
-        )",
-    },
-    "packageName": "bazelbuild/bazel-skylib",
-  },
-  {
-    "currentValue": "0.5.0",
-    "datasource": "github-releases",
-    "depName": "io_bazel_stardoc",
-    "depType": "http_archive",
-    "managerData": {
-      "def": "maybe(
-        http_archive,
-        name = "io_bazel_stardoc",
-        sha256 = "c9794dcc8026a30ff67cf7cf91ebe245ca294b20b071845d12c192afe243ad72",
-        urls = [
-            "https://mirror.bazel.build/github.com/bazelbuild/stardoc/releases/download/0.5.0/stardoc-0.5.0.tar.gz",
-            "https://github.com/bazelbuild/stardoc/releases/download/0.5.0/stardoc-0.5.0.tar.gz",
-        ],
-    )",
-    },
-    "packageName": "bazelbuild/stardoc",
-  },
-]
-`;
-
-exports[`modules/manager/bazel/extract extractPackageFile() extracts github tags 1`] = `
-[
-  {
-    "currentValue": "6.3.0",
-    "datasource": "github-tags",
-    "depName": "GBDeviceInfo",
-    "depType": "http_archive",
-    "managerData": {
-      "def": "http_archive(
-    name = "GBDeviceInfo",
-    url = "https://github.com/lmirosevic/GBDeviceInfo/archive/6.3.0.tar.gz",
-    sha256 = "d7666275dff039407ea467c3083b83e24934101777c8b55b6b1b3b7e9a9e220b",
-    strip_prefix = "GBDeviceInfo-6.3.0/GBDeviceInfo"
-)",
-    },
-    "packageName": "lmirosevic/GBDeviceInfo",
-  },
-  {
-    "currentDigest": "135d46b4c9423ee7d494c78a21ff621bc73c12f3",
-    "datasource": "github-tags",
-    "depName": "com_github_nelhage_rules_boost",
-    "depType": "http_archive",
-    "managerData": {
-      "def": "http_archive(
-    name = "com_github_nelhage_rules_boost",
-    url = "https://github.com/nelhage/rules_boost/archive/135d46b4c9423ee7d494c78a21ff621bc73c12f3.tar.gz",
-    sha256 = "3651f5dda0f7296e4cecafacc7f9d1f274be0fd64e30bebd74e28ffba28fe77f",
-    strip_prefix = "rules_boost-135d46b4c9423ee7d494c78a21ff621bc73c12f3",
-)",
-    },
-    "packageName": "nelhage/rules_boost",
-  },
-  {
-    "currentValue": "6.3.0",
-    "datasource": "github-tags",
-    "depName": "GBDeviceInfo-zip",
-    "depType": "http_archive",
-    "managerData": {
-      "def": "http_archive(
-    name = "GBDeviceInfo-zip",
-    url = "https://github.com/lmirosevic/GBDeviceInfo/archive/6.3.0.zip",
-    sha256 = "4ef4320c4880fd64cfb7f42132f4b02fa626bccf1ba3e1a71dfbfcb50735f141",
-    strip_prefix = "GBDeviceInfo-6.3.0/GBDeviceInfo"
-)",
-    },
-    "packageName": "lmirosevic/GBDeviceInfo",
-  },
-  {
-    "currentDigest": "135d46b4c9423ee7d494c78a21ff621bc73c12f3",
-    "datasource": "github-tags",
-    "depName": "com_github_nelhage_rules_boost-zip",
-    "depType": "http_archive",
-    "managerData": {
-      "def": "http_archive(
-    name = "com_github_nelhage_rules_boost-zip",
-    url = "https://github.com/nelhage/rules_boost/archive/135d46b4c9423ee7d494c78a21ff621bc73c12f3.zip",
-    sha256 = "de8aac034cabe4a9ba5f7a33b9523862bf76c245a6c554c0e737f591bb7c7aeb",
-    strip_prefix = "rules_boost-135d46b4c9423ee7d494c78a21ff621bc73c12f3",
-)",
-    },
-    "packageName": "nelhage/rules_boost",
-  },
-  {
-    "currentValue": "v0.29.0",
-    "datasource": "github-releases",
-    "depName": "io_bazel_rules_go",
-    "depType": "http_archive",
-    "managerData": {
-      "def": "maybe(
-  http_archive,
-  name = "io_bazel_rules_go",
-  sha256 = "2b1641428dff9018f9e85c0384f03ec6c10660d935b750e3fa1492a281a53b0f",
-  url = "https://github.com/bazelbuild/rules_go/releases/download/v0.29.0/rules_go-v0.29.0.zip",
-)",
-    },
-    "packageName": "bazelbuild/rules_go",
-  },
-]
-`;
-
 exports[`modules/manager/bazel/extract extractPackageFile() extracts multiple types of dependencies 1`] = `
 [
   {
@@ -268,6 +107,22 @@ exports[`modules/manager/bazel/extract extractPackageFile() extracts multiple ty
 )",
     },
     "packageName": "bazelbuild/bazel-toolchains",
+  },
+  {
+    "currentValue": "5.5.3",
+    "datasource": "github-releases",
+    "depName": "rules_nodejs",
+    "depType": "http_archive",
+    "managerData": {
+      "def": "http_archive(
+    name = "rules_nodejs",
+    sha256 = "5aef09ed3279aa01d5c928e3beb248f9ad32dde6aafe6373a8c994c3ce643064",
+    urls = [
+      "https://github.com/bazelbuild/rules_nodejs/releases/download/5.5.3/rules_nodejs-core-5.5.3.tar.gz"
+    ],
+)",
+    },
+    "packageName": "bazelbuild/rules_nodejs",
   },
   {
     "currentValue": "0.0.3",
@@ -435,22 +290,36 @@ exports[`modules/manager/bazel/extract extractPackageFile() extracts multiple ty
 ]
 `;
 
-exports[`modules/manager/bazel/extract extractPackageFile() handle comments and strings 1`] = `
+exports[`modules/manager/bazel/extract extractPackageFile() sequential http_archive 1`] = `
 [
   {
-    "currentDigest": "98495a618246683c9058dd87c2c78a2c06087999",
+    "currentValue": "v1.1.2",
     "datasource": "github-tags",
-    "depName": "com_github_nelhage_rules_boost",
+    "depName": "aspect_rules_js",
     "depType": "http_archive",
     "managerData": {
       "def": "http_archive(
-    name = "com_github_nelhage_rules_boost",
-    url = "https://github.com/nelhage/rules_boost/archive/98495a618246683c9058dd87c2c78a2c06087999.tar.gz",
-    sha256 = "f92cb7ed66a5b24f97a7fc3917407f808c70d2689273bdd68f93d70a379d22d3",
-    strip_prefix = "rules_boost-98495a618246683c9058dd87c2c78a2c06087999",
-)",
+            name = "aspect_rules_js",
+            sha256 = "db9f446752fe4100320cf8487e8fd476b9af0adf6b99b601bcfd70b289bb0598",
+            strip_prefix = "rules_js-1.1.2",
+            url = "https://github.com/aspect-build/rules_js/archive/refs/tags/v1.1.2.tar.gz",
+          )",
     },
-    "packageName": "nelhage/rules_boost",
+    "packageName": "aspect-build/rules_js",
+  },
+  {
+    "currentValue": "5.5.3",
+    "datasource": "github-releases",
+    "depName": "rules_nodejs",
+    "depType": "http_archive",
+    "managerData": {
+      "def": "http_archive(
+              name = "rules_nodejs",
+              sha256 = "5aef09ed3279aa01d5c928e3beb248f9ad32dde6aafe6373a8c994c3ce643064",
+              urls = ["https://github.com/bazelbuild/rules_nodejs/releases/download/5.5.3/rules_nodejs-core-5.5.3.tar.gz"],
+          )",
+    },
+    "packageName": "bazelbuild/rules_nodejs",
   },
 ]
 `;

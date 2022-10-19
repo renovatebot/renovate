@@ -17,6 +17,7 @@ describe('util/exec/containerbase', () => {
     beforeEach(() => {
       GlobalConfig.reset();
       delete process.env.BUILDPACK;
+      delete process.env.CONTAINERBASE;
     });
 
     it('returns false if binarySource is not install', () => {
@@ -30,7 +31,7 @@ describe('util/exec/containerbase', () => {
 
     it('returns false if any unsupported tools', () => {
       GlobalConfig.set({ binarySource: 'install' });
-      process.env.BUILDPACK = 'true';
+      process.env.CONTAINERBASE = 'true';
       const toolConstraints: ToolConstraint[] = [
         { toolName: 'node' },
         { toolName: 'invalid' },
@@ -40,7 +41,7 @@ describe('util/exec/containerbase', () => {
 
     it('returns true if supported tools', () => {
       GlobalConfig.set({ binarySource: 'install' });
-      process.env.BUILDPACK = 'true';
+      process.env.CONTAINERBASE = 'true';
       const toolConstraints: ToolConstraint[] = [{ toolName: 'npm' }];
       expect(isDynamicInstall(toolConstraints)).toBeTrue();
     });

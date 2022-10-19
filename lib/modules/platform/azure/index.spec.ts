@@ -1080,17 +1080,18 @@ describe('modules/platform/azure/index', () => {
             ]),
           } as any)
       );
-      await azure.addReviewers(123, ['test@bonjour.fr', 'jyc', 'def']);
+      await azure.addReviewers(123, ['test@bonjour.fr', 'jyc', 'required:def']);
       expect(azureApi.gitApi).toHaveBeenCalledTimes(3);
     });
   });
 
   describe('massageMarkdown(input)', () => {
     it('returns updated pr body', () => {
-      const input =
-        '\n---\n\n - [ ] <!-- rebase-check --> rebase\nplus also [a link](https://github.com/foo/bar/issues/5)';
-      expect(azure.massageMarkdown(input)).toMatchInlineSnapshot(
-        `"plus also [a link](https://github.com/foo/bar/issues/5)"`
+      const prBody =
+        '\n---\n\n - [ ] <!-- rebase-check --> rebase\n<!--renovate-config-hash:-->' +
+        'plus also [a link](https://github.com/foo/bar/issues/5)';
+      expect(azure.massageMarkdown(prBody)).toBe(
+        'plus also [a link](https://github.com/foo/bar/issues/5)'
       );
     });
   });
