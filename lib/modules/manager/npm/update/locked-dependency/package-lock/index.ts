@@ -206,7 +206,7 @@ export async function updateLockedDependency(
         }
       } else if (depType) {
         // TODO: `newValue` can probably null
-        // The constaint comes from the package.json file, so we need to update it
+        // The constraint comes from the package.json file, so we need to update it
         const newValue = semver.getNewValue({
           currentValue: constraint,
           rangeStrategy: 'replace',

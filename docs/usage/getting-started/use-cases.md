@@ -116,22 +116,42 @@ In such cases, it is best practice to:
 You can use Renovate to follow this best practice.
 Renovate finds and updates internal dependencies just like external or Open Source dependencies.
 
-#### Example of internal package update
+#### Automerge internal dependencies
 
-We automatically update our documentation site with Renovate bot.
-We use Renovate's git submodule support to do this.
-
-- Our main repository [`renovatebot/renovate`](https://github.com/renovatebot/renovate) has most of the Markdown documentation files
-- The documentation build repository [`renovatebot/renovatebot.github.io`](https://github.com/renovatebot/renovatebot.github.io) has a submodule link to our main repository `renovatebot/renovate`
-- Submodule updates are performed automatically whenever detected
-- After the automatic update is merged, the documentation site is rebuilt and pushed live
-
-We also use Renovate's "automerge" feature.
-It allows us to automatically merge the submodule update without needing manual approval, manual merging, or even without getting a PR at all.
-
-Automerge is particularly useful for internal dependencies where it's best to use the approach of "if it passes tests then merge it".
+Renovate's automerge feature is really useful for internal dependencies where you can say "if it passes tests let's merge it".
 
 To learn more about "automerge" read the [key concepts, automerge](https://docs.renovatebot.com/key-concepts/automerge/) documentation.
+
+#### Example of automerging internal dependencies
+
+We use these Renovate features to automerge an internal dependency:
+
+- [Git submodule support](https://docs.renovatebot.com/modules/manager/git-submodules/)
+- [`automerge`](https://docs.renovatebot.com/configuration-options/#automerge) set to `true
+- [`automergeType`](https://docs.renovatebot.com/configuration-options/#automergetype) set to `branch`
+
+##### Background information
+
+We split our work over two repositories:
+
+1. The [`renovatebot/renovate`](https://github.com/renovatebot/renovate) repository, which has the Renovate code, and most of the Markdown documentation files
+1. The [`renovatebot/renovatebot.github.io`](https://github.com/renovatebot/renovatebot.github.io) repository, which has a submodule link to the `renovatebot/renovate` repository
+
+##### Update process
+
+1. We edit our documentation files on the main Renovate repository `renovatebot/renovate`
+1. Renovate sees the change(s) to the `renovatebot/renovate` Git submodule, and creates an update branch on the _documentation build_ repository
+1. If the tests pass Renovate automerges the update branch into the `main` branch.
+1. A GitHub Actions workflow runs on `main` to build the documentation site and push the build live on our GitHub Pages domain
+
+##### Benefits
+
+The way we've set things up means we avoid:
+
+- reviewing PRs
+- manually merging PRs
+
+In fact we don't even get the update PR anymore!
 
 ## Advanced configuration
 

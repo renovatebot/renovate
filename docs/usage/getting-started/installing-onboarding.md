@@ -94,7 +94,7 @@ The `package.json` file must be located at the root of your repository.
 This is handy if you are already using a `package.json` file anyway, e.g. when you're working on a JavaScript project.
 The configuration in your `package.json` will apply to the whole project (this includes other, nested `package.json` files).
 
-### Customised defaults
+### Customized defaults
 
 Renovate provides a `renovate.json` file, with default settings that will work for most cases.
 Sometimes Renovate detects that an override to these defaults is needed, and will add this override automatically, such as:

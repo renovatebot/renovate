@@ -1,5 +1,6 @@
 import { Fixtures } from '../../../../test/fixtures';
 import type { UpdateLockedConfig } from '../types';
+import * as lockedVersion from './locked-version';
 import { updateLockedDependency } from '.';
 
 const lockFileContent = Fixtures.get('Gemfile.rubyci.lock');
@@ -16,6 +17,27 @@ describe('modules/manager/bundler/update-locked', () => {
     expect(updateLockedDependency(config).status).toBe('already-updated');
   });
 
+  it('returns unsupported for empty lockfile', () => {
+    const config: UpdateLockedConfig = {
+      packageFile: 'Gemfile',
+      lockFile: 'Gemfile.lock',
+      depName: 'activejob',
+      newVersion: '5.2.3',
+    };
+    expect(updateLockedDependency(config).status).toBe('unsupported');
+  });
+
+  it('returns unsupported for empty depName', () => {
+    const config: UpdateLockedConfig = {
+      packageFile: 'Gemfile',
+      lockFile: 'Gemfile.lock',
+      lockFileContent,
+      depName: undefined as never,
+      newVersion: '5.2.3',
+    };
+    expect(updateLockedDependency(config).status).toBe('unsupported');
+  });
+
   it('returns unsupported', () => {
     const config: UpdateLockedConfig = {
       packageFile: 'Gemfile',
@@ -25,5 +47,19 @@ describe('modules/manager/bundler/update-locked', () => {
       newVersion: '5.2.0',
     };
     expect(updateLockedDependency(config).status).toBe('unsupported');
+  });
+
+  it('returns update-falied incase of errors', () => {
+    const config: UpdateLockedConfig = {
+      packageFile: 'Gemfile',
+      lockFile: 'Gemfile.lock',
+      lockFileContent,
+      depName: 'activejob',
+      newVersion: '5.2.0',
+    };
+    jest
+      .spyOn(lockedVersion, 'extractLockFileEntries')
+      .mockReturnValueOnce(new Error() as never);
+    expect(updateLockedDependency(config).status).toBe('update-failed');
   });
 });
