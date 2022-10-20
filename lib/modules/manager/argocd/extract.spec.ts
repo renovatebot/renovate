@@ -64,6 +64,16 @@ describe('modules/manager/argocd/extract', () => {
             datasource: 'docker',
             depName: 'somecontainer.registry.io/some/image2',
           },
+          {
+            currentValue: '1.3.0',
+            datasource: 'docker',
+            depName: 'somecontainer.registry.io:443/some/image2',
+          },
+          {
+            currentValue: '1.0.0',
+            datasource: 'docker',
+            depName: 'somecontainer.registry.io:443/some/image3',
+          },
         ],
       });
     });
