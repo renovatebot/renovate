@@ -36,6 +36,7 @@ export async function getUpdatedPackageFiles(
     const manager = upgrade.manager!;
     const packageFile = upgrade.packageFile!;
     const depName = upgrade.depName!;
+    // TODO: fix types, can be undefined (#7154)
     const newVersion = upgrade.newVersion!;
     const currentVersion = upgrade.currentVersion!;
     const updateLockedDependency = get(manager, 'updateLockedDependency')!;
