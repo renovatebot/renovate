@@ -234,7 +234,7 @@ describe('modules/datasource/metadata', () => {
 
   describe('massageUrl', () => {
     it('Should return an empty string when massaging an invalid url', () => {
-      expect(massageGithubUrl('not a url')).toMatch('');
+      expect(massageUrl('not a url')).toMatch('');
     });
 
     test.each`
