@@ -214,7 +214,7 @@
     "shlex": "2.1.2",
     "simple-git": "3.14.1",
     "slugify": "1.6.5",
-    "traverse": "0.6.6",
+    "traverse": "0.6.7",
     "tslib": "2.4.0",
     "upath": "2.0.1",
     "url-join": "4.0.1",
