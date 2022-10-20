@@ -30,12 +30,12 @@ import {
   ListRepositoriesCommand,
   ListRepositoriesInput,
   ListRepositoriesOutput,
-  MergeBranchesByFastForwardCommand,
-  MergeBranchesByFastForwardInput,
-  MergeBranchesByFastForwardOutput,
-  MergeBranchesBySquashCommand,
-  MergeBranchesBySquashInput,
-  MergeBranchesBySquashOutput,
+  // MergeBranchesByFastForwardCommand,
+  // MergeBranchesByFastForwardInput,
+  // MergeBranchesByFastForwardOutput,
+  // MergeBranchesBySquashCommand,
+  // MergeBranchesBySquashInput,
+  // MergeBranchesBySquashOutput,
   PostCommentForPullRequestCommand,
   PostCommentForPullRequestInput,
   PostCommentForPullRequestOutput,
@@ -143,37 +143,37 @@ export async function getPrEvents(
   return await codeCommitClient.send(cmd);
 }
 
-export async function fastForwardMerge(
-  repositoryName: string,
-  sourceCommitSpecifier: string,
-  destinationReference: string
-): Promise<MergeBranchesByFastForwardOutput> {
-  const input: MergeBranchesByFastForwardInput = {
-    repositoryName,
-    sourceCommitSpecifier,
-    destinationCommitSpecifier: destinationReference,
-    targetBranch: destinationReference,
-  };
-  const cmd = new MergeBranchesByFastForwardCommand(input);
-  return await codeCommitClient.send(cmd);
-}
+// export async function fastForwardMerge(
+//   repositoryName: string,
+//   sourceCommitSpecifier: string,
+//   destinationReference: string
+// ): Promise<MergeBranchesByFastForwardOutput> {
+//   const input: MergeBranchesByFastForwardInput = {
+//     repositoryName,
+//     sourceCommitSpecifier,
+//     destinationCommitSpecifier: destinationReference,
+//     targetBranch: destinationReference,
+//   };
+//   const cmd = new MergeBranchesByFastForwardCommand(input);
+//   return await codeCommitClient.send(cmd);
+// }
 
-export async function squashMerge(
-  repositoryName: string,
-  sourceCommitSpecifier: string,
-  destinationReference: string,
-  commitMessage: string | undefined
-): Promise<MergeBranchesBySquashOutput> {
-  const input: MergeBranchesBySquashInput = {
-    repositoryName,
-    sourceCommitSpecifier,
-    destinationCommitSpecifier: destinationReference,
-    targetBranch: destinationReference,
-    commitMessage,
-  };
-  const cmd = new MergeBranchesBySquashCommand(input);
-  return await codeCommitClient.send(cmd);
-}
+// export async function squashMerge(
+//   repositoryName: string,
+//   sourceCommitSpecifier: string,
+//   destinationReference: string,
+//   commitMessage: string | undefined
+// ): Promise<MergeBranchesBySquashOutput> {
+//   const input: MergeBranchesBySquashInput = {
+//     repositoryName,
+//     sourceCommitSpecifier,
+//     destinationCommitSpecifier: destinationReference,
+//     targetBranch: destinationReference,
+//     commitMessage,
+//   };
+//   const cmd = new MergeBranchesBySquashCommand(input);
+//   return await codeCommitClient.send(cmd);
+// }
 
 export async function updatePrStatus(
   pullRequestId: string,
