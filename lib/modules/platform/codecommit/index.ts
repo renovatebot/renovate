@@ -40,11 +40,15 @@ import { getCodeCommitUrl } from './codecommit-client';
 import * as client from './codecommit-client';
 import { getUserArn, initIamClient } from './iam-client';
 
+export interface CodeCommitPr extends Pr {
+  body: string;
+}
+
 interface Config {
   repository?: string;
   defaultBranch?: string;
   region?: string;
-  prList?: Pr[];
+  prList?: CodeCommitPr[];
   credentials?: Credentials;
   userArn?: string;
 }
@@ -155,7 +159,7 @@ export async function initRepo({
   };
 }
 
-export async function getPrList(): Promise<Pr[]> {
+export async function getPrList(): Promise<CodeCommitPr[]> {
   logger.debug('getPrList()');
 
   if (config.prList) {
@@ -166,7 +170,7 @@ export async function getPrList(): Promise<Pr[]> {
     config.repository!,
     config.userArn!
   );
-  const fetchedPrs: Pr[] = [];
+  const fetchedPrs: CodeCommitPr[] = [];
 
   if (listPrsResponse && !listPrsResponse.pullRequestIds) {
     return fetchedPrs;
@@ -181,7 +185,7 @@ export async function getPrList(): Promise<Pr[]> {
       continue;
     }
     const prInfo = prRes.pullRequest;
-    const pr: Pr = {
+    const pr: CodeCommitPr = {
       targetBranch: prInfo.pullRequestTargets![0].destinationReference!,
       sourceBranch: prInfo.pullRequestTargets![0].sourceReference!,
       state:
@@ -190,6 +194,7 @@ export async function getPrList(): Promise<Pr[]> {
           : PrState.Closed,
       number: Number.parseInt(prId),
       title: prInfo.title!,
+      body: prInfo.description!,
     };
     fetchedPrs.push(pr);
   }
@@ -204,8 +209,8 @@ export async function findPr({
   branchName,
   prTitle,
   state = PrState.All,
-}: FindPRConfig): Promise<Pr | null> {
-  let prsFiltered: Pr[] = [];
+}: FindPRConfig): Promise<CodeCommitPr | null> {
+  let prsFiltered: CodeCommitPr[] = [];
   try {
     const prs = await getPrList();
     const refsHeadBranchName = getNewBranchName(branchName);
@@ -236,7 +241,9 @@ export async function findPr({
   return prsFiltered[0];
 }
 
-export async function getBranchPr(branchName: string): Promise<Pr | null> {
+export async function getBranchPr(
+  branchName: string
+): Promise<CodeCommitPr | null> {
   logger.debug(`getBranchPr(${branchName})`);
   const existingPr = await findPr({
     branchName,
@@ -245,7 +252,9 @@ export async function getBranchPr(branchName: string): Promise<Pr | null> {
   return existingPr ? getPr(existingPr.number) : null;
 }
 
-export async function getPr(pullRequestId: number): Promise<Pr | null> {
+export async function getPr(
+  pullRequestId: number
+): Promise<CodeCommitPr | null> {
   logger.debug(`getPr(${pullRequestId})`);
   const prRes = await client.getPr(`${pullRequestId}`);
 
@@ -271,6 +280,7 @@ export async function getPr(pullRequestId: number): Promise<Pr | null> {
     title: prInfo.title!,
     targetBranch: prInfo.pullRequestTargets![0].destinationReference!,
     sha: prInfo.revisionId,
+    body: prInfo.description!,
   };
 }
 
@@ -354,7 +364,7 @@ export async function createPr({
   targetBranch,
   prTitle: title,
   prBody: body,
-}: CreatePRConfig): Promise<Pr> {
+}: CreatePRConfig): Promise<CodeCommitPr> {
   const description = smartTruncate(sanitize(body), AMAZON_MAX_BODY_LENGTH);
 
   const prCreateRes = await client.createPr(
@@ -367,7 +377,8 @@ export async function createPr({
 
   if (
     !prCreateRes.pullRequest?.title ||
-    !prCreateRes.pullRequest?.pullRequestId
+    !prCreateRes.pullRequest?.pullRequestId ||
+    !prCreateRes.pullRequest?.description
   ) {
     throw new Error('Could not create pr, missing PR info');
   }
@@ -379,6 +390,7 @@ export async function createPr({
     sourceBranch,
     targetBranch,
     sourceRepo: config.repository,
+    body: prCreateRes.pullRequest.description,
   };
 }
 
@@ -390,14 +402,22 @@ export async function updatePr({
 }: UpdatePrConfig): Promise<void> {
   logger.debug(`updatePr(${prNo}, ${title}, body)`);
 
-  if (body) {
+  let cachedPr: CodeCommitPr | undefined = undefined;
+  const cachedPrs = config.prList ?? [];
+  for (const p of cachedPrs) {
+    if (p.number === prNo) {
+      cachedPr = p;
+    }
+  }
+
+  if (body && cachedPr?.body !== body) {
     await client.updatePrDescription(
       `${prNo}`,
       smartTruncate(sanitize(body), AMAZON_MAX_BODY_LENGTH)
     );
   }
 
-  if (title) {
+  if (title && cachedPr?.title !== title) {
     await client.updatePrTitle(`${prNo}`, title);
   }
 
@@ -405,10 +425,13 @@ export async function updatePr({
     state === PrState.Closed
       ? PullRequestStatusEnum.CLOSED
       : PullRequestStatusEnum.OPEN;
-  try {
-    await client.updatePrStatus(`${prNo}`, prStatusInput);
-  } catch (err) {
-    // do nothing, it's ok to fail sometimes when trying to update from open to open or from closed to closed.
+  if (cachedPr?.state !== prStatusInput) {
+    try {
+      await client.updatePrStatus(`${prNo}`, prStatusInput);
+    } catch (err) {
+      // safety check
+      // do nothing, it's ok to fail sometimes when trying to update from open to open or from closed to closed.
+    }
   }
 }
 
@@ -420,74 +443,74 @@ export async function mergePr({
   strategy,
 }: MergePRConfig): Promise<boolean> {
   logger.debug(`mergePr(${prNo}, ${branchName!})`);
-
-  const prOut = await client.getPr(`${prNo}`);
-
-  // istanbul ignore if
-  if (!prOut) {
-    return false;
-  }
-  const pReq = prOut.pullRequest;
-  const targets = pReq?.pullRequestTargets;
-
-  // istanbul ignore if
-  if (!targets) {
-    return false;
-  }
-
-  if (strategy === 'rebase') {
-    logger.warn('CodeCommit does not support a "rebase" strategy.');
-    return false;
-  }
-
-  try {
-    if (strategy === 'auto' || strategy === 'squash') {
-      await client.squashMerge(
-        targets[0].repositoryName!,
-        targets[0].sourceReference!,
-        targets[0].destinationReference!,
-        pReq?.title
-      );
-    } else if (strategy === 'fast-forward') {
-      await client.fastForwardMerge(
-        targets[0].repositoryName!,
-        targets[0].sourceReference!,
-        targets[0].destinationReference!
-      );
-    } else {
-      logger.debug(`unsupported strategy`);
-      return false;
-    }
-  } catch (err) {
-    logger.debug({ err }, `PR merge error`);
-    logger.info({ pr: prNo }, 'PR automerge failed');
-    return false;
-  }
-
-  logger.trace(`Updating PR ${prNo} to status ${PullRequestStatusEnum.CLOSED}`);
-
-  try {
-    const response = await client.updatePrStatus(
-      `${prNo}`,
-      PullRequestStatusEnum.CLOSED
-    );
-    const isClosed =
-      response.pullRequest?.pullRequestStatus === PullRequestStatusEnum.CLOSED;
-
-    if (!isClosed) {
-      logger.warn(
-        {
-          pullRequestId: prNo,
-          status: response.pullRequest?.pullRequestStatus,
-        },
-        `Expected PR to have status`
-      );
-    }
-    return true;
-  } catch (err) {
-    logger.debug({ err }, 'Failed to set the PR as Closed.');
-    return false;
-  }
+  await client.getPr(`${prNo}`);
+  return Promise.resolve(false);
+  //
+  // // istanbul ignore if
+  // if (!prOut) {
+  //   return false;
+  // }
+  // const pReq = prOut.pullRequest;
+  // const targets = pReq?.pullRequestTargets;
+  //
+  // // istanbul ignore if
+  // if (!targets) {
+  //   return false;
+  // }
+  //
+  // if (strategy === 'rebase') {
+  //   logger.warn('CodeCommit does not support a "rebase" strategy.');
+  //   return false;
+  // }
+  //
+  // try {
+  //   if (strategy === 'auto' || strategy === 'squash') {
+  //     await client.squashMerge(
+  //       targets[0].repositoryName!,
+  //       targets[0].sourceReference!,
+  //       targets[0].destinationReference!,
+  //       pReq?.title
+  //     );
+  //   } else if (strategy === 'fast-forward') {
+  //     await client.fastForwardMerge(
+  //       targets[0].repositoryName!,
+  //       targets[0].sourceReference!,
+  //       targets[0].destinationReference!
+  //     );
+  //   } else {
+  //     logger.debug(`unsupported strategy`);
+  //     return false;
+  //   }
+  // } catch (err) {
+  //   logger.debug({ err }, `PR merge error`);
+  //   logger.info({ pr: prNo }, 'PR automerge failed');
+  //   return false;
+  // }
+  //
+  // logger.trace(`Updating PR ${prNo} to status ${PullRequestStatusEnum.CLOSED}`);
+  //
+  // try {
+  //   const response = await client.updatePrStatus(
+  //     `${prNo}`,
+  //     PullRequestStatusEnum.CLOSED
+  //   );
+  //   const isClosed =
+  //     response.pullRequest?.pullRequestStatus === PullRequestStatusEnum.CLOSED;
+  //
+  //   if (!isClosed) {
+  //     logger.warn(
+  //       {
+  //         pullRequestId: prNo,
+  //         status: response.pullRequest?.pullRequestStatus,
+  //       },
+  //       `Expected PR to have status`
+  //     );
+  //   }
+  //   return true;
+  // } catch (err) {
+  //   logger.debug({ err }, 'Failed to set the PR as Closed.');
+  //   return false;
+  // }
 }
 
 export async function addReviewers(

@@ -10,7 +10,7 @@ import {
   GetRepositoryCommand,
   ListPullRequestsCommand,
   ListRepositoriesCommand,
-  MergeBranchesBySquashCommand,
+  // MergeBranchesBySquashCommand,
   PostCommentForPullRequestCommand,
   UpdatePullRequestDescriptionCommand,
   UpdatePullRequestStatusCommand,
@@ -27,7 +27,7 @@ import {
 import { PrState } from '../../../types';
 import * as git from '../../../util/git';
 import type { Platform } from '../types';
-import { config } from './index';
+import { CodeCommitPr, config } from './index';
 
 const codeCommitClient = mockClient(CodeCommitClient);
 const iamClient = mockClient(IAMClient);
@@ -464,6 +464,7 @@ describe('modules/platform/codecommit/index', () => {
       const prRes = {
         pullRequest: {
           title: 'someTitle',
+          description: 'body',
           pullRequestStatus: 'OPEN',
           pullRequestTargets: [
             {
@@ -624,6 +625,7 @@ describe('modules/platform/codecommit/index', () => {
           pullRequestId: '1',
           pullRequestStatus: 'OPEN',
           title: 'someTitle',
+          description: 'mybody',
         },
       };
 
@@ -642,6 +644,7 @@ describe('modules/platform/codecommit/index', () => {
         sourceBranch: 'sourceBranch',
         targetBranch: 'targetBranch',
         sourceRepo: undefined,
+        body: 'mybody',
       });
     });
 
@@ -681,6 +684,55 @@ describe('modules/platform/codecommit/index', () => {
       ).toResolve();
     });
 
+    it('updates PR body if cache is not the same', async () => {
+      config.prList = [];
+      const pr: CodeCommitPr = {
+        number: 1,
+        state: 'open',
+        title: 'someTitle',
+        sourceBranch: 'sourceBranch',
+        targetBranch: 'targetBranch',
+        sourceRepo: undefined,
+        body: 'some old description',
+      };
+      config.prList.push(pr);
+      codeCommitClient.on(UpdatePullRequestDescriptionCommand).resolvesOnce({});
+      codeCommitClient.on(UpdatePullRequestTitleCommand).resolvesOnce({});
+      codeCommitClient.on(UpdatePullRequestStatusCommand).resolvesOnce({});
+      await expect(
+        codeCommit.updatePr({
+          number: 1,
+          prTitle: 'title',
+          prBody: 'new description',
+          state: PrState.Open,
+        })
+      ).toResolve();
+    });
+
+    it('updates PR body does not update if cache is the same', async () => {
+      config.prList = [];
+      const pr: CodeCommitPr = {
+        number: 1,
+        state: 'open',
+        title: 'someTitle',
+        sourceBranch: 'sourceBranch',
+        targetBranch: 'targetBranch',
+        sourceRepo: undefined,
+        body: 'new description',
+      };
+      config.prList.push(pr);
+      codeCommitClient.on(UpdatePullRequestTitleCommand).resolvesOnce({});
+      codeCommitClient.on(UpdatePullRequestStatusCommand).resolvesOnce({});
+      await expect(
+        codeCommit.updatePr({
+          number: 1,
+          prTitle: 'title',
+          prBody: 'new description',
+          state: PrState.Open,
+        })
+      ).toResolve();
+    });
+
     it('updates PR regardless of status failure', async () => {
       codeCommitClient.on(UpdatePullRequestDescriptionCommand).resolvesOnce({});
       codeCommitClient.on(UpdatePullRequestTitleCommand).resolvesOnce({});
@@ -712,137 +764,143 @@ describe('modules/platform/codecommit/index', () => {
     });
   });
 
-  describe('mergePr()', () => {
-    it('checks that rebase is not supported', async () => {
-      expect(
-        await codeCommit.mergePr({
-          branchName: 'branch',
-          id: 1,
-          strategy: 'rebase',
-        })
-      ).toBeFalse();
-    });
+  // eslint-disable-next-line jest/no-commented-out-tests
+  // describe('mergePr()', () => {
+  // eslint-disable-next-line jest/no-commented-out-tests
+  //   it('checks that rebase is not supported', async () => {
+  //     expect(
+  //       await codeCommit.mergePr({
+  //         branchName: 'branch',
+  //         id: 1,
+  //         strategy: 'rebase',
+  //       })
+  //     ).toBeFalse();
+  //   });
 
-    it('posts Merge with auto', async () => {
-      const prRes = {
-        pullRequest: {
-          title: 'someTitle',
-          pullRequestStatus: 'OPEN',
-          pullRequestTargets: [
-            {
-              sourceReference: 'refs/heads/sourceBranch',
-              destinationReference: 'refs/heads/targetBranch',
-            },
-          ],
-        },
-      };
-      codeCommitClient.on(GetPullRequestCommand).resolvesOnce(prRes);
-      codeCommitClient.on(MergeBranchesBySquashCommand).resolvesOnce({});
+  // eslint-disable-next-line jest/no-commented-out-tests
+  //   it('posts Merge with auto', async () => {
+  //     const prRes = {
+  //       pullRequest: {
+  //         title: 'someTitle',
+  //         pullRequestStatus: 'OPEN',
+  //         pullRequestTargets: [
+  //           {
+  //             sourceReference: 'refs/heads/sourceBranch',
+  //             destinationReference: 'refs/heads/targetBranch',
+  //           },
+  //         ],
+  //       },
+  //     };
+  //     codeCommitClient.on(GetPullRequestCommand).resolvesOnce(prRes);
+  //     codeCommitClient.on(MergeBranchesBySquashCommand).resolvesOnce({});
+  //
+  //     const updateStatusRes = {
+  //       pullRequest: {
+  //         pullRequestStatus: 'OPEN',
+  //       },
+  //     };
+  //     codeCommitClient
+  //       .on(UpdatePullRequestStatusCommand)
+  //       .resolvesOnce(updateStatusRes);
+  //     expect(
+  //       await codeCommit.mergePr({
+  //         branchName: 'branch',
+  //         id: 1,
+  //         strategy: 'auto',
+  //       })
+  //     ).toBeTrue();
+  //   });
+  //
+  // eslint-disable-next-line jest/no-commented-out-tests
+  //   it('posts Merge with squash', async () => {
+  //     const prRes = {
+  //       pullRequest: {
+  //         title: 'someTitle',
+  //         pullRequestStatus: 'OPEN',
+  //         pullRequestTargets: [
+  //           {
+  //             sourceReference: 'refs/heads/sourceBranch',
+  //             destinationReference: 'refs/heads/targetBranch',
+  //           },
+  //         ],
+  //       },
+  //     };
+  //     codeCommitClient.on(GetPullRequestCommand).resolvesOnce(prRes);
+  //     codeCommitClient.on(MergeBranchesBySquashCommand).resolvesOnce({});
+  //     const updateStatusRes = {
+  //       pullRequest: {
+  //         pullRequestStatus: 'OPEN',
+  //       },
+  //     };
+  //     codeCommitClient
+  //       .on(UpdatePullRequestStatusCommand)
+  //       .resolvesOnce(updateStatusRes);
+  //     expect(
+  //       await codeCommit.mergePr({
+  //         branchName: 'branch',
+  //         id: 5,
+  //         strategy: 'squash',
+  //       })
+  //     ).toBeTrue();
+  //   });
 
-      const updateStatusRes = {
-        pullRequest: {
-          pullRequestStatus: 'OPEN',
-        },
-      };
-      codeCommitClient
-        .on(UpdatePullRequestStatusCommand)
-        .resolvesOnce(updateStatusRes);
-      expect(
-        await codeCommit.mergePr({
-          branchName: 'branch',
-          id: 1,
-          strategy: 'auto',
-        })
-      ).toBeTrue();
-    });
+  // eslint-disable-next-line jest/no-commented-out-tests
+  //   it('posts Merge with fast-forward', async () => {
+  //     const prRes = {
+  //       pullRequest: {
+  //         title: 'someTitle',
+  //         pullRequestStatus: 'OPEN',
+  //         pullRequestTargets: [
+  //           {
+  //             sourceReference: 'refs/heads/sourceBranch',
+  //             destinationReference: 'refs/heads/targetBranch',
+  //           },
+  //         ],
+  //       },
+  //     };
+  //     codeCommitClient.on(GetPullRequestCommand).resolvesOnce(prRes);
+  //     codeCommitClient.on(MergeBranchesBySquashCommand).resolvesOnce({});
+  //     const updateStatusRes = {
+  //       pullRequest: {
+  //         pullRequestStatus: 'OPEN',
+  //       },
+  //     };
+  //     codeCommitClient
+  //       .on(UpdatePullRequestStatusCommand)
+  //       .resolvesOnce(updateStatusRes);
+  //     expect(
+  //       await codeCommit.mergePr({
+  //         branchName: 'branch',
+  //         id: 1,
+  //         strategy: 'fast-forward',
+  //       })
+  //     ).toBe(true);
+  //   });
 
-    it('posts Merge with squash', async () => {
-      const prRes = {
-        pullRequest: {
-          title: 'someTitle',
-          pullRequestStatus: 'OPEN',
-          pullRequestTargets: [
-            {
-              sourceReference: 'refs/heads/sourceBranch',
-              destinationReference: 'refs/heads/targetBranch',
-            },
-          ],
-        },
-      };
-      codeCommitClient.on(GetPullRequestCommand).resolvesOnce(prRes);
-      codeCommitClient.on(MergeBranchesBySquashCommand).resolvesOnce({});
-      const updateStatusRes = {
-        pullRequest: {
-          pullRequestStatus: 'OPEN',
-        },
-      };
-      codeCommitClient
-        .on(UpdatePullRequestStatusCommand)
-        .resolvesOnce(updateStatusRes);
-      expect(
-        await codeCommit.mergePr({
-          branchName: 'branch',
-          id: 5,
-          strategy: 'squash',
-        })
-      ).toBeTrue();
-    });
-
-    it('posts Merge with fast-forward', async () => {
-      const prRes = {
-        pullRequest: {
-          title: 'someTitle',
-          pullRequestStatus: 'OPEN',
-          pullRequestTargets: [
-            {
-              sourceReference: 'refs/heads/sourceBranch',
-              destinationReference: 'refs/heads/targetBranch',
-            },
-          ],
-        },
-      };
-      codeCommitClient.on(GetPullRequestCommand).resolvesOnce(prRes);
-      codeCommitClient.on(MergeBranchesBySquashCommand).resolvesOnce({});
-      const updateStatusRes = {
-        pullRequest: {
-          pullRequestStatus: 'OPEN',
-        },
-      };
-      codeCommitClient
-        .on(UpdatePullRequestStatusCommand)
-        .resolvesOnce(updateStatusRes);
-      expect(
-        await codeCommit.mergePr({
-          branchName: 'branch',
-          id: 1,
-          strategy: 'fast-forward',
-        })
-      ).toBe(true);
-    });
-
-    it('checks that merge-commit is not supported', async () => {
-      const prRes = {
-        pullRequest: {
-          title: 'someTitle',
-          pullRequestStatus: 'OPEN',
-          pullRequestTargets: [
-            {
-              sourceReference: 'refs/heads/sourceBranch',
-              destinationReference: 'refs/heads/targetBranch',
-            },
-          ],
-        },
-      };
-      codeCommitClient.on(GetPullRequestCommand).resolvesOnce(prRes);
-      expect(
-        await codeCommit.mergePr({
-          branchName: 'branch',
-          id: 1,
-          strategy: 'merge-commit',
-        })
-      ).toBeFalse();
-    });
-  });
+  // eslint-disable-next-line jest/no-commented-out-tests
+  //   it('checks that merge-commit is not supported', async () => {
+  //     const prRes = {
+  //       pullRequest: {
+  //         title: 'someTitle',
+  //         pullRequestStatus: 'OPEN',
+  //         pullRequestTargets: [
+  //           {
+  //             sourceReference: 'refs/heads/sourceBranch',
+  //             destinationReference: 'refs/heads/targetBranch',
+  //           },
+  //         ],
+  //       },
+  //     };
+  //     codeCommitClient.on(GetPullRequestCommand).resolvesOnce(prRes);
+  //     expect(
+  //       await codeCommit.mergePr({
+  //         branchName: 'branch',
+  //         id: 1,
+  //         strategy: 'merge-commit',
+  //       })
+  //     ).toBeFalse();
+  //   });
+  // });
 
   describe('ensureComment', () => {
     it('adds comment if missing', async () => {
