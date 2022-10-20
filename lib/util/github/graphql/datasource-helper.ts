@@ -1,5 +1,4 @@
 import AggregateError from 'aggregate-error';
-import { TimeoutError } from 'got';
 import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import * as memCache from '../../cache/memory';
@@ -31,16 +30,14 @@ function isUnknownGraphqlError(err: Error): boolean {
   return message.startsWith('Something went wrong while executing your query.');
 }
 
-function isTimeoutError(err: Error): err is TimeoutError {
-  return err instanceof TimeoutError;
-}
-
 function canBeSolvedByShrinking(err: Error): boolean {
   if (err instanceof ExternalHostError) {
     return true;
   }
   const errors: Error[] = err instanceof AggregateError ? [...err] : [err];
-  return errors.some((e) => isTimeoutError(e) || isUnknownGraphqlError(e));
+  return errors.some(
+    (e) => err instanceof ExternalHostError || isUnknownGraphqlError(e)
+  );
 }
 
 export class GithubGraphqlDatasourceHelper<
