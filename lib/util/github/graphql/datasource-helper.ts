@@ -31,9 +31,6 @@ function isUnknownGraphqlError(err: Error): boolean {
 }
 
 function canBeSolvedByShrinking(err: Error): boolean {
-  if (err instanceof ExternalHostError) {
-    return true;
-  }
   const errors: Error[] = err instanceof AggregateError ? [...err] : [err];
   return errors.some(
     (e) => err instanceof ExternalHostError || isUnknownGraphqlError(e)
