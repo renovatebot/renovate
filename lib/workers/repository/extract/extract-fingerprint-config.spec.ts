@@ -20,18 +20,19 @@ describe('workers/repository/extract/extract-fingerprint-config', () => {
         },
       },
       enabledManagers: ['npm', 'regex'],
+      regexManagers: [
+        {
+          fileMatch: ['js', '***$}{]]['],
+          matchStrings: ['^(?<depName>foo)(?<currentValue>bar)$'],
+          datasourceTemplate: 'maven',
+          versioningTemplate: 'gradle',
+        },
+      ],
     });
-    config.regexManagers = [
-      {
-        fileMatch: ['js', '***$}{]]['],
-        matchStrings: ['^(?<depName>foo)(?<currentValue>bar)$'],
-        datasourceTemplate: 'maven',
-        versioningTemplate: 'gradle',
-      },
-    ];
+
     const fingerprintConfig = generateFingerprintConfig(config);
 
-    expect(fingerprintConfig.managerList).toEqual(['npm', 'regex']);
+    expect(fingerprintConfig.managerList).toEqual(new Set(['npm', 'regex']));
     expect(
       fingerprintConfig.managers.find((manager) => manager.manager === 'npm')
     ).toEqual({
@@ -68,7 +69,7 @@ describe('workers/repository/extract/extract-fingerprint-config', () => {
       npm: { fileMatch: ['hero.json'] },
     });
     const fingerprintConfig = generateFingerprintConfig(config);
-    expect(fingerprintConfig.managerList).toEqual(getManagerList());
+    expect(fingerprintConfig.managerList).toEqual(new Set(getManagerList()));
     expect(
       fingerprintConfig.managers.find((manager) => manager.manager === 'npm')
     ).toEqual({

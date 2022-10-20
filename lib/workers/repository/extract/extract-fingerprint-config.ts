@@ -3,7 +3,7 @@ import { get, getManagerList } from '../../../modules/manager';
 import type { WorkerExtractConfig } from '../../types';
 
 export interface FingerprintExtractConfig {
-  managerList: string[];
+  managerList: Set<string>;
   managers: WorkerExtractConfig[];
 }
 
@@ -11,12 +11,12 @@ function getFilteredManagerConfig(
   config: RenovateConfig,
   manager: string
 ): WorkerExtractConfig {
-  // the type here is not completely correct because there isn't any defined type only for managers
-  const managerConfig: WorkerExtractConfig = config[manager] as any;
+  // the type here is not completely correct because there isn't any defined type for managers
+  const managerConfig = config[manager] as WorkerExtractConfig;
   const language = get(manager, 'language');
-  // the type here is not completely correct because there isn't any defined type only for languages
+  // the type here is not completely correct because there isn't any defined type for languages
   const languageConfig = (
-    language ? (config[language] ? config[language] : {}) : {}
+    language && config[language] ? config[language] : {}
   ) as WorkerExtractConfig;
   const filteredConfig = {} as WorkerExtractConfig;
 
@@ -50,12 +50,10 @@ export function generateFingerprintConfig(
   const finalConfig = {} as FingerprintExtractConfig;
 
   const managerExtractConfigs: WorkerExtractConfig[] = [];
-  let managerList = getManagerList();
+  let managerList = new Set(getManagerList());
   const { enabledManagers } = config;
   if (enabledManagers?.length) {
-    managerList = managerList.filter((manager) =>
-      enabledManagers.includes(manager)
-    );
+    managerList = new Set(enabledManagers);
   }
   finalConfig.managerList = managerList;
 
