@@ -26,6 +26,8 @@ env:
   DEFAULT_BRANCH: main
   NODE_VERSION: 14
   DRY_RUN: true
+  # https://github.blog/2022-10-18-git-security-vulnerabilities-announced/
+  GIT_PROTOCOL_FROM_USER: 1
 
 jobs:
   test:
