@@ -2143,10 +2143,10 @@
   resolved "https://registry.yarnpkg.com/@pnpm/constants/-/constants-6.1.0.tgz#2db43ae0e029095df7959bc640081beae38a631b"
   integrity sha512-L6AiU3OXv9kjKGTJN9j8n1TeJGDcLX9atQlZvAkthlvbXjvKc5SKNWESc/eXhr5nEfuMWhQhiKHDJCpYejmeCQ==
 
-"@pnpm/error@3.1.0":
-  version "3.1.0"
-  resolved "https://registry.yarnpkg.com/@pnpm/error/-/error-3.1.0.tgz#f701ff46c5170a2dff1c198db85f8b4eade5d80a"
-  integrity sha512-bmXBD/kzlgHqlIZPP8QJUDAxGqug2qhPdnqNnuXyWQSyIEgeaXyPiUh91MLj9GwLoHA9Zdrx5+dfEougzxf4mA==
+"@pnpm/error@4.0.0":
+  version "4.0.0"
+  resolved "https://registry.yarnpkg.com/@pnpm/error/-/error-4.0.0.tgz#6a70907e9ea0f83aaf032fcc19c8b06df255189f"
+  integrity sha512-NI4DFCMF6xb1SA0bZiiV5KrMCaJM2QmPJFC6p78FXujn7FpiRSWhT9r032wpuQumsl7DEmN4s3wl/P8TA+bL8w==
   dependencies:
     "@pnpm/constants" "6.1.0"
 
@@ -2157,15 +2157,15 @@
   dependencies:
     graceful-fs "^4.2.6"
 
-"@pnpm/read-project-manifest@3.0.13":
-  version "3.0.13"
-  resolved "https://registry.yarnpkg.com/@pnpm/read-project-manifest/-/read-project-manifest-3.0.13.tgz#bcf558e81a7e6dab0d4dd1c57c6901d7f6f09e46"
-  integrity sha512-DEpAO64fA6VhcAudrjTAM4RIWCvw0Pmr4L0gaZqV0yta5zIkOTfFXT07lo80Zch4bvqmcOxlbM6Bazd4W+6Cww==
+"@pnpm/read-project-manifest@4.0.1":
+  version "4.0.1"
+  resolved "https://registry.yarnpkg.com/@pnpm/read-project-manifest/-/read-project-manifest-4.0.1.tgz#1eb6f9cb2e774587ebdabc7d2b3dafd24be8372c"
+  integrity sha512-+mf0hDMkqRi/nFikEHqNpm+MEYhB96e5QPucFTSMe049JEJ0Ux7vvWaEo2/cCLbedjrmA0tf3dagXNV228op+A==
   dependencies:
-    "@pnpm/error" "3.1.0"
+    "@pnpm/error" "4.0.0"
     "@pnpm/graceful-fs" "2.0.0"
-    "@pnpm/types" "8.7.0"
-    "@pnpm/write-project-manifest" "3.0.10"
+    "@pnpm/types" "8.8.0"
+    "@pnpm/write-project-manifest" "4.0.1"
     detect-indent "^6.1.0"
     fast-deep-equal "^3.1.3"
     is-windows "^1.0.2"
@@ -2175,17 +2175,17 @@
     sort-keys "^4.2.0"
     strip-bom "^4.0.0"
 
-"@pnpm/types@8.7.0":
-  version "8.7.0"
-  resolved "https://registry.yarnpkg.com/@pnpm/types/-/types-8.7.0.tgz#472dbe4e74b85985f43265750e6c861a28a9cce7"
-  integrity sha512-2j4ldzfOQNa3EZfJEmJrBQefE+OWBMgAoWWnVeXi5B7itVHRcg27Np+q0FxzuZE//O0N44WKH4WJG53sBsUqCQ==
+"@pnpm/types@8.8.0":
+  version "8.8.0"
+  resolved "https://registry.yarnpkg.com/@pnpm/types/-/types-8.8.0.tgz#44129e77527475a6a9aad3e51bdd68db530382ad"
+  integrity sha512-IKUpbWRHDB9C4Yy4UeBpeYhU7eIsLj50jF5HNRUkbJnM0CWHPLxX9TGCI+ov8pgGeTP1t1g0GPDHD6en9D8LxQ==
 
-"@pnpm/write-project-manifest@3.0.10":
-  version "3.0.10"
-  resolved "https://registry.yarnpkg.com/@pnpm/write-project-manifest/-/write-project-manifest-3.0.10.tgz#19927bc453050267ad45d0a3fcbfd66733dc40de"
-  integrity sha512-sw5AXR+KplipHL3GiPq8xNib8XUsi8ieh4XFVgjrAGkLIhfOrslonULY7d0QpVMotFMS7ha74s0s059T/5cnmQ==
+"@pnpm/write-project-manifest@4.0.1":
+  version "4.0.1"
+  resolved "https://registry.yarnpkg.com/@pnpm/write-project-manifest/-/write-project-manifest-4.0.1.tgz#2993d18bbd1c3cc920dc50c0a16091e4591ddfc9"
+  integrity sha512-QG6t7EPhZB3pik7BA/Ngv6g95Ys5YNfD5nTpMXb7vSHU7PiBm9vL/vEctdOZKBGh6HBjKcGgdqV5RdGS/CAF6g==
   dependencies:
-    "@pnpm/types" "8.7.0"
+    "@pnpm/types" "8.8.0"
     json5 "^2.2.1"
     write-file-atomic "^4.0.2"
     write-yaml-file "^4.2.0"
@@ -4868,13 +4868,13 @@ fill-range@^7.0.1:
   dependencies:
     to-regex-range "^5.0.1"
 
-find-packages@9.0.13:
-  version "9.0.13"
-  resolved "https://registry.yarnpkg.com/find-packages/-/find-packages-9.0.13.tgz#8912486b825d70eae6875450d0b135e085b28ee9"
-  integrity sha512-5DDQPKf6B1HCTO1jiBxmRfvvyVeOhNpFI2qW8inx1H7hOZV6gKJHHUqLcUTP34SsbswNTH2hj8vGi+JYxFCNxw==
+find-packages@10.0.1:
+  version "10.0.1"
+  resolved "https://registry.yarnpkg.com/find-packages/-/find-packages-10.0.1.tgz#41b6a5aa149c382bf726126225dbccb3fd0680f9"
+  integrity sha512-v0IMSFBDZvfnEeqPTSodiKfJLcpCpP7wyIIzF/MYVHlPME64pKG0gQzOmmOVPzQkpgP5xZobPfEiAcibepumyA==
   dependencies:
-    "@pnpm/read-project-manifest" "3.0.13"
-    "@pnpm/types" "8.7.0"
+    "@pnpm/read-project-manifest" "4.0.1"
+    "@pnpm/types" "8.8.0"
     fast-glob "^3.2.12"
     p-filter "^2.1.0"
 
