@@ -64,7 +64,10 @@ export function getNewValue({
   currentVersion,
   newVersion,
 }: NewValueConfig): string | null {
-  if (rangeStrategy === 'bump' && isSemVerXRange(currentValue)) {
+  if (
+    !['pin', 'update-lockfile'].includes(rangeStrategy) &&
+    isSemVerXRange(currentValue)
+  ) {
     return null;
   }
   if (rangeStrategy === 'pin' || isVersion(currentValue)) {

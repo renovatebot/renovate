@@ -176,6 +176,26 @@ export async function processBranch(
       };
     }
     if (branchExists) {
+      // check if branch is labelled to stop
+      config.stopUpdating = branchPr?.labels?.includes(
+        config.stopUpdatingLabel!
+      );
+
+      const prRebaseChecked = !!branchPr?.bodyStruct?.rebaseRequested;
+
+      if (branchExists && !dependencyDashboardCheck && config.stopUpdating) {
+        if (!prRebaseChecked) {
+          logger.info(
+            'Branch updating is skipped because stopUpdatingLabel is present in config'
+          );
+          return {
+            branchExists: true,
+            prNo: branchPr?.number,
+            result: BranchResult.NoWork,
+          };
+        }
+      }
+
       logger.debug('Checking if PR has been edited');
       const branchIsModified = await isBranchModified(config.branchName);
       if (branchPr) {
@@ -481,25 +501,6 @@ export async function processBranch(
         branchExists &&
         (await isBranchConflicted(config.baseBranch, config.branchName));
       config.forceCommit = forcedManually || config.isConflicted;
-
-      config.stopUpdating = branchPr?.labels?.includes(
-        config.stopUpdatingLabel!
-      );
-
-      const prRebaseChecked = !!branchPr?.bodyStruct?.rebaseRequested;
-
-      if (branchExists && !dependencyDashboardCheck && config.stopUpdating) {
-        if (!prRebaseChecked) {
-          logger.info(
-            'Branch updating is skipped because stopUpdatingLabel is present in config'
-          );
-          return {
-            branchExists: true,
-            prNo: branchPr?.number,
-            result: BranchResult.NoWork,
-          };
-        }
-      }
 
       // compile commit message with body, which maybe needs changelogs
       if (config.commitBody) {

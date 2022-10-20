@@ -22,7 +22,7 @@ export function extractPackageFile(
       continue;
     }
 
-    dep.managerData = { def: fragment.value };
+    dep.managerData = { idx };
     deps.push(dep);
   }
 
