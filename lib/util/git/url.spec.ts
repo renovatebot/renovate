@@ -175,7 +175,7 @@ describe('util/git/url', () => {
       );
     });
 
-    it('returns https url with encoded github token', () => {
+    it('returns https url for ssh url with encoded github token', () => {
       hostRules.find.mockReturnValueOnce({
         token: 'token',
       });
