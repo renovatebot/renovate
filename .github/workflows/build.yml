@@ -26,8 +26,6 @@ env:
   DEFAULT_BRANCH: main
   NODE_VERSION: 14
   DRY_RUN: true
-  # https://github.blog/2022-10-18-git-security-vulnerabilities-announced/
-  GIT_PROTOCOL_FROM_USER: 1
 
 jobs:
   test:
@@ -73,6 +71,8 @@ jobs:
           git config --global core.symlinks true
           git config --global user.email 'renovate@whitesourcesoftware.com'
           git config --global user.name  'Renovate Bot'
+          # https://github.blog/2022-10-18-git-security-vulnerabilities-announced/
+          git config --global protocol.file.allow always
           npm config set scripts-prepend-node-path true
           git --version
           echo "Node $(node --version)"
