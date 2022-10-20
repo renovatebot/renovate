@@ -218,7 +218,7 @@
     "tslib": "2.4.0",
     "upath": "2.0.1",
     "url-join": "4.0.1",
-    "validate-npm-package-name": "4.0.0",
+    "validate-npm-package-name": "5.0.0",
     "xmldoc": "1.2.0",
     "zod": "3.19.1"
   },
