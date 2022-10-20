@@ -1,6 +1,7 @@
 import AggregateError from 'aggregate-error';
 import { TimeoutError } from 'got';
 import { logger } from '../../../logger';
+import { ExternalHostError } from '../../../types/errors/external-host-error';
 import * as memCache from '../../cache/memory';
 import type {
   GithubGraphqlResponse,
@@ -35,6 +36,9 @@ function isTimeoutError(err: Error): err is TimeoutError {
 }
 
 function canBeSolvedByShrinking(err: Error): boolean {
+  if (err instanceof ExternalHostError) {
+    return true;
+  }
   const errors: Error[] = err instanceof AggregateError ? [...err] : [err];
   return errors.some((e) => isTimeoutError(e) || isUnknownGraphqlError(e));
 }
