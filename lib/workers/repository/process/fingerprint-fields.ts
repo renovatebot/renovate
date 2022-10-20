@@ -1,26 +1,43 @@
-import type { UpdateType } from '../../../config/types';
-import type { BranchUpgradeConfig } from '../../types';
+import type { GroupConfig, UpdateType } from '../../../config/types';
 
-export interface actualFingerprintConfigFields {
-  branchName: string;
-  baseBranch: string;
-  upgrades: BranchUpgradeConfig[];
-  packageFiles: string[];
-  excludeCommitPaths: string[];
-
-  // lockfile related
-  constraints?: Record<string, string>;
-  composerIgnorePlatformReqs?: string[];
-  ignoreScripts?: boolean;
-  ignorePlugins?: boolean;
-  isLockFileMaintenance?: boolean;
+export interface UpgradeFingerprintFields {
+  group?: GroupConfig;
+  groupName?: string;
+  groupSlug?: string;
+  manager: string;
+  packageFile?: string;
+  lockFile?: string;
+  currentDigestShort?: string;
+  datasource?: string;
+  digestOneAndOnly?: boolean;
+  fixedVersion?: string;
+  currentVersion?: string;
+  lockedVersion?: string | null;
+  newVersion?: string;
+  newDigest?: string;
+  newName?: string;
   updateType?: UpdateType;
-  updateLockFiles?: boolean;
-  transitiveRemediation?: boolean;
-  npmrc?: string;
-  reuselockFiles?: boolean;
-  npmLock?: string;
-  yarnLock?: string;
-  skipInstalls?: boolean;
-  postUpdateOptions?: string[];
+  replaceString?: string;
+  extractVersion?: string;
 }
+
+export const actualFingerprintUpgradeFields = [
+  'group',
+  'groupName',
+  'groupSlug',
+  'manager',
+  'packageFile',
+  'lockFile',
+  'currentDigestShort',
+  'datasource',
+  'digestOneAndOnly',
+  'fixedVersion',
+  'currentVersion',
+  'lockedVersion',
+  'newVersion',
+  'newDigest',
+  'newName',
+  'updateType',
+  'replaceString',
+  'extractVersion',
+];
