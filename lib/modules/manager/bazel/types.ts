@@ -5,7 +5,7 @@ export interface UrlParsedResult {
 }
 
 export interface BazelManagerData {
-  def: string;
+  idx: number;
 }
 
 export type TargetAttribute = string | string[];
@@ -41,3 +41,10 @@ export type FragmentData =
   | string
   | FragmentData[]
   | { [k: string]: FragmentData };
+
+export type FragmentPath =
+  | [number]
+  | [number, string]
+  | [number, string, number];
+
+export type FragmentUpdater = string | ((_: string) => string);
