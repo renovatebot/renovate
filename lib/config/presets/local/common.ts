@@ -17,10 +17,7 @@ export async function fetchJSONFile(
       throw err;
     }
 
-    logger.debug(
-      { err, repo, fileName },
-      `Failed to retrieve ${fileName} from repo ${repo}`
-    );
+    logger.debug(`Could not fetch ${fileName} from repo ${repo}`);
 
     throw new Error(PRESET_DEP_NOT_FOUND);
   }
