@@ -189,6 +189,7 @@ export class BaseGoDatasource {
 
     logger.debug({ goModule, goImportURL }, 'Go lookup import url');
     // get server base url from import url
+    const parsedUrl = URL.parse(goImportURL);
 
     const datasource = this.detectDatasource(
       goImportURL.replace(regEx(/\.git$/), ''),
@@ -199,8 +200,6 @@ export class BaseGoDatasource {
     }
 
     if (detectPlatform(goImportURL) === 'github') {
-      const parsedUrl = URL.parse(goImportURL);
-
       // split the go module from the URL: host/go/module -> go/module
       // TODO: `parsedUrl.pathname` can be undefined
       const packageName = trimTrailingSlash(`${parsedUrl.pathname}`)
