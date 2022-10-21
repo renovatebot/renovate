@@ -18,7 +18,9 @@ export interface UpgradeFingerprintConfig {
   extractVersion?: string;
 }
 
-export const upgradeFingerprintFields = [
+type K = keyof UpgradeFingerprintConfig;
+
+export const upgradeFingerprintFields: K[] = [
   'manager',
   'packageFile',
   'lockFile',
