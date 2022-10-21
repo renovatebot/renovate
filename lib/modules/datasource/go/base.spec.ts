@@ -100,6 +100,7 @@ describe('modules/datasource/go/base', () => {
       });
 
       it('supports GitHub EE deps', async () => {
+        hostRules.hostType.mockReturnValue('github');
         httpMock
           .scope('https://git.enterprise.com')
           .get('/example/module?go-get=1')
@@ -110,7 +111,7 @@ describe('modules/datasource/go/base', () => {
         );
 
         expect(res).toEqual({
-          datasource: GitTagsDatasource.id,
+          datasource: GithubTagsDatasource.id,
           packageName: 'example/module',
           registryUrl: 'https://git.enterprise.com',
         });
@@ -360,7 +361,6 @@ describe('modules/datasource/go/base', () => {
 
         expect(res).toEqual({
           datasource: GitTagsDatasource.id,
-          registryUrl: 'ssh://git.example.com',
           packageName: 'ssh://git.example.com/uncommon',
         });
       });
