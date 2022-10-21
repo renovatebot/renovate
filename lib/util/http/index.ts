@@ -89,6 +89,12 @@ async function gotTask<T>(
       duration =
         error.timings?.phases.total ??
         /* istanbul ignore next: can't be tested */ 0;
+      const method = options.method?.toUpperCase() ?? 'GET';
+      const code = error.code ?? 'UNKNOWN';
+      const retryCount = error.response?.retryCount ?? -1;
+      logger.debug(
+        `${method} ${url} = (code=${code}, statusCode=${statusCode} retryCount=${retryCount}, duration=${duration})`
+      );
     }
 
     throw error;
