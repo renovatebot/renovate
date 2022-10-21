@@ -1,6 +1,6 @@
 import type { UpdateType } from '../../../config/types';
 
-export interface UpgradeFingerprintFields {
+export interface UpgradeFingerprintConfig {
   manager: string;
   packageFile?: string;
   lockFile?: string;
@@ -18,7 +18,7 @@ export interface UpgradeFingerprintFields {
   extractVersion?: string;
 }
 
-export const actualFingerprintUpgradeFields = [
+export const upgradeFingerprintFields = [
   'manager',
   'packageFile',
   'lockFile',

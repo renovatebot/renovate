@@ -11,8 +11,8 @@ import { Limit, incLimitedValue, setMaxLimit } from '../../global/limits';
 import { BranchConfig, BranchResult } from '../../types';
 import { processBranch } from '../update/branch';
 import {
-  UpgradeFingerprintFields,
-  actualFingerprintUpgradeFields,
+  UpgradeFingerprintConfig,
+  upgradeFingerprintFields,
 } from './fingerprint-fields';
 import { getBranchesRemaining, getPrsRemaining } from './limits';
 
@@ -20,13 +20,13 @@ export type WriteUpdateResult = 'done' | 'automerged';
 
 export function generateBranchFingerprintConfig(
   branch: BranchConfig
-): UpgradeFingerprintFields[] {
+): UpgradeFingerprintConfig[] {
   const res = branch.upgrades.map((upgrade) => {
     const filtertedUpgrade = {} as any;
-    for (const field of actualFingerprintUpgradeFields) {
+    for (const field of upgradeFingerprintFields) {
       filtertedUpgrade[field] = upgrade[field];
     }
-    return filtertedUpgrade as UpgradeFingerprintFields;
+    return filtertedUpgrade as UpgradeFingerprintConfig;
   });
 
   return res;
