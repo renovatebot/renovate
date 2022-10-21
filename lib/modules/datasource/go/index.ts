@@ -4,6 +4,7 @@ import { addSecretForSanitizing } from '../../../util/sanitize';
 import { parseUrl } from '../../../util/url';
 import { BitBucketTagsDatasource } from '../bitbucket-tags';
 import { Datasource } from '../datasource';
+import { GitTagsDatasource } from '../git-tags';
 import { GithubTagsDatasource } from '../github-tags';
 import { GitlabTagsDatasource } from '../gitlab-tags';
 import type { DigestConfig, GetReleasesConfig, ReleaseResult } from '../types';
@@ -62,6 +63,9 @@ export class GoDatasource extends Datasource {
     const tag = value && !value.startsWith('v0.0.0-2') ? value : undefined;
 
     switch (source.datasource) {
+      case GitTagsDatasource.id: {
+        return this.direct.git.getDigest?.(source, tag) ?? null;
+      }
       case GithubTagsDatasource.id: {
         return this.direct.github.getDigest(source, tag);
       }
