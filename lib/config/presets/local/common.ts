@@ -17,7 +17,7 @@ export async function fetchJSONFile(
       throw err;
     }
 
-    logger.debug(`Could not fetch ${fileName} from repo ${repo}`);
+    logger.debug(`Preset file ${fileName} not found in ${repo}`);
 
     throw new Error(PRESET_DEP_NOT_FOUND);
   }
