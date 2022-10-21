@@ -154,11 +154,6 @@ function handleGotError(
   ) {
     return err;
   }
-  if (err.statusCode === 404) {
-    logger.debug({ url: path }, 'GitHub 404');
-  } else {
-    logger.debug({ err }, 'Unknown GitHub error');
-  }
   return err;
 }
 
