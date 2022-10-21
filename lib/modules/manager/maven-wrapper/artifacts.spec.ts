@@ -1,11 +1,7 @@
 import type { Stats } from 'fs';
 import os from 'os';
 import type { StatusResult } from 'simple-git';
-import {
-  envMock,
-  ExecSnapshots,
-  mockExecAll,
-} from '../../../../test/exec-util';
+import { envMock, mockExecAll } from '../../../../test/exec-util';
 import { env, fs, git, mockedFunction, partial } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
@@ -44,7 +40,6 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
       })
     );
 
-    fs.readLocalFile.mockResolvedValue('test');
     resetPrefetchedImages();
 
     env.getChildProcessEnv.mockReturnValue({
@@ -95,7 +90,7 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
     const expected = [
       {
         file: {
-          contents: 'test',
+          contents: undefined,
           path: 'maven.mvn/wrapper/maven-wrapper.properties',
           type: 'addition',
         },
@@ -119,7 +114,7 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
     const expected = [
       {
         file: {
-          contents: 'test',
+          contents: undefined,
           path: 'maven.mvn/wrapper/maven-wrapper.properties',
           type: 'addition',
         },
@@ -175,7 +170,7 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
     expect(result).toEqual([
       {
         file: {
-          contents: 'test',
+          contents: undefined,
           path: 'maven.mvn/wrapper/maven-wrapper.properties',
           type: 'addition',
         },
@@ -229,9 +224,7 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
   it('Should throw an error when it cant execute', async () => {
     mockMavenFileChangedInGit();
     GlobalConfig.set(adminConfig);
-    jest.spyOn(execModule, 'exec').mockImplementation(() => {
-      throw new Error('temporary-error');
-    });
+    mockExecAll(new Error('temporary-error'));
     const updatedDeps = await updateArtifacts({
       packageFileName: 'maven',
       newPackageFileContent: '',

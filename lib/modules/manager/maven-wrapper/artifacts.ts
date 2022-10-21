@@ -96,12 +96,14 @@ export async function updateArtifacts({
 async function getUpdatedArtifacts(
   status: StatusResult,
   artifactFileNames: string[]
-): Promise<(UpdateArtifactsResult | null)[]> {
-  const updatedResults: (UpdateArtifactsResult | null)[] = [];
-  for (const artifactFileName of artifactFileNames) {
-    updatedResults.push(await addIfUpdated(status, artifactFileName));
-  }
-  return updatedResults;
+): Promise<UpdateArtifactsResult[]> {
+  return (
+    await Promise.all(
+      artifactFileNames.map((fileProjectPath) =>
+        addIfUpdated(status, fileProjectPath)
+      )
+    )
+  ).filter(is.truthy);
 }
 
 /**
@@ -184,8 +186,9 @@ async function prepareCommand(
   // istanbul ignore if
   if (pathFileStats?.isFile() === true) {
     // if the file is not executable by others
-    if ((pathFileStats.mode & 0o1) === 0) {
+    if (os.platform() !== 'win32' && (pathFileStats.mode & 0o1) === 0) {
       // add the execution permission to the owner, group and others
+      logger.warn('Maven wrapper is missing the executable bit');
       await chmodLocalFile(
         upath.join(cwd, fileName),
         pathFileStats.mode | 0o111

@@ -64,9 +64,9 @@ describe('modules/manager/maven-wrapper/extract', () => {
       ]);
     });
 
-    it('it should return empty array when there is no string matching the maven properties regex', () => {
+    it('it should return null when there is no string matching the maven properties regex', () => {
       const res = extractPackageFile('nowrapper');
-      expect(res?.deps).toEqual([]);
+      expect(res).toEqual(null);
     });
   });
 });
