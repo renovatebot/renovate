@@ -64,5 +64,5 @@ export function extractPackageFile(fileContent: string): PackageFile | null {
     };
     deps.push(wrapper);
   }
-  return { deps };
+  return deps.length ? { deps } : null;
 }
