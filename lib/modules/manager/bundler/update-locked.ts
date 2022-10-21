@@ -8,8 +8,7 @@ export function updateLockedDependency(
   const { depName, currentVersion, newVersion, lockFile, lockFileContent } =
     config;
   logger.debug(
-    // TODO: types (#7154)
-    `bundler.updateLockedDependency: ${depName}@${currentVersion!} -> ${newVersion} [${lockFile}]`
+    `bundler.updateLockedDependency: ${depName}@${currentVersion} -> ${newVersion} [${lockFile}]`
   );
   try {
     const locked = extractLockFileEntries(lockFileContent ?? '');
