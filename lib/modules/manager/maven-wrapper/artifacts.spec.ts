@@ -5,9 +5,9 @@ import { envMock, mockExecAll } from '../../../../test/exec-util';
 import { env, fs, git, mockedFunction, partial } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
-import { updateArtifacts } from '.';
 import { resetPrefetchedImages } from '../../../util/exec/docker';
 import { getPkgReleases } from '../../datasource';
+import { updateArtifacts } from '.';
 
 jest.mock('../../../util/fs');
 jest.mock('../../../util/git');
@@ -19,9 +19,7 @@ const adminConfig: RepoGlobalConfig = {
   localDir: './',
 };
 
-function mockMavenFileChangedInGit(
-  fileName: string = 'maven-wrapper.properties'
-) {
+function mockMavenFileChangedInGit(fileName = 'maven-wrapper.properties') {
   git.getRepoStatus.mockResolvedValueOnce(
     partial<StatusResult>({
       modified: [`maven.mvn/wrapper/${fileName}`],
@@ -73,7 +71,7 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
 
   it('Docker should use java 8 if version is lower then 2.0.0', async () => {
     mockMavenFileChangedInGit();
-    let execSnapshots = mockExecAll();
+    const execSnapshots = mockExecAll();
     GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
     const updatedDeps = await updateArtifacts({
       packageFileName: 'maven',
