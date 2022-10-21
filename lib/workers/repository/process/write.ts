@@ -8,12 +8,13 @@ import { fingerprint } from '../../../util/fingerprint';
 import { branchExists, getBranchCommit } from '../../../util/git';
 import { setBranchNewCommit } from '../../../util/git/set-branch-commit';
 import { Limit, incLimitedValue, setMaxLimit } from '../../global/limits';
-import { BranchConfig, BranchResult } from '../../types';
-import { processBranch } from '../update/branch';
 import {
+  BranchConfig,
+  BranchResult,
   UpgradeFingerprintConfig,
-  upgradeFingerprintFields,
-} from './fingerprint-fields';
+} from '../../types';
+import { processBranch } from '../update/branch';
+import { upgradeFingerprintFields } from './fingerprint-fields';
 import { getBranchesRemaining, getPrsRemaining } from './limits';
 
 export type WriteUpdateResult = 'done' | 'automerged';

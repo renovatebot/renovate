@@ -1,25 +1,8 @@
-import type { UpdateType } from '../../../config/types';
+import type { UpgradeFingerprintConfig } from '../../types';
 
-export interface UpgradeFingerprintConfig {
-  manager: string;
-  packageFile?: string;
-  lockFile?: string;
-  currentDigestShort?: string;
-  datasource?: string;
-  digestOneAndOnly?: boolean;
-  fixedVersion?: string;
-  currentVersion?: string;
-  lockedVersion?: string | null;
-  newVersion?: string;
-  newDigest?: string;
-  newName?: string;
-  updateType?: UpdateType;
-  replaceString?: string;
-}
+type BranchFingerprintFields = keyof UpgradeFingerprintConfig;
 
-type K = keyof UpgradeFingerprintConfig;
-
-export const upgradeFingerprintFields: K[] = [
+export const upgradeFingerprintFields: BranchFingerprintFields[] = [
   'manager',
   'packageFile',
   'lockFile',
