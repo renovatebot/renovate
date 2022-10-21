@@ -214,7 +214,7 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
     mockMavenFileChangedInGit('also-not-maven-wrapper.properties');
     GlobalConfig.set(adminConfig);
     jest.spyOn(os, 'platform').mockImplementation(() => 'win32');
-
+    const execSnapshots = mockExecAll({ stdout: '', stderr: '' });
     fs.statLocalFile.mockResolvedValue(null);
     const updatedDeps = await updateArtifacts({
       packageFileName: 'maven',
@@ -223,6 +223,7 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
       config: { newValue: '3.3.1' },
     });
     expect(updatedDeps).toBeNull();
+    expect(execSnapshots).toMatchObject([]);
   });
 
   it('Should throw an error when it cant execute', async () => {
