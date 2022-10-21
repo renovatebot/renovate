@@ -62,7 +62,7 @@ function applyDefaultHeaders(options: Options): void {
 // `Buffer` in the latter case.
 // We don't declare overload signatures because it's immediately wrapped by
 // `request`.
-async function gotRoutine<T>(
+async function gotTask<T>(
   url: string,
   options: GotOptions,
   requestStats: Omit<RequestStats, 'duration' | 'statusCode'>
@@ -89,6 +89,12 @@ async function gotRoutine<T>(
       duration =
         error.timings?.phases.total ??
         /* istanbul ignore next: can't be tested */ 0;
+      const method = options.method?.toUpperCase() ?? 'GET';
+      const code = error.code ?? 'UNKNOWN';
+      const retryCount = error.response?.retryCount ?? -1;
+      logger.debug(
+        `${method} ${url} = (code=${code}, statusCode=${statusCode} retryCount=${retryCount}, duration=${duration})`
+      );
     }
 
     throw error;
@@ -162,16 +168,22 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
     // istanbul ignore else: no cache tests
     if (!resPromise) {
       const startTime = Date.now();
-      const queueTask = (): Promise<Response<T>> => {
+      const httpTask = (): Promise<Response<T>> => {
         const queueDuration = Date.now() - startTime;
-        return gotRoutine(url, options, {
+        return gotTask(url, options, {
           method: options.method ?? 'get',
           url,
           queueDuration,
         });
       };
+
       const queue = getQueue(url);
-      resPromise = queue?.add(queueTask) ?? queueTask();
+      const queuedTask = queue
+        ? () => queue.add<Response<T>>(httpTask)
+        : httpTask;
+
+      resPromise = queuedTask();
+
       if (options.method === 'get' || options.method === 'head') {
         memCache.set(cacheKey, resPromise); // always set if it's a get or a head
       }
