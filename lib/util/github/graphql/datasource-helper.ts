@@ -206,7 +206,11 @@ export class GithubGraphqlDatasourceHelper<
         if (!shrinkResult) {
           throw err;
         }
-        logger.debug({ err, size: this.itemsPerQuery }, 'Shrinking page size');
+        const { body, ...options } = this.getRawQueryOptions();
+        logger.debug(
+          { options, newSize: this.itemsPerQuery },
+          'Shrinking GitHub GraphQL page size after error'
+        );
       }
     }
 
