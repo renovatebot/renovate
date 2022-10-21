@@ -1,5 +1,6 @@
 import type { HttpOptions, HttpResponse, InternalHttpOptions } from './types';
 import { Http } from '.';
+
 let baseUrl = 'https://api.bitbucket.org/';
 
 export const setBaseUrl = (url: string): void => {

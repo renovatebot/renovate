@@ -1,6 +1,7 @@
 import { resolveBaseUrl } from '../url';
 import type { HttpOptions, HttpResponse, InternalHttpOptions } from './types';
 import { Http } from '.';
+
 let baseUrl: string;
 export const setBaseUrl = (url: string): void => {
   baseUrl = url;
