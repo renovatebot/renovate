@@ -198,6 +198,7 @@ export class BaseGoDatasource {
     if (datasource !== null) {
       return datasource;
     }
+    // fall back to old behaviour if detection did not work
 
     if (detectPlatform(goImportURL) === 'github') {
       // split the go module from the URL: host/go/module -> go/module
