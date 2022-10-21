@@ -1,4 +1,3 @@
-import { PlatformId } from '../../constants';
 import { getManagers } from '../../modules/manager';
 import { getPlatformList } from '../../modules/platform';
 import { getVersioningList } from '../../modules/versioning';
@@ -644,7 +643,7 @@ const options: RenovateOptions[] = [
     description: 'Platform type of repository.',
     type: 'string',
     allowedValues: getPlatformList(),
-    default: PlatformId.Github,
+    default: 'github',
     globalOnly: true,
   },
   {

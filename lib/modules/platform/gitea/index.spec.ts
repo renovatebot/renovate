@@ -6,7 +6,6 @@ import type {
   RepoResult,
 } from '..';
 import { mocked, partial } from '../../../../test/util';
-import { PlatformId } from '../../../constants';
 import {
   CONFIG_GIT_URL_UNAVAILABLE,
   REPOSITORY_ACCESS_FORBIDDEN,
@@ -472,7 +471,7 @@ describe('modules/platform/gitea/index', () => {
 
       const token = 'abc';
       hostRules.add({
-        hostType: PlatformId.Gitea,
+        hostType: 'gitea',
         matchHost: 'https://gitea.com/',
         token,
       });
@@ -500,7 +499,7 @@ describe('modules/platform/gitea/index', () => {
 
       const token = 'abc';
       hostRules.add({
-        hostType: PlatformId.Gitea,
+        hostType: 'gitea',
         matchHost: 'https://gitea.com/',
         token,
       });

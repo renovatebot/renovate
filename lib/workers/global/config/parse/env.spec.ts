@@ -1,5 +1,4 @@
 import type { RequiredConfig } from '../../../../config/types';
-import { PlatformId } from '../../../../constants';
 import { logger } from '../../../../logger';
 import * as env from './env';
 import type { ParseConfigOptions } from './types';
@@ -149,7 +148,7 @@ describe('workers/global/config/parse/env', () => {
 
     it('supports GitLab token', () => {
       const envParam: NodeJS.ProcessEnv = {
-        RENOVATE_PLATFORM: PlatformId.Gitlab,
+        RENOVATE_PLATFORM: 'gitlab',
         RENOVATE_TOKEN: 'a gitlab.com token',
       };
       expect(env.getConfig(envParam)).toMatchSnapshot({
@@ -160,7 +159,7 @@ describe('workers/global/config/parse/env', () => {
 
     it('supports GitLab custom endpoint', () => {
       const envParam: NodeJS.ProcessEnv = {
-        RENOVATE_PLATFORM: PlatformId.Gitlab,
+        RENOVATE_PLATFORM: 'gitlab',
         RENOVATE_TOKEN: 'a gitlab token',
         RENOVATE_ENDPOINT: 'a gitlab endpoint',
       };
@@ -186,7 +185,7 @@ describe('workers/global/config/parse/env', () => {
 
     it('supports Bitbucket token', () => {
       const envParam: NodeJS.ProcessEnv = {
-        RENOVATE_PLATFORM: PlatformId.Bitbucket,
+        RENOVATE_PLATFORM: 'bitbucket',
         RENOVATE_ENDPOINT: 'a bitbucket endpoint',
         RENOVATE_USERNAME: 'some-username',
         RENOVATE_PASSWORD: 'app-password',
@@ -201,7 +200,7 @@ describe('workers/global/config/parse/env', () => {
 
     it('supports Bitbucket username/password', () => {
       const envParam: NodeJS.ProcessEnv = {
-        RENOVATE_PLATFORM: PlatformId.Bitbucket,
+        RENOVATE_PLATFORM: 'bitbucket',
         RENOVATE_ENDPOINT: 'a bitbucket endpoint',
         RENOVATE_USERNAME: 'some-username',
         RENOVATE_PASSWORD: 'app-password',
