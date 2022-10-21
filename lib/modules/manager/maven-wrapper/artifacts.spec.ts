@@ -52,7 +52,7 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
       LANG: 'en_US.UTF-8',
       LC_ALL: 'en_US',
     });
-    mockedFunction(getPkgReleases).mockResolvedValue({
+    mockedFunction(getPkgReleases).mockResolvedValueOnce({
       releases: [
         { version: '8.0.1' },
         { version: '11.0.1' },
