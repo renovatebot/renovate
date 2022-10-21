@@ -199,8 +199,7 @@ export class BaseGoDatasource {
     }
     return {
       datasource: GitTagsDatasource.id,
-      registryUrl: `${parsedUrl.protocol}//${parsedUrl.host}`,
-      packageName: parsedUrl,
+      packageName: goImportURL,
     };
   }
 }
