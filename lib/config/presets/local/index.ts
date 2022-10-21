@@ -9,12 +9,12 @@ import * as gitlab from '../gitlab';
 import type { Preset, PresetConfig } from '../types';
 
 const resolvers = {
-  ['azure']: azure,
-  ['bitbucket']: bitbucket,
+  azure,
+  bitbucket,
   ['bitbucket-server']: bitbucketServer,
-  ['gitea']: gitea,
-  ['github']: github,
-  ['gitlab']: gitlab,
+  gitea,
+  github,
+  gitlab,
 } as const;
 
 export function getPreset({
