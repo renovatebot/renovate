@@ -12,10 +12,11 @@ export interface UpgradeFingerprintConfig {
   lockedVersion?: string | null;
   newVersion?: string;
   newDigest?: string;
+  newValue?:string;
   newName?: string;
   updateType?: UpdateType;
   replaceString?: string;
-  extractVersion?: string;
+  currentValue?: string;
 }
 
 type K = keyof UpgradeFingerprintConfig;
