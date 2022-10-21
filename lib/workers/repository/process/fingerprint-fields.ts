@@ -1,9 +1,6 @@
-import type { GroupConfig, UpdateType } from '../../../config/types';
+import type { UpdateType } from '../../../config/types';
 
 export interface UpgradeFingerprintFields {
-  group?: GroupConfig;
-  groupName?: string;
-  groupSlug?: string;
   manager: string;
   packageFile?: string;
   lockFile?: string;
@@ -22,9 +19,6 @@ export interface UpgradeFingerprintFields {
 }
 
 export const actualFingerprintUpgradeFields = [
-  'group',
-  'groupName',
-  'groupSlug',
   'manager',
   'packageFile',
   'lockFile',
