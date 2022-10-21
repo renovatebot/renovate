@@ -3,7 +3,6 @@ import os from 'os';
 import is from '@sindresorhus/is';
 import upath from 'upath';
 import { GlobalConfig } from '../../../config/global';
-import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { exec } from '../../../util/exec';
 import type { ExecOptions } from '../../../util/exec/types';
@@ -11,8 +10,6 @@ import { chmodLocalFile, readLocalFile, statLocalFile } from '../../../util/fs';
 import { getRepoStatus } from '../../../util/git';
 import type { StatusResult } from '../../../util/git/types';
 import mavenVersioning from '../../versioning/maven';
-
-import { id as semver } from '../../versioning/semver';
 import type {
   UpdateArtifact,
   UpdateArtifactsConfig,
@@ -134,24 +131,22 @@ async function executeWrapperCommand(
   logger.debug(`Updating maven wrapper: "${cmd}"`);
   const execOptions: ExecOptions = {
     docker: {
-      image: 'java',
-      tagConstraint:
-        config.constraints?.java ?? getJavaConstraint(config.currentValue),
-      tagScheme: semver,
+      image: 'sidecar',
     },
+    toolConstraints: [
+      {
+        toolName: 'java',
+        constraint:
+          config.constraints?.java ?? getJavaConstraint(config.currentValue),
+      },
+    ],
   };
 
   try {
     await exec(cmd, execOptions);
   } catch (err) {
-    // istanbul ignore if
-    if (err.message === TEMPORARY_ERROR) {
-      throw err;
-    }
-    logger.warn(
-      { err },
-      'Error executing maven wrapper update command. It can be not a critical one though.'
-    );
+    logger.error({ err }, 'Error executing maven wrapper update command.');
+    throw err;
   }
 }
 
