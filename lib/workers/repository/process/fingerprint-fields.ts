@@ -12,11 +12,9 @@ export interface UpgradeFingerprintConfig {
   lockedVersion?: string | null;
   newVersion?: string;
   newDigest?: string;
-  newValue?:string;
   newName?: string;
   updateType?: UpdateType;
   replaceString?: string;
-  currentValue?: string;
 }
 
 type K = keyof UpgradeFingerprintConfig;
@@ -36,5 +34,4 @@ export const upgradeFingerprintFields: K[] = [
   'newName',
   'updateType',
   'replaceString',
-  'extractVersion',
 ];
