@@ -24,6 +24,7 @@ describe('modules/manager/bundler/update-locked', () => {
       lockFile: 'Gemfile.lock',
       depName: 'activejob',
       newVersion: '5.2.3',
+      currentVersion: '5.2.2',
     };
     expect(updateLockedDependency(config).status).toBe('unsupported');
   });
@@ -35,6 +36,7 @@ describe('modules/manager/bundler/update-locked', () => {
       lockFileContent,
       depName: undefined as never,
       newVersion: '5.2.3',
+      currentVersion: '5.2.2',
     };
     expect(updateLockedDependency(config).status).toBe('unsupported');
   });
@@ -58,6 +60,7 @@ describe('modules/manager/bundler/update-locked', () => {
       lockFileContent,
       depName: 'activejob',
       newVersion: '5.2.0',
+      currentVersion: '5.1.9',
     };
     jest
       .spyOn(lockedVersion, 'extractLockFileEntries')
