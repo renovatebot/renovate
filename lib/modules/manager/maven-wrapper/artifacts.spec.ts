@@ -8,7 +8,6 @@ import type { RepoGlobalConfig } from '../../../config/types';
 import { updateArtifacts } from '.';
 import { resetPrefetchedImages } from '../../../util/exec/docker';
 import { getPkgReleases } from '../../datasource';
-import * as execModule from '../../../util/exec/';
 
 jest.mock('../../../util/fs');
 jest.mock('../../../util/git');
