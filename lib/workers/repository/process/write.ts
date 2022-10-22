@@ -148,7 +148,7 @@ export async function writeUpdates(
       ),
     ].sort();
     const branchFingerprint = fingerprint({
-      ...generateBranchFingerprintConfig(branch),
+      branchFingerprintConfig: generateBranchFingerprintConfig(branch),
       managers,
     });
     branch.skipBranchUpdate = canSkipBranchUpdateCheck(
