@@ -50,9 +50,8 @@ export async function renovateRepository(
       GlobalConfig.get('dryRun') !== 'lookup' &&
       GlobalConfig.get('dryRun') !== 'extract'
     ) {
-      await instrument(
-        'onboarding',
-        async () => await ensureOnboardingPr(config, packageFiles, branches)
+      await instrument('onboarding', () =>
+        ensureOnboardingPr(config, packageFiles, branches)
       );
       addSplit('onboarding');
 

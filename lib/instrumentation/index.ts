@@ -10,7 +10,10 @@ import * as api from '@opentelemetry/api';
 import { ProxyTracerProvider, SpanStatusCode } from '@opentelemetry/api';
 import { AsyncLocalStorageContextManager } from '@opentelemetry/context-async-hooks';
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
-import { registerInstrumentations } from '@opentelemetry/instrumentation';
+import {
+  Instrumentation,
+  registerInstrumentations,
+} from '@opentelemetry/instrumentation';
 import { BunyanInstrumentation } from '@opentelemetry/instrumentation-bunyan';
 import { HttpInstrumentation } from '@opentelemetry/instrumentation-http';
 import { Resource } from '@opentelemetry/resources';
@@ -27,6 +30,8 @@ import {
   isTraceSendingEnabled,
   isTracingEnabled,
 } from './utils';
+
+let instrumentations: Instrumentation[] = [];
 
 init();
 
@@ -62,27 +67,28 @@ export function init(): void {
     contextManager,
   });
 
+  instrumentations = [
+    new HttpInstrumentation({
+      applyCustomAttributesOnSpan: /* istanbul ignore next */ (
+        span,
+        request,
+        response
+      ) => {
+        // ignore 404 errors when the branch protection of Github could not be found. This is expected if no rules are configured
+        if (
+          request instanceof ClientRequest &&
+          request.host === `api.github.com` &&
+          request.path.endsWith(`/protection`) &&
+          response.statusCode === 404
+        ) {
+          span.setStatus({ code: SpanStatusCode.OK });
+        }
+      },
+    }),
+    new BunyanInstrumentation(),
+  ];
   registerInstrumentations({
-    instrumentations: [
-      new HttpInstrumentation({
-        applyCustomAttributesOnSpan: /* istanbul ignore next */ (
-          span,
-          request,
-          response
-        ) => {
-          // ignore 404 errors when the branch protection of Github could not be found. This is expected if no rules are configured
-          if (
-            request instanceof ClientRequest &&
-            request.host === `api.github.com` &&
-            request.path.endsWith(`/protection`) &&
-            response.statusCode === 404
-          ) {
-            span.setStatus({ code: SpanStatusCode.OK });
-          }
-        },
-      }),
-      new BunyanInstrumentation(),
-    ],
+    instrumentations,
   });
 }
 
@@ -98,6 +104,14 @@ export async function shutdown(): Promise<void> {
     if (delegateProvider instanceof NodeTracerProvider) {
       await delegateProvider.shutdown();
     }
+  }
+}
+
+// TODO use for instrumentation shutdowns during tests
+/* istanbul ignore next */
+export function disableInstrumentations(): void {
+  for (const instrumentation of instrumentations) {
+    instrumentation.disable();
   }
 }
 

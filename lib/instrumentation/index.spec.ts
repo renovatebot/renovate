@@ -3,9 +3,7 @@ import * as api from '@opentelemetry/api';
 import { NoopTracerProvider } from '@opentelemetry/api/build/src/trace/NoopTracerProvider';
 import { MultiSpanProcessor } from '@opentelemetry/sdk-trace-base/build/src/MultiSpanProcessor';
 import { NodeTracerProvider } from '@opentelemetry/sdk-trace-node';
-import { getTracerProvider, init, instrument } from './index';
-
-jest.unmock('.');
+import { getTracerProvider, init, instrument } from '.';
 
 describe('instrumentation/index', () => {
   const oldEnv = process.env;
@@ -106,10 +104,8 @@ describe('instrumentation/index', () => {
       const error = new Error('testError');
       await expect(
         instrument('test', async () => {
+          await Promise.resolve();
           throw error;
-          return await new Promise((resolve) => {
-            resolve('');
-          });
         })
       ).rejects.toThrow(error);
     });
