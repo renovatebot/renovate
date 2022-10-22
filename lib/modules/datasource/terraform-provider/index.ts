@@ -57,7 +57,9 @@ export class TerraformProviderDatasource extends TerraformDatasource {
     if (!registryUrl) {
       return null;
     }
-    logger.debug({ packageName }, 'terraform-provider.getDependencies()');
+    logger.debug(
+      `terraform-provider.getDependencies() packageName: ${packageName}`
+    );
 
     if (registryUrl === this.defaultRegistryUrls[1]) {
       return await this.queryReleaseBackend(packageName, registryUrl);

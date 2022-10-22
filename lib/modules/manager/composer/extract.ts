@@ -86,7 +86,7 @@ export async function extractPackageFile(
   try {
     composerJson = JSON.parse(content);
   } catch (err) {
-    logger.debug({ fileName }, 'Invalid JSON');
+    logger.debug(`Invalid JSON in ${fileName}`);
     return null;
   }
   const repositories: Record<string, Repo> = {};
@@ -98,7 +98,7 @@ export async function extractPackageFile(
   const lockContents = await readLocalFile(lockfilePath, 'utf8');
   let lockParsed: ComposerLock | undefined;
   if (lockContents) {
-    logger.debug({ packageFile: fileName }, 'Found composer lock file');
+    logger.debug(`Found composer lock file ${fileName}`);
     res.lockFiles = [lockfilePath];
     try {
       lockParsed = JSON.parse(lockContents) as ComposerLock;
