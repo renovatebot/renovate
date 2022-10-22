@@ -198,7 +198,7 @@ describe('workers/repository/process/write', () => {
         ),
       ].sort();
       const branchFingerprint = fingerprint({
-        ...generateBranchFingerprintConfig(branch),
+        branchFingerprintConfig: generateBranchFingerprintConfig(branch),
         managers,
       });
       expect(await writeUpdates(config, branches)).toBe('done');
