@@ -1709,6 +1709,11 @@ The above will match all package names starting with `eslint` but exclude ones s
 
 Use this field to restrict rules to a particular language. e.g.
 
+<!-- prettier-ignore -->
+!!! warning
+  `matchLanguages` is deprecated and will be removed in the future.
+  Use `matchCategories` which provides a more fine-grained and broad matching possibility.
+
 ```json
 {
   "packageRules": [
@@ -1724,6 +1729,11 @@ Use this field to restrict rules to a particular language. e.g.
 ### matchCategories
 
 Use this field to restrict rules to a particular language or group. The categories can be found on the [manager documentation](./modules/manager.md). e.g.
+
+<!-- prettier-ignore -->
+!!! warning
+  Rules with `matchCategories` are only applied after extraction of a repository, therefore it can not be used to completely prevent analyzes of a repository.
+  Still it can be used to prevent or change the renovation of dependencies.
 
 ```json
 {
