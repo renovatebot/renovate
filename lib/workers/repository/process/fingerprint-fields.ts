@@ -3,14 +3,22 @@ import type { UpgradeFingerprintConfig } from '../../types';
 type BranchFingerprintFields = keyof UpgradeFingerprintConfig;
 
 export const upgradeFingerprintFields: BranchFingerprintFields[] = [
-  'manager',
-  'packageFile',
-  'lockFile',
-  'fixedVersion',
+  'autoReplaceStringTemplate',
+  'currentDigest',
+  'currentValue',
   'currentVersion',
+  'datasource',
+  'depName',
+  'lockFile',
   'lockedVersion',
-  'newVersion',
-  'newDigest',
+  'manager',
   'newName',
+  'newDigest',
+  'newValue',
+  'newVersion',
+  'packageFile',
+  'packageName',
+  'replacementName',
+  'replacementVersion',
   'replaceString',
 ];
