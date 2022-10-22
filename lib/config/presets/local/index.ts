@@ -11,7 +11,7 @@ import type { Preset, PresetConfig } from '../types';
 const resolvers = {
   azure,
   bitbucket,
-  ['bitbucket-server']: bitbucketServer,
+  'bitbucket-server': bitbucketServer,
   gitea,
   github,
   gitlab,
