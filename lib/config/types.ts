@@ -311,7 +311,7 @@ export interface PackageRule
   matchSourceUrlPrefixes?: string[];
   matchSourceUrls?: string[];
   matchUpdateTypes?: UpdateType[];
-  registryUrls?: string[];
+  registryUrls?: string[] | null;
 }
 
 export interface ValidationMessage {

@@ -77,7 +77,9 @@ export async function extract(
     cachedExtract?.sha === baseBranchSha &&
     cachedExtract?.configHash === configHash
   ) {
-    logger.debug({ baseBranch, baseBranchSha }, 'Found cached extract');
+    logger.debug(
+      `Found cached extract for ${baseBranch!} (sha=${baseBranchSha})`
+    );
     packageFiles = cachedExtract.packageFiles;
     try {
       for (const files of Object.values(packageFiles)) {
