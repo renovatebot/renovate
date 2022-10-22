@@ -161,13 +161,15 @@ describe('modules/versioning/docker/index', () => {
   );
 
   test.each`
-    version             | expected
-    ${'3.7.0'}          | ${true}
-    ${'3.7.0b1'}        | ${false}
-    ${'3.7-alpine'}     | ${true}
-    ${'3.8.0-alpine'}   | ${true}
-    ${'3.8.0b1-alpine'} | ${false}
-    ${'3.8.2'}          | ${true}
+    version               | expected
+    ${'3.7.0'}            | ${true}
+    ${'3.7.0b1'}          | ${false}
+    ${'3.7-alpine'}       | ${true}
+    ${'3.8.0-alpine'}     | ${true}
+    ${'3.8.0b1-alpine'}   | ${false}
+    ${'3.8.2'}            | ${true}
+    ${'3.8.3-SNAPSHOT'}   | ${false}
+    ${'3.8.3-1-SNAPSHOT'} | ${false}
   `('isStable("$version") === $expected', ({ version, expected }) => {
     const res = docker.isStable(version);
     expect(!!res).toBe(expected);
