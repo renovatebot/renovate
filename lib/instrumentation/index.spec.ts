@@ -1,9 +1,17 @@
+import { afterAll } from '@jest/globals';
 import { ProxyTracerProvider } from '@opentelemetry/api';
 import * as api from '@opentelemetry/api';
 import { NoopTracerProvider } from '@opentelemetry/api/build/src/trace/NoopTracerProvider';
 import { MultiSpanProcessor } from '@opentelemetry/sdk-trace-base/build/src/MultiSpanProcessor';
 import { NodeTracerProvider } from '@opentelemetry/sdk-trace-node';
-import { getTracerProvider, init, instrument } from '.';
+import {
+  disableInstrumentations,
+  getTracerProvider,
+  init,
+  instrument,
+} from '.';
+
+afterAll(disableInstrumentations);
 
 describe('instrumentation/index', () => {
   const oldEnv = process.env;

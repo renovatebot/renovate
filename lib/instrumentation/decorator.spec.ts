@@ -1,4 +1,8 @@
+import { afterAll } from '@jest/globals';
 import { instrument } from './decorator';
+import { disableInstrumentations } from '.';
+
+afterAll(disableInstrumentations);
 
 describe('instrumentation/decorator', () => {
   const spy = jest.fn(() => Promise.resolve());
