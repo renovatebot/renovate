@@ -161,15 +161,12 @@ export interface UpgradeFingerprintConfig {
   datasource?: string;
   depName?: string;
   lockFile?: string;
-  lockedVersion?: string | null;
-  manager?: string;
+  lockedVersion?: string;
+  manager?: string | null;
   newName?: string;
   newDigest?: string;
   newValue?: string;
   newVersion?: string;
   packageFile?: string;
-  packageName?: string;
-  replacementName?: string;
-  replacementVersion?: string;
   replaceString?: string;
 }

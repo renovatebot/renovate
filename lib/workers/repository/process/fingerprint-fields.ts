@@ -17,8 +17,5 @@ export const upgradeFingerprintFields: BranchFingerprintFields[] = [
   'newValue',
   'newVersion',
   'packageFile',
-  'packageName',
-  'replacementName',
-  'replacementVersion',
   'replaceString',
 ];
