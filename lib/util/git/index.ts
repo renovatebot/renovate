@@ -367,6 +367,10 @@ export async function cloneSubmodules(shouldClone: boolean): Promise<void> {
   }
 }
 
+export function isCloned(): boolean {
+  return gitInitialized;
+}
+
 export async function syncGit(): Promise<void> {
   if (gitInitialized) {
     return;

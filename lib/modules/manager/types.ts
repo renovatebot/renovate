@@ -48,7 +48,6 @@ export interface RangeConfig<T = Record<string, any>> extends ManagerData<T> {
   depName?: string;
   depType?: string;
   manager?: string | null;
-  packageJsonType?: 'app' | 'library';
   rangeStrategy: RangeStrategy;
 }
 
@@ -78,7 +77,6 @@ export interface PackageFile<T = Record<string, any>>
   npmrc?: string;
   packageFile?: string | null;
   packageJsonName?: string;
-  packageJsonType?: 'app' | 'library';
   packageFileVersion?: string;
   parent?: string;
   skipInstalls?: boolean;
@@ -198,9 +196,9 @@ export interface UpdateArtifactsResult {
   file?: FileChange;
 }
 
-export interface UpdateArtifact {
+export interface UpdateArtifact<T = Record<string, unknown>> {
   packageFileName: string;
-  updatedDeps: PackageDependency[];
+  updatedDeps: PackageDependency<T>[];
   newPackageFileContent: string;
   config: UpdateArtifactsConfig;
 }

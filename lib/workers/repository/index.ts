@@ -7,6 +7,7 @@ import { instrument } from '../../instrumentation';
 import { logger, setMeta } from '../../logger';
 import { removeDanglingContainers } from '../../util/exec/docker';
 import { deleteLocalFile, privateCacheDir } from '../../util/fs';
+import { isCloned } from '../../util/git';
 import { clearDnsCache, printDnsStats } from '../../util/http/dns';
 import * as queue from '../../util/http/queue';
 import * as schemaUtil from '../../util/schema';
@@ -98,6 +99,7 @@ export async function renovateRepository(
   printDnsStats();
   clearDnsCache();
   schemaUtil.reportErrors();
-  logger.info({ durationMs: splits.total }, 'Repository finished');
+  const cloned = isCloned();
+  logger.info({ cloned, durationMs: splits.total }, 'Repository finished');
   return repoResult;
 }

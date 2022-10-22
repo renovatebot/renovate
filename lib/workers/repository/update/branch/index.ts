@@ -1,4 +1,3 @@
-// TODO #7154
 import is from '@sindresorhus/is';
 import { DateTime } from 'luxon';
 import { GlobalConfig } from '../../../../config/global';
@@ -177,6 +176,26 @@ export async function processBranch(
       };
     }
     if (branchExists) {
+      // check if branch is labelled to stop
+      config.stopUpdating = branchPr?.labels?.includes(
+        config.stopUpdatingLabel!
+      );
+
+      const prRebaseChecked = !!branchPr?.bodyStruct?.rebaseRequested;
+
+      if (branchExists && !dependencyDashboardCheck && config.stopUpdating) {
+        if (!prRebaseChecked) {
+          logger.info(
+            'Branch updating is skipped because stopUpdatingLabel is present in config'
+          );
+          return {
+            branchExists: true,
+            prNo: branchPr?.number,
+            result: BranchResult.NoWork,
+          };
+        }
+      }
+
       logger.debug('Checking if PR has been edited');
       const branchIsModified = await isBranchModified(config.branchName);
       if (branchPr) {
@@ -391,7 +410,7 @@ export async function processBranch(
     // TODO: types (#7154)
     logger.debug(`Using reuseExistingBranch: ${config.reuseExistingBranch!}`);
     if (!(config.reuseExistingBranch && config.skipBranchUpdate)) {
-      await checkoutBranch(config.baseBranch!);
+      await checkoutBranch(config.baseBranch);
       const res = await getUpdatedPackageFiles(config);
       // istanbul ignore if
       if (res.artifactErrors && config.artifactErrors) {
@@ -480,27 +499,8 @@ export async function processBranch(
 
       config.isConflicted ??=
         branchExists &&
-        (await isBranchConflicted(config.baseBranch!, config.branchName));
+        (await isBranchConflicted(config.baseBranch, config.branchName));
       config.forceCommit = forcedManually || config.isConflicted;
-
-      config.stopUpdating = branchPr?.labels?.includes(
-        config.stopUpdatingLabel!
-      );
-
-      const prRebaseChecked = !!branchPr?.bodyStruct?.rebaseRequested;
-
-      if (branchExists && !dependencyDashboardCheck && config.stopUpdating) {
-        if (!prRebaseChecked) {
-          logger.info(
-            'Branch updating is skipped because stopUpdatingLabel is present in config'
-          );
-          return {
-            branchExists: true,
-            prNo: branchPr?.number,
-            result: BranchResult.NoWork,
-          };
-        }
-      }
 
       // compile commit message with body, which maybe needs changelogs
       if (config.commitBody) {
@@ -543,8 +543,8 @@ export async function processBranch(
       logger.info({ commitSha }, `Branch ${action}`);
       // TODO #7154
       setCachedConflictResult(
-        config.baseBranch!,
-        getBranchCommit(config.baseBranch!)!,
+        config.baseBranch,
+        getBranchCommit(config.baseBranch)!,
         config.branchName,
         commitSha,
         false

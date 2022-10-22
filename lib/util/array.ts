@@ -6,3 +6,7 @@ export function coerceArray<T>(input: T[] | null | undefined): T[] {
   }
   return [];
 }
+
+export function sortNumeric(a: number, b: number): number {
+  return a - b;
+}
