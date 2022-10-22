@@ -107,7 +107,6 @@ export async function shutdown(): Promise<void> {
   }
 }
 
-// TODO use for instrumentation shutdowns during tests
 /* istanbul ignore next */
 export function disableInstrumentations(): void {
   for (const instrumentation of instrumentations) {

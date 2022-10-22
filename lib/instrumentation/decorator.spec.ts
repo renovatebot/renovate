@@ -1,6 +1,5 @@
 import { instrument } from './decorator';
 
-//TODO find better way to test this e2w
 describe('instrumentation/decorator', () => {
   const spy = jest.fn(() => Promise.resolve());
 
