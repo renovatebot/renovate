@@ -625,9 +625,9 @@ const options: RenovateOptions[] = [
   {
     name: 'ignoreScripts',
     description:
-      'Set this to `true` if `allowScripts=true` but you wish to skip running scripts when updating lock files.',
+      'Set this to `false` if `allowScripts=true` and you wish to run scripts when updating lock files.',
     type: 'boolean',
-    default: false,
+    default: true,
     supportedManagers: ['npm', 'composer'],
   },
   {
@@ -1486,7 +1486,7 @@ const options: RenovateOptions[] = [
     description: 'When and how to filter based on internal checks.',
     type: 'string',
     allowedValues: ['strict', 'flexible', 'none'],
-    default: 'none',
+    default: 'strict',
   },
   {
     name: 'prCreation',
