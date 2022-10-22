@@ -5,10 +5,11 @@ exports[`modules/manager/composer/extract extractPackageFile() extracts dependen
   "deps": [
     {
       "currentValue": ">=5.3.2",
-      "datasource": "packagist",
+      "datasource": "github-tags",
       "depName": "php",
       "depType": "require",
-      "skipReason": "unsupported",
+      "extractVersion": "php-(?<version>.*)",
+      "packageName": "php/php-src",
     },
     {
       "currentValue": "dev-master",
@@ -208,10 +209,11 @@ exports[`modules/manager/composer/extract extractPackageFile() extracts dependen
   "deps": [
     {
       "currentValue": ">=5.3.2",
-      "datasource": "packagist",
+      "datasource": "github-tags",
       "depName": "php",
       "depType": "require",
-      "skipReason": "unsupported",
+      "extractVersion": "php-(?<version>.*)",
+      "packageName": "php/php-src",
     },
     {
       "currentValue": "dev-master",
@@ -408,10 +410,11 @@ exports[`modules/manager/composer/extract extractPackageFile() extracts object r
   "deps": [
     {
       "currentValue": ">=5.5",
-      "datasource": "packagist",
+      "datasource": "github-tags",
       "depName": "php",
       "depType": "require",
-      "skipReason": "unsupported",
+      "extractVersion": "php-(?<version>.*)",
+      "packageName": "php/php-src",
     },
     {
       "currentValue": "~1.0.12",
