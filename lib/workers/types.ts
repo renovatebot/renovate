@@ -154,14 +154,22 @@ export interface SelectAllConfig extends RenovateConfig {
 }
 
 export interface UpgradeFingerprintConfig {
-  manager: string;
-  packageFile?: string;
-  lockFile?: string;
-  fixedVersion?: string;
+  autoReplaceStringTemplate?: string;
+  currentDigest?: string;
+  currentValue?: string;
   currentVersion?: string;
+  datasource?: string;
+  depName?: string;
+  lockFile?: string;
   lockedVersion?: string | null;
-  newVersion?: string;
-  newDigest?: string;
+  manager?: string;
   newName?: string;
+  newDigest?: string;
+  newValue?: string;
+  newVersion?: string;
+  packageFile?: string;
+  packageName?: string;
+  replacementName?: string;
+  replacementVersion?: string;
   replaceString?: string;
 }
