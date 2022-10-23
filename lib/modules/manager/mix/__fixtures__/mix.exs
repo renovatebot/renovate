@@ -22,8 +22,9 @@ defmodule MyProject.MixProject do
       {:secret, "~> 1.0", organization: "acme"},
       {:ex_doc, ">2.1.0 and <=3.0.0"},
       {:jason, ">= 1.0.0"},
-      {:jason, "~> 1.0", 
+      {:jason, "~> 1.0",
         optional: true},
+      #{:broadway_dashboard, "~> 0.2.2"},
     ]
   end
 end

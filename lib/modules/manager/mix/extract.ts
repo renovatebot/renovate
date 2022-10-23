@@ -6,7 +6,7 @@ import type { PackageDependency, PackageFile } from '../types';
 
 const depSectionRegExp = regEx(/defp\s+deps.*do/g);
 const depMatchRegExp = regEx(
-  /{:(?<depName>\w+),\s*(?<datasource>[^:"]+)?:?\s*"(?<currentValue>[^"]+)",?\s*(?:organization: "(?<organization>.*)")?.*}/gm
+  /[^#]{:(?<depName>\w+),\s*(?<datasource>[^:"]+)?:?\s*"(?<currentValue>[^"]+)",?\s*(?:organization: "(?<organization>.*)")?.*}/gm
 );
 
 export async function extractPackageFile(
