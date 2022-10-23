@@ -48,7 +48,6 @@ export interface RangeConfig<T = Record<string, any>> extends ManagerData<T> {
   depName?: string;
   depType?: string;
   manager?: string | null;
-  packageJsonType?: 'app' | 'library';
   rangeStrategy: RangeStrategy;
 }
 
@@ -78,7 +77,6 @@ export interface PackageFile<T = Record<string, any>>
   npmrc?: string;
   packageFile?: string | null;
   packageJsonName?: string;
-  packageJsonType?: 'app' | 'library';
   packageFileVersion?: string;
   parent?: string;
   skipInstalls?: boolean;

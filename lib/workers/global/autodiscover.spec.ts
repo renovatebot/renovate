@@ -66,7 +66,7 @@ describe('workers/global/autodiscover', () => {
 
   it('filters autodiscovered github repos but nothing matches', async () => {
     config.autodiscover = true;
-    config.autodiscoverFilter = 'project/re*';
+    config.autodiscoverFilter = ['project/re*'];
     config.platform = 'github';
     hostRules.find = jest.fn(() => ({
       token: 'abc',
@@ -80,7 +80,7 @@ describe('workers/global/autodiscover', () => {
 
   it('filters autodiscovered github repos with regex', async () => {
     config.autodiscover = true;
-    config.autodiscoverFilter = '/project/re*./';
+    config.autodiscoverFilter = ['/project/re*./'];
     config.platform = 'github';
     hostRules.find = jest.fn(() => ({
       token: 'abc',
@@ -93,8 +93,7 @@ describe('workers/global/autodiscover', () => {
   });
 
   it('filters autodiscovered github repos with regex negation', async () => {
-    config.autodiscover = true;
-    config.autodiscoverFilter = '!/project/re*./';
+    config.autodiscoverFilter = ['!/project/re*./'];
     config.platform = 'github';
     hostRules.find = jest.fn(() => ({
       token: 'abc',
@@ -108,7 +107,7 @@ describe('workers/global/autodiscover', () => {
 
   it('fail if regex pattern is not valid', async () => {
     config.autodiscover = true;
-    config.autodiscoverFilter = '/project/re**./';
+    config.autodiscoverFilter = ['/project/re**./'];
     config.platform = 'github';
     hostRules.find = jest.fn(() => ({
       token: 'abc',
@@ -117,5 +116,23 @@ describe('workers/global/autodiscover', () => {
       Promise.resolve(['project/repo', 'project/another-repo'])
     );
     await expect(autodiscoverRepositories(config)).rejects.toThrow();
+  });
+
+  it('filters autodiscovered github repos with multiple values', async () => {
+    config.autodiscover = true;
+    config.autodiscoverFilter = ['another-project/re*', 'department/dev/*'];
+    config.platform = 'github';
+    hostRules.find = jest.fn(() => ({
+      token: 'abc',
+    }));
+    const expectedRepositories = [
+      'another-project/repo',
+      'department/dev/aProject',
+    ];
+    ghApi.getRepos = jest.fn(() =>
+      Promise.resolve(['another-project/another-repo', ...expectedRepositories])
+    );
+    const res = await autodiscoverRepositories(config);
+    expect(res.repositories).toEqual(expectedRepositories);
   });
 });
