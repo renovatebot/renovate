@@ -394,7 +394,7 @@ export class DockerDatasource extends Datasource {
     mode: 'head' | 'get' = 'get'
   ): Promise<HttpResponse | null> {
     logger.debug(
-      `getManifestResponse(${registryHost}, ${dockerRepository}, ${tag})`
+      `getManifestResponse(${registryHost}, ${dockerRepository}, ${tag}, ${mode})`
     );
     try {
       const headers = await getAuthHeaders(

@@ -18,7 +18,6 @@ import type {
 import type { NpmManagerData } from '../types';
 import { getLockedVersions } from './locked-versions';
 import { detectMonorepos } from './monorepo';
-import { mightBeABrowserLibrary } from './type';
 import type { NpmPackage, NpmPackageDependency } from './types';
 import { isZeroInstall } from './yarn';
 
@@ -73,9 +72,6 @@ export async function extractPackageFile(
   } else {
     yarnWorkspacesPackages = packageJson.workspaces?.packages;
   }
-  const packageJsonType = mightBeABrowserLibrary(packageJson)
-    ? 'library'
-    : 'app';
 
   const lockFiles: NpmLockFiles = {
     yarnLock: 'yarn.lock',
@@ -458,7 +454,6 @@ export async function extractPackageFile(
     deps,
     packageJsonName,
     packageFileVersion,
-    packageJsonType,
     npmrc,
     ...lockFiles,
     managerData: {

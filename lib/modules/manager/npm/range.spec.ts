@@ -7,21 +7,20 @@ describe('modules/manager/npm/range', () => {
     expect(getRangeStrategy(config)).toBe('widen');
   });
 
-  it('pins devDependencies', () => {
+  it('replaces devDependencies', () => {
     const config: RangeConfig = {
       rangeStrategy: 'auto',
       depType: 'devDependencies',
     };
-    expect(getRangeStrategy(config)).toBe('pin');
+    expect(getRangeStrategy(config)).toBe('replace');
   });
 
-  it('pins app dependencies', () => {
+  it('replaces app dependencies', () => {
     const config: RangeConfig = {
       rangeStrategy: 'auto',
       depType: 'dependencies',
-      packageJsonType: 'app',
     };
-    expect(getRangeStrategy(config)).toBe('pin');
+    expect(getRangeStrategy(config)).toBe('replace');
   });
 
   it('widens peerDependencies', () => {
