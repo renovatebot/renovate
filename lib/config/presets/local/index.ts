@@ -7,7 +7,6 @@ import * as gitea from '../gitea';
 import * as github from '../github';
 import * as gitlab from '../gitlab';
 import type { Preset, PresetConfig } from '../types';
-import * as local from './common';
 
 const resolvers = {
   azure,
