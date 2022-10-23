@@ -35,12 +35,14 @@ describe('modules/manager/gradle/parser', () => {
   describe('variables', () => {
     describe('Groovy: single var assignments', () => {
       test.each`
-        input                             | name         | value
-        ${'foo = "1.2.3"'}                | ${'foo'}     | ${'1.2.3'}
-        ${'foo.bar = "1.2.3"'}            | ${'foo.bar'} | ${'1.2.3'}
-        ${'ext.foobar = "1.2.3"'}         | ${'foobar'}  | ${'1.2.3'}
-        ${'project.foobar = "1.2.3"'}     | ${'foobar'}  | ${'1.2.3'}
-        ${'rootProject.foobar = "1.2.3"'} | ${'foobar'}  | ${'1.2.3'}
+        input                              | name         | value
+        ${'foo = "1.2.3"'}                 | ${'foo'}     | ${'1.2.3'}
+        ${'foo.bar = "1.2.3"'}             | ${'foo.bar'} | ${'1.2.3'}
+        ${'ext.foobar = "1.2.3"'}          | ${'foobar'}  | ${'1.2.3'}
+        ${'project.foobar = "1.2.3"'}      | ${'foobar'}  | ${'1.2.3'}
+        ${'project.ext.foo.bar = "1.2.3"'} | ${'foo.bar'} | ${'1.2.3'}
+        ${'rootProject.foobar = "1.2.3"'}  | ${'foobar'}  | ${'1.2.3'}
+        ${'rootProject.foo.bar = "1.2.3"'} | ${'foo.bar'} | ${'1.2.3'}
       `('$input', async ({ input, name, value }) => {
         const { vars } = await parseGradle(input);
         expect(vars).toContainKey(name);
@@ -110,6 +112,8 @@ describe('modules/manager/gradle/parser', () => {
       test.each`
         def                 | input                                 | output
         ${''}               | ${'id "foo.bar" version "1.2.3"'}     | ${{ depName: 'foo.bar', packageName: 'foo.bar:foo.bar.gradle.plugin', currentValue: '1.2.3' }}
+        ${''}               | ${'id(["foo.bar"]) version "1.2.3"'}  | ${null}
+        ${''}               | ${'id("foo", "bar") version "1.2.3"'} | ${null}
         ${''}               | ${'id("foo.bar") version "1.2.3"'}    | ${{ depName: 'foo.bar', packageName: 'foo.bar:foo.bar.gradle.plugin', currentValue: '1.2.3' }}
         ${''}               | ${'id "foo.bar" version "$baz"'}      | ${{ depName: 'foo.bar', skipReason: 'unknown-version', currentValue: 'baz' }}
         ${'baz = "1.2.3"'}  | ${'id "foo.bar" version "$baz"'}      | ${{ depName: 'foo.bar', packageName: 'foo.bar:foo.bar.gradle.plugin', currentValue: '1.2.3' }}
@@ -148,8 +152,12 @@ describe('modules/manager/gradle/parser', () => {
       test.each`
         def                         | input                                                | url
         ${''}                       | ${'maven("")'}                                       | ${null}
+        ${''}                       | ${'maven(["https://foo.bar/baz/qux"])'}              | ${null}
+        ${''}                       | ${'maven("foo", "bar")'}                             | ${null}
         ${''}                       | ${'maven("https://foo.bar/baz")'}                    | ${'https://foo.bar/baz'}
         ${'base="https://foo.bar"'} | ${'maven("${base}/baz")'}                            | ${'https://foo.bar/baz'}
+        ${''}                       | ${'maven(uri(["https://foo.bar/baz"]))'}             | ${null}
+        ${''}                       | ${'maven { ["https://foo.bar/baz"] }'}               | ${null}
         ${''}                       | ${'maven { url "https://foo.bar/baz" }'}             | ${'https://foo.bar/baz'}
         ${'base="https://foo.bar"'} | ${'maven { url "${base}/baz" }'}                     | ${'https://foo.bar/baz'}
         ${''}                       | ${'maven { url = "https://foo.bar/baz" }'}           | ${'https://foo.bar/baz'}
@@ -167,10 +175,15 @@ describe('modules/manager/gradle/parser', () => {
 
   describe('version catalog', () => {
     test.each`
-      def                                           | str                                                     | output
-      ${'version("baz", "1.2.3")'}                  | ${'library("foo.bar", "foo", "bar").versionRef("baz")'} | ${{ depName: 'foo:bar', currentValue: '1.2.3', groupName: 'baz' }}
-      ${''}                                         | ${'library("foo.bar", "foo", "bar").version("1.2.3")'}  | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
-      ${'library("foo-bar_baz-qux", "foo", "bar")'} | ${'"${foo.bar.baz.qux}:1.2.3"'}                         | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
+      def                                           | str                                                             | output
+      ${'version("baz", "1.2.3")'}                  | ${'library("foo.bar", "foo", "bar").versionRef("baz")'}         | ${{ depName: 'foo:bar', currentValue: '1.2.3', groupName: 'baz' }}
+      ${'version("baz", "1.2.3")'}                  | ${'library("foo.bar", "foo", "bar").versionRef("baz")'}         | ${{ depName: 'foo:bar', currentValue: '1.2.3', groupName: 'baz' }}
+      ${''}                                         | ${'library("foo.bar", "foo", "bar").version("1.2.3")'}          | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
+      ${''}                                         | ${'library(["foo.bar", "foo", "bar"]).version("1.2.3")'}        | ${null}
+      ${''}                                         | ${'library("foo", "bar", "baz", "qux"]).version("1.2.3")'}      | ${null}
+      ${''}                                         | ${'library("foo.bar", "foo", "bar").version("1.2.3", "4.5.6")'} | ${null}
+      ${'group = "foo"; artifact="bar"'}            | ${'library("foo.bar", group, artifact).version("1.2.3")'}       | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
+      ${'library("foo-bar_baz-qux", "foo", "bar")'} | ${'"${foo.bar.baz.qux}:1.2.3"'}                                 | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
     `('$def | $str', async ({ def, str, output }) => {
       const input = [def, str].join('\n');
       const { deps } = await parseGradle(input);
@@ -182,6 +195,9 @@ describe('modules/manager/gradle/parser', () => {
     test.each`
       input                                                        | output
       ${'("foo", "bar", "1.2.3")'}                                 | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
+      ${'("foo", "bar", "1.2.3", "4.5.6")'}                        | ${null}
+      ${'(["foo", "bar", "1.2.3"])'}                               | ${null}
+      ${'someMethod("foo", "bar", "1.2.3")'}                       | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
       ${'createXmlValueRemover("defaults", "integer", "integer")'} | ${{ depName: 'defaults:integer', currentValue: 'integer', skipReason: 'ignored' }}
       ${'events("passed", "skipped", "failed")'}                   | ${{ depName: 'passed:skipped', currentValue: 'failed', skipReason: 'ignored' }}
       ${'args("foo", "bar", "baz")'}                               | ${{ depName: 'foo:bar', currentValue: 'baz', skipReason: 'ignored' }}
@@ -280,34 +296,39 @@ describe('modules/manager/gradle/parser', () => {
       },
     };
 
-    mockFs({
+    const fileContents = {
       'foo/bar.gradle': key + ' = "' + value + '"',
-    });
+    };
+    mockFs(fileContents);
 
     test.each`
-      def             | input                                               | output
-      ${''}           | ${'apply from: ""'}                                 | ${{}}
-      ${''}           | ${'apply from: "foo/invalid.gradle"'}               | ${{}}
-      ${''}           | ${'apply from: "foo/invalid.non-gradle"'}           | ${{}}
-      ${''}           | ${'apply from: "https://someurl.com/file.gradle"'}  | ${{}}
-      ${''}           | ${'apply from: "foo/bar.gradle"'}                   | ${validOutput}
-      ${'base="foo"'} | ${'apply from: "${base}/bar.gradle"'}               | ${validOutput}
-      ${''}           | ${'apply from: file("foo/bar.gradle")'}             | ${validOutput}
-      ${'base="foo"'} | ${'apply from: file("${base}/bar.gradle")'}         | ${validOutput}
-      ${''}           | ${'apply from: project.file("foo/bar.gradle")'}     | ${validOutput}
-      ${''}           | ${'apply from: rootProject.file("foo/bar.gradle")'} | ${validOutput}
-      ${''}           | ${'apply from: new File("foo/bar.gradle")'}         | ${validOutput}
-      ${'base="foo"'} | ${'apply from: new File("${base}/bar.gradle")'}     | ${validOutput}
-      ${''}           | ${'apply from: new File("foo", "bar.gradle")'}      | ${validOutput}
-      ${'base="foo"'} | ${'apply from: new File(base, "bar.gradle")'}       | ${validOutput}
-      ${'base="foo"'} | ${'apply from: new File("${base}", "bar.gradle")'}  | ${validOutput}
-      ${''}           | ${'apply(from = "foo/bar.gradle"))'}                | ${validOutput}
-      ${'base="foo"'} | ${'apply(from = "${base}/bar.gradle"))'}            | ${validOutput}
-      ${''}           | ${'apply(from = File("foo/bar.gradle"))'}           | ${validOutput}
-      ${'base="foo"'} | ${'apply(from = File("${base}/bar.gradle"))'}       | ${validOutput}
-      ${''}           | ${'apply(from = File("foo", "bar.gradle"))'}        | ${validOutput}
-      ${'base="foo"'} | ${'apply(from = File(base, "bar.gradle"))'}         | ${validOutput}
-      ${'base="foo"'} | ${'apply(from = File("${base}", "bar.gradle"))'}    | ${validOutput}
+      def                    | input                                               | output
+      ${''}                  | ${'apply from: ""'}                                 | ${{}}
+      ${''}                  | ${'apply from: "foo/invalid.gradle"'}               | ${{}}
+      ${''}                  | ${'apply from: "${base}"'}                          | ${{}}
+      ${''}                  | ${'apply from: "foo/invalid.non-gradle"'}           | ${{}}
+      ${''}                  | ${'apply from: "https://someurl.com/file.gradle"'}  | ${{}}
+      ${''}                  | ${'apply from: "foo/bar.gradle"'}                   | ${validOutput}
+      ${'base="foo"'}        | ${'apply from: "${base}/bar.gradle"'}               | ${validOutput}
+      ${''}                  | ${'apply from: file("foo/bar.gradle")'}             | ${validOutput}
+      ${'base="foo"'}        | ${'apply from: file("${base}/bar.gradle")'}         | ${validOutput}
+      ${''}                  | ${'apply from: project.file("foo/bar.gradle")'}     | ${validOutput}
+      ${''}                  | ${'apply from: rootProject.file("foo/bar.gradle")'} | ${validOutput}
+      ${''}                  | ${'apply from: new File("foo/bar.gradle")'}         | ${validOutput}
+      ${'base="foo"'}        | ${'apply from: new File("${base}/bar.gradle")'}     | ${validOutput}
+      ${''}                  | ${'apply from: new File("foo", "bar.gradle")'}      | ${validOutput}
+      ${'base="foo"'}        | ${'apply from: new File(base, "bar.gradle")'}       | ${validOutput}
+      ${'base="foo"'}        | ${'apply from: new File("${base}", "bar.gradle")'}  | ${validOutput}
+      ${'path="bar.gradle"'} | ${'apply from: new File("foo", "${path}")'}         | ${validOutput}
+      ${''}                  | ${'apply(from = "foo/bar.gradle"))'}                | ${validOutput}
+      ${'base="foo"'}        | ${'apply(from = "${base}/bar.gradle"))'}            | ${validOutput}
+      ${''}                  | ${'apply(from = File("foo/bar.gradle"))'}           | ${validOutput}
+      ${''}                  | ${'apply(from = File("foo", "bar", "baz"))'}        | ${{}}
+      ${''}                  | ${'apply(from = File(["${somedir}/foo.gradle"]))'}  | ${{}}
+      ${'base="foo"'}        | ${'apply(from = File("${base}/bar.gradle"))'}       | ${validOutput}
+      ${''}                  | ${'apply(from = File("foo", "bar.gradle"))'}        | ${validOutput}
+      ${'base="foo"'}        | ${'apply(from = File(base, "bar.gradle"))'}         | ${validOutput}
+      ${'base="foo"'}        | ${'apply(from = File("${base}", "bar.gradle"))'}    | ${validOutput}
     `('$def | $input', async ({ def, input, output }) => {
       const { vars } = await parseGradle([def, input].join('\n'));
       expect(vars).toMatchObject(output);
