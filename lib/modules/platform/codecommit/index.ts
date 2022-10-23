@@ -59,11 +59,12 @@ export async function initPlatform({
   endpoint,
   username,
   password,
-  token: awsToken,
+  token,
 }: PlatformParams): Promise<PlatformResult> {
   let accessKeyId = username;
   let secretAccessKey = password;
   let region: string | undefined;
+  let awsToken: string | undefined;
 
   if (!accessKeyId) {
     accessKeyId = process.env.AWS_ACCESS_KEY_ID;
@@ -71,7 +72,7 @@ export async function initPlatform({
   if (!secretAccessKey) {
     secretAccessKey = process.env.AWS_SECRET_ACCESS_KEY;
   }
-  if (!awsToken) {
+  if (!token) {
     awsToken = process.env.AWS_SESSION_TOKEN;
   }
   if (endpoint) {
