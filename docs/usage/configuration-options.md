@@ -299,14 +299,14 @@ If you truly need to configure this then it probably means either:
 
 ## branchNameStrict
 
-By default, Renovate doesn't care about special characters when slugifying the branch name.
-This means that special characters like `.` may end up in the branch name.
-
-When you set `branchNameStrict` to `true`:
+By default, Renovate removes special characters when slugifying the branch name:
 
 - all special characters are removed
 - only alphabetic characters are allowed
 - hyphens `-` are used to separate sections
+
+To revert this behavior to that used in v32 and before, set this value to `false`.
+This will mean that special characters like `.` may end up in the branch name.
 
 ## branchPrefix
 
