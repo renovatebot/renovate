@@ -9,7 +9,7 @@ import {
 } from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
 import { checkoutBranch, commitFiles } from '../../../../util/git';
-import * as MigratedDataModule from './migrated-data';
+import { MigratedDataFactory } from './migrated-data';
 import type { MigratedData } from './migrated-data';
 import { rebaseMigrationBranch } from './rebase';
 
@@ -20,7 +20,10 @@ const formattedMigratedData = Fixtures.getJson(
 );
 
 describe('workers/repository/config-migration/branch/rebase', () => {
-  const prettierSpy = jest.spyOn(MigratedDataModule, 'applyPrettierFormatting');
+  const prettierSpy = jest.spyOn(
+    MigratedDataFactory,
+    'applyPrettierFormatting'
+  );
 
   beforeAll(() => {
     GlobalConfig.set({

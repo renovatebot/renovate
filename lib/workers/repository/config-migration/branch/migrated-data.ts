@@ -1,6 +1,7 @@
 import detectIndent from 'detect-indent';
 import JSON5 from 'json5';
 import prettier, { BuiltInParserName } from 'prettier';
+import upath from 'upath';
 import { migrateConfig } from '../../../../config/migration';
 import { logger } from '../../../../logger';
 import { readLocalFile } from '../../../../util/fs';
@@ -33,6 +34,7 @@ const prettierConfigFilenames = new Set([
 ]);
 
 export type PrettierParser = BuiltInParserName;
+
 export async function applyPrettierFormatting(
   content: string,
   parser: PrettierParser,
@@ -92,6 +94,15 @@ export class MigratedDataFactory {
 
   static reset(): void {
     this.data = null;
+  }
+
+  static applyPrettierFormatting({
+    content,
+    filename,
+    indent,
+  }: MigratedData): Promise<string> {
+    const parser = upath.extname(filename).replace('.', '') as PrettierParser;
+    return applyPrettierFormatting(content, parser, indent);
   }
 
   private static async build(): Promise<MigratedData | null> {

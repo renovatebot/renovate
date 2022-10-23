@@ -1,5 +1,3 @@
-import hasha from 'hasha';
-import upath from 'upath';
 import { GlobalConfig } from '../../../../config/global';
 import type { RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
@@ -12,7 +10,7 @@ import {
 import { quickStringify } from '../../../../util/stringify';
 import { getMigrationBranchName } from '../common';
 import { ConfigMigrationCommitMessageFactory } from './commit-message';
-import { PrettierParser, applyPrettierFormatting } from './migrated-data';
+import { MigratedDataFactory } from './migrated-data';
 import type { MigratedData } from './migrated-data';
 
 export async function rebaseMigrationBranch(
@@ -28,7 +26,7 @@ export async function rebaseMigrationBranch(
   const configFileName = migratedConfigData.filename;
   let contents = migratedConfigData.content;
   const existingContents = await getFile(configFileName, branchName);
-  if (hash(contents) === hash(existingContents)) {
+  if (stripWhitespaces(contents) === stripWhitespaces(existingContents)) {
     logger.debug('Migration branch is up to date');
     return null;
   }
@@ -46,10 +44,9 @@ export async function rebaseMigrationBranch(
   const commitMessage = commitMessageFactory.getCommitMessage();
 
   await checkoutBranch(config.defaultBranch!);
-
-  const { content, filename, indent } = migratedConfigData;
-  const parser = upath.extname(filename).replace('.', '') as PrettierParser;
-  contents = await applyPrettierFormatting(content, parser, indent);
+  contents = await MigratedDataFactory.applyPrettierFormatting(
+    migratedConfigData
+  );
   return commitAndPush({
     branchName,
     files: [
@@ -64,14 +61,9 @@ export async function rebaseMigrationBranch(
   });
 }
 
-function stripWhitespaces(str: string): string {
-  return quickStringify(JSON.parse(str));
-}
-
-function hash(str: string | null): string | null {
+function stripWhitespaces(str: string | null): string | null {
   if (!str) {
     return null;
   }
-  const stripped = stripWhitespaces(str);
-  return hasha(stripped);
+  return quickStringify(JSON.parse(str));
 }

@@ -1,4 +1,3 @@
-import upath from 'upath';
 import { GlobalConfig } from '../../../../config/global';
 import type { RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
@@ -6,7 +5,7 @@ import { commitAndPush } from '../../../../modules/platform/commit';
 import { checkoutBranch } from '../../../../util/git';
 import { getMigrationBranchName } from '../common';
 import { ConfigMigrationCommitMessageFactory } from './commit-message';
-import { PrettierParser, applyPrettierFormatting } from './migrated-data';
+import { MigratedDataFactory } from './migrated-data';
 import type { MigratedData } from './migrated-data';
 
 export async function createConfigMigrationBranch(
@@ -31,9 +30,9 @@ export async function createConfigMigrationBranch(
   }
 
   await checkoutBranch(config.defaultBranch!);
-  const { content, filename, indent } = migratedConfigData;
-  const parser = upath.extname(filename).replace('.', '') as PrettierParser;
-  const contents = await applyPrettierFormatting(content, parser, indent);
+  const contents = await MigratedDataFactory.applyPrettierFormatting(
+    migratedConfigData
+  );
   return commitAndPush({
     branchName: getMigrationBranchName(config),
     files: [

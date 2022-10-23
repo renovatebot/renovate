@@ -8,8 +8,8 @@ import {
 } from '../../../../../test/util';
 import { checkoutBranch, commitFiles } from '../../../../util/git';
 import { createConfigMigrationBranch } from './create';
+import { MigratedDataFactory } from './migrated-data';
 import type { MigratedData } from './migrated-data';
-import * as MigratedDataModule from './migrated-data';
 
 jest.mock('../../../../util/git');
 
@@ -18,7 +18,10 @@ describe('workers/repository/config-migration/branch/create', () => {
   const indent = '  ';
   const renovateConfig = JSON.stringify(raw, undefined, indent) + '\n';
   const filename = 'renovate.json';
-  const prettierSpy = jest.spyOn(MigratedDataModule, 'applyPrettierFormatting');
+  const prettierSpy = jest.spyOn(
+    MigratedDataFactory,
+    'applyPrettierFormatting'
+  );
 
   let config: RenovateConfig;
   let migratedConfigData: MigratedData;
