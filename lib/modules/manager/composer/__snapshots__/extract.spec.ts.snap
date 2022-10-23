@@ -12,6 +12,13 @@ exports[`modules/manager/composer/extract extractPackageFile() extracts dependen
       "packageName": "php/php-src",
     },
     {
+      "currentValue": "*",
+      "datasource": "packagist",
+      "depName": "ext-intl",
+      "depType": "require",
+      "skipReason": "unsupported",
+    },
+    {
       "currentValue": "dev-master",
       "datasource": "packagist",
       "depName": "symfony/assetic-bundle",
@@ -214,6 +221,13 @@ exports[`modules/manager/composer/extract extractPackageFile() extracts dependen
       "depType": "require",
       "extractVersion": "php-(?<version>.*)",
       "packageName": "php/php-src",
+    },
+    {
+      "currentValue": "*",
+      "datasource": "packagist",
+      "depName": "ext-intl",
+      "depType": "require",
+      "skipReason": "unsupported",
     },
     {
       "currentValue": "dev-master",
