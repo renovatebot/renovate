@@ -1,4 +1,6 @@
 import AggregateError from 'aggregate-error';
+import { logger } from '../../../logger';
+import { ExternalHostError } from '../../../types/errors/external-host-error';
 import * as memCache from '../../cache/memory';
 import type {
   GithubGraphqlResponse,
@@ -17,24 +19,22 @@ import type {
   RawQueryResponse,
 } from './types';
 
-function isShrinkableMessage(msg: string): boolean {
-  return msg.startsWith('Something went wrong while executing your query.');
-}
-
 /**
  * We know empirically that certain type of GraphQL errors
  * can be fixed by shrinking page size.
  *
  * @see https://github.com/renovatebot/renovate/issues/16343
  */
-function canBeSolvedByShrinking(err: Error): boolean {
-  if (err instanceof AggregateError) {
-    const errors = [...err];
-    const messages = errors.map(({ message }) => message);
-    return messages.some(isShrinkableMessage);
-  }
+function isUnknownGraphqlError(err: Error): boolean {
+  const { message } = err;
+  return message.startsWith('Something went wrong while executing your query.');
+}
 
-  return isShrinkableMessage(err.message);
+function canBeSolvedByShrinking(err: Error): boolean {
+  const errors: Error[] = err instanceof AggregateError ? [...err] : [err];
+  return errors.some(
+    (e) => err instanceof ExternalHostError || isUnknownGraphqlError(e)
+  );
 }
 
 export class GithubGraphqlDatasourceHelper<
@@ -202,10 +202,15 @@ export class GithubGraphqlDatasourceHelper<
           throw err;
         }
 
-        const shrinkingResult = this.shrinkPageSize();
-        if (!shrinkingResult) {
+        const shrinkResult = this.shrinkPageSize();
+        if (!shrinkResult) {
           throw err;
         }
+        const { body, ...options } = this.getRawQueryOptions();
+        logger.debug(
+          { options, newSize: this.itemsPerQuery },
+          'Shrinking GitHub GraphQL page size after error'
+        );
       }
     }
 
