@@ -229,7 +229,7 @@ export interface RenovateConfig
   prHourlyLimit?: number;
 
   defaultRegistryUrls?: string[];
-  registryUrls?: string[];
+  registryUrls?: string[] | null;
   registryAliases?: Record<string, string>;
 
   repoIsOnboarded?: boolean;
