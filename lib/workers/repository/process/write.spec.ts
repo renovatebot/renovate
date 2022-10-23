@@ -294,7 +294,6 @@ describe('workers/repository/process/write', () => {
       upgrades: [],
       automerge: false,
       prNo: null,
-      parentSha: null,
     };
 
     it('returns false if no cache', () => {
@@ -353,7 +352,6 @@ describe('workers/repository/process/write', () => {
             upgrades: [],
             automerge: false,
             prNo: null,
-            parentSha: null,
           },
         ],
       };
@@ -368,7 +366,6 @@ describe('workers/repository/process/write', () => {
         upgrades: [],
         automerge: false,
         prNo: null,
-        parentSha: null,
       });
     });
 
@@ -384,7 +381,6 @@ describe('workers/repository/process/write', () => {
             upgrades: [],
             automerge: false,
             prNo: null,
-            parentSha: null,
           },
         ],
       };
@@ -399,7 +395,6 @@ describe('workers/repository/process/write', () => {
         upgrades: [],
         automerge: false,
         prNo: null,
-        parentSha: null,
       });
     });
 
@@ -417,7 +412,6 @@ describe('workers/repository/process/write', () => {
             upgrades: [],
             automerge: false,
             prNo: null,
-            parentSha: null,
           },
         ],
       };
@@ -432,7 +426,6 @@ describe('workers/repository/process/write', () => {
         upgrades: [],
         automerge: false,
         prNo: null,
-        parentSha: null,
       });
     });
   });

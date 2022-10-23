@@ -30,7 +30,6 @@ describe('util/git/set-branch-commit', () => {
           baseBranchSha: 'base_SHA',
           isBehindBase: false,
           isModified: false,
-          parentSha: 'base_SHA',
         },
       ]);
     });
@@ -45,7 +44,6 @@ describe('util/git/set-branch-commit', () => {
             baseBranchSha: 'base_SHA',
             isBehindBase: false,
             isModified: false,
-            parentSha: 'base_SHA',
           }),
         ],
       };
@@ -60,7 +58,6 @@ describe('util/git/set-branch-commit', () => {
           baseBranchSha: 'base_SHA',
           isBehindBase: false,
           isModified: false,
-          parentSha: 'base_SHA',
         },
       ]);
     });

@@ -45,7 +45,7 @@ import {
   getCachedModifiedResult,
   setCachedModifiedResult,
 } from './modified-cache';
-import { deleteCachedBranchParentShaResult } from './parent-sha-cache';
+import { setCachedPristineResult } from './pristine-cache';
 import { configSigningKey, writePrivateKey } from './private-key';
 import type {
   CommitFilesConfig,
@@ -663,7 +663,7 @@ export async function isBranchModified(branchName: string): Promise<boolean> {
   );
   config.branchIsModified[branchName] = true;
   setCachedModifiedResult(branchName, true);
-  deleteCachedBranchParentShaResult(branchName);
+  setCachedPristineResult(branchName);
   return true;
 }
 
