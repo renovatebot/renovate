@@ -26,7 +26,7 @@ export function versionLikeSubstring(
 
 export function isDependencyString(input: string): boolean {
   const split = input?.split(':');
-  if (split?.length !== 3) {
+  if (split?.length !== 3 && split?.length !== 4) {
     return false;
   }
   // eslint-disable-next-line prefer-const

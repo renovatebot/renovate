@@ -289,7 +289,7 @@ const options: RenovateOptions[] = [
     globalOnly: true,
     type: 'string',
     allowedValues: ['global', 'docker', 'install', 'hermit'],
-    default: 'global',
+    default: 'install',
   },
   {
     name: 'redisUrl',
@@ -421,22 +421,13 @@ const options: RenovateOptions[] = [
     default: false,
   },
   {
-    name: 'forkMode',
-    description:
-      'Set to `true` to fork the source repository and create branches there instead.',
-    stage: 'repository',
-    type: 'boolean',
-    default: false,
-    globalOnly: true,
-  },
-  {
     name: 'forkToken',
-    description:
-      'Will be used on GitHub when `forkMode` is set to `true` to clone the repositories.',
+    description: 'Set a personal access token here to enable "fork mode".',
     stage: 'repository',
     type: 'string',
-    default: '',
     globalOnly: true,
+    supportedPlatforms: ['github'],
+    experimental: true,
   },
   {
     name: 'githubTokenWarn',
@@ -645,9 +636,9 @@ const options: RenovateOptions[] = [
   {
     name: 'ignoreScripts',
     description:
-      'Set this to `true` if `allowScripts=true` but you wish to skip running scripts when updating lock files.',
+      'Set this to `false` if `allowScripts=true` and you wish to run scripts when updating lock files.',
     type: 'boolean',
-    default: false,
+    default: true,
     supportedManagers: ['npm', 'composer'],
   },
   {
@@ -734,7 +725,9 @@ const options: RenovateOptions[] = [
     name: 'autodiscoverFilter',
     description: 'Filter the list of autodiscovered repositories.',
     stage: 'global',
-    type: 'string',
+    type: 'array',
+    subType: 'string',
+    allowString: true,
     default: null,
     globalOnly: true,
   },
@@ -1504,7 +1497,7 @@ const options: RenovateOptions[] = [
     description: 'When and how to filter based on internal checks.',
     type: 'string',
     allowedValues: ['strict', 'flexible', 'none'],
-    default: 'none',
+    default: 'strict',
   },
   {
     name: 'prCreation',
@@ -1919,6 +1912,7 @@ const options: RenovateOptions[] = [
     default: [],
     allowedValues: [
       'bundlerConservative',
+      'helmUpdateSubChartArchives',
       'gomodMassage',
       'gomodUpdateImportPaths',
       'gomodTidy',
@@ -2429,7 +2423,7 @@ const options: RenovateOptions[] = [
     name: 'branchNameStrict',
     description: `Whether to be strict about the use of special characters within the branch name.`,
     type: 'boolean',
-    default: false,
+    default: true,
   },
 ];
 

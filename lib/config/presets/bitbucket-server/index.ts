@@ -36,10 +36,7 @@ export async function fetchJSONFile(
     if (err instanceof ExternalHostError) {
       throw err;
     }
-    logger.debug(
-      { statusCode: err.statusCode, url: `${endpoint}${url}` },
-      `Failed to retrieve ${fileName} from repo`
-    );
+    logger.debug(`Preset file ${fileName} not found in ${repo}`);
     throw new Error(PRESET_DEP_NOT_FOUND);
   }
   if (!res.body.isLastPage) {

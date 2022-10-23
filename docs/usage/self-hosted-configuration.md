@@ -85,11 +85,24 @@ You can limit which repositories Renovate can access by using the `autodiscoverF
 You can use this option to filter the list of repositories that the Renovate bot account can access through `autodiscover`.
 It takes a [minimatch](https://www.npmjs.com/package/minimatch) glob-style or regex pattern.
 
+If you set multiple filters, then the matches of each filter are added to the overall result.
+
+If you use an environment variable or the CLI to set the value for `autodiscoverFilter`, then commas `,` within filters are not supported.
+Commas will be used as delimiter for a new filter.
+
+```
+# DO NOT use commas inside the filter if your are using env or cli variables to configure it.
+RENOVATE_AUTODISCOVER_FILTER="/myapp/{readme.md,src/**}"
+
+# in this example you can use regex instead
+RENOVATE_AUTODISCOVER_FILTER="/myapp/(readme\.md|src/.*)/"
+```
+
 **Minimatch**:
 
 ```json
 {
-  "autodiscoverFilter": "project/*"
+  "autodiscoverFilter": ["project/*"]
 }
 ```
 
@@ -99,15 +112,17 @@ All text inside the start and end `/` will be treated as a regular expression.
 
 ```json
 {
-  "autodiscoverFilter": "/project/.*/"
+  "autodiscoverFilter": ["/project/.*/"]
 }
 ```
 
-You can negate the regex by putting a `!` in front:
+You can negate the regex by putting a `!` in front.
+Only use a single negation and don't mix with other filters because all filters are combined with `or`.
+If using negations, all repositories except those who match the regex are added to the result:
 
 ```json
 {
-  "autodiscoverFilter": "!/project/.*/"
+  "autodiscoverFilter": ["!/project/.*/"]
 }
 ```
 
@@ -361,16 +376,15 @@ In practice, it is implemented by converting the `force` configuration into a `p
 This is set to `true` by default, meaning that any settings (such as `schedule`) take maximum priority even against custom settings existing inside individual repositories.
 It will also override any settings in `packageRules`.
 
-## forkMode
-
-You probably have no need for this option - it is an experimental setting for the Renovate hosted GitHub App.
-If this is set to `true` then Renovate will fork the repository into the personal space of the person owning the Personal Access Token.
-
 ## forkToken
 
-You probably don't need this option - it is an experimental setting for the Renovate hosted GitHub App.
-This should be set to a Personal Access Token (GitHub only) when `forkMode` is set to `true`.
-Renovate will use this token to fork the repository into the personal space of the person owning the Personal Access Token.
+You probably don't need this option - it is an experimental setting developed for the Forking Renovate hosted GitHub App.
+
+If this value is configured then Renovate:
+
+- forks the target repository into the account that owns the PAT
+- keep this fork's default branch up-to-date with the target
+
 Renovate will then create branches on the fork and opens Pull Requests on the parent repository.
 
 ## gitNoVerify

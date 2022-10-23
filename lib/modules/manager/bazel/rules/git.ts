@@ -1,50 +1,51 @@
-import is from '@sindresorhus/is';
 import parseGithubUrl from 'github-url-from-git';
+import { z } from 'zod';
+import { regEx } from '../../../../util/regex';
 import { GithubReleasesDatasource } from '../../../datasource/github-releases';
 import type { PackageDependency } from '../../types';
-import type { Target } from '../types';
 
-export function gitDependency({
-  rule: depType,
-  name: depName,
-  tag: currentValue,
-  commit: currentDigest,
-  remote,
-}: Target): PackageDependency | null {
-  let dep: PackageDependency | null = null;
+const githubUrlRegex = regEx(
+  /^https:\/\/github\.com\/(?<packageName>[^/]+\/[^/]+)/
+);
 
-  if (
-    depType === 'git_repository' &&
-    is.string(depName) &&
-    (is.string(currentValue) || is.string(currentDigest)) &&
-    is.string(remote)
-  ) {
-    dep = {
-      datasource: GithubReleasesDatasource.id,
-      depType,
-      depName,
+function githubPackageName(input: string): string | undefined {
+  return parseGithubUrl(input)?.match(githubUrlRegex)?.groups?.packageName;
+}
+
+export const gitRules = ['git_repository'] as const;
+
+export const GitTarget = z
+  .object({
+    rule: z.enum(gitRules),
+    name: z.string(),
+    tag: z.string().optional(),
+    commit: z.string().optional(),
+    remote: z.string(),
+  })
+  .refine(({ tag, commit }) => !!tag || !!commit)
+  .transform(({ rule, name, tag, commit, remote }): PackageDependency => {
+    const dep: PackageDependency = {
+      depType: rule,
+      depName: name,
     };
 
-    if (is.string(currentValue)) {
-      dep.currentValue = currentValue;
+    if (tag) {
+      dep.currentValue = tag;
     }
 
-    if (is.string(currentDigest)) {
-      dep.currentDigest = currentDigest;
+    if (commit) {
+      dep.currentDigest = commit;
     }
 
-    // TODO: Check if we really need to use parse here or if it should always be a plain https url (#9605)
-    const packageName = parseGithubUrl(remote)?.substring(
-      'https://github.com/'.length
-    );
-
-    // istanbul ignore else
-    if (packageName) {
-      dep.packageName = packageName;
-    } else {
-      dep.skipReason = 'unsupported-remote';
+    const githubPackage = githubPackageName(remote);
+    if (githubPackage) {
+      dep.datasource = GithubReleasesDatasource.id;
+      dep.packageName = githubPackage;
     }
-  }
 
-  return dep;
-}
+    if (!dep.datasource) {
+      dep.skipReason = 'unsupported-datasource';
+    }
+
+    return dep;
+  });

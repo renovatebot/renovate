@@ -94,8 +94,10 @@ This can be done with this configuration:
 
 ## additionalReviewers
 
-In contrast to `reviewers`, this option adds to the existing reviewer list, rather than replacing it.
-This makes it suitable for augmenting a preset or base list without displacing the original, for example when adding focused reviewers for a specific package group.
+This option _adds_ to the existing reviewer list, rather than _replacing_ it like `reviewers`.
+
+Use `additionalReviewers` when you want to add to a preset or base list, without replacing the original.
+For example, when adding focused reviewers for a specific package group.
 
 ## assignAutomerge
 
@@ -247,7 +249,8 @@ If so then Renovate will reflect this setting in its description and use package
 
 <!-- prettier-ignore -->
 !!! note
-    The `baseBranches` config option is not supported when `forkMode` is enabled, including in the Forking Renovate app.
+    Do _not_ use the `baseBranches` config option when you've set a `forkToken`.
+    You may need a `forkToken` when you're using the Forking Renovate app.
 
 ## bbUseDefaultReviewers
 
@@ -296,14 +299,14 @@ If you truly need to configure this then it probably means either:
 
 ## branchNameStrict
 
-By default, Renovate doesn't care about special characters when slugifying the branch name.
-This means that special characters like `.` may end up in the branch name.
-
-When you set `branchNameStrict` to `true`:
+By default, Renovate removes special characters when slugifying the branch name:
 
 - all special characters are removed
 - only alphabetic characters are allowed
 - hyphens `-` are used to separate sections
+
+To revert this behavior to that used in v32 and before, set this value to `false`.
+This will mean that special characters like `.` may end up in the branch name.
 
 ## branchPrefix
 
@@ -388,25 +391,45 @@ This is used to alter `commitMessage` and `prTitle` without needing to copy/past
 Actions may be like `Update`, `Pin`, `Roll back`, `Refresh`, etc.
 Check out the default value for `commitMessage` to understand how this field is used.
 
+<!-- prettier-ignore -->
+!!! warning
+    Warning, for advanced use only! Use at your own risk!
+
 ## commitMessageExtra
 
 This is used to alter `commitMessage` and `prTitle` without needing to copy/paste the whole string.
 The "extra" is usually an identifier of the new version, e.g. "to v1.3.2" or "to tag 9.2".
+
+<!-- prettier-ignore -->
+!!! warning
+    Warning, for advanced use only! Use at your own risk!
 
 ## commitMessagePrefix
 
 This is used to alter `commitMessage` and `prTitle` without needing to copy/paste the whole string.
 The "prefix" is usually an automatically applied semantic commit prefix, but it can also be statically configured.
 
+<!-- prettier-ignore -->
+!!! warning
+    Warning, for advanced use only! Use at your own risk!
+
 ## commitMessageSuffix
 
 This is used to add a suffix to commit messages.
 Usually left empty except for internal use (multiple base branches, and vulnerability alerts).
 
+<!-- prettier-ignore -->
+!!! warning
+    Warning, for advanced use only! Use at your own risk!
+
 ## commitMessageTopic
 
 This is used to alter `commitMessage` and `prTitle` without needing to copy/paste the whole string.
 The "topic" is usually refers to the dependency being updated, e.g. `"dependency react"`.
+
+<!-- prettier-ignore -->
+!!! warning
+    Warning, for advanced use only! Use at your own risk!
 
 ## composerIgnorePlatformReqs
 
@@ -1203,6 +1226,29 @@ This can be a base URL (e.g. `https://api.github.com`) or a hostname like `githu
 If the value starts with `http(s)` then it will only match against URLs which start with the full base URL.
 Otherwise, it will be matched by checking if the URL's hostname matches the `matchHost` directly or ends with it.
 When checking the end of the hostname, a single dot is prefixed to the value of `matchHost`, if one is not already present, to ensure it can only match against whole domain segments.
+
+The `matchHost` URL must be the same as the `registryUrl` set in `.npmrc`, or you'll get authentication issues when the artifacts are updated when yarn or npm runs.
+
+```json
+{
+  "hostRules": [
+    {
+      "matchHost": "https://gitlab.myorg.com/api/v4/packages/npm/",
+      "token": "abc123"
+    }
+  ]
+}
+```
+
+The above corresponds with an `.npmrc` like the following:
+
+```
+registry=https://gitlab.myorg.com/api/v4/packages/npm/
+```
+
+<!-- prettier-ignore -->
+!!! note
+    Values containing a URL path but missing a scheme will be prepended with 'https://' (e.g. `domain.com/path` -> `https://domain.com/path`)
 
 ### timeout
 
@@ -2307,11 +2353,9 @@ Behavior:
 
 Renovate's `"auto"` strategy works like this for npm:
 
-1. Always pin `devDependencies`
-2. Pin `dependencies` if we detect that it's an app and not a library
-3. Widen `peerDependencies`
-4. If an existing range already ends with an "or" operator - e.g. `"^1.0.0 || ^2.0.0"` - then Renovate will widen it, e.g. making it into `"^1.0.0 || ^2.0.0 || ^3.0.0"`
-5. Otherwise, replace the range. e.g. `"^2.0.0"` would be replaced by `"^3.0.0"`
+1. Widen `peerDependencies`
+1. If an existing range already ends with an "or" operator like `"^1.0.0 || ^2.0.0"`, then Renovate widens it into `"^1.0.0 || ^2.0.0 || ^3.0.0"`
+1. Otherwise, Renovate replaces the range. So `"^2.0.0"` is replaced by `"^3.0.0"`
 
 By default, Renovate assumes that if you are using ranges then it's because you want them to be wide/open.
 Renovate won't deliberately "narrow" any range by increasing the semver value inside.
@@ -2353,7 +2397,7 @@ Avoid setting `rebaseWhen=never` and then also setting `prCreation=not-pending` 
 
 By default, Renovate will detect if it has proposed an update to a project before and not propose the same one again.
 For example the Webpack 3.x case described above.
-This field lets you customise this behavior down to a per-package level.
+This field lets you customize this behavior down to a per-package level.
 For example we override it to `true` in the following cases where branch names and PR titles need to be reused:
 
 - Package groups
@@ -2681,7 +2725,9 @@ By default, `renovate` will update to a version greater than `latest` only if th
 
 Must be valid usernames.
 
-If on GitHub and assigning a team to review, you must use the prefix `team:` and add the _last part_ of the team name.
+**Required reviewers on GitHub**
+
+If you're assigning a team to review on GitHub, you must use the prefix `team:` and add the _last part_ of the team name.
 Say the full team name on GitHub is `@organization/foo`, then you'd set the config option like this:
 
 ```json
@@ -2690,8 +2736,11 @@ Say the full team name on GitHub is `@organization/foo`, then you'd set the conf
 }
 ```
 
-To mark a reviewer as required in Azure DevOps, you must use the prefix `required:`.
-If the name of the reviewer is `bar` for example, this could also be the name of a team, then you would set the config option like this:
+**Required reviewers on Azure DevOps**
+
+To mark a reviewer as required on Azure DevOps, you must use the prefix `required:`.
+
+For example: if the username or team name is `bar` then you would set the config option like this:
 
 ```json
 {
@@ -2784,6 +2833,12 @@ Technical details: We mostly rely on the text parsing of the library [@breejs/la
 Read the parser documentation at [breejs.github.io/later/parsers.html#text](https://breejs.github.io/later/parsers.html#text).
 To parse Cron syntax, Renovate uses [@cheap-glitch/mi-cron](https://github.com/cheap-glitch/mi-cron).
 Renovate does not support scheduled minutes or "at an exact time" granularity.
+
+<!-- prettier-ignore -->
+!!! tip
+    If you want to _disable_ Renovate, then avoid setting `schedule` to `"never"`.
+    Instead, use the `enabled` config option to disable Renovate.
+    Read the [`enabled` config option docs](https://docs.renovatebot.com/configuration-options/#enabled) to learn more.
 
 <!-- prettier-ignore -->
 !!! note
