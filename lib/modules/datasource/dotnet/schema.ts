@@ -29,13 +29,13 @@ const ReleaseDetails = z.object({
   version: z.string(),
   'version-display': z.string(),
 });
-const Release = z.object({
+const ReleaseSchema = z.object({
   'release-date': z.date(),
   'release-version': z.string(),
   security: z.boolean(),
   'release-notes': z.string(),
-  runtime: ReleaseDetails,
-  sdk: ReleaseDetails,
+  runtime: z.nullable(ReleaseDetails),
+  sdk: z.nullable(ReleaseDetails),
 });
 export const DotnetReleasesSchema = z.object({
   'channel-version': z.string(),
@@ -44,8 +44,9 @@ export const DotnetReleasesSchema = z.object({
   'latest-runtime': z.string(),
   'latest-sdk': z.string(),
   'support-phase': SupportPhase,
-  releases: z.array(Release),
+  releases: z.array(ReleaseSchema),
 });
 
 export type DotnetReleasesIndex = z.infer<typeof DotnetReleasesIndexSchema>;
 export type DotnetReleases = z.infer<typeof DotnetReleasesSchema>;
+export type DotnetRelease = z.infer<typeof ReleaseSchema>;

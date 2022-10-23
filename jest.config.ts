@@ -68,7 +68,11 @@ const config: JestConfig = {
       },
     ],
   },
-  modulePathIgnorePatterns: ['<rootDir>/dist/', '/__fixtures__/'],
+  modulePathIgnorePatterns: [
+    '<rootDir>/dist/',
+    '/__fixtures__/',
+    '/__mocks__/',
+  ],
   reporters: ci ? ['default', 'github-actions'] : ['default'],
   setupFilesAfterEnv: [
     'jest-extended/all',
