@@ -19,6 +19,22 @@ exports[`modules/datasource/go/releases-direct getReleases support bitbucket tag
 }
 `;
 
+exports[`modules/datasource/go/releases-direct getReleases support git 1`] = `
+{
+  "releases": [
+    {
+      "gitRef": "v1.0.0",
+      "version": "v1.0.0",
+    },
+    {
+      "gitRef": "v2.0.0",
+      "version": "v2.0.0",
+    },
+  ],
+  "sourceUrl": undefined,
+}
+`;
+
 exports[`modules/datasource/go/releases-direct getReleases support gitlab 1`] = `
 {
   "releases": [
