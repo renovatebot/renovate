@@ -59,12 +59,11 @@ export async function initPlatform({
   endpoint,
   username,
   password,
-  token,
+  token: awsToken,
 }: PlatformParams): Promise<PlatformResult> {
   let accessKeyId = username;
   let secretAccessKey = password;
   let region: string | undefined;
-  let awsToken: string | undefined;
 
   if (!accessKeyId) {
     accessKeyId = process.env.AWS_ACCESS_KEY_ID;
@@ -72,9 +71,7 @@ export async function initPlatform({
   if (!secretAccessKey) {
     secretAccessKey = process.env.AWS_SECRET_ACCESS_KEY;
   }
-  if (!token) {
-    awsToken = process.env.AWS_SESSION_TOKEN;
-  }
+
   if (endpoint) {
     const regionReg = regEx(/.*codecommit\.(?<region>.+)\.amazonaws\.com/);
     const codeCommitMatch = regionReg.exec(endpoint);
@@ -96,7 +93,7 @@ export async function initPlatform({
   const credentials: Credentials = {
     accessKeyId,
     secretAccessKey,
-    sessionToken: awsToken,
+    sessionToken: awsToken ?? process.env.AWS_SESSION_TOKEN,
   };
   config.credentials = credentials;
 
