@@ -92,6 +92,9 @@ function genTable(obj: [string, string][], type: string, def: any): string {
     'experimentalDescription',
     'experimentalIssues',
     'advancedUse',
+    'followTagAdvancedFunctionality',
+    'groupAdvancedFunctionality',
+    'advancedConfig',
   ];
   obj.forEach(([key, val]) => {
     const el = [key, val];
@@ -235,7 +238,28 @@ export async function generateConfig(dist: string, bot = false): Promise<void> {
         genTable(Object.entries(el), option.type, option.default);
 
       if (el.advancedUse) {
-        configOptionsRaw[headerIndex] += generateAdvancedUse();
+        if (option.name === 'excludeCommitPaths') {
+          configOptionsRaw[headerIndex] += generateAdvancedUse();
+        } else {
+          configOptionsRaw[footerIndex] += generateAdvancedUse();
+        }
+      }
+
+      if (el.followTagAdvancedFunctionality) {
+        configOptionsRaw[headerIndex] +=
+          generateFollowTagAdvancedFunctionality();
+      }
+
+      if (el.groupAdvancedFunctionality) {
+        configOptionsRaw[headerIndex] += generateGroupAdvancedFunctionality();
+      }
+
+      if (el.advancedConfig) {
+        configOptionsRaw[footerIndex] += generateAdvancedConfig();
+      }
+
+      if (el.commitMsg) {
+        configOptionsRaw[footerIndex] += generateCommitMsg();
       }
 
       if (el.experimental) {
@@ -247,7 +271,29 @@ export async function generateConfig(dist: string, bot = false): Promise<void> {
 }
 
 function generateAdvancedUse(): string {
-  const warning =
-    '\n<!-- prettier-ignore -->\n!!! warning\n    For advanced use only! Use at your own risk!\n';
-  return warning;
+  return '\n<!-- prettier-ignore -->\n!!! warning\n    For advanced use only! Use at your own risk!\n';
+}
+
+function generateFollowTagAdvancedFunctionality(): string {
+  return "\n<!-- prettier-ignore -->\n!!! warning\n    Advanced functionality.\n    Only use this if you're sure you know what you're doing.\n";
+}
+
+function generateGroupAdvancedFunctionality(): string {
+  return (
+    '\n<!-- prettier-ignore --> \n!!! warning \n' +
+    '    Advanced functionality only. \n' +
+    "    Do not use unless you know what you're doing.\n"
+  );
+}
+
+function generateAdvancedConfig(): string {
+  return '\n<!-- prettier-ignore -->\n!!! warning\n    Advanced config, use at your own risk.\n';
+}
+
+function generateCommitMsg(): string {
+  return (
+    '\n<!-- prettier-ignore -->\n!!! warning\n' +
+    '    Editing of `commitMessage` directly is now deprecated and not recommended.\n' +
+    '    Please instead edit the fields such as `commitMessageAction`, `commitMessageExtra`, etc.\n'
+  );
 }

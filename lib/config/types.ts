@@ -359,6 +359,14 @@ export interface RenovateOptionBase {
   experimentalIssues?: number[];
 
   advancedUse?: boolean;
+
+  followTagAdvancedFunctionality?: boolean;
+
+  groupAdvancedFunctionality?: boolean;
+
+  advancedConfig?: boolean;
+
+  commitMsg?: boolean;
 }
 
 export interface RenovateArrayOption<
