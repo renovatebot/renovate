@@ -84,7 +84,7 @@ export interface RenovateSharedConfig {
 // The below should contain config options where stage=global
 export interface GlobalOnlyConfig {
   autodiscover?: boolean;
-  autodiscoverFilter?: string;
+  autodiscoverFilter?: string[];
   baseDir?: string;
   cacheDir?: string;
   containerbaseDir?: string;
@@ -229,7 +229,7 @@ export interface RenovateConfig
   prHourlyLimit?: number;
 
   defaultRegistryUrls?: string[];
-  registryUrls?: string[];
+  registryUrls?: string[] | null;
 
   repoIsOnboarded?: boolean;
   repoIsActivated?: boolean;
@@ -304,11 +304,12 @@ export interface PackageRule
   excludePackageNames?: string[];
   excludePackagePatterns?: string[];
   excludePackagePrefixes?: string[];
+  matchCurrentValue?: string;
   matchCurrentVersion?: string | Range;
   matchSourceUrlPrefixes?: string[];
   matchSourceUrls?: string[];
   matchUpdateTypes?: UpdateType[];
-  registryUrls?: string[];
+  registryUrls?: string[] | null;
 }
 
 export interface ValidationMessage {

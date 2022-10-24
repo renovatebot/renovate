@@ -190,7 +190,7 @@ function massageRegistryUrls(registryUrls: string[]): string[] {
 function resolveRegistryUrls(
   datasource: DatasourceApi,
   defaultRegistryUrls: string[] | undefined,
-  registryUrls: string[] | undefined,
+  registryUrls: string[] | undefined | null,
   additionalRegistryUrls: string[] | undefined
 ): string[] {
   if (!datasource.customRegistrySupport) {
@@ -433,7 +433,8 @@ function getDigestConfig(
   config: GetDigestInputConfig
 ): DigestConfig {
   const { currentValue, currentDigest } = config;
-  const packageName = config.packageName ?? config.depName;
+  const packageName =
+    config.replacementName ?? config.packageName ?? config.depName;
   const [registryUrl] = resolveRegistryUrls(
     datasource,
     config.defaultRegistryUrls,

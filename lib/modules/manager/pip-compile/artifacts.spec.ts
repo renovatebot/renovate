@@ -119,6 +119,7 @@ describe('modules/manager/pip-compile/artifacts', () => {
           '-v "/tmp/renovate/cache":"/tmp/renovate/cache" ' +
           '-e PIP_CACHE_DIR ' +
           '-e BUILDPACK_CACHE_DIR ' +
+          '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
           'renovate/sidecar ' +
           'bash -l -c "' +
@@ -199,7 +200,7 @@ describe('modules/manager/pip-compile/artifacts', () => {
     ]);
   });
 
-  it('uses pipenv version from config', async () => {
+  it('uses pip-compile version from config', async () => {
     GlobalConfig.set(dockerAdminConfig);
     const execSnapshots = mockExecAll();
     git.getRepoStatus.mockResolvedValue({
@@ -229,6 +230,7 @@ describe('modules/manager/pip-compile/artifacts', () => {
           '-v "/tmp/renovate/cache":"/tmp/renovate/cache" ' +
           '-e PIP_CACHE_DIR ' +
           '-e BUILDPACK_CACHE_DIR ' +
+          '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
           'renovate/sidecar ' +
           'bash -l -c "' +
@@ -261,7 +263,7 @@ describe('modules/manager/pip-compile/artifacts', () => {
           'subdir/requirements.txt'
         )
       ).toBe(
-        'pip-compile --allow-unsafe --generate-hashes --no-emit-index-url --output-file=requirements.txt requirements.in'
+        'pip-compile --allow-unsafe --generate-hashes --no-emit-index-url --strip-extras --output-file=requirements.txt requirements.in'
       );
     });
 

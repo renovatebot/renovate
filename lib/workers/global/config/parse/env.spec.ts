@@ -20,9 +20,15 @@ describe('workers/global/config/parse/env', () => {
       expect(env.getConfig(envParam).recreateClosed).toBeFalse();
     });
 
-    it('supports boolean nonsense as false', () => {
-      const envParam: NodeJS.ProcessEnv = { RENOVATE_RECREATE_CLOSED: 'foo' };
-      expect(env.getConfig(envParam).recreateClosed).toBeFalse();
+    it('throws exception for invalid boolean value', () => {
+      const envParam: NodeJS.ProcessEnv = {
+        RENOVATE_RECREATE_CLOSED: 'badvalue',
+      };
+      expect(() => env.getConfig(envParam)).toThrow(
+        Error(
+          "Invalid boolean value: expected 'true' or 'false', but got 'badvalue'"
+        )
+      );
     });
 
     delete process.env.RENOVATE_RECREATE_CLOSED;
@@ -34,6 +40,11 @@ describe('workers/global/config/parse/env', () => {
 
     it('supports list multiple', () => {
       const envParam: NodeJS.ProcessEnv = { RENOVATE_LABELS: 'a,b,c' };
+      expect(env.getConfig(envParam).labels).toEqual(['a', 'b', 'c']);
+    });
+
+    it('supports list multiple without blank items', () => {
+      const envParam: NodeJS.ProcessEnv = { RENOVATE_LABELS: 'a,b,c,' };
       expect(env.getConfig(envParam).labels).toEqual(['a', 'b', 'c']);
     });
 

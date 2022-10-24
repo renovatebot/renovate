@@ -1,6 +1,5 @@
 import is from '@sindresorhus/is';
 import { DateTime } from 'luxon';
-import pAll from 'p-all';
 import { PlatformId } from '../../constants';
 import {
   PLATFORM_BAD_CREDENTIALS,
@@ -12,6 +11,7 @@ import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import { getCache } from '../cache/repository';
 import { maskToken } from '../mask';
+import * as p from '../promises';
 import { range } from '../range';
 import { regEx } from '../regex';
 import { joinUrlParts, parseLinkHeader, resolveBaseUrl } from '../url';
@@ -20,7 +20,6 @@ import type { GotLegacyError } from './legacy';
 import type {
   GraphqlOptions,
   HttpOptions,
-  HttpPostOptions,
   HttpResponse,
   InternalHttpOptions,
 } from './types';
@@ -68,6 +67,7 @@ function handleGotError(
     message = String(body.message);
   }
   if (
+    err.code === 'ERR_HTTP2_STREAM_ERROR' ||
     err.code === 'ENOTFOUND' ||
     err.code === 'ETIMEDOUT' ||
     err.code === 'EAI_AGAIN' ||
@@ -153,11 +153,6 @@ function handleGotError(
     err.body?.message === 'Issues are disabled for this repo'
   ) {
     return err;
-  }
-  if (err.statusCode === 404) {
-    logger.debug({ url: path }, 'GitHub 404');
-  } else {
-    logger.debug({ err }, 'Unknown GitHub error');
   }
   return err;
 }
@@ -265,7 +260,7 @@ function setGraphqlPageSize(fieldName: string, newPageSize: number): void {
   }
 }
 
-export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
+export class GithubHttp extends Http<GithubHttpOptions> {
   constructor(
     hostType: string = PlatformId.Github,
     options?: GithubHttpOptions
@@ -335,7 +330,7 @@ export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
               );
             }
           );
-          const pages = await pAll(queue, { concurrency: 5 });
+          const pages = await p.all(queue);
           if (opts.paginationField && is.plainObject(result.body)) {
             const paginatedResult = result.body[opts.paginationField];
             if (is.array<T>(paginatedResult)) {
@@ -380,7 +375,7 @@ export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
     }
     const body = variables ? { query, variables } : { query };
 
-    const opts: HttpPostOptions = {
+    const opts: GithubHttpOptions = {
       baseUrl: baseUrl.replace('/v3/', '/'), // GHE uses unversioned graphql path
       body,
       headers: { accept: options?.acceptHeader },
@@ -431,9 +426,8 @@ export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
       });
       const repositoryData = res?.data?.repository;
       if (
-        repositoryData &&
-        is.plainObject(repositoryData) &&
-        repositoryData[fieldName]
+        is.nonEmptyObject(repositoryData) &&
+        !is.nullOrUndefined(repositoryData[fieldName])
       ) {
         optimalCount = count;
 

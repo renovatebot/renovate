@@ -15,9 +15,8 @@ describe('modules/manager/range', () => {
       manager: 'npm',
       rangeStrategy: 'auto',
       depType: 'dependencies',
-      packageJsonType: 'app',
     };
-    expect(getRangeStrategy(config)).toBe('pin');
+    expect(getRangeStrategy(config)).toBe('replace');
   });
 
   it('defaults to replace', () => {

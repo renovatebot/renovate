@@ -1,7 +1,10 @@
 import { mocked } from '../../../test/util';
 import * as _repositoryCache from '../cache/repository';
 import type { BranchCache, RepoCacheData } from '../cache/repository/types';
-import { getCachedBranchParentShaResult } from './parent-sha-cache';
+import {
+  deleteCachedBranchParentShaResult,
+  getCachedBranchParentShaResult,
+} from './parent-sha-cache';
 
 jest.mock('../cache/repository');
 const repositoryCache = mocked(_repositoryCache);
@@ -66,6 +69,20 @@ describe('util/git/parent-sha-cache', () => {
         ],
       });
       expect(getCachedBranchParentShaResult('foo', '111')).toBe('000');
+    });
+  });
+
+  describe('deleteCachedBranchParentShaResult', () => {
+    it('returns null if cache is not populated', () => {
+      repoCache.branches = [
+        {
+          branchName: 'foo',
+          sha: '111',
+          parentSha: 'sha',
+        } as BranchCache,
+      ];
+      deleteCachedBranchParentShaResult('foo');
+      expect(repoCache.branches[0].parentSha).toBeUndefined();
     });
   });
 });

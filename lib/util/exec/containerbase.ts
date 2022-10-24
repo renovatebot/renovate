@@ -112,8 +112,8 @@ export function supportsDynamicInstall(toolName: string): boolean {
   return !!allToolConfig[toolName];
 }
 
-export function isBuildpack(): boolean {
-  return !!process.env.BUILDPACK;
+export function isContainerbase(): boolean {
+  return !!process.env.CONTAINERBASE || !!process.env.BUILDPACK;
 }
 
 export function isDynamicInstall(
@@ -123,10 +123,8 @@ export function isDynamicInstall(
   if (binarySource !== 'install') {
     return false;
   }
-  if (!isBuildpack()) {
-    logger.warn(
-      'binarySource=install is only compatible with images derived from github.com/containerbase'
-    );
+  if (!isContainerbase()) {
+    logger.debug('Falling back to binarySource=global');
     return false;
   }
   return (
