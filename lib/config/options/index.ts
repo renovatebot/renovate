@@ -815,6 +815,7 @@ const options: RenovateOptions[] = [
     type: 'array',
     subType: 'string',
     default: [],
+    advancedUse: true,
   },
   {
     name: 'executionTimeout',

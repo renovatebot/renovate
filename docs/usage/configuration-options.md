@@ -748,10 +748,6 @@ See [Private module support](https://docs.renovatebot.com/getting-started/privat
 
 ## excludeCommitPaths
 
-<!-- prettier-ignore -->
-!!! warning
-    For advanced users only!
-
 Be careful you know what you're doing with this option.
 The initial intended use is to allow the user to exclude certain dependencies from being added/removed/modified when "vendoring" dependencies.
 Example:
