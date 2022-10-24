@@ -11,7 +11,6 @@ import { newlineRegex, regEx } from '../regex';
 import * as _behindBaseCache from './behind-base-branch-cache';
 import * as _conflictsCache from './conflicts-cache';
 import * as _modifiedCache from './modified-cache';
-import * as _pristineCache from './pristine-cache';
 import type { FileChange } from './types';
 import * as git from '.';
 import { setNoVerify } from '.';
@@ -19,13 +18,11 @@ import { setNoVerify } from '.';
 jest.mock('./conflicts-cache');
 jest.mock('./behind-base-branch-cache');
 jest.mock('./modified-cache');
-jest.mock('./pristine-cache');
 jest.mock('delay');
 jest.mock('../cache/repository');
 const behindBaseCache = mocked(_behindBaseCache);
 const conflictsCache = mocked(_conflictsCache);
 const modifiedCache = mocked(_modifiedCache);
-const pristineCache = mocked(_pristineCache);
 // Class is no longer exported
 const SimpleGit = Git().constructor as { prototype: ReturnType<typeof Git> };
 
@@ -116,7 +113,6 @@ describe('util/git/index', () => {
     // override some local git settings for better testing
     const local = Git(tmpDir.path);
     await local.addConfig('commit.gpgsign', 'false');
-    pristineCache.getCachedPristineResult.mockReturnValue(false);
     behindBaseCache.getCachedBehindBaseResult.mockReturnValue(null);
   });
 

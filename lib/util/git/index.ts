@@ -45,7 +45,6 @@ import {
   getCachedModifiedResult,
   setCachedModifiedResult,
 } from './modified-cache';
-import { setCachedPristineResult } from './pristine-cache';
 import { configSigningKey, writePrivateKey } from './private-key';
 import type {
   CommitFilesConfig,
@@ -663,7 +662,6 @@ export async function isBranchModified(branchName: string): Promise<boolean> {
   );
   config.branchIsModified[branchName] = true;
   setCachedModifiedResult(branchName, true);
-  setCachedPristineResult(branchName);
   return true;
 }
 
