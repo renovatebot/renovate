@@ -1,10 +1,22 @@
+import { fs as memfs } from 'memfs';
 import { Fixtures } from '../../../test/fixtures';
 import { configFileNames } from '../../config/app-strings';
 import { GlobalConfig } from '../../config/global';
 import { EditorConfig } from './editor-config';
 import { IndentationType } from './indentation-type';
 
-jest.mock('fs');
+// use real fs to read wasm files for `@one-ini/wasm`
+jest.mock('fs', () => ({
+  ...memfs,
+  readFileSync: (file: string, ...args: any[]) => {
+    if (file.endsWith('.wasm')) {
+      const realFs = jest.requireActual<typeof import('fs')>('fs');
+      return realFs.readFileSync(file, ...args);
+    }
+    return memfs.readFileSync(file, ...args);
+  },
+}));
+
 const defaultConfigFile = configFileNames[0];
 
 describe('util/json-writer/editor-config', () => {
