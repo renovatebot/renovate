@@ -18,10 +18,7 @@ export class PackageFiles {
   }
 
   static clear(): void {
-    logger.debug(
-      { baseBranches: [...this.data.keys()] },
-      'PackageFiles.clear() - Package files deleted'
-    );
+    logger.debug('PackageFiles.clear() - Package files deleted');
     this.data.clear();
   }
 

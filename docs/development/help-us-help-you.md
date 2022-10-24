@@ -1,6 +1,7 @@
-# Behavior
+# Help Us Help You
 
-If you've been referred to this document, it's because someone you're interacting with wants you to follow one or more of the following:
+This repository gets a lot of requests from the community every day, and we do our best to answer all of them.
+Please follow these points whenever interacting in this repo.
 
 ## Be positive and polite
 
