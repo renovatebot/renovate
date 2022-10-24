@@ -86,7 +86,7 @@ Fill the array with alternate index URL(s).
     To override the URL found in `requirements.txt`, you must create a custom `packageRules` setting.
     This is because `packageRules` are applied _after_ package file extraction.
     OPTION 1: Create new secion in private packages docs, and add this link: Go to the [private package support docs](https://docs.renovatebot.com/getting-started/private-packages/#pip).
-    OPTION 2: Link to https://docs.renovatebot.com/python/#specify-url-in-configuration
+    OPTION 2: Link to [specify URL in Python docs](https://docs.renovatebot.com/python/#specify-url-in-configuration)
 
 ## Disabling Python support
 
