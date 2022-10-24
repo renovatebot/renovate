@@ -248,6 +248,6 @@ export async function generateConfig(dist: string, bot = false): Promise<void> {
 
 function generateAdvancedUse(): string {
   const warning =
-    '\n<!-- prettier-ignore -->\n!!! warning\n    For advanced use only! Use at your own risk!';
-  return warning + '\n';
+    '\n<!-- prettier-ignore -->\n!!! warning\n    For advanced use only! Use at your own risk!\n';
+  return warning;
 }
