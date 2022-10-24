@@ -1,3 +1,4 @@
+import maven from '../maven';
 import semver from '../semver';
 import docker from '.';
 
@@ -171,7 +172,7 @@ describe('modules/versioning/docker/index', () => {
     ${'3.8.3-SNAPSHOT'}   | ${false}
     ${'3.8.3-1-SNAPSHOT'} | ${false}
   `('isStable("$version") === $expected', ({ version, expected }) => {
-    const res = docker.isStable(version);
+    const res = maven.isStable(version);
     expect(!!res).toBe(expected);
   });
 
