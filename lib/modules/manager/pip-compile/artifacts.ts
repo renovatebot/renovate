@@ -52,6 +52,7 @@ const allowedPipArguments = [
   '--allow-unsafe',
   '--generate-hashes',
   '--no-emit-index-url',
+  '--strip-extras',
 ];
 
 export function constructPipCompileCmd(
