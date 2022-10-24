@@ -58,7 +58,7 @@ export interface BranchCache {
   /**
    * Parent commit of branch sha
    */
-  parentSha: string | null;
+  parentSha?: string | null;
   /**
    * Pr nunber of PR created from this branch
    */

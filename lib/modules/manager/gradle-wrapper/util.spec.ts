@@ -62,7 +62,7 @@ describe('modules/manager/gradle-wrapper/util', () => {
 
   describe('prepareGradleCommand', () => {
     it('works', async () => {
-      platform.mockReturnValueOnce('linux');
+      platform.mockReturnValue('linux');
       fs.statLocalFile.mockResolvedValue(
         partial<Stats>({
           isFile: () => true,
