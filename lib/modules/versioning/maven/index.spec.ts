@@ -69,6 +69,8 @@ describe('modules/versioning/maven/index', () => {
     ${'Hoxton.RELEASE'}     | ${true}
     ${'Hoxton.SR'}          | ${true}
     ${'Hoxton.SR1'}         | ${true}
+    ${'1.2.3-SNAPSHOT'}     | ${false}
+    ${'1.2.3-1-SNAPSHOT'}   | ${false}
   `('isStable("$version") === $expected', ({ version, expected }) => {
     const res = !!isStable(version);
     expect(res).toBe(expected);
