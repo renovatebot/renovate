@@ -97,13 +97,11 @@ async function getUpdatedArtifacts(
   status: StatusResult,
   artifactFileNames: string[]
 ): Promise<UpdateArtifactsResult[]> {
-  return (
-    await Promise.all(
-      artifactFileNames.map((fileProjectPath) =>
-        addIfUpdated(status, fileProjectPath)
-      )
-    )
-  ).filter(is.truthy);
+  const updatedResults: (UpdateArtifactsResult | null)[] = [];
+  for (const artifactFileName of artifactFileNames) {
+    updatedResults.push(await addIfUpdated(status, artifactFileName));
+  }
+  return updatedResults.filter(is.truthy);
 }
 
 /**
