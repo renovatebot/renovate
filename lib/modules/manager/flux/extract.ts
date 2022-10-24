@@ -5,7 +5,6 @@ import { regEx } from '../../../util/regex';
 import { GithubReleasesDatasource } from '../../datasource/github-releases';
 import { HelmDatasource } from '../../datasource/helm';
 import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
-import { isSystemManifest } from './common';
 import type {
   FluxManagerData,
   FluxManifest,
@@ -14,20 +13,18 @@ import type {
 } from './types';
 
 function readManifest(content: string, file: string): FluxManifest | null {
-  if (isSystemManifest(file)) {
-    const versionMatch = regEx(
-      /#\s*Flux\s+Version:\s*(\S+)(?:\s*#\s*Components:\s*([A-Za-z,-]+))?/
-    ).exec(content);
-    if (!versionMatch) {
-      return null;
-    }
-    return {
-      kind: 'system',
-      file,
-      version: versionMatch[1],
-      components: versionMatch[2],
-    };
+  const versionMatch = regEx(
+    /#\s*Flux\s+Version:\s*(\S+)(?:\s*#\s*Components:\s*([A-Za-z,-]+))?/
+  ).exec(content);
+  if (!versionMatch) {
+    return null;
   }
+  return {
+    kind: 'system',
+    file,
+    version: versionMatch[1],
+    components: versionMatch[2],
+  };
 
   const manifest: FluxManifest = {
     kind: 'resource',

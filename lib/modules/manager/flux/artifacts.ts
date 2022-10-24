@@ -4,7 +4,6 @@ import { exec } from '../../../util/exec';
 import type { ExecOptions } from '../../../util/exec/types';
 import { readLocalFile } from '../../../util/fs';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
-import { isSystemManifest } from './common';
 import type { FluxManagerData } from './types';
 
 export async function updateArtifacts({
@@ -12,7 +11,7 @@ export async function updateArtifacts({
   updatedDeps,
 }: UpdateArtifact<FluxManagerData>): Promise<UpdateArtifactsResult[] | null> {
   const systemDep = updatedDeps[0];
-  if (!isSystemManifest(packageFileName) || !systemDep?.newVersion) {
+  if (!systemDep?.newVersion) {
     return null;
   }
   const existingFileContent = await readLocalFile(packageFileName);
