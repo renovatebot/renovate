@@ -1,6 +1,7 @@
 import { GlobalConfig } from '../../../config/global';
 import type { RenovateConfig } from '../../../config/types';
 import { REPOSITORY_CHANGED } from '../../../constants/error-messages';
+import { _ } from '../../../i18n';
 import { logger } from '../../../logger';
 import { platform } from '../../../modules/platform';
 import { ensureComment } from '../../../modules/platform/comment';
@@ -45,9 +46,10 @@ async function cleanUpBranches(
 
             await ensureComment({
               number: pr.number,
-              topic: 'Autoclosing Skipped',
-              content:
-                'This PR has been flagged for autoclosing. However, it is being skipped due to the branch being already modified. Please close/delete it manually or report a bug if you think this is in error.',
+              topic: _('Autoclosing Skipped'),
+              content: _(
+                'This PR has been flagged for autoclosing. However, it is being skipped due to the branch being already modified. Please close/delete it manually or report a bug if you think this is in error.'
+              ),
             });
           }
         } else if (GlobalConfig.get('dryRun')) {
