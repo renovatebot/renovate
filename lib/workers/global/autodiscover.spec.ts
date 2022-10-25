@@ -93,6 +93,7 @@ describe('workers/global/autodiscover', () => {
   });
 
   it('filters autodiscovered github repos with regex negation', async () => {
+    config.autodiscover = true;
     config.autodiscoverFilter = ['!/project/re*./'];
     config.platform = 'github';
     hostRules.find = jest.fn(() => ({
