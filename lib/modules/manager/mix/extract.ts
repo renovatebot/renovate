@@ -19,7 +19,6 @@ export async function extractPackageFile(
 
   for (let lineNumber = 0; lineNumber < contentArr.length; lineNumber += 1) {
     if (contentArr[lineNumber].match(depSectionRegExp)) {
-      logger.trace(`Matched dep section on line ${lineNumber}`);
       let depBuffer = '';
       do {
         depBuffer += contentArr[lineNumber] + '\n';
