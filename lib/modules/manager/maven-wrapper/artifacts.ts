@@ -1,7 +1,7 @@
 import type { Stats } from 'fs';
 import os from 'os';
 import is from '@sindresorhus/is';
-import upath from 'upath';
+import { dirname, join } from 'upath';
 import { GlobalConfig } from '../../../config/global';
 import { logger } from '../../../logger';
 import { exec } from '../../../util/exec';
@@ -52,7 +52,8 @@ export async function updateArtifacts({
       return null;
     }
 
-    const cmd = await createWrapperCommand();
+    const cmd = await createWrapperCommand(packageFileName);
+
     if (!cmd) {
       logger.info('No mvnw found - skipping Artifacts update');
       return null;
@@ -150,16 +151,19 @@ async function executeWrapperCommand(
   }
 }
 
-async function createWrapperCommand(): Promise<string | null> {
-  const projectDir = GlobalConfig.get('localDir');
+async function createWrapperCommand(
+  packageFileName: string
+): Promise<string | null> {
   const wrapperExecutableFileName = mavenWrapperFileName();
-  const wrapperFullyQualifiedPath = upath.resolve(
-    projectDir,
-    `./${wrapperExecutableFileName}`
+  const localProjectDir = join(dirname(packageFileName), '../../');
+  const wrapperFullyQualifiedPath = join(
+    localProjectDir,
+    wrapperExecutableFileName
   );
+
   return await prepareCommand(
     wrapperExecutableFileName,
-    projectDir,
+    localProjectDir,
     await statLocalFile(wrapperFullyQualifiedPath),
     `wrapper:wrapper`
   );
@@ -187,10 +191,7 @@ async function prepareCommand(
     if (os.platform() !== 'win32' && (pathFileStats.mode & 0o1) === 0) {
       // add the execution permission to the owner, group and others
       logger.warn('Maven wrapper is missing the executable bit');
-      await chmodLocalFile(
-        upath.join(cwd, fileName),
-        pathFileStats.mode | 0o111
-      );
+      await chmodLocalFile(join(cwd, fileName), pathFileStats.mode | 0o111);
     }
     if (args === null) {
       return fileName;
