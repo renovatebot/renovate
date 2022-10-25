@@ -3,10 +3,12 @@ import { clear, getThrottle } from './throttle';
 
 describe('util/http/throttle', () => {
   beforeEach(() => {
-    jest
-      .spyOn(hostRules, 'find')
-      .mockReturnValue({ maxRequestsPerSecond: 143 });
     clear();
+    hostRules.clear();
+    hostRules.add({
+      matchHost: 'https://example.com',
+      maxRequestsPerSecond: 143,
+    });
   });
 
   it('returns null for invalid URL', () => {

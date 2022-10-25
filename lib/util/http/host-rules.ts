@@ -122,8 +122,10 @@ export function applyHostRules(url: string, inOptions: GotOptions): GotOptions {
 }
 
 export function getConcurrentRequestsLimit(url: string): number | null {
-  const { concurrentRequestLimit: limit } = hostRules.find({ url });
-  return typeof limit === 'number' && limit > 0 ? limit : null;
+  const { concurrentRequestLimit } = hostRules.find({ url });
+  return is.number(concurrentRequestLimit) && concurrentRequestLimit > 0
+    ? concurrentRequestLimit
+    : null;
 }
 
 export function getThrottleIntervalMs(url: string): number | null {
