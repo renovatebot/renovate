@@ -134,7 +134,7 @@ export interface BranchMetadata {
   branchName: string;
   branchSha: string | null;
   baseBranch: string | undefined;
-  baseBranchSha: string | null;
+  baseBranchSha: string | null | undefined;
   automerge: boolean;
   isModified: boolean | undefined;
 }
