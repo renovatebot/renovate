@@ -8,9 +8,9 @@
 
 First, you need to obtain an AWS [IAM Access Key id and a Secret access key id](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_access-keys.html)
 
-Let Renovate use AWS CodeCommit access keys by doing one of the following:
+Let Renovate use AWS CodeCommit authentication keys by doing one of the following:
 
-- Set a Renovate configuration file - config.js and set:
+- Set a Renovate configuration file - config.js:
 
   ```
   username: AWS IAM access key id
@@ -19,7 +19,7 @@ Let Renovate use AWS CodeCommit access keys by doing one of the following:
   token: AWS session token, if you have one
   ```
 
-- Set up the environment with all required AWS environment variables for authentication, e.g:
+- Set up the environment with all required AWS environment variables:
 
   ```
   AWS_ACCESS_KEY_ID: AWS IAM access key id
@@ -28,7 +28,14 @@ Let Renovate use AWS CodeCommit access keys by doing one of the following:
   AWS_SESSION_TOKEN: AWS session token, if you have one
   ```
 
--
+- Set up AWS credentials using CLI parameters:
+
+  ```
+  --username: AWS IAM access key id
+  --password: AWS Secret access key
+  --endpoint: the url endpoint e.g https://git-codecommit.us-east-1.amazonaws.com/
+  --token: AWS session token, if you have one
+  ```
 
 ## AWS IAM security policies
 
@@ -37,12 +44,12 @@ Let Renovate use AWS CodeCommit access keys by doing one of the following:
 
 ## Running Renovate
 
-Set up a global configuration file (config.js) for running Renovate on CodeCommit:
+Set up a global configuration file (config.js), or alternatively use CLI params or Environment variables, for running Renovate on CodeCommit:
 
 - Set `platform: 'codecommit'`
 - Set `repositories: ['{repository names separated by comma}']`, or alternatively use Renovate’s [autodiscover](https://docs.renovatebot.com/self-hosted-configuration/#autodiscover)
 
-Run Renovate with the configuration file, and it will create an onboarding Pull Request in your set repositories.
+Run Renovate and it will operate on your repositories
 
 ## Unsupported platform features/concepts
 
@@ -64,7 +71,14 @@ module.exports = {
   repositories: ['abc/def', 'abc/ghi'],
   username: 'ACCESS_KEY_ID_GOES_HERE',
   password: 'SECRET_ACCESS_KEY_GOES_HERE',
+  token: 'AWS_SESSION_TOKEN_GOES_HERE',
   gitAuthor: 'your_email@domain',
   prConcurrentLimit: 10,
+  packageRules: [
+    {
+      matchPackageNames: ['package_name', 'package_name2'],
+      enabled: false,
+    },
+  ],
 };
 ```
