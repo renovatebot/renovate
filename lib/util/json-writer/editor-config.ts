@@ -9,7 +9,7 @@ export class EditorConfig {
   public static async getCodeFormat(fileName: string): Promise<CodeFormat> {
     const { localDir } = GlobalConfig.get();
     try {
-      knownProps = await parse(upath.join(localDir, fileName));
+      const knownProps = await parse(upath.join(localDir, fileName));
       return {
         indentationSize: EditorConfig.getIndentationSize(knownProps),
         indentationType: EditorConfig.getIndentationType(knownProps),
