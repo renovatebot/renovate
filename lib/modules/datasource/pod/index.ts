@@ -28,7 +28,7 @@ function shardParts(packageName: string): string[] {
 }
 
 const githubRegex = regEx(
-  /(?<hostURL>(^https:\/\/[a-zA-z0-9-.]+))\/(?<account>[^/]+)\/(?<repo>[^/]+?)(\.git|\/.*)?$/
+  /(?<hostURL>^https:\/\/[a-zA-Z0-9-.]+)\/(?<account>[^/]+)\/(?<repo>[^/]+?)(?:\.git|\/.*)?$/
 );
 
 function releasesGithubUrl(
