@@ -1,4 +1,18 @@
-The `azure-pipelines` manager extracts container and repository resources from the `resources` block as well as tasks from `steps` blocks.
+The `azure-pipelines` manager is disabled by default.
+This is because there's no way for Renovate to know whether new task versions are yet available with the Azure DevOps environment, so new versions proposed by Renovate could fail.
+
+To opt into running it, set the following:
+
+```json
+{
+  "azure-pipelines": {
+    "enabled": true
+  }
+}
+```
+
+It works by container and repository resources from the `resources` block as well as tasks from `steps` blocks.
+
 For example:
 
 ```yaml
