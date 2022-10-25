@@ -39,12 +39,14 @@ describe('modules/manager/gradle/utils', () => {
     expect(isDependencyString('foo.foo:bar.bar:1.2.3')).toBeTrue();
     expect(isDependencyString('foo:bar:baz:qux')).toBeTrue();
     expect(isDependencyString('foo.bar:baz:1.2.3')).toBeTrue();
+    expect(isDependencyString('foo.bar:baz:1.2.3:linux-cpu-x86_64')).toBeTrue();
     expect(isDependencyString('foo.bar:baz:1.2.+')).toBeTrue();
     expect(isDependencyString('foo:bar:baz:qux:quux')).toBeFalse();
     expect(isDependencyString("foo:bar:1.2.3'")).toBeFalse();
     expect(isDependencyString('foo:bar:1.2.3"')).toBeFalse();
     expect(isDependencyString('-Xep:ParameterName:OFF')).toBeFalse();
     expect(isDependencyString('foo$bar:baz:1.2.+')).toBeFalse();
+    expect(isDependencyString('scm:git:https://some.git')).toBeFalse();
   });
 
   it('parseDependencyString', () => {
