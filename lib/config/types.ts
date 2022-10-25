@@ -366,7 +366,7 @@ export interface RenovateOptionBase {
 
   advancedConfig?: boolean;
 
-  commitMsg?: boolean;
+  directEditOfCommitMessageDeprecation?: boolean;
 }
 
 export interface RenovateArrayOption<

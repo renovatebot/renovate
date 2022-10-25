@@ -258,7 +258,7 @@ export async function generateConfig(dist: string, bot = false): Promise<void> {
         configOptionsRaw[footerIndex] += generateAdvancedConfig();
       }
 
-      if (el.commitMsg) {
+      if (el.directEditOfCommitMessageDeprecation) {
         configOptionsRaw[footerIndex] += generateCommitMsg();
       }
 
@@ -271,11 +271,18 @@ export async function generateConfig(dist: string, bot = false): Promise<void> {
 }
 
 function generateAdvancedUse(): string {
-  return '\n<!-- prettier-ignore -->\n!!! warning\n    For advanced use only! Use at your own risk!\n';
+  return (
+    '\n<!-- prettier-ignore -->\n!!! warning\n' +
+    '    For advanced use only! Use at your own risk!\n'
+  );
 }
 
 function generateFollowTagAdvancedFunctionality(): string {
-  return "\n<!-- prettier-ignore -->\n!!! warning\n    Advanced functionality.\n    Only use this if you're sure you know what you're doing.\n";
+  return (
+    '\n<!-- prettier-ignore -->\n!!! warning\n' +
+    '    Advanced functionality.\n' +
+    "    Only use this if you're sure you know what you're doing.\n"
+  );
 }
 
 function generateGroupAdvancedFunctionality(): string {
@@ -287,7 +294,10 @@ function generateGroupAdvancedFunctionality(): string {
 }
 
 function generateAdvancedConfig(): string {
-  return '\n<!-- prettier-ignore -->\n!!! warning\n    Advanced config, use at your own risk.\n';
+  return (
+    '\n<!-- prettier-ignore -->\n!!! warning\n' +
+    '    Advanced config, use at your own risk.\n'
+  );
 }
 
 function generateCommitMsg(): string {

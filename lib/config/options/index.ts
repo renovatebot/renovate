@@ -1641,7 +1641,7 @@ const options: RenovateOptions[] = [
     default:
       '{{{commitMessagePrefix}}} {{{commitMessageAction}}} {{{commitMessageTopic}}} {{{commitMessageExtra}}} {{{commitMessageSuffix}}}',
     cli: false,
-    commitMsg: true,
+    directEditOfCommitMessageDeprecation: true,
   },
   {
     name: 'commitBody',
