@@ -18,7 +18,7 @@ export function getQueue(url: string): PQueue | null {
     queue = null; // null represents "no queue", as opposed to undefined
     const concurrency = getConcurrentRequestsLimit(url);
     if (concurrency) {
-      logger.debug({ concurrency, host }, 'Using queue');
+      logger.debug(`Using queue: host=${host}, concurrency=${concurrency}`);
       queue = new PQueue({ concurrency });
     } else {
       logger.debug({ host }, 'No concurrency limits');
