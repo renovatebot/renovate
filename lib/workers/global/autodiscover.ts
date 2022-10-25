@@ -32,7 +32,12 @@ export async function autodiscoverRepositories(
   }
 
   if (config.autodiscoverFilter) {
-    discovered = applyFilters(discovered, config.autodiscoverFilter);
+    discovered = applyFilters(
+      discovered,
+      is.string(config.autodiscoverFilter)
+        ? [config.autodiscoverFilter]
+        : config.autodiscoverFilter
+    );
 
     if (!discovered.length) {
       // Soft fail (no error thrown) if no accessible repositories match the filter
@@ -40,6 +45,7 @@ export async function autodiscoverRepositories(
       return config;
     }
   }
+
   logger.info(
     { length: discovered.length, repositories: discovered },
     `Autodiscovered repositories`
