@@ -4,7 +4,6 @@ import type { StatusResult } from 'simple-git';
 import { envMock, mockExecAll } from '../../../../test/exec-util';
 import { env, fs, git, mockedFunction, partial } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
-import type { RepoGlobalConfig } from '../../../config/types';
 import { resetPrefetchedImages } from '../../../util/exec/docker';
 import { getPkgReleases } from '../../datasource';
 import { updateArtifacts } from '.';
@@ -14,10 +13,6 @@ jest.mock('../../../util/git');
 jest.spyOn(os, 'platform').mockImplementation(() => 'darwin');
 jest.mock('../../../util/exec/env');
 jest.mock('../../datasource');
-
-const adminConfig: RepoGlobalConfig = {
-  localDir: './',
-};
 
 function mockMavenFileChangedInGit(fileName = 'maven-wrapper.properties') {
   git.getRepoStatus.mockResolvedValueOnce(
@@ -72,7 +67,7 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
   it('Docker should use java 8 if version is lower then 2.0.0', async () => {
     mockMavenFileChangedInGit();
     const execSnapshots = mockExecAll();
-    GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
+    GlobalConfig.set({ binarySource: 'docker' });
     const updatedDeps = await updateArtifacts({
       packageFileName: 'maven',
       newPackageFileContent: '',
@@ -99,7 +94,6 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
 
   it('Should update when it is maven wrapper', async () => {
     mockMavenFileChangedInGit();
-    GlobalConfig.set(adminConfig);
     mockExecAll({ stdout: '', stderr: '' });
     const updatedDeps = await updateArtifacts({
       packageFileName: 'maven',
@@ -123,7 +117,6 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
   it('Should not update deps when maven-wrapper.properties is not in git change', async () => {
     mockMavenFileChangedInGit('not-maven-wrapper.properties');
     mockExecAll({ stdout: '', stderr: '' });
-    GlobalConfig.set(adminConfig);
     const updatedDeps = await updateArtifacts({
       packageFileName: 'maven',
       newPackageFileContent: '',
@@ -133,30 +126,9 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
     expect(updatedDeps).toEqual([]);
   });
 
-  it('Should return an error when config is not set', async () => {
-    const updatedDeps = await updateArtifacts({
-      packageFileName: '',
-      newPackageFileContent: '',
-      updatedDeps: [{ depName: 'org.apache.maven.wrapper:maven-wrapper' }],
-      config: { newValue: '3.3.1' },
-    });
-
-    const expectedError = [
-      {
-        artifactError: {
-          lockFile: '',
-          stderr:
-            'The "path" argument must be of type string. Received undefined',
-        },
-      },
-    ];
-
-    expect(updatedDeps).toEqual(expectedError);
-  });
-
   it('updates with docker', async () => {
     mockMavenFileChangedInGit();
-    GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
+    GlobalConfig.set({ localDir: './', binarySource: 'docker' });
     const execSnapshots = mockExecAll({ stdout: '', stderr: '' });
     const result = await updateArtifacts({
       packageFileName: 'maven',
@@ -204,7 +176,6 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
 
   it('Should return null when cmd is not found', async () => {
     mockMavenFileChangedInGit('also-not-maven-wrapper.properties');
-    GlobalConfig.set(adminConfig);
     jest.spyOn(os, 'platform').mockImplementation(() => 'win32');
     const execSnapshots = mockExecAll({ stdout: '', stderr: '' });
     fs.statLocalFile.mockResolvedValue(null);
@@ -220,7 +191,6 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
 
   it('Should throw an error when it cant execute', async () => {
     mockMavenFileChangedInGit();
-    GlobalConfig.set(adminConfig);
     mockExecAll(new Error('temporary-error'));
     const updatedDeps = await updateArtifacts({
       packageFileName: 'maven',

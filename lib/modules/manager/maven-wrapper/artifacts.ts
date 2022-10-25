@@ -165,7 +165,7 @@ async function createWrapperCommand(
     wrapperExecutableFileName,
     localProjectDir,
     await statLocalFile(wrapperFullyQualifiedPath),
-    `wrapper:wrapper`
+    'wrapper:wrapper'
   );
 }
 
