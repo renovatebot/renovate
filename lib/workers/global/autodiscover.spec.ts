@@ -106,6 +106,20 @@ describe('workers/global/autodiscover', () => {
     expect(res.repositories).toEqual(['project/another-repo']);
   });
 
+  it('filters autodiscovered github repos with minimatch negation', async () => {
+    config.autodiscover = true;
+    config.autodiscoverFilter = '!project/re*';
+    config.platform = PlatformId.Github;
+    hostRules.find = jest.fn(() => ({
+      token: 'abc',
+    }));
+    ghApi.getRepos = jest.fn(() =>
+      Promise.resolve(['project/repo', 'project/another-repo'])
+    );
+    const res = await autodiscoverRepositories(config);
+    expect(res.repositories).toEqual(['project/another-repo']);
+  });
+
   it('fail if regex pattern is not valid', async () => {
     config.autodiscover = true;
     config.autodiscoverFilter = ['/project/re**./'];
