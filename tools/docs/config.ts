@@ -281,7 +281,7 @@ function generateFollowTagAdvancedFunctionality(): string {
   return (
     '\n<!-- prettier-ignore -->\n!!! warning\n' +
     '    Advanced functionality.\n' +
-    "    Only use this if you're sure you know what you're doing.\n"
+    '    Only use this if you're sure you know what you're doing.\n'
   );
 }
 
