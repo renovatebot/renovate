@@ -51,6 +51,18 @@ describe('util/json-writer/editor-config', () => {
     expect(format.indentationType).toBe(IndentationType.Space);
   });
 
+  // temporary ignoring error https://github.com/renovatebot/renovate/issues/18540
+  it('should temporary give undefined until its fixed on the library', async () => {
+    expect.assertions(2);
+    Fixtures.mock({
+      '.editorconfig': Fixtures.get('.customer_file'),
+    });
+    const format = await EditorConfig.getCodeFormat(defaultConfigFile);
+
+    expect(format.indentationSize).toBeUndefined();
+    expect(format.indentationType).toBeUndefined();
+  });
+
   it('should not handle non json config from .editorconfig', async () => {
     expect.assertions(2);
     Fixtures.mock({
