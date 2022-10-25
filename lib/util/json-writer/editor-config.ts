@@ -17,6 +17,7 @@ export class EditorConfig {
     } catch (err) {
       logger.warn({ err }, 'Failed to parse editor config');
       return {};
+      return {};
     }
   }
 
