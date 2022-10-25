@@ -16,10 +16,7 @@ export class EditorConfig {
       };
     } catch (err) {
       logger.warn({ err }, 'Failed to parse editor config');
-      return {
-        indentationSize: undefined,
-        indentationType: undefined,
-      };
+      return { };
     }
   }
 
