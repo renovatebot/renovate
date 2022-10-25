@@ -37,14 +37,16 @@ describe('modules/manager/gradle/utils', () => {
   it('isDependencyString', () => {
     expect(isDependencyString('foo:bar:1.2.3')).toBeTrue();
     expect(isDependencyString('foo.foo:bar.bar:1.2.3')).toBeTrue();
-    expect(isDependencyString('foo:bar:baz:qux')).toBeFalse();
+    expect(isDependencyString('foo:bar:baz:qux')).toBeTrue();
     expect(isDependencyString('foo.bar:baz:1.2.3')).toBeTrue();
+    expect(isDependencyString('foo.bar:baz:1.2.3:linux-cpu-x86_64')).toBeTrue();
     expect(isDependencyString('foo.bar:baz:1.2.+')).toBeTrue();
-    expect(isDependencyString('foo.bar:baz:qux:quux')).toBeFalse();
+    expect(isDependencyString('foo:bar:baz:qux:quux')).toBeFalse();
     expect(isDependencyString("foo:bar:1.2.3'")).toBeFalse();
     expect(isDependencyString('foo:bar:1.2.3"')).toBeFalse();
     expect(isDependencyString('-Xep:ParameterName:OFF')).toBeFalse();
     expect(isDependencyString('foo$bar:baz:1.2.+')).toBeFalse();
+    expect(isDependencyString('scm:git:https://some.git')).toBeFalse();
   });
 
   it('parseDependencyString', () => {
@@ -56,7 +58,10 @@ describe('modules/manager/gradle/utils', () => {
       depName: 'foo.foo:bar.bar',
       currentValue: '1.2.3',
     });
-    expect(parseDependencyString('foo:bar:baz:qux')).toBeNull();
+    expect(parseDependencyString('foo:bar:baz:qux')).toMatchObject({
+      depName: 'foo:bar',
+      currentValue: 'baz',
+    });
     expect(parseDependencyString('foo.bar:baz:1.2.3')).toMatchObject({
       depName: 'foo.bar:baz',
       currentValue: '1.2.3',
@@ -65,7 +70,7 @@ describe('modules/manager/gradle/utils', () => {
       depName: 'foo:bar',
       currentValue: '1.2.+',
     });
-    expect(parseDependencyString('foo.bar:baz:qux:quux')).toBeNull();
+    expect(parseDependencyString('foo:bar:baz:qux:quux')).toBeNull();
     expect(parseDependencyString("foo:bar:1.2.3'")).toBeNull();
     expect(parseDependencyString('foo:bar:1.2.3"')).toBeNull();
     expect(parseDependencyString('-Xep:ParameterName:OFF')).toBeNull();

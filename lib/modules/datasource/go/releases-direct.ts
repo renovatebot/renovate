@@ -3,6 +3,7 @@ import { cache } from '../../../util/cache/package/decorator';
 import { regEx } from '../../../util/regex';
 import { BitBucketTagsDatasource } from '../bitbucket-tags';
 import { Datasource } from '../datasource';
+import { GitTagsDatasource } from '../git-tags';
 import { GithubTagsDatasource } from '../github-tags';
 import { GitlabTagsDatasource } from '../gitlab-tags';
 import type { DatasourceApi, GetReleasesConfig, ReleaseResult } from '../types';
@@ -12,12 +13,14 @@ import { getSourceUrl } from './common';
 export class GoDirectDatasource extends Datasource {
   static readonly id = 'go-direct';
 
+  git: GitTagsDatasource;
   github: GithubTagsDatasource;
   gitlab: DatasourceApi;
   bitbucket: DatasourceApi;
 
   constructor() {
     super(GoDirectDatasource.id);
+    this.git = new GitTagsDatasource();
     this.github = new GithubTagsDatasource();
     this.gitlab = new GitlabTagsDatasource();
     this.bitbucket = new BitBucketTagsDatasource();
@@ -55,6 +58,10 @@ export class GoDirectDatasource extends Datasource {
     }
 
     switch (source.datasource) {
+      case GitTagsDatasource.id: {
+        res = await this.git.getReleases(source);
+        break;
+      }
       case GithubTagsDatasource.id: {
         res = await this.github.getReleases(source);
         break;
