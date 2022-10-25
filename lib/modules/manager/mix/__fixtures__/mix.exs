@@ -16,6 +16,10 @@ defmodule MyProject.MixProject do
 
   defp deps() do
     [
+      #{:broadway_dashboard, "~> 0.2.2"},
+#{:broadway_dashboard, "~> 0.2.2"},
+#   {:broadway_dashboard, "~> 0.2.2"},
+      #    {:broadway_dashboard, "~> 0.2.2"},
       {:postgrex, "~> 0.8.1"},
       {:ecto, ">2.1.0 or <=3.0.0"},
       {:cowboy, github: "ninenines/cowboy"},
@@ -24,7 +28,6 @@ defmodule MyProject.MixProject do
       {:jason, ">= 1.0.0"},
       {:jason, "~> 1.0",
         optional: true},
-      #{:broadway_dashboard, "~> 0.2.2"},
     ]
   end
 end
