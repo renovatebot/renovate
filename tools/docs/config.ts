@@ -289,7 +289,7 @@ function generateGroupAdvancedFunctionality(): string {
   return (
     '\n<!-- prettier-ignore --> \n!!! warning \n' +
     '    Advanced functionality only. \n' +
-    "    Do not use unless you know what you're doing.\n"
+    "   Do not use unless you know what you're doing.\n"
   );
 }
 
