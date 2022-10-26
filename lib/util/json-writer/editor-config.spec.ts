@@ -1,4 +1,3 @@
-import * as editorconf from 'editorconfig';
 import { fs as memfs } from 'memfs';
 import { Fixtures } from '../../../test/fixtures';
 import { configFileNames } from '../../config/app-strings';
@@ -57,6 +56,7 @@ describe('util/json-writer/editor-config', () => {
     Fixtures.mock({
       '.editorconfig': Fixtures.get('.global_editorconfig'),
     });
+    const editorconf = require('editorconfig');
     jest
       .spyOn(editorconf, 'parse')
       .mockImplementationOnce(new Error('something') as never);
