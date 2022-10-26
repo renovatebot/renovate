@@ -75,6 +75,7 @@ export interface InternalHttpOptions extends HttpOptions {
 
 export interface HttpHeaders extends IncomingHttpHeaders {
   link?: string | undefined;
+  'x-ms-continuationtoken'?: string | undefined;
 }
 
 export interface HttpResponse<T = string> {

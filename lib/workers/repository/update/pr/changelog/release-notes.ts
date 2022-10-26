@@ -9,6 +9,7 @@ import * as packageCache from '../../../../../util/cache/package';
 import { linkify } from '../../../../../util/markdown';
 import { newlineRegex, regEx } from '../../../../../util/regex';
 import type { BranchUpgradeConfig } from '../../../../types';
+import * as azure from './azure';
 import * as github from './github';
 import * as gitlab from './gitlab';
 import type {
@@ -34,6 +35,9 @@ export async function getReleaseList(
         return await gitlab.getReleaseList(project, release);
       case 'github':
         return await github.getReleaseList(project, release);
+      case 'azure':
+        logger.info('Azure DevOps Releases are not supported.');
+        return [];
 
       default:
         logger.warn({ apiBaseUrl, repository, type }, 'Invalid project type');
@@ -243,6 +247,12 @@ export async function getReleaseNotesMdFileInner(
           apiBaseUrl,
           sourceDirectory
         );
+      case 'azure':
+        return await azure.getReleaseNotesMd(
+          repository,
+          apiBaseUrl,
+          sourceDirectory
+        );
 
       default:
         logger.warn({ apiBaseUrl, repository, type }, 'Invalid project type');
@@ -285,7 +295,7 @@ export async function getReleaseNotesMd(
   project: ChangeLogProject,
   release: ChangeLogRelease
 ): Promise<ChangeLogNotes | null> {
-  const { baseUrl, repository } = project;
+  const { baseUrl, repository, type } = project;
   const version = release.version;
   logger.trace(`getReleaseNotesMd(${repository}, ${version})`);
   const skippedRepos = ['facebook/react-native'];
@@ -302,31 +312,32 @@ export async function getReleaseNotesMd(
     regEx(/\n\s*<a name="[^"]*">.*?<\/a>\n/g),
     '\n'
   );
+  const notesSourceUrl = type === 'azure' ?
+    `${baseUrl}_git/${repository}?path=${changelogFile}` :
+    `${baseUrl}${repository}/blob/HEAD/${changelogFile}`;
+
   for (const level of [1, 2, 3, 4, 5, 6, 7]) {
     const changelogParsed = sectionize(changelogMd, level);
     if (changelogParsed.length >= 2) {
       for (const section of changelogParsed) {
         try {
-          // replace brackets and parenthesis with space
-          const deParenthesizedSection = section.replace(
+          const [heading] = section.split(newlineRegex);
+          const deParenthesizedHeading = heading.replace(
             regEx(/[[\]()]/g),
             ' '
           );
-          const [heading] = deParenthesizedSection.split(newlineRegex);
-          const title = heading
+          const title = deParenthesizedHeading
             .replace(regEx(/^\s*#*\s*/), '')
             .split(' ')
             .filter(Boolean);
+          const url = type === 'azure' ?
+            `${notesSourceUrl}&anchor=user-content-${encodeURIComponent(heading.replace(regEx(/^\s*#*\s*/), '').toLowerCase().replace(regEx(/\s+/), '-'))}` :
+            `${notesSourceUrl}#${title.join('-').replace(regEx(/[^A-Za-z0-9-]/g), '')}`;
+
           let body = section.replace(regEx(/.*?\n(-{3,}\n)?/), '').trim();
           for (const word of title) {
             if (word.includes(version) && !isUrl(word)) {
               logger.trace({ body }, 'Found release notes for v' + version);
-              // TODO: fix url
-              const notesSourceUrl = `${baseUrl}${repository}/blob/HEAD/${changelogFile}`;
-              const url =
-                notesSourceUrl +
-                '#' +
-                title.join('-').replace(regEx(/[^A-Za-z0-9-]/g), '');
               body = massageBody(body, baseUrl);
               if (body?.length) {
                 try {
