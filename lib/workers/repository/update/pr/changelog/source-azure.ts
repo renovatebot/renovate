@@ -41,12 +41,8 @@ export async function getChangeLogJSON(
   const manager = config.manager;
   const version = allVersioning.get(versioning);
   const { protocol, host, pathname } = URL.parse(sourceUrl);
-  const organization = pathname!
-    .slice(1)
-    .split("/")[0]
-  const projectName = pathname!
-    .slice(1)
-    .split("/")[1]
+  const organization = pathname!.slice(1).split('/')[0];
+  const projectName = pathname!.slice(1).split('/')[1];
   const baseUrl = `${protocol!}//${host!}/${organization}/${projectName}/`;
   const url = sourceUrl;
   const { token } = hostRules.find({
@@ -68,9 +64,7 @@ export async function getChangeLogJSON(
     );
     return null;
   }
-  const repository = pathname!
-    .slice(1)
-    .split("/")[3];
+  const repository = pathname!.slice(1).split('/')[3];
   const apiBaseUrl = `${baseUrl}_apis/`;
   const releases = config.releases ?? (await getInRangeReleases(config));
   if (!releases?.length) {
@@ -135,7 +129,6 @@ export async function getChangeLogJSON(
         const prevHead = await getRef(prev);
         const nextHead = await getRef(next);
         if (prevHead && nextHead) {
-
           release.compare.url = `${baseUrl}_git/${repository}/branchCompare?baseVersion=GT${prevHead}&targetVersion=GT${nextHead}`;
         }
         const cacheMinutes = 55;

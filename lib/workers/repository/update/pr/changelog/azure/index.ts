@@ -1,6 +1,10 @@
 import changelogFilenameRegex from 'changelog-filename-regex';
 import { logger } from '../../../../../../logger';
-import type { AzureItem, AzureTree, AzureTreeNode } from '../../../../../../types/platform/azure';
+import type {
+  AzureItem,
+  AzureTree,
+  AzureTreeNode,
+} from '../../../../../../types/platform/azure';
 import { AzureHttp } from '../../../../../../util/http/azure';
 import { ensureTrailingSlash } from '../../../../../../util/url';
 import type { ChangeLogFile } from '../types';
@@ -22,7 +26,10 @@ export async function getTags(
     const tags = res.body.value;
 
     if (!tags.length) {
-      logger.debug({ sourceRepo: repository }, 'repository has no Azure DevOps tags');
+      logger.debug(
+        { sourceRepo: repository },
+        'repository has no Azure DevOps tags'
+      );
     }
 
     return tags.map((tag) => tag.name).filter(Boolean);
@@ -81,7 +88,9 @@ export async function getReleaseNotesMd(
     );
   }
 
-  const fileRes = await http.get(`${apiPrefix}items?path=${changelogFile}&includeContent=true&api-version=6.0`);
+  const fileRes = await http.get(
+    `${apiPrefix}items?path=${changelogFile}&includeContent=true&api-version=6.0`
+  );
   const changelogMd = fileRes.body + '\n#\n##';
   return { changelogFile, changelogMd };
 }

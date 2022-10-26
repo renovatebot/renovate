@@ -13,13 +13,19 @@ export class AzureHttp extends Http<HttpOptions> {
     url: string,
     continuationToken = ''
   ): Promise<HttpResponse<AzureBodyPaginated<AzureTag>>> {
-    const option = continuationToken ? `&continuationToken=${continuationToken}` : '';
-    const result = await super.getJson<AzureBodyPaginated<AzureTag>>(`${url}${option}`);
+    const option = continuationToken
+      ? `&continuationToken=${continuationToken}`
+      : '';
+    const result = await super.getJson<AzureBodyPaginated<AzureTag>>(
+      `${url}${option}`
+    );
     if (result.headers['x-ms-continuationtoken']) {
-      const nextResult = await this.getJsonPaginated(url, result.headers['x-ms-continuationtoken']);
+      const nextResult = await this.getJsonPaginated(
+        url,
+        result.headers['x-ms-continuationtoken']
+      );
       result.body.value.push(...nextResult.body.value);
     }
     return result;
   }
-
 }

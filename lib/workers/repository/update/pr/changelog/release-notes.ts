@@ -312,9 +312,10 @@ export async function getReleaseNotesMd(
     regEx(/\n\s*<a name="[^"]*">.*?<\/a>\n/g),
     '\n'
   );
-  const notesSourceUrl = type === 'azure' ?
-    `${baseUrl}_git/${repository}?path=${changelogFile}` :
-    `${baseUrl}${repository}/blob/HEAD/${changelogFile}`;
+  const notesSourceUrl =
+    type === 'azure'
+      ? `${baseUrl}_git/${repository}?path=${changelogFile}`
+      : `${baseUrl}${repository}/blob/HEAD/${changelogFile}`;
 
   for (const level of [1, 2, 3, 4, 5, 6, 7]) {
     const changelogParsed = sectionize(changelogMd, level);
@@ -330,9 +331,17 @@ export async function getReleaseNotesMd(
             .replace(regEx(/^\s*#*\s*/), '')
             .split(' ')
             .filter(Boolean);
-          const url = type === 'azure' ?
-            `${notesSourceUrl}&anchor=user-content-${encodeURIComponent(heading.replace(regEx(/^\s*#*\s*/), '').toLowerCase().replace(regEx(/\s+/), '-'))}` :
-            `${notesSourceUrl}#${title.join('-').replace(regEx(/[^A-Za-z0-9-]/g), '')}`;
+          const url =
+            type === 'azure'
+              ? `${notesSourceUrl}&anchor=user-content-${encodeURIComponent(
+                  heading
+                    .replace(regEx(/^\s*#*\s*/), '')
+                    .toLowerCase()
+                    .replace(regEx(/\s+/), '-')
+                )}`
+              : `${notesSourceUrl}#${title
+                  .join('-')
+                  .replace(regEx(/[^A-Za-z0-9-]/g), '')}`;
 
           let body = section.replace(regEx(/.*?\n(-{3,}\n)?/), '').trim();
           for (const word of title) {

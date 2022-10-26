@@ -12,7 +12,9 @@ import { parseUrl } from './url';
  * @param url the url to detect `platform` from
  * @returns matched `platform` if found, otherwise `null`
  */
-export function detectPlatform(url: string): 'gitlab' | 'github' | 'azure' | null {
+export function detectPlatform(
+  url: string
+): 'gitlab' | 'github' | 'azure' | null {
   const { hostname } = parseUrl(url) ?? {};
   if (hostname === 'github.com' || hostname?.includes('github')) {
     return 'github';
