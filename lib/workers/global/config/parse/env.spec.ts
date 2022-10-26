@@ -52,6 +52,13 @@ describe('workers/global/config/parse/env', () => {
       expect(env.getConfig(envParam).token).toBe('a');
     });
 
+    it('coerces string newlines', () => {
+      const envParam: NodeJS.ProcessEnv = {
+        RENOVATE_GIT_PRIVATE_KEY: 'abc\\ndef',
+      };
+      expect(env.getConfig(envParam).gitPrivateKey).toBe('abc\ndef');
+    });
+
     it('supports custom prefixes', () => {
       const envParam: NodeJS.ProcessEnv = {
         ENV_PREFIX: 'FOOBAR_',
