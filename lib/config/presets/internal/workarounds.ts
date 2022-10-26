@@ -124,7 +124,7 @@ export const presets: Record<string, Preset> = {
     packageRules: [
       {
         description:
-          'Limit Java runtime versions to LTS releases. To receive all major releases add `javaLTSVersions` to the `ignorePresets` array.',
+          'Limit Java runtime versions to LTS releases. To receive all major releases add `workarounds:javaLTSVersions` to the `ignorePresets` array.',
         matchDatasources: ['docker', 'adoptium-java'],
         matchPackageNames: [
           'eclipse-temurin',

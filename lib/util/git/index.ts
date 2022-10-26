@@ -684,10 +684,10 @@ export async function isBranchConflicted(
   }
 
   const isConflicted = getCachedConflictResult(
-    baseBranch,
-    baseBranchSha,
     branch,
-    branchSha
+    branchSha,
+    baseBranch,
+    baseBranchSha
   );
   if (is.boolean(isConflicted)) {
     logger.debug(
@@ -732,7 +732,7 @@ export async function isBranchConflicted(
     }
   }
 
-  setCachedConflictResult(baseBranch, baseBranchSha, branch, branchSha, result);
+  setCachedConflictResult(branch, result);
   logger.debug(`branch.isConflicted(): ${result}`);
   return result;
 }
