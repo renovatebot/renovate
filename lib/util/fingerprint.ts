@@ -2,5 +2,6 @@ import hasha from 'hasha';
 import { safeStringify } from './stringify';
 
 export function fingerprint(input: unknown): string {
-  return hasha(safeStringify(input));
+  const sortedInput = safeStringify(input);
+  return sortedInput ? hasha(sortedInput) : '';
 }
