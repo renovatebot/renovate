@@ -62,3 +62,8 @@ Source: [AWS s3 documentation - Interface BucketEndpointInputConfig](https://doc
 ## `RENOVATE_X_EXEC_GPID_HANDLE`
 
 If set, Renovate will terminate the whole process group of a terminated child process spawned by Renovate.
+
+## `OTEL_EXPORTER_OTLP_ENDPOINT`
+
+If set, Renovate will export OpenTelemetry data to the supplied endpoint.
+For more information see [the OpenTelemetry docs](opentelemetry.md).
