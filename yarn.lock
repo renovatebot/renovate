@@ -4124,10 +4124,10 @@ cli-table3@^0.6.1, cli-table3@^0.6.2:
   optionalDependencies:
     "@colors/colors" "1.5.0"
 
-clipanion@3.2.0-rc.12:
-  version "3.2.0-rc.12"
-  resolved "https://registry.yarnpkg.com/clipanion/-/clipanion-3.2.0-rc.12.tgz#4426199a1ca49d045f199613dd4e20387c815324"
-  integrity sha512-yhxjhyfuOtQW11CLgfqG3aWsVNu52CzQd18tgAn4P/AMaEvaLbB1x9qmKb5K5HPvjBzDG6JWSHdJOIfqQgOo7Q==
+clipanion@3.2.0-rc.13:
+  version "3.2.0-rc.13"
+  resolved "https://registry.yarnpkg.com/clipanion/-/clipanion-3.2.0-rc.13.tgz#e969465c17e2134a85c1978283dc4458fafd3b60"
+  integrity sha512-JYuPIaZZOl4nTUP4BMXmHGxYkAD2gc0m5GxZKr2eKEjquyFj/WBbkERDesnUsQKewUmWvBzzxdbf8WQ/GBDduQ==
   dependencies:
     typanion "^3.8.0"
 
