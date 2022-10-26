@@ -24,7 +24,7 @@ concurrency:
 env:
   # Currently no way to detect automatically (#8153)
   DEFAULT_BRANCH: main
-  NODE_VERSION: 16
+  NODE_VERSION: 14
   DRY_RUN: true
 
 jobs:
