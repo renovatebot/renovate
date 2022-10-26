@@ -2277,10 +2277,10 @@
   dependencies:
     "@octokit/openapi-types" "^14.0.0"
 
-"@one-ini/wasm@0.1.0":
-  version "0.1.0"
-  resolved "https://registry.yarnpkg.com/@one-ini/wasm/-/wasm-0.1.0.tgz#9afb7db5804f509490de695481cf05a00aef9ccd"
-  integrity sha512-cP8ZX+YBxw7SykvcX1NNKSia7ByE+PQTLZcRcEuuHsGJL+Zzuid+LSU1gC6QS1Ll3GTdE7z1/+JR5MYeMQkLBQ==
+"@one-ini/wasm@0.1.1":
+  version "0.1.1"
+  resolved "https://registry.yarnpkg.com/@one-ini/wasm/-/wasm-0.1.1.tgz#6013659736c9dbfccc96e8a9c2b3de317df39323"
+  integrity sha512-XuySG1E38YScSJoMlqovLru4KTUNSjgVTIjyh7qMX6aNN5HY5Ct5LhRJdxO79JtTzKfzV/bnWpz+zquYrISsvw==
 
 "@openpgp/web-stream-tools@0.0.12":
   version "0.0.12"
@@ -4665,12 +4665,12 @@ duplexer2@~0.1.0:
   dependencies:
     readable-stream "^2.0.2"
 
-editorconfig@1.0.0:
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/editorconfig/-/editorconfig-1.0.0.tgz#c2d9d0f287b3c14cb64aaf71dd1d11c8a6ec535c"
-  integrity sha512-kep0YWCniNr1Z/pkavbAQ3yRQRTkaO+xJBiZPWwObnsS8dlo4C14onTf35IpPtR1nM8bqgDF9XVscDY7QwVEng==
+editorconfig@1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/editorconfig/-/editorconfig-1.0.1.tgz#94dee9bf4351ccce3b12eefed663efef29b06046"
+  integrity sha512-QKhz+SCEjJ6JpIK4Ve64KpSZs8ZIoIkd2qWbhfrVrwbIh60+uVV70QDh3FYcZrhwJwQ+m9UdrOMSbGe/Osxiew==
   dependencies:
-    "@one-ini/wasm" "0.1.0"
+    "@one-ini/wasm" "0.1.1"
     commander "^9.4.1"
     minimatch "5.1.0"
     semver "^7.3.8"
