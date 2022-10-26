@@ -69,6 +69,7 @@ export function syncBranchState(
   if (baseBranchSha !== branchState.baseBranchSha) {
     logger.debug('syncBranchState(): update baseBranchSha');
     delete branchState.isBehindBase;
+    delete branchState.isConflicted;
 
     // update cached branchSha
     branchState.baseBranchSha = baseBranchSha;
@@ -78,6 +79,7 @@ export function syncBranchState(
   if (branchSha !== branchState.sha) {
     logger.debug('syncBranchState(): update branchSha');
     delete branchState.isBehindBase;
+    delete branchState.isConflicted;
     delete branchState.isModified;
     delete branchState.branchFingerprint;
 

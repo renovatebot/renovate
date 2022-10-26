@@ -191,7 +191,7 @@
     "git-url-parse": "13.1.0",
     "github-url-from-git": "1.5.0",
     "global-agent": "3.0.0",
-    "good-enough-parser": "1.1.19",
+    "good-enough-parser": "1.1.20",
     "got": "11.8.5",
     "graph-data-structure": "2.0.0",
     "handlebars": "4.7.7",
@@ -327,7 +327,7 @@
   },
   "resolutions": {
     "@types/jest/pretty-format": "^29.0.0",
-    "@yarnpkg/core/clipanion": "3.2.0-rc.12"
+    "@yarnpkg/core/clipanion": "3.2.0-rc.13"
   },
   "files": [
     "dist",
