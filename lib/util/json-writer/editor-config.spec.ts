@@ -51,6 +51,22 @@ describe('util/json-writer/editor-config', () => {
     expect(format.indentationType).toBe(IndentationType.Space);
   });
 
+  it('should return undefined in case of exception', async () => {
+    expect.assertions(2);
+    Fixtures.mock({
+      '.editorconfig': Fixtures.get('.global_editorconfig'),
+    });
+    const editorconf = await import('editorconfig');
+    jest
+      .spyOn(editorconf, 'parse')
+      .mockImplementationOnce(new Error('something') as never);
+
+    const format = await EditorConfig.getCodeFormat(defaultConfigFile);
+
+    expect(format.indentationSize).toBeUndefined();
+    expect(format.indentationType).toBeUndefined();
+  });
+
   it('should not handle non json config from .editorconfig', async () => {
     expect.assertions(2);
     Fixtures.mock({
