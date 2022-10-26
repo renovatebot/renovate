@@ -16,7 +16,7 @@ describe('util/git/set-branch-commit', () => {
   });
 
   describe('setBranchCommit', () => {
-    it('sets new branch in cache if it doesn not exist', () => {
+    it('sets new branch in cache', () => {
       git.getBranchCommit.mockReturnValueOnce('base_SHA');
       setBranchNewCommit('branch_name', 'base_branch', 'SHA');
       expect(logger.logger.debug).toHaveBeenCalledWith(
@@ -29,6 +29,7 @@ describe('util/git/set-branch-commit', () => {
           sha: 'SHA',
           baseBranchSha: 'base_SHA',
           isBehindBase: false,
+          isConflicted: false,
           isModified: false,
           parentSha: 'base_SHA',
         },
@@ -43,8 +44,9 @@ describe('util/git/set-branch-commit', () => {
             baseBranch: 'base_branch',
             sha: 'SHA',
             baseBranchSha: 'base_SHA',
-            isBehindBase: false,
-            isModified: false,
+            isBehindBase: true,
+            isModified: true,
+            isConflicted: true,
             parentSha: 'base_SHA',
           }),
         ],
@@ -60,6 +62,7 @@ describe('util/git/set-branch-commit', () => {
           baseBranchSha: 'base_SHA',
           isBehindBase: false,
           isModified: false,
+          isConflicted: false,
           parentSha: 'base_SHA',
         },
       ]);
