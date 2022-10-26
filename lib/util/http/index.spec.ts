@@ -1,10 +1,16 @@
+import * as z from 'zod';
 import * as httpMock from '../../../test/http-mock';
+import { logger } from '../../../test/util';
 import {
   EXTERNAL_HOST_ERROR,
   HOST_DISABLED,
 } from '../../constants/error-messages';
+import * as memCache from '../cache/memory';
 import * as hostRules from '../host-rules';
+import { reportErrors } from '../schema';
 import * as queue from './queue';
+import * as throttle from './throttle';
+import type { HttpResponse } from './types';
 import { Http } from '.';
 
 const baseUrl = 'http://renovate.com';
@@ -16,6 +22,7 @@ describe('util/http/index', () => {
     http = new Http('dummy');
     hostRules.clear();
     queue.clear();
+    throttle.clear();
   });
 
   it('get', async () => {
@@ -299,5 +306,165 @@ describe('util/http/index', () => {
     const res = await http.getBuffer('http://renovate.com');
     expect(res?.body).toBeInstanceOf(Buffer);
     expect(res?.body.toString('utf-8')).toBe('test');
+  });
+
+  describe('Schema support', () => {
+    const testSchema = z.object({ test: z.boolean() });
+    type TestType = z.infer<typeof testSchema>;
+
+    beforeEach(() => {
+      jest.resetAllMocks();
+      memCache.init();
+    });
+
+    afterEach(() => {
+      memCache.reset();
+    });
+
+    describe('getJson', () => {
+      it('infers body type', async () => {
+        httpMock
+          .scope(baseUrl)
+          .get('/')
+          .reply(200, JSON.stringify({ test: true }));
+
+        const { body }: HttpResponse<TestType> = await http.getJson(
+          'http://renovate.com',
+          testSchema
+        );
+
+        expect(body).toEqual({ test: true });
+
+        reportErrors();
+        expect(logger.logger.warn).not.toHaveBeenCalled();
+      });
+
+      it('reports warnings', async () => {
+        memCache.init();
+        httpMock
+          .scope(baseUrl)
+          .get('/')
+          .reply(200, JSON.stringify({ test: 'foobar' }));
+
+        const res = await http.getJson(
+          'http://renovate.com',
+          { onSchemaError: 'warn' },
+          testSchema
+        );
+
+        expect(res.body).toEqual({ test: 'foobar' });
+
+        expect(logger.logger.warn).not.toHaveBeenCalled();
+        reportErrors();
+        expect(logger.logger.warn).toHaveBeenCalled();
+      });
+
+      it('throws', async () => {
+        httpMock
+          .scope(baseUrl)
+          .get('/')
+          .reply(200, JSON.stringify({ test: 'foobar' }));
+
+        await expect(
+          http.getJson(
+            'http://renovate.com',
+            { onSchemaError: 'throw' },
+            testSchema
+          )
+        ).rejects.toThrow();
+
+        reportErrors();
+        expect(logger.logger.warn).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('postJson', () => {
+      it('infers body type', async () => {
+        httpMock
+          .scope(baseUrl)
+          .post('/')
+          .reply(200, JSON.stringify({ test: true }));
+
+        const { body }: HttpResponse<TestType> = await http.postJson(
+          'http://renovate.com',
+          testSchema
+        );
+
+        expect(body).toEqual({ test: true });
+
+        reportErrors();
+        expect(logger.logger.warn).not.toHaveBeenCalled();
+      });
+
+      it('reports warnings', async () => {
+        memCache.init();
+        httpMock
+          .scope(baseUrl)
+          .post('/')
+          .reply(200, JSON.stringify({ test: 'foobar' }));
+
+        const res = await http.postJson(
+          'http://renovate.com',
+          { onSchemaError: 'warn' },
+          testSchema
+        );
+
+        expect(res.body).toEqual({ test: 'foobar' });
+
+        expect(logger.logger.warn).not.toHaveBeenCalled();
+        reportErrors();
+        expect(logger.logger.warn).toHaveBeenCalled();
+      });
+
+      it('throws', async () => {
+        httpMock
+          .scope(baseUrl)
+          .post('/')
+          .reply(200, JSON.stringify({ test: 'foobar' }));
+
+        await expect(
+          http.postJson(
+            'http://renovate.com',
+            { onSchemaError: 'throw' },
+            testSchema
+          )
+        ).rejects.toThrow();
+
+        reportErrors();
+        expect(logger.logger.warn).not.toHaveBeenCalled();
+      });
+    });
+  });
+
+  describe('Throttling', () => {
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
+    it('works without throttling', async () => {
+      jest.useFakeTimers({ advanceTimers: 1 });
+      httpMock.scope(baseUrl).get('/foo').twice().reply(200, 'bar');
+
+      const t1 = Date.now();
+      await http.get('http://renovate.com/foo');
+      await http.get('http://renovate.com/foo');
+      const t2 = Date.now();
+
+      expect(t2 - t1).toBeLessThan(100);
+    });
+
+    it('limits request rate by host', async () => {
+      jest.useFakeTimers({ advanceTimers: true });
+      httpMock.scope(baseUrl).get('/foo').twice().reply(200, 'bar');
+      hostRules.add({ matchHost: 'renovate.com', maxRequestsPerSecond: 0.25 });
+
+      const t1 = Date.now();
+      await http.get('http://renovate.com/foo');
+      jest.advanceTimersByTime(4000);
+      await http.get('http://renovate.com/foo');
+      const t2 = Date.now();
+
+      expect(t2 - t1).toBeGreaterThanOrEqual(4000);
+    });
   });
 });

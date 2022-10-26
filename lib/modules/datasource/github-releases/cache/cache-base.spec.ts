@@ -194,7 +194,7 @@ describe('modules/datasource/github-releases/cache/cache-base', () => {
     const createdAt = now.minus({ minutes: 119 }).toISO();
     packageCache.get.mockResolvedValueOnce({
       items: { v1: { version: 'v1', releaseTimestamp, bar: 'aaa' } },
-      createdAt: createdAt,
+      createdAt,
       updatedAt: createdAt,
     });
     responses = [
@@ -219,7 +219,7 @@ describe('modules/datasource/github-releases/cache/cache-base', () => {
     const createdAt = now.minus({ minutes: 120 }).toISO();
     packageCache.get.mockResolvedValueOnce({
       items: { v1: { version: 'v1', releaseTimestamp, bar: 'aaa' } },
-      createdAt: createdAt,
+      createdAt,
       updatedAt: createdAt,
     });
     responses = [
@@ -240,7 +240,7 @@ describe('modules/datasource/github-releases/cache/cache-base', () => {
       'test-cache',
       'https://api.github.com/:foo:bar',
       {
-        createdAt: createdAt,
+        createdAt,
         items: {
           v1: { bar: 'aaa', releaseTimestamp, version: 'v1' },
           v2: { bar: 'bbb', releaseTimestamp: recentTimestamp, version: 'v2' },

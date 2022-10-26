@@ -1,8 +1,7 @@
-import { logger } from '../../../logger';
 import type { PackageDependency, PackageFile } from '../types';
-import { extractDepFromTarget, getRuleDefinition } from './common';
 import { parse } from './parser';
-import type { ParsedResult } from './types';
+import { extractDepFromFragment } from './rules';
+import type { RecordFragment } from './types';
 
 export function extractPackageFile(
   content: string,
@@ -10,33 +9,20 @@ export function extractPackageFile(
 ): PackageFile | null {
   const deps: PackageDependency[] = [];
 
-  let parsed: ParsedResult | null = null;
-  try {
-    parsed = parse(content);
-  } catch (err) /* istanbul ignore next */ {
-    logger.debug({ err, packageFile }, 'Bazel parsing error');
-  }
-
-  if (!parsed) {
+  const fragments: RecordFragment[] | null = parse(content, packageFile);
+  if (!fragments) {
     return null;
   }
 
-  const { targets, meta: meta } = parsed;
-  for (let idx = 0; idx < targets.length; idx += 1) {
-    const target = targets[idx];
-    const dep = extractDepFromTarget(target);
+  for (let idx = 0; idx < fragments.length; idx += 1) {
+    const fragment = fragments[idx];
+
+    const dep = extractDepFromFragment(fragment);
     if (!dep) {
       continue;
     }
 
-    const def = getRuleDefinition(content, meta, idx);
-    // istanbul ignore if: should not happen
-    if (!def) {
-      logger.warn({ dep }, `Bazel: can't extract definition fragment`);
-      continue;
-    }
-
-    dep.managerData = { def };
+    dep.managerData = { idx };
     deps.push(dep);
   }
 

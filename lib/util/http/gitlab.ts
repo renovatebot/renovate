@@ -15,7 +15,7 @@ export interface GitlabHttpOptions extends HttpOptions {
   paginate?: boolean;
 }
 
-export class GitlabHttp extends Http<GitlabHttpOptions, GitlabHttpOptions> {
+export class GitlabHttp extends Http<GitlabHttpOptions> {
   constructor(type: string = PlatformId.Gitlab, options?: GitlabHttpOptions) {
     super(type, options);
   }

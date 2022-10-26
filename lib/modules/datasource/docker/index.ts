@@ -394,7 +394,7 @@ export class DockerDatasource extends Datasource {
     mode: 'head' | 'get' = 'get'
   ): Promise<HttpResponse | null> {
     logger.debug(
-      `getManifestResponse(${registryHost}, ${dockerRepository}, ${tag})`
+      `getManifestResponse(${registryHost}, ${dockerRepository}, ${tag}, ${mode})`
     );
     try {
       const headers = await getAuthHeaders(
@@ -570,7 +570,7 @@ export class DockerDatasource extends Datasource {
     // OCI image lists are not required to specify a mediaType
     if (
       manifest.mediaType === MediaType.ociManifestIndexV1 ||
-      (!manifest.mediaType && hasKey('manifests', manifest))
+      (!manifest.mediaType && 'manifests' in manifest)
     ) {
       if (manifest.manifests.length) {
         logger.trace(
@@ -594,7 +594,7 @@ export class DockerDatasource extends Datasource {
     // OCI manifests are not required to specify a mediaType
     if (
       (manifest.mediaType === MediaType.ociManifestV1 ||
-        (!manifest.mediaType && hasKey('config', manifest))) &&
+        (!manifest.mediaType && 'config' in manifest)) &&
       is.string(manifest.config?.digest)
     ) {
       return manifest.config?.digest;
@@ -1042,7 +1042,7 @@ export class DockerDatasource extends Datasource {
             manifestList.schemaVersion === 2 &&
             (manifestList.mediaType === MediaType.manifestListV2 ||
               manifestList.mediaType === MediaType.ociManifestIndexV1 ||
-              (!manifestList.mediaType && hasKey('manifests', manifestList)))
+              (!manifestList.mediaType && 'manifests' in manifestList))
           ) {
             for (const manifest of manifestList.manifests) {
               if (manifest.platform['architecture'] === architecture) {

@@ -3,7 +3,6 @@ import { extractPackageFile } from '.';
 
 const gomod1 = Fixtures.get('1/go.mod');
 const gomod2 = Fixtures.get('2/go.mod');
-const gomod3 = Fixtures.get('3/go.mod');
 
 describe('modules/manager/gomod/extract', () => {
   describe('extractPackageFile()', () => {
@@ -17,21 +16,6 @@ describe('modules/manager/gomod/extract', () => {
       expect(res).toHaveLength(8);
       expect(res?.filter((e) => e.skipReason)).toHaveLength(1);
       expect(res?.filter((e) => e.depType === 'replace')).toHaveLength(1);
-    });
-
-    it('extracts constraints and golang', () => {
-      const res = extractPackageFile(gomod3);
-      expect(res?.deps).toEqual(
-        expect.arrayContaining([
-          expect.objectContaining({
-            depType: 'golang',
-            depName: 'go',
-            datasource: 'golang-version',
-            rangeStrategy: 'replace',
-          }),
-        ])
-      );
-      expect(res?.constraints?.go).toBe('^1.13');
     });
 
     it('extracts multi-line requires', () => {
@@ -56,9 +40,6 @@ replace (
 )`;
       const res = extractPackageFile(goMod);
       expect(res).toEqual({
-        constraints: {
-          go: '^1.18',
-        },
         deps: [
           {
             managerData: {

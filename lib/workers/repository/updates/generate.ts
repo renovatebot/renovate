@@ -83,6 +83,28 @@ export function generateBranchConfig(
   const toVersions: string[] = [];
   const toValues = new Set<string>();
   for (const upg of branchUpgrades) {
+    if (upg.currentDigest) {
+      upg.currentDigestShort =
+        upg.currentDigestShort ??
+        upg.currentDigest.replace('sha256:', '').substring(0, 7);
+    }
+    if (upg.newDigest) {
+      upg.newDigestShort =
+        upg.newDigestShort ||
+        upg.newDigest.replace('sha256:', '').substring(0, 7);
+    }
+    if (upg.isDigest || upg.isPinDigest) {
+      upg.displayFrom = upg.currentDigestShort;
+      upg.displayTo = upg.newDigestShort;
+    } else if (upg.isLockfileUpdate) {
+      upg.displayFrom = upg.currentVersion;
+      upg.displayTo = upg.newVersion;
+    } else if (!upg.isLockFileMaintenance) {
+      upg.displayFrom = upg.currentValue;
+      upg.displayTo = upg.newValue;
+    }
+    upg.displayFrom ??= '';
+    upg.displayTo ??= '';
     if (!depNames.includes(upg.depName!)) {
       depNames.push(upg.depName!);
     }
@@ -123,28 +145,6 @@ export function generateBranchConfig(
       upgrade.commitMessageExtra = `to v${toVersions[0]}`;
     }
 
-    if (upgrade.currentDigest) {
-      upgrade.currentDigestShort =
-        upgrade.currentDigestShort ??
-        upgrade.currentDigest.replace('sha256:', '').substring(0, 7);
-    }
-    if (upgrade.newDigest) {
-      upgrade.newDigestShort =
-        upgrade.newDigestShort ||
-        upgrade.newDigest.replace('sha256:', '').substring(0, 7);
-    }
-    if (upgrade.isDigest || upgrade.isPinDigest) {
-      upgrade.displayFrom = upgrade.currentDigestShort;
-      upgrade.displayTo = upgrade.newDigestShort;
-    } else if (upgrade.isLockfileUpdate) {
-      upgrade.displayFrom = upgrade.currentVersion;
-      upgrade.displayTo = upgrade.newVersion;
-    } else if (!upgrade.isLockFileMaintenance) {
-      upgrade.displayFrom = upgrade.currentValue;
-      upgrade.displayTo = upgrade.newValue;
-    }
-    upgrade.displayFrom ??= '';
-    upgrade.displayTo ??= '';
     const pendingVersionsLength = upgrade.pendingVersions?.length;
     if (pendingVersionsLength) {
       upgrade.displayPending = `\`${upgrade

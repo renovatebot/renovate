@@ -1,5 +1,6 @@
 import { logger } from '../../../logger';
-import type { GithubRestRef, GithubRestTag } from '../../../util/github/types';
+import { queryTags } from '../../../util/github/graphql';
+import type { GithubRestRef } from '../../../util/github/types';
 import { getApiBaseUrl, getSourceUrl } from '../../../util/github/url';
 import { GithubHttp } from '../../../util/http/github';
 import { Datasource } from '../datasource';
@@ -56,7 +57,7 @@ export class GithubTagsDatasource extends Datasource {
       digest = res.body[0].sha;
     } catch (err) {
       logger.debug(
-        { githubRepo: githubRepo, err, registryUrl },
+        { githubRepo, err, registryUrl },
         'Error getting latest commit from GitHub repo'
       );
     }
@@ -83,23 +84,14 @@ export class GithubTagsDatasource extends Datasource {
     config: GetReleasesConfig
   ): Promise<ReleaseResult> {
     const { registryUrl, packageName: repo } = config;
-    const apiBaseUrl = getApiBaseUrl(registryUrl);
-    // tag
-    const url = `${apiBaseUrl}repos/${repo}/tags?per_page=100`;
-
-    const versions = (
-      await this.http.getJson<GithubRestTag[]>(url, {
-        paginate: true,
-      })
-    ).body.map((o) => o.name);
-
-    const dependency: ReleaseResult = {
-      sourceUrl: getSourceUrl(repo, registryUrl),
-      releases: versions.map((version) => ({
-        version,
-        gitRef: version,
-      })),
-    };
+    const sourceUrl = getSourceUrl(repo, registryUrl);
+    const tags = await queryTags(config, this.http);
+    const releases = tags.map(({ version, releaseTimestamp, gitRef }) => ({
+      version,
+      releaseTimestamp,
+      gitRef,
+    }));
+    const dependency: ReleaseResult = { sourceUrl, releases };
     return dependency;
   }
 }

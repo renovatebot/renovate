@@ -90,52 +90,6 @@ exports[`modules/manager/github-actions/extract extractPackageFile() extracts mu
 ]
 `;
 
-exports[`modules/manager/github-actions/extract extractPackageFile() extracts multiple action tag lines with double quotes and comments 1`] = `
-[
-  {
-    "autoReplaceStringTemplate": ""{{depName}}@{{#if newDigest}}{{newDigest}}"{{#if newValue}} # tag={{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}"{{/unless}}",
-    "commitMessageTopic": "{{{depName}}} action",
-    "currentValue": "v0.13.1",
-    "datasource": "github-tags",
-    "depName": "pascalgn/automerge-action",
-    "depType": "action",
-    "replaceString": ""pascalgn/automerge-action@v0.13.1"",
-    "versioning": "docker",
-  },
-  {
-    "autoReplaceStringTemplate": "{{depName}}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # tag={{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}",
-    "commitMessageTopic": "{{{depName}}} action",
-    "currentDigest": "1e204e9a9253d643386038d443f96446fa156a97",
-    "currentValue": "v2.3.5",
-    "datasource": "github-tags",
-    "depName": "actions/checkout",
-    "depType": "action",
-    "replaceString": "actions/checkout@1e204e9a9253d643386038d443f96446fa156a97 # renovate: tag=v2.3.5",
-    "versioning": "docker",
-  },
-  {
-    "autoReplaceStringTemplate": "{{depName}}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # tag={{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}",
-    "commitMessageTopic": "{{{depName}}} action",
-    "currentValue": "v1",
-    "datasource": "github-tags",
-    "depName": "actions/checkout",
-    "depType": "action",
-    "replaceString": "actions/checkout@v1",
-    "versioning": "docker",
-  },
-  {
-    "autoReplaceStringTemplate": ""{{depName}}@{{#if newDigest}}{{newDigest}}"{{#if newValue}} # tag={{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}"{{/unless}}",
-    "commitMessageTopic": "{{{depName}}} action",
-    "currentValue": "v1.1.2",
-    "datasource": "github-tags",
-    "depName": "actions/checkout",
-    "depType": "action",
-    "replaceString": ""actions/checkout@v1.1.2"",
-    "versioning": "docker",
-  },
-]
-`;
-
 exports[`modules/manager/github-actions/extract extractPackageFile() extracts multiple docker image lines from yaml configuration file 1`] = `
 [
   {

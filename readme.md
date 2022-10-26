@@ -44,6 +44,15 @@ Renovate is widely used in the developer community:
 
 ![Renovate Matrix](https://app.renovatebot.com/images/matrix.png)
 
+## Renovate OSS Insights
+
+Renovate is built on a big community and actively invites and supports contributions.
+Information about our contributors and community can be found on [OSS Insight](https://ossinsight.io/analyze/renovatebot/renovate).
+
+## Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=renovatebot/renovate&type=Date)](https://star-history.com/#renovatebot/renovate&Date)
+
 ## The Renovate Approach
 
 We believe everyone benefits from automation, whether it's a little or a lot.
