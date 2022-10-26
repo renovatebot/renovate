@@ -45,7 +45,7 @@ import {
   getCachedModifiedResult,
   setCachedModifiedResult,
 } from './modified-cache';
-import { getCachedBranchParentShaResult } from './parent-sha-cache';
+import { deleteCachedBranchParentShaResult } from './parent-sha-cache';
 import { configSigningKey, writePrivateKey } from './private-key';
 import type {
   CommitFilesConfig,
@@ -490,29 +490,6 @@ export function getBranchCommit(branchName: string): CommitSha | null {
   return config.branchCommits[branchName] || null;
 }
 
-// Return the parent commit SHA for a branch
-export async function getBranchParentSha(
-  branchName: string
-): Promise<CommitSha | null> {
-  const branchSha = getBranchCommit(branchName);
-  let parentSha = getCachedBranchParentShaResult(branchName, branchSha);
-  if (parentSha !== null) {
-    logger.debug(
-      `branch.getBranchParentSha(): using cached result "${parentSha}"`
-    );
-    return parentSha;
-  }
-
-  try {
-    // TODO: branchSha can be null (#7154)
-    parentSha = await git.revparse([`${branchSha!}^`]);
-    return parentSha;
-  } catch (err) {
-    logger.debug({ err }, 'Error getting branch parent sha');
-    return null;
-  }
-}
-
 export async function getCommitMessages(): Promise<string[]> {
   await syncGit();
   logger.debug('getCommitMessages');
@@ -686,6 +663,7 @@ export async function isBranchModified(branchName: string): Promise<boolean> {
   );
   config.branchIsModified[branchName] = true;
   setCachedModifiedResult(branchName, true);
+  deleteCachedBranchParentShaResult(branchName);
   return true;
 }
 

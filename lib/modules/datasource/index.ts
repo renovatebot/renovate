@@ -190,7 +190,7 @@ function massageRegistryUrls(registryUrls: string[]): string[] {
 function resolveRegistryUrls(
   datasource: DatasourceApi,
   defaultRegistryUrls: string[] | undefined,
-  registryUrls: string[] | undefined,
+  registryUrls: string[] | undefined | null,
   additionalRegistryUrls: string[] | undefined
 ): string[] {
   if (!datasource.customRegistrySupport) {
