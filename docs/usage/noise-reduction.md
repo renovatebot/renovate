@@ -117,9 +117,9 @@ Granularity must be at least one hour.
 Automerging is a Renovate feature that can save you a lot of time/noise directly, while also benefiting grouping and scheduling.
 In short: it means that Renovate can merge PRs or even branches itself if they pass your tests.
 
-We recommend that you enable automerge for any type of dependency update where you would just click Merge anyway.
+We recommend that you enable automerge for any type of dependency update where you would just select Merge anyway.
 We all know that there are some types of updates that we (nearly) always verify manually before merging, and plenty of others that we don't bother looking at unless tests fail.
-Every time you click Merge on a Renovate PR without manually testing it, you should consider if you can enable automerge and save yourself the time in future.
+Every time you select Merge on a Renovate PR without manually testing it, you should consider if you can enable automerge and save yourself the time in future.
 
 Automerge works particularly well for `devDependencies` and for production `dependencies` that have great test coverage.
 

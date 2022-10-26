@@ -613,7 +613,7 @@ describe('workers/repository/dependency-dashboard', () => {
 
         ## Pending Approval
 
-        These branches will be created by Renovate only once you click their checkbox below.
+        These branches will be created by Renovate only once you select their checkbox below.
 
          - [ ] <!-- approve-branch=branchName1 -->pr1
          - [ ] <!-- approve-branch=branchName2 -->pr2
@@ -673,7 +673,7 @@ describe('workers/repository/dependency-dashboard', () => {
         title: 'Dependency Dashboard',
         body: `This issue contains a list of Renovate updates and their statuses.
         ## Rate-limited
-        These updates are currently rate-limited. Click on a checkbox below to force their creation now.
+        These updates are currently rate-limited. Select a checkbox below to force their creation now.
          - [x] <!-- create-all-rate-limited-prs -->**Open all rate-limited PRs**
          - [ ] <!-- unlimit-branch=branchName1 -->pr1
          - [ ] <!-- unlimit-branch=branchName2 -->pr2`,
@@ -734,14 +734,14 @@ describe('workers/repository/dependency-dashboard', () => {
 
         ## Pending Approval
 
-        These branches will be created by Renovate only once you click their checkbox below.
+        These branches will be created by Renovate only once you select their checkbox below.
 
          - [ ] <!-- approve-branch=branchName1 -->pr1
          - [x] <!-- approve-branch=branchName2 -->pr2
 
         ## Awaiting Schedule
 
-        These updates are awaiting their schedule. Click on a checkbox to get an update now.
+        These updates are awaiting their schedule. Select a checkbox to get an update now.
 
          - [x] <!-- unschedule-branch=branchName3 -->pr3
 

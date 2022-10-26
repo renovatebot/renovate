@@ -3084,8 +3084,8 @@ For this to work, you must enable the [Dependency graph](https://docs.github.com
 Follow these steps:
 
 1. While logged in to GitHub, navigate to your repository
-1. Click on the "Settings" tab
-1. Click on "Code security and analysis" in the sidebar
+1. Select the "Settings" tab
+1. Select "Code security and analysis" in the sidebar
 1. Enable the "Dependency graph"
 1. Enable "Dependabot alerts"
 1. If you're running Renovate in app mode: make sure the app has `read` permissions for "Vulnerability alerts".

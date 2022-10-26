@@ -22,7 +22,7 @@ describe('workers/repository/update/pr/body/controls', () => {
 
       it('has the correct contents', async () => {
         expect(await getControls(branchConfig)).toContain(
-          `- [ ] <!-- rebase-check -->If you want to rebase/retry this PR, click this checkbox. ⚠ **Warning**: custom changes will be lost.`
+          `- [ ] <!-- rebase-check -->If you want to rebase/retry this PR, select this checkbox. ⚠ **Warning**: custom changes will be lost.`
         );
         expect(git.isBranchModified).toHaveBeenCalledTimes(1);
         expect(git.isBranchModified).toHaveBeenCalledWith(
@@ -38,7 +38,7 @@ describe('workers/repository/update/pr/body/controls', () => {
 
       it('has the correct contents', async () => {
         expect(await getControls(branchConfig)).toContain(
-          `- [ ] <!-- rebase-check -->If you want to rebase/retry this PR, click this checkbox.`
+          `- [ ] <!-- rebase-check -->If you want to rebase/retry this PR, select this checkbox.`
         );
         expect(git.isBranchModified).toHaveBeenCalledTimes(1);
         expect(git.isBranchModified).toHaveBeenCalledWith(

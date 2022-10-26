@@ -461,7 +461,7 @@ These problems occurred while renovating this repository.
 
 ## Pending Status Checks
 
-These updates await pending status checks. To force their creation now, click the checkbox below.
+These updates await pending status checks. To force their creation now, select the checkbox below.
 
  - [ ] <!-- approvePr-branch=branchName1 -->pr1
 
@@ -505,7 +505,7 @@ exports[`workers/repository/dependency-dashboard ensureDependencyDashboard() rec
 
 ## Pending Approval
 
-These branches will be created by Renovate only once you click their checkbox below.
+These branches will be created by Renovate only once you select their checkbox below.
 
  - [ ] <!-- approve-branch=branchName1 -->pr1
  - [ ] <!-- approve-branch=branchName2 -->pr2
@@ -513,7 +513,7 @@ These branches will be created by Renovate only once you click their checkbox be
 
 ## Awaiting Schedule
 
-These updates are awaiting their schedule. Click on a checkbox to get an update now.
+These updates are awaiting their schedule. Select a checkbox to get an update now.
 
  - [x] <!-- unschedule-branch=branchName3 -->pr3
 

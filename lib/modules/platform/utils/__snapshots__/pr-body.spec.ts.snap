@@ -51,7 +51,7 @@ exports[`modules/platform/utils/pr-body .smartTruncate truncates to 1000 1`] = `
 
 ---
 
- - [ ] <!-- rebase-check -->If you want to rebase/retry this PR, click this checkbox
+ - [ ] <!-- rebase-check -->If you want to rebase/retry this PR, select this checkbox
 
 ---
 
