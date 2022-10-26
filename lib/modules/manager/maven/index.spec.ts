@@ -229,7 +229,7 @@ describe('modules/manager/maven/index', () => {
       expect(packages).toMatchSnapshot();
     });
 
-    it('should not touch content if new and old versions are equal', () => {
+    it('should not edit content if new and old versions are equal', () => {
       const newValue = '1.2.3';
 
       const { deps } = extractPackage(pomContent)!;
