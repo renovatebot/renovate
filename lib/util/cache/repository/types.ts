@@ -52,6 +52,10 @@ export interface BranchCache {
    */
   isBehindBase?: boolean;
   /**
+   * Whether the update branch is in conflict with base branch
+   */
+  isConflicted?: boolean;
+  /**
    * Whether a person not listed in gitIgnoredAuthors updated the branch.
    */
   isModified?: boolean;
