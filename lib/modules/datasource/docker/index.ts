@@ -714,7 +714,16 @@ export class DockerDatasource extends Datasource {
         headers,
         noAuth: true,
       });
-      labels = JSON.parse(configResponse.body).config?.Labels;
+
+      const body = JSON.parse(configResponse.body);
+      if (body.config) {
+        labels = body.config.Labels;
+      } else {
+        logger.debug(
+          { configResponse },
+          `manifest blob response body missing the "config" property`
+        );
+      }
 
       if (labels) {
         logger.debug(

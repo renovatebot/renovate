@@ -1775,6 +1775,10 @@ describe('modules/datasource/docker/index', () => {
           },
         ],
       });
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        expect.anything(),
+        `manifest blob response body missing the "config" property`
+      );
       expect(logger.logger.info).not.toHaveBeenCalledWith(
         expect.anything(),
         'Unknown error getting Docker labels'
