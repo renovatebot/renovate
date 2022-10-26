@@ -56,7 +56,7 @@ describe('util/json-writer/editor-config', () => {
     Fixtures.mock({
       '.editorconfig': Fixtures.get('.global_editorconfig'),
     });
-    const editorconf = require('editorconfig');
+    const editorconf = await import('editorconfig');
     jest
       .spyOn(editorconf, 'parse')
       .mockImplementationOnce(new Error('something') as never);
