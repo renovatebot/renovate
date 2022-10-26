@@ -204,6 +204,51 @@ describe('workers/repository/process/write', () => {
       expect(branch.branchFingerprint).toBe(branchFingerprint);
     });
 
+    it('caches same fingerprint when no commit is made and branch cache existed', async () => {
+      const branches: BranchConfig[] = [
+        {
+          branchName: 'new/some-branch',
+          baseBranch: 'base_branch',
+          manager: 'npm',
+          upgrades: [
+            {
+              manager: 'unknown-manager',
+            } as BranchUpgradeConfig,
+          ],
+        },
+      ];
+      const branch = branches[0];
+      const managers = [
+        ...new Set(
+          branch.upgrades
+            .map((upgrade) => hashMap.get(upgrade.manager) ?? upgrade.manager)
+            .filter(is.string)
+        ),
+      ].sort();
+
+      const branchFingerprint = fingerprint({
+        branch,
+        managers,
+      });
+      repoCache.getCache.mockReturnValueOnce({
+        branches: [
+          {
+            branchName: 'new/some-branch',
+            baseBranch: 'base_branch',
+            branchFingerprint,
+          } as BranchCache,
+        ],
+      });
+      branchWorker.processBranch.mockResolvedValueOnce({
+        branchExists: true,
+        result: BranchResult.Done,
+      });
+      git.branchExists.mockReturnValue(true);
+      config.repositoryCache = 'enabled';
+      expect(await writeUpdates(config, branches)).toBe('done');
+      expect(branch.branchFingerprint).toBe(branchFingerprint);
+    });
+
     it('caches same fingerprint when no commit is made', async () => {
       const branches: BranchConfig[] = [
         {
@@ -217,15 +262,16 @@ describe('workers/repository/process/write', () => {
           ],
         },
       ];
+      const branch = branches[0];
       const managers = [
         ...new Set(
-          branches[0].upgrades
+          branch.upgrades
             .map((upgrade) => hashMap.get(upgrade.manager) ?? upgrade.manager)
             .filter(is.string)
         ),
       ].sort();
       const branchFingerprint = fingerprint({
-        branches: JSON.stringify(branches[0]),
+        branch,
         managers,
       });
       repoCache.getCache.mockReturnValueOnce({
@@ -242,7 +288,7 @@ describe('workers/repository/process/write', () => {
         result: BranchResult.Done,
       });
       expect(await writeUpdates(config, branches)).toBe('done');
-      expect(branches[0].branchFingerprint).toBe(branchFingerprint);
+      expect(branch.branchFingerprint).toBe(branchFingerprint);
     });
 
     it('creates new branchCache when cache is not enabled', async () => {
@@ -413,6 +459,7 @@ describe('workers/repository/process/write', () => {
             baseBranchSha: 'base_sha',
             isBehindBase: true,
             isModified: true,
+            isConflicted: true,
             branchFingerprint: '123',
             upgrades: [],
             automerge: false,
@@ -429,6 +476,44 @@ describe('workers/repository/process/write', () => {
         sha: 'new_sha',
         baseBranch: 'base_branch',
         baseBranchSha: 'base_sha',
+        upgrades: [],
+        automerge: false,
+        prNo: null,
+        parentSha: null,
+      });
+    });
+
+    it('no change if all parameters are same', () => {
+      const repoCacheObj: RepoCacheData = {
+        branches: [
+          {
+            branchName: 'branch_name',
+            sha: 'sha',
+            baseBranch: 'base_branch',
+            baseBranchSha: 'base_sha',
+            isBehindBase: true,
+            isModified: true,
+            isConflicted: true,
+            branchFingerprint: '123',
+            upgrades: [],
+            automerge: false,
+            prNo: null,
+            parentSha: null,
+          },
+        ],
+      };
+      repoCache.getCache.mockReturnValue(repoCacheObj);
+      git.getBranchCommit.mockReturnValueOnce('sha');
+      git.getBranchCommit.mockReturnValueOnce('base_sha');
+      expect(syncBranchState('branch_name', 'base_branch')).toEqual({
+        branchName: 'branch_name',
+        sha: 'sha',
+        baseBranch: 'base_branch',
+        baseBranchSha: 'base_sha',
+        isBehindBase: true,
+        isModified: true,
+        isConflicted: true,
+        branchFingerprint: '123',
         upgrades: [],
         automerge: false,
         prNo: null,
