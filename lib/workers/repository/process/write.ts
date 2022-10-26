@@ -8,11 +8,30 @@ import { fingerprint } from '../../../util/fingerprint';
 import { branchExists, getBranchCommit } from '../../../util/git';
 import { setBranchNewCommit } from '../../../util/git/set-branch-commit';
 import { Limit, incLimitedValue, setMaxLimit } from '../../global/limits';
-import { BranchConfig, BranchResult } from '../../types';
+import {
+  BranchConfig,
+  BranchResult,
+  UpgradeFingerprintConfig,
+} from '../../types';
 import { processBranch } from '../update/branch';
+import { upgradeFingerprintFields } from './fingerprint-fields';
 import { getBranchesRemaining, getPrsRemaining } from './limits';
 
 export type WriteUpdateResult = 'done' | 'automerged';
+
+export function generateBranchFingerprintConfig(
+  branch: BranchConfig
+): UpgradeFingerprintConfig[] {
+  const res = branch.upgrades.map((upgrade) => {
+    const filteredUpgrade = {} as UpgradeFingerprintConfig;
+    for (const field of upgradeFingerprintFields) {
+      filteredUpgrade[field] = upgrade[field];
+    }
+    return filteredUpgrade;
+  });
+
+  return res;
+}
 
 export function canSkipBranchUpdateCheck(
   branchState: BranchCache,
@@ -131,7 +150,7 @@ export async function writeUpdates(
       ),
     ].sort();
     const branchFingerprint = fingerprint({
-      branch,
+      branchFingerprintConfig: generateBranchFingerprintConfig(branch),
       managers,
     });
     branch.skipBranchUpdate = canSkipBranchUpdateCheck(
