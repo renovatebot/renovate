@@ -132,7 +132,7 @@ export async function extractPackageFile(
               currentValue,
               datasource: GithubTagsDatasource.id,
               packageName: 'php/php-src',
-              extractVersion: 'php-(?<version>.*)',
+              extractVersion: '^php-(?<version>.*)$',
             });
           } else {
             // Default datasource and packageName
