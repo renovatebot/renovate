@@ -108,8 +108,8 @@ describe('workers/global/autodiscover', () => {
 
   it('filters autodiscovered github repos with minimatch negation', async () => {
     config.autodiscover = true;
-    config.autodiscoverFilter = '!project/re*';
-    config.platform = PlatformId.Github;
+    config.autodiscoverFilter = ['!project/re*'];
+    config.platform = 'github';
     hostRules.find = jest.fn(() => ({
       token: 'abc',
     }));
