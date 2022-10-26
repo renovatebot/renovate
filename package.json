@@ -327,7 +327,7 @@
   },
   "resolutions": {
     "@types/jest/pretty-format": "^29.0.0",
-    "@yarnpkg/core/clipanion": "3.2.0-rc.12"
+    "@yarnpkg/core/clipanion": "3.2.0-rc.13"
   },
   "files": [
     "dist",
