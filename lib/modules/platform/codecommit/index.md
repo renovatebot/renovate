@@ -2,20 +2,21 @@
 
 <!-- prettier-ignore -->
 !!! warning "This feature is flagged as experimental"
-    Experimental features might be changed or even removed at any time, To track this feature visit the following GitHub issue [#2868](https://github.com/renovatebot/renovate/issues/2868)
+    Experimental features might be changed or even removed at any time.
+    Subscribe to [GitHub issue #2868](https://github.com/renovatebot/renovate/issues/2868) to be notified of any changes.
 
 ## Authentication
 
-First, you need to obtain an AWS [IAM Access Key id and a Secret access key id](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_access-keys.html)
+First, you must get an AWS [IAM Access Key id and a Secret access key id](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_access-keys.html)
 
 Let Renovate use AWS CodeCommit authentication keys by doing one of the following:
 
-- Set a Renovate configuration file - config.js:
+- Set a Renovate configuration file - `config.js`:
 
   ```
   username: AWS IAM access key id
   password: AWS Secret access key
-  endpoint: the url endpoint e.g https://git-codecommit.us-east-1.amazonaws.com/
+  endpoint: the URL endpoint e.g https://git-codecommit.us-east-1.amazonaws.com/
   token: AWS session token, if you have one
   ```
 
@@ -33,36 +34,40 @@ Let Renovate use AWS CodeCommit authentication keys by doing one of the followin
   ```
   --username: AWS IAM access key id
   --password: AWS Secret access key
-  --endpoint: the url endpoint e.g https://git-codecommit.us-east-1.amazonaws.com/
+  --endpoint: the URL endpoint for example https://git-codecommit.us-east-1.amazonaws.com/
   --token: AWS session token, if you have one
   ```
 
 ## AWS IAM security policies
 
-- Make sure to attach the [AWSCodeCommitFullAccess](https://docs.aws.amazon.com/codecommit/latest/userguide/security-iam-awsmanpol.html#managed-policies-full) policy to your IAM User.
+- Make sure to attach the [AWSCodeCommitFullAccess](https://docs.aws.amazon.com/codecommit/latest/userguide/security-iam-awsmanpol.html#managed-policies-full) policy to your IAM User
 - It is recommended to also attach the [IAMReadOnlyAccess](https://docs.aws.amazon.com/IAM/latest/UserGuide/security-iam-awsmanpol.html) policy to your IAM User
 
 ## Running Renovate
 
-Set up a global configuration file (config.js), or alternatively use CLI params or Environment variables, for running Renovate on CodeCommit:
+Set up a global configuration file (`config.js`), or use CLI parameters or environment variables, to run Renovate on CodeCommit:
 
 - Set `platform: 'codecommit'`
-- Set `repositories: ['{repository names separated by comma}']`, or alternatively use Renovate’s [autodiscover](https://docs.renovatebot.com/self-hosted-configuration/#autodiscover)
+- Set `repositories: ['{repository, names, separated, by, comma}']`, or use [Renovate’s `autodiscover` feature](https://docs.renovatebot.com/self-hosted-configuration/#autodiscover)
 
-Run Renovate and it will operate on your repositories
+Run Renovate and it will process your repositories.
 
 ## Unsupported platform features/concepts
 
-- adding assignees to PRs not supported
-- auto-merge not supported
-- rebaseLabel isn't supported (request a rebase for Renovate)
+These features are not supported:
 
-## recommendations
+- Adding assignees to PRs
+- Auto-merge
+- [`rebaseLabel`](https://docs.renovatebot.com/configuration-options/#rebaselabel) (request a rebase for Renovate)
 
-- We recommend limiting Open Renovate PRs using `prConcurrentLimit`
-- Due to current platform limitations, if you close a PR and don’t wish for Renovate to recreate if, use [package rules](https://docs.renovatebot.com/configuration-options/#packagerules) with the `"enabled": false` key.
+## Recommendations
 
-Here's an example config.js:
+- We recommend that you limit the number of open Renovate PRs by setting a `prConcurrentLimit`
+- Due to current platform limitations, if you close a PR but don’t want for Renovate to recreate the PR, use [package rules](https://docs.renovatebot.com/configuration-options/#packagerules) with the `"enabled": false` key
+
+## Example configuration
+
+Here's an example `config.js`:
 
 ```js
 module.exports = {
