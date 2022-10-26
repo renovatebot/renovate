@@ -1743,6 +1743,44 @@ describe('modules/datasource/docker/index', () => {
       });
     });
 
+    it('supports labels - handle missing config prop on blob response', async () => {
+      httpMock
+        .scope('https://registry.company.com/v2')
+        .get('/')
+        .times(2)
+        .reply(200)
+        .get('/node/tags/list?n=10000')
+        .reply(200)
+        .get('/node/tags/list?n=10000')
+        .reply(200, {
+          tags: ['2-alpine'],
+        })
+        .get('/node/manifests/2-alpine')
+        .reply(200, {
+          schemaVersion: 2,
+          mediaType: MediaType.manifestV2,
+          config: { digest: 'some-config-digest' },
+        })
+        .get('/node/blobs/some-config-digest')
+        .reply(200, {}); // DockerDatasource.getLabels() inner response
+      const res = await getPkgReleases({
+        datasource: DockerDatasource.id,
+        depName: 'registry.company.com/node',
+      });
+      expect(res).toStrictEqual({
+        registryUrl: 'https://registry.company.com',
+        releases: [
+          {
+            version: '2-alpine',
+          },
+        ],
+      });
+      expect(logger.logger.info).not.toHaveBeenCalledWith(
+        expect.anything(),
+        'Unknown error getting Docker labels'
+      );
+    });
+
     it('supports manifest lists', async () => {
       httpMock
         .scope('https://registry.company.com/v2')

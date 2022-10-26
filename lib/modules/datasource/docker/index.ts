@@ -714,7 +714,7 @@ export class DockerDatasource extends Datasource {
         headers,
         noAuth: true,
       });
-      labels = JSON.parse(configResponse.body).config.Labels;
+      labels = JSON.parse(configResponse.body).config?.Labels;
 
       if (labels) {
         logger.debug(
