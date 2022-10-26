@@ -720,7 +720,7 @@ export class DockerDatasource extends Datasource {
         labels = body.config.Labels;
       } else {
         logger.debug(
-          { configResponse },
+          { headers: configResponse.headers, body },
           `manifest blob response body missing the "config" property`
         );
       }
