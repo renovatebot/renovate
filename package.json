@@ -127,7 +127,7 @@
   },
   "homepage": "https://renovatebot.com",
   "engines": {
-    "node": "^14.15.0 || ^16.13.0 || >= 18.12.0",
+    "node": "^14.15.0 || >=16.13.0",
     "yarn": "^1.17.0"
   },
   "engines-next": {
