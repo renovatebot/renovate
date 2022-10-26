@@ -23,11 +23,11 @@ export function generateBranchFingerprintConfig(
   branch: BranchConfig
 ): UpgradeFingerprintConfig[] {
   const res = branch.upgrades.map((upgrade) => {
-    const filtertedUpgrade = {} as UpgradeFingerprintConfig;
+    const filteredUpgrade = {} as UpgradeFingerprintConfig;
     for (const field of upgradeFingerprintFields) {
-      filtertedUpgrade[field] = upgrade[field];
+      filteredUpgrade[field] = upgrade[field];
     }
-    return filtertedUpgrade;
+    return filteredUpgrade;
   });
 
   return res;
