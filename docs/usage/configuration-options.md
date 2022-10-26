@@ -2074,7 +2074,7 @@ Add to this object if you wish to define rules that apply only to PRs that pin d
 
 ## pinDigests
 
-If enabled Renovate will pin Docker images by means of their SHA256 digest and not only by tag so that they are immutable.
+If enabled Renovate will pin Docker images or GitHub Actions by means of their SHA256 digest and not only by tag so that they are immutable.
 
 ## platformAutomerge
 
