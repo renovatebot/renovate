@@ -10,6 +10,7 @@ import type {
 import {
   getBranchCommit,
   isBranchBehindBase,
+  isBranchConflicted,
   isBranchModified,
 } from '../../util/git';
 import { getCachedPristineResult } from '../../util/git/pristine-cache';
@@ -56,6 +57,7 @@ async function generateBranchCache(
     let prNo = null;
     let isModified = false;
     let isBehindBase = false;
+    let isConflicted = false;
     if (sha) {
       const branchPr = await platform.getBranchPr(branchName);
       if (branchPr) {
@@ -63,6 +65,7 @@ async function generateBranchCache(
       }
       isModified = await isBranchModified(branchName);
       isBehindBase = await isBranchBehindBase(branchName, baseBranch);
+      isConflicted = await isBranchConflicted(baseBranch, branchName);
     }
     const automerge = !!branch.automerge;
     const upgrades: BranchUpgradeCache[] = branch.upgrades
@@ -76,6 +79,7 @@ async function generateBranchCache(
       branchFingerprint,
       branchName,
       isBehindBase,
+      isConflicted,
       isModified,
       pristine,
       prNo,

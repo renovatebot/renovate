@@ -852,7 +852,7 @@ describe('util/git/index', () => {
       expect(status.isClean()).toBeTrue();
     });
 
-    describe('cache', () => {
+    describe('cachedConflictResult', () => {
       beforeEach(() => {
         jest.resetAllMocks();
       });
@@ -868,10 +868,10 @@ describe('util/git/index', () => {
         expect(res).toBeTrue();
         expect(conflictsCache.getCachedConflictResult.mock.calls).toEqual([
           [
-            defaultBranch,
-            expect.any(String),
             'renovate/conflicted_branch',
-            expect.any(String),
+            git.getBranchCommit('renovate/conflicted_branch'),
+            defaultBranch,
+            git.getBranchCommit(defaultBranch),
           ],
         ]);
         expect(conflictsCache.setCachedConflictResult).not.toHaveBeenCalled();
@@ -887,13 +887,7 @@ describe('util/git/index', () => {
 
         expect(res).toBeTrue();
         expect(conflictsCache.setCachedConflictResult.mock.calls).toEqual([
-          [
-            defaultBranch,
-            expect.any(String),
-            'renovate/conflicted_branch',
-            expect.any(String),
-            true,
-          ],
+          ['renovate/conflicted_branch', true],
         ]);
       });
 
@@ -907,13 +901,7 @@ describe('util/git/index', () => {
 
         expect(res).toBeFalse();
         expect(conflictsCache.setCachedConflictResult.mock.calls).toEqual([
-          [
-            defaultBranch,
-            expect.any(String),
-            'renovate/non_conflicted_branch',
-            expect.any(String),
-            false,
-          ],
+          ['renovate/non_conflicted_branch', false],
         ]);
       });
     });
