@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-      - ci/node-v16
 
   pull_request:
 
@@ -92,12 +91,12 @@ jobs:
           path: .cache/jest
           key: ${{ runner.os }}-${{ matrix.node-version }}-jest-${{ hashFiles('yarn.lock') }}
 
-      # - name: Unit tests
-      #   run: yarn jest --ci --coverage ${{ env.coverage }}
+      - name: Unit tests
+        run: yarn jest --ci --coverage ${{ env.coverage }}
 
-      # - name: Codecov
-      #   uses: codecov/codecov-action@d9f34f8cd5cb3b3eb79b3e4b5dae3a16df499a70 # tag=v3.1.1
-      #   if: always() && env.coverage == 'true'
+      - name: Codecov
+        uses: codecov/codecov-action@d9f34f8cd5cb3b3eb79b3e4b5dae3a16df499a70 # tag=v3.1.1
+        if: always() && env.coverage == 'true'
 
       - name: E2E Test
         run: yarn test-e2e
@@ -152,7 +151,7 @@ jobs:
 
   release:
     needs: [lint, test]
-    if: github.repository == 'renovatebot/renovate' # && github.event_name != 'pull_request'
+    if: github.repository == 'renovatebot/renovate' && github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     # release shouldn't need more than 5 min
     timeout-minutes: 15
@@ -196,7 +195,7 @@ jobs:
       - name: semantic-release
         run: |
           echo '//registry.npmjs.org/:_authToken=${NPM_TOKEN}' >> ./.npmrc
-          yarn semantic-release --dry-run ${{env.DRY_RUN}} --ci ${{env.DRY_RUN != 'true'}}
+          yarn semantic-release --dry-run ${{env.DRY_RUN}}
           git checkout -- .npmrc
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}

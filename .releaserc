@@ -93,9 +93,6 @@
   "branches": [
     {
       "name": "main"
-    },
-    {
-      "name": "ci/node-v16"
     }
   ]
 }
