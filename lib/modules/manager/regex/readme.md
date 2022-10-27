@@ -111,7 +111,7 @@ You could configure Renovate to update the `Dockerfile` like this:
     {
       "fileMatch": ["^Dockerfile$"],
       "matchStrings": [
-        "ARG IMAGE=(?<depName>.*?):(?<currentValue>.*?)@(?<currentDigest>sha256:[a-f0-9]+)s"
+        "ARG IMAGE=(?<depName>.*?):(?<currentValue>.*?)@(?<currentDigest>sha256:[a-f0-9]+)\\s"
       ],
       "datasourceTemplate": "docker"
     }

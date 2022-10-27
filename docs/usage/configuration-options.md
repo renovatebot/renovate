@@ -299,14 +299,13 @@ If you truly need to configure this then it probably means either:
 
 ## branchNameStrict
 
-By default, Renovate removes special characters when slugifying the branch name:
+If `true`, Renovate removes special characters when slugifying the branch name:
 
 - all special characters are removed
 - only alphabetic characters are allowed
 - hyphens `-` are used to separate sections
 
-To revert this behavior to that used in v32 and before, set this value to `false`.
-This will mean that special characters like `.` may end up in the branch name.
+The default `false` behavior will mean that special characters like `.` may end up in the branch name.
 
 ## branchPrefix
 
@@ -1178,6 +1177,26 @@ Example config:
 
 Use an exact host for `matchHost` and not a domain (e.g. `api.github.com` as shown above and not `github.com`).
 Do not combine with `hostType` in the same rule or it won't work.
+
+### maxRequestsPerSecond
+
+In addition to `concurrentRequestLimit`, you can limit the maximum number of requests that can be made per one second.
+It can be used to set minimal delay between two requests to the same host.
+Fractional values are allowed, e.g. `0.25` means 1 request per 4 seconds.
+Default value `0` means no limit.
+
+Example config:
+
+```json
+{
+  "hostRules": [
+    {
+      "matchHost": "api.github.com",
+      "maxRequestsPerSecond": 2
+    }
+  ]
+}
+```
 
 ### dnsCache
 
