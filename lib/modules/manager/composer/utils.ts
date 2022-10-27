@@ -120,6 +120,9 @@ export function isGithubPersonalAccessToken(token: string): boolean {
   return regEx(/^ghp_/).test(token);
 }
 
+export function isGithubServerToServerToken(token: string): boolean {
+  return regEx(/^ghs_/).test(token);
+}
 export function takePersonalAccessTokenIfPossible(
   githubToken: string | undefined,
   gitTagsGithubToken: string | undefined
