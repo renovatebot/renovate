@@ -228,7 +228,7 @@ describe('workers/repository/process/write', () => {
       ].sort();
 
       const branchFingerprint = fingerprint({
-        branch,
+        branchFingerprintConfig: generateBranchFingerprintConfig(branch),
         managers,
       });
       repoCache.getCache.mockReturnValueOnce({
@@ -272,7 +272,7 @@ describe('workers/repository/process/write', () => {
         ),
       ].sort();
       const branchFingerprint = fingerprint({
-        branch,
+        branchFingerprintConfig: generateBranchFingerprintConfig(branch),
         managers,
       });
       repoCache.getCache.mockReturnValueOnce({

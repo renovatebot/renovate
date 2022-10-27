@@ -39,12 +39,12 @@ export function canSkipBranchUpdateCheck(
 ): boolean {
   if (!branchState.branchFingerprint) {
     logger.trace('branch.isUpToDate(): no fingerprint');
-    delete branchState.branchFingerprint;
     return false;
   }
 
   if (branchFingerprint !== branchState.branchFingerprint) {
     logger.debug('branch.isUpToDate(): needs recalculation');
+    delete branchState.branchFingerprint;
     return false;
   }
 
