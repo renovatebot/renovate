@@ -1,6 +1,7 @@
 import * as httpMock from '../../../../test/http-mock';
 import { mocked } from '../../../../test/util';
 import * as _hostRules from '../../../util/host-rules';
+import { GitTagsDatasource } from '../git-tags';
 import { GithubTagsDatasource } from '../github-tags';
 import { BaseGoDatasource } from './base';
 import { GoDirectDatasource } from './releases-direct';
@@ -13,6 +14,7 @@ const getDatasourceSpy = jest.spyOn(BaseGoDatasource, 'getDatasource');
 const hostRules = mocked(_hostRules);
 
 describe('modules/datasource/go/releases-direct', () => {
+  const gitGetTags = jest.spyOn(GitTagsDatasource.prototype, 'getReleases');
   const githubGetTags = jest.spyOn(
     GithubTagsDatasource.prototype,
     'getReleases'
@@ -84,6 +86,25 @@ describe('modules/datasource/go/releases-direct', () => {
         .reply(200, [{ name: 'v1.0.0' }, { name: 'v2.0.0' }]);
       const res = await datasource.getReleases({
         packageName: 'golang.org/x/text',
+      });
+      expect(res).toMatchSnapshot();
+      expect(res).not.toBeNull();
+      expect(res).toBeDefined();
+    });
+
+    it('support git', async () => {
+      getDatasourceSpy.mockResolvedValueOnce({
+        datasource: 'git-tags',
+        packageName: 'renovatebot.com/abc/def',
+      });
+      gitGetTags.mockResolvedValueOnce({
+        releases: [
+          { gitRef: 'v1.0.0', version: 'v1.0.0' },
+          { gitRef: 'v2.0.0', version: 'v2.0.0' },
+        ],
+      });
+      const res = await datasource.getReleases({
+        packageName: 'renovatebot.com/abc/def',
       });
       expect(res).toMatchSnapshot();
       expect(res).not.toBeNull();

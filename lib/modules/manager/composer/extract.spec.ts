@@ -30,7 +30,7 @@ describe('modules/manager/composer/extract', () => {
     it('extracts dependencies with no lock file', async () => {
       const res = await extractPackageFile(requirements1, packageFile);
       expect(res).toMatchSnapshot();
-      expect(res?.deps).toHaveLength(32);
+      expect(res?.deps).toHaveLength(33);
     });
 
     it('extracts registryUrls', async () => {
@@ -62,7 +62,7 @@ describe('modules/manager/composer/extract', () => {
       fs.readLocalFile.mockResolvedValue('some content');
       const res = await extractPackageFile(requirements1, packageFile);
       expect(res).toMatchSnapshot();
-      expect(res?.deps).toHaveLength(32);
+      expect(res?.deps).toHaveLength(33);
     });
   });
 });

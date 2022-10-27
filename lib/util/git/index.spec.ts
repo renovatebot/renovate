@@ -315,23 +315,6 @@ describe('util/git/index', () => {
     });
   });
 
-  describe('getBranchParentSha(branchName)', () => {
-    it('should return sha if found', async () => {
-      const parentSha = await git.getBranchParentSha('renovate/future_branch');
-      expect(parentSha).toHaveLength(40);
-      expect(parentSha).toEqual(git.getBranchCommit(defaultBranch));
-    });
-
-    it('should return null if not found', async () => {
-      expect(await git.getBranchParentSha('not_found')).toBeNull();
-    });
-
-    it('should return cached value', async () => {
-      parentShaCache.getCachedBranchParentShaResult.mockReturnValueOnce('111');
-      expect(await git.getBranchParentSha('not_found')).toBe('111');
-    });
-  });
-
   describe('getBranchFiles(branchName)', () => {
     it('detects changed files compared to current base branch', async () => {
       const file: FileChange = {
@@ -873,7 +856,7 @@ describe('util/git/index', () => {
       expect(status.isClean()).toBeTrue();
     });
 
-    describe('cache', () => {
+    describe('cachedConflictResult', () => {
       beforeEach(() => {
         jest.resetAllMocks();
       });
@@ -889,10 +872,10 @@ describe('util/git/index', () => {
         expect(res).toBeTrue();
         expect(conflictsCache.getCachedConflictResult.mock.calls).toEqual([
           [
-            defaultBranch,
-            expect.any(String),
             'renovate/conflicted_branch',
-            expect.any(String),
+            git.getBranchCommit('renovate/conflicted_branch'),
+            defaultBranch,
+            git.getBranchCommit(defaultBranch),
           ],
         ]);
         expect(conflictsCache.setCachedConflictResult).not.toHaveBeenCalled();
@@ -908,13 +891,7 @@ describe('util/git/index', () => {
 
         expect(res).toBeTrue();
         expect(conflictsCache.setCachedConflictResult.mock.calls).toEqual([
-          [
-            defaultBranch,
-            expect.any(String),
-            'renovate/conflicted_branch',
-            expect.any(String),
-            true,
-          ],
+          ['renovate/conflicted_branch', true],
         ]);
       });
 
@@ -928,13 +905,7 @@ describe('util/git/index', () => {
 
         expect(res).toBeFalse();
         expect(conflictsCache.setCachedConflictResult.mock.calls).toEqual([
-          [
-            defaultBranch,
-            expect.any(String),
-            'renovate/non_conflicted_branch',
-            expect.any(String),
-            false,
-          ],
+          ['renovate/non_conflicted_branch', false],
         ]);
       });
     });

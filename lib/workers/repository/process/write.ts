@@ -8,11 +8,30 @@ import { fingerprint } from '../../../util/fingerprint';
 import { branchExists, getBranchCommit } from '../../../util/git';
 import { setBranchNewCommit } from '../../../util/git/set-branch-commit';
 import { Limit, incLimitedValue, setMaxLimit } from '../../global/limits';
-import { BranchConfig, BranchResult } from '../../types';
+import {
+  BranchConfig,
+  BranchResult,
+  UpgradeFingerprintConfig,
+} from '../../types';
 import { processBranch } from '../update/branch';
+import { upgradeFingerprintFields } from './fingerprint-fields';
 import { getBranchesRemaining, getPrsRemaining } from './limits';
 
 export type WriteUpdateResult = 'done' | 'automerged';
+
+export function generateBranchFingerprintConfig(
+  branch: BranchConfig
+): UpgradeFingerprintConfig[] {
+  const res = branch.upgrades.map((upgrade) => {
+    const filteredUpgrade = {} as UpgradeFingerprintConfig;
+    for (const field of upgradeFingerprintFields) {
+      filteredUpgrade[field] = upgrade[field];
+    }
+    return filteredUpgrade;
+  });
+
+  return res;
+}
 
 export function canSkipBranchUpdateCheck(
   branchState: BranchCache,
@@ -69,6 +88,7 @@ export function syncBranchState(
   if (baseBranchSha !== branchState.baseBranchSha) {
     logger.debug('syncBranchState(): update baseBranchSha');
     delete branchState.isBehindBase;
+    delete branchState.isConflicted;
 
     // update cached branchSha
     branchState.baseBranchSha = baseBranchSha;
@@ -78,6 +98,7 @@ export function syncBranchState(
   if (branchSha !== branchState.sha) {
     logger.debug('syncBranchState(): update branchSha');
     delete branchState.isBehindBase;
+    delete branchState.isConflicted;
     delete branchState.isModified;
     delete branchState.branchFingerprint;
 
@@ -102,13 +123,12 @@ export async function writeUpdates(
       .join(', ')}`
   );
   const prsRemaining = await getPrsRemaining(config, branches);
-  logger.debug({ prsRemaining }, 'Calculated maximum PRs remaining this run');
+  logger.debug(`Calculated maximum PRs remaining this run: ${prsRemaining}`);
   setMaxLimit(Limit.PullRequests, prsRemaining);
 
   const branchesRemaining = await getBranchesRemaining(config, branches);
   logger.debug(
-    { branchesRemaining },
-    'Calculated maximum branches remaining this run'
+    `Calculated maximum branches remaining this run: ${branchesRemaining}`
   );
   setMaxLimit(Limit.Branches, branchesRemaining);
 
@@ -130,7 +150,7 @@ export async function writeUpdates(
       ),
     ].sort();
     const branchFingerprint = fingerprint({
-      branch,
+      branchFingerprintConfig: generateBranchFingerprintConfig(branch),
       managers,
     });
     branch.skipBranchUpdate = canSkipBranchUpdateCheck(
@@ -141,10 +161,9 @@ export async function writeUpdates(
     branch.prBlockedBy = res?.prBlockedBy;
     branch.prNo = res?.prNo;
     branch.result = res?.result;
-    branch.branchFingerprint =
-      res?.commitSha || !branchState.branchFingerprint
-        ? branchFingerprint
-        : branchState.branchFingerprint;
+    branch.branchFingerprint = res?.updatesVerified
+      ? branchFingerprint
+      : branchState.branchFingerprint;
 
     if (res?.commitSha) {
       setBranchNewCommit(branchName, baseBranch, res.commitSha);
