@@ -98,7 +98,7 @@ async function getUpdatedArtifacts(
   status: StatusResult,
   artifactFileNames: string[]
 ): Promise<UpdateArtifactsResult[]> {
-  const updatedResults: (UpdateArtifactsResult | null)[] = [];
+  const updatedResults: UpdateArtifactsResult[] = [];
   for (const artifactFileName of artifactFileNames) {
     updatedResults.push(await addIfUpdated(status, artifactFileName));
   }
