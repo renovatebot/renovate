@@ -26,11 +26,17 @@ export function versionLikeSubstring(
 
 export function isDependencyString(input: string): boolean {
   const split = input?.split(':');
-  if (split?.length !== 3) {
+  if (split?.length !== 3 && split?.length !== 4) {
     return false;
   }
   // eslint-disable-next-line prefer-const
-  let [tempGroupId, tempArtifactId, tempVersionPart] = split;
+  let [tempGroupId, tempArtifactId, tempVersionPart, optionalClassifier] =
+    split;
+
+  if (optionalClassifier && !artifactRegex.test(optionalClassifier)) {
+    return false;
+  }
+
   if (
     tempVersionPart !== versionLikeSubstring(tempVersionPart) &&
     tempVersionPart.includes('@')
