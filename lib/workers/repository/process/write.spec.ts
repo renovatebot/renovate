@@ -21,6 +21,7 @@ import * as _branchWorker from '../update/branch';
 import * as _limits from './limits';
 import {
   canSkipBranchUpdateCheck,
+  generateBranchFingerprintConfig,
   syncBranchState,
   writeUpdates,
 } from './write';
@@ -185,6 +186,7 @@ describe('workers/repository/process/write', () => {
       });
       branchWorker.processBranch.mockResolvedValueOnce({
         branchExists: true,
+        updatesVerified: true,
         result: BranchResult.Done,
         commitSha: 'some-value',
       });
@@ -197,7 +199,7 @@ describe('workers/repository/process/write', () => {
         ),
       ].sort();
       const branchFingerprint = fingerprint({
-        branch,
+        branchFingerprintConfig: generateBranchFingerprintConfig(branch),
         managers,
       });
       expect(await writeUpdates(config, branches)).toBe('done');
