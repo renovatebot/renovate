@@ -52,8 +52,12 @@ function getAuthJson(): string | null {
     gitTagsGithubToken
   );
   if (selectedGithubToken) {
-    if (!isGithubPersonalAccessToken(selectedGithubToken)) {
-      logger.debug(`Selected github token is not a Personal Access Token`);
+    if (isGithubPersonalAccessToken(selectedGithubToken)) {
+      logger.debug('Using GitHub Personal Access Token');
+    } else if (isGithubServerToServerToken(selectedGithubToken)) {
+      logger.debug('Using GitHub Server-to-Server token');
+    } else {
+      logger.debug('Using unknown GitHub token type');
     }
     authJson['github-oauth'] = {
       'github.com': selectedGithubToken,
