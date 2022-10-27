@@ -684,6 +684,7 @@ describe('workers/repository/update/branch/index', () => {
       git.getBranchCommit.mockReturnValue('123test');
       expect(await branchWorker.processBranch(inconfig)).toEqual({
         branchExists: true,
+        updatesVerified: true,
         prNo: undefined,
         result: 'pending',
         commitSha: '123test',
@@ -913,6 +914,7 @@ describe('workers/repository/update/branch/index', () => {
       const processBranchResult = await branchWorker.processBranch(config);
       expect(processBranchResult).toEqual({
         branchExists: true,
+        updatesVerified: true,
         prNo: undefined,
         result: 'pr-created',
         commitSha: '123test',
@@ -936,6 +938,7 @@ describe('workers/repository/update/branch/index', () => {
       const processBranchResult = await branchWorker.processBranch(config);
       expect(processBranchResult).toEqual({
         branchExists: true,
+        updatesVerified: true,
         prNo: undefined,
         result: 'done',
         commitSha: '123test',
@@ -1007,6 +1010,7 @@ describe('workers/repository/update/branch/index', () => {
       } as BranchConfig;
       expect(await branchWorker.processBranch(inconfig)).toEqual({
         branchExists: true,
+        updatesVerified: true,
         prNo: undefined,
         result: 'done',
         commitSha: null,
@@ -1048,6 +1052,7 @@ describe('workers/repository/update/branch/index', () => {
         })
       ).toEqual({
         branchExists: true,
+        updatesVerified: true,
         prNo: undefined,
         result: 'done',
         commitSha: null,
@@ -1089,6 +1094,7 @@ describe('workers/repository/update/branch/index', () => {
       } as BranchConfig;
       expect(await branchWorker.processBranch(inconfig)).toEqual({
         branchExists: true,
+        updatesVerified: true,
         prNo: undefined,
         result: 'done',
         commitSha: null,
@@ -1149,6 +1155,7 @@ describe('workers/repository/update/branch/index', () => {
       };
       expect(await branchWorker.processBranch(inconfig)).toEqual({
         branchExists: true,
+        updatesVerified: false,
         prNo: undefined,
         result: 'done',
         commitSha: null,
@@ -1188,6 +1195,7 @@ describe('workers/repository/update/branch/index', () => {
       } as BranchConfig;
       expect(await branchWorker.processBranch(inconfig)).toEqual({
         branchExists: true,
+        updatesVerified: true,
         prNo: undefined,
         result: 'done',
         commitSha: null,
@@ -1224,6 +1232,7 @@ describe('workers/repository/update/branch/index', () => {
       } as BranchConfig;
       expect(await branchWorker.processBranch(inconfig)).toEqual({
         branchExists: true,
+        updatesVerified: true,
         prNo: undefined,
         result: 'done',
         commitSha: null,
@@ -1309,6 +1318,7 @@ describe('workers/repository/update/branch/index', () => {
       const result = await branchWorker.processBranch(inconfig);
       expect(result).toEqual({
         branchExists: true,
+        updatesVerified: true,
         prNo: undefined,
         result: 'done',
         commitSha: null,
@@ -1483,6 +1493,7 @@ describe('workers/repository/update/branch/index', () => {
       const result = await branchWorker.processBranch(inconfig);
       expect(result).toEqual({
         branchExists: true,
+        updatesVerified: true,
         prNo: undefined,
         result: 'done',
         commitSha: null,
@@ -1608,6 +1619,7 @@ describe('workers/repository/update/branch/index', () => {
 
       expect(result).toEqual({
         branchExists: true,
+        updatesVerified: true,
         prNo: undefined,
         result: 'done',
         commitSha: null,
@@ -1753,6 +1765,7 @@ describe('workers/repository/update/branch/index', () => {
       const result = await branchWorker.processBranch(inconfig);
       expect(result).toEqual({
         branchExists: true,
+        updatesVerified: true,
         prNo: undefined,
         result: 'done',
         commitSha: null,
@@ -1810,6 +1823,7 @@ describe('workers/repository/update/branch/index', () => {
       git.getBranchCommit.mockReturnValue('123test');
       expect(await branchWorker.processBranch(inconfig)).toEqual({
         branchExists: true,
+        updatesVerified: true,
         prNo: undefined,
         result: 'done',
         commitSha: '123test',
@@ -1846,6 +1860,7 @@ describe('workers/repository/update/branch/index', () => {
       };
       expect(await branchWorker.processBranch(inconfig)).toEqual({
         branchExists: true,
+        updatesVerified: false,
         prNo: undefined,
         result: 'done',
         commitSha: null,
@@ -1882,6 +1897,7 @@ describe('workers/repository/update/branch/index', () => {
         })
       ).toEqual({
         branchExists: true,
+        updatesVerified: true,
         commitSha: '123test',
         prNo: undefined,
         result: 'done',
@@ -1914,6 +1930,7 @@ describe('workers/repository/update/branch/index', () => {
         })
       ).toEqual({
         branchExists: true,
+        updatesVerified: true,
         commitSha: '123test',
         prNo: undefined,
         result: 'done',

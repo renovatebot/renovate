@@ -52,6 +52,7 @@ describe('workers/repository/process/lookup/filter-checks', () => {
 
   describe('.filterInternalChecks()', () => {
     it('returns latest release if internalChecksFilter=none', async () => {
+      config.internalChecksFilter = 'none';
       const res = await filterInternalChecks(
         config,
         versioning,
