@@ -811,7 +811,7 @@ describe('modules/manager/dockerfile/extract', () => {
       expect(res).toEqual([
         {
           autoReplaceStringTemplate:
-            'ARG sha_digest={{#if newDigest}}{{newDigest}}{{/if}}\n',
+            'ARG sha_digest={{#if newDigest}}{{newDigest}}{{/if}}',
           currentDigest:
             'sha256:ab37242e81cbc031b2600eef4440fe87055a05c14b40686df85078cc5086c98f',
           currentValue: undefined,
@@ -819,7 +819,7 @@ describe('modules/manager/dockerfile/extract', () => {
           depName: 'gcr.io/distroless/java17',
           depType: 'final',
           replaceString:
-            'ARG sha_digest=sha256:ab37242e81cbc031b2600eef4440fe87055a05c14b40686df85078cc5086c98f\n',
+            'ARG sha_digest=sha256:ab37242e81cbc031b2600eef4440fe87055a05c14b40686df85078cc5086c98f',
         },
       ]);
     });
@@ -907,7 +907,7 @@ describe('modules/manager/dockerfile/extract', () => {
             '  \\\n' +
             ' # multi-line arg\n' +
             ' # and multi-line comment\n' +
-            '   nginx_version="nginx:{{#if newValue}}{{newValue}}{{/if}}@{{#if newDigest}}{{newDigest}}{{/if}}"\n',
+            '   nginx_version="nginx:{{#if newValue}}{{newValue}}{{/if}}@{{#if newDigest}}{{newDigest}}{{/if}}"',
           currentDigest:
             'sha256:ca9fac83c6c89a09424279de522214e865e322187b22a1a29b12747a4287b7bd',
           currentValue: '1.18.0-alpine',
@@ -919,7 +919,7 @@ describe('modules/manager/dockerfile/extract', () => {
             '  \\\n' +
             ' # multi-line arg\n' +
             ' # and multi-line comment\n' +
-            '   nginx_version="nginx:1.18.0-alpine@sha256:ca9fac83c6c89a09424279de522214e865e322187b22a1a29b12747a4287b7bd"\n',
+            '   nginx_version="nginx:1.18.0-alpine@sha256:ca9fac83c6c89a09424279de522214e865e322187b22a1a29b12747a4287b7bd"',
         },
       ]);
     });
@@ -968,7 +968,7 @@ describe('modules/manager/dockerfile/extract', () => {
             '  `\n' +
             ' # multi-line arg\n' +
             ' # and multi-line comment\n' +
-            '   nginx_version="nginx:{{#if newValue}}{{newValue}}{{/if}}@{{#if newDigest}}{{newDigest}}{{/if}}"\n',
+            '   nginx_version="nginx:{{#if newValue}}{{newValue}}{{/if}}@{{#if newDigest}}{{newDigest}}{{/if}}"',
           currentDigest: 'sha256:abcdef',
           currentValue: '18.04',
           datasource: 'docker',
@@ -979,7 +979,7 @@ describe('modules/manager/dockerfile/extract', () => {
             '  `\n' +
             ' # multi-line arg\n' +
             ' # and multi-line comment\n' +
-            '   nginx_version="nginx:18.04@sha256:abcdef"\n',
+            '   nginx_version="nginx:18.04@sha256:abcdef"',
         },
         {
           autoReplaceStringTemplate:
@@ -1013,14 +1013,14 @@ describe('modules/manager/dockerfile/extract', () => {
       expect(res).toEqual([
         {
           autoReplaceStringTemplate:
-            'ARG REF_NAME=${REF_NAME:-"gcr.io/distroless/static-debian11:{{#if newValue}}{{newValue}}{{/if}}@{{#if newDigest}}{{newDigest}}{{/if}}"}\n',
+            'ARG REF_NAME=${REF_NAME:-"gcr.io/distroless/static-debian11:{{#if newValue}}{{newValue}}{{/if}}@{{#if newDigest}}{{newDigest}}{{/if}}"}',
           currentDigest: 'sha256:abc',
           currentValue: 'nonroot',
           datasource: 'docker',
           depName: 'gcr.io/distroless/static-debian11',
           depType: 'final',
           replaceString:
-            'ARG REF_NAME=${REF_NAME:-"gcr.io/distroless/static-debian11:nonroot@sha256:abc"}\n',
+            'ARG REF_NAME=${REF_NAME:-"gcr.io/distroless/static-debian11:nonroot@sha256:abc"}',
         },
       ]);
     });
@@ -1034,14 +1034,14 @@ describe('modules/manager/dockerfile/extract', () => {
       expect(res).toEqual([
         {
           autoReplaceStringTemplate:
-            'ARG IMAGE_TAG={{#if newValue}}{{newValue}}{{/if}}\r\n#something unrelated\r\nFROM ubuntu:$IMAGE_TAG@{{#if newDigest}}{{newDigest}}{{/if}}\r\n',
+            'ARG IMAGE_TAG={{#if newValue}}{{newValue}}{{/if}}\r\n#something unrelated\r\nFROM ubuntu:$IMAGE_TAG@{{#if newDigest}}{{newDigest}}{{/if}}',
           currentDigest: 'sha256:abc',
           currentValue: '14.04',
           datasource: 'docker',
           depName: 'ubuntu',
           depType: 'final',
           replaceString:
-            'ARG IMAGE_TAG=14.04\r\n#something unrelated\r\nFROM ubuntu:$IMAGE_TAG@sha256:abc\r\n',
+            'ARG IMAGE_TAG=14.04\r\n#something unrelated\r\nFROM ubuntu:$IMAGE_TAG@sha256:abc',
           versioning: 'ubuntu',
         },
       ]);
@@ -1065,7 +1065,7 @@ describe('modules/manager/dockerfile/extract', () => {
             'ARG NODE_IMAGE_HASH="@{{#if newDigest}}{{newDigest}}{{/if}}"\n' +
             'ARG NODE_IMAGE_HOST="docker.io/library/"\n' +
             'ARG NODE_IMAGE_NAME=node\n' +
-            'ARG NODE_IMAGE_TAG="{{#if newValue}}{{newValue}}{{/if}}"\n',
+            'ARG NODE_IMAGE_TAG="{{#if newValue}}{{newValue}}{{/if}}"',
           currentDigest:
             'sha256:ba9c961513b853210ae0ca1524274eafa5fd94e20b856343887ca7274c8450e4',
           currentValue: '16.14.2-alpine3.14',
@@ -1076,7 +1076,7 @@ describe('modules/manager/dockerfile/extract', () => {
             'ARG NODE_IMAGE_HASH="@sha256:ba9c961513b853210ae0ca1524274eafa5fd94e20b856343887ca7274c8450e4"\n' +
             'ARG NODE_IMAGE_HOST="docker.io/library/"\n' +
             'ARG NODE_IMAGE_NAME=node\n' +
-            'ARG NODE_IMAGE_TAG="16.14.2-alpine3.14"\n',
+            'ARG NODE_IMAGE_TAG="16.14.2-alpine3.14"',
         },
       ]);
     });
