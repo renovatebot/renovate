@@ -123,6 +123,11 @@ export function isGithubPersonalAccessToken(token: string): boolean {
 export function isGithubServerToServerToken(token: string): boolean {
   return regEx(/^ghs_/).test(token);
 }
+
+export function isGithubFineGrainedPersonalAccessToken(token: string): boolean {
+  return regEx(/^github_pat_/).test(token);
+}
+
 export function takePersonalAccessTokenIfPossible(
   githubToken: string | undefined,
   gitTagsGithubToken: string | undefined
@@ -132,6 +137,17 @@ export function takePersonalAccessTokenIfPossible(
   }
 
   if (githubToken && isGithubPersonalAccessToken(githubToken)) {
+    return githubToken;
+  }
+
+  if (
+    gitTagsGithubToken &&
+    isGithubFineGrainedPersonalAccessToken(gitTagsGithubToken)
+  ) {
+    return gitTagsGithubToken;
+  }
+
+  if (githubToken && isGithubFineGrainedPersonalAccessToken(githubToken)) {
     return githubToken;
   }
 

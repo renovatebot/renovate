@@ -5,7 +5,9 @@ import {
   extractConstraints,
   findGithubToken,
   getComposerArguments,
+  isGithubFineGrainedPersonalAccessToken,
   isGithubPersonalAccessToken,
+  isGithubServerToServerToken,
   requireComposerDependencyInstallation,
   takePersonalAccessTokenIfPossible,
 } from './utils';
@@ -349,8 +351,50 @@ describe('modules/manager/composer/utils', () => {
       expect(isGithubPersonalAccessToken('ghs_XXXXXX')).toBeFalse();
     });
 
+    it('returns false when string is a github fine grained personal access token', () => {
+      expect(isGithubPersonalAccessToken('github_pat_XXXXXX')).toBeFalse();
+    });
+
     it('returns false when string is not a token at all', () => {
       expect(isGithubPersonalAccessToken('XXXXXX')).toBeFalse();
+    });
+  });
+
+  describe('isGithubServerToServerToken', () => {
+    it('returns true when string is a github server to server token', () => {
+      expect(isGithubServerToServerToken('ghs_XXXXXX')).toBeTrue();
+    });
+
+    it('returns false when string is a github personal access token token', () => {
+      expect(isGithubServerToServerToken('ghp_XXXXXX')).toBeFalse();
+    });
+
+    it('returns false when string is a github fine grained personal access token', () => {
+      expect(isGithubPersonalAccessToken('github_pat_XXXXXX')).toBeFalse();
+    });
+
+    it('returns false when string is not a token at all', () => {
+      expect(isGithubServerToServerToken('XXXXXX')).toBeFalse();
+    });
+  });
+
+  describe('isGithubFineGrainedPersonalAccessToken', () => {
+    it('returns true when string is a github fine grained personal access token', () => {
+      expect(
+        isGithubFineGrainedPersonalAccessToken('github_pat_XXXXXX')
+      ).toBeTrue();
+    });
+
+    it('returns false when string is a github personnal access token', () => {
+      expect(isGithubFineGrainedPersonalAccessToken('ghp_XXXXXX')).toBeFalse();
+    });
+
+    it('returns false when string is a github application token', () => {
+      expect(isGithubFineGrainedPersonalAccessToken('ghs_XXXXXX')).toBeFalse();
+    });
+
+    it('returns false when string is not a token at all', () => {
+      expect(isGithubFineGrainedPersonalAccessToken('XXXXXX')).toBeFalse();
     });
   });
 
@@ -398,6 +442,22 @@ describe('modules/manager/composer/utils', () => {
     it('returns githubToken when githubToken not PAT and gitTagsGithubToken is not set', () => {
       const githubToken = 'ghs_gitTags';
       const gitTagsGithubToken = undefined;
+      expect(
+        takePersonalAccessTokenIfPossible(githubToken, gitTagsGithubToken)
+      ).toEqual(githubToken);
+    });
+
+    it('take personal assess token over fine grained token', () => {
+      const githubToken = 'ghp_github';
+      const gitTagsGithubToken = 'github_pat_gitTags';
+      expect(
+        takePersonalAccessTokenIfPossible(githubToken, gitTagsGithubToken)
+      ).toEqual(githubToken);
+    });
+
+    it('take fine grained token over server to server token', () => {
+      const githubToken = 'github_pat_github';
+      const gitTagsGithubToken = 'ghs_gitTags';
       expect(
         takePersonalAccessTokenIfPossible(githubToken, gitTagsGithubToken)
       ).toEqual(githubToken);

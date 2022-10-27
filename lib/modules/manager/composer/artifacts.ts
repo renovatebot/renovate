@@ -29,7 +29,9 @@ import {
   findGithubToken,
   getComposerArguments,
   getPhpConstraint,
+  isGithubFineGrainedPersonalAccessToken,
   isGithubPersonalAccessToken,
+  isGithubServerToServerToken,
   requireComposerDependencyInstallation,
   takePersonalAccessTokenIfPossible,
 } from './utils';
@@ -56,6 +58,8 @@ function getAuthJson(): string | null {
       logger.debug('Using GitHub Personal Access Token');
     } else if (isGithubServerToServerToken(selectedGithubToken)) {
       logger.debug('Using GitHub Server-to-Server token');
+    } else if (isGithubFineGrainedPersonalAccessToken(selectedGithubToken)) {
+      logger.debug('Using GitHub Fine-grained Personal Access Token');
     } else {
       logger.debug('Using unknown GitHub token type');
     }
