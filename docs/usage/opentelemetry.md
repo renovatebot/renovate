@@ -5,7 +5,9 @@ description: How to use OpenTelemetry with Renovate
 
 # OpenTelemetry and Renovate
 
-**THIS FEATURE IS EXPERIMENTAL** and is subject to change in minor versions.
+<!-- prettier-ignore -->
+!!! warning "This feature is flagged as experimental"
+    Experimental features might be changed or even removed at any time.
 
 Renovate supports OpenTelemetry which is an emerging monitoring standard.
 
