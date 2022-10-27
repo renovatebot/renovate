@@ -763,20 +763,20 @@ describe('modules/manager/dockerfile/extract', () => {
 
     it('handles FROM with version in ARG value', () => {
       const res = extractPackageFile(
-        'ARG\tVARIANT="1.60.0-bullseye"\nFROM\trust:${VARIANT}\n',
+        'ARG\tVARIANT="1.60.0-bullseye" \nFROM\trust:${VARIANT}\n',
         '',
         {}
       )?.deps;
       expect(res).toEqual([
         {
           autoReplaceStringTemplate:
-            'ARG	VARIANT="{{#if newValue}}{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}"\n',
+            'ARG\tVARIANT="{{#if newValue}}{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}" \n',
           currentDigest: undefined,
           currentValue: '1.60.0-bullseye',
           datasource: 'docker',
           depName: 'rust',
           depType: 'final',
-          replaceString: 'ARG	VARIANT="1.60.0-bullseye"\n',
+          replaceString: 'ARG\tVARIANT="1.60.0-bullseye" \n',
         },
       ]);
     });

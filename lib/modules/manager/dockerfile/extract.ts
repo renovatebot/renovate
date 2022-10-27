@@ -277,7 +277,7 @@ export function extractPackageFile(
     const argRegex = regEx(
       '^[ \\t]*ARG(?:' +
         escapeChar +
-        '[ \\t]*\\r?\\n| |\\t|#.*?\\r?\\n)+(?<name>\\S+)[ =](?<value>.*)',
+        '[ \\t]*\\r?\\n| |\\t|#.*?\\r?\\n)+(?<name>\\w+)[ =](?<value>\\S*)',
       'im'
     );
     const argMatch = argRegex.exec(instruction);
