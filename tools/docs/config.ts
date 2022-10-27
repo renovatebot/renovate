@@ -282,7 +282,7 @@ function generateFollowTagAdvancedFunctionality(): string {
 }
 
 function generateGroupAdvancedFunctionality(): string {
-  return "\n<!-- prettier-ignore --> \n!!! warning\n    Advanced functionality only.\n    Do not use unless you know what you're doing.\n";
+  return "\n<!-- prettier-ignore --> \n!!! warning\n    Advanced functionality.\n    Only use this if you know what you're doing.\n";
 }
 
 function generateAdvancedConfig(): string {
