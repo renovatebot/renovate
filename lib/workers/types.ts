@@ -173,3 +173,21 @@ export interface SelectAllConfig extends RenovateConfig {
   dependencyDashboardAllPending?: boolean;
   dependencyDashboardAllRateLimited?: boolean;
 }
+
+export interface UpgradeFingerprintConfig {
+  autoReplaceStringTemplate?: string;
+  currentDigest?: string;
+  currentValue?: string;
+  currentVersion?: string;
+  datasource?: string;
+  depName?: string;
+  lockFile?: string;
+  lockedVersion?: string;
+  manager?: string | null;
+  newName?: string;
+  newDigest?: string;
+  newValue?: string;
+  newVersion?: string;
+  packageFile?: string;
+  replaceString?: string;
+}
