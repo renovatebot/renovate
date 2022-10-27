@@ -161,10 +161,9 @@ export async function writeUpdates(
     branch.prBlockedBy = res?.prBlockedBy;
     branch.prNo = res?.prNo;
     branch.result = res?.result;
-    branch.branchFingerprint =
-      res?.commitSha || !branchState.branchFingerprint
-        ? branchFingerprint
-        : branchState.branchFingerprint;
+    branch.branchFingerprint = res?.updatesVerified
+      ? branchFingerprint
+      : branchState.branchFingerprint;
 
     if (res?.commitSha) {
       setBranchNewCommit(branchName, baseBranch, res.commitSha);
