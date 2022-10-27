@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - ci/node-v16
 
   pull_request:
 
@@ -91,12 +92,12 @@ jobs:
           path: .cache/jest
           key: ${{ runner.os }}-${{ matrix.node-version }}-jest-${{ hashFiles('yarn.lock') }}
 
-      - name: Unit tests
-        run: yarn jest --ci --coverage ${{ env.coverage }}
+      # - name: Unit tests
+      #   run: yarn jest --ci --coverage ${{ env.coverage }}
 
-      - name: Codecov
-        uses: codecov/codecov-action@d9f34f8cd5cb3b3eb79b3e4b5dae3a16df499a70 # tag=v3.1.1
-        if: always() && env.coverage == 'true'
+      # - name: Codecov
+      #   uses: codecov/codecov-action@d9f34f8cd5cb3b3eb79b3e4b5dae3a16df499a70 # tag=v3.1.1
+      #   if: always() && env.coverage == 'true'
 
       - name: E2E Test
         run: yarn test-e2e
