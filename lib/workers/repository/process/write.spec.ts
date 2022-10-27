@@ -186,6 +186,7 @@ describe('workers/repository/process/write', () => {
       });
       branchWorker.processBranch.mockResolvedValueOnce({
         branchExists: true,
+        updatesVerified: true,
         result: BranchResult.Done,
         commitSha: 'some-value',
       });
