@@ -10,6 +10,7 @@ import type {
 import {
   getBranchCommit,
   isBranchBehindBase,
+  isBranchConflicted,
   isBranchModified,
 } from '../../util/git';
 import { getCachedBranchParentShaResult } from '../../util/git/parent-sha-cache';
@@ -56,6 +57,7 @@ async function generateBranchCache(
     let parentSha = null;
     let isModified = false;
     let isBehindBase = false;
+    let isConflicted = false;
     if (sha) {
       parentSha = getCachedBranchParentShaResult(branchName, sha);
       const branchPr = await platform.getBranchPr(branchName);
@@ -64,6 +66,7 @@ async function generateBranchCache(
       }
       isModified = await isBranchModified(branchName);
       isBehindBase = await isBranchBehindBase(branchName, baseBranch);
+      isConflicted = await isBranchConflicted(baseBranch, branchName);
     }
     const automerge = !!branch.automerge;
     const upgrades: BranchUpgradeCache[] = branch.upgrades
@@ -77,6 +80,7 @@ async function generateBranchCache(
       branchFingerprint,
       branchName,
       isBehindBase,
+      isConflicted,
       isModified,
       parentSha,
       prNo,
