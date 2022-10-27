@@ -92,8 +92,7 @@ function genTable(obj: [string, string][], type: string, def: any): string {
     'experimentalDescription',
     'experimentalIssues',
     'advancedUse',
-    'followTagAdvancedFunctionality',
-    'groupAdvancedFunctionality',
+    'advancedFunctionality',
     'advancedConfig',
   ];
   obj.forEach(([key, val]) => {
@@ -245,21 +244,12 @@ export async function generateConfig(dist: string, bot = false): Promise<void> {
         }
       }
 
-      if (el.followTagAdvancedFunctionality) {
-        configOptionsRaw[headerIndex] +=
-          generateFollowTagAdvancedFunctionality();
-      }
-
-      if (el.groupAdvancedFunctionality) {
-        configOptionsRaw[headerIndex] += generateGroupAdvancedFunctionality();
+      if (el.advancedFunctionality) {
+        configOptionsRaw[headerIndex] += generateAdvancedFunctionality();
       }
 
       if (el.advancedConfig) {
         configOptionsRaw[footerIndex] += generateAdvancedConfig();
-      }
-
-      if (el.directEditOfCommitMessageDeprecation) {
-        configOptionsRaw[footerIndex] += generateCommitMsg();
       }
 
       if (el.experimental) {
@@ -277,25 +267,17 @@ function generateAdvancedUse(): string {
   );
 }
 
-function generateFollowTagAdvancedFunctionality(): string {
-  return "\n<!-- prettier-ignore -->\n!!! warning\n    Advanced functionality.\n    Only use this if you're sure you know what you're doing.\n";
-}
-
-function generateGroupAdvancedFunctionality(): string {
-  return "\n<!-- prettier-ignore --> \n!!! warning\n    Advanced functionality.\n    Only use this if you know what you're doing.\n";
+function generateAdvancedFunctionality(): string {
+  return (
+    '\n<!-- prettier-ignore --> \n!!! warning\n' +
+    '    Advanced functionality.\n' +
+    "    Only use this if you know what you're doing.\n"
+  );
 }
 
 function generateAdvancedConfig(): string {
   return (
     '\n<!-- prettier-ignore -->\n!!! warning\n' +
     '    Advanced config, use at your own risk.\n'
-  );
-}
-
-function generateCommitMsg(): string {
-  return (
-    '\n<!-- prettier-ignore -->\n!!! warning\n' +
-    '    Editing of `commitMessage` directly is now deprecated and not recommended.\n' +
-    '    Please instead edit the fields such as `commitMessageAction`, `commitMessageExtra`, etc.\n'
   );
 }

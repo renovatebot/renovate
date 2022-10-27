@@ -360,13 +360,9 @@ export interface RenovateOptionBase {
 
   advancedUse?: boolean;
 
-  followTagAdvancedFunctionality?: boolean;
-
-  groupAdvancedFunctionality?: boolean;
+  advancedFunctionality?: boolean;
 
   advancedConfig?: boolean;
-
-  directEditOfCommitMessageDeprecation?: boolean;
 }
 
 export interface RenovateArrayOption<

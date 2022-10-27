@@ -380,6 +380,11 @@ If you want Renovate to signoff its commits, add the [`:gitSignOff` preset](http
 
 ## commitMessage
 
+<!-- prettier-ignore -->
+!!! warning
+    We deprecated editing the `commitMessage` directly, and we recommend you stop using this config option.
+    Instead use config options like `commitMessageAction`, `commitMessageExtra`, and so on, to create the commit message you want.
+
 ## commitMessageAction
 
 This is used to alter `commitMessage` and `prTitle` without needing to copy/paste the whole string.

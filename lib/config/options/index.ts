@@ -1257,7 +1257,7 @@ const options: RenovateOptions[] = [
     type: 'string',
     cli: false,
     env: false,
-    followTagAdvancedFunctionality: true,
+    advancedFunctionality: true,
   },
   {
     name: 'respectLatest',
@@ -1641,7 +1641,6 @@ const options: RenovateOptions[] = [
     default:
       '{{{commitMessagePrefix}}} {{{commitMessageAction}}} {{{commitMessageTopic}}} {{{commitMessageExtra}}} {{{commitMessageSuffix}}}',
     cli: false,
-    directEditOfCommitMessageDeprecation: true,
   },
   {
     name: 'commitBody',
@@ -1785,7 +1784,7 @@ const options: RenovateOptions[] = [
     cli: false,
     env: false,
     mergeable: true,
-    groupAdvancedFunctionality: true,
+    advancedFunctionality: true,
   },
   // Pull Request options
   {
