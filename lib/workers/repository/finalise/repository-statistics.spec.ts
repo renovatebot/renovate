@@ -87,12 +87,11 @@ describe('workers/repository/finalise/repository-statistics', () => {
 
     it('processes cache with baseBranches and branches', () => {
       const sha = '793221454914cdc422e1a8f0ca27b96fe39ff9ad';
-      const parentSha = '793221454914cdc422e1a8f0ca27b96fe39ff9ad';
+      const baseBranchSha = '793221454914cdc422e1a8f0ca27b96fe39ff9ad';
       const baseBranch = 'base-branch';
       const baseCache = partial<BaseBranchCache>({ sha });
       const branchCache = partial<BranchCache>({
         sha,
-        parentSha,
         baseBranch,
         isModified: false,
         automerge: false,
@@ -101,7 +100,7 @@ describe('workers/repository/finalise/repository-statistics', () => {
         automerge: branchCache.automerge,
         isModified: branchCache.isModified,
         baseBranch,
-        baseBranchSha: parentSha,
+        baseBranchSha,
         branchSha: sha,
       };
       const branches: BranchCache[] = [
@@ -120,27 +119,24 @@ describe('workers/repository/finalise/repository-statistics', () => {
       getCacheSpy.mockReturnValueOnce(cache);
       isCacheModifiedSpy.mockReturnValueOnce(false);
       runBranchSummary();
-      expect(logger.debug).toHaveBeenCalledWith(
-        {
-          cacheModified: false,
-          baseBranches: [
-            {
-              branchName: 'main',
-              sha,
-            },
-            {
-              branchName: 'dev',
-              sha,
-            },
-          ],
-          branches: [
-            { ...expectedMeta, branchName: 'b1' },
-            { ...expectedMeta, branchName: 'b2' },
-          ],
-          inactiveBranches: ['b3'],
-        },
-        `Branch summary`
-      );
+      expect(logger.debug).toHaveBeenCalledWith({
+        cacheModified: false,
+        baseBranches: [
+          {
+            branchName: 'main',
+            sha,
+          },
+          {
+            branchName: 'dev',
+            sha,
+          },
+        ],
+        branches: [
+          { ...expectedMeta, branchName: 'b1' },
+          { ...expectedMeta, branchName: 'b2' },
+        ],
+        inactiveBranches: ['b3'],
+      });
     });
   });
 });
