@@ -140,7 +140,7 @@ export const upgradeableTooling: Record<
       return {
         datasource: AdoptiumJavaDatasource.id,
         packageName: 'java-jre',
-        versioning: hermitVersioning.id,
+        versioning: semverVersioning.id,
         currentValue: adoptOpenJreMatches.groups!.version,
       };
     }
