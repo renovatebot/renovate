@@ -1,3 +1,4 @@
+import { mergeChildConfig } from '../../../config';
 import type { RenovateConfig } from '../../../config/types';
 import { get, getManagerList } from '../../../modules/manager';
 import type { WorkerExtractConfig } from '../../types';
@@ -11,37 +12,24 @@ function getFilteredManagerConfig(
   config: RenovateConfig,
   manager: string
 ): WorkerExtractConfig {
-  // the type here is not completely correct because there isn't any defined type for managers
-  const managerConfig = config[manager] as WorkerExtractConfig;
+  let mergedConfig = mergeChildConfig(config, config[manager] as any);
   const language = get(manager, 'language');
-  // the type here is not completely correct because there isn't any defined type for languages
-  const languageConfig = (
-    language && config[language] ? config[language] : {}
-  ) as WorkerExtractConfig;
-  const filteredConfig = {} as WorkerExtractConfig;
+  if (language) {
+    mergedConfig = mergeChildConfig(mergedConfig, config[language] as any);
+  }
 
-  filteredConfig.manager = manager;
-  filteredConfig.npmrc = config.npmrc;
-  filteredConfig.npmrcMerge = config.npmrcMerge;
-
-  //  non-mergeable so manager level config is given preference
-  filteredConfig.enabled = managerConfig?.enabled ?? config.enabled;
-  filteredConfig.ignorePaths = managerConfig?.ignorePaths ?? [];
-  filteredConfig.includePaths =
-    managerConfig?.includePaths ?? config.includePaths ?? [];
-  filteredConfig.skipInstalls =
-    managerConfig?.skipInstalls ?? config.skipInstalls;
-
-  // mergeable so manager level config is given preference
-  filteredConfig.registryAliases = {
-    ...config.registryAliases,
-    ...(managerConfig?.registryAliases ?? {}),
+  return {
+    manager,
+    npmrc: mergedConfig.npmrc,
+    npmrcMerge: mergedConfig.npmrcMerge,
+    enabled: mergedConfig.enabled,
+    ignorePaths: mergedConfig.ignorePaths ?? [],
+    includePaths: mergedConfig.includePaths ?? [],
+    skipInstalls: mergedConfig.skipInstalls,
+    registryAliases: mergedConfig.registryAliases,
+    fileMatch: mergedConfig.fileMatch ?? [],
+    fileList: [],
   };
-  filteredConfig.fileMatch = [...(managerConfig?.fileMatch ?? [])].concat(
-    ...(languageConfig?.fileMatch ?? [])
-  );
-
-  return filteredConfig;
 }
 
 export function generateFingerprintConfig(
@@ -72,7 +60,7 @@ export function generateFingerprintConfig(
     }
   }
 
-  // need to handle this different so as to get all necessary properties of RegExManager
+  // need to handle this differently so as to get all necessary properties of RegExManager
   finalConfig.managers = managerExtractConfigs;
   return finalConfig;
 }

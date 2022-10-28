@@ -7,7 +7,7 @@ describe('workers/repository/extract/extract-fingerprint-config', () => {
   it('filter with enabledManagers', () => {
     const config = mergeChildConfig(getConfig(), {
       registryAliases: {
-        stable: 'http://some.link',
+        stable: 'http://some.link', // should be absent in final config: registryAliases should be defined in manager block
       },
       ignorePaths: ['ignore-path-1'],
       includePaths: ['include-path-1'],
@@ -37,6 +37,7 @@ describe('workers/repository/extract/extract-fingerprint-config', () => {
       fingerprintConfig.managers.find((manager) => manager.manager === 'npm')
     ).toEqual({
       enabled: true,
+      fileList: [],
       fileMatch: ['(^|/)package\\.json$', 'hero.json'],
       ignorePaths: ['ignore-path-2'],
       includePaths: ['include-path-2'],
@@ -44,7 +45,6 @@ describe('workers/repository/extract/extract-fingerprint-config', () => {
       npmrc: null,
       npmrcMerge: false,
       registryAliases: {
-        stable: 'http://some.link',
         notStable: 'http://some.link.2',
       },
       skipInstalls: null,
@@ -74,8 +74,9 @@ describe('workers/repository/extract/extract-fingerprint-config', () => {
       fingerprintConfig.managers.find((manager) => manager.manager === 'npm')
     ).toEqual({
       enabled: true,
+      fileList: [],
       fileMatch: ['(^|/)package\\.json$', 'hero.json'],
-      ignorePaths: [],
+      ignorePaths: ['**/node_modules/**', '**/bower_components/**'],
       includePaths: [],
       manager: 'npm',
       npmrc: 'some-string',
@@ -89,8 +90,9 @@ describe('workers/repository/extract/extract-fingerprint-config', () => {
       )
     ).toEqual({
       enabled: true,
+      fileList: [],
       fileMatch: ['(^|/|\\.)Dockerfile$', '(^|/)Dockerfile[^/]*$'],
-      ignorePaths: [],
+      ignorePaths: ['**/node_modules/**', '**/bower_components/**'],
       includePaths: [],
       manager: 'dockerfile',
       npmrc: 'some-string',
