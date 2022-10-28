@@ -336,6 +336,7 @@ const annoyingMethods = new Set([
   'setOf',
   'mutableSetOf',
   'stages', // https://github.com/ajoberstar/reckon
+  'mapScalar', // https://github.com/apollographql/apollo-kotlin
 ]);
 
 function processLongFormDep({
