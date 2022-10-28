@@ -2,6 +2,7 @@ import { AdoptiumJavaDatasource } from '../../datasource/adoptium-java';
 import { DockerDatasource } from '../../datasource/docker';
 import { GithubReleasesDatasource } from '../../datasource/github-releases';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
+import { HexpmBobDatasource } from '../../datasource/hexpm-bob';
 import { NodeDatasource } from '../../datasource/node';
 import { RubyVersionDatasource } from '../../datasource/ruby-version';
 import * as nodeVersioning from '../../versioning/node';
@@ -64,10 +65,9 @@ export const upgradeableTooling: Record<
     versioning: semverVersioning.id,
   },
   elixir: {
-    datasource: GithubTagsDatasource.id,
-    packageName: 'elixir-lang/elixir',
+    datasource: HexpmBobDatasource.id,
+    packageName: 'elixir',
     versioning: semverVersioning.id,
-    extractVersion: '^v(?<version>\\S+)',
   },
   elm: {
     datasource: GithubReleasesDatasource.id,
