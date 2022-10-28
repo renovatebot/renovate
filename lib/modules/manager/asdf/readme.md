@@ -3,7 +3,7 @@ Keeps the [asdf](https://asdf-vm.com/manage/configuration.html#tool-versions)
 
 Because `asdf` supports the version management of many different tools, specific tool support needs to be added one by one.
 
-Only the following tools are currently supported
+The following tools are currently supported:
 
 - [awscli](https://github.com/MetricMike/asdf-awscli)
 - [bun](https://github.com/cometkim/asdf-bun)
