@@ -29,7 +29,8 @@ export const ANNOYING_METHODS: ReadonlySet<string> = new Set([
   'mutableListOf',
   'setOf',
   'mutableSetOf',
-  'stages', // https://github.com/ajoberstar/reckon
+  'stages', // https://github.com/ajoberstar/reckon,
+  'mapScalar', // https://github.com/apollographql/apollo-kotlin
 ]);
 
 export function storeVarToken(ctx: Ctx, node: lexer.Token): Ctx {
