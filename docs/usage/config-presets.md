@@ -43,7 +43,7 @@ You can set a Git tag (like a SemVer) to use a specific release of your shared c
 ### GitHub
 
 | name                                        | example use                      | preset    | resolves as                  | filename        | Git tag        |
-|---------------------------------------------|----------------------------------|-----------|------------------------------|-----------------|----------------|
+| ------------------------------------------- | -------------------------------- | --------- | ---------------------------- | --------------- | -------------- |
 | GitHub default                              | `github>abc/foo`                 | `default` | `https://github.com/abc/foo` | `default.json`  | Default branch |
 | GitHub with preset name                     | `github>abc/foo:xyz`             | `xyz`     | `https://github.com/abc/foo` | `xyz.json`      | Default branch |
 | GitHub with preset name (JSON5)             | `github>abc/foo:xyz.json5`       | `xyz`     | `https://github.com/abc/foo` | `xyz.json5`     | Default branch |
@@ -80,7 +80,7 @@ You can set a Git tag (like a SemVer) to use a specific release of your shared c
 ### Self-hosted Git
 
 | name                                       | example use                     | preset    | resolves as                          | filename        | Git tag        |
-|--------------------------------------------|---------------------------------|-----------|--------------------------------------|-----------------|----------------|
+| ------------------------------------------ | ------------------------------- | --------- | ------------------------------------ | --------------- | -------------- |
 | Local default                              | `local>abc/foo`                 | `default` | `https://github.company.com/abc/foo` | `default.json`  | Default branch |
 | Local with preset path                     | `local>abc/foo:xyz`             | `xyz`     | `https://github.company.com/abc/foo` | `xyz.json`      | Default branch |
 | Local with preset path (JSON5)             | `local>abc/foo:xyz.json5`       | `xyz`     | `https://github.company.com/abc/foo` | `xyz.json5`     | Default branch |
