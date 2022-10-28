@@ -38,6 +38,16 @@ const qStringValue = q.str((ctx: Ctx, node: lexer.Token) => {
   return ctx;
 });
 
+const qStringValueAsSymbol = q.str((ctx: Ctx, node: lexer.Token) => {
+  const nodeTransformed: lexer.SymbolToken = {
+    ...node,
+    type: 'symbol',
+  };
+  storeVarToken(ctx, nodeTransformed);
+  return ctx;
+});
+
+// foo.bar["baz"] = "1.2.3"
 const qVariableAssignmentIdentifier = q
   .sym(storeVarToken)
   .many(
@@ -48,7 +58,7 @@ const qVariableAssignmentIdentifier = q
         maxDepth: 1,
         startsWith: '[',
         endsWith: ']',
-        search: q.begin<Ctx>().join(qStringValue).end(),
+        search: q.begin<Ctx>().join(qStringValueAsSymbol).end(),
       })
     ),
     0,
@@ -56,45 +66,34 @@ const qVariableAssignmentIdentifier = q
   )
   .handler(stripReservedPrefixFromKeyTokens);
 
+// foo.bar["baz"] -> "foo.bar.baz"
 const qVariableAccessIdentifier =
   qVariableAssignmentIdentifier.handler(coalesceVariable);
 
+// project.ext.getProperty(...)
+// extra.get(...)
 const qPropertyAccessIdentifier = q
+  .opt(q.sym<Ctx>(regEx(/^(?:rootProject|project)$/)).op('.'))
   .alt(
-    q.sym<Ctx>('property'),
+    q.opt(q.sym<Ctx>('ext').op('.')).sym(regEx(/^(?:property|getProperty)$/)),
     q
-      .sym<Ctx>(/^(rootProject|project)$/)
+      .sym<Ctx>(regEx(/^(?:extra|ext)$/))
       .op('.')
-      .alt(
-        q.sym('getProperty'),
-        q
-          .sym<Ctx>(/^(extra|ext)$/)
-          .op('.')
-          .sym('get')
-      )
+      .sym('get')
   )
   .tree({
     maxDepth: 1,
     startsWith: '(',
     endsWith: ')',
-    search: q
-      .begin<Ctx>()
-      .str((ctx, node) => {
-        const nodeTransformed: lexer.SymbolToken = {
-          ...node,
-          type: 'symbol',
-        };
-        storeVarToken(ctx, nodeTransformed);
-        return ctx;
-      })
-      .end(),
+    search: q.begin<Ctx>().join(qStringValueAsSymbol).end(),
   });
 
-/*const qTemplateString = q // todo: requires https://github.com/zharinov/good-enough-parser/pull/144 to be merged
+// "foo${bar}baz${property("qux")}"
+const qTemplateString = q
   .tree({
     type: 'string-tree',
     maxDepth: 2,
-    preHandler: (ctx, tree) => {
+    preHandler: (ctx) => {
       ctx.tmpTokenStore.templateTokens = [];
       return ctx;
     },
@@ -119,126 +118,9 @@ const qPropertyAccessIdentifier = q
   .handler((ctx) => {
     ctx.varTokens = ctx.tmpTokenStore.templateTokens!;
     return ctx;
-  });*/
-
-const qTemplateString = q
-  .alt(
-    q.str<Ctx>({
-      // sym | apply(from = "${rootDir.path}")
-      match: [
-        qVariableAccessIdentifier.handler((ctx) => {
-          ctx.tmpTokenStore.templateTokens = ctx.varTokens;
-          ctx.varTokens = [];
-          return ctx;
-        }),
-      ],
-    }),
-    q.str<Ctx>({
-      // str + sym | apply(from = "foo/${rootDir.path}")
-      match: [
-        q.str((ctx: Ctx, node: lexer.Token) => {
-          ctx.tmpTokenStore.templateTokens = [node];
-          ctx.varTokens = [];
-          return ctx;
-        }),
-        qVariableAccessIdentifier.handler((ctx) => {
-          ctx.tmpTokenStore.templateTokens?.push(...ctx.varTokens);
-          ctx.varTokens = [];
-          return ctx;
-        }),
-      ],
-    }),
-    q.str<Ctx>({
-      // sym + str | apply(from = "${rootDir.path}/foo")
-      match: [
-        qVariableAccessIdentifier.handler((ctx) => {
-          ctx.tmpTokenStore.templateTokens = ctx.varTokens;
-          ctx.varTokens = [];
-          return ctx;
-        }),
-        q.str((ctx: Ctx, node: lexer.Token) => {
-          ctx.tmpTokenStore.templateTokens?.push(node);
-          return ctx;
-        }),
-      ],
-    }),
-    q.str<Ctx>({
-      // str + sym + str | apply(from = "foo/${rootDir.path}/baz")
-      preHandler: null,
-      match: [
-        q.str((ctx: Ctx, node: lexer.Token) => {
-          ctx.tmpTokenStore.templateTokens = [node];
-          return ctx;
-        }),
-        qVariableAccessIdentifier.handler((ctx) => {
-          ctx.tmpTokenStore.templateTokens?.push(...ctx.varTokens);
-          ctx.varTokens = [];
-          return ctx;
-        }),
-        q.str((ctx: Ctx, node: lexer.Token) => {
-          ctx.tmpTokenStore.templateTokens?.push(node);
-          return ctx;
-        }),
-      ],
-    }),
-    q.str<Ctx>({
-      // sym + str + sym | url = "${base}/${name}"
-      match: [
-        qVariableAccessIdentifier.handler((ctx) => {
-          ctx.tmpTokenStore.templateTokens = ctx.varTokens;
-          ctx.varTokens = [];
-          return ctx;
-        }),
-        q.str((ctx: Ctx, node: lexer.Token) => {
-          ctx.tmpTokenStore.templateTokens?.push(node);
-          return ctx;
-        }),
-        qVariableAccessIdentifier.handler((ctx) => {
-          ctx.tmpTokenStore.templateTokens?.push(...ctx.varTokens);
-          ctx.varTokens = [];
-          return ctx;
-        }),
-      ],
-    }),
-    q.str<Ctx>({
-      // str + sym + str + sym + str + sym | foo:bar:$foo.$bar.$baz
-      match: [
-        q.str((ctx: Ctx, node: lexer.Token) => {
-          ctx.tmpTokenStore.templateTokens = [node];
-          ctx.varTokens = [];
-          return ctx;
-        }),
-        qVariableAccessIdentifier.handler((ctx) => {
-          ctx.tmpTokenStore.templateTokens?.push(...ctx.varTokens);
-          ctx.varTokens = [];
-          return ctx;
-        }),
-        q.str((ctx: Ctx, node: lexer.Token) => {
-          ctx.tmpTokenStore.templateTokens?.push(node);
-          return ctx;
-        }),
-        qVariableAccessIdentifier.handler((ctx) => {
-          ctx.tmpTokenStore.templateTokens?.push(...ctx.varTokens);
-          ctx.varTokens = [];
-          return ctx;
-        }),
-        q.str((ctx: Ctx, node: lexer.Token) => {
-          ctx.tmpTokenStore.templateTokens?.push(node);
-          return ctx;
-        }),
-        qVariableAccessIdentifier.handler((ctx) => {
-          ctx.tmpTokenStore.templateTokens?.push(...ctx.varTokens);
-          ctx.varTokens = [];
-          return ctx;
-        }),
-      ],
-    })
-  )
-  .handler((ctx) => {
-    ctx.varTokens = ctx.tmpTokenStore.templateTokens!;
-    return ctx;
   });
 
+// foo = "1.2.3"
 const qGroovySingleVarAssignment = qVariableAssignmentIdentifier
   .op('=')
   .handler(coalesceVariable)
@@ -248,6 +130,7 @@ const qGroovySingleVarAssignment = qVariableAssignmentIdentifier
   .handler(handleAssignment)
   .handler(cleanupTempVars);
 
+// foo: "1.2.3"
 const qGroovyMapOfVarAssignment = q
   .sym(storeVarToken)
   .handler((ctx) => {
@@ -266,6 +149,7 @@ const qGroovyMapOfVarAssignment = q
     return ctx;
   });
 
+// versions = [ android: [ buildTools: '30.0.3' ], kotlin: '1.4.30' ]
 const qGroovyMultiVarAssignment = qVariableAssignmentIdentifier
   .op('=')
   .tree({
@@ -309,8 +193,9 @@ const qGroovyMultiVarAssignment = qVariableAssignmentIdentifier
   })
   .handler(cleanupTempVars);
 
+// set("foo", "1.2.3")
 const qKotlinSingleVarAssignment = q
-  .sym<Ctx>(/^(set|version)$/)
+  .sym<Ctx>(regEx(/^(?:set|version)$/))
   .tree({
     type: 'wrapped-tree',
     maxDepth: 1,
@@ -328,6 +213,7 @@ const qKotlinSingleVarAssignment = q
   })
   .handler(cleanupTempVars);
 
+// val foo by extra { "1.2.3" }
 const qKotlinSingleExtraVarAssignment = q
   .sym<Ctx>('val')
   .sym(storeVarToken)
@@ -347,6 +233,7 @@ const qKotlinSingleExtraVarAssignment = q
   })
   .handler(cleanupTempVars);
 
+// "foo1" to "bar1"
 const qKotlinSingleMapOfVarAssignment = qStringValue
   .sym('to')
   .handler((ctx) => {
@@ -364,6 +251,7 @@ const qKotlinSingleMapOfVarAssignment = qStringValue
     return ctx;
   });
 
+// val versions = mapOf("foo1" to "bar1", "foo2" to "bar2", "foo3" to "bar3")
 const qKotlinMultiMapOfVarAssignment = qVariableAssignmentIdentifier
   .op('=')
   .sym('mapOf')
@@ -408,16 +296,19 @@ const qKotlinMultiMapOfVarAssignment = qVariableAssignmentIdentifier
   })
   .handler(cleanupTempVars);
 
+// "foo:bar:1.2.3"
 const qDependenciesSimpleString = qStringValue
   .handler((ctx) => storeInTokenMap(ctx, 'stringToken'))
   .handler(handleDepSimpleString)
   .handler(cleanupTempVars);
 
+// "foo:bar:$baz"
 const qDependenciesInterpolation = qTemplateString
   .handler((ctx) => storeInTokenMap(ctx, 'templateStringTokens'))
   .handler(handleDepInterpolation)
   .handler(cleanupTempVars);
 
+// dependencySet(group: 'foo', version: bar) { entry 'baz' }
 const qDependencySet = q
   .sym<Ctx>('dependencySet', storeVarToken)
   .handler((ctx) => storeInTokenMap(ctx, 'methodName'))
@@ -466,6 +357,7 @@ const qDependencySet = q
   })
   .handler(cleanupTempVars);
 
+// group: "foo", name: "bar", version: "1.2.3"
 const qGroovyMapNotationDependencies = q
   .sym<Ctx>('group')
   .op(':')
@@ -484,6 +376,7 @@ const qGroovyMapNotationDependencies = q
   .handler(handleLongFormDep)
   .handler(cleanupTempVars);
 
+// (group = "foo", name = "bar", version = "1.2.3")
 const qKotlinMapNotationDependencies = q
   .tree({
     type: 'wrapped-tree',
@@ -510,8 +403,10 @@ const qKotlinMapNotationDependencies = q
   .handler(handleLongFormDep)
   .handler(cleanupTempVars);
 
+// id "foo.bar" version "1.2.3"
+// kotlin("jvm") version "1.3.71"
 const qPlugins = q
-  .sym(/^(id|kotlin)$/, storeVarToken)
+  .sym(regEx(/^(?:id|kotlin)$/), storeVarToken)
   .handler((ctx) => storeInTokenMap(ctx, 'methodName'))
   .alt(
     qStringValue,
@@ -535,18 +430,18 @@ const qPlugins = q
   .handler(handlePlugin)
   .handler(cleanupTempVars);
 
+// mavenCentral()
+// mavenCentral { ... }
 const qPredefinedRegistries = q
-  .sym(regEx(`^(${Object.keys(REGISTRY_URLS).join('|')})$`), storeVarToken)
+  .sym(regEx(`^(?:${Object.keys(REGISTRY_URLS).join('|')})$`), storeVarToken)
   .alt(
     q.tree({
-      // mavenCentral()
       type: 'wrapped-tree',
       startsWith: '(',
       endsWith: ')',
       search: q.begin<Ctx>().end(),
     }),
     q.tree({
-      // mavenCentral { ... }
       type: 'wrapped-tree',
       startsWith: '{',
       endsWith: '}',
@@ -556,6 +451,8 @@ const qPredefinedRegistries = q
   .handler(handlePredefinedRegistryUrl)
   .handler(cleanupTempVars);
 
+// maven(url = uri("https://foo.bar/baz"))
+// maven { name = some; url = "https://foo.bar/${name}" }
 const qCustomRegistryUrl = q
   .sym<Ctx>('maven')
   .alt(
@@ -621,6 +518,7 @@ const qCustomRegistryUrl = q
   .handler(handleCustomRegistryUrl)
   .handler(cleanupTempVars);
 
+// repositories { mavenCentral() }
 const qRepositories = q.tree<Ctx>({
   type: 'wrapped-tree',
   maxDepth: 1,
@@ -636,7 +534,7 @@ const qRepositoriesWithScope = q.alt<Ctx>(
 
 const qVersionCatalogVersion = q
   .op<Ctx>('.')
-  .sym(/^(versionRef|version)$/, storeVarToken)
+  .sym(regEx(/^(?:versionRef|version)$/), storeVarToken)
   .handler((ctx) => storeInTokenMap(ctx, 'versionType'))
   .tree({
     maxDepth: 1,
@@ -651,15 +549,11 @@ const qVersionCatalogVersion = q
         q.str<Ctx>((ctx, node) => {
           if (loadFromTokenMap(ctx, 'versionType')[0].value === 'versionRef') {
             // library("kotlin-reflect", "org.jetbrains.kotlin", "kotlin-reflect").versionRef("kotlin")
-            const node1: lexer.SymbolToken = {
+            const nodeTransformed: lexer.SymbolToken = {
+              ...node,
               type: 'symbol',
-              value: node.value,
-              offset: node.offset,
-              line: node.line,
-              col: node.col,
-              lineBreaks: node.lineBreaks,
             };
-            storeVarToken(ctx, node1);
+            storeVarToken(ctx, nodeTransformed);
           } else {
             // library("foobar", "foo", "bar").version("1.2.3")
             storeVarToken(ctx, node);
@@ -672,6 +566,7 @@ const qVersionCatalogVersion = q
       .end(),
   });
 
+// library("foo.bar", "foo", "bar")
 const qVersionCatalogDependencies = q
   .sym<Ctx>('library', storeVarToken)
   .handler((ctx) => storeInTokenMap(ctx, 'methodName'))
@@ -696,6 +591,7 @@ const qVersionCatalogDependencies = q
   .handler(handleLibraryDep)
   .handler(cleanupTempVars);
 
+// alias("foo.bar").to("foo", "bar").version("1.2.3")
 const qVersionCatalogAliasDependencies = q
   .sym<Ctx>('alias')
   .tree({
@@ -734,6 +630,7 @@ const qVersionCatalogs = q.alt(
   qVersionCatalogAliasDependencies
 );
 
+// someMethod("foo", "bar", "1.2.3")
 const qLongFormDep = q
   .opt<Ctx>(
     q.sym(storeVarToken).handler((ctx) => storeInTokenMap(ctx, 'methodName'))
@@ -766,15 +663,9 @@ const qApplyFromFile = q
     q
       .alt(
         q
-          .opt(
-            q
-              .sym<Ctx>(/^(rootProject|project)$/) // apply from: project.file("${somedir}/foo.gradle")
-              .op('.')
-          )
-          .sym('file'), // apply from: file("${somedir}/foo.gradle")
-        q
-          .opt<Ctx>(q.sym('new')) // apply from: new File("${somedir}/foo.gradle")
-          .sym('File')
+          .opt(q.sym<Ctx>(regEx(/^(?:rootProject|project)$/)).op('.'))
+          .sym('file'),
+        q.opt<Ctx>(q.sym('new')).sym('File')
       )
       .tree({
         maxDepth: 1,
@@ -808,11 +699,11 @@ const qApplyFromFile = q
 const qApplyFrom = q
   .sym<Ctx>('apply')
   .alt(
-    q // Groovy
+    q // apply from: rootProject.file("basedir", "foo/bar.gradle")
       .sym<Ctx>('from')
       .op(':')
       .join(qApplyFromFile),
-    q // Kotlin
+    q // apply(from = File(base, "bar.gradle"))
       .tree({
         maxDepth: 1,
         maxMatches: 1,
@@ -824,9 +715,10 @@ const qApplyFrom = q
   .handler(handleApplyFrom)
   .handler(cleanupTempVars);
 
+// pmd { toolVersion = "1.2.3" }
 const qImplicitGradlePlugin = q
   .sym(
-    regEx(`^(${Object.keys(IMPLICIT_GRADLE_PLUGINS).join('|')})$`),
+    regEx(`^(?:${Object.keys(IMPLICIT_GRADLE_PLUGINS).join('|')})$`),
     storeVarToken
   )
   .handler((ctx) => storeInTokenMap(ctx, 'pluginName'))
@@ -837,7 +729,7 @@ const qImplicitGradlePlugin = q
     startsWith: '{',
     endsWith: '}',
     search: q
-      .sym<Ctx>(/^(toolVersion|version)$/)
+      .sym<Ctx>(regEx(/^(?:toolVersion|version)$/))
       .op('=')
       .alt(
         qStringValue,

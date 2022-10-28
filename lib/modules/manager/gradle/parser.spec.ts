@@ -24,20 +24,22 @@ describe('modules/manager/gradle/parser', () => {
   describe('variables', () => {
     describe('Groovy: single var assignments', () => {
       test.each`
-        input                              | name             | value
-        ${'foo = "1.2.3"'}                 | ${'foo'}         | ${'1.2.3'}
-        ${'foo.bar = "1.2.3"'}             | ${'foo.bar'}     | ${'1.2.3'}
-        ${'foo.bar.baz = "1.2.3"'}         | ${'foo.bar.baz'} | ${'1.2.3'}
-        ${'ext.foobar = "1.2.3"'}          | ${'foobar'}      | ${'1.2.3'}
-        ${'foo["bar"] = "1.2.3"'}          | ${'foo.bar'}     | ${'1.2.3'}
-        ${'foo["bar"]["baz"] = "1.2.3"'}   | ${'foo.bar.baz'} | ${'1.2.3'}
-        ${'ext["foo"] = "1.2.3"'}          | ${'foo'}         | ${'1.2.3'}
-        ${'ext["foo"]["bar"] = "1.2.3"'}   | ${'foo.bar'}     | ${'1.2.3'}
-        ${'extra["foo"] = "1.2.3"'}        | ${'foo'}         | ${'1.2.3'}
-        ${'project.foobar = "1.2.3"'}      | ${'foobar'}      | ${'1.2.3'}
-        ${'project.ext.foo.bar = "1.2.3"'} | ${'foo.bar'}     | ${'1.2.3'}
-        ${'rootProject.foobar = "1.2.3"'}  | ${'foobar'}      | ${'1.2.3'}
-        ${'rootProject.foo.bar = "1.2.3"'} | ${'foo.bar'}     | ${'1.2.3'}
+        input                                | name                 | value
+        ${'foo = "1.2.3"'}                   | ${'foo'}             | ${'1.2.3'}
+        ${'foo.bar = "1.2.3"'}               | ${'foo.bar'}         | ${'1.2.3'}
+        ${'foo.bar.baz = "1.2.3"'}           | ${'foo.bar.baz'}     | ${'1.2.3'}
+        ${'ext.foobar = "1.2.3"'}            | ${'foobar'}          | ${'1.2.3'}
+        ${'foo["bar"] = "1.2.3"'}            | ${'foo.bar'}         | ${'1.2.3'}
+        ${'foo["bar"]["baz"] = "1.2.3"'}     | ${'foo.bar.baz'}     | ${'1.2.3'}
+        ${'foo["bar"]["baz.qux"] = "1.2.3"'} | ${'foo.bar.baz.qux'} | ${'1.2.3'}
+        ${'foo.bar["baz"]["qux"] = "1.2.3"'} | ${'foo.bar.baz.qux'} | ${'1.2.3'}
+        ${'ext["foo"] = "1.2.3"'}            | ${'foo'}             | ${'1.2.3'}
+        ${'ext["foo"]["bar"] = "1.2.3"'}     | ${'foo.bar'}         | ${'1.2.3'}
+        ${'extra["foo"] = "1.2.3"'}          | ${'foo'}             | ${'1.2.3'}
+        ${'project.foobar = "1.2.3"'}        | ${'foobar'}          | ${'1.2.3'}
+        ${'project.ext.foo.bar = "1.2.3"'}   | ${'foo.bar'}         | ${'1.2.3'}
+        ${'rootProject.foobar = "1.2.3"'}    | ${'foobar'}          | ${'1.2.3'}
+        ${'rootProject.foo.bar = "1.2.3"'}   | ${'foo.bar'}         | ${'1.2.3'}
       `('$input', ({ input, name, value }) => {
         const { vars } = parseGradle(input);
         expect(vars).toContainKey(name);
@@ -50,6 +52,7 @@ describe('modules/manager/gradle/parser', () => {
         input
         ${'foo[["bar"]] = "baz"'}
         ${'foo["bar", "invalid"] = "1.2.3"'}
+        ${'foo.bar["baz", "invalid"] = "1.2.3"'}
       `('$input', ({ input }) => {
         const { vars } = parseGradle(input);
         expect(vars).toBeEmpty();
@@ -228,18 +231,50 @@ describe('modules/manager/gradle/parser', () => {
 
     describe('interpolated dependency strings', () => {
       test.each`
-        def                                  | str                           | output
-        ${'foo = "1.2.3"'}                   | ${'"foo:bar:$foo@@@"'}        | ${null}
-        ${''}                                | ${'"foo:bar:$baz"'}           | ${null}
-        ${'foo = "1"; bar = "2"; baz = "3"'} | ${'"foo:bar:$foo.$bar.$baz"'} | ${{ depName: 'foo:bar', currentValue: '1.2.3', skipReason: 'contains-variable' }}
-        ${'baz = "1.2.3"'}                   | ${'"foo:bar:$baz"'}           | ${{ depName: 'foo:bar', currentValue: '1.2.3', groupName: 'baz' }}
-        ${'foo.bar = "1.2.3"'}               | ${'"foo:bar:$foo.bar"'}       | ${{ depName: 'foo:bar', currentValue: '1.2.3', groupName: 'foo.bar' }}
-        ${'foo = "1.2.3"'}                   | ${'"foo:bar_$foo:4.5.6"'}     | ${{ depName: 'foo:bar_1.2.3', managerData: { fileReplacePosition: 28 } }}
-        ${'baz = "1.2.3"'}                   | ${'foobar = "foo:bar:$baz"'}  | ${{ depName: 'foo:bar', currentValue: '1.2.3', groupName: 'baz' }}
-        ${'foo = "${bar}"; baz = "1.2.3"'}   | ${'"foo:bar:${baz}"'}         | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
+        def                                  | str                                    | output
+        ${'foo = "1.2.3"'}                   | ${'"foo:bar:$foo@@@"'}                 | ${null}
+        ${''}                                | ${'"foo:bar:$baz"'}                    | ${null}
+        ${'foo = "1"; bar = "2"; baz = "3"'} | ${'"foo:bar:$foo.$bar.$baz"'}          | ${{ depName: 'foo:bar', currentValue: '1.2.3', skipReason: 'contains-variable' }}
+        ${'baz = "1.2.3"'}                   | ${'"foo:bar:$baz"'}                    | ${{ depName: 'foo:bar', currentValue: '1.2.3', groupName: 'baz' }}
+        ${'foo.bar = "1.2.3"'}               | ${'"foo:bar:$foo.bar"'}                | ${{ depName: 'foo:bar', currentValue: '1.2.3', groupName: 'foo.bar' }}
+        ${'foo = "1.2.3"'}                   | ${'"foo:bar_$foo:4.5.6"'}              | ${{ depName: 'foo:bar_1.2.3', managerData: { fileReplacePosition: 28 } }}
+        ${'baz = "1.2.3"'}                   | ${'foobar = "foo:bar:$baz"'}           | ${{ depName: 'foo:bar', currentValue: '1.2.3', groupName: 'baz' }}
+        ${'foo = "${bar}"; baz = "1.2.3"'}   | ${'"foo:bar:${baz}"'}                  | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
+        ${'baz = "1.2.3"'}                   | ${'"foo:bar:${ext[\'baz\']}"'}         | ${{ depName: 'foo:bar', currentValue: '1.2.3', groupName: 'baz' }}
+        ${'baz = "1.2.3"'}                   | ${'"foo:bar:${ext.baz}"'}              | ${{ depName: 'foo:bar', currentValue: '1.2.3', groupName: 'baz' }}
+        ${'baz = "1.2.3"'}                   | ${'"foo:bar:${project.ext[\'baz\']}"'} | ${{ depName: 'foo:bar', currentValue: '1.2.3', groupName: 'baz' }}
+        ${'a = "foo"; b = "bar"; c="1.2.3"'} | ${'"${a}:${b}:${property("c")}"'}      | ${{ depName: 'foo:bar', currentValue: '1.2.3', groupName: 'c' }}
       `('$def | $str', ({ def, str, output }) => {
         const { deps } = parseGradle([def, str].join('\n'));
         expect(deps).toMatchObject([output].filter(Boolean));
+      });
+    });
+
+    describe('property accessors', () => {
+      test.each`
+        accessor
+        ${'property'}
+        ${'getProperty'}
+        ${'ext.getProperty'}
+        ${'extra.get'}
+        ${'project.property'}
+        ${'project.getProperty'}
+        ${'project.ext.getProperty'}
+        ${'project.ext.get'}
+        ${'project.extra.get'}
+        ${'rootProject.property'}
+        ${'rootProject.getProperty'}
+        ${'rootProject.ext.getProperty'}
+        ${'rootProject.extra.get'}
+      `('$accessor', ({ accessor }) => {
+        const input = `
+          baz = "1.2.3"
+          api("foo:bar:$\{${String(accessor)}("baz")}")
+        `;
+        const { deps } = parseGradle(input);
+        expect(deps).toMatchObject([
+          { depName: 'foo:bar', currentValue: '1.2.3', groupName: 'baz' },
+        ]);
       });
     });
 
@@ -289,6 +324,9 @@ describe('modules/manager/gradle/parser', () => {
             groupName: 'foo:1.2.3',
           },
         ];
+        const validOutput1 = validOutput.map((dep) => {
+          return { ...dep, groupName: 'baz' };
+        });
 
         test.each`
           def                               | str                                                                                                 | output
@@ -300,6 +338,8 @@ describe('modules/manager/gradle/parser', () => {
           ${''}                             | ${'dependencySet(group: "${nonexistingvar}", version: "1.2.3") { entry "bar1"; entry "bar2" }'}     | ${{}}
           ${''}                             | ${'dependencySet(group: "foo", version: "1.2.3") { entry "bar1"; entry "bar2" }'}                   | ${validOutput}
           ${''}                             | ${'dependencySet(group: "foo", version: "1.2.3") { entry "bar1"; entry ("bar2") }'}                 | ${validOutput}
+          ${'baz = "1.2.3"'}                | ${'dependencySet(group: "foo", version: baz) { entry "bar1"; entry ("bar2") }'}                     | ${validOutput1}
+          ${'baz = "1.2.3"'}                | ${'dependencySet(group: "foo", version: "${baz}") { entry "bar1"; entry ("bar2") }'}                | ${validOutput1}
           ${'some = "foo"; other = "bar1"'} | ${'dependencySet(group: some, version: "1.2.3") { entry other; entry "bar2" }'}                     | ${validOutput}
           ${'some = "foo"; baz = "1.2.3"'}  | ${'dependencySet(group: some, version: "${baz}456") { entry "bar1"; entry "bar2" }'}                | ${{}}
           ${'some = "foo"; other = "bar1"'} | ${'dependencySet(group: some, version: "1.2.3") { entry(other); entry "bar2" }'}                    | ${validOutput}
@@ -340,28 +380,24 @@ describe('modules/manager/gradle/parser', () => {
 
     describe('plugins', () => {
       test.each`
-        def                 | input                                                     | output
-        ${''}               | ${'id "foo.bar" version "1.2.3"'}                         | ${{ depName: 'foo.bar', packageName: 'foo.bar:foo.bar.gradle.plugin', currentValue: '1.2.3' }}
-        ${''}               | ${'id(["foo.bar"]) version "1.2.3"'}                      | ${null}
-        ${''}               | ${'id("foo", "bar") version "1.2.3"'}                     | ${null}
-        ${''}               | ${'id("foo.bar") version "1.2.3"'}                        | ${{ depName: 'foo.bar', packageName: 'foo.bar:foo.bar.gradle.plugin', currentValue: '1.2.3' }}
-        ${''}               | ${'id "foo.bar" version "$baz"'}                          | ${{ depName: 'foo.bar', skipReason: 'unknown-version', currentValue: 'baz' }}
-        ${'baz = "1.2.3"'}  | ${'id "foo.bar" version "$baz"'}                          | ${{ depName: 'foo.bar', packageName: 'foo.bar:foo.bar.gradle.plugin', currentValue: '1.2.3' }}
-        ${'baz = "1.2.3"'}  | ${'id("foo.bar") version "$baz"'}                         | ${{ depName: 'foo.bar', packageName: 'foo.bar:foo.bar.gradle.plugin', currentValue: '1.2.3' }}
-        ${''}               | ${'id "foo.bar" version "x${ab}cd"'}                      | ${{ depName: 'foo.bar', skipReason: 'unknown-version' }}
-        ${''}               | ${'id("foo.bar") version "$baz"'}                         | ${{ depName: 'foo.bar', skipReason: 'unknown-version', currentValue: 'baz' }}
-        ${''}               | ${'id("foo.bar") version "x${ab}cd"'}                     | ${{ depName: 'foo.bar', skipReason: 'unknown-version' }}
-        ${''}               | ${'id("foo.bar") version property("qux")'}                | ${{ depName: 'foo.bar', skipReason: 'unknown-version' }}
-        ${'baz = "1.2.3"'}  | ${'id("foo.bar") version property("baz")'}                | ${{ depName: 'foo.bar', packageName: 'foo.bar:foo.bar.gradle.plugin', currentValue: '1.2.3' }}
-        ${'baz = "1.2.3"'}  | ${'id("foo.bar") version project.getProperty("baz")'}     | ${{ depName: 'foo.bar', packageName: 'foo.bar:foo.bar.gradle.plugin', currentValue: '1.2.3' }}
-        ${'baz = "1.2.3"'}  | ${'id("foo.bar") version rootProject.getProperty("baz")'} | ${{ depName: 'foo.bar', packageName: 'foo.bar:foo.bar.gradle.plugin', currentValue: '1.2.3' }}
-        ${'baz = "1.2.3"'}  | ${'id("foo.bar") version project.ext.get("baz")'}         | ${{ depName: 'foo.bar', packageName: 'foo.bar:foo.bar.gradle.plugin', currentValue: '1.2.3' }}
-        ${'baz = "1.2.3"'}  | ${'id("foo.bar") version project.extra.get("baz")'}       | ${{ depName: 'foo.bar', packageName: 'foo.bar:foo.bar.gradle.plugin', currentValue: '1.2.3' }}
-        ${''}               | ${'id "foo.bar" version baz'}                             | ${{ depName: 'foo.bar', currentValue: 'baz', skipReason: 'unknown-version' }}
-        ${'baz = "1.2.3"'}  | ${'id "foo.bar" version baz'}                             | ${{ depName: 'foo.bar', packageName: 'foo.bar:foo.bar.gradle.plugin', currentValue: '1.2.3' }}
-        ${'baz = "1.2.3"'}  | ${'id("foo.bar") version baz'}                            | ${{ depName: 'foo.bar', packageName: 'foo.bar:foo.bar.gradle.plugin', currentValue: '1.2.3' }}
-        ${''}               | ${'kotlin("jvm") version "1.3.71"'}                       | ${{ depName: 'org.jetbrains.kotlin.jvm', packageName: 'org.jetbrains.kotlin.jvm:org.jetbrains.kotlin.jvm.gradle.plugin', currentValue: '1.3.71' }}
-        ${'baz = "1.3.71"'} | ${'kotlin("jvm") version baz'}                            | ${{ depName: 'org.jetbrains.kotlin.jvm', packageName: 'org.jetbrains.kotlin.jvm:org.jetbrains.kotlin.jvm.gradle.plugin', currentValue: '1.3.71' }}
+        def                 | input                                      | output
+        ${''}               | ${'id "foo.bar" version "1.2.3"'}          | ${{ depName: 'foo.bar', packageName: 'foo.bar:foo.bar.gradle.plugin', currentValue: '1.2.3' }}
+        ${''}               | ${'id(["foo.bar"]) version "1.2.3"'}       | ${null}
+        ${''}               | ${'id("foo", "bar") version "1.2.3"'}      | ${null}
+        ${''}               | ${'id("foo.bar") version "1.2.3"'}         | ${{ depName: 'foo.bar', packageName: 'foo.bar:foo.bar.gradle.plugin', currentValue: '1.2.3' }}
+        ${''}               | ${'id "foo.bar" version "$baz"'}           | ${{ depName: 'foo.bar', skipReason: 'unknown-version', currentValue: 'baz' }}
+        ${'baz = "1.2.3"'}  | ${'id "foo.bar" version "$baz"'}           | ${{ depName: 'foo.bar', packageName: 'foo.bar:foo.bar.gradle.plugin', currentValue: '1.2.3' }}
+        ${'baz = "1.2.3"'}  | ${'id("foo.bar") version "$baz"'}          | ${{ depName: 'foo.bar', packageName: 'foo.bar:foo.bar.gradle.plugin', currentValue: '1.2.3' }}
+        ${''}               | ${'id "foo.bar" version "x${ab}cd"'}       | ${{ depName: 'foo.bar', skipReason: 'unknown-version' }}
+        ${''}               | ${'id("foo.bar") version "$baz"'}          | ${{ depName: 'foo.bar', skipReason: 'unknown-version', currentValue: 'baz' }}
+        ${''}               | ${'id("foo.bar") version "x${ab}cd"'}      | ${{ depName: 'foo.bar', skipReason: 'unknown-version' }}
+        ${''}               | ${'id("foo.bar") version property("qux")'} | ${{ depName: 'foo.bar', skipReason: 'unknown-version' }}
+        ${'baz = "1.2.3"'}  | ${'id("foo.bar") version property("baz")'} | ${{ depName: 'foo.bar', packageName: 'foo.bar:foo.bar.gradle.plugin', currentValue: '1.2.3' }}
+        ${''}               | ${'id "foo.bar" version baz'}              | ${{ depName: 'foo.bar', currentValue: 'baz', skipReason: 'unknown-version' }}
+        ${'baz = "1.2.3"'}  | ${'id "foo.bar" version baz'}              | ${{ depName: 'foo.bar', packageName: 'foo.bar:foo.bar.gradle.plugin', currentValue: '1.2.3' }}
+        ${'baz = "1.2.3"'}  | ${'id("foo.bar") version baz'}             | ${{ depName: 'foo.bar', packageName: 'foo.bar:foo.bar.gradle.plugin', currentValue: '1.2.3' }}
+        ${''}               | ${'kotlin("jvm") version "1.3.71"'}        | ${{ depName: 'org.jetbrains.kotlin.jvm', packageName: 'org.jetbrains.kotlin.jvm:org.jetbrains.kotlin.jvm.gradle.plugin', currentValue: '1.3.71' }}
+        ${'baz = "1.3.71"'} | ${'kotlin("jvm") version baz'}             | ${{ depName: 'org.jetbrains.kotlin.jvm', packageName: 'org.jetbrains.kotlin.jvm:org.jetbrains.kotlin.jvm.gradle.plugin', currentValue: '1.3.71' }}
       `('$def | $input', ({ def, input, output }) => {
         const { deps } = parseGradle([def, input].join('\n'));
         expect(deps).toMatchObject([output].filter(Boolean));
@@ -441,6 +477,7 @@ describe('modules/manager/gradle/parser', () => {
       ${'group = "foo"; artifact="bar"'}            | ${'library("foo.bar", group, artifact).version("1.2.3")'}       | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
       ${'baz = "1.2.3"'}                            | ${'library("foo.bar", "foo", "bar").version(baz)'}              | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
       ${'library("foo-bar_baz-qux", "foo", "bar")'} | ${'"${foo.bar.baz.qux}:1.2.3"'}                                 | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
+      ${''}                                         | ${'alias("foo.bar").to("foo", "bar").version("1.2.3")'}         | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
       ${'version("baz", "1.2.3")'}                  | ${'alias("foo.bar").to("foo", "bar").versionRef("baz")'}        | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
       ${''}                                         | ${'alias(["foo.bar"]).to("foo", "bar").version("1.2.3")'}       | ${null}
     `('$def | $str', ({ def, str, output }) => {
