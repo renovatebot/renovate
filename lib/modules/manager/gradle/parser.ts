@@ -321,12 +321,12 @@ const qDependencySet = q
       .begin<Ctx>()
       .sym('group')
       .op(':')
-      .alt(qStringValue, qVariableAccessIdentifier, qTemplateString)
+      .alt(qTemplateString, qVariableAccessIdentifier)
       .handler((ctx) => storeInTokenMap(ctx, 'groupId'))
       .op(',')
       .sym('version')
       .op(':')
-      .alt(qStringValue, qVariableAccessIdentifier, qTemplateString)
+      .alt(qTemplateString, qVariableAccessIdentifier)
       .handler((ctx) => storeInTokenMap(ctx, 'version'))
       .end(),
   })
@@ -338,9 +338,8 @@ const qDependencySet = q
     search: q
       .sym<Ctx>('entry')
       .alt(
-        qStringValue,
-        qVariableAccessIdentifier,
         qTemplateString,
+        qVariableAccessIdentifier,
         q.tree({
           type: 'wrapped-tree',
           maxDepth: 1,
@@ -348,7 +347,7 @@ const qDependencySet = q
           endsWith: ')',
           search: q
             .begin<Ctx>()
-            .alt(qStringValue, qVariableAccessIdentifier, qTemplateString)
+            .alt(qTemplateString, qVariableAccessIdentifier)
             .end(),
         })
       )
@@ -361,17 +360,17 @@ const qDependencySet = q
 const qGroovyMapNotationDependencies = q
   .sym<Ctx>('group')
   .op(':')
-  .alt(qStringValue, qVariableAccessIdentifier, qTemplateString)
+  .alt(qTemplateString, qVariableAccessIdentifier)
   .handler((ctx) => storeInTokenMap(ctx, 'groupId'))
   .op(',')
   .sym('name')
   .op(':')
-  .alt(qStringValue, qVariableAccessIdentifier, qTemplateString)
+  .alt(qTemplateString, qVariableAccessIdentifier)
   .handler((ctx) => storeInTokenMap(ctx, 'artifactId'))
   .op(',')
   .sym('version')
   .op(':')
-  .alt(qStringValue, qVariableAccessIdentifier, qTemplateString)
+  .alt(qTemplateString, qVariableAccessIdentifier)
   .handler((ctx) => storeInTokenMap(ctx, 'version'))
   .handler(handleLongFormDep)
   .handler(cleanupTempVars);
@@ -387,17 +386,17 @@ const qKotlinMapNotationDependencies = q
       .begin<Ctx>()
       .sym('group')
       .op('=')
-      .alt(qStringValue, qVariableAccessIdentifier, qTemplateString)
+      .alt(qTemplateString, qVariableAccessIdentifier)
       .handler((ctx) => storeInTokenMap(ctx, 'groupId'))
       .op(',')
       .sym('name')
       .op('=')
-      .alt(qStringValue, qVariableAccessIdentifier, qTemplateString)
+      .alt(qTemplateString, qVariableAccessIdentifier)
       .handler((ctx) => storeInTokenMap(ctx, 'artifactId'))
       .op(',')
       .sym('version')
       .op('=')
-      .alt(qStringValue, qVariableAccessIdentifier, qTemplateString)
+      .alt(qTemplateString, qVariableAccessIdentifier)
       .handler((ctx) => storeInTokenMap(ctx, 'version')),
   })
   .handler(handleLongFormDep)
@@ -420,12 +419,7 @@ const qPlugins = q
   )
   .handler((ctx) => storeInTokenMap(ctx, 'pluginName'))
   .sym('version')
-  .alt(
-    qStringValue,
-    qTemplateString,
-    qPropertyAccessIdentifier,
-    qVariableAccessIdentifier
-  )
+  .alt(qTemplateString, qPropertyAccessIdentifier, qVariableAccessIdentifier)
   .handler((ctx) => storeInTokenMap(ctx, 'version'))
   .handler(handlePlugin)
   .handler(cleanupTempVars);
@@ -467,13 +461,9 @@ const qCustomRegistryUrl = q
         .alt(
           q.sym<Ctx>('uri').tree({
             maxDepth: 1,
-            search: q.alt(
-              qStringValue,
-              qTemplateString,
-              qVariableAccessIdentifier
-            ),
+            search: q.alt(qTemplateString, qVariableAccessIdentifier),
           }),
-          q.alt(qStringValue, qTemplateString, qVariableAccessIdentifier)
+          q.alt(qTemplateString, qVariableAccessIdentifier)
         )
         .end(),
     }),
@@ -486,7 +476,7 @@ const qCustomRegistryUrl = q
         q
           .sym<Ctx>('name')
           .opt(q.op('='))
-          .alt(qStringValue, qTemplateString, qVariableAccessIdentifier)
+          .alt(qTemplateString, qVariableAccessIdentifier)
           .handler((ctx) => storeInTokenMap(ctx, 'name')),
         q
           .sym<Ctx>('url')
@@ -494,13 +484,9 @@ const qCustomRegistryUrl = q
           .alt(
             q.sym<Ctx>('uri').tree({
               maxDepth: 1,
-              search: q.alt(
-                qStringValue,
-                qTemplateString,
-                qVariableAccessIdentifier
-              ),
+              search: q.alt(qTemplateString, qVariableAccessIdentifier),
             }),
-            q.alt(qStringValue, qTemplateString, qVariableAccessIdentifier)
+            q.alt(qTemplateString, qVariableAccessIdentifier)
           ),
         q.sym<Ctx>('setUrl').tree({
           maxDepth: 1,
@@ -508,7 +494,7 @@ const qCustomRegistryUrl = q
           endsWith: ')',
           search: q
             .begin<Ctx>()
-            .alt(qStringValue, qTemplateString, qVariableAccessIdentifier)
+            .alt(qTemplateString, qVariableAccessIdentifier)
             .end(),
         })
       ),
@@ -643,13 +629,13 @@ const qLongFormDep = q
     endsWith: ')',
     search: q
       .begin<Ctx>()
-      .alt(qStringValue, qVariableAccessIdentifier, qTemplateString)
+      .alt(qTemplateString, qVariableAccessIdentifier)
       .handler((ctx) => storeInTokenMap(ctx, 'groupId'))
       .op(',')
-      .alt(qStringValue, qVariableAccessIdentifier, qTemplateString)
+      .alt(qTemplateString, qVariableAccessIdentifier)
       .handler((ctx) => storeInTokenMap(ctx, 'artifactId'))
       .op(',')
-      .alt(qStringValue, qVariableAccessIdentifier, qTemplateString)
+      .alt(qTemplateString, qVariableAccessIdentifier)
       .handler((ctx) => storeInTokenMap(ctx, 'version'))
       .end(),
   })
@@ -658,7 +644,7 @@ const qLongFormDep = q
 
 const qApplyFromFile = q
   .alt(
-    qStringValue, // apply from: 'foo.gradle'
+    qTemplateString, // apply from: 'foo.gradle'
     qPropertyAccessIdentifier, // apply(from = property("foo"))
     q
       .alt(
@@ -676,23 +662,20 @@ const qApplyFromFile = q
           .opt(
             q
               .alt(
-                qStringValue,
-                qPropertyAccessIdentifier,
                 qTemplateString,
+                qPropertyAccessIdentifier,
                 qVariableAccessIdentifier
               )
               .op(',')
               .handler((ctx) => storeInTokenMap(ctx, 'parentPath'))
           )
           .alt(
-            qStringValue,
-            qPropertyAccessIdentifier,
             qTemplateString,
+            qPropertyAccessIdentifier,
             qVariableAccessIdentifier
           )
           .end(),
-      }),
-    qTemplateString
+      })
   )
   .handler((ctx) => storeInTokenMap(ctx, 'scriptFile'));
 
@@ -732,9 +715,8 @@ const qImplicitGradlePlugin = q
       .sym<Ctx>(regEx(/^(?:toolVersion|version)$/))
       .op('=')
       .alt(
-        qStringValue,
-        qPropertyAccessIdentifier,
         qTemplateString,
+        qPropertyAccessIdentifier,
         qVariableAccessIdentifier
       ),
   })
