@@ -345,6 +345,8 @@ const platform: Platform = {
       const repos = await helper.searchRepos({
         uid: botUserID,
         archived: false,
+        sort: 'updated',
+        order: 'desc',
       });
       return repos.filter((r) => !r.mirror).map((r) => r.full_name);
     } catch (err) {

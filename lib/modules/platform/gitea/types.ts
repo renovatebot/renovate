@@ -136,6 +136,16 @@ export interface CombinedCommitStatus {
 export interface RepoSearchParams {
   uid?: number;
   archived?: boolean;
+
+  /**
+   * Repo sort type, defaults to `alpha`.
+   */
+  sort?: 'alpha' | 'created' | 'updated' | 'size' | 'id';
+
+  /**
+   * Repo sort order, defaults to `asc`
+   */
+  order?: 'asc' | 'desc';
 }
 
 export type IssueCreateParams = Partial<IssueUpdateLabelsParams> &
