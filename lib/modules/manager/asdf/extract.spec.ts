@@ -8,11 +8,10 @@ describe('modules/manager/asdf/extract', () => {
         deps: [
           {
             currentValue: '16.16.0',
-            datasource: 'github-releases',
+            datasource: 'node',
             depName: 'node',
-            packageName: 'nodejs/node',
             versioning: 'node',
-            extractVersion: '^v(?<version>\\S+)',
+            packageName: 'node',
           },
         ],
       });
@@ -36,11 +35,10 @@ describe('modules/manager/asdf/extract', () => {
         deps: [
           {
             currentValue: '16.16.0',
-            datasource: 'github-releases',
+            datasource: 'node',
             depName: 'node',
-            packageName: 'nodejs/node',
+            packageName: 'node',
             versioning: 'node',
-            extractVersion: '^v(?<version>\\S+)',
           },
         ],
       });
@@ -231,12 +229,11 @@ dummy 1.2.3
             extractVersion: '^v(?<version>\\S+)',
           },
           {
-            currentValue: 'adoptopenjdk-16.0.0+36',
-            datasource: 'github-releases',
-            packageName: 'adoptium/temurin16-binaries',
+            currentValue: '16.0.0+36',
+            datasource: 'adoptium-java',
+            packageName: 'java-jdk',
             versioning: 'hermit',
             depName: 'java',
-            extractVersion: '^adoptopenjdk-(?<version>\\S+)',
           },
           {
             currentValue: '1.8.2',
@@ -287,11 +284,10 @@ dummy 1.2.3
           },
           {
             currentValue: '18.12.0',
-            datasource: 'github-releases',
-            packageName: 'nodejs/node',
+            datasource: 'node',
+            packageName: 'node',
             versioning: 'node',
             depName: 'node',
-            extractVersion: '^v(?<version>\\S+)',
           },
           {
             currentValue: '4.14.0',
@@ -413,11 +409,10 @@ dummy 1.2.3
               deps: [
                 {
                   currentValue: data.expect,
-                  datasource: 'github-releases',
+                  datasource: 'node',
                   depName: 'node',
-                  packageName: 'nodejs/node',
+                  packageName: 'node',
                   versioning: 'node',
-                  extractVersion: '^v(?<version>\\S+)',
                 },
               ],
             });
@@ -445,11 +440,10 @@ dummy 1.2.3
           deps: [
             {
               currentValue: '16.16.0',
-              datasource: 'github-releases',
+              datasource: 'node',
               depName: 'node',
-              packageName: 'nodejs/node',
+              packageName: 'node',
               versioning: 'node',
-              extractVersion: '^v(?<version>\\S+)',
             },
           ],
         });
@@ -461,12 +455,11 @@ dummy 1.2.3
           deps: [
             {
               currentValue: '16.16.0',
-              datasource: 'github-releases',
+              datasource: 'node',
               depName: 'node',
-              packageName: 'nodejs/node',
+              packageName: 'node',
               versioning: 'node',
               skipReason: 'ignored',
-              extractVersion: '^v(?<version>\\S+)',
             },
           ],
         });

@@ -1,10 +1,12 @@
+import { AdoptiumJavaDatasource } from '../../datasource/adoptium-java';
 import { DockerDatasource } from '../../datasource/docker';
 import { GithubReleasesDatasource } from '../../datasource/github-releases';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
+import { NodeDatasource } from '../../datasource/node';
+import * as hermitVersioning from '../../versioning/hermit';
 import * as nodeVersioning from '../../versioning/node';
 import * as regexVersioning from '../../versioning/regex';
 import * as semverVersioning from '../../versioning/semver';
-import * as hermitVersioning from '../../versioning/hermit';
 import type { PackageDependency } from '../types';
 
 type StaticTooling = Pick<
@@ -120,18 +122,29 @@ export const upgradeableTooling: Record<
     extractVersion: '^v(?<version>\\S+)',
   },
   java: (version) => {
-    const supportedMajorVersions = ['16', '17', '18'];
-    for (const majorVersion of supportedMajorVersions) {
-      if (!version.startsWith(`adoptopenjdk-${majorVersion}`)) {
-        continue;
-      }
+    const adoptOpenJdkMatches = version.match(
+      /^adoptopenjdk-(?<version>\d\S+)/
+    );
+    if (adoptOpenJdkMatches) {
       return {
-        datasource: GithubReleasesDatasource.id,
-        packageName: `adoptium/temurin${majorVersion}-binaries`,
+        datasource: AdoptiumJavaDatasource.id,
+        packageName: 'java-jdk',
         versioning: hermitVersioning.id,
-        extractVersion: '^adoptopenjdk-(?<version>\\S+)',
+        currentValue: adoptOpenJdkMatches.groups!.version,
       };
     }
+    const adoptOpenJreMatches = version.match(
+      /^adoptopenjdk-jre-(?<version>\d\S+)/
+    );
+    if (adoptOpenJreMatches) {
+      return {
+        datasource: AdoptiumJavaDatasource.id,
+        packageName: 'java-jre',
+        versioning: hermitVersioning.id,
+        currentValue: adoptOpenJreMatches.groups!.version,
+      };
+    }
+
     return undefined;
   },
   julia: {
@@ -171,10 +184,9 @@ export const upgradeableTooling: Record<
   },
   nodejs: {
     depName: 'node',
-    datasource: GithubReleasesDatasource.id,
-    packageName: 'nodejs/node',
+    datasource: NodeDatasource.id,
+    packageName: 'node',
     versioning: nodeVersioning.id,
-    extractVersion: '^v(?<version>\\S+)',
   },
   ocaml: {
     datasource: GithubReleasesDatasource.id,
