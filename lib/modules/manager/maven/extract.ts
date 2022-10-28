@@ -227,7 +227,9 @@ function applyPropsInternal(
     result.editFile = propSource;
   }
 
-  seenProps.forEach((prop) => previouslySeenProps.add(prop));
+  for (const prop of seenProps) {
+    previouslySeenProps.add(prop);
+  }
   return [result, anyChange, fatal];
 }
 
