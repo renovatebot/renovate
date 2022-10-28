@@ -112,9 +112,6 @@ export async function extractPackageFile(
   if (composerJson.repositories) {
     parseRepositories(composerJson.repositories, repositories, registryUrls);
   }
-  if (registryUrls.length !== 0) {
-    res.registryUrls = registryUrls;
-  }
 
   const deps: PackageDependency[] = [];
   const depTypes: ('require' | 'require-dev')[] = ['require', 'require-dev'];
@@ -172,6 +169,14 @@ export async function extractPackageFile(
               if (lockedDep && semverComposer.isVersion(lockedDep.version)) {
                 dep.lockedVersion = lockedDep.version.replace(regEx(/^v/i), '');
               }
+            }
+            if (
+              !dep.skipReason &&
+              (!repositories[depName] ||
+                repositories[depName].type === 'composer') &&
+              registryUrls.length !== 0
+            ) {
+              dep.registryUrls = registryUrls;
             }
             deps.push(dep);
           }
