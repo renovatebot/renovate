@@ -499,7 +499,7 @@ describe('workers/repository/process/write', () => {
             upgrades: [],
             automerge: false,
             prNo: null,
-            parentSha: null,
+            pristine: true,
           },
         ],
       };
@@ -518,7 +518,7 @@ describe('workers/repository/process/write', () => {
         upgrades: [],
         automerge: false,
         prNo: null,
-        parentSha: null,
+        pristine: true,
       });
     });
   });

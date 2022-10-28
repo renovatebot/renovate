@@ -63,6 +63,7 @@ describe('util/git/set-branch-commit', () => {
           isBehindBase: false,
           isModified: false,
           isConflicted: false,
+          pristine: true,
         },
       ]);
     });
