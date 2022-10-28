@@ -357,6 +357,7 @@ describe('modules/manager/gradle/parser', () => {
         def                | str                                                                               | output
         ${''}              | ${'group: "foo", name: "bar", version: "1.2.3"'}                                  | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
         ${''}              | ${'group: "foo", name: "bar", version: baz'}                                      | ${null}
+        ${''}              | ${'group: "foo", name: "bar", version: "1.2.3@@@"'}                               | ${null}
         ${'baz = "1.2.3"'} | ${'group: "foo", name: "bar", version: baz'}                                      | ${{ depName: 'foo:bar', currentValue: '1.2.3', groupName: 'baz' }}
         ${'some = "foo"'}  | ${'group: some, name: some, version: "1.2.3"'}                                    | ${{ depName: 'foo:foo', currentValue: '1.2.3' }}
         ${'some = "foo"'}  | ${'group: "${some}", name: "${some}", version: "1.2.3"'}                          | ${{ depName: 'foo:foo', currentValue: '1.2.3' }}
@@ -472,8 +473,9 @@ describe('modules/manager/gradle/parser', () => {
       ${'version("baz", "1.2.3")'}                  | ${'library("foo.bar", "foo", "bar").versionRef("baz")'}         | ${{ depName: 'foo:bar', currentValue: '1.2.3', groupName: 'baz' }}
       ${''}                                         | ${'library("foo.bar", "foo", "bar").version("1.2.3")'}          | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
       ${''}                                         | ${'library(["foo.bar", "foo", "bar"]).version("1.2.3")'}        | ${null}
-      ${''}                                         | ${'library("foo", "bar", "baz", "qux"]).version("1.2.3")'}      | ${null}
+      ${''}                                         | ${'library("foo", "bar", "baz", "qux").version("1.2.3")'}       | ${null}
       ${''}                                         | ${'library("foo.bar", "foo", "bar").version("1.2.3", "4.5.6")'} | ${null}
+      ${''}                                         | ${'library("foo", bar, "baz").version("1.2.3")'}                | ${null}
       ${'group = "foo"; artifact="bar"'}            | ${'library("foo.bar", group, artifact).version("1.2.3")'}       | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
       ${'baz = "1.2.3"'}                            | ${'library("foo.bar", "foo", "bar").version(baz)'}              | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
       ${'library("foo-bar_baz-qux", "foo", "bar")'} | ${'"${foo.bar.baz.qux}:1.2.3"'}                                 | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
@@ -668,6 +670,7 @@ describe('modules/manager/gradle/parser', () => {
       ${''}              | ${'lombok { version = "1.2.3" }'}               | ${{ depName: 'lombok', packageName: IMPLICIT_GRADLE_PLUGINS['lombok'], currentValue: '1.2.3' }}
       ${''}              | ${'pmd { toolVersion = "1.2.3" }'}              | ${{ depName: 'pmd', packageName: IMPLICIT_GRADLE_PLUGINS['pmd'], currentValue: '1.2.3' }}
       ${''}              | ${'spotbugs { toolVersion = "1.2.3" }'}         | ${{ depName: 'spotbugs', packageName: IMPLICIT_GRADLE_PLUGINS['spotbugs'], currentValue: '1.2.3' }}
+      ${''}              | ${'pmd { toolVersion = "@@@" }'}                | ${null}
       ${''}              | ${'pmd { toolVersion = "${baz}" }'}             | ${null}
       ${'baz = "1.2.3"'} | ${'pmd { toolVersion = "${baz}.456" }'}         | ${{ depName: 'pmd', currentValue: '1.2.3.456', skipReason: 'unknown-version' }}
       ${''}              | ${'pmd { [toolVersion = "6.36.0"] }'}           | ${null}

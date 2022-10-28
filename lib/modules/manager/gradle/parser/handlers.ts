@@ -56,50 +56,49 @@ export function handleDepSimpleString(ctx: Ctx): Ctx {
 }
 
 export function handleDepInterpolation(ctx: Ctx): Ctx {
-  const templateStringTokens = loadFromTokenMap(ctx, 'templateStringTokens');
+  const stringTokens = loadFromTokenMap(ctx, 'templateStringTokens');
 
-  const templateString = interpolateString(
-    templateStringTokens,
-    ctx.globalVars
-  );
+  const templateString = interpolateString(stringTokens, ctx.globalVars);
   if (!templateString) {
     return ctx;
   }
 
   const dep = parseDependencyString(templateString);
-  if (dep) {
-    let packageFile: string | undefined;
-    let fileReplacePosition: number | undefined;
-    for (const token of templateStringTokens) {
-      const varData = ctx.globalVars[token.value];
-      if (token.type === 'symbol' && varData) {
-        packageFile = varData.packageFile;
-        fileReplacePosition = varData.fileReplacePosition;
-        if (varData.value === dep.currentValue) {
-          dep.managerData = { fileReplacePosition, packageFile };
-          dep.groupName = varData.key;
-        }
-      }
-    }
-
-    if (!dep.managerData) {
-      const lastToken = templateStringTokens[templateStringTokens.length - 1];
-      if (
-        lastToken?.type === 'string-value' &&
-        dep.currentValue &&
-        lastToken.value.startsWith(`:${dep.currentValue}`)
-      ) {
-        packageFile = ctx.packageFile;
-        fileReplacePosition = lastToken.offset + 1;
-        delete dep.groupName;
-      } else {
-        dep.skipReason = 'contains-variable';
-      }
-      dep.managerData = { fileReplacePosition, packageFile };
-    }
-
-    ctx.deps.push(dep);
+  if (!dep) {
+    return ctx;
   }
+
+  let packageFile: string | undefined;
+  let fileReplacePosition: number | undefined;
+  for (const token of stringTokens) {
+    const varData = ctx.globalVars[token.value];
+    if (token.type === 'symbol' && varData) {
+      packageFile = varData.packageFile;
+      fileReplacePosition = varData.fileReplacePosition;
+      if (varData.value === dep.currentValue) {
+        dep.managerData = { fileReplacePosition, packageFile };
+        dep.groupName = varData.key;
+      }
+    }
+  }
+
+  if (!dep.managerData) {
+    const lastToken = stringTokens[stringTokens.length - 1];
+    if (
+      lastToken?.type === 'string-value' &&
+      dep.currentValue &&
+      lastToken.value.startsWith(`:${dep.currentValue}`)
+    ) {
+      packageFile = ctx.packageFile;
+      fileReplacePosition = lastToken.offset + 1;
+      delete dep.groupName;
+    } else {
+      dep.skipReason = 'contains-variable';
+    }
+    dep.managerData = { fileReplacePosition, packageFile };
+  }
+
+  ctx.deps.push(dep);
 
   return ctx;
 }
@@ -117,37 +116,39 @@ export function handleLongFormDep(ctx: Ctx): Ctx {
   }
 
   const dep = parseDependencyString([groupId, artifactId, version].join(':'));
-  if (dep) {
-    const methodName = ctx.tokenMap.methodName ?? null;
-    if (versionTokens.length > 1) {
-      // = template string with multiple variables
-      dep.skipReason = 'unknown-version';
-    } else if (versionTokens[0].type === 'symbol') {
-      const varData = ctx.globalVars[versionTokens[0].value];
-      if (varData) {
-        dep.groupName = varData.key;
-        dep.managerData = {
-          fileReplacePosition: varData.fileReplacePosition,
-          packageFile: varData.packageFile,
-        };
-      }
-    } else {
-      // = string value
-      if (methodName && methodName[0]?.value === 'dependencySet') {
-        dep.groupName = `${groupId}:${version}`;
-      }
+  if (!dep) {
+    return ctx;
+  }
+
+  const methodName = ctx.tokenMap.methodName ?? null;
+  if (versionTokens.length > 1) {
+    // = template string with multiple variables
+    dep.skipReason = 'unknown-version';
+  } else if (versionTokens[0].type === 'symbol') {
+    const varData = ctx.globalVars[versionTokens[0].value];
+    if (varData) {
+      dep.groupName = varData.key;
       dep.managerData = {
-        fileReplacePosition: versionTokens[0].offset,
-        packageFile: ctx.packageFile,
+        fileReplacePosition: varData.fileReplacePosition,
+        packageFile: varData.packageFile,
       };
     }
-
-    if (methodName?.[0] && ANNOYING_METHODS.has(methodName[0].value)) {
-      dep.skipReason = 'ignored';
+  } else {
+    // = string value
+    if (methodName && methodName[0]?.value === 'dependencySet') {
+      dep.groupName = `${groupId}:${version}`;
     }
-
-    ctx.deps.push(dep);
+    dep.managerData = {
+      fileReplacePosition: versionTokens[0].offset,
+      packageFile: ctx.packageFile,
+    };
   }
+
+  if (methodName?.[0] && ANNOYING_METHODS.has(methodName[0].value)) {
+    dep.skipReason = 'ignored';
+  }
+
+  ctx.deps.push(dep);
 
   return ctx;
 }
@@ -249,26 +250,27 @@ export function handleLibraryDep(ctx: Ctx): Ctx {
 
   const groupId = interpolateString(groupIdTokens, ctx.globalVars);
   const artifactId = interpolateString(artifactIdTokens, ctx.globalVars);
+  if (!groupId || !artifactId) {
+    return ctx;
+  }
 
-  if (groupId && artifactId) {
-    const aliasToken = loadFromTokenMap(ctx, 'alias')[0];
-    const key = aliasToken.value.replace(regEx(/[-_]/g), '.');
-    const varData: VariableData = {
-      key,
-      value: `${groupId}:${artifactId}`,
-      fileReplacePosition: aliasToken.offset,
-      packageFile: ctx.packageFile,
-    };
-    ctx.globalVars = { ...ctx.globalVars, [key]: varData };
+  const aliasToken = loadFromTokenMap(ctx, 'alias')[0];
+  const key = aliasToken.value.replace(regEx(/[-_]/g), '.');
+  const varData: VariableData = {
+    key,
+    value: `${groupId}:${artifactId}`,
+    fileReplacePosition: aliasToken.offset,
+    packageFile: ctx.packageFile,
+  };
+  ctx.globalVars = { ...ctx.globalVars, [key]: varData };
 
-    if (ctx.tokenMap.version) {
-      const version = interpolateString(
-        loadFromTokenMap(ctx, 'version'),
-        ctx.globalVars
-      );
-      if (version) {
-        handleLongFormDep(ctx);
-      }
+  if (ctx.tokenMap.version) {
+    const version = interpolateString(
+      loadFromTokenMap(ctx, 'version'),
+      ctx.globalVars
+    );
+    if (version) {
+      handleLongFormDep(ctx);
     }
   }
 
@@ -339,31 +341,33 @@ export function handleImplicitGradlePlugin(ctx: Ctx): Ctx {
   const templateString = `${groupIdArtifactId}:${versionValue}`;
 
   const dep = parseDependencyString(templateString);
-  if (dep) {
-    const version = versionTokens[0];
-    dep.depName = pluginName;
-    dep.packageName = groupIdArtifactId;
-    dep.managerData = {
-      fileReplacePosition: version.offset,
-      packageFile: ctx.packageFile,
-    };
-
-    if (versionTokens.length > 1) {
-      // = template string with multiple variables
-      dep.skipReason = 'unknown-version';
-    } else if (version.type === 'symbol') {
-      const varData = ctx.globalVars[version.value];
-      if (varData) {
-        dep.currentValue = varData.value;
-        dep.managerData = {
-          fileReplacePosition: varData.fileReplacePosition,
-          packageFile: varData.packageFile,
-        };
-      }
-    }
-
-    ctx.deps.push(dep);
+  if (!dep) {
+    return ctx;
   }
+
+  const version = versionTokens[0];
+  dep.depName = pluginName;
+  dep.packageName = groupIdArtifactId;
+  dep.managerData = {
+    fileReplacePosition: version.offset,
+    packageFile: ctx.packageFile,
+  };
+
+  if (versionTokens.length > 1) {
+    // = template string with multiple variables
+    dep.skipReason = 'unknown-version';
+  } else if (version.type === 'symbol') {
+    const varData = ctx.globalVars[version.value];
+    if (varData) {
+      dep.currentValue = varData.value;
+      dep.managerData = {
+        fileReplacePosition: varData.fileReplacePosition,
+        packageFile: varData.packageFile,
+      };
+    }
+  }
+
+  ctx.deps.push(dep);
 
   return ctx;
 }
