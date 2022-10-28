@@ -114,6 +114,7 @@ const repoGroups = {
   jest: 'https://github.com/facebook/jest',
   jsplumb: 'https://github.com/jsplumb/jsplumb',
   junit5: 'https://github.com/junit-team/junit5',
+  kotlin: 'https://github.com/JetBrains/kotlin',
   lerna: 'https://github.com/lerna/lerna',
   linguijs: 'https://github.com/lingui/js-lingui',
   lodash: 'https://github.com/lodash/',
