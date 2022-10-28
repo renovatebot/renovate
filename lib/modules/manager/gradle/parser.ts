@@ -1135,7 +1135,7 @@ async function parseInlineScriptFile(
   packageFile = ''
 ): Promise<SyntaxHandlerOutput> {
   if (recursionDepth > 2) {
-    logger.debug(`Max recursion depth reached ${scriptFile}`);
+    logger.debug(`Max recursion depth reached in script file: ${scriptFile}`);
     return null;
   }
 

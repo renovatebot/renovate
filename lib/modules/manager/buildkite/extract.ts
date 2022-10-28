@@ -52,7 +52,9 @@ export function extractPackageFile(content: string): PackageFile | null {
             skipReason = 'invalid-dependency-specification';
           }
         } else {
-          logger.debug(`Skipping non-pinned buildkite current version ${currentValue}`);
+          logger.debug(
+            `Skipping non-pinned buildkite current version ${currentValue}`
+          );
           skipReason = 'invalid-version';
         }
         const dep: PackageDependency = {
