@@ -15,7 +15,6 @@ export async function updateArtifacts(
   update: UpdateArtifact
 ): Promise<UpdateArtifactsResult[] | null> {
   const { packageFileName } = update;
-  logger.debug(`${packageFileName} hermit.updateArtifacts()`);
   try {
     await updateHermitPackage(update);
   } catch (err) {

@@ -121,7 +121,7 @@ export function extractPackageFile(
   content: string,
   fileName: string
 ): ExtractionResult | null {
-  logger.debug(`batect.extractPackageFile() fileName: ${fileName}`);
+  logger.trace(`batect.extractPackageFile() fileName: ${fileName}`);
 
   try {
     const config = loadConfig(content);

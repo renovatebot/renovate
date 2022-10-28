@@ -85,7 +85,7 @@ export async function getDependency(
     const res = raw.body;
     if (!res.versions || !Object.keys(res.versions).length) {
       // Registry returned a 200 OK but with no versions
-      logger.debug(`No versions returned for dependency ${packageName}`);
+      logger.debug(`No versions returned for npm dependency ${packageName}`);
       return null;
     }
 
