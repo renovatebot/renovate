@@ -7,11 +7,11 @@ import {
   CONFIG_VALIDATION,
   INVALID_PATH,
 } from '../../constants/error-messages';
+import * as _behindBaseCache from '../cache/branch/behind-base-branch-cache';
+import * as _conflictsCache from '../cache/branch/conflicts-cache';
+import * as _modifiedCache from '../cache/branch/modified-cache';
+import * as _parentShaCache from '../cache/branch/parent-sha-cache';
 import { newlineRegex, regEx } from '../regex';
-import * as _behindBaseCache from './behind-base-branch-cache';
-import * as _conflictsCache from './conflicts-cache';
-import * as _modifiedCache from './modified-cache';
-import * as _parentShaCache from './parent-sha-cache';
 import type { FileChange } from './types';
 import * as git from '.';
 import { setNoVerify } from '.';

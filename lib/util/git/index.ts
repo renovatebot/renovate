@@ -28,24 +28,24 @@ import { api as semverCoerced } from '../../modules/versioning/semver-coerced';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import type { GitProtocol } from '../../types/git';
 import { Limit, incLimitedValue } from '../../workers/global/limits';
-import { newlineRegex, regEx } from '../regex';
-import { parseGitAuthor } from './author';
-import { getCachedBehindBaseResult } from './behind-base-branch-cache';
-import { getNoVerify, simpleGitConfig } from './config';
+import { getCachedBehindBaseResult } from '../cache/branch/behind-base-branch-cache';
 import {
   getCachedConflictResult,
   setCachedConflictResult,
-} from './conflicts-cache';
+} from '../cache/branch/conflicts-cache';
+import {
+  getCachedModifiedResult,
+  setCachedModifiedResult,
+} from '../cache/branch/modified-cache';
+import { deleteCachedBranchParentShaResult } from '../cache/branch/parent-sha-cache';
+import { newlineRegex, regEx } from '../regex';
+import { parseGitAuthor } from './author';
+import { getNoVerify, simpleGitConfig } from './config';
 import {
   bulkChangesDisallowed,
   checkForPlatformFailure,
   handleCommitError,
 } from './error';
-import {
-  getCachedModifiedResult,
-  setCachedModifiedResult,
-} from './modified-cache';
-import { deleteCachedBranchParentShaResult } from './parent-sha-cache';
 import { configSigningKey, writePrivateKey } from './private-key';
 import type {
   CommitFilesConfig,
