@@ -135,8 +135,10 @@ describe('workers/repository/finalise/repository-statistics', () => {
           { ...expectedMeta, branchName: 'b1' },
           { ...expectedMeta, branchName: 'b2' },
         ],
-        inactiveBranches: ['b3'],
-      });
+          inactiveBranches: ['b3'],
+        },
+        `Branch summary`
+      );
     });
   });
 });
