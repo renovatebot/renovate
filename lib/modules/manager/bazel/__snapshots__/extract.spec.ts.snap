@@ -8,11 +8,7 @@ exports[`modules/manager/bazel/extract extractPackageFile() extracts multiple ty
     "depName": "com_github_bitly_go-nsq",
     "depType": "go_repository",
     "managerData": {
-      "def": "go_repository(
-    name = "com_github_bitly_go-nsq",
-    importpath = "github.com/bitly/go-nsq",
-    tag = "v1.0.5"
-)",
+      "idx": 0,
     },
     "packageName": "github.com/bitly/go-nsq",
   },
@@ -25,11 +21,7 @@ exports[`modules/manager/bazel/extract extractPackageFile() extracts multiple ty
     "depType": "go_repository",
     "digestOneAndOnly": true,
     "managerData": {
-      "def": "go_repository(
-   name = "com_github_google_uuid",
-   importpath = "github.com/google/uuid",
-   commit = "dec09d789f3dba190787f8b4454c7d3c936fed9e"
-)",
+      "idx": 1,
     },
     "packageName": "github.com/google/uuid",
   },
@@ -39,11 +31,7 @@ exports[`modules/manager/bazel/extract extractPackageFile() extracts multiple ty
     "depName": "com_gopkgin_mgo_v2",
     "depType": "go_repository",
     "managerData": {
-      "def": "go_repository(
-    name = "com_gopkgin_mgo_v2",
-    importpath = "gopkg.in/mgo.v2",
-    tag = "v2"
-)",
+      "idx": 2,
     },
     "packageName": "gopkg.in/mgo.v2",
   },
@@ -53,11 +41,7 @@ exports[`modules/manager/bazel/extract extractPackageFile() extracts multiple ty
     "depName": "build_bazel_rules_nodejs",
     "depType": "git_repository",
     "managerData": {
-      "def": "git_repository(
-    name = "build_bazel_rules_nodejs",
-    remote = "https://github.com/bazelbuild/rules_nodejs.git",
-    tag = "0.3.1",
-)",
+      "idx": 3,
     },
     "packageName": "bazelbuild/rules_nodejs",
   },
@@ -67,11 +51,7 @@ exports[`modules/manager/bazel/extract extractPackageFile() extracts multiple ty
     "depName": "build_bazel_rules_typescript",
     "depType": "git_repository",
     "managerData": {
-      "def": "git_repository(
-    name = "build_bazel_rules_typescript",
-    remote = "https://github.com/bazelbuild/rules_typescript.git",
-    tag = "0.6.1",
-)",
+      "idx": 4,
     },
     "packageName": "bazelbuild/rules_typescript",
   },
@@ -81,12 +61,7 @@ exports[`modules/manager/bazel/extract extractPackageFile() extracts multiple ty
     "depName": "distroless",
     "depType": "http_archive",
     "managerData": {
-      "def": "http_archive(
-    name="distroless",
-    sha256="f7a6ecfb8174a1dd4713ea3b21621072996ada7e8f1a69e6ae7581be137c6dd6",
-    strip_prefix="distroless-446923c3756ceeaa75888f52fcbdd48bb314fbf8",
-    urls=["https://github.com/GoogleContainerTools/distroless/archive/446923c3756ceeaa75888f52fcbdd48bb314fbf8.tar.gz"]
-)",
+      "idx": 5,
     },
     "packageName": "GoogleContainerTools/distroless",
   },
@@ -96,15 +71,7 @@ exports[`modules/manager/bazel/extract extractPackageFile() extracts multiple ty
     "depName": "bazel_toolchains",
     "depType": "http_archive",
     "managerData": {
-      "def": "http_archive(
-  name = "bazel_toolchains",
-    sha256 = "4b1468b254a572dbe134cc1fd7c6eab1618a72acd339749ea343bd8f55c3b7eb",
-    strip_prefix = "bazel-toolchains-d665ccfa3e9c90fa789671bf4ef5f7c19c5715c4",
-    urls = [
-        "https://mirror.bazel.build/github.com/bazelbuild/bazel-toolchains/archive/d665ccfa3e9c90fa789671bf4ef5f7c19c5715c4.tar.gz",
-        "https://github.com/bazelbuild/bazel-toolchains/archive/d665ccfa3e9c90fa789671bf4ef5f7c19c5715c4.tar.gz",
-    ],
-)",
+      "idx": 6,
     },
     "packageName": "bazelbuild/bazel-toolchains",
   },
@@ -114,13 +81,7 @@ exports[`modules/manager/bazel/extract extractPackageFile() extracts multiple ty
     "depName": "rules_nodejs",
     "depType": "http_archive",
     "managerData": {
-      "def": "http_archive(
-    name = "rules_nodejs",
-    sha256 = "5aef09ed3279aa01d5c928e3beb248f9ad32dde6aafe6373a8c994c3ce643064",
-    urls = [
-      "https://github.com/bazelbuild/rules_nodejs/releases/download/5.5.3/rules_nodejs-core-5.5.3.tar.gz"
-    ],
-)",
+      "idx": 7,
     },
     "packageName": "bazelbuild/rules_nodejs",
   },
@@ -130,11 +91,7 @@ exports[`modules/manager/bazel/extract extractPackageFile() extracts multiple ty
     "depName": "io_bazel_rules_sass",
     "depType": "git_repository",
     "managerData": {
-      "def": "git_repository(
-    name = "io_bazel_rules_sass",
-    remote = "https://github.com/bazelbuild/rules_sass.git",
-    tag = "0.0.3",
-)",
+      "idx": 8,
     },
     "packageName": "bazelbuild/rules_sass",
   },
@@ -144,12 +101,7 @@ exports[`modules/manager/bazel/extract extractPackageFile() extracts multiple ty
     "depName": "com_github_bazelbuild_buildtools",
     "depType": "git_repository",
     "managerData": {
-      "def": "git_repository(
-    name = "com_github_bazelbuild_buildtools",
-    remote = "https://github.com/bazelbuild/buildtools.git",
-    # Note, this commit matches the version of buildifier in angular/ngcontainer
-    commit = "b3b620e8bcff18ed3378cd3f35ebeb7016d71f71",
-)",
+      "idx": 9,
     },
     "packageName": "bazelbuild/buildtools",
   },
@@ -159,11 +111,7 @@ exports[`modules/manager/bazel/extract extractPackageFile() extracts multiple ty
     "depName": "io_bazel_rules_go",
     "depType": "http_archive",
     "managerData": {
-      "def": "http_archive(
-    name = "io_bazel_rules_go",
-    url = "https://github.com/bazelbuild/rules_go/releases/download/0.7.1/rules_go-0.7.1.tar.gz",
-    sha256 = "341d5eacef704415386974bc82a1783a8b7ffbff2ab6ba02375e1ca20d9b031c",
-)",
+      "idx": 10,
     },
     "packageName": "bazelbuild/rules_go",
   },
@@ -173,15 +121,7 @@ exports[`modules/manager/bazel/extract extractPackageFile() extracts multiple ty
     "depName": "bazel_skylib",
     "depType": "http_archive",
     "managerData": {
-      "def": "http_archive(
-    name = "bazel_skylib",
-    sha256 = "b5f6abe419da897b7901f90cbab08af958b97a8f3575b0d3dd062ac7ce78541f",
-    strip_prefix = "bazel-skylib-0.5.0",
-    urls = [
-        "https://mirror.bazel.build/github.com/bazelbuild/bazel-skylib/archive/0.5.0.tar.gz",
-        "https://github.com/bazelbuild/bazel-skylib/archive/0.5.0.tar.gz",
-    ],
-)",
+      "idx": 11,
     },
     "packageName": "bazelbuild/bazel-skylib",
   },
@@ -191,12 +131,7 @@ exports[`modules/manager/bazel/extract extractPackageFile() extracts multiple ty
     "depName": "distroless",
     "depType": "http_archive",
     "managerData": {
-      "def": "http_archive(
-    name="distroless",
-    sha256="f7a6ecfb8174a1dd4713ea3b21621072996ada7e8f1a69e6ae7581be137c6dd6",
-    strip_prefix="distroless-446923c3756ceeaa75888f52fcbdd48bb314fbf8",
-    urls=["https://github.com/GoogleContainerTools/distroless/archive/446923c3756ceeaa75888f52fcbdd48bb314fbf8.tar.gz"]
-)",
+      "idx": 12,
     },
     "packageName": "GoogleContainerTools/distroless",
   },
@@ -206,12 +141,7 @@ exports[`modules/manager/bazel/extract extractPackageFile() extracts multiple ty
     "depName": "io_bazel_rules_go",
     "depType": "http_archive",
     "managerData": {
-      "def": "maybe(
-  http_archive,
-  name = "io_bazel_rules_go",
-  sha256 = "2b1641428dff9018f9e85c0384f03ec6c10660d935b750e3fa1492a281a53b0f",
-  url = "https://github.com/bazelbuild/rules_go/releases/download/v0.29.0/rules_go-v0.29.0.zip",
-)",
+      "idx": 13,
     },
     "packageName": "bazelbuild/rules_go",
   },
@@ -221,15 +151,7 @@ exports[`modules/manager/bazel/extract extractPackageFile() extracts multiple ty
     "depName": "bazel_gazelle",
     "depType": "http_archive",
     "managerData": {
-      "def": "maybe(
-    http_archive,
-    name = "bazel_gazelle",
-    sha256 = "de69a09dc70417580aabf20a28619bb3ef60d038470c7cf8442fafcf627c21cb",
-    urls = [
-        "https://mirror.bazel.build/github.com/bazelbuild/bazel-gazelle/releases/download/v0.24.0/bazel-gazelle-v0.24.0.tar.gz",
-        "https://github.com/bazelbuild/bazel-gazelle/releases/download/v0.24.0/bazel-gazelle-v0.24.0.tar.gz",
-    ],
-)",
+      "idx": 14,
     },
     "packageName": "bazelbuild/bazel-gazelle",
   },
@@ -242,12 +164,7 @@ exports[`modules/manager/bazel/extract extractPackageFile() extracts multiple ty
     "depType": "go_repository",
     "digestOneAndOnly": true,
     "managerData": {
-      "def": "maybe(
-    go_repository,
-    name = "com_github_pkg_errors",
-    commit = "816c9085562cd7ee03e7f8188a1cfd942858cded",
-    importpath = "github.com/pkg/errors",
-)",
+      "idx": 15,
     },
     "packageName": "github.com/pkg/errors",
   },
@@ -258,13 +175,7 @@ exports[`modules/manager/bazel/extract extractPackageFile() extracts multiple ty
     "depName": "py3_image_base",
     "depType": "container_pull",
     "managerData": {
-      "def": "container_pull(
-    name = "py3_image_base",
-    digest = "sha256:d5a717649fd93ea5b9c430d7f84e4c37ba219eb53bd73ed1d4a5a98e9edd84a7",
-    registry = "gcr.io",
-    repository = "distroless/python3-debian10",
-    tag = "latest",
-)",
+      "idx": 16,
     },
     "packageName": "distroless/python3-debian10",
     "registryUrls": [
@@ -278,12 +189,7 @@ exports[`modules/manager/bazel/extract extractPackageFile() extracts multiple ty
     "depName": "distroless",
     "depType": "http_file",
     "managerData": {
-      "def": "http_file(
-    name="distroless",
-    sha256="f7a6ecfb8174a1dd4713ea3b21621072996ada7e8f1a69e6ae7581be137c6dd6",
-    strip_prefix="distroless-446923c3756ceeaa75888f52fcbdd48bb314fbf8",
-    urls=["https://github.com/GoogleContainerTools/distroless/archive/446923c3756ceeaa75888f52fcbdd48bb314fbf8.tar.gz"]
-)",
+      "idx": 17,
     },
     "packageName": "GoogleContainerTools/distroless",
   },
@@ -298,12 +204,7 @@ exports[`modules/manager/bazel/extract extractPackageFile() sequential http_arch
     "depName": "aspect_rules_js",
     "depType": "http_archive",
     "managerData": {
-      "def": "http_archive(
-            name = "aspect_rules_js",
-            sha256 = "db9f446752fe4100320cf8487e8fd476b9af0adf6b99b601bcfd70b289bb0598",
-            strip_prefix = "rules_js-1.1.2",
-            url = "https://github.com/aspect-build/rules_js/archive/refs/tags/v1.1.2.tar.gz",
-          )",
+      "idx": 0,
     },
     "packageName": "aspect-build/rules_js",
   },
@@ -313,11 +214,7 @@ exports[`modules/manager/bazel/extract extractPackageFile() sequential http_arch
     "depName": "rules_nodejs",
     "depType": "http_archive",
     "managerData": {
-      "def": "http_archive(
-              name = "rules_nodejs",
-              sha256 = "5aef09ed3279aa01d5c928e3beb248f9ad32dde6aafe6373a8c994c3ce643064",
-              urls = ["https://github.com/bazelbuild/rules_nodejs/releases/download/5.5.3/rules_nodejs-core-5.5.3.tar.gz"],
-          )",
+      "idx": 1,
     },
     "packageName": "bazelbuild/rules_nodejs",
   },

@@ -190,8 +190,7 @@ export async function extractPackageFile(
       const lockedEntries = extractLockFileEntries(lockContent);
       for (const dep of res.deps) {
         // TODO: types (#7154)
-        // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-        const lockedDepValue = lockedEntries.get(`${dep.depName}`);
+        const lockedDepValue = lockedEntries.get(`${dep.depName!}`);
         if (lockedDepValue) {
           dep.lockedVersion = lockedDepValue;
         }

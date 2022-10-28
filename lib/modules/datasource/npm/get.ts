@@ -157,35 +157,12 @@ export async function getDependency(
     }
     return dep;
   } catch (err) {
-    if (err.statusCode === 401 || err.statusCode === 403) {
-      logger.debug(
-        {
-          packageUrl,
-          err,
-          statusCode: err.statusCode,
-          packageName,
-        },
-        `Dependency lookup failure: unauthorized`
-      );
-      return null;
-    }
-    if (err.statusCode === 402) {
-      logger.debug(
-        {
-          packageUrl,
-          err,
-          statusCode: err.statusCode,
-          packageName,
-        },
-        `Dependency lookup failure: payment required`
-      );
-      return null;
-    }
-    if (err.statusCode === 404 || err.code === 'ENOTFOUND') {
-      logger.debug(
-        { err, packageName },
-        `Dependency lookup failure: not found`
-      );
+    const ignoredStatusCodes = [401, 402, 403, 404];
+    const ignoredResponseCodes = ['ENOTFOUND'];
+    if (
+      ignoredStatusCodes.includes(err.statusCode) ||
+      ignoredResponseCodes.includes(err.code)
+    ) {
       return null;
     }
     if (uri.host === 'registry.npmjs.org') {

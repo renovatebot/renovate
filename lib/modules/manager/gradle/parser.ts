@@ -200,7 +200,7 @@ function processDepInterpolation({
       return { deps: [dep] };
     }
   }
-  return null;
+  return {};
 }
 
 function processPlugin({
@@ -336,6 +336,7 @@ const annoyingMethods = new Set([
   'setOf',
   'mutableSetOf',
   'stages', // https://github.com/ajoberstar/reckon
+  'mapScalar', // https://github.com/apollographql/apollo-kotlin
 ]);
 
 function processLongFormDep({
@@ -376,7 +377,7 @@ function processLibraryDep(input: SyntaxHandlerInput): SyntaxHandlerOutput {
   const { tokenMap } = input;
 
   const varNameToken = tokenMap.varName;
-  const key = varNameToken.value;
+  const key = varNameToken.value.replace(regEx(/[-_]/g), '.');
   const fileReplacePosition = varNameToken.offset;
   const packageFile = input.packageFile;
 
