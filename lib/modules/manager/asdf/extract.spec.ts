@@ -232,7 +232,7 @@ dummy 1.2.3
             currentValue: '16.0.0+36',
             datasource: 'adoptium-java',
             packageName: 'java-jdk',
-            versioning: 'hermit',
+            versioning: 'semver',
             depName: 'java',
           },
           {
