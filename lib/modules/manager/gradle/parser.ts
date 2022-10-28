@@ -2,7 +2,7 @@ import { lang, lexer, query as q } from 'good-enough-parser';
 import { newlineRegex, regEx } from '../../../util/regex';
 import type { PackageDependency } from '../types';
 import {
-  IMPLICIT_GRADLE_PLUGINS,
+  GRADLE_PLUGINS,
   REGISTRY_URLS,
   cleanupTempVars,
   coalesceVariable,
@@ -700,10 +700,7 @@ const qApplyFrom = q
 
 // pmd { toolVersion = "1.2.3" }
 const qImplicitGradlePlugin = q
-  .sym(
-    regEx(`^(?:${Object.keys(IMPLICIT_GRADLE_PLUGINS).join('|')})$`),
-    storeVarToken
-  )
+  .sym(regEx(`^(?:${Object.keys(GRADLE_PLUGINS).join('|')})$`), storeVarToken)
   .handler((ctx) => storeInTokenMap(ctx, 'pluginName'))
   .tree({
     type: 'wrapped-tree',

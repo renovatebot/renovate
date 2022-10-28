@@ -8,7 +8,7 @@ export const REGISTRY_URLS = {
   mavenCentral: 'https://repo.maven.apache.org/maven2',
 };
 
-export const IMPLICIT_GRADLE_PLUGINS = {
+export const GRADLE_PLUGINS = {
   checkstyle: 'com.puppycrawl.tools:checkstyle',
   codenarc: 'org.codenarc:CodeNarc',
   detekt: 'io.gitlab.arturbosch.detekt:detekt-core',

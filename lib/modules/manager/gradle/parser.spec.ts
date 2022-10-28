@@ -1,7 +1,7 @@
 import { Fixtures } from '../../../../test/fixtures';
 import { fs, logger } from '../../../../test/util';
 import { parseGradle, parseProps } from './parser';
-import { IMPLICIT_GRADLE_PLUGINS, REGISTRY_URLS } from './parser/common';
+import { GRADLE_PLUGINS, REGISTRY_URLS } from './parser/common';
 
 jest.mock('../../../util/fs');
 
@@ -660,16 +660,16 @@ describe('modules/manager/gradle/parser', () => {
   describe('implicit gradle plugins', () => {
     test.each`
       def                | input                                           | output
-      ${'baz = "1.2.3"'} | ${'checkstyle { toolVersion = "${baz}" }'}      | ${{ depName: 'checkstyle', packageName: IMPLICIT_GRADLE_PLUGINS['checkstyle'], currentValue: '1.2.3' }}
-      ${''}              | ${'codenarc { toolVersion = "1.2.3" }'}         | ${{ depName: 'codenarc', packageName: IMPLICIT_GRADLE_PLUGINS['codenarc'], currentValue: '1.2.3' }}
-      ${''}              | ${'detekt { toolVersion = "1.2.3" }'}           | ${{ depName: 'detekt', packageName: IMPLICIT_GRADLE_PLUGINS['detekt'], currentValue: '1.2.3' }}
-      ${''}              | ${'findbugs { toolVersion = "1.2.3" }'}         | ${{ depName: 'findbugs', packageName: IMPLICIT_GRADLE_PLUGINS['findbugs'], currentValue: '1.2.3' }}
-      ${''}              | ${'googleJavaFormat { toolVersion = "1.2.3" }'} | ${{ depName: 'googleJavaFormat', packageName: IMPLICIT_GRADLE_PLUGINS['googleJavaFormat'], currentValue: '1.2.3' }}
-      ${'baz = "1.2.3"'} | ${'jacoco { toolVersion = baz }'}               | ${{ depName: 'jacoco', packageName: IMPLICIT_GRADLE_PLUGINS['jacoco'], currentValue: '1.2.3' }}
-      ${'baz = "1.2.3"'} | ${'jacoco { toolVersion = property("baz") }'}   | ${{ depName: 'jacoco', packageName: IMPLICIT_GRADLE_PLUGINS['jacoco'], currentValue: '1.2.3' }}
-      ${''}              | ${'lombok { version = "1.2.3" }'}               | ${{ depName: 'lombok', packageName: IMPLICIT_GRADLE_PLUGINS['lombok'], currentValue: '1.2.3' }}
-      ${''}              | ${'pmd { toolVersion = "1.2.3" }'}              | ${{ depName: 'pmd', packageName: IMPLICIT_GRADLE_PLUGINS['pmd'], currentValue: '1.2.3' }}
-      ${''}              | ${'spotbugs { toolVersion = "1.2.3" }'}         | ${{ depName: 'spotbugs', packageName: IMPLICIT_GRADLE_PLUGINS['spotbugs'], currentValue: '1.2.3' }}
+      ${'baz = "1.2.3"'} | ${'checkstyle { toolVersion = "${baz}" }'}      | ${{ depName: 'checkstyle', packageName: GRADLE_PLUGINS['checkstyle'], currentValue: '1.2.3', depType: 'devDependencies' }}
+      ${''}              | ${'codenarc { toolVersion = "1.2.3" }'}         | ${{ depName: 'codenarc', packageName: GRADLE_PLUGINS['codenarc'], currentValue: '1.2.3' }}
+      ${''}              | ${'detekt { toolVersion = "1.2.3" }'}           | ${{ depName: 'detekt', packageName: GRADLE_PLUGINS['detekt'], currentValue: '1.2.3' }}
+      ${''}              | ${'findbugs { toolVersion = "1.2.3" }'}         | ${{ depName: 'findbugs', packageName: GRADLE_PLUGINS['findbugs'], currentValue: '1.2.3' }}
+      ${''}              | ${'googleJavaFormat { toolVersion = "1.2.3" }'} | ${{ depName: 'googleJavaFormat', packageName: GRADLE_PLUGINS['googleJavaFormat'], currentValue: '1.2.3' }}
+      ${'baz = "1.2.3"'} | ${'jacoco { toolVersion = baz }'}               | ${{ depName: 'jacoco', packageName: GRADLE_PLUGINS['jacoco'], currentValue: '1.2.3' }}
+      ${'baz = "1.2.3"'} | ${'jacoco { toolVersion = property("baz") }'}   | ${{ depName: 'jacoco', packageName: GRADLE_PLUGINS['jacoco'], currentValue: '1.2.3' }}
+      ${''}              | ${'lombok { version = "1.2.3" }'}               | ${{ depName: 'lombok', packageName: GRADLE_PLUGINS['lombok'], currentValue: '1.2.3' }}
+      ${''}              | ${'pmd { toolVersion = "1.2.3" }'}              | ${{ depName: 'pmd', packageName: GRADLE_PLUGINS['pmd'], currentValue: '1.2.3' }}
+      ${''}              | ${'spotbugs { toolVersion = "1.2.3" }'}         | ${{ depName: 'spotbugs', packageName: GRADLE_PLUGINS['spotbugs'], currentValue: '1.2.3' }}
       ${''}              | ${'pmd { toolVersion = "@@@" }'}                | ${null}
       ${''}              | ${'pmd { toolVersion = "${baz}" }'}             | ${null}
       ${'baz = "1.2.3"'} | ${'pmd { toolVersion = "${baz}.456" }'}         | ${{ depName: 'pmd', currentValue: '1.2.3.456', skipReason: 'unknown-version' }}

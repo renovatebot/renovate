@@ -9,7 +9,7 @@ import type { Ctx, GradleManagerData, VariableData } from '../types';
 import { parseDependencyString } from '../utils';
 import {
   ANNOYING_METHODS,
-  IMPLICIT_GRADLE_PLUGINS,
+  GRADLE_PLUGINS,
   REGISTRY_URLS,
   interpolateString,
   loadFromTokenMap,
@@ -337,7 +337,7 @@ export function handleImplicitGradlePlugin(ctx: Ctx): Ctx {
   }
 
   const groupIdArtifactId =
-    IMPLICIT_GRADLE_PLUGINS[pluginName as keyof typeof IMPLICIT_GRADLE_PLUGINS];
+    GRADLE_PLUGINS[pluginName as keyof typeof GRADLE_PLUGINS];
   const templateString = `${groupIdArtifactId}:${versionValue}`;
 
   const dep = parseDependencyString(templateString);
@@ -346,6 +346,7 @@ export function handleImplicitGradlePlugin(ctx: Ctx): Ctx {
   }
 
   const version = versionTokens[0];
+  dep.depType = 'devDependencies';
   dep.depName = pluginName;
   dep.packageName = groupIdArtifactId;
   dep.managerData = {
