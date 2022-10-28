@@ -93,6 +93,7 @@ describe('workers/repository/finalise/repository-statistics', () => {
       const branchCache = partial<BranchCache>({
         sha,
         baseBranch,
+        baseBranchSha,
         isModified: false,
         automerge: false,
       });
@@ -119,22 +120,23 @@ describe('workers/repository/finalise/repository-statistics', () => {
       getCacheSpy.mockReturnValueOnce(cache);
       isCacheModifiedSpy.mockReturnValueOnce(false);
       runBranchSummary();
-      expect(logger.debug).toHaveBeenCalledWith({
-        cacheModified: false,
-        baseBranches: [
-          {
-            branchName: 'main',
-            sha,
-          },
-          {
-            branchName: 'dev',
-            sha,
-          },
-        ],
-        branches: [
-          { ...expectedMeta, branchName: 'b1' },
-          { ...expectedMeta, branchName: 'b2' },
-        ],
+      expect(logger.debug).toHaveBeenCalledWith(
+        {
+          cacheModified: false,
+          baseBranches: [
+            {
+              branchName: 'main',
+              sha,
+            },
+            {
+              branchName: 'dev',
+              sha,
+            },
+          ],
+          branches: [
+            { ...expectedMeta, branchName: 'b1' },
+            { ...expectedMeta, branchName: 'b2' },
+          ],
           inactiveBranches: ['b3'],
         },
         `Branch summary`
