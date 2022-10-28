@@ -194,7 +194,7 @@ jobs:
 
       - name: semantic-release
         run: |
-          echo '//registry.npmjs.org/:_authToken=${NPM_TOKEN}' >> ./.npmrc
+          echo '//registry.yarnpkg.com/:_authToken=${NPM_TOKEN}' >> ./.npmrc
           yarn semantic-release --dry-run ${{env.DRY_RUN}}
           git checkout -- .npmrc
         env:
