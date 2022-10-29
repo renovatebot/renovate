@@ -19,48 +19,30 @@ try {
   RegEx = RegExp;
 }
 
-function extractFlags(flagSet: Set<string>, flags: string): Set<string> {
-  for (const flag of flags.split('').map((f) => f.toLowerCase())) {
-    flagSet.add(flag);
-  }
-  return flagSet;
-}
-
-function makeFlags(flagSet: Set<string>): string {
-  return [...flagSet].sort().join('');
-}
-
-function isStateful(flagSet: Set<string>): boolean {
-  return flagSet.has('g') || flagSet.has('y');
-}
-
 export function regEx(
   pattern: string | RegExp,
-  withFlags?: string | undefined,
+  flags?: string | undefined,
   useCache = true
 ): RegExp {
-  const flagSet = new Set<string>();
-  if (is.regExp(pattern)) {
-    extractFlags(flagSet, pattern.flags);
+  let canBeCached = useCache;
+  if (canBeCached && flags?.includes('g')) {
+    canBeCached = false;
   }
-  if (withFlags) {
-    extractFlags(flagSet, withFlags);
+  if (canBeCached && is.regExp(pattern) && pattern.flags.includes('g')) {
+    canBeCached = false;
   }
-  const flags = makeFlags(flagSet);
-  const isRegexStateful = isStateful(flagSet);
 
-  const source = is.regExp(pattern) ? pattern.source : pattern;
-  const key = `/${source}/${flags}`;
-
-  if (useCache) {
+  const key = flags ? `${pattern.toString()}:${flags}` : pattern.toString();
+  if (canBeCached) {
     const cachedResult = cache.get(key);
     if (cachedResult) {
       return cachedResult;
     }
   }
+
   try {
-    const instance = new RegEx(source, flags);
-    if (useCache && !isRegexStateful) {
+    const instance = new RegEx(pattern, flags);
+    if (canBeCached) {
       cache.set(key, instance);
     }
     return instance;

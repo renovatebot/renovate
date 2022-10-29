@@ -19,10 +19,6 @@ describe('util/regex', () => {
     expect(regEx(/foo/i).flags).toBe('iu');
   });
 
-  it('merges flags', () => {
-    expect(regEx(/foo/i, 'mg').flags).toBe('gimu');
-  });
-
   it('caches non-stateful regex', () => {
     expect(regEx('foo')).toBe(regEx('foo'));
     expect(regEx('foo', 'm')).toBe(regEx('foo', 'm'));
@@ -30,7 +26,7 @@ describe('util/regex', () => {
 
   it('does not cache stateful regex', () => {
     expect(regEx('foo', 'g')).not.toBe(regEx('foo', 'g'));
-    expect(regEx('foo', 'y')).not.toBe(regEx('foo', 'y'));
+    expect(regEx(/bar/g)).not.toBe(/bar/g);
   });
 
   it('Falls back to RegExp', () => {
