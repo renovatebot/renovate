@@ -470,20 +470,23 @@ describe('modules/manager/gradle/parser', () => {
   describe('version catalog', () => {
     test.each`
       def                                           | str                                                             | output
-      ${'version("baz", "1.2.3")'}                  | ${'library("foo.bar", "foo", "bar").versionRef("baz")'}         | ${{ depName: 'foo:bar', currentValue: '1.2.3', groupName: 'baz' }}
-      ${'version("baz", "1.2.3")'}                  | ${'library("foo.bar", "foo", "bar").versionRef("baz")'}         | ${{ depName: 'foo:bar', currentValue: '1.2.3', groupName: 'baz' }}
       ${''}                                         | ${'library("foo.bar", "foo", "bar").version("1.2.3")'}          | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
+      ${'baz = "1.2.3"'}                            | ${'library("foo.bar", "foo", "bar").version(baz)'}              | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
+      ${'baz = "1.2.3"'}                            | ${'library("foo.bar", "foo", "bar").version("${baz}")'}         | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
+      ${'baz = "1.2.3"'}                            | ${'library("foo.bar", "foo", "bar").version("${baz}xy")'}       | ${{ depName: 'foo:bar', currentValue: '1.2.3xy', skipReason: 'unknown-version' }}
+      ${'group = "foo"; artifact = "bar"'}          | ${'library("foo.bar", group, artifact).version("1.2.3")'}       | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
+      ${'f = "foo"; b = "bar"'}                     | ${'library("foo.bar", "${f}", "${b}").version("1.2.3")'}        | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
+      ${'version("baz", "1.2.3")'}                  | ${'library("foo.bar", "foo", "bar").versionRef("baz")'}         | ${{ depName: 'foo:bar', currentValue: '1.2.3', groupName: 'baz' }}
+      ${'library("foo-bar_baz-qux", "foo", "bar")'} | ${'"${foo.bar.baz.qux}:1.2.3"'}                                 | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
       ${''}                                         | ${'library(["foo.bar", "foo", "bar"]).version("1.2.3")'}        | ${null}
       ${''}                                         | ${'library("foo", "bar", "baz", "qux").version("1.2.3")'}       | ${null}
       ${''}                                         | ${'library("foo.bar", "foo", "bar").version("1.2.3", "4.5.6")'} | ${null}
       ${''}                                         | ${'library("foo", bar, "baz").version("1.2.3")'}                | ${null}
-      ${'group = "foo"; artifact = "bar"'}          | ${'library("foo.bar", group, artifact).version("1.2.3")'}       | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
-      ${'f = "foo"; b = "bar"'}                     | ${'library("foo.bar", "${f}", "${b}").version("1.2.3")'}        | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
-      ${'baz = "1.2.3"'}                            | ${'library("foo.bar", "foo", "bar").version(baz)'}              | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
-      ${'library("foo-bar_baz-qux", "foo", "bar")'} | ${'"${foo.bar.baz.qux}:1.2.3"'}                                 | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
       ${''}                                         | ${'alias("foo.bar").to("foo", "bar").version("1.2.3")'}         | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
       ${'version("baz", "1.2.3")'}                  | ${'alias("foo.bar").to("foo", "bar").versionRef("baz")'}        | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
-      ${'f = "foo"; b = "bar"'}                     | ${'alias("foo.bar").to("${f}", "${b}").version("1.2.3")'}       | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
+      ${'version("baz", "1.2.3")'}                  | ${'alias("foo.bar").to("foo", "bar").version("${baz}")'}        | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
+      ${'f = "foo"; b = "bar"; v = "1.2.3"'}        | ${'alias("foo.bar").to(f, b).version(v)'}                       | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
+      ${'f = "foo"; b = "bar"; v = "1.2.3"'}        | ${'alias("foo.bar").to("${f}", "${b}").version("$v")'}          | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
       ${''}                                         | ${'alias(["foo.bar"]).to("foo", "bar").version("1.2.3")'}       | ${null}
     `('$def | $str', ({ def, str, output }) => {
       const input = [def, str].join('\n');

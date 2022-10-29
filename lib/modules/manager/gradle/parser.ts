@@ -546,7 +546,9 @@ const qVersionCatalogVersion = q
           }
 
           return ctx;
-        })
+        }),
+        // library("android-gradle", "com.android.tools.build", "gradle").version("${agp}")
+        qTemplateString
       )
       .handler((ctx) => storeInTokenMap(ctx, 'version'))
       .end(),
