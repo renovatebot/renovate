@@ -68,9 +68,10 @@ export async function getLockedVersions(
         }
       }
       for (const dep of packageFile.deps) {
+        // TODO: types (#7154)
         dep.lockedVersion = semver.valid(
           lockFileCache[npmLock].lockedVersions[dep.depName!]
-        );
+        )!;
       }
     } else if (pnpmShrinkwrap) {
       logger.debug('TODO: implement pnpm-lock.yaml parsing of lockVersion');

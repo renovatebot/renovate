@@ -26,7 +26,9 @@ import { PackageFiles } from './package-files';
 
 type PrUpgrade = BranchUpgradeConfig;
 
-const massageMdSpy = jest.spyOn(platform, 'massageMarkdown');
+const massageMdSpy = platform.massageMarkdown;
+const getIssueSpy = platform.getIssue;
+
 let config: RenovateConfig;
 
 beforeEach(() => {
@@ -64,7 +66,7 @@ function genRandPackageFile(
 
 async function dryRun(
   branches: BranchConfig[],
-  platform: jest.Mocked<Platform>,
+  platform: jest.MockedObject<Platform>,
   ensureIssueClosingCalls = 0,
   ensureIssueCalls = 0
 ) {
@@ -605,7 +607,7 @@ describe('workers/repository/dependency-dashboard', () => {
         branchName2: 'approve-branch',
       };
       config.dependencyDashboardIssue = 1;
-      jest.spyOn(platform, 'getIssue').mockResolvedValueOnce({
+      getIssueSpy.mockResolvedValueOnce({
         title: 'Dependency Dashboard',
         body: `This issue contains a list of Renovate updates and their statuses.
 
@@ -667,7 +669,7 @@ describe('workers/repository/dependency-dashboard', () => {
         branchName2: 'unlimit-branch',
       };
       config.dependencyDashboardIssue = 1;
-      jest.spyOn(platform, 'getIssue').mockResolvedValueOnce({
+      getIssueSpy.mockResolvedValueOnce({
         title: 'Dependency Dashboard',
         body: `This issue contains a list of Renovate updates and their statuses.
         ## Rate-limited
@@ -726,7 +728,7 @@ describe('workers/repository/dependency-dashboard', () => {
       config.dependencyDashboard = true;
       config.dependencyDashboardChecks = { branchName2: 'approve-branch' };
       config.dependencyDashboardIssue = 1;
-      mockedFunction(platform.getIssue!).mockResolvedValueOnce({
+      mockedFunction(platform.getIssue).mockResolvedValueOnce({
         title: 'Dependency Dashboard',
         body: `This issue contains a list of Renovate updates and their statuses.
 

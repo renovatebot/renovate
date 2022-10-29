@@ -8,6 +8,7 @@ const depSectionRegExp = regEx(/defp\s+deps.*do/g);
 const depMatchRegExp = regEx(
   /{:(?<depName>\w+),\s*(?<datasource>[^:"]+)?:?\s*"(?<currentValue>[^"]+)",?\s*(?:organization: "(?<organization>.*)")?.*}/gm
 );
+const commentMatchRegExp = regEx(/^\s*#/);
 
 export async function extractPackageFile(
   content: string,
@@ -15,11 +16,11 @@ export async function extractPackageFile(
 ): Promise<PackageFile | null> {
   logger.trace('mix.extractPackageFile()');
   const deps: PackageDependency[] = [];
-  const contentArr = content.split(newlineRegex);
-
+  const contentArr = content
+    .split(newlineRegex)
+    .filter((line) => !commentMatchRegExp.test(line));
   for (let lineNumber = 0; lineNumber < contentArr.length; lineNumber += 1) {
     if (contentArr[lineNumber].match(depSectionRegExp)) {
-      logger.trace(`Matched dep section on line ${lineNumber}`);
       let depBuffer = '';
       do {
         depBuffer += contentArr[lineNumber] + '\n';

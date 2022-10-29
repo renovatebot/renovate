@@ -7,11 +7,13 @@ import * as gitea from '../gitea';
 import * as github from '../github';
 import * as gitlab from '../gitlab';
 import type { Preset, PresetConfig } from '../types';
+import * as local from './common';
 
 const resolvers = {
   [PlatformId.Azure]: azure,
   [PlatformId.Bitbucket]: bitbucket,
   [PlatformId.BitbucketServer]: bitbucketServer,
+  [PlatformId.CodeCommit]: local,
   [PlatformId.Gitea]: gitea,
   [PlatformId.Github]: github,
   [PlatformId.Gitlab]: gitlab,
