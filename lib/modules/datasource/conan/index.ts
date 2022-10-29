@@ -3,7 +3,6 @@ import { load } from 'js-yaml';
 import { logger } from '../../../logger';
 import { cache } from '../../../util/cache/package/decorator';
 import { GithubHttp } from '../../../util/http/github';
-import { regEx } from '../../../util/regex';
 import { ensureTrailingSlash, joinUrlParts } from '../../../util/url';
 import { Datasource } from '../datasource';
 import type {
@@ -12,7 +11,12 @@ import type {
   Release,
   ReleaseResult,
 } from '../types';
-import { datasource, defaultRegistryUrl, getConanPackage } from './common';
+import {
+  conanDatasourceRegex,
+  datasource,
+  defaultRegistryUrl,
+  getConanPackage,
+} from './common';
 import type { ConanJSON, ConanRevisionsJSON, ConanYAML } from './types';
 
 export class ConanDatasource extends Datasource {
@@ -120,10 +124,7 @@ export class ConanDatasource extends Datasource {
           const dep: ReleaseResult = { releases: [] };
 
           for (const resultString of Object.values(versions.results ?? {})) {
-            const fromMatch = regEx(
-              /(?<name>[a-z\-_0-9]+)\/(?<version>[^@/\n]+)(?<userChannel>@\S+\/\S+)/,
-              'gim'
-            ).exec(resultString);
+            const fromMatch = conanDatasourceRegex.exec(resultString);
             if (fromMatch?.groups?.version && fromMatch?.groups?.userChannel) {
               const version = fromMatch.groups.version;
               if (fromMatch.groups.userChannel === userAndChannel) {
