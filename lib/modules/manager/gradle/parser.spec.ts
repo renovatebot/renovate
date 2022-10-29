@@ -650,8 +650,7 @@ describe('modules/manager/gradle/parser', () => {
         3
       );
       expect(logger.logger.debug).toHaveBeenCalledWith(
-        { scriptFile: 'foo/bar.gradle' },
-        `Max recursion depth reached`
+        'Max recursion depth reached in script file: foo/bar.gradle'
       );
       expect(vars).toBeEmpty();
     });

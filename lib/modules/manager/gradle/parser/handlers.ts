@@ -297,7 +297,7 @@ export function handleApplyFrom(ctx: Ctx): Ctx {
   }
 
   if (ctx.recursionDepth > 2) {
-    logger.debug({ scriptFile }, `Max recursion depth reached`);
+    logger.debug(`Max recursion depth reached in script file: ${scriptFile}`);
     return ctx;
   }
 
@@ -308,7 +308,7 @@ export function handleApplyFrom(ctx: Ctx): Ctx {
 
   const scriptFilePath = getSiblingFileName(ctx.packageFile, scriptFile);
   if (!ctx.fileContents[scriptFilePath]) {
-    logger.debug({ scriptFilePath }, `Failed to process included Gradle file`);
+    logger.debug(`Failed to process included Gradle file ${scriptFilePath}`);
     return ctx;
   }
 
