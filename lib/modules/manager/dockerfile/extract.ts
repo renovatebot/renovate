@@ -331,7 +331,7 @@ export function extractPackageFile(
       if (fromImage === 'scratch') {
         logger.debug('Skipping scratch');
       } else if (fromImage && stageNames.includes(fromImage)) {
-        logger.debug({ image: fromImage }, 'Skipping alias FROM');
+        logger.debug(`Skipping alias FROM image:${fromImage}`);
       } else {
         const dep = getDep(fromImage, true, config.registryAliases);
         processDepForAutoReplace(dep, lineNumberRanges, lines, lineFeed);
