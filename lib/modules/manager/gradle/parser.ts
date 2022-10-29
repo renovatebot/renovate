@@ -566,10 +566,10 @@ const qVersionCatalogDependencies = q
       .join(qStringValue)
       .handler((ctx) => storeInTokenMap(ctx, 'alias'))
       .op(',')
-      .alt(qStringValue, qVariableAccessIdentifier)
+      .alt(qTemplateString, qVariableAccessIdentifier)
       .handler((ctx) => storeInTokenMap(ctx, 'groupId'))
       .op(',')
-      .alt(qStringValue, qVariableAccessIdentifier)
+      .alt(qTemplateString, qVariableAccessIdentifier)
       .handler((ctx) => storeInTokenMap(ctx, 'artifactId'))
       .end(),
   })
@@ -600,10 +600,10 @@ const qVersionCatalogAliasDependencies = q
     endsWith: ')',
     search: q
       .begin<Ctx>()
-      .alt(qStringValue, qVariableAccessIdentifier)
+      .alt(qTemplateString, qVariableAccessIdentifier)
       .handler((ctx) => storeInTokenMap(ctx, 'groupId'))
       .op(',')
-      .alt(qStringValue, qVariableAccessIdentifier)
+      .alt(qTemplateString, qVariableAccessIdentifier)
       .handler((ctx) => storeInTokenMap(ctx, 'artifactId'))
       .end(),
   })
