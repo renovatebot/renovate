@@ -1135,7 +1135,7 @@ async function parseInlineScriptFile(
   packageFile = ''
 ): Promise<SyntaxHandlerOutput> {
   if (recursionDepth > 2) {
-    logger.debug({ scriptFile }, `Max recursion depth reached`);
+    logger.debug(`Max recursion depth reached in script file: ${scriptFile}`);
     return null;
   }
 
@@ -1147,7 +1147,7 @@ async function parseInlineScriptFile(
   const scriptFilePath = getSiblingFileName(packageFile, scriptFile);
   const scriptFileContent = await readLocalFile(scriptFilePath, 'utf8');
   if (!scriptFileContent) {
-    logger.debug({ scriptFilePath }, `Failed to process included Gradle file`);
+    logger.debug(`Failed to process included Gradle file ${scriptFilePath}`);
     return null;
   }
 

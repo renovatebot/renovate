@@ -342,28 +342,30 @@ describe('modules/manager/composer/artifacts', () => {
     ]);
     expect(execSnapshots).toMatchObject([
       {
-        cmd: 'docker pull renovate/php:7.3',
+        cmd: 'docker pull renovate/sidecar',
         options: {
           encoding: 'utf-8',
         },
       },
       {
-        cmd: 'docker ps --filter name=renovate_php -aq',
+        cmd: 'docker ps --filter name=renovate_sidecar -aq',
         options: {
           encoding: 'utf-8',
         },
       },
       {
         cmd:
-          'docker run --rm --name=renovate_php --label=renovate_child ' +
+          'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
           '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
           '-v "/tmp/renovate/cache":"/tmp/renovate/cache" ' +
           '-e COMPOSER_CACHE_DIR ' +
           '-e BUILDPACK_CACHE_DIR ' +
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
-          'renovate/php:7.3' +
+          'renovate/sidecar' +
           ' bash -l -c "' +
+          'install-tool php 7.3' +
+          ' && ' +
           'install-tool composer 1.10.17' +
           ' && ' +
           'composer update --with-dependencies --ignore-platform-reqs --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins' +
@@ -419,6 +421,9 @@ describe('modules/manager/composer/artifacts', () => {
       },
     ]);
     expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'install-tool php 7.3',
+      },
       {
         cmd: 'install-tool composer 1.10.17',
       },
