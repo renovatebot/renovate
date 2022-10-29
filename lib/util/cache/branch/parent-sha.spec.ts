@@ -1,15 +1,15 @@
-import { mocked } from '../../../test/util';
-import * as _repositoryCache from '../cache/repository';
-import type { BranchCache, RepoCacheData } from '../cache/repository/types';
+import { mocked } from '../../../../test/util';
+import * as _repositoryCache from '../repository';
+import type { BranchCache, RepoCacheData } from '../repository/types';
 import {
   deleteCachedBranchParentShaResult,
   getCachedBranchParentShaResult,
-} from './parent-sha-cache';
+} from './parent-sha';
 
-jest.mock('../cache/repository');
+jest.mock('../repository');
 const repositoryCache = mocked(_repositoryCache);
 
-describe('util/git/parent-sha-cache', () => {
+describe('util/cache/branch/parent-sha', () => {
   let repoCache: RepoCacheData = {};
 
   beforeEach(() => {
