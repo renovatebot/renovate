@@ -2,6 +2,7 @@
 
 import { logger } from '../../logger';
 import { platform } from '../../modules/platform';
+import { getCachedBranchParentShaResult } from '../../util/cache/branch';
 import { getCache } from '../../util/cache/repository';
 import type {
   BranchCache,
@@ -13,7 +14,6 @@ import {
   isBranchConflicted,
   isBranchModified,
 } from '../../util/git';
-import { getCachedBranchParentShaResult } from '../../util/git/parent-sha-cache';
 import type { BranchConfig, BranchUpgradeConfig } from '../types';
 
 function generateBranchUpgradeCache(
