@@ -23,7 +23,6 @@ import { PackagistDatasource } from '../../datasource/packagist';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
 import type { AuthJson, ComposerLock } from './types';
 import {
-  composerVersioningId,
   extractConstraints,
   getComposerArguments,
   getPhpConstraint,
@@ -109,17 +108,20 @@ export async function updateArtifacts({
       constraint: constraints.composer,
     };
 
+    const phpToolConstraint: ToolConstraint = {
+      toolName: 'php',
+      constraint: getPhpConstraint(constraints),
+    };
+
     const execOptions: ExecOptions = {
       cwdFile: packageFileName,
       extraEnv: {
         COMPOSER_CACHE_DIR: await ensureCacheDir('composer'),
         COMPOSER_AUTH: getAuthJson(),
       },
-      toolConstraints: [composerToolConstraint],
+      toolConstraints: [phpToolConstraint, composerToolConstraint],
       docker: {
-        image: 'php',
-        tagConstraint: getPhpConstraint(constraints),
-        tagScheme: composerVersioningId,
+        image: 'sidecar',
       },
     };
 
