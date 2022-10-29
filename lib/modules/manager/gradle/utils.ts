@@ -30,7 +30,13 @@ export function isDependencyString(input: string): boolean {
     return false;
   }
   // eslint-disable-next-line prefer-const
-  let [tempGroupId, tempArtifactId, tempVersionPart] = split;
+  let [tempGroupId, tempArtifactId, tempVersionPart, optionalClassifier] =
+    split;
+
+  if (optionalClassifier && !artifactRegex.test(optionalClassifier)) {
+    return false;
+  }
+
   if (
     tempVersionPart !== versionLikeSubstring(tempVersionPart) &&
     tempVersionPart.includes('@')

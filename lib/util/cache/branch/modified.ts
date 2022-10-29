@@ -1,5 +1,5 @@
-import { logger } from '../../logger';
-import { getCache } from '../cache/repository';
+import { logger } from '../../../logger';
+import { getCache } from '../repository';
 
 export function getCachedModifiedResult(
   branchName: string,
