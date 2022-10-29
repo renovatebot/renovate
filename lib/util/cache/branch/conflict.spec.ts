@@ -1,15 +1,12 @@
 import { mocked, partial } from '../../../../test/util';
 import * as _repositoryCache from '../repository';
 import type { BranchCache, RepoCacheData } from '../repository/types';
-import {
-  getCachedConflictResult,
-  setCachedConflictResult,
-} from './conflicts-cache';
+import { getCachedConflictResult, setCachedConflictResult } from './conflict';
 
-jest.mock('../cache/repository');
+jest.mock('../repository');
 const repositoryCache = mocked(_repositoryCache);
 
-describe('util/cache/branch/conflicts-cache', () => {
+describe('util/cache/branch/conflict', () => {
   let repoCache: RepoCacheData = {};
 
   beforeEach(() => {

@@ -1,15 +1,12 @@
 import { logger, mocked, partial } from '../../../../test/util';
 import * as _repositoryCache from '../repository';
 import type { BranchCache, RepoCacheData } from '../repository/types';
-import {
-  getCachedModifiedResult,
-  setCachedModifiedResult,
-} from './modified-cache';
+import { getCachedModifiedResult, setCachedModifiedResult } from './modified';
 
-jest.mock('../cache/repository');
+jest.mock('../repository');
 const repositoryCache = mocked(_repositoryCache);
 
-describe('util/cache/branch/modified-cache', () => {
+describe('util/cache/branch/modified', () => {
   let repoCache: RepoCacheData = {};
 
   beforeEach(() => {

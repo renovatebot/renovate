@@ -2,7 +2,7 @@
 
 import { logger } from '../../logger';
 import { platform } from '../../modules/platform';
-import { getCachedBranchParentShaResult } from '../../util/cache/branch/parent-sha-cache';
+import { getCachedBranchParentShaResult } from '../../util/cache/branch';
 import { getCache } from '../../util/cache/repository';
 import type {
   BranchCache,

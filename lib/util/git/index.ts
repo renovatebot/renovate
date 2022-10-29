@@ -28,16 +28,14 @@ import { api as semverCoerced } from '../../modules/versioning/semver-coerced';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import type { GitProtocol } from '../../types/git';
 import { Limit, incLimitedValue } from '../../workers/global/limits';
-import { getCachedBehindBaseResult } from '../cache/branch/behind-base-branch-cache';
 import {
+  deleteCachedBranchParentShaResult,
+  getCachedBehindBaseResult,
   getCachedConflictResult,
-  setCachedConflictResult,
-} from '../cache/branch/conflicts-cache';
-import {
   getCachedModifiedResult,
+  setCachedConflictResult,
   setCachedModifiedResult,
-} from '../cache/branch/modified-cache';
-import { deleteCachedBranchParentShaResult } from '../cache/branch/parent-sha-cache';
+} from '../cache/branch';
 import { newlineRegex, regEx } from '../regex';
 import { parseGitAuthor } from './author';
 import { getNoVerify, simpleGitConfig } from './config';

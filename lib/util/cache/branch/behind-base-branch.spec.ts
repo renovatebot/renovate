@@ -4,12 +4,12 @@ import type { BranchCache, RepoCacheData } from '../repository/types';
 import {
   getCachedBehindBaseResult,
   setCachedBehindBaseResult,
-} from './behind-base-branch-cache';
+} from './behind-base-branch';
 
-jest.mock('../cache/repository');
+jest.mock('../repository');
 const repositoryCache = mocked(_repositoryCache);
 
-describe('util/cache/branch/behind-base-branch-cache', () => {
+describe('util/cache/branch/behind-base-branch', () => {
   let repoCache: RepoCacheData = {};
 
   beforeEach(() => {

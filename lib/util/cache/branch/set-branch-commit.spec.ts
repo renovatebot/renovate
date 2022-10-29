@@ -3,8 +3,8 @@ import * as _repositoryCache from '../repository';
 import type { BranchCache, RepoCacheData } from '../repository/types';
 import { setBranchNewCommit } from './set-branch-commit';
 
-jest.mock('../cache/repository');
-jest.mock('.');
+jest.mock('../repository');
+jest.mock('../../git');
 const repositoryCache = mocked(_repositoryCache);
 
 describe('util/cache/branch/set-branch-commit', () => {
