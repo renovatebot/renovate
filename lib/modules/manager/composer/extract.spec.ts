@@ -30,39 +30,226 @@ describe('modules/manager/composer/extract', () => {
     it('extracts dependencies with no lock file', async () => {
       const res = await extractPackageFile(requirements1, packageFile);
       expect(res).toMatchSnapshot();
-      expect(res?.deps).toHaveLength(32);
+      expect(res?.deps).toHaveLength(33);
     });
 
     it('extracts registryUrls', async () => {
       const res = await extractPackageFile(requirements2, packageFile);
-      expect(res).toMatchSnapshot();
-      expect(res?.registryUrls).toHaveLength(1);
+      expect(res).toEqual({
+        deps: [
+          {
+            currentValue: '*',
+            datasource: 'packagist',
+            depName: 'aws/aws-sdk-php',
+            depType: 'require',
+            registryUrls: ['https://wpackagist.org'],
+          },
+          {
+            currentValue: '^1.10.0',
+            datasource: 'packagist',
+            depName: 'composer/composer',
+            depType: 'require',
+            registryUrls: ['https://wpackagist.org'],
+          },
+          {
+            currentValue: 'dev-trunk',
+            datasource: 'packagist',
+            depName: 'wpackagist-plugin/akismet',
+            depType: 'require',
+            registryUrls: ['https://wpackagist.org'],
+          },
+          {
+            currentValue: '>=7.0.2',
+            datasource: 'packagist',
+            depName: 'wpackagist-plugin/wordpress-seo',
+            depType: 'require',
+            registryUrls: ['https://wpackagist.org'],
+          },
+          {
+            currentValue: '*',
+            datasource: 'packagist',
+            depName: 'wpackagist-theme/hueman',
+            depType: 'require',
+            registryUrls: ['https://wpackagist.org'],
+          },
+        ],
+      });
     });
 
     it('extracts object registryUrls', async () => {
       const res = await extractPackageFile(requirements3, packageFile);
-      expect(res).toMatchSnapshot();
-      expect(res?.registryUrls).toHaveLength(1);
+      expect(res).toEqual({
+        deps: [
+          {
+            currentValue: '>=5.5',
+            datasource: 'github-tags',
+            depName: 'php',
+            depType: 'require',
+            extractVersion: '^php-(?<version>.*)$',
+            packageName: 'php/php-src',
+          },
+          {
+            currentValue: '~1.0.12',
+            datasource: 'packagist',
+            depName: 'composer/installers',
+            depType: 'require',
+            registryUrls: ['https://wpackagist.org'],
+          },
+          {
+            currentValue: '*',
+            datasource: 'packagist',
+            depName: 'johnpbloch/wordpress',
+            depType: 'require',
+            registryUrls: ['https://wpackagist.org'],
+          },
+          {
+            currentValue: '^2.0.1',
+            datasource: 'packagist',
+            depName: 'vlucas/phpdotenv',
+            depType: 'require',
+            registryUrls: ['https://wpackagist.org'],
+          },
+          {
+            currentValue: '^1.0',
+            datasource: 'packagist',
+            depName: 'oscarotero/env',
+            depType: 'require',
+            registryUrls: ['https://wpackagist.org'],
+          },
+          {
+            currentValue: '*',
+            datasource: 'packagist',
+            depName: 'wpackagist-plugin/tinymce-advanced',
+            depType: 'require',
+            registryUrls: ['https://wpackagist.org'],
+          },
+          {
+            currentValue: '*',
+            datasource: 'packagist',
+            depName: 'wpackagist-plugin/acf-content-analysis-for-yoast-seo',
+            depType: 'require',
+            registryUrls: ['https://wpackagist.org'],
+          },
+          {
+            currentValue: '*',
+            datasource: 'packagist',
+            depName: 'wpackagist-plugin/duplicate-post',
+            depType: 'require',
+            registryUrls: ['https://wpackagist.org'],
+          },
+          {
+            currentValue: '*',
+            datasource: 'packagist',
+            depName: 'wpackagist-plugin/simple-image-sizes',
+            depType: 'require',
+            registryUrls: ['https://wpackagist.org'],
+          },
+          {
+            currentValue: '*',
+            datasource: 'packagist',
+            depName: 'wpackagist-plugin/wordpress-seo',
+            depType: 'require',
+            registryUrls: ['https://wpackagist.org'],
+          },
+          {
+            currentValue: '*',
+            datasource: 'packagist',
+            depName: 'wpackagist-plugin/timber-library',
+            depType: 'require',
+            registryUrls: ['https://wpackagist.org'],
+          },
+          {
+            currentValue: '*',
+            datasource: 'packagist',
+            depName: 'wp-sync-db/wp-sync-db',
+            depType: 'require',
+            registryUrls: ['https://wpackagist.org'],
+          },
+          {
+            currentValue: '*',
+            datasource: 'packagist',
+            depName: 'asha23/wp-seed-timber',
+            depType: 'require',
+            registryUrls: ['https://wpackagist.org'],
+          },
+        ],
+        managerData: {
+          composerJsonType: 'project',
+        },
+      });
     });
 
     it('extracts repositories and registryUrls', async () => {
       const res = await extractPackageFile(requirements4, packageFile);
-      expect(res).toMatchSnapshot();
-      expect(res?.registryUrls).toHaveLength(3);
+      expect(res).toEqual({
+        deps: [
+          {
+            currentValue: '*',
+            datasource: 'packagist',
+            depName: 'aws/aws-sdk-php',
+            depType: 'require',
+            registryUrls: [
+              'https://wpackagist.org',
+              'https://gitlab.vendor.com/api/v4/group/2/-/packages/composer',
+              'https://packagist.org',
+            ],
+          },
+          {
+            currentValue: 'dev-trunk',
+            datasource: 'git-tags',
+            depName: 'awesome/vcs',
+            depType: 'require',
+            packageName: 'https://my-vcs.example/my-vcs-repo',
+          },
+          {
+            currentValue: '>=7.0.2',
+            datasource: 'git-tags',
+            depName: 'awesome/git',
+            depType: 'require',
+            packageName: 'https://my-git.example/my-git-repo',
+          },
+        ],
+      });
     });
 
     it('extracts object repositories and registryUrls with lock file', async () => {
       fs.readLocalFile.mockResolvedValue(requirements5Lock);
       const res = await extractPackageFile(requirements5, packageFile);
-      expect(res).toMatchSnapshot();
-      expect(res?.registryUrls).toHaveLength(2);
+      expect(res).toEqual({
+        deps: [
+          {
+            currentValue: '*',
+            datasource: 'packagist',
+            depName: 'aws/aws-sdk-php',
+            depType: 'require',
+            registryUrls: ['https://wpackagist.org', 'https://packagist.org'],
+          },
+          {
+            currentValue: 'dev-trunk',
+            datasource: 'git-tags',
+            depName: 'awesome/vcs',
+            depType: 'require',
+            lockedVersion: '1.1.0',
+            packageName: 'https://my-vcs.example/my-vcs-repo',
+          },
+          {
+            currentValue: '>=7.0.2',
+            datasource: 'git-tags',
+            depName: 'awesome/git',
+            depType: 'require',
+            lockedVersion: '1.2.0',
+            packageName: 'git@my-git.example:my-git-repo',
+          },
+        ],
+        lockFiles: ['composer.lock'],
+      });
     });
 
     it('extracts dependencies with lock file', async () => {
       fs.readLocalFile.mockResolvedValue('some content');
       const res = await extractPackageFile(requirements1, packageFile);
       expect(res).toMatchSnapshot();
-      expect(res?.deps).toHaveLength(32);
+      expect(res?.deps).toHaveLength(33);
     });
   });
 });

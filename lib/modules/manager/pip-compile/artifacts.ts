@@ -77,6 +77,11 @@ export function constructPipCompileCmd(
           );
         }
         args.push(`--output-file=${file}`);
+      } else if (argument.startsWith('--resolver=')) {
+        const value = extractResolver(argument);
+        if (value) {
+          args.push(`--resolver=${value}`);
+        }
       } else if (argument.startsWith('--')) {
         logger.trace(
           { argument },
@@ -167,4 +172,17 @@ export async function updateArtifacts({
       },
     ];
   }
+}
+
+export function extractResolver(argument: string): string | null {
+  const value = argument.replace('--resolver=', '');
+  if (['backtracking', 'legacy'].includes(value)) {
+    return value;
+  }
+
+  logger.warn(
+    { argument },
+    'pip-compile was previously executed with an unexpected `--resolver` value'
+  );
+  return null;
 }
