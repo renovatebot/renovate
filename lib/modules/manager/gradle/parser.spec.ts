@@ -345,6 +345,7 @@ describe('modules/manager/gradle/parser', () => {
           ${'some = "foo"; other = "bar1"'} | ${'dependencySet(group: some, version: "1.2.3") { entry(other); entry "bar2" }'}                    | ${validOutput}
           ${'some = "foo"; other = "bar1"'} | ${'dependencySet(group: "${some}", version: "1.2.3") { entry "${other}"; entry "bar2" }'}           | ${validOutput}
           ${'some = "foo"; other = "bar1"'} | ${'dependencySet(group: "${some}", version: "1.2.3") { entry("${other}"); entry "bar2" }'}          | ${validOutput}
+          ${''}                             | ${'dependencySet(group = "foo", version = "1.2.3") { entry "bar1"; entry "bar2" }'}                 | ${validOutput}
         `('$def | $str', ({ def, str, output }) => {
           const { deps } = parseGradle([def, str].join('\n'));
           expect(deps).toMatchObject(output);
