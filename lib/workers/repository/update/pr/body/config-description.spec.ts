@@ -89,12 +89,6 @@ describe('workers/repository/update/pr/body/config-description', () => {
       expect(res).toContain(`this update`);
     });
 
-    it('renders failed automerge', async () => {
-      checks.resolveBranchStatus.mockResolvedValueOnce(BranchStatus.red);
-      const res = await getPrConfigDescription({ ...config, automerge: true });
-      expect(res).toContain(`Disabled due to failing status checks`);
-    });
-
     it('renders automerge', async () => {
       checks.resolveBranchStatus.mockResolvedValueOnce(BranchStatus.green);
       const res = await getPrConfigDescription({ ...config, automerge: true });

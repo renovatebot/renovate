@@ -18,15 +18,7 @@ export async function getPrConfigDescription(
   prBody += '\n\n';
   prBody += emojify(':vertical_traffic_light: **Automerge**: ');
   if (config.automerge) {
-    const branchStatus = await resolveBranchStatus(
-      config.branchName,
-      config.ignoreTests
-    );
-    if (branchStatus === BranchStatus.red) {
-      prBody += 'Disabled due to failing status checks.';
-    } else {
-      prBody += 'Enabled.';
-    }
+    prBody += 'Enabled.';
   } else {
     prBody +=
       'Disabled by config. Please merge this manually once you are satisfied.';
