@@ -1,7 +1,7 @@
-import { logger } from '../../logger';
-import { getCache } from '../cache/repository';
-import type { BranchCache } from '../cache/repository/types';
-import { getBranchCommit } from '.';
+import { logger } from '../../../logger';
+import { getBranchCommit } from '../../git';
+import { getCache } from '../repository';
+import type { BranchCache } from '../repository/types';
 
 /**
  * Called when a new commit is added to branch
@@ -28,9 +28,10 @@ export function setBranchNewCommit(
 
   const baseBranchSha = getBranchCommit(baseBranch);
 
-  branch.sha = commitSha;
   branch.baseBranchSha = baseBranchSha;
   branch.isBehindBase = false;
+  branch.isConflicted = false;
   branch.isModified = false;
   branch.parentSha = baseBranchSha;
+  branch.sha = commitSha;
 }

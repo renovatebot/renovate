@@ -28,24 +28,22 @@ import { api as semverCoerced } from '../../modules/versioning/semver-coerced';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import type { GitProtocol } from '../../types/git';
 import { Limit, incLimitedValue } from '../../workers/global/limits';
+import {
+  deleteCachedBranchParentShaResult,
+  getCachedBehindBaseResult,
+  getCachedConflictResult,
+  getCachedModifiedResult,
+  setCachedConflictResult,
+  setCachedModifiedResult,
+} from '../cache/branch';
 import { newlineRegex, regEx } from '../regex';
 import { parseGitAuthor } from './author';
-import { getCachedBehindBaseResult } from './behind-base-branch-cache';
 import { getNoVerify, simpleGitConfig } from './config';
-import {
-  getCachedConflictResult,
-  setCachedConflictResult,
-} from './conflicts-cache';
 import {
   bulkChangesDisallowed,
   checkForPlatformFailure,
   handleCommitError,
 } from './error';
-import {
-  getCachedModifiedResult,
-  setCachedModifiedResult,
-} from './modified-cache';
-import { deleteCachedBranchParentShaResult } from './parent-sha-cache';
 import { configSigningKey, writePrivateKey } from './private-key';
 import type {
   CommitFilesConfig,
@@ -684,10 +682,10 @@ export async function isBranchConflicted(
   }
 
   const isConflicted = getCachedConflictResult(
-    baseBranch,
-    baseBranchSha,
     branch,
-    branchSha
+    branchSha,
+    baseBranch,
+    baseBranchSha
   );
   if (is.boolean(isConflicted)) {
     logger.debug(
@@ -732,7 +730,7 @@ export async function isBranchConflicted(
     }
   }
 
-  setCachedConflictResult(baseBranch, baseBranchSha, branch, branchSha, result);
+  setCachedConflictResult(branch, result);
   logger.debug(`branch.isConflicted(): ${result}`);
   return result;
 }
