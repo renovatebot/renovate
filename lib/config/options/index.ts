@@ -788,6 +788,7 @@ const options: RenovateOptions[] = [
     description:
       'A list of package managers to enable. If defined, then all managers not on the list are disabled.',
     type: 'array',
+    mergeable: false,
     stage: 'repository',
   },
   {
