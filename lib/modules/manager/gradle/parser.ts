@@ -6,7 +6,6 @@ import {
   REGISTRY_URLS,
   cleanupTempVars,
   coalesceVariable,
-  loadFromTokenMap,
   storeInTokenMap,
   storeVarToken,
   stripReservedPrefixFromKeyTokens,
@@ -520,39 +519,26 @@ const qRepositoriesWithScope = q.alt<Ctx>(
 
 const qVersionCatalogVersion = q
   .op<Ctx>('.')
-  .sym(regEx(/^(?:versionRef|version)$/), storeVarToken)
-  .handler((ctx) => storeInTokenMap(ctx, 'versionType'))
-  .tree({
-    maxDepth: 1,
-    maxMatches: 1,
-    startsWith: '(',
-    endsWith: ')',
-    search: q
-      .begin<Ctx>()
-      .alt(
-        // library("android-gradle", "com.android.tools.build", "gradle").version(agp)
-        qVariableAccessIdentifier,
-        q.str<Ctx>((ctx, node) => {
-          if (loadFromTokenMap(ctx, 'versionType')[0].value === 'versionRef') {
-            // library("kotlin-reflect", "org.jetbrains.kotlin", "kotlin-reflect").versionRef("kotlin")
-            const nodeTransformed: lexer.SymbolToken = {
-              ...node,
-              type: 'symbol',
-            };
-            storeVarToken(ctx, nodeTransformed);
-          } else {
-            // library("foobar", "foo", "bar").version("1.2.3")
-            storeVarToken(ctx, node);
-          }
-
-          return ctx;
-        }),
-        // library("android-gradle", "com.android.tools.build", "gradle").version("${agp}")
-        qTemplateString
-      )
-      .handler((ctx) => storeInTokenMap(ctx, 'version'))
-      .end(),
-  });
+  .alt(
+    // library("kotlin-reflect", "org.jetbrains.kotlin", "kotlin-reflect").versionRef("kotlin")
+    q.sym<Ctx>('versionRef').tree({
+      maxDepth: 1,
+      startsWith: '(',
+      endsWith: ')',
+      search: q.begin<Ctx>().join(qStringValueAsSymbol).end(),
+    }),
+    // library("android-gradle", "com.android.tools.build", "gradle").version("${agp}")
+    q.sym<Ctx>('version').tree({
+      maxDepth: 1,
+      startsWith: '(',
+      endsWith: ')',
+      search: q
+        .begin<Ctx>()
+        .alt(qTemplateString, qVariableAccessIdentifier)
+        .end(),
+    })
+  )
+  .handler((ctx) => storeInTokenMap(ctx, 'version'));
 
 // library("foo.bar", "foo", "bar")
 const qVersionCatalogDependencies = q
