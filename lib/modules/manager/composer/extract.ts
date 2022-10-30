@@ -87,7 +87,7 @@ export async function extractPackageFile(
   try {
     composerJson = JSON.parse(content);
   } catch (err) {
-    logger.debug({ fileName }, 'Invalid JSON');
+    logger.debug(`Invalid JSON in ${fileName}`);
     return null;
   }
   const repositories: Record<string, Repo> = {};
@@ -99,7 +99,7 @@ export async function extractPackageFile(
   const lockContents = await readLocalFile(lockfilePath, 'utf8');
   let lockParsed: ComposerLock | undefined;
   if (lockContents) {
-    logger.debug({ packageFile: fileName }, 'Found composer lock file');
+    logger.debug(`Found composer lock file ${fileName}`);
     res.lockFiles = [lockfilePath];
     try {
       lockParsed = JSON.parse(lockContents) as ComposerLock;
@@ -111,9 +111,6 @@ export async function extractPackageFile(
   // handle composer.json repositories
   if (composerJson.repositories) {
     parseRepositories(composerJson.repositories, repositories, registryUrls);
-  }
-  if (registryUrls.length !== 0) {
-    res.registryUrls = registryUrls;
   }
 
   const deps: PackageDependency[] = [];
@@ -172,6 +169,14 @@ export async function extractPackageFile(
               if (lockedDep && semverComposer.isVersion(lockedDep.version)) {
                 dep.lockedVersion = lockedDep.version.replace(regEx(/^v/i), '');
               }
+            }
+            if (
+              !dep.skipReason &&
+              (!repositories[depName] ||
+                repositories[depName].type === 'composer') &&
+              registryUrls.length !== 0
+            ) {
+              dep.registryUrls = registryUrls;
             }
             deps.push(dep);
           }
