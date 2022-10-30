@@ -1,7 +1,9 @@
 import { Fixtures } from '../../../../test/fixtures';
 import * as httpMock from '../../../../test/http-mock';
 import { mocked } from '../../../../test/util';
+import { PlatformId } from '../../../constants';
 import * as _hostRules from '../../../util/host-rules';
+import { GitTagsDatasource } from '../git-tags';
 import { GithubTagsDatasource } from '../github-tags';
 import { GitlabTagsDatasource } from '../gitlab-tags';
 import { BaseGoDatasource } from './base';
@@ -98,6 +100,7 @@ describe('modules/datasource/go/base', () => {
       });
 
       it('supports GitHub EE deps', async () => {
+        hostRules.hostType.mockReturnValue('github');
         httpMock
           .scope('https://git.enterprise.com')
           .get('/example/module?go-get=1')
@@ -202,7 +205,7 @@ describe('modules/datasource/go/base', () => {
       });
 
       it('supports GitLab EE deps', async () => {
-        hostRules.find.mockReturnValue({ token: 'some-token' });
+        hostRules.hostType.mockReturnValue(PlatformId.Gitlab);
         httpMock
           .scope('https://my.custom.domain')
           .get('/golang/myrepo?go-get=1')
@@ -220,7 +223,7 @@ describe('modules/datasource/go/base', () => {
       });
 
       it('supports GitLab EE deps in subgroup', async () => {
-        hostRules.find.mockReturnValue({ token: 'some-token' });
+        hostRules.hostType.mockReturnValue(PlatformId.Gitlab);
         httpMock
           .scope('https://my.custom.domain')
           .get('/golang/subgroup/myrepo?go-get=1')
@@ -238,7 +241,7 @@ describe('modules/datasource/go/base', () => {
       });
 
       it('supports GitLab EE deps in subgroup with version', async () => {
-        hostRules.find.mockReturnValue({ token: 'some-token' });
+        hostRules.hostType.mockReturnValue(PlatformId.Gitlab);
         httpMock
           .scope('https://my.custom.domain')
           .get('/golang/subgroup/myrepo/v2?go-get=1')
@@ -256,7 +259,7 @@ describe('modules/datasource/go/base', () => {
       });
 
       it('supports GitLab EE deps in private subgroup with vcs indicator', async () => {
-        hostRules.find.mockReturnValue({ token: 'some-token' });
+        hostRules.hostType.mockReturnValue(PlatformId.Gitlab);
         httpMock
           .scope('https://my.custom.domain')
           .get('/golang/subgroup/myrepo.git/v2?go-get=1')
@@ -274,7 +277,7 @@ describe('modules/datasource/go/base', () => {
       });
 
       it('supports GitLab EE monorepo deps in subgroup', async () => {
-        hostRules.find.mockReturnValue({ token: 'some-token' });
+        hostRules.hostType.mockReturnValue(PlatformId.Gitlab);
         httpMock
           .scope('https://my.custom.domain')
           .get('/golang/subgroup/myrepo/monorepo?go-get=1')
@@ -302,7 +305,7 @@ describe('modules/datasource/go/base', () => {
         const res = await BaseGoDatasource.getDatasource('fyne.io/fyne');
 
         expect(res).toEqual({
-          datasource: 'github-tags',
+          datasource: GithubTagsDatasource.id,
           registryUrl: 'https://github.com',
           packageName: 'fyne-io/fyne',
         });
@@ -319,7 +322,7 @@ describe('modules/datasource/go/base', () => {
         const res = await BaseGoDatasource.getDatasource('fyne.io/fyne');
 
         expect(res).toEqual({
-          datasource: 'github-tags',
+          datasource: GithubTagsDatasource.id,
           registryUrl: 'https://github.com',
           packageName: 'fyne-io/fyne',
         });
@@ -338,9 +341,27 @@ describe('modules/datasource/go/base', () => {
         );
 
         expect(res).toEqual({
-          datasource: 'gitlab-tags',
+          datasource: GitlabTagsDatasource.id,
           registryUrl: 'https://gitlab.com',
           packageName: 'golang/myrepo',
+        });
+      });
+
+      it('handles uncommon imports', async () => {
+        const meta =
+          '<meta name="go-import" content="example.com/uncommon git ssh://git.example.com/uncommon">';
+        httpMock
+          .scope('https://example.com')
+          .get('/uncommon?go-get=1')
+          .reply(200, meta);
+
+        const res = await BaseGoDatasource.getDatasource(
+          'example.com/uncommon'
+        );
+
+        expect(res).toEqual({
+          datasource: GitTagsDatasource.id,
+          packageName: 'ssh://git.example.com/uncommon',
         });
       });
     });

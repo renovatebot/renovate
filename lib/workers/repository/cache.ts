@@ -2,6 +2,7 @@
 
 import { logger } from '../../logger';
 import { platform } from '../../modules/platform';
+import { getCachedBranchParentShaResult } from '../../util/cache/branch';
 import { getCache } from '../../util/cache/repository';
 import type {
   BranchCache,
@@ -9,7 +10,8 @@ import type {
 } from '../../util/cache/repository/types';
 import {
   getBranchCommit,
-  getBranchParentSha,
+  isBranchBehindBase,
+  isBranchConflicted,
   isBranchModified,
 } from '../../util/git';
 import type { BranchConfig, BranchUpgradeConfig } from '../types';
@@ -47,37 +49,42 @@ function generateBranchUpgradeCache(
 async function generateBranchCache(
   branch: BranchConfig
 ): Promise<BranchCache | null> {
-  const { branchName } = branch;
+  const { baseBranch, branchName } = branch;
   try {
     const sha = getBranchCommit(branchName) ?? null;
+    const baseBranchSha = getBranchCommit(baseBranch);
     let prNo = null;
     let parentSha = null;
+    let isModified = false;
+    let isBehindBase = false;
+    let isConflicted = false;
     if (sha) {
-      parentSha = await getBranchParentSha(branchName);
+      parentSha = getCachedBranchParentShaResult(branchName, sha);
       const branchPr = await platform.getBranchPr(branchName);
       if (branchPr) {
         prNo = branchPr.number;
       }
+      isModified = await isBranchModified(branchName);
+      isBehindBase = await isBranchBehindBase(branchName, baseBranch);
+      isConflicted = await isBranchConflicted(baseBranch, branchName);
     }
     const automerge = !!branch.automerge;
-    let isModified = false;
-    if (sha) {
-      try {
-        isModified = await isBranchModified(branchName);
-      } catch (err) /* istanbul ignore next */ {
-        // Do nothing
-      }
-    }
     const upgrades: BranchUpgradeCache[] = branch.upgrades
       ? branch.upgrades.map(generateBranchUpgradeCache)
       : [];
+    const branchFingerprint = branch.branchFingerprint;
     return {
+      automerge,
+      baseBranchSha,
+      baseBranch,
+      branchFingerprint,
       branchName,
-      sha,
+      isBehindBase,
+      isConflicted,
+      isModified,
       parentSha,
       prNo,
-      automerge,
-      isModified,
+      sha,
       upgrades,
     };
   } catch (error) {

@@ -1,9 +1,54 @@
 import URL from 'url';
 import { logger } from '../../logger';
+import { sortNumeric } from '../../util/array';
 import * as memCache from '../../util/cache/memory';
 import type { RequestStats } from '../../util/http/types';
 
+interface CacheStats {
+  count: number;
+  avgMs?: number;
+  medianMs?: number;
+  maxMs?: number;
+}
+
 export function printRequestStats(): void {
+  const packageCacheGets = (
+    memCache.get<number[]>('package-cache-gets') ?? []
+  ).sort(sortNumeric);
+  const packageCacheSets = (
+    memCache.get<number[]>('package-cache-sets') ?? []
+  ).sort(sortNumeric);
+  const packageCacheStats: Record<string, CacheStats> = {
+    get: {
+      count: packageCacheGets.length,
+    },
+    set: {
+      count: packageCacheSets.length,
+    },
+  };
+  if (packageCacheGets.length) {
+    packageCacheStats.get.avgMs = Math.round(
+      packageCacheGets.reduce((a, b) => a + b, 0) / packageCacheGets.length
+    );
+    if (packageCacheGets.length > 1) {
+      packageCacheStats.get.medianMs =
+        packageCacheGets[Math.round(packageCacheGets.length / 2) - 1];
+      packageCacheStats.get.maxMs =
+        packageCacheGets[packageCacheGets.length - 1];
+    }
+  }
+  if (packageCacheSets.length) {
+    packageCacheStats.set.avgMs = Math.round(
+      packageCacheSets.reduce((a, b) => a + b, 0) / packageCacheSets.length
+    );
+    if (packageCacheSets.length > 1) {
+      packageCacheStats.set.medianMs =
+        packageCacheSets[Math.round(packageCacheSets.length / 2) - 1];
+      packageCacheStats.set.maxMs =
+        packageCacheSets[packageCacheSets.length - 1];
+    }
+  }
+  logger.debug(packageCacheStats, 'Package cache statistics');
   const httpRequests = memCache.get<RequestStats[]>('http-requests');
   // istanbul ignore next
   if (!httpRequests) {

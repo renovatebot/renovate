@@ -59,6 +59,7 @@ function getGitEnvironmentVariables(): NodeJS.ProcessEnv {
     PlatformId.Azure,
     PlatformId.Bitbucket,
     PlatformId.BitbucketServer,
+    PlatformId.CodeCommit,
     PlatformId.Gitea,
     PlatformId.Github,
     PlatformId.Gitlab,
@@ -239,6 +240,9 @@ export async function updateArtifacts({
       );
     }
   }
+  const goConstraints =
+    config.constraints?.go ?? (await getGoConstraints(goModFileName));
+
   try {
     await writeLocalFile(goModFileName, massagedGoMod);
 
@@ -253,13 +257,13 @@ export async function updateArtifacts({
         GONOSUMDB: process.env.GONOSUMDB,
         GOSUMDB: process.env.GOSUMDB,
         GOINSECURE: process.env.GOINSECURE,
-        GOFLAGS: useModcacherw(config.constraints?.go) ? '-modcacherw' : null,
+        GOFLAGS: useModcacherw(goConstraints) ? '-modcacherw' : null,
         CGO_ENABLED: GlobalConfig.get('binarySource') === 'docker' ? '0' : null,
         ...getGitEnvironmentVariables(),
       },
       docker: {
         image: 'go',
-        tagConstraint: config.constraints?.go,
+        tagConstraint: goConstraints,
         tagScheme: 'npm',
       },
     };
@@ -267,7 +271,7 @@ export async function updateArtifacts({
     const execCommands: string[] = [];
 
     let args = 'get -d -t ./...';
-    logger.debug({ cmd, args }, 'go get command included');
+    logger.trace({ cmd, args }, 'go get command included');
     execCommands.push(`${cmd} ${args}`);
 
     // Update import paths on major updates above v1
@@ -288,7 +292,7 @@ export async function updateArtifacts({
       !config.postUpdateOptions?.includes('gomodUpdateImportPaths') &&
       config.updateType === 'major';
     if (mustSkipGoModTidy) {
-      logger.debug({ cmd, args }, 'go mod tidy command skipped');
+      logger.debug('go mod tidy command skipped');
     }
 
     const tidyOpts = config.postUpdateOptions?.includes('gomodTidy1.17')
@@ -301,17 +305,17 @@ export async function updateArtifacts({
         (config.updateType === 'major' && isImportPathUpdateRequired));
     if (isGoModTidyRequired) {
       args = 'mod tidy' + tidyOpts;
-      logger.debug({ cmd, args }, 'go mod tidy command included');
+      logger.debug('go mod tidy command included');
       execCommands.push(`${cmd} ${args}`);
     }
 
     if (useVendor) {
       args = 'mod vendor';
-      logger.debug({ cmd, args }, 'go mod vendor command included');
+      logger.debug('go mod tidy command included');
       execCommands.push(`${cmd} ${args}`);
       if (isGoModTidyRequired) {
         args = 'mod tidy' + tidyOpts;
-        logger.debug({ cmd, args }, 'go mod tidy command included');
+        logger.debug('go mod tidy command included');
         execCommands.push(`${cmd} ${args}`);
       }
     }
@@ -319,7 +323,7 @@ export async function updateArtifacts({
     // We tidy one more time as a solution for #6795
     if (isGoModTidyRequired) {
       args = 'mod tidy' + tidyOpts;
-      logger.debug({ cmd, args }, 'additional go mod tidy command included');
+      logger.debug('go mod tidy command included');
       execCommands.push(`${cmd} ${args}`);
     }
 
@@ -409,4 +413,19 @@ export async function updateArtifacts({
       },
     ];
   }
+}
+
+async function getGoConstraints(
+  goModFileName: string
+): Promise<string | undefined> {
+  const content = (await readLocalFile(goModFileName, 'utf8')) ?? null;
+  if (!content) {
+    return undefined;
+  }
+  const re = regEx(/^go\s*(?<gover>\d+\.\d+)$/m);
+  const match = re.exec(content);
+  if (!match?.groups?.gover) {
+    return undefined;
+  }
+  return '^' + match.groups.gover;
 }

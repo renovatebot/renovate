@@ -259,6 +259,23 @@ describe('modules/manager/gomod/update', () => {
       );
     });
 
+    it('handles +incompatible tag without duplicating it', () => {
+      const upgrade = {
+        depName: 'github.com/Azure/azure-sdk-for-go',
+        managerData: { lineNumber: 8 },
+        newValue: 'v26.0.0+incompatible',
+        depType: 'require',
+      };
+      const res = updateDependency({ fileContent: gomod1, upgrade });
+      expect(res).not.toEqual(gomod1);
+      expect(res).not.toContain(
+        'github.com/Azure/azure-sdk-for-go v26.0.0+incompatible+incompatible'
+      );
+      expect(res).toContain(
+        'github.com/Azure/azure-sdk-for-go v26.0.0+incompatible'
+      );
+    });
+
     it('handles replace line with minor version update', () => {
       const upgrade = {
         depName: 'github.com/pravesht/gocql',

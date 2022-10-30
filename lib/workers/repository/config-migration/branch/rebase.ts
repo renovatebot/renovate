@@ -3,8 +3,8 @@ import type { RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
 import { commitAndPush } from '../../../../modules/platform/commit';
 import {
+  checkoutBranch,
   getFile,
-  isBranchBehindBase,
   isBranchModified,
 } from '../../../../util/git';
 import { getMigrationBranchName } from '../common';
@@ -24,10 +24,7 @@ export async function rebaseMigrationBranch(
   const configFileName = migratedConfigData.filename;
   const contents = migratedConfigData.content;
   const existingContents = await getFile(configFileName, branchName);
-  if (
-    contents === existingContents &&
-    !(await isBranchBehindBase(branchName))
-  ) {
+  if (contents === existingContents) {
     logger.debug('Migration branch is up to date');
     return null;
   }
@@ -44,6 +41,7 @@ export async function rebaseMigrationBranch(
   );
   const commitMessage = commitMessageFactory.getCommitMessage();
 
+  await checkoutBranch(config.defaultBranch!);
   return commitAndPush({
     branchName,
     files: [

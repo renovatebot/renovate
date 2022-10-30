@@ -1,11 +1,9 @@
+import { join } from 'upath';
 import { logger } from '../../../logger';
-import { regEx } from '../../../util/regex';
+import { coerceArray } from '../../../util/array';
+import { parseUrl } from '../../../util/url';
 import type { PackageDependency, PackageFile } from '../types';
 import type { Dependency, JsonnetFile } from './types';
-
-const gitUrl = regEx(
-  /(ssh:\/\/git@|https:\/\/)([\w.]+)\/([\w:/\-~]*)\/(?<depName>[\w:/-]+)(\.git)?/
-);
 
 export function extractPackageFile(
   content: string,
@@ -22,11 +20,11 @@ export function extractPackageFile(
   try {
     jsonnetFile = JSON.parse(content) as JsonnetFile;
   } catch (err) {
-    logger.debug({ packageFile }, 'Invalid JSON');
+    logger.debug(`Invalid JSON ${packageFile}`);
     return null;
   }
 
-  for (const dependency of jsonnetFile.dependencies ?? []) {
+  for (const dependency of coerceArray(jsonnetFile.dependencies)) {
     const dep = extractDependency(dependency);
     if (dep) {
       deps.push(dep);
@@ -45,11 +43,20 @@ function extractDependency(dependency: Dependency): PackageDependency | null {
     return null;
   }
 
-  const match = gitUrl.exec(dependency.source.git.remote);
+  const gitRemote = parseUrl(dependency.source.git.remote);
+  if (gitRemote === null) {
+    logger.debug({ dependency }, 'Invalid Git remote URL');
+    return null;
+  }
+
+  const depName = join(
+    gitRemote.host,
+    gitRemote.pathname.replace(/\.git$/, ''),
+    dependency.source.git.subdir
+  );
 
   return {
-    depName:
-      dependency.name ?? match?.groups?.depName ?? dependency.source.git.remote,
+    depName,
     packageName: dependency.source.git.remote,
     currentValue: dependency.version,
     managerData: { subdir: dependency.source.git.subdir },

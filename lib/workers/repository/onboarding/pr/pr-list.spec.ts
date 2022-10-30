@@ -24,11 +24,12 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
     });
 
     it('has special lock file maintenance description', () => {
-      const branches = [
+      const branches: BranchConfig[] = [
         {
           prTitle: 'Lock file maintenance',
           schedule: ['before 5am'],
           branchName: 'renovate/lock-file-maintenance',
+          baseBranch: 'base',
           manager: 'some-manager',
           upgrades: [
             {
@@ -50,6 +51,7 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
 
           - Schedule: ["before 5am"]
           - Branch name: \`renovate/lock-file-maintenance\`
+          - Merge into: \`base\`
           - Regenerate lock files to use latest dependency versions
 
         </details>
@@ -59,10 +61,10 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
     });
 
     it('handles multiple', () => {
-      const branches = [
+      const branches: BranchConfig[] = [
         {
           prTitle: 'Pin dependencies',
-          baseBranch: 'some-other',
+          baseBranch: 'base',
           branchName: 'renovate/pin-dependencies',
           manager: 'some-manager',
           upgrades: [
@@ -85,6 +87,7 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
         {
           prTitle: 'Update a to v2',
           branchName: 'renovate/a-2.x',
+          baseBranch: '', // handles case where baseBranch name is falsy
           manager: 'some-manager',
           upgrades: [
             {
@@ -111,7 +114,7 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
         <summary>Pin dependencies</summary>
 
           - Branch name: \`renovate/pin-dependencies\`
-          - Merge into: \`some-other\`
+          - Merge into: \`base\`
           - Pin [a](https://a) to \`1.1.0\`
           - Pin b to \`1.5.3\`
 

@@ -230,6 +230,16 @@ const options: RenovateOptions[] = [
     experimental: true,
   },
   {
+    name: 'repositoryCacheType',
+    description:
+      'Set the type of renovate repository cache if repositoryCache is not disabled.',
+    globalOnly: true,
+    type: 'string',
+    stage: 'repository',
+    default: 'local',
+    experimental: true,
+  },
+  {
     name: 'force',
     description:
       'Any configuration set in this object will force override existing settings.',
@@ -279,7 +289,7 @@ const options: RenovateOptions[] = [
     globalOnly: true,
     type: 'string',
     allowedValues: ['global', 'docker', 'install', 'hermit'],
-    default: 'global',
+    default: 'install',
   },
   {
     name: 'redisUrl',
@@ -301,6 +311,13 @@ const options: RenovateOptions[] = [
     name: 'cacheDir',
     description:
       'The directory where Renovate stores its cache. If left empty, Renovate creates a subdirectory within the `baseDir`.',
+    globalOnly: true,
+    type: 'string',
+  },
+  {
+    name: 'containerbaseDir',
+    description:
+      'The directory where Renovate stores its containerbase cache. If left empty, Renovate creates a subdirectory within the `cacheDir`.',
     globalOnly: true,
     type: 'string',
   },
@@ -365,6 +382,7 @@ const options: RenovateOptions[] = [
     globalOnly: true,
     type: 'string',
     default: null,
+    stage: 'global',
   },
   // Onboarding
   {
@@ -392,22 +410,13 @@ const options: RenovateOptions[] = [
     default: false,
   },
   {
-    name: 'forkMode',
-    description:
-      'Set to `true` to fork the source repository and create branches there instead.',
-    stage: 'repository',
-    type: 'boolean',
-    default: false,
-    globalOnly: true,
-  },
-  {
     name: 'forkToken',
-    description:
-      'Will be used on GitHub when `forkMode` is set to `true` to clone the repositories.',
+    description: 'Set a personal access token here to enable "fork mode".',
     stage: 'repository',
     type: 'string',
-    default: '',
     globalOnly: true,
+    supportedPlatforms: ['github'],
+    experimental: true,
   },
   {
     name: 'githubTokenWarn',
@@ -616,9 +625,9 @@ const options: RenovateOptions[] = [
   {
     name: 'ignoreScripts',
     description:
-      'Set this to `true` if `allowScripts=true` but you wish to skip running scripts when updating lock files.',
+      'Set this to `false` if `allowScripts=true` and you wish to run scripts when updating lock files.',
     type: 'boolean',
-    default: false,
+    default: true,
     supportedManagers: ['npm', 'composer'],
   },
   {
@@ -705,7 +714,9 @@ const options: RenovateOptions[] = [
     name: 'autodiscoverFilter',
     description: 'Filter the list of autodiscovered repositories.',
     stage: 'global',
-    type: 'string',
+    type: 'array',
+    subType: 'string',
+    allowString: true,
     default: null,
     globalOnly: true,
   },
@@ -777,6 +788,7 @@ const options: RenovateOptions[] = [
     description:
       'A list of package managers to enable. If defined, then all managers not on the list are disabled.',
     type: 'array',
+    mergeable: false,
     stage: 'repository',
   },
   {
@@ -832,6 +844,7 @@ const options: RenovateOptions[] = [
       'kubernetes',
       'ansible',
       'droneci',
+      'woodpecker',
     ],
   },
   {
@@ -1061,6 +1074,17 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
+    name: 'matchCurrentValue',
+    description:
+      'A regex to match against the raw currentValue string of a dependency. Valid only within a `packageRules` object.',
+    type: 'string',
+    stage: 'package',
+    parent: 'packageRules',
+    mergeable: true,
+    cli: false,
+    env: false,
+  },
+  {
     name: 'matchCurrentVersion',
     description:
       'A version or range of versions to match against the current version of a package. Valid only within a `packageRules` object.',
@@ -1176,6 +1200,16 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
+    name: 'customChangelogUrl',
+    description:
+      'If set, Renovate will use this url to fetch changelogs for a matched dependency. Valid only within a `packageRules` object.',
+    type: 'string',
+    stage: 'pr',
+    parent: 'packageRules',
+    cli: false,
+    env: false,
+  },
+  {
     name: 'pinDigests',
     description: 'Whether to add digests to Dockerfile source images.',
     type: 'boolean',
@@ -1266,7 +1300,7 @@ const options: RenovateOptions[] = [
     description: 'Bump the version in the package file being updated.',
     type: 'string',
     allowedValues: ['major', 'minor', 'patch', 'prerelease'],
-    supportedManagers: ['helmv3', 'npm', 'maven', 'sbt'],
+    supportedManagers: ['helmv3', 'npm', 'nuget', 'maven', 'sbt'],
   },
   // Major/Minor/Patch
   {
@@ -1453,7 +1487,7 @@ const options: RenovateOptions[] = [
     description: 'When and how to filter based on internal checks.',
     type: 'string',
     allowedValues: ['strict', 'flexible', 'none'],
-    default: 'none',
+    default: 'strict',
   },
   {
     name: 'prCreation',
@@ -1664,7 +1698,7 @@ const options: RenovateOptions[] = [
       'Pull Request body template. Controls which sections are rendered in the body.',
     type: 'string',
     default:
-      '{{{header}}}{{{table}}}{{{notes}}}{{{changelogs}}}{{{configDescription}}}{{{controls}}}{{{footer}}}',
+      '{{{header}}}{{{table}}}{{{warnings}}}{{{notes}}}{{{changelogs}}}{{{configDescription}}}{{{controls}}}{{{footer}}}',
     cli: false,
   },
   {
@@ -1868,6 +1902,7 @@ const options: RenovateOptions[] = [
     default: [],
     allowedValues: [
       'bundlerConservative',
+      'helmUpdateSubChartArchives',
       'gomodMassage',
       'gomodUpdateImportPaths',
       'gomodTidy',
@@ -2067,15 +2102,47 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
+    name: 'maxRequestsPerSecond',
+    description: 'Limit requests rate per host.',
+    type: 'integer',
+    stage: 'repository',
+    parent: 'hostRules',
+    default: 0,
+    cli: false,
+    env: false,
+  },
+  {
     name: 'authType',
     description:
-      'Authentication type for http header. e.g. `"Bearer"` or `"Basic"`. Use `"Token-Only"` to use only the token without an authorization type.',
+      'Authentication type for HTTP header. e.g. `"Bearer"` or `"Basic"`. Use `"Token-Only"` to use only the token without an authorization type.',
     type: 'string',
     stage: 'repository',
     parent: 'hostRules',
     default: 'Bearer',
     cli: false,
     env: false,
+  },
+  {
+    name: 'dnsCache',
+    description: 'Enable got DNS cache.',
+    type: 'boolean',
+    stage: 'repository',
+    parent: 'hostRules',
+    default: false,
+    cli: false,
+    env: false,
+    experimental: true,
+  },
+  {
+    name: 'keepalive',
+    description: 'Enable HTTP keepalives for hosts.',
+    type: 'boolean',
+    stage: 'repository',
+    parent: 'hostRules',
+    default: false,
+    cli: false,
+    env: false,
+    experimental: true,
   },
   {
     name: 'prBodyDefinitions',
@@ -2351,6 +2418,12 @@ const options: RenovateOptions[] = [
     type: 'boolean',
     default: false,
     supportedPlatforms: ['github'],
+  },
+  {
+    name: 'branchNameStrict',
+    description: `Whether to be strict about the use of special characters within the branch name.`,
+    type: 'boolean',
+    default: false,
   },
 ];
 

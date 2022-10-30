@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import {
   BITBUCKET_API_USING_HOST_TYPES,
   GITHUB_API_USING_HOST_TYPES,
@@ -8,9 +9,11 @@ import { logger } from '../../logger';
 import { hasProxy } from '../../proxy';
 import type { HostRule } from '../../types';
 import * as hostRules from '../host-rules';
+import { dnsLookup } from './dns';
+import { keepaliveAgents } from './keepalive';
 import type { GotOptions } from './types';
 
-function findMatchingRules(options: GotOptions, url: string): HostRule {
+export function findMatchingRules(options: GotOptions, url: string): HostRule {
   const { hostType } = options;
   let res = hostRules.find({ hostType, url });
 
@@ -104,16 +107,30 @@ export function applyHostRules(url: string, inOptions: GotOptions): GotOptions {
     options.timeout = foundRules.timeout;
   }
 
+  if (foundRules.dnsCache) {
+    options.lookup = dnsLookup;
+  }
+
+  if (foundRules.keepalive) {
+    options.agent = keepaliveAgents;
+  }
+
   if (!hasProxy() && foundRules.enableHttp2 === true) {
     options.http2 = true;
   }
   return options;
 }
 
-export function getRequestLimit(url: string): number | null {
-  const hostRule = hostRules.find({
-    url,
-  });
-  const limit = hostRule.concurrentRequestLimit;
-  return typeof limit === 'number' && limit > 0 ? limit : null;
+export function getConcurrentRequestsLimit(url: string): number | null {
+  const { concurrentRequestLimit } = hostRules.find({ url });
+  return is.number(concurrentRequestLimit) && concurrentRequestLimit > 0
+    ? concurrentRequestLimit
+    : null;
+}
+
+export function getThrottleIntervalMs(url: string): number | null {
+  const { maxRequestsPerSecond } = hostRules.find({ url });
+  return is.number(maxRequestsPerSecond) && maxRequestsPerSecond > 0
+    ? Math.ceil(1000 / maxRequestsPerSecond)
+    : null;
 }
