@@ -28,23 +28,21 @@ import { api as semverCoerced } from '../../modules/versioning/semver-coerced';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import type { GitProtocol } from '../../types/git';
 import { Limit, incLimitedValue } from '../../workers/global/limits';
+import {
+  getCachedBehindBaseResult,
+  getCachedConflictResult,
+  getCachedModifiedResult,
+  setCachedConflictResult,
+  setCachedModifiedResult,
+} from '../cache/branch';
 import { newlineRegex, regEx } from '../regex';
 import { parseGitAuthor } from './author';
-import { getCachedBehindBaseResult } from './behind-base-branch-cache';
 import { getNoVerify, simpleGitConfig } from './config';
-import {
-  getCachedConflictResult,
-  setCachedConflictResult,
-} from './conflicts-cache';
 import {
   bulkChangesDisallowed,
   checkForPlatformFailure,
   handleCommitError,
 } from './error';
-import {
-  getCachedModifiedResult,
-  setCachedModifiedResult,
-} from './modified-cache';
 import { configSigningKey, writePrivateKey } from './private-key';
 import type {
   CommitFilesConfig,

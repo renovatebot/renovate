@@ -42,7 +42,7 @@ describe('workers/repository/update/pr/body/index', () => {
       configDescription.getPrConfigDescription.mockResolvedValueOnce(
         'getPrConfigDescription'
       );
-      controls.getControls.mockResolvedValueOnce('getControls');
+      controls.getControls.mockReturnValueOnce('getControls');
       footer.getPrFooter.mockReturnValueOnce('getPrFooter');
       header.getPrHeader.mockReturnValueOnce('getPrHeader');
       notes.getPrExtraNotes.mockReturnValueOnce('getPrExtraNotes');

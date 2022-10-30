@@ -1,4 +1,4 @@
-import { getCache } from '../cache/repository';
+import { getCache } from '../repository';
 
 export function getCachedPristineResult(branchName: string): boolean {
   const cache = getCache();
