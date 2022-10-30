@@ -1,9 +1,7 @@
-import type { ExtractResult } from '../../workers/repository/process/extract-update';
 import { getCache } from '../cache/repository';
 import type { OnboardingCache } from '../cache/repository/types';
 
-export function getCachedOnboardingBranch(
-  branchSha: string,
+export function validateAndRetrieveOnboardingCache(
   baseBranchSha: string,
   baseBranchName: string
 ): OnboardingCache | null {
@@ -14,10 +12,7 @@ export function getCachedOnboardingBranch(
   }
 
   onboardingBranch.defaultBranchSha ??= cache.scan?.[baseBranchName].sha;
-  if (
-    onboardingBranch.onboardingBranchSha !== branchSha ||
-    onboardingBranch.defaultBranchSha !== baseBranchSha
-  ) {
+  if (onboardingBranch.defaultBranchSha !== baseBranchSha) {
     return null;
   }
   return onboardingBranch;
@@ -27,7 +22,8 @@ export function setOnboardingBranchCache(
   branchSha: string,
   baseBranchSha: string,
   isOnboarded: boolean,
-  extractedDependencies?: ExtractResult
+  configFile: string,
+  onboardingConfigRaw: string
 ): void {
   const cache = getCache();
   const onboardingBranch = cache.onboarding ?? ({} as OnboardingCache);
@@ -35,8 +31,6 @@ export function setOnboardingBranchCache(
   onboardingBranch.isOnboarded = isOnboarded;
   onboardingBranch.onboardingBranchSha = branchSha;
   onboardingBranch.defaultBranchSha = baseBranchSha;
-  if (extractedDependencies) {
-    onboardingBranch.extractedDependencies = extractedDependencies;
-  }
-  cache.onboarding = onboardingBranch;
+  onboardingBranch.configFileName = configFile;
+  onboardingBranch.onboardingConfigRaw = onboardingConfigRaw;
 }

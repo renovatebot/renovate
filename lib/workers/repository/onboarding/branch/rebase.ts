@@ -10,6 +10,7 @@ import {
 } from '../../../../util/git';
 import { OnboardingCommitMessageFactory } from './commit-message';
 import { getOnboardingConfigContents } from './config';
+import type { OnboardingResult } from './create';
 
 function defaultConfigFile(config: RenovateConfig): string {
   return configFileNames.includes(config.onboardingConfigFileName!)
@@ -19,12 +20,12 @@ function defaultConfigFile(config: RenovateConfig): string {
 
 export async function rebaseOnboardingBranch(
   config: RenovateConfig
-): Promise<string | null> {
+): Promise<OnboardingResult> {
   logger.debug('Checking if onboarding branch needs rebasing');
   // TODO #7154
   if (await isBranchModified(config.onboardingBranch!)) {
     logger.debug('Onboarding branch has been edited and cannot be rebased');
-    return null;
+    return { commit: null };
   }
   const configFile = defaultConfigFile(config);
   const existingContents = await getFile(configFile, config.onboardingBranch);
@@ -35,7 +36,7 @@ export async function rebaseOnboardingBranch(
     !(await isBranchBehindBase(config.onboardingBranch!, config.defaultBranch!))
   ) {
     logger.debug('Onboarding branch is up to date');
-    return null;
+    return { commit: null };
   }
   logger.debug('Rebasing onboarding branch');
   // istanbul ignore next
@@ -48,20 +49,24 @@ export async function rebaseOnboardingBranch(
   // istanbul ignore if
   if (GlobalConfig.get('dryRun')) {
     logger.info('DRY-RUN: Would rebase files in onboarding branch');
-    return null;
+    return { commit: null };
   }
 
   // TODO #7154
-  return commitAndPush({
-    branchName: config.onboardingBranch!,
-    files: [
-      {
-        type: 'addition',
-        path: configFile,
-        contents,
-      },
-    ],
-    message: commitMessage.toString(),
-    platformCommit: !!config.platformCommit,
-  });
+  return {
+    commit: await commitAndPush({
+      branchName: config.onboardingBranch!,
+      files: [
+        {
+          type: 'addition',
+          path: configFile,
+          contents,
+        },
+      ],
+      message: commitMessage.toString(),
+      platformCommit: !!config.platformCommit,
+    }),
+    configFile,
+    contents,
+  };
 }

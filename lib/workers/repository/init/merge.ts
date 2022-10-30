@@ -19,7 +19,8 @@ import * as npmApi from '../../../modules/datasource/npm';
 import { platform } from '../../../modules/platform';
 import { getCache } from '../../../util/cache/repository';
 import { readLocalFile } from '../../../util/fs';
-import { getFileList } from '../../../util/git';
+import { getBranchCommit, getFileList } from '../../../util/git';
+import { validateAndRetrieveOnboardingCache } from '../../../util/git/onboarding-branch-cache';
 import * as hostRules from '../../../util/host-rules';
 import * as queue from '../../../util/http/queue';
 import * as throttle from '../../../util/http/throttle';
@@ -180,7 +181,24 @@ export async function mergeRenovateConfig(
 ): Promise<RenovateConfig> {
   let returnConfig = { ...config };
   let repoConfig: RepoFileConfig = {};
-  if (config.repoIsOnboarded && config.requireConfig !== 'ignored') {
+
+  if (config.requireConfig !== 'ignored') {
+    if (!config.repoIsOnboarded) {
+      // TODO #7154
+      const baseBranchSha = getBranchCommit(config.defaultBranch!);
+      // TODO #7154
+      const onboardingCache = validateAndRetrieveOnboardingCache(
+        baseBranchSha!,
+        config.defaultBranch!
+      );
+      if (onboardingCache !== null) {
+        repoConfig = {
+          configFileName: onboardingCache.configFileName,
+          configFileRaw: onboardingCache.onboardingConfigRaw,
+          configFileParsed: JSON5.parse(onboardingCache.onboardingConfigRaw),
+        };
+      }
+    }
     repoConfig = await detectRepoFileConfig();
   }
   const configFileParsed = repoConfig?.configFileParsed || {};

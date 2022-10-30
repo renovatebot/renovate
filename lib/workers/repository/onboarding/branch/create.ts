@@ -7,10 +7,14 @@ import { OnboardingCommitMessageFactory } from './commit-message';
 import { getOnboardingConfigContents } from './config';
 
 const defaultConfigFile = configFileNames[0];
-
+export interface OnboardingResult {
+  commit: string | null;
+  configFile?: string;
+  contents?: string;
+}
 export async function createOnboardingBranch(
   config: Partial<RenovateConfig>
-): Promise<string | null> {
+): Promise<OnboardingResult> {
   // TODO #7154
   const configFile = configFileNames.includes(config.onboardingConfigFileName!)
     ? config.onboardingConfigFileName
@@ -30,20 +34,24 @@ export async function createOnboardingBranch(
   // istanbul ignore if
   if (GlobalConfig.get('dryRun')) {
     logger.info('DRY-RUN: Would commit files to onboarding branch');
-    return null;
+    return { commit: null };
   }
 
-  return commitAndPush({
-    branchName: config.onboardingBranch!,
-    files: [
-      {
-        type: 'addition',
-        // TODO #7154
-        path: configFile!,
-        contents,
-      },
-    ],
-    message: commitMessage.toString(),
-    platformCommit: !!config.platformCommit,
-  });
+  return {
+    commit: await commitAndPush({
+      branchName: config.onboardingBranch!,
+      files: [
+        {
+          type: 'addition',
+          // TODO #7154
+          path: configFile!,
+          contents,
+        },
+      ],
+      message: commitMessage.toString(),
+      platformCommit: !!config.platformCommit,
+    }),
+    configFile,
+    contents,
+  };
 }
