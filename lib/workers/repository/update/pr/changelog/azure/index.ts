@@ -2,6 +2,7 @@ import changelogFilenameRegex from 'changelog-filename-regex';
 import { logger } from '../../../../../../logger';
 import type {
   AzureItem,
+  AzureTag,
   AzureTree,
   AzureTreeNode,
 } from '../../../../../../types/platform/azure';
@@ -22,7 +23,7 @@ export async function getTags(
     endpoint
   )}git/repositories/${urlEncodedRepo}/refs?filter=tags&$top=2`;
   try {
-    const res = await http.getJsonPaginated(url);
+    const res = await http.getJsonPaginated<AzureTag>(url);
     const tags = res.body.value;
 
     if (!tags.length) {
@@ -60,15 +61,15 @@ export async function getReleaseNotesMd(
 
   const sourceDirectoryId: string = (
     await http.getJson<AzureItem>(
-      `${apiPrefix}items?api-version=6.0${
-        sourceDirectory ? `&path=${sourceDirectory}` : '&path=/'
+      `${apiPrefix}items${
+        sourceDirectory ? `?path=${sourceDirectory}` : '?path=/'
       }`
     )
   ).body.objectId;
 
   const tree: AzureTreeNode[] = (
     await http.getJson<AzureTree>(
-      `${apiPrefix}trees/${sourceDirectoryId}?api-version=6.0`
+      `${apiPrefix}trees/${sourceDirectoryId}`
     )
   ).body.treeEntries;
   const allFiles = tree.filter((f) => f.gitObjectType === 'blob');
@@ -80,7 +81,8 @@ export async function getReleaseNotesMd(
     logger.trace('no changelog file found');
     return null;
   }
-  const { relativePath: changelogFile } = files.shift()!;
+  const { relativePath: relativeChangelogFile } = files.shift()!;
+  const changelogFile = sourceDirectory ? `${sourceDirectory}/${relativeChangelogFile}` : `${relativeChangelogFile}`;
   /* istanbul ignore if */
   if (files.length !== 0) {
     logger.debug(

@@ -13,6 +13,7 @@ describe('util/common', () => {
       ${'https://github-enterprise.example.com/chalk/chalk'} | ${'github'}
       ${'https://gitlab.com/chalk/chalk'}                    | ${'gitlab'}
       ${'https://gitlab-enterprise.example.com/chalk/chalk'} | ${'gitlab'}
+      ${'https://dev.azure.com/chalk/chalk'}                 | ${'azure'}
     `('("$url") === $hostType', ({ url, hostType }) => {
       expect(detectPlatform(url)).toBe(hostType);
     });
@@ -30,11 +31,18 @@ describe('util/common', () => {
         hostType: 'gitea',
         matchHost: 'gt.example.com',
       });
+      hostRules.add({
+        hostType: 'azure-changelog',
+        matchHost: 'az.example.com',
+      });
       expect(detectPlatform('https://gl.example.com/chalk/chalk')).toBe(
         'gitlab'
       );
       expect(detectPlatform('https://gh.example.com/chalk/chalk')).toBe(
         'github'
+      );
+      expect(detectPlatform('https://az.example.com/chalk/chalk')).toBe(
+        'azure'
       );
       expect(detectPlatform('https://gt.example.com/chalk/chalk')).toBeNull();
     });

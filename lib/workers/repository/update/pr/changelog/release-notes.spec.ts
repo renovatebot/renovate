@@ -31,6 +31,16 @@ const yargsChangelogMd = Fixtures.get('yargs.md', '..');
 const adapterutilsChangelogMd = Fixtures.get('adapter-utils.md', '..');
 const gitterWebappChangelogMd = Fixtures.get('gitter-webapp.md', '..');
 
+const azureItemsResponse = { objectId: '123abc' };
+
+const azureTreeResponse = {
+  treeEntries: [
+    { relativePath: 'lib', gitObjectType: 'tree' },
+    { relativePath: 'CHANGELOG.md', gitObjectType: 'blob' },
+    { relativePath: 'README.md', gitObjectType: 'blob' },
+  ],
+};
+
 const githubTreeResponse = {
   tree: [
     { path: 'lib', type: 'tree' },
@@ -55,6 +65,12 @@ const gitlabProject = {
   type: 'gitlab',
   apiBaseUrl: 'https://gitlab.com/api/v4/',
   baseUrl: 'https://gitlab.com/',
+} as ChangeLogProject;
+
+const azureProject = {
+  type: 'azure',
+  apiBaseUrl: 'https://dev.azure.com/some-org/some-project/_apis/',
+  baseUrl: 'https://dev.azure.com/some-org/some-project/',
 } as ChangeLogProject;
 
 describe('workers/repository/update/pr/changelog/release-notes', () => {
@@ -925,6 +941,40 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
         notesSourceUrl:
           'https://github.com/nodeca/js-yaml/blob/HEAD/packages/foo/CHANGELOG.md',
         url: 'https://github.com/nodeca/js-yaml/blob/HEAD/packages/foo/CHANGELOG.md#3100--2017-09-10',
+      });
+    });
+
+    it('handles azure sourceDirectory', async () => {
+      const sourceDirectory = 'packages/foo';
+      httpMock
+        .scope('https://dev.azure.com/')
+        .get(
+          `/some-org/some-project/_apis/git/repositories/some-repo/items?path=${sourceDirectory}`
+        )
+        .reply(200, azureItemsResponse)
+        .get(
+          `/some-org/some-project/_apis/git/repositories/some-repo/trees/123abc`
+        )
+        .reply(200, azureTreeResponse)
+        .get(
+          `/some-org/some-project/_apis/git/repositories/some-repo/items?path=${sourceDirectory}/CHANGELOG.md&includeContent=true&api-version=6.0`
+        )
+        .reply(200, adapterutilsChangelogMd);
+      const res = await getReleaseNotesMd(
+        {
+          ...azureProject,
+          repository: 'some-repo',
+          sourceDirectory,
+        },
+        {
+          version: '4.33.0',
+          gitRef: '4.33.0',
+        } as ChangeLogRelease
+      );
+
+      expect(res).toMatchSnapshot({
+        notesSourceUrl: `https://dev.azure.com/some-org/some-project/_git/some-repo?path=${sourceDirectory}/CHANGELOG.md`,
+        url: `https://dev.azure.com/some-org/some-project/_git/some-repo?path=${sourceDirectory}/CHANGELOG.md&anchor=user-content-4.33.0-%5B05-15-2020%5D`,
       });
     });
 
