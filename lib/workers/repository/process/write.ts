@@ -2,17 +2,36 @@ import is from '@sindresorhus/is';
 import type { RenovateConfig } from '../../../config/types';
 import { addMeta, logger, removeMeta } from '../../../logger';
 import { hashMap } from '../../../modules/manager';
+import { setBranchNewCommit } from '../../../util/cache/branch';
 import { getCache } from '../../../util/cache/repository';
 import type { BranchCache } from '../../../util/cache/repository/types';
 import { fingerprint } from '../../../util/fingerprint';
 import { branchExists, getBranchCommit } from '../../../util/git';
-import { setBranchNewCommit } from '../../../util/git/set-branch-commit';
 import { Limit, incLimitedValue, setMaxLimit } from '../../global/limits';
-import { BranchConfig, BranchResult } from '../../types';
+import {
+  BranchConfig,
+  BranchResult,
+  UpgradeFingerprintConfig,
+} from '../../types';
 import { processBranch } from '../update/branch';
+import { upgradeFingerprintFields } from './fingerprint-fields';
 import { getBranchesRemaining, getPrsRemaining } from './limits';
 
 export type WriteUpdateResult = 'done' | 'automerged';
+
+export function generateBranchFingerprintConfig(
+  branch: BranchConfig
+): UpgradeFingerprintConfig[] {
+  const res = branch.upgrades.map((upgrade) => {
+    const filteredUpgrade = {} as UpgradeFingerprintConfig;
+    for (const field of upgradeFingerprintFields) {
+      filteredUpgrade[field] = upgrade[field];
+    }
+    return filteredUpgrade;
+  });
+
+  return res;
+}
 
 export function canSkipBranchUpdateCheck(
   branchState: BranchCache,
@@ -131,7 +150,7 @@ export async function writeUpdates(
       ),
     ].sort();
     const branchFingerprint = fingerprint({
-      branch,
+      branchFingerprintConfig: generateBranchFingerprintConfig(branch),
       managers,
     });
     branch.skipBranchUpdate = canSkipBranchUpdateCheck(
@@ -142,10 +161,9 @@ export async function writeUpdates(
     branch.prBlockedBy = res?.prBlockedBy;
     branch.prNo = res?.prNo;
     branch.result = res?.result;
-    branch.branchFingerprint =
-      res?.commitSha || !branchState.branchFingerprint
-        ? branchFingerprint
-        : branchState.branchFingerprint;
+    branch.branchFingerprint = res?.updatesVerified
+      ? branchFingerprint
+      : branchState.branchFingerprint;
 
     if (res?.commitSha) {
       setBranchNewCommit(branchName, baseBranch, res.commitSha);
