@@ -235,15 +235,7 @@ export async function generateConfig(dist: string, bot = false): Promise<void> {
         genTable(Object.entries(el), option.type, option.default);
 
       if (el.advancedUse) {
-        if (
-          option.name === 'excludeCommitPaths' ||
-          option.name === 'group' ||
-          option.name === 'followTag'
-        ) {
-          configOptionsRaw[headerIndex] += generateAdvancedUse();
-        } else {
-          configOptionsRaw[footerIndex] += generateAdvancedUse();
-        }
+        configOptionsRaw[headerIndex] += generateAdvancedUse();
       }
 
       if (el.experimental) {
