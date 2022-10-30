@@ -788,7 +788,6 @@ const options: RenovateOptions[] = [
     description:
       'A list of package managers to enable. If defined, then all managers not on the list are disabled.',
     type: 'array',
-    mergeable: false,
     stage: 'repository',
   },
   {
@@ -1258,7 +1257,7 @@ const options: RenovateOptions[] = [
     type: 'string',
     cli: false,
     env: false,
-    advancedFunctionality: true,
+    advancedUse: true,
   },
   {
     name: 'respectLatest',
@@ -1785,7 +1784,7 @@ const options: RenovateOptions[] = [
     cli: false,
     env: false,
     mergeable: true,
-    advancedFunctionality: true,
+    advancedUse: true,
   },
   // Pull Request options
   {
@@ -2066,7 +2065,7 @@ const options: RenovateOptions[] = [
     parent: 'hostRules',
     cli: false,
     env: false,
-    advancedConfig: true,
+    advancedUse: true,
   },
   {
     name: 'abortOnError',

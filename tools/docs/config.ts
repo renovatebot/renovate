@@ -92,8 +92,6 @@ function genTable(obj: [string, string][], type: string, def: any): string {
     'experimentalDescription',
     'experimentalIssues',
     'advancedUse',
-    'advancedFunctionality',
-    'advancedConfig',
   ];
   obj.forEach(([key, val]) => {
     const el = [key, val];
@@ -237,19 +235,15 @@ export async function generateConfig(dist: string, bot = false): Promise<void> {
         genTable(Object.entries(el), option.type, option.default);
 
       if (el.advancedUse) {
-        if (option.name === 'excludeCommitPaths') {
+        if (
+          option.name === 'excludeCommitPaths' ||
+          option.name === 'group' ||
+          option.name === 'followTag'
+        ) {
           configOptionsRaw[headerIndex] += generateAdvancedUse();
         } else {
           configOptionsRaw[footerIndex] += generateAdvancedUse();
         }
-      }
-
-      if (el.advancedFunctionality) {
-        configOptionsRaw[headerIndex] += generateAdvancedFunctionality();
-      }
-
-      if (el.advancedConfig) {
-        configOptionsRaw[footerIndex] += generateAdvancedConfig();
       }
 
       if (el.experimental) {
@@ -264,20 +258,5 @@ function generateAdvancedUse(): string {
   return (
     '\n<!-- prettier-ignore -->\n!!! warning\n' +
     '    For advanced use only! Use at your own risk!\n'
-  );
-}
-
-function generateAdvancedFunctionality(): string {
-  return (
-    '\n<!-- prettier-ignore --> \n!!! warning\n' +
-    '    Advanced functionality.\n' +
-    "    Only use this if you know what you're doing.\n"
-  );
-}
-
-function generateAdvancedConfig(): string {
-  return (
-    '\n<!-- prettier-ignore -->\n!!! warning\n' +
-    '    Advanced config, use at your own risk.\n'
   );
 }

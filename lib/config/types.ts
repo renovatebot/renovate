@@ -359,10 +359,6 @@ export interface RenovateOptionBase {
   experimentalIssues?: number[];
 
   advancedUse?: boolean;
-
-  advancedFunctionality?: boolean;
-
-  advancedConfig?: boolean;
 }
 
 export interface RenovateArrayOption<
@@ -440,7 +436,7 @@ export interface PackageRuleInputConfig extends Record<string, unknown> {
   depName?: string;
   currentValue?: string | null;
   currentVersion?: string;
-  lockedVersion?: string;
+  lockedVersion?: string | null;
   updateType?: UpdateType;
   isBump?: boolean;
   sourceUrl?: string | null;
