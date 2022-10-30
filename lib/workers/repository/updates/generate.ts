@@ -201,6 +201,7 @@ export function generateBranchConfig(
       );
     }
 
+    delete upgrade.commitMessagePrefix;
     // Compile a few times in case there are nested templates
     commitMessage.subject = template.compile(
       upgrade.commitMessage ?? '',
@@ -223,9 +224,9 @@ export function generateBranchConfig(
     );
 
     upgrade.commitMessage = commitMessage.toString();
-    if (upgrade.commitBody) {
-      commitMessage.body = template.compile(upgrade.commitBody, upgrade);
-      upgrade.commitMessage = commitMessage.toString();
+
+    if (upgrade.toLowerCase) {
+      upgrade.commitMessage = upgrade.commitMessage.toLowerCase();
     }
 
     logger.trace(`commitMessage: ` + JSON.stringify(upgrade.commitMessage));

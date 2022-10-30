@@ -314,8 +314,8 @@ describe('workers/repository/updates/generate', () => {
         foo: 2,
         isGroup: true,
         recreateClosed: true,
-        prTitle: 'some-group (minor)',
-        commitMessage: 'some-group',
+        prTitle: 'Some-group (minor)',
+        commitMessage: 'Some-group',
         groupName: 'some-group',
         releaseTimestamp: '2017-02-08T20:01:41+00:00',
       });
@@ -1075,38 +1075,6 @@ describe('workers/repository/updates/generate', () => {
       ]);
     });
 
-    it('fixes commit message with body', () => {
-      const branch: BranchUpgradeConfig[] = [
-        {
-          manager: 'some-manager',
-          branchName: 'some-branch',
-          commitMessage: 'update to vv1.2.0',
-          commitBody: 'some body',
-        },
-      ];
-      const res = generateBranchConfig(branch);
-      expect(res.commitMessage).toBe('Update to v1.2.0\n\nsome body');
-    });
-
-    it('generates semantic commit message properly', () => {
-      const branch: BranchUpgradeConfig[] = [
-        {
-          ...defaultConfig,
-          manager: 'some-manager',
-          branchName: 'some-branch',
-          semanticCommits: 'enabled',
-          semanticCommitType: 'chore',
-          semanticCommitScope: 'deps',
-          depName: 'some-dep',
-          newValue: '1.2.0',
-        } as BranchUpgradeConfig,
-      ];
-      const res = generateBranchConfig(branch);
-      expect(res.commitMessage).toBe(
-        'chore(deps): update dependency some-dep to 1.2.0'
-      );
-    });
-
     it('merge excludeCommitPaths if appears in upgrade', () => {
       const branch: BranchUpgradeConfig[] = [
         {
@@ -1172,8 +1140,8 @@ describe('workers/repository/updates/generate', () => {
         },
       ];
       const res = generateBranchConfig(branch);
-      expect(res.prTitle).toBe('update to v1.2.0');
-      expect(res.commitMessage).toBe('update to v1.2.0');
+      expect(res.prTitle).toBe('Update to v1.2.0');
+      expect(res.commitMessage).toBe('Update to v1.2.0');
     });
 
     it('apply semanticCommits and commitMessagePrefix together', () => {
@@ -1190,9 +1158,9 @@ describe('workers/repository/updates/generate', () => {
         } as BranchUpgradeConfig,
       ];
       const res = generateBranchConfig(branch);
-      expect(res.prTitle).toBe('PATCH: Update dependency some-dep to 1.2.0');
+      expect(res.prTitle).toBe('PATCH: update dependency some-dep to 1.2.0');
       expect(res.commitMessage).toBe(
-        'PATCH: Update dependency some-dep to 1.2.0'
+        'PATCH: update dependency some-dep to 1.2.0'
       );
     });
   });
