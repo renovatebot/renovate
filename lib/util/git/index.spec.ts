@@ -108,7 +108,6 @@ describe('util/git/index', () => {
     // override some local git settings for better testing
     const local = Git(tmpDir.path);
     await local.addConfig('commit.gpgsign', 'false');
-    branchCache.getCachedBranchParentShaResult.mockReturnValue(null);
     branchCache.getCachedBehindBaseResult.mockReturnValue(null);
   });
 
