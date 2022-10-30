@@ -180,8 +180,7 @@ export function handlePlugin(ctx: Ctx): Ctx {
     // = template string with multiple variables
     dep.skipReason = 'unknown-version';
   } else if (pluginVersion[0].type === 'symbol') {
-    const varName = pluginVersion[0].value;
-    const varData = ctx.globalVars[varName];
+    const varData = ctx.globalVars[pluginVersion[0].value];
     if (varData) {
       dep.currentValue = varData.value;
       dep.managerData = {
@@ -189,7 +188,6 @@ export function handlePlugin(ctx: Ctx): Ctx {
         packageFile: varData.packageFile,
       };
     } else {
-      dep.currentValue = varName;
       dep.skipReason = 'unknown-version';
     }
   }
