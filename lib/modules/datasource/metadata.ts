@@ -1,4 +1,3 @@
-import URL from 'url';
 import is from '@sindresorhus/is';
 import parse from 'github-url-from-git';
 import { DateTime } from 'luxon';
@@ -13,22 +12,19 @@ const githubPages = regEx('^https://([^.]+).github.com/([^/]+)$');
 const gitPrefix = regEx('^git:/?/?');
 
 export function massageUrl(sourceUrl: string): string {
-  const hostname = getHostname(sourceUrl);
-  if (!hostname) {
-    return '';
-  }
-  if (hostname.includes('gitlab')) {
-    return massageGitlabUrl(sourceUrl);
-  }
-  return massageGithubUrl(sourceUrl);
-}
-
-function getHostname(sourceUrl: string): string | null {
   // Replace git@ sourceUrl with https so hostname can be parsed
   const massagedUrl = massageGitAtUrl(sourceUrl);
 
-  const parsedUrl = URL.parse(massagedUrl);
-  return parsedUrl?.hostname;
+  // Check if URL is valid
+  const parsedUrl = parseUrl(massagedUrl);
+  if (!parsedUrl) {
+    return '';
+  }
+
+  if (detectPlatform(massagedUrl) === 'gitlab') {
+    return massageGitlabUrl(sourceUrl);
+  }
+  return massageGithubUrl(sourceUrl);
 }
 
 export function massageGithubUrl(url: string): string {
