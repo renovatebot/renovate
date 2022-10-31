@@ -347,132 +347,195 @@ describe('config/presets/index', () => {
       });
     });
 
-    it('resolves and keeps extends array from config ', async () => {
-      config.extends = ['local>username/preset-repo'];
-      local.getPreset.mockResolvedValueOnce({
-        labels: ['self-hosted resolved'],
+    describe('shallow config resolve', () => {
+      it('resolves and keeps extends array from config ', async () => {
+        config.extends = ['local>username/preset-repo'];
+        local.getPreset.mockResolvedValueOnce({
+          labels: ['self-hosted resolved'],
+        });
+        const res = await presets.resolveConfigPresets(
+          config,
+          {},
+          [],
+          [],
+          true // shallow log config
+        );
+        expect(res).toEqual({
+          labels: ['self-hosted resolved'],
+        });
       });
-      const res = await presets.resolveConfigPresets(
-        config,
-        {},
-        [],
-        [],
-        true // shallow log config
-      );
-      expect(res).toEqual({
-        labels: ['self-hosted resolved'],
-      });
-    });
 
-    it('resolves shallow config in case of local and github extend', async () => {
-      config.extends = ['config:base', 'some/repo'];
-      config.packageRules = [
-        {
-          matchManagers: ['github-actions'],
-          groupName: 'github-actions dependencies',
-        },
-      ];
-      local.getPreset.mockResolvedValueOnce({
-        extends: ['github>username/preset-repo'],
-        labels: ['self-hosted resolved'],
-      });
-      gitHub.getPreset.mockResolvedValueOnce({
-        packageRules: [
-          {
-            matchDatasources: ['docker'],
-            matchPackageNames: ['ubi-minimal'],
-            versioning: 'regex',
-          },
-        ],
-      });
-      const res = await presets.resolveConfigPresets(
-        config,
-        {},
-        [],
-        [],
-        true // shallow log config
-      );
-      expect(res).toEqual({
-        packageRules: [
-          {
-            matchDatasources: ['docker'],
-            matchPackageNames: ['ubi-minimal'],
-            versioning: 'regex',
-          },
+      it('resolves shallow config in case of local and github extend', async () => {
+        config.extends = ['config:base', 'some/repo'];
+        config.packageRules = [
           {
             matchManagers: ['github-actions'],
             groupName: 'github-actions dependencies',
           },
-        ],
-        extends: ['config:base'],
-        labels: ['self-hosted resolved'],
+        ];
+        local.getPreset.mockResolvedValueOnce({
+          extends: ['github>username/preset-repo'],
+          labels: ['self-hosted resolved'],
+        });
+        gitHub.getPreset.mockResolvedValueOnce({
+          packageRules: [
+            {
+              matchDatasources: ['docker'],
+              matchPackageNames: ['ubi-minimal'],
+              versioning: 'regex',
+            },
+          ],
+        });
+        const res = await presets.resolveConfigPresets(
+          config,
+          {},
+          [],
+          [],
+          true // shallow log config
+        );
+        expect(res).toEqual({
+          packageRules: [
+            {
+              matchDatasources: ['docker'],
+              matchPackageNames: ['ubi-minimal'],
+              versioning: 'regex',
+            },
+            {
+              matchManagers: ['github-actions'],
+              groupName: 'github-actions dependencies',
+            },
+          ],
+          extends: ['config:base'],
+          labels: ['self-hosted resolved'],
+        });
       });
-    });
 
-    it('combines extends with user and github', async () => {
-      config.extends = ['config:base', 'github>username/preset-repo'];
-      config.packageRules = [
-        {
-          matchManagers: ['github-actions'],
-          groupName: 'github-actions dependencies',
-        },
-      ];
-      gitHub.getPreset.mockResolvedValueOnce({
-        extends: ['config:js-app'],
-      });
-      const res = await presets.resolveConfigPresets(
-        config,
-        {},
-        [],
-        [],
-        true // shallow log config
-      );
-      expect(res).toEqual({
-        extends: ['config:base', 'config:js-app'],
-        packageRules: [
+      it('combines extends with user and github', async () => {
+        config.extends = ['config:base', 'github>username/preset-repo'];
+        config.packageRules = [
           {
             matchManagers: ['github-actions'],
             groupName: 'github-actions dependencies',
           },
-        ],
+        ];
+        gitHub.getPreset.mockResolvedValueOnce({
+          extends: ['config:js-app'],
+        });
+        const res = await presets.resolveConfigPresets(
+          config,
+          {},
+          [],
+          [],
+          true // shallow log config
+        );
+        expect(res).toEqual({
+          extends: ['config:base', 'config:js-app'],
+          packageRules: [
+            {
+              matchManagers: ['github-actions'],
+              groupName: 'github-actions dependencies',
+            },
+          ],
+        });
       });
-    });
 
-    it('ignore fetching internal persets ', async () => {
-      // ignore resolving of merge-confidence:beta
-      config.extends = [
-        'config:base',
-        'github>whitesource/merge-confidence:beta',
-        'whitesource/merge-confidence:beta',
-        'local>whitesource/merge-confidence:beta',
-      ];
-      config.packageRules = [
-        {
-          matchManagers: ['github-actions'],
-          groupName: 'github-actions dependencies',
-        },
-      ];
-      gitHub.getPreset.mockResolvedValueOnce({});
-      const res = await presets.resolveConfigPresets(
-        config,
-        {},
-        [],
-        [],
-        true // shallow log config
-      );
-      expect(res).toEqual({
-        extends: [
+      it('ignore fetching internal persets ', async () => {
+        // ignore resolving of merge-confidence:beta
+        config.extends = [
           'config:base',
           'github>whitesource/merge-confidence:beta',
           'whitesource/merge-confidence:beta',
           'local>whitesource/merge-confidence:beta',
-        ],
-        packageRules: [
+        ];
+        config.packageRules = [
           {
             matchManagers: ['github-actions'],
             groupName: 'github-actions dependencies',
           },
-        ],
+        ];
+        gitHub.getPreset.mockResolvedValueOnce({});
+        const res = await presets.resolveConfigPresets(
+          config,
+          {},
+          [],
+          [],
+          true // shallow log config
+        );
+        expect(res).toEqual({
+          extends: [
+            'config:base',
+            'github>whitesource/merge-confidence:beta',
+            'whitesource/merge-confidence:beta',
+            'local>whitesource/merge-confidence:beta',
+          ],
+          packageRules: [
+            {
+              matchManagers: ['github-actions'],
+              groupName: 'github-actions dependencies',
+            },
+          ],
+        });
+      });
+
+      it('resolves multi-layer user defined nested config', async () => {
+        const externalPresetA: RenovateConfig = {
+          extends: ['config:base', 'github>whitesource/merge-confidence:beta'],
+          packageRules: [
+            {
+              matchPackageNames: ['@floating-ui/react-dom'],
+              allowedVersions: '<0.6.3',
+            },
+          ],
+        };
+
+        const externalPresetB: RenovateConfig = {
+          extends: [
+            'github>example/repo-a:renovate.json',
+            ':separateMajorReleases',
+          ],
+          packageRules: [
+            {
+              matchPackageNames: ['luxon'],
+              allowedVersions: '<3.0.4',
+            },
+          ],
+        };
+
+        config = {
+          extends: ['github>example/repo-b:renovate.json', ':pinVersions'],
+          packageRules: [
+            {
+              updateTypes: ['major'],
+              labels: ['MAJOR'],
+            },
+          ],
+          ignoreDeps: ['express'],
+        };
+
+        gitHub.getPreset.mockResolvedValueOnce(externalPresetB);
+        gitHub.getPreset.mockResolvedValueOnce(externalPresetA);
+
+        const res = await presets.resolveConfigPresets(
+          config,
+          {},
+          [],
+          [],
+          true // shallow log config
+        );
+        const expected: RenovateConfig = {
+          extends: [
+            ':pinVersions',
+            ':separateMajorReleases',
+            ...externalPresetA.extends!,
+          ],
+          packageRules: [
+            ...externalPresetA.packageRules!,
+            ...externalPresetB.packageRules!,
+            ...config.packageRules!,
+          ],
+          ignoreDeps: config.ignoreDeps,
+        };
+        expect(res).toEqual(expected);
       });
     });
   });
