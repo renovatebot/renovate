@@ -33,7 +33,7 @@ export function parsePom(raw: string): XmlDocument | null {
 }
 
 function containsPlaceholder(str: string | null | undefined): boolean {
-  return !!str && regEx(/\${.*?}/g).test(str);
+  return !!str && regEx(/\${[^}]*?}/).test(str);
 }
 
 function depFromNode(
@@ -126,7 +126,7 @@ function applyProps(
 ): PackageDependency<Record<string, any>> {
   let result = dep;
   let anyChange = false;
-  const alreadySeenProps: string[] = [];
+  const alreadySeenProps: Set<string> = new Set();
 
   do {
     const [returnedResult, returnedAnyChange, fatal] = applyPropsInternal(
@@ -156,22 +156,24 @@ function applyPropsInternal(
   dep: PackageDependency<Record<string, any>>,
   depPackageFile: string,
   props: MavenProp,
-  alreadySeenProps: string[]
+  previouslySeenProps: Set<string>
 ): [PackageDependency<Record<string, any>>, boolean, boolean] {
   let anyChange = false;
   let fatal = false;
 
+  const seenProps: Set<string> = new Set();
+
   const replaceAll = (str: string): string =>
-    str.replace(regEx(/\${.*?}/g), (substr) => {
+    str.replace(regEx(/\${[^}]*?}/g), (substr) => {
       const propKey = substr.slice(2, -1).trim();
       // TODO: wrong types here, props is already `MavenProp`
       const propValue = (props as any)[propKey] as MavenProp;
       if (propValue) {
         anyChange = true;
-        if (alreadySeenProps.find((it) => it === propKey)) {
+        if (previouslySeenProps.has(propKey)) {
           fatal = true;
         } else {
-          alreadySeenProps.push(propKey);
+          seenProps.add(propKey);
         }
         return propValue.val;
       }
@@ -185,7 +187,7 @@ function applyPropsInternal(
   let propSource = dep.propSource;
   let groupName: string | null = null;
   const currentValue = dep.currentValue!.replace(
-    regEx(/^\${.*?}$/),
+    regEx(/^\${[^}]*?}$/),
     (substr) => {
       const propKey = substr.slice(2, -1).trim();
       // TODO: wrong types here, props is already `MavenProp`
@@ -197,10 +199,10 @@ function applyPropsInternal(
         fileReplacePosition = propValue.fileReplacePosition;
         propSource = propValue.packageFile ?? undefined;
         anyChange = true;
-        if (alreadySeenProps.find((it) => it === propKey)) {
+        if (previouslySeenProps.has(propKey)) {
           fatal = true;
         } else {
-          alreadySeenProps.push(propKey);
+          seenProps.add(propKey);
         }
         return propValue.val;
       }
@@ -225,6 +227,9 @@ function applyPropsInternal(
     result.editFile = propSource;
   }
 
+  for (const prop of seenProps) {
+    previouslySeenProps.add(prop);
+  }
   return [result, anyChange, fatal];
 }
 

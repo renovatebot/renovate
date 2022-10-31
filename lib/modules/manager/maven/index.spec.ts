@@ -189,6 +189,18 @@ describe('modules/manager/maven/index', () => {
       ]);
     });
 
+    it('should apply props multiple times', () => {
+      const [{ deps }] = resolveParents([
+        extractPackage(Fixtures.get('multiple_usages_props.pom.xml'))!,
+      ]);
+      expect(deps).toMatchObject([
+        {
+          depName: 'org.apache.lucene:lucene-core-1.2.3.1.2.3',
+          currentValue: '1.2.3',
+        },
+      ]);
+    });
+
     it('should detect props infinitely recursing props', () => {
       const [{ deps }] = resolveParents([
         extractPackage(Fixtures.get('infinite_recursive_props.pom.xml'))!,
