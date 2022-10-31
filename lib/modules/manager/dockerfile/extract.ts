@@ -276,7 +276,7 @@ export function extractPackageFile(
     const argRegex = regEx(
       '^[ \\t]*ARG(?:' +
         escapeChar +
-        '[ \\t]*\\r?\\n| |\\t|#.*?\\r?\\n)+(?<name>\\S+)[ =](?<value>.*)',
+        '[ \\t]*\\r?\\n| |\\t|#.*?\\r?\\n)+(?<name>\\w+)[ =](?<value>\\S*)',
       'im'
     );
     const argMatch = argRegex.exec(instruction);
@@ -327,7 +327,7 @@ export function extractPackageFile(
       if (fromImage === 'scratch') {
         logger.debug('Skipping scratch');
       } else if (fromImage && stageNames.includes(fromImage)) {
-        logger.debug({ image: fromImage }, 'Skipping alias FROM');
+        logger.debug(`Skipping alias FROM image:${fromImage}`);
       } else {
         const dep = getDep(fromImage, true, config.registryAliases);
         processDepForAutoReplace(dep, lineNumberRanges, lines, lineFeed);
