@@ -92,7 +92,6 @@ export async function initPlatform(config: AllConfig): Promise<AllConfig> {
       ['token', 'username', 'password'] as ('token' | 'username' | 'password')[]
     ).forEach((field) => {
       if (config[field]) {
-        // TODO: types #7154
         rule[field] = config[field] as string;
         delete returnConfig[field];
       }
