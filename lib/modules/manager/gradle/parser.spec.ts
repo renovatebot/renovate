@@ -125,6 +125,36 @@ describe('modules/manager/gradle/parser', () => {
           expect(vars[key]).toMatchObject({ key, value });
         }
       });
+
+      it('map with interpolated dependency strings', () => {
+        const input = `
+          def slfj4Version = "2.0.0"
+          libraries = [
+            jcl: "org.slf4j:jcl-over-slf4j:\${slfj4Version}",
+            releaseCoroutines: "org.jetbrains.kotlinx:kotlinx-coroutines-core:0.26.1-eap13"
+            api: "org.slf4j:slf4j-api:$slfj4Version",
+          ]
+        `;
+
+        const { deps } = parseGradle(input);
+        expect(deps).toMatchObject([
+          {
+            depName: 'org.slf4j:jcl-over-slf4j',
+            groupName: 'slfj4Version',
+            currentValue: '2.0.0',
+          },
+          {
+            depName: 'org.jetbrains.kotlinx:kotlinx-coroutines-core',
+            groupName: 'libraries.releaseCoroutines',
+            currentValue: '0.26.1-eap13',
+          },
+          {
+            depName: 'org.slf4j:slf4j-api',
+            groupName: 'slfj4Version',
+            currentValue: '2.0.0',
+          },
+        ]);
+      });
     });
 
     describe('Kotlin: single var assignments', () => {
@@ -212,6 +242,36 @@ describe('modules/manager/gradle/parser', () => {
           expect(vars).toContainKey(key);
           expect(vars[key]).toMatchObject({ key, value });
         }
+      });
+
+      it('map with interpolated dependency strings', () => {
+        const input = `
+          val slfj4Version = "2.0.0"
+          libraries = mapOf(
+            "jcl" to "org.slf4j:jcl-over-slf4j:\${slfj4Version}",
+            "releaseCoroutines" to "org.jetbrains.kotlinx:kotlinx-coroutines-core:0.26.1-eap13"
+            "api" to "org.slf4j:slf4j-api:$slfj4Version",
+          )
+        `;
+
+        const { deps } = parseGradle(input);
+        expect(deps).toMatchObject([
+          {
+            depName: 'org.slf4j:jcl-over-slf4j',
+            groupName: 'slfj4Version',
+            currentValue: '2.0.0',
+          },
+          {
+            depName: 'org.jetbrains.kotlinx:kotlinx-coroutines-core',
+            groupName: 'libraries.releaseCoroutines',
+            currentValue: '0.26.1-eap13',
+          },
+          {
+            depName: 'org.slf4j:slf4j-api',
+            groupName: 'slfj4Version',
+            currentValue: '2.0.0',
+          },
+        ]);
       });
     });
   });

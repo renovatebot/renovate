@@ -139,7 +139,7 @@ const qGroovyMapOfVarAssignment = q
   .handler(coalesceVariable)
   .handler((ctx) => storeInTokenMap(ctx, 'keyToken'))
   .op(':')
-  .join(qStringValue)
+  .join(qTemplateString)
   .handler((ctx) => storeInTokenMap(ctx, 'valToken'))
   .handler(handleAssignment)
   .handler((ctx) => {
@@ -241,7 +241,7 @@ const qKotlinSingleMapOfVarAssignment = qStringValue
   })
   .handler(coalesceVariable)
   .handler((ctx) => storeInTokenMap(ctx, 'keyToken'))
-  .join(qStringValue)
+  .join(qTemplateString)
   .handler((ctx) => storeInTokenMap(ctx, 'valToken'))
   .handler(handleAssignment)
   .handler((ctx) => {
