@@ -54,7 +54,8 @@ describe('modules/manager/flux/artifacts', () => {
     fs.readLocalFile.mockResolvedValueOnce('test');
 
     const res = await updateArtifacts({
-      packageFileName: 'clusters/my-cluster/flux-system/gitops-toolkit/gotk-components.yaml',
+      packageFileName:
+        'clusters/my-cluster/flux-system/gitops-toolkit/gotk-components.yaml',
       updatedDeps: [
         {
           newVersion: '1.0.1',
