@@ -68,8 +68,47 @@ describe('modules/platform/index', () => {
           password: '123',
           username: 'abc',
         },
+        {
+          matchHost: '.pkg.github.com',
+          password: '123',
+          username: 'abc',
+        },
+        {
+          matchHost: 'ghcr.io',
+          password: '123',
+          username: 'abc',
+        },
       ],
       platform: PlatformId.Bitbucket,
+    });
+  });
+
+  it('initializes token', async () => {
+    httpMock.scope('https://api.github.com').get('/user').reply(200, '');
+    const config = {
+      platform: PlatformId.Github,
+      gitAuthor: 'user@domain.com',
+      token: 'ghe_123abc',
+    };
+    expect(await platform.initPlatform(config)).toEqual({
+      endpoint: 'https://api.github.com/',
+      gitAuthor: 'user@domain.com',
+      hostRules: [
+        {
+          hostType: 'github',
+          matchHost: 'api.github.com',
+          token: 'ghe_123abc',
+        },
+        {
+          matchHost: '.pkg.github.com',
+          token: 'ghe_123abc',
+        },
+        {
+          matchHost: 'ghcr.io',
+          token: 'ghe_123abc',
+        },
+      ],
+      platform: PlatformId.Github,
     });
   });
 });

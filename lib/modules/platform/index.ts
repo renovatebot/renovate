@@ -79,5 +79,27 @@ export async function initPlatform(config: AllConfig): Promise<AllConfig> {
   };
   returnConfig.hostRules.push(typedPlatformRule);
   hostRules.add(typedPlatformRule);
+  const gitHubRule: HostRule[] = [
+    {
+      matchHost: '.pkg.github.com',
+    },
+    {
+      matchHost: 'ghcr.io',
+    },
+  ];
+  for (const rule of gitHubRule) {
+    (
+      ['token', 'username', 'password'] as ('token' | 'username' | 'password')[]
+    ).forEach((field) => {
+      if (config[field]) {
+        // TODO: types #7154
+        rule[field] = config[field] as string;
+        delete returnConfig[field];
+      }
+    });
+    returnConfig.hostRules = returnConfig.hostRules || [];
+    returnConfig.hostRules.push(rule);
+    hostRules.add(rule);
+  }
   return returnConfig;
 }
