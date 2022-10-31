@@ -9,24 +9,34 @@ description: How to use OpenTelemetry with Renovate
 !!! warning "This feature is flagged as experimental"
     Experimental features might be changed or even removed at any time.
 
-Renovate supports OpenTelemetry which is an emerging monitoring standard.
+Renovate partially supports OpenTelemetry, the emerging monitoring standard.
 
-OpenTelemetry supports three types of observability data:
+OpenTelemetry has three types of observability data:
 
 - traces
 - metrics
 - logs
 
-Renovate can only send traces and only via the OpenTelemetryProtocol (OTLP), other observability data or transfer protocols are not supported.
+## Limitations
+
+Renovate only:
+
+- sends traces
+- uses the OpenTelemetryProtocol (OTLP)
+
+Renovate does not support other observability data or transfer protocols.
 
 ## Usage
 
-To activate the instrumentation, the environment variable `OTEL_EXPORTER_OTLP_ENDPOINT` has to be set.
-This sets the endpoint where to send the telemetry data.
-If this endpoint is set, all other environment variables defined by the [OpenTelemetry specification](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/sdk-environment-variables.md) are supported.
+To activate the instrumentation, you must set the `OTEL_EXPORTER_OTLP_ENDPOINT` environment variable.
+This variable controls the endpoint for the telemetry data.
+Once this endpoint is set, you can use all environment variables listed in the [OpenTelemetry specification](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/sdk-environment-variables.md).
 
-For debugging purposes the telemetry can also be printed to the console if the environment variable `RENOVATE_TRACING_CONSOLE_EXPORTER` is set.
+## Debugging
+
+To help you debug, you can print the telemetry to the console.
+Use the environment variable `RENOVATE_TRACING_CONSOLE_EXPORTER`.
 
 ## Examples
 
-An usage example with a local OpenTelemetry setup can be found in the [OpenTelemetry examples](examples/opentelemetry.md)
+An example with a local OpenTelemetry setup can be found on the [OpenTelemetry examples](examples/opentelemetry.md) page.
