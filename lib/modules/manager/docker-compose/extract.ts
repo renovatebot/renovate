@@ -3,7 +3,7 @@ import { load } from 'js-yaml';
 import { logger } from '../../../logger';
 import { newlineRegex, regEx } from '../../../util/regex';
 import { getDep } from '../dockerfile/extract';
-import type { PackageFile } from '../types';
+import type { ExtractConfig, PackageFile } from '../types';
 import type { DockerComposeConfig } from './types';
 
 class LineMapper {
@@ -30,7 +30,8 @@ class LineMapper {
 
 export function extractPackageFile(
   content: string,
-  fileName?: string
+  fileName: string,
+  extractConfig: ExtractConfig
 ): PackageFile | null {
   logger.debug('docker-compose.extractPackageFile()');
   let config: DockerComposeConfig;
@@ -71,7 +72,7 @@ export function extractPackageFile(
     const deps = Object.values(services || {})
       .filter((service) => is.string(service?.image) && !service?.build)
       .map((service) => {
-        const dep = getDep(service.image);
+        const dep = getDep(service.image, true, extractConfig.registryAliases);
         const lineNumber = lineMapper.pluckLineNumber(service.image);
         // istanbul ignore if
         if (!lineNumber) {

@@ -12,13 +12,6 @@ import { toBase64 } from '../../../util/string';
 import { getPrBodyStruct } from '../pr-body';
 import type { AzurePr } from './types';
 
-export function getNewBranchName(branchName?: string): string | undefined {
-  if (branchName && !branchName.startsWith('refs/heads/')) {
-    return `refs/heads/${branchName}`;
-  }
-  return branchName;
-}
-
 export function getGitStatusContextCombinedName(
   context: GitStatusContext | null | undefined
 ): string | undefined {
@@ -181,11 +174,13 @@ export function getRepoByName(
   project = project.toLowerCase();
   repo = repo.toLowerCase();
 
-  return (
-    repos?.find(
-      (r) =>
-        project === r?.project?.name?.toLowerCase() &&
-        repo === r?.name?.toLowerCase()
-    ) ?? null
+  const foundRepo = repos?.find(
+    (r) =>
+      project === r?.project?.name?.toLowerCase() &&
+      repo === r?.name?.toLowerCase()
   );
+  if (!foundRepo) {
+    logger.debug(`Repo not found: ${name}`);
+  }
+  return foundRepo ?? null;
 }

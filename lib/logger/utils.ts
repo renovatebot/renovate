@@ -85,6 +85,7 @@ export default function prepareError(err: Error): Record<string, unknown> {
           err.name === 'TimeoutError' ? undefined : clone(err.response.body),
         headers: clone(err.response.headers),
         httpVersion: err.response.httpVersion,
+        retryCount: err.response.retryCount,
       };
     }
   }

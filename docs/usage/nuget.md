@@ -26,7 +26,7 @@ To convert your .NET Framework `.csproj`, `.fsproj` or `.vbproj` files into an S
 
 1. Renovate searches in each repository for any files with a `.csproj`, `.fsproj`, or `.vbproj` extension
 1. Existing dependencies are extracted from `<PackageReference>` and `<PackageVersion>` tags
-1. Renovate looks up the latest version on [nuget.org](https://nuget.org) (or on [alternate feeds](#Alternate%20feeds)) to see if any upgrades are available
+1. Renovate looks up the latest version on [nuget.org](https://nuget.org) (or an alternative feed if configured) to see if any upgrades are available
 1. If the source package includes a GitHub URL as its source, and has either:
 
    - a "changelog" file, or
@@ -98,9 +98,12 @@ Credentials for authenticated/private feeds can be given via host rules in the c
 }
 ```
 
+When using Azure DevOps, you can use `pkgs.dev.azure.com` as `matchHost` value.
+
 <!-- prettier-ignore -->
 !!! note
     Only Basic HTTP authentication (via username and password) is supported.
+    For Azure DevOps, you can use a Personal Access Token (PAT) with read permissions on `Packaging` along with an empty username.
 
 ## Future work
 

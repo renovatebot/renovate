@@ -1,9 +1,9 @@
 import { XmlDocument } from 'xmldoc';
 import { logger } from '../../../logger';
+import { detectPlatform } from '../../../util/common';
 import { Http } from '../../../util/http';
 import { regEx } from '../../../util/regex';
 import { ensureTrailingSlash } from '../../../util/url';
-import { detectPlatform } from '../../platform/util';
 import * as ivyVersioning from '../../versioning/ivy';
 import { compare } from '../../versioning/maven/compare';
 import { MavenDatasource } from '../maven';
@@ -190,6 +190,7 @@ export class SbtPackageDatasource extends MavenDatasource {
 
       const dependencyUrl = searchRoot;
 
+      logger.trace({ dependency: packageName, versions }, `Package versions`);
       if (versions) {
         return {
           ...urls,

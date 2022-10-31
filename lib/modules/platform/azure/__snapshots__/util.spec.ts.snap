@@ -1,22 +1,22 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`modules/platform/azure/util getProjectAndRepo should return the object with project and repo 1`] = `
-Object {
+{
   "project": "prjName",
   "repo": "myRepoName",
 }
 `;
 
 exports[`modules/platform/azure/util getProjectAndRepo should return the object with same strings 1`] = `
-Object {
+{
   "project": "myRepoName",
   "repo": "myRepoName",
 }
 `;
 
 exports[`modules/platform/azure/util getRenovatePRFormat should be formated (closed v2) 1`] = `
-Object {
-  "bodyStruct": Object {
+{
+  "bodyStruct": {
     "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
   },
   "createdAt": undefined,
@@ -31,8 +31,8 @@ Object {
 `;
 
 exports[`modules/platform/azure/util getRenovatePRFormat should be formated (closed) 1`] = `
-Object {
-  "bodyStruct": Object {
+{
+  "bodyStruct": {
     "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
   },
   "createdAt": undefined,
@@ -47,8 +47,8 @@ Object {
 `;
 
 exports[`modules/platform/azure/util getRenovatePRFormat should be formated (not closed) 1`] = `
-Object {
-  "bodyStruct": Object {
+{
+  "bodyStruct": {
     "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
   },
   "createdAt": undefined,
@@ -63,19 +63,19 @@ Object {
 `;
 
 exports[`modules/platform/azure/util getStorageExtraCloneOpts should configure basic auth 1`] = `
-Object {
+{
   "-c": "http.extraheader=AUTHORIZATION: basic dXNlcjpwYXNz",
 }
 `;
 
 exports[`modules/platform/azure/util getStorageExtraCloneOpts should configure bearer token 1`] = `
-Object {
+{
   "-c": "http.extraheader=AUTHORIZATION: bearer token",
 }
 `;
 
 exports[`modules/platform/azure/util getStorageExtraCloneOpts should configure personal access token 1`] = `
-Object {
+{
   "-c": "http.extraheader=AUTHORIZATION: basic OjEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3OHRlc3Q=",
 }
 `;

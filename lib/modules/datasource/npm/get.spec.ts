@@ -2,7 +2,7 @@ import * as httpMock from '../../../../test/http-mock';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import * as hostRules from '../../../util/host-rules';
 import { Http } from '../../../util/http';
-import { getDependency, resetMemCache } from './get';
+import { getDependency } from './get';
 import { resolveRegistryUrl, setNpmrc } from './npmrc';
 
 function getPath(s = ''): string {
@@ -16,7 +16,6 @@ const http = new Http('npm');
 describe('modules/datasource/npm/get', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    resetMemCache();
     hostRules.clear();
     setNpmrc();
   });
@@ -265,9 +264,9 @@ describe('modules/datasource/npm/get', () => {
     expect(dep?.sourceDirectory).toBe('packages/react');
 
     expect(httpMock.getTrace()).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "headers": Object {
+      [
+        {
+          "headers": {
             "accept": "application/json",
             "accept-encoding": "gzip, deflate, br",
             "authorization": "Bearer XXX",
@@ -340,6 +339,47 @@ describe('modules/datasource/npm/get', () => {
     );
   });
 
+  it('handles short sourceUrls in releases', async () => {
+    setNpmrc('registry=https://test.org\n_authToken=XXX');
+
+    httpMock
+      .scope('https://test.org')
+      .get('/vue')
+      .reply(200, {
+        name: 'vue',
+        repository: {
+          type: 'git',
+          url: 'https://github.com/vuejs/vue',
+        },
+        versions: {
+          '2.0.0': {
+            repository: 'vuejs/vue',
+          },
+          '3.0.0': {
+            repository: 'github:vuejs/vue-next',
+          },
+          '4.0.0': {
+            repository: 'gitlab:vuejs/vue',
+          },
+          '5.0.0': {
+            repository: 'bitbucket:vuejs/vue',
+          },
+        },
+        'dist-tags': { latest: '2.0.0' },
+      });
+    const registryUrl = resolveRegistryUrl('vue');
+    const dep = await getDependency(http, registryUrl, 'vue');
+    expect(dep).toMatchObject({
+      sourceUrl: 'https://github.com/vuejs/vue',
+      releases: [
+        {},
+        { sourceUrl: 'https://github.com/vuejs/vue-next' },
+        { sourceUrl: 'https://gitlab.com/vuejs/vue' },
+        { sourceUrl: 'https://bitbucket.org/vuejs/vue' },
+      ],
+    });
+  });
+
   it('does not override sourceDirectory', async () => {
     setNpmrc('registry=https://test.org\n_authToken=XXX');
 
@@ -363,9 +403,9 @@ describe('modules/datasource/npm/get', () => {
     expect(dep?.sourceDirectory).toBe('packages/foo');
 
     expect(httpMock.getTrace()).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "headers": Object {
+      [
+        {
+          "headers": {
             "accept": "application/json",
             "accept-encoding": "gzip, deflate, br",
             "authorization": "Bearer XXX",
@@ -403,9 +443,9 @@ describe('modules/datasource/npm/get', () => {
     expect(dep?.sourceDirectory).toBeUndefined();
 
     expect(httpMock.getTrace()).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "headers": Object {
+      [
+        {
+          "headers": {
             "accept": "application/json",
             "accept-encoding": "gzip, deflate, br",
             "authorization": "Bearer XXX",

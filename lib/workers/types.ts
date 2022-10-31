@@ -10,7 +10,6 @@ import type {
 import type { Release } from '../modules/datasource/types';
 import type {
   ArtifactError,
-  CustomExtractConfig,
   ExtractConfig,
   LookupUpdate,
   PackageDependency,
@@ -57,6 +56,8 @@ export interface BranchUpgradeConfig
   prBodyTemplate?: string;
   prPriority?: number;
   prTitle?: string;
+  prettyNewMajor?: string;
+  prettyNewVersion?: string;
   releases?: ReleaseWithNotes[];
   releaseTimestamp?: string;
   repoName?: string;
@@ -111,7 +112,7 @@ export interface BranchConfig
     PlatformPrOptions {
   automergeComment?: string;
   automergeType?: string;
-  baseBranch?: string;
+  baseBranch: string;
   errors?: ValidationMessage[];
   hasTypes?: boolean;
   dependencyDashboardChecks?: Record<string, string>;
@@ -125,11 +126,32 @@ export interface BranchConfig
   prNo?: number;
   stopUpdating?: boolean;
   isConflicted?: boolean;
+  branchFingerprint?: string;
+  skipBranchUpdate?: boolean;
 }
 
-export interface WorkerExtractConfig
-  extends ExtractConfig,
-    Partial<CustomExtractConfig> {
+export interface BranchMetadata {
+  branchName: string;
+  branchSha: string | null;
+  baseBranch: string | undefined;
+  baseBranchSha: string | null | undefined;
+  automerge: boolean;
+  isModified: boolean | undefined;
+}
+
+export interface BaseBranchMetadata {
+  branchName: string;
+  sha: string;
+}
+
+export interface BranchSummary {
+  cacheModified: boolean | undefined;
+  baseBranches: BaseBranchMetadata[];
+  branches: BranchMetadata[];
+  inactiveBranches: string[];
+}
+
+export interface WorkerExtractConfig extends ExtractConfig {
   manager: string;
   fileList: string[];
   fileMatch?: string[];
@@ -150,4 +172,22 @@ export interface SelectAllConfig extends RenovateConfig {
   dependencyDashboardRebaseAllOpen?: boolean;
   dependencyDashboardAllPending?: boolean;
   dependencyDashboardAllRateLimited?: boolean;
+}
+
+export interface UpgradeFingerprintConfig {
+  autoReplaceStringTemplate?: string;
+  currentDigest?: string;
+  currentValue?: string;
+  currentVersion?: string;
+  datasource?: string;
+  depName?: string;
+  lockFile?: string;
+  lockedVersion?: string;
+  manager?: string | null;
+  newName?: string;
+  newDigest?: string;
+  newValue?: string;
+  newVersion?: string;
+  packageFile?: string;
+  replaceString?: string;
 }

@@ -1,14 +1,21 @@
 import is from '@sindresorhus/is';
+import { lang, query as q } from 'good-enough-parser';
 import { quote } from 'shlex';
+import { dirname, join } from 'upath';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { exec } from '../../../util/exec';
 import type { ExecOptions } from '../../../util/exec/types';
-import { readLocalFile, writeLocalFile } from '../../../util/fs';
+import {
+  localPathExists,
+  readLocalFile,
+  writeLocalFile,
+} from '../../../util/fs';
 import { getRepoStatus } from '../../../util/git';
 import type { StatusResult } from '../../../util/git/types';
 import { Http } from '../../../util/http';
 import { newlineRegex } from '../../../util/regex';
+import { replaceAt } from '../../../util/string';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
 import {
   extraEnv,
@@ -18,6 +25,9 @@ import {
 } from './utils';
 
 const http = new Http('gradle-wrapper');
+const groovy = lang.createLang('groovy');
+
+type Ctx = string[];
 
 async function addIfUpdated(
   status: StatusResult,
@@ -52,6 +62,51 @@ async function getDistributionChecksum(url: string): Promise<string> {
   return body;
 }
 
+export async function updateBuildFile(
+  localGradleDir: string,
+  wrapperProperties: Record<string, string | undefined | null>
+): Promise<string> {
+  let buildFileName = join(localGradleDir, 'build.gradle');
+  if (!(await localPathExists(buildFileName))) {
+    buildFileName = join(localGradleDir, 'build.gradle.kts');
+  }
+
+  const buildFileContent = await readLocalFile(buildFileName, 'utf8');
+  if (!buildFileContent) {
+    logger.debug('build.gradle or build.gradle.kts not found');
+    return buildFileName;
+  }
+
+  let buildFileUpdated = buildFileContent;
+  for (const [propertyName, newValue] of Object.entries(wrapperProperties)) {
+    if (!newValue) {
+      continue;
+    }
+
+    const query = q.tree({
+      type: 'wrapped-tree',
+      maxDepth: 1,
+      search: q
+        .sym<Ctx>(propertyName)
+        .op('=')
+        .str((ctx, { value, offset }) => {
+          buildFileUpdated = replaceAt(
+            buildFileUpdated,
+            offset,
+            value,
+            newValue
+          );
+          return ctx;
+        }),
+    });
+    groovy.query(buildFileUpdated, query, []);
+  }
+
+  await writeLocalFile(buildFileName, buildFileUpdated);
+
+  return buildFileName;
+}
+
 export async function updateArtifacts({
   packageFileName,
   newPackageFileContent,
@@ -60,18 +115,23 @@ export async function updateArtifacts({
 }: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
   try {
     logger.debug({ updatedDeps }, 'gradle-wrapper.updateArtifacts()');
-    const gradlewFile = gradleWrapperFileName();
-    let cmd = await prepareGradleCommand(gradlewFile, `wrapper`);
+    const localGradleDir = join(dirname(packageFileName), '../../');
+    const gradlewFile = join(localGradleDir, gradleWrapperFileName());
+
+    let cmd = await prepareGradleCommand(gradlewFile);
     if (!cmd) {
       logger.info('No gradlew found - skipping Artifacts update');
       return null;
     }
+    cmd += ' wrapper';
+
+    let checksum: string | null = null;
     const distributionUrl = getDistributionUrl(newPackageFileContent);
     if (distributionUrl) {
       cmd += ` --gradle-distribution-url ${distributionUrl}`;
       if (newPackageFileContent.includes('distributionSha256Sum=')) {
         //update checksum in case of distributionSha256Sum in properties then run wrapper
-        const checksum = await getDistributionChecksum(distributionUrl);
+        checksum = await getDistributionChecksum(distributionUrl);
         await writeLocalFile(
           packageFileName,
           newPackageFileContent.replace(
@@ -86,6 +146,7 @@ export async function updateArtifacts({
     }
     logger.debug(`Updating gradle wrapper: "${cmd}"`);
     const execOptions: ExecOptions = {
+      cwdFile: gradlewFile,
       docker: {
         image: 'sidecar',
       },
@@ -110,18 +171,21 @@ export async function updateArtifacts({
         'Error executing gradle wrapper update command. It can be not a critical one though.'
       );
     }
+
+    const buildFileName = await updateBuildFile(localGradleDir, {
+      gradleVersion: config.newValue,
+      distributionSha256Sum: checksum,
+      distributionUrl,
+    });
+
     const status = await getRepoStatus();
     const artifactFileNames = [
-      'gradle/wrapper/gradle-wrapper.properties',
-      'gradle/wrapper/gradle-wrapper.jar',
-      'gradlew',
-      'gradlew.bat',
-    ].map(
-      (filename) =>
-        packageFileName
-          .replace('gradle/wrapper/', '')
-          .replace('gradle-wrapper.properties', '') + filename
-    );
+      packageFileName,
+      buildFileName,
+      ...['gradle/wrapper/gradle-wrapper.jar', 'gradlew', 'gradlew.bat'].map(
+        (filename) => join(localGradleDir, filename)
+      ),
+    ];
     const updateArtifactsResult = (
       await Promise.all(
         artifactFileNames.map((fileProjectPath) =>

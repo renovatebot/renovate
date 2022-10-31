@@ -82,7 +82,7 @@ export async function lookupUpdates(
         // If dependency lookup fails then warn and return
         const warning: ValidationMessage = {
           topic: depName,
-          message: `Failed to look up dependency ${depName}`,
+          message: `Failed to look up ${datasource} dependency ${depName}`,
         };
         logger.debug({ dependency: depName, packageFile }, warning.message);
         // TODO: return warnings in own field
@@ -206,20 +206,21 @@ export async function lookupUpdates(
       res.currentVersion = currentVersion!;
       if (
         currentValue &&
-        // TODO #7154
-        currentVersion! &&
+        currentVersion &&
         rangeStrategy === 'pin' &&
         !versioning.isSingleVersion(currentValue)
       ) {
         res.updates.push({
           updateType: 'pin',
           isPin: true,
+          // TODO: newValue can be null! (#7154)
           newValue: versioning.getNewValue({
             currentValue,
             rangeStrategy,
             currentVersion,
             newVersion: currentVersion,
           })!,
+          newVersion: currentVersion,
           newMajor: versioning.getMajor(currentVersion)!,
         });
       }
@@ -234,7 +235,9 @@ export async function lookupUpdates(
         config,
         currentVersion!,
         latestVersion!,
-        allVersions,
+        config.rangeStrategy === 'in-range-only'
+          ? allSatisfyingVersions
+          : allVersions,
         versioning
       ).filter(
         (v) =>

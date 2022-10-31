@@ -39,7 +39,7 @@ async function cleanUpBranches(
               number: pr.number,
               topic: 'Autoclosing Skipped',
               content:
-                'This PR has been flagged for autoclosing, however it is being skipped due to the branch being already modified. Please close/delete it manually or report a bug if you think this is in error.',
+                'This PR has been flagged for autoclosing. However, it is being skipped due to the branch being already modified. Please close/delete it manually or report a bug if you think this is in error.',
             });
           }
         } else if (GlobalConfig.get('dryRun')) {

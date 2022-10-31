@@ -4,7 +4,6 @@ import { PypiDatasource } from '../../datasource/pypi';
 
 export { updateArtifacts } from './artifacts';
 export { extractPackageFile } from './extract';
-export { getRangeStrategy } from './range';
 
 export const language = ProgrammingLanguage.Python;
 
