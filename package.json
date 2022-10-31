@@ -143,7 +143,7 @@
     "@aws-sdk/client-s3": "3.154.0",
     "@breejs/later": "4.1.0",
     "@cheap-glitch/mi-cron": "1.0.1",
-    "@iarna/toml": "2.2.5",
+    "@iarna/toml": "3.0.0",
     "@renovatebot/osv-offline": "1.0.5",
     "@opentelemetry/api": "1.2.0",
     "@opentelemetry/context-async-hooks": "1.7.0",
