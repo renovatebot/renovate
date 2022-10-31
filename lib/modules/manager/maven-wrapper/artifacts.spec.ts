@@ -24,6 +24,7 @@ function mockMavenFileChangedInGit(fileName = 'maven-wrapper.properties') {
 
 describe('modules/manager/maven-wrapper/artifacts', () => {
   beforeEach(() => {
+    GlobalConfig.set({ localDir: './' });
     jest.resetAllMocks();
     fs.statLocalFile.mockResolvedValue(
       partial<Stats>({
@@ -67,7 +68,7 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
   it('Docker should use java 8 if version is lower then 2.0.0', async () => {
     mockMavenFileChangedInGit();
     const execSnapshots = mockExecAll();
-    GlobalConfig.set({ binarySource: 'docker' });
+    GlobalConfig.set({ localDir: './', binarySource: 'docker' });
     const updatedDeps = await updateArtifacts({
       packageFileName: 'maven',
       newPackageFileContent: '',
@@ -88,6 +89,7 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
         },
       },
     ];
+
     expect(execSnapshots[2].cmd).toContain('java 8.0.1');
     expect(updatedDeps).toEqual(expected);
   });
@@ -150,13 +152,17 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
         cmd: 'docker pull renovate/sidecar',
         options: { encoding: 'utf-8' },
       },
+      { cmd: 'docker ps --filter name=renovate_sidecar -aq' },
       {
-        cmd: 'docker ps --filter name=renovate_sidecar -aq',
-      },
-      {
-        cmd: 'docker run --rm --name=renovate_sidecar --label=renovate_child -v "./":"./" -e BUILDPACK_CACHE_DIR -e CONTAINERBASE_CACHE_DIR -w "./" renovate/sidecar bash -l -c "install-tool java 17.0.0 && ./mvnw wrapper:wrapper"',
+        cmd:
+          'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
+          '-v "./":"./" ' +
+          '-e BUILDPACK_CACHE_DIR ' +
+          '-e CONTAINERBASE_CACHE_DIR ' +
+          '-w "../.." renovate/sidecar bash ' +
+          '-l -c "install-tool java 17.0.0 && ./mvnw wrapper:wrapper"',
         options: {
-          cwd: './',
+          cwd: '../..',
           encoding: 'utf-8',
           env: {
             HOME: '/home/user',

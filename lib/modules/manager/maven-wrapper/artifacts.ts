@@ -16,6 +16,12 @@ import type {
   UpdateArtifactsResult,
 } from '../types';
 
+type MavenWrapperPaths = {
+  wrapperExecutableFileName: string;
+  localProjectDir: string;
+  wrapperFullyQualifiedPath: string;
+};
+
 async function addIfUpdated(
   status: StatusResult,
   fileProjectPath: string
@@ -58,7 +64,7 @@ export async function updateArtifacts({
       logger.info('No mvnw found - skipping Artifacts update');
       return null;
     }
-    await executeWrapperCommand(cmd, config);
+    await executeWrapperCommand(cmd, config, packageFileName);
 
     const status = await getRepoStatus();
     const artifactFileNames = [
@@ -98,11 +104,14 @@ async function getUpdatedArtifacts(
   status: StatusResult,
   artifactFileNames: string[]
 ): Promise<UpdateArtifactsResult[]> {
-  const updatedResults: (UpdateArtifactsResult | null)[] = [];
+  const updatedResults: UpdateArtifactsResult[] = [];
   for (const artifactFileName of artifactFileNames) {
-    updatedResults.push(await addIfUpdated(status, artifactFileName));
+    const updatedResult = await addIfUpdated(status, artifactFileName);
+    if (updatedResult !== null) {
+      updatedResults.push(updatedResult);
+    }
   }
-  return updatedResults.filter(is.truthy);
+  return updatedResults;
 }
 
 /**
@@ -127,10 +136,13 @@ export function getJavaConstraint(
 
 async function executeWrapperCommand(
   cmd: string,
-  config: UpdateArtifactsConfig
+  config: UpdateArtifactsConfig,
+  packageFileName: string
 ): Promise<void> {
   logger.debug(`Updating maven wrapper: "${cmd}"`);
+  const { wrapperFullyQualifiedPath } = getMavenPaths(packageFileName);
   const execOptions: ExecOptions = {
+    cwdFile: wrapperFullyQualifiedPath,
     docker: {
       image: 'sidecar',
     },
@@ -154,12 +166,11 @@ async function executeWrapperCommand(
 async function createWrapperCommand(
   packageFileName: string
 ): Promise<string | null> {
-  const wrapperExecutableFileName = mavenWrapperFileName();
-  const localProjectDir = join(dirname(packageFileName), '../../');
-  const wrapperFullyQualifiedPath = join(
+  const {
+    wrapperExecutableFileName,
     localProjectDir,
-    wrapperExecutableFileName
-  );
+    wrapperFullyQualifiedPath,
+  } = getMavenPaths(packageFileName);
 
   return await prepareCommand(
     wrapperExecutableFileName,
@@ -177,6 +188,20 @@ function mavenWrapperFileName(): string {
     return 'mvnw.cmd';
   }
   return './mvnw';
+}
+
+function getMavenPaths(packageFileName: string): MavenWrapperPaths {
+  const wrapperExecutableFileName = mavenWrapperFileName();
+  const localProjectDir = join(dirname(packageFileName), '../../');
+  const wrapperFullyQualifiedPath = join(
+    localProjectDir,
+    wrapperExecutableFileName
+  );
+  return {
+    wrapperExecutableFileName,
+    localProjectDir,
+    wrapperFullyQualifiedPath,
+  };
 }
 
 async function prepareCommand(
