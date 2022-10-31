@@ -287,6 +287,7 @@ export async function resolveConfigPresets(
     'resolveConfigPresets'
   );
   let config: AllConfig = {};
+  // Contains unresolved renovate internal presets when running in shallow resolve mode
   const unresolvedPresets: string[] = [];
   // First, merge all the preset configs from left to right
   if (inputConfig.extends?.length) {
