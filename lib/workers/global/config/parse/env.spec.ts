@@ -20,9 +20,15 @@ describe('workers/global/config/parse/env', () => {
       expect(env.getConfig(envParam).recreateClosed).toBeFalse();
     });
 
-    it('supports boolean nonsense as false', () => {
-      const envParam: NodeJS.ProcessEnv = { RENOVATE_RECREATE_CLOSED: 'foo' };
-      expect(env.getConfig(envParam).recreateClosed).toBeFalse();
+    it('throws exception for invalid boolean value', () => {
+      const envParam: NodeJS.ProcessEnv = {
+        RENOVATE_RECREATE_CLOSED: 'badvalue',
+      };
+      expect(() => env.getConfig(envParam)).toThrow(
+        Error(
+          "Invalid boolean value: expected 'true' or 'false', but got 'badvalue'"
+        )
+      );
     });
 
     delete process.env.RENOVATE_RECREATE_CLOSED;
@@ -45,6 +51,13 @@ describe('workers/global/config/parse/env', () => {
     it('supports string', () => {
       const envParam: NodeJS.ProcessEnv = { RENOVATE_TOKEN: 'a' };
       expect(env.getConfig(envParam).token).toBe('a');
+    });
+
+    it('coerces string newlines', () => {
+      const envParam: NodeJS.ProcessEnv = {
+        RENOVATE_GIT_PRIVATE_KEY: 'abc\\ndef',
+      };
+      expect(env.getConfig(envParam).gitPrivateKey).toBe('abc\ndef');
     });
 
     it('supports custom prefixes', () => {

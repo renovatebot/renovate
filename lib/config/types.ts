@@ -84,7 +84,7 @@ export interface RenovateSharedConfig {
 // The below should contain config options where stage=global
 export interface GlobalOnlyConfig {
   autodiscover?: boolean;
-  autodiscoverFilter?: string;
+  autodiscoverFilter?: string[] | string;
   baseDir?: string;
   cacheDir?: string;
   containerbaseDir?: string;
@@ -434,7 +434,7 @@ export interface PackageRuleInputConfig extends Record<string, unknown> {
   depName?: string;
   currentValue?: string | null;
   currentVersion?: string;
-  lockedVersion?: string | null;
+  lockedVersion?: string;
   updateType?: UpdateType;
   isBump?: boolean;
   sourceUrl?: string | null;
