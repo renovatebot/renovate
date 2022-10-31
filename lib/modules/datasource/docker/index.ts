@@ -74,11 +74,11 @@ export async function getAuthHeaders(
         await http.getJson(apiCheckUrl, options);
 
     if (apiCheckResponse.statusCode === 200) {
-      logger.debug({ apiCheckUrl }, 'No registry auth required');
+      logger.debug(`No registry auth required for ${apiCheckUrl}`);
       return {};
     }
     if (apiCheckResponse.statusCode === 404) {
-      logger.debug({ apiCheckUrl }, 'Page Not Found');
+      logger.debug(`Page Not Found ${apiCheckUrl}`);
       // throw error up to be caught and potentially retried with library/ prefix
       throw new Error(PAGE_NOT_FOUND_ERROR);
     }
@@ -714,7 +714,16 @@ export class DockerDatasource extends Datasource {
         headers,
         noAuth: true,
       });
-      labels = JSON.parse(configResponse.body).config.Labels;
+
+      const body = JSON.parse(configResponse.body);
+      if (body.config) {
+        labels = body.config.Labels;
+      } else {
+        logger.debug(
+          { headers: configResponse.headers, body },
+          `manifest blob response body missing the "config" property`
+        );
+      }
 
       if (labels) {
         logger.debug(
@@ -1059,7 +1068,8 @@ export class DockerDatasource extends Datasource {
       }
 
       if (manifestResponse) {
-        logger.debug({ digest }, 'Got docker digest');
+        // TODO: fix types (#7154)
+        logger.debug(`Got docker digest ${digest!}`);
       }
     } catch (err) /* istanbul ignore next */ {
       if (err instanceof ExternalHostError) {
