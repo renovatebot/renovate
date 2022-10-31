@@ -12,6 +12,7 @@ import * as docker from '../../../../util/exec/docker';
 import { getPkgReleases } from '../../../datasource';
 import type { PostUpdateConfig } from '../../types';
 import type { NpmManagerData } from '../types';
+import { getNodeToolConstraint } from './node-version';
 import * as yarnHelper from './yarn';
 
 jest.mock('fs-extra', () =>
@@ -41,8 +42,12 @@ describe('modules/manager/npm/post-update/yarn', () => {
     delete process.env.BUILDPACK;
     jest.clearAllMocks();
     Fixtures.reset();
-    docker.resetPrefetchedImages();
     GlobalConfig.set({ localDir: '.', cacheDir: '/tmp/cache' });
+    docker.resetPrefetchedImages();
+    mockedFunction(getNodeToolConstraint).mockResolvedValueOnce({
+      toolName: 'node',
+      constraint: '16.16.0',
+    });
   });
 
   it.each([
@@ -380,8 +385,8 @@ describe('modules/manager/npm/post-update/yarn', () => {
       },
     });
     const res = await yarnHelper.generateLockFile('some-dir', {}, config);
-    expect(res.lockFile).toBe('package-lock-contents');
     expect(execSnapshots).toMatchObject([
+      { cmd: 'install-tool node 16.16.0', options: { cwd: 'some-dir' } },
       { cmd: 'install-tool corepack 0.10.0', options: { cwd: 'some-dir' } },
       {
         cmd: 'yarn install --mode=update-lockfile',
@@ -395,6 +400,56 @@ describe('modules/manager/npm/post-update/yarn', () => {
         },
       },
     ]);
+    expect(res.lockFile).toBe('package-lock-contents');
+  });
+
+  it('supports corepack on grouping', async () => {
+    process.env.BUILDPACK = 'true';
+    GlobalConfig.set({
+      localDir: '.',
+      binarySource: 'install',
+      cacheDir: '/tmp/cache',
+    });
+    Fixtures.mock(
+      {
+        'package.json': '{ "packageManager": "yarn@3.0.0" }',
+        'yarn.lock': 'package-lock-contents',
+      },
+      'some-dir'
+    );
+    mockedFunction(getPkgReleases).mockResolvedValueOnce({
+      releases: [{ version: '0.10.0' }],
+    });
+    const execSnapshots = mockExecAll({
+      stdout: '2.1.0',
+      stderr: '',
+    });
+    const config = partial<PostUpdateConfig<NpmManagerData>>({
+      constraints: {
+        yarn: '^3.0.0',
+      },
+    });
+    const res = await yarnHelper.generateLockFile('some-dir', {}, config, [
+      {
+        managerData: { hasPackageManager: true },
+      },
+    ]);
+    expect(execSnapshots).toMatchObject([
+      { cmd: 'install-tool node 16.16.0', options: { cwd: 'some-dir' } },
+      { cmd: 'install-tool corepack 0.10.0', options: { cwd: 'some-dir' } },
+      {
+        cmd: 'yarn install --mode=update-lockfile',
+        options: {
+          cwd: 'some-dir',
+          env: {
+            YARN_ENABLE_GLOBAL_CACHE: '1',
+            YARN_ENABLE_IMMUTABLE_INSTALLS: 'false',
+            YARN_HTTP_TIMEOUT: '100000',
+          },
+        },
+      },
+    ]);
+    expect(res.lockFile).toBe('package-lock-contents');
   });
 
   it('uses slim yarn instead of corepack', async () => {
@@ -427,6 +482,7 @@ describe('modules/manager/npm/post-update/yarn', () => {
     const res = await yarnHelper.generateLockFile('some-dir', {}, config);
     expect(res.lockFile).toBe(plocktest1YarnLockV1);
     expect(execSnapshots).toMatchObject([
+      { cmd: 'install-tool node 16.16.0', options: { cwd: 'some-dir' } },
       { cmd: 'install-tool yarn-slim 1.22.18', options: { cwd: 'some-dir' } },
       {
         cmd: 'yarn install --ignore-engines --ignore-platform --network-timeout 100000 --ignore-scripts',
@@ -500,11 +556,13 @@ describe('modules/manager/npm/post-update/yarn', () => {
     expect(res.lockFile).toBe(plocktest1YarnLockV1);
     const options = { encoding: 'utf-8' };
     expect(execSnapshots).toMatchObject([
-      { cmd: 'docker pull renovate/node', options },
+      { cmd: 'docker pull renovate/sidecar', options },
       {
         cmd:
-          `docker run --rm --name=renovate_node --label=renovate_child -v ".":"." -v "/tmp/cache":"/tmp/cache" -e CI -e BUILDPACK_CACHE_DIR -w "some-dir" renovate/node ` +
+          `docker run --rm --name=renovate_sidecar --label=renovate_child -v ".":"." -v "/tmp/cache":"/tmp/cache" -e CI -e BUILDPACK_CACHE_DIR -e CONTAINERBASE_CACHE_DIR -w "some-dir" renovate/sidecar ` +
           `bash -l -c "` +
+          `install-tool node 16.16.0` +
+          ` && ` +
           `install-tool yarn-slim 1.22.18` +
           ` && ` +
           `sed -i 's/ steps,/ steps.slice(0,1),/' some-dir/.yarn/cli.js || true` +
@@ -588,6 +646,18 @@ describe('modules/manager/npm/post-update/yarn', () => {
       expect(offlineMirror).toBeFalse();
       expect(yarnPath).toBeNull();
       expect(Fixtures.toJSON()['/tmp/renovate/.yarnrc']).toBe('\n');
+    });
+
+    it('removes pure-lockfile and frozen-lockfile from .yarnrc', async () => {
+      Fixtures.mock(
+        {
+          '.yarnrc': `--install.pure-lockfile true\n--install.frozen-lockfile true\n`,
+        },
+        '/tmp/renovate'
+      );
+      GlobalConfig.set({ localDir: '/tmp/renovate', cacheDir: '/tmp/cache' });
+      await yarnHelper.checkYarnrc('/tmp/renovate');
+      expect(Fixtures.toJSON()['/tmp/renovate/.yarnrc']).toBe('\n\n');
     });
   });
 });

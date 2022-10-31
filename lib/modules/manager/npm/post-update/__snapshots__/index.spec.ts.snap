@@ -7,19 +7,19 @@ a: b
 `;
 
 exports[`modules/manager/npm/post-update/index updateYarnBinary() should return .yarnrc.yml content if it has been overwritten 2`] = `
-Array [
-  Object {
+[
+  {
     "contents": "yarnPath: .yarn/releases/yarn-3.0.2.cjs
 a: b
 ",
     "path": "path/to/lockfile/.yarnrc.yml",
     "type": "addition",
   },
-  Object {
+  {
     "path": "path/to/lockfile/.yarn/releases/yarn-3.0.1.cjs",
     "type": "deletion",
   },
-  Object {
+  {
     "contents": "new yarn
 ",
     "isExecutable": true,
@@ -30,19 +30,19 @@ a: b
 `;
 
 exports[`modules/manager/npm/post-update/index updateYarnBinary() should update the Yarn binary 1`] = `
-Array [
-  Object {
+[
+  {
     "contents": "yarnPath: .yarn/releases/yarn-3.0.2.cjs
 a: b
 ",
     "path": "path/to/lockfile/.yarnrc.yml",
     "type": "addition",
   },
-  Object {
+  {
     "path": "path/to/lockfile/.yarn/releases/yarn-3.0.1.cjs",
     "type": "deletion",
   },
-  Object {
+  {
     "contents": "new yarn
 ",
     "isExecutable": true,

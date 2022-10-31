@@ -1,6 +1,8 @@
 import is from '@sindresorhus/is';
 import { loadAll } from 'js-yaml';
 import { logger } from '../../../logger';
+import { trimTrailingSlash } from '../../../util/url';
+import { DockerDatasource } from '../../datasource/docker';
 import { GitTagsDatasource } from '../../datasource/git-tags';
 import { HelmDatasource } from '../../datasource/helm';
 import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
@@ -30,6 +32,21 @@ function createDependency(
 
   // a chart variable is defined this is helm declaration
   if (source.chart) {
+    // assume OCI helm chart if repoURL doesn't contain explicit protocol
+    if (
+      source.repoURL.startsWith('oci://') ||
+      !source.repoURL.includes('://')
+    ) {
+      let registryURL = source.repoURL.replace('oci://', '');
+      registryURL = trimTrailingSlash(registryURL);
+
+      return {
+        depName: `${registryURL}/${source.chart}`,
+        currentValue: source.targetRevision,
+        datasource: DockerDatasource.id,
+      };
+    }
+
     return {
       depName: source.chart,
       registryUrls: [source.repoURL],
@@ -37,6 +54,7 @@ function createDependency(
       datasource: HelmDatasource.id,
     };
   }
+
   return {
     depName: source.repoURL,
     currentValue: source.targetRevision,

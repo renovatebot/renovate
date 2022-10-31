@@ -1,6 +1,5 @@
 import is from '@sindresorhus/is';
 import { DateTime } from 'luxon';
-import pAll from 'p-all';
 import { PlatformId } from '../../constants';
 import {
   PLATFORM_BAD_CREDENTIALS,
@@ -12,13 +11,15 @@ import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import { getCache } from '../cache/repository';
 import { maskToken } from '../mask';
+import * as p from '../promises';
 import { range } from '../range';
 import { regEx } from '../regex';
-import { parseLinkHeader } from '../url';
+import { joinUrlParts, parseLinkHeader, resolveBaseUrl } from '../url';
+import { findMatchingRules } from './host-rules';
 import type { GotLegacyError } from './legacy';
 import type {
   GraphqlOptions,
-  HttpPostOptions,
+  HttpOptions,
   HttpResponse,
   InternalHttpOptions,
 } from './types';
@@ -30,15 +31,11 @@ export const setBaseUrl = (url: string): void => {
   baseUrl = url;
 };
 
-interface GithubInternalOptions extends InternalHttpOptions {
-  body?: string;
-}
-
-export interface GithubHttpOptions extends InternalHttpOptions {
+export interface GithubHttpOptions extends HttpOptions {
   paginate?: boolean | string;
   paginationField?: string;
   pageLimit?: number;
-  token?: string;
+  repository?: string;
 }
 
 interface GithubGraphqlRepoData<T = unknown> {
@@ -70,6 +67,7 @@ function handleGotError(
     message = String(body.message);
   }
   if (
+    err.code === 'ERR_HTTP2_STREAM_ERROR' ||
     err.code === 'ENOTFOUND' ||
     err.code === 'ETIMEDOUT' ||
     err.code === 'EAI_AGAIN' ||
@@ -156,11 +154,6 @@ function handleGotError(
   ) {
     return err;
   }
-  if (err.statusCode === 404) {
-    logger.debug({ url: path }, 'GitHub 404');
-  } else {
-    logger.debug({ err }, 'Unknown GitHub error');
-  }
   return err;
 }
 
@@ -174,9 +167,12 @@ function constructAcceptString(input?: any): string {
   const defaultAccept = 'application/vnd.github.v3+json';
   const acceptStrings =
     typeof input === 'string' ? input.split(regEx(/\s*,\s*/)) : [];
+
+  // TODO: regression of #6736
   if (
-    !acceptStrings.some((x) => x.startsWith('application/vnd.github.')) ||
-    acceptStrings.length < 2
+    !acceptStrings.some((x) => x === defaultAccept) &&
+    (!acceptStrings.some((x) => x.startsWith('application/vnd.github.')) ||
+      acceptStrings.length < 2)
   ) {
     acceptStrings.push(defaultAccept);
   }
@@ -264,7 +260,7 @@ function setGraphqlPageSize(fieldName: string, newPageSize: number): void {
   }
 }
 
-export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
+export class GithubHttp extends Http<GithubHttpOptions> {
   constructor(
     hostType: string = PlatformId.Github,
     options?: GithubHttpOptions
@@ -274,14 +270,35 @@ export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
 
   protected override async request<T>(
     url: string | URL,
-    options?: GithubInternalOptions & GithubHttpOptions,
+    options?: InternalHttpOptions & GithubHttpOptions,
     okToRetry = true
   ): Promise<HttpResponse<T>> {
-    const opts = {
+    const opts: GithubHttpOptions = {
       baseUrl,
       ...options,
       throwHttpErrors: true,
     };
+
+    if (!opts.token) {
+      const authUrl = new URL(resolveBaseUrl(opts.baseUrl!, url));
+
+      if (opts.repository) {
+        // set authUrl to https://api.github.com/repos/org/repo or https://gihub.domain.com/api/v3/repos/org/repo
+        authUrl.hash = '';
+        authUrl.search = '';
+        authUrl.pathname = joinUrlParts(
+          authUrl.pathname.startsWith('/api/v3') ? '/api/v3' : '',
+          'repos',
+          `${opts.repository}`
+        );
+      }
+
+      const { token } = findMatchingRules(
+        { hostType: this.hostType },
+        authUrl.toString()
+      );
+      opts.token = token;
+    }
 
     const accept = constructAcceptString(opts.headers?.accept);
 
@@ -304,7 +321,7 @@ export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
           }
           const queue = [...range(2, lastPage)].map(
             (pageNumber) => (): Promise<HttpResponse<T>> => {
-              const nextUrl = new URL(linkHeader.next.url, baseUrl);
+              const nextUrl = new URL(linkHeader.next.url, opts.baseUrl);
               nextUrl.searchParams.set('page', String(pageNumber));
               return this.request<T>(
                 nextUrl,
@@ -313,7 +330,7 @@ export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
               );
             }
           );
-          const pages = await pAll(queue, { concurrency: 5 });
+          const pages = await p.all(queue);
           if (opts.paginationField && is.plainObject(result.body)) {
             const paginatedResult = result.body[opts.paginationField];
             if (is.array<T>(paginatedResult)) {
@@ -358,7 +375,7 @@ export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
     }
     const body = variables ? { query, variables } : { query };
 
-    const opts: HttpPostOptions = {
+    const opts: GithubHttpOptions = {
       baseUrl: baseUrl.replace('/v3/', '/'), // GHE uses unversioned graphql path
       body,
       headers: { accept: options?.acceptHeader },
@@ -409,9 +426,8 @@ export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
       });
       const repositoryData = res?.data?.repository;
       if (
-        repositoryData &&
-        is.plainObject(repositoryData) &&
-        repositoryData[fieldName]
+        is.nonEmptyObject(repositoryData) &&
+        !is.nullOrUndefined(repositoryData[fieldName])
       ) {
         optimalCount = count;
 

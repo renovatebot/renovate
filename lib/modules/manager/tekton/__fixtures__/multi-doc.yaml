@@ -1,0 +1,111 @@
+---
+kind: Pipeline
+spec:
+  tasks:
+  - taskRef:
+      bundle: gcr.io/tekton-releases/catalog/upstream/pipeline:1.0@sha256:01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+---
+kind: Pipeline
+spec:
+  tasks:
+  - taskRef:
+      resolver: bundles
+      resource:
+      - name: bundle
+        value: gcr.io/tekton-releases/catalog/upstream/pipeline-resolver:1.0@sha256:01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+---
+kind: List
+items:
+- kind: Pipeline
+  spec:
+    tasks:
+    - taskRef:
+        bundle: >-
+          gcr.io/tekton-releases/catalog/upstream/list-pipeline
+- kind: PipelineRun
+  spec:
+    pipelineRef:
+      bundle: >-
+        gcr.io/tekton-releases/catalog/upstream/list-pipeline-run
+- kind: TaskRun
+  spec:
+    taskRef:
+      bundle: >-
+        gcr.io/tekton-releases/catalog/upstream/list-task-run
+---
+kind: TriggerTemplate
+spec:
+  resourcetemplates:
+  - kind: TaskRun
+    spec:
+      taskRef:
+        bundle: gcr.io/tekton-releases/catalog/upstream/trigger-template-task-run
+  - kind: TaskRun
+    spec:
+      taskRef:
+        resolver: bundles
+        resource:
+        - name: bundle
+          value: gcr.io/tekton-releases/catalog/upstream/trigger-template-task-run-resolver
+  - kind: PipelineRun
+    spec:
+      pipelineRef:
+        bundle: gcr.io/tekton-releases/catalog/upstream/trigger-template-pipeline-run
+  - kind: PipelineRun
+    spec:
+      pipelineRef:
+        resolver: bundles
+        resource:
+        - name: bundle
+          value: gcr.io/tekton-releases/catalog/upstream/trigger-template-pipeline-run-resolver
+---
+kind: TaskRun
+spec:
+  taskRef:
+    resolver: bundles
+    resource:
+    - name: bundle
+      value: gcr.io/tekton-releases/catalog/upstream/task-run
+---
+kind: TaskRun
+spec:
+  taskRef:
+    resolver: bundles
+    resource:
+    - name: bundle
+      value: gcr.io/tekton-releases/catalog/upstream/task-run-resolver
+---
+kind: PipelineRun
+spec:
+  pipelineRef:
+    bundle: gcr.io/tekton-releases/catalog/upstream/pipeline-run
+---
+kind: PipelineRun
+spec:
+  pipelineRef:
+    resolver: bundles
+    resource:
+    - name: bundle
+      value: gcr.io/tekton-releases/catalog/upstream/pipeline-run-resolver
+---
+kind: Pipeline
+spec:
+  tasks:
+  - taskRef:
+      bundle: true
+---
+kind: Pipeline
+spec:
+  tasks:
+  - taskRef:
+      bundle: ""
+---
+kind: Pipeline
+spec:
+  tasks:
+  - taskRef:
+      resolver: bundles
+      resource:
+      - name: bundle
+        value: ""
+---

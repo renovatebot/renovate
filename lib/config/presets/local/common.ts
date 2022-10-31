@@ -13,21 +13,20 @@ export async function fetchJSONFile(
   try {
     raw = await platform.getRawFile(fileName, repo);
   } catch (err) {
-    // istanbul ignore if: not testable with nock
     if (err instanceof ExternalHostError) {
       throw err;
     }
 
-    logger.debug(
-      { err, repo, fileName },
-      `Failed to retrieve ${fileName} from repo ${repo}`
-    );
+    logger.debug(`Preset file ${fileName} not found in ${repo}`);
 
     throw new Error(PRESET_DEP_NOT_FOUND);
   }
 
-  // TODO: null check #7154
-  return parsePreset(raw!);
+  if (!raw) {
+    throw new Error(PRESET_DEP_NOT_FOUND);
+  }
+
+  return parsePreset(raw);
 }
 
 export function getPresetFromEndpoint(

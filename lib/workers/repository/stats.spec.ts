@@ -12,7 +12,13 @@ const log = logger.logger as jest.Mocked<Logger>;
 describe('workers/repository/stats', () => {
   describe('printRequestStats()', () => {
     it('runs', () => {
-      const stats: RequestStats[] = [
+      const getStats: number[] = [30, 100, 10, 20];
+      // TODO: fix types, jest is using wrong overload (#7154)
+      memCache.get.mockImplementationOnce(() => getStats as any);
+      const setStats: number[] = [110, 80, 20];
+      // TODO: fix types, jest is using wrong overload (#7154)
+      memCache.get.mockImplementationOnce(() => setStats as any);
+      const httpStats: RequestStats[] = [
         {
           method: 'get',
           url: 'https://api.github.com/api/v3/user',
@@ -56,13 +62,14 @@ describe('workers/repository/stats', () => {
           statusCode: 401,
         },
       ];
-      memCache.get.mockImplementationOnce(() => stats);
+      // TODO: fix types, jest is using wrong overload (#7154)
+      memCache.get.mockImplementationOnce(() => httpStats as any);
       expect(printRequestStats()).toBeUndefined();
       expect(log.trace).toHaveBeenCalledOnce();
-      expect(log.debug).toHaveBeenCalledTimes(2);
+      expect(log.debug).toHaveBeenCalledTimes(3);
       expect(log.trace.mock.calls[0][0]).toMatchInlineSnapshot(`
-        Object {
-          "allRequests": Array [
+        {
+          "allRequests": [
             "GET https://api.github.com/api/v3/repositories 500 500 0",
             "GET https://api.github.com/api/v3/user 200 100 0",
             "POST https://api.github.com/graphql 401 130 0",
@@ -70,37 +77,37 @@ describe('workers/repository/stats', () => {
             "POST https://api.github.com/graphql 200 20 10",
             "GET https://auth.docker.io 401 200 0",
           ],
-          "requestHosts": Object {
-            "api.github.com": Array [
-              Object {
+          "requestHosts": {
+            "api.github.com": [
+              {
                 "duration": 500,
                 "method": "get",
                 "queueDuration": 0,
                 "statusCode": 500,
                 "url": "https://api.github.com/api/v3/repositories",
               },
-              Object {
+              {
                 "duration": 100,
                 "method": "get",
                 "queueDuration": 0,
                 "statusCode": 200,
                 "url": "https://api.github.com/api/v3/user",
               },
-              Object {
+              {
                 "duration": 130,
                 "method": "post",
                 "queueDuration": 0,
                 "statusCode": 401,
                 "url": "https://api.github.com/graphql",
               },
-              Object {
+              {
                 "duration": 150,
                 "method": "post",
                 "queueDuration": 0,
                 "statusCode": 200,
                 "url": "https://api.github.com/graphql",
               },
-              Object {
+              {
                 "duration": 20,
                 "method": "post",
                 "queueDuration": 10,
@@ -108,8 +115,8 @@ describe('workers/repository/stats', () => {
                 "url": "https://api.github.com/graphql",
               },
             ],
-            "auth.docker.io": Array [
-              Object {
+            "auth.docker.io": [
+              {
                 "duration": 200,
                 "method": "get",
                 "queueDuration": 0,
@@ -121,21 +128,37 @@ describe('workers/repository/stats', () => {
         }
       `);
       expect(log.debug.mock.calls[1][0]).toMatchInlineSnapshot(`
-        Object {
-          "hostStats": Object {
-            "api.github.com": Object {
+        {
+          "get": {
+            "avgMs": 40,
+            "count": 4,
+            "maxMs": 100,
+            "medianMs": 20,
+          },
+          "set": {
+            "avgMs": 70,
+            "count": 3,
+            "maxMs": 110,
+            "medianMs": 80,
+          },
+        }
+      `);
+      expect(log.debug.mock.calls[2][0]).toMatchInlineSnapshot(`
+        {
+          "hostStats": {
+            "api.github.com": {
               "queueAvgMs": 2,
               "requestAvgMs": 180,
               "requestCount": 5,
             },
-            "auth.docker.io": Object {
+            "auth.docker.io": {
               "queueAvgMs": 0,
               "requestAvgMs": 200,
               "requestCount": 1,
             },
           },
           "totalRequests": 6,
-          "urls": Object {
+          "urls": {
             "https://api.github.com/api/v3/repositories (GET,500)": 1,
             "https://api.github.com/api/v3/user (GET,200)": 1,
             "https://api.github.com/graphql (POST,200)": 2,

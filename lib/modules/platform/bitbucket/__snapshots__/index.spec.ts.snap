@@ -7,15 +7,15 @@ exports[`modules/platform/bitbucket/index ensureComment() does not throw 1`] = `
 exports[`modules/platform/bitbucket/index ensureCommentRemoval() does not throw 1`] = `undefined`;
 
 exports[`modules/platform/bitbucket/index findIssue() does not throw 1`] = `
-Object {
+{
   "body": "content",
   "number": 25,
 }
 `;
 
 exports[`modules/platform/bitbucket/index findPr() finds pr 1`] = `
-Object {
-  "bodyStruct": Object {
+{
+  "bodyStruct": {
     "hash": "761b7ad8ad439b2855fcbb611331c646ef0870b0631247bba3f3025cb6df5a53",
   },
   "createdAt": "2018-07-02T07:02:25.275030+00:00",
@@ -29,8 +29,8 @@ Object {
 `;
 
 exports[`modules/platform/bitbucket/index getBranchPr() bitbucket finds PR for branch 1`] = `
-Object {
-  "bodyStruct": Object {
+{
+  "bodyStruct": {
     "hash": "761b7ad8ad439b2855fcbb611331c646ef0870b0631247bba3f3025cb6df5a53",
   },
   "createdAt": "2018-07-02T07:02:25.275030+00:00",
@@ -45,16 +45,16 @@ Object {
 `;
 
 exports[`modules/platform/bitbucket/index getIssueList() get issues 1`] = `
-Array [
-  Object {
-    "content": Object {
+[
+  {
+    "content": {
       "raw": "content",
     },
     "id": 25,
     "title": "title",
   },
-  Object {
-    "content": Object {
+  {
+    "content": {
       "raw": "content",
     },
     "id": 26,
@@ -64,8 +64,8 @@ Array [
 `;
 
 exports[`modules/platform/bitbucket/index getPr() canRebase 1`] = `
-Object {
-  "bodyStruct": Object {
+{
+  "bodyStruct": {
     "hash": "761b7ad8ad439b2855fcbb611331c646ef0870b0631247bba3f3025cb6df5a53",
   },
   "createdAt": "2018-07-02T07:02:25.275030+00:00",
@@ -80,8 +80,8 @@ Object {
 `;
 
 exports[`modules/platform/bitbucket/index getPr() canRebase 2`] = `
-Object {
-  "bodyStruct": Object {
+{
+  "bodyStruct": {
     "hash": "761b7ad8ad439b2855fcbb611331c646ef0870b0631247bba3f3025cb6df5a53",
   },
   "createdAt": "2018-07-02T07:02:25.275030+00:00",
@@ -96,8 +96,8 @@ Object {
 `;
 
 exports[`modules/platform/bitbucket/index getPr() canRebase 3`] = `
-Object {
-  "bodyStruct": Object {
+{
+  "bodyStruct": {
     "hash": "761b7ad8ad439b2855fcbb611331c646ef0870b0631247bba3f3025cb6df5a53",
   },
   "createdAt": "2018-07-02T07:02:25.275030+00:00",
@@ -112,8 +112,8 @@ Object {
 `;
 
 exports[`modules/platform/bitbucket/index getPr() exists 1`] = `
-Object {
-  "bodyStruct": Object {
+{
+  "bodyStruct": {
     "hash": "761b7ad8ad439b2855fcbb611331c646ef0870b0631247bba3f3025cb6df5a53",
   },
   "createdAt": "2018-07-02T07:02:25.275030+00:00",
@@ -128,9 +128,9 @@ Object {
 `;
 
 exports[`modules/platform/bitbucket/index getPrList() filters PR list by author 1`] = `
-Array [
-  Object {
-    "bodyStruct": Object {
+[
+  {
+    "bodyStruct": {
       "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     },
     "createdAt": undefined,
@@ -144,16 +144,11 @@ Array [
 ]
 `;
 
-exports[`modules/platform/bitbucket/index initPlatform() should init 1`] = `
-Object {
-  "endpoint": "https://api.bitbucket.org/",
-}
-`;
-
-exports[`modules/platform/bitbucket/index initRepo() works 1`] = `
-Object {
+exports[`modules/platform/bitbucket/index initRepo() works with username and password 1`] = `
+{
   "defaultBranch": "master",
   "isFork": false,
+  "repoFingerprint": "56653db0e9341ef4957c92bb78ee668b0a3f03c75b77db94d520230557385fca344cc1f593191e3594183b5b050909d29996c040045e8852f21774617b240642",
 }
 `;
 

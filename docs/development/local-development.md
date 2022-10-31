@@ -11,7 +11,7 @@ For example, if you think anything is unclear, or you think something needs to b
 You need the following dependencies for local development:
 
 - Git `>=2.33.0`
-- Node.js `>=14.15.4`
+- Node.js `^16.13.0 || >= 18.12.0`
 - Yarn `^1.22.5`
 - C++ compiler
 - Java between `8` and `12`
@@ -206,7 +206,7 @@ We want stay backwards-compatible as much as possible, as well as make the code 
 So most new functionality should be controllable via configuration options.
 
 Create your new configuration option in the `lib/config/options/index.ts` file.
-Also create documentation for the option in the `website/docs/configuration-options.md` file.
+Also create documentation for the option in the `docs/usage/configuration-options.md` file.
 
 ## Debugging
 

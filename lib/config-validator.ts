@@ -50,57 +50,80 @@ type PackageJson = {
 };
 
 (async () => {
-  for (const file of configFileNames.filter(
-    (name) => name !== 'package.json'
-  )) {
-    try {
-      if (!(await pathExists(file))) {
-        continue;
-      }
-      const parsedContent = await getParsedContent(file);
+  if (process.argv.length > 2) {
+    for (const file of process.argv.slice(2)) {
       try {
-        logger.info(`Validating ${file}`);
-        await validate(file, parsedContent);
+        if (!(await pathExists(file))) {
+          returnVal = 1;
+          logger.error(`${file} does not exist`);
+          break;
+        }
+        const parsedContent = await getParsedContent(file);
+        try {
+          logger.info(`Validating ${file}`);
+          await validate(file, parsedContent);
+        } catch (err) {
+          logger.warn({ err }, `${file} is not valid Renovate config`);
+          returnVal = 1;
+        }
       } catch (err) {
-        logger.warn({ err }, `${file} is not valid Renovate config`);
+        logger.warn({ err }, `${file} could not be parsed`);
         returnVal = 1;
+      }
+    }
+  } else {
+    for (const file of configFileNames.filter(
+      (name) => name !== 'package.json'
+    )) {
+      try {
+        if (!(await pathExists(file))) {
+          continue;
+        }
+        const parsedContent = await getParsedContent(file);
+        try {
+          logger.info(`Validating ${file}`);
+          await validate(file, parsedContent);
+        } catch (err) {
+          logger.warn({ err }, `${file} is not valid Renovate config`);
+          returnVal = 1;
+        }
+      } catch (err) {
+        logger.warn({ err }, `${file} could not be parsed`);
+        returnVal = 1;
+      }
+    }
+    try {
+      const pkgJson = JSON.parse(
+        await readFile('package.json', 'utf8')
+      ) as PackageJson;
+      if (pkgJson.renovate) {
+        logger.info(`Validating package.json > renovate`);
+        await validate('package.json > renovate', pkgJson.renovate);
+      }
+      if (pkgJson['renovate-config']) {
+        logger.info(`Validating package.json > renovate-config`);
+        for (const presetConfig of Object.values(pkgJson['renovate-config'])) {
+          await validate('package.json > renovate-config', presetConfig, true);
+        }
       }
     } catch (err) {
-      logger.warn({ err }, `${file} could not be parsed`);
-      returnVal = 1;
+      // ignore
     }
-  }
-  try {
-    const pkgJson = JSON.parse(
-      await readFile('package.json', 'utf8')
-    ) as PackageJson;
-    if (pkgJson.renovate) {
-      logger.info(`Validating package.json > renovate`);
-      await validate('package.json > renovate', pkgJson.renovate);
-    }
-    if (pkgJson['renovate-config']) {
-      logger.info(`Validating package.json > renovate-config`);
-      for (const presetConfig of Object.values(pkgJson['renovate-config'])) {
-        await validate('package.json > renovate-config', presetConfig, true);
+    try {
+      const fileConfig = await getFileConfig(process.env);
+      if (!dequal(fileConfig, {})) {
+        const file = process.env.RENOVATE_CONFIG_FILE ?? 'config.js';
+        logger.info(`Validating ${file}`);
+        try {
+          await validate(file, fileConfig);
+        } catch (err) {
+          logger.error({ err }, `${file} is not valid Renovate config`);
+          returnVal = 1;
+        }
       }
+    } catch (err) {
+      // ignore
     }
-  } catch (err) {
-    // ignore
-  }
-  try {
-    const fileConfig = await getFileConfig(process.env);
-    if (!dequal(fileConfig, {})) {
-      const file = process.env.RENOVATE_CONFIG_FILE ?? 'config.js';
-      logger.info(`Validating ${file}`);
-      try {
-        await validate(file, fileConfig);
-      } catch (err) {
-        logger.error({ err }, `${file} is not valid Renovate config`);
-        returnVal = 1;
-      }
-    }
-  } catch (err) {
-    // ignore
   }
   if (returnVal !== 0) {
     process.exit(returnVal);

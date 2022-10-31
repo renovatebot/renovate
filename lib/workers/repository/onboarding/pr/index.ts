@@ -14,7 +14,7 @@ import {
 import * as template from '../../../../util/template';
 import type { BranchConfig } from '../../../types';
 import {
-  getDepWarningsPR,
+  getDepWarningsOnboardingPR,
   getErrors,
   getWarnings,
 } from '../../errors-warnings';
@@ -104,7 +104,7 @@ If you need any further assistance then you can also [request help here](${
     );
     if (isConflicted) {
       configDesc += emojify(
-        `:warning: This PR has a merge conflict, however Renovate is unable to automatically fix that due to edits in this branch. Please resolve the merge conflict manually.\n\n`
+        `:warning: This PR has a merge conflict. However, Renovate is unable to automatically fix that due to edits in this branch. Please resolve the merge conflict manually.\n\n`
       );
     } else {
       configDesc += `Important: Now that this branch is edited, Renovate can't rebase it from the base branch any more. If you make changes to the base branch that could impact this onboarding PR, please merge them manually.\n\n`;
@@ -115,7 +115,7 @@ If you need any further assistance then you can also [request help here](${
   prBody = prBody.replace('{{CONFIG}}\n', configDesc);
   prBody = prBody.replace(
     '{{WARNINGS}}\n',
-    getWarnings(config) + getDepWarningsPR(packageFiles!)
+    getWarnings(config) + getDepWarningsOnboardingPR(packageFiles!)
   );
   prBody = prBody.replace('{{ERRORS}}\n', getErrors(config));
   prBody = prBody.replace('{{BASEBRANCH}}\n', getBaseBranchDesc(config));

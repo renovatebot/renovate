@@ -1,4 +1,3 @@
-// TODO #7154
 import { GlobalConfig } from '../../../../config/global';
 import { logger } from '../../../../logger';
 import { platform } from '../../../../modules/platform';
@@ -62,8 +61,8 @@ export async function shouldReuseExistingBranch(
     (config.rebaseWhen === 'auto' &&
       (config.automerge || (await platform.getRepoForceRebase())))
   ) {
-    if (await isBranchBehindBase(branchName)) {
-      logger.debug(`Branch is stale and needs rebasing`);
+    if (await isBranchBehindBase(branchName, baseBranch)) {
+      logger.debug(`Branch is behind base branch and needs rebasing`);
       // We can rebase the branch only if no PR or PR can be rebased
       if (await isBranchModified(branchName)) {
         logger.debug('Cannot rebase branch as it has been modified');
@@ -77,12 +76,12 @@ export async function shouldReuseExistingBranch(
     logger.debug('Branch is up-to-date');
   } else {
     logger.debug(
-      `Skipping stale branch check due to rebaseWhen=${config.rebaseWhen!}`
+      `Skipping behind base branch check due to rebaseWhen=${config.rebaseWhen!}`
     );
   }
 
   // Now check if PR is unmergeable. If so then we also rebase
-  result.isConflicted = await isBranchConflicted(baseBranch!, branchName);
+  result.isConflicted = await isBranchConflicted(baseBranch, branchName);
   if (result.isConflicted) {
     logger.debug('Branch is conflicted');
 

@@ -63,10 +63,12 @@ const staticGroups = {
       'group:jekyllEcosystem',
       'group:jestPlusTSJest',
       'group:jestPlusTypes',
+      'group:jwtFramework',
       'group:kubernetes',
       'group:phpstan',
       'group:polymer',
       'group:resilience4j',
+      'group:rubyOnRails',
       'group:rubyOmniauth',
       'group:socketio',
       'group:springAmqp',
@@ -484,6 +486,30 @@ const staticGroups = {
       },
     ],
   },
+  rubyOnRails: {
+    description: 'Group Ruby on Rails packages together.',
+    packageRules: [
+      {
+        matchDatasources: ['rubygems'],
+        matchPackageNames: [
+          'actioncable',
+          'actionmailbox',
+          'actionmailer',
+          'actionpack',
+          'actiontext',
+          'actionview',
+          'activejob',
+          'activemodel',
+          'activerecord',
+          'activestorage',
+          'activesupport',
+          'railties',
+          'rails',
+        ],
+        groupName: 'Ruby on Rails packages',
+      },
+    ],
+  },
   rubyOmniauth: {
     description: 'Group OmniAuth packages together.',
     packageRules: [
@@ -656,6 +682,16 @@ const staticGroups = {
         matchPackageNames: ['@types/jest'],
         matchUpdateTypes: nonPinUpdateTypes,
         groupName: 'jest monorepo',
+      },
+    ],
+  },
+  jwtFramework: {
+    description: 'Group JWT Framework packages together.',
+    packageRules: [
+      {
+        matchDatasources: ['packagist'],
+        matchPackagePrefixes: ['web-token/'],
+        groupName: 'JWT Framework packages',
       },
     ],
   },

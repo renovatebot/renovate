@@ -4,31 +4,37 @@ import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import * as packageCache from '../../../util/cache/package';
 import type { Http } from '../../../util/http';
+import { regEx } from '../../../util/regex';
 import { joinUrlParts } from '../../../util/url';
 import { id } from './common';
 import type { NpmDependency, NpmRelease, NpmResponse } from './types';
-
-let memcache: Record<string, string> = {};
-
-export function resetMemCache(): void {
-  logger.debug('resetMemCache()');
-  memcache = {};
-}
-
-export function resetCache(): void {
-  resetMemCache();
-}
 
 interface PackageSource {
   sourceUrl?: string;
   sourceDirectory?: string;
 }
 
+const SHORT_REPO_REGEX = regEx(
+  /^((?<platform>bitbucket|github|gitlab):)?(?<shortRepo>[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+)$/
+);
+
+const platformMapping: Record<string, string> = {
+  bitbucket: 'https://bitbucket.org/',
+  github: 'https://github.com/',
+  gitlab: 'https://gitlab.com/',
+};
+
 function getPackageSource(repository: any): PackageSource {
   const res: PackageSource = {};
   if (repository) {
     if (is.nonEmptyString(repository)) {
-      res.sourceUrl = repository;
+      const shortMatch = repository.match(SHORT_REPO_REGEX);
+      if (shortMatch?.groups) {
+        const { platform = 'github', shortRepo } = shortMatch.groups;
+        res.sourceUrl = platformMapping[platform] + shortRepo;
+      } else {
+        res.sourceUrl = repository;
+      }
     } else if (is.nonEmptyString(repository.url)) {
       res.sourceUrl = repository.url;
     }
@@ -59,12 +65,6 @@ export async function getDependency(
 ): Promise<NpmDependency | null> {
   logger.trace(`npm.getDependency(${packageName})`);
 
-  // This is our datastore cache and is cleared at the end of each repo, i.e. we never requery/revalidate during a "run"
-  if (memcache[packageName]) {
-    logger.trace('Returning cached result');
-    return JSON.parse(memcache[packageName]) as NpmDependency;
-  }
-
   const packageUrl = joinUrlParts(registryUrl, packageName.replace('/', '%2F'));
 
   // Now check the persistent cache
@@ -85,7 +85,7 @@ export async function getDependency(
     const res = raw.body;
     if (!res.versions || !Object.keys(res.versions).length) {
       // Registry returned a 200 OK but with no versions
-      logger.debug({ dependency: packageName }, 'No versions returned');
+      logger.debug(`No versions returned for npm dependency ${packageName}`);
       return null;
     }
 
@@ -138,7 +138,6 @@ export async function getDependency(
     });
     logger.trace({ dep }, 'dep');
     // serialize first before saving
-    memcache[packageName] = JSON.stringify(dep);
     const cacheMinutes = process.env.RENOVATE_CACHE_NPM_MINUTES
       ? parseInt(process.env.RENOVATE_CACHE_NPM_MINUTES, 10)
       : 15;
@@ -158,35 +157,12 @@ export async function getDependency(
     }
     return dep;
   } catch (err) {
-    if (err.statusCode === 401 || err.statusCode === 403) {
-      logger.debug(
-        {
-          packageUrl,
-          err,
-          statusCode: err.statusCode,
-          packageName,
-        },
-        `Dependency lookup failure: unauthorized`
-      );
-      return null;
-    }
-    if (err.statusCode === 402) {
-      logger.debug(
-        {
-          packageUrl,
-          err,
-          statusCode: err.statusCode,
-          packageName,
-        },
-        `Dependency lookup failure: payment required`
-      );
-      return null;
-    }
-    if (err.statusCode === 404 || err.code === 'ENOTFOUND') {
-      logger.debug(
-        { err, packageName },
-        `Dependency lookup failure: not found`
-      );
+    const ignoredStatusCodes = [401, 402, 403, 404];
+    const ignoredResponseCodes = ['ENOTFOUND'];
+    if (
+      ignoredStatusCodes.includes(err.statusCode) ||
+      ignoredResponseCodes.includes(err.code)
+    ) {
       return null;
     }
     if (uri.host === 'registry.npmjs.org') {

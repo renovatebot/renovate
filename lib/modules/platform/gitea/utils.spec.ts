@@ -1,6 +1,6 @@
 import { partial } from '../../../../test/util';
 import { CONFIG_GIT_URL_UNAVAILABLE } from '../../../constants/error-messages';
-import type { Repo } from './gitea-helper';
+import type { Repo } from './types';
 import { getMergeMethod, getRepoUrl, trimTrailingApiPath } from './utils';
 
 describe('modules/platform/gitea/utils', () => {

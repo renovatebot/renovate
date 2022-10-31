@@ -61,7 +61,7 @@ export class CrateDatasource extends Datasource {
       registryUrl,
     });
     if (!registryInfo) {
-      logger.debug({ registryUrl }, 'Could not fetch registry info');
+      logger.debug(`Could not fetch registry info from ${registryUrl}`);
       return null;
     }
 
@@ -168,7 +168,7 @@ export class CrateDatasource extends Datasource {
     if (info.flavor === RegistryFlavor.CratesIo) {
       const crateUrl =
         CrateDatasource.CRATES_IO_BASE_URL +
-        CrateDatasource.getIndexSuffix(packageName).join('/');
+        CrateDatasource.getIndexSuffix(packageName.toLowerCase()).join('/');
       try {
         return (await this.http.get(crateUrl)).body;
       } catch (err) {
@@ -232,7 +232,7 @@ export class CrateDatasource extends Datasource {
 
     const url = parseUrl(registryUrl);
     if (!url) {
-      logger.debug({ registryUrl }, 'could not parse registry URL');
+      logger.debug(`Could not parse registry URL ${registryUrl}`);
       return null;
     }
 

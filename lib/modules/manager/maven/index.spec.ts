@@ -61,7 +61,7 @@ describe('modules/manager/maven/index', () => {
           p.parent = p.parent.replace(/\\/g, '/');
         }
       }
-      expect(packages).toMatchSnapshot([
+      expect(packages).toMatchObject([
         {
           deps: [
             { depName: 'org.example:parent', currentValue: '42' },
@@ -185,6 +185,18 @@ describe('modules/manager/maven/index', () => {
         {
           depName: 'com.sksamuel.scapegoat:scalac-scapegoat-plugin_2.13.7',
           currentValue: '1.4.11',
+        },
+      ]);
+    });
+
+    it('should apply props multiple times', () => {
+      const [{ deps }] = resolveParents([
+        extractPackage(Fixtures.get('multiple_usages_props.pom.xml'))!,
+      ]);
+      expect(deps).toMatchObject([
+        {
+          depName: 'org.apache.lucene:lucene-core-1.2.3.1.2.3',
+          currentValue: '1.2.3',
         },
       ]);
     });

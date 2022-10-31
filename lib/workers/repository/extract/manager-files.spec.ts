@@ -75,10 +75,9 @@ describe('workers/repository/extract/manager-files', () => {
         '{"dependencies":{"chalk":"2.0.0"}}'
       );
       const res = await getManagerPackageFiles(managerConfig);
-      expect(res).toMatchSnapshot([
+      expect(res).toMatchObject([
         {
           packageFile: 'package.json',
-          packageJsonType: 'app',
           deps: [
             {
               currentValue: '2.0.0',

@@ -7,6 +7,7 @@ import { exec } from '../../../util/exec';
 import type { ExecOptions } from '../../../util/exec/types';
 import {
   deleteLocalFile,
+  ensureCacheDir,
   readLocalFile,
   writeLocalFile,
 } from '../../../util/fs';
@@ -51,6 +52,7 @@ const allowedPipArguments = [
   '--allow-unsafe',
   '--generate-hashes',
   '--no-emit-index-url',
+  '--strip-extras',
 ];
 
 export function constructPipCompileCmd(
@@ -75,6 +77,11 @@ export function constructPipCompileCmd(
           );
         }
         args.push(`--output-file=${file}`);
+      } else if (argument.startsWith('--resolver=')) {
+        const value = extractResolver(argument);
+        if (value) {
+          args.push(`--resolver=${value}`);
+        }
       } else if (argument.startsWith('--')) {
         logger.trace(
           { argument },
@@ -114,18 +121,25 @@ export async function updateArtifacts({
       inputFileName,
       outputFileName
     );
-    const tagConstraint = getPythonConstraint(config);
+    const constraint = getPythonConstraint(config);
     const pipToolsConstraint = getPipToolsConstraint(config);
     const execOptions: ExecOptions = {
       cwdFile: inputFileName,
       docker: {
-        image: 'python',
-        tagConstraint,
-        tagScheme: 'pep440',
+        image: 'sidecar',
       },
       preCommands: [
         `pip install --user ${quote(`pip-tools${pipToolsConstraint}`)}`,
       ],
+      toolConstraints: [
+        {
+          toolName: 'python',
+          constraint,
+        },
+      ],
+      extraEnv: {
+        PIP_CACHE_DIR: await ensureCacheDir('pip'),
+      },
     };
     logger.debug({ cmd }, 'pip-compile command');
     await exec(cmd, execOptions);
@@ -158,4 +172,17 @@ export async function updateArtifacts({
       },
     ];
   }
+}
+
+export function extractResolver(argument: string): string | null {
+  const value = argument.replace('--resolver=', '');
+  if (['backtracking', 'legacy'].includes(value)) {
+    return value;
+  }
+
+  logger.warn(
+    { argument },
+    'pip-compile was previously executed with an unexpected `--resolver` value'
+  );
+  return null;
 }
