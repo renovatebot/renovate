@@ -291,7 +291,8 @@ export async function resolveConfigPresets(
   // First, merge all the preset configs from left to right
   if (inputConfig.extends?.length) {
     for (const preset of inputConfig.extends) {
-      if (shallowResolve && skipDuringShallowResolve(preset)) {
+      // Dont resolve renovate internal presets
+      if (shallowResolve && isRenovateInternalPreset(preset)) {
         unresolvedPresets.push(preset);
         continue;
       }
@@ -318,7 +319,8 @@ export async function resolveConfigPresets(
         if (shallowResolve && presetConfig?.extends) {
           // save extends array to not lose values from it
           for (const extend of presetConfig.extends) {
-            if (skipDuringShallowResolve(extend)) {
+            // Dont resolve renovate internal presets
+            if (isRenovateInternalPreset(extend)) {
               unresolvedPresets.push(extend);
             }
           }
@@ -379,9 +381,14 @@ export async function resolveConfigPresets(
   return config;
 }
 
-// This function returns unresolved presets array when shallowResolve is enabled
-// 1. remove resolved external presets from the array.
-// 2. clean duplicate presets keys (from different resolution levels).
+/**
+ * This function does the following:
+ *    1. removes resolved external presets from the array.
+ *    2. cleans duplicate presets keys (from different resolution levels).
+ * @param presets
+ * @param unresolvedPresets
+ * @return Unresolved presets array when shallowResolve is enabled
+ */
 function mergeUnresolvedPresets(
   presets: string[] | undefined,
   unresolvedPresets: string[]
@@ -389,19 +396,22 @@ function mergeUnresolvedPresets(
   if (!presets?.length) {
     return [];
   }
-  const currentUnresolved = presets.filter((e) => skipDuringShallowResolve(e));
+  const currentUnresolved = presets.filter((e) => isRenovateInternalPreset(e));
   return Array.from(new Set([...currentUnresolved, ...unresolvedPresets]));
 }
 
-export function skipDuringShallowResolve(presetSource: string): boolean {
-  if (whitesourcePresetRegex.test(presetSource)) {
+function isRenovateInternalPreset(preset: string): boolean {
+  if (whitesourcePresetRegex.test(preset)) {
     return true;
   }
-  return !(
-    presetSource.startsWith('github>') ||
-    presetSource.startsWith('gitlab>') ||
-    presetSource.startsWith('gitea>') ||
-    isLocalPreset(presetSource)
+  return !(isLocalPreset(preset) || isUserExternalPreset(preset));
+}
+
+function isUserExternalPreset(preset: string): boolean {
+  return (
+    preset.startsWith('github>') ||
+    preset.startsWith('gitlab>') ||
+    preset.startsWith('gitea>')
   );
 }
 
@@ -409,14 +419,9 @@ function isLocalPreset(preset: string): boolean {
   if (preset.startsWith('local>')) {
     return true;
   }
-  if (
-    !preset.startsWith('@') &&
-    !preset.startsWith(':') &&
-    preset.includes('/')
-  ) {
-    return true;
-  }
-  return false;
+  return (
+    !preset.startsWith('@') && !preset.startsWith(':') && preset.includes('/')
+  );
 }
 
 async function fetchPreset(
