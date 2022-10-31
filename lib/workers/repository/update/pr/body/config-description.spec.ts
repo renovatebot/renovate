@@ -27,7 +27,7 @@ describe('workers/repository/update/pr/body/config-description', () => {
       });
 
       expect(res).toContain(
-        `**Rebasing**: Never, or you tick the rebase/retry checkbox.`
+        `**Rebasing**: Never, or you select the rebase/retry checkbox.`
       );
     });
 
@@ -38,7 +38,7 @@ describe('workers/repository/update/pr/body/config-description', () => {
       });
 
       expect(res).toContain(
-        `**Rebasing**: Never, or you tick the rebase/retry checkbox.`
+        `**Rebasing**: Never, or you select the rebase/retry checkbox.`
       );
     });
 

@@ -16,7 +16,7 @@
 - [ ] I have updated the documentation, or
 - [ ] No documentation update is required
 
-## How I've tested my work (please tick one)
+## How I've tested my work (please select one)
 
 I have verified these changes via:
 

@@ -40,7 +40,7 @@ export async function getPrConfigDescription(
   } else {
     prBody += 'Whenever PR becomes conflicted';
   }
-  prBody += `, or you tick the rebase/retry checkbox.\n\n`;
+  prBody += `, or you select the rebase/retry checkbox.\n\n`;
   if (config.recreateClosed) {
     prBody += emojify(
       // TODO: types (#7154)
