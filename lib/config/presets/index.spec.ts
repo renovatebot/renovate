@@ -453,7 +453,7 @@ describe('config/presets/index', () => {
             groupName: 'github-actions dependencies',
           },
         ];
-        gitHub.getPreset.mockResolvedValueOnce({});
+
         const res = await presets.resolveConfigPresets(
           config,
           {},
