@@ -47,3 +47,5 @@ Renovate reads the `requirements.txt` file and extracts these `pip-compile` argu
 - `--generate-hashes`
 - `--allow-unsafe`
 - `--no-emit-index-url`
+- `--strip-extras`
+- `--resolver`

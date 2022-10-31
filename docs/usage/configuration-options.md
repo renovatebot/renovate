@@ -249,7 +249,8 @@ If so then Renovate will reflect this setting in its description and use package
 
 <!-- prettier-ignore -->
 !!! note
-    The `baseBranches` config option is not supported when `forkMode` is enabled, including in the Forking Renovate app.
+    Do _not_ use the `baseBranches` config option when you've set a `forkToken`.
+    You may need a `forkToken` when you're using the Forking Renovate app.
 
 ## bbUseDefaultReviewers
 
@@ -298,14 +299,13 @@ If you truly need to configure this then it probably means either:
 
 ## branchNameStrict
 
-By default, Renovate doesn't care about special characters when slugifying the branch name.
-This means that special characters like `.` may end up in the branch name.
-
-When you set `branchNameStrict` to `true`:
+If `true`, Renovate removes special characters when slugifying the branch name:
 
 - all special characters are removed
 - only alphabetic characters are allowed
 - hyphens `-` are used to separate sections
+
+The default `false` behavior will mean that special characters like `.` may end up in the branch name.
 
 ## branchPrefix
 
@@ -381,8 +381,8 @@ If you want Renovate to signoff its commits, add the [`:gitSignOff` preset](http
 
 <!-- prettier-ignore -->
 !!! warning
-    Editing of `commitMessage` directly is now deprecated and not recommended.
-    Please instead edit the fields such as `commitMessageAction`, `commitMessageExtra`, etc.
+    We deprecated editing the `commitMessage` directly, and we recommend you stop using this config option.
+    Instead use config options like `commitMessageAction`, `commitMessageExtra`, and so on, to create the commit message you want.
 
 ## commitMessageAction
 
@@ -390,45 +390,25 @@ This is used to alter `commitMessage` and `prTitle` without needing to copy/past
 Actions may be like `Update`, `Pin`, `Roll back`, `Refresh`, etc.
 Check out the default value for `commitMessage` to understand how this field is used.
 
-<!-- prettier-ignore -->
-!!! warning
-    Warning, for advanced use only! Use at your own risk!
-
 ## commitMessageExtra
 
 This is used to alter `commitMessage` and `prTitle` without needing to copy/paste the whole string.
 The "extra" is usually an identifier of the new version, e.g. "to v1.3.2" or "to tag 9.2".
-
-<!-- prettier-ignore -->
-!!! warning
-    Warning, for advanced use only! Use at your own risk!
 
 ## commitMessagePrefix
 
 This is used to alter `commitMessage` and `prTitle` without needing to copy/paste the whole string.
 The "prefix" is usually an automatically applied semantic commit prefix, but it can also be statically configured.
 
-<!-- prettier-ignore -->
-!!! warning
-    Warning, for advanced use only! Use at your own risk!
-
 ## commitMessageSuffix
 
 This is used to add a suffix to commit messages.
 Usually left empty except for internal use (multiple base branches, and vulnerability alerts).
 
-<!-- prettier-ignore -->
-!!! warning
-    Warning, for advanced use only! Use at your own risk!
-
 ## commitMessageTopic
 
 This is used to alter `commitMessage` and `prTitle` without needing to copy/paste the whole string.
 The "topic" is usually refers to the dependency being updated, e.g. `"dependency react"`.
-
-<!-- prettier-ignore -->
-!!! warning
-    Warning, for advanced use only! Use at your own risk!
 
 ## composerIgnorePlatformReqs
 
@@ -747,10 +727,6 @@ See [Private module support](https://docs.renovatebot.com/getting-started/privat
 
 ## excludeCommitPaths
 
-<!-- prettier-ignore -->
-!!! warning
-    For advanced users only!
-
 Be careful you know what you're doing with this option.
 The initial intended use is to allow the user to exclude certain dependencies from being added/removed/modified when "vendoring" dependencies.
 Example:
@@ -862,11 +838,6 @@ For now, you can only use this option on the GitLab platform.
 
 ## followTag
 
-<!-- prettier-ignore -->
-!!! warning
-    Advanced functionality.
-    Only use this if you're sure you know what you're doing.
-
 For `followTag` to work, the datasource must support distribution streams or tags, like for example npm does.
 
 The main usecase is to follow a pre-release tag of a dependency, say TypeScripts's `"insiders"` build:
@@ -932,11 +903,6 @@ Usage of `direct` will fallback to the Renovate-native release fetching mechanis
 Also we support the `off` keyword which will stop any fetching immediately.
 
 ## group
-
-<!-- prettier-ignore -->
-!!! warning
-    Advanced functionality only.
-    Do not use unless you know what you're doing.
 
 The default configuration for groups are essentially internal to Renovate and you normally shouldn't need to modify them.
 But you may _add_ settings to any group by defining your own `group` configuration object.
@@ -1178,6 +1144,26 @@ Example config:
 Use an exact host for `matchHost` and not a domain (e.g. `api.github.com` as shown above and not `github.com`).
 Do not combine with `hostType` in the same rule or it won't work.
 
+### maxRequestsPerSecond
+
+In addition to `concurrentRequestLimit`, you can limit the maximum number of requests that can be made per one second.
+It can be used to set minimal delay between two requests to the same host.
+Fractional values are allowed, e.g. `0.25` means 1 request per 4 seconds.
+Default value `0` means no limit.
+
+Example config:
+
+```json
+{
+  "hostRules": [
+    {
+      "matchHost": "api.github.com",
+      "maxRequestsPerSecond": 2
+    }
+  ]
+}
+```
+
 ### dnsCache
 
 Enable got [dnsCache](https://github.com/sindresorhus/got/blob/v11.5.2/readme.md#dnsCache) support.
@@ -1194,10 +1180,6 @@ You usually don't need to configure it in a host rule if you have already config
 `hostType` can help for cases like an enterprise registry that serves multiple package types and has different authentication for each, although it's often the case that multiple `matchHost` rules could achieve the same thing.
 
 ### insecureRegistry
-
-<!-- prettier-ignore -->
-!!! warning
-    Advanced config, use at your own risk.
 
 Enable this option to allow Renovate to connect to an [insecure Docker registry](https://docs.docker.com/registry/insecure/) that is http only.
 This is insecure and is not recommended.
@@ -2053,7 +2035,7 @@ Add to this object if you wish to define rules that apply only to PRs that pin d
 
 ## pinDigests
 
-If enabled Renovate will pin Docker images by means of their SHA256 digest and not only by tag so that they are immutable.
+If enabled Renovate will pin Docker images or GitHub Actions by means of their SHA256 digest and not only by tag so that they are immutable.
 
 ## platformAutomerge
 
@@ -2352,11 +2334,9 @@ Behavior:
 
 Renovate's `"auto"` strategy works like this for npm:
 
-1. Always pin `devDependencies`
-2. Pin `dependencies` if we detect that it's an app and not a library
-3. Widen `peerDependencies`
-4. If an existing range already ends with an "or" operator - e.g. `"^1.0.0 || ^2.0.0"` - then Renovate will widen it, e.g. making it into `"^1.0.0 || ^2.0.0 || ^3.0.0"`
-5. Otherwise, replace the range. e.g. `"^2.0.0"` would be replaced by `"^3.0.0"`
+1. Widen `peerDependencies`
+1. If an existing range already ends with an "or" operator like `"^1.0.0 || ^2.0.0"`, then Renovate widens it into `"^1.0.0 || ^2.0.0 || ^3.0.0"`
+1. Otherwise, Renovate replaces the range. So `"^2.0.0"` is replaced by `"^3.0.0"`
 
 By default, Renovate assumes that if you are using ranges then it's because you want them to be wide/open.
 Renovate won't deliberately "narrow" any range by increasing the semver value inside.

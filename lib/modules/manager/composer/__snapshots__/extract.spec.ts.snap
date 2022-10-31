@@ -5,8 +5,16 @@ exports[`modules/manager/composer/extract extractPackageFile() extracts dependen
   "deps": [
     {
       "currentValue": ">=5.3.2",
-      "datasource": "packagist",
+      "datasource": "github-tags",
       "depName": "php",
+      "depType": "require",
+      "extractVersion": "^php-(?<version>.*)$",
+      "packageName": "php/php-src",
+    },
+    {
+      "currentValue": "*",
+      "datasource": "packagist",
+      "depName": "ext-intl",
       "depType": "require",
       "skipReason": "unsupported",
     },
@@ -208,8 +216,16 @@ exports[`modules/manager/composer/extract extractPackageFile() extracts dependen
   "deps": [
     {
       "currentValue": ">=5.3.2",
-      "datasource": "packagist",
+      "datasource": "github-tags",
       "depName": "php",
+      "depType": "require",
+      "extractVersion": "^php-(?<version>.*)$",
+      "packageName": "php/php-src",
+    },
+    {
+      "currentValue": "*",
+      "datasource": "packagist",
+      "depName": "ext-intl",
       "depType": "require",
       "skipReason": "unsupported",
     },
@@ -399,206 +415,6 @@ exports[`modules/manager/composer/extract extractPackageFile() extracts dependen
       "depName": "composer/composer",
       "depType": "require-dev",
     },
-  ],
-}
-`;
-
-exports[`modules/manager/composer/extract extractPackageFile() extracts object registryUrls 1`] = `
-{
-  "deps": [
-    {
-      "currentValue": ">=5.5",
-      "datasource": "packagist",
-      "depName": "php",
-      "depType": "require",
-      "skipReason": "unsupported",
-    },
-    {
-      "currentValue": "~1.0.12",
-      "datasource": "packagist",
-      "depName": "composer/installers",
-      "depType": "require",
-    },
-    {
-      "currentValue": "*",
-      "datasource": "packagist",
-      "depName": "johnpbloch/wordpress",
-      "depType": "require",
-    },
-    {
-      "currentValue": "^2.0.1",
-      "datasource": "packagist",
-      "depName": "vlucas/phpdotenv",
-      "depType": "require",
-    },
-    {
-      "currentValue": "^1.0",
-      "datasource": "packagist",
-      "depName": "oscarotero/env",
-      "depType": "require",
-    },
-    {
-      "currentValue": "*",
-      "datasource": "packagist",
-      "depName": "wpackagist-plugin/tinymce-advanced",
-      "depType": "require",
-    },
-    {
-      "currentValue": "*",
-      "datasource": "packagist",
-      "depName": "wpackagist-plugin/acf-content-analysis-for-yoast-seo",
-      "depType": "require",
-    },
-    {
-      "currentValue": "*",
-      "datasource": "packagist",
-      "depName": "wpackagist-plugin/duplicate-post",
-      "depType": "require",
-    },
-    {
-      "currentValue": "*",
-      "datasource": "packagist",
-      "depName": "wpackagist-plugin/simple-image-sizes",
-      "depType": "require",
-    },
-    {
-      "currentValue": "*",
-      "datasource": "packagist",
-      "depName": "wpackagist-plugin/wordpress-seo",
-      "depType": "require",
-    },
-    {
-      "currentValue": "*",
-      "datasource": "packagist",
-      "depName": "wpackagist-plugin/timber-library",
-      "depType": "require",
-    },
-    {
-      "currentValue": "*",
-      "datasource": "packagist",
-      "depName": "wp-sync-db/wp-sync-db",
-      "depType": "require",
-    },
-    {
-      "currentValue": "*",
-      "datasource": "packagist",
-      "depName": "asha23/wp-seed-timber",
-      "depType": "require",
-    },
-  ],
-  "managerData": {
-    "composerJsonType": "project",
-  },
-  "registryUrls": [
-    "https://wpackagist.org",
-  ],
-}
-`;
-
-exports[`modules/manager/composer/extract extractPackageFile() extracts object repositories and registryUrls with lock file 1`] = `
-{
-  "deps": [
-    {
-      "currentValue": "*",
-      "datasource": "packagist",
-      "depName": "aws/aws-sdk-php",
-      "depType": "require",
-    },
-    {
-      "currentValue": "dev-trunk",
-      "datasource": "git-tags",
-      "depName": "awesome/vcs",
-      "depType": "require",
-      "lockedVersion": "1.1.0",
-      "packageName": "https://my-vcs.example/my-vcs-repo",
-    },
-    {
-      "currentValue": ">=7.0.2",
-      "datasource": "git-tags",
-      "depName": "awesome/git",
-      "depType": "require",
-      "lockedVersion": "1.2.0",
-      "packageName": "git@my-git.example:my-git-repo",
-    },
-  ],
-  "lockFiles": [
-    "composer.lock",
-  ],
-  "registryUrls": [
-    "https://wpackagist.org",
-    "https://packagist.org",
-  ],
-}
-`;
-
-exports[`modules/manager/composer/extract extractPackageFile() extracts registryUrls 1`] = `
-{
-  "deps": [
-    {
-      "currentValue": "*",
-      "datasource": "packagist",
-      "depName": "aws/aws-sdk-php",
-      "depType": "require",
-    },
-    {
-      "currentValue": "^1.10.0",
-      "datasource": "packagist",
-      "depName": "composer/composer",
-      "depType": "require",
-    },
-    {
-      "currentValue": "dev-trunk",
-      "datasource": "packagist",
-      "depName": "wpackagist-plugin/akismet",
-      "depType": "require",
-    },
-    {
-      "currentValue": ">=7.0.2",
-      "datasource": "packagist",
-      "depName": "wpackagist-plugin/wordpress-seo",
-      "depType": "require",
-    },
-    {
-      "currentValue": "*",
-      "datasource": "packagist",
-      "depName": "wpackagist-theme/hueman",
-      "depType": "require",
-    },
-  ],
-  "registryUrls": [
-    "https://wpackagist.org",
-  ],
-}
-`;
-
-exports[`modules/manager/composer/extract extractPackageFile() extracts repositories and registryUrls 1`] = `
-{
-  "deps": [
-    {
-      "currentValue": "*",
-      "datasource": "packagist",
-      "depName": "aws/aws-sdk-php",
-      "depType": "require",
-    },
-    {
-      "currentValue": "dev-trunk",
-      "datasource": "git-tags",
-      "depName": "awesome/vcs",
-      "depType": "require",
-      "packageName": "https://my-vcs.example/my-vcs-repo",
-    },
-    {
-      "currentValue": ">=7.0.2",
-      "datasource": "git-tags",
-      "depName": "awesome/git",
-      "depType": "require",
-      "packageName": "https://my-git.example/my-git-repo",
-    },
-  ],
-  "registryUrls": [
-    "https://wpackagist.org",
-    "https://gitlab.vendor.com/api/v4/group/2/-/packages/composer",
-    "https://packagist.org",
   ],
 }
 `;

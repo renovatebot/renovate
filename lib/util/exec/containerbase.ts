@@ -81,6 +81,11 @@ const allToolConfig: Record<string, ToolConfig> = {
     hash: true,
     versioning: npmVersioningId,
   },
+  php: {
+    datasource: 'github-releases',
+    depName: 'containerbase/php-prebuild',
+    versioning: composerVersioningId,
+  },
   pnpm: {
     datasource: 'npm',
     depName: 'pnpm',
@@ -124,9 +129,7 @@ export function isDynamicInstall(
     return false;
   }
   if (!isContainerbase()) {
-    logger.warn(
-      'binarySource=install is only compatible with images derived from github.com/containerbase'
-    );
+    logger.debug('Falling back to binarySource=global');
     return false;
   }
   return (
