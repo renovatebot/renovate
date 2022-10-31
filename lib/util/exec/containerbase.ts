@@ -81,6 +81,11 @@ const allToolConfig: Record<string, ToolConfig> = {
     hash: true,
     versioning: npmVersioningId,
   },
+  php: {
+    datasource: 'github-releases',
+    depName: 'containerbase/php-prebuild',
+    versioning: composerVersioningId,
+  },
   pnpm: {
     datasource: 'npm',
     depName: 'pnpm',

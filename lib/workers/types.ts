@@ -130,6 +130,27 @@ export interface BranchConfig
   skipBranchUpdate?: boolean;
 }
 
+export interface BranchMetadata {
+  branchName: string;
+  branchSha: string | null;
+  baseBranch: string | undefined;
+  baseBranchSha: string | null | undefined;
+  automerge: boolean;
+  isModified: boolean | undefined;
+}
+
+export interface BaseBranchMetadata {
+  branchName: string;
+  sha: string;
+}
+
+export interface BranchSummary {
+  cacheModified: boolean | undefined;
+  baseBranches: BaseBranchMetadata[];
+  branches: BranchMetadata[];
+  inactiveBranches: string[];
+}
+
 export interface WorkerExtractConfig extends ExtractConfig {
   manager: string;
   fileList: string[];
