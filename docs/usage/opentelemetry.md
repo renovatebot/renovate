@@ -22,7 +22,6 @@ OpenTelemetry has three types of observability data:
 While OTLP support traces, metrics, and logs, Renovate only supports traces.
 This means Renovate does not support other observability data like: stats on caching, error events, number of found updates, and so on.
 
-Besides OTLP no other specifications for telemetry data ingestion are supported.
 
 Renovate uses [`@opentelemetry/exporter-trace-otlp-http`](https://www.npmjs.com/package/@opentelemetry/exporter-trace-otlp-http) under the hood.
 This means that Renovate sends traces via [OTLP/HTTP](https://opentelemetry.io/docs/reference/specification/protocol/otlp/#otlphttp) in JSON-encoded protobuf format only.
