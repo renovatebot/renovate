@@ -171,7 +171,7 @@ async function releaseNotesResult(
   }
   // set body for release notes
   releaseNotes.body = massageBody(releaseNotes.body, baseUrl);
-  if (releaseNotes.body.length) {
+  if (releaseNotes.body.length || releaseNotes.name?.length) {
     try {
       if (baseUrl !== 'https://gitlab.com/') {
         releaseNotes.body = await linkify(releaseNotes.body, {

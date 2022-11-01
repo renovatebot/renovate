@@ -288,7 +288,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
   });
 
   describe('getReleaseNotes()', () => {
-    it('should return null for release notes without body', async () => {
+    it('should return null for release notes without body and name', async () => {
       httpMock
         .scope('https://api.github.com/')
         .get('/repos/some/repository/releases?per_page=100')
@@ -336,6 +336,42 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
         body: 'some body [#123](https://github.com/some/other-repository/issues/123), [#124](https://github.com/some/yet-other-repository/issues/124)\n',
         id: undefined,
         name: undefined,
+        notesSourceUrl:
+          'https://api.github.com/repos/some/other-repository/releases',
+        tag: '1.0.1',
+        url: 'https://github.com/some/other-repository/releases/1.0.1',
+      });
+    });
+
+    it('gets release notes with name ""', async () => {
+      const prefix = '';
+      httpMock
+        .scope('https://api.github.com/')
+        .get('/repos/some/other-repository/releases?per_page=100')
+        .reply(200, [
+          { tag_name: `${prefix}1.0.0` },
+          {
+            tag_name: `${prefix}1.0.1`,
+            name: 'some release name',
+            body: undefined,
+          },
+        ]);
+      const res = await getReleaseNotes(
+        {
+          ...githubProject,
+          repository: 'some/other-repository',
+          depName: 'other',
+        },
+        {
+          version: '1.0.1',
+          gitRef: '1.0.1',
+        } as ChangeLogRelease,
+        {} as BranchUpgradeConfig
+      );
+      expect(res).toEqual({
+        body: '',
+        id: undefined,
+        name: 'some release name',
         notesSourceUrl:
           'https://api.github.com/repos/some/other-repository/releases',
         tag: '1.0.1',
