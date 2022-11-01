@@ -1,18 +1,15 @@
 import is from '@sindresorhus/is';
 import { loadAll } from 'js-yaml';
-import JSON5 from 'json5';
-import dataFiles from '../../../data-files.generated';
 import { logger } from '../../../logger';
 import { newlineRegex, regEx } from '../../../util/regex';
-import { KubernetesApiDatasource } from '../../datasource/kubernetes-api';
+import {
+  KubernetesApiDatasource,
+  supportedApis,
+} from '../../datasource/kubernetes-api';
 import * as kubernetesApiVersioning from '../../versioning/kubernetes-api';
 import { getDep } from '../dockerfile/extract';
 import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
 import type { KubernetesConfiguration } from './types';
-
-const kubernetesApiVersions = new Set(
-  Object.keys(JSON5.parse(dataFiles.get('data/kubernetes-api.json5')!))
-);
 
 export function extractPackageFile(
   content: string,
@@ -63,7 +60,7 @@ function extractImages(
 }
 
 function extractApis(content: string, fileName: string): PackageDependency[] {
-  let doc: KubernetesConfiguration[] | undefined;
+  let doc: KubernetesConfiguration[];
 
   try {
     doc = loadAll(content) as KubernetesConfiguration[];
@@ -79,7 +76,7 @@ function extractApis(content: string, fileName: string): PackageDependency[] {
         is.nonEmptyStringAndNotWhitespace(m.kind) &&
         is.nonEmptyStringAndNotWhitespace(m.apiVersion)
     )
-    .filter((m) => kubernetesApiVersions.has(m.kind))
+    .filter((m) => supportedApis.has(m.kind))
     .map((configuration) => ({
       depName: configuration.kind,
       currentValue: configuration.apiVersion,
