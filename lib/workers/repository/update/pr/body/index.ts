@@ -85,7 +85,7 @@ export async function getPrBody(
     notes: getPrNotes(branchConfig) + getPrExtraNotes(branchConfig),
     changelogs: getChangelogs(branchConfig),
     configDescription: await getPrConfigDescription(branchConfig),
-    controls: await getControls(branchConfig),
+    controls: getControls(),
     footer: getPrFooter(branchConfig),
   };
 

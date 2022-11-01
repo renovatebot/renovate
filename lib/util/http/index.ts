@@ -1,5 +1,5 @@
 import merge from 'deepmerge';
-import got, { Options, RequestError, Response } from 'got';
+import got, { Options, RequestError } from 'got';
 import hasha from 'hasha';
 import { infer as Infer, ZodSchema } from 'zod';
 import { HOST_DISABLED } from '../../constants/error-messages';
@@ -14,6 +14,7 @@ import { applyAuthorization, removeAuthorization } from './auth';
 import { hooks } from './hooks';
 import { applyHostRules } from './host-rules';
 import { getQueue } from './queue';
+import { getThrottle } from './throttle';
 import type {
   GotJSONOptions,
   GotOptions,
@@ -32,6 +33,8 @@ type JsonArgs<T extends HttpOptions> = {
   httpOptions?: T;
   schema?: ZodSchema | undefined;
 };
+
+type Task<T> = () => Promise<HttpResponse<T>>;
 
 function cloneResponse<T extends Buffer | string | any>(
   response: HttpResponse<T>
@@ -62,11 +65,11 @@ function applyDefaultHeaders(options: Options): void {
 // `Buffer` in the latter case.
 // We don't declare overload signatures because it's immediately wrapped by
 // `request`.
-async function gotRoutine<T>(
+async function gotTask<T>(
   url: string,
   options: GotOptions,
   requestStats: Omit<RequestStats, 'duration' | 'statusCode'>
-): Promise<Response<T>> {
+): Promise<HttpResponse<T>> {
   logger.trace({ url, options }, 'got request');
 
   let duration = 0;
@@ -85,10 +88,16 @@ async function gotRoutine<T>(
     if (error instanceof RequestError) {
       statusCode =
         error.response?.statusCode ??
-        /* istanbul ignore next: can't be tested */ 0;
+        /* istanbul ignore next: can't be tested */ -1;
       duration =
         error.timings?.phases.total ??
-        /* istanbul ignore next: can't be tested */ 0;
+        /* istanbul ignore next: can't be tested */ -1;
+      const method = options.method?.toUpperCase() ?? 'GET';
+      const code = error.code ?? 'UNKNOWN';
+      const retryCount = error.request?.retryCount ?? -1;
+      logger.debug(
+        `${method} ${url} = (code=${code}, statusCode=${statusCode} retryCount=${retryCount}, duration=${duration})`
+      );
     }
 
     throw error;
@@ -149,7 +158,7 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
         method: options.method,
       }),
     ]);
-    let resPromise;
+    let resPromise: Promise<HttpResponse<T>> | null = null;
 
     // Cache GET requests unless useCache=false
     if (
@@ -162,16 +171,27 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
     // istanbul ignore else: no cache tests
     if (!resPromise) {
       const startTime = Date.now();
-      const queueTask = (): Promise<Response<T>> => {
+      const httpTask: Task<T> = () => {
         const queueDuration = Date.now() - startTime;
-        return gotRoutine(url, options, {
+        return gotTask(url, options, {
           method: options.method ?? 'get',
           url,
           queueDuration,
         });
       };
+
+      const throttle = getThrottle(url);
+      const throttledTask: Task<T> = throttle
+        ? () => throttle.add<HttpResponse<T>>(httpTask)
+        : httpTask;
+
       const queue = getQueue(url);
-      resPromise = queue?.add(queueTask) ?? queueTask();
+      const queuedTask: Task<T> = queue
+        ? () => queue.add<HttpResponse<T>>(throttledTask)
+        : throttledTask;
+
+      resPromise = queuedTask();
+
       if (options.method === 'get' || options.method === 'head') {
         memCache.set(cacheKey, resPromise); // always set if it's a get or a head
       }

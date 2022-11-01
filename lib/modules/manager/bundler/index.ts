@@ -4,7 +4,6 @@ import { RubyGemsDatasource } from '../../datasource/rubygems';
 import * as rubyVersioning from '../../versioning/ruby';
 import { updateArtifacts } from './artifacts';
 import { extractPackageFile } from './extract';
-import { getRangeStrategy } from './range';
 import { updateLockedDependency } from './update-locked';
 
 export const language = ProgrammingLanguage.Ruby;
@@ -18,7 +17,6 @@ export const supportsLockFileMaintenance = true;
 export {
   extractPackageFile, // Mandatory unless extractAllPackageFiles is used instead
   updateArtifacts, // Optional
-  getRangeStrategy, // Optional
   updateLockedDependency,
 };
 

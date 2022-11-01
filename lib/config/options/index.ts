@@ -289,7 +289,7 @@ const options: RenovateOptions[] = [
     globalOnly: true,
     type: 'string',
     allowedValues: ['global', 'docker', 'install', 'hermit'],
-    default: 'global',
+    default: 'install',
   },
   {
     name: 'redisUrl',
@@ -410,22 +410,13 @@ const options: RenovateOptions[] = [
     default: false,
   },
   {
-    name: 'forkMode',
-    description:
-      'Set to `true` to fork the source repository and create branches there instead.',
-    stage: 'repository',
-    type: 'boolean',
-    default: false,
-    globalOnly: true,
-  },
-  {
     name: 'forkToken',
-    description:
-      'Will be used on GitHub when `forkMode` is set to `true` to clone the repositories.',
+    description: 'Set a personal access token here to enable "fork mode".',
     stage: 'repository',
     type: 'string',
-    default: '',
     globalOnly: true,
+    supportedPlatforms: ['github'],
+    experimental: true,
   },
   {
     name: 'githubTokenWarn',
@@ -634,9 +625,9 @@ const options: RenovateOptions[] = [
   {
     name: 'ignoreScripts',
     description:
-      'Set this to `true` if `allowScripts=true` but you wish to skip running scripts when updating lock files.',
+      'Set this to `false` if `allowScripts=true` and you wish to run scripts when updating lock files.',
     type: 'boolean',
-    default: false,
+    default: true,
     supportedManagers: ['npm', 'composer'],
   },
   {
@@ -723,7 +714,9 @@ const options: RenovateOptions[] = [
     name: 'autodiscoverFilter',
     description: 'Filter the list of autodiscovered repositories.',
     stage: 'global',
-    type: 'string',
+    type: 'array',
+    subType: 'string',
+    allowString: true,
     default: null,
     globalOnly: true,
   },
@@ -795,6 +788,7 @@ const options: RenovateOptions[] = [
     description:
       'A list of package managers to enable. If defined, then all managers not on the list are disabled.',
     type: 'array',
+    mergeable: false,
     stage: 'repository',
   },
   {
@@ -822,6 +816,7 @@ const options: RenovateOptions[] = [
     type: 'array',
     subType: 'string',
     default: [],
+    advancedUse: true,
   },
   {
     name: 'executionTimeout',
@@ -1263,6 +1258,7 @@ const options: RenovateOptions[] = [
     type: 'string',
     cli: false,
     env: false,
+    advancedUse: true,
   },
   {
     name: 'respectLatest',
@@ -1493,7 +1489,7 @@ const options: RenovateOptions[] = [
     description: 'When and how to filter based on internal checks.',
     type: 'string',
     allowedValues: ['strict', 'flexible', 'none'],
-    default: 'none',
+    default: 'strict',
   },
   {
     name: 'prCreation',
@@ -1667,6 +1663,7 @@ const options: RenovateOptions[] = [
       'Prefix to add to start of commit messages and PR titles. Uses a semantic prefix if `semanticCommits` is enabled.',
     type: 'string',
     cli: false,
+    advancedUse: true,
   },
   {
     name: 'commitMessageAction',
@@ -1674,6 +1671,7 @@ const options: RenovateOptions[] = [
     type: 'string',
     default: 'Update',
     cli: false,
+    advancedUse: true,
   },
   {
     name: 'commitMessageTopic',
@@ -1682,6 +1680,7 @@ const options: RenovateOptions[] = [
     type: 'string',
     default: 'dependency {{depName}}',
     cli: false,
+    advancedUse: true,
   },
   {
     name: 'commitMessageExtra',
@@ -1691,12 +1690,14 @@ const options: RenovateOptions[] = [
     default:
       'to {{#if isPinDigest}}{{{newDigestShort}}}{{else}}{{#if isMajor}}{{prettyNewMajor}}{{else}}{{#if isSingleVersion}}{{prettyNewVersion}}{{else}}{{#if newValue}}{{{newValue}}}{{else}}{{{newDigestShort}}}{{/if}}{{/if}}{{/if}}{{/if}}',
     cli: false,
+    advancedUse: true,
   },
   {
     name: 'commitMessageSuffix',
     description: 'Suffix to add to end of commit messages and PR titles.',
     type: 'string',
     cli: false,
+    advancedUse: true,
   },
   {
     name: 'prBodyTemplate',
@@ -1784,6 +1785,7 @@ const options: RenovateOptions[] = [
     cli: false,
     env: false,
     mergeable: true,
+    advancedUse: true,
   },
   // Pull Request options
   {
@@ -2064,6 +2066,7 @@ const options: RenovateOptions[] = [
     parent: 'hostRules',
     cli: false,
     env: false,
+    advancedUse: true,
   },
   {
     name: 'abortOnError',
@@ -2104,6 +2107,16 @@ const options: RenovateOptions[] = [
     stage: 'repository',
     parent: 'hostRules',
     default: null,
+    cli: false,
+    env: false,
+  },
+  {
+    name: 'maxRequestsPerSecond',
+    description: 'Limit requests rate per host.',
+    type: 'integer',
+    stage: 'repository',
+    parent: 'hostRules',
+    default: 0,
     cli: false,
     env: false,
   },

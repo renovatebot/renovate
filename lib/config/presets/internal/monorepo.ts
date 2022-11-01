@@ -114,6 +114,7 @@ const repoGroups = {
   jest: 'https://github.com/facebook/jest',
   jsplumb: 'https://github.com/jsplumb/jsplumb',
   junit5: 'https://github.com/junit-team/junit5',
+  kotlin: 'https://github.com/JetBrains/kotlin',
   lerna: 'https://github.com/lerna/lerna',
   linguijs: 'https://github.com/lingui/js-lingui',
   lodash: 'https://github.com/lodash/',
@@ -225,6 +226,7 @@ const repoGroups = {
   'typescript-eslint': 'https://github.com/typescript-eslint/typescript-eslint',
   'typography-js': 'https://github.com/KyleAMathews/typography.js',
   uppy: 'https://github.com/transloadit/uppy',
+  vitest: 'https://github.com/vitest-dev/vitest',
   vstest: 'https://github.com/microsoft/vstest',
   vue: ['https://github.com/vuejs/vue', 'https://github.com/vuejs/core'],
   'vue-cli': 'https://github.com/vuejs/vue-cli',
@@ -246,6 +248,7 @@ const patternGroups = {
   clarity: ['^@cds/', '^@clr/'],
   embroider: '^@embroider/',
   fullcalendar: '^@fullcalendar/',
+  spfx: ['^@microsoft\\/sp-', '^@microsoft\\/eslint-.+-spfx$'],
   wordpress: '^@wordpress/',
 };
 

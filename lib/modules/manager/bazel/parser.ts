@@ -1,9 +1,9 @@
 import { lang, lexer, parser, query as q } from 'good-enough-parser';
 import hasha from 'hasha';
+import { logger } from '../../../logger';
 import * as memCache from '../../../util/cache/memory';
 import { supportedRulesRegex } from './rules/index';
 import type {
-  ArrayFragment,
   Fragment,
   FragmentData,
   NestedFragment,
@@ -12,6 +12,7 @@ import type {
 
 interface Ctx {
   readonly source: string;
+  results: RecordFragment[];
   stack: NestedFragment[];
   recordKey?: string;
 }
@@ -19,14 +20,8 @@ interface Ctx {
 function emptyCtx(source: string): Ctx {
   return {
     source,
-    stack: [
-      {
-        type: 'array',
-        value: source,
-        offset: 0,
-        children: [],
-      },
-    ],
+    results: [],
+    stack: [],
   };
 }
 
@@ -139,12 +134,8 @@ function ruleCall(search: q.QueryBuilder<Ctx>): q.QueryBuilder<Ctx> {
       const frag = currentFragment(ctx);
       if (frag.type === 'record' && tree.type === 'wrapped-tree') {
         frag.value = extractTreeValue(ctx.source, tree, frag.offset);
-      }
-
-      ctx.stack.pop();
-      const parentFrag = currentFragment(ctx);
-      if (parentFrag.type === 'array') {
-        parentFrag.children.push(frag);
+        ctx.stack.pop();
+        ctx.results.push(frag);
       }
 
       return ctx;
@@ -152,17 +143,13 @@ function ruleCall(search: q.QueryBuilder<Ctx>): q.QueryBuilder<Ctx> {
   });
 }
 
-function ruleStartHandler(ctx: Ctx, { value, offset }: lexer.Token): Ctx {
-  const parentFragment = currentFragment(ctx);
-  if (parentFragment.type === 'array') {
-    ctx.stack.push({
-      type: 'record',
-      value: '',
-      offset,
-      children: {},
-    });
-  }
-
+function ruleStartHandler(ctx: Ctx, { offset }: lexer.Token): Ctx {
+  ctx.stack.push({
+    type: 'record',
+    value: '',
+    offset,
+    children: {},
+  });
   return ctx;
 }
 
@@ -217,22 +204,26 @@ function getCacheKey(input: string): string {
 
 const starlark = lang.createLang('starlark');
 
-export function parse(input: string): ArrayFragment | null {
+export function parse(
+  input: string,
+  packageFile?: string
+): RecordFragment[] | null {
   const cacheKey = getCacheKey(input);
 
-  const cachedResult = memCache.get<ArrayFragment | null>(cacheKey);
+  const cachedResult = memCache.get<RecordFragment[] | null>(cacheKey);
   // istanbul ignore if
   if (cachedResult === null || cachedResult) {
     return cachedResult;
   }
 
-  let result: ArrayFragment | null = null;
-  const parsedResult = starlark.query(input, query, emptyCtx(input));
-  if (parsedResult) {
-    const rootFragment = parsedResult.stack[0];
-    if (rootFragment.type === 'array') {
-      result = rootFragment;
+  let result: RecordFragment[] | null = null;
+  try {
+    const parsedResult = starlark.query(input, query, emptyCtx(input));
+    if (parsedResult) {
+      result = parsedResult.results;
     }
+  } catch (err) /* istanbul ignore next */ {
+    logger.debug({ err, packageFile }, 'Bazel parsing error');
   }
 
   memCache.set(cacheKey, result);
