@@ -19,6 +19,12 @@ export function getHttpUrl(url: string, token?: string): string {
         parsedUrl.token = token.includes(':')
           ? token
           : `gitlab-ci-token:${token}`;
+        break;
+      case 'github':
+        parsedUrl.token = token.includes(':')
+          ? token
+          : `x-access-token:${token}`;
+        break;
     }
   }
 
@@ -29,7 +35,17 @@ export function getHttpUrl(url: string, token?: string): string {
 }
 
 export function getRemoteUrlWithToken(url: string, hostType?: string): string {
-  const hostRule = hostRules.find({ url, hostType });
+  let coercedUrl: string;
+
+  try {
+    coercedUrl = getHttpUrl(url);
+  } catch {
+    logger.warn(`Attempting to use non-git url '${url}' for git operations`);
+
+    coercedUrl = url;
+  }
+
+  const hostRule = hostRules.find({ url: coercedUrl, hostType });
 
   if (hostRule?.token) {
     logger.debug(`Found hostRules token for url ${url}`);
