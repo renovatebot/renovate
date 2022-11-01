@@ -78,6 +78,7 @@ Allowed values:
 - `updated`
 - `size`
 - `id`
+
 Default value: `alpha`.
 
 ## `RENOVATE_X_AUTODISCOVER_REPO_ORDER`
@@ -92,6 +93,7 @@ Allowed values:
 
 - `asc`
 - `desc`
+
 Default value: `asc`.
 
 ## `OTEL_EXPORTER_OTLP_ENDPOINT`
