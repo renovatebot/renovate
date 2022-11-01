@@ -13,16 +13,9 @@ describe('modules/manager/kubernetes/extract', () => {
       expect(extractPackageFile('', 'file.yaml', {})).toBeNull();
     });
 
-    it('returns only API version', () => {
+    it('does not return unknown kind', () => {
       const res = extractPackageFile(kubernetesConfigMapFile, 'file.yaml', {});
-      expect(res?.deps).toStrictEqual([
-        {
-          currentValue: 'v1',
-          datasource: 'kubernetes-api',
-          depName: 'ConfigMap',
-          versioning: 'kubernetes-api',
-        },
-      ]);
+      expect(res).toBeNull();
     });
 
     it('extracts multiple Kubernetes configurations', () => {
