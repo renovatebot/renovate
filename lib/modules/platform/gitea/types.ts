@@ -133,6 +133,10 @@ export interface CombinedCommitStatus {
   statuses: CommitStatus[];
 }
 
+export type RepoSortMethod = 'alpha' | 'created' | 'updated' | 'size' | 'id';
+
+export type SortMethod = 'asc' | 'desc';
+
 export interface RepoSearchParams {
   uid?: number;
   archived?: boolean;
@@ -140,12 +144,12 @@ export interface RepoSearchParams {
   /**
    * Repo sort type, defaults to `alpha`.
    */
-  sort?: 'alpha' | 'created' | 'updated' | 'size' | 'id';
+  sort?: RepoSortMethod;
 
   /**
    * Repo sort order, defaults to `asc`
    */
-  order?: 'asc' | 'desc';
+  order?: SortMethod;
 }
 
 export type IssueCreateParams = Partial<IssueUpdateLabelsParams> &
