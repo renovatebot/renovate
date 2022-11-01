@@ -74,8 +74,6 @@ The sort method for autodiscover server side repository search.
 Allowed values: `alpha`, `created`, `updated`, `size`, `id`
 Default value: `alpha`
 
-See https://try.gitea.io/api/swagger#/repository/repoSearch for api details
-
 ## `RENOVATE_X_AUTODISCOVER_REPO_ORDER`
 
 <!-- prettier-ignore -->
@@ -86,8 +84,6 @@ The order method for autodiscover server side repository search.
 
 Allowed values: `asc`, `desc`
 Default value: `asc`
-
-See https://try.gitea.io/api/swagger#/repository/repoSearch for api details
 
 ## `OTEL_EXPORTER_OTLP_ENDPOINT`
 
