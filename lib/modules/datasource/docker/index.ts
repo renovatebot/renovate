@@ -938,7 +938,7 @@ export class DockerDatasource extends Datasource {
         );
         throw new ExternalHostError(err);
       }
-      if ([401, 403].includes(err.statusCode) && isDockerHost(registryHost)) {
+      if (err.statusCode === 401 && isDockerHost(registryHost)) {
         logger.warn(
           { registryHost, dockerRepository, err },
           'docker registry failure: unauthorized'
