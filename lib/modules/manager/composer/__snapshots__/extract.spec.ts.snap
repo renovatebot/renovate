@@ -8,7 +8,7 @@ exports[`modules/manager/composer/extract extractPackageFile() extracts dependen
       "datasource": "github-tags",
       "depName": "php",
       "depType": "require",
-      "extractVersion": "^php-(?<version>.*)$",
+      "extractVersion": "^php-(?<version>\d+(?:\.\d+)*)(?<prerelease>.*)$",
       "packageName": "php/php-src",
     },
     {
@@ -219,7 +219,7 @@ exports[`modules/manager/composer/extract extractPackageFile() extracts dependen
       "datasource": "github-tags",
       "depName": "php",
       "depType": "require",
-      "extractVersion": "^php-(?<version>.*)$",
+      "extractVersion": "^php-(?<version>\d+(?:\.\d+)*)(?<prerelease>.*)$",
       "packageName": "php/php-src",
     },
     {
@@ -427,7 +427,7 @@ exports[`modules/manager/composer/extract extractPackageFile() extracts object r
       "datasource": "github-tags",
       "depName": "php",
       "depType": "require",
-      "extractVersion": "^php-(?<version>.*)$",
+      "extractVersion": "^php-(?<version>\d+(?:\.\d+)*)(?<prerelease>.*)$",
       "packageName": "php/php-src",
     },
     {
