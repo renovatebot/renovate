@@ -51,6 +51,7 @@ export interface UpdateResult {
   sourceDirectory?: string;
   changelogUrl?: string;
   dependencyUrl?: string;
+  registryUrl?: string;
   homepage?: string;
   deprecationMessage?: string;
   sourceUrl?: string | null;

@@ -135,6 +135,7 @@ export interface LookupUpdate {
   checksumUrl?: string;
   downloadUrl?: string;
   releaseTimestamp?: any;
+  registryUrl?: string;
 }
 
 export interface PackageDependency<T = Record<string, any>> extends Package<T> {
