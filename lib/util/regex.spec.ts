@@ -15,6 +15,20 @@ describe('util/regex', () => {
     expect(() => regEx(`x++`)).toThrow(CONFIG_VALIDATION);
   });
 
+  it('reuses flags from regex', () => {
+    expect(regEx(/foo/i).flags).toBe('iu');
+  });
+
+  it('caches non-stateful regex', () => {
+    expect(regEx('foo')).toBe(regEx('foo'));
+    expect(regEx('foo', 'm')).toBe(regEx('foo', 'm'));
+  });
+
+  it('does not cache stateful regex', () => {
+    expect(regEx('foo', 'g')).not.toBe(regEx('foo', 'g'));
+    expect(regEx(/bar/g)).not.toBe(/bar/g);
+  });
+
   it('Falls back to RegExp', () => {
     jest.doMock('re2', () => {
       throw new Error();
