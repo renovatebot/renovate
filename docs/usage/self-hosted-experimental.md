@@ -67,23 +67,32 @@ If set, Renovate will terminate the whole process group of a terminated child pr
 
 <!-- prettier-ignore -->
 !!! note
-    Gitea only
+    For the Gitea platform only.
 
 The sort method for autodiscover server side repository search.
 
-Allowed values: `alpha`, `created`, `updated`, `size`, `id`
-Default value: `alpha`
+Allowed values:
+
+- `alpha`
+- `created`
+- `updated`
+- `size`
+- `id`
+Default value: `alpha`.
 
 ## `RENOVATE_X_AUTODISCOVER_REPO_ORDER`
 
 <!-- prettier-ignore -->
 !!! note
-    Gitea only
+    For the Gitea platform only.
 
 The order method for autodiscover server side repository search.
 
-Allowed values: `asc`, `desc`
-Default value: `asc`
+Allowed values:
+
+- `asc`
+- `desc`
+Default value: `asc`.
 
 ## `OTEL_EXPORTER_OTLP_ENDPOINT`
 
