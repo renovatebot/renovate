@@ -787,6 +787,7 @@ const options: RenovateOptions[] = [
     description:
       'A list of package managers to enable. If defined, then all managers not on the list are disabled.',
     type: 'array',
+    mergeable: false,
     stage: 'repository',
   },
   {
@@ -814,6 +815,7 @@ const options: RenovateOptions[] = [
     type: 'array',
     subType: 'string',
     default: [],
+    advancedUse: true,
   },
   {
     name: 'executionTimeout',
@@ -1255,6 +1257,7 @@ const options: RenovateOptions[] = [
     type: 'string',
     cli: false,
     env: false,
+    advancedUse: true,
   },
   {
     name: 'respectLatest',
@@ -1659,6 +1662,7 @@ const options: RenovateOptions[] = [
       'Prefix to add to start of commit messages and PR titles. Uses a semantic prefix if `semanticCommits` is enabled.',
     type: 'string',
     cli: false,
+    advancedUse: true,
   },
   {
     name: 'commitMessageAction',
@@ -1666,6 +1670,7 @@ const options: RenovateOptions[] = [
     type: 'string',
     default: 'Update',
     cli: false,
+    advancedUse: true,
   },
   {
     name: 'commitMessageTopic',
@@ -1674,6 +1679,7 @@ const options: RenovateOptions[] = [
     type: 'string',
     default: 'dependency {{depName}}',
     cli: false,
+    advancedUse: true,
   },
   {
     name: 'commitMessageExtra',
@@ -1683,12 +1689,14 @@ const options: RenovateOptions[] = [
     default:
       'to {{#if isPinDigest}}{{{newDigestShort}}}{{else}}{{#if isMajor}}{{prettyNewMajor}}{{else}}{{#if isSingleVersion}}{{prettyNewVersion}}{{else}}{{#if newValue}}{{{newValue}}}{{else}}{{{newDigestShort}}}{{/if}}{{/if}}{{/if}}{{/if}}',
     cli: false,
+    advancedUse: true,
   },
   {
     name: 'commitMessageSuffix',
     description: 'Suffix to add to end of commit messages and PR titles.',
     type: 'string',
     cli: false,
+    advancedUse: true,
   },
   {
     name: 'prBodyTemplate',
@@ -1776,6 +1784,7 @@ const options: RenovateOptions[] = [
     cli: false,
     env: false,
     mergeable: true,
+    advancedUse: true,
   },
   // Pull Request options
   {
@@ -2056,6 +2065,7 @@ const options: RenovateOptions[] = [
     parent: 'hostRules',
     cli: false,
     env: false,
+    advancedUse: true,
   },
   {
     name: 'abortOnError',

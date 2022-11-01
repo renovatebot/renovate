@@ -39,7 +39,7 @@ export function getThrottle(url: string): Throttle | null {
       logger.debug({ intervalMs, host }, 'Using throttle');
       throttle = new Throttle(intervalMs);
     } else {
-      logger.debug({ host }, 'No throttle');
+      logger.trace({ host }, 'No throttle');
     }
   }
   hostThrottles.set(host, throttle);

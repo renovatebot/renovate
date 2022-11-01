@@ -22,7 +22,6 @@ import { PackagistDatasource } from '../../datasource/packagist';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
 import type { AuthJson, ComposerLock } from './types';
 import {
-  composerVersioningId,
   extractConstraints,
   getComposerArguments,
   getPhpConstraint,
@@ -106,17 +105,20 @@ export async function updateArtifacts({
       constraint: constraints.composer,
     };
 
+    const phpToolConstraint: ToolConstraint = {
+      toolName: 'php',
+      constraint: getPhpConstraint(constraints),
+    };
+
     const execOptions: ExecOptions = {
       cwdFile: packageFileName,
       extraEnv: {
         COMPOSER_CACHE_DIR: await ensureCacheDir('composer'),
         COMPOSER_AUTH: getAuthJson(),
       },
-      toolConstraints: [composerToolConstraint],
+      toolConstraints: [phpToolConstraint, composerToolConstraint],
       docker: {
-        image: 'php',
-        tagConstraint: getPhpConstraint(constraints),
-        tagScheme: composerVersioningId,
+        image: 'sidecar',
       },
     };
 
@@ -127,7 +129,7 @@ export async function updateArtifacts({
       const preCmd = 'composer';
       const preArgs =
         'install' + getComposerArguments(config, composerToolConstraint);
-      logger.debug({ preCmd, preArgs }, 'composer pre-update command');
+      logger.trace({ preCmd, preArgs }, 'composer pre-update command');
       commands.push(`${preCmd} ${preArgs}`);
     }
 
@@ -147,7 +149,7 @@ export async function updateArtifacts({
         ).trim() + ' --with-dependencies';
     }
     args += getComposerArguments(config, composerToolConstraint);
-    logger.debug({ cmd, args }, 'composer command');
+    logger.trace({ cmd, args }, 'composer command');
     commands.push(`${cmd} ${args}`);
 
     await exec(commands, execOptions);

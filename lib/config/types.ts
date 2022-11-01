@@ -358,6 +358,8 @@ export interface RenovateOptionBase {
   experimentalDescription?: string;
 
   experimentalIssues?: number[];
+
+  advancedUse?: boolean;
 }
 
 export interface RenovateArrayOption<
