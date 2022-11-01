@@ -12,12 +12,13 @@ function getFilteredManagerConfig(
   config: RenovateConfig,
   manager: string
 ): WorkerExtractConfig {
-  let mergedConfig = mergeChildConfig(config, config[manager] as any);
   const language = get(manager, 'language');
+  let mergedConfig = {} as RenovateConfig;
   if (language) {
     mergedConfig = mergeChildConfig(mergedConfig, config[language] as any);
   }
 
+  mergedConfig = mergeChildConfig(config, config[manager] as any);
   return {
     manager,
     npmrc: mergedConfig.npmrc,
