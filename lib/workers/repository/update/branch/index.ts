@@ -75,6 +75,7 @@ async function deleteBranchSilently(branchName: string): Promise<void> {
 
 export interface ProcessBranchResult {
   branchExists: boolean;
+  updatesVerified?: boolean;
   prBlockedBy?: PrBlockedBy;
   prNo?: number;
   result: BranchResult;
@@ -88,6 +89,7 @@ export async function processBranch(
   let config: BranchConfig = { ...branchConfig };
   logger.trace({ config }, 'processBranch()');
   let branchExists = gitBranchExists(config.branchName);
+  let updatesVerified = false;
   if (!branchExists && config.branchPrefix !== config.branchPrefixOld) {
     const branchName = config.branchName.replace(
       config.branchPrefix!,
@@ -525,6 +527,7 @@ export async function processBranch(
       }
 
       commitSha = await commitFilesToBranch(config);
+      updatesVerified = true;
     }
     // istanbul ignore if
     if (branchPr && platform.refreshPr) {
@@ -557,6 +560,7 @@ export async function processBranch(
       logger.debug({ commitSha }, `Branch status pending`);
       return {
         branchExists: true,
+        updatesVerified,
         prNo: branchPr?.number,
         result: BranchResult.Pending,
         commitSha,
@@ -660,6 +664,7 @@ export async function processBranch(
       // we have already warned inside the bundler artifacts error handling, so just return
       return {
         branchExists: true,
+        updatesVerified,
         prNo: branchPr?.number,
         result: BranchResult.Error,
         commitSha,
@@ -826,6 +831,7 @@ export async function processBranch(
   if (!branchExists) {
     return {
       branchExists: true,
+      updatesVerified,
       prNo: branchPr?.number,
       result: BranchResult.PrCreated,
       commitSha,
@@ -833,6 +839,7 @@ export async function processBranch(
   }
   return {
     branchExists,
+    updatesVerified,
     prNo: branchPr?.number,
     result: BranchResult.Done,
     commitSha,

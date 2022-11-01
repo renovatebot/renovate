@@ -31,7 +31,7 @@ Updating system manifests requires that either:
 
 ### Non-configured fileMatch
 
-By default, the `flux` manager will only match `flux-system/gotk-components.yaml` (i.e. system manifest) files.
+By default, the `flux` manager will only match `flux-system/{.,**}/gotk-components.yaml` (i.e. system manifest) files.
 
 This is because there is no commonly accepted file/directory naming convention for Flux manifests and we don't want to check every single `*.yaml` file in repositories just in case some of them have Flux definitions.
 

@@ -1,5 +1,4 @@
 import { GlobalConfig } from '../config/global';
-import { PlatformId } from '../constants';
 import { logger } from '../logger';
 import { GithubReleasesDatasource } from '../modules/datasource/github-releases';
 import { GithubTagsDatasource } from '../modules/datasource/github-tags';
@@ -11,7 +10,7 @@ export function checkGithubToken(
   packageFiles: Record<string, PackageFile[]> | undefined
 ): void {
   const { token } = hostRules.find({
-    hostType: PlatformId.Github,
+    hostType: 'github',
     url: 'https://api.github.com',
   });
 
