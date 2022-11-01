@@ -10,7 +10,7 @@ export function parseGitUrl(url: string): gitUrlParse.GitUrl {
 
 export function getHttpUrl(url: string, token?: string): string {
   const parsedUrl = parseGitUrl(url);
-  
+
   const protocol = regEx(/^https?$/).exec(parsedUrl.protocol)
     ? parsedUrl.protocol
     : 'https';
