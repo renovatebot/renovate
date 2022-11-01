@@ -24,3 +24,8 @@ Either the account should have full name and email address set to allow Renovate
 ## Features awaiting implementation
 
 - none
+
+## Repo autodiscover sorting
+
+You can change the default sort method and order for server-side autodiscover api.
+Set those via [`RENOVATE_X_AUTODISCOVER_REPO_SORT`](https://docs.renovatebot.com/self-hosted-experimental/#renovate_x_autodiscover_repo_sort) and [`RENOVATE_X_AUTODISCOVER_REPO_ORDER`](https://docs.renovatebot.com/self-hosted-experimental/#renovate_x_autodiscover_repo_order)
