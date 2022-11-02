@@ -170,7 +170,6 @@ export async function initPlatform({
     }
   }
   logger.debug({ platformConfig, renovateUsername }, 'Platform config');
-
   const platformResult: PlatformResult = {
     endpoint: platformConfig.endpoint,
     gitAuthor: gitAuthor ?? discoveredGitAuthor,
