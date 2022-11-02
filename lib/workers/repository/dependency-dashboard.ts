@@ -380,7 +380,7 @@ export async function ensureDependencyDashboard(
     if (inProgress.length > 2) {
       issueBody += ' - [ ] ';
       issueBody += '<!-- rebase-all-open-prs -->';
-      issueBody += '**Select this checkbox to rebase all open PRs at once**';
+      issueBody += '**Select this checkbox to rebase all open PRs at once.**';
       issueBody += '\n';
     }
     issueBody += '\n';
