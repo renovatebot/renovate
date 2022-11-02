@@ -274,7 +274,7 @@
     "@types/nock": "10.0.3",
     "@types/node": "16.18.2",
     "@types/parse-link-header": "2.0.0",
-    "@types/semver": "7.3.12",
+    "@types/semver": "7.3.13",
     "@types/semver-stable": "3.0.0",
     "@types/semver-utils": "1.1.1",
     "@types/shelljs": "0.8.11",
