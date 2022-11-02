@@ -1,11 +1,7 @@
-import { BranchStatus } from '../../../../../types';
 import { emojify } from '../../../../../util/emoji';
 import type { BranchConfig } from '../../../../types';
-import { resolveBranchStatus } from '../../branch/status-checks';
 
-export async function getPrConfigDescription(
-  config: BranchConfig
-): Promise<string> {
+export function getPrConfigDescription(config: BranchConfig): string {
   let prBody = `\n\n---\n\n### Configuration\n\n`;
   prBody += emojify(`:date: **Schedule**: `);
   prBody +=
