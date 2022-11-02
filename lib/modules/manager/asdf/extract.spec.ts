@@ -198,7 +198,7 @@ dummy 1.2.3
           },
           {
             currentValue: '3.10.1',
-            datasource: 'github-tags',
+            datasource: 'github-releases',
             packageName: 'helm/helm',
             versioning: 'semver',
             depName: 'helm',
@@ -260,7 +260,7 @@ dummy 1.2.3
           },
           {
             currentValue: '4.5.7',
-            datasource: 'github-tags',
+            datasource: 'github-releases',
             packageName: 'kubernetes-sigs/kustomize',
             versioning: 'semver',
             depName: 'kustomize',
@@ -359,7 +359,7 @@ dummy 1.2.3
           },
           {
             currentValue: '1.3.3',
-            datasource: 'github-tags',
+            datasource: 'github-releases',
             packageName: 'hashicorp/terraform',
             versioning: 'semver',
             depName: 'terraform',
@@ -367,7 +367,7 @@ dummy 1.2.3
           },
           {
             currentValue: '0.33.0',
-            datasource: 'github-tags',
+            datasource: 'github-releases',
             packageName: 'aquasecurity/trivy',
             versioning: 'semver',
             depName: 'trivy',

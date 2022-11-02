@@ -3,7 +3,6 @@ import { DockerDatasource } from '../../datasource/docker';
 import { GithubReleasesDatasource } from '../../datasource/github-releases';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { NodeDatasource } from '../../datasource/node';
-import * as hermitVersioning from '../../versioning/hermit';
 import * as nodeVersioning from '../../versioning/node';
 import * as regexVersioning from '../../versioning/regex';
 import * as semverVersioning from '../../versioning/semver';
@@ -129,7 +128,7 @@ export const upgradeableTooling: Record<
       return {
         datasource: AdoptiumJavaDatasource.id,
         packageName: 'java-jdk',
-        versioning: hermitVersioning.id,
+        versioning: semverVersioning.id,
         currentValue: adoptOpenJdkMatches.groups!.version,
       };
     }
