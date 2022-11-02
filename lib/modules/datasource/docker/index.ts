@@ -952,6 +952,14 @@ export class DockerDatasource extends Datasource {
         );
         throw new ExternalHostError(err);
       }
+      const errorCodes = ['ECONNRESET', 'ETIMEDOUT'];
+      if (errorCodes.includes(err.code)) {
+        logger.warn(
+          { registryHost, dockerRepository, err },
+          'docker registry connection failure'
+        );
+        throw new ExternalHostError(err);
+      }
       if (isDockerHost(registryHost)) {
         logger.info({ err }, 'Docker Hub lookup failure');
       }
