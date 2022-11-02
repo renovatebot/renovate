@@ -133,9 +133,23 @@ export interface CombinedCommitStatus {
   statuses: CommitStatus[];
 }
 
+export type RepoSortMethod = 'alpha' | 'created' | 'updated' | 'size' | 'id';
+
+export type SortMethod = 'asc' | 'desc';
+
 export interface RepoSearchParams {
   uid?: number;
   archived?: boolean;
+
+  /**
+   * Repo sort type, defaults to `alpha`.
+   */
+  sort?: RepoSortMethod;
+
+  /**
+   * Repo sort order, defaults to `asc`
+   */
+  order?: SortMethod;
 }
 
 export type IssueCreateParams = Partial<IssueUpdateLabelsParams> &
