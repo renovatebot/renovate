@@ -20,8 +20,8 @@ describe('workers/repository/update/pr/body/controls', () => {
         git.isBranchModified.mockResolvedValue(true);
       });
 
-      it('has the correct contents', async () => {
-        expect(await getControls(branchConfig)).toContain(
+      it('has the correct contents', () => {
+        expect(getControls()).toContain(
           `- [ ] <!-- rebase-check -->If you want to rebase/retry this PR, select this checkbox. ⚠ **Warning**: custom changes will be lost.`
         );
         expect(git.isBranchModified).toHaveBeenCalledTimes(1);
@@ -36,8 +36,8 @@ describe('workers/repository/update/pr/body/controls', () => {
         git.isBranchModified.mockResolvedValue(false);
       });
 
-      it('has the correct contents', async () => {
-        expect(await getControls(branchConfig)).toContain(
+      it('has the correct contents', () => {
+        expect(getControls()).toContain(
           `- [ ] <!-- rebase-check -->If you want to rebase/retry this PR, select this checkbox.`
         );
         expect(git.isBranchModified).toHaveBeenCalledTimes(1);
