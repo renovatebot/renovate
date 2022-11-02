@@ -2,7 +2,6 @@ import is from '@sindresorhus/is';
 import delay from 'delay';
 import JSON5 from 'json5';
 import type { PartialDeep } from 'type-fest';
-import { PlatformId } from '../../../constants';
 import {
   REPOSITORY_CHANGED,
   REPOSITORY_EMPTY,
@@ -69,7 +68,7 @@ const defaults: {
   endpoint?: string;
   hostType: string;
 } = {
-  hostType: PlatformId.BitbucketServer,
+  hostType: 'bitbucket-server',
 };
 
 /* istanbul ignore next */

@@ -7,7 +7,6 @@ import JSON5 from 'json5';
 import { DateTime } from 'luxon';
 import semver from 'semver';
 import { GlobalConfig } from '../../../config/global';
-import { PlatformId } from '../../../constants';
 import {
   PLATFORM_INTEGRATION_UNAUTHORIZED,
   REPOSITORY_ACCESS_FORBIDDEN,
@@ -90,7 +89,7 @@ export const GitHubMaxPrBodyLen = 60000;
 export function resetConfigs(): void {
   config = {} as never;
   platformConfig = {
-    hostType: PlatformId.Github,
+    hostType: 'github',
     endpoint: 'https://api.github.com/',
   };
 }
@@ -266,7 +265,7 @@ export async function initRepo({
     githubHttp.setBaseUrl(endpoint);
   }
   const opts = hostRules.find({
-    hostType: PlatformId.Github,
+    hostType: 'github',
     url: platformConfig.endpoint,
   });
   config.renovateUsername = renovateUsername;
@@ -1248,7 +1247,7 @@ async function getComments(issueNo: number): Promise<Comment[]> {
   } catch (err) /* istanbul ignore next */ {
     if (err.statusCode === 404) {
       logger.debug('404 response when retrieving comments');
-      throw new ExternalHostError(err, PlatformId.Github);
+      throw new ExternalHostError(err, 'github');
     }
     throw err;
   }

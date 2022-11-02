@@ -9,7 +9,6 @@ import {
   platform,
 } from '../../../test/util';
 import { GlobalConfig } from '../../config/global';
-import { PlatformId } from '../../constants';
 import type {
   PackageDependency,
   PackageFile,
@@ -35,7 +34,7 @@ beforeEach(() => {
   jest.clearAllMocks();
   massageMdSpy.mockImplementation(massageMarkdown);
   config = getConfig();
-  config.platform = PlatformId.Github;
+  config.platform = 'github';
   config.errors = [];
   config.warnings = [];
 });

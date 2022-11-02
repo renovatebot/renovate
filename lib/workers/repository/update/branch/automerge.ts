@@ -4,7 +4,7 @@ import type { RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
 import { platform } from '../../../../modules/platform';
 import { BranchStatus } from '../../../../types';
-import { mergeBranch } from '../../../../util/git';
+import { checkoutBranch, mergeBranch } from '../../../../util/git';
 import { isScheduledNow } from './schedule';
 import { resolveBranchStatus } from './status-checks';
 
@@ -43,6 +43,7 @@ export async function tryBranchAutomerge(
         // TODO: types (#7154)
         logger.info(`DRY-RUN: Would automerge branch ${config.branchName!}`);
       } else {
+        await checkoutBranch(config.baseBranch!);
         await mergeBranch(config.branchName!);
       }
       logger.info({ branch: config.branchName }, 'Branch automerged');

@@ -931,7 +931,6 @@ export class DockerDatasource extends Datasource {
           jfrogRepository + '/library/' + dockerImage
         );
       }
-      // prettier-ignore
       if (err.statusCode === 429 && isDockerHost(registryHost)) {
         logger.warn(
           { registryHost, dockerRepository, err },
@@ -939,7 +938,6 @@ export class DockerDatasource extends Datasource {
         );
         throw new ExternalHostError(err);
       }
-      // prettier-ignore
       if (err.statusCode === 401 && isDockerHost(registryHost)) {
         logger.warn(
           { registryHost, dockerRepository, err },
@@ -953,6 +951,9 @@ export class DockerDatasource extends Datasource {
           'docker registry failure: internal error'
         );
         throw new ExternalHostError(err);
+      }
+      if (isDockerHost(registryHost)) {
+        logger.info({ err }, 'Docker Hub lookup failure');
       }
       throw err;
     }
