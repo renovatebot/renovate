@@ -26,7 +26,9 @@ export async function rebaseMigrationBranch(
   const configFileName = migratedConfigData.filename;
   let contents = migratedConfigData.content;
   const existingContents = await getFile(configFileName, branchName);
-  if (stripWhitespaces(contents) === stripWhitespaces(existingContents)) {
+  if (
+    jsonStripWhitespaces(contents) === jsonStripWhitespaces(existingContents)
+  ) {
     logger.debug('Migration branch is up to date');
     return null;
   }
@@ -61,9 +63,20 @@ export async function rebaseMigrationBranch(
   });
 }
 
-function stripWhitespaces(str: string | null): string | null {
-  if (!str) {
+/**
+ * @param json a JSON string
+ * @return a minimal json string. i.e. does not contain any formatting/whitespaces
+ */
+function jsonStripWhitespaces(json: string | null): string | null {
+  if (!json) {
     return null;
   }
-  return quickStringify(JSON.parse(str));
+  /**
+   * JSON.stringify(value, replacer, space):
+   * If "space" is anything other than a string or number —
+   * for example, is null or not provided — no white space is used.
+   *
+   * https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON/stringify#parameters
+   */
+  return quickStringify(JSON.parse(json));
 }
