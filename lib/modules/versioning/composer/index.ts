@@ -44,7 +44,10 @@ function padZeroes(input: string): string {
 
 function convertStabilityModifier(input: string): string {
   // Handle stability modifiers.
-  const versionParts = input.split('@');
+  const versionParts = input
+    // 1.0beta2 to 1.0@beta2
+    .replace(regEx(/(\d+(?:\.\d+)*)(beta|alpha|rc)/gi), '$1@$2')
+    .split('@');
   if (versionParts.length === 1) {
     return input;
   }

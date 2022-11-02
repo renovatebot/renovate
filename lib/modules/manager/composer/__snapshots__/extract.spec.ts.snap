@@ -5,11 +5,11 @@ exports[`modules/manager/composer/extract extractPackageFile() extracts dependen
   "deps": [
     {
       "currentValue": ">=5.3.2",
-      "datasource": "github-tags",
+      "datasource": "docker",
       "depName": "php",
       "depType": "require",
-      "extractVersion": "^php-(?<version>.*)$",
-      "packageName": "php/php-src",
+      "extractVersion": "^(?<version>\\d+(?:\\.\\d+)*[^-]*)",
+      "versioning": "composer",
     },
     {
       "currentValue": "*",
@@ -216,11 +216,11 @@ exports[`modules/manager/composer/extract extractPackageFile() extracts dependen
   "deps": [
     {
       "currentValue": ">=5.3.2",
-      "datasource": "github-tags",
+      "datasource": "docker",
       "depName": "php",
       "depType": "require",
-      "extractVersion": "^php-(?<version>.*)$",
-      "packageName": "php/php-src",
+      "extractVersion": "^(?<version>\\d+(?:\\.\\d+)*[^-]*)",
+      "versioning": "composer",
     },
     {
       "currentValue": "*",

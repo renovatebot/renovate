@@ -82,11 +82,11 @@ describe('modules/manager/composer/extract', () => {
         deps: [
           {
             currentValue: '>=5.5',
-            datasource: 'github-tags',
+            datasource: 'docker',
             depName: 'php',
             depType: 'require',
-            extractVersion: '^php-(?<version>.*)$',
-            packageName: 'php/php-src',
+            extractVersion: '^(?<version>\\d+(?:\\.\\d+)*[^-]*)',
+            versioning: 'composer',
           },
           {
             currentValue: '~1.0.12',

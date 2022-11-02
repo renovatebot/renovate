@@ -2,8 +2,8 @@ import is from '@sindresorhus/is';
 import { logger } from '../../../logger';
 import { readLocalFile } from '../../../util/fs';
 import { regEx } from '../../../util/regex';
+import { DockerDatasource } from '../../datasource/docker';
 import { GitTagsDatasource } from '../../datasource/git-tags';
-import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { PackagistDatasource } from '../../datasource/packagist';
 import { api as semverComposer } from '../../versioning/composer';
 import type { PackageDependency, PackageFile } from '../types';
@@ -14,6 +14,7 @@ import type {
   ComposerRepositories,
   Repo,
 } from './types';
+import { composerVersioningId } from './utils';
 
 /**
  * The regUrl is expected to be a base URL. GitLab composer repository installation guide specifies
@@ -127,9 +128,9 @@ export async function extractPackageFile(
               depType,
               depName,
               currentValue,
-              datasource: GithubTagsDatasource.id,
-              packageName: 'php/php-src',
-              extractVersion: '^php-(?<version>.*)$',
+              datasource: DockerDatasource.id,
+              extractVersion: '^(?<version>\\d+(?:\\.\\d+)*[^-]*)',
+              versioning: composerVersioningId,
             });
           } else {
             // Default datasource and packageName

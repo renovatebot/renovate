@@ -12,8 +12,11 @@ describe('modules/versioning/composer/index', () => {
     a               | b                  | expected
     ${'1.2.0'}      | ${'v1.2'}          | ${true}
     ${'v1.0.0'}     | ${'1'}             | ${true}
+    ${'1.0alpha3'}  | ${'1.0.0-alpha.3'} | ${true}
     ${'1.0@alpha3'} | ${'1.0.0-alpha.3'} | ${true}
+    ${'1.0beta'}    | ${'1.0.0-beta'}    | ${true}
     ${'1.0@beta'}   | ${'1.0.0-beta'}    | ${true}
+    ${'1.0rc2'}     | ${'1.0.0-rc.2'}    | ${true}
     ${'1.0@rc2'}    | ${'1.0.0-rc.2'}    | ${true}
   `('equals("$a", "$b") === $expected', ({ a, b, expected }) => {
     expect(semver.equals(a, b)).toBe(expected);
@@ -55,6 +58,9 @@ describe('modules/versioning/composer/index', () => {
     ${'~1.2.3-beta1'} | ${true}
     ${'^1.2.3-alpha'} | ${true}
     ${'>1.2.3-rc2'}   | ${true}
+    ${'~1.2.3beta1'}  | ${true}
+    ${'^1.2.3alpha'}  | ${true}
+    ${'>1.2.3rc2'}    | ${true}
     ${'~1.2.3@beta'}  | ${true}
     ${'^1.2.3@alpha'} | ${true}
     ${'>1.2.3@rc'}    | ${true}
