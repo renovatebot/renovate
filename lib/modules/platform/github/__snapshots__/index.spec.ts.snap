@@ -13,6 +13,16 @@ exports[`modules/platform/github/index initPlatform() should support custom endp
 {
   "endpoint": "https://ghe.renovatebot.com/",
   "gitAuthor": "undefined <user@domain.com>",
+  "hostRules": [
+    {
+      "matchHost": ".pkg.github.com",
+      "token": "123test",
+    },
+    {
+      "matchHost": "ghcr.io",
+      "token": "123test",
+    },
+  ],
   "renovateUsername": "renovate-bot",
   "token": "123test",
 }
@@ -22,6 +32,16 @@ exports[`modules/platform/github/index initPlatform() should support custom endp
 {
   "endpoint": "https://ghe.renovatebot.com/",
   "gitAuthor": "undefined <user@domain.com>",
+  "hostRules": [
+    {
+      "matchHost": ".pkg.github.com",
+      "token": "123test",
+    },
+    {
+      "matchHost": "ghcr.io",
+      "token": "123test",
+    },
+  ],
   "renovateUsername": "renovate-bot",
   "token": "123test",
 }
@@ -31,6 +51,16 @@ exports[`modules/platform/github/index initPlatform() should support default end
 {
   "endpoint": "https://api.github.com/",
   "gitAuthor": undefined,
+  "hostRules": [
+    {
+      "matchHost": ".pkg.github.com",
+      "token": "123test",
+    },
+    {
+      "matchHost": "ghcr.io",
+      "token": "123test",
+    },
+  ],
   "renovateUsername": "renovate-bot",
   "token": "123test",
 }
@@ -40,6 +70,16 @@ exports[`modules/platform/github/index initPlatform() should support default end
 {
   "endpoint": "https://api.github.com/",
   "gitAuthor": undefined,
+  "hostRules": [
+    {
+      "matchHost": ".pkg.github.com",
+      "token": "123test",
+    },
+    {
+      "matchHost": "ghcr.io",
+      "token": "123test",
+    },
+  ],
   "renovateUsername": "renovate-bot",
   "token": "123test",
 }
@@ -49,6 +89,16 @@ exports[`modules/platform/github/index initPlatform() should support default end
 {
   "endpoint": "https://api.github.com/",
   "gitAuthor": "undefined <user@domain.com>",
+  "hostRules": [
+    {
+      "matchHost": ".pkg.github.com",
+      "token": "123test",
+    },
+    {
+      "matchHost": "ghcr.io",
+      "token": "123test",
+    },
+  ],
   "renovateUsername": "renovate-bot",
   "token": "123test",
 }
@@ -58,6 +108,16 @@ exports[`modules/platform/github/index initPlatform() should support gitAuthor a
 {
   "endpoint": "https://api.github.com/",
   "gitAuthor": "renovate@whitesourcesoftware.com",
+  "hostRules": [
+    {
+      "matchHost": ".pkg.github.com",
+      "token": "123test",
+    },
+    {
+      "matchHost": "ghcr.io",
+      "token": "123test",
+    },
+  ],
   "renovateUsername": "renovate-bot",
   "token": "123test",
 }
