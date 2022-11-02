@@ -98,7 +98,7 @@ export const upgradeableTooling: Record<
     extractVersion: '^ghc-(?<version>\\S+?)-release',
   },
   helm: {
-    datasource: GithubTagsDatasource.id,
+    datasource: GithubReleasesDatasource.id,
     packageName: 'helm/helm',
     versioning: semverVersioning.id,
     extractVersion: '^v(?<version>\\S+)',
@@ -165,7 +165,7 @@ export const upgradeableTooling: Record<
     extractVersion: '^(Kotlin |v)(?<version>\\S+)',
   },
   kustomize: {
-    datasource: GithubTagsDatasource.id,
+    datasource: GithubReleasesDatasource.id,
     packageName: 'kubernetes-sigs/kustomize',
     versioning: semverVersioning.id,
     extractVersion: '^kustomize/v(?<version>\\S+)',
@@ -253,13 +253,13 @@ export const upgradeableTooling: Record<
     extractVersion: '^v(?<version>\\S+)',
   },
   terraform: {
-    datasource: GithubTagsDatasource.id,
+    datasource: GithubReleasesDatasource.id,
     packageName: 'hashicorp/terraform',
     versioning: semverVersioning.id,
     extractVersion: '^v(?<version>\\S+)',
   },
   trivy: {
-    datasource: GithubTagsDatasource.id,
+    datasource: GithubReleasesDatasource.id,
     packageName: 'aquasecurity/trivy',
     versioning: semverVersioning.id,
     extractVersion: '^v(?<version>\\S+)',
