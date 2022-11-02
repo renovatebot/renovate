@@ -1,7 +1,6 @@
 import { Fixtures } from '../../../../test/fixtures';
 import * as httpMock from '../../../../test/http-mock';
 import { mocked } from '../../../../test/util';
-import { PlatformId } from '../../../constants';
 import * as _hostRules from '../../../util/host-rules';
 import { GitTagsDatasource } from '../git-tags';
 import { GithubTagsDatasource } from '../github-tags';
@@ -205,7 +204,7 @@ describe('modules/datasource/go/base', () => {
       });
 
       it('supports GitLab EE deps', async () => {
-        hostRules.hostType.mockReturnValue(PlatformId.Gitlab);
+        hostRules.hostType.mockReturnValue('gitlab');
         httpMock
           .scope('https://my.custom.domain')
           .get('/golang/myrepo?go-get=1')
@@ -223,7 +222,7 @@ describe('modules/datasource/go/base', () => {
       });
 
       it('supports GitLab EE deps in subgroup', async () => {
-        hostRules.hostType.mockReturnValue(PlatformId.Gitlab);
+        hostRules.hostType.mockReturnValue('gitlab');
         httpMock
           .scope('https://my.custom.domain')
           .get('/golang/subgroup/myrepo?go-get=1')
@@ -241,7 +240,7 @@ describe('modules/datasource/go/base', () => {
       });
 
       it('supports GitLab EE deps in subgroup with version', async () => {
-        hostRules.hostType.mockReturnValue(PlatformId.Gitlab);
+        hostRules.hostType.mockReturnValue('gitlab');
         httpMock
           .scope('https://my.custom.domain')
           .get('/golang/subgroup/myrepo/v2?go-get=1')
@@ -259,7 +258,7 @@ describe('modules/datasource/go/base', () => {
       });
 
       it('supports GitLab EE deps in private subgroup with vcs indicator', async () => {
-        hostRules.hostType.mockReturnValue(PlatformId.Gitlab);
+        hostRules.hostType.mockReturnValue('gitlab');
         httpMock
           .scope('https://my.custom.domain')
           .get('/golang/subgroup/myrepo.git/v2?go-get=1')
@@ -277,7 +276,7 @@ describe('modules/datasource/go/base', () => {
       });
 
       it('supports GitLab EE monorepo deps in subgroup', async () => {
-        hostRules.hostType.mockReturnValue(PlatformId.Gitlab);
+        hostRules.hostType.mockReturnValue('gitlab');
         httpMock
           .scope('https://my.custom.domain')
           .get('/golang/subgroup/myrepo/monorepo?go-get=1')

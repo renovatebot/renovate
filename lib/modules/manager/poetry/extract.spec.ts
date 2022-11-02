@@ -18,6 +18,8 @@ const pyproject9toml = Fixtures.get('pyproject.9.toml');
 const pyproject11toml = Fixtures.get('pyproject.11.toml');
 const pyproject11tomlLock = Fixtures.get('pyproject.11.toml.lock');
 
+const pyproject12toml = Fixtures.get('pyproject.12.toml');
+
 describe('modules/manager/poetry/extract', () => {
   describe('extractPackageFile()', () => {
     let filename: string;
@@ -65,6 +67,12 @@ describe('modules/manager/poetry/extract', () => {
       const res = await extractPackageFile(pyproject4toml, filename);
       expect(res).toMatchSnapshot();
       expect(res?.deps).toHaveLength(1);
+    });
+
+    it('can parse TOML v1 heterogeneous arrays', async () => {
+      const res = await extractPackageFile(pyproject12toml, filename);
+      expect(res).not.toBeNull();
+      expect(res?.deps).toHaveLength(2);
     });
 
     it('extracts registries', async () => {

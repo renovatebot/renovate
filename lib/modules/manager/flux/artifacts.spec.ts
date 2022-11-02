@@ -48,6 +48,43 @@ describe('modules/manager/flux/artifacts', () => {
     ]);
   });
 
+  it('detects system manifests in subdirectories', async () => {
+    const snapshots = mockExecAll({ stdout: '', stderr: '' });
+    fs.readLocalFile.mockResolvedValueOnce('old');
+    fs.readLocalFile.mockResolvedValueOnce('test');
+
+    const res = await updateArtifacts({
+      packageFileName:
+        'clusters/my-cluster/flux-system/gitops-toolkit/gotk-components.yaml',
+      updatedDeps: [
+        {
+          newVersion: '1.0.1',
+          managerData: {
+            components:
+              'source-controller,kustomize-controller,helm-controller,notification-controller',
+          },
+        },
+      ],
+      newPackageFileContent: '',
+      config: {},
+    });
+
+    expect(res).toEqual([
+      {
+        file: {
+          type: 'addition',
+          path: 'clusters/my-cluster/flux-system/gitops-toolkit/gotk-components.yaml',
+          contents: 'test',
+        },
+      },
+    ]);
+    expect(snapshots).toMatchObject([
+      {
+        cmd: 'flux install --export --components source-controller,kustomize-controller,helm-controller,notification-controller > clusters/my-cluster/flux-system/gitops-toolkit/gotk-components.yaml',
+      },
+    ]);
+  });
+
   it('ignores non-system manifests', async () => {
     const res = await updateArtifacts({
       packageFileName: 'not-a-system-manifest.yaml',
