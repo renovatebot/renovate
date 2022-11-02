@@ -1,6 +1,6 @@
-import { mergeChildConfig } from '../../../config';
-import type { RenovateConfig } from '../../../config/types';
-import { get, getManagerList } from '../../../modules/manager';
+import { getManagerConfig } from '../../../config';
+import type { RegExManager, RenovateConfig } from '../../../config/types';
+import { getManagerList } from '../../../modules/manager';
 import type { WorkerExtractConfig } from '../../types';
 
 export interface FingerprintExtractConfig {
@@ -10,27 +10,31 @@ export interface FingerprintExtractConfig {
 
 function getFilteredManagerConfig(
   config: RenovateConfig,
-  manager: string
+  manager: string,
+  regexManagerConfig?: RegExManager
 ): WorkerExtractConfig {
-  const language = get(manager, 'language');
-  let mergedConfig = {} as RenovateConfig;
-  if (language) {
-    mergedConfig = mergeChildConfig(config, config[language] as any);
-  }
+  let filteredConfig = {} as WorkerExtractConfig;
 
-  mergedConfig = mergeChildConfig(mergedConfig, config[manager] as any);
-  return {
+  // need to merge the fileMatch config option
+  const fileMatch = [
+    ...(regexManagerConfig?.fileMatch ?? []),
+    ...(config.fileMatch ?? []),
+  ];
+
+  filteredConfig = {
+    ...(regexManagerConfig ?? {}),
     manager,
-    npmrc: mergedConfig.npmrc,
-    npmrcMerge: mergedConfig.npmrcMerge,
-    enabled: mergedConfig.enabled,
-    ignorePaths: mergedConfig.ignorePaths ?? [],
-    includePaths: mergedConfig.includePaths ?? [],
-    skipInstalls: mergedConfig.skipInstalls,
-    registryAliases: mergedConfig.registryAliases,
-    fileMatch: mergedConfig.fileMatch ?? [],
+    fileMatch,
+    npmrc: config.npmrc,
+    npmrcMerge: config.npmrcMerge,
+    enabled: config.enabled,
+    ignorePaths: config.ignorePaths ?? [],
+    includePaths: config.includePaths ?? [],
+    skipInstalls: config.skipInstalls,
+    registryAliases: config.registryAliases,
     fileList: [],
   };
+  return filteredConfig;
 }
 
 export function generateFingerprintConfig(
@@ -47,21 +51,20 @@ export function generateFingerprintConfig(
   finalConfig.managerList = managerList;
 
   for (const manager of managerList) {
+    const managerConfig = getManagerConfig(config, manager);
     if (manager === 'regex') {
-      for (const managerConfig of config.regexManagers ?? []) {
-        managerExtractConfigs.push({
-          manager,
-          fileList: [],
-          enabled: true,
-          ...managerConfig,
-        });
+      for (const regexManager of config.regexManagers ?? []) {
+        managerExtractConfigs.push(
+          getFilteredManagerConfig(managerConfig, manager, regexManager)
+        );
       }
     } else {
-      managerExtractConfigs.push(getFilteredManagerConfig(config, manager));
+      managerExtractConfigs.push(
+        getFilteredManagerConfig(managerConfig, manager)
+      );
     }
   }
 
-  // need to handle this differently so as to get all necessary properties of RegExManager
   finalConfig.managers = managerExtractConfigs;
   return finalConfig;
 }

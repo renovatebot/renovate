@@ -53,12 +53,20 @@ describe('workers/repository/extract/extract-fingerprint-config', () => {
       fingerprintConfig.managers.find((manager) => manager.manager === 'regex')
     ).toEqual({
       fileMatch: ['js', '***$}{]]['],
+      ignorePaths: ['ignore-path-1'],
+      includePaths: ['include-path-1'],
       fileList: [],
       matchStrings: ['^(?<depName>foo)(?<currentValue>bar)$'],
       datasourceTemplate: 'maven',
       versioningTemplate: 'gradle',
       enabled: true,
       manager: 'regex',
+      npmrc: null,
+      npmrcMerge: false,
+      registryAliases: {
+        stable: 'http://some.link',
+      },
+      skipInstalls: null,
     });
   });
 
