@@ -106,7 +106,7 @@ describe('modules/manager/github-actions/extract', () => {
           replaceString:
             'actions/setup-node@56337c425554a6be30cdef71bf441f15be286854 # tag=v3.1.1',
           autoReplaceStringTemplate:
-            '{{depName}}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # tag={{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}',
+            '{{depName}}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}',
           currentValue: 'v3.1.1',
           currentDigest: '56337c425554a6be30cdef71bf441f15be286854',
         },
@@ -119,7 +119,7 @@ describe('modules/manager/github-actions/extract', () => {
           replaceString:
             "'actions/setup-node@1f8c6b94b26d0feae1e387ca63ccbdc44d27b561' # tag=v3.1.1",
           autoReplaceStringTemplate:
-            "'{{depName}}@{{#if newDigest}}{{newDigest}}'{{#if newValue}} # tag={{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}'{{/unless}}",
+            "'{{depName}}@{{#if newDigest}}{{newDigest}}'{{#if newValue}} # {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}'{{/unless}}",
           currentValue: 'v3.1.1',
           currentDigest: '1f8c6b94b26d0feae1e387ca63ccbdc44d27b561',
         },
@@ -132,7 +132,7 @@ describe('modules/manager/github-actions/extract', () => {
           replaceString:
             '"actions/setup-node@1f8c6b94b26d0feae1e387ca63ccbdc44d27b561" # tag=v2.5.1',
           autoReplaceStringTemplate:
-            '"{{depName}}@{{#if newDigest}}{{newDigest}}"{{#if newValue}} # tag={{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}"{{/unless}}',
+            '"{{depName}}@{{#if newDigest}}{{newDigest}}"{{#if newValue}} # {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}"{{/unless}}',
           currentValue: 'v2.5.1',
           currentDigest: '1f8c6b94b26d0feae1e387ca63ccbdc44d27b561',
         },
@@ -144,7 +144,7 @@ describe('modules/manager/github-actions/extract', () => {
           depType: 'action',
           replaceString: '"actions/checkout@v2"',
           autoReplaceStringTemplate:
-            '"{{depName}}@{{#if newDigest}}{{newDigest}}"{{#if newValue}} # tag={{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}"{{/unless}}',
+            '"{{depName}}@{{#if newDigest}}{{newDigest}}"{{#if newValue}} # {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}"{{/unless}}',
           currentValue: 'v2',
         },
         {
@@ -155,7 +155,7 @@ describe('modules/manager/github-actions/extract', () => {
           depType: 'action',
           replaceString: '"actions/setup-java@v2"',
           autoReplaceStringTemplate:
-            '"{{depName}}@{{#if newDigest}}{{newDigest}}"{{#if newValue}} # tag={{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}"{{/unless}}',
+            '"{{depName}}@{{#if newDigest}}{{newDigest}}"{{#if newValue}} # {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}"{{/unless}}',
           currentValue: 'v2',
         },
       ]);
