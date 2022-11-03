@@ -1,7 +1,6 @@
 import is from '@sindresorhus/is';
 import JSON5 from 'json5';
 import semver from 'semver';
-import { PlatformId } from '../../../constants';
 import {
   REPOSITORY_ACCESS_FORBIDDEN,
   REPOSITORY_ARCHIVED,
@@ -45,6 +44,8 @@ import type {
   PR,
   PRMergeMethod,
   Repo,
+  RepoSortMethod,
+  SortMethod,
 } from './types';
 import {
   getMergeMethod,
@@ -67,7 +68,7 @@ interface GiteaRepoConfig {
 const DRAFT_PREFIX = 'WIP: ';
 
 const defaults = {
-  hostType: PlatformId.Gitea,
+  hostType: 'gitea',
   endpoint: 'https://gitea.com/',
   version: '0.0.0',
 };
@@ -345,6 +346,12 @@ const platform: Platform = {
       const repos = await helper.searchRepos({
         uid: botUserID,
         archived: false,
+        ...(process.env.RENOVATE_X_AUTODISCOVER_REPO_SORT && {
+          sort: process.env.RENOVATE_X_AUTODISCOVER_REPO_SORT as RepoSortMethod,
+        }),
+        ...(process.env.RENOVATE_X_AUTODISCOVER_REPO_ORDER && {
+          order: process.env.RENOVATE_X_AUTODISCOVER_REPO_ORDER as SortMethod,
+        }),
       });
       return repos.filter((r) => !r.mirror).map((r) => r.full_name);
     } catch (err) {

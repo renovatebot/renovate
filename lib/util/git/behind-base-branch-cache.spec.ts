@@ -1,15 +1,15 @@
-import { logger, mocked, partial } from '../../../../test/util';
-import * as _repositoryCache from '../repository';
-import type { BranchCache, RepoCacheData } from '../repository/types';
+import { logger, mocked, partial } from '../../../test/util';
+import * as _repositoryCache from '../cache/repository';
+import type { BranchCache, RepoCacheData } from '../cache/repository/types';
 import {
   getCachedBehindBaseResult,
   setCachedBehindBaseResult,
-} from './behind-base-branch';
+} from './behind-base-branch-cache';
 
-jest.mock('../repository');
+jest.mock('../cache/repository');
 const repositoryCache = mocked(_repositoryCache);
 
-describe('util/cache/branch/behind-base-branch', () => {
+describe('util/git/behind-base-branch-cache', () => {
   let repoCache: RepoCacheData = {};
 
   beforeEach(() => {

@@ -7,17 +7,25 @@ import {
   CONFIG_VALIDATION,
   INVALID_PATH,
 } from '../../constants/error-messages';
-import * as _branchCache from '../cache/branch';
 import { newlineRegex, regEx } from '../regex';
+import * as _behindBaseCache from './behind-base-branch-cache';
+import * as _conflictsCache from './conflicts-cache';
+import * as _modifiedCache from './modified-cache';
+import * as _parentShaCache from './parent-sha-cache';
 import type { FileChange } from './types';
 import * as git from '.';
 import { setNoVerify } from '.';
 
-jest.mock('../cache/branch');
+jest.mock('./conflicts-cache');
+jest.mock('./behind-base-branch-cache');
+jest.mock('./modified-cache');
+jest.mock('./parent-sha-cache');
 jest.mock('delay');
 jest.mock('../cache/repository');
-const branchCache = mocked(_branchCache);
-
+const behindBaseCache = mocked(_behindBaseCache);
+const conflictsCache = mocked(_conflictsCache);
+const modifiedCache = mocked(_modifiedCache);
+const parentShaCache = mocked(_parentShaCache);
 // Class is no longer exported
 const SimpleGit = Git().constructor as { prototype: ReturnType<typeof Git> };
 
@@ -108,8 +116,8 @@ describe('util/git/index', () => {
     // override some local git settings for better testing
     const local = Git(tmpDir.path);
     await local.addConfig('commit.gpgsign', 'false');
-    branchCache.getCachedBranchParentShaResult.mockReturnValue(null);
-    branchCache.getCachedBehindBaseResult.mockReturnValue(null);
+    parentShaCache.getCachedBranchParentShaResult.mockReturnValue(null);
+    behindBaseCache.getCachedBehindBaseResult.mockReturnValue(null);
   });
 
   afterEach(async () => {
@@ -256,7 +264,7 @@ describe('util/git/index', () => {
     });
 
     it('returns cached value', async () => {
-      branchCache.getCachedBehindBaseResult.mockReturnValue(true);
+      behindBaseCache.getCachedBehindBaseResult.mockReturnValue(true);
       expect(await git.isBranchBehindBase('develop', defaultBranch)).toBeTrue();
       expect(logger.logger.debug).toHaveBeenCalledWith(
         'branch.isBehindBase(): using cached result "true"'
@@ -266,7 +274,7 @@ describe('util/git/index', () => {
 
   describe('isBranchModified()', () => {
     beforeEach(() => {
-      branchCache.getCachedModifiedResult.mockReturnValue(null);
+      modifiedCache.getCachedModifiedResult.mockReturnValue(null);
     });
 
     it('should return false when branch is not found', async () => {
@@ -290,7 +298,7 @@ describe('util/git/index', () => {
     });
 
     it('should return value stored in modifiedCacheResult', async () => {
-      branchCache.getCachedModifiedResult.mockReturnValue(true);
+      modifiedCache.getCachedModifiedResult.mockReturnValue(true);
       expect(await git.isBranchModified('renovate/future_branch')).toBeTrue();
     });
   });
@@ -797,7 +805,7 @@ describe('util/git/index', () => {
 
       await repo.checkout(defaultBranch);
 
-      branchCache.getCachedConflictResult.mockReturnValue(null);
+      conflictsCache.getCachedConflictResult.mockReturnValue(null);
     });
 
     it('returns true for non-existing source branch', async () => {
@@ -854,7 +862,7 @@ describe('util/git/index', () => {
       });
 
       it('returns cached values', async () => {
-        branchCache.getCachedConflictResult.mockReturnValue(true);
+        conflictsCache.getCachedConflictResult.mockReturnValue(true);
 
         const res = await git.isBranchConflicted(
           defaultBranch,
@@ -862,7 +870,7 @@ describe('util/git/index', () => {
         );
 
         expect(res).toBeTrue();
-        expect(branchCache.getCachedConflictResult.mock.calls).toEqual([
+        expect(conflictsCache.getCachedConflictResult.mock.calls).toEqual([
           [
             'renovate/conflicted_branch',
             git.getBranchCommit('renovate/conflicted_branch'),
@@ -870,11 +878,11 @@ describe('util/git/index', () => {
             git.getBranchCommit(defaultBranch),
           ],
         ]);
-        expect(branchCache.setCachedConflictResult).not.toHaveBeenCalled();
+        expect(conflictsCache.setCachedConflictResult).not.toHaveBeenCalled();
       });
 
       it('caches truthy return value', async () => {
-        branchCache.getCachedConflictResult.mockReturnValue(null);
+        conflictsCache.getCachedConflictResult.mockReturnValue(null);
 
         const res = await git.isBranchConflicted(
           defaultBranch,
@@ -882,13 +890,13 @@ describe('util/git/index', () => {
         );
 
         expect(res).toBeTrue();
-        expect(branchCache.setCachedConflictResult.mock.calls).toEqual([
+        expect(conflictsCache.setCachedConflictResult.mock.calls).toEqual([
           ['renovate/conflicted_branch', true],
         ]);
       });
 
       it('caches falsy return value', async () => {
-        branchCache.getCachedConflictResult.mockReturnValue(null);
+        conflictsCache.getCachedConflictResult.mockReturnValue(null);
 
         const res = await git.isBranchConflicted(
           defaultBranch,
@@ -896,7 +904,7 @@ describe('util/git/index', () => {
         );
 
         expect(res).toBeFalse();
-        expect(branchCache.setCachedConflictResult.mock.calls).toEqual([
+        expect(conflictsCache.setCachedConflictResult.mock.calls).toEqual([
           ['renovate/non_conflicted_branch', false],
         ]);
       });

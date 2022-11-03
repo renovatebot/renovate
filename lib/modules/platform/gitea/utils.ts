@@ -1,5 +1,4 @@
 import type { MergeStrategy } from '../../../config/types';
-import { PlatformId } from '../../../constants';
 import { CONFIG_GIT_URL_UNAVAILABLE } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import * as hostRules from '../../../util/host-rules';
@@ -31,7 +30,7 @@ export function getRepoUrl(
 
   // Find options for current host and determine Git endpoint
   const opts = hostRules.find({
-    hostType: PlatformId.Gitea,
+    hostType: 'gitea',
     url: endpoint,
   });
 

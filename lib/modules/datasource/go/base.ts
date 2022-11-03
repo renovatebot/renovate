@@ -1,7 +1,6 @@
 // TODO: types (#7154)
 /* eslint-disable @typescript-eslint/restrict-template-expressions */
 import URL from 'url';
-import { PlatformId } from '../../../constants';
 import { logger } from '../../../logger';
 import { detectPlatform } from '../../../util/common';
 import * as hostRules from '../../../util/host-rules';
@@ -139,7 +138,7 @@ export class BaseGoDatasource {
       };
     }
 
-    if (hostRules.hostType({ url: goSourceUrl }) === PlatformId.Gitlab) {
+    if (hostRules.hostType({ url: goSourceUrl }) === 'gitlab') {
       // get server base url from import url
       const parsedUrl = URL.parse(goSourceUrl);
 
