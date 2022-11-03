@@ -58,6 +58,9 @@ describe('util/git/url', () => {
       expect(
         getHttpUrl('http://gitlab.com:8443/', 'gitlab-ci-token:token')
       ).toBe('http://gitlab-ci-token:token@gitlab.com:8443/');
+      expect(getHttpUrl('git@gitlab.com:some/repo', 'token')).toBe(
+        'https://gitlab-ci-token:token@gitlab.com/some/repo'
+      );
     });
 
     it('returns github url with token', () => {
@@ -70,6 +73,9 @@ describe('util/git/url', () => {
       expect(
         getHttpUrl('http://github.com:8443/', 'x-access-token:token')
       ).toBe('http://x-access-token:token@github.com:8443/');
+      expect(getHttpUrl('git@github.com:some/repo', 'token')).toBe(
+        'https://x-access-token:token@github.com/some/repo'
+      );
     });
   });
 

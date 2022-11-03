@@ -70,6 +70,11 @@ const allToolConfig: Record<string, ToolConfig> = {
     depName: 'lerna',
     versioning: npmVersioningId,
   },
+  nix: {
+    datasource: 'github-tags',
+    depName: 'NixOS/nix',
+    versioning: semverVersioningId,
+  },
   node: {
     datasource: 'node',
     depName: 'node',

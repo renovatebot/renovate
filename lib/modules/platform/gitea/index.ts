@@ -1,7 +1,6 @@
 import is from '@sindresorhus/is';
 import JSON5 from 'json5';
 import semver from 'semver';
-import { PlatformId } from '../../../constants';
 import {
   REPOSITORY_ACCESS_FORBIDDEN,
   REPOSITORY_ARCHIVED,
@@ -69,7 +68,7 @@ interface GiteaRepoConfig {
 const DRAFT_PREFIX = 'WIP: ';
 
 const defaults = {
-  hostType: PlatformId.Gitea,
+  hostType: 'gitea',
   endpoint: 'https://gitea.com/',
   version: '0.0.0',
 };

@@ -3,7 +3,6 @@ import { ERROR, WARN } from 'bunyan';
 import * as _fs from 'fs-extra';
 import { logger, mocked } from '../../../test/util';
 import * as _presets from '../../config/presets';
-import { PlatformId } from '../../constants';
 import { CONFIG_PRESETS_INVALID } from '../../constants/error-messages';
 import { DockerDatasource } from '../../modules/datasource/docker';
 import * as _platform from '../../modules/platform';
@@ -152,7 +151,7 @@ describe('workers/global/index', () => {
     it('github', async () => {
       configParser.parseConfigs.mockResolvedValueOnce({
         repositories: ['a'],
-        platform: PlatformId.Github,
+        platform: 'github',
         endpoint: 'https://github.com/',
       });
       await globalWorker.start();
@@ -163,7 +162,7 @@ describe('workers/global/index', () => {
     it('gitlab', async () => {
       configParser.parseConfigs.mockResolvedValueOnce({
         repositories: [{ repository: 'a' }],
-        platform: PlatformId.Gitlab,
+        platform: 'gitlab',
         endpoint: 'https://my.gitlab.com/',
       });
       await globalWorker.start();
@@ -176,7 +175,7 @@ describe('workers/global/index', () => {
     it('successfully write file', async () => {
       configParser.parseConfigs.mockResolvedValueOnce({
         repositories: ['myOrg/myRepo'],
-        platform: PlatformId.Github,
+        platform: 'github',
         endpoint: 'https://github.com/',
         writeDiscoveredRepos: '/tmp/renovate-output.json',
       });
