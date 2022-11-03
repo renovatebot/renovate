@@ -802,7 +802,7 @@ const platform: Platform = {
     const issueList = await platform.getIssueList();
     for (const issue of issueList) {
       if (issue.state === 'open' && issue.title === title) {
-        logger.debug({ number: issue.number }, 'Closing issue');
+        logger.debug(`Closing issue...issueNo: ${issue.number!}`);
         // TODO #7154
         await helper.closeIssue(config.repository, issue.number!);
       }

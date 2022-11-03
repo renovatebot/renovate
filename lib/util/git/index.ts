@@ -297,11 +297,11 @@ export async function writeGitAuthor(): Promise<void> {
   config.writeGitDone = true;
   try {
     if (gitAuthorName) {
-      logger.debug({ gitAuthorName }, 'Setting git author name');
+      logger.debug(`Setting git author name: ${gitAuthorName}`);
       await git.addConfig('user.name', gitAuthorName);
     }
     if (gitAuthorEmail) {
-      logger.debug({ gitAuthorEmail }, 'Setting git author email');
+      logger.debug(`Setting git author email:${gitAuthorEmail}`);
       await git.addConfig('user.email', gitAuthorEmail);
     }
   } catch (err) /* istanbul ignore next */ {
@@ -433,7 +433,7 @@ export async function syncGit(): Promise<void> {
       throw new ExternalHostError(err, 'git');
     }
     const durationMs = Math.round(Date.now() - cloneStart);
-    logger.debug({ durationMs }, 'git clone completed');
+    logger.debug(`Git clone completed in ${durationMs}`);
   }
   try {
     config.currentBranchSha = (await git.raw(['rev-parse', 'HEAD'])).trim();
@@ -739,25 +739,25 @@ export async function deleteBranch(branchName: string): Promise<void> {
   await syncGit();
   try {
     await gitRetry(() => git.raw(['push', '--delete', 'origin', branchName]));
-    logger.debug({ branchName }, 'Deleted remote branch');
+    logger.debug(`Deleted remote branch: ${branchName}`);
   } catch (err) /* istanbul ignore next */ {
     const errChecked = checkForPlatformFailure(err);
     if (errChecked) {
       throw errChecked;
     }
-    logger.debug({ branchName }, 'No remote branch to delete');
+    logger.debug(`No remote branch to delete with name: ${branchName}`);
   }
   try {
     await deleteLocalBranch(branchName);
     // istanbul ignore next
-    logger.debug({ branchName }, 'Deleted local branch');
+    logger.debug(`Deleted local branch: ${branchName}`);
   } catch (err) {
     const errChecked = checkForPlatformFailure(err);
     // istanbul ignore if
     if (errChecked) {
       throw errChecked;
     }
-    logger.debug({ branchName }, 'No local branch to delete');
+    logger.debug(`No local branch to delete with name: ${branchName}`);
   }
   delete config.branchCommits[branchName];
 }
@@ -958,7 +958,7 @@ export async function prepareCommit({
           ) {
             throw err;
           }
-          logger.debug({ fileName }, 'Cannot commit ignored file');
+          logger.debug(`Cannot commit ignored file: ${fileName}`);
           ignoredFiles.push(file.path);
         }
       }

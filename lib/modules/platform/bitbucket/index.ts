@@ -252,7 +252,7 @@ export async function getPrList(): Promise<Pr[]> {
     }
     const prs = await utils.accumulateValues(url, undefined, undefined, 50);
     config.prList = prs.map(utils.prInfo);
-    logger.debug({ length: config.prList.length }, 'Retrieved Pull Requests');
+    logger.debug(`Retrieved Pull Requests, count: ${config.prList.length}`);
   }
   return config.prList;
 }
@@ -502,7 +502,7 @@ export async function ensureIssue({
   /* istanbul ignore if */
   if (!config.has_issues) {
     logger.warn('Issues are disabled - cannot ensureIssue');
-    logger.debug({ title }, 'Failed to ensure Issue');
+    logger.debug(`Failed to ensure Issue with title:${title}`);
     return null;
   }
   try {

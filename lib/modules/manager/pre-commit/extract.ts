@@ -81,7 +81,7 @@ function extractDependency(
   skipReason?: SkipReason;
   currentValue?: string;
 } {
-  logger.debug({ tag }, 'Found version');
+  logger.debug(`Found version ${tag}`);
 
   const urlMatchers = [
     // This splits "http://my.github.com/user/repo" -> "my.github.com" "user/repo

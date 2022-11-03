@@ -19,6 +19,6 @@ export async function updateLockedDependency(
   if (lockFile.endsWith('yarn.lock')) {
     return yarnLock.updateLockedDependency(config);
   }
-  logger.debug({ lockFile }, 'Unsupported lock file');
+  logger.debug(`Unsupported lock file: ${lockFile}`);
   return { status: 'update-failed' };
 }

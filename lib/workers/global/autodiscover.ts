@@ -62,7 +62,9 @@ export async function autodiscoverRepositories(
       for (let i = discovered.length - 1; i > -1; i -= 1) {
         if (repository === repoName(discovered[i])) {
           found = true;
-          logger.debug({ repository }, 'Using configured repository settings');
+          logger.debug(
+            `Using configured repository settings for ${repository}`
+          );
           // TODO: fix typings
           discovered[i] = configuredRepo as never;
         }

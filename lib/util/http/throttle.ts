@@ -26,7 +26,7 @@ export function getThrottle(url: string): Throttle | null {
   const host = parseUrl(url)?.host;
   if (!host) {
     // should never happen
-    logger.debug({ url }, 'No host');
+    logger.debug(`No host on ${url}`);
     return null;
   }
 
@@ -36,6 +36,7 @@ export function getThrottle(url: string): Throttle | null {
     const throttleOptions = getThrottleIntervalMs(url);
     if (throttleOptions) {
       const intervalMs = throttleOptions;
+      // unsure
       logger.debug({ intervalMs, host }, 'Using throttle');
       throttle = new Throttle(intervalMs);
     } else {

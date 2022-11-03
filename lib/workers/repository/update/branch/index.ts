@@ -212,7 +212,7 @@ export async function processBranch(
           (branchPr.targetBranch &&
             branchPr.targetBranch !== branchConfig.baseBranch)
         ) {
-          logger.debug({ prNo: branchPr.number }, 'PR has been edited');
+          logger.debug(`PR has been edited, PrNo:${branchPr.number}`);
           if (dependencyDashboardCheck || config.rebaseRequested) {
             logger.debug('Manual rebase has been requested for PR');
           } else {
@@ -557,7 +557,7 @@ export async function processBranch(
       commitSha &&
       config.prCreation !== 'immediate'
     ) {
-      logger.debug({ commitSha }, `Branch status pending`);
+      logger.debug(`Branch status pending, current sha: ${commitSha}`);
       return {
         branchExists: true,
         updatesVerified,
@@ -605,7 +605,9 @@ export async function processBranch(
         mergeStatus === 'branch status error' ||
         mergeStatus === 'failed'
       ) {
-        logger.debug({ mergeStatus }, 'Branch automerge not possible');
+        logger.debug(
+          `Branch automerge not possible, mergeStatus:${mergeStatus}`
+        );
         config.forcePr = true;
         config.branchAutomergeFailureMessage = mergeStatus;
       }

@@ -86,7 +86,7 @@ export async function getChangeLogJSON(
     .replace(regEx(/\/$/), '')
     .replace(regEx(/\.git$/), '');
   if (repository.split('/').length !== 2) {
-    logger.debug({ sourceUrl }, 'Invalid github URL found');
+    logger.debug(`Invalid github URL found: ${sourceUrl}`);
     return null;
   }
   const releases = config.releases ?? (await getInRangeReleases(config));

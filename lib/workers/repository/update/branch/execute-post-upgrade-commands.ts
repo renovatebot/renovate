@@ -70,7 +70,7 @@ export async function postUpgradeCommandsExecutor(
               ? compile(cmd, mergeChildConfig(config, upgrade))
               : cmd;
 
-            logger.debug({ cmd: compiledCmd }, 'Executing post-upgrade task');
+            logger.trace({ cmd: compiledCmd }, 'Executing post-upgrade task');
             const execResult = await exec(compiledCmd, {
               cwd: GlobalConfig.get('localDir'),
             });

@@ -312,7 +312,7 @@ export async function getPrList(refreshCache?: boolean): Promise<Pr[]> {
     );
 
     config.prList = values.map(utils.prInfo);
-    logger.debug({ length: config.prList.length }, 'Retrieved Pull Requests');
+    logger.debug(`Retrieved Pull Requests, count: ${config.prList.length}`);
   } else {
     logger.debug('returning cached PR list');
   }
@@ -967,7 +967,7 @@ export async function mergePr({
     }
   }
 
-  logger.debug({ pr: prNo }, 'PR merged');
+  logger.debug(`PR merged, PrNo:${prNo}`);
   return true;
 }
 

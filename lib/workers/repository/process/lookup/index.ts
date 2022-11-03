@@ -90,7 +90,7 @@ export async function lookupUpdates(
         return res;
       }
       if (dependency.deprecationMessage) {
-        logger.debug({ dependency: depName }, 'Found deprecationMessage');
+        logger.debug(`Found deprecationMessage for dep:${depName}`);
         res.deprecationMessage = dependency.deprecationMessage;
       }
 
