@@ -2284,8 +2284,7 @@ describe('modules/platform/github/index', () => {
 
         expect(logger.logger.debug).toHaveBeenNthCalledWith(
           11,
-          { prNumber: 123 },
-          'GitHub-native automerge: success'
+          'GitHub-native automerge: success...PrNo: 123'
         );
       });
 
