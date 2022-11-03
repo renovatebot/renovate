@@ -1,7 +1,6 @@
 // TODO #7154
 import URL from 'url';
 import { GlobalConfig } from '../../../../../config/global';
-import { PlatformId } from '../../../../../constants';
 import { logger } from '../../../../../logger';
 import type { Release } from '../../../../../modules/datasource/types';
 import * as allVersioning from '../../../../../modules/versioning';
@@ -53,7 +52,7 @@ export async function getChangeLogJSON(
     ? 'https://api.github.com/'
     : sourceUrl;
   const { token } = hostRules.find({
-    hostType: PlatformId.Github,
+    hostType: 'github',
     url,
   });
   // istanbul ignore if

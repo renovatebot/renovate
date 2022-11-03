@@ -216,7 +216,7 @@ export async function processBranch(
           if (dependencyDashboardCheck || config.rebaseRequested) {
             logger.debug('Manual rebase has been requested for PR');
           } else {
-            const newBody = await getPrBody(branchConfig, {
+            const newBody = getPrBody(branchConfig, {
               debugData: updatePrDebugData(existingPr?.bodyStruct?.debugData),
               rebasingNotice:
                 'Renovate will not automatically rebase this PR, because other commits have been found.',
