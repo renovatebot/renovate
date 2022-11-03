@@ -160,5 +160,107 @@ describe('modules/manager/github-actions/extract', () => {
         },
       ]);
     });
+
+    it('extracts tags in different formats', () => {
+      const res = extractPackageFile(
+        Fixtures.get('workflow_4.yml'),
+        'workflow_4.yml'
+      );
+      expect(res?.deps).toMatchObject([
+        {
+          currentDigest: '1e204e9a9253d643386038d443f96446fa156a97',
+          currentValue: '1.2.3',
+          replaceString:
+            'actions/checkout@1e204e9a9253d643386038d443f96446fa156a97 # 1.2.3',
+        },
+        {
+          currentDigest: '1e204e9a9253d643386038d443f96446fa156a97',
+          currentValue: '1.2',
+          replaceString:
+            'actions/checkout@1e204e9a9253d643386038d443f96446fa156a97 # 1.2',
+        },
+        {
+          currentDigest: '1e204e9a9253d643386038d443f96446fa156a97',
+          currentValue: '1',
+          replaceString:
+            'actions/checkout@1e204e9a9253d643386038d443f96446fa156a97 # 1',
+        },
+        {
+          currentDigest: '1e204e9a9253d643386038d443f96446fa156a97',
+          currentValue: 'v1.2.3',
+          replaceString:
+            'actions/checkout@1e204e9a9253d643386038d443f96446fa156a97 # v1.2.3',
+        },
+        {
+          currentDigest: '1e204e9a9253d643386038d443f96446fa156a97',
+          currentValue: 'v1.2',
+          replaceString:
+            'actions/checkout@1e204e9a9253d643386038d443f96446fa156a97 # v1.2',
+        },
+        {
+          currentDigest: '1e204e9a9253d643386038d443f96446fa156a97',
+          currentValue: 'v1',
+          replaceString:
+            'actions/checkout@1e204e9a9253d643386038d443f96446fa156a97 # v1',
+        },
+        {
+          currentDigest: '1e204e9a9253d643386038d443f96446fa156a97',
+          currentValue: 'v2.1.0',
+          replaceString:
+            'actions/checkout@1e204e9a9253d643386038d443f96446fa156a97 # @v2.1.0',
+        },
+        {
+          currentDigest: '1e204e9a9253d643386038d443f96446fa156a97',
+          currentValue: 'v2.1.0',
+          replaceString:
+            'actions/checkout@1e204e9a9253d643386038d443f96446fa156a97 # pin @v2.1.0',
+        },
+        {
+          currentDigest: '1e204e9a9253d643386038d443f96446fa156a97',
+          currentValue: 'v2.1.0',
+          replaceString:
+            'actions/checkout@1e204e9a9253d643386038d443f96446fa156a97 # tag=v2.1.0',
+        },
+        {
+          currentDigest: '1e204e9a9253d643386038d443f96446fa156a97',
+          currentValue: 'v2.1.0',
+          replaceString:
+            'actions/checkout@1e204e9a9253d643386038d443f96446fa156a97  #   v2.1.0',
+        },
+        {
+          currentDigest: '1e204e9a9253d643386038d443f96446fa156a97',
+          currentValue: 'v2.1.0',
+          replaceString:
+            'actions/checkout@1e204e9a9253d643386038d443f96446fa156a97 #v2.1.0',
+        },
+        {
+          currentDigest: '1e204e9a9253d643386038d443f96446fa156a97',
+          currentValue: 'v2.1.0',
+          replaceString:
+            'actions/checkout@1e204e9a9253d643386038d443f96446fa156a97 #v2.1.0',
+        },
+        {
+          currentDigest: '1e204e',
+          currentValue: 'v2.1.0',
+          replaceString: 'actions/checkout@1e204e # v2.1.0',
+        },
+        {
+          currentValue: '01aecc#v2.1.0',
+          replaceString: 'actions/checkout@01aecc#v2.1.0',
+        },
+        {
+          currentDigest: '1e204e9a9253d643386038d443f96446fa156a97',
+          currentValue: undefined,
+          replaceString:
+            'actions/checkout@1e204e9a9253d643386038d443f96446fa156a97',
+        },
+        {
+          currentDigest: '1e204e9a9253d643386038d443f96446fa156a97',
+          currentValue: 'v2.1.0',
+          replaceString:
+            'actions/checkout@1e204e9a9253d643386038d443f96446fa156a97 # v2.1.0',
+        },
+      ]);
+    });
   });
 });
