@@ -1,13 +1,14 @@
 // TODO: types (#7154)
 /* eslint-disable @typescript-eslint/restrict-template-expressions */
 import URL from 'url';
-import { PlatformId } from '../../../constants';
 import { logger } from '../../../logger';
+import { detectPlatform } from '../../../util/common';
 import * as hostRules from '../../../util/host-rules';
 import { Http } from '../../../util/http';
 import { regEx } from '../../../util/regex';
 import { trimLeadingSlash, trimTrailingSlash } from '../../../util/url';
 import { BitBucketTagsDatasource } from '../bitbucket-tags';
+import { GitTagsDatasource } from '../git-tags';
 import { GithubTagsDatasource } from '../github-tags';
 import { GitlabTagsDatasource } from '../gitlab-tags';
 import type { DataSource } from './types';
@@ -137,11 +138,7 @@ export class BaseGoDatasource {
       };
     }
 
-    const opts = hostRules.find({
-      hostType: PlatformId.Gitlab,
-      url: goSourceUrl,
-    });
-    if (opts.token) {
+    if (hostRules.hostType({ url: goSourceUrl }) === 'gitlab') {
       // get server base url from import url
       const parsedUrl = URL.parse(goSourceUrl);
 
@@ -202,18 +199,27 @@ export class BaseGoDatasource {
     }
     // fall back to old behaviour if detection did not work
 
-    // split the go module from the URL: host/go/module -> go/module
-    // TODO: `parsedUrl.pathname` can be undefined
-    const packageName = trimTrailingSlash(`${parsedUrl.pathname}`)
-      .replace(regEx(/\.git$/), '')
-      .split('/')
-      .slice(-2)
-      .join('/');
+    if (detectPlatform(goImportURL) === 'github') {
+      // split the go module from the URL: host/go/module -> go/module
+      // TODO: `parsedUrl.pathname` can be undefined
+      const packageName = trimTrailingSlash(`${parsedUrl.pathname}`)
+        .replace(regEx(/\.git$/), '')
+        .split('/')
+        .slice(-2)
+        .join('/');
+
+      return {
+        datasource: GithubTagsDatasource.id,
+        registryUrl: `${parsedUrl.protocol}//${parsedUrl.host}`,
+        packageName,
+      };
+    }
+
+    // Fall back to git tags
 
     return {
-      datasource: GithubTagsDatasource.id,
-      registryUrl: `${parsedUrl.protocol}//${parsedUrl.host}`,
-      packageName,
+      datasource: GitTagsDatasource.id,
+      packageName: goImportURL,
     };
   }
 }

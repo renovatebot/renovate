@@ -1,5 +1,4 @@
 import * as httpMock from '../../../../../../test/http-mock';
-import { PlatformId } from '../../../../../constants';
 import * as semverVersioning from '../../../../../modules/versioning/semver';
 import * as hostRules from '../../../../../util/host-rules';
 import type { BranchUpgradeConfig } from '../../../../types';
@@ -41,7 +40,7 @@ describe('workers/repository/update/pr/changelog/gitlab', () => {
     beforeEach(() => {
       hostRules.clear();
       hostRules.add({
-        hostType: PlatformId.Gitlab,
+        hostType: 'gitlab',
         matchHost,
         token: 'abc',
       });
@@ -250,7 +249,7 @@ describe('workers/repository/update/pr/changelog/gitlab', () => {
 
     it('supports gitlab enterprise and gitlab enterprise changelog', async () => {
       hostRules.add({
-        hostType: PlatformId.Gitlab,
+        hostType: 'gitlab',
         matchHost: 'https://gitlab-enterprise.example.com/',
         token: 'abc',
       });
@@ -284,7 +283,7 @@ describe('workers/repository/update/pr/changelog/gitlab', () => {
     it('supports self-hosted gitlab changelog', async () => {
       httpMock.scope('https://git.test.com').persist().get(/.*/).reply(200, []);
       hostRules.add({
-        hostType: PlatformId.Gitlab,
+        hostType: 'gitlab',
         matchHost: 'https://git.test.com/',
         token: 'abc',
       });
@@ -292,7 +291,7 @@ describe('workers/repository/update/pr/changelog/gitlab', () => {
       expect(
         await getChangeLogJSON({
           ...upgrade,
-          platform: PlatformId.Gitlab,
+          platform: 'gitlab',
           sourceUrl: 'https://git.test.com/meno/dropzone/',
           endpoint: 'https://git.test.com/api/v4/',
         })
@@ -314,6 +313,39 @@ describe('workers/repository/update/pr/changelog/gitlab', () => {
           { version: '5.4.0' },
         ],
       });
+    });
+
+    it('supports overwriting sourceUrl for self-hosted gitlab changelog', async () => {
+      httpMock.scope('https://git.test.com').persist().get(/.*/).reply(200, []);
+      const sourceUrl = 'https://git.test.com/meno/dropzone/';
+      const replacementSourceUrl =
+        'https://git.test.com/replacement/sourceurl/';
+      const config = {
+        ...upgrade,
+        platform: 'gitlab',
+        endpoint: 'https://git.test.com/api/v4/',
+        sourceUrl,
+        customChangelogUrl: replacementSourceUrl,
+      };
+      hostRules.add({
+        hostType: 'gitlab',
+        matchHost: 'https://git.test.com/',
+        token: 'abc',
+      });
+      process.env.GITHUB_ENDPOINT = '';
+      expect(await getChangeLogJSON(config)).toMatchObject({
+        hasReleaseNotes: false,
+        project: {
+          apiBaseUrl: 'https://git.test.com/api/v4/',
+          baseUrl: 'https://git.test.com/',
+          depName: 'renovate',
+          repository: 'replacement/sourceurl',
+          sourceDirectory: undefined,
+          sourceUrl: 'https://git.test.com/replacement/sourceurl/',
+          type: 'gitlab',
+        },
+      });
+      expect(config.sourceUrl).toBe(sourceUrl); // ensure unmodified function argument
     });
   });
 });

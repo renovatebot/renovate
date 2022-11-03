@@ -4,6 +4,7 @@ import { toBase64 } from '../../../../../util/string';
 import * as template from '../../../../../util/template';
 import { joinUrlParts } from '../../../../../util/url';
 import type { BranchConfig } from '../../../../types';
+import { getDepWarningsPR, getWarnings } from '../../../errors-warnings';
 import { getChangelogs } from './changelogs';
 import { getPrConfigDescription } from './config-description';
 import { getControls } from './controls';
@@ -64,18 +65,27 @@ interface PrBodyConfig {
 
 const rebasingRegex = regEx(/\*\*Rebasing\*\*: .*/);
 
-export async function getPrBody(
+export function getPrBody(
   branchConfig: BranchConfig,
   prBodyConfig: PrBodyConfig
-): Promise<string> {
+): string {
   massageUpdateMetadata(branchConfig);
+  let warnings = '';
+  warnings += getWarnings(branchConfig);
+  if (branchConfig.packageFiles) {
+    warnings += getDepWarningsPR(
+      branchConfig.packageFiles,
+      branchConfig.dependencyDashboard
+    );
+  }
   const content = {
     header: getPrHeader(branchConfig),
     table: getPrUpdatesTable(branchConfig),
+    warnings,
     notes: getPrNotes(branchConfig) + getPrExtraNotes(branchConfig),
     changelogs: getChangelogs(branchConfig),
-    configDescription: await getPrConfigDescription(branchConfig),
-    controls: await getControls(branchConfig),
+    configDescription: getPrConfigDescription(branchConfig),
+    controls: getControls(),
     footer: getPrFooter(branchConfig),
   };
 

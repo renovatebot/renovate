@@ -122,7 +122,7 @@ function extractCargoRegistries(config: CargoConfig | null): CargoRegistries {
     if (registry.index) {
       result[registryName] = registry.index;
     } else {
-      logger.debug({ registryName }, 'cargo registry is missing index');
+      logger.debug(`${registryName} cargo registry is missing index`);
     }
   }
 

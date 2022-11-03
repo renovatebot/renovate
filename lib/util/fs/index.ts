@@ -6,6 +6,7 @@ import fs from 'fs-extra';
 import upath from 'upath';
 import { GlobalConfig } from '../../config/global';
 import { logger } from '../../logger';
+import { getFile } from '../git';
 import { ensureCachePath, ensureLocalPath } from './util';
 
 export const pipeline = util.promisify(stream.pipeline);
@@ -246,6 +247,16 @@ export async function rmCache(path: string): Promise<void> {
   await fs.rm(fullPath, { recursive: true });
 }
 
+export async function cachePathExists(pathName: string): Promise<boolean> {
+  const path = ensureCachePath(pathName);
+  try {
+    const s = await fs.stat(path);
+    return !!s;
+  } catch (_) {
+    return false;
+  }
+}
+
 export async function readCacheFile(fileName: string): Promise<Buffer>;
 export async function readCacheFile(
   fileName: string,
@@ -274,4 +285,19 @@ export function readSystemFile(
   encoding?: string
 ): Promise<string | Buffer> {
   return encoding ? fs.readFile(fileName, encoding) : fs.readFile(fileName);
+}
+
+export async function getFileContentMap(
+  fileNames: string[],
+  local = false
+): Promise<Record<string, string | null>> {
+  const fileContentMap: Record<string, string | null> = {};
+
+  for (const fileName of fileNames) {
+    fileContentMap[fileName] = local
+      ? await readLocalFile(fileName, 'utf8')
+      : await getFile(fileName);
+  }
+
+  return fileContentMap;
 }

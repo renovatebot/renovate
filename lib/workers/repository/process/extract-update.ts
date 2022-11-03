@@ -1,11 +1,11 @@
 // TODO #7154
 import is from '@sindresorhus/is';
-import hasha from 'hasha';
 import type { RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
 import type { PackageFile } from '../../../modules/manager/types';
 import { getCache } from '../../../util/cache/repository';
 import { checkGithubToken as ensureGithubToken } from '../../../util/check-token';
+import { fingerprint } from '../../../util/fingerprint';
 import { checkoutBranch, getBranchCommit } from '../../../util/git';
 import type { BranchConfig } from '../../types';
 import { extractAllDependencies } from '../extract';
@@ -71,13 +71,17 @@ export async function extract(
   const cache = getCache();
   cache.scan ||= {};
   const cachedExtract = cache.scan[baseBranch!];
-  const configHash = hasha(JSON.stringify(config));
+  const { packageRules, ...remainingConfig } = config;
+  // Calculate hash excluding packageRules, because they're not applied during extract
+  const configHash = fingerprint(remainingConfig);
   // istanbul ignore if
   if (
     cachedExtract?.sha === baseBranchSha &&
     cachedExtract?.configHash === configHash
   ) {
-    logger.debug({ baseBranch, baseBranchSha }, 'Found cached extract');
+    logger.debug(
+      `Found cached extract for ${baseBranch!} (sha=${baseBranchSha})`
+    );
     packageFiles = cachedExtract.packageFiles;
     try {
       for (const files of Object.values(packageFiles)) {

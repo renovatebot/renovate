@@ -85,11 +85,24 @@ You can limit which repositories Renovate can access by using the `autodiscoverF
 You can use this option to filter the list of repositories that the Renovate bot account can access through `autodiscover`.
 It takes a [minimatch](https://www.npmjs.com/package/minimatch) glob-style or regex pattern.
 
+If you set multiple filters, then the matches of each filter are added to the overall result.
+
+If you use an environment variable or the CLI to set the value for `autodiscoverFilter`, then commas `,` within filters are not supported.
+Commas will be used as delimiter for a new filter.
+
+```
+# DO NOT use commas inside the filter if your are using env or cli variables to configure it.
+RENOVATE_AUTODISCOVER_FILTER="/myapp/{readme.md,src/**}"
+
+# in this example you can use regex instead
+RENOVATE_AUTODISCOVER_FILTER="/myapp/(readme\.md|src/.*)/"
+```
+
 **Minimatch**:
 
 ```json
 {
-  "autodiscoverFilter": "project/*"
+  "autodiscoverFilter": ["project/*"]
 }
 ```
 
@@ -99,15 +112,17 @@ All text inside the start and end `/` will be treated as a regular expression.
 
 ```json
 {
-  "autodiscoverFilter": "/project/.*/"
+  "autodiscoverFilter": ["/project/.*/"]
 }
 ```
 
-You can negate the regex by putting a `!` in front:
+You can negate the regex by putting a `!` in front.
+Only use a single negation and don't mix with other filters because all filters are combined with `or`.
+If using negations, all repositories except those who match the regex are added to the result:
 
 ```json
 {
-  "autodiscoverFilter": "!/project/.*/"
+  "autodiscoverFilter": ["!/project/.*/"]
 }
 ```
 
@@ -136,7 +151,7 @@ But you can tell Renovate to use "sidecar" containers for third-party tools by s
 For this to work, `docker` needs to be installed and the Docker socket available to Renovate.
 Now Renovate uses `docker run` to create containers like Node.js or Python to run tools in as-needed.
 
-Additionally, when Renovate is run inside a container built using [`containerbase/buildpack`](https://github.com/containerbase/buildpack), such as the official Renovate images on Docker Hub, then `binarySource=install` can be used.
+Additionally, when Renovate is run inside a container built using [`containerbase`](https://github.com/containerbase), such as the official Renovate images on Docker Hub, then `binarySource=install` can be used.
 This mode means that Renovate will dynamically install the version of tools available, if supported.
 
 Supported tools for dynamic install are:
@@ -180,6 +195,12 @@ For example:
   "cacheDir": "/my-own-different-cache-folder"
 }
 ```
+
+## containerbaseDir
+
+This directory is used to cache downloads when `binarySource=docker` or `binarySource=install`.
+
+Use this option if you need such downloads to be stored outside of Renovate's regular cache directory (`cacheDir`).
 
 ## customEnvVariables
 
@@ -355,16 +376,15 @@ In practice, it is implemented by converting the `force` configuration into a `p
 This is set to `true` by default, meaning that any settings (such as `schedule`) take maximum priority even against custom settings existing inside individual repositories.
 It will also override any settings in `packageRules`.
 
-## forkMode
-
-You probably have no need for this option - it is an experimental setting for the Renovate hosted GitHub App.
-If this is set to `true` then Renovate will fork the repository into the personal space of the person owning the Personal Access Token.
-
 ## forkToken
 
-You probably don't need this option - it is an experimental setting for the Renovate hosted GitHub App.
-This should be set to a Personal Access Token (GitHub only) when `forkMode` is set to `true`.
-Renovate will use this token to fork the repository into the personal space of the person owning the Personal Access Token.
+You probably don't need this option - it is an experimental setting developed for the Forking Renovate hosted GitHub App.
+
+If this value is configured then Renovate:
+
+- forks the target repository into the account that owns the PAT
+- keep this fork's default branch up-to-date with the target
+
 Renovate will then create branches on the fork and opens Pull Requests on the parent repository.
 
 ## gitNoVerify
@@ -446,6 +466,10 @@ modules.exports = {
 ```
 
 In the above example any reference to the `@company` preset will be replaced with `local>org/renovate-config`.
+
+<!-- prettier-ignore -->
+!!! tip
+    Combine `migratePresets` with `configMigration` if you'd like your config migrated by PR.
 
 ## onboarding
 
@@ -613,10 +637,7 @@ Elements in the `repositories` array can be an object if you wish to define addi
 
 ```js
 {
-  repositories: [
-    { repository: 'g/r1', bumpVersion: true },
-    'g/r2'
-  ],
+  repositories: [{ repository: 'g/r1', bumpVersion: true }, 'g/r2'];
 }
 ```
 
@@ -625,6 +646,28 @@ Elements in the `repositories` array can be an object if you wish to define addi
 Set this to `"enabled"` to have Renovate maintain a JSON file cache per-repository to speed up extractions.
 Set to `"reset"` if you ever need to bypass the cache and have it overwritten.
 JSON files will be stored inside the `cacheDir` beside the existing file-based package cache.
+
+## repositoryCacheType
+
+Set this to an S3 URI to enable S3 backed repository cache.
+
+```ts
+{
+  repositoryCacheType: 's3://bucket-name';
+}
+```
+
+<!-- prettier-ignore -->
+!!! note
+    [IAM is supported](https://docs.aws.amazon.com/sdk-for-javascript/v3/developer-guide/loading-node-credentials-iam.html) when running renovate within an EC2 instance in an ECS cluster. In this case, no additional environment variables are required.
+    Otherwise, the following environment variables should be set for the S3 client to work.
+
+```
+    AWS_ACCESS_KEY_ID
+    AWS_SECRET_ACCESS_KEY
+    AWS_SESSION_TOKEN
+    AWS_REGION
+```
 
 ## requireConfig
 

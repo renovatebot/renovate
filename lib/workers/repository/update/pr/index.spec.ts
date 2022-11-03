@@ -60,6 +60,7 @@ describe('workers/repository/update/pr/index', () => {
     const config: BranchConfig = {
       manager: 'some-manager',
       branchName: sourceBranch,
+      baseBranch: 'base',
       upgrades: [],
       prTitle,
     };
@@ -67,7 +68,7 @@ describe('workers/repository/update/pr/index', () => {
     beforeEach(() => {
       jest.resetAllMocks();
       GlobalConfig.reset();
-      prBody.getPrBody.mockResolvedValue(body);
+      prBody.getPrBody.mockReturnValue(body);
     });
 
     describe('Create', () => {

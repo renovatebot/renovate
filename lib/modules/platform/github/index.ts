@@ -7,7 +7,6 @@ import JSON5 from 'json5';
 import { DateTime } from 'luxon';
 import semver from 'semver';
 import { GlobalConfig } from '../../../config/global';
-import { PlatformId } from '../../../constants';
 import {
   PLATFORM_INTEGRATION_UNAUTHORIZED,
   REPOSITORY_ACCESS_FORBIDDEN,
@@ -51,11 +50,11 @@ import type {
   PlatformParams,
   PlatformPrOptions,
   PlatformResult,
-  Pr,
   RepoParams,
   RepoResult,
   UpdatePrConfig,
 } from '../types';
+import { repoFingerprint } from '../util';
 import { smartTruncate } from '../utils/pr-body';
 import { coerceRestPr } from './common';
 import {
@@ -65,13 +64,14 @@ import {
   vulnerabilityAlertsQuery,
 } from './graphql';
 import { massageMarkdownLinks } from './massage-markdown-links';
-import { getPrCache } from './pr';
+import { getPrCache, updatePrCache } from './pr';
 import type {
   BranchProtection,
   CombinedBranchStatus,
   Comment,
   GhAutomergeResponse,
   GhBranchStatus,
+  GhPr,
   GhRepo,
   GhRestPr,
   LocalRepoConfig,
@@ -89,7 +89,7 @@ export const GitHubMaxPrBodyLen = 60000;
 export function resetConfigs(): void {
   config = {} as never;
   platformConfig = {
-    hostType: PlatformId.Github,
+    hostType: 'github',
     endpoint: 'https://api.github.com/',
   };
 }
@@ -245,7 +245,6 @@ export async function getJsonFile(
 export async function initRepo({
   endpoint,
   repository,
-  forkMode,
   forkToken,
   renovateUsername,
   cloneSubmodules,
@@ -266,7 +265,7 @@ export async function initRepo({
     githubHttp.setBaseUrl(endpoint);
   }
   const opts = hostRules.find({
-    hostType: PlatformId.Github,
+    hostType: 'github',
     url: platformConfig.endpoint,
   });
   config.renovateUsername = renovateUsername;
@@ -370,9 +369,8 @@ export async function initRepo({
   config.issueList = null;
   config.prList = null;
 
-  config.forkMode = !!forkMode;
-  if (forkMode) {
-    logger.debug('Bot is in forkMode');
+  if (forkToken) {
+    logger.debug('Bot is in fork mode');
     config.forkToken = forkToken;
     // save parent name then delete
     config.parentRepo = config.repository;
@@ -488,7 +486,7 @@ export async function initRepo({
 
   const parsedEndpoint = URL.parse(platformConfig.endpoint);
   // istanbul ignore else
-  if (forkMode) {
+  if (forkToken) {
     logger.debug('Using forkToken for git init');
     parsedEndpoint.auth = config.forkToken ?? null;
   } else {
@@ -512,6 +510,7 @@ export async function initRepo({
   const repoConfig: RepoResult = {
     defaultBranch: config.defaultBranch,
     isFork: repo.isFork === true,
+    repoFingerprint: repoFingerprint(repo.id, platformConfig.endpoint),
   };
   return repoConfig;
 }
@@ -564,9 +563,10 @@ export async function getRepoForceRebase(): Promise<boolean> {
   return !!config.repoForceRebase;
 }
 
-function cachePr(pr?: Pr | null): void {
+function cachePr(pr?: GhPr | null): void {
   config.prList ??= [];
   if (pr) {
+    updatePrCache(pr);
     for (let idx = 0; idx < config.prList.length; idx += 1) {
       const cachedPr = config.prList[idx];
       if (cachedPr.number === pr.number) {
@@ -579,17 +579,22 @@ function cachePr(pr?: Pr | null): void {
 }
 
 // Fetch fresh Pull Request and cache it when possible
-async function fetchPr(prNo: number): Promise<Pr | null> {
-  const { body: ghRestPr } = await githubApi.getJson<GhRestPr>(
-    `repos/${config.parentRepo ?? config.repository}/pulls/${prNo}`
-  );
-  const result = coerceRestPr(ghRestPr);
-  cachePr(result);
-  return result;
+async function fetchPr(prNo: number): Promise<GhPr | null> {
+  try {
+    const { body: ghRestPr } = await githubApi.getJson<GhRestPr>(
+      `repos/${config.parentRepo ?? config.repository}/pulls/${prNo}`
+    );
+    const result = coerceRestPr(ghRestPr);
+    cachePr(result);
+    return result;
+  } catch (err) {
+    logger.warn({ err, prNo }, `GitHub fetchPr error`);
+    return null;
+  }
 }
 
 // Gets details for a PR
-export async function getPr(prNo: number): Promise<Pr | null> {
+export async function getPr(prNo: number): Promise<GhPr | null> {
   if (!prNo) {
     return null;
   }
@@ -612,11 +617,11 @@ function matchesState(state: string, desiredState: string): boolean {
   return state === desiredState;
 }
 
-export async function getPrList(): Promise<Pr[]> {
+export async function getPrList(): Promise<GhPr[]> {
   if (!config.prList) {
     const repo = config.parentRepo ?? config.repository;
     const username =
-      !config.forkMode && !config.ignorePrAuthor && config.renovateUsername
+      !config.forkToken && !config.ignorePrAuthor && config.renovateUsername
         ? config.renovateUsername
         : null;
     // TODO: check null `repo` (#7154)
@@ -633,7 +638,7 @@ export async function findPr({
   branchName,
   prTitle,
   state = PrState.All,
-}: FindPRConfig): Promise<Pr | null> {
+}: FindPRConfig): Promise<GhPr | null> {
   logger.debug(`findPr(${branchName}, ${prTitle}, ${state})`);
   const prList = await getPrList();
   const pr = prList.find((p) => {
@@ -649,7 +654,7 @@ export async function findPr({
       return false;
     }
 
-    if (!config.forkMode && config.repository !== p.sourceRepo) {
+    if (!config.forkToken && config.repository !== p.sourceRepo) {
       return false;
     }
 
@@ -664,7 +669,7 @@ export async function findPr({
 const REOPEN_THRESHOLD_MILLIS = 1000 * 60 * 60 * 24 * 7;
 
 // Returns the Pull Request for a branch. Null if not exists.
-export async function getBranchPr(branchName: string): Promise<Pr | null> {
+export async function getBranchPr(branchName: string): Promise<GhPr | null> {
   logger.debug(`getBranchPr(${branchName})`);
 
   const openPr = await findPr({
@@ -1242,7 +1247,7 @@ async function getComments(issueNo: number): Promise<Comment[]> {
   } catch (err) /* istanbul ignore next */ {
     if (err.statusCode === 404) {
       logger.debug('404 response when retrieving comments');
-      throw new ExternalHostError(err, PlatformId.Github);
+      throw new ExternalHostError(err, 'github');
     }
     throw err;
   }
@@ -1404,10 +1409,10 @@ export async function createPr({
   labels,
   draftPR = false,
   platformOptions,
-}: CreatePRConfig): Promise<Pr | null> {
+}: CreatePRConfig): Promise<GhPr | null> {
   const body = sanitize(rawBody);
   const base = targetBranch;
-  // Include the repository owner to handle forkMode and regular mode
+  // Include the repository owner to handle forkToken and regular mode
   // TODO: can `repository` be null? (#7154)
 
   const head = `${config.repository!.split('/')[0]}:${sourceBranch}`;
@@ -1436,10 +1441,13 @@ export async function createPr({
     { branch: sourceBranch, pr: ghPr.number, draft: draftPR },
     'PR created'
   );
-  const { number, node_id } = ghPr;
+
+  const result = coerceRestPr(ghPr);
+  const { number, node_id } = result;
+
   await addLabels(number, labels);
   await tryPrAutomerge(number, node_id, platformOptions);
-  const result = coerceRestPr(ghPr);
+
   cachePr(result);
   return result;
 }

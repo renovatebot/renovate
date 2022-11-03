@@ -1,5 +1,5 @@
-import safeStringify from 'fast-safe-stringify';
+import { quickStringify } from './stringify';
 
 export function clone<T>(input: T | null = null): T {
-  return JSON.parse(safeStringify(input));
+  return JSON.parse(quickStringify(input));
 }
