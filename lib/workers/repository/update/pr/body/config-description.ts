@@ -1,8 +1,7 @@
+import * as util from 'util';
 import { _, ngettext, pgettext } from '../../../../../i18n';
 import { emojify } from '../../../../../util/emoji';
 import type { BranchConfig } from '../../../../types';
-import * as util from 'util';
-
 
 export function getPrConfigDescription(config: BranchConfig): string {
   let prBody = `\n\n---\n\n### Configuration\n\n`;
