@@ -121,7 +121,7 @@ dummy 1.2.3
           },
           {
             currentValue: '1.6.1',
-            datasource: 'github-tags',
+            datasource: 'github-releases',
             packageName: 'crystal-lang/crystal',
             versioning: 'semver',
             depName: 'crystal',
