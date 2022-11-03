@@ -41,7 +41,7 @@ export const upgradeableTooling: Record<
     versioning: `${regexVersioning.id}:^(?<major>\\d+?)\\.(?<minor>\\d+?)\\.(?<patch>\\d+)\\.(?<build>\\d+)$`,
   },
   crystal: {
-    datasource: GithubTagsDatasource.id,
+    datasource: GithubReleasesDatasource.id,
     packageName: 'crystal-lang/crystal',
     versioning: semverVersioning.id,
   },
