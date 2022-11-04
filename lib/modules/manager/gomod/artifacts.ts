@@ -1,7 +1,6 @@
 import is from '@sindresorhus/is';
 import upath from 'upath';
 import { GlobalConfig } from '../../../config/global';
-import { PlatformId } from '../../../constants';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import type { HostRule } from '../../../types';
@@ -37,7 +36,7 @@ function getGitEnvironmentVariables(): NodeJS.ProcessEnv {
 
   // hard-coded logic to use authentication for github.com based on the githubToken for api.github.com
   const githubToken = find({
-    hostType: PlatformId.Github,
+    hostType: 'github',
     url: 'https://api.github.com/',
   });
 
@@ -56,12 +55,12 @@ function getGitEnvironmentVariables(): NodeJS.ProcessEnv {
 
   const goGitAllowedHostType = new Set<string>([
     // All known git platforms
-    PlatformId.Azure,
-    PlatformId.Bitbucket,
-    PlatformId.BitbucketServer,
-    PlatformId.Gitea,
-    PlatformId.Github,
-    PlatformId.Gitlab,
+    'azure',
+    'bitbucket',
+    'bitbucket-server',
+    'gitea',
+    'github',
+    'gitlab',
   ]);
 
   // for each hostRule without hostType we add additional authentication variables to the environmentVariables
@@ -270,7 +269,7 @@ export async function updateArtifacts({
     const execCommands: string[] = [];
 
     let args = 'get -d -t ./...';
-    logger.debug({ cmd, args }, 'go get command included');
+    logger.trace({ cmd, args }, 'go get command included');
     execCommands.push(`${cmd} ${args}`);
 
     // Update import paths on major updates above v1
@@ -291,7 +290,7 @@ export async function updateArtifacts({
       !config.postUpdateOptions?.includes('gomodUpdateImportPaths') &&
       config.updateType === 'major';
     if (mustSkipGoModTidy) {
-      logger.debug({ cmd, args }, 'go mod tidy command skipped');
+      logger.debug('go mod tidy command skipped');
     }
 
     const tidyOpts = config.postUpdateOptions?.includes('gomodTidy1.17')
@@ -304,17 +303,17 @@ export async function updateArtifacts({
         (config.updateType === 'major' && isImportPathUpdateRequired));
     if (isGoModTidyRequired) {
       args = 'mod tidy' + tidyOpts;
-      logger.debug({ cmd, args }, 'go mod tidy command included');
+      logger.debug('go mod tidy command included');
       execCommands.push(`${cmd} ${args}`);
     }
 
     if (useVendor) {
       args = 'mod vendor';
-      logger.debug({ cmd, args }, 'go mod vendor command included');
+      logger.debug('go mod tidy command included');
       execCommands.push(`${cmd} ${args}`);
       if (isGoModTidyRequired) {
         args = 'mod tidy' + tidyOpts;
-        logger.debug({ cmd, args }, 'go mod tidy command included');
+        logger.debug('go mod tidy command included');
         execCommands.push(`${cmd} ${args}`);
       }
     }
@@ -322,7 +321,7 @@ export async function updateArtifacts({
     // We tidy one more time as a solution for #6795
     if (isGoModTidyRequired) {
       args = 'mod tidy' + tidyOpts;
-      logger.debug({ cmd, args }, 'additional go mod tidy command included');
+      logger.debug('go mod tidy command included');
       execCommands.push(`${cmd} ${args}`);
     }
 

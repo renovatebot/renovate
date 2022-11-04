@@ -18,7 +18,7 @@ on:
         required: false
 
 env:
-  NODE_VERSION: 14
+  NODE_VERSION: 16
   GIT_SHA: ${{ github.event.client_payload.sha }}
   NPM_VERSION: ${{ github.event.client_payload.version }}
   NPM_TAG: ${{ github.event.client_payload.tag }}
