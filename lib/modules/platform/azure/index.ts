@@ -10,7 +10,6 @@ import {
 } from 'azure-devops-node-api/interfaces/GitInterfaces.js';
 import delay from 'delay';
 import JSON5 from 'json5';
-import { PlatformId } from '../../../constants';
 import {
   REPOSITORY_ARCHIVED,
   REPOSITORY_EMPTY,
@@ -81,7 +80,7 @@ const defaults: {
   endpoint?: string;
   hostType: string;
 } = {
-  hostType: PlatformId.Azure,
+  hostType: 'azure',
 };
 
 export function initPlatform({
