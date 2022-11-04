@@ -714,7 +714,16 @@ export class DockerDatasource extends Datasource {
         headers,
         noAuth: true,
       });
-      labels = JSON.parse(configResponse.body).config.Labels;
+
+      const body = JSON.parse(configResponse.body);
+      if (body.config) {
+        labels = body.config.Labels;
+      } else {
+        logger.debug(
+          { headers: configResponse.headers, body },
+          `manifest blob response body missing the "config" property`
+        );
+      }
 
       if (labels) {
         logger.debug(
@@ -922,7 +931,6 @@ export class DockerDatasource extends Datasource {
           jfrogRepository + '/library/' + dockerImage
         );
       }
-      // prettier-ignore
       if (err.statusCode === 429 && isDockerHost(registryHost)) {
         logger.warn(
           { registryHost, dockerRepository, err },
@@ -930,7 +938,6 @@ export class DockerDatasource extends Datasource {
         );
         throw new ExternalHostError(err);
       }
-      // prettier-ignore
       if (err.statusCode === 401 && isDockerHost(registryHost)) {
         logger.warn(
           { registryHost, dockerRepository, err },
@@ -944,6 +951,17 @@ export class DockerDatasource extends Datasource {
           'docker registry failure: internal error'
         );
         throw new ExternalHostError(err);
+      }
+      const errorCodes = ['ECONNRESET', 'ETIMEDOUT'];
+      if (errorCodes.includes(err.code)) {
+        logger.warn(
+          { registryHost, dockerRepository, err },
+          'docker registry connection failure'
+        );
+        throw new ExternalHostError(err);
+      }
+      if (isDockerHost(registryHost)) {
+        logger.info({ err }, 'Docker Hub lookup failure');
       }
       throw err;
     }
