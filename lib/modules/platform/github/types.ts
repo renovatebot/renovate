@@ -97,6 +97,7 @@ export interface LocalRepoConfig {
   repositoryOwner: string;
   repository: string | null;
   renovateUsername: string | undefined;
+  renovateForkUser: string | undefined;
   productLinks: any;
   ignorePrAuthor: boolean;
   autoMergeAllowed: boolean;
