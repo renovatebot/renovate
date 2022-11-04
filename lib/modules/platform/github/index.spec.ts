@@ -365,13 +365,11 @@ describe('modules/platform/github/index', () => {
 
     it('throws when error creating fork', async () => {
       const repo = 'some/repo';
-      const branch = 'master';
       const scope = httpMock.scope(githubApiHost);
-      forkInitRepoMock(scope, repo, false, branch);
+      forkInitRepoMock(scope, repo, false);
       scope.get('/user').reply(200, {
-        login: 'renovate-bot',
+        login: 'forked',
       });
-      // getBranchCommit
       scope.post(`/repos/${repo}/forks`).reply(500);
       await expect(
         github.initRepo({
@@ -387,10 +385,12 @@ describe('modules/platform/github/index', () => {
       const scope = httpMock.scope(githubApiHost);
       forkInitRepoMock(scope, 'some/repo', true);
       scope.patch('/repos/forked/repo/git/refs/heads/master').reply(200);
+      scope.get('/user').reply(200, {
+        login: 'forked',
+      });
       const config = await github.initRepo({
         repository: 'some/repo',
         forkToken: 'true',
-        forkOrgs: ['forked'],
       });
       expect(config).toMatchSnapshot();
     });
@@ -398,13 +398,15 @@ describe('modules/platform/github/index', () => {
     it('detects fork default branch mismatch', async () => {
       const scope = httpMock.scope(githubApiHost);
       forkInitRepoMock(scope, 'some/repo', true, 'not_master');
+      scope.get('/user').reply(200, {
+        login: 'forked',
+      });
       scope.post('/repos/forked/repo/git/refs').reply(200);
       scope.patch('/repos/forked/repo').reply(200);
       scope.patch('/repos/forked/repo/git/refs/heads/master').reply(200);
       const config = await github.initRepo({
         repository: 'some/repo',
         forkToken: 'true',
-        forkOrgs: ['forked'],
       });
       expect(config).toMatchSnapshot();
     });
