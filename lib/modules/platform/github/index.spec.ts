@@ -267,7 +267,7 @@ describe('modules/platform/github/index', () => {
     scope: httpMock.Scope,
     repository: string,
     forkExisted: boolean,
-    forkDefaultBranch = 'master'
+    forkDefaulBranch = 'master'
   ): void {
     scope
       // repo info
@@ -300,7 +300,7 @@ describe('modules/platform/github/index', () => {
               {
                 full_name: 'forked/repo',
                 owner: { login: 'forked' },
-                default_branch: forkDefaultBranch,
+                default_branch: forkDefaulBranch,
               },
             ]
           : []
@@ -328,7 +328,6 @@ describe('modules/platform/github/index', () => {
       const config = await github.initRepo({
         repository: 'some/repo',
         forkToken: 'true',
-        forkOrgs: ['renovate-bot'],
         forkCreate: true,
       });
       expect(config).toMatchSnapshot();

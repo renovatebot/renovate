@@ -249,12 +249,20 @@ export async function getForkOrgs(
 ): Promise<string[]> {
   const destinationOrgs = forkOrgs ?? [];
   if (!destinationOrgs.length) {
-    try {
-      logger.debug('Determining fork user from API');
-      const userDetails = await getUserDetails(platformConfig.endpoint, token);
-      destinationOrgs.push(userDetails.username);
-    } catch (err) {
-      logger.debug({ err }, 'Error getting username for forkToken');
+    if (!config.renovateForkUser) {
+      try {
+        logger.debug('Determining fork user from API');
+        const userDetails = await getUserDetails(
+          platformConfig.endpoint,
+          token
+        );
+        config.renovateForkUser = userDetails.username;
+      } catch (err) {
+        logger.debug({ err }, 'Error getting username for forkToken');
+      }
+    }
+    if (config.renovateForkUser) {
+      destinationOrgs.push(config.renovateForkUser);
     }
   }
   return destinationOrgs;
