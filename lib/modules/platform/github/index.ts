@@ -288,7 +288,7 @@ export async function findFork(
     logger.debug(`Searching for forked repo in ${forkOrg}`);
     forkedRepo = forks.find((repo) => repo.owner.login === forkOrg);
     if (forkedRepo) {
-      logger.debug(`Found existing forked repo: ${config.repository}`);
+      logger.debug(`Found existing forked repo: ${forkedRepo.full_name}`);
       break;
     }
   }
