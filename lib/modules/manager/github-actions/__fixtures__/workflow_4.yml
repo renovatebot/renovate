@@ -15,5 +15,5 @@ jobs:
       - uses: actions/checkout@1e204e9a9253d643386038d443f96446fa156a97 #v2.1.0
       - uses: actions/checkout@1e204e # v2.1.0
       - uses: actions/checkout@01aecc#v2.1.0
-      - uses: actions/checkout@1e204e9a9253d643386038d443f96446fa156a97 # comment containing 2.1.0
-      - uses: actions/checkout@1e204e9a9253d643386038d443f96446fa156a97 # v2.1.0 additional comment
+      - uses: actions/checkout@689fcce700ae7ffc576f2b029b51b2ffb66d3abd # comment containing 2.1.0
+      - uses: actions/checkout@689fcce700ae7ffc576f2b029b51b2ffb66d3abd # v2.1.0 additional comment
