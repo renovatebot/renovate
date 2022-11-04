@@ -316,17 +316,14 @@ describe('modules/platform/github/index', () => {
     });
 
     it('should fork when using forkToken', async () => {
-      const repo = 'some/repo';
-      const branch = 'master';
       const scope = httpMock.scope(githubApiHost);
-      forkInitRepoMock(scope, repo, false, branch);
+      forkInitRepoMock(scope, 'some/repo', false);
       scope.get('/user').reply(200, {
-        login: 'renovate-bot',
+        login: 'forked',
       });
-      // getBranchCommit
-      scope.post(`/repos/${repo}/forks`).reply(200, {
+      scope.post('/repos/some/repo/forks').reply(200, {
         full_name: 'forked/repo',
-        default_branch: branch,
+        default_branch: 'master',
       });
       const config = await github.initRepo({
         repository: 'some/repo',
