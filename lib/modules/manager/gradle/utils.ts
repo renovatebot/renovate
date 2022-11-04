@@ -1,7 +1,6 @@
 import upath from 'upath';
 import { regEx } from '../../../util/regex';
 import type { PackageDependency } from '../types';
-import { TokenType } from './common';
 import type {
   GradleManagerData,
   PackageVariables,
@@ -90,9 +89,9 @@ export function interpolateString(
   const resolvedSubstrings: string[] = [];
   for (const childToken of childTokens) {
     const type = childToken.type;
-    if (type === TokenType.String) {
+    if (type === 'string') {
       resolvedSubstrings.push(childToken.value);
-    } else if (type === TokenType.Variable) {
+    } else if (type === 'variable') {
       const varName = childToken.value;
       const varData = variables[varName];
       if (varData) {

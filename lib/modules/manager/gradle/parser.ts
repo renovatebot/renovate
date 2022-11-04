@@ -10,8 +10,8 @@ import {
   GRADLE_PLUGIN_PORTAL_REPO,
   JCENTER_REPO,
   MAVEN_REPO,
-  TokenType,
 } from './common';
+import type { TokenType } from './common';
 import { tokenize } from './tokenizer';
 import type {
   GradleManagerData,
@@ -81,30 +81,21 @@ function matchTokens(
 
 const endOfInstruction: SyntaxMatcher = {
   // Ensure we skip assignments of complex expressions (not strings)
-  matchType: [
-    TokenType.Semicolon,
-    TokenType.RightBrace,
-    TokenType.Word,
-    TokenType.String,
-    TokenType.StringInterpolation,
-  ],
+  matchType: ['semicolon', 'rightBrace', 'word', 'string', 'interpolation'],
   lookahead: true,
 };
 
-const potentialStringTypes = [TokenType.String, TokenType.Word];
+const potentialStringTypes: TokenType[] = ['string', 'word'];
 
 function coercePotentialString(
   token: Token,
   variables: PackageVariables
 ): string | null {
   const tokenType = token?.type;
-  if (tokenType === TokenType.String) {
+  if (tokenType === 'string') {
     return token?.value;
   }
-  if (
-    tokenType === TokenType.Word &&
-    typeof variables[token?.value] !== 'undefined'
-  ) {
+  if (tokenType === 'word' && typeof variables[token?.value] !== 'undefined') {
     return variables[token.value].value;
   }
   return null;
@@ -172,7 +163,7 @@ function processDepInterpolation({
       let fileReplacePosition: number | undefined;
       token.children.forEach((child) => {
         const variable = variables[child.value];
-        if (child?.type === TokenType.Variable && variable) {
+        if (child?.type === 'variable' && variable) {
           packageFile = variable.packageFile;
           fileReplacePosition = variable.fileReplacePosition;
           if (variable?.value === dep.currentValue) {
@@ -184,7 +175,7 @@ function processDepInterpolation({
       if (!dep.managerData) {
         const lastToken = token.children[token.children.length - 1];
         if (
-          lastToken.type === TokenType.String &&
+          lastToken.type === 'string' &&
           // TODO: types (#7154)
           // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
           lastToken.value.startsWith(`:${dep.currentValue}`)
@@ -225,7 +216,7 @@ function processPlugin({
     commitMessageTopic: `plugin ${depName}`,
   };
 
-  if (pluginVersion.type === TokenType.Word) {
+  if (pluginVersion.type === 'word') {
     const varData = variables[pluginVersion.value];
     if (varData) {
       const currentValue = varData.value;
@@ -242,11 +233,11 @@ function processPlugin({
       dep.managerData = { fileReplacePosition, packageFile };
       dep.skipReason = 'unknown-version';
     }
-  } else if (pluginVersion.type === TokenType.StringInterpolation) {
+  } else if (pluginVersion.type === 'interpolation') {
     const versionTpl = pluginVersion as StringInterpolation;
     const children = versionTpl.children;
     const [child] = children;
-    if (child?.type === TokenType.Variable && children.length === 1) {
+    if (child?.type === 'variable' && children.length === 1) {
       const varData = variables[child.value];
       if (varData) {
         const currentValue = varData.value;
@@ -294,7 +285,7 @@ function processCustomRegistryUrl({
   }
 
   let registryUrl: string | null = tokenMap.registryUrl?.value;
-  if (tokenMap.registryUrl?.type === TokenType.StringInterpolation) {
+  if (tokenMap.registryUrl?.type === 'interpolation') {
     const token = tokenMap.registryUrl as StringInterpolation;
     registryUrl = interpolateString(token.children, localVariables);
   }
@@ -350,7 +341,7 @@ function processLongFormDep({
   const dep = parseDependencyString([groupId, artifactId, version].join(':'));
   if (dep) {
     const versionToken: Token = tokenMap.version;
-    if (versionToken.type === TokenType.Word) {
+    if (versionToken.type === 'word') {
       const variable = variables[versionToken.value];
       dep.groupName = variable.key;
       dep.managerData = {
@@ -391,7 +382,7 @@ function processLibraryDep(input: SyntaxHandlerInput): SyntaxHandlerOutput {
     const version = tokenMap.version;
     if (version) {
       if (tokenMap.versionType?.value === 'versionRef') {
-        version.type = TokenType.Word;
+        version.type = 'word';
       }
       const depRes = processLongFormDep({
         ...input,
@@ -408,16 +399,16 @@ function processApplyFrom({
   variables,
 }: SyntaxHandlerInput): SyntaxHandlerOutput {
   let scriptFile: string | null = tokenMap.scriptFile?.value ?? null;
-  if (tokenMap.scriptFile?.type === TokenType.StringInterpolation) {
+  if (tokenMap.scriptFile?.type === 'interpolation') {
     const token = tokenMap.scriptFile as StringInterpolation;
     scriptFile = interpolateString(token.children, variables);
   }
 
   if (tokenMap.parentPath) {
     let parentPath: string | null = tokenMap.parentPath.value ?? null;
-    if (tokenMap.parentPath.type === TokenType.Word) {
+    if (tokenMap.parentPath.type === 'word') {
       parentPath = coercePotentialString(tokenMap.parentPath, variables);
-    } else if (tokenMap.parentPath.type === TokenType.StringInterpolation) {
+    } else if (tokenMap.parentPath.type === 'interpolation') {
       const token = tokenMap.parentPath as StringInterpolation;
       parentPath = interpolateString(token.children, variables);
     }
@@ -436,13 +427,13 @@ const matcherConfigs: SyntaxMatchConfig[] = [
     // rootProject.foo = 'baz'
     matchers: [
       {
-        matchType: TokenType.Word,
+        matchType: 'word',
         matchValue: ['ext', 'project', 'rootProject'],
       },
-      { matchType: TokenType.Dot },
-      { matchType: TokenType.Word, tokenMapKey: 'keyToken' },
-      { matchType: TokenType.Assignment },
-      { matchType: TokenType.String, tokenMapKey: 'valToken' },
+      { matchType: 'dot' },
+      { matchType: 'word', tokenMapKey: 'keyToken' },
+      { matchType: 'assignment' },
+      { matchType: 'string', tokenMapKey: 'valToken' },
       endOfInstruction,
     ],
     handler: handleAssignment,
@@ -450,11 +441,11 @@ const matcherConfigs: SyntaxMatchConfig[] = [
   {
     // foo.bar = 'baz'
     matchers: [
-      { matchType: TokenType.Word, tokenMapKey: 'objectToken' },
-      { matchType: TokenType.Dot },
-      { matchType: TokenType.Word, tokenMapKey: 'keyToken' },
-      { matchType: TokenType.Assignment },
-      { matchType: TokenType.String, tokenMapKey: 'valToken' },
+      { matchType: 'word', tokenMapKey: 'objectToken' },
+      { matchType: 'dot' },
+      { matchType: 'word', tokenMapKey: 'keyToken' },
+      { matchType: 'assignment' },
+      { matchType: 'string', tokenMapKey: 'valToken' },
       endOfInstruction,
     ],
     handler: handleAssignment,
@@ -462,9 +453,9 @@ const matcherConfigs: SyntaxMatchConfig[] = [
   {
     // foo = 'bar'
     matchers: [
-      { matchType: TokenType.Word, tokenMapKey: 'keyToken' },
-      { matchType: TokenType.Assignment },
-      { matchType: TokenType.String, tokenMapKey: 'valToken' },
+      { matchType: 'word', tokenMapKey: 'keyToken' },
+      { matchType: 'assignment' },
+      { matchType: 'string', tokenMapKey: 'valToken' },
       endOfInstruction,
     ],
     handler: handleAssignment,
@@ -472,12 +463,12 @@ const matcherConfigs: SyntaxMatchConfig[] = [
   {
     // set('foo', 'bar')
     matchers: [
-      { matchType: TokenType.Word, matchValue: ['set', 'version'] },
-      { matchType: TokenType.LeftParen },
-      { matchType: TokenType.String, tokenMapKey: 'keyToken' },
-      { matchType: TokenType.Comma },
-      { matchType: TokenType.String, tokenMapKey: 'valToken' },
-      { matchType: TokenType.RightParen },
+      { matchType: 'word', matchValue: ['set', 'version'] },
+      { matchType: 'leftParen' },
+      { matchType: 'string', tokenMapKey: 'keyToken' },
+      { matchType: 'comma' },
+      { matchType: 'string', tokenMapKey: 'valToken' },
+      { matchType: 'rightParen' },
       endOfInstruction,
     ],
     handler: handleAssignment,
@@ -487,7 +478,7 @@ const matcherConfigs: SyntaxMatchConfig[] = [
     // 'foo.bar:baz:1.2.3@ext'
     matchers: [
       {
-        matchType: TokenType.String,
+        matchType: 'string',
         tokenMapKey: 'token',
       },
     ],
@@ -498,7 +489,7 @@ const matcherConfigs: SyntaxMatchConfig[] = [
     // "foo.bar:baz:${bazVersion}@ext"
     matchers: [
       {
-        matchType: TokenType.StringInterpolation,
+        matchType: 'interpolation',
         tokenMapKey: 'depInterpolation',
       },
     ],
@@ -510,18 +501,14 @@ const matcherConfigs: SyntaxMatchConfig[] = [
     // id 'foo.bar' version "$fooBarVersion"
     matchers: [
       {
-        matchType: TokenType.Word,
+        matchType: 'word',
         matchValue: ['id', 'kotlin'],
         tokenMapKey: 'methodName',
       },
-      { matchType: TokenType.String, tokenMapKey: 'pluginName' },
-      { matchType: TokenType.Word, matchValue: 'version' },
+      { matchType: 'string', tokenMapKey: 'pluginName' },
+      { matchType: 'word', matchValue: 'version' },
       {
-        matchType: [
-          TokenType.String,
-          TokenType.Word,
-          TokenType.StringInterpolation,
-        ],
+        matchType: ['string', 'word', 'interpolation'],
         tokenMapKey: 'pluginVersion',
       },
       endOfInstruction,
@@ -534,20 +521,16 @@ const matcherConfigs: SyntaxMatchConfig[] = [
     // id('foo.bar') version "$fooBarVersion"
     matchers: [
       {
-        matchType: TokenType.Word,
+        matchType: 'word',
         matchValue: ['id', 'kotlin'],
         tokenMapKey: 'methodName',
       },
-      { matchType: TokenType.LeftParen },
-      { matchType: TokenType.String, tokenMapKey: 'pluginName' },
-      { matchType: TokenType.RightParen },
-      { matchType: TokenType.Word, matchValue: 'version' },
+      { matchType: 'leftParen' },
+      { matchType: 'string', tokenMapKey: 'pluginName' },
+      { matchType: 'rightParen' },
+      { matchType: 'word', matchValue: 'version' },
       {
-        matchType: [
-          TokenType.String,
-          TokenType.Word,
-          TokenType.StringInterpolation,
-        ],
+        matchType: ['string', 'word', 'interpolation'],
         tokenMapKey: 'pluginVersion',
       },
       endOfInstruction,
@@ -558,12 +541,12 @@ const matcherConfigs: SyntaxMatchConfig[] = [
     // mavenCentral()
     matchers: [
       {
-        matchType: TokenType.Word,
+        matchType: 'word',
         matchValue: ['mavenCentral', 'jcenter', 'google', 'gradlePluginPortal'],
         tokenMapKey: 'registryName',
       },
-      { matchType: TokenType.LeftParen },
-      { matchType: TokenType.RightParen },
+      { matchType: 'leftParen' },
+      { matchType: 'rightParen' },
       endOfInstruction,
     ],
     handler: processPredefinedRegistryUrl,
@@ -572,17 +555,17 @@ const matcherConfigs: SyntaxMatchConfig[] = [
     // mavenCentral { content {
     matchers: [
       {
-        matchType: TokenType.Word,
+        matchType: 'word',
         matchValue: ['mavenCentral', 'jcenter', 'google', 'gradlePluginPortal'],
         tokenMapKey: 'registryName',
       },
-      { matchType: TokenType.LeftBrace },
+      { matchType: 'leftBrace' },
       {
-        matchType: TokenType.Word,
+        matchType: 'word',
         matchValue: ['content'],
       },
       {
-        matchType: TokenType.LeftBrace,
+        matchType: 'leftBrace',
         lookahead: true,
       },
     ],
@@ -592,15 +575,15 @@ const matcherConfigs: SyntaxMatchConfig[] = [
     // maven("https://repository.mycompany.com/m2/repository")
     matchers: [
       {
-        matchType: TokenType.Word,
+        matchType: 'word',
         matchValue: 'maven',
       },
-      { matchType: TokenType.LeftParen },
+      { matchType: 'leftParen' },
       {
-        matchType: [TokenType.String, TokenType.StringInterpolation],
+        matchType: ['string', 'interpolation'],
         tokenMapKey: 'registryUrl',
       },
-      { matchType: TokenType.RightParen },
+      { matchType: 'rightParen' },
       endOfInstruction,
     ],
     handler: processCustomRegistryUrl,
@@ -609,27 +592,27 @@ const matcherConfigs: SyntaxMatchConfig[] = [
     // maven { name = "baz"; url = "https://maven.springframework.org/${name}" }
     matchers: [
       {
-        matchType: TokenType.Word,
+        matchType: 'word',
         matchValue: 'maven',
       },
-      { matchType: TokenType.LeftBrace },
+      { matchType: 'leftBrace' },
       {
-        matchType: TokenType.Word,
+        matchType: 'word',
         matchValue: 'name',
         tokenMapKey: 'keyToken',
       },
-      { matchType: TokenType.Assignment },
+      { matchType: 'assignment' },
       {
-        matchType: [TokenType.String, TokenType.StringInterpolation],
+        matchType: ['string', 'interpolation'],
         tokenMapKey: 'valToken',
       },
       {
-        matchType: TokenType.Word,
+        matchType: 'word',
         matchValue: 'url',
       },
-      { matchType: TokenType.Assignment },
+      { matchType: 'assignment' },
       {
-        matchType: [TokenType.String, TokenType.StringInterpolation],
+        matchType: ['string', 'interpolation'],
         tokenMapKey: 'registryUrl',
       },
       endOfInstruction,
@@ -640,17 +623,17 @@ const matcherConfigs: SyntaxMatchConfig[] = [
     // maven { url = "https://maven.springframework.org/release"
     matchers: [
       {
-        matchType: TokenType.Word,
+        matchType: 'word',
         matchValue: 'maven',
       },
-      { matchType: TokenType.LeftBrace },
+      { matchType: 'leftBrace' },
       {
-        matchType: TokenType.Word,
+        matchType: 'word',
         matchValue: 'url',
       },
-      { matchType: TokenType.Assignment },
+      { matchType: 'assignment' },
       {
-        matchType: [TokenType.String, TokenType.StringInterpolation],
+        matchType: ['string', 'interpolation'],
         tokenMapKey: 'registryUrl',
       },
       endOfInstruction,
@@ -661,25 +644,25 @@ const matcherConfigs: SyntaxMatchConfig[] = [
     // maven { url = uri("https://maven.springframework.org/release")
     matchers: [
       {
-        matchType: TokenType.Word,
+        matchType: 'word',
         matchValue: 'maven',
       },
-      { matchType: TokenType.LeftBrace },
+      { matchType: 'leftBrace' },
       {
-        matchType: TokenType.Word,
+        matchType: 'word',
         matchValue: 'url',
       },
-      { matchType: TokenType.Assignment },
+      { matchType: 'assignment' },
       {
-        matchType: TokenType.Word,
+        matchType: 'word',
         matchValue: 'uri',
       },
-      { matchType: TokenType.LeftParen },
+      { matchType: 'leftParen' },
       {
-        matchType: [TokenType.String, TokenType.StringInterpolation],
+        matchType: ['string', 'interpolation'],
         tokenMapKey: 'registryUrl',
       },
-      { matchType: TokenType.RightParen },
+      { matchType: 'rightParen' },
       endOfInstruction,
     ],
     handler: processCustomRegistryUrl,
@@ -688,16 +671,16 @@ const matcherConfigs: SyntaxMatchConfig[] = [
     // maven { url "https://maven.springframework.org/release"
     matchers: [
       {
-        matchType: TokenType.Word,
+        matchType: 'word',
         matchValue: 'maven',
       },
-      { matchType: TokenType.LeftBrace },
+      { matchType: 'leftBrace' },
       {
-        matchType: TokenType.Word,
+        matchType: 'word',
         matchValue: 'url',
       },
       {
-        matchType: [TokenType.String, TokenType.StringInterpolation],
+        matchType: ['string', 'interpolation'],
         tokenMapKey: 'registryUrl',
       },
       endOfInstruction,
@@ -707,9 +690,9 @@ const matcherConfigs: SyntaxMatchConfig[] = [
   {
     // url 'https://repo.spring.io/snapshot/'
     matchers: [
-      { matchType: TokenType.Word, matchValue: ['uri', 'url'] },
+      { matchType: 'word', matchValue: ['uri', 'url'] },
       {
-        matchType: [TokenType.String, TokenType.StringInterpolation],
+        matchType: ['string', 'interpolation'],
         tokenMapKey: 'registryUrl',
       },
       endOfInstruction,
@@ -719,13 +702,13 @@ const matcherConfigs: SyntaxMatchConfig[] = [
   {
     // url('https://repo.spring.io/snapshot/')
     matchers: [
-      { matchType: TokenType.Word, matchValue: ['uri', 'url'] },
-      { matchType: TokenType.LeftParen },
+      { matchType: 'word', matchValue: ['uri', 'url'] },
+      { matchType: 'leftParen' },
       {
-        matchType: [TokenType.String, TokenType.StringInterpolation],
+        matchType: ['string', 'interpolation'],
         tokenMapKey: 'registryUrl',
       },
-      { matchType: TokenType.RightParen },
+      { matchType: 'rightParen' },
       endOfInstruction,
     ],
     handler: processCustomRegistryUrl,
@@ -734,53 +717,53 @@ const matcherConfigs: SyntaxMatchConfig[] = [
     // library("foobar", "foo", "bar").versionRef("foo.bar")
     // library("foobar", "foo", "bar").version("1.2.3")
     matchers: [
-      { matchType: TokenType.Word, matchValue: 'library' },
-      { matchType: TokenType.LeftParen },
-      { matchType: TokenType.String, tokenMapKey: 'varName' },
-      { matchType: TokenType.Comma },
+      { matchType: 'word', matchValue: 'library' },
+      { matchType: 'leftParen' },
+      { matchType: 'string', tokenMapKey: 'varName' },
+      { matchType: 'comma' },
       { matchType: potentialStringTypes, tokenMapKey: 'groupId' },
-      { matchType: TokenType.Comma },
+      { matchType: 'comma' },
       { matchType: potentialStringTypes, tokenMapKey: 'artifactId' },
-      { matchType: TokenType.RightParen },
-      { matchType: TokenType.Dot },
+      { matchType: 'rightParen' },
+      { matchType: 'dot' },
       {
-        matchType: TokenType.Word,
+        matchType: 'word',
         matchValue: ['versionRef', 'version'],
         tokenMapKey: 'versionType',
       },
-      { matchType: TokenType.LeftParen },
-      { matchType: TokenType.String, tokenMapKey: 'version' },
-      { matchType: TokenType.RightParen },
+      { matchType: 'leftParen' },
+      { matchType: 'string', tokenMapKey: 'version' },
+      { matchType: 'rightParen' },
     ],
     handler: processLibraryDep,
   },
   {
     // library("foobar", "foo", "bar")
     matchers: [
-      { matchType: TokenType.Word, matchValue: 'library' },
-      { matchType: TokenType.LeftParen },
-      { matchType: TokenType.String, tokenMapKey: 'varName' },
-      { matchType: TokenType.Comma },
+      { matchType: 'word', matchValue: 'library' },
+      { matchType: 'leftParen' },
+      { matchType: 'string', tokenMapKey: 'varName' },
+      { matchType: 'comma' },
       { matchType: potentialStringTypes, tokenMapKey: 'groupId' },
-      { matchType: TokenType.Comma },
+      { matchType: 'comma' },
       { matchType: potentialStringTypes, tokenMapKey: 'artifactId' },
-      { matchType: TokenType.RightParen },
+      { matchType: 'rightParen' },
     ],
     handler: processLibraryDep,
   },
   {
     // group: "com.example", name: "my.dependency", version: "1.2.3"
     matchers: [
-      { matchType: TokenType.Word, matchValue: 'group' },
-      { matchType: TokenType.Colon },
+      { matchType: 'word', matchValue: 'group' },
+      { matchType: 'colon' },
       { matchType: potentialStringTypes, tokenMapKey: 'groupId' },
-      { matchType: TokenType.Comma },
-      { matchType: TokenType.Word, matchValue: 'name' },
-      { matchType: TokenType.Colon },
+      { matchType: 'comma' },
+      { matchType: 'word', matchValue: 'name' },
+      { matchType: 'colon' },
       { matchType: potentialStringTypes, tokenMapKey: 'artifactId' },
-      { matchType: TokenType.Comma },
-      { matchType: TokenType.Word, matchValue: 'version' },
-      { matchType: TokenType.Colon },
+      { matchType: 'comma' },
+      { matchType: 'word', matchValue: 'version' },
+      { matchType: 'colon' },
       { matchType: potentialStringTypes, tokenMapKey: 'version' },
       endOfInstruction,
     ],
@@ -789,19 +772,19 @@ const matcherConfigs: SyntaxMatchConfig[] = [
   {
     // (group: "com.example", name: "my.dependency", version: "1.2.3")
     matchers: [
-      { matchType: TokenType.LeftParen },
-      { matchType: TokenType.Word, matchValue: 'group' },
-      { matchType: TokenType.Colon },
+      { matchType: 'leftParen' },
+      { matchType: 'word', matchValue: 'group' },
+      { matchType: 'colon' },
       { matchType: potentialStringTypes, tokenMapKey: 'groupId' },
-      { matchType: TokenType.Comma },
-      { matchType: TokenType.Word, matchValue: 'name' },
-      { matchType: TokenType.Colon },
+      { matchType: 'comma' },
+      { matchType: 'word', matchValue: 'name' },
+      { matchType: 'colon' },
       { matchType: potentialStringTypes, tokenMapKey: 'artifactId' },
-      { matchType: TokenType.Comma },
-      { matchType: TokenType.Word, matchValue: 'version' },
-      { matchType: TokenType.Colon },
+      { matchType: 'comma' },
+      { matchType: 'word', matchValue: 'version' },
+      { matchType: 'colon' },
       { matchType: potentialStringTypes, tokenMapKey: 'version' },
-      { matchType: TokenType.RightParen },
+      { matchType: 'rightParen' },
       endOfInstruction,
     ],
     handler: processLongFormDep,
@@ -809,20 +792,20 @@ const matcherConfigs: SyntaxMatchConfig[] = [
   {
     // group: "com.example", name: "my.dependency", version: "1.2.3", classifier:"class"
     matchers: [
-      { matchType: TokenType.Word, matchValue: 'group' },
-      { matchType: TokenType.Colon },
+      { matchType: 'word', matchValue: 'group' },
+      { matchType: 'colon' },
       { matchType: potentialStringTypes, tokenMapKey: 'groupId' },
-      { matchType: TokenType.Comma },
-      { matchType: TokenType.Word, matchValue: 'name' },
-      { matchType: TokenType.Colon },
+      { matchType: 'comma' },
+      { matchType: 'word', matchValue: 'name' },
+      { matchType: 'colon' },
       { matchType: potentialStringTypes, tokenMapKey: 'artifactId' },
-      { matchType: TokenType.Comma },
-      { matchType: TokenType.Word, matchValue: 'version' },
-      { matchType: TokenType.Colon },
+      { matchType: 'comma' },
+      { matchType: 'word', matchValue: 'version' },
+      { matchType: 'colon' },
       { matchType: potentialStringTypes, tokenMapKey: 'version' },
-      { matchType: TokenType.Comma },
-      { matchType: TokenType.Word, matchValue: 'classifier' },
-      { matchType: TokenType.Colon },
+      { matchType: 'comma' },
+      { matchType: 'word', matchValue: 'classifier' },
+      { matchType: 'colon' },
       endOfInstruction,
     ],
     handler: processLongFormDep,
@@ -830,23 +813,23 @@ const matcherConfigs: SyntaxMatchConfig[] = [
   {
     // (group: "com.example", name: "my.dependency", version: "1.2.3", classifier:"class")
     matchers: [
-      { matchType: TokenType.LeftParen },
-      { matchType: TokenType.Word, matchValue: 'group' },
-      { matchType: TokenType.Colon },
+      { matchType: 'leftParen' },
+      { matchType: 'word', matchValue: 'group' },
+      { matchType: 'colon' },
       { matchType: potentialStringTypes, tokenMapKey: 'groupId' },
-      { matchType: TokenType.Comma },
-      { matchType: TokenType.Word, matchValue: 'name' },
-      { matchType: TokenType.Colon },
+      { matchType: 'comma' },
+      { matchType: 'word', matchValue: 'name' },
+      { matchType: 'colon' },
       { matchType: potentialStringTypes, tokenMapKey: 'artifactId' },
-      { matchType: TokenType.Comma },
-      { matchType: TokenType.Word, matchValue: 'version' },
-      { matchType: TokenType.Colon },
+      { matchType: 'comma' },
+      { matchType: 'word', matchValue: 'version' },
+      { matchType: 'colon' },
       { matchType: potentialStringTypes, tokenMapKey: 'version' },
-      { matchType: TokenType.Comma },
-      { matchType: TokenType.Word, matchValue: 'classifier' },
-      { matchType: TokenType.Colon },
+      { matchType: 'comma' },
+      { matchType: 'word', matchValue: 'classifier' },
+      { matchType: 'colon' },
       { matchType: potentialStringTypes, tokenMapKey: 'classifier' },
-      { matchType: TokenType.RightParen },
+      { matchType: 'rightParen' },
       endOfInstruction,
     ],
     handler: processLongFormDep,
@@ -856,23 +839,23 @@ const matcherConfigs: SyntaxMatchConfig[] = [
     //        exclude module: 'exclude'
     //     }
     matchers: [
-      { matchType: TokenType.Word, matchValue: 'group' },
-      { matchType: TokenType.Colon },
+      { matchType: 'word', matchValue: 'group' },
+      { matchType: 'colon' },
       { matchType: potentialStringTypes, tokenMapKey: 'groupId' },
-      { matchType: TokenType.Comma },
-      { matchType: TokenType.Word, matchValue: 'name' },
-      { matchType: TokenType.Colon },
+      { matchType: 'comma' },
+      { matchType: 'word', matchValue: 'name' },
+      { matchType: 'colon' },
       { matchType: potentialStringTypes, tokenMapKey: 'artifactId' },
-      { matchType: TokenType.Comma },
-      { matchType: TokenType.Word, matchValue: 'version' },
-      { matchType: TokenType.Colon },
+      { matchType: 'comma' },
+      { matchType: 'word', matchValue: 'version' },
+      { matchType: 'colon' },
       { matchType: potentialStringTypes, tokenMapKey: 'version' },
-      { matchType: TokenType.LeftBrace },
-      { matchType: TokenType.Word, matchValue: 'exclude' },
-      { matchType: TokenType.Word, matchValue: 'module' },
-      { matchType: TokenType.Colon },
+      { matchType: 'leftBrace' },
+      { matchType: 'word', matchValue: 'exclude' },
+      { matchType: 'word', matchValue: 'module' },
+      { matchType: 'colon' },
       { matchType: potentialStringTypes, tokenMapKey: 'exclude' },
-      { matchType: TokenType.RightBrace },
+      { matchType: 'rightBrace' },
       endOfInstruction,
     ],
     handler: processLongFormDep,
@@ -882,25 +865,25 @@ const matcherConfigs: SyntaxMatchConfig[] = [
     //        exclude module: 'exclude'
     //     }
     matchers: [
-      { matchType: TokenType.LeftParen },
-      { matchType: TokenType.Word, matchValue: 'group' },
-      { matchType: TokenType.Colon },
+      { matchType: 'leftParen' },
+      { matchType: 'word', matchValue: 'group' },
+      { matchType: 'colon' },
       { matchType: potentialStringTypes, tokenMapKey: 'groupId' },
-      { matchType: TokenType.Comma },
-      { matchType: TokenType.Word, matchValue: 'name' },
-      { matchType: TokenType.Colon },
+      { matchType: 'comma' },
+      { matchType: 'word', matchValue: 'name' },
+      { matchType: 'colon' },
       { matchType: potentialStringTypes, tokenMapKey: 'artifactId' },
-      { matchType: TokenType.Comma },
-      { matchType: TokenType.Word, matchValue: 'version' },
-      { matchType: TokenType.Colon },
+      { matchType: 'comma' },
+      { matchType: 'word', matchValue: 'version' },
+      { matchType: 'colon' },
       { matchType: potentialStringTypes, tokenMapKey: 'version' },
-      { matchType: TokenType.RightParen },
-      { matchType: TokenType.LeftBrace },
-      { matchType: TokenType.Word, matchValue: 'exclude' },
-      { matchType: TokenType.Word, matchValue: 'module' },
-      { matchType: TokenType.Colon },
+      { matchType: 'rightParen' },
+      { matchType: 'leftBrace' },
+      { matchType: 'word', matchValue: 'exclude' },
+      { matchType: 'word', matchValue: 'module' },
+      { matchType: 'colon' },
       { matchType: potentialStringTypes, tokenMapKey: 'exclude' },
-      { matchType: TokenType.RightBrace },
+      { matchType: 'rightBrace' },
       endOfInstruction,
     ],
     handler: processLongFormDep,
@@ -908,46 +891,46 @@ const matcherConfigs: SyntaxMatchConfig[] = [
   {
     // fooBarBaz("com.example", "my.dependency", "1.2.3")
     matchers: [
-      { matchType: TokenType.Word, tokenMapKey: 'methodName' },
-      { matchType: TokenType.LeftParen },
+      { matchType: 'word', tokenMapKey: 'methodName' },
+      { matchType: 'leftParen' },
       { matchType: potentialStringTypes, tokenMapKey: 'groupId' },
-      { matchType: TokenType.Comma },
+      { matchType: 'comma' },
       { matchType: potentialStringTypes, tokenMapKey: 'artifactId' },
-      { matchType: TokenType.Comma },
+      { matchType: 'comma' },
       { matchType: potentialStringTypes, tokenMapKey: 'version' },
-      { matchType: TokenType.RightParen },
+      { matchType: 'rightParen' },
     ],
     handler: processLongFormDep,
   },
   {
     // ("com.example", "my.dependency", "1.2.3")
     matchers: [
-      { matchType: TokenType.LeftParen },
+      { matchType: 'leftParen' },
       { matchType: potentialStringTypes, tokenMapKey: 'groupId' },
-      { matchType: TokenType.Comma },
+      { matchType: 'comma' },
       { matchType: potentialStringTypes, tokenMapKey: 'artifactId' },
-      { matchType: TokenType.Comma },
+      { matchType: 'comma' },
       { matchType: potentialStringTypes, tokenMapKey: 'version' },
-      { matchType: TokenType.RightParen },
+      { matchType: 'rightParen' },
     ],
     handler: processLongFormDep,
   },
   {
     // (group = "com.example", name = "my.dependency", version = "1.2.3")
     matchers: [
-      { matchType: TokenType.LeftParen },
-      { matchType: TokenType.Word, matchValue: 'group' },
-      { matchType: TokenType.Assignment },
+      { matchType: 'leftParen' },
+      { matchType: 'word', matchValue: 'group' },
+      { matchType: 'assignment' },
       { matchType: potentialStringTypes, tokenMapKey: 'groupId' },
-      { matchType: TokenType.Comma },
-      { matchType: TokenType.Word, matchValue: 'name' },
-      { matchType: TokenType.Assignment },
+      { matchType: 'comma' },
+      { matchType: 'word', matchValue: 'name' },
+      { matchType: 'assignment' },
       { matchType: potentialStringTypes, tokenMapKey: 'artifactId' },
-      { matchType: TokenType.Comma },
-      { matchType: TokenType.Word, matchValue: 'version' },
-      { matchType: TokenType.Assignment },
+      { matchType: 'comma' },
+      { matchType: 'word', matchValue: 'version' },
+      { matchType: 'assignment' },
       { matchType: potentialStringTypes, tokenMapKey: 'version' },
-      { matchType: TokenType.RightParen },
+      { matchType: 'rightParen' },
     ],
     handler: processLongFormDep,
   },
@@ -955,11 +938,11 @@ const matcherConfigs: SyntaxMatchConfig[] = [
     // apply from: 'foo.gradle'
     // apply from: "${somedir}/foo.gradle"
     matchers: [
-      { matchType: TokenType.Word, matchValue: 'apply' },
-      { matchType: TokenType.Word, matchValue: 'from' },
-      { matchType: TokenType.Colon },
+      { matchType: 'word', matchValue: 'apply' },
+      { matchType: 'word', matchValue: 'from' },
+      { matchType: 'colon' },
       {
-        matchType: [TokenType.String, TokenType.StringInterpolation],
+        matchType: ['string', 'interpolation'],
         tokenMapKey: 'scriptFile',
       },
     ],
@@ -968,33 +951,33 @@ const matcherConfigs: SyntaxMatchConfig[] = [
   {
     // apply from: file("${somedir}/foo.gradle")
     matchers: [
-      { matchType: TokenType.Word, matchValue: 'apply' },
-      { matchType: TokenType.Word, matchValue: 'from' },
-      { matchType: TokenType.Colon },
-      { matchType: TokenType.Word, matchValue: 'file' },
-      { matchType: TokenType.LeftParen },
+      { matchType: 'word', matchValue: 'apply' },
+      { matchType: 'word', matchValue: 'from' },
+      { matchType: 'colon' },
+      { matchType: 'word', matchValue: 'file' },
+      { matchType: 'leftParen' },
       {
-        matchType: [TokenType.String, TokenType.StringInterpolation],
+        matchType: ['string', 'interpolation'],
         tokenMapKey: 'scriptFile',
       },
-      { matchType: TokenType.RightParen },
+      { matchType: 'rightParen' },
     ],
     handler: processApplyFrom,
   },
   {
     // apply from: new File("${somedir}/foo.gradle")
     matchers: [
-      { matchType: TokenType.Word, matchValue: 'apply' },
-      { matchType: TokenType.Word, matchValue: 'from' },
-      { matchType: TokenType.Colon },
-      { matchType: TokenType.Word, matchValue: 'new' },
-      { matchType: TokenType.Word, matchValue: 'File' },
-      { matchType: TokenType.LeftParen },
+      { matchType: 'word', matchValue: 'apply' },
+      { matchType: 'word', matchValue: 'from' },
+      { matchType: 'colon' },
+      { matchType: 'word', matchValue: 'new' },
+      { matchType: 'word', matchValue: 'File' },
+      { matchType: 'leftParen' },
       {
-        matchType: [TokenType.String, TokenType.StringInterpolation],
+        matchType: ['string', 'interpolation'],
         tokenMapKey: 'scriptFile',
       },
-      { matchType: TokenType.RightParen },
+      { matchType: 'rightParen' },
     ],
     handler: processApplyFrom,
   },
@@ -1002,26 +985,22 @@ const matcherConfigs: SyntaxMatchConfig[] = [
     // apply from: new File(somedir, "${otherdir}/foo.gradle")
     // apply from: new File("${somedir}", "${otherdir}/foo.gradle")
     matchers: [
-      { matchType: TokenType.Word, matchValue: 'apply' },
-      { matchType: TokenType.Word, matchValue: 'from' },
-      { matchType: TokenType.Colon },
-      { matchType: TokenType.Word, matchValue: 'new' },
-      { matchType: TokenType.Word, matchValue: 'File' },
-      { matchType: TokenType.LeftParen },
+      { matchType: 'word', matchValue: 'apply' },
+      { matchType: 'word', matchValue: 'from' },
+      { matchType: 'colon' },
+      { matchType: 'word', matchValue: 'new' },
+      { matchType: 'word', matchValue: 'File' },
+      { matchType: 'leftParen' },
       {
-        matchType: [
-          TokenType.Word,
-          TokenType.String,
-          TokenType.StringInterpolation,
-        ],
+        matchType: ['word', 'string', 'interpolation'],
         tokenMapKey: 'parentPath',
       },
-      { matchType: TokenType.Comma },
+      { matchType: 'comma' },
       {
-        matchType: [TokenType.String, TokenType.StringInterpolation],
+        matchType: ['string', 'interpolation'],
         tokenMapKey: 'scriptFile',
       },
-      { matchType: TokenType.RightParen },
+      { matchType: 'rightParen' },
     ],
     handler: processApplyFrom,
   },
@@ -1029,18 +1008,18 @@ const matcherConfigs: SyntaxMatchConfig[] = [
     // apply from: project.file("${somedir}/foo.gradle")
     // apply from: rootProject.file("${somedir}/foo.gradle")
     matchers: [
-      { matchType: TokenType.Word, matchValue: 'apply' },
-      { matchType: TokenType.Word, matchValue: 'from' },
-      { matchType: TokenType.Colon },
-      { matchType: TokenType.Word, matchValue: ['project', 'rootProject'] },
-      { matchType: TokenType.Dot },
-      { matchType: TokenType.Word, matchValue: 'file' },
-      { matchType: TokenType.LeftParen },
+      { matchType: 'word', matchValue: 'apply' },
+      { matchType: 'word', matchValue: 'from' },
+      { matchType: 'colon' },
+      { matchType: 'word', matchValue: ['project', 'rootProject'] },
+      { matchType: 'dot' },
+      { matchType: 'word', matchValue: 'file' },
+      { matchType: 'leftParen' },
       {
-        matchType: [TokenType.String, TokenType.StringInterpolation],
+        matchType: ['string', 'interpolation'],
         tokenMapKey: 'scriptFile',
       },
-      { matchType: TokenType.RightParen },
+      { matchType: 'rightParen' },
     ],
     handler: processApplyFrom,
   },
@@ -1048,32 +1027,32 @@ const matcherConfigs: SyntaxMatchConfig[] = [
     // apply(from = 'foo.gradle')
     // apply(from = "${somedir}/foo.gradle")
     matchers: [
-      { matchType: TokenType.Word, matchValue: 'apply' },
-      { matchType: TokenType.LeftParen },
-      { matchType: TokenType.Word, matchValue: 'from' },
-      { matchType: TokenType.Assignment },
+      { matchType: 'word', matchValue: 'apply' },
+      { matchType: 'leftParen' },
+      { matchType: 'word', matchValue: 'from' },
+      { matchType: 'assignment' },
       {
-        matchType: [TokenType.String, TokenType.StringInterpolation],
+        matchType: ['string', 'interpolation'],
         tokenMapKey: 'scriptFile',
       },
-      { matchType: TokenType.RightParen },
+      { matchType: 'rightParen' },
     ],
     handler: processApplyFrom,
   },
   {
     // apply(from = File("${somedir}/foo.gradle"))
     matchers: [
-      { matchType: TokenType.Word, matchValue: 'apply' },
-      { matchType: TokenType.LeftParen },
-      { matchType: TokenType.Word, matchValue: 'from' },
-      { matchType: TokenType.Assignment },
-      { matchType: TokenType.Word, matchValue: 'File' },
-      { matchType: TokenType.LeftParen },
+      { matchType: 'word', matchValue: 'apply' },
+      { matchType: 'leftParen' },
+      { matchType: 'word', matchValue: 'from' },
+      { matchType: 'assignment' },
+      { matchType: 'word', matchValue: 'File' },
+      { matchType: 'leftParen' },
       {
-        matchType: [TokenType.String, TokenType.StringInterpolation],
+        matchType: ['string', 'interpolation'],
         tokenMapKey: 'scriptFile',
       },
-      { matchType: TokenType.RightParen },
+      { matchType: 'rightParen' },
     ],
     handler: processApplyFrom,
   },
@@ -1081,26 +1060,22 @@ const matcherConfigs: SyntaxMatchConfig[] = [
     // apply(from = File(somedir, "${otherdir}/foo.gradle"))
     // apply(from = File("${somedir}", "${otherdir}/foo.gradle")
     matchers: [
-      { matchType: TokenType.Word, matchValue: 'apply' },
-      { matchType: TokenType.LeftParen },
-      { matchType: TokenType.Word, matchValue: 'from' },
-      { matchType: TokenType.Assignment },
-      { matchType: TokenType.Word, matchValue: 'File' },
-      { matchType: TokenType.LeftParen },
+      { matchType: 'word', matchValue: 'apply' },
+      { matchType: 'leftParen' },
+      { matchType: 'word', matchValue: 'from' },
+      { matchType: 'assignment' },
+      { matchType: 'word', matchValue: 'File' },
+      { matchType: 'leftParen' },
       {
-        matchType: [
-          TokenType.Word,
-          TokenType.String,
-          TokenType.StringInterpolation,
-        ],
+        matchType: ['word', 'string', 'interpolation'],
         tokenMapKey: 'parentPath',
       },
-      { matchType: TokenType.Comma },
+      { matchType: 'comma' },
       {
-        matchType: [TokenType.String, TokenType.StringInterpolation],
+        matchType: ['string', 'interpolation'],
         tokenMapKey: 'scriptFile',
       },
-      { matchType: TokenType.RightParen },
+      { matchType: 'rightParen' },
     ],
     handler: processApplyFrom,
   },

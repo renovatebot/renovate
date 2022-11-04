@@ -1,11 +1,10 @@
 import moo from 'moo';
 import { regEx } from '../../../util/regex';
-import { TokenType } from './common';
 import type { StringInterpolation, Token } from './types';
 
 const escapedCharRegex = /\\['"bfnrt\\]/; // TODO #12870
 const escapedChars = {
-  [TokenType.EscapedChar]: {
+  ['escapedChar']: {
     match: escapedCharRegex,
     value: (x: string): string =>
       /* istanbul ignore next */
@@ -25,65 +24,65 @@ const escapedChars = {
 const lexer = moo.states({
   // Top-level Groovy lexemes
   main: {
-    [TokenType.LineComment]: { match: /\/\/.*?$/ }, // TODO #12870
-    [TokenType.MultiComment]: { match: /\/\*[^]*?\*\//, lineBreaks: true }, // TODO #12870
-    [TokenType.Newline]: { match: /\r?\n/, lineBreaks: true }, // TODO #12870
-    [TokenType.Space]: { match: /[ \t\r]+/ }, // TODO #12870
-    [TokenType.Semicolon]: ';',
-    [TokenType.Colon]: ':',
-    [TokenType.Dot]: '.',
-    [TokenType.Comma]: ',',
-    [TokenType.Operator]: /(?:==|\+=?|-=?|\/=?|\*\*?|\.+|:)/, // TODO #12870
-    [TokenType.Assignment]: '=',
-    [TokenType.Word]: { match: /[a-zA-Z$_][a-zA-Z0-9$_]*/ }, // TODO #12870
-    [TokenType.LeftParen]: { match: '(' },
-    [TokenType.RightParen]: { match: ')' },
-    [TokenType.LeftBracket]: { match: '[' },
-    [TokenType.RightBracket]: { match: ']' },
-    [TokenType.LeftBrace]: { match: '{', push: 'main' },
-    [TokenType.RightBrace]: { match: '}', pop: 1 },
-    [TokenType.TripleSingleQuotedStart]: {
+    ['lineComment']: { match: /\/\/.*?$/ }, // TODO #12870
+    ['multiComment']: { match: /\/\*[^]*?\*\//, lineBreaks: true }, // TODO #12870
+    ['newline']: { match: /\r?\n/, lineBreaks: true }, // TODO #12870
+    ['space']: { match: /[ \t\r]+/ }, // TODO #12870
+    ['semicolon']: ';',
+    ['colon']: ':',
+    ['dot']: '.',
+    ['comma']: ',',
+    ['operator']: /(?:==|\+=?|-=?|\/=?|\*\*?|\.+|:)/, // TODO #12870
+    ['assignment']: '=',
+    ['word']: { match: /[a-zA-Z$_][a-zA-Z0-9$_]*/ }, // TODO #12870
+    ['leftParen']: { match: '(' },
+    ['rightParen']: { match: ')' },
+    ['leftBracket']: { match: '[' },
+    ['rightBracket']: { match: ']' },
+    ['leftBrace']: { match: '{', push: 'main' },
+    ['rightBrace']: { match: '}', pop: 1 },
+    ['tripleQuotedStart']: {
       match: "'''",
-      push: TokenType.TripleSingleQuotedStart,
+      push: 'tripleQuotedStart',
     },
-    [TokenType.TripleDoubleQuotedStart]: {
+    ['tripleDoubleQuotedStart']: {
       match: '"""',
-      push: TokenType.TripleDoubleQuotedStart,
+      push: 'tripleDoubleQuotedStart',
     },
-    [TokenType.SingleQuotedStart]: {
+    ['singleQuotedStart']: {
       match: "'",
-      push: TokenType.SingleQuotedStart,
+      push: 'singleQuotedStart',
     },
-    [TokenType.DoubleQuotedStart]: {
+    ['doubleQuotedStart']: {
       match: '"',
-      push: TokenType.DoubleQuotedStart,
+      push: 'doubleQuotedStart',
     },
-    [TokenType.UnknownFragment]: moo.fallback,
+    ['unknownFragment']: moo.fallback,
   },
 
   // Tokenize triple-quoted string literal characters
-  [TokenType.TripleSingleQuotedStart]: {
+  ['tripleQuotedStart']: {
     ...escapedChars,
-    [TokenType.TripleQuotedFinish]: { match: "'''", pop: 1 },
-    [TokenType.Chars]: moo.fallback,
+    ['tripleQuotedFinish']: { match: "'''", pop: 1 },
+    ['chars']: moo.fallback,
   },
-  [TokenType.TripleDoubleQuotedStart]: {
+  ['tripleDoubleQuotedStart']: {
     ...escapedChars,
-    [TokenType.TripleQuotedFinish]: { match: '"""', pop: 1 },
-    [TokenType.Chars]: moo.fallback,
+    ['tripleQuotedFinish']: { match: '"""', pop: 1 },
+    ['chars']: moo.fallback,
   },
 
   // Tokenize single-quoted string literal characters
-  [TokenType.SingleQuotedStart]: {
+  ['singleQuotedStart']: {
     ...escapedChars,
-    [TokenType.SingleQuotedFinish]: { match: "'", pop: 1 },
-    [TokenType.Chars]: moo.fallback,
+    ['singleQuotedFinish']: { match: "'", pop: 1 },
+    ['chars']: moo.fallback,
   },
 
   // Tokenize double-quoted string literal chars and interpolations
-  [TokenType.DoubleQuotedStart]: {
+  ['doubleQuotedStart']: {
     ...escapedChars,
-    [TokenType.DoubleQuotedFinish]: { match: '"', pop: 1 },
+    ['doubleQuotedFinish']: { match: '"', pop: 1 },
     variable: {
       // Supported: ${foo}, $foo, ${ foo.bar.baz }, $foo.bar.baz
       match:
@@ -91,22 +90,22 @@ const lexer = moo.states({
       value: (x: string): string =>
         x.replace(regEx(/^\${?\s*/), '').replace(regEx(/\s*}$/), ''),
     },
-    [TokenType.IgnoredInterpolationStart]: {
+    ['ignoredInterpolation']: {
       match: /\${/, // TODO #12870
-      push: TokenType.IgnoredInterpolationStart,
+      push: 'ignoredInterpolation',
     },
-    [TokenType.Chars]: moo.fallback,
+    ['chars']: moo.fallback,
   },
 
   // Ignore interpolation of complex expressions˙,
   // but track the balance of braces to find the end of interpolation.
-  [TokenType.IgnoredInterpolationStart]: {
-    [TokenType.LeftBrace]: {
+  ['ignoredInterpolation']: {
+    ['leftBrace']: {
       match: '{',
-      push: TokenType.IgnoredInterpolationStart,
+      push: 'ignoredInterpolation',
     },
-    [TokenType.RightBrace]: { match: '}', pop: 1 },
-    [TokenType.UnknownFragment]: moo.fallback,
+    ['rightBrace']: { match: '}', pop: 1 },
+    ['unknownFragment']: moo.fallback,
   },
 });
 
@@ -116,12 +115,12 @@ const lexer = moo.states({
 function processChars(acc: Token[], token: Token): Token[] {
   const tokenType = token.type;
   const prevToken: Token = acc[acc.length - 1];
-  if ([TokenType.Chars, TokenType.EscapedChar].includes(tokenType)) {
+  if (['chars', 'escapedChar'].includes(tokenType)) {
     // istanbul ignore if
-    if (prevToken?.type === TokenType.String) {
+    if (prevToken?.type === 'string') {
       prevToken.value += token.value;
     } else {
-      acc.push({ ...token, type: TokenType.String });
+      acc.push({ ...token, type: 'string' });
     }
   } else {
     acc.push(token);
@@ -132,17 +131,17 @@ function processChars(acc: Token[], token: Token): Token[] {
 export function isInterpolationToken(
   token: Token
 ): token is StringInterpolation {
-  return token?.type === TokenType.StringInterpolation;
+  return token?.type === 'interpolation';
 }
 
 //
 // Turn all tokens between double quote pairs into StringInterpolation token
 //
 function processInterpolation(acc: Token[], token: Token): Token[] {
-  if (token.type === TokenType.DoubleQuotedStart) {
+  if (token.type === 'doubleQuotedStart') {
     // This token will accumulate further strings and variables
     const interpolationToken: StringInterpolation = {
-      type: TokenType.StringInterpolation,
+      type: 'interpolation',
       children: [],
       isValid: true,
       isComplete: false,
@@ -156,21 +155,21 @@ function processInterpolation(acc: Token[], token: Token): Token[] {
   const prevToken: Token = acc[acc.length - 1];
   if (isInterpolationToken(prevToken) && !prevToken.isComplete) {
     const type = token.type;
-    if (type === TokenType.DoubleQuotedFinish) {
+    if (type === 'doubleQuotedFinish') {
       if (
         prevToken.isValid &&
-        prevToken.children.every(({ type: t }) => t === TokenType.String)
+        prevToken.children.every(({ type: t }) => t === 'string')
       ) {
         // Nothing to interpolate, replace to String
         acc[acc.length - 1] = {
-          type: TokenType.String,
+          type: 'string',
           value: prevToken.children.map(({ value }) => value).join(''),
           offset: prevToken.offset,
         };
         return acc;
       }
       prevToken.isComplete = true;
-    } else if (type === TokenType.String || type === TokenType.Variable) {
+    } else if (type === 'string' || type === 'variable') {
       prevToken.children.push(token);
     } else {
       prevToken.children.push(token);
@@ -183,17 +182,17 @@ function processInterpolation(acc: Token[], token: Token): Token[] {
 }
 
 const filteredTokens = [
-  TokenType.Space,
-  TokenType.LineComment,
-  TokenType.MultiComment,
-  TokenType.Newline,
-  TokenType.Semicolon,
-  TokenType.SingleQuotedStart,
-  TokenType.SingleQuotedFinish,
-  TokenType.DoubleQuotedFinish,
-  TokenType.TripleSingleQuotedStart,
-  TokenType.TripleDoubleQuotedStart,
-  TokenType.TripleQuotedFinish,
+  'space',
+  'lineComment',
+  'multiComment',
+  'newline',
+  'semicolon',
+  'singleQuotedStart',
+  'singleQuotedFinish',
+  'doubleQuotedFinish',
+  'tripleQuotedStart',
+  'tripleDoubleQuotedStart',
+  'tripleQuotedFinish',
 ];
 
 function filterTokens({ type }: Token): boolean {

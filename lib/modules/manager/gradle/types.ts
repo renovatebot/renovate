@@ -21,7 +21,7 @@ export interface Token {
 }
 
 export interface StringInterpolation extends Token {
-  type: TokenType.StringInterpolation;
+  type: 'interpolation';
   children: Token[]; // Tokens inside double-quoted string that are subject of interpolation
   isComplete: boolean; // True if token has parsed completely
   isValid: boolean; // False if string contains something unprocessable

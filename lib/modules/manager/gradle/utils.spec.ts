@@ -81,9 +81,9 @@ describe('modules/manager/gradle/utils', () => {
     expect(
       interpolateString(
         [
-          { type: TokenType.String, value: 'foo' },
-          { type: TokenType.Variable, value: 'bar' },
-          { type: TokenType.String, value: 'baz' },
+          { type: 'string', value: 'foo' },
+          { type: 'variable', value: 'bar' },
+          { type: 'string', value: 'baz' },
         ] as never,
         {
           bar: { value: 'BAR' },
@@ -92,13 +92,13 @@ describe('modules/manager/gradle/utils', () => {
     ).toBe('fooBARbaz');
     expect(
       interpolateString(
-        [{ type: TokenType.Variable, value: 'foo' }] as never,
+        [{ type: 'variable', value: 'foo' }] as never,
         {} as never
       )
     ).toBeNull();
     expect(
       interpolateString(
-        [{ type: TokenType.UnknownFragment, value: 'foo' }] as never,
+        [{ type: 'unknownFragment', value: 'foo' }] as never,
         {} as never
       )
     ).toBeNull();
