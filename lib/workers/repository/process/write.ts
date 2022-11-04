@@ -2,11 +2,11 @@ import is from '@sindresorhus/is';
 import type { RenovateConfig } from '../../../config/types';
 import { addMeta, logger, removeMeta } from '../../../logger';
 import { hashMap } from '../../../modules/manager';
-import { setBranchNewCommit } from '../../../util/cache/branch';
 import { getCache } from '../../../util/cache/repository';
 import type { BranchCache } from '../../../util/cache/repository/types';
 import { fingerprint } from '../../../util/fingerprint';
 import { branchExists, getBranchCommit } from '../../../util/git';
+import { setBranchNewCommit } from '../../../util/git/set-branch-commit';
 import { Limit, incLimitedValue, setMaxLimit } from '../../global/limits';
 import {
   BranchConfig,

@@ -101,6 +101,24 @@ export function massageBody(
   return body.trim();
 }
 
+export function massageName(
+  input: string | undefined | null,
+  version: string | undefined
+): string | undefined {
+  let name = input ?? '';
+
+  // Remove the current tag from the name if it's used as a prefix
+  if (version && name.startsWith(version)) {
+    name = name.slice(version.length);
+  }
+  name = name.trim();
+  if (!name.length) {
+    return undefined;
+  }
+
+  return name;
+}
+
 export async function getReleaseNotes(
   project: ChangeLogProject,
   release: ChangeLogRelease,
@@ -171,7 +189,8 @@ async function releaseNotesResult(
   }
   // set body for release notes
   releaseNotes.body = massageBody(releaseNotes.body, baseUrl);
-  if (releaseNotes.body.length) {
+  releaseNotes.name = massageName(releaseNotes.name, releaseNotes.tag);
+  if (releaseNotes.body.length || releaseNotes.name?.length) {
     try {
       if (baseUrl !== 'https://gitlab.com/') {
         releaseNotes.body = await linkify(releaseNotes.body, {
