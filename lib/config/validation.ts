@@ -460,7 +460,7 @@ export async function validateConfig(
                           !regexManager[`${field}Template`] &&
                           !regexManager.matchStrings.some(
                             (matchString: string) =>
-                              matchString.includes(`(?<${field}>`)
+                              matchString.includes(`(?<${field}>`) || matchString.includes(`(?P<${field}>`)
                           )
                         ) {
                           errors.push({

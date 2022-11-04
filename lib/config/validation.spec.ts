@@ -425,7 +425,7 @@ describe('config/validation', () => {
         regexManagers: [
           {
             fileMatch: ['Dockerfile'],
-            matchStrings: ['ENV (?<currentValue>.*?)\\s'],
+            matchStrings: ['ENV (?P<currentValue>.*?)\\s'],
             depNameTemplate: 'foo',
             datasourceTemplate: 'bar',
             registryUrlTemplate: 'foobar',
