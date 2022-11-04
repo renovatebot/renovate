@@ -23,6 +23,7 @@ import {
   REPOSITORY_MIRRORED,
   REPOSITORY_NOT_FOUND,
   REPOSITORY_NO_CONFIG,
+  REPOSITORY_NO_FORK,
   REPOSITORY_NO_PACKAGE_FILES,
   REPOSITORY_RENAMED,
   REPOSITORY_UNINITIATED,
@@ -61,6 +62,11 @@ export default async function handleError(
   }
   if (err.message === REPOSITORY_ARCHIVED) {
     logger.info('Repository is archived - skipping');
+    delete config.branchList;
+    return err.message;
+  }
+  if (err.message === REPOSITORY_NO_FORK) {
+    logger.info('Repository has no fork - skipping');
     delete config.branchList;
     return err.message;
   }

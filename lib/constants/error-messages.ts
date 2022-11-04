@@ -22,6 +22,7 @@ export const REPOSITORY_ACCESS_FORBIDDEN = 'forbidden';
 export const REPOSITORY_ARCHIVED = 'archived';
 export const REPOSITORY_BLOCKED = 'blocked';
 export const REPOSITORY_CANNOT_FORK = 'cannot-fork';
+export const REPOSITORY_NO_FORK = 'no-fork';
 export const REPOSITORY_DISABLED = 'disabled';
 export const REPOSITORY_CLOSED_ONBOARDING = 'disabled-closed-onboarding';
 export const REPOSITORY_DISABLED_BY_CONFIG = 'disabled-by-config';

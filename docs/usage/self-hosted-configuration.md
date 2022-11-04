@@ -376,9 +376,18 @@ In practice, it is implemented by converting the `force` configuration into a `p
 This is set to `true` by default, meaning that any settings (such as `schedule`) take maximum priority even against custom settings existing inside individual repositories.
 It will also override any settings in `packageRules`.
 
-## forkToken
+## forkCreate
 
-You probably don't need this option - it is an experimental setting developed for the Forking Renovate hosted GitHub App.
+Set this to false if using an app token which is not permitted to fork.
+
+## forkOrgs
+
+Configuring this value lets you choose which org/account you want repos forked into when fork mode is enabled.
+It also allows you to configure more than one if you are migrating from user-based forks into org-based ones.
+
+Renovate will first look if a fork exists in the preferred org, and then if not then look to see if one exists in any of the fallback orgs.
+
+## forkToken
 
 If this value is configured then Renovate:
 

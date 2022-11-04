@@ -418,6 +418,27 @@ const options: RenovateOptions[] = [
     experimental: true,
   },
   {
+    name: 'forkOrgs',
+    description:
+      'The preferred orgs to create or find forked repos, when in fork mode',
+    stage: 'repository',
+    type: 'array',
+    subType: 'string',
+    globalOnly: true,
+    supportedPlatforms: ['github'],
+    experimental: true,
+  },
+  {
+    name: 'forkCreate',
+    description: 'Whether to create a fork at runtime when in fork mode',
+    stage: 'repository',
+    type: 'boolean',
+    default: true,
+    globalOnly: true,
+    supportedPlatforms: ['github'],
+    experimental: true,
+  },
+  {
     name: 'githubTokenWarn',
     description: 'Display warnings about GitHub token not being set.',
     type: 'boolean',
