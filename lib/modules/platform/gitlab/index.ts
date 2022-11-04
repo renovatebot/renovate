@@ -3,7 +3,6 @@ import is from '@sindresorhus/is';
 import delay from 'delay';
 import JSON5 from 'json5';
 import semver from 'semver';
-import { PlatformId } from '../../../constants';
 import {
   CONFIG_GIT_URL_UNAVAILABLE,
   PLATFORM_AUTHENTICATION_ERROR,
@@ -75,7 +74,7 @@ let config: {
 } = {} as any;
 
 const defaults = {
-  hostType: PlatformId.Gitlab,
+  hostType: 'gitlab',
   endpoint: 'https://gitlab.com/api/v4/',
   version: '0.0.0',
 };

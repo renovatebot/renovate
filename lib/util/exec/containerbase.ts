@@ -70,6 +70,11 @@ const allToolConfig: Record<string, ToolConfig> = {
     depName: 'lerna',
     versioning: npmVersioningId,
   },
+  nix: {
+    datasource: 'github-tags',
+    depName: 'NixOS/nix',
+    versioning: semverVersioningId,
+  },
   node: {
     datasource: 'node',
     depName: 'node',
@@ -80,6 +85,11 @@ const allToolConfig: Record<string, ToolConfig> = {
     depName: 'npm',
     hash: true,
     versioning: npmVersioningId,
+  },
+  php: {
+    datasource: 'github-releases',
+    depName: 'containerbase/php-prebuild',
+    versioning: composerVersioningId,
   },
   pnpm: {
     datasource: 'npm',
@@ -124,9 +134,7 @@ export function isDynamicInstall(
     return false;
   }
   if (!isContainerbase()) {
-    logger.warn(
-      'binarySource=install is only compatible with images derived from github.com/containerbase'
-    );
+    logger.debug('Falling back to binarySource=global');
     return false;
   }
   return (

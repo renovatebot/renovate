@@ -52,13 +52,17 @@ export interface BranchCache {
    */
   isBehindBase?: boolean;
   /**
+   * Whether the update branch is in conflict with base branch
+   */
+  isConflicted?: boolean;
+  /**
    * Whether a person not listed in gitIgnoredAuthors updated the branch.
    */
   isModified?: boolean;
   /**
    * Parent commit of branch sha
    */
-  parentSha: string | null;
+  parentSha?: string | null;
   /**
    * Pr nunber of PR created from this branch
    */

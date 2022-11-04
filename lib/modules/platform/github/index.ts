@@ -7,7 +7,6 @@ import JSON5 from 'json5';
 import { DateTime } from 'luxon';
 import semver from 'semver';
 import { GlobalConfig } from '../../../config/global';
-import { PlatformId } from '../../../constants';
 import {
   PLATFORM_INTEGRATION_UNAUTHORIZED,
   REPOSITORY_ACCESS_FORBIDDEN,
@@ -90,7 +89,7 @@ export const GitHubMaxPrBodyLen = 60000;
 export function resetConfigs(): void {
   config = {} as never;
   platformConfig = {
-    hostType: PlatformId.Github,
+    hostType: 'github',
     endpoint: 'https://api.github.com/',
   };
 }
@@ -246,7 +245,6 @@ export async function getJsonFile(
 export async function initRepo({
   endpoint,
   repository,
-  forkMode,
   forkToken,
   renovateUsername,
   cloneSubmodules,
@@ -267,7 +265,7 @@ export async function initRepo({
     githubHttp.setBaseUrl(endpoint);
   }
   const opts = hostRules.find({
-    hostType: PlatformId.Github,
+    hostType: 'github',
     url: platformConfig.endpoint,
   });
   config.renovateUsername = renovateUsername;
@@ -371,9 +369,8 @@ export async function initRepo({
   config.issueList = null;
   config.prList = null;
 
-  config.forkMode = !!forkMode;
-  if (forkMode) {
-    logger.debug('Bot is in forkMode');
+  if (forkToken) {
+    logger.debug('Bot is in fork mode');
     config.forkToken = forkToken;
     // save parent name then delete
     config.parentRepo = config.repository;
@@ -489,7 +486,7 @@ export async function initRepo({
 
   const parsedEndpoint = URL.parse(platformConfig.endpoint);
   // istanbul ignore else
-  if (forkMode) {
+  if (forkToken) {
     logger.debug('Using forkToken for git init');
     parsedEndpoint.auth = config.forkToken ?? null;
   } else {
@@ -624,7 +621,7 @@ export async function getPrList(): Promise<GhPr[]> {
   if (!config.prList) {
     const repo = config.parentRepo ?? config.repository;
     const username =
-      !config.forkMode && !config.ignorePrAuthor && config.renovateUsername
+      !config.forkToken && !config.ignorePrAuthor && config.renovateUsername
         ? config.renovateUsername
         : null;
     // TODO: check null `repo` (#7154)
@@ -657,7 +654,7 @@ export async function findPr({
       return false;
     }
 
-    if (!config.forkMode && config.repository !== p.sourceRepo) {
+    if (!config.forkToken && config.repository !== p.sourceRepo) {
       return false;
     }
 
@@ -1250,7 +1247,7 @@ async function getComments(issueNo: number): Promise<Comment[]> {
   } catch (err) /* istanbul ignore next */ {
     if (err.statusCode === 404) {
       logger.debug('404 response when retrieving comments');
-      throw new ExternalHostError(err, PlatformId.Github);
+      throw new ExternalHostError(err, 'github');
     }
     throw err;
   }
@@ -1415,7 +1412,7 @@ export async function createPr({
 }: CreatePRConfig): Promise<GhPr | null> {
   const body = sanitize(rawBody);
   const base = targetBranch;
-  // Include the repository owner to handle forkMode and regular mode
+  // Include the repository owner to handle forkToken and regular mode
   // TODO: can `repository` be null? (#7154)
 
   const head = `${config.repository!.split('/')[0]}:${sourceBranch}`;
