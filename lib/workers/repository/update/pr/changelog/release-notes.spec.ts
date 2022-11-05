@@ -385,7 +385,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
         .scope('https://api.github.com/')
         .get('/repos/some/other-repository/releases?per_page=100')
         .reply(200, [
-          { tag_name: `${prefix}1.0.0` },
+          { tag_name: `${prefix}1.0.0`, name: 'Release v1.0.0' },
           {
             tag_name: `${prefix}1.0.1`,
             name: '1.0.1',
@@ -424,7 +424,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
           { tag_name: `${prefix}1.0.0` },
           {
             tag_name: `${prefix}1.0.1`,
-            name: '1.0.1 some release',
+            name: 'v1.0.1 some release',
             body: 'some body',
           },
         ]);
