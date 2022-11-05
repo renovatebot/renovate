@@ -41,7 +41,6 @@ export async function confirmIfDepUpdated(
     logger.debug({ manager, packageFile, err }, 'Failed to parse newContent');
   }
   if (!newUpgrade!) {
-    // unsure but should we not mention depName as well instead of packageFile and manager
     logger.debug(`No newUpgrade in ${packageFile!}`);
     return false;
   }
@@ -126,7 +125,8 @@ async function checkExistingBranch(
     );
     return null;
   }
-  logger.debug(`Branch dep ${depName} in ${packageFile} is already updated`);
+  // TODO: fix types (#7154)
+  logger.debug(`Branch dep ${depName!} in ${packageFile!} is already updated`);
   return existingContent;
 }
 
