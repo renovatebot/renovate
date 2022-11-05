@@ -274,14 +274,13 @@ export async function listForks(
 ): Promise<GhRestRepo[]> {
   // Get list of existing repos
   const url = `repos/${repository}/forks?per_page=100`;
-  const repos =
-    (
-      await githubApi.getJson<GhRestRepo[]>(url, {
-        token,
-        paginate: true,
-        pageLimit: 100,
-      })
-    )?.body ?? [];
+  const repos = (
+    await githubApi.getJson<GhRestRepo[]>(url, {
+      token,
+      paginate: true,
+      pageLimit: 100,
+    })
+  ).body;
   logger.debug(`Found ${repos.length} forked repo(s)`);
   return repos;
 }
@@ -301,7 +300,7 @@ export async function findFork(
     logger.debug(`Searching for forked repo in ${forkOrg}`);
     forkedRepo = forks.find((repo) => repo.owner.login === forkOrg);
     if (forkedRepo) {
-      logger.debug(`Found existing forked repo: ${config.repository}`);
+      logger.debug(`Found existing forked repo: ${forkedRepo.full_name}`);
       break;
     }
   }
