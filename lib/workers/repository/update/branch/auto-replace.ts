@@ -126,7 +126,7 @@ async function checkExistingBranch(
     );
     return null;
   }
-  logger.debug('Branch dep is already updated');
+  logger.debug(`Branch dep ${depName} in ${packageFile} is already updated`);
   return existingContent;
 }
 

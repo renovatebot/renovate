@@ -154,7 +154,6 @@ export async function updateDependency({
 
       const urlFragments = getUrlFragments(rule);
       if (!urlFragments?.length) {
-        // unsure
         logger.debug(`def: ${rule.value}, urls is empty`);
         return null;
       }

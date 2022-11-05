@@ -260,7 +260,7 @@ export async function initRepo({
   // istanbul ignore if
   if (endpoint) {
     // Necessary for Renovate Pro - do not remove
-    logger.debug(`Overriding default GitHub endpoint: ${endpoint}`);
+    logger.debug(`Overriding default GitHub endpoint with ${endpoint}`);
     platformConfig.endpoint = endpoint;
     githubHttp.setBaseUrl(endpoint);
   }
@@ -705,8 +705,7 @@ export async function getBranchPr(branchName: string): Promise<GhPr | null> {
       await githubApi.postJson(`repos/${config.repository}/git/refs`, {
         body: { ref: `refs/heads/${branchName}`, sha },
       });
-      // unsure about the sha
-      logger.debug(`Recreated autoclosed branch: ${branchName}`);
+      logger.debug(`Recreated autoclosed branch ${branchName} with sha ${sha}`);
     } catch (err) {
       logger.debug('Could not recreate autoclosed branch - skipping reopen');
       return null;
@@ -1032,7 +1031,7 @@ export async function ensureIssue({
     if (!issues.length) {
       issues = issueList.filter((i) => i.title === reuseTitle);
       if (issues.length) {
-        logger.debug(`Reusing issue title: ${title}`);
+        logger.debug(`Reusing issue title: "${reuseTitle}"`);
       }
     }
     if (issues.length) {

@@ -151,7 +151,7 @@ export async function removeDockerContainer(
     });
     const containerId = res?.stdout?.trim() || '';
     if (containerId.length) {
-      logger.debug(`Removing container with ID:${containerId}`);
+      logger.debug(`Removing container with ID: ${containerId}`);
       cmd = `docker rm -f ${containerId}`;
       await rawExec(cmd, {
         encoding: 'utf-8',

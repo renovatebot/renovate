@@ -303,7 +303,7 @@ export async function writeGitAuthor(): Promise<void> {
       await git.addConfig('user.name', gitAuthorName);
     }
     if (gitAuthorEmail) {
-      logger.debug(`Setting git author email:${gitAuthorEmail}`);
+      logger.debug(`Setting git author email: ${gitAuthorEmail}`);
       await git.addConfig('user.email', gitAuthorEmail);
     }
   } catch (err) /* istanbul ignore next */ {
@@ -435,7 +435,7 @@ export async function syncGit(): Promise<void> {
       throw new ExternalHostError(err, 'git');
     }
     const durationMs = Math.round(Date.now() - cloneStart);
-    logger.debug(`Git clone completed in ${durationMs}`);
+    logger.debug({ durationMs }, 'git clone completed');
   }
   try {
     config.currentBranchSha = (await git.raw(['rev-parse', 'HEAD'])).trim();
