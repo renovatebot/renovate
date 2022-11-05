@@ -107,10 +107,10 @@ export function massageName(
 ): string | undefined {
   let name = input ?? '';
 
-  // Remove the current tag from the name if it's used as a prefix
-  if (version && name.startsWith(version)) {
-    name = name.slice(version.length);
+  if (version) {
+    name = name.replace(RegExp(`^(Release )?v?${version}`, 'i'), '').trim();
   }
+
   name = name.trim();
   if (!name.length) {
     return undefined;
