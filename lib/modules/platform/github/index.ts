@@ -262,14 +262,13 @@ export async function listForks(
 ): Promise<GhRestRepo[]> {
   // Get list of existing repos
   const url = `repos/${repository}/forks?per_page=100`;
-  const repos =
-    (
-      await githubApi.getJson<GhRestRepo[]>(url, {
-        token,
-        paginate: true,
-        pageLimit: 100,
-      })
-    )?.body ?? [];
+  const repos = (
+    await githubApi.getJson<GhRestRepo[]>(url, {
+      token,
+      paginate: true,
+      pageLimit: 100,
+    })
+  ).body;
   logger.debug(`Found ${repos.length} forked repo(s)`);
   return repos;
 }
