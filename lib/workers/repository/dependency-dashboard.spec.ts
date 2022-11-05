@@ -31,7 +31,6 @@ const getIssueSpy = platform.getIssue;
 let config: RenovateConfig;
 
 beforeEach(() => {
-  jest.clearAllMocks();
   massageMdSpy.mockImplementation(massageMarkdown);
   config = getConfig();
   config.platform = 'github';
@@ -69,7 +68,6 @@ async function dryRun(
   ensureIssueClosingCalls = 0,
   ensureIssueCalls = 0
 ) {
-  jest.clearAllMocks();
   GlobalConfig.set({ dryRun: 'full' });
   await dependencyDashboard.ensureDependencyDashboard(config, branches);
   expect(platform.ensureIssueClosing).toHaveBeenCalledTimes(
