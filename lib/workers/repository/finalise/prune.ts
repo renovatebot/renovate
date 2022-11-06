@@ -35,9 +35,8 @@ async function cleanUpBranches(
           if (GlobalConfig.get('dryRun')) {
             logger.info(`DRY-RUN: Would update PR title and ensure comment.`);
           } else {
-            let newPrTitle = pr.title;
             if (!pr.title.endsWith('- abandoned')) {
-              newPrTitle += ' - abandoned';
+              const newPrTitle = pr.title + ' - abandoned';
               await platform.updatePr({
                 number: pr.number,
                 prTitle: newPrTitle,
