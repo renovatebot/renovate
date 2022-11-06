@@ -34,12 +34,6 @@ async function cleanUpBranches(
           if (GlobalConfig.get('dryRun')) {
             logger.info(`DRY-RUN: Would add - abandoned to PR title`);
           } else {
-            // await ensureComment({
-            //   number: pr.number,
-            //   topic: 'Autoclosing Skipped',
-            //   content:
-            //     'This PR has been flagged for autoclosing. However, it is being skipped due to the branch being already modified. Please close/delete it manually or report a bug if you think this is in error.',
-            // });
             let newPrTitle = pr.title;
             if (!pr.title.endsWith('- abandoned')) {
               newPrTitle += ' - abandoned';
