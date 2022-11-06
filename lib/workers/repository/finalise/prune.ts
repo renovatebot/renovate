@@ -3,7 +3,6 @@ import type { RenovateConfig } from '../../../config/types';
 import { REPOSITORY_CHANGED } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { platform } from '../../../modules/platform';
-import { ensureComment } from '../../../modules/platform/comment';
 import { PrState } from '../../../types';
 import {
   deleteBranch,
@@ -33,13 +32,22 @@ async function cleanUpBranches(
             'Branch is modified - skipping PR autoclosing'
           );
           if (GlobalConfig.get('dryRun')) {
-            logger.info(`DRY-RUN: Would add Autoclosing Skipped comment to PR`);
+            logger.info(`DRY-RUN: Would add - abandoned to PR title`);
           } else {
-            await ensureComment({
+            // await ensureComment({
+            //   number: pr.number,
+            //   topic: 'Autoclosing Skipped',
+            //   content:
+            //     'This PR has been flagged for autoclosing. However, it is being skipped due to the branch being already modified. Please close/delete it manually or report a bug if you think this is in error.',
+            // });
+            let newPrTitle = pr.title;
+            if (!pr.title.endsWith('- abandoned')) {
+              newPrTitle += ' - abandoned';
+            }
+            await platform.updatePr({
               number: pr.number,
-              topic: 'Autoclosing Skipped',
-              content:
-                'This PR has been flagged for autoclosing. However, it is being skipped due to the branch being already modified. Please close/delete it manually or report a bug if you think this is in error.',
+              prTitle: newPrTitle,
+              state: PrState.Open,
             });
           }
         } else if (GlobalConfig.get('dryRun')) {
