@@ -99,7 +99,7 @@ describe('workers/repository/finalise/prune', () => {
       expect(platform.updatePr).toHaveBeenCalledTimes(0);
     });
 
-    it('modified title if someone pushed to PR', async () => {
+    it('notifies via PR changes if someone pushed to PR', async () => {
       config.branchList = ['renovate/a', 'renovate/b'];
       git.getBranchList.mockReturnValueOnce(
         config.branchList.concat(['renovate/c'])
@@ -113,10 +113,10 @@ describe('workers/repository/finalise/prune', () => {
       expect(git.getBranchList).toHaveBeenCalledTimes(1);
       expect(git.deleteBranch).toHaveBeenCalledTimes(0);
       expect(platform.updatePr).toHaveBeenCalledTimes(1);
-      expect(platform.ensureComment).toHaveBeenCalledTimes(0);
+      expect(platform.ensureComment).toHaveBeenCalledTimes(1);
     });
 
-    it('skips modifying pr title if dry run', async () => {
+    it('skips changes to PR if dry run', async () => {
       config.branchList = ['renovate/a', 'renovate/b'];
       GlobalConfig.set({ dryRun: 'full' });
       git.getBranchList.mockReturnValueOnce(

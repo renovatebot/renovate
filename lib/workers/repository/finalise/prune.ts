@@ -3,6 +3,7 @@ import type { RenovateConfig } from '../../../config/types';
 import { REPOSITORY_CHANGED } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { platform } from '../../../modules/platform';
+import { ensureComment } from '../../../modules/platform/comment';
 import { PrState } from '../../../types';
 import {
   deleteBranch,
@@ -32,7 +33,7 @@ async function cleanUpBranches(
             'Branch is modified - skipping PR autoclosing'
           );
           if (GlobalConfig.get('dryRun')) {
-            logger.info(`DRY-RUN: Would add - abandoned to PR title`);
+            logger.info(`DRY-RUN: Would update PR title and ensure comment.`);
           } else {
             let newPrTitle = pr.title;
             if (!pr.title.endsWith('- abandoned')) {
@@ -42,6 +43,12 @@ async function cleanUpBranches(
               number: pr.number,
               prTitle: newPrTitle,
               state: PrState.Open,
+            });
+            await ensureComment({
+              number: pr.number,
+              topic: 'Autoclosing Skipped',
+              content:
+                'This PR has been flagged for autoclosing. However, it is being skipped due to the branch being already modified. Please close/delete it manually or report a bug if you think this is in error.',
             });
           }
         } else if (GlobalConfig.get('dryRun')) {
