@@ -301,14 +301,6 @@ export function extractPackage(
     const parentPath =
       project.valueWithPath('parent.relativePath')?.trim() ?? '../pom.xml';
     result.parent = resolveParentFile(packageFile, parentPath);
-  } else {
-    const groupId = project.valueWithPath('groupId')?.trim();
-    const artifactId = project.valueWithPath('artifactId')?.trim();
-    if (groupId && artifactId) {
-      const rootPackage = `${groupId}:${artifactId}`;
-      const key = `maven-repo-root-pom:${rootPackage}`;
-      memCache.set(key, true);
-    }
   }
 
   if (project.childNamed('version')) {
@@ -427,23 +419,35 @@ export function resolveParents(packages: PackageFile[]): PackageFile[] {
     });
   });
 
+  const rootDeps = new Set<string>();
   // Resolve placeholders
   packageFileNames.forEach((name) => {
     const pkg = extractedPackages[name];
     pkg.deps.forEach((rawDep) => {
       const dep = applyProps(rawDep, name, extractedProps[name]);
-      if (memCache.get(`maven-repo-root-pom:${dep.depName!}`)) {
-        dep.skipReason = 'root-pom';
+      if (dep.depType === 'parent') {
+        const parentPkg = extractedPackages[pkg.parent!];
+        if (parentPkg && !parentPkg.parent) {
+          rootDeps.add(dep.depName!);
+        }
       }
       const sourceName = dep.propSource ?? name;
       extractedDeps[sourceName].push(dep);
     });
   });
 
-  return packageFileNames.map((name) => ({
-    ...extractedPackages[name],
-    deps: extractedDeps[name],
-  }));
+  const packageFiles = packageFileNames.map((packageFile) => {
+    const pkg = extractedPackages[packageFile];
+    const deps = extractedDeps[packageFile];
+    for (const dep of deps) {
+      if (rootDeps.has(dep.depName!)) {
+        dep.skipReason = 'root-pom';
+      }
+    }
+    return { ...pkg, deps };
+  });
+
+  return packageFiles;
 }
 
 function cleanResult(

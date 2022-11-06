@@ -20,10 +20,6 @@ function selectDep(deps: PackageDependency[], name = 'org.example:quuz') {
 
 describe('modules/manager/maven/index', () => {
   describe('extractAllPackageFiles', () => {
-    beforeEach(() => {
-      memCache.reset();
-    });
-
     it('should return empty if package has no content', async () => {
       fs.readLocalFile.mockResolvedValueOnce('');
       const res = await extractAllPackageFiles({}, ['random.pom.xml']);
@@ -139,39 +135,92 @@ describe('modules/manager/maven/index', () => {
       ]);
     });
 
-    it('should skip root pom.xml', async () => {
-      memCache.init();
-      fs.readLocalFile.mockResolvedValueOnce(`
-        <project>
-          <modelVersion>4.0.0</modelVersion>
-          <groupId>org.example</groupId>
-          <artifactId>root</artifactId>
-          <version>1.0.0</version>
-        </project>
-      `);
-      fs.readLocalFile.mockResolvedValueOnce(`
-        <project>
-          <parent>
+    describe('root pom handling', () => {
+      beforeEach(() => {
+        memCache.init();
+      });
+
+      afterEach(() => {
+        memCache.reset();
+      });
+
+      it('should skip root pom.xml', async () => {
+        fs.readLocalFile.mockResolvedValueOnce(`
+          <project>
+            <modelVersion>4.0.0</modelVersion>
             <groupId>org.example</groupId>
             <artifactId>root</artifactId>
             <version>1.0.0</version>
-          </parent>
-          <modelVersion>4.0.0</modelVersion>
-          <groupId>org.example</groupId>
-          <artifactId>child</artifactId>
-        </project>
-      `);
-      const packages = await extractAllPackageFiles({}, [
-        'pom.xml',
-        'foo.bar/pom.xml',
-      ]);
-      expect(packages).toMatchObject([
-        { packageFile: 'pom.xml', deps: [] },
-        {
-          packageFile: 'foo.bar/pom.xml',
-          deps: [{ depName: 'org.example:root', skipReason: 'root-pom' }],
-        },
-      ]);
+          </project>
+        `);
+        fs.readLocalFile.mockResolvedValueOnce(`
+          <project>
+            <parent>
+              <groupId>org.example</groupId>
+              <artifactId>root</artifactId>
+              <version>1.0.0</version>
+            </parent>
+            <modelVersion>4.0.0</modelVersion>
+            <groupId>org.example</groupId>
+            <artifactId>child</artifactId>
+          </project>
+        `);
+        const packages = await extractAllPackageFiles({}, [
+          'pom.xml',
+          'foo.bar/pom.xml',
+        ]);
+        expect(packages).toMatchObject([
+          { packageFile: 'pom.xml', deps: [] },
+          {
+            packageFile: 'foo.bar/pom.xml',
+            deps: [{ depName: 'org.example:root', skipReason: 'root-pom' }],
+          },
+        ]);
+      });
+
+      it('handles cross-referencing', async () => {
+        fs.readLocalFile.mockResolvedValueOnce(`
+          <project>
+            <modelVersion>4.0.0</modelVersion>
+            <groupId>org.example</groupId>
+            <artifactId>foo</artifactId>
+            <version>1.0.0</version>
+            <dependencies>
+              <dependency>
+                <groupId>org.example</groupId>
+                <artifactId>bar</artifactId>
+                <version>1.0.0</version>
+              </dependency>
+            </dependencies>
+          </project>
+        `);
+        fs.readLocalFile.mockResolvedValueOnce(`
+          <project>
+            <modelVersion>4.0.0</modelVersion>
+            <groupId>org.example</groupId>
+            <artifactId>bar</artifactId>
+            <version>1.0.0</version>
+            <dependencies>
+              <dependency>
+                <groupId>org.example</groupId>
+                <artifactId>foo</artifactId>
+                <version>1.0.0</version>
+              </dependency>
+            </dependencies>
+          </project>
+        `);
+        const packages = await extractAllPackageFiles({}, [
+          'foo.xml',
+          'bar.xml',
+        ]);
+        expect(packages).toMatchObject([
+          { packageFile: 'foo.xml', deps: [{ depName: 'org.example:bar' }] },
+          { packageFile: 'bar.xml', deps: [{ depName: 'org.example:foo' }] },
+        ]);
+        const [foo, bar] = packages;
+        expect(foo.deps[0].skipReason).toBeUndefined();
+        expect(bar.deps[0].skipReason).toBeUndefined();
+      });
     });
   });
 
