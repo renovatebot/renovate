@@ -1,6 +1,7 @@
 // TODO #7154
 import { Fixtures } from '../../../../test/fixtures';
 import { fs } from '../../../../test/util';
+import * as memCache from '../../../util/cache/memory';
 import type { PackageDependency, PackageFile } from '../types';
 import { extractPackage, resolveParents } from './extract';
 import { extractAllPackageFiles, updateDependency } from '.';
@@ -19,6 +20,10 @@ function selectDep(deps: PackageDependency[], name = 'org.example:quuz') {
 
 describe('modules/manager/maven/index', () => {
   describe('extractAllPackageFiles', () => {
+    beforeEach(() => {
+      memCache.reset();
+    });
+
     it('should return empty if package has no content', async () => {
       fs.readLocalFile.mockResolvedValueOnce('');
       const res = await extractAllPackageFiles({}, ['random.pom.xml']);
@@ -130,6 +135,41 @@ describe('modules/manager/maven/index', () => {
           ],
           packageFile: 'random.pom.xml',
           parent: '../pom.xml',
+        },
+      ]);
+    });
+
+    it('should skip root pom.xml', async () => {
+      memCache.init();
+      fs.readLocalFile.mockResolvedValueOnce(`
+        <project>
+          <modelVersion>4.0.0</modelVersion>
+          <groupId>org.example</groupId>
+          <artifactId>root</artifactId>
+          <version>1.0.0</version>
+        </project>
+      `);
+      fs.readLocalFile.mockResolvedValueOnce(`
+        <project>
+          <parent>
+            <groupId>org.example</groupId>
+            <artifactId>root</artifactId>
+            <version>1.0.0</version>
+          </parent>
+          <modelVersion>4.0.0</modelVersion>
+          <groupId>org.example</groupId>
+          <artifactId>child</artifactId>
+        </project>
+      `);
+      const packages = await extractAllPackageFiles({}, [
+        'pom.xml',
+        'foo.bar/pom.xml',
+      ]);
+      expect(packages).toMatchObject([
+        { packageFile: 'pom.xml', deps: [] },
+        {
+          packageFile: 'foo.bar/pom.xml',
+          deps: [{ depName: 'org.example:root', skipReason: 'root-pom' }],
         },
       ]);
     });

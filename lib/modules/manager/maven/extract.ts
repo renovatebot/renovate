@@ -2,6 +2,7 @@ import is from '@sindresorhus/is';
 import upath from 'upath';
 import { XmlDocument, XmlElement } from 'xmldoc';
 import { logger } from '../../../logger';
+import * as memCache from '../../../util/cache/memory';
 import { readLocalFile } from '../../../util/fs';
 import { regEx } from '../../../util/regex';
 import { MavenDatasource } from '../../datasource/maven';
@@ -300,6 +301,14 @@ export function extractPackage(
     const parentPath =
       project.valueWithPath('parent.relativePath')?.trim() ?? '../pom.xml';
     result.parent = resolveParentFile(packageFile, parentPath);
+  } else {
+    const groupId = project.valueWithPath('groupId')?.trim();
+    const artifactId = project.valueWithPath('artifactId')?.trim();
+    if (groupId && artifactId) {
+      const rootPackage = `${groupId}:${artifactId}`;
+      const key = `maven-repo-root-pom:${rootPackage}`;
+      memCache.set(key, true);
+    }
   }
 
   if (project.childNamed('version')) {
@@ -423,6 +432,9 @@ export function resolveParents(packages: PackageFile[]): PackageFile[] {
     const pkg = extractedPackages[name];
     pkg.deps.forEach((rawDep) => {
       const dep = applyProps(rawDep, name, extractedProps[name]);
+      if (memCache.get(`maven-repo-root-pom:${dep.depName!}`)) {
+        dep.skipReason = 'root-pom';
+      }
       const sourceName = dep.propSource ?? name;
       extractedDeps[sourceName].push(dep);
     });
