@@ -1,6 +1,11 @@
-import { getManagerConfig } from '../../../config';
-import type { RegExManager, RenovateConfig } from '../../../config/types';
+import { getManagerConfig, mergeChildConfig } from '../../../config';
+import type {
+  RegexManagerTemplates,
+  RenovateConfig,
+} from '../../../config/types';
 import { getManagerList } from '../../../modules/manager';
+import { validMatchFields } from '../../../modules/manager/regex/utils';
+import type { CustomExtractConfig } from '../../../modules/manager/types';
 import type { WorkerExtractConfig } from '../../types';
 
 export interface FingerprintExtractConfig {
@@ -8,23 +13,33 @@ export interface FingerprintExtractConfig {
   managers: WorkerExtractConfig[];
 }
 
+function getRegexManagerFields(
+  config: WorkerExtractConfig
+): CustomExtractConfig {
+  const regexFields = {} as CustomExtractConfig;
+  for (const field of validMatchFields.map(
+    (f) => `${f}Template` as keyof RegexManagerTemplates
+  )) {
+    if (config[field]) {
+      regexFields[field] = config[field];
+    }
+  }
+
+  return {
+    autoReplaceStringTemplate: config.autoReplaceStringTemplate,
+    matchStrings: config.matchStrings,
+    matchStringsStrategy: config.matchStringsStrategy,
+    ...regexFields,
+  };
+}
+
 function getFilteredManagerConfig(
-  config: RenovateConfig,
-  manager: string,
-  regexManagerConfig?: RegExManager
+  config: WorkerExtractConfig
 ): WorkerExtractConfig {
-  let filteredConfig = {} as WorkerExtractConfig;
-
-  // need to merge the fileMatch config option
-  const fileMatch = [
-    ...(regexManagerConfig?.fileMatch ?? []),
-    ...(config.fileMatch ?? []),
-  ];
-
-  filteredConfig = {
-    ...(regexManagerConfig ?? {}),
-    manager,
-    fileMatch,
+  return {
+    ...(config.manager === 'regex' ? getRegexManagerFields(config) : {}),
+    manager: config.manager,
+    fileMatch: config.fileMatch,
     npmrc: config.npmrc,
     npmrcMerge: config.npmrcMerge,
     enabled: config.enabled,
@@ -34,37 +49,35 @@ function getFilteredManagerConfig(
     registryAliases: config.registryAliases,
     fileList: [],
   };
-  return filteredConfig;
 }
 
 export function generateFingerprintConfig(
   config: RenovateConfig
 ): FingerprintExtractConfig {
-  const finalConfig = {} as FingerprintExtractConfig;
-
-  const managerExtractConfigs: WorkerExtractConfig[] = [];
+  let managerExtractConfigs: WorkerExtractConfig[] = [];
   let managerList = new Set(getManagerList());
   const { enabledManagers } = config;
   if (enabledManagers?.length) {
     managerList = new Set(enabledManagers);
   }
-  finalConfig.managerList = managerList;
 
   for (const manager of managerList) {
     const managerConfig = getManagerConfig(config, manager);
     if (manager === 'regex') {
       for (const regexManager of config.regexManagers ?? []) {
-        managerExtractConfigs.push(
-          getFilteredManagerConfig(managerConfig, manager, regexManager)
-        );
+        managerExtractConfigs.push({
+          ...mergeChildConfig(managerConfig, regexManager),
+          fileList: [],
+        });
       }
     } else {
-      managerExtractConfigs.push(
-        getFilteredManagerConfig(managerConfig, manager)
-      );
+      managerExtractConfigs.push({ ...managerConfig, fileList: [] });
     }
   }
 
-  finalConfig.managers = managerExtractConfigs;
-  return finalConfig;
+  managerExtractConfigs = managerExtractConfigs.map(getFilteredManagerConfig);
+  return {
+    managerList,
+    managers: managerExtractConfigs,
+  };
 }
