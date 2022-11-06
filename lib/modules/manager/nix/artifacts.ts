@@ -39,9 +39,6 @@ export async function updateArtifacts({
   }
   const execOptions: ExecOptions = {
     cwdFile: packageFileName,
-    env: {
-      PATH: `/home/jamie/.local/bin:${process.env.PATH!}`,
-    },
     toolConstraints: [
       {
         toolName: 'nix',
