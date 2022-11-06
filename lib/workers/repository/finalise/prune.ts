@@ -38,12 +38,13 @@ async function cleanUpBranches(
             let newPrTitle = pr.title;
             if (!pr.title.endsWith('- abandoned')) {
               newPrTitle += ' - abandoned';
+              await platform.updatePr({
+                number: pr.number,
+                prTitle: newPrTitle,
+                state: PrState.Open,
+              });
             }
-            await platform.updatePr({
-              number: pr.number,
-              prTitle: newPrTitle,
-              state: PrState.Open,
-            });
+
             await ensureComment({
               number: pr.number,
               topic: 'Autoclosing Skipped',

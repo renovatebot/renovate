@@ -107,13 +107,27 @@ describe('workers/repository/finalise/prune', () => {
       platform.getBranchPr.mockResolvedValueOnce({} as never);
       git.isBranchModified.mockResolvedValueOnce(true);
       platform.findPr.mockResolvedValueOnce({
-        title: 'foo -abandoned',
+        title: 'foo',
       } as never);
       await cleanup.pruneStaleBranches(config, config.branchList);
       expect(git.getBranchList).toHaveBeenCalledTimes(1);
       expect(git.deleteBranch).toHaveBeenCalledTimes(0);
       expect(platform.updatePr).toHaveBeenCalledTimes(1);
       expect(platform.ensureComment).toHaveBeenCalledTimes(1);
+    });
+
+    it('skips appending - abandoned to PR title if already present', async () => {
+      config.branchList = ['renovate/a', 'renovate/b'];
+      git.getBranchList.mockReturnValueOnce(
+        config.branchList.concat(['renovate/c'])
+      );
+      platform.getBranchPr.mockResolvedValueOnce({} as never);
+      git.isBranchModified.mockResolvedValueOnce(true);
+      platform.findPr.mockResolvedValueOnce({
+        title: 'foo - abandoned',
+      } as never);
+      await cleanup.pruneStaleBranches(config, config.branchList);
+      expect(platform.updatePr).toHaveBeenCalledTimes(0);
     });
 
     it('skips changes to PR if dry run', async () => {
