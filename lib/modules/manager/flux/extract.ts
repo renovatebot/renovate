@@ -74,8 +74,7 @@ function readManifest(content: string, file: string): FluxManifest | null {
       case 'GitRepository':
         if (
           resource.apiVersion?.startsWith('source.toolkit.fluxcd.io/') &&
-          resource.spec?.url // &&
-          //(resource.spec?.ref?.tag || resource.spec?.ref?.commit)
+          resource.spec?.url
         ) {
           manifest.gitRepositories.push(resource);
         }
