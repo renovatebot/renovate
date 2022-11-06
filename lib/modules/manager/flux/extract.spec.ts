@@ -1,6 +1,12 @@
 import { Fixtures } from '../../../../test/fixtures';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
+import { BitBucketTagsDatasource } from '../../datasource/bitbucket-tags';
+import { GitRefsDatasource } from '../../datasource/git-refs';
+import { GitTagsDatasource } from '../../datasource/git-tags';
+import { GithubTagsDatasource } from '../../datasource/github-tags';
+import { GitlabTagsDatasource } from '../../datasource/gitlab-tags';
+import { HelmDatasource } from '../../datasource/helm';
 import type { ExtractConfig } from '../types';
 import { extractAllPackageFiles, extractPackageFile } from '.';
 
@@ -22,9 +28,16 @@ describe('modules/manager/flux/extract', () => {
         deps: [
           {
             currentValue: '1.7.0',
-            datasource: 'helm',
+            datasource: HelmDatasource.id,
             depName: 'external-dns',
             registryUrls: ['https://kubernetes-sigs.github.io/external-dns/'],
+          },
+          {
+            currentValue: 'v11.35.4',
+            datasource: GithubTagsDatasource.id,
+            depName: 'renovate-repo',
+            packageName: 'renovatebot/renovate',
+            sourceUrl: 'https://github.com/renovatebot/renovate',
           },
         ],
       });
@@ -68,8 +81,8 @@ describe('modules/manager/flux/extract', () => {
 
     it('extracts releases without repositories', () => {
       const result = extractPackageFile(
-        Fixtures.get('release.yaml'),
-        'release.yaml'
+        Fixtures.get('helmRelease.yaml'),
+        'helmRelease.yaml'
       );
       expect(result?.deps[0].skipReason).toBe('unknown-registry');
     });
@@ -86,7 +99,7 @@ describe('modules/manager/flux/extract', () => {
 
     it('ignores HelmRepository resources without metadata', () => {
       const result = extractPackageFile(
-        `${Fixtures.get('release.yaml')}
+        `${Fixtures.get('helmRelease.yaml')}
 ---
 apiVersion: source.toolkit.fluxcd.io/v1beta1
 kind: HelmRepository
@@ -143,7 +156,7 @@ spec:
 
     it('does not match HelmRelease resources without a sourceRef', () => {
       const result = extractPackageFile(
-        `${Fixtures.get('source.yaml')}
+        `${Fixtures.get('helmSource.yaml')}
 ---
 apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
@@ -162,7 +175,7 @@ spec:
 
     it('does not match HelmRelease resources without a namespace', () => {
       const result = extractPackageFile(
-        `${Fixtures.get('source.yaml')}
+        `${Fixtures.get('helmSource.yaml')}
 ---
 apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
@@ -182,7 +195,7 @@ spec:
 
     it('ignores HelmRepository resources without a namespace', () => {
       const result = extractPackageFile(
-        `${Fixtures.get('release.yaml')}
+        `${Fixtures.get('helmRelease.yaml')}
 ---
 apiVersion: source.toolkit.fluxcd.io/v1beta1
 kind: HelmRepository
@@ -196,7 +209,7 @@ metadata:
 
     it('ignores HelmRepository resources without a URL', () => {
       const result = extractPackageFile(
-        `${Fixtures.get('release.yaml')}
+        `${Fixtures.get('helmRelease.yaml')}
 ---
 apiVersion: source.toolkit.fluxcd.io/v1beta1
 kind: HelmRepository
@@ -207,6 +220,130 @@ metadata:
         'test.yaml'
       );
       expect(result?.deps[0].skipReason).toBe('unknown-registry');
+    });
+
+    it('ignores GitRepository without a tag nor a commit', () => {
+      const result = extractPackageFile(
+        `apiVersion: source.toolkit.fluxcd.io/v1beta1
+kind: GitRepository
+metadata:
+  name: renovate-repo
+  namespace: renovate-system
+spec:
+  url: https://github.com/renovatebot/renovate
+`,
+        'test.yaml'
+      );
+      expect(result?.deps[0].skipReason).toBe('unversioned-reference');
+    });
+
+    it('extracts GitRepository with a commit', () => {
+      const result = extractPackageFile(
+        `apiVersion: source.toolkit.fluxcd.io/v1beta1
+kind: GitRepository
+metadata:
+  name: renovate-repo
+  namespace: renovate-system
+spec:
+  ref:
+    commit: c93154b
+  url: https://github.com/renovatebot/renovate
+`,
+        'test.yaml'
+      );
+      expect(result?.deps[0].currentDigest).toBe('c93154b');
+      expect(result?.deps[0].replaceString).toBe('c93154b');
+      expect(result?.deps[0].datasource).toBe(GitRefsDatasource.id);
+    });
+
+    it('extracts GitRepository with a tag from github with ssh', () => {
+      const result = extractPackageFile(
+        `apiVersion: source.toolkit.fluxcd.io/v1beta1
+kind: GitRepository
+metadata:
+  name: renovate-repo
+  namespace: renovate-system
+spec:
+  ref:
+    tag: v11.35.9
+  url: git@github.com:renovatebot/renovate.git
+`,
+        'test.yaml'
+      );
+      expect(result?.deps[0].currentValue).toBe('v11.35.9');
+      expect(result?.deps[0].datasource).toBe(GithubTagsDatasource.id);
+    });
+
+    it('extracts GitRepository with a tag from github', () => {
+      const result = extractPackageFile(
+        `apiVersion: source.toolkit.fluxcd.io/v1beta1
+kind: GitRepository
+metadata:
+  name: renovate-repo
+  namespace: renovate-system
+spec:
+  ref:
+    tag: v11.35.9
+  url: https://github.com/renovatebot/renovate
+`,
+        'test.yaml'
+      );
+      expect(result?.deps[0].currentValue).toBe('v11.35.9');
+      expect(result?.deps[0].datasource).toBe(GithubTagsDatasource.id);
+    });
+
+    it('extracts GitRepository with a tag from gitlab', () => {
+      const result = extractPackageFile(
+        `apiVersion: source.toolkit.fluxcd.io/v1beta1
+kind: GitRepository
+metadata:
+  name: renovate-repo
+  namespace: renovate-system
+spec:
+  ref:
+    tag: 1.2.3
+  url: https://gitlab.com/renovatebot/renovate
+`,
+        'test.yaml'
+      );
+      expect(result?.deps[0].currentValue).toBe('1.2.3');
+      expect(result?.deps[0].datasource).toBe(GitlabTagsDatasource.id);
+    });
+
+    it('extracts GitRepository with a tag from bitbucket', () => {
+      const result = extractPackageFile(
+        `apiVersion: source.toolkit.fluxcd.io/v1beta1
+kind: GitRepository
+metadata:
+  name: renovate-repo
+  namespace: renovate-system
+spec:
+  ref:
+    tag: 2020.5.6+staging.ze
+  url: https://bitbucket.org/renovatebot/renovate
+`,
+        'test.yaml'
+      );
+      expect(result?.deps[0].currentValue).toBe('2020.5.6+staging.ze');
+      expect(result?.deps[0].datasource).toBe(BitBucketTagsDatasource.id);
+    });
+
+    it('extracts GitRepository with a tag from an unkown domain', () => {
+      const result = extractPackageFile(
+        `apiVersion: source.toolkit.fluxcd.io/v1beta1
+kind: GitRepository
+metadata:
+  name: renovate-repo
+  namespace: renovate-system
+spec:
+  ref:
+    tag: "7.56.4_p1"
+  url: https://example.com/renovatebot/renovate
+`,
+        'test.yaml'
+      );
+      expect(result?.deps[0].currentValue).toBe('7.56.4_p1');
+      expect(result?.deps[0].datasource).toBe(GitTagsDatasource.id);
     });
 
     it('ignores resources of an unknown kind', () => {
@@ -240,20 +377,34 @@ apiVersion: helm.toolkit.fluxcd.io/v2beta1`,
   describe('extractAllPackageFiles()', () => {
     it('extracts multiple files', async () => {
       const result = await extractAllPackageFiles(config, [
-        'lib/modules/manager/flux/__fixtures__/release.yaml',
-        'lib/modules/manager/flux/__fixtures__/source.yaml',
+        'lib/modules/manager/flux/__fixtures__/helmRelease.yaml',
+        'lib/modules/manager/flux/__fixtures__/helmSource.yaml',
+        'lib/modules/manager/flux/__fixtures__/gitSource.yaml',
       ]);
+
       expect(result).toEqual([
         {
           deps: [
             {
               currentValue: '2.0.2',
-              datasource: 'helm',
+              datasource: HelmDatasource.id,
               depName: 'sealed-secrets',
               registryUrls: ['https://bitnami-labs.github.io/sealed-secrets'],
             },
           ],
-          packageFile: 'lib/modules/manager/flux/__fixtures__/release.yaml',
+          packageFile: 'lib/modules/manager/flux/__fixtures__/helmRelease.yaml',
+        },
+        {
+          deps: [
+            {
+              currentValue: 'v11.35.4',
+              datasource: GithubTagsDatasource.id,
+              depName: 'renovate-repo',
+              packageName: 'renovatebot/renovate',
+              sourceUrl: 'https://github.com/renovatebot/renovate',
+            },
+          ],
+          packageFile: 'lib/modules/manager/flux/__fixtures__/gitSource.yaml',
         },
       ]);
     });

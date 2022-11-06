@@ -1,17 +1,17 @@
 This manager parses [Flux](https://fluxcd.io/) YAML manifests and supports:
 
 1. [`HelmRelease`](https://fluxcd.io/docs/components/helm/helmreleases/) resources
+1. ['GitRepository'](https://fluxcd.io/flux/components/source/gitrepositories/) resources
 1. Flux [system](https://fluxcd.io/docs/installation) manifests
 
 ### HelmRelease support
 
 Extracts `helm` dependencies from `HelmRelease` resources.
 
-The `flux` manager will only extract `helm` dependencies for `HelmRelease` resources linked to `HelmRepository` sources.
+The `flux` manager will only extract `helm` dependencies for `HelmRelease` resources linked to `HelmRepository` or `GitRepository` sources.
 The following configurations are currently unsupported:
 
 - OCI `HelmRepository` sources (those with `type: oci`)
-- `HelmRelease` resources linked to other kinds of sources like `GitRepository` or `Bucket`
 
 In addition, for the `flux` manager to properly link `HelmRelease` and `HelmRepository` resources, _both_ of the following conditions must be met:
 
@@ -19,6 +19,14 @@ In addition, for the `flux` manager to properly link `HelmRelease` and `HelmRepo
 2. The referenced `HelmRepository` resource must have its `metadata.namespace` property set
 
 Namespaces will not be inferred from the context (e.g. from the parent `Kustomization`).
+
+As for `HelmRelease` resources that sourced from `GitRepository`, those will be updated by updaing the `GitRepository` resource.
+
+### GitRepository support
+
+Updates `git` references from `GitRepository` resources.
+
+The `flux` manager will only update `GitRepository` that have either `tag` or `commit` key.
 
 ### Flux system manifests support
 
