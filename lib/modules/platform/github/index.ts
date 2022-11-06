@@ -171,13 +171,7 @@ export async function initPlatform({
     }
   }
   logger.debug({ platformConfig, renovateUsername }, 'Platform config');
-  const platformResult: PlatformResult = {
-    endpoint: platformConfig.endpoint,
-    gitAuthor: gitAuthor ?? discoveredGitAuthor,
-    renovateUsername,
-    token,
-  };
-  platformResult.hostRules = [];
+  const githubDS: HostRule[] = [];
   const gitHubRule: HostRule[] = [
     {
       matchHost: '.pkg.github.com',
@@ -192,10 +186,16 @@ export async function initPlatform({
         rule[field] = token;
       }
     });
-    platformResult.hostRules.push(rule);
+    githubDS.push(rule);
     hostRules.add(rule);
   }
-  return platformResult;
+  return {
+    endpoint: platformConfig.endpoint,
+    gitAuthor: gitAuthor ?? discoveredGitAuthor,
+    renovateUsername,
+    token,
+    hostRules: githubDS,
+  };
 }
 
 // Get all repositories that the user has access to
