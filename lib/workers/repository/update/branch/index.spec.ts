@@ -1798,6 +1798,26 @@ describe('workers/repository/update/branch/index', () => {
       expect(commit.commitFilesToBranch).not.toHaveBeenCalled();
     });
 
+    it('continues when rebaseWhen=never but checked', async () => {
+      getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
+        ...updatedPackageFiles,
+      });
+      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+        artifactErrors: [],
+        updatedArtifacts: [],
+      });
+      git.branchExists.mockReturnValue(true);
+      commit.commitFilesToBranch.mockResolvedValueOnce(null);
+      expect(
+        await branchWorker.processBranch({
+          ...config,
+          rebaseWhen: 'never',
+          dependencyDashboardChecks: { 'renovate/some-branch': 'other' },
+        })
+      ).toMatchObject({ result: BranchResult.Done });
+      expect(commit.commitFilesToBranch).toHaveBeenCalled();
+    });
+
     it('does nothing when branchPrefixOld/branch and its pr exists', async () => {
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
         ...updatedPackageFiles,

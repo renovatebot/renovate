@@ -398,7 +398,11 @@ export async function processBranch(
       logger.debug(
         'A user manually approved all rate-limited PRs via the Dependency Dashboard.'
       );
-    } else if (branchExists && config.rebaseWhen === 'never') {
+    } else if (
+      branchExists &&
+      config.rebaseWhen === 'never' &&
+      !dependencyDashboardCheck
+    ) {
       logger.debug('rebaseWhen=never so skipping branch update check');
       return {
         branchExists,
