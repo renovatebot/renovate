@@ -216,7 +216,7 @@ export async function processBranch(
           if (dependencyDashboardCheck || config.rebaseRequested) {
             logger.debug('Manual rebase has been requested for PR');
           } else {
-            const newBody = await getPrBody(branchConfig, {
+            const newBody = getPrBody(branchConfig, {
               debugData: updatePrDebugData(existingPr?.bodyStruct?.debugData),
               rebasingNotice:
                 'Renovate will not automatically rebase this PR, because other commits have been found.',
@@ -398,7 +398,11 @@ export async function processBranch(
       logger.debug(
         'A user manually approved all rate-limited PRs via the Dependency Dashboard.'
       );
-    } else if (branchExists && config.rebaseWhen === 'never') {
+    } else if (
+      branchExists &&
+      config.rebaseWhen === 'never' &&
+      !dependencyDashboardCheck
+    ) {
       logger.debug('rebaseWhen=never so skipping branch update check');
       return {
         branchExists,
