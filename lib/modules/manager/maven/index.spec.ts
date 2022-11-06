@@ -1,7 +1,6 @@
 // TODO #7154
 import { Fixtures } from '../../../../test/fixtures';
 import { fs } from '../../../../test/util';
-import * as memCache from '../../../util/cache/memory';
 import type { PackageDependency, PackageFile } from '../types';
 import { extractPackage, resolveParents } from './extract';
 import { extractAllPackageFiles, updateDependency } from '.';
@@ -136,14 +135,6 @@ describe('modules/manager/maven/index', () => {
     });
 
     describe('root pom handling', () => {
-      beforeEach(() => {
-        memCache.init();
-      });
-
-      afterEach(() => {
-        memCache.reset();
-      });
-
       it('should skip root pom.xml', async () => {
         fs.readLocalFile.mockResolvedValueOnce(`
           <project>
