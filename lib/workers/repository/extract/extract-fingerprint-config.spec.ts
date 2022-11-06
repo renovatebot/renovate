@@ -7,7 +7,7 @@ describe('workers/repository/extract/extract-fingerprint-config', () => {
   it('filter with enabledManagers', () => {
     const config = mergeChildConfig(getConfig(), {
       registryAliases: {
-        stable: 'http://some.link', // should be absent in final config: registryAliases should be defined in manager block
+        stable: 'http://some.link', // intentionally placing the field incorrectly
       },
       ignorePaths: ['ignore-path-1'],
       includePaths: ['include-path-1'],
