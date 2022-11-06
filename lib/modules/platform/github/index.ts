@@ -456,7 +456,7 @@ export async function initRepo({
     // save parent name then delete
     config.parentRepo = config.repository;
     config.repository = null;
-    const forkedRepo = await findFork(forkToken, repository);
+    let forkedRepo = await findFork(forkToken, repository);
     if (forkedRepo) {
       config.repository = forkedRepo.full_name;
       const forkDefaultBranch = forkedRepo.default_branch;
@@ -533,11 +533,9 @@ export async function initRepo({
         throw new ExternalHostError(err);
       }
     } else {
-      logger.debug(`Created fork: ${config.repository}`);
-      // TODO: fix types (#7154)
-      platformConfig.existingRepos?.push(config.repository!);
-      // Wait an arbitrary 30s to hopefully give GitHub enough time for forking to complete
-      await delay(30000);
+      logger.debug('Forked repo is not found - attempting to create it');
+      forkedRepo = await createFork(forkToken, repository);
+      config.repository = forkedRepo.full_name;
     }
   }
 
