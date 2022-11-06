@@ -3,6 +3,7 @@ import * as httpMock from '../../../../test/http-mock';
 import { logger, mocked, partial } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import {
+  REPOSITORY_CANNOT_FORK,
   REPOSITORY_NOT_FOUND,
   REPOSITORY_RENAMED,
 } from '../../../constants/error-messages';
@@ -289,20 +290,20 @@ describe('modules/platform/github/index', () => {
           },
         },
       })
-      // getRepos
-      .get('/user/repos?per_page=100')
+      // getForks
+      .get(`/repos/${repository}/forks?per_page=100`)
       .reply(
         200,
         forkExisted
-          ? [{ full_name: 'forked/repo', default_branch: forkDefaulBranch }]
+          ? [
+              {
+                full_name: 'forked/repo',
+                owner: { login: 'forked' },
+                default_branch: forkDefaulBranch,
+              },
+            ]
           : []
-      )
-      // getBranchCommit
-      .post(`/repos/${repository}/forks`)
-      .reply(200, {
-        full_name: 'forked/repo',
-        default_branch: forkDefaulBranch,
-      });
+      );
   }
 
   describe('initRepo', () => {
@@ -316,6 +317,13 @@ describe('modules/platform/github/index', () => {
     it('should fork when using forkToken', async () => {
       const scope = httpMock.scope(githubApiHost);
       forkInitRepoMock(scope, 'some/repo', false);
+      scope.get('/user').reply(200, {
+        login: 'forked',
+      });
+      scope.post('/repos/some/repo/forks').reply(200, {
+        full_name: 'forked/repo',
+        default_branch: 'master',
+      });
       const config = await github.initRepo({
         repository: 'some/repo',
         forkToken: 'true',
@@ -323,9 +331,43 @@ describe('modules/platform/github/index', () => {
       expect(config).toMatchSnapshot();
     });
 
+    it('throws when cannot fork due to username error', async () => {
+      const repo = 'some/repo';
+      const branch = 'master';
+      const scope = httpMock.scope(githubApiHost);
+      forkInitRepoMock(scope, repo, false, branch);
+      scope.get('/user').reply(404);
+      await expect(
+        github.initRepo({
+          repository: 'some/repo',
+          forkToken: 'true',
+        })
+      ).rejects.toThrow(REPOSITORY_CANNOT_FORK);
+    });
+
+    it('throws when error creating fork', async () => {
+      const repo = 'some/repo';
+      const scope = httpMock.scope(githubApiHost);
+      forkInitRepoMock(scope, repo, false);
+      scope.get('/user').reply(200, {
+        login: 'forked',
+      });
+      // getBranchCommit
+      scope.post(`/repos/${repo}/forks`).reply(500);
+      await expect(
+        github.initRepo({
+          repository: 'some/repo',
+          forkToken: 'true',
+        })
+      ).rejects.toThrow(REPOSITORY_CANNOT_FORK);
+    });
+
     it('should update fork when using forkToken', async () => {
       const scope = httpMock.scope(githubApiHost);
       forkInitRepoMock(scope, 'some/repo', true);
+      scope.get('/user').reply(200, {
+        login: 'forked',
+      });
       scope.patch('/repos/forked/repo/git/refs/heads/master').reply(200);
       const config = await github.initRepo({
         repository: 'some/repo',
@@ -337,6 +379,9 @@ describe('modules/platform/github/index', () => {
     it('detects fork default branch mismatch', async () => {
       const scope = httpMock.scope(githubApiHost);
       forkInitRepoMock(scope, 'some/repo', true, 'not_master');
+      scope.get('/user').reply(200, {
+        login: 'forked',
+      });
       scope.post('/repos/forked/repo/git/refs').reply(200);
       scope.patch('/repos/forked/repo').reply(200);
       scope.patch('/repos/forked/repo/git/refs/heads/master').reply(200);
@@ -512,6 +557,7 @@ describe('modules/platform/github/index', () => {
           required_pull_request_reviews: {
             dismiss_stale_reviews: false,
             require_code_owner_reviews: false,
+            required_approving_review_count: 1,
           },
           required_status_checks: {
             strict: true,

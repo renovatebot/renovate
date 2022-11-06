@@ -3,7 +3,7 @@ import upath from 'upath';
 import { GlobalConfig } from '../../config/global';
 import { logger } from '../../logger';
 import type { CodeFormat } from './code-format';
-import { IndentationType } from './indentation-type';
+import type { IndentationType } from './indentation-type';
 
 export class EditorConfig {
   public static async getCodeFormat(fileName: string): Promise<CodeFormat> {
@@ -26,11 +26,11 @@ export class EditorConfig {
     const { indent_style: indentStyle } = knownProps;
 
     if (indentStyle === 'tab') {
-      return IndentationType.Tab;
+      return 'tab';
     }
 
     if (indentStyle === 'space') {
-      return IndentationType.Space;
+      return 'space';
     }
 
     return undefined;
