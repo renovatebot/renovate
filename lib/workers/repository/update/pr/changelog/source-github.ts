@@ -13,7 +13,7 @@ import { slugifyUrl } from './common';
 import { getTags } from './github';
 import { addReleaseNotes } from './release-notes';
 import { getInRangeReleases } from './releases';
-import { ChangeLogError, ChangeLogRelease, ChangeLogResult } from './types';
+import type { ChangeLogRelease, ChangeLogResult } from './types';
 
 function getCachedTags(
   endpoint: string,
@@ -69,7 +69,7 @@ export async function getChangeLogJSON(
         { manager, depName, sourceUrl },
         'No github.com token has been configured. Skipping release notes retrieval'
       );
-      return { error: ChangeLogError.MissingGithubToken };
+      return { error: 'MissingGithubToken' };
     }
     logger.debug(
       { manager, depName, sourceUrl },
