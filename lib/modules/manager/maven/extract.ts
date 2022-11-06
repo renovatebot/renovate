@@ -2,7 +2,6 @@ import is from '@sindresorhus/is';
 import upath from 'upath';
 import { XmlDocument, XmlElement } from 'xmldoc';
 import { logger } from '../../../logger';
-import * as memCache from '../../../util/cache/memory';
 import { readLocalFile } from '../../../util/fs';
 import { regEx } from '../../../util/regex';
 import { MavenDatasource } from '../../datasource/maven';
