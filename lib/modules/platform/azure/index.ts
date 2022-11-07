@@ -260,7 +260,7 @@ export async function getPrList(): Promise<AzurePr[]> {
     } while (fetchedPrs.length > 0);
 
     config.prList = prs.map(getRenovatePRFormat);
-    logger.debug({ length: config.prList.length }, 'Retrieved Pull Requests');
+    logger.debug(`Retrieved Pull Requests count: ${config.prList.length}`);
   }
   return config.prList;
 }

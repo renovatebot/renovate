@@ -9,7 +9,7 @@ export function getQueue(url: string): PQueue | null {
   const host = parseUrl(url)?.host;
   if (!host) {
     // should never happen
-    logger.debug({ url }, 'No host');
+    logger.debug(`No host on ${url}`);
     return null;
   }
 
