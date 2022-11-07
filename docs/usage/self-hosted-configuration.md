@@ -378,7 +378,7 @@ It will also override any settings in `packageRules`.
 
 ## forkCreate
 
-Set this to false if using an app token which is not permitted to fork.
+If you're using an app token which is _not_ allowed to fork, set this to `false`.
 
 ## forkOrgs
 
