@@ -1,6 +1,6 @@
 import { join } from 'upath';
 import { envMock, mockExecAll } from '../../../../test/exec-util';
-import { env, fs, git } from '../../../../test/util';
+import { env, fs, mocked } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import * as docker from '../../../util/exec/docker';
@@ -85,13 +85,15 @@ describe('modules/manager/swift/artifacts', () => {
         config,
       })
     ).toBeNull();
-    expect(execSnapshots).toMatchSnapshot();
+    expect(execSnapshots).toMatchObject([
+      { cmd: "swift package resolve --package-path ''" },
+    ]);
   });
 
   it('returns updated Package.resolved', async () => {
     fs.getSiblingFileName.mockReturnValueOnce('Package.resolved');
     fs.localPathExists.mockResolvedValueOnce(true);
-    git.getFile.mockResolvedValueOnce('Old Package.resolved');
+    fs.readLocalFile.mockResolvedValueOnce('Old Package.resolved');
     fs.getParentDir.mockReturnValueOnce('');
     const execSnapshots = mockExecAll();
     fs.readLocalFile.mockResolvedValueOnce('New Package.resolved');
@@ -107,14 +109,24 @@ describe('modules/manager/swift/artifacts', () => {
         newPackageFileContent: '{}',
         config,
       })
-    ).not.toBeNull();
-    expect(execSnapshots).toMatchSnapshot();
+    ).toEqual([
+      {
+        file: {
+          type: 'addition',
+          path: 'Package.resolved',
+          contents: 'New Package.resolved',
+        },
+      },
+    ]);
+    expect(execSnapshots).toMatchObject([
+      { cmd: "swift package resolve --package-path ''" },
+    ]);
   });
 
   it('handles package in subfolder', async () => {
     fs.getSiblingFileName.mockReturnValueOnce('sub/path/Package.resolved');
     fs.localPathExists.mockResolvedValueOnce(true);
-    git.getFile.mockResolvedValueOnce('Old Package.resolved');
+    fs.readLocalFile.mockResolvedValueOnce('Old Package.resolved');
     fs.getParentDir.mockReturnValueOnce('sub/path/');
     const execSnapshots = mockExecAll();
     fs.readLocalFile.mockResolvedValueOnce('New Package.resolved');
@@ -130,14 +142,24 @@ describe('modules/manager/swift/artifacts', () => {
         newPackageFileContent: '{}',
         config,
       })
-    ).not.toBeNull();
-    expect(execSnapshots).toMatchSnapshot();
+    ).toEqual([
+      {
+        file: {
+          type: 'addition',
+          path: 'sub/path/Package.resolved',
+          contents: 'New Package.resolved',
+        },
+      },
+    ]);
+    expect(execSnapshots).toMatchObject([
+      { cmd: 'swift package resolve --package-path sub/path/' },
+    ]);
   });
 
   it('returns updated Package.resolved for lockfile maintenance', async () => {
     fs.getSiblingFileName.mockReturnValueOnce('Package.resolved');
     fs.localPathExists.mockResolvedValueOnce(true);
-    git.getFile.mockResolvedValueOnce('Old Package.resolved');
+    fs.readLocalFile.mockResolvedValueOnce('Old Package.resolved');
     fs.getParentDir.mockReturnValueOnce('');
     const execSnapshots = mockExecAll();
     fs.readLocalFile.mockResolvedValueOnce('New Package.resolved');
@@ -148,15 +170,25 @@ describe('modules/manager/swift/artifacts', () => {
         newPackageFileContent: '{}',
         config: { ...config, updateType: 'lockFileMaintenance' },
       })
-    ).not.toBeNull();
-    expect(execSnapshots).toMatchSnapshot();
+    ).toEqual([
+      {
+        file: {
+          type: 'addition',
+          path: 'Package.resolved',
+          contents: 'New Package.resolved',
+        },
+      },
+    ])
+    expect(execSnapshots).toMatchObject([
+      { cmd: "swift package resolve --package-path ''" },
+    ]);
   });
 
   it('returns updated Package.resolved with docker', async () => {
     fs.getSiblingFileName.mockReturnValueOnce('Package.resolved');
     fs.localPathExists.mockResolvedValueOnce(true);
     GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
-    git.getFile.mockResolvedValueOnce('Old Package.resolved');
+    fs.readLocalFile.mockResolvedValueOnce('Old Package.resolved');
     fs.getParentDir.mockReturnValueOnce('');
     const execSnapshots = mockExecAll();
     fs.readLocalFile.mockResolvedValueOnce('New Package.resolved');
@@ -172,8 +204,22 @@ describe('modules/manager/swift/artifacts', () => {
         newPackageFileContent: '{}',
         config,
       })
-    ).not.toBeNull();
-    expect(execSnapshots).toMatchSnapshot();
+    ).toEqual([
+      {
+        file: {
+          type: 'addition',
+          path: 'Package.resolved',
+          contents: 'New Package.resolved',
+        },
+      },
+    ]);
+    expect(execSnapshots).toMatchObject([
+      { cmd: 'docker pull renovate/swift' },
+      { cmd: 'docker ps --filter name=renovate_swift -aq' },
+      {
+        cmd: 'docker run --rm --name=renovate_swift --label=renovate_child -v "/tmp/github/some/repo":"/tmp/github/some/repo" -v "/tmp/cache":"/tmp/cache" -e BUILDPACK_CACHE_DIR -w "/tmp/github/some/repo" renovate/swift bash -l -c "swift package resolve --package-path \'\'"',
+      },
+    ]);
   });
 
   it('catches errors', async () => {
