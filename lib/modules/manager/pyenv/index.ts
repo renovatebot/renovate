@@ -1,10 +1,10 @@
-import { ProgrammingLanguage } from '../../../constants';
+import type { ProgrammingLanguage } from '../../../constants';
 import { DockerDatasource } from '../../datasource/docker';
 import * as dockerVersioning from '../../versioning/docker';
 
 export { extractPackageFile } from './extract';
 
-export const language = ProgrammingLanguage.Python;
+export const language: ProgrammingLanguage = 'python';
 
 export const supportedDatasources = [DockerDatasource.id];
 

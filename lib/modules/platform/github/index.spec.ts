@@ -3,6 +3,7 @@ import * as httpMock from '../../../../test/http-mock';
 import { logger, mocked, partial } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import {
+  REPOSITORY_CANNOT_FORK,
   REPOSITORY_NOT_FOUND,
   REPOSITORY_RENAMED,
 } from '../../../constants/error-messages';
@@ -289,20 +290,20 @@ describe('modules/platform/github/index', () => {
           },
         },
       })
-      // getRepos
-      .get('/user/repos?per_page=100')
+      // getForks
+      .get(`/repos/${repository}/forks?per_page=100`)
       .reply(
         200,
         forkExisted
-          ? [{ full_name: 'forked/repo', default_branch: forkDefaulBranch }]
+          ? [
+              {
+                full_name: 'forked/repo',
+                owner: { login: 'forked' },
+                default_branch: forkDefaulBranch,
+              },
+            ]
           : []
-      )
-      // getBranchCommit
-      .post(`/repos/${repository}/forks`)
-      .reply(200, {
-        full_name: 'forked/repo',
-        default_branch: forkDefaulBranch,
-      });
+      );
   }
 
   describe('initRepo', () => {
@@ -313,23 +314,64 @@ describe('modules/platform/github/index', () => {
       expect(config).toMatchSnapshot();
     });
 
-    it('should fork when forkMode', async () => {
+    it('should fork when using forkToken', async () => {
       const scope = httpMock.scope(githubApiHost);
       forkInitRepoMock(scope, 'some/repo', false);
+      scope.get('/user').reply(200, {
+        login: 'forked',
+      });
+      scope.post('/repos/some/repo/forks').reply(200, {
+        full_name: 'forked/repo',
+        default_branch: 'master',
+      });
       const config = await github.initRepo({
         repository: 'some/repo',
-        forkMode: 'true',
+        forkToken: 'true',
       });
       expect(config).toMatchSnapshot();
     });
 
-    it('should update fork when forkMode', async () => {
+    it('throws when cannot fork due to username error', async () => {
+      const repo = 'some/repo';
+      const branch = 'master';
+      const scope = httpMock.scope(githubApiHost);
+      forkInitRepoMock(scope, repo, false, branch);
+      scope.get('/user').reply(404);
+      await expect(
+        github.initRepo({
+          repository: 'some/repo',
+          forkToken: 'true',
+        })
+      ).rejects.toThrow(REPOSITORY_CANNOT_FORK);
+    });
+
+    it('throws when error creating fork', async () => {
+      const repo = 'some/repo';
+      const scope = httpMock.scope(githubApiHost);
+      forkInitRepoMock(scope, repo, false);
+      scope.get('/user').reply(200, {
+        login: 'forked',
+      });
+      // getBranchCommit
+      scope.post(`/repos/${repo}/forks`).reply(500);
+      await expect(
+        github.initRepo({
+          repository: 'some/repo',
+          forkToken: 'true',
+        })
+      ).rejects.toThrow(REPOSITORY_CANNOT_FORK);
+    });
+
+    it('should update fork when using forkToken', async () => {
       const scope = httpMock.scope(githubApiHost);
       forkInitRepoMock(scope, 'some/repo', true);
+      scope.get('/user').reply(200, {
+        login: 'forked',
+      });
       scope.patch('/repos/forked/repo/git/refs/heads/master').reply(200);
       const config = await github.initRepo({
         repository: 'some/repo',
-        forkMode: 'true',
+        forkToken: 'true',
       });
       expect(config).toMatchSnapshot();
     });
@@ -337,12 +379,15 @@ describe('modules/platform/github/index', () => {
     it('detects fork default branch mismatch', async () => {
       const scope = httpMock.scope(githubApiHost);
       forkInitRepoMock(scope, 'some/repo', true, 'not_master');
+      scope.get('/user').reply(200, {
+        login: 'forked',
+      });
       scope.post('/repos/forked/repo/git/refs').reply(200);
       scope.patch('/repos/forked/repo').reply(200);
       scope.patch('/repos/forked/repo/git/refs/heads/master').reply(200);
       const config = await github.initRepo({
         repository: 'some/repo',
-        forkMode: 'true',
+        forkToken: 'true',
       });
       expect(config).toMatchSnapshot();
     });
@@ -512,6 +557,7 @@ describe('modules/platform/github/index', () => {
           required_pull_request_reviews: {
             dismiss_stale_reviews: false,
             require_code_owner_reviews: false,
+            required_approving_review_count: 1,
           },
           required_status_checks: {
             strict: true,
@@ -679,64 +725,6 @@ describe('modules/platform/github/index', () => {
       ]);
     });
 
-    describe('Url cleanup', () => {
-      type GhRestPrWithUrls = GhRestPr & {
-        url: string;
-        example_url: string;
-        repo: {
-          example_url: string;
-        };
-      };
-
-      type PrCache = ApiPageCache<GhRestPrWithUrls>;
-
-      const prWithUrls = (): GhRestPrWithUrls => ({
-        ...pr1,
-        url: 'https://example.com',
-        example_url: 'https://example.com',
-        _links: { foo: { href: 'https://example.com' } },
-        repo: { example_url: 'https://example.com' },
-      });
-
-      it('removes url data from response', async () => {
-        const scope = httpMock.scope(githubApiHost);
-        initRepoMock(scope, 'some/repo');
-        scope.get(pagePath(1)).reply(200, [prWithUrls()]);
-        await github.initRepo({ repository: 'some/repo' });
-
-        await github.getPrList();
-
-        const repoCache = repository.getCache();
-        const prCache = repoCache.platform?.github?.prCache as PrCache;
-        expect(prCache).toMatchObject({ items: {} });
-
-        const item = prCache.items[1];
-        expect(item).toBeDefined();
-        expect(item._links).toBeUndefined();
-        expect(item.url).toBeUndefined();
-        expect(item.example_url).toBeUndefined();
-        expect(item.repo.example_url).toBeUndefined();
-      });
-
-      it('removes url data from existing cache', async () => {
-        const scope = httpMock.scope(githubApiHost);
-        initRepoMock(scope, 'some/repo');
-        scope.get(pagePath(1, 20)).reply(200, []);
-        await github.initRepo({ repository: 'some/repo' });
-        const repoCache = repository.getCache();
-        const prCache: PrCache = { items: { 1: prWithUrls() } };
-        repoCache.platform = { github: { prCache } };
-
-        await github.getPrList();
-
-        const item = prCache.items[1];
-        expect(item._links).toBeUndefined();
-        expect(item.url).toBeUndefined();
-        expect(item.example_url).toBeUndefined();
-        expect(item.repo.example_url).toBeUndefined();
-      });
-    });
-
     describe('Body compaction', () => {
       type PrCache = ApiPageCache<GhRestPr>;
 
@@ -754,31 +742,11 @@ describe('modules/platform/github/index', () => {
         await github.getPrList();
 
         const repoCache = repository.getCache();
-        const prCache = repoCache.platform?.github?.prCache as PrCache;
-        expect(prCache).toMatchObject({ items: {} });
+        const pullRequestsCache = repoCache.platform?.github
+          ?.pullRequestsCache as PrCache;
+        expect(pullRequestsCache).toMatchObject({ items: {} });
 
-        const item = prCache.items[1];
-        expect(item).toBeDefined();
-        expect(item.body).toBeUndefined();
-        expect(item.bodyStruct).toEqual({ hash: hashBody('foo') });
-      });
-
-      it('removes url data from existing cache', async () => {
-        const scope = httpMock.scope(githubApiHost);
-        initRepoMock(scope, 'some/repo');
-        scope.get(pagePath(1)).reply(200, [prWithBody('foo')]);
-        await github.initRepo({ repository: 'some/repo' });
-        const repoCache = repository.getCache();
-        const prCache: PrCache = {
-          items: { 1: prWithBody('bar'), 2: prWithBody('baz') },
-        };
-        repoCache.platform = { github: { prCache } };
-
-        await github.getPrList();
-
-        expect(prCache.items[2]).toBeUndefined();
-
-        const item = prCache.items[1];
+        const item = pullRequestsCache.items[1];
         expect(item).toBeDefined();
         expect(item.body).toBeUndefined();
         expect(item.bodyStruct).toEqual({ hash: hashBody('foo') });
@@ -2362,8 +2330,7 @@ describe('modules/platform/github/index', () => {
 
         expect(logger.logger.debug).toHaveBeenNthCalledWith(
           11,
-          { prNumber: 123 },
-          'GitHub-native automerge: success'
+          'GitHub-native automerge: success...PrNo: 123'
         );
       });
 
@@ -2456,7 +2423,7 @@ describe('modules/platform/github/index', () => {
         sourceRepo: 'some/repo',
         state: 'open',
         title: 'chore(deps): update dependency jest to v23.6.0',
-        updatedAt: '01-09-2022',
+        updated_at: '01-09-2022',
       });
     });
 
@@ -2586,7 +2553,7 @@ describe('modules/platform/github/index', () => {
         sourceBranch: 'some/branch',
         state: 'open',
         title: 'Some title',
-        updatedAt: '01-09-2022',
+        updated_at: '01-09-2022',
       });
     });
 
@@ -2619,7 +2586,7 @@ describe('modules/platform/github/index', () => {
         sourceBranch: 'some/branch',
         state: 'open',
         title: 'Some title',
-        updatedAt: '01-09-2022',
+        updated_at: '01-09-2022',
       });
     });
   });

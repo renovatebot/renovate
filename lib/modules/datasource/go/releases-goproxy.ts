@@ -8,7 +8,7 @@ import { newlineRegex, regEx } from '../../../util/regex';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
 import { BaseGoDatasource } from './base';
-import { GoproxyFallback, getSourceUrl } from './common';
+import { getSourceUrl } from './common';
 import { GoDirectDatasource } from './releases-direct';
 import type { GoproxyItem, VersionInfo } from './types';
 
@@ -68,17 +68,23 @@ export class GoProxyDatasource extends Datasource {
           }
         });
         if (releases.length) {
-          const datasource = await BaseGoDatasource.getDatasource(packageName);
-          const sourceUrl = getSourceUrl(datasource);
-          result = { releases, sourceUrl };
+          try {
+            const datasource = await BaseGoDatasource.getDatasource(
+              packageName
+            );
+            const sourceUrl = getSourceUrl(datasource);
+            result = { releases, sourceUrl };
+          } catch (err) {
+            logger.trace({ err }, `Can't get datasource for ${packageName}`);
+            result = { releases };
+          }
+
           break;
         }
       } catch (err) {
         const statusCode = err?.response?.statusCode;
         const canFallback =
-          fallback === GoproxyFallback.Always
-            ? true
-            : statusCode === 404 || statusCode === 410;
+          fallback === '|' ? true : statusCode === 404 || statusCode === 410;
         const msg = canFallback
           ? 'Goproxy error: trying next URL provided with GOPROXY'
           : 'Goproxy error: skipping other URLs provided with GOPROXY';
@@ -120,10 +126,7 @@ export class GoProxyDatasource extends Datasource {
       .map((s) => s.split(/(?=,|\|)/)) // TODO: #12872 lookahead
       .map(([url, separator]) => ({
         url,
-        fallback:
-          separator === ','
-            ? GoproxyFallback.WhenNotFoundOrGone
-            : GoproxyFallback.Always,
+        fallback: separator === ',' ? ',' : '|',
       }));
 
     parsedGoproxy[input] = result;

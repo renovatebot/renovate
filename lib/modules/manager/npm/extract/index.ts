@@ -18,7 +18,6 @@ import type {
 import type { NpmManagerData } from '../types';
 import { getLockedVersions } from './locked-versions';
 import { detectMonorepos } from './monorepo';
-import { mightBeABrowserLibrary } from './type';
 import type { NpmPackage, NpmPackageDependency } from './types';
 import { isZeroInstall } from './yarn';
 
@@ -47,7 +46,7 @@ export async function extractPackageFile(
   try {
     packageJson = JSON.parse(content);
   } catch (err) {
-    logger.debug({ fileName }, 'Invalid JSON');
+    logger.debug(`Invalid JSON in ${fileName}`);
     return null;
   }
 
@@ -73,9 +72,6 @@ export async function extractPackageFile(
   } else {
     yarnWorkspacesPackages = packageJson.workspaces?.packages;
   }
-  const packageJsonType = mightBeABrowserLibrary(packageJson)
-    ? 'library'
-    : 'app';
 
   const lockFiles: NpmLockFiles = {
     yarnLock: 'yarn.lock',
@@ -271,9 +267,6 @@ export async function extractPackageFile(
     }
     if (isValid(dep.currentValue)) {
       dep.datasource = NpmDatasource.id;
-      if (dep.currentValue === '*') {
-        dep.skipReason = 'any-version';
-      }
       if (dep.currentValue === '') {
         dep.skipReason = 'empty';
       }
@@ -461,7 +454,6 @@ export async function extractPackageFile(
     deps,
     packageJsonName,
     packageFileVersion,
-    packageJsonType,
     npmrc,
     ...lockFiles,
     managerData: {
@@ -501,7 +493,7 @@ export async function extractAllPackageFiles(
         });
       }
     } else {
-      logger.debug({ packageFile }, 'packageFile has no content');
+      logger.debug(`No content found in ${packageFile}`);
     }
   }
 

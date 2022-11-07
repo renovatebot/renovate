@@ -1,5 +1,5 @@
 import is from '@sindresorhus/is';
-import findPkgs from 'find-packages';
+import { findPackages } from 'find-packages';
 import { load } from 'js-yaml';
 import upath from 'upath';
 import { GlobalConfig } from '../../../../config/global';
@@ -103,7 +103,7 @@ export async function detectPnpmWorkspaces(
     if (!packagePathCache.has(workspaceYamlPath)) {
       const filters = await extractPnpmFilters(workspaceYamlPath);
       const { localDir } = GlobalConfig.get();
-      const packages = await findPkgs(
+      const packages = await findPackages(
         upath.dirname(upath.join(localDir, workspaceYamlPath)),
         { patterns: filters }
       );

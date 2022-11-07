@@ -51,7 +51,7 @@ export class OrbDatasource extends Datasource {
       })
     ).body.data.orb;
     if (!res) {
-      logger.debug({ packageName }, 'Failed to look up orb');
+      logger.debug(`Failed to look up orb ${packageName}`);
       return null;
     }
     // Simplify response before caching and returning

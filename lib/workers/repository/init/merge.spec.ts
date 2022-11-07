@@ -233,6 +233,25 @@ describe('workers/repository/init/merge', () => {
       });
     });
 
+    it('ignores presets', async () => {
+      git.getFileList.mockResolvedValue(['renovate.json']);
+      fs.readLocalFile.mockResolvedValue('{}');
+      migrateAndValidate.migrateAndValidate.mockResolvedValue({
+        extends: ['config:base'],
+        warnings: [],
+        errors: [],
+      });
+      migrate.migrateConfig.mockImplementation((c) => ({
+        isMigrated: true,
+        migratedConfig: c,
+      }));
+      config.extends = ['config:base'];
+      config.ignorePresets = [':ignoreModulesAndTests'];
+      config.ignorePaths = ['**/examples/**'];
+      const res = await mergeRenovateConfig(config);
+      expect(res.ignorePaths).toEqual(config.ignorePaths);
+    });
+
     it('continues if no errors', async () => {
       git.getFileList.mockResolvedValue(['package.json', '.renovaterc.json']);
       fs.readLocalFile.mockResolvedValue('{}');

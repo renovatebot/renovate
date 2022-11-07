@@ -233,6 +233,7 @@ Use `UTC` to be time zone independent.
 
 ## Unit testing
 
+- Separate _Arrange_, _Act_ and _Assert_ phases with empty line
 - Use `it.each` rather than `test.each`
 - Prefer [Tagged Template Literal](https://jestjs.io/docs/api#2-testeachtablename-fn-timeout) style for `it.each`, Prettier will help with formatting
   - See [Example](https://github.com/renovatebot/renovate/blob/768e178419437a98f5ce4996bafd23f169e530b4/lib/modules/platform/util.spec.ts#L8-L18)

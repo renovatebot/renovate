@@ -65,7 +65,7 @@ describe('modules/manager/gradle/extract', () => {
       'gradle.properties',
     ]);
 
-    expect(res).toMatchSnapshot([
+    expect(res).toMatchObject([
       {
         packageFile: 'gradle.properties',
         deps: [{ depName: 'foo:bar', currentValue: '1.2.3' }],
@@ -105,7 +105,8 @@ describe('modules/manager/gradle/extract', () => {
   it('works with file-ext-var', async () => {
     mockFs({
       'gradle.properties': 'baz=1.2.3',
-      'build.gradle': 'url "https://example.com"; "foo:bar:$baz@zip"',
+      'build.gradle':
+        'repositories { maven { url "https://example.com" } }; "foo:bar:$baz@zip"',
       'settings.gradle': null as never, // TODO: #7154
     });
 
@@ -171,10 +172,10 @@ describe('modules/manager/gradle/extract', () => {
   it('deduplicates registry urls', async () => {
     const fsMock = {
       'build.gradle': [
-        'url "https://repo.maven.apache.org/maven2"',
-        'url "https://repo.maven.apache.org/maven2"',
-        'url "https://example.com"',
-        'url "https://example.com"',
+        'repositories { maven { url "https://repo.maven.apache.org/maven2" } }',
+        'repositories { maven { url "https://repo.maven.apache.org/maven2" } }',
+        'repositories { maven { url "https://example.com" } }',
+        'repositories { maven { url "https://example.com" } }',
         'id "foo.bar" version "1.2.3"',
         '"foo:bar:1.2.3"',
       ].join(';\n'),

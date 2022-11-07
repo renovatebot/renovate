@@ -35,7 +35,7 @@ import {
 } from '../../versioning/docker';
 import { Datasource } from '../datasource';
 import type { DigestConfig, GetReleasesConfig, ReleaseResult } from '../types';
-import { gitRefLabel, sourceLabels } from './common';
+import { gitRefLabel, isArtifactoryServer, sourceLabels } from './common';
 import {
   Image,
   ImageConfig,
@@ -49,6 +49,7 @@ import {
 export const DOCKER_HUB = 'https://index.docker.io';
 
 export const ecrRegex = regEx(/\d+\.dkr\.ecr\.([-a-z0-9]+)\.amazonaws\.com/);
+export const ecrPublicRegex = regEx(/public\.ecr\.aws/);
 
 function isDockerHost(host: string): boolean {
   const regex = regEx(/(?:^|\.)docker\.io$/);
@@ -73,11 +74,11 @@ export async function getAuthHeaders(
         await http.getJson(apiCheckUrl, options);
 
     if (apiCheckResponse.statusCode === 200) {
-      logger.debug({ apiCheckUrl }, 'No registry auth required');
+      logger.debug(`No registry auth required for ${apiCheckUrl}`);
       return {};
     }
     if (apiCheckResponse.statusCode === 404) {
-      logger.debug({ apiCheckUrl }, 'Page Not Found');
+      logger.debug(`Page Not Found ${apiCheckUrl}`);
       // throw error up to be caught and potentially retried with library/ prefix
       throw new Error(PAGE_NOT_FOUND_ERROR);
     }
@@ -393,7 +394,7 @@ export class DockerDatasource extends Datasource {
     mode: 'head' | 'get' = 'get'
   ): Promise<HttpResponse | null> {
     logger.debug(
-      `getManifestResponse(${registryHost}, ${dockerRepository}, ${tag})`
+      `getManifestResponse(${registryHost}, ${dockerRepository}, ${tag}, ${mode})`
     );
     try {
       const headers = await getAuthHeaders(
@@ -569,7 +570,7 @@ export class DockerDatasource extends Datasource {
     // OCI image lists are not required to specify a mediaType
     if (
       manifest.mediaType === MediaType.ociManifestIndexV1 ||
-      (!manifest.mediaType && hasKey('manifests', manifest))
+      (!manifest.mediaType && 'manifests' in manifest)
     ) {
       if (manifest.manifests.length) {
         logger.trace(
@@ -593,7 +594,7 @@ export class DockerDatasource extends Datasource {
     // OCI manifests are not required to specify a mediaType
     if (
       (manifest.mediaType === MediaType.ociManifestV1 ||
-        (!manifest.mediaType && hasKey('config', manifest))) &&
+        (!manifest.mediaType && 'config' in manifest)) &&
       is.string(manifest.config?.digest)
     ) {
       return manifest.config?.digest;
@@ -713,7 +714,16 @@ export class DockerDatasource extends Datasource {
         headers,
         noAuth: true,
       });
-      labels = JSON.parse(configResponse.body).config.Labels;
+
+      const body = JSON.parse(configResponse.body);
+      if (body.config) {
+        labels = body.config.Labels;
+      } else {
+        logger.debug(
+          { headers: configResponse.headers, body },
+          `manifest blob response body missing the "config" property`
+        );
+      }
 
       if (labels) {
         logger.debug(
@@ -818,7 +828,11 @@ export class DockerDatasource extends Datasource {
     let tags: string[] = [];
     // AWS ECR limits the maximum number of results to 1000
     // See https://docs.aws.amazon.com/AmazonECR/latest/APIReference/API_DescribeRepositories.html#ECR-DescribeRepositories-request-maxResults
-    const limit = ecrRegex.test(registryHost) ? 1000 : 10000;
+    // See https://docs.aws.amazon.com/AmazonECRPublic/latest/APIReference/API_DescribeRepositories.html#ecrpublic-DescribeRepositories-request-maxResults
+    const limit =
+      ecrRegex.test(registryHost) || ecrPublicRegex.test(registryHost)
+        ? 1000
+        : 10000;
     let url:
       | string
       | null = `${registryHost}/${dockerRepository}/tags/list?n=${limit}`;
@@ -897,7 +911,26 @@ export class DockerDatasource extends Datasource {
         );
         return this.getTags(registryHost, 'library/' + dockerRepository);
       }
-      // prettier-ignore
+      // JFrog Artifactory - Retry handling when resolving Docker Official Images
+      // These follow the format of {{registryHost}}{{jFrogRepository}}/library/{{dockerRepository}}
+      if (
+        (err.statusCode === 404 || err.message === PAGE_NOT_FOUND_ERROR) &&
+        isArtifactoryServer(err.response) &&
+        dockerRepository.split('/').length === 2
+      ) {
+        logger.debug(
+          `JFrog Artifactory: Retrying Tags for ${registryHost}/${dockerRepository} using library/ path between JFrog virtual repository and image`
+        );
+
+        const dockerRepositoryParts = dockerRepository.split('/');
+        const jfrogRepository = dockerRepositoryParts[0];
+        const dockerImage = dockerRepositoryParts[1];
+
+        return this.getTags(
+          registryHost,
+          jfrogRepository + '/library/' + dockerImage
+        );
+      }
       if (err.statusCode === 429 && isDockerHost(registryHost)) {
         logger.warn(
           { registryHost, dockerRepository, err },
@@ -905,7 +938,6 @@ export class DockerDatasource extends Datasource {
         );
         throw new ExternalHostError(err);
       }
-      // prettier-ignore
       if (err.statusCode === 401 && isDockerHost(registryHost)) {
         logger.warn(
           { registryHost, dockerRepository, err },
@@ -919,6 +951,17 @@ export class DockerDatasource extends Datasource {
           'docker registry failure: internal error'
         );
         throw new ExternalHostError(err);
+      }
+      const errorCodes = ['ECONNRESET', 'ETIMEDOUT'];
+      if (errorCodes.includes(err.code)) {
+        logger.warn(
+          { registryHost, dockerRepository, err },
+          'docker registry connection failure'
+        );
+        throw new ExternalHostError(err);
+      }
+      if (isDockerHost(registryHost)) {
+        logger.info({ err }, 'Docker Hub lookup failure');
       }
       throw err;
     }
@@ -1017,7 +1060,7 @@ export class DockerDatasource extends Datasource {
             manifestList.schemaVersion === 2 &&
             (manifestList.mediaType === MediaType.manifestListV2 ||
               manifestList.mediaType === MediaType.ociManifestIndexV1 ||
-              (!manifestList.mediaType && hasKey('manifests', manifestList)))
+              (!manifestList.mediaType && 'manifests' in manifestList))
           ) {
             for (const manifest of manifestList.manifests) {
               if (manifest.platform['architecture'] === architecture) {
@@ -1034,7 +1077,8 @@ export class DockerDatasource extends Datasource {
       }
 
       if (manifestResponse) {
-        logger.debug({ digest }, 'Got docker digest');
+        // TODO: fix types (#7154)
+        logger.debug(`Got docker digest ${digest!}`);
       }
     } catch (err) /* istanbul ignore next */ {
       if (err instanceof ExternalHostError) {

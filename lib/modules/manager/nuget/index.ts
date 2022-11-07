@@ -1,10 +1,12 @@
-import { ProgrammingLanguage } from '../../../constants';
+import type { ProgrammingLanguage } from '../../../constants';
+import { DotnetDatasource } from '../../datasource/dotnet';
 import { NugetDatasource } from '../../datasource/nuget';
 
 export { extractPackageFile } from './extract';
 export { updateArtifacts } from './artifacts';
+export { bumpPackageVersion } from './update';
 
-export const language = ProgrammingLanguage.NET;
+export const language: ProgrammingLanguage = 'dotnet';
 
 export const defaultConfig = {
   fileMatch: [
@@ -15,4 +17,4 @@ export const defaultConfig = {
   ],
 };
 
-export const supportedDatasources = [NugetDatasource.id];
+export const supportedDatasources = [DotnetDatasource.id, NugetDatasource.id];
