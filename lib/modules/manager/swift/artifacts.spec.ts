@@ -4,16 +4,19 @@ import { env, fs, mocked } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import * as docker from '../../../util/exec/docker';
+import * as _datasource from '../../datasource';
 import type { UpdateArtifactsConfig } from '../types';
 import * as _swiftUtil from './util';
 import * as swift from '.';
 
+const datasource = mocked(_datasource);
 const swiftUtil = mocked(_swiftUtil);
 
 jest.mock('../../../util/exec/env');
 jest.mock('../../../util/git');
 jest.mock('../../../util/http');
 jest.mock('../../../util/fs');
+jest.mock('../../datasource');
 jest.mock('./util');
 
 const config: UpdateArtifactsConfig = {};
@@ -228,9 +231,17 @@ describe('modules/manager/swift/artifacts', () => {
   });
 
   it('returns updated Package.resolved with docker binarySource', async () => {
+    GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
+    datasource.getPkgReleases.mockResolvedValueOnce({
+      releases: [
+        { version: '5.0.0' },
+        { version: '5.7.0' },
+        { version: '5.7.1' },
+      ],
+    });
+    swiftUtil.extractSwiftToolsVersion.mockReturnValueOnce('5.0');
     fs.getSiblingFileName.mockReturnValueOnce('Package.resolved');
     fs.localPathExists.mockResolvedValueOnce(true);
-    GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
     fs.readLocalFile.mockResolvedValueOnce('Old Package.resolved');
     fs.getParentDir.mockReturnValueOnce('');
     const execSnapshots = mockExecAll();
@@ -257,10 +268,60 @@ describe('modules/manager/swift/artifacts', () => {
       },
     ]);
     expect(execSnapshots).toMatchObject([
-      { cmd: 'docker pull renovate/swift' },
-      { cmd: 'docker ps --filter name=renovate_swift -aq' },
+      { cmd: 'docker pull renovate/sidecar' },
+      { cmd: 'docker ps --filter name=renovate_sidecar -aq' },
       {
-        cmd: 'docker run --rm --name=renovate_swift --label=renovate_child -v "/tmp/github/some/repo":"/tmp/github/some/repo" -v "/tmp/cache":"/tmp/cache" -e BUILDPACK_CACHE_DIR -w "/tmp/github/some/repo" renovate/swift bash -l -c "swift package resolve --package-path \'\'"',
+        cmd: 'docker run --rm --name=renovate_sidecar --label=renovate_child -v "/tmp/github/some/repo":"/tmp/github/some/repo" -v "/tmp/cache":"/tmp/cache" -e BUILDPACK_CACHE_DIR -e CONTAINERBASE_CACHE_DIR -w "/tmp/github/some/repo" renovate/sidecar bash -l -c "install-tool swift 5.7.1 && swift package resolve --package-path \'\'"',
+      },
+    ]);
+  });
+
+  it('returns updated Package.resolved with docker binarySource & constraints', async () => {
+    GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
+    datasource.getPkgReleases.mockResolvedValueOnce({
+      releases: [
+        { version: '5.0.0' },
+        { version: '5.7.0' },
+        { version: '5.7.1' },
+      ],
+    });
+    fs.getSiblingFileName.mockReturnValueOnce('Package.resolved');
+    fs.localPathExists.mockResolvedValueOnce(true);
+    fs.readLocalFile.mockResolvedValueOnce('Old Package.resolved');
+    fs.getParentDir.mockReturnValueOnce('');
+    const execSnapshots = mockExecAll();
+    fs.readLocalFile.mockResolvedValueOnce('New Package.resolved');
+    const updatedDeps = [
+      {
+        depName: 'dep1',
+      },
+    ];
+    expect(
+      await swift.updateArtifacts({
+        packageFileName: 'Package.swift',
+        updatedDeps,
+        newPackageFileContent: '{}',
+        config: {
+          ...config,
+          constraints: {
+            swift: '5.4.0',
+          },
+        },
+      })
+    ).toEqual([
+      {
+        file: {
+          type: 'addition',
+          path: 'Package.resolved',
+          contents: 'New Package.resolved',
+        },
+      },
+    ]);
+    expect(execSnapshots).toMatchObject([
+      { cmd: 'docker pull renovate/sidecar' },
+      { cmd: 'docker ps --filter name=renovate_sidecar -aq' },
+      {
+        cmd: 'docker run --rm --name=renovate_sidecar --label=renovate_child -v "/tmp/github/some/repo":"/tmp/github/some/repo" -v "/tmp/cache":"/tmp/cache" -e BUILDPACK_CACHE_DIR -e CONTAINERBASE_CACHE_DIR -w "/tmp/github/some/repo" renovate/sidecar bash -l -c "install-tool swift 5.4.0 && swift package resolve --package-path \'\'"',
       },
     ]);
   });

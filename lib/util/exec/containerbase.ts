@@ -106,6 +106,11 @@ const allToolConfig: Record<string, ToolConfig> = {
     depName: 'containerbase/python-prebuild',
     versioning: pythonVersioningId,
   },
+  swift: {
+    datasource: 'github-releases',
+    depName: 'apple/swift',
+    versioning: semverCoercedVersioningId,
+  },
   yarn: {
     datasource: 'npm',
     depName: 'yarn',
