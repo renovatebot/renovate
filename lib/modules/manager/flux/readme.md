@@ -8,7 +8,7 @@ This manager parses [Flux](https://fluxcd.io/) YAML manifests and supports:
 
 Extracts `helm` dependencies from `HelmRelease` resources.
 
-The `flux` manager will only extract `helm` dependencies for `HelmRelease` resources linked to `HelmRepository` or `GitRepository` sources.
+The `flux` manager only extracts `helm` dependencies for `HelmRelease` resources linked to `HelmRepository` or `GitRepository` sources.
 The following configurations are currently unsupported:
 
 - OCI `HelmRepository` sources (those with `type: oci`)
