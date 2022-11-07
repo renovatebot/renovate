@@ -22,7 +22,7 @@ As for `HelmRelease` resources that sourced from `GitRepository`, those will be 
 
 ### GitRepository support
 
-Updates `git` references from `GitRepository` resources.
+Renovate can update `git` references from `GitRepository` resources.
 
 The `flux` manager will only update `GitRepository` that have either `tag` or `commit` key.
 
