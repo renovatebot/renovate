@@ -21,8 +21,11 @@ export function extractPackageFile(content: string): PackageFile | null {
     const version = groups.version.trim();
 
     const toolConfig = upgradeableTooling[depName];
-    const toolDefinition =
-      typeof toolConfig === 'function' ? toolConfig(version) : toolConfig;
+    const toolDefinition = toolConfig
+      ? typeof toolConfig.config === 'function'
+        ? toolConfig.config(version)
+        : toolConfig.config
+      : undefined;
 
     if (toolDefinition) {
       const dep: PackageDependency = {
