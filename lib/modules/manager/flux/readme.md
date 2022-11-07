@@ -18,7 +18,7 @@ In addition, for the `flux` manager to properly link `HelmRelease` and `HelmRepo
 
 Namespaces will not be inferred from the context (e.g. from the parent `Kustomization`).
 
-As for `HelmRelease` resources that sourced from `GitRepository`, those will be updated by updaing the `GitRepository` resource.
+Renovate updates `HelmRelease` resources coming from `GitRepository` by updating the `GitRepository` resource.
 
 ### GitRepository support
 
