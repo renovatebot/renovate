@@ -382,10 +382,17 @@ If you're using an app token which is _not_ allowed to fork, set this to `false`
 
 ## forkOrgs
 
-Configuring this value lets you choose which org/account you want repos forked into when fork mode is enabled.
-It also allows you to configure more than one if you are migrating from user-based forks into org-based ones.
+This configuration option lets you choose which organization or account you want repositories forked into when "fork mode" is enabled.
 
-Renovate will first look if a fork exists in the preferred org, and then if not then look to see if one exists in any of the fallback orgs.
+You may set more than one organization or account.
+This can be handy if you're migrating from user-based forks to organization-based forks.
+
+If you've set multiple `forkOrgs` then Renovate will:
+
+1. Check if a fork exists in the preferred organization
+1. If no fork exists in the preferred org: Renovate checks the fallback organizations
+
+Renovate always creates the new fork in the _first_ organization in the `forkOrgs` list.
 
 ## forkToken
 
