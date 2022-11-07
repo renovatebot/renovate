@@ -7,7 +7,6 @@ import JSON5 from 'json5';
 import { DateTime } from 'luxon';
 import semver from 'semver';
 import { GlobalConfig } from '../../../config/global';
-import { PlatformId } from '../../../constants';
 import {
   PLATFORM_INTEGRATION_UNAUTHORIZED,
   REPOSITORY_ACCESS_FORBIDDEN,
@@ -75,6 +74,7 @@ import type {
   GhPr,
   GhRepo,
   GhRestPr,
+  GhRestRepo,
   LocalRepoConfig,
   PlatformConfig,
 } from './types';
@@ -90,7 +90,7 @@ export const GitHubMaxPrBodyLen = 60000;
 export function resetConfigs(): void {
   config = {} as never;
   platformConfig = {
-    hostType: PlatformId.Github,
+    hostType: 'github',
     endpoint: 'https://api.github.com/',
   };
 }
@@ -242,6 +242,86 @@ export async function getJsonFile(
   return JSON5.parse(raw);
 }
 
+export async function getForkOrgs(token: string): Promise<string[]> {
+  // This function will be adapted later to support configured forkOrgs
+  if (!config.renovateForkUser) {
+    try {
+      logger.debug('Determining fork user from API');
+      const userDetails = await getUserDetails(platformConfig.endpoint, token);
+      config.renovateForkUser = userDetails.username;
+    } catch (err) {
+      logger.debug({ err }, 'Error getting username for forkToken');
+    }
+  }
+  return config.renovateForkUser ? [config.renovateForkUser] : [];
+}
+
+export async function listForks(
+  token: string,
+  repository: string
+): Promise<GhRestRepo[]> {
+  // Get list of existing repos
+  const url = `repos/${repository}/forks?per_page=100`;
+  const repos = (
+    await githubApi.getJson<GhRestRepo[]>(url, {
+      token,
+      paginate: true,
+      pageLimit: 100,
+    })
+  ).body;
+  logger.debug(`Found ${repos.length} forked repo(s)`);
+  return repos;
+}
+
+export async function findFork(
+  token: string,
+  repository: string
+): Promise<GhRestRepo | null> {
+  const forks = await listForks(token, repository);
+  const orgs = await getForkOrgs(token);
+  if (!orgs.length) {
+    throw new Error(REPOSITORY_CANNOT_FORK);
+  }
+  let forkedRepo: GhRestRepo | undefined;
+  for (const forkOrg of orgs) {
+    logger.debug(`Searching for forked repo in ${forkOrg}`);
+    forkedRepo = forks.find((repo) => repo.owner.login === forkOrg);
+    if (forkedRepo) {
+      logger.debug(`Found existing forked repo: ${forkedRepo.full_name}`);
+      break;
+    }
+  }
+  return forkedRepo ?? null;
+}
+
+export async function createFork(
+  token: string,
+  repository: string
+): Promise<GhRestRepo> {
+  let forkedRepo: GhRestRepo | undefined;
+  try {
+    const organization = (await getForkOrgs(token))[0];
+    forkedRepo = (
+      await githubApi.postJson<GhRestRepo>(`repos/${repository}/forks`, {
+        token,
+        body: {
+          organization,
+          name: config.parentRepo!.replace('/', '-_-'),
+          default_branch_only: true, // no baseBranches support yet
+        },
+      })
+    ).body;
+  } catch (err) {
+    logger.debug({ err }, 'Error creating fork');
+  }
+  if (!forkedRepo) {
+    throw new Error(REPOSITORY_CANNOT_FORK);
+  }
+  logger.debug(`Created forked repo ${forkedRepo.full_name}, now sleeping 30s`);
+  await delay(30000);
+  return forkedRepo;
+}
+
 // Initialize GitHub by getting base branch and SHA
 export async function initRepo({
   endpoint,
@@ -261,12 +341,12 @@ export async function initRepo({
   // istanbul ignore if
   if (endpoint) {
     // Necessary for Renovate Pro - do not remove
-    logger.debug({ endpoint }, 'Overriding default GitHub endpoint');
+    logger.debug(`Overriding default GitHub endpoint with ${endpoint}`);
     platformConfig.endpoint = endpoint;
     githubHttp.setBaseUrl(endpoint);
   }
   const opts = hostRules.find({
-    hostType: PlatformId.Github,
+    hostType: 'github',
     url: platformConfig.endpoint,
   });
   config.renovateUsername = renovateUsername;
@@ -376,26 +456,10 @@ export async function initRepo({
     // save parent name then delete
     config.parentRepo = config.repository;
     config.repository = null;
-    // Get list of existing repos
-    platformConfig.existingRepos ??= (
-      await githubApi.getJson<{ full_name: string }[]>(
-        'user/repos?per_page=100',
-        {
-          token: forkToken ?? opts.token,
-          paginate: true,
-          pageLimit: 100,
-        }
-      )
-    ).body.map((r) => r.full_name);
-    try {
-      const forkedRepo = await githubApi.postJson<{
-        full_name: string;
-        default_branch: string;
-      }>(`repos/${repository}/forks`, {
-        token: forkToken ?? opts.token,
-      });
-      config.repository = forkedRepo.body.full_name;
-      const forkDefaultBranch = forkedRepo.body.default_branch;
+    let forkedRepo = await findFork(forkToken, repository);
+    if (forkedRepo) {
+      config.repository = forkedRepo.full_name;
+      const forkDefaultBranch = forkedRepo.default_branch;
       if (forkDefaultBranch !== config.defaultBranch) {
         const body = {
           ref: `refs/heads/${config.defaultBranch}`,
@@ -443,15 +507,6 @@ export async function initRepo({
           logger.warn({ err }, 'Could not set default branch');
         }
       }
-    } catch (err) /* istanbul ignore next */ {
-      logger.debug({ err }, 'Error forking repository');
-      throw new Error(REPOSITORY_CANNOT_FORK);
-    }
-    if (platformConfig.existingRepos.includes(config.repository)) {
-      logger.debug(
-        { repository_fork: config.repository },
-        'Found existing fork'
-      );
       // This is a lovely "hack" by GitHub that lets us force update our fork's default branch
       // with the base commit from the parent repository
       const url = `repos/${config.repository}/git/refs/heads/${config.defaultBranch}`;
@@ -478,10 +533,9 @@ export async function initRepo({
         throw new ExternalHostError(err);
       }
     } else {
-      logger.debug({ repository_fork: config.repository }, 'Created fork');
-      platformConfig.existingRepos.push(config.repository);
-      // Wait an arbitrary 30s to hopefully give GitHub enough time for forking to complete
-      await delay(30000);
+      logger.debug('Forked repo is not found - attempting to create it');
+      forkedRepo = await createFork(forkToken, repository);
+      config.repository = forkedRepo.full_name;
     }
   }
 
@@ -522,7 +576,10 @@ export async function getRepoForceRebase(): Promise<boolean> {
       config.repoForceRebase = false;
       const branchProtection = await getBranchProtection(config.defaultBranch);
       logger.debug('Found branch protection');
-      if (branchProtection.required_pull_request_reviews) {
+      if (
+        branchProtection.required_pull_request_reviews
+          ?.required_approving_review_count > 0
+      ) {
         logger.debug(
           'Branch protection: PR Reviews are required before merging'
         );
@@ -706,7 +763,7 @@ export async function getBranchPr(branchName: string): Promise<GhPr | null> {
       await githubApi.postJson(`repos/${config.repository}/git/refs`, {
         body: { ref: `refs/heads/${branchName}`, sha },
       });
-      logger.debug({ branchName, sha }, 'Recreated autoclosed branch');
+      logger.debug(`Recreated autoclosed branch ${branchName} with sha ${sha}`);
     } catch (err) {
       logger.debug('Could not recreate autoclosed branch - skipping reopen');
       return null;
@@ -1032,7 +1089,7 @@ export async function ensureIssue({
     if (!issues.length) {
       issues = issueList.filter((i) => i.title === reuseTitle);
       if (issues.length) {
-        logger.debug({ reuseTitle, title }, 'Reusing issue title');
+        logger.debug(`Reusing issue title: "${reuseTitle}"`);
       }
     }
     if (issues.length) {
@@ -1125,7 +1182,7 @@ export async function ensureIssueClosing(title: string): Promise<void> {
     if (issue.state === 'open' && issue.title === title) {
       // TODO #7154
       await closeIssue(issue.number!);
-      logger.debug({ number: issue.number }, 'Issue closed');
+      logger.debug(`Issue closed, issueNo: ${issue.number}`);
     }
   }
 }
@@ -1248,7 +1305,7 @@ async function getComments(issueNo: number): Promise<Comment[]> {
   } catch (err) /* istanbul ignore next */ {
     if (err.statusCode === 404) {
       logger.debug('404 response when retrieving comments');
-      throw new ExternalHostError(err, PlatformId.Github);
+      throw new ExternalHostError(err, 'github');
     }
     throw err;
   }
@@ -1337,7 +1394,7 @@ export async function ensureCommentRemoval(
 
   try {
     if (commentId) {
-      logger.debug({ issueNo }, 'Removing comment');
+      logger.debug(`Removing comment from issueNo: ${issueNo}`);
       await deleteComment(commentId);
     }
   } catch (err) /* istanbul ignore next */ {
@@ -1395,7 +1452,7 @@ async function tryPrAutomerge(
       return;
     }
 
-    logger.debug({ prNumber }, 'GitHub-native automerge: success');
+    logger.debug(`GitHub-native automerge: success...PrNo: ${prNumber}`);
   } catch (err) /* istanbul ignore next: missing test #7154 */ {
     logger.warn({ prNumber, err }, 'GitHub-native automerge: REST API error');
   }
@@ -1482,7 +1539,7 @@ export async function updatePr({
     );
     const result = coerceRestPr(ghPr);
     cachePr(result);
-    logger.debug({ pr: prNo }, 'PR updated');
+    logger.debug(`PR updated...prNo: ${prNo}`);
   } catch (err) /* istanbul ignore next */ {
     if (err instanceof ExternalHostError) {
       throw err;

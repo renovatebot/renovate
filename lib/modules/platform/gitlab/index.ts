@@ -3,7 +3,6 @@ import is from '@sindresorhus/is';
 import delay from 'delay';
 import JSON5 from 'json5';
 import semver from 'semver';
-import { PlatformId } from '../../../constants';
 import {
   CONFIG_GIT_URL_UNAVAILABLE,
   PLATFORM_AUTHENTICATION_ERROR,
@@ -75,7 +74,7 @@ let config: {
 } = {} as any;
 
 const defaults = {
-  hostType: PlatformId.Gitlab,
+  hostType: 'gitlab',
   endpoint: 'https://gitlab.com/api/v4/',
   version: '0.0.0',
 };
@@ -197,7 +196,7 @@ function getRepoUrl(
     if (!res.body.ssh_url_to_repo) {
       throw new Error(CONFIG_GIT_URL_UNAVAILABLE);
     }
-    logger.debug({ url: res.body.ssh_url_to_repo }, `using ssh URL`);
+    logger.debug(`Using ssh URL: ${res.body.ssh_url_to_repo}`);
     return res.body.ssh_url_to_repo;
   }
 
@@ -230,11 +229,11 @@ function getRepoUrl(
       host,
       pathname: newPathname + '/' + repository + '.git',
     });
-    logger.debug({ url }, 'using URL based on configured endpoint');
+    logger.debug(`Using URL based on configured endpoint, url:${url}`);
     return url;
   }
 
-  logger.debug({ url: res.body.http_url_to_repo }, `using http URL`);
+  logger.debug(`Using http URL: ${res.body.http_url_to_repo}`);
   const repoUrl = URL.parse(`${res.body.http_url_to_repo}`);
   // TODO: types (#7154)
   repoUrl.auth = `oauth2:${opts.token!}`;

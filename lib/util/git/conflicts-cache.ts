@@ -1,5 +1,5 @@
-import { logger } from '../../../logger';
-import { getCache } from '../repository';
+import { logger } from '../../logger';
+import { getCache } from '../cache/repository';
 
 export function getCachedConflictResult(
   branchName: string,
