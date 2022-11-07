@@ -430,7 +430,7 @@ const options: RenovateOptions[] = [
   },
   {
     name: 'forkCreate',
-    description: 'Whether to create a fork at runtime when in fork mode',
+    description: 'Decide if Renovate creates a fork at runtime when in fork mode.',
     stage: 'repository',
     type: 'boolean',
     default: true,
