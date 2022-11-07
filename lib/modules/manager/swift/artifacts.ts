@@ -10,15 +10,30 @@ import {
   readLocalFile,
   writeLocalFile,
 } from '../../../util/fs';
-import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
+import type {
+  UpdateArtifact,
+  UpdateArtifactsConfig,
+  UpdateArtifactsResult,
+} from '../types';
+import { extractSwiftToolsVersion } from './util';
 
-async function swiftPackageResolve(packageFile: string): Promise<void> {
+async function swiftPackageResolve(
+  packageFile: string,
+  toolsVersion: string,
+  config: UpdateArtifactsConfig
+): Promise<void> {
   const packagePath = getParentDir(packageFile);
   const cmd = `swift package resolve --package-path ${quote(packagePath)}`;
   const execOptions: ExecOptions = {
     docker: {
-      image: 'swift',
+      image: 'sidecar',
     },
+    toolConstraints: [
+      {
+        toolName: 'swift',
+        constraint: config.constraints?.swift ?? '^' + toolsVersion,
+      },
+    ],
   };
   await exec(cmd, execOptions);
 }
@@ -51,9 +66,16 @@ export async function updateArtifacts({
     return null;
   }
   try {
+    const toolsVersion = extractSwiftToolsVersion(newPackageFileContent);
+    if (toolsVersion === null) {
+      throw new Error(
+        `${packageFileName} does not specify a valid swift tools version`
+      );
+    }
+
     await writeLocalFile(packageFileName, newPackageFileContent);
     logger.debug('Updating ' + lockFile);
-    await swiftPackageResolve(packageFileName);
+    await swiftPackageResolve(packageFileName, toolsVersion, config);
     logger.debug('Returning updated Package.resolved file');
     const newLockFileContent = await readLocalFile(lockFile);
     if (existingLockFileContent === newLockFileContent) {

@@ -5,12 +5,16 @@ import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import * as docker from '../../../util/exec/docker';
 import type { UpdateArtifactsConfig } from '../types';
+import * as _swiftUtil from './util';
 import * as swift from '.';
+
+const swiftUtil = mocked(_swiftUtil);
 
 jest.mock('../../../util/exec/env');
 jest.mock('../../../util/git');
 jest.mock('../../../util/http');
 jest.mock('../../../util/fs');
+jest.mock('./util');
 
 const config: UpdateArtifactsConfig = {};
 
@@ -65,6 +69,7 @@ describe('modules/manager/swift/artifacts', () => {
   });
 
   it('returns null if unchanged', async () => {
+    swiftUtil.extractSwiftToolsVersion.mockReturnValueOnce('5.0');
     fs.getSiblingFileName.mockReturnValueOnce('Package.resolved');
     fs.localPathExists.mockResolvedValueOnce(true);
     fs.readLocalFile.mockResolvedValueOnce('Current Package.resolved');
@@ -91,6 +96,7 @@ describe('modules/manager/swift/artifacts', () => {
   });
 
   it('returns updated Package.resolved', async () => {
+    swiftUtil.extractSwiftToolsVersion.mockReturnValueOnce('5.0');
     fs.getSiblingFileName.mockReturnValueOnce('Package.resolved');
     fs.localPathExists.mockResolvedValueOnce(true);
     fs.readLocalFile.mockResolvedValueOnce('Old Package.resolved');
@@ -124,6 +130,7 @@ describe('modules/manager/swift/artifacts', () => {
   });
 
   it('handles package in subfolder', async () => {
+    swiftUtil.extractSwiftToolsVersion.mockReturnValueOnce('5.0');
     fs.getSiblingFileName.mockReturnValueOnce('sub/path/Package.resolved');
     fs.localPathExists.mockResolvedValueOnce(true);
     fs.readLocalFile.mockResolvedValueOnce('Old Package.resolved');
@@ -157,6 +164,7 @@ describe('modules/manager/swift/artifacts', () => {
   });
 
   it('returns updated Package.resolved for lockfile maintenance', async () => {
+    swiftUtil.extractSwiftToolsVersion.mockReturnValueOnce('5.0');
     fs.getSiblingFileName.mockReturnValueOnce('Package.resolved');
     fs.localPathExists.mockResolvedValueOnce(true);
     fs.readLocalFile.mockResolvedValueOnce('Old Package.resolved');
@@ -178,13 +186,48 @@ describe('modules/manager/swift/artifacts', () => {
           contents: 'New Package.resolved',
         },
       },
-    ])
+    ]);
     expect(execSnapshots).toMatchObject([
       { cmd: "swift package resolve --package-path ''" },
     ]);
   });
 
-  it('returns updated Package.resolved with docker', async () => {
+  it('returns updated Package.resolved with global binarySource', async () => {
+    GlobalConfig.set({ ...adminConfig, binarySource: 'global' });
+    swiftUtil.extractSwiftToolsVersion.mockReturnValueOnce('5.0');
+    fs.getSiblingFileName.mockReturnValueOnce('Package.resolved');
+    fs.localPathExists.mockResolvedValueOnce(true);
+    fs.readLocalFile.mockResolvedValueOnce('Old Package.resolved');
+    fs.getParentDir.mockReturnValueOnce('');
+    const execSnapshots = mockExecAll();
+    fs.readLocalFile.mockResolvedValueOnce('New Package.resolved');
+    const updatedDeps = [
+      {
+        depName: 'dep1',
+      },
+    ];
+    expect(
+      await swift.updateArtifacts({
+        packageFileName: 'Package.swift',
+        updatedDeps,
+        newPackageFileContent: '{}',
+        config,
+      })
+    ).toEqual([
+      {
+        file: {
+          type: 'addition',
+          path: 'Package.resolved',
+          contents: 'New Package.resolved',
+        },
+      },
+    ]);
+    expect(execSnapshots).toMatchObject([
+      { cmd: "swift package resolve --package-path ''" },
+    ]);
+  });
+
+  it('returns updated Package.resolved with docker binarySource', async () => {
     fs.getSiblingFileName.mockReturnValueOnce('Package.resolved');
     fs.localPathExists.mockResolvedValueOnce(true);
     GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
@@ -223,6 +266,7 @@ describe('modules/manager/swift/artifacts', () => {
   });
 
   it('catches errors', async () => {
+    swiftUtil.extractSwiftToolsVersion.mockReturnValueOnce('5.0');
     fs.getSiblingFileName.mockReturnValueOnce('Package.resolved');
     fs.localPathExists.mockResolvedValueOnce(true);
     fs.readLocalFile.mockResolvedValueOnce('Current Package.resolved');
@@ -243,6 +287,36 @@ describe('modules/manager/swift/artifacts', () => {
       })
     ).toEqual([
       { artifactError: { lockFile: 'Package.resolved', stderr: 'not found' } },
+    ]);
+  });
+
+  it('returns error on tool version extraction failure', async () => {
+    swiftUtil.extractSwiftToolsVersion.mockReturnValueOnce(null);
+    swiftUtil.extractSwiftToolsVersion.mockReturnValueOnce('5.0');
+    fs.getSiblingFileName.mockReturnValueOnce('Package.resolved');
+    fs.localPathExists.mockResolvedValueOnce(true);
+    fs.readLocalFile.mockResolvedValueOnce('Old Package.resolved');
+    fs.getParentDir.mockReturnValueOnce('');
+    fs.readLocalFile.mockResolvedValueOnce('New Package.resolved');
+    const updatedDeps = [
+      {
+        depName: 'dep1',
+      },
+    ];
+    expect(
+      await swift.updateArtifacts({
+        packageFileName: 'Package.swift',
+        updatedDeps,
+        newPackageFileContent: '{}',
+        config,
+      })
+    ).toEqual([
+      {
+        artifactError: {
+          lockFile: 'Package.resolved',
+          stderr: 'Package.swift does not specify a valid swift tools version',
+        },
+      },
     ]);
   });
 });
