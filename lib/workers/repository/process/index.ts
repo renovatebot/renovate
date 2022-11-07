@@ -56,6 +56,13 @@ async function getBaseBranchConfig(
       throw error;
     }
 
+    if (config.printConfig) {
+      logger.info(
+        { baseBranchConfig },
+        'BaseBranchConfig overrides all configurations'
+      );
+    }
+
     baseBranchConfig = mergeChildConfig(config, baseBranchConfig);
     // baseBranches value should be based off the default branch
     baseBranchConfig.baseBranches = config.baseBranches;

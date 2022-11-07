@@ -3000,6 +3000,8 @@ You can configure `useBaseBranchConfig=merge` to instruct Renovate to merge the 
 The config file name in the base branch must be the same as in the default branch and cannot be `package.json`.
 This scenario may be useful for testing the config changes in base branches instantly.
 
+**Known Limitation**: Base branch config will override any other config that has been processed.
+
 ## userStrings
 
 When a PR is closed, Renovate posts a comment to let users know that future updates will be ignored.
