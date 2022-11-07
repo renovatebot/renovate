@@ -420,7 +420,7 @@ const options: RenovateOptions[] = [
   {
     name: 'forkOrgs',
     description:
-      'The preferred orgs to create or find forked repos, when in fork mode',
+      'The preferred organizations to create or find forked repositories, when in fork mode.',
     stage: 'repository',
     type: 'array',
     subType: 'string',
