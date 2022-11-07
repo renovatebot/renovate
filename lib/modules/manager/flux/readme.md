@@ -24,7 +24,7 @@ As for `HelmRelease` resources that sourced from `GitRepository`, those will be 
 
 Renovate can update `git` references from `GitRepository` resources.
 
-The `flux` manager will only update `GitRepository` that have either `tag` or `commit` key.
+The `flux` manager only updates `GitRepository` fields that have a `tag` or `commit` key.
 
 ### Flux system manifests support
 
