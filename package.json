@@ -144,7 +144,7 @@
     "@breejs/later": "4.1.0",
     "@cheap-glitch/mi-cron": "1.0.1",
     "@iarna/toml": "3.0.0",
-    "@renovatebot/osv-offline": "1.0.5",
+    "@renovatebot/osv-offline": "1.0.6",
     "@opentelemetry/api": "1.2.0",
     "@opentelemetry/context-async-hooks": "1.7.0",
     "@opentelemetry/exporter-trace-otlp-http": "0.33.0",
