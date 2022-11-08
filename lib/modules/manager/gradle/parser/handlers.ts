@@ -249,7 +249,7 @@ export function handleLibraryDep(ctx: Ctx): Ctx {
   }
 
   const aliasToken = loadFromTokenMap(ctx, 'alias')[0];
-  const key = `libs.${aliasToken.value.replace(RegExp(/[-_]/g), '.')}`;
+  const key = `libs.${aliasToken.value.replace(regEx(/[-_]/g), '.')}`;
   const varData: VariableData = {
     key,
     value: `${groupId}:${artifactId}`,
