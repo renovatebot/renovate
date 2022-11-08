@@ -21,6 +21,6 @@ describe('util/fingerprint', () => {
   it('maintains deterministic order', () => {
     const res = fingerprint(obj);
     const res2 = fingerprint(obj2);
-    expect(Object.keys(res)).toEqual(Object.keys(res2));
+    expect(res).toEqual(res2);
   });
 });
