@@ -18,10 +18,13 @@ import { ensureComment } from '../../../../modules/platform/comment';
 import { hashBody } from '../../../../modules/platform/pr-body';
 import { BranchStatus } from '../../../../types';
 import { ExternalHostError } from '../../../../types/errors/external-host-error';
-import { getCache } from '../../../../util/cache/repository';
 import { stripEmojis } from '../../../../util/emoji';
 import { fingerprint } from '../../../../util/fingerprint';
-import { deleteBranch, getBranchLastCommitTime } from '../../../../util/git';
+import {
+  deleteBranch,
+  getBranchLastCommitTime,
+  isCloned,
+} from '../../../../util/git';
 import { memoize } from '../../../../util/memoize';
 import { Limit, incLimitedValue, isLimitReached } from '../../../global/limits';
 import type {
@@ -35,6 +38,7 @@ import { getPrBody } from './body';
 import { ChangeLogError } from './changelog/types';
 import { prepareLabels } from './labels';
 import { addParticipants } from './participants';
+import { getPrCache, setPrCache } from './set-pr-cache';
 
 export function getPlatformPrOptions(
   config: RenovateConfig & PlatformPrOptions
@@ -87,11 +91,6 @@ export async function ensurePr(
 
   const config: BranchConfig = { ...prConfig };
   const prFingerprint = fingerprint(config);
-  const cache = getCache();
-  const branch = cache.branches?.find(
-    (branch) => branch.branchName === config.branchName
-  );
-  let prCache = branch?.prCache;
   logger.trace({ config }, 'ensurePr');
   // If there is a group, it will use the config of the first upgrade in the array
   const { branchName, ignoreTests, prTitle = '', upgrades } = config;
@@ -101,18 +100,29 @@ export async function ensurePr(
   const existingPr = await platform.getBranchPr(branchName);
   if (existingPr) {
     logger.debug('Found existing PR');
+    const prCache = getPrCache(branchName);
     if (prCache) {
+      logger.debug({ prCache }, 'Pr-Cache exists');
       const lastEditTime = prCache?.lastEdited;
       const currentTime = new Date();
-      const millisecondsPerHour = 1000 * 60 * 60;
+      // const millisecondsPerHour = 1000 * 60 * 60;
       const elapsedHours = Math.round(
-        (currentTime.getTime() - lastEditTime.getTime()) / millisecondsPerHour
+        currentTime.getTime() - new Date(lastEditTime).getTime()
       );
       // check pr config fingerprint: no need to check for upgrades as it is already inside config
-      if (prFingerprint === branch?.prCache?.fingerprint && elapsedHours > 24) {
-        logger.debug(`${existingPr.displayNumber!} does not need updating`);
+      if (
+        isCloned() === false &&
+        prFingerprint === prCache.fingerprint &&
+        elapsedHours > 24
+      ) {
+        logger.debug(
+          `${existingPr.displayNumber!} does not need updating --- cache used HURRAY !!!`
+        );
         return { type: 'with-pr', pr: existingPr };
       }
+    } else {
+      logger.debug('Pr-Cache not found');
+      setPrCache(branchName, prFingerprint);
     }
   }
   config.upgrades = [];
@@ -216,8 +226,12 @@ export async function ensurePr(
   }
 
   if (config.fetchReleaseNotes) {
+    // eslint-disable-next-line no-console
+    console.time('changelog');
     // fetch changelogs when not already done;
     await embedChangelogs(upgrades);
+    // eslint-disable-next-line no-console
+    console.timeEnd('changelog');
   }
 
   // Get changelog and then generate template strings
@@ -345,10 +359,7 @@ export async function ensurePr(
           'PR body changed'
         );
         // update prCache last edit time
-        prCache = {
-          fingerprint: prFingerprint,
-          lastEdited: new Date(),
-        };
+        setPrCache(branchName, prFingerprint);
       }
       if (GlobalConfig.get('dryRun')) {
         logger.info(`DRY-RUN: Would update PR #${existingPr.number}`);
@@ -392,10 +403,7 @@ export async function ensurePr(
         });
 
         // add pr object to branch cache
-        prCache = {
-          fingerprint: prFingerprint,
-          lastEdited: new Date(),
-        };
+        setPrCache(branchName, prFingerprint);
 
         incLimitedValue(Limit.PullRequests);
         logger.info({ pr: pr?.number, prTitle }, 'PR created');

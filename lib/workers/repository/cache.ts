@@ -15,6 +15,7 @@ import {
 } from '../../util/git';
 import { getCachedBranchParentShaResult } from '../../util/git/parent-sha-cache';
 import type { BranchConfig, BranchUpgradeConfig } from '../types';
+import { getPrCache } from './update/pr/set-pr-cache';
 
 function generateBranchUpgradeCache(
   upgrade: BranchUpgradeConfig
@@ -73,9 +74,7 @@ async function generateBranchCache(
       ? branch.upgrades.map(generateBranchUpgradeCache)
       : [];
     const branchFingerprint = branch.branchFingerprint;
-    const prCache = getCache().branches?.find(
-      (branch) => branch.branchName === branchName
-    )?.prCache;
+    const prCache = getPrCache(branchName);
     return {
       automerge,
       baseBranchSha,

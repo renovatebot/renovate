@@ -26,7 +26,7 @@ export interface BranchUpgradeCache {
   sourceUrl?: string;
 }
 
-interface PrCache {
+export interface PrCache {
   fingerprint: string;
   lastEdited: Date;
 }
@@ -83,7 +83,7 @@ export interface BranchCache {
   /**
    * Object that has PR info
    */
-  prCache?: PrCache;
+  prCache?: PrCache | null;
 }
 
 export interface RepoCacheData {
