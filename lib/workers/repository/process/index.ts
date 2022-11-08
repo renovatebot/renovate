@@ -58,7 +58,7 @@ async function getBaseBranchConfig(
 
     if (config.printConfig) {
       logger.info(
-        { baseBranchConfig },
+        { config: baseBranchConfig },
         'BaseBranchConfig overrides all configurations'
       );
     }
