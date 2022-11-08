@@ -1,4 +1,5 @@
 import { GitRefsDatasource } from '../../datasource/git-refs';
+import { id as nixpkgsVersioning } from '../../versioning/nixpkgs';
 import { extractPackageFile } from '.';
 
 describe('modules/manager/nix/extract', () => {
@@ -27,7 +28,7 @@ describe('modules/manager/nix/extract', () => {
         currentValue: 'nixos-21.11',
         datasource: GitRefsDatasource.id,
         packageName: 'https://github.com/NixOS/nixpkgs',
-        skipReason: 'unsupported-version',
+        versioning: nixpkgsVersioning,
       },
     ]);
   });
@@ -48,7 +49,7 @@ describe('modules/manager/nix/extract', () => {
         currentValue: 'nixos-21.11',
         datasource: GitRefsDatasource.id,
         packageName: 'https://github.com/NixOS/nixpkgs',
-        skipReason: 'unsupported-version',
+        versioning: nixpkgsVersioning,
       },
     ]);
   });
