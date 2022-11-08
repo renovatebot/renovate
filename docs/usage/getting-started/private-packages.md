@@ -179,7 +179,7 @@ The following details the most common/popular manager artifacts updating and how
 
 Any `hostRules` token for `github.com` or `gitlab.com` are found and written out to `COMPOSER_AUTH` in env for Composer to parse.
 Any `hostRules` with `hostType=packagist` are also included.
-For dependencies on `github.com` without a packagist server, a hostRule with `hostType=git-tags` should be used with a personal access token (not an application token).
+For dependencies on `github.com` without a Packagist server: use a Personal Access Token for `hostRule` with `hostType=git-tags`, do not use an application token.
 Avoid adding a `hostRule` with `hostType=github` because:
 
 - it overrides the default Renovate application token for everything else 
