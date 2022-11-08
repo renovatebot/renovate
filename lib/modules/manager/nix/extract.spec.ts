@@ -1,81 +1,67 @@
-import { fs } from '../../../../test/util';
+import { GitRefsDatasource } from '../../datasource/git-refs';
 import { extractPackageFile } from '.';
 
-jest.mock('../../../util/fs');
-
 describe('modules/manager/nix/extract', () => {
-  it('returns null for no flake.lock', async () => {
-    const res = await extractPackageFile('', 'flake.nix');
+  it('returns null when no nixpkgs', () => {
+    const content = `{
+  inputs = {};
+}`;
+    const res = extractPackageFile(content);
 
     expect(res).toBeNull();
   });
 
-  it('returns null for invalid JSON', async () => {
-    fs.readLocalFile.mockResolvedValueOnce('invalid-json');
-    const res = await extractPackageFile('', 'flake.nix');
+  it('returns nixpkgs', () => {
+    const content = `{
+  inputs = {
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-21.11";
+  };
+}`;
 
-    expect(res).toBeNull();
-  });
-
-  it('returns null for invalid lock file', async () => {
-    fs.readLocalFile.mockResolvedValueOnce('{}');
-    const res = await extractPackageFile('', 'flake.nix');
-
-    expect(res).toBeNull();
-  });
-
-  it('returns null when no nixpkgs', async () => {
-    fs.readLocalFile.mockResolvedValueOnce(`{
-  "nodes": {
-    "root": {
-      "inputs": {}
-    }
-  },
-  "root": "root",
-  "version": 7
-}
-`);
-    const res = await extractPackageFile('', 'flake.nix');
-
-    expect(res).toBeNull();
-  });
-
-  it('returns nixpkgs', async () => {
-    fs.readLocalFile.mockResolvedValueOnce(`{
-  "nodes": {
-    "nixpkgs": {
-      "locked": {
-        "lastModified": 1659131907,
-        "narHash": "sha256-8bz4k18M/FuVC+EVcI4aREN2PsEKT7LGmU2orfjnpCg=",
-        "owner": "nixos",
-        "repo": "nixpkgs",
-        "rev": "8d435fca5c561da8168abb30270788d2da2a7951",
-        "type": "github"
-      },
-      "original": {
-        "owner": "nixos",
-        "ref": "nixos-unstable",
-        "repo": "nixpkgs",
-        "type": "github"
-      }
-    },
-    "root": {
-      "inputs": {
-        "nixpkgs": "nixpkgs"
-      }
-    }
-  },
-  "root": "root",
-  "version": 7
-}`);
-
-    const res = await extractPackageFile('', 'flake.nix');
+    const res = extractPackageFile(content);
 
     expect(res?.deps).toHaveLength(1);
-    expect(res?.deps[0]).toMatchObject({
-      depName: 'nixpkgs',
-      currentValue: 'nixos-unstable',
-      skipReason: 'unsupported-version',
-    });
+    expect(res?.deps).toEqual([
+      {
+        depName: 'nixpkgs',
+        currentValue: 'nixos-21.11',
+        datasource: GitRefsDatasource.id,
+        packageName: 'https://github.com/NixOS/nixpkgs',
+        skipReason: 'unsupported-version',
+      },
+    ]);
+  });
+
+  it('is case insensitive', () => {
+    const content = `{
+  inputs = {
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-21.11";
+  };
+}`;
+
+    const res = extractPackageFile(content);
+
+    expect(res?.deps).toHaveLength(1);
+    expect(res?.deps).toEqual([
+      {
+        depName: 'nixpkgs',
+        currentValue: 'nixos-21.11',
+        datasource: GitRefsDatasource.id,
+        packageName: 'https://github.com/NixOS/nixpkgs',
+        skipReason: 'unsupported-version',
+      },
+    ]);
+  });
+
+  it('ignores nixpkgs with no explicit ref', () => {
+    const content = `{
+  inputs = {
+    nixpkgs.url = "github:NixOS/nixpkgs";
+  };
+}`;
+
+    const res = extractPackageFile(content);
+
+    expect(res).toBeNull();
   });
 });
