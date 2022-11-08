@@ -59,7 +59,7 @@ async function getBaseBranchConfig(
     // istanbul ignore if
     if (config.printConfig) {
       logger.info(
-        { baseBranchConfig },
+        { config: baseBranchConfig },
         'BaseBranchConfig overrides all configurations'
       );
     }
