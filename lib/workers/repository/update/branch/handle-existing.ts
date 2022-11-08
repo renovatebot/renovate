@@ -42,6 +42,6 @@ export async function handlepr(config: BranchConfig, pr: Pr): Promise<void> {
       }
     }
   } else if (pr.state === PrState.Merged) {
-    logger.debug({ pr: pr.number }, 'Merged PR is blocking this branch');
+    logger.debug(`Merged PR with PrNo: ${pr.number} is blocking this branch`);
   }
 }

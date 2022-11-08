@@ -557,6 +557,7 @@ describe('modules/platform/github/index', () => {
           required_pull_request_reviews: {
             dismiss_stale_reviews: false,
             require_code_owner_reviews: false,
+            required_approving_review_count: 1,
           },
           required_status_checks: {
             strict: true,
@@ -2329,8 +2330,7 @@ describe('modules/platform/github/index', () => {
 
         expect(logger.logger.debug).toHaveBeenNthCalledWith(
           11,
-          { prNumber: 123 },
-          'GitHub-native automerge: success'
+          'GitHub-native automerge: success...PrNo: 123'
         );
       });
 
