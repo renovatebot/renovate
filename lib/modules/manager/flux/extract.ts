@@ -152,7 +152,8 @@ function resolveResourceManifest(
   const helmRepositories = context.flatMap(
     (manifest) => manifest.helmRepositories
   );
-  const helmDeps = manifest.helmReleases.map((release) => {
+  const deps: PackageDependency<FluxManagerData>[] = [];
+  for (const release of manifest.helmReleases) {
     const dep: PackageDependency<FluxManagerData> = {
       depName: release.spec.chart.spec.chart,
       currentValue: release.spec.chart.spec.version,
@@ -172,10 +173,9 @@ function resolveResourceManifest(
     } else {
       dep.skipReason = 'unknown-registry';
     }
-
-    return dep;
-  });
-  const gitDeps = manifest.gitRepositories.map((repository) => {
+    deps.push(dep);
+  }
+  for (const repository of manifest.gitRepositories) {
     const dep: PackageDependency<FluxManagerData> = {
       depName: repository.metadata.name,
     };
@@ -195,9 +195,9 @@ function resolveResourceManifest(
     } else {
       dep.skipReason = 'unversioned-reference';
     }
-    return dep;
-  });
-  return [...helmDeps, ...gitDeps];
+    deps.push(dep);
+  }
+  return deps;
 }
 
 function resolveManifest(
