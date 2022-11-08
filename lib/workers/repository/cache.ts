@@ -73,6 +73,9 @@ async function generateBranchCache(
       ? branch.upgrades.map(generateBranchUpgradeCache)
       : [];
     const branchFingerprint = branch.branchFingerprint;
+    const prCache = getCache().branches?.find(
+      (branch) => branch.branchName === branchName
+    )?.prCache;
     return {
       automerge,
       baseBranchSha,
@@ -86,6 +89,7 @@ async function generateBranchCache(
       prNo,
       sha,
       upgrades,
+      prCache,
     };
   } catch (error) {
     const err = error.err || error; // external host error nests err

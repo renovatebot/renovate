@@ -26,6 +26,11 @@ export interface BranchUpgradeCache {
   sourceUrl?: string;
 }
 
+interface PrCache {
+  fingerprint: string;
+  lastEdited: Date;
+}
+
 export interface BranchCache {
   /**
    *Whether this branch has automerge enabled
@@ -40,7 +45,7 @@ export interface BranchCache {
    */
   baseBranchSha: string | null;
   /**
-   * Hash of the manager fingerprints and the update branch config
+   * Hash of the manager fingerprints and the update branch config(filtered)
    */
   branchFingerprint?: string;
   /**
@@ -75,6 +80,10 @@ export interface BranchCache {
    * Details on the dependency upgrades that have been applied in this branch
    */
   upgrades: BranchUpgradeCache[];
+  /**
+   * Object that has PR info
+   */
+  prCache?: PrCache;
 }
 
 export interface RepoCacheData {

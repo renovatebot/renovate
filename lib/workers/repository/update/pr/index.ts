@@ -18,7 +18,9 @@ import { ensureComment } from '../../../../modules/platform/comment';
 import { hashBody } from '../../../../modules/platform/pr-body';
 import { BranchStatus } from '../../../../types';
 import { ExternalHostError } from '../../../../types/errors/external-host-error';
+import { getCache } from '../../../../util/cache/repository';
 import { stripEmojis } from '../../../../util/emoji';
+import { fingerprint } from '../../../../util/fingerprint';
 import { deleteBranch, getBranchLastCommitTime } from '../../../../util/git';
 import { memoize } from '../../../../util/memoize';
 import { Limit, incLimitedValue, isLimitReached } from '../../../global/limits';
@@ -28,7 +30,6 @@ import type {
   PrBlockedBy,
 } from '../../../types';
 import { embedChangelogs } from '../../changelog';
-// import { embedChangelogs } from '../../changelog';
 import { resolveBranchStatus } from '../branch/status-checks';
 import { getPrBody } from './body';
 import { ChangeLogError } from './changelog/types';
@@ -85,7 +86,12 @@ export async function ensurePr(
   );
 
   const config: BranchConfig = { ...prConfig };
-
+  const prFingerprint = fingerprint(config);
+  const cache = getCache();
+  const branch = cache.branches?.find(
+    (branch) => branch.branchName === config.branchName
+  );
+  let prCache = branch?.prCache;
   logger.trace({ config }, 'ensurePr');
   // If there is a group, it will use the config of the first upgrade in the array
   const { branchName, ignoreTests, prTitle = '', upgrades } = config;
@@ -95,6 +101,19 @@ export async function ensurePr(
   const existingPr = await platform.getBranchPr(branchName);
   if (existingPr) {
     logger.debug('Found existing PR');
+    if (prCache) {
+      const lastEditTime = prCache?.lastEdited;
+      const currentTime = new Date();
+      const millisecondsPerHour = 1000 * 60 * 60;
+      const elapsedHours = Math.round(
+        (currentTime.getTime() - lastEditTime.getTime()) / millisecondsPerHour
+      );
+      // check pr config fingerprint: no need to check for upgrades as it is already inside config
+      if (prFingerprint === branch?.prCache?.fingerprint && elapsedHours > 24) {
+        logger.debug(`${existingPr.displayNumber!} does not need updating`);
+        return { type: 'with-pr', pr: existingPr };
+      }
+    }
   }
   config.upgrades = [];
 
@@ -325,6 +344,11 @@ export async function ensurePr(
           },
           'PR body changed'
         );
+        // update prCache last edit time
+        prCache = {
+          fingerprint: prFingerprint,
+          lastEdited: new Date(),
+        };
       }
       if (GlobalConfig.get('dryRun')) {
         logger.info(`DRY-RUN: Would update PR #${existingPr.number}`);
@@ -366,6 +390,12 @@ export async function ensurePr(
           platformOptions: getPlatformPrOptions(config),
           draftPR: config.draftPR,
         });
+
+        // add pr object to branch cache
+        prCache = {
+          fingerprint: prFingerprint,
+          lastEdited: new Date(),
+        };
 
         incLimitedValue(Limit.PullRequests);
         logger.info({ pr: pr?.number, prTitle }, 'PR created');
