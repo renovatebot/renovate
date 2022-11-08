@@ -21,7 +21,7 @@ const config = {
 describe('workers/repository/config-migration/index', () => {
   beforeEach(() => {
     jest.resetAllMocks();
-    mockedFunction(MigratedDataFactory.get).mockResolvedValue({
+    mockedFunction(MigratedDataFactory.getAsync).mockResolvedValue({
       filename,
       content,
       indent: partial<Indent>({}),
@@ -30,7 +30,7 @@ describe('workers/repository/config-migration/index', () => {
 
   it('does nothing when config migration is disabled', async () => {
     await configMigration({ ...config, configMigration: false }, []);
-    expect(MigratedDataFactory.get).toHaveBeenCalledTimes(0);
+    expect(MigratedDataFactory.getAsync).toHaveBeenCalledTimes(0);
     expect(checkConfigMigrationBranch).toHaveBeenCalledTimes(0);
     expect(ensureConfigMigrationPr).toHaveBeenCalledTimes(0);
   });

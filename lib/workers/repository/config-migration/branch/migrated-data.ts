@@ -78,7 +78,7 @@ export class MigratedDataFactory {
   // singleton
   private static data: MigratedData | null;
 
-  static async get(): Promise<MigratedData | null> {
+  static async getAsync(): Promise<MigratedData | null> {
     if (this.data) {
       return this.data;
     }
