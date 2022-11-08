@@ -19,7 +19,6 @@ export interface CargoSection {
   dependencies?: CargoDeps;
   'dev-dependencies'?: CargoDeps;
   'build-dependencies'?: CargoDeps;
-  'workspace.dependencies'?: CargoDeps;
 }
 
 export interface CargoManifest extends CargoSection {
