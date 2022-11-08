@@ -14,6 +14,7 @@ const cargo4toml = Fixtures.get('Cargo.4.toml');
 const cargo5toml = Fixtures.get('Cargo.5.toml');
 const cargo6configtoml = Fixtures.get('cargo.6.config.toml');
 const cargo6toml = Fixtures.get('Cargo.6.toml');
+const cargo7toml = Fixtures.get('Cargo.7.toml');
 
 describe('modules/manager/cargo/extract', () => {
   describe('extractPackageFile()', () => {
@@ -110,6 +111,19 @@ describe('modules/manager/cargo/extract', () => {
       });
       expect(res?.deps).toMatchSnapshot();
       expect(res?.deps).toHaveLength(3);
+    });
+
+    it('extracts workspace dependencies', async () => {
+      const res = await extractPackageFile(cargo7toml, 'Cargo.toml', config);
+      expect(res?.deps).toMatchSnapshot();
+      expect(res?.deps).toHaveLength(3);
+    });
+
+    it('skips workspace dependency', async () => {
+      const cargotoml = '[dependencies]\nfoobar = { workspace = true }';
+      const res = await extractPackageFile(cargotoml, 'Cargo.toml', config);
+      expect(res?.deps).toMatchSnapshot();
+      expect(res?.deps).toHaveLength(1);
     });
 
     it('skips unknown registries', async () => {

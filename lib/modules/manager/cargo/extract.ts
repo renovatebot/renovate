@@ -34,6 +34,7 @@ function extractFromSection(
       const path = currentValue.path;
       const git = currentValue.git;
       const registryName = currentValue.registry;
+      const workspace = currentValue.workspace;
 
       packageName = currentValue.package;
 
@@ -60,6 +61,9 @@ function extractFromSection(
       } else if (git) {
         currentValue = '';
         skipReason = 'git-dependency';
+      } else if (workspace) {
+        currentValue = '';
+        skipReason = 'local-dependency';
       } else {
         currentValue = '';
         skipReason = 'invalid-dependency-specification';
@@ -152,6 +156,7 @@ export async function extractPackageFile(
     [dev-dependencies]
     [build-dependencies]
     [target.*.dependencies]
+    [workspace.dependencies]
   */
   const targetSection = cargoManifest.target;
   // An array of all dependencies in the target section
@@ -184,11 +189,27 @@ export async function extractPackageFile(
       targetDeps = targetDeps.concat(deps);
     });
   }
+
+  const workspaceSection = cargoManifest.workspace;
+  // An array of all dependencies in the target section
+  let workspaceDeps: PackageDependency[] = [];
+  if (workspaceSection) {
+    const target = 'dependencies';
+    // Dependencies for `workspace.dependencies`
+    const deps = [
+      ...extractFromSection(workspaceSection, target, cargoRegistries, target),
+    ];
+    // workspace depedencies could potentially also be fully qualified
+    // like target.*.dependencies. It would require further unfolding of the sections
+    workspaceDeps = workspaceDeps.concat(deps);
+  }
+
   const deps = [
     ...extractFromSection(cargoManifest, 'dependencies', cargoRegistries),
     ...extractFromSection(cargoManifest, 'dev-dependencies', cargoRegistries),
     ...extractFromSection(cargoManifest, 'build-dependencies', cargoRegistries),
     ...targetDeps,
+    ...workspaceDeps,
   ];
   if (!deps.length) {
     return null;
