@@ -1,10 +1,8 @@
-import { quote } from 'shlex';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { exec } from '../../../util/exec';
 import type { ExecOptions } from '../../../util/exec/types';
 import {
-  getParentDir,
   getSiblingFileName,
   localPathExists,
   readLocalFile,
@@ -22,9 +20,9 @@ async function swiftPackageResolve(
   toolsVersion: string,
   config: UpdateArtifactsConfig
 ): Promise<void> {
-  const packagePath = getParentDir(packageFile);
-  const cmd = `swift package resolve --package-path ${quote(packagePath)}`;
+  const cmd = `swift package resolve`;
   const execOptions: ExecOptions = {
+    cwdFile: packageFile,
     docker: {
       image: 'sidecar',
     },

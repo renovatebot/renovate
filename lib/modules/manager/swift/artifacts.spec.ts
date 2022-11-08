@@ -94,7 +94,12 @@ describe('modules/manager/swift/artifacts', () => {
       })
     ).toBeNull();
     expect(execSnapshots).toMatchObject([
-      { cmd: "swift package resolve --package-path ''" },
+      {
+        cmd: 'swift package resolve',
+        options: {
+          cwd: '/tmp/github/some/repo',
+        },
+      },
     ]);
   });
 
@@ -128,7 +133,12 @@ describe('modules/manager/swift/artifacts', () => {
       },
     ]);
     expect(execSnapshots).toMatchObject([
-      { cmd: "swift package resolve --package-path ''" },
+      {
+        cmd: 'swift package resolve',
+        options: {
+          cwd: '/tmp/github/some/repo',
+        },
+      },
     ]);
   });
 
@@ -162,7 +172,12 @@ describe('modules/manager/swift/artifacts', () => {
       },
     ]);
     expect(execSnapshots).toMatchObject([
-      { cmd: 'swift package resolve --package-path sub/path/' },
+      {
+        cmd: 'swift package resolve',
+        options: {
+          cwd: '/tmp/github/some/repo/sub/path',
+        },
+      },
     ]);
   });
 
@@ -191,7 +206,12 @@ describe('modules/manager/swift/artifacts', () => {
       },
     ]);
     expect(execSnapshots).toMatchObject([
-      { cmd: "swift package resolve --package-path ''" },
+      {
+        cmd: 'swift package resolve',
+        options: {
+          cwd: '/tmp/github/some/repo',
+        },
+      },
     ]);
   });
 
@@ -226,7 +246,12 @@ describe('modules/manager/swift/artifacts', () => {
       },
     ]);
     expect(execSnapshots).toMatchObject([
-      { cmd: "swift package resolve --package-path ''" },
+      {
+        cmd: 'swift package resolve',
+        options: {
+          cwd: '/tmp/github/some/repo',
+        },
+      },
     ]);
   });
 
@@ -271,7 +296,10 @@ describe('modules/manager/swift/artifacts', () => {
       { cmd: 'docker pull renovate/sidecar' },
       { cmd: 'docker ps --filter name=renovate_sidecar -aq' },
       {
-        cmd: 'docker run --rm --name=renovate_sidecar --label=renovate_child -v "/tmp/github/some/repo":"/tmp/github/some/repo" -v "/tmp/cache":"/tmp/cache" -e BUILDPACK_CACHE_DIR -e CONTAINERBASE_CACHE_DIR -w "/tmp/github/some/repo" renovate/sidecar bash -l -c "install-tool swift 5.7.1 && swift package resolve --package-path \'\'"',
+        cmd: 'docker run --rm --name=renovate_sidecar --label=renovate_child -v "/tmp/github/some/repo":"/tmp/github/some/repo" -v "/tmp/cache":"/tmp/cache" -e BUILDPACK_CACHE_DIR -e CONTAINERBASE_CACHE_DIR -w "/tmp/github/some/repo" renovate/sidecar bash -l -c "install-tool swift 5.7.1 && swift package resolve"',
+        options: {
+          cwd: '/tmp/github/some/repo',
+        },
       },
     ]);
   });
@@ -321,7 +349,10 @@ describe('modules/manager/swift/artifacts', () => {
       { cmd: 'docker pull renovate/sidecar' },
       { cmd: 'docker ps --filter name=renovate_sidecar -aq' },
       {
-        cmd: 'docker run --rm --name=renovate_sidecar --label=renovate_child -v "/tmp/github/some/repo":"/tmp/github/some/repo" -v "/tmp/cache":"/tmp/cache" -e BUILDPACK_CACHE_DIR -e CONTAINERBASE_CACHE_DIR -w "/tmp/github/some/repo" renovate/sidecar bash -l -c "install-tool swift 5.4.0 && swift package resolve --package-path \'\'"',
+        cmd: 'docker run --rm --name=renovate_sidecar --label=renovate_child -v "/tmp/github/some/repo":"/tmp/github/some/repo" -v "/tmp/cache":"/tmp/cache" -e BUILDPACK_CACHE_DIR -e CONTAINERBASE_CACHE_DIR -w "/tmp/github/some/repo" renovate/sidecar bash -l -c "install-tool swift 5.4.0 && swift package resolve"',
+        options: {
+          cwd: '/tmp/github/some/repo',
+        },
       },
     ]);
   });
