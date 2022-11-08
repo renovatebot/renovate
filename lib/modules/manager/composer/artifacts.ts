@@ -1,6 +1,5 @@
 import is from '@sindresorhus/is';
 import { quote } from 'shlex';
-import { PlatformId } from '../../../constants';
 import {
   SYSTEM_INSUFFICIENT_DISK_SPACE,
   TEMPORARY_ERROR,
@@ -24,7 +23,6 @@ import { PackagistDatasource } from '../../datasource/packagist';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
 import type { AuthJson, ComposerLock } from './types';
 import {
-  composerVersioningId,
   extractConstraints,
   findGithubToken,
   getComposerArguments,
@@ -40,7 +38,7 @@ function getAuthJson(): string | null {
   const authJson: AuthJson = {};
 
   const githubToken = findGithubToken({
-    hostType: PlatformId.Github,
+    hostType: 'github',
     url: 'https://api.github.com/',
   });
 
@@ -68,20 +66,18 @@ function getAuthJson(): string | null {
     };
   }
 
-  hostRules
-    .findAll({ hostType: PlatformId.Gitlab })
-    ?.forEach((gitlabHostRule) => {
-      if (gitlabHostRule?.token) {
-        const host = gitlabHostRule.resolvedHost ?? 'gitlab.com';
-        authJson['gitlab-token'] = authJson['gitlab-token'] ?? {};
-        authJson['gitlab-token'][host] = gitlabHostRule.token;
-        // https://getcomposer.org/doc/articles/authentication-for-private-packages.md#gitlab-token
-        authJson['gitlab-domains'] = [
-          host,
-          ...(authJson['gitlab-domains'] ?? []),
-        ];
-      }
-    });
+  hostRules.findAll({ hostType: 'gitlab' })?.forEach((gitlabHostRule) => {
+    if (gitlabHostRule?.token) {
+      const host = gitlabHostRule.resolvedHost ?? 'gitlab.com';
+      authJson['gitlab-token'] = authJson['gitlab-token'] ?? {};
+      authJson['gitlab-token'][host] = gitlabHostRule.token;
+      // https://getcomposer.org/doc/articles/authentication-for-private-packages.md#gitlab-token
+      authJson['gitlab-domains'] = [
+        host,
+        ...(authJson['gitlab-domains'] ?? []),
+      ];
+    }
+  });
 
   hostRules
     .findAll({ hostType: PackagistDatasource.id })
@@ -134,17 +130,20 @@ export async function updateArtifacts({
       constraint: constraints.composer,
     };
 
+    const phpToolConstraint: ToolConstraint = {
+      toolName: 'php',
+      constraint: getPhpConstraint(constraints),
+    };
+
     const execOptions: ExecOptions = {
       cwdFile: packageFileName,
       extraEnv: {
         COMPOSER_CACHE_DIR: await ensureCacheDir('composer'),
         COMPOSER_AUTH: getAuthJson(),
       },
-      toolConstraints: [composerToolConstraint],
+      toolConstraints: [phpToolConstraint, composerToolConstraint],
       docker: {
-        image: 'php',
-        tagConstraint: getPhpConstraint(constraints),
-        tagScheme: composerVersioningId,
+        image: 'sidecar',
       },
     };
 
@@ -155,7 +154,7 @@ export async function updateArtifacts({
       const preCmd = 'composer';
       const preArgs =
         'install' + getComposerArguments(config, composerToolConstraint);
-      logger.debug({ preCmd, preArgs }, 'composer pre-update command');
+      logger.trace({ preCmd, preArgs }, 'composer pre-update command');
       commands.push(`${preCmd} ${preArgs}`);
     }
 
@@ -175,7 +174,7 @@ export async function updateArtifacts({
         ).trim() + ' --with-dependencies';
     }
     args += getComposerArguments(config, composerToolConstraint);
-    logger.debug({ cmd, args }, 'composer command');
+    logger.trace({ cmd, args }, 'composer command');
     commands.push(`${cmd} ${args}`);
 
     await exec(commands, execOptions);

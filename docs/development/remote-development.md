@@ -46,12 +46,60 @@ If you need more hours you'll need to buy a plan with more hours.
 
 ### Gitpod tips
 
-- Use `yarn jest:16` to run the tests on Gitpod
+- Use `yarn jest` to run the tests on Gitpod
 
 ### Known problems with Gitpod
 
-- `yarn jest:16` has some failing tests
-- You can't preview Markdown files in the VS Code online editor
+There are two failing tests when running `yarn jest` on Gitpod:
+
+```bash
+Summary of all failing tests
+ FAIL  lib/util/git/index.spec.ts (635.102 s, 319 MB heap size)
+  ● util/git/index › isBranchModified() › should return false when author matches
+
+    expected true to be false or Boolean(false)
+
+      283 |
+      284 |     it('should return false when author matches', async () => {
+    > 285 |       expect(await git.isBranchModified('renovate/future_branch')).toBeFalse();
+          |                                                                    ^
+      286 |       expect(await git.isBranchModified('renovate/future_branch')).toBeFalse();
+      287 |     });
+      288 |
+
+      at Object.<anonymous> (lib/util/git/index.spec.ts:285:68)
+
+  ● util/git/index › isBranchModified() › should return false when author is ignored
+
+    expected true to be false or Boolean(false)
+
+      291 |         gitIgnoredAuthors: ['custom@example.com'],
+      292 |       });
+    > 293 |       expect(await git.isBranchModified('renovate/custom_author')).toBeFalse();
+          |                                                                    ^
+      294 |     });
+      295 |
+      296 |     it('should return true when custom author is unknown', async () => {
+
+      at Object.<anonymous> (lib/util/git/index.spec.ts:293:68)
+
+ FAIL  test/static-files.spec.ts (14.506 s, 288 MB heap size)
+  ● static-files › has same static files in lib and dist
+
+    thrown: "Exceeded timeout of 10000 ms for a test.
+    Use jest.setTimeout(newTimeout) to increase the timeout value, if this is a long-running test."
+
+      36 |   jest.setTimeout(10 * 1000);
+      37 |
+    > 38 |   it('has same static files in lib and dist', async () => {
+         |   ^
+      39 |     expect(await getFiles('dist')).toEqual(await getFiles('lib'));
+      40 |   });
+      41 | });
+
+      at test/static-files.spec.ts:38:3
+      at Object.<anonymous> (test/static-files.spec.ts:34:1)
+```
 
 ## GitHub Codespaces
 

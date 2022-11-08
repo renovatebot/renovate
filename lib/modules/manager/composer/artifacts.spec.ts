@@ -3,7 +3,6 @@ import { envMock, mockExecAll } from '../../../../test/exec-util';
 import { env, fs, git, mocked, partial } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
-import { PlatformId } from '../../../constants';
 import * as docker from '../../../util/exec/docker';
 import type { StatusResult } from '../../../util/git/types';
 import * as hostRules from '../../../util/host-rules';
@@ -112,7 +111,7 @@ describe('modules/manager/composer/artifacts', () => {
 
   it('uses hostRules to set COMPOSER_AUTH', async () => {
     hostRules.add({
-      hostType: PlatformId.Github,
+      hostType: 'github',
       matchHost: 'api.github.com',
       token: 'ghp_github-token',
     });
@@ -123,7 +122,7 @@ describe('modules/manager/composer/artifacts', () => {
       token: 'ghp_git-tags-token',
     });
     hostRules.add({
-      hostType: PlatformId.Gitlab,
+      hostType: 'gitlab',
       matchHost: 'gitlab.com',
       token: 'gitlab-token',
     });
@@ -223,7 +222,7 @@ describe('modules/manager/composer/artifacts', () => {
 
   it('Skip github application access token hostRules in COMPOSER_AUTH', async () => {
     hostRules.add({
-      hostType: PlatformId.Github,
+      hostType: 'github',
       matchHost: 'api.github.com',
       token: 'ghs_token',
     });
@@ -261,7 +260,7 @@ describe('modules/manager/composer/artifacts', () => {
 
   it('github hostRule for github.com with x-access-token set github-token in COMPOSER_AUTH', async () => {
     hostRules.add({
-      hostType: PlatformId.Github,
+      hostType: 'github',
       matchHost: 'https://api.github.com/',
       token: 'x-access-token:ghp_token',
     });
@@ -462,28 +461,30 @@ describe('modules/manager/composer/artifacts', () => {
     ]);
     expect(execSnapshots).toMatchObject([
       {
-        cmd: 'docker pull renovate/php:7.3',
+        cmd: 'docker pull renovate/sidecar',
         options: {
           encoding: 'utf-8',
         },
       },
       {
-        cmd: 'docker ps --filter name=renovate_php -aq',
+        cmd: 'docker ps --filter name=renovate_sidecar -aq',
         options: {
           encoding: 'utf-8',
         },
       },
       {
         cmd:
-          'docker run --rm --name=renovate_php --label=renovate_child ' +
+          'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
           '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
           '-v "/tmp/renovate/cache":"/tmp/renovate/cache" ' +
           '-e COMPOSER_CACHE_DIR ' +
           '-e BUILDPACK_CACHE_DIR ' +
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
-          'renovate/php:7.3' +
+          'renovate/sidecar' +
           ' bash -l -c "' +
+          'install-tool php 7.3' +
+          ' && ' +
           'install-tool composer 1.10.17' +
           ' && ' +
           'composer update --with-dependencies --ignore-platform-reqs --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins' +
@@ -539,6 +540,9 @@ describe('modules/manager/composer/artifacts', () => {
       },
     ]);
     expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'install-tool php 7.3',
+      },
       {
         cmd: 'install-tool composer 1.10.17',
       },
