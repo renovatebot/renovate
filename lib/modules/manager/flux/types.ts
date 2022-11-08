@@ -56,9 +56,7 @@ export interface FluxFile {
 
 export interface ResourceFluxManifest extends FluxFile {
   kind: 'resource';
-  helmReleases: HelmRelease[];
-  helmRepositories: HelmRepository[];
-  gitRepositories: GitRepository[];
+  resources: FluxResource[];
 }
 
 export interface SystemFluxManifest extends FluxFile {

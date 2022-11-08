@@ -15,6 +15,9 @@ import type {
   FluxManagerData,
   FluxManifest,
   FluxResource,
+  GitRepository,
+  HelmRelease,
+  HelmRepository,
   ResourceFluxManifest,
   SystemFluxManifest,
 } from './types';
@@ -38,9 +41,7 @@ function readManifest(content: string, file: string): FluxManifest | null {
   const manifest: FluxManifest = {
     kind: 'resource',
     file,
-    helmReleases: [],
-    helmRepositories: [],
-    gitRepositories: [],
+    resources: [],
   };
   let resources: FluxResource[];
   try {
@@ -58,7 +59,7 @@ function readManifest(content: string, file: string): FluxManifest | null {
           resource.apiVersion?.startsWith('helm.toolkit.fluxcd.io/') &&
           resource.spec?.chart?.spec?.chart
         ) {
-          manifest.helmReleases.push(resource);
+          manifest.resources.push(resource);
         }
         break;
       case 'HelmRepository':
@@ -68,7 +69,7 @@ function readManifest(content: string, file: string): FluxManifest | null {
           resource.metadata.namespace &&
           resource.spec?.url
         ) {
-          manifest.helmRepositories.push(resource);
+          manifest.resources.push(resource);
         }
         break;
       case 'GitRepository':
@@ -76,7 +77,7 @@ function readManifest(content: string, file: string): FluxManifest | null {
           resource.apiVersion?.startsWith('source.toolkit.fluxcd.io/') &&
           resource.spec?.url
         ) {
-          manifest.gitRepositories.push(resource);
+          manifest.resources.push(resource);
         }
         break;
     }
@@ -149,53 +150,67 @@ function resolveResourceManifest(
   manifest: ResourceFluxManifest,
   context: ResourceFluxManifest[]
 ): PackageDependency<FluxManagerData>[] {
-  const helmRepositories = context.flatMap(
-    (manifest) => manifest.helmRepositories
-  );
-  const deps: PackageDependency<FluxManagerData>[] = [];
-  for (const release of manifest.helmReleases) {
-    const dep: PackageDependency<FluxManagerData> = {
-      depName: release.spec.chart.spec.chart,
-      currentValue: release.spec.chart.spec.version,
-      datasource: HelmDatasource.id,
-    };
-
-    const matchingRepositories = helmRepositories.filter(
-      (rep) =>
-        rep.kind === release.spec.chart.spec.sourceRef?.kind &&
-        rep.metadata.name === release.spec.chart.spec.sourceRef.name &&
-        rep.metadata.namespace ===
-          (release.spec.chart.spec.sourceRef.namespace ??
-            release.metadata?.namespace)
-    );
-    if (matchingRepositories.length) {
-      dep.registryUrls = matchingRepositories.map((repo) => repo.spec.url);
-    } else {
-      dep.skipReason = 'unknown-registry';
-    }
-    deps.push(dep);
-  }
-  for (const repository of manifest.gitRepositories) {
-    const dep: PackageDependency<FluxManagerData> = {
-      depName: repository.metadata.name,
-    };
-
-    if (repository.spec.ref?.commit) {
-      const gitUrl = repository.spec.url;
-      dep.currentDigest = repository.spec.ref.commit;
-      dep.datasource = GitRefsDatasource.id;
-      dep.packageName = gitUrl;
-      dep.replaceString = repository.spec.ref.commit;
-      if (gitUrl.startsWith('https://')) {
-        dep.sourceUrl = gitUrl.replace(/\.git$/, '');
+  const helmRepositories: HelmRepository[] = [];
+  for (const manifest of context) {
+    for (const resource of manifest.resources) {
+      if (resource.kind === 'HelmRepository') {
+        helmRepositories.push(resource);
       }
-    } else if (repository.spec.ref?.tag) {
-      dep.currentValue = repository.spec.ref.tag;
-      resolveGitRepositoryPerSourceTag(dep, repository.spec.url);
-    } else {
-      dep.skipReason = 'unversioned-reference';
     }
-    deps.push(dep);
+  }
+
+  const deps: PackageDependency<FluxManagerData>[] = [];
+  for (const resource of manifest.resources) {
+    switch (resource.kind) {
+      case 'HelmRelease': {
+        const helmRelease: HelmRelease = resource;
+        const dep: PackageDependency<FluxManagerData> = {
+          depName: helmRelease.spec.chart.spec.chart,
+          currentValue: helmRelease.spec.chart.spec.version,
+          datasource: HelmDatasource.id,
+        };
+
+        const matchingRepositories = helmRepositories.filter(
+          (rep) =>
+            rep.kind === helmRelease.spec.chart.spec.sourceRef?.kind &&
+            rep.metadata.name === helmRelease.spec.chart.spec.sourceRef.name &&
+            rep.metadata.namespace ===
+              (helmRelease.spec.chart.spec.sourceRef.namespace ??
+                helmRelease.metadata?.namespace)
+        );
+        if (matchingRepositories.length) {
+          dep.registryUrls = matchingRepositories.map((repo) => repo.spec.url);
+        } else {
+          dep.skipReason = 'unknown-registry';
+        }
+        deps.push(dep);
+        break;
+      }
+      case 'GitRepository': {
+        const gitRepository: GitRepository = resource;
+        const dep: PackageDependency<FluxManagerData> = {
+          depName: gitRepository.metadata.name,
+        };
+
+        if (gitRepository.spec.ref?.commit) {
+          const gitUrl = gitRepository.spec.url;
+          dep.currentDigest = gitRepository.spec.ref.commit;
+          dep.datasource = GitRefsDatasource.id;
+          dep.packageName = gitUrl;
+          dep.replaceString = gitRepository.spec.ref.commit;
+          if (gitUrl.startsWith('https://')) {
+            dep.sourceUrl = gitUrl.replace(/\.git$/, '');
+          }
+        } else if (gitRepository.spec.ref?.tag) {
+          dep.currentValue = gitRepository.spec.ref.tag;
+          resolveGitRepositoryPerSourceTag(dep, gitRepository.spec.url);
+        } else {
+          dep.skipReason = 'unversioned-reference';
+        }
+        deps.push(dep);
+        break;
+      }
+    }
   }
   return deps;
 }
