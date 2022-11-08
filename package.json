@@ -156,7 +156,7 @@
     "@opentelemetry/sdk-trace-node": "1.7.0",
     "@opentelemetry/semantic-conventions": "1.7.0",
     "@renovatebot/pep440": "2.1.5",
-    "@renovatebot/ruby-semver": "1.1.6",
+    "@renovatebot/ruby-semver": "1.1.7",
     "@sindresorhus/is": "4.6.0",
     "@types/tmp": "0.2.3",
     "@yarnpkg/core": "3.2.5",

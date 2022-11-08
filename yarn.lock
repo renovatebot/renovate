@@ -2429,12 +2429,12 @@
   resolved "https://registry.yarnpkg.com/@renovatebot/pep440/-/pep440-2.1.5.tgz#6a9d09ade925f380f9ae4e2153f711a1db92162a"
   integrity sha512-5KqCemtyjR7e98uHadFQUylRpoILYTopJGVaEbs+/WHfB14pJKGPGIkCUN1Zl6fYh+D0Qh7JAXsZ+fRVeSVNZg==
 
-"@renovatebot/ruby-semver@1.1.6":
-  version "1.1.6"
-  resolved "https://registry.yarnpkg.com/@renovatebot/ruby-semver/-/ruby-semver-1.1.6.tgz#c3ca354b62d683de5f108fb91881333e1788b1fd"
-  integrity sha512-sNNI3Zu0Vo5Jngbe1aBkfSmwdODxK/YPMfczrLgYj9LU/qb5N9NsF0EUOf52igoaVZo8zdCAb0w7tsXEd8+N4Q==
+"@renovatebot/ruby-semver@1.1.7":
+  version "1.1.7"
+  resolved "https://registry.yarnpkg.com/@renovatebot/ruby-semver/-/ruby-semver-1.1.7.tgz#0f684158ace11b0c18ba40425c24169d1b81fc75"
+  integrity sha512-M07oVOD2pr+E0lopMgFVtDwUqJ5oTZD2QlrVT7yyZ3qW5/R1RQTGb6FwME2Iy+QNjfxYtvkCz1XS2LHZcOPyOw==
   dependencies:
-    tslib "2.4.0"
+    tslib "2.4.1"
 
 "@seald-io/binary-search-tree@^1.0.2":
   version "1.0.2"
@@ -9461,11 +9461,6 @@ tsconfig-paths@^3.14.1:
     minimist "^1.2.6"
     strip-bom "^3.0.0"
 
-tslib@2.4.0, tslib@^2.1.0, tslib@^2.3.1, tslib@^2.4.0:
-  version "2.4.0"
-  resolved "https://registry.yarnpkg.com/tslib/-/tslib-2.4.0.tgz#7cecaa7f073ce680a05847aa77be941098f36dc3"
-  integrity sha512-d6xOpEDfsi2CZVlPQzGeux8XMwLT9hssAsaPYExaQMuYskwb+x1x7J371tWlbBdWHroy99KnVB6qIkUbs5X3UQ==
-
 tslib@2.4.1:
   version "2.4.1"
   resolved "https://registry.yarnpkg.com/tslib/-/tslib-2.4.1.tgz#0d0bfbaac2880b91e22df0768e55be9753a5b17e"
@@ -9475,6 +9470,11 @@ tslib@^1.11.1, tslib@^1.13.0, tslib@^1.8.1:
   version "1.14.1"
   resolved "https://registry.yarnpkg.com/tslib/-/tslib-1.14.1.tgz#cf2d38bdc34a134bcaf1091c41f6619e2f672d00"
   integrity sha512-Xni35NKzjgMrwevysHTCArtLDpPvye8zV/0E4EyYn43P7/7qvQwPh9BGkHewbMulVntbigmcT7rdX3BNo9wRJg==
+
+tslib@^2.1.0, tslib@^2.3.1, tslib@^2.4.0:
+  version "2.4.0"
+  resolved "https://registry.yarnpkg.com/tslib/-/tslib-2.4.0.tgz#7cecaa7f073ce680a05847aa77be941098f36dc3"
+  integrity sha512-d6xOpEDfsi2CZVlPQzGeux8XMwLT9hssAsaPYExaQMuYskwb+x1x7J371tWlbBdWHroy99KnVB6qIkUbs5X3UQ==
 
 tsutils@^3.21.0:
   version "3.21.0"
