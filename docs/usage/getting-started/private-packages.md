@@ -183,7 +183,7 @@ For dependencies on `github.com` without a Packagist server: use a Personal Acce
 Avoid adding a `hostRule` with `hostType=github` because:
 
 - it overrides the default Renovate application token for everything else 
-- it causes unwanted side effects.
+- it causes unwanted side effects
 
 The repository in `composer.json` should have the `vcs` type with a `https` URL.
 For example:
