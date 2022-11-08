@@ -56,6 +56,7 @@ async function getBaseBranchConfig(
       throw error;
     }
 
+    // istanbul ignore if
     if (config.printConfig) {
       logger.info(
         { baseBranchConfig },
