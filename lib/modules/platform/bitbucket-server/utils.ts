@@ -164,7 +164,7 @@ function generateUrlFromEndpoint(
     }scm`,
     repository,
   });
-  logger.debug({ url: generatedUrl }, `using generated endpoint URL`);
+  logger.debug(`Using generated endpoint URL: ${generatedUrl}`);
   return generatedUrl;
 }
 
@@ -192,7 +192,7 @@ export function getRepoGitUrl(
     if (sshUrl === undefined) {
       throw new Error(CONFIG_GIT_URL_UNAVAILABLE);
     }
-    logger.debug({ url: sshUrl.href }, `using ssh URL`);
+    logger.debug(`Using ssh URL: ${sshUrl.href}`);
     return sshUrl.href;
   }
   let cloneUrl = info.links.clone?.find(({ name }) => name === 'http');

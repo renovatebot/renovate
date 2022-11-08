@@ -2,7 +2,6 @@ import is from '@sindresorhus/is';
 import delay from 'delay';
 import JSON5 from 'json5';
 import type { PartialDeep } from 'type-fest';
-import { PlatformId } from '../../../constants';
 import {
   REPOSITORY_CHANGED,
   REPOSITORY_EMPTY,
@@ -69,7 +68,7 @@ const defaults: {
   endpoint?: string;
   hostType: string;
 } = {
-  hostType: PlatformId.BitbucketServer,
+  hostType: 'bitbucket-server',
 };
 
 /* istanbul ignore next */
@@ -312,7 +311,7 @@ export async function getPrList(refreshCache?: boolean): Promise<Pr[]> {
     );
 
     config.prList = values.map(utils.prInfo);
-    logger.debug({ length: config.prList.length }, 'Retrieved Pull Requests');
+    logger.debug(`Retrieved Pull Requests, count: ${config.prList.length}`);
   } else {
     logger.debug('returning cached PR list');
   }
@@ -967,7 +966,7 @@ export async function mergePr({
     }
   }
 
-  logger.debug({ pr: prNo }, 'PR merged');
+  logger.debug(`PR merged, PrNo:${prNo}`);
   return true;
 }
 

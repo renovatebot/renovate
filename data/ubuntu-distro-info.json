@@ -274,10 +274,10 @@
     "eol": "2023-07-20"
   },
   "v23.04": {
-    "codename": "L L",
-    "series": "l-series",
+    "codename": "Lunar Lobster",
+    "series": "lunar",
     "created": "2022-10-20",
-    "release": "2023-04-27",
+    "release": "2023-04-20",
     "eol": "2024-01-25"
   }
 }

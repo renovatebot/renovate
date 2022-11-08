@@ -3,7 +3,6 @@ import { envMock, mockExecAll } from '../../../../test/exec-util';
 import { env, fs, git, mocked } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
-import { PlatformId } from '../../../constants/platforms';
 import * as docker from '../../../util/exec/docker';
 import type { StatusResult } from '../../../util/git/types';
 import * as _hostRules from '../../../util/host-rules';
@@ -399,7 +398,7 @@ describe('modules/manager/gomod/artifacts', () => {
     hostRules.getAll.mockReturnValueOnce([
       {
         token: 'some-token',
-        hostType: PlatformId.Github,
+        hostType: 'github',
         matchHost: 'api.github.com',
       },
       { token: 'some-other-token', matchHost: 'https://gitea.com' },
@@ -499,13 +498,13 @@ describe('modules/manager/gomod/artifacts', () => {
     hostRules.getAll.mockReturnValueOnce([
       {
         token: 'some-token',
-        hostType: PlatformId.Github,
+        hostType: 'github',
         matchHost: 'api.github.com',
       },
       {
         token: 'some-enterprise-token',
         matchHost: 'github.enterprise.com',
-        hostType: PlatformId.Github,
+        hostType: 'github',
       },
     ]);
     fs.readLocalFile.mockResolvedValueOnce('Current go.sum');
@@ -568,7 +567,7 @@ describe('modules/manager/gomod/artifacts', () => {
       {
         token: 'some-enterprise-token',
         matchHost: 'gitlab.enterprise.com',
-        hostType: PlatformId.Gitlab,
+        hostType: 'gitlab',
       },
     ]);
     fs.readLocalFile.mockResolvedValueOnce('Current go.sum');
@@ -623,12 +622,12 @@ describe('modules/manager/gomod/artifacts', () => {
       {
         token: 'some-enterprise-token-repo1',
         matchHost: 'https://gitlab.enterprise.com/repo1',
-        hostType: PlatformId.Gitlab,
+        hostType: 'gitlab',
       },
       {
         token: 'some-enterprise-token-repo2',
         matchHost: 'https://gitlab.enterprise.com/repo2',
-        hostType: PlatformId.Gitlab,
+        hostType: 'gitlab',
       },
     ]);
     fs.readLocalFile.mockResolvedValueOnce('Current go.sum');
@@ -692,12 +691,12 @@ describe('modules/manager/gomod/artifacts', () => {
       {
         token: 'some-token',
         matchHost: 'ssh://github.enterprise.com',
-        hostType: PlatformId.Github,
+        hostType: 'github',
       },
       {
         token: 'some-gitlab-token',
         matchHost: 'gitlab.enterprise.com',
-        hostType: PlatformId.Gitlab,
+        hostType: 'gitlab',
       },
     ]);
     fs.readLocalFile.mockResolvedValueOnce('Current go.sum');
@@ -755,17 +754,17 @@ describe('modules/manager/gomod/artifacts', () => {
       {
         token: 'some-token',
         matchHost: 'api.github.com',
-        hostType: PlatformId.Github,
+        hostType: 'github',
       },
       {
         token: 'some-enterprise-token',
         matchHost: 'github.enterprise.com',
-        hostType: PlatformId.Github,
+        hostType: 'github',
       },
       {
         token: 'some-gitlab-token',
         matchHost: 'gitlab.enterprise.com',
-        hostType: PlatformId.Gitlab,
+        hostType: 'gitlab',
       },
     ]);
     fs.readLocalFile.mockResolvedValueOnce('Current go.sum');
