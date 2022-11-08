@@ -185,7 +185,8 @@ Avoid adding a `hostRule` with `hostType=github` because:
 - it overrides the default Renovate application token for everything else 
 - it causes unwanted side effects.
 
-The repository in `composer.json` should have the `vcs` type with a `https` url. Ex:
+The repository in `composer.json` should have the `vcs` type with a `https` URL.
+For example:
 
 ```json
 {
