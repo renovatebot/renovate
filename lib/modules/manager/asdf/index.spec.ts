@@ -19,7 +19,7 @@ scala 3.0.0`)!.deps,
         .filter((datasource): datasource is string => !!datasource)
     );
 
-    for (const datasource of usedDatasources.values()) {
+    for (const datasource of usedDatasources) {
       it(`contains ${datasource}`, () => {
         expect(supportedDatasources).toContain(datasource);
       });
