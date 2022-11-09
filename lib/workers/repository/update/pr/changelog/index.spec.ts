@@ -4,7 +4,7 @@ import { GlobalConfig } from '../../../../../config/global';
 import * as semverVersioning from '../../../../../modules/versioning/semver';
 import * as hostRules from '../../../../../util/host-rules';
 import type { BranchConfig } from '../../../../types';
-import { ChangeLogError, getChangeLogJSON } from '.';
+import { getChangeLogJSON } from '.';
 
 jest.mock('../../../../../modules/datasource/npm');
 
@@ -233,7 +233,7 @@ describe('workers/repository/update/pr/changelog/index', () => {
           ...upgrade,
           sourceUrl: 'https://github.com',
         })
-      ).toEqual({ error: ChangeLogError.MissingGithubToken });
+      ).toEqual({ error: 'MissingGithubToken' });
     });
 
     it('handles no releases', async () => {

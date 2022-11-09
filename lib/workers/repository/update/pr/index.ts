@@ -28,10 +28,8 @@ import type {
   PrBlockedBy,
 } from '../../../types';
 import { embedChangelogs } from '../../changelog';
-// import { embedChangelogs } from '../../changelog';
 import { resolveBranchStatus } from '../branch/status-checks';
 import { getPrBody } from './body';
-import { ChangeLogError } from './changelog/types';
 import { prepareLabels } from './labels';
 import { addParticipants } from './participants';
 
@@ -237,7 +235,7 @@ export async function ensurePr(
             }
           }
         }
-      } else if (logJSON.error === ChangeLogError.MissingGithubToken) {
+      } else if (logJSON.error === 'MissingGithubToken') {
         upgrade.prBodyNotes ??= [];
         upgrade.prBodyNotes = [
           ...upgrade.prBodyNotes,
@@ -278,7 +276,7 @@ export async function ensurePr(
     }
   }
 
-  const prBody = await getPrBody(config, {
+  const prBody = getPrBody(config, {
     debugData: updatePrDebugData(existingPr?.bodyStruct?.debugData),
   });
 

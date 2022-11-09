@@ -203,7 +203,7 @@ export async function getPrList(): Promise<CodeCommitPr[]> {
 
   config.prList = fetchedPrs;
 
-  logger.debug({ length: fetchedPrs.length }, 'Retrieved Pull Requests');
+  logger.debug(`Retrieved Pull Requests, count: ${fetchedPrs.length}`);
   return fetchedPrs;
 }
 

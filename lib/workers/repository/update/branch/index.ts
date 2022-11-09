@@ -212,11 +212,11 @@ export async function processBranch(
           (branchPr.targetBranch &&
             branchPr.targetBranch !== branchConfig.baseBranch)
         ) {
-          logger.debug({ prNo: branchPr.number }, 'PR has been edited');
+          logger.debug(`PR has been edited, PrNo:${branchPr.number}`);
           if (dependencyDashboardCheck || config.rebaseRequested) {
             logger.debug('Manual rebase has been requested for PR');
           } else {
-            const newBody = await getPrBody(branchConfig, {
+            const newBody = getPrBody(branchConfig, {
               debugData: updatePrDebugData(existingPr?.bodyStruct?.debugData),
               rebasingNotice:
                 'Renovate will not automatically rebase this PR, because other commits have been found.',
@@ -398,7 +398,11 @@ export async function processBranch(
       logger.debug(
         'A user manually approved all rate-limited PRs via the Dependency Dashboard.'
       );
-    } else if (branchExists && config.rebaseWhen === 'never') {
+    } else if (
+      branchExists &&
+      config.rebaseWhen === 'never' &&
+      !dependencyDashboardCheck
+    ) {
       logger.debug('rebaseWhen=never so skipping branch update check');
       return {
         branchExists,
@@ -557,7 +561,7 @@ export async function processBranch(
       commitSha &&
       config.prCreation !== 'immediate'
     ) {
-      logger.debug({ commitSha }, `Branch status pending`);
+      logger.debug(`Branch status pending, current sha: ${commitSha}`);
       return {
         branchExists: true,
         updatesVerified,
@@ -605,7 +609,9 @@ export async function processBranch(
         mergeStatus === 'branch status error' ||
         mergeStatus === 'failed'
       ) {
-        logger.debug({ mergeStatus }, 'Branch automerge not possible');
+        logger.debug(
+          `Branch automerge not possible, mergeStatus:${mergeStatus}`
+        );
         config.forcePr = true;
         config.branchAutomergeFailureMessage = mergeStatus;
       }

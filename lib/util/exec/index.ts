@@ -116,7 +116,7 @@ async function prepareRawExec(
   let rawCommands = typeof cmd === 'string' ? [cmd] : cmd;
 
   if (isDocker(docker)) {
-    logger.debug({ image: docker.image }, 'Using docker to execute');
+    logger.debug(`Using docker to execute image: ${docker.image}`);
     const extraEnv = {
       ...opts.extraEnv,
       ...customEnvVariables,
@@ -178,7 +178,7 @@ export async function exec(
     if (useDocker) {
       await removeDockerContainer(docker.image, dockerChildPrefix);
     }
-    logger.debug({ command: rawCmd }, 'Executing command');
+    logger.trace({ command: rawCmd }, 'Executing command');
     logger.trace({ commandOptions: rawOptions }, 'Command options');
     try {
       res = await rawExec(rawCmd, rawOptions);

@@ -74,7 +74,7 @@ ${
       existingPr.bodyStruct?.hash === prBodyHash &&
       existingPr.title === prTitle
     ) {
-      logger.debug({ pr: existingPr.number }, `Does not need updating`);
+      logger.debug(`Pr does not need updating, PrNo: ${existingPr.number}`);
       return;
     }
     // PR must need updating
