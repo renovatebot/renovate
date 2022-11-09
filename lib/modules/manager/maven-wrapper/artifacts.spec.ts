@@ -215,7 +215,7 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
     ]);
   });
 
-  it.only('updates with binarySource install', async () => {
+  it('updates with binarySource install', async () => {
     const execSnapshots = mockExecAll({ stdout: '', stderr: '' });
     mockMavenFileChangedInGit();
     GlobalConfig.set({ localDir: './', binarySource: 'install' });
