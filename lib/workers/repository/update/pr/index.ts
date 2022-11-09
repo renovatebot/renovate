@@ -40,6 +40,15 @@ import { prepareLabels } from './labels';
 import { addParticipants } from './participants';
 import { getPrCache, setPrCache } from './set-pr-cache';
 
+function getElapsedHours(time: Date | string): number {
+  const pastTime = typeof time === 'string' ? new Date(time) : time;
+  const currentTime = new Date();
+  const millisecondsPerHour = 1000 * 60 * 60;
+  return (
+    Math.round(currentTime.getTime() - pastTime.getTime()) / millisecondsPerHour
+  );
+}
+
 export function getPlatformPrOptions(
   config: RenovateConfig & PlatformPrOptions
 ): PlatformPrOptions {
@@ -104,16 +113,11 @@ export async function ensurePr(
     if (prCache) {
       logger.debug({ prCache }, 'Pr-Cache exists');
       const lastEditTime = prCache?.lastEdited;
-      const currentTime = new Date();
-      // const millisecondsPerHour = 1000 * 60 * 60;
-      const elapsedHours = Math.round(
-        currentTime.getTime() - new Date(lastEditTime).getTime()
-      );
       // check pr config fingerprint: no need to check for upgrades as it is already inside config
       if (
         isCloned() === false &&
         prFingerprint === prCache.fingerprint &&
-        elapsedHours > 24
+        getElapsedHours(lastEditTime) > 24
       ) {
         logger.debug(
           `${existingPr.displayNumber!} does not need updating --- cache used HURRAY !!!`
@@ -146,12 +150,7 @@ export async function ensurePr(
     ) {
       logger.debug('Checking how long this branch has been pending');
       const lastCommitTime = await getBranchLastCommitTime(branchName);
-      const currentTime = new Date();
-      const millisecondsPerHour = 1000 * 60 * 60;
-      const elapsedHours = Math.round(
-        (currentTime.getTime() - lastCommitTime.getTime()) / millisecondsPerHour
-      );
-      if (elapsedHours >= config.prNotPendingHours) {
+      if (getElapsedHours(lastCommitTime) >= config.prNotPendingHours) {
         logger.debug('Branch exceeds prNotPending hours - forcing PR creation');
         config.forcePr = true;
       }
@@ -185,11 +184,7 @@ export async function ensurePr(
     if ((await getBranchStatus()) === BranchStatus.yellow) {
       logger.debug(`Branch status is yellow - checking timeout`);
       const lastCommitTime = await getBranchLastCommitTime(branchName);
-      const currentTime = new Date();
-      const millisecondsPerHour = 1000 * 60 * 60;
-      const elapsedHours = Math.round(
-        (currentTime.getTime() - lastCommitTime.getTime()) / millisecondsPerHour
-      );
+      const elapsedHours = getElapsedHours(lastCommitTime);
       if (
         !dependencyDashboardCheck &&
         ((config.stabilityStatus &&
@@ -226,12 +221,8 @@ export async function ensurePr(
   }
 
   if (config.fetchReleaseNotes) {
-    // eslint-disable-next-line no-console
-    console.time('changelog');
     // fetch changelogs when not already done;
     await embedChangelogs(upgrades);
-    // eslint-disable-next-line no-console
-    console.timeEnd('changelog');
   }
 
   // Get changelog and then generate template strings
