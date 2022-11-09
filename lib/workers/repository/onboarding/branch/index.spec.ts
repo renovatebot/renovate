@@ -16,6 +16,7 @@ import {
 import { logger } from '../../../../logger';
 import type { Pr } from '../../../../modules/platform';
 import { PrState } from '../../../../types';
+import * as memCache from '../../../../util/cache/memory';
 import * as _cache from '../../../../util/cache/repository';
 import type { FileAddition } from '../../../../util/git/types';
 import { OnboardingState } from '../common';
@@ -39,6 +40,7 @@ describe('workers/repository/onboarding/branch/index', () => {
     let config: RenovateConfig;
 
     beforeEach(() => {
+      memCache.init();
       jest.resetAllMocks();
       config = getConfig();
       config.repository = 'some/repo';

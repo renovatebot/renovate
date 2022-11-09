@@ -10,6 +10,7 @@ import { GlobalConfig } from '../../../../config/global';
 import { logger } from '../../../../logger';
 import type { PackageFile } from '../../../../modules/manager/types';
 import type { Pr } from '../../../../modules/platform';
+import * as memCache from '../../../../util/cache/memory';
 import type { BranchConfig } from '../../../types';
 import { OnboardingState } from '../common';
 import { ensureOnboardingPr } from '.';
@@ -27,6 +28,7 @@ describe('workers/repository/onboarding/pr/index', () => {
     };
 
     beforeEach(() => {
+      memCache.init();
       jest.resetAllMocks();
       config = {
         ...getConfig(),

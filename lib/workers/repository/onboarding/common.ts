@@ -2,6 +2,7 @@ import hasha from 'hasha';
 import { configFileNames } from '../../../config/app-strings';
 import type { RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
+import * as memCache from '../../../util/cache/memory';
 
 export function defaultConfigFile(config: RenovateConfig): string {
   return configFileNames.includes(config.onboardingConfigFileName!)
@@ -10,19 +11,22 @@ export function defaultConfigFile(config: RenovateConfig): string {
 }
 
 export class OnboardingState {
-  private static updateRequested = false;
+  private static readonly cacheKey = 'OnboardingState';
 
   static get prUpdateRequested(): boolean {
+    const updateRequested = !!memCache.get<boolean | undefined>(
+      OnboardingState.cacheKey
+    );
     logger.trace(
-      { value: this.updateRequested },
+      { value: updateRequested },
       'Get OnboardingState.prUpdateRequested'
     );
-    return this.updateRequested;
+    return updateRequested;
   }
 
   static set prUpdateRequested(value: boolean) {
     logger.trace({ value }, 'Set OnboardingState.prUpdateRequested');
-    this.updateRequested = value;
+    memCache.set(OnboardingState.cacheKey, value);
   }
 }
 

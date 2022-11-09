@@ -5,6 +5,7 @@ import {
   platform,
 } from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
+import * as memCache from '../../../../util/cache/memory';
 import { OnboardingState, toSha256 } from '../common';
 import { rebaseOnboardingBranch } from './rebase';
 
@@ -22,6 +23,7 @@ describe('workers/repository/onboarding/branch/rebase', () => {
     const hash = '';
 
     beforeEach(() => {
+      memCache.init();
       jest.resetAllMocks();
       OnboardingState.prUpdateRequested = false;
       config = {
