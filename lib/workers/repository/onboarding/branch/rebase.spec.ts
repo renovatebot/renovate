@@ -6,7 +6,8 @@ import {
 } from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
 import * as memCache from '../../../../util/cache/memory';
-import { OnboardingState, toSha256 } from '../common';
+import { toSha256 } from '../../../../util/hasha';
+import { OnboardingState } from '../common';
 import { rebaseOnboardingBranch } from './rebase';
 
 jest.mock('../../../../util/git');

@@ -12,6 +12,7 @@ import {
   isBranchConflicted,
   isBranchModified,
 } from '../../../../util/git';
+import { toSha256 } from '../../../../util/hasha';
 import * as template from '../../../../util/template';
 import type { BranchConfig } from '../../../types';
 import {
@@ -22,7 +23,7 @@ import {
 import { getPlatformPrOptions } from '../../update/pr';
 import { prepareLabels } from '../../update/pr/labels';
 import { addParticipants } from '../../update/pr/participants';
-import { OnboardingState, defaultConfigFile, toSha256 } from '../common';
+import { OnboardingState, defaultConfigFile } from '../common';
 import { getBaseBranchDesc } from './base-branch';
 import { getConfigDesc } from './config-description';
 import { getPrList } from './pr-list';

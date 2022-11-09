@@ -8,7 +8,8 @@ import {
   isBranchBehindBase,
   isBranchModified,
 } from '../../../../util/git';
-import { OnboardingState, defaultConfigFile, toSha256 } from '../common';
+import { toSha256 } from '../../../../util/hasha';
+import { OnboardingState, defaultConfigFile } from '../common';
 import { OnboardingCommitMessageFactory } from './commit-message';
 import { getOnboardingConfigContents } from './config';
 
