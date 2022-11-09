@@ -559,13 +559,13 @@ export async function processBranch(
       !config.artifactErrors?.length &&
       !userRebaseRequested &&
       commitSha &&
+      !branchPr &&
       config.prCreation !== 'immediate'
     ) {
       logger.debug(`Branch status pending, current sha: ${commitSha}`);
       return {
         branchExists: true,
         updatesVerified,
-        prNo: branchPr?.number,
         result: BranchResult.Pending,
         commitSha,
       };
