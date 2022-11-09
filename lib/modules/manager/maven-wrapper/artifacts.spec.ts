@@ -214,4 +214,17 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
       },
     ]);
   });
+
+  it.only('updates distributionSha256Sum (install)', async () => {
+    const execSnapshots = mockExecAll();
+    GlobalConfig.set({ localDir: './', binarySource: 'install' });
+    const updatedDeps = await updateArtifacts({
+      packageFileName: 'maven',
+      newPackageFileContent: '',
+      updatedDeps: [],
+      config: { currentValue: '3.0.0', newValue: '3.3.1' },
+    });
+
+    expect(updatedDeps).toEqual({});
+  });
 });
