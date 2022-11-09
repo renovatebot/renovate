@@ -3,17 +3,18 @@ import { DockerDatasource } from '../../datasource/docker';
 import { GithubReleasesDatasource } from '../../datasource/github-releases';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { NodeDatasource } from '../../datasource/node';
+import { RubyVersionDatasource } from '../../datasource/ruby-version';
 import * as nodeVersioning from '../../versioning/node';
 import * as regexVersioning from '../../versioning/regex';
 import * as semverVersioning from '../../versioning/semver';
 import type { PackageDependency } from '../types';
 
-type StaticTooling = Pick<
+export type StaticTooling = Pick<
   PackageDependency,
   'depName' | 'datasource' | 'packageName' | 'versioning' | 'extractVersion'
 >;
 
-type DynamicTooling = (version: string) => StaticTooling | undefined;
+export type DynamicTooling = (version: string) => StaticTooling | undefined;
 
 export const upgradeableTooling: Record<
   string,
@@ -211,7 +212,7 @@ export const upgradeableTooling: Record<
     extractVersion: '^v(?<version>\\S+)',
   },
   ruby: {
-    datasource: 'ruby-version',
+    datasource: RubyVersionDatasource.id,
     packageName: 'ruby-version',
     versioning: semverVersioning.id,
   },
