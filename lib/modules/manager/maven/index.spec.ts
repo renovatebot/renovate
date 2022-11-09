@@ -164,7 +164,7 @@ describe('modules/manager/maven/index', () => {
           { packageFile: 'pom.xml', deps: [] },
           {
             packageFile: 'foo.bar/pom.xml',
-            deps: [{ depName: 'org.example:root', skipReason: 'root-pom' }],
+            deps: [{ depName: 'org.example:root', depType: 'parent-root' }],
           },
         ]);
       });

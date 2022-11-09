@@ -440,7 +440,7 @@ export function resolveParents(packages: PackageFile[]): PackageFile[] {
     const deps = extractedDeps[packageFile];
     for (const dep of deps) {
       if (rootDeps.has(dep.depName!)) {
-        dep.skipReason = 'root-pom';
+        dep.depType = 'parent-root';
       }
     }
     return { ...pkg, deps };
