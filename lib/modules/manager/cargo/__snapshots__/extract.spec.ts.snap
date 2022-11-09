@@ -528,40 +528,6 @@ exports[`modules/manager/cargo/extract extractPackageFile() extracts registry ur
 ]
 `;
 
-exports[`modules/manager/cargo/extract extractPackageFile() extracts workspace dependencies 1`] = `
-[
-  {
-    "currentValue": "0.14.0",
-    "datasource": "crate",
-    "depName": "git2",
-    "depType": "dependencies",
-    "managerData": {
-      "nestedVersion": false,
-    },
-  },
-  {
-    "currentValue": "1.0.146",
-    "datasource": "crate",
-    "depName": "serde",
-    "depType": "dependencies",
-    "managerData": {
-      "nestedVersion": false,
-    },
-    "target": "dependencies",
-  },
-  {
-    "currentValue": "1.21.1",
-    "datasource": "crate",
-    "depName": "tokio",
-    "depType": "dependencies",
-    "managerData": {
-      "nestedVersion": true,
-    },
-    "target": "dependencies",
-  },
-]
-`;
-
 exports[`modules/manager/cargo/extract extractPackageFile() fails to parse cargo config with invalid TOML 1`] = `
 [
   {
@@ -788,21 +754,6 @@ exports[`modules/manager/cargo/extract extractPackageFile() skips unknown regist
       "nestedVersion": true,
     },
     "skipReason": "unknown-registry",
-  },
-]
-`;
-
-exports[`modules/manager/cargo/extract extractPackageFile() skips workspace dependency 1`] = `
-[
-  {
-    "currentValue": "",
-    "datasource": "crate",
-    "depName": "foobar",
-    "depType": "dependencies",
-    "managerData": {
-      "nestedVersion": false,
-    },
-    "skipReason": "local-dependency",
   },
 ]
 `;

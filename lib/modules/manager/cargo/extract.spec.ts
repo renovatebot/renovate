@@ -14,7 +14,6 @@ const cargo4toml = Fixtures.get('Cargo.4.toml');
 const cargo5toml = Fixtures.get('Cargo.5.toml');
 const cargo6configtoml = Fixtures.get('cargo.6.config.toml');
 const cargo6toml = Fixtures.get('Cargo.6.toml');
-const cargo7toml = Fixtures.get('Cargo.7.toml');
 
 describe('modules/manager/cargo/extract', () => {
   describe('extractPackageFile()', () => {
@@ -114,16 +113,67 @@ describe('modules/manager/cargo/extract', () => {
     });
 
     it('extracts workspace dependencies', async () => {
-      const res = await extractPackageFile(cargo7toml, 'Cargo.toml', config);
-      expect(res?.deps).toMatchSnapshot();
-      expect(res?.deps).toHaveLength(3);
+      const cargoToml = `
+[package]
+name = "renovate-test"
+version = "0.1.0"
+authors = ["John Doe <john.doe@example.org>"]
+edition = "2018"
+
+[dependencies]
+git2 = "0.14.0"
+
+[workspace]
+members = ["pcap-sys"]
+
+[workspace.dependencies]
+serde = "1.0.146"
+tokio = { version = "1.21.1" }`;
+      const res = await extractPackageFile(cargoToml, 'Cargo.toml', config);
+      expect(res?.deps).toEqual([
+        {
+          currentValue: '0.14.0',
+          datasource: 'crate',
+          depName: 'git2',
+          depType: 'dependencies',
+          managerData: { nestedVersion: false },
+        },
+        {
+          currentValue: '1.0.146',
+          datasource: 'crate',
+          depName: 'serde',
+          depType: 'dependencies',
+          managerData: { nestedVersion: false },
+          target: 'dependencies',
+        },
+        {
+          currentValue: '1.21.1',
+          datasource: 'crate',
+          depName: 'tokio',
+          depType: 'dependencies',
+          managerData: {
+            nestedVersion: true,
+          },
+          target: 'dependencies',
+        },
+      ]);
     });
 
     it('skips workspace dependency', async () => {
       const cargotoml = '[dependencies]\nfoobar = { workspace = true }';
       const res = await extractPackageFile(cargotoml, 'Cargo.toml', config);
-      expect(res?.deps).toMatchSnapshot();
-      expect(res?.deps).toHaveLength(1);
+      expect(res?.deps).toEqual([
+        {
+          currentValue: '',
+          datasource: 'crate',
+          depName: 'foobar',
+          depType: 'dependencies',
+          managerData: {
+            nestedVersion: false,
+          },
+          skipReason: 'local-dependency',
+        },
+      ]);
     });
 
     it('skips unknown registries', async () => {
