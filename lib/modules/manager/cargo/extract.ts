@@ -191,17 +191,17 @@ export async function extractPackageFile(
   }
 
   const workspaceSection = cargoManifest.workspace;
-  // An array of all dependencies in the target section
   let workspaceDeps: PackageDependency[] = [];
   if (workspaceSection) {
     const target = 'dependencies';
-    // Dependencies for `workspace.dependencies`
-    const deps = [
-      ...extractFromSection(workspaceSection, target, cargoRegistries, target),
-    ];
     // workspace depedencies could potentially also be fully qualified
     // like target.*.dependencies. It would require further unfolding of the sections
-    workspaceDeps = workspaceDeps.concat(deps);
+    workspaceDeps = extractFromSection(
+      workspaceSection,
+      target,
+      cargoRegistries,
+      target
+    );
   }
 
   const deps = [
