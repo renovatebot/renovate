@@ -215,16 +215,46 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
     ]);
   });
 
-  it.only('updates distributionSha256Sum (install)', async () => {
-    const execSnapshots = mockExecAll();
+  it.only('updates with binarySource install', async () => {
+    const execSnapshots = mockExecAll({ stdout: '', stderr: '' });
+    mockMavenFileChangedInGit();
     GlobalConfig.set({ localDir: './', binarySource: 'install' });
     const updatedDeps = await updateArtifacts({
       packageFileName: 'maven',
       newPackageFileContent: '',
-      updatedDeps: [],
+      updatedDeps: [{ depName: 'org.apache.maven.wrapper:maven-wrapper' }],
       config: { currentValue: '3.0.0', newValue: '3.3.1' },
     });
 
-    expect(updatedDeps).toEqual({});
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: './mvnw wrapper:wrapper',
+        options: {
+          cwd: '../..',
+          encoding: 'utf-8',
+          env: {
+            HOME: '/home/user',
+            HTTPS_PROXY: 'https://example.com',
+            HTTP_PROXY: 'http://example.com',
+            LANG: 'en_US.UTF-8',
+            LC_ALL: 'en_US',
+            NO_PROXY: 'localhost',
+            PATH: '/tmp/path',
+          },
+          maxBuffer: 10485760,
+          timeout: 900000,
+        },
+      },
+    ]);
+
+    expect(updatedDeps).toEqual([
+      {
+        file: {
+          contents: undefined,
+          path: 'maven.mvn/wrapper/maven-wrapper.properties',
+          type: 'addition',
+        },
+      },
+    ]);
   });
 });
