@@ -46,7 +46,7 @@ export async function extractPackageFile(
   try {
     packageJson = JSON.parse(content);
   } catch (err) {
-    logger.debug({ fileName }, 'Invalid JSON');
+    logger.debug(`Invalid JSON in ${fileName}`);
     return null;
   }
 
@@ -493,7 +493,7 @@ export async function extractAllPackageFiles(
         });
       }
     } else {
-      logger.debug({ packageFile }, 'packageFile has no content');
+      logger.debug(`No content found in ${packageFile}`);
     }
   }
 

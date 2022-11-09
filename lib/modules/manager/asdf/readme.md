@@ -1,8 +1,6 @@
-Keeps the [asdf](https://asdf-vm.com/manage/configuration.html#tool-versions)
-`.tool-versions` file updated.
+Keeps the [asdf](https://asdf-vm.com/manage/configuration.html#tool-versions) `.tool-versions` file updated.
 
-Because `asdf` supports the version management of many different tools, specific tool support needs to be added one by one.
-
+Because `asdf` supports versioning for many different tools, specific tool support must be added one-by-one.
 The following tools are currently supported:
 
 - [awscli](https://github.com/MetricMike/asdf-awscli)
@@ -44,4 +42,6 @@ The following tools are currently supported:
 - [trivy](https://github.com/zufardhiyaulhaq/asdf-trivy)
 - [zig](https://github.com/cheetah/asdf-zig)
 
-NOTE: Because `.tool-versions` can support fallback versions only the first version entry for each supported tool is managed
+<!-- prettier-ignore -->
+!!! note
+    Only the first version entry for each supported tool is managed, this is because `.tool-versions` supports fallback versions.

@@ -145,7 +145,7 @@ export function isScheduledNow(
   logger.trace(`now=${now.toISO()}`);
   // Adjust the time if repo is in a different timezone to renovate
   if (config.timezone) {
-    logger.debug({ timezone: config.timezone }, 'Found timezone');
+    logger.debug(`Found timezone: ${config.timezone}`);
     const validTimezone = hasValidTimezone(config.timezone);
     if (!validTimezone[0]) {
       logger.warn(validTimezone[1]);
