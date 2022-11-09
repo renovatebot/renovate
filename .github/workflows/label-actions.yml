@@ -5,11 +5,14 @@ on:
     types: [labeled]
   discussion:
     types: [labeled]
+  pull_request:
+    types: [labeled]
 
 permissions:
   contents: read
   issues: write
   discussions: write
+  pull-requests: write
 
 jobs:
   reaction:
@@ -18,4 +21,4 @@ jobs:
       - uses: dessant/label-actions@93ea5ec1d65e6a21427a1571a18a5b8861206b0b # renovate: tag=v2.2.0
         with:
           github-token: ${{ github.token }}
-          process-only: 'issues, discussions'
+          process-only: 'issues, discussions, prs'
