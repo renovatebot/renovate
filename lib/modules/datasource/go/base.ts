@@ -89,7 +89,7 @@ export class BaseGoDatasource {
       logger.trace({ goModule }, 'go-source header prefix not match');
       return null;
     }
-    logger.debug({ goModule, goSourceUrl }, 'Go lookup source url');
+    logger.debug(`Go lookup source url ${goSourceUrl} for module ${goModule}`);
     return this.detectDatasource(goSourceUrl, goModule);
   }
 
@@ -186,7 +186,7 @@ export class BaseGoDatasource {
       return null;
     }
 
-    logger.debug({ goModule, goImportURL }, 'Go lookup import url');
+    logger.debug(`Go module: ${goModule} lookup import url ${goImportURL}`);
     // get server base url from import url
     const parsedUrl = URL.parse(goImportURL);
 

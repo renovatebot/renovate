@@ -32,7 +32,8 @@ export async function confirmIfDepUpdated(
     );
     // istanbul ignore if
     if (!newExtract) {
-      logger.debug({ manager, packageFile }, 'Could not extract package file');
+      // TODO: fix types (#7154)
+      logger.debug(`Could not extract ${packageFile!}`);
       return false;
     }
     newUpgrade = newExtract.deps[depIndex!];
@@ -40,7 +41,7 @@ export async function confirmIfDepUpdated(
     logger.debug({ manager, packageFile, err }, 'Failed to parse newContent');
   }
   if (!newUpgrade!) {
-    logger.debug({ manager, packageFile }, 'No newUpgrade');
+    logger.debug(`No newUpgrade in ${packageFile!}`);
     return false;
   }
 
@@ -127,7 +128,8 @@ async function checkExistingBranch(
     );
     return null;
   }
-  logger.debug({ packageFile, depName }, 'Branch dep is already updated');
+  // TODO: fix types (#7154)
+  logger.debug(`Branch dep ${depName!} in ${packageFile!} is already updated`);
   return existingContent;
 }
 

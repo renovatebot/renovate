@@ -223,11 +223,7 @@ interface PrefixRange {
   tokens: Token[];
 }
 
-// eslint-disable-next-line typescript-enum/no-enum
-export enum RangeBound {
-  Inclusive = 1,
-  Exclusive,
-}
+export type RangeBound = 'inclusive' | 'exclusive';
 
 interface MavenBasedRange {
   leftBound: RangeBound;
@@ -293,14 +289,9 @@ export function parseMavenBasedRange(input: string): MavenBasedRange | null {
       ) {
         return null;
       }
-      const leftBound =
-        leftBoundStr.trim() === '['
-          ? RangeBound.Inclusive
-          : RangeBound.Exclusive;
+      const leftBound = leftBoundStr.trim() === '[' ? 'inclusive' : 'exclusive';
       const rightBound =
-        rightBoundStr.trim() === ']'
-          ? RangeBound.Inclusive
-          : RangeBound.Exclusive;
+        rightBoundStr.trim() === ']' ? 'inclusive' : 'exclusive';
       return {
         leftBound,
         leftBoundStr,
