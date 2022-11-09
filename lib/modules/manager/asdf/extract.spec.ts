@@ -388,6 +388,79 @@ dummy 1.2.3
       });
     });
 
+    it('can handle java jre / jdk', () => {
+      const jdkRes = extractPackageFile('java adoptopenjdk-16.0.0+36');
+      expect(jdkRes).toEqual({
+        deps: [
+          {
+            currentValue: '16.0.0+36',
+            datasource: 'adoptium-java',
+            depName: 'java',
+            packageName: 'java-jdk',
+            versioning: 'semver',
+          },
+        ],
+      });
+      const jreRes = extractPackageFile('java adoptopenjdk-jre-16.0.0+36');
+      expect(jreRes).toEqual({
+        deps: [
+          {
+            currentValue: '16.0.0+36',
+            datasource: 'adoptium-java',
+            depName: 'java',
+            packageName: 'java-jre',
+            versioning: 'semver',
+          },
+        ],
+      });
+      const unknownRes = extractPackageFile('java unknown-16.0.0+36');
+      expect(unknownRes).toEqual({
+        deps: [
+          {
+            depName: 'java',
+            skipReason: 'unsupported-datasource',
+          },
+        ],
+      });
+    });
+
+    it('can handle scala v 2 & 3', () => {
+      const v2Res = extractPackageFile('scala 2.0.0');
+      expect(v2Res).toEqual({
+        deps: [
+          {
+            currentValue: '2.0.0',
+            datasource: 'github-tags',
+            depName: 'scala',
+            packageName: 'scala/scala',
+            extractVersion: '^v(?<version>\\S+)',
+            versioning: 'semver',
+          },
+        ],
+      });
+      const v3Res = extractPackageFile('scala 3.0.0');
+      expect(v3Res).toEqual({
+        deps: [
+          {
+            currentValue: '3.0.0',
+            datasource: 'github-tags',
+            depName: 'scala',
+            packageName: 'lampepfl/dotty',
+            versioning: 'semver',
+          },
+        ],
+      });
+      const unknownRes = extractPackageFile('scala 0.0.0');
+      expect(unknownRes).toEqual({
+        deps: [
+          {
+            depName: 'scala',
+            skipReason: 'unsupported-datasource',
+          },
+        ],
+      });
+    });
+
     describe('comment handling', () => {
       const validComments = [
         {
