@@ -61,7 +61,7 @@ export async function generateLockFile(
       args += ' --ignore-scripts';
       args += ' --ignore-pnpmfile';
     }
-    logger.debug({ cmd, args }, 'pnpm command');
+    logger.trace({ cmd, args }, 'pnpm command');
 
     if (upgrades.find((upgrade) => upgrade.isLockFileMaintenance)) {
       logger.debug(

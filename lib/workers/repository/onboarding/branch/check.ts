@@ -21,7 +21,7 @@ async function findFile(fileName: string): Promise<boolean> {
 async function configFileExists(): Promise<boolean> {
   for (const fileName of configFileNames) {
     if (fileName !== 'package.json' && (await findFile(fileName))) {
-      logger.debug({ fileName }, 'Config file exists');
+      logger.debug(`Config file exists, fileName: ${fileName}`);
       return true;
     }
   }
