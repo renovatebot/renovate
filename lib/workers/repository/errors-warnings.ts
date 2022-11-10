@@ -3,7 +3,6 @@ import type { RenovateConfig } from '../../config/types';
 import { logger } from '../../logger';
 import type { PackageFile } from '../../modules/manager/types';
 import { emojify } from '../../util/emoji';
-import { regEx } from '../../util/regex';
 import type { DepWarnings } from '../types';
 
 export function getWarnings(config: RenovateConfig): string {
