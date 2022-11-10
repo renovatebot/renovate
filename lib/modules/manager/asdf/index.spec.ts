@@ -14,9 +14,7 @@ scala 3.0.0`)!.deps,
     ];
 
     const usedDatasources = new Set(
-      toolConfigs
-        .map((config) => config.datasource)
-        .filter((datasource): datasource is string => !!datasource)
+      toolConfigs.map((config) => config.datasource!)
     );
 
     for (const datasource of usedDatasources) {

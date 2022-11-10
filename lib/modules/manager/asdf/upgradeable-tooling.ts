@@ -9,10 +9,10 @@ import * as regexVersioning from '../../versioning/regex';
 import * as semverVersioning from '../../versioning/semver';
 import type { PackageDependency } from '../types';
 
-export type StaticTooling = Pick<
-  PackageDependency,
-  'depName' | 'datasource' | 'packageName' | 'versioning' | 'extractVersion'
->;
+export type StaticTooling = Partial<PackageDependency> &
+  Required<
+    Pick<PackageDependency, 'datasource' | 'versioning' | 'packageName'>
+  >;
 
 export type DynamicTooling = (version: string) => StaticTooling | undefined;
 
