@@ -21,7 +21,12 @@ import {
   REPOSITORY_RENAMED,
 } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
-import { BranchStatus, PrState, VulnerabilityAlert } from '../../../types';
+import {
+  BranchStatus,
+  HostRule,
+  PrState,
+  VulnerabilityAlert,
+} from '../../../types';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import * as git from '../../../util/git';
 import { listCommitTree, pushCommitToRenovateRef } from '../../../util/git';
@@ -166,14 +171,31 @@ export async function initPlatform({
     }
   }
   logger.debug({ platformConfig, renovateUsername }, 'Platform config');
-  const platformResult: PlatformResult = {
+  const githubDS: HostRule[] = [];
+  const gitHubRule: HostRule[] = [
+    {
+      matchHost: '.pkg.github.com',
+    },
+    {
+      matchHost: 'ghcr.io',
+    },
+  ];
+  for (const rule of gitHubRule) {
+    (['token'] as 'token'[]).forEach((field) => {
+      if (token) {
+        rule[field] = token;
+      }
+    });
+    githubDS.push(rule);
+    hostRules.add(rule);
+  }
+  return {
     endpoint: platformConfig.endpoint,
     gitAuthor: gitAuthor ?? discoveredGitAuthor,
     renovateUsername,
     token,
+    hostRules: githubDS,
   };
-
-  return platformResult;
 }
 
 // Get all repositories that the user has access to
