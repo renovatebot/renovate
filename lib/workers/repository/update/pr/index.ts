@@ -18,6 +18,7 @@ import { ensureComment } from '../../../../modules/platform/comment';
 import { hashBody } from '../../../../modules/platform/pr-body';
 import { BranchStatus } from '../../../../types';
 import { ExternalHostError } from '../../../../types/errors/external-host-error';
+import { getElapsedHours } from '../../../../util/date';
 import { stripEmojis } from '../../../../util/emoji';
 import { fingerprint } from '../../../../util/fingerprint';
 import {
@@ -38,15 +39,6 @@ import { getPrBody } from './body';
 import { prepareLabels } from './labels';
 import { addParticipants } from './participants';
 import { getPrCache, setPrCache } from './set-pr-cache';
-
-function getElapsedHours(time: Date | string): number {
-  const pastTime = typeof time === 'string' ? new Date(time) : time;
-  const currentTime = new Date();
-  const millisecondsPerHour = 1000 * 60 * 60;
-  return Math.round(
-    (currentTime.getTime() - pastTime.getTime()) / millisecondsPerHour
-  );
-}
 
 export function getPlatformPrOptions(
   config: RenovateConfig & PlatformPrOptions
