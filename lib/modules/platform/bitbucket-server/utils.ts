@@ -7,11 +7,7 @@ import { HostRule, PrState } from '../../../types';
 import type { GitProtocol } from '../../../types/git';
 import * as git from '../../../util/git';
 import { BitbucketServerHttp } from '../../../util/http/bitbucket-server';
-import type {
-  HttpOptions,
-  HttpPostOptions,
-  HttpResponse,
-} from '../../../util/http/types';
+import type { HttpOptions, HttpResponse } from '../../../util/http/types';
 import { parseUrl } from '../../../util/url';
 import { getPrBodyStruct } from '../pr-body';
 import type { GitUrlOption } from '../types';
@@ -43,7 +39,7 @@ export function prInfo(pr: BbsRestPr): BbsPr {
 }
 
 const addMaxLength = (inputUrl: string, limit = 100): string => {
-  const { search, ...parsedUrl } = url.parse(inputUrl, true); // eslint-disable-line @typescript-eslint/no-unused-vars
+  const { search, ...parsedUrl } = url.parse(inputUrl, true);
   const maxedUrl = url.format({
     ...parsedUrl,
     query: { ...parsedUrl.query, limit },
@@ -54,29 +50,20 @@ const addMaxLength = (inputUrl: string, limit = 100): string => {
 function callApi<T>(
   apiUrl: string,
   method: string,
-  options?: HttpOptions | HttpPostOptions
+  options?: HttpOptions
 ): Promise<HttpResponse<T>> {
   /* istanbul ignore next */
   switch (method.toLowerCase()) {
     case 'post':
-      return bitbucketServerHttp.postJson<T>(
-        apiUrl,
-        options as HttpPostOptions
-      );
+      return bitbucketServerHttp.postJson<T>(apiUrl, options);
     case 'put':
-      return bitbucketServerHttp.putJson<T>(apiUrl, options as HttpPostOptions);
+      return bitbucketServerHttp.putJson<T>(apiUrl, options);
     case 'patch':
-      return bitbucketServerHttp.patchJson<T>(
-        apiUrl,
-        options as HttpPostOptions
-      );
+      return bitbucketServerHttp.patchJson<T>(apiUrl, options);
     case 'head':
       return bitbucketServerHttp.headJson<T>(apiUrl, options);
     case 'delete':
-      return bitbucketServerHttp.deleteJson<T>(
-        apiUrl,
-        options as HttpPostOptions
-      );
+      return bitbucketServerHttp.deleteJson<T>(apiUrl, options);
     case 'get':
     default:
       return bitbucketServerHttp.getJson<T>(apiUrl, options);
@@ -86,7 +73,7 @@ function callApi<T>(
 export async function accumulateValues<T = any>(
   reqUrl: string,
   method = 'get',
-  options?: HttpOptions | HttpPostOptions,
+  options?: HttpOptions,
   limit?: number
 ): Promise<T[]> {
   let accumulator: T[] = [];
@@ -104,7 +91,7 @@ export async function accumulateValues<T = any>(
       break;
     }
 
-    const { search, ...parsedUrl } = url.parse(nextUrl, true); // eslint-disable-line @typescript-eslint/no-unused-vars
+    const { search, ...parsedUrl } = url.parse(nextUrl, true);
     nextUrl = url.format({
       ...parsedUrl,
       query: {
@@ -177,7 +164,7 @@ function generateUrlFromEndpoint(
     }scm`,
     repository,
   });
-  logger.debug({ url: generatedUrl }, `using generated endpoint URL`);
+  logger.debug(`Using generated endpoint URL: ${generatedUrl}`);
   return generatedUrl;
 }
 
@@ -205,7 +192,7 @@ export function getRepoGitUrl(
     if (sshUrl === undefined) {
       throw new Error(CONFIG_GIT_URL_UNAVAILABLE);
     }
-    logger.debug({ url: sshUrl.href }, `using ssh URL`);
+    logger.debug(`Using ssh URL: ${sshUrl.href}`);
     return sshUrl.href;
   }
   let cloneUrl = info.links.clone?.find(({ name }) => name === 'http');

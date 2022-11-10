@@ -3,12 +3,10 @@ import { envMock, mockExecAll } from '../../../../test/exec-util';
 import { env, fs, git, mocked, partial } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
-import { PlatformId } from '../../../constants';
 import * as docker from '../../../util/exec/docker';
 import type { StatusResult } from '../../../util/git/types';
 import * as hostRules from '../../../util/host-rules';
 import * as _datasource from '../../datasource';
-import { GitTagsDatasource } from '../../datasource/git-tags';
 import { PackagistDatasource } from '../../datasource/packagist';
 import type { UpdateArtifactsConfig } from '../types';
 import * as composer from '.';
@@ -112,18 +110,12 @@ describe('modules/manager/composer/artifacts', () => {
 
   it('uses hostRules to set COMPOSER_AUTH', async () => {
     hostRules.add({
-      hostType: PlatformId.Github,
+      hostType: 'github',
       matchHost: 'api.github.com',
-      token: 'ghp_github-token',
-    });
-    // This rule should not affect the result the Github rule has priority to avoid breaking changes.
-    hostRules.add({
-      hostType: GitTagsDatasource.id,
-      matchHost: 'github.com',
-      token: 'ghp_git-tags-token',
+      token: 'github-token',
     });
     hostRules.add({
-      hostType: PlatformId.Gitlab,
+      hostType: 'gitlab',
       matchHost: 'gitlab.com',
       token: 'gitlab-token',
     });
@@ -172,87 +164,8 @@ describe('modules/manager/composer/artifacts', () => {
           cwd: '/tmp/github/some/repo',
           env: {
             COMPOSER_AUTH:
-              '{"github-oauth":{"github.com":"ghp_git-tags-token"},' +
-              '"gitlab-token":{"gitlab.com":"gitlab-token"},' +
-              '"gitlab-domains":["gitlab.com"],' +
-              '"http-basic":{' +
-              '"packagist.renovatebot.com":{"username":"some-username","password":"some-password"},' +
-              '"artifactory.yyyyyyy.com":{"username":"some-other-username","password":"some-other-password"}' +
-              '},' +
-              '"bearer":{"packages-bearer.example.com":"abcdef0123456789"}}',
+              '{"github-oauth":{"github.com":"github-token"},"gitlab-token":{"gitlab.com":"gitlab-token"},"gitlab-domains":["gitlab.com"],"http-basic":{"packagist.renovatebot.com":{"username":"some-username","password":"some-password"},"artifactory.yyyyyyy.com":{"username":"some-other-username","password":"some-other-password"}},"bearer":{"packages-bearer.example.com":"abcdef0123456789"}}',
             COMPOSER_CACHE_DIR: '/tmp/renovate/cache/others/composer',
-          },
-        },
-      },
-    ]);
-  });
-
-  it('git-tags hostRule for github.com set github-token in COMPOSER_AUTH', async () => {
-    hostRules.add({
-      hostType: GitTagsDatasource.id,
-      matchHost: 'github.com',
-      token: 'ghp_token',
-    });
-    fs.readLocalFile.mockResolvedValueOnce('{}');
-    const execSnapshots = mockExecAll();
-    fs.readLocalFile.mockResolvedValueOnce('{}');
-    const authConfig = {
-      ...config,
-      registryUrls: ['https://packagist.renovatebot.com'],
-    };
-    git.getRepoStatus.mockResolvedValueOnce(repoStatus);
-    expect(
-      await composer.updateArtifacts({
-        packageFileName: 'composer.json',
-        updatedDeps: [],
-        newPackageFileContent: '{}',
-        config: authConfig,
-      })
-    ).toBeNull();
-
-    expect(execSnapshots).toMatchObject([
-      {
-        options: {
-          env: {
-            COMPOSER_AUTH: '{"github-oauth":{"github.com":"ghp_token"}}',
-          },
-        },
-      },
-    ]);
-  });
-
-  it('Skip github application access token hostRules in COMPOSER_AUTH', async () => {
-    hostRules.add({
-      hostType: PlatformId.Github,
-      matchHost: 'api.github.com',
-      token: 'ghs_token',
-    });
-    hostRules.add({
-      hostType: GitTagsDatasource.id,
-      matchHost: 'github.com',
-      token: 'ghp_token',
-    });
-    fs.readLocalFile.mockResolvedValueOnce('{}');
-    const execSnapshots = mockExecAll();
-    fs.readLocalFile.mockResolvedValueOnce('{}');
-    const authConfig = {
-      ...config,
-      registryUrls: ['https://packagist.renovatebot.com'],
-    };
-    git.getRepoStatus.mockResolvedValueOnce(repoStatus);
-    expect(
-      await composer.updateArtifacts({
-        packageFileName: 'composer.json',
-        updatedDeps: [],
-        newPackageFileContent: '{}',
-        config: authConfig,
-      })
-    ).toBeNull();
-    expect(execSnapshots).toMatchObject([
-      {
-        options: {
-          env: {
-            COMPOSER_AUTH: '{"github-oauth":{"github.com":"ghp_token"}}',
           },
         },
       },
@@ -428,27 +341,30 @@ describe('modules/manager/composer/artifacts', () => {
     ]);
     expect(execSnapshots).toMatchObject([
       {
-        cmd: 'docker pull renovate/php:7.3',
+        cmd: 'docker pull renovate/sidecar',
         options: {
           encoding: 'utf-8',
         },
       },
       {
-        cmd: 'docker ps --filter name=renovate_php -aq',
+        cmd: 'docker ps --filter name=renovate_sidecar -aq',
         options: {
           encoding: 'utf-8',
         },
       },
       {
         cmd:
-          'docker run --rm --name=renovate_php --label=renovate_child ' +
+          'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
           '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
           '-v "/tmp/renovate/cache":"/tmp/renovate/cache" ' +
           '-e COMPOSER_CACHE_DIR ' +
           '-e BUILDPACK_CACHE_DIR ' +
+          '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
-          'renovate/php:7.3' +
+          'renovate/sidecar' +
           ' bash -l -c "' +
+          'install-tool php 7.3' +
+          ' && ' +
           'install-tool composer 1.10.17' +
           ' && ' +
           'composer update --with-dependencies --ignore-platform-reqs --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins' +
@@ -504,6 +420,9 @@ describe('modules/manager/composer/artifacts', () => {
       },
     ]);
     expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'install-tool php 7.3',
+      },
       {
         cmd: 'install-tool composer 1.10.17',
       },

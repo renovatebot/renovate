@@ -82,11 +82,11 @@ describe('modules/manager/jsonnet-bundler/artifacts', () => {
         packageFileName: 'jsonnetfile.json',
         updatedDeps: [
           {
-            depName: 'foo',
+            depName: 'github.com/foo/foo',
             packageName: 'https://github.com/foo/foo.git',
           },
           {
-            depName: 'foo',
+            depName: 'github.com/foo/foo',
             packageName: 'ssh://git@github.com/foo/foo.git',
             managerData: {
               subdir: 'bar',
@@ -96,7 +96,7 @@ describe('modules/manager/jsonnet-bundler/artifacts', () => {
         newPackageFileContent: 'Updated jsonnetfile.json',
         config,
       })
-    ).toMatchSnapshot([
+    ).toMatchObject([
       {
         file: {
           type: 'addition',
@@ -155,7 +155,7 @@ describe('modules/manager/jsonnet-bundler/artifacts', () => {
           isLockFileMaintenance: true,
         },
       })
-    ).toMatchSnapshot([
+    ).toMatchObject([
       {
         file: {
           type: 'addition',
@@ -190,7 +190,7 @@ describe('modules/manager/jsonnet-bundler/artifacts', () => {
           isLockFileMaintenance: true,
         },
       })
-    ).toMatchSnapshot([
+    ).toMatchObject([
       {
         artifactError: {
           lockFile: 'jsonnetfile.lock.json',

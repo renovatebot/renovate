@@ -1,5 +1,6 @@
 import type { LogLevel } from 'bunyan';
 import type { Range } from 'semver';
+import type { PlatformId } from '../constants';
 import type { HostRule } from '../types';
 import type { GitNoVerifyOption } from '../util/git/types';
 
@@ -84,7 +85,7 @@ export interface RenovateSharedConfig {
 // The below should contain config options where stage=global
 export interface GlobalOnlyConfig {
   autodiscover?: boolean;
-  autodiscoverFilter?: string;
+  autodiscoverFilter?: string[] | string;
   baseDir?: string;
   cacheDir?: string;
   containerbaseDir?: string;
@@ -100,7 +101,7 @@ export interface GlobalOnlyConfig {
   privateKeyPathOld?: string;
   redisUrl?: string;
   repositories?: RenovateRepository[];
-  platform?: string;
+  platform?: PlatformId;
   endpoint?: string;
 }
 
@@ -128,7 +129,7 @@ export interface RepoGlobalConfig {
   localDir?: string;
   cacheDir?: string;
   containerbaseDir?: string;
-  platform?: string;
+  platform?: PlatformId;
   endpoint?: string;
 }
 
@@ -229,7 +230,7 @@ export interface RenovateConfig
   prHourlyLimit?: number;
 
   defaultRegistryUrls?: string[];
-  registryUrls?: string[];
+  registryUrls?: string[] | null;
 
   repoIsOnboarded?: boolean;
   repoIsActivated?: boolean;
@@ -304,11 +305,12 @@ export interface PackageRule
   excludePackageNames?: string[];
   excludePackagePatterns?: string[];
   excludePackagePrefixes?: string[];
+  matchCurrentValue?: string;
   matchCurrentVersion?: string | Range;
   matchSourceUrlPrefixes?: string[];
   matchSourceUrls?: string[];
   matchUpdateTypes?: UpdateType[];
-  registryUrls?: string[];
+  registryUrls?: string[] | null;
 }
 
 export interface ValidationMessage {
@@ -356,6 +358,8 @@ export interface RenovateOptionBase {
   experimentalDescription?: string;
 
   experimentalIssues?: number[];
+
+  advancedUse?: boolean;
 }
 
 export interface RenovateArrayOption<
@@ -433,7 +437,7 @@ export interface PackageRuleInputConfig extends Record<string, unknown> {
   depName?: string;
   currentValue?: string | null;
   currentVersion?: string;
-  lockedVersion?: string | null;
+  lockedVersion?: string;
   updateType?: UpdateType;
   isBump?: boolean;
   sourceUrl?: string | null;

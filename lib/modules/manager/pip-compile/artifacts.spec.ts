@@ -8,7 +8,7 @@ import { logger } from '../../../logger';
 import * as docker from '../../../util/exec/docker';
 import type { StatusResult } from '../../../util/git/types';
 import type { UpdateArtifactsConfig } from '../types';
-import { constructPipCompileCmd } from './artifacts';
+import { constructPipCompileCmd, extractResolver } from './artifacts';
 import { updateArtifacts } from '.';
 
 jest.mock('../../../util/exec/env');
@@ -119,6 +119,7 @@ describe('modules/manager/pip-compile/artifacts', () => {
           '-v "/tmp/renovate/cache":"/tmp/renovate/cache" ' +
           '-e PIP_CACHE_DIR ' +
           '-e BUILDPACK_CACHE_DIR ' +
+          '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
           'renovate/sidecar ' +
           'bash -l -c "' +
@@ -199,7 +200,7 @@ describe('modules/manager/pip-compile/artifacts', () => {
     ]);
   });
 
-  it('uses pipenv version from config', async () => {
+  it('uses pip-compile version from config', async () => {
     GlobalConfig.set(dockerAdminConfig);
     const execSnapshots = mockExecAll();
     git.getRepoStatus.mockResolvedValue({
@@ -229,6 +230,7 @@ describe('modules/manager/pip-compile/artifacts', () => {
           '-v "/tmp/renovate/cache":"/tmp/renovate/cache" ' +
           '-e PIP_CACHE_DIR ' +
           '-e BUILDPACK_CACHE_DIR ' +
+          '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
           'renovate/sidecar ' +
           'bash -l -c "' +
@@ -261,7 +263,7 @@ describe('modules/manager/pip-compile/artifacts', () => {
           'subdir/requirements.txt'
         )
       ).toBe(
-        'pip-compile --allow-unsafe --generate-hashes --no-emit-index-url --output-file=requirements.txt requirements.in'
+        'pip-compile --allow-unsafe --generate-hashes --no-emit-index-url --strip-extras --resolver=backtracking --output-file=requirements.txt requirements.in'
       );
     });
 
@@ -276,6 +278,10 @@ describe('modules/manager/pip-compile/artifacts', () => {
       expect(logger.trace).toHaveBeenCalledWith(
         { argument: '--version' },
         'pip-compile argument is not (yet) supported'
+      );
+      expect(logger.warn).toHaveBeenCalledWith(
+        { argument: '--resolver=foobar' },
+        'pip-compile was previously executed with an unexpected `--resolver` value'
       );
     });
 
@@ -294,5 +300,28 @@ describe('modules/manager/pip-compile/artifacts', () => {
         'pip-compile was previously executed with an unexpected `--output-file` filename'
       );
     });
+  });
+
+  describe('extractResolver()', () => {
+    it.each([
+      ['--resolver=backtracking', 'backtracking'],
+      ['--resolver=legacy', 'legacy'],
+    ])(
+      'returns expected value for supported %s resolver',
+      (argument: string, expected: string) => {
+        expect(extractResolver(argument)).toBe(expected);
+      }
+    );
+
+    it.each(['--resolver=foo', '--resolver='])(
+      'returns null for unsupported %s resolver',
+      (argument: string) => {
+        expect(extractResolver(argument)).toBeNull();
+        expect(logger.warn).toHaveBeenCalledWith(
+          { argument },
+          'pip-compile was previously executed with an unexpected `--resolver` value'
+        );
+      }
+    );
   });
 });

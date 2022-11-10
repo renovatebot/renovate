@@ -2,6 +2,7 @@ import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { cache } from '../../../util/cache/package/decorator';
 import { HttpError } from '../../../util/http';
+import { joinUrlParts } from '../../../util/url';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
 import { datasource, defaultRegistryUrl } from './common';
@@ -14,7 +15,9 @@ export class CondaDatasource extends Datasource {
     super(datasource);
   }
 
-  override readonly customRegistrySupport = false;
+  override readonly customRegistrySupport = true;
+
+  override readonly registryStrategy = 'hunt';
 
   override readonly defaultRegistryUrls = [defaultRegistryUrl];
 
@@ -33,9 +36,11 @@ export class CondaDatasource extends Datasource {
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     logger.trace({ registryUrl, packageName }, 'fetching conda package');
 
-    // TODO: types (#7154)
-    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-    const url = `${registryUrl}${packageName}`;
+    if (!registryUrl) {
+      return null;
+    }
+
+    const url = joinUrlParts(registryUrl, packageName);
 
     const result: ReleaseResult = {
       releases: [],
@@ -51,7 +56,7 @@ export class CondaDatasource extends Datasource {
 
       response.body.versions.forEach((version: string) => {
         const thisRelease: Release = {
-          version: version,
+          version,
         };
         result.releases.push(thisRelease);
       });

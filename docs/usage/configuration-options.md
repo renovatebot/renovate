@@ -79,9 +79,12 @@ With the above config:
 
 ## additionalBranchPrefix
 
-This value defaults to an empty string, and is typically not necessary.
-Some managers previously populated this field, but they no longer do so by default.
-You normally don't need to configure this, but one example where it can be useful is combining with `parentDir` in monorepos to split PRs based on where the package definition is located, e.g.
+By default, the value for this config option is an empty string.
+Normally you don't need to set this config option.
+
+Here's an example where `additionalBranchPrefix` can help you.
+Say you're using a monorepo and want to split pull requests based on the location of the package definition, so that individual teams can manage their own Renovate pull requests.
+This can be done with this configuration:
 
 ```json
 {
@@ -91,8 +94,10 @@ You normally don't need to configure this, but one example where it can be usefu
 
 ## additionalReviewers
 
-In contrast to `reviewers`, this option adds to the existing reviewer list, rather than replacing it.
-This makes it suitable for augmenting a preset or base list without displacing the original, for example when adding focused reviewers for a specific package group.
+This option _adds_ to the existing reviewer list, rather than _replacing_ it like `reviewers`.
+
+Use `additionalReviewers` when you want to add to a preset or base list, without replacing the original.
+For example, when adding focused reviewers for a specific package group.
 
 ## assignAutomerge
 
@@ -177,20 +182,24 @@ To configure this option refer to [`schedule`](#schedule) as the syntax is the s
 
 ## automergeStrategy
 
-This setting is only applicable if you opt-in by configuring `automerge` to `true` and `automergeType` to `pr` for any of your dependencies.
+The automerge strategy defaults to `auto`, so Renovate decides how to merge pull requests as best it can.
+If possible, Renovate follows the merge strategy set on the platform itself for the repository.
 
-The automerge strategy defaults to `auto`, in which Renovate will make its best guess as to how to merge pull requests.
-This generally results in Renovate respecting the strategy configured in the platform itself for the repository if possible.
-Acceptable values are:
+If you've set `automerge=true` and `automergeType=pr` for any of your dependencies, then you may choose what automerge strategy Renovate uses by setting the `automergeStrategy` config option.
+If you're happy with the default behavior, you don't need to do anything.
 
-- `auto`, in which the choice is left to Renovate
-- `fast-forward`, which generally involves no new commits in the resultant tree, but "fast-forwarding" the main branch reference
-- `merge-commit`, which generally involves synthesizing a new merge commit
-- `rebase`, which generally involves rewriting history as part of the merge — but usually retaining the individual commits
-- `squash`, which generally involves flattening the commits that are being merged into a single new commit
+You may choose from these values:
 
-Not all platforms support all pull request merge strategies.
-In cases where a merge strategy is not supported by the platform, Renovate will hold off on merging instead of silently merging in a way you didn't wish for.
+- `auto`, Renovate decides how to merge
+- `fast-forward`, "fast-forwarding" the main branch reference, no new commits in the resultant tree
+- `merge-commit`, create a new merge commit
+- `rebase`, rewrite history as part of the merge, but usually keep the individual commits
+- `squash`, flatten the commits that are being merged into a single new commit
+
+Platforms may only support _some_ of these merge strategies.
+
+If the chosen automerge strategy is not supported on your platform then Renovate stops automerging.
+In that case just set a supported automerge strategy.
 
 ## automergeType
 
@@ -240,7 +249,8 @@ If so then Renovate will reflect this setting in its description and use package
 
 <!-- prettier-ignore -->
 !!! note
-    The `baseBranches` config option is not supported when `forkMode` is enabled, including in the Forking Renovate app.
+    Do _not_ use the `baseBranches` config option when you've set a `forkToken`.
+    You may need a `forkToken` when you're using the Forking Renovate app.
 
 ## bbUseDefaultReviewers
 
@@ -289,14 +299,13 @@ If you truly need to configure this then it probably means either:
 
 ## branchNameStrict
 
-By default, Renovate doesn't care about special characters when slugifying the branch name.
-This means that special characters like `.` may end up in the branch name.
-
-When you set `branchNameStrict` to `true`:
+If `true`, Renovate removes special characters when slugifying the branch name:
 
 - all special characters are removed
 - only alphabetic characters are allowed
 - hyphens `-` are used to separate sections
+
+The default `false` behavior will mean that special characters like `.` may end up in the branch name.
 
 ## branchPrefix
 
@@ -325,7 +334,7 @@ This is an advance field and it's recommend you seek a config review before appl
 
 ## bumpVersion
 
-Currently this setting supports `helmv3`, `npm`, `maven` and `sbt` only, so raise a feature request if you have a use for it with other package managers.
+Currently this setting supports `helmv3`, `npm`, 'nuget', `maven` and `sbt` only, so raise a feature request if you have a use for it with other package managers.
 Its purpose is if you want Renovate to update the `version` field within your package file any time it updates dependencies within.
 Usually this is for automatic release purposes, so that you don't need to add another step after Renovate before you can release a new version.
 
@@ -372,8 +381,8 @@ If you want Renovate to signoff its commits, add the [`:gitSignOff` preset](http
 
 <!-- prettier-ignore -->
 !!! warning
-    Editing of `commitMessage` directly is now deprecated and not recommended.
-    Please instead edit the fields such as `commitMessageAction`, `commitMessageExtra`, etc.
+    We deprecated editing the `commitMessage` directly, and we recommend you stop using this config option.
+    Instead use config options like `commitMessageAction`, `commitMessageExtra`, and so on, to create the commit message you want.
 
 ## commitMessageAction
 
@@ -718,10 +727,6 @@ See [Private module support](https://docs.renovatebot.com/getting-started/privat
 
 ## excludeCommitPaths
 
-<!-- prettier-ignore -->
-!!! warning
-    For advanced users only!
-
 Be careful you know what you're doing with this option.
 The initial intended use is to allow the user to exclude certain dependencies from being added/removed/modified when "vendoring" dependencies.
 Example:
@@ -833,11 +838,6 @@ For now, you can only use this option on the GitLab platform.
 
 ## followTag
 
-<!-- prettier-ignore -->
-!!! warning
-    Advanced functionality.
-    Only use this if you're sure you know what you're doing.
-
 For `followTag` to work, the datasource must support distribution streams or tags, like for example npm does.
 
 The main usecase is to follow a pre-release tag of a dependency, say TypeScripts's `"insiders"` build:
@@ -903,11 +903,6 @@ Usage of `direct` will fallback to the Renovate-native release fetching mechanis
 Also we support the `off` keyword which will stop any fetching immediately.
 
 ## group
-
-<!-- prettier-ignore -->
-!!! warning
-    Advanced functionality only.
-    Do not use unless you know what you're doing.
 
 The default configuration for groups are essentially internal to Renovate and you normally shouldn't need to modify them.
 But you may _add_ settings to any group by defining your own `group` configuration object.
@@ -1149,6 +1144,26 @@ Example config:
 Use an exact host for `matchHost` and not a domain (e.g. `api.github.com` as shown above and not `github.com`).
 Do not combine with `hostType` in the same rule or it won't work.
 
+### maxRequestsPerSecond
+
+In addition to `concurrentRequestLimit`, you can limit the maximum number of requests that can be made per one second.
+It can be used to set minimal delay between two requests to the same host.
+Fractional values are allowed, e.g. `0.25` means 1 request per 4 seconds.
+Default value `0` means no limit.
+
+Example config:
+
+```json
+{
+  "hostRules": [
+    {
+      "matchHost": "api.github.com",
+      "maxRequestsPerSecond": 2
+    }
+  ]
+}
+```
+
 ### dnsCache
 
 Enable got [dnsCache](https://github.com/sindresorhus/got/blob/v11.5.2/readme.md#dnsCache) support.
@@ -1165,10 +1180,6 @@ You usually don't need to configure it in a host rule if you have already config
 `hostType` can help for cases like an enterprise registry that serves multiple package types and has different authentication for each, although it's often the case that multiple `matchHost` rules could achieve the same thing.
 
 ### insecureRegistry
-
-<!-- prettier-ignore -->
-!!! warning
-    Advanced config, use at your own risk.
 
 Enable this option to allow Renovate to connect to an [insecure Docker registry](https://docs.docker.com/registry/insecure/) that is http only.
 This is insecure and is not recommended.
@@ -1196,6 +1207,29 @@ This can be a base URL (e.g. `https://api.github.com`) or a hostname like `githu
 If the value starts with `http(s)` then it will only match against URLs which start with the full base URL.
 Otherwise, it will be matched by checking if the URL's hostname matches the `matchHost` directly or ends with it.
 When checking the end of the hostname, a single dot is prefixed to the value of `matchHost`, if one is not already present, to ensure it can only match against whole domain segments.
+
+The `matchHost` URL must be the same as the `registryUrl` set in `.npmrc`, or you'll get authentication issues when the artifacts are updated when yarn or npm runs.
+
+```json
+{
+  "hostRules": [
+    {
+      "matchHost": "https://gitlab.myorg.com/api/v4/packages/npm/",
+      "token": "abc123"
+    }
+  ]
+}
+```
+
+The above corresponds with an `.npmrc` like the following:
+
+```
+registry=https://gitlab.myorg.com/api/v4/packages/npm/
+```
+
+<!-- prettier-ignore -->
+!!! note
+    Values containing a URL path but missing a scheme will be prepended with 'https://' (e.g. `domain.com/path` -> `https://domain.com/path`)
 
 ### timeout
 
@@ -1380,6 +1414,7 @@ Supported lock files are:
 
 - `package-lock.json`
 - `yarn.lock`
+- `pnpm-lock.yaml`
 - `composer.lock`
 - `Gemfile.lock`
 - `poetry.lock`
@@ -1514,7 +1549,7 @@ For example you have multiple `package.json` and want to use `dependencyDashboar
 ```
 
 Important to know: Renovate will evaluate all `packageRules` and not stop once it gets a first match.
-You should order your `packageRules` in order of importance so that later rules can override settings from earlier rules if needed.
+You should order your `packageRules` in ascending order of importance so that more important rules come later and can override settings from earlier rules if needed.
 
 <!-- prettier-ignore -->
 !!! warning
@@ -1690,6 +1725,8 @@ Use this field to restrict rules to a particular package manager. e.g.
 }
 ```
 
+For the full list of available managers, see the [Supported Managers](https://docs.renovatebot.com/modules/manager/#supported-managers) documentation.
+
 ### matchDatasources
 
 Use this field to restrict rules to a particular datasource. e.g.
@@ -1705,7 +1742,47 @@ Use this field to restrict rules to a particular datasource. e.g.
 }
 ```
 
+### matchCurrentValue
+
+This option is matched against the `currentValue` field of a dependency.
+
+`matchCurrentValue` supports Regular Expressions which must begin and end with `/`.
+For example, the following enforces that only `1.*` versions will be used:
+
+```json
+{
+  "packageRules": [
+    {
+      "matchPackagePatterns": ["io.github.resilience4j"],
+      "matchCurrentValue": "/^1\\./"
+    }
+  ]
+}
+```
+
+This field also supports a special negated regex syntax to ignore certain versions.
+Use the syntax `!/ /` like this:
+
+```json
+{
+  "packageRules": [
+    {
+      "matchPackagePatterns": ["io.github.resilience4j"],
+      "matchCurrentValue": "!/^0\\./"
+    }
+  ]
+}
+```
+
 ### matchCurrentVersion
+
+The `currentVersion` field will be one of the following (in order of preference):
+
+- locked version if a lock file exists
+- resolved version
+- current value
+
+Consider using instead `matchCurrentValue` if you wish to match against the raw string value of a dependency.
 
 `matchCurrentVersion` can be an exact SemVer version or a SemVer range:
 
@@ -1959,7 +2036,7 @@ Add to this object if you wish to define rules that apply only to PRs that pin d
 
 ## pinDigests
 
-If enabled Renovate will pin Docker images by means of their SHA256 digest and not only by tag so that they are immutable.
+If enabled Renovate will pin Docker images or GitHub Actions by means of their SHA256 digest and not only by tag so that they are immutable.
 
 ## platformAutomerge
 
@@ -2258,11 +2335,9 @@ Behavior:
 
 Renovate's `"auto"` strategy works like this for npm:
 
-1. Always pin `devDependencies`
-2. Pin `dependencies` if we detect that it's an app and not a library
-3. Widen `peerDependencies`
-4. If an existing range already ends with an "or" operator - e.g. `"^1.0.0 || ^2.0.0"` - then Renovate will widen it, e.g. making it into `"^1.0.0 || ^2.0.0 || ^3.0.0"`
-5. Otherwise, replace the range. e.g. `"^2.0.0"` would be replaced by `"^3.0.0"`
+1. Widen `peerDependencies`
+1. If an existing range already ends with an "or" operator like `"^1.0.0 || ^2.0.0"`, then Renovate widens it into `"^1.0.0 || ^2.0.0 || ^3.0.0"`
+1. Otherwise, Renovate replaces the range. So `"^2.0.0"` is replaced by `"^3.0.0"`
 
 By default, Renovate assumes that if you are using ranges then it's because you want them to be wide/open.
 Renovate won't deliberately "narrow" any range by increasing the semver value inside.
@@ -2304,7 +2379,7 @@ Avoid setting `rebaseWhen=never` and then also setting `prCreation=not-pending` 
 
 By default, Renovate will detect if it has proposed an update to a project before and not propose the same one again.
 For example the Webpack 3.x case described above.
-This field lets you customise this behavior down to a per-package level.
+This field lets you customize this behavior down to a per-package level.
 For example we override it to `true` in the following cases where branch names and PR titles need to be reused:
 
 - Package groups
@@ -2632,12 +2707,26 @@ By default, `renovate` will update to a version greater than `latest` only if th
 
 Must be valid usernames.
 
-If on GitHub and assigning a team to review, you must use the prefix `team:` and add the _last part_ of the team name.
+**Required reviewers on GitHub**
+
+If you're assigning a team to review on GitHub, you must use the prefix `team:` and add the _last part_ of the team name.
 Say the full team name on GitHub is `@organization/foo`, then you'd set the config option like this:
 
 ```json
 {
   "reviewers": ["team:foo"]
+}
+```
+
+**Required reviewers on Azure DevOps**
+
+To mark a reviewer as required on Azure DevOps, you must use the prefix `required:`.
+
+For example: if the username or team name is `bar` then you would set the config option like this:
+
+```json
+{
+  "reviewers": ["required:bar"]
 }
 ```
 
@@ -2726,6 +2815,12 @@ Technical details: We mostly rely on the text parsing of the library [@breejs/la
 Read the parser documentation at [breejs.github.io/later/parsers.html#text](https://breejs.github.io/later/parsers.html#text).
 To parse Cron syntax, Renovate uses [@cheap-glitch/mi-cron](https://github.com/cheap-glitch/mi-cron).
 Renovate does not support scheduled minutes or "at an exact time" granularity.
+
+<!-- prettier-ignore -->
+!!! tip
+    If you want to _disable_ Renovate, then avoid setting `schedule` to `"never"`.
+    Instead, use the `enabled` config option to disable Renovate.
+    Read the [`enabled` config option docs](https://docs.renovatebot.com/configuration-options/#enabled) to learn more.
 
 <!-- prettier-ignore -->
 !!! note

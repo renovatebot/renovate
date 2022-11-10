@@ -82,7 +82,7 @@ export async function lookupUpdates(
         // If dependency lookup fails then warn and return
         const warning: ValidationMessage = {
           topic: depName,
-          message: `Failed to look up dependency ${depName}`,
+          message: `Failed to look up ${datasource} dependency ${depName}`,
         };
         logger.debug({ dependency: depName, packageFile }, warning.message);
         // TODO: return warnings in own field
@@ -90,7 +90,7 @@ export async function lookupUpdates(
         return res;
       }
       if (dependency.deprecationMessage) {
-        logger.debug({ dependency: depName }, 'Found deprecationMessage');
+        logger.debug(`Found deprecationMessage for dependency ${depName}`);
         res.deprecationMessage = dependency.deprecationMessage;
       }
 
@@ -235,7 +235,9 @@ export async function lookupUpdates(
         config,
         currentVersion!,
         latestVersion!,
-        allVersions,
+        config.rangeStrategy === 'in-range-only'
+          ? allSatisfyingVersions
+          : allVersions,
         versioning
       ).filter(
         (v) =>

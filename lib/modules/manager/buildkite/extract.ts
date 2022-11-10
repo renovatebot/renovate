@@ -21,7 +21,7 @@ export function extractPackageFile(content: string): PackageFile | null {
         logger.trace('depLineMatch');
         let skipReason: SkipReason | undefined;
         let repo: string | undefined;
-        logger.debug({ depName }, 'Found BuildKite plugin');
+        logger.trace(`Found BuildKite plugin ${depName}`);
         // Plugins may simply be git repos. If so, we need to parse out the registry.
         const gitPluginMatch = regEx(
           /(ssh:\/\/git@|https:\/\/)(?<registry>[^/]+)\/(?<gitPluginName>.*)/
@@ -32,7 +32,7 @@ export function extractPackageFile(content: string): PackageFile | null {
           const gitDepName = gitPluginName.replace(regEx('\\.git$'), '');
           const dep: PackageDependency = {
             depName: gitDepName,
-            currentValue: currentValue,
+            currentValue,
             registryUrls: ['https://' + registry],
             datasource: GithubTagsDatasource.id,
           };
@@ -52,7 +52,9 @@ export function extractPackageFile(content: string): PackageFile | null {
             skipReason = 'invalid-dependency-specification';
           }
         } else {
-          logger.debug({ currentValue }, 'Skipping non-pinned current version');
+          logger.debug(
+            `Skipping non-pinned buildkite current version ${currentValue}`
+          );
           skipReason = 'invalid-version';
         }
         const dep: PackageDependency = {

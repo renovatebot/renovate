@@ -3,6 +3,7 @@ import semver from 'semver';
 import semverUtils from 'semver-utils';
 import { logger } from '../../../logger';
 import { regEx } from '../../../util/regex';
+import { isSemVerXRange } from '../semver/common';
 import type { NewValueConfig } from '../types';
 
 const {
@@ -63,6 +64,12 @@ export function getNewValue({
   currentVersion,
   newVersion,
 }: NewValueConfig): string | null {
+  if (
+    !['pin', 'update-lockfile'].includes(rangeStrategy) &&
+    isSemVerXRange(currentValue)
+  ) {
+    return null;
+  }
   if (rangeStrategy === 'pin' || isVersion(currentValue)) {
     return newVersion;
   }

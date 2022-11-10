@@ -3,10 +3,12 @@ import { getCache } from '../cache/repository';
 
 export function getCachedModifiedResult(
   branchName: string,
-  branchSha: string
+  branchSha: string | null
 ): boolean | null {
-  const { branches } = getCache();
-  const branch = branches?.find((branch) => branch.branchName === branchName);
+  const cache = getCache();
+  const branch = cache.branches?.find(
+    (branch) => branch.branchName === branchName
+  );
 
   if (branch?.sha === branchSha && branch.isModified !== undefined) {
     return branch.isModified;
@@ -17,7 +19,6 @@ export function getCachedModifiedResult(
 
 export function setCachedModifiedResult(
   branchName: string,
-  branchSha: string,
   isModified: boolean
 ): void {
   const cache = getCache();
@@ -26,12 +27,8 @@ export function setCachedModifiedResult(
   );
 
   if (!branch) {
-    logger.debug(`Branch cache not present for ${branchName}`);
+    logger.debug(`setCachedModifiedResult(): Branch cache not present`);
     return;
-  }
-
-  if (!branch.sha || branch.sha !== branchSha) {
-    branch.sha = branchSha;
   }
 
   branch.isModified = isModified;

@@ -1,4 +1,3 @@
-// TODO #7154
 import is from '@sindresorhus/is';
 import { DateTime } from 'luxon';
 import { GlobalConfig } from '../../../../config/global';
@@ -35,7 +34,6 @@ import {
   isBranchConflicted,
   isBranchModified,
 } from '../../../../util/git';
-import { setCachedConflictResult } from '../../../../util/git/conflicts-cache';
 import {
   getMergeConfidenceLevel,
   isActiveConfidenceLevel,
@@ -77,6 +75,7 @@ async function deleteBranchSilently(branchName: string): Promise<void> {
 
 export interface ProcessBranchResult {
   branchExists: boolean;
+  updatesVerified?: boolean;
   prBlockedBy?: PrBlockedBy;
   prNo?: number;
   result: BranchResult;
@@ -90,6 +89,7 @@ export async function processBranch(
   let config: BranchConfig = { ...branchConfig };
   logger.trace({ config }, 'processBranch()');
   let branchExists = gitBranchExists(config.branchName);
+  let updatesVerified = false;
   if (!branchExists && config.branchPrefix !== config.branchPrefixOld) {
     const branchName = config.branchName.replace(
       config.branchPrefix!,
@@ -177,6 +177,26 @@ export async function processBranch(
       };
     }
     if (branchExists) {
+      // check if branch is labelled to stop
+      config.stopUpdating = branchPr?.labels?.includes(
+        config.stopUpdatingLabel!
+      );
+
+      const prRebaseChecked = !!branchPr?.bodyStruct?.rebaseRequested;
+
+      if (branchExists && !dependencyDashboardCheck && config.stopUpdating) {
+        if (!prRebaseChecked) {
+          logger.info(
+            'Branch updating is skipped because stopUpdatingLabel is present in config'
+          );
+          return {
+            branchExists: true,
+            prNo: branchPr?.number,
+            result: BranchResult.NoWork,
+          };
+        }
+      }
+
       logger.debug('Checking if PR has been edited');
       const branchIsModified = await isBranchModified(config.branchName);
       if (branchPr) {
@@ -192,11 +212,11 @@ export async function processBranch(
           (branchPr.targetBranch &&
             branchPr.targetBranch !== branchConfig.baseBranch)
         ) {
-          logger.debug({ prNo: branchPr.number }, 'PR has been edited');
+          logger.debug(`PR has been edited, PrNo:${branchPr.number}`);
           if (dependencyDashboardCheck || config.rebaseRequested) {
             logger.debug('Manual rebase has been requested for PR');
           } else {
-            const newBody = await getPrBody(branchConfig, {
+            const newBody = getPrBody(branchConfig, {
               debugData: updatePrDebugData(existingPr?.bodyStruct?.debugData),
               rebasingNotice:
                 'Renovate will not automatically rebase this PR, because other commits have been found.',
@@ -378,7 +398,11 @@ export async function processBranch(
       logger.debug(
         'A user manually approved all rate-limited PRs via the Dependency Dashboard.'
       );
-    } else if (branchExists && config.rebaseWhen === 'never') {
+    } else if (
+      branchExists &&
+      config.rebaseWhen === 'never' &&
+      !dependencyDashboardCheck
+    ) {
       logger.debug('rebaseWhen=never so skipping branch update check');
       return {
         branchExists,
@@ -391,7 +415,7 @@ export async function processBranch(
     // TODO: types (#7154)
     logger.debug(`Using reuseExistingBranch: ${config.reuseExistingBranch!}`);
     if (!(config.reuseExistingBranch && config.skipBranchUpdate)) {
-      await checkoutBranch(config.baseBranch!);
+      await checkoutBranch(config.baseBranch);
       const res = await getUpdatedPackageFiles(config);
       // istanbul ignore if
       if (res.artifactErrors && config.artifactErrors) {
@@ -480,27 +504,8 @@ export async function processBranch(
 
       config.isConflicted ??=
         branchExists &&
-        (await isBranchConflicted(config.baseBranch!, config.branchName));
+        (await isBranchConflicted(config.baseBranch, config.branchName));
       config.forceCommit = forcedManually || config.isConflicted;
-
-      config.stopUpdating = branchPr?.labels?.includes(
-        config.stopUpdatingLabel!
-      );
-
-      const prRebaseChecked = !!branchPr?.bodyStruct?.rebaseRequested;
-
-      if (branchExists && !dependencyDashboardCheck && config.stopUpdating) {
-        if (!prRebaseChecked) {
-          logger.info(
-            'Branch updating is skipped because stopUpdatingLabel is present in config'
-          );
-          return {
-            branchExists: true,
-            prNo: branchPr?.number,
-            result: BranchResult.NoWork,
-          };
-        }
-      }
 
       // compile commit message with body, which maybe needs changelogs
       if (config.commitBody) {
@@ -526,6 +531,7 @@ export async function processBranch(
       }
 
       commitSha = await commitFilesToBranch(config);
+      updatesVerified = true;
     }
     // istanbul ignore if
     if (branchPr && platform.refreshPr) {
@@ -541,14 +547,6 @@ export async function processBranch(
     if (commitSha) {
       const action = branchExists ? 'updated' : 'created';
       logger.info({ commitSha }, `Branch ${action}`);
-      // TODO #7154
-      setCachedConflictResult(
-        config.baseBranch!,
-        getBranchCommit(config.baseBranch!)!,
-        config.branchName,
-        commitSha,
-        false
-      );
     }
     // Set branch statuses
     await setArtifactErrorStatus(config);
@@ -563,9 +561,10 @@ export async function processBranch(
       commitSha &&
       config.prCreation !== 'immediate'
     ) {
-      logger.debug({ commitSha }, `Branch status pending`);
+      logger.debug(`Branch status pending, current sha: ${commitSha}`);
       return {
         branchExists: true,
+        updatesVerified,
         prNo: branchPr?.number,
         result: BranchResult.Pending,
         commitSha,
@@ -610,7 +609,9 @@ export async function processBranch(
         mergeStatus === 'branch status error' ||
         mergeStatus === 'failed'
       ) {
-        logger.debug({ mergeStatus }, 'Branch automerge not possible');
+        logger.debug(
+          `Branch automerge not possible, mergeStatus:${mergeStatus}`
+        );
         config.forcePr = true;
         config.branchAutomergeFailureMessage = mergeStatus;
       }
@@ -669,6 +670,7 @@ export async function processBranch(
       // we have already warned inside the bundler artifacts error handling, so just return
       return {
         branchExists: true,
+        updatesVerified,
         prNo: branchPr?.number,
         result: BranchResult.Error,
         commitSha,
@@ -835,6 +837,7 @@ export async function processBranch(
   if (!branchExists) {
     return {
       branchExists: true,
+      updatesVerified,
       prNo: branchPr?.number,
       result: BranchResult.PrCreated,
       commitSha,
@@ -842,6 +845,7 @@ export async function processBranch(
   }
   return {
     branchExists,
+    updatesVerified,
     prNo: branchPr?.number,
     result: BranchResult.Done,
     commitSha,

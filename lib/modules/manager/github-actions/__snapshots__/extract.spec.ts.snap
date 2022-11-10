@@ -3,7 +3,7 @@
 exports[`modules/manager/github-actions/extract extractPackageFile() extracts multiple action tag lines from yaml configuration file 1`] = `
 [
   {
-    "autoReplaceStringTemplate": "{{depName}}/shellcheck@{{#if newDigest}}{{newDigest}}{{#if newValue}} # tag={{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}",
+    "autoReplaceStringTemplate": "{{depName}}/shellcheck@{{#if newDigest}}{{newDigest}}{{#if newValue}} # {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}",
     "commitMessageTopic": "{{{depName}}} action",
     "currentValue": "master",
     "datasource": "github-tags",
@@ -14,7 +14,7 @@ exports[`modules/manager/github-actions/extract extractPackageFile() extracts mu
     "versioning": "docker",
   },
   {
-    "autoReplaceStringTemplate": "{{depName}}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # tag={{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}",
+    "autoReplaceStringTemplate": "{{depName}}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}",
     "commitMessageTopic": "{{{depName}}} action",
     "currentDigest": "c308fdd69d26ed66f4506ebd74b180abe5362145",
     "currentValue": "v1.1.0",
@@ -25,7 +25,7 @@ exports[`modules/manager/github-actions/extract extractPackageFile() extracts mu
     "versioning": "docker",
   },
   {
-    "autoReplaceStringTemplate": "{{depName}}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # tag={{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}",
+    "autoReplaceStringTemplate": "{{depName}}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}",
     "commitMessageTopic": "{{{depName}}} action",
     "currentValue": "1.0.0",
     "datasource": "github-tags",
@@ -35,7 +35,7 @@ exports[`modules/manager/github-actions/extract extractPackageFile() extracts mu
     "versioning": "docker",
   },
   {
-    "autoReplaceStringTemplate": "{{depName}}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # tag={{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}",
+    "autoReplaceStringTemplate": "{{depName}}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}",
     "commitMessageTopic": "{{{depName}}} action",
     "currentDigest": "c308fdd69d26ed66f4506ebd74b180abe5362145",
     "currentValue": undefined,
@@ -46,7 +46,7 @@ exports[`modules/manager/github-actions/extract extractPackageFile() extracts mu
     "versioning": "docker",
   },
   {
-    "autoReplaceStringTemplate": "{{depName}}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # tag={{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}",
+    "autoReplaceStringTemplate": "{{depName}}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}",
     "commitMessageTopic": "{{{depName}}} action",
     "currentValue": "v2",
     "datasource": "github-tags",
@@ -56,7 +56,7 @@ exports[`modules/manager/github-actions/extract extractPackageFile() extracts mu
     "versioning": "docker",
   },
   {
-    "autoReplaceStringTemplate": "{{depName}}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # tag={{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}",
+    "autoReplaceStringTemplate": "{{depName}}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}",
     "commitMessageTopic": "{{{depName}}} action",
     "currentDigest": "ec3a7ce113134d7a93b817d10a8272cb61118579",
     "currentValue": "v2.4.0",
@@ -67,7 +67,7 @@ exports[`modules/manager/github-actions/extract extractPackageFile() extracts mu
     "versioning": "docker",
   },
   {
-    "autoReplaceStringTemplate": "{{depName}}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # tag={{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}",
+    "autoReplaceStringTemplate": "{{depName}}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}",
     "commitMessageTopic": "{{{depName}}} action",
     "currentDigest": "16499b5e05bf2e26879000db0c1d13f7e13fa3af",
     "currentValue": "v1.0.7",
@@ -78,7 +78,7 @@ exports[`modules/manager/github-actions/extract extractPackageFile() extracts mu
     "versioning": "docker",
   },
   {
-    "autoReplaceStringTemplate": "{{depName}}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # tag={{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}",
+    "autoReplaceStringTemplate": "{{depName}}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}",
     "commitMessageTopic": "{{{depName}}} action",
     "currentValue": "v1.0.3",
     "datasource": "github-tags",
@@ -90,56 +90,10 @@ exports[`modules/manager/github-actions/extract extractPackageFile() extracts mu
 ]
 `;
 
-exports[`modules/manager/github-actions/extract extractPackageFile() extracts multiple action tag lines with double quotes and comments 1`] = `
-[
-  {
-    "autoReplaceStringTemplate": ""{{depName}}@{{#if newDigest}}{{newDigest}}"{{#if newValue}} # tag={{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}"{{/unless}}",
-    "commitMessageTopic": "{{{depName}}} action",
-    "currentValue": "v0.13.1",
-    "datasource": "github-tags",
-    "depName": "pascalgn/automerge-action",
-    "depType": "action",
-    "replaceString": ""pascalgn/automerge-action@v0.13.1"",
-    "versioning": "docker",
-  },
-  {
-    "autoReplaceStringTemplate": "{{depName}}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # tag={{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}",
-    "commitMessageTopic": "{{{depName}}} action",
-    "currentDigest": "1e204e9a9253d643386038d443f96446fa156a97",
-    "currentValue": "v2.3.5",
-    "datasource": "github-tags",
-    "depName": "actions/checkout",
-    "depType": "action",
-    "replaceString": "actions/checkout@1e204e9a9253d643386038d443f96446fa156a97 # renovate: tag=v2.3.5",
-    "versioning": "docker",
-  },
-  {
-    "autoReplaceStringTemplate": "{{depName}}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # tag={{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}",
-    "commitMessageTopic": "{{{depName}}} action",
-    "currentValue": "v1",
-    "datasource": "github-tags",
-    "depName": "actions/checkout",
-    "depType": "action",
-    "replaceString": "actions/checkout@v1",
-    "versioning": "docker",
-  },
-  {
-    "autoReplaceStringTemplate": ""{{depName}}@{{#if newDigest}}{{newDigest}}"{{#if newValue}} # tag={{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}"{{/unless}}",
-    "commitMessageTopic": "{{{depName}}} action",
-    "currentValue": "v1.1.2",
-    "datasource": "github-tags",
-    "depName": "actions/checkout",
-    "depType": "action",
-    "replaceString": ""actions/checkout@v1.1.2"",
-    "versioning": "docker",
-  },
-]
-`;
-
 exports[`modules/manager/github-actions/extract extractPackageFile() extracts multiple docker image lines from yaml configuration file 1`] = `
 [
   {
-    "autoReplaceStringTemplate": "{{depName}}/shellcheck@{{#if newDigest}}{{newDigest}}{{#if newValue}} # tag={{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}",
+    "autoReplaceStringTemplate": "{{depName}}/shellcheck@{{#if newDigest}}{{newDigest}}{{#if newValue}} # {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}",
     "commitMessageTopic": "{{{depName}}} action",
     "currentValue": "master",
     "datasource": "github-tags",
@@ -159,7 +113,7 @@ exports[`modules/manager/github-actions/extract extractPackageFile() extracts mu
     "replaceString": "replicated/dockerfilelint",
   },
   {
-    "autoReplaceStringTemplate": "{{depName}}/cli@{{#if newDigest}}{{newDigest}}{{#if newValue}} # tag={{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}",
+    "autoReplaceStringTemplate": "{{depName}}/cli@{{#if newDigest}}{{newDigest}}{{#if newValue}} # {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}",
     "commitMessageTopic": "{{{depName}}} action",
     "currentValue": "master",
     "datasource": "github-tags",
