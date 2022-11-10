@@ -154,14 +154,14 @@ export async function lookupUpdates(
         res.updates.push(rollback);
       }
       let rangeStrategy = getRangeStrategy(config);
-      if (dependency.replacementName && dependency.replacementVersion) {
+      if (config.replacementName && config.replacementVersion) {
         res.updates.push({
           updateType: 'replacement',
-          newName: dependency.replacementName,
+          newName: config.replacementName,
           newValue: versioning.getNewValue({
             // TODO #7154
             currentValue: currentValue!,
-            newVersion: dependency.replacementVersion,
+            newVersion: config.replacementVersion,
             rangeStrategy: rangeStrategy!,
           })!,
         });

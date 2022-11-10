@@ -76,6 +76,8 @@ export class GithubGraphqlDatasourceHelper<
 
   private cursor: string | null = null;
 
+  private isCacheable = false;
+
   constructor(
     packageConfig: GithubPackageConfig,
     private http: GithubHttp,
@@ -166,8 +168,11 @@ export class GithubGraphqlDatasourceHelper<
 
     this.queryCount += 1;
 
-    const isRepoPrivate = data.repository.isRepoPrivate;
-    const res = { ...data.repository.payload, isRepoPrivate };
+    if (!this.isCacheable && data.repository.isRepoPrivate === false) {
+      this.isCacheable = true;
+    }
+
+    const res = data.repository.payload;
     return [res, null];
   }
 
@@ -243,9 +248,8 @@ export class GithubGraphqlDatasourceHelper<
 
   /**
    * This method intentionally was made not async, though it returns `Promise`.
-   *
-   * It helps us to avoid potential race conditions during concurrent fetching
-   * of the same package releases.
+   * This method doesn't make pages to be fetched concurrently.
+   * Instead, it ensures that same package release is not fetched twice.
    */
   private doConcurrentQuery(): Promise<ResultItem[]> {
     const packageFingerprint = this.getFingerprint();
@@ -256,7 +260,7 @@ export class GithubGraphqlDatasourceHelper<
     return resultPromise;
   }
 
-  private async getItems(): Promise<ResultItem[]> {
+  async getItems(): Promise<ResultItem[]> {
     const res = await this.doConcurrentQuery();
     return res;
   }
