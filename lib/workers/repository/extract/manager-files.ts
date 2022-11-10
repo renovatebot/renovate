@@ -65,7 +65,7 @@ export async function getManagerPackageFiles(
         });
       }
     } else {
-      logger.debug({ packageFile }, 'packageFile has no content');
+      logger.debug(`${packageFile} has no content`);
     }
   }
   return packageFiles;

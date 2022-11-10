@@ -35,7 +35,6 @@ import type {
 import { embedChangelogs } from '../../changelog';
 import { resolveBranchStatus } from '../branch/status-checks';
 import { getPrBody } from './body';
-import { ChangeLogError } from './changelog/types';
 import { prepareLabels } from './labels';
 import { addParticipants } from './participants';
 import { getPrCache, setPrCache } from './set-pr-cache';
@@ -257,7 +256,7 @@ export async function ensurePr(
             }
           }
         }
-      } else if (logJSON.error === ChangeLogError.MissingGithubToken) {
+      } else if (logJSON.error === 'MissingGithubToken') {
         upgrade.prBodyNotes ??= [];
         upgrade.prBodyNotes = [
           ...upgrade.prBodyNotes,

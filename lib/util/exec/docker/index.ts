@@ -151,7 +151,7 @@ export async function removeDockerContainer(
     });
     const containerId = res?.stdout?.trim() || '';
     if (containerId.length) {
-      logger.debug({ containerId }, 'Removing container');
+      logger.debug(`Removing container with ID: ${containerId}`);
       cmd = `docker rm -f ${containerId}`;
       await rawExec(cmd, {
         encoding: 'utf-8',
@@ -270,7 +270,7 @@ export async function generateDockerCommand(
       'Resolved tag constraint'
     );
   } else {
-    logger.debug({ image }, 'No tag or tagConstraint specified');
+    logger.debug(`No tag or tagConstraint specified for image: ${image}`);
   }
 
   const taggedImage = tag ? `${image}:${tag}` : `${image}`;
