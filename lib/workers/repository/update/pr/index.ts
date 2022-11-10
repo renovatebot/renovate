@@ -44,7 +44,7 @@ function getElapsedHours(time: Date | string): number {
   const currentTime = new Date();
   const millisecondsPerHour = 1000 * 60 * 60;
   return Math.round(
-    currentTime.getTime() - pastTime.getTime() / millisecondsPerHour
+    (currentTime.getTime() - pastTime.getTime()) / millisecondsPerHour
   );
 }
 
@@ -323,10 +323,9 @@ export async function ensurePr(
         existingPrTitle === newPrTitle &&
         existingPrBodyHash === newPrBodyHash
       ) {
+        // no need to update PrCache here else we will never reach elapsedHours > 24
         // TODO: types (#7154)
         logger.debug(`${existingPr.displayNumber!} does not need updating`);
-        // update prCache last edit time
-        setPrCache(branchName, prFingerprint);
         return { type: 'with-pr', pr: existingPr };
       }
       // PR must need updating

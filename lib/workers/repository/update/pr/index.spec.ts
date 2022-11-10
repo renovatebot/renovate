@@ -421,7 +421,6 @@ describe('workers/repository/update/pr/index', () => {
 
         git.getBranchLastCommitTime.mockResolvedValueOnce(then.toJSDate());
         checks.resolveBranchStatus.mockResolvedValueOnce(BranchStatus.yellow);
-        platform.createPr.mockResolvedValueOnce(pr);
 
         const res = await ensurePr({
           ...config,
