@@ -44,8 +44,8 @@ function getElapsedHours(time: Date | string): number {
   const pastTime = typeof time === 'string' ? new Date(time) : time;
   const currentTime = new Date();
   const millisecondsPerHour = 1000 * 60 * 60;
-  return (
-    Math.round(currentTime.getTime() - pastTime.getTime()) / millisecondsPerHour
+  return Math.round(
+    currentTime.getTime() - pastTime.getTime() / millisecondsPerHour
   );
 }
 
@@ -105,28 +105,24 @@ export async function ensurePr(
   const { branchName, ignoreTests, prTitle = '', upgrades } = config;
   const dependencyDashboardCheck =
     config.dependencyDashboardChecks?.[config.branchName];
-  // Check if existing PR exists
+  // Check if PR already exists
   const existingPr = await platform.getBranchPr(branchName);
   if (existingPr) {
     logger.debug('Found existing PR');
     const prCache = getPrCache(branchName);
     if (prCache) {
-      logger.debug({ prCache }, 'Pr-Cache exists');
+      logger.debug({ prCache }, 'Found existing Pr cache');
       const lastEditTime = prCache?.lastEdited;
-      // check pr config fingerprint: no need to check for upgrades as it is already inside config
+      // validate pr cache and if okay skip pr body update and changelog fetching
       if (
         isCloned() === false &&
         prFingerprint === prCache.fingerprint &&
         getElapsedHours(lastEditTime) > 24
       ) {
-        logger.debug(
-          `${existingPr.displayNumber!} does not need updating --- cache used HURRAY !!!`
-        );
+        logger.debug('Pr fingerprints match, skiping fetching changelogs');
         return { type: 'with-pr', pr: existingPr };
       }
-    } else {
-      logger.debug('Pr-Cache not found');
-      setPrCache(branchName, prFingerprint);
+      logger.debug('Pr fingerprints do not match');
     }
   }
   config.upgrades = [];
@@ -330,6 +326,8 @@ export async function ensurePr(
       ) {
         // TODO: types (#7154)
         logger.debug(`${existingPr.displayNumber!} does not need updating`);
+        // update prCache last edit time
+        setPrCache(branchName, prFingerprint);
         return { type: 'with-pr', pr: existingPr };
       }
       // PR must need updating
@@ -349,8 +347,6 @@ export async function ensurePr(
           },
           'PR body changed'
         );
-        // update prCache last edit time
-        setPrCache(branchName, prFingerprint);
       }
       if (GlobalConfig.get('dryRun')) {
         logger.info(`DRY-RUN: Would update PR #${existingPr.number}`);
@@ -363,6 +359,8 @@ export async function ensurePr(
         });
         logger.info({ pr: existingPr.number, prTitle }, `PR updated`);
       }
+      // update prCache last edit time
+      setPrCache(branchName, prFingerprint);
       return { type: 'with-pr', pr: existingPr };
     }
     logger.debug({ branch: branchName, prTitle }, `Creating PR`);
@@ -392,9 +390,6 @@ export async function ensurePr(
           platformOptions: getPlatformPrOptions(config),
           draftPR: config.draftPR,
         });
-
-        // add pr object to branch cache
-        setPrCache(branchName, prFingerprint);
 
         incLimitedValue(Limit.PullRequests);
         logger.info({ pr: pr?.number, prTitle }, 'PR created');
@@ -458,6 +453,8 @@ export async function ensurePr(
       }
       // TODO: types (#7154)
       logger.debug(`Created ${pr.displayNumber!}`);
+      // update prCache last edit time
+      setPrCache(branchName, prFingerprint);
       return { type: 'with-pr', pr };
     }
   } catch (err) {
