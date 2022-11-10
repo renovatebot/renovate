@@ -30,7 +30,7 @@ export async function updateArtifacts({
     const inputs = updatedDeps
       .map(({ depName }) => depName)
       .filter(is.nonEmptyStringAndNotWhitespace)
-      .map((depName) => `--update-input ${depName}`)
+      .map((depName) => `--update-input ${quote(depName)}`)
       .join(' ');
     cmd = `nix \
     --extra-experimental-features nix-command \
