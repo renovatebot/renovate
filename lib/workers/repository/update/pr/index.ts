@@ -122,6 +122,10 @@ export async function ensurePr(
         return { type: 'with-pr', pr: existingPr };
       }
       logger.debug('Pr fingerprints do not match');
+    } else {
+      logger.debug('Pr cache not found, creating new.');
+      // update prCache last edit time
+      setPrCache(branchName, prFingerprint);
     }
   }
   config.upgrades = [];
@@ -356,9 +360,9 @@ export async function ensurePr(
           platformOptions: getPlatformPrOptions(config),
         });
         logger.info({ pr: existingPr.number, prTitle }, `PR updated`);
+        // update prCache last edit time
+        setPrCache(branchName, prFingerprint);
       }
-      // update prCache last edit time
-      setPrCache(branchName, prFingerprint);
       return { type: 'with-pr', pr: existingPr };
     }
     logger.debug({ branch: branchName, prTitle }, `Creating PR`);
