@@ -301,6 +301,16 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
         },
       ]);
     });
+
+    it('should return empty array for dev.azure.com project', async () => {
+      const res = await getReleaseList(
+        {
+          ...azureProject,
+        },
+        {} as ChangeLogRelease
+      );
+      expect(res).toBeEmptyArray();
+    });
   });
 
   describe('getReleaseNotes()', () => {
