@@ -393,37 +393,28 @@ describe('util/github/graphql/datasource-helper', () => {
         { version: v3, releaseTimestamp: t3, foo: '3' },
       ];
 
-      it('true if repo is public', async () => {
-        httpMock
-          .scope('https://api.github.com/')
-          .post('/graphql')
-          .reply(200, resp(data, undefined, false));
+      test.each`
+        isPrivate | isCacheable
+        ${true}   | ${false}
+        ${false}  | ${true}
+      `(
+        'private=$isPrivate => isCacheable=$isCacheable',
+        async ({ isPrivate, isCacheable }) => {
+          httpMock
+            .scope('https://api.github.com/')
+            .post('/graphql')
+            .reply(200, resp(data, undefined, isPrivate));
 
-        const instance = new GithubGraphqlDatasourceHelper(
-          { packageName: 'foo/bar' },
-          http,
-          adapter
-        );
-        await instance.getItems();
+          const instance = new GithubGraphqlDatasourceHelper(
+            { packageName: 'foo/bar' },
+            http,
+            adapter
+          );
+          await instance.getItems();
 
-        expect(instance).toHaveProperty('isCacheable', true);
-      });
-
-      it('false if repo is private', async () => {
-        httpMock
-          .scope('https://api.github.com/')
-          .post('/graphql')
-          .reply(200, resp(data, undefined, true));
-
-        const instance = new GithubGraphqlDatasourceHelper(
-          { packageName: 'foo/bar' },
-          http,
-          adapter
-        );
-        await instance.getItems();
-
-        expect(instance).toHaveProperty('isCacheable', false);
-      });
+          expect(instance).toHaveProperty('isCacheable', isCacheable);
+        }
+      );
     });
   });
 });
