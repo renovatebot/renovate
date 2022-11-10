@@ -3,7 +3,10 @@ import { parse as graphqlParse } from 'graphql';
 import * as httpMock from '../../../../test/http-mock';
 import { GithubGraphqlResponse, GithubHttp } from '../../http/github';
 import { range } from '../../range';
-import { GithubGraphqlDatasourceHelper as Datasource } from './datasource-helper';
+import {
+  GithubGraphqlDatasourceHelper as Datasource,
+  GithubGraphqlDatasourceHelper,
+} from './datasource-helper';
 import type {
   GithubDatasourceItem,
   GithubGraphqlDatasourceAdapter,
@@ -380,6 +383,46 @@ describe('util/github/graphql/datasource-helper', () => {
           { body: { variables: { count: 50, cursor: null } } },
           { body: { variables: { count: 25, cursor: null } } },
         ]);
+      });
+    });
+
+    describe('Cacheable flag', () => {
+      const data = [
+        { version: v1, releaseTimestamp: t1, foo: '1' },
+        { version: v2, releaseTimestamp: t2, foo: '2' },
+        { version: v3, releaseTimestamp: t3, foo: '3' },
+      ];
+
+      it('true if repo is public', async () => {
+        httpMock
+          .scope('https://api.github.com/')
+          .post('/graphql')
+          .reply(200, resp(data, undefined, false));
+
+        const instance = new GithubGraphqlDatasourceHelper(
+          { packageName: 'foo/bar' },
+          http,
+          adapter
+        );
+        await instance.getItems();
+
+        expect(instance).toHaveProperty('isCacheable', true);
+      });
+
+      it('false if repo is private', async () => {
+        httpMock
+          .scope('https://api.github.com/')
+          .post('/graphql')
+          .reply(200, resp(data, undefined, true));
+
+        const instance = new GithubGraphqlDatasourceHelper(
+          { packageName: 'foo/bar' },
+          http,
+          adapter
+        );
+        await instance.getItems();
+
+        expect(instance).toHaveProperty('isCacheable', false);
       });
     });
   });
