@@ -35,13 +35,13 @@ export async function extractPackageFile(
       return null;
     }
   } catch (err) {
-    logger.debug({ fileName }, 'Failed to parse helm Chart.yaml');
+    logger.debug(`Failed to parse helm Chart.yaml from ${fileName}`);
     return null;
   }
   const packageFileVersion = chart.version;
   let deps: PackageDependency[] = [];
   if (!is.nonEmptyArray(chart?.dependencies)) {
-    logger.debug({ fileName }, 'Chart has no dependencies');
+    logger.debug(`Chart has no dependencies in ${fileName}`);
     return null;
   }
   const validDependencies = chart.dependencies.filter(

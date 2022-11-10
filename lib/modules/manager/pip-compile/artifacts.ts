@@ -63,7 +63,7 @@ export function constructPipCompileCmd(
   const headers = constraintLineRegex.exec(content);
   const args = ['pip-compile'];
   if (headers?.groups) {
-    logger.debug({ header: headers[0] }, 'Found pip-compile header');
+    logger.debug(`Found pip-compile header: ${headers[0]}`);
     for (const argument of split(headers.groups.arguments)) {
       if (allowedPipArguments.includes(argument)) {
         args.push(argument);
@@ -141,7 +141,7 @@ export async function updateArtifacts({
         PIP_CACHE_DIR: await ensureCacheDir('pip'),
       },
     };
-    logger.debug({ cmd }, 'pip-compile command');
+    logger.trace({ cmd }, 'pip-compile command');
     await exec(cmd, execOptions);
     const status = await getRepoStatus();
     if (!status?.modified.includes(outputFileName)) {
