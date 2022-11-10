@@ -45,7 +45,7 @@ describe('modules/manager/flux/extract', () => {
 
     it('extracts version and components from system manifests', () => {
       const result = extractPackageFile(
-        Fixtures.get('system.yaml'),
+        Fixtures.get('flux-system/gotk-components.yaml'),
         'clusters/my-cluster/flux-system/gotk-components.yaml'
       );
       expect(result).toEqual({
@@ -380,6 +380,7 @@ apiVersion: helm.toolkit.fluxcd.io/v2beta1`,
         'lib/modules/manager/flux/__fixtures__/helmRelease.yaml',
         'lib/modules/manager/flux/__fixtures__/helmSource.yaml',
         'lib/modules/manager/flux/__fixtures__/gitSource.yaml',
+        'lib/modules/manager/flux/__fixtures__/flux-system/gotk-components.yaml',
       ]);
 
       expect(result).toEqual([
@@ -405,6 +406,21 @@ apiVersion: helm.toolkit.fluxcd.io/v2beta1`,
             },
           ],
           packageFile: 'lib/modules/manager/flux/__fixtures__/gitSource.yaml',
+        },
+        {
+          deps: [
+            {
+              currentValue: 'v0.24.1',
+              datasource: 'github-releases',
+              depName: 'fluxcd/flux2',
+              managerData: {
+                components:
+                  'source-controller,kustomize-controller,helm-controller,notification-controller',
+              },
+            },
+          ],
+          packageFile:
+            'lib/modules/manager/flux/__fixtures__/flux-system/gotk-components.yaml',
         },
       ]);
     });

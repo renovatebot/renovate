@@ -146,17 +146,8 @@ function resolveSystemManifest(
 
 function resolveResourceManifest(
   manifest: ResourceFluxManifest,
-  context: ResourceFluxManifest[]
+  helmRepositories: HelmRepository[]
 ): PackageDependency<FluxManagerData>[] {
-  const helmRepositories: HelmRepository[] = [];
-  for (const manifest of context) {
-    for (const resource of manifest.resources) {
-      if (resource.kind === 'HelmRepository') {
-        helmRepositories.push(resource);
-      }
-    }
-  }
-
   const deps: PackageDependency<FluxManagerData>[] = [];
   for (const resource of manifest.resources) {
     switch (resource.kind) {
@@ -211,27 +202,6 @@ function resolveResourceManifest(
   return deps;
 }
 
-function resolveManifest(
-  manifest: FluxManifest,
-  context: FluxManifest[]
-): PackageDependency<FluxManagerData>[] | null {
-  let res: PackageDependency<FluxManagerData>[] | null = null;
-  switch (manifest.kind) {
-    case 'system':
-      res = resolveSystemManifest(manifest);
-      break;
-    case 'resource': {
-      const resourceManifests = context.filter(
-        (manifest) => manifest.kind === 'resource'
-      ) as ResourceFluxManifest[];
-      res = resolveResourceManifest(manifest, resourceManifests);
-      break;
-    }
-  }
-
-  return res;
-}
-
 export function extractPackageFile(
   content: string,
   packageFile: string
@@ -240,7 +210,24 @@ export function extractPackageFile(
   if (!manifest) {
     return null;
   }
-  const deps = resolveManifest(manifest, [manifest]);
+  const helmRepositories: HelmRepository[] = [];
+  if (manifest.kind === 'resource') {
+    for (const resource of manifest.resources) {
+      if (resource.kind === 'HelmRepository') {
+        helmRepositories.push(resource);
+      }
+    }
+  }
+  let deps: PackageDependency<FluxManagerData>[] | null = null;
+  switch (manifest.kind) {
+    case 'system':
+      deps = resolveSystemManifest(manifest);
+      break;
+    case 'resource': {
+      deps = resolveResourceManifest(manifest, helmRepositories);
+      break;
+    }
+  }
   return deps?.length ? { deps } : null;
 }
 
@@ -260,8 +247,28 @@ export async function extractAllPackageFiles(
     }
   }
 
+  const helmRepositories: HelmRepository[] = [];
   for (const manifest of manifests) {
-    const deps = resolveManifest(manifest, manifests);
+    if (manifest.kind === 'resource') {
+      for (const resource of manifest.resources) {
+        if (resource.kind === 'HelmRepository') {
+          helmRepositories.push(resource);
+        }
+      }
+    }
+  }
+
+  for (const manifest of manifests) {
+    let deps: PackageDependency<FluxManagerData>[] | null = null;
+    switch (manifest.kind) {
+      case 'system':
+        deps = resolveSystemManifest(manifest);
+        break;
+      case 'resource': {
+        deps = resolveResourceManifest(manifest, helmRepositories);
+        break;
+      }
+    }
     if (deps?.length) {
       results.push({
         packageFile: manifest.file,
