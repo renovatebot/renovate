@@ -102,20 +102,19 @@ describe('workers/repository/update/pr/changelog/azure', () => {
       httpMock
         .scope(matchHost)
         .get('/some-org/some-project/_apis/git/repositories/some-repo/refs?filter=tags&$top=100')
-        .reply(200, [
-          { name: 'refs/tags/v5.2.0' },
-          { name: 'refs/tags/v5.4.0' },
-          { name: 'refs/tags/v5.5.0' },
-          { name: 'refs/tags/v5.6.0' },
-          { name: 'refs/tags/v5.6.1' },
-          { name: 'refs/tags/v5.7.0' },
-        ])
+        .reply(200, {
+          value: [
+            { name: 'refs/tags/v5.2.0' },
+            { name: 'refs/tags/v5.4.0' },
+            { name: 'refs/tags/v5.5.0' },
+            { name: 'refs/tags/v5.6.0' },
+            { name: 'refs/tags/v5.6.1' },
+            { name: 'refs/tags/v5.7.0' },
+          ]
+        })
         .persist()
-        .get('/api/v4/projects/meno%2Fdropzone/repository/tree?per_page=100')
+        .get('/some-org//some-project/_apis/git/repositories/some-repo/items?path=/')
         .reply(200, [])
-        .persist()
-        .get('/api/v4/projects/meno%2Fdropzone/releases?per_page=100')
-        .reply(200, []);
       expect(
         await getChangeLogJSON({
           ...upgrade,
@@ -143,14 +142,11 @@ describe('workers/repository/update/pr/changelog/azure', () => {
     it('handles empty Azure tags response', async () => {
       httpMock
         .scope(matchHost)
-        .get('/api/v4/projects/meno%2Fdropzone/repository/tags?per_page=100')
+        .get('/some-org/some-project/_apis/git/repositories/some-repo/refs?filter=tags&$top=100')
         .reply(200, [])
         .persist()
-        .get('/api/v4/projects/meno%2Fdropzone/repository/tree?per_page=100')
+        .get('/some-org//some-project/_apis/git/repositories/some-repo/items?path=/')
         .reply(200, [])
-        .persist()
-        .get('/api/v4/projects/meno%2Fdropzone/releases?per_page=100')
-        .reply(200, []);
       expect(
         await getChangeLogJSON({
           ...upgrade,
@@ -159,7 +155,7 @@ describe('workers/repository/update/pr/changelog/azure', () => {
         hasReleaseNotes: false,
         project: {
           apiBaseUrl: 'https://dev.azure.com/some-org/some-project/_apis/',
-          baseUrl: 'https://dev.azure.com/',
+          baseUrl: 'https://dev.azure.com/some-org/some-project/',
           depName: 'renovate',
           repository: 'some-repo',
           sourceDirectory: undefined,
@@ -178,14 +174,11 @@ describe('workers/repository/update/pr/changelog/azure', () => {
     it('uses Azure tags with error', async () => {
       httpMock
         .scope(matchHost)
-        .get('/api/v4/projects/meno%2Fdropzone/repository/tags?per_page=100')
-        .replyWithError('Unknown GitLab Repo')
+        .get('/some-org/some-project/_apis/git/repositories/some-repo/refs?filter=tags&$top=100')
+        .replyWithError('Unknown Azure DevOps Repo')
         .persist()
-        .get('/api/v4/projects/meno%2Fdropzone/repository/tree?per_page=100')
+        .get('/some-org//some-project/_apis/git/repositories/some-repo/items?path=/')
         .reply(200, [])
-        .persist()
-        .get('/api/v4/projects/meno%2Fdropzone/releases?per_page=100')
-        .reply(200, []);
       expect(
         await getChangeLogJSON({
           ...upgrade,
@@ -194,7 +187,7 @@ describe('workers/repository/update/pr/changelog/azure', () => {
         hasReleaseNotes: false,
         project: {
           apiBaseUrl: 'https://dev.azure.com/some-org/some-project/_apis/',
-          baseUrl: 'https://dev.azure.com/',
+          baseUrl: 'https://dev.azure.com/some-org/some-project/',
           depName: 'renovate',
           repository: 'some-repo',
           sourceDirectory: undefined,
