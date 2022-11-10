@@ -299,14 +299,13 @@ If you truly need to configure this then it probably means either:
 
 ## branchNameStrict
 
-By default, Renovate removes special characters when slugifying the branch name:
+If `true`, Renovate removes special characters when slugifying the branch name:
 
 - all special characters are removed
 - only alphabetic characters are allowed
 - hyphens `-` are used to separate sections
 
-To revert this behavior to that used in v32 and before, set this value to `false`.
-This will mean that special characters like `.` may end up in the branch name.
+The default `false` behavior will mean that special characters like `.` may end up in the branch name.
 
 ## branchPrefix
 
@@ -382,8 +381,8 @@ If you want Renovate to signoff its commits, add the [`:gitSignOff` preset](http
 
 <!-- prettier-ignore -->
 !!! warning
-    Editing of `commitMessage` directly is now deprecated and not recommended.
-    Please instead edit the fields such as `commitMessageAction`, `commitMessageExtra`, etc.
+    We deprecated editing the `commitMessage` directly, and we recommend you stop using this config option.
+    Instead use config options like `commitMessageAction`, `commitMessageExtra`, and so on, to create the commit message you want.
 
 ## commitMessageAction
 
@@ -391,45 +390,25 @@ This is used to alter `commitMessage` and `prTitle` without needing to copy/past
 Actions may be like `Update`, `Pin`, `Roll back`, `Refresh`, etc.
 Check out the default value for `commitMessage` to understand how this field is used.
 
-<!-- prettier-ignore -->
-!!! warning
-    Warning, for advanced use only! Use at your own risk!
-
 ## commitMessageExtra
 
 This is used to alter `commitMessage` and `prTitle` without needing to copy/paste the whole string.
 The "extra" is usually an identifier of the new version, e.g. "to v1.3.2" or "to tag 9.2".
-
-<!-- prettier-ignore -->
-!!! warning
-    Warning, for advanced use only! Use at your own risk!
 
 ## commitMessagePrefix
 
 This is used to alter `commitMessage` and `prTitle` without needing to copy/paste the whole string.
 The "prefix" is usually an automatically applied semantic commit prefix, but it can also be statically configured.
 
-<!-- prettier-ignore -->
-!!! warning
-    Warning, for advanced use only! Use at your own risk!
-
 ## commitMessageSuffix
 
 This is used to add a suffix to commit messages.
 Usually left empty except for internal use (multiple base branches, and vulnerability alerts).
 
-<!-- prettier-ignore -->
-!!! warning
-    Warning, for advanced use only! Use at your own risk!
-
 ## commitMessageTopic
 
 This is used to alter `commitMessage` and `prTitle` without needing to copy/paste the whole string.
 The "topic" is usually refers to the dependency being updated, e.g. `"dependency react"`.
-
-<!-- prettier-ignore -->
-!!! warning
-    Warning, for advanced use only! Use at your own risk!
 
 ## composerIgnorePlatformReqs
 
@@ -748,10 +727,6 @@ See [Private module support](https://docs.renovatebot.com/getting-started/privat
 
 ## excludeCommitPaths
 
-<!-- prettier-ignore -->
-!!! warning
-    For advanced users only!
-
 Be careful you know what you're doing with this option.
 The initial intended use is to allow the user to exclude certain dependencies from being added/removed/modified when "vendoring" dependencies.
 Example:
@@ -863,11 +838,6 @@ For now, you can only use this option on the GitLab platform.
 
 ## followTag
 
-<!-- prettier-ignore -->
-!!! warning
-    Advanced functionality.
-    Only use this if you're sure you know what you're doing.
-
 For `followTag` to work, the datasource must support distribution streams or tags, like for example npm does.
 
 The main usecase is to follow a pre-release tag of a dependency, say TypeScripts's `"insiders"` build:
@@ -933,11 +903,6 @@ Usage of `direct` will fallback to the Renovate-native release fetching mechanis
 Also we support the `off` keyword which will stop any fetching immediately.
 
 ## group
-
-<!-- prettier-ignore -->
-!!! warning
-    Advanced functionality only.
-    Do not use unless you know what you're doing.
 
 The default configuration for groups are essentially internal to Renovate and you normally shouldn't need to modify them.
 But you may _add_ settings to any group by defining your own `group` configuration object.
@@ -1216,10 +1181,6 @@ You usually don't need to configure it in a host rule if you have already config
 
 ### insecureRegistry
 
-<!-- prettier-ignore -->
-!!! warning
-    Advanced config, use at your own risk.
-
 Enable this option to allow Renovate to connect to an [insecure Docker registry](https://docs.docker.com/registry/insecure/) that is http only.
 This is insecure and is not recommended.
 
@@ -1453,6 +1414,7 @@ Supported lock files are:
 
 - `package-lock.json`
 - `yarn.lock`
+- `pnpm-lock.yaml`
 - `composer.lock`
 - `Gemfile.lock`
 - `poetry.lock`
@@ -2074,7 +2036,7 @@ Add to this object if you wish to define rules that apply only to PRs that pin d
 
 ## pinDigests
 
-If enabled Renovate will pin Docker images by means of their SHA256 digest and not only by tag so that they are immutable.
+If enabled Renovate will pin Docker images or GitHub Actions by means of their SHA256 digest and not only by tag so that they are immutable.
 
 ## platformAutomerge
 

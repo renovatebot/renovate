@@ -133,6 +133,86 @@ describe('modules/manager/maven/index', () => {
         },
       ]);
     });
+
+    describe('root pom handling', () => {
+      it('should skip root pom.xml', async () => {
+        fs.readLocalFile.mockResolvedValueOnce(`
+          <project>
+            <modelVersion>4.0.0</modelVersion>
+            <groupId>org.example</groupId>
+            <artifactId>root</artifactId>
+            <version>1.0.0</version>
+          </project>
+        `);
+        fs.readLocalFile.mockResolvedValueOnce(`
+          <project>
+            <parent>
+              <groupId>org.example</groupId>
+              <artifactId>root</artifactId>
+              <version>1.0.0</version>
+            </parent>
+            <modelVersion>4.0.0</modelVersion>
+            <groupId>org.example</groupId>
+            <artifactId>child</artifactId>
+          </project>
+        `);
+        const packages = await extractAllPackageFiles({}, [
+          'pom.xml',
+          'foo.bar/pom.xml',
+        ]);
+        expect(packages).toMatchObject([
+          { packageFile: 'pom.xml', deps: [] },
+          {
+            packageFile: 'foo.bar/pom.xml',
+            deps: [{ depName: 'org.example:root', depType: 'parent-root' }],
+          },
+        ]);
+      });
+
+      it('handles cross-referencing', async () => {
+        fs.readLocalFile.mockResolvedValueOnce(`
+          <project>
+            <modelVersion>4.0.0</modelVersion>
+            <groupId>org.example</groupId>
+            <artifactId>foo</artifactId>
+            <version>1.0.0</version>
+            <dependencies>
+              <dependency>
+                <groupId>org.example</groupId>
+                <artifactId>bar</artifactId>
+                <version>1.0.0</version>
+              </dependency>
+            </dependencies>
+          </project>
+        `);
+        fs.readLocalFile.mockResolvedValueOnce(`
+          <project>
+            <modelVersion>4.0.0</modelVersion>
+            <groupId>org.example</groupId>
+            <artifactId>bar</artifactId>
+            <version>1.0.0</version>
+            <dependencies>
+              <dependency>
+                <groupId>org.example</groupId>
+                <artifactId>foo</artifactId>
+                <version>1.0.0</version>
+              </dependency>
+            </dependencies>
+          </project>
+        `);
+        const packages = await extractAllPackageFiles({}, [
+          'foo.xml',
+          'bar.xml',
+        ]);
+        expect(packages).toMatchObject([
+          { packageFile: 'foo.xml', deps: [{ depName: 'org.example:bar' }] },
+          { packageFile: 'bar.xml', deps: [{ depName: 'org.example:foo' }] },
+        ]);
+        const [foo, bar] = packages;
+        expect(foo.deps[0].skipReason).toBeUndefined();
+        expect(bar.deps[0].skipReason).toBeUndefined();
+      });
+    });
   });
 
   describe('updateDependency', () => {
@@ -185,6 +265,18 @@ describe('modules/manager/maven/index', () => {
         {
           depName: 'com.sksamuel.scapegoat:scalac-scapegoat-plugin_2.13.7',
           currentValue: '1.4.11',
+        },
+      ]);
+    });
+
+    it('should apply props multiple times', () => {
+      const [{ deps }] = resolveParents([
+        extractPackage(Fixtures.get('multiple_usages_props.pom.xml'))!,
+      ]);
+      expect(deps).toMatchObject([
+        {
+          depName: 'org.apache.lucene:lucene-core-1.2.3.1.2.3',
+          currentValue: '1.2.3',
         },
       ]);
     });

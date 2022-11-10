@@ -12,7 +12,7 @@ import { parseUrl } from '../../../util/url';
 import * as cargoVersioning from '../../versioning/cargo';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
-import {
+import type {
   CrateMetadata,
   CrateRecord,
   RegistryFlavor,
@@ -61,7 +61,7 @@ export class CrateDatasource extends Datasource {
       registryUrl,
     });
     if (!registryInfo) {
-      logger.debug({ registryUrl }, 'Could not fetch registry info');
+      logger.debug(`Could not fetch registry info from ${registryUrl}`);
       return null;
     }
 
@@ -125,7 +125,7 @@ export class CrateDatasource extends Datasource {
     info: RegistryInfo,
     packageName: string
   ): Promise<CrateMetadata | null> {
-    if (info.flavor !== RegistryFlavor.CratesIo) {
+    if (info.flavor !== 'crates.io') {
       return null;
     }
 
@@ -165,7 +165,7 @@ export class CrateDatasource extends Datasource {
       return readCacheFile(path, 'utf8');
     }
 
-    if (info.flavor === RegistryFlavor.CratesIo) {
+    if (info.flavor === 'crates.io') {
       const crateUrl =
         CrateDatasource.CRATES_IO_BASE_URL +
         CrateDatasource.getIndexSuffix(packageName.toLowerCase()).join('/');
@@ -187,9 +187,9 @@ export class CrateDatasource extends Datasource {
     packageName: string
   ): string {
     switch (info.flavor) {
-      case RegistryFlavor.CratesIo:
+      case 'crates.io':
         return `https://crates.io/crates/${packageName}`;
-      case RegistryFlavor.Cloudsmith: {
+      case 'cloudsmith': {
         // input: https://dl.cloudsmith.io/basic/$org/$repo/cargo/index.git
         const tokens = info.url.pathname.split('/');
         const org = tokens[2];
@@ -232,17 +232,17 @@ export class CrateDatasource extends Datasource {
 
     const url = parseUrl(registryUrl);
     if (!url) {
-      logger.debug({ registryUrl }, 'could not parse registry URL');
+      logger.debug(`Could not parse registry URL ${registryUrl}`);
       return null;
     }
 
     let flavor: RegistryFlavor;
     if (url.hostname === 'crates.io') {
-      flavor = RegistryFlavor.CratesIo;
+      flavor = 'crates.io';
     } else if (url.hostname === 'dl.cloudsmith.io') {
-      flavor = RegistryFlavor.Cloudsmith;
+      flavor = 'cloudsmith';
     } else {
-      flavor = RegistryFlavor.Other;
+      flavor = 'other';
     }
 
     const registry: RegistryInfo = {
@@ -251,7 +251,7 @@ export class CrateDatasource extends Datasource {
       url,
     };
 
-    if (flavor !== RegistryFlavor.CratesIo) {
+    if (flavor !== 'crates.io') {
       if (!GlobalConfig.get('allowCustomCrateRegistries')) {
         logger.warn(
           'crate datasource: allowCustomCrateRegistries=true is required for registries other than crates.io, bailing out'

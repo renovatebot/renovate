@@ -86,6 +86,7 @@ describe('modules/manager/gradle/parser', () => {
         ${'foo.bar = "1.2.3"'}               | ${'"foo:bar:$foo.bar"'}       | ${{ depName: 'foo:bar', currentValue: '1.2.3', groupName: 'foo.bar' }}
         ${'foo = "1.2.3"'}                   | ${'"foo:bar_$foo:4.5.6"'}     | ${{ depName: 'foo:bar_1.2.3', managerData: { fileReplacePosition: 28 } }}
         ${'baz = "1.2.3"'}                   | ${'foobar = "foo:bar:$baz"'}  | ${{ depName: 'foo:bar', currentValue: '1.2.3', groupName: 'baz' }}
+        ${'foo = "${bar}"; baz = "1.2.3"'}   | ${'"foo:bar:${baz}"'}         | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
       `('$def | $str', async ({ def, str, output }) => {
         const { deps } = await parseGradle([def, str].join('\n'));
         expect(deps).toMatchObject([output].filter(Boolean));
@@ -183,7 +184,7 @@ describe('modules/manager/gradle/parser', () => {
       ${''}                                         | ${'library("foo", "bar", "baz", "qux"]).version("1.2.3")'}      | ${null}
       ${''}                                         | ${'library("foo.bar", "foo", "bar").version("1.2.3", "4.5.6")'} | ${null}
       ${'group = "foo"; artifact="bar"'}            | ${'library("foo.bar", group, artifact).version("1.2.3")'}       | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
-      ${'library("foo-bar_baz-qux", "foo", "bar")'} | ${'"${foo.bar.baz.qux}:1.2.3"'}                                 | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
+      ${'library("foo-bar_baz-qux", "foo", "bar")'} | ${'"${libs.foo.bar.baz.qux}:1.2.3"'}                            | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
     `('$def | $str', async ({ def, str, output }) => {
       const input = [def, str].join('\n');
       const { deps } = await parseGradle(input);
@@ -207,6 +208,7 @@ describe('modules/manager/gradle/parser', () => {
       ${'setOf("foo", "bar", "baz")'}                              | ${{ depName: 'foo:bar', currentValue: 'baz', skipReason: 'ignored' }}
       ${'mutableSetOf("foo", "bar", "baz")'}                       | ${{ depName: 'foo:bar', currentValue: 'baz', skipReason: 'ignored' }}
       ${'stages("foo", "bar", "baz")'}                             | ${{ depName: 'foo:bar', currentValue: 'baz', skipReason: 'ignored' }}
+      ${'mapScalar("foo", "bar", "baz")'}                          | ${{ depName: 'foo:bar', currentValue: 'baz', skipReason: 'ignored' }}
     `('$input', async ({ input, output }) => {
       const { deps } = await parseGradle(input);
       expect(deps).toMatchObject([output].filter(Boolean));
@@ -342,8 +344,7 @@ describe('modules/manager/gradle/parser', () => {
         3
       );
       expect(logger.logger.debug).toHaveBeenCalledWith(
-        { scriptFile: 'foo/bar.gradle' },
-        `Max recursion depth reached`
+        'Max recursion depth reached in script file: foo/bar.gradle'
       );
       expect(vars).toBeEmpty();
     });

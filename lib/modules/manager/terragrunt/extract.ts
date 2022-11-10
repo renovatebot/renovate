@@ -1,7 +1,6 @@
 import { logger } from '../../../logger';
 import { newlineRegex, regEx } from '../../../util/regex';
 import type { PackageDependency, PackageFile } from '../types';
-import { TerragruntDependencyTypes } from './common';
 import { analyseTerragruntModule, extractTerragruntModule } from './modules';
 import type { ExtractionResult, TerraformManagerData } from './types';
 import {
@@ -32,7 +31,7 @@ export function extractPackageFile(content: string): PackageFile | null {
         );
         let result: ExtractionResult | null = null;
         switch (tfDepType) {
-          case TerragruntDependencyTypes.terragrunt: {
+          case 'terraform': {
             result = extractTerragruntModule(lineNumber, lines);
             break;
           }
@@ -56,7 +55,7 @@ export function extractPackageFile(content: string): PackageFile | null {
   deps.forEach((dep) => {
     // TODO #7154
     switch (dep.managerData!.terragruntDependencyType) {
-      case TerragruntDependencyTypes.terragrunt:
+      case 'terraform':
         analyseTerragruntModule(dep);
         break;
       /* istanbul ignore next */

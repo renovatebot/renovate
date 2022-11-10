@@ -9,7 +9,7 @@ export function getQueue(url: string): PQueue | null {
   const host = parseUrl(url)?.host;
   if (!host) {
     // should never happen
-    logger.debug({ url }, 'No host');
+    logger.debug(`No host on ${url}`);
     return null;
   }
 
@@ -21,7 +21,7 @@ export function getQueue(url: string): PQueue | null {
       logger.debug(`Using queue: host=${host}, concurrency=${concurrency}`);
       queue = new PQueue({ concurrency });
     } else {
-      logger.debug({ host }, 'No concurrency limits');
+      logger.trace({ host }, 'No concurrency limits');
     }
   }
   hostQueues.set(host, queue);

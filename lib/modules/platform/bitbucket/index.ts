@@ -1,7 +1,6 @@
 import URL from 'url';
 import is from '@sindresorhus/is';
 import JSON5 from 'json5';
-import { PlatformId } from '../../../constants';
 import { REPOSITORY_NOT_FOUND } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { BranchStatus, PrState, VulnerabilityAlert } from '../../../types';
@@ -158,7 +157,7 @@ export async function initRepo({
 }: RepoParams): Promise<RepoResult> {
   logger.debug(`initRepo("${repository}")`);
   const opts = hostRules.find({
-    hostType: PlatformId.Bitbucket,
+    hostType: 'bitbucket',
     url: defaults.endpoint,
   });
   config = {
@@ -252,7 +251,7 @@ export async function getPrList(): Promise<Pr[]> {
     }
     const prs = await utils.accumulateValues(url, undefined, undefined, 50);
     config.prList = prs.map(utils.prInfo);
-    logger.debug({ length: config.prList.length }, 'Retrieved Pull Requests');
+    logger.debug(`Retrieved Pull Requests, count: ${config.prList.length}`);
   }
   return config.prList;
 }
@@ -502,7 +501,7 @@ export async function ensureIssue({
   /* istanbul ignore if */
   if (!config.has_issues) {
     logger.warn('Issues are disabled - cannot ensureIssue');
-    logger.debug({ title }, 'Failed to ensure Issue');
+    logger.debug(`Failed to ensure Issue with title:${title}`);
     return null;
   }
   try {
