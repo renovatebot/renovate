@@ -575,12 +575,7 @@ export async function processBranch(
     // Try to automerge branch and finish if successful, but only if branch already existed before this run
     // skip if we have a non-immediate pr and there is an existing PR,
     // we want to update the PR and skip the Auto merge since status checks aren't done yet
-    if (
-      !commitSha &&
-      !config.artifactErrors?.length &&
-      !userRebaseRequested &&
-      (branchExists || config.ignoreTests)
-    ) {
+    if ((!commitSha && !config.artifactErrors?.length) || config.ignoreTests) {
       const mergeStatus = await tryBranchAutomerge(config);
       logger.debug(`mergeStatus=${mergeStatus}`);
       if (mergeStatus === 'automerged') {
@@ -820,9 +815,8 @@ export async function processBranch(
       } else if (config.automerge) {
         logger.debug('PR is configured for automerge');
         if (
-          !commitSha &&
-          !config.artifactErrors?.length &&
-          !userRebaseRequested
+          (!commitSha && !config.artifactErrors?.length) ||
+          config.ignoreTests
         ) {
           const prAutomergeResult = await checkAutoMerge(pr, config);
           if (prAutomergeResult?.automerged) {
