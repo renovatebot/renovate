@@ -43,6 +43,10 @@ export async function getChangeLogJSON(
   const { protocol, host, pathname } = URL.parse(sourceUrl);
   const organization = pathname!.slice(1).split('/')[0];
   const projectName = pathname!.slice(1).split('/')[1];
+  if (!organization || !projectName) {
+    logger.warn('invalid source url')
+    return null
+  }
   const baseUrl = `${protocol!}//${host!}/${organization}/${projectName}/`;
   const url = sourceUrl;
   const { token } = hostRules.find({
@@ -56,7 +60,7 @@ export async function getChangeLogJSON(
         { manager, depName, sourceUrl },
         'No Azure DevOps token has been configured. Skipping release notes retrieval'
       );
-      return { error: ChangeLogError.MissingGithubToken };
+      return { error: ChangeLogError.MissingAzureToken };
     }
     logger.debug(
       { manager, depName, sourceUrl },

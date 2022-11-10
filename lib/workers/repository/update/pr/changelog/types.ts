@@ -37,6 +37,7 @@ export interface ChangeLogProject {
 export enum ChangeLogError {
   MissingGithubToken = 1,
   MissingGitlabToken = 2,
+  MissingAzureToken = 2,
 }
 
 export interface ChangeLogResult {

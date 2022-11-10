@@ -21,7 +21,7 @@ export async function getTags(
   const urlEncodedRepo = encodeURIComponent(repository);
   const url = `${ensureTrailingSlash(
     endpoint
-  )}git/repositories/${urlEncodedRepo}/refs?filter=tags&$top=2`;
+  )}git/repositories/${urlEncodedRepo}/refs?filter=tags&$top=100`;
   try {
     const res = await http.getJsonPaginated<AzureTag>(url);
     const tags = res.body.value;
