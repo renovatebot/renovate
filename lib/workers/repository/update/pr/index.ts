@@ -111,7 +111,7 @@ export async function ensurePr(
     const prCache = getPrCache(branchName);
     if (prCache) {
       logger.debug({ prCache }, 'Found existing Pr cache');
-      const lastEditTime = prCache?.lastEdited;
+      const lastEditTime = prCache.lastEdited;
       // validate pr cache and if okay skip pr body update and changelog fetching
       if (
         isCloned() === false &&
