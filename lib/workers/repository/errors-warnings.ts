@@ -112,9 +112,7 @@ export function getDepWarningsDashboard(
   }
 
   const depWarnings = warnings
-    .map((w) =>
-      w.replace(regEx(/^Failed to look up(?: [-\w]+)? dependency /), '')
-    )
+    .map((w) => w.replace('Failed to look up dependency ', ''))
     .map((dep) => '`' + dep + '`')
     .join(', ');
 
