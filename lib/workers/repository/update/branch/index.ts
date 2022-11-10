@@ -107,6 +107,10 @@ export async function processBranch(
   const dependencyDashboardCheck =
     config.dependencyDashboardChecks?.[config.branchName];
   logger.debug(`dependencyDashboardCheck=${dependencyDashboardCheck!}`);
+  const userRebaseRequested =
+    dependencyDashboardCheck === 'rebase' ||
+    !!config.dependencyDashboardRebaseAllOpen ||
+    !!config.rebaseRequested;
   if (branchPr) {
     config.rebaseRequested = rebaseCheck(config, branchPr);
     logger.debug(`PR rebase requested=${config.rebaseRequested}`);
@@ -381,10 +385,6 @@ export async function processBranch(
       }
     }
 
-    const userRebaseRequested =
-      dependencyDashboardCheck === 'rebase' ||
-      !!config.dependencyDashboardRebaseAllOpen ||
-      !!config.rebaseRequested;
     const userApproveAllPendingPR = !!config.dependencyDashboardAllPending;
     const userOpenAllRateLimtedPR = !!config.dependencyDashboardAllRateLimited;
     if (userRebaseRequested) {
@@ -553,18 +553,17 @@ export async function processBranch(
     await setStability(config);
     await setConfidence(config);
 
-    const notImmediate = commitSha && config.prCreation !== 'immediate';
-
     // new commit means status check are pretty sure pending but maybe not reported yet
     // if PR has not been created + new commit + prCreation !== immediate skip
     // but do not break when there are artifact errors
     if (
-      notImmediate &&
+      commitSha &&
+      config.prCreation !== 'immediate' &&
       !branchPr &&
       !config.artifactErrors?.length &&
       !userRebaseRequested
     ) {
-      logger.debug(`Branch status pending, current sha: ${commitSha!}`);
+      logger.debug(`Branch status pending, current sha: ${commitSha}`);
       return {
         branchExists: true,
         updatesVerified,
@@ -577,7 +576,7 @@ export async function processBranch(
     // skip if we have a non-immediate pr and there is an existing PR,
     // we want to update the PR and skip the Auto merge since status checks aren't done yet
     if (
-      !notImmediate &&
+      !commitSha &&
       !config.artifactErrors?.length &&
       !userRebaseRequested &&
       (branchExists || config.ignoreTests)
@@ -820,13 +819,21 @@ export async function processBranch(
         }
       } else if (config.automerge) {
         logger.debug('PR is configured for automerge');
-        const prAutomergeResult = await checkAutoMerge(pr, config);
-        if (prAutomergeResult?.automerged) {
-          return {
-            branchExists,
-            result: BranchResult.Automerged,
-            commitSha,
-          };
+        if (
+          !commitSha &&
+          !config.artifactErrors?.length &&
+          !userRebaseRequested
+        ) {
+          const prAutomergeResult = await checkAutoMerge(pr, config);
+          if (prAutomergeResult?.automerged) {
+            return {
+              branchExists,
+              result: BranchResult.Automerged,
+              commitSha,
+            };
+          }
+        } else {
+          logger.debug('auto merge conditions are not met');
         }
       } else {
         logger.debug('PR is not configured for automerge');
