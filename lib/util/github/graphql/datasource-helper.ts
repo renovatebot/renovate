@@ -260,7 +260,7 @@ export class GithubGraphqlDatasourceHelper<
     return resultPromise;
   }
 
-  public async getItems(): Promise<ResultItem[]> {
+  async getItems(): Promise<ResultItem[]> {
     const res = await this.doConcurrentQuery();
     return res;
   }
