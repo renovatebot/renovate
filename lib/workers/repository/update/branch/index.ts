@@ -553,16 +553,17 @@ export async function processBranch(
     await setStability(config);
     await setConfidence(config);
 
-    const skipCondition =
-      commitSha &&
-      !config.artifactErrors?.length &&
-      !userRebaseRequested &&
-      config.prCreation !== 'immediate';
+    const notImmediate = commitSha && config.prCreation !== 'immediate';
 
     // new commit means status check are pretty sure pending but maybe not reported yet
     // if PR has not been created + new commit + prCreation !== immediate skip
     // but do not break when there are artifact errors
-    if (skipCondition && !branchPr) {
+    if (
+      notImmediate &&
+      !branchPr &&
+      !config.artifactErrors?.length &&
+      !userRebaseRequested
+    ) {
       logger.debug(`Branch status pending, current sha: ${commitSha!}`);
       return {
         branchExists: true,
@@ -573,9 +574,14 @@ export async function processBranch(
     }
 
     // Try to automerge branch and finish if successful, but only if branch already existed before this run
-    // skip if we have a new commit while prCreation != immediate and there is an existing PR,
+    // skip if we have a non-immediate pr and there is an existing PR,
     // we want to update the PR and skip the Auto merge since status checks aren't done yet
-    if (!skipCondition && (branchExists || config.ignoreTests)) {
+    if (
+      !notImmediate &&
+      !config.artifactErrors?.length &&
+      !userRebaseRequested &&
+      (branchExists || config.ignoreTests)
+    ) {
       const mergeStatus = await tryBranchAutomerge(config);
       logger.debug(`mergeStatus=${mergeStatus}`);
       if (mergeStatus === 'automerged') {
