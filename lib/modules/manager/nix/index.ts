@@ -7,6 +7,8 @@ export const supportsLockFileMaintenance = true;
 
 export const defaultConfig = {
   fileMatch: ['(^|\\/)flake\\.nix$'],
+  commitMessageTopic: 'nixpkgs',
+  commitMessageExtra: 'to {{newValue}}',
   enabled: false,
 };
 
