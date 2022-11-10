@@ -15,8 +15,6 @@ import type {
   FluxManagerData,
   FluxManifest,
   FluxResource,
-  GitRepository,
-  HelmRelease,
   HelmRepository,
   ResourceFluxManifest,
   SystemFluxManifest,
@@ -163,20 +161,19 @@ function resolveResourceManifest(
   for (const resource of manifest.resources) {
     switch (resource.kind) {
       case 'HelmRelease': {
-        const helmRelease: HelmRelease = resource;
         const dep: PackageDependency<FluxManagerData> = {
-          depName: helmRelease.spec.chart.spec.chart,
-          currentValue: helmRelease.spec.chart.spec.version,
+          depName: resource.spec.chart.spec.chart,
+          currentValue: resource.spec.chart.spec.version,
           datasource: HelmDatasource.id,
         };
 
         const matchingRepositories = helmRepositories.filter(
           (rep) =>
-            rep.kind === helmRelease.spec.chart.spec.sourceRef?.kind &&
-            rep.metadata.name === helmRelease.spec.chart.spec.sourceRef.name &&
+            rep.kind === resource.spec.chart.spec.sourceRef?.kind &&
+            rep.metadata.name === resource.spec.chart.spec.sourceRef.name &&
             rep.metadata.namespace ===
-              (helmRelease.spec.chart.spec.sourceRef.namespace ??
-                helmRelease.metadata?.namespace)
+              (resource.spec.chart.spec.sourceRef.namespace ??
+                resource.metadata?.namespace)
         );
         if (matchingRepositories.length) {
           dep.registryUrls = matchingRepositories.map((repo) => repo.spec.url);
@@ -187,23 +184,22 @@ function resolveResourceManifest(
         break;
       }
       case 'GitRepository': {
-        const gitRepository: GitRepository = resource;
         const dep: PackageDependency<FluxManagerData> = {
-          depName: gitRepository.metadata.name,
+          depName: resource.metadata.name,
         };
 
-        if (gitRepository.spec.ref?.commit) {
-          const gitUrl = gitRepository.spec.url;
-          dep.currentDigest = gitRepository.spec.ref.commit;
+        if (resource.spec.ref?.commit) {
+          const gitUrl = resource.spec.url;
+          dep.currentDigest = resource.spec.ref.commit;
           dep.datasource = GitRefsDatasource.id;
           dep.packageName = gitUrl;
-          dep.replaceString = gitRepository.spec.ref.commit;
+          dep.replaceString = resource.spec.ref.commit;
           if (gitUrl.startsWith('https://')) {
             dep.sourceUrl = gitUrl.replace(/\.git$/, '');
           }
-        } else if (gitRepository.spec.ref?.tag) {
-          dep.currentValue = gitRepository.spec.ref.tag;
-          resolveGitRepositoryPerSourceTag(dep, gitRepository.spec.url);
+        } else if (resource.spec.ref?.tag) {
+          dep.currentValue = resource.spec.ref.tag;
+          resolveGitRepositoryPerSourceTag(dep, resource.spec.url);
         } else {
           dep.skipReason = 'unversioned-reference';
         }
