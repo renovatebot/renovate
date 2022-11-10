@@ -1,0 +1,18 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`modules/manager/rootcloud-oam/extract extractPackageFile() returns results 1`] = `
+{
+  "deps": [
+    {
+      "currentValue": "1.301.2",
+      "datasource": "npm",
+      "depName": "@rootcloud/console-ui",
+    },
+    {
+      "currentValue": "1.66.163",
+      "datasource": "npm",
+      "depName": "@rootcloud/iothub-access-api",
+    },
+  ],
+}
+`;

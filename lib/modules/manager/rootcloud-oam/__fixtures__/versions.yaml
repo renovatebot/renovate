@@ -1,0 +1,20 @@
+apiVersion: config.rootcloud.dev/v1alpha1
+kind: VersionConfig
+metadata:
+  name: app-standard-scope-versions
+  version: "1.0.0"
+  annotations:
+    config.kubernetes.io/function: |
+      exec:
+        path: /usr/local/bin/orc-kzplugin-config
+spec:
+  services:
+    console-ui:
+      packageName: "@rootcloud/console-ui"
+      image:
+        tag: "1.301.2"
+    iothub-access-api:
+      packageName: "@rootcloud/iothub-access-api"
+      image:
+        tag: "1.66.163"
+

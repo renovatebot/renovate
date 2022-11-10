@@ -1,10 +1,10 @@
 {
-  "name": "renovate",
-  "description": "Automated dependency updates. Flexible so you don't need to be.",
+  "name": "rootnovate",
+  "description": "Automated dependency updates. Flexible so you don't need to be. Adapt for rootcloud publish",
   "version": "0.0.0-semantic-release",
   "bin": {
-    "renovate": "dist/renovate.js",
-    "renovate-config-validator": "dist/config-validator.js"
+    "rootnovate": "dist/renovate.js",
+    "rootnovate-config-validator": "dist/config-validator.js"
   },
   "scripts": {
     "build": "run-s clean generate:* compile:* create-json-schema",

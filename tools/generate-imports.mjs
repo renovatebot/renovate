@@ -101,12 +101,11 @@ export async function getManagerHash(managerName) {
     const hash = await getFileHash(fileAddr);
     hashes.push(hash);
   }
-
   if (hashes.length) {
     return hasha(hashes, options);
   }
 
-  throw new Error(`Unable to generate hash for manager/${managerName}`);
+  throw new Error(`Unable to generate hash for the manager/${managerName}`);
 }
 
 async function generateData() {
