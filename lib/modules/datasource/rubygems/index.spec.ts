@@ -121,7 +121,17 @@ describe('modules/datasource/rubygems/index', () => {
       const res = await getPkgReleases(newparams);
       expect(res).not.toBeNull();
       expect(res?.releases).toHaveLength(39);
-      expect(res).toMatchSnapshot();
+      expect(res).toMatchObject({
+        registryUrl: 'https://enterprise.contribsys.com',
+        releases: expect.arrayContaining([
+          {
+            version: '0.7.10',
+          },
+          {
+            version: '1.0.0',
+          },
+        ]),
+      });
       expect(
         res?.releases.find((release) => release.version === '2.1.2')
       ).toBeDefined();
