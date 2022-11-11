@@ -2,7 +2,6 @@ import is from '@sindresorhus/is';
 import delay from 'delay';
 import JSON5 from 'json5';
 import type { PartialDeep } from 'type-fest';
-import { PlatformId } from '../../../constants';
 import {
   REPOSITORY_CHANGED,
   REPOSITORY_EMPTY,
@@ -39,6 +38,7 @@ import type {
   RepoResult,
   UpdatePrConfig,
 } from '../types';
+import { repoFingerprint } from '../util';
 import { smartTruncate } from '../utils/pr-body';
 import type {
   BbsConfig,
@@ -68,7 +68,7 @@ const defaults: {
   endpoint?: string;
   hostType: string;
 } = {
-  hostType: PlatformId.BitbucketServer,
+  hostType: 'bitbucket-server',
 };
 
 /* istanbul ignore next */
@@ -132,7 +132,7 @@ export async function getRawFile(
   const res = await bitbucketServerHttp.getJson<FileData>(fileUrl);
   const { isLastPage, lines, size } = res.body;
   if (isLastPage) {
-    return lines.map(({ text }) => text).join('');
+    return lines.map(({ text }) => text).join('\n');
   }
   const msg = `The file is too big (${size}B)`;
   logger.warn({ size }, msg);
@@ -210,6 +210,7 @@ export async function initRepo({
     const repoConfig: RepoResult = {
       defaultBranch: branchRes.body.displayId,
       isFork: !!info.origin,
+      repoFingerprint: repoFingerprint(info.id, defaults.endpoint),
     };
 
     return repoConfig;
@@ -310,7 +311,7 @@ export async function getPrList(refreshCache?: boolean): Promise<Pr[]> {
     );
 
     config.prList = values.map(utils.prInfo);
-    logger.debug({ length: config.prList.length }, 'Retrieved Pull Requests');
+    logger.debug(`Retrieved Pull Requests, count: ${config.prList.length}`);
   } else {
     logger.debug('returning cached PR list');
   }
@@ -965,7 +966,7 @@ export async function mergePr({
     }
   }
 
-  logger.debug({ pr: prNo }, 'PR merged');
+  logger.debug(`PR merged, PrNo:${prNo}`);
   return true;
 }
 

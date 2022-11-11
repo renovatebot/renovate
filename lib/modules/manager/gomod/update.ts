@@ -94,7 +94,7 @@ export function updateDependency({
       );
     }
     if (upgrade.updateType === 'major') {
-      logger.debug({ depName }, 'gomod: major update');
+      logger.debug(`gomod: major update for ${depName}`);
       if (depName.startsWith('gopkg.in/')) {
         const oldV = depName.split('.').pop();
         newLine = newLine.replace(`.${oldV}`, `.v${upgrade.newMajor}`);
@@ -120,7 +120,10 @@ export function updateDependency({
         }
       }
     }
-    if (lineToChange.endsWith('+incompatible')) {
+    if (
+      lineToChange.endsWith('+incompatible') &&
+      !upgrade.newValue?.endsWith('+incompatible')
+    ) {
       let toAdd = '+incompatible';
 
       if (upgrade.updateType === 'major' && upgrade.newMajor! >= 2) {

@@ -1,7 +1,6 @@
 import is from '@sindresorhus/is';
 import JSON5 from 'json5';
 import semver from 'semver';
-import { PlatformId } from '../../../constants';
 import {
   REPOSITORY_ACCESS_FORBIDDEN,
   REPOSITORY_ARCHIVED,
@@ -34,6 +33,7 @@ import type {
   RepoResult,
   UpdatePrConfig,
 } from '../types';
+import { repoFingerprint } from '../util';
 import { smartTruncate } from '../utils/pr-body';
 import * as helper from './gitea-helper';
 import type {
@@ -44,6 +44,8 @@ import type {
   PR,
   PRMergeMethod,
   Repo,
+  RepoSortMethod,
+  SortMethod,
 } from './types';
 import {
   getMergeMethod,
@@ -66,7 +68,7 @@ interface GiteaRepoConfig {
 const DRAFT_PREFIX = 'WIP: ';
 
 const defaults = {
-  hostType: PlatformId.Gitea,
+  hostType: 'gitea',
   endpoint: 'https://gitea.com/',
   version: '0.0.0',
 };
@@ -334,6 +336,7 @@ const platform: Platform = {
     return {
       defaultBranch: config.defaultBranch,
       isFork: !!repo.fork,
+      repoFingerprint: repoFingerprint(repo.id, defaults.endpoint),
     };
   },
 
@@ -343,8 +346,14 @@ const platform: Platform = {
       const repos = await helper.searchRepos({
         uid: botUserID,
         archived: false,
+        ...(process.env.RENOVATE_X_AUTODISCOVER_REPO_SORT && {
+          sort: process.env.RENOVATE_X_AUTODISCOVER_REPO_SORT as RepoSortMethod,
+        }),
+        ...(process.env.RENOVATE_X_AUTODISCOVER_REPO_ORDER && {
+          order: process.env.RENOVATE_X_AUTODISCOVER_REPO_ORDER as SortMethod,
+        }),
       });
-      return repos.map((r) => r.full_name);
+      return repos.filter((r) => !r.mirror).map((r) => r.full_name);
     } catch (err) {
       logger.error({ err }, 'Gitea getRepos() error');
       throw err;
@@ -800,7 +809,7 @@ const platform: Platform = {
     const issueList = await platform.getIssueList();
     for (const issue of issueList) {
       if (issue.state === 'open' && issue.title === title) {
-        logger.debug({ number: issue.number }, 'Closing issue');
+        logger.debug(`Closing issue...issueNo: ${issue.number!}`);
         // TODO #7154
         await helper.closeIssue(config.repository, issue.number!);
       }

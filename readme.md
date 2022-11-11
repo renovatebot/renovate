@@ -5,7 +5,7 @@
 Automated dependency updates.
 Multi-platform and multi-language.
 
-[![License: AGPL v3](https://img.shields.io/badge/License-AGPL%20v3-blue.svg)](https://raw.githubusercontent.com/renovatebot/renovate/main/license)
+[![License: AGPL-3.0-only](https://img.shields.io/badge/license-%20%09AGPL--3.0--only-blue.svg)](https://raw.githubusercontent.com/renovatebot/renovate/main/license)
 [![codecov](https://codecov.io/gh/renovatebot/renovate/branch/main/graph/badge.svg)](https://codecov.io/gh/renovatebot/renovate)
 [![Renovate enabled](https://img.shields.io/badge/renovate-enabled-brightgreen.svg)](https://renovatebot.com/)
 [![Build status](https://github.com/renovatebot/renovate/workflows/build/badge.svg)](https://github.com/renovatebot/renovate/actions)
@@ -44,6 +44,15 @@ Renovate is widely used in the developer community:
 
 ![Renovate Matrix](https://app.renovatebot.com/images/matrix.png)
 
+## Renovate OSS Insights
+
+Renovate is built on a big community and actively invites and supports contributions.
+Information about our contributors and community can be found on [OSS Insight](https://ossinsight.io/analyze/renovatebot/renovate).
+
+## Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=renovatebot/renovate&type=Date)](https://star-history.com/#renovatebot/renovate&Date)
+
 ## The Renovate Approach
 
 We believe everyone benefits from automation, whether it's a little or a lot.
@@ -75,14 +84,13 @@ There are two ways to run Renovate on Azure DevOps:
 
 Go to the Visual Studio Marketplace and install the [Renovate Me](https://marketplace.visualstudio.com/items?itemName=jyc.vsts-extensions-renovate-me) extension in your organization.
 From there you can create a pipeline with the `RenovateMe` task.
-[More details on how to configure the pipeline](https://marketplace.visualstudio.com/items?itemName=jyc.vsts-extensions-renovate-me).
 
 **Note:** This extension is created and maintained personally by a Renovate developer/user so support requests relating to the extension itself cannot be answered directly in the main Renovate repository.
 
 #### Custom pipeline
 
 You can create a custom pipeline with a `yml` definition that triggers `npx renovate`.
-[More details on how to configure the pipeline](https://docs.renovatebot.com/setup-azure-devops/).
+[More details on how to configure the pipeline](https://docs.renovatebot.com/modules/platform/azure/).
 
 ### Bitbucket Cloud/Server, Gitea, GitLab
 

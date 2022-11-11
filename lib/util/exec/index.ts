@@ -3,8 +3,8 @@ import upath from 'upath';
 import { GlobalConfig } from '../../config/global';
 import { TEMPORARY_ERROR } from '../../constants/error-messages';
 import { logger } from '../../logger';
-import { generateInstallCommands, isDynamicInstall } from './buildpack';
 import { rawExec } from './common';
+import { generateInstallCommands, isDynamicInstall } from './containerbase';
 import { generateDockerCommand, removeDockerContainer } from './docker';
 import { getChildProcessEnv } from './env';
 import { getHermitEnvs, isHermit } from './hermit';
@@ -101,12 +101,14 @@ async function prepareRawExec(
   opts: ExecOptions = {}
 ): Promise<RawExecArguments> {
   const { docker } = opts;
-  const { customEnvVariables, cacheDir, binarySource } = GlobalConfig.get();
+  const { customEnvVariables, containerbaseDir, binarySource } =
+    GlobalConfig.get();
 
   if (binarySource === 'docker' || binarySource === 'install') {
-    const buildPackCacheDir = upath.join(cacheDir, 'buildpack');
+    logger.debug(`Setting CONTAINERBASE_CACHE_DIR to ${containerbaseDir!}`);
     opts.env ??= {};
-    opts.env.BUILDPACK_CACHE_DIR = buildPackCacheDir;
+    opts.env.BUILDPACK_CACHE_DIR = containerbaseDir;
+    opts.env.CONTAINERBASE_CACHE_DIR = containerbaseDir;
   }
 
   const rawOptions = getRawExecOptions(opts);
@@ -114,7 +116,7 @@ async function prepareRawExec(
   let rawCommands = typeof cmd === 'string' ? [cmd] : cmd;
 
   if (isDocker(docker)) {
-    logger.debug({ image: docker.image }, 'Using docker to execute');
+    logger.debug(`Using docker to execute image: ${docker.image}`);
     const extraEnv = {
       ...opts.extraEnv,
       ...customEnvVariables,
@@ -123,6 +125,7 @@ async function prepareRawExec(
     const envVars = [
       ...dockerEnvVars(extraEnv, childEnv),
       'BUILDPACK_CACHE_DIR',
+      'CONTAINERBASE_CACHE_DIR',
     ];
     const cwd = getCwd(opts);
     const dockerOptions: DockerOptions = { ...docker, cwd, envVars };
@@ -137,7 +140,7 @@ async function prepareRawExec(
     );
     rawCommands = [dockerCommand];
   } else if (isDynamicInstall(opts.toolConstraints)) {
-    logger.debug('Using buildpack dynamic installs');
+    logger.debug('Using containerbase dynamic installs');
     rawCommands = [
       ...(await generateInstallCommands(opts.toolConstraints)),
       ...(opts.preCommands ?? []),
@@ -175,7 +178,7 @@ export async function exec(
     if (useDocker) {
       await removeDockerContainer(docker.image, dockerChildPrefix);
     }
-    logger.debug({ command: rawCmd }, 'Executing command');
+    logger.trace({ command: rawCmd }, 'Executing command');
     logger.trace({ commandOptions: rawOptions }, 'Command options');
     try {
       res = await rawExec(rawCmd, rawOptions);

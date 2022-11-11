@@ -1,4 +1,5 @@
 import { logger } from '../../../../logger';
+import { DotnetDatasource } from '../../../datasource/dotnet';
 import { NugetDatasource } from '../../../datasource/nuget';
 import type { PackageDependency, PackageFile } from '../../types';
 import type { MsbuildGlobalManifest } from '../types';
@@ -13,7 +14,7 @@ export function extractMsbuildGlobalManifest(
   try {
     manifest = JSON.parse(content);
   } catch (err) {
-    logger.debug({ fileName: packageFile }, 'Invalid JSON');
+    logger.debug(`Invalid JSON in ${packageFile}`);
     return null;
   }
 
@@ -30,7 +31,7 @@ export function extractMsbuildGlobalManifest(
       depType: 'dotnet-sdk',
       depName: 'dotnet-sdk',
       currentValue: manifest.sdk?.version,
-      skipReason: 'unsupported-datasource',
+      datasource: DotnetDatasource.id,
     });
   }
 

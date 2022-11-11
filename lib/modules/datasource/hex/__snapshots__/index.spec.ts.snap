@@ -1,86 +1,86 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`modules/datasource/hex/index getReleases process public repo without auth 1`] = `
-Object {
+{
   "homepage": "https://hex.pm/packages/certifi",
   "registryUrl": "https://hex.pm/",
-  "releases": Array [
-    Object {
+  "releases": [
+    {
       "releaseTimestamp": "2015-09-10T13:58:55.620Z",
       "version": "0.1.1",
     },
-    Object {
+    {
       "releaseTimestamp": "2015-11-19T11:25:06.024Z",
       "version": "0.2.0",
     },
-    Object {
+    {
       "version": "0.3.0",
     },
-    Object {
+    {
       "releaseTimestamp": "2016-03-02T20:37:38.856Z",
       "version": "0.4.0",
     },
-    Object {
+    {
       "releaseTimestamp": "2016-08-25T14:22:42.043Z",
       "version": "0.5.0",
     },
-    Object {
+    {
       "releaseTimestamp": "2016-09-12T10:05:24.327Z",
       "version": "0.6.0",
     },
-    Object {
+    {
       "releaseTimestamp": "2016-10-02T23:16:44.504Z",
       "version": "0.7.0",
     },
-    Object {
+    {
       "releaseTimestamp": "2017-01-24T11:14:00.415Z",
       "version": "1.0.0",
     },
-    Object {
+    {
       "releaseTimestamp": "2017-04-20T03:47:25.151Z",
       "version": "1.1.0",
     },
-    Object {
+    {
       "releaseTimestamp": "2017-05-20T17:36:20.704Z",
       "version": "1.2.0",
     },
-    Object {
+    {
       "releaseTimestamp": "2017-05-22T10:05:04.091Z",
       "version": "1.2.1",
     },
-    Object {
+    {
       "releaseTimestamp": "2017-07-29T10:26:25.887Z",
       "version": "2.0.0",
     },
-    Object {
+    {
       "releaseTimestamp": "2018-02-15T14:24:33.990Z",
       "version": "2.1.0",
     },
-    Object {
+    {
       "releaseTimestamp": "2018-02-15T14:40:54.249Z",
       "version": "2.2.0",
     },
-    Object {
+    {
       "releaseTimestamp": "2018-02-27T21:20:24.804Z",
       "version": "2.3.0",
     },
-    Object {
+    {
       "releaseTimestamp": "2018-03-01T12:09:47.479Z",
       "version": "2.3.1",
     },
-    Object {
+    {
       "releaseTimestamp": "2018-08-23T08:18:39.658Z",
       "version": "2.4.1",
     },
-    Object {
+    {
       "releaseTimestamp": "2018-08-30T08:21:29.349Z",
       "version": "2.4.2",
     },
-    Object {
+    {
       "releaseTimestamp": "2019-01-24T15:14:25.991Z",
       "version": "2.5.1",
     },
-    Object {
+    {
       "releaseTimestamp": "2020-03-04T14:54:16.283Z",
       "version": "2.5.2",
     },
@@ -90,15 +90,15 @@ Object {
 `;
 
 exports[`modules/datasource/hex/index getReleases processes a private repo with auth 1`] = `
-Object {
+{
   "homepage": "https://hex.pm/packages/renovate_test/private_package",
   "registryUrl": "https://hex.pm/",
-  "releases": Array [
-    Object {
+  "releases": [
+    {
       "releaseTimestamp": "2021-08-04T15:26:26.500Z",
       "version": "0.1.0",
     },
-    Object {
+    {
       "releaseTimestamp": "2021-08-04T17:46:00.274Z",
       "version": "0.1.1",
     },
@@ -107,86 +107,86 @@ Object {
 `;
 
 exports[`modules/datasource/hex/index getReleases processes real data 1`] = `
-Object {
+{
   "homepage": "https://hex.pm/packages/certifi",
   "registryUrl": "https://hex.pm/",
-  "releases": Array [
-    Object {
+  "releases": [
+    {
       "releaseTimestamp": "2015-09-10T13:58:55.620Z",
       "version": "0.1.1",
     },
-    Object {
+    {
       "releaseTimestamp": "2015-11-19T11:25:06.024Z",
       "version": "0.2.0",
     },
-    Object {
+    {
       "version": "0.3.0",
     },
-    Object {
+    {
       "releaseTimestamp": "2016-03-02T20:37:38.856Z",
       "version": "0.4.0",
     },
-    Object {
+    {
       "releaseTimestamp": "2016-08-25T14:22:42.043Z",
       "version": "0.5.0",
     },
-    Object {
+    {
       "releaseTimestamp": "2016-09-12T10:05:24.327Z",
       "version": "0.6.0",
     },
-    Object {
+    {
       "releaseTimestamp": "2016-10-02T23:16:44.504Z",
       "version": "0.7.0",
     },
-    Object {
+    {
       "releaseTimestamp": "2017-01-24T11:14:00.415Z",
       "version": "1.0.0",
     },
-    Object {
+    {
       "releaseTimestamp": "2017-04-20T03:47:25.151Z",
       "version": "1.1.0",
     },
-    Object {
+    {
       "releaseTimestamp": "2017-05-20T17:36:20.704Z",
       "version": "1.2.0",
     },
-    Object {
+    {
       "releaseTimestamp": "2017-05-22T10:05:04.091Z",
       "version": "1.2.1",
     },
-    Object {
+    {
       "releaseTimestamp": "2017-07-29T10:26:25.887Z",
       "version": "2.0.0",
     },
-    Object {
+    {
       "releaseTimestamp": "2018-02-15T14:24:33.990Z",
       "version": "2.1.0",
     },
-    Object {
+    {
       "releaseTimestamp": "2018-02-15T14:40:54.249Z",
       "version": "2.2.0",
     },
-    Object {
+    {
       "releaseTimestamp": "2018-02-27T21:20:24.804Z",
       "version": "2.3.0",
     },
-    Object {
+    {
       "releaseTimestamp": "2018-03-01T12:09:47.479Z",
       "version": "2.3.1",
     },
-    Object {
+    {
       "releaseTimestamp": "2018-08-23T08:18:39.658Z",
       "version": "2.4.1",
     },
-    Object {
+    {
       "releaseTimestamp": "2018-08-30T08:21:29.349Z",
       "version": "2.4.2",
     },
-    Object {
+    {
       "releaseTimestamp": "2019-01-24T15:14:25.991Z",
       "version": "2.5.1",
     },
-    Object {
+    {
       "releaseTimestamp": "2020-03-04T14:54:16.283Z",
       "version": "2.5.2",
     },

@@ -1,6 +1,5 @@
 // TODO #7154
 import is from '@sindresorhus/is';
-import pAll from 'p-all';
 import { getManagerConfig, mergeChildConfig } from '../../../config';
 import type { RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
@@ -15,6 +14,7 @@ import type {
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { clone } from '../../../util/clone';
 import { applyPackageRules } from '../../../util/package-rules';
+import * as p from '../../../util/promises';
 import { PackageFiles } from '../package-files';
 import { lookupUpdates } from './lookup';
 import type { LookupUpdateConfig } from './lookup/types';
@@ -45,10 +45,11 @@ async function fetchDepUpdates(
   depConfig.versioning ??= getDefaultVersioning(depConfig.datasource);
   depConfig = applyPackageRules(depConfig);
   if (depConfig.ignoreDeps!.includes(depName!)) {
-    logger.debug({ dependency: depName }, 'Dependency is ignored');
+    // TODO: fix types (#7154)
+    logger.debug(`Dependency: ${depName!}, is ignored`);
     dep.skipReason = 'ignored';
   } else if (depConfig.enabled === false) {
-    logger.debug({ dependency: depName }, 'Dependency is disabled');
+    logger.debug(`Dependency: ${depName!}, is disabled`);
     dep.skipReason = 'disabled';
   } else {
     if (depConfig.datasource) {
@@ -96,7 +97,7 @@ async function fetchManagerPackagerFileUpdates(
     'fetchManagerPackagerFileUpdates starting with concurrency'
   );
 
-  pFile.deps = await pAll(queue, { concurrency: 5 });
+  pFile.deps = await p.all(queue);
   logger.trace({ packageFile }, 'fetchManagerPackagerFileUpdates finished');
 }
 
@@ -114,7 +115,7 @@ async function fetchManagerUpdates(
     { manager, queueLength: queue.length },
     'fetchManagerUpdates starting'
   );
-  await pAll(queue, { concurrency: 5 });
+  await p.all(queue);
   logger.trace({ manager }, 'fetchManagerUpdates finished');
 }
 

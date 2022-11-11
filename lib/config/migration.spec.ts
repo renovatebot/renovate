@@ -1,4 +1,3 @@
-import { PlatformId } from '../constants';
 import { GlobalConfig } from './global';
 import * as configMigration from './migration';
 import type {
@@ -16,7 +15,7 @@ describe('config/migration', () => {
       const config: TestRenovateConfig = {
         endpoints: [{}] as never,
         enabled: true,
-        platform: PlatformId.Github,
+        platform: 'github',
         hostRules: [
           {
             platform: 'docker',
@@ -678,7 +677,7 @@ describe('config/migration', () => {
     const { isMigrated, migratedConfig } =
       configMigration.migrateConfig(config);
     expect(isMigrated).toBe(true);
-    expect(migratedConfig).toMatchInlineSnapshot(`Object {}`);
+    expect(migratedConfig).toMatchInlineSnapshot(`{}`);
   });
 
   it('migrates azureAutoComplete', () => {

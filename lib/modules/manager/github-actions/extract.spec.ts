@@ -42,7 +42,7 @@ describe('modules/manager/github-actions/extract', () => {
         Fixtures.get('workflow_3.yml'),
         'workflow_3.yml'
       );
-      expect(res?.deps).toMatchSnapshot([
+      expect(res?.deps).toMatchObject([
         {
           currentValue: 'v0.13.1',
           datasource: 'github-tags',
@@ -106,7 +106,7 @@ describe('modules/manager/github-actions/extract', () => {
           replaceString:
             'actions/setup-node@56337c425554a6be30cdef71bf441f15be286854 # tag=v3.1.1',
           autoReplaceStringTemplate:
-            '{{depName}}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # tag={{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}',
+            '{{depName}}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}',
           currentValue: 'v3.1.1',
           currentDigest: '56337c425554a6be30cdef71bf441f15be286854',
         },
@@ -119,7 +119,7 @@ describe('modules/manager/github-actions/extract', () => {
           replaceString:
             "'actions/setup-node@1f8c6b94b26d0feae1e387ca63ccbdc44d27b561' # tag=v3.1.1",
           autoReplaceStringTemplate:
-            "'{{depName}}@{{#if newDigest}}{{newDigest}}'{{#if newValue}} # tag={{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}'{{/unless}}",
+            "'{{depName}}@{{#if newDigest}}{{newDigest}}'{{#if newValue}} # {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}'{{/unless}}",
           currentValue: 'v3.1.1',
           currentDigest: '1f8c6b94b26d0feae1e387ca63ccbdc44d27b561',
         },
@@ -132,7 +132,7 @@ describe('modules/manager/github-actions/extract', () => {
           replaceString:
             '"actions/setup-node@1f8c6b94b26d0feae1e387ca63ccbdc44d27b561" # tag=v2.5.1',
           autoReplaceStringTemplate:
-            '"{{depName}}@{{#if newDigest}}{{newDigest}}"{{#if newValue}} # tag={{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}"{{/unless}}',
+            '"{{depName}}@{{#if newDigest}}{{newDigest}}"{{#if newValue}} # {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}"{{/unless}}',
           currentValue: 'v2.5.1',
           currentDigest: '1f8c6b94b26d0feae1e387ca63ccbdc44d27b561',
         },
@@ -144,7 +144,7 @@ describe('modules/manager/github-actions/extract', () => {
           depType: 'action',
           replaceString: '"actions/checkout@v2"',
           autoReplaceStringTemplate:
-            '"{{depName}}@{{#if newDigest}}{{newDigest}}"{{#if newValue}} # tag={{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}"{{/unless}}',
+            '"{{depName}}@{{#if newDigest}}{{newDigest}}"{{#if newValue}} # {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}"{{/unless}}',
           currentValue: 'v2',
         },
         {
@@ -155,8 +155,110 @@ describe('modules/manager/github-actions/extract', () => {
           depType: 'action',
           replaceString: '"actions/setup-java@v2"',
           autoReplaceStringTemplate:
-            '"{{depName}}@{{#if newDigest}}{{newDigest}}"{{#if newValue}} # tag={{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}"{{/unless}}',
+            '"{{depName}}@{{#if newDigest}}{{newDigest}}"{{#if newValue}} # {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}"{{/unless}}',
           currentValue: 'v2',
+        },
+      ]);
+    });
+
+    it('extracts tags in different formats', () => {
+      const res = extractPackageFile(
+        Fixtures.get('workflow_4.yml'),
+        'workflow_4.yml'
+      );
+      expect(res?.deps).toMatchObject([
+        {
+          currentDigest: '1e204e9a9253d643386038d443f96446fa156a97',
+          currentValue: '1.2.3',
+          replaceString:
+            'actions/checkout@1e204e9a9253d643386038d443f96446fa156a97 # 1.2.3',
+        },
+        {
+          currentDigest: '1e204e9a9253d643386038d443f96446fa156a97',
+          currentValue: '1.2',
+          replaceString:
+            'actions/checkout@1e204e9a9253d643386038d443f96446fa156a97 # 1.2',
+        },
+        {
+          currentDigest: '1e204e9a9253d643386038d443f96446fa156a97',
+          currentValue: '1',
+          replaceString:
+            'actions/checkout@1e204e9a9253d643386038d443f96446fa156a97 # 1',
+        },
+        {
+          currentDigest: '1e204e9a9253d643386038d443f96446fa156a97',
+          currentValue: 'v1.2.3',
+          replaceString:
+            'actions/checkout@1e204e9a9253d643386038d443f96446fa156a97 # v1.2.3',
+        },
+        {
+          currentDigest: '1e204e9a9253d643386038d443f96446fa156a97',
+          currentValue: 'v1.2',
+          replaceString:
+            'actions/checkout@1e204e9a9253d643386038d443f96446fa156a97 # v1.2',
+        },
+        {
+          currentDigest: '1e204e9a9253d643386038d443f96446fa156a97',
+          currentValue: 'v1',
+          replaceString:
+            'actions/checkout@1e204e9a9253d643386038d443f96446fa156a97 # v1',
+        },
+        {
+          currentDigest: '1e204e9a9253d643386038d443f96446fa156a97',
+          currentValue: 'v2.1.0',
+          replaceString:
+            'actions/checkout@1e204e9a9253d643386038d443f96446fa156a97 # @v2.1.0',
+        },
+        {
+          currentDigest: '1e204e9a9253d643386038d443f96446fa156a97',
+          currentValue: 'v2.1.0',
+          replaceString:
+            'actions/checkout@1e204e9a9253d643386038d443f96446fa156a97 # pin @v2.1.0',
+        },
+        {
+          currentDigest: '1e204e9a9253d643386038d443f96446fa156a97',
+          currentValue: 'v2.1.0',
+          replaceString:
+            'actions/checkout@1e204e9a9253d643386038d443f96446fa156a97 # tag=v2.1.0',
+        },
+        {
+          currentDigest: '1e204e9a9253d643386038d443f96446fa156a97',
+          currentValue: 'v2.1.0',
+          replaceString:
+            'actions/checkout@1e204e9a9253d643386038d443f96446fa156a97  #   v2.1.0',
+        },
+        {
+          currentDigest: '1e204e9a9253d643386038d443f96446fa156a97',
+          currentValue: 'v2.1.0',
+          replaceString:
+            'actions/checkout@1e204e9a9253d643386038d443f96446fa156a97 #v2.1.0',
+        },
+        {
+          currentDigest: '1e204e9a9253d643386038d443f96446fa156a97',
+          currentValue: 'v2.1.0',
+          replaceString:
+            'actions/checkout@1e204e9a9253d643386038d443f96446fa156a97 #v2.1.0',
+        },
+        {
+          currentDigest: '1e204e',
+          currentValue: 'v2.1.0',
+          replaceString: 'actions/checkout@1e204e # v2.1.0',
+        },
+        {
+          currentValue: '01aecc#v2.1.0',
+          replaceString: 'actions/checkout@01aecc#v2.1.0',
+        },
+        {
+          currentDigest: '689fcce700ae7ffc576f2b029b51b2ffb66d3abd',
+          currentValue: undefined,
+          replaceString:
+            'actions/checkout@689fcce700ae7ffc576f2b029b51b2ffb66d3abd',
+        },
+        {
+          currentDigest: '689fcce700ae7ffc576f2b029b51b2ffb66d3abd',
+          currentValue: 'v2.1.0',
+          replaceString:
+            'actions/checkout@689fcce700ae7ffc576f2b029b51b2ffb66d3abd # v2.1.0',
         },
       ]);
     });

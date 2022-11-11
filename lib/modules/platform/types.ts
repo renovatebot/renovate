@@ -28,6 +28,7 @@ export interface PlatformResult {
 export interface RepoResult {
   defaultBranch: string;
   isFork: boolean;
+  repoFingerprint: string;
 }
 
 export type GitUrlOption = 'default' | 'ssh' | 'endpoint';
@@ -36,7 +37,6 @@ export interface RepoParams {
   repository: string;
   endpoint?: string;
   gitUrl?: GitUrlOption;
-  forkMode?: string;
   forkToken?: string;
   includeForks?: boolean;
   renovateUsername?: string;
@@ -51,6 +51,7 @@ export interface PrDebugData {
 
 export interface PrBodyStruct {
   hash: string;
+  rawConfigHash?: string;
   rebaseRequested?: boolean;
   debugData?: PrDebugData;
 }

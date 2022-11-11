@@ -1,5 +1,10 @@
 import { MavenDatasource } from './maven';
-import { addMetaData, massageGithubUrl } from './metadata';
+import {
+  addMetaData,
+  massageGithubUrl,
+  massageUrl,
+  shouldDeleteHomepage,
+} from './metadata';
 import { NpmDatasource } from './npm';
 import { PypiDatasource } from './pypi';
 import type { ReleaseResult } from './types';
@@ -227,6 +232,50 @@ describe('modules/datasource/metadata', () => {
     ]);
   });
 
+  describe('massageUrl', () => {
+    it('Should return an empty string when massaging an invalid url', () => {
+      expect(massageUrl('not a url')).toMatch('');
+    });
+
+    test.each`
+      sourceUrl
+      ${'git@github.com:user/repo'}
+      ${'http://github.com/user/repo'}
+      ${'http+git://github.com/user/repo'}
+      ${'https+git://github.com/user/repo'}
+      ${'ssh://git@github.com/user/repo'}
+      ${'git://github.com/user/repo'}
+      ${'https://www.github.com/user/repo'}
+      ${'https://user.github.com/repo'}
+    `('Should massage GitHub url $sourceUrl', ({ sourceUrl }) => {
+      expect(massageUrl(sourceUrl)).toBe('https://github.com/user/repo');
+    });
+
+    test.each`
+      sourceUrl
+      ${'http://gitlab.com/user/repo'}
+      ${'git://gitlab.com/user/repo'}
+      ${'https://gitlab.com/user/repo/tree/master'}
+      ${'http://gitlab.com/user/repo/'}
+      ${'http://gitlab.com/user/repo.git'}
+      ${'git@gitlab.com:user/repo.git'}
+    `('Should massage GitLab url $sourceUrl', ({ sourceUrl }) => {
+      expect(massageUrl(sourceUrl)).toBe('https://gitlab.com/user/repo');
+    });
+
+    test.each`
+      sourceUrl
+      ${'git@example.com:user/repo'}
+      ${'http://example.com/user/repo'}
+      ${'http+git://example.com/user/repo'}
+      ${'https+git://example.com/user/repo'}
+      ${'ssh://git@example.com/user/repo'}
+      ${'git://example.com/user/repo'}
+    `('Should massage other sourceUrl $sourceUrl', ({ sourceUrl }) => {
+      expect(massageUrl(sourceUrl)).toBe('https://example.com/user/repo');
+    });
+  });
+
   it('Should massage github git@ url to valid https url', () => {
     expect(massageGithubUrl('git@example.com:foo/bar')).toMatch(
       'https://example.com/foo/bar'
@@ -256,4 +305,141 @@ describe('modules/datasource/metadata', () => {
       'https://example.com/foo/bar'
     );
   });
+
+  it('Should remove homepage when homepage and sourceUrl are same', () => {
+    const dep = {
+      homepage: 'https://github.com/foo/bar',
+      sourceUrl: 'https://github.com/foo/bar',
+      releases: [
+        { version: '1.0.1', releaseTimestamp: '2000-01-01T12:34:56' },
+        { version: '1.0.2', releaseTimestamp: '2000-01-02T12:34:56.000Z' },
+        { version: '1.0.3', releaseTimestamp: '2000-01-03T14:34:56.000+02:00' },
+      ],
+    };
+    addMetaData(dep, MavenDatasource.id, 'foobar');
+    expect(dep).toMatchObject({
+      releases: [
+        {
+          version: '1.0.1',
+          releaseTimestamp: '2000-01-01T12:34:56.000Z',
+        },
+        {
+          version: '1.0.2',
+          releaseTimestamp: '2000-01-02T12:34:56.000Z',
+        },
+        {
+          version: '1.0.3',
+          releaseTimestamp: '2000-01-03T12:34:56.000Z',
+        },
+      ],
+      sourceUrl: 'https://github.com/foo/bar',
+    });
+  });
+
+  it('Should delete gitlab homepage if its same as sourceUrl', () => {
+    const dep = {
+      sourceUrl: 'https://gitlab.com/meno/repo',
+      homepage: 'https://gitlab.com/meno/repo',
+      releases: [
+        { version: '1.0.1', releaseTimestamp: '2000-01-01T12:34:56' },
+        { version: '1.0.2', releaseTimestamp: '2000-01-02T12:34:56.000Z' },
+        { version: '1.0.3', releaseTimestamp: '2000-01-03T14:34:56.000+02:00' },
+      ],
+    };
+    addMetaData(dep, MavenDatasource.id, 'foobar');
+    expect(dep).toMatchObject({
+      sourceUrl: 'https://gitlab.com/meno/repo',
+      releases: [
+        {
+          version: '1.0.1',
+          releaseTimestamp: '2000-01-01T12:34:56.000Z',
+        },
+        {
+          version: '1.0.2',
+          releaseTimestamp: '2000-01-02T12:34:56.000Z',
+        },
+        {
+          version: '1.0.3',
+          releaseTimestamp: '2000-01-03T12:34:56.000Z',
+        },
+      ],
+    });
+  });
+
+  it('does not set homepage to sourceURl when undefined', () => {
+    const dep = {
+      sourceUrl: 'https://gitlab.com/meno/repo',
+      releases: [
+        { version: '1.0.1', releaseTimestamp: '2000-01-01T12:34:56' },
+        { version: '1.0.2', releaseTimestamp: '2000-01-02T12:34:56.000Z' },
+        { version: '1.0.3', releaseTimestamp: '2000-01-03T14:34:56.000+02:00' },
+      ],
+    };
+    addMetaData(dep, MavenDatasource.id, 'foobar');
+    expect(dep).toMatchObject({
+      sourceUrl: 'https://gitlab.com/meno/repo',
+      releases: [
+        {
+          version: '1.0.1',
+          releaseTimestamp: '2000-01-01T12:34:56.000Z',
+        },
+        {
+          version: '1.0.2',
+          releaseTimestamp: '2000-01-02T12:34:56.000Z',
+        },
+        {
+          version: '1.0.3',
+          releaseTimestamp: '2000-01-03T12:34:56.000Z',
+        },
+      ],
+    });
+  });
+
+  it('does not set homepage to sourceURl when not github or gitlab', () => {
+    const dep = {
+      homepage: 'https://somesource.com/',
+      releases: [
+        { version: '1.0.1', releaseTimestamp: '2000-01-01T12:34:56' },
+        { version: '1.0.2', releaseTimestamp: '2000-01-02T12:34:56.000Z' },
+        { version: '1.0.3', releaseTimestamp: '2000-01-03T14:34:56.000+02:00' },
+      ],
+    };
+    addMetaData(dep, MavenDatasource.id, 'foobar');
+    expect(dep).toMatchObject({
+      homepage: 'https://somesource.com/',
+      releases: [
+        {
+          version: '1.0.1',
+          releaseTimestamp: '2000-01-01T12:34:56.000Z',
+        },
+        {
+          version: '1.0.2',
+          releaseTimestamp: '2000-01-02T12:34:56.000Z',
+        },
+        {
+          version: '1.0.3',
+          releaseTimestamp: '2000-01-03T12:34:56.000Z',
+        },
+      ],
+    });
+  });
+
+  test.each`
+    sourceUrl                              | homepage                                                                   | expected
+    ${'not a url'}                         | ${'https://gitlab.com/org/repo'}                                           | ${false}
+    ${'https://gitlab.com/org/repo'}       | ${'not a url'}                                                             | ${false}
+    ${'https://gitlab.com/org'}            | ${'https://gitlab.com/org/'}                                               | ${true}
+    ${'https://gitlab.com/org/repo/'}      | ${'https://gitlab.com/org/repo'}                                           | ${true}
+    ${'https://github.com/org/repo/path/'} | ${'https://github.com/org/repo/path/'}                                     | ${false}
+    ${'https://gitlab.com/org/repo/'}      | ${'https://gitlab.com/org/repo/path/to/something/'}                        | ${false}
+    ${'https://gitlab.com/org/repo/'}      | ${null}                                                                    | ${false}
+    ${'https://gitlab.com/org/repo/'}      | ${undefined}                                                               | ${false}
+    ${'https://gitlab.com/org/repo/'}      | ${'github.com'}                                                            | ${false}
+    ${'https://github.com/bitnami/charts'} | ${'https://github.com/bitnami/charts/tree/master/bitnami/kube-prometheus'} | ${false}
+  `(
+    'shouldDeleteHomepage($sourceUrl, $homepage) -> $expected',
+    ({ sourceUrl, homepage, expected }) => {
+      expect(shouldDeleteHomepage(sourceUrl, homepage)).toBe(expected);
+    }
+  );
 });

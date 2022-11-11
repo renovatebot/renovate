@@ -16,6 +16,10 @@ export function sortBranches(branches: Partial<BranchConfig>[]): void {
     if (a.isVulnerabilityAlert && !b.isVulnerabilityAlert) {
       return -1;
     }
+    if (!a.isVulnerabilityAlert && b.isVulnerabilityAlert) {
+      return 1;
+    }
+
     // TODO #7154
     if (a.prPriority !== b.prPriority) {
       return b.prPriority! - a.prPriority!;

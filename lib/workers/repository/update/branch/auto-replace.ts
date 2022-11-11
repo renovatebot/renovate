@@ -32,7 +32,8 @@ export async function confirmIfDepUpdated(
     );
     // istanbul ignore if
     if (!newExtract) {
-      logger.debug({ manager, packageFile }, 'Could not extract package file');
+      // TODO: fix types (#7154)
+      logger.debug(`Could not extract ${packageFile!}`);
       return false;
     }
     newUpgrade = newExtract.deps[depIndex!];
@@ -40,7 +41,7 @@ export async function confirmIfDepUpdated(
     logger.debug({ manager, packageFile, err }, 'Failed to parse newContent');
   }
   if (!newUpgrade!) {
-    logger.debug({ manager, packageFile }, 'No newUpgrade');
+    logger.debug(`No newUpgrade in ${packageFile!}`);
     return false;
   }
 
@@ -105,6 +106,30 @@ export async function checkBranchDepsMatchBaseDeps(
   }
 }
 
+async function checkExistingBranch(
+  upgrade: BranchUpgradeConfig,
+  existingContent: string
+): Promise<string | null> {
+  const { packageFile, depName } = upgrade;
+  if (!(await checkBranchDepsMatchBaseDeps(upgrade, existingContent))) {
+    logger.debug(
+      { packageFile, depName },
+      'Rebasing branch after deps list has changed'
+    );
+    return null;
+  }
+  if (!(await confirmIfDepUpdated(upgrade, existingContent))) {
+    logger.debug(
+      { packageFile, depName },
+      'Rebasing after outdated branch dep found'
+    );
+    return null;
+  }
+  // TODO: fix types (#7154)
+  logger.debug(`Branch dep ${depName!} in ${packageFile!} is already updated`);
+  return existingContent;
+}
+
 export async function doAutoReplace(
   upgrade: BranchUpgradeConfig,
   existingContent: string,
@@ -120,22 +145,7 @@ export async function doAutoReplace(
     autoReplaceStringTemplate,
   } = upgrade;
   if (reuseExistingBranch) {
-    if (!(await checkBranchDepsMatchBaseDeps(upgrade, existingContent))) {
-      logger.debug(
-        { packageFile, depName },
-        'Rebasing branch after deps list has changed'
-      );
-      return null;
-    }
-    if (!(await confirmIfDepUpdated(upgrade, existingContent))) {
-      logger.debug(
-        { packageFile, depName },
-        'Rebasing after outdated branch dep found'
-      );
-      return null;
-    }
-    logger.debug({ packageFile, depName }, 'Branch dep is already updated');
-    return existingContent;
+    return await checkExistingBranch(upgrade, existingContent);
   }
   const replaceString = upgrade.replaceString ?? currentValue;
   logger.trace({ depName, replaceString }, 'autoReplace replaceString');

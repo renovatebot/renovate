@@ -1,635 +1,635 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`modules/manager/gomod/extract extractPackageFile() extracts multi-line requires 1`] = `
-Array [
-  Object {
+[
+  {
     "currentValue": "v1.15.21",
     "datasource": "go",
     "depName": "github.com/aws/aws-sdk-go",
     "depType": "require",
-    "managerData": Object {
+    "managerData": {
       "lineNumber": 3,
       "multiLine": true,
     },
   },
-  Object {
+  {
     "currentDigest": "9fd32a8b3d3d",
     "currentValue": "v0.0.0-20140422174119-9fd32a8b3d3d",
     "datasource": "go",
     "depName": "github.com/bgentry/go-netrc",
     "depType": "require",
     "digestOneAndOnly": true,
-    "managerData": Object {
+    "managerData": {
       "lineNumber": 4,
       "multiLine": true,
     },
   },
-  Object {
+  {
     "currentDigest": "bcc4c8345a21",
     "currentValue": "v0.0.0-20151120183258-bcc4c8345a21",
     "datasource": "go",
     "depName": "github.com/cloudfoundry/jibber_jabber",
     "depType": "require",
     "digestOneAndOnly": true,
-    "managerData": Object {
+    "managerData": {
       "lineNumber": 5,
       "multiLine": true,
     },
   },
-  Object {
+  {
     "currentValue": "v1.1.0",
     "datasource": "go",
     "depName": "github.com/davecgh/go-spew",
     "depType": "require",
-    "managerData": Object {
+    "managerData": {
       "lineNumber": 6,
       "multiLine": true,
     },
   },
-  Object {
+  {
     "currentValue": "v1.9.0",
     "datasource": "go",
     "depName": "github.com/emirpasic/gods",
     "depType": "require",
-    "managerData": Object {
+    "managerData": {
       "lineNumber": 7,
       "multiLine": true,
     },
   },
-  Object {
+  {
     "currentValue": "v1.7.0",
     "datasource": "go",
     "depName": "github.com/fatih/color",
     "depType": "require",
-    "managerData": Object {
+    "managerData": {
       "lineNumber": 8,
       "multiLine": true,
     },
   },
-  Object {
+  {
     "currentValue": "v1.4.7",
     "datasource": "go",
     "depName": "github.com/fsnotify/fsnotify",
     "depType": "require",
-    "managerData": Object {
+    "managerData": {
       "lineNumber": 9,
       "multiLine": true,
     },
   },
-  Object {
+  {
     "currentValue": "v1.38.2",
     "datasource": "go",
     "depName": "github.com/go-ini/ini",
     "depType": "require",
-    "managerData": Object {
+    "managerData": {
       "lineNumber": 10,
       "multiLine": true,
     },
   },
-  Object {
+  {
     "currentDigest": "604e922904d3",
     "currentValue": "v0.0.0-20130729185459-604e922904d3",
     "datasource": "go",
     "depName": "github.com/golang-collections/collections",
     "depType": "require",
     "digestOneAndOnly": true,
-    "managerData": Object {
+    "managerData": {
       "lineNumber": 11,
       "multiLine": true,
     },
   },
-  Object {
+  {
     "currentDigest": "d5fe4b57a186",
     "currentValue": "v0.0.0-20171218145408-d5fe4b57a186",
     "datasource": "go",
     "depName": "github.com/hashicorp/go-cleanhttp",
     "depType": "require",
     "digestOneAndOnly": true,
-    "managerData": Object {
+    "managerData": {
       "lineNumber": 12,
       "multiLine": true,
     },
   },
-  Object {
+  {
     "currentDigest": "4bda8fa99001",
     "currentValue": "v0.0.0-20180809191950-4bda8fa99001",
     "datasource": "go",
     "depName": "github.com/hashicorp/go-getter",
     "depType": "require",
     "digestOneAndOnly": true,
-    "managerData": Object {
+    "managerData": {
       "lineNumber": 13,
       "multiLine": true,
     },
   },
-  Object {
+  {
     "currentDigest": "b1a1dbde6fdc",
     "currentValue": "v0.0.0-20180326211150-b1a1dbde6fdc",
     "datasource": "go",
     "depName": "github.com/hashicorp/go-safetemp",
     "depType": "require",
     "digestOneAndOnly": true,
-    "managerData": Object {
+    "managerData": {
       "lineNumber": 14,
       "multiLine": true,
     },
   },
-  Object {
+  {
     "currentValue": "v1.0.0",
     "datasource": "go",
     "depName": "github.com/hashicorp/go-version",
     "depType": "require",
-    "managerData": Object {
+    "managerData": {
       "lineNumber": 15,
       "multiLine": true,
     },
   },
-  Object {
+  {
     "currentDigest": "ef8a98b0bbce",
     "currentValue": "v0.0.0-20180404174102-ef8a98b0bbce",
     "datasource": "go",
     "depName": "github.com/hashicorp/hcl",
     "depType": "require",
     "digestOneAndOnly": true,
-    "managerData": Object {
+    "managerData": {
       "lineNumber": 16,
       "multiLine": true,
     },
   },
-  Object {
+  {
     "currentDigest": "fc0cef2ff331",
     "currentValue": "v0.0.0-20180515183152-fc0cef2ff331",
     "datasource": "go",
     "depName": "github.com/heroku/rollrus",
     "depType": "require",
     "digestOneAndOnly": true,
-    "managerData": Object {
+    "managerData": {
       "lineNumber": 17,
       "multiLine": true,
     },
   },
-  Object {
+  {
     "currentDigest": "d14ea06fba99",
     "currentValue": "v0.0.0-20150711004518-d14ea06fba99",
     "datasource": "go",
     "depName": "github.com/jbenet/go-context",
     "depType": "require",
     "digestOneAndOnly": true,
-    "managerData": Object {
+    "managerData": {
       "lineNumber": 18,
       "multiLine": true,
     },
   },
-  Object {
+  {
     "currentDigest": "906e15686e63",
     "currentValue": "v0.0.0-20180822080847-906e15686e63",
     "datasource": "go",
     "depName": "github.com/jesseduffield/go-getter",
     "depType": "require",
     "digestOneAndOnly": true,
-    "managerData": Object {
+    "managerData": {
       "lineNumber": 19,
       "multiLine": true,
     },
   },
-  Object {
+  {
     "currentDigest": "03e26ff3f1de",
     "currentValue": "v0.0.0-20180921065632-03e26ff3f1de",
     "datasource": "go",
     "depName": "github.com/jesseduffield/gocui",
     "depType": "require",
     "digestOneAndOnly": true,
-    "managerData": Object {
+    "managerData": {
       "lineNumber": 20,
       "multiLine": true,
     },
   },
-  Object {
+  {
     "currentDigest": "1e272ff78dcb",
     "currentValue": "v0.0.0-20180919093808-1e272ff78dcb",
     "datasource": "go",
     "depName": "github.com/jesseduffield/termbox-go",
     "depType": "require",
     "digestOneAndOnly": true,
-    "managerData": Object {
+    "managerData": {
       "lineNumber": 21,
       "multiLine": true,
     },
   },
-  Object {
+  {
     "currentDigest": "0b12d6b521d8",
     "currentValue": "v0.0.0-20160202185014-0b12d6b521d8",
     "datasource": "go",
     "depName": "github.com/jmespath/go-jmespath",
     "depType": "require",
     "digestOneAndOnly": true,
-    "managerData": Object {
+    "managerData": {
       "lineNumber": 22,
       "multiLine": true,
     },
   },
-  Object {
+  {
     "currentDigest": "ae77be60afb1",
     "currentValue": "v0.0.0-20170510131534-ae77be60afb1",
     "datasource": "go",
     "depName": "github.com/kardianos/osext",
     "depType": "require",
     "digestOneAndOnly": true,
-    "managerData": Object {
+    "managerData": {
       "lineNumber": 23,
       "multiLine": true,
     },
   },
-  Object {
+  {
     "currentDigest": "9fc7bb800b55",
     "currentValue": "v0.0.0-20180317175531-9fc7bb800b55",
     "datasource": "go",
     "depName": "github.com/kevinburke/ssh_config",
     "depType": "require",
     "digestOneAndOnly": true,
-    "managerData": Object {
+    "managerData": {
       "lineNumber": 24,
       "multiLine": true,
     },
   },
-  Object {
+  {
     "currentValue": "v1.8.0",
     "datasource": "go",
     "depName": "github.com/magiconair/properties",
     "depType": "require",
-    "managerData": Object {
+    "managerData": {
       "lineNumber": 25,
       "multiLine": true,
     },
   },
-  Object {
+  {
     "currentValue": "v0.0.9",
     "datasource": "go",
     "depName": "github.com/mattn/go-colorable",
     "depType": "require",
-    "managerData": Object {
+    "managerData": {
       "lineNumber": 26,
       "multiLine": true,
     },
   },
-  Object {
+  {
     "currentValue": "v0.0.3",
     "datasource": "go",
     "depName": "github.com/mattn/go-isatty",
     "depType": "require",
-    "managerData": Object {
+    "managerData": {
       "lineNumber": 27,
       "multiLine": true,
     },
   },
-  Object {
+  {
     "currentValue": "v0.0.2",
     "datasource": "go",
     "depName": "github.com/mattn/go-runewidth",
     "depType": "require",
-    "managerData": Object {
+    "managerData": {
       "lineNumber": 28,
       "multiLine": true,
     },
   },
-  Object {
+  {
     "currentValue": "v1.2.0",
     "datasource": "go",
     "depName": "github.com/mgutz/str",
     "depType": "require",
-    "managerData": Object {
+    "managerData": {
       "lineNumber": 29,
       "multiLine": true,
     },
   },
-  Object {
+  {
     "currentDigest": "58046073cbff",
     "currentValue": "v0.0.0-20180801233206-58046073cbff",
     "datasource": "go",
     "depName": "github.com/mitchellh/go-homedir",
     "depType": "require",
     "digestOneAndOnly": true,
-    "managerData": Object {
+    "managerData": {
       "lineNumber": 30,
       "multiLine": true,
     },
   },
-  Object {
+  {
     "currentDigest": "a61a99592b77",
     "currentValue": "v0.0.0-20171004221916-a61a99592b77",
     "datasource": "go",
     "depName": "github.com/mitchellh/go-testing-interface",
     "depType": "require",
     "digestOneAndOnly": true,
-    "managerData": Object {
+    "managerData": {
       "lineNumber": 31,
       "multiLine": true,
     },
   },
-  Object {
+  {
     "currentDigest": "f15292f7a699",
     "currentValue": "v0.0.0-20180715050151-f15292f7a699",
     "datasource": "go",
     "depName": "github.com/mitchellh/mapstructure",
     "depType": "require",
     "digestOneAndOnly": true,
-    "managerData": Object {
+    "managerData": {
       "lineNumber": 32,
       "multiLine": true,
     },
   },
-  Object {
+  {
     "currentDigest": "a16b91a3ba80",
     "currentValue": "v0.0.0-20180803040939-a16b91a3ba80",
     "datasource": "go",
     "depName": "github.com/nicksnyder/go-i18n",
     "depType": "require",
     "digestOneAndOnly": true,
-    "managerData": Object {
+    "managerData": {
       "lineNumber": 33,
       "multiLine": true,
     },
   },
-  Object {
+  {
     "currentValue": "v0.2.0",
     "datasource": "go",
     "depName": "github.com/pelletier/go-buffruneio",
     "depType": "require",
-    "managerData": Object {
+    "managerData": {
       "lineNumber": 34,
       "multiLine": true,
     },
   },
-  Object {
+  {
     "currentValue": "v1.2.0",
     "datasource": "go",
     "depName": "github.com/pelletier/go-toml",
     "depType": "require",
-    "managerData": Object {
+    "managerData": {
       "lineNumber": 35,
       "multiLine": true,
     },
   },
-  Object {
+  {
     "currentValue": "v0.8.0",
     "datasource": "go",
     "depName": "github.com/pkg/errors",
     "depType": "require",
-    "managerData": Object {
+    "managerData": {
       "lineNumber": 36,
       "multiLine": true,
     },
   },
-  Object {
+  {
     "currentValue": "v1.0.0",
     "datasource": "go",
     "depName": "github.com/pmezard/go-difflib",
     "depType": "require",
-    "managerData": Object {
+    "managerData": {
       "lineNumber": 37,
       "multiLine": true,
     },
   },
-  Object {
+  {
     "currentValue": "v1.0.0",
     "datasource": "go",
     "depName": "github.com/sergi/go-diff",
     "depType": "require",
-    "managerData": Object {
+    "managerData": {
       "lineNumber": 38,
       "multiLine": true,
     },
   },
-  Object {
+  {
     "currentDigest": "e180dbdc8da0",
     "currentValue": "v0.0.0-20170330084843-e180dbdc8da0",
     "datasource": "go",
     "depName": "github.com/shibukawa/configdir",
     "depType": "require",
     "digestOneAndOnly": true,
-    "managerData": Object {
+    "managerData": {
       "lineNumber": 39,
       "multiLine": true,
     },
   },
-  Object {
+  {
     "currentValue": "v1.0.6",
     "datasource": "go",
     "depName": "github.com/sirupsen/logrus",
     "depType": "require",
-    "managerData": Object {
+    "managerData": {
       "lineNumber": 40,
       "multiLine": true,
     },
   },
-  Object {
+  {
     "currentValue": "v1.1.1",
     "datasource": "go",
     "depName": "github.com/spf13/afero",
     "depType": "require",
-    "managerData": Object {
+    "managerData": {
       "lineNumber": 41,
       "multiLine": true,
     },
   },
-  Object {
+  {
     "currentValue": "v1.2.0",
     "datasource": "go",
     "depName": "github.com/spf13/cast",
     "depType": "require",
-    "managerData": Object {
+    "managerData": {
       "lineNumber": 42,
       "multiLine": true,
     },
   },
-  Object {
+  {
     "currentDigest": "14d3d4c51834",
     "currentValue": "v0.0.0-20180814060501-14d3d4c51834",
     "datasource": "go",
     "depName": "github.com/spf13/jwalterweatherman",
     "depType": "require",
     "digestOneAndOnly": true,
-    "managerData": Object {
+    "managerData": {
       "lineNumber": 43,
       "multiLine": true,
     },
   },
-  Object {
+  {
     "currentValue": "v1.0.2",
     "datasource": "go",
     "depName": "github.com/spf13/pflag",
     "depType": "require",
-    "managerData": Object {
+    "managerData": {
       "lineNumber": 44,
       "multiLine": true,
     },
   },
-  Object {
+  {
     "currentValue": "v1.1.0",
     "datasource": "go",
     "depName": "github.com/spf13/viper",
     "depType": "require",
-    "managerData": Object {
+    "managerData": {
       "lineNumber": 45,
       "multiLine": true,
     },
   },
-  Object {
+  {
     "currentDigest": "59b7046e48ad",
     "currentValue": "v0.0.0-20160624110644-59b7046e48ad",
     "datasource": "go",
     "depName": "github.com/spkg/bom",
     "depType": "require",
     "digestOneAndOnly": true,
-    "managerData": Object {
+    "managerData": {
       "lineNumber": 46,
       "multiLine": true,
     },
   },
-  Object {
+  {
     "currentValue": "v2.3.0",
     "datasource": "go",
     "depName": "github.com/src-d/gcfg/v2",
     "depType": "require",
-    "managerData": Object {
+    "managerData": {
       "lineNumber": 47,
       "multiLine": true,
     },
   },
-  Object {
+  {
     "currentValue": "v1.2.2",
     "datasource": "go",
     "depName": "github.com/stretchr/testify",
     "depType": "require",
-    "managerData": Object {
+    "managerData": {
       "lineNumber": 48,
       "multiLine": true,
     },
   },
-  Object {
+  {
     "currentDigest": "3627a5cbeaea",
     "currentValue": "v0.0.0-20170522205222-3627a5cbeaea",
     "datasource": "go",
     "depName": "github.com/stvp/roll",
     "depType": "require",
     "digestOneAndOnly": true,
-    "managerData": Object {
+    "managerData": {
       "lineNumber": 49,
       "multiLine": true,
     },
   },
-  Object {
+  {
     "currentValue": "v0.1.2",
     "datasource": "go",
     "depName": "github.com/tcnksm/go-gitconfig",
     "depType": "require",
-    "managerData": Object {
+    "managerData": {
       "lineNumber": 50,
       "multiLine": true,
     },
   },
-  Object {
+  {
     "currentValue": "v0.5.4",
     "datasource": "go",
     "depName": "github.com/ulikunitz/xz",
     "depType": "require",
-    "managerData": Object {
+    "managerData": {
       "lineNumber": 51,
       "multiLine": true,
     },
   },
-  Object {
+  {
     "currentValue": "v0.2.0",
     "datasource": "go",
     "depName": "github.com/xanzy/ssh-agent",
     "depType": "require",
-    "managerData": Object {
+    "managerData": {
       "lineNumber": 52,
       "multiLine": true,
     },
   },
-  Object {
+  {
     "currentDigest": "de0752318171",
     "currentValue": "v0.0.0-20180808211826-de0752318171",
     "datasource": "go",
     "depName": "golang.org/x/crypto",
     "depType": "require",
     "digestOneAndOnly": true,
-    "managerData": Object {
+    "managerData": {
       "lineNumber": 53,
       "multiLine": true,
     },
   },
-  Object {
+  {
     "currentDigest": "c39426892332",
     "currentValue": "v0.0.0-20180811021610-c39426892332",
     "datasource": "go",
     "depName": "golang.org/x/net",
     "depType": "require",
     "digestOneAndOnly": true,
-    "managerData": Object {
+    "managerData": {
       "lineNumber": 54,
       "multiLine": true,
     },
   },
-  Object {
+  {
     "currentDigest": "98c5dad5d1a0",
     "currentValue": "v0.0.0-20180810173357-98c5dad5d1a0",
     "datasource": "go",
     "depName": "golang.org/x/sys",
     "depType": "require",
     "digestOneAndOnly": true,
-    "managerData": Object {
+    "managerData": {
       "lineNumber": 55,
       "multiLine": true,
     },
   },
-  Object {
+  {
     "currentValue": "v0.3.0",
     "datasource": "go",
     "depName": "golang.org/x/text",
     "depType": "require",
-    "managerData": Object {
+    "managerData": {
       "lineNumber": 56,
       "multiLine": true,
     },
   },
-  Object {
+  {
     "currentValue": "v4.2.0",
     "datasource": "go",
     "depName": "gopkg.in/src-d/go-billy.v4",
     "depType": "require",
-    "managerData": Object {
+    "managerData": {
       "lineNumber": 57,
       "multiLine": true,
     },
   },
-  Object {
+  {
     "currentValue": "v4.0.0-20180807092216-43d17e14b714",
     "datasource": "go",
     "depName": "gopkg.in/src-d/go-git.v4",
     "depType": "require",
-    "managerData": Object {
+    "managerData": {
       "lineNumber": 58,
       "multiLine": true,
     },
   },
-  Object {
+  {
     "currentValue": "v0.1.2",
     "datasource": "go",
     "depName": "gopkg.in/warnings.v0",
     "depType": "require",
-    "managerData": Object {
+    "managerData": {
       "lineNumber": 59,
       "multiLine": true,
     },
   },
-  Object {
+  {
     "currentValue": "v2.2.1",
     "datasource": "go",
     "depName": "gopkg.in/yaml.v2",
     "depType": "require",
-    "managerData": Object {
+    "managerData": {
       "lineNumber": 60,
       "multiLine": true,
     },
@@ -638,76 +638,76 @@ Array [
 `;
 
 exports[`modules/manager/gomod/extract extractPackageFile() extracts single-line requires 1`] = `
-Array [
-  Object {
+[
+  {
     "currentValue": "v0.7.0",
     "datasource": "go",
     "depName": "github.com/pkg/errors",
     "depType": "require",
-    "managerData": Object {
+    "managerData": {
       "lineNumber": 2,
     },
   },
-  Object {
+  {
     "currentValue": "v1.15.21",
     "datasource": "go",
     "depName": "github.com/aws/aws-sdk-go",
     "depType": "require",
-    "managerData": Object {
+    "managerData": {
       "lineNumber": 3,
     },
   },
-  Object {
+  {
     "currentValue": "v1.0.0",
     "datasource": "go",
     "depName": "golang.org/x/foo",
     "depType": "require",
-    "managerData": Object {
+    "managerData": {
       "lineNumber": 5,
     },
   },
-  Object {
+  {
     "currentValue": "abcdef1",
     "depName": "github.com/rarkins/foo",
     "depType": "require",
-    "managerData": Object {
+    "managerData": {
       "lineNumber": 6,
     },
     "skipReason": "unsupported-version",
   },
-  Object {
+  {
     "currentValue": "v1.0.0",
     "datasource": "go",
     "depName": "gopkg.in/russross/blackfriday.v1",
     "depType": "require",
-    "managerData": Object {
+    "managerData": {
       "lineNumber": 7,
     },
   },
-  Object {
+  {
     "currentValue": "v25.1.0+incompatible",
     "datasource": "go",
     "depName": "github.com/Azure/azure-sdk-for-go",
     "depType": "require",
-    "managerData": Object {
+    "managerData": {
       "lineNumber": 8,
     },
   },
-  Object {
+  {
     "currentValue": "v0.0.0",
     "datasource": "go",
     "depName": "github.com/pravesht/gocql",
     "depType": "replace",
-    "managerData": Object {
+    "managerData": {
       "lineNumber": 11,
     },
   },
-  Object {
+  {
     "currentValue": "v3.5.0+incompatible",
     "datasource": "go",
     "depName": "github.com/caarlos0/env",
     "depType": "require",
-    "managerData": Object {
+    "managerData": {
       "lineNumber": 13,
     },
   },

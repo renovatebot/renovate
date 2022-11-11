@@ -1,5 +1,6 @@
 import type { LogLevel } from 'bunyan';
 import type { Range } from 'semver';
+import type { PlatformId } from '../constants';
 import type { HostRule } from '../types';
 import type { GitNoVerifyOption } from '../util/git/types';
 
@@ -11,6 +12,7 @@ export type RenovateConfigStage =
   | 'pr';
 
 export type RepositoryCacheConfig = 'disabled' | 'enabled' | 'reset';
+export type RepositoryCacheType = 'local' | string;
 export type DryRunConfig = 'extract' | 'lookup' | 'full';
 export type RequiredConfig = 'required' | 'optional' | 'ignored';
 
@@ -28,10 +30,12 @@ export interface RenovateSharedConfig {
   branchPrefix?: string;
   branchPrefixOld?: string;
   branchName?: string;
+  branchNameStrict?: boolean;
   manager?: string | null;
   commitMessage?: string;
   commitMessagePrefix?: string;
   confidential?: boolean;
+  customChangelogUrl?: string;
   draftPR?: boolean;
   enabled?: boolean;
   enabledManagers?: string[];
@@ -64,6 +68,7 @@ export interface RenovateSharedConfig {
   recreateClosed?: boolean;
   repository?: string;
   repositoryCache?: RepositoryCacheConfig;
+  repositoryCacheType?: RepositoryCacheType;
   schedule?: string[];
   automergeSchedule?: string[];
   semanticCommits?: 'auto' | 'enabled' | 'disabled';
@@ -80,9 +85,10 @@ export interface RenovateSharedConfig {
 // The below should contain config options where stage=global
 export interface GlobalOnlyConfig {
   autodiscover?: boolean;
-  autodiscoverFilter?: string;
+  autodiscoverFilter?: string[] | string;
   baseDir?: string;
   cacheDir?: string;
+  containerbaseDir?: string;
   detectHostRulesFromEnv?: boolean;
   forceCli?: boolean;
   gitNoVerify?: GitNoVerifyOption[];
@@ -95,7 +101,7 @@ export interface GlobalOnlyConfig {
   privateKeyPathOld?: string;
   redisUrl?: string;
   repositories?: RenovateRepository[];
-  platform?: string;
+  platform?: PlatformId;
   endpoint?: string;
 }
 
@@ -122,7 +128,8 @@ export interface RepoGlobalConfig {
   privateKeyOld?: string;
   localDir?: string;
   cacheDir?: string;
-  platform?: string;
+  containerbaseDir?: string;
+  platform?: PlatformId;
   endpoint?: string;
 }
 
@@ -240,7 +247,7 @@ export interface RenovateConfig
   prHourlyLimit?: number;
 
   defaultRegistryUrls?: string[];
-  registryUrls?: string[];
+  registryUrls?: string[] | null;
 
   repoIsOnboarded?: boolean;
   repoIsActivated?: boolean;
@@ -317,11 +324,12 @@ export interface PackageRule
   excludePackageNames?: string[];
   excludePackagePatterns?: string[];
   excludePackagePrefixes?: string[];
+  matchCurrentValue?: string;
   matchCurrentVersion?: string | Range;
   matchSourceUrlPrefixes?: string[];
   matchSourceUrls?: string[];
   matchUpdateTypes?: UpdateType[];
-  registryUrls?: string[];
+  registryUrls?: string[] | null;
 }
 
 export interface ValidationMessage {
@@ -374,6 +382,8 @@ export interface RenovateOptionBase {
   experimentalDescription?: string;
 
   experimentalIssues?: number[];
+
+  advancedUse?: boolean;
 }
 
 export interface RenovateArrayOption<
@@ -451,7 +461,7 @@ export interface PackageRuleInputConfig extends Record<string, unknown> {
   depName?: string;
   currentValue?: string | null;
   currentVersion?: string;
-  lockedVersion?: string | null;
+  lockedVersion?: string;
   updateType?: UpdateType;
   isBump?: boolean;
   sourceUrl?: string | null;

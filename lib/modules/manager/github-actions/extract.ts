@@ -9,11 +9,11 @@ import type { Container, Workflow } from './types';
 
 const dockerActionRe = regEx(/^\s+uses: ['"]?docker:\/\/([^'"]+)\s*$/);
 const actionRe = regEx(
-  /^\s+-?\s+?uses: (?<replaceString>['"]?(?<depName>[\w-]+\/[\w-]+)(?<path>\/.*)?@(?<currentValue>[^\s'"]+)['"]?(?:\s+#\s+(?:renovate:\s+)?tag=(?<tag>\S+))?)/
+  /^\s+-?\s+?uses: (?<replaceString>['"]?(?<depName>[\w-]+\/[\w-]+)(?<path>\/.*)?@(?<currentValue>[^\s'"]+)['"]?(?:\s+#\s*(?:renovate\s*:\s*)?(?:pin\s+|tag\s*=\s*)?@?(?<tag>v?\d+(?:\.\d+(?:\.\d+)?)?))?)/
 );
 
 // SHA1 or SHA256, see https://github.blog/2020-10-19-git-2-29-released/
-const shaRe = regEx(/^[a-z0-9]{40}|[a-z0-9]{64}$/);
+const shaRe = regEx(/^(?:[a-f0-9]{6,7}|[a-f0-9]{40}|[a-f0-9]{64})$/);
 
 function extractWithRegex(content: string): PackageDependency[] {
   logger.trace('github-actions.extractWithRegex()');
@@ -55,7 +55,7 @@ function extractWithRegex(content: string): PackageDependency[] {
         versioning: dockerVersioning.id,
         depType: 'action',
         replaceString,
-        autoReplaceStringTemplate: `${quotes}{{depName}}${path}@{{#if newDigest}}{{newDigest}}${quotes}{{#if newValue}} # tag={{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}${quotes}{{/unless}}`,
+        autoReplaceStringTemplate: `${quotes}{{depName}}${path}@{{#if newDigest}}{{newDigest}}${quotes}{{#if newValue}} # {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}${quotes}{{/unless}}`,
       };
       if (shaRe.test(currentValue)) {
         dep.currentValue = tag;

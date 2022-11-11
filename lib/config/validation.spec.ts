@@ -63,6 +63,30 @@ describe('config/validation', () => {
       expect(errors).toMatchSnapshot();
     });
 
+    it('catches invalid matchCurrentValue', async () => {
+      const config = {
+        packageRules: [
+          {
+            matchPackageNames: ['foo'],
+            matchCurrentValue: '/^2/',
+            enabled: true,
+          },
+          {
+            matchPackageNames: ['bar'],
+            matchCurrentValue: '^1',
+            enabled: true,
+          },
+          {
+            matchPackageNames: ['quack'],
+            matchCurrentValue: '<1.0.0',
+            enabled: true,
+          },
+        ],
+      };
+      const { errors } = await configValidation.validateConfig(config);
+      expect(errors).toHaveLength(2);
+    });
+
     it('catches invalid matchCurrentVersion regex', async () => {
       const config = {
         packageRules: [
@@ -320,8 +344,8 @@ describe('config/validation', () => {
       expect(warnings).toHaveLength(0);
       expect(errors).toHaveLength(1);
       expect(errors).toMatchInlineSnapshot(`
-        Array [
-          Object {
+        [
+          {
             "message": "Each Regex Manager must contain a non-empty fileMatch array",
             "topic": "Configuration Error",
           },
@@ -348,12 +372,12 @@ describe('config/validation', () => {
       expect(warnings).toHaveLength(0);
       expect(errors).toHaveLength(2);
       expect(errors).toMatchInlineSnapshot(`
-        Array [
-          Object {
+        [
+          {
             "message": "Each Regex Manager must contain a non-empty matchStrings array",
             "topic": "Configuration Error",
           },
-          Object {
+          {
             "message": "Each Regex Manager must contain a non-empty matchStrings array",
             "topic": "Configuration Error",
           },

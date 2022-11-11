@@ -151,7 +151,7 @@ export async function removeDockerContainer(
     });
     const containerId = res?.stdout?.trim() || '';
     if (containerId.length) {
-      logger.debug({ containerId }, 'Removing container');
+      logger.debug(`Removing container with ID: ${containerId}`);
       cmd = `docker rm -f ${containerId}`;
       await rawExec(cmd, {
         encoding: 'utf-8',
@@ -217,6 +217,7 @@ export async function generateDockerCommand(
   const {
     localDir,
     cacheDir,
+    containerbaseDir,
     dockerUser,
     dockerChildPrefix,
     dockerImagePrefix,
@@ -230,7 +231,19 @@ export async function generateDockerCommand(
     result.push(`--user=${dockerUser}`);
   }
 
-  result.push(...prepareVolumes([localDir, cacheDir, ...volumes]));
+  const volumeDirs: VolumeOption[] = [localDir, cacheDir];
+  if (containerbaseDir) {
+    if (cacheDir && containerbaseDir.startsWith(cacheDir)) {
+      logger.debug('containerbaseDir is inside cacheDir');
+    } else {
+      logger.debug('containerbaseDir is separate from cacheDir');
+      volumeDirs.push(containerbaseDir);
+    }
+  } else {
+    logger.debug('containerbaseDir is missing');
+  }
+  volumeDirs.push(...volumes);
+  result.push(...prepareVolumes(volumeDirs));
 
   if (envVars) {
     result.push(
@@ -257,7 +270,7 @@ export async function generateDockerCommand(
       'Resolved tag constraint'
     );
   } else {
-    logger.debug({ image }, 'No tag or tagConstraint specified');
+    logger.debug(`No tag or tagConstraint specified for image: ${image}`);
   }
 
   const taggedImage = tag ? `${image}:${tag}` : `${image}`;

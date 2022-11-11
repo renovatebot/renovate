@@ -14,7 +14,7 @@ import {
 import * as template from '../../../../util/template';
 import type { BranchConfig } from '../../../types';
 import {
-  getDepWarningsPR,
+  getDepWarningsOnboardingPR,
   getErrors,
   getWarnings,
 } from '../../errors-warnings';
@@ -115,7 +115,7 @@ If you need any further assistance then you can also [request help here](${
   prBody = prBody.replace('{{CONFIG}}\n', configDesc);
   prBody = prBody.replace(
     '{{WARNINGS}}\n',
-    getWarnings(config) + getDepWarningsPR(packageFiles!)
+    getWarnings(config) + getDepWarningsOnboardingPR(packageFiles!)
   );
   prBody = prBody.replace('{{ERRORS}}\n', getErrors(config));
   prBody = prBody.replace('{{BASEBRANCH}}\n', getBaseBranchDesc(config));

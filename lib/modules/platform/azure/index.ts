@@ -10,7 +10,6 @@ import {
 } from 'azure-devops-node-api/interfaces/GitInterfaces.js';
 import delay from 'delay';
 import JSON5 from 'json5';
-import { PlatformId } from '../../../constants';
 import {
   REPOSITORY_ARCHIVED,
   REPOSITORY_EMPTY,
@@ -40,6 +39,7 @@ import type {
   RepoResult,
   UpdatePrConfig,
 } from '../types';
+import { getNewBranchName, repoFingerprint } from '../util';
 import { smartTruncate } from '../utils/pr-body';
 import * as azureApi from './azure-got-wrapper';
 import * as azureHelper from './azure-helper';
@@ -48,7 +48,6 @@ import {
   getBranchNameWithoutRefsheadsPrefix,
   getGitStatusContextCombinedName,
   getGitStatusContextFromCombinedName,
-  getNewBranchName,
   getProjectAndRepo,
   getRenovatePRFormat,
   getRepoByName,
@@ -72,6 +71,7 @@ interface Config {
 interface User {
   id: string;
   name: string;
+  isRequired: boolean;
 }
 
 let config: Config = {} as any;
@@ -80,7 +80,7 @@ const defaults: {
   endpoint?: string;
   hostType: string;
 } = {
-  hostType: PlatformId.Azure,
+  hostType: 'azure',
 };
 
 export function initPlatform({
@@ -134,13 +134,17 @@ export async function getRawFile(
     repoId = config.repoId;
   }
 
+  if (!repoId) {
+    logger.debug('No repoId so cannot getRawFile');
+    return null;
+  }
+
   const versionDescriptor: GitVersionDescriptor = {
     version: branchOrTag,
   } as GitVersionDescriptor;
 
   const buf = await azureApiGit.getItemContent(
-    // TODO #7154
-    repoId!,
+    repoId,
     fileName,
     undefined,
     undefined,
@@ -161,8 +165,7 @@ export async function getJsonFile(
   branchOrTag?: string
 ): Promise<any | null> {
   const raw = await getRawFile(fileName, repoName, branchOrTag);
-  // TODO #7154
-  return JSON5.parse(raw!);
+  return raw ? JSON5.parse(raw) : null;
 }
 
 export async function initRepo({
@@ -227,6 +230,7 @@ export async function initRepo({
   const repoConfig: RepoResult = {
     defaultBranch,
     isFork: false,
+    repoFingerprint: repoFingerprint(repo.id!, defaults.endpoint),
   };
   return repoConfig;
 }
@@ -256,7 +260,7 @@ export async function getPrList(): Promise<AzurePr[]> {
     } while (fetchedPrs.length > 0);
 
     config.prList = prs.map(getRenovatePRFormat);
-    logger.debug({ length: config.prList.length }, 'Retrieved Pull Requests');
+    logger.debug(`Retrieved Pull Requests count: ${config.prList.length}`);
   }
   return config.prList;
 }
@@ -742,7 +746,7 @@ export function massageMarkdown(input: string): string {
       'rename PR to start with "rebase!"'
     )
     .replace(regEx(`\n---\n\n.*?<!-- rebase-check -->.*?\n`), '')
-    .replace(regEx(/<!--renovate-debug:.*?-->/), '');
+    .replace(regEx(/<!--renovate-(?:debug|config-hash):.*?-->/g), '');
 }
 
 /* istanbul ignore next */
@@ -774,6 +778,7 @@ async function getUserIds(users: string[]): Promise<User[]> {
   const azureApiCore = await azureApi.coreApi();
   const repos = await azureApiGit.getRepositories();
   const repo = repos.filter((c) => c.id === config.repoId)[0];
+  const requiredReviewerPrefix = 'required:';
 
   // TODO #7154
   const teams = await azureApiCore.getTeams(repo.project!.id!);
@@ -788,17 +793,27 @@ async function getUserIds(users: string[]): Promise<User[]> {
     )
   );
 
-  const ids: { id: string; name: string }[] = [];
+  const ids: { id: string; name: string; isRequired: boolean }[] = [];
   members.forEach((listMembers) => {
     listMembers.forEach((m) => {
       users.forEach((r) => {
+        let reviewer = r;
+        let isRequired = false;
+        if (reviewer.startsWith(requiredReviewerPrefix)) {
+          reviewer = reviewer.replace(requiredReviewerPrefix, '');
+          isRequired = true;
+        }
         if (
-          r.toLowerCase() === m.identity?.displayName?.toLowerCase() ||
-          r.toLowerCase() === m.identity?.uniqueName?.toLowerCase()
+          reviewer.toLowerCase() === m.identity?.displayName?.toLowerCase() ||
+          reviewer.toLowerCase() === m.identity?.uniqueName?.toLowerCase()
         ) {
           if (ids.filter((c) => c.id === m.identity?.id).length === 0) {
             // TODO #7154
-            ids.push({ id: m.identity.id!, name: r });
+            ids.push({
+              id: m.identity.id!,
+              name: reviewer,
+              isRequired,
+            });
           }
         }
       });
@@ -807,10 +822,16 @@ async function getUserIds(users: string[]): Promise<User[]> {
 
   teams.forEach((t) => {
     users.forEach((r) => {
-      if (r.toLowerCase() === t.name?.toLowerCase()) {
+      let reviewer = r;
+      let isRequired = false;
+      if (reviewer.startsWith(requiredReviewerPrefix)) {
+        reviewer = reviewer.replace(requiredReviewerPrefix, '');
+        isRequired = true;
+      }
+      if (reviewer.toLowerCase() === t.name?.toLowerCase()) {
         if (ids.filter((c) => c.id === t.id).length === 0) {
           // TODO #7154
-          ids.push({ id: t.id!, name: r });
+          ids.push({ id: t.id!, name: reviewer, isRequired });
         }
       }
     });
@@ -854,7 +875,9 @@ export async function addReviewers(
   await Promise.all(
     ids.map(async (obj) => {
       await azureApiGit.createPullRequestReviewer(
-        {},
+        {
+          isRequired: obj.isRequired,
+        },
         config.repoId,
         prNo,
         obj.id

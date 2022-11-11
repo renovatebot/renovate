@@ -6,7 +6,6 @@ import type {
   RepoResult,
 } from '..';
 import { mocked, partial } from '../../../../test/util';
-import { PlatformId } from '../../../constants';
 import {
   CONFIG_GIT_URL_UNAVAILABLE,
   REPOSITORY_ACCESS_FORBIDDEN,
@@ -76,6 +75,7 @@ describe('modules/platform/gitea/index', () => {
   const mockRepos: Repo[] = [
     partial<Repo>({ full_name: 'a/b' }),
     partial<Repo>({ full_name: 'c/d' }),
+    partial<Repo>({ full_name: 'e/f', mirror: true }),
   ];
 
   const mockPRs: MockPr[] = [
@@ -215,6 +215,9 @@ describe('modules/platform/gitea/index', () => {
     hostRules.clear();
 
     setBaseUrl('https://gitea.renovatebot.com/');
+
+    delete process.env.RENOVATE_X_AUTODISCOVER_REPO_SORT;
+    delete process.env.RENOVATE_X_AUTODISCOVER_REPO_ORDER;
   });
 
   function initFakePlatform(version = GITEA_VERSION): Promise<PlatformResult> {
@@ -303,7 +306,27 @@ describe('modules/platform/gitea/index', () => {
       helper.searchRepos.mockResolvedValueOnce(mockRepos);
 
       const repos = await gitea.getRepos();
-      expect(repos).toMatchSnapshot();
+      expect(repos).toEqual(['a/b', 'c/d']);
+      expect(helper.searchRepos).toHaveBeenCalledWith({
+        uid: undefined,
+        archived: false,
+      });
+    });
+
+    it('Sorts repos', async () => {
+      process.env.RENOVATE_X_AUTODISCOVER_REPO_SORT = 'updated';
+      process.env.RENOVATE_X_AUTODISCOVER_REPO_ORDER = 'desc';
+      helper.searchRepos.mockResolvedValueOnce(mockRepos);
+
+      const repos = await gitea.getRepos();
+      expect(repos).toEqual(['a/b', 'c/d']);
+
+      expect(helper.searchRepos).toHaveBeenCalledWith({
+        uid: undefined,
+        archived: false,
+        sort: 'updated',
+        order: 'desc',
+      });
     });
   });
 
@@ -471,7 +494,7 @@ describe('modules/platform/gitea/index', () => {
 
       const token = 'abc';
       hostRules.add({
-        hostType: PlatformId.Gitea,
+        hostType: 'gitea',
         matchHost: 'https://gitea.com/',
         token,
       });
@@ -499,7 +522,7 @@ describe('modules/platform/gitea/index', () => {
 
       const token = 'abc';
       hostRules.add({
-        hostType: PlatformId.Gitea,
+        hostType: 'gitea',
         matchHost: 'https://gitea.com/',
         token,
       });
