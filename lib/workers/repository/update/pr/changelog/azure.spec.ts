@@ -143,10 +143,14 @@ describe('workers/repository/update/pr/changelog/azure', () => {
       httpMock
         .scope(matchHost)
         .get('/some-org/some-project/_apis/git/repositories/some-repo/refs?filter=tags&$top=100')
-        .reply(200, [])
+        .reply(200, {
+          value: []
+        })
         .persist()
         .get('/some-org//some-project/_apis/git/repositories/some-repo/items?path=/')
-        .reply(200, [])
+        .reply(200, {
+          value: []
+        })
       expect(
         await getChangeLogJSON({
           ...upgrade,
@@ -178,7 +182,9 @@ describe('workers/repository/update/pr/changelog/azure', () => {
         .replyWithError('Unknown Azure DevOps Repo')
         .persist()
         .get('/some-org//some-project/_apis/git/repositories/some-repo/items?path=/')
-        .reply(200, [])
+        .reply(200, {
+          value: []
+        })
       expect(
         await getChangeLogJSON({
           ...upgrade,
