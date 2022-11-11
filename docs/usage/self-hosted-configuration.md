@@ -671,8 +671,8 @@ Set this to an S3 URI to enable S3 backed repository cache.
 
 <!-- prettier-ignore -->
 !!! tip
-When using S3 for repository cache storage, a folder hierarchy can be used by specifying it as part of `repositoryCacheType`.
-e.g. `repositoryCacheType: 's3://bucket-name/dir1/.../dirN/'`.
+    If you're storing the repository cache on Amazon S3 then you may set a folder hierarchy as part of `repositoryCacheType`.
+    For example, `repositoryCacheType: 's3://bucket-name/dir1/.../dirN/'`.
 
 ## requireConfig
 
