@@ -114,7 +114,7 @@ describe('util/cache/repository/impl/s3', () => {
     expect(logger.debug).toHaveBeenCalledWith('RepoCacheS3.read() - success');
     expect(logger.error).toHaveBeenCalledWith(
       { pathname },
-      'RepoCacheS3.constructor() - Invalid folder pathname expecting trailing slash - using default value instead'
+      'RepoCacheS3.getCacheFolder() - Invalid folder pathname expecting trailing slash - using default value instead'
     );
   });
 

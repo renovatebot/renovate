@@ -22,13 +22,6 @@ export class RepoCacheS3 extends RepoCacheBase {
     this.dir = this.getCacheFolder(Key);
     this.bucket = Bucket;
     this.s3Client = getS3Client();
-
-    if (Key && !this.dir) {
-      logger.error(
-        { pathname: Key },
-        'RepoCacheS3.constructor() - Invalid folder pathname expecting trailing slash - using default value instead'
-      );
-    }
   }
 
   async read(): Promise<string | null> {
@@ -74,11 +67,20 @@ export class RepoCacheS3 extends RepoCacheBase {
     }
   }
 
-  private getCacheFolder(path: string | undefined): string {
-    if (!path?.endsWith('/')) {
+  private getCacheFolder(pathname: string | undefined): string {
+    if (!pathname) {
       return '';
     }
-    return path;
+
+    if (!pathname.endsWith('/')) {
+      logger.error(
+        { pathname },
+        'RepoCacheS3.getCacheFolder() - Invalid folder pathname expecting trailing slash - using default value instead'
+      );
+      return '';
+    }
+
+    return pathname;
   }
 
   private getCacheFileName(): string {
