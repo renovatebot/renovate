@@ -22,6 +22,13 @@ export class RepoCacheS3 extends RepoCacheBase {
     this.dir = this.getCacheFolder(Key);
     this.bucket = Bucket;
     this.s3Client = getS3Client();
+
+    if (Key && !this.dir) {
+      logger.error(
+        { pathname: Key },
+        'RepoCacheS3.constructor() - Invalid folder pathname expecting trailing slash - using default value instead'
+      );
+    }
   }
 
   async read(): Promise<string | null> {

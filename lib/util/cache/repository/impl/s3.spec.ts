@@ -94,6 +94,7 @@ describe('util/cache/repository/impl/s3', () => {
       .resolvesOnce({ Body: Readable.from([json]) });
     await expect(s3Cache.read()).resolves.toBe(json);
     expect(logger.warn).toHaveBeenCalledTimes(0);
+    expect(logger.error).toHaveBeenCalledTimes(0);
     expect(logger.debug).toHaveBeenCalledWith('RepoCacheS3.read() - success');
   });
 
@@ -111,6 +112,10 @@ describe('util/cache/repository/impl/s3', () => {
     await expect(s3Cache.read()).resolves.toBe(json);
     expect(logger.warn).toHaveBeenCalledTimes(0);
     expect(logger.debug).toHaveBeenCalledWith('RepoCacheS3.read() - success');
+    expect(logger.error).toHaveBeenCalledWith(
+      { pathname },
+      'RepoCacheS3.constructor() - Invalid folder pathname expecting trailing slash - using default value instead'
+    );
   });
 
   it('gets an unexpected response from s3', async () => {
@@ -172,6 +177,7 @@ describe('util/cache/repository/impl/s3', () => {
       .resolvesOnce(putObjectCommandOutput);
     await expect(s3Cache.write(repoCache)).toResolve();
     expect(logger.warn).toHaveBeenCalledTimes(0);
+    expect(logger.error).toHaveBeenCalledTimes(0);
   });
 
   it('fails to write to s3', async () => {
