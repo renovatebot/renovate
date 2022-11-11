@@ -35,7 +35,7 @@ describe('modules/datasource/deno/index', () => {
         });
 
       const result = await deno.getReleases({
-        packageName: 'https://deno.land/std@0.157.0/http/server.ts',
+        packageName: 'https://deno.land/std',
       });
       expect(result).toMatchObject({
         releases: [
@@ -64,7 +64,7 @@ describe('modules/datasource/deno/index', () => {
 
       await expect(
         deno.getReleases({
-          packageName: 'https://deno.land/std@0.157.0/http/server.ts',
+          packageName: 'https://deno.land/std',
         })
       ).rejects.toThrow();
     });
@@ -91,7 +91,7 @@ describe('modules/datasource/deno/index', () => {
         .reply(503);
       await expect(
         deno.getReleases({
-          packageName: 'https://deno.land/std@0.157.0/http/server.ts',
+          packageName: 'https://deno.land/std',
         })
       ).rejects.toThrow();
     });
@@ -99,7 +99,7 @@ describe('modules/datasource/deno/index', () => {
     it('returns null if we could not match a deno land dependency', async () => {
       expect(
         await deno.getReleases({
-          packageName: 'https://myexample.com/std@0.157.0/http/server.ts',
+          packageName: 'https://myexample.com/std',
         })
       ).toBeNull();
     });
@@ -134,7 +134,7 @@ describe('modules/datasource/deno/index', () => {
         });
 
       const result = await deno.getReleases({
-        packageName: 'https://deno.land/x/postgres@v0.17.0/mod.ts',
+        packageName: 'https://deno.land/x/postgres',
       });
       expect(result).toMatchObject({
         releases: [
@@ -180,7 +180,7 @@ describe('modules/datasource/deno/index', () => {
         });
 
       const result = await deno.getReleases({
-        packageName: 'https://deno.land/x/postgres@v0.17.0/mod.ts',
+        packageName: 'https://deno.land/x/postgres',
         registryUrl: 'https://api.example.com',
       });
       expect(result).toMatchObject({
