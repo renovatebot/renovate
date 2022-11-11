@@ -14,8 +14,8 @@ describe('modules/manager/index', () => {
         // regex supports any
         continue;
       }
-      if (m === 'json-jsonata') {
-        // json-jsonata supports any
+      if (m === 'custom') {
+        // custom supports any
         continue;
       }
       const supportedDatasources = manager.get(m, 'supportedDatasources');

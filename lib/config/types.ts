@@ -196,8 +196,10 @@ export interface JSONataManagerTemplates {
   extractVersionTemplate?: string;
   registryUrlTemplate?: string;
 }
+
 export interface JSONataManager extends JSONataManagerTemplates {
   fileMatch: string[];
+  engine: 'jsonata';
   matchQueries: string[];
   autoReplaceStringTemplate?: string;
 }

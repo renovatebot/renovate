@@ -37,7 +37,7 @@ export async function extractAllDependencies(
       for (const regexManager of config.regexManagers ?? []) {
         tryConfig(mergeChildConfig(managerConfig, regexManager));
       }
-    } else if (manager === 'json-jsonata') {
+    } else if (manager === 'custom') {
       for (const jsonManager of config.jsonataManagers ?? []) {
         tryConfig(mergeChildConfig(managerConfig, jsonManager));
       }

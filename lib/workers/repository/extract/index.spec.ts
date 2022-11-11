@@ -56,7 +56,11 @@ describe('workers/repository/extract/index', () => {
     it('checks custom json managers', async () => {
       managerFiles.getManagerPackageFiles.mockResolvedValue([{} as never]);
       config.jsonataManagers = [
-        { fileMatch: ['package.json'], matchQueries: ['{}'] },
+        {
+          fileMatch: ['package.json'],
+          engine: 'jsonata',
+          matchQueries: ['{}'],
+        },
       ];
       const res = await extractAllDependencies(config);
       expect(Object.keys(res)).toContain('json-jsonata');
