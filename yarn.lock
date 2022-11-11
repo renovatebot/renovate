@@ -2897,10 +2897,10 @@
   resolved "https://registry.yarnpkg.com/@types/lodash/-/lodash-4.14.188.tgz#e4990c4c81f7c9b00c5ff8eae389c10f27980da5"
   integrity sha512-zmEmF5OIM3rb7SbLCFYoQhO4dGt2FRM9AMkxvA3LaADOF1n8in/zGJlWji9fmafLoNyz+FoL6FE0SLtGIArD7w==
 
-"@types/luxon@3.0.3":
-  version "3.0.3"
-  resolved "https://registry.yarnpkg.com/@types/luxon/-/luxon-3.0.3.tgz#698bf70d994a644b818241ea11c8f9e9e16af556"
-  integrity sha512-oHbqYmoYCihi5S09sdtf/sHh27+msnQ6qhrXJDFpUy/M7ohWcSpqNN5Mi22A2WHCsJ4ypD3zyJbCpyxvfC+VVw==
+"@types/luxon@3.1.0":
+  version "3.1.0"
+  resolved "https://registry.yarnpkg.com/@types/luxon/-/luxon-3.1.0.tgz#b9842d233a06b267fe4117f1c224f20b8a149825"
+  integrity sha512-gCd/HcCgjqSxfMrgtqxCgYk/22NBQfypwFUG7ZAyG/4pqs51WLTcUzVp1hqTbieDYeHS3WoVEh2Yv/2l+7B0Vg==
 
 "@types/markdown-it@12.2.3":
   version "12.2.3"
