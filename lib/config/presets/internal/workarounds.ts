@@ -15,6 +15,7 @@ export const presets: Record<string, Preset> = {
       'workarounds:doNotUpgradeFromAlpineStableToEdge',
       'workarounds:supportRedHatImageVersion',
       'workarounds:javaLTSVersions',
+      'workarounds:disableMavenParentRoot',
     ],
     ignoreDeps: [],
   },
@@ -138,6 +139,17 @@ export const presets: Record<string, Preset> = {
         versioning:
           'regex:^(?<major>\\d+)?(\\.(?<minor>\\d+))?(\\.(?<patch>\\d+))?([\\._+](?<build>\\d+))?(-(?<compatibility>.*))?$',
         allowedVersions: '/^(?:8|11|17|21|25|29)(?:\\.|$)/',
+      },
+    ],
+  },
+  disableMavenParentRoot: {
+    description:
+      'Avoid version fetching for Maven packages detected as project root.',
+    packageRules: [
+      {
+        matchManagers: ['maven'],
+        matchDepTypes: ['parent-root'],
+        enabled: false,
       },
     ],
   },
