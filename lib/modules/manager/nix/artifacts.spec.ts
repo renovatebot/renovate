@@ -51,14 +51,14 @@ describe('modules/manager/nix/artifacts', () => {
 
   it('returns if no flake.lock found', async () => {
     const execSnapshots = mockExecAll();
-    expect(
-      await updateArtifacts({
-        packageFileName: 'flake.nix',
-        updatedDeps: [],
-        newPackageFileContent: '',
-        config,
-      })
-    ).toBeNull();
+    const res = await updateArtifacts({
+      packageFileName: 'flake.nix',
+      updatedDeps: [],
+      newPackageFileContent: '',
+      config,
+    });
+
+    expect(res).toBeNull();
     expect(execSnapshots).toEqual([]);
   });
 
@@ -69,14 +69,14 @@ describe('modules/manager/nix/artifacts', () => {
       modified: [''],
     } as StatusResult);
 
-    expect(
-      await updateArtifacts({
-        packageFileName: 'flake.nix',
-        updatedDeps: [{ depName: 'nixpkgs' }],
-        newPackageFileContent: 'some new content',
-        config,
-      })
-    ).toBeNull();
+    const res = await updateArtifacts({
+      packageFileName: 'flake.nix',
+      updatedDeps: [{ depName: 'nixpkgs' }],
+      newPackageFileContent: 'some new content',
+      config,
+    });
+
+    expect(res).toBeNull();
     expect(execSnapshots).toMatchObject([{ cmd: updateInputCmd }]);
   });
 
@@ -88,14 +88,22 @@ describe('modules/manager/nix/artifacts', () => {
     } as StatusResult);
     fs.readLocalFile.mockResolvedValueOnce('new flake.lock');
 
-    expect(
-      await updateArtifacts({
-        packageFileName: 'flake.nix',
-        updatedDeps: [{ depName: 'nixpkgs' }],
-        newPackageFileContent: 'some new content',
-        config: { ...config, constraints: { python: '3.7' } },
-      })
-    ).not.toBeNull();
+    const res = await updateArtifacts({
+      packageFileName: 'flake.nix',
+      updatedDeps: [{ depName: 'nixpkgs' }],
+      newPackageFileContent: 'some new content',
+      config: { ...config, constraints: { python: '3.7' } },
+    });
+
+    expect(res).toEqual([
+      {
+        file: {
+          contents: 'new flake.lock',
+          path: 'flake.lock',
+          type: 'addition',
+        },
+      },
+    ]);
     expect(execSnapshots).toMatchObject([{ cmd: updateInputCmd }]);
   });
 
@@ -105,16 +113,23 @@ describe('modules/manager/nix/artifacts', () => {
     git.getRepoStatus.mockResolvedValue({
       modified: ['flake.lock'],
     } as StatusResult);
-    fs.readLocalFile.mockResolvedValueOnce('new lock');
+    fs.readLocalFile.mockResolvedValueOnce('new flake.lock');
 
-    expect(
-      await updateArtifacts({
-        packageFileName: 'flake.nix',
-        updatedDeps: [{ depName: 'nixpkgs' }],
-        newPackageFileContent: '{}',
-        config: { ...config, constraints: { nix: '2.10.0' } },
-      })
-    ).not.toBeNull();
+    const res = await updateArtifacts({
+      packageFileName: 'flake.nix',
+      updatedDeps: [{ depName: 'nixpkgs' }],
+      newPackageFileContent: '{}',
+      config: { ...config, constraints: { nix: '2.10.0' } },
+    });
+
+    expect(res).toEqual([
+      {
+        file: {
+          path: 'flake.lock',
+          type: 'addition',
+        },
+      },
+    ]);
     expect(execSnapshots).toMatchObject([
       { cmd: 'docker pull renovate/sidecar' },
       { cmd: 'docker ps --filter name=renovate_sidecar -aq' },
@@ -142,16 +157,23 @@ describe('modules/manager/nix/artifacts', () => {
     git.getRepoStatus.mockResolvedValue({
       modified: ['flake.lock'],
     } as StatusResult);
-    fs.readLocalFile.mockResolvedValueOnce('new lock');
+    fs.readLocalFile.mockResolvedValueOnce('new flake.lock');
 
-    expect(
-      await updateArtifacts({
-        packageFileName: 'flake.nix',
-        updatedDeps: [{ depName: 'nixpkgs' }],
-        newPackageFileContent: '{}',
-        config: { ...config, constraints: { nix: '2.10.0' } },
-      })
-    ).not.toBeNull();
+    const res = await updateArtifacts({
+      packageFileName: 'flake.nix',
+      updatedDeps: [{ depName: 'nixpkgs' }],
+      newPackageFileContent: '{}',
+      config: { ...config, constraints: { nix: '2.10.0' } },
+    });
+
+    expect(res).toEqual([
+      {
+        file: {
+          path: 'flake.lock',
+          type: 'addition',
+        },
+      },
+    ]);
     expect(execSnapshots).toMatchObject([
       { cmd: 'install-tool nix 2.10.0' },
       {
@@ -162,17 +184,17 @@ describe('modules/manager/nix/artifacts', () => {
   });
 
   it('catches errors', async () => {
-    fs.readLocalFile.mockResolvedValueOnce('Current flake.lock');
+    fs.readLocalFile.mockResolvedValueOnce('current flake.lock');
     const execSnapshots = mockExecSequence([new Error('exec error')]);
 
-    expect(
-      await updateArtifacts({
-        packageFileName: 'flake.nix',
-        updatedDeps: [{ depName: 'nixpkgs' }],
-        newPackageFileContent: '{}',
-        config,
-      })
-    ).toEqual([
+    const res = await updateArtifacts({
+      packageFileName: 'flake.nix',
+      updatedDeps: [{ depName: 'nixpkgs' }],
+      newPackageFileContent: '{}',
+      config,
+    });
+
+    expect(res).toEqual([
       {
         artifactError: { lockFile: 'flake.lock', stderr: 'exec error' },
       },
@@ -181,21 +203,29 @@ describe('modules/manager/nix/artifacts', () => {
   });
 
   it('returns updated flake.lock when doing lockfile maintenance', async () => {
-    fs.readLocalFile.mockResolvedValueOnce('Current flake.lock');
+    fs.readLocalFile.mockResolvedValueOnce('current flake.lock');
     const execSnapshots = mockExecAll();
     git.getRepoStatus.mockResolvedValue({
       modified: ['flake.lock'],
     } as StatusResult);
-    fs.readLocalFile.mockResolvedValueOnce('New flake.lock');
+    fs.readLocalFile.mockResolvedValueOnce('new flake.lock');
 
-    expect(
-      await updateArtifacts({
-        packageFileName: 'flake.nix',
-        updatedDeps: [{ depName: 'nixpkgs' }],
-        newPackageFileContent: '{}',
-        config: lockMaintenanceConfig,
-      })
-    ).not.toBeNull();
+    const res = await updateArtifacts({
+      packageFileName: 'flake.nix',
+      updatedDeps: [{ depName: 'nixpkgs' }],
+      newPackageFileContent: '{}',
+      config: lockMaintenanceConfig,
+    });
+
+    expect(res).toEqual([
+      {
+        file: {
+          contents: 'new flake.lock',
+          path: 'flake.lock',
+          type: 'addition',
+        },
+      },
+    ]);
     expect(execSnapshots).toMatchObject([{ cmd: lockfileMaintenanceCmd }]);
   });
 
@@ -207,17 +237,24 @@ describe('modules/manager/nix/artifacts', () => {
     } as StatusResult);
     fs.readLocalFile.mockResolvedValueOnce('new lock');
 
-    expect(
-      await updateArtifacts({
-        packageFileName: 'flake.nix',
-        updatedDeps: [{ depName: 'nixpkgs' }],
-        newPackageFileContent: 'some new content',
-        config: {
-          ...config,
-          constraints: { nix: '2.10.0' },
+    const res = await updateArtifacts({
+      packageFileName: 'flake.nix',
+      updatedDeps: [{ depName: 'nixpkgs' }],
+      newPackageFileContent: 'some new content',
+      config: {
+        ...config,
+        constraints: { nix: '2.10.0' },
+      },
+    });
+
+    expect(res).toEqual([
+      {
+        file: {
+          path: 'flake.lock',
+          type: 'addition',
         },
-      })
-    ).not.toBeNull();
+      },
+    ]);
     expect(execSnapshots).toMatchObject([
       { cmd: 'docker pull renovate/sidecar' },
       { cmd: 'docker ps --filter name=renovate_sidecar -aq' },

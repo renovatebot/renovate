@@ -21,7 +21,6 @@ describe('modules/manager/nix/extract', () => {
 
     const res = extractPackageFile(content);
 
-    expect(res?.deps).toHaveLength(1);
     expect(res?.deps).toEqual([
       {
         depName: 'nixpkgs',
@@ -42,7 +41,6 @@ describe('modules/manager/nix/extract', () => {
 
     const res = extractPackageFile(content);
 
-    expect(res?.deps).toHaveLength(1);
     expect(res?.deps).toEqual([
       {
         depName: 'nixpkgs',
