@@ -108,14 +108,17 @@ describe('util/cache/repository/impl/s3', () => {
       `${url}/${pathname}`
     );
     s3Mock
-      .on(GetObjectCommand, getObjectCommandInput) // url = 's3://bucket-name/platform/repository/cache.json'
+      .on(
+        GetObjectCommand,
+        createGetObjectCommandInput(repository, url, pathname + '/')
+      )
       .resolvesOnce({ Body: Readable.from([json]) });
     await expect(s3Cache.read()).resolves.toBe(json);
-    expect(logger.warn).toHaveBeenCalledTimes(0);
     expect(logger.debug).toHaveBeenCalledWith('RepoCacheS3.read() - success');
-    expect(logger.error).toHaveBeenCalledWith(
+    expect(logger.warn).toHaveBeenCalledTimes(1);
+    expect(logger.warn).toHaveBeenCalledWith(
       { pathname },
-      'RepoCacheS3.getCacheFolder() - Invalid folder pathname expecting trailing slash - using default value instead'
+      'RepoCacheS3.getCacheFolder() - appending missing trailing slash to pathname'
     );
   });
 

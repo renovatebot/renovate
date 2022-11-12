@@ -72,15 +72,15 @@ export class RepoCacheS3 extends RepoCacheBase {
       return '';
     }
 
-    if (!pathname.endsWith('/')) {
-      logger.error(
-        { pathname },
-        'RepoCacheS3.getCacheFolder() - Invalid folder pathname expecting trailing slash - using default value instead'
-      );
-      return '';
+    if (pathname.endsWith('/')) {
+      return pathname;
     }
 
-    return pathname;
+    logger.warn(
+      { pathname },
+      'RepoCacheS3.getCacheFolder() - appending missing trailing slash to pathname'
+    );
+    return pathname + '/';
   }
 
   private getCacheFileName(): string {
