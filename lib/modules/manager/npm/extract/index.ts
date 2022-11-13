@@ -8,7 +8,7 @@ import { newlineRegex, regEx } from '../../../../util/regex';
 import { GithubTagsDatasource } from '../../../datasource/github-tags';
 import { NpmDatasource } from '../../../datasource/npm';
 import * as nodeVersioning from '../../../versioning/node';
-import { isValid, isVersion, api } from '../../../versioning/npm';
+import { api, isValid, isVersion } from '../../../versioning/npm';
 import type {
   ExtractConfig,
   NpmLockFiles,
@@ -200,8 +200,9 @@ export async function extractPackageFile(
         dep.datasource = NpmDatasource.id;
         dep.commitMessageTopic = 'Yarn';
         constraints.yarn = dep.currentValue;
-        const major = api.getMajor(dep.currentValue);
-        if (isValid(dep.currentValue) && major && major > 1) {
+        const major =
+          isVersion(dep.currentValue) && api.getMajor(dep.currentValue);
+        if (major && major > 1) {
           dep.packageName = '@yarnpkg/cli';
         }
       } else if (depName === 'npm') {
@@ -233,8 +234,9 @@ export async function extractPackageFile(
       } else if (depName === 'yarn') {
         dep.datasource = NpmDatasource.id;
         dep.commitMessageTopic = 'Yarn';
-        const major = api.getMajor(dep.currentValue);
-        if (isValid(dep.currentValue) && major && major > 1) {
+        const major =
+          isVersion(dep.currentValue) && api.getMajor(dep.currentValue);
+        if (major && major > 1) {
           dep.packageName = '@yarnpkg/cli';
         }
       } else if (depName === 'npm') {
