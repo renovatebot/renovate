@@ -107,10 +107,6 @@ export async function processBranch(
   const dependencyDashboardCheck =
     config.dependencyDashboardChecks?.[config.branchName];
   logger.debug(`dependencyDashboardCheck=${dependencyDashboardCheck!}`);
-  const userRebaseRequested =
-    dependencyDashboardCheck === 'rebase' ||
-    !!config.dependencyDashboardRebaseAllOpen ||
-    !!config.rebaseRequested;
   if (branchPr) {
     config.rebaseRequested = rebaseCheck(config, branchPr);
     logger.debug(`PR rebase requested=${config.rebaseRequested}`);
@@ -385,6 +381,10 @@ export async function processBranch(
       }
     }
 
+    const userRebaseRequested =
+      dependencyDashboardCheck === 'rebase' ||
+      !!config.dependencyDashboardRebaseAllOpen ||
+      !!config.rebaseRequested;
     const userApproveAllPendingPR = !!config.dependencyDashboardAllPending;
     const userOpenAllRateLimtedPR = !!config.dependencyDashboardAllRateLimited;
     if (userRebaseRequested) {
