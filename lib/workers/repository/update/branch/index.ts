@@ -21,7 +21,6 @@ import {
   ensureComment,
   ensureCommentRemoval,
 } from '../../../../modules/platform/comment';
-import { hashBody } from '../../../../modules/platform/pr-body';
 import { BranchStatus, PrState } from '../../../../types';
 import { ExternalHostError } from '../../../../types/errors/external-host-error';
 import { getElapsedDays } from '../../../../util/date';
@@ -43,9 +42,8 @@ import * as template from '../../../../util/template';
 import { Limit, isLimitReached } from '../../../global/limits';
 import { BranchConfig, BranchResult, PrBlockedBy } from '../../../types';
 import { embedChangelog, needsChangelogs } from '../../changelog';
-import { ensurePr, getPlatformPrOptions, updatePrDebugData } from '../pr';
+import { ensurePr } from '../pr';
 import { checkAutoMerge } from '../pr/automerge';
-import { getPrBody } from '../pr/body';
 import { setArtifactErrorStatus } from './artifacts';
 import { tryBranchAutomerge } from './automerge';
 import { prAlreadyExisted } from './check-existing';
@@ -213,32 +211,8 @@ export async function processBranch(
             branchPr.targetBranch !== branchConfig.baseBranch)
         ) {
           logger.debug(`PR has been edited, PrNo:${branchPr.number}`);
-          if (dependencyDashboardCheck || config.rebaseRequested) {
-            logger.debug('Manual rebase has been requested for PR');
-          } else {
-            const newBody = getPrBody(branchConfig, {
-              debugData: updatePrDebugData(existingPr?.bodyStruct?.debugData),
-              rebasingNotice:
-                'Renovate will not automatically rebase this PR, because other commits have been found.',
-            });
-            const newBodyHash = hashBody(newBody);
-            if (newBodyHash !== branchPr.bodyStruct?.hash) {
-              if (GlobalConfig.get('dryRun')) {
-                logger.info(
-                  `DRY-RUN: Would update existing PR to indicate that rebasing is not possible`
-                );
-              } else {
-                logger.debug(
-                  'Updating existing PR to indicate that rebasing is not possible'
-                );
-                await platform.updatePr({
-                  number: branchPr.number,
-                  prTitle: branchPr.title,
-                  prBody: newBody,
-                  platformOptions: getPlatformPrOptions(config),
-                });
-              }
-            }
+          await handlepr(config, branchPr);
+          if (!(dependencyDashboardCheck || config.rebaseRequested)) {
             return {
               branchExists,
               prNo: branchPr.number,
