@@ -26,7 +26,6 @@ import * as _mergeConfidence from '../../../../util/merge-confidence';
 import * as _sanitize from '../../../../util/sanitize';
 import * as _limits from '../../../global/limits';
 import type { BranchConfig, BranchUpgradeConfig } from '../../../types';
-import { BranchResult } from '../../../types';
 import { needsChangelogs } from '../../changelog';
 import * as _prWorker from '../pr';
 import type { ResultWithPr } from '../pr';
@@ -766,7 +765,7 @@ describe('workers/repository/update/branch/index', () => {
       };
       await expect(branchWorker.processBranch(inconfig)).resolves.toEqual({
         branchExists: true,
-        result: BranchResult.NotScheduled,
+        result: 'not-scheduled',
         commitSha: null,
       });
       expect(logger.debug).toHaveBeenCalledWith(
@@ -1794,7 +1793,7 @@ describe('workers/repository/update/branch/index', () => {
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
       expect(
         await branchWorker.processBranch({ ...config, rebaseWhen: 'never' })
-      ).toMatchObject({ result: BranchResult.NoWork });
+      ).toMatchObject({ result: 'no-work' });
       expect(commit.commitFilesToBranch).not.toHaveBeenCalled();
     });
 
@@ -1814,7 +1813,7 @@ describe('workers/repository/update/branch/index', () => {
           rebaseWhen: 'never',
           dependencyDashboardChecks: { 'renovate/some-branch': 'other' },
         })
-      ).toMatchObject({ result: BranchResult.Done });
+      ).toMatchObject({ result: 'done' });
       expect(commit.commitFilesToBranch).toHaveBeenCalled();
     });
 

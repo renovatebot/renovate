@@ -16,7 +16,7 @@ import type {
 } from '../../../util/cache/repository/types';
 import { fingerprint } from '../../../util/fingerprint';
 import { Limit, isLimitReached } from '../../global/limits';
-import { BranchConfig, BranchResult, BranchUpgradeConfig } from '../../types';
+import type { BranchConfig, BranchUpgradeConfig } from '../../types';
 import * as _branchWorker from '../update/branch';
 import * as _limits from './limits';
 import {
@@ -86,19 +86,19 @@ describe('workers/repository/process/write', () => {
       git.branchExists.mockReturnValue(true);
       branchWorker.processBranch.mockResolvedValueOnce({
         branchExists: true,
-        result: BranchResult.PrCreated,
+        result: 'pr-created',
       });
       branchWorker.processBranch.mockResolvedValueOnce({
         branchExists: false,
-        result: BranchResult.AlreadyExisted,
+        result: 'already-existed',
       });
       branchWorker.processBranch.mockResolvedValueOnce({
         branchExists: false,
-        result: BranchResult.Automerged,
+        result: 'automerged',
       });
       branchWorker.processBranch.mockResolvedValueOnce({
         branchExists: false,
-        result: BranchResult.Automerged,
+        result: 'automerged',
       });
       GlobalConfig.set({ dryRun: 'full' });
       const res = await writeUpdates(config, branches);
@@ -115,7 +115,7 @@ describe('workers/repository/process/write', () => {
       repoCache.getCache.mockReturnValueOnce({});
       branchWorker.processBranch.mockResolvedValueOnce({
         branchExists: true,
-        result: BranchResult.PrCreated,
+        result: 'pr-created',
       });
       git.branchExists.mockReturnValueOnce(false).mockReturnValueOnce(true);
       limits.getBranchesRemaining.mockResolvedValueOnce(1);
@@ -158,7 +158,7 @@ describe('workers/repository/process/write', () => {
       });
       branchWorker.processBranch.mockResolvedValueOnce({
         branchExists: true,
-        result: BranchResult.NoWork,
+        result: 'no-work',
       });
       expect(await writeUpdates(config, branches)).toBe('done');
     });
@@ -187,7 +187,7 @@ describe('workers/repository/process/write', () => {
       branchWorker.processBranch.mockResolvedValueOnce({
         branchExists: true,
         updatesVerified: true,
-        result: BranchResult.Done,
+        result: 'done',
         commitSha: 'some-value',
       });
       const branch = branches[0];
@@ -243,7 +243,7 @@ describe('workers/repository/process/write', () => {
       });
       branchWorker.processBranch.mockResolvedValueOnce({
         branchExists: true,
-        result: BranchResult.Done,
+        result: 'done',
       });
       git.branchExists.mockReturnValue(true);
       config.repositoryCache = 'enabled';
@@ -287,7 +287,7 @@ describe('workers/repository/process/write', () => {
       });
       branchWorker.processBranch.mockResolvedValueOnce({
         branchExists: true,
-        result: BranchResult.Done,
+        result: 'done',
       });
       expect(await writeUpdates(config, branches)).toBe('done');
       expect(branch.branchFingerprint).toBe(branchFingerprint);
@@ -310,7 +310,7 @@ describe('workers/repository/process/write', () => {
       repoCache.getCache.mockReturnValueOnce(repoCacheObj);
       branchWorker.processBranch.mockResolvedValueOnce({
         branchExists: true,
-        result: BranchResult.NoWork,
+        result: 'no-work',
       });
       git.getBranchCommit
         .mockReturnValueOnce('sha')
