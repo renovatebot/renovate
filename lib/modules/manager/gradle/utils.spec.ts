@@ -1,4 +1,3 @@
-import { TokenType } from './common';
 import type { VariableRegistry } from './types';
 import {
   getVars,
