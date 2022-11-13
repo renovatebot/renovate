@@ -982,6 +982,37 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
         } as ChangeLogRelease
       );
 
+    it('handles empty azure tree response', async () => {
+      const sourceDirectory = 'packages/foo';
+      httpMock
+        .scope('https://dev.azure.com/')
+        .get(
+          `/some-org/some-project/_apis/git/repositories/some-repo/items?path=${sourceDirectory}`
+        )
+        .reply(200, azureItemsResponse)
+        .get(
+          `/some-org/some-project/_apis/git/repositories/some-repo/trees/123abc`
+        )
+        .reply(200, {
+          body: {
+            treeEntries: []
+          }
+        })
+      const res = await getReleaseNotesMd(
+        {
+          ...azureProject,
+          repository: 'some-repo',
+          sourceDirectory,
+        },
+        {
+          version: '4.33.0',
+          gitRef: '4.33.0',
+        } as ChangeLogRelease
+      );
+
+      expect(res).toBeNull();
+    });
+
       expect(res).toMatchSnapshot({
         notesSourceUrl: `https://dev.azure.com/some-org/some-project/_git/some-repo?path=${sourceDirectory}/CHANGELOG.md`,
         url: `https://dev.azure.com/some-org/some-project/_git/some-repo?path=${sourceDirectory}/CHANGELOG.md&anchor=user-content-4.33.0-%5B05-15-2020%5D`,
