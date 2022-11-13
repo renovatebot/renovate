@@ -22,7 +22,7 @@ import {
   ensureCommentRemoval,
 } from '../../../../modules/platform/comment';
 import { hashBody } from '../../../../modules/platform/pr-body';
-import { BranchStatus, PrState } from '../../../../types';
+import { PrState } from '../../../../types';
 import { ExternalHostError } from '../../../../types/errors/external-host-error';
 import { getElapsedDays } from '../../../../util/date';
 import { emojify } from '../../../../util/emoji';
@@ -319,7 +319,7 @@ export async function processBranch(
     ) {
       // Only set a stability status check if one or more of the updates contain
       // both a stabilityDays setting and a releaseTimestamp
-      config.stabilityStatus = BranchStatus.green;
+      config.stabilityStatus = 'green';
       // Default to 'success' but set 'pending' if any update is pending
       for (const upgrade of config.upgrades) {
         if (is.number(upgrade.stabilityDays) && upgrade.releaseTimestamp) {
@@ -333,7 +333,7 @@ export async function processBranch(
               },
               'Update has not passed stability days'
             );
-            config.stabilityStatus = BranchStatus.yellow;
+            config.stabilityStatus = 'yellow';
             continue;
           }
         }
@@ -352,13 +352,13 @@ export async function processBranch(
             updateType
           );
           if (satisfiesConfidenceLevel(confidence, minimumConfidence)) {
-            config.confidenceStatus = BranchStatus.green;
+            config.confidenceStatus = 'green';
           } else {
             logger.debug(
               { depName, confidence, minimumConfidence },
               'Update does not meet minimum confidence scores'
             );
-            config.confidenceStatus = BranchStatus.yellow;
+            config.confidenceStatus = 'yellow';
             continue;
           }
         }
@@ -367,7 +367,7 @@ export async function processBranch(
       if (
         !dependencyDashboardCheck &&
         !branchExists &&
-        config.stabilityStatus === BranchStatus.yellow &&
+        config.stabilityStatus === 'yellow' &&
         ['not-pending', 'status-success'].includes(config.prCreation!)
       ) {
         logger.debug(

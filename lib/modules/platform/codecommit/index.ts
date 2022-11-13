@@ -582,7 +582,7 @@ export function getBranchStatus(branchName: string): Promise<BranchStatus> {
   logger.debug(
     'returning branch status yellow, because getBranchStatus isnt supported on aws yet'
   );
-  return Promise.resolve(BranchStatus.yellow);
+  return Promise.resolve('yellow');
 }
 
 /* istanbul ignore next */

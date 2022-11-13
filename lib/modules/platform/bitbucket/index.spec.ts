@@ -1,6 +1,6 @@
 import * as httpMock from '../../../../test/http-mock';
 import type { logger as _logger } from '../../../logger';
-import { BranchStatus, PrState } from '../../../types';
+import { PrState } from '../../../types';
 import type * as _git from '../../../util/git';
 import { setBaseUrl } from '../../../util/http/bitbucket';
 import type { Platform, PlatformResult, RepoParams } from '../types';
@@ -226,7 +226,7 @@ describe('modules/platform/bitbucket/index', () => {
             },
           ],
         });
-      expect(await bitbucket.getBranchStatus('master')).toBe(BranchStatus.red);
+      expect(await bitbucket.getBranchStatus('master')).toBe('red');
     });
 
     it('getBranchStatus 4', async () => {
@@ -251,9 +251,7 @@ describe('modules/platform/bitbucket/index', () => {
             },
           ],
         });
-      expect(await bitbucket.getBranchStatus('branch')).toBe(
-        BranchStatus.green
-      );
+      expect(await bitbucket.getBranchStatus('branch')).toBe('green');
     });
 
     it('getBranchStatus 5', async () => {
@@ -278,9 +276,7 @@ describe('modules/platform/bitbucket/index', () => {
             },
           ],
         });
-      expect(await bitbucket.getBranchStatus('pending/branch')).toBe(
-        BranchStatus.yellow
-      );
+      expect(await bitbucket.getBranchStatus('pending/branch')).toBe('yellow');
     });
 
     it('getBranchStatus 6', async () => {
@@ -303,7 +299,7 @@ describe('modules/platform/bitbucket/index', () => {
           values: [],
         });
       expect(await bitbucket.getBranchStatus('branch-with-empty-status')).toBe(
-        BranchStatus.yellow
+        'yellow'
       );
     });
   });
@@ -335,9 +331,7 @@ describe('modules/platform/bitbucket/index', () => {
     });
 
     it('getBranchStatusCheck 2', async () => {
-      expect(await bitbucket.getBranchStatusCheck('master', 'foo')).toBe(
-        BranchStatus.red
-      );
+      expect(await bitbucket.getBranchStatusCheck('master', 'foo')).toBe('red');
     });
 
     it('getBranchStatusCheck 3', async () => {
@@ -376,7 +370,7 @@ describe('modules/platform/bitbucket/index', () => {
           branchName: 'branch',
           context: 'context',
           description: 'description',
-          state: BranchStatus.red,
+          state: 'red',
           url: 'targetUrl',
         })
       ).toResolve();

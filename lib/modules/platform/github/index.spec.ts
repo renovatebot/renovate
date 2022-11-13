@@ -7,7 +7,7 @@ import {
   REPOSITORY_NOT_FOUND,
   REPOSITORY_RENAMED,
 } from '../../../constants/error-messages';
-import { BranchStatus, PrState, VulnerabilityAlert } from '../../../types';
+import { PrState, VulnerabilityAlert } from '../../../types';
 import * as repository from '../../../util/cache/repository';
 import * as _git from '../../../util/git';
 import * as _hostRules from '../../../util/host-rules';
@@ -967,7 +967,7 @@ describe('modules/platform/github/index', () => {
 
       await github.initRepo({ repository: 'some/repo' });
       const res = await github.getBranchStatus('somebranch');
-      expect(res).toEqual(BranchStatus.green);
+      expect(res).toBe('green');
     });
 
     it('should pass through failed', async () => {
@@ -983,7 +983,7 @@ describe('modules/platform/github/index', () => {
 
       await github.initRepo({ repository: 'some/repo' });
       const res = await github.getBranchStatus('somebranch');
-      expect(res).toEqual(BranchStatus.red);
+      expect(res).toBe('red');
     });
 
     it('defaults to pending', async () => {
@@ -998,7 +998,7 @@ describe('modules/platform/github/index', () => {
         .reply(200, []);
       await github.initRepo({ repository: 'some/repo' });
       const res = await github.getBranchStatus('somebranch');
-      expect(res).toEqual(BranchStatus.yellow);
+      expect(res).toBe('yellow');
     });
 
     it('should fail if a check run has failed', async () => {
@@ -1030,7 +1030,7 @@ describe('modules/platform/github/index', () => {
         });
       await github.initRepo({ repository: 'some/repo' });
       const res = await github.getBranchStatus('somebranch');
-      expect(res).toEqual(BranchStatus.red);
+      expect(res).toBe('red');
     });
 
     it('should succeed if no status and all passed check runs', async () => {
@@ -1068,7 +1068,7 @@ describe('modules/platform/github/index', () => {
         });
       await github.initRepo({ repository: 'some/repo' });
       const res = await github.getBranchStatus('somebranch');
-      expect(res).toEqual(BranchStatus.green);
+      expect(res).toBe('green');
     });
 
     it('should fail if a check run is pending', async () => {
@@ -1099,7 +1099,7 @@ describe('modules/platform/github/index', () => {
         });
       await github.initRepo({ repository: 'some/repo' });
       const res = await github.getBranchStatus('somebranch');
-      expect(res).toEqual(BranchStatus.yellow);
+      expect(res).toBe('yellow');
     });
   });
 
@@ -1130,7 +1130,7 @@ describe('modules/platform/github/index', () => {
         'renovate/future_branch',
         'context-2'
       );
-      expect(res).toEqual(BranchStatus.yellow);
+      expect(res).toBe('yellow');
     });
 
     it('returns null', async () => {
@@ -1180,7 +1180,7 @@ describe('modules/platform/github/index', () => {
           branchName: 'some-branch',
           context: 'some-context',
           description: 'some-description',
-          state: BranchStatus.yellow,
+          state: 'yellow',
           url: 'some-url',
         })
       ).toResolve();
@@ -1224,7 +1224,7 @@ describe('modules/platform/github/index', () => {
           branchName: 'some-branch',
           context: 'some-context',
           description: 'some-description',
-          state: BranchStatus.green,
+          state: 'green',
           url: 'some-url',
         })
       ).toResolve();

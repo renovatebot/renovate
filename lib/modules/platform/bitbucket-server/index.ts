@@ -391,17 +391,15 @@ export async function getBranchStatus(
     logger.debug({ commitStatus }, 'branch status check result');
 
     if (commitStatus.failed > 0) {
-      return BranchStatus.red;
+      return 'red';
     }
     if (commitStatus.inProgress > 0) {
-      return BranchStatus.yellow;
+      return 'yellow';
     }
-    return commitStatus.successful > 0
-      ? BranchStatus.green
-      : BranchStatus.yellow;
+    return commitStatus.successful > 0 ? 'green' : 'yellow';
   } catch (err) {
     logger.warn({ err }, `Failed to get branch status`);
-    return BranchStatus.red;
+    return 'red';
   }
 }
 
@@ -433,12 +431,12 @@ export async function getBranchStatusCheck(
       if (state.key === context) {
         switch (state.state) {
           case 'SUCCESSFUL':
-            return BranchStatus.green;
+            return 'green';
           case 'INPROGRESS':
-            return BranchStatus.yellow;
+            return 'yellow';
           case 'FAILED':
           default:
-            return BranchStatus.red;
+            return 'red';
         }
       }
     }
@@ -473,13 +471,13 @@ export async function setBranchStatus({
     };
 
     switch (state) {
-      case BranchStatus.green:
+      case 'green':
         body.state = 'SUCCESSFUL';
         break;
-      case BranchStatus.yellow:
+      case 'yellow':
         body.state = 'INPROGRESS';
         break;
-      case BranchStatus.red:
+      case 'red':
       default:
         body.state = 'FAILED';
         break;

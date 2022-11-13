@@ -359,12 +359,12 @@ async function getStatusCheck(branchName: string): Promise<GitStatus[]> {
 }
 
 const azureToRenovateStatusMapping: Record<GitStatusState, BranchStatus> = {
-  [GitStatusState.Succeeded]: BranchStatus.green,
-  [GitStatusState.NotApplicable]: BranchStatus.green,
-  [GitStatusState.NotSet]: BranchStatus.yellow,
-  [GitStatusState.Pending]: BranchStatus.yellow,
-  [GitStatusState.Error]: BranchStatus.red,
-  [GitStatusState.Failed]: BranchStatus.red,
+  [GitStatusState.Succeeded]: 'green',
+  [GitStatusState.NotApplicable]: 'green',
+  [GitStatusState.NotSet]: 'yellow',
+  [GitStatusState.Pending]: 'yellow',
+  [GitStatusState.Error]: 'red',
+  [GitStatusState.Failed]: 'red',
 };
 
 export async function getBranchStatusCheck(
@@ -375,7 +375,7 @@ export async function getBranchStatusCheck(
   for (const check of res) {
     if (getGitStatusContextCombinedName(check.context) === context) {
       // TODO #7154
-      return azureToRenovateStatusMapping[check.state!] ?? BranchStatus.yellow;
+      return azureToRenovateStatusMapping[check.state!] ?? 'yellow';
     }
   }
   return null;
@@ -389,7 +389,7 @@ export async function getBranchStatus(
   logger.debug({ branch: branchName, statuses }, 'branch status check result');
   if (!statuses.length) {
     logger.debug('empty branch status check result = returning "pending"');
-    return BranchStatus.yellow;
+    return 'yellow';
   }
   const noOfFailures = statuses.filter(
     (status: GitStatus) =>
@@ -397,7 +397,7 @@ export async function getBranchStatus(
       status.state === GitStatusState.Failed
   ).length;
   if (noOfFailures) {
-    return BranchStatus.red;
+    return 'red';
   }
   const noOfPending = statuses.filter(
     (status: GitStatus) =>
@@ -405,9 +405,9 @@ export async function getBranchStatus(
       status.state === GitStatusState.Pending
   ).length;
   if (noOfPending) {
-    return BranchStatus.yellow;
+    return 'yellow';
   }
-  return BranchStatus.green;
+  return 'green';
 }
 
 export async function createPr({
@@ -623,10 +623,9 @@ export async function ensureCommentRemoval(
 }
 
 const renovateToAzureStatusMapping: Record<BranchStatus, GitStatusState> = {
-  [BranchStatus.green]: [GitStatusState.Succeeded],
-  [BranchStatus.green]: GitStatusState.Succeeded,
-  [BranchStatus.yellow]: GitStatusState.Pending,
-  [BranchStatus.red]: GitStatusState.Failed,
+  ['green']: GitStatusState.Succeeded,
+  ['yellow']: GitStatusState.Pending,
+  ['red']: GitStatusState.Failed,
 };
 
 export async function setBranchStatus({

@@ -9,7 +9,7 @@ import {
 import * as _comment from '../../../../modules/platform/comment';
 import { getPrBodyStruct } from '../../../../modules/platform/pr-body';
 import type { Pr } from '../../../../modules/platform/types';
-import { BranchStatus, PrState } from '../../../../types';
+import { PrState } from '../../../../types';
 import { ExternalHostError } from '../../../../types/errors/external-host-error';
 import * as _limits from '../../../global/limits';
 import type { BranchConfig, BranchUpgradeConfig } from '../../../types';
@@ -116,7 +116,7 @@ describe('workers/repository/update/pr/index', () => {
       });
 
       it('skips PR creation due to non-green branch check', async () => {
-        checks.resolveBranchStatus.mockResolvedValueOnce(BranchStatus.yellow);
+        checks.resolveBranchStatus.mockResolvedValueOnce('yellow');
 
         const res = await ensurePr({ ...config, prCreation: 'status-success' });
 
@@ -127,7 +127,7 @@ describe('workers/repository/update/pr/index', () => {
       });
 
       it('creates PR for green branch checks', async () => {
-        checks.resolveBranchStatus.mockResolvedValueOnce(BranchStatus.green);
+        checks.resolveBranchStatus.mockResolvedValueOnce('green');
         platform.createPr.mockResolvedValueOnce(pr);
 
         const res = await ensurePr({ ...config, prCreation: 'status-success' });
@@ -137,7 +137,7 @@ describe('workers/repository/update/pr/index', () => {
       });
 
       it('skips PR creation for unapproved dependencies', async () => {
-        checks.resolveBranchStatus.mockResolvedValueOnce(BranchStatus.yellow);
+        checks.resolveBranchStatus.mockResolvedValueOnce('yellow');
 
         const res = await ensurePr({ ...config, prCreation: 'approval' });
 
@@ -151,7 +151,7 @@ describe('workers/repository/update/pr/index', () => {
         const now = DateTime.now();
         const then = now.minus({ hours: 1 });
 
-        checks.resolveBranchStatus.mockResolvedValueOnce(BranchStatus.yellow);
+        checks.resolveBranchStatus.mockResolvedValueOnce('yellow');
         git.getBranchLastCommitTime.mockResolvedValueOnce(then.toJSDate());
 
         const res = await ensurePr({
@@ -170,13 +170,13 @@ describe('workers/repository/update/pr/index', () => {
         const now = DateTime.now();
         const then = now.minus({ hours: 1 });
 
-        checks.resolveBranchStatus.mockResolvedValueOnce(BranchStatus.yellow);
+        checks.resolveBranchStatus.mockResolvedValueOnce('yellow');
         git.getBranchLastCommitTime.mockResolvedValueOnce(then.toJSDate());
 
         const res = await ensurePr({
           ...config,
           prCreation: 'not-pending',
-          stabilityStatus: BranchStatus.green,
+          stabilityStatus: 'green',
         });
 
         expect(res).toEqual({
@@ -189,7 +189,7 @@ describe('workers/repository/update/pr/index', () => {
         const now = DateTime.now();
         const then = now.minus({ hours: 2 });
 
-        checks.resolveBranchStatus.mockResolvedValueOnce(BranchStatus.yellow);
+        checks.resolveBranchStatus.mockResolvedValueOnce('yellow');
         git.getBranchLastCommitTime.mockResolvedValueOnce(then.toJSDate());
         platform.createPr.mockResolvedValueOnce(pr);
 
@@ -327,7 +327,7 @@ describe('workers/repository/update/pr/index', () => {
 
       it('skips automerge failure comment', async () => {
         platform.createPr.mockResolvedValueOnce(pr);
-        checks.resolveBranchStatus.mockResolvedValueOnce(BranchStatus.red);
+        checks.resolveBranchStatus.mockResolvedValueOnce('red');
         platform.massageMarkdown.mockReturnValueOnce('markdown content');
 
         await ensurePr({
@@ -367,7 +367,7 @@ describe('workers/repository/update/pr/index', () => {
           hasReviewers: false,
         };
         platform.getBranchPr.mockResolvedValueOnce(changedPr);
-        checks.resolveBranchStatus.mockResolvedValueOnce(BranchStatus.red);
+        checks.resolveBranchStatus.mockResolvedValueOnce('red');
 
         const res = await ensurePr({
           ...config,
@@ -400,14 +400,14 @@ describe('workers/repository/update/pr/index', () => {
         const then = now.minus({ hours: 2 });
 
         git.getBranchLastCommitTime.mockResolvedValueOnce(then.toJSDate());
-        checks.resolveBranchStatus.mockResolvedValueOnce(BranchStatus.yellow);
+        checks.resolveBranchStatus.mockResolvedValueOnce('yellow');
         platform.createPr.mockResolvedValueOnce(pr);
 
         const res = await ensurePr({
           ...config,
           automerge: true,
           automergeType: 'branch',
-          stabilityStatus: BranchStatus.green,
+          stabilityStatus: 'green',
           prNotPendingHours: 1,
         });
 
@@ -420,14 +420,14 @@ describe('workers/repository/update/pr/index', () => {
         const then = now.minus({ hours: 1 });
 
         git.getBranchLastCommitTime.mockResolvedValueOnce(then.toJSDate());
-        checks.resolveBranchStatus.mockResolvedValueOnce(BranchStatus.yellow);
+        checks.resolveBranchStatus.mockResolvedValueOnce('yellow');
         platform.createPr.mockResolvedValueOnce(pr);
 
         const res = await ensurePr({
           ...config,
           automerge: true,
           automergeType: 'branch',
-          stabilityStatus: BranchStatus.green,
+          stabilityStatus: 'green',
           prNotPendingHours: 2,
         });
 
@@ -440,7 +440,7 @@ describe('workers/repository/update/pr/index', () => {
 
       it('comments on automerge failure', async () => {
         platform.createPr.mockResolvedValueOnce(pr);
-        checks.resolveBranchStatus.mockResolvedValueOnce(BranchStatus.red);
+        checks.resolveBranchStatus.mockResolvedValueOnce('red');
         jest
           .spyOn(platform, 'massageMarkdown')
           .mockImplementation((prBody) => 'markdown content');
@@ -463,7 +463,7 @@ describe('workers/repository/update/pr/index', () => {
 
       it('handles ensureComment error', async () => {
         platform.createPr.mockResolvedValueOnce(pr);
-        checks.resolveBranchStatus.mockResolvedValueOnce(BranchStatus.red);
+        checks.resolveBranchStatus.mockResolvedValueOnce('red');
         platform.massageMarkdown.mockReturnValueOnce('markdown content');
         comment.ensureComment.mockRejectedValueOnce(new Error('unknown'));
 
@@ -485,7 +485,7 @@ describe('workers/repository/update/pr/index', () => {
           hasReviewers: false,
         };
         platform.getBranchPr.mockResolvedValueOnce(changedPr);
-        checks.resolveBranchStatus.mockResolvedValueOnce(BranchStatus.red);
+        checks.resolveBranchStatus.mockResolvedValueOnce('red');
 
         const err = new Error('unknown');
         participants.addParticipants.mockRejectedValueOnce(err);
@@ -510,7 +510,7 @@ describe('workers/repository/update/pr/index', () => {
           hasReviewers: false,
         };
         platform.getBranchPr.mockResolvedValueOnce(changedPr);
-        checks.resolveBranchStatus.mockResolvedValueOnce(BranchStatus.red);
+        checks.resolveBranchStatus.mockResolvedValueOnce('red');
 
         const err = new ExternalHostError(new Error('unknown'));
         participants.addParticipants.mockRejectedValueOnce(err);
@@ -539,7 +539,7 @@ describe('workers/repository/update/pr/index', () => {
             hasReviewers: false,
           };
           platform.getBranchPr.mockResolvedValueOnce(changedPr);
-          checks.resolveBranchStatus.mockResolvedValueOnce(BranchStatus.red);
+          checks.resolveBranchStatus.mockResolvedValueOnce('red');
 
           const err = new Error(message);
           participants.addParticipants.mockRejectedValueOnce(err);

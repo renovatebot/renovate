@@ -405,10 +405,7 @@ const platform: Platform = {
     }
 
     logger.debug({ ccs }, 'Branch status check result');
-    return (
-      helper.giteaToRenovateStatusMapping[ccs.worstStatus] ??
-      BranchStatus.yellow
-    );
+    return helper.giteaToRenovateStatusMapping[ccs.worstStatus] ?? 'yellow';
   },
 
   async getBranchStatusCheck(
@@ -431,7 +428,7 @@ const platform: Platform = {
       { check: cs },
       'Could not map Gitea status value to Renovate status'
     );
-    return BranchStatus.yellow;
+    return 'yellow';
   },
 
   getPrList(): Promise<Pr[]> {

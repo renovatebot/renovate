@@ -377,12 +377,12 @@ export const giteaToRenovateStatusMapping: Record<
   CommitStatusType,
   BranchStatus | null
 > = {
-  unknown: BranchStatus.yellow,
-  success: BranchStatus.green,
-  pending: BranchStatus.yellow,
-  warning: BranchStatus.red,
-  failure: BranchStatus.red,
-  error: BranchStatus.red,
+  unknown: 'yellow',
+  success: 'green',
+  pending: 'yellow',
+  warning: 'red',
+  failure: 'red',
+  error: 'red',
 };
 
 export const renovateToGiteaStatusMapping: Record<

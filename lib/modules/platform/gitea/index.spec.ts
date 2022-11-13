@@ -564,7 +564,7 @@ describe('modules/platform/gitea/index', () => {
       await initFakeRepo();
       await gitea.setBranchStatus({
         branchName: 'some-branch',
-        state: BranchStatus.green,
+        state: 'green',
         context: 'some-context',
         description: 'some-description',
         ...bsc,
@@ -638,19 +638,19 @@ describe('modules/platform/gitea/index', () => {
     };
 
     it('should return yellow for unknown result', async () => {
-      expect(await getBranchStatus('unknown')).toEqual(BranchStatus.yellow);
+      expect(await getBranchStatus('unknown')).toEqual('yellow');
     });
 
     it('should return pending state for pending result', async () => {
-      expect(await getBranchStatus('pending')).toEqual(BranchStatus.yellow);
+      expect(await getBranchStatus('pending')).toEqual('yellow');
     });
 
     it('should return success state for success result', async () => {
-      expect(await getBranchStatus('success')).toEqual(BranchStatus.green);
+      expect(await getBranchStatus('success')).toEqual('green');
     });
 
     it('should return null for all other results', async () => {
-      expect(await getBranchStatus('invalid')).toEqual(BranchStatus.yellow);
+      expect(await getBranchStatus('invalid')).toEqual('yellow');
     });
 
     it('should abort when branch status returns 404', async () => {
@@ -710,7 +710,7 @@ describe('modules/platform/gitea/index', () => {
 
       expect(
         await gitea.getBranchStatusCheck('some-branch', 'some-context')
-      ).toEqual(BranchStatus.yellow);
+      ).toEqual('yellow');
     });
 
     it('should return green of matching result', async () => {
@@ -727,7 +727,7 @@ describe('modules/platform/gitea/index', () => {
 
       expect(
         await gitea.getBranchStatusCheck('some-branch', 'some-context')
-      ).toEqual(BranchStatus.green);
+      ).toEqual('green');
     });
   });
 
