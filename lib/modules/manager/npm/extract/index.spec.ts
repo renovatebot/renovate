@@ -500,7 +500,7 @@ describe('modules/manager/npm/extract/index', () => {
         'package.json',
         defaultConfig
       );
-      expect(res).toMatchSnapshot({
+      expect(res).toMatchObject({
         deps: [
           {},
           {
