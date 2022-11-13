@@ -480,6 +480,60 @@ exports[`modules/manager/npm/extract/index .extractPackageFile() extracts volta 
 }
 `;
 
+exports[`modules/manager/npm/extract/index .extractPackageFile() extracts volta yarn higher than 1 1`] = `
+{
+  "constraints": {
+    "node": "16.0.0",
+  },
+  "deps": [
+    {
+      "commitMessageTopic": "Node.js",
+      "currentValue": "16.0.0",
+      "datasource": "github-tags",
+      "depName": "node",
+      "depType": "engines",
+      "packageName": "nodejs/node",
+      "prettyDepType": "engine",
+      "versioning": "node",
+    },
+    {
+      "commitMessageTopic": "Node.js",
+      "currentValue": "16.0.0",
+      "datasource": "github-tags",
+      "depName": "node",
+      "depType": "volta",
+      "packageName": "nodejs/node",
+      "prettyDepType": "volta",
+      "versioning": "node",
+    },
+    {
+      "commitMessageTopic": "Yarn",
+      "currentValue": "3.2.4",
+      "datasource": "npm",
+      "depName": "yarn",
+      "depType": "volta",
+      "packageName": "@yarnpkg/cli",
+      "prettyDepType": "volta",
+    },
+  ],
+  "lernaClient": undefined,
+  "lernaPackages": undefined,
+  "managerData": {
+    "hasPackageManager": false,
+    "lernaJsonFile": undefined,
+    "yarnZeroInstall": false,
+  },
+  "npmLock": undefined,
+  "npmrc": undefined,
+  "packageFileVersion": undefined,
+  "packageJsonName": undefined,
+  "pnpmShrinkwrap": undefined,
+  "skipInstalls": true,
+  "yarnLock": undefined,
+  "yarnWorkspacesPackages": undefined,
+}
+`;
+
 exports[`modules/manager/npm/extract/index .extractPackageFile() extracts volta yarn unknown-version 1`] = `
 {
   "constraints": {

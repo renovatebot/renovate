@@ -1,3 +1,4 @@
+import { major } from '@renovatebot/ruby-semver';
 import is from '@sindresorhus/is';
 import validateNpmPackageName from 'validate-npm-package-name';
 import { GlobalConfig } from '../../../../config/global';
@@ -20,6 +21,7 @@ import { getLockedVersions } from './locked-versions';
 import { detectMonorepos } from './monorepo';
 import type { NpmPackage, NpmPackageDependency } from './types';
 import { isZeroInstall } from './yarn';
+import semver from 'semver';
 
 function parseDepName(depType: string, key: string): string {
   if (depType !== 'resolutions') {
@@ -201,8 +203,8 @@ export async function extractPackageFile(
         dep.commitMessageTopic = 'Yarn';
         constraints.yarn = dep.currentValue;
         if (
-          dep.currentValue.startsWith('2') ||
-          dep.currentValue.startsWith('3')
+          semver.valid(dep.currentValue) &&
+          semver.major(dep.currentValue) > 1
         ) {
           dep.packageName = '@yarnpkg/cli';
         }
@@ -236,8 +238,8 @@ export async function extractPackageFile(
         dep.datasource = NpmDatasource.id;
         dep.commitMessageTopic = 'Yarn';
         if (
-          dep.currentValue.startsWith('2') ||
-          dep.currentValue.startsWith('3')
+          semver.valid(dep.currentValue) &&
+          semver.major(dep.currentValue) > 1
         ) {
           dep.packageName = '@yarnpkg/cli';
         }
