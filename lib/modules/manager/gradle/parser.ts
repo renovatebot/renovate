@@ -368,7 +368,7 @@ function processLibraryDep(input: SyntaxHandlerInput): SyntaxHandlerOutput {
   const { tokenMap } = input;
 
   const varNameToken = tokenMap.varName;
-  const key = varNameToken.value.replace(regEx(/[-_]/g), '.');
+  const key = `libs.${varNameToken.value.replace(regEx(/[-_]/g), '.')}`;
   const fileReplacePosition = varNameToken.offset;
   const packageFile = input.packageFile;
 
