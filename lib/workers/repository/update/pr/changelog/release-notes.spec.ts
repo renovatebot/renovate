@@ -982,6 +982,12 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
         } as ChangeLogRelease
       );
 
+      expect(res).toMatchSnapshot({
+        notesSourceUrl: `https://dev.azure.com/some-org/some-project/_git/some-repo?path=${sourceDirectory}/CHANGELOG.md`,
+        url: `https://dev.azure.com/some-org/some-project/_git/some-repo?path=${sourceDirectory}/CHANGELOG.md&anchor=user-content-4.33.0-%5B05-15-2020%5D`,
+      });
+    });
+
     it('handles empty azure tree response', async () => {
       const sourceDirectory = 'packages/foo';
       httpMock
@@ -1011,12 +1017,6 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
       );
 
       expect(res).toBeNull();
-    });
-
-      expect(res).toMatchSnapshot({
-        notesSourceUrl: `https://dev.azure.com/some-org/some-project/_git/some-repo?path=${sourceDirectory}/CHANGELOG.md`,
-        url: `https://dev.azure.com/some-org/some-project/_git/some-repo?path=${sourceDirectory}/CHANGELOG.md&anchor=user-content-4.33.0-%5B05-15-2020%5D`,
-      });
     });
 
     it('parses js-yaml', async () => {
