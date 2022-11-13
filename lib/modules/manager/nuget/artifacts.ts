@@ -49,11 +49,13 @@ async function addSourceCmds(
       // Add name for registry, if known.
       addSourceCmd += ` --name ${quote(registry.name)}`;
     }
-    if (username && password) {
-      // Add registry credentials from host rules, if configured.
-      addSourceCmd += ` --username ${quote(username)} --password ${quote(
-        password
-      )} --store-password-in-clear-text`;
+    if (username) {
+      // Add registry username from host rules, if configured.
+      addSourceCmd += ` --username ${quote(username)}`;
+    }
+    if (password) {
+      // Add registry password from host rules, if configured.
+      addSourceCmd += ` --password ${quote(password)} --store-password-in-clear-text`;
     }
     result.push(addSourceCmd);
   }
