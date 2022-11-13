@@ -1,5 +1,5 @@
-import { major } from '@renovatebot/ruby-semver';
 import is from '@sindresorhus/is';
+import semver from 'semver';
 import validateNpmPackageName from 'validate-npm-package-name';
 import { GlobalConfig } from '../../../../config/global';
 import { CONFIG_VALIDATION } from '../../../../constants/error-messages';
@@ -21,7 +21,6 @@ import { getLockedVersions } from './locked-versions';
 import { detectMonorepos } from './monorepo';
 import type { NpmPackage, NpmPackageDependency } from './types';
 import { isZeroInstall } from './yarn';
-import semver from 'semver';
 
 function parseDepName(depType: string, key: string): string {
   if (depType !== 'resolutions') {
