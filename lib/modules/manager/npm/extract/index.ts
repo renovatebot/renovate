@@ -1,5 +1,4 @@
 import is from '@sindresorhus/is';
-import semver from 'semver';
 import validateNpmPackageName from 'validate-npm-package-name';
 import { GlobalConfig } from '../../../../config/global';
 import { CONFIG_VALIDATION } from '../../../../constants/error-messages';
@@ -9,7 +8,7 @@ import { newlineRegex, regEx } from '../../../../util/regex';
 import { GithubTagsDatasource } from '../../../datasource/github-tags';
 import { NpmDatasource } from '../../../datasource/npm';
 import * as nodeVersioning from '../../../versioning/node';
-import { isValid, isVersion } from '../../../versioning/npm';
+import { isValid, isVersion, api } from '../../../versioning/npm';
 import type {
   ExtractConfig,
   NpmLockFiles,
@@ -201,10 +200,8 @@ export async function extractPackageFile(
         dep.datasource = NpmDatasource.id;
         dep.commitMessageTopic = 'Yarn';
         constraints.yarn = dep.currentValue;
-        if (
-          semver.valid(dep.currentValue) &&
-          semver.major(dep.currentValue) > 1
-        ) {
+        const major = api.getMajor(dep.currentValue);
+        if (isValid(dep.currentValue) && major && major > 1) {
           dep.packageName = '@yarnpkg/cli';
         }
       } else if (depName === 'npm') {
@@ -236,10 +233,8 @@ export async function extractPackageFile(
       } else if (depName === 'yarn') {
         dep.datasource = NpmDatasource.id;
         dep.commitMessageTopic = 'Yarn';
-        if (
-          semver.valid(dep.currentValue) &&
-          semver.major(dep.currentValue) > 1
-        ) {
+        const major = api.getMajor(dep.currentValue);
+        if (isValid(dep.currentValue) && major && major > 1) {
           dep.packageName = '@yarnpkg/cli';
         }
       } else if (depName === 'npm') {
