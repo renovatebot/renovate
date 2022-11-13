@@ -87,20 +87,22 @@ export async function handleOpenPr(
       logger.info(
         `DRY-RUN: Would remove edited/blocked PR comment in PR #${pr.number}`
       );
-    } else {
-      await ensureCommentRemoval({
-        type: 'by-topic',
-        number: pr.number,
-        topic: editedPrCommentTopic,
-      });
+      return;
     }
-  }
 
-  if (GlobalConfig.get('dryRun')) {
-    logger.info(
-      `DRY-RUN: Would ensure edited/blocked PR comment in PR #${pr.number}`
-    );
+    await ensureCommentRemoval({
+      type: 'by-topic',
+      number: pr.number,
+      topic: editedPrCommentTopic,
+    });
   } else {
+    if (GlobalConfig.get('dryRun')) {
+      logger.info(
+        `DRY-RUN: Would ensure edited/blocked PR comment in PR #${pr.number}`
+      );
+      return;
+    }
+
     logger.debug('Ensuring comment to indicate that rebasing is not possible');
     await ensureComment({
       number: pr.number,
