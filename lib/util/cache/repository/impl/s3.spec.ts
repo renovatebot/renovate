@@ -99,7 +99,7 @@ describe('util/cache/repository/impl/s3', () => {
     expect(logger.debug).toHaveBeenCalledWith('RepoCacheS3.read() - success');
   });
 
-  it('ignores full pathname when instantiating RepoCacheS3', async () => {
+  it('appends a missing traling slash to pathname when instantiating RepoCacheS3', async () => {
     const json = '{}';
     const pathname = 'dir1/dir2/dir3/file.ext';
     s3Cache = new RepoCacheS3(
