@@ -1414,6 +1414,7 @@ Supported lock files are:
 
 - `package-lock.json`
 - `yarn.lock`
+- `pnpm-lock.yaml`
 - `composer.lock`
 - `Gemfile.lock`
 - `poetry.lock`
