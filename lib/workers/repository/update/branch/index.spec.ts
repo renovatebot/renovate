@@ -2005,10 +2005,7 @@ describe('workers/repository/update/branch/index', () => {
       });
       const inconfig = {
         ...config,
-        ignoreTests: true,
         prCreation: 'not-pending',
-        commitBody: '[skip-ci]',
-        fetchReleaseNotes: false,
       } as BranchConfig;
       expect(await branchWorker.processBranch(inconfig)).toEqual({
         branchExists: true,
