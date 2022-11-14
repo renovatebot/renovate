@@ -1,4 +1,5 @@
 // TODO #7154
+import is from '@sindresorhus/is';
 import { WORKER_FILE_UPDATE_FAILED } from '../../../../constants/error-messages';
 import { logger } from '../../../../logger';
 import { get } from '../../../../modules/manager';
@@ -152,10 +153,10 @@ export async function doAutoReplace(
     return await checkExistingBranch(upgrade, existingContent);
   }
   const replaceWithoutReplaceString = Boolean(
-    newName &&
+    is.string(newName) &&
       newName !== depName &&
-      (!upgrade.replaceString ||
-        upgrade.replaceString?.indexOf(depName!) === -1)
+      (is.undefined(upgrade.replaceString) ||
+        !upgrade.replaceString?.includes(depName!))
   );
   const replaceString = upgrade.replaceString ?? currentValue;
   logger.trace({ depName, replaceString }, 'autoReplace replaceString');

@@ -205,21 +205,7 @@ describe('workers/repository/update/branch/auto-replace', () => {
       expect(res).toBe(dockerfile);
     });
 
-    it('updates with terraform replacement', async () => {
-      const hcl =
-        'module "foo" {\nsource = "github.com/hashicorp/example?ref=v1.0.0"\n}';
-      upgrade.manager = 'terraform';
-      upgrade.updateType = 'replacement';
-      upgrade.depName = 'github.com/hashicorp/example';
-      upgrade.newName = 'github.com/hashicorp/new-example';
-      upgrade.currentValue = 'v1.0.0';
-      upgrade.depIndex = 0;
-      upgrade.packageFile = 'modules.tf';
-      const res = await doAutoReplace(upgrade, hcl, reuseExistingBranch);
-      expect(res).toBe(hcl.replace(upgrade.depName, upgrade.newName));
-    });
-
-    it('works with old name in depname', async () => {
+    it('handles replacement with depName===newName when replaceString exists', async () => {
       const yml =
         'image: "1111111111.dkr.ecr.us-east-1.amazonaws.com/my-repository:1"\n\n';
       upgrade.manager = 'regex';
@@ -238,6 +224,20 @@ describe('workers/repository/update/branch/auto-replace', () => {
       ];
       const res = await doAutoReplace(upgrade, yml, reuseExistingBranch);
       expect(res).toBe(yml);
+    });
+
+    it('updates with terraform replacement', async () => {
+      const hcl =
+        'module "foo" {\nsource = "github.com/hashicorp/example?ref=v1.0.0"\n}';
+      upgrade.manager = 'terraform';
+      upgrade.updateType = 'replacement';
+      upgrade.depName = 'github.com/hashicorp/example';
+      upgrade.newName = 'github.com/hashicorp/new-example';
+      upgrade.currentValue = 'v1.0.0';
+      upgrade.depIndex = 0;
+      upgrade.packageFile = 'modules.tf';
+      const res = await doAutoReplace(upgrade, hcl, reuseExistingBranch);
+      expect(res).toBe(hcl.replace(upgrade.depName, upgrade.newName));
     });
 
     it('updates with ansible replacement', async () => {

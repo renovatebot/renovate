@@ -19,8 +19,7 @@ export function mergeChildConfig<
     if (
       option.mergeable &&
       childConfig[option.name] &&
-      parentConfig[option.name] &&
-      parentConfig[option.name] !== childConfig[option.name]
+      parentConfig[option.name]
     ) {
       logger.trace(`mergeable option: ${option.name}`);
       if (option.name === 'constraints') {
