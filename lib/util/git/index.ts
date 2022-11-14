@@ -27,7 +27,7 @@ import { logger } from '../../logger';
 import { api as semverCoerced } from '../../modules/versioning/semver-coerced';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import type { GitProtocol } from '../../types/git';
-import { Limit, incLimitedValue } from '../../workers/global/limits';
+import { incLimitedValue } from '../../workers/global/limits';
 import { newlineRegex, regEx } from '../regex';
 import { parseGitAuthor } from './author';
 import { getCachedBehindBaseResult } from './behind-base-branch-cache';
@@ -782,7 +782,7 @@ export async function mergeBranch(branchName: string): Promise<void> {
     status = await git.status();
     await gitRetry(() => git.merge(['--ff-only', branchName]));
     await gitRetry(() => git.push('origin', config.currentBranch));
-    incLimitedValue(Limit.Commits);
+    incLimitedValue('Commits');
   } catch (err) {
     logger.debug(
       {
@@ -1032,7 +1032,7 @@ export async function pushCommit({
     );
     delete pushRes.repo;
     logger.debug({ result: pushRes }, 'git push');
-    incLimitedValue(Limit.Commits);
+    incLimitedValue('Commits');
     result = true;
   } catch (err) /* istanbul ignore next */ {
     handleCommitError(files, branchName, err);

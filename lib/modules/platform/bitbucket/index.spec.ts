@@ -1,6 +1,6 @@
 import * as httpMock from '../../../../test/http-mock';
 import type { logger as _logger } from '../../../logger';
-import { BranchStatus, PrState } from '../../../types';
+import { BranchStatus } from '../../../types';
 import type * as _git from '../../../util/git';
 import { setBaseUrl } from '../../../util/http/bitbucket';
 import type { Platform, PlatformResult, RepoParams } from '../types';
@@ -1210,7 +1210,7 @@ describe('modules/platform/bitbucket/index', () => {
         await bitbucket.updatePr({
           number: pr.id,
           prTitle: pr.title,
-          state: PrState.Closed,
+          state: 'closed',
         })
       ).toBeUndefined();
     });
