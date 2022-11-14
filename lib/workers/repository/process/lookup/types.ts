@@ -45,8 +45,8 @@ export interface LookupUpdateConfig
   depName: string;
   minimumConfidence?: string;
   extractedConstraints?: Record<string, string>;
-  replacementVersion?: string;
   replacementName?: string;
+  replacementVersion?: string;
 }
 
 export interface UpdateResult {
