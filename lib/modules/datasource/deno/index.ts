@@ -70,10 +70,18 @@ export class DenoDatasource extends Datasource {
       'v2/modules',
       massagedPackageName
     );
+
+    return await this.getReleaseResult(moduleAPIURL);
+  }
+
+  @cache({
+    namespace: `datasource-${DenoDatasource.id}-versions`,
+    key: (moduleAPIURL) => moduleAPIURL,
+  })
+  async getReleaseResult(moduleAPIURL: string): Promise<ReleaseResult> {
     const { versions, tags } = (
       await this.http.getJson<DenoAPIModuleResponse>(moduleAPIURL)
     ).body;
-
     // get details for the versions
     const releases = await pMap(
       versions,
