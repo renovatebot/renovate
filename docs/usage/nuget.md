@@ -76,17 +76,19 @@ By default, Renovate uses the `v2` protocol.
 If the configured feed URL ends with `index.json`, Renovate uses the `v3` protocol.
 So Renovate behaves like the official NuGet client.
 
-<!-- prettier-ignore -->
-!!! warning
-    If a `v3` feed does not end with `index.json`, you must append `#protocolVersion=3` to the registry URL.
-    
-    ```json
-    {
-      "nuget": {
-        "registryUrls": ["http://myV3feed#protocolVersion=3"]
-      }
-    }
-    ```
+#### v3 feed URL not ending with index.json
+
+If a `v3` feed URL does not end with `index.json`, you must append `#protocolVersion=3` to the registry URL:
+
+```json
+{
+  "nuget": {
+    "registryUrls": ["http://myV3feed#protocolVersion=3"]
+  }
+}
+```
+
+You may need this workaround when you use the JFrog Artifactory.
 
 ## Authenticated feeds
 
