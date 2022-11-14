@@ -75,9 +75,7 @@ describe('workers/repository/update/pr/index', () => {
 
         expect(res).toEqual({ type: 'with-pr', pr });
         expect(limits.incLimitedValue).toHaveBeenCalledOnce();
-        expect(limits.incLimitedValue).toHaveBeenCalledWith(
-          limits.Limit.PullRequests
-        );
+        expect(limits.incLimitedValue).toHaveBeenCalledWith('PullRequests');
         expect(logger.logger.info).toHaveBeenCalledWith(
           { pr: pr.number, prTitle },
           'PR created'

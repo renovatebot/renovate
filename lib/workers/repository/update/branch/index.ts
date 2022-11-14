@@ -40,7 +40,7 @@ import {
   satisfiesConfidenceLevel,
 } from '../../../../util/merge-confidence';
 import * as template from '../../../../util/template';
-import { Limit, isLimitReached } from '../../../global/limits';
+import { isLimitReached } from '../../../global/limits';
 import { BranchConfig, BranchResult, PrBlockedBy } from '../../../types';
 import { embedChangelog, needsChangelogs } from '../../changelog';
 import { ensurePr, getPlatformPrOptions, updatePrDebugData } from '../pr';
@@ -142,7 +142,7 @@ export async function processBranch(
     }
     if (
       !branchExists &&
-      isLimitReached(Limit.Branches) &&
+      isLimitReached('Branches') &&
       !dependencyDashboardCheck &&
       !config.isVulnerabilityAlert
     ) {
@@ -154,7 +154,7 @@ export async function processBranch(
       };
     }
     if (
-      isLimitReached(Limit.Commits) &&
+      isLimitReached('Commits') &&
       !dependencyDashboardCheck &&
       !config.isVulnerabilityAlert
     ) {
