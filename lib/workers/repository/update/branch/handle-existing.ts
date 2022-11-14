@@ -89,7 +89,7 @@ export async function handleOpenPr(
       );
       return;
     }
-
+    logger.debug(`Removing edited/blocked PR comment in PR #${pr.number}`);
     await ensureCommentRemoval({
       type: 'by-topic',
       number: pr.number,
@@ -102,7 +102,6 @@ export async function handleOpenPr(
       );
       return;
     }
-
     logger.debug('Ensuring comment to indicate that rebasing is not possible');
     await ensureComment({
       number: pr.number,
