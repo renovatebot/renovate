@@ -501,7 +501,6 @@ describe('modules/manager/npm/extract/index', () => {
         defaultConfig
       );
 
-      console.log(res);
       expect(res).toMatchObject({
         deps: [
           {},
