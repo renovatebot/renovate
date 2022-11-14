@@ -1,9 +1,7 @@
-// TODO #7154
 import { DateTime } from 'luxon';
 import type { RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
 import { Pr, platform } from '../../../modules/platform';
-import { PrState } from '../../../types';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { branchExists } from '../../../util/git';
 import type { BranchConfig } from '../../types';
@@ -55,7 +53,7 @@ export async function getConcurrentPrsRemaining(
           if (
             pr &&
             pr.sourceBranch !== config.onboardingBranch &&
-            pr.state === PrState.Open
+            pr.state === 'open'
           ) {
             openPrs.push(pr);
           }
@@ -121,7 +119,6 @@ export function getConcurrentBranchesRemaining(
 
       return concurrentRemaining;
     } catch (err) {
-      // TODO: #7154 should never throw
       logger.error({ err }, 'Error checking concurrent branches');
       return limit;
     }

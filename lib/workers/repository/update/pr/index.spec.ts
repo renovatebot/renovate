@@ -9,7 +9,7 @@ import {
 import * as _comment from '../../../../modules/platform/comment';
 import { getPrBodyStruct } from '../../../../modules/platform/pr-body';
 import type { Pr } from '../../../../modules/platform/types';
-import { BranchStatus, PrState } from '../../../../types';
+import { BranchStatus } from '../../../../types';
 import { ExternalHostError } from '../../../../types/errors/external-host-error';
 import * as _limits from '../../../global/limits';
 import type { BranchConfig, BranchUpgradeConfig } from '../../../types';
@@ -50,7 +50,7 @@ describe('workers/repository/update/pr/index', () => {
       sourceBranch,
       title: prTitle,
       bodyStruct,
-      state: PrState.Open,
+      state: 'open',
     };
 
     const config: BranchConfig = {
