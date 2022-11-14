@@ -1956,5 +1956,70 @@ describe('workers/repository/update/branch/index', () => {
         result: 'done',
       });
     });
+
+    it('continues branch, skips automerge if there are artifact errors', async () => {
+      jest.spyOn(getUpdated, 'getUpdatedPackageFiles').mockResolvedValueOnce({
+        updatedPackageFiles: [{}],
+        artifactErrors: [{}],
+      } as PackageFilesResult);
+      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+        artifactErrors: [],
+        updatedArtifacts: [],
+      });
+      git.branchExists.mockReturnValue(true);
+      git.isBranchModified.mockResolvedValueOnce(true);
+      git.getBranchCommit.mockReturnValue('123test');
+      platform.findPr.mockResolvedValueOnce({ sha: '123test' } as any);
+      const res = await branchWorker.processBranch(config);
+      expect(automerge.tryBranchAutomerge).not.toHaveBeenCalled();
+      expect(prAutomerge.checkAutoMerge).not.toHaveBeenCalled();
+      expect(res).toEqual({
+        branchExists: true,
+        commitSha: '123test',
+        prNo: undefined,
+        result: 'done',
+        updatesVerified: true,
+      });
+    });
+
+    it('continues to update PR, if branch got updated, even when prCreation!==immediate', async () => {
+      // schedule.isScheduledNow.mockReturnValueOnce(false);
+      git.branchExists.mockReturnValue(true);
+      git.isBranchModified.mockResolvedValueOnce(false);
+      git.getBranchCommit.mockReturnValue('123test');
+      platform.findPr.mockResolvedValueOnce({ sha: '123test' } as any);
+      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+        artifactErrors: [],
+        updatedArtifacts: [partial<FileChange>({})],
+      } as WriteExistingFilesResult);
+      platform.getBranchPr.mockResolvedValueOnce({
+        state: PrState.Open,
+        bodyStruct: { hash: hashBody(`- [ ] <!-- rebase-check -->`) },
+      } as Pr);
+      jest.spyOn(getUpdated, 'getUpdatedPackageFiles').mockResolvedValueOnce({
+        updatedPackageFiles: [{}],
+      } as PackageFilesResult);
+      jest.spyOn(prWorker, 'updatePrDebugData').mockReturnValueOnce({
+        updatedInVer: '1.0.3',
+        createdInVer: '1.0.2',
+      });
+      const inconfig = {
+        ...config,
+        ignoreTests: true,
+        prCreation: 'not-pending',
+        commitBody: '[skip-ci]',
+        fetchReleaseNotes: false,
+      } as BranchConfig;
+      expect(await branchWorker.processBranch(inconfig)).toEqual({
+        branchExists: true,
+        updatesVerified: true,
+        prNo: undefined,
+        result: 'done',
+        commitSha: '123test',
+      });
+
+      expect(automerge.tryBranchAutomerge).toHaveBeenCalledTimes(0);
+      expect(prWorker.ensurePr).toHaveBeenCalledTimes(0);
+    });
   });
 });
