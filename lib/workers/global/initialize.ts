@@ -9,7 +9,7 @@ import * as packageCache from '../../util/cache/package';
 import { setEmojiConfig } from '../../util/emoji';
 import { validateGitVersion } from '../../util/git';
 import * as hostRules from '../../util/host-rules';
-import { Limit, setMaxLimit } from './limits';
+import { setMaxLimit } from './limits';
 
 async function setDirectories(input: AllConfig): Promise<AllConfig> {
   const config: AllConfig = { ...input };
@@ -45,7 +45,7 @@ async function setDirectories(input: AllConfig): Promise<AllConfig> {
 function limitCommitsPerRun(config: RenovateConfig): void {
   let limit = config.prCommitsPerRunLimit;
   limit = typeof limit === 'number' && limit > 0 ? limit : null;
-  setMaxLimit(Limit.Commits, limit);
+  setMaxLimit('Commits', limit);
 }
 
 async function checkVersions(): Promise<void> {

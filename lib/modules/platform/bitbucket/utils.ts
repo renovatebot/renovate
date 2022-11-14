@@ -1,6 +1,6 @@
 import url from 'url';
 import type { MergeStrategy } from '../../../config/types';
-import { BranchStatus, PrState } from '../../../types';
+import type { BranchStatus } from '../../../types';
 import { BitbucketHttp } from '../../../util/http/bitbucket';
 import type { HttpOptions, HttpResponse } from '../../../util/http/types';
 import { getPrBodyStruct } from '../pr-body';
@@ -185,7 +185,7 @@ export function prInfo(pr: PrResponse): Pr {
     targetBranch: pr.destination?.branch?.name,
     title: pr.title,
     state: prStates.closed?.includes(pr.state)
-      ? /* istanbul ignore next */ PrState.Closed
+      ? /* istanbul ignore next */ 'closed'
       : pr.state?.toLowerCase(),
     createdAt: pr.created_on,
   };
