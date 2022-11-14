@@ -2018,8 +2018,8 @@ describe('workers/repository/update/branch/index', () => {
         commitSha: '123test',
       });
 
-      expect(automerge.tryBranchAutomerge).toHaveBeenCalledTimes(0);
-      expect(prWorker.ensurePr).toHaveBeenCalledTimes(0);
+      expect(automerge.tryBranchAutomerge).not.toHaveBeenCalled();
+      expect(prWorker.ensurePr).toHaveBeenCalledTimes(1);
     });
   });
 });
