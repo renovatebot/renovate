@@ -1,5 +1,3 @@
-// FIXME #12556
-/* eslint-disable @typescript-eslint/naming-convention */
 /**
  * Media Types
  * https://docs.docker.com/registry/spec/manifest-v2-2/#media-types
@@ -11,8 +9,6 @@ export type MediaType =
   | 'application/vnd.docker.distribution.manifest.list.v2+json' // manifestListV2
   | 'application/vnd.oci.image.manifest.v1+json' // ociManifestV1
   | 'application/vnd.oci.image.index.v1+json'; // ociManifestIndexV1
-
-/* eslint-enable @typescript-eslint/naming-convention */
 
 export interface MediaObject {
   readonly digest: string;
