@@ -2761,6 +2761,11 @@
   resolved "https://registry.yarnpkg.com/@types/clean-git-ref/-/clean-git-ref-2.0.0.tgz#309687ad1bcdd7012025b5bc76e7a209c378fb63"
   integrity sha512-dVoH5zxekPWDBllQ+tpBoSfCVnmOt9JYBbPqtl0YvR0twDrgQ4qGEd1ZqPvAe7SGSALcIXl54bhE+cH7Px3g+A==
 
+"@types/common-tags@1.8.1":
+  version "1.8.1"
+  resolved "https://registry.yarnpkg.com/@types/common-tags/-/common-tags-1.8.1.tgz#a5a49ca5ebbb58e0f8947f3ec98950c8970a68a9"
+  integrity sha512-20R/mDpKSPWdJs5TOpz3e7zqbeCNuMCPhV7Yndk9KU2Rbij2r5W4RzwDPkzC+2lzUqXYu9rFzTktCBnDjHuNQg==
+
 "@types/conventional-commits-detector@1.0.0":
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/@types/conventional-commits-detector/-/conventional-commits-detector-1.0.0.tgz#27e143c481d6fa6146863d77e6b91de877d4f09e"
@@ -4113,6 +4118,11 @@ common-ancestor-path@^1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/common-ancestor-path/-/common-ancestor-path-1.0.1.tgz#4f7d2d1394d91b7abdf51871c62f71eadb0182a7"
   integrity sha512-L3sHRo1pXXEqX8VU28kfgUY+YGsk09hPqZiZmLacNib6XNTCM8ubYeT7ryXQw8asB1sKgcU5lkB7ONug08aB8w==
+
+common-tags@1.8.2:
+  version "1.8.2"
+  resolved "https://registry.yarnpkg.com/common-tags/-/common-tags-1.8.2.tgz#94ebb3c076d26032745fd54face7f688ef5ac9c6"
+  integrity sha512-gk/Z852D2Wtb//0I+kRFNKKE9dIIVirjoqPoA1wJU+XePVXZfGeBpk45+A1rKO4Q43prqWBNY/MiIeRLbPWUaA==
 
 compare-func@^2.0.0:
   version "2.0.0"
