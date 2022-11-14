@@ -1983,26 +1983,19 @@ describe('workers/repository/update/branch/index', () => {
     });
 
     it('continues to update PR, if branch got updated, even when prCreation!==immediate', async () => {
-      // schedule.isScheduledNow.mockReturnValueOnce(false);
       git.branchExists.mockReturnValue(true);
       git.isBranchModified.mockResolvedValueOnce(false);
       git.getBranchCommit.mockReturnValue('123test');
-      platform.findPr.mockResolvedValueOnce({ sha: '123test' } as any);
       npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
         artifactErrors: [],
         updatedArtifacts: [partial<FileChange>({})],
       } as WriteExistingFilesResult);
       platform.getBranchPr.mockResolvedValueOnce({
         state: PrState.Open,
-        bodyStruct: { hash: hashBody(`- [ ] <!-- rebase-check -->`) },
       } as Pr);
       jest.spyOn(getUpdated, 'getUpdatedPackageFiles').mockResolvedValueOnce({
         updatedPackageFiles: [{}],
       } as PackageFilesResult);
-      jest.spyOn(prWorker, 'updatePrDebugData').mockReturnValueOnce({
-        updatedInVer: '1.0.3',
-        createdInVer: '1.0.2',
-      });
       const inconfig = {
         ...config,
         prCreation: 'not-pending',
@@ -2014,7 +2007,6 @@ describe('workers/repository/update/branch/index', () => {
         result: 'done',
         commitSha: '123test',
       });
-
       expect(automerge.tryBranchAutomerge).not.toHaveBeenCalled();
       expect(prWorker.ensurePr).toHaveBeenCalledTimes(1);
     });
