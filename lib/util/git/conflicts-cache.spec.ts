@@ -97,19 +97,6 @@ describe('util/git/conflicts-cache', () => {
         getCachedConflictResult('foo', 'sha', 'bar', 'base_sha')
       ).toBeTrue();
     });
-
-    it('deletes old cache', () => {
-      repoCache.gitConflicts = {
-        foo: {
-          targetBranchSha: '111',
-          sourceBranches: {
-            bar: { sourceBranchSha: '222', isConflicted: true },
-          },
-        },
-      };
-      getCachedConflictResult('foo', '111', 'bar', '222');
-      expect(repoCache.gitConflicts).toBeUndefined();
-    });
   });
 
   describe('setCachedConflictResult', () => {
