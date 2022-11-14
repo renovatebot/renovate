@@ -61,7 +61,7 @@ export class DenoDatasource extends Datasource {
       return null;
     }
 
-    // remove third party prefix if defined. The only internal library is `std` and is available under the same api
+    // remove third-party prefix if defined. The only internal library is `std` and is available under the same API
     const massagedPackageName = rawPackageName.replace('x/', '');
 
     // https://apiland.deno.dev/v2/modules/postgres

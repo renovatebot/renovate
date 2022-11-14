@@ -104,7 +104,7 @@ describe('modules/datasource/deno/index', () => {
       ).toBeNull();
     });
 
-    it('returns releases of third party library', async () => {
+    it('returns releases of third-party library', async () => {
       httpMock
         .scope('https://apiland.deno.dev')
         .get('/v2/modules/postgres')
@@ -150,7 +150,7 @@ describe('modules/datasource/deno/index', () => {
       });
     });
 
-    it('returns releases of a alternativ registry server', async () => {
+    it('returns releases of a alternative registry server', async () => {
       httpMock
         .scope('https://api.example.com')
         .get('/v2/modules/postgres')
