@@ -4,7 +4,6 @@ import type {
 } from '../../../config/types';
 import type { PackageFile } from '../../../modules/manager/types';
 import type { RepoInitConfig } from '../../../workers/repository/init/types';
-import type { GitConflictsCache } from '../../git/types';
 
 export interface BaseBranchCache {
   sha: string; // branch commit sha
@@ -87,7 +86,6 @@ export interface RepoCacheData {
   platform?: {
     github?: Record<string, unknown>;
   };
-  gitConflicts?: GitConflictsCache;
   prComments?: Record<number, Record<string, string>>;
 }
 

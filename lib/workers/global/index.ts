@@ -24,7 +24,7 @@ import * as repositoryWorker from '../repository';
 import { autodiscoverRepositories } from './autodiscover';
 import { parseConfigs } from './config/parse';
 import { globalFinalize, globalInitialize } from './initialize';
-import { Limit, isLimitReached } from './limits';
+import { isLimitReached } from './limits';
 
 export async function getRepositoryConfig(
   globalConfig: RenovateConfig,
@@ -50,7 +50,7 @@ function getGlobalConfig(): Promise<RenovateConfig> {
 }
 
 function haveReachedLimits(): boolean {
-  if (isLimitReached(Limit.Commits)) {
+  if (isLimitReached('Commits')) {
     logger.info('Max commits created for this run.');
     return true;
   }

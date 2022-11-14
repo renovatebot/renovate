@@ -230,11 +230,14 @@ export class GithubGraphqlDatasourceHelper<
     while (hasNextPage && !this.hasReachedQueryLimit()) {
       const queryResult = await this.doShrinkableQuery();
 
-      const pageResultItems = queryResult.nodes
-        .map((item) => this.datasourceAdapter.transform(item))
-        .filter((item): item is ResultItem => item !== null);
-
-      resultItems.push(...pageResultItems);
+      for (const node of queryResult.nodes) {
+        const item = this.datasourceAdapter.transform(node);
+        // istanbul ignore if: will be tested later
+        if (!item) {
+          continue;
+        }
+        resultItems.push(item);
+      }
 
       hasNextPage = queryResult?.pageInfo?.hasNextPage;
       cursor = queryResult?.pageInfo?.endCursor;

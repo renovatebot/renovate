@@ -30,7 +30,6 @@ import type {
   Issue,
   Label,
   PR,
-  PRState,
   Repo,
   RepoContents,
   User,
@@ -83,7 +82,7 @@ describe('modules/platform/gitea/index', () => {
       number: 1,
       title: 'Some PR',
       body: 'some random pull request',
-      state: PrState.Open,
+      state: 'open',
       diff_url: 'https://gitea.renovatebot.com/some/repo/pulls/1.diff',
       created_at: '2015-03-22T20:36:16Z',
       closed_at: undefined,
@@ -99,7 +98,7 @@ describe('modules/platform/gitea/index', () => {
       number: 2,
       title: 'Other PR',
       body: 'other random pull request',
-      state: PrState.Closed,
+      state: 'closed',
       diff_url: 'https://gitea.renovatebot.com/some/repo/pulls/2.diff',
       created_at: '2011-08-18T22:30:38Z',
       closed_at: '2016-01-09T10:03:21Z',
@@ -115,7 +114,7 @@ describe('modules/platform/gitea/index', () => {
       number: 3,
       title: 'WIP: Draft PR',
       body: 'other random pull request',
-      state: PrState.Open,
+      state: 'open',
       diff_url: 'https://gitea.renovatebot.com/some/repo/pulls/3.diff',
       created_at: '2011-08-18T22:30:39Z',
       closed_at: '2016-01-09T10:03:22Z',
@@ -755,7 +754,7 @@ describe('modules/platform/gitea/index', () => {
           number: 3,
           title: 'Third-party PR',
           body: 'other random pull request',
-          state: PrState.Open,
+          state: 'open',
           diff_url: 'https://gitea.renovatebot.com/some/repo/pulls/3.diff',
           created_at: '2011-08-18T22:30:38Z',
           closed_at: '2016-01-09T10:03:21Z',
@@ -881,7 +880,7 @@ describe('modules/platform/gitea/index', () => {
       expect(
         await gitea.findPr({
           branchName: mockPR.head.label,
-          state: `!${mockPR.state}` as PRState,
+          state: `!${mockPR.state as PrState}` as never, // wrong argument being passed intentionally
         })
       ).toBeNull();
     });
@@ -927,7 +926,7 @@ describe('modules/platform/gitea/index', () => {
   describe('createPr', () => {
     const mockNewPR: MockPr = {
       number: 42,
-      state: PrState.Open,
+      state: 'open',
       head: {
         label: 'pr-branch',
         sha: mockCommitHash,
@@ -1234,13 +1233,13 @@ describe('modules/platform/gitea/index', () => {
         number: 1,
         prTitle: 'New Title',
         prBody: 'New Body',
-        state: PrState.Closed,
+        state: 'closed',
       });
 
       expect(helper.updatePR).toHaveBeenCalledWith(mockRepo.full_name, 1, {
         title: 'New Title',
         body: 'New Body',
-        state: PrState.Closed,
+        state: 'closed',
       });
     });
   });

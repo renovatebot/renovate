@@ -14,10 +14,13 @@ import { RepoCacheBase } from './base';
 export class RepoCacheS3 extends RepoCacheBase {
   private readonly s3Client;
   private readonly bucket;
+  private readonly dir;
 
   constructor(repository: string, fingerprint: string, url: string) {
     super(repository, fingerprint);
-    this.bucket = parseS3Url(url)?.Bucket;
+    const { Bucket, Key } = parseS3Url(url)!;
+    this.dir = this.getCacheFolder(Key);
+    this.bucket = Bucket;
     this.s3Client = getS3Client();
   }
 
@@ -64,7 +67,23 @@ export class RepoCacheS3 extends RepoCacheBase {
     }
   }
 
+  private getCacheFolder(pathname: string | undefined): string {
+    if (!pathname) {
+      return '';
+    }
+
+    if (pathname.endsWith('/')) {
+      return pathname;
+    }
+
+    logger.warn(
+      { pathname },
+      'RepoCacheS3.getCacheFolder() - appending missing trailing slash to pathname'
+    );
+    return pathname + '/';
+  }
+
   private getCacheFileName(): string {
-    return `${this.platform}/${this.repository}/cache.json`;
+    return `${this.dir}${this.platform}/${this.repository}/cache.json`;
   }
 }
