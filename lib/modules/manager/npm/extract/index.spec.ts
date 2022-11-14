@@ -500,6 +500,8 @@ describe('modules/manager/npm/extract/index', () => {
         'package.json',
         defaultConfig
       );
+
+      console.log(res);
       expect(res).toMatchObject({
         deps: [
           {},
@@ -520,6 +522,7 @@ describe('modules/manager/npm/extract/index', () => {
             depName: 'yarn',
             depType: 'volta',
             prettyDepType: 'volta',
+            packageName: '@yarnpkg/cli',
           },
         ],
       });
